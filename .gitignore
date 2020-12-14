@@ -1,15 +1,19 @@
-# Binaries for programs and plugins
-*.exe
-*.exe~
-*.dll
-*.so
-*.dylib
+out/
 
-# Test binary, built with `go test -c`
-*.test
+.DS_Store
+.vscode
+.idea
+*.iml
+.run
 
-# Output of the go coverage tool, specifically when used with LiteIDE
-*.out
+# reporting stuff
+*-report.xml
+*.cov
+coverage.xml
+bin/
 
-# Dependency directories (remove the comment below to include it)
-# vendor/
+
+# CI deployment folder
+.deployment
+
+vendor/
