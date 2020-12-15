@@ -36,3 +36,7 @@ func UpdateCache(loadedFlags []byte) error {
 	mutex.Unlock()
 	return nil
 }
+
+func Close() {
+	FlagsCache = nil
+}

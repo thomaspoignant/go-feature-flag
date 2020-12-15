@@ -56,5 +56,6 @@ func retrieveFlagsAndUpdateCache(config Config) error {
 
 // Close the component by stopping the background refresh.
 func Close() {
+	cache.Close()
 	flagUpdater.Stop()
 }

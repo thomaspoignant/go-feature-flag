@@ -9,63 +9,39 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
 )
 
-func TestInit(t *testing.T) {
-	type args struct {
-		config ffclient.Config
-	}
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-	}{
-		{
-			name: "valid use case",
-			args: args{
-				config: ffclient.Config{
-					PollInterval: 0,
-					LocalFile:    "testdata/test.yaml",
-				},
-			},
-			wantErr: false,
-		},
-		{
-			name: "no retriever",
-			args: args{
-				config: ffclient.Config{
-					PollInterval: 3,
-				},
-			},
-			wantErr: true,
-		},
-		{
-			name: "S3 retriever return error",
-			args: args{
-				config: ffclient.Config{
-					PollInterval: 3,
-					S3Retriever: &ffclient.S3Retriever{
-						Bucket:    "unknown-bucket",
-						Item:      "unknown-item",
-						AwsConfig: aws.Config{},
-					},
-				},
-			},
-			wantErr: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-			err := ffclient.Init(tt.args.config)
-			defer ffclient.Close()
-			assert.Equal(t, tt.wantErr, err != nil)
+func TestNoRetriever(t *testing.T) {
+	err := ffclient.Init(ffclient.Config{
+		PollInterval: 3,
+	})
+	assert.Error(t, err)
+	ffclient.Close()
+}
 
-			if err == nil {
-				user := ffuser.NewUser("random-key")
-				hasTestFlag, _ := ffclient.BoolVariation("test-flag", user, false)
-				assert.True(t, hasTestFlag, "User should have test flag")
-				hasUnknownFlag, _ := ffclient.BoolVariation("unknown-flag", user, false)
-				assert.False(t, hasUnknownFlag, "User should use default value if flag does not exists")
-			}
-		})
-	}
+func TestValidUseCase(t *testing.T) {
+	// Valid use case
+	err := ffclient.Init(ffclient.Config{
+		PollInterval: 0,
+		LocalFile:    "testdata/test.yaml",
+	})
+
+	assert.NoError(t, err)
+	user := ffuser.NewUser("random-key")
+	hasTestFlag, _ := ffclient.BoolVariation("test-flag", user, false)
+	assert.True(t, hasTestFlag, "User should have test flag")
+	hasUnknownFlag, _ := ffclient.BoolVariation("unknown-flag", user, false)
+	assert.False(t, hasUnknownFlag, "User should use default value if flag does not exists")
+	ffclient.Close()
+}
+
+func TestS3RetrieverReturnError(t *testing.T) {
+	// Valid use case
+	err := ffclient.Init(ffclient.Config{
+		PollInterval: 0,
+		S3Retriever: &ffclient.S3Retriever{
+			Bucket:    "unknown-bucket",
+			Item:      "unknown-item",
+			AwsConfig: aws.Config{},
+		},
+	})
+	assert.Error(t, err)
 }
