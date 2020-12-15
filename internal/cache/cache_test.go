@@ -70,6 +70,7 @@ func Test_FlagCache(t *testing.T) {
 			if err == nil {
 				assert.Equal(t, tt.expected, cache.FlagsCache)
 			}
+			cache.Close()
 		})
 	}
 }
