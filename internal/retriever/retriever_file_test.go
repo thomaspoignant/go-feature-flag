@@ -23,7 +23,7 @@ func Test_localRetriever_Retrieve(t *testing.T) {
 				path: "../../testdata/test.yaml",
 			},
 			want: []byte(`test-flag:
-  rule: key eq "toto"
+  rule: key eq "random-key"
   percentage: 100
   true: true
   false: false

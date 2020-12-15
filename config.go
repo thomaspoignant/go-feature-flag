@@ -1,7 +1,10 @@
 package ffclient
 
 import (
+	"errors"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"net/http"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/retriever"
@@ -27,13 +30,21 @@ type S3Retriever struct {
 	AwsConfig aws.Config
 }
 
-func (c *Config) GetRetriever() retriever.FlagRetriever {
+func (c *Config) GetRetriever() (retriever.FlagRetriever, error) {
 	if c.S3Retriever != nil {
+		// Create an AWS session
+		sess, err := session.NewSession(&c.S3Retriever.AwsConfig)
+		if err != nil {
+			return nil, err
+		}
+
+		// Create a new AWS S3 downloader
+		downloader := s3manager.NewDownloader(sess)
 		return retriever.NewS3Retriever(
+			downloader,
 			c.S3Retriever.Bucket,
 			c.S3Retriever.Item,
-			c.S3Retriever.AwsConfig,
-		)
+		), nil
 	}
 
 	if c.HTTPRetriever != nil {
@@ -43,11 +54,11 @@ func (c *Config) GetRetriever() retriever.FlagRetriever {
 			c.HTTPRetriever.Method,
 			c.HTTPRetriever.Body,
 			c.HTTPRetriever.Header,
-		)
+		), nil
 	}
 
 	if c.LocalFile != "" {
-		return retriever.NewLocalRetriever(c.LocalFile)
+		return retriever.NewLocalRetriever(c.LocalFile), nil
 	}
-	return nil
+	return nil, errors.New("please add a config to get the flag config file")
 }

@@ -18,9 +18,10 @@ func TestConfig_GetRetriever(t *testing.T) {
 		S3Retriever   *ffClient.S3Retriever
 	}
 	tests := []struct {
-		name   string
-		fields fields
-		want   string
+		name    string
+		fields  fields
+		want    string
+		wantErr bool
 	}{
 		{
 			name: "File retriever",
@@ -28,7 +29,8 @@ func TestConfig_GetRetriever(t *testing.T) {
 				PollInterval: 3,
 				LocalFile:    "file-example.yaml",
 			},
-			want: "*retriever.localRetriever",
+			want:    "*retriever.localRetriever",
+			wantErr: false,
 		},
 		{
 			name: "S3 retriever",
@@ -42,7 +44,8 @@ func TestConfig_GetRetriever(t *testing.T) {
 					},
 				},
 			},
-			want: "*retriever.s3Retriever",
+			want:    "*retriever.s3Retriever",
+			wantErr: false,
 		},
 		{
 			name: "HTTP retriever",
@@ -54,7 +57,8 @@ func TestConfig_GetRetriever(t *testing.T) {
 					Body:   "",
 				},
 			},
-			want: "*retriever.httpRetriever",
+			want:    "*retriever.httpRetriever",
+			wantErr: false,
 		},
 		{
 			name: "Priority to S3",
@@ -74,7 +78,8 @@ func TestConfig_GetRetriever(t *testing.T) {
 				},
 				LocalFile: "file-example.yaml",
 			},
-			want: "*retriever.s3Retriever",
+			want:    "*retriever.s3Retriever",
+			wantErr: false,
 		},
 		{
 			name: "Priority to HTTP",
@@ -87,7 +92,15 @@ func TestConfig_GetRetriever(t *testing.T) {
 				},
 				LocalFile: "file-example.yaml",
 			},
-			want: "*retriever.httpRetriever",
+			want:    "*retriever.httpRetriever",
+			wantErr: false,
+		},
+		{
+			name: "No retriever",
+			fields: fields{
+				PollInterval: 3,
+			},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
@@ -98,8 +111,11 @@ func TestConfig_GetRetriever(t *testing.T) {
 				HTTPRetriever: tt.fields.HTTPRetriever,
 				S3Retriever:   tt.fields.S3Retriever,
 			}
-			got := c.GetRetriever()
-			assert.Equal(t, tt.want, reflect.ValueOf(got).Type().String())
+			got, err := c.GetRetriever()
+			assert.Equal(t, tt.wantErr, err != nil)
+			if err == nil {
+				assert.Equal(t, tt.want, reflect.ValueOf(got).Type().String())
+			}
 		})
 	}
 }

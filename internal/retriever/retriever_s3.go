@@ -3,32 +3,22 @@ package retriever
 import (
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager/s3manageriface"
 	"io/ioutil"
 )
 
-func NewS3Retriever(bucket string, item string, awsConfig aws.Config) FlagRetriever {
-	return &s3Retriever{bucket, item, awsConfig}
+func NewS3Retriever(downloader s3manageriface.DownloaderAPI, bucket string, item string) FlagRetriever {
+	return &s3Retriever{downloader, bucket, item}
 }
 
 type s3Retriever struct {
-	bucket    string
-	item      string
-	awsConfig aws.Config
+	downloader s3manageriface.DownloaderAPI
+	bucket     string
+	item       string
 }
 
 func (s *s3Retriever) Retrieve() ([]byte, error) {
-	// Create an AWS session
-	sess, err := session.NewSession(&s.awsConfig)
-	if err != nil {
-		return nil, err
-	}
-
-	// Create a new AWS S3 downloader
-	downloader := s3manager.NewDownloader(sess)
-
 	// Download the item from the bucket.
 	// If an error occurs, log it and exit.
 	// Otherwise, notify the user that the download succeeded.
@@ -37,7 +27,7 @@ func (s *s3Retriever) Retrieve() ([]byte, error) {
 		return nil, err
 	}
 
-	_, err = downloader.Download(file,
+	_, err = s.downloader.Download(file,
 		&s3.GetObjectInput{
 			Bucket: aws.String(s.bucket),
 			Key:    aws.String(s.item),

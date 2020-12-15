@@ -10,7 +10,7 @@ import (
 
 func Test_FlagCache(t *testing.T) {
 	exampleFile := []byte(`test-flag:
-  rule: key eq "toto"
+  rule: key eq "random-key"
   percentage: 100
   true: true
   false: false
@@ -34,7 +34,7 @@ func Test_FlagCache(t *testing.T) {
 			expected: map[string]flags.Flag{
 				"test-flag": {
 					Disable:    false,
-					Rule:       "key eq \"toto\"",
+					Rule:       "key eq \"random-key\"",
 					Percentage: 100,
 					True:       true,
 					False:      false,
@@ -47,7 +47,7 @@ func Test_FlagCache(t *testing.T) {
 			name: "Add invalid yaml file",
 			args: args{
 				loadedFlags: []byte(`test-flag:
-  rule: key eq "toto"
+  rule: key eq "random-key"
   percentage: "toot"
   true: true
   false: false

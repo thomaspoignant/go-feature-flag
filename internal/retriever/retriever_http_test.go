@@ -23,7 +23,7 @@ func (m *mockHTTP) Do(req *http.Request) (*http.Response, error) {
 		Status:     "OK",
 		StatusCode: http.StatusOK,
 		Body: ioutil.NopCloser(bytes.NewReader([]byte(`test-flag:
-  rule: key eq "toto"
+  rule: key eq "random-key"
   percentage: 100
   true: true
   false: false
@@ -70,7 +70,7 @@ func Test_httpRetriever_Retrieve(t *testing.T) {
 				header:     nil,
 			},
 			want: []byte(`test-flag:
-  rule: key eq "toto"
+  rule: key eq "random-key"
   percentage: 100
   true: true
   false: false
@@ -87,7 +87,7 @@ func Test_httpRetriever_Retrieve(t *testing.T) {
 				header:     nil,
 			},
 			want: []byte(`test-flag:
-  rule: key eq "toto"
+  rule: key eq "random-key"
   percentage: 100
   true: true
   false: false

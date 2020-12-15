@@ -1,8 +1,8 @@
 package ffclient
 
 import (
+	"fmt"
 	"github.com/go-co-op/gocron"
-	"log"
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
@@ -14,23 +14,34 @@ type Flags map[string]flags.Flag
 var flagUpdater gocron.Scheduler
 
 // Init the feature flag component.
-func Init(config Config) {
+func Init(config Config) error {
 	cache.Init()
 	err := retrieveFlagsAndUpdateCache(config)
 	if err != nil {
-		log.Fatalf("impossible to retrieve the flags, please check your configuration")
+		return fmt.Errorf("impossible to retrieve the flags, please check your configuration: %v", err)
 	}
 	flagUpdater = *gocron.NewScheduler(time.UTC)
+
+	// The default value for poll interval is 1
+	if config.PollInterval == 0 {
+		config.PollInterval = 1
+	}
 	_, err = flagUpdater.Every(uint64(config.PollInterval)).Seconds().Do(retrieveFlagsAndUpdateCache, config)
 	if err != nil {
-		log.Fatalf("impossible to launch background updater")
+		return fmt.Errorf("impossible to launch background updater: %v", err)
 	}
 
 	flagUpdater.StartAsync()
+	return nil
 }
 
 func retrieveFlagsAndUpdateCache(config Config) error {
-	loadedFlags, err := config.GetRetriever().Retrieve()
+	retriever, err := config.GetRetriever()
+	if err != nil {
+		return err
+	}
+
+	loadedFlags, err := retriever.Retrieve()
 	if err != nil {
 		return err
 	}
