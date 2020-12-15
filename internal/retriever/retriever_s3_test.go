@@ -20,7 +20,7 @@ type s3ManagerMock struct {
 func (s s3ManagerMock) Download(at io.WriterAt, input *s3.GetObjectInput, f ...func(*s3manager.Downloader)) (int64, error) {
 	if *input.Key == "valid" {
 		res, _ := ioutil.ReadFile("../../testdata/test.yaml")
-		at.WriteAt(res, 0)
+		_, _ = at.WriteAt(res, 0)
 		return 1, nil
 	} else if *input.Key == "no-file" {
 		return 0, errors.New("no file")

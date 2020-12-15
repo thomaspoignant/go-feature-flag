@@ -43,7 +43,7 @@ func TestInit(t *testing.T) {
 				config: ffclient.Config{
 					PollInterval: 3,
 					S3Retriever: &ffclient.S3Retriever{
-						Bucket:    "unkown-bucket",
+						Bucket:    "unknown-bucket",
 						Item:      "unknown-item",
 						AwsConfig: aws.Config{},
 					},
