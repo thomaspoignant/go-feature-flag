@@ -122,7 +122,7 @@ The rule format is based on the [`nikunjy/rules`](https://github.com/nikunjy/rul
 All the operations can be written capitalized or lowercase (ex: eq or EQ can be used).  
 Logical Operations supported are `AND` `OR`.
 
-Compare Expression and their definitions (a|b means you can use either one of the two a or b):
+Compare Expression and their definitions (`a|b` means you can use either one of the two `a` or `b`):
 
 ```
 eq|==: equals to 
