@@ -54,7 +54,6 @@ func TestConfig_GetRetriever(t *testing.T) {
 				HTTPRetriever: &ffClient.HTTPRetriever{
 					URL:    "http://example.com/test.yaml",
 					Method: http.MethodGet,
-					Body:   "",
 				},
 			},
 			want:    "*retriever.httpRetriever",
@@ -67,7 +66,6 @@ func TestConfig_GetRetriever(t *testing.T) {
 				HTTPRetriever: &ffClient.HTTPRetriever{
 					URL:    "http://example.com/test.yaml",
 					Method: http.MethodGet,
-					Body:   "",
 				},
 				S3Retriever: &ffClient.S3Retriever{
 					Bucket: "tpoi-test",
@@ -88,7 +86,6 @@ func TestConfig_GetRetriever(t *testing.T) {
 				HTTPRetriever: &ffClient.HTTPRetriever{
 					URL:    "http://example.com/test.yaml",
 					Method: http.MethodGet,
-					Body:   "",
 				},
 				LocalFile: "file-example.yaml",
 			},
