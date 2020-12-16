@@ -10,5 +10,5 @@ require (
 	github.com/google/go-cmp v0.5.4
 	github.com/nikunjy/rules v0.0.0-20200120082459-0b7c4dc9dc86
 	github.com/stretchr/testify v1.4.0
-	gopkg.in/yaml.v2 v2.2.8
+	gopkg.in/yaml.v2 v2.4.0
 )
