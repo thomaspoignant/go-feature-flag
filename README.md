@@ -141,7 +141,7 @@ not: not of a logical expression
 ### Examples
 
 - Select a specific user: `key eq "example@example.com"`
-- Select all anonymous user: `anonymous eq true`
+- Select all identified users: `anonymous ne true`
 - Select a user with a custom property: `userId eq "12345"`
 
 # How can I contribute?
