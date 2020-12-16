@@ -18,7 +18,7 @@ func BoolVariation(flagKey string, user ffuser.User, defaultValue bool) (bool, e
 	}
 
 	flag, ok := cache.FlagsCache[flagKey]
-	if !ok {
+	if !ok || flag.Disable {
 		return defaultValue, nil
 	}
 
@@ -35,7 +35,7 @@ func IntVariation(flagKey string, user ffuser.User, defaultValue int) (int, erro
 	}
 
 	flag, ok := cache.FlagsCache[flagKey]
-	if !ok {
+	if !ok || flag.Disable {
 		return defaultValue, nil
 	}
 
@@ -52,7 +52,7 @@ func Float64Variation(flagKey string, user ffuser.User, defaultValue float64) (f
 	}
 
 	flag, ok := cache.FlagsCache[flagKey]
-	if !ok {
+	if !ok || flag.Disable {
 		return defaultValue, nil
 	}
 
@@ -69,12 +69,12 @@ func StringVariation(flagKey string, user ffuser.User, defaultValue string) (str
 	}
 
 	flag, ok := cache.FlagsCache[flagKey]
-	if !ok {
+	if !ok || flag.Disable {
 		return defaultValue, nil
 	}
 
 	res, ok := flag.Value(flagKey, user).(string)
-	if !ok {
+	if !ok || flag.Disable {
 		return defaultValue, nil
 	}
 	return res, nil
@@ -86,7 +86,7 @@ func JSONArrayVariation(flagKey string, user ffuser.User, defaultValue []interfa
 	}
 
 	flag, ok := cache.FlagsCache[flagKey]
-	if !ok {
+	if !ok || flag.Disable {
 		return defaultValue, nil
 	}
 
@@ -104,7 +104,7 @@ func JSONVariation(
 	}
 
 	flag, ok := cache.FlagsCache[flagKey]
-	if !ok {
+	if !ok || flag.Disable {
 		return defaultValue, nil
 	}
 

@@ -18,6 +18,14 @@ func TestBoolVariation(t *testing.T) {
 			False:      false,
 			Default:    true,
 		},
+		"disable-flag": {
+			Rule:       "anonymous eq true",
+			Percentage: 50,
+			True:       false,
+			False:      false,
+			Default:    false,
+			Disable:    true,
+		},
 	}
 
 	type args struct {
@@ -32,6 +40,17 @@ func TestBoolVariation(t *testing.T) {
 		want    bool
 		wantErr bool
 	}{
+		{
+			name: "Get default value if flag disable",
+			args: args{
+				flagKey:      "disable-flag",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: true,
+				flagCache:    flagCacheMock,
+			},
+			want:    true,
+			wantErr: false,
+		},
 		{
 			name: "Get error when not init",
 			args: args{
@@ -132,6 +151,14 @@ func TestFloat64Variation(t *testing.T) {
 			False:      121.0,
 			Default:    119.0,
 		},
+		"disable-flag": {
+			Rule:       "anonymous eq true",
+			Percentage: 50,
+			True:       119.0,
+			False:      119.0,
+			Default:    119.0,
+			Disable:    true,
+		},
 	}
 
 	type args struct {
@@ -146,6 +173,17 @@ func TestFloat64Variation(t *testing.T) {
 		want    float64
 		wantErr bool
 	}{
+		{
+			name: "Get default value if flag disable",
+			args: args{
+				flagKey:      "disable-flag",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: 120.0,
+				flagCache:    flagCacheMock,
+			},
+			want:    120.0,
+			wantErr: false,
+		},
 		{
 			name: "Get error when not init",
 			args: args{
@@ -246,6 +284,14 @@ func TestJSONArrayVariation(t *testing.T) {
 			False:      []interface{}{"false"},
 			Default:    []interface{}{"default"},
 		},
+		"disable-flag": {
+			Rule:       "anonymous eq true",
+			Percentage: 50,
+			True:       []interface{}{"true"},
+			False:      []interface{}{"true"},
+			Default:    []interface{}{"true"},
+			Disable:    true,
+		},
 	}
 
 	type args struct {
@@ -260,6 +306,17 @@ func TestJSONArrayVariation(t *testing.T) {
 		want    []interface{}
 		wantErr bool
 	}{
+		{
+			name: "Get default value if flag disable",
+			args: args{
+				flagKey:      "disable-flag",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: []interface{}{"toto"},
+				flagCache:    flagCacheMock,
+			},
+			want:    []interface{}{"toto"},
+			wantErr: false,
+		},
 		{
 			name: "Get error when not init",
 			args: args{
@@ -360,6 +417,14 @@ func TestJSONVariation(t *testing.T) {
 			False:      map[string]interface{}{"false": true},
 			Default:    map[string]interface{}{"default": true},
 		},
+		"disable-flag": {
+			Rule:       "anonymous eq true",
+			Percentage: 50,
+			True:       map[string]interface{}{"true": true},
+			False:      map[string]interface{}{"true": true},
+			Default:    map[string]interface{}{"true": true},
+			Disable:    true,
+		},
 	}
 
 	type args struct {
@@ -374,6 +439,17 @@ func TestJSONVariation(t *testing.T) {
 		want    map[string]interface{}
 		wantErr bool
 	}{
+		{
+			name: "Get default value if flag disable",
+			args: args{
+				flagKey:      "disable-flag",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: map[string]interface{}{"default-notkey": true},
+				flagCache:    flagCacheMock,
+			},
+			want:    map[string]interface{}{"default-notkey": true},
+			wantErr: false,
+		},
 		{
 			name: "Get error when not init",
 			args: args{
@@ -474,6 +550,14 @@ func TestStringVariation(t *testing.T) {
 			False:      "false",
 			Default:    "default",
 		},
+		"disable-flag": {
+			Rule:       "anonymous eq true",
+			Percentage: 50,
+			True:       "true",
+			False:      "true",
+			Default:    "true",
+			Disable:    true,
+		},
 	}
 
 	type args struct {
@@ -488,6 +572,17 @@ func TestStringVariation(t *testing.T) {
 		want    string
 		wantErr bool
 	}{
+		{
+			name: "Get default value if flag disable",
+			args: args{
+				flagKey:      "disable-flag",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: "default-notkey",
+				flagCache:    flagCacheMock,
+			},
+			want:    "default-notkey",
+			wantErr: false,
+		},
 		{
 			name: "Get error when not init",
 			args: args{
@@ -588,6 +683,14 @@ func TestIntVariation(t *testing.T) {
 			False:      121,
 			Default:    119,
 		},
+		"disable-flag": {
+			Rule:       "anonymous eq true",
+			Percentage: 50,
+			True:       120,
+			False:      120,
+			Default:    120,
+			Disable:    true,
+		},
 	}
 
 	type args struct {
@@ -602,6 +705,17 @@ func TestIntVariation(t *testing.T) {
 		want    int
 		wantErr bool
 	}{
+		{
+			name: "Get default value if flag disable",
+			args: args{
+				flagKey:      "disable-flag",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: 125,
+				flagCache:    flagCacheMock,
+			},
+			want:    125,
+			wantErr: false,
+		},
 		{
 			name: "Get error when not init",
 			args: args{
