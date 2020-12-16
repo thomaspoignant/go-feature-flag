@@ -6,8 +6,7 @@
 [![GitHub](https://img.shields.io/github/license/thomaspoignant/go-feature-flag)](LICENSE)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fthomaspoignant%2Fgo-feature-flag.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fthomaspoignant%2Fgo-feature-flag?ref=badge_shield)
 ![Go version](https://img.shields.io/github/go-mod/go-version/thomaspoignant/go-feature-flag?logo=go%20version "Go version")
-[![GoDoc](https://godoc.org/github.com/thomaspoignant/go-feature-flag?status.svg)](https://godoc.org/github.com/thomaspoignant/go-feature-flag)
-
+[![GoDoc](https://godoc.org/github.com/thomaspoignant/go-feature-flag?status.svg)](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag)
 A feature flag solution, with YAML file in the backend (S3, HTTP, local file ...).  
 No server to install, just add a file in a central system *(HTTP, S3, ...)* and all your services will react to the changes of this file.
 
