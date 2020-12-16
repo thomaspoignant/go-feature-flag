@@ -10,6 +10,9 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/internal/retriever"
 )
 
+// Config is the configuration of go-feature-flag.
+// PollInterval is the interval in seconds where we gonna read the file to update the cache.
+// You should also have a retriever to specify where to read the flags file.
 type Config struct {
 	PollInterval  int // Poll every X seconds
 	LocalFile     string
@@ -17,6 +20,7 @@ type Config struct {
 	S3Retriever   *S3Retriever
 }
 
+// HTTPRetriever is a configuration struct for an HTTP endpoint retriever.
 type HTTPRetriever struct {
 	URL    string
 	Method string
@@ -24,12 +28,14 @@ type HTTPRetriever struct {
 	Header http.Header
 }
 
+// S3Retriever is a configuration struct for a S3 retriever.
 type S3Retriever struct {
 	Bucket    string
 	Item      string
 	AwsConfig aws.Config
 }
 
+// GetRetriever is used to get the retriever we will use to load the flags file.
 func (c *Config) GetRetriever() (retriever.FlagRetriever, error) {
 	if c.S3Retriever != nil {
 		// Create an AWS session

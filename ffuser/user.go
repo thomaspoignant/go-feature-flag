@@ -24,14 +24,17 @@ type User struct {
 	custom    Value
 }
 
+// GetKey return the unique key for the user.
 func (u *User) GetKey() string {
 	return u.key
 }
 
-func (u *User) GetAnonymous() bool {
+// IsAnonymous return if the user is anonymous or not.
+func (u *User) IsAnonymous() bool {
 	return u.anonymous
 }
 
+// GetCustom return all the custom properties of a user.
 func (u *User) GetCustom() map[string]interface{} {
 	return u.custom
 }

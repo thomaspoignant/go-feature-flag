@@ -7,14 +7,19 @@ import (
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
-	"github.com/thomaspoignant/go-feature-flag/internal/flags"
 )
-
-type Flags map[string]flags.Flag
 
 var flagUpdater gocron.Scheduler
 
-// Init the feature flag component.
+// Init the feature flag component with the configuration of ffclient.Config
+//  func main() {
+//    err := ffclient.Init(ffclient.Config{
+//             PollInterval: 3,
+//             HTTPRetriever: &ffClient.HTTPRetriever{
+//               URL:    "http://example.com/test.yaml",
+//             },
+//           })
+//    defer ffclient.Close()
 func Init(config Config) error {
 	cache.Init()
 	err := retrieveFlagsAndUpdateCache(config)
@@ -58,7 +63,7 @@ func retrieveFlagsAndUpdateCache(config Config) error {
 	return nil
 }
 
-// Close the component by stopping the background refresh.
+// Close the component by stopping the background refresh and clean the cache.
 func Close() {
 	cache.Close()
 	flagUpdater.Stop()

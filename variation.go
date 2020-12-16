@@ -29,6 +29,9 @@ func BoolVariation(flagKey string, user ffuser.User, defaultValue bool) (bool, e
 	return res, nil
 }
 
+// IntVariation return the value of the flag in boolean.
+// An error is return if you don't have init the library before calling the function.
+// If the key does not exist we return the default value.
 func IntVariation(flagKey string, user ffuser.User, defaultValue int) (int, error) {
 	if !cacheIsInitialized() {
 		return 0, errors.New(errorCacheNotInit)
@@ -46,6 +49,9 @@ func IntVariation(flagKey string, user ffuser.User, defaultValue int) (int, erro
 	return res, nil
 }
 
+// Float64Variation return the value of the flag in boolean.
+// An error is return if you don't have init the library before calling the function.
+// If the key does not exist we return the default value.
 func Float64Variation(flagKey string, user ffuser.User, defaultValue float64) (float64, error) {
 	if !cacheIsInitialized() {
 		return 0, errors.New(errorCacheNotInit)
@@ -63,6 +69,9 @@ func Float64Variation(flagKey string, user ffuser.User, defaultValue float64) (f
 	return res, nil
 }
 
+// StringVariation return the value of the flag in boolean.
+// An error is return if you don't have init the library before calling the function.
+// If the key does not exist we return the default value.
 func StringVariation(flagKey string, user ffuser.User, defaultValue string) (string, error) {
 	if !cacheIsInitialized() {
 		return "", errors.New(errorCacheNotInit)
@@ -80,6 +89,9 @@ func StringVariation(flagKey string, user ffuser.User, defaultValue string) (str
 	return res, nil
 }
 
+// JSONArrayVariation return the value of the flag in boolean.
+// An error is return if you don't have init the library before calling the function.
+// If the key does not exist we return the default value.
 func JSONArrayVariation(flagKey string, user ffuser.User, defaultValue []interface{}) ([]interface{}, error) {
 	if !cacheIsInitialized() {
 		return nil, errors.New(errorCacheNotInit)
@@ -97,6 +109,9 @@ func JSONArrayVariation(flagKey string, user ffuser.User, defaultValue []interfa
 	return res, nil
 }
 
+// JSONVariation return the value of the flag in boolean.
+// An error is return if you don't have init the library before calling the function.
+// If the key does not exist we return the default value.
 func JSONVariation(
 	flagKey string, user ffuser.User, defaultValue map[string]interface{}) (map[string]interface{}, error) {
 	if !cacheIsInitialized() {

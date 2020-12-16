@@ -85,7 +85,7 @@ func TestNewUser(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			assert.Equal(t, tt.want, tt.got)
-			assert.Equal(t, tt.want.GetAnonymous(), tt.got.GetAnonymous())
+			assert.Equal(t, tt.want.IsAnonymous(), tt.got.IsAnonymous())
 			assert.Equal(t, tt.want.GetKey(), tt.got.GetKey())
 			assert.Equal(t, tt.want.GetCustom(), tt.got.GetCustom())
 		})

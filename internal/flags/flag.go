@@ -92,7 +92,7 @@ func UserToJSON(u ffuser.User) map[string]interface{} {
 	for key, value := range u.GetCustom() {
 		userCopy[key] = value
 	}
-	userCopy["anonymous"] = u.GetAnonymous()
+	userCopy["anonymous"] = u.IsAnonymous()
 	userCopy["key"] = u.GetKey()
 	return userCopy
 }
