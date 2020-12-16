@@ -1,0 +1,32 @@
+language: go
+dist: bionic
+go:
+  - "1.15"
+
+env:
+  global:
+    - GO111MODULE=on
+
+cache:
+  directories:
+    - $GOPATH/pkg/mod
+
+stages:
+  - test
+
+before_script: make vendor
+
+jobs:
+  include:
+    - stage: test
+      name: "Lint"
+      script:
+        - make lint
+
+    - stage: test
+      name: "Test"
+      script: make test
+
+    - stage: test
+      name: "Coverage"
+      script: make coverage
