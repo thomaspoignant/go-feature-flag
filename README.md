@@ -11,6 +11,11 @@
 A feature flag solution, with YAML file in the backend (S3, HTTP, local file ...).  
 No server to install, just add a file in a central system *(HTTP, S3, ...)* and all your services will react to the changes of this file.
 
+
+If you are not familiar with feature flags also called feature Toggles you can read this [article of Martin Fowler](https://www.martinfowler.com/articles/feature-toggles.html)
+that explain why this is a great pattern.  
+I've also right an [article](https://medium.com/better-programming/feature-flags-and-how-to-iterate-quickly-7e3371b9986) that explain why feature flags can help you to iterate quickly.
+
 ## Installation
 ```bash
 go get github.com/thomaspoignant/go-feature-flag
