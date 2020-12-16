@@ -3,6 +3,7 @@ package ffclient
 import (
 	"fmt"
 	"github.com/go-co-op/gocron"
+	"log"
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
@@ -38,16 +39,19 @@ func Init(config Config) error {
 func retrieveFlagsAndUpdateCache(config Config) error {
 	retriever, err := config.GetRetriever()
 	if err != nil {
+		log.Printf("error while getting the file retriever: %v", err)
 		return err
 	}
 
 	loadedFlags, err := retriever.Retrieve()
 	if err != nil {
+		log.Printf("error: impossible to retrieve flags from the config file: %v", err)
 		return err
 	}
 
 	err = cache.UpdateCache(loadedFlags)
 	if err != nil {
+		log.Printf("error: impossible to update the cache of the flags: %v", err)
 		return err
 	}
 
