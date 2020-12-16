@@ -143,3 +143,6 @@ not: not of a logical expression
 - Select a specific user: `key eq "example@example.com"`
 - Select all anonymous user: `anonymous eq true`
 - Select a user with a custom property: `userId eq "12345"`
+
+# How can I contribute?
+This project is open for contribution, see the [contributor's guide](CONTRIBUTING.md) for some helpful tips.
