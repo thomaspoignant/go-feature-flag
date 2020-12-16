@@ -39,6 +39,58 @@ if hasFlag {
 }
 ```
 
+## Where do I store my flags file
+`go-feature-flags` support different ways of retrieving the flag file.  
+We can have only one source for the file, if you set multiple sources in your configuration, only one will be take in consideration.
+
+### From a file
+```go
+err := ffclient.Init(ffclient.Config{
+    PollInterval: 3,
+    LocalFile: "file-example.yaml",
+})
+defer ffclient.Close()
+```
+
+I will not recommend using a file to store your flags except if it is in a shared folder for all your services.
+
+### From an HTTP endpoint
+```go
+err := ffclient.Init(ffclient.Config{
+    PollInterval: 3,
+     HTTPRetriever: &ffClient.HTTPRetriever{
+        URL:    "http://example.com/test.yaml",
+    },
+})
+defer ffclient.Close()
+```
+
+To configure your HTTP endpoint:
+- **URL**: location of your file. **MANDATORY**
+- **Method**: the HTTP method you want to use *(default is GET)*.
+- **Body**: If you need a body to get the flags.
+- **Header**: Header you should pass while calling the endpoint *(useful for authorization)*.
+
+### From a S3 Bucket
+```go
+err := ffclient.Init(ffclient.Config{
+    PollInterval: 3,
+    S3Retriever: &ffClient.S3Retriever{
+        Bucket: "tpoi-test",
+        Item:   "test.yaml",
+        AwsConfig: aws.Config{
+            Region: aws.String("eu-west-1"),
+        },
+    },
+})
+defer ffclient.Close()
+```
+
+To configure your S3 file location:
+- **Bucket**: The name of your bucket. **MANDATORY**
+- **Item**: The location of your file in the bucket. **MANDATORY**
+- **AwsConfig**: An instance of `aws.Config` that configure your access to AWS *(see [this documentation for more info](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html))*. **MANDATORY**
+
 ## Flags file format
 `go-feature-flag` is to avoid to have to host a backend to manage your feature flags and to keep them centralized by using a file a source.  
 Your file should be a YAML file with a list of flags *([see example](testdata/test.yaml))*.
