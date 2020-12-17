@@ -1,12 +1,15 @@
 # 🎛️ go-feature-flag [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=I%27ve%20discovered%20go-feature-flag%20a%20great%20solution%20to%20easily%20managed%20feature%20flag%20in%20golang&url=https%3A%2F%2Fgithub.com%2Fthomaspoignant%2Fgo-feature-flag&via=thomaspoignant&hashtags=golang,featureflags,featuretoggle,go)
-[![Release version](https://img.shields.io/github/v/release/thomaspoignant/go-feature-flag "version")](https://github.com/thomaspoignant/go-feature-flag/releases)
+
 [![Build Status](https://travis-ci.com/thomaspoignant/go-feature-flag.svg?branch=main)](https://travis-ci.com/thomaspoignant/go-feature-flag)
 [![Coverage Status](https://coveralls.io/repos/github/thomaspoignant/go-feature-flag/badge.svg)](https://coveralls.io/github/thomaspoignant/go-feature-flag)
 [![Sonarcloud Status](https://sonarcloud.io/api/project_badges/measure?project=thomaspoignant_go-feature-flag&metric=alert_status)](https://sonarcloud.io/dashboard?id=thomaspoignant_go-feature-flag)
 [![GitHub](https://img.shields.io/github/license/thomaspoignant/go-feature-flag)](LICENSE)
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fthomaspoignant%2Fgo-feature-flag.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fthomaspoignant%2Fgo-feature-flag?ref=badge_shield)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fthomaspoignant%2Fgo-feature-flag.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fthomaspoignant%2Fgo-feature-flag?ref=badge_shield)  
+[![Release version](https://img.shields.io/github/v/release/thomaspoignant/go-feature-flag "version")](https://github.com/thomaspoignant/go-feature-flag/releases)
+[![GoDoc](https://godoc.org/github.com/thomaspoignant/go-feature-flag?status.svg)](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag)
 ![Go version](https://img.shields.io/github/go-mod/go-version/thomaspoignant/go-feature-flag?logo=go%20version "Go version")
-[![GoDoc](https://godoc.org/github.com/thomaspoignant/go-feature-flag?status.svg)](https://godoc.org/github.com/thomaspoignant/go-feature-flag)
+
+
 
 A feature flag solution, with YAML file in the backend (S3, HTTP, local file ...).  
 No server to install, just add a file in a central system *(HTTP, S3, ...)* and all your services will react to the changes of this file.
@@ -14,7 +17,7 @@ No server to install, just add a file in a central system *(HTTP, S3, ...)* and 
 
 If you are not familiar with feature flags also called feature Toggles you can read this [article of Martin Fowler](https://www.martinfowler.com/articles/feature-toggles.html)
 that explain why this is a great pattern.  
-I've also right an [article](https://medium.com/better-programming/feature-flags-and-how-to-iterate-quickly-7e3371b9986) that explain why feature flags can help you to iterate quickly.
+I've also write an [article](https://medium.com/better-programming/feature-flags-and-how-to-iterate-quickly-7e3371b9986) that explain why feature flags can help you to iterate quickly.
 
 ## Installation
 ```bash
@@ -119,6 +122,7 @@ test-flag:
 |`rule`   |![optional](https://img.shields.io/badge/-optional-green)   |  This is the query use to select on which user the flag should apply.<br>Rule format is describe in the [rule format section](#rule-format).<br>**If no rule set, the flag apply to all users *(percentage still apply)*.** |
 |`true`   |![mandatory](https://img.shields.io/badge/-mandatory-red)   |  The value return by the flag if apply to the user *(rule is evaluated to true)* and user is in the active percentage. |
 |`false`   |![mandatory](https://img.shields.io/badge/-mandatory-red)   |  The value return by the flag if apply to the user *(rule is evaluated to true)* and user is **not** in the active percentage. |
+|`default`   |![mandatory](https://img.shields.io/badge/-mandatory-red)   |  The value return by the flag if not apply to the user *(rule is evaluated to false)*. |
 |`disable`   |![optional](https://img.shields.io/badge/-optional-green)   |  True if the flag is disabled. |
 
 ## Rule format
