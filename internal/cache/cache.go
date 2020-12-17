@@ -10,9 +10,10 @@ import (
 var once sync.Once
 var mutex = &sync.Mutex{}
 
+// FlagsCache is the cache of your flags.
 var FlagsCache map[string]flags.Flag
 
-// InitFlagCache init the cache of all flags.
+// Init init the cache of all flags.
 // We are using a singleton to avoid multiple init and to be sure
 // we have only one cache for all the flags in our system.
 func Init() map[string]flags.Flag {
@@ -37,6 +38,7 @@ func UpdateCache(loadedFlags []byte) error {
 	return nil
 }
 
+// Close is removing everything from the cache.
 func Close() {
 	FlagsCache = nil
 }

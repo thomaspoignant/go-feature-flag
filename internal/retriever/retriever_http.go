@@ -9,10 +9,12 @@ import (
 	"strings"
 )
 
+// HTTPClient is an interface over http.Client to make mock easier.
 type HTTPClient interface {
 	Do(req *http.Request) (*http.Response, error)
 }
 
+// NewHTTPRetriever return a new HTTPRetriever to get the file from an HTTP endpoint.
 func NewHTTPRetriever(httpClient HTTPClient, url string, method string, body string, header http.Header) FlagRetriever {
 	return &httpRetriever{
 		httpClient,

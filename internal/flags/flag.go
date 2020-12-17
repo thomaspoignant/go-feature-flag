@@ -7,6 +7,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
 )
 
+// Flag describe the fields of a flag.
 type Flag struct {
 	Disable    bool
 	Rule       string
@@ -74,6 +75,7 @@ func (f *Flag) evaluateRule(user ffuser.User) bool {
 	return parser.Evaluate(f.Rule, UserToJSON(user))
 }
 
+// Hash is taking a string and convert.
 func Hash(s string) uint32 {
 	h := fnv.New32a()
 	_, err := h.Write([]byte(s))
@@ -84,6 +86,7 @@ func Hash(s string) uint32 {
 	return h.Sum32()
 }
 
+// UserToJSON convert the user to a MAP to use the query on it.
 func UserToJSON(u ffuser.User) map[string]interface{} {
 	// We don't have a json copy of the user.
 	userCopy := make(map[string]interface{})
