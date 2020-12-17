@@ -47,15 +47,8 @@ func (f *Flag) isInPercentage(flagName string, user ffuser.User) bool {
 		return false
 	}
 
-	hashFlag := Hash(flagName) % 100
-	hashUserKey := Hash(user.GetKey()) % 100
-	hashLimit := (hashFlag + uint32(f.Percentage)) % 100
-
-	if hashLimit < hashFlag {
-		return (hashUserKey >= hashFlag && hashFlag < 100) || (hashUserKey < hashLimit)
-	}
-
-	return hashUserKey >= hashFlag && hashUserKey < hashLimit
+	hashID := Hash(flagName+user.GetKey()) % 100
+	return hashID < uint32(f.Percentage)
 }
 
 // evaluateRule is checking if the rule can apply to a specific user.
