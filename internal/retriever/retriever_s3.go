@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 )
 
+// NewS3Retriever return a new S3Retriever to get the file from S3.
 func NewS3Retriever(downloader s3manageriface.DownloaderAPI, bucket string, item string) FlagRetriever {
 	return &s3Retriever{downloader, bucket, item}
 }

@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 )
 
+// NewLocalRetriever is the retriever for local file.
 func NewLocalRetriever(path string) FlagRetriever {
 	return &localRetriever{path}
 }

@@ -1,5 +1,6 @@
 package ffuser
 
+// Value is a type to define custom attribute.
 type Value map[string]interface{}
 
 // NewUser creates a new user identified by the given key.

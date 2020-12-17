@@ -11,6 +11,7 @@ func NewUserBuilder(key string) UserBuilder {
 	}
 }
 
+// UserBuilder is a builder to create a User.
 type UserBuilder interface {
 	Anonymous(bool) UserBuilder
 	AddCustom(string, interface{}) UserBuilder
@@ -23,16 +24,19 @@ type userBuilderImpl struct {
 	custom    Value
 }
 
+// Anonymous is to set the user as anonymous.
 func (u *userBuilderImpl) Anonymous(anonymous bool) UserBuilder {
 	u.anonymous = anonymous
 	return u
 }
 
+// AddCustom allows you to add a custom attribute to the user.
 func (u *userBuilderImpl) AddCustom(key string, value interface{}) UserBuilder {
 	u.custom[key] = value
 	return u
 }
 
+// Build is creating the user.
 func (u *userBuilderImpl) Build() User {
 	return User{
 		key:       u.key,
