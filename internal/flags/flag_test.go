@@ -137,54 +137,54 @@ func TestFlag_isInPercentage(t *testing.T) {
 				Percentage: 10,
 			},
 			args: args{
-				flagName: "test_689025",                 // hash is 20
-				user:     ffuser.NewUser("test_689053"), // hash of the key is 29
+				flagName: "test-flag",
+				user:     ffuser.NewUser("user2"), // combined hash is 1
 			},
 			want: true,
 		},
 		{
-			name: "User toggle in the range, after the modulo",
+			name: "High limit of the percentage",
 			fields: fields{
 				Percentage: 10,
 			},
 			args: args{
-				flagName: "test_689054",                 // hash is 96
-				user:     ffuser.NewUser("test_689061"), // hash of the key is 4
+				flagName: "test-flag",
+				user:     ffuser.NewUser("user66"), // combined hash is 9
 			},
 			want: true,
 		},
 		{
-			name: "User toggle same hash as the toggle",
+			name: "Limit +1",
 			fields: fields{
 				Percentage: 10,
 			},
 			args: args{
-				flagName: "test_689054",                 // hash is 96
-				user:     ffuser.NewUser("test_689371"), // hash of the key is 96
-			},
-			want: true,
-		},
-		{
-			name: "User toggle not in the range",
-			fields: fields{
-				Percentage: 10,
-			},
-			args: args{
-				flagName: "test_689372",                 // hash is 53
-				user:     ffuser.NewUser("test_689373"), // hash of the key is 54
+				flagName: "test-flag",
+				user:     ffuser.NewUser("user40"), // combined hash is 10
 			},
 			want: false,
 		},
 		{
-			name: "User toggle equals higher range",
+			name: "Low limit of the percentage",
 			fields: fields{
 				Percentage: 10,
 			},
 			args: args{
-				flagName: "test_689372",                 // hash is 53
-				user:     ffuser.NewUser("test_689470"), // hash of the key is 62
+				flagName: "test-flag",
+				user:     ffuser.NewUser("user135"), // hash of the key is 0
 			},
 			want: true,
+		},
+		{
+			name: "Flag not in the percentage",
+			fields: fields{
+				Percentage: 10,
+			},
+			args: args{
+				flagName: "test-flag",
+				user:     ffuser.NewUser("user134"), // hash of the key is 19
+			},
+			want: false,
 		},
 	}
 	for _, tt := range tests {
@@ -242,12 +242,12 @@ func TestFlag_value(t *testing.T) {
 				True:       "true",
 				False:      "false",
 				Default:    "default",
-				Rule:       "key == \"test_689483\"",
+				Rule:       "key == \"user66\"",
 				Percentage: 10,
 			},
 			args: args{
-				flagName: "test_689483",
-				user:     ffuser.NewUser("test_689483"),
+				flagName: "test-flag",
+				user:     ffuser.NewUser("user66"), // combined hash is 9
 			},
 			want: "true",
 		},
