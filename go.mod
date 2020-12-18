@@ -4,7 +4,7 @@ go 1.15
 
 require (
 	github.com/antlr/antlr4 v0.0.0-20201206235148-c87e55b61113 // indirect
-	github.com/aws/aws-sdk-go v1.36.10
+	github.com/aws/aws-sdk-go v1.36.11
 	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/go-co-op/gocron v0.4.0
 	github.com/google/go-cmp v0.5.4
