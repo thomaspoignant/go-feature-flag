@@ -148,6 +148,21 @@ pr: present
 not: not of a logical expression
 ```
 
+## Variation
+The Variation methods determine whether a flag is enabled or not for a specific user.
+There is a Variation method for each type: `BoolVariation`, `IntVariation`, `Float64Variation`, `StringVariation`, `JSONArrayVariation` and `JSONVariation`. (and JSONVariation, which can be any JSON type):
+
+```go
+result, _ := ffclient.BoolVariation("your.feature.key", user, false)
+
+// result is now true or false depending on the setting of this boolean feature flag
+```
+Variation methods take the feature flag key, a User, and a default value.
+
+The default value is return when an error is encountered _(`ffclient` not initialized, variation with wrong type, flag does not exist ...)._  
+In the example, if the flag `your.feature.key` does not exists, result will be `false`.  
+Not that you will always have a usable value in the result. 
+
 ### Examples
 
 - Select a specific user: `key eq "example@example.com"`
