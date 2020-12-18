@@ -3,9 +3,11 @@ package ffclient
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
+	"github.com/thomaspoignant/go-feature-flag/internal/flags"
 )
 
 const errorCacheNotInit = "impossible to read the toggle before the initialisation"
@@ -16,19 +18,18 @@ const errorWrongVariation = "wrong variation used for flag %v"
 // An error is return if you don't have init the library before calling the function.
 // If the key does not exist we return the default value.
 func BoolVariation(flagKey string, user ffuser.User, defaultValue bool) (bool, error) {
-	if !cacheIsInitialized() {
-		return defaultValue, errors.New(errorCacheNotInit)
-	}
-
-	flag, ok := cache.FlagsCache[flagKey]
-	if !ok || flag.Disable {
-		return defaultValue, fmt.Errorf(errorFlagNotAvailable, flagKey)
+	flag, err := getFlagFromCache(flagKey)
+	if err != nil {
+		notifyVariation(flagKey, user.GetKey(), defaultValue)
+		return defaultValue, err
 	}
 
 	res, ok := flag.Value(flagKey, user).(bool)
 	if !ok {
+		notifyVariation(flagKey, user.GetKey(), defaultValue)
 		return defaultValue, fmt.Errorf(errorWrongVariation, flagKey)
 	}
+	notifyVariation(flagKey, user.GetKey(), res)
 	return res, nil
 }
 
@@ -36,19 +37,18 @@ func BoolVariation(flagKey string, user ffuser.User, defaultValue bool) (bool, e
 // An error is return if you don't have init the library before calling the function.
 // If the key does not exist we return the default value.
 func IntVariation(flagKey string, user ffuser.User, defaultValue int) (int, error) {
-	if !cacheIsInitialized() {
-		return defaultValue, errors.New(errorCacheNotInit)
-	}
-
-	flag, ok := cache.FlagsCache[flagKey]
-	if !ok || flag.Disable {
-		return defaultValue, fmt.Errorf(errorFlagNotAvailable, flagKey)
+	flag, err := getFlagFromCache(flagKey)
+	if err != nil {
+		notifyVariation(flagKey, user.GetKey(), defaultValue)
+		return defaultValue, err
 	}
 
 	res, ok := flag.Value(flagKey, user).(int)
 	if !ok {
+		notifyVariation(flagKey, user.GetKey(), defaultValue)
 		return defaultValue, fmt.Errorf(errorWrongVariation, flagKey)
 	}
+	notifyVariation(flagKey, user.GetKey(), res)
 	return res, nil
 }
 
@@ -56,19 +56,18 @@ func IntVariation(flagKey string, user ffuser.User, defaultValue int) (int, erro
 // An error is return if you don't have init the library before calling the function.
 // If the key does not exist we return the default value.
 func Float64Variation(flagKey string, user ffuser.User, defaultValue float64) (float64, error) {
-	if !cacheIsInitialized() {
-		return defaultValue, errors.New(errorCacheNotInit)
-	}
-
-	flag, ok := cache.FlagsCache[flagKey]
-	if !ok || flag.Disable {
-		return defaultValue, fmt.Errorf(errorFlagNotAvailable, flagKey)
+	flag, err := getFlagFromCache(flagKey)
+	if err != nil {
+		notifyVariation(flagKey, user.GetKey(), defaultValue)
+		return defaultValue, err
 	}
 
 	res, ok := flag.Value(flagKey, user).(float64)
 	if !ok {
+		notifyVariation(flagKey, user.GetKey(), defaultValue)
 		return defaultValue, fmt.Errorf(errorWrongVariation, flagKey)
 	}
+	notifyVariation(flagKey, user.GetKey(), res)
 	return res, nil
 }
 
@@ -76,19 +75,18 @@ func Float64Variation(flagKey string, user ffuser.User, defaultValue float64) (f
 // An error is return if you don't have init the library before calling the function.
 // If the key does not exist we return the default value.
 func StringVariation(flagKey string, user ffuser.User, defaultValue string) (string, error) {
-	if !cacheIsInitialized() {
-		return defaultValue, errors.New(errorCacheNotInit)
-	}
-
-	flag, ok := cache.FlagsCache[flagKey]
-	if !ok || flag.Disable {
-		return defaultValue, fmt.Errorf(errorFlagNotAvailable, flagKey)
+	flag, err := getFlagFromCache(flagKey)
+	if err != nil {
+		notifyVariation(flagKey, user.GetKey(), defaultValue)
+		return defaultValue, err
 	}
 
 	res, ok := flag.Value(flagKey, user).(string)
-	if !ok || flag.Disable {
+	if !ok {
+		notifyVariation(flagKey, user.GetKey(), defaultValue)
 		return defaultValue, fmt.Errorf(errorWrongVariation, flagKey)
 	}
+	notifyVariation(flagKey, user.GetKey(), res)
 	return res, nil
 }
 
@@ -96,19 +94,18 @@ func StringVariation(flagKey string, user ffuser.User, defaultValue string) (str
 // An error is return if you don't have init the library before calling the function.
 // If the key does not exist we return the default value.
 func JSONArrayVariation(flagKey string, user ffuser.User, defaultValue []interface{}) ([]interface{}, error) {
-	if !cacheIsInitialized() {
-		return defaultValue, errors.New(errorCacheNotInit)
-	}
-
-	flag, ok := cache.FlagsCache[flagKey]
-	if !ok || flag.Disable {
-		return defaultValue, fmt.Errorf(errorFlagNotAvailable, flagKey)
+	flag, err := getFlagFromCache(flagKey)
+	if err != nil {
+		notifyVariation(flagKey, user.GetKey(), defaultValue)
+		return defaultValue, err
 	}
 
 	res, ok := flag.Value(flagKey, user).([]interface{})
 	if !ok {
+		notifyVariation(flagKey, user.GetKey(), defaultValue)
 		return defaultValue, fmt.Errorf(errorWrongVariation, flagKey)
 	}
+	notifyVariation(flagKey, user.GetKey(), res)
 	return res, nil
 }
 
@@ -117,22 +114,41 @@ func JSONArrayVariation(flagKey string, user ffuser.User, defaultValue []interfa
 // If the key does not exist we return the default value.
 func JSONVariation(
 	flagKey string, user ffuser.User, defaultValue map[string]interface{}) (map[string]interface{}, error) {
-	if !cacheIsInitialized() {
-		return defaultValue, errors.New(errorCacheNotInit)
-	}
-
-	flag, ok := cache.FlagsCache[flagKey]
-	if !ok || flag.Disable {
-		return defaultValue, fmt.Errorf(errorFlagNotAvailable, flagKey)
+	flag, err := getFlagFromCache(flagKey)
+	if err != nil {
+		notifyVariation(flagKey, user.GetKey(), defaultValue)
+		return defaultValue, err
 	}
 
 	res, ok := flag.Value(flagKey, user).(map[string]interface{})
 	if !ok {
+		notifyVariation(flagKey, user.GetKey(), defaultValue)
 		return defaultValue, fmt.Errorf(errorWrongVariation, flagKey)
 	}
+	notifyVariation(flagKey, user.GetKey(), res)
 	return res, nil
 }
 
-func cacheIsInitialized() bool {
-	return cache.FlagsCache != nil
+// notifyVariation is logging the evaluation result for a flag
+// if no logger is provided in the configuration we are not logging anything.
+func notifyVariation(flagKey string, userKey string, value interface{}) {
+	if logger != nil {
+		logger.Printf(
+			"[%v] user=\"%s\", flag=\"%s\", value=\"%v\"",
+			time.Now().Format(time.RFC3339), userKey, flagKey, value)
+	}
+}
+
+// getFlagFromCache try to get the flag from the cache.
+// It returns an error if the cache is not init or if the flag is not present or disabled.
+func getFlagFromCache(flagKey string) (flags.Flag, error) {
+	if cache.FlagsCache == nil {
+		return flags.Flag{}, errors.New(errorCacheNotInit)
+	}
+
+	flag, ok := cache.FlagsCache[flagKey]
+	if !ok || flag.Disable {
+		return flag, fmt.Errorf(errorFlagNotAvailable, flagKey)
+	}
+	return flag, nil
 }

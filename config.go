@@ -5,6 +5,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"log"
 	"net/http"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/retriever"
@@ -15,6 +16,7 @@ import (
 // You should also have a retriever to specify where to read the flags file.
 type Config struct {
 	PollInterval  int // Poll every X seconds
+	Logger        *log.Logger
 	LocalFile     string
 	HTTPRetriever *HTTPRetriever
 	S3Retriever   *S3Retriever
