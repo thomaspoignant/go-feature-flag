@@ -155,7 +155,7 @@ not: not of a logical expression
 
 ## Variation
 The Variation methods determine whether a flag is enabled or not for a specific user.
-There is a Variation method for each type: `BoolVariation`, `IntVariation`, `Float64Variation`, `StringVariation`, `JSONArrayVariation` and `JSONVariation`. (and JSONVariation, which can be any JSON type):
+There is a Variation method for each type: `BoolVariation`, `IntVariation`, `Float64Variation`, `StringVariation`, `JSONArrayVariation` and `JSONVariation`.
 
 ```go
 result, _ := ffclient.BoolVariation("your.feature.key", user, false)
