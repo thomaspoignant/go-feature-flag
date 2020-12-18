@@ -147,6 +147,11 @@ in: in a list
 pr: present
 not: not of a logical expression
 ```
+### Examples
+
+- Select a specific user: `key eq "example@example.com"`
+- Select all identified users: `anonymous ne true`
+- Select a user with a custom property: `userId eq "12345"`
 
 ## Variation
 The Variation methods determine whether a flag is enabled or not for a specific user.
@@ -162,12 +167,6 @@ Variation methods take the feature flag key, a User, and a default value.
 The default value is return when an error is encountered _(`ffclient` not initialized, variation with wrong type, flag does not exist ...)._  
 In the example, if the flag `your.feature.key` does not exists, result will be `false`.  
 Not that you will always have a usable value in the result. 
-
-### Examples
-
-- Select a specific user: `key eq "example@example.com"`
-- Select all identified users: `anonymous ne true`
-- Select a user with a custom property: `userId eq "12345"`
 
 # How can I contribute?
 This project is open for contribution, see the [contributor's guide](CONTRIBUTING.md) for some helpful tips.
