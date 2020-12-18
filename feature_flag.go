@@ -10,6 +10,7 @@ import (
 )
 
 var flagUpdater gocron.Scheduler
+var logger *log.Logger
 
 // Init the feature flag component with the configuration of ffclient.Config
 //  func main() {
@@ -32,6 +33,9 @@ func Init(config Config) error {
 	if config.PollInterval == 0 {
 		config.PollInterval = 1
 	}
+
+	logger = config.Logger
+
 	_, err = flagUpdater.Every(uint64(config.PollInterval)).Seconds().Do(retrieveFlagsAndUpdateCache, config)
 	if err != nil {
 		return fmt.Errorf("impossible to launch background updater: %v", err)
