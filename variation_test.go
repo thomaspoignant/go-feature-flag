@@ -49,7 +49,7 @@ func TestBoolVariation(t *testing.T) {
 				flagCache:    flagCacheMock,
 			},
 			want:    true,
-			wantErr: false,
+			wantErr: true,
 		},
 		{
 			name: "Get error when not init",
@@ -59,6 +59,7 @@ func TestBoolVariation(t *testing.T) {
 				defaultValue: true,
 				flagCache:    nil,
 			},
+			want:    true,
 			wantErr: true,
 		},
 		{
@@ -70,7 +71,7 @@ func TestBoolVariation(t *testing.T) {
 				flagCache:    flagCacheMock,
 			},
 			want:    true,
-			wantErr: false,
+			wantErr: true,
 		},
 		{
 			name: "Get default value, rule not apply",
@@ -122,7 +123,7 @@ func TestBoolVariation(t *testing.T) {
 				},
 			},
 			want:    true,
-			wantErr: false,
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
@@ -182,7 +183,7 @@ func TestFloat64Variation(t *testing.T) {
 				flagCache:    flagCacheMock,
 			},
 			want:    120.0,
-			wantErr: false,
+			wantErr: true,
 		},
 		{
 			name: "Get error when not init",
@@ -192,6 +193,7 @@ func TestFloat64Variation(t *testing.T) {
 				defaultValue: 118.0,
 				flagCache:    nil,
 			},
+			want:    118.0,
 			wantErr: true,
 		},
 		{
@@ -203,7 +205,7 @@ func TestFloat64Variation(t *testing.T) {
 				flagCache:    flagCacheMock,
 			},
 			want:    118.0,
-			wantErr: false,
+			wantErr: true,
 		},
 		{
 			name: "Get default value, rule not apply",
@@ -255,7 +257,7 @@ func TestFloat64Variation(t *testing.T) {
 				},
 			},
 			want:    118.0,
-			wantErr: false,
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
@@ -315,7 +317,7 @@ func TestJSONArrayVariation(t *testing.T) {
 				flagCache:    flagCacheMock,
 			},
 			want:    []interface{}{"toto"},
-			wantErr: false,
+			wantErr: true,
 		},
 		{
 			name: "Get error when not init",
@@ -325,6 +327,7 @@ func TestJSONArrayVariation(t *testing.T) {
 				defaultValue: []interface{}{"toto"},
 				flagCache:    nil,
 			},
+			want:    []interface{}{"toto"},
 			wantErr: true,
 		},
 		{
@@ -336,7 +339,7 @@ func TestJSONArrayVariation(t *testing.T) {
 				flagCache:    flagCacheMock,
 			},
 			want:    []interface{}{"toto"},
-			wantErr: false,
+			wantErr: true,
 		},
 		{
 			name: "Get default value, rule not apply",
@@ -388,7 +391,7 @@ func TestJSONArrayVariation(t *testing.T) {
 				},
 			},
 			want:    []interface{}{"toto"},
-			wantErr: false,
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
@@ -448,7 +451,7 @@ func TestJSONVariation(t *testing.T) {
 				flagCache:    flagCacheMock,
 			},
 			want:    map[string]interface{}{"default-notkey": true},
-			wantErr: false,
+			wantErr: true,
 		},
 		{
 			name: "Get error when not init",
@@ -458,6 +461,7 @@ func TestJSONVariation(t *testing.T) {
 				defaultValue: map[string]interface{}{"default-notkey": true},
 				flagCache:    nil,
 			},
+			want:    map[string]interface{}{"default-notkey": true},
 			wantErr: true,
 		},
 		{
@@ -469,7 +473,7 @@ func TestJSONVariation(t *testing.T) {
 				flagCache:    flagCacheMock,
 			},
 			want:    map[string]interface{}{"default-notkey": true},
-			wantErr: false,
+			wantErr: true,
 		},
 		{
 			name: "Get default value, rule not apply",
@@ -521,7 +525,7 @@ func TestJSONVariation(t *testing.T) {
 				},
 			},
 			want:    map[string]interface{}{"default-notkey": true},
-			wantErr: false,
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
@@ -581,7 +585,7 @@ func TestStringVariation(t *testing.T) {
 				flagCache:    flagCacheMock,
 			},
 			want:    "default-notkey",
-			wantErr: false,
+			wantErr: true,
 		},
 		{
 			name: "Get error when not init",
@@ -591,6 +595,7 @@ func TestStringVariation(t *testing.T) {
 				defaultValue: "default-notkey",
 				flagCache:    nil,
 			},
+			want:    "default-notkey",
 			wantErr: true,
 		},
 		{
@@ -602,7 +607,7 @@ func TestStringVariation(t *testing.T) {
 				flagCache:    flagCacheMock,
 			},
 			want:    "default-notkey",
-			wantErr: false,
+			wantErr: true,
 		},
 		{
 			name: "Get default value, rule not apply",
@@ -654,7 +659,7 @@ func TestStringVariation(t *testing.T) {
 				},
 			},
 			want:    "default-notkey",
-			wantErr: false,
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
@@ -714,7 +719,7 @@ func TestIntVariation(t *testing.T) {
 				flagCache:    flagCacheMock,
 			},
 			want:    125,
-			wantErr: false,
+			wantErr: true,
 		},
 		{
 			name: "Get error when not init",
@@ -724,6 +729,7 @@ func TestIntVariation(t *testing.T) {
 				defaultValue: 118,
 				flagCache:    nil,
 			},
+			want:    118,
 			wantErr: true,
 		},
 		{
@@ -735,7 +741,7 @@ func TestIntVariation(t *testing.T) {
 				flagCache:    flagCacheMock,
 			},
 			want:    118,
-			wantErr: false,
+			wantErr: true,
 		},
 		{
 			name: "Get default value rule not apply",
@@ -787,7 +793,7 @@ func TestIntVariation(t *testing.T) {
 				},
 			},
 			want:    118,
-			wantErr: false,
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
