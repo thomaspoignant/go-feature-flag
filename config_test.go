@@ -66,8 +66,8 @@ func TestConfig_GetRetriever(t *testing.T) {
 				PollInterval: 3,
 				GithubRetriever: &ffClient.GithubRetriever{
 					RepositorySlug: "thomaspoignant/go-feature-flag",
-					Branch:         "main",
 					FilePath:       "testdata/test.yaml",
+					GithubToken:    "XXX",
 				},
 			},
 			// we should have a http retriever because Github retriever is using httpRetriever
