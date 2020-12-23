@@ -11,13 +11,13 @@
 
 
 
-A feature flag solution, with YAML file in the backend (S3, HTTP, local file ...).  
-No server to install, just add a file in a central system *(HTTP, S3, ...)* and all your services will react to the changes of this file.
+A feature flag solution, with YAML file in the backend (S3, GitHub, HTTP, local file ...).  
+No server to install, just add a file in a central system *(HTTP, S3, GitHub, ...)* and all your services will react to the changes of this file.
 
 
 If you are not familiar with feature flags also called feature Toggles you can read this [article of Martin Fowler](https://www.martinfowler.com/articles/feature-toggles.html)
-that explain why this is a great pattern.  
-I've also write an [article](https://medium.com/better-programming/feature-flags-and-how-to-iterate-quickly-7e3371b9986) that explain why feature flags can help you to iterate quickly.
+that explains why this is a great pattern.  
+I've also wrote an [article](https://medium.com/better-programming/feature-flags-and-how-to-iterate-quickly-7e3371b9986) that explains why feature flags can help you to iterate quickly.
 
 ## Installation
 ```bash
@@ -52,16 +52,26 @@ if hasFlag {
 `go-feature-flags` support different ways of retrieving the flag file.  
 We can have only one source for the file, if you set multiple sources in your configuration, only one will be take in consideration.
 
-### From a file
+### From GitHub
 ```go
 err := ffclient.Init(ffclient.Config{
     PollInterval: 3,
-    LocalFile: "file-example.yaml",
+    GithubRetriever: &ffClient.GithubRetriever{
+        RepositorySlug: "thomaspoignant/go-feature-flag",
+        Branch: "main",
+        FilePath: "testdata/test.yaml",
+        GithubToken: "XXXX",
+    },
 })
 defer ffclient.Close()
 ```
+To configure the access to your GitHub file:
+- **RepositorySlug**: your GitHub slug `org/repo-name`. **MANDATORY**
+- **FilePath**: the path of your file. **MANDATORY**
+- **Branch**: the branch where your file is *(default is `main`)*.
+- **GithubToken**: Github token is used to access a private repository, you need the `repo` permission *([how to create a GitHub token](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token))*.
 
-I will not recommend using a file to store your flags except if it is in a shared folder for all your services.
+**Warning**: GitHub has rate limits, so be sure to not reach them when setting your `PollInterval`.
 
 ### From an HTTP endpoint
 ```go
@@ -99,6 +109,18 @@ To configure your S3 file location:
 - **Bucket**: The name of your bucket. **MANDATORY**
 - **Item**: The location of your file in the bucket. **MANDATORY**
 - **AwsConfig**: An instance of `aws.Config` that configure your access to AWS *(see [this documentation for more info](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html))*. **MANDATORY**
+
+### From a file
+```go
+err := ffclient.Init(ffclient.Config{
+    PollInterval: 3,
+    LocalFile: "file-example.yaml",
+})
+defer ffclient.Close()
+```
+
+*I will not recommend using a file to store your flags except if it is in a shared folder for all your services.*
+
 
 ## Flags file format
 `go-feature-flag` is to avoid to have to host a backend to manage your feature flags and to keep them centralized by using a file a source.  

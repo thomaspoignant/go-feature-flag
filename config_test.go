@@ -12,10 +12,11 @@ import (
 
 func TestConfig_GetRetriever(t *testing.T) {
 	type fields struct {
-		PollInterval  int
-		LocalFile     string
-		HTTPRetriever *ffClient.HTTPRetriever
-		S3Retriever   *ffClient.S3Retriever
+		PollInterval    int
+		LocalFile       string
+		HTTPRetriever   *ffClient.HTTPRetriever
+		S3Retriever     *ffClient.S3Retriever
+		GithubRetriever *ffClient.GithubRetriever
 	}
 	tests := []struct {
 		name    string
@@ -56,6 +57,20 @@ func TestConfig_GetRetriever(t *testing.T) {
 					Method: http.MethodGet,
 				},
 			},
+			want:    "*retriever.httpRetriever",
+			wantErr: false,
+		},
+		{
+			name: "Github retriever",
+			fields: fields{
+				PollInterval: 3,
+				GithubRetriever: &ffClient.GithubRetriever{
+					RepositorySlug: "thomaspoignant/go-feature-flag",
+					FilePath:       "testdata/test.yaml",
+					GithubToken:    "XXX",
+				},
+			},
+			// we should have a http retriever because Github retriever is using httpRetriever
 			want:    "*retriever.httpRetriever",
 			wantErr: false,
 		},
@@ -103,10 +118,11 @@ func TestConfig_GetRetriever(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &ffClient.Config{
-				PollInterval:  tt.fields.PollInterval,
-				LocalFile:     tt.fields.LocalFile,
-				HTTPRetriever: tt.fields.HTTPRetriever,
-				S3Retriever:   tt.fields.S3Retriever,
+				PollInterval:    tt.fields.PollInterval,
+				LocalFile:       tt.fields.LocalFile,
+				HTTPRetriever:   tt.fields.HTTPRetriever,
+				S3Retriever:     tt.fields.S3Retriever,
+				GithubRetriever: tt.fields.GithubRetriever,
 			}
 			got, err := c.GetRetriever()
 			assert.Equal(t, tt.wantErr, err != nil)
