@@ -6,8 +6,8 @@ github.com/blang/semver v3.5.1+incompatible h1:cQNTCjp13qL8KC3Nbxr/y2Bqb63oX6wdn
 github.com/blang/semver v3.5.1+incompatible/go.mod h1:kRBLl5iJ+tD4TcOOxsy/0fnwebNt5EWlYSAyrTnjyyk=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/go-co-op/gocron v0.4.0 h1:MO9iUktaVn03seJUDGEelPGL3SME9P+Ot9VdTAdorQw=
-github.com/go-co-op/gocron v0.4.0/go.mod h1:6Btk4lVj3bnFAgbVfr76W8impTyhYrEi1pV5Pt4Tp/M=
+github.com/go-co-op/gocron v0.5.0 h1:QBxhIsODdq6u9+Cu3JehdhznE2IzuEokOddpLnxVrtg=
+github.com/go-co-op/gocron v0.5.0/go.mod h1:6Btk4lVj3bnFAgbVfr76W8impTyhYrEi1pV5Pt4Tp/M=
 github.com/google/go-cmp v0.5.4 h1:L8R9j+yAqZuZjsqh/z+F1NCffTKKLShY6zXTItVIZ8M=
 github.com/google/go-cmp v0.5.4/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
 github.com/jmespath/go-jmespath v0.4.0 h1:BEgLn5cpjn8UN1mAw4NjwDrS35OdebyEtFe+9YPoQUg=
