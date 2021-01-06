@@ -35,7 +35,8 @@ err := ffclient.Init(ffclient.Config{
 })
 defer ffclient.Close()
 ```
-*This example will load a file from an HTTP endpoint and will refresh the flags every 3 seconds.*
+*This example will load a file from an HTTP endpoint and will refresh the flags every 3 seconds (if you omit the
+PollInterval, default value is 60s).*
 
 Now you can evalute your flags anywhere in your code.
 ```go
