@@ -201,7 +201,7 @@ Custom attributes are one of the most powerful features. They let you have rules
 
 ## Variation
 The Variation methods determine whether a flag is enabled or not for a specific user.
-There is a Variation method for each type: `BoolVariation`, `IntVariation`, `Float64Variation`, `StringVariation`, `JSONArrayVariation` and `JSONVariation`.
+There is a Variation method for each type: [`BoolVariation`,](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#BoolVariation) [`IntVariation`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#IntVariation), [`Float64Variation`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#Float64Variation), [`StringVariation`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#StringVariation), [`JSONArrayVariation`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#JSONArrayVariation) and [`JSONVariation`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#JSONVariation).
 
 ```go
 result, _ := ffclient.BoolVariation("your.feature.key", user, false)
