@@ -176,6 +176,29 @@ not: not of a logical expression
 - Select all identified users: `anonymous ne true`
 - Select a user with a custom property: `userId eq "12345"`
 
+## Users
+Feature flag targeting and rollouts are all determined by the user you pass to your Variation calls.  
+The SDK defines a [User](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/ffuser#User) struct and a [UserBuilder](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/ffuser#UserBuilder) to make this easy. 
+
+Here's an example:
+
+```go
+// User with only a key
+user1 := ffuser.NewUser("user1-key")
+
+// User with a key plus other attributes
+user2 = ffuser.NewUserBuilder("user2-key").
+ AddCustom("firstname", "John").
+ AddCustom("lastname", "Doe").
+ AddCustom("email", "john.doe@example.com").
+ Build()
+```
+
+The most common attribute is the user's key. In this case we've used the strings "**user1-key**" and "**user2-key**".  
+**The user key is the only mandatory user attribute.** The key should also uniquely identify each user. You can use a primary key, an e-mail address, or a hash, as long as the same user always has the same key. We recommend using a hash if possible.
+
+Custom attributes are one of the most powerful features. They let you have rules on these attributes and target users according to any data that you want.
+
 ## Variation
 The Variation methods determine whether a flag is enabled or not for a specific user.
 There is a Variation method for each type: `BoolVariation`, `IntVariation`, `Float64Variation`, `StringVariation`, `JSONArrayVariation` and `JSONVariation`.
