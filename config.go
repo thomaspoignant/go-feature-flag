@@ -39,7 +39,7 @@ type S3Retriever struct {
 	AwsConfig aws.Config
 }
 
-// S3Retriever is a configuration struct for a S3 retriever.
+// GithubRetriever is a configuration struct for a GitHub retriever.
 type GithubRetriever struct {
 	RepositorySlug string
 	Branch         string // default is main
