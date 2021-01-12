@@ -52,7 +52,7 @@ func retrieveFlagsAndUpdateCache(config Config) error {
 		return err
 	}
 
-	loadedFlags, err := retriever.Retrieve()
+	loadedFlags, err := retriever.Retrieve(config.Context)
 	if err != nil {
 		log.Printf("error: impossible to retrieve flags from the config file: %v", err)
 		return err

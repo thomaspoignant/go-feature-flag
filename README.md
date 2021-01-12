@@ -43,6 +43,7 @@ defer ffclient.Close()
 PollInterval, default value is 60s).*
 
 Now you can evalute your flags anywhere in your code.
+
 ```go
 user := ffuser.NewUser("user-unique-key")
 hasFlag, _ := ffclient.BoolVariation("test-flag", user, false)
@@ -53,9 +54,30 @@ if hasFlag {
 }
 ```
 
+## Configuration
+
+The configuration is set with `ffclient.Config{}` and you can give it to ``ffclient.Init()`` the initialization
+function.
+
+Example:
+```go 
+ffclient.Init(ffclient.Config{ 
+    PollInterval:   3,
+    Logger:         log.New(file, "/tmp/log", 0)
+    Context         context.Background(),
+})
+```
+
+|   |   |
+|---|---|
+|`PollInterval`   | Number of seconds to wait before refreshing the flags. The default value is 60 seconds.|
+|`Logger`   | Logger used to log what `go-feature-flag` is doing. If no logger provided no log will be output.|
+|`Context`  | The context used by the retriever. The default value is `context.Background()`.|
+
 ## Where do I store my flags file
 `go-feature-flags` support different ways of retrieving the flag file.  
-We can have only one source for the file, if you set multiple sources in your configuration, only one will be take in consideration.
+We can have only one source for the file, if you set multiple sources in your configuration, only one will be take in
+consideration.
 
 ### From GitHub
 ```go

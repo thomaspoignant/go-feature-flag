@@ -1,6 +1,7 @@
 package retriever_test
 
 import (
+	"context"
 	"github.com/google/go-cmp/cmp"
 	"testing"
 
@@ -52,7 +53,7 @@ func Test_localRetriever_Retrieve(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			l := retriever.NewLocalRetriever(tt.fields.path)
-			got, err := l.Retrieve()
+			got, err := l.Retrieve(context.Background())
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Retrieve() error = %v, wantErr %v", err, tt.wantErr)
 				return

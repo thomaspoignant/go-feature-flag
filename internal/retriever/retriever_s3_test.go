@@ -1,6 +1,7 @@
 package retriever_test
 
 import (
+	"context"
 	"errors"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -38,6 +39,7 @@ func Test_s3Retriever_Retrieve(t *testing.T) {
 		downloader s3manageriface.DownloaderAPI
 		bucket     string
 		item       string
+		context    context.Context
 	}
 	tests := []struct {
 		name    string
@@ -64,11 +66,22 @@ func Test_s3Retriever_Retrieve(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name: "File on S3 with context",
+			fields: fields{
+				downloader: s3ManagerMock{},
+				bucket:     "Bucket",
+				item:       "valid",
+				context:    context.Background(),
+			},
+			want:    "../../testdata/test.yaml",
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := retriever.NewS3Retriever(tt.fields.downloader, tt.fields.bucket, tt.fields.item)
-			got, err := s.Retrieve()
+			got, err := s.Retrieve(tt.fields.context)
 			assert.Equal(t, tt.wantErr, err != nil, "Retrieve() error = %v, wantErr %v", err, tt.wantErr)
 			if err == nil {
 				want, err := ioutil.ReadFile(tt.want)

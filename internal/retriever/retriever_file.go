@@ -1,6 +1,7 @@
 package retriever
 
 import (
+	"context"
 	"io/ioutil"
 )
 
@@ -13,7 +14,7 @@ type localRetriever struct {
 	path string
 }
 
-func (l *localRetriever) Retrieve() ([]byte, error) {
+func (l *localRetriever) Retrieve(ctx context.Context) ([]byte, error) {
 	content, err := ioutil.ReadFile(l.path)
 	if err != nil {
 		return nil, err
