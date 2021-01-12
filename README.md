@@ -66,6 +66,7 @@ err := ffclient.Init(ffclient.Config{
         Branch: "main",
         FilePath: "testdata/test.yaml",
         GithubToken: "XXXX",
+        Timeout: 2 * time.Second,
     },
 })
 defer ffclient.Close()
@@ -75,6 +76,7 @@ To configure the access to your GitHub file:
 - **FilePath**: the path of your file. **MANDATORY**
 - **Branch**: the branch where your file is *(default is `main`)*.
 - **GithubToken**: Github token is used to access a private repository, you need the `repo` permission *([how to create a GitHub token](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token))*.
+- **Timeout**: Timeout for the HTTP call (default is 10 seconds).
 
 **Warning**: GitHub has rate limits, so be sure to not reach them when setting your `PollInterval`.
 
@@ -84,6 +86,7 @@ err := ffclient.Init(ffclient.Config{
     PollInterval: 3,
      HTTPRetriever: &ffClient.HTTPRetriever{
         URL:    "http://example.com/test.yaml",
+        Timeout: 2 * time.Second,
     },
 })
 defer ffclient.Close()
@@ -94,6 +97,7 @@ To configure your HTTP endpoint:
 - **Method**: the HTTP method you want to use *(default is GET)*.
 - **Body**: If you need a body to get the flags.
 - **Header**: Header you should pass while calling the endpoint *(useful for authorization)*.
+- **Timeout**: Timeout for the HTTP call (default is 10 seconds).
 
 ### From a S3 Bucket
 ```go

@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/retriever"
 )
@@ -26,10 +27,11 @@ type Config struct {
 
 // HTTPRetriever is a configuration struct for an HTTP endpoint retriever.
 type HTTPRetriever struct {
-	URL    string
-	Method string
-	Body   string
-	Header http.Header
+	URL     string
+	Method  string
+	Body    string
+	Header  http.Header
+	Timeout time.Duration
 }
 
 // S3Retriever is a configuration struct for a S3 retriever.
@@ -45,6 +47,7 @@ type GithubRetriever struct {
 	Branch         string // default is main
 	FilePath       string
 	GithubToken    string
+	Timeout        time.Duration // default is 10 seconds
 }
 
 // GetRetriever is used to get the retriever we will use to load the flags file.
@@ -70,13 +73,7 @@ func (c *Config) GetRetriever() (retriever.FlagRetriever, error) {
 	}
 
 	if c.HTTPRetriever != nil {
-		return retriever.NewHTTPRetriever(
-			http.DefaultClient,
-			c.HTTPRetriever.URL,
-			c.HTTPRetriever.Method,
-			c.HTTPRetriever.Body,
-			c.HTTPRetriever.Header,
-		), nil
+		return initHTTPRetriever(*c.HTTPRetriever)
 	}
 
 	if c.LocalFile != "" {
@@ -105,11 +102,28 @@ func initGithubRetriever(r GithubRetriever) (retriever.FlagRetriever, error) {
 		branch,
 		r.FilePath)
 
+	return initHTTPRetriever(HTTPRetriever{
+		URL:     URL,
+		Method:  http.MethodGet,
+		Header:  header,
+		Timeout: r.Timeout,
+	})
+}
+
+// initHttpRetriever creates a HTTP retriever
+func initHTTPRetriever(r HTTPRetriever) (retriever.FlagRetriever, error) {
+	timeout := r.Timeout
+	if timeout <= 0 {
+		timeout = 10 * time.Second
+	}
+
 	return retriever.NewHTTPRetriever(
-		http.DefaultClient,
-		URL,
-		http.MethodGet,
-		"",
-		header,
+		&http.Client{
+			Timeout: timeout,
+		},
+		r.URL,
+		r.Method,
+		r.Body,
+		r.Header,
 	), nil
 }
