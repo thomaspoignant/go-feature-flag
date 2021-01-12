@@ -48,7 +48,7 @@ func (f *Flag) isInPercentage(flagName string, user ffuser.User) bool {
 		return false
 	}
 
-	hashID := Hash(flagName+user.GetKey()) % 100
+	hashID := hash(flagName+user.GetKey()) % 100
 	return hashID < uint32(f.Percentage)
 }
 
@@ -65,11 +65,11 @@ func (f *Flag) evaluateRule(user ffuser.User) bool {
 	}
 
 	// Evaluate the rule on the user.
-	return parser.Evaluate(f.Rule, UserToJSON(user))
+	return parser.Evaluate(f.Rule, userToMap(user))
 }
 
-// Hash is taking a string and convert.
-func Hash(s string) uint32 {
+// hash is taking a string and convert.
+func hash(s string) uint32 {
 	h := fnv.New32a()
 	_, err := h.Write([]byte(s))
 	// if we have a problem to get the hash we return 0
@@ -79,8 +79,8 @@ func Hash(s string) uint32 {
 	return h.Sum32()
 }
 
-// UserToJSON convert the user to a MAP to use the query on it.
-func UserToJSON(u ffuser.User) map[string]interface{} {
+// userToMap convert the user to a MAP to use the query on it.
+func userToMap(u ffuser.User) map[string]interface{} {
 	// We don't have a json copy of the user.
 	userCopy := make(map[string]interface{})
 
