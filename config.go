@@ -1,6 +1,7 @@
 package ffclient
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
@@ -19,6 +20,7 @@ import (
 type Config struct {
 	PollInterval    int // Poll every X seconds
 	Logger          *log.Logger
+	Context         context.Context // default is context.Background()
 	LocalFile       string
 	HTTPRetriever   *HTTPRetriever
 	S3Retriever     *S3Retriever

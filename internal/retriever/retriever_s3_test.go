@@ -1,6 +1,7 @@
 package retriever_test
 
 import (
+	"context"
 	"errors"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -68,7 +69,7 @@ func Test_s3Retriever_Retrieve(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := retriever.NewS3Retriever(tt.fields.downloader, tt.fields.bucket, tt.fields.item)
-			got, err := s.Retrieve()
+			got, err := s.Retrieve(context.Background())
 			assert.Equal(t, tt.wantErr, err != nil, "Retrieve() error = %v, wantErr %v", err, tt.wantErr)
 			if err == nil {
 				want, err := ioutil.ReadFile(tt.want)

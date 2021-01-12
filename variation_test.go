@@ -144,7 +144,6 @@ func TestBoolVariation(t *testing.T) {
 			// init logger
 			file, _ := ioutil.TempFile("", "log")
 			logger = log.New(file, "", 0)
-
 			cache.FlagsCache = tt.args.flagCache
 			got, err := BoolVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 			cache.FlagsCache = nil

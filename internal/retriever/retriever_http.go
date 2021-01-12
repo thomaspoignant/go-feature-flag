@@ -33,7 +33,7 @@ type httpRetriever struct {
 	header     http.Header
 }
 
-func (h *httpRetriever) Retrieve() ([]byte, error) {
+func (h *httpRetriever) Retrieve(ctx context.Context) ([]byte, error) {
 	if h.url == "" {
 		return nil, errors.New("URL is a mandatory parameter when using HTTPRetriever")
 	}
@@ -43,7 +43,11 @@ func (h *httpRetriever) Retrieve() ([]byte, error) {
 		method = http.MethodGet
 	}
 
-	req, err := http.NewRequestWithContext(context.Background(), method, h.url, strings.NewReader(h.body))
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	req, err := http.NewRequestWithContext(ctx, method, h.url, strings.NewReader(h.body))
 	if err != nil {
 		return nil, err
 	}

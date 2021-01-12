@@ -2,6 +2,7 @@ package retriever_test
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
@@ -138,7 +139,7 @@ func Test_httpRetriever_Retrieve(t *testing.T) {
 				tt.fields.body,
 				tt.fields.header,
 			)
-			got, err := h.Retrieve()
+			got, err := h.Retrieve(context.Background())
 			assert.Equal(t, tt.wantErr, err != nil, "Retrieve() error = %v, wantErr %v", err, tt.wantErr)
 
 			if tt.fields.method == "" {
