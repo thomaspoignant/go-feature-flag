@@ -21,7 +21,7 @@ func TestValidUseCase(t *testing.T) {
 	// Valid use case
 	err := ffclient.Init(ffclient.Config{
 		PollInterval: 0,
-		LocalFile:    "testdata/test.yaml",
+		Retriever:    &ffclient.FileRetriever{Path: "testdata/test.yaml"},
 	})
 
 	assert.NoError(t, err)
