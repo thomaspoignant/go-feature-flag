@@ -1,6 +1,7 @@
 package retriever
 
 import (
+	"context"
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -19,7 +20,7 @@ type s3Retriever struct {
 	item       string
 }
 
-func (s *s3Retriever) Retrieve() ([]byte, error) {
+func (s *s3Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	// Download the item from the bucket.
 	// If an error occurs, log it and exit.
 	// Otherwise, notify the user that the download succeeded.
@@ -28,11 +29,16 @@ func (s *s3Retriever) Retrieve() ([]byte, error) {
 		return nil, err
 	}
 
-	_, err = s.downloader.Download(file,
-		&s3.GetObjectInput{
-			Bucket: aws.String(s.bucket),
-			Key:    aws.String(s.item),
-		})
+	s3Req := &s3.GetObjectInput{
+		Bucket: aws.String(s.bucket),
+		Key:    aws.String(s.item),
+	}
+
+	if ctx == nil {
+		_, err = s.downloader.Download(file, s3Req)
+	} else {
+		_, err = s.downloader.DownloadWithContext(ctx, file, s3Req)
+	}
 
 	if err != nil {
 		return nil, fmt.Errorf("unable to download item from S3 %q, %v", s.item, err)

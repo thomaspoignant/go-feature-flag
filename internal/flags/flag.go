@@ -67,7 +67,7 @@ func (f *Flag) evaluateRule(user ffuser.User) bool {
 	}
 
 	// Evaluate the rule on the user.
-	return parser.Evaluate(f.Rule, UserToJSON(user))
+	return parser.Evaluate(f.Rule, userToMap(user))
 }
 
 // string display correctly a flag
@@ -96,8 +96,8 @@ func Hash(s string) uint32 {
 	return h.Sum32()
 }
 
-// UserToJSON convert the user to a MAP to use the query on it.
-func UserToJSON(u ffuser.User) map[string]interface{} {
+// userToMap convert the user to a MAP to use the query on it.
+func userToMap(u ffuser.User) map[string]interface{} {
 	// We don't have a json copy of the user.
 	userCopy := make(map[string]interface{})
 

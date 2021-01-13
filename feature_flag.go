@@ -29,9 +29,9 @@ func Init(config Config) error {
 	}
 	flagUpdater = *gocron.NewScheduler(time.UTC)
 
-	// The default value for poll interval is 1
+	// The default value for poll interval is 60 seconds
 	if config.PollInterval == 0 {
-		config.PollInterval = 1
+		config.PollInterval = 60
 	}
 
 	logger = config.Logger
@@ -52,7 +52,7 @@ func retrieveFlagsAndUpdateCache(config Config) error {
 		return err
 	}
 
-	loadedFlags, err := retriever.Retrieve()
+	loadedFlags, err := retriever.Retrieve(config.Context)
 	if err != nil {
 		log.Printf("error: impossible to retrieve flags from the config file: %v", err)
 		return err

@@ -2,6 +2,7 @@ package retriever_test
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
@@ -53,6 +54,7 @@ func Test_httpRetriever_Retrieve(t *testing.T) {
 		method     string
 		body       string
 		header     http.Header
+		context    context.Context
 	}
 	tests := []struct {
 		name    string
@@ -68,6 +70,25 @@ func Test_httpRetriever_Retrieve(t *testing.T) {
 				method:     http.MethodGet,
 				body:       "",
 				header:     nil,
+			},
+			want: []byte(`test-flag:
+  rule: key eq "random-key"
+  percentage: 100
+  true: true
+  false: false
+  default: false
+`),
+			wantErr: false,
+		},
+		{
+			name: "Success with context",
+			fields: fields{
+				httpClient: &mockHTTP{},
+				url:        "http://localhost.example/file",
+				method:     http.MethodGet,
+				body:       "",
+				header:     nil,
+				context:    context.Background(),
 			},
 			want: []byte(`test-flag:
   rule: key eq "random-key"
@@ -138,7 +159,7 @@ func Test_httpRetriever_Retrieve(t *testing.T) {
 				tt.fields.body,
 				tt.fields.header,
 			)
-			got, err := h.Retrieve()
+			got, err := h.Retrieve(tt.fields.context)
 			assert.Equal(t, tt.wantErr, err != nil, "Retrieve() error = %v, wantErr %v", err, tt.wantErr)
 
 			if tt.fields.method == "" {
