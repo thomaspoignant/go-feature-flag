@@ -69,7 +69,7 @@ ffclient.Init(ffclient.Config{
 })
 ```
 
-|  | Description |
+|  | Descriptions |
 |---|---|
 |`PollInterval`   | Number of seconds to wait before refreshing the flags.<br />The default value is 60 seconds.|
 |`Logger`   | Logger used to log what `go-feature-flag` is doing.<br />If no logger is provided the module will not log anything.|
