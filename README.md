@@ -53,6 +53,7 @@ if hasFlag {
     // flag "test-flag" is false for the user
 }
 ```
+You can find more example programs in the [examples/](examples) directory.
 
 ## Configuration
 

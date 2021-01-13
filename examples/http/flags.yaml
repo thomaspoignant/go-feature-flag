@@ -1,0 +1,12 @@
+new-admin-access:
+  percentage: 30
+  true: true
+  false: false
+  default: false
+
+flag-only-for-admin:
+  rule: admin eq true
+  percentage: 100
+  true: true
+  false: false
+  default: false
