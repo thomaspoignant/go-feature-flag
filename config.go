@@ -21,11 +21,7 @@ type Config struct {
 	PollInterval    int // Poll every X seconds
 	Logger          *log.Logger
 	Context         context.Context // default is context.Background()
-	LocalFile       string
 	Retriever       Retriever
-	HTTPRetriever   *HTTPRetriever
-	S3Retriever     *S3Retriever
-	GithubRetriever *GithubRetriever
 }
 
 // GetRetriever returns a retriever.FlagRetriever configure with the retriever available in the config.

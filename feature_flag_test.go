@@ -37,7 +37,7 @@ func TestS3RetrieverReturnError(t *testing.T) {
 	// Valid use case
 	err := ffclient.Init(ffclient.Config{
 		PollInterval: 0,
-		S3Retriever: &ffclient.S3Retriever{
+		Retriever: &ffclient.S3Retriever{
 			Bucket:    "unknown-bucket",
 			Item:      "unknown-item",
 			AwsConfig: aws.Config{},
