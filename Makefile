@@ -20,7 +20,7 @@ coverage:
 	# Print code coverage details
 	GO111MODULE=off go get github.com/mattn/goveralls
 	GO111MODULE=off go get golang.org/x/tools/cmd/cover
-	goveralls -service=travis-ci -coverprofile=coverage.out -v -package ./... -repotoken=$COVERALLS_TOKEN
+	goveralls -service=travis-ci -coverprofile=coverage.out -v -package ./... -repotoken=${COVERALLS_TOKEN}
 
 vendor:
 	$(GOCMD) mod vendor
