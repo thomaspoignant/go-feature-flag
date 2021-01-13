@@ -1,10 +1,11 @@
 package cache
 
 import (
-	"fmt"
 	"github.com/google/go-cmp/cmp"
 	"gopkg.in/yaml.v2"
+	"log"
 	"sync"
+	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/flags"
 )
@@ -27,14 +28,17 @@ func Init() map[string]flags.Flag {
 
 // UpdateCache retrieve the flags from the backend file and update the cache,
 // we are using a mutex during the update to be sure to stay consistent.
-func UpdateCache(loadedFlags []byte) error {
+func UpdateCache(logger *log.Logger, loadedFlags []byte) error {
 	var flags map[string]flags.Flag
 	err := yaml.Unmarshal(loadedFlags, &flags)
 	if err != nil {
 		return err
 	}
 
-	go FlagChanges(FlagsCache, flags)
+	// launching a go routine to log the differences
+	if logger != nil {
+		go FlagChanges(logger, FlagsCache, flags)
+	}
 
 	mutex.Lock()
 	FlagsCache = flags
@@ -47,39 +51,32 @@ func Close() {
 	FlagsCache = nil
 }
 
-func FlagChanges(oldCache map[string]flags.Flag, newCache map[string]flags.Flag) map[string]flags.Flag {
+func FlagChanges(logger *log.Logger, oldCache map[string]flags.Flag, newCache map[string]flags.Flag) {
+	date := time.Now().Format(time.RFC3339)
 	for key := range oldCache {
 		_, inNewCache := newCache[key]
-
 		if !inNewCache {
-			fmt.Printf("flag %v removed\n", key)
+			logger.Printf("[%v] flag %v removed\n", date, key)
 			continue
 		}
 
 		if oldCache[key].Disable != newCache[key].Disable {
 			if newCache[key].Disable {
 				// Flag is disabled
-				fmt.Printf("The flag %v is turned off\n", key)
+				logger.Printf("[%v] flag %v is turned OFF\n", date, key)
 			} else {
-				flag := newCache[key]
-				fmt.Printf(
-					"The flag %s is turned ON \n\t"+
-						"- percentage is %d%% \n\t"+
-						"- rule is [%s] \n", key, flag.Percentage, flag.Rule)
+				logger.Printf("[%v] flag %v is turned ON (flag=%v)  \n", date, key, newCache[key])
 			}
 		} else if !cmp.Equal(oldCache[key], newCache[key]) {
 			// key has changed in cache
-			fmt.Printf("Flag %v hasChanged: %v\n", key, cmp.Diff(oldCache[key], newCache[key]))
+			logger.Printf("[%v] flag %s updated, old=[%v], new=[%v]\n", date, key, oldCache[key], newCache[key])
 		}
 	}
 
 	for key := range newCache {
 		_, inOldCache := oldCache[key]
 		if !inOldCache && !newCache[key].Disable {
-			fmt.Printf("flag %v addedd\n", key)
+			logger.Printf("[%v] flag %v added\n", date, key)
 		}
 	}
-
-	// TODO: valid return
-	return make(map[string]flags.Flag)
 }

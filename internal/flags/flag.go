@@ -1,8 +1,10 @@
 package flags
 
 import (
+	"fmt"
 	"github.com/nikunjy/rules/parser"
 	"hash/fnv"
+	"strings"
 
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
 )
@@ -66,6 +68,21 @@ func (f *Flag) evaluateRule(user ffuser.User) bool {
 
 	// Evaluate the rule on the user.
 	return parser.Evaluate(f.Rule, UserToJSON(user))
+}
+
+// string display correctly a flag
+func (f Flag) String() string {
+	var strBuilder strings.Builder
+	strBuilder.WriteString(fmt.Sprintf("percentage=%d%%, ", f.Percentage))
+	if f.Rule != "" {
+		strBuilder.WriteString(fmt.Sprintf("rule=\"%s\", ", f.Rule))
+	}
+	strBuilder.WriteString(fmt.Sprintf("true=\"%v\", ", f.True))
+	strBuilder.WriteString(fmt.Sprintf("false=\"%v\", ", f.False))
+	strBuilder.WriteString(fmt.Sprintf("true=\"%v\", ", f.Default))
+	strBuilder.WriteString(fmt.Sprintf("disable=\"%v\"", f.Disable))
+
+	return strBuilder.String()
 }
 
 // Hash is taking a string and convert.

@@ -60,7 +60,7 @@ func Test_FlagCache(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			cache.Init()
-			err := cache.UpdateCache(tt.args.loadedFlags)
+			err := cache.UpdateCache(nil, tt.args.loadedFlags)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("UpdateCache() error = %v, wantErr %v", err, tt.wantErr)
 				return
