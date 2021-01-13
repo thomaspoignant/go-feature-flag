@@ -70,10 +70,10 @@ ffclient.Init(ffclient.Config{
 
 |   |   |
 |---|---|
-|`PollInterval`   | Number of seconds to wait before refreshing the flags. The default value is 60 seconds.|
-|`Logger`   | Logger used to log what `go-feature-flag` is doing. If no logger provided no log will be output.|
-|`Context`  | The context used by the retriever. The default value is `context.Background()`.|
-|`Retriever`  | The configuration retriever you want to use to get your flag file *(see [Where do I store my flags file](#where-do-i-store-my-flags-file) for the details*.|
+|`PollInterval`   | Number of seconds to wait before refreshing the flags.<br />The default value is 60 seconds.|
+|`Logger`   | Logger used to log what `go-feature-flag` is doing.<br />If no logger is provided the module will not log anything.|
+|`Context`  | The context used by the retriever.<br />The default value is `context.Background()`.|
+|`Retriever`  | The configuration retriever you want to use to get your flag file *(see [Where do I store my flags file](#where-do-i-store-my-flags-file) for the configuration details)*.|
 
 ## Where do I store my flags file
 `go-feature-flags` support different ways of retrieving the flag file.  
