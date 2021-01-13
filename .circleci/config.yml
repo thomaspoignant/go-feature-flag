@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  lint:
+  build:
     docker:
       - image: circleci/golang:1.15
     working_directory: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
@@ -8,12 +8,5 @@ jobs:
       - checkout
       - run: make vendor
       - run: make lint
-  test:
-    docker:
-      - image: circleci/golang:1.15
-      working_directory: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
-      steps:
-        - checkout
-        - run: make vendor
-        - run: make test
-        - run: make coverage
+      - run: make test
+      - run: make coverage
