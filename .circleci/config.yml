@@ -1,0 +1,15 @@
+version: 2
+jobs:
+  build:
+    docker:
+      # specify the version
+      - image: circleci/golang:1.15
+    working_directory: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
+    steps:
+      - checkout
+
+      # specify any bash command here prefixed with `run: `
+      - run: make vendor
+      - run: make lint
+      - run: make test
+      - run: make coverage
