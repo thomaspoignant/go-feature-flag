@@ -13,7 +13,7 @@ lint:
 
 test:
 	GO111MODULE=off go get -u github.com/jstemmer/go-junit-report
-	$(GOTEST) -v -race ./... | tee /dev/tty | go-junit-report -set-exit-code > /tmp/test-results/junit-report.xml
+	$(GOTEST) -v -race ./...
 
 coverage:
 	# Create cover profile

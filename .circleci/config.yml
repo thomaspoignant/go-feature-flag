@@ -6,10 +6,7 @@ jobs:
     working_directory: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
     steps:
       - checkout
-      - run: mkdir /tmp/test-results
       - run: make vendor
       - run: make lint
       - run: make test
       - run: make coverage
-    store_test_results:
-      - path: /tmp/test-results/junit-report.xml
