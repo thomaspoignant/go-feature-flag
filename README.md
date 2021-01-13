@@ -33,16 +33,16 @@ First, you need to initialize the `ffclient` with the location of your backend f
 ```go
 err := ffclient.Init(ffclient.Config{
     PollInterval: 3,
-    HTTPRetriever: &ffClient.HTTPRetriever{
+    Retriever: &ffclient.HTTPRetriever{
         URL:    "http://example.com/test.yaml",
     },
 })
 defer ffclient.Close()
 ```
 *This example will load a file from an HTTP endpoint and will refresh the flags every 3 seconds (if you omit the
-PollInterval, default value is 60s).*
+PollInterval, the default value is 60 seconds).*
 
-Now you can evalute your flags anywhere in your code.
+Now you can evaluate your flags anywhere in your code.
 
 ```go
 user := ffuser.NewUser("user-unique-key")
@@ -70,9 +70,10 @@ ffclient.Init(ffclient.Config{
 
 |   |   |
 |---|---|
-|`PollInterval`   | Number of seconds to wait before refreshing the flags. The default value is 60 seconds.|
-|`Logger`   | Logger used to log what `go-feature-flag` is doing. If no logger provided no log will be output.|
-|`Context`  | The context used by the retriever. The default value is `context.Background()`.|
+|`PollInterval`   | Number of seconds to wait before refreshing the flags.<br />The default value is 60 seconds.|
+|`Logger`   | Logger used to log what `go-feature-flag` is doing.<br />If no logger is provided the module will not log anything.|
+|`Context`  | The context used by the retriever.<br />The default value is `context.Background()`.|
+|`Retriever`  | The configuration retriever you want to use to get your flag file *(see [Where do I store my flags file](#where-do-i-store-my-flags-file) for the configuration details)*.|
 
 ## Where do I store my flags file
 `go-feature-flags` support different ways of retrieving the flag file.  
@@ -83,7 +84,7 @@ consideration.
 ```go
 err := ffclient.Init(ffclient.Config{
     PollInterval: 3,
-    GithubRetriever: &ffClient.GithubRetriever{
+    Retriever: &ffclient.GithubRetriever{
         RepositorySlug: "thomaspoignant/go-feature-flag",
         Branch: "main",
         FilePath: "testdata/test.yaml",
@@ -100,13 +101,13 @@ To configure the access to your GitHub file:
 - **GithubToken**: Github token is used to access a private repository, you need the `repo` permission *([how to create a GitHub token](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token))*.
 - **Timeout**: Timeout for the HTTP call (default is 10 seconds).
 
-**Warning**: GitHub has rate limits, so be sure to not reach them when setting your `PollInterval`.
+:warning: GitHub has rate limits, so be sure to not reach them when setting your `PollInterval`.
 
 ### From an HTTP endpoint
 ```go
 err := ffclient.Init(ffclient.Config{
     PollInterval: 3,
-     HTTPRetriever: &ffClient.HTTPRetriever{
+    Retriever: &ffclient.HTTPRetriever{
         URL:    "http://example.com/test.yaml",
         Timeout: 2 * time.Second,
     },
@@ -125,7 +126,7 @@ To configure your HTTP endpoint:
 ```go
 err := ffclient.Init(ffclient.Config{
     PollInterval: 3,
-    S3Retriever: &ffClient.S3Retriever{
+    Retriever: &ffclient.S3Retriever{
         Bucket: "tpoi-test",
         Item:   "test.yaml",
         AwsConfig: aws.Config{
@@ -145,10 +146,15 @@ To configure your S3 file location:
 ```go
 err := ffclient.Init(ffclient.Config{
     PollInterval: 3,
-    LocalFile: "file-example.yaml",
+    Retriever: &ffclient.FileRetriever{
+        Path: "file-example.yaml",
+    },
 })
 defer ffclient.Close()
 ```
+
+To configure your File retriever:
+- **Path**: location of your file. **MANDATORY**
 
 *I will not recommend using a file to store your flags except if it is in a shared folder for all your services.*
 

@@ -12,11 +12,8 @@ import (
 
 func TestConfig_GetRetriever(t *testing.T) {
 	type fields struct {
-		PollInterval    int
-		LocalFile       string
-		HTTPRetriever   *ffClient.HTTPRetriever
-		S3Retriever     *ffClient.S3Retriever
-		GithubRetriever *ffClient.GithubRetriever
+		PollInterval int
+		Retriever    ffClient.Retriever
 	}
 	tests := []struct {
 		name    string
@@ -28,7 +25,7 @@ func TestConfig_GetRetriever(t *testing.T) {
 			name: "File retriever",
 			fields: fields{
 				PollInterval: 3,
-				LocalFile:    "file-example.yaml",
+				Retriever:    &ffClient.FileRetriever{Path: "file-example.yaml"},
 			},
 			want:    "*retriever.localRetriever",
 			wantErr: false,
@@ -37,7 +34,7 @@ func TestConfig_GetRetriever(t *testing.T) {
 			name: "S3 retriever",
 			fields: fields{
 				PollInterval: 3,
-				S3Retriever: &ffClient.S3Retriever{
+				Retriever: &ffClient.S3Retriever{
 					Bucket: "tpoi-test",
 					Item:   "test.yaml",
 					AwsConfig: aws.Config{
@@ -52,7 +49,7 @@ func TestConfig_GetRetriever(t *testing.T) {
 			name: "HTTP retriever",
 			fields: fields{
 				PollInterval: 3,
-				HTTPRetriever: &ffClient.HTTPRetriever{
+				Retriever: &ffClient.HTTPRetriever{
 					URL:    "http://example.com/test.yaml",
 					Method: http.MethodGet,
 				},
@@ -64,46 +61,13 @@ func TestConfig_GetRetriever(t *testing.T) {
 			name: "Github retriever",
 			fields: fields{
 				PollInterval: 3,
-				GithubRetriever: &ffClient.GithubRetriever{
+				Retriever: &ffClient.GithubRetriever{
 					RepositorySlug: "thomaspoignant/go-feature-flag",
 					FilePath:       "testdata/test.yaml",
 					GithubToken:    "XXX",
 				},
 			},
 			// we should have a http retriever because Github retriever is using httpRetriever
-			want:    "*retriever.httpRetriever",
-			wantErr: false,
-		},
-		{
-			name: "Priority to S3",
-			fields: fields{
-				PollInterval: 3,
-				HTTPRetriever: &ffClient.HTTPRetriever{
-					URL:    "http://example.com/test.yaml",
-					Method: http.MethodGet,
-				},
-				S3Retriever: &ffClient.S3Retriever{
-					Bucket: "tpoi-test",
-					Item:   "test.yaml",
-					AwsConfig: aws.Config{
-						Region: aws.String("eu-west-1"),
-					},
-				},
-				LocalFile: "file-example.yaml",
-			},
-			want:    "*retriever.s3Retriever",
-			wantErr: false,
-		},
-		{
-			name: "Priority to HTTP",
-			fields: fields{
-				PollInterval: 3,
-				HTTPRetriever: &ffClient.HTTPRetriever{
-					URL:    "http://example.com/test.yaml",
-					Method: http.MethodGet,
-				},
-				LocalFile: "file-example.yaml",
-			},
 			want:    "*retriever.httpRetriever",
 			wantErr: false,
 		},
@@ -118,11 +82,8 @@ func TestConfig_GetRetriever(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &ffClient.Config{
-				PollInterval:    tt.fields.PollInterval,
-				LocalFile:       tt.fields.LocalFile,
-				HTTPRetriever:   tt.fields.HTTPRetriever,
-				S3Retriever:     tt.fields.S3Retriever,
-				GithubRetriever: tt.fields.GithubRetriever,
+				PollInterval: tt.fields.PollInterval,
+				Retriever:    tt.fields.Retriever,
 			}
 			got, err := c.GetRetriever()
 			assert.Equal(t, tt.wantErr, err != nil)
