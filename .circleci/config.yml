@@ -6,7 +6,13 @@ jobs:
     working_directory: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
     steps:
       - checkout
+      - run: mkdir /tmp/test-results
       - run: make vendor
       - run: make lint
       - run: make test
+      - run: |
+        PACKAGE_NAMES=$(go list ./... | circleci tests split --split-by=timings --timings-type=classname)
+        gotestsum --junitfile ${TEST_RESULTS}/gotestsum-report.xml -- $PACKAGE_NAMES
       - run: make coverage
+      - store_test_results: # upload test results for display in Test Summary
+          path: /tmp/test-results
