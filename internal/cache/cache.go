@@ -66,7 +66,7 @@ func logFlagChanges(logger *log.Logger, oldCache map[string]flags.Flag, newCache
 				// Flag is disabled
 				logger.Printf("[%v] flag %v is turned OFF\n", date, key)
 			} else {
-				logger.Printf("[%v] flag %v is turned ON (flag=%v)  \n", date, key, newCache[key])
+				logger.Printf("[%v] flag %v is turned ON (flag=[%v])  \n", date, key, newCache[key])
 			}
 		} else if !cmp.Equal(oldCache[key], newCache[key]) {
 			// key has changed in cache

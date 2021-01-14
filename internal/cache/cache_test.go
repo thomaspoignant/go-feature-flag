@@ -171,7 +171,7 @@ add-test-flag:
   default: false
 `),
 			},
-			expected: "\\[" + testutil.RFC3339Regex + "\\] flag test-flag is turned ON",
+			expected: "\\[" + testutil.RFC3339Regex + "\\] flag test-flag is turned ON \\(flag=\\[percentage=100%, rule=\"key eq \"random-key\"\", true=\"true\", false=\"false\", true=\"false\", disable=\"false\"\\]\\)",
 		},
 	}
 	for _, tt := range tests {

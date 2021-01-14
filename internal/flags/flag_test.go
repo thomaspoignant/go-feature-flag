@@ -268,3 +268,67 @@ func TestFlag_value(t *testing.T) {
 		})
 	}
 }
+
+func TestFlag_String(t *testing.T) {
+	type fields struct {
+		Disable    bool
+		Rule       string
+		Percentage int
+		True       interface{}
+		False      interface{}
+		Default    interface{}
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name: "All fields",
+			fields: fields{
+				Disable:    false,
+				Rule:       "key eq \"toto\"",
+				Percentage: 10,
+				True:       true,
+				False:      false,
+				Default:    false,
+			},
+			want: "percentage=10%, rule=\"key eq \"toto\"\", true=\"true\", false=\"false\", true=\"false\", disable=\"false\"",
+		},
+		{
+			name: "No rule",
+			fields: fields{
+				Disable:    false,
+				Percentage: 10,
+				True:       true,
+				False:      false,
+				Default:    false,
+			},
+			want: "percentage=10%, true=\"true\", false=\"false\", true=\"false\", disable=\"false\"",
+		},
+		{
+			name: "Default values",
+			fields: fields{
+				True:    true,
+				False:   false,
+				Default: false,
+			},
+			want: "percentage=0%, true=\"true\", false=\"false\", true=\"false\", disable=\"false\"",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			f := Flag{
+				Disable:    tt.fields.Disable,
+				Rule:       tt.fields.Rule,
+				Percentage: tt.fields.Percentage,
+				True:       tt.fields.True,
+				False:      tt.fields.False,
+				Default:    tt.fields.Default,
+			}
+			if got := f.String(); got != tt.want {
+				t.Errorf("String() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
