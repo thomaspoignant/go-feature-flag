@@ -185,7 +185,7 @@ add-test-flag:
 			// create temp log file
 			logOutput, _ := ioutil.TempFile("", "")
 			// update the cache file
-			flagChanges(
+			logFlagChanges(
 				log.New(logOutput, "", 0),
 				oldValue,
 				newValue,
