@@ -58,7 +58,7 @@ func retrieveFlagsAndUpdateCache(config Config) error {
 		return err
 	}
 
-	err = cache.UpdateCache(loadedFlags)
+	err = cache.UpdateCache(config.Logger, loadedFlags)
 	if err != nil {
 		log.Printf("error: impossible to update the cache of the flags: %v", err)
 		return err

@@ -10,9 +10,8 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
 	"github.com/thomaspoignant/go-feature-flag/internal/flags"
+	"github.com/thomaspoignant/go-feature-flag/testutil"
 )
-
-const RFC3339Regex = "([0-9]+)-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])[Tt]([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|60)(\\.[0-9]+)?(([Zz])|([\\+|\\-]([01][0-9]|2[0-3]):[0-5][0-9]))"
 
 func TestBoolVariation(t *testing.T) {
 	flagCacheMock := map[string]flags.Flag{
@@ -56,7 +55,7 @@ func TestBoolVariation(t *testing.T) {
 			},
 			want:        true,
 			wantErr:     true,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key\", flag=\"disable-flag\", value=\"true\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key\", flag=\"disable-flag\", value=\"true\"\n",
 		},
 		{
 			name: "Get error when not init",
@@ -68,7 +67,7 @@ func TestBoolVariation(t *testing.T) {
 			},
 			want:        true,
 			wantErr:     true,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"true\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"true\"\n",
 		},
 		{
 			name: "Get default value with key not exist",
@@ -80,7 +79,7 @@ func TestBoolVariation(t *testing.T) {
 			},
 			want:        true,
 			wantErr:     true,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"true\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"true\"\n",
 		},
 		{
 			name: "Get default value, rule not apply",
@@ -92,7 +91,7 @@ func TestBoolVariation(t *testing.T) {
 			},
 			want:        true,
 			wantErr:     false,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"true\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"true\"\n",
 		},
 		{
 			name: "Get true value, rule apply",
@@ -104,7 +103,7 @@ func TestBoolVariation(t *testing.T) {
 			},
 			want:        true,
 			wantErr:     false,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"true\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"true\"\n",
 		},
 		{
 			name: "Get false value, rule apply",
@@ -116,7 +115,7 @@ func TestBoolVariation(t *testing.T) {
 			},
 			want:        false,
 			wantErr:     false,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"false\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"false\"\n",
 		},
 		{
 			name: "Get default value, when rule apply and not right type",
@@ -136,7 +135,7 @@ func TestBoolVariation(t *testing.T) {
 			},
 			want:        true,
 			wantErr:     true,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"true\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"true\"\n",
 		},
 	}
 	for _, tt := range tests {
@@ -209,7 +208,7 @@ func TestFloat64Variation(t *testing.T) {
 			},
 			want:        120.0,
 			wantErr:     true,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key\", flag=\"disable-flag\", value=\"120\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key\", flag=\"disable-flag\", value=\"120\"\n",
 		},
 		{
 			name: "Get error when not init",
@@ -221,7 +220,7 @@ func TestFloat64Variation(t *testing.T) {
 			},
 			want:        118.0,
 			wantErr:     true,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"118\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"118\"\n",
 		},
 		{
 			name: "Get default value with key not exist",
@@ -233,7 +232,7 @@ func TestFloat64Variation(t *testing.T) {
 			},
 			want:        118.0,
 			wantErr:     true,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"118\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"118\"\n",
 		},
 		{
 			name: "Get default value, rule not apply",
@@ -245,7 +244,7 @@ func TestFloat64Variation(t *testing.T) {
 			},
 			want:        119.0,
 			wantErr:     false,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"119\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"119\"\n",
 		},
 		{
 			name: "Get true value, rule apply",
@@ -257,7 +256,7 @@ func TestFloat64Variation(t *testing.T) {
 			},
 			want:        120.0,
 			wantErr:     false,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"120\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"120\"\n",
 		},
 		{
 			name: "Get false value, rule apply",
@@ -269,7 +268,7 @@ func TestFloat64Variation(t *testing.T) {
 			},
 			want:        121.0,
 			wantErr:     false,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"121\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"121\"\n",
 		},
 		{
 			name: "Get default value, when rule apply and not right type",
@@ -289,7 +288,7 @@ func TestFloat64Variation(t *testing.T) {
 			},
 			want:        118.0,
 			wantErr:     true,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"118\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"118\"\n",
 		},
 	}
 	for _, tt := range tests {
@@ -363,7 +362,7 @@ func TestJSONArrayVariation(t *testing.T) {
 			},
 			want:        []interface{}{"toto"},
 			wantErr:     true,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key\", flag=\"disable-flag\", value=\"\\[toto\\]\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key\", flag=\"disable-flag\", value=\"\\[toto\\]\"\n",
 		},
 		{
 			name: "Get error when not init",
@@ -375,7 +374,7 @@ func TestJSONArrayVariation(t *testing.T) {
 			},
 			want:        []interface{}{"toto"},
 			wantErr:     true,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"\\[toto\\]\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"\\[toto\\]\"\n",
 		},
 		{
 			name: "Get default value with key not exist",
@@ -387,7 +386,7 @@ func TestJSONArrayVariation(t *testing.T) {
 			},
 			want:        []interface{}{"toto"},
 			wantErr:     true,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"\\[toto\\]\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"\\[toto\\]\"\n",
 		},
 		{
 			name: "Get default value, rule not apply",
@@ -399,7 +398,7 @@ func TestJSONArrayVariation(t *testing.T) {
 			},
 			want:        []interface{}{"default"},
 			wantErr:     false,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"\\[default\\]\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"\\[default\\]\"\n",
 		},
 		{
 			name: "Get true value, rule apply",
@@ -411,7 +410,7 @@ func TestJSONArrayVariation(t *testing.T) {
 			},
 			want:        []interface{}{"true"},
 			wantErr:     false,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"\\[true\\]\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"\\[true\\]\"\n",
 		},
 		{
 			name: "Get false value, rule apply",
@@ -423,7 +422,7 @@ func TestJSONArrayVariation(t *testing.T) {
 			},
 			want:        []interface{}{"false"},
 			wantErr:     false,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"\\[false\\]\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"\\[false\\]\"\n",
 		},
 		{
 			name: "Get default value, when rule apply and not right type",
@@ -443,7 +442,7 @@ func TestJSONArrayVariation(t *testing.T) {
 			},
 			want:        []interface{}{"toto"},
 			wantErr:     true,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"\\[toto\\]\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"\\[toto\\]\"\n",
 		},
 	}
 	for _, tt := range tests {
@@ -517,7 +516,7 @@ func TestJSONVariation(t *testing.T) {
 			},
 			want:        map[string]interface{}{"default-notkey": true},
 			wantErr:     true,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key\", flag=\"disable-flag\", value=\"map\\[default-notkey:true\\]\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key\", flag=\"disable-flag\", value=\"map\\[default-notkey:true\\]\"\n",
 		},
 		{
 			name: "Get error when not init",
@@ -529,7 +528,7 @@ func TestJSONVariation(t *testing.T) {
 			},
 			want:        map[string]interface{}{"default-notkey": true},
 			wantErr:     true,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"map\\[default-notkey:true\\]\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"map\\[default-notkey:true\\]\"\n",
 		},
 		{
 			name: "Get default value with key not exist",
@@ -541,7 +540,7 @@ func TestJSONVariation(t *testing.T) {
 			},
 			want:        map[string]interface{}{"default-notkey": true},
 			wantErr:     true,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"map\\[default-notkey:true\\]\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"map\\[default-notkey:true\\]\"\n",
 		},
 		{
 			name: "Get default value, rule not apply",
@@ -553,7 +552,7 @@ func TestJSONVariation(t *testing.T) {
 			},
 			want:        map[string]interface{}{"default": true},
 			wantErr:     false,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"map\\[default:true\\]\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"map\\[default:true\\]\"\n",
 		},
 		{
 			name: "Get true value, rule apply",
@@ -565,7 +564,7 @@ func TestJSONVariation(t *testing.T) {
 			},
 			want:        map[string]interface{}{"true": true},
 			wantErr:     false,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"map\\[true:true\\]\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"map\\[true:true\\]\"\n",
 		},
 		{
 			name: "Get false value, rule apply",
@@ -577,7 +576,7 @@ func TestJSONVariation(t *testing.T) {
 			},
 			want:        map[string]interface{}{"false": true},
 			wantErr:     false,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"map\\[false:true\\]\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"map\\[false:true\\]\"\n",
 		},
 		{
 			name: "Get default value, when rule apply and not right type",
@@ -597,7 +596,7 @@ func TestJSONVariation(t *testing.T) {
 			},
 			want:        map[string]interface{}{"default-notkey": true},
 			wantErr:     true,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"map\\[default-notkey:true\\]\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"map\\[default-notkey:true\\]\"\n",
 		},
 	}
 	for _, tt := range tests {
@@ -671,7 +670,7 @@ func TestStringVariation(t *testing.T) {
 			},
 			want:        "default-notkey",
 			wantErr:     true,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key\", flag=\"disable-flag\", value=\"default-notkey\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key\", flag=\"disable-flag\", value=\"default-notkey\"\n",
 		},
 		{
 			name: "Get error when not init",
@@ -683,7 +682,7 @@ func TestStringVariation(t *testing.T) {
 			},
 			want:        "default-notkey",
 			wantErr:     true,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"default-notkey\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"default-notkey\"\n",
 		},
 		{
 			name: "Get default value with key not exist",
@@ -695,7 +694,7 @@ func TestStringVariation(t *testing.T) {
 			},
 			want:        "default-notkey",
 			wantErr:     true,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"default-notkey\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"default-notkey\"\n",
 		},
 
 		{
@@ -708,7 +707,7 @@ func TestStringVariation(t *testing.T) {
 			},
 			want:        "default",
 			wantErr:     false,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"default\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"default\"\n",
 		},
 		{
 			name: "Get true value, rule apply",
@@ -720,7 +719,7 @@ func TestStringVariation(t *testing.T) {
 			},
 			want:        "true",
 			wantErr:     false,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"true\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"true\"\n",
 		},
 		{
 			name: "Get false value, rule apply",
@@ -732,7 +731,7 @@ func TestStringVariation(t *testing.T) {
 			},
 			want:        "false",
 			wantErr:     false,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"false\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"false\"\n",
 		},
 		{
 			name: "Get default value, when rule apply and not right type",
@@ -752,7 +751,7 @@ func TestStringVariation(t *testing.T) {
 			},
 			want:        "default-notkey",
 			wantErr:     true,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"default-notkey\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"default-notkey\"\n",
 		},
 		{
 			name: "No log",
@@ -837,7 +836,7 @@ func TestIntVariation(t *testing.T) {
 			},
 			want:        125,
 			wantErr:     true,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key\", flag=\"disable-flag\", value=\"125\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key\", flag=\"disable-flag\", value=\"125\"\n",
 		},
 		{
 			name: "Get error when not init",
@@ -849,7 +848,7 @@ func TestIntVariation(t *testing.T) {
 			},
 			want:        118,
 			wantErr:     true,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"118\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"118\"\n",
 		},
 		{
 			name: "Get default value with key not exist",
@@ -861,7 +860,7 @@ func TestIntVariation(t *testing.T) {
 			},
 			want:        118,
 			wantErr:     true,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"118\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"118\"\n",
 		},
 		{
 			name: "Get default value rule not apply",
@@ -873,7 +872,7 @@ func TestIntVariation(t *testing.T) {
 			},
 			want:        119,
 			wantErr:     false,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"119\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"119\"\n",
 		},
 		{
 			name: "Get true value, rule apply",
@@ -885,7 +884,7 @@ func TestIntVariation(t *testing.T) {
 			},
 			want:        120,
 			wantErr:     false,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"120\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"120\"\n",
 		},
 		{
 			name: "Get false value, rule apply",
@@ -897,7 +896,7 @@ func TestIntVariation(t *testing.T) {
 			},
 			want:        121,
 			wantErr:     false,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"121\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"121\"\n",
 		},
 		{
 			name: "Get default value, when rule apply and not right type",
@@ -917,7 +916,7 @@ func TestIntVariation(t *testing.T) {
 			},
 			want:        118,
 			wantErr:     true,
-			expectedLog: "\\[" + RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"118\"\n",
+			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"118\"\n",
 		},
 	}
 	for _, tt := range tests {
