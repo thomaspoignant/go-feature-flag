@@ -37,7 +37,7 @@ func UpdateCache(logger *log.Logger, loadedFlags []byte) error {
 
 	// launching a go routine to log the differences
 	if logger != nil {
-		go FlagChanges(logger, FlagsCache, flags)
+		go flagChanges(logger, FlagsCache, flags)
 	}
 
 	mutex.Lock()
@@ -51,7 +51,8 @@ func Close() {
 	FlagsCache = nil
 }
 
-func FlagChanges(logger *log.Logger, oldCache map[string]flags.Flag, newCache map[string]flags.Flag) {
+// flagChanges is logging if something has changed in your flag config file
+func flagChanges(logger *log.Logger, oldCache map[string]flags.Flag, newCache map[string]flags.Flag) {
 	date := time.Now().Format(time.RFC3339)
 	for key := range oldCache {
 		_, inNewCache := newCache[key]
