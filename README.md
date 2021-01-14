@@ -12,7 +12,7 @@
 [![Release version](https://img.shields.io/github/v/release/thomaspoignant/go-feature-flag "version")](https://github.com/thomaspoignant/go-feature-flag/releases)
 [![GoDoc](https://godoc.org/github.com/thomaspoignant/go-feature-flag?status.svg)](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag)
 ![Go version](https://img.shields.io/github/go-mod/go-version/thomaspoignant/go-feature-flag?logo=go%20version "Go version")
-
+[![Mentioned in Awesome Go](https://awesome.re/mentioned-badge-flat.svg)](https://github.com/avelino/awesome-go)
 
 
 A feature flag solution, with YAML file in the backend (S3, GitHub, HTTP, local file ...).  
@@ -53,6 +53,7 @@ if hasFlag {
     // flag "test-flag" is false for the user
 }
 ```
+You can find more example programs in the [examples/](examples) directory.
 
 ## Configuration
 
@@ -68,7 +69,7 @@ ffclient.Init(ffclient.Config{
 })
 ```
 
-|   |   |
+|  | Descriptions |
 |---|---|
 |`PollInterval`   | Number of seconds to wait before refreshing the flags.<br />The default value is 60 seconds.|
 |`Logger`   | Logger used to log what `go-feature-flag` is doing.<br />If no logger is provided the module will not log anything.|
