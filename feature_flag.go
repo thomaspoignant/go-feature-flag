@@ -10,21 +10,11 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
 )
 
-type goFeatureFlag struct {
-	flagUpdater gocron.Scheduler
-	cache       cache.Cache
-	config      Config
-}
-
-// ff is the default object for go-feature-flag
-var ff *goFeatureFlag
-var onceFF sync.Once
-
 // Init the feature flag component with the configuration of ffclient.Config
 //  func main() {
 //    err := ffclient.Init(ffclient.Config{
 //             PollInterval: 3,
-//             HTTPRetriever: &ffClient.HTTPRetriever{
+//             Retriever: &ffClient.HTTPRetriever{
 //               URL:    "http://example.com/test.yaml",
 //             },
 //           })
@@ -43,6 +33,18 @@ func Close() {
 	ff.flagUpdater.Stop()
 	ff.cache.Close()
 }
+
+// goFeatureFlag is the main object of the library
+// it contains the cache, the config and the update.
+type goFeatureFlag struct {
+	flagUpdater gocron.Scheduler
+	cache       cache.Cache
+	config      Config
+}
+
+// ff is the default object for go-feature-flag
+var ff *goFeatureFlag
+var onceFF sync.Once
 
 func newGoFeatureFlag(config Config) *goFeatureFlag {
 	flagUpdater := *gocron.NewScheduler(time.UTC)

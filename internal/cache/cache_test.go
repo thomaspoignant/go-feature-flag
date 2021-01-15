@@ -13,6 +13,12 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/testutil"
 )
 
+func Test_FlagCacheNotInit(t *testing.T) {
+	fCache := cacheImpl{}
+	_, err := fCache.GetFlag("test-flag")
+	assert.Error(t, err, "We should have an error if the cache is not init")
+}
+
 func Test_FlagCache(t *testing.T) {
 	exampleFile := []byte(`test-flag:
   rule: key eq "random-key"

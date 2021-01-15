@@ -247,7 +247,7 @@ func TestFlag_value(t *testing.T) {
 			},
 			args: args{
 				flagName: "test-flag",
-				user:     ffuser.NewUser("user66"), // combined hash is 9
+				user:     ffuser.NewUserBuilder("user66").AddCustom("name", "john").Build(), // combined hash is 9
 			},
 			want: "true",
 		},
