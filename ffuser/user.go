@@ -1,7 +1,7 @@
 package ffuser
 
-// Value is a type to define custom attribute.
-type Value map[string]interface{}
+// value is a type to define custom attribute.
+type value map[string]interface{}
 
 // NewUser creates a new user identified by the given key.
 func NewUser(key string) User {
@@ -22,7 +22,7 @@ func NewAnonymousUser(key string) User {
 type User struct {
 	key       string // only mandatory attribute
 	anonymous bool
-	custom    Value
+	custom    value
 }
 
 // GetKey return the unique key for the user.

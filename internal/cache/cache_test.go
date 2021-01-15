@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"sync"
 	"testing"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/flags"
@@ -63,8 +64,12 @@ func Test_FlagCache(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			Init()
-			err := UpdateCache(log.New(os.Stdout, "", 0), tt.args.loadedFlags)
+			fCache := cacheImpl{
+				flagsCache: make(map[string]flags.Flag),
+				mutex:      sync.Mutex{},
+				Logger:     log.New(os.Stdout, "", 0),
+			}
+			err := fCache.UpdateCache(tt.args.loadedFlags)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("UpdateCache() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -72,9 +77,9 @@ func Test_FlagCache(t *testing.T) {
 
 			// If no error we compare with expected
 			if err == nil {
-				assert.Equal(t, tt.expected, FlagsCache)
+				assert.Equal(t, tt.expected, fCache.flagsCache)
 			}
-			Close()
+			fCache.Close()
 		})
 	}
 }
@@ -179,15 +184,20 @@ add-test-flag:
 			var oldValue map[string]flags.Flag
 			_ = yaml.Unmarshal(tt.args.oldFlag, &oldValue)
 
+			// create temp log file
+			logOutput, _ := ioutil.TempFile("", "")
+
+			fCache := cacheImpl{
+				flagsCache: oldValue,
+				mutex:      sync.Mutex{},
+				Logger:     log.New(logOutput, "", 0),
+			}
+
 			var newValue map[string]flags.Flag
 			_ = yaml.Unmarshal(tt.args.loadedFlags, &newValue)
 
-			// create temp log file
-			logOutput, _ := ioutil.TempFile("", "")
 			// update the cache file
-			logFlagChanges(
-				log.New(logOutput, "", 0),
-				oldValue,
+			fCache.logFlagChanges(
 				newValue,
 			)
 
