@@ -217,3 +217,44 @@ add-test-flag:
 		})
 	}
 }
+
+func Test_cacheImpl_getCacheCopy(t *testing.T) {
+	type fields struct {
+		flagsCache map[string]flags.Flag
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   map[string]flags.Flag
+	}{
+		{
+			name: "Copy with values",
+			fields: fields{
+				flagsCache: map[string]flags.Flag{
+					"test": {
+						Disable:    false,
+						Rule:       "key eq \"toto\"",
+						Percentage: 20,
+						True:       true,
+						False:      false,
+						Default:    true,
+					},
+				},
+			},
+		},
+		{
+			name: "Copy without value",
+			fields: fields{
+				flagsCache: map[string]flags.Flag{},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &cacheImpl{
+				flagsCache: tt.fields.flagsCache,
+			}
+			assert.Equal(t, c.flagsCache, c.getCacheCopy())
+		})
+	}
+}
