@@ -70,12 +70,7 @@ func Test_FlagCache(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fCache := cacheImpl{
-				flagsCache: make(map[string]flags.Flag),
-				mutex:      sync.Mutex{},
-				Logger:     log.New(os.Stdout, "", 0),
-				waitGroup:  sync.WaitGroup{},
-			}
+			fCache := New(log.New(os.Stdout, "", 0))
 			err := fCache.UpdateCache(tt.args.loadedFlags)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("UpdateCache() error = %v, wantErr %v", err, tt.wantErr)
@@ -84,7 +79,10 @@ func Test_FlagCache(t *testing.T) {
 
 			// If no error we compare with expected
 			if err == nil {
-				assert.Equal(t, tt.expected, fCache.flagsCache)
+				for key, value := range tt.expected {
+					got, _ := fCache.GetFlag(key)
+					assert.Equal(t, value, got)
+				}
 			}
 			fCache.Close()
 		})
