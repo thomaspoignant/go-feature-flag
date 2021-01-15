@@ -19,6 +19,12 @@ func Test_FlagCacheNotInit(t *testing.T) {
 	assert.Error(t, err, "We should have an error if the cache is not init")
 }
 
+func Test_GetFlagNotExist(t *testing.T) {
+	fCache := New(nil)
+	_, err := fCache.GetFlag("not-exists-flag")
+	assert.Error(t, err, "We should have an error if the flag does not exists")
+}
+
 func Test_FlagCache(t *testing.T) {
 	exampleFile := []byte(`test-flag:
   rule: key eq "random-key"
