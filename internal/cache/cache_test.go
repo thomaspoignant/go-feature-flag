@@ -74,6 +74,7 @@ func Test_FlagCache(t *testing.T) {
 				flagsCache: make(map[string]flags.Flag),
 				mutex:      sync.Mutex{},
 				Logger:     log.New(os.Stdout, "", 0),
+				waitGroup:  sync.WaitGroup{},
 			}
 			err := fCache.UpdateCache(tt.args.loadedFlags)
 			if (err != nil) != tt.wantErr {
@@ -197,15 +198,14 @@ add-test-flag:
 				flagsCache: oldValue,
 				mutex:      sync.Mutex{},
 				Logger:     log.New(logOutput, "", 0),
+				waitGroup:  sync.WaitGroup{},
 			}
 
 			var newValue map[string]flags.Flag
 			_ = yaml.Unmarshal(tt.args.loadedFlags, &newValue)
 
 			// update the cache file
-			fCache.logFlagChanges(
-				newValue,
-			)
+			fCache.logFlagChanges(oldValue, newValue)
 
 			// get the logs
 			log, _ := ioutil.ReadFile(logOutput.Name())
@@ -213,6 +213,7 @@ add-test-flag:
 
 			// Remove temp log file
 			os.Remove(logOutput.Name())
+			fCache.Close()
 		})
 	}
 }

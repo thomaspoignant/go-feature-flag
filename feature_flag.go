@@ -30,8 +30,8 @@ func Init(config Config) error {
 
 // Close the component by stopping the background refresh and clean the cache.
 func Close() {
-	ff.flagUpdater.Stop()
 	ff.cache.Close()
+	ff.flagUpdater.Stop()
 }
 
 // goFeatureFlag is the main object of the library

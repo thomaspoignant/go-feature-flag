@@ -36,6 +36,7 @@ func TestValidUseCase(t *testing.T) {
 		Retriever:    &FileRetriever{Path: "testdata/test.yaml"},
 		Logger:       log.New(os.Stdout, "", 0),
 	})
+	defer Close()
 
 	assert.NoError(t, err)
 	user := ffuser.NewUser("random-key")
@@ -43,8 +44,6 @@ func TestValidUseCase(t *testing.T) {
 	assert.True(t, hasTestFlag, "User should have test flag")
 	hasUnknownFlag, _ := BoolVariation("unknown-flag", user, false)
 	assert.False(t, hasUnknownFlag, "User should use default value if flag does not exists")
-
-	Close()
 }
 
 func TestS3RetrieverReturnError(t *testing.T) {
