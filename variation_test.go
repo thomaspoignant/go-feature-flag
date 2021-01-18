@@ -2,7 +2,6 @@ package ffclient
 
 import (
 	"errors"
-	"github.com/go-co-op/gocron"
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
@@ -168,8 +167,11 @@ func TestBoolVariation(t *testing.T) {
 			logger := log.New(file, "", 0)
 
 			ff = &GoFeatureFlag{
-				flagUpdater: *gocron.NewScheduler(time.UTC),
-				cache:       tt.args.cacheMock,
+				bgUpdater: backgroundUpdater{
+					ticker:      time.NewTicker(5 * time.Second),
+					updaterChan: make(chan struct{}),
+				},
+				cache: tt.args.cacheMock,
 				config: Config{
 					PollInterval: 0,
 					Logger:       logger,
@@ -330,8 +332,11 @@ func TestFloat64Variation(t *testing.T) {
 			logger := log.New(file, "", 0)
 
 			ff = &GoFeatureFlag{
-				flagUpdater: *gocron.NewScheduler(time.UTC),
-				cache:       tt.args.cacheMock,
+				bgUpdater: backgroundUpdater{
+					ticker:      time.NewTicker(5 * time.Second),
+					updaterChan: make(chan struct{}),
+				},
+				cache: tt.args.cacheMock,
 				config: Config{
 					PollInterval: 0,
 					Logger:       logger,
@@ -492,8 +497,11 @@ func TestJSONArrayVariation(t *testing.T) {
 			logger := log.New(file, "", 0)
 
 			ff = &GoFeatureFlag{
-				flagUpdater: *gocron.NewScheduler(time.UTC),
-				cache:       tt.args.cacheMock,
+				bgUpdater: backgroundUpdater{
+					ticker:      time.NewTicker(5 * time.Second),
+					updaterChan: make(chan struct{}),
+				},
+				cache: tt.args.cacheMock,
 				config: Config{
 					PollInterval: 0,
 					Logger:       logger,
@@ -654,8 +662,11 @@ func TestJSONVariation(t *testing.T) {
 			logger := log.New(file, "", 0)
 
 			ff = &GoFeatureFlag{
-				flagUpdater: *gocron.NewScheduler(time.UTC),
-				cache:       tt.args.cacheMock,
+				bgUpdater: backgroundUpdater{
+					ticker:      time.NewTicker(5 * time.Second),
+					updaterChan: make(chan struct{}),
+				},
+				cache: tt.args.cacheMock,
 				config: Config{
 					PollInterval: 0,
 					Logger:       logger,
@@ -818,8 +829,11 @@ func TestStringVariation(t *testing.T) {
 			logger := log.New(file, "", 0)
 
 			ff = &GoFeatureFlag{
-				flagUpdater: *gocron.NewScheduler(time.UTC),
-				cache:       tt.args.cacheMock,
+				bgUpdater: backgroundUpdater{
+					ticker:      time.NewTicker(5 * time.Second),
+					updaterChan: make(chan struct{}),
+				},
+				cache: tt.args.cacheMock,
 				config: Config{
 					PollInterval: 0,
 					Logger:       logger,
@@ -980,8 +994,11 @@ func TestIntVariation(t *testing.T) {
 			logger := log.New(file, "", 0)
 
 			ff = &GoFeatureFlag{
-				flagUpdater: *gocron.NewScheduler(time.UTC),
-				cache:       tt.args.cacheMock,
+				bgUpdater: backgroundUpdater{
+					ticker:      time.NewTicker(5 * time.Second),
+					updaterChan: make(chan struct{}),
+				},
+				cache: tt.args.cacheMock,
 				config: Config{
 					PollInterval: 0,
 					Logger:       logger,
