@@ -11,20 +11,18 @@ import (
 )
 
 func TestStartWithoutRetriever(t *testing.T) {
-	ff = newGoFeatureFlag(Config{
+	_, err := New(Config{
 		PollInterval: 60,
 	})
-	err := ff.startUpdater()
 	assert.Error(t, err)
 	ff = nil
 }
 
 func TestStartWithNegativeInterval(t *testing.T) {
-	ff = newGoFeatureFlag(Config{
+	_, err := New(Config{
 		PollInterval: -60,
 		Retriever:    &FileRetriever{Path: "testdata/test.yaml"},
 	})
-	err := ff.startUpdater()
 	assert.Error(t, err)
 	ff = nil
 }
@@ -47,7 +45,7 @@ func TestValidUseCase(t *testing.T) {
 }
 
 func TestS3RetrieverReturnError(t *testing.T) {
-	ff = newGoFeatureFlag(Config{
+	_, err := New(Config{
 		Retriever: &S3Retriever{
 			Bucket:    "unknown-bucket",
 			Item:      "unknown-item",
@@ -55,6 +53,35 @@ func TestS3RetrieverReturnError(t *testing.T) {
 		},
 	})
 
-	err := ff.startUpdater()
 	assert.Error(t, err)
+}
+
+func Test2GoFeatureFlagInstance(t *testing.T) {
+	gffClient1, err := New(Config{
+		PollInterval: 5,
+		Retriever:    &FileRetriever{Path: "testdata/test.yaml"},
+		Logger:       log.New(os.Stdout, "", 0),
+	})
+	defer gffClient1.Close()
+
+	gffClient2, err2 := New(Config{
+		PollInterval: 10,
+		Retriever:    &FileRetriever{Path: "testdata/test-instance2.yaml"},
+		Logger:       log.New(os.Stdout, "", 0),
+	})
+	defer gffClient2.Close()
+
+	// Init should be OK for both clients.
+	assert.NoError(t, err)
+	assert.NoError(t, err2)
+
+	user := ffuser.NewUser("random-key")
+
+	// Client1 is supposed to have the flag at true
+	hasTestFlagClient1, _ := gffClient1.BoolVariation("test-flag", user, false)
+	assert.True(t, hasTestFlagClient1, "User should have test flag")
+
+	// Client2 is supposed to have the flag at true
+	hasTestFlagClient2, _ := gffClient2.BoolVariation("test-flag", user, false)
+	assert.False(t, hasTestFlagClient2, "User should have test flag")
 }

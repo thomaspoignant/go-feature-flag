@@ -22,31 +22,31 @@ import (
 func Init(config Config) error {
 	var err error = nil
 	onceFF.Do(func() {
-		ff = newGoFeatureFlag(config)
-		err = ff.startUpdater()
+		ff, err = New(config)
 	})
 	return err
 }
 
 // Close the component by stopping the background refresh and clean the cache.
 func Close() {
-	ff.cache.Close()
-	ff.flagUpdater.Stop()
+	ff.Close()
 }
 
-// goFeatureFlag is the main object of the library
+// GoFeatureFlag is the main object of the library
 // it contains the cache, the config and the update.
-type goFeatureFlag struct {
+type GoFeatureFlag struct {
 	flagUpdater gocron.Scheduler
 	cache       cache.Cache
 	config      Config
 }
 
 // ff is the default object for go-feature-flag
-var ff *goFeatureFlag
+var ff *GoFeatureFlag
 var onceFF sync.Once
 
-func newGoFeatureFlag(config Config) *goFeatureFlag {
+// New creates a new go-feature-flag instance that retrieve the config from a YAML file
+// and return everything you need to manage your flags.
+func New(config Config) (*GoFeatureFlag, error) {
 	flagUpdater := *gocron.NewScheduler(time.UTC)
 
 	// The default value for poll interval is 60 seconds
@@ -54,16 +54,28 @@ func newGoFeatureFlag(config Config) *goFeatureFlag {
 		config.PollInterval = 60
 	}
 
-	return &goFeatureFlag{
+	goFF := &GoFeatureFlag{
 		cache:       cache.New(config.Logger),
 		flagUpdater: flagUpdater,
 		config:      config,
 	}
+
+	err := goFF.startUpdater()
+	if err != nil {
+		return nil, err
+	}
+
+	return goFF, nil
 }
 
-func (g *goFeatureFlag) startUpdater() error {
+func (g *GoFeatureFlag) Close() {
+	g.cache.Close()
+	g.flagUpdater.Stop()
+}
+
+func (g *GoFeatureFlag) startUpdater() error {
 	// fail if we cannot retrieve the flags the 1st time
-	err := retrieveFlagsAndUpdateCache(g.config)
+	err := retrieveFlagsAndUpdateCache(g.config, g.cache)
 	if err != nil {
 		return fmt.Errorf("impossible to retrieve the flags, please check your configuration: %v", err)
 	}
@@ -73,7 +85,11 @@ func (g *goFeatureFlag) startUpdater() error {
 	}
 
 	// start flag updater
-	_, err = g.flagUpdater.Every(uint64(g.config.PollInterval)).Seconds().Do(retrieveFlagsAndUpdateCache, g.config)
+	_, err = g.flagUpdater.
+		Every(uint64(g.config.PollInterval)).
+		Seconds().
+		Do(retrieveFlagsAndUpdateCache, g.config, g.cache)
+
 	if err != nil {
 		return fmt.Errorf("impossible to launch background updater: %v", err)
 	}
@@ -82,7 +98,7 @@ func (g *goFeatureFlag) startUpdater() error {
 }
 
 // retrieveFlagsAndUpdateCache is called every X seconds to refresh the cache flag.
-func retrieveFlagsAndUpdateCache(config Config) error {
+func retrieveFlagsAndUpdateCache(config Config, cache cache.Cache) error {
 	retriever, err := config.GetRetriever()
 	if err != nil {
 		log.Printf("error while getting the file retriever: %v", err)
@@ -95,7 +111,7 @@ func retrieveFlagsAndUpdateCache(config Config) error {
 		return err
 	}
 
-	err = ff.cache.UpdateCache(loadedFlags)
+	err = cache.UpdateCache(loadedFlags)
 	if err != nil {
 		log.Printf("error: impossible to update the cache of the flags: %v", err)
 		return err

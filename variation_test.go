@@ -167,7 +167,7 @@ func TestBoolVariation(t *testing.T) {
 			file, _ := ioutil.TempFile("", "log")
 			logger := log.New(file, "", 0)
 
-			ff = &goFeatureFlag{
+			ff = &GoFeatureFlag{
 				flagUpdater: *gocron.NewScheduler(time.UTC),
 				cache:       tt.args.cacheMock,
 				config: Config{
@@ -329,7 +329,7 @@ func TestFloat64Variation(t *testing.T) {
 			file, _ := ioutil.TempFile("", "log")
 			logger := log.New(file, "", 0)
 
-			ff = &goFeatureFlag{
+			ff = &GoFeatureFlag{
 				flagUpdater: *gocron.NewScheduler(time.UTC),
 				cache:       tt.args.cacheMock,
 				config: Config{
@@ -491,7 +491,7 @@ func TestJSONArrayVariation(t *testing.T) {
 			file, _ := ioutil.TempFile("", "log")
 			logger := log.New(file, "", 0)
 
-			ff = &goFeatureFlag{
+			ff = &GoFeatureFlag{
 				flagUpdater: *gocron.NewScheduler(time.UTC),
 				cache:       tt.args.cacheMock,
 				config: Config{
@@ -653,7 +653,7 @@ func TestJSONVariation(t *testing.T) {
 			file, _ := ioutil.TempFile("", "log")
 			logger := log.New(file, "", 0)
 
-			ff = &goFeatureFlag{
+			ff = &GoFeatureFlag{
 				flagUpdater: *gocron.NewScheduler(time.UTC),
 				cache:       tt.args.cacheMock,
 				config: Config{
@@ -817,7 +817,7 @@ func TestStringVariation(t *testing.T) {
 			file, _ := ioutil.TempFile("", "log")
 			logger := log.New(file, "", 0)
 
-			ff = &goFeatureFlag{
+			ff = &GoFeatureFlag{
 				flagUpdater: *gocron.NewScheduler(time.UTC),
 				cache:       tt.args.cacheMock,
 				config: Config{
@@ -979,7 +979,7 @@ func TestIntVariation(t *testing.T) {
 			file, _ := ioutil.TempFile("", "log")
 			logger := log.New(file, "", 0)
 
-			ff = &goFeatureFlag{
+			ff = &GoFeatureFlag{
 				flagUpdater: *gocron.NewScheduler(time.UTC),
 				cache:       tt.args.cacheMock,
 				config: Config{

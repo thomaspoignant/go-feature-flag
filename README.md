@@ -251,5 +251,35 @@ The default value is return when an error is encountered _(`ffclient` not initia
 In the example, if the flag `your.feature.key` does not exists, result will be `false`.  
 Not that you will always have a usable value in the result. 
 
+## Multiple flag configurations
+`go-feature-flag` comes ready to use out of the box by calling the `Init` function and after that it will be available everywhere.
+Since most applications will want to use a single central flag configuration, the `go-feature-flag` package provides this. It is similar to a singleton.
+
+In all of the examples above, they demonstrate using `go-feature-flag` in its singleton style approach.
+
+### Working with multiple go-feature-flag
+
+You can also create many different `go-feature-flag` client for use in your application.  
+Each will have its own unique set of configurations and flags. Each can read from a different config file and from different places.  
+All of the functions that `go-feature-flag` package supports are mirrored as methods on a `goFeatureFlag`.
+
+### Example:
+
+```go
+x, err := ffclient.New(Config{ Retriever: &ffclient.HTTPRetriever{{URL: "http://example.com/test.yaml",}})
+defer x.Close()
+
+y, err := ffclient.New(Config{ Retriever: &ffclient.HTTPRetriever{{URL: "http://example.com/test2.yaml",}})
+defer y.Close()
+
+user := ffuser.NewUser("user-key")
+x.BoolVariation("test-flag", user, false)
+y.BoolVariation("test-flag", user, false)
+
+// ...
+```
+
+When working with multiple `go-feature-flag`, it is up to the user to keep track of the different `go-feature-flag` instances.
+
 # How can I contribute?
 This project is open for contribution, see the [contributor's guide](CONTRIBUTING.md) for some helpful tips.
