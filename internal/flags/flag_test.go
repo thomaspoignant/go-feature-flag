@@ -223,7 +223,7 @@ func TestFlag_value(t *testing.T) {
 		want   interface{}
 	}{
 		{
-			name: "Rule disable get default Value",
+			name: "Rule disable get default value",
 			fields: fields{
 				Disable: true,
 				True:    "true",
@@ -237,7 +237,7 @@ func TestFlag_value(t *testing.T) {
 			want: "default",
 		},
 		{
-			name: "Get true Value if rule pass",
+			name: "Get true value if rule pass",
 			fields: fields{
 				True:       "true",
 				False:      "false",
@@ -247,7 +247,7 @@ func TestFlag_value(t *testing.T) {
 			},
 			args: args{
 				flagName: "test-flag",
-				user:     ffuser.NewUser("user66"), // combined hash is 9
+				user:     ffuser.NewUserBuilder("user66").AddCustom("name", "john").Build(), // combined hash is 9
 			},
 			want: "true",
 		},

@@ -21,7 +21,7 @@ type UserBuilder interface {
 type userBuilderImpl struct {
 	key       string // only mandatory attribute
 	anonymous bool
-	custom    Value
+	custom    value
 }
 
 // Anonymous is to set the user as anonymous.

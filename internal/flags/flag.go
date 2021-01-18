@@ -34,7 +34,7 @@ func (f *Flag) Value(flagName string, user ffuser.User) interface{} {
 		return f.False
 	}
 
-	// Default Value is used if the rule does not applied to the user.
+	// Default value is used if the rule does not applied to the user.
 	return f.Default
 }
 

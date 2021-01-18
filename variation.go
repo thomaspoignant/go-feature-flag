@@ -1,16 +1,13 @@
 package ffclient
 
 import (
-	"errors"
 	"fmt"
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
-	"github.com/thomaspoignant/go-feature-flag/internal/cache"
 	"github.com/thomaspoignant/go-feature-flag/internal/flags"
 )
 
-const errorCacheNotInit = "impossible to read the toggle before the initialisation"
 const errorFlagNotAvailable = "flag %v is not present or disabled"
 const errorWrongVariation = "wrong variation used for flag %v"
 
@@ -132,8 +129,8 @@ func JSONVariation(
 // notifyVariation is logging the evaluation result for a flag
 // if no logger is provided in the configuration we are not logging anything.
 func notifyVariation(flagKey string, userKey string, value interface{}) {
-	if logger != nil {
-		logger.Printf(
+	if ff.config.Logger != nil {
+		ff.config.Logger.Printf(
 			"[%v] user=\"%s\", flag=\"%s\", value=\"%v\"",
 			time.Now().Format(time.RFC3339), userKey, flagKey, value)
 	}
@@ -142,12 +139,8 @@ func notifyVariation(flagKey string, userKey string, value interface{}) {
 // getFlagFromCache try to get the flag from the cache.
 // It returns an error if the cache is not init or if the flag is not present or disabled.
 func getFlagFromCache(flagKey string) (flags.Flag, error) {
-	if cache.FlagsCache == nil {
-		return flags.Flag{}, errors.New(errorCacheNotInit)
-	}
-
-	flag, ok := cache.FlagsCache[flagKey]
-	if !ok || flag.Disable {
+	flag, err := ff.cache.GetFlag(flagKey)
+	if err != nil || flag.Disable {
 		return flag, fmt.Errorf(errorFlagNotAvailable, flagKey)
 	}
 	return flag, nil

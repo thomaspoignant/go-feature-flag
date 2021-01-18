@@ -1,8 +1,10 @@
 package cache
 
 import (
+	"errors"
+	"fmt"
 	"github.com/google/go-cmp/cmp"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 	"log"
 	"sync"
 	"time"
@@ -10,74 +12,105 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/internal/flags"
 )
 
-var once sync.Once
-var mutex = &sync.Mutex{}
-
-// FlagsCache is the cache of your flags.
-var FlagsCache map[string]flags.Flag
-
-// Init init the cache of all flags.
-// We are using a singleton to avoid multiple init and to be sure
-// we have only one cache for all the flags in our system.
-func Init() map[string]flags.Flag {
-	once.Do(func() {
-		FlagsCache = make(map[string]flags.Flag)
-	})
-	return FlagsCache
+type Cache interface {
+	UpdateCache(loadedFlags []byte) error
+	Close()
+	GetFlag(key string) (flags.Flag, error)
+}
+type cacheImpl struct {
+	Logger     *log.Logger
+	flagsCache map[string]flags.Flag
+	mutex      sync.Mutex
+	waitGroup  sync.WaitGroup
 }
 
-// UpdateCache retrieve the flags from the backend file and update the cache,
-// we are using a mutex during the update to be sure to stay consistent.
-func UpdateCache(logger *log.Logger, loadedFlags []byte) error {
-	var flags map[string]flags.Flag
-	err := yaml.Unmarshal(loadedFlags, &flags)
+func New(logger *log.Logger) Cache {
+	return &cacheImpl{
+		flagsCache: make(map[string]flags.Flag),
+		mutex:      sync.Mutex{},
+		Logger:     logger,
+		waitGroup:  sync.WaitGroup{},
+	}
+}
+
+func (c *cacheImpl) UpdateCache(loadedFlags []byte) error {
+	var newCache map[string]flags.Flag
+	err := yaml.Unmarshal(loadedFlags, &newCache)
 	if err != nil {
 		return err
 	}
 
 	// launching a go routine to log the differences
-	if logger != nil {
-		go logFlagChanges(logger, FlagsCache, flags)
+	if c.Logger != nil {
+		// copy cache for difference checks async
+		cacheCopy := c.getCacheCopy()
+		c.waitGroup.Add(1)
+		go c.logFlagChangesRoutine(cacheCopy, newCache)
 	}
 
-	mutex.Lock()
-	FlagsCache = flags
-	mutex.Unlock()
+	c.mutex.Lock()
+	c.flagsCache = newCache
+	c.mutex.Unlock()
 	return nil
 }
 
-// Close is removing everything from the cache.
-func Close() {
-	FlagsCache = nil
+func (c *cacheImpl) Close() {
+	c.waitGroup.Wait()
+	c.flagsCache = nil
+}
+
+func (c *cacheImpl) getCacheCopy() map[string]flags.Flag {
+	copyCache := make(map[string]flags.Flag)
+	for k, v := range c.flagsCache {
+		copyCache[k] = v
+	}
+	return copyCache
+}
+
+func (c *cacheImpl) GetFlag(key string) (flags.Flag, error) {
+	if c.flagsCache == nil {
+		return flags.Flag{}, errors.New("impossible to read the toggle before the initialisation")
+	}
+
+	flag, ok := c.flagsCache[key]
+	if !ok {
+		return flags.Flag{}, fmt.Errorf("flag [%v] does not exists", key)
+	}
+	return flag, nil
+}
+
+func (c *cacheImpl) logFlagChangesRoutine(oldCache map[string]flags.Flag, newCache map[string]flags.Flag) {
+	c.logFlagChanges(oldCache, newCache)
+	c.waitGroup.Done()
 }
 
 // logFlagChanges is logging if something has changed in your flag config file
-func logFlagChanges(logger *log.Logger, oldCache map[string]flags.Flag, newCache map[string]flags.Flag) {
+func (c *cacheImpl) logFlagChanges(oldCache map[string]flags.Flag, newCache map[string]flags.Flag) {
 	date := time.Now().Format(time.RFC3339)
 	for key := range oldCache {
 		_, inNewCache := newCache[key]
 		if !inNewCache {
-			logger.Printf("[%v] flag %v removed\n", date, key)
+			c.Logger.Printf("[%v] flag %v removed\n", date, key)
 			continue
 		}
 
 		if oldCache[key].Disable != newCache[key].Disable {
 			if newCache[key].Disable {
 				// Flag is disabled
-				logger.Printf("[%v] flag %v is turned OFF\n", date, key)
+				c.Logger.Printf("[%v] flag %v is turned OFF\n", date, key)
 			} else {
-				logger.Printf("[%v] flag %v is turned ON (flag=[%v])  \n", date, key, newCache[key])
+				c.Logger.Printf("[%v] flag %v is turned ON (flag=[%v])  \n", date, key, newCache[key])
 			}
 		} else if !cmp.Equal(oldCache[key], newCache[key]) {
 			// key has changed in cache
-			logger.Printf("[%v] flag %s updated, old=[%v], new=[%v]\n", date, key, oldCache[key], newCache[key])
+			c.Logger.Printf("[%v] flag %s updated, old=[%v], new=[%v]\n", date, key, c.flagsCache[key], newCache[key])
 		}
 	}
 
 	for key := range newCache {
 		_, inOldCache := oldCache[key]
 		if !inOldCache && !newCache[key].Disable {
-			logger.Printf("[%v] flag %v added\n", date, key)
+			c.Logger.Printf("[%v] flag %v added\n", date, key)
 		}
 	}
 }
