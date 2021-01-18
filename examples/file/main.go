@@ -67,8 +67,7 @@ func main() {
 	}
 
 	// user 3 is admin and the flag apply to this key.
-	user3HasAccess, _ := ffclient.BoolVariation("flag-only-for-admin", user3, false)
-	if user3HasAccess {
+	if user3HasAccess, _ := ffclient.BoolVariation("flag-only-for-admin", user3, false); user3HasAccess {
 		fmt.Println("user 3 is admin and the flag apply to this key.")
 	}
 }
