@@ -57,7 +57,6 @@ func TestS3RetrieverReturnError(t *testing.T) {
 }
 
 func Test2GoFeatureFlagInstance(t *testing.T) {
-	// Valid use case
 	gffClient1, err := New(Config{
 		PollInterval: 5,
 		Retriever:    &FileRetriever{Path: "testdata/test.yaml"},
