@@ -20,14 +20,14 @@ type Cache interface {
 type cacheImpl struct {
 	Logger     *log.Logger
 	flagsCache map[string]flags.Flag
-	mutex      sync.Mutex
+	mutex      sync.RWMutex
 	waitGroup  sync.WaitGroup
 }
 
 func New(logger *log.Logger) Cache {
 	return &cacheImpl{
 		flagsCache: make(map[string]flags.Flag),
-		mutex:      sync.Mutex{},
+		mutex:      sync.RWMutex{},
 		Logger:     logger,
 		waitGroup:  sync.WaitGroup{},
 	}
@@ -55,8 +55,13 @@ func (c *cacheImpl) UpdateCache(loadedFlags []byte) error {
 }
 
 func (c *cacheImpl) Close() {
+	// Wait for the logs to finish
 	c.waitGroup.Wait()
+
+	// Clear the cache
+	c.mutex.Lock()
 	c.flagsCache = nil
+	c.mutex.Unlock()
 }
 
 func (c *cacheImpl) getCacheCopy() map[string]flags.Flag {
@@ -68,6 +73,9 @@ func (c *cacheImpl) getCacheCopy() map[string]flags.Flag {
 }
 
 func (c *cacheImpl) GetFlag(key string) (flags.Flag, error) {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+
 	if c.flagsCache == nil {
 		return flags.Flag{}, errors.New("impossible to read the toggle before the initialisation")
 	}
@@ -103,7 +111,7 @@ func (c *cacheImpl) logFlagChanges(oldCache map[string]flags.Flag, newCache map[
 			}
 		} else if !cmp.Equal(oldCache[key], newCache[key]) {
 			// key has changed in cache
-			c.Logger.Printf("[%v] flag %s updated, old=[%v], new=[%v]\n", date, key, c.flagsCache[key], newCache[key])
+			c.Logger.Printf("[%v] flag %s updated, old=[%v], new=[%v]\n", date, key, oldCache[key], newCache[key])
 		}
 	}
 
