@@ -266,7 +266,6 @@ All of the functions that `go-feature-flag` package supports are mirrored as met
 Example:
 
 ```go
-// Valid use case
 x, err := ffclient.New(Config{ Retriever: &ffclient.HTTPRetriever{{URL: "http://example.com/test.yaml",}})
 defer x.Close()
 
