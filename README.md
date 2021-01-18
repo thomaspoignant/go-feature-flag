@@ -259,8 +259,8 @@ In all of the examples above, they demonstrate using `go-feature-flag` in its si
 
 ### Working with multiple go-feature-flag
 
-You can also create many different `go-feature-flag` client for use in your application. 
-Each will have its own unique set of configurations and flags. Each can read from a different config file and from different places. 
+You can also create many different `go-feature-flag` client for use in your application.  
+Each will have its own unique set of configurations and flags. Each can read from a different config file and from different places.  
 All of the functions that `go-feature-flag` package supports are mirrored as methods on a `goFeatureFlag`.
 
 ### Example:
