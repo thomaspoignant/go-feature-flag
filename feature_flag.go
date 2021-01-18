@@ -82,6 +82,7 @@ func (g *GoFeatureFlag) Close() {
 	g.bgUpdater.close()
 }
 
+// startFlagUpdaterDaemon is the daemon that refresh the cache every X seconds.
 func (g *GoFeatureFlag) startFlagUpdaterDaemon() {
 	for {
 		select {
