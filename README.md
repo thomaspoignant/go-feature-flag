@@ -4,7 +4,7 @@
 
 # 🎛️ go-feature-flag [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=I%27ve%20discovered%20go-feature-flag%20a%20great%20solution%20to%20easily%20managed%20feature%20flag%20in%20golang&url=https%3A%2F%2Fgithub.com%2Fthomaspoignant%2Fgo-feature-flag&via=thomaspoignant&hashtags=golang,featureflags,featuretoggle,go)
 
-[![Build Status](https://travis-ci.com/thomaspoignant/go-feature-flag.svg?branch=main)](https://travis-ci.com/thomaspoignant/go-feature-flag)
+[![Build Status](https://img.shields.io/circleci/build/github/thomaspoignant/go-feature-flag/main)](https://app.circleci.com/pipelines/github/thomaspoignant/go-feature-flag)
 [![Coverage Status](https://coveralls.io/repos/github/thomaspoignant/go-feature-flag/badge.svg)](https://coveralls.io/github/thomaspoignant/go-feature-flag)
 [![Sonarcloud Status](https://sonarcloud.io/api/project_badges/measure?project=thomaspoignant_go-feature-flag&metric=alert_status)](https://sonarcloud.io/dashboard?id=thomaspoignant_go-feature-flag)
 [![GitHub](https://img.shields.io/github/license/thomaspoignant/go-feature-flag)](LICENSE)
