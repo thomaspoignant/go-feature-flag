@@ -2,13 +2,11 @@ package ffclient
 
 import (
 	"errors"
-	"github.com/go-co-op/gocron"
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"log"
 	"testing"
-	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
@@ -168,8 +166,8 @@ func TestBoolVariation(t *testing.T) {
 			logger := log.New(file, "", 0)
 
 			ff = &GoFeatureFlag{
-				flagUpdater: *gocron.NewScheduler(time.UTC),
-				cache:       tt.args.cacheMock,
+				bgUpdater: newBackgroundUpdater(5),
+				cache:     tt.args.cacheMock,
 				config: Config{
 					PollInterval: 0,
 					Logger:       logger,
@@ -330,8 +328,8 @@ func TestFloat64Variation(t *testing.T) {
 			logger := log.New(file, "", 0)
 
 			ff = &GoFeatureFlag{
-				flagUpdater: *gocron.NewScheduler(time.UTC),
-				cache:       tt.args.cacheMock,
+				bgUpdater: newBackgroundUpdater(5),
+				cache:     tt.args.cacheMock,
 				config: Config{
 					PollInterval: 0,
 					Logger:       logger,
@@ -492,8 +490,8 @@ func TestJSONArrayVariation(t *testing.T) {
 			logger := log.New(file, "", 0)
 
 			ff = &GoFeatureFlag{
-				flagUpdater: *gocron.NewScheduler(time.UTC),
-				cache:       tt.args.cacheMock,
+				bgUpdater: newBackgroundUpdater(5),
+				cache:     tt.args.cacheMock,
 				config: Config{
 					PollInterval: 0,
 					Logger:       logger,
@@ -654,8 +652,8 @@ func TestJSONVariation(t *testing.T) {
 			logger := log.New(file, "", 0)
 
 			ff = &GoFeatureFlag{
-				flagUpdater: *gocron.NewScheduler(time.UTC),
-				cache:       tt.args.cacheMock,
+				bgUpdater: newBackgroundUpdater(5),
+				cache:     tt.args.cacheMock,
 				config: Config{
 					PollInterval: 0,
 					Logger:       logger,
@@ -818,8 +816,8 @@ func TestStringVariation(t *testing.T) {
 			logger := log.New(file, "", 0)
 
 			ff = &GoFeatureFlag{
-				flagUpdater: *gocron.NewScheduler(time.UTC),
-				cache:       tt.args.cacheMock,
+				bgUpdater: newBackgroundUpdater(5),
+				cache:     tt.args.cacheMock,
 				config: Config{
 					PollInterval: 0,
 					Logger:       logger,
@@ -980,8 +978,8 @@ func TestIntVariation(t *testing.T) {
 			logger := log.New(file, "", 0)
 
 			ff = &GoFeatureFlag{
-				flagUpdater: *gocron.NewScheduler(time.UTC),
-				cache:       tt.args.cacheMock,
+				bgUpdater: newBackgroundUpdater(5),
+				cache:     tt.args.cacheMock,
 				config: Config{
 					PollInterval: 0,
 					Logger:       logger,

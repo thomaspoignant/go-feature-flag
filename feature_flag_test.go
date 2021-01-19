@@ -3,9 +3,11 @@ package ffclient
 import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/stretchr/testify/assert"
+	"io/ioutil"
 	"log"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
 )
@@ -84,4 +86,42 @@ func Test2GoFeatureFlagInstance(t *testing.T) {
 	// Client2 is supposed to have the flag at true
 	hasTestFlagClient2, _ := gffClient2.BoolVariation("test-flag", user, false)
 	assert.False(t, hasTestFlagClient2, "User should have test flag")
+}
+
+func TestUpdateFlag(t *testing.T) {
+	initialFileContent := `test-flag:
+  rule: key eq "random-key"
+  percentage: 100
+  true: true
+  false: false
+  default: false`
+
+	flagFile, _ := ioutil.TempFile("", "")
+	_ = ioutil.WriteFile(flagFile.Name(), []byte(initialFileContent), 0600)
+
+	gffClient1, _ := New(Config{
+		PollInterval: 1,
+		Retriever:    &FileRetriever{Path: flagFile.Name()},
+	})
+	defer gffClient1.Close()
+
+	flagValue, _ := gffClient1.BoolVariation("test-flag", ffuser.NewUser("random-key"), false)
+	assert.True(t, flagValue)
+
+	updatedFileContent := `test-flag:
+  rule: key eq "random-key2"
+  percentage: 100
+  true: true
+  false: false
+  default: false`
+
+	_ = ioutil.WriteFile(flagFile.Name(), []byte(updatedFileContent), 0600)
+
+	flagValue, _ = gffClient1.BoolVariation("test-flag", ffuser.NewUser("random-key"), false)
+	assert.True(t, flagValue)
+
+	time.Sleep(2 * time.Second)
+
+	flagValue, _ = gffClient1.BoolVariation("test-flag", ffuser.NewUser("random-key"), false)
+	assert.False(t, flagValue)
 }

@@ -200,7 +200,7 @@ add-test-flag:
 
 			fCache := cacheImpl{
 				flagsCache: oldValue,
-				mutex:      sync.Mutex{},
+				mutex:      sync.RWMutex{},
 				Logger:     log.New(logOutput, "", 0),
 				waitGroup:  sync.WaitGroup{},
 			}

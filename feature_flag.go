@@ -2,7 +2,6 @@ package ffclient
 
 import (
 	"fmt"
-	"github.com/go-co-op/gocron"
 	"log"
 	"sync"
 	"time"
@@ -35,9 +34,9 @@ func Close() {
 // GoFeatureFlag is the main object of the library
 // it contains the cache, the config and the update.
 type GoFeatureFlag struct {
-	flagUpdater gocron.Scheduler
-	cache       cache.Cache
-	config      Config
+	cache     cache.Cache
+	config    Config
+	bgUpdater backgroundUpdater
 }
 
 // ff is the default object for go-feature-flag
@@ -47,54 +46,55 @@ var onceFF sync.Once
 // New creates a new go-feature-flag instance that retrieve the config from a YAML file
 // and return everything you need to manage your flags.
 func New(config Config) (*GoFeatureFlag, error) {
-	flagUpdater := *gocron.NewScheduler(time.UTC)
-
 	// The default value for poll interval is 60 seconds
 	if config.PollInterval == 0 {
 		config.PollInterval = 60
 	}
 
-	goFF := &GoFeatureFlag{
-		cache:       cache.New(config.Logger),
-		flagUpdater: flagUpdater,
-		config:      config,
+	// Check that value is not negative
+	if config.PollInterval < 0 {
+		return nil, fmt.Errorf("%d is not a valid PollInterval value, it need to be > 0", config.PollInterval)
 	}
 
-	err := goFF.startUpdater()
-	if err != nil {
-		return nil, err
+	goFF := &GoFeatureFlag{
+		cache:     cache.New(config.Logger),
+		config:    config,
+		bgUpdater: newBackgroundUpdater(config.PollInterval),
 	}
+
+	// fail if we cannot retrieve the flags the 1st time
+	err := retrieveFlagsAndUpdateCache(goFF.config, goFF.cache)
+	if err != nil {
+		return nil, fmt.Errorf("impossible to retrieve the flags, please check your configuration: %v", err)
+	}
+
+	// start the flag update in background
+	go goFF.startFlagUpdaterDaemon()
 
 	return goFF, nil
 }
 
 func (g *GoFeatureFlag) Close() {
+	// clear the cache
 	g.cache.Close()
-	g.flagUpdater.Stop()
+
+	// stop the background updater
+	g.bgUpdater.close()
 }
 
-func (g *GoFeatureFlag) startUpdater() error {
-	// fail if we cannot retrieve the flags the 1st time
-	err := retrieveFlagsAndUpdateCache(g.config, g.cache)
-	if err != nil {
-		return fmt.Errorf("impossible to retrieve the flags, please check your configuration: %v", err)
+// startFlagUpdaterDaemon is the daemon that refresh the cache every X seconds.
+func (g *GoFeatureFlag) startFlagUpdaterDaemon() {
+	for {
+		select {
+		case <-g.bgUpdater.ticker.C:
+			err := retrieveFlagsAndUpdateCache(g.config, g.cache)
+			if err != nil && g.config.Logger != nil {
+				g.config.Logger.Printf("[%v] error while updating the cache: %v\n", time.Now().Format(time.RFC3339), err)
+			}
+		case <-g.bgUpdater.updaterChan:
+			return
+		}
 	}
-
-	if g.config.PollInterval < 0 {
-		return fmt.Errorf("%d is not a valid PollInterval value, it need to be > 0", g.config.PollInterval)
-	}
-
-	// start flag updater
-	_, err = g.flagUpdater.
-		Every(uint64(g.config.PollInterval)).
-		Seconds().
-		Do(retrieveFlagsAndUpdateCache, g.config, g.cache)
-
-	if err != nil {
-		return fmt.Errorf("impossible to launch background updater: %v", err)
-	}
-	g.flagUpdater.StartAsync()
-	return nil
 }
 
 // retrieveFlagsAndUpdateCache is called every X seconds to refresh the cache flag.
