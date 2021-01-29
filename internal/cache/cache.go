@@ -45,7 +45,7 @@ func (c *cacheImpl) UpdateCache(loadedFlags []byte) error {
 		// copy cache for difference checks async
 		cacheCopy := c.getCacheCopy()
 		c.waitGroup.Add(1)
-		go c.logFlagChangesRoutine(cacheCopy, newCache)
+		go c.notifyFlagsChanges(cacheCopy, newCache)
 	}
 
 	c.mutex.Lock()
@@ -87,9 +87,9 @@ func (c *cacheImpl) GetFlag(key string) (flags.Flag, error) {
 	return flag, nil
 }
 
-func (c *cacheImpl) logFlagChangesRoutine(oldCache map[string]flags.Flag, newCache map[string]flags.Flag) {
+func (c *cacheImpl) notifyFlagsChanges(oldCache map[string]flags.Flag, newCache map[string]flags.Flag) {
+	defer c.waitGroup.Done()
 	c.logFlagChanges(oldCache, newCache)
-	c.waitGroup.Done()
 }
 
 // logFlagChanges is logging if something has changed in your flag config file
