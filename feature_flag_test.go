@@ -15,6 +15,7 @@ import (
 func TestStartWithoutRetriever(t *testing.T) {
 	_, err := New(Config{
 		PollInterval: 60,
+		Logger:       log.New(os.Stdout, "", 0),
 	})
 	assert.Error(t, err)
 	ff = nil
@@ -24,6 +25,7 @@ func TestStartWithNegativeInterval(t *testing.T) {
 	_, err := New(Config{
 		PollInterval: -60,
 		Retriever:    &FileRetriever{Path: "testdata/test.yaml"},
+		Logger:       log.New(os.Stdout, "", 0),
 	})
 	assert.Error(t, err)
 	ff = nil
@@ -53,6 +55,7 @@ func TestS3RetrieverReturnError(t *testing.T) {
 			Item:      "unknown-item",
 			AwsConfig: aws.Config{},
 		},
+		Logger: log.New(os.Stdout, "", 0),
 	})
 
 	assert.Error(t, err)
@@ -102,6 +105,7 @@ func TestUpdateFlag(t *testing.T) {
 	gffClient1, _ := New(Config{
 		PollInterval: 1,
 		Retriever:    &FileRetriever{Path: flagFile.Name()},
+		Logger:       log.New(os.Stdout, "", 0),
 	})
 	defer gffClient1.Close()
 
@@ -124,4 +128,12 @@ func TestUpdateFlag(t *testing.T) {
 
 	flagValue, _ = gffClient1.BoolVariation("test-flag", ffuser.NewUser("random-key"), false)
 	assert.False(t, flagValue)
+
+	// remove file we should still take the last version in consideration
+	os.Remove(flagFile.Name())
+	time.Sleep(2 * time.Second)
+
+	flagValue, _ = gffClient1.BoolVariation("test-flag", ffuser.NewUser("random-key"), false)
+	assert.False(t, flagValue)
 }
+

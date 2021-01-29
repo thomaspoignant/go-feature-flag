@@ -76,7 +76,7 @@ func Test_FlagCache(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fCache := New(log.New(os.Stdout, "", 0))
+			fCache := New(NewService([]Notifier{}))
 			err := fCache.UpdateCache(tt.args.loadedFlags)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("UpdateCache() error = %v, wantErr %v", err, tt.wantErr)
@@ -201,15 +201,13 @@ add-test-flag:
 			fCache := cacheImpl{
 				flagsCache: oldValue,
 				mutex:      sync.RWMutex{},
-				Logger:     log.New(logOutput, "", 0),
-				waitGroup:  sync.WaitGroup{},
+				notificationService: NewService([]Notifier{
+					&LogNotifier{Logger: log.New(logOutput, "", 0)},
+				}),
 			}
 
-			var newValue map[string]flags.Flag
-			_ = yaml.Unmarshal(tt.args.loadedFlags, &newValue)
-
-			// update the cache file
-			fCache.logFlagChanges(oldValue, newValue)
+			// log cache differences
+			_ = fCache.UpdateCache(tt.args.loadedFlags)
 
 			// get the logs
 			log, _ := ioutil.ReadFile(logOutput.Name())
@@ -218,47 +216,6 @@ add-test-flag:
 			// Remove temp log file
 			os.Remove(logOutput.Name())
 			fCache.Close()
-		})
-	}
-}
-
-func Test_cacheImpl_getCacheCopy(t *testing.T) {
-	type fields struct {
-		flagsCache map[string]flags.Flag
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		want   map[string]flags.Flag
-	}{
-		{
-			name: "Copy with values",
-			fields: fields{
-				flagsCache: map[string]flags.Flag{
-					"test": {
-						Disable:    false,
-						Rule:       "key eq \"toto\"",
-						Percentage: 20,
-						True:       true,
-						False:      false,
-						Default:    true,
-					},
-				},
-			},
-		},
-		{
-			name: "Copy without value",
-			fields: fields{
-				flagsCache: map[string]flags.Flag{},
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			c := &cacheImpl{
-				flagsCache: tt.fields.flagsCache,
-			}
-			assert.Equal(t, c.flagsCache, c.getCacheCopy())
 		})
 	}
 }
