@@ -63,7 +63,7 @@ func (c *notificationService) getDifferences(
 
 	for key := range newCache {
 		if _, inOldCache := oldCache[key]; !inOldCache {
-			diff.Added[key] = oldCache[key]
+			diff.Added[key] = newCache[key]
 		}
 	}
 	return diff

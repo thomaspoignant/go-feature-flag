@@ -128,12 +128,36 @@ func TestUpdateFlag(t *testing.T) {
 
 	flagValue, _ = gffClient1.BoolVariation("test-flag", ffuser.NewUser("random-key"), false)
 	assert.False(t, flagValue)
+}
+
+func TestImpossibleToLoadfile(t *testing.T) {
+	initialFileContent := `test-flag:
+  rule: key eq "random-key"
+  percentage: 100
+  true: true
+  false: false
+  default: false`
+
+	flagFile, _ := ioutil.TempFile("", "")
+	_ = ioutil.WriteFile(flagFile.Name(), []byte(initialFileContent), 0600)
+
+	gffClient1, _ := New(Config{
+		PollInterval: 1,
+		Retriever:    &FileRetriever{Path: flagFile.Name()},
+		Logger:       log.New(os.Stdout, "", 0),
+	})
+	defer gffClient1.Close()
+
+	flagValue, _ := gffClient1.BoolVariation("test-flag", ffuser.NewUser("random-key"), false)
+	assert.True(t, flagValue)
+
+	flagValue, _ = gffClient1.BoolVariation("test-flag", ffuser.NewUser("random-key"), false)
+	assert.True(t, flagValue)
 
 	// remove file we should still take the last version in consideration
 	os.Remove(flagFile.Name())
 	time.Sleep(2 * time.Second)
 
 	flagValue, _ = gffClient1.BoolVariation("test-flag", ffuser.NewUser("random-key"), false)
-	assert.False(t, flagValue)
+	assert.True(t, flagValue)
 }
-
