@@ -59,6 +59,25 @@ func TestGoFeatureFlag_getNotifiers(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "error in DNS",
+			fields: fields{
+				config: Config{
+					Logger: log.New(os.Stdout, "", 0),
+					Webhooks: []WebhookConfig{
+						{
+							PayloadURL: " https://example.com/hook",
+							Secret:     "Secret",
+							Meta: map[string]string{
+								"my-app":   "go-ff-test",
+								"hostname": hostname,
+							},
+						},
+					},
+				},
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
