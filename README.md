@@ -69,7 +69,7 @@ Example:
 ```go 
 ffclient.Init(ffclient.Config{ 
     PollInterval:   3,
-    Logger:         log.New(file, "/tmp/log", 0)
+    Logger:         log.New(file, "/tmp/log", 0),
     Context:        context.Background(),
     Retriever:      &ffclient.FileRetriever{Path: "testdata/test.yaml"},
     Webhooks:       []ffclient.WebhookConfig{
