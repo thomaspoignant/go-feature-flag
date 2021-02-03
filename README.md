@@ -284,6 +284,14 @@ ffclient.Config{
 }
 ```
 
+|   |   |   |
+|---|---|---|
+|`PayloadURL`   |![mandatory](https://img.shields.io/badge/-mandatory-red)   | The complete URL of your API *(we will send a POST request to this URL, [see format](#format))*  |
+|`Secret`   |![optional](https://img.shields.io/badge/-optional-green)   |  A secret key you can share with your webhook. We will use this key to sign the request *(see [signature section](#signature) for more details)*. |
+|`Meta`   |![optional](https://img.shields.io/badge/-optional-green)   |  A list of key value that will be add in your request, this is super usefull if you to add information on the current running instance of your app.<br/>*By default the hostname is always added in the meta informations.*|
+
+
+
 ### Format
 If you have configured a webhook, a POST request will be sent to the `PayloadURL` with a body in this format:
 
