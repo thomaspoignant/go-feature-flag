@@ -96,6 +96,34 @@ ffclient.Init(ffclient.Config{
 We can have only one source for the file, if you set multiple sources in your configuration, only one will be take in
 consideration.
 
+<details>
+<summary><h3>From GitHub</h3></summary>
+
+```go
+err := ffclient.Init(ffclient.Config{
+    PollInterval: 3,
+    Retriever: &ffclient.GithubRetriever{
+        RepositorySlug: "thomaspoignant/go-feature-flag",
+        Branch: "main",
+        FilePath: "testdata/test.yaml",
+        GithubToken: "XXXX",
+        Timeout: 2 * time.Second,
+    },
+})
+defer ffclient.Close()
+```
+To configure the access to your GitHub file:
+- **RepositorySlug**: your GitHub slug `org/repo-name`. **MANDATORY**
+- **FilePath**: the path of your file. **MANDATORY**
+- **Branch**: the branch where your file is *(default is `main`)*.
+- **GithubToken**: Github token is used to access a private repository, you need the `repo` permission *([how to create a GitHub token](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token))*.
+- **Timeout**: Timeout for the HTTP call (default is 10 seconds).
+
+:warning: GitHub has rate limits, so be sure to not reach them when setting your `PollInterval`.
+
+</details>
+
+
 ### From GitHub
 ```go
 err := ffclient.Init(ffclient.Config{
