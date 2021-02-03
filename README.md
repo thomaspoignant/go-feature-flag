@@ -97,7 +97,7 @@ We can have only one source for the file, if you set multiple sources in your co
 consideration.
 
 <details>
-<summary><h3>From GitHub</h3></summary>
+<summary><span style="font-size: 1.2em;font-style: bold;">From GitHub</span> <span style="font-size:0.8em;font-style: italic;">(click to see details)</span></summary>
 
 ```go
 err := ffclient.Init(ffclient.Config{
@@ -123,31 +123,9 @@ To configure the access to your GitHub file:
 
 </details>
 
+<details>
+<summary><span style="font-size: 1.2em;font-style: bold;">From an HTTP endpoint</span> <span style="font-size:0.8em;font-style: italic;">(click to see details)</span></summary>
 
-### From GitHub
-```go
-err := ffclient.Init(ffclient.Config{
-    PollInterval: 3,
-    Retriever: &ffclient.GithubRetriever{
-        RepositorySlug: "thomaspoignant/go-feature-flag",
-        Branch: "main",
-        FilePath: "testdata/test.yaml",
-        GithubToken: "XXXX",
-        Timeout: 2 * time.Second,
-    },
-})
-defer ffclient.Close()
-```
-To configure the access to your GitHub file:
-- **RepositorySlug**: your GitHub slug `org/repo-name`. **MANDATORY**
-- **FilePath**: the path of your file. **MANDATORY**
-- **Branch**: the branch where your file is *(default is `main`)*.
-- **GithubToken**: Github token is used to access a private repository, you need the `repo` permission *([how to create a GitHub token](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token))*.
-- **Timeout**: Timeout for the HTTP call (default is 10 seconds).
-
-:warning: GitHub has rate limits, so be sure to not reach them when setting your `PollInterval`.
-
-### From an HTTP endpoint
 ```go
 err := ffclient.Init(ffclient.Config{
     PollInterval: 3,
@@ -166,7 +144,11 @@ To configure your HTTP endpoint:
 - **Header**: Header you should pass while calling the endpoint *(useful for authorization)*.
 - **Timeout**: Timeout for the HTTP call (default is 10 seconds).
 
-### From a S3 Bucket
+</details>
+
+<details>
+<summary><span style="font-size: 1.2em;font-style: bold;">From a S3 Bucket</span> <span style="font-size:0.8em;font-style: italic;">(click to see details)</span></summary>
+
 ```go
 err := ffclient.Init(ffclient.Config{
     PollInterval: 3,
@@ -186,7 +168,11 @@ To configure your S3 file location:
 - **Item**: The location of your file in the bucket. **MANDATORY**
 - **AwsConfig**: An instance of `aws.Config` that configure your access to AWS *(see [this documentation for more info](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html))*. **MANDATORY**
 
-### From a file
+</details>
+
+<details>
+<summary><span style="font-size: 1.2em;font-style: bold;">From a file</span> <span style="font-size:0.8em;font-style: italic;">(click to see details)</span></summary>
+
 ```go
 err := ffclient.Init(ffclient.Config{
     PollInterval: 3,
@@ -201,7 +187,7 @@ To configure your File retriever:
 - **Path**: location of your file. **MANDATORY**
 
 *I will not recommend using a file to store your flags except if it is in a shared folder for all your services.*
-
+</details>
 
 ## Flags file format
 `go-feature-flag` is to avoid to have to host a backend to manage your feature flags and to keep them centralized by using a file a source.  
