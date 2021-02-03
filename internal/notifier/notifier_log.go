@@ -1,16 +1,18 @@
-package cache
+package notifier
 
 import (
 	"log"
 	"sync"
 	"time"
+
+	"github.com/thomaspoignant/go-feature-flag/internal/model"
 )
 
 type LogNotifier struct {
 	Logger *log.Logger
 }
 
-func (c *LogNotifier) Notify(diff diffCache, wg *sync.WaitGroup) {
+func (c *LogNotifier) Notify(diff model.DiffCache, wg *sync.WaitGroup) {
 	defer wg.Done()
 	date := time.Now().Format(time.RFC3339)
 	for key := range diff.Deleted {

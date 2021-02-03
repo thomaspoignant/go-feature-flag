@@ -10,16 +10,16 @@ import (
 
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
-	"github.com/thomaspoignant/go-feature-flag/internal/flags"
+	"github.com/thomaspoignant/go-feature-flag/internal/model"
 	"github.com/thomaspoignant/go-feature-flag/testutil"
 )
 
 type cacheMock struct {
-	flag flags.Flag
+	flag model.Flag
 	err  error
 }
 
-func NewCacheMock(flag flags.Flag, err error) cache.Cache {
+func NewCacheMock(flag model.Flag, err error) cache.Cache {
 	return &cacheMock{
 		flag: flag,
 		err:  err,
@@ -29,7 +29,7 @@ func (c *cacheMock) UpdateCache(loadedFlags []byte) error {
 	return nil
 }
 func (c *cacheMock) Close() {}
-func (c *cacheMock) GetFlag(key string) (flags.Flag, error) {
+func (c *cacheMock) GetFlag(key string) (model.Flag, error) {
 	return c.flag, c.err
 }
 
@@ -53,7 +53,7 @@ func TestBoolVariation(t *testing.T) {
 				flagKey:      "disable-flag",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: true,
-				cacheMock: NewCacheMock(flags.Flag{
+				cacheMock: NewCacheMock(model.Flag{
 					Disable: true,
 				}, nil),
 			},
@@ -68,7 +68,7 @@ func TestBoolVariation(t *testing.T) {
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: true,
 				cacheMock: NewCacheMock(
-					flags.Flag{},
+					model.Flag{},
 					errors.New("impossible to read the toggle before the initialisation")),
 			},
 			want:        true,
@@ -81,7 +81,7 @@ func TestBoolVariation(t *testing.T) {
 				flagKey:      "key-not-exist",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: true,
-				cacheMock:    NewCacheMock(flags.Flag{}, errors.New("flag [key-not-exist] does not exists")),
+				cacheMock:    NewCacheMock(model.Flag{}, errors.New("flag [key-not-exist] does not exists")),
 			},
 			want:        true,
 			wantErr:     true,
@@ -93,7 +93,7 @@ func TestBoolVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: true,
-				cacheMock: NewCacheMock(flags.Flag{
+				cacheMock: NewCacheMock(model.Flag{
 					Rule:       "key eq \"key\"",
 					Percentage: 100,
 					Default:    true,
@@ -111,7 +111,7 @@ func TestBoolVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewAnonymousUser("random-key"),
 				defaultValue: true,
-				cacheMock: NewCacheMock(flags.Flag{
+				cacheMock: NewCacheMock(model.Flag{
 					Rule:       "key eq \"random-key\"",
 					Percentage: 100,
 					Default:    false,
@@ -129,7 +129,7 @@ func TestBoolVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewAnonymousUser("random-key-ssss1"),
 				defaultValue: true,
-				cacheMock: NewCacheMock(flags.Flag{
+				cacheMock: NewCacheMock(model.Flag{
 					Rule:       "anonymous eq true",
 					Percentage: 50,
 					Default:    true,
@@ -147,7 +147,7 @@ func TestBoolVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewUser("random-key-ssss1"),
 				defaultValue: true,
-				cacheMock: NewCacheMock(flags.Flag{
+				cacheMock: NewCacheMock(model.Flag{
 					Percentage: 100,
 					Default:    "xxx",
 					True:       "xxx",
@@ -215,7 +215,7 @@ func TestFloat64Variation(t *testing.T) {
 				flagKey:      "disable-flag",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: 120.12,
-				cacheMock: NewCacheMock(flags.Flag{
+				cacheMock: NewCacheMock(model.Flag{
 					Disable: true,
 				}, nil),
 			},
@@ -230,7 +230,7 @@ func TestFloat64Variation(t *testing.T) {
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: 118.12,
 				cacheMock: NewCacheMock(
-					flags.Flag{},
+					model.Flag{},
 					errors.New("impossible to read the toggle before the initialisation")),
 			},
 			want:        118.12,
@@ -243,7 +243,7 @@ func TestFloat64Variation(t *testing.T) {
 				flagKey:      "key-not-exist",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: 118.12,
-				cacheMock:    NewCacheMock(flags.Flag{}, errors.New("flag [key-not-exist] does not exists")),
+				cacheMock:    NewCacheMock(model.Flag{}, errors.New("flag [key-not-exist] does not exists")),
 			},
 			want:        118.12,
 			wantErr:     true,
@@ -255,7 +255,7 @@ func TestFloat64Variation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: 118.12,
-				cacheMock: NewCacheMock(flags.Flag{
+				cacheMock: NewCacheMock(model.Flag{
 					Rule:       "key eq \"key\"",
 					Percentage: 100,
 					Default:    119.12,
@@ -273,7 +273,7 @@ func TestFloat64Variation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewAnonymousUser("random-key"),
 				defaultValue: 118.12,
-				cacheMock: NewCacheMock(flags.Flag{
+				cacheMock: NewCacheMock(model.Flag{
 					Rule:       "key eq \"random-key\"",
 					Percentage: 100,
 					Default:    119.12,
@@ -291,7 +291,7 @@ func TestFloat64Variation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewAnonymousUser("random-key-ssss1"),
 				defaultValue: 118.12,
-				cacheMock: NewCacheMock(flags.Flag{
+				cacheMock: NewCacheMock(model.Flag{
 					Rule:       "anonymous eq true",
 					Percentage: 50,
 					Default:    119.12,
@@ -309,7 +309,7 @@ func TestFloat64Variation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewUser("random-key-ssss1"),
 				defaultValue: 118.12,
-				cacheMock: NewCacheMock(flags.Flag{
+				cacheMock: NewCacheMock(model.Flag{
 					Percentage: 100,
 					Default:    "xxx",
 					True:       "xxx",
@@ -377,7 +377,7 @@ func TestJSONArrayVariation(t *testing.T) {
 				flagKey:      "disable-flag",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: []interface{}{"toto"},
-				cacheMock: NewCacheMock(flags.Flag{
+				cacheMock: NewCacheMock(model.Flag{
 					Disable: true,
 				}, nil),
 			},
@@ -392,7 +392,7 @@ func TestJSONArrayVariation(t *testing.T) {
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: []interface{}{"toto"},
 				cacheMock: NewCacheMock(
-					flags.Flag{},
+					model.Flag{},
 					errors.New("impossible to read the toggle before the initialisation")),
 			},
 			want:        []interface{}{"toto"},
@@ -405,7 +405,7 @@ func TestJSONArrayVariation(t *testing.T) {
 				flagKey:      "key-not-exist",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: []interface{}{"toto"},
-				cacheMock:    NewCacheMock(flags.Flag{}, errors.New("flag [key-not-exist] does not exists")),
+				cacheMock:    NewCacheMock(model.Flag{}, errors.New("flag [key-not-exist] does not exists")),
 			},
 			want:        []interface{}{"toto"},
 			wantErr:     true,
@@ -417,7 +417,7 @@ func TestJSONArrayVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: []interface{}{"toto"},
-				cacheMock: NewCacheMock(flags.Flag{
+				cacheMock: NewCacheMock(model.Flag{
 					Rule:       "key eq \"key\"",
 					Percentage: 100,
 					Default:    []interface{}{"default"},
@@ -435,7 +435,7 @@ func TestJSONArrayVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewAnonymousUser("random-key"),
 				defaultValue: []interface{}{"toto"},
-				cacheMock: NewCacheMock(flags.Flag{
+				cacheMock: NewCacheMock(model.Flag{
 					Rule:       "key eq \"random-key\"",
 					Percentage: 100,
 					Default:    []interface{}{"default"},
@@ -453,7 +453,7 @@ func TestJSONArrayVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewAnonymousUser("random-key-ssss1"),
 				defaultValue: []interface{}{"toto"},
-				cacheMock: NewCacheMock(flags.Flag{
+				cacheMock: NewCacheMock(model.Flag{
 					Rule:       "anonymous eq true",
 					Percentage: 50,
 					Default:    []interface{}{"default"},
@@ -471,7 +471,7 @@ func TestJSONArrayVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewUser("random-key-ssss1"),
 				defaultValue: []interface{}{"toto"},
-				cacheMock: NewCacheMock(flags.Flag{
+				cacheMock: NewCacheMock(model.Flag{
 					Percentage: 100,
 					Default:    "xxx",
 					True:       "xxx",
@@ -539,7 +539,7 @@ func TestJSONVariation(t *testing.T) {
 				flagKey:      "disable-flag",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: map[string]interface{}{"default-notkey": true},
-				cacheMock: NewCacheMock(flags.Flag{
+				cacheMock: NewCacheMock(model.Flag{
 					Disable: true,
 				}, nil),
 			},
@@ -554,7 +554,7 @@ func TestJSONVariation(t *testing.T) {
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: map[string]interface{}{"default-notkey": true},
 				cacheMock: NewCacheMock(
-					flags.Flag{},
+					model.Flag{},
 					errors.New("impossible to read the toggle before the initialisation")),
 			},
 			want:        map[string]interface{}{"default-notkey": true},
@@ -567,7 +567,7 @@ func TestJSONVariation(t *testing.T) {
 				flagKey:      "key-not-exist",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: map[string]interface{}{"default-notkey": true},
-				cacheMock:    NewCacheMock(flags.Flag{}, errors.New("flag [key-not-exist] does not exists")),
+				cacheMock:    NewCacheMock(model.Flag{}, errors.New("flag [key-not-exist] does not exists")),
 			},
 			want:        map[string]interface{}{"default-notkey": true},
 			wantErr:     true,
@@ -579,7 +579,7 @@ func TestJSONVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: map[string]interface{}{"default-notkey": true},
-				cacheMock: NewCacheMock(flags.Flag{
+				cacheMock: NewCacheMock(model.Flag{
 					Rule:       "key eq \"key\"",
 					Percentage: 100,
 					Default:    map[string]interface{}{"default": true},
@@ -597,7 +597,7 @@ func TestJSONVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewAnonymousUser("random-key"),
 				defaultValue: map[string]interface{}{"default-notkey": true},
-				cacheMock: NewCacheMock(flags.Flag{
+				cacheMock: NewCacheMock(model.Flag{
 					Rule:       "key eq \"random-key\"",
 					Percentage: 100,
 					Default:    map[string]interface{}{"default": true},
@@ -615,7 +615,7 @@ func TestJSONVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewAnonymousUser("random-key-ssss1"),
 				defaultValue: map[string]interface{}{"default-notkey": true},
-				cacheMock: NewCacheMock(flags.Flag{
+				cacheMock: NewCacheMock(model.Flag{
 					Rule:       "anonymous eq true",
 					Percentage: 50,
 					Default:    map[string]interface{}{"default": true},
@@ -633,7 +633,7 @@ func TestJSONVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewUser("random-key-ssss1"),
 				defaultValue: map[string]interface{}{"default-notkey": true},
-				cacheMock: NewCacheMock(flags.Flag{
+				cacheMock: NewCacheMock(model.Flag{
 					Percentage: 100,
 					Default:    "xxx",
 					True:       "xxx",
@@ -701,7 +701,7 @@ func TestStringVariation(t *testing.T) {
 				flagKey:      "disable-flag",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: "default-notkey",
-				cacheMock: NewCacheMock(flags.Flag{
+				cacheMock: NewCacheMock(model.Flag{
 					Disable: true,
 				}, nil),
 			},
@@ -716,7 +716,7 @@ func TestStringVariation(t *testing.T) {
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: "default-notkey",
 				cacheMock: NewCacheMock(
-					flags.Flag{},
+					model.Flag{},
 					errors.New("impossible to read the toggle before the initialisation")),
 			},
 			want:        "default-notkey",
@@ -729,7 +729,7 @@ func TestStringVariation(t *testing.T) {
 				flagKey:      "key-not-exist",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: "default-notkey",
-				cacheMock:    NewCacheMock(flags.Flag{}, errors.New("flag [key-not-exist] does not exists")),
+				cacheMock:    NewCacheMock(model.Flag{}, errors.New("flag [key-not-exist] does not exists")),
 			},
 			want:        "default-notkey",
 			wantErr:     true,
@@ -742,7 +742,7 @@ func TestStringVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: "default-notkey",
-				cacheMock: NewCacheMock(flags.Flag{
+				cacheMock: NewCacheMock(model.Flag{
 					Rule:       "key eq \"key\"",
 					Percentage: 100,
 					Default:    "default",
@@ -760,7 +760,7 @@ func TestStringVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewAnonymousUser("random-key"),
 				defaultValue: "default-notkey",
-				cacheMock: NewCacheMock(flags.Flag{
+				cacheMock: NewCacheMock(model.Flag{
 					Rule:       "key eq \"random-key\"",
 					Percentage: 100,
 					Default:    "default",
@@ -778,7 +778,7 @@ func TestStringVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewAnonymousUser("random-key-ssss1"),
 				defaultValue: "default-notkey",
-				cacheMock: NewCacheMock(flags.Flag{
+				cacheMock: NewCacheMock(model.Flag{
 					Rule:       "anonymous eq true",
 					Percentage: 50,
 					Default:    "default",
@@ -796,7 +796,7 @@ func TestStringVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewUser("random-key-ssss1"),
 				defaultValue: "default-notkey",
-				cacheMock: NewCacheMock(flags.Flag{
+				cacheMock: NewCacheMock(model.Flag{
 					Rule:       "anonymous eq true",
 					Percentage: 50,
 					Default:    111,
@@ -864,7 +864,7 @@ func TestIntVariation(t *testing.T) {
 				flagKey:      "disable-flag",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: 125,
-				cacheMock: NewCacheMock(flags.Flag{
+				cacheMock: NewCacheMock(model.Flag{
 					Disable: true,
 				}, nil),
 			},
@@ -879,7 +879,7 @@ func TestIntVariation(t *testing.T) {
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: 118,
 				cacheMock: NewCacheMock(
-					flags.Flag{},
+					model.Flag{},
 					errors.New("impossible to read the toggle before the initialisation")),
 			},
 			want:        118,
@@ -892,7 +892,7 @@ func TestIntVariation(t *testing.T) {
 				flagKey:      "key-not-exist",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: 118,
-				cacheMock:    NewCacheMock(flags.Flag{}, errors.New("flag [key-not-exist] does not exists")),
+				cacheMock:    NewCacheMock(model.Flag{}, errors.New("flag [key-not-exist] does not exists")),
 			},
 			want:        118,
 			wantErr:     true,
@@ -904,7 +904,7 @@ func TestIntVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: 118,
-				cacheMock: NewCacheMock(flags.Flag{
+				cacheMock: NewCacheMock(model.Flag{
 					Rule:       "key eq \"key\"",
 					Percentage: 100,
 					Default:    119,
@@ -922,7 +922,7 @@ func TestIntVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewAnonymousUser("random-key"),
 				defaultValue: 118,
-				cacheMock: NewCacheMock(flags.Flag{
+				cacheMock: NewCacheMock(model.Flag{
 					Rule:       "key eq \"random-key\"",
 					Percentage: 100,
 					Default:    119,
@@ -940,7 +940,7 @@ func TestIntVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewAnonymousUser("random-key-ssss1"),
 				defaultValue: 118,
-				cacheMock: NewCacheMock(flags.Flag{
+				cacheMock: NewCacheMock(model.Flag{
 					Rule:       "anonymous eq true",
 					Percentage: 50,
 					Default:    119,
@@ -958,7 +958,7 @@ func TestIntVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewUser("random-key-ssss1"),
 				defaultValue: 118,
-				cacheMock: NewCacheMock(flags.Flag{
+				cacheMock: NewCacheMock(model.Flag{
 					Rule:       "anonymous eq true",
 					Percentage: 50,
 					Default:    "default",

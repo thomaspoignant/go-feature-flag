@@ -138,7 +138,7 @@ func TestImpossibleToLoadfile(t *testing.T) {
   false: false
   default: false`
 
-	flagFile, _ := ioutil.TempFile("", "")
+	flagFile, _ := ioutil.TempFile("", "impossible")
 	_ = ioutil.WriteFile(flagFile.Name(), []byte(initialFileContent), 0600)
 
 	gffClient1, _ := New(Config{
@@ -160,4 +160,24 @@ func TestImpossibleToLoadfile(t *testing.T) {
 
 	flagValue, _ = gffClient1.BoolVariation("test-flag", ffuser.NewUser("random-key"), false)
 	assert.True(t, flagValue)
+}
+
+func TestWrongWebhookConfig(t *testing.T) {
+	_, err := New(Config{
+		PollInterval: 5,
+		Retriever:    &FileRetriever{Path: "testdata/test.yaml"},
+		Webhooks: []WebhookConfig{
+			{
+				PayloadURL: " https://example.com/hook",
+				Secret:     "Secret",
+				Meta: map[string]string{
+					"my-app": "go-ff-test",
+				},
+			},
+		},
+	})
+
+	assert.Errorf(t, err, "wrong url should return an error")
+	assert.Equal(t, err.Error(), "wrong configuration in your webhook: parse \" https://example.com/hook\": "+
+		"first path segment in URL cannot contain colon")
 }

@@ -6,13 +6,13 @@ import (
 	"gopkg.in/yaml.v3"
 	"sync"
 
-	"github.com/thomaspoignant/go-feature-flag/internal/flags"
+	"github.com/thomaspoignant/go-feature-flag/internal/model"
 )
 
 type Cache interface {
 	UpdateCache(loadedFlags []byte) error
 	Close()
-	GetFlag(key string) (flags.Flag, error)
+	GetFlag(key string) (model.Flag, error)
 }
 
 type cacheImpl struct {
@@ -23,7 +23,7 @@ type cacheImpl struct {
 
 func New(notificationService Service) Cache {
 	return &cacheImpl{
-		flagsCache:          make(map[string]flags.Flag),
+		flagsCache:          make(map[string]model.Flag),
 		mutex:               sync.RWMutex{},
 		notificationService: notificationService,
 	}
@@ -56,17 +56,17 @@ func (c *cacheImpl) Close() {
 	c.notificationService.Close()
 }
 
-func (c *cacheImpl) GetFlag(key string) (flags.Flag, error) {
+func (c *cacheImpl) GetFlag(key string) (model.Flag, error) {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
 	if c.flagsCache == nil {
-		return flags.Flag{}, errors.New("impossible to read the toggle before the initialisation")
+		return model.Flag{}, errors.New("impossible to read the toggle before the initialisation")
 	}
 
 	flag, ok := c.flagsCache[key]
 	if !ok {
-		return flags.Flag{}, fmt.Errorf("flag [%v] does not exists", key)
+		return model.Flag{}, fmt.Errorf("flag [%v] does not exists", key)
 	}
 	return flag, nil
 }

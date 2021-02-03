@@ -69,8 +69,18 @@ Example:
 ```go 
 ffclient.Init(ffclient.Config{ 
     PollInterval:   3,
-    Logger:         log.New(file, "/tmp/log", 0)
-    Context         context.Background(),
+    Logger:         log.New(file, "/tmp/log", 0),
+    Context:        context.Background(),
+    Retriever:      &ffclient.FileRetriever{Path: "testdata/test.yaml"},
+    Webhooks:       []ffclient.WebhookConfig{
+        {
+            PayloadURL: " https://example.com/hook",
+            Secret:     "Secret",
+            Meta: map[string]string{
+                "app.name": "my app",
+            },
+        },
+    },
 })
 ```
 
@@ -80,7 +90,7 @@ ffclient.Init(ffclient.Config{
 |`Logger`   | Logger used to log what `go-feature-flag` is doing.<br />If no logger is provided the module will not log anything.|
 |`Context`  | The context used by the retriever.<br />The default value is `context.Background()`.|
 |`Retriever`  | The configuration retriever you want to use to get your flag file *(see [Where do I store my flags file](#where-do-i-store-my-flags-file) for the configuration details)*.|
-
+|`Webhooks` | List of webhooks to call when your flag file has changed *(see [webhook section](#webhook) for more details)*.|
 ## Where do I store my flags file
 `go-feature-flags` support different ways of retrieving the flag file.  
 We can have only one source for the file, if you set multiple sources in your configuration, only one will be take in
@@ -255,6 +265,111 @@ Variation methods take the feature flag key, a User, and a default value.
 The default value is return when an error is encountered _(`ffclient` not initialized, variation with wrong type, flag does not exist ...)._  
 In the example, if the flag `your.feature.key` does not exists, result will be `false`.  
 Not that you will always have a usable value in the result. 
+
+## Webhook
+If you want to be informed when a flag has changed outside of your app, you can configure a webhook.
+
+```go
+ffclient.Config{ 
+    // ...
+    Webhooks: []ffclient.WebhookConfig{
+        {
+            PayloadURL: " https://example.com/hook",
+            Secret:     "Secret",
+            Meta: map[string]string{
+                "app.name": "my app",
+            },
+        },
+    },
+}
+```
+
+|   |   |   |
+|---|---|---|
+|`PayloadURL`   |![mandatory](https://img.shields.io/badge/-mandatory-red)   | The complete URL of your API *(we will send a POST request to this URL, [see format](#format))*  |
+|`Secret`   |![optional](https://img.shields.io/badge/-optional-green)   |  A secret key you can share with your webhook. We will use this key to sign the request *(see [signature section](#signature) for more details)*. |
+|`Meta`   |![optional](https://img.shields.io/badge/-optional-green)   |  A list of key value that will be add in your request, this is super usefull if you to add information on the current running instance of your app.<br/>*By default the hostname is always added in the meta informations.*|
+
+
+
+### Format
+If you have configured a webhook, a POST request will be sent to the `PayloadURL` with a body in this format:
+
+```json
+{
+    "meta": {
+        "hostname": "server01",
+        // ...
+    },
+    "flags": {
+        "deleted": {}, // map of your deleted flags
+        "added": {}, // map of your added flags
+        "updated": {
+            "flag-name": { // an object that contains old and new value
+                "old_value": {},
+                "new_value": {}
+            }
+        }
+    }
+}
+```
+
+<details>
+<summary><b>Example</b></summary>
+  
+ ```json
+{
+   "meta":{
+       "hostname": "server01"
+   },
+   "flags":{
+       "deleted": {
+           "test-flag": {
+               "rule": "key eq \"random-key\"",
+               "percentage": 100,
+               "true": true,
+               "false": false,
+               "default": false
+           }
+       },
+       "added": {
+           "test-flag3": {
+               "percentage": 5,
+               "true": "test",
+               "false": "false",
+               "default": "default"
+           }
+       },
+       "updated": {
+           "test-flag2": {
+               "old_value": {
+                   "rule": "key eq \"not-a-key\"",
+                   "percentage": 100,
+                   "true": true,
+                   "false": false,
+                   "default": false
+               },
+               "new_value": {
+                   "disable": true,
+                   "rule": "key eq \"not-a-key\"",
+                   "percentage": 100,
+                   "true": true,
+                   "false": false,
+                   "default": false
+               }
+           }
+       }
+   }
+}
+```
+</details>
+
+### Signature
+This header **`X-Hub-Signature-256`** is sent if the webhook is configured with a secret. This is the HMAC hex digest of the request body, and is generated using the SHA-256 hash function and the secret as the HMAC key.
+
+:warning: **The recommendation is to always use the `Secret` and on your API/webook always verify the signature key to be sure that you don't have a man in the middle attack.**
+
+---
 
 ## Multiple flag configurations
 `go-feature-flag` comes ready to use out of the box by calling the `Init` function and after that it will be available everywhere.

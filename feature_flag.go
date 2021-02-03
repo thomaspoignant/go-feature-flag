@@ -56,14 +56,20 @@ func New(config Config) (*GoFeatureFlag, error) {
 		return nil, fmt.Errorf("%d is not a valid PollInterval value, it need to be > 0", config.PollInterval)
 	}
 
+	notifiers, err := getNotifiers(config)
+	if err != nil {
+		return nil, fmt.Errorf("wrong configuration in your webhook: %v", err)
+	}
+	notificationService := cache.NewNotificationService(notifiers)
+
 	goFF := &GoFeatureFlag{
 		config:    config,
 		bgUpdater: newBackgroundUpdater(config.PollInterval),
+		cache:     cache.New(notificationService),
 	}
-	goFF.cache = cache.New(cache.NewService(goFF.getNotifiers()))
 
 	// fail if we cannot retrieve the flags the 1st time
-	err := retrieveFlagsAndUpdateCache(goFF.config, goFF.cache)
+	err = retrieveFlagsAndUpdateCache(goFF.config, goFF.cache)
 	if err != nil {
 		return nil, fmt.Errorf("impossible to retrieve the flags, please check your configuration: %v", err)
 	}
@@ -74,6 +80,7 @@ func New(config Config) (*GoFeatureFlag, error) {
 	return goFF, nil
 }
 
+// Close wait until thread are done
 func (g *GoFeatureFlag) Close() {
 	// clear the cache
 	g.cache.Close()
@@ -95,15 +102,6 @@ func (g *GoFeatureFlag) startFlagUpdaterDaemon() {
 			return
 		}
 	}
-}
-
-// getNotifiers is creating Notifier from the config
-func (g *GoFeatureFlag) getNotifiers() []cache.Notifier {
-	var notifiers []cache.Notifier
-	if g.config.Logger != nil {
-		notifiers = append(notifiers, &cache.LogNotifier{Logger: g.config.Logger})
-	}
-	return notifiers
 }
 
 // retrieveFlagsAndUpdateCache is called every X seconds to refresh the cache flag.
