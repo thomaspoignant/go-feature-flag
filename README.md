@@ -96,7 +96,9 @@ ffclient.Init(ffclient.Config{
 We can have only one source for the file, if you set multiple sources in your configuration, only one will be take in
 consideration.
 
-### From GitHub
+<details>
+<summary><span style="font-size: 1.2em;font-style: bold;">From GitHub</span> <span style="font-size:0.8em;font-style: italic;">(click to see details)</span></summary>
+
 ```go
 err := ffclient.Init(ffclient.Config{
     PollInterval: 3,
@@ -119,7 +121,11 @@ To configure the access to your GitHub file:
 
 :warning: GitHub has rate limits, so be sure to not reach them when setting your `PollInterval`.
 
-### From an HTTP endpoint
+</details>
+
+<details>
+<summary><span style="font-size: 1.2em;font-style: bold;">From an HTTP endpoint</span> <span style="font-size:0.8em;font-style: italic;">(click to see details)</span></summary>
+
 ```go
 err := ffclient.Init(ffclient.Config{
     PollInterval: 3,
@@ -138,7 +144,11 @@ To configure your HTTP endpoint:
 - **Header**: Header you should pass while calling the endpoint *(useful for authorization)*.
 - **Timeout**: Timeout for the HTTP call (default is 10 seconds).
 
-### From a S3 Bucket
+</details>
+
+<details>
+<summary><span style="font-size: 1.2em;font-style: bold;">From a S3 Bucket</span> <span style="font-size:0.8em;font-style: italic;">(click to see details)</span></summary>
+
 ```go
 err := ffclient.Init(ffclient.Config{
     PollInterval: 3,
@@ -158,7 +168,11 @@ To configure your S3 file location:
 - **Item**: The location of your file in the bucket. **MANDATORY**
 - **AwsConfig**: An instance of `aws.Config` that configure your access to AWS *(see [this documentation for more info](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html))*. **MANDATORY**
 
-### From a file
+</details>
+
+<details>
+<summary><span style="font-size: 1.2em;font-style: bold;">From a file</span> <span style="font-size:0.8em;font-style: italic;">(click to see details)</span></summary>
+
 ```go
 err := ffclient.Init(ffclient.Config{
     PollInterval: 3,
@@ -173,7 +187,7 @@ To configure your File retriever:
 - **Path**: location of your file. **MANDATORY**
 
 *I will not recommend using a file to store your flags except if it is in a shared folder for all your services.*
-
+</details>
 
 ## Flags file format
 `go-feature-flag` is to avoid to have to host a backend to manage your feature flags and to keep them centralized by using a file a source.  
