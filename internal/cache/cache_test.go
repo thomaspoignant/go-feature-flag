@@ -4,7 +4,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"testing"
 
-	"github.com/thomaspoignant/go-feature-flag/internal/flags"
+	"github.com/thomaspoignant/go-feature-flag/internal/model"
+	"github.com/thomaspoignant/go-feature-flag/internal/notifier"
 )
 
 func Test_FlagCacheNotInit(t *testing.T) {
@@ -34,7 +35,7 @@ func Test_FlagCache(t *testing.T) {
 	tests := []struct {
 		name     string
 		args     args
-		expected map[string]flags.Flag
+		expected map[string]model.Flag
 		wantErr  bool
 	}{
 		{
@@ -42,7 +43,7 @@ func Test_FlagCache(t *testing.T) {
 			args: args{
 				loadedFlags: exampleFile,
 			},
-			expected: map[string]flags.Flag{
+			expected: map[string]model.Flag{
 				"test-flag": {
 					Disable:    false,
 					Rule:       "key eq \"random-key\"",
@@ -70,7 +71,7 @@ func Test_FlagCache(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fCache := New(NewService([]Notifier{}))
+			fCache := New(NewNotificationService([]notifier.Notifier{}))
 			err := fCache.UpdateCache(tt.args.loadedFlags)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("UpdateCache() error = %v, wantErr %v", err, tt.wantErr)

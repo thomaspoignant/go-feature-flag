@@ -1,4 +1,4 @@
-package cache
+package notifier
 
 import (
 	"fmt"
@@ -9,13 +9,13 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/thomaspoignant/go-feature-flag/internal/flags"
+	"github.com/thomaspoignant/go-feature-flag/internal/model"
 	"github.com/thomaspoignant/go-feature-flag/testutil"
 )
 
 func TestLogNotifier_Notify(t *testing.T) {
 	type args struct {
-		diff diffCache
+		diff model.DiffCache
 		wg   *sync.WaitGroup
 	}
 	tests := []struct {
@@ -26,8 +26,8 @@ func TestLogNotifier_Notify(t *testing.T) {
 		{
 			name: "Flag deleted",
 			args: args{
-				diff: diffCache{
-					Deleted: map[string]flags.Flag{
+				diff: model.DiffCache{
+					Deleted: map[string]model.Flag{
 						"test-flag": {
 							Percentage: 100,
 							True:       true,
@@ -35,8 +35,8 @@ func TestLogNotifier_Notify(t *testing.T) {
 							Default:    false,
 						},
 					},
-					Updated: map[string]diffUpdated{},
-					Added:   map[string]flags.Flag{},
+					Updated: map[string]model.DiffUpdated{},
+					Added:   map[string]model.Flag{},
 				},
 				wg: &sync.WaitGroup{},
 			},
@@ -45,18 +45,18 @@ func TestLogNotifier_Notify(t *testing.T) {
 		{
 			name: "Update flag",
 			args: args{
-				diff: diffCache{
-					Deleted: map[string]flags.Flag{},
-					Updated: map[string]diffUpdated{
+				diff: model.DiffCache{
+					Deleted: map[string]model.Flag{},
+					Updated: map[string]model.DiffUpdated{
 						"test-flag": {
-							Before: flags.Flag{
+							Before: model.Flag{
 								Rule:       "key eq \"random-key\"",
 								Percentage: 100,
 								True:       true,
 								False:      false,
 								Default:    false,
 							},
-							After: flags.Flag{
+							After: model.Flag{
 								Percentage: 100,
 								True:       true,
 								False:      false,
@@ -64,7 +64,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 							},
 						},
 					},
-					Added: map[string]flags.Flag{},
+					Added: map[string]model.Flag{},
 				},
 				wg: &sync.WaitGroup{},
 			},
@@ -73,18 +73,18 @@ func TestLogNotifier_Notify(t *testing.T) {
 		{
 			name: "Disable flag",
 			args: args{
-				diff: diffCache{
-					Deleted: map[string]flags.Flag{},
-					Updated: map[string]diffUpdated{
+				diff: model.DiffCache{
+					Deleted: map[string]model.Flag{},
+					Updated: map[string]model.DiffUpdated{
 						"test-flag": {
-							Before: flags.Flag{
+							Before: model.Flag{
 								Rule:       "key eq \"random-key\"",
 								Percentage: 100,
 								True:       true,
 								False:      false,
 								Default:    false,
 							},
-							After: flags.Flag{
+							After: model.Flag{
 								Rule:       "key eq \"random-key\"",
 								Disable:    true,
 								Percentage: 100,
@@ -94,7 +94,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 							},
 						},
 					},
-					Added: map[string]flags.Flag{},
+					Added: map[string]model.Flag{},
 				},
 				wg: &sync.WaitGroup{},
 			},
@@ -103,10 +103,10 @@ func TestLogNotifier_Notify(t *testing.T) {
 		{
 			name: "Add flag",
 			args: args{
-				diff: diffCache{
-					Deleted: map[string]flags.Flag{},
-					Updated: map[string]diffUpdated{},
-					Added: map[string]flags.Flag{
+				diff: model.DiffCache{
+					Deleted: map[string]model.Flag{},
+					Updated: map[string]model.DiffUpdated{},
+					Added: map[string]model.Flag{
 						"add-test-flag": {
 							Rule:       "key eq \"random-key\"",
 							Percentage: 100,
@@ -123,18 +123,18 @@ func TestLogNotifier_Notify(t *testing.T) {
 		{
 			name: "Enable flag",
 			args: args{
-				diff: diffCache{
-					Deleted: map[string]flags.Flag{},
-					Updated: map[string]diffUpdated{
+				diff: model.DiffCache{
+					Deleted: map[string]model.Flag{},
+					Updated: map[string]model.DiffUpdated{
 						"test-flag": {
-							After: flags.Flag{
+							After: model.Flag{
 								Rule:       "key eq \"random-key\"",
 								Percentage: 100,
 								True:       true,
 								False:      false,
 								Default:    false,
 							},
-							Before: flags.Flag{
+							Before: model.Flag{
 								Rule:       "key eq \"random-key\"",
 								Disable:    true,
 								Percentage: 100,
@@ -144,7 +144,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 							},
 						},
 					},
-					Added: map[string]flags.Flag{},
+					Added: map[string]model.Flag{},
 				},
 				wg: &sync.WaitGroup{},
 			},

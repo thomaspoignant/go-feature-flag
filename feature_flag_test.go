@@ -138,7 +138,7 @@ func TestImpossibleToLoadfile(t *testing.T) {
   false: false
   default: false`
 
-	flagFile, _ := ioutil.TempFile("", "")
+	flagFile, _ := ioutil.TempFile("", "impossible")
 	_ = ioutil.WriteFile(flagFile.Name(), []byte(initialFileContent), 0600)
 
 	gffClient1, _ := New(Config{

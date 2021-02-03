@@ -60,7 +60,7 @@ func New(config Config) (*GoFeatureFlag, error) {
 		config:    config,
 		bgUpdater: newBackgroundUpdater(config.PollInterval),
 	}
-	goFF.cache = cache.New(cache.NewService(goFF.getNotifiers()))
+	goFF.cache = cache.New(cache.NewNotificationService(goFF.getNotifiers()))
 
 	// fail if we cannot retrieve the flags the 1st time
 	err := retrieveFlagsAndUpdateCache(goFF.config, goFF.cache)
@@ -95,15 +95,6 @@ func (g *GoFeatureFlag) startFlagUpdaterDaemon() {
 			return
 		}
 	}
-}
-
-// getNotifiers is creating Notifier from the config
-func (g *GoFeatureFlag) getNotifiers() []cache.Notifier {
-	var notifiers []cache.Notifier
-	if g.config.Logger != nil {
-		notifiers = append(notifiers, &cache.LogNotifier{Logger: g.config.Logger})
-	}
-	return notifiers
 }
 
 // retrieveFlagsAndUpdateCache is called every X seconds to refresh the cache flag.

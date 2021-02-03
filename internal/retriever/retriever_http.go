@@ -7,15 +7,13 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	"github.com/thomaspoignant/go-feature-flag/internal"
 )
 
-// HTTPClient is an interface over http.Client to make mock easier.
-type HTTPClient interface {
-	Do(req *http.Request) (*http.Response, error)
-}
-
 // NewHTTPRetriever return a new HTTPRetriever to get the file from an HTTP endpoint.
-func NewHTTPRetriever(httpClient HTTPClient, url string, method string, body string, header http.Header) FlagRetriever {
+func NewHTTPRetriever(httpClient internal.HTTPClient, url string, method string,
+	body string, header http.Header) FlagRetriever {
 	return &httpRetriever{
 		httpClient,
 		url,
@@ -26,7 +24,7 @@ func NewHTTPRetriever(httpClient HTTPClient, url string, method string, body str
 }
 
 type httpRetriever struct {
-	httpClient HTTPClient
+	httpClient internal.HTTPClient
 	url        string
 	method     string
 	body       string

@@ -5,12 +5,13 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/thomaspoignant/go-feature-flag/internal/flags"
+	"github.com/thomaspoignant/go-feature-flag/internal/model"
+	"github.com/thomaspoignant/go-feature-flag/internal/notifier"
 )
 
 func Test_notificationService_getDifferences(t *testing.T) {
 	type fields struct {
-		Notifiers []Notifier
+		Notifiers []notifier.Notifier
 	}
 	type args struct {
 		oldCache FlagsCache
@@ -20,19 +21,19 @@ func Test_notificationService_getDifferences(t *testing.T) {
 		name   string
 		fields fields
 		args   args
-		want   diffCache
+		want   model.DiffCache
 	}{
 		{
 			name: "Delete flag",
 			args: args{
 				oldCache: FlagsCache{
-					"test-flag": flags.Flag{
+					"test-flag": model.Flag{
 						Percentage: 100,
 						True:       true,
 						False:      false,
 						Default:    false,
 					},
-					"test-flag2": flags.Flag{
+					"test-flag2": model.Flag{
 						Percentage: 100,
 						True:       true,
 						False:      false,
@@ -40,7 +41,7 @@ func Test_notificationService_getDifferences(t *testing.T) {
 					},
 				},
 				newCache: FlagsCache{
-					"test-flag": flags.Flag{
+					"test-flag": model.Flag{
 						Percentage: 100,
 						True:       true,
 						False:      false,
@@ -48,8 +49,8 @@ func Test_notificationService_getDifferences(t *testing.T) {
 					},
 				},
 			},
-			want: diffCache{
-				Deleted: map[string]flags.Flag{
+			want: model.DiffCache{
+				Deleted: map[string]model.Flag{
 					"test-flag2": {
 						Percentage: 100,
 						True:       true,
@@ -57,15 +58,15 @@ func Test_notificationService_getDifferences(t *testing.T) {
 						Default:    false,
 					},
 				},
-				Added:   map[string]flags.Flag{},
-				Updated: map[string]diffUpdated{},
+				Added:   map[string]model.Flag{},
+				Updated: map[string]model.DiffUpdated{},
 			},
 		},
 		{
 			name: "Added flag",
 			args: args{
 				oldCache: FlagsCache{
-					"test-flag": flags.Flag{
+					"test-flag": model.Flag{
 						Percentage: 100,
 						True:       true,
 						False:      false,
@@ -73,13 +74,13 @@ func Test_notificationService_getDifferences(t *testing.T) {
 					},
 				},
 				newCache: FlagsCache{
-					"test-flag": flags.Flag{
+					"test-flag": model.Flag{
 						Percentage: 100,
 						True:       true,
 						False:      false,
 						Default:    false,
 					},
-					"test-flag2": flags.Flag{
+					"test-flag2": model.Flag{
 						Percentage: 100,
 						True:       true,
 						False:      false,
@@ -87,8 +88,8 @@ func Test_notificationService_getDifferences(t *testing.T) {
 					},
 				},
 			},
-			want: diffCache{
-				Added: map[string]flags.Flag{
+			want: model.DiffCache{
+				Added: map[string]model.Flag{
 					"test-flag2": {
 						Percentage: 100,
 						True:       true,
@@ -96,15 +97,15 @@ func Test_notificationService_getDifferences(t *testing.T) {
 						Default:    false,
 					},
 				},
-				Deleted: map[string]flags.Flag{},
-				Updated: map[string]diffUpdated{},
+				Deleted: map[string]model.Flag{},
+				Updated: map[string]model.DiffUpdated{},
 			},
 		},
 		{
 			name: "Updated flag",
 			args: args{
 				oldCache: FlagsCache{
-					"test-flag": flags.Flag{
+					"test-flag": model.Flag{
 						Percentage: 100,
 						True:       true,
 						False:      false,
@@ -112,7 +113,7 @@ func Test_notificationService_getDifferences(t *testing.T) {
 					},
 				},
 				newCache: FlagsCache{
-					"test-flag": flags.Flag{
+					"test-flag": model.Flag{
 						Percentage: 100,
 						True:       true,
 						False:      false,
@@ -120,18 +121,18 @@ func Test_notificationService_getDifferences(t *testing.T) {
 					},
 				},
 			},
-			want: diffCache{
-				Added:   map[string]flags.Flag{},
-				Deleted: map[string]flags.Flag{},
-				Updated: map[string]diffUpdated{
+			want: model.DiffCache{
+				Added:   map[string]model.Flag{},
+				Deleted: map[string]model.Flag{},
+				Updated: map[string]model.DiffUpdated{
 					"test-flag": {
-						Before: flags.Flag{
+						Before: model.Flag{
 							Percentage: 100,
 							True:       true,
 							False:      false,
 							Default:    false,
 						},
-						After: flags.Flag{
+						After: model.Flag{
 							Percentage: 100,
 							True:       true,
 							False:      false,

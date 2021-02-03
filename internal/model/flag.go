@@ -1,4 +1,4 @@
-package flags
+package model
 
 import (
 	"fmt"
@@ -11,12 +11,12 @@ import (
 
 // Flag describe the fields of a flag.
 type Flag struct {
-	Disable    bool
-	Rule       string
-	Percentage int
-	True       interface{} // Value if Rule applied, and in percentage
-	False      interface{} // Value if Rule applied and not in percentage
-	Default    interface{} // Value if Rule does not applied
+	Disable    bool        `json:"disable,omitempty"`
+	Rule       string      `json:"rule,omitempty"`
+	Percentage int         `json:"percentage,omitempty"`
+	True       interface{} `json:"true,omitempty"`    // Value if Rule applied, and in percentage
+	False      interface{} `json:"false,omitempty"`   // Value if Rule applied and not in percentage
+	Default    interface{} `json:"default,omitempty"` // Value if Rule does not applied
 }
 
 // Value is returning the Value associate to the flag (True or False) based

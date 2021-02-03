@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
-	"github.com/thomaspoignant/go-feature-flag/internal/flags"
+	"github.com/thomaspoignant/go-feature-flag/internal/model"
 )
 
 const errorFlagNotAvailable = "flag %v is not present or disabled"
@@ -188,7 +188,7 @@ func (g *GoFeatureFlag) notifyVariation(flagKey string, userKey string, value in
 
 // getFlagFromCache try to get the flag from the cache.
 // It returns an error if the cache is not init or if the flag is not present or disabled.
-func (g *GoFeatureFlag) getFlagFromCache(flagKey string) (flags.Flag, error) {
+func (g *GoFeatureFlag) getFlagFromCache(flagKey string) (model.Flag, error) {
 	flag, err := g.cache.GetFlag(flagKey)
 	if err != nil || flag.Disable {
 		return flag, fmt.Errorf(errorFlagNotAvailable, flagKey)
