@@ -9,7 +9,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"log"
 	"net/http"
-	"net/url"
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/retriever"
@@ -181,7 +180,7 @@ func (r *GithubRetriever) getFlagRetriever() (retriever.FlagRetriever, error) {
 //    }
 //   }
 type WebhookConfig struct {
-	PayloadURL url.URL           // PayloadURL of your webhook
+	PayloadURL string            // PayloadURL of your webhook
 	Secret     string            // Secret used to sign your request body.
 	Meta       map[string]string // Meta information that you want to send to your webhook (not mandatory)
 }

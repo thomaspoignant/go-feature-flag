@@ -2,6 +2,7 @@ package ffclient
 
 import (
 	"net/http"
+	"net/url"
 	"os"
 	"time"
 
@@ -9,18 +10,24 @@ import (
 )
 
 // getNotifiers is creating Notifier from the config
-func (g *GoFeatureFlag) getNotifiers() []notifier.Notifier {
+func getNotifiers(config Config) ([]notifier.Notifier, error) {
 	var notifiers []notifier.Notifier
-	if g.config.Logger != nil {
-		notifiers = append(notifiers, &notifier.LogNotifier{Logger: g.config.Logger})
+	if config.Logger != nil {
+		notifiers = append(notifiers, &notifier.LogNotifier{Logger: config.Logger})
 	}
-	notifiers = append(notifiers, g.getWebhooks()...)
-	return notifiers
+
+	wh, err := getWebhooks(config)
+	if err != nil {
+		return nil, err
+	}
+
+	notifiers = append(notifiers, wh...)
+	return notifiers, nil
 }
 
-func (g *GoFeatureFlag) getWebhooks() []notifier.Notifier {
-	res := make([]notifier.Notifier, len(g.config.Webhooks))
-	for index, whConf := range g.config.Webhooks {
+func getWebhooks(config Config) ([]notifier.Notifier, error) {
+	res := make([]notifier.Notifier, len(config.Webhooks))
+	for index, whConf := range config.Webhooks {
 		// httpClient used to call the webhook
 		httpClient := http.Client{
 			Timeout: 10 * time.Second,
@@ -33,14 +40,19 @@ func (g *GoFeatureFlag) getWebhooks() []notifier.Notifier {
 		hostname, _ := os.Hostname()
 		whConf.Meta["hostname"] = hostname
 
+		payloadURL, err := url.Parse(whConf.PayloadURL)
+		if err != nil {
+			return nil, err
+		}
+
 		w := notifier.WebhookNotifier{
-			Logger:     g.config.Logger,
-			PayloadURL: whConf.PayloadURL,
+			Logger:     config.Logger,
+			PayloadURL: *payloadURL,
 			Secret:     whConf.Secret,
 			Meta:       whConf.Meta,
 			HTTPClient: &httpClient,
 		}
 		res[index] = &w
 	}
-	return res
+	return res, nil
 }
