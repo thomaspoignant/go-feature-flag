@@ -20,6 +20,7 @@ type FileRetriever struct {
 	Path string
 }
 
+// nolint: unused
 func (r *FileRetriever) getFlagRetriever() (retriever.FlagRetriever, error) { // nolint: unparam
 	return retriever.NewLocalRetriever(r.Path), nil
 }
@@ -33,6 +34,7 @@ type HTTPRetriever struct {
 	Timeout time.Duration
 }
 
+// nolint: unused
 func (r *HTTPRetriever) getFlagRetriever() (retriever.FlagRetriever, error) {
 	timeout := r.Timeout
 	if timeout <= 0 {
@@ -57,6 +59,7 @@ type S3Retriever struct {
 	AwsConfig aws.Config
 }
 
+// nolint: unused
 func (r *S3Retriever) getFlagRetriever() (retriever.FlagRetriever, error) {
 	// Create an AWS session
 	sess, err := session.NewSession(&r.AwsConfig)
