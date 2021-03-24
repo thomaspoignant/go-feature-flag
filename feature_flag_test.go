@@ -66,6 +66,24 @@ func TestValidUseCaseToml(t *testing.T) {
 	assert.False(t, hasUnknownFlag, "User should use default value if flag does not exists")
 }
 
+func TestValidUseCaseJson(t *testing.T) {
+	// Valid use case
+	gffClient, err := New(Config{
+		PollInterval: 5,
+		Retriever:    &FileRetriever{Path: "testdata/flag-config.json"},
+		Logger:       log.New(os.Stdout, "", 0),
+		FileFormat:   "json",
+	})
+	defer gffClient.Close()
+
+	assert.NoError(t, err)
+	user := ffuser.NewUser("random-key")
+	hasTestFlag, _ := gffClient.BoolVariation("test-flag", user, false)
+	assert.True(t, hasTestFlag, "User should have test flag")
+	hasUnknownFlag, _ := gffClient.BoolVariation("unknown-flag", user, false)
+	assert.False(t, hasUnknownFlag, "User should use default value if flag does not exists")
+}
+
 func TestS3RetrieverReturnError(t *testing.T) {
 	_, err := New(Config{
 		Retriever: &S3Retriever{
