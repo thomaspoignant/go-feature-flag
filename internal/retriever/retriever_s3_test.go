@@ -20,7 +20,7 @@ type s3ManagerMock struct {
 
 func (s s3ManagerMock) Download(at io.WriterAt, input *s3.GetObjectInput, f ...func(*s3manager.Downloader)) (int64, error) {
 	if *input.Key == "valid" {
-		res, _ := ioutil.ReadFile("../../testdata/test.yaml")
+		res, _ := ioutil.ReadFile("../../testdata/flag-config.yaml")
 		_, _ = at.WriteAt(res, 0)
 		return 1, nil
 	} else if *input.Key == "no-file" {
@@ -54,7 +54,7 @@ func Test_s3Retriever_Retrieve(t *testing.T) {
 				bucket:     "Bucket",
 				item:       "valid",
 			},
-			want:    "../../testdata/test.yaml",
+			want:    "../../testdata/flag-config.yaml",
 			wantErr: false,
 		},
 		{
@@ -74,7 +74,7 @@ func Test_s3Retriever_Retrieve(t *testing.T) {
 				item:       "valid",
 				context:    context.Background(),
 			},
-			want:    "../../testdata/test.yaml",
+			want:    "../../testdata/flag-config.yaml",
 			wantErr: false,
 		},
 	}

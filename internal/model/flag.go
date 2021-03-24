@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/nikunjy/rules/parser"
 	"hash/fnv"
+	"math"
 	"strings"
 
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
@@ -13,7 +14,7 @@ import (
 type Flag struct {
 	Disable    bool        `json:"disable,omitempty"`
 	Rule       string      `json:"rule,omitempty"`
-	Percentage int         `json:"percentage,omitempty"`
+	Percentage float64     `json:"percentage,omitempty"`
 	True       interface{} `json:"true,omitempty"`    // Value if Rule applied, and in percentage
 	False      interface{} `json:"false,omitempty"`   // Value if Rule applied and not in percentage
 	Default    interface{} `json:"default,omitempty"` // Value if Rule does not applied
@@ -73,7 +74,7 @@ func (f *Flag) evaluateRule(user ffuser.User) bool {
 // string display correctly a flag
 func (f Flag) String() string {
 	var strBuilder strings.Builder
-	strBuilder.WriteString(fmt.Sprintf("percentage=%d%%, ", f.Percentage))
+	strBuilder.WriteString(fmt.Sprintf("percentage=%d%%, ", int64(math.Round(f.Percentage))))
 	if f.Rule != "" {
 		strBuilder.WriteString(fmt.Sprintf("rule=\"%s\", ", f.Rule))
 	}

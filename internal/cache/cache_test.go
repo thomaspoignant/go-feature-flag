@@ -72,7 +72,7 @@ func Test_FlagCache(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			fCache := New(NewNotificationService([]notifier.Notifier{}))
-			err := fCache.UpdateCache(tt.args.loadedFlags)
+			err := fCache.UpdateCache(tt.args.loadedFlags, "yaml")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("UpdateCache() error = %v, wantErr %v", err, tt.wantErr)
 				return
