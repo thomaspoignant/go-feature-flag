@@ -192,9 +192,7 @@ To configure your File retriever:
 </details>
 
 ## Flags file format
-
-`go-feature-flag` is to avoid to have to host a backend to manage your feature flags and to keep them centralized by
-using a file a source.  
+`go-feature-flag` is to avoid to have to host a backend to manage your feature flags and to keep them centralized by using a file a source.  
 Your file should be a YAML file with a list of flags *([see example](testdata/flag-config.yaml))*.
 
 A flag configuration looks like:
