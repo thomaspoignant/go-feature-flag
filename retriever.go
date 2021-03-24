@@ -84,7 +84,7 @@ type GithubRetriever struct {
 	GithubToken    string
 	Timeout        time.Duration // default is 10 seconds
 }
-
+// nolint: unused
 func (r *GithubRetriever) getFlagRetriever() (retriever.FlagRetriever, error) {
 	// default branch is main
 	branch := r.Branch
