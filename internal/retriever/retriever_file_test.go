@@ -36,7 +36,7 @@ func Test_localRetriever_Retrieve(t *testing.T) {
 		{
 			name: "File exists",
 			fields: fields{
-				path: "../../testdata/test.yaml",
+				path: "../../testdata/flag-config.yaml",
 			},
 			want:    []byte(expectedFile),
 			wantErr: false,

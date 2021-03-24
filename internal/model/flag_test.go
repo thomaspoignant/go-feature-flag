@@ -11,7 +11,7 @@ func TestFlag_evaluateRule(t *testing.T) {
 	type fields struct {
 		Disable    bool
 		Rule       string
-		Percentage int
+		Percentage float64
 		True       interface{}
 		False      interface{}
 	}
@@ -95,7 +95,7 @@ func TestFlag_isInPercentage(t *testing.T) {
 	type fields struct {
 		Disable    bool
 		Rule       string
-		Percentage int
+		Percentage float64
 		True       interface{}
 		False      interface{}
 	}
@@ -207,7 +207,7 @@ func TestFlag_value(t *testing.T) {
 	type fields struct {
 		Disable    bool
 		Rule       string
-		Percentage int
+		Percentage float64
 		True       interface{}
 		False      interface{}
 		Default    interface{}
@@ -273,7 +273,7 @@ func TestFlag_String(t *testing.T) {
 	type fields struct {
 		Disable    bool
 		Rule       string
-		Percentage int
+		Percentage float64
 		True       interface{}
 		False      interface{}
 		Default    interface{}

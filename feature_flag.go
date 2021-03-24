@@ -14,7 +14,7 @@ import (
 //    err := ffclient.Init(ffclient.Config{
 //             PollInterval: 3,
 //             Retriever: &ffClient.HTTPRetriever{
-//               URL:    "http://example.com/test.yaml",
+//               URL:    "http://example.com/flag-config.yaml",
 //             },
 //           })
 //    defer ffclient.Close()
@@ -118,7 +118,7 @@ func retrieveFlagsAndUpdateCache(config Config, cache cache.Cache) error {
 		return err
 	}
 
-	err = cache.UpdateCache(loadedFlags)
+	err = cache.UpdateCache(loadedFlags, config.FileFormat)
 	if err != nil {
 		log.Printf("error: impossible to update the cache of the flags: %v", err)
 		return err

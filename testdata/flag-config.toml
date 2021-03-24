@@ -1,0 +1,13 @@
+[test-flag]
+rule = "key eq \"random-key\""
+percentage = 100.0
+true = true
+false = false
+default = false
+
+[test-flag2]
+rule = "key eq \"not-a-key\""
+percentage = 100.0
+true = true
+false = false
+default = false

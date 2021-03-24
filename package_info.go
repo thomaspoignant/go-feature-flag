@@ -15,7 +15,7 @@
 //    err := ffclient.Init(ffclient.Config{
 //             PollInterval: 3,
 //             HTTPRetriever: &ffClient.HTTPRetriever{
-//               URL:    "http://example.com/test.yaml",
+//               URL:    "http://example.com/flag-config.yaml",
 //             },
 //           })
 //    defer ffclient.Close()

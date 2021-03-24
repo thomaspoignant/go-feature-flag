@@ -24,7 +24,7 @@ func TestStartWithoutRetriever(t *testing.T) {
 func TestStartWithNegativeInterval(t *testing.T) {
 	_, err := New(Config{
 		PollInterval: -60,
-		Retriever:    &FileRetriever{Path: "testdata/test.yaml"},
+		Retriever:    &FileRetriever{Path: "testdata/flag-config.yaml"},
 		Logger:       log.New(os.Stdout, "", 0),
 	})
 	assert.Error(t, err)
@@ -35,7 +35,7 @@ func TestValidUseCase(t *testing.T) {
 	// Valid use case
 	err := Init(Config{
 		PollInterval: 5,
-		Retriever:    &FileRetriever{Path: "testdata/test.yaml"},
+		Retriever:    &FileRetriever{Path: "testdata/flag-config.yaml"},
 		Logger:       log.New(os.Stdout, "", 0),
 	})
 	defer Close()
@@ -45,6 +45,42 @@ func TestValidUseCase(t *testing.T) {
 	hasTestFlag, _ := BoolVariation("test-flag", user, false)
 	assert.True(t, hasTestFlag, "User should have test flag")
 	hasUnknownFlag, _ := BoolVariation("unknown-flag", user, false)
+	assert.False(t, hasUnknownFlag, "User should use default value if flag does not exists")
+}
+
+func TestValidUseCaseToml(t *testing.T) {
+	// Valid use case
+	gffClient, err := New(Config{
+		PollInterval: 5,
+		Retriever:    &FileRetriever{Path: "testdata/flag-config.toml"},
+		Logger:       log.New(os.Stdout, "", 0),
+		FileFormat:   "toml",
+	})
+	defer gffClient.Close()
+
+	assert.NoError(t, err)
+	user := ffuser.NewUser("random-key")
+	hasTestFlag, _ := gffClient.BoolVariation("test-flag", user, false)
+	assert.True(t, hasTestFlag, "User should have test flag")
+	hasUnknownFlag, _ := gffClient.BoolVariation("unknown-flag", user, false)
+	assert.False(t, hasUnknownFlag, "User should use default value if flag does not exists")
+}
+
+func TestValidUseCaseJson(t *testing.T) {
+	// Valid use case
+	gffClient, err := New(Config{
+		PollInterval: 5,
+		Retriever:    &FileRetriever{Path: "testdata/flag-config.json"},
+		Logger:       log.New(os.Stdout, "", 0),
+		FileFormat:   "json",
+	})
+	defer gffClient.Close()
+
+	assert.NoError(t, err)
+	user := ffuser.NewUser("random-key")
+	hasTestFlag, _ := gffClient.BoolVariation("test-flag", user, false)
+	assert.True(t, hasTestFlag, "User should have test flag")
+	hasUnknownFlag, _ := gffClient.BoolVariation("unknown-flag", user, false)
 	assert.False(t, hasUnknownFlag, "User should use default value if flag does not exists")
 }
 
@@ -64,7 +100,7 @@ func TestS3RetrieverReturnError(t *testing.T) {
 func Test2GoFeatureFlagInstance(t *testing.T) {
 	gffClient1, err := New(Config{
 		PollInterval: 5,
-		Retriever:    &FileRetriever{Path: "testdata/test.yaml"},
+		Retriever:    &FileRetriever{Path: "testdata/flag-config.yaml"},
 		Logger:       log.New(os.Stdout, "", 0),
 	})
 	defer gffClient1.Close()
@@ -165,7 +201,7 @@ func TestImpossibleToLoadfile(t *testing.T) {
 func TestWrongWebhookConfig(t *testing.T) {
 	_, err := New(Config{
 		PollInterval: 5,
-		Retriever:    &FileRetriever{Path: "testdata/test.yaml"},
+		Retriever:    &FileRetriever{Path: "testdata/flag-config.yaml"},
 		Webhooks: []WebhookConfig{
 			{
 				PayloadURL: " https://example.com/hook",

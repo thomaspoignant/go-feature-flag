@@ -25,7 +25,7 @@ func NewCacheMock(flag model.Flag, err error) cache.Cache {
 		err:  err,
 	}
 }
-func (c *cacheMock) UpdateCache(loadedFlags []byte) error {
+func (c *cacheMock) UpdateCache(loadedFlags []byte, fileFormat string) error {
 	return nil
 }
 func (c *cacheMock) Close() {}

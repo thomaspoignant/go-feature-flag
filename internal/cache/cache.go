@@ -1,16 +1,20 @@
 package cache
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"gopkg.in/yaml.v3"
+	"strings"
 	"sync"
+
+	"github.com/pelletier/go-toml"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/model"
 )
 
 type Cache interface {
-	UpdateCache(loadedFlags []byte) error
+	UpdateCache(loadedFlags []byte, fileFormat string) error
 	Close()
 	GetFlag(key string) (model.Flag, error)
 }
@@ -29,9 +33,19 @@ func New(notificationService Service) Cache {
 	}
 }
 
-func (c *cacheImpl) UpdateCache(loadedFlags []byte) error {
+func (c *cacheImpl) UpdateCache(loadedFlags []byte, fileFormat string) error {
 	var newCache FlagsCache
-	err := yaml.Unmarshal(loadedFlags, &newCache)
+	var err error
+	switch strings.ToLower(fileFormat) {
+	case "toml":
+		err = toml.Unmarshal(loadedFlags, &newCache)
+	case "json":
+		err = json.Unmarshal(loadedFlags, &newCache)
+	default:
+		// default unmarshaller is YAML
+		err = yaml.Unmarshal(loadedFlags, &newCache)
+	}
+
 	if err != nil {
 		return err
 	}

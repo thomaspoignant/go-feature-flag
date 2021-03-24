@@ -39,7 +39,7 @@ First, you need to initialize the `ffclient` with the location of your backend f
 err := ffclient.Init(ffclient.Config{
     PollInterval: 3,
     Retriever: &ffclient.HTTPRetriever{
-        URL:    "http://example.com/test.yaml",
+        URL:    "http://example.com/flag-config.yaml",
     },
 })
 defer ffclient.Close()
@@ -71,7 +71,8 @@ ffclient.Init(ffclient.Config{
     PollInterval:   3,
     Logger:         log.New(file, "/tmp/log", 0),
     Context:        context.Background(),
-    Retriever:      &ffclient.FileRetriever{Path: "testdata/test.yaml"},
+    Retriever:      &ffclient.FileRetriever{Path: "testdata/flag-config.yaml"},
+    FileFormat:     "yaml",
     Webhooks:       []ffclient.WebhookConfig{
         {
             PayloadURL: " https://example.com/hook",
@@ -89,6 +90,7 @@ ffclient.Init(ffclient.Config{
 |`PollInterval`   | Number of seconds to wait before refreshing the flags.<br />The default value is 60 seconds.|
 |`Logger`   | Logger used to log what `go-feature-flag` is doing.<br />If no logger is provided the module will not log anything.|
 |`Context`  | The context used by the retriever.<br />The default value is `context.Background()`.|
+|`FileFormat`| Format of your configuration file. Available formats are `yaml`, `toml` and `json`, if you omit the field it will try to unmarshal the file as a `yaml` file.|
 |`Retriever`  | The configuration retriever you want to use to get your flag file *(see [Where do I store my flags file](#where-do-i-store-my-flags-file) for the configuration details)*.|
 |`Webhooks` | List of webhooks to call when your flag file has changed *(see [webhook section](#webhook) for more details)*.|
 ## Where do I store my flags file
@@ -105,7 +107,7 @@ err := ffclient.Init(ffclient.Config{
     Retriever: &ffclient.GithubRetriever{
         RepositorySlug: "thomaspoignant/go-feature-flag",
         Branch: "main",
-        FilePath: "testdata/test.yaml",
+        FilePath: "testdata/flag-config.yaml",
         GithubToken: "XXXX",
         Timeout: 2 * time.Second,
     },
@@ -130,7 +132,7 @@ To configure the access to your GitHub file:
 err := ffclient.Init(ffclient.Config{
     PollInterval: 3,
     Retriever: &ffclient.HTTPRetriever{
-        URL:    "http://example.com/test.yaml",
+        URL:    "http://example.com/flag-config.yaml",
         Timeout: 2 * time.Second,
     },
 })
@@ -154,7 +156,7 @@ err := ffclient.Init(ffclient.Config{
     PollInterval: 3,
     Retriever: &ffclient.S3Retriever{
         Bucket: "tpoi-test",
-        Item:   "test.yaml",
+        Item:   "flag-config.yaml",
         AwsConfig: aws.Config{
             Region: aws.String("eu-west-1"),
         },
@@ -191,7 +193,7 @@ To configure your File retriever:
 
 ## Flags file format
 `go-feature-flag` is to avoid to have to host a backend to manage your feature flags and to keep them centralized by using a file a source.  
-Your file should be a YAML file with a list of flags *([see example](testdata/test.yaml))*.
+Your file should be a YAML file with a list of flags *([see example](testdata/flag-config.yaml))*.
 
 A flag configuration looks like:
 ```yaml
@@ -400,7 +402,7 @@ All of the functions that `go-feature-flag` package supports are mirrored as met
 ### Example:
 
 ```go
-x, err := ffclient.New(Config{ Retriever: &ffclient.HTTPRetriever{{URL: "http://example.com/test.yaml",}})
+x, err := ffclient.New(Config{ Retriever: &ffclient.HTTPRetriever{{URL: "http://example.com/flag-config.yaml",}})
 defer x.Close()
 
 y, err := ffclient.New(Config{ Retriever: &ffclient.HTTPRetriever{{URL: "http://example.com/test2.yaml",}})

@@ -20,7 +20,7 @@ func Test_GetFlagNotExist(t *testing.T) {
 	assert.Error(t, err, "We should have an error if the flag does not exists")
 }
 
-func Test_FlagCache(t *testing.T) {
+func Test_FlagCache_yaml(t *testing.T) {
 	exampleFile := []byte(`test-flag:
   rule: key eq "random-key"
   percentage: 100
@@ -72,7 +72,7 @@ func Test_FlagCache(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			fCache := New(NewNotificationService([]notifier.Notifier{}))
-			err := fCache.UpdateCache(tt.args.loadedFlags)
+			err := fCache.UpdateCache(tt.args.loadedFlags, "yaml")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("UpdateCache() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -90,4 +90,144 @@ func Test_FlagCache(t *testing.T) {
 	}
 }
 
+func Test_FlagCache_json(t *testing.T) {
+	exampleFile := []byte(`{
+  "test-flag": {
+    "rule": "key eq \"random-key\"",
+    "percentage": 100,
+    "true": true,
+    "false": false,
+    "default": false
+  }
+}
+`)
 
+	type args struct {
+		loadedFlags []byte
+	}
+	tests := []struct {
+		name     string
+		args     args
+		expected map[string]model.Flag
+		wantErr  bool
+	}{
+		{
+			name: "Add valid",
+			args: args{
+				loadedFlags: exampleFile,
+			},
+			expected: map[string]model.Flag{
+				"test-flag": {
+					Disable:    false,
+					Rule:       "key eq \"random-key\"",
+					Percentage: 100,
+					True:       true,
+					False:      false,
+					Default:    false,
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "Add invalid yaml file",
+			args: args{
+				loadedFlags: []byte(`test-flag:
+  rule: key eq "random-key"
+  percentage: "toot"
+  true: true
+  false: false
+  default: false
+`),
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fCache := New(NewNotificationService([]notifier.Notifier{}))
+			err := fCache.UpdateCache(tt.args.loadedFlags, "json")
+			if (err != nil) != tt.wantErr {
+				t.Errorf("UpdateCache() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			// If no error we compare with expected
+			if err == nil {
+				for key, value := range tt.expected {
+					got, _ := fCache.GetFlag(key)
+					assert.Equal(t, value, got)
+				}
+			}
+			fCache.Close()
+		})
+	}
+}
+
+func Test_FlagCache_toml(t *testing.T) {
+	exampleFile := []byte(`[test-flag]
+rule = "key eq \"random-key\""
+percentage = 100.0
+true = true
+false = false
+default = false`)
+
+	type args struct {
+		loadedFlags []byte
+	}
+	tests := []struct {
+		name     string
+		args     args
+		expected map[string]model.Flag
+		wantErr  bool
+	}{
+		{
+			name: "Add valid",
+			args: args{
+				loadedFlags: exampleFile,
+			},
+			expected: map[string]model.Flag{
+				"test-flag": {
+					Disable:    false,
+					Rule:       "key eq \"random-key\"",
+					Percentage: 100,
+					True:       true,
+					False:      false,
+					Default:    false,
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "Add invalid yaml file",
+			args: args{
+				loadedFlags: []byte(`test-flag:
+  rule: key eq "random-key"
+  percentage: "toot"
+  true: true
+  false: false
+  default: false
+`),
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fCache := New(NewNotificationService([]notifier.Notifier{}))
+			err := fCache.UpdateCache(tt.args.loadedFlags, "TOML")
+			if (err != nil) != tt.wantErr {
+				t.Errorf("UpdateCache() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			// If no error we compare with expected
+			if err == nil {
+				for key, value := range tt.expected {
+					got, _ := fCache.GetFlag(key)
+					assert.Equal(t, value, got)
+				}
+			}
+			fCache.Close()
+		})
+	}
+}
