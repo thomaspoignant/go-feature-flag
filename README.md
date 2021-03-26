@@ -18,10 +18,8 @@
     <a href="https://github.com/avelino/awesome-go/#server-applications"><img src="https://awesome.re/mentioned-badge-flat.svg" alt="Mentioned in Awesome Go"></a>
 </p>
 
-
-
-A feature flag solution, with YAML file in the backend (S3, GitHub, HTTP, local file ...).  
-No server to install, just add a file in a central system *(HTTP, S3, GitHub, ...)* and all your services will react to the changes of this file.
+A feature flag solution, with only a file _(`YAML`, `JSON` or `TOML`)_ in the backend.  
+No server to install, just add a file in a central system *(HTTP, S3, GitHub, Local file ...)* and all your services will react to the changes of this file.
 
 
 If you are not familiar with feature flags also called feature Toggles you can read this [article of Martin Fowler](https://www.martinfowler.com/articles/feature-toggles.html)
@@ -193,7 +191,7 @@ To configure your File retriever:
 
 ## Flags file format
 `go-feature-flag` is to avoid to have to host a backend to manage your feature flags and to keep them centralized by using a file a source.  
-Your file should be a YAML file with a list of flags *([see example](testdata/flag-config.yaml))*.
+Your file should be a `YAML`, `JSON` or `TOML` file with a list of flags *(examples: [`YAML`](testdata/flag-config.yaml), [`JSON`](testdata/flag-config.json), [`TOML`](testdata/flag-config.toml))*.
 
 A flag configuration looks like:
 ```yaml
