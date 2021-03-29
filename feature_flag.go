@@ -82,7 +82,6 @@ func New(config Config) (*GoFeatureFlag, error) {
 
 // Close wait until thread are done
 func (g *GoFeatureFlag) Close() {
-
 	if g != nil {
 		if g.cache != nil {
 			// clear the cache
