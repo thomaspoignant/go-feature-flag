@@ -63,8 +63,10 @@ func (c *WebhookNotifier) Notify(diff model.DiffCache, wg *sync.WaitGroup) {
 	}
 	response, err := c.HTTPClient.Do(&request)
 	// Log if something went wrong while calling the webhook.
-	if err != nil && c.Logger != nil {
-		c.Logger.Printf("[%v] error: while calling webhook: %v\n", date, err)
+	if err != nil {
+		if c.Logger != nil {
+			c.Logger.Printf("[%v] error: while calling webhook: %v\n", date, err)
+		}
 		return
 	}
 	defer response.Body.Close()
