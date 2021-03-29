@@ -82,11 +82,15 @@ func New(config Config) (*GoFeatureFlag, error) {
 
 // Close wait until thread are done
 func (g *GoFeatureFlag) Close() {
-	// clear the cache
-	g.cache.Close()
 
-	// stop the background updater
-	g.bgUpdater.close()
+	if g != nil {
+		if g.cache != nil {
+			// clear the cache
+			g.cache.Close()
+		}
+
+		g.bgUpdater.close()
+	}
 }
 
 // startFlagUpdaterDaemon is the daemon that refresh the cache every X seconds.
