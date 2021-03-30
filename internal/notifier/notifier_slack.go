@@ -17,6 +17,7 @@ import (
 )
 
 const goFFLogo = "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png"
+const slackFooter = "go-feature-flag"
 
 func NewSlackNotifier(logger *log.Logger, webhookURL string) SlackNotifier {
 	slackURL, _ := url.Parse(webhookURL)
@@ -83,7 +84,7 @@ func convertToSlackMessage(diff model.DiffCache) slackMessage {
 			Color:      "#FF0000",
 			Title:      fmt.Sprintf("❌ Flag \"%s\" deleted", key),
 			FooterIcon: goFFLogo,
-			Footer:     "go-feature-flag",
+			Footer:     slackFooter,
 		}
 		res.Attachments = append(res.Attachments, attachment)
 	}
@@ -94,7 +95,7 @@ func convertToSlackMessage(diff model.DiffCache) slackMessage {
 			Color:      "#FFA500",
 			Title:      fmt.Sprintf("✏️ Flag \"%s\" updated", key),
 			FooterIcon: goFFLogo,
-			Footer:     "go-feature-flag",
+			Footer:     slackFooter,
 			Fields:     []Field{},
 		}
 
@@ -134,7 +135,7 @@ func convertToSlackMessage(diff model.DiffCache) slackMessage {
 			Color:      "#008000",
 			Title:      fmt.Sprintf("🆕 Flag \"%s\" created", key),
 			FooterIcon: goFFLogo,
-			Footer:     "go-feature-flag",
+			Footer:     slackFooter,
 			Fields:     []Field{},
 		}
 
@@ -144,7 +145,7 @@ func convertToSlackMessage(diff model.DiffCache) slackMessage {
 		}
 
 		attachment.Fields = append(attachment.Fields, Field{Title: "Percentage",
-			Short: true, Value: string(int64(math.Round(value.Percentage)))})
+			Short: true, Value: fmt.Sprintf("%x%%", int64(math.Round(value.Percentage)))})
 		attachment.Fields = append(attachment.Fields, Field{Title: "True",
 			Short: true, Value: fmt.Sprintf("%v", value.True)})
 		attachment.Fields = append(attachment.Fields, Field{Title: "False",
