@@ -391,7 +391,6 @@ This header **`X-Hub-Signature-256`** is sent if the webhook is configured with 
 :warning: **The recommendation is to always use the `Secret` and on your API/webook always verify the signature key to be sure that you don't have a man in the middle attack.**
 
 </details>
----
 
 ## Multiple flag configurations
 `go-feature-flag` comes ready to use out of the box by calling the `Init` function and after that it will be available everywhere.
