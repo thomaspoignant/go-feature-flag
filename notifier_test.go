@@ -9,12 +9,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/thomaspoignant/go-feature-flag/internal"
 	"github.com/thomaspoignant/go-feature-flag/internal/notifier"
 )
 
 func TestGoFeatureFlag_getNotifiers(t *testing.T) {
-	urlStr := "http://webhook.com/hook"
-	parsedURL, _ := url.Parse(urlStr)
+	parsedURL, _ := url.Parse("http://webhook.com/hook")
 	hostname, _ := os.Hostname()
 
 	type fields struct {
@@ -33,12 +33,15 @@ func TestGoFeatureFlag_getNotifiers(t *testing.T) {
 					Logger: log.New(os.Stdout, "", 0),
 					Notifiers: []NotifierConfig{
 						&WebhookConfig{
-							PayloadURL: urlStr,
+							PayloadURL: parsedURL.String(),
 							Secret:     "Secret",
 							Meta: map[string]string{
 								"my-app":   "go-ff-test",
 								"hostname": hostname,
 							},
+						},
+						&SlackNotifier{
+							SlackWebhookURL: parsedURL.String(),
 						},
 					},
 				},
@@ -57,6 +60,11 @@ func TestGoFeatureFlag_getNotifiers(t *testing.T) {
 						"hostname": hostname,
 					},
 				},
+				&notifier.SlackNotifier{
+					Logger:     log.New(os.Stdout, "", 0),
+					HTTPClient: internal.DefaultHTTPClient(),
+					WebhookURL: *parsedURL,
+				},
 			},
 		},
 		{
@@ -66,7 +74,7 @@ func TestGoFeatureFlag_getNotifiers(t *testing.T) {
 					Logger: log.New(os.Stdout, "", 0),
 					Webhooks: []WebhookConfig{
 						{
-							PayloadURL: urlStr,
+							PayloadURL: parsedURL.String(),
 							Secret:     "Secret",
 							Meta: map[string]string{
 								"my-app":   "go-ff-test",
@@ -78,6 +86,7 @@ func TestGoFeatureFlag_getNotifiers(t *testing.T) {
 			},
 			want: []notifier.Notifier{
 				&notifier.LogNotifier{Logger: log.New(os.Stdout, "", 0)},
+
 				&notifier.WebhookNotifier{
 					Logger: log.New(os.Stdout, "", 0),
 					HTTPClient: &http.Client{
