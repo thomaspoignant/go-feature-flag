@@ -109,3 +109,13 @@ func (w *WebhookConfig) GetNotifier(config Config) (notifier.Notifier, error) {
 		w.PayloadURL, w.Secret, w.Meta)
 	return &notifier, err
 }
+
+type SlackNotifier struct {
+	SlackWebhookURL string
+}
+
+// GetNotifier convert the configuration in a Notifier struct
+func (w *SlackNotifier) GetNotifier(config Config) (notifier.Notifier, error) {
+	notifier := notifier.NewSlackNotifier(config.Logger, internal.DefaultHTTPClient(), w.SlackWebhookURL)
+	return &notifier, nil
+}

@@ -385,12 +385,43 @@ If you have configured a webhook, a POST request will be sent to the `PayloadURL
 ```
 </details>
 
+
+
 ### Signature
 This header **`X-Hub-Signature-256`** is sent if the webhook is configured with a secret. This is the HMAC hex digest of the request body, and is generated using the SHA-256 hash function and the secret as the HMAC key.
 
 :warning: **The recommendation is to always use the `Secret` and on your API/webook always verify the signature key to be sure that you don't have a man in the middle attack.**
 
 </details>
+
+<details>
+<summary><span style="font-size: 1.2em;font-style: bold;">Slack</span></summary>
+
+The **Slack** notifier allows you to get notification on your favorite slack channel when an instance of `go-feature-flag` is detecting changes in the configuration file.
+
+![slack notification example](.doc/slack_notification.png)
+
+- First, you need to create an incoming webhook on your slack instance *(you can follow this [documentation to see how to do it](https://api.slack.com/messaging/webhooks#getting_started))*
+- Copy your webhook URL. It should looks like `https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX`.
+- In your `go-feature-flag` init method add a slack notifier
+```go
+ffclient.Config{ 
+    // ...
+    Notifiers: []ffclient.NotifierConfig{
+        &ffclient.SlackNotifier{
+            SlackWebhookURL: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
+        },
+        // ...
+    },
+}
+```
+
+|   |   |   |
+|---|---|---|
+|`SlackWebhookURL`   |![mandatory](https://img.shields.io/badge/-mandatory-red)   | The complete URL of your incoming webhook configured in Slack.  |
+
+</details>
+
 
 ## Multiple flag configurations
 `go-feature-flag` comes ready to use out of the box by calling the `Init` function and after that it will be available everywhere.

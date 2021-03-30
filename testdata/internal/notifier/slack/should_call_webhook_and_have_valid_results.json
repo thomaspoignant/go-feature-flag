@@ -1,0 +1,79 @@
+{
+  "icon_url": "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png",
+  "text": "Changes detected in your feature flag file on: *{{hostname}}*",
+  "attachments": [
+    {
+      "color": "#FF0000",
+      "title": "❌ Flag \"test-flag\" deleted",
+      "fields": null,
+      "footer_icon": "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png",
+      "footer": "go-feature-flag"
+    },
+    {
+      "color": "#FFA500",
+      "title": "✏️ Flag \"test-flag2\" updated",
+      "fields": [
+        {
+          "title": "Rule",
+          "value": "key eq \"not-a-key\" =\u003e key eq \"not-a-ke\"",
+          "short": false
+        },
+        {
+          "title": "Percentage",
+          "value": "100% =\u003e 80%",
+          "short": true
+        },
+        {
+          "title": "True",
+          "value": "true =\u003e strTrue",
+          "short": true
+        },
+        {
+          "title": "False",
+          "value": "false =\u003e strFalse",
+          "short": true
+        },
+        {
+          "title": "False",
+          "value": "false =\u003e strDefault",
+          "short": true
+        }
+      ],
+      "footer_icon": "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png",
+      "footer": "go-feature-flag"
+    },
+    {
+      "color": "#008000",
+      "title": "🆕 Flag \"test-flag3\" created",
+      "fields": [
+        {
+          "title": "Rule",
+          "value": "key eq \"random-key\"",
+          "short": false
+        },
+        {
+          "title": "Percentage",
+          "value": "5%",
+          "short": true
+        },
+        {
+          "title": "True",
+          "value": "test",
+          "short": true
+        },
+        {
+          "title": "False",
+          "value": "false",
+          "short": true
+        },
+        {
+          "title": "Default",
+          "value": "default",
+          "short": true
+        }
+      ],
+      "footer_icon": "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png",
+      "footer": "go-feature-flag"
+    }
+  ]
+}
