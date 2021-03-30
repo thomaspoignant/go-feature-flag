@@ -394,7 +394,6 @@ This header **`X-Hub-Signature-256`** is sent if the webhook is configured with 
 
 </details>
 
-
 <details>
 <summary><span style="font-size: 1.2em;font-style: bold;">Slack</span></summary>
 
@@ -422,6 +421,7 @@ ffclient.Config{
 |`SlackWebhookURL`   |![mandatory](https://img.shields.io/badge/-mandatory-red)   | The complete URL of your incoming webhook configured in Slack.  |
 
 </details>
+
 
 ## Multiple flag configurations
 `go-feature-flag` comes ready to use out of the box by calling the `Init` function and after that it will be available everywhere.
