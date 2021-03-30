@@ -10,12 +10,45 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"sync"
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/internal"
 	"github.com/thomaspoignant/go-feature-flag/internal/model"
 )
+
+func NewWebhookNotifier(logger *log.Logger,
+	payloadURL string,
+	secret string,
+	meta map[string]string,
+) (WebhookNotifier, error) {
+	// httpClient used to call the webhook
+	httpClient := http.Client{
+		Timeout: 10 * time.Second,
+	}
+
+	// Deal with meta information
+	if meta == nil {
+		meta = make(map[string]string)
+	}
+	hostname, _ := os.Hostname()
+	meta["hostname"] = hostname
+
+	parsedURL, err := url.Parse(payloadURL)
+	if err != nil {
+		return WebhookNotifier{}, err
+	}
+
+	w := WebhookNotifier{
+		Logger:     logger,
+		PayloadURL: *parsedURL,
+		Secret:     secret,
+		Meta:       meta,
+		HTTPClient: &httpClient,
+	}
+	return w, nil
+}
 
 type webhookReqBody struct {
 	Meta  map[string]string `json:"meta"`
