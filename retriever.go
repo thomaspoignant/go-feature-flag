@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/thomaspoignant/go-feature-flag/internal"
 	"github.com/thomaspoignant/go-feature-flag/internal/retriever"
 )
 
@@ -42,9 +43,7 @@ func (r *HTTPRetriever) getFlagRetriever() (retriever.FlagRetriever, error) {
 	}
 
 	return retriever.NewHTTPRetriever(
-		&http.Client{
-			Timeout: timeout,
-		},
+		internal.HTTPClientWithTimeout(timeout),
 		r.URL,
 		r.Method,
 		r.Body,

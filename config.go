@@ -4,9 +4,8 @@ import (
 	"context"
 	"errors"
 	"log"
-	"net/http"
-	"time"
 
+	"github.com/thomaspoignant/go-feature-flag/internal"
 	"github.com/thomaspoignant/go-feature-flag/internal/notifier"
 	"github.com/thomaspoignant/go-feature-flag/internal/retriever"
 )
@@ -104,9 +103,9 @@ type WebhookConfig struct {
 
 // GetNotifier convert the configuration in a Notifier struct
 func (w *WebhookConfig) GetNotifier(config Config) (notifier.Notifier, error) {
-	// httpClient used to call the webhook
-	httpClient := http.DefaultClient
-	httpClient.Timeout = 10 * time.Second
-	notifier, err := notifier.NewWebhookNotifier(config.Logger, httpClient, w.PayloadURL, w.Secret, w.Meta)
+	notifier, err := notifier.NewWebhookNotifier(
+		config.Logger,
+		internal.DefaultHTTPClient(),
+		w.PayloadURL, w.Secret, w.Meta)
 	return &notifier, err
 }
