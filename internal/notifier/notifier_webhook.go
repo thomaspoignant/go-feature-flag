@@ -19,21 +19,21 @@ import (
 )
 
 func NewWebhookNotifier(logger *log.Logger,
+	httpClient internal.HTTPClient,
 	payloadURL string,
 	secret string,
 	meta map[string]string,
 ) (WebhookNotifier, error) {
-	// httpClient used to call the webhook
-	httpClient := http.Client{
-		Timeout: 10 * time.Second,
-	}
-
 	// Deal with meta information
 	if meta == nil {
 		meta = make(map[string]string)
 	}
-	hostname, _ := os.Hostname()
-	meta["hostname"] = hostname
+
+	// if no hostname provided we return the hostname of the current machine
+	if _, ok := meta["hostname"]; !ok {
+		hostname, _ := os.Hostname()
+		meta["hostname"] = hostname
+	}
 
 	parsedURL, err := url.Parse(payloadURL)
 	if err != nil {
@@ -45,7 +45,7 @@ func NewWebhookNotifier(logger *log.Logger,
 		PayloadURL: *parsedURL,
 		Secret:     secret,
 		Meta:       meta,
-		HTTPClient: &httpClient,
+		HTTPClient: httpClient,
 	}
 	return w, nil
 }

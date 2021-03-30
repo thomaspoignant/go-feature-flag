@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"sync"
 	"testing"
@@ -163,16 +162,15 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 			defer logFile.Close()
 			defer os.Remove(logFile.Name())
 
-			webhookURL, _ := url.Parse("http://webhook.example/hook")
 			mockHTTPClient := &httpClientMock{statusCode: tt.args.statusCode, forceError: tt.args.forceError}
 
-			c := WebhookNotifier{
-				Logger:     log.New(logFile, "", 0),
-				HTTPClient: mockHTTPClient,
-				PayloadURL: *webhookURL,
-				Secret:     tt.fields.Secret,
-				Meta:       map[string]string{"hostname": "toto"},
-			}
+			c, _ := NewWebhookNotifier(
+				log.New(logFile, "", 0),
+				mockHTTPClient,
+				"http://webhook.example/hook",
+				tt.fields.Secret,
+				map[string]string{"hostname": "toto"},
+			)
 
 			w := sync.WaitGroup{}
 			w.Add(1)
