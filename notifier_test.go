@@ -31,6 +31,39 @@ func TestGoFeatureFlag_getNotifiers(t *testing.T) {
 			fields: fields{
 				config: Config{
 					Logger: log.New(os.Stdout, "", 0),
+					Notifiers: []NotifierConfig{
+						&WebhookConfig{
+							PayloadURL: urlStr,
+							Secret:     "Secret",
+							Meta: map[string]string{
+								"my-app":   "go-ff-test",
+								"hostname": hostname,
+							},
+						},
+					},
+				},
+			},
+			want: []notifier.Notifier{
+				&notifier.LogNotifier{Logger: log.New(os.Stdout, "", 0)},
+				&notifier.WebhookNotifier{
+					Logger: log.New(os.Stdout, "", 0),
+					HTTPClient: &http.Client{
+						Timeout: 10 * time.Second,
+					},
+					PayloadURL: *parsedURL,
+					Secret:     "Secret",
+					Meta: map[string]string{
+						"my-app":   "go-ff-test",
+						"hostname": hostname,
+					},
+				},
+			},
+		},
+		{
+			name: "log + webhook notifier - deprecated webhook",
+			fields: fields{
+				config: Config{
+					Logger: log.New(os.Stdout, "", 0),
 					Webhooks: []WebhookConfig{
 						{
 							PayloadURL: urlStr,
@@ -64,8 +97,8 @@ func TestGoFeatureFlag_getNotifiers(t *testing.T) {
 			fields: fields{
 				config: Config{
 					Logger: log.New(os.Stdout, "", 0),
-					Webhooks: []WebhookConfig{
-						{
+					Notifiers: []NotifierConfig{
+						&WebhookConfig{
 							PayloadURL: " https://example.com/hook",
 							Secret:     "Secret",
 							Meta: map[string]string{

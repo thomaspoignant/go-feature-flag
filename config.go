@@ -5,6 +5,8 @@ import (
 	"errors"
 	"log"
 
+	"github.com/thomaspoignant/go-feature-flag/internal"
+	"github.com/thomaspoignant/go-feature-flag/internal/notifier"
 	"github.com/thomaspoignant/go-feature-flag/internal/retriever"
 )
 
@@ -12,12 +14,14 @@ import (
 // PollInterval is the interval in seconds where we gonna read the file to update the cache.
 // You should also have a retriever to specify where to read the flags file.
 type Config struct {
-	PollInterval int // Poll every X seconds
-	Logger       *log.Logger
-	Context      context.Context // default is context.Background()
-	Retriever    Retriever
-	Webhooks     []WebhookConfig // webhooks we should call when a flag create/update/delete
-	FileFormat   string
+	PollInterval int              // Poll every X seconds
+	Logger       *log.Logger      // Logger use by the library
+	Context      context.Context  // default is context.Background()
+	Retriever    Retriever        // Retriever is the component in charge to retrieve your flag file
+	Notifiers    []NotifierConfig // Notifiers is the list of notifiers called when a flag change
+	FileFormat   string           // FileFormat is the format of the file to retrieve (available YAML, TOML and JSON)
+	// Deprecated: Use Notifiers instead, webhooks will be delete in a future version
+	Webhooks []WebhookConfig // webhooks we should call when a flag create/update/delete
 }
 
 // GetRetriever returns a retriever.FlagRetriever configure with the retriever available in the config.
@@ -26,6 +30,23 @@ func (c *Config) GetRetriever() (retriever.FlagRetriever, error) {
 		return nil, errors.New("no retriever in the configuration, impossible to get the flags")
 	}
 	return c.Retriever.getFlagRetriever()
+}
+
+// NotifierConfig is the interface for your notifiers.
+// You can use as notifier a WebhookConfig
+//
+// Notifiers: []ffclient.NotifierConfig{
+//        &ffclient.WebhookConfig{
+//            PayloadURL: " https://example.com/hook",
+//            Secret:     "Secret",
+//            Meta: map[string]string{
+//                "app.name": "my app",
+//            },
+//        },
+//        // ...
+//    }
+type NotifierConfig interface {
+	GetNotifier(config Config) (notifier.Notifier, error)
 }
 
 // WebhookConfig is the configuration of your webhook.
@@ -73,9 +94,18 @@ func (c *Config) GetRetriever() (retriever.FlagRetriever, error) {
 //            }
 //        }
 //    }
-//   }
+//  }
 type WebhookConfig struct {
 	PayloadURL string            // PayloadURL of your webhook
 	Secret     string            // Secret used to sign your request body.
 	Meta       map[string]string // Meta information that you want to send to your webhook (not mandatory)
+}
+
+// GetNotifier convert the configuration in a Notifier struct
+func (w *WebhookConfig) GetNotifier(config Config) (notifier.Notifier, error) {
+	notifier, err := notifier.NewWebhookNotifier(
+		config.Logger,
+		internal.DefaultHTTPClient(),
+		w.PayloadURL, w.Secret, w.Meta)
+	return &notifier, err
 }

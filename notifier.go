@@ -11,20 +11,32 @@ import (
 
 // getNotifiers is creating Notifier from the config
 func getNotifiers(config Config) ([]notifier.Notifier, error) {
-	var notifiers []notifier.Notifier
+	notifiers := make([]notifier.Notifier, 0)
 	if config.Logger != nil {
 		notifiers = append(notifiers, &notifier.LogNotifier{Logger: config.Logger})
 	}
 
+	// add all the notifiers
+	for _, whConf := range config.Notifiers {
+		notifier, err := whConf.GetNotifier(config)
+		if err != nil {
+			return nil, err
+		}
+		notifiers = append(notifiers, notifier)
+	}
+
+	// Deprecated: we will have to remove that block when webhook will be un-supported
 	wh, err := getWebhooks(config)
 	if err != nil {
 		return nil, err
 	}
-
 	notifiers = append(notifiers, wh...)
+	// end deprecated
+
 	return notifiers, nil
 }
 
+// Deprecated: use getNotifiers instead
 func getWebhooks(config Config) ([]notifier.Notifier, error) {
 	res := make([]notifier.Notifier, len(config.Webhooks))
 	for index, whConf := range config.Webhooks {
