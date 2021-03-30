@@ -1,0 +1,179 @@
+package notifier
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"log"
+	"math"
+	"net/http"
+	"net/url"
+	"os"
+	"sync"
+
+	"github.com/thomaspoignant/go-feature-flag/internal"
+	"github.com/thomaspoignant/go-feature-flag/internal/model"
+)
+
+const goFFLogo = "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png"
+
+func NewSlackNotifier(logger *log.Logger, webhookURL string) SlackNotifier {
+	slackURL, _ := url.Parse(webhookURL)
+	return SlackNotifier{
+		Logger:     logger,
+		HTTPClient: internal.DefaultHTTPClient(),
+		WebhookURL: *slackURL,
+	}
+}
+
+type SlackNotifier struct {
+	Logger     *log.Logger
+	HTTPClient internal.HTTPClient
+	WebhookURL url.URL
+}
+
+func (c *SlackNotifier) Notify(diff model.DiffCache, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	reqBody := convertToSlackMessage(diff)
+	payload, err := json.Marshal(reqBody)
+	if err != nil && c.Logger != nil {
+		// c.Logger.Printf("[%v] error: (WebhookNotifier) impossible to read differences; %v\n", date, err)
+		return
+	}
+	fmt.Println(string(payload))
+	request := http.Request{
+		Method: http.MethodPost,
+		URL:    &c.WebhookURL,
+		Body:   ioutil.NopCloser(bytes.NewReader(payload)),
+		Header: map[string][]string{"Content-type": {"application/json"}},
+	}
+	//
+	//
+	//
+	res, err := c.HTTPClient.Do(&request)
+	fmt.Println(res, err)
+	defer res.Body.Close()
+	// for key, value := range diff.Added {
+	// 	fmt.Printf("flag %v added:%v\n", key, value.String())
+	// }
+	//
+	// for key := range diff.Deleted {
+	// 	fmt.Printf("flag %v deleted\n", key)
+	// }
+	//
+	// for key, value := range diff.Updated {
+	// 	fmt.Printf("flag %v updated:%v\n", key, value.After.String())
+	// }
+}
+
+func convertToSlackMessage(diff model.DiffCache) slackMessage {
+	hostname, _ := os.Hostname()
+
+	res := slackMessage{
+		IconURL:     goFFLogo,
+		Text:        fmt.Sprintf("Changes detected in your feature flag file on: *%s*", hostname),
+		Attachments: []attachment{},
+	}
+
+	// deleted flags
+	for key := range diff.Deleted {
+		attachment := attachment{
+			Color:      "#FF0000",
+			Title:      fmt.Sprintf("❌ Flag \"%s\" deleted", key),
+			FooterIcon: goFFLogo,
+			Footer:     "go-feature-flag",
+		}
+		res.Attachments = append(res.Attachments, attachment)
+	}
+
+	// updated flags
+	for key, value := range diff.Updated {
+		attachment := attachment{
+			Color:      "#FFA500",
+			Title:      fmt.Sprintf("✏️ Flag \"%s\" updated", key),
+			FooterIcon: goFFLogo,
+			Footer:     "go-feature-flag",
+			Fields:     []Field{},
+		}
+
+		if value.Before.Rule != value.After.Rule {
+			attachment.Fields = append(attachment.Fields, Field{Title: "Rule", Short: false,
+				Value: fmt.Sprintf("%s => %s", value.Before.Rule, value.After.Rule)})
+		}
+
+		if value.Before.Percentage != value.After.Percentage {
+			attachment.Fields = append(attachment.Fields, Field{Title: "Percentage",
+				Short: true,
+				Value: fmt.Sprintf("%d => %d",
+					int64(math.Round(value.Before.Percentage)), int64(math.Round(value.After.Percentage))),
+			})
+		}
+
+		if value.Before.True != value.After.True {
+			attachment.Fields = append(attachment.Fields, Field{Title: "True",
+				Short: true, Value: fmt.Sprintf("%v => %v", value.Before.True, value.After.True)})
+		}
+
+		if value.Before.False != value.After.False {
+			attachment.Fields = append(attachment.Fields, Field{Title: "False",
+				Short: true, Value: fmt.Sprintf("%v => %v", value.Before.False, value.After.False)})
+		}
+
+		if value.Before.Default != value.After.Default {
+			attachment.Fields = append(attachment.Fields, Field{Title: "False",
+				Short: true, Value: fmt.Sprintf("%v => %v", value.Before.Default, value.After.Default)})
+		}
+		res.Attachments = append(res.Attachments, attachment)
+	}
+
+	// added flags
+	for key, value := range diff.Added {
+		attachment := attachment{
+			Color:      "#008000",
+			Title:      fmt.Sprintf("🆕 Flag \"%s\" created", key),
+			FooterIcon: goFFLogo,
+			Footer:     "go-feature-flag",
+			Fields:     []Field{},
+		}
+
+		// display rule only if available
+		if value.Rule != "" {
+			attachment.Fields = append(attachment.Fields, Field{Title: "Rule", Short: false, Value: value.Rule})
+		}
+
+		attachment.Fields = append(attachment.Fields, Field{Title: "Percentage",
+			Short: true, Value: string(int64(math.Round(value.Percentage)))})
+		attachment.Fields = append(attachment.Fields, Field{Title: "True",
+			Short: true, Value: fmt.Sprintf("%v", value.True)})
+		attachment.Fields = append(attachment.Fields, Field{Title: "False",
+			Short: true, Value: fmt.Sprintf("%v", value.False)})
+		attachment.Fields = append(attachment.Fields, Field{Title: "Default",
+			Short: true, Value: fmt.Sprintf("%v", value.Default)})
+		attachment.FooterIcon = goFFLogo
+		res.Attachments = append(res.Attachments, attachment)
+	}
+
+	return res
+}
+
+type slackMessage struct {
+	IconURL     string       `json:"icon_url"`
+	Text        string       `json:"text"`
+	Attachments []attachment `json:"attachments"`
+}
+
+type attachment struct {
+	Color      string  `json:"color"`
+	Title      string  `json:"title"`
+	Fields     []Field `json:"fields"`
+	FooterIcon string  `json:"footer_icon,omitempty"`
+	Footer     string  `json:"footer,omitempty"`
+}
+
+type Field struct {
+	Title string `json:"title"`
+	Value string `json:"value"`
+	Short bool   `json:"short"`
+}
