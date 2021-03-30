@@ -116,6 +116,6 @@ type SlackNotifier struct {
 
 // GetNotifier convert the configuration in a Notifier struct
 func (w *SlackNotifier) GetNotifier(config Config) (notifier.Notifier, error) {
-	notifier := notifier.NewSlackNotifier(config.Logger, w.SlackWebhookURL)
+	notifier := notifier.NewSlackNotifier(config.Logger, internal.DefaultHTTPClient(), w.SlackWebhookURL)
 	return &notifier, nil
 }
