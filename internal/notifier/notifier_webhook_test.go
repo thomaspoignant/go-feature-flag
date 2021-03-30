@@ -3,11 +3,11 @@ package notifier
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"sync"
 	"testing"
@@ -178,12 +178,61 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 
 			if tt.expected.err {
 				log, _ := ioutil.ReadFile(logFile.Name())
-				fmt.Println(string(log))
 				assert.Regexp(t, tt.expected.errLog, string(log))
 			} else {
 				content, _ := ioutil.ReadFile(tt.expected.bodyPath)
 				assert.JSONEq(t, string(content), mockHTTPClient.body)
 				assert.Equal(t, tt.expected.signature, mockHTTPClient.signature)
+			}
+		})
+	}
+}
+
+func TestNewWebhookNotifier(t *testing.T) {
+	mockHTTPClient := &httpClientMock{statusCode: 200, forceError: false}
+	hostname, _ := os.Hostname()
+
+	type args struct {
+		payloadURL string
+		secret     string
+		meta       map[string]string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    WebhookNotifier
+		wantErr bool
+	}{
+		{
+			name: "Invalid URL",
+			args: args{
+				payloadURL: " http://example.com",
+			},
+			wantErr: true,
+		},
+		{
+			name: "No meta",
+			args: args{
+				payloadURL: "http://example.com",
+			},
+			wantErr: false,
+			want: WebhookNotifier{
+				HTTPClient: mockHTTPClient,
+				PayloadURL: url.URL{Host: "example.com", Scheme: "http"},
+				Secret:     "",
+				Meta:       map[string]string{"hostname": hostname},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := NewWebhookNotifier(nil, mockHTTPClient, tt.args.payloadURL, tt.args.secret, tt.args.meta)
+
+			if tt.wantErr {
+				assert.Error(t, err, "NewWebhookNotifier should return an error")
+			} else {
+				assert.NoError(t, err, "NewWebhookNotifier should not return an error. Error return: %v", err)
+				assert.Equal(t, tt.want, got, "WebhookNotifier should be equals.")
 			}
 		})
 	}
