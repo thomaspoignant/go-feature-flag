@@ -6,7 +6,7 @@ require (
 	github.com/antlr/antlr4 v0.0.0-20201206235148-c87e55b61113 // indirect
 	github.com/aws/aws-sdk-go v1.38.10
 	github.com/blang/semver v3.5.1+incompatible // indirect
-	github.com/google/go-cmp v0.5.4
+	github.com/google/go-cmp v0.5.5
 	github.com/nikunjy/rules v0.0.0-20200120082459-0b7c4dc9dc86
 	github.com/pelletier/go-toml v1.8.1
 	github.com/stretchr/testify v1.7.0
