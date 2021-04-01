@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"net/http"
@@ -167,9 +166,7 @@ func Test_httpRetriever_Retrieve(t *testing.T) {
 			}
 
 			if !t.Failed() {
-				if !cmp.Equal(got, tt.want) {
-					t.Errorf(cmp.Diff(got, tt.want))
-				}
+				assert.Equal(t, tt.want, got)
 			}
 		})
 	}

@@ -326,9 +326,8 @@ func TestFlag_String(t *testing.T) {
 				False:      tt.fields.False,
 				Default:    tt.fields.Default,
 			}
-			if got := f.String(); got != tt.want {
-				t.Errorf("String() = %v, want %v", got, tt.want)
-			}
+			got := f.String()
+			assert.Equal(t, tt.want, got, "String() = %v, want %v", got, tt.want)
 		})
 	}
 }

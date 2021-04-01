@@ -2,7 +2,7 @@ package retriever_test
 
 import (
 	"context"
-	"github.com/google/go-cmp/cmp"
+	"github.com/stretchr/testify/assert"
 	"testing"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/retriever"
@@ -54,13 +54,11 @@ func Test_localRetriever_Retrieve(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			l := retriever.NewLocalRetriever(tt.fields.path)
 			got, err := l.Retrieve(context.Background())
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Retrieve() error = %v, wantErr %v", err, tt.wantErr)
+			if tt.wantErr {
+				assert.Error(t, err, "Retrieve() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !cmp.Equal(got, tt.want) {
-				t.Errorf(cmp.Diff(got, tt.want))
-			}
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }

@@ -73,17 +73,15 @@ func Test_FlagCache_yaml(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			fCache := New(NewNotificationService([]notifier.Notifier{}))
 			err := fCache.UpdateCache(tt.args.loadedFlags, "yaml")
-			if (err != nil) != tt.wantErr {
-				t.Errorf("UpdateCache() error = %v, wantErr %v", err, tt.wantErr)
+			if tt.wantErr {
+				assert.Error(t, err, "UpdateCache() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-
+			assert.NoError(t, err, "UpdateCache() error = %v, wantErr %v", err, tt.wantErr)
 			// If no error we compare with expected
-			if err == nil {
-				for key, value := range tt.expected {
-					got, _ := fCache.GetFlag(key)
-					assert.Equal(t, value, got)
-				}
+			for key, value := range tt.expected {
+				got, _ := fCache.GetFlag(key)
+				assert.Equal(t, value, got)
 			}
 			fCache.Close()
 		})
@@ -146,17 +144,14 @@ func Test_FlagCache_json(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			fCache := New(NewNotificationService([]notifier.Notifier{}))
 			err := fCache.UpdateCache(tt.args.loadedFlags, "json")
-			if (err != nil) != tt.wantErr {
-				t.Errorf("UpdateCache() error = %v, wantErr %v", err, tt.wantErr)
+			if tt.wantErr {
+				assert.Error(t, err, "UpdateCache() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-
-			// If no error we compare with expected
-			if err == nil {
-				for key, value := range tt.expected {
-					got, _ := fCache.GetFlag(key)
-					assert.Equal(t, value, got)
-				}
+			assert.NoError(t, err, "UpdateCache() error = %v, wantErr %v", err, tt.wantErr)
+			for key, value := range tt.expected {
+				got, _ := fCache.GetFlag(key)
+				assert.Equal(t, value, got)
 			}
 			fCache.Close()
 		})
@@ -215,17 +210,14 @@ default = false`)
 		t.Run(tt.name, func(t *testing.T) {
 			fCache := New(NewNotificationService([]notifier.Notifier{}))
 			err := fCache.UpdateCache(tt.args.loadedFlags, "TOML")
-			if (err != nil) != tt.wantErr {
-				t.Errorf("UpdateCache() error = %v, wantErr %v", err, tt.wantErr)
+			if tt.wantErr {
+				assert.Error(t, err, "UpdateCache() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-
-			// If no error we compare with expected
-			if err == nil {
-				for key, value := range tt.expected {
-					got, _ := fCache.GetFlag(key)
-					assert.Equal(t, value, got)
-				}
+			assert.NoError(t, err, "UpdateCache() error = %v, wantErr %v", err, tt.wantErr)
+			for key, value := range tt.expected {
+				got, _ := fCache.GetFlag(key)
+				assert.Equal(t, value, got)
 			}
 			fCache.Close()
 		})
