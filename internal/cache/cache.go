@@ -50,10 +50,9 @@ func (c *cacheImpl) UpdateCache(loadedFlags []byte, fileFormat string) error {
 		return err
 	}
 
+	c.mutex.Lock()
 	// copy cache for difference checks async
 	cacheCopy := c.flagsCache.Copy()
-
-	c.mutex.Lock()
 	c.flagsCache = newCache
 	c.mutex.Unlock()
 
