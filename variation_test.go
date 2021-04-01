@@ -2,7 +2,6 @@ package ffclient
 
 import (
 	"errors"
-	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"log"
@@ -176,13 +175,11 @@ func TestBoolVariation(t *testing.T) {
 
 			got, err := BoolVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
-			if (err != nil) != tt.wantErr {
-				t.Errorf("BoolVariation() error = %v, wantErr %v", err, tt.wantErr)
+			if tt.wantErr {
+				assert.Error(t, err, "BoolVariation() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if got != tt.want {
-				t.Errorf("BoolVariation() got = %v, want %v", got, tt.want)
-			}
+			assert.Equal(t, tt.want, got, "BoolVariation() got = %v, want %v", got, tt.want)
 
 			if tt.expectedLog != "" {
 				content, _ := ioutil.ReadFile(file.Name())
@@ -338,14 +335,11 @@ func TestFloat64Variation(t *testing.T) {
 
 			got, err := Float64Variation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Float64Variation() error = %v, wantErr %v", err, tt.wantErr)
+			if tt.wantErr {
+				assert.Error(t, err, "Float64Variation() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if got != tt.want {
-				t.Errorf("Float64Variation() got = %v, want %v", got, tt.want)
-			}
-
+			assert.Equal(t, tt.want, got, "Float64Variation() got = %v, want %v", got, tt.want)
 			if tt.expectedLog != "" {
 				content, _ := ioutil.ReadFile(file.Name())
 				assert.Regexp(t, tt.expectedLog, string(content))
@@ -500,14 +494,11 @@ func TestJSONArrayVariation(t *testing.T) {
 
 			got, err := JSONArrayVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
-			if (err != nil) != tt.wantErr {
-				t.Errorf("JSONArrayVariation() error = %v, wantErr %v", err, tt.wantErr)
+			if tt.wantErr {
+				assert.Error(t, err, "JSONArrayVariation() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !cmp.Equal(got, tt.want) {
-				t.Errorf("JSONArrayVariation() got = %v, want %v", got, tt.want)
-			}
-
+			assert.Equal(t, tt.want, got, "JSONArrayVariation() got = %v, want %v", got, tt.want)
 			if tt.expectedLog != "" {
 				content, _ := ioutil.ReadFile(file.Name())
 				assert.Regexp(t, tt.expectedLog, string(content))
@@ -662,13 +653,11 @@ func TestJSONVariation(t *testing.T) {
 
 			got, err := JSONVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
-			if (err != nil) != tt.wantErr {
-				t.Errorf("JSONVariation() error = %v, wantErr %v", err, tt.wantErr)
+			if tt.wantErr {
+				assert.Error(t, err, "JSONVariation() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !cmp.Equal(got, tt.want) {
-				t.Errorf("JSONVariation() got = %v, want %v", got, tt.want)
-			}
+			assert.Equal(t, tt.want, got, "JSONVariation() got = %v, want %v", got, tt.want)
 
 			if tt.expectedLog != "" {
 				content, _ := ioutil.ReadFile(file.Name())
@@ -825,13 +814,11 @@ func TestStringVariation(t *testing.T) {
 			}
 			got, err := StringVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
-			if (err != nil) != tt.wantErr {
-				t.Errorf("StringVariation() error = %v, wantErr %v", err, tt.wantErr)
+			if tt.wantErr {
+				assert.Error(t, err, "StringVariation() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if got != tt.want {
-				t.Errorf("StringVariation() got = %v, want %v", got, tt.want)
-			}
+			assert.Equal(t, tt.want, got, "StringVariation() got = %v, want %v", got, tt.want)
 
 			if tt.expectedLog != "" {
 				content, _ := ioutil.ReadFile(file.Name())
@@ -987,13 +974,11 @@ func TestIntVariation(t *testing.T) {
 			}
 			got, err := IntVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
-			if (err != nil) != tt.wantErr {
-				t.Errorf("IntVariation() error = %v, wantErr %v", err, tt.wantErr)
+			if tt.wantErr {
+				assert.Error(t, err, "IntVariation() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if got != tt.want {
-				t.Errorf("IntVariation() got = %v, want %v", got, tt.want)
-			}
+			assert.Equal(t, tt.want, got, "IntVariation() got = %v, want %v", got, tt.want)
 
 			if tt.expectedLog != "" {
 				content, _ := ioutil.ReadFile(file.Name())
