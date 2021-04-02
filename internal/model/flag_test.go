@@ -216,11 +216,15 @@ func TestFlag_value(t *testing.T) {
 		flagName string
 		user     ffuser.User
 	}
+	type want struct {
+		value         interface{}
+		variationType VariationType
+	}
 	tests := []struct {
 		name   string
 		fields fields
 		args   args
-		want   interface{}
+		want   want
 	}{
 		{
 			name: "Rule disable get default value",
@@ -234,7 +238,10 @@ func TestFlag_value(t *testing.T) {
 				flagName: "test_689483",
 				user:     ffuser.NewUser("test_689483"),
 			},
-			want: "default",
+			want: want{
+				value:         "default",
+				variationType: VariationDefault,
+			},
 		},
 		{
 			name: "Get true value if rule pass",
@@ -249,7 +256,10 @@ func TestFlag_value(t *testing.T) {
 				flagName: "test-flag",
 				user:     ffuser.NewUserBuilder("user66").AddCustom("name", "john").Build(), // combined hash is 9
 			},
-			want: "true",
+			want: want{
+				value:         "true",
+				variationType: VariationTrue,
+			},
 		},
 	}
 	for _, tt := range tests {
@@ -263,8 +273,9 @@ func TestFlag_value(t *testing.T) {
 				Default:    tt.fields.Default,
 			}
 
-			got := f.Value(tt.args.flagName, tt.args.user)
-			assert.Equal(t, tt.want, got)
+			got, variationType := f.Value(tt.args.flagName, tt.args.user)
+			assert.Equal(t, tt.want.value, got)
+			assert.Equal(t, tt.want.variationType, variationType)
 		})
 	}
 }
