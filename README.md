@@ -423,7 +423,7 @@ ffclient.Config{
 </details>
 
 
-## Multiple flag configurations
+## Multiple configuration flag files
 `go-feature-flag` comes ready to use out of the box by calling the `Init` function and after that it will be available everywhere.
 Since most applications will want to use a single central flag configuration, the `go-feature-flag` package provides this. It is similar to a singleton.
 
