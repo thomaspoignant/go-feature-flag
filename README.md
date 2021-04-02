@@ -286,7 +286,7 @@ If you want to be informed when a flag has changed outside of your app, you can 
 `go-feature-flag` can handle more than one notifier at a time *(see bellow the list of available notifiers and how to configure them)*.
 
 <details>
-<summary><span style="font-size: 1.2em;font-style: bold;">Webhooks</span></summary>
+<summary><span style="font-size: 1.2em;font-style: bold;">Webhooks</span> <span style="font-size:0.8em;font-style: italic;">(click to see details)</span></summary>
 
 > :warning: In `v0.9.0` we have changed how to configure webhooks, moving from the key `Webhooks` to `Notifiers`.  
 `Webhooks` is still supported for now but will be removed in a future version.
@@ -395,7 +395,7 @@ This header **`X-Hub-Signature-256`** is sent if the webhook is configured with 
 </details>
 
 <details>
-<summary><span style="font-size: 1.2em;font-style: bold;">Slack</span></summary>
+<summary><span style="font-size: 1.2em;font-style: bold;">Slack</span> <span style="font-size:0.8em;font-style: italic;">(click to see details)</span></summary>
 
 The **Slack** notifier allows you to get notification on your favorite slack channel when an instance of `go-feature-flag` is detecting changes in the configuration file.
 
