@@ -97,8 +97,9 @@ ffclient.Init(ffclient.Config{
 We can have only one source for the file, if you set multiple sources in your configuration, only one will be take in
 consideration.
 
+### From Github
 <details>
-<summary><span style="font-size: 1.2em;font-style: bold;">From GitHub</span> <span style="font-size:0.8em;font-style: italic;">(click to see details)</span></summary>
+<summary><i>expand to see details</i></summary>
 
 ```go
 err := ffclient.Init(ffclient.Config{
@@ -124,8 +125,9 @@ To configure the access to your GitHub file:
 
 </details>
 
+### From an HTTP endpoint
 <details>
-<summary><span style="font-size: 1.2em;font-style: bold;">From an HTTP endpoint</span> <span style="font-size:0.8em;font-style: italic;">(click to see details)</span></summary>
+<summary><i>expand to see details</i></summary>
 
 ```go
 err := ffclient.Init(ffclient.Config{
@@ -147,8 +149,9 @@ To configure your HTTP endpoint:
 
 </details>
 
+### From a S3 Bucket
 <details>
-<summary><span style="font-size: 1.2em;font-style: bold;">From a S3 Bucket</span> <span style="font-size:0.8em;font-style: italic;">(click to see details)</span></summary>
+<summary><i>expand to see details</i></summary>
 
 ```go
 err := ffclient.Init(ffclient.Config{
@@ -171,8 +174,9 @@ To configure your S3 file location:
 
 </details>
 
+### From a file
 <details>
-<summary><span style="font-size: 1.2em;font-style: bold;">From a file</span> <span style="font-size:0.8em;font-style: italic;">(click to see details)</span></summary>
+<summary><i>expand to see details</i></summary>
 
 ```go
 err := ffclient.Init(ffclient.Config{
@@ -285,8 +289,9 @@ Not that you will always have a usable value in the result.
 If you want to be informed when a flag has changed outside of your app, you can configure a **notifier**.
 `go-feature-flag` can handle more than one notifier at a time *(see bellow the list of available notifiers and how to configure them)*.
 
+### Webhooks
 <details>
-<summary><span style="font-size: 1.2em;font-style: bold;">Webhooks</span> <span style="font-size:0.8em;font-style: italic;">(click to see details)</span></summary>
+<summary><i>expand to see details</i></summary>
 
 > :warning: In `v0.9.0` we have changed how to configure webhooks, moving from the key `Webhooks` to `Notifiers`.  
 `Webhooks` is still supported for now but will be removed in a future version.
@@ -313,7 +318,7 @@ ffclient.Config{
 |`Secret`   |![optional](https://img.shields.io/badge/-optional-green)   |  A secret key you can share with your webhook. We will use this key to sign the request *(see [signature section](#signature) for more details)*. |
 |`Meta`   |![optional](https://img.shields.io/badge/-optional-green)   |  A list of key value that will be add in your request, this is super usefull if you to add information on the current running instance of your app.<br/>*By default the hostname is always added in the meta informations.*|
 
-### Format
+#### Format
 If you have configured a webhook, a POST request will be sent to the `PayloadURL` with a body in this format:
 
 ```json
@@ -387,15 +392,16 @@ If you have configured a webhook, a POST request will be sent to the `PayloadURL
 
 
 
-### Signature
+#### Signature
 This header **`X-Hub-Signature-256`** is sent if the webhook is configured with a secret. This is the HMAC hex digest of the request body, and is generated using the SHA-256 hash function and the secret as the HMAC key.
 
 :warning: **The recommendation is to always use the `Secret` and on your API/webook always verify the signature key to be sure that you don't have a man in the middle attack.**
 
 </details>
 
+### SLACK
 <details>
-<summary><span style="font-size: 1.2em;font-style: bold;">Slack</span> <span style="font-size:0.8em;font-style: italic;">(click to see details)</span></summary>
+<summary><i>expand to see details</i></summary>
 
 The **Slack** notifier allows you to get notification on your favorite slack channel when an instance of `go-feature-flag` is detecting changes in the configuration file.
 
