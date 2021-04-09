@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"sync"
 	"testing"
 	"time"
 
@@ -20,10 +21,13 @@ type mockExporter struct {
 	err               error
 	expectedNumberErr int
 	currentNumberErr  int
+	mutex             sync.Mutex
 }
 
 func (m *mockExporter) Export(logger *log.Logger, events []exporter.FeatureEvent) error {
+	m.mutex.Lock()
 	m.exportedEvents = append(m.exportedEvents, events...)
+	m.mutex.Unlock()
 
 	if m.err != nil {
 		if m.expectedNumberErr > m.currentNumberErr {
@@ -34,8 +38,14 @@ func (m *mockExporter) Export(logger *log.Logger, events []exporter.FeatureEvent
 	return nil
 }
 
+func (m *mockExporter) getExportedEvents() []exporter.FeatureEvent {
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
+	return m.exportedEvents
+}
+
 func TestDataExporterScheduler_flushWithTime(t *testing.T) {
-	mockExporter := mockExporter{}
+	mockExporter := mockExporter{mutex: sync.Mutex{}}
 	dc := exporter.NewDataExporterScheduler(
 		10*time.Millisecond, 1000, &mockExporter, log.New(os.Stdout, "", 0))
 	go dc.StartDaemon()
@@ -51,11 +61,11 @@ func TestDataExporterScheduler_flushWithTime(t *testing.T) {
 	}
 
 	time.Sleep(10 * time.Millisecond * 2)
-	assert.Equal(t, inputEvents, mockExporter.exportedEvents)
+	assert.Equal(t, inputEvents, mockExporter.getExportedEvents())
 }
 
 func TestDataExporterScheduler_flushWithNumberOfEvents(t *testing.T) {
-	mockExporter := mockExporter{}
+	mockExporter := mockExporter{mutex: sync.Mutex{}}
 	dc := exporter.NewDataExporterScheduler(
 		10*time.Minute, 100, &mockExporter, log.New(os.Stdout, "", 0))
 	go dc.StartDaemon()
@@ -69,11 +79,11 @@ func TestDataExporterScheduler_flushWithNumberOfEvents(t *testing.T) {
 	for _, event := range inputEvents {
 		dc.AddEvent(event)
 	}
-	assert.Equal(t, inputEvents[:100], mockExporter.exportedEvents)
+	assert.Equal(t, inputEvents[:100], mockExporter.getExportedEvents())
 }
 
 func TestDataExporterScheduler_defaultFlush(t *testing.T) {
-	mockExporter := mockExporter{}
+	mockExporter := mockExporter{mutex: sync.Mutex{}}
 	dc := exporter.NewDataExporterScheduler(
 		0, 0, &mockExporter, log.New(os.Stdout, "", 0))
 	go dc.StartDaemon()
@@ -87,11 +97,11 @@ func TestDataExporterScheduler_defaultFlush(t *testing.T) {
 	for _, event := range inputEvents {
 		dc.AddEvent(event)
 	}
-	assert.Equal(t, inputEvents[:100000], mockExporter.exportedEvents)
+	assert.Equal(t, inputEvents[:100000], mockExporter.getExportedEvents())
 }
 
 func TestDataExporterScheduler_exporterReturnError(t *testing.T) {
-	mockExporter := mockExporter{err: errors.New("random err"), expectedNumberErr: 1}
+	mockExporter := mockExporter{err: errors.New("random err"), expectedNumberErr: 1, mutex: sync.Mutex{}}
 
 	file, _ := ioutil.TempFile("", "log")
 	defer file.Close()
@@ -111,7 +121,7 @@ func TestDataExporterScheduler_exporterReturnError(t *testing.T) {
 	for _, event := range inputEvents {
 		dc.AddEvent(event)
 	}
-	assert.Equal(t, inputEvents[:201], mockExporter.exportedEvents)
+	assert.Equal(t, inputEvents[:201], mockExporter.getExportedEvents())
 
 	// read log
 	logs, _ := ioutil.ReadFile(file.Name())
