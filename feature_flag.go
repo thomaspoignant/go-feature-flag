@@ -8,6 +8,7 @@ import (
 
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
 	"github.com/thomaspoignant/go-feature-flag/internal/exporter"
+	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 )
 
 // Init the feature flag component with the configuration of ffclient.Config
@@ -109,8 +110,8 @@ func (g *GoFeatureFlag) startFlagUpdaterDaemon() {
 		select {
 		case <-g.bgUpdater.ticker.C:
 			err := retrieveFlagsAndUpdateCache(g.config, g.cache)
-			if err != nil && g.config.Logger != nil {
-				g.config.Logger.Printf("[%v] error while updating the cache: %v\n", time.Now().Format(time.RFC3339), err)
+			if err != nil {
+				fflog.Printf(g.config.Logger, "[%v] error while updating the cache: %v\n", time.Now().Format(time.RFC3339), err)
 			}
 		case <-g.bgUpdater.updaterChan:
 			return

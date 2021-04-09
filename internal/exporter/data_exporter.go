@@ -4,6 +4,8 @@ import (
 	"log"
 	"sync"
 	"time"
+
+	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 )
 
 const defaultFlushInterval = 60 * time.Second
@@ -92,9 +94,7 @@ func (dc *DataExporter) sendData() {
 	if len(dc.localCache) > 0 {
 		err := dc.exporter.Export(dc.logger, dc.localCache)
 		if err != nil {
-			if dc.logger != nil {
-				dc.logger.Printf("[%v] error while exporting data: %v\n", time.Now().Format(time.RFC3339), err)
-			}
+			fflog.Printf(dc.logger, "[%v] error while exporting data: %v\n", time.Now().Format(time.RFC3339), err)
 		}
 	}
 	// Clear the cache

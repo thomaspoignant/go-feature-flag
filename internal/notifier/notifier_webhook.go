@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/internal"
+	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 	"github.com/thomaspoignant/go-feature-flag/internal/model"
 )
 
@@ -74,8 +75,8 @@ func (c *WebhookNotifier) Notify(diff model.DiffCache, wg *sync.WaitGroup) {
 	}
 
 	payload, err := json.Marshal(reqBody)
-	if err != nil && c.Logger != nil {
-		c.Logger.Printf("[%v] error: (WebhookNotifier) impossible to read differences; %v\n", date, err)
+	if err != nil {
+		fflog.Printf(c.Logger, "[%v] error: (WebhookNotifier) impossible to read differences; %v\n", date, err)
 		return
 	}
 
@@ -97,14 +98,12 @@ func (c *WebhookNotifier) Notify(diff model.DiffCache, wg *sync.WaitGroup) {
 	response, err := c.HTTPClient.Do(&request)
 	// Log if something went wrong while calling the webhook.
 	if err != nil {
-		if c.Logger != nil {
-			c.Logger.Printf("[%v] error: while calling webhook: %v\n", date, err)
-		}
+		fflog.Printf(c.Logger, "[%v] error: while calling webhook: %v\n", date, err)
 		return
 	}
 	defer response.Body.Close()
-	if response.StatusCode > 399 && c.Logger != nil {
-		c.Logger.Printf("[%v] error: while calling webhook, statusCode = %d", date, response.StatusCode)
+	if response.StatusCode > 399 {
+		fflog.Printf(c.Logger, "[%v] error: while calling webhook, statusCode = %d", date, response.StatusCode)
 		return
 	}
 }

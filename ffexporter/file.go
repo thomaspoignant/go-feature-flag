@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/exporter"
+	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 )
 
 type File struct {
@@ -70,24 +71,18 @@ func (f *File) Export(logger *log.Logger, featureEvents []exporter.FeatureEvent)
 		case "csv":
 			err := f.csvTemplate.Execute(file, event)
 			if err != nil {
-				if logger != nil {
-					logger.Printf("[%v] impossible to parse the event in CSV: %v\n", time.Now().Format(time.RFC3339), err)
-				}
+				fflog.Printf(logger, "[%v] impossible to parse the event in CSV: %v\n", time.Now().Format(time.RFC3339), err)
 			}
 		case "json":
 		default:
 			b, err := json.Marshal(event)
 			if err != nil {
-				if logger != nil {
-					logger.Printf("[%v] error while marshal into JSON: %v\n", time.Now().Format(time.RFC3339), err)
-				}
+				fflog.Printf(logger, "[%v] error while marshal into JSON: %v\n", time.Now().Format(time.RFC3339), err)
 			}
 			b = append(b, []byte("\n")...)
 			_, err = file.Write(b)
 			if err != nil {
-				if logger != nil {
-					logger.Printf("[%v] error while writing the export file: %v\n", time.Now().Format(time.RFC3339), err)
-				}
+				fflog.Printf(logger, "[%v] error while writing the export file: %v\n", time.Now().Format(time.RFC3339), err)
 			}
 		}
 	}

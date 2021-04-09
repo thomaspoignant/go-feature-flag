@@ -6,6 +6,7 @@ import (
 
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
 	"github.com/thomaspoignant/go-feature-flag/internal/exporter"
+	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 	"github.com/thomaspoignant/go-feature-flag/internal/model"
 )
 
@@ -195,11 +196,8 @@ func (g *GoFeatureFlag) notifyVariation(
 		g.dataExporter.AddEvent(event)
 	}
 
-	if g.config.Logger != nil {
-		tm := time.Unix(event.CreationDate, 0)
-		g.config.Logger.Printf("[%v] user=\"%s\", flag=\"%s\", value=\"%v\"",
-			tm.Format(time.RFC3339), event.UserKey, event.Key, event.Value)
-	}
+	fflog.Printf(g.config.Logger, "[%v] user=\"%s\", flag=\"%s\", value=\"%v\"",
+		time.Unix(event.CreationDate, 0).Format(time.RFC3339), event.UserKey, event.Key, event.Value)
 }
 
 // getFlagFromCache try to get the flag from the cache.
