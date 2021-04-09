@@ -1,15 +1,14 @@
 package ffexporter
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"strings"
 	"sync"
 	"text/template"
-	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/exporter"
-	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 )
 
 type File struct {
@@ -83,12 +82,11 @@ func (f *File) Export(logger *log.Logger, featureEvents []exporter.FeatureEvent)
 
 		// Handle error and write line into the file
 		if err != nil {
-			fflog.Printf(logger, "[%v] impossible to format the event in %s: %v\n",
-				time.Now().Format(time.RFC3339), f.Format, err)
+			return fmt.Errorf("impossible to format the event in %s: %v", f.Format, err)
 		}
 		_, errWrite := file.Write(line)
 		if errWrite != nil {
-			fflog.Printf(logger, "[%v] error while writing the export file: %v\n", time.Now().Format(time.RFC3339), err)
+			return fmt.Errorf("error while writing the export file: %v", err)
 		}
 	}
 	return nil

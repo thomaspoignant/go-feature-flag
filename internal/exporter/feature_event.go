@@ -14,8 +14,6 @@ func NewFeatureEvent(
 	value interface{},
 	variation model.VariationType,
 	failed bool) FeatureEvent {
-	// TODO: check if flag trackable
-
 	contextKind := "user"
 	if user.IsAnonymous() {
 		contextKind = "anonymousUser"
@@ -36,7 +34,6 @@ func NewFeatureEvent(
 type FeatureEvent struct {
 	// The kind for a feature event is feature.
 	// A feature event will only be generated if the trackEvents attribute of the flag is set to true.
-	// TODO: check the trackEvents attribute
 	Kind string `json:"kind"`
 
 	// The kind of context which generated an event. This will only be "anonymousUser" for events generated on behalf of

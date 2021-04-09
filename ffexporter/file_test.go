@@ -160,6 +160,22 @@ func TestFile_Export(t *testing.T) {
 				},
 			},
 		},
+		{
+			name:    "invalid csv formatter",
+			wantErr: true,
+			fields: fields{
+				Format:      "csv",
+				CsvTemplate: "{{ .Foo}}",
+			},
+			args: args{
+				featureEvents: []exporter.FeatureEvent{
+					{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
+						Variation: "Default", Value: "YO", Default: false},
+					{Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
+						Variation: "Default", Value: "YO2", Default: false},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
