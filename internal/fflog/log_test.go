@@ -3,6 +3,7 @@ package fflog_test
 import (
 	"github.com/stretchr/testify/assert"
 	"log"
+	"os"
 	"testing"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
@@ -29,7 +30,7 @@ func TestPrintf(t *testing.T) {
 		{
 			name: "with logger",
 			args: args{
-				logger: log.Default(),
+				logger: log.New(os.Stdout, "", 0),
 				format: "Toto %v",
 				v:      []interface{}{"toto"},
 			},
