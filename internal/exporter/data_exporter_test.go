@@ -14,38 +14,11 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/internal/exporter"
 	"github.com/thomaspoignant/go-feature-flag/internal/model"
 	"github.com/thomaspoignant/go-feature-flag/testutil"
+	"github.com/thomaspoignant/go-feature-flag/testutils"
 )
 
-type mockExporter struct {
-	exportedEvents    []exporter.FeatureEvent
-	err               error
-	expectedNumberErr int
-	currentNumberErr  int
-	mutex             sync.Mutex
-}
-
-func (m *mockExporter) Export(logger *log.Logger, events []exporter.FeatureEvent) error {
-	m.mutex.Lock()
-	m.exportedEvents = append(m.exportedEvents, events...)
-	m.mutex.Unlock()
-
-	if m.err != nil {
-		if m.expectedNumberErr > m.currentNumberErr {
-			m.currentNumberErr++
-			return m.err
-		}
-	}
-	return nil
-}
-
-func (m *mockExporter) getExportedEvents() []exporter.FeatureEvent {
-	m.mutex.Lock()
-	defer m.mutex.Unlock()
-	return m.exportedEvents
-}
-
 func TestDataExporterScheduler_flushWithTime(t *testing.T) {
-	mockExporter := mockExporter{mutex: sync.Mutex{}}
+	mockExporter := testutils.MockExporter{Mutex: sync.Mutex{}}
 	dc := exporter.NewDataExporterScheduler(
 		10*time.Millisecond, 1000, &mockExporter, log.New(os.Stdout, "", 0))
 	go dc.StartDaemon()
@@ -61,11 +34,11 @@ func TestDataExporterScheduler_flushWithTime(t *testing.T) {
 	}
 
 	time.Sleep(10 * time.Millisecond * 2)
-	assert.Equal(t, inputEvents, mockExporter.getExportedEvents())
+	assert.Equal(t, inputEvents, mockExporter.GetExportedEvents())
 }
 
 func TestDataExporterScheduler_flushWithNumberOfEvents(t *testing.T) {
-	mockExporter := mockExporter{mutex: sync.Mutex{}}
+	mockExporter := testutils.MockExporter{Mutex: sync.Mutex{}}
 	dc := exporter.NewDataExporterScheduler(
 		10*time.Minute, 100, &mockExporter, log.New(os.Stdout, "", 0))
 	go dc.StartDaemon()
@@ -79,11 +52,11 @@ func TestDataExporterScheduler_flushWithNumberOfEvents(t *testing.T) {
 	for _, event := range inputEvents {
 		dc.AddEvent(event)
 	}
-	assert.Equal(t, inputEvents[:100], mockExporter.getExportedEvents())
+	assert.Equal(t, inputEvents[:100], mockExporter.GetExportedEvents())
 }
 
 func TestDataExporterScheduler_defaultFlush(t *testing.T) {
-	mockExporter := mockExporter{mutex: sync.Mutex{}}
+	mockExporter := testutils.MockExporter{Mutex: sync.Mutex{}}
 	dc := exporter.NewDataExporterScheduler(
 		0, 0, &mockExporter, log.New(os.Stdout, "", 0))
 	go dc.StartDaemon()
@@ -97,11 +70,11 @@ func TestDataExporterScheduler_defaultFlush(t *testing.T) {
 	for _, event := range inputEvents {
 		dc.AddEvent(event)
 	}
-	assert.Equal(t, inputEvents[:100000], mockExporter.getExportedEvents())
+	assert.Equal(t, inputEvents[:100000], mockExporter.GetExportedEvents())
 }
 
 func TestDataExporterScheduler_exporterReturnError(t *testing.T) {
-	mockExporter := mockExporter{err: errors.New("random err"), expectedNumberErr: 1, mutex: sync.Mutex{}}
+	mockExporter := testutils.MockExporter{Err: errors.New("random err"), ExpectedNumberErr: 1, Mutex: sync.Mutex{}}
 
 	file, _ := ioutil.TempFile("", "log")
 	defer file.Close()
@@ -121,7 +94,7 @@ func TestDataExporterScheduler_exporterReturnError(t *testing.T) {
 	for _, event := range inputEvents {
 		dc.AddEvent(event)
 	}
-	assert.Equal(t, inputEvents[:201], mockExporter.getExportedEvents())
+	assert.Equal(t, inputEvents[:201], mockExporter.GetExportedEvents())
 
 	// read log
 	logs, _ := ioutil.ReadFile(file.Name())

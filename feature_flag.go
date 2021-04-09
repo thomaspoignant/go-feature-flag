@@ -80,10 +80,10 @@ func New(config Config) (*GoFeatureFlag, error) {
 	// start the flag update in background
 	go goFF.startFlagUpdaterDaemon()
 
-	if goFF.config.DataExporter.Collector != nil {
+	if goFF.config.DataExporter.Exporter != nil {
 		// init the data exporter
 		goFF.dataExporter = exporter.NewDataExporterScheduler(goFF.config.DataExporter.FlushInterval,
-			goFF.config.DataExporter.MaxEventInCache, goFF.config.DataExporter.Collector, goFF.config.Logger)
+			goFF.config.DataExporter.MaxEventInCache, goFF.config.DataExporter.Exporter, goFF.config.Logger)
 		go goFF.dataExporter.StartDaemon()
 	}
 	return goFF, nil

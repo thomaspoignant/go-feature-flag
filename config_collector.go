@@ -6,8 +6,9 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/internal/exporter"
 )
 
+// TODO : Add documentation
 type DataExporter struct {
 	FlushInterval   time.Duration
 	MaxEventInCache int64
-	Collector       exporter.Exporter
+	Exporter        exporter.Exporter
 }
