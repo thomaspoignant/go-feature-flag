@@ -2,11 +2,14 @@ package ffexporter
 
 import (
 	"bytes"
+	"encoding/json"
 	"os"
 	"strconv"
 	"strings"
 	"text/template"
 	"time"
+
+	"github.com/thomaspoignant/go-feature-flag/internal/exporter"
 )
 
 const DefaultCsvTemplate = "{{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};" +
@@ -14,13 +17,12 @@ const DefaultCsvTemplate = "{{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .Creat
 const DefaultFilenameTemplate = "flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}"
 
 // parseTemplate is parsing the template given by the config or use the default template
-func parseTemplate(csvTemplate string, defaultTemplate string) *template.Template {
-	if csvTemplate == "" {
-		csvTemplate = defaultTemplate
+func parseTemplate(templateToParse string, defaultTemplate string) *template.Template {
+	if templateToParse == "" {
+		templateToParse = defaultTemplate
 	}
-	t, err := template.New("exporter").Parse(csvTemplate)
+	t, err := template.New("exporter").Parse(templateToParse)
 	if err != nil {
-		// TODO: log that we are using default template
 		t, _ = template.New("exporter").Parse(defaultTemplate)
 	}
 	return t
@@ -33,7 +35,6 @@ func computeFilename(template *template.Template, format string) (string, error)
 	format = strings.ToLower(format)
 
 	var buf bytes.Buffer
-	// TODO: Handle error
 	err := template.Execute(&buf, struct {
 		Hostname  string
 		Timestamp string
@@ -43,6 +44,17 @@ func computeFilename(template *template.Template, format string) (string, error)
 		Timestamp: timestamp,
 		Format:    format,
 	})
-
 	return buf.String(), err
+}
+
+func formatEventInCSV(csvTemplate *template.Template, event exporter.FeatureEvent) ([]byte, error) {
+	var buf bytes.Buffer
+	err := csvTemplate.Execute(&buf, event)
+	return buf.Bytes(), err
+}
+
+func formatEventInJSON(event exporter.FeatureEvent) ([]byte, error) {
+	b, err := json.Marshal(event)
+	b = append(b, []byte("\n")...)
+	return b, err
 }

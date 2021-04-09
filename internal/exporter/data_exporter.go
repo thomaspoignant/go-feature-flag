@@ -11,9 +11,9 @@ import (
 const defaultFlushInterval = 60 * time.Second
 const defaultMaxEventInCache = int64(100000)
 
-// NewDataExporter allows to create a new instance of DataExporter ready to be used to export data.
-func NewDataExporter(flushInterval time.Duration, maxEventInCache int64,
-	collector Exporter, logger *log.Logger) *DataExporter {
+// NewDataExporterScheduler allows to create a new instance of DataExporterScheduler ready to be used to export data.
+func NewDataExporterScheduler(flushInterval time.Duration, maxEventInCache int64,
+	exporter Exporter, logger *log.Logger) *DataExporterScheduler {
 	if flushInterval == 0 {
 		flushInterval = defaultFlushInterval
 	}
@@ -22,11 +22,11 @@ func NewDataExporter(flushInterval time.Duration, maxEventInCache int64,
 		maxEventInCache = defaultMaxEventInCache
 	}
 
-	return &DataExporter{
+	return &DataExporterScheduler{
 		localCache:      make([]FeatureEvent, 0),
 		mutex:           sync.Mutex{},
 		maxEventInCache: maxEventInCache,
-		exporter:        collector,
+		exporter:        exporter,
 		daemonChan:      make(chan struct{}),
 		ticker:          time.NewTicker(flushInterval),
 		logger:          logger,
@@ -38,8 +38,8 @@ type Exporter interface {
 	Export(*log.Logger, []FeatureEvent) error
 }
 
-// DataExporter is the struct that handle the data collection.
-type DataExporter struct {
+// DataExporterScheduler is the struct that handle the data collection.
+type DataExporterScheduler struct {
 	localCache      []FeatureEvent
 	mutex           sync.Mutex
 	daemonChan      chan struct{}
@@ -51,23 +51,23 @@ type DataExporter struct {
 
 // AddEvent allow to add an event to the local cache and to call the exporter if we reach
 // the maximum number of events that can be present in the cache.
-func (dc *DataExporter) AddEvent(event FeatureEvent) {
+func (dc *DataExporterScheduler) AddEvent(event FeatureEvent) {
 	dc.mutex.Lock()
 	if int64(len(dc.localCache)) >= dc.maxEventInCache {
-		dc.sendData()
+		dc.flush()
 	}
 	dc.localCache = append(dc.localCache, event)
 	dc.mutex.Unlock()
 }
 
 // StartDaemon will start a goroutine to check every X seconds if we should send the data.
-func (dc *DataExporter) StartDaemon() {
+func (dc *DataExporterScheduler) StartDaemon() {
 	for {
 		select {
 		case <-dc.ticker.C:
 			// send data and clear local cache
 			dc.mutex.Lock()
-			dc.sendData()
+			dc.flush()
 			dc.mutex.Unlock()
 		case <-dc.daemonChan:
 			// stop the daemon
@@ -77,24 +77,25 @@ func (dc *DataExporter) StartDaemon() {
 }
 
 // Close will stop the daemon and send the data still in the cache
-func (dc *DataExporter) Close() {
+func (dc *DataExporterScheduler) Close() {
 	// Close the daemon
 	dc.ticker.Stop()
 	close(dc.daemonChan)
 
 	// Send the data still in the cache
 	dc.mutex.Lock()
-	dc.sendData()
+	dc.flush()
 	dc.mutex.Unlock()
 }
 
-// sendData will call the data exporter and clear the cache
+// flush will call the data exporter and clear the cache
 // this method should be always called with a mutex
-func (dc *DataExporter) sendData() {
+func (dc *DataExporterScheduler) flush() {
 	if len(dc.localCache) > 0 {
 		err := dc.exporter.Export(dc.logger, dc.localCache)
 		if err != nil {
 			fflog.Printf(dc.logger, "[%v] error while exporting data: %v\n", time.Now().Format(time.RFC3339), err)
+			return
 		}
 	}
 	// Clear the cache

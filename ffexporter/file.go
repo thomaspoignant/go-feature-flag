@@ -1,7 +1,6 @@
 package ffexporter
 
 import (
-	"encoding/json"
 	"log"
 	"os"
 	"strings"
@@ -65,25 +64,28 @@ func (f *File) Export(logger *log.Logger, featureEvents []exporter.FeatureEvent)
 		return err
 	}
 	defer file.Close()
-
 	for _, event := range featureEvents {
+		var line []byte
+		var err error
+
+		// Convert the line in the right format
 		switch strings.ToLower(f.Format) {
 		case "csv":
-			err := f.csvTemplate.Execute(file, event)
-			if err != nil {
-				fflog.Printf(logger, "[%v] impossible to parse the event in CSV: %v\n", time.Now().Format(time.RFC3339), err)
-			}
+			line, err = formatEventInCSV(f.csvTemplate, event)
 		case "json":
+			line, err = formatEventInJSON(event)
 		default:
-			b, err := json.Marshal(event)
-			if err != nil {
-				fflog.Printf(logger, "[%v] error while marshal into JSON: %v\n", time.Now().Format(time.RFC3339), err)
-			}
-			b = append(b, []byte("\n")...)
-			_, err = file.Write(b)
-			if err != nil {
-				fflog.Printf(logger, "[%v] error while writing the export file: %v\n", time.Now().Format(time.RFC3339), err)
-			}
+			line, err = formatEventInJSON(event)
+		}
+
+		// Handle error and write line into the file
+		if err != nil {
+			fflog.Printf(logger, "[%v] impossible to format the event in %s: %v\n",
+				time.Now().Format(time.RFC3339), f.Format, err)
+		}
+		_, errWrite := file.Write(line)
+		if errWrite != nil {
+			fflog.Printf(logger, "[%v] error while writing the export file: %v\n", time.Now().Format(time.RFC3339), err)
 		}
 	}
 	return nil

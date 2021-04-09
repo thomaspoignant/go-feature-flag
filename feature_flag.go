@@ -39,7 +39,7 @@ type GoFeatureFlag struct {
 	cache        cache.Cache
 	config       Config
 	bgUpdater    backgroundUpdater
-	dataExporter *exporter.DataExporter
+	dataExporter *exporter.DataExporterScheduler
 }
 
 // ff is the default object for go-feature-flag
@@ -82,7 +82,7 @@ func New(config Config) (*GoFeatureFlag, error) {
 
 	if goFF.config.DataExporter.Collector != nil {
 		// init the data exporter
-		goFF.dataExporter = exporter.NewDataExporter(goFF.config.DataExporter.FlushInterval,
+		goFF.dataExporter = exporter.NewDataExporterScheduler(goFF.config.DataExporter.FlushInterval,
 			goFF.config.DataExporter.MaxEventInCache, goFF.config.DataExporter.Collector, goFF.config.Logger)
 		go goFF.dataExporter.StartDaemon()
 	}
