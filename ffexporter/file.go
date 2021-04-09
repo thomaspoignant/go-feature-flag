@@ -55,8 +55,11 @@ func (f *File) Export(logger *log.Logger, featureEvents []exporter.FeatureEvent)
 	}
 
 	// Get the filename
-	// TODO: handle error
-	filename, _ := computeFilename(f.filenameTemplate, f.Format)
+	filename, err := computeFilename(f.filenameTemplate, f.Format)
+	if err != nil {
+		return err
+	}
+
 	filePath := f.OutputDir + "/" + filename
 
 	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)

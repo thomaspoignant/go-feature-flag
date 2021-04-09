@@ -144,9 +144,20 @@ func TestFile_Export(t *testing.T) {
 						Variation: "Default", Value: "YO2", Default: false},
 				},
 			},
-			expected: expected{
-				fileNameRegex: "^flag-variation-" + hostname + "-[0-9]*\\.xxx$",
-				content:       "../testdata/ffexporter/file/all_default.json",
+		},
+		{
+			name:    "invalid filename template",
+			wantErr: true,
+			fields: fields{
+				Filename: "{{ .InvalidField}}",
+			},
+			args: args{
+				featureEvents: []exporter.FeatureEvent{
+					{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
+						Variation: "Default", Value: "YO", Default: false},
+					{Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
+						Variation: "Default", Value: "YO2", Default: false},
+				},
 			},
 		},
 	}
