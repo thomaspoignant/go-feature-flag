@@ -23,7 +23,7 @@ type Config struct {
 	// Deprecated: Use Notifiers instead, webhooks will be delete in a future version
 	Webhooks []WebhookConfig // Webhooks we should call when a flag create/update/delete
 	// DataCollector is the configuration where we store how we should output the flags variations results
-	DataExporter CollectorConfig
+	DataExporter DataExporter
 }
 
 // GetRetriever returns a retriever.FlagRetriever configure with the retriever available in the config.
