@@ -1,3 +1,6 @@
+run:
+  skip-dirs:
+    - (^|/)bin($|/)
 linters:
   enable:
     - asciicheck
@@ -13,25 +16,20 @@ linters:
     - golint
     - gosec
     - lll
-    - maligned
     - misspell
     - nakedret
     - noctx
     - prealloc
     - rowserrcheck
-    - scopelint
+    - exportloopref
     - stylecheck
     - unconvert
     - unparam
     - whitespace
-skip-dirs:
-  - docs
 linters-settings:
   funlen:
     lines: 90
     statements: 50
-  maligned:
-    suggest-new: true
   gocritic:
     disabled-checks:
       - singleCaseSwitch

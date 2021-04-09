@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
-	"github.com/thomaspoignant/go-feature-flag/internal/datacollector"
+	"github.com/thomaspoignant/go-feature-flag/internal/exporter"
 	"github.com/thomaspoignant/go-feature-flag/internal/model"
 )
 
@@ -188,12 +188,17 @@ func (g *GoFeatureFlag) JSONVariation(
 // if no logger is provided in the configuration we are not logging anything.
 func (g *GoFeatureFlag) notifyVariation(
 	flagKey string, flag model.Flag, user ffuser.User, value interface{}, variationType model.VariationType, failed bool) {
-	fe := datacollector.NewFeatureEvent(user, flagKey, flag, value, variationType, failed)
+	event := exporter.NewFeatureEvent(user, flagKey, flag, value, variationType, failed)
+
+	// Add event in the exporter
+	if g.dataExporter != nil {
+		g.dataExporter.AddEvent(event)
+	}
 
 	if g.config.Logger != nil {
-		g.config.Logger.Printf(
-			"[%v] user=\"%s\", flag=\"%s\", value=\"%v\"",
-			fe.CreationDate.Format(time.RFC3339), fe.UserKey, fe.Key, fe.Value)
+		tm := time.Unix(event.CreationDate, 0)
+		g.config.Logger.Printf("[%v] user=\"%s\", flag=\"%s\", value=\"%v\"",
+			tm.Format(time.RFC3339), event.UserKey, event.Key, event.Value)
 	}
 }
 

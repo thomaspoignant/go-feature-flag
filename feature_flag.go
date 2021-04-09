@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
+	"github.com/thomaspoignant/go-feature-flag/internal/exporter"
 )
 
 // Init the feature flag component with the configuration of ffclient.Config
@@ -34,9 +35,10 @@ func Close() {
 // GoFeatureFlag is the main object of the library
 // it contains the cache, the config and the update.
 type GoFeatureFlag struct {
-	cache     cache.Cache
-	config    Config
-	bgUpdater backgroundUpdater
+	cache        cache.Cache
+	config       Config
+	bgUpdater    backgroundUpdater
+	dataExporter *exporter.DataExporter
 }
 
 // ff is the default object for go-feature-flag
@@ -77,6 +79,12 @@ func New(config Config) (*GoFeatureFlag, error) {
 	// start the flag update in background
 	go goFF.startFlagUpdaterDaemon()
 
+	if goFF.config.DataExporter.Collector != nil {
+		// init the data exporter
+		goFF.dataExporter = exporter.NewDataExporter(goFF.config.DataExporter.FlushInterval,
+			goFF.config.DataExporter.MaxEventInCache, goFF.config.DataExporter.Collector, goFF.config.Logger)
+		go goFF.dataExporter.StartDaemon()
+	}
 	return goFF, nil
 }
 
@@ -87,8 +95,11 @@ func (g *GoFeatureFlag) Close() {
 			// clear the cache
 			g.cache.Close()
 		}
-
 		g.bgUpdater.close()
+
+		if g.dataExporter != nil {
+			g.dataExporter.Close()
+		}
 	}
 }
 

@@ -1,4 +1,4 @@
-package datacollector
+package exporter
 
 import (
 	"time"
@@ -25,7 +25,7 @@ func NewFeatureEvent(
 		Kind:         "feature",
 		ContextKind:  contextKind,
 		UserKey:      user.GetKey(),
-		CreationDate: time.Now(),
+		CreationDate: time.Now().Unix(),
 		Key:          flagKey,
 		Variation:    variation,
 		Value:        value,
@@ -48,7 +48,7 @@ type FeatureEvent struct {
 	UserKey string `json:"userKey"`
 
 	// When the feature flag was requested at Unix epoch time in milliseconds.
-	CreationDate time.Time `json:"creationDate"`
+	CreationDate int64 `json:"creationDate"`
 
 	// The key of the feature flag requested.
 	Key string `json:"key"`
