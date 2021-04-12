@@ -98,7 +98,7 @@ ffclient.Init(ffclient.Config{
 |`FileFormat`| Format of your configuration file. Available formats are `yaml`, `toml` and `json`, if you omit the field it will try to unmarshal the file as a `yaml` file.|
 |`Retriever`  | The configuration retriever you want to use to get your flag file *(see [Where do I store my flags file](#where-do-i-store-my-flags-file) for the configuration details)*.|
 |`Notifiers` | List of notifiers to call when your flag file has changed *(see [notifiers section](#notifiers) for more details)*.|
-|`DataExporter` | DataExporter defines how to export data on how your flag are used. *(see [export data section](#export-data) for more details)*.|
+|`DataExporter` | DataExporter defines how to export data on how your flags are used. *(see [export data section](#export-data) for more details)*.|
 
 ## Where do I store my flags file
 `go-feature-flags` support different ways of retrieving the flag file.  
