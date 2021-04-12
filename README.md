@@ -463,7 +463,7 @@ An example feature event below:
 
 Events are collected and send in bulk to avoid to spam your exporter *(see details in [how to configure data export](#how-to-configure-data-export)*)
 
-### How to configure data export
+### How to configure data export?
 In your `ffclient.Config` add the `DataExporter` field and configure your export location.
 
 To avoid to spam your location everytime you have a variation called, `go-feature-flag` is storing in memory all the events and send them in bulk to the exporter.  
