@@ -1,6 +1,7 @@
 run:
   skip-dirs:
     - (^|/)bin($|/)
+    - (^|/)examples($|/)
 linters:
   enable:
     - asciicheck
