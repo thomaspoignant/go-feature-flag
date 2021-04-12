@@ -6,10 +6,12 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"sync"
 	"testing"
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
+	"github.com/thomaspoignant/go-feature-flag/testutils"
 )
 
 func TestStartWithoutRetriever(t *testing.T) {
@@ -37,6 +39,13 @@ func TestValidUseCase(t *testing.T) {
 		PollInterval: 5,
 		Retriever:    &FileRetriever{Path: "testdata/flag-config.yaml"},
 		Logger:       log.New(os.Stdout, "", 0),
+		DataExporter: DataExporter{
+			FlushInterval:    10 * time.Second,
+			MaxEventInMemory: 1000,
+			Exporter: &testutils.MockExporter{
+				Mutex: sync.Mutex{},
+			},
+		},
 	})
 	defer Close()
 

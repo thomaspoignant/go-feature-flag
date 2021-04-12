@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
+	"github.com/thomaspoignant/go-feature-flag/internal/exporter"
+	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 )
 
 // Init the feature flag component with the configuration of ffclient.Config
@@ -34,9 +36,10 @@ func Close() {
 // GoFeatureFlag is the main object of the library
 // it contains the cache, the config and the update.
 type GoFeatureFlag struct {
-	cache     cache.Cache
-	config    Config
-	bgUpdater backgroundUpdater
+	cache        cache.Cache
+	config       Config
+	bgUpdater    backgroundUpdater
+	dataExporter *exporter.DataExporterScheduler
 }
 
 // ff is the default object for go-feature-flag
@@ -77,6 +80,12 @@ func New(config Config) (*GoFeatureFlag, error) {
 	// start the flag update in background
 	go goFF.startFlagUpdaterDaemon()
 
+	if goFF.config.DataExporter.Exporter != nil {
+		// init the data exporter
+		goFF.dataExporter = exporter.NewDataExporterScheduler(goFF.config.DataExporter.FlushInterval,
+			goFF.config.DataExporter.MaxEventInMemory, goFF.config.DataExporter.Exporter, goFF.config.Logger)
+		go goFF.dataExporter.StartDaemon()
+	}
 	return goFF, nil
 }
 
@@ -87,8 +96,11 @@ func (g *GoFeatureFlag) Close() {
 			// clear the cache
 			g.cache.Close()
 		}
-
 		g.bgUpdater.close()
+
+		if g.dataExporter != nil {
+			g.dataExporter.Close()
+		}
 	}
 }
 
@@ -98,8 +110,8 @@ func (g *GoFeatureFlag) startFlagUpdaterDaemon() {
 		select {
 		case <-g.bgUpdater.ticker.C:
 			err := retrieveFlagsAndUpdateCache(g.config, g.cache)
-			if err != nil && g.config.Logger != nil {
-				g.config.Logger.Printf("[%v] error while updating the cache: %v\n", time.Now().Format(time.RFC3339), err)
+			if err != nil {
+				fflog.Printf(g.config.Logger, "[%v] error while updating the cache: %v\n", time.Now().Format(time.RFC3339), err)
 			}
 		case <-g.bgUpdater.updaterChan:
 			return

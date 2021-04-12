@@ -21,7 +21,9 @@ type Config struct {
 	Notifiers    []NotifierConfig // Notifiers is the list of notifiers called when a flag change
 	FileFormat   string           // FileFormat is the format of the file to retrieve (available YAML, TOML and JSON)
 	// Deprecated: Use Notifiers instead, webhooks will be delete in a future version
-	Webhooks []WebhookConfig // webhooks we should call when a flag create/update/delete
+	Webhooks []WebhookConfig // Webhooks we should call when a flag create/update/delete
+	// DataExporter is the configuration where we store how we should output the flags variations results
+	DataExporter DataExporter
 }
 
 // GetRetriever returns a retriever.FlagRetriever configure with the retriever available in the config.

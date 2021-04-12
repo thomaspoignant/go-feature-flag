@@ -10,6 +10,16 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
 )
 
+// VariationType enum which describe the decision taken
+type VariationType string
+
+const (
+	VariationTrue       VariationType = "True"
+	VariationFalse      VariationType = "False"
+	VariationDefault    VariationType = "Default"
+	VariationSDKDefault VariationType = "SdkDefault"
+)
+
 // Flag describe the fields of a flag.
 type Flag struct {
 	Disable    bool        `json:"disable,omitempty"`
@@ -20,23 +30,23 @@ type Flag struct {
 	Default    interface{} `json:"default,omitempty"` // Value if Rule does not applied
 }
 
-// Value is returning the Value associate to the flag (True or False) based
+// Value is returning the Value associate to the flag (True / False / Default ) based
 // if the toggle apply to the user or not.
-func (f *Flag) Value(flagName string, user ffuser.User) interface{} {
+func (f *Flag) Value(flagName string, user ffuser.User) (interface{}, VariationType) {
 	inRule := f.evaluateRule(user)
 	inPercentage := f.isInPercentage(flagName, user)
 
 	if inRule {
 		if inPercentage {
 			// Rule applied and user in the cohort.
-			return f.True
+			return f.True, VariationTrue
 		}
 		// Rule applied and user not in the cohort.
-		return f.False
+		return f.False, VariationFalse
 	}
 
 	// Default value is used if the rule does not applied to the user.
-	return f.Default
+	return f.Default, VariationDefault
 }
 
 // isInPercentage check if the user is in the cohort for the toggle.

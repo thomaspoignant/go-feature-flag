@@ -80,6 +80,13 @@ ffclient.Init(ffclient.Config{
             },
         },
     },
+    DataExporter: ffclient.DataExporter{
+        FlushInterval:   10 * time.Second,
+        MaxEventInMemory: 1000,
+        Exporter: &ffexporter.File{
+            OutputDir: "/output-data/",
+        },
+    },
 })
 ```
 
@@ -91,6 +98,7 @@ ffclient.Init(ffclient.Config{
 |`FileFormat`| Format of your configuration file. Available formats are `yaml`, `toml` and `json`, if you omit the field it will try to unmarshal the file as a `yaml` file.|
 |`Retriever`  | The configuration retriever you want to use to get your flag file *(see [Where do I store my flags file](#where-do-i-store-my-flags-file) for the configuration details)*.|
 |`Notifiers` | List of notifiers to call when your flag file has changed *(see [notifiers section](#notifiers) for more details)*.|
+|`DataExporter` | DataExporter defines how to export data on how your flag are used. *(see [export data section](#export-data) for more details)*.|
 
 ## Where do I store my flags file
 `go-feature-flags` support different ways of retrieving the flag file.  
@@ -425,6 +433,103 @@ ffclient.Config{
 |   |   |   |
 |---|---|---|
 |`SlackWebhookURL`   |![mandatory](https://img.shields.io/badge/-mandatory-red)   | The complete URL of your incoming webhook configured in Slack.  |
+
+</details>
+
+## Export data
+If you want to export data about how your flag are used, you can use the **`DataExporter`**.  
+It collects all the variations events and can save these events on several locations:
+- [File](#file-exporter)
+
+Currently we are supporting only feature events.
+It represent individual flag evaluations and are considered "full fidelity" events.
+
+An example feature event below:
+```json
+{
+    "kind": "feature",
+    "contextKind": "anonymousUser",
+    "userKey": "ABCD",
+    "creationDate": 1618228297,
+    "key": "test-flag",
+    "variation": "Default",
+    "value": false,
+    "default": false
+}
+```
+
+| Field  | Description  |
+|---|---|
+|**`kind`** | The kind for a feature event is feature. A feature event will only be generated if the trackEvents attribute of the flag is set to true.  |
+|**`contextKind`** | The kind of context which generated an event. This will only be "**anonymousUser**" for events generated on behalf of an anonymous user or the reserved word "**user**" for events generated on behalf of a non-anonymous user |
+|**`userKey`** | The key of the user object used in a feature flag evaluation. |
+|**`creationDate`** | When the feature flag was requested at Unix epoch time in milliseconds. |
+|**`key`** | The key of the feature flag requested. |
+|**`variation`** | The variation of the flag requested. Available values are:<br>**True**: if the flag was evaluated to True <br>**False**: if the flag was evaluated to False<br>**Dafault**: if the flag was evaluated to Default<br>**SdkDefault**: if something wrong happened and the SDK default value was used. |
+|**`value`** | The value of the feature flag returned by feature flag evaluation. |
+|**`default`** | (Optional) This value is set to true if feature flag evaluation failed, in which case the value returned was the default value passed to variation. |
+
+Events are collected and send in bulk to avoid to spam your exporter *(see details in [how to configure data export](#how-to-configure-data-export)*)
+
+### How to configure data export?
+In your `ffclient.Config` add the `DataExporter` field and configure your export location.
+
+To avoid to spam your location everytime you have a variation called, `go-feature-flag` is storing in memory all the events and send them in bulk to the exporter.  
+You can decide the threshold on when to send the data with the properties `FlushInterval` and `MaxEventInMemory`. The first threshold hit will export the data.
+
+**Example:**
+```go
+ffclient.Config{ 
+    // ...
+   DataExporter: ffclient.DataExporter{
+        FlushInterval:   10 * time.Second,
+        MaxEventInMemory: 1000,
+        Exporter: &ffexporter.File{
+            OutputDir: "/output-data/",
+        },
+    },
+    // ...
+}
+```
+| Field  |   |  Description |
+|---|---|---|
+|`FlushInterval`   |![optional](https://img.shields.io/badge/-optional-green)   | Time to wait before exporting the data (default: 60 seconds).  |
+|`MaxEventInMemory`   |![optional](https://img.shields.io/badge/-optional-green)   | If `MaxEventInMemory` is reach before the `FlushInterval` a intermediary export will be done (default: 100000).|
+|`Exporter`   |![mandatory](https://img.shields.io/badge/-mandatory-red)   | The configuration of the exporter you want to use. All the exporters are available in the `ffexporter` package.|
+
+### File Exporter
+<details>
+<summary><i>expand to see details</i></summary>
+
+The file exporter will collect the data and create a new file in a specific folder everytime we send the data.  
+This file should be in the local instance.
+
+Check this [complete example](examples/data_export_file/main.go) to see how to export the data in a file.
+
+**Configuration example:**
+```go
+ffclient.Config{ 
+    // ...
+   DataExporter: ffclient.DataExporter{
+        // ...
+        Exporter: &ffexporter.File{
+            OutputDir: "/output-data/",
+            Format: "csv",
+            FileName: "flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}",
+            CsvTemplate: "{{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}}\n"
+        },
+    },
+    // ...
+}
+```
+
+| Field  | Description  |
+|---|---|
+|`OutputDir`   | OutputDir is the location of the directory where to store the exported files. It should finish with a `/`.  |
+|`Format`   |   Format is the output format you want in your exported file. Available format are **`JSON`** and **`CSV`**. *(Default: `JSON`)* |
+|`Filename`   | Filename is the name of your output file. You can use a templated config to define the name of your exported files.<br>Available replacement are `{{ .Hostname}}`, `{{ .Timestamp}`} and `{{ .Format}}`<br>Default: `flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}`|
+|`CsvTemplate`   |   CsvTemplate is used if your output format is CSV. This field will be ignored if you are using another format than CSV. You can decide which fields you want in your CSV line with a go-template syntax, please check [internal/exporter/feature_event.go](internal/exporter/feature_event.go) to see what are the fields available.<br>**Default:** `{{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}}\n` |
+
 
 </details>
 
