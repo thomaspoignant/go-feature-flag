@@ -32,8 +32,8 @@ type File struct {
 	// This field will be ignored if you are using another format than CSV.
 	// You can decide which fields you want in your CSV line with a go-template syntax,
 	// please check internal/exporter/feature_event.go to see what are the fields available.
-	// Default: "{{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};" +
-	//	"{{ .Value}};{{ .Default}}\n"
+	// Default:
+	// {{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}}\n
 	CsvTemplate string
 
 	csvTemplate      *template.Template
@@ -41,6 +41,7 @@ type File struct {
 	initTemplates    sync.Once
 }
 
+// Export is saving a collection of events in a file.
 func (f *File) Export(logger *log.Logger, featureEvents []exporter.FeatureEvent) error {
 	// Parse the template only once
 	f.initTemplates.Do(func() {

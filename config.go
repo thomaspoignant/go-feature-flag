@@ -22,7 +22,7 @@ type Config struct {
 	FileFormat   string           // FileFormat is the format of the file to retrieve (available YAML, TOML and JSON)
 	// Deprecated: Use Notifiers instead, webhooks will be delete in a future version
 	Webhooks []WebhookConfig // Webhooks we should call when a flag create/update/delete
-	// DataCollector is the configuration where we store how we should output the flags variations results
+	// DataExporter is the configuration where we store how we should output the flags variations results
 	DataExporter DataExporter
 }
 
