@@ -2,11 +2,9 @@ package ffclient
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
 	"github.com/thomaspoignant/go-feature-flag/internal/exporter"
-	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 	"github.com/thomaspoignant/go-feature-flag/internal/model"
 )
 
@@ -195,9 +193,6 @@ func (g *GoFeatureFlag) notifyVariation(
 	if g.dataExporter != nil {
 		g.dataExporter.AddEvent(event)
 	}
-
-	fflog.Printf(g.config.Logger, "[%v] user=\"%s\", flag=\"%s\", value=\"%v\"",
-		time.Unix(event.CreationDate, 0).Format(time.RFC3339), event.UserKey, event.Key, event.Value)
 }
 
 // getFlagFromCache try to get the flag from the cache.
