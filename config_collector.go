@@ -13,11 +13,11 @@ type DataExporter struct {
 	// the data every minute unless we reach the max event in cache before.
 	FlushInterval time.Duration
 
-	// MaxEventInCache is the maximum number of event you keep in the cache
+	// MaxEventInMemory is the maximum number of event you keep in the cache
 	// before sending the data to the Exporter.
-	// We will send the data when the MaxEventInCache is reach or if we have
+	// We will send the data when the MaxEventInMemory is reach or if we have
 	// waited the FlushInterval.
-	MaxEventInCache int64
+	MaxEventInMemory int64
 
 	// Exporter is the configuration of your exporter.
 	// You can see all available exporter in the ffexporter package.

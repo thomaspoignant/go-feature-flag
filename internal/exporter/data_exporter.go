@@ -9,23 +9,23 @@ import (
 )
 
 const defaultFlushInterval = 60 * time.Second
-const defaultMaxEventInCache = int64(100000)
+const defaultMaxEventInMemory = int64(100000)
 
 // NewDataExporterScheduler allows to create a new instance of DataExporterScheduler ready to be used to export data.
-func NewDataExporterScheduler(flushInterval time.Duration, maxEventInCache int64,
+func NewDataExporterScheduler(flushInterval time.Duration, maxEventInMemory int64,
 	exporter Exporter, logger *log.Logger) *DataExporterScheduler {
 	if flushInterval == 0 {
 		flushInterval = defaultFlushInterval
 	}
 
-	if maxEventInCache == 0 {
-		maxEventInCache = defaultMaxEventInCache
+	if maxEventInMemory == 0 {
+		maxEventInMemory = defaultMaxEventInMemory
 	}
 
 	return &DataExporterScheduler{
 		localCache:      make([]FeatureEvent, 0),
 		mutex:           sync.Mutex{},
-		maxEventInCache: maxEventInCache,
+		maxEventInCache: maxEventInMemory,
 		exporter:        exporter,
 		daemonChan:      make(chan struct{}),
 		ticker:          time.NewTicker(flushInterval),

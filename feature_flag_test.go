@@ -40,8 +40,8 @@ func TestValidUseCase(t *testing.T) {
 		Retriever:    &FileRetriever{Path: "testdata/flag-config.yaml"},
 		Logger:       log.New(os.Stdout, "", 0),
 		DataExporter: DataExporter{
-			FlushInterval:   10 * time.Second,
-			MaxEventInCache: 1000,
+			FlushInterval:    10 * time.Second,
+			MaxEventInMemory: 1000,
 			Exporter: &testutils.MockExporter{
 				Mutex: sync.Mutex{},
 			},

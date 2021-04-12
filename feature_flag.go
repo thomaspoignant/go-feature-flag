@@ -83,7 +83,7 @@ func New(config Config) (*GoFeatureFlag, error) {
 	if goFF.config.DataExporter.Exporter != nil {
 		// init the data exporter
 		goFF.dataExporter = exporter.NewDataExporterScheduler(goFF.config.DataExporter.FlushInterval,
-			goFF.config.DataExporter.MaxEventInCache, goFF.config.DataExporter.Exporter, goFF.config.Logger)
+			goFF.config.DataExporter.MaxEventInMemory, goFF.config.DataExporter.Exporter, goFF.config.Logger)
 		go goFF.dataExporter.StartDaemon()
 	}
 	return goFF, nil
