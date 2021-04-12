@@ -10,7 +10,7 @@ Please add a description of what your pull request is doing.
 # Changes include
 - [ ] Bugfix (non-breaking change that solves an issue)
 - [ ] New feature (non-breaking change that adds functionality)
-- [ ] Breaking changes (change that is not backward-comptible and/or changes current functionality)
+- [ ] Breaking changes (change that is not backward-compatible and/or changes current functionality)
 
 # Closes issue(s)
 <!-- 
