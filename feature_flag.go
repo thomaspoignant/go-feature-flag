@@ -73,7 +73,7 @@ func New(config Config) (*GoFeatureFlag, error) {
 
 	// fail if we cannot retrieve the flags the 1st time
 	err = retrieveFlagsAndUpdateCache(goFF.config, goFF.cache)
-	if err != nil {
+	if err != nil && !config.StartWithRetrieverError {
 		return nil, fmt.Errorf("impossible to retrieve the flags, please check your configuration: %v", err)
 	}
 

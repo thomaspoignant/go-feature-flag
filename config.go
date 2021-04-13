@@ -14,16 +14,34 @@ import (
 // PollInterval is the interval in seconds where we gonna read the file to update the cache.
 // You should also have a retriever to specify where to read the flags file.
 type Config struct {
-	PollInterval int              // Poll every X seconds
-	Logger       *log.Logger      // Logger use by the library
-	Context      context.Context  // default is context.Background()
-	Retriever    Retriever        // Retriever is the component in charge to retrieve your flag file
-	Notifiers    []NotifierConfig // Notifiers is the list of notifiers called when a flag change
-	FileFormat   string           // FileFormat is the format of the file to retrieve (available YAML, TOML and JSON)
+	// Poll every X seconds
+	PollInterval int
+
+	// Logger use by the library
+	Logger *log.Logger
+
+	// default is context.Background()
+	Context context.Context
+
+	// Retriever is the component in charge to retrieve your flag file
+	Retriever Retriever
+
+	// Notifiers is the list of notifiers called when a flag change
+	Notifiers []NotifierConfig
+
+	// FileFormat is the format of the file to retrieve (available YAML, TOML and JSON)
+	FileFormat string
+
 	// Deprecated: Use Notifiers instead, webhooks will be delete in a future version
 	Webhooks []WebhookConfig // Webhooks we should call when a flag create/update/delete
+
 	// DataExporter is the configuration where we store how we should output the flags variations results
 	DataExporter DataExporter
+
+	// StartWithRetrieverError if true the SDK will start even if the flag file is unreachable and will
+	// server default values. If the flag is reachable again it will works as expected.
+	// The init method will not return any error if the flag file is unreachable.
+	StartWithRetrieverError bool
 }
 
 // GetRetriever returns a retriever.FlagRetriever configure with the retriever available in the config.
