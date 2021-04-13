@@ -5,15 +5,14 @@ import (
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"log"
-	"sync"
 	"testing"
 
+	"github.com/thomaspoignant/go-feature-flag/ffexporter"
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
 	"github.com/thomaspoignant/go-feature-flag/internal/exporter"
 	"github.com/thomaspoignant/go-feature-flag/internal/model"
 	"github.com/thomaspoignant/go-feature-flag/testutil"
-	"github.com/thomaspoignant/go-feature-flag/testutils"
 )
 
 type cacheMock struct {
@@ -175,7 +174,7 @@ func TestBoolVariation(t *testing.T) {
 					Logger:       logger,
 				},
 				dataExporter: exporter.NewDataExporterScheduler(0, 0,
-					&testutils.MockExporter{Mutex: sync.Mutex{}}, logger),
+					&ffexporter.Log{}, logger),
 			}
 
 			got, err := BoolVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
@@ -336,6 +335,8 @@ func TestFloat64Variation(t *testing.T) {
 					PollInterval: 0,
 					Logger:       logger,
 				},
+				dataExporter: exporter.NewDataExporterScheduler(0, 0,
+					&ffexporter.Log{}, logger),
 			}
 
 			got, err := Float64Variation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
@@ -495,6 +496,8 @@ func TestJSONArrayVariation(t *testing.T) {
 					PollInterval: 0,
 					Logger:       logger,
 				},
+				dataExporter: exporter.NewDataExporterScheduler(0, 0,
+					&ffexporter.Log{}, logger),
 			}
 
 			got, err := JSONArrayVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
@@ -654,6 +657,8 @@ func TestJSONVariation(t *testing.T) {
 					PollInterval: 0,
 					Logger:       logger,
 				},
+				dataExporter: exporter.NewDataExporterScheduler(0, 0,
+					&ffexporter.Log{}, logger),
 			}
 
 			got, err := JSONVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
@@ -816,6 +821,8 @@ func TestStringVariation(t *testing.T) {
 					PollInterval: 0,
 					Logger:       logger,
 				},
+				dataExporter: exporter.NewDataExporterScheduler(0, 0,
+					&ffexporter.Log{}, logger),
 			}
 			got, err := StringVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
@@ -976,6 +983,8 @@ func TestIntVariation(t *testing.T) {
 					PollInterval: 0,
 					Logger:       logger,
 				},
+				dataExporter: exporter.NewDataExporterScheduler(0, 0,
+					&ffexporter.Log{}, logger),
 			}
 			got, err := IntVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 

@@ -35,7 +35,12 @@ func NewDataExporterScheduler(flushInterval time.Duration, maxEventInMemory int6
 
 // Exporter is an interface to describe how a exporter looks like.
 type Exporter interface {
+	// Export will send the data to the exporter.
 	Export(*log.Logger, []FeatureEvent) error
+
+	// IsBulk return false if we should directly send the data as soon as it is produce
+	// and true if we collect the data to send them in bulk.
+	IsBulk() bool
 }
 
 // DataExporterScheduler is the struct that handle the data collection.
@@ -53,14 +58,23 @@ type DataExporterScheduler struct {
 // the maximum number of events that can be present in the cache.
 func (dc *DataExporterScheduler) AddEvent(event FeatureEvent) {
 	dc.mutex.Lock()
+	defer dc.mutex.Unlock()
+
+	if !dc.exporter.IsBulk() {
+		// if we are not in bulk we are directly flushing the data
+		dc.localCache = append(dc.localCache, event)
+		dc.flush()
+		return
+	}
+
 	if int64(len(dc.localCache)) >= dc.maxEventInCache {
 		dc.flush()
 	}
 	dc.localCache = append(dc.localCache, event)
-	dc.mutex.Unlock()
 }
 
 // StartDaemon will start a goroutine to check every X seconds if we should send the data.
+// The daemon is started only if we have a bulk exporter.
 func (dc *DataExporterScheduler) StartDaemon() {
 	for {
 		select {

@@ -34,3 +34,7 @@ func (m *MockExporter) GetExportedEvents() []exporter.FeatureEvent {
 	defer m.Mutex.Unlock()
 	return m.ExportedEvents
 }
+
+func (m *MockExporter) IsBulk() bool {
+	return true
+}
