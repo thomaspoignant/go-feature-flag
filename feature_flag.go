@@ -84,7 +84,11 @@ func New(config Config) (*GoFeatureFlag, error) {
 		// init the data exporter
 		goFF.dataExporter = exporter.NewDataExporterScheduler(goFF.config.DataExporter.FlushInterval,
 			goFF.config.DataExporter.MaxEventInMemory, goFF.config.DataExporter.Exporter, goFF.config.Logger)
-		go goFF.dataExporter.StartDaemon()
+
+		// we start the daemon only if we have a bulk exporter
+		if goFF.config.DataExporter.Exporter.IsBulk() {
+			go goFF.dataExporter.StartDaemon()
+		}
 	}
 	return goFF, nil
 }

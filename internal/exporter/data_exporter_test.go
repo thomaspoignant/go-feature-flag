@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"sync"
 	"testing"
 	"time"
 
@@ -18,7 +17,7 @@ import (
 )
 
 func TestDataExporterScheduler_flushWithTime(t *testing.T) {
-	mockExporter := testutils.MockExporter{Mutex: sync.Mutex{}}
+	mockExporter := testutils.MockExporter{Bulk: true}
 	dc := exporter.NewDataExporterScheduler(
 		10*time.Millisecond, 1000, &mockExporter, log.New(os.Stdout, "", 0))
 	go dc.StartDaemon()
@@ -38,7 +37,7 @@ func TestDataExporterScheduler_flushWithTime(t *testing.T) {
 }
 
 func TestDataExporterScheduler_flushWithNumberOfEvents(t *testing.T) {
-	mockExporter := testutils.MockExporter{Mutex: sync.Mutex{}}
+	mockExporter := testutils.MockExporter{Bulk: true}
 	dc := exporter.NewDataExporterScheduler(
 		10*time.Minute, 100, &mockExporter, log.New(os.Stdout, "", 0))
 	go dc.StartDaemon()
@@ -56,7 +55,7 @@ func TestDataExporterScheduler_flushWithNumberOfEvents(t *testing.T) {
 }
 
 func TestDataExporterScheduler_defaultFlush(t *testing.T) {
-	mockExporter := testutils.MockExporter{Mutex: sync.Mutex{}}
+	mockExporter := testutils.MockExporter{Bulk: true}
 	dc := exporter.NewDataExporterScheduler(
 		0, 0, &mockExporter, log.New(os.Stdout, "", 0))
 	go dc.StartDaemon()
@@ -74,7 +73,7 @@ func TestDataExporterScheduler_defaultFlush(t *testing.T) {
 }
 
 func TestDataExporterScheduler_exporterReturnError(t *testing.T) {
-	mockExporter := testutils.MockExporter{Err: errors.New("random err"), ExpectedNumberErr: 1, Mutex: sync.Mutex{}}
+	mockExporter := testutils.MockExporter{Err: errors.New("random err"), ExpectedNumberErr: 1, Bulk: true}
 
 	file, _ := ioutil.TempFile("", "log")
 	defer file.Close()
@@ -99,4 +98,21 @@ func TestDataExporterScheduler_exporterReturnError(t *testing.T) {
 	// read log
 	logs, _ := ioutil.ReadFile(file.Name())
 	assert.Regexp(t, "\\["+testutil.RFC3339Regex+"\\] error while exporting data: random err\\n", string(logs))
+}
+
+func TestDataExporterScheduler_nonBulkExporter(t *testing.T) {
+	mockExporter := testutils.MockExporter{Bulk: false}
+	dc := exporter.NewDataExporterScheduler(
+		0, 0, &mockExporter, log.New(os.Stdout, "", 0))
+	defer dc.Close()
+
+	var inputEvents []exporter.FeatureEvent
+	for i := 0; i < 100; i++ {
+		inputEvents = append(inputEvents, exporter.NewFeatureEvent(ffuser.NewAnonymousUser("ABCD"),
+			"random-key", model.Flag{Percentage: 100}, "YO", model.VariationDefault, false))
+	}
+	for _, event := range inputEvents {
+		dc.AddEvent(event)
+	}
+	assert.Equal(t, inputEvents[:100], mockExporter.GetExportedEvents())
 }

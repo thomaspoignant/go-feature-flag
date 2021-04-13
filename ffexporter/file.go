@@ -45,8 +45,8 @@ type File struct {
 func (f *File) Export(logger *log.Logger, featureEvents []exporter.FeatureEvent) error {
 	// Parse the template only once
 	f.initTemplates.Do(func() {
-		f.csvTemplate = parseTemplate(f.CsvTemplate, DefaultCsvTemplate)
-		f.filenameTemplate = parseTemplate(f.Filename, DefaultFilenameTemplate)
+		f.csvTemplate = parseTemplate("csvFormat", f.CsvTemplate, DefaultCsvTemplate)
+		f.filenameTemplate = parseTemplate("filenameFormat", f.Filename, DefaultFilenameTemplate)
 	})
 
 	// Default format for the output
@@ -91,4 +91,10 @@ func (f *File) Export(logger *log.Logger, featureEvents []exporter.FeatureEvent)
 		}
 	}
 	return nil
+}
+
+// IsBulk return false if we should directly send the data as soon as it is produce
+// and true if we collect the data to send them in bulk.
+func (f *File) IsBulk() bool {
+	return true
 }

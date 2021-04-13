@@ -208,3 +208,8 @@ func TestFile_Export(t *testing.T) {
 		})
 	}
 }
+
+func TestFile_IsBulk(t *testing.T) {
+	exporter := ffexporter.File{}
+	assert.True(t, exporter.IsBulk(), "File exporter is a bulk exporter")
+}

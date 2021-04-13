@@ -38,9 +38,9 @@ func Test_parseTemplate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			defaultT, _ := template.New("exporter").Parse(tt.args.defaultTemplate)
-			assert.NotPanics(t, func() { parseTemplate(tt.args.template, tt.args.defaultTemplate) })
-			got := parseTemplate(tt.args.template, tt.args.defaultTemplate)
+			defaultT, _ := template.New("random-name").Parse(tt.args.defaultTemplate)
+			assert.NotPanics(t, func() { parseTemplate("random-name", tt.args.template, tt.args.defaultTemplate) })
+			got := parseTemplate("random-name", tt.args.template, tt.args.defaultTemplate)
 
 			if tt.wantErr {
 				assert.Equal(t, defaultT, got, "If template invalid we should use default template")

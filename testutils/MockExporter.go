@@ -12,14 +12,17 @@ type MockExporter struct {
 	Err               error
 	ExpectedNumberErr int
 	CurrentNumberErr  int
-	Mutex             sync.Mutex
+	Bulk              bool
+
+	mutex sync.Mutex
+	once  sync.Once
 }
 
 func (m *MockExporter) Export(logger *log.Logger, events []exporter.FeatureEvent) error {
-	m.Mutex.Lock()
+	m.once.Do(m.initMutex)
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
 	m.ExportedEvents = append(m.ExportedEvents, events...)
-	m.Mutex.Unlock()
-
 	if m.Err != nil {
 		if m.ExpectedNumberErr > m.CurrentNumberErr {
 			m.CurrentNumberErr++
@@ -30,7 +33,16 @@ func (m *MockExporter) Export(logger *log.Logger, events []exporter.FeatureEvent
 }
 
 func (m *MockExporter) GetExportedEvents() []exporter.FeatureEvent {
-	m.Mutex.Lock()
-	defer m.Mutex.Unlock()
+	m.once.Do(m.initMutex)
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
 	return m.ExportedEvents
+}
+
+func (m *MockExporter) IsBulk() bool {
+	return m.Bulk
+}
+
+func (m *MockExporter) initMutex() {
+	m.mutex = sync.Mutex{}
 }
