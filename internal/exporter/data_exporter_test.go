@@ -33,7 +33,7 @@ func TestDataExporterScheduler_flushWithTime(t *testing.T) {
 		dc.AddEvent(event)
 	}
 
-	time.Sleep(10 * time.Millisecond * 2)
+	time.Sleep(10 * time.Millisecond * 4)
 	assert.Equal(t, inputEvents, mockExporter.GetExportedEvents())
 }
 
