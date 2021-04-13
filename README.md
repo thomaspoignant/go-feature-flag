@@ -441,7 +441,7 @@ ffclient.Config{
 If you want to export data about how your flag are used, you can use the **`DataExporter`**.  
 It collects all the variations events and can save these events on several locations:
 - [File](#file-exporter) *- create local files with the variation usages.*
-- [Log](#log-exporter) *- use your logger to write the variation usages*
+- [Log](#log-exporter) *- use your logger to write the variation usages.*
  
 Currently we are supporting only feature events.
 It represent individual flag evaluations and are considered "full fidelity" events.
@@ -541,7 +541,8 @@ ffclient.Config{
 The log exporter is here mostly for backward compatibility *(originaly every variations were logged, but it can be a lot of data for a default configuration)*.  
 It will use your logger `ffclient.Config.Logger` to log every variations changes.
 
-You can configure your output log with the `Format` field. It use a [go template](https://golang.org/pkg/text/template/) format.
+You can configure your output log with the `Format` field.  
+It use a [go template](https://golang.org/pkg/text/template/) format.
 
 **Configuration example:**
 ```go
@@ -558,7 +559,7 @@ ffclient.Config{
 
 | Field  | Description  |
 |---|---|
-|`Format`   | Format is the [template](https://golang.org/pkg/text/template/) configuration of the output format of your log. You can use all the key from the `exporter.FeatureEvent` + a key called `FormattedDate` that represent the date with the **RFC 3339** Format.<br>Default: `[{{ .FormattedDate}}] user="{{ .UserKey}}", flag="{{ .Key}}", value="{{ .Value}}"`  |
+|`Format`   | Format is the [template](https://golang.org/pkg/text/template/) configuration of the output format of your log.<br>You can use all the key from the `exporter.FeatureEvent` + a key called `FormattedDate` that represent the date with the **RFC 3339** Format.<br><br>Default: `[{{ .FormattedDate}}] user="{{ .UserKey}}", flag="{{ .Key}}", value="{{ .Value}}"`  |
 
 </details>
 
