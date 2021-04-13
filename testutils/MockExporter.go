@@ -1,7 +1,6 @@
 package testutils
 
 import (
-	"fmt"
 	"log"
 	"sync"
 
@@ -32,7 +31,6 @@ func (m *MockExporter) Export(logger *log.Logger, events []exporter.FeatureEvent
 
 func (m *MockExporter) GetExportedEvents() []exporter.FeatureEvent {
 	m.Mutex.Lock()
-	fmt.Println(m.ExportedEvents)
 	defer m.Mutex.Unlock()
 	return m.ExportedEvents
 }
