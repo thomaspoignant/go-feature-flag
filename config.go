@@ -14,33 +14,38 @@ import (
 // PollInterval is the interval in seconds where we gonna read the file to update the cache.
 // You should also have a retriever to specify where to read the flags file.
 type Config struct {
-	// Poll every X seconds
+	// PollInterval (optional) Poll every X seconds
+	// Default: 60 seconds
 	PollInterval int
 
-	// Logger use by the library
+	// Logger (optional) logger use by the library
+	// Default: No log
 	Logger *log.Logger
 
-	// default is context.Background()
+	// Context (optional) used to call other services (HTTP, S3 ...)
+	// Default: context.Background()
 	Context context.Context
 
 	// Retriever is the component in charge to retrieve your flag file
 	Retriever Retriever
 
-	// Notifiers is the list of notifiers called when a flag change
+	// Notifiers (optional) is the list of notifiers called when a flag change
 	Notifiers []NotifierConfig
 
-	// FileFormat is the format of the file to retrieve (available YAML, TOML and JSON)
+	// FileFormat (optional) is the format of the file to retrieve (available YAML, TOML and JSON)
+	// Default: YAML
 	FileFormat string
 
 	// Deprecated: Use Notifiers instead, webhooks will be delete in a future version
 	Webhooks []WebhookConfig // Webhooks we should call when a flag create/update/delete
 
-	// DataExporter is the configuration where we store how we should output the flags variations results
+	// DataExporter (optional) is the configuration where we store how we should output the flags variations results
 	DataExporter DataExporter
 
-	// StartWithRetrieverError if true the SDK will start even if the flag file is unreachable and will
-	// server default values. If the flag is reachable again it will works as expected.
+	// StartWithRetrieverError (optional) If true, the SDK will start even if we did not get any flags from the retriever.
+	// It will serve only default values until the retriever returns the flags.
 	// The init method will not return any error if the flag file is unreachable.
+	// Default: false
 	StartWithRetrieverError bool
 }
 
