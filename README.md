@@ -439,8 +439,9 @@ ffclient.Config{
 ## Export data
 If you want to export data about how your flag are used, you can use the **`DataExporter`**.  
 It collects all the variations events and can save these events on several locations:
-- [File](#file-exporter)
-
+- [File](#file-exporter) *- create local files with the variation usages.*
+- [Log](#log-exporter) *- use your logger to write the variation usages*
+ 
 Currently we are supporting only feature events.
 It represent individual flag evaluations and are considered "full fidelity" events.
 
@@ -530,6 +531,33 @@ ffclient.Config{
 |`Filename`   | Filename is the name of your output file. You can use a templated config to define the name of your exported files.<br>Available replacement are `{{ .Hostname}}`, `{{ .Timestamp}`} and `{{ .Format}}`<br>Default: `flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}`|
 |`CsvTemplate`   |   CsvTemplate is used if your output format is CSV. This field will be ignored if you are using another format than CSV. You can decide which fields you want in your CSV line with a go-template syntax, please check [internal/exporter/feature_event.go](internal/exporter/feature_event.go) to see what are the fields available.<br>**Default:** `{{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}}\n` |
 
+</details>
+
+### Log Exporter
+<details>
+<summary><i>expand to see details</i></summary>
+
+The log exporter is here mostly for backward compatibility *(originaly every variations were logged, but it can be a lot of data for a default configuration)*.  
+It will use your logger `ffclient.Config.Logger` to log every variations changes.
+
+You can configure your output log with the `Format` field. It use a [go template](https://golang.org/pkg/text/template/) format.
+
+**Configuration example:**
+```go
+ffclient.Config{
+    // ...
+   DataExporter: ffclient.DataExporter{
+        Exporter: &ffexporter.Log{
+            Format: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", value=\"{{ .Value}}\"",
+        },
+    },
+    // ...
+}
+```
+
+| Field  | Description  |
+|---|---|
+|`Format`   | Format is the [template](https://golang.org/pkg/text/template/) configuration of the output format of your log. You can use all the key from the `exporter.FeatureEvent` + a key called `FormattedDate` that represent the date with the **RFC 3339** Format.<br>Default: `[{{ .FormattedDate}}] user="{{ .UserKey}}", flag="{{ .Key}}", value="{{ .Value}}"`  |
 
 </details>
 
