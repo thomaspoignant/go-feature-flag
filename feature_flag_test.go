@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"sync"
 	"testing"
 	"time"
 
@@ -43,7 +42,7 @@ func TestValidUseCase(t *testing.T) {
 			FlushInterval:    10 * time.Second,
 			MaxEventInMemory: 1000,
 			Exporter: &testutils.MockExporter{
-				Mutex: sync.Mutex{},
+				Bulk: true,
 			},
 		},
 	})
