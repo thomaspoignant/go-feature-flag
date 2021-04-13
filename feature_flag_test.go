@@ -225,3 +225,35 @@ func TestWrongWebhookConfig(t *testing.T) {
 	assert.Equal(t, err.Error(), "wrong configuration in your webhook: parse \" https://example.com/hook\": "+
 		"first path segment in URL cannot contain colon")
 }
+
+func TestFlagFileUnreachable(t *testing.T) {
+	initialFileContent := `test-flag:
+  rule: key eq "random-key"
+  percentage: 100
+  true: "true"
+  false: "false"
+  default: "false"`
+
+	tempDir, _ := ioutil.TempDir("", "")
+	defer os.Remove(tempDir)
+
+	flagFilePath := tempDir + "_FlagFileUnreachable.yaml"
+	gff, err := New(Config{
+		PollInterval:            1,
+		Retriever:               &FileRetriever{Path: flagFilePath},
+		Logger:                  log.New(os.Stdout, "", 0),
+		StartWithRetrieverError: true,
+	})
+	defer gff.Close()
+
+	assert.NoError(t, err, "should not return any error even if we can't retrieve the file")
+
+	flagValue, _ := gff.StringVariation("test-flag", ffuser.NewUser("random-key"), "SDKdefault")
+	assert.Equal(t, "SDKdefault", flagValue, "should use the SDK default value")
+
+	_ = ioutil.WriteFile(flagFilePath, []byte(initialFileContent), 0600)
+	time.Sleep(2 * time.Second)
+
+	flagValue, _ = gff.StringVariation("test-flag", ffuser.NewUser("random-key"), "SDKdefault")
+	assert.Equal(t, "true", flagValue, "should use the true value")
+}

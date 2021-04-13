@@ -4,7 +4,6 @@
 
 # 🎛️ go-feature-flag [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=I%27ve%20discovered%20go-feature-flag%20a%20great%20solution%20to%20easily%20managed%20feature%20flag%20in%20golang&url=https%3A%2F%2Fgithub.com%2Fthomaspoignant%2Fgo-feature-flag&via=thomaspoignant&hashtags=golang,featureflags,featuretoggle,go)
 
-
 <p align="center">
     <a href="https://app.circleci.com/pipelines/github/thomaspoignant/go-feature-flag"><img src="https://img.shields.io/circleci/build/github/thomaspoignant/go-feature-flag" alt="Build Status" /></a>
     <a href="https://coveralls.io/github/thomaspoignant/go-feature-flag"><img src="https://coveralls.io/repos/github/thomaspoignant/go-feature-flag/badge.svg" alt="Coverage Status" /></a>
@@ -87,18 +86,20 @@ ffclient.Init(ffclient.Config{
             OutputDir: "/output-data/",
         },
     },
+    StartWithRetrieverError: false,
 })
 ```
 
-|  | Descriptions |
+| Field | Description |
 |---|---|
-|`PollInterval`   | Number of seconds to wait before refreshing the flags.<br />The default value is 60 seconds.|
-|`Logger`   | Logger used to log what `go-feature-flag` is doing.<br />If no logger is provided the module will not log anything.|
-|`Context`  | The context used by the retriever.<br />The default value is `context.Background()`.|
-|`FileFormat`| Format of your configuration file. Available formats are `yaml`, `toml` and `json`, if you omit the field it will try to unmarshal the file as a `yaml` file.|
-|`Retriever`  | The configuration retriever you want to use to get your flag file *(see [Where do I store my flags file](#where-do-i-store-my-flags-file) for the configuration details)*.|
-|`Notifiers` | List of notifiers to call when your flag file has changed *(see [notifiers section](#notifiers) for more details)*.|
-|`DataExporter` | DataExporter defines how to export data on how your flags are used. *(see [export data section](#export-data) for more details)*.|
+|`Retriever`  | The configuration retriever you want to use to get your flag file<br> *see [Where do I store my flags file](#where-do-i-store-my-flags-file) for the configuration details*.|
+|`Context`  | *(optional)* The context used by the retriever.<br />Default: `context.Background()`|
+|`DataExporter` | *(optional)* DataExporter defines how to export data on how your flags are used.<br> *see [export data section](#export-data) for more details*.|
+|`FileFormat`| *(optional)* Format of your configuration file. Available formats are `yaml`, `toml` and `json`, if you omit the field it will try to unmarshal the file as a `yaml` file.<br>Default: `YAML`|
+|`Logger`   | *(optional)* Logger used to log what `go-feature-flag` is doing.<br />If no logger is provided the module will not log anything.<br>Default: No log|
+|`Notifiers` | *(optional)* List of notifiers to call when your flag file has changed.<br> *see [notifiers section](#notifiers) for more details*.|
+|`PollInterval`   | (optional) Number of seconds to wait before refreshing the flags.<br />Default: 60|
+|`StartWithRetrieverError` | *(optional)* If **true**, the SDK will start even if we did not get any flags from the retriever. It will serve only default values until the retriever returns the flags.<br>The init method will not return any error if the flag file is unreachable.<br>Default: **false**|
 
 ## Where do I store my flags file
 `go-feature-flags` support different ways of retrieving the flag file.  

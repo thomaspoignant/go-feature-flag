@@ -14,16 +14,39 @@ import (
 // PollInterval is the interval in seconds where we gonna read the file to update the cache.
 // You should also have a retriever to specify where to read the flags file.
 type Config struct {
-	PollInterval int              // Poll every X seconds
-	Logger       *log.Logger      // Logger use by the library
-	Context      context.Context  // default is context.Background()
-	Retriever    Retriever        // Retriever is the component in charge to retrieve your flag file
-	Notifiers    []NotifierConfig // Notifiers is the list of notifiers called when a flag change
-	FileFormat   string           // FileFormat is the format of the file to retrieve (available YAML, TOML and JSON)
+	// PollInterval (optional) Poll every X seconds
+	// Default: 60 seconds
+	PollInterval int
+
+	// Logger (optional) logger use by the library
+	// Default: No log
+	Logger *log.Logger
+
+	// Context (optional) used to call other services (HTTP, S3 ...)
+	// Default: context.Background()
+	Context context.Context
+
+	// Retriever is the component in charge to retrieve your flag file
+	Retriever Retriever
+
+	// Notifiers (optional) is the list of notifiers called when a flag change
+	Notifiers []NotifierConfig
+
+	// FileFormat (optional) is the format of the file to retrieve (available YAML, TOML and JSON)
+	// Default: YAML
+	FileFormat string
+
 	// Deprecated: Use Notifiers instead, webhooks will be delete in a future version
 	Webhooks []WebhookConfig // Webhooks we should call when a flag create/update/delete
-	// DataExporter is the configuration where we store how we should output the flags variations results
+
+	// DataExporter (optional) is the configuration where we store how we should output the flags variations results
 	DataExporter DataExporter
+
+	// StartWithRetrieverError (optional) If true, the SDK will start even if we did not get any flags from the retriever.
+	// It will serve only default values until the retriever returns the flags.
+	// The init method will not return any error if the flag file is unreachable.
+	// Default: false
+	StartWithRetrieverError bool
 }
 
 // GetRetriever returns a retriever.FlagRetriever configure with the retriever available in the config.
