@@ -1,6 +1,7 @@
 package exporter
 
 import (
+	"fmt"
 	"log"
 	"sync"
 	"time"
@@ -52,6 +53,7 @@ type DataExporterScheduler struct {
 // AddEvent allow to add an event to the local cache and to call the exporter if we reach
 // the maximum number of events that can be present in the cache.
 func (dc *DataExporterScheduler) AddEvent(event FeatureEvent) {
+	fmt.Println("added")
 	dc.mutex.Lock()
 	if int64(len(dc.localCache)) >= dc.maxEventInCache {
 		dc.flush()
