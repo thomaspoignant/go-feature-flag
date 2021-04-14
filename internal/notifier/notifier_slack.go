@@ -11,7 +11,6 @@ import (
 	"net/url"
 	"os"
 	"sync"
-	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/internal"
 	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
@@ -42,11 +41,10 @@ type SlackNotifier struct {
 func (c *SlackNotifier) Notify(diff model.DiffCache, wg *sync.WaitGroup) {
 	defer wg.Done()
 
-	date := time.Now().Format(time.RFC3339)
 	reqBody := convertToSlackMessage(diff)
 	payload, err := json.Marshal(reqBody)
 	if err != nil {
-		fflog.Printf(c.Logger, "[%v] error: (SlackNotifier) impossible to read differences; %v\n", date, err)
+		fflog.Printf(c.Logger, "error: (SlackNotifier) impossible to read differences; %v\n", err)
 		return
 	}
 	request := http.Request{
@@ -57,14 +55,14 @@ func (c *SlackNotifier) Notify(diff model.DiffCache, wg *sync.WaitGroup) {
 	}
 	response, err := c.HTTPClient.Do(&request)
 	if err != nil {
-		fflog.Printf(c.Logger, "[%v] error: (SlackNotifier) error: while calling webhook: %v\n", date, err)
+		fflog.Printf(c.Logger, "error: (SlackNotifier) error: while calling webhook: %v\n", err)
 		return
 	}
 
 	defer response.Body.Close()
 	if response.StatusCode > 399 {
-		fflog.Printf(c.Logger, "[%v] error: (SlackNotifier) while calling slack webhook, statusCode = %d",
-			date, response.StatusCode)
+		fflog.Printf(c.Logger, "error: (SlackNotifier) while calling slack webhook, statusCode = %d",
+			response.StatusCode)
 		return
 	}
 }

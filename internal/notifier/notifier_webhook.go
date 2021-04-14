@@ -12,7 +12,6 @@ import (
 	"net/url"
 	"os"
 	"sync"
-	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/internal"
 	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
@@ -66,7 +65,6 @@ type WebhookNotifier struct {
 
 func (c *WebhookNotifier) Notify(diff model.DiffCache, wg *sync.WaitGroup) {
 	defer wg.Done()
-	date := time.Now().Format(time.RFC3339)
 
 	// Create request body
 	reqBody := webhookReqBody{
@@ -76,7 +74,7 @@ func (c *WebhookNotifier) Notify(diff model.DiffCache, wg *sync.WaitGroup) {
 
 	payload, err := json.Marshal(reqBody)
 	if err != nil {
-		fflog.Printf(c.Logger, "[%v] error: (WebhookNotifier) impossible to read differences; %v\n", date, err)
+		fflog.Printf(c.Logger, "error: (WebhookNotifier) impossible to read differences; %v\n", err)
 		return
 	}
 
@@ -98,12 +96,12 @@ func (c *WebhookNotifier) Notify(diff model.DiffCache, wg *sync.WaitGroup) {
 	response, err := c.HTTPClient.Do(&request)
 	// Log if something went wrong while calling the webhook.
 	if err != nil {
-		fflog.Printf(c.Logger, "[%v] error: while calling webhook: %v\n", date, err)
+		fflog.Printf(c.Logger, "error: while calling webhook: %v\n", err)
 		return
 	}
 	defer response.Body.Close()
 	if response.StatusCode > 399 {
-		fflog.Printf(c.Logger, "[%v] error: while calling webhook, statusCode = %d", date, response.StatusCode)
+		fflog.Printf(c.Logger, "error: while calling webhook, statusCode = %d", response.StatusCode)
 		return
 	}
 }

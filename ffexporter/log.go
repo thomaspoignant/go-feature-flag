@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/exporter"
-	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 )
 
 const defaultLoggerFormat = "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", value=\"{{ .Value}}\""
@@ -37,7 +36,7 @@ func (f *Log) Export(logger *log.Logger, featureEvents []exporter.FeatureEvent) 
 			FormattedDate string
 		}{FeatureEvent: event, FormattedDate: time.Unix(event.CreationDate, 0).Format(time.RFC3339)})
 
-		fflog.Printf(logger, log.String())
+		logger.Print(log.String())
 		if err != nil {
 			return err
 		}

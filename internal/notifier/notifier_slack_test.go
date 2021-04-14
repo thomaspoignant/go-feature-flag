@@ -83,7 +83,7 @@ func TestSlackNotifier_Notify(t *testing.T) {
 			name: "should log if http code is superior to 399",
 			expected: expected{
 				err:    true,
-				errLog: "\\[" + testutil.RFC3339Regex + "\\] error: \\(SlackNotifier\\) while calling slack webhook, statusCode = 400",
+				errLog: "^\\[" + testutil.RFC3339Regex + "\\] error: \\(SlackNotifier\\) while calling slack webhook, statusCode = 400",
 			},
 			args: args{
 				statusCode: http.StatusBadRequest,
@@ -94,7 +94,7 @@ func TestSlackNotifier_Notify(t *testing.T) {
 			name: "should log if error while calling webhook",
 			expected: expected{
 				err:    true,
-				errLog: "\\[" + testutil.RFC3339Regex + "\\] error: \\(SlackNotifier\\) error: while calling webhook: random error",
+				errLog: "^\\[" + testutil.RFC3339Regex + "\\] error: \\(SlackNotifier\\) error: while calling webhook: random error",
 			},
 			args: args{
 				statusCode: http.StatusOK,
