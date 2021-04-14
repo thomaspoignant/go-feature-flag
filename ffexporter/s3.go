@@ -15,14 +15,20 @@ import (
 )
 
 type S3 struct {
+	// Bucket is the name of your S3 Bucket.
 	Bucket string
 
+	// AwsConfig is the AWS SDK configuration object we will use to
+	// upload your exported data files.
 	AwsConfig *aws.Config
 
 	// Format is the output format you want in your exported file.
 	// Available format are JSON and CSV.
 	// Default: JSON
 	Format string
+
+	// S3Path allows you to specify in which directory you want to export your data.
+	S3Path string
 
 	// Filename is the name of your output file
 	// You can use a templated config to define the name of your export files.
@@ -44,16 +50,18 @@ type S3 struct {
 
 // Export is saving a collection of events in a file.
 func (f *S3) Export(logger *log.Logger, featureEvents []exporter.FeatureEvent) error {
-	var initErr error
-	f.init.Do(func() {
-		var sess *session.Session
-		sess, initErr = session.NewSession(f.AwsConfig)
-		f.s3Uploader = s3manager.NewUploader(sess)
-	})
-
-	// Check that we don't have error in the init.Do()
-	if initErr != nil {
-		return initErr
+	// init the s3 uploader
+	if f.s3Uploader == nil {
+		var initErr error
+		f.init.Do(func() {
+			var sess *session.Session
+			sess, initErr = session.NewSession(f.AwsConfig)
+			f.s3Uploader = s3manager.NewUploader(sess)
+		})
+		// Check that we don't have error in the init.Do()
+		if initErr != nil {
+			return initErr
+		}
 	}
 
 	// Create a temp directory to store the file we will produce
@@ -92,14 +100,14 @@ func (f *S3) Export(logger *log.Logger, featureEvents []exporter.FeatureEvent) e
 		result, err := f.s3Uploader.Upload(
 			&s3manager.UploadInput{
 				Bucket: aws.String(f.Bucket),
-				Key:    aws.String(file.Name()),
+				Key:    aws.String(f.S3Path + "/" + file.Name()),
 				Body:   of,
 			})
 		if err != nil {
 			return err
 		}
-		fflog.Printf(logger,
-			"info: [S3Exporter] file %s uploaded.", result.Location)
+
+		fflog.Printf(logger, "info: [S3Exporter] file %s uploaded.", result.Location)
 	}
 	return nil
 }
