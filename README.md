@@ -442,6 +442,7 @@ If you want to export data about how your flag are used, you can use the **`Data
 It collects all the variations events and can save these events on several locations:
 - [File](#file-exporter) *- create local files with the variation usages.*
 - [Log](#log-exporter) *- use your logger to write the variation usages.*
+- [S3](#s3-exporter) *- export your variation usages to S3.*
  
 Currently we are supporting only feature events.
 It represent individual flag evaluations and are considered "full fidelity" events.

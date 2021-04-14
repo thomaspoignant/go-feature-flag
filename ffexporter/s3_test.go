@@ -175,6 +175,15 @@ func TestS3_Export(t *testing.T) {
 	}
 }
 
+func Test_errSDK(t *testing.T) {
+	f := &S3{
+		Bucket:    "empty",
+		AwsConfig: &aws.Config{},
+	}
+	err := f.Export(log.New(os.Stdout, "", 0), []exporter.FeatureEvent{})
+	assert.Error(t, err, "Empty AWS config should failed")
+}
+
 func TestS3_IsBulk(t *testing.T) {
 	exporter := S3{}
 	assert.True(t, exporter.IsBulk(), "File exporter is not a bulk exporter")
