@@ -32,7 +32,7 @@ func TestLog_Export(t *testing.T) {
 				{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false},
 			}},
-			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"ABCD\", flag=\"random-key\", value=\"YO\"\n",
+			expectedLog: "^\\[" + testutil.RFC3339Regex + "\\] user=\"ABCD\", flag=\"random-key\", value=\"YO\"\n",
 		},
 		{
 			name: "Custom format",
@@ -54,7 +54,7 @@ func TestLog_Export(t *testing.T) {
 				{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false},
 			}},
-			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"ABCD\", flag=\"random-key\", value=\"YO\"\n",
+			expectedLog: "^\\[" + testutil.RFC3339Regex + "\\] user=\"ABCD\", flag=\"random-key\", value=\"YO\"\n",
 		},
 		{
 			name: "Field does not exist",
@@ -65,7 +65,7 @@ func TestLog_Export(t *testing.T) {
 				{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false},
 			}},
-			expectedLog: "\\[" + testutil.RFC3339Regex + "\\] user=\"ABCD\", flag=\"random-key\", value=\"YO\"\n",
+			expectedLog: "^\\[" + testutil.RFC3339Regex + "\\] user=\"ABCD\", flag=\"random-key\", value=\"YO\"\n",
 			wantErr:     true,
 		},
 	}

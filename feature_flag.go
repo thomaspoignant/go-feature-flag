@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"sync"
-	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
 	"github.com/thomaspoignant/go-feature-flag/internal/exporter"
@@ -115,7 +114,7 @@ func (g *GoFeatureFlag) startFlagUpdaterDaemon() {
 		case <-g.bgUpdater.ticker.C:
 			err := retrieveFlagsAndUpdateCache(g.config, g.cache)
 			if err != nil {
-				fflog.Printf(g.config.Logger, "[%v] error while updating the cache: %v\n", time.Now().Format(time.RFC3339), err)
+				fflog.Printf(g.config.Logger, "error while updating the cache: %v\n", err)
 			}
 		case <-g.bgUpdater.updaterChan:
 			return

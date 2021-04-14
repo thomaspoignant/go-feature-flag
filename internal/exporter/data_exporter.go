@@ -108,7 +108,7 @@ func (dc *DataExporterScheduler) flush() {
 	if len(dc.localCache) > 0 {
 		err := dc.exporter.Export(dc.logger, dc.localCache)
 		if err != nil {
-			fflog.Printf(dc.logger, "[%v] error while exporting data: %v\n", time.Now().Format(time.RFC3339), err)
+			fflog.Printf(dc.logger, "error while exporting data: %v\n", err)
 			return
 		}
 	}
