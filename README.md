@@ -352,7 +352,7 @@ If you have configured a webhook, a POST request will be sent to the `PayloadURL
 <details>
 <summary><b>Example</b></summary>
   
- ```json
+```json
 {
    "meta":{
        "hostname": "server01"
@@ -397,6 +397,7 @@ If you have configured a webhook, a POST request will be sent to the `PayloadURL
    }
 }
 ```
+
 </details>
 
 
