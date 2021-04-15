@@ -17,18 +17,26 @@
     <a href="https://github.com/avelino/awesome-go/#server-applications"><img src="https://awesome.re/mentioned-badge-flat.svg" alt="Mentioned in Awesome Go"></a>
 </p>
 
-A feature flag solution, with only a file _(`YAML`, `JSON` or `TOML`)_ in the backend.  
-No server to install, just add a file in a central system *(HTTP, S3, GitHub, Local file ...)* and all your services will react to the changes of this file.
-
-
-If you are not familiar with feature flags also called feature Toggles you can read this [article of Martin Fowler](https://www.martinfowler.com/articles/feature-toggles.html)
-that explains why this is a great pattern.  
-I've also wrote an [article](https://medium.com/better-programming/feature-flags-and-how-to-iterate-quickly-7e3371b9986) that explains why feature flags can help you to iterate quickly.
+**Feature flags with no complex system to maintain!**
 
 ## Installation
 ```bash
 go get github.com/thomaspoignant/go-feature-flag
 ```
+## What is go-feature-flag?
+A simple and complete feature flag solution, without any complex backend system to install, you need only a file as your backend.  
+No server is needed, just add a file in a central system and all your services will react to the changes of this file.  
+
+`go-feature-flags` supports:
+- Storing your configuration flags file on various locations ([`HTTP`](#from-an-http-endpoint), [`S3`](#from-a-s3-bucket), [`GitHub`](#from-github), [`file`](#from-a-file)).
+- Configuring your flags in various [format](#flags-file-format) (`JSON`, `TOML` and `YAML`).
+- Adding complex [rules](#rule-format) to target your users.
+- Getting notified when a flag has changed ([`webhook`](#webhooks) and [`slack`](#slack)).
+- Exporting your flags usage data ([`s3`](#s3-exporter), [`log`](#log-exporter) and [`file`](#file-exporter)).
+
+If you are not familiar with feature flags also called feature Toggles you can read this [article of Martin Fowler](https://www.martinfowler.com/articles/feature-toggles.html)
+that explains why this is a great pattern.  
+I've also wrote an [article](https://medium.com/better-programming/feature-flags-and-how-to-iterate-quickly-7e3371b9986) that explains why feature flags can help you to iterate quickly.
 
 ## Quickstart
 First, you need to initialize the `ffclient` with the location of your backend file.
