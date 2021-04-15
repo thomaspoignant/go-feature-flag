@@ -36,9 +36,6 @@ type Config struct {
 	// Default: YAML
 	FileFormat string
 
-	// Deprecated: Use Notifiers instead, webhooks will be delete in a future version
-	Webhooks []WebhookConfig // Webhooks we should call when a flag create/update/delete
-
 	// DataExporter (optional) is the configuration where we store how we should output the flags variations results
 	DataExporter DataExporter
 

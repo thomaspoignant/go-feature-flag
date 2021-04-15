@@ -210,8 +210,8 @@ func TestWrongWebhookConfig(t *testing.T) {
 	_, err := New(Config{
 		PollInterval: 5,
 		Retriever:    &FileRetriever{Path: "testdata/flag-config.yaml"},
-		Webhooks: []WebhookConfig{
-			{
+		Notifiers: []NotifierConfig{
+			&WebhookConfig{
 				PayloadURL: " https://example.com/hook",
 				Secret:     "Secret",
 				Meta: map[string]string{
