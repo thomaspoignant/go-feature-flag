@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/aws/aws-sdk-go/aws"
 	"log"
 	"os"
 	"time"
@@ -12,21 +13,32 @@ import (
 )
 
 func main() {
-	// Init ffclient with a file retriever.
+	/*
+		1. You need to have your AWS credentials in your machine to use this example.
+		2. Create a bucket in your account, and replace the bucket name "my-test-bucket" in the configuration
+		3. Run this example
+		4. In your bucket you will have 2 files:
+			   - /go-feature-flag/variations/flag-variation-EXAMPLE-<timestamp>.json
+			   - /go-feature-flag/variations/flag-variation-EXAMPLE-<timestamp>.json
+	*/
 	err := ffclient.Init(ffclient.Config{
 		PollInterval: 10,
 		Logger:       log.New(os.Stdout, "", 0),
 		Context:      context.Background(),
 		Retriever: &ffclient.FileRetriever{
-			Path: "examples/data_export_file/flags.yaml",
+			Path: "examples/data_export_s3/flags.yaml",
 		},
 		DataExporter: ffclient.DataExporter{
 			FlushInterval:    1 * time.Second,
 			MaxEventInMemory: 100,
-			Exporter: &ffexporter.File{
-				Format:    "json",
-				OutputDir: "./examples/data_export_file/",
-				Filename:  " flag-variation-EXAMPLE-{{ .Timestamp}}.{{ .Format}}",
+			Exporter: &ffexporter.S3{
+				Format:   "json",
+				Bucket:   "my-test-bucket",
+				S3Path:   "/go-feature-flag/variations/",
+				Filename: "flag-variation-{{ .Timestamp}}.{{ .Format}}",
+				AwsConfig: &aws.Config{
+					Region: aws.String("eu-west-1"),
+				},
 			},
 		},
 	})
@@ -53,15 +65,14 @@ func main() {
 	_, _ = ffclient.BoolVariation("new-admin-access", user2, false)
 
 	/*
-		The output will be something like that:
-
-		flag-variation-EXAMPLE-<timestamp>.json:
+		The content of those files should looks like:
+		/go-feature-flag/variations/flag-variation-EXAMPLE-<timestamp>.json:
 			{"kind":"feature","contextKind":"anonymousUser","userKey":"aea2fdc1-b9a0-417a-b707-0c9083de68e3","creationDate":1618234129,"key":"new-admin-access","variation":"True","value":true,"default":false}
 			{"kind":"feature","contextKind":"user","userKey":"332460b9-a8aa-4f7a-bc5d-9cc33632df9a","creationDate":1618234129,"key":"new-admin-access","variation":"False","value":false,"default":false}
 			{"kind":"feature","contextKind":"anonymousUser","userKey":"aea2fdc1-b9a0-417a-b707-0c9083de68e3","creationDate":1618234129,"key":"unknown-flag","variation":"SdkDefault","value":"defaultValue","default":true}
 			{"kind":"feature","contextKind":"anonymousUser","userKey":"aea2fdc1-b9a0-417a-b707-0c9083de68e3","creationDate":1618234129,"key":"unknown-flag-2","variation":"SdkDefault","value":{"test":"toto"},"default":true}
 		----
-		flag-variation-EXAMPLE-<timestamp>.json:
+		/go-feature-flag/variations/flag-variation-EXAMPLE-<timestamp>.json:
 			{"kind":"feature","contextKind":"anonymousUser","userKey":"aea2fdc1-b9a0-417a-b707-0c9083de68e3","creationDate":1618234131,"key":"new-admin-access","variation":"True","value":true,"default":false}
 			{"kind":"feature","contextKind":"user","userKey":"332460b9-a8aa-4f7a-bc5d-9cc33632df9a","creationDate":1618234131,"key":"new-admin-access","variation":"False","value":false,"default":false}
 	*/
