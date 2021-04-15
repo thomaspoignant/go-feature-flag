@@ -53,8 +53,14 @@ func (r *HTTPRetriever) getFlagRetriever() (retriever.FlagRetriever, error) {
 
 // S3Retriever is a configuration struct for a S3 retriever.
 type S3Retriever struct {
-	Bucket    string
-	Item      string
+	// Bucket is the name of your S3 Bucket.
+	Bucket string
+
+	// Item is the path to your flag file in your bucket.
+	Item string
+
+	// AwsConfig is the AWS SDK configuration object we will use to
+	// download your feature flag configuration file.
 	AwsConfig aws.Config
 }
 
@@ -83,6 +89,7 @@ type GithubRetriever struct {
 	GithubToken    string
 	Timeout        time.Duration // default is 10 seconds
 }
+
 // nolint: unused
 func (r *GithubRetriever) getFlagRetriever() (retriever.FlagRetriever, error) {
 	// default branch is main

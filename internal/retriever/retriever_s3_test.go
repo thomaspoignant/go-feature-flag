@@ -2,37 +2,14 @@ package retriever_test
 
 import (
 	"context"
-	"errors"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager/s3manageriface"
 	"github.com/stretchr/testify/assert"
-	"io"
 	"io/ioutil"
 	"testing"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/retriever"
+	"github.com/thomaspoignant/go-feature-flag/testutils"
 )
-
-type s3ManagerMock struct {
-}
-
-func (s s3ManagerMock) Download(at io.WriterAt, input *s3.GetObjectInput, f ...func(*s3manager.Downloader)) (int64, error) {
-	if *input.Key == "valid" {
-		res, _ := ioutil.ReadFile("../../testdata/flag-config.yaml")
-		_, _ = at.WriteAt(res, 0)
-		return 1, nil
-	} else if *input.Key == "no-file" {
-		return 0, errors.New("no file")
-	}
-
-	return 1, nil
-}
-
-func (s s3ManagerMock) DownloadWithContext(context aws.Context, at io.WriterAt, input *s3.GetObjectInput, f ...func(*s3manager.Downloader)) (int64, error) {
-	return s.Download(at, input)
-}
 
 func Test_s3Retriever_Retrieve(t *testing.T) {
 	type fields struct {
@@ -50,7 +27,7 @@ func Test_s3Retriever_Retrieve(t *testing.T) {
 		{
 			name: "File on S3",
 			fields: fields{
-				downloader: s3ManagerMock{},
+				downloader: &testutils.S3ManagerMock{},
 				bucket:     "Bucket",
 				item:       "valid",
 			},
@@ -60,7 +37,7 @@ func Test_s3Retriever_Retrieve(t *testing.T) {
 		{
 			name: "File not present S3",
 			fields: fields{
-				downloader: s3ManagerMock{},
+				downloader: &testutils.S3ManagerMock{},
 				bucket:     "Bucket",
 				item:       "no-file",
 			},
@@ -69,7 +46,7 @@ func Test_s3Retriever_Retrieve(t *testing.T) {
 		{
 			name: "File on S3 with context",
 			fields: fields{
-				downloader: s3ManagerMock{},
+				downloader: &testutils.S3ManagerMock{},
 				bucket:     "Bucket",
 				item:       "valid",
 				context:    context.Background(),

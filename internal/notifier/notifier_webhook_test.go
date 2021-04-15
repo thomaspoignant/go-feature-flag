@@ -13,7 +13,7 @@ import (
 	"testing"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/model"
-	"github.com/thomaspoignant/go-feature-flag/testutil"
+	"github.com/thomaspoignant/go-feature-flag/testutils"
 )
 
 type httpClientMock struct {
@@ -136,7 +136,7 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 			name: "should log if http code is superior to 399",
 			expected: expected{
 				err:    true,
-				errLog: "^\\[" + testutil.RFC3339Regex + "\\] error: while calling webhook, statusCode = 400",
+				errLog: "^\\[" + testutils.RFC3339Regex + "\\] error: while calling webhook, statusCode = 400",
 			},
 			args: args{
 				statusCode: http.StatusBadRequest,
@@ -147,7 +147,7 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 			name: "should log if error while calling webhook",
 			expected: expected{
 				err:    true,
-				errLog: "^\\[" + testutil.RFC3339Regex + "\\] error: while calling webhook: random error",
+				errLog: "^\\[" + testutils.RFC3339Regex + "\\] error: while calling webhook: random error",
 			},
 			args: args{
 				statusCode: http.StatusOK,

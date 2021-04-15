@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/model"
-	"github.com/thomaspoignant/go-feature-flag/testutil"
+	"github.com/thomaspoignant/go-feature-flag/testutils"
 )
 
 func TestLogNotifier_Notify(t *testing.T) {
@@ -40,7 +40,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 				},
 				wg: &sync.WaitGroup{},
 			},
-			expected: "^\\[" + testutil.RFC3339Regex + "\\] flag test-flag removed",
+			expected: "^\\[" + testutils.RFC3339Regex + "\\] flag test-flag removed",
 		},
 		{
 			name: "Update flag",
@@ -68,7 +68,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 				},
 				wg: &sync.WaitGroup{},
 			},
-			expected: "^\\[" + testutil.RFC3339Regex + "\\] flag test-flag updated, old=\\[percentage=100%, rule=\"key eq \"random-key\"\", true=\"true\", false=\"false\", true=\"false\", disable=\"false\"\\], new=\\[percentage=100%, true=\"true\", false=\"false\", true=\"false\", disable=\"false\"\\]",
+			expected: "^\\[" + testutils.RFC3339Regex + "\\] flag test-flag updated, old=\\[percentage=100%, rule=\"key eq \"random-key\"\", true=\"true\", false=\"false\", true=\"false\", disable=\"false\"\\], new=\\[percentage=100%, true=\"true\", false=\"false\", true=\"false\", disable=\"false\"\\]",
 		},
 		{
 			name: "Disable flag",
@@ -98,7 +98,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 				},
 				wg: &sync.WaitGroup{},
 			},
-			expected: "^\\[" + testutil.RFC3339Regex + "\\] flag test-flag is turned OFF",
+			expected: "^\\[" + testutils.RFC3339Regex + "\\] flag test-flag is turned OFF",
 		},
 		{
 			name: "Add flag",
@@ -118,7 +118,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 				},
 				wg: &sync.WaitGroup{},
 			},
-			expected: "^\\[" + testutil.RFC3339Regex + "\\] flag add-test-flag added",
+			expected: "^\\[" + testutils.RFC3339Regex + "\\] flag add-test-flag added",
 		},
 		{
 			name: "Enable flag",
@@ -148,7 +148,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 				},
 				wg: &sync.WaitGroup{},
 			},
-			expected: "^\\[" + testutil.RFC3339Regex + "\\] flag test-flag is turned ON \\(flag=\\[percentage=100%, rule=\"key eq \"random-key\"\", true=\"true\", false=\"false\", true=\"false\", disable=\"false\"\\]\\)",
+			expected: "^\\[" + testutils.RFC3339Regex + "\\] flag test-flag is turned ON \\(flag=\\[percentage=100%, rule=\"key eq \"random-key\"\", true=\"true\", false=\"false\", true=\"false\", disable=\"false\"\\]\\)",
 		},
 	}
 	for _, tt := range tests {

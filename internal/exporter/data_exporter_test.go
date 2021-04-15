@@ -12,7 +12,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
 	"github.com/thomaspoignant/go-feature-flag/internal/exporter"
 	"github.com/thomaspoignant/go-feature-flag/internal/model"
-	"github.com/thomaspoignant/go-feature-flag/testutil"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
 )
 
@@ -97,7 +96,7 @@ func TestDataExporterScheduler_exporterReturnError(t *testing.T) {
 
 	// read log
 	logs, _ := ioutil.ReadFile(file.Name())
-	assert.Regexp(t, "\\["+testutil.RFC3339Regex+"\\] error while exporting data: random err\\n", string(logs))
+	assert.Regexp(t, "\\["+testutils.RFC3339Regex+"\\] error while exporting data: random err\\n", string(logs))
 }
 
 func TestDataExporterScheduler_nonBulkExporter(t *testing.T) {
