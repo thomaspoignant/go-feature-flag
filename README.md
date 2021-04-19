@@ -236,6 +236,7 @@ test-flag:
 |`false`   |![mandatory](https://img.shields.io/badge/-mandatory-red)   |  The value return by the flag if apply to the user *(rule is evaluated to true)* and user is **not** in the active percentage. |
 |`default`   |![mandatory](https://img.shields.io/badge/-mandatory-red)   |  The value return by the flag if not apply to the user *(rule is evaluated to false)*. |
 |`disable`   |![optional](https://img.shields.io/badge/-optional-green)   |  True if the flag is disabled. |
+|`trackEvents`   |![optional](https://img.shields.io/badge/-optional-green)   |   False if you don't want to export the data in your data exporter.<br>Default value is true |
 
 ## Rule format
 The rule format is based on the [`nikunjy/rules`](https://github.com/nikunjy/rules) library.
@@ -489,6 +490,8 @@ In your `ffclient.Config` add the `DataExporter` field and configure your export
 
 To avoid to spam your location everytime you have a variation called, `go-feature-flag` is storing in memory all the events and send them in bulk to the exporter.  
 You can decide the threshold on when to send the data with the properties `FlushInterval` and `MaxEventInMemory`. The first threshold hit will export the data.
+
+If there are some flags you don't want to export, you can user `trackEvents` fields on these specific flags to disable the data export *(see [flag file format](#flags-file-format))*.
 
 **Example:**
 ```go

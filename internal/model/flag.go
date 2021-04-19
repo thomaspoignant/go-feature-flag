@@ -22,12 +22,32 @@ const (
 
 // Flag describe the fields of a flag.
 type Flag struct {
-	Disable    bool        `json:"disable,omitempty"`
-	Rule       string      `json:"rule,omitempty"`
-	Percentage float64     `json:"percentage,omitempty"`
-	True       interface{} `json:"true,omitempty"`    // Value if Rule applied, and in percentage
-	False      interface{} `json:"false,omitempty"`   // Value if Rule applied and not in percentage
-	Default    interface{} `json:"default,omitempty"` // Value if Rule does not applied
+	// Rule is the query use to select on which user the flag should apply.
+	// Rule format is based on the nikunjy/rules module.
+	// If no rule set, the flag apply to all users (percentage still apply).
+	Rule string `json:"rule,omitempty" yaml:"rule,omitempty" toml:"rule,omitempty" slack_short:"false"`
+
+	// Percentage of the users affect by the flag.
+	// Default value is 0
+	Percentage float64 `json:"percentage,omitempty" yaml:"percentage,omitempty" toml:"percentage,omitempty"`
+
+	// True is the value return by the flag if apply to the user (rule is evaluated to true)
+	// and user is in the active percentage.
+	True interface{} `json:"true,omitempty" yaml:"true,omitempty" toml:"true,omitempty"`
+
+	// False is the value return by the flag if apply to the user (rule is evaluated to true)
+	// and user is not in the active percentage.
+	False interface{} `json:"false,omitempty" yaml:"false,omitempty" toml:"false,omitempty"`
+
+	// Default is the value return by the flag if not apply to the user (rule is evaluated to false).
+	Default interface{} `json:"default,omitempty" yaml:"default,omitempty" toml:"default,omitempty"`
+
+	// TrackEvents is false if you don't want to export the data in your data exporter.
+	// Default value is true
+	TrackEvents *bool `json:"trackEvents,omitempty" yaml:"trackEvents,omitempty" toml:"trackEvents,omitempty"`
+
+	// Disable is true if the flag is disabled.
+	Disable bool `json:"disable,omitempty" yaml:"disable,omitempty" toml:"disable,omitempty"`
 }
 
 // Value is returning the Value associate to the flag (True / False / Default ) based
@@ -92,6 +112,10 @@ func (f Flag) String() string {
 	strBuilder.WriteString(fmt.Sprintf("false=\"%v\", ", f.False))
 	strBuilder.WriteString(fmt.Sprintf("true=\"%v\", ", f.Default))
 	strBuilder.WriteString(fmt.Sprintf("disable=\"%v\"", f.Disable))
+
+	if f.TrackEvents != nil {
+		strBuilder.WriteString(fmt.Sprintf(", trackEvents=\"%v\"", *f.TrackEvents))
+	}
 
 	return strBuilder.String()
 }

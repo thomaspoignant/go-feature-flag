@@ -66,7 +66,7 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 			},
 			expected: expected{
 				bodyPath:  "../../testdata/internal/notifier/webhook/should_call_webhook_and_have_valid_results.json",
-				signature: "sha256=9859701f2e692d33b0cf7ed4546c56dc0d0df8d587e95472f36592c482cd835d",
+				signature: "sha256=23effe4da9927ab72df5202a3146e6be39c12b7f6cee99f8d2e19326d8806b81",
 			},
 			args: args{
 				statusCode: http.StatusOK,

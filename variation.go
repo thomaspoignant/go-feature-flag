@@ -187,11 +187,13 @@ func (g *GoFeatureFlag) JSONVariation(
 // if no logger is provided in the configuration we are not logging anything.
 func (g *GoFeatureFlag) notifyVariation(
 	flagKey string, flag model.Flag, user ffuser.User, value interface{}, variationType model.VariationType, failed bool) {
-	event := exporter.NewFeatureEvent(user, flagKey, flag, value, variationType, failed)
+	if flag.TrackEvents == nil || *flag.TrackEvents {
+		event := exporter.NewFeatureEvent(user, flagKey, flag, value, variationType, failed)
 
-	// Add event in the exporter
-	if g.dataExporter != nil {
-		g.dataExporter.AddEvent(event)
+		// Add event in the exporter
+		if g.dataExporter != nil {
+			g.dataExporter.AddEvent(event)
+		}
 	}
 }
 
