@@ -82,6 +82,11 @@
           "short": true
         },
         {
+          "title": "TrackEvents",
+          "value": "true",
+          "short": true
+        },
+        {
           "title": "Disable",
           "value": "false",
           "short": true

@@ -41,11 +41,12 @@ func TestSlackNotifier_Notify(t *testing.T) {
 				diff: model.DiffCache{
 					Added: map[string]model.Flag{
 						"test-flag3": {
-							Percentage: 5,
-							True:       "test",
-							False:      "false",
-							Default:    "default",
-							Rule:       "key eq \"random-key\"",
+							Percentage:  5,
+							True:        "test",
+							False:       "false",
+							Default:     "default",
+							Rule:        "key eq \"random-key\"",
+							TrackEvents: testutils.Bool(true),
 						},
 					},
 					Deleted: map[string]model.Flag{
