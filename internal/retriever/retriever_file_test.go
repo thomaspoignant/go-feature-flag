@@ -58,7 +58,7 @@ func Test_localRetriever_Retrieve(t *testing.T) {
 				assert.Error(t, err, "Retrieve() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			assert.Equal(t, tt.want, got)
+			assert.Equal(t, string(tt.want), string(got))
 		})
 	}
 }

@@ -22,12 +22,22 @@ const (
 
 // Flag describe the fields of a flag.
 type Flag struct {
-	Disable    bool        `json:"disable,omitempty"`
-	Rule       string      `json:"rule,omitempty"`
-	Percentage float64     `json:"percentage,omitempty"`
-	True       interface{} `json:"true,omitempty"`    // Value if Rule applied, and in percentage
-	False      interface{} `json:"false,omitempty"`   // Value if Rule applied and not in percentage
-	Default    interface{} `json:"default,omitempty"` // Value if Rule does not applied
+	// TODO: Add more godoc
+
+	Rule       string  `json:"rule,omitempty" yaml:"rule,omitempty" toml:"rule,omitempty" slack_short:"false"`
+	Percentage float64 `json:"percentage,omitempty" yaml:"percentage,omitempty" toml:"percentage,omitempty"`
+
+	// Value if Rule applied, and in percentage
+	True interface{} `json:"true,omitempty" yaml:"true,omitempty" toml:"true,omitempty"`
+
+	// Value if Rule applied and not in percentage
+	False interface{} `json:"false,omitempty" yaml:"false,omitempty" toml:"false,omitempty"`
+
+	// Value if Rule does not applied
+	Default     interface{} `json:"default,omitempty" yaml:"default,omitempty" toml:"default,omitempty"`
+	TrackEvents *bool       `json:"trackEvents,omitempty" yaml:"trackEvents,omitempty" toml:"trackEvents,omitempty"`
+
+	Disable bool `json:"disable,omitempty" yaml:"disable,omitempty" toml:"disable,omitempty"`
 }
 
 // Value is returning the Value associate to the flag (True / False / Default ) based
@@ -92,6 +102,10 @@ func (f Flag) String() string {
 	strBuilder.WriteString(fmt.Sprintf("false=\"%v\", ", f.False))
 	strBuilder.WriteString(fmt.Sprintf("true=\"%v\", ", f.Default))
 	strBuilder.WriteString(fmt.Sprintf("disable=\"%v\"", f.Disable))
+
+	if f.TrackEvents != nil {
+		strBuilder.WriteString(fmt.Sprintf(", trackEvents=\"%v\"", *f.TrackEvents))
+	}
 
 	return strBuilder.String()
 }
