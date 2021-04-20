@@ -1,7 +1,6 @@
 package notifier
 
 import (
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"log"
@@ -162,7 +161,6 @@ func TestLogNotifier_Notify(t *testing.T) {
 			tt.args.wg.Add(1)
 			c.Notify(tt.args.diff, tt.args.wg)
 			log, _ := ioutil.ReadFile(logOutput.Name())
-			fmt.Println(string(log))
 			assert.Regexp(t, tt.expected, string(log))
 		})
 	}

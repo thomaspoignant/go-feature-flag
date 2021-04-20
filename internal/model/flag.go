@@ -61,8 +61,9 @@ func (f *Flag) isInPercentage(flagName string, user ffuser.User) bool {
 		return false
 	}
 
-	hashID := (uint64(Hash(flagName+user.GetKey())) * 1000) % 100000
-	percentage := uint64(f.Percentage * 1000)
+	hashID := Hash(flagName+user.GetKey()) % 100000
+	percentage := uint32(f.Percentage * 1000)
+
 	return hashID < percentage
 }
 
