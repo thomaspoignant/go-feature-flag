@@ -546,7 +546,7 @@ func TestJSONArrayVariation(t *testing.T) {
 				defaultValue: []interface{}{"toto"},
 				cacheMock: NewCacheMock(model.Flag{
 					Rule:        "anonymous eq true",
-					Percentage:  50,
+					Percentage:  10,
 					Default:     []interface{}{"default"},
 					True:        []interface{}{"true"},
 					False:       []interface{}{"false"},
