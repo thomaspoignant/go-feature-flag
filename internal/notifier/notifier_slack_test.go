@@ -41,11 +41,12 @@ func TestSlackNotifier_Notify(t *testing.T) {
 				diff: model.DiffCache{
 					Added: map[string]model.Flag{
 						"test-flag3": {
-							Percentage: 5,
-							True:       "test",
-							False:      "false",
-							Default:    "default",
-							Rule:       "key eq \"random-key\"",
+							Percentage:  5,
+							True:        "test",
+							False:       "false",
+							Default:     "default",
+							Rule:        "key eq \"random-key\"",
+							TrackEvents: testutils.Bool(true),
 						},
 					},
 					Deleted: map[string]model.Flag{
@@ -60,19 +61,21 @@ func TestSlackNotifier_Notify(t *testing.T) {
 					Updated: map[string]model.DiffUpdated{
 						"test-flag2": {
 							Before: model.Flag{
-								Rule:       "key eq \"not-a-key\"",
-								Percentage: 100,
-								True:       true,
-								False:      false,
-								Default:    false,
+								Rule:        "key eq \"not-a-key\"",
+								Percentage:  100,
+								True:        true,
+								False:       false,
+								Default:     false,
+								TrackEvents: testutils.Bool(true),
 							},
 							After: model.Flag{
-								Rule:       "key eq \"not-a-ke\"",
-								Percentage: 80,
-								True:       "strTrue",
-								False:      "strFalse",
-								Default:    "strDefault",
-								Disable:    true,
+								Rule:        "key eq \"not-a-ke\"",
+								Percentage:  80,
+								True:        "strTrue",
+								False:       "strFalse",
+								Default:     "strDefault",
+								Disable:     true,
+								TrackEvents: testutils.Bool(false),
 							},
 						},
 					},

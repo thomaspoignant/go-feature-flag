@@ -20,7 +20,7 @@
         },
         {
           "title": "Percentage",
-          "value": "100% =\u003e 80%",
+          "value": "100 =\u003e 80",
           "short": true
         },
         {
@@ -34,8 +34,18 @@
           "short": true
         },
         {
-          "title": "False",
+          "title": "Default",
           "value": "false =\u003e strDefault",
+          "short": true
+        },
+        {
+          "title": "TrackEvents",
+          "value": "true =\u003e false",
+          "short": true
+        },
+        {
+          "title": "Disable",
+          "value": "false =\u003e true",
           "short": true
         }
       ],
@@ -53,7 +63,7 @@
         },
         {
           "title": "Percentage",
-          "value": "5%",
+          "value": "5",
           "short": true
         },
         {
@@ -69,6 +79,16 @@
         {
           "title": "Default",
           "value": "default",
+          "short": true
+        },
+        {
+          "title": "TrackEvents",
+          "value": "true",
+          "short": true
+        },
+        {
+          "title": "Disable",
+          "value": "false",
           "short": true
         }
       ],

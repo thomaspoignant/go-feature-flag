@@ -159,6 +159,25 @@ func TestBoolVariation(t *testing.T) {
 			wantErr:     true,
 			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"true\"\n",
 		},
+		{
+			name: "No exported log",
+			args: args{
+				flagKey:      "test-flag",
+				user:         ffuser.NewAnonymousUser("random-key"),
+				defaultValue: true,
+				cacheMock: NewCacheMock(model.Flag{
+					Rule:        "key eq \"random-key\"",
+					Percentage:  100,
+					True:        true,
+					False:       false,
+					Default:     false,
+					TrackEvents: testutils.Bool(false),
+				}, nil),
+			},
+			want:        true,
+			wantErr:     false,
+			expectedLog: "^$",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -321,6 +340,25 @@ func TestFloat64Variation(t *testing.T) {
 			wantErr:     true,
 			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"118.12\"\n",
 		},
+		{
+			name: "No exported log",
+			args: args{
+				flagKey:      "test-flag",
+				user:         ffuser.NewAnonymousUser("random-key"),
+				defaultValue: 118.12,
+				cacheMock: NewCacheMock(model.Flag{
+					Rule:        "key eq \"random-key\"",
+					Percentage:  100,
+					Default:     119.12,
+					True:        120.12,
+					False:       121.12,
+					TrackEvents: testutils.Bool(false),
+				}, nil),
+			},
+			want:        120.12,
+			wantErr:     false,
+			expectedLog: "^$",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -481,6 +519,43 @@ func TestJSONArrayVariation(t *testing.T) {
 			want:        []interface{}{"toto"},
 			wantErr:     true,
 			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"\\[toto\\]\"\n",
+		},
+		{
+			name: "No exported log",
+			args: args{
+				flagKey:      "test-flag",
+				user:         ffuser.NewUser("random-key-ssss1"),
+				defaultValue: []interface{}{"toto"},
+				cacheMock: NewCacheMock(model.Flag{
+					Percentage:  100,
+					Default:     []interface{}{"default"},
+					True:        []interface{}{"true"},
+					False:       []interface{}{"false"},
+					TrackEvents: testutils.Bool(false),
+				}, nil),
+			},
+			want:        []interface{}{"true"},
+			wantErr:     false,
+			expectedLog: "^$",
+		},
+		{
+			name: "No exported data",
+			args: args{
+				flagKey:      "test-flag",
+				user:         ffuser.NewAnonymousUser("random-key-ssss1"),
+				defaultValue: []interface{}{"toto"},
+				cacheMock: NewCacheMock(model.Flag{
+					Rule:        "anonymous eq true",
+					Percentage:  50,
+					Default:     []interface{}{"default"},
+					True:        []interface{}{"true"},
+					False:       []interface{}{"false"},
+					TrackEvents: testutils.Bool(false),
+				}, nil),
+			},
+			want:        []interface{}{"false"},
+			wantErr:     false,
+			expectedLog: "^$",
 		},
 	}
 	for _, tt := range tests {
