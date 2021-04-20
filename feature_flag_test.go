@@ -212,8 +212,8 @@ func TestWrongWebhookConfig(t *testing.T) {
 		Retriever:    &FileRetriever{Path: "testdata/flag-config.yaml"},
 		Webhooks: []WebhookConfig{
 			{
-				PayloadURL: " https://example.com/hook",
-				Secret:     "Secret",
+				EndpointURL: " https://example.com/hook",
+				Secret:      "Secret",
 				Meta: map[string]string{
 					"my-app": "go-ff-test",
 				},
