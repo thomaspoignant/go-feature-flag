@@ -277,8 +277,7 @@ test-flag:
     <pre lang="yaml" >
   experimentation:
     startDate: 2021-03-20T00:00:00.10-05:00
-    endDate: 2021-03-21T00:00:00.10-05:00
-   </pre>
+    endDate: 2021-03-21T00:00:00.10-05:00</pre>
    <i>The date is in the format supported natively by your flag file format.</i><br>
    Check this <a href="https://github.com/thomaspoignant/go-feature-flag/blob/main/examples/experimentation/main.go">example</a> to see how it works.
    </td>
