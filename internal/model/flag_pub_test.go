@@ -263,7 +263,7 @@ func TestFlag_value(t *testing.T) {
 				user:     ffuser.NewUserBuilder("user66").AddCustom("name", "john").Build(), // combined hash is 9
 			},
 			want: want{
-				value:         "Default",
+				value:         "default",
 				variationType: model.VariationDefault,
 			},
 		},
