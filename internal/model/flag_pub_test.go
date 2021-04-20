@@ -67,6 +67,42 @@ func TestFlag_value(t *testing.T) {
 				variationType: model.VariationTrue,
 			},
 		},
+		{
+			name: "Get default value if does not pass",
+			fields: fields{
+				True:       "true",
+				False:      "false",
+				Default:    "default",
+				Rule:       "key == \"7e50ee61-06ad-4bb0-9034-38ad7\"",
+				Percentage: 10,
+			},
+			args: args{
+				flagName: "test-flag",
+				user:     ffuser.NewUserBuilder("7e50ee61-06ad-4bb0-9034-38ad7cdea9f5").AddCustom("name", "john").Build(),
+			},
+			want: want{
+				value:         "default",
+				variationType: model.VariationDefault,
+			},
+		},
+		{
+			name: "Get false value if rule pass and not in the cohort",
+			fields: fields{
+				True:       "true",
+				False:      "false",
+				Default:    "default",
+				Rule:       "key == \"7e50ee61-06ad-4bb0-9034-38ad7cdea9f5\"",
+				Percentage: 10,
+			},
+			args: args{
+				flagName: "test-flag2",
+				user:     ffuser.NewUserBuilder("7e50ee61-06ad-4bb0-9034-38ad7cdea9f5").AddCustom("name", "john").Build(),
+			},
+			want: want{
+				value:         "false",
+				variationType: model.VariationFalse,
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
