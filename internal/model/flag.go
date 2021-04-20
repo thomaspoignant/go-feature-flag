@@ -28,11 +28,12 @@ type Experimentation struct {
 
 func (e Experimentation) String() string {
 	buf := make([]string, 0)
+	lo, _ := time.LoadLocation("UTC")
 	if e.StartDate != nil {
-		buf = append(buf, fmt.Sprintf("start:[%v]", e.StartDate.Format(time.RFC3339)))
+		buf = append(buf, fmt.Sprintf("start:[%v]", e.StartDate.In(lo).Format(time.RFC3339)))
 	}
 	if e.EndDate != nil {
-		buf = append(buf, fmt.Sprintf("end:[%v]", e.EndDate.Format(time.RFC3339)))
+		buf = append(buf, fmt.Sprintf("end:[%v]", e.EndDate.In(lo).Format(time.RFC3339)))
 	}
 	return strings.Join(buf, " ")
 }
