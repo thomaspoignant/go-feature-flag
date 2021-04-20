@@ -1,8 +1,6 @@
 package notifier
 
 import (
-	"bytes"
-	"errors"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"log"
@@ -15,28 +13,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/internal/model"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
 )
-
-type httpClientMock struct {
-	forceError bool
-	statusCode int
-	body       string
-	signature  string
-}
-
-func (h *httpClientMock) Do(req *http.Request) (*http.Response, error) {
-	if h.forceError {
-		return nil, errors.New("random error")
-	}
-
-	b, _ := ioutil.ReadAll(req.Body)
-	h.body = string(b)
-	h.signature = req.Header.Get("X-Hub-Signature-256")
-	resp := &http.Response{
-		Body: ioutil.NopCloser(bytes.NewReader([]byte(""))),
-	}
-	resp.StatusCode = h.statusCode
-	return resp, nil
-}
 
 func Test_webhookNotifier_Notify(t *testing.T) {
 	type fields struct {
@@ -162,7 +138,7 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 			defer logFile.Close()
 			defer os.Remove(logFile.Name())
 
-			mockHTTPClient := &httpClientMock{statusCode: tt.args.statusCode, forceError: tt.args.forceError}
+			mockHTTPClient := &testutils.HTTPClientMock{StatusCode: tt.args.statusCode, ForceError: tt.args.forceError}
 
 			c, _ := NewWebhookNotifier(
 				log.New(logFile, "", 0),
@@ -181,15 +157,15 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 				assert.Regexp(t, tt.expected.errLog, string(log))
 			} else {
 				content, _ := ioutil.ReadFile(tt.expected.bodyPath)
-				assert.JSONEq(t, string(content), mockHTTPClient.body)
-				assert.Equal(t, tt.expected.signature, mockHTTPClient.signature)
+				assert.JSONEq(t, string(content), mockHTTPClient.Body)
+				assert.Equal(t, tt.expected.signature, mockHTTPClient.Signature)
 			}
 		})
 	}
 }
 
 func TestNewWebhookNotifier(t *testing.T) {
-	mockHTTPClient := &httpClientMock{statusCode: 200, forceError: false}
+	mockHTTPClient := &testutils.HTTPClientMock{StatusCode: 200, ForceError: false}
 	hostname, _ := os.Hostname()
 
 	type args struct {
