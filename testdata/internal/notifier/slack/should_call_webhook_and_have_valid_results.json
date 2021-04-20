@@ -47,6 +47,11 @@
           "title": "Disable",
           "value": "false =\u003e true",
           "short": true
+        },
+        {
+          "title": "Experimentation",
+          "value": "start:[2004-09-17T02:03:20+02:00] end:[2004-09-16T23:43:20+02:00] => <nil>",
+          "short": false
         }
       ],
       "footer_icon": "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png",
