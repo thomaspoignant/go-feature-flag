@@ -245,6 +245,28 @@ func TestFlag_value(t *testing.T) {
 				variationType: model.VariationTrue,
 			},
 		},
+		{
+			name: "Invert start date and end date",
+			fields: fields{
+				True:       "true",
+				False:      "false",
+				Default:    "default",
+				Rule:       "key == \"user66\"",
+				Percentage: 10,
+				Experimentation: model.Experimentation{
+					StartDate: testutils.Time(time.Now().Add(1 * time.Minute)),
+					EndDate:   testutils.Time(time.Now().Add(-1 * time.Minute)),
+				},
+			},
+			args: args{
+				flagName: "test-flag",
+				user:     ffuser.NewUserBuilder("user66").AddCustom("name", "john").Build(), // combined hash is 9
+			},
+			want: want{
+				value:         "Default",
+				variationType: model.VariationDefault,
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
