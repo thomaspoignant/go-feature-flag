@@ -17,6 +17,27 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/internal/signer"
 )
 
+// Webhook is the exporter of your data to a webhook.
+//
+// It calls the EndpointURL with a POST request with the following format:
+//   {
+//      "meta": {
+//        "hostname": "server01",
+//      },
+//      "events": [
+//        {
+//           "kind": "feature",
+//           "contextKind": "anonymousUser",
+//           "userKey": "14613538188334553206",
+//           "creationDate": 1618909178,
+//           "key": "test-flag",
+//           "variation": "Default",
+//           "value": false,
+//           "default": false
+//        },
+//      ]
+//    }
+//
 type Webhook struct {
 	// EndpointURL of your webhook
 	EndpointURL string
