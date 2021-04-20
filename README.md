@@ -666,7 +666,6 @@ ffclient.Config{
 
 
 #### Webhook format
-
 If you have configured a webhook, a POST request will be sent to the `EndpointURL` with a body in this format:
 
 ```json
@@ -689,7 +688,8 @@ If you have configured a webhook, a POST request will be sent to the `EndpointUR
         // ...
     ]
 }
-**```**
+```
+
 
 #### Signature
 This header **`X-Hub-Signature-256`** is sent if the webhook is configured with a **`secret`**. This is the **HMAC hex digest** of the request body, and is generated using the **SHA-256** hash function and the **secret as the HMAC key**.
