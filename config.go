@@ -62,7 +62,7 @@ func (c *Config) GetRetriever() (retriever.FlagRetriever, error) {
 //
 // Notifiers: []ffclient.NotifierConfig{
 //        &ffclient.WebhookConfig{
-//            PayloadURL: " https://example.com/hook",
+//            EndpointURL: " https://example.com/hook",
 //            Secret:     "Secret",
 //            Meta: map[string]string{
 //                "app.name": "my app",
@@ -121,17 +121,28 @@ type NotifierConfig interface {
 //    }
 //  }
 type WebhookConfig struct {
-	PayloadURL string            // PayloadURL of your webhook
-	Secret     string            // Secret used to sign your request body.
-	Meta       map[string]string // Meta information that you want to send to your webhook (not mandatory)
+	// Deprecated: use EndpointURL instead
+	PayloadURL string
+
+	// EndpointURL is the URL where we gonna do the POST Request.
+	EndpointURL string
+	Secret      string            // Secret used to sign your request body.
+	Meta        map[string]string // Meta information that you want to send to your webhook (not mandatory)
 }
 
 // GetNotifier convert the configuration in a Notifier struct
 func (w *WebhookConfig) GetNotifier(config Config) (notifier.Notifier, error) {
+	url := w.EndpointURL
+
+	// remove this if when EndpointURL will be removed
+	if url == "" {
+		url = w.PayloadURL
+	}
+
 	notifier, err := notifier.NewWebhookNotifier(
 		config.Logger,
 		internal.DefaultHTTPClient(),
-		w.PayloadURL, w.Secret, w.Meta)
+		url, w.Secret, w.Meta)
 	return &notifier, err
 }
 

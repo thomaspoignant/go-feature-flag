@@ -169,9 +169,9 @@ func TestNewWebhookNotifier(t *testing.T) {
 	hostname, _ := os.Hostname()
 
 	type args struct {
-		payloadURL string
-		secret     string
-		meta       map[string]string
+		endpointURL string
+		secret      string
+		meta        map[string]string
 	}
 	tests := []struct {
 		name    string
@@ -182,27 +182,27 @@ func TestNewWebhookNotifier(t *testing.T) {
 		{
 			name: "Invalid URL",
 			args: args{
-				payloadURL: " http://example.com",
+				endpointURL: " http://example.com",
 			},
 			wantErr: true,
 		},
 		{
 			name: "No meta",
 			args: args{
-				payloadURL: "http://example.com",
+				endpointURL: "http://example.com",
 			},
 			wantErr: false,
 			want: WebhookNotifier{
-				HTTPClient: mockHTTPClient,
-				PayloadURL: url.URL{Host: "example.com", Scheme: "http"},
-				Secret:     "",
-				Meta:       map[string]string{"hostname": hostname},
+				HTTPClient:  mockHTTPClient,
+				EndpointURL: url.URL{Host: "example.com", Scheme: "http"},
+				Secret:      "",
+				Meta:        map[string]string{"hostname": hostname},
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := NewWebhookNotifier(nil, mockHTTPClient, tt.args.payloadURL, tt.args.secret, tt.args.meta)
+			got, err := NewWebhookNotifier(nil, mockHTTPClient, tt.args.endpointURL, tt.args.secret, tt.args.meta)
 
 			if tt.wantErr {
 				assert.Error(t, err, "NewWebhookNotifier should return an error")

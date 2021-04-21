@@ -18,7 +18,7 @@ import (
 
 func NewWebhookNotifier(logger *log.Logger,
 	httpClient internal.HTTPClient,
-	payloadURL string,
+	endpointURL string,
 	secret string,
 	meta map[string]string,
 ) (WebhookNotifier, error) {
@@ -33,17 +33,17 @@ func NewWebhookNotifier(logger *log.Logger,
 		meta["hostname"] = hostname
 	}
 
-	parsedURL, err := url.Parse(payloadURL)
+	parsedURL, err := url.Parse(endpointURL)
 	if err != nil {
 		return WebhookNotifier{}, err
 	}
 
 	w := WebhookNotifier{
-		Logger:     logger,
-		PayloadURL: *parsedURL,
-		Secret:     secret,
-		Meta:       meta,
-		HTTPClient: httpClient,
+		Logger:      logger,
+		EndpointURL: *parsedURL,
+		Secret:      secret,
+		Meta:        meta,
+		HTTPClient:  httpClient,
 	}
 	return w, nil
 }
@@ -54,11 +54,11 @@ type webhookReqBody struct {
 }
 
 type WebhookNotifier struct {
-	Logger     *log.Logger
-	HTTPClient internal.HTTPClient
-	PayloadURL url.URL
-	Secret     string
-	Meta       map[string]string
+	Logger      *log.Logger
+	HTTPClient  internal.HTTPClient
+	EndpointURL url.URL
+	Secret      string
+	Meta        map[string]string
 }
 
 func (c *WebhookNotifier) Notify(diff model.DiffCache, wg *sync.WaitGroup) {
@@ -87,7 +87,7 @@ func (c *WebhookNotifier) Notify(diff model.DiffCache, wg *sync.WaitGroup) {
 
 	request := http.Request{
 		Method: "POST",
-		URL:    &c.PayloadURL,
+		URL:    &c.EndpointURL,
 		Header: headers,
 		Body:   ioutil.NopCloser(bytes.NewReader(payload)),
 	}

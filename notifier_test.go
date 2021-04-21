@@ -33,8 +33,8 @@ func TestGoFeatureFlag_getNotifiers(t *testing.T) {
 					Logger: log.New(os.Stdout, "", 0),
 					Notifiers: []NotifierConfig{
 						&WebhookConfig{
-							PayloadURL: parsedURL.String(),
-							Secret:     "Secret",
+							EndpointURL: parsedURL.String(),
+							Secret:      "Secret",
 							Meta: map[string]string{
 								"my-app":   "go-ff-test",
 								"hostname": hostname,
@@ -53,8 +53,8 @@ func TestGoFeatureFlag_getNotifiers(t *testing.T) {
 					HTTPClient: &http.Client{
 						Timeout: 10 * time.Second,
 					},
-					PayloadURL: *parsedURL,
-					Secret:     "Secret",
+					EndpointURL: *parsedURL,
+					Secret:      "Secret",
 					Meta: map[string]string{
 						"my-app":   "go-ff-test",
 						"hostname": hostname,
@@ -74,8 +74,8 @@ func TestGoFeatureFlag_getNotifiers(t *testing.T) {
 					Logger: log.New(os.Stdout, "", 0),
 					Webhooks: []WebhookConfig{
 						{
-							PayloadURL: parsedURL.String(),
-							Secret:     "Secret",
+							EndpointURL: parsedURL.String(),
+							Secret:      "Secret",
 							Meta: map[string]string{
 								"my-app":   "go-ff-test",
 								"hostname": hostname,
@@ -92,8 +92,8 @@ func TestGoFeatureFlag_getNotifiers(t *testing.T) {
 					HTTPClient: &http.Client{
 						Timeout: 10 * time.Second,
 					},
-					PayloadURL: *parsedURL,
-					Secret:     "Secret",
+					EndpointURL: *parsedURL,
+					Secret:      "Secret",
 					Meta: map[string]string{
 						"my-app":   "go-ff-test",
 						"hostname": hostname,
@@ -108,8 +108,8 @@ func TestGoFeatureFlag_getNotifiers(t *testing.T) {
 					Logger: log.New(os.Stdout, "", 0),
 					Notifiers: []NotifierConfig{
 						&WebhookConfig{
-							PayloadURL: " https://example.com/hook",
-							Secret:     "Secret",
+							EndpointURL: " https://example.com/hook",
+							Secret:      "Secret",
 							Meta: map[string]string{
 								"my-app":   "go-ff-test",
 								"hostname": hostname,
