@@ -454,6 +454,7 @@ It collects all the variations events and can save these events on several locat
 - [File](#file-exporter) *- create local files with the variation usages.*
 - [Log](#log-exporter) *- use your logger to write the variation usages.*
 - [S3](#s3-exporter) *- export your variation usages to S3.*
+- [Webhook](#webhook-exporter) *- export your variation usages by calling a webhook.*
  
 Currently we are supporting only feature events.
 It represent individual flag evaluations and are considered "full fidelity" events.
@@ -601,7 +602,7 @@ ffclient.Config{
     // ...
    DataExporter: ffclient.DataExporter{
         // ...
-        Exporter: &ffexporter.File{
+        Exporter: &ffexporter.S3{
             Format: "csv",
             FileName: "flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}",
             CsvTemplate: "{{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}}\n",
@@ -630,6 +631,72 @@ Check the [godoc for full details](https://pkg.go.dev/github.com/thomaspoignant/
 
 </details>
 
+### Webhook Exporter
+
+<details>
+<summary><i>expand to see details</i></summary>
+
+The **Webhook exporter** will collect the data and will send an HTTP POST request to the specified endpoint.  
+Everytime the `FlushInterval` or `MaxEventInMemory` is reached a new call is performed.  
+If for some reason the call failed, we will keep the data in memory and retry to add the next time we reach `FlushInterval` or `MaxEventInMemory`.
+
+**Configuration example:**
+```go
+ffclient.Config{ 
+    // ...
+   DataExporter: ffclient.DataExporter{
+        // ...
+        Exporter: &ffexporter.Webhook{
+            EndpointURL: " https://webhook.url/",
+            Secret:      "secret-for-signing",
+            Meta:        map[string]string{
+                "extraInfo": "info",
+            },
+        },
+    },
+    // ...
+}
+```
+
+| Field  | Description  |
+|---|---|
+|`EndpointURL `   | EndpointURL of your webhook |
+|`Secret `   |  *(optional)* Secret used to sign your request body and fill the `X-Hub-Signature-256` header.  |
+|`Meta`   |   *(optional)* Add all the informations you want to see in your request. |
+
+
+#### Webhook format
+If you have configured a webhook, a POST request will be sent to the `EndpointURL` with a body in this format:
+
+```json
+{
+    "meta": {
+        "hostname": "server01",
+        // ...
+    },
+    "events": [
+        {
+            "kind": "feature",
+            "contextKind": "anonymousUser",
+            "userKey": "14613538188334553206",
+            "creationDate": 1618909178,
+            "key": "test-flag",
+            "variation": "Default",
+            "value": false,
+            "default": false
+        },
+        // ...
+    ]
+}
+```
+
+
+#### Signature
+This header **`X-Hub-Signature-256`** is sent if the webhook is configured with a **`secret`**. This is the **HMAC hex digest** of the request body, and is generated using the **SHA-256** hash function and the **secret as the HMAC key**.
+
+:warning: **The recommendation is to always use the `Secret` and on your API/webook always verify the signature key to be sure that you don't have a man in the middle attack.**
+
+</details>
 
 ## Multiple configuration flag files
 `go-feature-flag` comes ready to use out of the box by calling the `Init` function and after that it will be available everywhere.

@@ -112,7 +112,7 @@ func TestSlackNotifier_Notify(t *testing.T) {
 			defer logFile.Close()
 			defer os.Remove(logFile.Name())
 
-			mockHTTPClient := &httpClientMock{statusCode: tt.args.statusCode, forceError: tt.args.forceError}
+			mockHTTPClient := &testutils.HTTPClientMock{StatusCode: tt.args.statusCode, ForceError: tt.args.forceError}
 
 			c := NewSlackNotifier(
 				log.New(logFile, "", 0),
@@ -131,8 +131,8 @@ func TestSlackNotifier_Notify(t *testing.T) {
 				hostname, _ := os.Hostname()
 				content, _ := ioutil.ReadFile(tt.expected.bodyPath)
 				expectedContent := strings.ReplaceAll(string(content), "{{hostname}}", hostname)
-				assert.JSONEq(t, expectedContent, mockHTTPClient.body)
-				assert.Equal(t, tt.expected.signature, mockHTTPClient.signature)
+				assert.JSONEq(t, expectedContent, mockHTTPClient.Body)
+				assert.Equal(t, tt.expected.signature, mockHTTPClient.Signature)
 			}
 		})
 	}

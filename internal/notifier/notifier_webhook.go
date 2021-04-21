@@ -2,9 +2,6 @@ package notifier
 
 import (
 	"bytes"
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"io/ioutil"
 	"log"
@@ -16,6 +13,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/internal"
 	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 	"github.com/thomaspoignant/go-feature-flag/internal/model"
+	"github.com/thomaspoignant/go-feature-flag/internal/signer"
 )
 
 func NewWebhookNotifier(logger *log.Logger,
@@ -84,7 +82,7 @@ func (c *WebhookNotifier) Notify(diff model.DiffCache, wg *sync.WaitGroup) {
 
 	// if a secret is provided we sign the body and add this signature as a header.
 	if c.Secret != "" {
-		headers["X-Hub-Signature-256"] = []string{signPayload(payload, []byte(c.Secret))}
+		headers["X-Hub-Signature-256"] = []string{signer.Sign(payload, []byte(c.Secret))}
 	}
 
 	request := http.Request{
@@ -104,13 +102,4 @@ func (c *WebhookNotifier) Notify(diff model.DiffCache, wg *sync.WaitGroup) {
 		fflog.Printf(c.Logger, "error: while calling webhook, statusCode = %d", response.StatusCode)
 		return
 	}
-}
-
-// signPayload is using the data and the secret to compute a HMAC(SHA256) to sign the body of the request.
-// so the webhook can use this signature to verify that no data have been compromised.
-func signPayload(payloadBody []byte, secretToken []byte) string {
-	mac := hmac.New(sha256.New, secretToken)
-	_, _ = mac.Write(payloadBody)
-	expectedMAC := mac.Sum(nil)
-	return "sha256=" + hex.EncodeToString(expectedMAC)
 }
