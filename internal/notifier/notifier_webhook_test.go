@@ -1,8 +1,6 @@
 package notifier
 
 import (
-	"bytes"
-	"errors"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"log"
@@ -15,28 +13,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/internal/model"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
 )
-
-type httpClientMock struct {
-	forceError bool
-	statusCode int
-	body       string
-	signature  string
-}
-
-func (h *httpClientMock) Do(req *http.Request) (*http.Response, error) {
-	if h.forceError {
-		return nil, errors.New("random error")
-	}
-
-	b, _ := ioutil.ReadAll(req.Body)
-	h.body = string(b)
-	h.signature = req.Header.Get("X-Hub-Signature-256")
-	resp := &http.Response{
-		Body: ioutil.NopCloser(bytes.NewReader([]byte(""))),
-	}
-	resp.StatusCode = h.statusCode
-	return resp, nil
-}
 
 func Test_webhookNotifier_Notify(t *testing.T) {
 	type fields struct {
@@ -66,7 +42,7 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 			},
 			expected: expected{
 				bodyPath:  "../../testdata/internal/notifier/webhook/should_call_webhook_and_have_valid_results.json",
-				signature: "sha256=9859701f2e692d33b0cf7ed4546c56dc0d0df8d587e95472f36592c482cd835d",
+				signature: "sha256=23effe4da9927ab72df5202a3146e6be39c12b7f6cee99f8d2e19326d8806b81",
 			},
 			args: args{
 				statusCode: http.StatusOK,
@@ -162,7 +138,7 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 			defer logFile.Close()
 			defer os.Remove(logFile.Name())
 
-			mockHTTPClient := &httpClientMock{statusCode: tt.args.statusCode, forceError: tt.args.forceError}
+			mockHTTPClient := &testutils.HTTPClientMock{StatusCode: tt.args.statusCode, ForceError: tt.args.forceError}
 
 			c, _ := NewWebhookNotifier(
 				log.New(logFile, "", 0),
@@ -181,21 +157,21 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 				assert.Regexp(t, tt.expected.errLog, string(log))
 			} else {
 				content, _ := ioutil.ReadFile(tt.expected.bodyPath)
-				assert.JSONEq(t, string(content), mockHTTPClient.body)
-				assert.Equal(t, tt.expected.signature, mockHTTPClient.signature)
+				assert.JSONEq(t, string(content), mockHTTPClient.Body)
+				assert.Equal(t, tt.expected.signature, mockHTTPClient.Signature)
 			}
 		})
 	}
 }
 
 func TestNewWebhookNotifier(t *testing.T) {
-	mockHTTPClient := &httpClientMock{statusCode: 200, forceError: false}
+	mockHTTPClient := &testutils.HTTPClientMock{StatusCode: 200, ForceError: false}
 	hostname, _ := os.Hostname()
 
 	type args struct {
-		payloadURL string
-		secret     string
-		meta       map[string]string
+		endpointURL string
+		secret      string
+		meta        map[string]string
 	}
 	tests := []struct {
 		name    string
@@ -206,27 +182,27 @@ func TestNewWebhookNotifier(t *testing.T) {
 		{
 			name: "Invalid URL",
 			args: args{
-				payloadURL: " http://example.com",
+				endpointURL: " http://example.com",
 			},
 			wantErr: true,
 		},
 		{
 			name: "No meta",
 			args: args{
-				payloadURL: "http://example.com",
+				endpointURL: "http://example.com",
 			},
 			wantErr: false,
 			want: WebhookNotifier{
-				HTTPClient: mockHTTPClient,
-				PayloadURL: url.URL{Host: "example.com", Scheme: "http"},
-				Secret:     "",
-				Meta:       map[string]string{"hostname": hostname},
+				HTTPClient:  mockHTTPClient,
+				EndpointURL: url.URL{Host: "example.com", Scheme: "http"},
+				Secret:      "",
+				Meta:        map[string]string{"hostname": hostname},
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := NewWebhookNotifier(nil, mockHTTPClient, tt.args.payloadURL, tt.args.secret, tt.args.meta)
+			got, err := NewWebhookNotifier(nil, mockHTTPClient, tt.args.endpointURL, tt.args.secret, tt.args.meta)
 
 			if tt.wantErr {
 				assert.Error(t, err, "NewWebhookNotifier should return an error")

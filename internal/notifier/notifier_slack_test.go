@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/model"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
@@ -41,11 +42,12 @@ func TestSlackNotifier_Notify(t *testing.T) {
 				diff: model.DiffCache{
 					Added: map[string]model.Flag{
 						"test-flag3": {
-							Percentage: 5,
-							True:       "test",
-							False:      "false",
-							Default:    "default",
-							Rule:       "key eq \"random-key\"",
+							Percentage:  5,
+							True:        "test",
+							False:       "false",
+							Default:     "default",
+							Rule:        "key eq \"random-key\"",
+							TrackEvents: testutils.Bool(true),
 						},
 					},
 					Deleted: map[string]model.Flag{
@@ -60,19 +62,25 @@ func TestSlackNotifier_Notify(t *testing.T) {
 					Updated: map[string]model.DiffUpdated{
 						"test-flag2": {
 							Before: model.Flag{
-								Rule:       "key eq \"not-a-key\"",
-								Percentage: 100,
-								True:       true,
-								False:      false,
-								Default:    false,
+								Rule:        "key eq \"not-a-key\"",
+								Percentage:  100,
+								True:        true,
+								False:       false,
+								Default:     false,
+								TrackEvents: testutils.Bool(true),
+								Experimentation: &model.Experimentation{
+									StartDate: testutils.Time(time.Unix(1095379400, 0)),
+									EndDate:   testutils.Time(time.Unix(1095371000, 0)),
+								},
 							},
 							After: model.Flag{
-								Rule:       "key eq \"not-a-ke\"",
-								Percentage: 80,
-								True:       "strTrue",
-								False:      "strFalse",
-								Default:    "strDefault",
-								Disable:    true,
+								Rule:        "key eq \"not-a-ke\"",
+								Percentage:  80,
+								True:        "strTrue",
+								False:       "strFalse",
+								Default:     "strDefault",
+								Disable:     true,
+								TrackEvents: testutils.Bool(false),
 							},
 						},
 					},
@@ -109,7 +117,7 @@ func TestSlackNotifier_Notify(t *testing.T) {
 			defer logFile.Close()
 			defer os.Remove(logFile.Name())
 
-			mockHTTPClient := &httpClientMock{statusCode: tt.args.statusCode, forceError: tt.args.forceError}
+			mockHTTPClient := &testutils.HTTPClientMock{StatusCode: tt.args.statusCode, ForceError: tt.args.forceError}
 
 			c := NewSlackNotifier(
 				log.New(logFile, "", 0),
@@ -128,8 +136,8 @@ func TestSlackNotifier_Notify(t *testing.T) {
 				hostname, _ := os.Hostname()
 				content, _ := ioutil.ReadFile(tt.expected.bodyPath)
 				expectedContent := strings.ReplaceAll(string(content), "{{hostname}}", hostname)
-				assert.JSONEq(t, expectedContent, mockHTTPClient.body)
-				assert.Equal(t, tt.expected.signature, mockHTTPClient.signature)
+				assert.JSONEq(t, expectedContent, mockHTTPClient.Body)
+				assert.Equal(t, tt.expected.signature, mockHTTPClient.Signature)
 			}
 		})
 	}

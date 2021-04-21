@@ -132,7 +132,7 @@ func TestBoolVariation(t *testing.T) {
 				defaultValue: true,
 				cacheMock: NewCacheMock(model.Flag{
 					Rule:       "anonymous eq true",
-					Percentage: 50,
+					Percentage: 10,
 					Default:    true,
 					True:       true,
 					False:      false,
@@ -158,6 +158,25 @@ func TestBoolVariation(t *testing.T) {
 			want:        true,
 			wantErr:     true,
 			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"true\"\n",
+		},
+		{
+			name: "No exported log",
+			args: args{
+				flagKey:      "test-flag",
+				user:         ffuser.NewAnonymousUser("random-key"),
+				defaultValue: true,
+				cacheMock: NewCacheMock(model.Flag{
+					Rule:        "key eq \"random-key\"",
+					Percentage:  100,
+					True:        true,
+					False:       false,
+					Default:     false,
+					TrackEvents: testutils.Bool(false),
+				}, nil),
+			},
+			want:        true,
+			wantErr:     false,
+			expectedLog: "^$",
 		},
 	}
 	for _, tt := range tests {
@@ -294,7 +313,7 @@ func TestFloat64Variation(t *testing.T) {
 				defaultValue: 118.12,
 				cacheMock: NewCacheMock(model.Flag{
 					Rule:       "anonymous eq true",
-					Percentage: 50,
+					Percentage: 10,
 					Default:    119.12,
 					True:       120.12,
 					False:      121.12,
@@ -320,6 +339,25 @@ func TestFloat64Variation(t *testing.T) {
 			want:        118.12,
 			wantErr:     true,
 			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"118.12\"\n",
+		},
+		{
+			name: "No exported log",
+			args: args{
+				flagKey:      "test-flag",
+				user:         ffuser.NewAnonymousUser("random-key"),
+				defaultValue: 118.12,
+				cacheMock: NewCacheMock(model.Flag{
+					Rule:        "key eq \"random-key\"",
+					Percentage:  100,
+					Default:     119.12,
+					True:        120.12,
+					False:       121.12,
+					TrackEvents: testutils.Bool(false),
+				}, nil),
+			},
+			want:        120.12,
+			wantErr:     false,
+			expectedLog: "^$",
 		},
 	}
 	for _, tt := range tests {
@@ -455,7 +493,7 @@ func TestJSONArrayVariation(t *testing.T) {
 				defaultValue: []interface{}{"toto"},
 				cacheMock: NewCacheMock(model.Flag{
 					Rule:       "anonymous eq true",
-					Percentage: 50,
+					Percentage: 10,
 					Default:    []interface{}{"default"},
 					True:       []interface{}{"true"},
 					False:      []interface{}{"false"},
@@ -481,6 +519,43 @@ func TestJSONArrayVariation(t *testing.T) {
 			want:        []interface{}{"toto"},
 			wantErr:     true,
 			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"\\[toto\\]\"\n",
+		},
+		{
+			name: "No exported log",
+			args: args{
+				flagKey:      "test-flag",
+				user:         ffuser.NewUser("random-key-ssss1"),
+				defaultValue: []interface{}{"toto"},
+				cacheMock: NewCacheMock(model.Flag{
+					Percentage:  100,
+					Default:     []interface{}{"default"},
+					True:        []interface{}{"true"},
+					False:       []interface{}{"false"},
+					TrackEvents: testutils.Bool(false),
+				}, nil),
+			},
+			want:        []interface{}{"true"},
+			wantErr:     false,
+			expectedLog: "^$",
+		},
+		{
+			name: "No exported data",
+			args: args{
+				flagKey:      "test-flag",
+				user:         ffuser.NewAnonymousUser("random-key-ssss1"),
+				defaultValue: []interface{}{"toto"},
+				cacheMock: NewCacheMock(model.Flag{
+					Rule:        "anonymous eq true",
+					Percentage:  10,
+					Default:     []interface{}{"default"},
+					True:        []interface{}{"true"},
+					False:       []interface{}{"false"},
+					TrackEvents: testutils.Bool(false),
+				}, nil),
+			},
+			want:        []interface{}{"false"},
+			wantErr:     false,
+			expectedLog: "^$",
 		},
 	}
 	for _, tt := range tests {
@@ -616,7 +691,7 @@ func TestJSONVariation(t *testing.T) {
 				defaultValue: map[string]interface{}{"default-notkey": true},
 				cacheMock: NewCacheMock(model.Flag{
 					Rule:       "anonymous eq true",
-					Percentage: 50,
+					Percentage: 10,
 					Default:    map[string]interface{}{"default": true},
 					True:       map[string]interface{}{"true": true},
 					False:      map[string]interface{}{"false": true},
@@ -779,7 +854,7 @@ func TestStringVariation(t *testing.T) {
 				defaultValue: "default-notkey",
 				cacheMock: NewCacheMock(model.Flag{
 					Rule:       "anonymous eq true",
-					Percentage: 50,
+					Percentage: 10,
 					Default:    "default",
 					True:       "true",
 					False:      "false",
@@ -941,7 +1016,7 @@ func TestIntVariation(t *testing.T) {
 				defaultValue: 118,
 				cacheMock: NewCacheMock(model.Flag{
 					Rule:       "anonymous eq true",
-					Percentage: 50,
+					Percentage: 10,
 					Default:    119,
 					True:       120,
 					False:      121,

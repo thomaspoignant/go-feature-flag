@@ -20,7 +20,7 @@
         },
         {
           "title": "Percentage",
-          "value": "100% =\u003e 80%",
+          "value": "100 =\u003e 80",
           "short": true
         },
         {
@@ -34,9 +34,24 @@
           "short": true
         },
         {
-          "title": "False",
+          "title": "Default",
           "value": "false =\u003e strDefault",
           "short": true
+        },
+        {
+          "title": "TrackEvents",
+          "value": "true =\u003e false",
+          "short": true
+        },
+        {
+          "title": "Disable",
+          "value": "false =\u003e true",
+          "short": true
+        },
+        {
+          "title": "Experimentation",
+          "value": "start:[2004-09-17T00:03:20Z] end:[2004-09-16T21:43:20Z] => <nil>",
+          "short": false
         }
       ],
       "footer_icon": "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png",
@@ -53,7 +68,7 @@
         },
         {
           "title": "Percentage",
-          "value": "5%",
+          "value": "5",
           "short": true
         },
         {
@@ -69,6 +84,16 @@
         {
           "title": "Default",
           "value": "default",
+          "short": true
+        },
+        {
+          "title": "TrackEvents",
+          "value": "true",
+          "short": true
+        },
+        {
+          "title": "Disable",
+          "value": "false",
           "short": true
         }
       ],

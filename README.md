@@ -8,27 +8,38 @@
     <a href="https://app.circleci.com/pipelines/github/thomaspoignant/go-feature-flag"><img src="https://img.shields.io/circleci/build/github/thomaspoignant/go-feature-flag" alt="Build Status" /></a>
     <a href="https://coveralls.io/github/thomaspoignant/go-feature-flag"><img src="https://coveralls.io/repos/github/thomaspoignant/go-feature-flag/badge.svg" alt="Coverage Status" /></a>
     <a href="https://sonarcloud.io/dashboard?id=thomaspoignant_go-feature-flag"><img src="https://sonarcloud.io/api/project_badges/measure?project=thomaspoignant_go-feature-flag&metric=alert_status" alt="Sonarcloud Status" /></a>
-    <a href="LICENSE"><img src="https://img.shields.io/github/license/thomaspoignant/go-feature-flag" alt="License"/></a>
+    <a href="https://github.com/thomaspoignant/go-feature-flag/actions?query=workflow%3ACodeQL"><img src="https://github.com/thomaspoignant/go-feature-flag/workflows/CodeQL/badge.svg" alt="Build Status" /></a>
     <a href="https://app.fossa.com/projects/git%2Bgithub.com%2Fthomaspoignant%2Fgo-feature-flag"><img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2Fthomaspoignant%2Fgo-feature-flag.svg?type=shield" alt="FOSSA Status"/></a>
     <br/>
     <a href="https://github.com/thomaspoignant/go-feature-flag/releases"><img src="https://img.shields.io/github/v/release/thomaspoignant/go-feature-flag" alt="Release version" /></a>
     <a href="https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag"><img src="https://godoc.org/github.com/thomaspoignant/go-feature-flag?status.svg" alt="GoDoc" /></a>
     <img src="https://img.shields.io/github/go-mod/go-version/thomaspoignant/go-feature-flag?logo=go%20version" alt="Go version"/>
+    <a href="LICENSE"><img src="https://img.shields.io/github/license/thomaspoignant/go-feature-flag" alt="License"/></a>
+    <a href="https://replit.com/@thomaspoignant/go-feature-flag-example#main.go"><img src="https://replit.com/badge/github/thomaspoignant/go-feature-flag-example"  alt="run on repl.it"></a>
     <a href="https://github.com/avelino/awesome-go/#server-applications"><img src="https://awesome.re/mentioned-badge-flat.svg" alt="Mentioned in Awesome Go"></a>
 </p>
 
-A feature flag solution, with only a file _(`YAML`, `JSON` or `TOML`)_ in the backend.  
-No server to install, just add a file in a central system *(HTTP, S3, GitHub, Local file ...)* and all your services will react to the changes of this file.
-
-
-If you are not familiar with feature flags also called feature Toggles you can read this [article of Martin Fowler](https://www.martinfowler.com/articles/feature-toggles.html)
-that explains why this is a great pattern.  
-I've also wrote an [article](https://medium.com/better-programming/feature-flags-and-how-to-iterate-quickly-7e3371b9986) that explains why feature flags can help you to iterate quickly.
+**Feature flags with no complex system to maintain!**
 
 ## Installation
 ```bash
 go get github.com/thomaspoignant/go-feature-flag
 ```
+## What is go-feature-flag?
+A simple and complete feature flag solution, without any complex backend system to install, you need only a file as your backend.  
+No server is needed, just add a file in a central system and all your services will react to the changes of this file.  
+
+`go-feature-flags` supports:
+- Storing your configuration flags file on various locations ([`HTTP`](#from-an-http-endpoint), [`S3`](#from-a-s3-bucket), [`GitHub`](#from-github), [`file`](#from-a-file)).
+- Configuring your flags in various [format](#flags-file-format) (`JSON`, `TOML` and `YAML`).
+- Adding complex [rules](#rule-format) to target your users.
+- Run A/B test experimentations.
+- Getting notified when a flag has changed ([`webhook`](#webhooks) and [`slack`](#slack)).
+- Exporting your flags usage data ([`s3`](#s3-exporter), [`log`](#log-exporter) and [`file`](#file-exporter)).
+
+If you are not familiar with feature flags also called feature Toggles you can read this [article of Martin Fowler](https://www.martinfowler.com/articles/feature-toggles.html)
+that explains why this is a great pattern.  
+I've also wrote an [article](https://medium.com/better-programming/feature-flags-and-how-to-iterate-quickly-7e3371b9986) that explains why feature flags can help you to iterate quickly.
 
 ## Quickstart
 First, you need to initialize the `ffclient` with the location of your backend file.
@@ -72,7 +83,7 @@ ffclient.Init(ffclient.Config{
     FileFormat:     "yaml",
     Notifiers: []ffclient.NotifierConfig{
         &ffclient.WebhookConfig{
-            PayloadURL: " https://example.com/hook",
+            EndpointURL: " https://example.com/hook",
             Secret:     "Secret",
             Meta: map[string]string{
                 "app.name": "my app",
@@ -216,17 +227,62 @@ test-flag:
   false: false
   default: false
   disable: false
+  trackEvents: true
+  experimentation:
+    startDate: 2021-03-20T00:00:00.10-05:00
+    endDate: 2021-03-21T00:00:00.10-05:00
 ```
 
-|   |   |   |
-|---|---|---|
-|`test-flag`   |![mandatory](https://img.shields.io/badge/-mandatory-red)   |  Name of the flag. It should be unique.  |
-|`percentage`   |![optional](https://img.shields.io/badge/-optional-green)   |  Percentage of the users affect by the flag.<br>**Default value is 0**  |
-|`rule`   |![optional](https://img.shields.io/badge/-optional-green)   |  This is the query use to select on which user the flag should apply.<br>Rule format is describe in the [rule format section](#rule-format).<br>**If no rule set, the flag apply to all users *(percentage still apply)*.** |
-|`true`   |![mandatory](https://img.shields.io/badge/-mandatory-red)   |  The value return by the flag if apply to the user *(rule is evaluated to true)* and user is in the active percentage. |
-|`false`   |![mandatory](https://img.shields.io/badge/-mandatory-red)   |  The value return by the flag if apply to the user *(rule is evaluated to true)* and user is **not** in the active percentage. |
-|`default`   |![mandatory](https://img.shields.io/badge/-mandatory-red)   |  The value return by the flag if not apply to the user *(rule is evaluated to false)*. |
-|`disable`   |![optional](https://img.shields.io/badge/-optional-green)   |  True if the flag is disabled. |
+<table>
+<thead>
+    <tr>
+    <td><strong>Field</strong></td><td><strong>Description</strong></td>
+    </tr>
+</thead>
+<tr>
+    <td><code>test-flag</code></td>
+    <td>Name of the flag.<br>It should be unique.</td>
+</tr>
+<tr>
+    <td><code>true</code></td>
+    <td>The value return by the flag if apply to the user <i>(rule is evaluated to true)</i> and user is in the active percentage.</td>
+</tr>
+<tr>
+    <td><code>false</code></td>
+    <td>The value return by the flag if apply to the user <i>(rule is evaluated to true)</i> and user is <strong>not</strong> in the active percentage.</td>
+</tr>
+<tr>
+    <td><code>default</code></td>
+    <td>The value return by the flag if not apply to the user <i>(rule is evaluated to false).</i></td>
+</tr>
+<tr>
+    <td><code>percentage</code></td>
+<td><i>(optional)</i> Percentage of the users affect by the flag.<br><strong>Default value is 0</strong><br>The percentage is done by doing a hash of the user key <i>(100000 variations)</i>, it means that you can have 3 numbers after the comma.</td>
+</tr>
+<tr>
+    <td><code>rule</code></td>
+    <td><i>(optional)</i> This is the query use to select on which user the flag should apply.<br>Rule format is describe in the <a href="#rule-format">rule format section</a>.<br><strong>If no rule set, the flag apply to all users <i>(percentage still apply)</i>.</strong></td>
+</tr>
+<tr>
+    <td><code>disable</code></td>
+    <td><i>(optional)</i> True if the flag is disabled.</i></td>
+</tr>
+<tr>
+    <td><code>trackEvents</code></td>
+    <td><i>(optional)</i> False if you don't want to export the data in your data exporter.<br>Default value is true</i></td>
+</tr>
+<tr>
+    <td><code>experimentation</code></td>
+    <td><i>(optional)</i> <code>experimentation</code> is here to configure a flag that is available for only a determined time.<br>The structure is:<br> 
+    <pre lang="yaml" >
+  experimentation:
+    startDate: 2021-03-20T00:00:00.10-05:00
+    endDate: 2021-03-21T00:00:00.10-05:00</pre>
+   <i>The date is in the format supported natively by your flag file format.</i><br>
+   Check this <a href="https://github.com/thomaspoignant/go-feature-flag/blob/main/examples/experimentation/main.go">example</a> to see how it works.
+   </td>
+</tr>
+</table>
 
 ## Rule format
 The rule format is based on the [`nikunjy/rules`](https://github.com/nikunjy/rules) library.
@@ -310,7 +366,7 @@ ffclient.Config{
     // ...
     Notifiers: []ffclient.NotifierConfig{
         &ffclient.WebhookConfig{
-            PayloadURL: " https://example.com/hook",
+            EndpointURL: " https://example.com/hook",
             Secret:     "Secret",
             Meta: map[string]string{
                 "app.name": "my app",
@@ -323,12 +379,12 @@ ffclient.Config{
 
 |   |   |   |
 |---|---|---|
-|`PayloadURL`   |![mandatory](https://img.shields.io/badge/-mandatory-red)   | The complete URL of your API *(we will send a POST request to this URL, [see format](#format))*  |
+|`EndpointURL`   |![mandatory](https://img.shields.io/badge/-mandatory-red)   | The complete URL of your API *(we will send a POST request to this URL, [see format](#format))*  |
 |`Secret`   |![optional](https://img.shields.io/badge/-optional-green)   |  A secret key you can share with your webhook. We will use this key to sign the request *(see [signature section](#signature) for more details)*. |
 |`Meta`   |![optional](https://img.shields.io/badge/-optional-green)   |  A list of key value that will be add in your request, this is super usefull if you to add information on the current running instance of your app.<br/>*By default the hostname is always added in the meta informations.*|
 
 #### Format
-If you have configured a webhook, a POST request will be sent to the `PayloadURL` with a body in this format:
+If you have configured a webhook, a POST request will be sent to the `EndpointURL` with a body in this format:
 
 ```json
 {
@@ -444,6 +500,7 @@ It collects all the variations events and can save these events on several locat
 - [File](#file-exporter) *- create local files with the variation usages.*
 - [Log](#log-exporter) *- use your logger to write the variation usages.*
 - [S3](#s3-exporter) *- export your variation usages to S3.*
+- [Webhook](#webhook-exporter) *- export your variation usages by calling a webhook.*
  
 Currently we are supporting only feature events.
 It represent individual flag evaluations and are considered "full fidelity" events.
@@ -480,6 +537,8 @@ In your `ffclient.Config` add the `DataExporter` field and configure your export
 
 To avoid to spam your location everytime you have a variation called, `go-feature-flag` is storing in memory all the events and send them in bulk to the exporter.  
 You can decide the threshold on when to send the data with the properties `FlushInterval` and `MaxEventInMemory`. The first threshold hit will export the data.
+
+If there are some flags you don't want to export, you can user `trackEvents` fields on these specific flags to disable the data export *(see [flag file format](#flags-file-format))*.
 
 **Example:**
 ```go
@@ -589,7 +648,7 @@ ffclient.Config{
     // ...
    DataExporter: ffclient.DataExporter{
         // ...
-        Exporter: &ffexporter.File{
+        Exporter: &ffexporter.S3{
             Format: "csv",
             FileName: "flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}",
             CsvTemplate: "{{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}}\n",
@@ -618,6 +677,72 @@ Check the [godoc for full details](https://pkg.go.dev/github.com/thomaspoignant/
 
 </details>
 
+### Webhook Exporter
+
+<details>
+<summary><i>expand to see details</i></summary>
+
+The **Webhook exporter** will collect the data and will send an HTTP POST request to the specified endpoint.  
+Everytime the `FlushInterval` or `MaxEventInMemory` is reached a new call is performed.  
+If for some reason the call failed, we will keep the data in memory and retry to add the next time we reach `FlushInterval` or `MaxEventInMemory`.
+
+**Configuration example:**
+```go
+ffclient.Config{ 
+    // ...
+   DataExporter: ffclient.DataExporter{
+        // ...
+        Exporter: &ffexporter.Webhook{
+            EndpointURL: " https://webhook.url/",
+            Secret:      "secret-for-signing",
+            Meta:        map[string]string{
+                "extraInfo": "info",
+            },
+        },
+    },
+    // ...
+}
+```
+
+| Field  | Description  |
+|---|---|
+|`EndpointURL `   | EndpointURL of your webhook |
+|`Secret `   |  *(optional)* Secret used to sign your request body and fill the `X-Hub-Signature-256` header.  |
+|`Meta`   |   *(optional)* Add all the informations you want to see in your request. |
+
+
+#### Webhook format
+If you have configured a webhook, a POST request will be sent to the `EndpointURL` with a body in this format:
+
+```json
+{
+    "meta": {
+        "hostname": "server01",
+        // ...
+    },
+    "events": [
+        {
+            "kind": "feature",
+            "contextKind": "anonymousUser",
+            "userKey": "14613538188334553206",
+            "creationDate": 1618909178,
+            "key": "test-flag",
+            "variation": "Default",
+            "value": false,
+            "default": false
+        },
+        // ...
+    ]
+}
+```
+
+
+#### Signature
+This header **`X-Hub-Signature-256`** is sent if the webhook is configured with a **`secret`**. This is the **HMAC hex digest** of the request body, and is generated using the **SHA-256** hash function and the **secret as the HMAC key**.
+
+:warning: **The recommendation is to always use the `Secret` and on your API/webook always verify the signature key to be sure that you don't have a man in the middle attack.**
+
+</details>
 
 ## Multiple configuration flag files
 `go-feature-flag` comes ready to use out of the box by calling the `Init` function and after that it will be available everywhere.
