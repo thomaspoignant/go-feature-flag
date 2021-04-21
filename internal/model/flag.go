@@ -103,18 +103,20 @@ func (f *Flag) isExperimentationOver() bool {
 
 // isInPercentage check if the user is in the cohort for the toggle.
 func (f *Flag) isInPercentage(flagName string, user ffuser.User) bool {
-	// 100%
-	if f.Percentage == 100 {
+	// >= 100%
+	if f.Percentage >= 100 {
 		return true
 	}
 
-	// 0%
-	if f.Percentage == 0 {
+	// <= 0%
+	if f.Percentage <= 0 {
 		return false
 	}
 
-	hashID := Hash(flagName+user.GetKey()) % 100
-	return hashID < uint32(f.Percentage)
+	hashID := Hash(flagName+user.GetKey()) % 100000
+	percentage := uint32(f.Percentage * 1000)
+
+	return hashID < percentage
 }
 
 // evaluateRule is checking if the rule can apply to a specific user.

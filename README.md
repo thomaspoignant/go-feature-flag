@@ -232,7 +232,6 @@ test-flag:
     endDate: 2021-03-21T00:00:00.10-05:00
 ```
 
-
 <table>
 <thead>
     <tr>
@@ -257,7 +256,7 @@ test-flag:
 </tr>
 <tr>
     <td><code>percentage</code></td>
-    <td><i>(optional)</i> Percentage of the users affect by the flag.<br><strong>Default value is 0</strong></td>
+<td><i>(optional)</i> Percentage of the users affect by the flag.<br><strong>Default value is 0</strong><br>The percentage is done by doing a hash of the user key <i>(100000 variations)</i>, it means that you can have 3 numbers after the comma.</td>
 </tr>
 <tr>
     <td><code>rule</code></td>

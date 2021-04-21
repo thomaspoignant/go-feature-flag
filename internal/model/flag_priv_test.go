@@ -121,9 +121,31 @@ func TestFlag_isInPercentage(t *testing.T) {
 			want: true,
 		},
 		{
+			name: "105% should work as 100%",
+			fields: fields{
+				Percentage: 105,
+			},
+			args: args{
+				flagName: "test_689025",
+				user:     ffuser.NewUser("test_689053"),
+			},
+			want: true,
+		},
+		{
 			name: "Anything should work at 0%",
 			fields: fields{
 				Percentage: 0,
+			},
+			args: args{
+				flagName: "test_689025",
+				user:     ffuser.NewUser("test_689053"),
+			},
+			want: false,
+		},
+		{
+			name: "-1% should work like 0%",
+			fields: fields{
+				Percentage: -1,
 			},
 			args: args{
 				flagName: "test_689025",
@@ -138,7 +160,7 @@ func TestFlag_isInPercentage(t *testing.T) {
 			},
 			args: args{
 				flagName: "test-flag",
-				user:     ffuser.NewUser("user2"), // combined hash is 1
+				user:     ffuser.NewUser("86fe0fd9-d19c-4c35-bd05-07b434a21c04"),
 			},
 			want: true,
 		},
@@ -149,7 +171,7 @@ func TestFlag_isInPercentage(t *testing.T) {
 			},
 			args: args{
 				flagName: "test-flag",
-				user:     ffuser.NewUser("user66"), // combined hash is 9
+				user:     ffuser.NewUser("7e50ee61-06ad-4bb0-9034-38ad7cdea9f5"),
 			},
 			want: true,
 		},
@@ -160,7 +182,7 @@ func TestFlag_isInPercentage(t *testing.T) {
 			},
 			args: args{
 				flagName: "test-flag",
-				user:     ffuser.NewUser("user40"), // combined hash is 10
+				user:     ffuser.NewUser("a287f16a-b50b-4151-a50f-a97fe334a4bf"),
 			},
 			want: false,
 		},
@@ -171,7 +193,7 @@ func TestFlag_isInPercentage(t *testing.T) {
 			},
 			args: args{
 				flagName: "test-flag",
-				user:     ffuser.NewUser("user135"), // hash of the key is 0
+				user:     ffuser.NewUser("a4599f14-f7a3-4c14-b3b9-0c0d728224ff"),
 			},
 			want: true,
 		},
@@ -182,7 +204,18 @@ func TestFlag_isInPercentage(t *testing.T) {
 			},
 			args: args{
 				flagName: "test-flag",
-				user:     ffuser.NewUser("user134"), // hash of the key is 19
+				user:     ffuser.NewUser("ffc35559-bc1d-4cf3-8e21-7f95c432d1c2"),
+			},
+			want: false,
+		},
+		{
+			name: "float percentage",
+			fields: fields{
+				Percentage: 10.123,
+			},
+			args: args{
+				flagName: "test-flag",
+				user:     ffuser.NewUser("ffc35559-bc1d-4cf3-8e21-7f95c432d1c2"),
 			},
 			want: false,
 		},

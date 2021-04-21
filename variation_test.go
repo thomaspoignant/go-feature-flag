@@ -132,7 +132,7 @@ func TestBoolVariation(t *testing.T) {
 				defaultValue: true,
 				cacheMock: NewCacheMock(model.Flag{
 					Rule:       "anonymous eq true",
-					Percentage: 50,
+					Percentage: 10,
 					Default:    true,
 					True:       true,
 					False:      false,
@@ -313,7 +313,7 @@ func TestFloat64Variation(t *testing.T) {
 				defaultValue: 118.12,
 				cacheMock: NewCacheMock(model.Flag{
 					Rule:       "anonymous eq true",
-					Percentage: 50,
+					Percentage: 10,
 					Default:    119.12,
 					True:       120.12,
 					False:      121.12,
@@ -493,7 +493,7 @@ func TestJSONArrayVariation(t *testing.T) {
 				defaultValue: []interface{}{"toto"},
 				cacheMock: NewCacheMock(model.Flag{
 					Rule:       "anonymous eq true",
-					Percentage: 50,
+					Percentage: 10,
 					Default:    []interface{}{"default"},
 					True:       []interface{}{"true"},
 					False:      []interface{}{"false"},
@@ -546,7 +546,7 @@ func TestJSONArrayVariation(t *testing.T) {
 				defaultValue: []interface{}{"toto"},
 				cacheMock: NewCacheMock(model.Flag{
 					Rule:        "anonymous eq true",
-					Percentage:  50,
+					Percentage:  10,
 					Default:     []interface{}{"default"},
 					True:        []interface{}{"true"},
 					False:       []interface{}{"false"},
@@ -691,7 +691,7 @@ func TestJSONVariation(t *testing.T) {
 				defaultValue: map[string]interface{}{"default-notkey": true},
 				cacheMock: NewCacheMock(model.Flag{
 					Rule:       "anonymous eq true",
-					Percentage: 50,
+					Percentage: 10,
 					Default:    map[string]interface{}{"default": true},
 					True:       map[string]interface{}{"true": true},
 					False:      map[string]interface{}{"false": true},
@@ -854,7 +854,7 @@ func TestStringVariation(t *testing.T) {
 				defaultValue: "default-notkey",
 				cacheMock: NewCacheMock(model.Flag{
 					Rule:       "anonymous eq true",
-					Percentage: 50,
+					Percentage: 10,
 					Default:    "default",
 					True:       "true",
 					False:      "false",
@@ -1016,7 +1016,7 @@ func TestIntVariation(t *testing.T) {
 				defaultValue: 118,
 				cacheMock: NewCacheMock(model.Flag{
 					Rule:       "anonymous eq true",
-					Percentage: 50,
+					Percentage: 10,
 					Default:    119,
 					True:       120,
 					False:      121,

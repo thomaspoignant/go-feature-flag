@@ -57,12 +57,12 @@ func TestFlag_value(t *testing.T) {
 				True:       "true",
 				False:      "false",
 				Default:    "default",
-				Rule:       "key == \"user66\"",
+				Rule:       "key == \"7e50ee61-06ad-4bb0-9034-38ad7cdea9f5\"",
 				Percentage: 10,
 			},
 			args: args{
 				flagName: "test-flag",
-				user:     ffuser.NewUserBuilder("user66").AddCustom("name", "john").Build(), // combined hash is 9
+				user:     ffuser.NewUserBuilder("7e50ee61-06ad-4bb0-9034-38ad7cdea9f5").AddCustom("name", "john").Build(), // combined hash is 9
 			},
 			want: want{
 				value:         "true",
@@ -75,7 +75,7 @@ func TestFlag_value(t *testing.T) {
 				True:       "true",
 				False:      "false",
 				Default:    "default",
-				Rule:       "key == \"user66\"",
+				Rule:       "key == \"7e50ee61-06ad-4bb0-9034-38ad7cdea9f5\"",
 				Percentage: 10,
 				Experimentation: model.Experimentation{
 					StartDate: testutils.Time(time.Now().Add(-1 * time.Minute)),
@@ -84,7 +84,7 @@ func TestFlag_value(t *testing.T) {
 			},
 			args: args{
 				flagName: "test-flag",
-				user:     ffuser.NewUserBuilder("user66").AddCustom("name", "john").Build(), // combined hash is 9
+				user:     ffuser.NewUserBuilder("7e50ee61-06ad-4bb0-9034-38ad7cdea9f5").AddCustom("name", "john").Build(),
 			},
 			want: want{
 				value:         "true",
@@ -119,7 +119,7 @@ func TestFlag_value(t *testing.T) {
 				True:       "true",
 				False:      "false",
 				Default:    "default",
-				Rule:       "key == \"user66\"",
+				Rule:       "key == \"7e50ee61-06ad-4bb0-9034-38ad7cdea9f5\"",
 				Percentage: 10,
 				Experimentation: model.Experimentation{
 					StartDate: testutils.Time(time.Now().Add(-1 * time.Minute)),
@@ -128,7 +128,7 @@ func TestFlag_value(t *testing.T) {
 			},
 			args: args{
 				flagName: "test-flag",
-				user:     ffuser.NewUserBuilder("user66").AddCustom("name", "john").Build(), // combined hash is 9
+				user:     ffuser.NewUserBuilder("7e50ee61-06ad-4bb0-9034-38ad7cdea9f5").AddCustom("name", "john").Build(),
 			},
 			want: want{
 				value:         "true",
@@ -207,7 +207,7 @@ func TestFlag_value(t *testing.T) {
 				True:       "true",
 				False:      "false",
 				Default:    "default",
-				Rule:       "key == \"user66\"",
+				Rule:       "key == \"7e50ee61-06ad-4bb0-9034-38ad7cdea9f5\"",
 				Percentage: 10,
 				Experimentation: model.Experimentation{
 					StartDate: nil,
@@ -216,7 +216,7 @@ func TestFlag_value(t *testing.T) {
 			},
 			args: args{
 				flagName: "test-flag",
-				user:     ffuser.NewUserBuilder("user66").AddCustom("name", "john").Build(), // combined hash is 9
+				user:     ffuser.NewUserBuilder("7e50ee61-06ad-4bb0-9034-38ad7cdea9f5").AddCustom("name", "john").Build(),
 			},
 			want: want{
 				value:         "true",
@@ -229,7 +229,7 @@ func TestFlag_value(t *testing.T) {
 				True:       "true",
 				False:      "false",
 				Default:    "default",
-				Rule:       "key == \"user66\"",
+				Rule:       "key == \"7e50ee61-06ad-4bb0-9034-38ad7cdea9f5\"",
 				Percentage: 10,
 				Experimentation: model.Experimentation{
 					StartDate: nil,
@@ -238,7 +238,7 @@ func TestFlag_value(t *testing.T) {
 			},
 			args: args{
 				flagName: "test-flag",
-				user:     ffuser.NewUserBuilder("user66").AddCustom("name", "john").Build(), // combined hash is 9
+				user:     ffuser.NewUserBuilder("7e50ee61-06ad-4bb0-9034-38ad7cdea9f5").AddCustom("name", "john").Build(),
 			},
 			want: want{
 				value:         "true",
@@ -265,6 +265,42 @@ func TestFlag_value(t *testing.T) {
 			want: want{
 				value:         "default",
 				variationType: model.VariationDefault,
+			},
+		},
+		{
+			name: "Get default value if does not pass",
+			fields: fields{
+				True:       "true",
+				False:      "false",
+				Default:    "default",
+				Rule:       "key == \"7e50ee61-06ad-4bb0-9034-38ad7\"",
+				Percentage: 10,
+			},
+			args: args{
+				flagName: "test-flag",
+				user:     ffuser.NewUserBuilder("7e50ee61-06ad-4bb0-9034-38ad7cdea9f5").AddCustom("name", "john").Build(),
+			},
+			want: want{
+				value:         "default",
+				variationType: model.VariationDefault,
+			},
+		},
+		{
+			name: "Get false value if rule pass and not in the cohort",
+			fields: fields{
+				True:       "true",
+				False:      "false",
+				Default:    "default",
+				Rule:       "key == \"7e50ee61-06ad-4bb0-9034-38ad7cdea9f5\"",
+				Percentage: 10,
+			},
+			args: args{
+				flagName: "test-flag2",
+				user:     ffuser.NewUserBuilder("7e50ee61-06ad-4bb0-9034-38ad7cdea9f5").AddCustom("name", "john").Build(),
+			},
+			want: want{
+				value:         "false",
+				variationType: model.VariationFalse,
 			},
 		},
 	}
