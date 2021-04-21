@@ -1,0 +1,27 @@
+{
+  "meta": {
+    "hostname": "hostname"
+  },
+  "events": [
+    {
+      "kind": "feature",
+      "contextKind": "anonymousUser",
+      "userKey": "ABCD",
+      "creationDate": 1617970547,
+      "key": "random-key",
+      "variation": "Default",
+      "value": "YO",
+      "default": false
+    },
+    {
+      "kind": "feature",
+      "contextKind": "anonymousUser",
+      "userKey": "EFGH",
+      "creationDate": 1617970701,
+      "key": "random-key",
+      "variation": "Default",
+      "value": "YO2",
+      "default": false
+    }
+  ]
+}

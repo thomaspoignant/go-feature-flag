@@ -52,17 +52,17 @@ func getWebhooks(config Config) ([]notifier.Notifier, error) {
 		hostname, _ := os.Hostname()
 		whConf.Meta["hostname"] = hostname
 
-		payloadURL, err := url.Parse(whConf.PayloadURL)
+		endpointURL, err := url.Parse(whConf.EndpointURL)
 		if err != nil {
 			return nil, err
 		}
 
 		w := notifier.WebhookNotifier{
-			Logger:     config.Logger,
-			PayloadURL: *payloadURL,
-			Secret:     whConf.Secret,
-			Meta:       whConf.Meta,
-			HTTPClient: &httpClient,
+			Logger:      config.Logger,
+			EndpointURL: *endpointURL,
+			Secret:      whConf.Secret,
+			Meta:        whConf.Meta,
+			HTTPClient:  &httpClient,
 		}
 		res[index] = &w
 	}

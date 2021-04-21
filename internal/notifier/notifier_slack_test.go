@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/model"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
@@ -67,6 +68,10 @@ func TestSlackNotifier_Notify(t *testing.T) {
 								False:       false,
 								Default:     false,
 								TrackEvents: testutils.Bool(true),
+								Experimentation: &model.Experimentation{
+									StartDate: testutils.Time(time.Unix(1095379400, 0)),
+									EndDate:   testutils.Time(time.Unix(1095371000, 0)),
+								},
 							},
 							After: model.Flag{
 								Rule:        "key eq \"not-a-ke\"",
@@ -112,7 +117,7 @@ func TestSlackNotifier_Notify(t *testing.T) {
 			defer logFile.Close()
 			defer os.Remove(logFile.Name())
 
-			mockHTTPClient := &httpClientMock{statusCode: tt.args.statusCode, forceError: tt.args.forceError}
+			mockHTTPClient := &testutils.HTTPClientMock{StatusCode: tt.args.statusCode, ForceError: tt.args.forceError}
 
 			c := NewSlackNotifier(
 				log.New(logFile, "", 0),
@@ -131,8 +136,8 @@ func TestSlackNotifier_Notify(t *testing.T) {
 				hostname, _ := os.Hostname()
 				content, _ := ioutil.ReadFile(tt.expected.bodyPath)
 				expectedContent := strings.ReplaceAll(string(content), "{{hostname}}", hostname)
-				assert.JSONEq(t, expectedContent, mockHTTPClient.body)
-				assert.Equal(t, tt.expected.signature, mockHTTPClient.signature)
+				assert.JSONEq(t, expectedContent, mockHTTPClient.Body)
+				assert.Equal(t, tt.expected.signature, mockHTTPClient.Signature)
 			}
 		})
 	}

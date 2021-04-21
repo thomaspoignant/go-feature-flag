@@ -6,6 +6,7 @@ import (
 	"hash/fnv"
 	"math"
 	"strings"
+	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
 )
@@ -19,6 +20,23 @@ const (
 	VariationDefault    VariationType = "Default"
 	VariationSDKDefault VariationType = "SdkDefault"
 )
+
+type Experimentation struct {
+	StartDate *time.Time `json:"startDate,omitempty" yaml:"startDate,omitempty" toml:"startDate,omitempty"`
+	EndDate   *time.Time `json:"endDate,omitempty" yaml:"endDate,omitempty" toml:"endDate,omitempty"`
+}
+
+func (e Experimentation) String() string {
+	buf := make([]string, 0)
+	lo, _ := time.LoadLocation("UTC")
+	if e.StartDate != nil {
+		buf = append(buf, fmt.Sprintf("start:[%v]", e.StartDate.In(lo).Format(time.RFC3339)))
+	}
+	if e.EndDate != nil {
+		buf = append(buf, fmt.Sprintf("end:[%v]", e.EndDate.In(lo).Format(time.RFC3339)))
+	}
+	return strings.Join(buf, " ")
+}
 
 // Flag describe the fields of a flag.
 type Flag struct {
@@ -48,16 +66,23 @@ type Flag struct {
 
 	// Disable is true if the flag is disabled.
 	Disable bool `json:"disable,omitempty" yaml:"disable,omitempty" toml:"disable,omitempty"`
+
+	// Experimentation is your object to configure an experimentation, it will allow you to configure a start date and
+	// an end date for your flag.
+	// When the experimentation is not running, the flag will serve the default value.
+	Experimentation *Experimentation `json:"experimentation,omitempty" yaml:"experimentation,omitempty" toml:"experimentation,omitempty" slack_short:"false"` // nolint: lll
 }
 
 // Value is returning the Value associate to the flag (True / False / Default ) based
 // if the toggle apply to the user or not.
 func (f *Flag) Value(flagName string, user ffuser.User) (interface{}, VariationType) {
-	inRule := f.evaluateRule(user)
-	inPercentage := f.isInPercentage(flagName, user)
+	if f.isExperimentationOver() {
+		// if we have an experimentation that has not started or that is finished we use the default value.
+		return f.Default, VariationDefault
+	}
 
-	if inRule {
-		if inPercentage {
+	if f.evaluateRule(user) {
+		if f.isInPercentage(flagName, user) {
 			// Rule applied and user in the cohort.
 			return f.True, VariationTrue
 		}
@@ -67,6 +92,13 @@ func (f *Flag) Value(flagName string, user ffuser.User) (interface{}, VariationT
 
 	// Default value is used if the rule does not applied to the user.
 	return f.Default, VariationDefault
+}
+
+func (f *Flag) isExperimentationOver() bool {
+	now := time.Now()
+	return f.Experimentation != nil && (
+		(f.Experimentation.StartDate != nil && now.Before(*f.Experimentation.StartDate)) ||
+			(f.Experimentation.EndDate != nil && now.After(*f.Experimentation.EndDate)))
 }
 
 // isInPercentage check if the user is in the cohort for the toggle.
