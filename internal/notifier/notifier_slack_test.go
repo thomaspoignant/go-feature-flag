@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/model"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
@@ -67,6 +68,10 @@ func TestSlackNotifier_Notify(t *testing.T) {
 								False:       false,
 								Default:     false,
 								TrackEvents: testutils.Bool(true),
+								Experimentation: &model.Experimentation{
+									StartDate: testutils.Time(time.Unix(1095379400, 0)),
+									EndDate:   testutils.Time(time.Unix(1095371000, 0)),
+								},
 							},
 							After: model.Flag{
 								Rule:        "key eq \"not-a-ke\"",

@@ -32,6 +32,7 @@ No server is needed, just add a file in a central system and all your services w
 - Storing your configuration flags file on various locations ([`HTTP`](#from-an-http-endpoint), [`S3`](#from-a-s3-bucket), [`GitHub`](#from-github), [`file`](#from-a-file)).
 - Configuring your flags in various [format](#flags-file-format) (`JSON`, `TOML` and `YAML`).
 - Adding complex [rules](#rule-format) to target your users.
+- Run A/B test experimentations.
 - Getting notified when a flag has changed ([`webhook`](#webhooks) and [`slack`](#slack)).
 - Exporting your flags usage data ([`s3`](#s3-exporter), [`log`](#log-exporter) and [`file`](#file-exporter)).
 
@@ -225,18 +226,63 @@ test-flag:
   false: false
   default: false
   disable: false
+  trackEvents: true
+  experimentation:
+    startDate: 2021-03-20T00:00:00.10-05:00
+    endDate: 2021-03-21T00:00:00.10-05:00
 ```
 
-|   |   |   |
-|---|---|---|
-|`test-flag`   |![mandatory](https://img.shields.io/badge/-mandatory-red)   |  Name of the flag. It should be unique.  |
-|`percentage`   |![optional](https://img.shields.io/badge/-optional-green)   |  Percentage of the users affect by the flag.<br>**Default value is 0**  |
-|`rule`   |![optional](https://img.shields.io/badge/-optional-green)   |  This is the query use to select on which user the flag should apply.<br>Rule format is describe in the [rule format section](#rule-format).<br>**If no rule set, the flag apply to all users *(percentage still apply)*.** |
-|`true`   |![mandatory](https://img.shields.io/badge/-mandatory-red)   |  The value return by the flag if apply to the user *(rule is evaluated to true)* and user is in the active percentage. |
-|`false`   |![mandatory](https://img.shields.io/badge/-mandatory-red)   |  The value return by the flag if apply to the user *(rule is evaluated to true)* and user is **not** in the active percentage. |
-|`default`   |![mandatory](https://img.shields.io/badge/-mandatory-red)   |  The value return by the flag if not apply to the user *(rule is evaluated to false)*. |
-|`disable`   |![optional](https://img.shields.io/badge/-optional-green)   |  True if the flag is disabled. |
-|`trackEvents`   |![optional](https://img.shields.io/badge/-optional-green)   |   False if you don't want to export the data in your data exporter.<br>Default value is true |
+
+<table>
+<thead>
+    <tr>
+    <td><strong>Field</strong></td><td><strong>Description</strong></td>
+    </tr>
+</thead>
+<tr>
+    <td><code>test-flag</code></td>
+    <td>Name of the flag.<br>It should be unique.</td>
+</tr>
+<tr>
+    <td><code>true</code></td>
+    <td>The value return by the flag if apply to the user <i>(rule is evaluated to true)</i> and user is in the active percentage.</td>
+</tr>
+<tr>
+    <td><code>false</code></td>
+    <td>The value return by the flag if apply to the user <i>(rule is evaluated to true)</i> and user is <strong>not</strong> in the active percentage.</td>
+</tr>
+<tr>
+    <td><code>default</code></td>
+    <td>The value return by the flag if not apply to the user <i>(rule is evaluated to false).</i></td>
+</tr>
+<tr>
+    <td><code>percentage</code></td>
+    <td><i>(optional)</i> Percentage of the users affect by the flag.<br><strong>Default value is 0</strong></td>
+</tr>
+<tr>
+    <td><code>rule</code></td>
+    <td><i>(optional)</i> This is the query use to select on which user the flag should apply.<br>Rule format is describe in the <a href="#rule-format">rule format section</a>.<br><strong>If no rule set, the flag apply to all users <i>(percentage still apply)</i>.</strong></td>
+</tr>
+<tr>
+    <td><code>disable</code></td>
+    <td><i>(optional)</i> True if the flag is disabled.</i></td>
+</tr>
+<tr>
+    <td><code>trackEvents</code></td>
+    <td><i>(optional)</i> False if you don't want to export the data in your data exporter.<br>Default value is true</i></td>
+</tr>
+<tr>
+    <td><code>experimentation</code></td>
+    <td><i>(optional)</i> <code>experimentation</code> is here to configure a flag that is available for only a determined time.<br>The structure is:<br> 
+    <pre lang="yaml" >
+  experimentation:
+    startDate: 2021-03-20T00:00:00.10-05:00
+    endDate: 2021-03-21T00:00:00.10-05:00</pre>
+   <i>The date is in the format supported natively by your flag file format.</i><br>
+   Check this <a href="https://github.com/thomaspoignant/go-feature-flag/blob/main/examples/experimentation/main.go">example</a> to see how it works.
+   </td>
+</tr>
+</table>
 
 ## Rule format
 The rule format is based on the [`nikunjy/rules`](https://github.com/nikunjy/rules) library.
