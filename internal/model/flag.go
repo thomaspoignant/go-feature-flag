@@ -21,23 +21,6 @@ const (
 	VariationSDKDefault VariationType = "SdkDefault"
 )
 
-type Experimentation struct {
-	StartDate *time.Time `json:"startDate,omitempty" yaml:"startDate,omitempty" toml:"startDate,omitempty"`
-	EndDate   *time.Time `json:"endDate,omitempty" yaml:"endDate,omitempty" toml:"endDate,omitempty"`
-}
-
-func (e Experimentation) String() string {
-	buf := make([]string, 0)
-	lo, _ := time.LoadLocation("UTC")
-	if e.StartDate != nil {
-		buf = append(buf, fmt.Sprintf("start:[%v]", e.StartDate.In(lo).Format(time.RFC3339)))
-	}
-	if e.EndDate != nil {
-		buf = append(buf, fmt.Sprintf("end:[%v]", e.EndDate.In(lo).Format(time.RFC3339)))
-	}
-	return strings.Join(buf, " ")
-}
-
 // Flag describe the fields of a flag.
 type Flag struct {
 	// Rule is the query use to select on which user the flag should apply.
@@ -67,10 +50,12 @@ type Flag struct {
 	// Disable is true if the flag is disabled.
 	Disable bool `json:"disable,omitempty" yaml:"disable,omitempty" toml:"disable,omitempty"`
 
-	// Experimentation is your object to configure an experimentation, it will allow you to configure a start date and
-	// an end date for your flag.
-	// When the experimentation is not running, the flag will serve the default value.
-	Experimentation *Experimentation `json:"experimentation,omitempty" yaml:"experimentation,omitempty" toml:"experimentation,omitempty" slack_short:"false"` // nolint: lll
+	// Deprecated: you should use Rollout.Experimentation instead.
+	Experimentation *Experimentation `json:"experimentation,omitempty" yaml:"experimentation,omitempty" toml:"experimentation,omitempty" slack_ignore:"true"` // nolint: lll
+
+	// Rollout is the object to configure how the flag is rollout.
+	// You have different rollout strategy available but only one is used at a time.
+	Rollout *Rollout `json:"rollout,omitempty" yaml:"rollout,omitempty" toml:"rollout,omitempty" slack_short:"false"` // nolint: lll
 }
 
 // Value is returning the Value associate to the flag (True / False / Default ) based
@@ -96,9 +81,25 @@ func (f *Flag) Value(flagName string, user ffuser.User) (interface{}, VariationT
 
 func (f *Flag) isExperimentationOver() bool {
 	now := time.Now()
-	return f.Experimentation != nil && (
-		(f.Experimentation.StartDate != nil && now.Before(*f.Experimentation.StartDate)) ||
+	// legacy experimentation notation
+	// TO BE REMOVED when deprecated time is over
+	legacy := f.Experimentation != nil && (
+		(f.Experimentation.Start != nil && now.Before(*f.Experimentation.Start)) ||
+			(f.Experimentation.StartDate != nil && now.Before(*f.Experimentation.StartDate)) ||
+			(f.Experimentation.End != nil && now.After(*f.Experimentation.End)) ||
 			(f.Experimentation.EndDate != nil && now.After(*f.Experimentation.EndDate)))
+
+	if legacy {
+		return legacy
+	}
+	// END TO BE REMOVED
+
+	return f.Rollout != nil && f.Rollout.Experimentation != nil && (
+		(f.Rollout.Experimentation.Start != nil && now.Before(*f.Rollout.Experimentation.Start)) ||
+			(f.Rollout.Experimentation.End != nil && now.After(*f.Rollout.Experimentation.End)) ||
+			// Remove bellow when deprecated field are removed
+			(f.Rollout.Experimentation.StartDate != nil && now.Before(*f.Rollout.Experimentation.StartDate)) ||
+			(f.Rollout.Experimentation.EndDate != nil && now.After(*f.Rollout.Experimentation.EndDate)))
 }
 
 // isInPercentage check if the user is in the cohort for the toggle.

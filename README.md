@@ -228,9 +228,10 @@ test-flag:
   default: false
   disable: false
   trackEvents: true
-  experimentation:
-    startDate: 2021-03-20T00:00:00.10-05:00
-    endDate: 2021-03-21T00:00:00.10-05:00
+  rollout:
+    experimentation:
+        start: 2021-03-20T00:00:00.10-05:00
+        end: 2021-03-21T00:00:00.10-05:00
 ```
 
 <table>
@@ -272,15 +273,8 @@ test-flag:
     <td><i>(optional)</i> False if you don't want to export the data in your data exporter.<br>Default value is true</i></td>
 </tr>
 <tr>
-    <td><code>experimentation</code></td>
-    <td><i>(optional)</i> <code>experimentation</code> is here to configure a flag that is available for only a determined time.<br>The structure is:<br> 
-    <pre lang="yaml" >
-  experimentation:
-    startDate: 2021-03-20T00:00:00.10-05:00
-    endDate: 2021-03-21T00:00:00.10-05:00</pre>
-   <i>The date is in the format supported natively by your flag file format.</i><br>
-   Check this <a href="https://github.com/thomaspoignant/go-feature-flag/blob/main/examples/experimentation/main.go">example</a> to see how it works.
-   </td>
+    <td><code>rollout</code></td>
+    <td><i>(optional)</i> <code>rollout</code> contains a specific rollout strategy you want to use.<br><strong>See <a href="#rollout">rollout section</a> for more details.</strong></td>
 </tr>
 </table>
 
@@ -349,6 +343,36 @@ Variation methods take the feature flag key, a User, and a default value.
 The default value is return when an error is encountered _(`ffclient` not initialized, variation with wrong type, flag does not exist ...)._  
 In the example, if the flag `your.feature.key` does not exists, result will be `false`.  
 Not that you will always have a usable value in the result. 
+
+## Rollout
+A critical part of every new feature release is orchestrating the actual launch schedule between Product, Engineering, and Marketing teams.  
+Delivering powerful user experiences typically requires software teams to manage complex releases and make manual updates at inconvenient times. But it doesn’t have to.  
+Having a complex **rollout** strategy allows you to have lifecycle for your flags.
+
+### Experimentation rollout
+An **experimentation rollout** is when your flag is configured to be served only for a determined time.
+
+1. It means that before the rollout start date, the `default` value is served for all users.
+2. Between the dates the flag is evaluated.
+3. After the end date the `default` value is served for all users.
+
+This strategy you should use to run an A/B test.
+
+**Configuration example:**
+```yaml
+experimentation-flag:
+  true: "B"
+  false: "A"
+  default: "Default"
+  rollout:
+    experimentation:
+      start: 2021-03-20T00:00:00.10-05:00
+      end: 2021-03-21T00:00:00.10-05:00
+
+```
+
+The date is in the format supported natively by your flag file format.
+Check this [example](examples/experimentation/) to see how it works. 
 
 ## Notifiers
 If you want to be informed when a flag has changed outside of your app, you can configure a **notifier**.
