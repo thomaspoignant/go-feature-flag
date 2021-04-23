@@ -11,38 +11,14 @@ import (
 
 func TestExperimentation_String(t *testing.T) {
 	type fields struct {
-		StartDate *time.Time
-		EndDate   *time.Time
-		Start     *time.Time
-		End       *time.Time
+		Start *time.Time
+		End   *time.Time
 	}
 	tests := []struct {
 		name   string
 		fields fields
 		want   string
 	}{
-		{
-			name: "both dates - deprecated fields",
-			fields: fields{
-				StartDate: testutils.Time(time.Unix(1095379400, 0)),
-				EndDate:   testutils.Time(time.Unix(1095379500, 0)),
-			},
-			want: "start:[2004-09-17T00:03:20Z] end:[2004-09-17T00:05:00Z]",
-		},
-		{
-			name: "only start date - deprecated fields",
-			fields: fields{
-				StartDate: testutils.Time(time.Unix(1095379400, 0)),
-			},
-			want: "start:[2004-09-17T00:03:20Z]",
-		},
-		{
-			name: "only end date - deprecated fields",
-			fields: fields{
-				EndDate: testutils.Time(time.Unix(1095379500, 0)),
-			},
-			want: "end:[2004-09-17T00:05:00Z]",
-		},
 		{
 			name: "both dates",
 			fields: fields{
@@ -69,10 +45,8 @@ func TestExperimentation_String(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			e := model.Experimentation{
-				StartDate: tt.fields.StartDate,
-				EndDate:   tt.fields.EndDate,
-				End:       tt.fields.End,
-				Start:     tt.fields.Start,
+				End:   tt.fields.End,
+				Start: tt.fields.Start,
 			}
 			got := e.String()
 			assert.Equal(t, tt.want, got)
