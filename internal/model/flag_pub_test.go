@@ -19,6 +19,7 @@ func TestFlag_value(t *testing.T) {
 		False           interface{}
 		Default         interface{}
 		Experimentation model.Experimentation
+		Rollout         model.Rollout
 	}
 	type args struct {
 		flagName string
@@ -69,6 +70,8 @@ func TestFlag_value(t *testing.T) {
 				variationType: model.VariationTrue,
 			},
 		},
+
+		// Remove these tests when the deprecated fields are removed
 		{
 			name: "Experimentation only start date in the past",
 			fields: fields{
@@ -246,6 +249,391 @@ func TestFlag_value(t *testing.T) {
 			},
 		},
 		{
+			name: "Rollout Deprecated Experimentation only start date in the past",
+			fields: fields{
+				True:       "true",
+				False:      "false",
+				Default:    "default",
+				Rule:       "key == \"7e50ee61-06ad-4bb0-9034-38ad7cdea9f5\"",
+				Percentage: 10,
+				Rollout: model.Rollout{
+					Experimentation: &model.Experimentation{
+						StartDate: testutils.Time(time.Now().Add(-1 * time.Minute)),
+						EndDate:   nil,
+					},
+				},
+			},
+			args: args{
+				flagName: "test-flag",
+				user:     ffuser.NewUserBuilder("7e50ee61-06ad-4bb0-9034-38ad7cdea9f5").AddCustom("name", "john").Build(),
+			},
+			want: want{
+				value:         "true",
+				variationType: model.VariationTrue,
+			},
+		},
+		{
+			name: "Rollout Deprecated Experimentation only start date in the future",
+			fields: fields{
+				True:       "true",
+				False:      "false",
+				Default:    "default",
+				Rule:       "key == \"user66\"",
+				Percentage: 10,
+				Rollout: model.Rollout{
+					Experimentation: &model.Experimentation{
+						StartDate: testutils.Time(time.Now().Add(1 * time.Minute)),
+						EndDate:   nil,
+					},
+				},
+			},
+			args: args{
+				flagName: "test-flag",
+				user:     ffuser.NewUserBuilder("user66").AddCustom("name", "john").Build(), // combined hash is 9
+			},
+			want: want{
+				value:         "default",
+				variationType: model.VariationDefault,
+			},
+		},
+		{
+			name: "Rollout Deprecated Experimentation between start and end date",
+			fields: fields{
+				True:       "true",
+				False:      "false",
+				Default:    "default",
+				Rule:       "key == \"7e50ee61-06ad-4bb0-9034-38ad7cdea9f5\"",
+				Percentage: 10,
+				Rollout: model.Rollout{
+					Experimentation: &model.Experimentation{
+						StartDate: testutils.Time(time.Now().Add(-1 * time.Minute)),
+						EndDate:   testutils.Time(time.Now().Add(1 * time.Minute)),
+					},
+				},
+			},
+			args: args{
+				flagName: "test-flag",
+				user:     ffuser.NewUserBuilder("7e50ee61-06ad-4bb0-9034-38ad7cdea9f5").AddCustom("name", "john").Build(),
+			},
+			want: want{
+				value:         "true",
+				variationType: model.VariationTrue,
+			},
+		},
+		{
+			name: "Rollout Deprecated Experimentation not started yet",
+			fields: fields{
+				True:       "true",
+				False:      "false",
+				Default:    "default",
+				Rule:       "key == \"user66\"",
+				Percentage: 10,
+				Rollout: model.Rollout{
+					Experimentation: &model.Experimentation{
+						StartDate: testutils.Time(time.Now().Add(1 * time.Minute)),
+						EndDate:   testutils.Time(time.Now().Add(2 * time.Minute)),
+					},
+				},
+			},
+			args: args{
+				flagName: "test-flag",
+				user:     ffuser.NewUserBuilder("user66").AddCustom("name", "john").Build(), // combined hash is 9
+			},
+			want: want{
+				value:         "default",
+				variationType: model.VariationDefault,
+			},
+		},
+		{
+			name: "Rollout Deprecated Experimentation finished",
+			fields: fields{
+				True:       "true",
+				False:      "false",
+				Default:    "default",
+				Rule:       "key == \"user66\"",
+				Percentage: 10,
+				Rollout: model.Rollout{
+					Experimentation: &model.Experimentation{
+						StartDate: testutils.Time(time.Now().Add(-2 * time.Minute)),
+						EndDate:   testutils.Time(time.Now().Add(-1 * time.Minute)),
+					},
+				},
+			},
+			args: args{
+				flagName: "test-flag",
+				user:     ffuser.NewUserBuilder("user66").AddCustom("name", "john").Build(), // combined hash is 9
+			},
+			want: want{
+				value:         "default",
+				variationType: model.VariationDefault,
+			},
+		},
+		{
+			name: "Rollout Deprecated Experimentation only end date finished",
+			fields: fields{
+				True:       "true",
+				False:      "false",
+				Default:    "default",
+				Rule:       "key == \"user66\"",
+				Percentage: 10,
+				Rollout: model.Rollout{
+					Experimentation: &model.Experimentation{
+						StartDate: nil,
+						EndDate:   testutils.Time(time.Now().Add(-1 * time.Minute)),
+					},
+				},
+			},
+			args: args{
+				flagName: "test-flag",
+				user:     ffuser.NewUserBuilder("user66").AddCustom("name", "john").Build(), // combined hash is 9
+			},
+			want: want{
+				value:         "default",
+				variationType: model.VariationDefault,
+			},
+		},
+		{
+			name: "Rollout Deprecated Experimentation only end date not finished",
+			fields: fields{
+				True:       "true",
+				False:      "false",
+				Default:    "default",
+				Rule:       "key == \"7e50ee61-06ad-4bb0-9034-38ad7cdea9f5\"",
+				Percentage: 10,
+				Rollout: model.Rollout{
+					Experimentation: &model.Experimentation{
+						StartDate: nil,
+						EndDate:   testutils.Time(time.Now().Add(1 * time.Minute)),
+					},
+				},
+			},
+			args: args{
+				flagName: "test-flag",
+				user:     ffuser.NewUserBuilder("7e50ee61-06ad-4bb0-9034-38ad7cdea9f5").AddCustom("name", "john").Build(),
+			},
+			want: want{
+				value:         "true",
+				variationType: model.VariationTrue,
+			},
+		},
+		{
+			name: "Rollout Deprecated Experimentation only end date not finished",
+			fields: fields{
+				True:       "true",
+				False:      "false",
+				Default:    "default",
+				Rule:       "key == \"7e50ee61-06ad-4bb0-9034-38ad7cdea9f5\"",
+				Percentage: 10,
+				Rollout: model.Rollout{
+					Experimentation: &model.Experimentation{
+						StartDate: nil,
+						EndDate:   nil,
+					},
+				},
+			},
+			args: args{
+				flagName: "test-flag",
+				user:     ffuser.NewUserBuilder("7e50ee61-06ad-4bb0-9034-38ad7cdea9f5").AddCustom("name", "john").Build(),
+			},
+			want: want{
+				value:         "true",
+				variationType: model.VariationTrue,
+			},
+		},
+		// End remove when deprecated ok
+		{
+			name: "Rollout Experimentation only start date in the past",
+			fields: fields{
+				True:       "true",
+				False:      "false",
+				Default:    "default",
+				Rule:       "key == \"7e50ee61-06ad-4bb0-9034-38ad7cdea9f5\"",
+				Percentage: 10,
+				Rollout: model.Rollout{
+					Experimentation: &model.Experimentation{
+						Start: testutils.Time(time.Now().Add(-1 * time.Minute)),
+						End:   nil,
+					},
+				},
+			},
+			args: args{
+				flagName: "test-flag",
+				user:     ffuser.NewUserBuilder("7e50ee61-06ad-4bb0-9034-38ad7cdea9f5").AddCustom("name", "john").Build(),
+			},
+			want: want{
+				value:         "true",
+				variationType: model.VariationTrue,
+			},
+		},
+		{
+			name: "Rollout Experimentation only start date in the future",
+			fields: fields{
+				True:       "true",
+				False:      "false",
+				Default:    "default",
+				Rule:       "key == \"user66\"",
+				Percentage: 10,
+				Rollout: model.Rollout{
+					Experimentation: &model.Experimentation{
+						Start: testutils.Time(time.Now().Add(1 * time.Minute)),
+						End:   nil,
+					},
+				},
+			},
+			args: args{
+				flagName: "test-flag",
+				user:     ffuser.NewUserBuilder("user66").AddCustom("name", "john").Build(), // combined hash is 9
+			},
+			want: want{
+				value:         "default",
+				variationType: model.VariationDefault,
+			},
+		},
+		{
+			name: "Rollout Experimentation between start and end date",
+			fields: fields{
+				True:       "true",
+				False:      "false",
+				Default:    "default",
+				Rule:       "key == \"7e50ee61-06ad-4bb0-9034-38ad7cdea9f5\"",
+				Percentage: 10,
+				Rollout: model.Rollout{
+					Experimentation: &model.Experimentation{
+						Start: testutils.Time(time.Now().Add(-1 * time.Minute)),
+						End:   testutils.Time(time.Now().Add(1 * time.Minute)),
+					},
+				},
+			},
+			args: args{
+				flagName: "test-flag",
+				user:     ffuser.NewUserBuilder("7e50ee61-06ad-4bb0-9034-38ad7cdea9f5").AddCustom("name", "john").Build(),
+			},
+			want: want{
+				value:         "true",
+				variationType: model.VariationTrue,
+			},
+		},
+		{
+			name: "Rollout Experimentation not started yet",
+			fields: fields{
+				True:       "true",
+				False:      "false",
+				Default:    "default",
+				Rule:       "key == \"user66\"",
+				Percentage: 10,
+				Rollout: model.Rollout{
+					Experimentation: &model.Experimentation{
+						Start: testutils.Time(time.Now().Add(1 * time.Minute)),
+						End:   testutils.Time(time.Now().Add(2 * time.Minute)),
+					},
+				},
+			},
+			args: args{
+				flagName: "test-flag",
+				user:     ffuser.NewUserBuilder("user66").AddCustom("name", "john").Build(), // combined hash is 9
+			},
+			want: want{
+				value:         "default",
+				variationType: model.VariationDefault,
+			},
+		},
+		{
+			name: "Rollout Experimentation finished",
+			fields: fields{
+				True:       "true",
+				False:      "false",
+				Default:    "default",
+				Rule:       "key == \"user66\"",
+				Percentage: 10,
+				Rollout: model.Rollout{
+					Experimentation: &model.Experimentation{
+						Start: testutils.Time(time.Now().Add(-2 * time.Minute)),
+						End:   testutils.Time(time.Now().Add(-1 * time.Minute)),
+					},
+				},
+			},
+			args: args{
+				flagName: "test-flag",
+				user:     ffuser.NewUserBuilder("user66").AddCustom("name", "john").Build(), // combined hash is 9
+			},
+			want: want{
+				value:         "default",
+				variationType: model.VariationDefault,
+			},
+		},
+		{
+			name: "Rollout Experimentation only end date finished",
+			fields: fields{
+				True:       "true",
+				False:      "false",
+				Default:    "default",
+				Rule:       "key == \"user66\"",
+				Percentage: 10,
+				Rollout: model.Rollout{
+					Experimentation: &model.Experimentation{
+						Start: nil,
+						End:   testutils.Time(time.Now().Add(-1 * time.Minute)),
+					},
+				},
+			},
+			args: args{
+				flagName: "test-flag",
+				user:     ffuser.NewUserBuilder("user66").AddCustom("name", "john").Build(), // combined hash is 9
+			},
+			want: want{
+				value:         "default",
+				variationType: model.VariationDefault,
+			},
+		},
+		{
+			name: "Rollout Experimentation only end date not finished",
+			fields: fields{
+				True:       "true",
+				False:      "false",
+				Default:    "default",
+				Rule:       "key == \"7e50ee61-06ad-4bb0-9034-38ad7cdea9f5\"",
+				Percentage: 10,
+				Rollout: model.Rollout{
+					Experimentation: &model.Experimentation{
+						Start: nil,
+						End:   testutils.Time(time.Now().Add(1 * time.Minute)),
+					},
+				},
+			},
+			args: args{
+				flagName: "test-flag",
+				user:     ffuser.NewUserBuilder("7e50ee61-06ad-4bb0-9034-38ad7cdea9f5").AddCustom("name", "john").Build(),
+			},
+			want: want{
+				value:         "true",
+				variationType: model.VariationTrue,
+			},
+		},
+		{
+			name: "Rollout Experimentation only end date not finished",
+			fields: fields{
+				True:       "true",
+				False:      "false",
+				Default:    "default",
+				Rule:       "key == \"7e50ee61-06ad-4bb0-9034-38ad7cdea9f5\"",
+				Percentage: 10,
+				Rollout: model.Rollout{
+					Experimentation: &model.Experimentation{
+						Start: nil,
+						End:   nil,
+					},
+				},
+			},
+			args: args{
+				flagName: "test-flag",
+				user:     ffuser.NewUserBuilder("7e50ee61-06ad-4bb0-9034-38ad7cdea9f5").AddCustom("name", "john").Build(),
+			},
+			want: want{
+				value:         "true",
+				variationType: model.VariationTrue,
+			},
+		},
+		{
 			name: "Invert start date and end date",
 			fields: fields{
 				True:       "true",
@@ -314,6 +702,7 @@ func TestFlag_value(t *testing.T) {
 				False:           tt.fields.False,
 				Default:         tt.fields.Default,
 				Experimentation: &tt.fields.Experimentation,
+				Rollout:         &tt.fields.Rollout,
 			}
 
 			got, variationType := f.Value(tt.args.flagName, tt.args.user)

@@ -3,6 +3,7 @@ experimentation-flag:
   true: "B"
   false: "A"
   default: "A"
-  experimentation:
-    startDate: 2021-03-20T00:00:00.10-05:00
-    endDate: 2021-03-21T00:00:00.10-05:00
+  rollout:
+    experimentation:
+      start: 2021-03-20T00:00:00.10-05:00
+      end: 2021-03-21T00:00:00.10-05:00
