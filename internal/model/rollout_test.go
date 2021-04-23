@@ -92,7 +92,7 @@ func TestRollout_String(t *testing.T) {
 				Start: testutils.Time(time.Unix(1095379400, 0)),
 				End:   testutils.Time(time.Unix(1095379500, 0)),
 			}},
-			want: "start:[2004-09-17T00:03:20Z] end:[2004-09-17T00:05:00Z]",
+			want: "experimentation: start:[2004-09-17T00:03:20Z] end:[2004-09-17T00:05:00Z]",
 		},
 		{
 			name:    "empty",
