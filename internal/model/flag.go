@@ -51,7 +51,7 @@ type Flag struct {
 	Disable bool `json:"disable,omitempty" yaml:"disable,omitempty" toml:"disable,omitempty"`
 
 	// Deprecated: you should use Rollout.Experimentation instead.
-	Experimentation *Experimentation `json:"experimentation,omitempty" yaml:"experimentation,omitempty" toml:"experimentation,omitempty" slack_short:"false"` // nolint: lll
+	Experimentation *Experimentation `json:"experimentation,omitempty" yaml:"experimentation,omitempty" toml:"experimentation,omitempty" slack_ignore:"true"` // nolint: lll
 
 	// Rollout is the object to configure how the flag is rollout.
 	// You have different rollout strategy available but only one is used at a time.

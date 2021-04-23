@@ -15,7 +15,7 @@ type Rollout struct {
 
 func (e Rollout) String() string {
 	if e.Experimentation != nil {
-		return e.Experimentation.String()
+		return "experimentation: " + e.Experimentation.String()
 	}
 	return ""
 }

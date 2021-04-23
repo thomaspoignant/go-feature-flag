@@ -68,10 +68,11 @@ func TestSlackNotifier_Notify(t *testing.T) {
 								False:       false,
 								Default:     false,
 								TrackEvents: testutils.Bool(true),
-								Experimentation: &model.Experimentation{
-									StartDate: testutils.Time(time.Unix(1095379400, 0)),
-									EndDate:   testutils.Time(time.Unix(1095371000, 0)),
-								},
+								Rollout: &model.Rollout{
+									Experimentation: &model.Experimentation{
+										Start: testutils.Time(time.Unix(1095379400, 0)),
+										End:   testutils.Time(time.Unix(1095371000, 0)),
+									}},
 							},
 							After: model.Flag{
 								Rule:        "key eq \"not-a-ke\"",

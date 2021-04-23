@@ -49,8 +49,8 @@
           "short": true
         },
         {
-          "title": "Experimentation",
-          "value": "start:[2004-09-17T00:03:20Z] end:[2004-09-16T21:43:20Z] => <nil>",
+          "title": "Rollout",
+          "value": "experimentation: start:[2004-09-17T00:03:20Z] end:[2004-09-16T21:43:20Z] => <nil>",
           "short": false
         }
       ],

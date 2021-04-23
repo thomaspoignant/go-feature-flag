@@ -130,8 +130,9 @@ func convertUpdatedFlagsToSlackMessage(diff model.DiffCache) []attachment {
 			if field.Tag.Get("slack_short") == "false" {
 				slackShort = false
 			}
+			slackIgnore := field.Tag.Get("slack_ignore") == "true"
 
-			if beforeVal != afterVal {
+			if !slackIgnore && beforeVal != afterVal {
 				attachment.Fields = append(attachment.Fields, Field{Title: name, Short: slackShort,
 					Value: fmt.Sprintf("%v => %v", beforeVal, afterVal)})
 			}
