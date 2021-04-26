@@ -199,14 +199,15 @@ func (f *Flag) getPercentage() float64 {
 		return flagPercentage
 	}
 	// Expand percentage with the percentageMultiplier
-	if f.Rollout.Progressive.Percentage.Initial > f.Rollout.Progressive.Percentage.End {
-		return flagPercentage
-	}
 	initialPercentage := f.Rollout.Progressive.Percentage.Initial * percentageMultiplier
 	if f.Rollout.Progressive.Percentage.End == 0 {
 		f.Rollout.Progressive.Percentage.End = 100
 	}
 	endPercentage := f.Rollout.Progressive.Percentage.End * percentageMultiplier
+
+	if f.Rollout.Progressive.Percentage.Initial > f.Rollout.Progressive.Percentage.End {
+		return flagPercentage
+	}
 
 	// Not in the range of the progressive rollout
 	if now.Before(*f.Rollout.Progressive.ReleaseRamp.Start) {
