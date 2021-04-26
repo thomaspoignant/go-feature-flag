@@ -1,6 +1,7 @@
 package testutils
 
 import (
+	"context"
 	"log"
 	"sync"
 
@@ -18,7 +19,7 @@ type MockExporter struct {
 	once  sync.Once
 }
 
-func (m *MockExporter) Export(logger *log.Logger, events []exporter.FeatureEvent) error {
+func (m *MockExporter) Export(ctx context.Context, logger *log.Logger, events []exporter.FeatureEvent) error {
 	m.once.Do(m.initMutex)
 	m.mutex.Lock()
 	defer m.mutex.Unlock()

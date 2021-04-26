@@ -1,6 +1,7 @@
 package ffexporter
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -42,7 +43,7 @@ type File struct {
 }
 
 // Export is saving a collection of events in a file.
-func (f *File) Export(logger *log.Logger, featureEvents []exporter.FeatureEvent) error {
+func (f *File) Export(ctx context.Context, logger *log.Logger, featureEvents []exporter.FeatureEvent) error {
 	// Parse the template only once
 	f.initTemplates.Do(func() {
 		f.csvTemplate = parseTemplate("csvFormat", f.CsvTemplate, DefaultCsvTemplate)
