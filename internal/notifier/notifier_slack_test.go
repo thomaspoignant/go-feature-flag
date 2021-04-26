@@ -13,6 +13,7 @@ import (
 
 	"github.com/thomaspoignant/go-feature-flag/internal/model"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
+	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 )
 
 func TestSlackNotifier_Notify(t *testing.T) {
@@ -47,7 +48,7 @@ func TestSlackNotifier_Notify(t *testing.T) {
 							False:       "false",
 							Default:     "default",
 							Rule:        "key eq \"random-key\"",
-							TrackEvents: testutils.Bool(true),
+							TrackEvents: testconvert.Bool(true),
 						},
 					},
 					Deleted: map[string]model.Flag{
@@ -67,11 +68,11 @@ func TestSlackNotifier_Notify(t *testing.T) {
 								True:        true,
 								False:       false,
 								Default:     false,
-								TrackEvents: testutils.Bool(true),
+								TrackEvents: testconvert.Bool(true),
 								Rollout: &model.Rollout{
 									Experimentation: &model.Experimentation{
-										Start: testutils.Time(time.Unix(1095379400, 0)),
-										End:   testutils.Time(time.Unix(1095371000, 0)),
+										Start: testconvert.Time(time.Unix(1095379400, 0)),
+										End:   testconvert.Time(time.Unix(1095371000, 0)),
 									}},
 							},
 							After: model.Flag{
@@ -81,7 +82,7 @@ func TestSlackNotifier_Notify(t *testing.T) {
 								False:       "strFalse",
 								Default:     "strDefault",
 								Disable:     true,
-								TrackEvents: testutils.Bool(false),
+								TrackEvents: testconvert.Bool(false),
 							},
 						},
 					},
