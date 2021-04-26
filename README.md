@@ -34,6 +34,7 @@ No server is needed, just add a file in a central system and all your services w
 - Configuring your flags in various [format](#flags-file-format) (`JSON`, `TOML` and `YAML`).
 - Adding complex [rules](#rule-format) to target your users.
 - Run A/B test experimentations.
+- Deploy progressively your flag.
 - Getting notified when a flag has changed ([`webhook`](#webhooks) and [`slack`](#slack)).
 - Exporting your flags usage data ([`s3`](#s3-exporter), [`log`](#log-exporter) and [`file`](#file-exporter)).
 
