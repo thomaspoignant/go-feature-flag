@@ -1,6 +1,7 @@
 package exporter
 
 import (
+	"context"
 	"log"
 	"sync"
 	"time"
@@ -12,8 +13,12 @@ const defaultFlushInterval = 60 * time.Second
 const defaultMaxEventInMemory = int64(100000)
 
 // NewDataExporterScheduler allows to create a new instance of DataExporterScheduler ready to be used to export data.
-func NewDataExporterScheduler(flushInterval time.Duration, maxEventInMemory int64,
+func NewDataExporterScheduler(ctx context.Context, flushInterval time.Duration, maxEventInMemory int64,
 	exporter Exporter, logger *log.Logger) *DataExporterScheduler {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
 	if flushInterval == 0 {
 		flushInterval = defaultFlushInterval
 	}
@@ -30,13 +35,14 @@ func NewDataExporterScheduler(flushInterval time.Duration, maxEventInMemory int6
 		daemonChan:      make(chan struct{}),
 		ticker:          time.NewTicker(flushInterval),
 		logger:          logger,
+		ctx:             ctx,
 	}
 }
 
 // Exporter is an interface to describe how a exporter looks like.
 type Exporter interface {
 	// Export will send the data to the exporter.
-	Export(*log.Logger, []FeatureEvent) error
+	Export(context.Context, *log.Logger, []FeatureEvent) error
 
 	// IsBulk return false if we should directly send the data as soon as it is produce
 	// and true if we collect the data to send them in bulk.
@@ -52,6 +58,7 @@ type DataExporterScheduler struct {
 	maxEventInCache int64
 	exporter        Exporter
 	logger          *log.Logger
+	ctx             context.Context
 }
 
 // AddEvent allow to add an event to the local cache and to call the exporter if we reach
@@ -106,7 +113,7 @@ func (dc *DataExporterScheduler) Close() {
 // this method should be always called with a mutex
 func (dc *DataExporterScheduler) flush() {
 	if len(dc.localCache) > 0 {
-		err := dc.exporter.Export(dc.logger, dc.localCache)
+		err := dc.exporter.Export(dc.ctx, dc.logger, dc.localCache)
 		if err != nil {
 			fflog.Printf(dc.logger, "error while exporting data: %v\n", err)
 			return

@@ -1,6 +1,7 @@
 package ffexporter
 
 import (
+	"context"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"log"
@@ -138,7 +139,7 @@ func TestWebhook_Export(t *testing.T) {
 				Meta:        tt.fields.Meta,
 				httpClient:  &tt.fields.httpClient,
 			}
-			err := f.Export(tt.args.logger, tt.args.featureEvents)
+			err := f.Export(context.Background(), tt.args.logger, tt.args.featureEvents)
 			if tt.wantErr {
 				assert.Error(t, err)
 				return
@@ -162,10 +163,6 @@ func TestWebhook_Export_impossibleToParse(t *testing.T) {
 		EndpointURL: " http://invalid.com/",
 	}
 
-	err := f.Export(log.New(os.Stdout, "", 0), []exporter.FeatureEvent{})
+	err := f.Export(context.Background(), log.New(os.Stdout, "", 0), []exporter.FeatureEvent{})
 	assert.EqualError(t, err, "parse \" http://invalid.com/\": first path segment in URL cannot contain colon")
-
-	// We should parse the URL only once
-	err = f.Export(log.New(os.Stdout, "", 0), []exporter.FeatureEvent{})
-	assert.EqualError(t, err, "no URL available for the webhook")
 }

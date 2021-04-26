@@ -1,6 +1,7 @@
 package ffexporter_test
 
 import (
+	"context"
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
@@ -191,7 +192,7 @@ func TestFile_Export(t *testing.T) {
 				Filename:    tt.fields.Filename,
 				CsvTemplate: tt.fields.CsvTemplate,
 			}
-			err := f.Export(tt.args.logger, tt.args.featureEvents)
+			err := f.Export(context.Background(), tt.args.logger, tt.args.featureEvents)
 			if tt.wantErr {
 				assert.Error(t, err, "export method should error")
 				return

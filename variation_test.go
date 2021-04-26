@@ -1,6 +1,7 @@
 package ffclient
 
 import (
+	"context"
 	"errors"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
@@ -192,7 +193,7 @@ func TestBoolVariation(t *testing.T) {
 					PollInterval: 0,
 					Logger:       logger,
 				},
-				dataExporter: exporter.NewDataExporterScheduler(0, 0,
+				dataExporter: exporter.NewDataExporterScheduler(context.Background(), 0, 0,
 					&ffexporter.Log{}, logger),
 			}
 
@@ -210,7 +211,7 @@ func TestBoolVariation(t *testing.T) {
 			}
 			// clean logger
 			ff = nil
-			file.Close()
+			_ = file.Close()
 		})
 	}
 }
@@ -373,7 +374,7 @@ func TestFloat64Variation(t *testing.T) {
 					PollInterval: 0,
 					Logger:       logger,
 				},
-				dataExporter: exporter.NewDataExporterScheduler(0, 0,
+				dataExporter: exporter.NewDataExporterScheduler(context.Background(), 0, 0,
 					&ffexporter.Log{}, logger),
 			}
 
@@ -390,7 +391,7 @@ func TestFloat64Variation(t *testing.T) {
 			}
 			// clean logger
 			ff = nil
-			file.Close()
+			_ = file.Close()
 		})
 	}
 }
@@ -571,7 +572,7 @@ func TestJSONArrayVariation(t *testing.T) {
 					PollInterval: 0,
 					Logger:       logger,
 				},
-				dataExporter: exporter.NewDataExporterScheduler(0, 0,
+				dataExporter: exporter.NewDataExporterScheduler(context.Background(), 0, 0,
 					&ffexporter.Log{}, logger),
 			}
 
@@ -588,7 +589,7 @@ func TestJSONArrayVariation(t *testing.T) {
 			}
 			// clean logger
 			ff = nil
-			file.Close()
+			_ = file.Close()
 		})
 	}
 }
@@ -732,7 +733,7 @@ func TestJSONVariation(t *testing.T) {
 					PollInterval: 0,
 					Logger:       logger,
 				},
-				dataExporter: exporter.NewDataExporterScheduler(0, 0,
+				dataExporter: exporter.NewDataExporterScheduler(context.Background(), 0, 0,
 					&ffexporter.Log{}, logger),
 			}
 
@@ -750,7 +751,7 @@ func TestJSONVariation(t *testing.T) {
 			}
 			// clean logger
 			ff = nil
-			file.Close()
+			_ = file.Close()
 		})
 	}
 }
@@ -896,7 +897,7 @@ func TestStringVariation(t *testing.T) {
 					PollInterval: 0,
 					Logger:       logger,
 				},
-				dataExporter: exporter.NewDataExporterScheduler(0, 0,
+				dataExporter: exporter.NewDataExporterScheduler(context.Background(), 0, 0,
 					&ffexporter.Log{}, logger),
 			}
 			got, err := StringVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
@@ -913,7 +914,7 @@ func TestStringVariation(t *testing.T) {
 			}
 			// clean logger
 			ff = nil
-			file.Close()
+			_ = file.Close()
 		})
 	}
 }
@@ -1058,7 +1059,7 @@ func TestIntVariation(t *testing.T) {
 					PollInterval: 0,
 					Logger:       logger,
 				},
-				dataExporter: exporter.NewDataExporterScheduler(0, 0,
+				dataExporter: exporter.NewDataExporterScheduler(context.Background(), 0, 0,
 					&ffexporter.Log{}, logger),
 			}
 			got, err := IntVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
@@ -1075,7 +1076,7 @@ func TestIntVariation(t *testing.T) {
 			}
 			// clean logger
 			ff = nil
-			file.Close()
+			_ = file.Close()
 		})
 	}
 }

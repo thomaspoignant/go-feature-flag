@@ -1,6 +1,7 @@
 package exporter_test
 
 import (
+	"context"
 	"errors"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
@@ -18,7 +19,7 @@ import (
 func TestDataExporterScheduler_flushWithTime(t *testing.T) {
 	mockExporter := testutils.MockExporter{Bulk: true}
 	dc := exporter.NewDataExporterScheduler(
-		10*time.Millisecond, 1000, &mockExporter, log.New(os.Stdout, "", 0))
+		context.Background(), 10*time.Millisecond, 1000, &mockExporter, log.New(os.Stdout, "", 0))
 	go dc.StartDaemon()
 	defer dc.Close()
 
@@ -38,7 +39,7 @@ func TestDataExporterScheduler_flushWithTime(t *testing.T) {
 func TestDataExporterScheduler_flushWithNumberOfEvents(t *testing.T) {
 	mockExporter := testutils.MockExporter{Bulk: true}
 	dc := exporter.NewDataExporterScheduler(
-		10*time.Minute, 100, &mockExporter, log.New(os.Stdout, "", 0))
+		context.Background(), 10*time.Minute, 100, &mockExporter, log.New(os.Stdout, "", 0))
 	go dc.StartDaemon()
 	defer dc.Close()
 
@@ -56,7 +57,7 @@ func TestDataExporterScheduler_flushWithNumberOfEvents(t *testing.T) {
 func TestDataExporterScheduler_defaultFlush(t *testing.T) {
 	mockExporter := testutils.MockExporter{Bulk: true}
 	dc := exporter.NewDataExporterScheduler(
-		0, 0, &mockExporter, log.New(os.Stdout, "", 0))
+		context.Background(), 0, 0, &mockExporter, log.New(os.Stdout, "", 0))
 	go dc.StartDaemon()
 	defer dc.Close()
 
@@ -80,7 +81,7 @@ func TestDataExporterScheduler_exporterReturnError(t *testing.T) {
 	logger := log.New(file, "", 0)
 
 	dc := exporter.NewDataExporterScheduler(
-		0, 100, &mockExporter, logger)
+		context.Background(), 0, 100, &mockExporter, logger)
 	go dc.StartDaemon()
 	defer dc.Close()
 
@@ -102,7 +103,7 @@ func TestDataExporterScheduler_exporterReturnError(t *testing.T) {
 func TestDataExporterScheduler_nonBulkExporter(t *testing.T) {
 	mockExporter := testutils.MockExporter{Bulk: false}
 	dc := exporter.NewDataExporterScheduler(
-		0, 0, &mockExporter, log.New(os.Stdout, "", 0))
+		context.Background(), 0, 0, &mockExporter, log.New(os.Stdout, "", 0))
 	defer dc.Close()
 
 	var inputEvents []exporter.FeatureEvent

@@ -2,13 +2,12 @@ package ffexporter
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"sync"
 
@@ -47,7 +46,6 @@ type Webhook struct {
 	Meta map[string]string
 
 	httpClient internal.HTTPClient
-	parsedURL  *url.URL
 	init       sync.Once
 }
 
@@ -61,8 +59,7 @@ type webhookPayload struct {
 }
 
 // Export is sending a collection of events in a webhook call.
-func (f *Webhook) Export(logger *log.Logger, featureEvents []exporter.FeatureEvent) error {
-	var err error
+func (f *Webhook) Export(ctx context.Context, logger *log.Logger, featureEvents []exporter.FeatureEvent) error {
 	f.init.Do(func() {
 		if f.httpClient == nil {
 			f.httpClient = internal.DefaultHTTPClient()
@@ -76,16 +73,7 @@ func (f *Webhook) Export(logger *log.Logger, featureEvents []exporter.FeatureEve
 			hostname, _ := os.Hostname()
 			f.Meta["hostname"] = hostname
 		}
-		f.parsedURL, err = url.Parse(f.EndpointURL)
 	})
-	if err != nil {
-		return err
-	}
-
-	// if we were not able to parse the URL the 1st time
-	if f.parsedURL == nil {
-		return errors.New("no URL available for the webhook")
-	}
 
 	body := webhookPayload{
 		Meta:   f.Meta,
@@ -105,14 +93,13 @@ func (f *Webhook) Export(logger *log.Logger, featureEvents []exporter.FeatureEve
 		headers["X-Hub-Signature-256"] = []string{signer.Sign(payload, []byte(f.Secret))}
 	}
 
-	request := http.Request{
-		Method: "POST",
-		URL:    f.parsedURL,
-		Header: headers,
-		Body:   ioutil.NopCloser(bytes.NewReader(payload)),
+	request, err := http.NewRequestWithContext(
+		ctx, http.MethodPost, f.EndpointURL, ioutil.NopCloser(bytes.NewReader(payload)))
+	if err != nil {
+		return err
 	}
-
-	response, err := f.httpClient.Do(&request)
+	request.Header = headers
+	response, err := f.httpClient.Do(request)
 	// Log if something went wrong while calling the webhook.
 	if err != nil {
 		return err

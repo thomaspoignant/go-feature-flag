@@ -2,6 +2,7 @@ package ffexporter
 
 import (
 	"bytes"
+	"context"
 	"log"
 	"sync"
 	"text/template"
@@ -24,7 +25,7 @@ type Log struct {
 }
 
 // Export is saving a collection of events in a file.
-func (f *Log) Export(logger *log.Logger, featureEvents []exporter.FeatureEvent) error {
+func (f *Log) Export(ctx context.Context, logger *log.Logger, featureEvents []exporter.FeatureEvent) error {
 	f.initTemplates.Do(func() {
 		f.logTemplate = parseTemplate("logFormat", f.Format, defaultLoggerFormat)
 	})
