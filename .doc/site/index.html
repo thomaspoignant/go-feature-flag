@@ -1,0 +1,1577 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      <link rel="icon" href="assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.1.3">
+    
+    
+      
+        <title>go-feature-flag</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.e35208c4.min.css">
+      
+        
+        <link rel="stylesheet" href="assets/stylesheets/palette.ef6f36e2.min.css">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>:root{--md-text-font-family:"Roboto";--md-code-font-family:"Roboto Mono"}</style>
+      
+    
+    
+    
+    
+      
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
+  
+    
+    <script>function __prefix(e){return new URL(".",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#go-feature-flag" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="." title="go-feature-flag" class="md-header__button md-logo" aria-label="go-feature-flag" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            go-feature-flag
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Home
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        
+<a href="https://github.com/thomaspoignant/go-feature-flag/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="." title="go-feature-flag" class="md-nav__button md-logo" aria-label="go-feature-flag" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    go-feature-flag
+  </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/thomaspoignant/go-feature-flag/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Home
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="." class="md-nav__link md-nav__link--active">
+        Home
+      </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    Installation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-go-feature-flag" class="md-nav__link">
+    What is go-feature-flag?
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quickstart" class="md-nav__link">
+    Quickstart
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    Configuration
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-do-i-store-my-flags-file" class="md-nav__link">
+    Where do I store my flags file
+  </a>
+  
+    <nav class="md-nav" aria-label="Where do I store my flags file">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#from-github" class="md-nav__link">
+    From Github
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#from-an-http-endpoint" class="md-nav__link">
+    From an HTTP endpoint
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#from-a-s3-bucket" class="md-nav__link">
+    From a S3 Bucket
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#from-a-file" class="md-nav__link">
+    From a file
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flags-file-format" class="md-nav__link">
+    Flags file format
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rule-format" class="md-nav__link">
+    Rule format
+  </a>
+  
+    <nav class="md-nav" aria-label="Rule format">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    Examples
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#users" class="md-nav__link">
+    Users
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#variation" class="md-nav__link">
+    Variation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rollout" class="md-nav__link">
+    Rollout
+  </a>
+  
+    <nav class="md-nav" aria-label="Rollout">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#experimentation-rollout" class="md-nav__link">
+    Experimentation rollout
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notifiers" class="md-nav__link">
+    Notifiers
+  </a>
+  
+    <nav class="md-nav" aria-label="Notifiers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#webhooks" class="md-nav__link">
+    Webhooks
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#slack" class="md-nav__link">
+    SLACK
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#export-data" class="md-nav__link">
+    Export data
+  </a>
+  
+    <nav class="md-nav" aria-label="Export data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-to-configure-data-export" class="md-nav__link">
+    How to configure data export?
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-exporter" class="md-nav__link">
+    File Exporter
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#log-exporter" class="md-nav__link">
+    Log Exporter
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#s3-exporter" class="md-nav__link">
+    S3 Exporter
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#webhook-exporter" class="md-nav__link">
+    Webhook Exporter
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#multiple-configuration-flag-files" class="md-nav__link">
+    Multiple configuration flag files
+  </a>
+  
+    <nav class="md-nav" aria-label="Multiple configuration flag files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#working-with-multiple-go-feature-flag" class="md-nav__link">
+    Working with multiple go-feature-flag
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    Example:
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    Installation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-go-feature-flag" class="md-nav__link">
+    What is go-feature-flag?
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quickstart" class="md-nav__link">
+    Quickstart
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    Configuration
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-do-i-store-my-flags-file" class="md-nav__link">
+    Where do I store my flags file
+  </a>
+  
+    <nav class="md-nav" aria-label="Where do I store my flags file">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#from-github" class="md-nav__link">
+    From Github
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#from-an-http-endpoint" class="md-nav__link">
+    From an HTTP endpoint
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#from-a-s3-bucket" class="md-nav__link">
+    From a S3 Bucket
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#from-a-file" class="md-nav__link">
+    From a file
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flags-file-format" class="md-nav__link">
+    Flags file format
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rule-format" class="md-nav__link">
+    Rule format
+  </a>
+  
+    <nav class="md-nav" aria-label="Rule format">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    Examples
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#users" class="md-nav__link">
+    Users
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#variation" class="md-nav__link">
+    Variation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rollout" class="md-nav__link">
+    Rollout
+  </a>
+  
+    <nav class="md-nav" aria-label="Rollout">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#experimentation-rollout" class="md-nav__link">
+    Experimentation rollout
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notifiers" class="md-nav__link">
+    Notifiers
+  </a>
+  
+    <nav class="md-nav" aria-label="Notifiers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#webhooks" class="md-nav__link">
+    Webhooks
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#slack" class="md-nav__link">
+    SLACK
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#export-data" class="md-nav__link">
+    Export data
+  </a>
+  
+    <nav class="md-nav" aria-label="Export data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-to-configure-data-export" class="md-nav__link">
+    How to configure data export?
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-exporter" class="md-nav__link">
+    File Exporter
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#log-exporter" class="md-nav__link">
+    Log Exporter
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#s3-exporter" class="md-nav__link">
+    S3 Exporter
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#webhook-exporter" class="md-nav__link">
+    Webhook Exporter
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#multiple-configuration-flag-files" class="md-nav__link">
+    Multiple configuration flag files
+  </a>
+  
+    <nav class="md-nav" aria-label="Multiple configuration flag files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#working-with-multiple-go-feature-flag" class="md-nav__link">
+    Working with multiple go-feature-flag
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    Example:
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/thomaspoignant/go-feature-flag/edit/master/docs/index.md" title="Edit this page" class="md-content__button md-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+                  </a>
+                
+                
+                <p align="center">
+  <img width="250" height="238" src="https://github.com/thomaspoignant/go-feature-flag/raw/main/logo.png" alt="go-feature-flag logo" />
+</p>
+
+<h1 id="go-feature-flag">go-feature-flag <a href="https://twitter.com/intent/tweet?text=I%27ve%20discovered%20go-feature-flag%20a%20great%20solution%20to%20easily%20managed%20feature%20flag%20in%20golang&amp;url=https%3A%2F%2Fgithub.com%2Fthomaspoignant%2Fgo-feature-flag&amp;via=thomaspoignant&amp;hashtags=golang,featureflags,featuretoggle,go"><img alt="Tweet" src="https://img.shields.io/twitter/url/http/shields.io.svg?style=social" /></a></h1>
+<p align="center">
+    <a href="https://app.circleci.com/pipelines/github/thomaspoignant/go-feature-flag"><img src="https://img.shields.io/circleci/build/github/thomaspoignant/go-feature-flag" alt="Build Status" /></a>
+    <a href="https://coveralls.io/github/thomaspoignant/go-feature-flag"><img src="https://coveralls.io/repos/github/thomaspoignant/go-feature-flag/badge.svg" alt="Coverage Status" /></a>
+    <a href="https://sonarcloud.io/dashboard?id=thomaspoignant_go-feature-flag"><img src="https://sonarcloud.io/api/project_badges/measure?project=thomaspoignant_go-feature-flag&metric=alert_status" alt="Sonarcloud Status" /></a>
+    <a href="https://github.com/thomaspoignant/go-feature-flag/actions?query=workflow%3ACodeQL"><img src="https://github.com/thomaspoignant/go-feature-flag/workflows/CodeQL/badge.svg" alt="Build Status" /></a>
+    <a href="https://app.fossa.com/projects/git%2Bgithub.com%2Fthomaspoignant%2Fgo-feature-flag"><img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2Fthomaspoignant%2Fgo-feature-flag.svg?type=shield" alt="FOSSA Status"/></a>
+    <br/>
+    <a href="https://github.com/thomaspoignant/go-feature-flag/releases"><img src="https://img.shields.io/github/v/release/thomaspoignant/go-feature-flag" alt="Release version" /></a>
+    <a href="https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag"><img src="https://godoc.org/github.com/thomaspoignant/go-feature-flag?status.svg" alt="GoDoc" /></a>
+    <img src="https://img.shields.io/github/go-mod/go-version/thomaspoignant/go-feature-flag?logo=go%20version" alt="Go version"/>
+    <a href="LICENSE"><img src="https://img.shields.io/github/license/thomaspoignant/go-feature-flag" alt="License"/></a>
+    <a href="https://replit.com/@thomaspoignant/go-feature-flag-example#main.go"><img src="https://replit.com/badge/github/thomaspoignant/go-feature-flag-example"  alt="run on repl.it"></a>
+    <a href="https://github.com/avelino/awesome-go/#server-applications"><img src="https://awesome.re/mentioned-badge-flat.svg" alt="Mentioned in Awesome Go"></a>
+</p>
+
+<p><strong>Feature flags with no complex system to maintain!</strong></p>
+<h2 id="installation">Installation</h2>
+<div class="highlight"><pre><span></span><code>go get github.com/thomaspoignant/go-feature-flag
+</code></pre></div>
+<h2 id="what-is-go-feature-flag">What is go-feature-flag?</h2>
+<p>A simple and complete feature flag solution, without any complex backend system to install, you need only a file as your backend.<br />
+No server is needed, just add a file in a central system and all your services will react to the changes of this file.  </p>
+<p><code>go-feature-flags</code> supports:
+- Storing your configuration flags file on various locations (<a href="#from-an-http-endpoint"><code>HTTP</code></a>, <a href="#from-a-s3-bucket"><code>S3</code></a>, <a href="#from-github"><code>GitHub</code></a>, <a href="#from-a-file"><code>file</code></a>).
+- Configuring your flags in various <a href="#flags-file-format">format</a> (<code>JSON</code>, <code>TOML</code> and <code>YAML</code>).
+- Adding complex <a href="#rule-format">rules</a> to target your users.
+- Run A/B test experimentations.
+- Getting notified when a flag has changed (<a href="#webhooks"><code>webhook</code></a> and <a href="#slack"><code>slack</code></a>).
+- Exporting your flags usage data (<a href="#s3-exporter"><code>s3</code></a>, <a href="#log-exporter"><code>log</code></a> and <a href="#file-exporter"><code>file</code></a>).</p>
+<p>If you are not familiar with feature flags also called feature Toggles you can read this <a href="https://www.martinfowler.com/articles/feature-toggles.html">article of Martin Fowler</a>
+that explains why this is a great pattern.<br />
+I've also wrote an <a href="https://medium.com/better-programming/feature-flags-and-how-to-iterate-quickly-7e3371b9986">article</a> that explains why feature flags can help you to iterate quickly.</p>
+<h2 id="quickstart">Quickstart</h2>
+<p>First, you need to initialize the <code>ffclient</code> with the location of your backend file.
+<div class="highlight"><pre><span></span><code><span class="nx">err</span> <span class="o">:=</span> <span class="nx">ffclient</span><span class="p">.</span><span class="nx">Init</span><span class="p">(</span><span class="nx">ffclient</span><span class="p">.</span><span class="nx">Config</span><span class="p">{</span>
+    <span class="nx">PollInterval</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="nx">Retriever</span><span class="p">:</span> <span class="o">&amp;</span><span class="nx">ffclient</span><span class="p">.</span><span class="nx">HTTPRetriever</span><span class="p">{</span>
+        <span class="nx">URL</span><span class="p">:</span>    <span class="s">&quot;http://example.com/flag-config.yaml&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">})</span>
+<span class="k">defer</span> <span class="nx">ffclient</span><span class="p">.</span><span class="nx">Close</span><span class="p">()</span>
+</code></pre></div>
+<em>This example will load a file from an HTTP endpoint and will refresh the flags every 3 seconds (if you omit the
+PollInterval, the default value is 60 seconds).</em></p>
+<p>Now you can evaluate your flags anywhere in your code.</p>
+<p><div class="highlight"><pre><span></span><code><span class="nx">user</span> <span class="o">:=</span> <span class="nx">ffuser</span><span class="p">.</span><span class="nx">NewUser</span><span class="p">(</span><span class="s">&quot;user-unique-key&quot;</span><span class="p">)</span>
+<span class="nx">hasFlag</span><span class="p">,</span> <span class="nx">_</span> <span class="o">:=</span> <span class="nx">ffclient</span><span class="p">.</span><span class="nx">BoolVariation</span><span class="p">(</span><span class="s">&quot;test-flag&quot;</span><span class="p">,</span> <span class="nx">user</span><span class="p">,</span> <span class="kc">false</span><span class="p">)</span>
+<span class="k">if</span> <span class="nx">hasFlag</span> <span class="p">{</span>
+    <span class="c1">// flag &quot;test-flag&quot; is true for the user</span>
+<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="c1">// flag &quot;test-flag&quot; is false for the user</span>
+<span class="p">}</span>
+</code></pre></div>
+You can find more example programs in the <a href="examples">examples/</a> directory.</p>
+<h2 id="configuration">Configuration</h2>
+<p>The configuration is set with <code>ffclient.Config{}</code> and you can give it to <code>ffclient.Init()</code> the initialization
+function.</p>
+<p>Example:
+<div class="highlight"><pre><span></span><code><span class="nx">ffclient</span><span class="p">.</span><span class="nx">Init</span><span class="p">(</span><span class="nx">ffclient</span><span class="p">.</span><span class="nx">Config</span><span class="p">{</span> 
+    <span class="nx">PollInterval</span><span class="p">:</span>   <span class="mi">3</span><span class="p">,</span>
+    <span class="nx">Logger</span><span class="p">:</span>         <span class="nx">log</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="nx">file</span><span class="p">,</span> <span class="s">&quot;/tmp/log&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+    <span class="nx">Context</span><span class="p">:</span>        <span class="nx">context</span><span class="p">.</span><span class="nx">Background</span><span class="p">(),</span>
+    <span class="nx">Retriever</span><span class="p">:</span>      <span class="o">&amp;</span><span class="nx">ffclient</span><span class="p">.</span><span class="nx">FileRetriever</span><span class="p">{</span><span class="nx">Path</span><span class="p">:</span> <span class="s">&quot;testdata/flag-config.yaml&quot;</span><span class="p">},</span>
+    <span class="nx">FileFormat</span><span class="p">:</span>     <span class="s">&quot;yaml&quot;</span><span class="p">,</span>
+    <span class="nx">Notifiers</span><span class="p">:</span> <span class="p">[]</span><span class="nx">ffclient</span><span class="p">.</span><span class="nx">NotifierConfig</span><span class="p">{</span>
+        <span class="o">&amp;</span><span class="nx">ffclient</span><span class="p">.</span><span class="nx">WebhookConfig</span><span class="p">{</span>
+            <span class="nx">EndpointURL</span><span class="p">:</span> <span class="s">&quot; https://example.com/hook&quot;</span><span class="p">,</span>
+            <span class="nx">Secret</span><span class="p">:</span>     <span class="s">&quot;Secret&quot;</span><span class="p">,</span>
+            <span class="nx">Meta</span><span class="p">:</span> <span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">string</span><span class="p">{</span>
+                <span class="s">&quot;app.name&quot;</span><span class="p">:</span> <span class="s">&quot;my app&quot;</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+    <span class="nx">DataExporter</span><span class="p">:</span> <span class="nx">ffclient</span><span class="p">.</span><span class="nx">DataExporter</span><span class="p">{</span>
+        <span class="nx">FlushInterval</span><span class="p">:</span>   <span class="mi">10</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">,</span>
+        <span class="nx">MaxEventInMemory</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+        <span class="nx">Exporter</span><span class="p">:</span> <span class="o">&amp;</span><span class="nx">ffexporter</span><span class="p">.</span><span class="nx">File</span><span class="p">{</span>
+            <span class="nx">OutputDir</span><span class="p">:</span> <span class="s">&quot;/output-data/&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+    <span class="nx">StartWithRetrieverError</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+<span class="p">})</span>
+</code></pre></div></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Retriever</code></td>
+<td>The configuration retriever you want to use to get your flag file<br> <em>see <a href="#where-do-i-store-my-flags-file">Where do I store my flags file</a> for the configuration details</em>.</td>
+</tr>
+<tr>
+<td><code>Context</code></td>
+<td><em>(optional)</em> The context used by the retriever.<br />Default: <code>context.Background()</code></td>
+</tr>
+<tr>
+<td><code>DataExporter</code></td>
+<td><em>(optional)</em> DataExporter defines how to export data on how your flags are used.<br> <em>see <a href="#export-data">export data section</a> for more details</em>.</td>
+</tr>
+<tr>
+<td><code>FileFormat</code></td>
+<td><em>(optional)</em> Format of your configuration file. Available formats are <code>yaml</code>, <code>toml</code> and <code>json</code>, if you omit the field it will try to unmarshal the file as a <code>yaml</code> file.<br>Default: <code>YAML</code></td>
+</tr>
+<tr>
+<td><code>Logger</code></td>
+<td><em>(optional)</em> Logger used to log what <code>go-feature-flag</code> is doing.<br />If no logger is provided the module will not log anything.<br>Default: No log</td>
+</tr>
+<tr>
+<td><code>Notifiers</code></td>
+<td><em>(optional)</em> List of notifiers to call when your flag file has changed.<br> <em>see <a href="#notifiers">notifiers section</a> for more details</em>.</td>
+</tr>
+<tr>
+<td><code>PollInterval</code></td>
+<td>(optional) Number of seconds to wait before refreshing the flags.<br />Default: 60</td>
+</tr>
+<tr>
+<td><code>StartWithRetrieverError</code></td>
+<td><em>(optional)</em> If <strong>true</strong>, the SDK will start even if we did not get any flags from the retriever. It will serve only default values until the retriever returns the flags.<br>The init method will not return any error if the flag file is unreachable.<br>Default: <strong>false</strong></td>
+</tr>
+</tbody>
+</table>
+<h2 id="where-do-i-store-my-flags-file">Where do I store my flags file</h2>
+<p><code>go-feature-flags</code> support different ways of retrieving the flag file.<br />
+We can have only one source for the file, if you set multiple sources in your configuration, only one will be take in
+consideration.</p>
+<h3 id="from-github">From Github</h3>
+<details>
+<summary><i>expand to see details</i></summary>
+
+<div class="highlight"><pre><span></span><code><span class="nx">err</span> <span class="o">:=</span> <span class="nx">ffclient</span><span class="p">.</span><span class="nx">Init</span><span class="p">(</span><span class="nx">ffclient</span><span class="p">.</span><span class="nx">Config</span><span class="p">{</span>
+    <span class="nx">PollInterval</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="nx">Retriever</span><span class="p">:</span> <span class="o">&amp;</span><span class="nx">ffclient</span><span class="p">.</span><span class="nx">GithubRetriever</span><span class="p">{</span>
+        <span class="nx">RepositorySlug</span><span class="p">:</span> <span class="s">&quot;thomaspoignant/go-feature-flag&quot;</span><span class="p">,</span>
+        <span class="nx">Branch</span><span class="p">:</span> <span class="s">&quot;main&quot;</span><span class="p">,</span>
+        <span class="nx">FilePath</span><span class="p">:</span> <span class="s">&quot;testdata/flag-config.yaml&quot;</span><span class="p">,</span>
+        <span class="nx">GithubToken</span><span class="p">:</span> <span class="s">&quot;XXXX&quot;</span><span class="p">,</span>
+        <span class="nx">Timeout</span><span class="p">:</span> <span class="mi">2</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">})</span>
+<span class="k">defer</span> <span class="nx">ffclient</span><span class="p">.</span><span class="nx">Close</span><span class="p">()</span>
+</code></pre></div>
+To configure the access to your GitHub file:
+- **RepositorySlug**: your GitHub slug `org/repo-name`. **MANDATORY**
+- **FilePath**: the path of your file. **MANDATORY**
+- **Branch**: the branch where your file is *(default is `main`)*.
+- **GithubToken**: Github token is used to access a private repository, you need the `repo` permission *([how to create a GitHub token](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token))*.
+- **Timeout**: Timeout for the HTTP call (default is 10 seconds).
+
+:warning: GitHub has rate limits, so be sure to not reach them when setting your `PollInterval`.
+
+</details>
+
+<h3 id="from-an-http-endpoint">From an HTTP endpoint</h3>
+<details>
+<summary><i>expand to see details</i></summary>
+
+<div class="highlight"><pre><span></span><code><span class="nx">err</span> <span class="o">:=</span> <span class="nx">ffclient</span><span class="p">.</span><span class="nx">Init</span><span class="p">(</span><span class="nx">ffclient</span><span class="p">.</span><span class="nx">Config</span><span class="p">{</span>
+    <span class="nx">PollInterval</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="nx">Retriever</span><span class="p">:</span> <span class="o">&amp;</span><span class="nx">ffclient</span><span class="p">.</span><span class="nx">HTTPRetriever</span><span class="p">{</span>
+        <span class="nx">URL</span><span class="p">:</span>    <span class="s">&quot;http://example.com/flag-config.yaml&quot;</span><span class="p">,</span>
+        <span class="nx">Timeout</span><span class="p">:</span> <span class="mi">2</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">})</span>
+<span class="k">defer</span> <span class="nx">ffclient</span><span class="p">.</span><span class="nx">Close</span><span class="p">()</span>
+</code></pre></div>
+
+To configure your HTTP endpoint:
+- **URL**: location of your file. **MANDATORY**
+- **Method**: the HTTP method you want to use *(default is GET)*.
+- **Body**: If you need a body to get the flags.
+- **Header**: Header you should pass while calling the endpoint *(useful for authorization)*.
+- **Timeout**: Timeout for the HTTP call (default is 10 seconds).
+
+</details>
+
+<h3 id="from-a-s3-bucket">From a S3 Bucket</h3>
+<details>
+<summary><i>expand to see details</i></summary>
+
+<div class="highlight"><pre><span></span><code><span class="nx">err</span> <span class="o">:=</span> <span class="nx">ffclient</span><span class="p">.</span><span class="nx">Init</span><span class="p">(</span><span class="nx">ffclient</span><span class="p">.</span><span class="nx">Config</span><span class="p">{</span>
+    <span class="nx">PollInterval</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="nx">Retriever</span><span class="p">:</span> <span class="o">&amp;</span><span class="nx">ffclient</span><span class="p">.</span><span class="nx">S3Retriever</span><span class="p">{</span>
+        <span class="nx">Bucket</span><span class="p">:</span> <span class="s">&quot;tpoi-test&quot;</span><span class="p">,</span>
+        <span class="nx">Item</span><span class="p">:</span>   <span class="s">&quot;flag-config.yaml&quot;</span><span class="p">,</span>
+        <span class="nx">AwsConfig</span><span class="p">:</span> <span class="nx">aws</span><span class="p">.</span><span class="nx">Config</span><span class="p">{</span>
+            <span class="nx">Region</span><span class="p">:</span> <span class="nx">aws</span><span class="p">.</span><span class="nx">String</span><span class="p">(</span><span class="s">&quot;eu-west-1&quot;</span><span class="p">),</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+<span class="p">})</span>
+<span class="k">defer</span> <span class="nx">ffclient</span><span class="p">.</span><span class="nx">Close</span><span class="p">()</span>
+</code></pre></div>
+
+To configure your S3 file location:
+- **Bucket**: The name of your bucket. **MANDATORY**
+- **Item**: The location of your file in the bucket. **MANDATORY**
+- **AwsConfig**: An instance of `aws.Config` that configure your access to AWS *(see [this documentation for more info](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html))*. **MANDATORY**
+
+</details>
+
+<h3 id="from-a-file">From a file</h3>
+<details>
+<summary><i>expand to see details</i></summary>
+
+<div class="highlight"><pre><span></span><code><span class="nx">err</span> <span class="o">:=</span> <span class="nx">ffclient</span><span class="p">.</span><span class="nx">Init</span><span class="p">(</span><span class="nx">ffclient</span><span class="p">.</span><span class="nx">Config</span><span class="p">{</span>
+    <span class="nx">PollInterval</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="nx">Retriever</span><span class="p">:</span> <span class="o">&amp;</span><span class="nx">ffclient</span><span class="p">.</span><span class="nx">FileRetriever</span><span class="p">{</span>
+        <span class="nx">Path</span><span class="p">:</span> <span class="s">&quot;file-example.yaml&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">})</span>
+<span class="k">defer</span> <span class="nx">ffclient</span><span class="p">.</span><span class="nx">Close</span><span class="p">()</span>
+</code></pre></div>
+
+To configure your File retriever:
+- **Path**: location of your file. **MANDATORY**
+
+*I will not recommend using a file to store your flags except if it is in a shared folder for all your services.*
+</details>
+
+<h2 id="flags-file-format">Flags file format</h2>
+<p><code>go-feature-flag</code> is to avoid to have to host a backend to manage your feature flags and to keep them centralized by using a file a source.<br />
+Your file should be a <code>YAML</code>, <code>JSON</code> or <code>TOML</code> file with a list of flags <em>(examples: <a href="testdata/flag-config.yaml"><code>YAML</code></a>, <a href="testdata/flag-config.json"><code>JSON</code></a>, <a href="testdata/flag-config.toml"><code>TOML</code></a>)</em>.</p>
+<p>A flag configuration looks like:
+<div class="highlight"><pre><span></span><code><span class="nt">test-flag</span><span class="p">:</span>
+  <span class="nt">percentage</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">100</span>
+  <span class="nt">rule</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">key eq &quot;random-key&quot;</span>
+  <span class="nt">true</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+  <span class="nt">false</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
+  <span class="nt">default</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
+  <span class="nt">disable</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
+  <span class="nt">trackEvents</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+  <span class="nt">rollout</span><span class="p">:</span>
+    <span class="nt">experimentation</span><span class="p">:</span>
+        <span class="nt">start</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2021-03-20T00:00:00.10-05:00</span>
+        <span class="nt">end</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2021-03-21T00:00:00.10-05:00</span>
+</code></pre></div></p>
+<table>
+<thead>
+    <tr>
+    <td><strong>Field</strong></td><td><strong>Description</strong></td>
+    </tr>
+</thead>
+<tr>
+    <td><code>test-flag</code></td>
+    <td>Name of the flag.<br>It should be unique.</td>
+</tr>
+<tr>
+    <td><code>true</code></td>
+    <td>The value return by the flag if apply to the user <i>(rule is evaluated to true)</i> and user is in the active percentage.</td>
+</tr>
+<tr>
+    <td><code>false</code></td>
+    <td>The value return by the flag if apply to the user <i>(rule is evaluated to true)</i> and user is <strong>not</strong> in the active percentage.</td>
+</tr>
+<tr>
+    <td><code>default</code></td>
+    <td>The value return by the flag if not apply to the user <i>(rule is evaluated to false).</i></td>
+</tr>
+<tr>
+    <td><code>percentage</code></td>
+<td><i>(optional)</i> Percentage of the users affect by the flag.<br><strong>Default value is 0</strong><br>The percentage is done by doing a hash of the user key <i>(100000 variations)</i>, it means that you can have 3 numbers after the comma.</td>
+</tr>
+<tr>
+    <td><code>rule</code></td>
+    <td><i>(optional)</i> This is the query use to select on which user the flag should apply.<br>Rule format is describe in the <a href="#rule-format">rule format section</a>.<br><strong>If no rule set, the flag apply to all users <i>(percentage still apply)</i>.</strong></td>
+</tr>
+<tr>
+    <td><code>disable</code></td>
+    <td><i>(optional)</i> True if the flag is disabled.</i></td>
+</tr>
+<tr>
+    <td><code>trackEvents</code></td>
+    <td><i>(optional)</i> False if you don't want to export the data in your data exporter.<br>Default value is true</i></td>
+</tr>
+<tr>
+    <td><code>rollout</code></td>
+    <td><i>(optional)</i> <code>rollout</code> contains a specific rollout strategy you want to use.<br><strong>See <a href="#rollout">rollout section</a> for more details.</strong></td>
+</tr>
+</table>
+
+<h2 id="rule-format">Rule format</h2>
+<p>The rule format is based on the <a href="https://github.com/nikunjy/rules"><code>nikunjy/rules</code></a> library.</p>
+<p>All the operations can be written capitalized or lowercase (ex: eq or EQ can be used).<br />
+Logical Operations supported are <code>AND</code> <code>OR</code>.</p>
+<p>Compare Expression and their definitions (<code>a|b</code> means you can use either one of the two <code>a</code> or <code>b</code>):</p>
+<div class="highlight"><pre><span></span><code>eq|==: equals to 
+ne|!=: not equals to
+lt|&lt;: less than 
+gt|&gt;: greater than
+le|&lt;=: less than equal to
+ge|&gt;=: greater than equal to 
+co: contains 
+sw: starts with 
+ew: ends with
+in: in a list
+pr: present
+not: not of a logical expression
+</code></pre></div>
+<h3 id="examples">Examples</h3>
+<ul>
+<li>Select a specific user: <code>key eq "example@example.com"</code></li>
+<li>Select all identified users: <code>anonymous ne true</code></li>
+<li>Select a user with a custom property: <code>userId eq "12345"</code></li>
+</ul>
+<h2 id="users">Users</h2>
+<p>Feature flag targeting and rollouts are all determined by the user you pass to your Variation calls.<br />
+The SDK defines a <a href="https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/ffuser#User"><code>User</code></a> struct and a <a href="https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/ffuser#UserBuilder"><code>UserBuilder</code></a> to make this easy. </p>
+<p>Here's an example:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// User with only a key</span>
+<span class="nx">user1</span> <span class="o">:=</span> <span class="nx">ffuser</span><span class="p">.</span><span class="nx">NewUser</span><span class="p">(</span><span class="s">&quot;user1-key&quot;</span><span class="p">)</span>
+
+<span class="c1">// User with a key plus other attributes</span>
+<span class="nx">user2</span> <span class="p">=</span> <span class="nx">ffuser</span><span class="p">.</span><span class="nx">NewUserBuilder</span><span class="p">(</span><span class="s">&quot;user2-key&quot;</span><span class="p">).</span>
+ <span class="nx">AddCustom</span><span class="p">(</span><span class="s">&quot;firstname&quot;</span><span class="p">,</span> <span class="s">&quot;John&quot;</span><span class="p">).</span>
+ <span class="nx">AddCustom</span><span class="p">(</span><span class="s">&quot;lastname&quot;</span><span class="p">,</span> <span class="s">&quot;Doe&quot;</span><span class="p">).</span>
+ <span class="nx">AddCustom</span><span class="p">(</span><span class="s">&quot;email&quot;</span><span class="p">,</span> <span class="s">&quot;john.doe@example.com&quot;</span><span class="p">).</span>
+ <span class="nx">Build</span><span class="p">()</span>
+</code></pre></div>
+<p>The most common attribute is the user's key. In this case we've used the strings "<strong>user1-key</strong>" and "<strong>user2-key</strong>".<br />
+<strong>The user key is the only mandatory user attribute.</strong> The key should also uniquely identify each user. You can use a primary key, an e-mail address, or a hash, as long as the same user always has the same key. We recommend using a hash if possible.</p>
+<p>Custom attributes are one of the most powerful features. They let you have rules on these attributes and target users according to any data that you want.</p>
+<h2 id="variation">Variation</h2>
+<p>The Variation methods determine whether a flag is enabled or not for a specific user.
+There is a Variation method for each type: <a href="https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#BoolVariation"><code>BoolVariation</code>,</a> <a href="https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#IntVariation"><code>IntVariation</code></a>, <a href="https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#Float64Variation"><code>Float64Variation</code></a>, <a href="https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#StringVariation"><code>StringVariation</code></a>, <a href="https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#JSONArrayVariation"><code>JSONArrayVariation</code></a> and <a href="https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#JSONVariation"><code>JSONVariation</code></a>.</p>
+<p><div class="highlight"><pre><span></span><code><span class="nx">result</span><span class="p">,</span> <span class="nx">_</span> <span class="o">:=</span> <span class="nx">ffclient</span><span class="p">.</span><span class="nx">BoolVariation</span><span class="p">(</span><span class="s">&quot;your.feature.key&quot;</span><span class="p">,</span> <span class="nx">user</span><span class="p">,</span> <span class="kc">false</span><span class="p">)</span>
+
+<span class="c1">// result is now true or false depending on the setting of this boolean feature flag</span>
+</code></pre></div>
+Variation methods take the feature flag key, a User, and a default value.</p>
+<p>The default value is return when an error is encountered <em>(<code>ffclient</code> not initialized, variation with wrong type, flag does not exist ...).</em><br />
+In the example, if the flag <code>your.feature.key</code> does not exists, result will be <code>false</code>.<br />
+Not that you will always have a usable value in the result. </p>
+<h2 id="rollout">Rollout</h2>
+<p>A critical part of every new feature release is orchestrating the actual launch schedule between Product, Engineering, and Marketing teams.<br />
+Delivering powerful user experiences typically requires software teams to manage complex releases and make manual updates at inconvenient times. But it doesn’t have to.<br />
+Having a complex <strong>rollout</strong> strategy allows you to have lifecycle for your flags.</p>
+<h3 id="experimentation-rollout">Experimentation rollout</h3>
+<p>An <strong>experimentation rollout</strong> is when your flag is configured to be served only for a determined time.</p>
+<ol>
+<li>It means that before the rollout start date, the <code>default</code> value is served for all users.</li>
+<li>Between the dates the flag is evaluated.</li>
+<li>After the end date the <code>default</code> value is served for all users.</li>
+</ol>
+<p>This strategy you should use to run an A/B test.</p>
+<p><strong>Configuration example:</strong>
+<div class="highlight"><pre><span></span><code><span class="nt">experimentation-flag</span><span class="p">:</span>
+  <span class="nt">true</span><span class="p">:</span> <span class="s">&quot;B&quot;</span>
+  <span class="nt">false</span><span class="p">:</span> <span class="s">&quot;A&quot;</span>
+  <span class="nt">default</span><span class="p">:</span> <span class="s">&quot;Default&quot;</span>
+  <span class="nt">rollout</span><span class="p">:</span>
+    <span class="nt">experimentation</span><span class="p">:</span>
+      <span class="nt">start</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2021-03-20T00:00:00.10-05:00</span>
+      <span class="nt">end</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2021-03-21T00:00:00.10-05:00</span>
+</code></pre></div></p>
+<p>The date is in the format supported natively by your flag file format.
+Check this <a href="examples/experimentation/">example</a> to see how it works. </p>
+<h2 id="notifiers">Notifiers</h2>
+<p>If you want to be informed when a flag has changed outside of your app, you can configure a <strong>notifier</strong>.
+<code>go-feature-flag</code> can handle more than one notifier at a time <em>(see bellow the list of available notifiers and how to configure them)</em>.</p>
+<h3 id="webhooks">Webhooks</h3>
+<details>
+<summary><i>expand to see details</i></summary>
+
+> :warning: In `v0.9.0` we have changed how to configure webhooks, moving from the key `Webhooks` to `Notifiers`.  
+`Webhooks` is still supported for now but will be removed in a future version.
+
+<div class="highlight"><pre><span></span><code><span class="nx">ffclient</span><span class="p">.</span><span class="nx">Config</span><span class="p">{</span> 
+    <span class="c1">// ...</span>
+    <span class="nx">Notifiers</span><span class="p">:</span> <span class="p">[]</span><span class="nx">ffclient</span><span class="p">.</span><span class="nx">NotifierConfig</span><span class="p">{</span>
+        <span class="o">&amp;</span><span class="nx">ffclient</span><span class="p">.</span><span class="nx">WebhookConfig</span><span class="p">{</span>
+            <span class="nx">EndpointURL</span><span class="p">:</span> <span class="s">&quot; https://example.com/hook&quot;</span><span class="p">,</span>
+            <span class="nx">Secret</span><span class="p">:</span>     <span class="s">&quot;Secret&quot;</span><span class="p">,</span>
+            <span class="nx">Meta</span><span class="p">:</span> <span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">string</span><span class="p">{</span>
+                <span class="s">&quot;app.name&quot;</span><span class="p">:</span> <span class="s">&quot;my app&quot;</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">},</span>
+        <span class="c1">// ...</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+</code></pre></div>
+
+|   |   |   |
+|---|---|---|
+|`EndpointURL`   |![mandatory](https://img.shields.io/badge/-mandatory-red)   | The complete URL of your API *(we will send a POST request to this URL, [see format](#format))*  |
+|`Secret`   |![optional](https://img.shields.io/badge/-optional-green)   |  A secret key you can share with your webhook. We will use this key to sign the request *(see [signature section](#signature) for more details)*. |
+|`Meta`   |![optional](https://img.shields.io/badge/-optional-green)   |  A list of key value that will be add in your request, this is super usefull if you to add information on the current running instance of your app.<br/>*By default the hostname is always added in the meta informations.*|
+
+#### Format
+If you have configured a webhook, a POST request will be sent to the `EndpointURL` with a body in this format:
+
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+    <span class="nt">&quot;meta&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;hostname&quot;</span><span class="p">:</span> <span class="s2">&quot;server01&quot;</span><span class="p">,</span>
+        <span class="err">//</span> <span class="err">...</span>
+    <span class="p">},</span>
+    <span class="nt">&quot;flags&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;deleted&quot;</span><span class="p">:</span> <span class="p">{},</span> <span class="err">//</span> <span class="err">map</span> <span class="err">o</span><span class="kc">f</span> <span class="err">your</span> <span class="err">dele</span><span class="kc">te</span><span class="err">d</span> <span class="kc">fla</span><span class="err">gs</span>
+        <span class="nt">&quot;added&quot;</span><span class="p">:</span> <span class="p">{},</span> <span class="err">//</span> <span class="err">map</span> <span class="err">o</span><span class="kc">f</span> <span class="err">your</span> <span class="err">added</span> <span class="kc">fla</span><span class="err">gs</span>
+        <span class="nt">&quot;updated&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">&quot;flag-name&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="err">//</span> <span class="err">a</span><span class="kc">n</span> <span class="err">objec</span><span class="kc">t</span> <span class="kc">t</span><span class="err">ha</span><span class="kc">t</span> <span class="err">co</span><span class="kc">nta</span><span class="err">i</span><span class="kc">ns</span> <span class="err">old</span> <span class="err">a</span><span class="kc">n</span><span class="err">d</span> <span class="kc">ne</span><span class="err">w</span> <span class="err">value</span>
+                <span class="nt">&quot;old_value&quot;</span><span class="p">:</span> <span class="p">{},</span>
+                <span class="nt">&quot;new_value&quot;</span><span class="p">:</span> <span class="p">{}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<details>
+<summary><b>Example</b></summary>
+
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+   <span class="nt">&quot;meta&quot;</span><span class="p">:{</span>
+       <span class="nt">&quot;hostname&quot;</span><span class="p">:</span> <span class="s2">&quot;server01&quot;</span>
+   <span class="p">},</span>
+   <span class="nt">&quot;flags&quot;</span><span class="p">:{</span>
+       <span class="nt">&quot;deleted&quot;</span><span class="p">:</span> <span class="p">{</span>
+           <span class="nt">&quot;test-flag&quot;</span><span class="p">:</span> <span class="p">{</span>
+               <span class="nt">&quot;rule&quot;</span><span class="p">:</span> <span class="s2">&quot;key eq \&quot;random-key\&quot;&quot;</span><span class="p">,</span>
+               <span class="nt">&quot;percentage&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+               <span class="nt">&quot;true&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+               <span class="nt">&quot;false&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+               <span class="nt">&quot;default&quot;</span><span class="p">:</span> <span class="kc">false</span>
+           <span class="p">}</span>
+       <span class="p">},</span>
+       <span class="nt">&quot;added&quot;</span><span class="p">:</span> <span class="p">{</span>
+           <span class="nt">&quot;test-flag3&quot;</span><span class="p">:</span> <span class="p">{</span>
+               <span class="nt">&quot;percentage&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+               <span class="nt">&quot;true&quot;</span><span class="p">:</span> <span class="s2">&quot;test&quot;</span><span class="p">,</span>
+               <span class="nt">&quot;false&quot;</span><span class="p">:</span> <span class="s2">&quot;false&quot;</span><span class="p">,</span>
+               <span class="nt">&quot;default&quot;</span><span class="p">:</span> <span class="s2">&quot;default&quot;</span>
+           <span class="p">}</span>
+       <span class="p">},</span>
+       <span class="nt">&quot;updated&quot;</span><span class="p">:</span> <span class="p">{</span>
+           <span class="nt">&quot;test-flag2&quot;</span><span class="p">:</span> <span class="p">{</span>
+               <span class="nt">&quot;old_value&quot;</span><span class="p">:</span> <span class="p">{</span>
+                   <span class="nt">&quot;rule&quot;</span><span class="p">:</span> <span class="s2">&quot;key eq \&quot;not-a-key\&quot;&quot;</span><span class="p">,</span>
+                   <span class="nt">&quot;percentage&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+                   <span class="nt">&quot;true&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+                   <span class="nt">&quot;false&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+                   <span class="nt">&quot;default&quot;</span><span class="p">:</span> <span class="kc">false</span>
+               <span class="p">},</span>
+               <span class="nt">&quot;new_value&quot;</span><span class="p">:</span> <span class="p">{</span>
+                   <span class="nt">&quot;disable&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+                   <span class="nt">&quot;rule&quot;</span><span class="p">:</span> <span class="s2">&quot;key eq \&quot;not-a-key\&quot;&quot;</span><span class="p">,</span>
+                   <span class="nt">&quot;percentage&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+                   <span class="nt">&quot;true&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+                   <span class="nt">&quot;false&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+                   <span class="nt">&quot;default&quot;</span><span class="p">:</span> <span class="kc">false</span>
+               <span class="p">}</span>
+           <span class="p">}</span>
+       <span class="p">}</span>
+   <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+</details>
+
+
+
+#### Signature
+This header **`X-Hub-Signature-256`** is sent if the webhook is configured with a secret. This is the HMAC hex digest of the request body, and is generated using the SHA-256 hash function and the secret as the HMAC key.
+
+:warning: **The recommendation is to always use the `Secret` and on your API/webook always verify the signature key to be sure that you don't have a man in the middle attack.**
+
+</details>
+
+<h3 id="slack">SLACK</h3>
+<details>
+<summary><i>expand to see details</i></summary>
+
+The **Slack** notifier allows you to get notification on your favorite slack channel when an instance of `go-feature-flag` is detecting changes in the configuration file.
+
+![slack notification example](.doc/slack_notification.png)
+
+- First, you need to create an incoming webhook on your slack instance *(you can follow this [documentation to see how to do it](https://api.slack.com/messaging/webhooks#getting_started))*
+- Copy your webhook URL. It should looks like `https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX`.
+- In your `go-feature-flag` init method add a slack notifier
+<div class="highlight"><pre><span></span><code><span class="nx">ffclient</span><span class="p">.</span><span class="nx">Config</span><span class="p">{</span> 
+    <span class="c1">// ...</span>
+    <span class="nx">Notifiers</span><span class="p">:</span> <span class="p">[]</span><span class="nx">ffclient</span><span class="p">.</span><span class="nx">NotifierConfig</span><span class="p">{</span>
+        <span class="o">&amp;</span><span class="nx">ffclient</span><span class="p">.</span><span class="nx">SlackNotifier</span><span class="p">{</span>
+            <span class="nx">SlackWebhookURL</span><span class="p">:</span> <span class="s">&quot;https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="c1">// ...</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+</code></pre></div>
+
+|   |   |   |
+|---|---|---|
+|`SlackWebhookURL`   |![mandatory](https://img.shields.io/badge/-mandatory-red)   | The complete URL of your incoming webhook configured in Slack.  |
+
+</details>
+
+<h2 id="export-data">Export data</h2>
+<p>If you want to export data about how your flag are used, you can use the <strong><code>DataExporter</code></strong>.<br />
+It collects all the variations events and can save these events on several locations:
+- <a href="#file-exporter">File</a> <em>- create local files with the variation usages.</em>
+- <a href="#log-exporter">Log</a> <em>- use your logger to write the variation usages.</em>
+- <a href="#s3-exporter">S3</a> <em>- export your variation usages to S3.</em>
+- <a href="#webhook-exporter">Webhook</a> <em>- export your variation usages by calling a webhook.</em></p>
+<p>Currently we are supporting only feature events.
+It represent individual flag evaluations and are considered "full fidelity" events.</p>
+<p>An example feature event below:
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+    <span class="nt">&quot;kind&quot;</span><span class="p">:</span> <span class="s2">&quot;feature&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;contextKind&quot;</span><span class="p">:</span> <span class="s2">&quot;anonymousUser&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;userKey&quot;</span><span class="p">:</span> <span class="s2">&quot;ABCD&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;creationDate&quot;</span><span class="p">:</span> <span class="mi">1618228297</span><span class="p">,</span>
+    <span class="nt">&quot;key&quot;</span><span class="p">:</span> <span class="s2">&quot;test-flag&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;variation&quot;</span><span class="p">:</span> <span class="s2">&quot;Default&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;value&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+    <span class="nt">&quot;default&quot;</span><span class="p">:</span> <span class="kc">false</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>kind</code></strong></td>
+<td>The kind for a feature event is feature. A feature event will only be generated if the trackEvents attribute of the flag is set to true.</td>
+</tr>
+<tr>
+<td><strong><code>contextKind</code></strong></td>
+<td>The kind of context which generated an event. This will only be "<strong>anonymousUser</strong>" for events generated on behalf of an anonymous user or the reserved word "<strong>user</strong>" for events generated on behalf of a non-anonymous user</td>
+</tr>
+<tr>
+<td><strong><code>userKey</code></strong></td>
+<td>The key of the user object used in a feature flag evaluation.</td>
+</tr>
+<tr>
+<td><strong><code>creationDate</code></strong></td>
+<td>When the feature flag was requested at Unix epoch time in milliseconds.</td>
+</tr>
+<tr>
+<td><strong><code>key</code></strong></td>
+<td>The key of the feature flag requested.</td>
+</tr>
+<tr>
+<td><strong><code>variation</code></strong></td>
+<td>The variation of the flag requested. Available values are:<br><strong>True</strong>: if the flag was evaluated to True <br><strong>False</strong>: if the flag was evaluated to False<br><strong>Dafault</strong>: if the flag was evaluated to Default<br><strong>SdkDefault</strong>: if something wrong happened and the SDK default value was used.</td>
+</tr>
+<tr>
+<td><strong><code>value</code></strong></td>
+<td>The value of the feature flag returned by feature flag evaluation.</td>
+</tr>
+<tr>
+<td><strong><code>default</code></strong></td>
+<td>(Optional) This value is set to true if feature flag evaluation failed, in which case the value returned was the default value passed to variation.</td>
+</tr>
+</tbody>
+</table>
+<p>Events are collected and send in bulk to avoid to spam your exporter <em>(see details in <a href="#how-to-configure-data-export">how to configure data export</a></em>)</p>
+<h3 id="how-to-configure-data-export">How to configure data export?</h3>
+<p>In your <code>ffclient.Config</code> add the <code>DataExporter</code> field and configure your export location.</p>
+<p>To avoid to spam your location everytime you have a variation called, <code>go-feature-flag</code> is storing in memory all the events and send them in bulk to the exporter.<br />
+You can decide the threshold on when to send the data with the properties <code>FlushInterval</code> and <code>MaxEventInMemory</code>. The first threshold hit will export the data.</p>
+<p>If there are some flags you don't want to export, you can user <code>trackEvents</code> fields on these specific flags to disable the data export <em>(see <a href="#flags-file-format">flag file format</a>)</em>.</p>
+<p><strong>Example:</strong>
+<div class="highlight"><pre><span></span><code><span class="nx">ffclient</span><span class="p">.</span><span class="nx">Config</span><span class="p">{</span> 
+    <span class="c1">// ...</span>
+   <span class="nx">DataExporter</span><span class="p">:</span> <span class="nx">ffclient</span><span class="p">.</span><span class="nx">DataExporter</span><span class="p">{</span>
+        <span class="nx">FlushInterval</span><span class="p">:</span>   <span class="mi">10</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">,</span>
+        <span class="nx">MaxEventInMemory</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+        <span class="nx">Exporter</span><span class="p">:</span> <span class="o">&amp;</span><span class="nx">ffexporter</span><span class="p">.</span><span class="nx">File</span><span class="p">{</span>
+            <span class="nx">OutputDir</span><span class="p">:</span> <span class="s">&quot;/output-data/&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+    <span class="c1">// ...</span>
+<span class="p">}</span>
+</code></pre></div>
+| Field  |   |  Description |
+|---|---|---|
+|<code>FlushInterval</code>   |<img alt="optional" src="https://img.shields.io/badge/-optional-green" />   | Time to wait before exporting the data (default: 60 seconds).  |
+|<code>MaxEventInMemory</code>   |<img alt="optional" src="https://img.shields.io/badge/-optional-green" />   | If <code>MaxEventInMemory</code> is reach before the <code>FlushInterval</code> a intermediary export will be done (default: 100000).|
+|<code>Exporter</code>   |<img alt="mandatory" src="https://img.shields.io/badge/-mandatory-red" />   | The configuration of the exporter you want to use. All the exporters are available in the <code>ffexporter</code> package.|</p>
+<h3 id="file-exporter">File Exporter</h3>
+<details>
+<summary><i>expand to see details</i></summary>
+
+The file exporter will collect the data and create a new file in a specific folder everytime we send the data.  
+This file should be in the local instance.
+
+Check this [complete example](examples/data_export_file/main.go) to see how to export the data in a file.
+
+**Configuration example:**
+<div class="highlight"><pre><span></span><code><span class="nx">ffclient</span><span class="p">.</span><span class="nx">Config</span><span class="p">{</span> 
+    <span class="c1">// ...</span>
+   <span class="nx">DataExporter</span><span class="p">:</span> <span class="nx">ffclient</span><span class="p">.</span><span class="nx">DataExporter</span><span class="p">{</span>
+        <span class="c1">// ...</span>
+        <span class="nx">Exporter</span><span class="p">:</span> <span class="o">&amp;</span><span class="nx">ffexporter</span><span class="p">.</span><span class="nx">File</span><span class="p">{</span>
+            <span class="nx">OutputDir</span><span class="p">:</span> <span class="s">&quot;/output-data/&quot;</span><span class="p">,</span>
+            <span class="nx">Format</span><span class="p">:</span> <span class="s">&quot;csv&quot;</span><span class="p">,</span>
+            <span class="nx">FileName</span><span class="p">:</span> <span class="s">&quot;flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}&quot;</span><span class="p">,</span>
+            <span class="nx">CsvTemplate</span><span class="p">:</span> <span class="s">&quot;{{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}}\n&quot;</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+    <span class="c1">// ...</span>
+<span class="p">}</span>
+</code></pre></div>
+
+| Field  | Description  |
+|---|---|
+|`OutputDir`   | OutputDir is the location of the directory where to store the exported files. It should finish with a `/`.  |
+|`Format`   |   Format is the output format you want in your exported file. Available format are **`JSON`** and **`CSV`**. *(Default: `JSON`)* |
+|`Filename`   | Filename is the name of your output file. You can use a templated config to define the name of your exported files.<br>Available replacement are `{{ .Hostname}}`, `{{ .Timestamp}`} and `{{ .Format}}`<br>Default: `flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}`|
+|`CsvTemplate`   |   CsvTemplate is used if your output format is CSV. This field will be ignored if you are using another format than CSV. You can decide which fields you want in your CSV line with a go-template syntax, please check [internal/exporter/feature_event.go](internal/exporter/feature_event.go) to see what are the fields available.<br>**Default:** `{{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}}\n` |
+
+Check the [godoc for full details](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag@v0.11.0/ffexporter#File).
+
+</details>
+
+<h3 id="log-exporter">Log Exporter</h3>
+<details>
+<summary><i>expand to see details</i></summary>
+
+The log exporter is here mostly for backward compatibility *(originaly every variations were logged, but it can be a lot of data for a default configuration)*.  
+It will use your logger `ffclient.Config.Logger` to log every variations changes.
+
+You can configure your output log with the `Format` field.  
+It use a [go template](https://golang.org/pkg/text/template/) format.
+
+**Configuration example:**
+<div class="highlight"><pre><span></span><code><span class="nx">ffclient</span><span class="p">.</span><span class="nx">Config</span><span class="p">{</span>
+    <span class="c1">// ...</span>
+   <span class="nx">DataExporter</span><span class="p">:</span> <span class="nx">ffclient</span><span class="p">.</span><span class="nx">DataExporter</span><span class="p">{</span>
+        <span class="nx">Exporter</span><span class="p">:</span> <span class="o">&amp;</span><span class="nx">ffexporter</span><span class="p">.</span><span class="nx">Log</span><span class="p">{</span>
+            <span class="nx">Format</span><span class="p">:</span> <span class="s">&quot;[{{ .FormattedDate}}] user=\&quot;{{ .UserKey}}\&quot;, flag=\&quot;{{ .Key}}\&quot;, value=\&quot;{{ .Value}}\&quot;&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+    <span class="c1">// ...</span>
+<span class="p">}</span>
+</code></pre></div>
+
+| Field  | Description  |
+|---|---|
+|`Format`   | Format is the [template](https://golang.org/pkg/text/template/) configuration of the output format of your log.<br>You can use all the key from the `exporter.FeatureEvent` + a key called `FormattedDate` that represent the date with the **RFC 3339** Format.<br><br>Default: `[{{ .FormattedDate}}] user="{{ .UserKey}}", flag="{{ .Key}}", value="{{ .Value}}"`  |
+
+Check the [godoc for full details](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag@v0.11.0/ffexporter#Log).
+
+</details>
+
+<h3 id="s3-exporter">S3 Exporter</h3>
+<details>
+<summary><i>expand to see details</i></summary>
+
+The **S3 exporter** will collect the data and create a new file in a specific folder everytime we send the data.  
+Everytime the `FlushInterval` or `MaxEventInMemory` is reached a new file will be added to S3.  
+If for some reason the S3 upload failed, we will keep the data in memory and retry to add the next time we reach `FlushInterval` or `MaxEventInMemory`.
+
+![export in S3 screenshot](.doc/s3-exporter.png)
+
+
+Check this [complete example](examples/data_export_s3/main.go) to see how to export the data in S3.
+
+**Configuration example:**
+<div class="highlight"><pre><span></span><code><span class="nx">ffclient</span><span class="p">.</span><span class="nx">Config</span><span class="p">{</span> 
+    <span class="c1">// ...</span>
+   <span class="nx">DataExporter</span><span class="p">:</span> <span class="nx">ffclient</span><span class="p">.</span><span class="nx">DataExporter</span><span class="p">{</span>
+        <span class="c1">// ...</span>
+        <span class="nx">Exporter</span><span class="p">:</span> <span class="o">&amp;</span><span class="nx">ffexporter</span><span class="p">.</span><span class="nx">S3</span><span class="p">{</span>
+            <span class="nx">Format</span><span class="p">:</span> <span class="s">&quot;csv&quot;</span><span class="p">,</span>
+            <span class="nx">FileName</span><span class="p">:</span> <span class="s">&quot;flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}&quot;</span><span class="p">,</span>
+            <span class="nx">CsvTemplate</span><span class="p">:</span> <span class="s">&quot;{{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}}\n&quot;</span><span class="p">,</span>
+            <span class="nx">Bucket</span><span class="p">:</span>    <span class="s">&quot;my-bucket&quot;</span><span class="p">,</span>
+            <span class="nx">S3Path</span><span class="p">:</span>    <span class="s">&quot;/go-feature-flag/variations/&quot;</span><span class="p">,</span>
+            <span class="nx">Filename</span><span class="p">:</span>  <span class="s">&quot;flag-variation-{{ .Timestamp}}.{{ .Format}}&quot;</span><span class="p">,</span>
+            <span class="nx">AwsConfig</span><span class="p">:</span> <span class="o">&amp;</span><span class="nx">aws</span><span class="p">.</span><span class="nx">Config</span><span class="p">{</span>
+               <span class="nx">Region</span><span class="p">:</span> <span class="nx">aws</span><span class="p">.</span><span class="nx">String</span><span class="p">(</span><span class="s">&quot;eu-west-1&quot;</span><span class="p">),</span>
+           <span class="p">},</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+    <span class="c1">// ...</span>
+<span class="p">}</span>
+</code></pre></div>
+
+| Field  | Description  |
+|---|---|
+|`Bucket `   |   Name of your S3 Bucket. |
+|`AwsConfig `   |  An instance of `aws.Config` that configure your access to AWS *(see [this documentation for more info](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html))*.  |
+|`CsvTemplate`   |   *(optional)* CsvTemplate is used if your output format is CSV. This field will be ignored if you are using another format than CSV. You can decide which fields you want in your CSV line with a go-template syntax, please check [internal/exporter/feature_event.go](internal/exporter/feature_event.go) to see what are the fields available.<br>**Default:** `{{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}}\n` |
+|`Filename`   | *(optional)* Filename is the name of your output file. You can use a templated config to define the name of your exported files.<br>Available replacement are `{{ .Hostname}}`, `{{ .Timestamp}`} and `{{ .Format}}`<br>Default: `flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}`|
+|`Format`   |   *(optional)* Format is the output format you want in your exported file. Available format are **`JSON`** and **`CSV`**. *(Default: `JSON`)* |
+|`S3Path `   |   *(optional)* The location of the directory in S3. |
+
+Check the [godoc for full details](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag@v0.11.0/ffexporter#S3).
+
+</details>
+
+<h3 id="webhook-exporter">Webhook Exporter</h3>
+<details>
+<summary><i>expand to see details</i></summary>
+
+The **Webhook exporter** will collect the data and will send an HTTP POST request to the specified endpoint.  
+Everytime the `FlushInterval` or `MaxEventInMemory` is reached a new call is performed.  
+If for some reason the call failed, we will keep the data in memory and retry to add the next time we reach `FlushInterval` or `MaxEventInMemory`.
+
+**Configuration example:**
+<div class="highlight"><pre><span></span><code><span class="nx">ffclient</span><span class="p">.</span><span class="nx">Config</span><span class="p">{</span> 
+    <span class="c1">// ...</span>
+   <span class="nx">DataExporter</span><span class="p">:</span> <span class="nx">ffclient</span><span class="p">.</span><span class="nx">DataExporter</span><span class="p">{</span>
+        <span class="c1">// ...</span>
+        <span class="nx">Exporter</span><span class="p">:</span> <span class="o">&amp;</span><span class="nx">ffexporter</span><span class="p">.</span><span class="nx">Webhook</span><span class="p">{</span>
+            <span class="nx">EndpointURL</span><span class="p">:</span> <span class="s">&quot; https://webhook.url/&quot;</span><span class="p">,</span>
+            <span class="nx">Secret</span><span class="p">:</span>      <span class="s">&quot;secret-for-signing&quot;</span><span class="p">,</span>
+            <span class="nx">Meta</span><span class="p">:</span>        <span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">string</span><span class="p">{</span>
+                <span class="s">&quot;extraInfo&quot;</span><span class="p">:</span> <span class="s">&quot;info&quot;</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+    <span class="c1">// ...</span>
+<span class="p">}</span>
+</code></pre></div>
+
+| Field  | Description  |
+|---|---|
+|`EndpointURL `   | EndpointURL of your webhook |
+|`Secret `   |  *(optional)* Secret used to sign your request body and fill the `X-Hub-Signature-256` header.  |
+|`Meta`   |   *(optional)* Add all the informations you want to see in your request. |
+
+
+#### Webhook format
+If you have configured a webhook, a POST request will be sent to the `EndpointURL` with a body in this format:
+
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+    <span class="nt">&quot;meta&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;hostname&quot;</span><span class="p">:</span> <span class="s2">&quot;server01&quot;</span><span class="p">,</span>
+        <span class="err">//</span> <span class="err">...</span>
+    <span class="p">},</span>
+    <span class="nt">&quot;events&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="nt">&quot;kind&quot;</span><span class="p">:</span> <span class="s2">&quot;feature&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;contextKind&quot;</span><span class="p">:</span> <span class="s2">&quot;anonymousUser&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;userKey&quot;</span><span class="p">:</span> <span class="s2">&quot;14613538188334553206&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;creationDate&quot;</span><span class="p">:</span> <span class="mi">1618909178</span><span class="p">,</span>
+            <span class="nt">&quot;key&quot;</span><span class="p">:</span> <span class="s2">&quot;test-flag&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;variation&quot;</span><span class="p">:</span> <span class="s2">&quot;Default&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;value&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+            <span class="nt">&quot;default&quot;</span><span class="p">:</span> <span class="kc">false</span>
+        <span class="p">},</span>
+        <span class="err">//</span> <span class="err">...</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+#### Signature
+This header **`X-Hub-Signature-256`** is sent if the webhook is configured with a **`secret`**. This is the **HMAC hex digest** of the request body, and is generated using the **SHA-256** hash function and the **secret as the HMAC key**.
+
+:warning: **The recommendation is to always use the `Secret` and on your API/webook always verify the signature key to be sure that you don't have a man in the middle attack.**
+
+</details>
+
+<h2 id="multiple-configuration-flag-files">Multiple configuration flag files</h2>
+<p><code>go-feature-flag</code> comes ready to use out of the box by calling the <code>Init</code> function and after that it will be available everywhere.
+Since most applications will want to use a single central flag configuration, the <code>go-feature-flag</code> package provides this. It is similar to a singleton.</p>
+<p>In all of the examples above, they demonstrate using <code>go-feature-flag</code> in its singleton style approach.</p>
+<h3 id="working-with-multiple-go-feature-flag">Working with multiple go-feature-flag</h3>
+<p>You can also create many different <code>go-feature-flag</code> client for use in your application.<br />
+Each will have its own unique set of configurations and flags. Each can read from a different config file and from different places.<br />
+All of the functions that <code>go-feature-flag</code> package supports are mirrored as methods on a <code>goFeatureFlag</code>.</p>
+<h3 id="example">Example:</h3>
+<div class="highlight"><pre><span></span><code><span class="nx">x</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">ffclient</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="nx">Config</span><span class="p">{</span> <span class="nx">Retriever</span><span class="p">:</span> <span class="o">&amp;</span><span class="nx">ffclient</span><span class="p">.</span><span class="nx">HTTPRetriever</span><span class="p">{{</span><span class="nx">URL</span><span class="p">:</span> <span class="s">&quot;http://example.com/flag-config.yaml&quot;</span><span class="p">,}})</span>
+<span class="k">defer</span> <span class="nx">x</span><span class="p">.</span><span class="nx">Close</span><span class="p">()</span>
+
+<span class="nx">y</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">ffclient</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="nx">Config</span><span class="p">{</span> <span class="nx">Retriever</span><span class="p">:</span> <span class="o">&amp;</span><span class="nx">ffclient</span><span class="p">.</span><span class="nx">HTTPRetriever</span><span class="p">{{</span><span class="nx">URL</span><span class="p">:</span> <span class="s">&quot;http://example.com/test2.yaml&quot;</span><span class="p">,}})</span>
+<span class="k">defer</span> <span class="nx">y</span><span class="p">.</span><span class="nx">Close</span><span class="p">()</span>
+
+<span class="nx">user</span> <span class="o">:=</span> <span class="nx">ffuser</span><span class="p">.</span><span class="nx">NewUser</span><span class="p">(</span><span class="s">&quot;user-key&quot;</span><span class="p">)</span>
+<span class="nx">x</span><span class="p">.</span><span class="nx">BoolVariation</span><span class="p">(</span><span class="s">&quot;test-flag&quot;</span><span class="p">,</span> <span class="nx">user</span><span class="p">,</span> <span class="kc">false</span><span class="p">)</span>
+<span class="nx">y</span><span class="p">.</span><span class="nx">BoolVariation</span><span class="p">(</span><span class="s">&quot;test-flag&quot;</span><span class="p">,</span> <span class="nx">user</span><span class="p">,</span> <span class="kc">false</span><span class="p">)</span>
+
+<span class="c1">// ...</span>
+</code></pre></div>
+<p>When working with multiple <code>go-feature-flag</code>, it is up to the user to keep track of the different <code>go-feature-flag</code> instances.</p>
+<h1 id="how-can-i-contribute">How can I contribute?</h1>
+<p>This project is open for contribution, see the <a href="CONTRIBUTING.md">contributor's guide</a> for some helpful tips.</p>
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        
+<footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
+        
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": ".", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "assets/javascripts/workers/search.fe42c31b.min.js", "version": null}</script>
+    
+    
+      <script src="assets/javascripts/bundle.4ea5477f.min.js"></script>
+      
+    
+  </body>
+</html>
