@@ -21,6 +21,9 @@ const (
 	VariationSDKDefault VariationType = "SdkDefault"
 )
 
+// percentageMultiplier is the multiplier used to have a bigger range of possibility.
+const percentageMultiplier = 1000
+
 // Flag describe the fields of a flag.
 type Flag struct {
 	// Rule is the query use to select on which user the flag should apply.
@@ -104,20 +107,20 @@ func (f *Flag) isExperimentationOver() bool {
 
 // isInPercentage check if the user is in the cohort for the toggle.
 func (f *Flag) isInPercentage(flagName string, user ffuser.User) bool {
+	percentage := int32(f.getPercentage())
+	maxPercentage := uint32(100 * percentageMultiplier)
+
+	// <= 0%
+	if percentage <= 0 {
+		return false
+	}
 	// >= 100%
-	if f.Percentage >= 100 {
+	if uint32(percentage) >= maxPercentage {
 		return true
 	}
 
-	// <= 0%
-	if f.Percentage <= 0 {
-		return false
-	}
-
-	hashID := Hash(flagName+user.GetKey()) % 100000
-	percentage := uint32(f.Percentage * 1000)
-
-	return hashID < percentage
+	hashID := Hash(flagName+user.GetKey()) % maxPercentage
+	return hashID < uint32(percentage)
 }
 
 // evaluateRule is checking if the rule can apply to a specific user.
@@ -178,4 +181,48 @@ func userToMap(u ffuser.User) map[string]interface{} {
 	userCopy["anonymous"] = u.IsAnonymous()
 	userCopy["key"] = u.GetKey()
 	return userCopy
+}
+
+// getPercentage return the the actual percentage of the flag.
+// the result value is the version with the percentageMultiplier.
+func (f *Flag) getPercentage() float64 {
+	flagPercentage := f.Percentage * percentageMultiplier
+	if f.Rollout == nil || f.Rollout.Progressive == nil {
+		return flagPercentage
+	}
+
+	// compute progressive rollout percentage
+	now := time.Now()
+
+	// Missing date we ignore the progressive rollout
+	if f.Rollout.Progressive.ReleaseRamp.Start == nil || f.Rollout.Progressive.ReleaseRamp.End == nil {
+		return flagPercentage
+	}
+	// Expand percentage with the percentageMultiplier
+	initialPercentage := f.Rollout.Progressive.Percentage.Initial * percentageMultiplier
+	if f.Rollout.Progressive.Percentage.End == 0 {
+		f.Rollout.Progressive.Percentage.End = 100
+	}
+	endPercentage := f.Rollout.Progressive.Percentage.End * percentageMultiplier
+
+	if f.Rollout.Progressive.Percentage.Initial > f.Rollout.Progressive.Percentage.End {
+		return flagPercentage
+	}
+
+	// Not in the range of the progressive rollout
+	if now.Before(*f.Rollout.Progressive.ReleaseRamp.Start) {
+		return initialPercentage
+	}
+	if now.After(*f.Rollout.Progressive.ReleaseRamp.End) {
+		return endPercentage
+	}
+
+	// during the rollout ramp we compute the percentage
+	nbSec := f.Rollout.Progressive.ReleaseRamp.End.Unix() - f.Rollout.Progressive.ReleaseRamp.Start.Unix()
+	percentage := endPercentage - initialPercentage
+	percentPerSec := percentage / float64(nbSec)
+
+	c := now.Unix() - f.Rollout.Progressive.ReleaseRamp.Start.Unix()
+	currentPercentage := float64(c)*percentPerSec + initialPercentage
+	return currentPercentage
 }

@@ -14,6 +14,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/internal/exporter"
 	"github.com/thomaspoignant/go-feature-flag/internal/model"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
+	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 )
 
 type cacheMock struct {
@@ -172,7 +173,7 @@ func TestBoolVariation(t *testing.T) {
 					True:        true,
 					False:       false,
 					Default:     false,
-					TrackEvents: testutils.Bool(false),
+					TrackEvents: testconvert.Bool(false),
 				}, nil),
 			},
 			want:        true,
@@ -353,7 +354,7 @@ func TestFloat64Variation(t *testing.T) {
 					Default:     119.12,
 					True:        120.12,
 					False:       121.12,
-					TrackEvents: testutils.Bool(false),
+					TrackEvents: testconvert.Bool(false),
 				}, nil),
 			},
 			want:        120.12,
@@ -532,7 +533,7 @@ func TestJSONArrayVariation(t *testing.T) {
 					Default:     []interface{}{"default"},
 					True:        []interface{}{"true"},
 					False:       []interface{}{"false"},
-					TrackEvents: testutils.Bool(false),
+					TrackEvents: testconvert.Bool(false),
 				}, nil),
 			},
 			want:        []interface{}{"true"},
@@ -551,7 +552,7 @@ func TestJSONArrayVariation(t *testing.T) {
 					Default:     []interface{}{"default"},
 					True:        []interface{}{"true"},
 					False:       []interface{}{"false"},
-					TrackEvents: testutils.Bool(false),
+					TrackEvents: testconvert.Bool(false),
 				}, nil),
 			},
 			want:        []interface{}{"false"},
