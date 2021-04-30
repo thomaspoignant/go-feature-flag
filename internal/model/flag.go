@@ -53,9 +53,6 @@ type Flag struct {
 	// Disable is true if the flag is disabled.
 	Disable bool `json:"disable,omitempty" yaml:"disable,omitempty" toml:"disable,omitempty"`
 
-	// Deprecated: you should use Rollout.Experimentation instead.
-	Experimentation *Experimentation `json:"experimentation,omitempty" yaml:"experimentation,omitempty" toml:"experimentation,omitempty" slack_ignore:"true"` // nolint: lll
-
 	// Rollout is the object to configure how the flag is rollout.
 	// You have different rollout strategy available but only one is used at a time.
 	Rollout *Rollout `json:"rollout,omitempty" yaml:"rollout,omitempty" toml:"rollout,omitempty" slack_short:"false"` // nolint: lll
@@ -84,25 +81,9 @@ func (f *Flag) Value(flagName string, user ffuser.User) (interface{}, VariationT
 
 func (f *Flag) isExperimentationOver() bool {
 	now := time.Now()
-	// legacy experimentation notation
-	// TO BE REMOVED when deprecated time is over
-	legacy := f.Experimentation != nil && (
-		(f.Experimentation.Start != nil && now.Before(*f.Experimentation.Start)) ||
-			(f.Experimentation.StartDate != nil && now.Before(*f.Experimentation.StartDate)) ||
-			(f.Experimentation.End != nil && now.After(*f.Experimentation.End)) ||
-			(f.Experimentation.EndDate != nil && now.After(*f.Experimentation.EndDate)))
-
-	if legacy {
-		return legacy
-	}
-	// END TO BE REMOVED
-
 	return f.Rollout != nil && f.Rollout.Experimentation != nil && (
 		(f.Rollout.Experimentation.Start != nil && now.Before(*f.Rollout.Experimentation.Start)) ||
-			(f.Rollout.Experimentation.End != nil && now.After(*f.Rollout.Experimentation.End)) ||
-			// Remove bellow when deprecated field are removed
-			(f.Rollout.Experimentation.StartDate != nil && now.Before(*f.Rollout.Experimentation.StartDate)) ||
-			(f.Rollout.Experimentation.EndDate != nil && now.After(*f.Rollout.Experimentation.EndDate)))
+			(f.Rollout.Experimentation.End != nil && now.After(*f.Rollout.Experimentation.End)))
 }
 
 // isInPercentage check if the user is in the cohort for the toggle.
