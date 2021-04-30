@@ -1,6 +1,7 @@
 package ffexporter
 
 import (
+	"context"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
@@ -49,7 +50,7 @@ type S3 struct {
 }
 
 // Export is saving a collection of events in a file.
-func (f *S3) Export(logger *log.Logger, featureEvents []exporter.FeatureEvent) error {
+func (f *S3) Export(ctx context.Context, logger *log.Logger, featureEvents []exporter.FeatureEvent) error {
 	// init the s3 uploader
 	if f.s3Uploader == nil {
 		var initErr error
@@ -79,7 +80,7 @@ func (f *S3) Export(logger *log.Logger, featureEvents []exporter.FeatureEvent) e
 		Filename:    f.Filename,
 		CsvTemplate: f.CsvTemplate,
 	}
-	err = fileExporter.Export(logger, featureEvents)
+	err = fileExporter.Export(ctx, logger, featureEvents)
 	if err != nil {
 		return err
 	}
@@ -97,7 +98,8 @@ func (f *S3) Export(logger *log.Logger, featureEvents []exporter.FeatureEvent) e
 			continue
 		}
 
-		result, err := f.s3Uploader.Upload(
+		result, err := f.s3Uploader.UploadWithContext(
+			ctx,
 			&s3manager.UploadInput{
 				Bucket: aws.String(f.Bucket),
 				Key:    aws.String(f.S3Path + "/" + file.Name()),

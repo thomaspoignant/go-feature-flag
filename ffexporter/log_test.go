@@ -1,6 +1,7 @@
 package ffexporter_test
 
 import (
+	"context"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"log"
@@ -78,7 +79,7 @@ func TestLog_Export(t *testing.T) {
 			logFile, _ := ioutil.TempFile("", "")
 			logger := log.New(logFile, "", 0)
 
-			err := f.Export(logger, tt.args.featureEvents)
+			err := f.Export(context.Background(), logger, tt.args.featureEvents)
 
 			if tt.wantErr {
 				assert.Error(t, err, "It should return an error")

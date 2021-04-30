@@ -7,7 +7,7 @@ import (
 
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
 	"github.com/thomaspoignant/go-feature-flag/internal/model"
-	"github.com/thomaspoignant/go-feature-flag/testutils"
+	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 )
 
 func TestFlag_value(t *testing.T) {
@@ -79,7 +79,7 @@ func TestFlag_value(t *testing.T) {
 				Percentage: 10,
 				Rollout: model.Rollout{
 					Experimentation: &model.Experimentation{
-						Start: testutils.Time(time.Now().Add(-1 * time.Minute)),
+						Start: testconvert.Time(time.Now().Add(-1 * time.Minute)),
 						End:   nil,
 					},
 				},
@@ -103,7 +103,7 @@ func TestFlag_value(t *testing.T) {
 				Percentage: 10,
 				Rollout: model.Rollout{
 					Experimentation: &model.Experimentation{
-						Start: testutils.Time(time.Now().Add(1 * time.Minute)),
+						Start: testconvert.Time(time.Now().Add(1 * time.Minute)),
 						End:   nil,
 					},
 				},
@@ -127,8 +127,8 @@ func TestFlag_value(t *testing.T) {
 				Percentage: 10,
 				Rollout: model.Rollout{
 					Experimentation: &model.Experimentation{
-						Start: testutils.Time(time.Now().Add(-1 * time.Minute)),
-						End:   testutils.Time(time.Now().Add(1 * time.Minute)),
+						Start: testconvert.Time(time.Now().Add(-1 * time.Minute)),
+						End:   testconvert.Time(time.Now().Add(1 * time.Minute)),
 					},
 				},
 			},
@@ -151,8 +151,8 @@ func TestFlag_value(t *testing.T) {
 				Percentage: 10,
 				Rollout: model.Rollout{
 					Experimentation: &model.Experimentation{
-						Start: testutils.Time(time.Now().Add(1 * time.Minute)),
-						End:   testutils.Time(time.Now().Add(2 * time.Minute)),
+						Start: testconvert.Time(time.Now().Add(1 * time.Minute)),
+						End:   testconvert.Time(time.Now().Add(2 * time.Minute)),
 					},
 				},
 			},
@@ -175,8 +175,8 @@ func TestFlag_value(t *testing.T) {
 				Percentage: 10,
 				Rollout: model.Rollout{
 					Experimentation: &model.Experimentation{
-						Start: testutils.Time(time.Now().Add(-2 * time.Minute)),
-						End:   testutils.Time(time.Now().Add(-1 * time.Minute)),
+						Start: testconvert.Time(time.Now().Add(-2 * time.Minute)),
+						End:   testconvert.Time(time.Now().Add(-1 * time.Minute)),
 					},
 				},
 			},
@@ -200,7 +200,7 @@ func TestFlag_value(t *testing.T) {
 				Rollout: model.Rollout{
 					Experimentation: &model.Experimentation{
 						Start: nil,
-						End:   testutils.Time(time.Now().Add(-1 * time.Minute)),
+						End:   testconvert.Time(time.Now().Add(-1 * time.Minute)),
 					},
 				},
 			},
@@ -224,7 +224,7 @@ func TestFlag_value(t *testing.T) {
 				Rollout: model.Rollout{
 					Experimentation: &model.Experimentation{
 						Start: nil,
-						End:   testutils.Time(time.Now().Add(1 * time.Minute)),
+						End:   testconvert.Time(time.Now().Add(1 * time.Minute)),
 					},
 				},
 			},
@@ -271,8 +271,8 @@ func TestFlag_value(t *testing.T) {
 				Percentage: 10,
 				Rollout: model.Rollout{
 					Experimentation: &model.Experimentation{
-						Start: testutils.Time(time.Now().Add(1 * time.Minute)),
-						End:   testutils.Time(time.Now().Add(-1 * time.Minute)),
+						Start: testconvert.Time(time.Now().Add(1 * time.Minute)),
+						End:   testconvert.Time(time.Now().Add(-1 * time.Minute)),
 					},
 				},
 			},
@@ -365,7 +365,7 @@ func TestFlag_String(t *testing.T) {
 				True:        true,
 				False:       false,
 				Default:     false,
-				TrackEvents: testutils.Bool(true),
+				TrackEvents: testconvert.Bool(true),
 			},
 			want: "percentage=10%, rule=\"key eq \"toto\"\", true=\"true\", false=\"false\", true=\"false\", disable=\"false\", trackEvents=\"true\"",
 		},
@@ -405,4 +405,34 @@ func TestFlag_String(t *testing.T) {
 			assert.Equal(t, tt.want, got, "String() = %v, want %v", got, tt.want)
 		})
 	}
+}
+
+func TestFlag_ProgressiveRollout(t *testing.T) {
+	f := &model.Flag{
+		Percentage: 0,
+		True:       "True",
+		False:      "False",
+		Default:    "Default",
+		Rollout: &model.Rollout{Progressive: &model.Progressive{
+			ReleaseRamp: model.ProgressiveReleaseRamp{
+				Start: testconvert.Time(time.Now().Add(1 * time.Second)),
+				End:   testconvert.Time(time.Now().Add(2 * time.Second)),
+			},
+		}},
+	}
+
+	user := ffuser.NewAnonymousUser("test")
+	flagName := "test-flag"
+
+	// We evaluate the same flag multiple time overtime.
+	v, _ := f.Value(flagName, user)
+	assert.Equal(t, f.False, v)
+
+	time.Sleep(1 * time.Second)
+	v2, _ := f.Value(flagName, user)
+	assert.Equal(t, f.False, v2)
+
+	time.Sleep(1 * time.Second)
+	v3, _ := f.Value(flagName, user)
+	assert.Equal(t, f.True, v3)
 }
