@@ -27,11 +27,6 @@ func (e Rollout) String() string {
 }
 
 type Experimentation struct {
-	// Deprecated: use Start instead
-	StartDate *time.Time `json:"startDate,omitempty" yaml:"startDate,omitempty" toml:"startDate,omitempty"`
-	// Deprecated: use End instead
-	EndDate *time.Time `json:"endDate,omitempty" yaml:"endDate,omitempty" toml:"endDate,omitempty"`
-
 	// Start is the starting time of the experimentation
 	Start *time.Time `json:"start,omitempty" yaml:"start,omitempty" toml:"start,omitempty"`
 
@@ -42,15 +37,6 @@ type Experimentation struct {
 func (e Experimentation) String() string {
 	buf := make([]string, 0)
 	lo, _ := time.LoadLocation("UTC")
-
-	// Remove when deprecated fields will be removed
-	if e.StartDate != nil {
-		buf = append(buf, fmt.Sprintf("start:[%v]", e.StartDate.In(lo).Format(time.RFC3339)))
-	}
-	if e.EndDate != nil {
-		buf = append(buf, fmt.Sprintf("end:[%v]", e.EndDate.In(lo).Format(time.RFC3339)))
-	}
-	// end removed
 
 	if e.Start != nil {
 		buf = append(buf, fmt.Sprintf("start:[%v]", e.Start.In(lo).Format(time.RFC3339)))
