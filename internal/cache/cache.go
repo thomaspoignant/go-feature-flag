@@ -27,7 +27,7 @@ type cacheImpl struct {
 
 func New(notificationService Service) Cache {
 	return &cacheImpl{
-		flagsCache:          make(map[string]model.Flag),
+		flagsCache:          make(map[string]model.FlagData),
 		mutex:               sync.RWMutex{},
 		notificationService: notificationService,
 	}
@@ -74,12 +74,13 @@ func (c *cacheImpl) GetFlag(key string) (model.Flag, error) {
 	defer c.mutex.RUnlock()
 
 	if c.flagsCache == nil {
-		return model.Flag{}, errors.New("impossible to read the toggle before the initialisation")
+		return &model.FlagData{}, errors.New("impossible to read the toggle before the initialisation")
 	}
 
 	flag, ok := c.flagsCache[key]
 	if !ok {
-		return model.Flag{}, fmt.Errorf("flag [%v] does not exists", key)
+		return &model.FlagData{}, fmt.Errorf("flag [%v] does not exists", key)
 	}
-	return flag, nil
+
+	return &flag, nil
 }

@@ -11,3 +11,16 @@ func Bool(v bool) *bool {
 func Time(t time.Time) *time.Time {
 	return &t
 }
+
+// Float64 returns a pointer to the float64 value passed in.
+func Float64(t float64) *float64 {
+	return &t
+}
+
+func Interface(v interface{}) *interface{} {
+	return &v
+}
+
+func String(v string) *string {
+	return &v
+}

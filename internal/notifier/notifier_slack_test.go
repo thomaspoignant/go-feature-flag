@@ -42,32 +42,34 @@ func TestSlackNotifier_Notify(t *testing.T) {
 				statusCode: http.StatusOK,
 				diff: model.DiffCache{
 					Added: map[string]model.Flag{
-						"test-flag3": {
-							Percentage:  5,
-							True:        "test",
-							False:       "false",
-							Default:     "default",
-							Rule:        "key eq \"random-key\"",
+						"test-flag3": &model.FlagData{
+							Percentage:  testconvert.Float64(5),
+							True:        testconvert.Interface("test"),
+							False:       testconvert.Interface("false"),
+							Default:     testconvert.Interface("default"),
+							Rule:        testconvert.String("key eq \"random-key\""),
 							TrackEvents: testconvert.Bool(true),
+							Disable:     testconvert.Bool(false),
 						},
 					},
 					Deleted: map[string]model.Flag{
-						"test-flag": {
-							Rule:       "key eq \"random-key\"",
-							Percentage: 100,
-							True:       true,
-							False:      false,
-							Default:    false,
+						"test-flag": &model.FlagData{
+							Rule:       testconvert.String("key eq \"random-key\""),
+							Percentage: testconvert.Float64(100),
+							True:       testconvert.Interface(true),
+							False:      testconvert.Interface(false),
+							Default:    testconvert.Interface(false),
 						},
 					},
 					Updated: map[string]model.DiffUpdated{
 						"test-flag2": {
-							Before: model.Flag{
-								Rule:        "key eq \"not-a-key\"",
-								Percentage:  100,
-								True:        true,
-								False:       false,
-								Default:     false,
+							Before: &model.FlagData{
+								Rule:        testconvert.String("key eq \"not-a-key\""),
+								Percentage:  testconvert.Float64(100),
+								True:        testconvert.Interface(true),
+								False:       testconvert.Interface(false),
+								Default:     testconvert.Interface(false),
+								Disable:     testconvert.Bool(false),
 								TrackEvents: testconvert.Bool(true),
 								Rollout: &model.Rollout{
 									Experimentation: &model.Experimentation{
@@ -75,13 +77,13 @@ func TestSlackNotifier_Notify(t *testing.T) {
 										End:   testconvert.Time(time.Unix(1095371000, 0)),
 									}},
 							},
-							After: model.Flag{
-								Rule:        "key eq \"not-a-ke\"",
-								Percentage:  80,
-								True:        "strTrue",
-								False:       "strFalse",
-								Default:     "strDefault",
-								Disable:     true,
+							After: &model.FlagData{
+								Rule:        testconvert.String("key eq \"not-a-ke\""),
+								Percentage:  testconvert.Float64(80),
+								True:        testconvert.Interface("strTrue"),
+								False:       testconvert.Interface("strFalse"),
+								Default:     testconvert.Interface("strDefault"),
+								Disable:     testconvert.Bool(true),
 								TrackEvents: testconvert.Bool(false),
 							},
 						},

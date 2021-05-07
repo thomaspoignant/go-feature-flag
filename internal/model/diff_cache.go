@@ -9,7 +9,7 @@ type DiffCache struct {
 }
 
 // HasDiff check if we have differences
-func (d DiffCache) HasDiff() bool {
+func (d *DiffCache) HasDiff() bool {
 	return len(d.Deleted) > 0 || len(d.Added) > 0 || len(d.Updated) > 0
 }
 
