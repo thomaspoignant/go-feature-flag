@@ -256,3 +256,53 @@ func TestFlagFileUnreachable(t *testing.T) {
 	flagValue, _ = gff.StringVariation("test-flag", ffuser.NewUser("random-key"), "SDKdefault")
 	assert.Equal(t, "true", flagValue, "should use the true value")
 }
+
+func TestValidUseCaseWithToml(t *testing.T) {
+	// Valid use case
+	err := ffclient.Init(ffclient.Config{
+		PollInterval: 5,
+		Retriever:    &ffclient.FileRetriever{Path: "testdata/flag-config.toml"},
+		Logger:       log.New(os.Stdout, "", 0),
+		FileFormat:   "toml",
+		DataExporter: ffclient.DataExporter{
+			FlushInterval:    10 * time.Second,
+			MaxEventInMemory: 1000,
+			Exporter: &testutils.MockExporter{
+				Bulk: true,
+			},
+		},
+	})
+	defer ffclient.Close()
+
+	assert.NoError(t, err)
+	user := ffuser.NewUser("random-key")
+	hasTestFlag, _ := ffclient.BoolVariation("test-flag", user, false)
+	assert.True(t, hasTestFlag, "User should have test flag")
+	hasUnknownFlag, _ := ffclient.BoolVariation("unknown-flag", user, false)
+	assert.False(t, hasUnknownFlag, "User should use default value if flag does not exists")
+}
+
+func TestValidUseCaseWithJson(t *testing.T) {
+	// Valid use case
+	err := ffclient.Init(ffclient.Config{
+		PollInterval: 5,
+		Retriever:    &ffclient.FileRetriever{Path: "testdata/flag-config.json"},
+		Logger:       log.New(os.Stdout, "", 0),
+		FileFormat:   "json",
+		DataExporter: ffclient.DataExporter{
+			FlushInterval:    10 * time.Second,
+			MaxEventInMemory: 1000,
+			Exporter: &testutils.MockExporter{
+				Bulk: true,
+			},
+		},
+	})
+	defer ffclient.Close()
+
+	assert.NoError(t, err)
+	user := ffuser.NewUser("random-key")
+	hasTestFlag, _ := ffclient.BoolVariation("test-flag", user, false)
+	assert.True(t, hasTestFlag, "User should have test flag")
+	hasUnknownFlag, _ := ffclient.BoolVariation("unknown-flag", user, false)
+	assert.False(t, hasUnknownFlag, "User should use default value if flag does not exists")
+}
