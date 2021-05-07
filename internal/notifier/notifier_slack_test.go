@@ -1,7 +1,8 @@
-package notifier
+package notifier_test
 
 import (
 	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/internal/notifier"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -123,7 +124,7 @@ func TestSlackNotifier_Notify(t *testing.T) {
 
 			mockHTTPClient := &testutils.HTTPClientMock{StatusCode: tt.args.statusCode, ForceError: tt.args.forceError}
 
-			c := NewSlackNotifier(
+			c := notifier.NewSlackNotifier(
 				log.New(logFile, "", 0),
 				mockHTTPClient,
 				"https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",

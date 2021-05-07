@@ -1,7 +1,8 @@
-package signer
+package signer_test
 
 import (
 	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/internal/signer"
 	"testing"
 )
 
@@ -26,7 +27,7 @@ func TestSign(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := Sign(tt.args.payloadBody, tt.args.secretToken)
+			got := signer.Sign(tt.args.payloadBody, tt.args.secretToken)
 			assert.Equal(t, tt.want, got)
 		})
 	}
