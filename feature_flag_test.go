@@ -262,7 +262,6 @@ func TestValidUseCaseBigFlagFile(t *testing.T) {
 	gff, err := ffclient.New(ffclient.Config{
 		PollInterval: 5,
 		Retriever:    &ffclient.FileRetriever{Path: "testdata/flag-config-big.yaml"},
-		Logger:       log.New(os.Stdout, "", 0),
 	})
 	defer gff.Close()
 

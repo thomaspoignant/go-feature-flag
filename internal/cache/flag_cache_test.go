@@ -1,20 +1,21 @@
-package cache
+package cache_test
 
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/internal/model"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
+	"github.com/thomaspoignant/go-feature-flag/internal/cache"
 	"testing"
 )
 
 func TestFlagsCache_Copy(t *testing.T) {
 	tests := []struct {
 		name string
-		fc   FlagsCache
+		fc   cache.FlagsCache
 	}{
 		{
 			name: "Copy with values",
-			fc: FlagsCache{
+			fc: cache.FlagsCache{
 				"test": model.FlagData{
 					Disable:    testconvert.Bool(false),
 					Rule:       testconvert.String("key eq \"toto\""),
@@ -27,7 +28,7 @@ func TestFlagsCache_Copy(t *testing.T) {
 		},
 		{
 			name: "Copy without value",
-			fc:   FlagsCache{},
+			fc:   cache.FlagsCache{},
 		},
 	}
 	for _, tt := range tests {
