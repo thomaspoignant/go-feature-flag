@@ -1,6 +1,8 @@
 package ffclient
 
-import "time"
+import (
+	"time"
+)
 
 // backgroundUpdater contains what is needed to manage the
 // background update of the flags.
