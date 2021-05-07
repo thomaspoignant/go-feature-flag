@@ -25,15 +25,43 @@ const (
 const percentageMultiplier = 1000
 
 type Flag interface {
+	// Value is returning the Value associate to the flag (True / False / Default ) based
+	// if the flag apply to the user or not.
 	Value(flagName string, user ffuser.User) (interface{}, VariationType)
+
+	// String display correctly a flag with the right formatting
 	String() string
+
+	// GetRule is the getter of the field Rule
+	// Default: empty string
 	GetRule() string
+
+	// GetPercentage is the getter of the field Rule
+	// Default: 0.0
 	GetPercentage() float64
+
+	// GetTrue is the getter of the field True
+	// Default: nil
 	GetTrue() interface{}
+
+	// GetFalse is the getter of the field False
+	// Default: nil
 	GetFalse() interface{}
+
+	// GetDefault is the getter of the field Default
+	// Default: nil
 	GetDefault() interface{}
+
+	// GetTrackEvents is the getter of the field TrackEvents
+	// Default: true
 	GetTrackEvents() bool
+
+	// GetDisable is the getter of the field Disable
+	// Default: false
 	GetDisable() bool
+
+	// GetRollout is the getter of the field Rollout
+	// Default: nil
 	GetRollout() *Rollout
 }
 
