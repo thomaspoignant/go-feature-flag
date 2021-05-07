@@ -89,6 +89,13 @@ func (g *GoFeatureFlag) IntVariation(flagKey string, user ffuser.User, defaultVa
 	flagValue, variationType := flag.Value(flagKey, user)
 	res, ok := flagValue.(int)
 	if !ok {
+		// if this is a float64 we convert it to int
+		if resFloat, okFloat := flagValue.(float64); okFloat {
+			intRes := int(resFloat)
+			g.notifyVariation(flagKey, flag, user, intRes, variationType, false)
+			return intRes, nil
+		}
+
 		g.notifyVariation(flagKey, flag, user, defaultValue, model.VariationSDKDefault, true)
 		return defaultValue, fmt.Errorf(errorWrongVariation, flagKey)
 	}
@@ -187,7 +194,7 @@ func (g *GoFeatureFlag) JSONVariation(
 // if no logger is provided in the configuration we are not logging anything.
 func (g *GoFeatureFlag) notifyVariation(
 	flagKey string, flag model.Flag, user ffuser.User, value interface{}, variationType model.VariationType, failed bool) {
-	if flag.TrackEvents == nil || *flag.TrackEvents {
+	if flag.GetTrackEvents() {
 		event := exporter.NewFeatureEvent(user, flagKey, flag, value, variationType, failed)
 
 		// Add event in the exporter
@@ -201,7 +208,7 @@ func (g *GoFeatureFlag) notifyVariation(
 // It returns an error if the cache is not init or if the flag is not present or disabled.
 func (g *GoFeatureFlag) getFlagFromCache(flagKey string) (model.Flag, error) {
 	flag, err := g.cache.GetFlag(flagKey)
-	if err != nil || flag.Disable {
+	if err != nil || flag.GetDisable() {
 		return flag, fmt.Errorf(errorFlagNotAvailable, flagKey)
 	}
 	return flag, nil
