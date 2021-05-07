@@ -2,6 +2,8 @@ package cache
 
 import (
 	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
+	"github.com/thomaspoignant/go-feature-flag/testutils/testflag"
 	"sync"
 	"testing"
 
@@ -27,36 +29,36 @@ func Test_notificationService_getDifferences(t *testing.T) {
 			name: "Delete flag",
 			args: args{
 				oldCache: FlagsCache{
-					"test-flag": model.Flag{
-						Percentage: 100,
-						True:       true,
-						False:      false,
-						Default:    false,
-					},
-					"test-flag2": model.Flag{
-						Percentage: 100,
-						True:       true,
-						False:      false,
-						Default:    false,
-					},
+					"test-flag": testflag.NewFlag(testflag.Data{
+						Percentage: testconvert.Float64(100),
+						True:       testconvert.Interface(true),
+						False:      testconvert.Interface(false),
+						Default:    testconvert.Interface(false),
+					}),
+					"test-flag2": testflag.NewFlag(testflag.Data{
+						Percentage: testconvert.Float64(100),
+						True:       testconvert.Interface(true),
+						False:      testconvert.Interface(false),
+						Default:    testconvert.Interface(false),
+					}),
 				},
 				newCache: FlagsCache{
-					"test-flag": model.Flag{
-						Percentage: 100,
-						True:       true,
-						False:      false,
-						Default:    false,
-					},
+					"test-flag": testflag.NewFlag(testflag.Data{
+						Percentage: testconvert.Float64(100),
+						True:       testconvert.Interface(true),
+						False:      testconvert.Interface(false),
+						Default:    testconvert.Interface(false),
+					}),
 				},
 			},
 			want: model.DiffCache{
 				Deleted: map[string]model.Flag{
-					"test-flag2": {
-						Percentage: 100,
-						True:       true,
-						False:      false,
-						Default:    false,
-					},
+					"test-flag2": testflag.NewFlag(testflag.Data{
+						Percentage: testconvert.Float64(100),
+						True:       testconvert.Interface(true),
+						False:      testconvert.Interface(false),
+						Default:    testconvert.Interface(false),
+					}),
 				},
 				Added:   map[string]model.Flag{},
 				Updated: map[string]model.DiffUpdated{},
@@ -66,36 +68,36 @@ func Test_notificationService_getDifferences(t *testing.T) {
 			name: "Added flag",
 			args: args{
 				oldCache: FlagsCache{
-					"test-flag": model.Flag{
-						Percentage: 100,
-						True:       true,
-						False:      false,
-						Default:    false,
-					},
+					"test-flag": testflag.NewFlag(testflag.Data{
+						Percentage: testconvert.Float64(100),
+						True:       testconvert.Interface(true),
+						False:      testconvert.Interface(false),
+						Default:    testconvert.Interface(false),
+					}),
 				},
 				newCache: FlagsCache{
-					"test-flag": model.Flag{
-						Percentage: 100,
-						True:       true,
-						False:      false,
-						Default:    false,
-					},
-					"test-flag2": model.Flag{
-						Percentage: 100,
-						True:       true,
-						False:      false,
-						Default:    false,
-					},
+					"test-flag": testflag.NewFlag(testflag.Data{
+						Percentage: testconvert.Float64(100),
+						True:       testconvert.Interface(true),
+						False:      testconvert.Interface(false),
+						Default:    testconvert.Interface(false),
+					}),
+					"test-flag2": testflag.NewFlag(testflag.Data{
+						Percentage: testconvert.Float64(100),
+						True:       testconvert.Interface(true),
+						False:      testconvert.Interface(false),
+						Default:    testconvert.Interface(false),
+					}),
 				},
 			},
 			want: model.DiffCache{
 				Added: map[string]model.Flag{
-					"test-flag2": {
-						Percentage: 100,
-						True:       true,
-						False:      false,
-						Default:    false,
-					},
+					"test-flag2": testflag.NewFlag(testflag.Data{
+						Percentage: testconvert.Float64(100),
+						True:       testconvert.Interface(true),
+						False:      testconvert.Interface(false),
+						Default:    testconvert.Interface(false),
+					}),
 				},
 				Deleted: map[string]model.Flag{},
 				Updated: map[string]model.DiffUpdated{},
@@ -105,20 +107,20 @@ func Test_notificationService_getDifferences(t *testing.T) {
 			name: "Updated flag",
 			args: args{
 				oldCache: FlagsCache{
-					"test-flag": model.Flag{
-						Percentage: 100,
-						True:       true,
-						False:      false,
-						Default:    false,
-					},
+					"test-flag": testflag.NewFlag(testflag.Data{
+						Percentage: testconvert.Float64(100),
+						True:       testconvert.Interface(true),
+						False:      testconvert.Interface(false),
+						Default:    testconvert.Interface(false),
+					}),
 				},
 				newCache: FlagsCache{
-					"test-flag": model.Flag{
-						Percentage: 100,
-						True:       true,
-						False:      false,
-						Default:    true,
-					},
+					"test-flag": testflag.NewFlag(testflag.Data{
+						Percentage: testconvert.Float64(100),
+						True:       testconvert.Interface(true),
+						False:      testconvert.Interface(false),
+						Default:    testconvert.Interface(true),
+					}),
 				},
 			},
 			want: model.DiffCache{
@@ -126,18 +128,18 @@ func Test_notificationService_getDifferences(t *testing.T) {
 				Deleted: map[string]model.Flag{},
 				Updated: map[string]model.DiffUpdated{
 					"test-flag": {
-						Before: model.Flag{
-							Percentage: 100,
-							True:       true,
-							False:      false,
-							Default:    false,
-						},
-						After: model.Flag{
-							Percentage: 100,
-							True:       true,
-							False:      false,
-							Default:    true,
-						},
+						Before: testflag.NewFlag(testflag.Data{
+							Percentage: testconvert.Float64(100),
+							True:       testconvert.Interface(true),
+							False:      testconvert.Interface(false),
+							Default:    testconvert.Interface(false),
+						}),
+						After: testflag.NewFlag(testflag.Data{
+							Percentage: testconvert.Float64(100),
+							True:       testconvert.Interface(true),
+							False:      testconvert.Interface(false),
+							Default:    testconvert.Interface(true),
+						}),
 					},
 				},
 			},

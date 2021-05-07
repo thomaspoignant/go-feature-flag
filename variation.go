@@ -89,6 +89,13 @@ func (g *GoFeatureFlag) IntVariation(flagKey string, user ffuser.User, defaultVa
 	flagValue, variationType := flag.Value(flagKey, user)
 	res, ok := flagValue.(int)
 	if !ok {
+		// if this is a float64 we convert it to int
+		if resFloat, okFloat := flagValue.(float64); okFloat {
+			intRes := int(resFloat)
+			g.notifyVariation(flagKey, flag, user, intRes, variationType, false)
+			return intRes, nil
+		}
+
 		g.notifyVariation(flagKey, flag, user, defaultValue, model.VariationSDKDefault, true)
 		return defaultValue, fmt.Errorf(errorWrongVariation, flagKey)
 	}
@@ -201,7 +208,7 @@ func (g *GoFeatureFlag) notifyVariation(
 // It returns an error if the cache is not init or if the flag is not present or disabled.
 func (g *GoFeatureFlag) getFlagFromCache(flagKey string) (model.Flag, error) {
 	flag, err := g.cache.GetFlag(flagKey)
-	if err != nil || flag.Disable {
+	if err != nil || (flag.Disable != nil && *flag.Disable) {
 		return flag, fmt.Errorf(errorFlagNotAvailable, flagKey)
 	}
 	return flag, nil

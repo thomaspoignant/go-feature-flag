@@ -2,6 +2,8 @@ package cache
 
 import (
 	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
+	"github.com/thomaspoignant/go-feature-flag/testutils/testflag"
 	"testing"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/model"
@@ -44,14 +46,14 @@ func Test_FlagCache_yaml(t *testing.T) {
 				loadedFlags: exampleFile,
 			},
 			expected: map[string]model.Flag{
-				"test-flag": {
-					Disable:    false,
-					Rule:       "key eq \"random-key\"",
-					Percentage: 100,
-					True:       true,
-					False:      false,
-					Default:    false,
-				},
+				"test-flag": testflag.NewFlag(testflag.Data{
+					Disable:    nil,
+					Rule:       testconvert.String("key eq \"random-key\""),
+					Percentage: testconvert.Float64(100),
+					True:       testconvert.Interface(true),
+					False:      testconvert.Interface(false),
+					Default:    testconvert.Interface(false),
+				}),
 			},
 			wantErr: false,
 		},
@@ -115,14 +117,13 @@ func Test_FlagCache_json(t *testing.T) {
 				loadedFlags: exampleFile,
 			},
 			expected: map[string]model.Flag{
-				"test-flag": {
-					Disable:    false,
-					Rule:       "key eq \"random-key\"",
-					Percentage: 100,
-					True:       true,
-					False:      false,
-					Default:    false,
-				},
+				"test-flag": testflag.NewFlag(testflag.Data{
+					Rule:       testconvert.String("key eq \"random-key\""),
+					Percentage: testconvert.Float64(100),
+					True:       testconvert.Interface(true),
+					False:      testconvert.Interface(false),
+					Default:    testconvert.Interface(false),
+				}),
 			},
 			wantErr: false,
 		},
@@ -164,7 +165,8 @@ rule = "key eq \"random-key\""
 percentage = 100.0
 true = true
 false = false
-default = false`)
+default = false
+disable = false`)
 
 	type args struct {
 		loadedFlags []byte
@@ -181,14 +183,14 @@ default = false`)
 				loadedFlags: exampleFile,
 			},
 			expected: map[string]model.Flag{
-				"test-flag": {
-					Disable:    false,
-					Rule:       "key eq \"random-key\"",
-					Percentage: 100,
-					True:       true,
-					False:      false,
-					Default:    false,
-				},
+				"test-flag": testflag.NewFlag(testflag.Data{
+					Rule:       testconvert.String("key eq \"random-key\""),
+					Percentage: testconvert.Float64(100),
+					True:       testconvert.Interface(true),
+					False:      testconvert.Interface(false),
+					Default:    testconvert.Interface(false),
+					Disable:    testconvert.Bool(false),
+				}),
 			},
 			wantErr: false,
 		},
