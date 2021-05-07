@@ -66,7 +66,9 @@ func (c *cacheImpl) Close() {
 	c.mutex.Lock()
 	c.flagsCache = nil
 	c.mutex.Unlock()
-	c.notificationService.Close()
+	if c.notificationService != nil {
+		c.notificationService.Close()
+	}
 }
 
 func (c *cacheImpl) GetFlag(key string) (model.Flag, error) {
