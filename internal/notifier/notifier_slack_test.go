@@ -2,7 +2,6 @@ package notifier
 
 import (
 	"github.com/stretchr/testify/assert"
-	"github.com/thomaspoignant/go-feature-flag/testutils/testflag"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -43,7 +42,7 @@ func TestSlackNotifier_Notify(t *testing.T) {
 				statusCode: http.StatusOK,
 				diff: model.DiffCache{
 					Added: map[string]model.Flag{
-						"test-flag3": testflag.NewFlag(testflag.Data{
+						"test-flag3": &model.FlagData{
 							Percentage:  testconvert.Float64(5),
 							True:        testconvert.Interface("test"),
 							False:       testconvert.Interface("false"),
@@ -51,20 +50,20 @@ func TestSlackNotifier_Notify(t *testing.T) {
 							Rule:        testconvert.String("key eq \"random-key\""),
 							TrackEvents: testconvert.Bool(true),
 							Disable:     testconvert.Bool(false),
-						}),
+						},
 					},
 					Deleted: map[string]model.Flag{
-						"test-flag": testflag.NewFlag(testflag.Data{
+						"test-flag": &model.FlagData{
 							Rule:       testconvert.String("key eq \"random-key\""),
 							Percentage: testconvert.Float64(100),
 							True:       testconvert.Interface(true),
 							False:      testconvert.Interface(false),
 							Default:    testconvert.Interface(false),
-						}),
+						},
 					},
 					Updated: map[string]model.DiffUpdated{
 						"test-flag2": {
-							Before: testflag.NewFlag(testflag.Data{
+							Before: &model.FlagData{
 								Rule:        testconvert.String("key eq \"not-a-key\""),
 								Percentage:  testconvert.Float64(100),
 								True:        testconvert.Interface(true),
@@ -77,8 +76,8 @@ func TestSlackNotifier_Notify(t *testing.T) {
 										Start: testconvert.Time(time.Unix(1095379400, 0)),
 										End:   testconvert.Time(time.Unix(1095371000, 0)),
 									}},
-							}),
-							After: testflag.NewFlag(testflag.Data{
+							},
+							After: &model.FlagData{
 								Rule:        testconvert.String("key eq \"not-a-ke\""),
 								Percentage:  testconvert.Float64(80),
 								True:        testconvert.Interface("strTrue"),
@@ -86,7 +85,7 @@ func TestSlackNotifier_Notify(t *testing.T) {
 								Default:     testconvert.Interface("strDefault"),
 								Disable:     testconvert.Bool(true),
 								TrackEvents: testconvert.Bool(false),
-							}),
+							},
 						},
 					},
 				},

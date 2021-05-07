@@ -5,7 +5,6 @@ import (
 	"errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
-	"github.com/thomaspoignant/go-feature-flag/testutils/testflag"
 	"io/ioutil"
 	"log"
 	"os"
@@ -27,7 +26,7 @@ func TestDataExporterScheduler_flushWithTime(t *testing.T) {
 
 	inputEvents := []exporter.FeatureEvent{
 		exporter.NewFeatureEvent(ffuser.NewAnonymousUser("ABCD"), "random-key",
-			testflag.NewFlag(testflag.Data{Percentage: testconvert.Float64(100)}), "YO", model.VariationDefault, false),
+			&model.FlagData{Percentage: testconvert.Float64(100)}, "YO", model.VariationDefault, false),
 	}
 
 	for _, event := range inputEvents {
@@ -48,7 +47,7 @@ func TestDataExporterScheduler_flushWithNumberOfEvents(t *testing.T) {
 	var inputEvents []exporter.FeatureEvent
 	for i := 0; i <= 100; i++ {
 		inputEvents = append(inputEvents, exporter.NewFeatureEvent(ffuser.NewAnonymousUser("ABCD"),
-			"random-key", testflag.NewFlag(testflag.Data{Percentage: testconvert.Float64(100)}),
+			"random-key", &model.FlagData{Percentage: testconvert.Float64(100)},
 			"YO", model.VariationDefault, false))
 	}
 	for _, event := range inputEvents {
@@ -67,7 +66,7 @@ func TestDataExporterScheduler_defaultFlush(t *testing.T) {
 	var inputEvents []exporter.FeatureEvent
 	for i := 0; i <= 100000; i++ {
 		inputEvents = append(inputEvents, exporter.NewFeatureEvent(ffuser.NewAnonymousUser("ABCD"),
-			"random-key", testflag.NewFlag(testflag.Data{Percentage: testconvert.Float64(100)}),
+			"random-key", &model.FlagData{Percentage: testconvert.Float64(100)},
 			"YO", model.VariationDefault, false))
 	}
 	for _, event := range inputEvents {
@@ -92,7 +91,7 @@ func TestDataExporterScheduler_exporterReturnError(t *testing.T) {
 	var inputEvents []exporter.FeatureEvent
 	for i := 0; i <= 200; i++ {
 		inputEvents = append(inputEvents, exporter.NewFeatureEvent(ffuser.NewAnonymousUser("ABCD"),
-			"random-key", testflag.NewFlag(testflag.Data{Percentage: testconvert.Float64(100)}),
+			"random-key", &model.FlagData{Percentage: testconvert.Float64(100)},
 			"YO", model.VariationDefault, false))
 	}
 	for _, event := range inputEvents {
@@ -114,7 +113,7 @@ func TestDataExporterScheduler_nonBulkExporter(t *testing.T) {
 	var inputEvents []exporter.FeatureEvent
 	for i := 0; i < 100; i++ {
 		inputEvents = append(inputEvents, exporter.NewFeatureEvent(ffuser.NewAnonymousUser("ABCD"),
-			"random-key", testflag.NewFlag(testflag.Data{Percentage: testconvert.Float64(100)}),
+			"random-key", &model.FlagData{Percentage: testconvert.Float64(100)},
 			"YO", model.VariationDefault, false))
 	}
 	for _, event := range inputEvents {

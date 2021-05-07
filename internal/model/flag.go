@@ -24,8 +24,21 @@ const (
 // percentageMultiplier is the multiplier used to have a bigger range of possibility.
 const percentageMultiplier = 1000
 
-// Flag describe the fields of a flag.
-type Flag struct {
+type Flag interface {
+	Value(flagName string, user ffuser.User) (interface{}, VariationType)
+	String() string
+	GetRule() string
+	GetPercentage() float64
+	GetTrue() interface{}
+	GetFalse() interface{}
+	GetDefault() interface{}
+	GetTrackEvents() bool
+	GetDisable() bool
+	GetRollout() *Rollout
+}
+
+// FlagData describe the fields of a flag.
+type FlagData struct {
 	// Rule is the query use to select on which user the flag should apply.
 	// Rule format is based on the nikunjy/rules module.
 	// If no rule set, the flag apply to all users (percentage still apply).
@@ -60,7 +73,7 @@ type Flag struct {
 
 // Value is returning the Value associate to the flag (True / False / Default ) based
 // if the toggle apply to the user or not.
-func (f *Flag) Value(flagName string, user ffuser.User) (interface{}, VariationType) {
+func (f *FlagData) Value(flagName string, user ffuser.User) (interface{}, VariationType) {
 	if f.isExperimentationOver() {
 		// if we have an experimentation that has not started or that is finished we use the default value.
 		return f.GetDefault(), VariationDefault
@@ -79,7 +92,7 @@ func (f *Flag) Value(flagName string, user ffuser.User) (interface{}, VariationT
 	return f.GetDefault(), VariationDefault
 }
 
-func (f *Flag) isExperimentationOver() bool {
+func (f *FlagData) isExperimentationOver() bool {
 	now := time.Now()
 	return f.Rollout != nil && f.Rollout.Experimentation != nil && (
 		(f.Rollout.Experimentation.Start != nil && now.Before(*f.Rollout.Experimentation.Start)) ||
@@ -87,7 +100,7 @@ func (f *Flag) isExperimentationOver() bool {
 }
 
 // isInPercentage check if the user is in the cohort for the toggle.
-func (f *Flag) isInPercentage(flagName string, user ffuser.User) bool {
+func (f *FlagData) isInPercentage(flagName string, user ffuser.User) bool {
 	percentage := int32(f.getActualPercentage())
 	maxPercentage := uint32(100 * percentageMultiplier)
 
@@ -105,7 +118,7 @@ func (f *Flag) isInPercentage(flagName string, user ffuser.User) bool {
 }
 
 // evaluateRule is checking if the rule can apply to a specific user.
-func (f *Flag) evaluateRule(user ffuser.User) bool {
+func (f *FlagData) evaluateRule(user ffuser.User) bool {
 	// Flag disable we cannot apply it.
 	if f.GetDisable() {
 		return false
@@ -121,7 +134,7 @@ func (f *Flag) evaluateRule(user ffuser.User) bool {
 }
 
 // string display correctly a flag
-func (f Flag) String() string {
+func (f FlagData) String() string {
 	var strBuilder strings.Builder
 	strBuilder.WriteString(fmt.Sprintf("percentage=%d%%, ", int64(math.Round(f.GetPercentage()))))
 	if f.GetRule() != "" {
@@ -166,7 +179,7 @@ func userToMap(u ffuser.User) map[string]interface{} {
 
 // getActualPercentage return the the actual percentage of the flag.
 // the result value is the version with the percentageMultiplier.
-func (f *Flag) getActualPercentage() float64 {
+func (f *FlagData) getActualPercentage() float64 {
 	flagPercentage := f.GetPercentage() * percentageMultiplier
 	if f.Rollout == nil || f.Rollout.Progressive == nil {
 		return flagPercentage
@@ -208,7 +221,7 @@ func (f *Flag) getActualPercentage() float64 {
 	return currentPercentage
 }
 
-// func (f *Flag) scheduledRollout() {
+// func (f *FlagData) scheduledRollout() {
 //	if f.Rollout == nil ||
 //		f.Rollout.Scheduled == nil ||
 //		f.Rollout.Scheduled.Steps == nil ||
@@ -229,7 +242,7 @@ func (f *Flag) getActualPercentage() float64 {
 // }
 
 // GetRule is the getter of the field Rule
-func (f *Flag) GetRule() string {
+func (f *FlagData) GetRule() string {
 	if f.Rule == nil {
 		return ""
 	}
@@ -237,7 +250,7 @@ func (f *Flag) GetRule() string {
 }
 
 // GetPercentage is the getter of the field Percentage
-func (f *Flag) GetPercentage() float64 {
+func (f *FlagData) GetPercentage() float64 {
 	if f.Percentage == nil {
 		return 0
 	}
@@ -245,7 +258,7 @@ func (f *Flag) GetPercentage() float64 {
 }
 
 // GetTrue is the getter of the field True
-func (f *Flag) GetTrue() interface{} {
+func (f *FlagData) GetTrue() interface{} {
 	if f.True == nil {
 		return nil
 	}
@@ -253,7 +266,7 @@ func (f *Flag) GetTrue() interface{} {
 }
 
 // GetFalse is the getter of the field False
-func (f *Flag) GetFalse() interface{} {
+func (f *FlagData) GetFalse() interface{} {
 	if f.False == nil {
 		return nil
 	}
@@ -261,7 +274,7 @@ func (f *Flag) GetFalse() interface{} {
 }
 
 // GetDefault is the getter of the field Default
-func (f *Flag) GetDefault() interface{} {
+func (f *FlagData) GetDefault() interface{} {
 	if f.Default == nil {
 		return nil
 	}
@@ -269,15 +282,15 @@ func (f *Flag) GetDefault() interface{} {
 }
 
 // GetTrackEvents is the getter of the field TrackEvents
-func (f *Flag) GetTrackEvents() bool {
+func (f *FlagData) GetTrackEvents() bool {
 	if f.TrackEvents == nil {
-		return false
+		return true
 	}
 	return *f.TrackEvents
 }
 
 // GetDisable is the getter of the field Disable
-func (f *Flag) GetDisable() bool {
+func (f *FlagData) GetDisable() bool {
 	if f.Disable == nil {
 		return false
 	}
@@ -285,6 +298,6 @@ func (f *Flag) GetDisable() bool {
 }
 
 // GetRollout is the getter of the field Rollout
-func (f *Flag) GetRollout() *Rollout {
+func (f *FlagData) GetRollout() *Rollout {
 	return f.Rollout
 }

@@ -2,7 +2,6 @@ package model_test
 
 import (
 	"github.com/stretchr/testify/assert"
-	"github.com/thomaspoignant/go-feature-flag/testutils/testflag"
 	"testing"
 	"time"
 
@@ -325,7 +324,7 @@ func TestFlag_value(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			f := testflag.NewFlag(testflag.Data{
+			f := &model.FlagData{
 				Disable:    testconvert.Bool(tt.fields.Disable),
 				Rule:       testconvert.String(tt.fields.Rule),
 				Percentage: testconvert.Float64(tt.fields.Percentage),
@@ -333,7 +332,7 @@ func TestFlag_value(t *testing.T) {
 				False:      testconvert.Interface(tt.fields.False),
 				Default:    testconvert.Interface(tt.fields.Default),
 				Rollout:    &tt.fields.Rollout,
-			})
+			}
 
 			got, variationType := f.Value(tt.args.flagName, tt.args.user)
 			assert.Equal(t, tt.want.value, got)
@@ -393,7 +392,7 @@ func TestFlag_String(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			f := testflag.NewFlag(testflag.Data{
+			f := &model.FlagData{
 				Disable:     testconvert.Bool(tt.fields.Disable),
 				Rule:        testconvert.String(tt.fields.Rule),
 				Percentage:  testconvert.Float64(tt.fields.Percentage),
@@ -401,7 +400,7 @@ func TestFlag_String(t *testing.T) {
 				False:       testconvert.Interface(tt.fields.False),
 				Default:     testconvert.Interface(tt.fields.Default),
 				TrackEvents: tt.fields.TrackEvents,
-			})
+			}
 			got := f.String()
 			assert.Equal(t, tt.want, got, "String() = %v, want %v", got, tt.want)
 		})
@@ -409,7 +408,7 @@ func TestFlag_String(t *testing.T) {
 }
 
 func TestFlag_ProgressiveRollout(t *testing.T) {
-	f := testflag.NewFlag(testflag.Data{
+	f := &model.FlagData{
 		Percentage: testconvert.Float64(0),
 		True:       testconvert.Interface("True"),
 		False:      testconvert.Interface("False"),
@@ -420,7 +419,7 @@ func TestFlag_ProgressiveRollout(t *testing.T) {
 				End:   testconvert.Time(time.Now().Add(2 * time.Second)),
 			},
 		}},
-	})
+	}
 
 	user := ffuser.NewAnonymousUser("test")
 	flagName := "test-flag"

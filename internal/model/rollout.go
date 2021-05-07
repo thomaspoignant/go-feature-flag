@@ -22,10 +22,10 @@ type Rollout struct {
 }
 
 func (e Rollout) String() string {
-	if e.Experimentation != nil {
-		return "experimentation: " + e.Experimentation.String()
+	if e.Experimentation == nil {
+		return ""
 	}
-	return ""
+	return "experimentation: " + e.Experimentation.String()
 }
 
 type Experimentation struct {
@@ -100,6 +100,6 @@ type ScheduledRollout struct {
 }
 
 type ScheduledStep struct {
-	Flag `yaml:",inline"`
-	Date *time.Time `json:"date,omitempty" yaml:"date,omitempty" toml:"date,omitempty"`
+	FlagData `yaml:",inline"`
+	Date     *time.Time `json:"date,omitempty" yaml:"date,omitempty" toml:"date,omitempty"`
 }

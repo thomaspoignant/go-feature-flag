@@ -79,7 +79,7 @@ func TestFlag_evaluateRule(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			f := &Flag{
+			f := &FlagData{
 				Disable:    testconvert.Bool(tt.fields.Disable),
 				Rule:       testconvert.String(tt.fields.Rule),
 				Percentage: testconvert.Float64(tt.fields.Percentage),
@@ -224,7 +224,7 @@ func TestFlag_isInPercentage(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			f := &Flag{
+			f := &FlagData{
 				Disable:    testconvert.Bool(tt.fields.Disable),
 				Rule:       testconvert.String(tt.fields.Rule),
 				Percentage: testconvert.Float64(tt.fields.Percentage),
@@ -241,33 +241,33 @@ func TestFlag_isInPercentage(t *testing.T) {
 func TestFlag_getPercentage(t *testing.T) {
 	tests := []struct {
 		name string
-		flag Flag
+		flag FlagData
 		want float64
 	}{
 		{
 			name: "No rollout strategy 100",
-			flag: Flag{
+			flag: FlagData{
 				Percentage: testconvert.Float64(100),
 			},
 			want: float64(100 * percentageMultiplier),
 		},
 		{
 			name: "No rollout strategy 0",
-			flag: Flag{
+			flag: FlagData{
 				Percentage: testconvert.Float64(0),
 			},
 			want: float64(0 * percentageMultiplier),
 		},
 		{
 			name: "No rollout strategy 50",
-			flag: Flag{
+			flag: FlagData{
 				Percentage: testconvert.Float64(50),
 			},
 			want: float64(50 * percentageMultiplier),
 		},
 		{
 			name: "Progressive rollout no explicit percentage",
-			flag: Flag{
+			flag: FlagData{
 				Rollout: &Rollout{
 					Progressive: &Progressive{
 						ReleaseRamp: ProgressiveReleaseRamp{
@@ -281,7 +281,7 @@ func TestFlag_getPercentage(t *testing.T) {
 		},
 		{
 			name: "Progressive rollout explicit initial percentage",
-			flag: Flag{
+			flag: FlagData{
 				Rollout: &Rollout{
 					Progressive: &Progressive{
 						Percentage: ProgressivePercentage{
@@ -298,7 +298,7 @@ func TestFlag_getPercentage(t *testing.T) {
 		},
 		{
 			name: "Progressive rollout explicit end percentage",
-			flag: Flag{
+			flag: FlagData{
 				Rollout: &Rollout{
 					Progressive: &Progressive{
 						Percentage: ProgressivePercentage{
@@ -315,7 +315,7 @@ func TestFlag_getPercentage(t *testing.T) {
 		},
 		{
 			name: "Progressive rollout explicit initial and end percentage",
-			flag: Flag{
+			flag: FlagData{
 				Rollout: &Rollout{
 					Progressive: &Progressive{
 						Percentage: ProgressivePercentage{
@@ -333,7 +333,7 @@ func TestFlag_getPercentage(t *testing.T) {
 		},
 		{
 			name: "Progressive rollout before date",
-			flag: Flag{
+			flag: FlagData{
 				Rollout: &Rollout{
 					Progressive: &Progressive{
 						Percentage: ProgressivePercentage{
@@ -351,7 +351,7 @@ func TestFlag_getPercentage(t *testing.T) {
 		},
 		{
 			name: "Progressive rollout after date",
-			flag: Flag{
+			flag: FlagData{
 				Rollout: &Rollout{
 					Progressive: &Progressive{
 						Percentage: ProgressivePercentage{
@@ -369,7 +369,7 @@ func TestFlag_getPercentage(t *testing.T) {
 		},
 		{
 			name: "End percentage lower than start use top level percentage",
-			flag: Flag{
+			flag: FlagData{
 				Rollout: &Rollout{
 					Progressive: &Progressive{
 						Percentage: ProgressivePercentage{
@@ -387,7 +387,7 @@ func TestFlag_getPercentage(t *testing.T) {
 		},
 		{
 			name: "Missing end date",
-			flag: Flag{
+			flag: FlagData{
 				Rollout: &Rollout{
 					Progressive: &Progressive{
 						ReleaseRamp: ProgressiveReleaseRamp{
@@ -400,7 +400,7 @@ func TestFlag_getPercentage(t *testing.T) {
 		},
 		{
 			name: "Missing start date",
-			flag: Flag{
+			flag: FlagData{
 				Rollout: &Rollout{
 					Progressive: &Progressive{
 						ReleaseRamp: ProgressiveReleaseRamp{
@@ -413,7 +413,7 @@ func TestFlag_getPercentage(t *testing.T) {
 		},
 		{
 			name: "Missing date use default percentage",
-			flag: Flag{
+			flag: FlagData{
 				Percentage: testconvert.Float64(46),
 				Rollout: &Rollout{
 					Progressive: &Progressive{

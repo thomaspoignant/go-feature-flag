@@ -3,7 +3,6 @@ package notifier
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
-	"github.com/thomaspoignant/go-feature-flag/testutils/testflag"
 	"io/ioutil"
 	"log"
 	"os"
@@ -29,12 +28,12 @@ func TestLogNotifier_Notify(t *testing.T) {
 			args: args{
 				diff: model.DiffCache{
 					Deleted: map[string]model.Flag{
-						"test-flag": testflag.NewFlag(testflag.Data{
+						"test-flag": &model.FlagData{
 							Percentage: testconvert.Float64(100),
 							True:       testconvert.Interface(true),
 							False:      testconvert.Interface(false),
 							Default:    testconvert.Interface(false),
-						}),
+						},
 					},
 					Updated: map[string]model.DiffUpdated{},
 					Added:   map[string]model.Flag{},
@@ -50,19 +49,19 @@ func TestLogNotifier_Notify(t *testing.T) {
 					Deleted: map[string]model.Flag{},
 					Updated: map[string]model.DiffUpdated{
 						"test-flag": {
-							Before: testflag.NewFlag(testflag.Data{
+							Before: &model.FlagData{
 								Rule:       testconvert.String("key eq \"random-key\""),
 								Percentage: testconvert.Float64(100),
 								True:       testconvert.Interface(true),
 								False:      testconvert.Interface(false),
 								Default:    testconvert.Interface(false),
-							}),
-							After: testflag.NewFlag(testflag.Data{
+							},
+							After: &model.FlagData{
 								Percentage: testconvert.Float64(100),
 								True:       testconvert.Interface(true),
 								False:      testconvert.Interface(false),
 								Default:    testconvert.Interface(false),
-							}),
+							},
 						},
 					},
 					Added: map[string]model.Flag{},
@@ -78,21 +77,21 @@ func TestLogNotifier_Notify(t *testing.T) {
 					Deleted: map[string]model.Flag{},
 					Updated: map[string]model.DiffUpdated{
 						"test-flag": {
-							Before: testflag.NewFlag(testflag.Data{
+							Before: &model.FlagData{
 								Rule:       testconvert.String("key eq \"random-key\""),
 								Percentage: testconvert.Float64(100),
 								True:       testconvert.Interface(true),
 								False:      testconvert.Interface(false),
 								Default:    testconvert.Interface(false),
-							}),
-							After: testflag.NewFlag(testflag.Data{
+							},
+							After: &model.FlagData{
 								Rule:       testconvert.String("key eq \"random-key\""),
 								Disable:    testconvert.Bool(true),
 								Percentage: testconvert.Float64(100),
 								True:       testconvert.Interface(true),
 								False:      testconvert.Interface(false),
 								Default:    testconvert.Interface(false),
-							}),
+							},
 						},
 					},
 					Added: map[string]model.Flag{},
@@ -108,13 +107,13 @@ func TestLogNotifier_Notify(t *testing.T) {
 					Deleted: map[string]model.Flag{},
 					Updated: map[string]model.DiffUpdated{},
 					Added: map[string]model.Flag{
-						"add-test-flag": testflag.NewFlag(testflag.Data{
+						"add-test-flag": &model.FlagData{
 							Rule:       testconvert.String("key eq \"random-key\""),
 							Percentage: testconvert.Float64(100),
 							True:       testconvert.Interface(true),
 							False:      testconvert.Interface(false),
 							Default:    testconvert.Interface(false),
-						}),
+						},
 					},
 				},
 				wg: &sync.WaitGroup{},
@@ -128,21 +127,21 @@ func TestLogNotifier_Notify(t *testing.T) {
 					Deleted: map[string]model.Flag{},
 					Updated: map[string]model.DiffUpdated{
 						"test-flag": {
-							After: testflag.NewFlag(testflag.Data{
+							After: &model.FlagData{
 								Rule:       testconvert.String("key eq \"random-key\""),
 								Percentage: testconvert.Float64(100),
 								True:       testconvert.Interface(true),
 								False:      testconvert.Interface(false),
 								Default:    testconvert.Interface(false),
-							}),
-							Before: testflag.NewFlag(testflag.Data{
+							},
+							Before: &model.FlagData{
 								Rule:       testconvert.String("key eq \"random-key\""),
 								Disable:    testconvert.Bool(true),
 								Percentage: testconvert.Float64(100),
 								True:       testconvert.Interface(true),
 								False:      testconvert.Interface(false),
 								Default:    testconvert.Interface(false),
-							}),
+							},
 						},
 					},
 					Added: map[string]model.Flag{},

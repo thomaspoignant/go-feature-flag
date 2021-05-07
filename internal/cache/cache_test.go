@@ -3,7 +3,6 @@ package cache
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
-	"github.com/thomaspoignant/go-feature-flag/testutils/testflag"
 	"testing"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/model"
@@ -46,14 +45,14 @@ func Test_FlagCache_yaml(t *testing.T) {
 				loadedFlags: exampleFile,
 			},
 			expected: map[string]model.Flag{
-				"test-flag": testflag.NewFlag(testflag.Data{
+				"test-flag": &model.FlagData{
 					Disable:    nil,
 					Rule:       testconvert.String("key eq \"random-key\""),
 					Percentage: testconvert.Float64(100),
 					True:       testconvert.Interface(true),
 					False:      testconvert.Interface(false),
 					Default:    testconvert.Interface(false),
-				}),
+				},
 			},
 			wantErr: false,
 		},
@@ -117,13 +116,13 @@ func Test_FlagCache_json(t *testing.T) {
 				loadedFlags: exampleFile,
 			},
 			expected: map[string]model.Flag{
-				"test-flag": testflag.NewFlag(testflag.Data{
+				"test-flag": &model.FlagData{
 					Rule:       testconvert.String("key eq \"random-key\""),
 					Percentage: testconvert.Float64(100),
 					True:       testconvert.Interface(true),
 					False:      testconvert.Interface(false),
 					Default:    testconvert.Interface(false),
-				}),
+				},
 			},
 			wantErr: false,
 		},
@@ -183,14 +182,14 @@ disable = false`)
 				loadedFlags: exampleFile,
 			},
 			expected: map[string]model.Flag{
-				"test-flag": testflag.NewFlag(testflag.Data{
+				"test-flag": &model.FlagData{
 					Rule:       testconvert.String("key eq \"random-key\""),
 					Percentage: testconvert.Float64(100),
 					True:       testconvert.Interface(true),
 					False:      testconvert.Interface(false),
 					Default:    testconvert.Interface(false),
 					Disable:    testconvert.Bool(false),
-				}),
+				},
 			},
 			wantErr: false,
 		},
