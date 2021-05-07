@@ -107,7 +107,7 @@ func convertUpdatedFlagsToSlackMessage(diff model.DiffCache) []attachment {
 
 		before := value.Before
 		after := value.After
-		compareFormat := "%v => %v"
+		const compareFormat = "%v => %v"
 
 		// rule
 		if before.GetRule() != after.GetRule() {
