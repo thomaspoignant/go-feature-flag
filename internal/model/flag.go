@@ -249,26 +249,6 @@ func (f *FlagData) getActualPercentage() float64 {
 	return currentPercentage
 }
 
-// func (f *FlagData) scheduledRollout() {
-//	if f.Rollout == nil ||
-//		f.Rollout.Scheduled == nil ||
-//		f.Rollout.Scheduled.Steps == nil ||
-//		len(f.Rollout.Scheduled.Steps) <= 0 {
-//		return
-//	}
-//
-//	now := time.Now()
-//	for _, step := range f.Rollout.Scheduled.Steps {
-//		if step.Date == nil {
-//			// TODO: log that we should have a date
-//		}
-//
-//		if now.After(*step.Date) {
-//
-//		}
-//	}
-// }
-
 // GetRule is the getter of the field Rule
 func (f *FlagData) GetRule() string {
 	if f.Rule == nil {
