@@ -1,7 +1,8 @@
-package notifier
+package notifier_test
 
 import (
 	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/internal/notifier"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 	"io/ioutil"
 	"log"
@@ -141,7 +142,7 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 
 			mockHTTPClient := &testutils.HTTPClientMock{StatusCode: tt.args.statusCode, ForceError: tt.args.forceError}
 
-			c, _ := NewWebhookNotifier(
+			c, _ := notifier.NewWebhookNotifier(
 				log.New(logFile, "", 0),
 				mockHTTPClient,
 				"http://webhook.example/hook",
@@ -177,7 +178,7 @@ func TestNewWebhookNotifier(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    WebhookNotifier
+		want    notifier.WebhookNotifier
 		wantErr bool
 	}{
 		{
@@ -193,7 +194,7 @@ func TestNewWebhookNotifier(t *testing.T) {
 				endpointURL: "http://example.com",
 			},
 			wantErr: false,
-			want: WebhookNotifier{
+			want: notifier.WebhookNotifier{
 				HTTPClient:  mockHTTPClient,
 				EndpointURL: url.URL{Host: "example.com", Scheme: "http"},
 				Secret:      "",
@@ -203,7 +204,7 @@ func TestNewWebhookNotifier(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := NewWebhookNotifier(nil, mockHTTPClient, tt.args.endpointURL, tt.args.secret, tt.args.meta)
+			got, err := notifier.NewWebhookNotifier(nil, mockHTTPClient, tt.args.endpointURL, tt.args.secret, tt.args.meta)
 
 			if tt.wantErr {
 				assert.Error(t, err, "NewWebhookNotifier should return an error")

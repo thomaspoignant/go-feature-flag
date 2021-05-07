@@ -3,9 +3,8 @@ package retriever_test
 import (
 	"context"
 	"github.com/stretchr/testify/assert"
-	"testing"
-
 	"github.com/thomaspoignant/go-feature-flag/internal/retriever"
+	"testing"
 )
 
 var expectedFile = `test-flag:

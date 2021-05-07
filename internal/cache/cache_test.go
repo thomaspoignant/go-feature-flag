@@ -1,7 +1,8 @@
-package cache
+package cache_test
 
 import (
 	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/internal/cache"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 	"testing"
 
@@ -10,13 +11,14 @@ import (
 )
 
 func Test_FlagCacheNotInit(t *testing.T) {
-	fCache := cacheImpl{}
+	fCache := cache.New(nil)
+	fCache.Close()
 	_, err := fCache.GetFlag("test-flag")
 	assert.Error(t, err, "We should have an error if the cache is not init")
 }
 
 func Test_GetFlagNotExist(t *testing.T) {
-	fCache := New(nil)
+	fCache := cache.New(nil)
 	_, err := fCache.GetFlag("not-exists-flag")
 	assert.Error(t, err, "We should have an error if the flag does not exists")
 }
@@ -161,7 +163,7 @@ disable = false`),
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fCache := New(NewNotificationService([]notifier.Notifier{}))
+			fCache := cache.New(cache.NewNotificationService([]notifier.Notifier{}))
 			err := fCache.UpdateCache(tt.args.loadedFlags, tt.flagFormat)
 			if tt.wantErr {
 				assert.Error(t, err, "UpdateCache() error = %v, wantErr %v", err, tt.wantErr)
