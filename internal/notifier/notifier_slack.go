@@ -107,53 +107,54 @@ func convertUpdatedFlagsToSlackMessage(diff model.DiffCache) []attachment {
 
 		before := value.Before
 		after := value.After
+		compareFormat := "%v => %v"
 
 		// rule
 		if before.GetRule() != after.GetRule() {
 			attachment.Fields = append(attachment.Fields, Field{Title: "Rule", Short: false,
-				Value: fmt.Sprintf("%v => %v", before.GetRule(), after.GetRule())})
+				Value: fmt.Sprintf(compareFormat, before.GetRule(), after.GetRule())})
 		}
 
 		// Percentage
 		if before.GetPercentage() != after.GetPercentage() {
 			attachment.Fields = append(attachment.Fields, Field{Title: "Percentage", Short: true,
-				Value: fmt.Sprintf("%v => %v", before.GetPercentage(), after.GetPercentage())})
+				Value: fmt.Sprintf(compareFormat, before.GetPercentage(), after.GetPercentage())})
 		}
 
 		// True
 		if before.GetTrue() != after.GetTrue() {
 			attachment.Fields = append(attachment.Fields, Field{Title: "True", Short: true,
-				Value: fmt.Sprintf("%v => %v", before.GetTrue(), after.GetTrue())})
+				Value: fmt.Sprintf(compareFormat, before.GetTrue(), after.GetTrue())})
 		}
 
 		// False
 		if before.GetFalse() != after.GetFalse() {
 			attachment.Fields = append(attachment.Fields, Field{Title: "False", Short: true,
-				Value: fmt.Sprintf("%v => %v", before.GetFalse(), after.GetFalse())})
+				Value: fmt.Sprintf(compareFormat, before.GetFalse(), after.GetFalse())})
 		}
 
 		// Default
 		if before.GetDefault() != after.GetDefault() {
 			attachment.Fields = append(attachment.Fields, Field{Title: "Default", Short: true,
-				Value: fmt.Sprintf("%v => %v", before.GetDefault(), after.GetDefault())})
+				Value: fmt.Sprintf(compareFormat, before.GetDefault(), after.GetDefault())})
 		}
 
 		// TrackEvents
 		if before.GetTrackEvents() != after.GetTrackEvents() {
 			attachment.Fields = append(attachment.Fields, Field{Title: "TrackEvents", Short: true,
-				Value: fmt.Sprintf("%v => %v", before.GetTrackEvents(), after.GetTrackEvents())})
+				Value: fmt.Sprintf(compareFormat, before.GetTrackEvents(), after.GetTrackEvents())})
 		}
 
 		// Disable
 		if before.GetDisable() != after.GetDisable() {
 			attachment.Fields = append(attachment.Fields, Field{Title: "Disable", Short: true,
-				Value: fmt.Sprintf("%v => %v", before.GetDisable(), after.GetDisable())})
+				Value: fmt.Sprintf(compareFormat, before.GetDisable(), after.GetDisable())})
 		}
 
 		// Rollout
 		if before.GetRollout() != after.GetRollout() {
 			attachment.Fields = append(attachment.Fields, Field{Title: "Rollout", Short: false,
-				Value: fmt.Sprintf("%v => %v", before.GetRollout(), after.GetRollout())})
+				Value: fmt.Sprintf(compareFormat, before.GetRollout(), after.GetRollout())})
 		}
 		attachments = append(attachments, attachment)
 	}
