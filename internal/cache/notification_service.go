@@ -48,23 +48,25 @@ func (c *notificationService) getDifferences(
 		Updated: map[string]model.DiffUpdated{},
 	}
 	for key := range oldCache {
-		_, inNewCache := newCache[key]
+		newFlag, inNewCache := newCache[key]
+		oldFlag := oldCache[key]
 		if !inNewCache {
-			diff.Deleted[key] = oldCache[key]
+			diff.Deleted[key] = &oldFlag
 			continue
 		}
 
 		if !cmp.Equal(oldCache[key], newCache[key]) {
 			diff.Updated[key] = model.DiffUpdated{
-				Before: oldCache[key],
-				After:  newCache[key],
+				Before: &oldFlag,
+				After:  &newFlag,
 			}
 		}
 	}
 
 	for key := range newCache {
 		if _, inOldCache := oldCache[key]; !inOldCache {
-			diff.Added[key] = newCache[key]
+			flag := newCache[key]
+			diff.Added[key] = &flag
 		}
 	}
 	return diff

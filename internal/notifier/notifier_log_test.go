@@ -2,6 +2,7 @@ package notifier
 
 import (
 	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 	"io/ioutil"
 	"log"
 	"os"
@@ -27,11 +28,11 @@ func TestLogNotifier_Notify(t *testing.T) {
 			args: args{
 				diff: model.DiffCache{
 					Deleted: map[string]model.Flag{
-						"test-flag": {
-							Percentage: 100,
-							True:       true,
-							False:      false,
-							Default:    false,
+						"test-flag": &model.FlagData{
+							Percentage: testconvert.Float64(100),
+							True:       testconvert.Interface(true),
+							False:      testconvert.Interface(false),
+							Default:    testconvert.Interface(false),
 						},
 					},
 					Updated: map[string]model.DiffUpdated{},
@@ -48,18 +49,18 @@ func TestLogNotifier_Notify(t *testing.T) {
 					Deleted: map[string]model.Flag{},
 					Updated: map[string]model.DiffUpdated{
 						"test-flag": {
-							Before: model.Flag{
-								Rule:       "key eq \"random-key\"",
-								Percentage: 100,
-								True:       true,
-								False:      false,
-								Default:    false,
+							Before: &model.FlagData{
+								Rule:       testconvert.String("key eq \"random-key\""),
+								Percentage: testconvert.Float64(100),
+								True:       testconvert.Interface(true),
+								False:      testconvert.Interface(false),
+								Default:    testconvert.Interface(false),
 							},
-							After: model.Flag{
-								Percentage: 100,
-								True:       true,
-								False:      false,
-								Default:    false,
+							After: &model.FlagData{
+								Percentage: testconvert.Float64(100),
+								True:       testconvert.Interface(true),
+								False:      testconvert.Interface(false),
+								Default:    testconvert.Interface(false),
 							},
 						},
 					},
@@ -76,20 +77,20 @@ func TestLogNotifier_Notify(t *testing.T) {
 					Deleted: map[string]model.Flag{},
 					Updated: map[string]model.DiffUpdated{
 						"test-flag": {
-							Before: model.Flag{
-								Rule:       "key eq \"random-key\"",
-								Percentage: 100,
-								True:       true,
-								False:      false,
-								Default:    false,
+							Before: &model.FlagData{
+								Rule:       testconvert.String("key eq \"random-key\""),
+								Percentage: testconvert.Float64(100),
+								True:       testconvert.Interface(true),
+								False:      testconvert.Interface(false),
+								Default:    testconvert.Interface(false),
 							},
-							After: model.Flag{
-								Rule:       "key eq \"random-key\"",
-								Disable:    true,
-								Percentage: 100,
-								True:       true,
-								False:      false,
-								Default:    false,
+							After: &model.FlagData{
+								Rule:       testconvert.String("key eq \"random-key\""),
+								Disable:    testconvert.Bool(true),
+								Percentage: testconvert.Float64(100),
+								True:       testconvert.Interface(true),
+								False:      testconvert.Interface(false),
+								Default:    testconvert.Interface(false),
 							},
 						},
 					},
@@ -106,12 +107,12 @@ func TestLogNotifier_Notify(t *testing.T) {
 					Deleted: map[string]model.Flag{},
 					Updated: map[string]model.DiffUpdated{},
 					Added: map[string]model.Flag{
-						"add-test-flag": {
-							Rule:       "key eq \"random-key\"",
-							Percentage: 100,
-							True:       true,
-							False:      false,
-							Default:    false,
+						"add-test-flag": &model.FlagData{
+							Rule:       testconvert.String("key eq \"random-key\""),
+							Percentage: testconvert.Float64(100),
+							True:       testconvert.Interface(true),
+							False:      testconvert.Interface(false),
+							Default:    testconvert.Interface(false),
 						},
 					},
 				},
@@ -126,20 +127,20 @@ func TestLogNotifier_Notify(t *testing.T) {
 					Deleted: map[string]model.Flag{},
 					Updated: map[string]model.DiffUpdated{
 						"test-flag": {
-							After: model.Flag{
-								Rule:       "key eq \"random-key\"",
-								Percentage: 100,
-								True:       true,
-								False:      false,
-								Default:    false,
+							After: &model.FlagData{
+								Rule:       testconvert.String("key eq \"random-key\""),
+								Percentage: testconvert.Float64(100),
+								True:       testconvert.Interface(true),
+								False:      testconvert.Interface(false),
+								Default:    testconvert.Interface(false),
 							},
-							Before: model.Flag{
-								Rule:       "key eq \"random-key\"",
-								Disable:    true,
-								Percentage: 100,
-								True:       true,
-								False:      false,
-								Default:    false,
+							Before: &model.FlagData{
+								Rule:       testconvert.String("key eq \"random-key\""),
+								Disable:    testconvert.Bool(true),
+								Percentage: testconvert.Float64(100),
+								True:       testconvert.Interface(true),
+								False:      testconvert.Interface(false),
+								Default:    testconvert.Interface(false),
 							},
 						},
 					},

@@ -324,13 +324,13 @@ func TestFlag_value(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			f := &model.Flag{
-				Disable:    tt.fields.Disable,
-				Rule:       tt.fields.Rule,
-				Percentage: tt.fields.Percentage,
-				True:       tt.fields.True,
-				False:      tt.fields.False,
-				Default:    tt.fields.Default,
+			f := &model.FlagData{
+				Disable:    testconvert.Bool(tt.fields.Disable),
+				Rule:       testconvert.String(tt.fields.Rule),
+				Percentage: testconvert.Float64(tt.fields.Percentage),
+				True:       testconvert.Interface(tt.fields.True),
+				False:      testconvert.Interface(tt.fields.False),
+				Default:    testconvert.Interface(tt.fields.Default),
 				Rollout:    &tt.fields.Rollout,
 			}
 
@@ -339,6 +339,36 @@ func TestFlag_value(t *testing.T) {
 			assert.Equal(t, tt.want.variationType, variationType)
 		})
 	}
+}
+
+func TestFlag_ProgressiveRollout(t *testing.T) {
+	f := &model.FlagData{
+		Percentage: testconvert.Float64(0),
+		True:       testconvert.Interface("True"),
+		False:      testconvert.Interface("False"),
+		Default:    testconvert.Interface("Default"),
+		Rollout: &model.Rollout{Progressive: &model.Progressive{
+			ReleaseRamp: model.ProgressiveReleaseRamp{
+				Start: testconvert.Time(time.Now().Add(1 * time.Second)),
+				End:   testconvert.Time(time.Now().Add(2 * time.Second)),
+			},
+		}},
+	}
+
+	user := ffuser.NewAnonymousUser("test")
+	flagName := "test-flag"
+
+	// We evaluate the same flag multiple time overtime.
+	v, _ := f.Value(flagName, user)
+	assert.Equal(t, f.GetFalse(), v)
+
+	time.Sleep(1 * time.Second)
+	v2, _ := f.Value(flagName, user)
+	assert.Equal(t, f.GetFalse(), v2)
+
+	time.Sleep(1 * time.Second)
+	v3, _ := f.Value(flagName, user)
+	assert.Equal(t, f.GetTrue(), v3)
 }
 
 func TestFlag_String(t *testing.T) {
@@ -392,13 +422,13 @@ func TestFlag_String(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			f := model.Flag{
-				Disable:     tt.fields.Disable,
-				Rule:        tt.fields.Rule,
-				Percentage:  tt.fields.Percentage,
-				True:        tt.fields.True,
-				False:       tt.fields.False,
-				Default:     tt.fields.Default,
+			f := &model.FlagData{
+				Disable:     testconvert.Bool(tt.fields.Disable),
+				Rule:        testconvert.String(tt.fields.Rule),
+				Percentage:  testconvert.Float64(tt.fields.Percentage),
+				True:        testconvert.Interface(tt.fields.True),
+				False:       testconvert.Interface(tt.fields.False),
+				Default:     testconvert.Interface(tt.fields.Default),
 				TrackEvents: tt.fields.TrackEvents,
 			}
 			got := f.String()
@@ -407,32 +437,69 @@ func TestFlag_String(t *testing.T) {
 	}
 }
 
-func TestFlag_ProgressiveRollout(t *testing.T) {
-	f := &model.Flag{
-		Percentage: 0,
-		True:       "True",
-		False:      "False",
-		Default:    "Default",
-		Rollout: &model.Rollout{Progressive: &model.Progressive{
-			ReleaseRamp: model.ProgressiveReleaseRamp{
-				Start: testconvert.Time(time.Now().Add(1 * time.Second)),
-				End:   testconvert.Time(time.Now().Add(2 * time.Second)),
+func TestFlag_Getter(t *testing.T) {
+	type expected struct {
+		True        interface{}
+		False       interface{}
+		Default     interface{}
+		Rollout     *model.Rollout
+		Disable     bool
+		TrackEvents bool
+		Percentage  float64
+		Rule        string
+	}
+	tests := []struct {
+		name string
+		flag model.Flag
+		want expected
+	}{
+		{
+			name: "all default",
+			flag: &model.FlagData{},
+			want: expected{
+				True:        nil,
+				False:       nil,
+				Default:     nil,
+				Rollout:     nil,
+				Disable:     false,
+				TrackEvents: true,
+				Percentage:  0,
+				Rule:        "",
 			},
-		}},
+		},
+		{
+			name: "custom flag",
+			flag: &model.FlagData{
+				Rule:        testconvert.String("test"),
+				Percentage:  testconvert.Float64(90),
+				True:        testconvert.Interface(12.2),
+				False:       testconvert.Interface(13.2),
+				Default:     testconvert.Interface(14.2),
+				TrackEvents: testconvert.Bool(false),
+				Disable:     testconvert.Bool(true),
+			},
+			want: expected{
+				True:        12.2,
+				False:       13.2,
+				Default:     14.2,
+				Disable:     true,
+				TrackEvents: false,
+				Percentage:  90,
+				Rule:        "test",
+			},
+		},
 	}
 
-	user := ffuser.NewAnonymousUser("test")
-	flagName := "test-flag"
-
-	// We evaluate the same flag multiple time overtime.
-	v, _ := f.Value(flagName, user)
-	assert.Equal(t, f.False, v)
-
-	time.Sleep(1 * time.Second)
-	v2, _ := f.Value(flagName, user)
-	assert.Equal(t, f.False, v2)
-
-	time.Sleep(1 * time.Second)
-	v3, _ := f.Value(flagName, user)
-	assert.Equal(t, f.True, v3)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want.True, tt.flag.GetTrue())
+			assert.Equal(t, tt.want.False, tt.flag.GetFalse())
+			assert.Equal(t, tt.want.Default, tt.flag.GetDefault())
+			assert.Equal(t, tt.want.Rollout, tt.flag.GetRollout())
+			assert.Equal(t, tt.want.Disable, tt.flag.GetDisable())
+			assert.Equal(t, tt.want.TrackEvents, tt.flag.GetTrackEvents())
+			assert.Equal(t, tt.want.Percentage, tt.flag.GetPercentage())
+			assert.Equal(t, tt.want.Rule, tt.flag.GetRule())
+		})
+	}
 }

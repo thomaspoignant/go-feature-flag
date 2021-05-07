@@ -2,6 +2,7 @@ package notifier
 
 import (
 	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -48,38 +49,38 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 				statusCode: http.StatusOK,
 				diff: model.DiffCache{
 					Added: map[string]model.Flag{
-						"test-flag3": {
-							Percentage: 5,
-							True:       "test",
-							False:      "false",
-							Default:    "default",
+						"test-flag3": &model.FlagData{
+							Percentage: testconvert.Float64(5),
+							True:       testconvert.Interface("test"),
+							False:      testconvert.Interface("false"),
+							Default:    testconvert.Interface("default"),
 						},
 					},
 					Deleted: map[string]model.Flag{
-						"test-flag": {
-							Rule:       "key eq \"random-key\"",
-							Percentage: 100,
-							True:       true,
-							False:      false,
-							Default:    false,
+						"test-flag": &model.FlagData{
+							Rule:       testconvert.String("key eq \"random-key\""),
+							Percentage: testconvert.Float64(100),
+							True:       testconvert.Interface(true),
+							False:      testconvert.Interface(false),
+							Default:    testconvert.Interface(false),
 						},
 					},
 					Updated: map[string]model.DiffUpdated{
 						"test-flag2": {
-							Before: model.Flag{
-								Rule:       "key eq \"not-a-key\"",
-								Percentage: 100,
-								True:       true,
-								False:      false,
-								Default:    false,
+							Before: &model.FlagData{
+								Rule:       testconvert.String("key eq \"not-a-key\""),
+								Percentage: testconvert.Float64(100),
+								True:       testconvert.Interface(true),
+								False:      testconvert.Interface(false),
+								Default:    testconvert.Interface(false),
 							},
-							After: model.Flag{
-								Rule:       "key eq \"not-a-key\"",
-								Percentage: 100,
-								True:       true,
-								False:      false,
-								Default:    false,
-								Disable:    true,
+							After: &model.FlagData{
+								Rule:       testconvert.String("key eq \"not-a-key\""),
+								Percentage: testconvert.Float64(100),
+								True:       testconvert.Interface(true),
+								False:      testconvert.Interface(false),
+								Default:    testconvert.Interface(false),
+								Disable:    testconvert.Bool(true),
 							},
 						},
 					},
@@ -96,11 +97,11 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 				statusCode: http.StatusOK,
 				diff: model.DiffCache{
 					Added: map[string]model.Flag{
-						"test-flag3": {
-							Percentage: 5,
-							True:       "test",
-							False:      "false",
-							Default:    "default",
+						"test-flag3": &model.FlagData{
+							Percentage: testconvert.Float64(5),
+							True:       testconvert.Interface("test"),
+							False:      testconvert.Interface("false"),
+							Default:    testconvert.Interface("default"),
 						},
 					},
 					Deleted: map[string]model.Flag{},
