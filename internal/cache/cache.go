@@ -76,7 +76,7 @@ func (c *cacheImpl) GetFlag(key string) (model.Flag, error) {
 	defer c.mutex.RUnlock()
 
 	if c.flagsCache == nil {
-		return &model.FlagData{}, errors.New("impossible to read the toggle before the initialisation")
+		return &model.FlagData{}, errors.New("impossible to read the flag before the initialisation")
 	}
 
 	flag, ok := c.flagsCache[key]

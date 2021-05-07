@@ -1046,6 +1046,24 @@ func TestIntVariation(t *testing.T) {
 			wantErr:     true,
 			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"118\"\n",
 		},
+		{
+			name: "Convert float to Int",
+			args: args{
+				flagKey:      "test-flag",
+				user:         ffuser.NewAnonymousUser("random-key"),
+				defaultValue: 118,
+				cacheMock: NewCacheMock(&model.FlagData{
+					Rule:       testconvert.String("key eq \"random-key\""),
+					Percentage: testconvert.Float64(100),
+					Default:    testconvert.Interface(119.1),
+					True:       testconvert.Interface(120.1),
+					False:      testconvert.Interface(121.1),
+				}, nil),
+			},
+			want:        120,
+			wantErr:     false,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"120\"\n",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -1,8 +1,7 @@
-package notifier_test
+package notifier
 
 import (
 	"github.com/stretchr/testify/assert"
-	"github.com/thomaspoignant/go-feature-flag/internal/notifier"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 	"io/ioutil"
 	"log"
@@ -157,7 +156,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 			logOutput, _ := ioutil.TempFile("", "")
 			defer os.Remove(logOutput.Name())
 
-			c := &notifier.LogNotifier{
+			c := &LogNotifier{
 				Logger: log.New(logOutput, "", 0),
 			}
 			tt.args.wg.Add(1)
