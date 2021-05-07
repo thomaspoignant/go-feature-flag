@@ -27,7 +27,7 @@ type cacheImpl struct {
 
 func New(notificationService Service) Cache {
 	return &cacheImpl{
-		flagsCache:          make(map[string]*model.FlagData),
+		flagsCache:          make(map[string]model.FlagData),
 		mutex:               sync.RWMutex{},
 		notificationService: notificationService,
 	}
@@ -81,5 +81,6 @@ func (c *cacheImpl) GetFlag(key string) (model.Flag, error) {
 	if !ok {
 		return &model.FlagData{}, fmt.Errorf("flag [%v] does not exists", key)
 	}
-	return flag, nil
+
+	return &flag, nil
 }

@@ -15,7 +15,7 @@ func TestFlagsCache_Copy(t *testing.T) {
 		{
 			name: "Copy with values",
 			fc: FlagsCache{
-				"test": &model.FlagData{
+				"test": model.FlagData{
 					Disable:    testconvert.Bool(false),
 					Rule:       testconvert.String("key eq \"toto\""),
 					Percentage: testconvert.Float64(20),
