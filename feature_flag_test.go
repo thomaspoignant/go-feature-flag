@@ -1,8 +1,9 @@
-package ffclient
+package ffclient_test
 
 import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/stretchr/testify/assert"
+	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"io/ioutil"
 	"log"
 	"os"
@@ -14,31 +15,29 @@ import (
 )
 
 func TestStartWithoutRetriever(t *testing.T) {
-	_, err := New(Config{
+	_, err := ffclient.New(ffclient.Config{
 		PollInterval: 60,
 		Logger:       log.New(os.Stdout, "", 0),
 	})
 	assert.Error(t, err)
-	ff = nil
 }
 
 func TestStartWithNegativeInterval(t *testing.T) {
-	_, err := New(Config{
+	_, err := ffclient.New(ffclient.Config{
 		PollInterval: -60,
-		Retriever:    &FileRetriever{Path: "testdata/flag-config.yaml"},
+		Retriever:    &ffclient.FileRetriever{Path: "testdata/flag-config.yaml"},
 		Logger:       log.New(os.Stdout, "", 0),
 	})
 	assert.Error(t, err)
-	ff = nil
 }
 
 func TestValidUseCase(t *testing.T) {
 	// Valid use case
-	err := Init(Config{
+	err := ffclient.Init(ffclient.Config{
 		PollInterval: 5,
-		Retriever:    &FileRetriever{Path: "testdata/flag-config.yaml"},
+		Retriever:    &ffclient.FileRetriever{Path: "testdata/flag-config.yaml"},
 		Logger:       log.New(os.Stdout, "", 0),
-		DataExporter: DataExporter{
+		DataExporter: ffclient.DataExporter{
 			FlushInterval:    10 * time.Second,
 			MaxEventInMemory: 1000,
 			Exporter: &testutils.MockExporter{
@@ -46,21 +45,21 @@ func TestValidUseCase(t *testing.T) {
 			},
 		},
 	})
-	defer Close()
+	defer ffclient.Close()
 
 	assert.NoError(t, err)
 	user := ffuser.NewUser("random-key")
-	hasTestFlag, _ := BoolVariation("test-flag", user, false)
+	hasTestFlag, _ := ffclient.BoolVariation("test-flag", user, false)
 	assert.True(t, hasTestFlag, "User should have test flag")
-	hasUnknownFlag, _ := BoolVariation("unknown-flag", user, false)
+	hasUnknownFlag, _ := ffclient.BoolVariation("unknown-flag", user, false)
 	assert.False(t, hasUnknownFlag, "User should use default value if flag does not exists")
 }
 
 func TestValidUseCaseToml(t *testing.T) {
 	// Valid use case
-	gffClient, err := New(Config{
+	gffClient, err := ffclient.New(ffclient.Config{
 		PollInterval: 5,
-		Retriever:    &FileRetriever{Path: "testdata/flag-config.toml"},
+		Retriever:    &ffclient.FileRetriever{Path: "testdata/flag-config.toml"},
 		Logger:       log.New(os.Stdout, "", 0),
 		FileFormat:   "toml",
 	})
@@ -76,9 +75,9 @@ func TestValidUseCaseToml(t *testing.T) {
 
 func TestValidUseCaseJson(t *testing.T) {
 	// Valid use case
-	gffClient, err := New(Config{
+	gffClient, err := ffclient.New(ffclient.Config{
 		PollInterval: 5,
-		Retriever:    &FileRetriever{Path: "testdata/flag-config.json"},
+		Retriever:    &ffclient.FileRetriever{Path: "testdata/flag-config.json"},
 		Logger:       log.New(os.Stdout, "", 0),
 		FileFormat:   "json",
 	})
@@ -93,8 +92,8 @@ func TestValidUseCaseJson(t *testing.T) {
 }
 
 func TestS3RetrieverReturnError(t *testing.T) {
-	_, err := New(Config{
-		Retriever: &S3Retriever{
+	_, err := ffclient.New(ffclient.Config{
+		Retriever: &ffclient.S3Retriever{
 			Bucket:    "unknown-bucket",
 			Item:      "unknown-item",
 			AwsConfig: aws.Config{},
@@ -106,16 +105,16 @@ func TestS3RetrieverReturnError(t *testing.T) {
 }
 
 func Test2GoFeatureFlagInstance(t *testing.T) {
-	gffClient1, err := New(Config{
+	gffClient1, err := ffclient.New(ffclient.Config{
 		PollInterval: 5,
-		Retriever:    &FileRetriever{Path: "testdata/flag-config.yaml"},
+		Retriever:    &ffclient.FileRetriever{Path: "testdata/flag-config.yaml"},
 		Logger:       log.New(os.Stdout, "", 0),
 	})
 	defer gffClient1.Close()
 
-	gffClient2, err2 := New(Config{
+	gffClient2, err2 := ffclient.New(ffclient.Config{
 		PollInterval: 10,
-		Retriever:    &FileRetriever{Path: "testdata/test-instance2.yaml"},
+		Retriever:    &ffclient.FileRetriever{Path: "testdata/test-instance2.yaml"},
 		Logger:       log.New(os.Stdout, "", 0),
 	})
 	defer gffClient2.Close()
@@ -146,9 +145,9 @@ func TestUpdateFlag(t *testing.T) {
 	flagFile, _ := ioutil.TempFile("", "")
 	_ = ioutil.WriteFile(flagFile.Name(), []byte(initialFileContent), 0600)
 
-	gffClient1, _ := New(Config{
+	gffClient1, _ := ffclient.New(ffclient.Config{
 		PollInterval: 1,
-		Retriever:    &FileRetriever{Path: flagFile.Name()},
+		Retriever:    &ffclient.FileRetriever{Path: flagFile.Name()},
 		Logger:       log.New(os.Stdout, "", 0),
 	})
 	defer gffClient1.Close()
@@ -185,9 +184,9 @@ func TestImpossibleToLoadfile(t *testing.T) {
 	flagFile, _ := ioutil.TempFile("", "impossible")
 	_ = ioutil.WriteFile(flagFile.Name(), []byte(initialFileContent), 0600)
 
-	gffClient1, _ := New(Config{
+	gffClient1, _ := ffclient.New(ffclient.Config{
 		PollInterval: 1,
-		Retriever:    &FileRetriever{Path: flagFile.Name()},
+		Retriever:    &ffclient.FileRetriever{Path: flagFile.Name()},
 		Logger:       log.New(os.Stdout, "", 0),
 	})
 	defer gffClient1.Close()
@@ -207,13 +206,13 @@ func TestImpossibleToLoadfile(t *testing.T) {
 }
 
 func TestWrongWebhookConfig(t *testing.T) {
-	_, err := New(Config{
+	_, err := ffclient.New(ffclient.Config{
 		PollInterval: 5,
-		Retriever:    &FileRetriever{Path: "testdata/flag-config.yaml"},
-		Notifiers: []NotifierConfig{
-			&WebhookConfig{
+		Retriever:    &ffclient.FileRetriever{Path: "testdata/flag-config.yaml"},
+		Notifiers: []ffclient.NotifierConfig{
+			&ffclient.WebhookConfig{
 				EndpointURL: " https://example.com/hook",
-				Secret:     "Secret",
+				Secret:      "Secret",
 				Meta: map[string]string{
 					"my-app": "go-ff-test",
 				},
@@ -238,9 +237,9 @@ func TestFlagFileUnreachable(t *testing.T) {
 	defer os.Remove(tempDir)
 
 	flagFilePath := tempDir + "_FlagFileUnreachable.yaml"
-	gff, err := New(Config{
+	gff, err := ffclient.New(ffclient.Config{
 		PollInterval:            1,
-		Retriever:               &FileRetriever{Path: flagFilePath},
+		Retriever:               &ffclient.FileRetriever{Path: flagFilePath},
 		Logger:                  log.New(os.Stdout, "", 0),
 		StartWithRetrieverError: true,
 	})
@@ -256,4 +255,20 @@ func TestFlagFileUnreachable(t *testing.T) {
 
 	flagValue, _ = gff.StringVariation("test-flag", ffuser.NewUser("random-key"), "SDKdefault")
 	assert.Equal(t, "true", flagValue, "should use the true value")
+}
+
+func TestValidUseCaseBigFlagFile(t *testing.T) {
+	// Valid use case
+	gff, err := ffclient.New(ffclient.Config{
+		PollInterval: 5,
+		Retriever:    &ffclient.FileRetriever{Path: "testdata/flag-config-big.yaml"},
+	})
+	defer gff.Close()
+
+	assert.NoError(t, err)
+	user := ffuser.NewUser("random-key")
+	hasTestFlag, _ := gff.BoolVariation("test-flag99", user, false)
+	assert.True(t, hasTestFlag, "User should have test flag")
+	hasUnknownFlag, _ := gff.BoolVariation("unknown-flag", user, false)
+	assert.False(t, hasUnknownFlag, "User should use default value if flag does not exists")
 }

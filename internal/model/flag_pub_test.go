@@ -7,19 +7,18 @@ import (
 
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
 	"github.com/thomaspoignant/go-feature-flag/internal/model"
-	"github.com/thomaspoignant/go-feature-flag/testutils"
+	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 )
 
 func TestFlag_value(t *testing.T) {
 	type fields struct {
-		Disable         bool
-		Rule            string
-		Percentage      float64
-		True            interface{}
-		False           interface{}
-		Default         interface{}
-		Experimentation model.Experimentation
-		Rollout         model.Rollout
+		Disable    bool
+		Rule       string
+		Percentage float64
+		True       interface{}
+		False      interface{}
+		Default    interface{}
+		Rollout    model.Rollout
 	}
 	type args struct {
 		flagName string
@@ -70,377 +69,6 @@ func TestFlag_value(t *testing.T) {
 				variationType: model.VariationTrue,
 			},
 		},
-
-		// Remove these tests when the deprecated fields are removed
-		{
-			name: "Experimentation only start date in the past",
-			fields: fields{
-				True:       "true",
-				False:      "false",
-				Default:    "default",
-				Rule:       "key == \"7e50ee61-06ad-4bb0-9034-38ad7cdea9f5\"",
-				Percentage: 10,
-				Experimentation: model.Experimentation{
-					StartDate: testutils.Time(time.Now().Add(-1 * time.Minute)),
-					EndDate:   nil,
-				},
-			},
-			args: args{
-				flagName: "test-flag",
-				user:     ffuser.NewUserBuilder("7e50ee61-06ad-4bb0-9034-38ad7cdea9f5").AddCustom("name", "john").Build(),
-			},
-			want: want{
-				value:         "true",
-				variationType: model.VariationTrue,
-			},
-		},
-		{
-			name: "Experimentation only start date in the future",
-			fields: fields{
-				True:       "true",
-				False:      "false",
-				Default:    "default",
-				Rule:       "key == \"user66\"",
-				Percentage: 10,
-				Experimentation: model.Experimentation{
-					StartDate: testutils.Time(time.Now().Add(1 * time.Minute)),
-					EndDate:   nil,
-				},
-			},
-			args: args{
-				flagName: "test-flag",
-				user:     ffuser.NewUserBuilder("user66").AddCustom("name", "john").Build(), // combined hash is 9
-			},
-			want: want{
-				value:         "default",
-				variationType: model.VariationDefault,
-			},
-		},
-		{
-			name: "Experimentation between start and end date",
-			fields: fields{
-				True:       "true",
-				False:      "false",
-				Default:    "default",
-				Rule:       "key == \"7e50ee61-06ad-4bb0-9034-38ad7cdea9f5\"",
-				Percentage: 10,
-				Experimentation: model.Experimentation{
-					StartDate: testutils.Time(time.Now().Add(-1 * time.Minute)),
-					EndDate:   testutils.Time(time.Now().Add(1 * time.Minute)),
-				},
-			},
-			args: args{
-				flagName: "test-flag",
-				user:     ffuser.NewUserBuilder("7e50ee61-06ad-4bb0-9034-38ad7cdea9f5").AddCustom("name", "john").Build(),
-			},
-			want: want{
-				value:         "true",
-				variationType: model.VariationTrue,
-			},
-		},
-		{
-			name: "Experimentation not started yet",
-			fields: fields{
-				True:       "true",
-				False:      "false",
-				Default:    "default",
-				Rule:       "key == \"user66\"",
-				Percentage: 10,
-				Experimentation: model.Experimentation{
-					StartDate: testutils.Time(time.Now().Add(1 * time.Minute)),
-					EndDate:   testutils.Time(time.Now().Add(2 * time.Minute)),
-				},
-			},
-			args: args{
-				flagName: "test-flag",
-				user:     ffuser.NewUserBuilder("user66").AddCustom("name", "john").Build(), // combined hash is 9
-			},
-			want: want{
-				value:         "default",
-				variationType: model.VariationDefault,
-			},
-		},
-		{
-			name: "Experimentation finished",
-			fields: fields{
-				True:       "true",
-				False:      "false",
-				Default:    "default",
-				Rule:       "key == \"user66\"",
-				Percentage: 10,
-				Experimentation: model.Experimentation{
-					StartDate: testutils.Time(time.Now().Add(-2 * time.Minute)),
-					EndDate:   testutils.Time(time.Now().Add(-1 * time.Minute)),
-				},
-			},
-			args: args{
-				flagName: "test-flag",
-				user:     ffuser.NewUserBuilder("user66").AddCustom("name", "john").Build(), // combined hash is 9
-			},
-			want: want{
-				value:         "default",
-				variationType: model.VariationDefault,
-			},
-		},
-		{
-			name: "Experimentation only end date finished",
-			fields: fields{
-				True:       "true",
-				False:      "false",
-				Default:    "default",
-				Rule:       "key == \"user66\"",
-				Percentage: 10,
-				Experimentation: model.Experimentation{
-					StartDate: nil,
-					EndDate:   testutils.Time(time.Now().Add(-1 * time.Minute)),
-				},
-			},
-			args: args{
-				flagName: "test-flag",
-				user:     ffuser.NewUserBuilder("user66").AddCustom("name", "john").Build(), // combined hash is 9
-			},
-			want: want{
-				value:         "default",
-				variationType: model.VariationDefault,
-			},
-		},
-		{
-			name: "Experimentation only end date not finished",
-			fields: fields{
-				True:       "true",
-				False:      "false",
-				Default:    "default",
-				Rule:       "key == \"7e50ee61-06ad-4bb0-9034-38ad7cdea9f5\"",
-				Percentage: 10,
-				Experimentation: model.Experimentation{
-					StartDate: nil,
-					EndDate:   testutils.Time(time.Now().Add(1 * time.Minute)),
-				},
-			},
-			args: args{
-				flagName: "test-flag",
-				user:     ffuser.NewUserBuilder("7e50ee61-06ad-4bb0-9034-38ad7cdea9f5").AddCustom("name", "john").Build(),
-			},
-			want: want{
-				value:         "true",
-				variationType: model.VariationTrue,
-			},
-		},
-		{
-			name: "Experimentation only end date not finished",
-			fields: fields{
-				True:       "true",
-				False:      "false",
-				Default:    "default",
-				Rule:       "key == \"7e50ee61-06ad-4bb0-9034-38ad7cdea9f5\"",
-				Percentage: 10,
-				Experimentation: model.Experimentation{
-					StartDate: nil,
-					EndDate:   nil,
-				},
-			},
-			args: args{
-				flagName: "test-flag",
-				user:     ffuser.NewUserBuilder("7e50ee61-06ad-4bb0-9034-38ad7cdea9f5").AddCustom("name", "john").Build(),
-			},
-			want: want{
-				value:         "true",
-				variationType: model.VariationTrue,
-			},
-		},
-		{
-			name: "Rollout Deprecated Experimentation only start date in the past",
-			fields: fields{
-				True:       "true",
-				False:      "false",
-				Default:    "default",
-				Rule:       "key == \"7e50ee61-06ad-4bb0-9034-38ad7cdea9f5\"",
-				Percentage: 10,
-				Rollout: model.Rollout{
-					Experimentation: &model.Experimentation{
-						StartDate: testutils.Time(time.Now().Add(-1 * time.Minute)),
-						EndDate:   nil,
-					},
-				},
-			},
-			args: args{
-				flagName: "test-flag",
-				user:     ffuser.NewUserBuilder("7e50ee61-06ad-4bb0-9034-38ad7cdea9f5").AddCustom("name", "john").Build(),
-			},
-			want: want{
-				value:         "true",
-				variationType: model.VariationTrue,
-			},
-		},
-		{
-			name: "Rollout Deprecated Experimentation only start date in the future",
-			fields: fields{
-				True:       "true",
-				False:      "false",
-				Default:    "default",
-				Rule:       "key == \"user66\"",
-				Percentage: 10,
-				Rollout: model.Rollout{
-					Experimentation: &model.Experimentation{
-						StartDate: testutils.Time(time.Now().Add(1 * time.Minute)),
-						EndDate:   nil,
-					},
-				},
-			},
-			args: args{
-				flagName: "test-flag",
-				user:     ffuser.NewUserBuilder("user66").AddCustom("name", "john").Build(), // combined hash is 9
-			},
-			want: want{
-				value:         "default",
-				variationType: model.VariationDefault,
-			},
-		},
-		{
-			name: "Rollout Deprecated Experimentation between start and end date",
-			fields: fields{
-				True:       "true",
-				False:      "false",
-				Default:    "default",
-				Rule:       "key == \"7e50ee61-06ad-4bb0-9034-38ad7cdea9f5\"",
-				Percentage: 10,
-				Rollout: model.Rollout{
-					Experimentation: &model.Experimentation{
-						StartDate: testutils.Time(time.Now().Add(-1 * time.Minute)),
-						EndDate:   testutils.Time(time.Now().Add(1 * time.Minute)),
-					},
-				},
-			},
-			args: args{
-				flagName: "test-flag",
-				user:     ffuser.NewUserBuilder("7e50ee61-06ad-4bb0-9034-38ad7cdea9f5").AddCustom("name", "john").Build(),
-			},
-			want: want{
-				value:         "true",
-				variationType: model.VariationTrue,
-			},
-		},
-		{
-			name: "Rollout Deprecated Experimentation not started yet",
-			fields: fields{
-				True:       "true",
-				False:      "false",
-				Default:    "default",
-				Rule:       "key == \"user66\"",
-				Percentage: 10,
-				Rollout: model.Rollout{
-					Experimentation: &model.Experimentation{
-						StartDate: testutils.Time(time.Now().Add(1 * time.Minute)),
-						EndDate:   testutils.Time(time.Now().Add(2 * time.Minute)),
-					},
-				},
-			},
-			args: args{
-				flagName: "test-flag",
-				user:     ffuser.NewUserBuilder("user66").AddCustom("name", "john").Build(), // combined hash is 9
-			},
-			want: want{
-				value:         "default",
-				variationType: model.VariationDefault,
-			},
-		},
-		{
-			name: "Rollout Deprecated Experimentation finished",
-			fields: fields{
-				True:       "true",
-				False:      "false",
-				Default:    "default",
-				Rule:       "key == \"user66\"",
-				Percentage: 10,
-				Rollout: model.Rollout{
-					Experimentation: &model.Experimentation{
-						StartDate: testutils.Time(time.Now().Add(-2 * time.Minute)),
-						EndDate:   testutils.Time(time.Now().Add(-1 * time.Minute)),
-					},
-				},
-			},
-			args: args{
-				flagName: "test-flag",
-				user:     ffuser.NewUserBuilder("user66").AddCustom("name", "john").Build(), // combined hash is 9
-			},
-			want: want{
-				value:         "default",
-				variationType: model.VariationDefault,
-			},
-		},
-		{
-			name: "Rollout Deprecated Experimentation only end date finished",
-			fields: fields{
-				True:       "true",
-				False:      "false",
-				Default:    "default",
-				Rule:       "key == \"user66\"",
-				Percentage: 10,
-				Rollout: model.Rollout{
-					Experimentation: &model.Experimentation{
-						StartDate: nil,
-						EndDate:   testutils.Time(time.Now().Add(-1 * time.Minute)),
-					},
-				},
-			},
-			args: args{
-				flagName: "test-flag",
-				user:     ffuser.NewUserBuilder("user66").AddCustom("name", "john").Build(), // combined hash is 9
-			},
-			want: want{
-				value:         "default",
-				variationType: model.VariationDefault,
-			},
-		},
-		{
-			name: "Rollout Deprecated Experimentation only end date not finished",
-			fields: fields{
-				True:       "true",
-				False:      "false",
-				Default:    "default",
-				Rule:       "key == \"7e50ee61-06ad-4bb0-9034-38ad7cdea9f5\"",
-				Percentage: 10,
-				Rollout: model.Rollout{
-					Experimentation: &model.Experimentation{
-						StartDate: nil,
-						EndDate:   testutils.Time(time.Now().Add(1 * time.Minute)),
-					},
-				},
-			},
-			args: args{
-				flagName: "test-flag",
-				user:     ffuser.NewUserBuilder("7e50ee61-06ad-4bb0-9034-38ad7cdea9f5").AddCustom("name", "john").Build(),
-			},
-			want: want{
-				value:         "true",
-				variationType: model.VariationTrue,
-			},
-		},
-		{
-			name: "Rollout Deprecated Experimentation only end date not finished",
-			fields: fields{
-				True:       "true",
-				False:      "false",
-				Default:    "default",
-				Rule:       "key == \"7e50ee61-06ad-4bb0-9034-38ad7cdea9f5\"",
-				Percentage: 10,
-				Rollout: model.Rollout{
-					Experimentation: &model.Experimentation{
-						StartDate: nil,
-						EndDate:   nil,
-					},
-				},
-			},
-			args: args{
-				flagName: "test-flag",
-				user:     ffuser.NewUserBuilder("7e50ee61-06ad-4bb0-9034-38ad7cdea9f5").AddCustom("name", "john").Build(),
-			},
-			want: want{
-				value:         "true",
-				variationType: model.VariationTrue,
-			},
-		},
-		// End remove when deprecated ok
 		{
 			name: "Rollout Experimentation only start date in the past",
 			fields: fields{
@@ -451,7 +79,7 @@ func TestFlag_value(t *testing.T) {
 				Percentage: 10,
 				Rollout: model.Rollout{
 					Experimentation: &model.Experimentation{
-						Start: testutils.Time(time.Now().Add(-1 * time.Minute)),
+						Start: testconvert.Time(time.Now().Add(-1 * time.Minute)),
 						End:   nil,
 					},
 				},
@@ -475,7 +103,7 @@ func TestFlag_value(t *testing.T) {
 				Percentage: 10,
 				Rollout: model.Rollout{
 					Experimentation: &model.Experimentation{
-						Start: testutils.Time(time.Now().Add(1 * time.Minute)),
+						Start: testconvert.Time(time.Now().Add(1 * time.Minute)),
 						End:   nil,
 					},
 				},
@@ -499,8 +127,8 @@ func TestFlag_value(t *testing.T) {
 				Percentage: 10,
 				Rollout: model.Rollout{
 					Experimentation: &model.Experimentation{
-						Start: testutils.Time(time.Now().Add(-1 * time.Minute)),
-						End:   testutils.Time(time.Now().Add(1 * time.Minute)),
+						Start: testconvert.Time(time.Now().Add(-1 * time.Minute)),
+						End:   testconvert.Time(time.Now().Add(1 * time.Minute)),
 					},
 				},
 			},
@@ -523,8 +151,8 @@ func TestFlag_value(t *testing.T) {
 				Percentage: 10,
 				Rollout: model.Rollout{
 					Experimentation: &model.Experimentation{
-						Start: testutils.Time(time.Now().Add(1 * time.Minute)),
-						End:   testutils.Time(time.Now().Add(2 * time.Minute)),
+						Start: testconvert.Time(time.Now().Add(1 * time.Minute)),
+						End:   testconvert.Time(time.Now().Add(2 * time.Minute)),
 					},
 				},
 			},
@@ -547,8 +175,8 @@ func TestFlag_value(t *testing.T) {
 				Percentage: 10,
 				Rollout: model.Rollout{
 					Experimentation: &model.Experimentation{
-						Start: testutils.Time(time.Now().Add(-2 * time.Minute)),
-						End:   testutils.Time(time.Now().Add(-1 * time.Minute)),
+						Start: testconvert.Time(time.Now().Add(-2 * time.Minute)),
+						End:   testconvert.Time(time.Now().Add(-1 * time.Minute)),
 					},
 				},
 			},
@@ -572,7 +200,7 @@ func TestFlag_value(t *testing.T) {
 				Rollout: model.Rollout{
 					Experimentation: &model.Experimentation{
 						Start: nil,
-						End:   testutils.Time(time.Now().Add(-1 * time.Minute)),
+						End:   testconvert.Time(time.Now().Add(-1 * time.Minute)),
 					},
 				},
 			},
@@ -596,7 +224,7 @@ func TestFlag_value(t *testing.T) {
 				Rollout: model.Rollout{
 					Experimentation: &model.Experimentation{
 						Start: nil,
-						End:   testutils.Time(time.Now().Add(1 * time.Minute)),
+						End:   testconvert.Time(time.Now().Add(1 * time.Minute)),
 					},
 				},
 			},
@@ -641,9 +269,11 @@ func TestFlag_value(t *testing.T) {
 				Default:    "default",
 				Rule:       "key == \"user66\"",
 				Percentage: 10,
-				Experimentation: model.Experimentation{
-					StartDate: testutils.Time(time.Now().Add(1 * time.Minute)),
-					EndDate:   testutils.Time(time.Now().Add(-1 * time.Minute)),
+				Rollout: model.Rollout{
+					Experimentation: &model.Experimentation{
+						Start: testconvert.Time(time.Now().Add(1 * time.Minute)),
+						End:   testconvert.Time(time.Now().Add(-1 * time.Minute)),
+					},
 				},
 			},
 			args: args{
@@ -694,15 +324,14 @@ func TestFlag_value(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			f := &model.Flag{
-				Disable:         tt.fields.Disable,
-				Rule:            tt.fields.Rule,
-				Percentage:      tt.fields.Percentage,
-				True:            tt.fields.True,
-				False:           tt.fields.False,
-				Default:         tt.fields.Default,
-				Experimentation: &tt.fields.Experimentation,
-				Rollout:         &tt.fields.Rollout,
+			f := &model.FlagData{
+				Disable:    testconvert.Bool(tt.fields.Disable),
+				Rule:       testconvert.String(tt.fields.Rule),
+				Percentage: testconvert.Float64(tt.fields.Percentage),
+				True:       testconvert.Interface(tt.fields.True),
+				False:      testconvert.Interface(tt.fields.False),
+				Default:    testconvert.Interface(tt.fields.Default),
+				Rollout:    &tt.fields.Rollout,
 			}
 
 			got, variationType := f.Value(tt.args.flagName, tt.args.user)
@@ -710,6 +339,36 @@ func TestFlag_value(t *testing.T) {
 			assert.Equal(t, tt.want.variationType, variationType)
 		})
 	}
+}
+
+func TestFlag_ProgressiveRollout(t *testing.T) {
+	f := &model.FlagData{
+		Percentage: testconvert.Float64(0),
+		True:       testconvert.Interface("True"),
+		False:      testconvert.Interface("False"),
+		Default:    testconvert.Interface("Default"),
+		Rollout: &model.Rollout{Progressive: &model.Progressive{
+			ReleaseRamp: model.ProgressiveReleaseRamp{
+				Start: testconvert.Time(time.Now().Add(1 * time.Second)),
+				End:   testconvert.Time(time.Now().Add(2 * time.Second)),
+			},
+		}},
+	}
+
+	user := ffuser.NewAnonymousUser("test")
+	flagName := "test-flag"
+
+	// We evaluate the same flag multiple time overtime.
+	v, _ := f.Value(flagName, user)
+	assert.Equal(t, f.GetFalse(), v)
+
+	time.Sleep(1 * time.Second)
+	v2, _ := f.Value(flagName, user)
+	assert.Equal(t, f.GetFalse(), v2)
+
+	time.Sleep(1 * time.Second)
+	v3, _ := f.Value(flagName, user)
+	assert.Equal(t, f.GetTrue(), v3)
 }
 
 func TestFlag_String(t *testing.T) {
@@ -736,7 +395,7 @@ func TestFlag_String(t *testing.T) {
 				True:        true,
 				False:       false,
 				Default:     false,
-				TrackEvents: testutils.Bool(true),
+				TrackEvents: testconvert.Bool(true),
 			},
 			want: "percentage=10%, rule=\"key eq \"toto\"\", true=\"true\", false=\"false\", true=\"false\", disable=\"false\", trackEvents=\"true\"",
 		},
@@ -763,17 +422,84 @@ func TestFlag_String(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			f := model.Flag{
-				Disable:     tt.fields.Disable,
-				Rule:        tt.fields.Rule,
-				Percentage:  tt.fields.Percentage,
-				True:        tt.fields.True,
-				False:       tt.fields.False,
-				Default:     tt.fields.Default,
+			f := &model.FlagData{
+				Disable:     testconvert.Bool(tt.fields.Disable),
+				Rule:        testconvert.String(tt.fields.Rule),
+				Percentage:  testconvert.Float64(tt.fields.Percentage),
+				True:        testconvert.Interface(tt.fields.True),
+				False:       testconvert.Interface(tt.fields.False),
+				Default:     testconvert.Interface(tt.fields.Default),
 				TrackEvents: tt.fields.TrackEvents,
 			}
 			got := f.String()
 			assert.Equal(t, tt.want, got, "String() = %v, want %v", got, tt.want)
+		})
+	}
+}
+
+func TestFlag_Getter(t *testing.T) {
+	type expected struct {
+		True        interface{}
+		False       interface{}
+		Default     interface{}
+		Rollout     *model.Rollout
+		Disable     bool
+		TrackEvents bool
+		Percentage  float64
+		Rule        string
+	}
+	tests := []struct {
+		name string
+		flag model.Flag
+		want expected
+	}{
+		{
+			name: "all default",
+			flag: &model.FlagData{},
+			want: expected{
+				True:        nil,
+				False:       nil,
+				Default:     nil,
+				Rollout:     nil,
+				Disable:     false,
+				TrackEvents: true,
+				Percentage:  0,
+				Rule:        "",
+			},
+		},
+		{
+			name: "custom flag",
+			flag: &model.FlagData{
+				Rule:        testconvert.String("test"),
+				Percentage:  testconvert.Float64(90),
+				True:        testconvert.Interface(12.2),
+				False:       testconvert.Interface(13.2),
+				Default:     testconvert.Interface(14.2),
+				TrackEvents: testconvert.Bool(false),
+				Disable:     testconvert.Bool(true),
+			},
+			want: expected{
+				True:        12.2,
+				False:       13.2,
+				Default:     14.2,
+				Disable:     true,
+				TrackEvents: false,
+				Percentage:  90,
+				Rule:        "test",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want.True, tt.flag.GetTrue())
+			assert.Equal(t, tt.want.False, tt.flag.GetFalse())
+			assert.Equal(t, tt.want.Default, tt.flag.GetDefault())
+			assert.Equal(t, tt.want.Rollout, tt.flag.GetRollout())
+			assert.Equal(t, tt.want.Disable, tt.flag.GetDisable())
+			assert.Equal(t, tt.want.TrackEvents, tt.flag.GetTrackEvents())
+			assert.Equal(t, tt.want.Percentage, tt.flag.GetPercentage())
+			assert.Equal(t, tt.want.Rule, tt.flag.GetRule())
 		})
 	}
 }

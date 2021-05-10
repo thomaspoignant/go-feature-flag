@@ -34,6 +34,7 @@ No server is needed, just add a file in a central system and all your services w
 - Configuring your flags in various [format](#flags-file-format) (`JSON`, `TOML` and `YAML`).
 - Adding complex [rules](#rule-format) to target your users.
 - Run A/B test experimentations.
+- Deploy progressively your flag.
 - Getting notified when a flag has changed ([`webhook`](#webhooks) and [`slack`](#slack)).
 - Exporting your flags usage data ([`s3`](#s3-exporter), [`log`](#log-exporter) and [`file`](#file-exporter)).
 
@@ -373,6 +374,32 @@ experimentation-flag:
 
 The date is in the format supported natively by your flag file format.
 Check this [example](examples/experimentation/) to see how it works. 
+
+### Progressive rollout
+A **progressive rollout** allows you to increase the percentage of your flag over time.
+
+You can select a **release ramp** where the percentage of your flag will increase progressively between the start date and the end date.
+
+
+**Configuration example:**
+```yaml
+experimentation-flag:
+  true: "B"
+  false: "A"
+  default: "Default"
+  rollout:
+    progressive:
+      percentage:
+        initial: 0
+        end: 100
+      releaseRamp:
+        start: 2021-03-20T00:00:00.10-05:00
+        end: 2021-03-21T00:00:00.10-05:00
+```
+
+The `percentage` field is not mandatory, by default we will use **0** to **100%**.
+If you have no date in your `releaseRamp` we will not do any progressive rollout and use the top level percentage you have configured *(0% in our example)*.
+
 
 ## Notifiers
 If you want to be informed when a flag has changed outside of your app, you can configure a **notifier**.

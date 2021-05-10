@@ -1,7 +1,7 @@
 ---
 name: Bug Report
 about: Found a bug? We are sorry about that! Let us know! 🐛
-
+labels: bug, needs-triage
 ---
 
 # Observed behavior

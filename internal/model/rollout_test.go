@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/model"
-	"github.com/thomaspoignant/go-feature-flag/testutils"
+	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 )
 
 func TestExperimentation_String(t *testing.T) {
@@ -22,46 +22,24 @@ func TestExperimentation_String(t *testing.T) {
 		want   string
 	}{
 		{
-			name: "both dates - deprecated fields",
-			fields: fields{
-				StartDate: testutils.Time(time.Unix(1095379400, 0)),
-				EndDate:   testutils.Time(time.Unix(1095379500, 0)),
-			},
-			want: "start:[2004-09-17T00:03:20Z] end:[2004-09-17T00:05:00Z]",
-		},
-		{
-			name: "only start date - deprecated fields",
-			fields: fields{
-				StartDate: testutils.Time(time.Unix(1095379400, 0)),
-			},
-			want: "start:[2004-09-17T00:03:20Z]",
-		},
-		{
-			name: "only end date - deprecated fields",
-			fields: fields{
-				EndDate: testutils.Time(time.Unix(1095379500, 0)),
-			},
-			want: "end:[2004-09-17T00:05:00Z]",
-		},
-		{
 			name: "both dates",
 			fields: fields{
-				Start: testutils.Time(time.Unix(1095379400, 0)),
-				End:   testutils.Time(time.Unix(1095379500, 0)),
+				Start: testconvert.Time(time.Unix(1095379400, 0)),
+				End:   testconvert.Time(time.Unix(1095379500, 0)),
 			},
 			want: "start:[2004-09-17T00:03:20Z] end:[2004-09-17T00:05:00Z]",
 		},
 		{
 			name: "only start date",
 			fields: fields{
-				Start: testutils.Time(time.Unix(1095379400, 0)),
+				Start: testconvert.Time(time.Unix(1095379400, 0)),
 			},
 			want: "start:[2004-09-17T00:03:20Z]",
 		},
 		{
 			name: "only end date",
 			fields: fields{
-				End: testutils.Time(time.Unix(1095379500, 0)),
+				End: testconvert.Time(time.Unix(1095379500, 0)),
 			},
 			want: "end:[2004-09-17T00:05:00Z]",
 		},
@@ -69,10 +47,8 @@ func TestExperimentation_String(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			e := model.Experimentation{
-				StartDate: tt.fields.StartDate,
-				EndDate:   tt.fields.EndDate,
-				End:       tt.fields.End,
-				Start:     tt.fields.Start,
+				End:   tt.fields.End,
+				Start: tt.fields.Start,
 			}
 			got := e.String()
 			assert.Equal(t, tt.want, got)
@@ -89,8 +65,8 @@ func TestRollout_String(t *testing.T) {
 		{
 			name: "experimentation",
 			rollout: model.Rollout{Experimentation: &model.Experimentation{
-				Start: testutils.Time(time.Unix(1095379400, 0)),
-				End:   testutils.Time(time.Unix(1095379500, 0)),
+				Start: testconvert.Time(time.Unix(1095379400, 0)),
+				End:   testconvert.Time(time.Unix(1095379500, 0)),
 			}},
 			want: "experimentation: start:[2004-09-17T00:03:20Z] end:[2004-09-17T00:05:00Z]",
 		},

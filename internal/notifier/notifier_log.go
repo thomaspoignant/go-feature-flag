@@ -23,8 +23,8 @@ func (c *LogNotifier) Notify(diff model.DiffCache, wg *sync.WaitGroup) {
 	}
 
 	for key, flagDiff := range diff.Updated {
-		if flagDiff.After.Disable != flagDiff.Before.Disable {
-			if flagDiff.After.Disable {
+		if flagDiff.After.GetDisable() != flagDiff.Before.GetDisable() {
+			if flagDiff.After.GetDisable() {
 				// Flag is disabled
 				fflog.Printf(c.Logger, "flag %v is turned OFF\n", key)
 				continue

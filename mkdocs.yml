@@ -9,13 +9,13 @@ theme:
       toggle:
         icon: material/lightbulb
         name: Switch to light mode
-      primary: black    
+      primary: black
       accent: teal
     - scheme: default
       toggle:
         icon: material/lightbulb-outline
         name: Switch to light mode
-      primary: white    
+      primary: white
       accent: teal
 plugins:
   - search
@@ -40,5 +40,5 @@ nav:
   - 'quickstart.md'
   - 'configuration.md'
   - 'flag_file.md'
-    
+
 

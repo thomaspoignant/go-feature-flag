@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"reflect"
 	"sync"
 
 	"github.com/thomaspoignant/go-feature-flag/internal"
@@ -22,7 +21,6 @@ const slackFooter = "go-feature-flag"
 const colorDeleted = "#FF0000"
 const colorUpdated = "#FFA500"
 const colorAdded = "#008000"
-const defaultFieldShort = true
 
 func NewSlackNotifier(logger *log.Logger, httpClient internal.HTTPClient, webhookURL string) SlackNotifier {
 	slackURL, _ := url.Parse(webhookURL)
@@ -107,35 +105,56 @@ func convertUpdatedFlagsToSlackMessage(diff model.DiffCache) []attachment {
 			Fields:     []Field{},
 		}
 
-		before := reflect.ValueOf(&value.Before).Elem()
-		beforeType := reflect.TypeOf(&value.Before).Elem()
-		after := reflect.ValueOf(&value.After).Elem()
+		before := value.Before
+		after := value.After
+		const compareFormat = "%v => %v"
 
-		for i := 0; i < before.NumField(); i++ {
-			name := before.Type().Field(i).Name
+		// rule
+		if before.GetRule() != after.GetRule() {
+			attachment.Fields = append(attachment.Fields, Field{Title: "Rule", Short: false,
+				Value: fmt.Sprintf(compareFormat, before.GetRule(), after.GetRule())})
+		}
 
-			beforeVal := before.FieldByName(name)
-			afterVal := after.FieldByName(name)
+		// Percentage
+		if before.GetPercentage() != after.GetPercentage() {
+			attachment.Fields = append(attachment.Fields, Field{Title: "Percentage", Short: true,
+				Value: fmt.Sprintf(compareFormat, before.GetPercentage(), after.GetPercentage())})
+		}
 
-			if beforeVal.Kind() == reflect.Ptr && beforeVal.Elem().IsValid() {
-				beforeVal = beforeVal.Elem()
-			}
+		// True
+		if before.GetTrue() != after.GetTrue() {
+			attachment.Fields = append(attachment.Fields, Field{Title: "True", Short: true,
+				Value: fmt.Sprintf(compareFormat, before.GetTrue(), after.GetTrue())})
+		}
 
-			if afterVal.Kind() == reflect.Ptr && afterVal.Elem().IsValid() {
-				afterVal = afterVal.Elem()
-			}
-			field, _ := beforeType.FieldByName(name)
-			// Check the tag "slack_short" to see if it should be displayed Short or not
-			slackShort := defaultFieldShort
-			if field.Tag.Get("slack_short") == "false" {
-				slackShort = false
-			}
-			slackIgnore := field.Tag.Get("slack_ignore") == "true"
+		// False
+		if before.GetFalse() != after.GetFalse() {
+			attachment.Fields = append(attachment.Fields, Field{Title: "False", Short: true,
+				Value: fmt.Sprintf(compareFormat, before.GetFalse(), after.GetFalse())})
+		}
 
-			if !slackIgnore && beforeVal != afterVal {
-				attachment.Fields = append(attachment.Fields, Field{Title: name, Short: slackShort,
-					Value: fmt.Sprintf("%v => %v", beforeVal, afterVal)})
-			}
+		// Default
+		if before.GetDefault() != after.GetDefault() {
+			attachment.Fields = append(attachment.Fields, Field{Title: "Default", Short: true,
+				Value: fmt.Sprintf(compareFormat, before.GetDefault(), after.GetDefault())})
+		}
+
+		// TrackEvents
+		if before.GetTrackEvents() != after.GetTrackEvents() {
+			attachment.Fields = append(attachment.Fields, Field{Title: "TrackEvents", Short: true,
+				Value: fmt.Sprintf(compareFormat, before.GetTrackEvents(), after.GetTrackEvents())})
+		}
+
+		// Disable
+		if before.GetDisable() != after.GetDisable() {
+			attachment.Fields = append(attachment.Fields, Field{Title: "Disable", Short: true,
+				Value: fmt.Sprintf(compareFormat, before.GetDisable(), after.GetDisable())})
+		}
+
+		// Rollout
+		if before.GetRollout() != after.GetRollout() {
+			attachment.Fields = append(attachment.Fields, Field{Title: "Rollout", Short: false,
+				Value: fmt.Sprintf(compareFormat, before.GetRollout(), after.GetRollout())})
 		}
 		attachments = append(attachments, attachment)
 	}
@@ -144,7 +163,7 @@ func convertUpdatedFlagsToSlackMessage(diff model.DiffCache) []attachment {
 
 func convertAddedFlagsToSlackMessage(diff model.DiffCache) []attachment {
 	var attachments = make([]attachment, 0)
-	for key := range diff.Added {
+	for key, value := range diff.Added {
 		attachment := attachment{
 			Title:      fmt.Sprintf("🆕 Flag \"%s\" created", key),
 			Color:      colorAdded,
@@ -153,29 +172,20 @@ func convertAddedFlagsToSlackMessage(diff model.DiffCache) []attachment {
 			Fields:     []Field{},
 		}
 
-		value := diff.Added[key]
-		refValue := reflect.ValueOf(&value).Elem()
-		refType := reflect.TypeOf(&value).Elem()
-
-		for i := 0; i < refValue.NumField(); i++ {
-			fieldName := refValue.Type().Field(i).Name
-			fieldValue := refValue.Field(i)
-			if fieldValue.Kind() == reflect.Ptr && fieldValue.Elem().IsValid() {
-				fieldValue = fieldValue.Elem()
-			}
-
-			field := refType.Field(i)
-			slackShort := defaultFieldShort
-			if field.Tag.Get("slack_short") == "false" {
-				slackShort = false
-			}
-
-			strValue := fmt.Sprintf("%v", fieldValue)
-			if strValue != "<nil>" {
-				attachment.Fields = append(attachment.Fields, Field{Title: fieldName, Short: slackShort, Value: strValue})
-			}
-		}
-		attachment.FooterIcon = goFFLogo
+		attachment.Fields = append(attachment.Fields, Field{Title: "Rule", Short: false,
+			Value: fmt.Sprintf("%v", value.GetRule())})
+		attachment.Fields = append(attachment.Fields, Field{Title: "Percentage", Short: true,
+			Value: fmt.Sprintf("%v", value.GetPercentage())})
+		attachment.Fields = append(attachment.Fields, Field{Title: "True", Short: true,
+			Value: fmt.Sprintf("%v", value.GetTrue())})
+		attachment.Fields = append(attachment.Fields, Field{Title: "False", Short: true,
+			Value: fmt.Sprintf("%v", value.GetFalse())})
+		attachment.Fields = append(attachment.Fields, Field{Title: "Default", Short: true,
+			Value: fmt.Sprintf("%v", value.GetDefault())})
+		attachment.Fields = append(attachment.Fields, Field{Title: "TrackEvents", Short: true,
+			Value: fmt.Sprintf("%v", value.GetTrackEvents())})
+		attachment.Fields = append(attachment.Fields, Field{Title: "Disable", Short: true,
+			Value: fmt.Sprintf("%v", value.GetDisable())})
 		attachments = append(attachments, attachment)
 	}
 	return attachments

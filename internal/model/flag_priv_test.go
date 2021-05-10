@@ -3,8 +3,10 @@ package model
 import (
 	"github.com/stretchr/testify/assert"
 	"testing"
+	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
+	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 )
 
 func TestFlag_evaluateRule(t *testing.T) {
@@ -77,12 +79,12 @@ func TestFlag_evaluateRule(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			f := &Flag{
-				Disable:    tt.fields.Disable,
-				Rule:       tt.fields.Rule,
-				Percentage: tt.fields.Percentage,
-				True:       tt.fields.True,
-				False:      tt.fields.False,
+			f := &FlagData{
+				Disable:    testconvert.Bool(tt.fields.Disable),
+				Rule:       testconvert.String(tt.fields.Rule),
+				Percentage: testconvert.Float64(tt.fields.Percentage),
+				True:       testconvert.Interface(tt.fields.True),
+				False:      testconvert.Interface(tt.fields.False),
 			}
 
 			got := f.evaluateRule(tt.args.user)
@@ -222,15 +224,211 @@ func TestFlag_isInPercentage(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			f := &Flag{
-				Disable:    tt.fields.Disable,
-				Rule:       tt.fields.Rule,
-				Percentage: tt.fields.Percentage,
-				True:       tt.fields.True,
-				False:      tt.fields.False,
+			f := &FlagData{
+				Disable:    testconvert.Bool(tt.fields.Disable),
+				Rule:       testconvert.String(tt.fields.Rule),
+				Percentage: testconvert.Float64(tt.fields.Percentage),
+				True:       testconvert.Interface(tt.fields.True),
+				False:      testconvert.Interface(tt.fields.False),
 			}
 
 			got := f.isInPercentage(tt.args.flagName, tt.args.user)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestFlag_getPercentage(t *testing.T) {
+	tests := []struct {
+		name string
+		flag FlagData
+		want float64
+	}{
+		{
+			name: "No rollout strategy 100",
+			flag: FlagData{
+				Percentage: testconvert.Float64(100),
+			},
+			want: float64(100 * percentageMultiplier),
+		},
+		{
+			name: "No rollout strategy 0",
+			flag: FlagData{
+				Percentage: testconvert.Float64(0),
+			},
+			want: float64(0 * percentageMultiplier),
+		},
+		{
+			name: "No rollout strategy 50",
+			flag: FlagData{
+				Percentage: testconvert.Float64(50),
+			},
+			want: float64(50 * percentageMultiplier),
+		},
+		{
+			name: "Progressive rollout no explicit percentage",
+			flag: FlagData{
+				Rollout: &Rollout{
+					Progressive: &Progressive{
+						ReleaseRamp: ProgressiveReleaseRamp{
+							Start: testconvert.Time(time.Now().Add(-1 * time.Minute)),
+							End:   testconvert.Time(time.Now().Add(1 * time.Minute)),
+						},
+					},
+				},
+			},
+			want: float64(50 * percentageMultiplier),
+		},
+		{
+			name: "Progressive rollout explicit initial percentage",
+			flag: FlagData{
+				Rollout: &Rollout{
+					Progressive: &Progressive{
+						Percentage: ProgressivePercentage{
+							Initial: 20,
+						},
+						ReleaseRamp: ProgressiveReleaseRamp{
+							Start: testconvert.Time(time.Now().Add(-1 * time.Minute)),
+							End:   testconvert.Time(time.Now().Add(1 * time.Minute)),
+						},
+					},
+				},
+			},
+			want: float64(60000),
+		},
+		{
+			name: "Progressive rollout explicit end percentage",
+			flag: FlagData{
+				Rollout: &Rollout{
+					Progressive: &Progressive{
+						Percentage: ProgressivePercentage{
+							End: 20,
+						},
+						ReleaseRamp: ProgressiveReleaseRamp{
+							Start: testconvert.Time(time.Now().Add(-1 * time.Minute)),
+							End:   testconvert.Time(time.Now().Add(1 * time.Minute)),
+						},
+					},
+				},
+			},
+			want: float64(10000),
+		},
+		{
+			name: "Progressive rollout explicit initial and end percentage",
+			flag: FlagData{
+				Rollout: &Rollout{
+					Progressive: &Progressive{
+						Percentage: ProgressivePercentage{
+							Initial: 10,
+							End:     20,
+						},
+						ReleaseRamp: ProgressiveReleaseRamp{
+							Start: testconvert.Time(time.Now().Add(-1 * time.Minute)),
+							End:   testconvert.Time(time.Now().Add(1 * time.Minute)),
+						},
+					},
+				},
+			},
+			want: float64(15000),
+		},
+		{
+			name: "Progressive rollout before date",
+			flag: FlagData{
+				Rollout: &Rollout{
+					Progressive: &Progressive{
+						Percentage: ProgressivePercentage{
+							Initial: 10,
+							End:     20,
+						},
+						ReleaseRamp: ProgressiveReleaseRamp{
+							Start: testconvert.Time(time.Now().Add(1 * time.Minute)),
+							End:   testconvert.Time(time.Now().Add(2 * time.Minute)),
+						},
+					},
+				},
+			},
+			want: float64(10000),
+		},
+		{
+			name: "Progressive rollout after date",
+			flag: FlagData{
+				Rollout: &Rollout{
+					Progressive: &Progressive{
+						Percentage: ProgressivePercentage{
+							Initial: 10,
+							End:     80,
+						},
+						ReleaseRamp: ProgressiveReleaseRamp{
+							Start: testconvert.Time(time.Now().Add(-1 * time.Minute)),
+							End:   testconvert.Time(time.Now().Add(-2 * time.Minute)),
+						},
+					},
+				},
+			},
+			want: float64(80000),
+		},
+		{
+			name: "End percentage lower than start use top level percentage",
+			flag: FlagData{
+				Rollout: &Rollout{
+					Progressive: &Progressive{
+						Percentage: ProgressivePercentage{
+							Initial: 80,
+							End:     10,
+						},
+						ReleaseRamp: ProgressiveReleaseRamp{
+							Start: testconvert.Time(time.Now().Add(-1 * time.Minute)),
+							End:   testconvert.Time(time.Now().Add(1 * time.Minute)),
+						},
+					},
+				},
+			},
+			want: float64(0),
+		},
+		{
+			name: "Missing end date",
+			flag: FlagData{
+				Rollout: &Rollout{
+					Progressive: &Progressive{
+						ReleaseRamp: ProgressiveReleaseRamp{
+							Start: testconvert.Time(time.Now().Add(-1 * time.Minute)),
+						},
+					},
+				},
+			},
+			want: float64(0),
+		},
+		{
+			name: "Missing start date",
+			flag: FlagData{
+				Rollout: &Rollout{
+					Progressive: &Progressive{
+						ReleaseRamp: ProgressiveReleaseRamp{
+							End: testconvert.Time(time.Now().Add(-1 * time.Minute)),
+						},
+					},
+				},
+			},
+			want: float64(0),
+		},
+		{
+			name: "Missing date use default percentage",
+			flag: FlagData{
+				Percentage: testconvert.Float64(46),
+				Rollout: &Rollout{
+					Progressive: &Progressive{
+						ReleaseRamp: ProgressiveReleaseRamp{
+							End: testconvert.Time(time.Now().Add(-1 * time.Minute)),
+						},
+					},
+				},
+			},
+			want: float64(46000),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.flag.getActualPercentage()
 			assert.Equal(t, tt.want, got)
 		})
 	}
