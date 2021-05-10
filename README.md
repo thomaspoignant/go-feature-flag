@@ -522,7 +522,7 @@ This header **`X-Hub-Signature-256`** is sent if the webhook is configured with 
 
 The **Slack** notifier allows you to get notification on your favorite slack channel when an instance of `go-feature-flag` is detecting changes in the configuration file.
 
-![slack notification example](.doc/slack_notification.png)
+![slack notification example](docs/assets/slack_notification.png)
 
 - First, you need to create an incoming webhook on your slack instance *(you can follow this [documentation to see how to do it](https://api.slack.com/messaging/webhooks#getting_started))*
 - Copy your webhook URL. It should looks like `https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX`.
@@ -688,7 +688,7 @@ The **S3 exporter** will collect the data and create a new file in a specific fo
 Everytime the `FlushInterval` or `MaxEventInMemory` is reached a new file will be added to S3.  
 If for some reason the S3 upload failed, we will keep the data in memory and retry to add the next time we reach `FlushInterval` or `MaxEventInMemory`.
 
-![export in S3 screenshot](.doc/s3-exporter.png)
+![export in S3 screenshot](docs/assets/s3-exporter.png)
 
 
 Check this [complete example](examples/data_export_s3/main.go) to see how to export the data in S3.
