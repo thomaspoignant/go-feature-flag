@@ -1,0 +1,40 @@
+site_name: go-feature-flag
+theme:
+  name: material
+  use_pygments: true
+  logo: assets/logo.png
+  favicon: assets/logo.png
+  palette:
+    - scheme: slate
+      toggle:
+        icon: material/lightbulb
+        name: Switch to light mode
+      primary: black
+      accent: teal
+    - scheme: default
+      toggle:
+        icon: material/lightbulb-outline
+        name: Switch to light mode
+      primary: white
+      accent: teal
+plugins:
+  - search
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - admonition
+repo_url: https://github.com/thomaspoignant/go-feature-flag
+extra:
+  generator: false
+  social:
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/thomaspoignant
+    - icon: fontawesome/brands/linkedin
+      link: https://linkedin.com/in/poignantthomas
+    - icon: fontawesome/brands/medium
+      link: https://thomaspoignant.medium.com
+    - icon: fontawesome/brands/github
+      link: https://github.com/thomaspoignant/go-feature-flag
+nav:
+  - 'index.md'
+
