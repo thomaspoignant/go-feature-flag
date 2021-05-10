@@ -22,6 +22,7 @@ plugins:
 markdown_extensions:
   - pymdownx.highlight
   - pymdownx.superfences
+  - admonition
 repo_url: https://github.com/thomaspoignant/go-feature-flag
 extra:
   generator: false
@@ -34,6 +35,10 @@ extra:
       link: https://thomaspoignant.medium.com
     - icon: fontawesome/brands/github
       link: https://github.com/thomaspoignant/go-feature-flag
-    
+nav:
+  - 'index.md'
+  - 'quickstart.md'
+  - 'configuration.md'
+  - 'flag_file.md'
     
 
