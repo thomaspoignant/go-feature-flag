@@ -1,0 +1,22 @@
+new-admin-access:
+  percentage: 100
+  rule: key eq "785a14bf-d2c5-4caa-9c70-2bbc4e3732a5"
+  true: true
+  false: false
+  default: false
+  rollout:
+    scheduled:
+      steps:
+        - date: 2020-04-10T00:00:00.10+02:00
+          rule: beta eq "true"
+          percentage: 100
+
+        - date: 2022-05-12T15:36:00.10+02:00
+          rule: beta eq "false"
+
+flag-only-for-admin:
+  rule: admin eq true
+  percentage: 100
+  true: true
+  false: false
+  default: false
