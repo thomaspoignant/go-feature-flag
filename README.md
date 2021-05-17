@@ -400,6 +400,28 @@ experimentation-flag:
 The `percentage` field is not mandatory, by default we will use **0** to **100%**.
 If you have no date in your `releaseRamp` we will not do any progressive rollout and use the top level percentage you have configured *(0% in our example)*.
 
+### Scheduled rollout
+
+Scheduling introduces the ability for users to changes their flags for future points in time. 
+While this sounds deceptively straightforward, it unlocks the potential for users to create complex release strategies by scheduling the incremental steps in advance.
+
+For example, you may want to turn a feature ON for internal testing tomorrow and then enable it for your ‘beta’ user segment four days later.
+
+**Configuration example:**
+```yaml
+rollout:
+  scheduled:
+      steps:
+        - date: 2020-04-10T00:00:00.10+02:00
+          rule: beta eq "true"
+          percentage: 100
+    
+        - date: 2022-05-12T15:36:00.10+02:00
+          rule: beta eq "false"
+```
+
+You can change any fields that are available on your flag.
+Since your configuration has not been changed manually, it does not trigger any notifier.
 
 ## Notifiers
 If you want to be informed when a flag has changed outside of your app, you can configure a **notifier**.
