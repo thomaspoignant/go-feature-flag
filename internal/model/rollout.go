@@ -17,6 +17,8 @@ type Rollout struct {
 	// You can decide at which percentage you starts and at what percentage you ends in your release ramp.
 	// Before the start date we will serve the initial percentage and after we will serve the end percentage.
 	Progressive *Progressive `json:"progressive,omitempty" yaml:"progressive,omitempty" toml:"progressive,omitempty" slack_short:"false"` // nolint: lll
+
+	Scheduled *ScheduledRollout `json:"scheduled,omitempty" yaml:"scheduled,omitempty" toml:"scheduled,omitempty" slack_short:"false"` // nolint: lll
 }
 
 func (e Rollout) String() string {
@@ -78,4 +80,26 @@ type ProgressiveReleaseRamp struct {
 
 	// End is the ending time of the ramp
 	End *time.Time `json:"end,omitempty" yaml:"end,omitempty" toml:"end,omitempty"`
+}
+
+type ScheduledRollout struct {
+	Steps []ScheduledStep `json:"steps,omitempty" yaml:"steps,omitempty" toml:"steps,omitempty"`
+	// scheduled:
+	// steps:
+	// - date: 2021-04-10T00:00:00.10-05:00
+	// rule: internal eq true
+	// percentage: 100
+	//
+	// - date: 2021-04-14T00:00:00.10-05:00
+	// rule: internal eq true OR beta eq true
+	// percentage: 100
+	//
+	// - date: 2021-05-21T00:00:00.10-05:00
+	// rule: "" // no restriction on who is affected by the flag
+	// percentage: 100
+}
+
+type ScheduledStep struct {
+	FlagData `yaml:",inline"`
+	Date     *time.Time `json:"date,omitempty" yaml:"date,omitempty" toml:"date,omitempty"`
 }

@@ -371,6 +371,112 @@ func TestFlag_ProgressiveRollout(t *testing.T) {
 	assert.Equal(t, f.GetTrue(), v3)
 }
 
+func TestFlag_ScheduledRollout(t *testing.T) {
+	f := &model.FlagData{
+		Rule:       testconvert.String("key eq \"test\""),
+		Percentage: testconvert.Float64(0),
+		True:       testconvert.Interface("True"),
+		False:      testconvert.Interface("False"),
+		Default:    testconvert.Interface("Default"),
+		Rollout: &model.Rollout{
+			Scheduled: &model.ScheduledRollout{
+				Steps: []model.ScheduledStep{
+					{
+						FlagData: model.FlagData{
+							Percentage: testconvert.Float64(100),
+						},
+						Date: testconvert.Time(time.Now().Add(1 * time.Second)),
+					},
+					{
+						FlagData: model.FlagData{
+							True:    testconvert.Interface("True2"),
+							False:   testconvert.Interface("False2"),
+							Default: testconvert.Interface("Default2"),
+							Rule:    testconvert.String("key eq \"test2\""),
+						},
+						Date: testconvert.Time(time.Now().Add(2 * time.Second)),
+					},
+					{
+						FlagData: model.FlagData{
+							True:    testconvert.Interface("True2"),
+							False:   testconvert.Interface("False2"),
+							Default: testconvert.Interface("Default2"),
+							Rule:    testconvert.String("key eq \"test\""),
+						},
+						Date: testconvert.Time(time.Now().Add(3 * time.Second)),
+					},
+					{
+						FlagData: model.FlagData{
+							Disable: testconvert.Bool(true),
+						},
+						Date: testconvert.Time(time.Now().Add(4 * time.Second)),
+					},
+					{
+						FlagData: model.FlagData{
+							Percentage: testconvert.Float64(0),
+						},
+					},
+					{
+						FlagData: model.FlagData{
+							Disable:     testconvert.Bool(false),
+							TrackEvents: testconvert.Bool(true),
+							Rollout: &model.Rollout{
+								Experimentation: &model.Experimentation{
+									Start: testconvert.Time(time.Now().Add(6 * time.Second)),
+									End:   testconvert.Time(time.Now().Add(7 * time.Second)),
+								},
+							},
+						},
+						Date: testconvert.Time(time.Now().Add(5 * time.Second)),
+					},
+				},
+			},
+		},
+	}
+
+	user := ffuser.NewAnonymousUser("test")
+	flagName := "test-flag"
+
+	// We evaluate the same flag multiple time overtime.
+	v, _ := f.Value(flagName, user)
+	assert.Equal(t, f.GetFalse(), v)
+
+	time.Sleep(1 * time.Second)
+
+	v, _ = f.Value(flagName, user)
+	assert.Equal(t, "True", v)
+
+	time.Sleep(1 * time.Second)
+
+	v, _ = f.Value(flagName, user)
+	assert.Equal(t, "Default2", v)
+
+	time.Sleep(1 * time.Second)
+
+	v, _ = f.Value(flagName, user)
+	assert.Equal(t, "True2", v)
+
+	time.Sleep(1 * time.Second)
+
+	v, _ = f.Value(flagName, user)
+	assert.Equal(t, "Default2", v)
+
+	time.Sleep(1 * time.Second)
+
+	v, _ = f.Value(flagName, user)
+	assert.Equal(t, "Default2", v)
+
+	time.Sleep(1 * time.Second)
+
+	v, _ = f.Value(flagName, user)
+	assert.Equal(t, "True2", v)
+
+	time.Sleep(1 * time.Second)
+
+	v, _ = f.Value(flagName, user)
+	assert.Equal(t, "Default2", v)
+}
+
 func TestFlag_String(t *testing.T) {
 	type fields struct {
 		Disable     bool
@@ -397,7 +503,7 @@ func TestFlag_String(t *testing.T) {
 				Default:     false,
 				TrackEvents: testconvert.Bool(true),
 			},
-			want: "percentage=10%, rule=\"key eq \"toto\"\", true=\"true\", false=\"false\", true=\"false\", disable=\"false\", trackEvents=\"true\"",
+			want: "percentage=10%, rule=\"key eq \"toto\"\", true=\"true\", false=\"false\", default=\"false\", disable=\"false\", trackEvents=\"true\"",
 		},
 		{
 			name: "No rule",
@@ -408,7 +514,7 @@ func TestFlag_String(t *testing.T) {
 				False:      false,
 				Default:    false,
 			},
-			want: "percentage=10%, true=\"true\", false=\"false\", true=\"false\", disable=\"false\"",
+			want: "percentage=10%, true=\"true\", false=\"false\", default=\"false\", disable=\"false\"",
 		},
 		{
 			name: "Default values",
@@ -417,7 +523,7 @@ func TestFlag_String(t *testing.T) {
 				False:   false,
 				Default: false,
 			},
-			want: "percentage=0%, true=\"true\", false=\"false\", true=\"false\", disable=\"false\"",
+			want: "percentage=0%, true=\"true\", false=\"false\", default=\"false\", disable=\"false\"",
 		},
 	}
 	for _, tt := range tests {

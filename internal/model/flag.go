@@ -102,6 +102,7 @@ type FlagData struct {
 // Value is returning the Value associate to the flag (True / False / Default ) based
 // if the toggle apply to the user or not.
 func (f *FlagData) Value(flagName string, user ffuser.User) (interface{}, VariationType) {
+	f.updateFlagStage()
 	if f.isExperimentationOver() {
 		// if we have an experimentation that has not started or that is finished we use the default value.
 		return f.GetDefault(), VariationDefault
@@ -170,7 +171,7 @@ func (f FlagData) String() string {
 	}
 	strBuilder.WriteString(fmt.Sprintf("true=\"%v\", ", f.GetTrue()))
 	strBuilder.WriteString(fmt.Sprintf("false=\"%v\", ", f.GetFalse()))
-	strBuilder.WriteString(fmt.Sprintf("true=\"%v\", ", f.GetDefault()))
+	strBuilder.WriteString(fmt.Sprintf("default=\"%v\", ", f.GetDefault()))
 	strBuilder.WriteString(fmt.Sprintf("disable=\"%v\"", f.GetDisable()))
 
 	if f.TrackEvents != nil {
@@ -247,6 +248,58 @@ func (f *FlagData) getActualPercentage() float64 {
 	c := now.Unix() - f.Rollout.Progressive.ReleaseRamp.Start.Unix()
 	currentPercentage := float64(c)*percentPerSec + initialPercentage
 	return currentPercentage
+}
+
+func (f *FlagData) updateFlagStage() {
+	if f.Rollout == nil || f.Rollout.Scheduled == nil || len(f.Rollout.Scheduled.Steps) == 0 {
+		// no update required because no scheduled rollout configuration
+		return
+	}
+
+	now := time.Now()
+	for _, step := range f.Rollout.Scheduled.Steps {
+		// if the step has no date we ignore it
+		if step.Date == nil {
+			continue
+		}
+
+		// as soon as we have a step in the future we stop the updates
+		if now.Before(*step.Date) {
+			break
+		}
+
+		if step.Date != nil && now.After(*step.Date) {
+			f.mergeChanges(step)
+		}
+	}
+}
+
+// mergeChanges f;ejs;
+func (f *FlagData) mergeChanges(stepFlag ScheduledStep) {
+	if stepFlag.Disable != nil {
+		f.Disable = stepFlag.Disable
+	}
+	if stepFlag.False != nil {
+		f.False = stepFlag.False
+	}
+	if stepFlag.True != nil {
+		f.True = stepFlag.True
+	}
+	if stepFlag.Default != nil {
+		f.Default = stepFlag.Default
+	}
+	if stepFlag.TrackEvents != nil {
+		f.TrackEvents = stepFlag.TrackEvents
+	}
+	if stepFlag.Percentage != nil {
+		f.Percentage = stepFlag.Percentage
+	}
+	if stepFlag.Rule != nil {
+		f.Rule = stepFlag.Rule
+	}
+	if stepFlag.Rollout != nil {
+		f.Rollout = stepFlag.Rollout
+	}
 }
 
 // GetRule is the getter of the field Rule
