@@ -13,7 +13,6 @@
     <a href="https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag"><img src="https://godoc.org/github.com/thomaspoignant/go-feature-flag?status.svg" alt="GoDoc" /></a>
     <img src="https://img.shields.io/github/go-mod/go-version/thomaspoignant/go-feature-flag?logo=go%20version" alt="Go version"/>
     <a href="LICENSE"><img src="https://img.shields.io/github/license/thomaspoignant/go-feature-flag" alt="License"/></a>
-    <a href="https://replit.com/@thomaspoignant/go-feature-flag-example#main.go"><img src="https://replit.com/badge/github/thomaspoignant/go-feature-flag-example"  alt="run on repl.it"></a>
     <a href="https://github.com/avelino/awesome-go/#server-applications"><img src="https://awesome.re/mentioned-badge-flat.svg" alt="Mentioned in Awesome Go"></a>
 </p>
 
@@ -21,10 +20,6 @@
 
 **Feature flags with no complex system to maintain!**
 
-## Installation
-```bash
-go get github.com/thomaspoignant/go-feature-flag
-```
 ## What is go-feature-flag?
 
 A simple and complete feature flag solution, without any complex backend system to install, you need only a file as your backend.
@@ -36,7 +31,7 @@ that explains why this is a great pattern.
 
 I've also wrote an [article](https://medium.com/better-programming/feature-flags-and-how-to-iterate-quickly-7e3371b9986) that explains why feature flags can help you to iterate quickly.
 
-### `go-feature-flags` supports
+## go-feature-flags supports
 
 - Storing your configuration flags file on various locations ([`HTTP`](#from-an-http-endpoint), [`S3`](#from-a-s3-bucket), [`GitHub`](#from-github), [`file`](#from-a-file)).
 - Configuring your flags in various [format](#flags-file-format) (`JSON`, `TOML` and `YAML`).

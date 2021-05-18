@@ -43,7 +43,7 @@ I've also wrote an [article](https://medium.com/better-programming/feature-flags
 
 ## Quickstart
 First, you need to initialize the `ffclient` with the location of your backend file.
-```go
+```go linenums="1"
 err := ffclient.Init(ffclient.Config{
     PollInterval: 3,
     Retriever: &ffclient.HTTPRetriever{
@@ -57,7 +57,7 @@ PollInterval, the default value is 60 seconds).*
 
 Now you can evaluate your flags anywhere in your code.
 
-```go
+```go linenums="1"
 user := ffuser.NewUser("user-unique-key")
 hasFlag, _ := ffclient.BoolVariation("test-flag", user, false)
 if hasFlag {
@@ -74,7 +74,7 @@ The configuration is set with `ffclient.Config{}` and you can give it to ``ffcli
 function.
 
 Example:
-```go 
+```go linenums="1" 
 ffclient.Init(ffclient.Config{ 
     PollInterval:   3,
     Logger:         log.New(file, "/tmp/log", 0),
@@ -104,13 +104,13 @@ ffclient.Init(ffclient.Config{
 | Field | Description |
 |---|---|
 |`Retriever`  | The configuration retriever you want to use to get your flag file<br> *see [Where do I store my flags file](#where-do-i-store-my-flags-file) for the configuration details*.|
-|`Context`  | *(optional)* The context used by the retriever.<br />Default: `context.Background()`|
-|`DataExporter` | *(optional)* DataExporter defines how to export data on how your flags are used.<br> *see [export data section](#export-data) for more details*.|
-|`FileFormat`| *(optional)* Format of your configuration file. Available formats are `yaml`, `toml` and `json`, if you omit the field it will try to unmarshal the file as a `yaml` file.<br>Default: `YAML`|
-|`Logger`   | *(optional)* Logger used to log what `go-feature-flag` is doing.<br />If no logger is provided the module will not log anything.<br>Default: No log|
-|`Notifiers` | *(optional)* List of notifiers to call when your flag file has changed.<br> *see [notifiers section](#notifiers) for more details*.|
+|`Context`  | *(optional)*<br>The context used by the retriever.<br />Default: `context.Background()`|
+|`DataExporter` | *(optional)*<br>DataExporter defines how to export data on how your flags are used.<br> *see [export data section](#export-data) for more details*.|
+|`FileFormat`| *(optional)*<br>Format of your configuration file. Available formats are `yaml`, `toml` and `json`, if you omit the field it will try to unmarshal the file as a `yaml` file.<br>Default: `YAML`|
+|`Logger`   | *(optional)*<br>Logger used to log what `go-feature-flag` is doing.<br />If no logger is provided the module will not log anything.<br>Default: No log|
+|`Notifiers` | *(optional)*<br>List of notifiers to call when your flag file has changed.<br> *see [notifiers section](#notifiers) for more details*.|
 |`PollInterval`   | (optional) Number of seconds to wait before refreshing the flags.<br />Default: 60|
-|`StartWithRetrieverError` | *(optional)* If **true**, the SDK will start even if we did not get any flags from the retriever. It will serve only default values until the retriever returns the flags.<br>The init method will not return any error if the flag file is unreachable.<br>Default: **false**|
+|`StartWithRetrieverError` | *(optional)*<br>If **true**, the SDK will start even if we did not get any flags from the retriever. It will serve only default values until the retriever returns the flags.<br>The init method will not return any error if the flag file is unreachable.<br>Default: **false**|
 
 ## Where do I store my flags file
 `go-feature-flags` support different ways of retrieving the flag file.  
@@ -121,7 +121,7 @@ consideration.
 <details>
 <summary><i>expand to see details</i></summary>
 
-```go
+```go linenums="1"
 err := ffclient.Init(ffclient.Config{
     PollInterval: 3,
     Retriever: &ffclient.GithubRetriever{
@@ -149,7 +149,7 @@ To configure the access to your GitHub file:
 <details>
 <summary><i>expand to see details</i></summary>
 
-```go
+```go linenums="1"
 err := ffclient.Init(ffclient.Config{
     PollInterval: 3,
     Retriever: &ffclient.HTTPRetriever{
@@ -173,7 +173,7 @@ To configure your HTTP endpoint:
 <details>
 <summary><i>expand to see details</i></summary>
 
-```go
+```go linenums="1"
 err := ffclient.Init(ffclient.Config{
     PollInterval: 3,
     Retriever: &ffclient.S3Retriever{
@@ -198,7 +198,7 @@ To configure your S3 file location:
 <details>
 <summary><i>expand to see details</i></summary>
 
-```go
+```go linenums="1"
 err := ffclient.Init(ffclient.Config{
     PollInterval: 3,
     Retriever: &ffclient.FileRetriever{
@@ -219,7 +219,7 @@ To configure your File retriever:
 Your file should be a `YAML`, `JSON` or `TOML` file with a list of flags *(examples: [`YAML`](testdata/flag-config.yaml), [`JSON`](testdata/flag-config.json), [`TOML`](testdata/flag-config.toml))*.
 
 A flag configuration looks like:
-```yaml
+```yaml linenums="1"
 test-flag:
   percentage: 100
   rule: key eq "random-key"
@@ -312,7 +312,7 @@ The SDK defines a [`User`](https://pkg.go.dev/github.com/thomaspoignant/go-featu
 
 Here's an example:
 
-```go
+```go linenums="1"
 // User with only a key
 user1 := ffuser.NewUser("user1-key")
 
@@ -333,7 +333,7 @@ Custom attributes are one of the most powerful features. They let you have rules
 The Variation methods determine whether a flag is enabled or not for a specific user.
 There is a Variation method for each type: [`BoolVariation`,](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#BoolVariation) [`IntVariation`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#IntVariation), [`Float64Variation`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#Float64Variation), [`StringVariation`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#StringVariation), [`JSONArrayVariation`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#JSONArrayVariation) and [`JSONVariation`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#JSONVariation).
 
-```go
+```go linenums="1"
 result, _ := ffclient.BoolVariation("your.feature.key", user, false)
 
 // result is now true or false depending on the setting of this boolean feature flag
@@ -359,7 +359,7 @@ An **experimentation rollout** is when your flag is configured to be served only
 This strategy you should use to run an A/B test.
 
 **Configuration example:**
-```yaml
+```yaml linenums="1"
 experimentation-flag:
   true: "B"
   false: "A"
@@ -385,7 +385,7 @@ If you want to be informed when a flag has changed outside of your app, you can 
 > :warning: In `v0.9.0` we have changed how to configure webhooks, moving from the key `Webhooks` to `Notifiers`.  
 `Webhooks` is still supported for now but will be removed in a future version.
 
-```go
+```go linenums="1"
 ffclient.Config{ 
     // ...
     Notifiers: []ffclient.NotifierConfig{
@@ -410,7 +410,7 @@ ffclient.Config{
 #### Format
 If you have configured a webhook, a POST request will be sent to the `EndpointURL` with a body in this format:
 
-```json
+```json linenums="1"
 {
     "meta": {
         "hostname": "server01",
@@ -432,7 +432,7 @@ If you have configured a webhook, a POST request will be sent to the `EndpointUR
 <details>
 <summary><b>Example</b></summary>
   
-```json
+```json linenums="1"
 {
    "meta":{
        "hostname": "server01"
@@ -692,10 +692,10 @@ ffclient.Config{
 |---|---|
 |`Bucket `   |   Name of your S3 Bucket. |
 |`AwsConfig `   |  An instance of `aws.Config` that configure your access to AWS *(see [this documentation for more info](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html))*.  |
-|`CsvTemplate`   |   *(optional)* CsvTemplate is used if your output format is CSV. This field will be ignored if you are using another format than CSV. You can decide which fields you want in your CSV line with a go-template syntax, please check [internal/exporter/feature_event.go](internal/exporter/feature_event.go) to see what are the fields available.<br>**Default:** `{{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}}\n` |
-|`Filename`   | *(optional)* Filename is the name of your output file. You can use a templated config to define the name of your exported files.<br>Available replacement are `{{ .Hostname}}`, `{{ .Timestamp}`} and `{{ .Format}}`<br>Default: `flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}`|
-|`Format`   |   *(optional)* Format is the output format you want in your exported file. Available format are **`JSON`** and **`CSV`**. *(Default: `JSON`)* |
-|`S3Path `   |   *(optional)* The location of the directory in S3. |
+|`CsvTemplate`   |   *(optional)*<br>CsvTemplate is used if your output format is CSV. This field will be ignored if you are using another format than CSV. You can decide which fields you want in your CSV line with a go-template syntax, please check [internal/exporter/feature_event.go](internal/exporter/feature_event.go) to see what are the fields available.<br>**Default:** `{{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}}\n` |
+|`Filename`   | *(optional)*<br>Filename is the name of your output file. You can use a templated config to define the name of your exported files.<br>Available replacement are `{{ .Hostname}}`, `{{ .Timestamp}`} and `{{ .Format}}`<br>Default: `flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}`|
+|`Format`   |   *(optional)*<br>Format is the output format you want in your exported file. Available format are **`JSON`** and **`CSV`**. *(Default: `JSON`)* |
+|`S3Path `   |   *(optional)*<br>The location of the directory in S3. |
 
 Check the [godoc for full details](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag@v0.11.0/ffexporter#S3).
 
@@ -731,8 +731,8 @@ ffclient.Config{
 | Field  | Description  |
 |---|---|
 |`EndpointURL `   | EndpointURL of your webhook |
-|`Secret `   |  *(optional)* Secret used to sign your request body and fill the `X-Hub-Signature-256` header.  |
-|`Meta`   |   *(optional)* Add all the informations you want to see in your request. |
+|`Secret `   |  *(optional)*<br>Secret used to sign your request body and fill the `X-Hub-Signature-256` header.  |
+|`Meta`   |   *(optional)*<br>Add all the informations you want to see in your request. |
 
 
 #### Webhook format

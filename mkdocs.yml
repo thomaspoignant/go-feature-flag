@@ -17,12 +17,18 @@ theme:
         name: Switch to light mode
       primary: white
       accent: teal
+  features:
+    - navigation.indexes
+    - navigation.expand
+    - navigation.top
 plugins:
   - search
 markdown_extensions:
   - pymdownx.highlight
   - pymdownx.superfences
   - admonition
+  - pymdownx.tabbed
+  - pymdownx.superfences
 repo_url: https://github.com/thomaspoignant/go-feature-flag
 extra:
   generator: false
@@ -39,6 +45,18 @@ nav:
   - 'index.md'
   - 'quickstart.md'
   - 'configuration.md'
-  - 'flag_file.md'
-
+  - 'Store your flag file':
+      - 'flag_file/index.md'
+      - 'flag_file/s3.md'
+      - 'flag_file/http.md'
+      - 'flag_file/github.md'
+      - 'flag_file/file.md'
+  - 'flag_format.md'
+  - 'users.md'
+  - 'Data collection':
+      - 'data_collection/index.md'
+      - 'data_collection/file.md'
+      - 'data_collection/log.md'
+      - 'data_collection/s3.md'
+      - 'data_collection/webhook.md'
 

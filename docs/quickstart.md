@@ -8,7 +8,7 @@ go get github.com/thomaspoignant/go-feature-flag
 ## SDK Initialisation
 
 First, you need to initialize the `ffclient` with the location of your backend file.
-```go
+```go linenums="1"
 err := ffclient.Init(ffclient.Config{
     PollInterval: 3,
     Retriever: &ffclient.HTTPRetriever{
@@ -23,7 +23,7 @@ PollInterval, the default value is 60 seconds).*
 ## Evaluate your flags
 Now you can evaluate your flags anywhere in your code.
 
-```go
+```go linenums="1"
 user := ffuser.NewUser("user-unique-key")
 hasFlag, _ := ffclient.BoolVariation("test-flag", user, false)
 if hasFlag {
