@@ -7,6 +7,7 @@ theme:
   use_pygments: true
   logo: assets/logo.png
   favicon: assets/logo.png
+  language: en
   palette:
     - scheme: slate
       toggle:
@@ -24,6 +25,9 @@ theme:
     - navigation.indexes
     - navigation.expand
     - navigation.top
+  icon:
+    repo: fontawesome/brands/github
+edit_uri: edit/main/docs/
 plugins:
   - search
 markdown_extensions:
@@ -56,16 +60,19 @@ nav:
       - 'flag_file/file.md'
   - 'flag_format.md'
   - 'users.md'
+  - 'Rollout strategies':
+      - 'rollout/index.md'
+      - 'rollout/progressive.md'
+      - 'rollout/scheduled.md'
+      - 'rollout/experimentation.md'
   - 'Export data':
       - 'data_collection/index.md'
       - 'data_collection/file.md'
       - 'data_collection/log.md'
       - 'data_collection/s3.md'
       - 'data_collection/webhook.md'
-  - 'Rollout strategies':
-      - 'rollout/index.md'
-      - 'rollout/progressive.md'
-      - 'rollout/scheduled.md'
-      - 'rollout/experimentation.md'
-
+  - 'Notify flag changes':
+      - 'notifier/index.md'
+      - 'notifier/slack.md'
+      - 'notifier/webhook.md'
 

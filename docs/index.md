@@ -33,10 +33,14 @@ I've also wrote an [article](https://medium.com/better-programming/feature-flags
 
 ## go-feature-flags supports
 
-- Storing your configuration flags file on various locations ([`HTTP`](#from-an-http-endpoint), [`S3`](#from-a-s3-bucket), [`GitHub`](#from-github), [`file`](#from-a-file)).
-- Configuring your flags in various [format](#flags-file-format) (`JSON`, `TOML` and `YAML`).
-- Adding complex [rules](#rule-format) to target your users.
-- Run A/B test experimentations.
-- Getting notified when a flag has changed ([`webhook`](#webhooks) and [`slack`](#slack)).
-- Exporting your flags usage data ([`s3`](#s3-exporter), [`log`](#log-exporter) and [`file`](#file-exporter)).
+- Storing your configuration flags file on various locations ([`HTTP`](./flag_file/http.md), [`S3`](.flag_file/s3.md), [`GitHub`](./flag_file/github.md), [`file`](./flag_file/file.md)).
+- Configuring your flags in various [format](flag_format.md) (`JSON`, `TOML` and `YAML`).
+- Adding complex [rules](flag_format.md#rule-format) to target your users.
+- Use complex rollout strategy for your flags
+    - [Run A/B testing experimentation](rollout/experimentation.md).
+    - [Progressively rollout a feature](rollout/progressive.md).
+    - [Schedule your flag updates](rollout/scheduled.md).
+- Exporting your flags usage data ([`s3`](data_collection/s3.md), [`log`](data_collection/log.md) and [`file`](data_collection/file.md)).
+- Getting notified when a flag has changed ([`webhook`](notifier/webhook.md) and [`slack`](notifier/slack.md)).
+
 
