@@ -50,7 +50,7 @@ extra:
     - icon: fontawesome/brands/github
       link: https://github.com/thomaspoignant
 nav:
-  - 'index.md'
+  - 'Home': 'index.md'
   - 'quickstart.md'
   - 'configuration.md'
   - 'Store your flag file':
