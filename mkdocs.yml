@@ -1,4 +1,7 @@
 site_name: go-feature-flag
+google_analytics:
+  - UA-197484083-1
+  - auto
 theme:
   name: material
   use_pygments: true
