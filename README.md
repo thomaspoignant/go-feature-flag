@@ -1,3 +1,4 @@
+
 <p align="center">
   <img width="250" height="238" src="logo.png" alt="go-feature-flag logo" />
 </p>
@@ -296,7 +297,7 @@ The key should also uniquely identify each user. You can use a primary key, an e
 **We recommend using a hash if possible.**    
 All the other attributes are optional.
 
-:info: Custom attributes are one of the most powerful features. They let you have rules on these attributes and target users according to any data that you want.
+ℹ️ Custom attributes are one of the most powerful features. They let you have rules on these attributes and target users according to any data that you want.
 
 You can also distinguish logged-in users from anonymous users in the SDK ([check documentation about anonymous users](https://thomaspoignant.github.io/go-feature-flag/users/#anonymous-users)).
 
@@ -340,7 +341,7 @@ If you want to be informed when a flag has changed, you can configure a [**notif
 
 A notifier will send one notification to the targeted system to inform them that a new flag configuration has been loaded.
 
-:info: `go-feature-flag` can handle more than one notifier at a time.
+ℹ️ `go-feature-flag` can handle more than one notifier at a time.
 
 Available notifiers are:
 
