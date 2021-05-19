@@ -29,9 +29,9 @@ No server is needed, just add a file in a central system and all your services w
 If you are not familiar with feature flags also called feature Toggles you can read this [article of Martin Fowler](https://www.martinfowler.com/articles/feature-toggles.html)
 that explains why this is a great pattern.
 
-I've also wrote an [article](https://medium.com/better-programming/feature-flags-and-how-to-iterate-quickly-7e3371b9986) that explains why feature flags can help you to iterate quickly.
+I've also written an [article](https://medium.com/better-programming/feature-flags-and-how-to-iterate-quickly-7e3371b9986) that explains why feature flags can help you to iterate quickly.
 
-## go-feature-flags supports
+**go-feature-flags supports:**
 
 - Storing your configuration flags file on various locations ([`HTTP`](./flag_file/http.md), [`S3`](.flag_file/s3.md), [`GitHub`](./flag_file/github.md), [`file`](./flag_file/file.md)).
 - Configuring your flags in various [format](flag_format.md) (`JSON`, `TOML` and `YAML`).

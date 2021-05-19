@@ -49,11 +49,11 @@ ffclient.Init(ffclient.Config{
 `go-feature-flag` comes ready to use out of the box by calling the `Init` function and, it will be available everywhere.  
 Since most applications will want to use a single central flag configuration, the package provides this. It is similar to a singleton.
 
-In all of the examples above, they demonstrate using `go-feature-flag` in its singleton style approach.
+In all the examples above, they demonstrate using `go-feature-flag` in its singleton style approach.
 
 ### Working with multiple go-feature-flag
 
-You can also create many different `go-feature-flag` client for use in your application.  
+You can also create many `go-feature-flag` clients to use in your application.  
 
 Each will have its own unique set of configurations and flags. Each can read from a different config file and from different places.  
 All the functions that `go-feature-flag` package supports are mirrored as methods on a [`GoFeatureFlag`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#GoFeatureFlag).

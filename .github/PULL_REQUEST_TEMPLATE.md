@@ -22,5 +22,5 @@ Resolve #
 # Checklist
 - [ ] I have tested this code
 - [ ] I have added unit test to cover this code
-- [ ] I have updated the Readme
+- [ ] I have updated the documentation (README.md and /docs)
 - [ ] I have followed the [contributing guide](CONTRIBUTING.md)

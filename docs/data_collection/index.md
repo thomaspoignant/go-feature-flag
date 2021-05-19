@@ -38,12 +38,12 @@ It represents individual flag evaluations and are considered "full fidelity" eve
 |**`value`** | The value of the feature flag returned by feature flag evaluation. |
 |**`default`** | (Optional) This value is set to true if feature flag evaluation failed, in which case the value returned was the default value passed to variation. |
 
-Events are collected and send in bulk to avoid to spam your exporter *(see details in [how to configure data export](#how-to-configure-data-export)*)
+Events are collected and send in bulk to avoid spamming your exporter *(see details in [how to configure data export](#how-to-configure-data-export)*)
 
 ## How to configure data export?
 In your `ffclient.Config` add the `DataExporter` field and configure your export location.
 
-To avoid to spam your location everytime you have a variation called, `go-feature-flag` is storing in memory all the events and send them in bulk to the exporter.  
+To avoid spamming your location everytime you have a variation called, `go-feature-flag` is storing in memory all the events and send them in bulk to the exporter.  
 You can decide the threshold on when to send the data with the properties `FlushInterval` and `MaxEventInMemory`. The first threshold hit will export the data.
 
 If there are some flags you don't want to export, you can use `trackEvents` fields on these specific flags to disable the data export *(see [flag file format](../flag_format.md))*.

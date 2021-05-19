@@ -47,7 +47,7 @@ extra:
     - icon: fontawesome/brands/medium
       link: https://thomaspoignant.medium.com
     - icon: fontawesome/brands/github
-      link: https://github.com/thomaspoignant/go-feature-flag
+      link: https://github.com/thomaspoignant
 nav:
   - 'index.md'
   - 'quickstart.md'
@@ -75,4 +75,3 @@ nav:
       - 'notifier/index.md'
       - 'notifier/slack.md'
       - 'notifier/webhook.md'
-
