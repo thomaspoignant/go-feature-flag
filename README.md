@@ -1,3 +1,4 @@
+
 <p align="center">
   <img width="250" height="238" src="logo.png" alt="go-feature-flag logo" />
 </p>
@@ -15,7 +16,6 @@
     <a href="https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag"><img src="https://godoc.org/github.com/thomaspoignant/go-feature-flag?status.svg" alt="GoDoc" /></a>
     <img src="https://img.shields.io/github/go-mod/go-version/thomaspoignant/go-feature-flag?logo=go%20version" alt="Go version"/>
     <a href="LICENSE"><img src="https://img.shields.io/github/license/thomaspoignant/go-feature-flag" alt="License"/></a>
-    <a href="https://replit.com/@thomaspoignant/go-feature-flag-example#main.go"><img src="https://replit.com/badge/github/thomaspoignant/go-feature-flag-example"  alt="run on repl.it"></a>
     <a href="https://github.com/avelino/awesome-go/#server-applications"><img src="https://awesome.re/mentioned-badge-flat.svg" alt="Mentioned in Awesome Go"></a>
 </p>
 
@@ -26,23 +26,29 @@
 go get github.com/thomaspoignant/go-feature-flag
 ```
 ## What is go-feature-flag?
-A simple and complete feature flag solution, without any complex backend system to install, you need only a file as your backend.  
-No server is needed, just add a file in a central system and all your services will react to the changes of this file.  
 
-`go-feature-flags` supports:
-- Storing your configuration flags file on various locations ([`HTTP`](#from-an-http-endpoint), [`S3`](#from-a-s3-bucket), [`GitHub`](#from-github), [`file`](#from-a-file)).
-- Configuring your flags in various [format](#flags-file-format) (`JSON`, `TOML` and `YAML`).
-- Adding complex [rules](#rule-format) to target your users.
-- Run A/B test experimentations.
-- Deploy progressively your flag.
-- Getting notified when a flag has changed ([`webhook`](#webhooks) and [`slack`](#slack)).
-- Exporting your flags usage data ([`s3`](#s3-exporter), [`log`](#log-exporter) and [`file`](#file-exporter)).
+A simple and complete feature flag solution, without any complex backend system to install, you need only a file as your backend.
+
+No server is needed, just add a file in a central system and all your services will react to the changes of this file.
+
+**go-feature-flags supports:**
+
+- Storing your configuration flags file on various locations (`HTTP`, `S3`, `GitHub`, `file`).
+- Configuring your flags in various format (`JSON`, `TOML` and `YAML`).
+- Adding complex rules to target your users.
+- Use complex rollout strategy for your flags
+    - Run A/B testing experimentation.
+    - Progressively rollout a feature.
+    - Schedule your flag updates.
+- Exporting your flags usage data (`S3`, `log` and `file`).
+- Getting notified when a flag has changed (`webhook` and `slack`).
 
 If you are not familiar with feature flags also called feature Toggles you can read this [article of Martin Fowler](https://www.martinfowler.com/articles/feature-toggles.html)
-that explains why this is a great pattern.  
-I've also wrote an [article](https://medium.com/better-programming/feature-flags-and-how-to-iterate-quickly-7e3371b9986) that explains why feature flags can help you to iterate quickly.
+that explains why this is a great pattern.
 
-## Quickstart
+I've also written an [article](https://medium.com/better-programming/feature-flags-and-how-to-iterate-quickly-7e3371b9986) that explains why feature flags can help you to iterate quickly.
+
+## Getting started
 First, you need to initialize the `ffclient` with the location of your backend file.
 ```go
 err := ffclient.Init(ffclient.Config{
@@ -67,15 +73,18 @@ if hasFlag {
     // flag "test-flag" is false for the user
 }
 ```
-You can find more example programs in the [examples/](examples) directory.
+The full documentation is available on https://thomaspoignant.github.io/go-feature-flag/  
+You can find more examples programs in the [examples/](https://github.com/thomaspoignant/go-feature-flag/tree/main/examples**) directory.
 
 ## Configuration
 
-The configuration is set with `ffclient.Config{}` and you can give it to ``ffclient.Init()`` the initialization
-function.
+`go-feature-flag` needs to be initialized to be used.  
+During the initialization you must give a [`ffclient.Config{}`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#Config) configuration object.
 
-Example:
-```go 
+[`ffclient.Config{}`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#Config) is the only location where you can put the configuration.
+
+### Example
+```go
 ffclient.Init(ffclient.Config{ 
     PollInterval:   3,
     Logger:         log.New(file, "/tmp/log", 0),
@@ -101,125 +110,46 @@ ffclient.Init(ffclient.Config{
     StartWithRetrieverError: false,
 })
 ```
+### Configuration fields
 
 | Field | Description |
 |---|---|
-|`Retriever`  | The configuration retriever you want to use to get your flag file<br> *see [Where do I store my flags file](#where-do-i-store-my-flags-file) for the configuration details*.|
-|`Context`  | *(optional)* The context used by the retriever.<br />Default: `context.Background()`|
-|`DataExporter` | *(optional)* DataExporter defines how to export data on how your flags are used.<br> *see [export data section](#export-data) for more details*.|
-|`FileFormat`| *(optional)* Format of your configuration file. Available formats are `yaml`, `toml` and `json`, if you omit the field it will try to unmarshal the file as a `yaml` file.<br>Default: `YAML`|
-|`Logger`   | *(optional)* Logger used to log what `go-feature-flag` is doing.<br />If no logger is provided the module will not log anything.<br>Default: No log|
-|`Notifiers` | *(optional)* List of notifiers to call when your flag file has changed.<br> *see [notifiers section](#notifiers) for more details*.|
+|`Retriever`  | The configuration retriever you want to use to get your flag file<br> *see [Store your flag file](flag_file/index.md) for the configuration details*.|
+|`Context`  | *(optional)*<br>The context used by the retriever.<br />Default: `context.Background()`|
+|`DataExporter` | *(optional)*<br>DataExporter defines how to export data on how your flags are used.<br> *see [export data section](data_collection/index.md) for more details*.|
+|`FileFormat`| *(optional)*<br>Format of your configuration file. Available formats are `yaml`, `toml` and `json`, if you omit the field it will try to unmarshal the file as a `yaml` file.<br>Default: `YAML`|
+|`Logger`   | *(optional)*<br>Logger used to log what `go-feature-flag` is doing.<br />If no logger is provided the module will not log anything.<br>Default: No log|
+|`Notifiers` | *(optional)*<br>List of notifiers to call when your flag file has changed.<br> *see [notifiers section](./notifier/index.md) for more details*.|
 |`PollInterval`   | (optional) Number of seconds to wait before refreshing the flags.<br />Default: 60|
-|`StartWithRetrieverError` | *(optional)* If **true**, the SDK will start even if we did not get any flags from the retriever. It will serve only default values until the retriever returns the flags.<br>The init method will not return any error if the flag file is unreachable.<br>Default: **false**|
+|`StartWithRetrieverError` | *(optional)*<br>If **true**, the SDK will start even if we did not get any flags from the retriever. It will serve only default values until the retriever returns the flags.<br>The init method will not return any error if the flag file is unreachable.<br>Default: **false**|
 
-## Where do I store my flags file
-`go-feature-flags` support different ways of retrieving the flag file.  
-We can have only one source for the file, if you set multiple sources in your configuration, only one will be take in
-consideration.
+### Multiple configuration flag files
+`go-feature-flag` comes ready to use out of the box by calling the `Init` function and, it will be available everywhere.  
+Since most applications will want to use a single central flag configuration, the package provides this. It is similar to a singleton.
 
-### From Github
-<details>
-<summary><i>expand to see details</i></summary>
+In all the examples above, they demonstrate using `go-feature-flag` in its singleton style approach.  
+You can also create many `go-feature-flag` clients to use in your application.  
+[See the documentation for more details.](https://thomaspoignant.github.io/go-feature-flag/configuration/#multiple-configuration-flag-files)
 
-```go
-err := ffclient.Init(ffclient.Config{
-    PollInterval: 3,
-    Retriever: &ffclient.GithubRetriever{
-        RepositorySlug: "thomaspoignant/go-feature-flag",
-        Branch: "main",
-        FilePath: "testdata/flag-config.yaml",
-        GithubToken: "XXXX",
-        Timeout: 2 * time.Second,
-    },
-})
-defer ffclient.Close()
-```
-To configure the access to your GitHub file:
-- **RepositorySlug**: your GitHub slug `org/repo-name`. **MANDATORY**
-- **FilePath**: the path of your file. **MANDATORY**
-- **Branch**: the branch where your file is *(default is `main`)*.
-- **GithubToken**: Github token is used to access a private repository, you need the `repo` permission *([how to create a GitHub token](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token))*.
-- **Timeout**: Timeout for the HTTP call (default is 10 seconds).
 
-:warning: GitHub has rate limits, so be sure to not reach them when setting your `PollInterval`.
+## Where do I store my flags file?
+The module supports different ways of retrieving the flag file.  
+Available retriever are:
 
-</details>
-
-### From an HTTP endpoint
-<details>
-<summary><i>expand to see details</i></summary>
-
-```go
-err := ffclient.Init(ffclient.Config{
-    PollInterval: 3,
-    Retriever: &ffclient.HTTPRetriever{
-        URL:    "http://example.com/flag-config.yaml",
-        Timeout: 2 * time.Second,
-    },
-})
-defer ffclient.Close()
-```
-
-To configure your HTTP endpoint:
-- **URL**: location of your file. **MANDATORY**
-- **Method**: the HTTP method you want to use *(default is GET)*.
-- **Body**: If you need a body to get the flags.
-- **Header**: Header you should pass while calling the endpoint *(useful for authorization)*.
-- **Timeout**: Timeout for the HTTP call (default is 10 seconds).
-
-</details>
-
-### From a S3 Bucket
-<details>
-<summary><i>expand to see details</i></summary>
-
-```go
-err := ffclient.Init(ffclient.Config{
-    PollInterval: 3,
-    Retriever: &ffclient.S3Retriever{
-        Bucket: "tpoi-test",
-        Item:   "flag-config.yaml",
-        AwsConfig: aws.Config{
-            Region: aws.String("eu-west-1"),
-        },
-    },
-})
-defer ffclient.Close()
-```
-
-To configure your S3 file location:
-- **Bucket**: The name of your bucket. **MANDATORY**
-- **Item**: The location of your file in the bucket. **MANDATORY**
-- **AwsConfig**: An instance of `aws.Config` that configure your access to AWS *(see [this documentation for more info](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html))*. **MANDATORY**
-
-</details>
-
-### From a file
-<details>
-<summary><i>expand to see details</i></summary>
-
-```go
-err := ffclient.Init(ffclient.Config{
-    PollInterval: 3,
-    Retriever: &ffclient.FileRetriever{
-        Path: "file-example.yaml",
-    },
-})
-defer ffclient.Close()
-```
-
-To configure your File retriever:
-- **Path**: location of your file. **MANDATORY**
-
-*I will not recommend using a file to store your flags except if it is in a shared folder for all your services.*
-</details>
+- [From GitHub](https://thomaspoignant.github.io/go-feature-flag/flag_file/github/)
+- [From an HTTP endpoint](https://thomaspoignant.github.io/go-feature-flag/flag_file/http/)
+- [From a S3 Bucket](https://thomaspoignant.github.io/go-feature-flag/flag_file/s3/)
+- [From a file](https://thomaspoignant.github.io/go-feature-flag/flag_file/file/)
 
 ## Flags file format
 `go-feature-flag` is to avoid to have to host a backend to manage your feature flags and to keep them centralized by using a file a source.  
 Your file should be a `YAML`, `JSON` or `TOML` file with a list of flags *(examples: [`YAML`](testdata/flag-config.yaml), [`JSON`](testdata/flag-config.json), [`TOML`](testdata/flag-config.toml))*.
 
-A flag configuration looks like:
+**A flag configuration looks like:**
+
+<details open>
+<summary>YAML</summary>
+
 ```yaml
 test-flag:
   percentage: 100
@@ -231,58 +161,95 @@ test-flag:
   trackEvents: true
   rollout:
     experimentation:
-        start: 2021-03-20T00:00:00.10-05:00
-        end: 2021-03-21T00:00:00.10-05:00
+      start: 2021-03-20T00:00:00.10-05:00
+      end: 2021-03-21T00:00:00.10-05:00
+
+  test-flag2:
+    rule: key eq "not-a-key"
+    percentage: 100
+    true: true
+    false: false
+    default: false
+```
+</details>
+<details>
+<summary>JSON</summary>
+
+```json
+{
+  "test-flag": {
+    "percentage": 100,
+    "rule": "key eq \"random-key\"",
+    "true": true,
+    "false": false,
+    "default": false,
+    "disable": false,
+    "trackEvents": true,
+    "rollout": {
+      "experimentation": {
+        "start": "2021-03-20T05:00:00.100Z",
+        "end": "2021-03-21T05:00:00.100Z"
+      }
+    }
+  },
+  "test-flag2": {
+    "rule": "key eq \"not-a-key\"",
+    "percentage": 100,
+    "true": true,
+    "false": false,
+    "default": false
+  }
+}
 ```
 
-<table>
-<thead>
-    <tr>
-    <td><strong>Field</strong></td><td><strong>Description</strong></td>
-    </tr>
-</thead>
-<tr>
-    <td><code>test-flag</code></td>
-    <td>Name of the flag.<br>It should be unique.</td>
-</tr>
-<tr>
-    <td><code>true</code></td>
-    <td>The value return by the flag if apply to the user <i>(rule is evaluated to true)</i> and user is in the active percentage.</td>
-</tr>
-<tr>
-    <td><code>false</code></td>
-    <td>The value return by the flag if apply to the user <i>(rule is evaluated to true)</i> and user is <strong>not</strong> in the active percentage.</td>
-</tr>
-<tr>
-    <td><code>default</code></td>
-    <td>The value return by the flag if not apply to the user <i>(rule is evaluated to false).</i></td>
-</tr>
-<tr>
-    <td><code>percentage</code></td>
-<td><i>(optional)</i> Percentage of the users affect by the flag.<br><strong>Default value is 0</strong><br>The percentage is done by doing a hash of the user key <i>(100000 variations)</i>, it means that you can have 3 numbers after the comma.</td>
-</tr>
-<tr>
-    <td><code>rule</code></td>
-    <td><i>(optional)</i> This is the query use to select on which user the flag should apply.<br>Rule format is describe in the <a href="#rule-format">rule format section</a>.<br><strong>If no rule set, the flag apply to all users <i>(percentage still apply)</i>.</strong></td>
-</tr>
-<tr>
-    <td><code>disable</code></td>
-    <td><i>(optional)</i> True if the flag is disabled.</i></td>
-</tr>
-<tr>
-    <td><code>trackEvents</code></td>
-    <td><i>(optional)</i> False if you don't want to export the data in your data exporter.<br>Default value is true</i></td>
-</tr>
-<tr>
-    <td><code>rollout</code></td>
-    <td><i>(optional)</i> <code>rollout</code> contains a specific rollout strategy you want to use.<br><strong>See <a href="#rollout">rollout section</a> for more details.</strong></td>
-</tr>
-</table>
+</details>
+
+<details>
+<summary>TOML</summary>
+
+```toml
+[test-flag]
+percentage = 100.0
+rule = "key eq \"random-key\""
+true = true
+false = false
+default = false
+disable = false
+trackEvents = true
+
+[test-flag.rollout]
+
+  [test-flag.rollout.experimentation]
+  start = 2021-03-20T05:00:00.100Z
+  end = 2021-03-21T05:00:00.100Z
+
+[test-flag2]
+rule = "key eq \"not-a-key\""
+percentage = 100.0
+true = true
+false = false
+default = false
+```
+
+</details>
+
+
+| Field | Description |
+|:---:|---|
+| **flag-key** | The `flag-key` is the name of your flag.<br> It must be unique.<br>*On the example the flag keys are **`test-flag`** and **`test-flag2`**.*|
+| `true` | The value return by the flag if apply to the user *(rule is evaluated to true)* and user is in the active percentage.|
+| `false`| The value return by the flag if apply to the user *(rule is evaluated to true)* and user is **not** in the active percentage.|
+| `default` |The value return by the flag if not apply to the user *(rule is evaluated to false).*|
+| `percentage` |*(optional)*<br>Percentage of the users affect by the flag.<br>**Default: 0**<br><br>The percentage is compute by doing a hash of the user key *(100000 variations)*, it means that you can have 3 numbers after the comma.|
+| `rule` |*(optional)*<br>This is the query use to select on which user the flag should apply.<br>Rule format is describe in the <a href="#rule-format">rule format section</a>.<br>**If no rule set, the flag apply to all users *(percentage still apply)*.**|
+| `disable` |*(optional)*<br>True if the flag is disabled.<br>**Default: `false`**|
+| `trackEvents` |*(optional)*<br>False if you don't want to export the data in your data exporter.<br>**Default: `true`**|
+| `rollout` |*(optional)*<br><code>rollout</code> contains a specific rollout strategy you want to use.<br>**See [rollout section](https://thomaspoignant.github.io/go-feature-flag/rollout/index.md) for more details.**|
 
 ## Rule format
 The rule format is based on the [`nikunjy/rules`](https://github.com/nikunjy/rules) library.
 
-All the operations can be written capitalized or lowercase (ex: eq or EQ can be used).  
+All the operations can be written capitalized or lowercase (ex: `eq` or `EQ` can be used).  
 Logical Operations supported are `AND` `OR`.
 
 Compare Expression and their definitions (`a|b` means you can use either one of the two `a` or `b`):
@@ -308,8 +275,8 @@ not: not of a logical expression
 - Select a user with a custom property: `userId eq "12345"`
 
 ## Users
-Feature flag targeting and rollouts are all determined by the user you pass to your Variation calls.  
-The SDK defines a [`User`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/ffuser#User) struct and a [`UserBuilder`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/ffuser#UserBuilder) to make this easy. 
+Feature flag targeting and rollouts are all determined by the user you pass to your Variation calls.
+The SDK defines a [`User`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/ffuser#User) struct and a [`UserBuilder`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/ffuser#UserBuilder) to make this easy.
 
 Here's an example:
 
@@ -325,260 +292,75 @@ user2 = ffuser.NewUserBuilder("user2-key").
  Build()
 ```
 
-The most common attribute is the user's key. In this case we've used the strings "**user1-key**" and "**user2-key**".  
-**The user key is the only mandatory user attribute.** The key should also uniquely identify each user. You can use a primary key, an e-mail address, or a hash, as long as the same user always has the same key. We recommend using a hash if possible.
+The most common attribute is the user's key and **this is the only mandatory user attribute.**
+The key should also uniquely identify each user. You can use a primary key, an e-mail address, or a hash, as long as the same user always has the same key.  
+**We recommend using a hash if possible.**    
+All the other attributes are optional.
 
-Custom attributes are one of the most powerful features. They let you have rules on these attributes and target users according to any data that you want.
+ℹ️ Custom attributes are one of the most powerful features. They let you have rules on these attributes and target users according to any data that you want.
+
+You can also distinguish logged-in users from anonymous users in the SDK ([check documentation about anonymous users](https://thomaspoignant.github.io/go-feature-flag/users/#anonymous-users)).
 
 ## Variation
 The Variation methods determine whether a flag is enabled or not for a specific user.
-There is a Variation method for each type: [`BoolVariation`,](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#BoolVariation) [`IntVariation`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#IntVariation), [`Float64Variation`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#Float64Variation), [`StringVariation`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#StringVariation), [`JSONArrayVariation`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#JSONArrayVariation) and [`JSONVariation`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#JSONVariation).
+There is a Variation method for each type:   
+[`BoolVariation`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#BoolVariation) , [`IntVariation`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#IntVariation)
+, [`Float64Variation`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#Float64Variation)
+, [`StringVariation`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#StringVariation)
+, [`JSONArrayVariation`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#JSONArrayVariation)
+, [`JSONVariation`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#JSONVariation)
 
-```go
+```go linenums="1"
 result, _ := ffclient.BoolVariation("your.feature.key", user, false)
 
-// result is now true or false depending on the setting of this boolean feature flag
+// result is now true or false depending on the setting of
+// this boolean feature flag
 ```
-Variation methods take the feature flag key, a User, and a default value.
+Variation methods take the feature **flag key**, a **user**, and a **default value**.
 
-The default value is return when an error is encountered _(`ffclient` not initialized, variation with wrong type, flag does not exist ...)._  
+The default value is return when an error is encountered _(`ffclient` not initialized, variation with wrong type, flag does not exist ...)._
+
 In the example, if the flag `your.feature.key` does not exists, result will be `false`.  
-Not that you will always have a usable value in the result. 
+Not that you will always have a usable value in the result.
 
 ## Rollout
-A critical part of every new feature release is orchestrating the actual launch schedule between Product, Engineering, and Marketing teams.  
-Delivering powerful user experiences typically requires software teams to manage complex releases and make manual updates at inconvenient times. But it doesn’t have to.  
-Having a complex **rollout** strategy allows you to have lifecycle for your flags.
+A critical part of every new feature release is orchestrating the actual launch schedule between Product, Engineering, and Marketing teams.
 
-### Experimentation rollout
-An **experimentation rollout** is when your flag is configured to be served only for a determined time.
+Delivering powerful user experiences typically requires software teams to manage complex releases and make manual updates at inconvenient times.
 
-1. It means that before the rollout start date, the `default` value is served for all users.
-2. Between the dates the flag is evaluated.
-3. After the end date the `default` value is served for all users.
+But it doesn’t have to, having a complex **rollout** strategy allows you to have lifecycle for your flags.
 
-This strategy you should use to run an A/B test.
+### Complex rollout strategy available
 
-**Configuration example:**
-```yaml
-experimentation-flag:
-  true: "B"
-  false: "A"
-  default: "Default"
-  rollout:
-    experimentation:
-      start: 2021-03-20T00:00:00.10-05:00
-      end: 2021-03-21T00:00:00.10-05:00
-
-```
-
-The date is in the format supported natively by your flag file format.
-Check this [example](examples/experimentation/) to see how it works. 
-
-### Progressive rollout
-A **progressive rollout** allows you to increase the percentage of your flag over time.
-
-You can select a **release ramp** where the percentage of your flag will increase progressively between the start date and the end date.
-
-
-**Configuration example:**
-```yaml
-experimentation-flag:
-  true: "B"
-  false: "A"
-  default: "Default"
-  rollout:
-    progressive:
-      percentage:
-        initial: 0
-        end: 100
-      releaseRamp:
-        start: 2021-03-20T00:00:00.10-05:00
-        end: 2021-03-21T00:00:00.10-05:00
-```
-
-The `percentage` field is not mandatory, by default we will use **0** to **100%**.
-If you have no date in your `releaseRamp` we will not do any progressive rollout and use the top level percentage you have configured *(0% in our example)*.
-
-### Scheduled rollout
-
-Scheduling introduces the ability for users to changes their flags for future points in time. 
-While this sounds deceptively straightforward, it unlocks the potential for users to create complex release strategies by scheduling the incremental steps in advance.
-
-For example, you may want to turn a feature ON for internal testing tomorrow and then enable it for your ‘beta’ user segment four days later.
-
-**Configuration example:**
-```yaml
-rollout:
-  scheduled:
-      steps:
-        - date: 2020-04-10T00:00:00.10+02:00
-          rule: beta eq "true"
-          percentage: 100
-    
-        - date: 2022-05-12T15:36:00.10+02:00
-          rule: beta eq "false"
-```
-
-You can change any fields that are available on your flag.
-Since your configuration has not been changed manually, it does not trigger any notifier.
+- [Progressive rollout](https://thomaspoignant.github.io/go-feature-flag/rollout/progressive.md) - increase the percentage of your flag over time.
+- [Scheduled rollout](https://thomaspoignant.github.io/go-feature-flag/rollout/scheduled.md) - update your flag over time.
+- [Experimentation rollout](https://thomaspoignant.github.io/go-feature-flag/rollout/experimentation.md) - serve your feature only for a determined time *(perfect for A/B testing)*.
 
 ## Notifiers
-If you want to be informed when a flag has changed outside of your app, you can configure a **notifier**.
-`go-feature-flag` can handle more than one notifier at a time *(see bellow the list of available notifiers and how to configure them)*.
+If you want to be informed when a flag has changed, you can configure a [**notifier**](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#NotifierConfig).
 
-### Webhooks
-<details>
-<summary><i>expand to see details</i></summary>
+A notifier will send one notification to the targeted system to inform them that a new flag configuration has been loaded.
 
-> :warning: In `v0.9.0` we have changed how to configure webhooks, moving from the key `Webhooks` to `Notifiers`.  
-`Webhooks` is still supported for now but will be removed in a future version.
+ℹ️ `go-feature-flag` can handle more than one notifier at a time.
 
-```go
-ffclient.Config{ 
-    // ...
-    Notifiers: []ffclient.NotifierConfig{
-        &ffclient.WebhookConfig{
-            EndpointURL: " https://example.com/hook",
-            Secret:     "Secret",
-            Meta: map[string]string{
-                "app.name": "my app",
-            },
-        },
-        // ...
-    },
-}
-```
+Available notifiers are:
 
-|   |   |   |
-|---|---|---|
-|`EndpointURL`   |![mandatory](https://img.shields.io/badge/-mandatory-red)   | The complete URL of your API *(we will send a POST request to this URL, [see format](#format))*  |
-|`Secret`   |![optional](https://img.shields.io/badge/-optional-green)   |  A secret key you can share with your webhook. We will use this key to sign the request *(see [signature section](#signature) for more details)*. |
-|`Meta`   |![optional](https://img.shields.io/badge/-optional-green)   |  A list of key value that will be add in your request, this is super usefull if you to add information on the current running instance of your app.<br/>*By default the hostname is always added in the meta informations.*|
-
-#### Format
-If you have configured a webhook, a POST request will be sent to the `EndpointURL` with a body in this format:
-
-```json
-{
-    "meta": {
-        "hostname": "server01",
-        // ...
-    },
-    "flags": {
-        "deleted": {}, // map of your deleted flags
-        "added": {}, // map of your added flags
-        "updated": {
-            "flag-name": { // an object that contains old and new value
-                "old_value": {},
-                "new_value": {}
-            }
-        }
-    }
-}
-```
-
-<details>
-<summary><b>Example</b></summary>
-  
-```json
-{
-   "meta":{
-       "hostname": "server01"
-   },
-   "flags":{
-       "deleted": {
-           "test-flag": {
-               "rule": "key eq \"random-key\"",
-               "percentage": 100,
-               "true": true,
-               "false": false,
-               "default": false
-           }
-       },
-       "added": {
-           "test-flag3": {
-               "percentage": 5,
-               "true": "test",
-               "false": "false",
-               "default": "default"
-           }
-       },
-       "updated": {
-           "test-flag2": {
-               "old_value": {
-                   "rule": "key eq \"not-a-key\"",
-                   "percentage": 100,
-                   "true": true,
-                   "false": false,
-                   "default": false
-               },
-               "new_value": {
-                   "disable": true,
-                   "rule": "key eq \"not-a-key\"",
-                   "percentage": 100,
-                   "true": true,
-                   "false": false,
-                   "default": false
-               }
-           }
-       }
-   }
-}
-```
-
-</details>
-
-
-
-#### Signature
-This header **`X-Hub-Signature-256`** is sent if the webhook is configured with a secret. This is the HMAC hex digest of the request body, and is generated using the SHA-256 hash function and the secret as the HMAC key.
-
-:warning: **The recommendation is to always use the `Secret` and on your API/webook always verify the signature key to be sure that you don't have a man in the middle attack.**
-
-</details>
-
-### SLACK
-<details>
-<summary><i>expand to see details</i></summary>
-
-The **Slack** notifier allows you to get notification on your favorite slack channel when an instance of `go-feature-flag` is detecting changes in the configuration file.
-
-![slack notification example](.doc/slack_notification.png)
-
-- First, you need to create an incoming webhook on your slack instance *(you can follow this [documentation to see how to do it](https://api.slack.com/messaging/webhooks#getting_started))*
-- Copy your webhook URL. It should looks like `https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX`.
-- In your `go-feature-flag` init method add a slack notifier
-```go
-ffclient.Config{ 
-    // ...
-    Notifiers: []ffclient.NotifierConfig{
-        &ffclient.SlackNotifier{
-            SlackWebhookURL: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
-        },
-        // ...
-    },
-}
-```
-
-|   |   |   |
-|---|---|---|
-|`SlackWebhookURL`   |![mandatory](https://img.shields.io/badge/-mandatory-red)   | The complete URL of your incoming webhook configured in Slack.  |
-
-</details>
+- [Slack](https://thomaspoignant.github.io/go-feature-flag/notifiers/slack.md) - Get a slack message with the changes.
+- [Webhook](https://thomaspoignant.github.io/go-feature-flag/notifiers/webhook.md) - Call an API with the changes.
 
 ## Export data
 If you want to export data about how your flag are used, you can use the **`DataExporter`**.  
 It collects all the variations events and can save these events on several locations:
-- [File](#file-exporter) *- create local files with the variation usages.*
-- [Log](#log-exporter) *- use your logger to write the variation usages.*
-- [S3](#s3-exporter) *- export your variation usages to S3.*
-- [Webhook](#webhook-exporter) *- export your variation usages by calling a webhook.*
- 
-Currently we are supporting only feature events.
-It represent individual flag evaluations and are considered "full fidelity" events.
 
-An example feature event below:
+- [File](https://thomaspoignant.github.io/go-feature-flag/data_collection/file.md) *- create local files with the variation usages.*
+- [Log](https://thomaspoignant.github.io/go-feature-flag/data_collection/log.md) *- use your logger to write the variation usages.*
+- [S3](https://thomaspoignant.github.io/go-feature-flag/data_collection/s3.md) *- export your variation usages to S3.*
+- [Webhook](https://thomaspoignant.github.io/go-feature-flag/data_collection/webhook.md) *- export your variation usages by calling a webhook.*
+
+Currently, we are supporting only feature events.  
+It represents individual flag evaluations and are considered "full fidelity" events.
+
+**An example feature event below:**
 ```json
 {
     "kind": "feature",
@@ -591,30 +373,20 @@ An example feature event below:
     "default": false
 }
 ```
+The format of the data is [described in the documentation](https://thomaspoignant.github.io/go-feature-flag/data_collection/#data-format).
 
-| Field  | Description  |
-|---|---|
-|**`kind`** | The kind for a feature event is feature. A feature event will only be generated if the trackEvents attribute of the flag is set to true.  |
-|**`contextKind`** | The kind of context which generated an event. This will only be "**anonymousUser**" for events generated on behalf of an anonymous user or the reserved word "**user**" for events generated on behalf of a non-anonymous user |
-|**`userKey`** | The key of the user object used in a feature flag evaluation. |
-|**`creationDate`** | When the feature flag was requested at Unix epoch time in milliseconds. |
-|**`key`** | The key of the feature flag requested. |
-|**`variation`** | The variation of the flag requested. Available values are:<br>**True**: if the flag was evaluated to True <br>**False**: if the flag was evaluated to False<br>**Dafault**: if the flag was evaluated to Default<br>**SdkDefault**: if something wrong happened and the SDK default value was used. |
-|**`value`** | The value of the feature flag returned by feature flag evaluation. |
-|**`default`** | (Optional) This value is set to true if feature flag evaluation failed, in which case the value returned was the default value passed to variation. |
-
-Events are collected and send in bulk to avoid to spam your exporter *(see details in [how to configure data export](#how-to-configure-data-export)*)
+Events are collected and send in bulk to avoid spamming your exporter *(see details in [how to configure data export](#how-to-configure-data-export)*).
 
 ### How to configure data export?
 In your `ffclient.Config` add the `DataExporter` field and configure your export location.
 
-To avoid to spam your location everytime you have a variation called, `go-feature-flag` is storing in memory all the events and send them in bulk to the exporter.  
+To avoid spamming your location everytime you have a variation called, `go-feature-flag` is storing in memory all the events and send them in bulk to the exporter.  
 You can decide the threshold on when to send the data with the properties `FlushInterval` and `MaxEventInMemory`. The first threshold hit will export the data.
 
-If there are some flags you don't want to export, you can user `trackEvents` fields on these specific flags to disable the data export *(see [flag file format](#flags-file-format))*.
+If there are some flags you don't want to export, you can use `trackEvents` fields on these specific flags to disable the data export *(see [flag file format](../flag_format.md))*.
 
-**Example:**
-```go
+### Example
+```go  linenums="1"
 ffclient.Config{ 
     // ...
    DataExporter: ffclient.DataExporter{
@@ -627,225 +399,7 @@ ffclient.Config{
     // ...
 }
 ```
-| Field  |   |  Description |
-|---|---|---|
-|`FlushInterval`   |![optional](https://img.shields.io/badge/-optional-green)   | Time to wait before exporting the data (default: 60 seconds).  |
-|`MaxEventInMemory`   |![optional](https://img.shields.io/badge/-optional-green)   | If `MaxEventInMemory` is reach before the `FlushInterval` a intermediary export will be done (default: 100000).|
-|`Exporter`   |![mandatory](https://img.shields.io/badge/-mandatory-red)   | The configuration of the exporter you want to use. All the exporters are available in the `ffexporter` package.|
-
-### File Exporter
-<details>
-<summary><i>expand to see details</i></summary>
-
-The file exporter will collect the data and create a new file in a specific folder everytime we send the data.  
-This file should be in the local instance.
-
-Check this [complete example](examples/data_export_file/main.go) to see how to export the data in a file.
-
-**Configuration example:**
-```go
-ffclient.Config{ 
-    // ...
-   DataExporter: ffclient.DataExporter{
-        // ...
-        Exporter: &ffexporter.File{
-            OutputDir: "/output-data/",
-            Format: "csv",
-            FileName: "flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}",
-            CsvTemplate: "{{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}}\n"
-        },
-    },
-    // ...
-}
-```
-
-| Field  | Description  |
-|---|---|
-|`OutputDir`   | OutputDir is the location of the directory where to store the exported files. It should finish with a `/`.  |
-|`Format`   |   Format is the output format you want in your exported file. Available format are **`JSON`** and **`CSV`**. *(Default: `JSON`)* |
-|`Filename`   | Filename is the name of your output file. You can use a templated config to define the name of your exported files.<br>Available replacement are `{{ .Hostname}}`, `{{ .Timestamp}`} and `{{ .Format}}`<br>Default: `flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}`|
-|`CsvTemplate`   |   CsvTemplate is used if your output format is CSV. This field will be ignored if you are using another format than CSV. You can decide which fields you want in your CSV line with a go-template syntax, please check [internal/exporter/feature_event.go](internal/exporter/feature_event.go) to see what are the fields available.<br>**Default:** `{{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}}\n` |
-
-Check the [godoc for full details](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag@v0.11.0/ffexporter#File).
-
-</details>
-
-### Log Exporter
-<details>
-<summary><i>expand to see details</i></summary>
-
-The log exporter is here mostly for backward compatibility *(originaly every variations were logged, but it can be a lot of data for a default configuration)*.  
-It will use your logger `ffclient.Config.Logger` to log every variations changes.
-
-You can configure your output log with the `Format` field.  
-It use a [go template](https://golang.org/pkg/text/template/) format.
-
-**Configuration example:**
-```go
-ffclient.Config{
-    // ...
-   DataExporter: ffclient.DataExporter{
-        Exporter: &ffexporter.Log{
-            Format: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", value=\"{{ .Value}}\"",
-        },
-    },
-    // ...
-}
-```
-
-| Field  | Description  |
-|---|---|
-|`Format`   | Format is the [template](https://golang.org/pkg/text/template/) configuration of the output format of your log.<br>You can use all the key from the `exporter.FeatureEvent` + a key called `FormattedDate` that represent the date with the **RFC 3339** Format.<br><br>Default: `[{{ .FormattedDate}}] user="{{ .UserKey}}", flag="{{ .Key}}", value="{{ .Value}}"`  |
-
-Check the [godoc for full details](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag@v0.11.0/ffexporter#Log).
-
-</details>
-
-### S3 Exporter
-
-<details>
-<summary><i>expand to see details</i></summary>
-
-The **S3 exporter** will collect the data and create a new file in a specific folder everytime we send the data.  
-Everytime the `FlushInterval` or `MaxEventInMemory` is reached a new file will be added to S3.  
-If for some reason the S3 upload failed, we will keep the data in memory and retry to add the next time we reach `FlushInterval` or `MaxEventInMemory`.
-
-![export in S3 screenshot](.doc/s3-exporter.png)
-
-
-Check this [complete example](examples/data_export_s3/main.go) to see how to export the data in S3.
-
-**Configuration example:**
-```go
-ffclient.Config{ 
-    // ...
-   DataExporter: ffclient.DataExporter{
-        // ...
-        Exporter: &ffexporter.S3{
-            Format: "csv",
-            FileName: "flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}",
-            CsvTemplate: "{{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}}\n",
-            Bucket:    "my-bucket",
-            S3Path:    "/go-feature-flag/variations/",
-            Filename:  "flag-variation-{{ .Timestamp}}.{{ .Format}}",
-            AwsConfig: &aws.Config{
-               Region: aws.String("eu-west-1"),
-           },
-        },
-    },
-    // ...
-}
-```
-
-| Field  | Description  |
-|---|---|
-|`Bucket `   |   Name of your S3 Bucket. |
-|`AwsConfig `   |  An instance of `aws.Config` that configure your access to AWS *(see [this documentation for more info](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html))*.  |
-|`CsvTemplate`   |   *(optional)* CsvTemplate is used if your output format is CSV. This field will be ignored if you are using another format than CSV. You can decide which fields you want in your CSV line with a go-template syntax, please check [internal/exporter/feature_event.go](internal/exporter/feature_event.go) to see what are the fields available.<br>**Default:** `{{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}}\n` |
-|`Filename`   | *(optional)* Filename is the name of your output file. You can use a templated config to define the name of your exported files.<br>Available replacement are `{{ .Hostname}}`, `{{ .Timestamp}`} and `{{ .Format}}`<br>Default: `flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}`|
-|`Format`   |   *(optional)* Format is the output format you want in your exported file. Available format are **`JSON`** and **`CSV`**. *(Default: `JSON`)* |
-|`S3Path `   |   *(optional)* The location of the directory in S3. |
-
-Check the [godoc for full details](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag@v0.11.0/ffexporter#S3).
-
-</details>
-
-### Webhook Exporter
-
-<details>
-<summary><i>expand to see details</i></summary>
-
-The **Webhook exporter** will collect the data and will send an HTTP POST request to the specified endpoint.  
-Everytime the `FlushInterval` or `MaxEventInMemory` is reached a new call is performed.  
-If for some reason the call failed, we will keep the data in memory and retry to add the next time we reach `FlushInterval` or `MaxEventInMemory`.
-
-**Configuration example:**
-```go
-ffclient.Config{ 
-    // ...
-   DataExporter: ffclient.DataExporter{
-        // ...
-        Exporter: &ffexporter.Webhook{
-            EndpointURL: " https://webhook.url/",
-            Secret:      "secret-for-signing",
-            Meta:        map[string]string{
-                "extraInfo": "info",
-            },
-        },
-    },
-    // ...
-}
-```
-
-| Field  | Description  |
-|---|---|
-|`EndpointURL `   | EndpointURL of your webhook |
-|`Secret `   |  *(optional)* Secret used to sign your request body and fill the `X-Hub-Signature-256` header.  |
-|`Meta`   |   *(optional)* Add all the informations you want to see in your request. |
-
-
-#### Webhook format
-If you have configured a webhook, a POST request will be sent to the `EndpointURL` with a body in this format:
-
-```json
-{
-    "meta": {
-        "hostname": "server01",
-        // ...
-    },
-    "events": [
-        {
-            "kind": "feature",
-            "contextKind": "anonymousUser",
-            "userKey": "14613538188334553206",
-            "creationDate": 1618909178,
-            "key": "test-flag",
-            "variation": "Default",
-            "value": false,
-            "default": false
-        },
-        // ...
-    ]
-}
-```
-
-
-#### Signature
-This header **`X-Hub-Signature-256`** is sent if the webhook is configured with a **`secret`**. This is the **HMAC hex digest** of the request body, and is generated using the **SHA-256** hash function and the **secret as the HMAC key**.
-
-:warning: **The recommendation is to always use the `Secret` and on your API/webook always verify the signature key to be sure that you don't have a man in the middle attack.**
-
-</details>
-
-## Multiple configuration flag files
-`go-feature-flag` comes ready to use out of the box by calling the `Init` function and after that it will be available everywhere.
-Since most applications will want to use a single central flag configuration, the `go-feature-flag` package provides this. It is similar to a singleton.
-
-In all of the examples above, they demonstrate using `go-feature-flag` in its singleton style approach.
-
-### Working with multiple go-feature-flag
-
-You can also create many different `go-feature-flag` client for use in your application.  
-Each will have its own unique set of configurations and flags. Each can read from a different config file and from different places.  
-All of the functions that `go-feature-flag` package supports are mirrored as methods on a `goFeatureFlag`.
-
-### Example:
-
-```go
-x, err := ffclient.New(Config{ Retriever: &ffclient.HTTPRetriever{{URL: "http://example.com/flag-config.yaml",}})
-defer x.Close()
-
-y, err := ffclient.New(Config{ Retriever: &ffclient.HTTPRetriever{{URL: "http://example.com/test2.yaml",}})
-defer y.Close()
-
-user := ffuser.NewUser("user-key")
-x.BoolVariation("test-flag", user, false)
-y.BoolVariation("test-flag", user, false)
-
-// ...
-```
-
-When working with multiple `go-feature-flag`, it is up to the user to keep track of the different `go-feature-flag` instances.
+The full configuration is [described in the documentation](https://thomaspoignant.github.io/go-feature-flag/data_collection/#how-to-configure-data-export).
 
 # How can I contribute?
 This project is open for contribution, see the [contributor's guide](CONTRIBUTING.md) for some helpful tips.

@@ -1,9 +1,13 @@
 site_name: go-feature-flag
+google_analytics:
+  - UA-197484083-1
+  - auto
 theme:
   name: material
   use_pygments: true
   logo: assets/logo.png
   favicon: assets/logo.png
+  language: en
   palette:
     - scheme: slate
       toggle:
@@ -17,12 +21,21 @@ theme:
         name: Switch to light mode
       primary: white
       accent: teal
+  features:
+    - navigation.indexes
+    - navigation.expand
+    - navigation.top
+  icon:
+    repo: fontawesome/brands/github
+edit_uri: edit/main/docs/
 plugins:
   - search
 markdown_extensions:
   - pymdownx.highlight
   - pymdownx.superfences
   - admonition
+  - pymdownx.tabbed
+  - pymdownx.superfences
 repo_url: https://github.com/thomaspoignant/go-feature-flag
 extra:
   generator: false
@@ -34,7 +47,31 @@ extra:
     - icon: fontawesome/brands/medium
       link: https://thomaspoignant.medium.com
     - icon: fontawesome/brands/github
-      link: https://github.com/thomaspoignant/go-feature-flag
+      link: https://github.com/thomaspoignant
 nav:
   - 'index.md'
-
+  - 'quickstart.md'
+  - 'configuration.md'
+  - 'Store your flag file':
+      - 'flag_file/index.md'
+      - 'flag_file/s3.md'
+      - 'flag_file/http.md'
+      - 'flag_file/github.md'
+      - 'flag_file/file.md'
+  - 'flag_format.md'
+  - 'users.md'
+  - 'Rollout strategies':
+      - 'rollout/index.md'
+      - 'rollout/progressive.md'
+      - 'rollout/scheduled.md'
+      - 'rollout/experimentation.md'
+  - 'Export data':
+      - 'data_collection/index.md'
+      - 'data_collection/file.md'
+      - 'data_collection/log.md'
+      - 'data_collection/s3.md'
+      - 'data_collection/webhook.md'
+  - 'Notify flag changes':
+      - 'notifier/index.md'
+      - 'notifier/slack.md'
+      - 'notifier/webhook.md'

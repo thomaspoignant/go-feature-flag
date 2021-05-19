@@ -1,9 +1,5 @@
-!!! warning
-    This is a work in progress documentation.
-
-
 <p align="center">
-  <img src="assets/logo.png" alt="go-feature-flag logo" />
+  <img width="250" height="238" src="assets/logo.png" alt="go-feature-flag logo" />
 </p>
 
 <p align="center">
@@ -17,7 +13,6 @@
     <a href="https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag"><img src="https://godoc.org/github.com/thomaspoignant/go-feature-flag?status.svg" alt="GoDoc" /></a>
     <img src="https://img.shields.io/github/go-mod/go-version/thomaspoignant/go-feature-flag?logo=go%20version" alt="Go version"/>
     <a href="LICENSE"><img src="https://img.shields.io/github/license/thomaspoignant/go-feature-flag" alt="License"/></a>
-    <a href="https://replit.com/@thomaspoignant/go-feature-flag-example#main.go"><img src="https://replit.com/badge/github/thomaspoignant/go-feature-flag-example"  alt="run on repl.it"></a>
     <a href="https://github.com/avelino/awesome-go/#server-applications"><img src="https://awesome.re/mentioned-badge-flat.svg" alt="Mentioned in Awesome Go"></a>
 </p>
 
@@ -25,32 +20,27 @@
 
 **Feature flags with no complex system to maintain!**
 
-## Installation
-
-```bash
-go get github.com/thomaspoignant/go-feature-flag
-```
-
 ## What is go-feature-flag?
 
-A simple and complete feature flag solution, without any complex backend system to install, you need only a file as your
-backend.
+A simple and complete feature flag solution, without any complex backend system to install, you need only a file as your backend.
 
-No server is needed, just add a file in a central system and all your services will react to the changes of this file.
+No server is needed, just add a file in a central system and all your services will react to the changes of this file. 
 
-`go-feature-flags` supports:
-
-- Storing your configuration flags file on various locations ([`HTTP`](#from-an-http-endpoint)
-  , [`S3`](#from-a-s3-bucket), [`GitHub`](#from-github), [`file`](#from-a-file)).
-- Configuring your flags in various [format](#flags-file-format) (`JSON`, `TOML` and `YAML`).
-- Adding complex [rules](#rule-format) to target your users.
-- Run A/B test experimentations.
-- Getting notified when a flag has changed ([`webhook`](#webhooks) and [`slack`](#slack)).
-- Exporting your flags usage data ([`s3`](#s3-exporter), [`log`](#log-exporter) and [`file`](#file-exporter)).
-
-If you are not familiar with feature flags also called feature Toggles you can read
-this [article of Martin Fowler](https://www.martinfowler.com/articles/feature-toggles.html)
+If you are not familiar with feature flags also called feature Toggles you can read this [article of Martin Fowler](https://www.martinfowler.com/articles/feature-toggles.html)
 that explains why this is a great pattern.
 
-I've also wrote an [article](https://medium.com/better-programming/feature-flags-and-how-to-iterate-quickly-7e3371b9986)
-that explains why feature flags can help you to iterate quickly.
+I've also written an [article](https://medium.com/better-programming/feature-flags-and-how-to-iterate-quickly-7e3371b9986) that explains why feature flags can help you to iterate quickly.
+
+**go-feature-flags supports:**
+
+- Storing your configuration flags file on various locations ([`HTTP`](./flag_file/http.md), [`S3`](.flag_file/s3.md), [`GitHub`](./flag_file/github.md), [`file`](./flag_file/file.md)).
+- Configuring your flags in various [format](flag_format.md) (`JSON`, `TOML` and `YAML`).
+- Adding complex [rules](flag_format.md#rule-format) to target your users.
+- Use complex rollout strategy for your flags
+    - [Run A/B testing experimentation](rollout/experimentation.md).
+    - [Progressively rollout a feature](rollout/progressive.md).
+    - [Schedule your flag updates](rollout/scheduled.md).
+- Exporting your flags usage data ([`s3`](data_collection/s3.md), [`log`](data_collection/log.md) and [`file`](data_collection/file.md)).
+- Getting notified when a flag has changed ([`webhook`](notifier/webhook.md) and [`slack`](notifier/slack.md)).
+
+
