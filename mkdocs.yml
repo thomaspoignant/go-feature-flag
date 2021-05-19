@@ -36,6 +36,7 @@ markdown_extensions:
   - admonition
   - pymdownx.tabbed
   - pymdownx.superfences
+  - meta
 repo_url: https://github.com/thomaspoignant/go-feature-flag
 extra:
   generator: false
