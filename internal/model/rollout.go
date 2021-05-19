@@ -18,6 +18,9 @@ type Rollout struct {
 	// Before the start date we will serve the initial percentage and after we will serve the end percentage.
 	Progressive *Progressive `json:"progressive,omitempty" yaml:"progressive,omitempty" toml:"progressive,omitempty" slack_short:"false"` // nolint: lll
 
+	// Scheduled is your struct to configure an update on some fields of your flag over time.
+	// You can add several steps that updates the flag, this is typically used if you want to gradually add more user
+	// in your flag.
 	Scheduled *ScheduledRollout `json:"scheduled,omitempty" yaml:"scheduled,omitempty" toml:"scheduled,omitempty" slack_short:"false"` // nolint: lll
 }
 
@@ -83,20 +86,8 @@ type ProgressiveReleaseRamp struct {
 }
 
 type ScheduledRollout struct {
+	// Steps is the list of updates to do in a specific date.
 	Steps []ScheduledStep `json:"steps,omitempty" yaml:"steps,omitempty" toml:"steps,omitempty"`
-	// scheduled:
-	// steps:
-	// - date: 2021-04-10T00:00:00.10-05:00
-	// rule: internal eq true
-	// percentage: 100
-	//
-	// - date: 2021-04-14T00:00:00.10-05:00
-	// rule: internal eq true OR beta eq true
-	// percentage: 100
-	//
-	// - date: 2021-05-21T00:00:00.10-05:00
-	// rule: "" // no restriction on who is affected by the flag
-	// percentage: 100
 }
 
 type ScheduledStep struct {
