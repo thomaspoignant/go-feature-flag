@@ -3,7 +3,6 @@
 # Configuration
 `go-feature-flag` needs to be initialized to be used.  
 During the initialization you must give a [`ffclient.Config{}`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#Config) configuration object.  
-All available fields are describe in the [configuration fields](#configuration-fields) section.
 
 [`ffclient.Config{}`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#Config) is the only location where you can put the configuration.
 
@@ -13,7 +12,7 @@ All available fields are describe in the [configuration fields](#configuration-f
 |---|---|
 |`Retriever`  | The configuration retriever you want to use to get your flag file<br> *see [Store your flag file](flag_file/index.md) for the configuration details*.|
 |`Context`  | *(optional)*<br>The context used by the retriever.<br />Default: `context.Background()`|
-|`DataExporter` | *(optional)*<br>DataExporter defines how to export data on how your flags are used.<br> *see [export data section](#export-data) for more details*.|
+|`DataExporter` | *(optional)*<br>DataExporter defines how to export data on how your flags are used.<br> *see [export data section](data_collection/index.md) for more details*.|
 |`FileFormat`| *(optional)*<br>Format of your configuration file. Available formats are `yaml`, `toml` and `json`, if you omit the field it will try to unmarshal the file as a `yaml` file.<br>Default: `YAML`|
 |`Logger`   | *(optional)*<br>Logger used to log what `go-feature-flag` is doing.<br />If no logger is provided the module will not log anything.<br>Default: No log|
 |`Notifiers` | *(optional)*<br>List of notifiers to call when your flag file has changed.<br> *see [notifiers section](#notifiers) for more details*.|
@@ -48,4 +47,6 @@ ffclient.Init(ffclient.Config{
 })
 ```
 
+## Advanced configuration
 
+- [Export data from your flag variations](./data_collection/index.md)

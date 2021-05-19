@@ -96,7 +96,7 @@ A flag configuration looks like:
 | `rule` |*(optional)*<br>This is the query use to select on which user the flag should apply.<br>Rule format is describe in the <a href="#rule-format">rule format section</a>.<br>**If no rule set, the flag apply to all users *(percentage still apply)*.**|
 | `disable` |*(optional)*<br>True if the flag is disabled.<br>**Default: `false`**|
 | `trackEvents` |*(optional)*<br>False if you don't want to export the data in your data exporter.<br>**Default: `true`**|
-| `rollout` |*(optional)*<br><code>rollout</code> contains a specific rollout strategy you want to use.<br>**See <a href="#rollout">rollout section</a> for more details.**|
+| `rollout` |*(optional)*<br><code>rollout</code> contains a specific rollout strategy you want to use.<br>**See [rollout section](rollout/index.md) for more details.**|
 
 
 ## Rule format
@@ -128,3 +128,10 @@ Compare Expression and their definitions (`a|b` means you can use either one of 
 - Select a specific user: `key eq "example@example.com"`
 - Select all identified users: `anonymous ne true`
 - Select a user with a custom property: `userId eq "12345"`
+
+## Advanced configurations
+
+You can have advanced configurations for your flag to have specific behavior for them, such as:
+
+- [Specific rollout strategies](rollout/index.md)
+- [Don't track a flag](data_collection/index.md#dont-track-a-flag)

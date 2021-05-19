@@ -1,4 +1,4 @@
-# Export data
+# Data format / Export data 
 If you want to export data about how your flag are used, you can use the **`DataExporter`**.  
 It collects all the variations events and can save these events on several locations:
 
@@ -6,7 +6,6 @@ It collects all the variations events and can save these events on several locat
 - [Log](log.md) *- use your logger to write the variation usages.*
 - [S3](s3.md) *- export your variation usages to S3.*
 - [Webhook](webhook.md) *- export your variation usages by calling a webhook.*
-
 
 ## Data format
 Currently, we are supporting only feature events.  
@@ -72,3 +71,45 @@ ffclient.Config{
 |`FlushInterval`   | *(optional)*<br>Time to wait before exporting the data.<br>**Default: 60 seconds**.  |
 |`MaxEventInMemory`   | *(optional)*<br>If `MaxEventInMemory` is reach before the `FlushInterval` a intermediary export will be done<br>**Default: 100000**.|
 
+
+## Don't track a flag
+By default, all flags are trackable, and their data are exported.
+
+If you want to exclude a specific flag from the data export, you can set the property `trackEvents` to `false` on your flag, and you will have no export for it.
+
+=== "YAML"
+
+    ``` yaml linenums="1" hl_lines="6"
+    test-flag:
+      percentage: 50
+      true: "B"
+      false: "A"
+      default: "Default"
+      trackEvents: false
+    ```
+
+=== "JSON"
+
+    ``` json linenums="1"  hl_lines="7"
+    {
+      "test-flag": {
+        "percentage": 50,
+        "true": "B",
+        "false": "A",
+        "default": "Default",
+        "trackEvents": false
+      }
+    }
+    ```
+
+=== "TOML"
+
+    ``` toml linenums="1" hl_lines="6"
+    [test-flag]
+    percentage = 50.0
+    true = "B"
+    false = "A"
+    default = "Default"
+    trackEvents = false
+    ```
+ 

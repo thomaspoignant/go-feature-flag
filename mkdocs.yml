@@ -53,10 +53,16 @@ nav:
       - 'flag_file/file.md'
   - 'flag_format.md'
   - 'users.md'
-  - 'Data collection':
+  - 'Export data':
       - 'data_collection/index.md'
       - 'data_collection/file.md'
       - 'data_collection/log.md'
       - 'data_collection/s3.md'
       - 'data_collection/webhook.md'
+  - 'Rollout strategies':
+      - 'rollout/index.md'
+      - 'rollout/progressive.md'
+      - 'rollout/scheduled.md'
+      - 'rollout/experimentation.md'
+
 
