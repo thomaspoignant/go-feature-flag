@@ -16,27 +16,36 @@ import (
 
 func TestStartWithoutRetriever(t *testing.T) {
 	_, err := ffclient.New(ffclient.Config{
-		PollInterval: 60,
-		Logger:       log.New(os.Stdout, "", 0),
+		PollingInterval: 60 * time.Second,
+		Logger:          log.New(os.Stdout, "", 0),
 	})
 	assert.Error(t, err)
 }
 
 func TestStartWithNegativeInterval(t *testing.T) {
 	_, err := ffclient.New(ffclient.Config{
-		PollInterval: -60,
-		Retriever:    &ffclient.FileRetriever{Path: "testdata/flag-config.yaml"},
-		Logger:       log.New(os.Stdout, "", 0),
+		PollingInterval: -60 * time.Second,
+		Retriever:       &ffclient.FileRetriever{Path: "testdata/flag-config.yaml"},
+		Logger:          log.New(os.Stdout, "", 0),
 	})
 	assert.Error(t, err)
+}
+
+func TestStartWithMinInterval(t *testing.T) {
+	_, err := ffclient.New(ffclient.Config{
+		PollingInterval: 2,
+		Retriever:       &ffclient.FileRetriever{Path: "testdata/flag-config.yaml"},
+		Logger:          log.New(os.Stdout, "", 0),
+	})
+	assert.NoError(t, err)
 }
 
 func TestValidUseCase(t *testing.T) {
 	// Valid use case
 	err := ffclient.Init(ffclient.Config{
-		PollInterval: 5,
-		Retriever:    &ffclient.FileRetriever{Path: "testdata/flag-config.yaml"},
-		Logger:       log.New(os.Stdout, "", 0),
+		PollingInterval: 5 * time.Second,
+		Retriever:       &ffclient.FileRetriever{Path: "testdata/flag-config.yaml"},
+		Logger:          log.New(os.Stdout, "", 0),
 		DataExporter: ffclient.DataExporter{
 			FlushInterval:    10 * time.Second,
 			MaxEventInMemory: 1000,
@@ -58,10 +67,10 @@ func TestValidUseCase(t *testing.T) {
 func TestValidUseCaseToml(t *testing.T) {
 	// Valid use case
 	gffClient, err := ffclient.New(ffclient.Config{
-		PollInterval: 5,
-		Retriever:    &ffclient.FileRetriever{Path: "testdata/flag-config.toml"},
-		Logger:       log.New(os.Stdout, "", 0),
-		FileFormat:   "toml",
+		PollingInterval: 5 * time.Second,
+		Retriever:       &ffclient.FileRetriever{Path: "testdata/flag-config.toml"},
+		Logger:          log.New(os.Stdout, "", 0),
+		FileFormat:      "toml",
 	})
 	defer gffClient.Close()
 
@@ -76,10 +85,10 @@ func TestValidUseCaseToml(t *testing.T) {
 func TestValidUseCaseJson(t *testing.T) {
 	// Valid use case
 	gffClient, err := ffclient.New(ffclient.Config{
-		PollInterval: 5,
-		Retriever:    &ffclient.FileRetriever{Path: "testdata/flag-config.json"},
-		Logger:       log.New(os.Stdout, "", 0),
-		FileFormat:   "json",
+		PollingInterval: 5 * time.Second,
+		Retriever:       &ffclient.FileRetriever{Path: "testdata/flag-config.json"},
+		Logger:          log.New(os.Stdout, "", 0),
+		FileFormat:      "json",
 	})
 	defer gffClient.Close()
 
@@ -106,16 +115,16 @@ func TestS3RetrieverReturnError(t *testing.T) {
 
 func Test2GoFeatureFlagInstance(t *testing.T) {
 	gffClient1, err := ffclient.New(ffclient.Config{
-		PollInterval: 5,
-		Retriever:    &ffclient.FileRetriever{Path: "testdata/flag-config.yaml"},
-		Logger:       log.New(os.Stdout, "", 0),
+		PollingInterval: 5 * time.Second,
+		Retriever:       &ffclient.FileRetriever{Path: "testdata/flag-config.yaml"},
+		Logger:          log.New(os.Stdout, "", 0),
 	})
 	defer gffClient1.Close()
 
 	gffClient2, err2 := ffclient.New(ffclient.Config{
-		PollInterval: 10,
-		Retriever:    &ffclient.FileRetriever{Path: "testdata/test-instance2.yaml"},
-		Logger:       log.New(os.Stdout, "", 0),
+		PollingInterval: 10 * time.Second,
+		Retriever:       &ffclient.FileRetriever{Path: "testdata/test-instance2.yaml"},
+		Logger:          log.New(os.Stdout, "", 0),
 	})
 	defer gffClient2.Close()
 
@@ -146,9 +155,9 @@ func TestUpdateFlag(t *testing.T) {
 	_ = ioutil.WriteFile(flagFile.Name(), []byte(initialFileContent), 0600)
 
 	gffClient1, _ := ffclient.New(ffclient.Config{
-		PollInterval: 1,
-		Retriever:    &ffclient.FileRetriever{Path: flagFile.Name()},
-		Logger:       log.New(os.Stdout, "", 0),
+		PollingInterval: 1 * time.Second,
+		Retriever:       &ffclient.FileRetriever{Path: flagFile.Name()},
+		Logger:          log.New(os.Stdout, "", 0),
 	})
 	defer gffClient1.Close()
 
@@ -185,9 +194,9 @@ func TestImpossibleToLoadfile(t *testing.T) {
 	_ = ioutil.WriteFile(flagFile.Name(), []byte(initialFileContent), 0600)
 
 	gffClient1, _ := ffclient.New(ffclient.Config{
-		PollInterval: 1,
-		Retriever:    &ffclient.FileRetriever{Path: flagFile.Name()},
-		Logger:       log.New(os.Stdout, "", 0),
+		PollingInterval: 1 * time.Second,
+		Retriever:       &ffclient.FileRetriever{Path: flagFile.Name()},
+		Logger:          log.New(os.Stdout, "", 0),
 	})
 	defer gffClient1.Close()
 
@@ -207,8 +216,8 @@ func TestImpossibleToLoadfile(t *testing.T) {
 
 func TestWrongWebhookConfig(t *testing.T) {
 	_, err := ffclient.New(ffclient.Config{
-		PollInterval: 5,
-		Retriever:    &ffclient.FileRetriever{Path: "testdata/flag-config.yaml"},
+		PollingInterval: 5 * time.Second,
+		Retriever:       &ffclient.FileRetriever{Path: "testdata/flag-config.yaml"},
 		Notifiers: []ffclient.NotifierConfig{
 			&ffclient.WebhookConfig{
 				EndpointURL: " https://example.com/hook",
@@ -238,7 +247,7 @@ func TestFlagFileUnreachable(t *testing.T) {
 
 	flagFilePath := tempDir + "_FlagFileUnreachable.yaml"
 	gff, err := ffclient.New(ffclient.Config{
-		PollInterval:            1,
+		PollingInterval:         1 * time.Second,
 		Retriever:               &ffclient.FileRetriever{Path: flagFilePath},
 		Logger:                  log.New(os.Stdout, "", 0),
 		StartWithRetrieverError: true,
@@ -260,8 +269,8 @@ func TestFlagFileUnreachable(t *testing.T) {
 func TestValidUseCaseBigFlagFile(t *testing.T) {
 	// Valid use case
 	gff, err := ffclient.New(ffclient.Config{
-		PollInterval: 5,
-		Retriever:    &ffclient.FileRetriever{Path: "testdata/flag-config-big.yaml"},
+		PollingInterval: 5 * time.Second,
+		Retriever:       &ffclient.FileRetriever{Path: "testdata/flag-config-big.yaml"},
 	})
 	defer gff.Close()
 

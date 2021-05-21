@@ -13,7 +13,7 @@
 // Before using the module you need to initialized it this way:
 //  func main() {
 //    err := ffclient.Init(ffclient.Config{
-//             PollInterval: 3,
+//             PollingInterval: 3 * time.Second,
 //             HTTPRetriever: &ffClient.HTTPRetriever{
 //               URL:    "http://example.com/flag-config.yaml",
 //             },

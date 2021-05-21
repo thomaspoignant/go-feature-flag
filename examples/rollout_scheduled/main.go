@@ -16,9 +16,9 @@ func main() {
 	// You can update the dates of the steps in the rollout to see it working.
 
 	err := ffclient.Init(ffclient.Config{
-		PollInterval: 10,
-		Logger:       log.New(os.Stdout, "", 0),
-		Context:      context.Background(),
+		PollingInterval: 10 * time.Second,
+		Logger:          log.New(os.Stdout, "", 0),
+		Context:         context.Background(),
 		Retriever: &ffclient.FileRetriever{
 			Path: "examples/rollout_scheduled/flags.yaml",
 		},
