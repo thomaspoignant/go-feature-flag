@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"sync"
+	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
 	"github.com/thomaspoignant/go-feature-flag/internal/exporter"
@@ -13,7 +14,7 @@ import (
 // Init the feature flag component with the configuration of ffclient.Config
 //  func main() {
 //    err := ffclient.Init(ffclient.Config{
-//             PollInterval: 3,
+//             PollingInterval: 3 * time.Second,
 //             Retriever: &ffClient.HTTPRetriever{
 //               URL:    "http://example.com/flag-config.yaml",
 //             },
@@ -48,14 +49,24 @@ var onceFF sync.Once
 // New creates a new go-feature-flag instance that retrieve the config from a YAML file
 // and return everything you need to manage your flags.
 func New(config Config) (*GoFeatureFlag, error) {
-	// The default value for poll interval is 60 seconds
-	if config.PollInterval == 0 {
-		config.PollInterval = 60
+	// Deprecated: remove when PollInterval is deleted
+	if config.PollingInterval == 0 {
+		config.PollingInterval = time.Duration(config.PollInterval) * time.Second
 	}
+	// End deprecated
 
-	// Check that value is not negative
-	if config.PollInterval < 0 {
-		return nil, fmt.Errorf("%d is not a valid PollInterval value, it need to be > 0", config.PollInterval)
+	switch {
+	case config.PollingInterval == 0:
+		// The default value for poll interval is 60 seconds
+		config.PollingInterval = 60 * time.Second
+	case config.PollingInterval < 0:
+		// Check that value is not negative
+		return nil, fmt.Errorf("%d is not a valid PollingInterval value, it need to be > 0", config.PollingInterval)
+	case config.PollingInterval < time.Second:
+		// the minimum value for the polling policy is 1 second
+		config.PollingInterval = time.Second
+	default:
+		// do nothing
 	}
 
 	notifiers, err := getNotifiers(config)
@@ -66,7 +77,7 @@ func New(config Config) (*GoFeatureFlag, error) {
 
 	goFF := &GoFeatureFlag{
 		config:    config,
-		bgUpdater: newBackgroundUpdater(config.PollInterval),
+		bgUpdater: newBackgroundUpdater(config.PollingInterval),
 		cache:     cache.New(notificationService),
 	}
 

@@ -6,14 +6,15 @@ import (
 	"net/http"
 	"reflect"
 	"testing"
+	"time"
 
 	ffClient "github.com/thomaspoignant/go-feature-flag"
 )
 
 func TestConfig_GetRetriever(t *testing.T) {
 	type fields struct {
-		PollInterval int
-		Retriever    ffClient.Retriever
+		PollingInterval time.Duration
+		Retriever       ffClient.Retriever
 	}
 	tests := []struct {
 		name    string
@@ -24,8 +25,8 @@ func TestConfig_GetRetriever(t *testing.T) {
 		{
 			name: "File retriever",
 			fields: fields{
-				PollInterval: 3,
-				Retriever:    &ffClient.FileRetriever{Path: "file-example.yaml"},
+				PollingInterval: 3 * time.Second,
+				Retriever:       &ffClient.FileRetriever{Path: "file-example.yaml"},
 			},
 			want:    "*retriever.localRetriever",
 			wantErr: false,
@@ -33,7 +34,7 @@ func TestConfig_GetRetriever(t *testing.T) {
 		{
 			name: "S3 retriever",
 			fields: fields{
-				PollInterval: 3,
+				PollingInterval: 3 * time.Second,
 				Retriever: &ffClient.S3Retriever{
 					Bucket: "tpoi-test",
 					Item:   "flag-config.yaml",
@@ -48,7 +49,7 @@ func TestConfig_GetRetriever(t *testing.T) {
 		{
 			name: "HTTP retriever",
 			fields: fields{
-				PollInterval: 3,
+				PollingInterval: 3 * time.Second,
 				Retriever: &ffClient.HTTPRetriever{
 					URL:    "http://example.com/flag-config.yaml",
 					Method: http.MethodGet,
@@ -60,7 +61,7 @@ func TestConfig_GetRetriever(t *testing.T) {
 		{
 			name: "Github retriever",
 			fields: fields{
-				PollInterval: 3,
+				PollingInterval: 3 * time.Second,
 				Retriever: &ffClient.GithubRetriever{
 					RepositorySlug: "thomaspoignant/go-feature-flag",
 					FilePath:       "testdata/flag-config.yaml",
@@ -74,7 +75,7 @@ func TestConfig_GetRetriever(t *testing.T) {
 		{
 			name: "No retriever",
 			fields: fields{
-				PollInterval: 3,
+				PollingInterval: 3 * time.Second,
 			},
 			wantErr: true,
 		},
@@ -82,8 +83,8 @@ func TestConfig_GetRetriever(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &ffClient.Config{
-				PollInterval: tt.fields.PollInterval,
-				Retriever:    tt.fields.Retriever,
+				PollingInterval: tt.fields.PollingInterval,
+				Retriever:       tt.fields.Retriever,
 			}
 			got, err := c.GetRetriever()
 			assert.Equal(t, tt.wantErr, err != nil)

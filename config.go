@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/internal"
 	"github.com/thomaspoignant/go-feature-flag/internal/notifier"
@@ -11,12 +12,15 @@ import (
 )
 
 // Config is the configuration of go-feature-flag.
-// PollInterval is the interval in seconds where we gonna read the file to update the cache.
 // You should also have a retriever to specify where to read the flags file.
 type Config struct {
-	// PollInterval (optional) Poll every X seconds
-	// Default: 60 seconds
+	// Deprecated: use PollingInterval instead
 	PollInterval int
+
+	// PollingInterval (optional) Poll every X time
+	// The minimum possible is 1 second
+	// Default: 60 seconds
+	PollingInterval time.Duration
 
 	// Logger (optional) logger use by the library
 	// Default: No log

@@ -12,9 +12,9 @@ type backgroundUpdater struct {
 }
 
 // newBackgroundUpdater init default value for the ticker and the channel.
-func newBackgroundUpdater(pollInterval int) backgroundUpdater {
+func newBackgroundUpdater(pollingInterval time.Duration) backgroundUpdater {
 	return backgroundUpdater{
-		ticker:      time.NewTicker(time.Duration(pollInterval) * time.Second),
+		ticker:      time.NewTicker(pollingInterval),
 		updaterChan: make(chan struct{}),
 	}
 }
