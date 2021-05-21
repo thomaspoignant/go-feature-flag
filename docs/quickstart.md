@@ -10,7 +10,7 @@ go get github.com/thomaspoignant/go-feature-flag
 First, you need to initialize the `ffclient` with the location of your backend file.
 ```go linenums="1"
 err := ffclient.Init(ffclient.Config{
-    PollInterval: 3,
+    PollingInterval: 3 * time.Second,
     Retriever: &ffclient.HTTPRetriever{
         URL:    "http://example.com/flag-config.yaml",
     },
@@ -18,7 +18,7 @@ err := ffclient.Init(ffclient.Config{
 defer ffclient.Close()
 ```
 *This example will load a file from an HTTP endpoint and will refresh the flags every 3 seconds (if you omit the
-PollInterval, the default value is 60 seconds).*
+PollingInterval, the default value is 60 seconds).*
 
 ## Evaluate your flags
 Now you can evaluate your flags anywhere in your code.

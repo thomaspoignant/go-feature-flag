@@ -14,9 +14,9 @@ import (
 func main() {
 	// Init ffclient with an http retriever.
 	err := ffclient.Init(ffclient.Config{
-		PollInterval: 10,
-		Logger:       log.New(os.Stdout, "", 0),
-		Context:      context.Background(),
+		PollingInterval: 10 * time.Second,
+		Logger:          log.New(os.Stdout, "", 0),
+		Context:         context.Background(),
 		Retriever: &ffclient.GithubRetriever{
 			RepositorySlug: "thomaspoignant/go-feature-flag",
 			Branch:         "feature/add-examples",

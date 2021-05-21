@@ -14,13 +14,13 @@ During the initialization you must give a [`ffclient.Config{}`](https://pkg.go.d
 |`FileFormat`| *(optional)*<br>Format of your configuration file. Available formats are `yaml`, `toml` and `json`, if you omit the field it will try to unmarshal the file as a `yaml` file.<br>Default: `YAML`|
 |`Logger`   | *(optional)*<br>Logger used to log what `go-feature-flag` is doing.<br />If no logger is provided the module will not log anything.<br>Default: No log|
 |`Notifiers` | *(optional)*<br>List of notifiers to call when your flag file has changed.<br> *see [notifiers section](./notifier/index.md) for more details*.|
-|`PollInterval`   | (optional) Number of seconds to wait before refreshing the flags.<br />Default: 60|
+|`PollingInterval`   | (optional) Duration to wait before refreshing the flags.<br>The minimum polling interval is 1 second.<br>Default: 60 * time.Second|
 |`StartWithRetrieverError` | *(optional)*<br>If **true**, the SDK will start even if we did not get any flags from the retriever. It will serve only default values until the retriever returns the flags.<br>The init method will not return any error if the flag file is unreachable.<br>Default: **false**|
 
 ## Example
 ```go linenums="1"
 ffclient.Init(ffclient.Config{ 
-    PollInterval:   3,
+    PollingInterval:   3 * time.Second,
     Logger:         log.New(file, "/tmp/log", 0),
     Context:        context.Background(),
     Retriever:      &ffclient.FileRetriever{Path: "testdata/flag-config.yaml"},

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
@@ -13,11 +14,11 @@ import (
 func main() {
 	// Init ffclient with a file retriever.
 	err := ffclient.Init(ffclient.Config{
-		PollInterval: 10,
-		Logger:       log.New(os.Stdout, "", 0),
-		Context:      context.Background(),
+		PollingInterval: 10 * time.Second,
+		Logger:          log.New(os.Stdout, "", 0),
+		Context:         context.Background(),
 		Retriever: &ffclient.FileRetriever{
-			Path:     "examples/file/flags.yaml",
+			Path: "examples/file/flags.yaml",
 		},
 	})
 
