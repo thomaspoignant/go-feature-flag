@@ -75,7 +75,7 @@ if hasFlag {
 }
 ```
 The full documentation is available on https://thomaspoignant.github.io/go-feature-flag/  
-You can find more examples programs in the [examples/](https://github.com/thomaspoignant/go-feature-flag/tree/main/examples**) directory.
+You can find more examples programs in the [examples/](https://github.com/thomaspoignant/go-feature-flag/tree/main/examples) directory.
 
 ## Configuration
 
