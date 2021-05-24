@@ -2,44 +2,21 @@ name: "CI"
 on: [ push, pull_request ]
 
 jobs:
-  setup:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-      - run: make vendor
-
-  lint:
-    needs: setup
+  Lint:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
       - run: make lint
 
-  test:
-    needs: setup
+  Test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
       - run: make test
 
-  coverage:
-    needs: test
-    env:
-      COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-      - run: make coverage
-      - uses: shogo82148/actions-goveralls@v1
-        with:
-          path-to-profile: coverage.cov
-
-  codeQl:
-    needs: setup
+  CodeQl:
     name: Analyze
     runs-on: ubuntu-latest
     steps:
@@ -51,3 +28,16 @@ jobs:
           languages: 'go'
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v1
+
+  Coverage:
+    needs: test
+    env:
+      COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - run: make coverage
+      - uses: shogo82148/actions-goveralls@v1
+        with:
+          path-to-profile: coverage.cov
