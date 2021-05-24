@@ -22,7 +22,7 @@ ifeq ($(CI), true)
 	# Print code coverage details
 	GO111MODULE=off go get github.com/mattn/goveralls
 	GO111MODULE=off go get golang.org/x/tools/cmd/cover
-	goveralls -service=circle-ci -coverprofile=coverage.out -v -package ./... -repotoken=${COVERALLS_TOKEN}
+	goveralls -service=github -coverprofile=coverage.out -v -package ./...
 endif
 
 vendor:
