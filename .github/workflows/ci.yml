@@ -1,0 +1,30 @@
+name: "CI"
+on: [ push, pull_request ]
+
+jobs:
+  Lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - run: make lint
+
+  Test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - run: make test
+
+  Coverage:
+    needs: test
+    env:
+      COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - run: make coverage
+      - uses: shogo82148/actions-goveralls@v1
+        with:
+          path-to-profile: coverage.cov
