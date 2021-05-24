@@ -7,26 +7,30 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-
       - run: make vendor
-
 
   lint:
     needs: setup
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
       - run: make lint
 
   test:
     needs: setup
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
       - run: make test
 
   coverage:
     needs: test
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
       - run: make coverage
 
   codeQl:
@@ -42,12 +46,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-
-      # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v1
         with:
           languages: ${{ matrix.language }}
-
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v1
