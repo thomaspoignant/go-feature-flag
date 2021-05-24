@@ -14,16 +14,8 @@ lint:
 test:
 	$(GOTEST) -v -race ./...
 
-
 coverage:
-	# Create cover profile
-	$(GOTEST) -cover -covermode=count -coverprofile=coverage.out ./...
-ifeq ($(CI), true)
-	# Print code coverage details
-	GO111MODULE=off go get github.com/mattn/goveralls
-	GO111MODULE=off go get golang.org/x/tools/cmd/cover
-	goveralls -service=github -coverprofile=coverage.out -v -package ./...
-endif
+	$(GOTEST) -cover -covermode=count -coverprofile=coverage.cov ./...
 
 vendor:
 	$(GOCMD) mod vendor

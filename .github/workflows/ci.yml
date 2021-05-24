@@ -34,6 +34,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
       - run: make coverage
+      - uses: shogo82148/actions-goveralls@v1
+        with:
+          path-to-profile: coverage.cov
 
   codeQl:
     needs: setup
