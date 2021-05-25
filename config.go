@@ -8,7 +8,6 @@ import (
 
 	"github.com/thomaspoignant/go-feature-flag/internal"
 	"github.com/thomaspoignant/go-feature-flag/internal/notifier"
-	"github.com/thomaspoignant/go-feature-flag/internal/retriever"
 )
 
 // Config is the configuration of go-feature-flag.
@@ -51,11 +50,11 @@ type Config struct {
 }
 
 // GetRetriever returns a retriever.FlagRetriever configure with the retriever available in the config.
-func (c *Config) GetRetriever() (retriever.FlagRetriever, error) {
+func (c *Config) GetRetriever() (Retriever, error) {
 	if c.Retriever == nil {
 		return nil, errors.New("no retriever in the configuration, impossible to get the flags")
 	}
-	return c.Retriever.getFlagRetriever()
+	return c.Retriever, nil
 }
 
 // NotifierConfig is the interface for your notifiers.

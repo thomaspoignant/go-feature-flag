@@ -28,7 +28,7 @@ func TestConfig_GetRetriever(t *testing.T) {
 				PollingInterval: 3 * time.Second,
 				Retriever:       &ffClient.FileRetriever{Path: "file-example.yaml"},
 			},
-			want:    "*retriever.localRetriever",
+			want:    "*ffclient.FileRetriever",
 			wantErr: false,
 		},
 		{
@@ -43,7 +43,7 @@ func TestConfig_GetRetriever(t *testing.T) {
 					},
 				},
 			},
-			want:    "*retriever.s3Retriever",
+			want:    "*ffclient.S3Retriever",
 			wantErr: false,
 		},
 		{
@@ -55,7 +55,7 @@ func TestConfig_GetRetriever(t *testing.T) {
 					Method: http.MethodGet,
 				},
 			},
-			want:    "*retriever.httpRetriever",
+			want:    "*ffclient.HTTPRetriever",
 			wantErr: false,
 		},
 		{
@@ -69,7 +69,7 @@ func TestConfig_GetRetriever(t *testing.T) {
 				},
 			},
 			// we should have a http retriever because Github retriever is using httpRetriever
-			want:    "*retriever.httpRetriever",
+			want:    "*ffclient.GithubRetriever",
 			wantErr: false,
 		},
 		{

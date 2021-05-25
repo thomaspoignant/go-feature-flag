@@ -1,16 +1,15 @@
-package retriever_test
+package ffclient_test
 
 import (
 	"bytes"
 	"context"
 	"errors"
 	"github.com/stretchr/testify/assert"
+	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"testing"
-
-	"github.com/thomaspoignant/go-feature-flag/internal/retriever"
 )
 
 type mockHTTP struct {
@@ -23,11 +22,11 @@ func (m *mockHTTP) Do(req *http.Request) (*http.Response, error) {
 		Status:     "OK",
 		StatusCode: http.StatusOK,
 		Body: ioutil.NopCloser(bytes.NewReader([]byte(`test-flag:
-  rule: key eq "random-key"
-  percentage: 100
-  true: true
-  false: false
-  default: false
+ rule: key eq "random-key"
+ percentage: 100
+ true: true
+ false: false
+ default: false
 `))),
 	}
 
@@ -48,7 +47,7 @@ func (m *mockHTTP) Do(req *http.Request) (*http.Response, error) {
 
 func Test_httpRetriever_Retrieve(t *testing.T) {
 	type fields struct {
-		httpClient *mockHTTP
+		httpClient mockHTTP
 		url        string
 		method     string
 		body       string
@@ -64,25 +63,25 @@ func Test_httpRetriever_Retrieve(t *testing.T) {
 		{
 			name: "Success",
 			fields: fields{
-				httpClient: &mockHTTP{},
+				httpClient: mockHTTP{},
 				url:        "http://localhost.example/file",
 				method:     http.MethodGet,
 				body:       "",
 				header:     nil,
 			},
 			want: []byte(`test-flag:
-  rule: key eq "random-key"
-  percentage: 100
-  true: true
-  false: false
-  default: false
+ rule: key eq "random-key"
+ percentage: 100
+ true: true
+ false: false
+ default: false
 `),
 			wantErr: false,
 		},
 		{
 			name: "Success with context",
 			fields: fields{
-				httpClient: &mockHTTP{},
+				httpClient: mockHTTP{},
 				url:        "http://localhost.example/file",
 				method:     http.MethodGet,
 				body:       "",
@@ -90,35 +89,35 @@ func Test_httpRetriever_Retrieve(t *testing.T) {
 				context:    context.Background(),
 			},
 			want: []byte(`test-flag:
-  rule: key eq "random-key"
-  percentage: 100
-  true: true
-  false: false
-  default: false
+ rule: key eq "random-key"
+ percentage: 100
+ true: true
+ false: false
+ default: false
 `),
 			wantErr: false,
 		},
 		{
 			name: "Success with default method",
 			fields: fields{
-				httpClient: &mockHTTP{},
+				httpClient: mockHTTP{},
 				url:        "http://localhost.example/file",
 				body:       "",
 				header:     nil,
 			},
 			want: []byte(`test-flag:
-  rule: key eq "random-key"
-  percentage: 100
-  true: true
-  false: false
-  default: false
+ rule: key eq "random-key"
+ percentage: 100
+ true: true
+ false: false
+ default: false
 `),
 			wantErr: false,
 		},
 		{
 			name: "HTTP Error",
 			fields: fields{
-				httpClient: &mockHTTP{},
+				httpClient: mockHTTP{},
 				url:        "http://localhost.example/httpError",
 				method:     http.MethodPost,
 				body:       "",
@@ -129,7 +128,7 @@ func Test_httpRetriever_Retrieve(t *testing.T) {
 		{
 			name: "Error",
 			fields: fields{
-				httpClient: &mockHTTP{},
+				httpClient: mockHTTP{},
 				url:        "http://localhost.example/error",
 				method:     http.MethodPost,
 				body:       "",
@@ -140,7 +139,7 @@ func Test_httpRetriever_Retrieve(t *testing.T) {
 		{
 			name: "No URL",
 			fields: fields{
-				httpClient: &mockHTTP{},
+				httpClient: mockHTTP{},
 				url:        "",
 				method:     http.MethodPost,
 				body:       "",
@@ -151,13 +150,13 @@ func Test_httpRetriever_Retrieve(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			h := retriever.NewHTTPRetriever(
-				tt.fields.httpClient,
-				tt.fields.url,
-				tt.fields.method,
-				tt.fields.body,
-				tt.fields.header,
-			)
+			h := ffclient.HTTPRetriever{
+				URL:    tt.fields.url,
+				Method: tt.fields.method,
+				Body:   tt.fields.body,
+				Header: tt.fields.header,
+			}
+			h.SetHTTPClient(&tt.fields.httpClient)
 			got, err := h.Retrieve(tt.fields.context)
 			assert.Equal(t, tt.wantErr, err != nil, "Retrieve() error = %v, wantErr %v", err, tt.wantErr)
 
