@@ -19,7 +19,7 @@ func main() {
 		Context:         context.Background(),
 		Retriever: &ffclient.GithubRetriever{
 			RepositorySlug: "thomaspoignant/go-feature-flag",
-			Branch:         "feature/add-examples",
+			Branch:         "main",
 			FilePath:       "examples/github/flags.yaml",
 			Timeout:        3 * time.Second,
 		},
