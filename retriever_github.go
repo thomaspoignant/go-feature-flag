@@ -3,6 +3,7 @@ package ffclient
 import (
 	"context"
 	"fmt"
+	"github.com/thomaspoignant/go-feature-flag/internal"
 	"net/http"
 	"time"
 )
@@ -14,9 +15,16 @@ type GithubRetriever struct {
 	FilePath       string
 	GithubToken    string
 	Timeout        time.Duration // default is 10 seconds
+
+	// httpClient is the http.Client if you want to override it.
+	httpClient internal.HTTPClient
 }
 
 func (r *GithubRetriever) Retrieve(ctx context.Context) ([]byte, error) {
+	if r.FilePath == "" || r.RepositorySlug == "" {
+		return nil, fmt.Errorf("missing mandatory information filePath=%s, repositorySlug=%s", r.FilePath, r.RepositorySlug)
+	}
+
 	// default branch is main
 	branch := r.Branch
 	if branch == "" {
@@ -42,5 +50,15 @@ func (r *GithubRetriever) Retrieve(ctx context.Context) ([]byte, error) {
 		Timeout: r.Timeout,
 	}
 
+	if r.httpClient != nil {
+		httpRetriever.SetHTTPClient(r.httpClient)
+	}
+
 	return httpRetriever.Retrieve(ctx)
+}
+
+// SetHTTPClient is here if you want to override the default http.Client we are using.
+// It is also used for the tests.
+func (r *GithubRetriever) SetHTTPClient(client internal.HTTPClient) {
+	r.httpClient = client
 }
