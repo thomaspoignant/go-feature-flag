@@ -2,10 +2,11 @@ package ffclient
 
 import (
 	"fmt"
-
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
 	"github.com/thomaspoignant/go-feature-flag/internal/exporter"
+	"github.com/thomaspoignant/go-feature-flag/internal/flagstate"
 	"github.com/thomaspoignant/go-feature-flag/internal/model"
+	"time"
 )
 
 const errorFlagNotAvailable = "flag %v is not present or disabled"
@@ -52,6 +53,12 @@ func JSONArrayVariation(flagKey string, user ffuser.User, defaultValue []interfa
 func JSONVariation(
 	flagKey string, user ffuser.User, defaultValue map[string]interface{}) (map[string]interface{}, error) {
 	return ff.JSONVariation(flagKey, user, defaultValue)
+}
+
+// AllFlagsState return the values of all the flags for a specific user.
+// If valid field is false it means that we had an error when checking the flags.
+func AllFlagsState(user ffuser.User) flagstate.AllFlags {
+	return ff.AllFlagsState(user)
 }
 
 // BoolVariation return the value of the flag in boolean.
@@ -212,4 +219,46 @@ func (g *GoFeatureFlag) getFlagFromCache(flagKey string) (model.Flag, error) {
 		return flag, fmt.Errorf(errorFlagNotAvailable, flagKey)
 	}
 	return flag, nil
+}
+
+func (g *GoFeatureFlag) AllFlagsState(user ffuser.User) flagstate.AllFlags {
+	flags, err := g.cache.AllFlags()
+	if err != nil {
+		return flagstate.AllFlags{Valid: false, Flags: map[string]flagstate.FlagState{}}
+	}
+
+	allFlags := flagstate.AllFlags{Valid: true, Flags: map[string]flagstate.FlagState{}}
+	hasError := false
+	for key := range flags {
+		now := time.Now().Unix()
+		var err error
+
+		switch trueValue := *flags[key].True; trueValue.(type) {
+		case bool:
+			var flagValue bool
+			flagValue, err = g.BoolVariation(key, user, false)
+			allFlags.Flags[key] = flagstate.FlagState{Value: flagValue, Timestamp: now}
+		case float64:
+			var flagValue float64
+			flagValue, err = g.Float64Variation(key, user, 0)
+			allFlags.Flags[key] = flagstate.FlagState{Value: flagValue, Timestamp: now}
+		case string:
+			var flagValue string
+			flagValue, err = g.StringVariation(key, user, "")
+			allFlags.Flags[key] = flagstate.FlagState{Value: flagValue, Timestamp: now}
+		case []interface{}:
+			var flagValue []interface{}
+			flagValue, err = g.JSONArrayVariation(key, user, nil)
+			allFlags.Flags[key] = flagstate.FlagState{Value: flagValue, Timestamp: now}
+		case map[string]interface{}:
+			var flagValue map[string]interface{}
+			flagValue, err = g.JSONVariation(key, user, nil)
+			allFlags.Flags[key] = flagstate.FlagState{Value: flagValue, Timestamp: now}
+		}
+		if err != nil {
+			hasError = true
+		}
+	}
+	allFlags.Valid = !hasError
+	return allFlags
 }

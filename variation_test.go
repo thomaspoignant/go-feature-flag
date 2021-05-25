@@ -35,6 +35,7 @@ func (c *cacheMock) Close() {}
 func (c *cacheMock) GetFlag(key string) (model.Flag, error) {
 	return c.flag, c.err
 }
+func (c *cacheMock) AllFlags() (cache.FlagsCache, error) { return nil, nil }
 
 func TestBoolVariation(t *testing.T) {
 	type args struct {
