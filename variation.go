@@ -194,7 +194,7 @@ func (g *GoFeatureFlag) JSONVariation(
 func (g *GoFeatureFlag) notifyVariation(
 	flagKey string, flag model.Flag, user ffuser.User, value interface{}, variationType model.VariationType, failed bool) {
 	if flag.GetTrackEvents() {
-		event := exporter.NewFeatureEvent(user, flagKey, flag, value, variationType, failed)
+		event := exporter.NewFeatureEvent(user, flagKey, value, variationType, failed)
 
 		// Add event in the exporter
 		if g.dataExporter != nil {

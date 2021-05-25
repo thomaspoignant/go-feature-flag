@@ -10,7 +10,6 @@ import (
 func NewFeatureEvent(
 	user ffuser.User,
 	flagKey string,
-	flag model.Flag,
 	value interface{},
 	variation model.VariationType,
 	failed bool) FeatureEvent {
