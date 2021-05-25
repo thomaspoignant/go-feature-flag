@@ -186,7 +186,6 @@ func (g *GoFeatureFlag) JSONVariation(
 		return defaultValue, fmt.Errorf(errorWrongVariation, flagKey)
 	}
 	g.notifyVariation(flagKey, flag, user, res, variationType, false)
-	g.notifyVariation(flagKey, flag, user, res, variationType, false)
 	return res, nil
 }
 
