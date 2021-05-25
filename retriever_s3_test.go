@@ -1,13 +1,13 @@
-package retriever_test
+package ffclient
 
 import (
 	"context"
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager/s3manageriface"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"testing"
 
-	"github.com/thomaspoignant/go-feature-flag/internal/retriever"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
 )
 
@@ -31,7 +31,7 @@ func Test_s3Retriever_Retrieve(t *testing.T) {
 				bucket:     "Bucket",
 				item:       "valid",
 			},
-			want:    "../../testdata/flag-config.yaml",
+			want:    "./testdata/flag-config.yaml",
 			wantErr: false,
 		},
 		{
@@ -51,13 +51,18 @@ func Test_s3Retriever_Retrieve(t *testing.T) {
 				item:       "valid",
 				context:    context.Background(),
 			},
-			want:    "../../testdata/flag-config.yaml",
+			want:    "./testdata/flag-config.yaml",
 			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := retriever.NewS3Retriever(tt.fields.downloader, tt.fields.bucket, tt.fields.item)
+			s := S3Retriever{
+				Bucket:     tt.fields.bucket,
+				Item:       tt.fields.item,
+				AwsConfig:  aws.Config{},
+				downloader: tt.fields.downloader,
+			}
 			got, err := s.Retrieve(tt.fields.context)
 			assert.Equal(t, tt.wantErr, err != nil, "Retrieve() error = %v, wantErr %v", err, tt.wantErr)
 			if err == nil {
