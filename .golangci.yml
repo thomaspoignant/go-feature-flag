@@ -14,7 +14,7 @@ linters:
     - goconst
     - gocritic
     - gocyclo
-    - golint
+    - revive
     - gosec
     - lll
     - misspell

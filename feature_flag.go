@@ -21,7 +21,7 @@ import (
 //           })
 //    defer ffclient.Close()
 func Init(config Config) error {
-	var err error = nil
+	var err error
 	onceFF.Do(func() {
 		ff, err = New(config)
 	})
