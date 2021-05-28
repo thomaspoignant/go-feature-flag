@@ -2,6 +2,7 @@ package ffclient
 
 import (
 	"fmt"
+
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
 	"github.com/thomaspoignant/go-feature-flag/internal/exporter"
 	"github.com/thomaspoignant/go-feature-flag/internal/flagstate"
@@ -167,8 +168,12 @@ func (g *GoFeatureFlag) boolVariation(flagKey string, user ffuser.User, defaultV
 ) (model.BoolVarResult, error) {
 	flag, err := g.getFlagFromCache(flagKey)
 	if err != nil {
-		return model.BoolVarResult{Value: defaultValue,
-			VariationResult: model.VariationResult{VariationType: model.VariationSDKDefault, Failed: true},
+		return model.BoolVarResult{
+			Value: defaultValue,
+			VariationResult: model.VariationResult{
+				VariationType: model.VariationSDKDefault,
+				Failed: true,
+			},
 		}, err
 	}
 
