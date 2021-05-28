@@ -323,6 +323,17 @@ The default value is return when an error is encountered _(`ffclient` not initia
 In the example, if the flag `your.feature.key` does not exists, result will be `false`.  
 Not that you will always have a usable value in the result.
 
+## Get all flags for a specific user
+If you want to send the information about a specific user to a front-end, you will want a snapshot of all the flags for
+this user at a specific time.
+
+The method `ffclient.AllFlagsState` returns a snapshot of flag values and metadata.  
+The function is evaluating all available flags for the user and return a `flagstate.AllFlagsState` object containing the
+information you need.
+
+The `MarshalJSON()` function will return a JSON Object, that can be directly used by your front-end application.  
+[More details in the documentation.](https://thomaspoignant.github.io/go-feature-flag/users/#get-all-flags-for-a-specific-user)
+
 ## Rollout
 A critical part of every new feature release is orchestrating the actual launch schedule between Product, Engineering, and Marketing teams.
 
