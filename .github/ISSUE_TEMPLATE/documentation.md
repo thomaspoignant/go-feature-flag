@@ -1,7 +1,7 @@
 ---
 name: Documentation
 about: Update functionality that already exists.
-labels: change, needs-triage
+labels: documentation, needs-triage
 title: "(doc) "
 ---
 
