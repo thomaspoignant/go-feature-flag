@@ -1,7 +1,7 @@
 ---
 name: Documentation
 about: Any documentation related issue/addition.
-labels: change, needs-triage
+labels: documentation, needs-triage
 title: "(doc) "
 ---
 
