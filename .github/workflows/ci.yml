@@ -4,7 +4,7 @@ on:
     branches:
       - main
   pull_request:
-      types: [opened, synchronize, reopened]
+    types: [ opened, synchronize, reopened ]
 
 jobs:
   Lint:
@@ -12,6 +12,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+      - name: Setup go
+        uses: actions/setup-go@v1
+        with:
+          go-version: '^1.16.0'
       - run: make lint
 
   Test:
@@ -19,6 +23,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+      - name: Setup go
+        uses: actions/setup-go@v1
+        with:
+          go-version: '^1.16.0'
       - run: make test
 
   Coverage:
@@ -29,15 +37,19 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+      - name: Setup go
+        uses: actions/setup-go@v1
+        with:
+          go-version: '^1.16.0'
       - run: make coverage
       - uses: shogo82148/actions-goveralls@v1
         with:
           path-to-profile: coverage.cov
-          
+
   Docs:
     name: Deploy docs
     runs-on: ubuntu-latest
-    needs: [Coverage, Lint]
+    needs: [ Coverage, Lint ]
     if: ${{ github.ref == 'refs/heads/main' }}
     steps:
       - name: Checkout repository
@@ -46,5 +58,5 @@ jobs:
         uses: mhausenblas/mkdocs-deploy-gh-pages@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
+
 
