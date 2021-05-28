@@ -1,0 +1,46 @@
+{
+  "flags": {
+    "test-flag0": {
+      "value": true,
+      "timestamp": 1622206239,
+      "variationType": "True",
+      "trackEvents": true
+    },
+    "test-flag1": {
+      "value": "true",
+      "timestamp": 1622206239,
+      "variationType": "True",
+      "trackEvents": true
+    },
+    "test-flag2": {
+      "value": 1,
+      "timestamp": 1622206239,
+      "variationType": "True",
+      "trackEvents": true
+    },
+    "test-flag3": {
+      "value": [
+        "yo",
+        "ya"
+      ],
+      "timestamp": 1622206239,
+      "variationType": "True",
+      "trackEvents": true
+    },
+    "test-flag4": {
+      "value": {
+        "test": "yo"
+      },
+      "timestamp": 1622206239,
+      "variationType": "True",
+      "trackEvents": true
+    },
+    "test-flag5": {
+      "value": 1.1,
+      "timestamp": 1622206239,
+      "variationType": "True",
+      "trackEvents": false
+    }
+  },
+  "valid": true
+}

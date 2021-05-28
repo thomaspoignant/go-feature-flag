@@ -49,3 +49,7 @@ func (a AllFlags) MarshalJSON() ([]byte, error) {
 func (a *AllFlags) IsValid() bool {
 	return a.valid
 }
+
+func (a *AllFlags) GetFlags() map[string]FlagState {
+	return a.flags
+}
