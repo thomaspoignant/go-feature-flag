@@ -1,6 +1,6 @@
 ---
 name: Documentation
-about: Update functionality that already exists.
+about: Any documentation related issue/addition.
 labels: documentation, needs-triage
 title: "(doc) "
 ---

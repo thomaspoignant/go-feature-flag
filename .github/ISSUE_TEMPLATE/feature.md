@@ -2,7 +2,7 @@
 name: Feature
 about: Add new functionality to the project.
 labels: enhancement, needs-triage
-
+title: "(feature) "
 ---
 
 # Requirements
