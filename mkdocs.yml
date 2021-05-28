@@ -76,3 +76,4 @@ nav:
       - 'notifier/index.md'
       - 'notifier/slack.md'
       - 'notifier/webhook.md'
+  - 'faq.md'
