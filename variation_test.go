@@ -2,11 +2,14 @@ package ffclient
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"log"
+	"os"
 	"testing"
+	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/ffexporter"
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
@@ -35,6 +38,7 @@ func (c *cacheMock) Close() {}
 func (c *cacheMock) GetFlag(key string) (model.Flag, error) {
 	return c.flag, c.err
 }
+func (c *cacheMock) AllFlags() (cache.FlagsCache, error) { return nil, nil }
 
 func TestBoolVariation(t *testing.T) {
 	type args struct {
@@ -1096,6 +1100,88 @@ func TestIntVariation(t *testing.T) {
 			// clean logger
 			ff = nil
 			_ = file.Close()
+		})
+	}
+}
+
+func TestAllFlagsState(t *testing.T) {
+	tests := []struct {
+		name       string
+		config     Config
+		valid      bool
+		jsonOutput string
+		initModule bool
+	}{
+		{
+			name: "Valid multiple types",
+			config: Config{
+				Retriever: &FileRetriever{
+					Path: "./testdata/ffclient/all_flags/config_flag/flag-config-all-flags.yaml",
+				},
+			},
+			valid:      true,
+			jsonOutput: "./testdata/ffclient/all_flags/marshal_json/valid_multiple_types.json",
+			initModule: true,
+		},
+		{
+			name: "module not init",
+			config: Config{
+				Retriever: &FileRetriever{
+					Path: "./testdata/ffclient/all_flags/config_flag/flag-config-all-flags.yaml",
+				},
+			},
+			valid:      false,
+			jsonOutput: "./testdata/ffclient/all_flags/marshal_json/module_not_init.json",
+			initModule: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// init logger
+			exportDir, _ := ioutil.TempDir("", "export")
+			tt.config.DataExporter = DataExporter{
+				FlushInterval:    1000,
+				MaxEventInMemory: 1,
+				Exporter:         &ffexporter.File{OutputDir: exportDir},
+			}
+
+			var goff *GoFeatureFlag
+			var err error
+			if tt.initModule {
+				goff, err = New(tt.config)
+				assert.NoError(t, err)
+				defer goff.Close()
+			} else {
+				// we close directly so we can test with module not init
+				goff, _ = New(tt.config)
+				goff.Close()
+			}
+
+			user := ffuser.NewUser("random-key")
+			allFlagsState := goff.AllFlagsState(user)
+			assert.Equal(t, tt.valid, allFlagsState.IsValid())
+
+			// expected JSON output - we force the timestamp
+			expected, _ := ioutil.ReadFile(tt.jsonOutput)
+			var f map[string]interface{}
+			_ = json.Unmarshal(expected, &f)
+			if expectedFlags, ok := f["flags"].(map[string]interface{}); ok {
+				for _, value := range expectedFlags {
+					if valueObj, ok := value.(map[string]interface{}); ok {
+						assert.NotNil(t, valueObj["timestamp"])
+						assert.NotEqual(t, 0, valueObj["timestamp"])
+						valueObj["timestamp"] = time.Now().Unix()
+					}
+				}
+			}
+			expectedJSON, _ := json.Marshal(f)
+			marshaled, err := allFlagsState.MarshalJSON()
+			assert.NoError(t, err)
+			assert.JSONEq(t, string(expectedJSON), string(marshaled))
+
+			// no data exported
+			files, _ := os.ReadDir(exportDir)
+			assert.Equal(t, 0, len(files))
 		})
 	}
 }

@@ -5,24 +5,33 @@ test-flag0:
   default: false
 test-flag1:
   percentage: 1
-  true: true
-  false: false
-  default: false
+  true: "true"
+  false: "false"
+  default: "false"
 test-flag2:
   percentage: 2
-  true: true
-  false: false
-  default: false
+  true: 1
+  false: 2
+  default: 3
 test-flag3:
   percentage: 3
-  true: true
-  false: false
-  default: false
+  true:
+    - yo
+    - ya
+  false:
+    - yo
+    - ya
+  default:
+    - yo
+    - ya
 test-flag4:
   percentage: 4
-  true: true
-  false: false
-  default: false
+  true:
+    test: yo
+  false:
+    test: yo
+  default:
+    test: yo
 test-flag5:
   percentage: 5
   true: true

@@ -17,6 +17,7 @@ type Cache interface {
 	UpdateCache(loadedFlags []byte, fileFormat string) error
 	Close()
 	GetFlag(key string) (model.Flag, error)
+	AllFlags() (FlagsCache, error)
 }
 
 type cacheImpl struct {
@@ -85,4 +86,14 @@ func (c *cacheImpl) GetFlag(key string) (model.Flag, error) {
 	}
 
 	return &flag, nil
+}
+
+func (c *cacheImpl) AllFlags() (FlagsCache, error) {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+	if c.flagsCache == nil {
+		return nil, errors.New("impossible to read the flags before the initialisation")
+	}
+
+	return c.flagsCache.Copy(), nil
 }
