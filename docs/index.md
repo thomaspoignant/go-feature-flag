@@ -38,7 +38,7 @@ I've also written an [article](https://medium.com/better-programming/feature-fla
 
 **go-feature-flags supports:**
 
-- Storing your configuration flags file on various locations ([`HTTP`](./flag_file/http.md), [`S3`](.flag_file/s3.md), [`GitHub`](./flag_file/github.md), [`file`](./flag_file/file.md)).
+- Storing your configuration flags file on various locations ([`HTTP`](./flag_file/http.md), [`S3`](./flag_file/s3.md), [`GitHub`](./flag_file/github.md), [`file`](./flag_file/file.md)).
 - Configuring your flags in various [format](flag_format.md) (`JSON`, `TOML` and `YAML`).
 - Adding complex [rules](flag_format.md#rule-format) to target your users.
 - Use complex rollout strategy for your flags
