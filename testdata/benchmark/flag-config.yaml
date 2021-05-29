@@ -1,0 +1,32 @@
+test-flag:
+  rule: key eq "random-key"
+  percentage: 100
+  true: true
+  false: false
+  default: false
+
+schedule-flag:
+  percentage: 0
+  true: true
+  false: false
+  default: false
+  rollout:
+    scheduled:
+      steps:
+        - date: 2019-04-10T00:00:00.10+02:00
+          percentage: 20
+
+        - date: 2021-05-12T15:36:00.10+02:00
+          percentage: 90
+
+schedule-flag2:
+  percentage: 0
+  true:
+    - toto
+    - tata
+  false:
+    - titi
+    - tutu
+  default:
+    - default1
+    - default2
