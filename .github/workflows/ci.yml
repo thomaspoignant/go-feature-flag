@@ -49,7 +49,7 @@ jobs:
   Docs:
     name: Deploy docs
     runs-on: ubuntu-latest
-    needs: [ Coverage, Lint ]
+    #    needs: [ Coverage, Lint ]
     #    if: ${{ github.ref == 'refs/heads/main' }}
     steps:
       - name: Checkout repository
@@ -58,7 +58,6 @@ jobs:
         with:
           python-version: 3.x
       - run: pip install mkdocs-material mike
-      - run: mike install-extras
       # we are using --dirty to avoid deleting the perf graphs
       - run: mike deploy --push --update-aliases 0.17.1 latest
       - run: mike set-default --push latest
