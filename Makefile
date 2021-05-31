@@ -19,3 +19,6 @@ coverage:
 
 vendor:
 	$(GOCMD) mod vendor
+
+bench:
+	 $(GOTEST) -bench Benchmark -cpu 2 -run=^$$
