@@ -1124,6 +1124,17 @@ func TestAllFlagsState(t *testing.T) {
 			initModule: true,
 		},
 		{
+			name: "Error in flag-0",
+			config: Config{
+				Retriever: &FileRetriever{
+					Path: "./testdata/ffclient/all_flags/config_flag/flag-config-with-error.yaml",
+				},
+			},
+			valid:      false,
+			jsonOutput: "./testdata/ffclient/all_flags/marshal_json/error_in_flag_0.json",
+			initModule: true,
+		},
+		{
 			name: "module not init",
 			config: Config{
 				Retriever: &FileRetriever{
