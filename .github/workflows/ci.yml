@@ -59,6 +59,7 @@ jobs:
           python-version: 3.x
       - run: pip install mkdocs-material mike
       - run: git config --global user.name "${GITHUB_ACTOR}"
+      - run: git config --global user.email "${GITHUB_ACTOR}@users.noreply.${GITHUB_DOMAIN:-"github.com"}"
       # we are using --dirty to avoid deleting the perf graphs
       - run: mike deploy --push --update-aliases 0.17.1 latest
       - run: mike set-default --push latest
