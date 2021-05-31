@@ -12,12 +12,32 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v2
-      - name: gobenchdata publish
-        uses: bobheadxi/gobenchdata@v1
+      - name: Setup go
+        uses: actions/setup-go@v1
         with:
-          PRUNE_COUNT: 30
-          GO_TEST_FLAGS: -cpu 1,2  -run=^$
-          PUBLISH: true
-          PUBLISH_BRANCH: gh-pages
-        env:
-          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          go-version: '^1.16.0'
+      - name: Run benchmark
+        run: make bench | tee bench-output.txt
+      - name: Download previous benchmark data
+        uses: actions/cache@v1
+        with:
+          path: ./cache
+          key: ${{ runner.os }}-benchmark
+      - name: Store benchmark result
+        uses: rhysd/github-action-benchmark@v1
+        with:
+          tool: 'go'
+          output-file-path: bench-output.txt
+          external-data-json-path: ./cache/benchmark-data.json
+          fail-on-alert: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          comment-on-alert: true
+          alert-comment-cc-users: "@$GITHUB_ACTOR"
+      - name: Store benchmark result
+        uses: rhysd/github-action-benchmark@v1
+        with:
+          name: go-feature-flag
+          tool: 'go'
+          output-file-path: bench-output.txt
+          github-token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+          auto-push: true
