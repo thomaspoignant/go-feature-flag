@@ -172,7 +172,7 @@ func (g *GoFeatureFlag) boolVariation(flagKey string, user ffuser.User, defaultV
 			Value: defaultValue,
 			VariationResult: model.VariationResult{
 				VariationType: model.VariationSDKDefault,
-				Failed: true,
+				Failed:        true,
 			},
 		}, err
 	}
