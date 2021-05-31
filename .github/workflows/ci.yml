@@ -50,19 +50,20 @@ jobs:
     name: Deploy docs
     runs-on: ubuntu-latest
     needs: [ Coverage, Lint ]
-    if: ${{ github.ref == 'refs/heads/main' }}
+    #    if: ${{ github.ref == 'refs/heads/main' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-      - name: Deploy docs
-        uses: mhausenblas/mkdocs-deploy-gh-pages@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+      - run: pip install mkdocs-material
+      - run: mkdocs gh-deploy --force --dirty
 
   Benchmark:
     runs-on: ubuntu-latest
     needs: Docs
-    if: ${{ github.ref == 'refs/heads/main' }}
+    #    if: ${{ github.ref == 'refs/heads/main' }}
     steps:
       - name: checkout
         uses: actions/checkout@v2
