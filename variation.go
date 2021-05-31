@@ -132,7 +132,14 @@ func (g *GoFeatureFlag) AllFlagsState(user ffuser.User) flagstate.AllFlags {
 	}
 
 	allFlags := flagstate.NewAllFlags()
-	for key := range flags {
+	for key, flag := range flags {
+		// True is not configured the flag is not valid
+		if flags[key].True == nil {
+			allFlags.AddFlag(
+				key, flagstate.NewFlagState(flag.GetTrackEvents(), flag.GetDefault(), model.VariationDefault, true))
+			continue
+		}
+
 		switch trueValue := *flags[key].True; trueValue.(type) {
 		case int:
 			f, _ := g.intVariation(key, user, 0)
@@ -172,7 +179,7 @@ func (g *GoFeatureFlag) boolVariation(flagKey string, user ffuser.User, defaultV
 			Value: defaultValue,
 			VariationResult: model.VariationResult{
 				VariationType: model.VariationSDKDefault,
-				Failed: true,
+				Failed:        true,
 			},
 		}, err
 	}

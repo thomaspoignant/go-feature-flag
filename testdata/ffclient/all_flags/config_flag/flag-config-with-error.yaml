@@ -1,0 +1,40 @@
+test-flag0:
+  percentage: 100
+  true:
+  false: false
+  default: false
+test-flag1:
+  percentage: 100
+  true: "true"
+  false: "false"
+  default: "false"
+test-flag2:
+  percentage: 100
+  true: 1
+  false: 2
+  default: 3
+test-flag3:
+  percentage: 100
+  true:
+    - yo
+    - ya
+  false:
+    - yo
+    - ya
+  default:
+    - yo
+    - ya
+test-flag4:
+  percentage: 100
+  true:
+    test: yo
+  false:
+    test: yo
+  default:
+    test: yo
+test-flag5:
+  percentage: 100
+  true: 1.1
+  false: 1.2
+  default: 1.3
+  trackEvents: false
