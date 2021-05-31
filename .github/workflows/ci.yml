@@ -59,39 +59,39 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  Benchmark:
-    runs-on: ubuntu-latest
-    needs: Docs
-    if: ${{ github.ref == 'refs/heads/main' }}
-    steps:
-      - name: checkout
-        uses: actions/checkout@v2
-      - name: Setup go
-        uses: actions/setup-go@v1
-        with:
-          go-version: '^1.16.0'
-      - name: Run benchmark
-        run: make bench | tee bench-output.txt
-      - name: Download previous benchmark data
-        uses: actions/cache@v1
-        with:
-          path: ./cache
-          key: ${{ runner.os }}-benchmark
-      - name: Store benchmark result
-        uses: rhysd/github-action-benchmark@v1
-        with:
-          tool: 'go'
-          output-file-path: bench-output.txt
-          external-data-json-path: ./cache/benchmark-data.json
-          fail-on-alert: true
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          comment-on-alert: true
-          alert-comment-cc-users: "@$GITHUB_ACTOR"
-      - name: Store benchmark result
-        uses: rhysd/github-action-benchmark@v1
-        with:
-          name: go-feature-flag
-          tool: 'go'
-          output-file-path: bench-output.txt
-          github-token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
-          auto-push: true
+#   Benchmark:
+#     runs-on: ubuntu-latest
+#     needs: Docs
+#     if: ${{ github.ref == 'refs/heads/main' }}
+#     steps:
+#       - name: checkout
+#         uses: actions/checkout@v2
+#       - name: Setup go
+#         uses: actions/setup-go@v1
+#         with:
+#           go-version: '^1.16.0'
+#       - name: Run benchmark
+#         run: make bench | tee bench-output.txt
+#       - name: Download previous benchmark data
+#         uses: actions/cache@v1
+#         with:
+#           path: ./cache
+#           key: ${{ runner.os }}-benchmark
+#       - name: Store benchmark result
+#         uses: rhysd/github-action-benchmark@v1
+#         with:
+#           tool: 'go'
+#           output-file-path: bench-output.txt
+#           external-data-json-path: ./cache/benchmark-data.json
+#           fail-on-alert: true
+#           github-token: ${{ secrets.GITHUB_TOKEN }}
+#           comment-on-alert: true
+#           alert-comment-cc-users: "@$GITHUB_ACTOR"
+#       - name: Store benchmark result
+#         uses: rhysd/github-action-benchmark@v1
+#         with:
+#           name: go-feature-flag
+#           tool: 'go'
+#           output-file-path: bench-output.txt
+#           github-token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+#           auto-push: true
