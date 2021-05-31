@@ -50,6 +50,8 @@ extra:
       link: https://thomaspoignant.medium.com
     - icon: fontawesome/brands/github
       link: https://github.com/thomaspoignant
+  version:
+    provider: mike
 nav:
   - 'Home': 'index.md'
   - 'quickstart.md'
