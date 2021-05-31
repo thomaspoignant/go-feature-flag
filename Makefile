@@ -21,4 +21,4 @@ vendor:
 	$(GOCMD) mod vendor
 
 bench:
-	 $(GOTEST) -bench Benchmark -cpu 1,2 -run=^$$
+	 $(GOTEST) -bench Benchmark -cpu 2 -run=^$$
