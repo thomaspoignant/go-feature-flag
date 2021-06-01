@@ -41,5 +41,34 @@ jobs:
           output-file-path: bench-output.txt
           github-token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 #           auto-push: true
-      - name: Push benchmark result
-        run: git push 'https://thomaspoignant:${{ secrets.PERSONAL_GITHUB_TOKEN }}@github.com/thomaspoignant/benchmark-results.git' gh-pages:gh-pages
+      - name: Checkout target repo
+        uses: actions/checkout@v2
+        env:
+          REPO: thomaspoignant/benchmark-results
+          REPO_PATH: benchmark-results
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+          repository: "${{ env.REPO }}"
+          path: ${{ env.REPO_PATH }}
+      - name: Copy index to new repo
+        env:
+          SOURCE: ./dev/env/*
+          TARGET: ./benchmark-results/
+        run:
+          cp -r ${{ env.SOURCE }} ${{ env.TARGET }} && ls ${{ env.TARGET }}
+          
+          
+      - name: Push
+        env:
+          REPO_PATH: benchmark-results
+          GIT_USERNAME: action
+          GIT_EMAIL: action@github.com
+        run: |
+          cd ${{ env.REPO_PATH }}
+          git config --local user.name "${{ env.GIT_USERNAME }}"
+          git config --local user.email "${{ env.GIT_EMAIL }}"
+          git add .
+          git commit -m "Github Actions Automatically Built in `date +"%Y-%m-%d %H:%M"`"
+          git push
+          
