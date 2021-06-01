@@ -7,48 +7,8 @@ on:
     types: [ opened, synchronize, reopened ]
 
 jobs:
-  Lint:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-      - name: Setup go
-        uses: actions/setup-go@v1
-        with:
-          go-version: '^1.16.0'
-      - run: make lint
-
-  Test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-      - name: Setup go
-        uses: actions/setup-go@v1
-        with:
-          go-version: '^1.16.0'
-      - run: make test
-
-  Coverage:
-    needs: Test
-    env:
-      COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-      - name: Setup go
-        uses: actions/setup-go@v1
-        with:
-          go-version: '^1.16.0'
-      - run: make coverage
-      - uses: shogo82148/actions-goveralls@v1
-        with:
-          path-to-profile: coverage.cov
-
   Benchmark:
     runs-on: ubuntu-latest
-    if: ${{ github.ref == 'refs/heads/main' }}
     steps:
       - name: checkout
         uses: actions/checkout@v2
