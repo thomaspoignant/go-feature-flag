@@ -67,8 +67,8 @@ jobs:
 
   Benchmark:
     runs-on: ubuntu-latest
-    needs: [ Coverage, Lint ]
-    #    if: ${{ github.ref == 'refs/heads/main' }}
+    needs: Docs
+    if: ${{ github.ref == 'refs/heads/main' }}
     steps:
       - name: checkout
         uses: actions/checkout@v2
@@ -100,4 +100,6 @@ jobs:
           tool: 'go'
           output-file-path: bench-output.txt
           github-token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
-          auto-push: true
+#           auto-push: true
+      - name: Push benchmark result
+        run: git push 'https://thomaspoignant:${{ secrets.PERSONAL_GITHUB_TOKEN }}@github.com/thomaspoignant/benchmark-results.git' gh-pages:gh-pages
