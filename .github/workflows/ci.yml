@@ -56,7 +56,7 @@ jobs:
           SOURCE: ./dev/env/*
           TARGET: ./benchmark-results/
         run:
-          ls && cp -r ${{ env.SOURCE }} ${{ env.TARGET }} && ls ${{ env.TARGET }}
+          ls ./cache/ && cp -r ${{ env.SOURCE }} ${{ env.TARGET }} && ls ${{ env.TARGET }}
           
           
       - name: Push
