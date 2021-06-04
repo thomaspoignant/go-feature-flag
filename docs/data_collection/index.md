@@ -7,6 +7,7 @@ It collects all the variations events and can save these events on several locat
 - [S3](s3.md) *- export your variation usages to S3.*
 - [Webhook](webhook.md) *- export your variation usages by calling a webhook.*
 
+If the existing exporter does not work with your system you can extend the system and use a [custom exporter](custom.md).
 ## Data format
 Currently, we are supporting only feature events.  
 It represents individual flag evaluations and are considered "full fidelity" events.
