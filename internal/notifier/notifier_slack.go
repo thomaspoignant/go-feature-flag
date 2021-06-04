@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"sync"
 
 	"github.com/thomaspoignant/go-feature-flag/internal"
@@ -156,6 +157,13 @@ func convertUpdatedFlagsToSlackMessage(diff model.DiffCache) []attachment {
 			attachment.Fields = append(attachment.Fields, Field{Title: "Rollout", Short: false,
 				Value: fmt.Sprintf(compareFormat, before.GetRollout(), after.GetRollout())})
 		}
+
+		// Version
+		if before.GetVersion() != after.GetVersion() {
+			attachment.Fields = append(attachment.Fields, Field{Title: "Version", Short: true,
+				Value: fmt.Sprintf(compareFormat, before.GetVersion(), after.GetVersion())})
+		}
+
 		attachments = append(attachments, attachment)
 	}
 	return attachments
@@ -186,6 +194,11 @@ func convertAddedFlagsToSlackMessage(diff model.DiffCache) []attachment {
 			Value: fmt.Sprintf("%v", value.GetTrackEvents())})
 		attachment.Fields = append(attachment.Fields, Field{Title: "Disable", Short: true,
 			Value: fmt.Sprintf("%v", value.GetDisable())})
+
+		if value.GetVersion() != 0 {
+			attachment.Fields = append(attachment.Fields, Field{Title: "Version", Short: true,
+				Value: strconv.FormatFloat(value.GetVersion(), 'f', -1, 64)})
+		}
 		attachments = append(attachments, attachment)
 	}
 	return attachments

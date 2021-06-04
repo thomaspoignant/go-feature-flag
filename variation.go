@@ -67,7 +67,7 @@ func AllFlagsState(user ffuser.User) flagstate.AllFlags {
 // Note: Use this function only if you are using multiple go-feature-flag instances.
 func (g *GoFeatureFlag) BoolVariation(flagKey string, user ffuser.User, defaultValue bool) (bool, error) {
 	res, err := g.boolVariation(flagKey, user, defaultValue)
-	g.notifyVariation(flagKey, res.TrackEvents, user, res.Value, res.VariationType, res.Failed)
+	g.notifyVariation(flagKey, user, res.VariationResult, res.Value)
 	return res.Value, err
 }
 
@@ -77,7 +77,7 @@ func (g *GoFeatureFlag) BoolVariation(flagKey string, user ffuser.User, defaultV
 // Note: Use this function only if you are using multiple go-feature-flag instances.
 func (g *GoFeatureFlag) IntVariation(flagKey string, user ffuser.User, defaultValue int) (int, error) {
 	res, err := g.intVariation(flagKey, user, defaultValue)
-	g.notifyVariation(flagKey, res.TrackEvents, user, res.Value, res.VariationType, res.Failed)
+	g.notifyVariation(flagKey, user, res.VariationResult, res.Value)
 	return res.Value, err
 }
 
@@ -87,7 +87,7 @@ func (g *GoFeatureFlag) IntVariation(flagKey string, user ffuser.User, defaultVa
 // Note: Use this function only if you are using multiple go-feature-flag instances.
 func (g *GoFeatureFlag) Float64Variation(flagKey string, user ffuser.User, defaultValue float64) (float64, error) {
 	res, err := g.float64Variation(flagKey, user, defaultValue)
-	g.notifyVariation(flagKey, res.TrackEvents, user, res.Value, res.VariationType, res.Failed)
+	g.notifyVariation(flagKey, user, res.VariationResult, res.Value)
 	return res.Value, err
 }
 
@@ -97,7 +97,7 @@ func (g *GoFeatureFlag) Float64Variation(flagKey string, user ffuser.User, defau
 // Note: Use this function only if you are using multiple go-feature-flag instances.
 func (g *GoFeatureFlag) StringVariation(flagKey string, user ffuser.User, defaultValue string) (string, error) {
 	res, err := g.stringVariation(flagKey, user, defaultValue)
-	g.notifyVariation(flagKey, res.TrackEvents, user, res.Value, res.VariationType, res.Failed)
+	g.notifyVariation(flagKey, user, res.VariationResult, res.Value)
 	return res.Value, err
 }
 
@@ -108,7 +108,7 @@ func (g *GoFeatureFlag) StringVariation(flagKey string, user ffuser.User, defaul
 func (g *GoFeatureFlag) JSONArrayVariation(
 	flagKey string, user ffuser.User, defaultValue []interface{}) ([]interface{}, error) {
 	res, err := g.jsonArrayVariation(flagKey, user, defaultValue)
-	g.notifyVariation(flagKey, res.TrackEvents, user, res.Value, res.VariationType, res.Failed)
+	g.notifyVariation(flagKey, user, res.VariationResult, res.Value)
 	return res.Value, err
 }
 
@@ -119,7 +119,7 @@ func (g *GoFeatureFlag) JSONArrayVariation(
 func (g *GoFeatureFlag) JSONVariation(
 	flagKey string, user ffuser.User, defaultValue map[string]interface{}) (map[string]interface{}, error) {
 	res, err := g.jsonVariation(flagKey, user, defaultValue)
-	g.notifyVariation(flagKey, res.TrackEvents, user, res.Value, res.VariationType, res.Failed)
+	g.notifyVariation(flagKey, user, res.VariationResult, res.Value)
 	return res.Value, err
 }
 
@@ -339,6 +339,7 @@ func computeVariationResult(flag model.Flag, variationType model.VariationType, 
 
 	if flag != nil {
 		varResult.TrackEvents = flag.GetTrackEvents()
+		varResult.Version = flag.GetVersion()
 	}
 
 	return varResult
@@ -348,13 +349,11 @@ func computeVariationResult(flag model.Flag, variationType model.VariationType, 
 // if no logger is provided in the configuration we are not logging anything.
 func (g *GoFeatureFlag) notifyVariation(
 	flagKey string,
-	trackEvents bool,
 	user ffuser.User,
-	value interface{},
-	variationType model.VariationType,
-	failed bool) {
-	if trackEvents {
-		event := exporter.NewFeatureEvent(user, flagKey, value, variationType, failed)
+	result model.VariationResult,
+	value interface{}) {
+	if result.TrackEvents {
+		event := exporter.NewFeatureEvent(user, flagKey, value, result.VariationType, result.Failed, result.Version)
 
 		// Add event in the exporter
 		if g.dataExporter != nil {

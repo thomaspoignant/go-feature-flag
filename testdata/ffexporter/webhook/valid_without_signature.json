@@ -11,7 +11,8 @@
       "key": "random-key",
       "variation": "Default",
       "value": "YO",
-      "default": false
+      "default": false,
+      "version": 0
     },
     {
       "kind": "feature",
@@ -21,7 +22,8 @@
       "key": "random-key",
       "variation": "Default",
       "value": "YO2",
-      "default": false
+      "default": false,
+      "version": 127
     }
   ]
 }
