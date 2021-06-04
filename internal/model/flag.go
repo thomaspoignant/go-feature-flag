@@ -63,13 +63,17 @@ type Flag interface {
 	// Default: true
 	GetTrackEvents() bool
 
-	// GetDisable is the getter of the field Disable
+	// GetDisable is the getter for the field Disable
 	// Default: false
 	GetDisable() bool
 
-	// GetRollout is the getter of the field Rollout
+	// GetRollout is the getter for the field Rollout
 	// Default: nil
 	GetRollout() *Rollout
+
+	// GetVersion is the getter for the field Version
+	// Default: 0.0
+	GetVersion() float64
 }
 
 // FlagData describe the fields of a flag.
@@ -103,7 +107,12 @@ type FlagData struct {
 
 	// Rollout is the object to configure how the flag is rollout.
 	// You have different rollout strategy available but only one is used at a time.
-	Rollout *Rollout `json:"rollout,omitempty" yaml:"rollout,omitempty" toml:"rollout,omitempty" slack_short:"false"` // nolint: lll
+	Rollout *Rollout `json:"rollout,omitempty" yaml:"rollout,omitempty" toml:"rollout,omitempty" slack_short:"false"`
+
+	// Version (optional) This field contains the version of the flag.
+	// The version is manually managed when you configure your flags and it is used to display the information
+	// in the notifications and data collection.
+	Version float64 `json:"version,omitempty" yaml:"version,omitempty" toml:"version,omitempty" slack_short:"false"`
 }
 
 // Value is returning the Value associate to the flag (True / False / Default ) based
@@ -357,7 +366,7 @@ func (f *FlagData) GetTrackEvents() bool {
 	return *f.TrackEvents
 }
 
-// GetDisable is the getter of the field Disable
+// GetDisable is the getter for the field Disable
 func (f *FlagData) GetDisable() bool {
 	if f.Disable == nil {
 		return false
@@ -365,7 +374,12 @@ func (f *FlagData) GetDisable() bool {
 	return *f.Disable
 }
 
-// GetRollout is the getter of the field Rollout
+// GetRollout is the getter for the field Rollout
 func (f *FlagData) GetRollout() *Rollout {
 	return f.Rollout
+}
+
+// GetVersion is the getter for the field Version
+func (f *FlagData) GetVersion() float64 {
+	return f.Version
 }

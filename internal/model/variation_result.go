@@ -4,6 +4,7 @@ type VariationResult struct {
 	TrackEvents   bool
 	VariationType VariationType
 	Failed        bool
+	Version       float64
 }
 
 // BoolVarResult is the internal result format of a bool variation.
