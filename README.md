@@ -120,7 +120,7 @@ ffclient.Init(ffclient.Config{
 |`FileFormat`| *(optional)*<br>Format of your configuration file. Available formats are `yaml`, `toml` and `json`, if you omit the field it will try to unmarshal the file as a `yaml` file.<br>Default: `YAML`|
 |`Logger`   | *(optional)*<br>Logger used to log what `go-feature-flag` is doing.<br />If no logger is provided the module will not log anything.<br>Default: No log|
 |`Notifiers` | *(optional)*<br>List of notifiers to call when your flag file has changed.<br> *see [notifiers section](https://thomaspoignant.github.io/go-feature-flag/notifier/) for more details*.|
-|`PollingInterval`   | (optional) Duration to wait before refreshing the flags.<br>The minimum polling interval is 1 second<br>Default: 60 * time.Second|
+|`PollingInterval`   | *(optional)* Duration to wait before refreshing the flags.<br>The minimum polling interval is 1 second<br>Default: 60 * time.Second|
 |`StartWithRetrieverError` | *(optional)*<br>If **true**, the SDK will start even if we did not get any flags from the retriever. It will serve only default values until the retriever returns the flags.<br>The init method will not return any error if the flag file is unreachable.<br>Default: **false**|
 
 ### Multiple configuration flag files
@@ -159,6 +159,7 @@ test-flag:
   default: false
   disable: false
   trackEvents: true
+  version: 1
   rollout:
     experimentation:
       start: 2021-03-20T00:00:00.10-05:00
@@ -170,6 +171,7 @@ test-flag:
     true: true
     false: false
     default: false
+    version: 12
 ```
 </details>
 <details>
@@ -185,6 +187,7 @@ test-flag:
     "default": false,
     "disable": false,
     "trackEvents": true,
+    "version": 1,
     "rollout": {
       "experimentation": {
         "start": "2021-03-20T05:00:00.100Z",
@@ -197,7 +200,8 @@ test-flag:
     "percentage": 100,
     "true": true,
     "false": false,
-    "default": false
+    "default": false,
+    "version": 12
   }
 }
 ```
@@ -216,6 +220,7 @@ false = false
 default = false
 disable = false
 trackEvents = true
+version = 1.0
 
 [test-flag.rollout]
 
@@ -229,6 +234,7 @@ percentage = 100.0
 true = true
 false = false
 default = false
+version = 12.0
 ```
 
 </details>
@@ -244,6 +250,7 @@ default = false
 | `rule` |*(optional)*<br>This is the query use to select on which user the flag should apply.<br>Rule format is describe in the <a href="#rule-format">rule format section</a>.<br>**If no rule set, the flag apply to all users *(percentage still apply)*.**|
 | `disable` |*(optional)*<br>True if the flag is disabled.<br>**Default: `false`**|
 | `trackEvents` |*(optional)*<br>False if you don't want to export the data in your data exporter.<br>**Default: `true`**|
+| `version` |*(optional)*<br>The version is the version of your flag.<br>This number is used to display the information in the notifiers and data collection, you have to update it your self.<br>**Default: 0**|
 | `rollout` |*(optional)*<br><code>rollout</code> contains a specific rollout strategy you want to use.<br>**See [rollout section](https://thomaspoignant.github.io/go-feature-flag/rollout/) for more details.**|
 
 ## Rule format
