@@ -553,6 +553,7 @@ func TestFlag_Getter(t *testing.T) {
 		TrackEvents bool
 		Percentage  float64
 		Rule        string
+		Version     float64
 	}
 	tests := []struct {
 		name string
@@ -571,6 +572,7 @@ func TestFlag_Getter(t *testing.T) {
 				TrackEvents: true,
 				Percentage:  0,
 				Rule:        "",
+				Version:     0,
 			},
 		},
 		{
@@ -583,6 +585,7 @@ func TestFlag_Getter(t *testing.T) {
 				Default:     testconvert.Interface(14.2),
 				TrackEvents: testconvert.Bool(false),
 				Disable:     testconvert.Bool(true),
+				Version:     testconvert.Float64(127),
 			},
 			want: expected{
 				True:        12.2,
@@ -592,6 +595,7 @@ func TestFlag_Getter(t *testing.T) {
 				TrackEvents: false,
 				Percentage:  90,
 				Rule:        "test",
+				Version:     127,
 			},
 		},
 	}
@@ -606,6 +610,7 @@ func TestFlag_Getter(t *testing.T) {
 			assert.Equal(t, tt.want.TrackEvents, tt.flag.GetTrackEvents())
 			assert.Equal(t, tt.want.Percentage, tt.flag.GetPercentage())
 			assert.Equal(t, tt.want.Rule, tt.flag.GetRule())
+			assert.Equal(t, tt.want.Version, tt.flag.GetVersion())
 		})
 	}
 }

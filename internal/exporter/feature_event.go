@@ -63,5 +63,7 @@ type FeatureEvent struct {
 	// value passed to variation. If the default field is omitted, it is assumed to be false.
 	Default bool `json:"default"`
 
+	// Version contains the version of the flag. If the field is omitted for the flag in the configuration file
+	// the default version will be 0.
 	Version float64 `json:"version"`
 }

@@ -112,7 +112,7 @@ type FlagData struct {
 	// Version (optional) This field contains the version of the flag.
 	// The version is manually managed when you configure your flags and it is used to display the information
 	// in the notifications and data collection.
-	Version float64 `json:"version,omitempty" yaml:"version,omitempty" toml:"version,omitempty" slack_short:"false"`
+	Version *float64 `json:"version,omitempty" yaml:"version,omitempty" toml:"version,omitempty" slack_short:"false"`
 }
 
 // Value is returning the Value associate to the flag (True / False / Default ) based
@@ -381,5 +381,8 @@ func (f *FlagData) GetRollout() *Rollout {
 
 // GetVersion is the getter for the field Version
 func (f *FlagData) GetVersion() float64 {
-	return f.Version
+	if f.Version == nil {
+		return 0
+	}
+	return *f.Version
 }
