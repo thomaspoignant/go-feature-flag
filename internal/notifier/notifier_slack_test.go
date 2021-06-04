@@ -51,6 +51,7 @@ func TestSlackNotifier_Notify(t *testing.T) {
 							Rule:        testconvert.String("key eq \"random-key\""),
 							TrackEvents: testconvert.Bool(true),
 							Disable:     testconvert.Bool(false),
+							Version:     testconvert.Float64(1.1),
 						},
 					},
 					Deleted: map[string]model.Flag{
@@ -86,6 +87,7 @@ func TestSlackNotifier_Notify(t *testing.T) {
 								Default:     testconvert.Interface("strDefault"),
 								Disable:     testconvert.Bool(true),
 								TrackEvents: testconvert.Bool(false),
+								Version:     testconvert.Float64(1.1),
 							},
 						},
 					},

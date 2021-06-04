@@ -383,6 +383,12 @@ func TestFlag_ScheduledRollout(t *testing.T) {
 				Steps: []model.ScheduledStep{
 					{
 						FlagData: model.FlagData{
+							Version: testconvert.Float64(1.1),
+						},
+						Date: testconvert.Time(time.Now().Add(1 * time.Second)),
+					},
+					{
+						FlagData: model.FlagData{
 							Percentage: testconvert.Float64(100),
 						},
 						Date: testconvert.Time(time.Now().Add(1 * time.Second)),
@@ -445,6 +451,7 @@ func TestFlag_ScheduledRollout(t *testing.T) {
 
 	v, _ = f.Value(flagName, user)
 	assert.Equal(t, "True", v)
+	assert.Equal(t, 1.1, f.GetVersion())
 
 	time.Sleep(1 * time.Second)
 
@@ -486,6 +493,7 @@ func TestFlag_String(t *testing.T) {
 		False       interface{}
 		Default     interface{}
 		TrackEvents *bool
+		Version     *float64
 	}
 	tests := []struct {
 		name   string
@@ -502,8 +510,9 @@ func TestFlag_String(t *testing.T) {
 				False:       false,
 				Default:     false,
 				TrackEvents: testconvert.Bool(true),
+				Version:     testconvert.Float64(12),
 			},
-			want: "percentage=10%, rule=\"key eq \"toto\"\", true=\"true\", false=\"false\", default=\"false\", disable=\"false\", trackEvents=\"true\"",
+			want: "percentage=10%, rule=\"key eq \"toto\"\", true=\"true\", false=\"false\", default=\"false\", disable=\"false\", trackEvents=\"true\", version=12",
 		},
 		{
 			name: "No rule",
@@ -536,6 +545,7 @@ func TestFlag_String(t *testing.T) {
 				False:       testconvert.Interface(tt.fields.False),
 				Default:     testconvert.Interface(tt.fields.Default),
 				TrackEvents: tt.fields.TrackEvents,
+				Version:     tt.fields.Version,
 			}
 			got := f.String()
 			assert.Equal(t, tt.want, got, "String() = %v, want %v", got, tt.want)
