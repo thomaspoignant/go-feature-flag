@@ -62,6 +62,9 @@ func TestValidUseCase(t *testing.T) {
 	assert.True(t, hasTestFlag, "User should have test flag")
 	hasUnknownFlag, _ := ffclient.BoolVariation("unknown-flag", user, false)
 	assert.False(t, hasUnknownFlag, "User should use default value if flag does not exists")
+
+	allFlags := ffclient.AllFlagsState(user)
+	assert.Equal(t, 2, len(allFlags.GetFlags()))
 }
 
 func TestValidUseCaseToml(t *testing.T) {
