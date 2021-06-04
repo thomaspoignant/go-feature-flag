@@ -60,6 +60,7 @@ nav:
       - 'flag_file/http.md'
       - 'flag_file/github.md'
       - 'flag_file/file.md'
+      - 'flag_file/custom.md'
   - 'flag_format.md'
   - 'users.md'
   - 'Rollout strategies':
