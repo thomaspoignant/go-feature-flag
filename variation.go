@@ -171,16 +171,13 @@ func (g *GoFeatureFlag) AllFlagsState(user ffuser.User) flagstate.AllFlags {
 
 // boolVariation is the internal func that handle the logic of a variation with a bool value
 // the result will always contains a valid model.BoolVarResult
-func (g *GoFeatureFlag) boolVariation(flagKey string, user ffuser.User, defaultValue bool,
+func (g *GoFeatureFlag) boolVariation(flagKey string, user ffuser.User, sdkDefaultValue bool,
 ) (model.BoolVarResult, error) {
 	flag, err := g.getFlagFromCache(flagKey)
 	if err != nil {
 		return model.BoolVarResult{
-			Value: defaultValue,
-			VariationResult: model.VariationResult{
-				VariationType: model.VariationSDKDefault,
-				Failed:        true,
-			},
+			Value:           sdkDefaultValue,
+			VariationResult: computeVariationResult(flag, model.VariationSDKDefault, true),
 		}, err
 	}
 
@@ -188,27 +185,23 @@ func (g *GoFeatureFlag) boolVariation(flagKey string, user ffuser.User, defaultV
 	res, ok := flagValue.(bool)
 	if !ok {
 		return model.BoolVarResult{
-			Value: defaultValue,
-			VariationResult: model.VariationResult{
-				TrackEvents:   flag.GetTrackEvents(),
-				VariationType: model.VariationSDKDefault,
-				Failed:        true,
-			},
+			Value:           sdkDefaultValue,
+			VariationResult: computeVariationResult(flag, model.VariationSDKDefault, true),
 		}, fmt.Errorf(errorWrongVariation, flagKey)
 	}
 	return model.BoolVarResult{Value: res,
-		VariationResult: model.VariationResult{TrackEvents: flag.GetTrackEvents(), VariationType: variationType},
+		VariationResult: computeVariationResult(flag, variationType, false),
 	}, nil
 }
 
 // intVariation is the internal func that handle the logic of a variation with an int value
 // the result will always contains a valid model.IntVarResult
-func (g *GoFeatureFlag) intVariation(flagKey string, user ffuser.User, defaultValue int,
+func (g *GoFeatureFlag) intVariation(flagKey string, user ffuser.User, sdkDefaultValue int,
 ) (model.IntVarResult, error) {
 	flag, err := g.getFlagFromCache(flagKey)
 	if err != nil {
-		return model.IntVarResult{Value: defaultValue,
-			VariationResult: model.VariationResult{VariationType: model.VariationSDKDefault, Failed: true},
+		return model.IntVarResult{Value: sdkDefaultValue,
+			VariationResult: computeVariationResult(flag, model.VariationSDKDefault, true),
 		}, err
 	}
 
@@ -218,41 +211,30 @@ func (g *GoFeatureFlag) intVariation(flagKey string, user ffuser.User, defaultVa
 		// if this is a float64 we convert it to int
 		if resFloat, okFloat := flagValue.(float64); okFloat {
 			return model.IntVarResult{
-				Value: int(resFloat),
-				VariationResult: model.VariationResult{
-					TrackEvents:   flag.GetTrackEvents(),
-					VariationType: model.VariationSDKDefault,
-					Failed:        true,
-				},
-			}, fmt.Errorf(errorWrongVariation, flagKey)
+				Value:           int(resFloat),
+				VariationResult: computeVariationResult(flag, variationType, false),
+			}, nil
 		}
 
 		return model.IntVarResult{
-			Value: defaultValue,
-			VariationResult: model.VariationResult{
-				TrackEvents:   flag.GetTrackEvents(),
-				VariationType: model.VariationSDKDefault,
-				Failed:        true,
-			},
+			Value:           sdkDefaultValue,
+			VariationResult: computeVariationResult(flag, model.VariationSDKDefault, true),
 		}, fmt.Errorf(errorWrongVariation, flagKey)
 	}
 	return model.IntVarResult{Value: res,
-		VariationResult: model.VariationResult{TrackEvents: flag.GetTrackEvents(), VariationType: variationType},
+		VariationResult: computeVariationResult(flag, variationType, false),
 	}, nil
 }
 
 // float64Variation is the internal func that handle the logic of a variation with a float64 value
 // the result will always contains a valid model.Float64VarResult
-func (g *GoFeatureFlag) float64Variation(flagKey string, user ffuser.User, defaultValue float64,
+func (g *GoFeatureFlag) float64Variation(flagKey string, user ffuser.User, sdkDefaultValue float64,
 ) (model.Float64VarResult, error) {
 	flag, err := g.getFlagFromCache(flagKey)
 	if err != nil {
 		return model.Float64VarResult{
-			Value: defaultValue,
-			VariationResult: model.VariationResult{
-				VariationType: model.VariationSDKDefault,
-				Failed:        true,
-			},
+			Value:           sdkDefaultValue,
+			VariationResult: computeVariationResult(flag, model.VariationSDKDefault, true),
 		}, err
 	}
 
@@ -260,31 +242,25 @@ func (g *GoFeatureFlag) float64Variation(flagKey string, user ffuser.User, defau
 	res, ok := flagValue.(float64)
 	if !ok {
 		return model.Float64VarResult{
-			Value: defaultValue,
-			VariationResult: model.VariationResult{
-				TrackEvents:   flag.GetTrackEvents(),
-				VariationType: model.VariationSDKDefault,
-				Failed:        true,
-			},
+			Value:           sdkDefaultValue,
+			VariationResult: computeVariationResult(flag, model.VariationSDKDefault, true),
 		}, fmt.Errorf(errorWrongVariation, flagKey)
 	}
-	return model.Float64VarResult{Value: res,
-		VariationResult: model.VariationResult{TrackEvents: flag.GetTrackEvents(), VariationType: variationType},
+	return model.Float64VarResult{
+		Value:           res,
+		VariationResult: computeVariationResult(flag, variationType, false),
 	}, nil
 }
 
 // stringVariation is the internal func that handle the logic of a variation with a string value
 // the result will always contains a valid model.StringVarResult
-func (g *GoFeatureFlag) stringVariation(flagKey string, user ffuser.User, defaultValue string,
+func (g *GoFeatureFlag) stringVariation(flagKey string, user ffuser.User, sdkDefaultValue string,
 ) (model.StringVarResult, error) {
 	flag, err := g.getFlagFromCache(flagKey)
 	if err != nil {
 		return model.StringVarResult{
-			Value: defaultValue,
-			VariationResult: model.VariationResult{
-				VariationType: model.VariationSDKDefault,
-				Failed:        true,
-			},
+			Value:           sdkDefaultValue,
+			VariationResult: computeVariationResult(flag, model.VariationSDKDefault, true),
 		}, err
 	}
 
@@ -292,31 +268,25 @@ func (g *GoFeatureFlag) stringVariation(flagKey string, user ffuser.User, defaul
 	res, ok := flagValue.(string)
 	if !ok {
 		return model.StringVarResult{
-			Value: defaultValue,
-			VariationResult: model.VariationResult{
-				TrackEvents:   flag.GetTrackEvents(),
-				VariationType: model.VariationSDKDefault,
-				Failed:        true,
-			},
+			Value:           sdkDefaultValue,
+			VariationResult: computeVariationResult(flag, model.VariationSDKDefault, true),
 		}, fmt.Errorf(errorWrongVariation, flagKey)
 	}
-	return model.StringVarResult{Value: res,
-		VariationResult: model.VariationResult{TrackEvents: flag.GetTrackEvents(), VariationType: variationType},
+	return model.StringVarResult{
+		Value:           res,
+		VariationResult: computeVariationResult(flag, variationType, false),
 	}, nil
 }
 
 // jsonArrayVariation is the internal func that handle the logic of a variation with a json value
 // the result will always contains a valid model.JSONArrayVarResult
-func (g *GoFeatureFlag) jsonArrayVariation(flagKey string, user ffuser.User, defaultValue []interface{},
+func (g *GoFeatureFlag) jsonArrayVariation(flagKey string, user ffuser.User, sdkDefaultValue []interface{},
 ) (model.JSONArrayVarResult, error) {
 	flag, err := g.getFlagFromCache(flagKey)
 	if err != nil {
 		return model.JSONArrayVarResult{
-			Value: defaultValue,
-			VariationResult: model.VariationResult{
-				VariationType: model.VariationSDKDefault,
-				Failed:        true,
-			},
+			Value:           sdkDefaultValue,
+			VariationResult: computeVariationResult(flag, model.VariationSDKDefault, true),
 		}, err
 	}
 
@@ -324,31 +294,25 @@ func (g *GoFeatureFlag) jsonArrayVariation(flagKey string, user ffuser.User, def
 	res, ok := flagValue.([]interface{})
 	if !ok {
 		return model.JSONArrayVarResult{
-			Value: defaultValue,
-			VariationResult: model.VariationResult{
-				TrackEvents:   flag.GetTrackEvents(),
-				VariationType: model.VariationSDKDefault,
-				Failed:        true,
-			},
+			Value:           sdkDefaultValue,
+			VariationResult: computeVariationResult(flag, model.VariationSDKDefault, true),
 		}, fmt.Errorf(errorWrongVariation, flagKey)
 	}
-	return model.JSONArrayVarResult{Value: res,
-		VariationResult: model.VariationResult{TrackEvents: flag.GetTrackEvents(), VariationType: variationType},
+	return model.JSONArrayVarResult{
+		Value:           res,
+		VariationResult: computeVariationResult(flag, variationType, false),
 	}, nil
 }
 
 // jsonVariation is the internal func that handle the logic of a variation with a json value
 // the result will always contains a valid model.JSONVarResult
-func (g *GoFeatureFlag) jsonVariation(flagKey string, user ffuser.User, defaultValue map[string]interface{},
+func (g *GoFeatureFlag) jsonVariation(flagKey string, user ffuser.User, sdkDefaultValue map[string]interface{},
 ) (model.JSONVarResult, error) {
 	flag, err := g.getFlagFromCache(flagKey)
 	if err != nil {
 		return model.JSONVarResult{
-			Value: defaultValue,
-			VariationResult: model.VariationResult{
-				VariationType: model.VariationSDKDefault,
-				Failed:        true,
-			},
+			Value:           sdkDefaultValue,
+			VariationResult: computeVariationResult(flag, model.VariationSDKDefault, true),
 		}, err
 	}
 
@@ -356,17 +320,28 @@ func (g *GoFeatureFlag) jsonVariation(flagKey string, user ffuser.User, defaultV
 	res, ok := flagValue.(map[string]interface{})
 	if !ok {
 		return model.JSONVarResult{
-			Value: defaultValue,
-			VariationResult: model.VariationResult{
-				TrackEvents:   flag.GetTrackEvents(),
-				VariationType: model.VariationSDKDefault,
-				Failed:        true,
-			},
+			Value:           sdkDefaultValue,
+			VariationResult: computeVariationResult(flag, model.VariationSDKDefault, true),
 		}, fmt.Errorf(errorWrongVariation, flagKey)
 	}
-	return model.JSONVarResult{Value: res,
-		VariationResult: model.VariationResult{TrackEvents: flag.GetTrackEvents(), VariationType: variationType},
+	return model.JSONVarResult{
+		Value:           res,
+		VariationResult: computeVariationResult(flag, variationType, false),
 	}, nil
+}
+
+// computeVariationResult is creating a model.VariationResult
+func computeVariationResult(flag model.Flag, variationType model.VariationType, failed bool) model.VariationResult {
+	varResult := model.VariationResult{
+		VariationType: variationType,
+		Failed:        failed,
+	}
+
+	if flag != nil {
+		varResult.TrackEvents = flag.GetTrackEvents()
+	}
+
+	return varResult
 }
 
 // notifyVariation is logging the evaluation result for a flag
