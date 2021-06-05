@@ -60,6 +60,7 @@ nav:
       - 'flag_file/http.md'
       - 'flag_file/github.md'
       - 'flag_file/file.md'
+      - 'flag_file/custom.md'
   - 'flag_format.md'
   - 'users.md'
   - 'Rollout strategies':
@@ -73,6 +74,7 @@ nav:
       - 'data_collection/log.md'
       - 'data_collection/s3.md'
       - 'data_collection/webhook.md'
+      - 'data_collection/custom.md'
   - 'Notify flag changes':
       - 'notifier/index.md'
       - 'notifier/slack.md'
