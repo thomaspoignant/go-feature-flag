@@ -48,3 +48,11 @@ of your release.
 You have an endless list of rollout strategies depending on what is your feature.
 
 ---
+
+### How we ensure that users affected by the feature flags are not always the same?
+
+To avoid always have the same users affected by a flag, the hash we compute that allows us to determine if the user is part of the percentage is not computed only based on the user key but a combination of the user key and the flag name.
+
+It guarantees that the user will be always in the same group but depending on the flag.
+
+---
