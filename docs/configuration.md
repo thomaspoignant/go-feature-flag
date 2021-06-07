@@ -8,12 +8,12 @@ During the initialization you must give a [`ffclient.Config{}`](https://pkg.go.d
 
 | Field | Description |
 |---|---|
-|`Retriever`  | The configuration retriever you want to use to get your flag file<br> *see [Store your flag file](flag_file/index.md) for the configuration details*.|
+|`Retriever`  | The configuration retriever you want to use to get your flag file<br> *See [Store your flag file](flag_file/index.md) for the configuration details*.|
 |`Context`  | *(optional)*<br>The context used by the retriever.<br />Default: `context.Background()`|
 |`DataExporter` | *(optional)*<br>DataExporter defines how to export data on how your flags are used.<br> *see [export data section](data_collection/index.md) for more details*.|
 |`FileFormat`| *(optional)*<br>Format of your configuration file. Available formats are `yaml`, `toml` and `json`, if you omit the field it will try to unmarshal the file as a `yaml` file.<br>Default: `YAML`|
 |`Logger`   | *(optional)*<br>Logger used to log what `go-feature-flag` is doing.<br />If no logger is provided the module will not log anything.<br>Default: No log|
-|`Notifiers` | *(optional)*<br>List of notifiers to call when your flag file has changed.<br> *see [notifiers section](./notifier/index.md) for more details*.|
+|`Notifiers` | *(optional)*<br>List of notifiers to call when your flag file has been changed.<br> *See [notifiers section](./notifier/index.md) for more details*.|
 |`PollingInterval`   | (optional) Duration to wait before refreshing the flags.<br>The minimum polling interval is 1 second.<br>Default: 60 * time.Second|
 |`StartWithRetrieverError` | *(optional)*<br>If **true**, the SDK will start even if we did not get any flags from the retriever. It will serve only default values until the retriever returns the flags.<br>The init method will not return any error if the flag file is unreachable.<br>Default: **false**|
 
@@ -46,7 +46,7 @@ ffclient.Init(ffclient.Config{
 ```
 
 ## Multiple configuration flag files
-`go-feature-flag` comes ready to use out of the box by calling the `Init` function and, it will be available everywhere.  
+`go-feature-flag` comes ready to use out of the box by calling the `Init` function and it will be available everywhere.  
 Since most applications will want to use a single central flag configuration, the package provides this. It is similar to a singleton.
 
 In all the examples above, they demonstrate using `go-feature-flag` in its singleton style approach.
