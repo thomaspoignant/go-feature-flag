@@ -65,6 +65,7 @@ nav:
   - 'users.md'
   - 'Rollout strategies':
       - 'rollout/index.md'
+      - 'rollout/canary.md'
       - 'rollout/progressive.md'
       - 'rollout/scheduled.md'
       - 'rollout/experimentation.md'

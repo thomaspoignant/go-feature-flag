@@ -351,6 +351,7 @@ But it doesn’t have to, having a complex **rollout** strategy allows you to ha
 
 ### Complex rollout strategy available
 
+- [Canary releases](https://thomaspoignant.github.io/go-feature-flag/rollout/canary) - impact randomly a subset of your users.
 - [Progressive rollout](https://thomaspoignant.github.io/go-feature-flag/rollout/progressive/) - increase the percentage of your flag over time.
 - [Scheduled rollout](https://thomaspoignant.github.io/go-feature-flag/rollout/scheduled/) - update your flag over time.
 - [Experimentation rollout](https://thomaspoignant.github.io/go-feature-flag/rollout/experimentation/) - serve your feature only for a determined time *(perfect for A/B testing)*.
