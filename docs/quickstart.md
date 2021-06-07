@@ -32,4 +32,4 @@ if hasFlag {
     // flag "test-flag" is false for the user
 }
 ```
-You can find more examples programs in the [examples/](https://github.com/thomaspoignant/go-feature-flag/tree/main/examples) directory.
+You can find more examples in the [examples/](https://github.com/thomaspoignant/go-feature-flag/tree/main/examples) directory.
