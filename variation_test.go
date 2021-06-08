@@ -46,6 +46,7 @@ func TestBoolVariation(t *testing.T) {
 		user         ffuser.User
 		defaultValue bool
 		cacheMock    cache.Cache
+		offline      bool
 	}
 	tests := []struct {
 		name        string
@@ -184,6 +185,21 @@ func TestBoolVariation(t *testing.T) {
 			wantErr:     false,
 			expectedLog: "^$",
 		},
+		{
+			name: "Get sdk default value if offline",
+			args: args{
+				offline:      true,
+				flagKey:      "disable-flag",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: false,
+				cacheMock: NewCacheMock(&model.FlagData{
+					Disable: testconvert.Bool(true),
+				}, nil),
+			},
+			want:        false,
+			wantErr:     false,
+			expectedLog: "",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -197,6 +213,7 @@ func TestBoolVariation(t *testing.T) {
 				config: Config{
 					PollingInterval: 0,
 					Logger:          logger,
+					Offline:         tt.args.offline,
 				},
 				dataExporter: exporter.NewDataExporterScheduler(context.Background(), 0, 0,
 					&ffexporter.Log{
@@ -231,6 +248,7 @@ func TestFloat64Variation(t *testing.T) {
 		user         ffuser.User
 		defaultValue float64
 		cacheMock    cache.Cache
+		offline      bool
 	}
 	tests := []struct {
 		name        string
@@ -369,6 +387,21 @@ func TestFloat64Variation(t *testing.T) {
 			wantErr:     false,
 			expectedLog: "^$",
 		},
+		{
+			name: "Get sdk default value if offline",
+			args: args{
+				offline:      true,
+				flagKey:      "disable-flag",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: 118.12,
+				cacheMock: NewCacheMock(&model.FlagData{
+					Disable: testconvert.Bool(true),
+				}, nil),
+			},
+			want:        118.12,
+			wantErr:     false,
+			expectedLog: "",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -382,6 +415,7 @@ func TestFloat64Variation(t *testing.T) {
 				config: Config{
 					PollingInterval: 0,
 					Logger:          logger,
+					Offline:         tt.args.offline,
 				},
 				dataExporter: exporter.NewDataExporterScheduler(context.Background(), 0, 0,
 					&ffexporter.Log{
@@ -415,6 +449,7 @@ func TestJSONArrayVariation(t *testing.T) {
 		user         ffuser.User
 		defaultValue []interface{}
 		cacheMock    cache.Cache
+		offline      bool
 	}
 	tests := []struct {
 		name        string
@@ -571,6 +606,21 @@ func TestJSONArrayVariation(t *testing.T) {
 			wantErr:     false,
 			expectedLog: "^$",
 		},
+		{
+			name: "Get sdk default value if offline",
+			args: args{
+				offline:      true,
+				flagKey:      "disable-flag",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: []interface{}{"toto"},
+				cacheMock: NewCacheMock(&model.FlagData{
+					Disable: testconvert.Bool(true),
+				}, nil),
+			},
+			want:        []interface{}{"toto"},
+			wantErr:     false,
+			expectedLog: "",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -584,6 +634,7 @@ func TestJSONArrayVariation(t *testing.T) {
 				config: Config{
 					PollingInterval: 0,
 					Logger:          logger,
+					Offline:         tt.args.offline,
 				},
 				dataExporter: exporter.NewDataExporterScheduler(context.Background(), 0, 0,
 					&ffexporter.Log{}, logger),
@@ -613,6 +664,7 @@ func TestJSONVariation(t *testing.T) {
 		user         ffuser.User
 		defaultValue map[string]interface{}
 		cacheMock    cache.Cache
+		offline      bool
 	}
 	tests := []struct {
 		name        string
@@ -732,6 +784,21 @@ func TestJSONVariation(t *testing.T) {
 			wantErr:     true,
 			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"map\\[default-notkey:true\\]\", variation=\"SdkDefault\"\n",
 		},
+		{
+			name: "Get sdk default value if offline",
+			args: args{
+				offline:      true,
+				flagKey:      "disable-flag",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: map[string]interface{}{"default-notkey": true},
+				cacheMock: NewCacheMock(&model.FlagData{
+					Disable: testconvert.Bool(true),
+				}, nil),
+			},
+			want:        map[string]interface{}{"default-notkey": true},
+			wantErr:     false,
+			expectedLog: "",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -745,6 +812,7 @@ func TestJSONVariation(t *testing.T) {
 				config: Config{
 					PollingInterval: 0,
 					Logger:          logger,
+					Offline:         tt.args.offline,
 				},
 				dataExporter: exporter.NewDataExporterScheduler(context.Background(), 0, 0,
 					&ffexporter.Log{
@@ -779,6 +847,7 @@ func TestStringVariation(t *testing.T) {
 		user         ffuser.User
 		defaultValue string
 		cacheMock    cache.Cache
+		offline      bool
 	}
 	tests := []struct {
 		name        string
@@ -900,6 +969,21 @@ func TestStringVariation(t *testing.T) {
 			wantErr:     true,
 			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"default-notkey\", variation=\"SdkDefault\"\n",
 		},
+		{
+			name: "Get sdk default value if offline",
+			args: args{
+				offline:      true,
+				flagKey:      "disable-flag",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: "default-notkey",
+				cacheMock: NewCacheMock(&model.FlagData{
+					Disable: testconvert.Bool(true),
+				}, nil),
+			},
+			want:        "default-notkey",
+			wantErr:     false,
+			expectedLog: "",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -913,6 +997,7 @@ func TestStringVariation(t *testing.T) {
 				config: Config{
 					PollingInterval: 0,
 					Logger:          logger,
+					Offline:         tt.args.offline,
 				},
 				dataExporter: exporter.NewDataExporterScheduler(context.Background(), 0, 0,
 					&ffexporter.Log{
@@ -946,6 +1031,7 @@ func TestIntVariation(t *testing.T) {
 		user         ffuser.User
 		defaultValue int
 		cacheMock    cache.Cache
+		offline      bool
 	}
 	tests := []struct {
 		name        string
@@ -1084,6 +1170,21 @@ func TestIntVariation(t *testing.T) {
 			wantErr:     false,
 			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"120\", variation=\"True\"\n",
 		},
+		{
+			name: "Get sdk default value if offline",
+			args: args{
+				offline:      true,
+				flagKey:      "disable-flag",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: 125,
+				cacheMock: NewCacheMock(&model.FlagData{
+					Disable: testconvert.Bool(true),
+				}, nil),
+			},
+			want:        125,
+			wantErr:     false,
+			expectedLog: "",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -1097,6 +1198,7 @@ func TestIntVariation(t *testing.T) {
 				config: Config{
 					PollingInterval: 0,
 					Logger:          logger,
+					Offline:         tt.args.offline,
 				},
 				dataExporter: exporter.NewDataExporterScheduler(context.Background(), 0, 0,
 					&ffexporter.Log{
@@ -1163,6 +1265,18 @@ func TestAllFlagsState(t *testing.T) {
 			},
 			valid:      false,
 			jsonOutput: "./testdata/ffclient/all_flags/marshal_json/module_not_init.json",
+			initModule: false,
+		},
+		{
+			name: "offline",
+			config: Config{
+				Offline: true,
+				Retriever: &FileRetriever{
+					Path: "./testdata/ffclient/all_flags/config_flag/flag-config-all-flags.yaml",
+				},
+			},
+			valid:      true,
+			jsonOutput: "./testdata/ffclient/all_flags/marshal_json/offline.json",
 			initModule: false,
 		},
 	}
