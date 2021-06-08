@@ -69,35 +69,34 @@ func New(config Config) (*GoFeatureFlag, error) {
 		// do nothing
 	}
 
-	notifiers, err := getNotifiers(config)
-	if err != nil {
-		return nil, fmt.Errorf("wrong configuration in your webhook: %v", err)
-	}
-	notificationService := cache.NewNotificationService(notifiers)
-
 	goFF := &GoFeatureFlag{
-		config:    config,
-		bgUpdater: newBackgroundUpdater(config.PollingInterval),
-		cache:     cache.New(notificationService),
+		config: config,
 	}
 
-	// fail if we cannot retrieve the flags the 1st time
-	err = retrieveFlagsAndUpdateCache(goFF.config, goFF.cache)
-	if err != nil && !config.StartWithRetrieverError {
-		return nil, fmt.Errorf("impossible to retrieve the flags, please check your configuration: %v", err)
-	}
+	if !config.Offline {
+		notifiers, err := getNotifiers(config)
+		if err != nil {
+			return nil, fmt.Errorf("wrong configuration in your webhook: %v", err)
+		}
+		notificationService := cache.NewNotificationService(notifiers)
+		goFF.bgUpdater = newBackgroundUpdater(config.PollingInterval)
+		goFF.cache = cache.New(notificationService)
 
-	// start the flag update in background
-	go goFF.startFlagUpdaterDaemon()
+		err = retrieveFlagsAndUpdateCache(goFF.config, goFF.cache)
+		if err != nil && !config.StartWithRetrieverError {
+			return nil, fmt.Errorf("impossible to retrieve the flags, please check your configuration: %v", err)
+		}
+		go goFF.startFlagUpdaterDaemon()
 
-	if goFF.config.DataExporter.Exporter != nil {
-		// init the data exporter
-		goFF.dataExporter = exporter.NewDataExporterScheduler(goFF.config.Context, goFF.config.DataExporter.FlushInterval,
-			goFF.config.DataExporter.MaxEventInMemory, goFF.config.DataExporter.Exporter, goFF.config.Logger)
+		if goFF.config.DataExporter.Exporter != nil {
+			// init the data exporter
+			goFF.dataExporter = exporter.NewDataExporterScheduler(goFF.config.Context, goFF.config.DataExporter.FlushInterval,
+				goFF.config.DataExporter.MaxEventInMemory, goFF.config.DataExporter.Exporter, goFF.config.Logger)
 
-		// we start the daemon only if we have a bulk exporter
-		if goFF.config.DataExporter.Exporter.IsBulk() {
-			go goFF.dataExporter.StartDaemon()
+			// we start the daemon only if we have a bulk exporter
+			if goFF.config.DataExporter.Exporter.IsBulk() {
+				go goFF.dataExporter.StartDaemon()
+			}
 		}
 	}
 	return goFF, nil
@@ -110,7 +109,9 @@ func (g *GoFeatureFlag) Close() {
 			// clear the cache
 			g.cache.Close()
 		}
-		g.bgUpdater.close()
+		if g.bgUpdater.updaterChan != nil && g.bgUpdater.ticker != nil {
+			g.bgUpdater.close()
+		}
 
 		if g.dataExporter != nil {
 			g.dataExporter.Close()

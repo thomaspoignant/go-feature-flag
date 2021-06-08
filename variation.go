@@ -2,6 +2,7 @@ package ffclient
 
 import (
 	"fmt"
+	"github.com/thomaspoignant/go-feature-flag/internal/cache"
 
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
 	"github.com/thomaspoignant/go-feature-flag/internal/exporter"
@@ -11,6 +12,8 @@ import (
 
 const errorFlagNotAvailable = "flag %v is not present or disabled"
 const errorWrongVariation = "wrong variation used for flag %v"
+
+var offlineVariationResult = model.VariationResult{VariationType: model.VariationSDKDefault, Failed: true}
 
 // BoolVariation return the value of the flag in boolean.
 // An error is return if you don't have init the library before calling the function.
@@ -125,10 +128,15 @@ func (g *GoFeatureFlag) JSONVariation(
 
 // AllFlagsState return a flagstate.AllFlags that contains all the flags for a specific user.
 func (g *GoFeatureFlag) AllFlagsState(user ffuser.User) flagstate.AllFlags {
-	flags, err := g.cache.AllFlags()
-	if err != nil {
-		// empty AllFlags will set valid to false
-		return flagstate.AllFlags{}
+	flags := cache.FlagsCache{}
+
+	if !g.config.Offline {
+		var err error
+		flags, err = g.cache.AllFlags()
+		if err != nil {
+			// empty AllFlags will set valid to false
+			return flagstate.AllFlags{}
+		}
 	}
 
 	allFlags := flagstate.NewAllFlags()
@@ -173,6 +181,10 @@ func (g *GoFeatureFlag) AllFlagsState(user ffuser.User) flagstate.AllFlags {
 // the result will always contains a valid model.BoolVarResult
 func (g *GoFeatureFlag) boolVariation(flagKey string, user ffuser.User, sdkDefaultValue bool,
 ) (model.BoolVarResult, error) {
+	if g.config.Offline {
+		return model.BoolVarResult{Value: sdkDefaultValue, VariationResult: offlineVariationResult}, nil
+	}
+
 	flag, err := g.getFlagFromCache(flagKey)
 	if err != nil {
 		return model.BoolVarResult{
@@ -198,6 +210,10 @@ func (g *GoFeatureFlag) boolVariation(flagKey string, user ffuser.User, sdkDefau
 // the result will always contains a valid model.IntVarResult
 func (g *GoFeatureFlag) intVariation(flagKey string, user ffuser.User, sdkDefaultValue int,
 ) (model.IntVarResult, error) {
+	if g.config.Offline {
+		return model.IntVarResult{Value: sdkDefaultValue, VariationResult: offlineVariationResult}, nil
+	}
+
 	flag, err := g.getFlagFromCache(flagKey)
 	if err != nil {
 		return model.IntVarResult{Value: sdkDefaultValue,
@@ -230,6 +246,10 @@ func (g *GoFeatureFlag) intVariation(flagKey string, user ffuser.User, sdkDefaul
 // the result will always contains a valid model.Float64VarResult
 func (g *GoFeatureFlag) float64Variation(flagKey string, user ffuser.User, sdkDefaultValue float64,
 ) (model.Float64VarResult, error) {
+	if g.config.Offline {
+		return model.Float64VarResult{Value: sdkDefaultValue, VariationResult: offlineVariationResult}, nil
+	}
+
 	flag, err := g.getFlagFromCache(flagKey)
 	if err != nil {
 		return model.Float64VarResult{
@@ -256,6 +276,10 @@ func (g *GoFeatureFlag) float64Variation(flagKey string, user ffuser.User, sdkDe
 // the result will always contains a valid model.StringVarResult
 func (g *GoFeatureFlag) stringVariation(flagKey string, user ffuser.User, sdkDefaultValue string,
 ) (model.StringVarResult, error) {
+	if g.config.Offline {
+		return model.StringVarResult{Value: sdkDefaultValue, VariationResult: offlineVariationResult}, nil
+	}
+
 	flag, err := g.getFlagFromCache(flagKey)
 	if err != nil {
 		return model.StringVarResult{
@@ -282,6 +306,10 @@ func (g *GoFeatureFlag) stringVariation(flagKey string, user ffuser.User, sdkDef
 // the result will always contains a valid model.JSONArrayVarResult
 func (g *GoFeatureFlag) jsonArrayVariation(flagKey string, user ffuser.User, sdkDefaultValue []interface{},
 ) (model.JSONArrayVarResult, error) {
+	if g.config.Offline {
+		return model.JSONArrayVarResult{Value: sdkDefaultValue, VariationResult: offlineVariationResult}, nil
+	}
+
 	flag, err := g.getFlagFromCache(flagKey)
 	if err != nil {
 		return model.JSONArrayVarResult{
@@ -308,6 +336,10 @@ func (g *GoFeatureFlag) jsonArrayVariation(flagKey string, user ffuser.User, sdk
 // the result will always contains a valid model.JSONVarResult
 func (g *GoFeatureFlag) jsonVariation(flagKey string, user ffuser.User, sdkDefaultValue map[string]interface{},
 ) (model.JSONVarResult, error) {
+	if g.config.Offline {
+		return model.JSONVarResult{Value: sdkDefaultValue, VariationResult: offlineVariationResult}, nil
+	}
+
 	flag, err := g.getFlagFromCache(flagKey)
 	if err != nil {
 		return model.JSONVarResult{

@@ -122,6 +122,7 @@ ffclient.Init(ffclient.Config{
 |`Notifiers` | *(optional)*<br>List of notifiers to call when your flag file has been changed.<br> *See [notifiers section](https://thomaspoignant.github.io/go-feature-flag/notifier/) for more details*.|
 |`PollingInterval`   | *(optional)* Duration to wait before refreshing the flags.<br>The minimum polling interval is 1 second.<br>Default: 60 * time.Second|
 |`StartWithRetrieverError` | *(optional)*<br>If **true**, the SDK will start even if we did not get any flags from the retriever. It will serve only default values until the retriever returns the flags.<br>The init method will not return any error if the flag file is unreachable.<br>Default: **false**|
+|`Offline`| *(optional)* If **true**, the SDK will not try to retrieve the flag file and will not export any data. No notification will be send neither.<br>Default: false|
 
 ### Multiple configuration flag files
 `go-feature-flag` comes ready to use out of the box by calling the `Init` function and it will be available everywhere.  

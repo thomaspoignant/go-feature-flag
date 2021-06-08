@@ -47,6 +47,11 @@ type Config struct {
 	// The init method will not return any error if the flag file is unreachable.
 	// Default: false
 	StartWithRetrieverError bool
+
+	// Offline (optional) If true, the SDK will not try to retrieve the flag file and will not export any data.
+	// No notification will be send neither.
+	// Default: false
+	Offline bool
 }
 
 // GetRetriever returns a retriever.FlagRetriever configure with the retriever available in the config.
