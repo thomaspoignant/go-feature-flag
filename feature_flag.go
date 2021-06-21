@@ -49,12 +49,6 @@ var onceFF sync.Once
 // New creates a new go-feature-flag instance that retrieve the config from a YAML file
 // and return everything you need to manage your flags.
 func New(config Config) (*GoFeatureFlag, error) {
-	// Deprecated: remove when PollInterval is deleted
-	if config.PollingInterval == 0 {
-		config.PollingInterval = time.Duration(config.PollInterval) * time.Second
-	}
-	// End deprecated
-
 	switch {
 	case config.PollingInterval == 0:
 		// The default value for poll interval is 60 seconds

@@ -13,9 +13,6 @@ import (
 // Config is the configuration of go-feature-flag.
 // You should also have a retriever to specify where to read the flags file.
 type Config struct {
-	// Deprecated: use PollingInterval instead
-	PollInterval int
-
 	// PollingInterval (optional) Poll every X time
 	// The minimum possible is 1 second
 	// Default: 60 seconds
