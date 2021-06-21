@@ -67,3 +67,73 @@ The default value is return when an error is encountered _(`ffclient` not initia
 
 In the example, if the flag `your.feature.key` does not exists, result will be `false`.  
 Not that you will always have a usable value in the result. 
+
+## Get all flags for a specific user
+If you want to send the information about a specific user to a front-end, you will want a snapshot of all the flags for
+this user at a specific time.
+
+The method `ffclient.AllFlagsState` returns a snapshot of flag values and metadata.  
+The function is evaluating all available flags for the user and return a `flagstate.AllFlagsState` object containing the
+information you need.
+
+```go linenums="1"
+user := ffuser.NewUser("example")
+// AllFlagsState will give you the value for all the flags available.
+allFlagsState := ffclient.AllFlagsState(u)
+
+// If you want to send it to a front-end you can Marshal it by calling MarshalJSON()
+forFE, err := allFlagsState.MarshalJSON()
+```
+
+The `MarshalJSON()` function will return something like bellow, that can be directly used by your front-end application. 
+```json linenums="1"
+{
+    "flags": {
+        "test-flag0": {
+            "value": true,
+            "timestamp": 1622209328,
+            "variationType": "True",
+            "trackEvents": true
+        },
+        "test-flag1": {
+            "value": "true",
+            "timestamp": 1622209328,
+            "variationType": "True",
+            "trackEvents": true
+        },
+        "test-flag2": {
+            "value": 1,
+            "timestamp": 1622209328,
+            "variationType": "True",
+            "trackEvents": true
+        },
+        "test-flag3": {
+            "value": [
+                "yo",
+                "ya"
+            ],
+            "timestamp": 1622209328,
+            "variationType": "True",
+            "trackEvents": true
+        },
+        "test-flag4": {
+            "value": {
+                "test": "yo"
+            },
+            "timestamp": 1622209328,
+            "variationType": "True",
+            "trackEvents": true
+        },
+        "test-flag5": {
+            "value": 1.1,
+            "timestamp": 1622209328,
+            "variationType": "True",
+            "trackEvents": false
+        }
+    },
+    "valid": true
+}
+```
+
+!!! Warning
+    There is no tracking done when evaluating all the flag at once.

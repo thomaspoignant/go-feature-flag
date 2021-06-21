@@ -2,7 +2,7 @@
 name: Change
 about: Update functionality that already exists.
 labels: change, needs-triage
-
+title: "(change) "
 ---
 
 # Motivation

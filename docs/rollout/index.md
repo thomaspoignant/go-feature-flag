@@ -7,6 +7,7 @@ But it doesn’t have to, having a complex **rollout** strategy allows you to ha
 
 ## Complex rollout strategy available
 
+- [Canary releases](canary.md) - impact randomly a subset of your users. 
 - [Progressive rollout](progressive.md) - increase the percentage of your flag over time.
 - [Scheduled rollout](scheduled.md) - update your flag over time.
 - [Experimentation rollout](experimentation.md) - serve your feature only for a determined time *(perfect for A/B testing)*.

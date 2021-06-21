@@ -5,6 +5,7 @@ import (
 	"github.com/nikunjy/rules/parser"
 	"hash/fnv"
 	"math"
+	"strconv"
 	"strings"
 	"time"
 
@@ -15,9 +16,16 @@ import (
 type VariationType string
 
 const (
-	VariationTrue       VariationType = "True"
-	VariationFalse      VariationType = "False"
-	VariationDefault    VariationType = "Default"
+	// VariationTrue is a constant to explain that we are using the "True" variation
+	VariationTrue VariationType = "True"
+
+	// VariationFalse is a constant to explain that we are using the "False" variation
+	VariationFalse VariationType = "False"
+
+	// VariationDefault is a constant to explain that we are using the "Default" variation
+	VariationDefault VariationType = "Default"
+
+	// VariationSDKDefault is a constant to explain that we are using the default from the SDK variation
 	VariationSDKDefault VariationType = "SdkDefault"
 )
 
@@ -56,13 +64,17 @@ type Flag interface {
 	// Default: true
 	GetTrackEvents() bool
 
-	// GetDisable is the getter of the field Disable
+	// GetDisable is the getter for the field Disable
 	// Default: false
 	GetDisable() bool
 
-	// GetRollout is the getter of the field Rollout
+	// GetRollout is the getter for the field Rollout
 	// Default: nil
 	GetRollout() *Rollout
+
+	// GetVersion is the getter for the field Version
+	// Default: 0.0
+	GetVersion() float64
 }
 
 // FlagData describe the fields of a flag.
@@ -96,7 +108,12 @@ type FlagData struct {
 
 	// Rollout is the object to configure how the flag is rollout.
 	// You have different rollout strategy available but only one is used at a time.
-	Rollout *Rollout `json:"rollout,omitempty" yaml:"rollout,omitempty" toml:"rollout,omitempty" slack_short:"false"` // nolint: lll
+	Rollout *Rollout `json:"rollout,omitempty" yaml:"rollout,omitempty" toml:"rollout,omitempty" slack_short:"false"`
+
+	// Version (optional) This field contains the version of the flag.
+	// The version is manually managed when you configure your flags and it is used to display the information
+	// in the notifications and data collection.
+	Version *float64 `json:"version,omitempty" yaml:"version,omitempty" toml:"version,omitempty" slack_short:"false"`
 }
 
 // Value is returning the Value associate to the flag (True / False / Default ) based
@@ -164,21 +181,25 @@ func (f *FlagData) evaluateRule(user ffuser.User) bool {
 
 // string display correctly a flag
 func (f FlagData) String() string {
-	var strBuilder strings.Builder
-	strBuilder.WriteString(fmt.Sprintf("percentage=%d%%, ", int64(math.Round(f.GetPercentage()))))
+	toString := []string{}
+	toString = append(toString, fmt.Sprintf("percentage=%d%%", int64(math.Round(f.GetPercentage()))))
 	if f.GetRule() != "" {
-		strBuilder.WriteString(fmt.Sprintf("rule=\"%s\", ", f.GetRule()))
+		toString = append(toString, fmt.Sprintf("rule=\"%s\"", f.GetRule()))
 	}
-	strBuilder.WriteString(fmt.Sprintf("true=\"%v\", ", f.GetTrue()))
-	strBuilder.WriteString(fmt.Sprintf("false=\"%v\", ", f.GetFalse()))
-	strBuilder.WriteString(fmt.Sprintf("default=\"%v\", ", f.GetDefault()))
-	strBuilder.WriteString(fmt.Sprintf("disable=\"%v\"", f.GetDisable()))
+	toString = append(toString, fmt.Sprintf("true=\"%v\"", f.GetTrue()))
+	toString = append(toString, fmt.Sprintf("false=\"%v\"", f.GetFalse()))
+	toString = append(toString, fmt.Sprintf("default=\"%v\"", f.GetDefault()))
+	toString = append(toString, fmt.Sprintf("disable=\"%v\"", f.GetDisable()))
 
 	if f.TrackEvents != nil {
-		strBuilder.WriteString(fmt.Sprintf(", trackEvents=\"%v\"", f.GetTrackEvents()))
+		toString = append(toString, fmt.Sprintf("trackEvents=\"%v\"", f.GetTrackEvents()))
 	}
 
-	return strBuilder.String()
+	if f.Version != nil {
+		toString = append(toString, fmt.Sprintf("version=%s", strconv.FormatFloat(f.GetVersion(), 'f', -1, 64)))
+	}
+
+	return strings.Join(toString, ", ")
 }
 
 // Hash is taking a string and convert.
@@ -274,7 +295,7 @@ func (f *FlagData) updateFlagStage() {
 	}
 }
 
-// mergeChanges f;ejs;
+// mergeChanges will check every changes on the flag and apply them to the current configuration.
 func (f *FlagData) mergeChanges(stepFlag ScheduledStep) {
 	if stepFlag.Disable != nil {
 		f.Disable = stepFlag.Disable
@@ -299,6 +320,9 @@ func (f *FlagData) mergeChanges(stepFlag ScheduledStep) {
 	}
 	if stepFlag.Rollout != nil {
 		f.Rollout = stepFlag.Rollout
+	}
+	if stepFlag.Version != nil {
+		f.Version = stepFlag.Version
 	}
 }
 
@@ -350,7 +374,7 @@ func (f *FlagData) GetTrackEvents() bool {
 	return *f.TrackEvents
 }
 
-// GetDisable is the getter of the field Disable
+// GetDisable is the getter for the field Disable
 func (f *FlagData) GetDisable() bool {
 	if f.Disable == nil {
 		return false
@@ -358,7 +382,15 @@ func (f *FlagData) GetDisable() bool {
 	return *f.Disable
 }
 
-// GetRollout is the getter of the field Rollout
+// GetRollout is the getter for the field Rollout
 func (f *FlagData) GetRollout() *Rollout {
 	return f.Rollout
+}
+
+// GetVersion is the getter for the field Version
+func (f *FlagData) GetVersion() float64 {
+	if f.Version == nil {
+		return 0
+	}
+	return *f.Version
 }

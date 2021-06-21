@@ -8,7 +8,6 @@ import (
 
 	"github.com/thomaspoignant/go-feature-flag/internal"
 	"github.com/thomaspoignant/go-feature-flag/internal/notifier"
-	"github.com/thomaspoignant/go-feature-flag/internal/retriever"
 )
 
 // Config is the configuration of go-feature-flag.
@@ -45,14 +44,19 @@ type Config struct {
 	// The init method will not return any error if the flag file is unreachable.
 	// Default: false
 	StartWithRetrieverError bool
+
+	// Offline (optional) If true, the SDK will not try to retrieve the flag file and will not export any data.
+	// No notification will be send neither.
+	// Default: false
+	Offline bool
 }
 
 // GetRetriever returns a retriever.FlagRetriever configure with the retriever available in the config.
-func (c *Config) GetRetriever() (retriever.FlagRetriever, error) {
+func (c *Config) GetRetriever() (Retriever, error) {
 	if c.Retriever == nil {
 		return nil, errors.New("no retriever in the configuration, impossible to get the flags")
 	}
-	return c.Retriever.getFlagRetriever()
+	return c.Retriever, nil
 }
 
 // NotifierConfig is the interface for your notifiers.

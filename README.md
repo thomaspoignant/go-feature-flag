@@ -6,11 +6,10 @@
 # 🎛️ go-feature-flag [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=I%27ve%20discovered%20go-feature-flag%20a%20great%20solution%20to%20easily%20managed%20feature%20flag%20in%20golang&url=https%3A%2F%2Fgithub.com%2Fthomaspoignant%2Fgo-feature-flag&via=thomaspoignant&hashtags=golang,featureflags,featuretoggle,go)
 
 <p align="center">
-    <a href="https://app.circleci.com/pipelines/github/thomaspoignant/go-feature-flag"><img src="https://img.shields.io/circleci/build/github/thomaspoignant/go-feature-flag" alt="Build Status" /></a>
+    <a href="https://github.com/thomaspoignant/go-feature-flag/actions/workflows/ci.yml"><img src="https://github.com/thomaspoignant/go-feature-flag/actions/workflows/ci.yml/badge.svg" alt="Build Status" /></a>
     <a href="https://coveralls.io/github/thomaspoignant/go-feature-flag"><img src="https://coveralls.io/repos/github/thomaspoignant/go-feature-flag/badge.svg" alt="Coverage Status" /></a>
     <a href="https://sonarcloud.io/dashboard?id=thomaspoignant_go-feature-flag"><img src="https://sonarcloud.io/api/project_badges/measure?project=thomaspoignant_go-feature-flag&metric=alert_status" alt="Sonarcloud Status" /></a>
-    <a href="https://github.com/thomaspoignant/go-feature-flag/actions?query=workflow%3ACodeQL"><img src="https://github.com/thomaspoignant/go-feature-flag/workflows/CodeQL/badge.svg" alt="Build Status" /></a>
-    <a href="https://thomaspoignant.github.io/go-feature-flag/"><img src="https://github.com/thomaspoignant/go-feature-flag/actions/workflows/publish_doc.yml/badge.svg" alt="Doc Status" /></a>
+    <a href="https://github.com/thomaspoignant/go-feature-flag/actions/workflows/codeql-analysis.yml"><img src="https://github.com/thomaspoignant/go-feature-flag/workflows/CodeQL/badge.svg" alt="Build Status" /></a>
     <a href="https://app.fossa.com/projects/git%2Bgithub.com%2Fthomaspoignant%2Fgo-feature-flag"><img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2Fthomaspoignant%2Fgo-feature-flag.svg?type=shield" alt="FOSSA Status"/></a>
     <br/>
     <a href="https://github.com/thomaspoignant/go-feature-flag/releases"><img src="https://img.shields.io/github/v/release/thomaspoignant/go-feature-flag" alt="Release version" /></a>
@@ -28,26 +27,26 @@ go get github.com/thomaspoignant/go-feature-flag
 ```
 ## What is go-feature-flag?
 
-A simple and complete feature flag solution, without any complex backend system to install, you need only a file as your backend.
+A simple and complete feature flag solution, without any complex backend system to install, all you need is a file as your backend.
 
-No server is needed, just add a file in a central system and all your services will react to the changes of this file.
+No server is needed, just add a file to your central system and all your services will react to the changes in this file.
 
 **go-feature-flags supports:**
 
 - Storing your configuration flags file on various locations (`HTTP`, `S3`, `GitHub`, `file`).
 - Configuring your flags in various format (`JSON`, `TOML` and `YAML`).
 - Adding complex rules to target your users.
-- Use complex rollout strategy for your flags
+- Use complex rollout strategy for your flags :
     - Run A/B testing experimentation.
     - Progressively rollout a feature.
     - Schedule your flag updates.
 - Exporting your flags usage data (`S3`, `log` and `file`).
-- Getting notified when a flag has changed (`webhook` and `slack`).
+- Getting notified when a flag has been changed (`webhook` and `slack`).
 
-If you are not familiar with feature flags also called feature Toggles you can read this [article of Martin Fowler](https://www.martinfowler.com/articles/feature-toggles.html)
-that explains why this is a great pattern.
+If you are not familiar with feature flags, also called feature Toggles, you can read this [article from Martin Fowler](https://www.martinfowler.com/articles/feature-toggles.html)
+where he explains why this is a great pattern.
 
-I've also written an [article](https://medium.com/better-programming/feature-flags-and-how-to-iterate-quickly-7e3371b9986) that explains why feature flags can help you to iterate quickly.
+I've also written an [article](https://medium.com/better-programming/feature-flags-and-how-to-iterate-quickly-7e3371b9986) explaining why feature flags can fasten your iteration cycle.
 
 ## Getting started
 First, you need to initialize the `ffclient` with the location of your backend file.
@@ -75,7 +74,7 @@ if hasFlag {
 }
 ```
 The full documentation is available on https://thomaspoignant.github.io/go-feature-flag/  
-You can find more examples programs in the [examples/](https://github.com/thomaspoignant/go-feature-flag/tree/main/examples**) directory.
+You can find more examples in the [examples/](https://github.com/thomaspoignant/go-feature-flag/tree/main/examples) directory.
 
 ## Configuration
 
@@ -115,17 +114,18 @@ ffclient.Init(ffclient.Config{
 
 | Field | Description |
 |---|---|
-|`Retriever`  | The configuration retriever you want to use to get your flag file<br> *see [Store your flag file](https://thomaspoignant.github.io/go-feature-flag/flag_file/) for the configuration details*.|
+|`Retriever`  | The configuration retriever you want to use to get your flag file.<br> *See [Store your flag file](https://thomaspoignant.github.io/go-feature-flag/flag_file/) for the configuration details*.|
 |`Context`  | *(optional)*<br>The context used by the retriever.<br />Default: `context.Background()`|
 |`DataExporter` | *(optional)*<br>DataExporter defines how to export data on how your flags are used.<br> *see [export data section](https://thomaspoignant.github.io/go-feature-flag/data_collection/) for more details*.|
 |`FileFormat`| *(optional)*<br>Format of your configuration file. Available formats are `yaml`, `toml` and `json`, if you omit the field it will try to unmarshal the file as a `yaml` file.<br>Default: `YAML`|
 |`Logger`   | *(optional)*<br>Logger used to log what `go-feature-flag` is doing.<br />If no logger is provided the module will not log anything.<br>Default: No log|
-|`Notifiers` | *(optional)*<br>List of notifiers to call when your flag file has changed.<br> *see [notifiers section](https://thomaspoignant.github.io/go-feature-flag/notifier/) for more details*.|
-|`PollingInterval`   | (optional) Duration to wait before refreshing the flags.<br>The minimum polling interval is 1 second<br>Default: 60 * time.Second|
+|`Notifiers` | *(optional)*<br>List of notifiers to call when your flag file has been changed.<br> *See [notifiers section](https://thomaspoignant.github.io/go-feature-flag/notifier/) for more details*.|
+|`PollingInterval`   | *(optional)* Duration to wait before refreshing the flags.<br>The minimum polling interval is 1 second.<br>Default: 60 * time.Second|
 |`StartWithRetrieverError` | *(optional)*<br>If **true**, the SDK will start even if we did not get any flags from the retriever. It will serve only default values until the retriever returns the flags.<br>The init method will not return any error if the flag file is unreachable.<br>Default: **false**|
+|`Offline`| *(optional)* If **true**, the SDK will not try to retrieve the flag file and will not export any data. No notification will be send neither.<br>Default: false|
 
 ### Multiple configuration flag files
-`go-feature-flag` comes ready to use out of the box by calling the `Init` function and, it will be available everywhere.  
+`go-feature-flag` comes ready to use out of the box by calling the `Init` function and it will be available everywhere.  
 Since most applications will want to use a single central flag configuration, the package provides this. It is similar to a singleton.
 
 In all the examples above, they demonstrate using `go-feature-flag` in its singleton style approach.  
@@ -143,7 +143,8 @@ Available retriever are:
 - [From a file](https://thomaspoignant.github.io/go-feature-flag/flag_file/file/)
 
 ## Flags file format
-`go-feature-flag` is to avoid to have to host a backend to manage your feature flags and to keep them centralized by using a file a source.  
+`go-feature-flag` core feature is to centralize all your feature flags in a source file, and to avoid hosting and maintaining a backend server to manage them.
+
 Your file should be a `YAML`, `JSON` or `TOML` file with a list of flags *(examples: [`YAML`](testdata/flag-config.yaml), [`JSON`](testdata/flag-config.json), [`TOML`](testdata/flag-config.toml))*.
 
 **A flag configuration looks like:**
@@ -160,6 +161,7 @@ test-flag:
   default: false
   disable: false
   trackEvents: true
+  version: 1
   rollout:
     experimentation:
       start: 2021-03-20T00:00:00.10-05:00
@@ -171,6 +173,7 @@ test-flag:
     true: true
     false: false
     default: false
+    version: 12
 ```
 </details>
 <details>
@@ -186,6 +189,7 @@ test-flag:
     "default": false,
     "disable": false,
     "trackEvents": true,
+    "version": 1,
     "rollout": {
       "experimentation": {
         "start": "2021-03-20T05:00:00.100Z",
@@ -198,7 +202,8 @@ test-flag:
     "percentage": 100,
     "true": true,
     "false": false,
-    "default": false
+    "default": false,
+    "version": 12
   }
 }
 ```
@@ -217,6 +222,7 @@ false = false
 default = false
 disable = false
 trackEvents = true
+version = 1.0
 
 [test-flag.rollout]
 
@@ -230,6 +236,7 @@ percentage = 100.0
 true = true
 false = false
 default = false
+version = 12.0
 ```
 
 </details>
@@ -237,14 +244,15 @@ default = false
 
 | Field | Description |
 |:---:|---|
-| **flag-key** | The `flag-key` is the name of your flag.<br> It must be unique.<br>*On the example the flag keys are **`test-flag`** and **`test-flag2`**.*|
-| `true` | The value return by the flag if apply to the user *(rule is evaluated to true)* and user is in the active percentage.|
-| `false`| The value return by the flag if apply to the user *(rule is evaluated to true)* and user is **not** in the active percentage.|
-| `default` |The value return by the flag if not apply to the user *(rule is evaluated to false).*|
-| `percentage` |*(optional)*<br>Percentage of the users affect by the flag.<br>**Default: 0**<br><br>The percentage is compute by doing a hash of the user key *(100000 variations)*, it means that you can have 3 numbers after the comma.|
-| `rule` |*(optional)*<br>This is the query use to select on which user the flag should apply.<br>Rule format is describe in the <a href="#rule-format">rule format section</a>.<br>**If no rule set, the flag apply to all users *(percentage still apply)*.**|
+| **flag-key** | Name of your flag.<br> It must be unique.<br>*On the example the flag keys are **`test-flag`** and **`test-flag2`**.*|
+| `true` | Value returned by the flag if the rule is evaluated to true and the user is in the active percentage.|
+| `false`| Value returned by the flag if the rule is evaluated to true and the user is **not** in the active percentage.|
+| `default` |Value returned by the flag if the rule is evaluated to false.|
+| `percentage` |*(optional)*<br>Percentage of users who should be affected by the flag.<br>**Default: 0**<br><br>The percentage is computed by calculating a hash of the user key *(100000 variations)*, it means that you can have 3 numbers after the comma.|
+| `rule` |*(optional)*<br>Condition to determine on which user the flag should be applied.<br>Rule format is described in the <a href="#rule-format">rule format section</a>.<br>**If no rule is set, the flag applies to all users *(percentage still apply)*.**|
 | `disable` |*(optional)*<br>True if the flag is disabled.<br>**Default: `false`**|
 | `trackEvents` |*(optional)*<br>False if you don't want to export the data in your data exporter.<br>**Default: `true`**|
+| `version` |*(optional)*<br>The version is the version of your flag.<br>This number is used to display the information in the notifiers and data collection, you have to update it your self.<br>**Default: 0**|
 | `rollout` |*(optional)*<br><code>rollout</code> contains a specific rollout strategy you want to use.<br>**See [rollout section](https://thomaspoignant.github.io/go-feature-flag/rollout/) for more details.**|
 
 ## Rule format
@@ -324,6 +332,17 @@ The default value is return when an error is encountered _(`ffclient` not initia
 In the example, if the flag `your.feature.key` does not exists, result will be `false`.  
 Not that you will always have a usable value in the result.
 
+## Get all flags for a specific user
+If you want to send the information about a specific user to a front-end, you will want a snapshot of all the flags for
+this user at a specific time.
+
+The method `ffclient.AllFlagsState` returns a snapshot of flag values and metadata.  
+The function is evaluating all available flags for the user and return a `flagstate.AllFlagsState` object containing the
+information you need.
+
+The `MarshalJSON()` function will return a JSON Object, that can be directly used by your front-end application.  
+[More details in the documentation.](https://thomaspoignant.github.io/go-feature-flag/users/#get-all-flags-for-a-specific-user)
+
 ## Rollout
 A critical part of every new feature release is orchestrating the actual launch schedule between Product, Engineering, and Marketing teams.
 
@@ -333,6 +352,7 @@ But it doesn’t have to, having a complex **rollout** strategy allows you to ha
 
 ### Complex rollout strategy available
 
+- [Canary releases](https://thomaspoignant.github.io/go-feature-flag/rollout/canary) - impact randomly a subset of your users.
 - [Progressive rollout](https://thomaspoignant.github.io/go-feature-flag/rollout/progressive/) - increase the percentage of your flag over time.
 - [Scheduled rollout](https://thomaspoignant.github.io/go-feature-flag/rollout/scheduled/) - update your flag over time.
 - [Experimentation rollout](https://thomaspoignant.github.io/go-feature-flag/rollout/experimentation/) - serve your feature only for a determined time *(perfect for A/B testing)*.
