@@ -3,6 +3,12 @@
 
 Your file must be a valid `YAML`, `JSON` or `TOML` file with a list of flags *(examples: [`YAML`](https://github.com/thomaspoignant/go-feature-flag/tree/main/testdata/flag-config.yaml), [`JSON`](https://github.com/thomaspoignant/go-feature-flag/tree/main/testdata/flag-config.json), [`TOML`](https://github.com/thomaspoignant/go-feature-flag/tree/main/testdata/flag-config.toml))*.
 
+The easiest way to create your configuration file is to used **GO Feature Flag Editor** available at https://thomaspoignant.github.io/go-feature-flag-editor/.  
+If you prefer to do it manually please follow instruction bellow.
+
+## Editor
+Creating the first version of the flag is not always pleasant, that's why we have created [**GO Feature Flag Editor**](https://thomaspoignant.github.io/go-feature-flag-editor/) a simple editor to create your files.  
+
 ## Example
 A flag configuration looks like:
 
