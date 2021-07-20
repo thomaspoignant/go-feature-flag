@@ -3,7 +3,7 @@ package notifier_test
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	"github.com/thomaspoignant/go-feature-flag/internal/flag_v1"
+	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
 	"github.com/thomaspoignant/go-feature-flag/internal/notifier"
 	"io/ioutil"
 	"log"
@@ -45,7 +45,7 @@ func TestSlackNotifier_Notify(t *testing.T) {
 				statusCode: http.StatusOK,
 				diff: model.DiffCache{
 					Added: map[string]flag.Flag{
-						"test-flag3": &flag_v1.FlagData{
+						"test-flag3": &flagv1.FlagData{
 							Percentage:  testconvert.Float64(5),
 							True:        testconvert.Interface("test"),
 							False:       testconvert.Interface("false"),
@@ -57,7 +57,7 @@ func TestSlackNotifier_Notify(t *testing.T) {
 						},
 					},
 					Deleted: map[string]flag.Flag{
-						"test-flag": &flag_v1.FlagData{
+						"test-flag": &flagv1.FlagData{
 							Rule:       testconvert.String("key eq \"random-key\""),
 							Percentage: testconvert.Float64(100),
 							True:       testconvert.Interface(true),
@@ -67,7 +67,7 @@ func TestSlackNotifier_Notify(t *testing.T) {
 					},
 					Updated: map[string]model.DiffUpdated{
 						"test-flag2": {
-							Before: &flag_v1.FlagData{
+							Before: &flagv1.FlagData{
 								Rule:        testconvert.String("key eq \"not-a-key\""),
 								Percentage:  testconvert.Float64(100),
 								True:        testconvert.Interface(true),
@@ -75,13 +75,13 @@ func TestSlackNotifier_Notify(t *testing.T) {
 								Default:     testconvert.Interface(false),
 								Disable:     testconvert.Bool(false),
 								TrackEvents: testconvert.Bool(true),
-								Rollout: &flag_v1.Rollout{
-									Experimentation: &flag_v1.Experimentation{
+								Rollout: &flagv1.Rollout{
+									Experimentation: &flagv1.Experimentation{
 										Start: testconvert.Time(time.Unix(1095379400, 0)),
 										End:   testconvert.Time(time.Unix(1095371000, 0)),
 									}},
 							},
-							After: &flag_v1.FlagData{
+							After: &flagv1.FlagData{
 								Rule:        testconvert.String("key eq \"not-a-ke\""),
 								Percentage:  testconvert.Float64(80),
 								True:        testconvert.Interface("strTrue"),

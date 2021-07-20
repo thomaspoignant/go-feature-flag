@@ -1,4 +1,4 @@
-package flag_v1
+package flagv1
 
 // VariationType enum which describe the decision taken
 type VariationType = string

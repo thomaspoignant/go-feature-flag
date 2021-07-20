@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	"github.com/thomaspoignant/go-feature-flag/internal/flag_v1"
+	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
 	"gopkg.in/yaml.v3"
 	"strings"
 	"sync"
@@ -28,7 +28,7 @@ type cacheImpl struct {
 
 func New(notificationService Service) Cache {
 	return &cacheImpl{
-		flagsCache:          make(map[string]flag_v1.FlagData),
+		flagsCache:          make(map[string]flagv1.FlagData),
 		mutex:               sync.RWMutex{},
 		notificationService: notificationService,
 	}
@@ -77,12 +77,12 @@ func (c *cacheImpl) GetFlag(key string) (flag.Flag, error) {
 	defer c.mutex.RUnlock()
 
 	if c.flagsCache == nil {
-		return &flag_v1.FlagData{}, errors.New("impossible to read the flag before the initialisation")
+		return &flagv1.FlagData{}, errors.New("impossible to read the flag before the initialisation")
 	}
 
 	f, ok := c.flagsCache[key]
 	if !ok {
-		return &flag_v1.FlagData{}, fmt.Errorf("flag [%v] does not exists", key)
+		return &flagv1.FlagData{}, fmt.Errorf("flag [%v] does not exists", key)
 	}
 
 	return &f, nil

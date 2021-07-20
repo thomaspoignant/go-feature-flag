@@ -3,7 +3,7 @@ package notifier
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	"github.com/thomaspoignant/go-feature-flag/internal/flag_v1"
+	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 	"io/ioutil"
 	"log"
@@ -30,7 +30,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 			args: args{
 				diff: model.DiffCache{
 					Deleted: map[string]flag.Flag{
-						"test-flag": &flag_v1.FlagData{
+						"test-flag": &flagv1.FlagData{
 							Percentage: testconvert.Float64(100),
 							True:       testconvert.Interface(true),
 							False:      testconvert.Interface(false),
@@ -51,14 +51,14 @@ func TestLogNotifier_Notify(t *testing.T) {
 					Deleted: map[string]flag.Flag{},
 					Updated: map[string]model.DiffUpdated{
 						"test-flag": {
-							Before: &flag_v1.FlagData{
+							Before: &flagv1.FlagData{
 								Rule:       testconvert.String("key eq \"random-key\""),
 								Percentage: testconvert.Float64(100),
 								True:       testconvert.Interface(true),
 								False:      testconvert.Interface(false),
 								Default:    testconvert.Interface(false),
 							},
-							After: &flag_v1.FlagData{
+							After: &flagv1.FlagData{
 								Percentage: testconvert.Float64(100),
 								True:       testconvert.Interface(true),
 								False:      testconvert.Interface(false),
@@ -79,14 +79,14 @@ func TestLogNotifier_Notify(t *testing.T) {
 					Deleted: map[string]flag.Flag{},
 					Updated: map[string]model.DiffUpdated{
 						"test-flag": {
-							Before: &flag_v1.FlagData{
+							Before: &flagv1.FlagData{
 								Rule:       testconvert.String("key eq \"random-key\""),
 								Percentage: testconvert.Float64(100),
 								True:       testconvert.Interface(true),
 								False:      testconvert.Interface(false),
 								Default:    testconvert.Interface(false),
 							},
-							After: &flag_v1.FlagData{
+							After: &flagv1.FlagData{
 								Rule:       testconvert.String("key eq \"random-key\""),
 								Disable:    testconvert.Bool(true),
 								Percentage: testconvert.Float64(100),
@@ -109,7 +109,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 					Deleted: map[string]flag.Flag{},
 					Updated: map[string]model.DiffUpdated{},
 					Added: map[string]flag.Flag{
-						"add-test-flag": &flag_v1.FlagData{
+						"add-test-flag": &flagv1.FlagData{
 							Rule:       testconvert.String("key eq \"random-key\""),
 							Percentage: testconvert.Float64(100),
 							True:       testconvert.Interface(true),
@@ -129,14 +129,14 @@ func TestLogNotifier_Notify(t *testing.T) {
 					Deleted: map[string]flag.Flag{},
 					Updated: map[string]model.DiffUpdated{
 						"test-flag": {
-							After: &flag_v1.FlagData{
+							After: &flagv1.FlagData{
 								Rule:       testconvert.String("key eq \"random-key\""),
 								Percentage: testconvert.Float64(100),
 								True:       testconvert.Interface(true),
 								False:      testconvert.Interface(false),
 								Default:    testconvert.Interface(false),
 							},
-							Before: &flag_v1.FlagData{
+							Before: &flagv1.FlagData{
 								Rule:       testconvert.String("key eq \"random-key\""),
 								Disable:    testconvert.Bool(true),
 								Percentage: testconvert.Float64(100),

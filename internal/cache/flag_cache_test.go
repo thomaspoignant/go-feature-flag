@@ -3,7 +3,7 @@ package cache_test
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
-	"github.com/thomaspoignant/go-feature-flag/internal/flag_v1"
+	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 	"testing"
 )
@@ -16,7 +16,7 @@ func TestFlagsCache_Copy(t *testing.T) {
 		{
 			name: "Copy with values",
 			fc: cache.FlagsCache{
-				"test": flag_v1.FlagData{
+				"test": flagv1.FlagData{
 					Disable:    testconvert.Bool(false),
 					Rule:       testconvert.String("key eq \"toto\""),
 					Percentage: testconvert.Float64(20),

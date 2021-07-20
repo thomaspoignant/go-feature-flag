@@ -3,7 +3,7 @@ package model_test
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	"github.com/thomaspoignant/go-feature-flag/internal/flag_v1"
+	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
 	"github.com/thomaspoignant/go-feature-flag/internal/model"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 	"testing"
@@ -38,7 +38,7 @@ func TestDiffCache_HasDiff(t *testing.T) {
 			name: "only Deleted",
 			fields: fields{
 				Deleted: map[string]flag.Flag{
-					"flag": &flag_v1.FlagData{
+					"flag": &flagv1.FlagData{
 						Percentage: testconvert.Float64(100),
 						True:       testconvert.Interface(true),
 						False:      testconvert.Interface(true),
@@ -54,7 +54,7 @@ func TestDiffCache_HasDiff(t *testing.T) {
 			name: "only Added",
 			fields: fields{
 				Added: map[string]flag.Flag{
-					"flag": &flag_v1.FlagData{
+					"flag": &flagv1.FlagData{
 						Percentage: testconvert.Float64(100),
 						True:       testconvert.Interface(true),
 						False:      testconvert.Interface(true),
@@ -73,13 +73,13 @@ func TestDiffCache_HasDiff(t *testing.T) {
 				Deleted: map[string]flag.Flag{},
 				Updated: map[string]model.DiffUpdated{
 					"flag": {
-						Before: &flag_v1.FlagData{
+						Before: &flagv1.FlagData{
 							Percentage: testconvert.Float64(100),
 							True:       testconvert.Interface(true),
 							False:      testconvert.Interface(true),
 							Default:    testconvert.Interface(true),
 						},
-						After: &flag_v1.FlagData{
+						After: &flagv1.FlagData{
 							Percentage: testconvert.Float64(100),
 							True:       testconvert.Interface(true),
 							False:      testconvert.Interface(true),
@@ -94,7 +94,7 @@ func TestDiffCache_HasDiff(t *testing.T) {
 			name: "all fields",
 			fields: fields{
 				Added: map[string]flag.Flag{
-					"flag": &flag_v1.FlagData{
+					"flag": &flagv1.FlagData{
 						Percentage: testconvert.Float64(100),
 						True:       testconvert.Interface(true),
 						False:      testconvert.Interface(true),
@@ -102,7 +102,7 @@ func TestDiffCache_HasDiff(t *testing.T) {
 					},
 				},
 				Deleted: map[string]flag.Flag{
-					"flag": &flag_v1.FlagData{
+					"flag": &flagv1.FlagData{
 						Percentage: testconvert.Float64(100),
 						True:       testconvert.Interface(true),
 						False:      testconvert.Interface(true),
@@ -111,13 +111,13 @@ func TestDiffCache_HasDiff(t *testing.T) {
 				},
 				Updated: map[string]model.DiffUpdated{
 					"flag": {
-						Before: &flag_v1.FlagData{
+						Before: &flagv1.FlagData{
 							Percentage: testconvert.Float64(100),
 							True:       testconvert.Interface(true),
 							False:      testconvert.Interface(true),
 							Default:    testconvert.Interface(true),
 						},
-						After: &flag_v1.FlagData{
+						After: &flagv1.FlagData{
 							Percentage: testconvert.Float64(100),
 							True:       testconvert.Interface(true),
 							False:      testconvert.Interface(true),

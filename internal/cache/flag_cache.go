@@ -1,10 +1,8 @@
 package cache
 
-import (
-	"github.com/thomaspoignant/go-feature-flag/internal/flag_v1"
-)
+import flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
 
-type FlagsCache map[string]flag_v1.FlagData
+type FlagsCache map[string]flagv1.FlagData
 
 func (fc FlagsCache) Copy() FlagsCache {
 	copyCache := make(FlagsCache)
