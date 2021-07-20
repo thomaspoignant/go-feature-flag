@@ -2,7 +2,7 @@ package model
 
 type VariationResult struct {
 	TrackEvents   bool
-	VariationType VariationType
+	VariationType string
 	Failed        bool
 	Version       float64
 }
