@@ -328,13 +328,25 @@ func (f *FlagData) GetDefaultVariation() string {
 func (f *FlagData) GetRawValues() map[string]string {
 	var rawValues = make(map[string]string)
 	rawValues["Rule"] = f.getRule()
-	rawValues["Rollout"] = fmt.Sprintf("%v", f.getRollout())
 	rawValues["Percentage"] = fmt.Sprintf("%.2f", f.getPercentage())
-	rawValues["True"] = fmt.Sprintf("%v", f.getTrue())
-	rawValues["False"] = fmt.Sprintf("%v", f.getFalse())
-	rawValues["Default"] = fmt.Sprintf("%v", f.getDefault())
+
+	if f.getRollout() == nil {
+		rawValues["Rollout"] = ""
+	} else {
+		rawValues["Rollout"] = fmt.Sprintf("%v", f.getRollout())
+	}
+	rawValues["True"] = convertNilEmpty(f.getTrue())
+	rawValues["False"] = convertNilEmpty(f.getFalse())
+	rawValues["Default"] = convertNilEmpty(f.getDefault())
 	rawValues["TrackEvents"] = fmt.Sprintf("%t", f.GetTrackEvents())
 	rawValues["Disable"] = fmt.Sprintf("%t", f.GetDisable())
 	rawValues["Version"] = fmt.Sprintf("%v", f.GetVersion())
 	return rawValues
+}
+
+func convertNilEmpty(input interface{}) string {
+	if input == nil {
+		return ""
+	}
+	return fmt.Sprintf("%v", input)
 }

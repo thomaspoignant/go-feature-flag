@@ -566,6 +566,7 @@ func TestFlag_Getter(t *testing.T) {
 		Percentage  float64
 		Rule        string
 		Version     float64
+		RawValues   map[string]string
 	}
 	tests := []struct {
 		name string
@@ -585,6 +586,17 @@ func TestFlag_Getter(t *testing.T) {
 				Percentage:  0,
 				Rule:        "",
 				Version:     0,
+				RawValues: map[string]string{
+					"Default":     "",
+					"Disable":     "false",
+					"False":       "",
+					"Percentage":  "0.00",
+					"Rollout":     "",
+					"Rule":        "",
+					"TrackEvents": "true",
+					"True":        "",
+					"Version":     "0",
+				},
 			},
 		},
 		{
@@ -608,6 +620,17 @@ func TestFlag_Getter(t *testing.T) {
 				Percentage:  90,
 				Rule:        "test",
 				Version:     127,
+				RawValues: map[string]string{
+					"Default":     "14.2",
+					"Disable":     "true",
+					"False":       "13.2",
+					"Percentage":  "90.00",
+					"Rollout":     "",
+					"Rule":        "test",
+					"TrackEvents": "false",
+					"True":        "12.2",
+					"Version":     "127",
+				},
 			},
 		},
 	}
@@ -620,6 +643,7 @@ func TestFlag_Getter(t *testing.T) {
 			assert.Equal(t, flagv1.VariationDefault, tt.flag.GetDefaultVariation())
 			fmt.Println(tt.want.Default, tt.flag.GetVariationValue(tt.flag.GetDefaultVariation()))
 			assert.Equal(t, tt.want.Default, tt.flag.GetVariationValue(tt.flag.GetDefaultVariation()))
+			assert.Equal(t, tt.want.RawValues, tt.flag.GetRawValues())
 		})
 	}
 }

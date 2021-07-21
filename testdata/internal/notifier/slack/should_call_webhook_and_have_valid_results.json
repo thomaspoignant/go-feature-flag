@@ -35,7 +35,7 @@
         },
         {
           "title": "Rollout",
-          "value": "experimentation: start:[2004-09-17T00:03:20Z] end:[2004-09-16T21:43:20Z] =\u003e \u003cnil\u003e",
+          "value": "experimentation: start:[2004-09-17T00:03:20Z] end:[2004-09-16T21:43:20Z] =\u003e \u003cempty\u003e",
           "short": false
         },
         {
@@ -84,11 +84,6 @@
         {
           "title": "Percentage",
           "value": "5.00",
-          "short": true
-        },
-        {
-          "title": "Rollout",
-          "value": "\u003cnil\u003e",
           "short": true
         },
         {

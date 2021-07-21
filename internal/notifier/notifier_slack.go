@@ -111,6 +111,14 @@ func convertUpdatedFlagsToSlackMessage(diff model.DiffCache) []attachment {
 		sortedKey := sortedKeys(before)
 		for _, bKey := range sortedKey {
 			if before[bKey] != after[bKey] {
+				// format output if empty
+				if before[bKey] == "" {
+					before[bKey] = "<empty>"
+				}
+				if after[bKey] == "" {
+					after[bKey] = "<empty>"
+				}
+
 				value := fmt.Sprintf("%v => %v", before[bKey], after[bKey])
 				short := len(value) < longSlackAttachment
 				attachment.Fields = append(attachment.Fields, Field{Title: bKey, Short: short, Value: value})
@@ -135,7 +143,7 @@ func convertAddedFlagsToSlackMessage(diff model.DiffCache) []attachment {
 		rawValues := value.GetRawValues()
 		sortedKey := sortedKeys(rawValues)
 		for _, bKey := range sortedKey {
-			if rawValues[bKey] != "\\u003cnil\\u003e" {
+			if rawValues[bKey] != "" {
 				value := fmt.Sprintf("%v", rawValues[bKey])
 				short := len(value) < longSlackAttachment
 				attachment.Fields = append(attachment.Fields, Field{Title: bKey, Short: short, Value: value})
