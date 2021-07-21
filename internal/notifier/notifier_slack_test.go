@@ -68,7 +68,6 @@ func TestSlackNotifier_Notify(t *testing.T) {
 					Updated: map[string]model.DiffUpdated{
 						"test-flag2": {
 							Before: &flagv1.FlagData{
-								Rule:        testconvert.String("key eq \"not-a-key\""),
 								Percentage:  testconvert.Float64(100),
 								True:        testconvert.Interface(true),
 								False:       testconvert.Interface(false),

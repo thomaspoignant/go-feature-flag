@@ -40,8 +40,8 @@
         },
         {
           "title": "Rule",
-          "value": "key eq \"not-a-key\" =\u003e key eq \"not-a-ke\"",
-          "short": false
+          "value": "<empty> =\u003e key eq \"not-a-ke\"",
+          "short": true
         },
         {
           "title": "TrackEvents",
