@@ -1,10 +1,14 @@
 package model
 
+import (
+	"github.com/thomaspoignant/go-feature-flag/internal/flag"
+)
+
 // DiffCache contains the changes made in the cache, to be able
 // to notify the user that something has changed (logs, webhook ...)
 type DiffCache struct {
-	Deleted map[string]Flag        `json:"deleted"`
-	Added   map[string]Flag        `json:"added"`
+	Deleted map[string]flag.Flag   `json:"deleted"`
+	Added   map[string]flag.Flag   `json:"added"`
 	Updated map[string]DiffUpdated `json:"updated"`
 }
 
@@ -14,6 +18,6 @@ func (d *DiffCache) HasDiff() bool {
 }
 
 type DiffUpdated struct {
-	Before Flag `json:"old_value"`
-	After  Flag `json:"new_value"`
+	Before flag.Flag `json:"old_value"`
+	After  flag.Flag `json:"new_value"`
 }

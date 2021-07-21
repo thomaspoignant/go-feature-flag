@@ -4,19 +4,19 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/thomaspoignant/go-feature-flag/internal/flag"
+	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
 	"gopkg.in/yaml.v3"
 	"strings"
 	"sync"
 
 	"github.com/pelletier/go-toml"
-
-	"github.com/thomaspoignant/go-feature-flag/internal/model"
 )
 
 type Cache interface {
 	UpdateCache(loadedFlags []byte, fileFormat string) error
 	Close()
-	GetFlag(key string) (model.Flag, error)
+	GetFlag(key string) (flag.Flag, error)
 	AllFlags() (FlagsCache, error)
 }
 
@@ -28,7 +28,7 @@ type cacheImpl struct {
 
 func New(notificationService Service) Cache {
 	return &cacheImpl{
-		flagsCache:          make(map[string]model.FlagData),
+		flagsCache:          make(map[string]flagv1.FlagData),
 		mutex:               sync.RWMutex{},
 		notificationService: notificationService,
 	}
@@ -72,20 +72,20 @@ func (c *cacheImpl) Close() {
 	}
 }
 
-func (c *cacheImpl) GetFlag(key string) (model.Flag, error) {
+func (c *cacheImpl) GetFlag(key string) (flag.Flag, error) {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
 	if c.flagsCache == nil {
-		return &model.FlagData{}, errors.New("impossible to read the flag before the initialisation")
+		return &flagv1.FlagData{}, errors.New("impossible to read the flag before the initialisation")
 	}
 
-	flag, ok := c.flagsCache[key]
+	f, ok := c.flagsCache[key]
 	if !ok {
-		return &model.FlagData{}, fmt.Errorf("flag [%v] does not exists", key)
+		return &flagv1.FlagData{}, fmt.Errorf("flag [%v] does not exists", key)
 	}
 
-	return &flag, nil
+	return &f, nil
 }
 
 func (c *cacheImpl) AllFlags() (FlagsCache, error) {

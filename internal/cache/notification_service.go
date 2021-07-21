@@ -2,6 +2,7 @@ package cache
 
 import (
 	"github.com/google/go-cmp/cmp"
+	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"sync"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/model"
@@ -43,8 +44,8 @@ func (c *notificationService) Close() {
 func (c *notificationService) getDifferences(
 	oldCache FlagsCache, newCache FlagsCache) model.DiffCache {
 	diff := model.DiffCache{
-		Deleted: map[string]model.Flag{},
-		Added:   map[string]model.Flag{},
+		Deleted: map[string]flag.Flag{},
+		Added:   map[string]flag.Flag{},
 		Updated: map[string]model.DiffUpdated{},
 	}
 	for key := range oldCache {
@@ -65,8 +66,8 @@ func (c *notificationService) getDifferences(
 
 	for key := range newCache {
 		if _, inOldCache := oldCache[key]; !inOldCache {
-			flag := newCache[key]
-			diff.Added[key] = &flag
+			f := newCache[key]
+			diff.Added[key] = &f
 		}
 	}
 	return diff

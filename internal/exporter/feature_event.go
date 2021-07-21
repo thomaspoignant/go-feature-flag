@@ -4,14 +4,13 @@ import (
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
-	"github.com/thomaspoignant/go-feature-flag/internal/model"
 )
 
 func NewFeatureEvent(
 	user ffuser.User,
 	flagKey string,
 	value interface{},
-	variation model.VariationType,
+	variation string,
 	failed bool,
 	version float64) FeatureEvent {
 	contextKind := "user"
@@ -54,7 +53,7 @@ type FeatureEvent struct {
 	// Variation  of the flag requested. Flag variation values can be "True", "False", "Default" or "SdkDefault"
 	// depending on which value was taken during flag evaluation. "SdkDefault" is used when an error is detected and the
 	// default value passed during the call to your variation is used.
-	Variation model.VariationType `json:"variation"`
+	Variation string `json:"variation"`
 
 	// Value of the feature flag returned by feature flag evaluation.
 	Value interface{} `json:"value"`

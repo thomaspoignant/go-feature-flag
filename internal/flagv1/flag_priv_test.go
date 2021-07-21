@@ -1,4 +1,4 @@
-package model
+package flagv1
 
 import (
 	"github.com/stretchr/testify/assert"
@@ -249,21 +249,21 @@ func TestFlag_getPercentage(t *testing.T) {
 			flag: FlagData{
 				Percentage: testconvert.Float64(100),
 			},
-			want: float64(100 * percentageMultiplier),
+			want: 100 * percentageMultiplier,
 		},
 		{
 			name: "No rollout strategy 0",
 			flag: FlagData{
 				Percentage: testconvert.Float64(0),
 			},
-			want: float64(0 * percentageMultiplier),
+			want: 0 * percentageMultiplier,
 		},
 		{
 			name: "No rollout strategy 50",
 			flag: FlagData{
 				Percentage: testconvert.Float64(50),
 			},
-			want: float64(50 * percentageMultiplier),
+			want: 50 * percentageMultiplier,
 		},
 		{
 			name: "Progressive rollout no explicit percentage",
@@ -277,7 +277,7 @@ func TestFlag_getPercentage(t *testing.T) {
 					},
 				},
 			},
-			want: float64(50 * percentageMultiplier),
+			want: 50 * percentageMultiplier,
 		},
 		{
 			name: "Progressive rollout explicit initial percentage",

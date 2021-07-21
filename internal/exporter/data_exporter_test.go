@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/internal/flagv1"
 	"io/ioutil"
 	"log"
 	"os"
@@ -12,7 +13,6 @@ import (
 
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
 	"github.com/thomaspoignant/go-feature-flag/internal/exporter"
-	"github.com/thomaspoignant/go-feature-flag/internal/model"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
 )
 
@@ -25,7 +25,7 @@ func TestDataExporterScheduler_flushWithTime(t *testing.T) {
 
 	inputEvents := []exporter.FeatureEvent{
 		exporter.NewFeatureEvent(ffuser.NewAnonymousUser("ABCD"), "random-key",
-			"YO", model.VariationDefault, false, 0),
+			"YO", flagv1.VariationDefault, false, 0),
 	}
 
 	for _, event := range inputEvents {
@@ -46,7 +46,7 @@ func TestDataExporterScheduler_flushWithNumberOfEvents(t *testing.T) {
 	var inputEvents []exporter.FeatureEvent
 	for i := 0; i <= 100; i++ {
 		inputEvents = append(inputEvents, exporter.NewFeatureEvent(ffuser.NewAnonymousUser("ABCD"),
-			"random-key", "YO", model.VariationDefault, false, 0))
+			"random-key", "YO", flagv1.VariationDefault, false, 0))
 	}
 	for _, event := range inputEvents {
 		dc.AddEvent(event)
@@ -64,7 +64,7 @@ func TestDataExporterScheduler_defaultFlush(t *testing.T) {
 	var inputEvents []exporter.FeatureEvent
 	for i := 0; i <= 100000; i++ {
 		inputEvents = append(inputEvents, exporter.NewFeatureEvent(ffuser.NewAnonymousUser("ABCD"),
-			"random-key", "YO", model.VariationDefault, false, 0))
+			"random-key", "YO", flagv1.VariationDefault, false, 0))
 	}
 	for _, event := range inputEvents {
 		dc.AddEvent(event)
@@ -88,7 +88,7 @@ func TestDataExporterScheduler_exporterReturnError(t *testing.T) {
 	var inputEvents []exporter.FeatureEvent
 	for i := 0; i <= 200; i++ {
 		inputEvents = append(inputEvents, exporter.NewFeatureEvent(ffuser.NewAnonymousUser("ABCD"),
-			"random-key", "YO", model.VariationDefault, false, 0))
+			"random-key", "YO", flagv1.VariationDefault, false, 0))
 	}
 	for _, event := range inputEvents {
 		dc.AddEvent(event)
@@ -109,7 +109,7 @@ func TestDataExporterScheduler_nonBulkExporter(t *testing.T) {
 	var inputEvents []exporter.FeatureEvent
 	for i := 0; i < 100; i++ {
 		inputEvents = append(inputEvents, exporter.NewFeatureEvent(ffuser.NewAnonymousUser("ABCD"),
-			"random-key", "YO", model.VariationDefault, false, 0))
+			"random-key", "YO", flagv1.VariationDefault, false, 0))
 	}
 	for _, event := range inputEvents {
 		dc.AddEvent(event)

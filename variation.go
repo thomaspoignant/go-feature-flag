@@ -2,18 +2,19 @@ package ffclient
 
 import (
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/internal/cache"
-
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
+	"github.com/thomaspoignant/go-feature-flag/internal/cache"
 	"github.com/thomaspoignant/go-feature-flag/internal/exporter"
+	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/internal/flagstate"
+	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
 	"github.com/thomaspoignant/go-feature-flag/internal/model"
 )
 
 const errorFlagNotAvailable = "flag %v is not present or disabled"
 const errorWrongVariation = "wrong variation used for flag %v"
 
-var offlineVariationResult = model.VariationResult{VariationType: model.VariationSDKDefault, Failed: true}
+var offlineVariationResult = model.VariationResult{VariationType: flagv1.VariationSDKDefault, Failed: true}
 
 // BoolVariation return the value of the flag in boolean.
 // An error is return if you don't have init the library before calling the function.
@@ -140,38 +141,17 @@ func (g *GoFeatureFlag) AllFlagsState(user ffuser.User) flagstate.AllFlags {
 	}
 
 	allFlags := flagstate.NewAllFlags()
-	for key, flag := range flags {
-		// True is not configured the flag is not valid
-		if flags[key].True == nil {
+	for key, currentFlag := range flags {
+		flagValue, varType := currentFlag.Value(key, user)
+		switch v := flagValue; v.(type) {
+		case int, float64, bool, string, []interface{}, map[string]interface{}:
+			allFlags.AddFlag(key, flagstate.NewFlagState(currentFlag.GetTrackEvents(), v, varType, false))
+
+		default:
+			defaultVariationName := currentFlag.GetDefaultVariation()
+			defaultVariationValue := currentFlag.GetVariationValue(defaultVariationName)
 			allFlags.AddFlag(
-				key, flagstate.NewFlagState(flag.GetTrackEvents(), flag.GetDefault(), model.VariationDefault, true))
-			continue
-		}
-
-		switch trueValue := *flags[key].True; trueValue.(type) {
-		case int:
-			f, _ := g.intVariation(key, user, 0)
-			allFlags.AddFlag(key, flagstate.NewFlagState(f.TrackEvents, f.Value, f.VariationType, f.Failed))
-
-		case float64:
-			f, _ := g.float64Variation(key, user, 0)
-			allFlags.AddFlag(key, flagstate.NewFlagState(f.TrackEvents, f.Value, f.VariationType, f.Failed))
-
-		case bool:
-			f, _ := g.boolVariation(key, user, false)
-			allFlags.AddFlag(key, flagstate.NewFlagState(f.TrackEvents, f.Value, f.VariationType, f.Failed))
-
-		case string:
-			f, _ := g.stringVariation(key, user, "")
-			allFlags.AddFlag(key, flagstate.NewFlagState(f.TrackEvents, f.Value, f.VariationType, f.Failed))
-
-		case []interface{}:
-			f, _ := g.jsonArrayVariation(key, user, nil)
-			allFlags.AddFlag(key, flagstate.NewFlagState(f.TrackEvents, f.Value, f.VariationType, f.Failed))
-
-		case map[string]interface{}:
-			f, _ := g.jsonVariation(key, user, nil)
-			allFlags.AddFlag(key, flagstate.NewFlagState(f.TrackEvents, f.Value, f.VariationType, f.Failed))
+				key, flagstate.NewFlagState(currentFlag.GetTrackEvents(), defaultVariationValue, defaultVariationName, true))
 		}
 	}
 	return allFlags
@@ -189,7 +169,7 @@ func (g *GoFeatureFlag) boolVariation(flagKey string, user ffuser.User, sdkDefau
 	if err != nil {
 		return model.BoolVarResult{
 			Value:           sdkDefaultValue,
-			VariationResult: computeVariationResult(flag, model.VariationSDKDefault, true),
+			VariationResult: computeVariationResult(flag, flagv1.VariationSDKDefault, true),
 		}, err
 	}
 
@@ -198,7 +178,7 @@ func (g *GoFeatureFlag) boolVariation(flagKey string, user ffuser.User, sdkDefau
 	if !ok {
 		return model.BoolVarResult{
 			Value:           sdkDefaultValue,
-			VariationResult: computeVariationResult(flag, model.VariationSDKDefault, true),
+			VariationResult: computeVariationResult(flag, flagv1.VariationSDKDefault, true),
 		}, fmt.Errorf(errorWrongVariation, flagKey)
 	}
 	return model.BoolVarResult{Value: res,
@@ -217,7 +197,7 @@ func (g *GoFeatureFlag) intVariation(flagKey string, user ffuser.User, sdkDefaul
 	flag, err := g.getFlagFromCache(flagKey)
 	if err != nil {
 		return model.IntVarResult{Value: sdkDefaultValue,
-			VariationResult: computeVariationResult(flag, model.VariationSDKDefault, true),
+			VariationResult: computeVariationResult(flag, flagv1.VariationSDKDefault, true),
 		}, err
 	}
 
@@ -234,7 +214,7 @@ func (g *GoFeatureFlag) intVariation(flagKey string, user ffuser.User, sdkDefaul
 
 		return model.IntVarResult{
 			Value:           sdkDefaultValue,
-			VariationResult: computeVariationResult(flag, model.VariationSDKDefault, true),
+			VariationResult: computeVariationResult(flag, flagv1.VariationSDKDefault, true),
 		}, fmt.Errorf(errorWrongVariation, flagKey)
 	}
 	return model.IntVarResult{Value: res,
@@ -254,7 +234,7 @@ func (g *GoFeatureFlag) float64Variation(flagKey string, user ffuser.User, sdkDe
 	if err != nil {
 		return model.Float64VarResult{
 			Value:           sdkDefaultValue,
-			VariationResult: computeVariationResult(flag, model.VariationSDKDefault, true),
+			VariationResult: computeVariationResult(flag, flagv1.VariationSDKDefault, true),
 		}, err
 	}
 
@@ -263,7 +243,7 @@ func (g *GoFeatureFlag) float64Variation(flagKey string, user ffuser.User, sdkDe
 	if !ok {
 		return model.Float64VarResult{
 			Value:           sdkDefaultValue,
-			VariationResult: computeVariationResult(flag, model.VariationSDKDefault, true),
+			VariationResult: computeVariationResult(flag, flagv1.VariationSDKDefault, true),
 		}, fmt.Errorf(errorWrongVariation, flagKey)
 	}
 	return model.Float64VarResult{
@@ -284,7 +264,7 @@ func (g *GoFeatureFlag) stringVariation(flagKey string, user ffuser.User, sdkDef
 	if err != nil {
 		return model.StringVarResult{
 			Value:           sdkDefaultValue,
-			VariationResult: computeVariationResult(flag, model.VariationSDKDefault, true),
+			VariationResult: computeVariationResult(flag, flagv1.VariationSDKDefault, true),
 		}, err
 	}
 
@@ -293,7 +273,7 @@ func (g *GoFeatureFlag) stringVariation(flagKey string, user ffuser.User, sdkDef
 	if !ok {
 		return model.StringVarResult{
 			Value:           sdkDefaultValue,
-			VariationResult: computeVariationResult(flag, model.VariationSDKDefault, true),
+			VariationResult: computeVariationResult(flag, flagv1.VariationSDKDefault, true),
 		}, fmt.Errorf(errorWrongVariation, flagKey)
 	}
 	return model.StringVarResult{
@@ -314,7 +294,7 @@ func (g *GoFeatureFlag) jsonArrayVariation(flagKey string, user ffuser.User, sdk
 	if err != nil {
 		return model.JSONArrayVarResult{
 			Value:           sdkDefaultValue,
-			VariationResult: computeVariationResult(flag, model.VariationSDKDefault, true),
+			VariationResult: computeVariationResult(flag, flagv1.VariationSDKDefault, true),
 		}, err
 	}
 
@@ -323,7 +303,7 @@ func (g *GoFeatureFlag) jsonArrayVariation(flagKey string, user ffuser.User, sdk
 	if !ok {
 		return model.JSONArrayVarResult{
 			Value:           sdkDefaultValue,
-			VariationResult: computeVariationResult(flag, model.VariationSDKDefault, true),
+			VariationResult: computeVariationResult(flag, flagv1.VariationSDKDefault, true),
 		}, fmt.Errorf(errorWrongVariation, flagKey)
 	}
 	return model.JSONArrayVarResult{
@@ -344,7 +324,7 @@ func (g *GoFeatureFlag) jsonVariation(flagKey string, user ffuser.User, sdkDefau
 	if err != nil {
 		return model.JSONVarResult{
 			Value:           sdkDefaultValue,
-			VariationResult: computeVariationResult(flag, model.VariationSDKDefault, true),
+			VariationResult: computeVariationResult(flag, flagv1.VariationSDKDefault, true),
 		}, err
 	}
 
@@ -353,7 +333,7 @@ func (g *GoFeatureFlag) jsonVariation(flagKey string, user ffuser.User, sdkDefau
 	if !ok {
 		return model.JSONVarResult{
 			Value:           sdkDefaultValue,
-			VariationResult: computeVariationResult(flag, model.VariationSDKDefault, true),
+			VariationResult: computeVariationResult(flag, flagv1.VariationSDKDefault, true),
 		}, fmt.Errorf(errorWrongVariation, flagKey)
 	}
 	return model.JSONVarResult{
@@ -363,7 +343,7 @@ func (g *GoFeatureFlag) jsonVariation(flagKey string, user ffuser.User, sdkDefau
 }
 
 // computeVariationResult is creating a model.VariationResult
-func computeVariationResult(flag model.Flag, variationType model.VariationType, failed bool) model.VariationResult {
+func computeVariationResult(flag flag.Flag, variationType string, failed bool) model.VariationResult {
 	varResult := model.VariationResult{
 		VariationType: variationType,
 		Failed:        failed,
@@ -396,7 +376,7 @@ func (g *GoFeatureFlag) notifyVariation(
 
 // getFlagFromCache try to get the flag from the cache.
 // It returns an error if the cache is not init or if the flag is not present or disabled.
-func (g *GoFeatureFlag) getFlagFromCache(flagKey string) (model.Flag, error) {
+func (g *GoFeatureFlag) getFlagFromCache(flagKey string) (flag.Flag, error) {
 	flag, err := g.cache.GetFlag(flagKey)
 	if err != nil || flag.GetDisable() {
 		return flag, fmt.Errorf(errorFlagNotAvailable, flagKey)

@@ -1,88 +1,25 @@
-package model
+package flagv1
 
 import (
 	"fmt"
 	"github.com/nikunjy/rules/parser"
-	"hash/fnv"
+	"github.com/thomaspoignant/go-feature-flag/ffuser"
+	"github.com/thomaspoignant/go-feature-flag/internal/utils"
 	"math"
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/thomaspoignant/go-feature-flag/ffuser"
-)
-
-// VariationType enum which describe the decision taken
-type VariationType string
-
-const (
-	// VariationTrue is a constant to explain that we are using the "True" variation
-	VariationTrue VariationType = "True"
-
-	// VariationFalse is a constant to explain that we are using the "False" variation
-	VariationFalse VariationType = "False"
-
-	// VariationDefault is a constant to explain that we are using the "Default" variation
-	VariationDefault VariationType = "Default"
-
-	// VariationSDKDefault is a constant to explain that we are using the default from the SDK variation
-	VariationSDKDefault VariationType = "SdkDefault"
 )
 
 // percentageMultiplier is the multiplier used to have a bigger range of possibility.
-const percentageMultiplier = 1000
-
-type Flag interface {
-	// Value is returning the Value associate to the flag (True / False / Default ) based
-	// if the flag apply to the user or not.
-	Value(flagName string, user ffuser.User) (interface{}, VariationType)
-
-	// String display correctly a flag with the right formatting
-	String() string
-
-	// GetRule is the getter of the field Rule
-	// Default: empty string
-	GetRule() string
-
-	// GetPercentage is the getter of the field Rule
-	// Default: 0.0
-	GetPercentage() float64
-
-	// GetTrue is the getter of the field True
-	// Default: nil
-	GetTrue() interface{}
-
-	// GetFalse is the getter of the field False
-	// Default: nil
-	GetFalse() interface{}
-
-	// GetDefault is the getter of the field Default
-	// Default: nil
-	GetDefault() interface{}
-
-	// GetTrackEvents is the getter of the field TrackEvents
-	// Default: true
-	GetTrackEvents() bool
-
-	// GetDisable is the getter for the field Disable
-	// Default: false
-	GetDisable() bool
-
-	// GetRollout is the getter for the field Rollout
-	// Default: nil
-	GetRollout() *Rollout
-
-	// GetVersion is the getter for the field Version
-	// Default: 0.0
-	GetVersion() float64
-}
+const percentageMultiplier = float64(1000)
 
 // FlagData describe the fields of a flag.
 type FlagData struct {
 	// Rule is the query use to select on which user the flag should apply.
 	// Rule format is based on the nikunjy/rules module.
 	// If no rule set, the flag apply to all users (percentage still apply).
-	Rule *string `json:"rule,omitempty" yaml:"rule,omitempty" toml:"rule,omitempty" slack_short:"false"`
+	Rule *string `json:"rule,omitempty" yaml:"rule,omitempty" toml:"rule,omitempty"`
 
 	// Percentage of the users affect by the flag.
 	// Default value is 0
@@ -108,12 +45,12 @@ type FlagData struct {
 
 	// Rollout is the object to configure how the flag is rollout.
 	// You have different rollout strategy available but only one is used at a time.
-	Rollout *Rollout `json:"rollout,omitempty" yaml:"rollout,omitempty" toml:"rollout,omitempty" slack_short:"false"`
+	Rollout *Rollout `json:"rollout,omitempty" yaml:"rollout,omitempty" toml:"rollout,omitempty"`
 
 	// Version (optional) This field contains the version of the flag.
 	// The version is manually managed when you configure your flags and it is used to display the information
 	// in the notifications and data collection.
-	Version *float64 `json:"version,omitempty" yaml:"version,omitempty" toml:"version,omitempty" slack_short:"false"`
+	Version *float64 `json:"version,omitempty" yaml:"version,omitempty" toml:"version,omitempty"`
 }
 
 // Value is returning the Value associate to the flag (True / False / Default ) based
@@ -122,20 +59,20 @@ func (f *FlagData) Value(flagName string, user ffuser.User) (interface{}, Variat
 	f.updateFlagStage()
 	if f.isExperimentationOver() {
 		// if we have an experimentation that has not started or that is finished we use the default value.
-		return f.GetDefault(), VariationDefault
+		return f.getDefault(), VariationDefault
 	}
 
 	if f.evaluateRule(user) {
 		if f.isInPercentage(flagName, user) {
 			// Rule applied and user in the cohort.
-			return f.GetTrue(), VariationTrue
+			return f.getTrue(), VariationTrue
 		}
 		// Rule applied and user not in the cohort.
-		return f.GetFalse(), VariationFalse
+		return f.getFalse(), VariationFalse
 	}
 
 	// Default value is used if the rule does not applied to the user.
-	return f.GetDefault(), VariationDefault
+	return f.getDefault(), VariationDefault
 }
 
 func (f *FlagData) isExperimentationOver() bool {
@@ -159,7 +96,7 @@ func (f *FlagData) isInPercentage(flagName string, user ffuser.User) bool {
 		return true
 	}
 
-	hashID := Hash(flagName+user.GetKey()) % maxPercentage
+	hashID := utils.Hash(flagName+user.GetKey()) % maxPercentage
 	return hashID < uint32(percentage)
 }
 
@@ -171,24 +108,24 @@ func (f *FlagData) evaluateRule(user ffuser.User) bool {
 	}
 
 	// No rule means that all user can be impacted.
-	if f.GetRule() == "" {
+	if f.getRule() == "" {
 		return true
 	}
 
 	// Evaluate the rule on the user.
-	return parser.Evaluate(f.GetRule(), userToMap(user))
+	return parser.Evaluate(f.getRule(), utils.UserToMap(user))
 }
 
 // string display correctly a flag
 func (f FlagData) String() string {
 	toString := []string{}
-	toString = append(toString, fmt.Sprintf("percentage=%d%%", int64(math.Round(f.GetPercentage()))))
-	if f.GetRule() != "" {
-		toString = append(toString, fmt.Sprintf("rule=\"%s\"", f.GetRule()))
+	toString = append(toString, fmt.Sprintf("percentage=%d%%", int64(math.Round(f.getPercentage()))))
+	if f.getRule() != "" {
+		toString = append(toString, fmt.Sprintf("rule=\"%s\"", f.getRule()))
 	}
-	toString = append(toString, fmt.Sprintf("true=\"%v\"", f.GetTrue()))
-	toString = append(toString, fmt.Sprintf("false=\"%v\"", f.GetFalse()))
-	toString = append(toString, fmt.Sprintf("default=\"%v\"", f.GetDefault()))
+	toString = append(toString, fmt.Sprintf("true=\"%v\"", f.getTrue()))
+	toString = append(toString, fmt.Sprintf("false=\"%v\"", f.getFalse()))
+	toString = append(toString, fmt.Sprintf("default=\"%v\"", f.getDefault()))
 	toString = append(toString, fmt.Sprintf("disable=\"%v\"", f.GetDisable()))
 
 	if f.TrackEvents != nil {
@@ -202,35 +139,10 @@ func (f FlagData) String() string {
 	return strings.Join(toString, ", ")
 }
 
-// Hash is taking a string and convert.
-func Hash(s string) uint32 {
-	h := fnv.New32a()
-	_, err := h.Write([]byte(s))
-	// if we have a problem to get the hash we return 0
-	if err != nil {
-		return 0
-	}
-	return h.Sum32()
-}
-
-// userToMap convert the user to a MAP to use the query on it.
-func userToMap(u ffuser.User) map[string]interface{} {
-	// We don't have a json copy of the user.
-	userCopy := make(map[string]interface{})
-
-	// Duplicate the map to keep User un-mutable
-	for key, value := range u.GetCustom() {
-		userCopy[key] = value
-	}
-	userCopy["anonymous"] = u.IsAnonymous()
-	userCopy["key"] = u.GetKey()
-	return userCopy
-}
-
 // getActualPercentage return the the actual percentage of the flag.
 // the result value is the version with the percentageMultiplier.
 func (f *FlagData) getActualPercentage() float64 {
-	flagPercentage := f.GetPercentage() * percentageMultiplier
+	flagPercentage := f.getPercentage() * percentageMultiplier
 	if f.Rollout == nil || f.Rollout.Progressive == nil {
 		return flagPercentage
 	}
@@ -327,7 +239,7 @@ func (f *FlagData) mergeChanges(stepFlag ScheduledStep) {
 }
 
 // GetRule is the getter of the field Rule
-func (f *FlagData) GetRule() string {
+func (f *FlagData) getRule() string {
 	if f.Rule == nil {
 		return ""
 	}
@@ -335,7 +247,7 @@ func (f *FlagData) GetRule() string {
 }
 
 // GetPercentage is the getter of the field Percentage
-func (f *FlagData) GetPercentage() float64 {
+func (f *FlagData) getPercentage() float64 {
 	if f.Percentage == nil {
 		return 0
 	}
@@ -343,15 +255,15 @@ func (f *FlagData) GetPercentage() float64 {
 }
 
 // GetTrue is the getter of the field True
-func (f *FlagData) GetTrue() interface{} {
+func (f *FlagData) getTrue() interface{} {
 	if f.True == nil {
 		return nil
 	}
 	return *f.True
 }
 
-// GetFalse is the getter of the field False
-func (f *FlagData) GetFalse() interface{} {
+// f.getFalse is the getter of the field False
+func (f *FlagData) getFalse() interface{} {
 	if f.False == nil {
 		return nil
 	}
@@ -359,7 +271,7 @@ func (f *FlagData) GetFalse() interface{} {
 }
 
 // GetDefault is the getter of the field Default
-func (f *FlagData) GetDefault() interface{} {
+func (f *FlagData) getDefault() interface{} {
 	if f.Default == nil {
 		return nil
 	}
@@ -383,7 +295,7 @@ func (f *FlagData) GetDisable() bool {
 }
 
 // GetRollout is the getter for the field Rollout
-func (f *FlagData) GetRollout() *Rollout {
+func (f *FlagData) getRollout() *Rollout {
 	return f.Rollout
 }
 
@@ -393,4 +305,48 @@ func (f *FlagData) GetVersion() float64 {
 		return 0
 	}
 	return *f.Version
+}
+
+// GetVariationValue return the value of variation from his name
+func (f *FlagData) GetVariationValue(variationName string) interface{} {
+	switch variationName {
+	case VariationDefault:
+		return f.getDefault()
+	case VariationTrue:
+		return f.getTrue()
+	case VariationFalse:
+		return f.getFalse()
+	default:
+		return nil
+	}
+}
+
+func (f *FlagData) GetDefaultVariation() string {
+	return VariationDefault
+}
+
+func (f *FlagData) GetRawValues() map[string]string {
+	var rawValues = make(map[string]string)
+	rawValues["Rule"] = f.getRule()
+	rawValues["Percentage"] = fmt.Sprintf("%.2f", f.getPercentage())
+
+	if f.getRollout() == nil {
+		rawValues["Rollout"] = ""
+	} else {
+		rawValues["Rollout"] = fmt.Sprintf("%v", f.getRollout())
+	}
+	rawValues["True"] = convertNilEmpty(f.getTrue())
+	rawValues["False"] = convertNilEmpty(f.getFalse())
+	rawValues["Default"] = convertNilEmpty(f.getDefault())
+	rawValues["TrackEvents"] = fmt.Sprintf("%t", f.GetTrackEvents())
+	rawValues["Disable"] = fmt.Sprintf("%t", f.GetDisable())
+	rawValues["Version"] = fmt.Sprintf("%v", f.GetVersion())
+	return rawValues
+}
+
+func convertNilEmpty(input interface{}) string {
+	if input == nil {
+		return ""
+	}
+	return fmt.Sprintf("%v", input)
 }

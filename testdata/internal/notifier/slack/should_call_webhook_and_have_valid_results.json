@@ -14,33 +14,8 @@
       "title": "✏️ Flag \"test-flag2\" updated",
       "fields": [
         {
-          "title": "Rule",
-          "value": "key eq \"not-a-key\" =\u003e key eq \"not-a-ke\"",
-          "short": false
-        },
-        {
-          "title": "Percentage",
-          "value": "100 =\u003e 80",
-          "short": true
-        },
-        {
-          "title": "True",
-          "value": "true =\u003e strTrue",
-          "short": true
-        },
-        {
-          "title": "False",
-          "value": "false =\u003e strFalse",
-          "short": true
-        },
-        {
           "title": "Default",
           "value": "false =\u003e strDefault",
-          "short": true
-        },
-        {
-          "title": "TrackEvents",
-          "value": "true =\u003e false",
           "short": true
         },
         {
@@ -49,9 +24,34 @@
           "short": true
         },
         {
+          "title": "False",
+          "value": "false =\u003e strFalse",
+          "short": true
+        },
+        {
+          "title": "Percentage",
+          "value": "100.00 =\u003e 80.00",
+          "short": true
+        },
+        {
           "title": "Rollout",
-          "value": "experimentation: start:[2004-09-17T00:03:20Z] end:[2004-09-16T21:43:20Z] => <nil>",
+          "value": "experimentation: start:[2004-09-17T00:03:20Z] end:[2004-09-16T21:43:20Z] =\u003e \u003cempty\u003e",
           "short": false
+        },
+        {
+          "title": "Rule",
+          "value": "<empty> =\u003e key eq \"not-a-ke\"",
+          "short": true
+        },
+        {
+          "title": "TrackEvents",
+          "value": "true =\u003e false",
+          "short": true
+        },
+        {
+          "title": "True",
+          "value": "true =\u003e strTrue",
+          "short": true
         },
         {
           "title": "Version",
@@ -67,18 +67,13 @@
       "title": "🆕 Flag \"test-flag3\" created",
       "fields": [
         {
-          "title": "Rule",
-          "value": "key eq \"random-key\"",
-          "short": false
-        },
-        {
-          "title": "Percentage",
-          "value": "5",
+          "title": "Default",
+          "value": "default",
           "short": true
         },
         {
-          "title": "True",
-          "value": "test",
+          "title": "Disable",
+          "value": "false",
           "short": true
         },
         {
@@ -87,8 +82,13 @@
           "short": true
         },
         {
-          "title": "Default",
-          "value": "default",
+          "title": "Percentage",
+          "value": "5.00",
+          "short": true
+        },
+        {
+          "title": "Rule",
+          "value": "key eq \"random-key\"",
           "short": true
         },
         {
@@ -97,8 +97,8 @@
           "short": true
         },
         {
-          "title": "Disable",
-          "value": "false",
+          "title": "True",
+          "value": "test",
           "short": true
         },
         {

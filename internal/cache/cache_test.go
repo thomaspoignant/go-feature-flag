@@ -3,10 +3,10 @@ package cache_test
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
+	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 	"testing"
 
-	"github.com/thomaspoignant/go-feature-flag/internal/model"
 	"github.com/thomaspoignant/go-feature-flag/internal/notifier"
 )
 
@@ -58,7 +58,7 @@ disable = false`)
 	tests := []struct {
 		name       string
 		args       args
-		expected   map[string]model.FlagData
+		expected   map[string]flagv1.FlagData
 		wantErr    bool
 		flagFormat string
 	}{
@@ -68,7 +68,7 @@ disable = false`)
 			args: args{
 				loadedFlags: yamlFile,
 			},
-			expected: map[string]model.FlagData{
+			expected: map[string]flagv1.FlagData{
 				"test-flag": {
 					Disable:     nil,
 					Rule:        testconvert.String("key eq \"random-key\""),
@@ -101,7 +101,7 @@ disable = false`)
 				loadedFlags: jsonFile,
 			},
 			flagFormat: "json",
-			expected: map[string]model.FlagData{
+			expected: map[string]flagv1.FlagData{
 				"test-flag": {
 					Rule:       testconvert.String("key eq \"random-key\""),
 					Percentage: testconvert.Float64(100),
@@ -134,13 +134,14 @@ disable = false`)
 				loadedFlags: tomlFile,
 			},
 			flagFormat: "toml",
-			expected: map[string]model.FlagData{
+			expected: map[string]flagv1.FlagData{
 				"test-flag": {
 					Rule:       testconvert.String("key eq \"random-key\""),
 					Percentage: testconvert.Float64(100),
 					True:       testconvert.Interface(true),
 					False:      testconvert.Interface(false),
 					Default:    testconvert.Interface(false),
+					Disable:    testconvert.Bool(false),
 				},
 			},
 			wantErr: false,
@@ -173,14 +174,7 @@ disable = false`),
 			// If no error we compare with expected
 			for key, expected := range tt.expected {
 				got, _ := fCache.GetFlag(key)
-				assert.Equal(t, expected.GetRule(), got.GetRule())
-				assert.Equal(t, expected.GetPercentage(), got.GetPercentage())
-				assert.Equal(t, expected.GetTrue(), got.GetTrue())
-				assert.Equal(t, expected.GetFalse(), got.GetFalse())
-				assert.Equal(t, expected.GetDefault(), got.GetDefault())
-				assert.Equal(t, expected.GetTrackEvents(), got.GetTrackEvents())
-				assert.Equal(t, expected.GetDisable(), got.GetDisable())
-				assert.Equal(t, expected.GetRollout(), got.GetRollout())
+				assert.Equal(t, &expected, got) // nolint
 			}
 			fCache.Close()
 		})
@@ -203,7 +197,7 @@ func Test_AllFlags(t *testing.T) {
 	tests := []struct {
 		name       string
 		args       args
-		expected   map[string]model.FlagData
+		expected   map[string]flagv1.FlagData
 		wantErr    bool
 		flagFormat string
 	}{
@@ -213,7 +207,7 @@ func Test_AllFlags(t *testing.T) {
 			args: args{
 				loadedFlags: yamlFile,
 			},
-			expected: map[string]model.FlagData{
+			expected: map[string]flagv1.FlagData{
 				"test-flag": {
 					Disable:     nil,
 					Rule:        testconvert.String("key eq \"random-key\""),
@@ -246,7 +240,7 @@ test-flag2:
   trackEvents: false
 `),
 			},
-			expected: map[string]model.FlagData{
+			expected: map[string]flagv1.FlagData{
 				"test-flag": {
 					Disable:     nil,
 					Rule:        testconvert.String("key eq \"random-key\""),
@@ -273,7 +267,7 @@ test-flag2:
 			args: args{
 				loadedFlags: []byte(``),
 			},
-			expected: map[string]model.FlagData{},
+			expected: map[string]flagv1.FlagData{},
 			wantErr:  true,
 		},
 	}
@@ -293,14 +287,7 @@ test-flag2:
 			// If no error we compare with expected
 			for key, expected := range tt.expected {
 				got := allFlags[key]
-				assert.Equal(t, expected.GetRule(), got.GetRule())
-				assert.Equal(t, expected.GetPercentage(), got.GetPercentage())
-				assert.Equal(t, expected.GetTrue(), got.GetTrue())
-				assert.Equal(t, expected.GetFalse(), got.GetFalse())
-				assert.Equal(t, expected.GetDefault(), got.GetDefault())
-				assert.Equal(t, expected.GetTrackEvents(), got.GetTrackEvents())
-				assert.Equal(t, expected.GetDisable(), got.GetDisable())
-				assert.Equal(t, expected.GetRollout(), got.GetRollout())
+				assert.Equal(t, expected, got)
 			}
 			fCache.Close()
 		})

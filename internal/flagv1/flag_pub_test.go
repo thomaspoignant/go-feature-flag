@@ -1,12 +1,14 @@
-package model_test
+package flagv1_test
 
 import (
+	"fmt"
 	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/internal/flag"
+	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
 	"testing"
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
-	"github.com/thomaspoignant/go-feature-flag/internal/model"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 )
 
@@ -18,7 +20,7 @@ func TestFlag_value(t *testing.T) {
 		True       interface{}
 		False      interface{}
 		Default    interface{}
-		Rollout    model.Rollout
+		Rollout    flagv1.Rollout
 	}
 	type args struct {
 		flagName string
@@ -26,7 +28,7 @@ func TestFlag_value(t *testing.T) {
 	}
 	type want struct {
 		value         interface{}
-		variationType model.VariationType
+		variationType flagv1.VariationType
 	}
 	tests := []struct {
 		name   string
@@ -48,7 +50,7 @@ func TestFlag_value(t *testing.T) {
 			},
 			want: want{
 				value:         "default",
-				variationType: model.VariationDefault,
+				variationType: flagv1.VariationDefault,
 			},
 		},
 		{
@@ -66,7 +68,7 @@ func TestFlag_value(t *testing.T) {
 			},
 			want: want{
 				value:         "true",
-				variationType: model.VariationTrue,
+				variationType: flagv1.VariationTrue,
 			},
 		},
 		{
@@ -77,8 +79,8 @@ func TestFlag_value(t *testing.T) {
 				Default:    "default",
 				Rule:       "key == \"7e50ee61-06ad-4bb0-9034-38ad7cdea9f5\"",
 				Percentage: 10,
-				Rollout: model.Rollout{
-					Experimentation: &model.Experimentation{
+				Rollout: flagv1.Rollout{
+					Experimentation: &flagv1.Experimentation{
 						Start: testconvert.Time(time.Now().Add(-1 * time.Minute)),
 						End:   nil,
 					},
@@ -90,7 +92,7 @@ func TestFlag_value(t *testing.T) {
 			},
 			want: want{
 				value:         "true",
-				variationType: model.VariationTrue,
+				variationType: flagv1.VariationTrue,
 			},
 		},
 		{
@@ -101,8 +103,8 @@ func TestFlag_value(t *testing.T) {
 				Default:    "default",
 				Rule:       "key == \"user66\"",
 				Percentage: 10,
-				Rollout: model.Rollout{
-					Experimentation: &model.Experimentation{
+				Rollout: flagv1.Rollout{
+					Experimentation: &flagv1.Experimentation{
 						Start: testconvert.Time(time.Now().Add(1 * time.Minute)),
 						End:   nil,
 					},
@@ -114,7 +116,7 @@ func TestFlag_value(t *testing.T) {
 			},
 			want: want{
 				value:         "default",
-				variationType: model.VariationDefault,
+				variationType: flagv1.VariationDefault,
 			},
 		},
 		{
@@ -125,8 +127,8 @@ func TestFlag_value(t *testing.T) {
 				Default:    "default",
 				Rule:       "key == \"7e50ee61-06ad-4bb0-9034-38ad7cdea9f5\"",
 				Percentage: 10,
-				Rollout: model.Rollout{
-					Experimentation: &model.Experimentation{
+				Rollout: flagv1.Rollout{
+					Experimentation: &flagv1.Experimentation{
 						Start: testconvert.Time(time.Now().Add(-1 * time.Minute)),
 						End:   testconvert.Time(time.Now().Add(1 * time.Minute)),
 					},
@@ -138,7 +140,7 @@ func TestFlag_value(t *testing.T) {
 			},
 			want: want{
 				value:         "true",
-				variationType: model.VariationTrue,
+				variationType: flagv1.VariationTrue,
 			},
 		},
 		{
@@ -149,8 +151,8 @@ func TestFlag_value(t *testing.T) {
 				Default:    "default",
 				Rule:       "key == \"user66\"",
 				Percentage: 10,
-				Rollout: model.Rollout{
-					Experimentation: &model.Experimentation{
+				Rollout: flagv1.Rollout{
+					Experimentation: &flagv1.Experimentation{
 						Start: testconvert.Time(time.Now().Add(1 * time.Minute)),
 						End:   testconvert.Time(time.Now().Add(2 * time.Minute)),
 					},
@@ -162,7 +164,7 @@ func TestFlag_value(t *testing.T) {
 			},
 			want: want{
 				value:         "default",
-				variationType: model.VariationDefault,
+				variationType: flagv1.VariationDefault,
 			},
 		},
 		{
@@ -173,8 +175,8 @@ func TestFlag_value(t *testing.T) {
 				Default:    "default",
 				Rule:       "key == \"user66\"",
 				Percentage: 10,
-				Rollout: model.Rollout{
-					Experimentation: &model.Experimentation{
+				Rollout: flagv1.Rollout{
+					Experimentation: &flagv1.Experimentation{
 						Start: testconvert.Time(time.Now().Add(-2 * time.Minute)),
 						End:   testconvert.Time(time.Now().Add(-1 * time.Minute)),
 					},
@@ -186,7 +188,7 @@ func TestFlag_value(t *testing.T) {
 			},
 			want: want{
 				value:         "default",
-				variationType: model.VariationDefault,
+				variationType: flagv1.VariationDefault,
 			},
 		},
 		{
@@ -197,8 +199,8 @@ func TestFlag_value(t *testing.T) {
 				Default:    "default",
 				Rule:       "key == \"user66\"",
 				Percentage: 10,
-				Rollout: model.Rollout{
-					Experimentation: &model.Experimentation{
+				Rollout: flagv1.Rollout{
+					Experimentation: &flagv1.Experimentation{
 						Start: nil,
 						End:   testconvert.Time(time.Now().Add(-1 * time.Minute)),
 					},
@@ -210,7 +212,7 @@ func TestFlag_value(t *testing.T) {
 			},
 			want: want{
 				value:         "default",
-				variationType: model.VariationDefault,
+				variationType: flagv1.VariationDefault,
 			},
 		},
 		{
@@ -221,8 +223,8 @@ func TestFlag_value(t *testing.T) {
 				Default:    "default",
 				Rule:       "key == \"7e50ee61-06ad-4bb0-9034-38ad7cdea9f5\"",
 				Percentage: 10,
-				Rollout: model.Rollout{
-					Experimentation: &model.Experimentation{
+				Rollout: flagv1.Rollout{
+					Experimentation: &flagv1.Experimentation{
 						Start: nil,
 						End:   testconvert.Time(time.Now().Add(1 * time.Minute)),
 					},
@@ -234,7 +236,7 @@ func TestFlag_value(t *testing.T) {
 			},
 			want: want{
 				value:         "true",
-				variationType: model.VariationTrue,
+				variationType: flagv1.VariationTrue,
 			},
 		},
 		{
@@ -245,8 +247,8 @@ func TestFlag_value(t *testing.T) {
 				Default:    "default",
 				Rule:       "key == \"7e50ee61-06ad-4bb0-9034-38ad7cdea9f5\"",
 				Percentage: 10,
-				Rollout: model.Rollout{
-					Experimentation: &model.Experimentation{
+				Rollout: flagv1.Rollout{
+					Experimentation: &flagv1.Experimentation{
 						Start: nil,
 						End:   nil,
 					},
@@ -258,7 +260,7 @@ func TestFlag_value(t *testing.T) {
 			},
 			want: want{
 				value:         "true",
-				variationType: model.VariationTrue,
+				variationType: flagv1.VariationTrue,
 			},
 		},
 		{
@@ -269,8 +271,8 @@ func TestFlag_value(t *testing.T) {
 				Default:    "default",
 				Rule:       "key == \"user66\"",
 				Percentage: 10,
-				Rollout: model.Rollout{
-					Experimentation: &model.Experimentation{
+				Rollout: flagv1.Rollout{
+					Experimentation: &flagv1.Experimentation{
 						Start: testconvert.Time(time.Now().Add(1 * time.Minute)),
 						End:   testconvert.Time(time.Now().Add(-1 * time.Minute)),
 					},
@@ -282,7 +284,7 @@ func TestFlag_value(t *testing.T) {
 			},
 			want: want{
 				value:         "default",
-				variationType: model.VariationDefault,
+				variationType: flagv1.VariationDefault,
 			},
 		},
 		{
@@ -300,7 +302,7 @@ func TestFlag_value(t *testing.T) {
 			},
 			want: want{
 				value:         "default",
-				variationType: model.VariationDefault,
+				variationType: flagv1.VariationDefault,
 			},
 		},
 		{
@@ -318,13 +320,13 @@ func TestFlag_value(t *testing.T) {
 			},
 			want: want{
 				value:         "false",
-				variationType: model.VariationFalse,
+				variationType: flagv1.VariationFalse,
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			f := &model.FlagData{
+			f := &flagv1.FlagData{
 				Disable:    testconvert.Bool(tt.fields.Disable),
 				Rule:       testconvert.String(tt.fields.Rule),
 				Percentage: testconvert.Float64(tt.fields.Percentage),
@@ -342,13 +344,13 @@ func TestFlag_value(t *testing.T) {
 }
 
 func TestFlag_ProgressiveRollout(t *testing.T) {
-	f := &model.FlagData{
+	f := &flagv1.FlagData{
 		Percentage: testconvert.Float64(0),
 		True:       testconvert.Interface("True"),
 		False:      testconvert.Interface("False"),
 		Default:    testconvert.Interface("Default"),
-		Rollout: &model.Rollout{Progressive: &model.Progressive{
-			ReleaseRamp: model.ProgressiveReleaseRamp{
+		Rollout: &flagv1.Rollout{Progressive: &flagv1.Progressive{
+			ReleaseRamp: flagv1.ProgressiveReleaseRamp{
 				Start: testconvert.Time(time.Now().Add(1 * time.Second)),
 				End:   testconvert.Time(time.Now().Add(2 * time.Second)),
 			},
@@ -360,41 +362,41 @@ func TestFlag_ProgressiveRollout(t *testing.T) {
 
 	// We evaluate the same flag multiple time overtime.
 	v, _ := f.Value(flagName, user)
-	assert.Equal(t, f.GetFalse(), v)
+	assert.Equal(t, f.GetVariationValue(flagv1.VariationFalse), v)
 
 	time.Sleep(1 * time.Second)
 	v2, _ := f.Value(flagName, user)
-	assert.Equal(t, f.GetFalse(), v2)
+	assert.Equal(t, f.GetVariationValue(flagv1.VariationFalse), v2)
 
 	time.Sleep(1 * time.Second)
 	v3, _ := f.Value(flagName, user)
-	assert.Equal(t, f.GetTrue(), v3)
+	assert.Equal(t, f.GetVariationValue(flagv1.VariationTrue), v3)
 }
 
 func TestFlag_ScheduledRollout(t *testing.T) {
-	f := &model.FlagData{
+	f := &flagv1.FlagData{
 		Rule:       testconvert.String("key eq \"test\""),
 		Percentage: testconvert.Float64(0),
 		True:       testconvert.Interface("True"),
 		False:      testconvert.Interface("False"),
 		Default:    testconvert.Interface("Default"),
-		Rollout: &model.Rollout{
-			Scheduled: &model.ScheduledRollout{
-				Steps: []model.ScheduledStep{
+		Rollout: &flagv1.Rollout{
+			Scheduled: &flagv1.ScheduledRollout{
+				Steps: []flagv1.ScheduledStep{
 					{
-						FlagData: model.FlagData{
+						FlagData: flagv1.FlagData{
 							Version: testconvert.Float64(1.1),
 						},
 						Date: testconvert.Time(time.Now().Add(1 * time.Second)),
 					},
 					{
-						FlagData: model.FlagData{
+						FlagData: flagv1.FlagData{
 							Percentage: testconvert.Float64(100),
 						},
 						Date: testconvert.Time(time.Now().Add(1 * time.Second)),
 					},
 					{
-						FlagData: model.FlagData{
+						FlagData: flagv1.FlagData{
 							True:    testconvert.Interface("True2"),
 							False:   testconvert.Interface("False2"),
 							Default: testconvert.Interface("Default2"),
@@ -403,7 +405,7 @@ func TestFlag_ScheduledRollout(t *testing.T) {
 						Date: testconvert.Time(time.Now().Add(2 * time.Second)),
 					},
 					{
-						FlagData: model.FlagData{
+						FlagData: flagv1.FlagData{
 							True:    testconvert.Interface("True2"),
 							False:   testconvert.Interface("False2"),
 							Default: testconvert.Interface("Default2"),
@@ -412,22 +414,22 @@ func TestFlag_ScheduledRollout(t *testing.T) {
 						Date: testconvert.Time(time.Now().Add(3 * time.Second)),
 					},
 					{
-						FlagData: model.FlagData{
+						FlagData: flagv1.FlagData{
 							Disable: testconvert.Bool(true),
 						},
 						Date: testconvert.Time(time.Now().Add(4 * time.Second)),
 					},
 					{
-						FlagData: model.FlagData{
+						FlagData: flagv1.FlagData{
 							Percentage: testconvert.Float64(0),
 						},
 					},
 					{
-						FlagData: model.FlagData{
+						FlagData: flagv1.FlagData{
 							Disable:     testconvert.Bool(false),
 							TrackEvents: testconvert.Bool(true),
-							Rollout: &model.Rollout{
-								Experimentation: &model.Experimentation{
+							Rollout: &flagv1.Rollout{
+								Experimentation: &flagv1.Experimentation{
 									Start: testconvert.Time(time.Now().Add(6 * time.Second)),
 									End:   testconvert.Time(time.Now().Add(7 * time.Second)),
 								},
@@ -445,7 +447,7 @@ func TestFlag_ScheduledRollout(t *testing.T) {
 
 	// We evaluate the same flag multiple time overtime.
 	v, _ := f.Value(flagName, user)
-	assert.Equal(t, f.GetFalse(), v)
+	assert.Equal(t, f.GetVariationValue(flagv1.VariationFalse), v)
 
 	time.Sleep(1 * time.Second)
 
@@ -537,7 +539,7 @@ func TestFlag_String(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			f := &model.FlagData{
+			f := &flagv1.FlagData{
 				Disable:     testconvert.Bool(tt.fields.Disable),
 				Rule:        testconvert.String(tt.fields.Rule),
 				Percentage:  testconvert.Float64(tt.fields.Percentage),
@@ -558,21 +560,22 @@ func TestFlag_Getter(t *testing.T) {
 		True        interface{}
 		False       interface{}
 		Default     interface{}
-		Rollout     *model.Rollout
+		Rollout     *flagv1.Rollout
 		Disable     bool
 		TrackEvents bool
 		Percentage  float64
 		Rule        string
 		Version     float64
+		RawValues   map[string]string
 	}
 	tests := []struct {
 		name string
-		flag model.Flag
+		flag flag.Flag
 		want expected
 	}{
 		{
 			name: "all default",
-			flag: &model.FlagData{},
+			flag: &flagv1.FlagData{},
 			want: expected{
 				True:        nil,
 				False:       nil,
@@ -583,11 +586,22 @@ func TestFlag_Getter(t *testing.T) {
 				Percentage:  0,
 				Rule:        "",
 				Version:     0,
+				RawValues: map[string]string{
+					"Default":     "",
+					"Disable":     "false",
+					"False":       "",
+					"Percentage":  "0.00",
+					"Rollout":     "",
+					"Rule":        "",
+					"TrackEvents": "true",
+					"True":        "",
+					"Version":     "0",
+				},
 			},
 		},
 		{
 			name: "custom flag",
-			flag: &model.FlagData{
+			flag: &flagv1.FlagData{
 				Rule:        testconvert.String("test"),
 				Percentage:  testconvert.Float64(90),
 				True:        testconvert.Interface(12.2),
@@ -606,21 +620,30 @@ func TestFlag_Getter(t *testing.T) {
 				Percentage:  90,
 				Rule:        "test",
 				Version:     127,
+				RawValues: map[string]string{
+					"Default":     "14.2",
+					"Disable":     "true",
+					"False":       "13.2",
+					"Percentage":  "90.00",
+					"Rollout":     "",
+					"Rule":        "test",
+					"TrackEvents": "false",
+					"True":        "12.2",
+					"Version":     "127",
+				},
 			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want.True, tt.flag.GetTrue())
-			assert.Equal(t, tt.want.False, tt.flag.GetFalse())
-			assert.Equal(t, tt.want.Default, tt.flag.GetDefault())
-			assert.Equal(t, tt.want.Rollout, tt.flag.GetRollout())
 			assert.Equal(t, tt.want.Disable, tt.flag.GetDisable())
 			assert.Equal(t, tt.want.TrackEvents, tt.flag.GetTrackEvents())
-			assert.Equal(t, tt.want.Percentage, tt.flag.GetPercentage())
-			assert.Equal(t, tt.want.Rule, tt.flag.GetRule())
 			assert.Equal(t, tt.want.Version, tt.flag.GetVersion())
+			assert.Equal(t, flagv1.VariationDefault, tt.flag.GetDefaultVariation())
+			fmt.Println(tt.want.Default, tt.flag.GetVariationValue(tt.flag.GetDefaultVariation()))
+			assert.Equal(t, tt.want.Default, tt.flag.GetVariationValue(tt.flag.GetDefaultVariation()))
+			assert.Equal(t, tt.want.RawValues, tt.flag.GetRawValues())
 		})
 	}
 }

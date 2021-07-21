@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"strconv"
+	"sort"
 	"sync"
 
 	"github.com/thomaspoignant/go-feature-flag/internal"
@@ -22,6 +22,7 @@ const slackFooter = "go-feature-flag"
 const colorDeleted = "#FF0000"
 const colorUpdated = "#FFA500"
 const colorAdded = "#008000"
+const longSlackAttachment = 35
 
 func NewSlackNotifier(logger *log.Logger, httpClient internal.HTTPClient, webhookURL string) SlackNotifier {
 	slackURL, _ := url.Parse(webhookURL)
@@ -96,7 +97,6 @@ func convertDeletedFlagsToSlackMessage(diff model.DiffCache) []attachment {
 
 func convertUpdatedFlagsToSlackMessage(diff model.DiffCache) []attachment {
 	var attachments = make([]attachment, 0)
-	// updated flags - use reflection to list the flags
 	for key, value := range diff.Updated {
 		attachment := attachment{
 			Title:      fmt.Sprintf("✏️ Flag \"%s\" updated", key),
@@ -106,64 +106,24 @@ func convertUpdatedFlagsToSlackMessage(diff model.DiffCache) []attachment {
 			Fields:     []Field{},
 		}
 
-		before := value.Before
-		after := value.After
-		const compareFormat = "%v => %v"
+		before := value.Before.GetRawValues()
+		after := value.After.GetRawValues()
+		sortedKey := sortedKeys(before)
+		for _, bKey := range sortedKey {
+			if before[bKey] != after[bKey] {
+				// format output if empty
+				if before[bKey] == "" {
+					before[bKey] = "<empty>"
+				}
+				if after[bKey] == "" {
+					after[bKey] = "<empty>"
+				}
 
-		// rule
-		if before.GetRule() != after.GetRule() {
-			attachment.Fields = append(attachment.Fields, Field{Title: "Rule", Short: false,
-				Value: fmt.Sprintf(compareFormat, before.GetRule(), after.GetRule())})
+				value := fmt.Sprintf("%v => %v", before[bKey], after[bKey])
+				short := len(value) < longSlackAttachment
+				attachment.Fields = append(attachment.Fields, Field{Title: bKey, Short: short, Value: value})
+			}
 		}
-
-		// Percentage
-		if before.GetPercentage() != after.GetPercentage() {
-			attachment.Fields = append(attachment.Fields, Field{Title: "Percentage", Short: true,
-				Value: fmt.Sprintf(compareFormat, before.GetPercentage(), after.GetPercentage())})
-		}
-
-		// True
-		if before.GetTrue() != after.GetTrue() {
-			attachment.Fields = append(attachment.Fields, Field{Title: "True", Short: true,
-				Value: fmt.Sprintf(compareFormat, before.GetTrue(), after.GetTrue())})
-		}
-
-		// False
-		if before.GetFalse() != after.GetFalse() {
-			attachment.Fields = append(attachment.Fields, Field{Title: "False", Short: true,
-				Value: fmt.Sprintf(compareFormat, before.GetFalse(), after.GetFalse())})
-		}
-
-		// Default
-		if before.GetDefault() != after.GetDefault() {
-			attachment.Fields = append(attachment.Fields, Field{Title: "Default", Short: true,
-				Value: fmt.Sprintf(compareFormat, before.GetDefault(), after.GetDefault())})
-		}
-
-		// TrackEvents
-		if before.GetTrackEvents() != after.GetTrackEvents() {
-			attachment.Fields = append(attachment.Fields, Field{Title: "TrackEvents", Short: true,
-				Value: fmt.Sprintf(compareFormat, before.GetTrackEvents(), after.GetTrackEvents())})
-		}
-
-		// Disable
-		if before.GetDisable() != after.GetDisable() {
-			attachment.Fields = append(attachment.Fields, Field{Title: "Disable", Short: true,
-				Value: fmt.Sprintf(compareFormat, before.GetDisable(), after.GetDisable())})
-		}
-
-		// Rollout
-		if before.GetRollout() != after.GetRollout() {
-			attachment.Fields = append(attachment.Fields, Field{Title: "Rollout", Short: false,
-				Value: fmt.Sprintf(compareFormat, before.GetRollout(), after.GetRollout())})
-		}
-
-		// Version
-		if before.GetVersion() != after.GetVersion() {
-			attachment.Fields = append(attachment.Fields, Field{Title: "Version", Short: true,
-				Value: fmt.Sprintf(compareFormat, before.GetVersion(), after.GetVersion())})
-		}
-
 		attachments = append(attachments, attachment)
 	}
 	return attachments
@@ -180,24 +140,14 @@ func convertAddedFlagsToSlackMessage(diff model.DiffCache) []attachment {
 			Fields:     []Field{},
 		}
 
-		attachment.Fields = append(attachment.Fields, Field{Title: "Rule", Short: false,
-			Value: fmt.Sprintf("%v", value.GetRule())})
-		attachment.Fields = append(attachment.Fields, Field{Title: "Percentage", Short: true,
-			Value: fmt.Sprintf("%v", value.GetPercentage())})
-		attachment.Fields = append(attachment.Fields, Field{Title: "True", Short: true,
-			Value: fmt.Sprintf("%v", value.GetTrue())})
-		attachment.Fields = append(attachment.Fields, Field{Title: "False", Short: true,
-			Value: fmt.Sprintf("%v", value.GetFalse())})
-		attachment.Fields = append(attachment.Fields, Field{Title: "Default", Short: true,
-			Value: fmt.Sprintf("%v", value.GetDefault())})
-		attachment.Fields = append(attachment.Fields, Field{Title: "TrackEvents", Short: true,
-			Value: fmt.Sprintf("%v", value.GetTrackEvents())})
-		attachment.Fields = append(attachment.Fields, Field{Title: "Disable", Short: true,
-			Value: fmt.Sprintf("%v", value.GetDisable())})
-
-		if value.GetVersion() != 0 {
-			attachment.Fields = append(attachment.Fields, Field{Title: "Version", Short: true,
-				Value: strconv.FormatFloat(value.GetVersion(), 'f', -1, 64)})
+		rawValues := value.GetRawValues()
+		sortedKey := sortedKeys(rawValues)
+		for _, bKey := range sortedKey {
+			if rawValues[bKey] != "" {
+				value := fmt.Sprintf("%v", rawValues[bKey])
+				short := len(value) < longSlackAttachment
+				attachment.Fields = append(attachment.Fields, Field{Title: bKey, Short: short, Value: value})
+			}
 		}
 		attachments = append(attachments, attachment)
 	}
@@ -222,4 +172,15 @@ type Field struct {
 	Title string `json:"title"`
 	Value string `json:"value"`
 	Short bool   `json:"short"`
+}
+
+func sortedKeys(m map[string]string) []string {
+	keys := make([]string, len(m))
+	i := 0
+	for k := range m {
+		keys[i] = k
+		i++
+	}
+	sort.Strings(keys)
+	return keys
 }
