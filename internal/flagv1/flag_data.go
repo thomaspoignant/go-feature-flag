@@ -55,7 +55,7 @@ type FlagData struct {
 
 // Value is returning the Value associate to the flag (True / False / Default ) based
 // if the toggle apply to the user or not.
-func (f *FlagData) Value(flagName string, user ffuser.User) (interface{}, VariationType) {
+func (f *FlagData) Value(flagName string, user ffuser.User) (interface{}, string) {
 	f.updateFlagStage()
 	if f.isExperimentationOver() {
 		// if we have an experimentation that has not started or that is finished we use the default value.
