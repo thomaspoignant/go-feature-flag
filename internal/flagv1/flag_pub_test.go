@@ -28,7 +28,7 @@ func TestFlag_value(t *testing.T) {
 	}
 	type want struct {
 		value         interface{}
-		variationType flagv1.VariationType
+		variationType string
 	}
 	tests := []struct {
 		name   string

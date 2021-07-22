@@ -3,7 +3,6 @@ package cache
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
 	"gopkg.in/yaml.v3"
@@ -77,15 +76,10 @@ func (c *cacheImpl) GetFlag(key string) (flag.Flag, error) {
 	defer c.mutex.RUnlock()
 
 	if c.flagsCache == nil {
-		return &flagv1.FlagData{}, errors.New("impossible to read the flag before the initialisation")
+		return nil, errors.New("impossible to read the flag before the initialisation")
 	}
 
-	f, ok := c.flagsCache[key]
-	if !ok {
-		return &flagv1.FlagData{}, fmt.Errorf("flag [%v] does not exists", key)
-	}
-
-	return &f, nil
+	return c.flagsCache.GetFlag(key)
 }
 
 func (c *cacheImpl) AllFlags() (FlagsCache, error) {

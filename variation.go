@@ -7,14 +7,13 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/internal/exporter"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/internal/flagstate"
-	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
 	"github.com/thomaspoignant/go-feature-flag/internal/model"
 )
 
 const errorFlagNotAvailable = "flag %v is not present or disabled"
 const errorWrongVariation = "wrong variation used for flag %v"
 
-var offlineVariationResult = model.VariationResult{VariationType: flagv1.VariationSDKDefault, Failed: true}
+var offlineVariationResult = model.VariationResult{VariationType: flag.VariationSDKDefault, Failed: true}
 
 // BoolVariation return the value of the flag in boolean.
 // An error is return if you don't have init the library before calling the function.
@@ -165,24 +164,24 @@ func (g *GoFeatureFlag) boolVariation(flagKey string, user ffuser.User, sdkDefau
 		return model.BoolVarResult{Value: sdkDefaultValue, VariationResult: offlineVariationResult}, nil
 	}
 
-	flag, err := g.getFlagFromCache(flagKey)
+	f, err := g.getFlagFromCache(flagKey)
 	if err != nil {
 		return model.BoolVarResult{
 			Value:           sdkDefaultValue,
-			VariationResult: computeVariationResult(flag, flagv1.VariationSDKDefault, true),
+			VariationResult: computeVariationResult(f, flag.VariationSDKDefault, true),
 		}, err
 	}
 
-	flagValue, variationType := flag.Value(flagKey, user)
+	flagValue, variationType := f.Value(flagKey, user)
 	res, ok := flagValue.(bool)
 	if !ok {
 		return model.BoolVarResult{
 			Value:           sdkDefaultValue,
-			VariationResult: computeVariationResult(flag, flagv1.VariationSDKDefault, true),
+			VariationResult: computeVariationResult(f, flag.VariationSDKDefault, true),
 		}, fmt.Errorf(errorWrongVariation, flagKey)
 	}
 	return model.BoolVarResult{Value: res,
-		VariationResult: computeVariationResult(flag, variationType, false),
+		VariationResult: computeVariationResult(f, variationType, false),
 	}, nil
 }
 
@@ -194,31 +193,31 @@ func (g *GoFeatureFlag) intVariation(flagKey string, user ffuser.User, sdkDefaul
 		return model.IntVarResult{Value: sdkDefaultValue, VariationResult: offlineVariationResult}, nil
 	}
 
-	flag, err := g.getFlagFromCache(flagKey)
+	f, err := g.getFlagFromCache(flagKey)
 	if err != nil {
 		return model.IntVarResult{Value: sdkDefaultValue,
-			VariationResult: computeVariationResult(flag, flagv1.VariationSDKDefault, true),
+			VariationResult: computeVariationResult(f, flag.VariationSDKDefault, true),
 		}, err
 	}
 
-	flagValue, variationType := flag.Value(flagKey, user)
+	flagValue, variationType := f.Value(flagKey, user)
 	res, ok := flagValue.(int)
 	if !ok {
 		// if this is a float64 we convert it to int
 		if resFloat, okFloat := flagValue.(float64); okFloat {
 			return model.IntVarResult{
 				Value:           int(resFloat),
-				VariationResult: computeVariationResult(flag, variationType, false),
+				VariationResult: computeVariationResult(f, variationType, false),
 			}, nil
 		}
 
 		return model.IntVarResult{
 			Value:           sdkDefaultValue,
-			VariationResult: computeVariationResult(flag, flagv1.VariationSDKDefault, true),
+			VariationResult: computeVariationResult(f, flag.VariationSDKDefault, true),
 		}, fmt.Errorf(errorWrongVariation, flagKey)
 	}
 	return model.IntVarResult{Value: res,
-		VariationResult: computeVariationResult(flag, variationType, false),
+		VariationResult: computeVariationResult(f, variationType, false),
 	}, nil
 }
 
@@ -230,25 +229,25 @@ func (g *GoFeatureFlag) float64Variation(flagKey string, user ffuser.User, sdkDe
 		return model.Float64VarResult{Value: sdkDefaultValue, VariationResult: offlineVariationResult}, nil
 	}
 
-	flag, err := g.getFlagFromCache(flagKey)
+	f, err := g.getFlagFromCache(flagKey)
 	if err != nil {
 		return model.Float64VarResult{
 			Value:           sdkDefaultValue,
-			VariationResult: computeVariationResult(flag, flagv1.VariationSDKDefault, true),
+			VariationResult: computeVariationResult(f, flag.VariationSDKDefault, true),
 		}, err
 	}
 
-	flagValue, variationType := flag.Value(flagKey, user)
+	flagValue, variationType := f.Value(flagKey, user)
 	res, ok := flagValue.(float64)
 	if !ok {
 		return model.Float64VarResult{
 			Value:           sdkDefaultValue,
-			VariationResult: computeVariationResult(flag, flagv1.VariationSDKDefault, true),
+			VariationResult: computeVariationResult(f, flag.VariationSDKDefault, true),
 		}, fmt.Errorf(errorWrongVariation, flagKey)
 	}
 	return model.Float64VarResult{
 		Value:           res,
-		VariationResult: computeVariationResult(flag, variationType, false),
+		VariationResult: computeVariationResult(f, variationType, false),
 	}, nil
 }
 
@@ -260,25 +259,25 @@ func (g *GoFeatureFlag) stringVariation(flagKey string, user ffuser.User, sdkDef
 		return model.StringVarResult{Value: sdkDefaultValue, VariationResult: offlineVariationResult}, nil
 	}
 
-	flag, err := g.getFlagFromCache(flagKey)
+	f, err := g.getFlagFromCache(flagKey)
 	if err != nil {
 		return model.StringVarResult{
 			Value:           sdkDefaultValue,
-			VariationResult: computeVariationResult(flag, flagv1.VariationSDKDefault, true),
+			VariationResult: computeVariationResult(f, flag.VariationSDKDefault, true),
 		}, err
 	}
 
-	flagValue, variationType := flag.Value(flagKey, user)
+	flagValue, variationType := f.Value(flagKey, user)
 	res, ok := flagValue.(string)
 	if !ok {
 		return model.StringVarResult{
 			Value:           sdkDefaultValue,
-			VariationResult: computeVariationResult(flag, flagv1.VariationSDKDefault, true),
+			VariationResult: computeVariationResult(f, flag.VariationSDKDefault, true),
 		}, fmt.Errorf(errorWrongVariation, flagKey)
 	}
 	return model.StringVarResult{
 		Value:           res,
-		VariationResult: computeVariationResult(flag, variationType, false),
+		VariationResult: computeVariationResult(f, variationType, false),
 	}, nil
 }
 
@@ -290,25 +289,25 @@ func (g *GoFeatureFlag) jsonArrayVariation(flagKey string, user ffuser.User, sdk
 		return model.JSONArrayVarResult{Value: sdkDefaultValue, VariationResult: offlineVariationResult}, nil
 	}
 
-	flag, err := g.getFlagFromCache(flagKey)
+	f, err := g.getFlagFromCache(flagKey)
 	if err != nil {
 		return model.JSONArrayVarResult{
 			Value:           sdkDefaultValue,
-			VariationResult: computeVariationResult(flag, flagv1.VariationSDKDefault, true),
+			VariationResult: computeVariationResult(f, flag.VariationSDKDefault, true),
 		}, err
 	}
 
-	flagValue, variationType := flag.Value(flagKey, user)
+	flagValue, variationType := f.Value(flagKey, user)
 	res, ok := flagValue.([]interface{})
 	if !ok {
 		return model.JSONArrayVarResult{
 			Value:           sdkDefaultValue,
-			VariationResult: computeVariationResult(flag, flagv1.VariationSDKDefault, true),
+			VariationResult: computeVariationResult(f, flag.VariationSDKDefault, true),
 		}, fmt.Errorf(errorWrongVariation, flagKey)
 	}
 	return model.JSONArrayVarResult{
 		Value:           res,
-		VariationResult: computeVariationResult(flag, variationType, false),
+		VariationResult: computeVariationResult(f, variationType, false),
 	}, nil
 }
 
@@ -320,25 +319,25 @@ func (g *GoFeatureFlag) jsonVariation(flagKey string, user ffuser.User, sdkDefau
 		return model.JSONVarResult{Value: sdkDefaultValue, VariationResult: offlineVariationResult}, nil
 	}
 
-	flag, err := g.getFlagFromCache(flagKey)
+	f, err := g.getFlagFromCache(flagKey)
 	if err != nil {
 		return model.JSONVarResult{
 			Value:           sdkDefaultValue,
-			VariationResult: computeVariationResult(flag, flagv1.VariationSDKDefault, true),
+			VariationResult: computeVariationResult(f, flag.VariationSDKDefault, true),
 		}, err
 	}
 
-	flagValue, variationType := flag.Value(flagKey, user)
+	flagValue, variationType := f.Value(flagKey, user)
 	res, ok := flagValue.(map[string]interface{})
 	if !ok {
 		return model.JSONVarResult{
 			Value:           sdkDefaultValue,
-			VariationResult: computeVariationResult(flag, flagv1.VariationSDKDefault, true),
+			VariationResult: computeVariationResult(f, flag.VariationSDKDefault, true),
 		}, fmt.Errorf(errorWrongVariation, flagKey)
 	}
 	return model.JSONVarResult{
 		Value:           res,
-		VariationResult: computeVariationResult(flag, variationType, false),
+		VariationResult: computeVariationResult(f, variationType, false),
 	}, nil
 }
 
