@@ -20,7 +20,7 @@ type Manager interface {
 }
 
 type cacheManagerImpl struct {
-	inMemoryCache       *InMemoryCache
+	inMemoryCache       Cache
 	mutex               sync.RWMutex
 	notificationService Service
 }

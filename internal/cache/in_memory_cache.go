@@ -36,7 +36,7 @@ func (fc *InMemoryCache) keys() []string {
 	return keys
 }
 
-func (fc *InMemoryCache) Copy() *InMemoryCache {
+func (fc *InMemoryCache) Copy() Cache {
 	inMemoryCache := NewInMemoryCache()
 	for k, v := range fc.Flags {
 		inMemoryCache.addFlag(k, v)
