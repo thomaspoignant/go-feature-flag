@@ -26,7 +26,7 @@ type cacheMock struct {
 	err  error
 }
 
-func NewCacheMock(flag flag.Flag, err error) cache.Cache {
+func NewCacheMock(flag flag.Flag, err error) cache.Manager {
 	return &cacheMock{
 		flag: flag,
 		err:  err,
@@ -39,14 +39,14 @@ func (c *cacheMock) Close() {}
 func (c *cacheMock) GetFlag(key string) (flag.Flag, error) {
 	return c.flag, c.err
 }
-func (c *cacheMock) AllFlags() (cache.FlagsCache, error) { return nil, nil }
+func (c *cacheMock) AllFlags() (map[string]flag.Flag, error) { return nil, nil }
 
 func TestBoolVariation(t *testing.T) {
 	type args struct {
 		flagKey      string
 		user         ffuser.User
 		defaultValue bool
-		cacheMock    cache.Cache
+		cacheMock    cache.Manager
 		offline      bool
 	}
 	tests := []struct {
@@ -248,7 +248,7 @@ func TestFloat64Variation(t *testing.T) {
 		flagKey      string
 		user         ffuser.User
 		defaultValue float64
-		cacheMock    cache.Cache
+		cacheMock    cache.Manager
 		offline      bool
 	}
 	tests := []struct {
@@ -449,7 +449,7 @@ func TestJSONArrayVariation(t *testing.T) {
 		flagKey      string
 		user         ffuser.User
 		defaultValue []interface{}
-		cacheMock    cache.Cache
+		cacheMock    cache.Manager
 		offline      bool
 	}
 	tests := []struct {
@@ -664,7 +664,7 @@ func TestJSONVariation(t *testing.T) {
 		flagKey      string
 		user         ffuser.User
 		defaultValue map[string]interface{}
-		cacheMock    cache.Cache
+		cacheMock    cache.Manager
 		offline      bool
 	}
 	tests := []struct {
@@ -847,7 +847,7 @@ func TestStringVariation(t *testing.T) {
 		flagKey      string
 		user         ffuser.User
 		defaultValue string
-		cacheMock    cache.Cache
+		cacheMock    cache.Manager
 		offline      bool
 	}
 	tests := []struct {
@@ -1031,7 +1031,7 @@ func TestIntVariation(t *testing.T) {
 		flagKey      string
 		user         ffuser.User
 		defaultValue int
-		cacheMock    cache.Cache
+		cacheMock    cache.Manager
 		offline      bool
 	}
 	tests := []struct {

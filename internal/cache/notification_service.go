@@ -11,7 +11,7 @@ import (
 
 type Service interface {
 	Close()
-	Notify(oldCache FlagsCache, newCache FlagsCache)
+	Notify(oldCache map[string]flag.Flag, newCache map[string]flag.Flag)
 }
 
 func NewNotificationService(notifiers []notifier.Notifier) Service {
@@ -26,7 +26,7 @@ type notificationService struct {
 	waitGroup *sync.WaitGroup
 }
 
-func (c *notificationService) Notify(oldCache FlagsCache, newCache FlagsCache) {
+func (c *notificationService) Notify(oldCache map[string]flag.Flag, newCache map[string]flag.Flag) {
 	diff := c.getDifferences(oldCache, newCache)
 	if diff.HasDiff() {
 		for _, notifier := range c.Notifiers {
@@ -42,7 +42,7 @@ func (c *notificationService) Close() {
 
 // getDifferences is checking what are the difference in the updated cache.
 func (c *notificationService) getDifferences(
-	oldCache FlagsCache, newCache FlagsCache) model.DiffCache {
+	oldCache map[string]flag.Flag, newCache map[string]flag.Flag) model.DiffCache {
 	diff := model.DiffCache{
 		Deleted: map[string]flag.Flag{},
 		Added:   map[string]flag.Flag{},
@@ -52,14 +52,14 @@ func (c *notificationService) getDifferences(
 		newFlag, inNewCache := newCache[key]
 		oldFlag := oldCache[key]
 		if !inNewCache {
-			diff.Deleted[key] = &oldFlag
+			diff.Deleted[key] = oldFlag
 			continue
 		}
 
 		if !cmp.Equal(oldCache[key], newCache[key]) {
 			diff.Updated[key] = model.DiffUpdated{
-				Before: &oldFlag,
-				After:  &newFlag,
+				Before: oldFlag,
+				After:  newFlag,
 			}
 		}
 	}
@@ -67,7 +67,7 @@ func (c *notificationService) getDifferences(
 	for key := range newCache {
 		if _, inOldCache := oldCache[key]; !inOldCache {
 			f := newCache[key]
-			diff.Added[key] = &f
+			diff.Added[key] = f
 		}
 	}
 	return diff

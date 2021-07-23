@@ -36,7 +36,7 @@ func Close() {
 // GoFeatureFlag is the main object of the library
 // it contains the cache, the config and the update.
 type GoFeatureFlag struct {
-	cache        cache.Cache
+	cache        cache.Manager
 	config       Config
 	bgUpdater    backgroundUpdater
 	dataExporter *exporter.DataExporterScheduler
@@ -129,7 +129,7 @@ func (g *GoFeatureFlag) startFlagUpdaterDaemon() {
 }
 
 // retrieveFlagsAndUpdateCache is called every X seconds to refresh the cache flag.
-func retrieveFlagsAndUpdateCache(config Config, cache cache.Cache) error {
+func retrieveFlagsAndUpdateCache(config Config, cache cache.Manager) error {
 	retriever, err := config.GetRetriever()
 	if err != nil {
 		log.Printf("error while getting the file retriever: %v", err)

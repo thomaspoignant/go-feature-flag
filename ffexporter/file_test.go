@@ -2,7 +2,6 @@ package ffexporter_test
 
 import (
 	"context"
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"log"
@@ -200,7 +199,6 @@ func TestFile_Export(t *testing.T) {
 
 			files, _ := ioutil.ReadDir(outputDir)
 			assert.Equal(t, 1, len(files), "Directory %s should have only one file", outputDir)
-			fmt.Printf(files[0].Name())
 			assert.Regexp(t, tt.expected.fileNameRegex, files[0].Name(), "Invalid file name")
 
 			expectedContent, _ := ioutil.ReadFile(tt.expected.content)
