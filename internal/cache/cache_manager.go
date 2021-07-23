@@ -34,29 +34,33 @@ func New(notificationService Service) Manager {
 }
 
 func (c *cacheManagerImpl) UpdateCache(loadedFlags []byte, fileFormat string) error {
-	var newCache map[string]flagv1.FlagData
+	var newFlags map[string]flagv1.FlagData
 	var err error
 	switch strings.ToLower(fileFormat) {
 	case "toml":
-		err = toml.Unmarshal(loadedFlags, &newCache)
+		err = toml.Unmarshal(loadedFlags, &newFlags)
 	case "json":
-		err = json.Unmarshal(loadedFlags, &newCache)
+		err = json.Unmarshal(loadedFlags, &newFlags)
 	default:
 		// default unmarshaller is YAML
-		err = yaml.Unmarshal(loadedFlags, &newCache)
+		err = yaml.Unmarshal(loadedFlags, &newFlags)
 	}
-
 	if err != nil {
 		return err
 	}
+
+	newCache := NewInMemoryCache()
+	newCache.Init(newFlags)
+	newCacheFlags := newCache.All()
+
 	c.mutex.Lock()
-	// copy cache for difference checks async
-	cacheCopy := c.inMemoryCache.Copy()
-	c.inMemoryCache.Init(newCache)
+	// collect flags for compare.
+	oldCacheFlags := c.inMemoryCache.All()
+	c.inMemoryCache = newCache
 	c.mutex.Unlock()
 
 	// notify the changes
-	c.notificationService.Notify(cacheCopy.All(), c.inMemoryCache.All())
+	c.notificationService.Notify(oldCacheFlags, newCacheFlags)
 	return nil
 }
 
