@@ -3,7 +3,6 @@ package ffclient
 import (
 	"fmt"
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
-	"github.com/thomaspoignant/go-feature-flag/internal/cache"
 	"github.com/thomaspoignant/go-feature-flag/internal/exporter"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/internal/flagstate"
@@ -128,7 +127,7 @@ func (g *GoFeatureFlag) JSONVariation(
 
 // AllFlagsState return a flagstate.AllFlags that contains all the flags for a specific user.
 func (g *GoFeatureFlag) AllFlagsState(user ffuser.User) flagstate.AllFlags {
-	flags := cache.FlagsCache{}
+	flags := map[string]flag.Flag{}
 
 	if !g.config.Offline {
 		var err error

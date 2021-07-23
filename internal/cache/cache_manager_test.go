@@ -268,7 +268,7 @@ test-flag2:
 				loadedFlags: []byte(``),
 			},
 			expected: map[string]flagv1.FlagData{},
-			wantErr:  true,
+			wantErr:  false,
 		},
 	}
 
@@ -287,7 +287,7 @@ test-flag2:
 			// If no error we compare with expected
 			for key, expected := range tt.expected {
 				got := allFlags[key]
-				assert.Equal(t, expected, got)
+				assert.Equal(t, &expected, got) //nolint: gosec
 			}
 			fCache.Close()
 		})

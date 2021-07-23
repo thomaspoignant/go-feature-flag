@@ -12,29 +12,29 @@ import (
 	"github.com/pelletier/go-toml"
 )
 
-type Cache interface {
+type Manager interface {
 	UpdateCache(loadedFlags []byte, fileFormat string) error
 	Close()
 	GetFlag(key string) (flag.Flag, error)
-	AllFlags() (FlagsCache, error)
+	AllFlags() (map[string]flag.Flag, error)
 }
 
-type cacheImpl struct {
-	flagsCache          FlagsCache
+type cacheManagerImpl struct {
+	inMemoryCache       *InMemoryCache
 	mutex               sync.RWMutex
 	notificationService Service
 }
 
-func New(notificationService Service) Cache {
-	return &cacheImpl{
-		flagsCache:          make(map[string]flagv1.FlagData),
+func New(notificationService Service) Manager {
+	return &cacheManagerImpl{
+		inMemoryCache:       NewInMemoryCache(),
 		mutex:               sync.RWMutex{},
 		notificationService: notificationService,
 	}
 }
 
-func (c *cacheImpl) UpdateCache(loadedFlags []byte, fileFormat string) error {
-	var newCache FlagsCache
+func (c *cacheManagerImpl) UpdateCache(loadedFlags []byte, fileFormat string) error {
+	var newCache map[string]flagv1.FlagData
 	var err error
 	switch strings.ToLower(fileFormat) {
 	case "toml":
@@ -49,45 +49,41 @@ func (c *cacheImpl) UpdateCache(loadedFlags []byte, fileFormat string) error {
 	if err != nil {
 		return err
 	}
-
 	c.mutex.Lock()
 	// copy cache for difference checks async
-	cacheCopy := c.flagsCache.Copy()
-	c.flagsCache = newCache
+	cacheCopy := c.inMemoryCache.Copy()
+	c.inMemoryCache.Init(newCache)
 	c.mutex.Unlock()
 
 	// notify the changes
-	c.notificationService.Notify(cacheCopy, newCache)
+	c.notificationService.Notify(cacheCopy.All(), c.inMemoryCache.All())
 	return nil
 }
 
-func (c *cacheImpl) Close() {
+func (c *cacheManagerImpl) Close() {
 	// Clear the cache
 	c.mutex.Lock()
-	c.flagsCache = nil
+	c.inMemoryCache = nil
 	c.mutex.Unlock()
 	if c.notificationService != nil {
 		c.notificationService.Close()
 	}
 }
 
-func (c *cacheImpl) GetFlag(key string) (flag.Flag, error) {
+func (c *cacheManagerImpl) GetFlag(key string) (flag.Flag, error) {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
-
-	if c.flagsCache == nil {
+	if c.inMemoryCache == nil {
 		return nil, errors.New("impossible to read the flag before the initialisation")
 	}
-
-	return c.flagsCache.GetFlag(key)
+	return c.inMemoryCache.getFlag(key)
 }
 
-func (c *cacheImpl) AllFlags() (FlagsCache, error) {
+func (c *cacheManagerImpl) AllFlags() (map[string]flag.Flag, error) {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
-	if c.flagsCache == nil {
-		return nil, errors.New("impossible to read the flags before the initialisation")
+	if c.inMemoryCache == nil {
+		return nil, errors.New("impossible to read the flag before the initialisation")
 	}
-
-	return c.flagsCache.Copy(), nil
+	return c.inMemoryCache.All(), nil
 }
