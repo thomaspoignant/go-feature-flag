@@ -52,10 +52,13 @@ func (c *cacheManagerImpl) UpdateCache(loadedFlags []byte, fileFormat string) er
 	newCache := NewInMemoryCache()
 	newCache.Init(newFlags)
 	newCacheFlags := newCache.All()
+	oldCacheFlags := map[string]flag.Flag{}
 
 	c.mutex.Lock()
 	// collect flags for compare.
-	oldCacheFlags := c.inMemoryCache.All()
+	if c.inMemoryCache != nil {
+		oldCacheFlags = c.inMemoryCache.All()
+	}
 	c.inMemoryCache = newCache
 	c.mutex.Unlock()
 
