@@ -5,6 +5,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
 	"github.com/thomaspoignant/go-feature-flag/internal/notifier"
+	"github.com/thomaspoignant/go-feature-flag/internal/rollout"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -53,7 +54,7 @@ func TestSlackNotifier_Notify(t *testing.T) {
 							Rule:        testconvert.String("key eq \"random-key\""),
 							TrackEvents: testconvert.Bool(true),
 							Disable:     testconvert.Bool(false),
-							Version:     testconvert.Float64(1.1),
+							Version:     testconvert.String("1.1"),
 						},
 					},
 					Deleted: map[string]flag.Flag{
@@ -75,7 +76,7 @@ func TestSlackNotifier_Notify(t *testing.T) {
 								Disable:     testconvert.Bool(false),
 								TrackEvents: testconvert.Bool(true),
 								Rollout: &flagv1.Rollout{
-									Experimentation: &flagv1.Experimentation{
+									Experimentation: &rollout.Experimentation{
 										Start: testconvert.Time(time.Unix(1095379400, 0)),
 										End:   testconvert.Time(time.Unix(1095371000, 0)),
 									}},
@@ -88,7 +89,7 @@ func TestSlackNotifier_Notify(t *testing.T) {
 								Default:     testconvert.Interface("strDefault"),
 								Disable:     testconvert.Bool(true),
 								TrackEvents: testconvert.Bool(false),
-								Version:     testconvert.Float64(1.1),
+								Version:     testconvert.String("1.1"),
 							},
 						},
 					},

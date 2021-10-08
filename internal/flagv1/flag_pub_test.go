@@ -1,10 +1,10 @@
 package flagv1_test
 
 import (
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
+	"github.com/thomaspoignant/go-feature-flag/internal/rollout"
 	"testing"
 	"time"
 
@@ -80,7 +80,7 @@ func TestFlag_value(t *testing.T) {
 				Rule:       "key == \"7e50ee61-06ad-4bb0-9034-38ad7cdea9f5\"",
 				Percentage: 10,
 				Rollout: flagv1.Rollout{
-					Experimentation: &flagv1.Experimentation{
+					Experimentation: &rollout.Experimentation{
 						Start: testconvert.Time(time.Now().Add(-1 * time.Minute)),
 						End:   nil,
 					},
@@ -104,7 +104,7 @@ func TestFlag_value(t *testing.T) {
 				Rule:       "key == \"user66\"",
 				Percentage: 10,
 				Rollout: flagv1.Rollout{
-					Experimentation: &flagv1.Experimentation{
+					Experimentation: &rollout.Experimentation{
 						Start: testconvert.Time(time.Now().Add(1 * time.Minute)),
 						End:   nil,
 					},
@@ -128,7 +128,7 @@ func TestFlag_value(t *testing.T) {
 				Rule:       "key == \"7e50ee61-06ad-4bb0-9034-38ad7cdea9f5\"",
 				Percentage: 10,
 				Rollout: flagv1.Rollout{
-					Experimentation: &flagv1.Experimentation{
+					Experimentation: &rollout.Experimentation{
 						Start: testconvert.Time(time.Now().Add(-1 * time.Minute)),
 						End:   testconvert.Time(time.Now().Add(1 * time.Minute)),
 					},
@@ -152,7 +152,7 @@ func TestFlag_value(t *testing.T) {
 				Rule:       "key == \"user66\"",
 				Percentage: 10,
 				Rollout: flagv1.Rollout{
-					Experimentation: &flagv1.Experimentation{
+					Experimentation: &rollout.Experimentation{
 						Start: testconvert.Time(time.Now().Add(1 * time.Minute)),
 						End:   testconvert.Time(time.Now().Add(2 * time.Minute)),
 					},
@@ -176,7 +176,7 @@ func TestFlag_value(t *testing.T) {
 				Rule:       "key == \"user66\"",
 				Percentage: 10,
 				Rollout: flagv1.Rollout{
-					Experimentation: &flagv1.Experimentation{
+					Experimentation: &rollout.Experimentation{
 						Start: testconvert.Time(time.Now().Add(-2 * time.Minute)),
 						End:   testconvert.Time(time.Now().Add(-1 * time.Minute)),
 					},
@@ -200,7 +200,7 @@ func TestFlag_value(t *testing.T) {
 				Rule:       "key == \"user66\"",
 				Percentage: 10,
 				Rollout: flagv1.Rollout{
-					Experimentation: &flagv1.Experimentation{
+					Experimentation: &rollout.Experimentation{
 						Start: nil,
 						End:   testconvert.Time(time.Now().Add(-1 * time.Minute)),
 					},
@@ -224,7 +224,7 @@ func TestFlag_value(t *testing.T) {
 				Rule:       "key == \"7e50ee61-06ad-4bb0-9034-38ad7cdea9f5\"",
 				Percentage: 10,
 				Rollout: flagv1.Rollout{
-					Experimentation: &flagv1.Experimentation{
+					Experimentation: &rollout.Experimentation{
 						Start: nil,
 						End:   testconvert.Time(time.Now().Add(1 * time.Minute)),
 					},
@@ -248,7 +248,7 @@ func TestFlag_value(t *testing.T) {
 				Rule:       "key == \"7e50ee61-06ad-4bb0-9034-38ad7cdea9f5\"",
 				Percentage: 10,
 				Rollout: flagv1.Rollout{
-					Experimentation: &flagv1.Experimentation{
+					Experimentation: &rollout.Experimentation{
 						Start: nil,
 						End:   nil,
 					},
@@ -272,7 +272,7 @@ func TestFlag_value(t *testing.T) {
 				Rule:       "key == \"user66\"",
 				Percentage: 10,
 				Rollout: flagv1.Rollout{
-					Experimentation: &flagv1.Experimentation{
+					Experimentation: &rollout.Experimentation{
 						Start: testconvert.Time(time.Now().Add(1 * time.Minute)),
 						End:   testconvert.Time(time.Now().Add(-1 * time.Minute)),
 					},
@@ -385,7 +385,7 @@ func TestFlag_ScheduledRollout(t *testing.T) {
 				Steps: []flagv1.ScheduledStep{
 					{
 						FlagData: flagv1.FlagData{
-							Version: testconvert.Float64(1.1),
+							Version: testconvert.String("1.1"),
 						},
 						Date: testconvert.Time(time.Now().Add(1 * time.Second)),
 					},
@@ -429,7 +429,7 @@ func TestFlag_ScheduledRollout(t *testing.T) {
 							Disable:     testconvert.Bool(false),
 							TrackEvents: testconvert.Bool(true),
 							Rollout: &flagv1.Rollout{
-								Experimentation: &flagv1.Experimentation{
+								Experimentation: &rollout.Experimentation{
 									Start: testconvert.Time(time.Now().Add(6 * time.Second)),
 									End:   testconvert.Time(time.Now().Add(7 * time.Second)),
 								},
@@ -453,7 +453,7 @@ func TestFlag_ScheduledRollout(t *testing.T) {
 
 	v, _ = f.Value(flagName, user)
 	assert.Equal(t, "True", v)
-	assert.Equal(t, 1.1, f.GetVersion())
+	assert.Equal(t, "1.1", f.GetVersion())
 
 	time.Sleep(1 * time.Second)
 
@@ -495,7 +495,7 @@ func TestFlag_String(t *testing.T) {
 		False       interface{}
 		Default     interface{}
 		TrackEvents *bool
-		Version     *float64
+		Version     *string
 	}
 	tests := []struct {
 		name   string
@@ -512,7 +512,7 @@ func TestFlag_String(t *testing.T) {
 				False:       false,
 				Default:     false,
 				TrackEvents: testconvert.Bool(true),
-				Version:     testconvert.Float64(12),
+				Version:     testconvert.String("12"),
 			},
 			want: "percentage=10%, rule=\"key eq \"toto\"\", true=\"true\", false=\"false\", default=\"false\", disable=\"false\", trackEvents=\"true\", version=12",
 		},
@@ -565,7 +565,7 @@ func TestFlag_Getter(t *testing.T) {
 		TrackEvents bool
 		Percentage  float64
 		Rule        string
-		Version     float64
+		Version     string
 		RawValues   map[string]string
 	}
 	tests := []struct {
@@ -585,7 +585,6 @@ func TestFlag_Getter(t *testing.T) {
 				TrackEvents: true,
 				Percentage:  0,
 				Rule:        "",
-				Version:     0,
 				RawValues: map[string]string{
 					"Default":     "",
 					"Disable":     "false",
@@ -595,7 +594,7 @@ func TestFlag_Getter(t *testing.T) {
 					"Rule":        "",
 					"TrackEvents": "true",
 					"True":        "",
-					"Version":     "0",
+					"Version":     "",
 				},
 			},
 		},
@@ -609,7 +608,7 @@ func TestFlag_Getter(t *testing.T) {
 				Default:     testconvert.Interface(14.2),
 				TrackEvents: testconvert.Bool(false),
 				Disable:     testconvert.Bool(true),
-				Version:     testconvert.Float64(127),
+				Version:     testconvert.String("127"),
 			},
 			want: expected{
 				True:        12.2,
@@ -619,7 +618,7 @@ func TestFlag_Getter(t *testing.T) {
 				TrackEvents: false,
 				Percentage:  90,
 				Rule:        "test",
-				Version:     127,
+				Version:     "127",
 				RawValues: map[string]string{
 					"Default":     "14.2",
 					"Disable":     "true",
@@ -637,11 +636,10 @@ func TestFlag_Getter(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want.Disable, tt.flag.GetDisable())
-			assert.Equal(t, tt.want.TrackEvents, tt.flag.GetTrackEvents())
+			assert.Equal(t, tt.want.Disable, tt.flag.IsDisable())
+			assert.Equal(t, tt.want.TrackEvents, tt.flag.IsTrackEvents())
 			assert.Equal(t, tt.want.Version, tt.flag.GetVersion())
 			assert.Equal(t, flagv1.VariationDefault, tt.flag.GetDefaultVariation())
-			fmt.Println(tt.want.Default, tt.flag.GetVariationValue(tt.flag.GetDefaultVariation()))
 			assert.Equal(t, tt.want.Default, tt.flag.GetVariationValue(tt.flag.GetDefaultVariation()))
 			assert.Equal(t, tt.want.RawValues, tt.flag.GetRawValues())
 		})

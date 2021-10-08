@@ -4,7 +4,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	"github.com/thomaspoignant/go-feature-flag/internal/flagv1"
+	"github.com/thomaspoignant/go-feature-flag/internal/flagv2"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 	"testing"
 )
@@ -12,62 +12,92 @@ import (
 func TestAll(t *testing.T) {
 	tests := []struct {
 		name  string
-		param map[string]flagv1.FlagData
+		param map[string]flag.DtoFlag
 		want  map[string]flag.Flag
 	}{
 		{
 			name: "all with 1 flag",
-			param: map[string]flagv1.FlagData{
+			param: map[string]flag.DtoFlag{
 				"test": {
-					Percentage: testconvert.Float64(40),
-					True:       testconvert.Interface("true"),
-					False:      testconvert.Interface("false"),
-					Default:    testconvert.Interface("default"),
+					Variations: &map[string]*interface{}{
+						"test":  testconvert.Interface(true),
+						"test2": testconvert.Interface(false),
+					},
+					DefaultRule: &flagv2.Rule{
+						Percentages: &[]flagv2.VariationPercentage{
+							{"test": 10}, {"test2": 90},
+						},
+					},
 				},
 			},
 			want: map[string]flag.Flag{
-				"test": &flagv1.FlagData{
-					Percentage: testconvert.Float64(40),
-					True:       testconvert.Interface("true"),
-					False:      testconvert.Interface("false"),
-					Default:    testconvert.Interface("default"),
+				"test": &flagv2.FlagData{
+					Variations: &map[string]*interface{}{
+						"test":  testconvert.Interface(true),
+						"test2": testconvert.Interface(false),
+					},
+					DefaultRule: &flagv2.Rule{
+						Percentages: &[]flagv2.VariationPercentage{
+							{"test": 10}, {"test2": 90},
+						},
+					},
 				},
 			},
 		},
 		{
 			name: "all with multiple flags",
-			param: map[string]flagv1.FlagData{
+			param: map[string]flag.DtoFlag{
 				"test": {
-					Percentage: testconvert.Float64(40),
-					True:       testconvert.Interface("true"),
-					False:      testconvert.Interface("false"),
-					Default:    testconvert.Interface("default"),
+					Variations: &map[string]*interface{}{
+						"test":  testconvert.Interface(true),
+						"test2": testconvert.Interface(false),
+					},
+					DefaultRule: &flagv2.Rule{
+						Percentages: &[]flagv2.VariationPercentage{
+							{"test": 10}, {"test2": 90},
+						},
+					},
 				},
 				"test1": {
-					Percentage: testconvert.Float64(30),
-					True:       testconvert.Interface(true),
-					False:      testconvert.Interface(false),
-					Default:    testconvert.Interface(false),
+					Variations: &map[string]*interface{}{
+						"test":  testconvert.Interface(true),
+						"test2": testconvert.Interface(false),
+					},
+					DefaultRule: &flagv2.Rule{
+						Percentages: &[]flagv2.VariationPercentage{
+							{"test": 0}, {"test2": 100},
+						},
+					},
 				},
 			},
 			want: map[string]flag.Flag{
-				"test": &flagv1.FlagData{
-					Percentage: testconvert.Float64(40),
-					True:       testconvert.Interface("true"),
-					False:      testconvert.Interface("false"),
-					Default:    testconvert.Interface("default"),
+				"test": &flagv2.FlagData{
+					Variations: &map[string]*interface{}{
+						"test":  testconvert.Interface(true),
+						"test2": testconvert.Interface(false),
+					},
+					DefaultRule: &flagv2.Rule{
+						Percentages: &[]flagv2.VariationPercentage{
+							{"test": 10}, {"test2": 90},
+						},
+					},
 				},
-				"test1": &flagv1.FlagData{
-					Percentage: testconvert.Float64(30),
-					True:       testconvert.Interface(true),
-					False:      testconvert.Interface(false),
-					Default:    testconvert.Interface(false),
+				"test1": &flagv2.FlagData{
+					Variations: &map[string]*interface{}{
+						"test":  testconvert.Interface(true),
+						"test2": testconvert.Interface(false),
+					},
+					DefaultRule: &flagv2.Rule{
+						Percentages: &[]flagv2.VariationPercentage{
+							{"test": 0}, {"test2": 100},
+						},
+					},
 				},
 			},
 		},
 		{
 			name:  "empty",
-			param: map[string]flagv1.FlagData{},
+			param: map[string]flag.DtoFlag{},
 			want:  map[string]flag.Flag{},
 		},
 	}
@@ -83,11 +113,11 @@ func TestAll(t *testing.T) {
 func TestCopy(t *testing.T) {
 	tests := []struct {
 		name  string
-		param map[string]flagv1.FlagData
+		param map[string]flag.DtoFlag
 	}{
 		{
 			name: "copy with 1 flag",
-			param: map[string]flagv1.FlagData{
+			param: map[string]flag.DtoFlag{
 				"test": {
 					Percentage: testconvert.Float64(40),
 					True:       testconvert.Interface("true"),

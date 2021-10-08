@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
 	"gopkg.in/yaml.v3"
 	"strings"
 	"sync"
@@ -34,7 +33,7 @@ func New(notificationService Service) Manager {
 }
 
 func (c *cacheManagerImpl) UpdateCache(loadedFlags []byte, fileFormat string) error {
-	var newFlags map[string]flagv1.FlagData
+	var newFlags map[string]flag.DtoFlag
 	var err error
 	switch strings.ToLower(fileFormat) {
 	case "toml":
