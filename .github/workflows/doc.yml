@@ -30,4 +30,6 @@ jobs:
           mike deploy --push --update-aliases ${{ github.event.release.tag_name }} latest
           mike set-default --push latest
       - name: Clean old doc version
-        run: mike list --json | .github/ci/doc_to_delete.py | xargs -n1 mike delete --push
+        run: |
+          chmod +x .github/ci/doc_to_delete.py
+          mike list --json | .github/ci/doc_to_delete.py | xargs -n1 mike delete --push
