@@ -141,6 +141,12 @@ Compare Expression and their definitions (`a|b` means you can use either one of 
 - Select a specific user: `key eq "example@example.com"`
 - Select all identified users: `anonymous ne true`
 - Select a user with a custom property: `userId eq "12345"`
+- Select on multiple criteria:  
+  _All users with ids finishing by `@test.com` that have the role `backend engineer` in the `pro` environment for the
+  company `go-feature-flag`_
+    ```bash
+    (key ew "@test.com") and (role eq "backend engineer") and (env eq "pro") and (company eq "go-feature-flag")`
+    ```
 
 ## Advanced configurations
 
