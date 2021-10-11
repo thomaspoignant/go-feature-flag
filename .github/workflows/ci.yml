@@ -46,19 +46,6 @@ jobs:
         with:
           path-to-profile: coverage.cov
 
-  Docs:
-    name: Deploy docs
-    runs-on: ubuntu-latest
-    needs: [ Coverage, Lint ]
-    if: ${{ github.ref == 'refs/heads/main' }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-      - name: Deploy docs
-        uses: mhausenblas/mkdocs-deploy-gh-pages@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   Benchmark:
     runs-on: ubuntu-latest
     needs: Coverage
