@@ -16,7 +16,7 @@
     <img src="https://img.shields.io/github/go-mod/go-version/thomaspoignant/go-feature-flag?logo=go%20version" alt="Go version"/>
     <a href="LICENSE"><img src="https://img.shields.io/github/license/thomaspoignant/go-feature-flag" alt="License"/></a>
     <a href="https://github.com/avelino/awesome-go/#server-applications"><img src="https://awesome.re/mentioned-badge-flat.svg" alt="Mentioned in Awesome Go"></a>
-    <a href="http://gophers.slack.com/messages/go-feature-flag"><img src="https://img.shields.io/badge/join-us%20on%20slack-gray.svg?longCache=true&logo=slack&colorB=green" alt="Mentioned in Awesome Go"></a> 
+    <a href="http://gophers.slack.com/messages/go-feature-flag"><img src="https://img.shields.io/badge/join-us%20on%20slack-gray.svg?longCache=true&logo=slack&colorB=green" alt="Join us on slack"></a> 
 </p>
 
 **Feature flags with no complex system to maintain!**
@@ -114,12 +114,12 @@ ffclient.Init(ffclient.Config{
 
 | Field | Description |
 |---|---|
-|`Retriever`  | The configuration retriever you want to use to get your flag file.<br> *See [Store your flag file](https://thomaspoignant.github.io/go-feature-flag/flag_file/) for the configuration details*.|
+|`Retriever`  | The configuration retriever you want to use to get your flag file.<br> *See [Store your flag file](https://thomaspoignant.github.io/go-feature-flag/latest/flag_file/) for the configuration details*.|
 |`Context`  | *(optional)*<br>The context used by the retriever.<br />Default: `context.Background()`|
-|`DataExporter` | *(optional)*<br>DataExporter defines how to export data on how your flags are used.<br> *see [export data section](https://thomaspoignant.github.io/go-feature-flag/data_collection/) for more details*.|
+|`DataExporter` | *(optional)*<br>DataExporter defines how to export data on how your flags are used.<br> *see [export data section](https://thomaspoignant.github.io/go-feature-flag/latest/data_collection/) for more details*.|
 |`FileFormat`| *(optional)*<br>Format of your configuration file. Available formats are `yaml`, `toml` and `json`, if you omit the field it will try to unmarshal the file as a `yaml` file.<br>Default: `YAML`|
 |`Logger`   | *(optional)*<br>Logger used to log what `go-feature-flag` is doing.<br />If no logger is provided the module will not log anything.<br>Default: No log|
-|`Notifiers` | *(optional)*<br>List of notifiers to call when your flag file has been changed.<br> *See [notifiers section](https://thomaspoignant.github.io/go-feature-flag/notifier/) for more details*.|
+|`Notifiers` | *(optional)*<br>List of notifiers to call when your flag file has been changed.<br> *See [notifiers section](https://thomaspoignant.github.io/go-feature-flag/latest/notifier/) for more details*.|
 |`PollingInterval`   | *(optional)* Duration to wait before refreshing the flags.<br>The minimum polling interval is 1 second.<br>Default: 60 * time.Second|
 |`StartWithRetrieverError` | *(optional)*<br>If **true**, the SDK will start even if we did not get any flags from the retriever. It will serve only default values until the retriever returns the flags.<br>The init method will not return any error if the flag file is unreachable.<br>Default: **false**|
 |`Offline`| *(optional)* If **true**, the SDK will not try to retrieve the flag file and will not export any data. No notification will be send neither.<br>Default: false|
@@ -130,7 +130,7 @@ Since most applications will want to use a single central flag configuration, th
 
 In all the examples above, they demonstrate using `go-feature-flag` in its singleton style approach.  
 You can also create many `go-feature-flag` clients to use in your application.  
-[See the documentation for more details.](https://thomaspoignant.github.io/go-feature-flag/configuration/#multiple-configuration-flag-files)
+[See the documentation for more details.](https://thomaspoignant.github.io/go-feature-flag/latest/configuration/#multiple-configuration-flag-files)
 
 
 ## Where do I store my flags file?
@@ -257,7 +257,7 @@ version = 12.0
 | `disable` |*(optional)*<br>True if the flag is disabled.<br>**Default: `false`**|
 | `trackEvents` |*(optional)*<br>False if you don't want to export the data in your data exporter.<br>**Default: `true`**|
 | `version` |*(optional)*<br>The version is the version of your flag.<br>This number is used to display the information in the notifiers and data collection, you have to update it your self.<br>**Default: 0**|
-| `rollout` |*(optional)*<br><code>rollout</code> contains a specific rollout strategy you want to use.<br>**See [rollout section](https://thomaspoignant.github.io/go-feature-flag/rollout/) for more details.**|
+| `rollout` |*(optional)*<br><code>rollout</code> contains a specific rollout strategy you want to use.<br>**See [rollout section](https://thomaspoignant.github.io/go-feature-flag/latest/rollout/) for more details.**|
 
 ## Rule format
 The rule format is based on the [`nikunjy/rules`](https://github.com/nikunjy/rules) library.
@@ -312,7 +312,7 @@ All the other attributes are optional.
 
 ℹ️ Custom attributes are one of the most powerful features. They let you have rules on these attributes and target users according to any data that you want.
 
-You can also distinguish logged-in users from anonymous users in the SDK ([check documentation about anonymous users](https://thomaspoignant.github.io/go-feature-flag/users/#anonymous-users)).
+You can also distinguish logged-in users from anonymous users in the SDK ([check documentation about anonymous users](https://thomaspoignant.github.io/go-feature-flag/latest/users/#anonymous-users)).
 
 ## Variation
 The Variation methods determine whether a flag is enabled or not for a specific user.
@@ -345,7 +345,7 @@ The function is evaluating all available flags for the user and return a `flagst
 information you need.
 
 The `MarshalJSON()` function will return a JSON Object, that can be directly used by your front-end application.  
-[More details in the documentation.](https://thomaspoignant.github.io/go-feature-flag/users/#get-all-flags-for-a-specific-user)
+[More details in the documentation.](https://thomaspoignant.github.io/go-feature-flag/latest/users/#get-all-flags-for-a-specific-user)
 
 ## Rollout
 A critical part of every new feature release is orchestrating the actual launch schedule between Product, Engineering, and Marketing teams.
@@ -356,10 +356,10 @@ But it doesn’t have to, having a complex **rollout** strategy allows you to ha
 
 ### Complex rollout strategy available
 
-- [Canary releases](https://thomaspoignant.github.io/go-feature-flag/rollout/canary) - impact randomly a subset of your users.
-- [Progressive rollout](https://thomaspoignant.github.io/go-feature-flag/rollout/progressive/) - increase the percentage of your flag over time.
-- [Scheduled rollout](https://thomaspoignant.github.io/go-feature-flag/rollout/scheduled/) - update your flag over time.
-- [Experimentation rollout](https://thomaspoignant.github.io/go-feature-flag/rollout/experimentation/) - serve your feature only for a determined time *(perfect for A/B testing)*.
+- [Canary releases](https://thomaspoignant.github.io/go-feature-flag/latest/rollout/canary) - impact randomly a subset of your users.
+- [Progressive rollout](https://thomaspoignant.github.io/go-feature-flag/latest/rollout/progressive/) - increase the percentage of your flag over time.
+- [Scheduled rollout](https://thomaspoignant.github.io/go-feature-flag/latest/rollout/scheduled/) - update your flag over time.
+- [Experimentation rollout](https://thomaspoignant.github.io/go-feature-flag/latest/rollout/experimentation/) - serve your feature only for a determined time *(perfect for A/B testing)*.
 
 ## Notifiers
 If you want to be informed when a flag has changed, you can configure a [**notifier**](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#NotifierConfig).
@@ -370,17 +370,17 @@ A notifier will send one notification to the targeted system to inform them that
 
 Available notifiers are:
 
-- [Slack](https://thomaspoignant.github.io/go-feature-flag/notifiers/slack/) - Get a slack message with the changes.
-- [Webhook](https://thomaspoignant.github.io/go-feature-flag/notifiers/webhook/) - Call an API with the changes.
+- [Slack](https://thomaspoignant.github.io/go-feature-flag/latest/notifiers/slack/) - Get a slack message with the changes.
+- [Webhook](https://thomaspoignant.github.io/go-feature-flag/latest/notifiers/webhook/) - Call an API with the changes.
 
 ## Export data
 If you want to export data about how your flag are used, you can use the **`DataExporter`**.  
 It collects all the variations events and can save these events on several locations:
 
-- [File](https://thomaspoignant.github.io/go-feature-flag/data_collection/file/) *- create local files with the variation usages.*
-- [Log](https://thomaspoignant.github.io/go-feature-flag/data_collection/log/) *- use your logger to write the variation usages.*
-- [S3](https://thomaspoignant.github.io/go-feature-flag/data_collection/s3/) *- export your variation usages to S3.*
-- [Webhook](https://thomaspoignant.github.io/go-feature-flag/data_collection/webhook/) *- export your variation usages by calling a webhook.*
+- [File](https://thomaspoignant.github.io/go-feature-flag/latest/data_collection/file/) *- create local files with the variation usages.*
+- [Log](https://thomaspoignant.github.io/go-feature-flag/latest/data_collection/log/) *- use your logger to write the variation usages.*
+- [S3](https://thomaspoignant.github.io/go-feature-flag/latest/data_collection/s3/) *- export your variation usages to S3.*
+- [Webhook](https://thomaspoignant.github.io/go-feature-flag/latest/data_collection/webhook/) *- export your variation usages by calling a webhook.*
 
 Currently, we are supporting only feature events.  
 It represents individual flag evaluations and are considered "full fidelity" events.
@@ -398,7 +398,7 @@ It represents individual flag evaluations and are considered "full fidelity" eve
     "default": false
 }
 ```
-The format of the data is [described in the documentation](https://thomaspoignant.github.io/go-feature-flag/data_collection/#data-format).
+The format of the data is [described in the documentation](https://thomaspoignant.github.io/go-feature-flag/latest/data_collection/#data-format).
 
 Events are collected and send in bulk to avoid spamming your exporter *(see details in [how to configure data export](#how-to-configure-data-export)*).
 
@@ -408,7 +408,7 @@ In your `ffclient.Config` add the `DataExporter` field and configure your export
 To avoid spamming your location everytime you have a variation called, `go-feature-flag` is storing in memory all the events and send them in bulk to the exporter.  
 You can decide the threshold on when to send the data with the properties `FlushInterval` and `MaxEventInMemory`. The first threshold hit will export the data.
 
-If there are some flags you don't want to export, you can use `trackEvents` fields on these specific flags to disable the data export *(see [flag file format](https://thomaspoignant.github.io/go-feature-flag/flag_format/))*.
+If there are some flags you don't want to export, you can use `trackEvents` fields on these specific flags to disable the data export *(see [flag file format](https://thomaspoignant.github.io/go-feature-flag/latest/flag_format/))*.
 
 ### Example
 ```go  linenums="1"
@@ -424,7 +424,7 @@ ffclient.Config{
     // ...
 }
 ```
-The full configuration is [described in the documentation](https://thomaspoignant.github.io/go-feature-flag/data_collection/#how-to-configure-data-export).
+The full configuration is [described in the documentation](https://thomaspoignant.github.io/go-feature-flag/latest/data_collection/#how-to-configure-data-export).
 
 # How can I contribute?
 This project is open for contribution, see the [contributor's guide](CONTRIBUTING.md) for some helpful tips.
