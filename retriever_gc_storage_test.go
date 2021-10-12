@@ -11,12 +11,12 @@ import (
 	"testing"
 )
 
-func TestGCPRetriever_Retrieve(t *testing.T) {
+func TestGCStorageRetriever_Retrieve(t *testing.T) {
 	type fields struct {
-		Option option.ClientOption
-		Bucket string
-		Object string
-		rC     io.ReadCloser
+		Options []option.ClientOption
+		Bucket  string
+		Object  string
+		rC      io.ReadCloser
 	}
 	type args struct {
 		ctx context.Context
@@ -31,9 +31,9 @@ func TestGCPRetriever_Retrieve(t *testing.T) {
 		{
 			name: "File on Object",
 			fields: fields{
-				Option: option.WithCredentials(&google.Credentials{}),
-				Bucket: "bucket",
-				Object: "object",
+				Options: []option.ClientOption{option.WithCredentials(&google.Credentials{})},
+				Bucket:  "bucket",
+				Object:  "object",
 				rC: &testutils.GCPStorageReaderMock{
 					ShouldFail: false,
 				},
@@ -47,9 +47,9 @@ func TestGCPRetriever_Retrieve(t *testing.T) {
 		{
 			name: "File not On Object",
 			fields: fields{
-				Option: option.WithCredentials(&google.Credentials{}),
-				Bucket: "bucket",
-				Object: "object",
+				Options: []option.ClientOption{option.WithCredentials(&google.Credentials{})},
+				Bucket:  "bucket",
+				Object:  "object",
 				rC: &testutils.GCPStorageReaderMock{
 					ShouldFail: true,
 				},
@@ -62,9 +62,9 @@ func TestGCPRetriever_Retrieve(t *testing.T) {
 		{
 			name: "Option Without Auth",
 			fields: fields{
-				Option: option.WithoutAuthentication(),
-				Bucket: "bucket",
-				Object: "object",
+				Options: []option.ClientOption{option.WithoutAuthentication()},
+				Bucket:  "bucket",
+				Object:  "object",
 				rC: &testutils.GCPStorageReaderMock{
 					ShouldFail: false,
 				},
@@ -78,11 +78,11 @@ func TestGCPRetriever_Retrieve(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := &GCPRetriever{
-				Option: tt.fields.Option,
-				Bucket: tt.fields.Bucket,
-				Object: tt.fields.Object,
-				rC:     tt.fields.rC,
+			r := &GCStorageRetriever{
+				Options: tt.fields.Options,
+				Bucket:  tt.fields.Bucket,
+				Object:  tt.fields.Object,
+				rC:      tt.fields.rC,
 			}
 			got, err := r.Retrieve(tt.args.ctx)
 			assert.Equal(t, tt.wantErr, err != nil, "Retrieve() error = %v, wantErr %v", err, tt.wantErr)

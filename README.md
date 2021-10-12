@@ -141,6 +141,7 @@ Available retriever are:
 - [From an HTTP endpoint](https://thomaspoignant.github.io/go-feature-flag/flag_file/http/)
 - [From a S3 Bucket](https://thomaspoignant.github.io/go-feature-flag/flag_file/s3/)
 - [From a file](https://thomaspoignant.github.io/go-feature-flag/flag_file/file/)
+- [From Google Cloud Storage](https://thomaspoignant.github.io/go-feature-flag/flag_file/google_cloud_storage/)
 
 ## Flags file format
 `go-feature-flag` core feature is to centralize all your feature flags in a source file, and to avoid hosting and maintaining a backend server to manage them.
