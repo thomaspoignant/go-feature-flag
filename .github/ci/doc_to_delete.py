@@ -2,6 +2,14 @@
 import json
 import re
 
+# This script is computing which version of the documentation should be delete.
+# We are keeping only the last minor of each version with the latest patch version,
+# it means that if you have these version 0.1.1, 0.1.2, 0.1.3 and, 0.2.0 we will keep only
+# the versions 0.1.3 and 0.2.0.
+#
+# The script expect the output of the command "mike list --json" as the input and will return
+# the list of version to delete separate with a white space (ex: "0.1.1 0.1.2")
+
 mike_json = input()
 versions = json.loads(mike_json)
 versionPattern = r'^(v?)(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(' \
