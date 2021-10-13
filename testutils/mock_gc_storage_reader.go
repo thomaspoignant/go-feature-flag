@@ -6,27 +6,28 @@ import (
 	"io/ioutil"
 )
 
-type GCPStorageReaderMock struct {
+type GCStorageReaderMock struct {
 	ShouldFail bool
+	FileToRead string
 	data       []byte
 	readIndex  int64
 }
 
-func (r *GCPStorageReaderMock) Close() error {
+func (r *GCStorageReaderMock) Close() error {
 	return nil
 }
 
-func (r *GCPStorageReaderMock) Read(p []byte) (n int, err error) {
+func (r *GCStorageReaderMock) Read(p []byte) (n int, err error) {
+	if r.ShouldFail {
+		return 0, fmt.Errorf("failed to read from GCP")
+	}
+
 	// Set the mocked data to be read.
 	if r.data == nil {
-		r.data, err = ioutil.ReadFile("./testdata/flag-config.yaml")
+		r.data, err = ioutil.ReadFile(r.FileToRead)
 		if err != nil {
 			return 0, err
 		}
-	}
-
-	if r.ShouldFail {
-		return 0, fmt.Errorf("failed to read from GCP")
 	}
 
 	// Return io.EOF if read all bytes.

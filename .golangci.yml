@@ -52,3 +52,7 @@ issues:
         - gochecknoinits
         - dupl
         - staticcheck
+    - path: retriever_gc_storage
+      text: "weak cryptographic primitive"
+      linters:
+        - gosec

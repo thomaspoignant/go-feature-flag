@@ -137,11 +137,11 @@ You can also create many `go-feature-flag` clients to use in your application.
 The module supports different ways of retrieving the flag file.  
 Available retriever are:
 
-- [From GitHub](https://thomaspoignant.github.io/go-feature-flag/flag_file/github/)
-- [From an HTTP endpoint](https://thomaspoignant.github.io/go-feature-flag/flag_file/http/)
-- [From a S3 Bucket](https://thomaspoignant.github.io/go-feature-flag/flag_file/s3/)
-- [From a file](https://thomaspoignant.github.io/go-feature-flag/flag_file/file/)
-- [From Google Cloud Storage](https://thomaspoignant.github.io/go-feature-flag/flag_file/google_cloud_storage/)
+- [From GitHub](https://thomaspoignant.github.io/go-feature-flag/latest/flag_file/github/)
+- [From an HTTP endpoint](https://thomaspoignant.github.io/go-feature-flag/latest/flag_file/http/)
+- [From a S3 Bucket](https://thomaspoignant.github.io/go-feature-flag/latest/flag_file/s3/)
+- [From a file](https://thomaspoignant.github.io/go-feature-flag/latest/flag_file/file/)
+- [From Google Cloud Storage](https://thomaspoignant.github.io/go-feature-flag/latest/flag_file/google_cloud_storage/)
 
 ## Flags file format
 `go-feature-flag` core feature is to centralize all your feature flags in a source file, and to avoid hosting and maintaining a backend server to manage them.
