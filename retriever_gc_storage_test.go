@@ -3,7 +3,7 @@ package ffclient
 import (
 	"cloud.google.com/go/storage"
 	"context"
-	"crypto/md5"
+	"crypto/md5" //nolint: gosec
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
@@ -117,7 +117,7 @@ func TestGCStorageRetriever_Retrieve(t *testing.T) {
 			r.cache = want
 
 			// Compute Hash of this file data.
-			md5Hash := md5.Sum(want)
+			md5Hash := md5.Sum(want) //nolint: gosec
 			wantedMd5 := md5Hash[:]
 			copy(r.md5, wantedMd5)
 
@@ -133,7 +133,7 @@ func TestGCStorageRetriever_Retrieve(t *testing.T) {
 				want, err = ioutil.ReadFile("./testdata/flag-config-updated.yaml")
 				assert.NoError(t, err)
 
-				md5Hash = md5.Sum(want)
+				md5Hash = md5.Sum(want) //nolint: gosec
 				wantedMd5 = md5Hash[:]
 				obj.EXPECT().Attrs(context.Background()).Return(&storage.ObjectAttrs{MD5: wantedMd5}, nil).Times(1)
 			}

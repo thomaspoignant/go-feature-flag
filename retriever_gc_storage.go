@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"cloud.google.com/go/storage"
 	"context"
-	"crypto/md5"
+	"crypto/md5" //nolint: gosec
 	"fmt"
 	"google.golang.org/api/option"
 	"io"
@@ -83,7 +83,7 @@ func (retriever *GCStorageRetriever) Retrieve(ctx context.Context) (content []by
 
 	// Update Cache along with its hash.
 	retriever.cache = content
-	md5Hash := md5.Sum(content)
+	md5Hash := md5.Sum(content) //nolint: gosec
 	retriever.md5 = md5Hash[:]
 
 	return content, nil
