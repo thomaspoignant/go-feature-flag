@@ -130,6 +130,8 @@ func (dto *DtoFlag) IsFlagV2() bool {
 
 func (dto *DtoFlag) ToFlagV1() flagv2.FlagData {
 
+	panic("STOP flag v1")
+
 	variations := map[string]*interface{}{
 		"True":    dto.True,
 		"False":   dto.False,
@@ -145,9 +147,9 @@ func (dto *DtoFlag) ToFlagV1() flagv2.FlagData {
 		if dto.Percentage != nil {
 			percentage = *dto.Percentage
 		}
-		var percentages []flagv2.VariationPercentage
-		percentages = append(percentages, flagv2.VariationPercentage{"True": percentage})
-		percentages = append(percentages, flagv2.VariationPercentage{"False": 100 - percentage})
+		percentages := map[string]float64{}
+		percentages["True"] = percentage
+		percentages["False"] = 100 - percentage
 
 		newRule := flagv2.Rule{
 			Percentages: &percentages,
@@ -163,9 +165,9 @@ func (dto *DtoFlag) ToFlagV1() flagv2.FlagData {
 		if dto.Percentage != nil {
 			percentage = *dto.Percentage
 		}
-		var percentages []flagv2.VariationPercentage
-		percentages = append(percentages, flagv2.VariationPercentage{"True": percentage})
-		percentages = append(percentages, flagv2.VariationPercentage{"False": 100 - percentage})
+		percentages := map[string]float64{}
+		percentages["True"] = percentage
+		percentages["False"] = 100 - percentage
 
 		defaultRule = flagv2.Rule{
 			Percentages: &percentages,

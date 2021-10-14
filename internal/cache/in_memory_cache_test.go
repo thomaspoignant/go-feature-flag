@@ -24,9 +24,7 @@ func TestAll(t *testing.T) {
 						"test2": testconvert.Interface(false),
 					},
 					DefaultRule: &flagv2.Rule{
-						Percentages: &[]flagv2.VariationPercentage{
-							{"test": 10}, {"test2": 90},
-						},
+						Percentages: &map[string]float64{"test": 10, "test2": 90},
 					},
 				},
 			},
@@ -37,9 +35,7 @@ func TestAll(t *testing.T) {
 						"test2": testconvert.Interface(false),
 					},
 					DefaultRule: &flagv2.Rule{
-						Percentages: &[]flagv2.VariationPercentage{
-							{"test": 10}, {"test2": 90},
-						},
+						Percentages: &map[string]float64{"test": 10, "test2": 90},
 					},
 				},
 			},
@@ -53,9 +49,7 @@ func TestAll(t *testing.T) {
 						"test2": testconvert.Interface(false),
 					},
 					DefaultRule: &flagv2.Rule{
-						Percentages: &[]flagv2.VariationPercentage{
-							{"test": 10}, {"test2": 90},
-						},
+						Percentages: &map[string]float64{"test": 10, "test2": 90},
 					},
 				},
 				"test1": {
@@ -64,9 +58,7 @@ func TestAll(t *testing.T) {
 						"test2": testconvert.Interface(false),
 					},
 					DefaultRule: &flagv2.Rule{
-						Percentages: &[]flagv2.VariationPercentage{
-							{"test": 0}, {"test2": 100},
-						},
+						Percentages: &map[string]float64{"test": 0, "test2": 100},
 					},
 				},
 			},
@@ -77,9 +69,7 @@ func TestAll(t *testing.T) {
 						"test2": testconvert.Interface(false),
 					},
 					DefaultRule: &flagv2.Rule{
-						Percentages: &[]flagv2.VariationPercentage{
-							{"test": 10}, {"test2": 90},
-						},
+						Percentages: &map[string]float64{"test": 10, "test2": 90},
 					},
 				},
 				"test1": &flagv2.FlagData{
@@ -88,9 +78,7 @@ func TestAll(t *testing.T) {
 						"test2": testconvert.Interface(false),
 					},
 					DefaultRule: &flagv2.Rule{
-						Percentages: &[]flagv2.VariationPercentage{
-							{"test": 0}, {"test2": 100},
-						},
+						Percentages: &map[string]float64{"test": 0, "test2": 100},
 					},
 				},
 			},
@@ -119,10 +107,18 @@ func TestCopy(t *testing.T) {
 			name: "copy with 1 flag",
 			param: map[string]flag.DtoFlag{
 				"test": {
-					Percentage: testconvert.Float64(40),
-					True:       testconvert.Interface("true"),
-					False:      testconvert.Interface("false"),
-					Default:    testconvert.Interface("default"),
+					Variations: &map[string]*interface{}{
+						"True":    testconvert.Interface(true),
+						"False":   testconvert.Interface(false),
+						"Default": testconvert.Interface(false),
+					},
+					DefaultRule: &flagv2.Rule{
+						Query: testconvert.String("key eq \"random-key\""),
+						Percentages: &map[string]float64{
+							"True":  40,
+							"False": 60,
+						},
+					},
 				},
 			},
 		},

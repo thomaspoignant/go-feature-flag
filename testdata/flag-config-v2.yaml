@@ -6,8 +6,8 @@ test-flag:
   targeting:
     - query: key eq "random-key"
       percentage:
-        - "True": 100
-        - "False": 0
+        "True": 100
+        "False": 0
   defaultRule:
     variation: Default
 
@@ -19,7 +19,7 @@ test-flag2:
   targeting:
     - query: key eq "not-a-key"
       percentage:
-        - "True": 100
-        - "False": 0
+        "True": 100
+        "False": 0
   defaultRule:
     variation: Default

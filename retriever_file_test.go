@@ -8,18 +8,30 @@ import (
 )
 
 var expectedFile = `test-flag:
-  rule: key eq "random-key"
-  percentage: 100
-  true: true
-  false: false
-  default: false
+  variations:
+    Default: false
+    "False": false
+    "True": true
+  targeting:
+    - query: key eq "random-key"
+      percentage:
+        - "True": 100
+        - "False": 0
+  defaultRule:
+    variation: Default
 
 test-flag2:
-  rule: key eq "not-a-key"
-  percentage: 100
-  true: true
-  false: false
-  default: false
+  variations:
+    Default: false
+    "False": false
+    "True": true
+  targeting:
+    - query: key eq "not-a-key"
+      percentage:
+        - "True": 100
+        - "False": 0
+  defaultRule:
+    variation: Default
 `
 
 func Test_localRetriever_Retrieve(t *testing.T) {

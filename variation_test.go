@@ -6,7 +6,7 @@ import (
 	"errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
+	"github.com/thomaspoignant/go-feature-flag/internal/flagv2"
 	"io/ioutil"
 	"log"
 	"os"
@@ -62,7 +62,7 @@ func TestBoolVariation(t *testing.T) {
 				flagKey:      "disable-flag",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: true,
-				cacheMock: NewCacheMock(&flagv1.FlagData{
+				cacheMock: NewCacheMock(&flagv2.FlagData{
 					Disable: testconvert.Bool(true),
 				}, nil),
 			},
@@ -77,7 +77,7 @@ func TestBoolVariation(t *testing.T) {
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: true,
 				cacheMock: NewCacheMock(
-					&flagv1.FlagData{},
+					&flagv2.FlagData{},
 					errors.New("impossible to read the toggle before the initialisation")),
 			},
 			want:        true,
@@ -90,7 +90,7 @@ func TestBoolVariation(t *testing.T) {
 				flagKey:      "key-not-exist",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: true,
-				cacheMock:    NewCacheMock(&flagv1.FlagData{}, errors.New("flag [key-not-exist] does not exists")),
+				cacheMock:    NewCacheMock(&flagv2.FlagData{}, errors.New("flag [key-not-exist] does not exists")),
 			},
 			want:        true,
 			wantErr:     true,
@@ -102,12 +102,19 @@ func TestBoolVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: true,
-				cacheMock: NewCacheMock(&flagv1.FlagData{
-					Rule:       testconvert.String("key eq \"key\""),
-					Percentage: testconvert.Float64(100),
-					Default:    testconvert.Interface(true),
-					True:       testconvert.Interface(false),
-					False:      testconvert.Interface(false),
+				cacheMock: NewCacheMock(&flagv2.FlagData{
+					Variations: &map[string]*interface{}{
+						"True":    testconvert.Interface(false),
+						"False":   testconvert.Interface(false),
+						"Default": testconvert.Interface(true),
+					},
+					Rules: &[]flagv2.Rule{{
+						Query:       testconvert.String("key eq \"key\""),
+						Percentages: &map[string]float64{"True": 100, "False": 0},
+					}},
+					DefaultRule: &flagv2.Rule{
+						VariationResult: testconvert.String("Default"),
+					},
 				}, nil),
 			},
 			want:        true,
@@ -120,12 +127,19 @@ func TestBoolVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewAnonymousUser("random-key"),
 				defaultValue: true,
-				cacheMock: NewCacheMock(&flagv1.FlagData{
-					Rule:       testconvert.String("key eq \"random-key\""),
-					Percentage: testconvert.Float64(100),
-					Default:    testconvert.Interface(false),
-					True:       testconvert.Interface(true),
-					False:      testconvert.Interface(false),
+				cacheMock: NewCacheMock(&flagv2.FlagData{
+					Variations: &map[string]*interface{}{
+						"True":    testconvert.Interface(true),
+						"False":   testconvert.Interface(false),
+						"Default": testconvert.Interface(false),
+					},
+					Rules: &[]flagv2.Rule{{
+						Query:       testconvert.String("key eq \"random-key\""),
+						Percentages: &map[string]float64{"True": 100, "False": 0},
+					}},
+					DefaultRule: &flagv2.Rule{
+						VariationResult: testconvert.String("Default"),
+					},
 				}, nil),
 			},
 			want:        true,
@@ -138,12 +152,19 @@ func TestBoolVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewAnonymousUser("random-key-ssss1"),
 				defaultValue: true,
-				cacheMock: NewCacheMock(&flagv1.FlagData{
-					Rule:       testconvert.String("anonymous eq true"),
-					Percentage: testconvert.Float64(10),
-					Default:    testconvert.Interface(true),
-					True:       testconvert.Interface(true),
-					False:      testconvert.Interface(false),
+				cacheMock: NewCacheMock(&flagv2.FlagData{
+					Variations: &map[string]*interface{}{
+						"True":    testconvert.Interface(true),
+						"False":   testconvert.Interface(false),
+						"Default": testconvert.Interface(true),
+					},
+					Rules: &[]flagv2.Rule{{
+						Query:       testconvert.String("anonymous eq true"),
+						Percentages: &map[string]float64{"True": 10, "False": 90},
+					}},
+					DefaultRule: &flagv2.Rule{
+						VariationResult: testconvert.String("Default"),
+					},
 				}, nil),
 			},
 			want:        false,
@@ -156,11 +177,19 @@ func TestBoolVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewUser("random-key-ssss1"),
 				defaultValue: true,
-				cacheMock: NewCacheMock(&flagv1.FlagData{
-					Percentage: testconvert.Float64(100),
-					Default:    testconvert.Interface("xxx"),
-					True:       testconvert.Interface("xxx"),
-					False:      testconvert.Interface("xxx"),
+				cacheMock: NewCacheMock(&flagv2.FlagData{
+					Variations: &map[string]*interface{}{
+						"True":    testconvert.Interface("xxx"),
+						"False":   testconvert.Interface("xxx"),
+						"Default": testconvert.Interface("xxx"),
+					},
+					Rules: &[]flagv2.Rule{{
+						Query:       testconvert.String("key eq \"key\""),
+						Percentages: &map[string]float64{"True": 100, "False": 0},
+					}},
+					DefaultRule: &flagv2.Rule{
+						VariationResult: testconvert.String("Default"),
+					},
 				}, nil),
 			},
 			want:        true,
@@ -173,12 +202,15 @@ func TestBoolVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewAnonymousUser("random-key"),
 				defaultValue: true,
-				cacheMock: NewCacheMock(&flagv1.FlagData{
-					Rule:        testconvert.String("key eq \"random-key\""),
-					Percentage:  testconvert.Float64(100),
-					True:        testconvert.Interface(true),
-					False:       testconvert.Interface(false),
-					Default:     testconvert.Interface(false),
+				cacheMock: NewCacheMock(&flagv2.FlagData{
+					Variations: &map[string]*interface{}{
+						"True":    testconvert.Interface(true),
+						"False":   testconvert.Interface(false),
+						"Default": testconvert.Interface(false),
+					},
+					DefaultRule: &flagv2.Rule{
+						Percentages: &map[string]float64{"True": 100, "False": 0},
+					},
 					TrackEvents: testconvert.Bool(false),
 				}, nil),
 			},
@@ -193,7 +225,7 @@ func TestBoolVariation(t *testing.T) {
 				flagKey:      "disable-flag",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: false,
-				cacheMock: NewCacheMock(&flagv1.FlagData{
+				cacheMock: NewCacheMock(&flagv2.FlagData{
 					Disable: testconvert.Bool(true),
 				}, nil),
 			},
@@ -264,7 +296,7 @@ func TestFloat64Variation(t *testing.T) {
 				flagKey:      "disable-flag",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: 120.12,
-				cacheMock: NewCacheMock(&flagv1.FlagData{
+				cacheMock: NewCacheMock(&flagv2.FlagData{
 					Disable: testconvert.Bool(true),
 				}, nil),
 			},
@@ -279,7 +311,7 @@ func TestFloat64Variation(t *testing.T) {
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: 118.12,
 				cacheMock: NewCacheMock(
-					&flagv1.FlagData{},
+					&flagv2.FlagData{},
 					errors.New("impossible to read the toggle before the initialisation")),
 			},
 			want:        118.12,
@@ -292,7 +324,7 @@ func TestFloat64Variation(t *testing.T) {
 				flagKey:      "key-not-exist",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: 118.12,
-				cacheMock:    NewCacheMock(&flagv1.FlagData{}, errors.New("flag [key-not-exist] does not exists")),
+				cacheMock:    NewCacheMock(&flagv2.FlagData{}, errors.New("flag [key-not-exist] does not exists")),
 			},
 			want:        118.12,
 			wantErr:     true,
@@ -304,12 +336,19 @@ func TestFloat64Variation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: 118.12,
-				cacheMock: NewCacheMock(&flagv1.FlagData{
-					Rule:       testconvert.String("key eq \"key\""),
-					Percentage: testconvert.Float64(100),
-					Default:    testconvert.Interface(119.12),
-					True:       testconvert.Interface(120.12),
-					False:      testconvert.Interface(121.12),
+				cacheMock: NewCacheMock(&flagv2.FlagData{
+					Variations: &map[string]*interface{}{
+						"True":    testconvert.Interface(120.12),
+						"False":   testconvert.Interface(121.12),
+						"Default": testconvert.Interface(119.12),
+					},
+					Rules: &[]flagv2.Rule{{
+						Query:       testconvert.String("key eq \"key\""),
+						Percentages: &map[string]float64{"True": 100, "False": 0},
+					}},
+					DefaultRule: &flagv2.Rule{
+						VariationResult: testconvert.String("Default"),
+					},
 				}, nil),
 			},
 			want:        119.12,
@@ -322,12 +361,19 @@ func TestFloat64Variation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewAnonymousUser("random-key"),
 				defaultValue: 118.12,
-				cacheMock: NewCacheMock(&flagv1.FlagData{
-					Rule:       testconvert.String("key eq \"random-key\""),
-					Percentage: testconvert.Float64(100),
-					Default:    testconvert.Interface(119.12),
-					True:       testconvert.Interface(120.12),
-					False:      testconvert.Interface(121.12),
+				cacheMock: NewCacheMock(&flagv2.FlagData{
+					Variations: &map[string]*interface{}{
+						"True":    testconvert.Interface(120.12),
+						"False":   testconvert.Interface(121.12),
+						"Default": testconvert.Interface(119.12),
+					},
+					Rules: &[]flagv2.Rule{{
+						Query:       testconvert.String("key eq \"random-key\""),
+						Percentages: &map[string]float64{"True": 100, "False": 0},
+					}},
+					DefaultRule: &flagv2.Rule{
+						VariationResult: testconvert.String("Default"),
+					},
 				}, nil),
 			},
 			want:        120.12,
@@ -340,12 +386,19 @@ func TestFloat64Variation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewAnonymousUser("random-key-ssss1"),
 				defaultValue: 118.12,
-				cacheMock: NewCacheMock(&flagv1.FlagData{
-					Rule:       testconvert.String("anonymous eq true"),
-					Percentage: testconvert.Float64(10),
-					Default:    testconvert.Interface(119.12),
-					True:       testconvert.Interface(120.12),
-					False:      testconvert.Interface(121.12),
+				cacheMock: NewCacheMock(&flagv2.FlagData{
+					Variations: &map[string]*interface{}{
+						"True":    testconvert.Interface(120.12),
+						"False":   testconvert.Interface(121.12),
+						"Default": testconvert.Interface(119.12),
+					},
+					Rules: &[]flagv2.Rule{{
+						Query:       testconvert.String("anonymous eq true"),
+						Percentages: &map[string]float64{"True": 10, "False": 90},
+					}},
+					DefaultRule: &flagv2.Rule{
+						VariationResult: testconvert.String("Default"),
+					},
 				}, nil),
 			},
 			want:        121.12,
@@ -358,11 +411,19 @@ func TestFloat64Variation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewUser("random-key-ssss1"),
 				defaultValue: 118.12,
-				cacheMock: NewCacheMock(&flagv1.FlagData{
-					Percentage: testconvert.Float64(100),
-					Default:    testconvert.Interface("xxx"),
-					True:       testconvert.Interface("xxx"),
-					False:      testconvert.Interface("xxx"),
+				cacheMock: NewCacheMock(&flagv2.FlagData{
+					Variations: &map[string]*interface{}{
+						"True":    testconvert.Interface("xxx"),
+						"False":   testconvert.Interface("xxx"),
+						"Default": testconvert.Interface("xxx"),
+					},
+					Rules: &[]flagv2.Rule{{
+						Query:       testconvert.String("key eq \"key\""),
+						Percentages: &map[string]float64{"True": 100, "False": 0},
+					}},
+					DefaultRule: &flagv2.Rule{
+						VariationResult: testconvert.String("Default"),
+					},
 				}, nil),
 			},
 			want:        118.12,
@@ -375,12 +436,15 @@ func TestFloat64Variation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewAnonymousUser("random-key"),
 				defaultValue: 118.12,
-				cacheMock: NewCacheMock(&flagv1.FlagData{
-					Rule:        testconvert.String("key eq \"random-key\""),
-					Percentage:  testconvert.Float64(100),
-					Default:     testconvert.Interface(119.12),
-					True:        testconvert.Interface(120.12),
-					False:       testconvert.Interface(121.12),
+				cacheMock: NewCacheMock(&flagv2.FlagData{
+					Variations: &map[string]*interface{}{
+						"True":    testconvert.Interface(120.12),
+						"False":   testconvert.Interface(121.12),
+						"Default": testconvert.Interface(119.12),
+					},
+					DefaultRule: &flagv2.Rule{
+						Percentages: &map[string]float64{"True": 100, "False": 0},
+					},
 					TrackEvents: testconvert.Bool(false),
 				}, nil),
 			},
@@ -395,7 +459,7 @@ func TestFloat64Variation(t *testing.T) {
 				flagKey:      "disable-flag",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: 118.12,
-				cacheMock: NewCacheMock(&flagv1.FlagData{
+				cacheMock: NewCacheMock(&flagv2.FlagData{
 					Disable: testconvert.Bool(true),
 				}, nil),
 			},
@@ -465,7 +529,7 @@ func TestJSONArrayVariation(t *testing.T) {
 				flagKey:      "disable-flag",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: []interface{}{"toto"},
-				cacheMock: NewCacheMock(&flagv1.FlagData{
+				cacheMock: NewCacheMock(&flagv2.FlagData{
 					Disable: testconvert.Bool(true),
 				}, nil),
 			},
@@ -480,7 +544,7 @@ func TestJSONArrayVariation(t *testing.T) {
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: []interface{}{"toto"},
 				cacheMock: NewCacheMock(
-					&flagv1.FlagData{},
+					&flagv2.FlagData{},
 					errors.New("impossible to read the toggle before the initialisation")),
 			},
 			want:        []interface{}{"toto"},
@@ -493,7 +557,7 @@ func TestJSONArrayVariation(t *testing.T) {
 				flagKey:      "key-not-exist",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: []interface{}{"toto"},
-				cacheMock:    NewCacheMock(&flagv1.FlagData{}, errors.New("flag [key-not-exist] does not exists")),
+				cacheMock:    NewCacheMock(&flagv2.FlagData{}, errors.New("flag [key-not-exist] does not exists")),
 			},
 			want:        []interface{}{"toto"},
 			wantErr:     true,
@@ -505,12 +569,19 @@ func TestJSONArrayVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: []interface{}{"toto"},
-				cacheMock: NewCacheMock(&flagv1.FlagData{
-					Rule:       testconvert.String("key eq \"key\""),
-					Percentage: testconvert.Float64(100),
-					Default:    testconvert.Interface([]interface{}{"default"}),
-					True:       testconvert.Interface([]interface{}{"true"}),
-					False:      testconvert.Interface([]interface{}{"false"}),
+				cacheMock: NewCacheMock(&flagv2.FlagData{
+					Variations: &map[string]*interface{}{
+						"True":    testconvert.Interface([]interface{}{"true"}),
+						"False":   testconvert.Interface([]interface{}{"false"}),
+						"Default": testconvert.Interface([]interface{}{"default"}),
+					},
+					Rules: &[]flagv2.Rule{{
+						Query:       testconvert.String("key eq \"key\""),
+						Percentages: &map[string]float64{"True": 100, "False": 0},
+					}},
+					DefaultRule: &flagv2.Rule{
+						VariationResult: testconvert.String("Default"),
+					},
 				}, nil),
 			},
 			want:        []interface{}{"default"},
@@ -523,12 +594,19 @@ func TestJSONArrayVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewAnonymousUser("random-key"),
 				defaultValue: []interface{}{"toto"},
-				cacheMock: NewCacheMock(&flagv1.FlagData{
-					Rule:       testconvert.String("key eq \"random-key\""),
-					Percentage: testconvert.Float64(100),
-					Default:    testconvert.Interface([]interface{}{"default"}),
-					True:       testconvert.Interface([]interface{}{"true"}),
-					False:      testconvert.Interface([]interface{}{"false"}),
+				cacheMock: NewCacheMock(&flagv2.FlagData{
+					Variations: &map[string]*interface{}{
+						"True":    testconvert.Interface([]interface{}{"true"}),
+						"False":   testconvert.Interface([]interface{}{"false"}),
+						"Default": testconvert.Interface([]interface{}{"default"}),
+					},
+					Rules: &[]flagv2.Rule{{
+						Query:       testconvert.String("key eq \"random-key\""),
+						Percentages: &map[string]float64{"True": 100, "False": 0},
+					}},
+					DefaultRule: &flagv2.Rule{
+						VariationResult: testconvert.String("Default"),
+					},
 				}, nil),
 			},
 			want:        []interface{}{"true"},
@@ -541,12 +619,19 @@ func TestJSONArrayVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewAnonymousUser("random-key-ssss1"),
 				defaultValue: []interface{}{"toto"},
-				cacheMock: NewCacheMock(&flagv1.FlagData{
-					Rule:       testconvert.String("anonymous eq true"),
-					Percentage: testconvert.Float64(10),
-					Default:    testconvert.Interface([]interface{}{"default"}),
-					True:       testconvert.Interface([]interface{}{"true"}),
-					False:      testconvert.Interface([]interface{}{"false"}),
+				cacheMock: NewCacheMock(&flagv2.FlagData{
+					Variations: &map[string]*interface{}{
+						"True":    testconvert.Interface([]interface{}{"true"}),
+						"False":   testconvert.Interface([]interface{}{"false"}),
+						"Default": testconvert.Interface([]interface{}{"default"}),
+					},
+					Rules: &[]flagv2.Rule{{
+						Query:       testconvert.String("anonymous eq true"),
+						Percentages: &map[string]float64{"True": 10, "False": 90},
+					}},
+					DefaultRule: &flagv2.Rule{
+						VariationResult: testconvert.String("Default"),
+					},
 				}, nil),
 			},
 			want:        []interface{}{"false"},
@@ -559,11 +644,19 @@ func TestJSONArrayVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewUser("random-key-ssss1"),
 				defaultValue: []interface{}{"toto"},
-				cacheMock: NewCacheMock(&flagv1.FlagData{
-					Percentage: testconvert.Float64(100),
-					Default:    testconvert.Interface("xxx"),
-					True:       testconvert.Interface("xxx"),
-					False:      testconvert.Interface("xxx"),
+				cacheMock: NewCacheMock(&flagv2.FlagData{
+					Variations: &map[string]*interface{}{
+						"True":    testconvert.Interface("xxx"),
+						"False":   testconvert.Interface("xxx"),
+						"Default": testconvert.Interface("xxx"),
+					},
+					Rules: &[]flagv2.Rule{{
+						Query:       testconvert.String("anonymous eq true"),
+						Percentages: &map[string]float64{"True": 10, "False": 90},
+					}},
+					DefaultRule: &flagv2.Rule{
+						VariationResult: testconvert.String("Default"),
+					},
 				}, nil),
 			},
 			want:        []interface{}{"toto"},
@@ -576,11 +669,15 @@ func TestJSONArrayVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewUser("random-key-ssss1"),
 				defaultValue: []interface{}{"toto"},
-				cacheMock: NewCacheMock(&flagv1.FlagData{
-					Percentage:  testconvert.Float64(100),
-					Default:     testconvert.Interface([]interface{}{"default"}),
-					True:        testconvert.Interface([]interface{}{"true"}),
-					False:       testconvert.Interface([]interface{}{"false"}),
+				cacheMock: NewCacheMock(&flagv2.FlagData{
+					Variations: &map[string]*interface{}{
+						"True":    testconvert.Interface([]interface{}{"true"}),
+						"False":   testconvert.Interface([]interface{}{"false"}),
+						"Default": testconvert.Interface([]interface{}{"default"}),
+					},
+					DefaultRule: &flagv2.Rule{
+						Percentages: &map[string]float64{"True": 100, "False": 0},
+					},
 					TrackEvents: testconvert.Bool(false),
 				}, nil),
 			},
@@ -594,14 +691,22 @@ func TestJSONArrayVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewAnonymousUser("random-key-ssss1"),
 				defaultValue: []interface{}{"toto"},
-				cacheMock: NewCacheMock(&flagv1.FlagData{
-					Rule:        testconvert.String("anonymous eq true"),
-					Percentage:  testconvert.Float64(10),
-					Default:     testconvert.Interface([]interface{}{"default"}),
-					True:        testconvert.Interface([]interface{}{"true"}),
-					False:       testconvert.Interface([]interface{}{"false"}),
-					TrackEvents: testconvert.Bool(false),
-				}, nil),
+				cacheMock: NewCacheMock(
+					&flagv2.FlagData{
+						Variations: &map[string]*interface{}{
+							"True":    testconvert.Interface([]interface{}{"true"}),
+							"False":   testconvert.Interface([]interface{}{"false"}),
+							"Default": testconvert.Interface([]interface{}{"default"}),
+						},
+						Rules: &[]flagv2.Rule{{
+							Query:       testconvert.String("anonymous eq true"),
+							Percentages: &map[string]float64{"True": 10, "False": 90},
+						}},
+						DefaultRule: &flagv2.Rule{
+							VariationResult: testconvert.String("Default"),
+						},
+						TrackEvents: testconvert.Bool(false),
+					}, nil),
 			},
 			want:        []interface{}{"false"},
 			wantErr:     false,
@@ -614,7 +719,7 @@ func TestJSONArrayVariation(t *testing.T) {
 				flagKey:      "disable-flag",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: []interface{}{"toto"},
-				cacheMock: NewCacheMock(&flagv1.FlagData{
+				cacheMock: NewCacheMock(&flagv2.FlagData{
 					Disable: testconvert.Bool(true),
 				}, nil),
 			},
@@ -680,7 +785,7 @@ func TestJSONVariation(t *testing.T) {
 				flagKey:      "disable-flag",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: map[string]interface{}{"default-notkey": true},
-				cacheMock: NewCacheMock(&flagv1.FlagData{
+				cacheMock: NewCacheMock(&flagv2.FlagData{
 					Disable: testconvert.Bool(true),
 				}, nil),
 			},
@@ -695,7 +800,7 @@ func TestJSONVariation(t *testing.T) {
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: map[string]interface{}{"default-notkey": true},
 				cacheMock: NewCacheMock(
-					&flagv1.FlagData{},
+					&flagv2.FlagData{},
 					errors.New("impossible to read the toggle before the initialisation")),
 			},
 			want:        map[string]interface{}{"default-notkey": true},
@@ -708,7 +813,7 @@ func TestJSONVariation(t *testing.T) {
 				flagKey:      "key-not-exist",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: map[string]interface{}{"default-notkey": true},
-				cacheMock:    NewCacheMock(&flagv1.FlagData{}, errors.New("flag [key-not-exist] does not exists")),
+				cacheMock:    NewCacheMock(&flagv2.FlagData{}, errors.New("flag [key-not-exist] does not exists")),
 			},
 			want:        map[string]interface{}{"default-notkey": true},
 			wantErr:     true,
@@ -720,12 +825,19 @@ func TestJSONVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: map[string]interface{}{"default-notkey": true},
-				cacheMock: NewCacheMock(&flagv1.FlagData{
-					Rule:       testconvert.String("key eq \"key\""),
-					Percentage: testconvert.Float64(100),
-					Default:    testconvert.Interface(map[string]interface{}{"default": true}),
-					True:       testconvert.Interface(map[string]interface{}{"true": true}),
-					False:      testconvert.Interface(map[string]interface{}{"false": true}),
+				cacheMock: NewCacheMock(&flagv2.FlagData{
+					Variations: &map[string]*interface{}{
+						"True":    testconvert.Interface(map[string]interface{}{"true": true}),
+						"False":   testconvert.Interface(map[string]interface{}{"false": true}),
+						"Default": testconvert.Interface(map[string]interface{}{"default": true}),
+					},
+					Rules: &[]flagv2.Rule{{
+						Query:       testconvert.String("key eq \"key\""),
+						Percentages: &map[string]float64{"True": 100, "False": 0},
+					}},
+					DefaultRule: &flagv2.Rule{
+						VariationResult: testconvert.String("Default"),
+					},
 				}, nil),
 			},
 			want:        map[string]interface{}{"default": true},
@@ -738,12 +850,19 @@ func TestJSONVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewAnonymousUser("random-key"),
 				defaultValue: map[string]interface{}{"default-notkey": true},
-				cacheMock: NewCacheMock(&flagv1.FlagData{
-					Rule:       testconvert.String("key eq \"random-key\""),
-					Percentage: testconvert.Float64(100),
-					Default:    testconvert.Interface(map[string]interface{}{"default": true}),
-					True:       testconvert.Interface(map[string]interface{}{"true": true}),
-					False:      testconvert.Interface(map[string]interface{}{"false": true}),
+				cacheMock: NewCacheMock(&flagv2.FlagData{
+					Variations: &map[string]*interface{}{
+						"True":    testconvert.Interface(map[string]interface{}{"true": true}),
+						"False":   testconvert.Interface(map[string]interface{}{"false": true}),
+						"Default": testconvert.Interface(map[string]interface{}{"default": true}),
+					},
+					Rules: &[]flagv2.Rule{{
+						Query:       testconvert.String("key eq \"random-key\""),
+						Percentages: &map[string]float64{"True": 100, "False": 0},
+					}},
+					DefaultRule: &flagv2.Rule{
+						VariationResult: testconvert.String("Default"),
+					},
 				}, nil),
 			},
 			want:        map[string]interface{}{"true": true},
@@ -756,12 +875,19 @@ func TestJSONVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewAnonymousUser("random-key-ssss1"),
 				defaultValue: map[string]interface{}{"default-notkey": true},
-				cacheMock: NewCacheMock(&flagv1.FlagData{
-					Rule:       testconvert.String("anonymous eq true"),
-					Percentage: testconvert.Float64(10),
-					Default:    testconvert.Interface(map[string]interface{}{"default": true}),
-					True:       testconvert.Interface(map[string]interface{}{"true": true}),
-					False:      testconvert.Interface(map[string]interface{}{"false": true}),
+				cacheMock: NewCacheMock(&flagv2.FlagData{
+					Variations: &map[string]*interface{}{
+						"True":    testconvert.Interface(map[string]interface{}{"true": true}),
+						"False":   testconvert.Interface(map[string]interface{}{"false": true}),
+						"Default": testconvert.Interface(map[string]interface{}{"default": true}),
+					},
+					Rules: &[]flagv2.Rule{{
+						Query:       testconvert.String("anonymous eq true"),
+						Percentages: &map[string]float64{"True": 10, "False": 90},
+					}},
+					DefaultRule: &flagv2.Rule{
+						VariationResult: testconvert.String("Default"),
+					},
 				}, nil),
 			},
 			want:        map[string]interface{}{"false": true},
@@ -774,11 +900,19 @@ func TestJSONVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewUser("random-key-ssss1"),
 				defaultValue: map[string]interface{}{"default-notkey": true},
-				cacheMock: NewCacheMock(&flagv1.FlagData{
-					Percentage: testconvert.Float64(100),
-					Default:    testconvert.Interface("xxx"),
-					True:       testconvert.Interface("xxx"),
-					False:      testconvert.Interface("xxx"),
+				cacheMock: NewCacheMock(&flagv2.FlagData{
+					Variations: &map[string]*interface{}{
+						"True":    testconvert.Interface("xxx"),
+						"False":   testconvert.Interface("xxx"),
+						"Default": testconvert.Interface("xxx"),
+					},
+					Rules: &[]flagv2.Rule{{
+						Query:       testconvert.String("key eq \"key\""),
+						Percentages: &map[string]float64{"True": 100, "False": 0},
+					}},
+					DefaultRule: &flagv2.Rule{
+						VariationResult: testconvert.String("Default"),
+					},
 				}, nil),
 			},
 			want:        map[string]interface{}{"default-notkey": true},
@@ -792,7 +926,7 @@ func TestJSONVariation(t *testing.T) {
 				flagKey:      "disable-flag",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: map[string]interface{}{"default-notkey": true},
-				cacheMock: NewCacheMock(&flagv1.FlagData{
+				cacheMock: NewCacheMock(&flagv2.FlagData{
 					Disable: testconvert.Bool(true),
 				}, nil),
 			},
@@ -863,7 +997,7 @@ func TestStringVariation(t *testing.T) {
 				flagKey:      "disable-flag",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: "default-notkey",
-				cacheMock: NewCacheMock(&flagv1.FlagData{
+				cacheMock: NewCacheMock(&flagv2.FlagData{
 					Disable: testconvert.Bool(true),
 				}, nil),
 			},
@@ -878,7 +1012,7 @@ func TestStringVariation(t *testing.T) {
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: "default-notkey",
 				cacheMock: NewCacheMock(
-					&flagv1.FlagData{},
+					&flagv2.FlagData{},
 					errors.New("impossible to read the toggle before the initialisation")),
 			},
 			want:        "default-notkey",
@@ -891,7 +1025,7 @@ func TestStringVariation(t *testing.T) {
 				flagKey:      "key-not-exist",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: "default-notkey",
-				cacheMock:    NewCacheMock(&flagv1.FlagData{}, errors.New("flag [key-not-exist] does not exists")),
+				cacheMock:    NewCacheMock(&flagv2.FlagData{}, errors.New("flag [key-not-exist] does not exists")),
 			},
 			want:        "default-notkey",
 			wantErr:     true,
@@ -904,12 +1038,19 @@ func TestStringVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: "default-notkey",
-				cacheMock: NewCacheMock(&flagv1.FlagData{
-					Rule:       testconvert.String("key eq \"key\""),
-					Percentage: testconvert.Float64(100),
-					Default:    testconvert.Interface("default"),
-					True:       testconvert.Interface("true"),
-					False:      testconvert.Interface("false"),
+				cacheMock: NewCacheMock(&flagv2.FlagData{
+					Variations: &map[string]*interface{}{
+						"True":    testconvert.Interface("true"),
+						"False":   testconvert.Interface("false"),
+						"Default": testconvert.Interface("default"),
+					},
+					Rules: &[]flagv2.Rule{{
+						Query:       testconvert.String("key eq \"key\""),
+						Percentages: &map[string]float64{"True": 100, "False": 0},
+					}},
+					DefaultRule: &flagv2.Rule{
+						VariationResult: testconvert.String("Default"),
+					},
 				}, nil),
 			},
 			want:        "default",
@@ -922,12 +1063,19 @@ func TestStringVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewAnonymousUser("random-key"),
 				defaultValue: "default-notkey",
-				cacheMock: NewCacheMock(&flagv1.FlagData{
-					Rule:       testconvert.String("key eq \"random-key\""),
-					Percentage: testconvert.Float64(100),
-					Default:    testconvert.Interface("default"),
-					True:       testconvert.Interface("true"),
-					False:      testconvert.Interface("false"),
+				cacheMock: NewCacheMock(&flagv2.FlagData{
+					Variations: &map[string]*interface{}{
+						"True":    testconvert.Interface("true"),
+						"False":   testconvert.Interface("false"),
+						"Default": testconvert.Interface("default"),
+					},
+					Rules: &[]flagv2.Rule{{
+						Query:       testconvert.String("key eq \"random-key\""),
+						Percentages: &map[string]float64{"True": 100, "False": 0},
+					}},
+					DefaultRule: &flagv2.Rule{
+						VariationResult: testconvert.String("Default"),
+					},
 				}, nil),
 			},
 			want:        "true",
@@ -940,12 +1088,19 @@ func TestStringVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewAnonymousUser("random-key-ssss1"),
 				defaultValue: "default-notkey",
-				cacheMock: NewCacheMock(&flagv1.FlagData{
-					Rule:       testconvert.String("anonymous eq true"),
-					Percentage: testconvert.Float64(10),
-					Default:    testconvert.Interface("default"),
-					True:       testconvert.Interface("true"),
-					False:      testconvert.Interface("false"),
+				cacheMock: NewCacheMock(&flagv2.FlagData{
+					Variations: &map[string]*interface{}{
+						"True":    testconvert.Interface("true"),
+						"False":   testconvert.Interface("false"),
+						"Default": testconvert.Interface("default"),
+					},
+					Rules: &[]flagv2.Rule{{
+						Query:       testconvert.String("anonymous eq true"),
+						Percentages: &map[string]float64{"True": 10, "False": 90},
+					}},
+					DefaultRule: &flagv2.Rule{
+						VariationResult: testconvert.String("Default"),
+					},
 				}, nil),
 			},
 			want:        "false",
@@ -958,12 +1113,19 @@ func TestStringVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewUser("random-key-ssss1"),
 				defaultValue: "default-notkey",
-				cacheMock: NewCacheMock(&flagv1.FlagData{
-					Rule:       testconvert.String("anonymous eq true"),
-					Percentage: testconvert.Float64(50),
-					Default:    testconvert.Interface(111),
-					True:       testconvert.Interface(112),
-					False:      testconvert.Interface(113),
+				cacheMock: NewCacheMock(&flagv2.FlagData{
+					Variations: &map[string]*interface{}{
+						"True":    testconvert.Interface(112),
+						"False":   testconvert.Interface(113),
+						"Default": testconvert.Interface(111),
+					},
+					Rules: &[]flagv2.Rule{{
+						Query:       testconvert.String("key eq \"key\""),
+						Percentages: &map[string]float64{"True": 100, "False": 0},
+					}},
+					DefaultRule: &flagv2.Rule{
+						VariationResult: testconvert.String("Default"),
+					},
 				}, nil),
 			},
 			want:        "default-notkey",
@@ -977,7 +1139,7 @@ func TestStringVariation(t *testing.T) {
 				flagKey:      "disable-flag",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: "default-notkey",
-				cacheMock: NewCacheMock(&flagv1.FlagData{
+				cacheMock: NewCacheMock(&flagv2.FlagData{
 					Disable: testconvert.Bool(true),
 				}, nil),
 			},
@@ -1047,7 +1209,7 @@ func TestIntVariation(t *testing.T) {
 				flagKey:      "disable-flag",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: 125,
-				cacheMock: NewCacheMock(&flagv1.FlagData{
+				cacheMock: NewCacheMock(&flagv2.FlagData{
 					Disable: testconvert.Bool(true),
 				}, nil),
 			},
@@ -1062,7 +1224,7 @@ func TestIntVariation(t *testing.T) {
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: 118,
 				cacheMock: NewCacheMock(
-					&flagv1.FlagData{},
+					&flagv2.FlagData{},
 					errors.New("impossible to read the toggle before the initialisation")),
 			},
 			want:        118,
@@ -1075,7 +1237,7 @@ func TestIntVariation(t *testing.T) {
 				flagKey:      "key-not-exist",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: 118,
-				cacheMock:    NewCacheMock(&flagv1.FlagData{}, errors.New("flag [key-not-exist] does not exists")),
+				cacheMock:    NewCacheMock(&flagv2.FlagData{}, errors.New("flag [key-not-exist] does not exists")),
 			},
 			want:        118,
 			wantErr:     true,
@@ -1087,12 +1249,19 @@ func TestIntVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: 118,
-				cacheMock: NewCacheMock(&flagv1.FlagData{
-					Rule:       testconvert.String("key eq \"key\""),
-					Percentage: testconvert.Float64(100),
-					Default:    testconvert.Interface(119),
-					True:       testconvert.Interface(120),
-					False:      testconvert.Interface(121),
+				cacheMock: NewCacheMock(&flagv2.FlagData{
+					Variations: &map[string]*interface{}{
+						"True":    testconvert.Interface(122),
+						"False":   testconvert.Interface(121),
+						"Default": testconvert.Interface(119),
+					},
+					Rules: &[]flagv2.Rule{{
+						Query:       testconvert.String("key eq \"key\""),
+						Percentages: &map[string]float64{"True": 100, "False": 0},
+					}},
+					DefaultRule: &flagv2.Rule{
+						VariationResult: testconvert.String("Default"),
+					},
 				}, nil),
 			},
 			want:        119,
@@ -1105,12 +1274,19 @@ func TestIntVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewAnonymousUser("random-key"),
 				defaultValue: 118,
-				cacheMock: NewCacheMock(&flagv1.FlagData{
-					Rule:       testconvert.String("key eq \"random-key\""),
-					Percentage: testconvert.Float64(100),
-					Default:    testconvert.Interface(119),
-					True:       testconvert.Interface(120),
-					False:      testconvert.Interface(121),
+				cacheMock: NewCacheMock(&flagv2.FlagData{
+					Variations: &map[string]*interface{}{
+						"True":    testconvert.Interface(120),
+						"False":   testconvert.Interface(121),
+						"Default": testconvert.Interface(119),
+					},
+					Rules: &[]flagv2.Rule{{
+						Query:       testconvert.String("key eq \"random-key\""),
+						Percentages: &map[string]float64{"True": 100, "False": 0},
+					}},
+					DefaultRule: &flagv2.Rule{
+						VariationResult: testconvert.String("Default"),
+					},
 				}, nil),
 			},
 			want:        120,
@@ -1123,12 +1299,19 @@ func TestIntVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewAnonymousUser("random-key-ssss1"),
 				defaultValue: 118,
-				cacheMock: NewCacheMock(&flagv1.FlagData{
-					Rule:       testconvert.String("anonymous eq true"),
-					Percentage: testconvert.Float64(10),
-					Default:    testconvert.Interface(119),
-					True:       testconvert.Interface(120),
-					False:      testconvert.Interface(121),
+				cacheMock: NewCacheMock(&flagv2.FlagData{
+					Variations: &map[string]*interface{}{
+						"True":    testconvert.Interface(122),
+						"False":   testconvert.Interface(121),
+						"Default": testconvert.Interface(119),
+					},
+					Rules: &[]flagv2.Rule{{
+						Query:       testconvert.String("anonymous eq true"),
+						Percentages: &map[string]float64{"True": 10, "False": 90},
+					}},
+					DefaultRule: &flagv2.Rule{
+						VariationResult: testconvert.String("Default"),
+					},
 				}, nil),
 			},
 			want:        121,
@@ -1141,12 +1324,19 @@ func TestIntVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewUser("random-key-ssss1"),
 				defaultValue: 118,
-				cacheMock: NewCacheMock(&flagv1.FlagData{
-					Rule:       testconvert.String("anonymous eq true"),
-					Percentage: testconvert.Float64(50),
-					Default:    testconvert.Interface("default"),
-					True:       testconvert.Interface("true"),
-					False:      testconvert.Interface("false"),
+				cacheMock: NewCacheMock(&flagv2.FlagData{
+					Variations: &map[string]*interface{}{
+						"True":    testconvert.Interface("122"),
+						"False":   testconvert.Interface("121"),
+						"Default": testconvert.Interface("119"),
+					},
+					Rules: &[]flagv2.Rule{{
+						Query:       testconvert.String("anonymous eq true"),
+						Percentages: &map[string]float64{"True": 50, "False": 50},
+					}},
+					DefaultRule: &flagv2.Rule{
+						VariationResult: testconvert.String("Default"),
+					},
 				}, nil),
 			},
 			want:        118,
@@ -1159,12 +1349,19 @@ func TestIntVariation(t *testing.T) {
 				flagKey:      "test-flag",
 				user:         ffuser.NewAnonymousUser("random-key"),
 				defaultValue: 118,
-				cacheMock: NewCacheMock(&flagv1.FlagData{
-					Rule:       testconvert.String("key eq \"random-key\""),
-					Percentage: testconvert.Float64(100),
-					Default:    testconvert.Interface(119.1),
-					True:       testconvert.Interface(120.1),
-					False:      testconvert.Interface(121.1),
+				cacheMock: NewCacheMock(&flagv2.FlagData{
+					Variations: &map[string]*interface{}{
+						"True":    testconvert.Interface(120.1),
+						"False":   testconvert.Interface(121.1),
+						"Default": testconvert.Interface(119.1),
+					},
+					Rules: &[]flagv2.Rule{{
+						Query:       testconvert.String("key eq \"random-key\""),
+						Percentages: &map[string]float64{"True": 100, "False": 0},
+					}},
+					DefaultRule: &flagv2.Rule{
+						VariationResult: testconvert.String("Default"),
+					},
 				}, nil),
 			},
 			want:        120,
@@ -1178,7 +1375,7 @@ func TestIntVariation(t *testing.T) {
 				flagKey:      "disable-flag",
 				user:         ffuser.NewUser("random-key"),
 				defaultValue: 125,
-				cacheMock: NewCacheMock(&flagv1.FlagData{
+				cacheMock: NewCacheMock(&flagv2.FlagData{
 					Disable: testconvert.Bool(true),
 				}, nil),
 			},

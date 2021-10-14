@@ -19,7 +19,7 @@ type Rule struct {
 
 	// Percentages represents the percentage we should give to each variations.
 	// example: variationA = 10%, variationB = 80%, variationC = 10%
-	Percentages *[]VariationPercentage `json:"percentage,omitempty" yaml:"percentage,omitempty" toml:"percentage,omitempty"` // nolint: lll
+	Percentages *map[string]float64 `json:"percentage,omitempty" yaml:"percentage,omitempty" toml:"percentage,omitempty"` // nolint: lll
 
 	ProgressiveRollout *ProgressiveRollout `json:"progressiveRollout,omitempty" yaml:"progressiveRollout,omitempty" toml:"progressiveRollout,omitempty"` // nolint: lll
 }
@@ -93,7 +93,8 @@ func (r *Rule) getVariationFromProgressiveRollout(hash uint32) (string, error) {
 }
 
 func (r *Rule) getVariationFromPercentage(hash uint32) (string, error) {
-	for key, bucket := range r.getPercentageBuckets() {
+	buckets := r.getPercentageBuckets()
+	for key, bucket := range buckets {
 		if uint32(bucket.start) <= hash && uint32(bucket.end) > hash {
 			return key, nil
 		}
@@ -105,20 +106,9 @@ func (r *Rule) getVariationFromPercentage(hash uint32) (string, error) {
 func (r *Rule) getPercentageBuckets() map[string]rulePercentageBucket {
 	percentageBuckets := map[string]rulePercentageBucket{}
 	bucketStart := float64(0)
-	for _, item := range r.GetPercentages() {
-		itemPercentage, err := item.GetPercentage()
-		if err != nil {
-			//TODO: add log to explain we ignore this percentage
-			continue
-		}
-		bucketLimit := itemPercentage * percentageMultiplier
+	for varName, value := range r.GetPercentages() {
+		bucketLimit := value * percentageMultiplier
 		bucketEnd := bucketLimit
-
-		varName, err := item.GetVariationName()
-		if err != nil {
-			//TODO: add log to explain we ignore this variation
-			continue
-		}
 		percentageBuckets[varName] = rulePercentageBucket{
 			start: bucketStart,
 			end:   bucketEnd,
@@ -142,9 +132,9 @@ func (r *Rule) GetVariation() string {
 	return *r.VariationResult
 }
 
-func (r *Rule) GetPercentages() []VariationPercentage {
+func (r *Rule) GetPercentages() map[string]float64 {
 	if r.Percentages == nil {
-		return []VariationPercentage{}
+		return map[string]float64{}
 	}
 	return *r.Percentages
 }
@@ -159,9 +149,10 @@ func (r Rule) String() string {
 	toString = appendIfHasValue(toString, "variation", fmt.Sprintf("%v", r.GetVariation()))
 
 	var percentString []string
-	for _, p := range r.GetPercentages() {
-		percentString = append(percentString, p.String())
-	}
+	//TODO : fix me
+	//for _, p := range r.GetPercentages() {
+	//percentString = append(percentString, p.String())
+	//}
 	toString = appendIfHasValue(toString, "percentages", strings.Join(percentString, ","))
 	//if r.GetRollout() != nil {
 	//	toString = appendIfHasValue(toString, "rollout", fmt.Sprintf("%v", *r.GetRollout()))

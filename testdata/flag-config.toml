@@ -1,13 +1,33 @@
 [test-flag]
-rule = "key eq \"random-key\""
-percentage = 100.0
-true = true
-false = false
-default = false
+
+[test-flag.variations]
+Default = false
+False = false
+True = true
+
+[test-flag.defaultRule]
+variation = "Default"
+
+[[test-flag.targeting]]
+query = "key eq \"random-key\""
+
+[test-flag.targeting.percentage]
+True = 100.0
+False = 0.0
 
 [test-flag2]
-rule = "key eq \"not-a-key\""
-percentage = 100.0
-true = true
-false = false
-default = false
+
+[test-flag2.variations]
+Default = false
+False = false
+True = true
+
+[test-flag2.defaultRule]
+variation = "Default"
+
+[[test-flag2.targeting]]
+query = "key eq \"not-a-key\""
+
+[test-flag2.targeting.percentage]
+True = 100.0
+False = 0.0

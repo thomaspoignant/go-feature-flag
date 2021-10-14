@@ -148,11 +148,17 @@ func Test2GoFeatureFlagInstance(t *testing.T) {
 
 func TestUpdateFlag(t *testing.T) {
 	initialFileContent := `test-flag:
-  rule: key eq "random-key"
-  percentage: 100
-  true: true
-  false: false
-  default: false`
+    variations:
+        Default: false
+        "False": false
+        "True": true
+    targeting:
+      - query: key eq "random-key"
+        percentage:
+            "False": 0
+            "True": 100
+    defaultRule:
+        variation: Default`
 
 	flagFile, _ := ioutil.TempFile("", "")
 	_ = ioutil.WriteFile(flagFile.Name(), []byte(initialFileContent), 0600)

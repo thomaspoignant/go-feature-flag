@@ -3,7 +3,7 @@ package notifier_test
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
+	"github.com/thomaspoignant/go-feature-flag/internal/flagv2"
 	"github.com/thomaspoignant/go-feature-flag/internal/notifier"
 	"github.com/thomaspoignant/go-feature-flag/internal/rollout"
 	"io/ioutil"
@@ -46,50 +46,80 @@ func TestSlackNotifier_Notify(t *testing.T) {
 				statusCode: http.StatusOK,
 				diff: model.DiffCache{
 					Added: map[string]flag.Flag{
-						"test-flag3": &flagv1.FlagData{
-							Percentage:  testconvert.Float64(5),
-							True:        testconvert.Interface("test"),
-							False:       testconvert.Interface("false"),
-							Default:     testconvert.Interface("default"),
-							Rule:        testconvert.String("key eq \"random-key\""),
-							TrackEvents: testconvert.Bool(true),
+						"test-flag3": &flagv2.FlagData{
+							Variations: &map[string]*interface{}{
+								"Default": testconvert.Interface("default"),
+								"False":   testconvert.Interface("false"),
+								"True":    testconvert.Interface("test"),
+							},
+							Rules: &[]flagv2.Rule{{
+								Query:       testconvert.String("key eq \"random-key\""),
+								Percentages: &map[string]float64{"True": 5, "False": 95},
+							}},
+							DefaultRule: &flagv2.Rule{
+								VariationResult: testconvert.String("Default"),
+							},
 							Disable:     testconvert.Bool(false),
+							TrackEvents: testconvert.Bool(true),
 							Version:     testconvert.String("1.1"),
 						},
 					},
 					Deleted: map[string]flag.Flag{
-						"test-flag": &flagv1.FlagData{
-							Rule:       testconvert.String("key eq \"random-key\""),
-							Percentage: testconvert.Float64(100),
-							True:       testconvert.Interface(true),
-							False:      testconvert.Interface(false),
-							Default:    testconvert.Interface(false),
+						"test-flag": &flagv2.FlagData{
+							Variations: &map[string]*interface{}{
+								"Default": testconvert.Interface(false),
+								"False":   testconvert.Interface(false),
+								"True":    testconvert.Interface(true),
+							},
+							Rules: &[]flagv2.Rule{{
+								Query:       testconvert.String("key eq \"random-key\""),
+								Percentages: &map[string]float64{"True": 100, "False": 0},
+							}},
+							DefaultRule: &flagv2.Rule{
+								VariationResult: testconvert.String("Default"),
+							},
 						},
 					},
 					Updated: map[string]model.DiffUpdated{
 						"test-flag2": {
-							Before: &flagv1.FlagData{
-								Percentage:  testconvert.Float64(100),
-								True:        testconvert.Interface(true),
-								False:       testconvert.Interface(false),
-								Default:     testconvert.Interface(false),
-								Disable:     testconvert.Bool(false),
-								TrackEvents: testconvert.Bool(true),
-								Rollout: &flagv1.Rollout{
+							Before: &flagv2.FlagData{
+								Variations: &map[string]*interface{}{
+									"True":    testconvert.Interface("strTrue"),
+									"False":   testconvert.Interface("strFalse"),
+									"Default": testconvert.Interface("strDefault"),
+								},
+								Rules: &[]flagv2.Rule{{
+									Query:       testconvert.String("key eq \"not-a-ke\""),
+									Percentages: &map[string]float64{"True": 80, "False": 20},
+								}},
+								DefaultRule: &flagv2.Rule{
+									VariationResult: testconvert.String("Default"),
+								},
+								Rollout: &flagv2.Rollout{
 									Experimentation: &rollout.Experimentation{
 										Start: testconvert.Time(time.Unix(1095379400, 0)),
 										End:   testconvert.Time(time.Unix(1095371000, 0)),
-									}},
+									},
+								},
+								TrackEvents: testconvert.Bool(true),
+								Disable:     testconvert.Bool(false),
 							},
-							After: &flagv1.FlagData{
-								Rule:        testconvert.String("key eq \"not-a-ke\""),
-								Percentage:  testconvert.Float64(80),
-								True:        testconvert.Interface("strTrue"),
-								False:       testconvert.Interface("strFalse"),
-								Default:     testconvert.Interface("strDefault"),
-								Disable:     testconvert.Bool(true),
-								TrackEvents: testconvert.Bool(false),
+							After: &flagv2.FlagData{
+								Variations: &map[string]*interface{}{
+									"True":    testconvert.Interface("strTrue"),
+									"False":   testconvert.Interface("strFalse"),
+									"Default": testconvert.Interface("strDefault"),
+								},
+								Rules: &[]flagv2.Rule{{
+									Query:       testconvert.String("key eq \"not-a-ke\""),
+									Percentages: &map[string]float64{"True": 80, "False": 20},
+								}},
+								DefaultRule: &flagv2.Rule{
+									VariationResult: testconvert.String("Default"),
+								},
 								Version:     testconvert.String("1.1"),
+								TrackEvents: testconvert.Bool(false),
+								Disable:     testconvert.Bool(true),
 							},
 						},
 					},

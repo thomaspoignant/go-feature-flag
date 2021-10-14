@@ -149,6 +149,7 @@ func (g *GoFeatureFlag) AllFlagsState(user ffuser.User) flagstate.AllFlags {
 
 		default:
 			// TODO: add log and ignore the flag
+			allFlags.AddFlag(key, flagstate.NewFlagState(currentFlag.IsTrackEvents(), v, varType, true))
 			continue
 		}
 	}

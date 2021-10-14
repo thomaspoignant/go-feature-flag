@@ -1,13 +1,24 @@
 test-flag:
-  rule: key eq "random-key"
-  percentage: 0
-  true: true
-  false: false
-  default: false
-
+  variations:
+    Default: false
+    "False": false
+    "True": true
+  targeting:
+    - query: key eq "random-key"
+      percentage:
+        "False": 100
+        "True": 0
+  defaultRule:
+    variation: Default
 test-flag2:
-  rule: key eq "not-a-key"
-  percentage: 100
-  true: true
-  false: false
-  default: false
+  variations:
+    Default: false
+    "False": false
+    "True": true
+  targeting:
+    - query: key eq "not-a-key"
+      percentage:
+        "False": 0
+        "True": 100
+  defaultRule:
+    variation: Default
