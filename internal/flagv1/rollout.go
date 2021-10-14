@@ -23,7 +23,6 @@ type Rollout struct {
 	Scheduled *ScheduledRollout `json:"scheduled,omitempty" yaml:"scheduled,omitempty" toml:"scheduled,omitempty"` // nolint: lll
 }
 
-
 func (e Rollout) String() string {
 	// TODO: other rollout
 	if e.Experimentation == nil {
@@ -31,7 +30,6 @@ func (e Rollout) String() string {
 	}
 	return "experimentation: " + e.Experimentation.String()
 }
-
 
 // Progressive is the configuration struct to define a progressive rollout.
 type Progressive struct {
@@ -72,6 +70,6 @@ type ScheduledRollout struct {
 }
 
 type ScheduledStep struct {
-	FlagData `yaml:",inline"`
-	Date     *time.Time `json:"date,omitempty" yaml:"date,omitempty" toml:"date,omitempty"`
+	//FlagData `yaml:",inline"`
+	Date *time.Time `json:"date,omitempty" yaml:"date,omitempty" toml:"date,omitempty"`
 }

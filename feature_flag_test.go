@@ -25,7 +25,7 @@ func TestStartWithoutRetriever(t *testing.T) {
 func TestStartWithNegativeInterval(t *testing.T) {
 	_, err := ffclient.New(ffclient.Config{
 		PollingInterval: -60 * time.Second,
-		Retriever:       &ffclient.FileRetriever{Path: "testdata/flag-config.yaml"},
+		Retriever:       &ffclient.FileRetriever{Path: "testdata/flag-config-v2.yaml"},
 		Logger:          log.New(os.Stdout, "", 0),
 	})
 	assert.Error(t, err)
@@ -34,7 +34,7 @@ func TestStartWithNegativeInterval(t *testing.T) {
 func TestStartWithMinInterval(t *testing.T) {
 	_, err := ffclient.New(ffclient.Config{
 		PollingInterval: 2,
-		Retriever:       &ffclient.FileRetriever{Path: "testdata/flag-config.yaml"},
+		Retriever:       &ffclient.FileRetriever{Path: "testdata/flag-config-v2.yaml"},
 		Logger:          log.New(os.Stdout, "", 0),
 	})
 	assert.NoError(t, err)
@@ -44,7 +44,7 @@ func TestValidUseCase(t *testing.T) {
 	// Valid use case
 	err := ffclient.Init(ffclient.Config{
 		PollingInterval: 5 * time.Second,
-		Retriever:       &ffclient.FileRetriever{Path: "testdata/flag-config.yaml"},
+		Retriever:       &ffclient.FileRetriever{Path: "testdata/flag-config-v2.yaml"},
 		Logger:          log.New(os.Stdout, "", 0),
 		DataExporter: ffclient.DataExporter{
 			FlushInterval:    10 * time.Second,
@@ -119,7 +119,7 @@ func TestS3RetrieverReturnError(t *testing.T) {
 func Test2GoFeatureFlagInstance(t *testing.T) {
 	gffClient1, err := ffclient.New(ffclient.Config{
 		PollingInterval: 5 * time.Second,
-		Retriever:       &ffclient.FileRetriever{Path: "testdata/flag-config.yaml"},
+		Retriever:       &ffclient.FileRetriever{Path: "testdata/flag-config-v2.yaml"},
 		Logger:          log.New(os.Stdout, "", 0),
 	})
 	defer gffClient1.Close()
@@ -220,7 +220,7 @@ func TestImpossibleToLoadfile(t *testing.T) {
 func TestWrongWebhookConfig(t *testing.T) {
 	_, err := ffclient.New(ffclient.Config{
 		PollingInterval: 5 * time.Second,
-		Retriever:       &ffclient.FileRetriever{Path: "testdata/flag-config.yaml"},
+		Retriever:       &ffclient.FileRetriever{Path: "testdata/flag-config-v2.yaml"},
 		Notifiers: []ffclient.NotifierConfig{
 			&ffclient.WebhookConfig{
 				EndpointURL: " https://example.com/hook",

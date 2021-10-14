@@ -37,7 +37,7 @@ func TestConfig_GetRetriever(t *testing.T) {
 				PollingInterval: 3 * time.Second,
 				Retriever: &ffClient.S3Retriever{
 					Bucket: "tpoi-test",
-					Item:   "flag-config.yaml",
+					Item:   "flag-config-v2.yaml",
 					AwsConfig: aws.Config{
 						Region: aws.String("eu-west-1"),
 					},
@@ -64,7 +64,7 @@ func TestConfig_GetRetriever(t *testing.T) {
 				PollingInterval: 3 * time.Second,
 				Retriever: &ffClient.GithubRetriever{
 					RepositorySlug: "thomaspoignant/go-feature-flag",
-					FilePath:       "testdata/flag-config.yaml",
+					FilePath:       "testdata/flag-config-v2.yaml",
 					GithubToken:    "XXX",
 				},
 			},

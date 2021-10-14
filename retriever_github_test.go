@@ -27,7 +27,7 @@ func Test_github_Retrieve(t *testing.T) {
 			fields: fields{
 				httpClient:     mockHTTP{},
 				repositorySlug: "thomaspoignant/go-feature-flag",
-				filePath:       "testdata/flag-config.yaml",
+				filePath:       "testdata/flag-config-v2.yaml",
 			},
 			want: []byte(`test-flag:
  rule: key eq "random-key"
@@ -43,7 +43,7 @@ func Test_github_Retrieve(t *testing.T) {
 			fields: fields{
 				httpClient:     mockHTTP{},
 				repositorySlug: "thomaspoignant/go-feature-flag",
-				filePath:       "testdata/flag-config.yaml",
+				filePath:       "testdata/flag-config-v2.yaml",
 				context:        context.Background(),
 			},
 			want: []byte(`test-flag:
@@ -60,7 +60,7 @@ func Test_github_Retrieve(t *testing.T) {
 			fields: fields{
 				httpClient:     mockHTTP{},
 				repositorySlug: "thomaspoignant/go-feature-flag",
-				filePath:       "testdata/flag-config.yaml",
+				filePath:       "testdata/flag-config-v2.yaml",
 			},
 			want: []byte(`test-flag:
  rule: key eq "random-key"
@@ -85,7 +85,7 @@ func Test_github_Retrieve(t *testing.T) {
 			fields: fields{
 				httpClient:     mockHTTP{},
 				repositorySlug: "",
-				filePath:       "testdata/flag-config.yaml",
+				filePath:       "testdata/flag-config-v2.yaml",
 			},
 			wantErr: true,
 		},
@@ -103,7 +103,7 @@ func Test_github_Retrieve(t *testing.T) {
 			fields: fields{
 				httpClient:     mockHTTP{},
 				repositorySlug: "thomaspoignant/go-feature-flag",
-				filePath:       "testdata/flag-config.yaml",
+				filePath:       "testdata/flag-config-v2.yaml",
 				githubToken:    "XXX_GH_TOKEN",
 			},
 			want: []byte(`test-flag:

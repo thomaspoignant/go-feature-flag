@@ -16,7 +16,7 @@ var client *ffclient.GoFeatureFlag
 
 // init is creating a flag file for this test with the expected date.
 func init() {
-	content, _ := ioutil.ReadFile("testdata/benchmark/flag-config.yaml")
+	content, _ := ioutil.ReadFile("testdata/benchmark/flag-config-v2.yaml")
 	t, _ := template.New("example-flag-config").Parse(string(content))
 
 	var buf bytes.Buffer

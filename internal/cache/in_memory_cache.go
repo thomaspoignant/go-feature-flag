@@ -3,18 +3,15 @@ package cache
 import (
 	"fmt"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	"github.com/thomaspoignant/go-feature-flag/internal/flagv1"
 	"github.com/thomaspoignant/go-feature-flag/internal/flagv2"
 )
 
 type InMemoryCache struct {
-	flagsV1 map[string]flagv1.FlagData
 	flagsV2 map[string]flagv2.FlagData
 }
 
 func NewInMemoryCache() *InMemoryCache {
 	return &InMemoryCache{
-		flagsV1: map[string]flagv1.FlagData{},
 		flagsV2: map[string]flagv2.FlagData{},
 	}
 }
@@ -32,22 +29,15 @@ func (fc *InMemoryCache) addFlag(key string, fd flagv2.FlagData) {
 }
 
 func (fc *InMemoryCache) getFlag(key string) (flag.Flag, error) {
-	fV1, okV1 := fc.flagsV1[key]
 	fV2, okV2 := fc.flagsV2[key]
-	if !okV1 && !okV2 {
+	if !okV2 {
 		return nil, fmt.Errorf("flag [%v] does not exists", key)
 	}
-	if okV2 {
-		return &fV2, nil
-	}
-	return &fV1, nil
+	return &fV2, nil
 }
 
 func (fc *InMemoryCache) keys() []string {
-	var keys = make([]string, 0, len(fc.flagsV1)+len(fc.flagsV2))
-	for k := range fc.flagsV1 {
-		keys = append(keys, k)
-	}
+	var keys = make([]string, 0, len(fc.flagsV2))
 	for k := range fc.flagsV2 {
 		keys = append(keys, k)
 	}

@@ -148,10 +148,8 @@ func (g *GoFeatureFlag) AllFlagsState(user ffuser.User) flagstate.AllFlags {
 			allFlags.AddFlag(key, flagstate.NewFlagState(currentFlag.IsTrackEvents(), v, varType, false))
 
 		default:
-			defaultVariationName := currentFlag.GetDefaultVariation()
-			defaultVariationValue := currentFlag.GetVariationValue(defaultVariationName)
-			allFlags.AddFlag(
-				key, flagstate.NewFlagState(currentFlag.IsTrackEvents(), defaultVariationValue, defaultVariationName, true))
+			// TODO: add log and ignore the flag
+			continue
 		}
 	}
 	return allFlags

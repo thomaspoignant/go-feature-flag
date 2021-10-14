@@ -31,7 +31,7 @@ func Test_s3Retriever_Retrieve(t *testing.T) {
 				bucket:     "Bucket",
 				item:       "valid",
 			},
-			want:    "./testdata/flag-config.yaml",
+			want:    "./testdata/flag-config-v2.yaml",
 			wantErr: false,
 		},
 		{
@@ -51,7 +51,7 @@ func Test_s3Retriever_Retrieve(t *testing.T) {
 				item:       "valid",
 				context:    context.Background(),
 			},
-			want:    "./testdata/flag-config.yaml",
+			want:    "./testdata/flag-config-v2.yaml",
 			wantErr: false,
 		},
 	}

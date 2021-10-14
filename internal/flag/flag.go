@@ -24,9 +24,6 @@ type Flag interface {
 	// Default: false
 	IsDisable() bool
 
-	// GetDefaultVariation return the name of the default variation (if something goes wrong)
-	GetDefaultVariation() string
-
 	// GetVariationValue return the value of variation from his name
 	GetVariationValue(variationName string) interface{}
 
