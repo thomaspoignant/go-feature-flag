@@ -1,4 +1,4 @@
-package flagv2
+package flag
 
 import (
 	"github.com/thomaspoignant/go-feature-flag/internal/rollout"

@@ -1,9 +1,10 @@
-package flagv2
+package flag
 
 import (
 	"fmt"
 	"github.com/nikunjy/rules/parser"
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
+	"sort"
 	"strings"
 	"time"
 )
@@ -105,9 +106,24 @@ func (r *Rule) getVariationFromPercentage(hash uint32) (string, error) {
 // getPercentageBuckets compute a map containing the buckets of each variation for this rule.
 func (r *Rule) getPercentageBuckets() map[string]rulePercentageBucket {
 	percentageBuckets := map[string]rulePercentageBucket{}
+
+	// we sort the variation to be sure to create the buckets all the time in the same order
+	percentage := r.GetPercentages()
+
+	// we need to sort the map to affect the bucket to be sure we are constantly affecting the users to the same bucket.
+	// Map are not ordered in GO, so we have to order the variationNames to be able to compute the same numbers for the buckets
+	// everytime we are in this function.
+	variationNames := make([]string, 0, len(percentage))
+	for k := range percentage {
+		variationNames = append(variationNames, k)
+	}
+	// HACK: we are reversing the sort to support the legacy format of the flags (before 1.0.0) and to be sure to always
+	// have "True" before "False"
+	sort.Sort(sort.Reverse(sort.StringSlice(variationNames)))
+
 	bucketStart := float64(0)
-	for varName, value := range r.GetPercentages() {
-		bucketLimit := value * percentageMultiplier
+	for _, varName := range variationNames {
+		bucketLimit := percentage[varName] * percentageMultiplier
 		bucketEnd := bucketLimit
 		percentageBuckets[varName] = rulePercentageBucket{
 			start: bucketStart,

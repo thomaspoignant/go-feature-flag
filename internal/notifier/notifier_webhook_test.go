@@ -3,7 +3,6 @@ package notifier
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	"github.com/thomaspoignant/go-feature-flag/internal/flagv2"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 	"io/ioutil"
 	"log"
@@ -51,60 +50,60 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 				statusCode: http.StatusOK,
 				diff: model.DiffCache{
 					Added: map[string]flag.Flag{
-						"test-flag3": &flagv2.FlagData{
+						"test-flag3": &flag.FlagData{
 							Variations: &map[string]*interface{}{
 								"True":    testconvert.Interface("test"),
 								"False":   testconvert.Interface("false"),
 								"Default": testconvert.Interface("default"),
 							},
-							DefaultRule: &flagv2.Rule{
+							DefaultRule: &flag.Rule{
 								Percentages: &map[string]float64{"True": 5, "False": 95},
 							},
 						},
 					},
 					Deleted: map[string]flag.Flag{
-						"test-flag": &flagv2.FlagData{
+						"test-flag": &flag.FlagData{
 							Variations: &map[string]*interface{}{
 								"Default": testconvert.Interface(false),
 								"False":   testconvert.Interface(false),
 								"True":    testconvert.Interface(true),
 							},
-							Rules: &[]flagv2.Rule{{
+							Rules: &[]flag.Rule{{
 								Query:       testconvert.String("key eq \"random-key\""),
 								Percentages: &map[string]float64{"True": 100, "False": 0},
 							}},
-							DefaultRule: &flagv2.Rule{
+							DefaultRule: &flag.Rule{
 								VariationResult: testconvert.String("Default"),
 							},
 						},
 					},
 					Updated: map[string]model.DiffUpdated{
 						"test-flag2": {
-							Before: &flagv2.FlagData{
+							Before: &flag.FlagData{
 								Variations: &map[string]*interface{}{
 									"Default": testconvert.Interface(false),
 									"False":   testconvert.Interface(false),
 									"True":    testconvert.Interface(true),
 								},
-								Rules: &[]flagv2.Rule{{
+								Rules: &[]flag.Rule{{
 									Query:       testconvert.String("key eq \"random-key\""),
 									Percentages: &map[string]float64{"True": 100, "False": 0},
 								}},
-								DefaultRule: &flagv2.Rule{
+								DefaultRule: &flag.Rule{
 									VariationResult: testconvert.String("Default"),
 								},
 							},
-							After: &flagv2.FlagData{
+							After: &flag.FlagData{
 								Variations: &map[string]*interface{}{
 									"Default": testconvert.Interface(false),
 									"False":   testconvert.Interface(false),
 									"True":    testconvert.Interface(true),
 								},
-								Rules: &[]flagv2.Rule{{
+								Rules: &[]flag.Rule{{
 									Query:       testconvert.String("key eq \"random-key\""),
 									Percentages: &map[string]float64{"True": 100, "False": 0},
 								}},
-								DefaultRule: &flagv2.Rule{
+								DefaultRule: &flag.Rule{
 									VariationResult: testconvert.String("Default"),
 								},
 								Disable: testconvert.Bool(true),
@@ -124,13 +123,13 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 				statusCode: http.StatusOK,
 				diff: model.DiffCache{
 					Added: map[string]flag.Flag{
-						"test-flag3": &flagv2.FlagData{
+						"test-flag3": &flag.FlagData{
 							Variations: &map[string]*interface{}{
 								"True":    testconvert.Interface("test"),
 								"False":   testconvert.Interface("false"),
 								"Default": testconvert.Interface("default"),
 							},
-							DefaultRule: &flagv2.Rule{
+							DefaultRule: &flag.Rule{
 								Percentages: &map[string]float64{"True": 5, "False": 95},
 							},
 						},

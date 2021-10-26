@@ -3,7 +3,6 @@ package model_test
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	"github.com/thomaspoignant/go-feature-flag/internal/flagv2"
 	"github.com/thomaspoignant/go-feature-flag/internal/model"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 	"testing"
@@ -38,13 +37,13 @@ func TestDiffCache_HasDiff(t *testing.T) {
 			name: "only Deleted",
 			fields: fields{
 				Deleted: map[string]flag.Flag{
-					"flag": &flagv2.FlagData{
+					"flag": &flag.FlagData{
 						Variations: &map[string]*interface{}{
 							"Default": testconvert.Interface(true),
 							"False":   testconvert.Interface(true),
 							"True":    testconvert.Interface(true),
 						},
-						DefaultRule: &flagv2.Rule{
+						DefaultRule: &flag.Rule{
 							Percentages: &map[string]float64{"True": 100, "False": 0},
 						},
 					},
@@ -58,13 +57,13 @@ func TestDiffCache_HasDiff(t *testing.T) {
 			name: "only Added",
 			fields: fields{
 				Added: map[string]flag.Flag{
-					"flag": &flagv2.FlagData{
+					"flag": &flag.FlagData{
 						Variations: &map[string]*interface{}{
 							"Default": testconvert.Interface(true),
 							"False":   testconvert.Interface(true),
 							"True":    testconvert.Interface(true),
 						},
-						DefaultRule: &flagv2.Rule{
+						DefaultRule: &flag.Rule{
 							Percentages: &map[string]float64{"True": 100, "False": 0},
 						},
 					},
@@ -81,23 +80,23 @@ func TestDiffCache_HasDiff(t *testing.T) {
 				Deleted: map[string]flag.Flag{},
 				Updated: map[string]model.DiffUpdated{
 					"flag": {
-						Before: &flagv2.FlagData{
+						Before: &flag.FlagData{
 							Variations: &map[string]*interface{}{
 								"Default": testconvert.Interface(true),
 								"False":   testconvert.Interface(true),
 								"True":    testconvert.Interface(true),
 							},
-							DefaultRule: &flagv2.Rule{
+							DefaultRule: &flag.Rule{
 								Percentages: &map[string]float64{"True": 100, "False": 0},
 							},
 						},
-						After: &flagv2.FlagData{
+						After: &flag.FlagData{
 							Variations: &map[string]*interface{}{
 								"Default": testconvert.Interface(false),
 								"False":   testconvert.Interface(true),
 								"True":    testconvert.Interface(true),
 							},
-							DefaultRule: &flagv2.Rule{
+							DefaultRule: &flag.Rule{
 								Percentages: &map[string]float64{"True": 100, "False": 0},
 							},
 						},
@@ -110,48 +109,48 @@ func TestDiffCache_HasDiff(t *testing.T) {
 			name: "all fields",
 			fields: fields{
 				Added: map[string]flag.Flag{
-					"flag": &flagv2.FlagData{
+					"flag": &flag.FlagData{
 						Variations: &map[string]*interface{}{
 							"Default": testconvert.Interface(true),
 							"False":   testconvert.Interface(true),
 							"True":    testconvert.Interface(true),
 						},
-						DefaultRule: &flagv2.Rule{
+						DefaultRule: &flag.Rule{
 							Percentages: &map[string]float64{"True": 100, "False": 0},
 						},
 					},
 				},
 				Deleted: map[string]flag.Flag{
-					"flag": &flagv2.FlagData{
+					"flag": &flag.FlagData{
 						Variations: &map[string]*interface{}{
 							"Default": testconvert.Interface(true),
 							"False":   testconvert.Interface(true),
 							"True":    testconvert.Interface(true),
 						},
-						DefaultRule: &flagv2.Rule{
+						DefaultRule: &flag.Rule{
 							Percentages: &map[string]float64{"True": 100, "False": 0},
 						},
 					},
 				},
 				Updated: map[string]model.DiffUpdated{
 					"flag": {
-						Before: &flagv2.FlagData{
+						Before: &flag.FlagData{
 							Variations: &map[string]*interface{}{
 								"Default": testconvert.Interface(true),
 								"False":   testconvert.Interface(true),
 								"True":    testconvert.Interface(true),
 							},
-							DefaultRule: &flagv2.Rule{
+							DefaultRule: &flag.Rule{
 								Percentages: &map[string]float64{"True": 100, "False": 0},
 							},
 						},
-						After: &flagv2.FlagData{
+						After: &flag.FlagData{
 							Variations: &map[string]*interface{}{
 								"Default": testconvert.Interface(false),
 								"False":   testconvert.Interface(true),
 								"True":    testconvert.Interface(true),
 							},
-							DefaultRule: &flagv2.Rule{
+							DefaultRule: &flag.Rule{
 								Percentages: &map[string]float64{"True": 100, "False": 0},
 							},
 						},

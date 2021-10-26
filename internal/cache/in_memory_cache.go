@@ -3,16 +3,15 @@ package cache
 import (
 	"fmt"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	"github.com/thomaspoignant/go-feature-flag/internal/flagv2"
 )
 
 type InMemoryCache struct {
-	flagsV2 map[string]flagv2.FlagData
+	flagsV2 map[string]flag.FlagData
 }
 
 func NewInMemoryCache() *InMemoryCache {
 	return &InMemoryCache{
-		flagsV2: map[string]flagv2.FlagData{},
+		flagsV2: map[string]flag.FlagData{},
 	}
 }
 
@@ -24,7 +23,7 @@ func (fc *InMemoryCache) addDtoFlag(key string, dto flag.DtoFlag) {
 	}
 }
 
-func (fc *InMemoryCache) addFlag(key string, fd flagv2.FlagData) {
+func (fc *InMemoryCache) addFlag(key string, fd flag.FlagData) {
 	fc.flagsV2[key] = fd
 }
 

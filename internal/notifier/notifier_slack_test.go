@@ -3,7 +3,6 @@ package notifier_test
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	"github.com/thomaspoignant/go-feature-flag/internal/flagv2"
 	"github.com/thomaspoignant/go-feature-flag/internal/notifier"
 	"github.com/thomaspoignant/go-feature-flag/internal/rollout"
 	"io/ioutil"
@@ -46,17 +45,17 @@ func TestSlackNotifier_Notify(t *testing.T) {
 				statusCode: http.StatusOK,
 				diff: model.DiffCache{
 					Added: map[string]flag.Flag{
-						"test-flag3": &flagv2.FlagData{
+						"test-flag3": &flag.FlagData{
 							Variations: &map[string]*interface{}{
 								"Default": testconvert.Interface("default"),
 								"False":   testconvert.Interface("false"),
 								"True":    testconvert.Interface("test"),
 							},
-							Rules: &[]flagv2.Rule{{
+							Rules: &[]flag.Rule{{
 								Query:       testconvert.String("key eq \"random-key\""),
 								Percentages: &map[string]float64{"True": 5, "False": 95},
 							}},
-							DefaultRule: &flagv2.Rule{
+							DefaultRule: &flag.Rule{
 								VariationResult: testconvert.String("Default"),
 							},
 							Disable:     testconvert.Bool(false),
@@ -65,37 +64,37 @@ func TestSlackNotifier_Notify(t *testing.T) {
 						},
 					},
 					Deleted: map[string]flag.Flag{
-						"test-flag": &flagv2.FlagData{
+						"test-flag": &flag.FlagData{
 							Variations: &map[string]*interface{}{
 								"Default": testconvert.Interface(false),
 								"False":   testconvert.Interface(false),
 								"True":    testconvert.Interface(true),
 							},
-							Rules: &[]flagv2.Rule{{
+							Rules: &[]flag.Rule{{
 								Query:       testconvert.String("key eq \"random-key\""),
 								Percentages: &map[string]float64{"True": 100, "False": 0},
 							}},
-							DefaultRule: &flagv2.Rule{
+							DefaultRule: &flag.Rule{
 								VariationResult: testconvert.String("Default"),
 							},
 						},
 					},
 					Updated: map[string]model.DiffUpdated{
 						"test-flag2": {
-							Before: &flagv2.FlagData{
+							Before: &flag.FlagData{
 								Variations: &map[string]*interface{}{
 									"True":    testconvert.Interface("strTrue"),
 									"False":   testconvert.Interface("strFalse"),
 									"Default": testconvert.Interface("strDefault"),
 								},
-								Rules: &[]flagv2.Rule{{
+								Rules: &[]flag.Rule{{
 									Query:       testconvert.String("key eq \"not-a-ke\""),
 									Percentages: &map[string]float64{"True": 80, "False": 20},
 								}},
-								DefaultRule: &flagv2.Rule{
+								DefaultRule: &flag.Rule{
 									VariationResult: testconvert.String("Default"),
 								},
-								Rollout: &flagv2.Rollout{
+								Rollout: &flag.Rollout{
 									Experimentation: &rollout.Experimentation{
 										Start: testconvert.Time(time.Unix(1095379400, 0)),
 										End:   testconvert.Time(time.Unix(1095371000, 0)),
@@ -104,17 +103,17 @@ func TestSlackNotifier_Notify(t *testing.T) {
 								TrackEvents: testconvert.Bool(true),
 								Disable:     testconvert.Bool(false),
 							},
-							After: &flagv2.FlagData{
+							After: &flag.FlagData{
 								Variations: &map[string]*interface{}{
 									"True":    testconvert.Interface("strTrue"),
 									"False":   testconvert.Interface("strFalse"),
 									"Default": testconvert.Interface("strDefault"),
 								},
-								Rules: &[]flagv2.Rule{{
+								Rules: &[]flag.Rule{{
 									Query:       testconvert.String("key eq \"not-a-ke\""),
 									Percentages: &map[string]float64{"True": 80, "False": 20},
 								}},
-								DefaultRule: &flagv2.Rule{
+								DefaultRule: &flag.Rule{
 									VariationResult: testconvert.String("Default"),
 								},
 								Version:     testconvert.String("1.1"),

@@ -3,7 +3,7 @@ package cache_test
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
-	"github.com/thomaspoignant/go-feature-flag/internal/flagv2"
+	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 	"testing"
 
@@ -213,7 +213,7 @@ func Test_AllFlags(t *testing.T) {
 	tests := []struct {
 		name       string
 		args       args
-		expected   map[string]flagv2.FlagData
+		expected   map[string]flag.FlagData
 		wantErr    bool
 		flagFormat string
 	}{
@@ -223,7 +223,7 @@ func Test_AllFlags(t *testing.T) {
 			args: args{
 				loadedFlags: yamlFile,
 			},
-			expected: map[string]flagv2.FlagData{
+			expected: map[string]flag.FlagData{
 				"test-flag": {
 					Disable: nil,
 					Variations: &map[string]*interface{}{
@@ -231,11 +231,11 @@ func Test_AllFlags(t *testing.T) {
 						"False":   testconvert.Interface(false),
 						"True":    testconvert.Interface(true),
 					},
-					Rules: &[]flagv2.Rule{{
+					Rules: &[]flag.Rule{{
 						Query:       testconvert.String("key eq \"random-key\""),
 						Percentages: &map[string]float64{"True": 100, "False": 0},
 					}},
-					DefaultRule: &flagv2.Rule{
+					DefaultRule: &flag.Rule{
 						VariationResult: testconvert.String("Default"),
 					},
 					TrackEvents: testconvert.Bool(false),
@@ -262,9 +262,9 @@ func Test_AllFlags(t *testing.T) {
     trackEvents: false
 test-flag2:
     variations:
-        Default: "false"
-        "False": "false"
-        "True": "true"
+        Default: false
+        "False": false
+        "True": true
     targeting:
       - query: key eq "random-key"
         percentage:
@@ -275,7 +275,7 @@ test-flag2:
     trackEvents: false
 `),
 			},
-			expected: map[string]flagv2.FlagData{
+			expected: map[string]flag.FlagData{
 				"test-flag": {
 					Disable: nil,
 					Variations: &map[string]*interface{}{
@@ -283,11 +283,11 @@ test-flag2:
 						"False":   testconvert.Interface(false),
 						"True":    testconvert.Interface(true),
 					},
-					Rules: &[]flagv2.Rule{{
+					Rules: &[]flag.Rule{{
 						Query:       testconvert.String("key eq \"random-key\""),
 						Percentages: &map[string]float64{"True": 100, "False": 0},
 					}},
-					DefaultRule: &flagv2.Rule{
+					DefaultRule: &flag.Rule{
 						VariationResult: testconvert.String("Default"),
 					},
 					TrackEvents: testconvert.Bool(false),
@@ -299,11 +299,11 @@ test-flag2:
 						"False":   testconvert.Interface(false),
 						"True":    testconvert.Interface(true),
 					},
-					Rules: &[]flagv2.Rule{{
+					Rules: &[]flag.Rule{{
 						Query:       testconvert.String("key eq \"random-key\""),
-						Percentages: &map[string]float64{"True": 100, "False": 0},
+						Percentages: &map[string]float64{"False": 100, "True": 0},
 					}},
-					DefaultRule: &flagv2.Rule{
+					DefaultRule: &flag.Rule{
 						VariationResult: testconvert.String("Default"),
 					},
 					TrackEvents: testconvert.Bool(false),
@@ -316,7 +316,7 @@ test-flag2:
 			args: args{
 				loadedFlags: []byte(``),
 			},
-			expected: map[string]flagv2.FlagData{},
+			expected: map[string]flag.FlagData{},
 			wantErr:  false,
 		},
 	}

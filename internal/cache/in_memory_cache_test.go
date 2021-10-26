@@ -4,7 +4,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	"github.com/thomaspoignant/go-feature-flag/internal/flagv2"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 	"testing"
 )
@@ -23,18 +22,18 @@ func TestAll(t *testing.T) {
 						"test":  testconvert.Interface(true),
 						"test2": testconvert.Interface(false),
 					},
-					DefaultRule: &flagv2.Rule{
+					DefaultRule: &flag.Rule{
 						Percentages: &map[string]float64{"test": 10, "test2": 90},
 					},
 				},
 			},
 			want: map[string]flag.Flag{
-				"test": &flagv2.FlagData{
+				"test": &flag.FlagData{
 					Variations: &map[string]*interface{}{
 						"test":  testconvert.Interface(true),
 						"test2": testconvert.Interface(false),
 					},
-					DefaultRule: &flagv2.Rule{
+					DefaultRule: &flag.Rule{
 						Percentages: &map[string]float64{"test": 10, "test2": 90},
 					},
 				},
@@ -48,7 +47,7 @@ func TestAll(t *testing.T) {
 						"test":  testconvert.Interface(true),
 						"test2": testconvert.Interface(false),
 					},
-					DefaultRule: &flagv2.Rule{
+					DefaultRule: &flag.Rule{
 						Percentages: &map[string]float64{"test": 10, "test2": 90},
 					},
 				},
@@ -57,27 +56,27 @@ func TestAll(t *testing.T) {
 						"test":  testconvert.Interface(true),
 						"test2": testconvert.Interface(false),
 					},
-					DefaultRule: &flagv2.Rule{
+					DefaultRule: &flag.Rule{
 						Percentages: &map[string]float64{"test": 0, "test2": 100},
 					},
 				},
 			},
 			want: map[string]flag.Flag{
-				"test": &flagv2.FlagData{
+				"test": &flag.FlagData{
 					Variations: &map[string]*interface{}{
 						"test":  testconvert.Interface(true),
 						"test2": testconvert.Interface(false),
 					},
-					DefaultRule: &flagv2.Rule{
+					DefaultRule: &flag.Rule{
 						Percentages: &map[string]float64{"test": 10, "test2": 90},
 					},
 				},
-				"test1": &flagv2.FlagData{
+				"test1": &flag.FlagData{
 					Variations: &map[string]*interface{}{
 						"test":  testconvert.Interface(true),
 						"test2": testconvert.Interface(false),
 					},
-					DefaultRule: &flagv2.Rule{
+					DefaultRule: &flag.Rule{
 						Percentages: &map[string]float64{"test": 0, "test2": 100},
 					},
 				},
@@ -112,7 +111,7 @@ func TestCopy(t *testing.T) {
 						"False":   testconvert.Interface(false),
 						"Default": testconvert.Interface(false),
 					},
-					DefaultRule: &flagv2.Rule{
+					DefaultRule: &flag.Rule{
 						Query: testconvert.String("key eq \"random-key\""),
 						Percentages: &map[string]float64{
 							"True":  40,

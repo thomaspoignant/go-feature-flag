@@ -1,6 +1,8 @@
-package flagv2
+package flag
 
-import "time"
+import (
+	"time"
+)
 
 type ScheduledRollout struct {
 	// Steps is the list of updates to do in a specific date.

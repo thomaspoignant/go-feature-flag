@@ -3,7 +3,6 @@ package flag
 import (
 	"encoding/json"
 	"github.com/thomaspoignant/go-feature-flag/internal/flagv1"
-	"github.com/thomaspoignant/go-feature-flag/internal/flagv2"
 	"github.com/thomaspoignant/go-feature-flag/internal/rollout"
 	"strconv"
 )
@@ -48,16 +47,16 @@ func (dr *DtoRollout) toRolloutV1() *flagv1.Rollout {
 	return &r
 }
 
-func (dr *DtoRollout) toRolloutV2() *flagv2.Rollout {
+func (dr *DtoRollout) toRolloutV2() *Rollout {
 	if dr == nil {
 		return nil
 	}
 
-	r := flagv2.Rollout{
+	r := Rollout{
 		Experimentation: dr.Experimentation,
 	}
 	if dr.Scheduled != nil {
-		scheduled := flagv2.ScheduledRollout{}
+		scheduled := ScheduledRollout{}
 		jsonString, _ := json.Marshal(dr.Scheduled)
 		err := json.Unmarshal(jsonString, &scheduled)
 		if err != nil {
@@ -117,18 +116,18 @@ type DtoFlag struct {
 
 	// Rules is the list of Rule for this flag.
 	// This an optional field.
-	Rules *[]flagv2.Rule `json:"targeting,omitempty" yaml:"targeting,omitempty" toml:"targeting,omitempty"`
+	Rules *[]Rule `json:"targeting,omitempty" yaml:"targeting,omitempty" toml:"targeting,omitempty"`
 
 	// DefaultRule is the rule applied after checking that any other rules
 	// matched the user.
-	DefaultRule *flagv2.Rule `json:"defaultRule,omitempty" yaml:"defaultRule,omitempty" toml:"defaultRule,omitempty"`
+	DefaultRule *Rule `json:"defaultRule,omitempty" yaml:"defaultRule,omitempty" toml:"defaultRule,omitempty"`
 }
 
 func (dto *DtoFlag) IsFlagV2() bool {
 	return dto.Variations != nil
 }
 
-func (dto *DtoFlag) ToFlagV1() flagv2.FlagData {
+func (dto *DtoFlag) ToFlagV1() FlagData {
 
 	panic("STOP flag v1")
 
@@ -139,8 +138,8 @@ func (dto *DtoFlag) ToFlagV1() flagv2.FlagData {
 	}
 	defaultVariation := "Default"
 
-	var rules []flagv2.Rule
-	var defaultRule flagv2.Rule
+	var rules []Rule
+	var defaultRule Rule
 	if dto.Rule != nil && *dto.Rule != "" {
 
 		percentage := float64(0)
@@ -151,13 +150,13 @@ func (dto *DtoFlag) ToFlagV1() flagv2.FlagData {
 		percentages["True"] = percentage
 		percentages["False"] = 100 - percentage
 
-		newRule := flagv2.Rule{
+		newRule := Rule{
 			Percentages: &percentages,
 			Query:       dto.Rule,
 		}
 		rules = append(rules, newRule)
 
-		defaultRule = flagv2.Rule{
+		defaultRule = Rule{
 			VariationResult: &defaultVariation,
 		}
 	} else {
@@ -169,12 +168,12 @@ func (dto *DtoFlag) ToFlagV1() flagv2.FlagData {
 		percentages["True"] = percentage
 		percentages["False"] = 100 - percentage
 
-		defaultRule = flagv2.Rule{
+		defaultRule = Rule{
 			Percentages: &percentages,
 		}
 	}
 
-	return flagv2.FlagData{
+	return FlagData{
 		Variations:  &variations,
 		Rules:       &rules,
 		DefaultRule: &defaultRule,
@@ -217,8 +216,8 @@ func (dto *DtoFlag) ToFlagV1() flagv2.FlagData {
 
 }
 
-func (dto *DtoFlag) ToFlagV2() flagv2.FlagData {
-	return flagv2.FlagData{
+func (dto *DtoFlag) ToFlagV2() FlagData {
+	return FlagData{
 		Variations:  dto.Variations,
 		Rules:       dto.Rules,
 		DefaultRule: dto.DefaultRule,
