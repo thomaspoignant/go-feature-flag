@@ -136,43 +136,41 @@ func (f *FlagData) updateFlagStage() {
 
 		if step.Date != nil && now.After(*step.Date) {
 			// TODO Merge
-			//f.mergeChanges(step)
+			f.mergeChanges(step)
 		}
 	}
 }
 
-// mergeChanges will check every changes on the flag and apply them to the current configuration.
-//func (f *FlagData) mergeChanges(stepFlag ScheduledStep) {
-//	if stepFlag.Disable != nil {
-//		f.Disable = stepFlag.Disable
-//	}
-//	if stepFlag.Rollout != nil {
-//		f.Rollout = stepFlag.Rollout
-//	}
-//
-//	if stepFlag.False != nil {
-//		f.False = stepFlag.False
-//	}
-//	if stepFlag.True != nil {
-//		f.True = stepFlag.True
-//	}
-//	if stepFlag.Default != nil {
-//		f.Default = stepFlag.Default
-//	}
-//	if stepFlag.TrackEvents != nil {
-//		f.TrackEvents = stepFlag.TrackEvents
-//	}
-//	if stepFlag.Percentage != nil {
-//		f.Percentage = stepFlag.Percentage
-//	}
-//	if stepFlag.Rule != nil {
-//		f.Rule = stepFlag.Rule
-//	}
-//
-//	if stepFlag.Version != nil {
-//		f.Version = stepFlag.Version
-//	}
-//}
+//mergeChanges will check every changes on the flag and apply them to the current configuration.
+func (f *FlagData) mergeChanges(stepFlag ScheduledStep) {
+	if stepFlag.Disable != nil {
+		f.Disable = stepFlag.Disable
+	}
+
+	if stepFlag.Rollout != nil {
+		f.Rollout = stepFlag.Rollout
+	}
+
+	if stepFlag.Variations != nil {
+		f.Variations = stepFlag.Variations
+	}
+
+	if stepFlag.Rules != nil {
+		f.Rules = stepFlag.Rules
+	}
+
+	if stepFlag.DefaultRule != nil {
+		f.DefaultRule = stepFlag.DefaultRule
+	}
+
+	if stepFlag.TrackEvents != nil {
+		f.TrackEvents = stepFlag.TrackEvents
+	}
+
+	if stepFlag.Version != nil {
+		f.Version = stepFlag.Version
+	}
+}
 
 func (f FlagData) String() string {
 	var toString []string

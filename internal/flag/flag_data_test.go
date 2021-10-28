@@ -423,3 +423,182 @@ func TestFlag_value(t *testing.T) {
 		})
 	}
 }
+
+func TestFlag_ProgressiveRollout(t *testing.T) {
+	sdkDefaultValue := "toto"
+	f := flag.FlagData{
+		Variations: &map[string]*interface{}{
+			"True":    testconvert.Interface("True"),
+			"False":   testconvert.Interface("False"),
+			"Default": testconvert.Interface("Default"),
+		},
+		DefaultRule: &flag.Rule{
+			ProgressiveRollout: &flag.ProgressiveRollout{
+				ReleaseRamp: flag.ProgressiveReleaseRamp{
+					Start: testconvert.Time(time.Now().Add(1 * time.Second)),
+					End:   testconvert.Time(time.Now().Add(2 * time.Second)),
+				},
+				Variation: flag.ProgressiveVariation{
+					Initial: testconvert.String("False"),
+					End:     testconvert.String("True"),
+				},
+			},
+		},
+	}
+
+	user := ffuser.NewAnonymousUser("test")
+	flagName := "test-flag"
+
+	// We evaluate the same flag multiple time overtime.
+	v, _ := f.Value(flagName, user, sdkDefaultValue)
+	assert.Equal(t, f.GetVariationValue("False"), v)
+
+	time.Sleep(1 * time.Second)
+	v2, _ := f.Value(flagName, user, sdkDefaultValue)
+	assert.Equal(t, f.GetVariationValue("False"), v2)
+
+	time.Sleep(1 * time.Second)
+	v3, _ := f.Value(flagName, user, sdkDefaultValue)
+	assert.Equal(t, f.GetVariationValue("True"), v3)
+}
+
+func TestFlag_ScheduledRollout(t *testing.T) {
+	f := &flag.FlagData{
+		Variations: &map[string]*interface{}{
+			"True":    testconvert.Interface("True"),
+			"False":   testconvert.Interface("False"),
+			"Default": testconvert.Interface("Default"),
+		},
+		Rules: &[]flag.Rule{{
+			Query: testconvert.String("key eq \"test\""),
+			Percentages: &map[string]float64{
+				"True": 0, "False": 100,
+			},
+		}},
+		DefaultRule: &flag.Rule{
+			VariationResult: testconvert.String("Default"),
+		},
+		Rollout: &flag.Rollout{
+			Scheduled: &flag.ScheduledRollout{
+				Steps: []flag.ScheduledStep{
+					{
+						FlagData: flag.FlagData{
+							Version: testconvert.String("1.1"),
+						},
+						Date: testconvert.Time(time.Now().Add(1 * time.Second)),
+					},
+					{
+						FlagData: flag.FlagData{
+							Rules: &[]flag.Rule{{
+								Query: testconvert.String("key eq \"test\""),
+								Percentages: &map[string]float64{
+									"True": 100, "False": 0,
+								},
+							}},
+						},
+						Date: testconvert.Time(time.Now().Add(1 * time.Second)),
+					},
+					{
+						Date: testconvert.Time(time.Now().Add(2 * time.Second)),
+						FlagData: flag.FlagData{
+							Variations: &map[string]*interface{}{
+								"True":    testconvert.Interface("True2"),
+								"False":   testconvert.Interface("False2"),
+								"Default": testconvert.Interface("Default2"),
+							},
+							Rules: &[]flag.Rule{{
+								Query: testconvert.String("key eq \"test2\""),
+								Percentages: &map[string]float64{
+									"True": 100, "False": 0,
+								},
+							}},
+						},
+					},
+					{
+						Date: testconvert.Time(time.Now().Add(3 * time.Second)),
+						FlagData: flag.FlagData{
+							Rules: &[]flag.Rule{{
+								Query: testconvert.String("key eq \"test\""),
+								Percentages: &map[string]float64{
+									"True": 100, "False": 0,
+								},
+							}},
+						},
+					},
+					{
+						FlagData: flag.FlagData{
+							Disable: testconvert.Bool(true),
+						},
+						Date: testconvert.Time(time.Now().Add(4 * time.Second)),
+					},
+					{
+						FlagData: flag.FlagData{
+							Rules: &[]flag.Rule{{
+								Query: testconvert.String("key eq \"test\""),
+								Percentages: &map[string]float64{
+									"True": 0, "False": 100,
+								},
+							}},
+						},
+					},
+					{
+						FlagData: flag.FlagData{
+							Disable:     testconvert.Bool(false),
+							TrackEvents: testconvert.Bool(true),
+							Rollout: &flag.Rollout{
+								Experimentation: &rollout.Experimentation{
+									Start: testconvert.Time(time.Now().Add(6 * time.Second)),
+									End:   testconvert.Time(time.Now().Add(7 * time.Second)),
+								},
+							},
+						},
+						Date: testconvert.Time(time.Now().Add(5 * time.Second)),
+					},
+				},
+			},
+		},
+	}
+
+	user := ffuser.NewAnonymousUser("test")
+	flagName := "test-flag"
+	sdkDefault := "sdkDefault"
+	// We evaluate the same flag multiple time overtime.
+	v, _ := f.Value(flagName, user, sdkDefault)
+	assert.Equal(t, f.GetVariationValue("False"), v)
+
+	time.Sleep(1 * time.Second)
+
+	v, _ = f.Value(flagName, user, sdkDefault)
+	assert.Equal(t, "True", v)
+	assert.Equal(t, "1.1", f.GetVersion())
+
+	time.Sleep(1 * time.Second)
+
+	v, _ = f.Value(flagName, user, sdkDefault)
+	assert.Equal(t, "Default2", v)
+
+	time.Sleep(1 * time.Second)
+
+	v, _ = f.Value(flagName, user, sdkDefault)
+	assert.Equal(t, "True2", v)
+
+	time.Sleep(1 * time.Second)
+
+	v, _ = f.Value(flagName, user, sdkDefault)
+	assert.Equal(t, "sdkDefault", v)
+
+	time.Sleep(1 * time.Second)
+
+	v, _ = f.Value(flagName, user, sdkDefault)
+	assert.Equal(t, "sdkDefault", v)
+
+	time.Sleep(1 * time.Second)
+
+	v, _ = f.Value(flagName, user, sdkDefault)
+	assert.Equal(t, "True2", v)
+
+	time.Sleep(1 * time.Second)
+
+	v, _ = f.Value(flagName, user, sdkDefault)
+	assert.Equal(t, "sdkDefault", v)
+}
