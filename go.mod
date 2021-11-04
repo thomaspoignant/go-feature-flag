@@ -13,7 +13,7 @@ require (
 	github.com/pelletier/go-toml v1.9.4
 	github.com/stretchr/testify v1.7.0
 	golang.org/x/oauth2 v0.0.0-20211005180243-6b3c2da341f1
-	google.golang.org/api v0.58.0
+	google.golang.org/api v0.60.0
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
 )
