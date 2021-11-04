@@ -3,7 +3,7 @@ import json
 import re
 
 # This script is computing which version of the documentation should be delete.
-# We are keeping only the last minor of each version with the latest patch version,
+# We are keeping only the latest minor of each version with the latest patch version,
 # it means that if you have these version 0.1.1, 0.1.2, 0.1.3 and, 0.2.0 we will keep only
 # the versions 0.1.3 and 0.2.0.
 #
