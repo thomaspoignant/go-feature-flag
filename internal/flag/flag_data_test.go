@@ -434,13 +434,13 @@ func TestFlag_ProgressiveRollout(t *testing.T) {
 		},
 		DefaultRule: &flag.Rule{
 			ProgressiveRollout: &flag.ProgressiveRollout{
-				ReleaseRamp: flag.ProgressiveReleaseRamp{
-					Start: testconvert.Time(time.Now().Add(1 * time.Second)),
-					End:   testconvert.Time(time.Now().Add(2 * time.Second)),
+				Initial: &flag.Progressive{
+					Date:      testconvert.Time(time.Now().Add(1 * time.Second)),
+					Variation: testconvert.String("False"),
 				},
-				Variation: flag.ProgressiveVariation{
-					Initial: testconvert.String("False"),
-					End:     testconvert.String("True"),
+				End: &flag.Progressive{
+					Date:      testconvert.Time(time.Now().Add(2 * time.Second)),
+					Variation: testconvert.String("True"),
 				},
 			},
 		},
@@ -449,7 +449,7 @@ func TestFlag_ProgressiveRollout(t *testing.T) {
 	user := ffuser.NewAnonymousUser("test")
 	flagName := "test-flag"
 
-	// We evaluate the same flag multiple time overtime.
+	// We Evaluate the same flag multiple time overtime.
 	v, _ := f.Value(flagName, user, sdkDefaultValue)
 	assert.Equal(t, f.GetVariationValue("False"), v)
 
@@ -562,7 +562,7 @@ func TestFlag_ScheduledRollout(t *testing.T) {
 	user := ffuser.NewAnonymousUser("test")
 	flagName := "test-flag"
 	sdkDefault := "sdkDefault"
-	// We evaluate the same flag multiple time overtime.
+	// We Evaluate the same flag multiple time overtime.
 	v, _ := f.Value(flagName, user, sdkDefault)
 	assert.Equal(t, f.GetVariationValue("False"), v)
 

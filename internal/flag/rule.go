@@ -1,6 +1,7 @@
 package flag
 
 import (
+	"errors"
 	"fmt"
 	"github.com/nikunjy/rules/parser"
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
@@ -25,7 +26,7 @@ type Rule struct {
 	ProgressiveRollout *ProgressiveRollout `json:"progressiveRollout,omitempty" yaml:"progressiveRollout,omitempty" toml:"progressiveRollout,omitempty"` // nolint: lll
 }
 
-func (r *Rule) evaluate(user ffuser.User, hash uint32, defaultRule bool,
+func (r *Rule) Evaluate(user ffuser.User, hashID uint32, defaultRule bool,
 ) ( /* apply */ bool /* variation name */, string, error) {
 	// Check if the rule apply for this user
 	ruleApply := defaultRule || r.Query == nil || *r.Query == "" || parser.Evaluate(*r.Query, userToMap(user))
@@ -34,7 +35,7 @@ func (r *Rule) evaluate(user ffuser.User, hash uint32, defaultRule bool,
 	}
 
 	if r.ProgressiveRollout != nil {
-		variation, err := r.getVariationFromProgressiveRollout(hash)
+		variation, err := r.getVariationFromProgressiveRollout(hashID)
 		if err == nil {
 			return true, variation, nil
 		}
@@ -42,7 +43,7 @@ func (r *Rule) evaluate(user ffuser.User, hash uint32, defaultRule bool,
 	}
 
 	if r.Percentages != nil {
-		variationName, err := r.getVariationFromPercentage(hash)
+		variationName, err := r.getVariationFromPercentage(hashID)
 		if err != nil {
 			return false, "", err
 		}
@@ -56,45 +57,50 @@ func (r *Rule) evaluate(user ffuser.User, hash uint32, defaultRule bool,
 }
 
 func (r *Rule) getVariationFromProgressiveRollout(hash uint32) (string, error) {
-	isRolloutValid := r.ProgressiveRollout.ReleaseRamp.Start != nil &&
-		r.ProgressiveRollout.ReleaseRamp.End != nil &&
-		r.ProgressiveRollout.Variation.End != nil &&
-		r.ProgressiveRollout.Variation.Initial != nil
+	isRolloutValid :=
+		r.ProgressiveRollout.Initial.Date != nil &&
+			r.ProgressiveRollout.End.Date != nil &&
+			r.ProgressiveRollout.Initial.Variation != nil &&
+			r.ProgressiveRollout.End.Variation != nil
 
 	if isRolloutValid {
 		now := time.Now()
-		if now.Before(*r.ProgressiveRollout.ReleaseRamp.Start) {
-			return *r.ProgressiveRollout.Variation.Initial, nil
+		if now.Before(*r.ProgressiveRollout.Initial.Date) {
+			return *r.ProgressiveRollout.Initial.Variation, nil
 		}
 
-		if now.After(*r.ProgressiveRollout.ReleaseRamp.End) {
-			return *r.ProgressiveRollout.Variation.End, nil
+		if now.After(*r.ProgressiveRollout.End.Date) {
+			return *r.ProgressiveRollout.End.Variation, nil
 		}
 
 		// We are between initial and end
-		initialPercentage := r.ProgressiveRollout.Percentage.Initial * percentageMultiplier
-		if r.ProgressiveRollout.Percentage.End == 0 {
-			r.ProgressiveRollout.Percentage.End = 100
+		initialPercentage := r.ProgressiveRollout.Initial.Percentage * PercentageMultiplier
+		if r.ProgressiveRollout.End.Percentage == 0 || r.ProgressiveRollout.End.Percentage > 100 {
+			r.ProgressiveRollout.End.Percentage = 100
 		}
-		endPercentage := r.ProgressiveRollout.Percentage.End * percentageMultiplier
+		endPercentage := r.ProgressiveRollout.End.Percentage * PercentageMultiplier
 
-		nbSec := r.ProgressiveRollout.ReleaseRamp.End.Unix() - r.ProgressiveRollout.ReleaseRamp.Start.Unix()
+		nbSec := r.ProgressiveRollout.End.Date.Unix() - r.ProgressiveRollout.Initial.Date.Unix()
 		percentage := endPercentage - initialPercentage
 		percentPerSec := percentage / float64(nbSec)
 
-		c := now.Unix() - r.ProgressiveRollout.ReleaseRamp.Start.Unix()
+		c := now.Unix() - r.ProgressiveRollout.Initial.Date.Unix()
 		currentPercentage := float64(c)*percentPerSec + initialPercentage
 
 		if hash < uint32(currentPercentage) {
-			return *r.ProgressiveRollout.Variation.End, nil
+			return *r.ProgressiveRollout.End.Variation, nil
 		}
-		return *r.ProgressiveRollout.Variation.Initial, nil
+		return *r.ProgressiveRollout.Initial.Variation, nil
 	}
 	return "", fmt.Errorf("error in the progressive rollout, missing params")
 }
 
 func (r *Rule) getVariationFromPercentage(hash uint32) (string, error) {
-	buckets := r.getPercentageBuckets()
+	buckets, err := r.getPercentageBuckets()
+	if err != nil {
+		return "", err
+	}
+
 	for key, bucket := range buckets {
 		if uint32(bucket.start) <= hash && uint32(bucket.end) > hash {
 			return key, nil
@@ -104,10 +110,9 @@ func (r *Rule) getVariationFromPercentage(hash uint32) (string, error) {
 }
 
 // getPercentageBuckets compute a map containing the buckets of each variation for this rule.
-func (r *Rule) getPercentageBuckets() map[string]rulePercentageBucket {
+func (r *Rule) getPercentageBuckets() (map[string]rulePercentageBucket, error) {
 	percentageBuckets := map[string]rulePercentageBucket{}
-
-	// we sort the variation to be sure to create the buckets all the time in the same order
+	totalPercentage := float64(0)
 	percentage := r.GetPercentages()
 
 	// we need to sort the map to affect the bucket to be sure we are constantly affecting the users to the same bucket.
@@ -123,15 +128,21 @@ func (r *Rule) getPercentageBuckets() map[string]rulePercentageBucket {
 
 	bucketStart := float64(0)
 	for _, varName := range variationNames {
-		bucketLimit := percentage[varName] * percentageMultiplier
-		bucketEnd := bucketLimit
+		totalPercentage += percentage[varName]
+		bucketLimit := percentage[varName] * PercentageMultiplier
+		bucketEnd := bucketStart + bucketLimit
 		percentageBuckets[varName] = rulePercentageBucket{
 			start: bucketStart,
 			end:   bucketEnd,
 		}
 		bucketStart = bucketLimit
 	}
-	return percentageBuckets
+
+	if totalPercentage != float64(100) {
+		return nil, errors.New("invalid rule because percentage are not representing 100%")
+	}
+
+	return percentageBuckets, nil
 }
 
 func (r *Rule) GetQuery() string {

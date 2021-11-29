@@ -3,10 +3,18 @@ package flag
 import "time"
 
 type ProgressiveRollout struct {
+	Initial *Progressive `json:"initial,omitempty" yaml:"initial,omitempty" toml:"initial,omitempty"`
+	End     *Progressive `json:"end,omitempty" yaml:"end,omitempty" toml:"end,omitempty"`
 	// TODO: add comments here
-	Percentage  ProgressivePercentage  `json:"percentage,omitempty" yaml:"percentage,omitempty" toml:"percentage,omitempty"`
-	ReleaseRamp ProgressiveReleaseRamp `json:"releaseRamp,omitempty" yaml:"releaseRamp,omitempty" toml:"releaseRamp,omitempty"` // nolint: lll
-	Variation   ProgressiveVariation   `json:"variation,omitempty" yaml:"variation,omitempty" toml:"variation,omitempty"`       // nolint: lll
+	//Percentage  ProgressivePercentage  `json:"percentage,omitempty" yaml:"percentage,omitempty" toml:"percentage,omitempty"`
+	//ReleaseRamp ProgressiveReleaseRamp `json:"releaseRamp,omitempty" yaml:"releaseRamp,omitempty" toml:"releaseRamp,omitempty"` // nolint: lll
+	//Variation   ProgressiveVariation   `json:"variation,omitempty" yaml:"variation,omitempty" toml:"variation,omitempty"`       // nolint: lll
+}
+
+type Progressive struct {
+	Variation  *string
+	Percentage float64
+	Date       *time.Time
 }
 
 type ProgressivePercentage struct {

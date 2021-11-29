@@ -9,8 +9,8 @@ import (
 	"time"
 )
 
-const percentageMultiplier = float64(1000)
-const maxPercentage = uint32(100 * percentageMultiplier)
+const PercentageMultiplier = float64(1000)
+const MaxPercentage = uint32(100 * PercentageMultiplier)
 
 type FlagData struct {
 	// Variations are all the variations available for this flag. The minimum is 2 variations and, we don't have any max
@@ -84,13 +84,13 @@ func (f *FlagData) Value(flagName string, user ffuser.User, sdkDefaultValue inte
 }
 
 func (f *FlagData) getVariation(flagName string, user ffuser.User) (string, error) {
-	hashID := utils.Hash(flagName+user.GetKey()) % maxPercentage
+	hashID := utils.Hash(flagName+user.GetKey()) % MaxPercentage
 
 	// Targeting rules
 	if f.Rules != nil && len(*f.Rules) != 0 {
 		rules := *f.Rules
 		for _, rule := range rules {
-			apply, varName, err := rule.evaluate(user, hashID, false)
+			apply, varName, err := rule.Evaluate(user, hashID, false)
 			if err != nil {
 				// TODO log + continue to next rule
 			}
@@ -106,7 +106,7 @@ func (f *FlagData) getVariation(flagName string, user ffuser.User) (string, erro
 	}
 
 	defaultRule := *f.DefaultRule
-	_, varName, err := defaultRule.evaluate(user, hashID, true)
+	_, varName, err := defaultRule.Evaluate(user, hashID, true)
 	return varName, err
 }
 
