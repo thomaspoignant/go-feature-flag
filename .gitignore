@@ -17,3 +17,6 @@ bin/
 .deployment
 
 vendor/
+
+# venv created for the documentation script
+.venv
