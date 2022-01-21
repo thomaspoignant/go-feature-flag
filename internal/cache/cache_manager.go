@@ -33,7 +33,7 @@ func New(notificationService Service) Manager {
 }
 
 func (c *cacheManagerImpl) UpdateCache(loadedFlags []byte, fileFormat string) error {
-	var newFlags map[string]flag.FlagData
+	var newFlags map[string]flag.DtoFlag
 	var err error
 	switch strings.ToLower(fileFormat) {
 	case "toml":

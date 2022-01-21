@@ -11,12 +11,12 @@ import (
 func TestAll(t *testing.T) {
 	tests := []struct {
 		name  string
-		param map[string]flag.FlagData
+		param map[string]flag.DtoFlag
 		want  map[string]flag.Flag
 	}{
 		{
 			name: "all with 1 flag",
-			param: map[string]flag.FlagData{
+			param: map[string]flag.DtoFlag{
 				"test": {
 					Percentage: testconvert.Float64(40),
 					True:       testconvert.Interface("true"),
@@ -35,7 +35,7 @@ func TestAll(t *testing.T) {
 		},
 		{
 			name: "all with multiple flags",
-			param: map[string]flag.FlagData{
+			param: map[string]flag.DtoFlag{
 				"test": {
 					Percentage: testconvert.Float64(40),
 					True:       testconvert.Interface("true"),
@@ -66,7 +66,7 @@ func TestAll(t *testing.T) {
 		},
 		{
 			name:  "empty",
-			param: map[string]flag.FlagData{},
+			param: map[string]flag.DtoFlag{},
 			want:  map[string]flag.Flag{},
 		},
 	}
@@ -82,11 +82,11 @@ func TestAll(t *testing.T) {
 func TestCopy(t *testing.T) {
 	tests := []struct {
 		name  string
-		param map[string]flag.FlagData
+		param map[string]flag.DtoFlag
 	}{
 		{
 			name: "copy with 1 flag",
-			param: map[string]flag.FlagData{
+			param: map[string]flag.DtoFlag{
 				"test": {
 					Percentage: testconvert.Float64(40),
 					True:       testconvert.Interface("true"),
