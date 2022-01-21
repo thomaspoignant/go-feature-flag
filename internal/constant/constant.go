@@ -1,3 +1,3 @@
-package flag
+package constant
 
 const VariationSDKDefault string = "SdkDefault"

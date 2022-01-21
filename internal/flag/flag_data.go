@@ -6,7 +6,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
 	"github.com/thomaspoignant/go-feature-flag/internal/utils"
 	"math"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -55,7 +54,7 @@ type FlagData struct {
 
 // Value is returning the Value associate to the flag (True / False / Default ) based
 // if the toggle apply to the user or not.
-func (f *FlagData) Value(flagName string, user ffuser.User) (interface{}, string) {
+func (f *FlagData) Value(flagName string, user ffuser.User, sdkDefaultValue interface{}) (interface{}, string) {
 	f.updateFlagStage()
 	if f.isExperimentationOver() {
 		// if we have an experimentation that has not started or that is finished we use the default value.
@@ -103,7 +102,7 @@ func (f *FlagData) isInPercentage(flagName string, user ffuser.User) bool {
 // evaluateRule is checking if the rule can apply to a specific user.
 func (f *FlagData) evaluateRule(user ffuser.User) bool {
 	// Flag disable we cannot apply it.
-	if f.GetDisable() {
+	if f.IsDisable() {
 		return false
 	}
 
@@ -126,14 +125,14 @@ func (f FlagData) String() string {
 	toString = append(toString, fmt.Sprintf("true=\"%v\"", f.getTrue()))
 	toString = append(toString, fmt.Sprintf("false=\"%v\"", f.getFalse()))
 	toString = append(toString, fmt.Sprintf("default=\"%v\"", f.getDefault()))
-	toString = append(toString, fmt.Sprintf("disable=\"%v\"", f.GetDisable()))
+	toString = append(toString, fmt.Sprintf("disable=\"%v\"", f.IsDisable()))
 
 	if f.TrackEvents != nil {
-		toString = append(toString, fmt.Sprintf("trackEvents=\"%v\"", f.GetTrackEvents()))
+		toString = append(toString, fmt.Sprintf("trackEvents=\"%v\"", f.IsTrackEvents()))
 	}
 
 	if f.Version != nil {
-		toString = append(toString, fmt.Sprintf("version=%s", strconv.FormatFloat(f.GetVersion(), 'f', -1, 64)))
+		toString = append(toString, fmt.Sprintf("version=%s", f.GetVersion()))
 	}
 
 	return strings.Join(toString, ", ")
@@ -278,16 +277,16 @@ func (f *FlagData) getDefault() interface{} {
 	return *f.Default
 }
 
-// GetTrackEvents is the getter of the field TrackEvents
-func (f *FlagData) GetTrackEvents() bool {
+// IsTrackEvents is the getter of the field TrackEvents
+func (f *FlagData) IsTrackEvents() bool {
 	if f.TrackEvents == nil {
 		return true
 	}
 	return *f.TrackEvents
 }
 
-// GetDisable is the getter for the field Disable
-func (f *FlagData) GetDisable() bool {
+// IsDisable is the getter for the field Disable
+func (f *FlagData) IsDisable() bool {
 	if f.Disable == nil {
 		return false
 	}
@@ -300,11 +299,11 @@ func (f *FlagData) getRollout() *Rollout {
 }
 
 // GetVersion is the getter for the field Version
-func (f *FlagData) GetVersion() float64 {
+func (f *FlagData) GetVersion() string {
 	if f.Version == nil {
-		return 0
+		return ""
 	}
-	return *f.Version
+	return fmt.Sprintf("%f", *f.Version)
 }
 
 // GetVariationValue return the value of variation from his name
@@ -338,8 +337,8 @@ func (f *FlagData) GetRawValues() map[string]string {
 	rawValues["True"] = convertNilEmpty(f.getTrue())
 	rawValues["False"] = convertNilEmpty(f.getFalse())
 	rawValues["Default"] = convertNilEmpty(f.getDefault())
-	rawValues["TrackEvents"] = fmt.Sprintf("%t", f.GetTrackEvents())
-	rawValues["Disable"] = fmt.Sprintf("%t", f.GetDisable())
+	rawValues["TrackEvents"] = fmt.Sprintf("%t", f.IsTrackEvents())
+	rawValues["Disable"] = fmt.Sprintf("%t", f.IsDisable())
 	rawValues["Version"] = fmt.Sprintf("%v", f.GetVersion())
 	return rawValues
 }

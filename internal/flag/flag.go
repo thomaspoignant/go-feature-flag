@@ -5,27 +5,23 @@ import (
 )
 
 type Flag interface {
-	// Value is returning the Value associate to the flag (True / False / Default ) based
-	// if the flag apply to the user or not.
-	Value(flagName string, user ffuser.User) (interface{}, string)
+	// Value is returning the Value associate to the flag based if the flag apply to the user or not.
+	Value(flagName string, user ffuser.User, sdkDefaultValue interface{}) (interface{}, string)
 
 	// String display correctly a flag with the right formatting
 	String() string
 
 	// GetVersion is the getter for the field Version
-	// Default: 0.0
-	GetVersion() float64
+	// Default: empty string
+	GetVersion() string
 
-	// GetTrackEvents is the getter of the field TrackEvents
+	// IsTrackEvents is the getter of the field TrackEvents
 	// Default: true
-	GetTrackEvents() bool
+	IsTrackEvents() bool
 
-	// GetDisable is the getter for the field Disable
+	// IsDisable is the getter for the field Disable
 	// Default: false
-	GetDisable() bool
-
-	// GetDefaultVariation return the name of the default variation (if something goes wrong)
-	GetDefaultVariation() string
+	IsDisable() bool
 
 	// GetVariationValue return the value of variation from his name
 	GetVariationValue(variationName string) interface{}

@@ -1,9 +1,9 @@
 {
   "flags": {
     "test-flag0": {
-      "value": false,
+      "value": null,
       "timestamp": 1622206239,
-      "variationType": "Default",
+      "variationType": "True",
       "trackEvents": true
     },
     "test-flag1": {

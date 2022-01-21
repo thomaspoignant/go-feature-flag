@@ -1,7 +1,6 @@
 package flag_test
 
 import (
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	flag "github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"testing"
@@ -335,7 +334,7 @@ func TestFlag_value(t *testing.T) {
 				Rollout:    &tt.fields.Rollout,
 			}
 
-			got, variationType := f.Value(tt.args.flagName, tt.args.user)
+			got, variationType := f.Value(tt.args.flagName, tt.args.user, tt.fields.Default)
 			assert.Equal(t, tt.want.value, got)
 			assert.Equal(t, tt.want.variationType, variationType)
 		})
@@ -360,15 +359,15 @@ func TestFlag_ProgressiveRollout(t *testing.T) {
 	flagName := "test-flag"
 
 	// We evaluate the same flag multiple time overtime.
-	v, _ := f.Value(flagName, user)
+	v, _ := f.Value(flagName, user, "sdkdefault")
 	assert.Equal(t, f.GetVariationValue(flag.VariationFalse), v)
 
 	time.Sleep(1 * time.Second)
-	v2, _ := f.Value(flagName, user)
+	v2, _ := f.Value(flagName, user, "sdkdefault")
 	assert.Equal(t, f.GetVariationValue(flag.VariationFalse), v2)
 
 	time.Sleep(1 * time.Second)
-	v3, _ := f.Value(flagName, user)
+	v3, _ := f.Value(flagName, user, "sdkdefault")
 	assert.Equal(t, f.GetVariationValue(flag.VariationTrue), v3)
 }
 
@@ -445,43 +444,43 @@ func TestFlag_ScheduledRollout(t *testing.T) {
 	flagName := "test-flag"
 
 	// We evaluate the same flag multiple time overtime.
-	v, _ := f.Value(flagName, user)
+	v, _ := f.Value(flagName, user, "sdkdefault")
 	assert.Equal(t, f.GetVariationValue(flag.VariationFalse), v)
 
 	time.Sleep(1 * time.Second)
 
-	v, _ = f.Value(flagName, user)
+	v, _ = f.Value(flagName, user, "sdkdefault")
 	assert.Equal(t, "True", v)
-	assert.Equal(t, 1.1, f.GetVersion())
+	assert.Equal(t, "1.100000", f.GetVersion())
 
 	time.Sleep(1 * time.Second)
 
-	v, _ = f.Value(flagName, user)
+	v, _ = f.Value(flagName, user, "sdkdefault")
 	assert.Equal(t, "Default2", v)
 
 	time.Sleep(1 * time.Second)
 
-	v, _ = f.Value(flagName, user)
+	v, _ = f.Value(flagName, user, "sdkdefault")
 	assert.Equal(t, "True2", v)
 
 	time.Sleep(1 * time.Second)
 
-	v, _ = f.Value(flagName, user)
+	v, _ = f.Value(flagName, user, "sdkdefault")
 	assert.Equal(t, "Default2", v)
 
 	time.Sleep(1 * time.Second)
 
-	v, _ = f.Value(flagName, user)
+	v, _ = f.Value(flagName, user, "sdkdefault")
 	assert.Equal(t, "Default2", v)
 
 	time.Sleep(1 * time.Second)
 
-	v, _ = f.Value(flagName, user)
+	v, _ = f.Value(flagName, user, "sdkdefault")
 	assert.Equal(t, "True2", v)
 
 	time.Sleep(1 * time.Second)
 
-	v, _ = f.Value(flagName, user)
+	v, _ = f.Value(flagName, user, "sdkdefault")
 	assert.Equal(t, "Default2", v)
 }
 
@@ -513,7 +512,7 @@ func TestFlag_String(t *testing.T) {
 				TrackEvents: testconvert.Bool(true),
 				Version:     testconvert.Float64(12),
 			},
-			want: "percentage=10%, rule=\"key eq \"toto\"\", true=\"true\", false=\"false\", default=\"false\", disable=\"false\", trackEvents=\"true\", version=12",
+			want: "percentage=10%, rule=\"key eq \"toto\"\", true=\"true\", false=\"false\", default=\"false\", disable=\"false\", trackEvents=\"true\", version=12.000000",
 		},
 		{
 			name: "No rule",
@@ -564,7 +563,7 @@ func TestFlag_Getter(t *testing.T) {
 		TrackEvents bool
 		Percentage  float64
 		Rule        string
-		Version     float64
+		Version     string
 		RawValues   map[string]string
 	}
 	tests := []struct {
@@ -584,7 +583,7 @@ func TestFlag_Getter(t *testing.T) {
 				TrackEvents: true,
 				Percentage:  0,
 				Rule:        "",
-				Version:     0,
+				Version:     "",
 				RawValues: map[string]string{
 					"Default":     "",
 					"Disable":     "false",
@@ -594,7 +593,7 @@ func TestFlag_Getter(t *testing.T) {
 					"Rule":        "",
 					"TrackEvents": "true",
 					"True":        "",
-					"Version":     "0",
+					"Version":     "",
 				},
 			},
 		},
@@ -618,7 +617,7 @@ func TestFlag_Getter(t *testing.T) {
 				TrackEvents: false,
 				Percentage:  90,
 				Rule:        "test",
-				Version:     127,
+				Version:     "127.000000",
 				RawValues: map[string]string{
 					"Default":     "14.2",
 					"Disable":     "true",
@@ -628,7 +627,7 @@ func TestFlag_Getter(t *testing.T) {
 					"Rule":        "test",
 					"TrackEvents": "false",
 					"True":        "12.2",
-					"Version":     "127",
+					"Version":     "127.000000",
 				},
 			},
 		},
@@ -636,12 +635,9 @@ func TestFlag_Getter(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want.Disable, tt.flag.GetDisable())
-			assert.Equal(t, tt.want.TrackEvents, tt.flag.GetTrackEvents())
+			assert.Equal(t, tt.want.Disable, tt.flag.IsDisable())
+			assert.Equal(t, tt.want.TrackEvents, tt.flag.IsTrackEvents())
 			assert.Equal(t, tt.want.Version, tt.flag.GetVersion())
-			assert.Equal(t, flag.VariationDefault, tt.flag.GetDefaultVariation())
-			fmt.Println(tt.want.Default, tt.flag.GetVariationValue(tt.flag.GetDefaultVariation()))
-			assert.Equal(t, tt.want.Default, tt.flag.GetVariationValue(tt.flag.GetDefaultVariation()))
 			assert.Equal(t, tt.want.RawValues, tt.flag.GetRawValues())
 		})
 	}
