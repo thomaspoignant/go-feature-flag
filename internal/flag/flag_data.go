@@ -1,4 +1,4 @@
-package flagv1
+package flag
 
 import (
 	"fmt"
@@ -77,8 +77,8 @@ func (f *FlagData) Value(flagName string, user ffuser.User) (interface{}, string
 
 func (f *FlagData) isExperimentationOver() bool {
 	now := time.Now()
-	return f.Rollout != nil && f.Rollout.Experimentation != nil && (
-		(f.Rollout.Experimentation.Start != nil && now.Before(*f.Rollout.Experimentation.Start)) ||
+	return f.Rollout != nil && f.Rollout.Experimentation != nil &&
+		((f.Rollout.Experimentation.Start != nil && now.Before(*f.Rollout.Experimentation.Start)) ||
 			(f.Rollout.Experimentation.End != nil && now.After(*f.Rollout.Experimentation.End)))
 }
 

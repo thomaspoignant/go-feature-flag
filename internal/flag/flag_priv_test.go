@@ -1,4 +1,4 @@
-package flagv1
+package flag
 
 import (
 	"github.com/stretchr/testify/assert"

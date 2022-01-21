@@ -3,7 +3,6 @@ package cache
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 	"sync"
 	"testing"
@@ -30,13 +29,13 @@ func Test_notificationService_getDifferences(t *testing.T) {
 			name: "Delete flag",
 			args: args{
 				oldCache: map[string]flag.Flag{
-					"test-flag": &flagv1.FlagData{
+					"test-flag": &flag.FlagData{
 						Percentage: testconvert.Float64(100),
 						True:       testconvert.Interface(true),
 						False:      testconvert.Interface(false),
 						Default:    testconvert.Interface(false),
 					},
-					"test-flag2": &flagv1.FlagData{
+					"test-flag2": &flag.FlagData{
 						Percentage: testconvert.Float64(100),
 						True:       testconvert.Interface(true),
 						False:      testconvert.Interface(false),
@@ -44,7 +43,7 @@ func Test_notificationService_getDifferences(t *testing.T) {
 					},
 				},
 				newCache: map[string]flag.Flag{
-					"test-flag": &flagv1.FlagData{
+					"test-flag": &flag.FlagData{
 						Percentage: testconvert.Float64(100),
 						True:       testconvert.Interface(true),
 						False:      testconvert.Interface(false),
@@ -54,7 +53,7 @@ func Test_notificationService_getDifferences(t *testing.T) {
 			},
 			want: model.DiffCache{
 				Deleted: map[string]flag.Flag{
-					"test-flag2": &flagv1.FlagData{
+					"test-flag2": &flag.FlagData{
 						Percentage: testconvert.Float64(100),
 						True:       testconvert.Interface(true),
 						False:      testconvert.Interface(false),
@@ -69,7 +68,7 @@ func Test_notificationService_getDifferences(t *testing.T) {
 			name: "Added flag",
 			args: args{
 				oldCache: map[string]flag.Flag{
-					"test-flag": &flagv1.FlagData{
+					"test-flag": &flag.FlagData{
 						Percentage: testconvert.Float64(100),
 						True:       testconvert.Interface(true),
 						False:      testconvert.Interface(false),
@@ -77,13 +76,13 @@ func Test_notificationService_getDifferences(t *testing.T) {
 					},
 				},
 				newCache: map[string]flag.Flag{
-					"test-flag": &flagv1.FlagData{
+					"test-flag": &flag.FlagData{
 						Percentage: testconvert.Float64(100),
 						True:       testconvert.Interface(true),
 						False:      testconvert.Interface(false),
 						Default:    testconvert.Interface(false),
 					},
-					"test-flag2": &flagv1.FlagData{
+					"test-flag2": &flag.FlagData{
 						Percentage: testconvert.Float64(100),
 						True:       testconvert.Interface(true),
 						False:      testconvert.Interface(false),
@@ -93,7 +92,7 @@ func Test_notificationService_getDifferences(t *testing.T) {
 			},
 			want: model.DiffCache{
 				Added: map[string]flag.Flag{
-					"test-flag2": &flagv1.FlagData{
+					"test-flag2": &flag.FlagData{
 						Percentage: testconvert.Float64(100),
 						True:       testconvert.Interface(true),
 						False:      testconvert.Interface(false),
@@ -108,7 +107,7 @@ func Test_notificationService_getDifferences(t *testing.T) {
 			name: "Updated flag",
 			args: args{
 				oldCache: map[string]flag.Flag{
-					"test-flag": &flagv1.FlagData{
+					"test-flag": &flag.FlagData{
 						Percentage: testconvert.Float64(100),
 						True:       testconvert.Interface(true),
 						False:      testconvert.Interface(false),
@@ -116,7 +115,7 @@ func Test_notificationService_getDifferences(t *testing.T) {
 					},
 				},
 				newCache: map[string]flag.Flag{
-					"test-flag": &flagv1.FlagData{
+					"test-flag": &flag.FlagData{
 						Percentage: testconvert.Float64(100),
 						True:       testconvert.Interface(true),
 						False:      testconvert.Interface(false),
@@ -129,13 +128,13 @@ func Test_notificationService_getDifferences(t *testing.T) {
 				Deleted: map[string]flag.Flag{},
 				Updated: map[string]model.DiffUpdated{
 					"test-flag": {
-						Before: &flagv1.FlagData{
+						Before: &flag.FlagData{
 							Percentage: testconvert.Float64(100),
 							True:       testconvert.Interface(true),
 							False:      testconvert.Interface(false),
 							Default:    testconvert.Interface(false),
 						},
-						After: &flagv1.FlagData{
+						After: &flag.FlagData{
 							Percentage: testconvert.Float64(100),
 							True:       testconvert.Interface(true),
 							False:      testconvert.Interface(false),

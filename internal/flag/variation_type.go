@@ -1,4 +1,4 @@
-package flagv1
+package flag
 
 const (
 	// VariationTrue is a constant to explain that we are using the "True" variation

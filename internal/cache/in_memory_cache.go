@@ -3,20 +3,19 @@ package cache
 import (
 	"fmt"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	"github.com/thomaspoignant/go-feature-flag/internal/flagv1"
 )
 
 type InMemoryCache struct {
-	Flags map[string]flagv1.FlagData
+	Flags map[string]flag.FlagData
 }
 
 func NewInMemoryCache() *InMemoryCache {
 	return &InMemoryCache{
-		Flags: map[string]flagv1.FlagData{},
+		Flags: map[string]flag.FlagData{},
 	}
 }
 
-func (fc *InMemoryCache) addFlag(key string, value flagv1.FlagData) {
+func (fc *InMemoryCache) addFlag(key string, value flag.FlagData) {
 	fc.Flags[key] = value
 }
 
@@ -53,6 +52,6 @@ func (fc *InMemoryCache) All() map[string]flag.Flag {
 	return c
 }
 
-func (fc *InMemoryCache) Init(flags map[string]flagv1.FlagData) {
+func (fc *InMemoryCache) Init(flags map[string]flag.FlagData) {
 	fc.Flags = flags
 }
