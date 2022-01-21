@@ -1,6 +1,7 @@
 package flag_test
 
 import (
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
@@ -11,12 +12,6 @@ import (
 )
 
 func TestRule_Evaluate(t *testing.T) {
-	type fields struct {
-		Query              *string
-		VariationResult    *string
-		Percentages        *map[string]float64
-		ProgressiveRollout *flag.ProgressiveRollout
-	}
 	type args struct {
 		user        ffuser.User
 		flagName    string
@@ -135,15 +130,15 @@ func TestRule_Evaluate(t *testing.T) {
 			wantApply: false,
 		},
 		{
-			name: "Progressive rollout not started",
+			name: "ProgressiveRolloutStep rollout not started",
 			rule: &flag.Rule{
 				ProgressiveRollout: &flag.ProgressiveRollout{
-					Initial: &flag.Progressive{
+					Initial: &flag.ProgressiveRolloutStep{
 						Variation:  testconvert.String("Variation1"),
 						Percentage: 0,
 						Date:       testconvert.Time(time.Now().Add(1 * time.Second)),
 					},
-					End: &flag.Progressive{
+					End: &flag.ProgressiveRolloutStep{
 						Variation:  testconvert.String("Variation2"),
 						Percentage: 100,
 						Date:       testconvert.Time(time.Now().Add(1 * time.Hour)),
@@ -159,15 +154,15 @@ func TestRule_Evaluate(t *testing.T) {
 			wantVariation: "Variation1",
 		},
 		{
-			name: "Progressive rollout already finished",
+			name: "ProgressiveRolloutStep rollout already finished",
 			rule: &flag.Rule{
 				ProgressiveRollout: &flag.ProgressiveRollout{
-					Initial: &flag.Progressive{
+					Initial: &flag.ProgressiveRolloutStep{
 						Variation:  testconvert.String("Variation1"),
 						Percentage: 0,
 						Date:       testconvert.Time(time.Now().Add(-10 * time.Second)),
 					},
-					End: &flag.Progressive{
+					End: &flag.ProgressiveRolloutStep{
 						Variation:  testconvert.String("Variation2"),
 						Percentage: 100,
 						Date:       testconvert.Time(time.Now().Add(-1 * time.Second)),
@@ -183,15 +178,15 @@ func TestRule_Evaluate(t *testing.T) {
 			wantVariation: "Variation2",
 		},
 		{
-			name: "Progressive rollout in the middle (Variation1)",
+			name: "ProgressiveRolloutStep rollout in the middle (Variation1)",
 			rule: &flag.Rule{
 				ProgressiveRollout: &flag.ProgressiveRollout{
-					Initial: &flag.Progressive{
+					Initial: &flag.ProgressiveRolloutStep{
 						Variation:  testconvert.String("Variation1"),
 						Percentage: 0,
 						Date:       testconvert.Time(time.Now().Add(-1 * time.Second)),
 					},
-					End: &flag.Progressive{
+					End: &flag.ProgressiveRolloutStep{
 						Variation:  testconvert.String("Variation2"),
 						Percentage: 100,
 						Date:       testconvert.Time(time.Now().Add(10 * time.Second)),
@@ -207,15 +202,15 @@ func TestRule_Evaluate(t *testing.T) {
 			wantVariation: "Variation1",
 		},
 		{
-			name: "Progressive rollout in the middle (Variation2)",
+			name: "ProgressiveRolloutStep rollout in the middle (Variation2)",
 			rule: &flag.Rule{
 				ProgressiveRollout: &flag.ProgressiveRollout{
-					Initial: &flag.Progressive{
+					Initial: &flag.ProgressiveRolloutStep{
 						Variation:  testconvert.String("Variation1"),
 						Percentage: 0,
 						Date:       testconvert.Time(time.Now().Add(-10 * time.Second)),
 					},
-					End: &flag.Progressive{
+					End: &flag.ProgressiveRolloutStep{
 						Variation:  testconvert.String("Variation2"),
 						Percentage: 100,
 						Date:       testconvert.Time(time.Now().Add(10 * time.Second)),
@@ -231,14 +226,14 @@ func TestRule_Evaluate(t *testing.T) {
 			wantVariation: "Variation2",
 		},
 		{
-			name: "Progressive rollout no percentage (will take 0 -> 100)",
+			name: "ProgressiveRolloutStep rollout no percentage (will take 0 -> 100)",
 			rule: &flag.Rule{
 				ProgressiveRollout: &flag.ProgressiveRollout{
-					Initial: &flag.Progressive{
+					Initial: &flag.ProgressiveRolloutStep{
 						Variation: testconvert.String("Variation1"),
 						Date:      testconvert.Time(time.Now().Add(-10 * time.Second)),
 					},
-					End: &flag.Progressive{
+					End: &flag.ProgressiveRolloutStep{
 						Variation: testconvert.String("Variation2"),
 						Date:      testconvert.Time(time.Now().Add(10 * time.Second)),
 					},
@@ -253,13 +248,13 @@ func TestRule_Evaluate(t *testing.T) {
 			wantVariation: "Variation2",
 		},
 		{
-			name: "Progressive rollout missing date",
+			name: "ProgressiveRolloutStep rollout missing date",
 			rule: &flag.Rule{
 				ProgressiveRollout: &flag.ProgressiveRollout{
-					Initial: &flag.Progressive{
+					Initial: &flag.ProgressiveRolloutStep{
 						Variation: testconvert.String("Variation1"),
 					},
-					End: &flag.Progressive{
+					End: &flag.ProgressiveRolloutStep{
 						Variation: testconvert.String("Variation2"),
 						Date:      testconvert.Time(time.Now().Add(10 * time.Second)),
 					},
@@ -282,6 +277,85 @@ func TestRule_Evaluate(t *testing.T) {
 			}
 			assert.Equal(t, tt.wantApply, gotValue)
 			assert.Equal(t, tt.wantVariation, gotVariation)
+		})
+	}
+}
+
+func TestRule_string(t *testing.T) {
+	tests := []struct {
+		name     string
+		rule     *flag.Rule
+		expected string
+	}{
+		{
+			name: "Only variation",
+			rule: &flag.Rule{
+				VariationResult: testconvert.String("Variation1"),
+			},
+			expected: "variation:[Variation1]",
+		},
+		{
+			name:     "Empty",
+			rule:     &flag.Rule{},
+			expected: "",
+		},
+		{
+			name: "Percentage variation",
+			rule: &flag.Rule{
+				VariationResult: testconvert.String("Variation1"),
+				Percentages: &map[string]float64{
+					"Variation1": 10,
+					"Variation2": 75,
+					"Variation3": 5,
+				},
+			},
+			expected: "variation:[Variation1], percentages:[Variation1=10.00,Variation2=75.00,Variation3=5.00]",
+		},
+		{
+			name: "With Query",
+			rule: &flag.Rule{
+				VariationResult: testconvert.String("Variation1"),
+				Percentages: &map[string]float64{
+					"Variation1": 10,
+					"Variation2": 75,
+					"Variation3": 5,
+				},
+				Query: testconvert.String("key eq \"toto\""),
+			},
+			expected: "query:[key eq \"toto\"], variation:[Variation1], percentages:[Variation1=10.00,Variation2=75.00,Variation3=5.00]",
+		},
+		{
+			name: "Progressive rollout",
+			rule: &flag.Rule{
+				VariationResult: testconvert.String("Variation1"),
+				Percentages: &map[string]float64{
+					"Variation1": 10,
+					"Variation2": 75,
+					"Variation3": 5,
+				},
+				Query: testconvert.String("key eq \"toto\""),
+				ProgressiveRollout: &flag.ProgressiveRollout{
+					Initial: &flag.ProgressiveRolloutStep{
+						Variation:  testconvert.String("Variation1"),
+						Percentage: 0,
+						Date:       testconvert.Time(time.Date(2021, time.February, 1, 10, 10, 10, 10, time.Local)),
+					},
+					End: &flag.ProgressiveRolloutStep{
+						Variation:  testconvert.String("Variation2"),
+						Percentage: 100,
+						Date:       testconvert.Time(time.Date(2021, time.February, 1, 10, 10, 30, 10, time.Local)),
+					},
+				},
+			},
+			expected: "query:[key eq \"toto\"], variation:[Variation1], percentages:[Variation1=10.00,Variation2=75.00,Variation3=5.00], progressiveRollout:[Initial:[Variation:[Variation1], Percentage:[0], Date:[2021-02-01T10:10:10+01:00]], End:[Variation:[Variation2], Percentage:[100], Date:[2021-02-01T10:10:30+01:00]]]",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.rule.String()
+			fmt.Println(got)
+			assert.Equal(t, tt.expected, got)
 		})
 	}
 }

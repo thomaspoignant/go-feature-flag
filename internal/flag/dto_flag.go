@@ -128,7 +128,6 @@ func (dto *DtoFlag) IsFlagV2() bool {
 }
 
 func (dto *DtoFlag) ToFlagV1() FlagData {
-
 	panic("STOP flag v1")
 
 	variations := map[string]*interface{}{
@@ -141,7 +140,6 @@ func (dto *DtoFlag) ToFlagV1() FlagData {
 	var rules []Rule
 	var defaultRule Rule
 	if dto.Rule != nil && *dto.Rule != "" {
-
 		percentage := float64(0)
 		if dto.Percentage != nil {
 			percentage = *dto.Percentage
@@ -213,7 +211,6 @@ func (dto *DtoFlag) ToFlagV1() FlagData {
 	//this.defaultRule = defaultRule
 	//}
 	//}
-
 }
 
 func (dto *DtoFlag) ToFlagV2() FlagData {

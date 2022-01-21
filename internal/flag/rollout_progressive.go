@@ -1,46 +1,51 @@
 package flag
 
-import "time"
+import (
+	"fmt"
+	"strings"
+	"time"
+)
 
 type ProgressiveRollout struct {
-	Initial *Progressive `json:"initial,omitempty" yaml:"initial,omitempty" toml:"initial,omitempty"`
-	End     *Progressive `json:"end,omitempty" yaml:"end,omitempty" toml:"end,omitempty"`
-	// TODO: add comments here
-	//Percentage  ProgressivePercentage  `json:"percentage,omitempty" yaml:"percentage,omitempty" toml:"percentage,omitempty"`
-	//ReleaseRamp ProgressiveReleaseRamp `json:"releaseRamp,omitempty" yaml:"releaseRamp,omitempty" toml:"releaseRamp,omitempty"` // nolint: lll
-	//Variation   ProgressiveVariation   `json:"variation,omitempty" yaml:"variation,omitempty" toml:"variation,omitempty"`       // nolint: lll
+	// TODO: comments
+	Initial *ProgressiveRolloutStep `json:"initial,omitempty" yaml:"initial,omitempty" toml:"initial,omitempty"`
+	End     *ProgressiveRolloutStep `json:"end,omitempty" yaml:"end,omitempty" toml:"end,omitempty"`
 }
 
-type Progressive struct {
+type ProgressiveRolloutStep struct {
 	Variation  *string
 	Percentage float64
 	Date       *time.Time
 }
 
-type ProgressivePercentage struct {
-	// Initial is the initial percentage before the rollout start date.
-	// This field is optional
-	// Default: 0.0
-	Initial float64 `json:"initial,omitempty" yaml:"initial,omitempty" toml:"initial,omitempty"`
-
-	// End is the target percentage we want to reach at the end of the rollout phase.
-	// This field is optional
-	// Default: 100.0
-	End float64 `json:"end,omitempty" yaml:"end,omitempty" toml:"end,omitempty"`
+func (p *ProgressiveRolloutStep) getVariation() string {
+	if p.Variation == nil {
+		return ""
+	}
+	return *p.Variation
 }
 
-type ProgressiveReleaseRamp struct {
-	// Start is the starting time of the ramp
-	Start *time.Time `json:"start,omitempty" yaml:"start,omitempty" toml:"start,omitempty"`
-
-	// End is the ending time of the ramp
-	End *time.Time `json:"end,omitempty" yaml:"end,omitempty" toml:"end,omitempty"`
+func (p *ProgressiveRolloutStep) getPercentage() float64 {
+	return p.Percentage
 }
 
-type ProgressiveVariation struct {
-	// Initial is the initial variation for the rollout.
-	Initial *string `json:"initial,omitempty" yaml:"initial,omitempty" toml:"initial,omitempty"`
+func (p ProgressiveRollout) String() string {
+	var initial []string
+	initial = appendIfHasValue(initial, "Variation", fmt.Sprintf("%v", p.Initial.getVariation()))
+	initial = appendIfHasValue(initial, "Percentage", fmt.Sprintf("%v", p.Initial.getPercentage()))
+	if p.Initial.Date != nil {
+		initialDate := *p.Initial.Date
+		initial = appendIfHasValue(initial, "Date", fmt.Sprintf("%v", initialDate.Format(time.RFC3339)))
+	}
 
-	// End is the targeted variation.
-	End *string `json:"end,omitempty" yaml:"end,omitempty" toml:"end,omitempty"`
+	var end []string
+	end = appendIfHasValue(end, "Variation", fmt.Sprintf("%v", p.End.getVariation()))
+	end = appendIfHasValue(end, "Percentage", fmt.Sprintf("%v", p.End.getPercentage()))
+	if p.End.Date != nil {
+		endDate := *p.End.Date
+		end = appendIfHasValue(end, "Date", fmt.Sprintf("%v", endDate.Format(time.RFC3339)))
+	}
+
+	return fmt.Sprintf("Initial:[%v], End:[%v]", strings.Join(initial, ", "), strings.Join(end, ", "))
+
 }

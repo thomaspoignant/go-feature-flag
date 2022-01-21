@@ -166,23 +166,23 @@ func (r *Rule) GetPercentages() map[string]float64 {
 	return *r.Percentages
 }
 
-//func (r *Rule) GetRollout() *RuleRollout {
-//	return r.Rollout
-//}
-
 func (r Rule) String() string {
 	var toString []string
 	toString = appendIfHasValue(toString, "query", fmt.Sprintf("%v", r.GetQuery()))
 	toString = appendIfHasValue(toString, "variation", fmt.Sprintf("%v", r.GetVariation()))
 
 	var percentString []string
-	//TODO : fix me
-	//for _, p := range r.GetPercentages() {
-	//percentString = append(percentString, p.String())
-	//}
-	toString = appendIfHasValue(toString, "percentages", strings.Join(percentString, ","))
-	//if r.GetRollout() != nil {
-	//	toString = appendIfHasValue(toString, "rollout", fmt.Sprintf("%v", *r.GetRollout()))
-	//}
-	return fmt.Sprintf("%s", strings.Join(toString, ","))
+	for key, val := range r.GetPercentages() {
+		percentString = append(percentString, fmt.Sprintf("%s=%.2f", key, val))
+	}
+	sort.Sort(sort.StringSlice(percentString))
+
+	if len(percentString) == 0 {
+		percentString = nil
+	}
+	toString = appendIfHasValue(toString, "percentages", fmt.Sprintf("%s", strings.Join(percentString, ",")))
+	if r.ProgressiveRollout != nil {
+		toString = appendIfHasValue(toString, "progressiveRollout", fmt.Sprintf("%v", r.ProgressiveRollout))
+	}
+	return fmt.Sprintf("%s", strings.Join(toString, ", "))
 }

@@ -5,6 +5,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
 	"github.com/thomaspoignant/go-feature-flag/internal/constant"
 	"github.com/thomaspoignant/go-feature-flag/internal/utils"
+	"sort"
 	"strings"
 	"time"
 )
@@ -56,10 +57,43 @@ func (f *FlagData) GetVariationValue(variationName string) interface{} {
 	return nil
 }
 
+func convertNilEmpty(input interface{}) string {
+	if input == nil {
+		return ""
+	}
+	return fmt.Sprintf("%v", input)
+}
+
 func (f *FlagData) GetRawValues() map[string]string {
 	//panic("implement me")
 	// TODO
-	return map[string]string{}
+
+	//func convertNilEmpty(input interface{}) string {
+	//if input == nil {
+	//return ""
+	//}
+	//return fmt.Sprintf("%v", input)
+	//}
+
+	var rawValues = make(map[string]string)
+	rawValues["Variations"] = fmt.Sprintf("%v", f.GetVariations())
+	//rawRules["Rules"] = fmt.Sprintf("%v", f.GetRules())
+	//
+	//rawValues["Rule"] = f.getRule()
+	//rawValues["Percentage"] = fmt.Sprintf("%.2f", f.getPercentage())
+	//
+	//if f.getRollout() == nil {
+	//	rawValues["Rollout"] = ""
+	//} else {
+	//	rawValues["Rollout"] = fmt.Sprintf("%v", f.getRollout())
+	//}
+	//rawValues["True"] = convertNilEmpty(f.getTrue())
+	//rawValues["False"] = convertNilEmpty(f.getFalse())
+	//rawValues["Default"] = convertNilEmpty(f.getDefault())
+	//rawValues["TrackEvents"] = fmt.Sprintf("%t", f.GetTrackEvents())
+	//rawValues["Disable"] = fmt.Sprintf("%t", f.GetDisable())
+	//rawValues["Version"] = fmt.Sprintf("%v", f.GetVersion())
+	return rawValues
 }
 
 // Value is returning the Value associate to the flag
@@ -135,7 +169,6 @@ func (f *FlagData) updateFlagStage() {
 		}
 
 		if step.Date != nil && now.After(*step.Date) {
-			// TODO Merge
 			f.mergeChanges(step)
 		}
 	}
@@ -178,25 +211,26 @@ func (f FlagData) String() string {
 	// Variations
 	var variationString []string
 	for key, val := range f.GetVariations() {
-		variationString = append(variationString, fmt.Sprintf("%s=%v", key, val))
+		variationString = append(variationString, fmt.Sprintf("%s=%v", key, *val))
 	}
-	toString = appendIfHasValue(toString, "Variations", fmt.Sprintf("[%s]", strings.Join(variationString, ",")))
+	sort.Sort(sort.StringSlice(variationString))
+	toString = appendIfHasValue(toString, "Variations", fmt.Sprintf("%s", strings.Join(variationString, ",")))
 
 	// Rules
 	var rulesString []string
 	for _, rule := range f.GetRules() {
 		rulesString = append(rulesString, fmt.Sprintf("[%v]", rule))
 	}
-	toString = appendIfHasValue(toString, "Rules", fmt.Sprintf("[%s]", strings.Join(rulesString, ",")))
-	toString = appendIfHasValue(toString, "DefaultRule", fmt.Sprintf("[%s]", f.GetDefaultRule()))
+	toString = appendIfHasValue(toString, "Rules", fmt.Sprintf("%s", strings.Join(rulesString, ",")))
+	toString = appendIfHasValue(toString, "DefaultRule", fmt.Sprintf("%s", f.GetDefaultRule()))
 
 	// Others
 	if f.GetRollout() != nil {
-		toString = appendIfHasValue(toString, "Rollout", fmt.Sprintf("[%v]", *f.GetRollout()))
+		toString = appendIfHasValue(toString, "Rollout", fmt.Sprintf("%v", *f.GetRollout()))
 	}
-	toString = appendIfHasValue(toString, "TrackEvents", fmt.Sprintf("[%t]", f.IsTrackEvents()))
-	toString = appendIfHasValue(toString, "Disable", fmt.Sprintf("[%t]", f.IsDisable()))
-	toString = appendIfHasValue(toString, "Version", fmt.Sprintf("[%s]", f.GetVersion()))
+	toString = appendIfHasValue(toString, "TrackEvents", fmt.Sprintf("%t", f.IsTrackEvents()))
+	toString = appendIfHasValue(toString, "Disable", fmt.Sprintf("%t", f.IsDisable()))
+	toString = appendIfHasValue(toString, "Version", fmt.Sprintf("%s", f.GetVersion()))
 
 	return strings.Join(toString, ", ")
 }

@@ -33,6 +33,6 @@ func (c *LogNotifier) Notify(diff model.DiffCache, wg *sync.WaitGroup) {
 			continue
 		}
 		// key has changed in cache
-		fflog.Printf(c.Logger, "flag %s updated, old=[%v], new=[%v]\n", key, flagDiff.Before, flagDiff.After)
+		fflog.Printf(c.Logger, "flag %s updated, old=%v, new=[%v]\n", key, flagDiff.Before, flagDiff.After)
 	}
 }

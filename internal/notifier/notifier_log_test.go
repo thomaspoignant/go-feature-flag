@@ -84,7 +84,12 @@ func TestLogNotifier_Notify(t *testing.T) {
 				},
 				wg: &sync.WaitGroup{},
 			},
-			expected: "^\\[" + testutils.RFC3339Regex + "\\] flag test-flag updated, old=\\[percentage=100%, rule=\"key eq \"random-key\"\", true=\"true\", false=\"false\", default=\"false\", disable=\"false\"\\], new=\\[percentage=100%, true=\"true\", false=\"false\", default=\"false\", disable=\"false\"\\]",
+			expected: "^\\[" + testutils.RFC3339Regex + "\\] flag test-flag updated, old=Variations:\\[Default=false,False" +
+				"=false,True=true\\], Rules:\\[\\[query:\\[key eq \"random\\-key\"\\], percentages:\\[False=0.00,True=100.00\\]" +
+				"\\]\\], DefaultRule:\\[variation:\\[Default\\]\\], TrackEvents:\\[true\\], Disable:\\[false\\], new=\\[" +
+				"Variations:\\[Default=false,False=false,True=true\\], DefaultRule:\\[percentages:\\[False=0.00,True=100.00\\]" +
+				"\\], TrackEvents:\\[true\\], Disable:\\[false\\]\\]",
+			//
 		},
 		{
 			name: "Disable flag",
@@ -199,7 +204,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 				},
 				wg: &sync.WaitGroup{},
 			},
-			expected: "^\\[" + testutils.RFC3339Regex + "\\] flag test-flag is turned ON \\(flag=\\[percentage=100%, rule=\"key eq \"random-key\"\", true=\"true\", false=\"false\", default=\"false\", disable=\"false\"\\]\\)",
+			expected: "^\\[" + testutils.RFC3339Regex + "\\] flag test-flag is turned ON \\(flag=\\[Variations:\\[Default=false,False=false,True=true\\], Rules:\\[\\[query:\\[key eq \"random-key\"\\], percentages:\\[False=0.00,True=100.00\\]\\]\\], DefaultRule:\\[variation:\\[Default\\]\\], TrackEvents:\\[true\\], Disable:\\[false\\]\\]\\)",
 		},
 	}
 	for _, tt := range tests {
