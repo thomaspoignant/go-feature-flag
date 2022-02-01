@@ -146,7 +146,7 @@ func (r *Rule) getPercentageBuckets() (map[string]rulePercentageBucket, error) {
 	// we need to sort the map to affect the bucket to be sure we are constantly affecting the users to the same bucket.
 	// Map are not ordered in GO, so we have to order the variationNames to be able to compute the same numbers for the
 	// buckets everytime we are in this function.
-	variationNames := make([]string, 0, len(percentage))
+	variationNames := make([]string, 0)
 	for k := range percentage {
 		variationNames = append(variationNames, k)
 	}
@@ -199,7 +199,7 @@ func (r Rule) String() string {
 	toString = appendIfHasValue(toString, "query", fmt.Sprintf("%v", r.GetQuery()))
 	toString = appendIfHasValue(toString, "variation", fmt.Sprintf("%v", r.GetVariation()))
 
-	var percentString = make([]string, len(r.GetPercentages()))
+	var percentString = make([]string, 0)
 	for key, val := range r.GetPercentages() {
 		percentString = append(percentString, fmt.Sprintf("%s=%.2f", key, val))
 	}

@@ -189,7 +189,7 @@ func (f FlagData) String() string {
 	var toString []string
 
 	// Variations
-	var variationString = make([]string, len(f.GetVariations()))
+	var variationString = make([]string, 0)
 	for key, val := range f.GetVariations() {
 		variationString = append(variationString, fmt.Sprintf("%s=%v", key, *val))
 	}
@@ -197,7 +197,7 @@ func (f FlagData) String() string {
 	toString = appendIfHasValue(toString, "Variations", strings.Join(variationString, ","))
 
 	// Rules
-	var rulesString = make([]string, len(f.GetRules()))
+	var rulesString = make([]string, 0)
 	for _, rule := range f.GetRules() {
 		rulesString = append(rulesString, fmt.Sprintf("[%v]", rule))
 	}
