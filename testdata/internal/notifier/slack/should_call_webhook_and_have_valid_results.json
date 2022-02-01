@@ -1,6 +1,6 @@
 {
   "icon_url": "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png",
-  "text": "Changes detected in your feature flag file on: *MBP-C02ZT789LVDL.leboncoin.loc*",
+  "text": "Changes detected in your feature flag file on: *{{hostname}}*",
   "attachments": [
     {
       "color": "#FF0000",
