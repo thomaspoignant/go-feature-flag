@@ -38,10 +38,14 @@ func TestDiffCache_HasDiff(t *testing.T) {
 			fields: fields{
 				Deleted: map[string]flag.Flag{
 					"flag": &flag.FlagData{
-						Percentage: testconvert.Float64(100),
-						True:       testconvert.Interface(true),
-						False:      testconvert.Interface(true),
-						Default:    testconvert.Interface(true),
+						Variations: &map[string]*interface{}{
+							"A": testconvert.Interface(true),
+							"B": testconvert.Interface(false),
+						},
+						DefaultRule: &flag.Rule{
+							VariationResult: testconvert.String("A"),
+						},
+						Version: testconvert.String("1.1.0"),
 					},
 				},
 				Added:   map[string]flag.Flag{},
@@ -54,10 +58,14 @@ func TestDiffCache_HasDiff(t *testing.T) {
 			fields: fields{
 				Added: map[string]flag.Flag{
 					"flag": &flag.FlagData{
-						Percentage: testconvert.Float64(100),
-						True:       testconvert.Interface(true),
-						False:      testconvert.Interface(true),
-						Default:    testconvert.Interface(true),
+						Variations: &map[string]*interface{}{
+							"A": testconvert.Interface(true),
+							"B": testconvert.Interface(false),
+						},
+						DefaultRule: &flag.Rule{
+							VariationResult: testconvert.String("A"),
+						},
+						Version: testconvert.String("1.1.0"),
 					},
 				},
 				Deleted: map[string]flag.Flag{},
@@ -73,16 +81,24 @@ func TestDiffCache_HasDiff(t *testing.T) {
 				Updated: map[string]model.DiffUpdated{
 					"flag": {
 						Before: &flag.FlagData{
-							Percentage: testconvert.Float64(100),
-							True:       testconvert.Interface(true),
-							False:      testconvert.Interface(true),
-							Default:    testconvert.Interface(true),
+							Variations: &map[string]*interface{}{
+								"A": testconvert.Interface(true),
+								"B": testconvert.Interface(false),
+							},
+							DefaultRule: &flag.Rule{
+								VariationResult: testconvert.String("A"),
+							},
+							Version: testconvert.String("1.1.0"),
 						},
 						After: &flag.FlagData{
-							Percentage: testconvert.Float64(100),
-							True:       testconvert.Interface(true),
-							False:      testconvert.Interface(true),
-							Default:    testconvert.Interface(false),
+							Variations: &map[string]*interface{}{
+								"A": testconvert.Interface(true),
+								"B": testconvert.Interface(false),
+							},
+							DefaultRule: &flag.Rule{
+								VariationResult: testconvert.String("B"),
+							},
+							Version: testconvert.String("1.2.0"),
 						},
 					},
 				},
@@ -94,33 +110,49 @@ func TestDiffCache_HasDiff(t *testing.T) {
 			fields: fields{
 				Added: map[string]flag.Flag{
 					"flag": &flag.FlagData{
-						Percentage: testconvert.Float64(100),
-						True:       testconvert.Interface(true),
-						False:      testconvert.Interface(true),
-						Default:    testconvert.Interface(true),
+						Variations: &map[string]*interface{}{
+							"A": testconvert.Interface(true),
+							"B": testconvert.Interface(false),
+						},
+						DefaultRule: &flag.Rule{
+							VariationResult: testconvert.String("A"),
+						},
+						Version: testconvert.String("1.1.0"),
 					},
 				},
 				Deleted: map[string]flag.Flag{
 					"flag": &flag.FlagData{
-						Percentage: testconvert.Float64(100),
-						True:       testconvert.Interface(true),
-						False:      testconvert.Interface(true),
-						Default:    testconvert.Interface(true),
+						Variations: &map[string]*interface{}{
+							"A": testconvert.Interface(true),
+							"B": testconvert.Interface(false),
+						},
+						DefaultRule: &flag.Rule{
+							VariationResult: testconvert.String("A"),
+						},
+						Version: testconvert.String("1.1.0"),
 					},
 				},
 				Updated: map[string]model.DiffUpdated{
 					"flag": {
 						Before: &flag.FlagData{
-							Percentage: testconvert.Float64(100),
-							True:       testconvert.Interface(true),
-							False:      testconvert.Interface(true),
-							Default:    testconvert.Interface(true),
+							Variations: &map[string]*interface{}{
+								"A": testconvert.Interface(true),
+								"B": testconvert.Interface(false),
+							},
+							DefaultRule: &flag.Rule{
+								VariationResult: testconvert.String("A"),
+							},
+							Version: testconvert.String("1.1.0"),
 						},
 						After: &flag.FlagData{
-							Percentage: testconvert.Float64(100),
-							True:       testconvert.Interface(true),
-							False:      testconvert.Interface(true),
-							Default:    testconvert.Interface(false),
+							Variations: &map[string]*interface{}{
+								"A": testconvert.Interface(true),
+								"B": testconvert.Interface(false),
+							},
+							DefaultRule: &flag.Rule{
+								VariationResult: testconvert.String("A"),
+							},
+							Version: testconvert.String("1.0.0"),
 						},
 					},
 				},

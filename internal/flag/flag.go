@@ -25,9 +25,4 @@ type Flag interface {
 
 	// GetVariationValue return the value of variation from his name
 	GetVariationValue(variationName string) interface{}
-
-	// GetRawValues is returning a raw value of the Flag used by the notifiers
-	// We should not have any logic based on these values, this is only to
-	// display  the information.
-	GetRawValues() map[string]string
 }

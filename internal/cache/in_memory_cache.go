@@ -19,7 +19,7 @@ func NewInMemoryCache() *InMemoryCache {
 
 // addDtoFlag is converting the dto into a flag.FlagData and adds it into the memory cache.
 func (fc *InMemoryCache) addDtoFlag(key string, dto flag.DtoFlag) {
-	convertedDto, err := dto.ConvertToFlagData()
+	convertedDto, err := dto.ConvertToFlagData(false)
 	if err != nil {
 		// TODO: error message saying that we ignore this flag
 		fmt.Println("Please log something here")

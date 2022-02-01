@@ -1,10 +1,5 @@
 package flag
 
-import (
-	"encoding/json"
-	"strconv"
-)
-
 // DtoFlag is struct able to manage all types of Flag that go-feature-flag supports.
 type DtoFlag struct {
 	// --- FLAGv1 FIELDS ---
@@ -61,41 +56,6 @@ type DtoFlag struct {
 }
 
 // ConvertToFlagData detect the type of Flag and use the right convertor to create a FlagData instance.
-func (d *DtoFlag) ConvertToFlagData() (FlagData, error) {
-	// TODO: rewrite this function
-
-	fd := FlagData{
-		Rule:        d.Rule,
-		Percentage:  d.Percentage,
-		True:        d.True,
-		False:       d.False,
-		Default:     d.Default,
-		TrackEvents: d.TrackEvents,
-		Disable:     d.Disable,
-	}
-
-	if d.Version != nil {
-		version, _ := strconv.ParseFloat(*d.Version, 64)
-		fd.Version = &version
-	}
-
-	if d.Rollout != nil {
-		r := Rollout{
-			Experimentation: d.Rollout.Experimentation,
-			Progressive:     d.Rollout.Progressive,
-		}
-		if d.Rollout.Scheduled != nil {
-			scheduled := ScheduledRollout{}
-			jsonString, _ := json.Marshal(d.Rollout.Scheduled)
-			err := json.Unmarshal(jsonString, &scheduled)
-			if err != nil {
-				// TODO: log impossible to read scheduled
-				return FlagData{}, err
-			}
-			*r.Scheduled = scheduled
-		}
-		fd.Rollout = &r
-	}
-
-	return fd, nil
+func (d *DtoFlag) ConvertToFlagData(isScheduleStep bool) (FlagData, error) {
+	return ConvertV0DtoToFlag(*d, isScheduleStep)
 }

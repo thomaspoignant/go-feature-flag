@@ -26,10 +26,22 @@ func TestAll(t *testing.T) {
 			},
 			want: map[string]flag.Flag{
 				"test": &flag.FlagData{
-					Percentage: testconvert.Float64(40),
-					True:       testconvert.Interface("true"),
-					False:      testconvert.Interface("false"),
-					Default:    testconvert.Interface("default"),
+					Variations: &map[string]*interface{}{
+						"Default": testconvert.Interface("default"),
+						"False":   testconvert.Interface("false"),
+						"True":    testconvert.Interface("true"),
+					},
+					Rules: &map[string]flag.Rule{
+						"defaultRule": {
+							Percentages: &map[string]float64{
+								"True":  40,
+								"False": 60,
+							},
+						},
+					},
+					DefaultRule: &flag.Rule{
+						VariationResult: testconvert.String("Default"),
+					},
 				},
 			},
 		},
@@ -51,16 +63,40 @@ func TestAll(t *testing.T) {
 			},
 			want: map[string]flag.Flag{
 				"test": &flag.FlagData{
-					Percentage: testconvert.Float64(40),
-					True:       testconvert.Interface("true"),
-					False:      testconvert.Interface("false"),
-					Default:    testconvert.Interface("default"),
+					Variations: &map[string]*interface{}{
+						"Default": testconvert.Interface("default"),
+						"False":   testconvert.Interface("false"),
+						"True":    testconvert.Interface("true"),
+					},
+					Rules: &map[string]flag.Rule{
+						"defaultRule": {
+							Percentages: &map[string]float64{
+								"True":  40,
+								"False": 60,
+							},
+						},
+					},
+					DefaultRule: &flag.Rule{
+						VariationResult: testconvert.String("Default"),
+					},
 				},
 				"test1": &flag.FlagData{
-					Percentage: testconvert.Float64(30),
-					True:       testconvert.Interface(true),
-					False:      testconvert.Interface(false),
-					Default:    testconvert.Interface(false),
+					Variations: &map[string]*interface{}{
+						"Default": testconvert.Interface(false),
+						"False":   testconvert.Interface(false),
+						"True":    testconvert.Interface(true),
+					},
+					Rules: &map[string]flag.Rule{
+						"defaultRule": {
+							Percentages: &map[string]float64{
+								"True":  30,
+								"False": 70,
+							},
+						},
+					},
+					DefaultRule: &flag.Rule{
+						VariationResult: testconvert.String("Default"),
+					},
 				},
 			},
 		},

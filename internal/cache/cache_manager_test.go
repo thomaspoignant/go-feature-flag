@@ -70,12 +70,24 @@ disable = false`)
 			},
 			expected: map[string]flag.FlagData{
 				"test-flag": {
-					Disable:     nil,
-					Rule:        testconvert.String("key eq \"random-key\""),
-					Percentage:  testconvert.Float64(100),
-					True:        testconvert.Interface(true),
-					False:       testconvert.Interface(false),
-					Default:     testconvert.Interface(false),
+					Variations: &map[string]*interface{}{
+						"Default": testconvert.Interface(false),
+						"False":   testconvert.Interface(false),
+						"True":    testconvert.Interface(true),
+					},
+					Rules: &map[string]flag.Rule{
+						"defaultRule": {
+							Query:           testconvert.String("key eq \"random-key\""),
+							VariationResult: nil,
+							Percentages: &map[string]float64{
+								"True":  100,
+								"False": 0,
+							},
+						},
+					},
+					DefaultRule: &flag.Rule{
+						VariationResult: testconvert.String("Default"),
+					},
 					TrackEvents: testconvert.Bool(false),
 				},
 			},
@@ -103,11 +115,24 @@ disable = false`)
 			flagFormat: "json",
 			expected: map[string]flag.FlagData{
 				"test-flag": {
-					Rule:       testconvert.String("key eq \"random-key\""),
-					Percentage: testconvert.Float64(100),
-					True:       testconvert.Interface(true),
-					False:      testconvert.Interface(false),
-					Default:    testconvert.Interface(false),
+					Variations: &map[string]*interface{}{
+						"Default": testconvert.Interface(false),
+						"False":   testconvert.Interface(false),
+						"True":    testconvert.Interface(true),
+					},
+					Rules: &map[string]flag.Rule{
+						"defaultRule": {
+							Query:           testconvert.String("key eq \"random-key\""),
+							VariationResult: nil,
+							Percentages: &map[string]float64{
+								"True":  100,
+								"False": 0,
+							},
+						},
+					},
+					DefaultRule: &flag.Rule{
+						VariationResult: testconvert.String("Default"),
+					},
 				},
 			},
 			wantErr: false,
@@ -136,12 +161,25 @@ disable = false`)
 			flagFormat: "toml",
 			expected: map[string]flag.FlagData{
 				"test-flag": {
-					Rule:       testconvert.String("key eq \"random-key\""),
-					Percentage: testconvert.Float64(100),
-					True:       testconvert.Interface(true),
-					False:      testconvert.Interface(false),
-					Default:    testconvert.Interface(false),
-					Disable:    testconvert.Bool(false),
+					Variations: &map[string]*interface{}{
+						"Default": testconvert.Interface(false),
+						"False":   testconvert.Interface(false),
+						"True":    testconvert.Interface(true),
+					},
+					Rules: &map[string]flag.Rule{
+						"defaultRule": {
+							Query:           testconvert.String("key eq \"random-key\""),
+							VariationResult: nil,
+							Percentages: &map[string]float64{
+								"True":  100,
+								"False": 0,
+							},
+						},
+					},
+					DefaultRule: &flag.Rule{
+						VariationResult: testconvert.String("Default"),
+					},
+					Disable: testconvert.Bool(false),
 				},
 			},
 			wantErr: false,
@@ -209,12 +247,24 @@ func Test_AllFlags(t *testing.T) {
 			},
 			expected: map[string]flag.FlagData{
 				"test-flag": {
-					Disable:     nil,
-					Rule:        testconvert.String("key eq \"random-key\""),
-					Percentage:  testconvert.Float64(100),
-					True:        testconvert.Interface(true),
-					False:       testconvert.Interface(false),
-					Default:     testconvert.Interface(false),
+					Variations: &map[string]*interface{}{
+						"Default": testconvert.Interface(false),
+						"False":   testconvert.Interface(false),
+						"True":    testconvert.Interface(true),
+					},
+					Rules: &map[string]flag.Rule{
+						"defaultRule": {
+							Query:           testconvert.String("key eq \"random-key\""),
+							VariationResult: nil,
+							Percentages: &map[string]float64{
+								"True":  100,
+								"False": 0,
+							},
+						},
+					},
+					DefaultRule: &flag.Rule{
+						VariationResult: testconvert.String("Default"),
+					},
 					TrackEvents: testconvert.Bool(false),
 				},
 			},
@@ -242,21 +292,45 @@ test-flag2:
 			},
 			expected: map[string]flag.FlagData{
 				"test-flag": {
-					Disable:     nil,
-					Rule:        testconvert.String("key eq \"random-key\""),
-					Percentage:  testconvert.Float64(100),
-					True:        testconvert.Interface(true),
-					False:       testconvert.Interface(false),
-					Default:     testconvert.Interface(false),
+					Variations: &map[string]*interface{}{
+						"Default": testconvert.Interface(false),
+						"False":   testconvert.Interface(false),
+						"True":    testconvert.Interface(true),
+					},
+					Rules: &map[string]flag.Rule{
+						"defaultRule": {
+							Query:           testconvert.String("key eq \"random-key\""),
+							VariationResult: nil,
+							Percentages: &map[string]float64{
+								"True":  100,
+								"False": 0,
+							},
+						},
+					},
+					DefaultRule: &flag.Rule{
+						VariationResult: testconvert.String("Default"),
+					},
 					TrackEvents: testconvert.Bool(false),
 				},
 				"test-flag2": {
-					Disable:     nil,
-					Rule:        testconvert.String("key eq \"random-key\""),
-					Percentage:  testconvert.Float64(0),
-					True:        testconvert.Interface("true"),
-					False:       testconvert.Interface("false"),
-					Default:     testconvert.Interface("false"),
+					Variations: &map[string]*interface{}{
+						"Default": testconvert.Interface("false"),
+						"False":   testconvert.Interface("false"),
+						"True":    testconvert.Interface("true"),
+					},
+					Rules: &map[string]flag.Rule{
+						"defaultRule": {
+							Query:           testconvert.String("key eq \"random-key\""),
+							VariationResult: nil,
+							Percentages: &map[string]float64{
+								"True":  0,
+								"False": 100,
+							},
+						},
+					},
+					DefaultRule: &flag.Rule{
+						VariationResult: testconvert.String("Default"),
+					},
 					TrackEvents: testconvert.Bool(false),
 				},
 			},
