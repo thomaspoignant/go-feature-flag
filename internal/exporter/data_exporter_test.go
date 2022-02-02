@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"io/ioutil"
 	"log"
@@ -19,7 +20,7 @@ import (
 func TestDataExporterScheduler_flushWithTime(t *testing.T) {
 	mockExporter := testutils.MockExporter{Bulk: true}
 	dc := exporter.NewDataExporterScheduler(
-		context.Background(), 10*time.Millisecond, 1000, &mockExporter, log.New(os.Stdout, "", 0))
+		context.Background(), 10*time.Millisecond, 1000, &mockExporter, fflog.Logger{Logger: log.New(os.Stdout, "", 0)})
 	go dc.StartDaemon()
 	defer dc.Close()
 
@@ -39,7 +40,7 @@ func TestDataExporterScheduler_flushWithTime(t *testing.T) {
 func TestDataExporterScheduler_flushWithNumberOfEvents(t *testing.T) {
 	mockExporter := testutils.MockExporter{Bulk: true}
 	dc := exporter.NewDataExporterScheduler(
-		context.Background(), 10*time.Minute, 100, &mockExporter, log.New(os.Stdout, "", 0))
+		context.Background(), 10*time.Minute, 100, &mockExporter, fflog.Logger{Logger: log.New(os.Stdout, "", 0)})
 	go dc.StartDaemon()
 	defer dc.Close()
 
@@ -57,7 +58,7 @@ func TestDataExporterScheduler_flushWithNumberOfEvents(t *testing.T) {
 func TestDataExporterScheduler_defaultFlush(t *testing.T) {
 	mockExporter := testutils.MockExporter{Bulk: true}
 	dc := exporter.NewDataExporterScheduler(
-		context.Background(), 0, 0, &mockExporter, log.New(os.Stdout, "", 0))
+		context.Background(), 0, 0, &mockExporter, fflog.Logger{Logger: log.New(os.Stdout, "", 0)})
 	go dc.StartDaemon()
 	defer dc.Close()
 
@@ -76,10 +77,9 @@ func TestDataExporterScheduler_exporterReturnError(t *testing.T) {
 	mockExporter := testutils.MockExporter{Err: errors.New("random err"), ExpectedNumberErr: 1, Bulk: true}
 
 	file, _ := ioutil.TempFile("", "log")
-	defer file.Close()
-	defer os.Remove(file.Name())
-	logger := log.New(file, "", 0)
-
+	defer func() { _ = file.Close() }()
+	defer func() { _ = os.Remove(file.Name()) }()
+	logger := fflog.Logger{Logger: log.New(file, "", 0)}
 	dc := exporter.NewDataExporterScheduler(
 		context.Background(), 0, 100, &mockExporter, logger)
 	go dc.StartDaemon()
@@ -97,13 +97,13 @@ func TestDataExporterScheduler_exporterReturnError(t *testing.T) {
 
 	// read log
 	logs, _ := ioutil.ReadFile(file.Name())
-	assert.Regexp(t, "\\["+testutils.RFC3339Regex+"\\] error while exporting data: random err\\n", string(logs))
+	assert.Equal(t, "error while exporting data: random err\n", string(logs))
 }
 
 func TestDataExporterScheduler_nonBulkExporter(t *testing.T) {
 	mockExporter := testutils.MockExporter{Bulk: false}
 	dc := exporter.NewDataExporterScheduler(
-		context.Background(), 0, 0, &mockExporter, log.New(os.Stdout, "", 0))
+		context.Background(), 0, 0, &mockExporter, fflog.Logger{Logger: log.New(os.Stdout, "", 0)})
 	defer dc.Close()
 
 	var inputEvents []exporter.FeatureEvent

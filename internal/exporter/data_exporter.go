@@ -2,7 +2,6 @@ package exporter
 
 import (
 	"context"
-	"log"
 	"sync"
 	"time"
 
@@ -14,7 +13,7 @@ const defaultMaxEventInMemory = int64(100000)
 
 // NewDataExporterScheduler allows to create a new instance of DataExporterScheduler ready to be used to export data.
 func NewDataExporterScheduler(ctx context.Context, flushInterval time.Duration, maxEventInMemory int64,
-	exporter Exporter, logger *log.Logger) *DataExporterScheduler {
+	exporter Exporter, logger fflog.Logger) *DataExporterScheduler {
 	if ctx == nil {
 		ctx = context.Background()
 	}
@@ -42,7 +41,7 @@ func NewDataExporterScheduler(ctx context.Context, flushInterval time.Duration, 
 // Exporter is an interface to describe how a exporter looks like.
 type Exporter interface {
 	// Export will send the data to the exporter.
-	Export(context.Context, *log.Logger, []FeatureEvent) error
+	Export(context.Context, fflog.Logger, []FeatureEvent) error
 
 	// IsBulk return false if we should directly send the data as soon as it is produce
 	// and true if we collect the data to send them in bulk.
@@ -57,7 +56,7 @@ type DataExporterScheduler struct {
 	ticker          *time.Ticker
 	maxEventInCache int64
 	exporter        Exporter
-	logger          *log.Logger
+	logger          fflog.Logger
 	ctx             context.Context
 }
 
@@ -115,7 +114,7 @@ func (dc *DataExporterScheduler) flush() {
 	if len(dc.localCache) > 0 {
 		err := dc.exporter.Export(dc.ctx, dc.logger, dc.localCache)
 		if err != nil {
-			fflog.Printf(dc.logger, "error while exporting data: %v\n", err)
+			dc.logger.Printf("error while exporting data: %v\n", err)
 			return
 		}
 	}

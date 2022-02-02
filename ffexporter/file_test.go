@@ -3,8 +3,8 @@ package ffexporter_test
 import (
 	"context"
 	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 	"io/ioutil"
-	"log"
 	"os"
 	"testing"
 
@@ -21,7 +21,7 @@ func TestFile_Export(t *testing.T) {
 		OutputDir   string
 	}
 	type args struct {
-		logger        *log.Logger
+		logger        fflog.Logger
 		featureEvents []exporter.FeatureEvent
 	}
 	type expected struct {

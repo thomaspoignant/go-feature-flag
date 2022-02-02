@@ -2,6 +2,7 @@ package notifier
 
 import (
 	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 	"io/ioutil"
@@ -248,7 +249,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 			defer os.Remove(logOutput.Name())
 
 			c := &LogNotifier{
-				Logger: log.New(logOutput, "", 0),
+				Logger: fflog.Logger{Logger: log.New(logOutput, "", 0)},
 			}
 			tt.args.wg.Add(1)
 			c.Notify(tt.args.diff, tt.args.wg)

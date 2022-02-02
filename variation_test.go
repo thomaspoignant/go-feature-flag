@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"io/ioutil"
 	"log"
@@ -214,14 +215,13 @@ func TestBoolVariation(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// init logger
 			file, _ := ioutil.TempFile("", "log")
-			logger := log.New(file, "", 0)
+			logger := fflog.Logger{Logger: log.New(file, "", 0)}
 
 			ff = &GoFeatureFlag{
 				bgUpdater: newBackgroundUpdater(5),
 				cache:     tt.args.cacheMock,
 				config: Config{
 					PollingInterval: 0,
-					Logger:          logger,
 					Offline:         tt.args.offline,
 				},
 				dataExporter: exporter.NewDataExporterScheduler(context.Background(), 0, 0,
@@ -416,14 +416,13 @@ func TestFloat64Variation(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// init logger
 			file, _ := ioutil.TempFile("", "log")
-			logger := log.New(file, "", 0)
+			logger := fflog.Logger{Logger: log.New(file, "", 0)}
 
 			ff = &GoFeatureFlag{
 				bgUpdater: newBackgroundUpdater(5),
 				cache:     tt.args.cacheMock,
 				config: Config{
 					PollingInterval: 0,
-					Logger:          logger,
 					Offline:         tt.args.offline,
 				},
 				dataExporter: exporter.NewDataExporterScheduler(context.Background(), 0, 0,
@@ -635,14 +634,13 @@ func TestJSONArrayVariation(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// init logger
 			file, _ := ioutil.TempFile("", "log")
-			logger := log.New(file, "", 0)
+			logger := fflog.Logger{Logger: log.New(file, "", 0)}
 
 			ff = &GoFeatureFlag{
 				bgUpdater: newBackgroundUpdater(5),
 				cache:     tt.args.cacheMock,
 				config: Config{
 					PollingInterval: 0,
-					Logger:          logger,
 					Offline:         tt.args.offline,
 				},
 				dataExporter: exporter.NewDataExporterScheduler(context.Background(), 0, 0,
@@ -813,14 +811,13 @@ func TestJSONVariation(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// init logger
 			file, _ := ioutil.TempFile("", "log")
-			logger := log.New(file, "", 0)
+			logger := fflog.Logger{Logger: log.New(file, "", 0)}
 
 			ff = &GoFeatureFlag{
 				bgUpdater: newBackgroundUpdater(5),
 				cache:     tt.args.cacheMock,
 				config: Config{
 					PollingInterval: 0,
-					Logger:          logger,
 					Offline:         tt.args.offline,
 				},
 				dataExporter: exporter.NewDataExporterScheduler(context.Background(), 0, 0,
@@ -998,14 +995,13 @@ func TestStringVariation(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// init logger
 			file, _ := ioutil.TempFile("", "log")
-			logger := log.New(file, "", 0)
+			logger := fflog.Logger{Logger: log.New(file, "", 0)}
 
 			ff = &GoFeatureFlag{
 				bgUpdater: newBackgroundUpdater(5),
 				cache:     tt.args.cacheMock,
 				config: Config{
 					PollingInterval: 0,
-					Logger:          logger,
 					Offline:         tt.args.offline,
 				},
 				dataExporter: exporter.NewDataExporterScheduler(context.Background(), 0, 0,
@@ -1199,14 +1195,13 @@ func TestIntVariation(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// init logger
 			file, _ := ioutil.TempFile("", "log")
-			logger := log.New(file, "", 0)
+			logger := fflog.Logger{Logger: log.New(file, "", 0)}
 
 			ff = &GoFeatureFlag{
 				bgUpdater: newBackgroundUpdater(5),
 				cache:     tt.args.cacheMock,
 				config: Config{
 					PollingInterval: 0,
-					Logger:          logger,
 					Offline:         tt.args.offline,
 				},
 				dataExporter: exporter.NewDataExporterScheduler(context.Background(), 0, 0,

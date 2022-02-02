@@ -2,6 +2,7 @@ package ffclient
 
 import (
 	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 	"log"
 	"net/http"
 	"net/url"
@@ -19,6 +20,7 @@ func TestGoFeatureFlag_getNotifiers(t *testing.T) {
 
 	type fields struct {
 		config Config
+		logger fflog.Logger
 	}
 	tests := []struct {
 		name    string
@@ -29,6 +31,7 @@ func TestGoFeatureFlag_getNotifiers(t *testing.T) {
 		{
 			name: "log + webhook notifier",
 			fields: fields{
+				logger: fflog.Logger{Logger: log.New(os.Stdout, "", 0)},
 				config: Config{
 					Logger: log.New(os.Stdout, "", 0),
 					Notifiers: []NotifierConfig{
@@ -47,9 +50,9 @@ func TestGoFeatureFlag_getNotifiers(t *testing.T) {
 				},
 			},
 			want: []notifier.Notifier{
-				&notifier.LogNotifier{Logger: log.New(os.Stdout, "", 0)},
+				&notifier.LogNotifier{Logger: fflog.Logger{Logger: log.New(os.Stdout, "", 0)}},
 				&notifier.WebhookNotifier{
-					Logger: log.New(os.Stdout, "", 0),
+					Logger: fflog.Logger{Logger: log.New(os.Stdout, "", 0)},
 					HTTPClient: &http.Client{
 						Timeout: 10 * time.Second,
 					},
@@ -61,7 +64,7 @@ func TestGoFeatureFlag_getNotifiers(t *testing.T) {
 					},
 				},
 				&notifier.SlackNotifier{
-					Logger:     log.New(os.Stdout, "", 0),
+					Logger:     fflog.Logger{Logger: log.New(os.Stdout, "", 0)},
 					HTTPClient: internal.DefaultHTTPClient(),
 					WebhookURL: *parsedURL,
 				},
@@ -70,6 +73,7 @@ func TestGoFeatureFlag_getNotifiers(t *testing.T) {
 		{
 			name: "error in DNS",
 			fields: fields{
+				logger: fflog.Logger{Logger: log.New(os.Stdout, "", 0)},
 				config: Config{
 					Logger: log.New(os.Stdout, "", 0),
 					Notifiers: []NotifierConfig{
@@ -89,7 +93,7 @@ func TestGoFeatureFlag_getNotifiers(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := getNotifiers(tt.fields.config)
+			got, err := getNotifiers(tt.fields.config, tt.fields.logger)
 			if tt.wantErr {
 				assert.Error(t, err)
 				return

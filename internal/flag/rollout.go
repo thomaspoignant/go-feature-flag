@@ -2,6 +2,7 @@ package flag
 
 import (
 	"fmt"
+	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 	"strings"
 	"time"
 )
@@ -39,10 +40,10 @@ func (e Experimentation) String() string {
 	lo, _ := time.LoadLocation("UTC")
 
 	if e.Start != nil {
-		buf = append(buf, fmt.Sprintf("start:[%v]", e.Start.In(lo).Format(time.RFC3339)))
+		buf = append(buf, fmt.Sprintf("start:[%v]", e.Start.In(lo).Format(fflog.LogDateFormat)))
 	}
 	if e.End != nil {
-		buf = append(buf, fmt.Sprintf("end:[%v]", e.End.In(lo).Format(time.RFC3339)))
+		buf = append(buf, fmt.Sprintf("end:[%v]", e.End.In(lo).Format(fflog.LogDateFormat)))
 	}
 	return strings.Join(buf, " ")
 }

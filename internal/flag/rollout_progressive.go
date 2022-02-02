@@ -2,6 +2,7 @@ package flag
 
 import (
 	"fmt"
+	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 	"strings"
 	"time"
 )
@@ -35,7 +36,7 @@ func (p ProgressiveRollout) String() string {
 	initial = appendIfHasValue(initial, "Percentage", fmt.Sprintf("%v", p.Initial.getPercentage()))
 	if p.Initial.Date != nil {
 		initialDate := *p.Initial.Date
-		initial = appendIfHasValue(initial, "Date", fmt.Sprintf("%v", initialDate.Format(time.RFC3339)))
+		initial = appendIfHasValue(initial, "Date", fmt.Sprintf("%v", initialDate.Format(fflog.LogDateFormat)))
 	}
 
 	var end []string
@@ -43,7 +44,7 @@ func (p ProgressiveRollout) String() string {
 	end = appendIfHasValue(end, "Percentage", fmt.Sprintf("%v", p.End.getPercentage()))
 	if p.End.Date != nil {
 		endDate := *p.End.Date
-		end = appendIfHasValue(end, "Date", fmt.Sprintf("%v", endDate.Format(time.RFC3339)))
+		end = appendIfHasValue(end, "Date", fmt.Sprintf("%v", endDate.Format(fflog.LogDateFormat)))
 	}
 
 	return fmt.Sprintf("Initial:[%v], End:[%v]", strings.Join(initial, ", "), strings.Join(end, ", "))
