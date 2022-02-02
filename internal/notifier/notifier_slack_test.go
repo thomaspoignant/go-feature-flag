@@ -1,7 +1,6 @@
 package notifier_test
 
 import (
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
@@ -179,7 +178,6 @@ func TestSlackNotifier_Notify(t *testing.T) {
 				hostname, _ := os.Hostname()
 				content, _ := ioutil.ReadFile(tt.expected.bodyPath)
 				expectedContent := strings.ReplaceAll(string(content), "{{hostname}}", hostname)
-				fmt.Println(mockHTTPClient.Body)
 				assert.JSONEq(t, expectedContent, mockHTTPClient.Body)
 				assert.Equal(t, tt.expected.signature, mockHTTPClient.Signature)
 			}
