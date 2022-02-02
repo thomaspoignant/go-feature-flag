@@ -3,7 +3,6 @@ package notifier
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 	"io/ioutil"
 	"log"
@@ -30,11 +29,23 @@ func TestLogNotifier_Notify(t *testing.T) {
 			args: args{
 				diff: model.DiffCache{
 					Deleted: map[string]flag.Flag{
-						"test-flag": &flagv1.FlagData{
-							Percentage: testconvert.Float64(100),
-							True:       testconvert.Interface(true),
-							False:      testconvert.Interface(false),
-							Default:    testconvert.Interface(false),
+						"test-flag": &flag.FlagData{
+							Variations: &map[string]*interface{}{
+								"Default": testconvert.Interface("default"),
+								"False":   testconvert.Interface("false"),
+								"True":    testconvert.Interface("true"),
+							},
+							Rules: &map[string]flag.Rule{
+								"defaultRule": {
+									Percentages: &map[string]float64{
+										"True":  40,
+										"False": 60,
+									},
+								},
+							},
+							DefaultRule: &flag.Rule{
+								VariationResult: testconvert.String("Default"),
+							},
 						},
 					},
 					Updated: map[string]model.DiffUpdated{},
@@ -51,18 +62,41 @@ func TestLogNotifier_Notify(t *testing.T) {
 					Deleted: map[string]flag.Flag{},
 					Updated: map[string]model.DiffUpdated{
 						"test-flag": {
-							Before: &flagv1.FlagData{
-								Rule:       testconvert.String("key eq \"random-key\""),
-								Percentage: testconvert.Float64(100),
-								True:       testconvert.Interface(true),
-								False:      testconvert.Interface(false),
-								Default:    testconvert.Interface(false),
+							Before: &flag.FlagData{
+								Variations: &map[string]*interface{}{
+									"Default": testconvert.Interface("default"),
+									"False":   testconvert.Interface("false"),
+									"True":    testconvert.Interface("true"),
+								},
+								Rules: &map[string]flag.Rule{
+									"defaultRule": {
+										Percentages: &map[string]float64{
+											"True":  40,
+											"False": 60,
+										},
+									},
+								},
+								DefaultRule: &flag.Rule{
+									VariationResult: testconvert.String("Default"),
+								},
 							},
-							After: &flagv1.FlagData{
-								Percentage: testconvert.Float64(100),
-								True:       testconvert.Interface(true),
-								False:      testconvert.Interface(false),
-								Default:    testconvert.Interface(false),
+							After: &flag.FlagData{
+								Variations: &map[string]*interface{}{
+									"Default": testconvert.Interface("default"),
+									"False":   testconvert.Interface("false"),
+									"True":    testconvert.Interface("true"),
+								},
+								Rules: &map[string]flag.Rule{
+									"defaultRule": {
+										Percentages: &map[string]float64{
+											"True":  10,
+											"False": 90,
+										},
+									},
+								},
+								DefaultRule: &flag.Rule{
+									VariationResult: testconvert.String("Default"),
+								},
 							},
 						},
 					},
@@ -70,7 +104,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 				},
 				wg: &sync.WaitGroup{},
 			},
-			expected: "^\\[" + testutils.RFC3339Regex + "\\] flag test-flag updated, old=\\[percentage=100%, rule=\"key eq \"random-key\"\", true=\"true\", false=\"false\", default=\"false\", disable=\"false\"\\], new=\\[percentage=100%, true=\"true\", false=\"false\", default=\"false\", disable=\"false\"\\]",
+			expected: "^\\[" + testutils.RFC3339Regex + "\\] flag test-flag updated, old=\\[Variations:\\[Default=default,False=false,True=true\\], Rules:\\[\\[percentages:\\[False=60.00,True=40.00\\]\\]\\], DefaultRule:\\[variation:\\[Default\\]\\], TrackEvents:\\[true\\], Disable:\\[false\\]\\], new=\\[Variations:\\[Default=default,False=false,True=true\\], Rules:\\[\\[percentages:\\[False=90.00,True=10.00\\]\\]\\], DefaultRule:\\[variation:\\[Default\\]\\], TrackEvents:\\[true\\], Disable:\\[false\\]\\]",
 		},
 		{
 			name: "Disable flag",
@@ -79,20 +113,42 @@ func TestLogNotifier_Notify(t *testing.T) {
 					Deleted: map[string]flag.Flag{},
 					Updated: map[string]model.DiffUpdated{
 						"test-flag": {
-							Before: &flagv1.FlagData{
-								Rule:       testconvert.String("key eq \"random-key\""),
-								Percentage: testconvert.Float64(100),
-								True:       testconvert.Interface(true),
-								False:      testconvert.Interface(false),
-								Default:    testconvert.Interface(false),
+							Before: &flag.FlagData{
+								Variations: &map[string]*interface{}{
+									"Default": testconvert.Interface("default"),
+									"False":   testconvert.Interface("false"),
+									"True":    testconvert.Interface("true"),
+								},
+								Rules: &map[string]flag.Rule{
+									"defaultRule": {
+										Percentages: &map[string]float64{
+											"True":  10,
+											"False": 90,
+										},
+									},
+								},
+								DefaultRule: &flag.Rule{
+									VariationResult: testconvert.String("Default"),
+								},
 							},
-							After: &flagv1.FlagData{
-								Rule:       testconvert.String("key eq \"random-key\""),
-								Disable:    testconvert.Bool(true),
-								Percentage: testconvert.Float64(100),
-								True:       testconvert.Interface(true),
-								False:      testconvert.Interface(false),
-								Default:    testconvert.Interface(false),
+							After: &flag.FlagData{
+								Variations: &map[string]*interface{}{
+									"Default": testconvert.Interface("default"),
+									"False":   testconvert.Interface("false"),
+									"True":    testconvert.Interface("true"),
+								},
+								Rules: &map[string]flag.Rule{
+									"defaultRule": {
+										Percentages: &map[string]float64{
+											"True":  10,
+											"False": 90,
+										},
+									},
+								},
+								DefaultRule: &flag.Rule{
+									VariationResult: testconvert.String("Default"),
+								},
+								Disable: testconvert.Bool(true),
 							},
 						},
 					},
@@ -109,12 +165,23 @@ func TestLogNotifier_Notify(t *testing.T) {
 					Deleted: map[string]flag.Flag{},
 					Updated: map[string]model.DiffUpdated{},
 					Added: map[string]flag.Flag{
-						"add-test-flag": &flagv1.FlagData{
-							Rule:       testconvert.String("key eq \"random-key\""),
-							Percentage: testconvert.Float64(100),
-							True:       testconvert.Interface(true),
-							False:      testconvert.Interface(false),
-							Default:    testconvert.Interface(false),
+						"add-test-flag": &flag.FlagData{
+							Variations: &map[string]*interface{}{
+								"Default": testconvert.Interface("default"),
+								"False":   testconvert.Interface("false"),
+								"True":    testconvert.Interface("true"),
+							},
+							Rules: &map[string]flag.Rule{
+								"defaultRule": {
+									Percentages: &map[string]float64{
+										"True":  10,
+										"False": 90,
+									},
+								},
+							},
+							DefaultRule: &flag.Rule{
+								VariationResult: testconvert.String("Default"),
+							},
 						},
 					},
 				},
@@ -129,20 +196,42 @@ func TestLogNotifier_Notify(t *testing.T) {
 					Deleted: map[string]flag.Flag{},
 					Updated: map[string]model.DiffUpdated{
 						"test-flag": {
-							After: &flagv1.FlagData{
-								Rule:       testconvert.String("key eq \"random-key\""),
-								Percentage: testconvert.Float64(100),
-								True:       testconvert.Interface(true),
-								False:      testconvert.Interface(false),
-								Default:    testconvert.Interface(false),
+							Before: &flag.FlagData{
+								Variations: &map[string]*interface{}{
+									"Default": testconvert.Interface("default"),
+									"False":   testconvert.Interface("false"),
+									"True":    testconvert.Interface("true"),
+								},
+								Rules: &map[string]flag.Rule{
+									"defaultRule": {
+										Percentages: &map[string]float64{
+											"True":  10,
+											"False": 90,
+										},
+									},
+								},
+								DefaultRule: &flag.Rule{
+									VariationResult: testconvert.String("Default"),
+								},
+								Disable: testconvert.Bool(true),
 							},
-							Before: &flagv1.FlagData{
-								Rule:       testconvert.String("key eq \"random-key\""),
-								Disable:    testconvert.Bool(true),
-								Percentage: testconvert.Float64(100),
-								True:       testconvert.Interface(true),
-								False:      testconvert.Interface(false),
-								Default:    testconvert.Interface(false),
+							After: &flag.FlagData{
+								Variations: &map[string]*interface{}{
+									"Default": testconvert.Interface("default"),
+									"False":   testconvert.Interface("false"),
+									"True":    testconvert.Interface("true"),
+								},
+								Rules: &map[string]flag.Rule{
+									"defaultRule": {
+										Percentages: &map[string]float64{
+											"True":  10,
+											"False": 90,
+										},
+									},
+								},
+								DefaultRule: &flag.Rule{
+									VariationResult: testconvert.String("Default"),
+								},
 							},
 						},
 					},
@@ -150,7 +239,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 				},
 				wg: &sync.WaitGroup{},
 			},
-			expected: "^\\[" + testutils.RFC3339Regex + "\\] flag test-flag is turned ON \\(flag=\\[percentage=100%, rule=\"key eq \"random-key\"\", true=\"true\", false=\"false\", default=\"false\", disable=\"false\"\\]\\)",
+			expected: "^\\[" + testutils.RFC3339Regex + "\\] flag test-flag is turned ON \\(flag=\\[Variations:\\[Default=default,False=false,True=true\\], Rules:\\[\\[percentages:\\[False=90.00,True=10.00\\]\\]\\], DefaultRule:\\[variation:\\[Default\\]\\], TrackEvents:\\[true\\], Disable:\\[false\\]\\]\\)",
 		},
 	}
 	for _, tt := range tests {

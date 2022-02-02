@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"sort"
 	"sync"
 
 	"github.com/thomaspoignant/go-feature-flag/internal"
@@ -22,7 +21,6 @@ const slackFooter = "go-feature-flag"
 const colorDeleted = "#FF0000"
 const colorUpdated = "#FFA500"
 const colorAdded = "#008000"
-const longSlackAttachment = 35
 
 func NewSlackNotifier(logger *log.Logger, httpClient internal.HTTPClient, webhookURL string) SlackNotifier {
 	slackURL, _ := url.Parse(webhookURL)
@@ -97,32 +95,13 @@ func convertDeletedFlagsToSlackMessage(diff model.DiffCache) []attachment {
 
 func convertUpdatedFlagsToSlackMessage(diff model.DiffCache) []attachment {
 	var attachments = make([]attachment, 0)
-	for key, value := range diff.Updated {
+	for key := range diff.Updated {
 		attachment := attachment{
 			Title:      fmt.Sprintf("✏️ Flag \"%s\" updated", key),
 			Color:      colorUpdated,
 			FooterIcon: goFFLogo,
 			Footer:     slackFooter,
 			Fields:     []Field{},
-		}
-
-		before := value.Before.GetRawValues()
-		after := value.After.GetRawValues()
-		sortedKey := sortedKeys(before)
-		for _, bKey := range sortedKey {
-			if before[bKey] != after[bKey] {
-				// format output if empty
-				if before[bKey] == "" {
-					before[bKey] = "<empty>"
-				}
-				if after[bKey] == "" {
-					after[bKey] = "<empty>"
-				}
-
-				value := fmt.Sprintf("%v => %v", before[bKey], after[bKey])
-				short := len(value) < longSlackAttachment
-				attachment.Fields = append(attachment.Fields, Field{Title: bKey, Short: short, Value: value})
-			}
 		}
 		attachments = append(attachments, attachment)
 	}
@@ -131,23 +110,13 @@ func convertUpdatedFlagsToSlackMessage(diff model.DiffCache) []attachment {
 
 func convertAddedFlagsToSlackMessage(diff model.DiffCache) []attachment {
 	var attachments = make([]attachment, 0)
-	for key, value := range diff.Added {
+	for key := range diff.Added {
 		attachment := attachment{
 			Title:      fmt.Sprintf("🆕 Flag \"%s\" created", key),
 			Color:      colorAdded,
 			FooterIcon: goFFLogo,
 			Footer:     slackFooter,
 			Fields:     []Field{},
-		}
-
-		rawValues := value.GetRawValues()
-		sortedKey := sortedKeys(rawValues)
-		for _, bKey := range sortedKey {
-			if rawValues[bKey] != "" {
-				value := fmt.Sprintf("%v", rawValues[bKey])
-				short := len(value) < longSlackAttachment
-				attachment.Fields = append(attachment.Fields, Field{Title: bKey, Short: short, Value: value})
-			}
 		}
 		attachments = append(attachments, attachment)
 	}
@@ -172,15 +141,4 @@ type Field struct {
 	Title string `json:"title"`
 	Value string `json:"value"`
 	Short bool   `json:"short"`
-}
-
-func sortedKeys(m map[string]string) []string {
-	keys := make([]string, len(m))
-	i := 0
-	for k := range m {
-		keys[i] = k
-		i++
-	}
-	sort.Strings(keys)
-	return keys
 }

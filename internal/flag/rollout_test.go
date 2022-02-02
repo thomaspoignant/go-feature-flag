@@ -1,8 +1,8 @@
-package flagv1_test
+package flag_test
 
 import (
 	"github.com/stretchr/testify/assert"
-	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
+	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"testing"
 	"time"
 
@@ -46,7 +46,7 @@ func TestExperimentation_String(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			e := flagv1.Experimentation{
+			e := flag.Experimentation{
 				End:   tt.fields.End,
 				Start: tt.fields.Start,
 			}
@@ -59,12 +59,12 @@ func TestExperimentation_String(t *testing.T) {
 func TestRollout_String(t *testing.T) {
 	tests := []struct {
 		name    string
-		rollout flagv1.Rollout
+		rollout flag.Rollout
 		want    string
 	}{
 		{
 			name: "experimentation",
-			rollout: flagv1.Rollout{Experimentation: &flagv1.Experimentation{
+			rollout: flag.Rollout{Experimentation: &flag.Experimentation{
 				Start: testconvert.Time(time.Unix(1095379400, 0)),
 				End:   testconvert.Time(time.Unix(1095379500, 0)),
 			}},
@@ -72,7 +72,7 @@ func TestRollout_String(t *testing.T) {
 		},
 		{
 			name:    "empty",
-			rollout: flagv1.Rollout{},
+			rollout: flag.Rollout{},
 			want:    "",
 		},
 	}

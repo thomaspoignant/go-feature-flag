@@ -12,7 +12,7 @@ func NewFeatureEvent(
 	value interface{},
 	variation string,
 	failed bool,
-	version float64) FeatureEvent {
+	version string) FeatureEvent {
 	contextKind := "user"
 	if user.IsAnonymous() {
 		contextKind = "anonymousUser"
@@ -64,5 +64,5 @@ type FeatureEvent struct {
 
 	// Version contains the version of the flag. If the field is omitted for the flag in the configuration file
 	// the default version will be 0.
-	Version float64 `json:"version"`
+	Version string `json:"version"`
 }
