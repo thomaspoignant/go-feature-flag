@@ -338,16 +338,16 @@ func TestRule_string(t *testing.T) {
 					Initial: &flag.ProgressiveRolloutStep{
 						Variation:  testconvert.String("Variation1"),
 						Percentage: 0,
-						Date:       testconvert.Time(time.Date(2021, time.February, 1, 10, 10, 10, 10, time.Local)),
+						Date:       testconvert.Time(time.Date(2021, time.February, 1, 10, 10, 10, 10, time.UTC)),
 					},
 					End: &flag.ProgressiveRolloutStep{
 						Variation:  testconvert.String("Variation2"),
 						Percentage: 100,
-						Date:       testconvert.Time(time.Date(2021, time.February, 1, 10, 10, 30, 10, time.Local)),
+						Date:       testconvert.Time(time.Date(2021, time.February, 1, 10, 10, 30, 10, time.UTC)),
 					},
 				},
 			},
-			expected: "query:[key eq \"toto\"], variation:[Variation1], percentages:[Variation1=10.00,Variation2=75.00,Variation3=5.00], progressiveRollout:[Initial:[Variation:[Variation1], Percentage:[0], Date:[2021-02-01T10:10:10+01:00]], End:[Variation:[Variation2], Percentage:[100], Date:[2021-02-01T10:10:30+01:00]]]",
+			expected: "query:[key eq \"toto\"], variation:[Variation1], percentages:[Variation1=10.00,Variation2=75.00,Variation3=5.00], progressiveRollout:[Initial:[Variation:[Variation1], Percentage:[0], Date:[2021-02-01T10:10:10Z]], End:[Variation:[Variation2], Percentage:[100], Date:[2021-02-01T10:10:30Z]]]",
 		},
 	}
 
