@@ -156,8 +156,8 @@ func TestSlackNotifier_Notify(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			logFile, _ := ioutil.TempFile("", "")
-			defer logFile.Close()
-			defer os.Remove(logFile.Name())
+			defer func() { _ = logFile.Close() }()
+			defer func() { _ = os.Remove(logFile.Name()) }()
 
 			mockHTTPClient := &testutils.HTTPClientMock{StatusCode: tt.args.statusCode, ForceError: tt.args.forceError}
 
@@ -172,8 +172,8 @@ func TestSlackNotifier_Notify(t *testing.T) {
 			c.Notify(tt.args.diff, &w)
 
 			if tt.expected.err {
-				log, _ := ioutil.ReadFile(logFile.Name())
-				assert.Regexp(t, tt.expected.errLog, string(log))
+				output, _ := ioutil.ReadFile(logFile.Name())
+				assert.Regexp(t, tt.expected.errLog, string(output))
 			} else {
 				hostname, _ := os.Hostname()
 				content, _ := ioutil.ReadFile(tt.expected.bodyPath)

@@ -3,6 +3,7 @@ package cache
 import (
 	"encoding/json"
 	"errors"
+	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"gopkg.in/yaml.v3"
 	"strings"
@@ -26,7 +27,7 @@ type cacheManagerImpl struct {
 
 func New(notificationService Service) Manager {
 	return &cacheManagerImpl{
-		inMemoryCache:       NewInMemoryCache(),
+		inMemoryCache:       NewInMemoryCache(fflog.Logger{}),
 		mutex:               sync.RWMutex{},
 		notificationService: notificationService,
 	}
@@ -48,7 +49,7 @@ func (c *cacheManagerImpl) UpdateCache(loadedFlags []byte, fileFormat string) er
 		return err
 	}
 
-	newCache := NewInMemoryCache()
+	newCache := NewInMemoryCache(fflog.Logger{})
 	newCache.Init(newFlags)
 	newCacheFlags := newCache.All()
 	oldCacheFlags := map[string]flag.Flag{}

@@ -43,8 +43,8 @@ func (r *Rule) mergeChanges(updatedRule Rule) {
 		updatedPercentages := *updatedRule.Percentages
 		mergedPercentages := r.GetPercentages()
 		for key, percentage := range updatedPercentages {
-			// TODO add documentation about the -1
-			if percentage == -1 {
+			// When you set a negative percentage we are not taking it in consideration.
+			if percentage < 0 {
 				delete(mergedPercentages, key)
 				continue
 			}
@@ -54,8 +54,10 @@ func (r *Rule) mergeChanges(updatedRule Rule) {
 	}
 }
 
+// Evaluate is checking if the rule apply to for the user.
+// If yes it returns the variation you should use for this rule.
 func (r *Rule) Evaluate(user ffuser.User, hashID uint32, defaultRule bool,
-) ( /* apply */ bool /* variation name */, string, error) {
+) ( /* apply */ bool /* variation name */, string /* error */, error) {
 	// Check if the rule apply for this user
 	ruleApply := defaultRule || r.Query == nil || *r.Query == "" || parser.Evaluate(*r.Query, userToMap(user))
 	if !ruleApply {
@@ -64,10 +66,10 @@ func (r *Rule) Evaluate(user ffuser.User, hashID uint32, defaultRule bool,
 
 	if r.ProgressiveRollout != nil {
 		variation, err := r.getVariationFromProgressiveRollout(hashID)
-		if err == nil {
-			return true, variation, nil
+		if err != nil {
+			return false, variation, err
 		}
-		// TODO add log to explain that we cannot use the rollout flag + continue
+		return true, variation, nil
 	}
 
 	if r.Percentages != nil {

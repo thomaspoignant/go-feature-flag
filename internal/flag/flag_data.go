@@ -55,25 +55,25 @@ func (f *FlagData) GetVariationValue(variationName string) interface{} {
 }
 
 // Value is returning the Value associate to the flag
-func (f *FlagData) Value(flagName string, user ffuser.User, sdkDefaultValue interface{}) (interface{}, string) {
+func (f *FlagData) Value(flagName string, user ffuser.User, sdkDefaultValue interface{}) (interface{}, string, error) {
 	f.updateFlagStage()
 
-	variations := *f.Variations
 	if f.isExperimentationOver() || f.IsDisable() {
-		return sdkDefaultValue, constant.VariationSDKDefault
+		return sdkDefaultValue, constant.VariationSDKDefault, nil
 	}
 
 	variationName, err := f.getVariation(flagName, user)
 	if err != nil {
-		// TODO log something + check that default variation exists
-		return sdkDefaultValue, constant.VariationSDKDefault
+		return sdkDefaultValue, constant.VariationSDKDefault, err
 	}
 
+	// If we have no value for a variation we consider that this variation does not exist.
+	variations := *f.Variations
 	if variations[variationName] == nil {
-		return nil, variationName
+		return nil, variationName, fmt.Errorf("variation %s does not exist for the flag %s", variationName, flagName)
 	}
 
-	return f.GetVariationValue(variationName), variationName
+	return f.GetVariationValue(variationName), variationName, nil
 }
 
 func (f *FlagData) getVariation(flagName string, user ffuser.User) (string, error) {
@@ -85,7 +85,7 @@ func (f *FlagData) getVariation(flagName string, user ffuser.User) (string, erro
 		for _, rule := range rules {
 			apply, varName, err := rule.Evaluate(user, hashID, false)
 			if err != nil {
-				// TODO log + continue to next rule
+				return varName, err
 			}
 			if apply {
 				return varName, nil
@@ -145,20 +145,25 @@ func (f *FlagData) mergeChanges(stepFlag ScheduledStep) {
 		f.Rollout = stepFlag.Rollout
 	}
 
-	// Replace all variations
+	// Here we are looking to all the variations
 	if stepFlag.Variations != nil {
-		for variation := range stepFlag.GetVariations() {
-			vVar := stepFlag.GetVariationValue(variation)
-			if vVar != nil {
-				err := f.replaceVariation(variation, vVar)
-				if err != nil {
-					// TODO: please write a log here
-				}
+		variations := f.GetVariations()
+		for variationName := range stepFlag.GetVariations() {
+			// if the new value of an existing variation is nil we are deleting the variation.
+			variationValue := stepFlag.GetVariationValue(variationName)
+			if variationValue == nil {
+				delete(variations, variationName)
+				continue
 			}
+
+			// if the variation name already exist or is new we upsert the new value
+			variations[variationName] = &variationValue
 		}
+		f.Variations = &variations
 	}
 
-	// TODO: please write a comment to explain why we are doing this
+	// If we have a rule with an existing name we are overriding his content,
+	// if the rule is new we are adding it to the collection of rules.
 	if stepFlag.Rules != nil {
 		rulesBeforeMerge := f.GetRules()
 		for key, val := range *stepFlag.Rules {
@@ -240,17 +245,6 @@ func (f *FlagData) GetVariations() map[string]*interface{} {
 		return map[string]*interface{}{}
 	}
 	return *f.Variations
-}
-
-func (f *FlagData) replaceVariation(variationName string, variationValue interface{}) error {
-	_, ok := f.GetVariations()[variationName]
-	if ok {
-		variations := f.GetVariations()
-		variations[variationName] = &variationValue
-		f.Variations = &variations
-		return nil
-	}
-	return fmt.Errorf("impossible to update the variation %s, unknow variation name", variationName)
 }
 
 // IsTrackEvents is the getter of the field TrackEvents

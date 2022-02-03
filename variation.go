@@ -140,16 +140,18 @@ func (g *GoFeatureFlag) AllFlagsState(user ffuser.User) flagstate.AllFlags {
 	}
 
 	allFlags := flagstate.NewAllFlags()
-	for key, currentFlag := range flags {
-		// TODO : check if we should pass nil or not
-		flagValue, varType := currentFlag.Value(key, user, nil)
+	for flagKey, currentFlag := range flags {
+		flagValue, varType, err := currentFlag.Value(flagKey, user, nil)
+		if err != nil {
+			g.logger.Printf("impossible to get the value for flag %s: %v", flagKey, err)
+		}
+
 		switch v := flagValue; v.(type) {
 		case int, float64, bool, string, []interface{}, map[string]interface{}:
-			allFlags.AddFlag(key, flagstate.NewFlagState(currentFlag.IsTrackEvents(), v, varType, false))
+			allFlags.AddFlag(flagKey, flagstate.NewFlagState(currentFlag.IsTrackEvents(), v, varType, false))
 
 		default:
-			// TODO: add log and ignore the flag
-			allFlags.AddFlag(key, flagstate.NewFlagState(currentFlag.IsTrackEvents(), v, varType, true))
+			allFlags.AddFlag(flagKey, flagstate.NewFlagState(currentFlag.IsTrackEvents(), v, varType, true))
 			continue
 		}
 	}
@@ -172,7 +174,10 @@ func (g *GoFeatureFlag) boolVariation(flagKey string, user ffuser.User, sdkDefau
 		}, err
 	}
 
-	flagValue, variationType := f.Value(flagKey, user, sdkDefaultValue)
+	flagValue, variationType, err := f.Value(flagKey, user, sdkDefaultValue)
+	if err != nil {
+		g.logger.Printf("impossible to get the value for flag %s: %v", flagKey, err)
+	}
 	res, ok := flagValue.(bool)
 	if !ok {
 		return model.BoolVarResult{
@@ -200,7 +205,10 @@ func (g *GoFeatureFlag) intVariation(flagKey string, user ffuser.User, sdkDefaul
 		}, err
 	}
 
-	flagValue, variationType := f.Value(flagKey, user, sdkDefaultValue)
+	flagValue, variationType, err := f.Value(flagKey, user, sdkDefaultValue)
+	if err != nil {
+		g.logger.Printf("impossible to get the value for flag %s: %v", flagKey, err)
+	}
 	res, ok := flagValue.(int)
 	if !ok {
 		// if this is a float64 we convert it to int
@@ -237,7 +245,10 @@ func (g *GoFeatureFlag) float64Variation(flagKey string, user ffuser.User, sdkDe
 		}, err
 	}
 
-	flagValue, variationType := f.Value(flagKey, user, sdkDefaultValue)
+	flagValue, variationType, err := f.Value(flagKey, user, sdkDefaultValue)
+	if err != nil {
+		g.logger.Printf("impossible to get the value for flag %s: %v", flagKey, err)
+	}
 	res, ok := flagValue.(float64)
 	if !ok {
 		return model.Float64VarResult{
@@ -267,7 +278,10 @@ func (g *GoFeatureFlag) stringVariation(flagKey string, user ffuser.User, sdkDef
 		}, err
 	}
 
-	flagValue, variationType := f.Value(flagKey, user, sdkDefaultValue)
+	flagValue, variationType, err := f.Value(flagKey, user, sdkDefaultValue)
+	if err != nil {
+		g.logger.Printf("impossible to get the value for flag %s: %v", flagKey, err)
+	}
 	res, ok := flagValue.(string)
 	if !ok {
 		return model.StringVarResult{
@@ -297,7 +311,10 @@ func (g *GoFeatureFlag) jsonArrayVariation(flagKey string, user ffuser.User, sdk
 		}, err
 	}
 
-	flagValue, variationType := f.Value(flagKey, user, sdkDefaultValue)
+	flagValue, variationType, err := f.Value(flagKey, user, sdkDefaultValue)
+	if err != nil {
+		g.logger.Printf("impossible to get the value for flag %s: %v", flagKey, err)
+	}
 	res, ok := flagValue.([]interface{})
 	if !ok {
 		return model.JSONArrayVarResult{
@@ -327,7 +344,10 @@ func (g *GoFeatureFlag) jsonVariation(flagKey string, user ffuser.User, sdkDefau
 		}, err
 	}
 
-	flagValue, variationType := f.Value(flagKey, user, sdkDefaultValue)
+	flagValue, variationType, err := f.Value(flagKey, user, sdkDefaultValue)
+	if err != nil {
+		g.logger.Printf("impossible to get the value for flag %s: %v", flagKey, err)
+	}
 	res, ok := flagValue.(map[string]interface{})
 	if !ok {
 		return model.JSONVarResult{

@@ -3,6 +3,7 @@ package cache_test
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
+	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 	"testing"
@@ -108,7 +109,7 @@ func TestAll(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := cache.NewInMemoryCache()
+			c := cache.NewInMemoryCache(fflog.Logger{})
 			c.Init(tt.param)
 			assert.Equal(t, tt.want, c.All())
 		})
@@ -134,7 +135,7 @@ func TestCopy(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := cache.NewInMemoryCache()
+			c := cache.NewInMemoryCache(fflog.Logger{})
 			c.Init(tt.param)
 			got := c.Copy()
 			assert.Equal(t, c, got)

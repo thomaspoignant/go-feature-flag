@@ -1,18 +1,19 @@
 package flag
 
 import (
-	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
-	"strings"
 	"time"
 )
 
+// ProgressiveRollout represents how to progressively rolout a rule.
 type ProgressiveRollout struct {
-	// TODO: comments
+	// Initial contains a description of the initial state of the rollout.
 	Initial *ProgressiveRolloutStep `json:"initial,omitempty" yaml:"initial,omitempty" toml:"initial,omitempty"`
-	End     *ProgressiveRolloutStep `json:"end,omitempty" yaml:"end,omitempty" toml:"end,omitempty"`
+
+	// End contains what describes the end status of the rollout.
+	End *ProgressiveRolloutStep `json:"end,omitempty" yaml:"end,omitempty" toml:"end,omitempty"`
 }
 
+// ProgressiveRolloutStep define a progressive rollout step (initial and end)
 type ProgressiveRolloutStep struct {
 	Variation  *string
 	Percentage float64

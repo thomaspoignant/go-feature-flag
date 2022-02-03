@@ -339,7 +339,7 @@ func TestFlag_value(t *testing.T) {
 			f, err := dto.ConvertToFlagData(false)
 			assert.NoError(t, err)
 
-			got, variationType := f.Value(tt.args.flagName, tt.args.user, tt.fields.Default)
+			got, variationType, _ := f.Value(tt.args.flagName, tt.args.user, tt.fields.Default)
 			assert.Equal(t, tt.want.value, got)
 			assert.Equal(t, tt.want.variationType, variationType)
 		})
@@ -367,15 +367,15 @@ func TestFlag_ProgressiveRollout(t *testing.T) {
 	flagName := "test-flag"
 
 	// We evaluate the same flag multiple time overtime.
-	v, _ := f.Value(flagName, user, "sdkdefault")
+	v, _, _ := f.Value(flagName, user, "sdkdefault")
 	assert.Equal(t, f.GetVariationValue("False"), v)
 
 	time.Sleep(1 * time.Second)
-	v2, _ := f.Value(flagName, user, "sdkdefault")
+	v2, _, _ := f.Value(flagName, user, "sdkdefault")
 	assert.Equal(t, f.GetVariationValue("False"), v2)
 
 	time.Sleep(1 * time.Second)
-	v3, _ := f.Value(flagName, user, "sdkdefault")
+	v3, _, _ := f.Value(flagName, user, "sdkdefault")
 	assert.Equal(t, f.GetVariationValue("True"), v3)
 }
 
