@@ -12,6 +12,7 @@ import (
 
 const errorFlagNotAvailable = "flag %v is not present or disabled"
 const errorWrongVariation = "wrong variation used for flag %v"
+const errorErrRetrievingFlag = "impossible to get the value for flag %s: %w"
 
 var offlineVariationResult = model.VariationResult{VariationType: constant.VariationSDKDefault, Failed: true}
 
@@ -175,7 +176,7 @@ func (g *GoFeatureFlag) boolVariation(flagKey string, user ffuser.User, sdkDefau
 
 	flagValue, variationType, err := f.Value(flagKey, user, sdkDefaultValue)
 	if err != nil {
-		return errVarResult, fmt.Errorf("impossible to get the value for flag %s: %w", flagKey, err)
+		return errVarResult, fmt.Errorf(errorErrRetrievingFlag, flagKey, err)
 	}
 	res, ok := flagValue.(bool)
 	if !ok {
@@ -203,7 +204,7 @@ func (g *GoFeatureFlag) intVariation(flagKey string, user ffuser.User, sdkDefaul
 
 	flagValue, variationType, err := f.Value(flagKey, user, sdkDefaultValue)
 	if err != nil {
-		return errVarResult, fmt.Errorf("impossible to get the value for flag %s: %w", flagKey, err)
+		return errVarResult, fmt.Errorf(errorErrRetrievingFlag, flagKey, err)
 	}
 	res, ok := flagValue.(int)
 	if !ok {
@@ -239,7 +240,7 @@ func (g *GoFeatureFlag) float64Variation(flagKey string, user ffuser.User, sdkDe
 
 	flagValue, variationType, err := f.Value(flagKey, user, sdkDefaultValue)
 	if err != nil {
-		return errVarResult, fmt.Errorf("impossible to get the value for flag %s: %w", flagKey, err)
+		return errVarResult, fmt.Errorf(errorErrRetrievingFlag, flagKey, err)
 	}
 	res, ok := flagValue.(float64)
 	if !ok {
@@ -268,7 +269,7 @@ func (g *GoFeatureFlag) stringVariation(flagKey string, user ffuser.User, sdkDef
 
 	flagValue, variationType, err := f.Value(flagKey, user, sdkDefaultValue)
 	if err != nil {
-		return errVarResult, fmt.Errorf("impossible to get the value for flag %s: %w", flagKey, err)
+		return errVarResult, fmt.Errorf(errorErrRetrievingFlag, flagKey, err)
 	}
 	res, ok := flagValue.(string)
 	if !ok {
@@ -297,7 +298,7 @@ func (g *GoFeatureFlag) jsonArrayVariation(flagKey string, user ffuser.User, sdk
 
 	flagValue, variationType, err := f.Value(flagKey, user, sdkDefaultValue)
 	if err != nil {
-		return errVarResult, fmt.Errorf("impossible to get the value for flag %s: %w", flagKey, err)
+		return errVarResult, fmt.Errorf(errorErrRetrievingFlag, flagKey, err)
 	}
 	res, ok := flagValue.([]interface{})
 	if !ok {
@@ -326,7 +327,7 @@ func (g *GoFeatureFlag) jsonVariation(flagKey string, user ffuser.User, sdkDefau
 
 	flagValue, variationType, err := f.Value(flagKey, user, sdkDefaultValue)
 	if err != nil {
-		return errVarResult, fmt.Errorf("impossible to get the value for flag %s: %w", flagKey, err)
+		return errVarResult, fmt.Errorf(errorErrRetrievingFlag, flagKey, err)
 	}
 	res, ok := flagValue.(map[string]interface{})
 	if !ok {
