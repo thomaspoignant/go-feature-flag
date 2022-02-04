@@ -38,7 +38,8 @@ func TestPrintf(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.NotPanics(t, func() { fflog.Printf(tt.args.logger, tt.args.format, tt.args.v) })
+			logger := fflog.Logger{Logger: tt.args.logger}
+			assert.NotPanics(t, func() { logger.Printf(tt.args.format, tt.args.v) })
 		})
 	}
 }

@@ -55,25 +55,25 @@ func (f *FlagData) GetVariationValue(variationName string) interface{} {
 }
 
 // Value is returning the Value associate to the flag
-func (f *FlagData) Value(flagName string, user ffuser.User, sdkDefaultValue interface{}) (interface{}, string) {
-	f.updateFlagStage()
+func (f *FlagData) Value(flagName string, user ffuser.User, sdkDefaultValue interface{}) (interface{}, string, error) {
+	f.applyScheduledRolloutSteps()
 
-	variations := *f.Variations
 	if f.isExperimentationOver() || f.IsDisable() {
-		return sdkDefaultValue, constant.VariationSDKDefault
+		return sdkDefaultValue, constant.VariationSDKDefault, nil
 	}
 
 	variationName, err := f.getVariation(flagName, user)
 	if err != nil {
-		// TODO log something + check that default variation exists
-		return sdkDefaultValue, constant.VariationSDKDefault
+		return sdkDefaultValue, constant.VariationSDKDefault, err
 	}
 
+	// If we have no value for a variation we consider that this variation does not exist.
+	variations := *f.Variations
 	if variations[variationName] == nil {
-		return nil, variationName
+		return nil, variationName, fmt.Errorf("variation %s does not exist for the flag %s", variationName, flagName)
 	}
 
-	return f.GetVariationValue(variationName), variationName
+	return f.GetVariationValue(variationName), variationName, nil
 }
 
 func (f *FlagData) getVariation(flagName string, user ffuser.User) (string, error) {
@@ -85,7 +85,7 @@ func (f *FlagData) getVariation(flagName string, user ffuser.User) (string, erro
 		for _, rule := range rules {
 			apply, varName, err := rule.Evaluate(user, hashID, false)
 			if err != nil {
-				// TODO log + continue to next rule
+				return varName, err
 			}
 			if apply {
 				return varName, nil
@@ -111,7 +111,9 @@ func (f *FlagData) isExperimentationOver() bool {
 			(f.Rollout.Experimentation.End != nil && now.After(*f.Rollout.Experimentation.End)))
 }
 
-func (f *FlagData) updateFlagStage() {
+// applyScheduledRolloutSteps is checking if the flag has a scheduled rollout configured.
+// If yes we merge the changes to the current flag.
+func (f *FlagData) applyScheduledRolloutSteps() {
 	if f.Rollout == nil || f.Rollout.Scheduled == nil || len(f.Rollout.Scheduled.Steps) == 0 {
 		// no update required because no scheduled rollout configuration
 		return
@@ -130,13 +132,13 @@ func (f *FlagData) updateFlagStage() {
 		}
 
 		if step.Date != nil && now.After(*step.Date) {
-			f.mergeChanges(step)
+			f.mergeScheduledStep(step)
 		}
 	}
 }
 
-// mergeChanges will check every changes on the flag and apply them to the current configuration.
-func (f *FlagData) mergeChanges(stepFlag ScheduledStep) {
+// mergeScheduledStep will check every changes on the flag and apply them to the current configuration.
+func (f *FlagData) mergeScheduledStep(stepFlag ScheduledStep) {
 	if stepFlag.Disable != nil {
 		f.Disable = stepFlag.Disable
 	}
@@ -145,20 +147,26 @@ func (f *FlagData) mergeChanges(stepFlag ScheduledStep) {
 		f.Rollout = stepFlag.Rollout
 	}
 
-	// Replace all variations
-	if stepFlag.Variations != nil {
-		for variation := range stepFlag.GetVariations() {
-			vVar := stepFlag.GetVariationValue(variation)
-			if vVar != nil {
-				err := f.replaceVariation(variation, vVar)
-				if err != nil {
-					// TODO: please write a log here
-				}
-			}
-		}
+	f.mergeVariationScheduledStep(stepFlag)
+	f.mergeRulesScheduledStep(stepFlag)
+
+	if stepFlag.DefaultRule != nil {
+		f.DefaultRule.mergeChanges(*stepFlag.DefaultRule)
 	}
 
-	// TODO: please write a comment to explain why we are doing this
+	if stepFlag.TrackEvents != nil {
+		f.TrackEvents = stepFlag.TrackEvents
+	}
+
+	if stepFlag.Version != nil {
+		f.Version = stepFlag.Version
+	}
+}
+
+// mergeRulesScheduledStep is used to merge the rules from a ScheduledStep.
+// If we have a rule with an existing name we are overriding his content,
+// if the rule is new we are adding it to the collection of rules.
+func (f *FlagData) mergeRulesScheduledStep(stepFlag ScheduledStep) {
 	if stepFlag.Rules != nil {
 		rulesBeforeMerge := f.GetRules()
 		for key, val := range *stepFlag.Rules {
@@ -171,17 +179,26 @@ func (f *FlagData) mergeChanges(stepFlag ScheduledStep) {
 			rulesBeforeMerge[key] = currentRule
 		}
 	}
+}
 
-	if stepFlag.DefaultRule != nil {
-		f.DefaultRule.mergeChanges(*stepFlag.DefaultRule)
-	}
+// mergeVariationScheduledStep is used to merge the variations from a ScheduledStep.
+// if the new value of an existing variation is nil we are deleting the variation.
+// if the variation name already exist or is new we upsert the new value
+func (f *FlagData) mergeVariationScheduledStep(stepFlag ScheduledStep) {
+	if stepFlag.Variations != nil {
+		variations := f.GetVariations()
+		for variationName := range stepFlag.GetVariations() {
+			// if the new value of an existing variation is nil we are deleting the variation.
+			variationValue := stepFlag.GetVariationValue(variationName)
+			if variationValue == nil {
+				delete(variations, variationName)
+				continue
+			}
 
-	if stepFlag.TrackEvents != nil {
-		f.TrackEvents = stepFlag.TrackEvents
-	}
-
-	if stepFlag.Version != nil {
-		f.Version = stepFlag.Version
+			// if the variation name already exist or is new we upsert the new value
+			variations[variationName] = &variationValue
+		}
+		f.Variations = &variations
 	}
 }
 
@@ -202,14 +219,22 @@ func (f FlagData) String() string {
 		rulesString = append(rulesString, fmt.Sprintf("[%v]", rule))
 	}
 	toString = appendIfHasValue(toString, "Rules", strings.Join(rulesString, ","))
-	toString = appendIfHasValue(toString, "DefaultRule", f.GetDefaultRule().String())
+
+	if f.GetDefaultRule() != nil {
+		toString = appendIfHasValue(toString, "DefaultRule", f.GetDefaultRule().String())
+	}
 
 	// Others
 	if f.GetRollout() != nil {
 		toString = appendIfHasValue(toString, "Rollout", fmt.Sprintf("%v", *f.GetRollout()))
 	}
-	toString = appendIfHasValue(toString, "TrackEvents", fmt.Sprintf("%t", f.IsTrackEvents()))
-	toString = appendIfHasValue(toString, "Disable", fmt.Sprintf("%t", f.IsDisable()))
+
+	if f.TrackEvents != nil {
+		toString = appendIfHasValue(toString, "TrackEvents", fmt.Sprintf("%t", f.IsTrackEvents()))
+	}
+	if f.Disable != nil {
+		toString = appendIfHasValue(toString, "Disable", fmt.Sprintf("%t", f.IsDisable()))
+	}
 	toString = appendIfHasValue(toString, "Version", f.GetVersion())
 
 	return strings.Join(toString, ", ")
@@ -240,17 +265,6 @@ func (f *FlagData) GetVariations() map[string]*interface{} {
 		return map[string]*interface{}{}
 	}
 	return *f.Variations
-}
-
-func (f *FlagData) replaceVariation(variationName string, variationValue interface{}) error {
-	_, ok := f.GetVariations()[variationName]
-	if ok {
-		variations := f.GetVariations()
-		variations[variationName] = &variationValue
-		f.Variations = &variations
-		return nil
-	}
-	return fmt.Errorf("impossible to update the variation %s, unknow variation name", variationName)
 }
 
 // IsTrackEvents is the getter of the field TrackEvents

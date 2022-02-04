@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
+	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 	"io/ioutil"
 	"testing"
 	"text/template"
@@ -25,9 +26,9 @@ func init() {
 		DateBefore string
 		DateAfter  string
 	}{
-		DateBefore: time.Now().Add(-3 * time.Second).Format(time.RFC3339),
-		DateNow:    time.Now().Format(time.RFC3339),
-		DateAfter:  time.Now().Add(3 * time.Second).Format(time.RFC3339),
+		DateBefore: time.Now().Add(-3 * time.Second).Format(fflog.LogDateFormat),
+		DateNow:    time.Now().Format(fflog.LogDateFormat),
+		DateAfter:  time.Now().Add(3 * time.Second).Format(fflog.LogDateFormat),
 	})
 
 	flagFile, _ := ioutil.TempFile("", "")

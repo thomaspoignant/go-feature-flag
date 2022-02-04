@@ -7,7 +7,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager/s3manageriface"
 	"io/ioutil"
-	"log"
 	"os"
 	"sync"
 
@@ -50,7 +49,7 @@ type S3 struct {
 }
 
 // Export is saving a collection of events in a file.
-func (f *S3) Export(ctx context.Context, logger *log.Logger, featureEvents []exporter.FeatureEvent) error {
+func (f *S3) Export(ctx context.Context, logger fflog.Logger, featureEvents []exporter.FeatureEvent) error {
 	// init the s3 uploader
 	if f.s3Uploader == nil {
 		var initErr error
@@ -94,7 +93,7 @@ func (f *S3) Export(ctx context.Context, logger *log.Logger, featureEvents []exp
 		// read file
 		of, err := os.Open(outputDir + "/" + file.Name())
 		if err != nil {
-			fflog.Printf(logger, "error: [S3Exporter] impossible to open the file %s/%s", outputDir, file.Name())
+			logger.Printf("error: [S3Exporter] impossible to open the file %s/%s", outputDir, file.Name())
 			continue
 		}
 
@@ -109,7 +108,7 @@ func (f *S3) Export(ctx context.Context, logger *log.Logger, featureEvents []exp
 			return err
 		}
 
-		fflog.Printf(logger, "info: [S3Exporter] file %s uploaded.", result.Location)
+		logger.Printf("info: [S3Exporter] file %s uploaded.", result.Location)
 	}
 	return nil
 }

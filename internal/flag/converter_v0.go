@@ -11,10 +11,15 @@ var defaultVariation = "Default"
 // backward support of the configurations.
 func ConvertV0DtoToFlag(d DtoFlag, isScheduleStep bool) (FlagData, error) {
 	// Create variations based on the available definition in the flag v0
-	variations := map[string]*interface{}{
-		trueVariation:    d.True,
-		falseVariation:   d.False,
-		defaultVariation: d.Default,
+	variations := map[string]*interface{}{}
+	if d.True != nil {
+		variations[trueVariation] = d.True
+	}
+	if d.False != nil {
+		variations[falseVariation] = d.False
+	}
+	if d.Default != nil {
+		variations[defaultVariation] = d.Default
 	}
 
 	// Convert the rule to the new format

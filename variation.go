@@ -12,6 +12,7 @@ import (
 
 const errorFlagNotAvailable = "flag %v is not present or disabled"
 const errorWrongVariation = "wrong variation used for flag %v"
+const errorErrRetrievingFlag = "impossible to get the value for flag %s: %w"
 
 var offlineVariationResult = model.VariationResult{VariationType: constant.VariationSDKDefault, Failed: true}
 
@@ -140,16 +141,18 @@ func (g *GoFeatureFlag) AllFlagsState(user ffuser.User) flagstate.AllFlags {
 	}
 
 	allFlags := flagstate.NewAllFlags()
-	for key, currentFlag := range flags {
-		// TODO : check if we should pass nil or not
-		flagValue, varType := currentFlag.Value(key, user, nil)
+	for flagKey, currentFlag := range flags {
+		flagValue, varType, err := currentFlag.Value(flagKey, user, nil)
+		if err != nil {
+			g.logger.Printf("impossible to get the value for flag %s: %v", flagKey, err)
+		}
+
 		switch v := flagValue; v.(type) {
 		case int, float64, bool, string, []interface{}, map[string]interface{}:
-			allFlags.AddFlag(key, flagstate.NewFlagState(currentFlag.IsTrackEvents(), v, varType, false))
+			allFlags.AddFlag(flagKey, flagstate.NewFlagState(currentFlag.IsTrackEvents(), v, varType, false))
 
 		default:
-			// TODO: add log and ignore the flag
-			allFlags.AddFlag(key, flagstate.NewFlagState(currentFlag.IsTrackEvents(), v, varType, true))
+			allFlags.AddFlag(flagKey, flagstate.NewFlagState(currentFlag.IsTrackEvents(), v, varType, true))
 			continue
 		}
 	}
@@ -157,7 +160,7 @@ func (g *GoFeatureFlag) AllFlagsState(user ffuser.User) flagstate.AllFlags {
 }
 
 // boolVariation is the internal func that handle the logic of a variation with a bool value
-// the result will always contains a valid model.BoolVarResult
+// the result will always contain a valid model.BoolVarResult
 func (g *GoFeatureFlag) boolVariation(flagKey string, user ffuser.User, sdkDefaultValue bool,
 ) (model.BoolVarResult, error) {
 	if g.config.Offline {
@@ -165,20 +168,19 @@ func (g *GoFeatureFlag) boolVariation(flagKey string, user ffuser.User, sdkDefau
 	}
 
 	f, err := g.getFlagFromCache(flagKey)
+	errVarResult := model.BoolVarResult{Value: sdkDefaultValue,
+		VariationResult: computeVariationResult(f, constant.VariationSDKDefault, true)}
 	if err != nil {
-		return model.BoolVarResult{
-			Value:           sdkDefaultValue,
-			VariationResult: computeVariationResult(f, constant.VariationSDKDefault, true),
-		}, err
+		return errVarResult, err
 	}
 
-	flagValue, variationType := f.Value(flagKey, user, sdkDefaultValue)
+	flagValue, variationType, err := f.Value(flagKey, user, sdkDefaultValue)
+	if err != nil {
+		return errVarResult, fmt.Errorf(errorErrRetrievingFlag, flagKey, err)
+	}
 	res, ok := flagValue.(bool)
 	if !ok {
-		return model.BoolVarResult{
-			Value:           sdkDefaultValue,
-			VariationResult: computeVariationResult(f, constant.VariationSDKDefault, true),
-		}, fmt.Errorf(errorWrongVariation, flagKey)
+		return errVarResult, fmt.Errorf(errorWrongVariation, flagKey)
 	}
 	return model.BoolVarResult{Value: res,
 		VariationResult: computeVariationResult(f, variationType, false),
@@ -186,7 +188,7 @@ func (g *GoFeatureFlag) boolVariation(flagKey string, user ffuser.User, sdkDefau
 }
 
 // intVariation is the internal func that handle the logic of a variation with an int value
-// the result will always contains a valid model.IntVarResult
+// the result will always contain a valid model.IntVarResult
 func (g *GoFeatureFlag) intVariation(flagKey string, user ffuser.User, sdkDefaultValue int,
 ) (model.IntVarResult, error) {
 	if g.config.Offline {
@@ -194,13 +196,16 @@ func (g *GoFeatureFlag) intVariation(flagKey string, user ffuser.User, sdkDefaul
 	}
 
 	f, err := g.getFlagFromCache(flagKey)
+	errVarResult := model.IntVarResult{Value: sdkDefaultValue,
+		VariationResult: computeVariationResult(f, constant.VariationSDKDefault, true)}
 	if err != nil {
-		return model.IntVarResult{Value: sdkDefaultValue,
-			VariationResult: computeVariationResult(f, constant.VariationSDKDefault, true),
-		}, err
+		return errVarResult, err
 	}
 
-	flagValue, variationType := f.Value(flagKey, user, sdkDefaultValue)
+	flagValue, variationType, err := f.Value(flagKey, user, sdkDefaultValue)
+	if err != nil {
+		return errVarResult, fmt.Errorf(errorErrRetrievingFlag, flagKey, err)
+	}
 	res, ok := flagValue.(int)
 	if !ok {
 		// if this is a float64 we convert it to int
@@ -211,10 +216,7 @@ func (g *GoFeatureFlag) intVariation(flagKey string, user ffuser.User, sdkDefaul
 			}, nil
 		}
 
-		return model.IntVarResult{
-			Value:           sdkDefaultValue,
-			VariationResult: computeVariationResult(f, constant.VariationSDKDefault, true),
-		}, fmt.Errorf(errorWrongVariation, flagKey)
+		return errVarResult, fmt.Errorf(errorWrongVariation, flagKey)
 	}
 	return model.IntVarResult{Value: res,
 		VariationResult: computeVariationResult(f, variationType, false),
@@ -222,7 +224,7 @@ func (g *GoFeatureFlag) intVariation(flagKey string, user ffuser.User, sdkDefaul
 }
 
 // float64Variation is the internal func that handle the logic of a variation with a float64 value
-// the result will always contains a valid model.Float64VarResult
+// the result will always contain a valid model.Float64VarResult
 func (g *GoFeatureFlag) float64Variation(flagKey string, user ffuser.User, sdkDefaultValue float64,
 ) (model.Float64VarResult, error) {
 	if g.config.Offline {
@@ -230,20 +232,19 @@ func (g *GoFeatureFlag) float64Variation(flagKey string, user ffuser.User, sdkDe
 	}
 
 	f, err := g.getFlagFromCache(flagKey)
+	errVarResult := model.Float64VarResult{Value: sdkDefaultValue,
+		VariationResult: computeVariationResult(f, constant.VariationSDKDefault, true)}
 	if err != nil {
-		return model.Float64VarResult{
-			Value:           sdkDefaultValue,
-			VariationResult: computeVariationResult(f, constant.VariationSDKDefault, true),
-		}, err
+		return errVarResult, err
 	}
 
-	flagValue, variationType := f.Value(flagKey, user, sdkDefaultValue)
+	flagValue, variationType, err := f.Value(flagKey, user, sdkDefaultValue)
+	if err != nil {
+		return errVarResult, fmt.Errorf(errorErrRetrievingFlag, flagKey, err)
+	}
 	res, ok := flagValue.(float64)
 	if !ok {
-		return model.Float64VarResult{
-			Value:           sdkDefaultValue,
-			VariationResult: computeVariationResult(f, constant.VariationSDKDefault, true),
-		}, fmt.Errorf(errorWrongVariation, flagKey)
+		return errVarResult, fmt.Errorf(errorWrongVariation, flagKey)
 	}
 	return model.Float64VarResult{
 		Value:           res,
@@ -252,7 +253,7 @@ func (g *GoFeatureFlag) float64Variation(flagKey string, user ffuser.User, sdkDe
 }
 
 // stringVariation is the internal func that handle the logic of a variation with a string value
-// the result will always contains a valid model.StringVarResult
+// the result will always contain a valid model.StringVarResult
 func (g *GoFeatureFlag) stringVariation(flagKey string, user ffuser.User, sdkDefaultValue string,
 ) (model.StringVarResult, error) {
 	if g.config.Offline {
@@ -260,20 +261,19 @@ func (g *GoFeatureFlag) stringVariation(flagKey string, user ffuser.User, sdkDef
 	}
 
 	f, err := g.getFlagFromCache(flagKey)
+	errVarResult := model.StringVarResult{Value: sdkDefaultValue,
+		VariationResult: computeVariationResult(f, constant.VariationSDKDefault, true)}
 	if err != nil {
-		return model.StringVarResult{
-			Value:           sdkDefaultValue,
-			VariationResult: computeVariationResult(f, constant.VariationSDKDefault, true),
-		}, err
+		return errVarResult, err
 	}
 
-	flagValue, variationType := f.Value(flagKey, user, sdkDefaultValue)
+	flagValue, variationType, err := f.Value(flagKey, user, sdkDefaultValue)
+	if err != nil {
+		return errVarResult, fmt.Errorf(errorErrRetrievingFlag, flagKey, err)
+	}
 	res, ok := flagValue.(string)
 	if !ok {
-		return model.StringVarResult{
-			Value:           sdkDefaultValue,
-			VariationResult: computeVariationResult(f, constant.VariationSDKDefault, true),
-		}, fmt.Errorf(errorWrongVariation, flagKey)
+		return errVarResult, fmt.Errorf(errorWrongVariation, flagKey)
 	}
 	return model.StringVarResult{
 		Value:           res,
@@ -282,7 +282,7 @@ func (g *GoFeatureFlag) stringVariation(flagKey string, user ffuser.User, sdkDef
 }
 
 // jsonArrayVariation is the internal func that handle the logic of a variation with a json value
-// the result will always contains a valid model.JSONArrayVarResult
+// the result will always contain a valid model.JSONArrayVarResult
 func (g *GoFeatureFlag) jsonArrayVariation(flagKey string, user ffuser.User, sdkDefaultValue []interface{},
 ) (model.JSONArrayVarResult, error) {
 	if g.config.Offline {
@@ -290,20 +290,19 @@ func (g *GoFeatureFlag) jsonArrayVariation(flagKey string, user ffuser.User, sdk
 	}
 
 	f, err := g.getFlagFromCache(flagKey)
+	errVarResult := model.JSONArrayVarResult{Value: sdkDefaultValue,
+		VariationResult: computeVariationResult(f, constant.VariationSDKDefault, true)}
 	if err != nil {
-		return model.JSONArrayVarResult{
-			Value:           sdkDefaultValue,
-			VariationResult: computeVariationResult(f, constant.VariationSDKDefault, true),
-		}, err
+		return errVarResult, err
 	}
 
-	flagValue, variationType := f.Value(flagKey, user, sdkDefaultValue)
+	flagValue, variationType, err := f.Value(flagKey, user, sdkDefaultValue)
+	if err != nil {
+		return errVarResult, fmt.Errorf(errorErrRetrievingFlag, flagKey, err)
+	}
 	res, ok := flagValue.([]interface{})
 	if !ok {
-		return model.JSONArrayVarResult{
-			Value:           sdkDefaultValue,
-			VariationResult: computeVariationResult(f, constant.VariationSDKDefault, true),
-		}, fmt.Errorf(errorWrongVariation, flagKey)
+		return errVarResult, fmt.Errorf(errorWrongVariation, flagKey)
 	}
 	return model.JSONArrayVarResult{
 		Value:           res,
@@ -312,7 +311,7 @@ func (g *GoFeatureFlag) jsonArrayVariation(flagKey string, user ffuser.User, sdk
 }
 
 // jsonVariation is the internal func that handle the logic of a variation with a json value
-// the result will always contains a valid model.JSONVarResult
+// the result will always contain a valid model.JSONVarResult
 func (g *GoFeatureFlag) jsonVariation(flagKey string, user ffuser.User, sdkDefaultValue map[string]interface{},
 ) (model.JSONVarResult, error) {
 	if g.config.Offline {
@@ -320,20 +319,19 @@ func (g *GoFeatureFlag) jsonVariation(flagKey string, user ffuser.User, sdkDefau
 	}
 
 	f, err := g.getFlagFromCache(flagKey)
+	errVarResult := model.JSONVarResult{Value: sdkDefaultValue,
+		VariationResult: computeVariationResult(f, constant.VariationSDKDefault, true)}
 	if err != nil {
-		return model.JSONVarResult{
-			Value:           sdkDefaultValue,
-			VariationResult: computeVariationResult(f, constant.VariationSDKDefault, true),
-		}, err
+		return errVarResult, err
 	}
 
-	flagValue, variationType := f.Value(flagKey, user, sdkDefaultValue)
+	flagValue, variationType, err := f.Value(flagKey, user, sdkDefaultValue)
+	if err != nil {
+		return errVarResult, fmt.Errorf(errorErrRetrievingFlag, flagKey, err)
+	}
 	res, ok := flagValue.(map[string]interface{})
 	if !ok {
-		return model.JSONVarResult{
-			Value:           sdkDefaultValue,
-			VariationResult: computeVariationResult(f, constant.VariationSDKDefault, true),
-		}, fmt.Errorf(errorWrongVariation, flagKey)
+		return errVarResult, fmt.Errorf(errorWrongVariation, flagKey)
 	}
 	return model.JSONVarResult{
 		Value:           res,
@@ -376,9 +374,9 @@ func (g *GoFeatureFlag) notifyVariation(
 // getFlagFromCache try to get the flag from the cache.
 // It returns an error if the cache is not init or if the flag is not present or disabled.
 func (g *GoFeatureFlag) getFlagFromCache(flagKey string) (flag.Flag, error) {
-	flag, err := g.cache.GetFlag(flagKey)
-	if err != nil || flag.IsDisable() {
-		return flag, fmt.Errorf(errorFlagNotAvailable, flagKey)
+	f, err := g.cache.GetFlag(flagKey)
+	if err != nil || f.IsDisable() {
+		return f, fmt.Errorf(errorFlagNotAvailable, flagKey)
 	}
-	return flag, nil
+	return f, nil
 }

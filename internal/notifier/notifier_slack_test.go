@@ -1,8 +1,8 @@
 package notifier_test
 
 import (
-	"fmt"
 	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/internal/model"
 	"github.com/thomaspoignant/go-feature-flag/internal/notifier"
@@ -133,7 +133,7 @@ func TestSlackNotifier_Notify(t *testing.T) {
 			name: "should log if http code is superior to 399",
 			expected: expected{
 				err:    true,
-				errLog: "^\\[" + testutils.RFC3339Regex + "\\] error: \\(SlackNotifier\\) while calling slack webhook, statusCode = 400",
+				errLog: "\\(SlackNotifier\\) error while calling slack webhook, statusCode = 400",
 			},
 			args: args{
 				statusCode: http.StatusBadRequest,
@@ -144,7 +144,7 @@ func TestSlackNotifier_Notify(t *testing.T) {
 			name: "should log if error while calling webhook",
 			expected: expected{
 				err:    true,
-				errLog: "^\\[" + testutils.RFC3339Regex + "\\] error: \\(SlackNotifier\\) error: while calling webhook: random error",
+				errLog: "\\(SlackNotifier\\) error: while calling webhook: random error",
 			},
 			args: args{
 				statusCode: http.StatusOK,
@@ -156,13 +156,13 @@ func TestSlackNotifier_Notify(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			logFile, _ := ioutil.TempFile("", "")
-			defer logFile.Close()
-			defer os.Remove(logFile.Name())
+			defer func() { _ = logFile.Close() }()
+			defer func() { _ = os.Remove(logFile.Name()) }()
 
 			mockHTTPClient := &testutils.HTTPClientMock{StatusCode: tt.args.statusCode, ForceError: tt.args.forceError}
 
 			c := notifier.NewSlackNotifier(
-				log.New(logFile, "", 0),
+				fflog.Logger{Logger: log.New(logFile, "", 0)},
 				mockHTTPClient,
 				"https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
 			)
@@ -172,13 +172,12 @@ func TestSlackNotifier_Notify(t *testing.T) {
 			c.Notify(tt.args.diff, &w)
 
 			if tt.expected.err {
-				log, _ := ioutil.ReadFile(logFile.Name())
-				assert.Regexp(t, tt.expected.errLog, string(log))
+				output, _ := ioutil.ReadFile(logFile.Name())
+				assert.Regexp(t, tt.expected.errLog, string(output))
 			} else {
 				hostname, _ := os.Hostname()
 				content, _ := ioutil.ReadFile(tt.expected.bodyPath)
 				expectedContent := strings.ReplaceAll(string(content), "{{hostname}}", hostname)
-				fmt.Println(mockHTTPClient.Body)
 				assert.JSONEq(t, expectedContent, mockHTTPClient.Body)
 				assert.Equal(t, tt.expected.signature, mockHTTPClient.Signature)
 			}

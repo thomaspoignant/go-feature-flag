@@ -2,7 +2,7 @@ package testutils
 
 import (
 	"context"
-	"log"
+	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 	"sync"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/exporter"
@@ -19,7 +19,7 @@ type MockExporter struct {
 	once  sync.Once
 }
 
-func (m *MockExporter) Export(ctx context.Context, logger *log.Logger, events []exporter.FeatureEvent) error {
+func (m *MockExporter) Export(ctx context.Context, logger fflog.Logger, events []exporter.FeatureEvent) error {
 	m.once.Do(m.initMutex)
 	m.mutex.Lock()
 	defer m.mutex.Unlock()

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -22,7 +21,7 @@ const colorDeleted = "#FF0000"
 const colorUpdated = "#FFA500"
 const colorAdded = "#008000"
 
-func NewSlackNotifier(logger *log.Logger, httpClient internal.HTTPClient, webhookURL string) SlackNotifier {
+func NewSlackNotifier(logger fflog.Logger, httpClient internal.HTTPClient, webhookURL string) SlackNotifier {
 	slackURL, _ := url.Parse(webhookURL)
 	return SlackNotifier{
 		Logger:     logger,
@@ -32,7 +31,7 @@ func NewSlackNotifier(logger *log.Logger, httpClient internal.HTTPClient, webhoo
 }
 
 type SlackNotifier struct {
-	Logger     *log.Logger
+	Logger     fflog.Logger
 	HTTPClient internal.HTTPClient
 	WebhookURL url.URL
 }
@@ -43,7 +42,7 @@ func (c *SlackNotifier) Notify(diff model.DiffCache, wg *sync.WaitGroup) {
 	reqBody := convertToSlackMessage(diff)
 	payload, err := json.Marshal(reqBody)
 	if err != nil {
-		fflog.Printf(c.Logger, "error: (SlackNotifier) impossible to read differences; %v\n", err)
+		c.Logger.Printf("(SlackNotifier) impossible to read differences; %v\n", err)
 		return
 	}
 	request := http.Request{
@@ -54,13 +53,13 @@ func (c *SlackNotifier) Notify(diff model.DiffCache, wg *sync.WaitGroup) {
 	}
 	response, err := c.HTTPClient.Do(&request)
 	if err != nil {
-		fflog.Printf(c.Logger, "error: (SlackNotifier) error: while calling webhook: %v\n", err)
+		c.Logger.Printf("(SlackNotifier) error: while calling webhook: %v\n", err)
 		return
 	}
 
-	defer response.Body.Close()
+	defer func() { _ = response.Body.Close() }()
 	if response.StatusCode > 399 {
-		fflog.Printf(c.Logger, "error: (SlackNotifier) while calling slack webhook, statusCode = %d",
+		c.Logger.Printf("(SlackNotifier) error while calling slack webhook, statusCode = %d",
 			response.StatusCode)
 		return
 	}

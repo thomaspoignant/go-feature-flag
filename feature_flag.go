@@ -40,6 +40,7 @@ type GoFeatureFlag struct {
 	config       Config
 	bgUpdater    backgroundUpdater
 	dataExporter *exporter.DataExporterScheduler
+	logger       fflog.Logger
 }
 
 // ff is the default object for go-feature-flag
@@ -65,10 +66,11 @@ func New(config Config) (*GoFeatureFlag, error) {
 
 	goFF := &GoFeatureFlag{
 		config: config,
+		logger: fflog.Logger{Logger: config.Logger},
 	}
 
 	if !config.Offline {
-		notifiers, err := getNotifiers(config)
+		notifiers, err := getNotifiers(goFF.config, goFF.logger)
 		if err != nil {
 			return nil, fmt.Errorf("wrong configuration in your webhook: %v", err)
 		}
@@ -85,7 +87,7 @@ func New(config Config) (*GoFeatureFlag, error) {
 		if goFF.config.DataExporter.Exporter != nil {
 			// init the data exporter
 			goFF.dataExporter = exporter.NewDataExporterScheduler(goFF.config.Context, goFF.config.DataExporter.FlushInterval,
-				goFF.config.DataExporter.MaxEventInMemory, goFF.config.DataExporter.Exporter, goFF.config.Logger)
+				goFF.config.DataExporter.MaxEventInMemory, goFF.config.DataExporter.Exporter, goFF.logger)
 
 			// we start the daemon only if we have a bulk exporter
 			if goFF.config.DataExporter.Exporter.IsBulk() {
@@ -120,7 +122,7 @@ func (g *GoFeatureFlag) startFlagUpdaterDaemon() {
 		case <-g.bgUpdater.ticker.C:
 			err := retrieveFlagsAndUpdateCache(g.config, g.cache)
 			if err != nil {
-				fflog.Printf(g.config.Logger, "error while updating the cache: %v\n", err)
+				g.logger.Printf("error while updating the cache: %v\n", err)
 			}
 		case <-g.bgUpdater.updaterChan:
 			return

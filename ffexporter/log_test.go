@@ -3,6 +3,7 @@ package ffexporter_test
 import (
 	"context"
 	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 	"io/ioutil"
 	"log"
 	"testing"
@@ -77,7 +78,7 @@ func TestLog_Export(t *testing.T) {
 			}
 
 			logFile, _ := ioutil.TempFile("", "")
-			logger := log.New(logFile, "", 0)
+			logger := fflog.Logger{Logger: log.New(logFile, "", 0)}
 
 			err := f.Export(context.Background(), logger, tt.args.featureEvents)
 

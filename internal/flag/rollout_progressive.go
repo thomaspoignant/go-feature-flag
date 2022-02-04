@@ -2,16 +2,21 @@ package flag
 
 import (
 	"fmt"
+	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 	"strings"
 	"time"
 )
 
+// ProgressiveRollout represents how to progressively rolout a rule.
 type ProgressiveRollout struct {
-	// TODO: comments
+	// Initial contains a description of the initial state of the rollout.
 	Initial *ProgressiveRolloutStep `json:"initial,omitempty" yaml:"initial,omitempty" toml:"initial,omitempty"`
-	End     *ProgressiveRolloutStep `json:"end,omitempty" yaml:"end,omitempty" toml:"end,omitempty"`
+
+	// End contains what describes the end status of the rollout.
+	End *ProgressiveRolloutStep `json:"end,omitempty" yaml:"end,omitempty" toml:"end,omitempty"`
 }
 
+// ProgressiveRolloutStep define a progressive rollout step (initial and end)
 type ProgressiveRolloutStep struct {
 	Variation  *string
 	Percentage float64
@@ -35,7 +40,7 @@ func (p ProgressiveRollout) String() string {
 	initial = appendIfHasValue(initial, "Percentage", fmt.Sprintf("%v", p.Initial.getPercentage()))
 	if p.Initial.Date != nil {
 		initialDate := *p.Initial.Date
-		initial = appendIfHasValue(initial, "Date", fmt.Sprintf("%v", initialDate.Format(time.RFC3339)))
+		initial = appendIfHasValue(initial, "Date", fmt.Sprintf("%v", initialDate.Format(fflog.LogDateFormat)))
 	}
 
 	var end []string
@@ -43,7 +48,7 @@ func (p ProgressiveRollout) String() string {
 	end = appendIfHasValue(end, "Percentage", fmt.Sprintf("%v", p.End.getPercentage()))
 	if p.End.Date != nil {
 		endDate := *p.End.Date
-		end = appendIfHasValue(end, "Date", fmt.Sprintf("%v", endDate.Format(time.RFC3339)))
+		end = appendIfHasValue(end, "Date", fmt.Sprintf("%v", endDate.Format(fflog.LogDateFormat)))
 	}
 
 	return fmt.Sprintf("Initial:[%v], End:[%v]", strings.Join(initial, ", "), strings.Join(end, ", "))

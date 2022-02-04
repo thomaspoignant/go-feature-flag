@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 	"io/ioutil"
 	"log"
 	"os"
@@ -159,7 +160,7 @@ func TestS3_Export(t *testing.T) {
 				CsvTemplate: tt.fields.CsvTemplate,
 				s3Uploader:  &s3ManagerMock,
 			}
-			err := f.Export(context.Background(), log.New(os.Stdout, "", 0), tt.events)
+			err := f.Export(context.Background(), fflog.Logger{Logger: log.New(os.Stdout, "", 0)}, tt.events)
 			if tt.wantErr {
 				assert.Error(t, err, "Export should error")
 				return
@@ -181,11 +182,11 @@ func Test_errSDK(t *testing.T) {
 		Bucket:    "empty",
 		AwsConfig: &aws.Config{},
 	}
-	err := f.Export(context.Background(), log.New(os.Stdout, "", 0), []exporter.FeatureEvent{})
+	err := f.Export(context.Background(), fflog.Logger{Logger: log.New(os.Stdout, "", 0)}, []exporter.FeatureEvent{})
 	assert.Error(t, err, "Empty AWS config should failed")
 }
 
 func TestS3_IsBulk(t *testing.T) {
-	exporter := S3{}
-	assert.True(t, exporter.IsBulk(), "S3 exporter is not a bulk exporter")
+	s3Exporter := S3{}
+	assert.True(t, s3Exporter.IsBulk(), "S3 exporter is not a bulk exporter")
 }

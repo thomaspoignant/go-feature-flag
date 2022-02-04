@@ -6,7 +6,7 @@ import (
 
 type Flag interface {
 	// Value is returning the Value associate to the flag based if the flag apply to the user or not.
-	Value(flagName string, user ffuser.User, sdkDefaultValue interface{}) (interface{}, string)
+	Value(flagName string, user ffuser.User, sdkDefaultValue interface{}) (interface{}, string, error)
 
 	// String display correctly a flag with the right formatting
 	String() string

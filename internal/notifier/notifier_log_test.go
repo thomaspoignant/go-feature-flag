@@ -2,6 +2,7 @@ package notifier
 
 import (
 	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 	"io/ioutil"
@@ -104,7 +105,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 				},
 				wg: &sync.WaitGroup{},
 			},
-			expected: "^\\[" + testutils.RFC3339Regex + "\\] flag test-flag updated, old=\\[Variations:\\[Default=default,False=false,True=true\\], Rules:\\[\\[percentages:\\[False=60.00,True=40.00\\]\\]\\], DefaultRule:\\[variation:\\[Default\\]\\], TrackEvents:\\[true\\], Disable:\\[false\\]\\], new=\\[Variations:\\[Default=default,False=false,True=true\\], Rules:\\[\\[percentages:\\[False=90.00,True=10.00\\]\\]\\], DefaultRule:\\[variation:\\[Default\\]\\], TrackEvents:\\[true\\], Disable:\\[false\\]\\]",
+			expected: "^\\[" + testutils.RFC3339Regex + "\\] flag test-flag updated, old=\\[Variations:\\[Default=default,False=false,True=true\\], Rules:\\[\\[percentages:\\[False=60.00,True=40.00\\]\\]\\], DefaultRule:\\[variation:\\[Default\\]\\]\\], new=\\[Variations:\\[Default=default,False=false,True=true\\], Rules:\\[\\[percentages:\\[False=90.00,True=10.00\\]\\]\\], DefaultRule:\\[variation:\\[Default\\]\\]\\]",
 		},
 		{
 			name: "Disable flag",
@@ -239,7 +240,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 				},
 				wg: &sync.WaitGroup{},
 			},
-			expected: "^\\[" + testutils.RFC3339Regex + "\\] flag test-flag is turned ON \\(flag=\\[Variations:\\[Default=default,False=false,True=true\\], Rules:\\[\\[percentages:\\[False=90.00,True=10.00\\]\\]\\], DefaultRule:\\[variation:\\[Default\\]\\], TrackEvents:\\[true\\], Disable:\\[false\\]\\]\\)",
+			expected: "^\\[" + testutils.RFC3339Regex + "\\] flag test-flag is turned ON \\(flag=\\[Variations:\\[Default=default,False=false,True=true\\], Rules:\\[\\[percentages:\\[False=90.00,True=10.00\\]\\]\\], DefaultRule:\\[variation:\\[Default\\]\\]\\]\\)",
 		},
 	}
 	for _, tt := range tests {
@@ -248,7 +249,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 			defer os.Remove(logOutput.Name())
 
 			c := &LogNotifier{
-				Logger: log.New(logOutput, "", 0),
+				Logger: fflog.Logger{Logger: log.New(logOutput, "", 0)},
 			}
 			tt.args.wg.Add(1)
 			c.Notify(tt.args.diff, tt.args.wg)

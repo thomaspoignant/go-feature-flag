@@ -339,7 +339,7 @@ func TestFlag_value(t *testing.T) {
 			f, err := dto.ConvertToFlagData(false)
 			assert.NoError(t, err)
 
-			got, variationType := f.Value(tt.args.flagName, tt.args.user, tt.fields.Default)
+			got, variationType, _ := f.Value(tt.args.flagName, tt.args.user, tt.fields.Default)
 			assert.Equal(t, tt.want.value, got)
 			assert.Equal(t, tt.want.variationType, variationType)
 		})
@@ -352,8 +352,8 @@ func TestFlag_ProgressiveRollout(t *testing.T) {
 		True:       testconvert.Interface("True"),
 		False:      testconvert.Interface("False"),
 		Default:    testconvert.Interface("Default"),
-		Rollout: &flag.DtoRollout{Progressive: &flag.Progressive{
-			ReleaseRamp: flag.ProgressiveReleaseRamp{
+		Rollout: &flag.DtoRollout{Progressive: &flag.DtoProgressiveRollout{
+			ReleaseRamp: flag.DtoProgressiveReleaseRamp{
 				Start: testconvert.Time(time.Now().Add(1 * time.Second)),
 				End:   testconvert.Time(time.Now().Add(2 * time.Second)),
 			},
@@ -367,15 +367,15 @@ func TestFlag_ProgressiveRollout(t *testing.T) {
 	flagName := "test-flag"
 
 	// We evaluate the same flag multiple time overtime.
-	v, _ := f.Value(flagName, user, "sdkdefault")
+	v, _, _ := f.Value(flagName, user, "sdkdefault")
 	assert.Equal(t, f.GetVariationValue("False"), v)
 
 	time.Sleep(1 * time.Second)
-	v2, _ := f.Value(flagName, user, "sdkdefault")
+	v2, _, _ := f.Value(flagName, user, "sdkdefault")
 	assert.Equal(t, f.GetVariationValue("False"), v2)
 
 	time.Sleep(1 * time.Second)
-	v3, _ := f.Value(flagName, user, "sdkdefault")
+	v3, _, _ := f.Value(flagName, user, "sdkdefault")
 	assert.Equal(t, f.GetVariationValue("True"), v3)
 }
 
@@ -455,50 +455,50 @@ func TestFlag_ScheduledRollout(t *testing.T) {
 	flagName := "test-flag"
 
 	// We evaluate the same flag multiple time overtime.
-	v, _ := f.Value(flagName, user, "sdkdefault")
+	v, _, _ := f.Value(flagName, user, "sdkdefault")
 	assert.Equal(t, f.GetVariationValue("False"), v)
 
 	time.Sleep(1 * time.Second)
 
 	// Change the version of the flag + rollout the flag to 100% of the users with the filter
-	v, _ = f.Value(flagName, user, "sdkdefault")
+	v, _, _ = f.Value(flagName, user, "sdkdefault")
 	assert.Equal(t, "True", v)
 	assert.Equal(t, "1.10", f.GetVersion())
 
 	time.Sleep(1 * time.Second)
 
 	// Change the query to unmatch user + value of variations
-	v, _ = f.Value(flagName, user, "sdkdefault")
+	v, _, _ = f.Value(flagName, user, "sdkdefault")
 	assert.Equal(t, "Default2", v)
 
 	time.Sleep(1 * time.Second)
 
 	// Change the query to match user + value of variations
-	v, _ = f.Value(flagName, user, "sdkdefault")
+	v, _, _ = f.Value(flagName, user, "sdkdefault")
 	assert.Equal(t, "True2", v)
 
 	time.Sleep(1 * time.Second)
 
 	// Disable the flag
-	v, _ = f.Value(flagName, user, "sdkdefault")
+	v, _, _ = f.Value(flagName, user, "sdkdefault")
 	assert.Equal(t, "sdkdefault", v)
 
 	time.Sleep(1 * time.Second)
 
 	// Enable flag without date (should be ignored)
-	v, _ = f.Value(flagName, user, "sdkdefault")
+	v, _, _ = f.Value(flagName, user, "sdkdefault")
 	assert.Equal(t, "sdkdefault", v)
 
 	time.Sleep(1 * time.Second)
 
 	// enable flag + add progressive rollout
-	v, _ = f.Value(flagName, user, "sdkdefault")
+	v, _, _ = f.Value(flagName, user, "sdkdefault")
 	assert.Equal(t, "True2", v)
 
 	time.Sleep(1 * time.Second)
 
 	// experimentation should be finished so we serve default value
-	v, _ = f.Value(flagName, user, "sdkdefault")
+	v, _, _ = f.Value(flagName, user, "sdkdefault")
 	assert.Equal(t, "sdkdefault", v)
 }
 
@@ -541,7 +541,7 @@ func TestFlag_String(t *testing.T) {
 				False:      false,
 				Default:    false,
 			},
-			want: "Variations:[Default=false,False=false,True=true], Rules:[[percentages:[False=90.00,True=10.00]]], DefaultRule:[variation:[Default]], TrackEvents:[true], Disable:[false]",
+			want: "Variations:[Default=false,False=false,True=true], Rules:[[percentages:[False=90.00,True=10.00]]], DefaultRule:[variation:[Default]], Disable:[false]",
 		},
 		{
 			name: "Default values",
@@ -550,7 +550,7 @@ func TestFlag_String(t *testing.T) {
 				False:   false,
 				Default: false,
 			},
-			want: "Variations:[Default=false,False=false,True=true], Rules:[[percentages:[False=100.00,True=0.00]]], DefaultRule:[variation:[Default]], TrackEvents:[true], Disable:[false]",
+			want: "Variations:[Default=false,False=false,True=true], Rules:[[percentages:[False=100.00,True=0.00]]], DefaultRule:[variation:[Default]], Disable:[false]",
 		},
 	}
 	for _, tt := range tests {

@@ -2,6 +2,7 @@ package notifier
 
 import (
 	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 	"io/ioutil"
@@ -174,7 +175,7 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 			name: "should log if http code is superior to 399",
 			expected: expected{
 				err:    true,
-				errLog: "^\\[" + testutils.RFC3339Regex + "\\] error: while calling webhook, statusCode = 400",
+				errLog: "error: while calling webhook, statusCode = 400",
 			},
 			args: args{
 				statusCode: http.StatusBadRequest,
@@ -185,7 +186,7 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 			name: "should log if error while calling webhook",
 			expected: expected{
 				err:    true,
-				errLog: "^\\[" + testutils.RFC3339Regex + "\\] error: while calling webhook: random error",
+				errLog: "error: while calling webhook: random error",
 			},
 			args: args{
 				statusCode: http.StatusOK,
@@ -203,7 +204,7 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 			mockHTTPClient := &testutils.HTTPClientMock{StatusCode: tt.args.statusCode, ForceError: tt.args.forceError}
 
 			c, _ := NewWebhookNotifier(
-				log.New(logFile, "", 0),
+				fflog.Logger{Logger: log.New(logFile, "", 0)},
 				mockHTTPClient,
 				"http://webhook.example/hook",
 				tt.fields.Secret,
@@ -264,7 +265,7 @@ func TestNewWebhookNotifier(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := NewWebhookNotifier(nil, mockHTTPClient, tt.args.endpointURL, tt.args.secret, tt.args.meta)
+			got, err := NewWebhookNotifier(fflog.Logger{}, mockHTTPClient, tt.args.endpointURL, tt.args.secret, tt.args.meta)
 
 			if tt.wantErr {
 				assert.Error(t, err, "NewWebhookNotifier should return an error")

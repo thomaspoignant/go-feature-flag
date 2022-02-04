@@ -2,18 +2,21 @@ package cache
 
 import (
 	"fmt"
+	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 )
 
 // InMemoryCache is a memory cache to store the status of each flag.
 type InMemoryCache struct {
-	Flags map[string]flag.FlagData
+	Flags  map[string]flag.FlagData
+	logger fflog.Logger
 }
 
 // NewInMemoryCache is the constructor to create a new in memory cache.
-func NewInMemoryCache() *InMemoryCache {
+func NewInMemoryCache(logger fflog.Logger) *InMemoryCache {
 	return &InMemoryCache{
-		Flags: map[string]flag.FlagData{},
+		Flags:  map[string]flag.FlagData{},
+		logger: logger,
 	}
 }
 
@@ -21,8 +24,8 @@ func NewInMemoryCache() *InMemoryCache {
 func (fc *InMemoryCache) addDtoFlag(key string, dto flag.DtoFlag) {
 	convertedDto, err := dto.ConvertToFlagData(false)
 	if err != nil {
-		// TODO: error message saying that we ignore this flag
-		fmt.Println("Please log something here")
+		fc.logger.Printf("impossible to convert the flag %s", key)
+		return
 	}
 	fc.addFlag(key, convertedDto)
 }
@@ -52,7 +55,7 @@ func (fc *InMemoryCache) keys() []string {
 
 // Copy is duplicating the cache, it is used when updating the cache.
 func (fc *InMemoryCache) Copy() Cache {
-	inMemoryCache := NewInMemoryCache()
+	inMemoryCache := NewInMemoryCache(fc.logger)
 	for k, v := range fc.Flags {
 		inMemoryCache.addFlag(k, v)
 	}
