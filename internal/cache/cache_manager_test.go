@@ -76,7 +76,7 @@ disable = false`)
 						"True":    testconvert.Interface(true),
 					},
 					Rules: &map[string]flag.Rule{
-						"defaultRule": {
+						flag.LegacyRuleName: {
 							Query:           testconvert.String("key eq \"random-key\""),
 							VariationResult: nil,
 							Percentages: &map[string]float64{
@@ -121,7 +121,7 @@ disable = false`)
 						"True":    testconvert.Interface(true),
 					},
 					Rules: &map[string]flag.Rule{
-						"defaultRule": {
+						flag.LegacyRuleName: {
 							Query:           testconvert.String("key eq \"random-key\""),
 							VariationResult: nil,
 							Percentages: &map[string]float64{
@@ -167,7 +167,7 @@ disable = false`)
 						"True":    testconvert.Interface(true),
 					},
 					Rules: &map[string]flag.Rule{
-						"defaultRule": {
+						flag.LegacyRuleName: {
 							Query:           testconvert.String("key eq \"random-key\""),
 							VariationResult: nil,
 							Percentages: &map[string]float64{
@@ -253,7 +253,7 @@ func Test_AllFlags(t *testing.T) {
 						"True":    testconvert.Interface(true),
 					},
 					Rules: &map[string]flag.Rule{
-						"defaultRule": {
+						flag.LegacyRuleName: {
 							Query:           testconvert.String("key eq \"random-key\""),
 							VariationResult: nil,
 							Percentages: &map[string]float64{
@@ -298,7 +298,7 @@ test-flag2:
 						"True":    testconvert.Interface(true),
 					},
 					Rules: &map[string]flag.Rule{
-						"defaultRule": {
+						flag.LegacyRuleName: {
 							Query:           testconvert.String("key eq \"random-key\""),
 							VariationResult: nil,
 							Percentages: &map[string]float64{
@@ -319,7 +319,7 @@ test-flag2:
 						"True":    testconvert.Interface("true"),
 					},
 					Rules: &map[string]flag.Rule{
-						"defaultRule": {
+						flag.LegacyRuleName: {
 							Query:           testconvert.String("key eq \"random-key\""),
 							VariationResult: nil,
 							Percentages: &map[string]float64{

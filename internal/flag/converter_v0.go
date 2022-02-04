@@ -1,6 +1,6 @@
 package flag
 
-const legacyRuleName = "defaultRule"
+const LegacyRuleName = "legacyRuleV0"
 
 var trueVariation = "True"
 var falseVariation = "False"
@@ -63,7 +63,7 @@ func ConvertV0DtoToFlag(d DtoFlag, isScheduleStep bool) (FlagData, error) {
 	}
 
 	// Affect the new rule to the collection of Rules.
-	rules[legacyRuleName] = legacyRule
+	rules[LegacyRuleName] = legacyRule
 
 	// Create the flag struct.
 	return FlagData{

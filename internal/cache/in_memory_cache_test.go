@@ -33,7 +33,7 @@ func TestAll(t *testing.T) {
 						"True":    testconvert.Interface("true"),
 					},
 					Rules: &map[string]flag.Rule{
-						"defaultRule": {
+						flag.LegacyRuleName: {
 							Percentages: &map[string]float64{
 								"True":  40,
 								"False": 60,
@@ -70,7 +70,7 @@ func TestAll(t *testing.T) {
 						"True":    testconvert.Interface("true"),
 					},
 					Rules: &map[string]flag.Rule{
-						"defaultRule": {
+						flag.LegacyRuleName: {
 							Percentages: &map[string]float64{
 								"True":  40,
 								"False": 60,
@@ -88,7 +88,7 @@ func TestAll(t *testing.T) {
 						"True":    testconvert.Interface(true),
 					},
 					Rules: &map[string]flag.Rule{
-						"defaultRule": {
+						flag.LegacyRuleName: {
 							Percentages: &map[string]float64{
 								"True":  30,
 								"False": 70,
