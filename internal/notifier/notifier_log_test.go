@@ -105,7 +105,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 				},
 				wg: &sync.WaitGroup{},
 			},
-			expected: "^\\[" + testutils.RFC3339Regex + "\\] flag test-flag updated, old=\\[Variations:\\[Default=default,False=false,True=true\\], Rules:\\[\\[percentages:\\[False=60.00,True=40.00\\]\\]\\], DefaultRule:\\[variation:\\[Default\\]\\], TrackEvents:\\[true\\], Disable:\\[false\\]\\], new=\\[Variations:\\[Default=default,False=false,True=true\\], Rules:\\[\\[percentages:\\[False=90.00,True=10.00\\]\\]\\], DefaultRule:\\[variation:\\[Default\\]\\], TrackEvents:\\[true\\], Disable:\\[false\\]\\]",
+			expected: "^\\[" + testutils.RFC3339Regex + "\\] flag test-flag updated, old=\\[Variations:\\[Default=default,False=false,True=true\\], Rules:\\[\\[percentages:\\[False=60.00,True=40.00\\]\\]\\], DefaultRule:\\[variation:\\[Default\\]\\]\\], new=\\[Variations:\\[Default=default,False=false,True=true\\], Rules:\\[\\[percentages:\\[False=90.00,True=10.00\\]\\]\\], DefaultRule:\\[variation:\\[Default\\]\\]\\]",
 		},
 		{
 			name: "Disable flag",
@@ -240,7 +240,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 				},
 				wg: &sync.WaitGroup{},
 			},
-			expected: "^\\[" + testutils.RFC3339Regex + "\\] flag test-flag is turned ON \\(flag=\\[Variations:\\[Default=default,False=false,True=true\\], Rules:\\[\\[percentages:\\[False=90.00,True=10.00\\]\\]\\], DefaultRule:\\[variation:\\[Default\\]\\], TrackEvents:\\[true\\], Disable:\\[false\\]\\]\\)",
+			expected: "^\\[" + testutils.RFC3339Regex + "\\] flag test-flag is turned ON \\(flag=\\[Variations:\\[Default=default,False=false,True=true\\], Rules:\\[\\[percentages:\\[False=90.00,True=10.00\\]\\]\\], DefaultRule:\\[variation:\\[Default\\]\\]\\]\\)",
 		},
 	}
 	for _, tt := range tests {

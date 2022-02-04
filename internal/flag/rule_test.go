@@ -325,7 +325,7 @@ func TestRule_string(t *testing.T) {
 			expected: "query:[key eq \"toto\"], variation:[Variation1], percentages:[Variation1=10.00,Variation2=75.00,Variation3=5.00]",
 		},
 		{
-			name: "Progressive rollout",
+			name: "DtoProgressiveRollout rollout",
 			rule: &flag.Rule{
 				VariationResult: testconvert.String("Variation1"),
 				Percentages: &map[string]float64{

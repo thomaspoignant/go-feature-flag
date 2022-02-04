@@ -207,14 +207,22 @@ func (f FlagData) String() string {
 		rulesString = append(rulesString, fmt.Sprintf("[%v]", rule))
 	}
 	toString = appendIfHasValue(toString, "Rules", strings.Join(rulesString, ","))
-	toString = appendIfHasValue(toString, "DefaultRule", f.GetDefaultRule().String())
+
+	if f.GetDefaultRule() != nil {
+		toString = appendIfHasValue(toString, "DefaultRule", f.GetDefaultRule().String())
+	}
 
 	// Others
 	if f.GetRollout() != nil {
 		toString = appendIfHasValue(toString, "Rollout", fmt.Sprintf("%v", *f.GetRollout()))
 	}
-	toString = appendIfHasValue(toString, "TrackEvents", fmt.Sprintf("%t", f.IsTrackEvents()))
-	toString = appendIfHasValue(toString, "Disable", fmt.Sprintf("%t", f.IsDisable()))
+
+	if f.TrackEvents != nil {
+		toString = appendIfHasValue(toString, "TrackEvents", fmt.Sprintf("%t", f.IsTrackEvents()))
+	}
+	if f.Disable != nil {
+		toString = appendIfHasValue(toString, "Disable", fmt.Sprintf("%t", f.IsDisable()))
+	}
 	toString = appendIfHasValue(toString, "Version", f.GetVersion())
 
 	return strings.Join(toString, ", ")
