@@ -33,6 +33,7 @@ func New(notificationService Service) Manager {
 	}
 }
 
+// UpdateCache unmarshal the flag file based on the format
 func (c *cacheManagerImpl) UpdateCache(loadedFlags []byte, fileFormat string) error {
 	var newFlags map[string]flag.DtoFlag
 	var err error
