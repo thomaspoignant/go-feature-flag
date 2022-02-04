@@ -56,7 +56,7 @@ func (f *FlagData) GetVariationValue(variationName string) interface{} {
 
 // Value is returning the Value associate to the flag
 func (f *FlagData) Value(flagName string, user ffuser.User, sdkDefaultValue interface{}) (interface{}, string, error) {
-	f.updateFlagStage()
+	f.applyScheduledRolloutSteps()
 
 	if f.isExperimentationOver() || f.IsDisable() {
 		return sdkDefaultValue, constant.VariationSDKDefault, nil
@@ -111,7 +111,9 @@ func (f *FlagData) isExperimentationOver() bool {
 			(f.Rollout.Experimentation.End != nil && now.After(*f.Rollout.Experimentation.End)))
 }
 
-func (f *FlagData) updateFlagStage() {
+// applyScheduledRolloutSteps is checking if the flag has a scheduled rollout configured.
+// If yes we merge the changes to the current flag.
+func (f *FlagData) applyScheduledRolloutSteps() {
 	if f.Rollout == nil || f.Rollout.Scheduled == nil || len(f.Rollout.Scheduled.Steps) == 0 {
 		// no update required because no scheduled rollout configuration
 		return
@@ -130,13 +132,13 @@ func (f *FlagData) updateFlagStage() {
 		}
 
 		if step.Date != nil && now.After(*step.Date) {
-			f.mergeChanges(step)
+			f.mergeScheduledStep(step)
 		}
 	}
 }
 
-// mergeChanges will check every changes on the flag and apply them to the current configuration.
-func (f *FlagData) mergeChanges(stepFlag ScheduledStep) {
+// mergeScheduledStep will check every changes on the flag and apply them to the current configuration.
+func (f *FlagData) mergeScheduledStep(stepFlag ScheduledStep) {
 	if stepFlag.Disable != nil {
 		f.Disable = stepFlag.Disable
 	}
@@ -145,7 +147,44 @@ func (f *FlagData) mergeChanges(stepFlag ScheduledStep) {
 		f.Rollout = stepFlag.Rollout
 	}
 
-	// Here we are looking to all the variations
+	f.mergeVariationScheduledStep(stepFlag)
+	f.mergeRulesScheduledStep(stepFlag)
+
+	if stepFlag.DefaultRule != nil {
+		f.DefaultRule.mergeChanges(*stepFlag.DefaultRule)
+	}
+
+	if stepFlag.TrackEvents != nil {
+		f.TrackEvents = stepFlag.TrackEvents
+	}
+
+	if stepFlag.Version != nil {
+		f.Version = stepFlag.Version
+	}
+}
+
+// mergeRulesScheduledStep is used to merge the rules from a ScheduledStep.
+// If we have a rule with an existing name we are overriding his content,
+// if the rule is new we are adding it to the collection of rules.
+func (f *FlagData) mergeRulesScheduledStep(stepFlag ScheduledStep) {
+	if stepFlag.Rules != nil {
+		rulesBeforeMerge := f.GetRules()
+		for key, val := range *stepFlag.Rules {
+			currentRule := f.GetRule(key)
+			if (Rule{}) == currentRule {
+				rulesBeforeMerge[key] = val
+				continue
+			}
+			currentRule.mergeChanges(val)
+			rulesBeforeMerge[key] = currentRule
+		}
+	}
+}
+
+// mergeVariationScheduledStep is used to merge the variations from a ScheduledStep.
+// if the new value of an existing variation is nil we are deleting the variation.
+// if the variation name already exist or is new we upsert the new value
+func (f *FlagData) mergeVariationScheduledStep(stepFlag ScheduledStep) {
 	if stepFlag.Variations != nil {
 		variations := f.GetVariations()
 		for variationName := range stepFlag.GetVariations() {
@@ -160,33 +199,6 @@ func (f *FlagData) mergeChanges(stepFlag ScheduledStep) {
 			variations[variationName] = &variationValue
 		}
 		f.Variations = &variations
-	}
-
-	// If we have a rule with an existing name we are overriding his content,
-	// if the rule is new we are adding it to the collection of rules.
-	if stepFlag.Rules != nil {
-		rulesBeforeMerge := f.GetRules()
-		for key, val := range *stepFlag.Rules {
-			currentRule := f.GetRule(key)
-			if (Rule{}) == currentRule {
-				rulesBeforeMerge[key] = val
-				continue
-			}
-			currentRule.mergeChanges(val)
-			rulesBeforeMerge[key] = currentRule
-		}
-	}
-
-	if stepFlag.DefaultRule != nil {
-		f.DefaultRule.mergeChanges(*stepFlag.DefaultRule)
-	}
-
-	if stepFlag.TrackEvents != nil {
-		f.TrackEvents = stepFlag.TrackEvents
-	}
-
-	if stepFlag.Version != nil {
-		f.Version = stepFlag.Version
 	}
 }
 
