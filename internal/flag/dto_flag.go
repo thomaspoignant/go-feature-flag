@@ -43,19 +43,21 @@ type DtoFlag struct {
 	// Variations are all the variations available for this flag.
 	// The minimum is 2 variations and we don't have any max limit except
 	// if the variationValue is a bool, the max is 2.
-	// Variations *map[string]*interface{}
-	// `json:"variations,omitempty" yaml:"variations,omitempty" toml:"variations,omitempty"`
-	//
+	Variations *map[string]*interface{} `json:"variations,omitempty" yaml:"variations,omitempty" toml:"variations,omitempty"` //nolint: lll
+
 	// Rules is the list of Rule for this flag.
 	// This an optional field.
-	// Rules *[]Rule `json:"targeting,omitempty" yaml:"targeting,omitempty" toml:"targeting,omitempty"`
+	Rules *map[string]Rule `json:"targeting,omitempty" yaml:"targeting,omitempty" toml:"targeting,omitempty"`
 	//
 	// DefaultRule is the rule applied after checking that any other rules
 	// matched the user.
-	// DefaultRule *Rule `json:"defaultRule,omitempty" yaml:"defaultRule,omitempty" toml:"defaultRule,omitempty"`
+	DefaultRule *Rule `json:"defaultRule,omitempty" yaml:"defaultRule,omitempty" toml:"defaultRule,omitempty"`
 }
 
 // ConvertToFlagData detect the type of Flag and use the right convertor to create a FlagData instance.
-func (d *DtoFlag) ConvertToFlagData(isScheduleStep bool) (FlagData, error) {
-	return ConvertV0DtoToFlag(*d, isScheduleStep)
+func (d *DtoFlag) ConvertToFlagData(isScheduleStep bool) FlagData {
+	if d.True != nil || d.False != nil || d.Default != nil {
+		return ConvertV0DtoToFlag(*d, isScheduleStep)
+	}
+	return ConvertV1DtoToFlag(*d, isScheduleStep)
 }

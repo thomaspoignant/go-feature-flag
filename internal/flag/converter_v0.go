@@ -9,7 +9,7 @@ var defaultVariation = "Default"
 // ConvertV0DtoToFlag is converting a flag in the config file to the internal format.
 // this function convert only the old format of the flag (before v1.0.0), to keep
 // backward support of the configurations.
-func ConvertV0DtoToFlag(d DtoFlag, isScheduleStep bool) (FlagData, error) {
+func ConvertV0DtoToFlag(d DtoFlag, isScheduleStep bool) FlagData {
 	// Create variations based on the available definition in the flag v0
 	variations := map[string]*interface{}{}
 	if d.True != nil {
@@ -70,9 +70,9 @@ func ConvertV0DtoToFlag(d DtoFlag, isScheduleStep bool) (FlagData, error) {
 		Variations:  &variations,
 		Rules:       &rules,
 		DefaultRule: &Rule{VariationResult: &defaultVariation},
-		Rollout:     d.Rollout.convertRollout(),
+		Rollout:     d.Rollout.convertRollout(0),
 		TrackEvents: d.TrackEvents,
 		Disable:     d.Disable,
 		Version:     d.Version,
-	}, nil
+	}
 }

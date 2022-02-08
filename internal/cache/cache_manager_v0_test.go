@@ -4,83 +4,43 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
+	"github.com/thomaspoignant/go-feature-flag/internal/notifier"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 	"testing"
-
-	"github.com/thomaspoignant/go-feature-flag/internal/notifier"
 )
 
-func Test_FlagCacheNotInit(t *testing.T) {
-	fCache := cache.New(nil)
-	fCache.Close()
-	_, err := fCache.GetFlag("test-flag")
-	assert.Error(t, err, "We should have an error if the cache is not init")
-}
+// These tests are here to validate the backward compatibility with the version v0 of go-feature-flag
+//
+// We place them in a dedicated file to be able to drop them easily in the future.
 
-func Test_GetFlagNotExist(t *testing.T) {
-	fCache := cache.New(nil)
-	_, err := fCache.GetFlag("not-exists-flag")
-	assert.Error(t, err, "We should have an error if the flag does not exists")
-}
-
-func Test_FlagCache(t *testing.T) {
+func Test_FlagCache_v0(t *testing.T) {
 	yamlFile := []byte(`test-flag:
-    variations:
-        "Default": false
-        "False": false
-        "True": true
-    targeting:
-        legacyRuleV0:
-            query: key eq "random-key"
-            percentage:
-                "False": 0
-                "True": 100
-    defaultRule:
-        variation: Default
-    trackEvents: false
+  rule: key eq "random-key"
+  percentage: 100
+  true: true
+  false: false
+  default: false
+  trackEvents: false
 `)
 
 	jsonFile := []byte(`{
-    "test-flag": {
-        "variations": {
-            "Default": false,
-            "False": false,
-            "True": true
-        },
-        "targeting": {
-            "legacyRuleV0": {
-                "query": "key eq \"random-key\"",
-                "percentage": {
-                    "False": 0,
-                    "True": 100
-                }
-            }
-        },
-        "defaultRule": {
-            "variation": "Default"
-        }
-    }
+  "test-flag": {
+    "rule": "key eq \"random-key\"",
+    "percentage": 100,
+    "true": true,
+    "false": false,
+    "default": false
+  }
 }
 `)
 
 	tomlFile := []byte(`[test-flag]
-disable = false
-
-  [test-flag.variations]
-  Default = false
-  False = false
-  True = true
-
-[test-flag.targeting.legacyRuleV0]
-query = 'key eq "random-key"'
-
-  [test-flag.targeting.legacyRuleV0.percentage]
-  False = 0.00
-  True = 100.00
-
-  [test-flag.defaultRule]
-  variation = "Default"
-`)
+rule = "key eq \"random-key\""
+percentage = 100.0
+true = true
+false = false
+default = false
+disable = false`)
 
 	type args struct {
 		loadedFlags []byte
@@ -128,18 +88,11 @@ query = 'key eq "random-key"'
 			flagFormat: "yaml",
 			args: args{
 				loadedFlags: []byte(`test-flag:
-    variations:
-        Default: false
-        "False": false
-        		"True": true
-    targeting:
-        legacyRuleV0:
-            query: key eq "random-key"
-            percentage:
-                "False": 100
-                "True": 0
-    defaultRule:
-        variation: Default
+  rule: key eq "random-key"
+  percentage: "toot"
+  true: true
+  false: false
+  default: false
 `),
 			},
 			wantErr: true,
@@ -179,25 +132,13 @@ query = 'key eq "random-key"'
 			flagFormat: "json",
 			args: args{
 				loadedFlags: []byte(`{
-    "test-flag": {
-        "variations": {
-            "Default": false,
-            "False": false,
-            "True": true"
-        },
-        "targeting": {
-            "legacyRuleV0": {
-                "query": "key eq \"random-key\"",
-                "percentage": {
-                    "False": 0,
-                    "True": 100
-                }
-            }
-        },
-        "defaultRule": {
-            "variation": "Default"
-        }
-    }
+  "test-flag": {
+    "rule": "key eq \"random-key\"",
+    "percentage": 100,
+    "true": true,
+    "false": false,
+    "default": false"
+  }
 }`),
 			},
 			wantErr: true,
@@ -236,20 +177,13 @@ query = 'key eq "random-key"'
 		{
 			name: "TOML invalid file",
 			args: args{
-				loadedFlags: []byte(`[test-flag.variations]
-Default = false
-False = false
-True = true"
-
-[test-flag.targeting.legacyRuleV0]
-query = 'key eq "random-key"'
-
-  [test-flag.targeting.legacyRuleV0.percentage]
-  False = 0
-  True = 100
-
-[test-flag.defaultRule]
-variation = "Default"`),
+				loadedFlags: []byte(`[test-flag]
+rule = "key eq \"random-key\""
+percentage = 100.0
+true = true
+false = false
+default = false"
+disable = false`),
 			},
 			flagFormat: "toml",
 			wantErr:    true,
@@ -275,7 +209,7 @@ variation = "Default"`),
 	}
 }
 
-func Test_AllFlags(t *testing.T) {
+func Test_AllFlags_v0(t *testing.T) {
 	yamlFile := []byte(`test-flag:
   rule: key eq "random-key"
   percentage: 100

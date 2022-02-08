@@ -34,7 +34,7 @@ func NewCacheMock(flag flag.Flag, err error) cache.Manager {
 }
 
 func NewCacheMockDto(dto flag.DtoFlag, err error) cache.Manager {
-	f, _ := dto.ConvertToFlagData(false)
+	f := dto.ConvertToFlagData(false)
 	return &cacheMock{
 		flag: &f,
 		err:  err,

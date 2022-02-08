@@ -336,8 +336,7 @@ func TestFlag_value(t *testing.T) {
 				Rollout:    &tt.fields.Rollout,
 			}
 
-			f, err := dto.ConvertToFlagData(false)
-			assert.NoError(t, err)
+			f := dto.ConvertToFlagData(false)
 
 			got, variationType, _ := f.Value(tt.args.flagName, tt.args.user, tt.fields.Default)
 			assert.Equal(t, tt.want.value, got)
@@ -360,8 +359,7 @@ func TestFlag_ProgressiveRollout(t *testing.T) {
 		}},
 	}
 
-	f, err := dto.ConvertToFlagData(false)
-	assert.NoError(t, err)
+	f := dto.ConvertToFlagData(false)
 
 	user := ffuser.NewAnonymousUser("test")
 	flagName := "test-flag"
@@ -448,8 +446,7 @@ func TestFlag_ScheduledRollout(t *testing.T) {
 		},
 	}
 
-	f, err := dto.ConvertToFlagData(false)
-	assert.NoError(t, err)
+	f := dto.ConvertToFlagData(false)
 
 	user := ffuser.NewAnonymousUser("test")
 	flagName := "test-flag"
@@ -461,7 +458,8 @@ func TestFlag_ScheduledRollout(t *testing.T) {
 	time.Sleep(1 * time.Second)
 
 	// Change the version of the flag + rollout the flag to 100% of the users with the filter
-	v, _, _ = f.Value(flagName, user, "sdkdefault")
+	v, _, err := f.Value(flagName, user, "sdkdefault")
+	assert.NoError(t, err)
 	assert.Equal(t, "True", v)
 	assert.Equal(t, "1.10", f.GetVersion())
 
@@ -570,8 +568,7 @@ func TestFlag_String(t *testing.T) {
 				Version:     testconvert.String(version),
 			}
 
-			f, err := dto.ConvertToFlagData(false)
-			assert.NoError(t, err)
+			f := dto.ConvertToFlagData(false)
 
 			got := f.String()
 			assert.Equal(t, tt.want, got, "String() = %v, want %v", got, tt.want)

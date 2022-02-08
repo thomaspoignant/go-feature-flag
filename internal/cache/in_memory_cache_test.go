@@ -19,29 +19,49 @@ func TestAll(t *testing.T) {
 			name: "all with 1 flag",
 			param: map[string]flag.DtoFlag{
 				"test": {
-					Percentage: testconvert.Float64(40),
-					True:       testconvert.Interface("true"),
-					False:      testconvert.Interface("false"),
-					Default:    testconvert.Interface("default"),
+					Variations: &map[string]*interface{}{
+						"A": testconvert.Interface("true"),
+						"B": testconvert.Interface("false"),
+						"C": testconvert.Interface("C"),
+						"D": testconvert.Interface("D"),
+					},
+					Rules: &map[string]flag.Rule{
+						"testRule": {
+							Query:           testconvert.String("key eq \"marty\""),
+							VariationResult: testconvert.String("A"),
+						},
+					},
+					DefaultRule: &flag.Rule{
+						Percentages: &map[string]float64{
+							"A": 10,
+							"B": 10,
+							"C": 10,
+							"D": 70,
+						},
+					},
 				},
 			},
 			want: map[string]flag.Flag{
 				"test": &flag.FlagData{
 					Variations: &map[string]*interface{}{
-						"Default": testconvert.Interface("default"),
-						"False":   testconvert.Interface("false"),
-						"True":    testconvert.Interface("true"),
-					},
-					Rules: &map[string]flag.Rule{
-						flag.LegacyRuleName: {
-							Percentages: &map[string]float64{
-								"True":  40,
-								"False": 60,
-							},
-						},
+						"A": testconvert.Interface("true"),
+						"B": testconvert.Interface("false"),
+						"C": testconvert.Interface("C"),
+						"D": testconvert.Interface("D"),
 					},
 					DefaultRule: &flag.Rule{
-						VariationResult: testconvert.String("Default"),
+						Percentages: &map[string]float64{
+							"A": 10,
+							"B": 10,
+							"C": 10,
+							"D": 70,
+						},
+					},
+					Rules: &map[string]flag.Rule{
+						"testRule": {
+							Query:           testconvert.String("key eq \"marty\""),
+							VariationResult: testconvert.String("A"),
+						},
 					},
 				},
 			},
@@ -50,53 +70,79 @@ func TestAll(t *testing.T) {
 			name: "all with multiple flags",
 			param: map[string]flag.DtoFlag{
 				"test": {
-					Percentage: testconvert.Float64(40),
-					True:       testconvert.Interface("true"),
-					False:      testconvert.Interface("false"),
-					Default:    testconvert.Interface("default"),
+					Variations: &map[string]*interface{}{
+						"A": testconvert.Interface("true"),
+						"B": testconvert.Interface("false"),
+						"C": testconvert.Interface("C"),
+						"D": testconvert.Interface("D"),
+					},
+					Rules: &map[string]flag.Rule{
+						"testRule": {
+							Query:           testconvert.String("key eq \"marty\""),
+							VariationResult: testconvert.String("A"),
+						},
+					},
+					DefaultRule: &flag.Rule{
+						VariationResult: testconvert.String("D"),
+					},
 				},
 				"test1": {
-					Percentage: testconvert.Float64(30),
-					True:       testconvert.Interface(true),
-					False:      testconvert.Interface(false),
-					Default:    testconvert.Interface(false),
+					Variations: &map[string]*interface{}{
+						"E": testconvert.Interface("E"),
+						"F": testconvert.Interface("F"),
+						"H": testconvert.Interface("HH"),
+					},
+					Rules: &map[string]flag.Rule{
+						"testRule": {
+							Query:           testconvert.String("key eq \"mcfly\""),
+							VariationResult: testconvert.String("G"),
+						},
+					},
+					DefaultRule: &flag.Rule{
+						Percentages: &map[string]float64{
+							"E": 10,
+							"F": 10,
+							"H": 80,
+						},
+					},
 				},
 			},
 			want: map[string]flag.Flag{
 				"test": &flag.FlagData{
 					Variations: &map[string]*interface{}{
-						"Default": testconvert.Interface("default"),
-						"False":   testconvert.Interface("false"),
-						"True":    testconvert.Interface("true"),
+						"A": testconvert.Interface("true"),
+						"B": testconvert.Interface("false"),
+						"C": testconvert.Interface("C"),
+						"D": testconvert.Interface("D"),
 					},
 					Rules: &map[string]flag.Rule{
-						flag.LegacyRuleName: {
-							Percentages: &map[string]float64{
-								"True":  40,
-								"False": 60,
-							},
+						"testRule": {
+							Query:           testconvert.String("key eq \"marty\""),
+							VariationResult: testconvert.String("A"),
 						},
 					},
 					DefaultRule: &flag.Rule{
-						VariationResult: testconvert.String("Default"),
+						VariationResult: testconvert.String("D"),
 					},
 				},
 				"test1": &flag.FlagData{
 					Variations: &map[string]*interface{}{
-						"Default": testconvert.Interface(false),
-						"False":   testconvert.Interface(false),
-						"True":    testconvert.Interface(true),
+						"E": testconvert.Interface("E"),
+						"F": testconvert.Interface("F"),
+						"H": testconvert.Interface("HH"),
 					},
 					Rules: &map[string]flag.Rule{
-						flag.LegacyRuleName: {
-							Percentages: &map[string]float64{
-								"True":  30,
-								"False": 70,
-							},
+						"testRule": {
+							Query:           testconvert.String("key eq \"mcfly\""),
+							VariationResult: testconvert.String("G"),
 						},
 					},
 					DefaultRule: &flag.Rule{
-						VariationResult: testconvert.String("Default"),
+						Percentages: &map[string]float64{
+							"E": 10,
+							"F": 10,
+							"H": 80,
+						},
 					},
 				},
 			},
@@ -125,10 +171,24 @@ func TestCopy(t *testing.T) {
 			name: "copy with 1 flag",
 			param: map[string]flag.DtoFlag{
 				"test": {
-					Percentage: testconvert.Float64(40),
-					True:       testconvert.Interface("true"),
-					False:      testconvert.Interface("false"),
-					Default:    testconvert.Interface("default"),
+					Variations: &map[string]*interface{}{
+						"E": testconvert.Interface("E"),
+						"F": testconvert.Interface("F"),
+						"H": testconvert.Interface("HH"),
+					},
+					Rules: &map[string]flag.Rule{
+						"testRule": {
+							Query:           testconvert.String("key eq \"mcfly\""),
+							VariationResult: testconvert.String("G"),
+						},
+					},
+					DefaultRule: &flag.Rule{
+						Percentages: &map[string]float64{
+							"E": 10,
+							"F": 10,
+							"H": 80,
+						},
+					},
 				},
 			},
 		},

@@ -22,11 +22,7 @@ func NewInMemoryCache(logger fflog.Logger) *InMemoryCache {
 
 // addDtoFlag is converting the dto into a flag.FlagData and adds it into the memory cache.
 func (fc *InMemoryCache) addDtoFlag(key string, dto flag.DtoFlag) {
-	convertedDto, err := dto.ConvertToFlagData(false)
-	if err != nil {
-		fc.logger.Printf("impossible to convert the flag %s", key)
-		return
-	}
+	convertedDto := dto.ConvertToFlagData(false)
 	fc.addFlag(key, convertedDto)
 }
 
