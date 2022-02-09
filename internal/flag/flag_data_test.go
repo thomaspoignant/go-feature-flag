@@ -302,7 +302,7 @@ func TestFlag_value(t *testing.T) {
 			},
 			want: want{
 				value:         "default",
-				variationType: flag.VariationDefault,
+				variationType: "Default",
 			},
 		},
 		{
