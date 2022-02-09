@@ -34,7 +34,7 @@ type DtoScheduledStep struct {
 
 // convertRollout convert the rollout configuration in a Flag_data format.
 func (dr *DtoRollout) convertRollout(version int) *Rollout {
-	if dr == nil {
+	if dr == nil || (dr.Scheduled == nil && dr.Experimentation == nil) {
 		return nil
 	}
 

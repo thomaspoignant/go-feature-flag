@@ -11,34 +11,41 @@ var defaultVariation = "Default"
 // backward support of the configurations.
 func ConvertV0DtoToFlag(d DtoFlag, isScheduleStep bool) FlagData {
 	// Create variations based on the available definition in the flag v0
-	variations := map[string]*interface{}{}
-	if d.True != nil {
-		variations[trueVariation] = d.True
-	}
-	if d.False != nil {
-		variations[falseVariation] = d.False
-	}
-	if d.Default != nil {
-		variations[defaultVariation] = d.Default
+	var variations *map[string]*interface{}
+	newVariations := createVariationsV0(d, isScheduleStep)
+	if newVariations != nil {
+		variations = &newVariations
 	}
 
 	// Convert the rule to the new format
-	var rules = make(map[string]Rule)
-	legacyRule := Rule{}
-
-	// Deal with the percentages.
-	if !isScheduleStep || d.Percentage != nil {
-		percentages := map[string]float64{}
-		percentage := float64(0)
-		if d.Percentage != nil {
-			percentage = *d.Percentage
-		}
-		percentages[trueVariation] = percentage
-		percentages[falseVariation] = 100 - percentage
-		legacyRule.Percentages = &percentages
+	var rules *map[string]Rule
+	legacyRule := createLegacyRuleV0(d, isScheduleStep)
+	if legacyRule != nil {
+		rules = &map[string]Rule{LegacyRuleName: *legacyRule}
 	}
 
-	// If we have a query.
+	var defaultRule *Rule
+	if !isScheduleStep {
+		defaultRule = &Rule{VariationResult: &defaultVariation}
+	}
+
+	r := d.Rollout.convertRollout(0)
+	// Create the flag struct.
+	return FlagData{
+		Variations:  variations,
+		DefaultRule: defaultRule,
+		Rules:       rules,
+		Rollout:     r,
+		TrackEvents: d.TrackEvents,
+		Disable:     d.Disable,
+		Version:     d.Version,
+	}
+}
+
+// createLegacyRuleV0 will create a rule based on the previous format
+func createLegacyRuleV0(d DtoFlag, isScheduleStep bool) *Rule {
+	legacyRule := Rule{}
+
 	if d.Rule != nil {
 		legacyRule.Query = d.Rule
 	}
@@ -62,17 +69,40 @@ func ConvertV0DtoToFlag(d DtoFlag, isScheduleStep bool) FlagData {
 		}
 	}
 
-	// Affect the new rule to the collection of Rules.
-	rules[LegacyRuleName] = legacyRule
-
-	// Create the flag struct.
-	return FlagData{
-		Variations:  &variations,
-		Rules:       &rules,
-		DefaultRule: &Rule{VariationResult: &defaultVariation},
-		Rollout:     d.Rollout.convertRollout(0),
-		TrackEvents: d.TrackEvents,
-		Disable:     d.Disable,
-		Version:     d.Version,
+	// Deal with the percentages.
+	if (!isScheduleStep || d.Percentage != nil) && legacyRule.ProgressiveRollout == nil {
+		percentages := map[string]float64{}
+		percentage := float64(0)
+		if d.Percentage != nil {
+			percentage = *d.Percentage
+		}
+		percentages[trueVariation] = percentage
+		percentages[falseVariation] = 100 - percentage
+		legacyRule.Percentages = &percentages
 	}
+
+	if legacyRule == (Rule{}) {
+		return nil
+	}
+
+	return &legacyRule
+}
+
+// createVariationsV0 will create a set of variations based on the previous format
+func createVariationsV0(d DtoFlag, isScheduleStep bool) map[string]*interface{} {
+	var variations = make(map[string]*interface{}, 3)
+	if d.True != nil {
+		variations[trueVariation] = d.True
+	}
+	if d.False != nil {
+		variations[falseVariation] = d.False
+	}
+	if d.Default != nil {
+		variations[defaultVariation] = d.Default
+	}
+
+	if isScheduleStep && len(variations) == 0 {
+		variations = nil
+	}
+	return variations
 }
