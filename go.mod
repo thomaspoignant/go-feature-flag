@@ -5,7 +5,7 @@ go 1.15
 require (
 	cloud.google.com/go/storage v1.19.0
 	github.com/antlr/antlr4 v0.0.0-20201206235148-c87e55b61113 // indirect
-	github.com/aws/aws-sdk-go v1.42.44
+	github.com/aws/aws-sdk-go v1.43.8
 	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.5.7
