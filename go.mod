@@ -3,7 +3,7 @@ module github.com/thomaspoignant/go-feature-flag
 go 1.15
 
 require (
-	cloud.google.com/go/storage v1.19.0
+	cloud.google.com/go/storage v1.21.0
 	github.com/antlr/antlr4 v0.0.0-20201206235148-c87e55b61113 // indirect
 	github.com/aws/aws-sdk-go v1.42.44
 	github.com/blang/semver v3.5.1+incompatible // indirect
@@ -13,7 +13,7 @@ require (
 	github.com/pelletier/go-toml v1.9.4
 	github.com/stretchr/testify v1.7.0
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
-	google.golang.org/api v0.66.0
+	google.golang.org/api v0.69.0
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
 )
