@@ -62,8 +62,8 @@ github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAE
 github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kdvxnR2qWY=
 github.com/antlr/antlr4 v0.0.0-20201206235148-c87e55b61113 h1:+Je12tQpLUUQEfMUrLkTPXe1wh8VXCPjFsdwY29co30=
 github.com/antlr/antlr4 v0.0.0-20201206235148-c87e55b61113/go.mod h1:T7PbCXFs94rrTttyxjbyT5+/1V8T2TYDejxUfHJjw1Y=
-github.com/aws/aws-sdk-go v1.43.25 h1:PtdVewK7GZAGnu7JFdi4XFgH+j2AICXkHRjaAXow/4s=
-github.com/aws/aws-sdk-go v1.43.25/go.mod h1:y4AeaBuwd2Lk+GepC1E9v0qOiTws0MIWAX4oIKwKHZo=
+github.com/aws/aws-sdk-go v1.43.30 h1:Q3lgrX/tz/MkEiPVVQnOQThBAK2QC2SCTCKTD1mwGFA=
+github.com/aws/aws-sdk-go v1.43.30/go.mod h1:y4AeaBuwd2Lk+GepC1E9v0qOiTws0MIWAX4oIKwKHZo=
 github.com/blang/semver v3.5.1+incompatible h1:cQNTCjp13qL8KC3Nbxr/y2Bqb63oX6wdnnjpJbkM4JQ=
 github.com/blang/semver v3.5.1+incompatible/go.mod h1:kRBLl5iJ+tD4TcOOxsy/0fnwebNt5EWlYSAyrTnjyyk=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
