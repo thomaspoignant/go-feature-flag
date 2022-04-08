@@ -9,7 +9,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/thomaspoignant/go-feature-flag/internal/exporter"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
 )
 
@@ -27,7 +26,7 @@ func TestS3_Export(t *testing.T) {
 	tests := []struct {
 		name         string
 		fields       fields
-		events       []exporter.FeatureEvent
+		events       []FeatureEvent
 		wantErr      bool
 		expectedFile string
 		expectedName string
@@ -37,7 +36,7 @@ func TestS3_Export(t *testing.T) {
 			fields: fields{
 				Bucket: "test",
 			},
-			events: []exporter.FeatureEvent{
+			events: []FeatureEvent{
 				{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false},
 			},
@@ -50,7 +49,7 @@ func TestS3_Export(t *testing.T) {
 				S3Path: "random/path",
 				Bucket: "test",
 			},
-			events: []exporter.FeatureEvent{
+			events: []FeatureEvent{
 				{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false},
 			},
@@ -63,7 +62,7 @@ func TestS3_Export(t *testing.T) {
 				Format: "csv",
 				Bucket: "test",
 			},
-			events: []exporter.FeatureEvent{
+			events: []FeatureEvent{
 				{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false},
 			},
@@ -77,7 +76,7 @@ func TestS3_Export(t *testing.T) {
 				CsvTemplate: "{{ .Kind}};{{ .ContextKind}}\n",
 				Bucket:      "test",
 			},
-			events: []exporter.FeatureEvent{
+			events: []FeatureEvent{
 				{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false},
 			},
@@ -91,7 +90,7 @@ func TestS3_Export(t *testing.T) {
 				Filename: "{{ .Format}}-test-{{ .Timestamp}}",
 				Bucket:   "test",
 			},
-			events: []exporter.FeatureEvent{
+			events: []FeatureEvent{
 				{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false},
 			},
@@ -104,7 +103,7 @@ func TestS3_Export(t *testing.T) {
 				Format: "xxx",
 				Bucket: "test",
 			},
-			events: []exporter.FeatureEvent{
+			events: []FeatureEvent{
 				{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false},
 			},
@@ -116,7 +115,7 @@ func TestS3_Export(t *testing.T) {
 			fields: fields{
 				Format: "xxx",
 			},
-			events: []exporter.FeatureEvent{
+			events: []FeatureEvent{
 				{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false},
 			},
@@ -128,7 +127,7 @@ func TestS3_Export(t *testing.T) {
 				Filename: "{{ .InvalidField}}",
 				Bucket:   "test",
 			},
-			events: []exporter.FeatureEvent{
+			events: []FeatureEvent{
 				{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false},
 			},
@@ -140,7 +139,7 @@ func TestS3_Export(t *testing.T) {
 				Format:      "csv",
 				CsvTemplate: "{{ .Foo}}",
 			},
-			events: []exporter.FeatureEvent{
+			events: []FeatureEvent{
 				{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false},
 			},
@@ -181,7 +180,7 @@ func Test_errSDK(t *testing.T) {
 		Bucket:    "empty",
 		AwsConfig: &aws.Config{},
 	}
-	err := f.Export(context.Background(), log.New(os.Stdout, "", 0), []exporter.FeatureEvent{})
+	err := f.Export(context.Background(), log.New(os.Stdout, "", 0), []FeatureEvent{})
 	assert.Error(t, err, "Empty AWS config should failed")
 }
 

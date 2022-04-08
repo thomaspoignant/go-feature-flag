@@ -8,7 +8,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/thomaspoignant/go-feature-flag/internal/exporter"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
 )
 
@@ -27,7 +26,7 @@ func TestWebhook_Export(t *testing.T) {
 	}
 	type args struct {
 		logger        *log.Logger
-		featureEvents []exporter.FeatureEvent
+		featureEvents []FeatureEvent
 	}
 	type expected struct {
 		bodyFilePath string
@@ -56,7 +55,7 @@ func TestWebhook_Export(t *testing.T) {
 			},
 			args: args{
 				logger: logger,
-				featureEvents: []exporter.FeatureEvent{
+				featureEvents: []FeatureEvent{
 					{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 						Variation: "Default", Value: "YO", Default: false},
 					{Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
@@ -79,7 +78,7 @@ func TestWebhook_Export(t *testing.T) {
 			},
 			args: args{
 				logger: logger,
-				featureEvents: []exporter.FeatureEvent{
+				featureEvents: []FeatureEvent{
 					{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 						Variation: "Default", Value: "YO", Default: false},
 					{Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
@@ -102,7 +101,7 @@ func TestWebhook_Export(t *testing.T) {
 			},
 			args: args{
 				logger: logger,
-				featureEvents: []exporter.FeatureEvent{
+				featureEvents: []FeatureEvent{
 					{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 						Variation: "Default", Value: "YO", Default: false},
 					{Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
@@ -121,7 +120,7 @@ func TestWebhook_Export(t *testing.T) {
 			},
 			args: args{
 				logger: logger,
-				featureEvents: []exporter.FeatureEvent{
+				featureEvents: []FeatureEvent{
 					{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 						Variation: "Default", Value: "YO", Default: false},
 					{Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
@@ -163,6 +162,6 @@ func TestWebhook_Export_impossibleToParse(t *testing.T) {
 		EndpointURL: " http://invalid.com/",
 	}
 
-	err := f.Export(context.Background(), log.New(os.Stdout, "", 0), []exporter.FeatureEvent{})
+	err := f.Export(context.Background(), log.New(os.Stdout, "", 0), []FeatureEvent{})
 	assert.EqualError(t, err, "parse \" http://invalid.com/\": first path segment in URL cannot contain colon")
 }

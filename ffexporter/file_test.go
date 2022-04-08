@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/thomaspoignant/go-feature-flag/ffexporter"
-	"github.com/thomaspoignant/go-feature-flag/internal/exporter"
 )
 
 func TestFile_Export(t *testing.T) {
@@ -22,7 +21,7 @@ func TestFile_Export(t *testing.T) {
 	}
 	type args struct {
 		logger        *log.Logger
-		featureEvents []exporter.FeatureEvent
+		featureEvents []ffexporter.FeatureEvent
 	}
 	type expected struct {
 		fileNameRegex string
@@ -40,7 +39,7 @@ func TestFile_Export(t *testing.T) {
 			wantErr: false,
 			fields:  fields{},
 			args: args{
-				featureEvents: []exporter.FeatureEvent{
+				featureEvents: []ffexporter.FeatureEvent{
 					{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 						Variation: "Default", Value: "YO", Default: false},
 					{Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
@@ -59,7 +58,7 @@ func TestFile_Export(t *testing.T) {
 				Format: "csv",
 			},
 			args: args{
-				featureEvents: []exporter.FeatureEvent{
+				featureEvents: []ffexporter.FeatureEvent{
 					{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 						Variation: "Default", Value: "YO", Default: false},
 					{Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
@@ -79,7 +78,7 @@ func TestFile_Export(t *testing.T) {
 				CsvTemplate: "{{ .Kind}};{{ .ContextKind}}\n",
 			},
 			args: args{
-				featureEvents: []exporter.FeatureEvent{
+				featureEvents: []ffexporter.FeatureEvent{
 					{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 						Variation: "Default", Value: "YO", Default: false},
 					{Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
@@ -99,7 +98,7 @@ func TestFile_Export(t *testing.T) {
 				Filename: "{{ .Format}}-test-{{ .Timestamp}}",
 			},
 			args: args{
-				featureEvents: []exporter.FeatureEvent{
+				featureEvents: []ffexporter.FeatureEvent{
 					{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 						Variation: "Default", Value: "YO", Default: false},
 					{Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
@@ -118,7 +117,7 @@ func TestFile_Export(t *testing.T) {
 				Format: "xxx",
 			},
 			args: args{
-				featureEvents: []exporter.FeatureEvent{
+				featureEvents: []ffexporter.FeatureEvent{
 					{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 						Variation: "Default", Value: "YO", Default: false},
 					{Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
@@ -137,7 +136,7 @@ func TestFile_Export(t *testing.T) {
 				OutputDir: "/tmp/foo/bar/",
 			},
 			args: args{
-				featureEvents: []exporter.FeatureEvent{
+				featureEvents: []ffexporter.FeatureEvent{
 					{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 						Variation: "Default", Value: "YO", Default: false},
 					{Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
@@ -152,7 +151,7 @@ func TestFile_Export(t *testing.T) {
 				Filename: "{{ .InvalidField}}",
 			},
 			args: args{
-				featureEvents: []exporter.FeatureEvent{
+				featureEvents: []ffexporter.FeatureEvent{
 					{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 						Variation: "Default", Value: "YO", Default: false},
 					{Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
@@ -168,7 +167,7 @@ func TestFile_Export(t *testing.T) {
 				CsvTemplate: "{{ .Foo}}",
 			},
 			args: args{
-				featureEvents: []exporter.FeatureEvent{
+				featureEvents: []ffexporter.FeatureEvent{
 					{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 						Variation: "Default", Value: "YO", Default: false},
 					{Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",

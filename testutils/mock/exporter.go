@@ -1,15 +1,14 @@
-package testutils
+package mock
 
 import (
 	"context"
+	"github.com/thomaspoignant/go-feature-flag/ffexporter"
 	"log"
 	"sync"
-
-	"github.com/thomaspoignant/go-feature-flag/internal/exporter"
 )
 
-type MockExporter struct {
-	ExportedEvents    []exporter.FeatureEvent
+type Exporter struct {
+	ExportedEvents    []ffexporter.FeatureEvent
 	Err               error
 	ExpectedNumberErr int
 	CurrentNumberErr  int
@@ -19,7 +18,7 @@ type MockExporter struct {
 	once  sync.Once
 }
 
-func (m *MockExporter) Export(ctx context.Context, logger *log.Logger, events []exporter.FeatureEvent) error {
+func (m *Exporter) Export(ctx context.Context, logger *log.Logger, events []ffexporter.FeatureEvent) error {
 	m.once.Do(m.initMutex)
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
@@ -33,17 +32,17 @@ func (m *MockExporter) Export(ctx context.Context, logger *log.Logger, events []
 	return nil
 }
 
-func (m *MockExporter) GetExportedEvents() []exporter.FeatureEvent {
+func (m *Exporter) GetExportedEvents() []ffexporter.FeatureEvent {
 	m.once.Do(m.initMutex)
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 	return m.ExportedEvents
 }
 
-func (m *MockExporter) IsBulk() bool {
+func (m *Exporter) IsBulk() bool {
 	return m.Bulk
 }
 
-func (m *MockExporter) initMutex() {
+func (m *Exporter) initMutex() {
 	m.mutex = sync.Mutex{}
 }

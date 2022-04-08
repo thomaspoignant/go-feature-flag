@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/thomaspoignant/go-feature-flag/ffexporter"
-	"github.com/thomaspoignant/go-feature-flag/internal/exporter"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
 )
 
@@ -17,7 +16,7 @@ func TestLog_Export(t *testing.T) {
 		Format string
 	}
 	type args struct {
-		featureEvents []exporter.FeatureEvent
+		featureEvents []ffexporter.FeatureEvent
 	}
 	tests := []struct {
 		name        string
@@ -29,7 +28,7 @@ func TestLog_Export(t *testing.T) {
 		{
 			name:   "Default format",
 			fields: fields{Format: ""},
-			args: args{featureEvents: []exporter.FeatureEvent{
+			args: args{featureEvents: []ffexporter.FeatureEvent{
 				{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false},
 			}},
@@ -40,7 +39,7 @@ func TestLog_Export(t *testing.T) {
 			fields: fields{
 				Format: "key=\"{{ .Key}}\" [{{ .FormattedDate}}]",
 			},
-			args: args{featureEvents: []exporter.FeatureEvent{
+			args: args{featureEvents: []ffexporter.FeatureEvent{
 				{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false},
 			}},
@@ -51,7 +50,7 @@ func TestLog_Export(t *testing.T) {
 			fields: fields{
 				Format: "key=\"{{ .Key}\" [{{ .FormattedDate}}]",
 			},
-			args: args{featureEvents: []exporter.FeatureEvent{
+			args: args{featureEvents: []ffexporter.FeatureEvent{
 				{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false},
 			}},
@@ -62,7 +61,7 @@ func TestLog_Export(t *testing.T) {
 			fields: fields{
 				Format: "key=\"{{ .UnknownKey}}\" [{{ .FormattedDate}}]",
 			},
-			args: args{featureEvents: []exporter.FeatureEvent{
+			args: args{featureEvents: []ffexporter.FeatureEvent{
 				{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false},
 			}},

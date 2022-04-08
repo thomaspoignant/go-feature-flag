@@ -12,7 +12,6 @@ import (
 	"sync"
 
 	"github.com/thomaspoignant/go-feature-flag/internal"
-	"github.com/thomaspoignant/go-feature-flag/internal/exporter"
 	"github.com/thomaspoignant/go-feature-flag/internal/signer"
 )
 
@@ -55,11 +54,11 @@ type webhookPayload struct {
 	Meta map[string]string `json:"meta"`
 
 	// events is the list of the event we send in the payload
-	Events []exporter.FeatureEvent `json:"events"`
+	Events []FeatureEvent `json:"events"`
 }
 
 // Export is sending a collection of events in a webhook call.
-func (f *Webhook) Export(ctx context.Context, logger *log.Logger, featureEvents []exporter.FeatureEvent) error {
+func (f *Webhook) Export(ctx context.Context, logger *log.Logger, featureEvents []FeatureEvent) error {
 	f.init.Do(func() {
 		if f.httpClient == nil {
 			f.httpClient = internal.DefaultHTTPClient()

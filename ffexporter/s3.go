@@ -11,7 +11,6 @@ import (
 	"os"
 	"sync"
 
-	"github.com/thomaspoignant/go-feature-flag/internal/exporter"
 	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 )
 
@@ -50,7 +49,7 @@ type S3 struct {
 }
 
 // Export is saving a collection of events in a file.
-func (f *S3) Export(ctx context.Context, logger *log.Logger, featureEvents []exporter.FeatureEvent) error {
+func (f *S3) Export(ctx context.Context, logger *log.Logger, featureEvents []FeatureEvent) error {
 	// init the s3 uploader
 	if f.s3Uploader == nil {
 		var initErr error
