@@ -13,7 +13,7 @@ import (
 type CustomNotifierConfig struct{}
 
 // GetNotifier returns a notfier that implement ffnotifier.Notifier
-func (c *CustomNotifier) GetNotifier(config ffclient.Config) (ffnotifier.Notifier, error) {
+func (c *CustomNotifierConfig) GetNotifier(config ffclient.Config) (ffnotifier.Notifier, error) {
 	return &CustomNotifier{}, nil
 }
 
