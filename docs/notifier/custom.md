@@ -3,7 +3,6 @@ To create a custom notifier you must have a `struct` that implements the [`ffnot
 
 ```go linenums="1"
 import (
-	"fmt"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/ffnotifier"
 	"sync"
