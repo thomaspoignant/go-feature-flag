@@ -4,6 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/stretchr/testify/assert"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
+	"github.com/thomaspoignant/go-feature-flag/testutils/mock"
 	"io/ioutil"
 	"log"
 	"os"
@@ -11,7 +12,6 @@ import (
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
-	"github.com/thomaspoignant/go-feature-flag/testutils"
 )
 
 func TestStartWithoutRetriever(t *testing.T) {
@@ -49,7 +49,7 @@ func TestValidUseCase(t *testing.T) {
 		DataExporter: ffclient.DataExporter{
 			FlushInterval:    10 * time.Second,
 			MaxEventInMemory: 1000,
-			Exporter: &testutils.MockExporter{
+			Exporter: &mock.Exporter{
 				Bulk: true,
 			},
 		},
