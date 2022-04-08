@@ -1,4 +1,4 @@
-package model
+package ffnotifier
 
 import (
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"

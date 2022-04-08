@@ -1,10 +1,10 @@
-package model_test
+package ffnotifier_test
 
 import (
 	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/ffnotifier"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
-	"github.com/thomaspoignant/go-feature-flag/internal/model"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 	"testing"
 )
@@ -13,7 +13,7 @@ func TestDiffCache_HasDiff(t *testing.T) {
 	type fields struct {
 		Deleted map[string]flag.Flag
 		Added   map[string]flag.Flag
-		Updated map[string]model.DiffUpdated
+		Updated map[string]ffnotifier.DiffUpdated
 	}
 	tests := []struct {
 		name   string
@@ -30,7 +30,7 @@ func TestDiffCache_HasDiff(t *testing.T) {
 			fields: fields{
 				Deleted: map[string]flag.Flag{},
 				Added:   map[string]flag.Flag{},
-				Updated: map[string]model.DiffUpdated{},
+				Updated: map[string]ffnotifier.DiffUpdated{},
 			},
 			want: false,
 		},
@@ -46,7 +46,7 @@ func TestDiffCache_HasDiff(t *testing.T) {
 					},
 				},
 				Added:   map[string]flag.Flag{},
-				Updated: map[string]model.DiffUpdated{},
+				Updated: map[string]ffnotifier.DiffUpdated{},
 			},
 			want: true,
 		},
@@ -62,7 +62,7 @@ func TestDiffCache_HasDiff(t *testing.T) {
 					},
 				},
 				Deleted: map[string]flag.Flag{},
-				Updated: map[string]model.DiffUpdated{},
+				Updated: map[string]ffnotifier.DiffUpdated{},
 			},
 			want: true,
 		},
@@ -71,7 +71,7 @@ func TestDiffCache_HasDiff(t *testing.T) {
 			fields: fields{
 				Added:   map[string]flag.Flag{},
 				Deleted: map[string]flag.Flag{},
-				Updated: map[string]model.DiffUpdated{
+				Updated: map[string]ffnotifier.DiffUpdated{
 					"flag": {
 						Before: &flagv1.FlagData{
 							Percentage: testconvert.Float64(100),
@@ -109,7 +109,7 @@ func TestDiffCache_HasDiff(t *testing.T) {
 						Default:    testconvert.Interface(true),
 					},
 				},
-				Updated: map[string]model.DiffUpdated{
+				Updated: map[string]ffnotifier.DiffUpdated{
 					"flag": {
 						Before: &flagv1.FlagData{
 							Percentage: testconvert.Float64(100),
@@ -131,7 +131,7 @@ func TestDiffCache_HasDiff(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			d := model.DiffCache{
+			d := ffnotifier.DiffCache{
 				Deleted: tt.fields.Deleted,
 				Added:   tt.fields.Added,
 				Updated: tt.fields.Updated,

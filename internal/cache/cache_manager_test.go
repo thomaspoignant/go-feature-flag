@@ -2,12 +2,11 @@ package cache_test
 
 import (
 	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/ffnotifier"
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
 	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 	"testing"
-
-	"github.com/thomaspoignant/go-feature-flag/internal/notifier"
 )
 
 func Test_FlagCacheNotInit(t *testing.T) {
@@ -164,7 +163,7 @@ disable = false`),
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fCache := cache.New(cache.NewNotificationService([]notifier.Notifier{}))
+			fCache := cache.New(cache.NewNotificationService([]ffnotifier.Notifier{}))
 			err := fCache.UpdateCache(tt.args.loadedFlags, tt.flagFormat)
 			if tt.wantErr {
 				assert.Error(t, err, "UpdateCache() error = %v, wantErr %v", err, tt.wantErr)
@@ -274,7 +273,7 @@ test-flag2:
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fCache := cache.New(cache.NewNotificationService([]notifier.Notifier{}))
+			fCache := cache.New(cache.NewNotificationService([]ffnotifier.Notifier{}))
 			_ = fCache.UpdateCache(tt.args.loadedFlags, tt.flagFormat)
 
 			allFlags, err := fCache.AllFlags()

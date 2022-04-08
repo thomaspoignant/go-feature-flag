@@ -2,6 +2,7 @@ package notifier_test
 
 import (
 	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/ffnotifier"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
 	"github.com/thomaspoignant/go-feature-flag/internal/notifier"
@@ -14,14 +15,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/thomaspoignant/go-feature-flag/internal/model"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 )
 
 func TestSlackNotifier_Notify(t *testing.T) {
 	type args struct {
-		diff       model.DiffCache
+		diff       ffnotifier.DiffCache
 		statusCode int
 		forceError bool
 	}
@@ -43,7 +43,7 @@ func TestSlackNotifier_Notify(t *testing.T) {
 			},
 			args: args{
 				statusCode: http.StatusOK,
-				diff: model.DiffCache{
+				diff: ffnotifier.DiffCache{
 					Added: map[string]flag.Flag{
 						"test-flag3": &flagv1.FlagData{
 							Percentage:  testconvert.Float64(5),
@@ -65,7 +65,7 @@ func TestSlackNotifier_Notify(t *testing.T) {
 							Default:    testconvert.Interface(false),
 						},
 					},
-					Updated: map[string]model.DiffUpdated{
+					Updated: map[string]ffnotifier.DiffUpdated{
 						"test-flag2": {
 							Before: &flagv1.FlagData{
 								Percentage:  testconvert.Float64(100),
@@ -103,7 +103,7 @@ func TestSlackNotifier_Notify(t *testing.T) {
 			},
 			args: args{
 				statusCode: http.StatusBadRequest,
-				diff:       model.DiffCache{},
+				diff:       ffnotifier.DiffCache{},
 			},
 		},
 		{
@@ -114,7 +114,7 @@ func TestSlackNotifier_Notify(t *testing.T) {
 			},
 			args: args{
 				statusCode: http.StatusOK,
-				diff:       model.DiffCache{},
+				diff:       ffnotifier.DiffCache{},
 				forceError: true,
 			},
 		},

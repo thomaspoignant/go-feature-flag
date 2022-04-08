@@ -2,6 +2,7 @@ package ffclient
 
 import (
 	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/ffnotifier"
 	"log"
 	"net/http"
 	"net/url"
@@ -23,7 +24,7 @@ func TestGoFeatureFlag_getNotifiers(t *testing.T) {
 	tests := []struct {
 		name    string
 		fields  fields
-		want    []notifier.Notifier
+		want    []ffnotifier.Notifier
 		wantErr bool
 	}{
 		{
@@ -46,7 +47,7 @@ func TestGoFeatureFlag_getNotifiers(t *testing.T) {
 					},
 				},
 			},
-			want: []notifier.Notifier{
+			want: []ffnotifier.Notifier{
 				&notifier.LogNotifier{Logger: log.New(os.Stdout, "", 0)},
 				&notifier.WebhookNotifier{
 					Logger: log.New(os.Stdout, "", 0),

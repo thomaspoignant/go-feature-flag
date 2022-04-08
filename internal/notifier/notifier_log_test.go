@@ -2,6 +2,7 @@ package notifier
 
 import (
 	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/ffnotifier"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
@@ -11,13 +12,12 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/thomaspoignant/go-feature-flag/internal/model"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
 )
 
 func TestLogNotifier_Notify(t *testing.T) {
 	type args struct {
-		diff model.DiffCache
+		diff ffnotifier.DiffCache
 		wg   *sync.WaitGroup
 	}
 	tests := []struct {
@@ -28,7 +28,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 		{
 			name: "Flag deleted",
 			args: args{
-				diff: model.DiffCache{
+				diff: ffnotifier.DiffCache{
 					Deleted: map[string]flag.Flag{
 						"test-flag": &flagv1.FlagData{
 							Percentage: testconvert.Float64(100),
@@ -37,7 +37,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 							Default:    testconvert.Interface(false),
 						},
 					},
-					Updated: map[string]model.DiffUpdated{},
+					Updated: map[string]ffnotifier.DiffUpdated{},
 					Added:   map[string]flag.Flag{},
 				},
 				wg: &sync.WaitGroup{},
@@ -47,9 +47,9 @@ func TestLogNotifier_Notify(t *testing.T) {
 		{
 			name: "Update flag",
 			args: args{
-				diff: model.DiffCache{
+				diff: ffnotifier.DiffCache{
 					Deleted: map[string]flag.Flag{},
-					Updated: map[string]model.DiffUpdated{
+					Updated: map[string]ffnotifier.DiffUpdated{
 						"test-flag": {
 							Before: &flagv1.FlagData{
 								Rule:       testconvert.String("key eq \"random-key\""),
@@ -75,9 +75,9 @@ func TestLogNotifier_Notify(t *testing.T) {
 		{
 			name: "Disable flag",
 			args: args{
-				diff: model.DiffCache{
+				diff: ffnotifier.DiffCache{
 					Deleted: map[string]flag.Flag{},
-					Updated: map[string]model.DiffUpdated{
+					Updated: map[string]ffnotifier.DiffUpdated{
 						"test-flag": {
 							Before: &flagv1.FlagData{
 								Rule:       testconvert.String("key eq \"random-key\""),
@@ -105,9 +105,9 @@ func TestLogNotifier_Notify(t *testing.T) {
 		{
 			name: "Add flag",
 			args: args{
-				diff: model.DiffCache{
+				diff: ffnotifier.DiffCache{
 					Deleted: map[string]flag.Flag{},
-					Updated: map[string]model.DiffUpdated{},
+					Updated: map[string]ffnotifier.DiffUpdated{},
 					Added: map[string]flag.Flag{
 						"add-test-flag": &flagv1.FlagData{
 							Rule:       testconvert.String("key eq \"random-key\""),
@@ -125,9 +125,9 @@ func TestLogNotifier_Notify(t *testing.T) {
 		{
 			name: "Enable flag",
 			args: args{
-				diff: model.DiffCache{
+				diff: ffnotifier.DiffCache{
 					Deleted: map[string]flag.Flag{},
-					Updated: map[string]model.DiffUpdated{
+					Updated: map[string]ffnotifier.DiffUpdated{
 						"test-flag": {
 							After: &flagv1.FlagData{
 								Rule:       testconvert.String("key eq \"random-key\""),
