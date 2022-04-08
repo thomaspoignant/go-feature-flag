@@ -14,10 +14,6 @@ Describe what you think went wrong during this.
 # Expected behavior
 
 
-# Browser, device, and OS
-<!--
-This is just to get a bit of context.
--->
 
 # Steps to reproduce
 <!--
