@@ -2,11 +2,9 @@ package cache
 
 import (
 	"github.com/google/go-cmp/cmp"
+	"github.com/thomaspoignant/go-feature-flag/ffnotifier"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"sync"
-
-	"github.com/thomaspoignant/go-feature-flag/internal/model"
-	"github.com/thomaspoignant/go-feature-flag/internal/notifier"
 )
 
 type Service interface {
@@ -14,7 +12,7 @@ type Service interface {
 	Notify(oldCache map[string]flag.Flag, newCache map[string]flag.Flag)
 }
 
-func NewNotificationService(notifiers []notifier.Notifier) Service {
+func NewNotificationService(notifiers []ffnotifier.Notifier) Service {
 	return &notificationService{
 		Notifiers: notifiers,
 		waitGroup: &sync.WaitGroup{},
@@ -22,7 +20,7 @@ func NewNotificationService(notifiers []notifier.Notifier) Service {
 }
 
 type notificationService struct {
-	Notifiers []notifier.Notifier
+	Notifiers []ffnotifier.Notifier
 	waitGroup *sync.WaitGroup
 }
 
@@ -42,11 +40,11 @@ func (c *notificationService) Close() {
 
 // getDifferences is checking what are the difference in the updated cache.
 func (c *notificationService) getDifferences(
-	oldCache map[string]flag.Flag, newCache map[string]flag.Flag) model.DiffCache {
-	diff := model.DiffCache{
+	oldCache map[string]flag.Flag, newCache map[string]flag.Flag) ffnotifier.DiffCache {
+	diff := ffnotifier.DiffCache{
 		Deleted: map[string]flag.Flag{},
 		Added:   map[string]flag.Flag{},
-		Updated: map[string]model.DiffUpdated{},
+		Updated: map[string]ffnotifier.DiffUpdated{},
 	}
 	for key := range oldCache {
 		newFlag, inNewCache := newCache[key]
@@ -57,7 +55,7 @@ func (c *notificationService) getDifferences(
 		}
 
 		if !cmp.Equal(oldCache[key], newCache[key]) {
-			diff.Updated[key] = model.DiffUpdated{
+			diff.Updated[key] = ffnotifier.DiffUpdated{
 				Before: oldFlag,
 				After:  newFlag,
 			}

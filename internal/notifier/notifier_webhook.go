@@ -3,6 +3,7 @@ package notifier
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/thomaspoignant/go-feature-flag/ffnotifier"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -12,7 +13,6 @@ import (
 
 	"github.com/thomaspoignant/go-feature-flag/internal"
 	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
-	"github.com/thomaspoignant/go-feature-flag/internal/model"
 	"github.com/thomaspoignant/go-feature-flag/internal/signer"
 )
 
@@ -49,8 +49,8 @@ func NewWebhookNotifier(logger *log.Logger,
 }
 
 type webhookReqBody struct {
-	Meta  map[string]string `json:"meta"`
-	Flags model.DiffCache   `json:"flags"`
+	Meta  map[string]string    `json:"meta"`
+	Flags ffnotifier.DiffCache `json:"flags"`
 }
 
 type WebhookNotifier struct {
@@ -61,7 +61,7 @@ type WebhookNotifier struct {
 	Meta        map[string]string
 }
 
-func (c *WebhookNotifier) Notify(diff model.DiffCache, wg *sync.WaitGroup) {
+func (c *WebhookNotifier) Notify(diff ffnotifier.DiffCache, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	// Create request body

@@ -1,12 +1,13 @@
 package ffclient
 
 import (
+	"github.com/thomaspoignant/go-feature-flag/ffnotifier"
 	"github.com/thomaspoignant/go-feature-flag/internal/notifier"
 )
 
 // getNotifiers is creating Notifier from the config
-func getNotifiers(config Config) ([]notifier.Notifier, error) {
-	notifiers := make([]notifier.Notifier, 0)
+func getNotifiers(config Config) ([]ffnotifier.Notifier, error) {
+	notifiers := make([]ffnotifier.Notifier, 0)
 	if config.Logger != nil {
 		notifiers = append(notifiers, &notifier.LogNotifier{Logger: config.Logger})
 	}

@@ -3,6 +3,7 @@ package ffclient
 import (
 	"context"
 	"errors"
+	"github.com/thomaspoignant/go-feature-flag/ffnotifier"
 	"log"
 	"time"
 
@@ -73,7 +74,7 @@ func (c *Config) GetRetriever() (Retriever, error) {
 //        // ...
 //    }
 type NotifierConfig interface {
-	GetNotifier(config Config) (notifier.Notifier, error)
+	GetNotifier(config Config) (ffnotifier.Notifier, error)
 }
 
 // WebhookConfig is the configuration of your webhook.
@@ -133,7 +134,7 @@ type WebhookConfig struct {
 }
 
 // GetNotifier convert the configuration in a Notifier struct
-func (w *WebhookConfig) GetNotifier(config Config) (notifier.Notifier, error) {
+func (w *WebhookConfig) GetNotifier(config Config) (ffnotifier.Notifier, error) {
 	url := w.EndpointURL
 
 	// remove this if when EndpointURL will be removed
@@ -153,7 +154,7 @@ type SlackNotifier struct {
 }
 
 // GetNotifier convert the configuration in a Notifier struct
-func (w *SlackNotifier) GetNotifier(config Config) (notifier.Notifier, error) {
+func (w *SlackNotifier) GetNotifier(config Config) (ffnotifier.Notifier, error) {
 	notifier := notifier.NewSlackNotifier(config.Logger, internal.DefaultHTTPClient(), w.SlackWebhookURL)
 	return &notifier, nil
 }

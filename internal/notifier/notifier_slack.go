@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/thomaspoignant/go-feature-flag/ffnotifier"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -14,7 +15,6 @@ import (
 
 	"github.com/thomaspoignant/go-feature-flag/internal"
 	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
-	"github.com/thomaspoignant/go-feature-flag/internal/model"
 )
 
 const goFFLogo = "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png"
@@ -39,7 +39,7 @@ type SlackNotifier struct {
 	WebhookURL url.URL
 }
 
-func (c *SlackNotifier) Notify(diff model.DiffCache, wg *sync.WaitGroup) {
+func (c *SlackNotifier) Notify(diff ffnotifier.DiffCache, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	reqBody := convertToSlackMessage(diff)
@@ -68,7 +68,7 @@ func (c *SlackNotifier) Notify(diff model.DiffCache, wg *sync.WaitGroup) {
 	}
 }
 
-func convertToSlackMessage(diff model.DiffCache) slackMessage {
+func convertToSlackMessage(diff ffnotifier.DiffCache) slackMessage {
 	hostname, _ := os.Hostname()
 	attachments := convertDeletedFlagsToSlackMessage(diff)
 	attachments = append(attachments, convertUpdatedFlagsToSlackMessage(diff)...)
@@ -81,7 +81,7 @@ func convertToSlackMessage(diff model.DiffCache) slackMessage {
 	return res
 }
 
-func convertDeletedFlagsToSlackMessage(diff model.DiffCache) []attachment {
+func convertDeletedFlagsToSlackMessage(diff ffnotifier.DiffCache) []attachment {
 	var attachments = make([]attachment, 0)
 	for key := range diff.Deleted {
 		attachment := attachment{
@@ -95,7 +95,7 @@ func convertDeletedFlagsToSlackMessage(diff model.DiffCache) []attachment {
 	return attachments
 }
 
-func convertUpdatedFlagsToSlackMessage(diff model.DiffCache) []attachment {
+func convertUpdatedFlagsToSlackMessage(diff ffnotifier.DiffCache) []attachment {
 	var attachments = make([]attachment, 0)
 	for key, value := range diff.Updated {
 		attachment := attachment{
@@ -129,7 +129,7 @@ func convertUpdatedFlagsToSlackMessage(diff model.DiffCache) []attachment {
 	return attachments
 }
 
-func convertAddedFlagsToSlackMessage(diff model.DiffCache) []attachment {
+func convertAddedFlagsToSlackMessage(diff ffnotifier.DiffCache) []attachment {
 	var attachments = make([]attachment, 0)
 	for key, value := range diff.Added {
 		attachment := attachment{

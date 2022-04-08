@@ -1,18 +1,18 @@
 package notifier
 
 import (
+	"github.com/thomaspoignant/go-feature-flag/ffnotifier"
 	"log"
 	"sync"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
-	"github.com/thomaspoignant/go-feature-flag/internal/model"
 )
 
 type LogNotifier struct {
 	Logger *log.Logger
 }
 
-func (c *LogNotifier) Notify(diff model.DiffCache, wg *sync.WaitGroup) {
+func (c *LogNotifier) Notify(diff ffnotifier.DiffCache, wg *sync.WaitGroup) {
 	defer wg.Done()
 	for key := range diff.Deleted {
 		fflog.Printf(c.Logger, "flag %v removed\n", key)
