@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/ffexporter"
+	"github.com/thomaspoignant/go-feature-flag/testutils/mock"
 	"io/ioutil"
 	"log"
 	"os"
@@ -17,14 +19,14 @@ import (
 )
 
 func TestDataExporterScheduler_flushWithTime(t *testing.T) {
-	mockExporter := testutils.MockExporter{Bulk: true}
+	mockExporter := mock.Exporter{Bulk: true}
 	dc := exporter.NewDataExporterScheduler(
 		context.Background(), 10*time.Millisecond, 1000, &mockExporter, log.New(os.Stdout, "", 0))
 	go dc.StartDaemon()
 	defer dc.Close()
 
-	inputEvents := []exporter.FeatureEvent{
-		exporter.NewFeatureEvent(ffuser.NewAnonymousUser("ABCD"), "random-key",
+	inputEvents := []ffexporter.FeatureEvent{
+		ffexporter.NewFeatureEvent(ffuser.NewAnonymousUser("ABCD"), "random-key",
 			"YO", model.VariationDefault, false, 0),
 	}
 
@@ -37,15 +39,15 @@ func TestDataExporterScheduler_flushWithTime(t *testing.T) {
 }
 
 func TestDataExporterScheduler_flushWithNumberOfEvents(t *testing.T) {
-	mockExporter := testutils.MockExporter{Bulk: true}
+	mockExporter := mock.Exporter{Bulk: true}
 	dc := exporter.NewDataExporterScheduler(
 		context.Background(), 10*time.Minute, 100, &mockExporter, log.New(os.Stdout, "", 0))
 	go dc.StartDaemon()
 	defer dc.Close()
 
-	var inputEvents []exporter.FeatureEvent
+	var inputEvents []ffexporter.FeatureEvent
 	for i := 0; i <= 100; i++ {
-		inputEvents = append(inputEvents, exporter.NewFeatureEvent(ffuser.NewAnonymousUser("ABCD"),
+		inputEvents = append(inputEvents, ffexporter.NewFeatureEvent(ffuser.NewAnonymousUser("ABCD"),
 			"random-key", "YO", model.VariationDefault, false, 0))
 	}
 	for _, event := range inputEvents {
@@ -55,15 +57,15 @@ func TestDataExporterScheduler_flushWithNumberOfEvents(t *testing.T) {
 }
 
 func TestDataExporterScheduler_defaultFlush(t *testing.T) {
-	mockExporter := testutils.MockExporter{Bulk: true}
+	mockExporter := mock.Exporter{Bulk: true}
 	dc := exporter.NewDataExporterScheduler(
 		context.Background(), 0, 0, &mockExporter, log.New(os.Stdout, "", 0))
 	go dc.StartDaemon()
 	defer dc.Close()
 
-	var inputEvents []exporter.FeatureEvent
+	var inputEvents []ffexporter.FeatureEvent
 	for i := 0; i <= 100000; i++ {
-		inputEvents = append(inputEvents, exporter.NewFeatureEvent(ffuser.NewAnonymousUser("ABCD"),
+		inputEvents = append(inputEvents, ffexporter.NewFeatureEvent(ffuser.NewAnonymousUser("ABCD"),
 			"random-key", "YO", model.VariationDefault, false, 0))
 	}
 	for _, event := range inputEvents {
@@ -73,7 +75,7 @@ func TestDataExporterScheduler_defaultFlush(t *testing.T) {
 }
 
 func TestDataExporterScheduler_exporterReturnError(t *testing.T) {
-	mockExporter := testutils.MockExporter{Err: errors.New("random err"), ExpectedNumberErr: 1, Bulk: true}
+	mockExporter := mock.Exporter{Err: errors.New("random err"), ExpectedNumberErr: 1, Bulk: true}
 
 	file, _ := ioutil.TempFile("", "log")
 	defer file.Close()
@@ -85,9 +87,9 @@ func TestDataExporterScheduler_exporterReturnError(t *testing.T) {
 	go dc.StartDaemon()
 	defer dc.Close()
 
-	var inputEvents []exporter.FeatureEvent
+	var inputEvents []ffexporter.FeatureEvent
 	for i := 0; i <= 200; i++ {
-		inputEvents = append(inputEvents, exporter.NewFeatureEvent(ffuser.NewAnonymousUser("ABCD"),
+		inputEvents = append(inputEvents, ffexporter.NewFeatureEvent(ffuser.NewAnonymousUser("ABCD"),
 			"random-key", "YO", model.VariationDefault, false, 0))
 	}
 	for _, event := range inputEvents {
@@ -101,14 +103,14 @@ func TestDataExporterScheduler_exporterReturnError(t *testing.T) {
 }
 
 func TestDataExporterScheduler_nonBulkExporter(t *testing.T) {
-	mockExporter := testutils.MockExporter{Bulk: false}
+	mockExporter := mock.Exporter{Bulk: false}
 	dc := exporter.NewDataExporterScheduler(
 		context.Background(), 0, 0, &mockExporter, log.New(os.Stdout, "", 0))
 	defer dc.Close()
 
-	var inputEvents []exporter.FeatureEvent
+	var inputEvents []ffexporter.FeatureEvent
 	for i := 0; i < 100; i++ {
-		inputEvents = append(inputEvents, exporter.NewFeatureEvent(ffuser.NewAnonymousUser("ABCD"),
+		inputEvents = append(inputEvents, ffexporter.NewFeatureEvent(ffuser.NewAnonymousUser("ABCD"),
 			"random-key", "YO", model.VariationDefault, false, 0))
 	}
 	for _, event := range inputEvents {

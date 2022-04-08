@@ -5,10 +5,9 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager/s3manageriface"
 	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/testutils"
 	"io/ioutil"
 	"testing"
-
-	"github.com/thomaspoignant/go-feature-flag/testutils"
 )
 
 func Test_s3Retriever_Retrieve(t *testing.T) {

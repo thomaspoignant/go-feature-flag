@@ -7,8 +7,6 @@ import (
 	"sync"
 	"text/template"
 	"time"
-
-	"github.com/thomaspoignant/go-feature-flag/internal/exporter"
 )
 
 const defaultLoggerFormat = "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", value=\"{{ .Value}}\""
@@ -25,7 +23,7 @@ type Log struct {
 }
 
 // Export is saving a collection of events in a file.
-func (f *Log) Export(ctx context.Context, logger *log.Logger, featureEvents []exporter.FeatureEvent) error {
+func (f *Log) Export(ctx context.Context, logger *log.Logger, featureEvents []FeatureEvent) error {
 	f.initTemplates.Do(func() {
 		f.logTemplate = parseTemplate("logFormat", f.Format, defaultLoggerFormat)
 	})
@@ -33,7 +31,7 @@ func (f *Log) Export(ctx context.Context, logger *log.Logger, featureEvents []ex
 	for _, event := range featureEvents {
 		var log bytes.Buffer
 		err := f.logTemplate.Execute(&log, struct {
-			exporter.FeatureEvent
+			FeatureEvent
 			FormattedDate string
 		}{FeatureEvent: event, FormattedDate: time.Unix(event.CreationDate, 0).Format(time.RFC3339)})
 

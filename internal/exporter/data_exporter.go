@@ -2,6 +2,7 @@ package exporter
 
 import (
 	"context"
+	"github.com/thomaspoignant/go-feature-flag/ffexporter"
 	"log"
 	"sync"
 	"time"
@@ -28,7 +29,7 @@ func NewDataExporterScheduler(ctx context.Context, flushInterval time.Duration, 
 	}
 
 	return &DataExporterScheduler{
-		localCache:      make([]FeatureEvent, 0),
+		localCache:      make([]ffexporter.FeatureEvent, 0),
 		mutex:           sync.Mutex{},
 		maxEventInCache: maxEventInMemory,
 		exporter:        exporter,
@@ -42,7 +43,7 @@ func NewDataExporterScheduler(ctx context.Context, flushInterval time.Duration, 
 // Exporter is an interface to describe how a exporter looks like.
 type Exporter interface {
 	// Export will send the data to the exporter.
-	Export(context.Context, *log.Logger, []FeatureEvent) error
+	Export(context.Context, *log.Logger, []ffexporter.FeatureEvent) error
 
 	// IsBulk return false if we should directly send the data as soon as it is produce
 	// and true if we collect the data to send them in bulk.
@@ -51,7 +52,7 @@ type Exporter interface {
 
 // DataExporterScheduler is the struct that handle the data collection.
 type DataExporterScheduler struct {
-	localCache      []FeatureEvent
+	localCache      []ffexporter.FeatureEvent
 	mutex           sync.Mutex
 	daemonChan      chan struct{}
 	ticker          *time.Ticker
@@ -63,7 +64,7 @@ type DataExporterScheduler struct {
 
 // AddEvent allow to add an event to the local cache and to call the exporter if we reach
 // the maximum number of events that can be present in the cache.
-func (dc *DataExporterScheduler) AddEvent(event FeatureEvent) {
+func (dc *DataExporterScheduler) AddEvent(event ffexporter.FeatureEvent) {
 	dc.mutex.Lock()
 	defer dc.mutex.Unlock()
 
@@ -120,5 +121,5 @@ func (dc *DataExporterScheduler) flush() {
 		}
 	}
 	// Clear the cache
-	dc.localCache = make([]FeatureEvent, 0)
+	dc.localCache = make([]ffexporter.FeatureEvent, 0)
 }

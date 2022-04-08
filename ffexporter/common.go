@@ -8,8 +8,6 @@ import (
 	"strings"
 	"text/template"
 	"time"
-
-	"github.com/thomaspoignant/go-feature-flag/internal/exporter"
 )
 
 const DefaultCsvTemplate = "{{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};" +
@@ -47,13 +45,13 @@ func computeFilename(template *template.Template, format string) (string, error)
 	return buf.String(), err
 }
 
-func formatEventInCSV(csvTemplate *template.Template, event exporter.FeatureEvent) ([]byte, error) {
+func formatEventInCSV(csvTemplate *template.Template, event FeatureEvent) ([]byte, error) {
 	var buf bytes.Buffer
 	err := csvTemplate.Execute(&buf, event)
 	return buf.Bytes(), err
 }
 
-func formatEventInJSON(event exporter.FeatureEvent) ([]byte, error) {
+func formatEventInJSON(event FeatureEvent) ([]byte, error) {
 	b, err := json.Marshal(event)
 	b = append(b, []byte("\n")...)
 	return b, err
