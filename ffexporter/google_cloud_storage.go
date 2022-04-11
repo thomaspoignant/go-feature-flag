@@ -49,9 +49,13 @@ func (f *GoogleCloudStorage) IsBulk() bool {
 // Export is saving a collection of events in a file.
 func (f *GoogleCloudStorage) Export(ctx context.Context, logger *log.Logger, featureEvents []FeatureEvent) error {
 	// Init google storage client
-	f.client, err := storage.NewClient(ctx, f.Options...)
+	client, err := storage.NewClient(ctx, f.Options...)
 	if err != nil {
 		return err
+	}
+
+	if f.Bucket == "" {
+		return fmt.Errorf("you should specify a bucket. %v is invalid", f.Bucket)
 	}
 
 	// Create a temp directory to store the file we will produce
