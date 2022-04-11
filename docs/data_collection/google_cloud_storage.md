@@ -1,16 +1,13 @@
-# S3 Exporter
+# Google Cloud Storage Exporter
 
-The **S3 exporter** will collect the data and create a new file in a specific folder everytime we send the data.
+The **Google Cloud Storage exporter** will collect the data and create a new file in a specific folder everytime we send the data.
 
 Everytime the `FlushInterval` or `MaxEventInMemory` is reached a new file will be added to S3.
 
 !!! Info
-    If for some reason the S3 upload failed, we will keep the data in memory and retry to add the next time we reach `FlushInterval` or `MaxEventInMemory`.
+    If for some reason the Google Cloud Storage upload failed, we will keep the data in memory and retry to add the next time we reach `FlushInterval` or `MaxEventInMemory`.
 
-![export in S3 screenshot](../assets/s3-exporter.png)
-
-
-Check this [complete example](https://github.com/thomaspoignant/go-feature-flag/tree/main/examples/data_export_s3) to see how to export the data in S3.
+Check this [complete example](https://github.com/thomaspoignant/go-feature-flag/tree/main/examples/data_export_googlecloudstorage) to see how to export the data in S3.
 
 ## Configuration example
 ```go linenums="1"
@@ -18,16 +15,12 @@ ffclient.Config{
     // ...
    DataExporter: ffclient.DataExporter{
         // ...
-        Exporter: &ffexporter.S3{
-            Format: "csv",
-            FileName: "flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}",
-            CsvTemplate: "{{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}}\n",
-            Bucket:    "my-bucket",
-            S3Path:    "/go-feature-flag/variations/",
-            Filename:  "flag-variation-{{ .Timestamp}}.{{ .Format}}",
-            AwsConfig: &aws.Config{
-               Region: aws.String("eu-west-1"),
-           },
+        Exporter: &ffexporter.GoogleCloudStorage{
+            Bucket:   "test-goff",
+            Format:   "json",
+            Path:     "yourPath",
+            Filename: "flag-variation-{{ .Timestamp}}.{{ .Format}}",
+            Options:  []option.ClientOption{}, // Your google cloud SDK options
         },
     },
     // ...
@@ -37,11 +30,11 @@ ffclient.Config{
 ## Configuration fields
 | Field         | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 |---------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `Bucket `     | Name of your S3 Bucket.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `AwsConfig `  | An instance of `aws.Config` that configure your access to AWS *(see [this documentation for more info](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html))*.                                                                                                                                                                                                                                                                                                                                                          |
+| `Bucket `     | Name of your Google Cloud Storage Bucket.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | `CsvTemplate` | *(optional)* CsvTemplate is used if your output format is CSV. This field will be ignored if you are using another format than CSV. You can decide which fields you want in your CSV line with a go-template syntax, please check [internal/exporter/feature_event.go](https://github.com/thomaspoignant/go-feature-flag/blob/main/internal/exporter/feature_event.go) to see what are the fields available.<br>**Default:** `{{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}}\n` |
 | `Filename`    | *(optional)* Filename is the name of your output file. You can use a templated config to define the name of your exported files.<br>Available replacement are `{{ .Hostname}}`, `{{ .Timestamp}`} and `{{ .Format}}`<br>Default: `flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}`                                                                                                                                                                                                                                                      |
 | `Format`      | *(optional)* Format is the output format you want in your exported file. Available format are **`JSON`** and **`CSV`**. *(Default: `JSON`)*                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `S3Path `     | *(optional)* The location of the directory in S3.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `Options`     | *(optional)* An instance of `option.ClientOption` that configures your access to Google Cloud. <br> Check [this documentation for more info](https://cloud.google.com/docs/authentication).                                                                                                                                                                                                                                                                                                                                                        |
+| `Path `       | *(optional)* The location of the directory in your bucket.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 
-Check the [godoc for full details](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/ffexporter#S3).
+Check the [godoc for full details](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/ffexporter#GoogleCloudStorage).

@@ -117,17 +117,17 @@ ffclient.Init(ffclient.Config{
 ```
 ### Configuration fields
 
-| Field | Description |
-|---|---|
-|`Retriever`  | The configuration retriever you want to use to get your flag file.<br> *See [Store your flag file](https://thomaspoignant.github.io/go-feature-flag/latest/flag_file/) for the configuration details*.|
-|`Context`  | *(optional)*<br>The context used by the retriever.<br />Default: `context.Background()`|
-|`DataExporter` | *(optional)*<br>DataExporter defines how to export data on how your flags are used.<br> *see [export data section](https://thomaspoignant.github.io/go-feature-flag/latest/data_collection/) for more details*.|
-|`FileFormat`| *(optional)*<br>Format of your configuration file. Available formats are `yaml`, `toml` and `json`, if you omit the field it will try to unmarshal the file as a `yaml` file.<br>Default: `YAML`|
-|`Logger`   | *(optional)*<br>Logger used to log what `go-feature-flag` is doing.<br />If no logger is provided the module will not log anything.<br>Default: No log|
-|`Notifiers` | *(optional)*<br>List of notifiers to call when your flag file has been changed.<br> *See [notifiers section](https://thomaspoignant.github.io/go-feature-flag/latest/notifier/) for more details*.|
-|`PollingInterval`   | *(optional)* Duration to wait before refreshing the flags.<br>The minimum polling interval is 1 second.<br>Default: 60 * time.Second|
-|`StartWithRetrieverError` | *(optional)*<br>If **true**, the SDK will start even if we did not get any flags from the retriever. It will serve only default values until the retriever returns the flags.<br>The init method will not return any error if the flag file is unreachable.<br>Default: **false**|
-|`Offline`| *(optional)* If **true**, the SDK will not try to retrieve the flag file and will not export any data. No notification will be send neither.<br>Default: false|
+| Field                     | Description                                                                                                                                                                                                                                                                       |
+|---------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Retriever`               | The configuration retriever you want to use to get your flag file.<br> *See [Store your flag file](https://thomaspoignant.github.io/go-feature-flag/latest/flag_file/) for the configuration details*.                                                                            |
+| `Context`                 | *(optional)*<br>The context used by the retriever.<br />Default: `context.Background()`                                                                                                                                                                                           |
+| `DataExporter`            | *(optional)*<br>DataExporter defines how to export data on how your flags are used.<br> *see [export data section](https://thomaspoignant.github.io/go-feature-flag/latest/data_collection/) for more details*.                                                                   |
+| `FileFormat`              | *(optional)*<br>Format of your configuration file. Available formats are `yaml`, `toml` and `json`, if you omit the field it will try to unmarshal the file as a `yaml` file.<br>Default: `YAML`                                                                                  |
+| `Logger`                  | *(optional)*<br>Logger used to log what `go-feature-flag` is doing.<br />If no logger is provided the module will not log anything.<br>Default: No log                                                                                                                            |
+| `Notifiers`               | *(optional)*<br>List of notifiers to call when your flag file has been changed.<br> *See [notifiers section](https://thomaspoignant.github.io/go-feature-flag/latest/notifier/) for more details*.                                                                                |
+| `PollingInterval`         | *(optional)* Duration to wait before refreshing the flags.<br>The minimum polling interval is 1 second.<br>Default: 60 * time.Second                                                                                                                                              |
+| `StartWithRetrieverError` | *(optional)*<br>If **true**, the SDK will start even if we did not get any flags from the retriever. It will serve only default values until the retriever returns the flags.<br>The init method will not return any error if the flag file is unreachable.<br>Default: **false** |
+| `Offline`                 | *(optional)* If **true**, the SDK will not try to retrieve the flag file and will not export any data. No notification will be send neither.<br>Default: false                                                                                                                    |
 
 ### Multiple configuration flag files
 `go-feature-flag` comes ready to use out of the box by calling the `Init` function and it will be available everywhere.  
@@ -251,18 +251,18 @@ version = 12.0
 </details>
 
 
-| Field | Description |
-|:---:|---|
-| **flag-key** | Name of your flag.<br> It must be unique.<br>*On the example the flag keys are **`test-flag`** and **`test-flag2`**.*|
-| `true` | Value returned by the flag if the rule is evaluated to true and the user is in the active percentage.|
-| `false`| Value returned by the flag if the rule is evaluated to true and the user is **not** in the active percentage.|
-| `default` |Value returned by the flag if the rule is evaluated to false.|
-| `percentage` |*(optional)*<br>Percentage of users who should be affected by the flag.<br>**Default: 0**<br><br>The percentage is computed by calculating a hash of the user key *(100000 variations)*, it means that you can have 3 numbers after the comma.|
-| `rule` |*(optional)*<br>Condition to determine on which user the flag should be applied.<br>Rule format is described in the <a href="#rule-format">rule format section</a>.<br>**If no rule is set, the flag applies to all users *(percentage still apply)*.**|
-| `disable` |*(optional)*<br>True if the flag is disabled.<br>**Default: `false`**|
-| `trackEvents` |*(optional)*<br>False if you don't want to export the data in your data exporter.<br>**Default: `true`**|
-| `version` |*(optional)*<br>The version is the version of your flag.<br>This number is used to display the information in the notifiers and data collection, you have to update it your self.<br>**Default: 0**|
-| `rollout` |*(optional)*<br><code>rollout</code> contains a specific rollout strategy you want to use.<br>**See [rollout section](https://thomaspoignant.github.io/go-feature-flag/latest/rollout/) for more details.**|
+|     Field     | Description                                                                                                                                                                                                                                             |
+|:-------------:|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **flag-key**  | Name of your flag.<br> It must be unique.<br>*On the example the flag keys are **`test-flag`** and **`test-flag2`**.*                                                                                                                                   |
+|    `true`     | Value returned by the flag if the rule is evaluated to true and the user is in the active percentage.                                                                                                                                                   |
+|    `false`    | Value returned by the flag if the rule is evaluated to true and the user is **not** in the active percentage.                                                                                                                                           |
+|   `default`   | Value returned by the flag if the rule is evaluated to false.                                                                                                                                                                                           |
+| `percentage`  | *(optional)*<br>Percentage of users who should be affected by the flag.<br>**Default: 0**<br><br>The percentage is computed by calculating a hash of the user key *(100000 variations)*, it means that you can have 3 numbers after the comma.          |
+|    `rule`     | *(optional)*<br>Condition to determine on which user the flag should be applied.<br>Rule format is described in the <a href="#rule-format">rule format section</a>.<br>**If no rule is set, the flag applies to all users *(percentage still apply)*.** |
+|   `disable`   | *(optional)*<br>True if the flag is disabled.<br>**Default: `false`**                                                                                                                                                                                   |
+| `trackEvents` | *(optional)*<br>False if you don't want to export the data in your data exporter.<br>**Default: `true`**                                                                                                                                                |
+|   `version`   | *(optional)*<br>The version is the version of your flag.<br>This number is used to display the information in the notifiers and data collection, you have to update it your self.<br>**Default: 0**                                                     |
+|   `rollout`   | *(optional)*<br><code>rollout</code> contains a specific rollout strategy you want to use.<br>**See [rollout section](https://thomaspoignant.github.io/go-feature-flag/latest/rollout/) for more details.**                                             |
 
 ## Rule format
 The rule format is based on the [`nikunjy/rules`](https://github.com/nikunjy/rules) library.
@@ -385,6 +385,7 @@ It collects all the variations events and can save these events on several locat
 - [File](https://thomaspoignant.github.io/go-feature-flag/latest/data_collection/file/) *- create local files with the variation usages.*
 - [Log](https://thomaspoignant.github.io/go-feature-flag/latest/data_collection/log/) *- use your logger to write the variation usages.*
 - [S3](https://thomaspoignant.github.io/go-feature-flag/latest/data_collection/s3/) *- export your variation usages to S3.*
+- [Google Cloud Storage](https://thomaspoignant.github.io/go-feature-flag/latest/flag_file/data_collection/google_cloud_storage) *- export your variation usages to Google Cloud Storage.*
 - [Webhook](https://thomaspoignant.github.io/go-feature-flag/latest/data_collection/webhook/) *- export your variation usages by calling a webhook.*
 
 Currently, we are supporting only feature events.  
