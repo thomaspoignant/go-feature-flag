@@ -1,3 +1,8 @@
+> ## go-feature-flag v1 feedback
+> go-feature-flag is heading towards v1 and it may require a change on how to design your flags.
+> I would love to get your feedback about this change in this [discussion #229](https://github.com/thomaspoignant/go-feature-flag/discussions/229)
+>
+> **Thank you!**
 
 <p align="center">
   <img width="250" height="238" src="logo.png" alt="go-feature-flag logo" />
