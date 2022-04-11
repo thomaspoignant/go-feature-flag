@@ -38,14 +38,14 @@ No server is needed, just add a file to your central system and all your service
 
 **go-feature-flags supports:**
 
-- Storing your configuration flags file on various locations (`HTTP`, `S3`, `GitHub`, `file`).
+- Storing your configuration flags file on various locations (`HTTP`, `S3`, `GitHub`, `file`, `Google Cloud Storage` ...).
 - Configuring your flags in various format (`JSON`, `TOML` and `YAML`).
 - Adding complex rules to target your users.
 - Use complex rollout strategy for your flags :
     - Run A/B testing experimentation.
     - Progressively rollout a feature.
     - Schedule your flag updates.
-- Exporting your flags usage data (`S3`, `log` and `file`).
+- Exporting your flags usage data (`S3`, `log`, `file`, `Google Cloud Storage` ...).
 - Getting notified when a flag has been changed (`webhook` and `slack`).
 
 If you are not familiar with feature flags, also called feature Toggles, you can read this [article from Martin Fowler](https://www.martinfowler.com/articles/feature-toggles.html)
