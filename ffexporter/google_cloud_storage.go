@@ -102,7 +102,8 @@ func (f *GoogleCloudStorage) Export(ctx context.Context, logger *log.Logger, fea
 		_, err = io.Copy(wc, of)
 		_ = wc.Close()
 		if err != nil {
-			return fmt.Errorf("error: [GoogleCloudStorage] impossible to copy the file from %s to bucket %s: %v", source, f.Bucket, err)
+			return fmt.Errorf("error: [GoogleCloudStorage] impossible to copy the file from %s to bucket %s: %v",
+				source, f.Bucket, err)
 		}
 		fflog.Printf(logger, "info: [GoogleCloudStorage] file %s uploaded.", file.Name())
 	}

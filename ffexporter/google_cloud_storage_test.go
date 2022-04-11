@@ -143,7 +143,6 @@ func TestGoogleStorage_Export(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			// init mock httpclient
 			handler := GoogleCloudStorageHandler{}
 
@@ -151,7 +150,7 @@ func TestGoogleStorage_Export(t *testing.T) {
 			httpclient := http.Client{
 				Transport: &http.Transport{
 					TLSClientConfig: &tls.Config{
-						InsecureSkipVerify: true,
+						InsecureSkipVerify: true, // nolint: gosec
 					},
 				},
 			}
@@ -194,7 +193,6 @@ func (g *GoogleCloudStorageHandler) handler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		g.r = r
 		w.WriteHeader(http.StatusOK)
-		return
 	})
 }
 
