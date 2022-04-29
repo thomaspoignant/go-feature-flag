@@ -1,8 +1,6 @@
 package flag_test
 
 import (
-	"fmt"
-	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
@@ -217,8 +215,7 @@ func TestConvertV0DtoToFlag(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fmt.Println(cmp.Diff(tt.want, flag.ConvertV0DtoToFlag(tt.args.dtoFlag, tt.args.isScheduleStep)))
-			assert.Equalf(t, tt.want, flag.ConvertV0DtoToFlag(tt.args.dtoFlag, tt.args.isScheduleStep), "ConvertV0DtoToFlag(%v, %v)", tt.args.dtoFlag, tt.args.isScheduleStep)
+			assert.Equalf(t, tt.want, tt.args.dtoFlag.ConvertToFlagData(tt.args.isScheduleStep), "ConvertV0DtoToFlag(%v, %v)", tt.args.dtoFlag, tt.args.isScheduleStep)
 		})
 	}
 }
