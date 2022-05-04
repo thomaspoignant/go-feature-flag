@@ -36,10 +36,6 @@ func New(notificationService Service) Manager {
 	}
 }
 
-func (c *cacheManagerImpl) GetLatestUpdateDate() time.Time {
-	return c.latestUpdate
-}
-
 func (c *cacheManagerImpl) UpdateCache(loadedFlags []byte, fileFormat string) error {
 	var newFlags map[string]flagv1.FlagData
 	var err error
@@ -101,4 +97,10 @@ func (c *cacheManagerImpl) AllFlags() (map[string]flag.Flag, error) {
 		return nil, errors.New("impossible to read the flag before the initialisation")
 	}
 	return c.inMemoryCache.All(), nil
+}
+
+func (c *cacheManagerImpl) GetLatestUpdateDate() time.Time {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+	return c.latestUpdate
 }
