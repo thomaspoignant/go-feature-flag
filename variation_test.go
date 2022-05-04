@@ -32,6 +32,11 @@ func NewCacheMock(flag flag.Flag, err error) cache.Manager {
 		err:  err,
 	}
 }
+
+func (c *cacheMock) GetLatestUpdateDate() time.Time {
+	return time.Now()
+}
+
 func (c *cacheMock) UpdateCache(loadedFlags []byte, fileFormat string) error {
 	return nil
 }

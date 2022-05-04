@@ -149,3 +149,13 @@ func retrieveFlagsAndUpdateCache(config Config, cache cache.Manager) error {
 	}
 	return nil
 }
+
+// GetCacheRefreshDate gives the date of the latest refresh of the cache
+func (g *GoFeatureFlag) GetCacheRefreshDate() time.Time {
+	return g.cache.GetLatestUpdateDate()
+}
+
+// GetCacheRefreshDate gives the date of the latest refresh of the cache
+func GetCacheRefreshDate() time.Time {
+	return ff.GetCacheRefreshDate()
+}
