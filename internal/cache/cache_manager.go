@@ -8,6 +8,7 @@ import (
 	"gopkg.in/yaml.v3"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/pelletier/go-toml"
 )
@@ -17,12 +18,14 @@ type Manager interface {
 	Close()
 	GetFlag(key string) (flag.Flag, error)
 	AllFlags() (map[string]flag.Flag, error)
+	GetLatestUpdateDate() time.Time
 }
 
 type cacheManagerImpl struct {
 	inMemoryCache       Cache
 	mutex               sync.RWMutex
 	notificationService Service
+	latestUpdate        time.Time
 }
 
 func New(notificationService Service) Manager {
@@ -60,6 +63,7 @@ func (c *cacheManagerImpl) UpdateCache(loadedFlags []byte, fileFormat string) er
 		oldCacheFlags = c.inMemoryCache.All()
 	}
 	c.inMemoryCache = newCache
+	c.latestUpdate = time.Now()
 	c.mutex.Unlock()
 
 	// notify the changes
@@ -93,4 +97,10 @@ func (c *cacheManagerImpl) AllFlags() (map[string]flag.Flag, error) {
 		return nil, errors.New("impossible to read the flag before the initialisation")
 	}
 	return c.inMemoryCache.All(), nil
+}
+
+func (c *cacheManagerImpl) GetLatestUpdateDate() time.Time {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+	return c.latestUpdate
 }

@@ -292,3 +292,21 @@ test-flag2:
 		})
 	}
 }
+
+func Test_cacheManagerImpl_GetLatestUpdateDate(t *testing.T) {
+	loadedFlags := []byte(`test-flag:
+  rule: key eq "random-key"
+  percentage: 100
+  true: true
+  false: false
+  default: false
+  trackEvents: false
+`)
+
+	fCache := cache.New(cache.NewNotificationService([]ffnotifier.Notifier{}))
+	timeBefore := fCache.GetLatestUpdateDate()
+	_ = fCache.UpdateCache(loadedFlags, "yaml")
+	timeAfter := fCache.GetLatestUpdateDate()
+
+	assert.True(t, timeBefore.Before(timeAfter))
+}

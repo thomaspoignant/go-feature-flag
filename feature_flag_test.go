@@ -62,6 +62,7 @@ func TestValidUseCase(t *testing.T) {
 	assert.True(t, hasTestFlag, "User should have test flag")
 	hasUnknownFlag, _ := ffclient.BoolVariation("unknown-flag", user, false)
 	assert.False(t, hasUnknownFlag, "User should use default value if flag does not exists")
+	assert.NotEqual(t, time.Time{}, ffclient.GetCacheRefreshDate())
 
 	allFlags := ffclient.AllFlagsState(user)
 	assert.Equal(t, 2, len(allFlags.GetFlags()))
@@ -101,6 +102,7 @@ func TestValidUseCaseJson(t *testing.T) {
 	assert.True(t, hasTestFlag, "User should have test flag")
 	hasUnknownFlag, _ := gffClient.BoolVariation("unknown-flag", user, false)
 	assert.False(t, hasUnknownFlag, "User should use default value if flag does not exists")
+	assert.NotEqual(t, time.Time{}, gffClient.GetCacheRefreshDate())
 }
 
 func TestS3RetrieverReturnError(t *testing.T) {
@@ -283,4 +285,44 @@ func TestValidUseCaseBigFlagFile(t *testing.T) {
 	assert.True(t, hasTestFlag, "User should have test flag")
 	hasUnknownFlag, _ := gff.BoolVariation("unknown-flag", user, false)
 	assert.False(t, hasUnknownFlag, "User should use default value if flag does not exists")
+}
+
+func TestGoFeatureFlag_GetCacheRefreshDate(t *testing.T) {
+	type fields struct {
+		pollingInterval time.Duration
+		waitingDuration time.Duration
+	}
+
+	tests := []struct {
+		name       string
+		fields     fields
+		hasRefresh bool
+	}{
+		{
+			name:       "Should be refreshed",
+			fields:     fields{waitingDuration: 2 * time.Second, pollingInterval: 1 * time.Second},
+			hasRefresh: true,
+		},
+		{
+			name:       "Should not be refreshed",
+			fields:     fields{waitingDuration: 2 * time.Second, pollingInterval: 3 * time.Second},
+			hasRefresh: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gff, _ := ffclient.New(ffclient.Config{
+				PollingInterval: tt.fields.pollingInterval,
+				Retriever:       &ffclient.FileRetriever{Path: "testdata/flag-config.yaml"},
+			})
+
+			date1 := gff.GetCacheRefreshDate()
+			time.Sleep(tt.fields.waitingDuration)
+			date2 := gff.GetCacheRefreshDate()
+
+			assert.NotEqual(t, time.Time{}, date1)
+			assert.NotEqual(t, time.Time{}, date2)
+			assert.Equal(t, tt.hasRefresh, date1.Before(date2))
+		})
+	}
 }
