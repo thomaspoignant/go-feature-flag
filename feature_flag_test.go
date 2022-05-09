@@ -297,6 +297,7 @@ func TestGoFeatureFlag_GetCacheRefreshDate(t *testing.T) {
 		name       string
 		fields     fields
 		hasRefresh bool
+		offline    bool
 	}{
 		{
 			name:       "Should be refreshed",
@@ -308,20 +309,29 @@ func TestGoFeatureFlag_GetCacheRefreshDate(t *testing.T) {
 			fields:     fields{waitingDuration: 2 * time.Second, pollingInterval: 3 * time.Second},
 			hasRefresh: false,
 		},
+		{
+			name:       "Should not crash in offline mode",
+			fields:     fields{waitingDuration: 2 * time.Second, pollingInterval: 3 * time.Second},
+			hasRefresh: false,
+			offline:    true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			gff, _ := ffclient.New(ffclient.Config{
 				PollingInterval: tt.fields.pollingInterval,
 				Retriever:       &ffclient.FileRetriever{Path: "testdata/flag-config.yaml"},
+				Offline:         tt.offline,
 			})
 
 			date1 := gff.GetCacheRefreshDate()
 			time.Sleep(tt.fields.waitingDuration)
 			date2 := gff.GetCacheRefreshDate()
 
-			assert.NotEqual(t, time.Time{}, date1)
-			assert.NotEqual(t, time.Time{}, date2)
+			if !tt.offline {
+				assert.NotEqual(t, time.Time{}, date1)
+				assert.NotEqual(t, time.Time{}, date2)
+			}
 			assert.Equal(t, tt.hasRefresh, date1.Before(date2))
 		})
 	}
