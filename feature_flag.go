@@ -152,6 +152,9 @@ func retrieveFlagsAndUpdateCache(config Config, cache cache.Manager) error {
 
 // GetCacheRefreshDate gives the date of the latest refresh of the cache
 func (g *GoFeatureFlag) GetCacheRefreshDate() time.Time {
+	if g.config.Offline {
+		return time.Time{}
+	}
 	return g.cache.GetLatestUpdateDate()
 }
 
