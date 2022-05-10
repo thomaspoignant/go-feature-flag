@@ -355,6 +355,36 @@ func computeVariationResult(flag flag.Flag, variationType string, failed bool) m
 	return varResult
 }
 
+// RawVariation return the raw value of the flag (without any types).
+// This raw result is mostly used by software built on top of go-feature-flag such as
+// go-feature-flag relay proxy.
+// If you are using directly the library you should avoid calling this function.
+// Note: Use this function only if you are using multiple go-feature-flag instances.
+func (g *GoFeatureFlag) RawVariation(flagKey string, user ffuser.User, sdkDefaultValue interface{},
+) (model.RawVarResult, error) {
+	if g.config.Offline {
+		return model.RawVarResult{Value: sdkDefaultValue, VariationResult: offlineVariationResult}, nil
+	}
+
+	f, err := g.getFlagFromCache(flagKey)
+	if err != nil {
+		res := model.RawVarResult{
+			Value:           sdkDefaultValue,
+			VariationResult: computeVariationResult(f, flag.VariationSDKDefault, true),
+		}
+		g.notifyVariation(flagKey, user, res.VariationResult, res.Value)
+		return res, err
+	}
+
+	flagValue, variationType := f.Value(flagKey, user)
+	res := model.RawVarResult{
+		Value:           flagValue,
+		VariationResult: computeVariationResult(f, variationType, false),
+	}
+	g.notifyVariation(flagKey, user, res.VariationResult, res.Value)
+	return res, nil
+}
+
 // notifyVariation is logging the evaluation result for a flag
 // if no logger is provided in the configuration we are not logging anything.
 func (g *GoFeatureFlag) notifyVariation(
