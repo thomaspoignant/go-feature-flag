@@ -48,3 +48,10 @@ type JSONArrayVarResult struct {
 	VariationResult
 	Value []interface{}
 }
+
+// RawVarResult is the result of the raw variation call.
+// This is used by ffclient.RawVariation functions, this should be used only by internal calls.
+type RawVarResult struct {
+	VariationResult
+	Value interface{}
+}

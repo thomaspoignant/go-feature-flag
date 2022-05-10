@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
+	"github.com/thomaspoignant/go-feature-flag/internal/model"
 	"io/ioutil"
 	"log"
 	"os"
@@ -1333,6 +1334,246 @@ func TestAllFlagsState(t *testing.T) {
 			// no data exported
 			files, _ := os.ReadDir(exportDir)
 			assert.Equal(t, 0, len(files))
+		})
+	}
+}
+
+func TestRawVariation(t *testing.T) {
+	type args struct {
+		flagKey      string
+		user         ffuser.User
+		defaultValue interface{}
+		cacheMock    cache.Manager
+		offline      bool
+	}
+	tests := []struct {
+		name        string
+		args        args
+		want        model.RawVarResult
+		wantErr     bool
+		expectedLog string
+	}{
+		{
+			name: "Get default value if flag disable",
+			args: args{
+				flagKey:      "disable-flag",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: true,
+				cacheMock: NewCacheMock(&flagv1.FlagData{
+					Disable: testconvert.Bool(true),
+				}, nil),
+			},
+			want: model.RawVarResult{
+				Value: true,
+				VariationResult: model.VariationResult{
+					VariationType: flag.VariationSDKDefault,
+					Failed:        true,
+					TrackEvents:   true,
+				},
+			},
+			wantErr:     true,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"disable-flag\", value=\"true\", variation=\"SdkDefault\"\n",
+		},
+		{
+			name: "Get error when not init",
+			args: args{
+				flagKey:      "key-not-exist",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: "defaultValue",
+				cacheMock: NewCacheMock(
+					&flagv1.FlagData{},
+					errors.New("impossible to read the toggle before the initialisation")),
+			},
+			want: model.RawVarResult{
+				Value: "defaultValue",
+				VariationResult: model.VariationResult{
+					VariationType: flag.VariationSDKDefault,
+					Failed:        true,
+					TrackEvents:   true,
+				},
+			},
+			wantErr:     true,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"defaultValue\", variation=\"SdkDefault\"\n",
+		},
+		{
+			name: "Get default value with key not exist",
+			args: args{
+				flagKey:      "key-not-exist",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: 123456,
+				cacheMock:    NewCacheMock(&flagv1.FlagData{}, errors.New("flag [key-not-exist] does not exists")),
+			},
+			want: model.RawVarResult{
+				Value: 123456,
+				VariationResult: model.VariationResult{
+					VariationType: flag.VariationSDKDefault,
+					Failed:        true,
+					TrackEvents:   true,
+				},
+			},
+			wantErr:     true,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"123456\", variation=\"SdkDefault\"\n",
+		},
+		{
+			name: "Get default value, rule not apply",
+			args: args{
+				flagKey:      "test-flag",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: map[string]interface{}{"test123": "test"},
+				cacheMock: NewCacheMock(&flagv1.FlagData{
+					Rule:       testconvert.String("key eq \"key\""),
+					Percentage: testconvert.Float64(100),
+					Default:    testconvert.Interface(map[string]interface{}{"test": "test"}),
+					True:       testconvert.Interface(map[string]interface{}{"test2": "test"}),
+					False:      testconvert.Interface(map[string]interface{}{"test3": "test"}),
+				}, nil),
+			},
+			want: model.RawVarResult{
+				Value: map[string]interface{}{"test": "test"},
+				VariationResult: model.VariationResult{
+					VariationType: "Default",
+					Failed:        false,
+					TrackEvents:   true,
+				},
+			},
+			wantErr:     false,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"map\\[test:test\\]\", variation=\"Default\"",
+		},
+		{
+			name: "Get true value, rule apply",
+			args: args{
+				flagKey:      "test-flag",
+				user:         ffuser.NewAnonymousUser("random-key"),
+				defaultValue: map[string]interface{}{"test123": "test"},
+				cacheMock: NewCacheMock(&flagv1.FlagData{
+					Rule:       testconvert.String("key eq \"random-key\""),
+					Percentage: testconvert.Float64(100),
+					Default:    testconvert.Interface(map[string]interface{}{"test": "test"}),
+					True:       testconvert.Interface(map[string]interface{}{"test2": "test"}),
+					False:      testconvert.Interface(map[string]interface{}{"test3": "test"}),
+				}, nil),
+			},
+			want: model.RawVarResult{
+				Value: map[string]interface{}{"test2": "test"},
+				VariationResult: model.VariationResult{
+					VariationType: "True",
+					Failed:        false,
+					TrackEvents:   true,
+				},
+			},
+			wantErr:     false,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"map\\[test2:test\\]\", variation=\"True\"",
+		},
+		{
+			name: "Get false value, rule apply",
+			args: args{
+				flagKey:      "test-flag",
+				user:         ffuser.NewAnonymousUser("random-key-ssss1"),
+				defaultValue: map[string]interface{}{"test123": "test"},
+				cacheMock: NewCacheMock(&flagv1.FlagData{
+					Rule:       testconvert.String("anonymous eq true"),
+					Percentage: testconvert.Float64(10),
+					Default:    testconvert.Interface(map[string]interface{}{"test": "test"}),
+					True:       testconvert.Interface(map[string]interface{}{"test2": "test"}),
+					False:      testconvert.Interface(map[string]interface{}{"test3": "test"}),
+				}, nil),
+			},
+			want: model.RawVarResult{
+				Value: map[string]interface{}{"test3": "test"},
+				VariationResult: model.VariationResult{
+					VariationType: "False",
+					Failed:        false,
+					TrackEvents:   true,
+				},
+			},
+			wantErr:     false,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"map\\[test3:test\\]\", variation=\"False\"",
+		},
+		{
+			name: "No exported log",
+			args: args{
+				flagKey:      "test-flag",
+				user:         ffuser.NewAnonymousUser("random-key"),
+				defaultValue: true,
+				cacheMock: NewCacheMock(&flagv1.FlagData{
+					Rule:        testconvert.String("key eq \"random-key\""),
+					Percentage:  testconvert.Float64(100),
+					True:        testconvert.Interface(true),
+					False:       testconvert.Interface(false),
+					Default:     testconvert.Interface(false),
+					TrackEvents: testconvert.Bool(false),
+				}, nil),
+			},
+			want: model.RawVarResult{
+				Value: true,
+				VariationResult: model.VariationResult{
+					VariationType: "True",
+					Failed:        false,
+					TrackEvents:   false,
+				},
+			},
+			wantErr:     false,
+			expectedLog: "^$",
+		},
+		{
+			name: "Get sdk default value if offline",
+			args: args{
+				offline:      true,
+				flagKey:      "disable-flag",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: false,
+				cacheMock: NewCacheMock(&flagv1.FlagData{
+					Disable: testconvert.Bool(true),
+				}, nil),
+			},
+			want: model.RawVarResult{
+				Value: false,
+				VariationResult: model.VariationResult{
+					VariationType: flag.VariationSDKDefault,
+					Failed:        true,
+					TrackEvents:   false,
+				},
+			},
+			wantErr:     false,
+			expectedLog: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// init logger
+			file, _ := ioutil.TempFile("", "log")
+			logger := log.New(file, "", 0)
+
+			ff = &GoFeatureFlag{
+				bgUpdater: newBackgroundUpdater(5),
+				cache:     tt.args.cacheMock,
+				config: Config{
+					PollingInterval: 0,
+					Logger:          logger,
+					Offline:         tt.args.offline,
+				},
+				dataExporter: exporter.NewDataExporterScheduler(context.Background(), 0, 0,
+					&ffexporter.Log{
+						Format: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+							"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+					}, logger),
+			}
+
+			got, err := ff.RawVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
+
+			if tt.expectedLog != "" {
+				content, _ := ioutil.ReadFile(file.Name())
+				assert.Regexp(t, tt.expectedLog, string(content))
+			}
+
+			if tt.wantErr {
+				assert.Error(t, err, "RawVariation() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			assert.Equal(t, tt.want, got, "RawVariation() got = %v, want %v", got, tt.want)
+
+			// clean logger
+			ff = nil
+			_ = file.Close()
 		})
 	}
 }
