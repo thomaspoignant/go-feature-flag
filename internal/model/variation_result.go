@@ -1,10 +1,10 @@
 package model
 
 type VariationResult struct {
-	TrackEvents   bool
-	VariationType string
-	Failed        bool
-	Version       float64
+	TrackEvents   bool    `json:"trackEvents"`
+	VariationType string  `json:"variationType"`
+	Failed        bool    `json:"failed"`
+	Version       float64 `json:"version"`
 }
 
 // BoolVarResult is the internal result format of a bool variation.
@@ -53,5 +53,5 @@ type JSONArrayVarResult struct {
 // This is used by ffclient.RawVariation functions, this should be used only by internal calls.
 type RawVarResult struct {
 	VariationResult
-	Value interface{}
+	Value interface{} `json:"value"`
 }
