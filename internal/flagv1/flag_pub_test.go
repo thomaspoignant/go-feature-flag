@@ -2,11 +2,12 @@ package flagv1_test
 
 import (
 	"fmt"
+	"testing"
+	"time"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
-	"testing"
-	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
@@ -336,7 +337,7 @@ func TestFlag_value(t *testing.T) {
 				Rollout:    &tt.fields.Rollout,
 			}
 
-			got, variationType := f.Value(tt.args.flagName, tt.args.user)
+			got, variationType := f.Value(tt.args.flagName, tt.args.user, "")
 			assert.Equal(t, tt.want.value, got)
 			assert.Equal(t, tt.want.variationType, variationType)
 		})
@@ -361,15 +362,15 @@ func TestFlag_ProgressiveRollout(t *testing.T) {
 	flagName := "test-flag"
 
 	// We evaluate the same flag multiple time overtime.
-	v, _ := f.Value(flagName, user)
+	v, _ := f.Value(flagName, user, "")
 	assert.Equal(t, f.GetVariationValue(flagv1.VariationFalse), v)
 
 	time.Sleep(1 * time.Second)
-	v2, _ := f.Value(flagName, user)
+	v2, _ := f.Value(flagName, user, "")
 	assert.Equal(t, f.GetVariationValue(flagv1.VariationFalse), v2)
 
 	time.Sleep(1 * time.Second)
-	v3, _ := f.Value(flagName, user)
+	v3, _ := f.Value(flagName, user, "")
 	assert.Equal(t, f.GetVariationValue(flagv1.VariationTrue), v3)
 }
 
@@ -446,43 +447,43 @@ func TestFlag_ScheduledRollout(t *testing.T) {
 	flagName := "test-flag"
 
 	// We evaluate the same flag multiple time overtime.
-	v, _ := f.Value(flagName, user)
+	v, _ := f.Value(flagName, user, "")
 	assert.Equal(t, f.GetVariationValue(flagv1.VariationFalse), v)
 
 	time.Sleep(1 * time.Second)
 
-	v, _ = f.Value(flagName, user)
+	v, _ = f.Value(flagName, user, "")
 	assert.Equal(t, "True", v)
 	assert.Equal(t, 1.1, f.GetVersion())
 
 	time.Sleep(1 * time.Second)
 
-	v, _ = f.Value(flagName, user)
+	v, _ = f.Value(flagName, user, "")
 	assert.Equal(t, "Default2", v)
 
 	time.Sleep(1 * time.Second)
 
-	v, _ = f.Value(flagName, user)
+	v, _ = f.Value(flagName, user, "")
 	assert.Equal(t, "True2", v)
 
 	time.Sleep(1 * time.Second)
 
-	v, _ = f.Value(flagName, user)
+	v, _ = f.Value(flagName, user, "")
 	assert.Equal(t, "Default2", v)
 
 	time.Sleep(1 * time.Second)
 
-	v, _ = f.Value(flagName, user)
+	v, _ = f.Value(flagName, user, "")
 	assert.Equal(t, "Default2", v)
 
 	time.Sleep(1 * time.Second)
 
-	v, _ = f.Value(flagName, user)
+	v, _ = f.Value(flagName, user, "")
 	assert.Equal(t, "True2", v)
 
 	time.Sleep(1 * time.Second)
 
-	v, _ = f.Value(flagName, user)
+	v, _ = f.Value(flagName, user, "")
 	assert.Equal(t, "Default2", v)
 }
 

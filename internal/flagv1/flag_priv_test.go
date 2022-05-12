@@ -1,9 +1,10 @@
 package flagv1
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
@@ -87,7 +88,7 @@ func TestFlag_evaluateRule(t *testing.T) {
 				False:      testconvert.Interface(tt.fields.False),
 			}
 
-			got := f.evaluateRule(tt.args.user)
+			got := f.evaluateRule(tt.args.user, "")
 			assert.Equal(t, tt.want, got)
 		})
 	}

@@ -3,9 +3,10 @@ package ffclient
 import (
 	"context"
 	"errors"
-	"github.com/thomaspoignant/go-feature-flag/ffnotifier"
 	"log"
 	"time"
+
+	"github.com/thomaspoignant/go-feature-flag/ffnotifier"
 
 	"github.com/thomaspoignant/go-feature-flag/internal"
 	"github.com/thomaspoignant/go-feature-flag/internal/notifier"
@@ -26,6 +27,10 @@ type Config struct {
 	// Context (optional) used to call other services (HTTP, S3 ...)
 	// Default: context.Background()
 	Context context.Context
+
+	// Environment (optional), can be checked in feature flag rules
+	// Default: ""
+	Environment string
 
 	// Retriever is the component in charge to retrieve your flag file
 	Retriever Retriever

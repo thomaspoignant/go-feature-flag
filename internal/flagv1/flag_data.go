@@ -2,13 +2,14 @@ package flagv1
 
 import (
 	"fmt"
-	"github.com/nikunjy/rules/parser"
-	"github.com/thomaspoignant/go-feature-flag/ffuser"
-	"github.com/thomaspoignant/go-feature-flag/internal/utils"
 	"math"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/nikunjy/rules/parser"
+	"github.com/thomaspoignant/go-feature-flag/ffuser"
+	"github.com/thomaspoignant/go-feature-flag/internal/utils"
 )
 
 // percentageMultiplier is the multiplier used to have a bigger range of possibility.
@@ -55,14 +56,14 @@ type FlagData struct {
 
 // Value is returning the Value associate to the flag (True / False / Default ) based
 // if the toggle apply to the user or not.
-func (f *FlagData) Value(flagName string, user ffuser.User) (interface{}, string) {
+func (f *FlagData) Value(flagName string, user ffuser.User, environment string) (interface{}, string) {
 	f.updateFlagStage()
 	if f.isExperimentationOver() {
 		// if we have an experimentation that has not started or that is finished we use the default value.
 		return f.getDefault(), VariationDefault
 	}
 
-	if f.evaluateRule(user) {
+	if f.evaluateRule(user, environment) {
 		if f.isInPercentage(flagName, user) {
 			// Rule applied and user in the cohort.
 			return f.getTrue(), VariationTrue
@@ -77,9 +78,8 @@ func (f *FlagData) Value(flagName string, user ffuser.User) (interface{}, string
 
 func (f *FlagData) isExperimentationOver() bool {
 	now := time.Now()
-	return f.Rollout != nil && f.Rollout.Experimentation != nil && (
-		(f.Rollout.Experimentation.Start != nil && now.Before(*f.Rollout.Experimentation.Start)) ||
-			(f.Rollout.Experimentation.End != nil && now.After(*f.Rollout.Experimentation.End)))
+	return f.Rollout != nil && f.Rollout.Experimentation != nil && ((f.Rollout.Experimentation.Start != nil && now.Before(*f.Rollout.Experimentation.Start)) ||
+		(f.Rollout.Experimentation.End != nil && now.After(*f.Rollout.Experimentation.End)))
 }
 
 // isInPercentage check if the user is in the cohort for the toggle.
@@ -101,7 +101,7 @@ func (f *FlagData) isInPercentage(flagName string, user ffuser.User) bool {
 }
 
 // evaluateRule is checking if the rule can apply to a specific user.
-func (f *FlagData) evaluateRule(user ffuser.User) bool {
+func (f *FlagData) evaluateRule(user ffuser.User, environment string) bool {
 	// Flag disable we cannot apply it.
 	if f.GetDisable() {
 		return false
@@ -113,7 +113,9 @@ func (f *FlagData) evaluateRule(user ffuser.User) bool {
 	}
 
 	// Evaluate the rule on the user.
-	return parser.Evaluate(f.getRule(), utils.UserToMap(user))
+	userMap := utils.UserToMap(user)
+	userMap["env"] = environment
+	return parser.Evaluate(f.getRule(), userMap)
 }
 
 // string display correctly a flag
