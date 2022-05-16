@@ -53,6 +53,10 @@ where he explains why this is a great pattern.
 
 I've also written an [article](https://medium.com/better-programming/feature-flags-and-how-to-iterate-quickly-7e3371b9986) explaining why feature flags can fasten your iteration cycle.
 
+
+https://user-images.githubusercontent.com/17908063/168597893-e957e648-b795-4b5f-94d5-265d272a2137.mp4
+
+
 ## Getting started
 First, you need to initialize the `ffclient` with the location of your backend file.
 ```go
