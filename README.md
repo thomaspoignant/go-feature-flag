@@ -56,6 +56,7 @@ I've also written an [article](https://medium.com/better-programming/feature-fla
 
 https://user-images.githubusercontent.com/17908063/168597893-e957e648-b795-4b5f-94d5-265d272a2137.mp4
 
+_The code of this demo is available in [`thomaspoignant/go-feature-flag-demo`](https://github.com/thomaspoignant/go-feature-flag-demo) repository_.
 
 ## Getting started
 First, you need to initialize the `ffclient` with the location of your backend file.
