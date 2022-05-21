@@ -13,7 +13,7 @@ import (
 
 func TestLog_Export(t *testing.T) {
 	type fields struct {
-		Format string
+		LogFormat string
 	}
 	type args struct {
 		featureEvents []ffexporter.FeatureEvent
@@ -27,7 +27,7 @@ func TestLog_Export(t *testing.T) {
 	}{
 		{
 			name:   "Default format",
-			fields: fields{Format: ""},
+			fields: fields{LogFormat: ""},
 			args: args{featureEvents: []ffexporter.FeatureEvent{
 				{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false},
@@ -37,7 +37,7 @@ func TestLog_Export(t *testing.T) {
 		{
 			name: "Custom format",
 			fields: fields{
-				Format: "key=\"{{ .Key}}\" [{{ .FormattedDate}}]",
+				LogFormat: "key=\"{{ .Key}}\" [{{ .FormattedDate}}]",
 			},
 			args: args{featureEvents: []ffexporter.FeatureEvent{
 				{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
@@ -46,9 +46,9 @@ func TestLog_Export(t *testing.T) {
 			expectedLog: "key=\"random-key\" \\[" + testutils.RFC3339Regex + "\\]\n",
 		},
 		{
-			name: "Format error",
+			name: "LogFormat error",
 			fields: fields{
-				Format: "key=\"{{ .Key}\" [{{ .FormattedDate}}]",
+				LogFormat: "key=\"{{ .Key}\" [{{ .FormattedDate}}]",
 			},
 			args: args{featureEvents: []ffexporter.FeatureEvent{
 				{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
@@ -59,7 +59,7 @@ func TestLog_Export(t *testing.T) {
 		{
 			name: "Field does not exist",
 			fields: fields{
-				Format: "key=\"{{ .UnknownKey}}\" [{{ .FormattedDate}}]",
+				LogFormat: "key=\"{{ .UnknownKey}}\" [{{ .FormattedDate}}]",
 			},
 			args: args{featureEvents: []ffexporter.FeatureEvent{
 				{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
@@ -72,7 +72,7 @@ func TestLog_Export(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			f := &ffexporter.Log{
-				Format: tt.fields.Format,
+				LogFormat: tt.fields.LogFormat,
 			}
 
 			logFile, _ := ioutil.TempFile("", "")

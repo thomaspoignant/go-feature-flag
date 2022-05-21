@@ -16,7 +16,13 @@ type Log struct {
 	// You can use all the key from the exporter.FeatureEvent + a key called FormattedDate that represent the date with
 	// the RFC 3339 Format
 	// Default: [{{ .FormattedDate}}] user="{{ .UserKey}}", flag="{{ .Key}}", value="{{ .Value}}"
-	Format string
+	Format string // Deprecated: use LogFormat instead.
+
+	// Format is the template configuration of the output format of your log.
+	// You can use all the key from the exporter.FeatureEvent + a key called FormattedDate that represent the date with
+	// the RFC 3339 Format
+	// Default: [{{ .FormattedDate}}] user="{{ .UserKey}}", flag="{{ .Key}}", value="{{ .Value}}"
+	LogFormat string
 
 	logTemplate   *template.Template
 	initTemplates sync.Once
@@ -25,7 +31,12 @@ type Log struct {
 // Export is saving a collection of events in a file.
 func (f *Log) Export(ctx context.Context, logger *log.Logger, featureEvents []FeatureEvent) error {
 	f.initTemplates.Do(func() {
-		f.logTemplate = parseTemplate("logFormat", f.Format, defaultLoggerFormat)
+		// Remove bellow after deprecation of Format
+		if f.LogFormat == "" && f.Format != "" {
+			f.LogFormat = f.Format
+		}
+
+		f.logTemplate = parseTemplate("logFormat", f.LogFormat, defaultLoggerFormat)
 	})
 
 	for _, event := range featureEvents {
