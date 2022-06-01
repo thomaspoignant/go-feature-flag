@@ -83,10 +83,10 @@ func Test_kubernetesRetriever_Retrieve(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := KubernetesRetriever{
-				ClientSet:     fake.NewSimpleClientset(tt.fields.object),
+				client:  fake.NewSimpleClientset(tt.fields.object),
 				ConfigMapName: tt.fields.configMapName,
 				Key:           tt.fields.key,
-				Namespace: tt.fields.namespace,
+				Namespace:     tt.fields.namespace,
 			}
 			got, err := s.Retrieve(tt.fields.context)
 			assert.Equal(t, tt.wantErr, err, "Retrieve() error = %v, wantErr %v", err, tt.wantErr)
