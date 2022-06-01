@@ -8,6 +8,10 @@ import (
 	restclient "k8s.io/client-go/rest"
 )
 
+var kubeClientProvider = func(config *restclient.Config) (kubernetes.Interface, error) {
+	return kubernetes.NewForConfig(config)
+}
+
 // KubernetesRetriever is a configuration struct for a Kubernetes retriever.
 type KubernetesRetriever struct {
 	Namespace     string
@@ -19,7 +23,7 @@ type KubernetesRetriever struct {
 
 func (s *KubernetesRetriever) Retrieve(ctx context.Context) ([]byte, error) {
 	if s.client == nil {
-		client, clientErr := kubernetes.NewForConfig(&s.ClientConfig)
+		client, clientErr := kubeClientProvider(&s.ClientConfig)
 		if clientErr != nil {
 			return nil, fmt.Errorf("unable to create client, error: %s", clientErr)
 		}
