@@ -13,7 +13,7 @@ err = ffclient.Init(ffclient.Config{
     PollingInterval: 3 * time.Second,
     Retriever: &ffclient.KubernetesRetriever{
         Path: "file-example.yaml",
-        Namespace:      ""
+        Namespace:      "default"
         ConfigMapName: "my-configmap"
         Key:    "somekey.yml"
         ClientConfig: &config
