@@ -53,6 +53,11 @@ where he explains why this is a great pattern.
 
 I've also written an [article](https://medium.com/better-programming/feature-flags-and-how-to-iterate-quickly-7e3371b9986) explaining why feature flags can fasten your iteration cycle.
 
+
+https://user-images.githubusercontent.com/17908063/168597893-e957e648-b795-4b5f-94d5-265d272a2137.mp4
+
+_The code of this demo is available in [`thomaspoignant/go-feature-flag-demo`](https://github.com/thomaspoignant/go-feature-flag-demo) repository_.
+
 ## Getting started
 First, you need to initialize the `ffclient` with the location of your backend file.
 ```go
@@ -147,6 +152,7 @@ Available retriever are:
 - [From a S3 Bucket](https://thomaspoignant.github.io/go-feature-flag/latest/flag_file/s3/)
 - [From a file](https://thomaspoignant.github.io/go-feature-flag/latest/flag_file/file/)
 - [From Google Cloud Storage](https://thomaspoignant.github.io/go-feature-flag/latest/flag_file/google_cloud_storage/)
+- [From Kubernetes ConfigMaps](https://thomaspoignant.github.io/go-feature-flag/latest/flag_file/kubernetes_configmaps/)
 
 ## Flags file format
 `go-feature-flag` core feature is to centralize all your feature flags in a source file, and to avoid hosting and maintaining a backend server to manage them.

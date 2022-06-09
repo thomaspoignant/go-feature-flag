@@ -11,7 +11,7 @@ ffclient.Config{
     // ...
    DataExporter: ffclient.DataExporter{
         Exporter: &ffexporter.Log{
-            Format: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", value=\"{{ .Value}}\"",
+            LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", value=\"{{ .Value}}\"",
         },
     },
     // ...
@@ -19,8 +19,8 @@ ffclient.Config{
 ```
 
 ## Configuration fields
-| Field  | Description  |
-|---|---|
-|`Format`   | *(optional)*<br>Format is the [template](https://golang.org/pkg/text/template/) configuration of the output format of your log.<br>You can use all the key from the `exporter.FeatureEvent` + a key called `FormattedDate` that represent the date with the **RFC 3339** Format.<br><br>**Default: `[{{ .FormattedDate}}] user="{{ .UserKey}}", flag="{{ .Key}}", value="{{ .Value}}"`**  |
+| Field       | Description                                                                                                                                                                                                                                                                                                                                                                                 |
+|-------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `LogFormat` | *(optional)*<br>LogFormat is the [template](https://golang.org/pkg/text/template/) configuration of the output format of your log.<br>You can use all the key from the `exporter.FeatureEvent` + a key called `FormattedDate` that represent the date with the **RFC 3339** Format.<br><br>**Default: `[{{ .FormattedDate}}] user="{{ .UserKey}}", flag="{{ .Key}}", value="{{ .Value}}"`** |
 
 Check the [godoc for full details](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag@v0.11.0/ffexporter#Log).

@@ -63,6 +63,7 @@ nav:
       - 'flag_file/github.md'
       - 'flag_file/file.md'
       - 'flag_file/google_cloud_storage.md'
+      - 'flag_file/kubernetes_configmaps.md'
       - 'flag_file/custom.md'
   - 'flag_format.md'
   - 'users.md'
