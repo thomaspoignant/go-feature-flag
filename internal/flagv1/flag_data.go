@@ -114,7 +114,9 @@ func (f *FlagData) evaluateRule(user ffuser.User, environment string) bool {
 
 	// Evaluate the rule on the user.
 	userMap := utils.UserToMap(user)
-	userMap["env"] = environment
+	if environment != "" {
+		userMap["env"] = environment
+	}	
 	return parser.Evaluate(f.getRule(), userMap)
 }
 
