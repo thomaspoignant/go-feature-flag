@@ -2,7 +2,6 @@ package ffclient
 
 import (
 	"fmt"
-
 	"github.com/thomaspoignant/go-feature-flag/ffexporter"
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"

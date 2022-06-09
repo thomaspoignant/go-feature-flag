@@ -2,14 +2,13 @@ package flagv1
 
 import (
 	"fmt"
+	"github.com/nikunjy/rules/parser"
+	"github.com/thomaspoignant/go-feature-flag/ffuser"
+	"github.com/thomaspoignant/go-feature-flag/internal/utils"
 	"math"
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/nikunjy/rules/parser"
-	"github.com/thomaspoignant/go-feature-flag/ffuser"
-	"github.com/thomaspoignant/go-feature-flag/internal/utils"
 )
 
 // percentageMultiplier is the multiplier used to have a bigger range of possibility.
@@ -78,8 +77,9 @@ func (f *FlagData) Value(flagName string, user ffuser.User, environment string) 
 
 func (f *FlagData) isExperimentationOver() bool {
 	now := time.Now()
-	return f.Rollout != nil && f.Rollout.Experimentation != nil && ((f.Rollout.Experimentation.Start != nil && now.Before(*f.Rollout.Experimentation.Start)) ||
-		(f.Rollout.Experimentation.End != nil && now.After(*f.Rollout.Experimentation.End)))
+	return f.Rollout != nil && f.Rollout.Experimentation != nil && (
+		(f.Rollout.Experimentation.Start != nil && now.Before(*f.Rollout.Experimentation.Start)) ||
+			(f.Rollout.Experimentation.End != nil && now.After(*f.Rollout.Experimentation.End)))
 }
 
 // isInPercentage check if the user is in the cohort for the toggle.
