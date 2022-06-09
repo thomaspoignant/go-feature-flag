@@ -1,4 +1,4 @@
-# File
+# Kubernetes configmaps
 The [**KubernetesRetriever**](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#KubernetesRetriever)
 will access flags in a Kubernetes ConfigMap via the [Kubernetes Go client](https://github.com/kubernetes/client-go)
 
@@ -25,12 +25,9 @@ defer ffclient.Close()
 ## Configuration fields
 To configure your retriever:
 
-| Field              | Description                                        |
-|--------------------|----------------------------------------------------|
-|**`Namespace`**     | The namespace of the ConfigMap.                    |
-|--------------------|----------------------------------------------------|
-|**`ConfigMapName`** | The name of the ConfigMap.                         |
-|--------------------|----------------------------------------------------|
-|**`Key`**           | The key within the ConfigMap storing the flags.    |
-|--------------------|----------------------------------------------------|
-| **`ClientConfig`** | The configuration object for the Kubernetes client |
+| Field               | Description                                        |
+|---------------------|----------------------------------------------------|
+| **`Namespace`**     | The namespace of the ConfigMap.                    |
+| **`ConfigMapName`** | The name of the ConfigMap.                         |
+| **`Key`**           | The key within the ConfigMap storing the flags.    |
+| **`ClientConfig`**  | The configuration object for the Kubernetes client |
