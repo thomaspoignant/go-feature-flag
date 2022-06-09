@@ -2,7 +2,6 @@ package flagv1_test
 
 import (
 	"fmt"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
