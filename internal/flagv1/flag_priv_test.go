@@ -110,7 +110,7 @@ func TestFlag_evaluateRule(t *testing.T) {
 				False:      testconvert.Interface(tt.fields.False),
 			}
 
-			got := f.evaluateRule(tt.args.user, "")
+			got := f.evaluateRule(tt.args.user, tt.args.env)
 			assert.Equal(t, tt.want, got)
 		})
 	}
