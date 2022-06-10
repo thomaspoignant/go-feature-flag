@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	// Init ffclient with an http retriever.
+	// Init ffclient with a kubernetes configmap retriever.
 	config, err := rest.InClusterConfig()
 	if err != nil {
 		panic(err.Error())
