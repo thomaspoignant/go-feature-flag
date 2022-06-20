@@ -67,6 +67,13 @@ func AllFlagsState(user ffuser.User) flagstate.AllFlags {
 	return ff.AllFlagsState(user)
 }
 
+// GetFlagsFromCache returns all the flags present in the cache with their
+// current state when calling this method. If cache hasn't been initialized, an
+// error reporting this is returned.
+func GetFlagsFromCache() (map[string]flag.Flag, error) {
+	return ff.GetFlagsFromCache()
+}
+
 // BoolVariation return the value of the flag in boolean.
 // An error is return if you don't have init the library before calling the function.
 // If the key does not exist we return the default value.
