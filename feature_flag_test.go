@@ -1,15 +1,16 @@
 package ffclient_test
 
 import (
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/stretchr/testify/assert"
-	ffclient "github.com/thomaspoignant/go-feature-flag"
-	"github.com/thomaspoignant/go-feature-flag/testutils/mock"
 	"io/ioutil"
 	"log"
 	"os"
 	"testing"
 	"time"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/stretchr/testify/assert"
+	ffclient "github.com/thomaspoignant/go-feature-flag"
+	"github.com/thomaspoignant/go-feature-flag/testutils/mock"
 
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
 )
@@ -66,6 +67,20 @@ func TestValidUseCase(t *testing.T) {
 
 	allFlags := ffclient.AllFlagsState(user)
 	assert.Equal(t, 2, len(allFlags.GetFlags()))
+}
+
+func TestAllFlagsFromCache(t *testing.T) {
+	err := ffclient.Init(ffclient.Config{
+		Retriever:       &ffclient.FileRetriever{Path: "testdata/flag-config.yaml"},
+		PollingInterval: 5 * time.Second,
+	})
+	defer ffclient.Close()
+
+	assert.NoError(t, err)
+	flags, err := ffclient.GetFlagsFromCache()
+
+	assert.NoError(t, err)
+	assert.Len(t, flags, 2)
 }
 
 func TestValidUseCaseToml(t *testing.T) {
@@ -157,7 +172,7 @@ func TestUpdateFlag(t *testing.T) {
   default: false`
 
 	flagFile, _ := ioutil.TempFile("", "")
-	_ = ioutil.WriteFile(flagFile.Name(), []byte(initialFileContent), 0600)
+	_ = ioutil.WriteFile(flagFile.Name(), []byte(initialFileContent), 0o600)
 
 	gffClient1, _ := ffclient.New(ffclient.Config{
 		PollingInterval: 1 * time.Second,
@@ -176,7 +191,7 @@ func TestUpdateFlag(t *testing.T) {
   false: false
   default: false`
 
-	_ = ioutil.WriteFile(flagFile.Name(), []byte(updatedFileContent), 0600)
+	_ = ioutil.WriteFile(flagFile.Name(), []byte(updatedFileContent), 0o600)
 
 	flagValue, _ = gffClient1.BoolVariation("test-flag", ffuser.NewUser("random-key"), false)
 	assert.True(t, flagValue)
@@ -196,7 +211,7 @@ func TestImpossibleToLoadfile(t *testing.T) {
   default: false`
 
 	flagFile, _ := ioutil.TempFile("", "impossible")
-	_ = ioutil.WriteFile(flagFile.Name(), []byte(initialFileContent), 0600)
+	_ = ioutil.WriteFile(flagFile.Name(), []byte(initialFileContent), 0o600)
 
 	gffClient1, _ := ffclient.New(ffclient.Config{
 		PollingInterval: 1 * time.Second,
@@ -264,7 +279,7 @@ func TestFlagFileUnreachable(t *testing.T) {
 	flagValue, _ := gff.StringVariation("test-flag", ffuser.NewUser("random-key"), "SDKdefault")
 	assert.Equal(t, "SDKdefault", flagValue, "should use the SDK default value")
 
-	_ = ioutil.WriteFile(flagFilePath, []byte(initialFileContent), 0600)
+	_ = ioutil.WriteFile(flagFilePath, []byte(initialFileContent), 0o600)
 	time.Sleep(2 * time.Second)
 
 	flagValue, _ = gff.StringVariation("test-flag", ffuser.NewUser("random-key"), "SDKdefault")
