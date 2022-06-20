@@ -24,7 +24,6 @@ type Rollout struct {
 	Scheduled *ScheduledRollout `json:"scheduled,omitempty" yaml:"scheduled,omitempty" toml:"scheduled,omitempty"` // nolint: lll
 }
 
-
 func (e Rollout) String() string {
 	// TODO: other rollout
 	if e.Experimentation == nil {

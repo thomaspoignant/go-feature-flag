@@ -9,7 +9,8 @@ func NewFlagState(
 	trackEvents bool,
 	value interface{},
 	variationType string,
-	failed bool) FlagState {
+	failed bool,
+) FlagState {
 	return FlagState{
 		Value:         value,
 		Timestamp:     time.Now().Unix(),

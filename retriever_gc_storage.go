@@ -2,13 +2,15 @@ package ffclient
 
 import (
 	"bytes"
-	"cloud.google.com/go/storage"
 	"context"
 	"crypto/md5" //nolint: gosec
 	"fmt"
-	"google.golang.org/api/option"
 	"io"
 	"io/ioutil"
+
+	"cloud.google.com/go/storage"
+
+	"google.golang.org/api/option"
 )
 
 // GCStorageRetriever is a configuration struct for a Google Cloud Storage retriever.

@@ -2,13 +2,14 @@ package flagv1
 
 import (
 	"fmt"
-	"github.com/nikunjy/rules/parser"
-	"github.com/thomaspoignant/go-feature-flag/ffuser"
-	"github.com/thomaspoignant/go-feature-flag/internal/utils"
 	"math"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/nikunjy/rules/parser"
+	"github.com/thomaspoignant/go-feature-flag/ffuser"
+	"github.com/thomaspoignant/go-feature-flag/internal/utils"
 )
 
 // percentageMultiplier is the multiplier used to have a bigger range of possibility.
@@ -77,8 +78,8 @@ func (f *FlagData) Value(flagName string, user ffuser.User) (interface{}, string
 
 func (f *FlagData) isExperimentationOver() bool {
 	now := time.Now()
-	return f.Rollout != nil && f.Rollout.Experimentation != nil && (
-		(f.Rollout.Experimentation.Start != nil && now.Before(*f.Rollout.Experimentation.Start)) ||
+	return f.Rollout != nil && f.Rollout.Experimentation != nil &&
+		((f.Rollout.Experimentation.Start != nil && now.Before(*f.Rollout.Experimentation.Start)) ||
 			(f.Rollout.Experimentation.End != nil && now.After(*f.Rollout.Experimentation.End)))
 }
 
@@ -326,7 +327,7 @@ func (f *FlagData) GetDefaultVariation() string {
 }
 
 func (f *FlagData) GetRawValues() map[string]string {
-	var rawValues = make(map[string]string)
+	rawValues := make(map[string]string)
 	rawValues["Rule"] = f.getRule()
 	rawValues["Percentage"] = fmt.Sprintf("%.2f", f.getPercentage())
 

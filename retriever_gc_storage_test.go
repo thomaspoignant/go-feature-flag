@@ -1,17 +1,19 @@
 package ffclient
 
 import (
-	"cloud.google.com/go/storage"
 	"context"
 	"crypto/md5" //nolint: gosec
+	"io"
+	"io/ioutil"
+	"testing"
+
+	"cloud.google.com/go/storage"
+
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
-	"io"
-	"io/ioutil"
-	"testing"
 )
 
 func TestGCStorageRetriever_Retrieve(t *testing.T) {

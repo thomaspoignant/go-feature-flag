@@ -1,9 +1,10 @@
 package notifier
 
 import (
-	"github.com/thomaspoignant/go-feature-flag/ffnotifier"
 	"log"
 	"sync"
+
+	"github.com/thomaspoignant/go-feature-flag/ffnotifier"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 )

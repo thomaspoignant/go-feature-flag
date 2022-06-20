@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/ffnotifier"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -13,16 +12,20 @@ import (
 	"sort"
 	"sync"
 
+	"github.com/thomaspoignant/go-feature-flag/ffnotifier"
+
 	"github.com/thomaspoignant/go-feature-flag/internal"
 	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 )
 
-const goFFLogo = "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png"
-const slackFooter = "go-feature-flag"
-const colorDeleted = "#FF0000"
-const colorUpdated = "#FFA500"
-const colorAdded = "#008000"
-const longSlackAttachment = 35
+const (
+	goFFLogo            = "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png"
+	slackFooter         = "go-feature-flag"
+	colorDeleted        = "#FF0000"
+	colorUpdated        = "#FFA500"
+	colorAdded          = "#008000"
+	longSlackAttachment = 35
+)
 
 func NewSlackNotifier(logger *log.Logger, httpClient internal.HTTPClient, webhookURL string) SlackNotifier {
 	slackURL, _ := url.Parse(webhookURL)
@@ -82,7 +85,7 @@ func convertToSlackMessage(diff ffnotifier.DiffCache) slackMessage {
 }
 
 func convertDeletedFlagsToSlackMessage(diff ffnotifier.DiffCache) []attachment {
-	var attachments = make([]attachment, 0)
+	attachments := make([]attachment, 0)
 	for key := range diff.Deleted {
 		attachment := attachment{
 			Title:      fmt.Sprintf("❌ Flag \"%s\" deleted", key),
@@ -96,7 +99,7 @@ func convertDeletedFlagsToSlackMessage(diff ffnotifier.DiffCache) []attachment {
 }
 
 func convertUpdatedFlagsToSlackMessage(diff ffnotifier.DiffCache) []attachment {
-	var attachments = make([]attachment, 0)
+	attachments := make([]attachment, 0)
 	for key, value := range diff.Updated {
 		attachment := attachment{
 			Title:      fmt.Sprintf("✏️ Flag \"%s\" updated", key),
@@ -130,7 +133,7 @@ func convertUpdatedFlagsToSlackMessage(diff ffnotifier.DiffCache) []attachment {
 }
 
 func convertAddedFlagsToSlackMessage(diff ffnotifier.DiffCache) []attachment {
-	var attachments = make([]attachment, 0)
+	attachments := make([]attachment, 0)
 	for key, value := range diff.Added {
 		attachment := attachment{
 			Title:      fmt.Sprintf("🆕 Flag \"%s\" created", key),

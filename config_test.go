@@ -1,12 +1,13 @@
 package ffclient_test
 
 import (
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/stretchr/testify/assert"
 
 	ffClient "github.com/thomaspoignant/go-feature-flag"
 )

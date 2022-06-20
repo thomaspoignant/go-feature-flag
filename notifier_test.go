@@ -1,14 +1,15 @@
 package ffclient
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/thomaspoignant/go-feature-flag/ffnotifier"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/ffnotifier"
 
 	"github.com/thomaspoignant/go-feature-flag/internal"
 	"github.com/thomaspoignant/go-feature-flag/internal/notifier"

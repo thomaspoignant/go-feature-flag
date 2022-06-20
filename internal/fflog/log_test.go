@@ -1,10 +1,11 @@
 package fflog_test
 
 import (
-	"github.com/stretchr/testify/assert"
 	"log"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 )

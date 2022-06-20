@@ -3,6 +3,8 @@ package ffclient
 import (
 	"context"
 	"errors"
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	api "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -10,7 +12,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/fake"
 	restclient "k8s.io/client-go/rest"
-	"testing"
 )
 
 var expectedContent = `test-flag:
@@ -34,7 +35,7 @@ func Test_kubernetesRetriever_Retrieve(t *testing.T) {
 		kubeClientProvider = originalKubeClientProvider
 	}()
 
-	kubeClientProviderFactory := func(object ...runtime.Object) func(*restclient.Config)(kubernetes.Interface, error) {
+	kubeClientProviderFactory := func(object ...runtime.Object) func(*restclient.Config) (kubernetes.Interface, error) {
 		return func(config *restclient.Config) (kubernetes.Interface, error) {
 			return fake.NewSimpleClientset(object...), nil
 		}
@@ -45,8 +46,8 @@ func Test_kubernetesRetriever_Retrieve(t *testing.T) {
 		namespace     string
 		configMapName string
 		key           string
-		context   context.Context
-		setClient bool
+		context       context.Context
+		setClient     bool
 	}
 	tests := []struct {
 		name    string
@@ -59,13 +60,13 @@ func Test_kubernetesRetriever_Retrieve(t *testing.T) {
 			fields: fields{
 				object: &api.ConfigMap{
 					ObjectMeta: v1.ObjectMeta{Name: "ConfigMap1", Namespace: "Namespace"},
-					Data: map[string]string{"valid": expectedContent},
+					Data:       map[string]string{"valid": expectedContent},
 				},
 				namespace:     "Namespace",
 				configMapName: "ConfigMap1",
 				key:           "valid",
 			},
-			want:[]byte(expectedContent),
+			want:    []byte(expectedContent),
 			wantErr: nil,
 		},
 		{
@@ -73,7 +74,7 @@ func Test_kubernetesRetriever_Retrieve(t *testing.T) {
 			fields: fields{
 				object: &api.ConfigMap{
 					ObjectMeta: v1.ObjectMeta{Name: "ConfigMap1", Namespace: "Namespace"},
-					Data: map[string]string{"valid": expectedContent},
+					Data:       map[string]string{"valid": expectedContent},
 				},
 				namespace:     "Namespace",
 				configMapName: "ConfigMap1",
@@ -86,7 +87,7 @@ func Test_kubernetesRetriever_Retrieve(t *testing.T) {
 			fields: fields{
 				object: &api.ConfigMap{
 					ObjectMeta: v1.ObjectMeta{Name: "ConfigMap1", Namespace: "Namespace"},
-					Data: map[string]string{"valid": expectedContent},
+					Data:       map[string]string{"valid": expectedContent},
 				},
 				namespace:     "WrongNamespace",
 				configMapName: "NotExisting",
@@ -98,7 +99,7 @@ func Test_kubernetesRetriever_Retrieve(t *testing.T) {
 			fields: fields{
 				object: &api.ConfigMap{
 					ObjectMeta: v1.ObjectMeta{Name: "ConfigMap1", Namespace: "Namespace"},
-					Data: map[string]string{"valid": expectedContent},
+					Data:       map[string]string{"valid": expectedContent},
 				},
 				namespace:     "Namespace",
 				configMapName: "ConfigMap1",
