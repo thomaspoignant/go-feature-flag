@@ -2,10 +2,11 @@ package ffclient_test
 
 import (
 	"context"
-	"github.com/stretchr/testify/assert"
-	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"net/http"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	ffclient "github.com/thomaspoignant/go-feature-flag"
 )
 
 func Test_github_Retrieve(t *testing.T) {

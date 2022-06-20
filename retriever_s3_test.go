@@ -2,11 +2,12 @@ package ffclient
 
 import (
 	"context"
+	"io/ioutil"
+	"testing"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager/s3manageriface"
 	"github.com/stretchr/testify/assert"
-	"io/ioutil"
-	"testing"
 
 	"github.com/thomaspoignant/go-feature-flag/testutils"
 )

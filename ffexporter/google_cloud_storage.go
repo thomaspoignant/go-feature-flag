@@ -1,15 +1,17 @@
 package ffexporter
 
 import (
-	"cloud.google.com/go/storage"
 	"context"
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
-	"google.golang.org/api/option"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
+
+	"cloud.google.com/go/storage"
+
+	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
+	"google.golang.org/api/option"
 )
 
 type GoogleCloudStorage struct {

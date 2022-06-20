@@ -3,13 +3,14 @@ package notifier
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/thomaspoignant/go-feature-flag/ffnotifier"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
 	"sync"
+
+	"github.com/thomaspoignant/go-feature-flag/ffnotifier"
 
 	"github.com/thomaspoignant/go-feature-flag/internal"
 	"github.com/thomaspoignant/go-feature-flag/internal/fflog"

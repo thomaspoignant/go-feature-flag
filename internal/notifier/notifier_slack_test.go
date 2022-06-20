@@ -1,11 +1,6 @@
 package notifier_test
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/thomaspoignant/go-feature-flag/ffnotifier"
-	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
-	"github.com/thomaspoignant/go-feature-flag/internal/notifier"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -14,6 +9,12 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/ffnotifier"
+	"github.com/thomaspoignant/go-feature-flag/internal/flag"
+	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
+	"github.com/thomaspoignant/go-feature-flag/internal/notifier"
 
 	"github.com/thomaspoignant/go-feature-flag/testutils"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
@@ -78,7 +79,8 @@ func TestSlackNotifier_Notify(t *testing.T) {
 									Experimentation: &flagv1.Experimentation{
 										Start: testconvert.Time(time.Unix(1095379400, 0)),
 										End:   testconvert.Time(time.Unix(1095371000, 0)),
-									}},
+									},
+								},
 							},
 							After: &flagv1.FlagData{
 								Rule:        testconvert.String("key eq \"not-a-ke\""),

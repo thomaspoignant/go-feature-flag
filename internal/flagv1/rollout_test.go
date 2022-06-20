@@ -1,10 +1,11 @@
 package flagv1_test
 
 import (
-	"github.com/stretchr/testify/assert"
-	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
 
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 )

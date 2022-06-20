@@ -1,10 +1,11 @@
 package cache
 
 import (
+	"sync"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/thomaspoignant/go-feature-flag/ffnotifier"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	"sync"
 )
 
 type Service interface {
@@ -40,7 +41,8 @@ func (c *notificationService) Close() {
 
 // getDifferences is checking what are the difference in the updated cache.
 func (c *notificationService) getDifferences(
-	oldCache map[string]flag.Flag, newCache map[string]flag.Flag) ffnotifier.DiffCache {
+	oldCache map[string]flag.Flag, newCache map[string]flag.Flag,
+) ffnotifier.DiffCache {
 	diff := ffnotifier.DiffCache{
 		Deleted: map[string]flag.Flag{},
 		Added:   map[string]flag.Flag{},

@@ -12,7 +12,8 @@ func NewFeatureEvent(
 	value interface{},
 	variation string,
 	failed bool,
-	version float64) FeatureEvent {
+	version float64,
+) FeatureEvent {
 	contextKind := "user"
 	if user.IsAnonymous() {
 		contextKind = "anonymousUser"

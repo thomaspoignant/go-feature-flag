@@ -3,15 +3,16 @@ package ffexporter_test
 import (
 	"context"
 	"crypto/tls"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/stretchr/testify/assert"
-	"github.com/thomaspoignant/go-feature-flag/ffexporter"
-	"google.golang.org/api/option"
 	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/ffexporter"
+	"google.golang.org/api/option"
 )
 
 func TestGoogleStorage_Export(t *testing.T) {
@@ -38,8 +39,10 @@ func TestGoogleStorage_Export(t *testing.T) {
 				Bucket: "test",
 			},
 			events: []ffexporter.FeatureEvent{
-				{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-					Variation: "Default", Value: "YO", Default: false},
+				{
+					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
+					Variation: "Default", Value: "YO", Default: false,
+				},
 			},
 			expectedName: "^flag-variation-" + hostname + "-[0-9]*\\.json$",
 		},
@@ -50,8 +53,10 @@ func TestGoogleStorage_Export(t *testing.T) {
 				Bucket: "test",
 			},
 			events: []ffexporter.FeatureEvent{
-				{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-					Variation: "Default", Value: "YO", Default: false},
+				{
+					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
+					Variation: "Default", Value: "YO", Default: false,
+				},
 			},
 			expectedName: "^random/path/flag-variation-" + hostname + "-[0-9]*\\.json$",
 		},
@@ -62,8 +67,10 @@ func TestGoogleStorage_Export(t *testing.T) {
 				Bucket: "test",
 			},
 			events: []ffexporter.FeatureEvent{
-				{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-					Variation: "Default", Value: "YO", Default: false},
+				{
+					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
+					Variation: "Default", Value: "YO", Default: false,
+				},
 			},
 			expectedName: "^flag-variation-" + hostname + "-[0-9]*\\.csv$",
 		},
@@ -75,8 +82,10 @@ func TestGoogleStorage_Export(t *testing.T) {
 				Bucket:      "test",
 			},
 			events: []ffexporter.FeatureEvent{
-				{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-					Variation: "Default", Value: "YO", Default: false},
+				{
+					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
+					Variation: "Default", Value: "YO", Default: false,
+				},
 			},
 			expectedName: "^flag-variation-" + hostname + "-[0-9]*\\.csv$",
 		},
@@ -88,8 +97,10 @@ func TestGoogleStorage_Export(t *testing.T) {
 				Bucket:   "test",
 			},
 			events: []ffexporter.FeatureEvent{
-				{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-					Variation: "Default", Value: "YO", Default: false},
+				{
+					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
+					Variation: "Default", Value: "YO", Default: false,
+				},
 			},
 			expectedName: "^json-test-[0-9]*$",
 		},
@@ -100,8 +111,10 @@ func TestGoogleStorage_Export(t *testing.T) {
 				Bucket: "test",
 			},
 			events: []ffexporter.FeatureEvent{
-				{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-					Variation: "Default", Value: "YO", Default: false},
+				{
+					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
+					Variation: "Default", Value: "YO", Default: false,
+				},
 			},
 			expectedName: "^flag-variation-" + hostname + "-[0-9]*\\.xxx$",
 		},
@@ -111,8 +124,10 @@ func TestGoogleStorage_Export(t *testing.T) {
 				Format: "xxx",
 			},
 			events: []ffexporter.FeatureEvent{
-				{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-					Variation: "Default", Value: "YO", Default: false},
+				{
+					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
+					Variation: "Default", Value: "YO", Default: false,
+				},
 			},
 			wantErr: true,
 		},
@@ -123,8 +138,10 @@ func TestGoogleStorage_Export(t *testing.T) {
 				Bucket:   "test",
 			},
 			events: []ffexporter.FeatureEvent{
-				{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-					Variation: "Default", Value: "YO", Default: false},
+				{
+					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
+					Variation: "Default", Value: "YO", Default: false,
+				},
 			},
 			wantErr: true,
 		},
@@ -135,8 +152,10 @@ func TestGoogleStorage_Export(t *testing.T) {
 				CsvTemplate: "{{ .Foo}}",
 			},
 			events: []ffexporter.FeatureEvent{
-				{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-					Variation: "Default", Value: "YO", Default: false},
+				{
+					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
+					Variation: "Default", Value: "YO", Default: false,
+				},
 			},
 			wantErr: true,
 		},

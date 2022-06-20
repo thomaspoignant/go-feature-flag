@@ -3,9 +3,10 @@ package ffclient
 import (
 	"context"
 	"errors"
-	"github.com/thomaspoignant/go-feature-flag/ffnotifier"
 	"log"
 	"time"
+
+	"github.com/thomaspoignant/go-feature-flag/ffnotifier"
 
 	"github.com/thomaspoignant/go-feature-flag/internal"
 	"github.com/thomaspoignant/go-feature-flag/internal/notifier"

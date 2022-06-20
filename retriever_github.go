@@ -3,9 +3,10 @@ package ffclient
 import (
 	"context"
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/internal"
 	"net/http"
 	"time"
+
+	"github.com/thomaspoignant/go-feature-flag/internal"
 )
 
 // GithubRetriever is a configuration struct for a GitHub retriever.

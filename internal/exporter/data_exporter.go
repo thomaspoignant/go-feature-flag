@@ -2,20 +2,24 @@ package exporter
 
 import (
 	"context"
-	"github.com/thomaspoignant/go-feature-flag/ffexporter"
 	"log"
 	"sync"
 	"time"
 
+	"github.com/thomaspoignant/go-feature-flag/ffexporter"
+
 	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 )
 
-const defaultFlushInterval = 60 * time.Second
-const defaultMaxEventInMemory = int64(100000)
+const (
+	defaultFlushInterval    = 60 * time.Second
+	defaultMaxEventInMemory = int64(100000)
+)
 
 // NewDataExporterScheduler allows to create a new instance of DataExporterScheduler ready to be used to export data.
 func NewDataExporterScheduler(ctx context.Context, flushInterval time.Duration, maxEventInMemory int64,
-	exporter Exporter, logger *log.Logger) *DataExporterScheduler {
+	exporter Exporter, logger *log.Logger,
+) *DataExporterScheduler {
 	if ctx == nil {
 		ctx = context.Background()
 	}

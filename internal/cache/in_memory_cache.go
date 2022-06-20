@@ -2,6 +2,7 @@ package cache
 
 import (
 	"fmt"
+
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/internal/flagv1"
 )
@@ -29,7 +30,7 @@ func (fc *InMemoryCache) getFlag(key string) (flag.Flag, error) {
 }
 
 func (fc *InMemoryCache) keys() []string {
-	var keys = make([]string, 0, len(fc.Flags))
+	keys := make([]string, 0, len(fc.Flags))
 	for k := range fc.Flags {
 		keys = append(keys, k)
 	}

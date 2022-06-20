@@ -1,12 +1,13 @@
 package ffnotifier_test
 
 import (
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/ffnotifier"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
-	"testing"
 )
 
 func TestDiffCache_HasDiff(t *testing.T) {

@@ -2,10 +2,11 @@ package ffexporter_test
 
 import (
 	"context"
-	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"log"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	"github.com/thomaspoignant/go-feature-flag/ffexporter"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
@@ -29,8 +30,10 @@ func TestLog_Export(t *testing.T) {
 			name:   "Default format",
 			fields: fields{LogFormat: ""},
 			args: args{featureEvents: []ffexporter.FeatureEvent{
-				{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-					Variation: "Default", Value: "YO", Default: false},
+				{
+					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
+					Variation: "Default", Value: "YO", Default: false,
+				},
 			}},
 			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"ABCD\", flag=\"random-key\", value=\"YO\"\n",
 		},
@@ -40,8 +43,10 @@ func TestLog_Export(t *testing.T) {
 				LogFormat: "key=\"{{ .Key}}\" [{{ .FormattedDate}}]",
 			},
 			args: args{featureEvents: []ffexporter.FeatureEvent{
-				{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-					Variation: "Default", Value: "YO", Default: false},
+				{
+					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
+					Variation: "Default", Value: "YO", Default: false,
+				},
 			}},
 			expectedLog: "key=\"random-key\" \\[" + testutils.RFC3339Regex + "\\]\n",
 		},
@@ -51,8 +56,10 @@ func TestLog_Export(t *testing.T) {
 				LogFormat: "key=\"{{ .Key}\" [{{ .FormattedDate}}]",
 			},
 			args: args{featureEvents: []ffexporter.FeatureEvent{
-				{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-					Variation: "Default", Value: "YO", Default: false},
+				{
+					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
+					Variation: "Default", Value: "YO", Default: false,
+				},
 			}},
 			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"ABCD\", flag=\"random-key\", value=\"YO\"\n",
 		},
@@ -62,8 +69,10 @@ func TestLog_Export(t *testing.T) {
 				LogFormat: "key=\"{{ .UnknownKey}}\" [{{ .FormattedDate}}]",
 			},
 			args: args{featureEvents: []ffexporter.FeatureEvent{
-				{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-					Variation: "Default", Value: "YO", Default: false},
+				{
+					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
+					Variation: "Default", Value: "YO", Default: false,
+				},
 			}},
 			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"ABCD\", flag=\"random-key\", value=\"YO\"\n",
 			wantErr:     true,
