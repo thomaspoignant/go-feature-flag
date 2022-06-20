@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"github.com/stretchr/testify/assert"
-	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	ffclient "github.com/thomaspoignant/go-feature-flag"
 )
 
 type mockHTTP struct {

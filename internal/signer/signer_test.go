@@ -1,9 +1,10 @@
 package signer_test
 
 import (
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/internal/signer"
-	"testing"
 )
 
 func TestSign(t *testing.T) {

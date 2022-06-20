@@ -4,11 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/internal"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/thomaspoignant/go-feature-flag/internal"
 )
 
 // HTTPRetriever is a configuration struct for an HTTP endpoint retriever.

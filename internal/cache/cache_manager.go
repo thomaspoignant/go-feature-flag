@@ -3,12 +3,13 @@ package cache
 import (
 	"encoding/json"
 	"errors"
-	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
-	"gopkg.in/yaml.v3"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/thomaspoignant/go-feature-flag/internal/flag"
+	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
+	"gopkg.in/yaml.v3"
 
 	"github.com/pelletier/go-toml"
 )

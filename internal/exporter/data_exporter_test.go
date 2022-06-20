@@ -3,16 +3,17 @@ package exporter_test
 import (
 	"context"
 	"errors"
-	"github.com/stretchr/testify/assert"
-	"github.com/thomaspoignant/go-feature-flag/ffexporter"
-	"github.com/thomaspoignant/go-feature-flag/internal/exporter"
-	"github.com/thomaspoignant/go-feature-flag/internal/flagv1"
-	"github.com/thomaspoignant/go-feature-flag/testutils/mock"
 	"io/ioutil"
 	"log"
 	"os"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/ffexporter"
+	"github.com/thomaspoignant/go-feature-flag/internal/exporter"
+	"github.com/thomaspoignant/go-feature-flag/internal/flagv1"
+	"github.com/thomaspoignant/go-feature-flag/testutils/mock"
 
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
 	"github.com/thomaspoignant/go-feature-flag/testutils"

@@ -2,9 +2,10 @@ package ffclient_test
 
 import (
 	"context"
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
-	"testing"
 )
 
 var expectedFile = `test-flag:

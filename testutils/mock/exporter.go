@@ -2,9 +2,10 @@ package mock
 
 import (
 	"context"
-	"github.com/thomaspoignant/go-feature-flag/ffexporter"
 	"log"
 	"sync"
+
+	"github.com/thomaspoignant/go-feature-flag/ffexporter"
 )
 
 type Exporter struct {

@@ -1,12 +1,13 @@
 package cache_test
 
 import (
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/ffnotifier"
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
 	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
-	"testing"
 )
 
 func Test_FlagCacheNotInit(t *testing.T) {
@@ -260,7 +261,8 @@ test-flag2:
 				},
 			},
 			wantErr: false,
-		}, {
+		},
+		{
 			name:       "empty",
 			flagFormat: "yaml",
 			args: args{

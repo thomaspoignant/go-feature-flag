@@ -1,16 +1,17 @@
 package notifier
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/thomaspoignant/go-feature-flag/ffnotifier"
-	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
-	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 	"io/ioutil"
 	"log"
 	"os"
 	"sync"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/ffnotifier"
+	"github.com/thomaspoignant/go-feature-flag/internal/flag"
+	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
+	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 
 	"github.com/thomaspoignant/go-feature-flag/testutils"
 )

@@ -2,12 +2,13 @@ package testutils
 
 import (
 	"errors"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"io"
 	"io/ioutil"
 	"strings"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
 type S3ManagerMock struct {
@@ -15,7 +16,8 @@ type S3ManagerMock struct {
 }
 
 func (s *S3ManagerMock) Download(at io.WriterAt, input *s3.GetObjectInput,
-	f ...func(*s3manager.Downloader)) (int64, error) {
+	f ...func(*s3manager.Downloader),
+) (int64, error) {
 	if *input.Key == "valid" {
 		res, _ := ioutil.ReadFile("./testdata/flag-config.yaml")
 		_, _ = at.WriteAt(res, 0)
@@ -28,12 +30,14 @@ func (s *S3ManagerMock) Download(at io.WriterAt, input *s3.GetObjectInput,
 }
 
 func (s *S3ManagerMock) DownloadWithContext(context aws.Context, at io.WriterAt,
-	input *s3.GetObjectInput, f ...func(*s3manager.Downloader)) (int64, error) {
+	input *s3.GetObjectInput, f ...func(*s3manager.Downloader),
+) (int64, error) {
 	return s.Download(at, input)
 }
 
 func (s *S3ManagerMock) Upload(uploadInput *s3manager.UploadInput,
-	funC ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error) {
+	funC ...func(*s3manager.Uploader),
+) (*s3manager.UploadOutput, error) {
 	if uploadInput.Bucket == nil || *uploadInput.Bucket == "" {
 		return nil, errors.New("invalid bucket")
 	}
@@ -52,7 +56,8 @@ func (s *S3ManagerMock) Upload(uploadInput *s3manager.UploadInput,
 }
 
 func (s *S3ManagerMock) UploadWithContext(context aws.Context, uploadInput *s3manager.UploadInput,
-	funC ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error) {
+	funC ...func(*s3manager.Uploader),
+) (*s3manager.UploadOutput, error) {
 	return s.Upload(uploadInput, funC...)
 }
 

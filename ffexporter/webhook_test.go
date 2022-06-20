@@ -2,11 +2,12 @@ package ffexporter
 
 import (
 	"context"
-	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"log"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	"github.com/thomaspoignant/go-feature-flag/testutils"
 )
@@ -56,10 +57,14 @@ func TestWebhook_Export(t *testing.T) {
 			args: args{
 				logger: logger,
 				featureEvents: []FeatureEvent{
-					{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-						Variation: "Default", Value: "YO", Default: false},
-					{Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
-						Variation: "Default", Value: "YO2", Default: false, Version: 127},
+					{
+						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
+						Variation: "Default", Value: "YO", Default: false,
+					},
+					{
+						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
+						Variation: "Default", Value: "YO2", Default: false, Version: 127,
+					},
 				},
 			},
 			expected: expected{
@@ -79,10 +84,14 @@ func TestWebhook_Export(t *testing.T) {
 			args: args{
 				logger: logger,
 				featureEvents: []FeatureEvent{
-					{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-						Variation: "Default", Value: "YO", Default: false},
-					{Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
-						Variation: "Default", Value: "YO2", Default: false, Version: 127},
+					{
+						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
+						Variation: "Default", Value: "YO", Default: false,
+					},
+					{
+						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
+						Variation: "Default", Value: "YO2", Default: false, Version: 127,
+					},
 				},
 			},
 			expected: expected{
@@ -102,10 +111,14 @@ func TestWebhook_Export(t *testing.T) {
 			args: args{
 				logger: logger,
 				featureEvents: []FeatureEvent{
-					{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-						Variation: "Default", Value: "YO", Default: false},
-					{Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
-						Variation: "Default", Value: "YO2", Default: false},
+					{
+						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
+						Variation: "Default", Value: "YO", Default: false,
+					},
+					{
+						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
+						Variation: "Default", Value: "YO2", Default: false,
+					},
 				},
 			},
 			wantErr: true,
@@ -121,10 +134,14 @@ func TestWebhook_Export(t *testing.T) {
 			args: args{
 				logger: logger,
 				featureEvents: []FeatureEvent{
-					{Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-						Variation: "Default", Value: "YO", Default: false},
-					{Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
-						Variation: "Default", Value: "YO2", Default: false},
+					{
+						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
+						Variation: "Default", Value: "YO", Default: false,
+					},
+					{
+						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
+						Variation: "Default", Value: "YO2", Default: false,
+					},
 				},
 			},
 			wantErr: true,
