@@ -1,10 +1,10 @@
 repos:
-  - repo: https://github.com/golangci/golangci-lint
-    rev: v1.39.0
-    hooks:
-      - id: golangci-lint
-
   - repo: https://github.com/Bahjat/pre-commit-golang
     rev: v1.0.1
     hooks:
       - id: gofumpt
+
+  - repo: https://github.com/golangci/golangci-lint
+    rev: v1.46.2
+    hooks:
+      - id: golangci-lint
