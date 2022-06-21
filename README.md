@@ -118,6 +118,7 @@ ffclient.Init(ffclient.Config{
         },
     },
     StartWithRetrieverError: false,
+    Environment: os.Getenv("MYAPP_ENV"),
 })
 ```
 ### Configuration fields
@@ -126,6 +127,7 @@ ffclient.Init(ffclient.Config{
 |---------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `Retriever`               | The configuration retriever you want to use to get your flag file.<br> *See [Store your flag file](https://thomaspoignant.github.io/go-feature-flag/latest/flag_file/) for the configuration details*.                                                                            |
 | `Context`                 | *(optional)*<br>The context used by the retriever.<br />Default: `context.Background()`                                                                                                                                                                                           |
+| `Environment`             | *(optional)*<br>The environment the app is running under, can be checked in feature flag rules.<br />Default: `""`                                                                                                                                                                                           |
 | `DataExporter`            | *(optional)*<br>DataExporter defines how to export data on how your flags are used.<br> *see [export data section](https://thomaspoignant.github.io/go-feature-flag/latest/data_collection/) for more details*.                                                                   |
 | `FileFormat`              | *(optional)*<br>Format of your configuration file. Available formats are `yaml`, `toml` and `json`, if you omit the field it will try to unmarshal the file as a `yaml` file.<br>Default: `YAML`                                                                                  |
 | `Logger`                  | *(optional)*<br>Logger used to log what `go-feature-flag` is doing.<br />If no logger is provided the module will not log anything.<br>Default: No log                                                                                                                            |

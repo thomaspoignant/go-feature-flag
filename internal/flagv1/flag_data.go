@@ -56,14 +56,14 @@ type FlagData struct {
 
 // Value is returning the Value associate to the flag (True / False / Default ) based
 // if the toggle apply to the user or not.
-func (f *FlagData) Value(flagName string, user ffuser.User) (interface{}, string) {
+func (f *FlagData) Value(flagName string, user ffuser.User, environment string) (interface{}, string) {
 	f.updateFlagStage()
 	if f.isExperimentationOver() {
 		// if we have an experimentation that has not started or that is finished we use the default value.
 		return f.getDefault(), VariationDefault
 	}
 
-	if f.evaluateRule(user) {
+	if f.evaluateRule(user, environment) {
 		if f.isInPercentage(flagName, user) {
 			// Rule applied and user in the cohort.
 			return f.getTrue(), VariationTrue
@@ -102,7 +102,7 @@ func (f *FlagData) isInPercentage(flagName string, user ffuser.User) bool {
 }
 
 // evaluateRule is checking if the rule can apply to a specific user.
-func (f *FlagData) evaluateRule(user ffuser.User) bool {
+func (f *FlagData) evaluateRule(user ffuser.User, environment string) bool {
 	// Flag disable we cannot apply it.
 	if f.GetDisable() {
 		return false
@@ -114,7 +114,11 @@ func (f *FlagData) evaluateRule(user ffuser.User) bool {
 	}
 
 	// Evaluate the rule on the user.
-	return parser.Evaluate(f.getRule(), utils.UserToMap(user))
+	userMap := utils.UserToMap(user)
+	if environment != "" {
+		userMap["env"] = environment
+	}
+	return parser.Evaluate(f.getRule(), userMap)
 }
 
 // string display correctly a flag

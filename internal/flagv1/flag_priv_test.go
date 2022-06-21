@@ -20,6 +20,7 @@ func TestFlag_evaluateRule(t *testing.T) {
 	}
 	type args struct {
 		user ffuser.User
+		env  string
 	}
 	tests := []struct {
 		name   string
@@ -77,6 +78,28 @@ func TestFlag_evaluateRule(t *testing.T) {
 			},
 			want: false,
 		},
+		{
+			name: "Rolled out to environment",
+			fields: fields{
+				Rule: "env == \"staging\"",
+			},
+			args: args{
+				user: ffuser.NewAnonymousUser(""),
+				env:  "staging",
+			},
+			want: true,
+		},
+		{
+			name: "Not rolled out to environment",
+			fields: fields{
+				Rule: "env != \"production\"",
+			},
+			args: args{
+				user: ffuser.NewAnonymousUser(""),
+				env:  "production",
+			},
+			want: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -88,7 +111,7 @@ func TestFlag_evaluateRule(t *testing.T) {
 				False:      testconvert.Interface(tt.fields.False),
 			}
 
-			got := f.evaluateRule(tt.args.user)
+			got := f.evaluateRule(tt.args.user, tt.args.env)
 			assert.Equal(t, tt.want, got)
 		})
 	}

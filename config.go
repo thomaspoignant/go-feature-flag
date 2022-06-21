@@ -28,6 +28,10 @@ type Config struct {
 	// Default: context.Background()
 	Context context.Context
 
+	// Environment (optional), can be checked in feature flag rules
+	// Default: ""
+	Environment string
+
 	// Retriever is the component in charge to retrieve your flag file
 	Retriever Retriever
 

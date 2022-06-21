@@ -10,6 +10,7 @@ During the initialization you must give a [`ffclient.Config{}`](https://pkg.go.d
 |---|---|
 |`Retriever`  | The configuration retriever you want to use to get your flag file<br> *See [Store your flag file](flag_file/index.md) for the configuration details*.|
 |`Context`  | *(optional)*<br>The context used by the retriever.<br />Default: `context.Background()`|
+|`Environment`  | *(optional)*<br>The environment the app is running under, can be checked in feature flag rules.<br />Default: `""`|
 |`DataExporter` | *(optional)*<br>DataExporter defines how to export data on how your flags are used.<br> *see [export data section](data_collection/index.md) for more details*.|
 |`FileFormat`| *(optional)*<br>Format of your configuration file. Available formats are `yaml`, `toml` and `json`, if you omit the field it will try to unmarshal the file as a `yaml` file.<br>Default: `YAML`|
 |`Logger`   | *(optional)*<br>Logger used to log what `go-feature-flag` is doing.<br />If no logger is provided the module will not log anything.<br>Default: No log|
@@ -24,6 +25,7 @@ ffclient.Init(ffclient.Config{
     PollingInterval:   3 * time.Second,
     Logger:         log.New(file, "/tmp/log", 0),
     Context:        context.Background(),
+    Environment:    os.Getenv("MYAPP_ENV"),
     Retriever:      &ffclient.FileRetriever{Path: "testdata/flag-config.yaml"},
     FileFormat:     "yaml",
     Notifiers: []ffclient.NotifierConfig{

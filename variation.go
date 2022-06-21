@@ -153,7 +153,7 @@ func (g *GoFeatureFlag) AllFlagsState(user ffuser.User) flagstate.AllFlags {
 
 	allFlags := flagstate.NewAllFlags()
 	for key, currentFlag := range flags {
-		flagValue, varType := currentFlag.Value(key, user)
+		flagValue, varType := currentFlag.Value(key, user, g.config.Environment)
 		switch v := flagValue; v.(type) {
 		case int, float64, bool, string, []interface{}, map[string]interface{}:
 			allFlags.AddFlag(key, flagstate.NewFlagState(currentFlag.GetTrackEvents(), v, varType, false))
@@ -191,7 +191,7 @@ func (g *GoFeatureFlag) boolVariation(flagKey string, user ffuser.User, sdkDefau
 		}, err
 	}
 
-	flagValue, variationType := f.Value(flagKey, user)
+	flagValue, variationType := f.Value(flagKey, user, g.config.Environment)
 	res, ok := flagValue.(bool)
 	if !ok {
 		return model.BoolVarResult{
@@ -221,7 +221,7 @@ func (g *GoFeatureFlag) intVariation(flagKey string, user ffuser.User, sdkDefaul
 		}, err
 	}
 
-	flagValue, variationType := f.Value(flagKey, user)
+	flagValue, variationType := f.Value(flagKey, user, g.config.Environment)
 	res, ok := flagValue.(int)
 	if !ok {
 		// if this is a float64 we convert it to int
@@ -259,7 +259,7 @@ func (g *GoFeatureFlag) float64Variation(flagKey string, user ffuser.User, sdkDe
 		}, err
 	}
 
-	flagValue, variationType := f.Value(flagKey, user)
+	flagValue, variationType := f.Value(flagKey, user, g.config.Environment)
 	res, ok := flagValue.(float64)
 	if !ok {
 		return model.Float64VarResult{
@@ -289,7 +289,7 @@ func (g *GoFeatureFlag) stringVariation(flagKey string, user ffuser.User, sdkDef
 		}, err
 	}
 
-	flagValue, variationType := f.Value(flagKey, user)
+	flagValue, variationType := f.Value(flagKey, user, g.config.Environment)
 	res, ok := flagValue.(string)
 	if !ok {
 		return model.StringVarResult{
@@ -319,7 +319,7 @@ func (g *GoFeatureFlag) jsonArrayVariation(flagKey string, user ffuser.User, sdk
 		}, err
 	}
 
-	flagValue, variationType := f.Value(flagKey, user)
+	flagValue, variationType := f.Value(flagKey, user, g.config.Environment)
 	res, ok := flagValue.([]interface{})
 	if !ok {
 		return model.JSONArrayVarResult{
@@ -349,7 +349,7 @@ func (g *GoFeatureFlag) jsonVariation(flagKey string, user ffuser.User, sdkDefau
 		}, err
 	}
 
-	flagValue, variationType := f.Value(flagKey, user)
+	flagValue, variationType := f.Value(flagKey, user, g.config.Environment)
 	res, ok := flagValue.(map[string]interface{})
 	if !ok {
 		return model.JSONVarResult{
@@ -399,7 +399,7 @@ func (g *GoFeatureFlag) RawVariation(flagKey string, user ffuser.User, sdkDefaul
 		return res, err
 	}
 
-	flagValue, variationType := f.Value(flagKey, user)
+	flagValue, variationType := f.Value(flagKey, user, g.config.Environment)
 	res := model.RawVarResult{
 		Value:           flagValue,
 		VariationResult: computeVariationResult(f, variationType, false),

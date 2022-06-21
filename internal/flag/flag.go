@@ -6,8 +6,8 @@ import (
 
 type Flag interface {
 	// Value is returning the Value associate to the flag (True / False / Default ) based
-	// if the flag apply to the user or not.
-	Value(flagName string, user ffuser.User) (interface{}, string)
+	// if the flag apply to the user and environment or not.
+	Value(flagName string, user ffuser.User, environment string) (interface{}, string)
 
 	// String display correctly a flag with the right formatting
 	String() string
