@@ -148,6 +148,35 @@ Compare Expression and their definitions (`a|b` means you can use either one of 
     (key ew "@test.com") and (role eq "backend engineer") and (env eq "pro") and (company eq "go-feature-flag")`
     ```
 
+## Environments
+
+When you initialise `go-feature-flag` you can set an [environment](../configuration/#option_environment) for the instance of this SDK.
+
+```go linenums="1"
+ffclient.Init(ffclient.Config{ 
+    // ...
+    Environment:    "prod",
+    // ...
+})
+```
+
+When an environment is set, it adds a new field in your user called **`env`** that you can use in your rules.  
+It means that you can decide to activate a flag only for some **environment**.
+
+**Example of rules based on the environment:**
+```yaml
+# Flag activate only in dev
+rule: env == "dev"
+```
+```yaml
+# Flag used only in dev and staging environment
+rule: (env == "dev") or (env == "staging")
+```
+```yaml
+# Flag used on non prod environments except for the user 1234 in prod
+rule: (env != "prod") or (user_id == 1234)
+```
+
 ## Advanced configurations
 
 You can have advanced configurations for your flag to have specific behavior for them, such as:
