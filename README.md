@@ -442,3 +442,11 @@ The full configuration is [described in the documentation](https://thomaspoignan
 
 # How can I contribute?
 This project is open for contribution, see the [contributor's guide](CONTRIBUTING.md) for some helpful tips.
+
+## Contributors
+
+Thanks so much to our contributors.
+
+<a href="https://github.com/thomaspoignant/go-feature-flag/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=thomaspoignant/go-feature-flag" />
+</a>
