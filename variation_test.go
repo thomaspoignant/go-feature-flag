@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/thomaspoignant/go-feature-flag/ffretriever"
 	"io/ioutil"
 	"log"
 	"os"
@@ -1245,7 +1246,7 @@ func TestAllFlagsState(t *testing.T) {
 		{
 			name: "Valid multiple types",
 			config: Config{
-				Retriever: &FileRetriever{
+				Retriever: &ffretriever.FileRetriever{
 					Path: "./testdata/ffclient/all_flags/config_flag/flag-config-all-flags.yaml",
 				},
 			},
@@ -1256,7 +1257,7 @@ func TestAllFlagsState(t *testing.T) {
 		{
 			name: "Error in flag-0",
 			config: Config{
-				Retriever: &FileRetriever{
+				Retriever: &ffretriever.FileRetriever{
 					Path: "./testdata/ffclient/all_flags/config_flag/flag-config-with-error.yaml",
 				},
 			},
@@ -1267,7 +1268,7 @@ func TestAllFlagsState(t *testing.T) {
 		{
 			name: "module not init",
 			config: Config{
-				Retriever: &FileRetriever{
+				Retriever: &ffretriever.FileRetriever{
 					Path: "./testdata/ffclient/all_flags/config_flag/flag-config-all-flags.yaml",
 				},
 			},
@@ -1279,7 +1280,7 @@ func TestAllFlagsState(t *testing.T) {
 			name: "offline",
 			config: Config{
 				Offline: true,
-				Retriever: &FileRetriever{
+				Retriever: &ffretriever.FileRetriever{
 					Path: "./testdata/ffclient/all_flags/config_flag/flag-config-all-flags.yaml",
 				},
 			},
@@ -1348,7 +1349,7 @@ func TestAllFlagsFromCache(t *testing.T) {
 		{
 			name: "Valid multiple types",
 			config: Config{
-				Retriever: &FileRetriever{
+				Retriever: &ffretriever.FileRetriever{
 					Path: "./testdata/ffclient/all_flags/config_flag/flag-config-all-flags.yaml",
 				},
 			},
@@ -1357,7 +1358,7 @@ func TestAllFlagsFromCache(t *testing.T) {
 		{
 			name: "module not init",
 			config: Config{
-				Retriever: &FileRetriever{
+				Retriever: &ffretriever.FileRetriever{
 					Path: "./testdata/ffclient/all_flags/config_flag/flag-config-all-flags.yaml",
 				},
 			},

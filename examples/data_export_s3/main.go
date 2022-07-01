@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/thomaspoignant/go-feature-flag/ffretriever"
 	"log"
 	"os"
 	"time"
@@ -25,7 +26,7 @@ func main() {
 		PollingInterval: 10 * time.Second,
 		Logger:          log.New(os.Stdout, "", 0),
 		Context:         context.Background(),
-		Retriever: &ffclient.FileRetriever{
+		Retriever: &ffretriever.FileRetriever{
 			Path: "examples/data_export_s3/flags.yaml",
 		},
 		DataExporter: ffclient.DataExporter{

@@ -11,7 +11,7 @@ First, you need to initialize the `ffclient` with the location of your backend f
 ```go linenums="1"
 err := ffclient.Init(ffclient.Config{
     PollingInterval: 3 * time.Second,
-    Retriever: &ffclient.HTTPRetriever{
+    Retriever: &ffretriever.HTTPRetriever{
         URL:    "http://example.com/flag-config.yaml",
     },
 })

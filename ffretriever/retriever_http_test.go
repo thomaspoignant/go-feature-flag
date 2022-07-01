@@ -1,16 +1,16 @@
-package ffclient_test
+package ffretriever_test
 
 import (
 	"bytes"
 	"context"
 	"errors"
+	"github.com/thomaspoignant/go-feature-flag/ffretriever"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	ffclient "github.com/thomaspoignant/go-feature-flag"
 )
 
 type mockHTTP struct {
@@ -151,7 +151,7 @@ func Test_httpRetriever_Retrieve(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			h := ffclient.HTTPRetriever{
+			h := ffretriever.HTTPRetriever{
 				URL:    tt.fields.url,
 				Method: tt.fields.method,
 				Body:   tt.fields.body,

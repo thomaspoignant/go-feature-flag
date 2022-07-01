@@ -1,11 +1,11 @@
-package ffclient_test
+package ffretriever_test
 
 import (
 	"context"
+	"github.com/thomaspoignant/go-feature-flag/ffretriever"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	ffclient "github.com/thomaspoignant/go-feature-flag"
 )
 
 var expectedFile = `test-flag:
@@ -36,7 +36,7 @@ func Test_localRetriever_Retrieve(t *testing.T) {
 		{
 			name: "File exists",
 			fields: fields{
-				path: "./testdata/flag-config.yaml",
+				path: "../testdata/flag-config.yaml",
 			},
 			want:    []byte(expectedFile),
 			wantErr: false,
@@ -44,7 +44,7 @@ func Test_localRetriever_Retrieve(t *testing.T) {
 		{
 			name: "File does not exists",
 			fields: fields{
-				path: "./testdata/test-not-exist.yaml",
+				path: "../testdata/test-not-exist.yaml",
 			},
 			want:    nil,
 			wantErr: true,
@@ -52,7 +52,7 @@ func Test_localRetriever_Retrieve(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			l := ffclient.FileRetriever{Path: tt.fields.path}
+			l := ffretriever.FileRetriever{Path: tt.fields.path}
 			got, err := l.Retrieve(context.Background())
 			if tt.wantErr {
 				assert.Error(t, err, "Retrieve() error = %v, wantErr %v", err, tt.wantErr)

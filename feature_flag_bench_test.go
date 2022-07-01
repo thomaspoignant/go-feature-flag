@@ -3,6 +3,7 @@ package ffclient_test
 import (
 	"bytes"
 	"fmt"
+	"github.com/thomaspoignant/go-feature-flag/ffretriever"
 	"io/ioutil"
 	"testing"
 	"text/template"
@@ -36,7 +37,7 @@ func init() {
 
 	client, _ = ffclient.New(ffclient.Config{
 		PollingInterval: 1 * time.Second,
-		Retriever:       &ffclient.FileRetriever{Path: flagFile.Name()},
+		Retriever:       &ffretriever.FileRetriever{Path: flagFile.Name()},
 	})
 }
 
