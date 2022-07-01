@@ -12,8 +12,8 @@ require (
 	github.com/nikunjy/rules v0.0.0-20200120082459-0b7c4dc9dc86
 	github.com/pelletier/go-toml v1.9.5
 	github.com/stretchr/testify v1.8.0
-	golang.org/x/oauth2 v0.0.0-20220608161450-d0670ef3b1eb
-	google.golang.org/api v0.85.0
+	golang.org/x/oauth2 v0.0.0-20220622183110-fd043fe589d2
+	google.golang.org/api v0.86.0
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.24.1
 	k8s.io/apimachinery v0.24.2
