@@ -1,12 +1,12 @@
-package ffretriever_test
+package ffclient_test
 
 import (
 	"context"
-	"github.com/thomaspoignant/go-feature-flag/ffretriever"
 	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	ffclient "github.com/thomaspoignant/go-feature-flag"
 )
 
 func Test_github_Retrieve(t *testing.T) {
@@ -119,7 +119,7 @@ func Test_github_Retrieve(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			h := ffretriever.GithubRetriever{
+			h := ffclient.GithubRetriever{
 				RepositorySlug: tt.fields.repositorySlug,
 				FilePath:       tt.fields.filePath,
 				GithubToken:    tt.fields.githubToken,

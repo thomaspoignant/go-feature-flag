@@ -8,7 +8,7 @@ The [**GithubRetriever**](https://pkg.go.dev/github.com/thomaspoignant/go-featur
 ```go linenums="1"
 err := ffclient.Init(ffclient.Config{
     PollingInterval: 3 * time.Second,
-    Retriever: &ffretriever.GithubRetriever{
+    Retriever: &ffclient.GithubRetriever{
         RepositorySlug: "thomaspoignant/go-feature-flag",
         Branch: "main",
         FilePath: "testdata/flag-config.yaml",

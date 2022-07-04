@@ -11,7 +11,7 @@ import (
 config, _ := restclient.InClusterConfig()
 err = ffclient.Init(ffclient.Config{
     PollingInterval: 3 * time.Second,
-    Retriever: &ffretriever.KubernetesRetriever{
+    Retriever: &ffclient.KubernetesRetriever{
         Path: "file-example.yaml",
         Namespace:      "default"
         ConfigMapName: "my-configmap"

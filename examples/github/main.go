@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/ffretriever"
 	"log"
 	"os"
 	"time"
@@ -18,7 +17,7 @@ func main() {
 		PollingInterval: 10 * time.Second,
 		Logger:          log.New(os.Stdout, "", 0),
 		Context:         context.Background(),
-		Retriever: &ffretriever.GithubRetriever{
+		Retriever: &ffclient.GithubRetriever{
 			RepositorySlug: "thomaspoignant/go-feature-flag",
 			Branch:         "main",
 			FilePath:       "examples/github/flags.yaml",

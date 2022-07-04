@@ -1,4 +1,4 @@
-package ffretriever
+package ffclient
 
 import (
 	"bytes"

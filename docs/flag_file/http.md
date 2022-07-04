@@ -5,7 +5,7 @@ The [**HTTPRetriever**](https://pkg.go.dev/github.com/thomaspoignant/go-feature-
 ```go linenums="1"
 err := ffclient.Init(ffclient.Config{
     PollingInterval: 3 * time.Second,
-    Retriever: &ffretriever.HTTPRetriever{
+    Retriever: &ffclient.HTTPRetriever{
         URL:    "http://example.com/flag-config.yaml",
         Timeout: 2 * time.Second,
     },

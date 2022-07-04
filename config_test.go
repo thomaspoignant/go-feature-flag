@@ -1,7 +1,6 @@
 package ffclient_test
 
 import (
-	"github.com/thomaspoignant/go-feature-flag/ffretriever"
 	"net/http"
 	"reflect"
 	"testing"
@@ -16,7 +15,7 @@ import (
 func TestConfig_GetRetriever(t *testing.T) {
 	type fields struct {
 		PollingInterval time.Duration
-		Retriever       ffretriever.Retriever
+		Retriever       ffClient.Retriever
 	}
 	tests := []struct {
 		name    string
@@ -28,16 +27,16 @@ func TestConfig_GetRetriever(t *testing.T) {
 			name: "File retriever",
 			fields: fields{
 				PollingInterval: 3 * time.Second,
-				Retriever:       &ffretriever.FileRetriever{Path: "file-example.yaml"},
+				Retriever:       &ffClient.FileRetriever{Path: "file-example.yaml"},
 			},
-			want:    "*ffretriever.FileRetriever",
+			want:    "*ffclient.FileRetriever",
 			wantErr: false,
 		},
 		{
 			name: "S3 retriever",
 			fields: fields{
 				PollingInterval: 3 * time.Second,
-				Retriever: &ffretriever.S3Retriever{
+				Retriever: &ffClient.S3Retriever{
 					Bucket: "tpoi-test",
 					Item:   "flag-config.yaml",
 					AwsConfig: aws.Config{
@@ -45,33 +44,33 @@ func TestConfig_GetRetriever(t *testing.T) {
 					},
 				},
 			},
-			want:    "*ffretriever.S3Retriever",
+			want:    "*ffclient.S3Retriever",
 			wantErr: false,
 		},
 		{
 			name: "HTTP retriever",
 			fields: fields{
 				PollingInterval: 3 * time.Second,
-				Retriever: &ffretriever.HTTPRetriever{
+				Retriever: &ffClient.HTTPRetriever{
 					URL:    "http://example.com/flag-config.yaml",
 					Method: http.MethodGet,
 				},
 			},
-			want:    "*ffretriever.HTTPRetriever",
+			want:    "*ffclient.HTTPRetriever",
 			wantErr: false,
 		},
 		{
 			name: "Github retriever",
 			fields: fields{
 				PollingInterval: 3 * time.Second,
-				Retriever: &ffretriever.GithubRetriever{
+				Retriever: &ffClient.GithubRetriever{
 					RepositorySlug: "thomaspoignant/go-feature-flag",
 					FilePath:       "testdata/flag-config.yaml",
 					GithubToken:    "XXX",
 				},
 			},
 			// we should have a http retriever because Github retriever is using httpRetriever
-			want:    "*ffretriever.GithubRetriever",
+			want:    "*ffclient.GithubRetriever",
 			wantErr: false,
 		},
 		{

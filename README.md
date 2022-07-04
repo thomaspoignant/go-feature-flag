@@ -63,7 +63,7 @@ First, you need to initialize the `ffclient` with the location of your backend f
 ```go
 err := ffclient.Init(ffclient.Config{
     PollingInterval: 3 * time.Second,
-    Retriever: &ffretriever.HTTPRetriever{
+    Retriever: &ffclient.HTTPRetriever{
         URL:    "http://example.com/flag-config.yaml",
     },
 })
@@ -99,7 +99,7 @@ ffclient.Init(ffclient.Config{
     PollingInterval:   3 * time.Second,
     Logger:         log.New(file, "/tmp/log", 0),
     Context:        context.Background(),
-    Retriever:      &ffretriever.FileRetriever{Path: "testdata/flag-config.yaml"},
+    Retriever:      &ffclient.FileRetriever{Path: "testdata/flag-config.yaml"},
     FileFormat:     "yaml",
     Notifiers: []ffclient.NotifierConfig{
         &ffclient.WebhookConfig{

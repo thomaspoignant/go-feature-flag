@@ -1,7 +1,6 @@
 package ffclient_test
 
 import (
-	"github.com/thomaspoignant/go-feature-flag/ffretriever"
 	"io/ioutil"
 	"log"
 	"os"
@@ -27,7 +26,7 @@ func TestStartWithoutRetriever(t *testing.T) {
 func TestStartWithNegativeInterval(t *testing.T) {
 	_, err := ffclient.New(ffclient.Config{
 		PollingInterval: -60 * time.Second,
-		Retriever:       &ffretriever.FileRetriever{Path: "testdata/flag-config.yaml"},
+		Retriever:       &ffclient.FileRetriever{Path: "testdata/flag-config.yaml"},
 		Logger:          log.New(os.Stdout, "", 0),
 	})
 	assert.Error(t, err)
@@ -36,7 +35,7 @@ func TestStartWithNegativeInterval(t *testing.T) {
 func TestStartWithMinInterval(t *testing.T) {
 	_, err := ffclient.New(ffclient.Config{
 		PollingInterval: 2,
-		Retriever:       &ffretriever.FileRetriever{Path: "testdata/flag-config.yaml"},
+		Retriever:       &ffclient.FileRetriever{Path: "testdata/flag-config.yaml"},
 		Logger:          log.New(os.Stdout, "", 0),
 	})
 	assert.NoError(t, err)
@@ -46,7 +45,7 @@ func TestValidUseCase(t *testing.T) {
 	// Valid use case
 	err := ffclient.Init(ffclient.Config{
 		PollingInterval: 5 * time.Second,
-		Retriever:       &ffretriever.FileRetriever{Path: "testdata/flag-config.yaml"},
+		Retriever:       &ffclient.FileRetriever{Path: "testdata/flag-config.yaml"},
 		Logger:          log.New(os.Stdout, "", 0),
 		DataExporter: ffclient.DataExporter{
 			FlushInterval:    10 * time.Second,
@@ -72,7 +71,7 @@ func TestValidUseCase(t *testing.T) {
 
 func TestAllFlagsFromCache(t *testing.T) {
 	err := ffclient.Init(ffclient.Config{
-		Retriever:       &ffretriever.FileRetriever{Path: "testdata/flag-config.yaml"},
+		Retriever:       &ffclient.FileRetriever{Path: "testdata/flag-config.yaml"},
 		PollingInterval: 5 * time.Second,
 	})
 	defer ffclient.Close()
@@ -88,7 +87,7 @@ func TestValidUseCaseToml(t *testing.T) {
 	// Valid use case
 	gffClient, err := ffclient.New(ffclient.Config{
 		PollingInterval: 5 * time.Second,
-		Retriever:       &ffretriever.FileRetriever{Path: "testdata/flag-config.toml"},
+		Retriever:       &ffclient.FileRetriever{Path: "testdata/flag-config.toml"},
 		Logger:          log.New(os.Stdout, "", 0),
 		FileFormat:      "toml",
 	})
@@ -106,7 +105,7 @@ func TestValidUseCaseJson(t *testing.T) {
 	// Valid use case
 	gffClient, err := ffclient.New(ffclient.Config{
 		PollingInterval: 5 * time.Second,
-		Retriever:       &ffretriever.FileRetriever{Path: "testdata/flag-config.json"},
+		Retriever:       &ffclient.FileRetriever{Path: "testdata/flag-config.json"},
 		Logger:          log.New(os.Stdout, "", 0),
 		FileFormat:      "json",
 	})
@@ -123,7 +122,7 @@ func TestValidUseCaseJson(t *testing.T) {
 
 func TestS3RetrieverReturnError(t *testing.T) {
 	_, err := ffclient.New(ffclient.Config{
-		Retriever: &ffretriever.S3Retriever{
+		Retriever: &ffclient.S3Retriever{
 			Bucket:    "unknown-bucket",
 			Item:      "unknown-item",
 			AwsConfig: aws.Config{},
@@ -137,14 +136,14 @@ func TestS3RetrieverReturnError(t *testing.T) {
 func Test2GoFeatureFlagInstance(t *testing.T) {
 	gffClient1, err := ffclient.New(ffclient.Config{
 		PollingInterval: 5 * time.Second,
-		Retriever:       &ffretriever.FileRetriever{Path: "testdata/flag-config.yaml"},
+		Retriever:       &ffclient.FileRetriever{Path: "testdata/flag-config.yaml"},
 		Logger:          log.New(os.Stdout, "", 0),
 	})
 	defer gffClient1.Close()
 
 	gffClient2, err2 := ffclient.New(ffclient.Config{
 		PollingInterval: 10 * time.Second,
-		Retriever:       &ffretriever.FileRetriever{Path: "testdata/test-instance2.yaml"},
+		Retriever:       &ffclient.FileRetriever{Path: "testdata/test-instance2.yaml"},
 		Logger:          log.New(os.Stdout, "", 0),
 	})
 	defer gffClient2.Close()
@@ -177,7 +176,7 @@ func TestUpdateFlag(t *testing.T) {
 
 	gffClient1, _ := ffclient.New(ffclient.Config{
 		PollingInterval: 1 * time.Second,
-		Retriever:       &ffretriever.FileRetriever{Path: flagFile.Name()},
+		Retriever:       &ffclient.FileRetriever{Path: flagFile.Name()},
 		Logger:          log.New(os.Stdout, "", 0),
 	})
 	defer gffClient1.Close()
@@ -216,7 +215,7 @@ func TestImpossibleToLoadfile(t *testing.T) {
 
 	gffClient1, _ := ffclient.New(ffclient.Config{
 		PollingInterval: 1 * time.Second,
-		Retriever:       &ffretriever.FileRetriever{Path: flagFile.Name()},
+		Retriever:       &ffclient.FileRetriever{Path: flagFile.Name()},
 		Logger:          log.New(os.Stdout, "", 0),
 	})
 	defer gffClient1.Close()
@@ -238,7 +237,7 @@ func TestImpossibleToLoadfile(t *testing.T) {
 func TestWrongWebhookConfig(t *testing.T) {
 	_, err := ffclient.New(ffclient.Config{
 		PollingInterval: 5 * time.Second,
-		Retriever:       &ffretriever.FileRetriever{Path: "testdata/flag-config.yaml"},
+		Retriever:       &ffclient.FileRetriever{Path: "testdata/flag-config.yaml"},
 		Notifiers: []ffclient.NotifierConfig{
 			&ffclient.WebhookConfig{
 				EndpointURL: " https://example.com/hook",
@@ -269,7 +268,7 @@ func TestFlagFileUnreachable(t *testing.T) {
 	flagFilePath := tempDir + "_FlagFileUnreachable.yaml"
 	gff, err := ffclient.New(ffclient.Config{
 		PollingInterval:         1 * time.Second,
-		Retriever:               &ffretriever.FileRetriever{Path: flagFilePath},
+		Retriever:               &ffclient.FileRetriever{Path: flagFilePath},
 		Logger:                  log.New(os.Stdout, "", 0),
 		StartWithRetrieverError: true,
 	})
@@ -291,7 +290,7 @@ func TestValidUseCaseBigFlagFile(t *testing.T) {
 	// Valid use case
 	gff, err := ffclient.New(ffclient.Config{
 		PollingInterval: 5 * time.Second,
-		Retriever:       &ffretriever.FileRetriever{Path: "testdata/flag-config-big.yaml"},
+		Retriever:       &ffclient.FileRetriever{Path: "testdata/flag-config-big.yaml"},
 	})
 	defer gff.Close()
 
@@ -336,7 +335,7 @@ func TestGoFeatureFlag_GetCacheRefreshDate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			gff, _ := ffclient.New(ffclient.Config{
 				PollingInterval: tt.fields.pollingInterval,
-				Retriever:       &ffretriever.FileRetriever{Path: "testdata/flag-config.yaml"},
+				Retriever:       &ffclient.FileRetriever{Path: "testdata/flag-config.yaml"},
 				Offline:         tt.offline,
 			})
 

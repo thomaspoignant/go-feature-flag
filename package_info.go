@@ -14,7 +14,7 @@
 //  func main() {
 //    err := ffclient.Init(ffclient.Config{
 //             PollingInterval: 3 * time.Second,
-//             HTTPRetriever: &ffretriever.HTTPRetriever{
+//             HTTPRetriever: &ffClient.HTTPRetriever{
 //               URL:    "http://example.com/flag-config.yaml",
 //             },
 //           })

@@ -1,4 +1,4 @@
-package ffretriever
+package ffclient
 
 import (
 	"context"
@@ -28,37 +28,31 @@ func Test_s3Retriever_Retrieve(t *testing.T) {
 		{
 			name: "File on S3",
 			fields: fields{
-				downloader: &testutils.S3ManagerMock{
-					TestdataLocation: "../testdata",
-				},
-				bucket: "Bucket",
-				item:   "valid",
+				downloader: &testutils.S3ManagerMock{},
+				bucket:     "Bucket",
+				item:       "valid",
 			},
-			want:    "../testdata/flag-config.yaml",
+			want:    "./testdata/flag-config.yaml",
 			wantErr: false,
 		},
 		{
 			name: "File not present S3",
 			fields: fields{
-				downloader: &testutils.S3ManagerMock{
-					TestdataLocation: "../testdata",
-				},
-				bucket: "Bucket",
-				item:   "no-file",
+				downloader: &testutils.S3ManagerMock{},
+				bucket:     "Bucket",
+				item:       "no-file",
 			},
 			wantErr: true,
 		},
 		{
 			name: "File on S3 with context",
 			fields: fields{
-				downloader: &testutils.S3ManagerMock{
-					TestdataLocation: "../testdata",
-				},
-				bucket:  "Bucket",
-				item:    "valid",
-				context: context.Background(),
+				downloader: &testutils.S3ManagerMock{},
+				bucket:     "Bucket",
+				item:       "valid",
+				context:    context.Background(),
 			},
-			want:    "../testdata/flag-config.yaml",
+			want:    "./testdata/flag-config.yaml",
 			wantErr: false,
 		},
 	}
