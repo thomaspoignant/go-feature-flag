@@ -30,7 +30,7 @@ func TestConfig_GetRetriever(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "File retriever",
+			name: "Exporter retriever",
 			fields: fields{
 				PollingInterval: 3 * time.Second,
 				Retriever:       &file.Retriever{Path: "file-example.yaml"},
@@ -39,7 +39,7 @@ func TestConfig_GetRetriever(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "S3 retriever",
+			name: "Exporter retriever",
 			fields: fields{
 				PollingInterval: 3 * time.Second,
 				Retriever: &awss3.Retriever{

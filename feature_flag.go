@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
-	"github.com/thomaspoignant/go-feature-flag/internal/exporter"
+	"github.com/thomaspoignant/go-feature-flag/internal/dataexporter"
 	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 )
 
@@ -39,7 +39,7 @@ type GoFeatureFlag struct {
 	cache        cache.Manager
 	config       Config
 	bgUpdater    backgroundUpdater
-	dataExporter *exporter.DataExporterScheduler
+	dataExporter *dataexporter.Scheduler
 }
 
 // ff is the default object for go-feature-flag
@@ -84,7 +84,7 @@ func New(config Config) (*GoFeatureFlag, error) {
 
 		if goFF.config.DataExporter.Exporter != nil {
 			// init the data exporter
-			goFF.dataExporter = exporter.NewDataExporterScheduler(goFF.config.Context, goFF.config.DataExporter.FlushInterval,
+			goFF.dataExporter = dataexporter.NewScheduler(goFF.config.Context, goFF.config.DataExporter.FlushInterval,
 				goFF.config.DataExporter.MaxEventInMemory, goFF.config.DataExporter.Exporter, goFF.config.Logger)
 
 			// we start the daemon only if we have a bulk exporter

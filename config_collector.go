@@ -3,7 +3,7 @@ package ffclient
 import (
 	"time"
 
-	"github.com/thomaspoignant/go-feature-flag/internal/exporter"
+	"github.com/thomaspoignant/go-feature-flag/internal/dataexporter"
 )
 
 // DataExporter is the configuration of your export target.
@@ -20,6 +20,6 @@ type DataExporter struct {
 	MaxEventInMemory int64
 
 	// Exporter is the configuration of your exporter.
-	// You can see all available exporter in the ffexporter package.
-	Exporter exporter.Exporter
+	// You can see all available exporter in the exporter package.
+	Exporter dataexporter.Exporter
 }

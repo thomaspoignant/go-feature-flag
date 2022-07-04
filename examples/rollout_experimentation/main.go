@@ -2,13 +2,13 @@ package main
 
 import (
 	"context"
+	"github.com/thomaspoignant/go-feature-flag/exporter/logs"
 	"github.com/thomaspoignant/go-feature-flag/retriever/file"
 	"log"
 	"os"
 	"time"
 
 	ffclient "github.com/thomaspoignant/go-feature-flag"
-	"github.com/thomaspoignant/go-feature-flag/ffexporter"
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
 )
 
@@ -27,8 +27,8 @@ func main() {
 		DataExporter: ffclient.DataExporter{
 			FlushInterval:    10,
 			MaxEventInMemory: 2,
-			Exporter: &ffexporter.Log{
-				Format: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+			Exporter: &logs.Exporter{
+				LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
 			},
 		},
 	})

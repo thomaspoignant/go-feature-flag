@@ -8,11 +8,14 @@ import (
 	"testing"
 	"time"
 
+	"github.com/thomaspoignant/go-feature-flag/notifier/logs"
+	"github.com/thomaspoignant/go-feature-flag/notifier/slack"
+	"github.com/thomaspoignant/go-feature-flag/notifier/webhook"
+
 	"github.com/stretchr/testify/assert"
-	"github.com/thomaspoignant/go-feature-flag/ffnotifier"
+	"github.com/thomaspoignant/go-feature-flag/notifier"
 
 	"github.com/thomaspoignant/go-feature-flag/internal"
-	"github.com/thomaspoignant/go-feature-flag/internal/notifier"
 )
 
 func TestGoFeatureFlag_getNotifiers(t *testing.T) {
@@ -25,7 +28,7 @@ func TestGoFeatureFlag_getNotifiers(t *testing.T) {
 	tests := []struct {
 		name    string
 		fields  fields
-		want    []ffnotifier.Notifier
+		want    []notifier.Notifier
 		wantErr bool
 	}{
 		{
@@ -48,9 +51,9 @@ func TestGoFeatureFlag_getNotifiers(t *testing.T) {
 					},
 				},
 			},
-			want: []ffnotifier.Notifier{
-				&notifier.LogNotifier{Logger: log.New(os.Stdout, "", 0)},
-				&notifier.WebhookNotifier{
+			want: []notifier.Notifier{
+				&logs.Notifier{Logger: log.New(os.Stdout, "", 0)},
+				&webhook.Notifier{
 					Logger: log.New(os.Stdout, "", 0),
 					HTTPClient: &http.Client{
 						Timeout: 10 * time.Second,
@@ -62,7 +65,7 @@ func TestGoFeatureFlag_getNotifiers(t *testing.T) {
 						"hostname": hostname,
 					},
 				},
-				&notifier.SlackNotifier{
+				&slack.Notifier{
 					Logger:     log.New(os.Stdout, "", 0),
 					HTTPClient: internal.DefaultHTTPClient(),
 					WebhookURL: *parsedURL,

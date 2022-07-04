@@ -5,11 +5,11 @@ import (
 	"log"
 	"sync"
 
-	"github.com/thomaspoignant/go-feature-flag/ffexporter"
+	"github.com/thomaspoignant/go-feature-flag/exporter"
 )
 
 type Exporter struct {
-	ExportedEvents    []ffexporter.FeatureEvent
+	ExportedEvents    []exporter.FeatureEvent
 	Err               error
 	ExpectedNumberErr int
 	CurrentNumberErr  int
@@ -19,7 +19,7 @@ type Exporter struct {
 	once  sync.Once
 }
 
-func (m *Exporter) Export(ctx context.Context, logger *log.Logger, events []ffexporter.FeatureEvent) error {
+func (m *Exporter) Export(ctx context.Context, logger *log.Logger, events []exporter.FeatureEvent) error {
 	m.once.Do(m.initMutex)
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
@@ -33,7 +33,7 @@ func (m *Exporter) Export(ctx context.Context, logger *log.Logger, events []ffex
 	return nil
 }
 
-func (m *Exporter) GetExportedEvents() []ffexporter.FeatureEvent {
+func (m *Exporter) GetExportedEvents() []exporter.FeatureEvent {
 	m.once.Do(m.initMutex)
 	m.mutex.Lock()
 	defer m.mutex.Unlock()

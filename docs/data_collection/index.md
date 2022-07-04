@@ -6,6 +6,7 @@ It collects all the variations events and can save these events on several locat
 - [Log](log.md) *- use your logger to write the variation usages.*
 - [S3](s3.md) *- export your variation usages to S3.*
 - [Webhook](webhook.md) *- export your variation usages by calling a webhook.*
+- [Google Cloud Storage](google_cloud_storage.md) *- export your variation usages by calling a webhook.*
 
 If the existing exporter does not work with your system you can extend the system and use a [custom exporter](custom.md).
 ## Data format
@@ -56,7 +57,7 @@ ffclient.Config{
    DataExporter: ffclient.DataExporter{
         FlushInterval:   10 * time.Second,
         MaxEventInMemory: 1000,
-        Exporter: &ffexporter.File{
+        Exporter: &file.Exporter{
             OutputDir: "/output-data/",
         },
     },
@@ -68,7 +69,7 @@ ffclient.Config{
 
 | Field  |   |  Description |
 |---|---|---|
-|`Exporter`   |The configuration of the exporter you want to use. All the exporters are available in the `ffexporter` package.|
+|`Exporter`   |The configuration of the exporter you want to use. All the exporters are available in the `exporter` package.|
 |`FlushInterval`   | *(optional)*<br>Time to wait before exporting the data.<br>**Default: 60 seconds**.  |
 |`MaxEventInMemory`   | *(optional)*<br>If `MaxEventInMemory` is reach before the `FlushInterval` a intermediary export will be done<br>**Default: 100000**.|
 

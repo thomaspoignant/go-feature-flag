@@ -6,12 +6,14 @@ import (
 	"log"
 	"time"
 
+	"github.com/thomaspoignant/go-feature-flag/notifier/slack"
+	"github.com/thomaspoignant/go-feature-flag/notifier/webhook"
+
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 
-	"github.com/thomaspoignant/go-feature-flag/ffnotifier"
+	"github.com/thomaspoignant/go-feature-flag/notifier"
 
 	"github.com/thomaspoignant/go-feature-flag/internal"
-	"github.com/thomaspoignant/go-feature-flag/internal/notifier"
 )
 
 // Config is the configuration of go-feature-flag.
@@ -81,7 +83,7 @@ func (c *Config) GetRetriever() (retriever.Retriever, error) {
 //        // ...
 //    }
 type NotifierConfig interface {
-	GetNotifier(config Config) (ffnotifier.Notifier, error)
+	GetNotifier(config Config) (notifier.Notifier, error)
 }
 
 // WebhookConfig is the configuration of your webhook.
@@ -131,9 +133,6 @@ type NotifierConfig interface {
 //    }
 //  }
 type WebhookConfig struct {
-	// Deprecated: use EndpointURL instead
-	PayloadURL string
-
 	// EndpointURL is the URL where we gonna do the POST Request.
 	EndpointURL string
 	Secret      string            // Secret used to sign your request body.
@@ -141,19 +140,13 @@ type WebhookConfig struct {
 }
 
 // GetNotifier convert the configuration in a Notifier struct
-func (w *WebhookConfig) GetNotifier(config Config) (ffnotifier.Notifier, error) {
+func (w *WebhookConfig) GetNotifier(config Config) (notifier.Notifier, error) {
 	url := w.EndpointURL
-
-	// remove this if when EndpointURL will be removed
-	if url == "" {
-		url = w.PayloadURL
-	}
-
-	notifier, err := notifier.NewWebhookNotifier(
+	webhookNotif, err := webhook.NewNotifier(
 		config.Logger,
 		internal.DefaultHTTPClient(),
 		url, w.Secret, w.Meta)
-	return &notifier, err
+	return &webhookNotif, err
 }
 
 type SlackNotifier struct {
@@ -161,7 +154,7 @@ type SlackNotifier struct {
 }
 
 // GetNotifier convert the configuration in a Notifier struct
-func (w *SlackNotifier) GetNotifier(config Config) (ffnotifier.Notifier, error) {
-	notifier := notifier.NewSlackNotifier(config.Logger, internal.DefaultHTTPClient(), w.SlackWebhookURL)
-	return &notifier, nil
+func (w *SlackNotifier) GetNotifier(config Config) (notifier.Notifier, error) {
+	slackNotif := slack.NewNotifier(config.Logger, internal.DefaultHTTPClient(), w.SlackWebhookURL)
+	return &slackNotif, nil
 }

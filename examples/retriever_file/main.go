@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	fileExp "github.com/thomaspoignant/go-feature-flag/exporter/file"
 	"github.com/thomaspoignant/go-feature-flag/retriever/file"
 	"log"
 	"os"
@@ -19,7 +20,14 @@ func main() {
 		Logger:          log.New(os.Stdout, "", 0),
 		Context:         context.Background(),
 		Retriever: &file.Retriever{
-			Path: "examples/file/flags.yaml",
+			Path: "examples/retrfile/flags.yaml",
+		},
+		DataExporter: ffclient.DataExporter{
+			FlushInterval:    1 * time.Second,
+			MaxEventInMemory: 100,
+			Exporter: &fileExp.Exporter{
+				OutputDir: "./",
+			},
 		},
 	})
 

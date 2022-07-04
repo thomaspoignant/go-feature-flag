@@ -10,7 +10,7 @@ It uses a [go template](https://golang.org/pkg/text/template/) format.
 ffclient.Config{
     // ...
    DataExporter: ffclient.DataExporter{
-        Exporter: &ffexporter.Log{
+        Exporter: &log.Exporter{
             LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", value=\"{{ .Value}}\"",
         },
     },
@@ -23,4 +23,4 @@ ffclient.Config{
 |-------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `LogFormat` | *(optional)*<br>LogFormat is the [template](https://golang.org/pkg/text/template/) configuration of the output format of your log.<br>You can use all the key from the `exporter.FeatureEvent` + a key called `FormattedDate` that represent the date with the **RFC 3339** Format.<br><br>**Default: `[{{ .FormattedDate}}] user="{{ .UserKey}}", flag="{{ .Key}}", value="{{ .Value}}"`** |
 
-Check the [godoc for full details](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag@v0.11.0/ffexporter#Log).
+Check the [godoc for full details](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/exporter/logs).

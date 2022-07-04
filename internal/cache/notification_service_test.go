@@ -5,15 +5,15 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/thomaspoignant/go-feature-flag/ffnotifier"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
+	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 )
 
 func Test_notificationService_getDifferences(t *testing.T) {
 	type fields struct {
-		Notifiers []ffnotifier.Notifier
+		Notifiers []notifier.Notifier
 	}
 	type args struct {
 		oldCache map[string]flag.Flag
@@ -23,7 +23,7 @@ func Test_notificationService_getDifferences(t *testing.T) {
 		name   string
 		fields fields
 		args   args
-		want   ffnotifier.DiffCache
+		want   notifier.DiffCache
 	}{
 		{
 			name: "Delete flag",
@@ -51,7 +51,7 @@ func Test_notificationService_getDifferences(t *testing.T) {
 					},
 				},
 			},
-			want: ffnotifier.DiffCache{
+			want: notifier.DiffCache{
 				Deleted: map[string]flag.Flag{
 					"test-flag2": &flagv1.FlagData{
 						Percentage: testconvert.Float64(100),
@@ -61,7 +61,7 @@ func Test_notificationService_getDifferences(t *testing.T) {
 					},
 				},
 				Added:   map[string]flag.Flag{},
-				Updated: map[string]ffnotifier.DiffUpdated{},
+				Updated: map[string]notifier.DiffUpdated{},
 			},
 		},
 		{
@@ -90,7 +90,7 @@ func Test_notificationService_getDifferences(t *testing.T) {
 					},
 				},
 			},
-			want: ffnotifier.DiffCache{
+			want: notifier.DiffCache{
 				Added: map[string]flag.Flag{
 					"test-flag2": &flagv1.FlagData{
 						Percentage: testconvert.Float64(100),
@@ -100,7 +100,7 @@ func Test_notificationService_getDifferences(t *testing.T) {
 					},
 				},
 				Deleted: map[string]flag.Flag{},
-				Updated: map[string]ffnotifier.DiffUpdated{},
+				Updated: map[string]notifier.DiffUpdated{},
 			},
 		},
 		{
@@ -123,10 +123,10 @@ func Test_notificationService_getDifferences(t *testing.T) {
 					},
 				},
 			},
-			want: ffnotifier.DiffCache{
+			want: notifier.DiffCache{
 				Added:   map[string]flag.Flag{},
 				Deleted: map[string]flag.Flag{},
-				Updated: map[string]ffnotifier.DiffUpdated{
+				Updated: map[string]notifier.DiffUpdated{
 					"test-flag": {
 						Before: &flagv1.FlagData{
 							Percentage: testconvert.Float64(100),

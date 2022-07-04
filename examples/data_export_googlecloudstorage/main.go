@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/thomaspoignant/go-feature-flag/exporter/gcstorage"
 	"github.com/thomaspoignant/go-feature-flag/retriever/file"
 	"google.golang.org/api/option"
 	"log"
@@ -9,7 +10,6 @@ import (
 	"time"
 
 	ffclient "github.com/thomaspoignant/go-feature-flag"
-	"github.com/thomaspoignant/go-feature-flag/ffexporter"
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
 )
 
@@ -32,7 +32,7 @@ func main() {
 		DataExporter: ffclient.DataExporter{
 			FlushInterval:    1 * time.Second,
 			MaxEventInMemory: 100,
-			Exporter: &ffexporter.GoogleCloudStorage{
+			Exporter: &gcstorage.Exporter{
 				Bucket:   "test-goff",
 				Format:   "json",
 				Path:     "yourPath",

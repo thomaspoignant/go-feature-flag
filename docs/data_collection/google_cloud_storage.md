@@ -15,7 +15,7 @@ ffclient.Config{
     // ...
    DataExporter: ffclient.DataExporter{
         // ...
-        Exporter: &ffexporter.GoogleCloudStorage{
+        Exporter: &gcstorage.Exporter{
             Bucket:   "test-goff",
             Format:   "json",
             Path:     "yourPath",
@@ -37,4 +37,4 @@ ffclient.Config{
 | `Options`     | *(optional)* An instance of `option.ClientOption` that configures your access to Google Cloud. <br> Check [this documentation for more info](https://cloud.google.com/docs/authentication).                                                                                                                                                                                                                                                                                                                                                        |
 | `Path `       | *(optional)* The location of the directory in your bucket.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 
-Check the [godoc for full details](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/ffexporter#GoogleCloudStorage).
+Check the [godoc for full details](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/exporter/gcstorage).

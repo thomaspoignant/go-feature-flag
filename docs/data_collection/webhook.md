@@ -12,7 +12,7 @@ ffclient.Config{
     // ...
    DataExporter: ffclient.DataExporter{
         // ...
-        Exporter: &ffexporter.Webhook{
+        Exporter: &webhook.Exporter{
             EndpointURL: " https://webhook.url/",
             Secret:      "secret-for-signing",
             Meta:        map[string]string{
