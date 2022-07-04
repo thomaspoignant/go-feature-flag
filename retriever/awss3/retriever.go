@@ -1,4 +1,4 @@
-package ffclient
+package awss3
 
 import (
 	"context"
@@ -12,8 +12,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager/s3manageriface"
 )
 
-// S3Retriever is a configuration struct for a S3 retriever.
-type S3Retriever struct {
+// Retriever is a configuration struct for a S3 retriever.
+type Retriever struct {
 	// Bucket is the name of your S3 Bucket.
 	Bucket string
 
@@ -28,7 +28,7 @@ type S3Retriever struct {
 	downloader s3manageriface.DownloaderAPI
 }
 
-func (s *S3Retriever) Retrieve(ctx context.Context) ([]byte, error) {
+func (s *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	// Download the item from the bucket.
 	// If an error occurs, log it and exit.
 	// Otherwise, notify the user that the download succeeded.

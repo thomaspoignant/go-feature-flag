@@ -6,9 +6,12 @@ The [**FileRetriever**](https://pkg.go.dev/github.com/thomaspoignant/go-feature-
 
 ## Example
 ```go linenums="1"
+import 	"github.com/thomaspoignant/go-feature-flag/retriever/file"
+// ...
+
 err := ffclient.Init(ffclient.Config{
     PollingInterval: 3 * time.Second,
-    Retriever: &ffclient.FileRetriever{
+    Retriever: &file.Retriever{
         Path: "file-example.yaml",
     },
 })

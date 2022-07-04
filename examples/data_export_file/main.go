@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/thomaspoignant/go-feature-flag/retriever/file"
 	"log"
 	"os"
 	"time"
@@ -17,7 +18,7 @@ func main() {
 		PollingInterval: 10 * time.Second,
 		Logger:          log.New(os.Stdout, "", 0),
 		Context:         context.Background(),
-		Retriever: &ffclient.FileRetriever{
+		Retriever: &file.Retriever{
 			Path: "examples/data_export_file/flags.yaml",
 		},
 		DataExporter: ffclient.DataExporter{

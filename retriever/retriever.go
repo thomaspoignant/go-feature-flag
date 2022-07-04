@@ -1,4 +1,4 @@
-package ffclient
+package retriever
 
 import (
 	"context"

@@ -1,4 +1,4 @@
-package ffclient
+package github
 
 import (
 	"context"
@@ -6,11 +6,13 @@ import (
 	"net/http"
 	"time"
 
+	httpretriever "github.com/thomaspoignant/go-feature-flag/retriever/httpendpoint"
+
 	"github.com/thomaspoignant/go-feature-flag/internal"
 )
 
-// GithubRetriever is a configuration struct for a GitHub retriever.
-type GithubRetriever struct {
+// Retriever is a configuration struct for a GitHub retriever.
+type Retriever struct {
 	RepositorySlug string
 	Branch         string // default is main
 	FilePath       string
@@ -21,7 +23,7 @@ type GithubRetriever struct {
 	httpClient internal.HTTPClient
 }
 
-func (r *GithubRetriever) Retrieve(ctx context.Context) ([]byte, error) {
+func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	if r.FilePath == "" || r.RepositorySlug == "" {
 		return nil, fmt.Errorf("missing mandatory information filePath=%s, repositorySlug=%s", r.FilePath, r.RepositorySlug)
 	}
@@ -44,7 +46,7 @@ func (r *GithubRetriever) Retrieve(ctx context.Context) ([]byte, error) {
 		branch,
 		r.FilePath)
 
-	httpRetriever := HTTPRetriever{
+	httpRetriever := httpretriever.Retriever{
 		URL:     URL,
 		Method:  http.MethodGet,
 		Header:  header,
@@ -60,6 +62,6 @@ func (r *GithubRetriever) Retrieve(ctx context.Context) ([]byte, error) {
 
 // SetHTTPClient is here if you want to override the default http.Client we are using.
 // It is also used for the tests.
-func (r *GithubRetriever) SetHTTPClient(client internal.HTTPClient) {
+func (r *Retriever) SetHTTPClient(client internal.HTTPClient) {
 	r.httpClient = client
 }

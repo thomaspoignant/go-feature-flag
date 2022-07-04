@@ -13,5 +13,5 @@ The `Retrieve` 	function is supposed to load the file and to return a []byte of 
 If you want to specify the format of the file, you can use the `ffclient.Config.FileFormat` option to specify if it is 
 a `YAML`, `JSON` or `TOML` file.
 
-You can check existing `Retriever` *([file](https://github.com/thomaspoignant/go-feature-flag/blob/main/retriever_file.go),
-[s3](https://github.com/thomaspoignant/go-feature-flag/blob/main/retriever_s3.go), ...)* to have an idea on how to do build your own.
+You can check existing `Retriever` *([file](https://github.com/thomaspoignant/go-feature-flag/blob/main/retriever/file.go),
+[s3](https://github.com/thomaspoignant/go-feature-flag/blob/main/retriever/awss3.go), ...)* to have an idea on how to do build your own.

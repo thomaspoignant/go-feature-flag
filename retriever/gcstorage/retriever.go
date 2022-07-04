@@ -1,4 +1,4 @@
-package ffclient
+package gcstorage
 
 import (
 	"bytes"
@@ -13,8 +13,8 @@ import (
 	"google.golang.org/api/option"
 )
 
-// GCStorageRetriever is a configuration struct for a Google Cloud Storage retriever.
-type GCStorageRetriever struct {
+// Retriever is a configuration struct for a Google Cloud Storage retriever.
+type Retriever struct {
 	// Bucket is the name of your Google Cloud Storage Bucket.
 	Bucket string
 
@@ -43,7 +43,7 @@ type object interface {
 	NewReader(ctx context.Context) (*storage.Reader, error)
 }
 
-func (retriever *GCStorageRetriever) Retrieve(ctx context.Context) (content []byte, err error) {
+func (retriever *Retriever) Retrieve(ctx context.Context) (content []byte, err error) {
 	if retriever.obj == nil {
 		// Create GC Storage Client.
 		client, err := storage.NewClient(ctx, retriever.Options...)

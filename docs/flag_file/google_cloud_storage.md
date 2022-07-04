@@ -10,7 +10,7 @@ Storage.
 ```go linenums="1"
 err := ffclient.Init(ffclient.Config{
     PollingInterval: 3 * time.Second,
-    Retriever: &ffclient.GCStorageRetriever{
+    Retriever: &gcstorage.Retriever{
 	    Options: []option.ClientOption{option.WithoutAuthentication()},
 		Bucket: "2093u4pkasjc3",
 		Object: "flags.yaml",

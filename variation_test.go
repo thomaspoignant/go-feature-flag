@@ -10,6 +10,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/thomaspoignant/go-feature-flag/retriever/file"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
@@ -1245,7 +1247,7 @@ func TestAllFlagsState(t *testing.T) {
 		{
 			name: "Valid multiple types",
 			config: Config{
-				Retriever: &FileRetriever{
+				Retriever: &file.Retriever{
 					Path: "./testdata/ffclient/all_flags/config_flag/flag-config-all-flags.yaml",
 				},
 			},
@@ -1256,7 +1258,7 @@ func TestAllFlagsState(t *testing.T) {
 		{
 			name: "Error in flag-0",
 			config: Config{
-				Retriever: &FileRetriever{
+				Retriever: &file.Retriever{
 					Path: "./testdata/ffclient/all_flags/config_flag/flag-config-with-error.yaml",
 				},
 			},
@@ -1267,7 +1269,7 @@ func TestAllFlagsState(t *testing.T) {
 		{
 			name: "module not init",
 			config: Config{
-				Retriever: &FileRetriever{
+				Retriever: &file.Retriever{
 					Path: "./testdata/ffclient/all_flags/config_flag/flag-config-all-flags.yaml",
 				},
 			},
@@ -1279,7 +1281,7 @@ func TestAllFlagsState(t *testing.T) {
 			name: "offline",
 			config: Config{
 				Offline: true,
-				Retriever: &FileRetriever{
+				Retriever: &file.Retriever{
 					Path: "./testdata/ffclient/all_flags/config_flag/flag-config-all-flags.yaml",
 				},
 			},
@@ -1348,7 +1350,7 @@ func TestAllFlagsFromCache(t *testing.T) {
 		{
 			name: "Valid multiple types",
 			config: Config{
-				Retriever: &FileRetriever{
+				Retriever: &file.Retriever{
 					Path: "./testdata/ffclient/all_flags/config_flag/flag-config-all-flags.yaml",
 				},
 			},
@@ -1357,7 +1359,7 @@ func TestAllFlagsFromCache(t *testing.T) {
 		{
 			name: "module not init",
 			config: Config{
-				Retriever: &FileRetriever{
+				Retriever: &file.Retriever{
 					Path: "./testdata/ffclient/all_flags/config_flag/flag-config-all-flags.yaml",
 				},
 			},

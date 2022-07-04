@@ -1,4 +1,4 @@
-package ffclient
+package gcstorage
 
 import (
 	"context"
@@ -44,7 +44,7 @@ func TestGCStorageRetriever_Retrieve(t *testing.T) {
 				Object:  "Object",
 				rC: &testutils.GCStorageReaderMock{
 					ShouldFail: false,
-					FileToRead: "./testdata/flag-config-updated.yaml",
+					FileToRead: "../../testdata/flag-config-updated.yaml",
 				},
 			},
 			args: args{
@@ -93,7 +93,7 @@ func TestGCStorageRetriever_Retrieve(t *testing.T) {
 				Object:  "Object",
 				rC: &testutils.GCStorageReaderMock{
 					ShouldFail: false,
-					FileToRead: "./testdata/flag-config-updated.yaml",
+					FileToRead: "../../testdata/flag-config-updated.yaml",
 				},
 			},
 			args: args{
@@ -105,7 +105,7 @@ func TestGCStorageRetriever_Retrieve(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := &GCStorageRetriever{
+			r := &Retriever{
 				Options: tt.fields.Options,
 				Bucket:  tt.fields.Bucket,
 				Object:  tt.fields.Object,
@@ -114,7 +114,7 @@ func TestGCStorageRetriever_Retrieve(t *testing.T) {
 			}
 
 			// Read default file.
-			want, err := ioutil.ReadFile("./testdata/flag-config.yaml")
+			want, err := ioutil.ReadFile("../../testdata/flag-config.yaml")
 			assert.NoError(t, err)
 			r.cache = want
 
@@ -132,7 +132,7 @@ func TestGCStorageRetriever_Retrieve(t *testing.T) {
 				// If expect data not to be in cache, mock the
 				// remote hash to a different one that the local hash.
 
-				want, err = ioutil.ReadFile("./testdata/flag-config-updated.yaml")
+				want, err = ioutil.ReadFile("../../testdata/flag-config-updated.yaml")
 				assert.NoError(t, err)
 
 				md5Hash = md5.Sum(want) //nolint: gosec
@@ -148,8 +148,8 @@ func TestGCStorageRetriever_Retrieve(t *testing.T) {
 
 			if err == nil {
 				assert.Equal(t, want, got, "Retrieve() got = %v, want %v", got, tt.want)
-				assert.Equal(t, want, r.cache, "Retrieve() got = GCStorageRetriever{cache: %v} want = GCStorageRetriever{cache: %v}", r.cache, want)
-				assert.Equal(t, wantedMd5, r.md5, "Retrieve() got = GCStorageRetriever{md5: %v} want = GCStorageRetriever{md5: %v}", r.md5, wantedMd5)
+				assert.Equal(t, want, r.cache, "Retrieve() got = Retriever{cache: %v} want = Retriever{cache: %v}", r.cache, want)
+				assert.Equal(t, wantedMd5, r.md5, "Retrieve() got = Retriever{md5: %v} want = Retriever{md5: %v}", r.md5, wantedMd5)
 			}
 		})
 	}

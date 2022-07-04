@@ -1,4 +1,4 @@
-package ffclient
+package kubernetes
 
 import (
 	"context"
@@ -13,8 +13,8 @@ var kubeClientProvider = func(config *restclient.Config) (kubernetes.Interface, 
 	return kubernetes.NewForConfig(config)
 }
 
-// KubernetesRetriever is a configuration struct for a Kubernetes retriever.
-type KubernetesRetriever struct {
+// Retriever is a configuration struct for a Kubernetes retriever.
+type Retriever struct {
 	Namespace     string
 	ConfigMapName string
 	Key           string
@@ -22,7 +22,7 @@ type KubernetesRetriever struct {
 	client        kubernetes.Interface
 }
 
-func (s *KubernetesRetriever) Retrieve(ctx context.Context) ([]byte, error) {
+func (s *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	if s.client == nil {
 		client, clientErr := kubeClientProvider(&s.ClientConfig)
 		if clientErr != nil {

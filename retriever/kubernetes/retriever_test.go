@@ -1,4 +1,4 @@
-package ffclient
+package kubernetes
 
 import (
 	"context"
@@ -112,7 +112,7 @@ func Test_kubernetesRetriever_Retrieve(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			kubeClientProvider = kubeClientProviderFactory(tt.fields.object)
-			s := KubernetesRetriever{
+			s := Retriever{
 				ConfigMapName: tt.fields.configMapName,
 				Key:           tt.fields.key,
 				Namespace:     tt.fields.namespace,

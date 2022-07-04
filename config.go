@@ -6,6 +6,8 @@ import (
 	"log"
 	"time"
 
+	"github.com/thomaspoignant/go-feature-flag/retriever"
+
 	"github.com/thomaspoignant/go-feature-flag/ffnotifier"
 
 	"github.com/thomaspoignant/go-feature-flag/internal"
@@ -33,7 +35,7 @@ type Config struct {
 	Environment string
 
 	// Retriever is the component in charge to retrieve your flag file
-	Retriever Retriever
+	Retriever retriever.Retriever
 
 	// Notifiers (optional) is the list of notifiers called when a flag change
 	Notifiers []NotifierConfig
@@ -58,7 +60,7 @@ type Config struct {
 }
 
 // GetRetriever returns a retriever.FlagRetriever configure with the retriever available in the config.
-func (c *Config) GetRetriever() (Retriever, error) {
+func (c *Config) GetRetriever() (retriever.Retriever, error) {
 	if c.Retriever == nil {
 		return nil, errors.New("no retriever in the configuration, impossible to get the flags")
 	}

@@ -1,54 +1,19 @@
-package ffclient_test
+package httpendpoint_test
 
 import (
-	"bytes"
 	"context"
-	"errors"
-	"io/ioutil"
 	"net/http"
-	"strings"
 	"testing"
 
+	"github.com/thomaspoignant/go-feature-flag/retriever/httpendpoint"
+	"github.com/thomaspoignant/go-feature-flag/testutils/mock"
+
 	"github.com/stretchr/testify/assert"
-	ffclient "github.com/thomaspoignant/go-feature-flag"
 )
-
-type mockHTTP struct {
-	req http.Request
-}
-
-func (m *mockHTTP) Do(req *http.Request) (*http.Response, error) {
-	m.req = *req
-	success := &http.Response{
-		Status:     "OK",
-		StatusCode: http.StatusOK,
-		Body: ioutil.NopCloser(bytes.NewReader([]byte(`test-flag:
- rule: key eq "random-key"
- percentage: 100
- true: true
- false: false
- default: false
-`))),
-	}
-
-	error := &http.Response{
-		Status:     "KO",
-		StatusCode: http.StatusInternalServerError,
-		Body:       ioutil.NopCloser(bytes.NewReader([]byte(""))),
-	}
-
-	if strings.HasSuffix(req.URL.String(), "error") {
-		return nil, errors.New("http error")
-	} else if strings.HasSuffix(req.URL.String(), "httpError") {
-		return error, nil
-	}
-
-	return success, nil
-}
 
 func Test_httpRetriever_Retrieve(t *testing.T) {
 	type fields struct {
-		httpClient mockHTTP
+		httpClient mock.HTTP
 		url        string
 		method     string
 		body       string
@@ -64,7 +29,7 @@ func Test_httpRetriever_Retrieve(t *testing.T) {
 		{
 			name: "Success",
 			fields: fields{
-				httpClient: mockHTTP{},
+				httpClient: mock.HTTP{},
 				url:        "http://localhost.example/file",
 				method:     http.MethodGet,
 				body:       "",
@@ -82,7 +47,7 @@ func Test_httpRetriever_Retrieve(t *testing.T) {
 		{
 			name: "Success with context",
 			fields: fields{
-				httpClient: mockHTTP{},
+				httpClient: mock.HTTP{},
 				url:        "http://localhost.example/file",
 				method:     http.MethodGet,
 				body:       "",
@@ -101,7 +66,7 @@ func Test_httpRetriever_Retrieve(t *testing.T) {
 		{
 			name: "Success with default method",
 			fields: fields{
-				httpClient: mockHTTP{},
+				httpClient: mock.HTTP{},
 				url:        "http://localhost.example/file",
 				body:       "",
 				header:     nil,
@@ -118,7 +83,7 @@ func Test_httpRetriever_Retrieve(t *testing.T) {
 		{
 			name: "HTTP Error",
 			fields: fields{
-				httpClient: mockHTTP{},
+				httpClient: mock.HTTP{},
 				url:        "http://localhost.example/httpError",
 				method:     http.MethodPost,
 				body:       "",
@@ -129,7 +94,7 @@ func Test_httpRetriever_Retrieve(t *testing.T) {
 		{
 			name: "Error",
 			fields: fields{
-				httpClient: mockHTTP{},
+				httpClient: mock.HTTP{},
 				url:        "http://localhost.example/error",
 				method:     http.MethodPost,
 				body:       "",
@@ -140,7 +105,7 @@ func Test_httpRetriever_Retrieve(t *testing.T) {
 		{
 			name: "No URL",
 			fields: fields{
-				httpClient: mockHTTP{},
+				httpClient: mock.HTTP{},
 				url:        "",
 				method:     http.MethodPost,
 				body:       "",
@@ -151,7 +116,7 @@ func Test_httpRetriever_Retrieve(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			h := ffclient.HTTPRetriever{
+			h := httpendpoint.Retriever{
 				URL:    tt.fields.url,
 				Method: tt.fields.method,
 				Body:   tt.fields.body,
@@ -162,7 +127,7 @@ func Test_httpRetriever_Retrieve(t *testing.T) {
 			assert.Equal(t, tt.wantErr, err != nil, "Retrieve() error = %v, wantErr %v", err, tt.wantErr)
 
 			if tt.fields.method == "" {
-				assert.Equal(t, http.MethodGet, tt.fields.httpClient.req.Method)
+				assert.Equal(t, http.MethodGet, tt.fields.httpClient.Req.Method)
 			}
 
 			if !t.Failed() {

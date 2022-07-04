@@ -1,17 +1,19 @@
-package ffclient_test
+package github_test
 
 import (
 	"context"
 	"net/http"
 	"testing"
 
+	"github.com/thomaspoignant/go-feature-flag/retriever/github"
+	"github.com/thomaspoignant/go-feature-flag/testutils/mock"
+
 	"github.com/stretchr/testify/assert"
-	ffclient "github.com/thomaspoignant/go-feature-flag"
 )
 
 func Test_github_Retrieve(t *testing.T) {
 	type fields struct {
-		httpClient     mockHTTP
+		httpClient     mock.HTTP
 		context        context.Context
 		repositorySlug string
 		filePath       string
@@ -26,7 +28,7 @@ func Test_github_Retrieve(t *testing.T) {
 		{
 			name: "Success",
 			fields: fields{
-				httpClient:     mockHTTP{},
+				httpClient:     mock.HTTP{},
 				repositorySlug: "thomaspoignant/go-feature-flag",
 				filePath:       "testdata/flag-config.yaml",
 			},
@@ -42,7 +44,7 @@ func Test_github_Retrieve(t *testing.T) {
 		{
 			name: "Success with context",
 			fields: fields{
-				httpClient:     mockHTTP{},
+				httpClient:     mock.HTTP{},
 				repositorySlug: "thomaspoignant/go-feature-flag",
 				filePath:       "testdata/flag-config.yaml",
 				context:        context.Background(),
@@ -59,7 +61,7 @@ func Test_github_Retrieve(t *testing.T) {
 		{
 			name: "Success with default method",
 			fields: fields{
-				httpClient:     mockHTTP{},
+				httpClient:     mock.HTTP{},
 				repositorySlug: "thomaspoignant/go-feature-flag",
 				filePath:       "testdata/flag-config.yaml",
 			},
@@ -75,7 +77,7 @@ func Test_github_Retrieve(t *testing.T) {
 		{
 			name: "HTTP Error",
 			fields: fields{
-				httpClient:     mockHTTP{},
+				httpClient:     mock.HTTP{},
 				repositorySlug: "thomaspoignant/go-feature-flag",
 				filePath:       "testdata/error",
 			},
@@ -84,7 +86,7 @@ func Test_github_Retrieve(t *testing.T) {
 		{
 			name: "Error missing slug",
 			fields: fields{
-				httpClient:     mockHTTP{},
+				httpClient:     mock.HTTP{},
 				repositorySlug: "",
 				filePath:       "testdata/flag-config.yaml",
 			},
@@ -93,7 +95,7 @@ func Test_github_Retrieve(t *testing.T) {
 		{
 			name: "Error missing file path",
 			fields: fields{
-				httpClient:     mockHTTP{},
+				httpClient:     mock.HTTP{},
 				repositorySlug: "thomaspoignant/go-feature-flag",
 				filePath:       "",
 			},
@@ -102,7 +104,7 @@ func Test_github_Retrieve(t *testing.T) {
 		{
 			name: "Use GitHub token",
 			fields: fields{
-				httpClient:     mockHTTP{},
+				httpClient:     mock.HTTP{},
 				repositorySlug: "thomaspoignant/go-feature-flag",
 				filePath:       "testdata/flag-config.yaml",
 				githubToken:    "XXX_GH_TOKEN",
@@ -119,7 +121,7 @@ func Test_github_Retrieve(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			h := ffclient.GithubRetriever{
+			h := github.Retriever{
 				RepositorySlug: tt.fields.repositorySlug,
 				FilePath:       tt.fields.filePath,
 				GithubToken:    tt.fields.githubToken,
@@ -129,10 +131,10 @@ func Test_github_Retrieve(t *testing.T) {
 			got, err := h.Retrieve(tt.fields.context)
 			assert.Equal(t, tt.wantErr, err != nil, "Retrieve() error = %v, wantErr %v", err, tt.wantErr)
 			if !tt.wantErr {
-				assert.Equal(t, http.MethodGet, tt.fields.httpClient.req.Method)
+				assert.Equal(t, http.MethodGet, tt.fields.httpClient.Req.Method)
 				assert.Equal(t, tt.want, got)
 				if tt.fields.githubToken != "" {
-					assert.Equal(t, "token "+tt.fields.githubToken, tt.fields.httpClient.req.Header.Get("Authorization"))
+					assert.Equal(t, "token "+tt.fields.githubToken, tt.fields.httpClient.Req.Header.Get("Authorization"))
 				}
 			}
 		})

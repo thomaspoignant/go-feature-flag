@@ -1,4 +1,4 @@
-package ffclient
+package httpendpoint
 
 import (
 	"context"
@@ -12,8 +12,8 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/internal"
 )
 
-// HTTPRetriever is a configuration struct for an HTTP endpoint retriever.
-type HTTPRetriever struct {
+// Retriever is a configuration struct for an HTTP endpoint retriever.
+type Retriever struct {
 	// URL of your endpoint
 	URL string
 
@@ -34,18 +34,18 @@ type HTTPRetriever struct {
 
 // SetHTTPClient is here if you want to override the default http.Client we are using.
 // It is also used for the tests.
-func (r *HTTPRetriever) SetHTTPClient(client internal.HTTPClient) {
+func (r *Retriever) SetHTTPClient(client internal.HTTPClient) {
 	r.httpClient = client
 }
 
-func (r *HTTPRetriever) Retrieve(ctx context.Context) ([]byte, error) {
+func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	timeout := r.Timeout
 	if timeout <= 0 {
 		timeout = 10 * time.Second
 	}
 
 	if r.URL == "" {
-		return nil, errors.New("URL is a mandatory parameter when using HTTPRetriever")
+		return nil, errors.New("URL is a mandatory parameter when using Retriever")
 	}
 
 	method := r.Method
