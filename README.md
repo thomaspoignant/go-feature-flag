@@ -161,7 +161,7 @@ Available retriever are:
 
 Your file should be a `YAML`, `JSON` or `TOML` file with a list of flags *(examples: [`YAML`](testdata/flag-config.yaml), [`JSON`](testdata/flag-config.json), [`TOML`](testdata/flag-config.toml))*.
 
-The easiest way to create your configuration file is to used **GO Feature Flag Editor** available at https://thomaspoignant.github.io/go-feature-flag-editor/.  
+The easiest way to create your configuration file is to used **GO Feature Flag Editor** available at https://editor.gofeatureflag.org.  
 If you prefer to do it manually please follow instruction bellow.
 
 **A flag configuration looks like:**
