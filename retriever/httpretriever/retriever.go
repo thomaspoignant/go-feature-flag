@@ -45,7 +45,7 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	}
 
 	if r.URL == "" {
-		return nil, errors.New("URL is a mandatory parameter when using Retriever")
+		return nil, errors.New("URL is a mandatory parameter when using httpretriever.Retriever")
 	}
 
 	method := r.Method

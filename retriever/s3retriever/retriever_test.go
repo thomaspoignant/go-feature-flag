@@ -75,7 +75,7 @@ func Test_s3Retriever_Retrieve(t *testing.T) {
 			if err == nil {
 				want, err := ioutil.ReadFile(tt.want)
 				assert.NoError(t, err)
-				assert.Equal(t, string(want), string(got), "Retrieve() got = %v, want %v")
+				assert.Equal(t, string(want), string(got), "Retrieve() got = %v, want %v", string(want), string(got))
 			}
 		})
 	}

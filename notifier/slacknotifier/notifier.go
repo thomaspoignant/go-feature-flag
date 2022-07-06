@@ -48,7 +48,7 @@ func (c *Notifier) Notify(diff notifier.DiffCache, wg *sync.WaitGroup) {
 	reqBody := convertToSlackMessage(diff)
 	payload, err := json.Marshal(reqBody)
 	if err != nil {
-		fflog.Printf(c.Logger, "error: (Notifier) impossible to read differences; %v\n", err)
+		fflog.Printf(c.Logger, "error: (Slack Notifier) impossible to read differences; %v\n", err)
 		return
 	}
 	request := http.Request{
@@ -59,13 +59,13 @@ func (c *Notifier) Notify(diff notifier.DiffCache, wg *sync.WaitGroup) {
 	}
 	response, err := c.HTTPClient.Do(&request)
 	if err != nil {
-		fflog.Printf(c.Logger, "error: (Notifier) error: while calling webhook: %v\n", err)
+		fflog.Printf(c.Logger, "error: (Slack Notifier) error: while calling webhook: %v\n", err)
 		return
 	}
 
 	defer response.Body.Close()
 	if response.StatusCode > 399 {
-		fflog.Printf(c.Logger, "error: (Notifier) while calling slack webhook, statusCode = %d",
+		fflog.Printf(c.Logger, "error: (Slack Notifier) while calling slack webhook, statusCode = %d",
 			response.StatusCode)
 		return
 	}

@@ -35,7 +35,7 @@ func Test_localRetriever_Retrieve(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "Exporter exists",
+			name: "File exists",
 			fields: fields{
 				path: "../../testdata/flag-config.yaml",
 			},
@@ -43,7 +43,7 @@ func Test_localRetriever_Retrieve(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "Exporter does not exists",
+			name: "File does not exists",
 			fields: fields{
 				path: "../../testdata/test-not-exist.yaml",
 			},

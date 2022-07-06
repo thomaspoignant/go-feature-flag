@@ -73,7 +73,7 @@ func (c *Notifier) Notify(diff notifier.DiffCache, wg *sync.WaitGroup) {
 
 	payload, err := json.Marshal(reqBody)
 	if err != nil {
-		fflog.Printf(c.Logger, "error: (Notifier) impossible to read differences; %v\n", err)
+		fflog.Printf(c.Logger, "error: (Webhook Notifier) impossible to read differences; %v\n", err)
 		return
 	}
 
