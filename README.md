@@ -156,7 +156,7 @@ Available retriever are:
 - [From Google Cloud Storage](https://thomaspoignant.github.io/go-feature-flag/latest/flag_file/google_cloud_storage/)
 - [From Kubernetes ConfigMaps](https://thomaspoignant.github.io/go-feature-flag/latest/flag_file/kubernetes_configmaps/)
 
-You can also [create your own retriever](https://thomaspoignant.github.io/go-feature-flag/latest/flag_file/kubernetes_configmaps/).
+You can also [create your own retriever](https://thomaspoignant.github.io/go-feature-flag/latest/flag_file/custom/).
 
 ## Flags file format
 `go-feature-flag` core feature is to centralize all your feature flags in a source file, and to avoid hosting and maintaining a backend server to manage them.
