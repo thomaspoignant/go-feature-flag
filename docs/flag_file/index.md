@@ -1,4 +1,4 @@
-# Where to store my file?
+# 📦  Store your flag file
 The module supports different ways of retrieving the flag file.  
 Available retriever are:
 
@@ -6,6 +6,9 @@ Available retriever are:
 - [HTTP endpoint](http)
 - [Github](github)
 - [File](file)
+- [Google Cloud Storage](google_cloud_storage)
+- [Kubernetes Configmaps](kubernetes_configmaps)
+- [Custom](custom)
 
 To retrieve a file you need to provide a [retriever](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#Retriever) in your `ffclient.Config{}` during the initialization.  
 If the existing retriever does not work with your system you can extend the system and use a [custom retriever](custom.md).

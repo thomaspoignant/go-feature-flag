@@ -4,6 +4,9 @@ google_analytics:
   - UA-197484083-1
   - auto
 theme:
+  font:
+    text: Roboto
+    code: JetBrains Mono
   name: material
   use_pygments: true
   logo: assets/logo.png
@@ -26,6 +29,7 @@ theme:
     - navigation.indexes
     - navigation.expand
     - navigation.top
+    - navigation.tracking
   icon:
     repo: fontawesome/brands/github
 edit_uri: edit/main/docs/
@@ -57,7 +61,7 @@ nav:
   - 'quickstart.md'
   - 'configuration.md'
   - 'flag_format.md'
-  - 'Store your flag file':
+  - '📦  Store your flag file':
       - 'flag_file/index.md'
       - 'flag_file/s3.md'
       - 'flag_file/http.md'
@@ -67,21 +71,21 @@ nav:
       - 'flag_file/kubernetes_configmaps.md'
       - 'flag_file/custom.md'
   - 'users.md'
-  - 'Rollout strategies':
+  - '🚀 Rollout strategies':
       - 'rollout/index.md'
       - 'rollout/canary.md'
       - 'rollout/progressive.md'
       - 'rollout/scheduled.md'
       - 'rollout/experimentation.md'
-  - 'Export data':
-      - 'data_collection/index.md'
-      - 'data_collection/file.md'
-      - 'data_collection/log.md'
-      - 'data_collection/s3.md'
-      - 'data_collection/google_cloud_storage.md'
-      - 'data_collection/webhook.md'
-      - 'data_collection/custom.md'
-  - 'Notify flag changes':
+  - '🗄️ Export data':
+      - 'data_exporter/index.md'
+      - 'data_exporter/file.md'
+      - 'data_exporter/log.md'
+      - 'data_exporter/s3.md'
+      - 'data_exporter/google_cloud_storage.md'
+      - 'data_exporter/webhook.md'
+      - 'data_exporter/custom.md'
+  - '📣 Notify flag changes':
       - 'notifier/index.md'
       - 'notifier/slack.md'
       - 'notifier/webhook.md'

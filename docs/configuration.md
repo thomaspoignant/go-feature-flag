@@ -1,4 +1,4 @@
-# Configuration
+# ⚙️ SDK Configuration
 `go-feature-flag` needs to be initialized to be used.  
 During the initialization you must give a [`ffclient.Config{}`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#Config) configuration object.  
 
@@ -11,7 +11,7 @@ During the initialization you must give a [`ffclient.Config{}`](https://pkg.go.d
 |`Retriever`  | The configuration retriever you want to use to get your flag file<br> *See [Store your flag file](flag_file/index.md) for the configuration details*.|
 |`Context`  | *(optional)*<br>The context used by the retriever.<br />Default: `context.Background()`|
 |`Environment`  | <a name="option_environment"></a>*(optional)*<br>The environment the app is running under, can be checked in feature flag rules.<br />Default: `""`<br>*Check [**"environments"** section](../flag_format/#environments) to understand how to use this parameter.*|
-|`DataExporter` | *(optional)*<br>DataExporter defines how to export data on how your flags are used.<br> *see [export data section](data_collection/index.md) for more details*.|
+|`DataExporter` | *(optional)*<br>DataExporter defines how to export data on how your flags are used.<br> *see [export data section](data_exporter/index.md) for more details*.|
 |`FileFormat`| *(optional)*<br>Format of your configuration file. Available formats are `yaml`, `toml` and `json`, if you omit the field it will try to unmarshal the file as a `yaml` file.<br>Default: `YAML`|
 |`Logger`   | *(optional)*<br>Logger used to log what `go-feature-flag` is doing.<br />If no logger is provided the module will not log anything.<br>Default: No log|
 |`Notifiers` | *(optional)*<br>List of notifiers to call when your flag file has been changed.<br> *See [notifiers section](./notifier/index.md) for more details*.|
@@ -88,5 +88,5 @@ You can do this by setting `Offline` mode in the client's Config.
 
 ## Advanced configuration
 
-- [Export data from your flag variations](./data_collection/index.md)
+- [Export data from your flag variations](data_exporter/index.md)
 - [Be notified when your flags change](./notifier/index.md)

@@ -45,5 +45,5 @@ I've also written an [article](https://medium.com/better-programming/feature-fla
     - [Run A/B testing experimentation](rollout/experimentation.md).
     - [Progressively rollout a feature](rollout/progressive.md).
     - [Schedule your flag updates](rollout/scheduled.md).
-- Exporting your flags usage data ([`s3`](data_collection/s3.md), [`log`](data_collection/log.md) and [`file`](data_collection/file.md)).
+- Exporting your flags usage data ([`s3`](data_exporter/s3.md), [`log`](data_exporter/log.md) and [`file`](data_exporter/file.md)).
 - Getting notified when a flag has been changed ([`webhook`](notifier/webhook.md) and [`slack`](notifier/slack.md)).

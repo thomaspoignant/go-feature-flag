@@ -1,4 +1,4 @@
-# Frequently Asked Questions
+# ❓ Frequently Asked Questions
 
 ### Why using feature flags?
 This one of most common question I get.

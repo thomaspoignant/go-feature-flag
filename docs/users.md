@@ -1,4 +1,4 @@
-# Targeting users with flags
+# 🎯 Targeting users with flags
 
 ## Users
 Feature flag targeting and rollouts are all determined by the user you pass to your Variation calls.

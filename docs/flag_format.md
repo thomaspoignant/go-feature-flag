@@ -1,4 +1,4 @@
-# Configure a flag
+# ⛳ Configure a flag
 `go-feature-flag` core feature is to centralize all your feature flags in a source file, and to avoid hosting and maintaining a backend server to manage them.  
 
 Your file must be a valid `YAML`, `JSON` or `TOML` file with a list of flags *(examples: [`YAML`](https://github.com/thomaspoignant/go-feature-flag/tree/main/testdata/flag-config.yaml), [`JSON`](https://github.com/thomaspoignant/go-feature-flag/tree/main/testdata/flag-config.json), [`TOML`](https://github.com/thomaspoignant/go-feature-flag/tree/main/testdata/flag-config.toml))*.
@@ -182,4 +182,4 @@ rule: (env != "prod") or (user_id == 1234)
 You can have advanced configurations for your flag to have specific behavior for them, such as:
 
 - [Specific rollout strategies](rollout/index.md)
-- [Don't track a flag](data_collection/index.md#dont-track-a-flag)
+- [Don't track a flag](data_exporter/index.md#dont-track-a-flag)
