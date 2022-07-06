@@ -10,7 +10,8 @@ import (
 	"testing"
 	"time"
 
-	fileExp "github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
+	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
+
 	"github.com/thomaspoignant/go-feature-flag/exporter/logsexporter"
 	"github.com/thomaspoignant/go-feature-flag/internal/dataexporter"
 
@@ -1299,7 +1300,7 @@ func TestAllFlagsState(t *testing.T) {
 			tt.config.DataExporter = DataExporter{
 				FlushInterval:    1000,
 				MaxEventInMemory: 1,
-				Exporter:         &fileExp.Exporter{OutputDir: exportDir},
+				Exporter:         &fileexporter.Exporter{OutputDir: exportDir},
 			}
 
 			var goff *GoFeatureFlag

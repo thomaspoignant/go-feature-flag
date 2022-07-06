@@ -36,7 +36,9 @@ func (c *notificationService) Notify(oldCache map[string]flag.Flag, newCache map
 			notif := n
 			go func() {
 				err := notif.Notify(diff, c.waitGroup)
-				fflog.Printf(log, "error while calling the notifier: %v", err)
+				if err != nil {
+					fflog.Printf(log, "error while calling the notifier: %v", err)
+				}
 			}()
 		}
 	}
