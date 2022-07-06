@@ -13,8 +13,8 @@ The **Slack** notifier allows you to get notification on your favorite slack cha
 ```go linenums="1" hl_lines="5"
 ffclient.Config{ 
     // ...
-    Notifiers: []ffclient.NotifierConfig{
-        &ffclient.SlackNotifier{
+    Notifiers: []notifier.Notifier{
+        &slacknotifier.Notifier{
             SlackWebhookURL: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
         },
         // ...

@@ -101,8 +101,8 @@ ffclient.Init(ffclient.Config{
     Context:        context.Background(),
     Retriever:      &fileretriever.Retriever{Path: "testdata/flag-config.yaml"},
     FileFormat:     "yaml",
-    Notifiers: []ffclient.NotifierConfig{
-        &ffclient.WebhookConfig{
+    Notifiers: []notifier.Notifier{
+        &webhooknotifier.Notifier{
             EndpointURL: " https://example.com/hook",
             Secret:     "Secret",
             Meta: map[string]string{
