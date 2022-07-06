@@ -6,6 +6,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/thomaspoignant/go-feature-flag/notifier/logsnotifier"
+
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
 	"github.com/thomaspoignant/go-feature-flag/internal/dataexporter"
 	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
@@ -68,15 +70,16 @@ func New(config Config) (*GoFeatureFlag, error) {
 	}
 
 	if !config.Offline {
-		notifiers, err := getNotifiers(config)
-		if err != nil {
-			return nil, fmt.Errorf("wrong configuration in your webhook: %v", err)
+		notifiers := config.Notifiers
+		if config.Logger != nil {
+			notifiers = append(notifiers, &logsnotifier.Notifier{Logger: config.Logger})
 		}
+
 		notificationService := cache.NewNotificationService(notifiers)
 		goFF.bgUpdater = newBackgroundUpdater(config.PollingInterval)
 		goFF.cache = cache.New(notificationService)
 
-		err = retrieveFlagsAndUpdateCache(goFF.config, goFF.cache)
+		err := retrieveFlagsAndUpdateCache(goFF.config, goFF.cache)
 		if err != nil && !config.StartWithRetrieverError {
 			return nil, fmt.Errorf("impossible to retrieve the flags, please check your configuration: %v", err)
 		}
@@ -143,7 +146,7 @@ func retrieveFlagsAndUpdateCache(config Config, cache cache.Manager) error {
 		return err
 	}
 
-	err = cache.UpdateCache(loadedFlags, config.FileFormat)
+	err = cache.UpdateCache(loadedFlags, config.FileFormat, config.Logger)
 	if err != nil {
 		log.Printf("error: impossible to update the cache of the flags: %v", err)
 		return err

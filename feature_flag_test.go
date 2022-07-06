@@ -237,26 +237,6 @@ func TestImpossibleToLoadfile(t *testing.T) {
 	assert.True(t, flagValue)
 }
 
-func TestWrongWebhookConfig(t *testing.T) {
-	_, err := ffclient.New(ffclient.Config{
-		PollingInterval: 5 * time.Second,
-		Retriever:       &fileretriever.Retriever{Path: "testdata/flag-config.yaml"},
-		Notifiers: []ffclient.NotifierConfig{
-			&ffclient.WebhookConfig{
-				EndpointURL: " https://example.com/hook",
-				Secret:      "Secret",
-				Meta: map[string]string{
-					"my-app": "go-ff-test",
-				},
-			},
-		},
-	})
-
-	assert.Errorf(t, err, "wrong url should return an error")
-	assert.Equal(t, err.Error(), "wrong configuration in your webhook: parse \" https://example.com/hook\": "+
-		"first path segment in URL cannot contain colon")
-}
-
 func TestFlagFileUnreachable(t *testing.T) {
 	initialFileContent := `test-flag:
   rule: key eq "random-key"

@@ -1,7 +1,11 @@
 package cache
 
 import (
+	"fmt"
+	"log"
 	"sync"
+
+	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
@@ -10,7 +14,7 @@ import (
 
 type Service interface {
 	Close()
-	Notify(oldCache map[string]flag.Flag, newCache map[string]flag.Flag)
+	Notify(oldCache map[string]flag.Flag, newCache map[string]flag.Flag, log *log.Logger)
 }
 
 func NewNotificationService(notifiers []notifier.Notifier) Service {
@@ -25,12 +29,17 @@ type notificationService struct {
 	waitGroup *sync.WaitGroup
 }
 
-func (c *notificationService) Notify(oldCache map[string]flag.Flag, newCache map[string]flag.Flag) {
+func (c *notificationService) Notify(oldCache map[string]flag.Flag, newCache map[string]flag.Flag, log *log.Logger) {
 	diff := c.getDifferences(oldCache, newCache)
 	if diff.HasDiff() {
-		for _, notifier := range c.Notifiers {
+		for _, n := range c.Notifiers {
 			c.waitGroup.Add(1)
-			go notifier.Notify(diff, c.waitGroup)
+			notif := n
+			go func() {
+				err := notif.Notify(diff, c.waitGroup)
+				fmt.Println(log)
+				fflog.Printf(log, "error while calling the notifier: %v", err)
+			}()
 		}
 	}
 }

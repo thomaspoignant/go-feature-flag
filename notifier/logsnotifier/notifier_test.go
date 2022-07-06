@@ -163,7 +163,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 				Logger: log.New(logOutput, "", 0),
 			}
 			tt.args.wg.Add(1)
-			c.Notify(tt.args.diff, tt.args.wg)
+			_ = c.Notify(tt.args.diff, tt.args.wg)
 			log, _ := ioutil.ReadFile(logOutput.Name())
 			assert.Regexp(t, tt.expected, string(log))
 		})

@@ -6,14 +6,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/thomaspoignant/go-feature-flag/notifier/slacknotifier"
-	"github.com/thomaspoignant/go-feature-flag/notifier/webhooknotifier"
-
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 
 	"github.com/thomaspoignant/go-feature-flag/notifier"
-
-	"github.com/thomaspoignant/go-feature-flag/internal"
 )
 
 // Config is the configuration of go-feature-flag.
@@ -40,7 +35,7 @@ type Config struct {
 	Retriever retriever.Retriever
 
 	// Notifiers (optional) is the list of notifiers called when a flag change
-	Notifiers []NotifierConfig
+	Notifiers []notifier.Notifier
 
 	// FileFormat (optional) is the format of the file to retrieve (available YAML, TOML and JSON)
 	// Default: YAML
@@ -67,94 +62,4 @@ func (c *Config) GetRetriever() (retriever.Retriever, error) {
 		return nil, errors.New("no retriever in the configuration, impossible to get the flags")
 	}
 	return c.Retriever, nil
-}
-
-// NotifierConfig is the interface for your notifiers.
-// You can use as notifier a WebhookConfig
-//
-// Notifiers: []ffclient.NotifierConfig{
-//        &ffclient.WebhookConfig{
-//            EndpointURL: " https://example.com/hook",
-//            Secret:     "Secret",
-//            Meta: map[string]string{
-//                "app.name": "my app",
-//            },
-//        },
-//        // ...
-//    }
-type NotifierConfig interface {
-	GetNotifier(config Config) (notifier.Notifier, error)
-}
-
-// WebhookConfig is the configuration of your webhook.
-// we will call this URL with a POST request with the following format
-//
-//   {
-//    "meta":{
-//        "hostname": "server01"
-//    },
-//    "flags":{
-//        "deleted": {
-//            "test-flag": {
-//                "rule": "key eq \"random-key\"",
-//                "percentage": 100,
-//                "true": true,
-//                "false": false,
-//                "default": false
-//            }
-//        },
-//        "added": {
-//            "test-flag3": {
-//                "percentage": 5,
-//                "true": "test",
-//                "false": "false",
-//                "default": "default"
-//            }
-//        },
-//        "updated": {
-//            "test-flag2": {
-//                "old_value": {
-//                    "rule": "key eq \"not-a-key\"",
-//                    "percentage": 100,
-//                    "true": true,
-//                    "false": false,
-//                    "default": false
-//                },
-//                "new_value": {
-//                    "disable": true,
-//                    "rule": "key eq \"not-a-key\"",
-//                    "percentage": 100,
-//                    "true": true,
-//                    "false": false,
-//                    "default": false
-//                }
-//            }
-//        }
-//    }
-//  }
-type WebhookConfig struct {
-	// EndpointURL is the URL where we gonna do the POST Request.
-	EndpointURL string
-	Secret      string            // Secret used to sign your request body.
-	Meta        map[string]string // Meta information that you want to send to your webhook (not mandatory)
-}
-
-// GetNotifier convert the configuration in a Notifier struct
-func (w *WebhookConfig) GetNotifier(config Config) (notifier.Notifier, error) {
-	url := w.EndpointURL
-	webhookNotif, err := webhooknotifier.NewNotifier(
-		config.Logger,
-		internal.DefaultHTTPClient(),
-		url, w.Secret, w.Meta)
-	return &webhookNotif, err
-}
-
-type SlackNotifier struct {
-	SlackWebhookURL string
-}
-
-// GetNotifier convert the configuration in a Notifier struct
-func (w *SlackNotifier) GetNotifier(config Config) (notifier.Notifier, error) {
-	slackNotif := slacknotifier.NewNotifier(config.Logger, internal.DefaultHTTPClient(), w.SlackWebhookURL)
-	return &slackNotif, nil
 }

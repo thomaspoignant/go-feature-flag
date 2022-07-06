@@ -5,5 +5,5 @@ import (
 )
 
 type Notifier interface {
-	Notify(cache DiffCache, waitGroup *sync.WaitGroup)
+	Notify(cache DiffCache, waitGroup *sync.WaitGroup) error
 }

@@ -1,11 +1,9 @@
 package webhooknotifier
 
 import (
+	"encoding/json"
 	"io/ioutil"
-	"log"
 	"net/http"
-	"net/url"
-	"os"
 	"sync"
 	"testing"
 
@@ -24,7 +22,7 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 	}
 	type expected struct {
 		err       bool
-		errLog    string
+		errorMsg  string
 		bodyPath  string
 		signature string
 	}
@@ -32,6 +30,7 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 		diff       notifier.DiffCache
 		statusCode int
 		forceError bool
+		url        string
 	}
 	tests := []struct {
 		name     string
@@ -49,6 +48,7 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 				signature: "sha256=23effe4da9927ab72df5202a3146e6be39c12b7f6cee99f8d2e19326d8806b81",
 			},
 			args: args{
+				url:        "http://webhook.example/hook",
 				statusCode: http.StatusOK,
 				diff: notifier.DiffCache{
 					Added: map[string]flag.Flag{
@@ -97,6 +97,7 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 				signature: "",
 			},
 			args: args{
+				url:        "http://webhook.example/hook",
 				statusCode: http.StatusOK,
 				diff: notifier.DiffCache{
 					Added: map[string]flag.Flag{
@@ -115,10 +116,11 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 		{
 			name: "should log if http code is superior to 399",
 			expected: expected{
-				err:    true,
-				errLog: "^\\[" + testutils.RFC3339Regex + "\\] error: while calling webhook, statusCode = 400",
+				err:      true,
+				errorMsg: "error: while calling webhook, statusCode = 400",
 			},
 			args: args{
+				url:        "http://webhook.example/hook",
 				statusCode: http.StatusBadRequest,
 				diff:       notifier.DiffCache{},
 			},
@@ -126,10 +128,24 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 		{
 			name: "should log if error while calling webhook",
 			expected: expected{
-				err:    true,
-				errLog: "^\\[" + testutils.RFC3339Regex + "\\] error: while calling webhook: random error",
+				err:      true,
+				errorMsg: "error: while calling webhook: random error",
 			},
 			args: args{
+				url:        "http://webhook.example/hook",
+				statusCode: http.StatusOK,
+				diff:       notifier.DiffCache{},
+				forceError: true,
+			},
+		},
+		{
+			name: "no endpointURL",
+			expected: expected{
+				err:      true,
+				errorMsg: "invalid notifier configuration, no endpointURL provided for the webhook notifier",
+			},
+			args: args{
+				url:        "",
 				statusCode: http.StatusOK,
 				diff:       notifier.DiffCache{},
 				forceError: true,
@@ -138,28 +154,24 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			logFile, _ := ioutil.TempFile("", "")
-			defer logFile.Close()
-			defer os.Remove(logFile.Name())
-
 			mockHTTPClient := &testutils.HTTPClientMock{StatusCode: tt.args.statusCode, ForceError: tt.args.forceError}
 
-			c, _ := NewNotifier(
-				log.New(logFile, "", 0),
-				mockHTTPClient,
-				"http://webhook.example/hook",
-				tt.fields.Secret,
-				map[string]string{"hostname": "toto"},
-			)
+			c := Notifier{
+				EndpointURL: tt.args.url,
+				Secret:      tt.fields.Secret,
+				Meta:        map[string]string{"hostname": "toto"},
+				httpClient:  mockHTTPClient,
+				init:        sync.Once{},
+			}
 
 			w := sync.WaitGroup{}
 			w.Add(1)
-			c.Notify(tt.args.diff, &w)
+			err := c.Notify(tt.args.diff, &w)
 
 			if tt.expected.err {
-				log, _ := ioutil.ReadFile(logFile.Name())
-				assert.Regexp(t, tt.expected.errLog, string(log))
+				assert.ErrorContains(t, err, tt.expected.errorMsg)
 			} else {
+				assert.NoError(t, err)
 				content, _ := ioutil.ReadFile(tt.expected.bodyPath)
 				assert.JSONEq(t, string(content), mockHTTPClient.Body)
 				assert.Equal(t, tt.expected.signature, mockHTTPClient.Signature)
@@ -168,52 +180,35 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 	}
 }
 
-func TestNewWebhookNotifier(t *testing.T) {
+func Test_webhookNotifier_no_meta_data(t *testing.T) {
 	mockHTTPClient := &testutils.HTTPClientMock{StatusCode: 200, ForceError: false}
-	hostname, _ := os.Hostname()
-
-	type args struct {
-		endpointURL string
-		secret      string
-		meta        map[string]string
-	}
-	tests := []struct {
-		name    string
-		args    args
-		want    Notifier
-		wantErr bool
-	}{
-		{
-			name: "Invalid URL",
-			args: args{
-				endpointURL: " http://example.com",
-			},
-			wantErr: true,
-		},
-		{
-			name: "No meta",
-			args: args{
-				endpointURL: "http://example.com",
-			},
-			wantErr: false,
-			want: Notifier{
-				HTTPClient:  mockHTTPClient,
-				EndpointURL: url.URL{Host: "example.com", Scheme: "http"},
-				Secret:      "",
-				Meta:        map[string]string{"hostname": hostname},
+	diff := notifier.DiffCache{
+		Added: map[string]flag.Flag{
+			"test-flag3": &flagv1.FlagData{
+				Percentage: testconvert.Float64(5),
+				True:       testconvert.Interface("test"),
+				False:      testconvert.Interface("false"),
+				Default:    testconvert.Interface("default"),
 			},
 		},
+		Deleted: map[string]flag.Flag{},
+		Updated: map[string]notifier.DiffUpdated{},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := NewNotifier(nil, mockHTTPClient, tt.args.endpointURL, tt.args.secret, tt.args.meta)
 
-			if tt.wantErr {
-				assert.Error(t, err, "NewNotifier should return an error")
-			} else {
-				assert.NoError(t, err, "NewNotifier should not return an error. Error return: %v", err)
-				assert.Equal(t, tt.want, got, "Notifier should be equals.")
-			}
-		})
+	// no meta
+	c := Notifier{
+		EndpointURL: "http://webhook.example/hook",
+		httpClient:  mockHTTPClient,
+		init:        sync.Once{},
 	}
+
+	w := sync.WaitGroup{}
+	w.Add(1)
+	err := c.Notify(diff, &w)
+
+	assert.NoError(t, err)
+	var m map[string]interface{}
+	_ = json.Unmarshal([]byte(mockHTTPClient.Body), &m)
+
+	assert.NotEmpty(t, m["meta"])
 }

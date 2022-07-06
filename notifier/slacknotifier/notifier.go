@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -15,7 +14,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 
 	"github.com/thomaspoignant/go-feature-flag/internal"
-	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 )
 
 const (
@@ -27,48 +25,51 @@ const (
 	longSlackAttachment = 35
 )
 
-func NewNotifier(logger *log.Logger, httpClient internal.HTTPClient, webhookURL string) Notifier {
-	slackURL, _ := url.Parse(webhookURL)
-	return Notifier{
-		Logger:     logger,
-		HTTPClient: httpClient,
-		WebhookURL: *slackURL,
-	}
-}
-
 type Notifier struct {
-	Logger     *log.Logger
-	HTTPClient internal.HTTPClient
-	WebhookURL url.URL
+	SlackWebhookURL url.URL
+
+	httpClient internal.HTTPClient
+	init       sync.Once
 }
 
-func (c *Notifier) Notify(diff notifier.DiffCache, wg *sync.WaitGroup) {
+func (c *Notifier) Notify(diff notifier.DiffCache, wg *sync.WaitGroup) error {
 	defer wg.Done()
+
+	if c.SlackWebhookURL.String() == "" {
+		return fmt.Errorf("error: (Slack Notifier) invalid notifier configuration, no " +
+			"SlackWebhookURL provided for the slack notifier")
+	}
+
+	// init the notifier
+	c.init.Do(func() {
+		if c.httpClient == nil {
+			c.httpClient = internal.DefaultHTTPClient()
+		}
+	})
 
 	reqBody := convertToSlackMessage(diff)
 	payload, err := json.Marshal(reqBody)
 	if err != nil {
-		fflog.Printf(c.Logger, "error: (Slack Notifier) impossible to read differences; %v\n", err)
-		return
+		return fmt.Errorf("error: (Slack Notifier) impossible to read differences; %v", err)
 	}
 	request := http.Request{
 		Method: http.MethodPost,
-		URL:    &c.WebhookURL,
+		URL:    &c.SlackWebhookURL,
 		Body:   ioutil.NopCloser(bytes.NewReader(payload)),
 		Header: map[string][]string{"Content-type": {"application/json"}},
 	}
-	response, err := c.HTTPClient.Do(&request)
+	response, err := c.httpClient.Do(&request)
 	if err != nil {
-		fflog.Printf(c.Logger, "error: (Slack Notifier) error: while calling webhook: %v\n", err)
-		return
+		return fmt.Errorf("error: (Slack Notifier) error: while calling webhook: %v", err)
 	}
 
-	defer response.Body.Close()
+	defer func() { _ = response.Body.Close() }()
 	if response.StatusCode > 399 {
-		fflog.Printf(c.Logger, "error: (Slack Notifier) while calling slack webhook, statusCode = %d",
+		return fmt.Errorf("error: (Slack Notifier) while calling slack webhook, statusCode = %d",
 			response.StatusCode)
-		return
 	}
+
+	return nil
 }
 
 func convertToSlackMessage(diff notifier.DiffCache) slackMessage {

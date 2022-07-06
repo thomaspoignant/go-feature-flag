@@ -3,8 +3,8 @@ package webhooknotifier
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -13,57 +13,101 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 
 	"github.com/thomaspoignant/go-feature-flag/internal"
-	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 	"github.com/thomaspoignant/go-feature-flag/internal/signer"
 )
 
-func NewNotifier(logger *log.Logger,
-	httpClient internal.HTTPClient,
-	endpointURL string,
-	secret string,
-	meta map[string]string,
-) (Notifier, error) {
-	// Deal with meta information
-	if meta == nil {
-		meta = make(map[string]string)
-	}
-
-	// if no hostname provided we return the hostname of the current machine
-	if _, ok := meta["hostname"]; !ok {
-		hostname, _ := os.Hostname()
-		meta["hostname"] = hostname
-	}
-
-	parsedURL, err := url.Parse(endpointURL)
-	if err != nil {
-		return Notifier{}, err
-	}
-
-	w := Notifier{
-		Logger:      logger,
-		EndpointURL: *parsedURL,
-		Secret:      secret,
-		Meta:        meta,
-		HTTPClient:  httpClient,
-	}
-	return w, nil
-}
-
+// webhookReqBody is the format we are sending to the webhook
 type webhookReqBody struct {
 	Meta  map[string]string  `json:"meta"`
 	Flags notifier.DiffCache `json:"flags"`
 }
 
+// Notifier will call your endpoint URL with a POST request with the following format
+//
+//   {
+//    "meta":{
+//        "hostname": "server01"
+//    },
+//    "flags":{
+//        "deleted": {
+//            "test-flag": {
+//                "rule": "key eq \"random-key\"",
+//                "percentage": 100,
+//                "true": true,
+//                "false": false,
+//                "default": false
+//            }
+//        },
+//        "added": {
+//            "test-flag3": {
+//                "percentage": 5,
+//                "true": "test",
+//                "false": "false",
+//                "default": "default"
+//            }
+//        },
+//        "updated": {
+//            "test-flag2": {
+//                "old_value": {
+//                    "rule": "key eq \"not-a-key\"",
+//                    "percentage": 100,
+//                    "true": true,
+//                    "false": false,
+//                    "default": false
+//                },
+//                "new_value": {
+//                    "disable": true,
+//                    "rule": "key eq \"not-a-key\"",
+//                    "percentage": 100,
+//                    "true": true,
+//                    "false": false,
+//                    "default": false
+//                }
+//            }
+//        }
+//    }
+//  }
 type Notifier struct {
-	Logger      *log.Logger
-	HTTPClient  internal.HTTPClient
-	EndpointURL url.URL
-	Secret      string
-	Meta        map[string]string
+	// EndpointURL of your webhook
+	EndpointURL string
+
+	// Optional: Secret used to sign your request body.
+	Secret string
+
+	// Optional: Meta information that you want to send to your webhook
+	Meta map[string]string
+
+	httpClient internal.HTTPClient
+	init       sync.Once
 }
 
-func (c *Notifier) Notify(diff notifier.DiffCache, wg *sync.WaitGroup) {
+func (c *Notifier) Notify(diff notifier.DiffCache, wg *sync.WaitGroup) error {
 	defer wg.Done()
+	if c.EndpointURL == "" {
+		return fmt.Errorf("invalid notifier configuration, no endpointURL provided for the webhook notifier")
+	}
+
+	// init the notifier
+	c.init.Do(func() {
+		if c.httpClient == nil {
+			c.httpClient = internal.DefaultHTTPClient()
+		}
+
+		if c.Meta == nil {
+			c.Meta = make(map[string]string)
+		}
+
+		// if no hostname provided we return the hostname of the current machine
+		if _, ok := c.Meta["hostname"]; !ok {
+			hostname, _ := os.Hostname()
+			c.Meta["hostname"] = hostname
+		}
+	})
+
+	endpointURL, err := url.Parse(c.EndpointURL)
+	if err != nil {
+		return fmt.Errorf("error: (Webhook Notifier) invalid EnpointURL:%v", c.EndpointURL)
+	}
 
 	// Create request body
 	reqBody := webhookReqBody{
@@ -73,8 +117,7 @@ func (c *Notifier) Notify(diff notifier.DiffCache, wg *sync.WaitGroup) {
 
 	payload, err := json.Marshal(reqBody)
 	if err != nil {
-		fflog.Printf(c.Logger, "error: (Webhook Notifier) impossible to read differences; %v\n", err)
-		return
+		return fmt.Errorf("error: (Webhook Notifier) impossible to read differences; %v", err)
 	}
 
 	headers := http.Header{
@@ -88,19 +131,19 @@ func (c *Notifier) Notify(diff notifier.DiffCache, wg *sync.WaitGroup) {
 
 	request := http.Request{
 		Method: "POST",
-		URL:    &c.EndpointURL,
+		URL:    endpointURL,
 		Header: headers,
 		Body:   ioutil.NopCloser(bytes.NewReader(payload)),
 	}
-	response, err := c.HTTPClient.Do(&request)
+	response, err := c.httpClient.Do(&request)
 	// Log if something went wrong while calling the webhook.
 	if err != nil {
-		fflog.Printf(c.Logger, "error: while calling webhook: %v\n", err)
-		return
+		return fmt.Errorf("error: while calling webhook: %v", err)
 	}
-	defer response.Body.Close()
+	defer func() { _ = response.Body.Close() }()
 	if response.StatusCode > 399 {
-		fflog.Printf(c.Logger, "error: while calling webhook, statusCode = %d", response.StatusCode)
-		return
+		return fmt.Errorf("error: while calling webhook, statusCode = %d", response.StatusCode)
 	}
+
+	return nil
 }

@@ -3,6 +3,7 @@ package cache
 import (
 	"encoding/json"
 	"errors"
+	"log"
 	"strings"
 	"sync"
 	"time"
@@ -15,7 +16,7 @@ import (
 )
 
 type Manager interface {
-	UpdateCache(loadedFlags []byte, fileFormat string) error
+	UpdateCache(loadedFlags []byte, fileFormat string, log *log.Logger) error
 	Close()
 	GetFlag(key string) (flag.Flag, error)
 	AllFlags() (map[string]flag.Flag, error)
@@ -37,7 +38,7 @@ func New(notificationService Service) Manager {
 	}
 }
 
-func (c *cacheManagerImpl) UpdateCache(loadedFlags []byte, fileFormat string) error {
+func (c *cacheManagerImpl) UpdateCache(loadedFlags []byte, fileFormat string, log *log.Logger) error {
 	var newFlags map[string]flagv1.FlagData
 	var err error
 	switch strings.ToLower(fileFormat) {
@@ -68,7 +69,7 @@ func (c *cacheManagerImpl) UpdateCache(loadedFlags []byte, fileFormat string) er
 	c.mutex.Unlock()
 
 	// notify the changes
-	c.notificationService.Notify(oldCacheFlags, newCacheFlags)
+	c.notificationService.Notify(oldCacheFlags, newCacheFlags, log)
 	return nil
 }
 

@@ -1,6 +1,8 @@
 package cache_test
 
 import (
+	"log"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -165,7 +167,7 @@ disable = false`),
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			fCache := cache.New(cache.NewNotificationService([]notifier.Notifier{}))
-			err := fCache.UpdateCache(tt.args.loadedFlags, tt.flagFormat)
+			err := fCache.UpdateCache(tt.args.loadedFlags, tt.flagFormat, log.New(os.Stdout, "", 0))
 			if tt.wantErr {
 				assert.Error(t, err, "UpdateCache() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -276,7 +278,7 @@ test-flag2:
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			fCache := cache.New(cache.NewNotificationService([]notifier.Notifier{}))
-			_ = fCache.UpdateCache(tt.args.loadedFlags, tt.flagFormat)
+			_ = fCache.UpdateCache(tt.args.loadedFlags, tt.flagFormat, log.New(os.Stdout, "", 0))
 
 			allFlags, err := fCache.AllFlags()
 			if tt.wantErr {
@@ -307,7 +309,7 @@ func Test_cacheManagerImpl_GetLatestUpdateDate(t *testing.T) {
 
 	fCache := cache.New(cache.NewNotificationService([]notifier.Notifier{}))
 	timeBefore := fCache.GetLatestUpdateDate()
-	_ = fCache.UpdateCache(loadedFlags, "yaml")
+	_ = fCache.UpdateCache(loadedFlags, "yaml", log.New(os.Stdout, "", 0))
 	timeAfter := fCache.GetLatestUpdateDate()
 
 	assert.True(t, timeBefore.Before(timeAfter))

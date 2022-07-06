@@ -43,7 +43,7 @@ func (c *cacheMock) GetLatestUpdateDate() time.Time {
 	return time.Now()
 }
 
-func (c *cacheMock) UpdateCache(loadedFlags []byte, fileFormat string) error {
+func (c *cacheMock) UpdateCache(loadedFlags []byte, fileFormat string, log *log.Logger) error {
 	return nil
 }
 func (c *cacheMock) Close() {}

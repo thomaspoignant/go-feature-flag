@@ -1,16 +1,14 @@
-package slacknotifier_test
+package slacknotifier
 
 import (
 	"io/ioutil"
-	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"sync"
 	"testing"
 	"time"
-
-	"github.com/thomaspoignant/go-feature-flag/notifier/slacknotifier"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
@@ -26,10 +24,11 @@ func TestSlackNotifier_Notify(t *testing.T) {
 		diff       notifier.DiffCache
 		statusCode int
 		forceError bool
+		url        string
 	}
 	type expected struct {
 		err       bool
-		errLog    string
+		errMsg    string
 		bodyPath  string
 		signature string
 	}
@@ -44,6 +43,7 @@ func TestSlackNotifier_Notify(t *testing.T) {
 				bodyPath: "../../testdata/internal/notifier/slack/should_call_webhook_and_have_valid_results.json",
 			},
 			args: args{
+				url:        "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
 				statusCode: http.StatusOK,
 				diff: notifier.DiffCache{
 					Added: map[string]flag.Flag{
@@ -99,21 +99,35 @@ func TestSlackNotifier_Notify(t *testing.T) {
 			},
 		},
 		{
-			name: "should log if http code is superior to 399",
+			name: "should err if http code is superior to 399",
 			expected: expected{
 				err:    true,
-				errLog: "^\\[" + testutils.RFC3339Regex + "\\] error: \\(Slack Notifier\\) while calling slack webhook, statusCode = 400",
+				errMsg: "error: (Slack Notifier) while calling slack webhook, statusCode = 400",
 			},
 			args: args{
+				url:        "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
 				statusCode: http.StatusBadRequest,
 				diff:       notifier.DiffCache{},
 			},
 		},
 		{
-			name: "should log if error while calling webhook",
+			name: "should err if error while calling webhook",
 			expected: expected{
 				err:    true,
-				errLog: "^\\[" + testutils.RFC3339Regex + "\\] error: \\(Slack Notifier\\) error: while calling webhook: random error",
+				errMsg: "error: (Slack Notifier) error: while calling webhook: random error",
+			},
+			args: args{
+				url:        "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
+				statusCode: http.StatusOK,
+				diff:       notifier.DiffCache{},
+				forceError: true,
+			},
+		},
+		{
+			name: "missing slack url",
+			expected: expected{
+				err:    true,
+				errMsg: "error: (Slack Notifier) invalid notifier configuration, no SlackWebhookURL provided for the slack notifier",
 			},
 			args: args{
 				statusCode: http.StatusOK,
@@ -124,26 +138,22 @@ func TestSlackNotifier_Notify(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			logFile, _ := ioutil.TempFile("", "")
-			defer logFile.Close()
-			defer os.Remove(logFile.Name())
-
 			mockHTTPClient := &testutils.HTTPClientMock{StatusCode: tt.args.statusCode, ForceError: tt.args.forceError}
 
-			c := slacknotifier.NewNotifier(
-				log.New(logFile, "", 0),
-				mockHTTPClient,
-				"https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
-			)
+			slackURL, _ := url.Parse(tt.args.url)
+			c := Notifier{
+				SlackWebhookURL: *slackURL,
+				httpClient:      mockHTTPClient,
+			}
 
 			w := sync.WaitGroup{}
 			w.Add(1)
-			c.Notify(tt.args.diff, &w)
+			err := c.Notify(tt.args.diff, &w)
 
 			if tt.expected.err {
-				log, _ := ioutil.ReadFile(logFile.Name())
-				assert.Regexp(t, tt.expected.errLog, string(log))
+				assert.ErrorContains(t, err, tt.expected.errMsg)
 			} else {
+				assert.NoError(t, err)
 				hostname, _ := os.Hostname()
 				content, _ := ioutil.ReadFile(tt.expected.bodyPath)
 				expectedContent := strings.ReplaceAll(string(content), "{{hostname}}", hostname)

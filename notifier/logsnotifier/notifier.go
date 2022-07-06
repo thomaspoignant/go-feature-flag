@@ -13,7 +13,7 @@ type Notifier struct {
 	Logger *log.Logger
 }
 
-func (c *Notifier) Notify(diff notifier.DiffCache, wg *sync.WaitGroup) {
+func (c *Notifier) Notify(diff notifier.DiffCache, wg *sync.WaitGroup) error {
 	defer wg.Done()
 	for key := range diff.Deleted {
 		fflog.Printf(c.Logger, "flag %v removed\n", key)
@@ -36,4 +36,6 @@ func (c *Notifier) Notify(diff notifier.DiffCache, wg *sync.WaitGroup) {
 		// key has changed in cache
 		fflog.Printf(c.Logger, "flag %s updated, old=[%v], new=[%v]\n", key, flagDiff.Before, flagDiff.After)
 	}
+
+	return nil
 }
