@@ -10,11 +10,11 @@ import (
 	"testing"
 	"time"
 
-	fileExp "github.com/thomaspoignant/go-feature-flag/exporter/file"
-	"github.com/thomaspoignant/go-feature-flag/exporter/logs"
+	fileExp "github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
+	"github.com/thomaspoignant/go-feature-flag/exporter/logsexporter"
 	"github.com/thomaspoignant/go-feature-flag/internal/dataexporter"
 
-	"github.com/thomaspoignant/go-feature-flag/retriever/file"
+	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
@@ -228,7 +228,7 @@ func TestBoolVariation(t *testing.T) {
 					Offline:         tt.args.offline,
 				},
 				dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
-					&logs.Exporter{
+					&logsexporter.Exporter{
 						LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
 							"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
 					}, logger),
@@ -430,7 +430,7 @@ func TestFloat64Variation(t *testing.T) {
 					Offline:         tt.args.offline,
 				},
 				dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
-					&logs.Exporter{
+					&logsexporter.Exporter{
 						LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
 							"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
 					}, logger),
@@ -649,7 +649,7 @@ func TestJSONArrayVariation(t *testing.T) {
 					Offline:         tt.args.offline,
 				},
 				dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
-					&logs.Exporter{}, logger),
+					&logsexporter.Exporter{}, logger),
 			}
 
 			got, err := JSONArrayVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
@@ -827,7 +827,7 @@ func TestJSONVariation(t *testing.T) {
 					Offline:         tt.args.offline,
 				},
 				dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
-					&logs.Exporter{
+					&logsexporter.Exporter{
 						LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
 							"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
 					}, logger),
@@ -1012,7 +1012,7 @@ func TestStringVariation(t *testing.T) {
 					Offline:         tt.args.offline,
 				},
 				dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
-					&logs.Exporter{
+					&logsexporter.Exporter{
 						LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
 							"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
 					}, logger),
@@ -1213,7 +1213,7 @@ func TestIntVariation(t *testing.T) {
 					Offline:         tt.args.offline,
 				},
 				dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
-					&logs.Exporter{
+					&logsexporter.Exporter{
 						LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
 							"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
 					}, logger),
@@ -1249,7 +1249,7 @@ func TestAllFlagsState(t *testing.T) {
 		{
 			name: "Valid multiple types",
 			config: Config{
-				Retriever: &file.Retriever{
+				Retriever: &fileretriever.Retriever{
 					Path: "./testdata/ffclient/all_flags/config_flag/flag-config-all-flags.yaml",
 				},
 			},
@@ -1260,7 +1260,7 @@ func TestAllFlagsState(t *testing.T) {
 		{
 			name: "Error in flag-0",
 			config: Config{
-				Retriever: &file.Retriever{
+				Retriever: &fileretriever.Retriever{
 					Path: "./testdata/ffclient/all_flags/config_flag/flag-config-with-error.yaml",
 				},
 			},
@@ -1271,7 +1271,7 @@ func TestAllFlagsState(t *testing.T) {
 		{
 			name: "module not init",
 			config: Config{
-				Retriever: &file.Retriever{
+				Retriever: &fileretriever.Retriever{
 					Path: "./testdata/ffclient/all_flags/config_flag/flag-config-all-flags.yaml",
 				},
 			},
@@ -1283,7 +1283,7 @@ func TestAllFlagsState(t *testing.T) {
 			name: "offline",
 			config: Config{
 				Offline: true,
-				Retriever: &file.Retriever{
+				Retriever: &fileretriever.Retriever{
 					Path: "./testdata/ffclient/all_flags/config_flag/flag-config-all-flags.yaml",
 				},
 			},
@@ -1352,7 +1352,7 @@ func TestAllFlagsFromCache(t *testing.T) {
 		{
 			name: "Valid multiple types",
 			config: Config{
-				Retriever: &file.Retriever{
+				Retriever: &fileretriever.Retriever{
 					Path: "./testdata/ffclient/all_flags/config_flag/flag-config-all-flags.yaml",
 				},
 			},
@@ -1361,7 +1361,7 @@ func TestAllFlagsFromCache(t *testing.T) {
 		{
 			name: "module not init",
 			config: Config{
-				Retriever: &file.Retriever{
+				Retriever: &fileretriever.Retriever{
 					Path: "./testdata/ffclient/all_flags/config_flag/flag-config-all-flags.yaml",
 				},
 			},
@@ -1609,7 +1609,7 @@ func TestRawVariation(t *testing.T) {
 					Offline:         tt.args.offline,
 				},
 				dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
-					&logs.Exporter{
+					&logsexporter.Exporter{
 						LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
 							"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
 					}, logger),

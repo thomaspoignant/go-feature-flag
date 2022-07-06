@@ -10,7 +10,7 @@ ffclient.Config{
     // ...
    DataExporter: ffclient.DataExporter{
         // ...
-        Exporter: &file.Exporter{
+        Exporter: &fileexporter.Exporter{
             OutputDir: "/output-data/",
             Format: "csv",
             FileName: "flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}",
@@ -30,4 +30,4 @@ ffclient.Config{
 |`Filename`   | _(Optional)_ Filename is the name of your output file.<br>You can use a templated config to define the name of your exported files.<br>Available replacement are `{{ .Hostname}}`, `{{ .Timestamp}}` and `{{ .Format}}`<br>**Default: `flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}`**|
 |`CsvTemplate`   | _(Optional)_ CsvTemplate is used if your output format is CSV.<br>This field will be ignored if you are using another format than CSV.<br>You can decide which fields you want in your CSV line with a go-template syntax, please check [internal/exporter/feature_event.go](https://github.com/thomaspoignant/go-feature-flag/blob/main/internal/exporter/feature_event.go) to see what are the fields available.<br>**Default:** `{{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}}\n` |
 
-Check the [godoc for full details](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/exporter/file).
+Check the [godoc for full details](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/exporter/fileexporter).

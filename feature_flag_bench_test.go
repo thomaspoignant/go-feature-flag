@@ -8,7 +8,7 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/thomaspoignant/go-feature-flag/retriever/file"
+	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 
@@ -38,7 +38,7 @@ func init() {
 
 	client, _ = ffclient.New(ffclient.Config{
 		PollingInterval: 1 * time.Second,
-		Retriever:       &file.Retriever{Path: flagFile.Name()},
+		Retriever:       &fileretriever.Retriever{Path: flagFile.Name()},
 	})
 }
 

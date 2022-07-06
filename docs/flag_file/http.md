@@ -1,11 +1,12 @@
 # HTTP endpoint
-The [**HTTPRetriever**](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#HTTPRetriever) will perform an HTTP Request with your configuration to get your flags.
+The [**HTTP Retriever**](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/retriever/httpretriever/#Retriever) 
+will perform an HTTP Request with your configuration to get your flags.
 
 ## Example
 ```go linenums="1"
 err := ffclient.Init(ffclient.Config{
     PollingInterval: 3 * time.Second,
-    Retriever: &httpendpoint.Retriever{
+    Retriever: &httpretriever.Retriever{
         URL:    "http://example.com/flag-config.yaml",
         Timeout: 2 * time.Second,
     },

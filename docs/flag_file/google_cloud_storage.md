@@ -1,7 +1,7 @@
 # Google Cloud Storage
 
-The [**GCStorageRetriever**](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#GCStorageRetriever) will use
-the [google-cloud-storage package](https://pkg.go.dev/cloud.google.com/go/storage)
+The [**Google Cloud Storage Retriever**](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/retriever/gcstorageretriever/#Retriever) 
+will use the [google-cloud-storage package](https://pkg.go.dev/cloud.google.com/go/storage)
 and [google-api-options package](https://pkg.go.dev/google.golang.org/api/option) to access your flag in Google Cloud
 Storage.
 
@@ -10,7 +10,7 @@ Storage.
 ```go linenums="1"
 err := ffclient.Init(ffclient.Config{
     PollingInterval: 3 * time.Second,
-    Retriever: &gcstorage.Retriever{
+    Retriever: &gcstorageretriever.Retriever{
 	    Options: []option.ClientOption{option.WithoutAuthentication()},
 		Bucket: "2093u4pkasjc3",
 		Object: "flags.yaml",

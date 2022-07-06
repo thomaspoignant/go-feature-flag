@@ -6,8 +6,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/thomaspoignant/go-feature-flag/notifier/slack"
-	"github.com/thomaspoignant/go-feature-flag/notifier/webhook"
+	"github.com/thomaspoignant/go-feature-flag/notifier/slacknotifier"
+	"github.com/thomaspoignant/go-feature-flag/notifier/webhooknotifier"
 
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 
@@ -142,7 +142,7 @@ type WebhookConfig struct {
 // GetNotifier convert the configuration in a Notifier struct
 func (w *WebhookConfig) GetNotifier(config Config) (notifier.Notifier, error) {
 	url := w.EndpointURL
-	webhookNotif, err := webhook.NewNotifier(
+	webhookNotif, err := webhooknotifier.NewNotifier(
 		config.Logger,
 		internal.DefaultHTTPClient(),
 		url, w.Secret, w.Meta)
@@ -155,6 +155,6 @@ type SlackNotifier struct {
 
 // GetNotifier convert the configuration in a Notifier struct
 func (w *SlackNotifier) GetNotifier(config Config) (notifier.Notifier, error) {
-	slackNotif := slack.NewNotifier(config.Logger, internal.DefaultHTTPClient(), w.SlackWebhookURL)
+	slackNotif := slacknotifier.NewNotifier(config.Logger, internal.DefaultHTTPClient(), w.SlackWebhookURL)
 	return &slackNotif, nil
 }

@@ -8,10 +8,10 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
-	"github.com/thomaspoignant/go-feature-flag/retriever/awss3"
-	"github.com/thomaspoignant/go-feature-flag/retriever/file"
-	"github.com/thomaspoignant/go-feature-flag/retriever/github"
-	"github.com/thomaspoignant/go-feature-flag/retriever/httpendpoint"
+	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever/githubretriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever/httpretriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever/s3retriever"
 
 	"github.com/stretchr/testify/assert"
 
@@ -30,19 +30,19 @@ func TestConfig_GetRetriever(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "Exporter retriever",
+			name: "File retriever",
 			fields: fields{
 				PollingInterval: 3 * time.Second,
-				Retriever:       &file.Retriever{Path: "file-example.yaml"},
+				Retriever:       &fileretriever.Retriever{Path: "file-example.yaml"},
 			},
-			want:    "*file.Retriever",
+			want:    "*fileretriever.Retriever",
 			wantErr: false,
 		},
 		{
-			name: "Exporter retriever",
+			name: "S3 retriever",
 			fields: fields{
 				PollingInterval: 3 * time.Second,
-				Retriever: &awss3.Retriever{
+				Retriever: &s3retriever.Retriever{
 					Bucket: "tpoi-test",
 					Item:   "flag-config.yaml",
 					AwsConfig: aws.Config{
@@ -50,33 +50,32 @@ func TestConfig_GetRetriever(t *testing.T) {
 					},
 				},
 			},
-			want:    "*awss3.Retriever",
+			want:    "*s3retriever.Retriever",
 			wantErr: false,
 		},
 		{
 			name: "HTTP retriever",
 			fields: fields{
 				PollingInterval: 3 * time.Second,
-				Retriever: &httpendpoint.Retriever{
+				Retriever: &httpretriever.Retriever{
 					URL:    "http://example.com/flag-config.yaml",
 					Method: http.MethodGet,
 				},
 			},
-			want:    "*httpendpoint.Retriever",
+			want:    "*httpretriever.Retriever",
 			wantErr: false,
 		},
 		{
 			name: "Github retriever",
 			fields: fields{
 				PollingInterval: 3 * time.Second,
-				Retriever: &github.Retriever{
+				Retriever: &githubretriever.Retriever{
 					RepositorySlug: "thomaspoignant/go-feature-flag",
 					FilePath:       "testdata/flag-config.yaml",
 					GithubToken:    "XXX",
 				},
 			},
-			// we should have a http retriever because Github retriever is using httpRetriever
-			want:    "*github.Retriever",
+			want:    "*githubretriever.Retriever",
 			wantErr: false,
 		},
 		{

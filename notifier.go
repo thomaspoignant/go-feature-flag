@@ -2,14 +2,14 @@ package ffclient
 
 import (
 	"github.com/thomaspoignant/go-feature-flag/notifier"
-	"github.com/thomaspoignant/go-feature-flag/notifier/logs"
+	"github.com/thomaspoignant/go-feature-flag/notifier/logsnotifier"
 )
 
 // getNotifiers is creating Notifier from the config
 func getNotifiers(config Config) ([]notifier.Notifier, error) {
 	notifiers := make([]notifier.Notifier, 0)
 	if config.Logger != nil {
-		notifiers = append(notifiers, &logs.Notifier{Logger: config.Logger})
+		notifiers = append(notifiers, &logsnotifier.Notifier{Logger: config.Logger})
 	}
 
 	// add all the notifiers

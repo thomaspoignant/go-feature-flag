@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
-	"github.com/thomaspoignant/go-feature-flag/retriever/kubernetes"
+	"github.com/thomaspoignant/go-feature-flag/retriever/k8sretriever"
 	"k8s.io/client-go/rest"
 	"log"
 	"net/http"
@@ -25,7 +25,7 @@ func main() {
 		PollingInterval: 10 * time.Second,
 		Logger:          log.New(os.Stdout, "", 0),
 		Context:         context.Background(),
-		Retriever: &kubernetes.Retriever{
+		Retriever: &k8sretriever.Retriever{
 			Namespace:     "default",
 			ConfigMapName: "goff",
 			Key:           "flags.yaml",

@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/retriever/github"
+	"github.com/thomaspoignant/go-feature-flag/retriever/githubretriever"
 	"log"
 	"os"
 	"time"
@@ -13,12 +13,12 @@ import (
 )
 
 func main() {
-	// Init ffclient with an http retriever.
+	// Init ffclient with a GitHub retriever.
 	err := ffclient.Init(ffclient.Config{
 		PollingInterval: 10 * time.Second,
 		Logger:          log.New(os.Stdout, "", 0),
 		Context:         context.Background(),
-		Retriever: &github.Retriever{
+		Retriever: &githubretriever.Retriever{
 			RepositorySlug: "thomaspoignant/go-feature-flag",
 			Branch:         "main",
 			FilePath:       "examples/github/flags.yaml",

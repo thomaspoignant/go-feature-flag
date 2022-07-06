@@ -57,7 +57,7 @@ ffclient.Config{
    DataExporter: ffclient.DataExporter{
         FlushInterval:   10 * time.Second,
         MaxEventInMemory: 1000,
-        Exporter: &file.Exporter{
+        Exporter: &fileexporter.Exporter{
             OutputDir: "/output-data/",
         },
     },

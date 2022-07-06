@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/retriever/httpendpoint"
+	"github.com/thomaspoignant/go-feature-flag/retriever/httpretriever"
 	"log"
 	"os"
 	"time"
@@ -13,12 +13,12 @@ import (
 )
 
 func main() {
-	// Init ffclient with an http retriever.
+	// Init ffclient with a HTTP retriever.
 	err := ffclient.Init(ffclient.Config{
 		PollingInterval: 10 * time.Second,
 		Logger:          log.New(os.Stdout, "", 0),
 		Context:         context.Background(),
-		Retriever: &httpendpoint.Retriever{
+		Retriever: &httpretriever.Retriever{
 			URL:     "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/http/flags.yaml",
 			Timeout: 3 * time.Second,
 		},
