@@ -1,5 +1,5 @@
 site_name: go-feature-flag
-site_url: https://thomaspoignant.github.io/go-feature-flag/
+site_url: https://docs.gofeatureflag.org
 google_analytics:
   - UA-197484083-1
   - auto
