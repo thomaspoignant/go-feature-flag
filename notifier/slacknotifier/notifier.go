@@ -26,7 +26,7 @@ const (
 )
 
 type Notifier struct {
-	SlackWebhookURL url.URL
+	SlackWebhookURL string
 
 	httpClient internal.HTTPClient
 	init       sync.Once
@@ -35,7 +35,7 @@ type Notifier struct {
 func (c *Notifier) Notify(diff notifier.DiffCache, wg *sync.WaitGroup) error {
 	defer wg.Done()
 
-	if c.SlackWebhookURL.String() == "" {
+	if c.SlackWebhookURL == "" {
 		return fmt.Errorf("error: (Slack Notifier) invalid notifier configuration, no " +
 			"SlackWebhookURL provided for the slack notifier")
 	}
@@ -47,6 +47,11 @@ func (c *Notifier) Notify(diff notifier.DiffCache, wg *sync.WaitGroup) error {
 		}
 	})
 
+	slackURL, err := url.Parse(c.SlackWebhookURL)
+	if err != nil {
+		return fmt.Errorf("error: (Slack Notifier) invalid SlackWebhookURL: %v", c.SlackWebhookURL)
+	}
+
 	reqBody := convertToSlackMessage(diff)
 	payload, err := json.Marshal(reqBody)
 	if err != nil {
@@ -54,7 +59,7 @@ func (c *Notifier) Notify(diff notifier.DiffCache, wg *sync.WaitGroup) error {
 	}
 	request := http.Request{
 		Method: http.MethodPost,
-		URL:    &c.SlackWebhookURL,
+		URL:    slackURL,
 		Body:   ioutil.NopCloser(bytes.NewReader(payload)),
 		Header: map[string][]string{"Content-type": {"application/json"}},
 	}

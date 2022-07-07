@@ -3,7 +3,6 @@ package slacknotifier
 import (
 	"io/ioutil"
 	"net/http"
-	"net/url"
 	"os"
 	"strings"
 	"sync"
@@ -140,9 +139,8 @@ func TestSlackNotifier_Notify(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mockHTTPClient := &testutils.HTTPClientMock{StatusCode: tt.args.statusCode, ForceError: tt.args.forceError}
 
-			slackURL, _ := url.Parse(tt.args.url)
 			c := Notifier{
-				SlackWebhookURL: *slackURL,
+				SlackWebhookURL: tt.args.url,
 				httpClient:      mockHTTPClient,
 			}
 
