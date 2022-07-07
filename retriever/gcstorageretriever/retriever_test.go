@@ -44,7 +44,7 @@ func TestGCStorageRetriever_Retrieve(t *testing.T) {
 				Object:  "Object",
 				rC: &testutils.GCStorageReaderMock{
 					ShouldFail: false,
-					FileToRead: "../../testdata/flag-config-updated.yaml",
+					FileToRead: "./testdata/flag-config-updated.yaml",
 				},
 			},
 			args: args{
@@ -93,7 +93,7 @@ func TestGCStorageRetriever_Retrieve(t *testing.T) {
 				Object:  "Object",
 				rC: &testutils.GCStorageReaderMock{
 					ShouldFail: false,
-					FileToRead: "../../testdata/flag-config-updated.yaml",
+					FileToRead: "./testdata/flag-config-updated.yaml",
 				},
 			},
 			args: args{
@@ -114,7 +114,7 @@ func TestGCStorageRetriever_Retrieve(t *testing.T) {
 			}
 
 			// Read default file.
-			want, err := ioutil.ReadFile("../../testdata/flag-config.yaml")
+			want, err := ioutil.ReadFile("./testdata/flag-config.yaml")
 			assert.NoError(t, err)
 			r.cache = want
 
@@ -132,7 +132,7 @@ func TestGCStorageRetriever_Retrieve(t *testing.T) {
 				// If expect data not to be in cache, mock the
 				// remote hash to a different one that the local hash.
 
-				want, err = ioutil.ReadFile("../../testdata/flag-config-updated.yaml")
+				want, err = ioutil.ReadFile("./testdata/flag-config-updated.yaml")
 				assert.NoError(t, err)
 
 				md5Hash = md5.Sum(want) //nolint: gosec

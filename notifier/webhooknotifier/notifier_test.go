@@ -44,7 +44,7 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 				Secret: "test-secret",
 			},
 			expected: expected{
-				bodyPath:  "../../testdata/internal/notifier/webhook/should_call_webhook_and_have_valid_results.json",
+				bodyPath:  "./testdata/should_call_webhook_and_have_valid_results.json",
 				signature: "sha256=23effe4da9927ab72df5202a3146e6be39c12b7f6cee99f8d2e19326d8806b81",
 			},
 			args: args{
@@ -93,7 +93,7 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 		{
 			name: "should not be signed if no secret",
 			expected: expected{
-				bodyPath:  "../../testdata/internal/notifier/webhook/should_not_be_signed_if_no_secret.json",
+				bodyPath:  "./testdata/should_not_be_signed_if_no_secret.json",
 				signature: "",
 			},
 			args: args{

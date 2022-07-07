@@ -29,19 +29,19 @@ func Test_s3Retriever_Retrieve(t *testing.T) {
 			name: "File on S3",
 			fields: fields{
 				downloader: &testutils.S3ManagerMock{
-					TestDataLocation: "../../testdata",
+					TestDataLocation: "./testdata",
 				},
 				bucket: "Bucket",
 				item:   "valid",
 			},
-			want:    "../../testdata/flag-config.yaml",
+			want:    "./testdata/flag-config.yaml",
 			wantErr: false,
 		},
 		{
 			name: "File not present S3",
 			fields: fields{
 				downloader: &testutils.S3ManagerMock{
-					TestDataLocation: "../../testdata",
+					TestDataLocation: "./testdata",
 				},
 				bucket: "Bucket",
 				item:   "no-file",
@@ -52,13 +52,13 @@ func Test_s3Retriever_Retrieve(t *testing.T) {
 			name: "File on S3 with context",
 			fields: fields{
 				downloader: &testutils.S3ManagerMock{
-					TestDataLocation: "../../testdata",
+					TestDataLocation: "./testdata",
 				},
 				bucket:  "Bucket",
 				item:    "valid",
 				context: context.Background(),
 			},
-			want:    "../../testdata/flag-config.yaml",
+			want:    "./testdata/flag-config.yaml",
 			wantErr: false,
 		},
 	}

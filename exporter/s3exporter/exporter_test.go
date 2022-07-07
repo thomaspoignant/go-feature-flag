@@ -45,7 +45,7 @@ func TestS3_Export(t *testing.T) {
 					Variation: "Default", Value: "YO", Default: false,
 				},
 			},
-			expectedFile: "../../testdata/exporter/s3/all_default.json",
+			expectedFile: "./testdata/all_default.json",
 			expectedName: "^/flag-variation-" + hostname + "-[0-9]*\\.json$",
 		},
 		{
@@ -60,7 +60,7 @@ func TestS3_Export(t *testing.T) {
 					Variation: "Default", Value: "YO", Default: false,
 				},
 			},
-			expectedFile: "../../testdata/exporter/s3/all_default.json",
+			expectedFile: "./testdata/all_default.json",
 			expectedName: "^random/path/flag-variation-" + hostname + "-[0-9]*\\.json$",
 		},
 		{
@@ -75,7 +75,7 @@ func TestS3_Export(t *testing.T) {
 					Variation: "Default", Value: "YO", Default: false,
 				},
 			},
-			expectedFile: "../../testdata/exporter/s3/all_default.csv",
+			expectedFile: "./testdata/all_default.csv",
 			expectedName: "^/flag-variation-" + hostname + "-[0-9]*\\.csv$",
 		},
 		{
@@ -91,7 +91,7 @@ func TestS3_Export(t *testing.T) {
 					Variation: "Default", Value: "YO", Default: false,
 				},
 			},
-			expectedFile: "../../testdata/exporter/s3/custom_csv_format.csv",
+			expectedFile: "./testdata/custom_csv_format.csv",
 			expectedName: "^/flag-variation-" + hostname + "-[0-9]*\\.csv$",
 		},
 		{
@@ -107,7 +107,7 @@ func TestS3_Export(t *testing.T) {
 					Variation: "Default", Value: "YO", Default: false,
 				},
 			},
-			expectedFile: "../../testdata/exporter/s3/all_default.json",
+			expectedFile: "./testdata/all_default.json",
 			expectedName: "^/json-test-[0-9]*$",
 		},
 		{
@@ -122,7 +122,7 @@ func TestS3_Export(t *testing.T) {
 					Variation: "Default", Value: "YO", Default: false,
 				},
 			},
-			expectedFile: "../../testdata/exporter/s3/all_default.json",
+			expectedFile: "./testdata/all_default.json",
 			expectedName: "^/flag-variation-" + hostname + "-[0-9]*\\.xxx$",
 		},
 		{

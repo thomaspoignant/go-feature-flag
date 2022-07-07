@@ -40,7 +40,7 @@ func TestSlackNotifier_Notify(t *testing.T) {
 		{
 			name: "should call webhook and have valid results",
 			expected: expected{
-				bodyPath: "../../testdata/internal/notifier/slack/should_call_webhook_and_have_valid_results.json",
+				bodyPath: "./testdata/should_call_webhook_and_have_valid_results.json",
 			},
 			args: args{
 				url:        "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",

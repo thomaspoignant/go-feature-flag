@@ -71,7 +71,7 @@ func TestWebhook_Export(t *testing.T) {
 				},
 			},
 			expected: expected{
-				bodyFilePath: "../../testdata/exporter/webhook/valid_without_signature.json",
+				bodyFilePath: "./testdata/valid_without_signature.json",
 				signHeader:   "",
 			},
 			wantErr: false,
@@ -98,7 +98,7 @@ func TestWebhook_Export(t *testing.T) {
 				},
 			},
 			expected: expected{
-				bodyFilePath: "../../testdata/exporter/webhook/valid_with_signature.json",
+				bodyFilePath: "./testdata/valid_with_signature.json",
 				signHeader:   "sha256=1ac12dcfbc2f5734a949b301c251a542384735c5552d8570e25bf5a4e7c21a32",
 			},
 			wantErr: false,

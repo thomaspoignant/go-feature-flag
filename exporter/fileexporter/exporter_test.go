@@ -55,7 +55,7 @@ func TestFile_Export(t *testing.T) {
 			},
 			expected: expected{
 				fileNameRegex: "^flag-variation-" + hostname + "-[0-9]*\\.json$",
-				content:       "../../testdata/exporter/file/all_default.json",
+				content:       "./testdata/all_default.json",
 			},
 		},
 		{
@@ -78,7 +78,7 @@ func TestFile_Export(t *testing.T) {
 			},
 			expected: expected{
 				fileNameRegex: "^flag-variation-" + hostname + "-[0-9]*\\.csv",
-				content:       "../../testdata/exporter/file/all_default.csv",
+				content:       "./testdata/all_default.csv",
 			},
 		},
 		{
@@ -102,7 +102,7 @@ func TestFile_Export(t *testing.T) {
 			},
 			expected: expected{
 				fileNameRegex: "^flag-variation-" + hostname + "-[0-9]*\\.csv",
-				content:       "../../testdata/exporter/file/custom_csv_format.csv",
+				content:       "./testdata/custom_csv_format.csv",
 			},
 		},
 		{
@@ -126,7 +126,7 @@ func TestFile_Export(t *testing.T) {
 			},
 			expected: expected{
 				fileNameRegex: "^json-test-[0-9]*$",
-				content:       "../../testdata/exporter/file/custom_file_name.json",
+				content:       "./testdata/custom_file_name.json",
 			},
 		},
 		{
@@ -149,7 +149,7 @@ func TestFile_Export(t *testing.T) {
 			},
 			expected: expected{
 				fileNameRegex: "^flag-variation-" + hostname + "-[0-9]*\\.xxx$",
-				content:       "../../testdata/exporter/file/all_default.json",
+				content:       "./testdata/all_default.json",
 			},
 		},
 		{
