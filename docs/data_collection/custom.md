@@ -4,15 +4,15 @@ To create a custom exporter you must have a `struct` that implements the [`expor
 
 ```go linenums="1"
 type Exporter interface {
-    // Export will send the data to the exporter.
-    Export(context.Context, *log.Logger, []ffexporter.FeatureEvent) error
+  // Export will send the data to the exporter.
+  Export(context.Context, *log.Logger, []exporter.FeatureEvent) error
 
 	// IsBulk return false if we should directly send the data as soon as it is produce
 	// and true if we collect the data to send them in bulk.
 	IsBulk() bool
 }
 ```
-`Export` is called asynchronously with a list of `FeatureEvent` that have been collected.  
+`Export` is called asynchronously with a list of `exporter.FeatureEvent` that have been collected.  
 It is your responsibility to store them where you want.
 
 `IsBulk` function should return `false` if the exporter can handle the results in stream mode.  

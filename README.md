@@ -63,7 +63,7 @@ First, you need to initialize the `ffclient` with the location of your backend f
 ```go
 err := ffclient.Init(ffclient.Config{
     PollingInterval: 3 * time.Second,
-    Retriever: &ffclient.HTTPRetriever{
+    Retriever: &httpretriever.Retriever{
         URL:    "http://example.com/flag-config.yaml",
     },
 })
@@ -99,10 +99,10 @@ ffclient.Init(ffclient.Config{
     PollingInterval:   3 * time.Second,
     Logger:         log.New(file, "/tmp/log", 0),
     Context:        context.Background(),
-    Retriever:      &ffclient.FileRetriever{Path: "testdata/flag-config.yaml"},
+    Retriever:      &fileretriever.Retriever{Path: "testdata/flag-config.yaml"},
     FileFormat:     "yaml",
-    Notifiers: []ffclient.NotifierConfig{
-        &ffclient.WebhookConfig{
+    Notifiers: []notifier.Notifier{
+        &webhooknotifier.Notifier{
             EndpointURL: " https://example.com/hook",
             Secret:     "Secret",
             Meta: map[string]string{
@@ -113,7 +113,7 @@ ffclient.Init(ffclient.Config{
     DataExporter: ffclient.DataExporter{
         FlushInterval:   10 * time.Second,
         MaxEventInMemory: 1000,
-        Exporter: &ffexporter.File{
+        Exporter: &fileexporter.Exporter{
             OutputDir: "/output-data/",
         },
     },
@@ -155,6 +155,8 @@ Available retriever are:
 - [From a file](https://thomaspoignant.github.io/go-feature-flag/latest/flag_file/file/)
 - [From Google Cloud Storage](https://thomaspoignant.github.io/go-feature-flag/latest/flag_file/google_cloud_storage/)
 - [From Kubernetes ConfigMaps](https://thomaspoignant.github.io/go-feature-flag/latest/flag_file/kubernetes_configmaps/)
+
+You can also [create your own retriever](https://thomaspoignant.github.io/go-feature-flag/latest/flag_file/custom/).
 
 ## Flags file format
 `go-feature-flag` core feature is to centralize all your feature flags in a source file, and to avoid hosting and maintaining a backend server to manage them.
@@ -431,7 +433,7 @@ ffclient.Config{
    DataExporter: ffclient.DataExporter{
         FlushInterval:   10 * time.Second,
         MaxEventInMemory: 1000,
-        Exporter: &ffexporter.File{
+        Exporter: &fileexporter.Exporter{
             OutputDir: "/output-data/",
         },
     },

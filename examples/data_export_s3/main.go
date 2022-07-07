@@ -3,12 +3,13 @@ package main
 import (
 	"context"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/thomaspoignant/go-feature-flag/exporter/s3exporter"
+	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"log"
 	"os"
 	"time"
 
 	ffclient "github.com/thomaspoignant/go-feature-flag"
-	"github.com/thomaspoignant/go-feature-flag/ffexporter"
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
 )
 
@@ -25,13 +26,13 @@ func main() {
 		PollingInterval: 10 * time.Second,
 		Logger:          log.New(os.Stdout, "", 0),
 		Context:         context.Background(),
-		Retriever: &ffclient.FileRetriever{
+		Retriever: &fileretriever.Retriever{
 			Path: "examples/data_export_s3/flags.yaml",
 		},
 		DataExporter: ffclient.DataExporter{
 			FlushInterval:    1 * time.Second,
 			MaxEventInMemory: 100,
-			Exporter: &ffexporter.S3{
+			Exporter: &s3exporter.Exporter{
 				Format:   "json",
 				Bucket:   "my-test-bucket",
 				S3Path:   "/go-feature-flag/variations/",

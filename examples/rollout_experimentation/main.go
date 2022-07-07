@@ -2,12 +2,13 @@ package main
 
 import (
 	"context"
+	"github.com/thomaspoignant/go-feature-flag/exporter/logsexporter"
+	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"log"
 	"os"
 	"time"
 
 	ffclient "github.com/thomaspoignant/go-feature-flag"
-	"github.com/thomaspoignant/go-feature-flag/ffexporter"
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
 )
 
@@ -20,14 +21,14 @@ func main() {
 		PollingInterval: 10 * time.Second,
 		Logger:          log.New(os.Stdout, "", 0),
 		Context:         context.Background(),
-		Retriever: &ffclient.FileRetriever{
+		Retriever: &fileretriever.Retriever{
 			Path: "examples/rollout_experimentation/flags.yaml",
 		},
 		DataExporter: ffclient.DataExporter{
 			FlushInterval:    10,
 			MaxEventInMemory: 2,
-			Exporter: &ffexporter.Log{
-				Format: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+			Exporter: &logsexporter.Exporter{
+				LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
 			},
 		},
 	})

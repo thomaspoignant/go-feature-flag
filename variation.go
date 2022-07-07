@@ -3,7 +3,7 @@ package ffclient
 import (
 	"fmt"
 
-	"github.com/thomaspoignant/go-feature-flag/ffexporter"
+	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/internal/flagstate"
@@ -417,7 +417,7 @@ func (g *GoFeatureFlag) notifyVariation(
 	value interface{},
 ) {
 	if result.TrackEvents {
-		event := ffexporter.NewFeatureEvent(user, flagKey, value, result.VariationType, result.Failed, result.Version)
+		event := exporter.NewFeatureEvent(user, flagKey, value, result.VariationType, result.Failed, result.Version)
 
 		// Add event in the exporter
 		if g.dataExporter != nil {

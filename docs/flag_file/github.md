@@ -1,5 +1,5 @@
 # Github
-The [**GithubRetriever**](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#GithubRetriever) will perform an HTTP Request with your GitHub configuration to get your flags.
+The [**Github Retriever**](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/retriever/githubretriever/#Retriever) will perform an HTTP Request with your GitHub configuration to get your flags.
 
 !!! Tip
     GitHub has rate limits, be sure to correctly set your `PollingInterval` to avoid reaching the limit.
@@ -8,7 +8,7 @@ The [**GithubRetriever**](https://pkg.go.dev/github.com/thomaspoignant/go-featur
 ```go linenums="1"
 err := ffclient.Init(ffclient.Config{
     PollingInterval: 3 * time.Second,
-    Retriever: &ffclient.GithubRetriever{
+    Retriever: &githubretriever.Retriever{
         RepositorySlug: "thomaspoignant/go-feature-flag",
         Branch: "main",
         FilePath: "testdata/flag-config.yaml",

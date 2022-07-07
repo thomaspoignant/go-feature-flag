@@ -2,12 +2,13 @@ package main
 
 import (
 	"context"
+	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
+	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"log"
 	"os"
 	"time"
 
 	ffclient "github.com/thomaspoignant/go-feature-flag"
-	"github.com/thomaspoignant/go-feature-flag/ffexporter"
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
 )
 
@@ -17,13 +18,13 @@ func main() {
 		PollingInterval: 10 * time.Second,
 		Logger:          log.New(os.Stdout, "", 0),
 		Context:         context.Background(),
-		Retriever: &ffclient.FileRetriever{
+		Retriever: &fileretriever.Retriever{
 			Path: "examples/data_export_file/flags.yaml",
 		},
 		DataExporter: ffclient.DataExporter{
 			FlushInterval:    1 * time.Second,
 			MaxEventInMemory: 100,
-			Exporter: &ffexporter.File{
+			Exporter: &fileexporter.Exporter{
 				Format:    "json",
 				OutputDir: "./examples/data_export_file/",
 				Filename:  " flag-variation-EXAMPLE-{{ .Timestamp}}.{{ .Format}}",

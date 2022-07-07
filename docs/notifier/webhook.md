@@ -8,8 +8,8 @@ The format of the call is specified in the [format section](#format) and, you ca
 ```go linenums="1" 
 ffclient.Config{ 
     // ...
-    Notifiers: []ffclient.NotifierConfig{
-        &ffclient.WebhookConfig{
+    Notifiers: []notifier.Notifier{
+        &webhooknotifier.Notifier{
             EndpointURL: " https://example.com/hook",
             Secret:     "Secret",
             Meta: map[string]string{

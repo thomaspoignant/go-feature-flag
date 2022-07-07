@@ -1,19 +1,22 @@
 package cache
 
 import (
+	"log"
 	"sync"
 
+	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
+
 	"github.com/google/go-cmp/cmp"
-	"github.com/thomaspoignant/go-feature-flag/ffnotifier"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
+	"github.com/thomaspoignant/go-feature-flag/notifier"
 )
 
 type Service interface {
 	Close()
-	Notify(oldCache map[string]flag.Flag, newCache map[string]flag.Flag)
+	Notify(oldCache map[string]flag.Flag, newCache map[string]flag.Flag, log *log.Logger)
 }
 
-func NewNotificationService(notifiers []ffnotifier.Notifier) Service {
+func NewNotificationService(notifiers []notifier.Notifier) Service {
 	return &notificationService{
 		Notifiers: notifiers,
 		waitGroup: &sync.WaitGroup{},
@@ -21,16 +24,22 @@ func NewNotificationService(notifiers []ffnotifier.Notifier) Service {
 }
 
 type notificationService struct {
-	Notifiers []ffnotifier.Notifier
+	Notifiers []notifier.Notifier
 	waitGroup *sync.WaitGroup
 }
 
-func (c *notificationService) Notify(oldCache map[string]flag.Flag, newCache map[string]flag.Flag) {
+func (c *notificationService) Notify(oldCache map[string]flag.Flag, newCache map[string]flag.Flag, log *log.Logger) {
 	diff := c.getDifferences(oldCache, newCache)
 	if diff.HasDiff() {
-		for _, notifier := range c.Notifiers {
+		for _, n := range c.Notifiers {
 			c.waitGroup.Add(1)
-			go notifier.Notify(diff, c.waitGroup)
+			notif := n
+			go func() {
+				err := notif.Notify(diff, c.waitGroup)
+				if err != nil {
+					fflog.Printf(log, "error while calling the notifier: %v", err)
+				}
+			}()
 		}
 	}
 }
@@ -42,11 +51,11 @@ func (c *notificationService) Close() {
 // getDifferences is checking what are the difference in the updated cache.
 func (c *notificationService) getDifferences(
 	oldCache map[string]flag.Flag, newCache map[string]flag.Flag,
-) ffnotifier.DiffCache {
-	diff := ffnotifier.DiffCache{
+) notifier.DiffCache {
+	diff := notifier.DiffCache{
 		Deleted: map[string]flag.Flag{},
 		Added:   map[string]flag.Flag{},
-		Updated: map[string]ffnotifier.DiffUpdated{},
+		Updated: map[string]notifier.DiffUpdated{},
 	}
 	for key := range oldCache {
 		newFlag, inNewCache := newCache[key]
@@ -57,7 +66,7 @@ func (c *notificationService) getDifferences(
 		}
 
 		if !cmp.Equal(oldCache[key], newCache[key]) {
-			diff.Updated[key] = ffnotifier.DiffUpdated{
+			diff.Updated[key] = notifier.DiffUpdated{
 				Before: oldFlag,
 				After:  newFlag,
 			}

@@ -1,12 +1,14 @@
 package cache_test
 
 import (
+	"log"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/thomaspoignant/go-feature-flag/ffnotifier"
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
 	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
+	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 )
 
@@ -164,8 +166,8 @@ disable = false`),
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fCache := cache.New(cache.NewNotificationService([]ffnotifier.Notifier{}))
-			err := fCache.UpdateCache(tt.args.loadedFlags, tt.flagFormat)
+			fCache := cache.New(cache.NewNotificationService([]notifier.Notifier{}))
+			err := fCache.UpdateCache(tt.args.loadedFlags, tt.flagFormat, log.New(os.Stdout, "", 0))
 			if tt.wantErr {
 				assert.Error(t, err, "UpdateCache() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -275,8 +277,8 @@ test-flag2:
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fCache := cache.New(cache.NewNotificationService([]ffnotifier.Notifier{}))
-			_ = fCache.UpdateCache(tt.args.loadedFlags, tt.flagFormat)
+			fCache := cache.New(cache.NewNotificationService([]notifier.Notifier{}))
+			_ = fCache.UpdateCache(tt.args.loadedFlags, tt.flagFormat, log.New(os.Stdout, "", 0))
 
 			allFlags, err := fCache.AllFlags()
 			if tt.wantErr {
@@ -305,9 +307,9 @@ func Test_cacheManagerImpl_GetLatestUpdateDate(t *testing.T) {
   trackEvents: false
 `)
 
-	fCache := cache.New(cache.NewNotificationService([]ffnotifier.Notifier{}))
+	fCache := cache.New(cache.NewNotificationService([]notifier.Notifier{}))
 	timeBefore := fCache.GetLatestUpdateDate()
-	_ = fCache.UpdateCache(loadedFlags, "yaml")
+	_ = fCache.UpdateCache(loadedFlags, "yaml", log.New(os.Stdout, "", 0))
 	timeAfter := fCache.GetLatestUpdateDate()
 
 	assert.True(t, timeBefore.Before(timeAfter))

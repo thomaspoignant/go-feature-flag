@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"log"
 	"os"
 	"time"
@@ -19,7 +20,7 @@ func main() {
 		PollingInterval: 10 * time.Second,
 		Logger:          log.New(os.Stdout, "", 0),
 		Context:         context.Background(),
-		Retriever: &ffclient.FileRetriever{
+		Retriever: &fileretriever.Retriever{
 			Path: "examples/rollout_progressive/flags.yaml",
 		},
 	})

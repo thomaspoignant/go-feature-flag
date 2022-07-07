@@ -1,5 +1,5 @@
 # Kubernetes configmaps
-The [**KubernetesRetriever**](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#KubernetesRetriever)
+The [**Kubernetes Retriever**](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/retriever/k8sretriever/#Retriever)
 will access flags in a Kubernetes ConfigMap via the [Kubernetes Go client](https://github.com/kubernetes/client-go)
 
 ## Example
@@ -11,7 +11,7 @@ import (
 config, _ := restclient.InClusterConfig()
 err = ffclient.Init(ffclient.Config{
     PollingInterval: 3 * time.Second,
-    Retriever: &ffclient.KubernetesRetriever{
+    Retriever: &k8sretriever.Retriever{
         Path: "file-example.yaml",
         Namespace:      "default"
         ConfigMapName: "my-configmap"
