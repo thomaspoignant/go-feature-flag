@@ -29,16 +29,6 @@ func TestFlag_evaluateRule(t *testing.T) {
 		want   bool
 	}{
 		{
-			name: "Disabled toggle",
-			fields: fields{
-				Disable: true,
-			},
-			args: args{
-				user: ffuser.NewAnonymousUser("random-key"),
-			},
-			want: false,
-		},
-		{
 			name: "Toggle enabled and no rule",
 			fields: fields{
 				Disable: false,

@@ -4,19 +4,25 @@
       "value": true,
       "timestamp": 1622206239,
       "variationType": "True",
-      "trackEvents": true
+      "trackEvents": true,
+      "reason":"TARGETING_MATCH",
+      "errorCode": ""
     },
     "test-flag1": {
       "value": "true",
       "timestamp": 1622206239,
       "variationType": "True",
-      "trackEvents": true
+      "trackEvents": true,
+      "reason":"TARGETING_MATCH",
+      "errorCode": ""
     },
     "test-flag2": {
       "value": 1,
       "timestamp": 1622206239,
       "variationType": "True",
-      "trackEvents": true
+      "trackEvents": true,
+      "reason":"TARGETING_MATCH",
+      "errorCode": ""
     },
     "test-flag3": {
       "value": [
@@ -25,7 +31,9 @@
       ],
       "timestamp": 1622206239,
       "variationType": "True",
-      "trackEvents": true
+      "trackEvents": true,
+      "reason":"TARGETING_MATCH",
+      "errorCode": ""
     },
     "test-flag4": {
       "value": {
@@ -33,13 +41,17 @@
       },
       "timestamp": 1622206239,
       "variationType": "True",
-      "trackEvents": true
+      "trackEvents": true,
+      "reason":"TARGETING_MATCH",
+      "errorCode": ""
     },
     "test-flag5": {
       "value": 1.1,
       "timestamp": 1622206239,
       "variationType": "True",
-      "trackEvents": false
+      "trackEvents": false,
+      "reason":"TARGETING_MATCH",
+      "errorCode": ""
     }
   },
   "valid": true

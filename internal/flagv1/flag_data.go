@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/thomaspoignant/go-feature-flag/internal/flag"
+
 	"github.com/nikunjy/rules/parser"
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
 	"github.com/thomaspoignant/go-feature-flag/internal/utils"
@@ -56,24 +58,56 @@ type FlagData struct {
 
 // Value is returning the Value associate to the flag (True / False / Default ) based
 // if the toggle apply to the user or not.
-func (f *FlagData) Value(flagName string, user ffuser.User, environment string) (interface{}, string) {
+func (f *FlagData) Value(
+	flagName string,
+	user ffuser.User,
+	evaluationCtx flag.EvaluationContext,
+) (interface{}, flag.ResolutionDetails) {
 	f.updateFlagStage()
 	if f.isExperimentationOver() {
 		// if we have an experimentation that has not started or that is finished we use the default value.
-		return f.getDefault(), VariationDefault
+		return f.getDefault(), flag.ResolutionDetails{
+			Variant: VariationDefault,
+			Reason:  flag.ReasonDefault,
+		}
 	}
 
-	if f.evaluateRule(user, environment) {
+	// Flag disable we cannot apply it.
+	if f.GetDisable() {
+		return evaluationCtx.DefaultSdkValue, flag.ResolutionDetails{
+			Variant: flag.VariationSDKDefault,
+			Reason:  flag.ReasonDisabled,
+		}
+	}
+
+	// we are targeting all users
+	if f.getRule() == "" && f.getPercentage() == 100 {
+		return f.getTrue(), flag.ResolutionDetails{
+			Variant: VariationTrue,
+			Reason:  flag.ReasonTargetingMatch,
+		}
+	}
+
+	if f.evaluateRule(user, evaluationCtx.Environment) {
 		if f.isInPercentage(flagName, user) {
 			// Rule applied and user in the cohort.
-			return f.getTrue(), VariationTrue
+			return f.getTrue(), flag.ResolutionDetails{
+				Variant: VariationTrue,
+				Reason:  flag.ReasonSplit,
+			}
 		}
 		// Rule applied and user not in the cohort.
-		return f.getFalse(), VariationFalse
+		return f.getFalse(), flag.ResolutionDetails{
+			Variant: VariationFalse,
+			Reason:  flag.ReasonSplit,
+		}
 	}
 
-	// Default value is used if the rule does not applied to the user.
-	return f.getDefault(), VariationDefault
+	// Default value is used if the rule does not apply to the user.
+	return f.getDefault(), flag.ResolutionDetails{
+		Variant: VariationDefault,
+		Reason:  flag.ReasonDefault,
+	}
 }
 
 func (f *FlagData) isExperimentationOver() bool {
@@ -103,11 +137,6 @@ func (f *FlagData) isInPercentage(flagName string, user ffuser.User) bool {
 
 // evaluateRule is checking if the rule can apply to a specific user.
 func (f *FlagData) evaluateRule(user ffuser.User, environment string) bool {
-	// Flag disable we cannot apply it.
-	if f.GetDisable() {
-		return false
-	}
-
 	// No rule means that all user can be impacted.
 	if f.getRule() == "" {
 		return true

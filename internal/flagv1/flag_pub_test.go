@@ -24,12 +24,13 @@ func TestFlag_value(t *testing.T) {
 		Rollout    flagv1.Rollout
 	}
 	type args struct {
-		flagName string
-		user     ffuser.User
+		flagName   string
+		user       ffuser.User
+		sdkDefault string
 	}
 	type want struct {
-		value         interface{}
-		variationType string
+		value             interface{}
+		resolutionDetails flag.ResolutionDetails
 	}
 	tests := []struct {
 		name   string
@@ -38,7 +39,7 @@ func TestFlag_value(t *testing.T) {
 		want   want
 	}{
 		{
-			name: "Rule disable get default value",
+			name: "Flag disable get default value",
 			fields: fields{
 				Disable: true,
 				True:    "true",
@@ -46,12 +47,17 @@ func TestFlag_value(t *testing.T) {
 				Default: "default",
 			},
 			args: args{
-				flagName: "test_689483",
-				user:     ffuser.NewUser("test_689483"),
+				flagName:   "test_689483",
+				user:       ffuser.NewUser("test_689483"),
+				sdkDefault: "defaultSDK",
 			},
 			want: want{
-				value:         "default",
-				variationType: flagv1.VariationDefault,
+				value: "defaultSDK",
+				resolutionDetails: flag.ResolutionDetails{
+					Variant:   flag.VariationSDKDefault,
+					Reason:    flag.ReasonDisabled,
+					ErrorCode: "",
+				},
 			},
 		},
 		{
@@ -68,8 +74,12 @@ func TestFlag_value(t *testing.T) {
 				user:     ffuser.NewUserBuilder("7e50ee61-06ad-4bb0-9034-38ad7cdea9f5").AddCustom("name", "john").Build(), // combined hash is 9
 			},
 			want: want{
-				value:         "true",
-				variationType: flagv1.VariationTrue,
+				value: "true",
+				resolutionDetails: flag.ResolutionDetails{
+					Variant:   flagv1.VariationTrue,
+					Reason:    flag.ReasonSplit,
+					ErrorCode: "",
+				},
 			},
 		},
 		{
@@ -92,8 +102,12 @@ func TestFlag_value(t *testing.T) {
 				user:     ffuser.NewUserBuilder("7e50ee61-06ad-4bb0-9034-38ad7cdea9f5").AddCustom("name", "john").Build(),
 			},
 			want: want{
-				value:         "true",
-				variationType: flagv1.VariationTrue,
+				value: "true",
+				resolutionDetails: flag.ResolutionDetails{
+					Variant:   flagv1.VariationTrue,
+					Reason:    flag.ReasonSplit,
+					ErrorCode: "",
+				},
 			},
 		},
 		{
@@ -116,8 +130,12 @@ func TestFlag_value(t *testing.T) {
 				user:     ffuser.NewUserBuilder("user66").AddCustom("name", "john").Build(), // combined hash is 9
 			},
 			want: want{
-				value:         "default",
-				variationType: flagv1.VariationDefault,
+				value: "default",
+				resolutionDetails: flag.ResolutionDetails{
+					Variant:   flagv1.VariationDefault,
+					Reason:    flag.ReasonDefault,
+					ErrorCode: "",
+				},
 			},
 		},
 		{
@@ -140,8 +158,12 @@ func TestFlag_value(t *testing.T) {
 				user:     ffuser.NewUserBuilder("7e50ee61-06ad-4bb0-9034-38ad7cdea9f5").AddCustom("name", "john").Build(),
 			},
 			want: want{
-				value:         "true",
-				variationType: flagv1.VariationTrue,
+				value: "true",
+				resolutionDetails: flag.ResolutionDetails{
+					Variant:   flagv1.VariationTrue,
+					Reason:    flag.ReasonSplit,
+					ErrorCode: "",
+				},
 			},
 		},
 		{
@@ -164,8 +186,12 @@ func TestFlag_value(t *testing.T) {
 				user:     ffuser.NewUserBuilder("user66").AddCustom("name", "john").Build(), // combined hash is 9
 			},
 			want: want{
-				value:         "default",
-				variationType: flagv1.VariationDefault,
+				value: "default",
+				resolutionDetails: flag.ResolutionDetails{
+					Variant:   flagv1.VariationDefault,
+					Reason:    flag.ReasonDefault,
+					ErrorCode: "",
+				},
 			},
 		},
 		{
@@ -188,8 +214,12 @@ func TestFlag_value(t *testing.T) {
 				user:     ffuser.NewUserBuilder("user66").AddCustom("name", "john").Build(), // combined hash is 9
 			},
 			want: want{
-				value:         "default",
-				variationType: flagv1.VariationDefault,
+				value: "default",
+				resolutionDetails: flag.ResolutionDetails{
+					Variant:   flagv1.VariationDefault,
+					Reason:    flag.ReasonDefault,
+					ErrorCode: "",
+				},
 			},
 		},
 		{
@@ -212,8 +242,12 @@ func TestFlag_value(t *testing.T) {
 				user:     ffuser.NewUserBuilder("user66").AddCustom("name", "john").Build(), // combined hash is 9
 			},
 			want: want{
-				value:         "default",
-				variationType: flagv1.VariationDefault,
+				value: "default",
+				resolutionDetails: flag.ResolutionDetails{
+					Variant:   flagv1.VariationDefault,
+					Reason:    flag.ReasonDefault,
+					ErrorCode: "",
+				},
 			},
 		},
 		{
@@ -236,8 +270,12 @@ func TestFlag_value(t *testing.T) {
 				user:     ffuser.NewUserBuilder("7e50ee61-06ad-4bb0-9034-38ad7cdea9f5").AddCustom("name", "john").Build(),
 			},
 			want: want{
-				value:         "true",
-				variationType: flagv1.VariationTrue,
+				value: "true",
+				resolutionDetails: flag.ResolutionDetails{
+					Variant:   flagv1.VariationTrue,
+					Reason:    flag.ReasonSplit,
+					ErrorCode: "",
+				},
 			},
 		},
 		{
@@ -260,8 +298,12 @@ func TestFlag_value(t *testing.T) {
 				user:     ffuser.NewUserBuilder("7e50ee61-06ad-4bb0-9034-38ad7cdea9f5").AddCustom("name", "john").Build(),
 			},
 			want: want{
-				value:         "true",
-				variationType: flagv1.VariationTrue,
+				value: "true",
+				resolutionDetails: flag.ResolutionDetails{
+					Variant:   flagv1.VariationTrue,
+					Reason:    flag.ReasonSplit,
+					ErrorCode: "",
+				},
 			},
 		},
 		{
@@ -284,8 +326,12 @@ func TestFlag_value(t *testing.T) {
 				user:     ffuser.NewUserBuilder("user66").AddCustom("name", "john").Build(), // combined hash is 9
 			},
 			want: want{
-				value:         "default",
-				variationType: flagv1.VariationDefault,
+				value: "default",
+				resolutionDetails: flag.ResolutionDetails{
+					Variant:   flagv1.VariationDefault,
+					Reason:    flag.ReasonDefault,
+					ErrorCode: "",
+				},
 			},
 		},
 		{
@@ -302,8 +348,12 @@ func TestFlag_value(t *testing.T) {
 				user:     ffuser.NewUserBuilder("7e50ee61-06ad-4bb0-9034-38ad7cdea9f5").AddCustom("name", "john").Build(),
 			},
 			want: want{
-				value:         "default",
-				variationType: flagv1.VariationDefault,
+				value: "default",
+				resolutionDetails: flag.ResolutionDetails{
+					Variant:   flagv1.VariationDefault,
+					Reason:    flag.ReasonDefault,
+					ErrorCode: "",
+				},
 			},
 		},
 		{
@@ -320,8 +370,33 @@ func TestFlag_value(t *testing.T) {
 				user:     ffuser.NewUserBuilder("7e50ee61-06ad-4bb0-9034-38ad7cdea9f5").AddCustom("name", "john").Build(),
 			},
 			want: want{
-				value:         "false",
-				variationType: flagv1.VariationFalse,
+				value: "false",
+				resolutionDetails: flag.ResolutionDetails{
+					Variant:   flagv1.VariationFalse,
+					Reason:    flag.ReasonSplit,
+					ErrorCode: "",
+				},
+			},
+		},
+		{
+			name: "Flag target everyone",
+			fields: fields{
+				True:       "true",
+				False:      "false",
+				Default:    "default",
+				Percentage: 100,
+			},
+			args: args{
+				flagName: "test-flag2",
+				user:     ffuser.NewUserBuilder("7e50ee61-06ad-4bb0-9034-38ad7cdea9f5").AddCustom("name", "john").Build(),
+			},
+			want: want{
+				value: "true",
+				resolutionDetails: flag.ResolutionDetails{
+					Variant:   flagv1.VariationTrue,
+					Reason:    flag.ReasonTargetingMatch,
+					ErrorCode: "",
+				},
 			},
 		},
 	}
@@ -337,9 +412,10 @@ func TestFlag_value(t *testing.T) {
 				Rollout:    &tt.fields.Rollout,
 			}
 
-			got, variationType := f.Value(tt.args.flagName, tt.args.user, "")
+			got, resolutionDetails := f.Value(tt.args.flagName, tt.args.user,
+				flag.EvaluationContext{DefaultSdkValue: tt.args.sdkDefault})
 			assert.Equal(t, tt.want.value, got)
-			assert.Equal(t, tt.want.variationType, variationType)
+			assert.Equal(t, tt.want.resolutionDetails, resolutionDetails)
 		})
 	}
 }
@@ -362,15 +438,15 @@ func TestFlag_ProgressiveRollout(t *testing.T) {
 	flagName := "test-flag"
 
 	// We evaluate the same flag multiple time overtime.
-	v, _ := f.Value(flagName, user, "")
+	v, _ := f.Value(flagName, user, flag.EvaluationContext{})
 	assert.Equal(t, f.GetVariationValue(flagv1.VariationFalse), v)
 
 	time.Sleep(1 * time.Second)
-	v2, _ := f.Value(flagName, user, "")
+	v2, _ := f.Value(flagName, user, flag.EvaluationContext{})
 	assert.Equal(t, f.GetVariationValue(flagv1.VariationFalse), v2)
 
 	time.Sleep(1 * time.Second)
-	v3, _ := f.Value(flagName, user, "")
+	v3, _ := f.Value(flagName, user, flag.EvaluationContext{})
 	assert.Equal(t, f.GetVariationValue(flagv1.VariationTrue), v3)
 }
 
@@ -447,43 +523,43 @@ func TestFlag_ScheduledRollout(t *testing.T) {
 	flagName := "test-flag"
 
 	// We evaluate the same flag multiple time overtime.
-	v, _ := f.Value(flagName, user, "")
+	v, _ := f.Value(flagName, user, flag.EvaluationContext{})
 	assert.Equal(t, f.GetVariationValue(flagv1.VariationFalse), v)
 
 	time.Sleep(1 * time.Second)
 
-	v, _ = f.Value(flagName, user, "")
+	v, _ = f.Value(flagName, user, flag.EvaluationContext{})
 	assert.Equal(t, "True", v)
 	assert.Equal(t, 1.1, f.GetVersion())
 
 	time.Sleep(1 * time.Second)
 
-	v, _ = f.Value(flagName, user, "")
+	v, _ = f.Value(flagName, user, flag.EvaluationContext{})
 	assert.Equal(t, "Default2", v)
 
 	time.Sleep(1 * time.Second)
 
-	v, _ = f.Value(flagName, user, "")
+	v, _ = f.Value(flagName, user, flag.EvaluationContext{})
 	assert.Equal(t, "True2", v)
 
 	time.Sleep(1 * time.Second)
 
-	v, _ = f.Value(flagName, user, "")
+	v, _ = f.Value(flagName, user, flag.EvaluationContext{DefaultSdkValue: "Default2"})
 	assert.Equal(t, "Default2", v)
 
 	time.Sleep(1 * time.Second)
 
-	v, _ = f.Value(flagName, user, "")
+	v, _ = f.Value(flagName, user, flag.EvaluationContext{})
 	assert.Equal(t, "Default2", v)
 
 	time.Sleep(1 * time.Second)
 
-	v, _ = f.Value(flagName, user, "")
+	v, _ = f.Value(flagName, user, flag.EvaluationContext{})
 	assert.Equal(t, "True2", v)
 
 	time.Sleep(1 * time.Second)
 
-	v, _ = f.Value(flagName, user, "")
+	v, _ = f.Value(flagName, user, flag.EvaluationContext{})
 	assert.Equal(t, "Default2", v)
 }
 
