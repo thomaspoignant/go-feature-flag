@@ -378,6 +378,27 @@ func TestFlag_value(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "Flag target everyone",
+			fields: fields{
+				True:       "true",
+				False:      "false",
+				Default:    "default",
+				Percentage: 100,
+			},
+			args: args{
+				flagName: "test-flag2",
+				user:     ffuser.NewUserBuilder("7e50ee61-06ad-4bb0-9034-38ad7cdea9f5").AddCustom("name", "john").Build(),
+			},
+			want: want{
+				value: "true",
+				resolutionDetails: flag.ResolutionDetails{
+					Variant:   flagv1.VariationTrue,
+					Reason:    flag.ReasonTargetingMatch,
+					ErrorCode: "",
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
