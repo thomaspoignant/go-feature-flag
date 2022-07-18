@@ -1,10 +1,14 @@
 package model
 
+import "github.com/thomaspoignant/go-feature-flag/internal/flag"
+
 type VariationResult struct {
-	TrackEvents   bool    `json:"trackEvents"`
-	VariationType string  `json:"variationType"`
-	Failed        bool    `json:"failed"`
-	Version       float64 `json:"version"`
+	TrackEvents   bool                  `json:"trackEvents"`
+	VariationType string                `json:"variationType"`
+	Failed        bool                  `json:"failed"`
+	Version       float64               `json:"version"`
+	Reason        flag.ResolutionReason `json:"reason"`
+	ErrorCode     flag.ErrorCode        `json:"errorCode"`
 }
 
 // BoolVarResult is the internal result format of a bool variation.
