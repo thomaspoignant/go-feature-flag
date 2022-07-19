@@ -8,5 +8,5 @@ type ResolutionDetails struct {
 	Reason ResolutionReason
 
 	// ErrorCode indicates the error code for this evaluation
-	ErrorCode string
+	ErrorCode ErrorCode
 }
