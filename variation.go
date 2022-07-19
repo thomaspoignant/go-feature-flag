@@ -162,6 +162,13 @@ func (g *GoFeatureFlag) AllFlagsState(user ffuser.User) flagstate.AllFlags {
 
 		// if the flag is disabled we are ignoring it.
 		if resolutionDetails.Reason == flag.ReasonDisabled {
+			allFlags.AddFlag(key, flagstate.FlagState{
+				Timestamp:   time.Now().Unix(),
+				TrackEvents: currentFlag.GetTrackEvents(),
+				Failed:      resolutionDetails.ErrorCode != "",
+				ErrorCode:   resolutionDetails.ErrorCode,
+				Reason:      resolutionDetails.Reason,
+			})
 			continue
 		}
 

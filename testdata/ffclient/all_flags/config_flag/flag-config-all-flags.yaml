@@ -38,3 +38,10 @@ test-flag5:
   false: 1.2
   default: 1.3
   trackEvents: false
+test-flag6:
+  percentage: 100
+  true: 1.1
+  false: 1.2
+  default: 1.3
+  trackEvents: false
+  disable: true

@@ -52,6 +52,14 @@
       "trackEvents": false,
       "reason":"TARGETING_MATCH",
       "errorCode": ""
+    },
+    "test-flag6": {
+      "value": null,
+      "timestamp": 1622206239,
+      "variationType": "",
+      "trackEvents": false,
+      "reason":"DISABLED",
+      "errorCode": ""
     }
   },
   "valid": true
