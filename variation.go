@@ -155,20 +155,33 @@ func (g *GoFeatureFlag) AllFlagsState(user ffuser.User) flagstate.AllFlags {
 
 	allFlags := flagstate.NewAllFlags()
 	for key, currentFlag := range flags {
-		flagValue, varType := currentFlag.Value(key, user, flag.EvaluationContext{
+		flagValue, resolutionDetails := currentFlag.Value(key, user, flag.EvaluationContext{
 			Environment:     g.config.Environment,
 			DefaultSdkValue: nil,
 		})
+
+		// if the flag is disabled we are ignoring it.
+		if resolutionDetails.Reason == flag.ReasonDisabled {
+			allFlags.AddFlag(key, flagstate.FlagState{
+				Timestamp:   time.Now().Unix(),
+				TrackEvents: currentFlag.GetTrackEvents(),
+				Failed:      resolutionDetails.ErrorCode != "",
+				ErrorCode:   resolutionDetails.ErrorCode,
+				Reason:      resolutionDetails.Reason,
+			})
+			continue
+		}
+
 		switch v := flagValue; v.(type) {
 		case int, float64, bool, string, []interface{}, map[string]interface{}:
 			allFlags.AddFlag(key, flagstate.FlagState{
 				Value:         v,
 				Timestamp:     time.Now().Unix(),
-				VariationType: varType.Variant,
+				VariationType: resolutionDetails.Variant,
 				TrackEvents:   currentFlag.GetTrackEvents(),
-				Failed:        varType.ErrorCode != "",
-				ErrorCode:     varType.ErrorCode,
-				Reason:        varType.Reason,
+				Failed:        resolutionDetails.ErrorCode != "",
+				ErrorCode:     resolutionDetails.ErrorCode,
+				Reason:        resolutionDetails.Reason,
 			})
 
 		default:
