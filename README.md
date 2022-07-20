@@ -65,7 +65,7 @@ To be compatible with more language we have implemented the [GO Feature Flag Rel
 It is a service you can host that provides an API to evaluate your flags, you can call it using HTTP to get your variation.
 
 Since we believe in standardization we are also implementing [Open-feature](https://github.com/open-feature) providers to interact with this API in the language of your choice.
-__(Open-feature is still at an early stage, so not all language are supported and expect some changes in the future)__
+_(Open-feature is still at an early stage, so not all language are supported and expect some changes in the future)_
 
 ## Getting started
 First, you need to initialize the `ffclient` with the location of your backend file.
