@@ -1,9 +1,14 @@
 # Slack Notifier
-The **Slack** notifier allows you to get notification on your favorite slack channel when an instance of `go-feature-flag` is detecting changes in the configuration file.
 
-<center>![slack notification example](../assets/slack_notification.png)</center>
+The **Slack** notifier allows you to get notification on your favorite slack channel when an instance of
+`go-feature-flag` is detecting changes in the configuration file.
+
+<center>
+  ![slack notification example](../assets/slack_notification.png)
+</center>
 
 ## Configure Slack Notification
+
 1. First, you need to create an incoming webhook on your slack instance.  
    *You can follow this [documentation to see how to do it](https://api.slack.com/messaging/webhooks#getting_started)*
 2. Copy your webhook URL.  

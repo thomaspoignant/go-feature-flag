@@ -21,7 +21,7 @@
     <img src="https://img.shields.io/github/go-mod/go-version/thomaspoignant/go-feature-flag?logo=go%20version" alt="Go version"/>
     <a href="LICENSE"><img src="https://img.shields.io/github/license/thomaspoignant/go-feature-flag" alt="License"/></a>
     <a href="https://github.com/avelino/awesome-go/#server-applications"><img src="https://awesome.re/mentioned-badge-flat.svg" alt="Mentioned in Awesome Go"></a>
-    <a href="http://gophers.slack.com/messages/go-feature-flag"><img src="https://img.shields.io/badge/join-us%20on%20slack-gray.svg?longCache=true&logo=slack&colorB=green" alt="Join us on slack"></a> 
+    <a href="http://gophers.slack.com/messages/go-feature-flag"><img src="https://img.shields.io/badge/join-us%20on%20slack-gray.svg?longCache=true&logo=slack&colorB=green" alt="Join us on slack"></a>
 </p>
 
 **Feature flags with no complex system to maintain!**
@@ -38,7 +38,7 @@ No server is needed, just add a file to your central system and all your service
 
 **go-feature-flags supports:**
 
-- Storing your configuration flags file on various locations (`HTTP`, `S3`, `GitHub`, `file`, `Google Cloud Storage` ...).
+- Storing your configuration flags file on various locations (`HTTP`, `S3`, `GitHub`, `file`, `Google Cloud Storage`, `Kubernetes` ...).
 - Configuring your flags in various format (`JSON`, `TOML` and `YAML`).
 - Adding complex rules to target your users.
 - Use complex rollout strategy for your flags :
@@ -57,6 +57,15 @@ I've also written an [article](https://medium.com/better-programming/feature-fla
 https://user-images.githubusercontent.com/17908063/168597893-e957e648-b795-4b5f-94d5-265d272a2137.mp4
 
 _The code of this demo is available in [`thomaspoignant/go-feature-flag-demo`](https://github.com/thomaspoignant/go-feature-flag-demo) repository_.
+
+## Can I use GO Feature Flag with another language?
+
+Originally GO Feature Flag was build to be a GOlang only libraries, but it limits too much the echo system.  
+To be compatible with more language we have implemented the [GO Feature Flag Relay Proxy](https://github.com/thomaspoignant/go-feature-flag-relay-proxy).
+It is a service you can host that provides an API to evaluate your flags, you can call it using HTTP to get your variation.
+
+Since we believe in standardization we are also implementing [Open-feature](https://github.com/open-feature) providers to interact with this API in the language of your choice.
+__(Open-feature is still at an early stage, so not all language are supported and expect some changes in the future)__
 
 ## Getting started
 First, you need to initialize the `ffclient` with the location of your backend file.
@@ -123,20 +132,10 @@ ffclient.Init(ffclient.Config{
 ```
 ### Configuration fields
 
-| Field                     | Description                                                                                                                                                                                                                                                                       |
-|---------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `Retriever`               | The configuration retriever you want to use to get your flag file.<br> *See [Store your flag file](https://thomaspoignant.github.io/go-feature-flag/latest/flag_file/) for the configuration details*.                                                                            |
-| `Context`                 | *(optional)*<br>The context used by the retriever.<br />Default: `context.Background()`                                                                                                                                                                                           |
-| `Environment`             | *(optional)*<br>The environment the app is running under, can be checked in feature flag rules.<br />Default: `""`                                                                                                                                                                                           |
-| `DataExporter`            | *(optional)*<br>DataExporter defines how to export data on how your flags are used.<br> *see [export data section](https://thomaspoignant.github.io/go-feature-flag/latest/data_collection/) for more details*.                                                                   |
-| `FileFormat`              | *(optional)*<br>Format of your configuration file. Available formats are `yaml`, `toml` and `json`, if you omit the field it will try to unmarshal the file as a `yaml` file.<br>Default: `YAML`                                                                                  |
-| `Logger`                  | *(optional)*<br>Logger used to log what `go-feature-flag` is doing.<br />If no logger is provided the module will not log anything.<br>Default: No log                                                                                                                            |
-| `Notifiers`               | *(optional)*<br>List of notifiers to call when your flag file has been changed.<br> *See [notifiers section](https://thomaspoignant.github.io/go-feature-flag/latest/notifier/) for more details*.                                                                                |
-| `PollingInterval`         | *(optional)* Duration to wait before refreshing the flags.<br>The minimum polling interval is 1 second.<br>Default: 60 * time.Second                                                                                                                                              |
-| `StartWithRetrieverError` | *(optional)*<br>If **true**, the SDK will start even if we did not get any flags from the retriever. It will serve only default values until the retriever returns the flags.<br>The init method will not return any error if the flag file is unreachable.<br>Default: **false** |
-| `Offline`                 | *(optional)* If **true**, the SDK will not try to retrieve the flag file and will not export any data. No notification will be send neither.<br>Default: false                                                                                                                    |
+All the configuration fields are described in the [configuration documentation page](https://docs.gofeatureflag.org/configuration/).  
 
 ### Multiple configuration flag files
+
 `go-feature-flag` comes ready to use out of the box by calling the `Init` function and it will be available everywhere.  
 Since most applications will want to use a single central flag configuration, the package provides this. It is similar to a singleton.
 
@@ -159,7 +158,7 @@ Available retriever are:
 You can also [create your own retriever](https://thomaspoignant.github.io/go-feature-flag/latest/flag_file/custom/).
 
 ## Flags file format
-`go-feature-flag` core feature is to centralize all your feature flags in a source file, and to avoid hosting and maintaining a backend server to manage them.
+`go-feature-flag` core feature is to centralize all your feature flags in a single file, and to avoid hosting and maintaining a backend server to manage them.
 
 Your file should be a `YAML`, `JSON` or `TOML` file with a list of flags *(examples: [`YAML`](testdata/flag-config.yaml), [`JSON`](testdata/flag-config.json), [`TOML`](testdata/flag-config.toml))*.
 
@@ -260,21 +259,10 @@ version = 12.0
 
 </details>
 
-
-|     Field     | Description                                                                                                                                                                                                                                             |
-|:-------------:|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **flag-key**  | Name of your flag.<br> It must be unique.<br>*On the example the flag keys are **`test-flag`** and **`test-flag2`**.*                                                                                                                                   |
-|    `true`     | Value returned by the flag if the rule is evaluated to true and the user is in the active percentage.                                                                                                                                                   |
-|    `false`    | Value returned by the flag if the rule is evaluated to true and the user is **not** in the active percentage.                                                                                                                                           |
-|   `default`   | Value returned by the flag if the rule is evaluated to false.                                                                                                                                                                                           |
-| `percentage`  | *(optional)*<br>Percentage of users who should be affected by the flag.<br>**Default: 0**<br><br>The percentage is computed by calculating a hash of the user key *(100000 variations)*, it means that you can have 3 numbers after the comma.          |
-|    `rule`     | *(optional)*<br>Condition to determine on which user the flag should be applied.<br>Rule format is described in the <a href="#rule-format">rule format section</a>.<br>**If no rule is set, the flag applies to all users *(percentage still apply)*.** |
-|   `disable`   | *(optional)*<br>True if the flag is disabled.<br>**Default: `false`**                                                                                                                                                                                   |
-| `trackEvents` | *(optional)*<br>False if you don't want to export the data in your data exporter.<br>**Default: `true`**                                                                                                                                                |
-|   `version`   | *(optional)*<br>The version is the version of your flag.<br>This number is used to display the information in the notifiers and data collection, you have to update it your self.<br>**Default: 0**                                                     |
-|   `rollout`   | *(optional)*<br><code>rollout</code> contains a specific rollout strategy you want to use.<br>**See [rollout section](https://thomaspoignant.github.io/go-feature-flag/latest/rollout/) for more details.**                                             |
+All the fields to create a flag are described in the [documentation](https://docs.gofeatureflag.org/v0.27.1/flag_format/). 
 
 ## Rule format
+
 The rule format is based on the [`nikunjy/rules`](https://github.com/nikunjy/rules) library.
 
 All the operations can be written capitalized or lowercase (ex: `eq` or `EQ` can be used).  
@@ -332,7 +320,8 @@ You can also distinguish logged-in users from anonymous users in the SDK ([check
 ## Variation
 The Variation methods determine whether a flag is enabled or not for a specific user.
 There is a Variation method for each type:   
-[`BoolVariation`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#BoolVariation) , [`IntVariation`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#IntVariation)
+[`BoolVariation`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#BoolVariation) 
+, [`IntVariation`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#IntVariation)
 , [`Float64Variation`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#Float64Variation)
 , [`StringVariation`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#StringVariation)
 , [`JSONArrayVariation`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#JSONArrayVariation)
