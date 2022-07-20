@@ -1,5 +1,7 @@
 # Custom Notifier
-To create a custom notifier you must have a `struct` that implements the [`notifier.Notifier`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/notifier/notifier) interface.
+
+To create a custom notifier you must have a `struct` that implements the
+[`notifier.Notifier`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/notifier/notifier) interface.
 
 ```go linenums="1"
 import (

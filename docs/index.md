@@ -4,7 +4,7 @@ description:  go-feature-flag is a simple and complete feature flag solution, wi
 ---
 
 <p align="center">
-  <img width="250" height="238" src="assets/logo.png" alt="go-feature-flag logo" />
+  <img width="250" height="238" src="/assets/logo.png" alt="go-feature-flag logo" />
 </p>
 
 <p align="center">
