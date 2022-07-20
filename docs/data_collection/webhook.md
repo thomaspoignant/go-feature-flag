@@ -27,8 +27,8 @@ ffclient.Config{
 | Field  | Description  |
 |---|---|
 |`EndpointURL `   | EndpointURL of your webhook |
-|`Secret `   |  *(optional)*<br>Secret used to sign your request body and fill the `X-Hub-Signature-256` header.<br>See [signature section](#signature) for more details.  |
-|`Meta`   |   *(optional)*<br>Add all the information you want to see in your request. |
+|`Secret `   |  *(optional)*<br/>Secret used to sign your request body and fill the `X-Hub-Signature-256` header.<br/>See [signature section](#signature) for more details.  |
+|`Meta`   |   *(optional)*<br/>Add all the information you want to see in your request. |
 
 
 ## Webhook format

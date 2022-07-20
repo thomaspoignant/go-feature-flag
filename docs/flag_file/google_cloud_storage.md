@@ -28,4 +28,4 @@ To configure your Google Cloud Storage file location:
 |--------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **`Bucket`** | The name of your bucket.                                                                                                                                                       |
 | **`Object`** | The name of your object in your bucket.                                                                                                                                        |
-| **`Option`** | An instance of `option.ClientOption` that configures your access to Google Cloud. <br> Check [this documentation for more info](https://cloud.google.com/docs/authentication). |
+| **`Option`** | An instance of `option.ClientOption` that configures your access to Google Cloud. <br/> Check [this documentation for more info](https://cloud.google.com/docs/authentication). |

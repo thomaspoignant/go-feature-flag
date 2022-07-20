@@ -40,7 +40,7 @@ It represents individual flag evaluations and are considered "full fidelity" eve
 | **`userKey`**      | The key of the user object used in a feature flag evaluation.                                                                                                                                                                                                                                       |
 | **`creationDate`** | When the feature flag was requested at Unix epoch time in milliseconds.                                                                                                                                                                                                                             |
 | **`key`**          | The key of the feature flag requested.                                                                                                                                                                                                                                                              |
-| **`variation`**    | The variation of the flag requested. Available values are:<br>**True**: if the flag was evaluated to True <br>**False**: if the flag was evaluated to False<br>**Dafault**: if the flag was evaluated to Default<br>**SdkDefault**: if something wrong happened and the SDK default value was used. |
+| **`variation`**    | The variation of the flag requested. Available values are:<br/>**True**: if the flag was evaluated to True <br/>**False**: if the flag was evaluated to False<br/>**Dafault**: if the flag was evaluated to Default<br/>**SdkDefault**: if something wrong happened and the SDK default value was used. |
 | **`value`**        | The value of the feature flag returned by feature flag evaluation.                                                                                                                                                                                                                                  |
 | **`default`**      | (Optional) This value is set to true if feature flag evaluation failed, in which case the value returned was the default value passed to variation.                                                                                                                                                 |
 
@@ -76,8 +76,8 @@ ffclient.Config{
 | Field              |                                                                                                                                      | Description |
 |--------------------|--------------------------------------------------------------------------------------------------------------------------------------|-------------|
 | `Exporter`         | The configuration of the exporter you want to use. All the exporters are available in the `exporter` package.                        |
-| `FlushInterval`    | *(optional)*<br>Time to wait before exporting the data.<br>**Default: 60 seconds**.                                                  |
-| `MaxEventInMemory` | *(optional)*<br>If `MaxEventInMemory` is reach before the `FlushInterval` a intermediary export will be done<br>**Default: 100000**. |
+| `FlushInterval`    | *(optional)*<br/>Time to wait before exporting the data.<br/>**Default: 60 seconds**.                                                  |
+| `MaxEventInMemory` | *(optional)*<br/>If `MaxEventInMemory` is reach before the `FlushInterval` a intermediary export will be done<br/>**Default: 100000**. |
 
 ## Don't track a flag
 
