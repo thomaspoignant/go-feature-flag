@@ -1,3 +1,7 @@
+---
+sidebar_position: 3
+---
+
 # Configuration
 `go-feature-flag` needs to be initialized to be used.  
 During the initialization you must give a [`ffclient.Config{}`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#Config) configuration object.  

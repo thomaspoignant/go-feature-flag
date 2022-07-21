@@ -1,3 +1,7 @@
+---
+sidebar_position: 2
+---
+
 # Slack Notifier
 
 The **Slack** notifier allows you to get notification on your favorite slack channel when an instance of

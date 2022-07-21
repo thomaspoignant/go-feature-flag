@@ -1,6 +1,7 @@
 ---
 title: GO Feature flags with no complex system to maintain!
 description:  go-feature-flag is a simple and complete feature flag solution, without any complex backend system to install. You need only a file as your backend.
+sidebar_position: 1
 ---
 
 <p align="center">

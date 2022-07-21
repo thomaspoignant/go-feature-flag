@@ -1,3 +1,7 @@
+---
+sidebar_position: 6
+---
+
 # Github
 
 The [**Github Retriever**](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/retriever/githubretriever/#Retriever)

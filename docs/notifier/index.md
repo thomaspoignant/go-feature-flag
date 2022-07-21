@@ -1,4 +1,8 @@
-# Notifiers
+---
+sidebar_position: 1
+---
+
+# Notify flag changes
 
 If you want to be informed when a flag has changed, you can configure a [**notifier**](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#NotifierConfig).
 

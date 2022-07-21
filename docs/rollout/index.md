@@ -1,4 +1,8 @@
-# Available rollout strategies
+---
+sidebar_position: 1
+---
+
+# Rollout strategies
 A critical part of every new feature release is orchestrating the actual launch schedule between Product, Engineering, and Marketing teams.
 
 Delivering powerful user experiences typically requires software teams to manage complex releases and make manual updates at inconvenient times.

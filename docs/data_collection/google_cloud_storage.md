@@ -1,3 +1,7 @@
+---
+sidebar_position: 4
+---
+
 # Google Cloud Storage Exporter
 
 The **Google Cloud Storage exporter** will collect the data and create a new file in a specific folder everytime we send the data.

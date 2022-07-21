@@ -1,3 +1,7 @@
+---
+sidebar_position: 7
+---
+
 # Log Exporter
 The log exporter is here mostly for backward compatibility *(originally every variation were logged, but it can be a lot of data for a default configuration)*.  
 It will use your logger `ffclient.Config.Logger` to log every variation changes.

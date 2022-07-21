@@ -1,3 +1,7 @@
+---
+sidebar_position: 3
+---
+
 # Experimentation rollout / A/B Testing
 An **experimentation rollout** is when your flag is configured to be served only for a determined time.
 

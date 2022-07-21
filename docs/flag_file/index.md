@@ -1,3 +1,7 @@
+---
+sidebar_position: 1
+---
+
 # Where to store my file?
 The module supports different ways of retrieving the flag file.  
 Available retriever are:
