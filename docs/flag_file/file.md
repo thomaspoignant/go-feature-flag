@@ -1,3 +1,7 @@
+---
+sidebar_position: 4
+---
+
 # File
 The [**File Retriever**](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/retriever/fileretriever/#Retriever) will read a local file to get your flags.
 

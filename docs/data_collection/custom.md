@@ -1,3 +1,7 @@
+---
+sidebar_position: 7
+---
+
 # Custom exporter
 To create a custom exporter you must have a `struct` that implements the [`exporter.Exporter`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/internal/exporter#Exporter) interface.
 

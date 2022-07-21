@@ -1,3 +1,7 @@
+---
+sidebar_position: 4
+---
+
 # Custom Notifier
 
 To create a custom notifier you must have a `struct` that implements the

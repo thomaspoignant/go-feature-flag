@@ -1,3 +1,7 @@
+---
+sidebar_position: 3
+---
+
 # Kubernetes configmaps
 The [**Kubernetes Retriever**](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/retriever/k8sretriever/#Retriever)
 will access flags in a Kubernetes ConfigMap via the [Kubernetes Go client](https://github.com/kubernetes/client-go)

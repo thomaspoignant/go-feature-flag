@@ -1,4 +1,8 @@
-# Data format / Export data
+---
+sidebar_position: 1
+---
+
+# Export data
 
 If you want to export data about how your flag are used, you can use the **`DataExporter`**.  
 It collects all the variations events and can save these events on several locations:

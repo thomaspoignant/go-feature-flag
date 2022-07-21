@@ -1,3 +1,7 @@
+---
+sidebar_position: 6
+---
+
 # Webhook Exporter
 
 The **Webhook exporter** will collect the data and send them via an HTTP POST request to the specified endpoint.

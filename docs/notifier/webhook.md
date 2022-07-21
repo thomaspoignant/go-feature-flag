@@ -1,3 +1,7 @@
+---
+sidebar_position: 3
+---
+
 # Webhook Notifier
 
 The **Webhook notifier** will perform an HTTP POST request to the specified endpoint everytime that a change in the flags is detected.

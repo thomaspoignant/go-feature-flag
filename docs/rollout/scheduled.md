@@ -1,3 +1,7 @@
+---
+sidebar_position: 5
+---
+
 # Scheduled rollout
 
 Scheduling introduces the ability for users to changes their flags for future points in time.  

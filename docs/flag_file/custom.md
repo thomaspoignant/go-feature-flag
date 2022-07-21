@@ -1,3 +1,7 @@
+---
+sidebar_position: 8
+---
+
 # Custom Retriever
 
 To create a custom retriever you must have a `struct` that implements the [`Retriever`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/retriever/#Retriever) interface.

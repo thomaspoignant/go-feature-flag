@@ -1,3 +1,7 @@
+---
+sidebar_position: 4
+---
+
 # Progressive rollout
 
 A **progressive rollout** allows you to increase the percentage of your flag over time.

@@ -1,3 +1,7 @@
+---
+sidebar_position: 2
+---
+
 # File Exporter
 The file exporter will collect the data and create a new file in a specific folder everytime we send the data.  
 This file should be in the local instance.

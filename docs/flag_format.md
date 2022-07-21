@@ -1,3 +1,7 @@
+---
+sidebar_position: 4
+---
+
 # Configure a flag
 
 `go-feature-flag` core feature is to centralize all your feature flags in a source file, and to avoid hosting and maintaining a backend server to manage them.  

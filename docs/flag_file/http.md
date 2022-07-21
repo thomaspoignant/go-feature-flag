@@ -1,3 +1,7 @@
+---
+sidebar_position: 7
+---
+
 # HTTP endpoint
 
 The [__HTTP Retriever__](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/retriever/httpretriever/#Retriever)

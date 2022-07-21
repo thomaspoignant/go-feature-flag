@@ -1,3 +1,7 @@
+---
+sidebar_position: 2
+---
+
 # Google Cloud Storage
 
 The [**Google Cloud Storage Retriever**](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/retriever/gcstorageretriever/#Retriever)
