@@ -1,6 +1,7 @@
 package slacknotifier
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -166,6 +167,7 @@ func TestSlackNotifier_Notify(t *testing.T) {
 				hostname, _ := os.Hostname()
 				content, _ := ioutil.ReadFile(tt.expected.bodyPath)
 				expectedContent := strings.ReplaceAll(string(content), "{{hostname}}", hostname)
+				fmt.Println(mockHTTPClient.Body)
 				assert.JSONEq(t, expectedContent, mockHTTPClient.Body)
 				assert.Equal(t, tt.expected.signature, mockHTTPClient.Signature)
 			}

@@ -66,7 +66,7 @@ func TestWebhook_Export(t *testing.T) {
 					},
 					{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
-						Variation: "Default", Value: "YO2", Default: false, Version: 127,
+						Variation: "Default", Value: "YO2", Default: false, Version: "127",
 					},
 				},
 			},
@@ -93,13 +93,13 @@ func TestWebhook_Export(t *testing.T) {
 					},
 					{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
-						Variation: "Default", Value: "YO2", Default: false, Version: 127,
+						Variation: "Default", Value: "YO2", Default: false, Version: "127",
 					},
 				},
 			},
 			expected: expected{
 				bodyFilePath: "./testdata/valid_with_signature.json",
-				signHeader:   "sha256=1ac12dcfbc2f5734a949b301c251a542384735c5552d8570e25bf5a4e7c21a32",
+				signHeader:   "sha256=0c504fe37d423ff0a80e4dc29b93c18c2d1438a5387f36d8e6491e77fb5e70d4",
 			},
 			wantErr: false,
 		},

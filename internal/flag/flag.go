@@ -13,24 +13,16 @@ type Flag interface {
 
 	// GetVersion is the getter for the field Version
 	// Default: 0.0
-	GetVersion() float64
+	GetVersion() string
 
-	// GetTrackEvents is the getter of the field TrackEvents
+	// IsTrackEvents is the getter of the field TrackEvents
 	// Default: true
-	GetTrackEvents() bool
+	IsTrackEvents() bool
 
-	// GetDisable is the getter for the field Disable
+	// IsDisable is the getter for the field Disable
 	// Default: false
-	GetDisable() bool
-
-	// GetDefaultVariation return the name of the default variation (if something goes wrong)
-	GetDefaultVariation() string
+	IsDisable() bool
 
 	// GetVariationValue return the value of variation from his name
-	GetVariationValue(variationName string) interface{}
-
-	// GetRawValues is returning a raw value of the Flag used by the notifiers
-	// We should not have any logic based on these values, this is only to
-	// display  the information.
-	GetRawValues() map[string]string
+	GetVariationValue(name string) interface{}
 }

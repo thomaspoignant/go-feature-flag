@@ -1,12 +1,12 @@
 {
   "flags": {
     "test-flag0": {
-      "value": false,
       "timestamp": 1622206239,
-      "variationType": "Default",
+      "variationType": "SdkDefault",
       "trackEvents": true,
       "reason":"ERROR",
-      "errorCode": "TYPE_MISMATCH"
+      "errorCode": "TYPE_MISMATCH",
+      "value": null
     },
     "test-flag1": {
       "value": "true",

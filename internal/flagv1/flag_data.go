@@ -73,7 +73,7 @@ func (f *FlagData) Value(
 	}
 
 	// Flag disable we cannot apply it.
-	if f.GetDisable() {
+	if f.IsDisable() {
 		return evaluationCtx.DefaultSdkValue, flag.ResolutionDetails{
 			Variant: flag.VariationSDKDefault,
 			Reason:  flag.ReasonDisabled,
@@ -160,14 +160,14 @@ func (f FlagData) String() string {
 	toString = append(toString, fmt.Sprintf("true=\"%v\"", f.getTrue()))
 	toString = append(toString, fmt.Sprintf("false=\"%v\"", f.getFalse()))
 	toString = append(toString, fmt.Sprintf("default=\"%v\"", f.getDefault()))
-	toString = append(toString, fmt.Sprintf("disable=\"%v\"", f.GetDisable()))
+	toString = append(toString, fmt.Sprintf("disable=\"%v\"", f.IsDisable()))
 
 	if f.TrackEvents != nil {
-		toString = append(toString, fmt.Sprintf("trackEvents=\"%v\"", f.GetTrackEvents()))
+		toString = append(toString, fmt.Sprintf("trackEvents=\"%v\"", f.IsTrackEvents()))
 	}
 
 	if f.Version != nil {
-		toString = append(toString, fmt.Sprintf("version=%s", strconv.FormatFloat(f.GetVersion(), 'f', -1, 64)))
+		toString = append(toString, fmt.Sprintf("version=%s", f.GetVersion()))
 	}
 
 	return strings.Join(toString, ", ")
@@ -312,16 +312,16 @@ func (f *FlagData) getDefault() interface{} {
 	return *f.Default
 }
 
-// GetTrackEvents is the getter of the field TrackEvents
-func (f *FlagData) GetTrackEvents() bool {
+// IsTrackEvents is the getter of the field TrackEvents
+func (f *FlagData) IsTrackEvents() bool {
 	if f.TrackEvents == nil {
 		return true
 	}
 	return *f.TrackEvents
 }
 
-// GetDisable is the getter for the field Disable
-func (f *FlagData) GetDisable() bool {
+// IsDisable is the getter for the field Disable
+func (f *FlagData) IsDisable() bool {
 	if f.Disable == nil {
 		return false
 	}
@@ -334,11 +334,11 @@ func (f *FlagData) getRollout() *Rollout {
 }
 
 // GetVersion is the getter for the field Version
-func (f *FlagData) GetVersion() float64 {
+func (f *FlagData) GetVersion() string {
 	if f.Version == nil {
-		return 0
+		return ""
 	}
-	return *f.Version
+	return strconv.FormatFloat(*f.Version, 'f', -1, 64)
 }
 
 // GetVariationValue return the value of variation from his name
@@ -372,8 +372,8 @@ func (f *FlagData) GetRawValues() map[string]string {
 	rawValues["True"] = convertNilEmpty(f.getTrue())
 	rawValues["False"] = convertNilEmpty(f.getFalse())
 	rawValues["Default"] = convertNilEmpty(f.getDefault())
-	rawValues["TrackEvents"] = fmt.Sprintf("%t", f.GetTrackEvents())
-	rawValues["Disable"] = fmt.Sprintf("%t", f.GetDisable())
+	rawValues["TrackEvents"] = fmt.Sprintf("%t", f.IsTrackEvents())
+	rawValues["Disable"] = fmt.Sprintf("%t", f.IsDisable())
 	rawValues["Version"] = fmt.Sprintf("%v", f.GetVersion())
 	return rawValues
 }
