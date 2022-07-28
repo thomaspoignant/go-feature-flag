@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"github.com/thomaspoignant/go-feature-flag/internal/dto"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/internal/flagv1"
 )
@@ -20,5 +21,5 @@ type Cache interface {
 	All() map[string]flag.Flag
 
 	// Init allow to initialize the cache with a collection of flags.
-	Init(flags map[string]flagv1.FlagData)
+	Init(flags map[string]dto.DTO)
 }

@@ -3,6 +3,8 @@ package cache
 import (
 	"fmt"
 
+	"github.com/thomaspoignant/go-feature-flag/internal/dto"
+
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/internal/flagv1"
 )
@@ -54,6 +56,10 @@ func (fc *InMemoryCache) All() map[string]flag.Flag {
 	return c
 }
 
-func (fc *InMemoryCache) Init(flags map[string]flagv1.FlagData) {
-	fc.Flags = flags
+func (fc *InMemoryCache) Init(flags map[string]dto.DTO) {
+	cache := make(map[string]flagv1.FlagData, 0)
+	for k, v := range flags {
+		cache[k] = v.Convert()
+	}
+	fc.Flags = cache
 }

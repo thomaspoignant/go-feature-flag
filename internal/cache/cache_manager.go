@@ -8,8 +8,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/thomaspoignant/go-feature-flag/internal/dto"
+
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
 	"gopkg.in/yaml.v3"
 
 	"github.com/pelletier/go-toml"
@@ -39,7 +40,7 @@ func New(notificationService Service) Manager {
 }
 
 func (c *cacheManagerImpl) UpdateCache(loadedFlags []byte, fileFormat string, log *log.Logger) error {
-	var newFlags map[string]flagv1.FlagData
+	var newFlags map[string]dto.DTO
 	var err error
 	switch strings.ToLower(fileFormat) {
 	case "toml":

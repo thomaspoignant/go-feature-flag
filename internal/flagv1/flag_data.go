@@ -24,7 +24,7 @@ type FlagData struct {
 	// If no rule set, the flag apply to all users (percentage still apply).
 	Rule *string `json:"rule,omitempty" yaml:"rule,omitempty" toml:"rule,omitempty"`
 
-	// Percentage of the users affect by the flag.
+	// Percentage of the users affected by the flag.
 	// Default value is 0
 	Percentage *float64 `json:"percentage,omitempty" yaml:"percentage,omitempty" toml:"percentage,omitempty"`
 
