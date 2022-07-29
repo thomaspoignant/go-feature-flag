@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/thomaspoignant/go-feature-flag/internal/dto"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 	"gopkg.in/yaml.v2"
@@ -37,6 +38,5 @@ func main() {
 		fmt.Println("--- " + k)
 		y, _ := yaml.Marshal(v.Convert())
 		fmt.Println(string(y))
-
 	}
 }

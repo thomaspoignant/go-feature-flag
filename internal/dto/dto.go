@@ -1,9 +1,10 @@
 package dto
 
 import (
+	"strconv"
+
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/internal/flagv1"
-	"strconv"
 )
 
 // DTO is representing all the fields we can have in a flag.
@@ -71,7 +72,7 @@ func (d *DTO) ConvertLegacy() flagv1.FlagData {
 
 func (d *DTO) Convert() flag.InternalFlag {
 	return ConvertV0DtoToFlag(*d, false)
-	//return flagv1.FlagData{
+	// return flagv1.FlagData{
 	//	Rule:        d.Rule,
 	//	Percentage:  d.Percentage,
 	//	True:        d.True,

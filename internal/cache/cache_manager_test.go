@@ -1,10 +1,11 @@
 package cache_test
 
 import (
-	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"log"
 	"os"
 	"testing"
+
+	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
@@ -80,7 +81,6 @@ func Test_FlagCache(t *testing.T) {
 								"False": 0,
 								"True":  100,
 							},
-							ProgressiveRollout: nil,
 						},
 					},
 					Variations: &map[string]*interface{}{
@@ -127,7 +127,6 @@ func Test_FlagCache(t *testing.T) {
 								"False": 0,
 								"True":  100,
 							},
-							ProgressiveRollout: nil,
 						},
 					},
 					Variations: &map[string]*interface{}{
@@ -176,7 +175,6 @@ func Test_FlagCache(t *testing.T) {
 								"False": 0,
 								"True":  100,
 							},
-							ProgressiveRollout: nil,
 						},
 					},
 					Variations: &map[string]*interface{}{
@@ -268,7 +266,6 @@ func Test_AllFlags(t *testing.T) {
 								"False": 0,
 								"True":  100,
 							},
-							ProgressiveRollout: nil,
 						},
 					},
 					DefaultRule: &flag.Rule{
@@ -315,7 +312,6 @@ test-flag2:
 								"False": 0,
 								"True":  100,
 							},
-							ProgressiveRollout: nil,
 						},
 					},
 					DefaultRule: &flag.Rule{
@@ -338,7 +334,6 @@ test-flag2:
 								"False": 100,
 								"True":  0,
 							},
-							ProgressiveRollout: nil,
 						},
 					},
 					DefaultRule: &flag.Rule{

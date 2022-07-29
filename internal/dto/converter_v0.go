@@ -2,12 +2,16 @@ package dto
 
 import "github.com/thomaspoignant/go-feature-flag/internal/flag"
 
-var LegacyRuleName = "legacyRuleV0"
-var defaultRuleName = "legacyDefaultRule"
+var (
+	LegacyRuleName  = "legacyRuleV0"
+	defaultRuleName = "legacyDefaultRule"
+)
 
-var trueVariation = "True"
-var falseVariation = "False"
-var defaultVariation = "Default"
+var (
+	trueVariation    = "True"
+	falseVariation   = "False"
+	defaultVariation = "Default"
+)
 
 // ConvertV0DtoToFlag is converting a flag in the config file to the internal format.
 // this function convert only the old format of the flag (before v1.0.0), to keep
@@ -96,7 +100,7 @@ func createLegacyRuleV0(d DTO, isScheduleStep bool) flag.Rule {
 
 // createVariationsV0 will create a set of variations based on the previous format
 func createVariationsV0(d DTO, isScheduleStep bool) map[string]*interface{} {
-	var variations = make(map[string]*interface{}, 3)
+	variations := make(map[string]*interface{}, 3)
 	if d.True != nil {
 		variations[trueVariation] = d.True
 	}
