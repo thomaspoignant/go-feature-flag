@@ -14,6 +14,36 @@
       "title": "✏️ Flag \"test-flag2\" updated",
       "fields": [
         {
+          "title": "DefaultRule.Percentages",
+          "value": "(*map[string]float64){\"False\":0, \"True\":100} =\u003e nil",
+          "short": false
+        },
+        {
+          "title": "DefaultRule.VariationResult",
+          "value": "nil =\u003e (*string)(\"Default\")",
+          "short": true
+        },
+        {
+          "title": "Disable",
+          "value": "nil =\u003e (*bool)(true)",
+          "short": true
+        },
+        {
+          "title": "Rollout",
+          "value": "(*flag.Rollout){Experimentation:(*flag.ExperimentationRollout){Start:(*time.Time){wall:0, ext:63230976200, loc:(*time.Location){name:\"\", zone:[]time.zone(nil), tx:[]time.zoneTrans(nil), extend:\"\", cacheStart:0, cacheEnd:0, cacheZone:(*time.zone)(nil)}}, End:(*time.Time){wall:0, ext:63230967800, loc:(*time.Location){name:\"\", zone:[]time.zone(nil), tx:[]time.zoneTrans(nil), extend:\"\", cacheStart:0, cacheEnd:0, cacheZone:(*time.zone)(nil)}}}, Scheduled:(*[]flag.ScheduledStep)(nil)} =\u003e nil",
+          "short": false
+        },
+        {
+          "title": "Rules",
+          "value": "nil =\u003e (*[]flag.Rule){flag.Rule{Name:(*string)(\"legacyRuleV0\"), Query:(*string)(\"key eq \\\"not-a-ke\\\"\"), VariationResult:(*string)(nil), Percentages:(*map[string]float64){\"False\":20, \"True\":80}, ProgressiveRollout:(*flag.ProgressiveRollout)(nil)}}",
+          "short": false
+        },
+        {
+          "title": "TrackEvents",
+          "value": "nil =\u003e (*bool)(false)",
+          "short": true
+        },
+        {
           "title": "Variations.Default",
           "value": "false =\u003e \"strDefault\"",
           "short": true
@@ -26,36 +56,6 @@
         {
           "title": "Variations.True",
           "value": "true =\u003e \"strTrue\"",
-          "short": true
-        },
-        {
-          "title": "Rules",
-          "value": "nil =\u003e (*[]flag.Rule){flag.Rule{Name:(*string)(\"legacyRuleV0\"), Query:(*string)(\"key eq \\\"not-a-ke\\\"\"), VariationResult:(*string)(nil), Percentages:(*map[string]float64){\"False\":20, \"True\":80}, ProgressiveRollout:(*flag.ProgressiveRollout)(nil)}}",
-          "short": false
-        },
-        {
-          "title": "DefaultRule.VariationResult",
-          "value": "nil =\u003e (*string)(\"Default\")",
-          "short": true
-        },
-        {
-          "title": "DefaultRule.Percentages",
-          "value": "(*map[string]float64){\"False\":0, \"True\":100} =\u003e nil",
-          "short": false
-        },
-        {
-          "title": "Rollout",
-          "value": "(*flag.Rollout){Experimentation:(*flag.ExperimentationRollout){Start:(*time.Time){wall:0, ext:63230976200, loc:(*time.Location){name:\"\", zone:[]time.zone(nil), tx:[]time.zoneTrans(nil), extend:\"\", cacheStart:0, cacheEnd:0, cacheZone:(*time.zone)(nil)}}, End:(*time.Time){wall:0, ext:63230967800, loc:(*time.Location){name:\"\", zone:[]time.zone(nil), tx:[]time.zoneTrans(nil), extend:\"\", cacheStart:0, cacheEnd:0, cacheZone:(*time.zone)(nil)}}}, Scheduled:(*[]flag.ScheduledStep)(nil)} =\u003e nil",
-          "short": false
-        },
-        {
-          "title": "TrackEvents",
-          "value": "nil =\u003e (*bool)(false)",
-          "short": true
-        },
-        {
-          "title": "Disable",
-          "value": "nil =\u003e (*bool)(true)",
           "short": true
         },
         {

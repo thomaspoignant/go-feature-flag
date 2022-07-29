@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"sort"
 	"strings"
 	"sync"
 
@@ -132,6 +133,9 @@ func convertUpdatedFlagsToSlackMessage(diffCache notifier.DiffCache) []attachmen
 				)
 			}
 		}
+
+		sort.Sort(ByTitle(attachment.Fields))
+
 		attachments = append(attachments, attachment)
 	}
 	return attachments
@@ -170,3 +174,9 @@ type Field struct {
 	Value string `json:"value"`
 	Short bool   `json:"short"`
 }
+
+type ByTitle []Field
+
+func (a ByTitle) Len() int           { return len(a) }
+func (a ByTitle) Less(i, j int) bool { return a[i].Title < a[j].Title }
+func (a ByTitle) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }

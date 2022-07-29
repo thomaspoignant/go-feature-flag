@@ -132,6 +132,24 @@ func convertRollout(rollout RolloutV0) *flag.Rollout {
 			End:   rollout.Experimentation.End,
 		}
 	}
+
+	if rollout.Scheduled != nil && rollout.Scheduled.Steps != nil {
+		var convertedSteps []flag.ScheduledStep
+		for _, v := range rollout.Scheduled.Steps {
+			converter := "v0"
+			toConvert := DTO{
+				DTOv0:     v.DTOv0,
+				Converter: &converter,
+			}
+			step := flag.ScheduledStep{
+				InternalFlag: ConvertV0DtoToInternalFlag(toConvert, true),
+				Date:         v.Date,
+			}
+			convertedSteps = append(convertedSteps, step)
+		}
+		r.Scheduled = &convertedSteps
+	}
+
 	return &r
 }
 
