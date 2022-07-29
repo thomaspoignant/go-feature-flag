@@ -47,7 +47,6 @@ type InternalFlag struct {
 }
 
 func (f *InternalFlag) String() string {
-
 	panic("implement me")
 }
 
