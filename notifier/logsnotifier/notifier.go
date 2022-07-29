@@ -30,11 +30,11 @@ func (c *Notifier) Notify(diff notifier.DiffCache, wg *sync.WaitGroup) error {
 				fflog.Printf(c.Logger, "flag %v is turned OFF\n", key)
 				continue
 			}
-			fflog.Printf(c.Logger, "flag %v is turned ON (flag=[%v])  \n", key, flagDiff.After)
+			fflog.Printf(c.Logger, "flag %v is turned ON\n", key)
 			continue
 		}
 		// key has changed in cache
-		fflog.Printf(c.Logger, "flag %s updated, old=[%v], new=[%v]\n", key, flagDiff.Before, flagDiff.After)
+		fflog.Printf(c.Logger, "flag %s updated\n", key)
 	}
 
 	return nil

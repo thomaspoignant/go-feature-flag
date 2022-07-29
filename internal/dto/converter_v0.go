@@ -1,6 +1,9 @@
 package dto
 
-import "github.com/thomaspoignant/go-feature-flag/internal/flag"
+import (
+	"github.com/thomaspoignant/go-feature-flag/internal/flag"
+	"github.com/thomaspoignant/go-feature-flag/internal/flagv1"
+)
 
 var (
 	LegacyRuleName  = "legacyRuleV0"
@@ -46,11 +49,16 @@ func ConvertV0DtoToFlag(d DTO, isScheduleStep bool) flag.InternalFlag {
 		}
 	}
 
+	var rollout *flag.Rollout
+	if d.Rollout != nil {
+		rollout = convertRollout(*d.Rollout)
+	}
+
 	return flag.InternalFlag{
 		Variations:  variations,
 		Rules:       rules,
 		DefaultRule: defaultRule,
-		Rollout:     nil,
+		Rollout:     rollout,
 		TrackEvents: d.TrackEvents,
 		Disable:     d.Disable,
 		Version:     d.Version,
@@ -115,6 +123,17 @@ func createVariationsV0(d DTO, isScheduleStep bool) map[string]*interface{} {
 		variations = nil
 	}
 	return variations
+}
+
+func convertRollout(rollout flagv1.Rollout) *flag.Rollout {
+	r := flag.Rollout{}
+	if rollout.Experimentation != nil && rollout.Experimentation.Start != nil && rollout.Experimentation.End != nil {
+		r.Experimentation = &flag.ExperimentationRollout{
+			Start: rollout.Experimentation.Start,
+			End:   rollout.Experimentation.End,
+		}
+	}
+	return &r
 }
 
 func computePercentages(percentage float64) map[string]float64 {

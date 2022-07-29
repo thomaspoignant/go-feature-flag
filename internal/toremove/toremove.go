@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-
 	"github.com/thomaspoignant/go-feature-flag/internal/dto"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 	"gopkg.in/yaml.v2"
