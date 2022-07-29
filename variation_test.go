@@ -4,12 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/thomaspoignant/go-feature-flag/internal/model"
 	"io/ioutil"
 	"log"
 	"os"
 	"testing"
 	"time"
+
+	"github.com/thomaspoignant/go-feature-flag/internal/model"
 
 	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
 

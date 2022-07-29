@@ -12,12 +12,10 @@ func main() {
 	t := map[string]dto.DTO{
 		"test-flag": {
 			DTOv0: dto.DTOv0{
-				Rule:        testconvert.String("key eq \"random-key\""),
-				Percentage:  testconvert.Float64(100),
-				True:        testconvert.Interface(true),
-				False:       testconvert.Interface(false),
-				Default:     testconvert.Interface(false),
-				TrackEvents: testconvert.Bool(false),
+				Percentage: testconvert.Float64(100),
+				True:       testconvert.Interface(true),
+				False:      testconvert.Interface(false),
+				Default:    testconvert.Interface(false),
 			},
 		},
 	}
