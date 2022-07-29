@@ -1,44 +1,93 @@
 {
+  "meta": {
+    "hostname": "toto"
+  },
   "flags": {
     "deleted": {
       "test-flag": {
-        "rule": "key eq \"random-key\"",
-        "percentage": 100,
-        "true": true,
-        "false": false,
-        "default": false
+        "variations": {
+          "Default": false,
+          "False": false,
+          "True": true
+        },
+        "targeting": [
+          {
+            "name": "legacyRuleV0",
+            "query": "key eq \"random-key\"",
+            "percentage": {
+              "False": 0,
+              "True": 100
+            }
+          }
+        ],
+        "defaultRule": {
+          "name": "legacyDefaultRule",
+          "variation": "Default"
+        }
       }
     },
     "added": {
       "test-flag3": {
-        "percentage": 5,
-        "true": "test",
-        "false": "false",
-        "default": "default"
+        "variations": {
+          "Default": "default",
+          "False": "false",
+          "True": "test"
+        },
+        "defaultRule": {
+          "name": "legacyDefaultRule",
+          "percentage": {
+            "False": 95,
+            "True": 5
+          }
+        }
       }
     },
     "updated": {
       "test-flag2": {
         "old_value": {
-          "rule": "key eq \"not-a-key\"",
-          "percentage": 100,
-          "true": true,
-          "false": false,
-          "default": false
+          "variations": {
+            "Default": false,
+            "False": false,
+            "True": true
+          },
+          "targeting": [
+            {
+              "name": "legacyRuleV0",
+              "query": "key eq \"not-a-key\"",
+              "percentage": {
+                "False": 0,
+                "True": 100
+              }
+            }
+          ],
+          "defaultRule": {
+            "name": "legacyDefaultRule",
+            "variation": "Default"
+          }
         },
         "new_value": {
-          "disable": true,
-          "rule": "key eq \"not-a-key\"",
-          "percentage": 100,
-          "true": true,
-          "false": false,
-          "default": false,
+          "variations": {
+            "Default": false,
+            "False": false,
+            "True": true
+          },
+          "targeting": [
+            {
+              "name": "legacyRuleV0",
+              "query": "key eq \"not-a-key\"",
+              "percentage": {
+                "False": 0,
+                "True": 100
+              }
+            }
+          ],
+          "defaultRule": {
+            "name": "legacyDefaultRule",
+            "variation": "Default"
+          },
           "disable": true
         }
       }
     }
-  },
-  "meta": {
-    "hostname": "toto"
   }
 }

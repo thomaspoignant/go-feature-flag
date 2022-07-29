@@ -2,7 +2,6 @@ package dto
 
 import (
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	"github.com/thomaspoignant/go-feature-flag/internal/flagv1"
 )
 
 var (
@@ -16,10 +15,10 @@ var (
 	defaultVariation = "Default"
 )
 
-// ConvertV0DtoToFlag is converting a flag in the config file to the internal format.
+// ConvertV0DtoToInternalFlag is converting a flag in the config file to the internal format.
 // this function convert only the old format of the flag (before v1.0.0), to keep
 // backward support of the configurations.
-func ConvertV0DtoToFlag(d DTO, isScheduleStep bool) flag.InternalFlag {
+func ConvertV0DtoToInternalFlag(d DTO, isScheduleStep bool) flag.InternalFlag {
 	// Create variations based on the available definition in the flag v0
 	var variations *map[string]*interface{}
 	newVariations := createVariationsV0(d, isScheduleStep)
@@ -125,7 +124,7 @@ func createVariationsV0(d DTO, isScheduleStep bool) map[string]*interface{} {
 	return variations
 }
 
-func convertRollout(rollout flagv1.Rollout) *flag.Rollout {
+func convertRollout(rollout RolloutV0) *flag.Rollout {
 	r := flag.Rollout{}
 	if rollout.Experimentation != nil && rollout.Experimentation.Start != nil && rollout.Experimentation.End != nil {
 		r.Experimentation = &flag.ExperimentationRollout{
