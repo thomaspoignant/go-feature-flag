@@ -1,7 +1,6 @@
 package flag_test
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
@@ -43,7 +42,7 @@ func TestInternalFlag_Value(t *testing.T) {
 					DefaultSdkValue: false,
 				},
 			},
-			want: testconvert.Interface(true),
+			want: true,
 			want1: flag.ResolutionDetails{
 				Variant: "variation_A",
 				Reason:  flag.ReasonDefault,
@@ -58,10 +57,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				flagName: "my-flag",
 				user:     ffuser.NewUser("user-key"),
 				evaluationCtx: flag.EvaluationContext{
-					DefaultSdkValue: testconvert.Interface("default-sdk"),
+					DefaultSdkValue: "default-sdk",
 				},
 			},
-			want: testconvert.Interface("default-sdk"),
+			want: "default-sdk",
 			want1: flag.ResolutionDetails{
 				Variant: "SdkDefault",
 				Reason:  flag.ReasonDisabled,
@@ -81,10 +80,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				flagName: "my-flag",
 				user:     ffuser.NewUser("user-key"),
 				evaluationCtx: flag.EvaluationContext{
-					DefaultSdkValue: testconvert.Interface("default-sdk"),
+					DefaultSdkValue: "default-sdk",
 				},
 			},
-			want: testconvert.Interface("default-sdk"),
+			want: "default-sdk",
 			want1: flag.ResolutionDetails{
 				Variant: "SdkDefault",
 				Reason:  flag.ReasonDisabled,
@@ -104,10 +103,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				flagName: "my-flag",
 				user:     ffuser.NewUser("user-key"),
 				evaluationCtx: flag.EvaluationContext{
-					DefaultSdkValue: testconvert.Interface("default-sdk"),
+					DefaultSdkValue: "default-sdk",
 				},
 			},
-			want: testconvert.Interface("default-sdk"),
+			want: "default-sdk",
 			want1: flag.ResolutionDetails{
 				Variant: "SdkDefault",
 				Reason:  flag.ReasonDisabled,
@@ -138,7 +137,7 @@ func TestInternalFlag_Value(t *testing.T) {
 					DefaultSdkValue: false,
 				},
 			},
-			want: testconvert.Interface(false),
+			want: false,
 			want1: flag.ResolutionDetails{
 				Variant:   "variation_B",
 				Reason:    flag.ReasonTargetingMatch,
@@ -174,10 +173,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				flagName: "my-flag",
 				user:     ffuser.NewUser("user-key"),
 				evaluationCtx: flag.EvaluationContext{
-					DefaultSdkValue: testconvert.Interface("value_default"),
+					DefaultSdkValue: "value_default",
 				},
 			},
-			want: testconvert.Interface("value_C"),
+			want: "value_C",
 			want1: flag.ResolutionDetails{
 				Variant:   "variation_C",
 				Reason:    flag.ReasonTargetingMatch,
@@ -211,10 +210,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				flagName: "my-flag",
 				user:     ffuser.NewUser("user-key"),
 				evaluationCtx: flag.EvaluationContext{
-					DefaultSdkValue: testconvert.Interface("value_default"),
+					DefaultSdkValue: "value_default",
 				},
 			},
-			want: testconvert.Interface("value_C"),
+			want: "value_C",
 			want1: flag.ResolutionDetails{
 				Variant:   "variation_C",
 				Reason:    flag.ReasonTargetingMatch,
@@ -252,10 +251,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				flagName: "my-flag",
 				user:     ffuser.NewUserBuilder("user-key").AddCustom("company", "go-feature-flag").Build(),
 				evaluationCtx: flag.EvaluationContext{
-					DefaultSdkValue: testconvert.Interface("value_default"),
+					DefaultSdkValue: "value_default",
 				},
 			},
-			want: testconvert.Interface("value_D"),
+			want: "value_D",
 			want1: flag.ResolutionDetails{
 				Variant:   "variation_D",
 				Reason:    flag.ReasonTargetingMatch,
@@ -288,10 +287,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				flagName: "my-flag",
 				user:     ffuser.NewUserBuilder("user-key").Build(),
 				evaluationCtx: flag.EvaluationContext{
-					DefaultSdkValue: testconvert.Interface("value_default"),
+					DefaultSdkValue: "value_default",
 				},
 			},
-			want: testconvert.Interface("value_default"),
+			want: "value_default",
 			want1: flag.ResolutionDetails{
 				Variant:   flag.VariationSDKDefault,
 				Reason:    flag.ReasonError,
@@ -321,10 +320,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				flagName: "my-flag",
 				user:     ffuser.NewUserBuilder("user-key").Build(),
 				evaluationCtx: flag.EvaluationContext{
-					DefaultSdkValue: testconvert.Interface("value_default"),
+					DefaultSdkValue: "value_default",
 				},
 			},
-			want: testconvert.Interface("value_default"),
+			want: "value_default",
 			want1: flag.ResolutionDetails{
 				Variant:   flag.VariationSDKDefault,
 				Reason:    flag.ReasonError,
@@ -351,10 +350,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				flagName: "my-flag",
 				user:     ffuser.NewUserBuilder("user-key").Build(),
 				evaluationCtx: flag.EvaluationContext{
-					DefaultSdkValue: testconvert.Interface("value_default"),
+					DefaultSdkValue: "value_default",
 				},
 			},
-			want: testconvert.Interface("value_default"),
+			want: "value_default",
 			want1: flag.ResolutionDetails{
 				Variant:   flag.VariationSDKDefault,
 				Reason:    flag.ReasonError,
@@ -396,10 +395,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				flagName: "my-flag",
 				user:     ffuser.NewUserBuilder("user-key").Build(),
 				evaluationCtx: flag.EvaluationContext{
-					DefaultSdkValue: testconvert.Interface("value_default"),
+					DefaultSdkValue: "value_default",
 				},
 			},
-			want: testconvert.Interface("value_A"),
+			want: "value_A",
 			want1: flag.ResolutionDetails{
 				Variant: "variation_A",
 				Reason:  flag.ReasonDefault,
@@ -440,10 +439,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				flagName: "my-flag",
 				user:     ffuser.NewUserBuilder("user-key").Build(),
 				evaluationCtx: flag.EvaluationContext{
-					DefaultSdkValue: testconvert.Interface("value_default"),
+					DefaultSdkValue: "value_default",
 				},
 			},
-			want: testconvert.Interface("value_B"),
+			want: "value_B",
 			want1: flag.ResolutionDetails{
 				Variant: "variation_B",
 				Reason:  flag.ReasonDefault,
@@ -484,10 +483,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				flagName: "my-flag",
 				user:     ffuser.NewUserBuilder("user-key").Build(),
 				evaluationCtx: flag.EvaluationContext{
-					DefaultSdkValue: testconvert.Interface("value_default"),
+					DefaultSdkValue: "value_default",
 				},
 			},
-			want: testconvert.Interface("value_QWERTY"),
+			want: "value_QWERTY",
 			want1: flag.ResolutionDetails{
 				Variant: "variation_B",
 				Reason:  flag.ReasonDefault,
@@ -519,10 +518,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				flagName: "my-flag",
 				user:     ffuser.NewUserBuilder("user-key").Build(),
 				evaluationCtx: flag.EvaluationContext{
-					DefaultSdkValue: testconvert.Interface("value_default"),
+					DefaultSdkValue: "value_default",
 				},
 			},
-			want: testconvert.Interface("value_A"),
+			want: "value_A",
 			want1: flag.ResolutionDetails{
 				Variant: "variation_A",
 				Reason:  flag.ReasonDefault,
@@ -568,10 +567,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				flagName: "my-flag",
 				user:     ffuser.NewUserBuilder("user-key").Build(),
 				evaluationCtx: flag.EvaluationContext{
-					DefaultSdkValue: testconvert.Interface("value_default"),
+					DefaultSdkValue: "value_default",
 				},
 			},
-			want: testconvert.Interface("value_C"),
+			want: "value_C",
 			want1: flag.ResolutionDetails{
 				Variant:   "variation_C",
 				Reason:    flag.ReasonTargetingMatch,
@@ -613,10 +612,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				flagName: "my-flag",
 				user:     ffuser.NewUserBuilder("user-key-123").Build(),
 				evaluationCtx: flag.EvaluationContext{
-					DefaultSdkValue: testconvert.Interface("value_default"),
+					DefaultSdkValue: "value_default",
 				},
 			},
-			want: testconvert.Interface("value_C"),
+			want: "value_C",
 			want1: flag.ResolutionDetails{
 				Variant: "variation_C",
 				Reason:  flag.ReasonDefault,
@@ -663,10 +662,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				flagName: "my-flag",
 				user:     ffuser.NewUserBuilder("user-key-123").Build(),
 				evaluationCtx: flag.EvaluationContext{
-					DefaultSdkValue: testconvert.Interface("value_default"),
+					DefaultSdkValue: "value_default",
 				},
 			},
-			want: testconvert.Interface("value_C"),
+			want: "value_C",
 			want1: flag.ResolutionDetails{
 				Variant:   "variation_C",
 				Reason:    flag.ReasonTargetingMatch,
@@ -709,10 +708,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				flagName: "my-flag",
 				user:     ffuser.NewUserBuilder("user-key").Build(),
 				evaluationCtx: flag.EvaluationContext{
-					DefaultSdkValue: testconvert.Interface("value_default"),
+					DefaultSdkValue: "value_default",
 				},
 			},
-			want: testconvert.Interface("value_QWERTY"),
+			want: "value_QWERTY",
 			want1: flag.ResolutionDetails{
 				Variant: "variation_B",
 				Reason:  flag.ReasonDefault,
@@ -745,10 +744,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				flagName: "my-flag",
 				user:     ffuser.NewUserBuilder("user-key").Build(),
 				evaluationCtx: flag.EvaluationContext{
-					DefaultSdkValue: testconvert.Interface("value_default"),
+					DefaultSdkValue: "value_default",
 				},
 			},
-			want: testconvert.Interface("value_default"),
+			want: "value_default",
 			want1: flag.ResolutionDetails{
 				Variant: flag.VariationSDKDefault,
 				Reason:  flag.ReasonDisabled,
@@ -784,10 +783,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				flagName: "my-flag",
 				user:     ffuser.NewUserBuilder("user-key").Build(),
 				evaluationCtx: flag.EvaluationContext{
-					DefaultSdkValue: testconvert.Interface("value_default"),
+					DefaultSdkValue: "value_default",
 				},
 			},
-			want: testconvert.Interface("value_A"),
+			want: "value_A",
 			want1: flag.ResolutionDetails{
 				Variant: "variation_A",
 				Reason:  flag.ReasonDefault,
@@ -797,7 +796,6 @@ func TestInternalFlag_Value(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, got1 := tt.flag.Value(tt.args.flagName, tt.args.user, tt.args.evaluationCtx)
-			fmt.Println()
 			assert.Equalf(t, tt.want, got, "not expected value: %s", cmp.Diff(tt.want, got))
 			assert.Equalf(t, tt.want1, got1, "not expected value: %s", cmp.Diff(tt.want1, got1))
 		})

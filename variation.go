@@ -211,7 +211,7 @@ func (g *GoFeatureFlag) GetFlagsFromCache() (map[string]flag.Flag, error) {
 }
 
 // boolVariation is the internal func that handle the logic of a variation with a bool value
-// the result will always contains a valid model.BoolVarResult
+// the result will always contain a valid model.BoolVarResult
 func (g *GoFeatureFlag) boolVariation(flagKey string, user ffuser.User, sdkDefaultValue bool,
 ) (model.BoolVarResult, error) {
 	if g.config.Offline {

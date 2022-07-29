@@ -6,20 +6,19 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/internal/dto"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	"github.com/thomaspoignant/go-feature-flag/internal/flagv1"
 )
 
 type InMemoryCache struct {
-	Flags map[string]flagv1.FlagData
+	Flags map[string]flag.InternalFlag
 }
 
 func NewInMemoryCache() *InMemoryCache {
 	return &InMemoryCache{
-		Flags: map[string]flagv1.FlagData{},
+		Flags: map[string]flag.InternalFlag{},
 	}
 }
 
-func (fc *InMemoryCache) addFlag(key string, value flagv1.FlagData) {
+func (fc *InMemoryCache) addFlag(key string, value flag.InternalFlag) {
 	fc.Flags[key] = value
 }
 
@@ -57,7 +56,7 @@ func (fc *InMemoryCache) All() map[string]flag.Flag {
 }
 
 func (fc *InMemoryCache) Init(flags map[string]dto.DTO) {
-	cache := make(map[string]flagv1.FlagData, 0)
+	cache := make(map[string]flag.InternalFlag, 0)
 	for k, v := range flags {
 		cache[k] = v.Convert()
 	}

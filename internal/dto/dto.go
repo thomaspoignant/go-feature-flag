@@ -1,6 +1,10 @@
 package dto
 
-import "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
+import (
+	"github.com/thomaspoignant/go-feature-flag/internal/flag"
+	"github.com/thomaspoignant/go-feature-flag/internal/flagv1"
+	"strconv"
+)
 
 // DTO is representing all the fields we can have in a flag.
 // This DTO supports all flag formats and convert them into an InternalFlag using a converter.
@@ -47,10 +51,11 @@ type DTOv0 struct {
 	// Version (optional) This field contains the version of the flag.
 	// The version is manually managed when you configure your flags and it is used to display the information
 	// in the notifications and data collection.
-	Version *float64 `json:"version,omitempty" yaml:"version,omitempty" toml:"version,omitempty"`
+	Version *string `json:"version,omitempty" yaml:"version,omitempty" toml:"version,omitempty"`
 }
 
-func (d *DTO) Convert() flagv1.FlagData {
+func (d *DTO) ConvertLegacy() flagv1.FlagData {
+	version, _ := strconv.ParseFloat(*d.Version, 32)
 	return flagv1.FlagData{
 		Rule:        d.Rule,
 		Percentage:  d.Percentage,
@@ -60,6 +65,21 @@ func (d *DTO) Convert() flagv1.FlagData {
 		TrackEvents: d.TrackEvents,
 		Disable:     d.Disable,
 		Rollout:     d.Rollout,
-		Version:     d.Version,
+		Version:     &version,
 	}
+}
+
+func (d *DTO) Convert() flag.InternalFlag {
+	return ConvertV0DtoToFlag(*d, false)
+	//return flagv1.FlagData{
+	//	Rule:        d.Rule,
+	//	Percentage:  d.Percentage,
+	//	True:        d.True,
+	//	False:       d.False,
+	//	Default:     d.Default,
+	//	TrackEvents: d.TrackEvents,
+	//	Disable:     d.Disable,
+	//	Rollout:     d.Rollout,
+	//	Version:     d.Version,
+	//}
 }

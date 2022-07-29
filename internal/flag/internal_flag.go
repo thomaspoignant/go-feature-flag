@@ -46,6 +46,11 @@ type InternalFlag struct {
 	Version *string `json:"version,omitempty" yaml:"version,omitempty" toml:"version,omitempty"`
 }
 
+func (f *InternalFlag) String() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 // Value is returning the Value associate to the flag
 func (f *InternalFlag) Value(
 	flagName string,
@@ -221,8 +226,8 @@ func (f *InternalFlag) GetRollout() *Rollout {
 // GetVariationValue return the value of variation from his name
 func (f *InternalFlag) GetVariationValue(name string) interface{} {
 	for k, v := range f.GetVariations() {
-		if k == name {
-			return v
+		if k == name && v != nil {
+			return *v
 		}
 	}
 	return nil
