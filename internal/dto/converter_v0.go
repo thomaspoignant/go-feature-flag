@@ -50,7 +50,7 @@ func ConvertV0DtoToInternalFlag(d DTO, isScheduleStep bool) flag.InternalFlag {
 
 	var rollout *flag.Rollout
 	if d.Rollout != nil {
-		rollout = convertRollout(*d.Rollout)
+		rollout = convertRollout(*d.Rollout, isScheduleStep)
 	}
 
 	return flag.InternalFlag{
@@ -124,7 +124,7 @@ func createVariationsV0(d DTO, isScheduleStep bool) map[string]*interface{} {
 	return variations
 }
 
-func convertRollout(rollout RolloutV0) *flag.Rollout {
+func convertRollout(rollout RolloutV0, isScheduledStep bool) *flag.Rollout {
 	r := flag.Rollout{}
 	if rollout.Experimentation != nil && rollout.Experimentation.Start != nil && rollout.Experimentation.End != nil {
 		r.Experimentation = &flag.ExperimentationRollout{
@@ -133,7 +133,8 @@ func convertRollout(rollout RolloutV0) *flag.Rollout {
 		}
 	}
 
-	if rollout.Scheduled != nil && rollout.Scheduled.Steps != nil {
+	// it is not allowed to have a scheduled step inside a scheduled step
+	if !isScheduledStep && rollout.Scheduled != nil && rollout.Scheduled.Steps != nil {
 		var convertedSteps []flag.ScheduledStep
 		for _, v := range rollout.Scheduled.Steps {
 			converter := "v0"
@@ -153,6 +154,8 @@ func convertRollout(rollout RolloutV0) *flag.Rollout {
 	return &r
 }
 
+// computePercentages is creating the percentage structure based on the
+// field percentage in the DTO.
 func computePercentages(percentage float64) map[string]float64 {
 	return map[string]float64{
 		trueVariation:  percentage,
