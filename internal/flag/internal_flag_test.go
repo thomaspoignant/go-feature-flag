@@ -792,6 +792,55 @@ func TestInternalFlag_Value(t *testing.T) {
 				Reason:  flag.ReasonDefault,
 			},
 		},
+		{
+			name: "Should not apply a scheduled step inside another scheduled step",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"variation_A": testconvert.Interface("value_A"),
+					"variation_B": testconvert.Interface("value_B"),
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("variation_A"),
+				},
+				Rollout: &flag.Rollout{
+					Scheduled: &[]flag.ScheduledStep{
+						{
+							InternalFlag: flag.InternalFlag{
+								Variations: &map[string]*interface{}{
+									"variation_A": testconvert.Interface("value_AB"),
+									"variation_B": testconvert.Interface("value_B"),
+								},
+								Rollout: &flag.Rollout{
+									Scheduled: &[]flag.ScheduledStep{
+										{
+											InternalFlag: flag.InternalFlag{
+												Variations: &map[string]*interface{}{
+													"variation_A": testconvert.Interface("value_ABC"),
+												},
+											},
+											Date: testconvert.Time(time.Now().Add(-3 * time.Second)),
+										},
+									},
+								},
+							},
+							Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
+						},
+					},
+				},
+			},
+			args: args{
+				flagName: "my-flag",
+				user:     ffuser.NewUserBuilder("user-key").Build(),
+				evaluationCtx: flag.EvaluationContext{
+					DefaultSdkValue: "value_default",
+				},
+			},
+			want: "value_AB",
+			want1: flag.ResolutionDetails{
+				Variant: "variation_A",
+				Reason:  flag.ReasonDefault,
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
