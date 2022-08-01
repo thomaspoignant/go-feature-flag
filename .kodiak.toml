@@ -1,8 +1,5 @@
-# .kodiak.toml
-# Minimal config. version is the only required field.
 version = 1
 
-# .kodiak.toml
 [merge]
 automerge_label = "automerge"
 
@@ -10,3 +7,6 @@ automerge_label = "automerge"
 # auto merge all PRs opened by "dependabot" that are "minor" or "patch" version upgrades. "major" version upgrades will be ignored.
 versions = ["minor", "patch"]
 usernames = ["dependabot"]
+
+[approve]
+auto_approve_usernames = ["dependabot"]
