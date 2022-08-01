@@ -173,6 +173,9 @@ func convertRollout(dto DTOv0, isScheduledStep bool) *flag.Rollout {
 		scheduledSteps := dto.Rollout.Scheduled.Steps
 		initialDto.Rollout.Scheduled = nil
 		for _, v := range scheduledSteps {
+			// Hack for simplicity
+			// When we translate the DTOvO scheduled step into a flag.ScheduledStep what we are doing
+			// is patching the flag the old way and putting the whole patch into the schedule step.
 			initialDto = mergeDtoScheduledStep(initialDto, v.DTOv0)
 			step := flag.ScheduledStep{
 				InternalFlag: ConvertV0DtoToInternalFlag(initialDto, false),
@@ -182,7 +185,6 @@ func convertRollout(dto DTOv0, isScheduledStep bool) *flag.Rollout {
 		}
 		r.Scheduled = &convertedSteps
 	}
-
 	return &r
 }
 
