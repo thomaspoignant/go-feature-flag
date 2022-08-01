@@ -10,8 +10,8 @@ type RolloutV0 struct {
 
 	// Progressive is your struct to configure a progressive rollout deployment of your flag.
 	// It will allow you to ramp up the percentage of your flag over time.
-	// You can decide at which percentage you starts and at what percentage you ends in your release ramp.
-	// Before the start date we will serve the initial percentage and after we will serve the end percentage.
+	// You can decide at which percentage you start and at what percentage you ends in your release ramp.
+	// Before the start date we will serve the initial percentage and, after we will serve the end percentage.
 	Progressive *ProgressiveV0 `json:"progressive,omitempty" yaml:"progressive,omitempty" toml:"progressive,omitempty"` // nolint: lll
 
 	// Scheduled is your struct to configure an update on some fields of your flag over time.

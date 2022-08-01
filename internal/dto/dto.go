@@ -47,11 +47,11 @@ type DTOv0 struct {
 	Rollout *RolloutV0 `json:"rollout,omitempty" yaml:"rollout,omitempty" toml:"rollout,omitempty"`
 
 	// Version (optional) This field contains the version of the flag.
-	// The version is manually managed when you configure your flags and it is used to display the information
+	// The version is manually managed when you configure your flags and, it is used to display the information
 	// in the notifications and data collection.
 	Version *string `json:"version,omitempty" yaml:"version,omitempty" toml:"version,omitempty"`
 }
 
 func (d *DTO) Convert() flag.InternalFlag {
-	return ConvertV0DtoToInternalFlag(*d, false)
+	return ConvertV0DtoToInternalFlag(d.DTOv0, false)
 }
