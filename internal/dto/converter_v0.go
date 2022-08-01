@@ -29,7 +29,7 @@ func ConvertV0DtoToInternalFlag(d DTO, isScheduleStep bool) flag.InternalFlag {
 	var rules *[]flag.Rule
 	if d.Rule != nil && *d.Rule != "" {
 		r := make([]flag.Rule, 1)
-		r[0] = createLegacyRuleV0(d, false)
+		r[0] = createLegacyRuleV0(d)
 		rules = &r
 	}
 
@@ -65,7 +65,7 @@ func ConvertV0DtoToInternalFlag(d DTO, isScheduleStep bool) flag.InternalFlag {
 }
 
 // createLegacyRuleV0 will create a rule based on the previous format
-func createLegacyRuleV0(d DTO, isScheduleStep bool) flag.Rule {
+func createLegacyRuleV0(d DTO) flag.Rule {
 	// Handle the specific use case of progressive rollout.
 	var progressiveRollout *flag.ProgressiveRollout
 	if d.Rollout != nil &&

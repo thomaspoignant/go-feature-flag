@@ -801,3 +801,41 @@ func TestInternalFlag_Value(t *testing.T) {
 		})
 	}
 }
+
+func TestFlag_ProgressiveRollout(t *testing.T) {
+	f := &flag.InternalFlag{
+		Variations: &map[string]*interface{}{
+			"variation_A": testconvert.Interface("value_A"),
+			"variation_B": testconvert.Interface("value_B"),
+		},
+		DefaultRule: &flag.Rule{
+			ProgressiveRollout: &flag.ProgressiveRollout{
+				Initial: &flag.ProgressiveRolloutStep{
+					Variation:  testconvert.String("variation_A"),
+					Percentage: testconvert.Float64(0),
+					Date:       testconvert.Time(time.Now().Add(1 * time.Second)),
+				},
+				End: &flag.ProgressiveRolloutStep{
+					Variation:  testconvert.String("variation_B"),
+					Percentage: testconvert.Float64(100),
+					Date:       testconvert.Time(time.Now().Add(2 * time.Second)),
+				},
+			},
+		},
+	}
+
+	user := ffuser.NewAnonymousUser("test")
+	flagName := "test-flag"
+
+	// We evaluate the same flag multiple time overtime.
+	v, _ := f.Value(flagName, user, flag.EvaluationContext{})
+	assert.Equal(t, f.GetVariationValue("variation_A"), v)
+
+	time.Sleep(1 * time.Second)
+	v2, _ := f.Value(flagName, user, flag.EvaluationContext{})
+	assert.Equal(t, f.GetVariationValue("variation_A"), v2)
+
+	time.Sleep(1 * time.Second)
+	v3, _ := f.Value(flagName, user, flag.EvaluationContext{})
+	assert.Equal(t, f.GetVariationValue("variation_B"), v3)
+}

@@ -1,0 +1,27 @@
+name: 🐞 Bug Report
+description: Found a bug? We are sorry about that! Let us know! 🐛
+title: "(bug) <title>"
+labels: [bug, needs-triage]
+body:
+  - type: textarea
+    attributes:
+      label: Observed behavior
+      description: |
+        What are you trying to do?  
+        Describe what you think went wrong during this.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Expected Behavior
+      description: A concise description of what you expected to happen.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Steps to reproduce
+      description: |
+        Describe as much as you can the problem.  
+        Please provide us scenario file, logs or anything you have that can help us to understand.
+    validations:
+      required: false

@@ -33,7 +33,7 @@ type ProgressiveV0 struct {
 	// Percentage is where you can configure at what percentage your progressive rollout start
 	// and at what percentage it ends.
 	// This field is optional
-	Percentage ProgressivePercentageV0 `json:"percentage,omitempty" yaml:"percentage,omitempty" toml:"percentage,omitempty"`
+	Percentage ProgressivePercentageV0 `json:"percentage,omitempty" yaml:"percentage,omitempty" toml:"percentage,omitempty"` // nolint: lll
 
 	// ReleaseRamp is the defining when the progressive rollout starts and ends.
 	// This field is mandatory if you want to use a progressive rollout.
