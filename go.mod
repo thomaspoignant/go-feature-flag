@@ -3,7 +3,7 @@ module github.com/thomaspoignant/go-feature-flag
 go 1.17
 
 require (
-	cloud.google.com/go/storage v1.23.0
+	cloud.google.com/go/storage v1.24.0
 	github.com/aws/aws-sdk-go v1.44.46
 	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.5.8
@@ -41,7 +41,6 @@ require (
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.1.0 // indirect
 	github.com/googleapis/gax-go/v2 v2.4.0 // indirect
-	github.com/googleapis/go-type-adapters v1.0.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
