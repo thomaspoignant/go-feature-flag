@@ -1,0 +1,27 @@
+test-flag:
+  rule: key eq "random-key"
+  percentage: 100
+  true: true
+  false: false
+  default: false
+  rollout:
+    scheduled:
+      steps:
+        - date: 2022-08-01T00:00:00.10+02:00
+          rule: beta eq "true"
+          percentage: 100
+
+        - date: 2022-05-12T15:36:00.10+02:00
+          rule: beta eq "false"
+          percentage: 0
+
+        - date: 2022-05-12T15:36:00.10+02:00
+          rule: ""
+
+
+test-flag2:
+  rule: key eq "not-a-key"
+  percentage: 100
+  true: true
+  false: false
+  default: false

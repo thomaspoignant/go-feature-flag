@@ -49,6 +49,31 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 		},
 		{
+			name: "Should use default value if percentages are empty",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"variation_A": testconvert.Interface(true),
+					"variation_B": testconvert.Interface(false),
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("variation_A"),
+					Percentages:     &map[string]float64{},
+				},
+			},
+			args: args{
+				flagName: "my-flag",
+				user:     ffuser.NewUser("user-key"),
+				evaluationCtx: flag.EvaluationContext{
+					DefaultSdkValue: false,
+				},
+			},
+			want: true,
+			want1: flag.ResolutionDetails{
+				Variant: "variation_A",
+				Reason:  flag.ReasonDefault,
+			},
+		},
+		{
 			name: "Should return sdk default value when flag is disabled",
 			flag: flag.InternalFlag{
 				Disable: testconvert.Bool(true),
@@ -221,7 +246,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 		},
 		{
-			name: "Should match only the first rule that apply (even if more than one can apply)å",
+			name: "Should match only the first rule that apply (even if more than one can apply)",
 			flag: flag.InternalFlag{
 				Variations: &map[string]*interface{}{
 					"variation_A": testconvert.Interface("value_A"),
@@ -259,6 +284,48 @@ func TestInternalFlag_Value(t *testing.T) {
 				Variant:   "variation_D",
 				Reason:    flag.ReasonTargetingMatch,
 				RuleIndex: testconvert.Int(1),
+			},
+		},
+		{
+			name: "Should ignore a rule that is disabled",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"variation_A": testconvert.Interface("value_A"),
+					"variation_B": testconvert.Interface("value_B"),
+					"variation_C": testconvert.Interface("value_C"),
+					"variation_D": testconvert.Interface("value_D"),
+				},
+				Rules: &[]flag.Rule{
+					{
+						Query:           testconvert.String("key eq \"not-user-key\""),
+						VariationResult: testconvert.String("variation_C"),
+					},
+					{
+						Query:           testconvert.String("company eq \"go-feature-flag\""),
+						VariationResult: testconvert.String("variation_D"),
+						Disable:         testconvert.Bool(true),
+					},
+					{
+						Query:           testconvert.String("key eq \"user-key\""),
+						VariationResult: testconvert.String("variation_C"),
+					},
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("variation_A"),
+				},
+			},
+			args: args{
+				flagName: "my-flag",
+				user:     ffuser.NewUserBuilder("user-key").AddCustom("company", "go-feature-flag").Build(),
+				evaluationCtx: flag.EvaluationContext{
+					DefaultSdkValue: "value_default",
+				},
+			},
+			want: "value_C",
+			want1: flag.ResolutionDetails{
+				Variant:   "variation_C",
+				Reason:    flag.ReasonTargetingMatch,
+				RuleIndex: testconvert.Int(2),
 			},
 		},
 		{

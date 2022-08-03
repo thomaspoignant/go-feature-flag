@@ -8,6 +8,7 @@ require (
 	github.com/gdexlab/go-render v1.0.1
 	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.5.8
+	github.com/jessevdk/go-flags v1.5.0
 	github.com/nikunjy/rules v1.1.0
 	github.com/pelletier/go-toml v1.9.5
 	github.com/r3labs/diff/v3 v3.0.0

@@ -26,30 +26,31 @@ func ConvertV0DtoToInternalFlag(d DTOv0, isScheduledStep bool) flag.InternalFlag
 	}
 
 	var rules *[]flag.Rule
+	var defaultRule *flag.Rule
 	if d.Rule != nil && *d.Rule != "" {
-		r := make([]flag.Rule, 1)
-		r[0] = createLegacyRuleV0(d)
-		rules = &r
+		rules = &[]flag.Rule{createLegacyRuleV0(d)}
+		defaultRule = createDefaultLegacyRuleV0(d, true)
+	} else {
+		rules = nil
+		defaultRule = createDefaultLegacyRuleV0(d, false)
 	}
 
-	// Default rule
-	hasTargetRule := rules != nil && len(*rules) > 0
-	defaultRule := createDefaultLegacyRuleV0(d, hasTargetRule)
-
-	var rollout *flag.Rollout
-	if d.Rollout != nil && (d.Rollout.Experimentation != nil || d.Rollout.Scheduled != nil) {
-		rollout = convertRollout(d, isScheduledStep)
-	}
-
-	return flag.InternalFlag{
+	internalFlag := flag.InternalFlag{
 		Variations:  variations,
 		Rules:       rules,
 		DefaultRule: defaultRule,
-		Rollout:     rollout,
 		TrackEvents: d.TrackEvents,
 		Disable:     d.Disable,
 		Version:     d.Version,
 	}
+
+	var rollout *flag.Rollout
+	if d.Rollout != nil && (d.Rollout.Experimentation != nil || d.Rollout.Scheduled != nil) {
+		rollout = convertRollout(d, false)
+	}
+
+	internalFlag.Rollout = rollout
+	return internalFlag
 }
 
 // createDefaultLegacyRuleV0 create the default rule based on the legacy format.
@@ -76,6 +77,7 @@ func createDefaultLegacyRuleV0(d DTOv0, hasTargetRule bool) *flag.Rule {
 			},
 		}
 	}
+
 	if d.Rule == nil {
 		if d.Percentage == nil {
 			d.Percentage = &defaultPercentage
@@ -83,14 +85,16 @@ func createDefaultLegacyRuleV0(d DTOv0, hasTargetRule bool) *flag.Rule {
 
 		p := computePercentages(*d.Percentage)
 		return &flag.Rule{
-			Name:        &defaultRuleName,
-			Percentages: p,
+			Name:            &defaultRuleName,
+			Percentages:     p,
+			VariationResult: nil,
 		}
 	}
 
 	return &flag.Rule{
 		Name:            &defaultRuleName,
 		VariationResult: &defaultVariation,
+		Percentages:     nil,
 	}
 }
 
@@ -169,16 +173,9 @@ func convertRollout(dto DTOv0, isScheduledStep bool) *flag.Rollout {
 	// it is not allowed to have a scheduled step inside a scheduled step
 	if !isScheduledStep && dto.Rollout.Scheduled != nil && dto.Rollout.Scheduled.Steps != nil {
 		var convertedSteps []flag.ScheduledStep
-		initialDto := dto
-		scheduledSteps := dto.Rollout.Scheduled.Steps
-		initialDto.Rollout.Scheduled = nil
-		for _, v := range scheduledSteps {
-			// Hack for simplicity
-			// When we translate the DTOvO scheduled step into a flag.ScheduledStep what we are doing
-			// is patching the flag the old way and putting the whole patch into the schedule step.
-			initialDto = mergeDtoScheduledStep(initialDto, v.DTOv0)
+		for _, v := range dto.Rollout.Scheduled.Steps {
 			step := flag.ScheduledStep{
-				InternalFlag: ConvertV0DtoToInternalFlag(initialDto, false),
+				InternalFlag: ConvertV0DtoToInternalFlag(v.DTOv0, true),
 				Date:         v.Date,
 			}
 			convertedSteps = append(convertedSteps, step)
@@ -195,35 +192,4 @@ func computePercentages(percentage float64) *map[string]float64 {
 		trueVariation:  percentage,
 		falseVariation: 100 - percentage,
 	}
-}
-
-func mergeDtoScheduledStep(origin DTOv0, toBeMerged DTOv0) DTOv0 {
-	if toBeMerged.Disable != nil {
-		origin.Disable = toBeMerged.Disable
-	}
-	if toBeMerged.False != nil {
-		origin.False = toBeMerged.False
-	}
-	if toBeMerged.True != nil {
-		origin.True = toBeMerged.True
-	}
-	if toBeMerged.Default != nil {
-		origin.Default = toBeMerged.Default
-	}
-	if toBeMerged.TrackEvents != nil {
-		origin.TrackEvents = toBeMerged.TrackEvents
-	}
-	if toBeMerged.Percentage != nil {
-		origin.Percentage = toBeMerged.Percentage
-	}
-	if toBeMerged.Rule != nil {
-		origin.Rule = toBeMerged.Rule
-	}
-	if toBeMerged.Rollout != nil {
-		origin.Rollout = toBeMerged.Rollout
-	}
-	if toBeMerged.Version != nil {
-		origin.Version = toBeMerged.Version
-	}
-	return origin
 }

@@ -34,6 +34,9 @@ type Rule struct {
 	// You can decide at which percentage you starts with and at what percentage you ends with in your release ramp.
 	// Before the start date we will serve the initial percentage and, after we will serve the end percentage.
 	ProgressiveRollout *ProgressiveRollout `json:"progressiveRollout,omitempty" yaml:"progressiveRollout,omitempty" toml:"progressiveRollout,omitempty"` // nolint: lll
+
+	// Disable indicates that this rule is disabled.
+	Disable *bool `json:"disable,omitempty" yaml:"disable,omitempty" toml:"disable,omitempty"`
 }
 
 // Evaluate is checking if the originalRule apply to for the user.
@@ -42,7 +45,7 @@ func (r *Rule) Evaluate(user ffuser.User, hashID uint32, isDefault bool,
 ) (string, error) {
 	// Check if the originalRule apply for this user
 	ruleApply := isDefault || r.GetQuery() == "" || parser.Evaluate(r.GetQuery(), utils.UserToMap(user))
-	if !ruleApply {
+	if !ruleApply || r.IsDisable() {
 		return "", &internalerror.RuleNotApply{User: user}
 	}
 
@@ -54,7 +57,7 @@ func (r *Rule) Evaluate(user ffuser.User, hashID uint32, isDefault bool,
 		return variation, nil
 	}
 
-	if r.Percentages != nil {
+	if r.Percentages != nil && len(r.GetPercentages()) > 0 {
 		variationName, err := r.getVariationFromPercentage(hashID)
 		if err != nil {
 			return "", err
@@ -226,6 +229,13 @@ func (r *Rule) GetPercentages() map[string]float64 {
 		return map[string]float64{}
 	}
 	return *r.Percentages
+}
+
+func (r *Rule) IsDisable() bool {
+	if r.Disable == nil {
+		return false
+	}
+	return *r.Disable
 }
 
 func (r *Rule) GetProgressiveRollout() ProgressiveRollout {

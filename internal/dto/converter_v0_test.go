@@ -1,6 +1,8 @@
 package dto_test
 
 import (
+	"encoding/json"
+	"fmt"
 	"testing"
 	"time"
 
@@ -322,18 +324,18 @@ func TestConvertV0DtoToInternalFlag(t *testing.T) {
 				Default:    testconvert.Interface("default"),
 				Rollout: &dto.RolloutV0{
 					Scheduled: &dto.ScheduledRolloutV0{Steps: []dto.ScheduledStepV0{
-						{
-							DTOv0: dto.DTOv0{
-								Percentage: testconvert.Float64(20),
-							},
-							Date: testconvert.Time(time.Date(2021, time.February, 2, 10, 10, 10, 10, time.UTC)),
-						},
-						{
-							DTOv0: dto.DTOv0{
-								True: testconvert.Interface("true2"),
-							},
-							Date: testconvert.Time(time.Date(2021, time.February, 3, 10, 10, 10, 10, time.UTC)),
-						},
+						//{
+						//	DTOv0: dto.DTOv0{
+						//		Percentage: testconvert.Float64(20),
+						//	},
+						//	Date: testconvert.Time(time.Date(2021, time.February, 2, 10, 10, 10, 10, time.UTC)),
+						// },
+						//{
+						//	DTOv0: dto.DTOv0{
+						//		True: testconvert.Interface("true2"),
+						//	},
+						//	Date: testconvert.Time(time.Date(2021, time.February, 3, 10, 10, 10, 10, time.UTC)),
+						// },
 						{
 							DTOv0: dto.DTOv0{
 								Rule: testconvert.String("key eq \"test-user\""),
@@ -360,11 +362,6 @@ func TestConvertV0DtoToInternalFlag(t *testing.T) {
 					Scheduled: &[]flag.ScheduledStep{
 						{
 							InternalFlag: flag.InternalFlag{
-								Variations: &map[string]*interface{}{
-									"Default": testconvert.Interface("default"),
-									"False":   testconvert.Interface("false"),
-									"True":    testconvert.Interface("true"),
-								},
 								DefaultRule: &flag.Rule{
 									Name: testconvert.String("legacyDefaultRule"),
 									Percentages: &map[string]float64{
@@ -403,10 +400,6 @@ func TestConvertV0DtoToInternalFlag(t *testing.T) {
 									{
 										Name:  testconvert.String("legacyRuleV0"),
 										Query: testconvert.String("key eq \"test-user\""),
-										Percentages: &map[string]float64{
-											"False": 80,
-											"True":  20,
-										},
 									},
 								},
 								DefaultRule: &flag.Rule{
@@ -423,6 +416,9 @@ func TestConvertV0DtoToInternalFlag(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			res := dto.ConvertV0DtoToInternalFlag(tt.d, false)
+			m, _ := json.Marshal(res)
+			fmt.Println(string(m))
 			assert.Equal(t, tt.want, dto.ConvertV0DtoToInternalFlag(tt.d, false))
 		})
 	}
