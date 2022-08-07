@@ -27,7 +27,7 @@ linters:
     - unconvert
     - unparam
     - whitespace
-    - gofumpt
+#    - gofumpt
 linters-settings:
   funlen:
     lines: 90
