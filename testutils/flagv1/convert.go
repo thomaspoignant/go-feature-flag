@@ -59,5 +59,4 @@ func ConvertDtoToV1(d dto.DTOv0) FlagData {
 		Disable:     d.Disable,
 		Rollout:     &r,
 	}
-
 }

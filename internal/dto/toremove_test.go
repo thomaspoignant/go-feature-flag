@@ -2,14 +2,15 @@ package dto_test
 
 import (
 	"fmt"
+	"testing"
+	"time"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
 	"github.com/thomaspoignant/go-feature-flag/internal/dto"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/testutils/flagv1"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
-	"testing"
-	"time"
 )
 
 func Test_toto(t *testing.T) {
@@ -102,6 +103,5 @@ func Test_toto(t *testing.T) {
 
 	fmt.Println(m)
 	assert.Equal(t, m, n)
-	//assert.Equal(t, n1, m1)
 
 }

@@ -3,10 +3,11 @@ package dto_test
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/ffuser"
-	"github.com/thomaspoignant/go-feature-flag/testutils/flagv1"
 	"testing"
 	"time"
+
+	"github.com/thomaspoignant/go-feature-flag/ffuser"
+	"github.com/thomaspoignant/go-feature-flag/testutils/flagv1"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/internal/dto"
@@ -326,7 +327,7 @@ func TestConvertV0DtoToInternalFlag(t *testing.T) {
 				Default:    testconvert.Interface("default"),
 				Rollout: &dto.RolloutV0{
 					Scheduled: &dto.ScheduledRolloutV0{Steps: []dto.ScheduledStepV0{
-						//{ScheduledStepV0
+						// {ScheduledStepV0
 						//	DTOv0: dto.DTOv0{
 						//		Percentage: testconvert.Float64(20),
 						//	},
@@ -731,5 +732,4 @@ func TestConvertV0ScheduleStep(t *testing.T) {
 			assert.Equal(t, gotFlagV1, gotInternalFlag)
 		})
 	}
-
 }

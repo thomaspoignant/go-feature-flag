@@ -2,6 +2,7 @@ package dto
 
 import (
 	"fmt"
+
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 )
@@ -179,7 +180,6 @@ func createScheduledStep(f flag.InternalFlag, dto ScheduledStepV0) flag.Schedule
 
 	// rules management
 	switch {
-
 	case hasRuleBefore && !updateRule:
 		// deactivate rule + update the default rule
 		// activate the target rule
@@ -214,7 +214,7 @@ func createScheduledStep(f flag.InternalFlag, dto ScheduledStepV0) flag.Schedule
 		break
 
 	case !hasRuleBefore && !updateRule:
-		//update the defaultRule
+
 		if dto.Percentage != nil {
 			step.DefaultRule = &flag.Rule{
 				VariationResult: &emptyVarRes,
@@ -246,7 +246,7 @@ func createScheduledStep(f flag.InternalFlag, dto ScheduledStepV0) flag.Schedule
 	}
 
 	// we have only a default rule
-	//if dto.Rule == nil && ruleIndex == nil {
+	// if dto.Rule == nil && ruleIndex == nil {
 	//	if dto.Percentage != nil {
 	//		step.DefaultRule = &flag.Rule{
 	//			Name:        &defaultRuleName,
