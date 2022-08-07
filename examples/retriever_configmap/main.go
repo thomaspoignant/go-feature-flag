@@ -3,13 +3,14 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/ffuser"
-	"github.com/thomaspoignant/go-feature-flag/retriever/k8sretriever"
-	"k8s.io/client-go/rest"
 	"log"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/thomaspoignant/go-feature-flag/ffuser"
+	"github.com/thomaspoignant/go-feature-flag/retriever/k8sretriever"
+	"k8s.io/client-go/rest"
 
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 )
@@ -30,7 +31,8 @@ func main() {
 			ConfigMapName: "goff",
 			Key:           "flags.yaml",
 			ClientConfig:  *config,
-		}})
+		},
+	})
 
 	// Check init errors.
 	if err != nil {
@@ -41,7 +43,6 @@ func main() {
 
 	http.HandleFunc("/", handler)
 	http.ListenAndServe(":8080", nil)
-
 }
 
 func handler(w http.ResponseWriter, req *http.Request) {
