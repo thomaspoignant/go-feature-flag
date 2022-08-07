@@ -3,10 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/retriever/httpretriever"
 	"log"
 	"os"
 	"time"
+
+	"github.com/thomaspoignant/go-feature-flag/retriever/httpretriever"
 
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
@@ -23,7 +24,6 @@ func main() {
 			Timeout: 3 * time.Second,
 		},
 	})
-
 	// Check init errors.
 	if err != nil {
 		log.Fatal(err)
