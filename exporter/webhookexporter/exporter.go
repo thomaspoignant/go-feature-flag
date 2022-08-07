@@ -18,8 +18,8 @@ import (
 )
 
 // Exporter is the exporter of your data to a webhook.
-//
 // It calls the EndpointURL with a POST request with the following format:
+//
 //   {
 //      "meta": {
 //        "hostname": "server01",
@@ -37,7 +37,6 @@ import (
 //        },
 //      ]
 //    }
-//
 type Exporter struct {
 	// EndpointURL of your webhook
 	EndpointURL string
