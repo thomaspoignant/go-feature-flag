@@ -2,12 +2,13 @@ package main
 
 import (
 	"context"
-	"github.com/thomaspoignant/go-feature-flag/exporter/gcstorageexporter"
-	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
-	"google.golang.org/api/option"
 	"log"
 	"os"
 	"time"
+
+	"github.com/thomaspoignant/go-feature-flag/exporter/gcstorageexporter"
+	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
+	"google.golang.org/api/option"
 
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
@@ -41,7 +42,6 @@ func main() {
 			},
 		},
 	})
-
 	// Check init errors.
 	if err != nil {
 		log.Fatal(err)

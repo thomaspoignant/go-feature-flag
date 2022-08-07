@@ -27,7 +27,7 @@ linters:
     - unconvert
     - unparam
     - whitespace
-    - gofumpt
+#    - gofumpt
 linters-settings:
   funlen:
     lines: 90
@@ -37,6 +37,9 @@ linters-settings:
       - singleCaseSwitch
   golint:
     min-confidence: 0.6
+  gofumpt:
+    module-path: github.com/thomaspoignant/go-feature-flag
+    lang-version: "1.17"
 issues:
   exclude-rules:
     - path: _test.go

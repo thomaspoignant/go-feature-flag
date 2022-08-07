@@ -3,10 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"log"
 	"os"
 	"time"
+
+	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
@@ -24,7 +25,6 @@ func main() {
 			Path: "examples/rollout_progressive/flags.yaml",
 		},
 	})
-
 	// Check init errors.
 	if err != nil {
 		log.Fatal(err)

@@ -14,6 +14,7 @@ import (
 )
 
 // Init the feature flag component with the configuration of ffclient.Config
+//
 //  func main() {
 //    err := ffclient.Init(ffclient.Config{
 //             PollingInterval: 3 * time.Second,
