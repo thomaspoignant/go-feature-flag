@@ -87,10 +87,6 @@ func (r *Rule) getVariationFromProgressiveRollout(hash uint32) (string, error) {
 			return *r.ProgressiveRollout.Initial.Variation, nil
 		}
 
-		if now.After(*r.ProgressiveRollout.End.Date) {
-			return *r.ProgressiveRollout.End.Variation, nil
-		}
-
 		// We are between initial and end
 		initialPercentage := r.ProgressiveRollout.Initial.getPercentage() * PercentageMultiplier
 		if r.ProgressiveRollout.End.getPercentage() == 0 || r.ProgressiveRollout.End.getPercentage() > 100 {

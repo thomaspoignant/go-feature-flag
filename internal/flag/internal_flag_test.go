@@ -908,6 +908,41 @@ func TestInternalFlag_Value(t *testing.T) {
 				Reason:  flag.ReasonDefault,
 			},
 		},
+		{
+			name: "Should return the false value if not in between initial and end percentage",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"variation_A": testconvert.Interface("value_A"),
+					"variation_B": testconvert.Interface("value_B"),
+				},
+				DefaultRule: &flag.Rule{
+					ProgressiveRollout: &flag.ProgressiveRollout{
+						Initial: &flag.ProgressiveRolloutStep{
+							Variation:  testconvert.String("variation_A"),
+							Percentage: testconvert.Float64(0),
+							Date:       testconvert.Time(time.Now().Add(-10 * time.Second)),
+						},
+						End: &flag.ProgressiveRolloutStep{
+							Variation:  testconvert.String("variation_B"),
+							Percentage: testconvert.Float64(5),
+							Date:       testconvert.Time(time.Now().Add(-1 * time.Second)),
+						},
+					},
+				},
+			},
+			args: args{
+				flagName: "my-flag",
+				user:     ffuser.NewUserBuilder("user-key").Build(),
+				evaluationCtx: flag.EvaluationContext{
+					DefaultSdkValue: "value_default",
+				},
+			},
+			want: "value_A",
+			want1: flag.ResolutionDetails{
+				Variant: "variation_A",
+				Reason:  flag.ReasonDefault,
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -37,6 +37,8 @@ linters-settings:
       - singleCaseSwitch
   golint:
     min-confidence: 0.6
+  gosimple:
+    checks: ["all","-S1023"]
 issues:
   exclude-rules:
     - path: _test.go

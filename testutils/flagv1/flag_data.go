@@ -203,9 +203,6 @@ func (f *FlagData) getActualPercentage() float64 {
 	if now.Before(*f.Rollout.Progressive.ReleaseRamp.Start) {
 		return initialPercentage
 	}
-	if now.After(*f.Rollout.Progressive.ReleaseRamp.End) {
-		return endPercentage
-	}
 
 	// during the rollout ramp we compute the percentage
 	nbSec := f.Rollout.Progressive.ReleaseRamp.End.Unix() - f.Rollout.Progressive.ReleaseRamp.Start.Unix()

@@ -1,10 +1,7 @@
 package dto
 
 import (
-	"fmt"
-
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 )
 
 var (
@@ -29,7 +26,7 @@ func ConvertV0DtoToInternalFlag(d DTOv0, isScheduledStep bool) flag.InternalFlag
 	var variations *map[string]*interface{}
 	newVariations := createVariationsV0(d, isScheduledStep)
 	if newVariations != nil {
-		variations = &newVariations
+		variations = newVariations
 	}
 
 	var rules *[]flag.Rule
@@ -148,7 +145,7 @@ func createLegacyRuleV0(d DTOv0) flag.Rule {
 }
 
 // createVariationsV0 will create a set of variations based on the previous format
-func createVariationsV0(d DTOv0, isScheduleStep bool) map[string]*interface{} {
+func createVariationsV0(d DTOv0, isScheduleStep bool) *map[string]*interface{} {
 	variations := make(map[string]*interface{}, 3)
 	if d.True != nil {
 		variations[trueVariation] = d.True
@@ -161,160 +158,105 @@ func createVariationsV0(d DTOv0, isScheduleStep bool) map[string]*interface{} {
 	}
 
 	if isScheduleStep && len(variations) == 0 {
-		variations = nil
+		return nil
 	}
-	return variations
+	return &variations
 }
 
+// createScheduledStep is converting the old format of scheduled step to the new one.
+// since the format has changed a lot the logic in this function is a bit complex to follow.
+// In the tests we are testing that we have the same results as the one returns by the old
+// flag logic.
 func createScheduledStep(f flag.InternalFlag, dto ScheduledStepV0) flag.ScheduledStep {
 	step := flag.ScheduledStep{
 		Date: dto.Date,
+		InternalFlag: flag.InternalFlag{
+			Variations: createVariationsV0(dto.DTOv0, true),
+		},
 	}
 
-	variations := createVariationsV0(dto.DTOv0, true)
-	step.Variations = &variations
-
-	ruleIndex := f.GetRuleIndexByName(LegacyRuleName)
-	hasRuleBefore := ruleIndex != nil && !f.GetRules()[*ruleIndex].IsDisable()
+	legacyRuleIndex := f.GetRuleIndexByName(LegacyRuleName)
+	hasRuleBefore := legacyRuleIndex != nil && !f.GetRules()[*legacyRuleIndex].IsDisable()
 	updateRule := dto.Rule != nil
+	progressive := convertScheduledStepProgressiveRollout(dto)
 
-	// rules management
 	switch {
 	case hasRuleBefore && !updateRule:
-		// deactivate rule + update the default rule
-		// activate the target rule
-		if dto.Percentage != nil {
-			step.Rules = &[]flag.Rule{{
-				Name:        testconvert.String(LegacyRuleName),
-				Percentages: computePercentages(*dto.Percentage),
-			}}
+		if progressive != nil {
+			step.Rules = &[]flag.Rule{{Name: &LegacyRuleName, ProgressiveRollout: progressive}}
+		} else if dto.Percentage != nil {
+			step.Rules = &[]flag.Rule{{Name: &LegacyRuleName, Percentages: computePercentages(*dto.Percentage)}}
 		}
-		fmt.Println("1")
 		break
 
 	case !hasRuleBefore && updateRule:
 		if *dto.Rule == "" {
-			// disable target + update default
-			step.Rules = &[]flag.Rule{{
-				Name:    testconvert.String(LegacyRuleName),
-				Disable: &disableRuleValue,
-			}}
+			step.Rules = &[]flag.Rule{{Name: &LegacyRuleName, Disable: &disableRuleValue}}
+			step.DefaultRule = &flag.Rule{Name: &defaultRuleName}
 
-			step.DefaultRule = &flag.Rule{
-				Name: testconvert.String(defaultRuleName),
-			}
-
-			if dto.Percentage != nil {
+			if progressive != nil {
+				step.DefaultRule.ProgressiveRollout = progressive
+			} else if dto.Percentage != nil {
 				step.DefaultRule.Percentages = computePercentages(*dto.Percentage)
 			}
 		} else {
-			// TODO: Update target
+			r := flag.Rule{Name: &LegacyRuleName, Disable: &enableRuleValue, Query: dto.Rule}
+
+			switch {
+			case progressive != nil:
+				r.ProgressiveRollout = progressive
+				break
+			case dto.Percentage != nil:
+				r.Percentages = computePercentages(*dto.Percentage)
+				break
+			case f.DefaultRule != nil && f.DefaultRule.Percentages != nil && len(f.GetDefaultRule().GetPercentages()) > 0:
+				r.Percentages = deepCopyPercentages(f.GetDefaultRule().GetPercentages())
+				break
+			default:
+				// no explicit percentage, default value is 0
+				r.Percentages = computePercentages(0)
+				break
+			}
+			step.Rules = &[]flag.Rule{r}
+
+			// clean up the default value
+			step.DefaultRule = &flag.Rule{
+				Name:            &defaultRuleName,
+				Percentages:     &map[string]float64{trueVariation: -1, falseVariation: -1},
+				VariationResult: &defaultVariation,
+			}
 		}
-		fmt.Println("2")
 		break
 
 	case !hasRuleBefore && !updateRule:
-
-		if dto.Percentage != nil {
+		if progressive != nil {
+			step.DefaultRule = &flag.Rule{VariationResult: &emptyVarRes, Name: &defaultRuleName, ProgressiveRollout: progressive}
+		} else if dto.Percentage != nil {
 			step.DefaultRule = &flag.Rule{
 				VariationResult: &emptyVarRes,
-				Name:            testconvert.String(defaultRuleName),
+				Name:            &defaultRuleName,
 				Percentages:     computePercentages(*dto.Percentage),
 			}
 		}
-		fmt.Println("3")
 		break
 
 	case hasRuleBefore && updateRule:
-		// update targeting
-		if dto.Rule != nil {
-			r := flag.Rule{
-				Name:    testconvert.String(LegacyRuleName),
-				Query:   dto.Rule,
-				Disable: &enableRuleValue,
-			}
-			if dto.Percentage != nil {
-				r.VariationResult = &emptyVarRes
-				r.Percentages = computePercentages(*dto.Percentage)
-			}
-			step.Rules = &[]flag.Rule{r}
-		} else {
-			// TODO: disable targeting and update default
+		r := flag.Rule{Name: &LegacyRuleName, Query: dto.Rule, Disable: &enableRuleValue}
+
+		if progressive != nil {
+			r.VariationResult = &emptyVarRes
+			r.ProgressiveRollout = progressive
+		} else if dto.Percentage != nil {
+			r.VariationResult = &emptyVarRes
+			r.Percentages = computePercentages(*dto.Percentage)
 		}
-		fmt.Println("4")
+		step.Rules = &[]flag.Rule{r}
 		break
 	}
 
-	// we have only a default rule
-	// if dto.Rule == nil && ruleIndex == nil {
-	//	if dto.Percentage != nil {
-	//		step.DefaultRule = &flag.Rule{
-	//			Name:        &defaultRuleName,
-	//			Percentages: computePercentages(*dto.Percentage),
-	//		}
-	//	}
-	//}
-	//
-	//if dto.Rule != nil && *dto.Rule == "" && ruleIndex != nil {
-	//	disable := true
-	//	r := flag.Rule{
-	//		Name:    testconvert.String(LegacyRuleName),
-	//		Disable: &disable,
-	//	}
-	//	step.Rules = &[]flag.Rule{r}
-	//}
-	//
-	//// We add a rule before or we update the query
-	//if dto.Rule != nil || (ruleIndex != nil && !f.GetRules()[*ruleIndex].IsDisable()) {
-	//	r := flag.Rule{
-	//		Name:  testconvert.String(LegacyRuleName),
-	//		Query: dto.Rule,
-	//	}
-	//
-	//	if dto.Percentage != nil {
-	//		if ruleIndex != nil && f.GetRules()[*ruleIndex].VariationResult != nil {
-	//			r.VariationResult = testconvert.String("")
-	//		}
-	//		r.Percentages = computePercentages(*dto.Percentage)
-	//	} else if ruleIndex != nil && f.GetRules()[*ruleIndex].Percentages != nil {
-	//		r.Percentages = deepCopyPercentages(f.GetRules()[*ruleIndex].GetPercentages())
-	//	} else if ruleIndex == nil && f.GetDefaultRule() != nil {
-	//		r.Percentages = deepCopyPercentages(f.GetDefaultRule().GetPercentages())
-	//	}
-	//
-	//	// if we did not have rules before we migrate the percentage into the rule
-	//	if ruleIndex == nil && dto.Percentage == nil {
-	//		r.Percentages = deepCopyPercentages(f.GetDefaultRule().GetPercentages())
-	//	}
-	//
-	//	// remove all percentages from default rule
-	//	if f.GetDefaultRule().Percentages != nil {
-	//		removedPercentages := map[string]float64{}
-	//		for k, _ := range f.GetDefaultRule().GetPercentages() {
-	//			removedPercentages[k] = -1
-	//		}
-	//		step.DefaultRule = &flag.Rule{
-	//			Percentages:     &removedPercentages,
-	//			Name:            &defaultRuleName,
-	//			VariationResult: &defaultVariation,
-	//		}
-	//	}
-	//
-	//	step.Rules = &[]flag.Rule{r}
-	//}
-
-	if dto.Disable != nil {
-		step.Disable = dto.Disable
-	}
-
-	if dto.TrackEvents != nil {
-		step.TrackEvents = dto.TrackEvents
-	}
-
-	if dto.Version != nil {
-		step.Version = dto.Version
-	}
-
+	step.Disable = dto.Disable
+	step.TrackEvents = dto.TrackEvents
+	step.Version = dto.Version
 	return step
 }
 
@@ -349,6 +291,7 @@ func computePercentages(percentage float64) *map[string]float64 {
 	}
 }
 
+// deepCopyPercentages is creating a new map with the same values
 func deepCopyPercentages(in map[string]float64) *map[string]float64 {
 	p := make(map[string]float64, len(in))
 	// deep copy of the percentages to avoid being override
@@ -356,4 +299,30 @@ func deepCopyPercentages(in map[string]float64) *map[string]float64 {
 		p[k] = v
 	}
 	return &p
+}
+
+// convertProgressiveRollout convert the legacy format to the new format.
+// If we can't convert we return a nil value.
+func convertScheduledStepProgressiveRollout(dto ScheduledStepV0) *flag.ProgressiveRollout {
+	hasProgressiveRollout := dto.Rollout != nil &&
+		dto.Rollout.Progressive != nil &&
+		dto.Rollout.Progressive.ReleaseRamp.End != nil &&
+		dto.Rollout.Progressive.ReleaseRamp.Start != nil
+
+	var progressive *flag.ProgressiveRollout
+	if hasProgressiveRollout {
+		progressive = &flag.ProgressiveRollout{
+			Initial: &flag.ProgressiveRolloutStep{
+				Variation:  &falseVariation,
+				Percentage: &dto.Rollout.Progressive.Percentage.Initial,
+				Date:       dto.Rollout.Progressive.ReleaseRamp.Start,
+			},
+			End: &flag.ProgressiveRolloutStep{
+				Variation:  &trueVariation,
+				Percentage: &dto.Rollout.Progressive.Percentage.End,
+				Date:       dto.Rollout.Progressive.ReleaseRamp.End,
+			},
+		}
+	}
+	return progressive
 }

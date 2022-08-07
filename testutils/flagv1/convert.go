@@ -21,17 +21,33 @@ func ConvertDtoToV1(d dto.DTOv0) FlagData {
 			if d.Rollout.Scheduled.Steps != nil {
 				r.Scheduled.Steps = []ScheduledStep{}
 				for _, step := range d.Rollout.Scheduled.Steps {
+					f := FlagData{
+						Rule:        step.Rule,
+						Percentage:  step.Percentage,
+						True:        step.True,
+						False:       step.False,
+						Default:     step.Default,
+						TrackEvents: step.TrackEvents,
+						Disable:     step.Disable,
+					}
+					if step.Rollout != nil && step.Rollout.Progressive != nil {
+						f.Rollout = &Rollout{
+							Progressive: &Progressive{
+								ReleaseRamp: ProgressiveReleaseRamp{
+									Start: step.Rollout.Progressive.ReleaseRamp.Start,
+									End:   step.Rollout.Progressive.ReleaseRamp.End,
+								},
+								Percentage: ProgressivePercentage{
+									Initial: step.Rollout.Progressive.Percentage.Initial,
+									End:     step.Rollout.Progressive.Percentage.End,
+								},
+							},
+						}
+					}
+
 					s := ScheduledStep{
-						FlagData: FlagData{
-							Rule:        step.Rule,
-							Percentage:  step.Percentage,
-							True:        step.True,
-							False:       step.False,
-							Default:     step.Default,
-							TrackEvents: step.TrackEvents,
-							Disable:     step.Disable,
-						},
-						Date: step.Date,
+						FlagData: f,
+						Date:     step.Date,
 					}
 					r.Scheduled.Steps = append(r.Scheduled.Steps, s)
 				}
