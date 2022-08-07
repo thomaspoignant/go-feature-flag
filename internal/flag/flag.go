@@ -8,9 +8,6 @@ type Flag interface {
 	// Value is returning the Value associate to the flag (True / False / Default )
 	Value(flagName string, user ffuser.User, evaluationCtx EvaluationContext) (interface{}, ResolutionDetails)
 
-	// String display correctly a flag with the right formatting
-	String() string
-
 	// GetVersion is the getter for the field Version
 	// Default: 0.0
 	GetVersion() string

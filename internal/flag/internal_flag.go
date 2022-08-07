@@ -46,10 +46,6 @@ type InternalFlag struct {
 	Version *string `json:"version,omitempty" yaml:"version,omitempty" toml:"version,omitempty"`
 }
 
-func (f *InternalFlag) String() string {
-	panic("implement me")
-}
-
 // Value is returning the Value associate to the flag
 func (f *InternalFlag) Value(
 	flagName string,
