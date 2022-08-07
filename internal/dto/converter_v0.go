@@ -1,7 +1,9 @@
 package dto
 
 import (
+	"fmt"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
+	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 )
 
 var (
@@ -12,6 +14,10 @@ var (
 	falseVariation    = "False"
 	defaultVariation  = "Default"
 	defaultPercentage = float64(0)
+
+	emptyVarRes      = ""
+	disableRuleValue = true
+	enableRuleValue  = false
 )
 
 // ConvertV0DtoToInternalFlag is converting a flag in the config file to the internal format.
@@ -46,7 +52,7 @@ func ConvertV0DtoToInternalFlag(d DTOv0, isScheduledStep bool) flag.InternalFlag
 
 	var rollout *flag.Rollout
 	if d.Rollout != nil && (d.Rollout.Experimentation != nil || d.Rollout.Scheduled != nil) {
-		rollout = convertRollout(d, false)
+		rollout = convertRollout(d, internalFlag)
 	}
 
 	internalFlag.Rollout = rollout
@@ -159,7 +165,160 @@ func createVariationsV0(d DTOv0, isScheduleStep bool) map[string]*interface{} {
 	return variations
 }
 
-func convertRollout(dto DTOv0, isScheduledStep bool) *flag.Rollout {
+func createScheduledStep(f flag.InternalFlag, dto ScheduledStepV0) flag.ScheduledStep {
+	step := flag.ScheduledStep{
+		Date: dto.Date,
+	}
+
+	variations := createVariationsV0(dto.DTOv0, true)
+	step.Variations = &variations
+
+	ruleIndex := f.GetRuleIndexByName(LegacyRuleName)
+	hasRuleBefore := ruleIndex != nil && !f.GetRules()[*ruleIndex].IsDisable()
+	updateRule := dto.Rule != nil
+
+	// rules management
+	switch {
+
+	case hasRuleBefore && !updateRule:
+		// deactivate rule + update the default rule
+		// activate the target rule
+		if dto.Percentage != nil {
+			step.Rules = &[]flag.Rule{{
+				Name:        testconvert.String(LegacyRuleName),
+				Percentages: computePercentages(*dto.Percentage),
+			}}
+		}
+		fmt.Println("1")
+		break
+
+	case !hasRuleBefore && updateRule:
+		if *dto.Rule == "" {
+			// disable target + update default
+			step.Rules = &[]flag.Rule{{
+				Name:    testconvert.String(LegacyRuleName),
+				Disable: &disableRuleValue,
+			}}
+
+			step.DefaultRule = &flag.Rule{
+				Name: testconvert.String(defaultRuleName),
+			}
+
+			if dto.Percentage != nil {
+				step.DefaultRule.Percentages = computePercentages(*dto.Percentage)
+			}
+		} else {
+			// TODO: Update target
+		}
+		fmt.Println("2")
+		break
+
+	case !hasRuleBefore && !updateRule:
+		//update the defaultRule
+		if dto.Percentage != nil {
+			step.DefaultRule = &flag.Rule{
+				VariationResult: &emptyVarRes,
+				Name:            testconvert.String(defaultRuleName),
+				Percentages:     computePercentages(*dto.Percentage),
+			}
+		}
+		fmt.Println("3")
+		break
+
+	case hasRuleBefore && updateRule:
+		// update targeting
+		if dto.Rule != nil {
+			r := flag.Rule{
+				Name:    testconvert.String(LegacyRuleName),
+				Query:   dto.Rule,
+				Disable: &enableRuleValue,
+			}
+			if dto.Percentage != nil {
+				r.VariationResult = &emptyVarRes
+				r.Percentages = computePercentages(*dto.Percentage)
+			}
+			step.Rules = &[]flag.Rule{r}
+		} else {
+			// TODO: disable targeting and update default
+		}
+		fmt.Println("4")
+		break
+	}
+
+	// we have only a default rule
+	//if dto.Rule == nil && ruleIndex == nil {
+	//	if dto.Percentage != nil {
+	//		step.DefaultRule = &flag.Rule{
+	//			Name:        &defaultRuleName,
+	//			Percentages: computePercentages(*dto.Percentage),
+	//		}
+	//	}
+	//}
+	//
+	//if dto.Rule != nil && *dto.Rule == "" && ruleIndex != nil {
+	//	disable := true
+	//	r := flag.Rule{
+	//		Name:    testconvert.String(LegacyRuleName),
+	//		Disable: &disable,
+	//	}
+	//	step.Rules = &[]flag.Rule{r}
+	//}
+	//
+	//// We add a rule before or we update the query
+	//if dto.Rule != nil || (ruleIndex != nil && !f.GetRules()[*ruleIndex].IsDisable()) {
+	//	r := flag.Rule{
+	//		Name:  testconvert.String(LegacyRuleName),
+	//		Query: dto.Rule,
+	//	}
+	//
+	//	if dto.Percentage != nil {
+	//		if ruleIndex != nil && f.GetRules()[*ruleIndex].VariationResult != nil {
+	//			r.VariationResult = testconvert.String("")
+	//		}
+	//		r.Percentages = computePercentages(*dto.Percentage)
+	//	} else if ruleIndex != nil && f.GetRules()[*ruleIndex].Percentages != nil {
+	//		r.Percentages = deepCopyPercentages(f.GetRules()[*ruleIndex].GetPercentages())
+	//	} else if ruleIndex == nil && f.GetDefaultRule() != nil {
+	//		r.Percentages = deepCopyPercentages(f.GetDefaultRule().GetPercentages())
+	//	}
+	//
+	//	// if we did not have rules before we migrate the percentage into the rule
+	//	if ruleIndex == nil && dto.Percentage == nil {
+	//		r.Percentages = deepCopyPercentages(f.GetDefaultRule().GetPercentages())
+	//	}
+	//
+	//	// remove all percentages from default rule
+	//	if f.GetDefaultRule().Percentages != nil {
+	//		removedPercentages := map[string]float64{}
+	//		for k, _ := range f.GetDefaultRule().GetPercentages() {
+	//			removedPercentages[k] = -1
+	//		}
+	//		step.DefaultRule = &flag.Rule{
+	//			Percentages:     &removedPercentages,
+	//			Name:            &defaultRuleName,
+	//			VariationResult: &defaultVariation,
+	//		}
+	//	}
+	//
+	//	step.Rules = &[]flag.Rule{r}
+	//}
+
+	if dto.Disable != nil {
+		step.Disable = dto.Disable
+	}
+
+	if dto.TrackEvents != nil {
+		step.TrackEvents = dto.TrackEvents
+	}
+
+	if dto.Version != nil {
+		step.Version = dto.Version
+	}
+
+	return step
+}
+
+func convertRollout(dto DTOv0, f flag.InternalFlag) *flag.Rollout {
 	r := flag.Rollout{}
 	if dto.Rollout.Experimentation != nil &&
 		dto.Rollout.Experimentation.Start != nil &&
@@ -171,14 +330,10 @@ func convertRollout(dto DTOv0, isScheduledStep bool) *flag.Rollout {
 	}
 
 	// it is not allowed to have a scheduled step inside a scheduled step
-	if !isScheduledStep && dto.Rollout.Scheduled != nil && dto.Rollout.Scheduled.Steps != nil {
+	if dto.Rollout.Scheduled != nil && dto.Rollout.Scheduled.Steps != nil {
 		var convertedSteps []flag.ScheduledStep
 		for _, v := range dto.Rollout.Scheduled.Steps {
-			step := flag.ScheduledStep{
-				InternalFlag: ConvertV0DtoToInternalFlag(v.DTOv0, true),
-				Date:         v.Date,
-			}
-			convertedSteps = append(convertedSteps, step)
+			convertedSteps = append(convertedSteps, createScheduledStep(f, v))
 		}
 		r.Scheduled = &convertedSteps
 	}
@@ -192,4 +347,13 @@ func computePercentages(percentage float64) *map[string]float64 {
 		trueVariation:  percentage,
 		falseVariation: 100 - percentage,
 	}
+}
+
+func deepCopyPercentages(in map[string]float64) *map[string]float64 {
+	p := make(map[string]float64, len(in))
+	// deep copy of the percentages to avoid being override
+	for k, v := range in {
+		p[k] = v
+	}
+	return &p
 }

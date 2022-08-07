@@ -45,7 +45,7 @@ func (r *Rule) Evaluate(user ffuser.User, hashID uint32, isDefault bool,
 ) (string, error) {
 	// Check if the originalRule apply for this user
 	ruleApply := isDefault || r.GetQuery() == "" || parser.Evaluate(r.GetQuery(), utils.UserToMap(user))
-	if !ruleApply || r.IsDisable() {
+	if !ruleApply || (!isDefault && r.IsDisable()) {
 		return "", &internalerror.RuleNotApply{User: user}
 	}
 

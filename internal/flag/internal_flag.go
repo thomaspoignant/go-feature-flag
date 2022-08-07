@@ -188,6 +188,15 @@ func (f *InternalFlag) GetRules() []Rule {
 	return *f.Rules
 }
 
+func (f *InternalFlag) GetRuleIndexByName(name string) *int {
+	for index, rule := range f.GetRules() {
+		if rule.GetName() == name {
+			return &index
+		}
+	}
+	return nil
+}
+
 // GetDefaultRule is the getter of the field DefaultRule
 func (f *InternalFlag) GetDefaultRule() *Rule {
 	return f.DefaultRule
