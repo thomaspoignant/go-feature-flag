@@ -35,7 +35,7 @@
         },
         {
           "title": "Rules",
-          "value": "nil =\u003e (*[]flag.Rule){flag.Rule{Name:(*string)(\"legacyRuleV0\"), Query:(*string)(\"key eq \\\"not-a-ke\\\"\"), VariationResult:(*string)(nil), Percentages:(*map[string]float64){\"False\":20, \"True\":80}, ProgressiveRollout:(*flag.ProgressiveRollout)(nil)}}",
+          "value": "nil =\u003e (*[]flag.Rule){flag.Rule{Name:(*string)(\"legacyRuleV0\"), Query:(*string)(\"key eq \\\"not-a-ke\\\"\"), VariationResult:(*string)(nil), Percentages:(*map[string]float64){\"False\":20, \"True\":80}, ProgressiveRollout:(*flag.ProgressiveRollout)(nil), Disable:(*bool)(nil)}}",
           "short": false
         },
         {
