@@ -2,6 +2,7 @@ package dto
 
 import "github.com/thomaspoignant/go-feature-flag/internal/flag"
 
+// ConvertV1DtoToInternalFlag is converting a DTO to a flag.InternalFlag
 func ConvertV1DtoToInternalFlag(dto DTO) flag.InternalFlag {
 	var rollout *flag.Rollout
 	if dto.Rollout != nil {
