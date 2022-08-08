@@ -4,7 +4,7 @@ import (
 	"context"
 	"crypto/md5" //nolint: gosec
 	"io"
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"cloud.google.com/go/storage"
@@ -114,7 +114,7 @@ func TestGCStorageRetriever_Retrieve(t *testing.T) {
 			}
 
 			// Read default file.
-			want, err := ioutil.ReadFile("./testdata/flag-config.yaml")
+			want, err := os.ReadFile("./testdata/flag-config.yaml")
 			assert.NoError(t, err)
 			r.cache = want
 
@@ -132,7 +132,7 @@ func TestGCStorageRetriever_Retrieve(t *testing.T) {
 				// If expect data not to be in cache, mock the
 				// remote hash to a different one that the local hash.
 
-				want, err = ioutil.ReadFile("./testdata/flag-config-updated.yaml")
+				want, err = os.ReadFile("./testdata/flag-config-updated.yaml")
 				assert.NoError(t, err)
 
 				md5Hash = md5.Sum(want) //nolint: gosec

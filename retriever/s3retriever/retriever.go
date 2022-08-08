@@ -3,7 +3,7 @@ package s3retriever
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -32,7 +32,7 @@ func (s *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	// Download the item from the bucket.
 	// If an error occurs, log it and exit.
 	// Otherwise, notify the user that the download succeeded.
-	file, err := ioutil.TempFile("", "go_feature_flag")
+	file, err := os.CreateTemp("", "go_feature_flag")
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func (s *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	}
 
 	// Read file content
-	content, err := ioutil.ReadAll(file)
+	content, err := os.ReadFile(file.Name())
 	if err != nil {
 		return nil, err
 	}

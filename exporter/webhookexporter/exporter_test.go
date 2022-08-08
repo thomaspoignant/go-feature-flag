@@ -3,7 +3,6 @@ package webhookexporter
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"testing"
@@ -166,7 +165,7 @@ func TestWebhook_Export(t *testing.T) {
 
 			assert.NoError(t, err)
 			if tt.expected.bodyFilePath != "" {
-				c, err := ioutil.ReadFile(tt.expected.bodyFilePath)
+				c, err := os.ReadFile(tt.expected.bodyFilePath)
 				fmt.Println(err)
 				assert.JSONEq(t, string(c), tt.fields.httpClient.Body)
 			}

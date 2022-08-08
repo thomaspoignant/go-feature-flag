@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -63,7 +63,7 @@ func (c *Notifier) Notify(diff notifier.DiffCache, wg *sync.WaitGroup) error {
 	request := http.Request{
 		Method: http.MethodPost,
 		URL:    slackURL,
-		Body:   ioutil.NopCloser(bytes.NewReader(payload)),
+		Body:   io.NopCloser(bytes.NewReader(payload)),
 		Header: map[string][]string{"Content-type": {"application/json"}},
 	}
 	response, err := c.httpClient.Do(&request)

@@ -1,7 +1,6 @@
 package ffclient_test
 
 import (
-	"io/ioutil"
 	"log"
 	"os"
 	"testing"
@@ -174,8 +173,8 @@ func TestUpdateFlag(t *testing.T) {
   false: false
   default: false`
 
-	flagFile, _ := ioutil.TempFile("", "")
-	_ = ioutil.WriteFile(flagFile.Name(), []byte(initialFileContent), 0o600)
+	flagFile, _ := os.CreateTemp("", "")
+	_ = os.WriteFile(flagFile.Name(), []byte(initialFileContent), os.ModePerm)
 
 	gffClient1, _ := ffclient.New(ffclient.Config{
 		PollingInterval: 1 * time.Second,
@@ -194,7 +193,7 @@ func TestUpdateFlag(t *testing.T) {
   false: false
   default: false`
 
-	_ = ioutil.WriteFile(flagFile.Name(), []byte(updatedFileContent), 0o600)
+	_ = os.WriteFile(flagFile.Name(), []byte(updatedFileContent), os.ModePerm)
 
 	flagValue, _ = gffClient1.BoolVariation("test-flag", ffuser.NewUser("random-key"), false)
 	assert.True(t, flagValue)
@@ -213,8 +212,8 @@ func TestImpossibleToLoadfile(t *testing.T) {
   false: false
   default: false`
 
-	flagFile, _ := ioutil.TempFile("", "impossible")
-	_ = ioutil.WriteFile(flagFile.Name(), []byte(initialFileContent), 0o600)
+	flagFile, _ := os.CreateTemp("", "impossible")
+	_ = os.WriteFile(flagFile.Name(), []byte(initialFileContent), os.ModePerm)
 
 	gffClient1, _ := ffclient.New(ffclient.Config{
 		PollingInterval: 1 * time.Second,
@@ -245,7 +244,7 @@ func TestFlagFileUnreachable(t *testing.T) {
   false: "false"
   default: "false"`
 
-	tempDir, _ := ioutil.TempDir("", "")
+	tempDir, _ := os.MkdirTemp("", "")
 	defer os.Remove(tempDir)
 
 	flagFilePath := tempDir + "_FlagFileUnreachable.yaml"
@@ -262,7 +261,7 @@ func TestFlagFileUnreachable(t *testing.T) {
 	flagValue, _ := gff.StringVariation("test-flag", ffuser.NewUser("random-key"), "SDKdefault")
 	assert.Equal(t, "SDKdefault", flagValue, "should use the SDK default value")
 
-	_ = ioutil.WriteFile(flagFilePath, []byte(initialFileContent), 0o600)
+	_ = os.WriteFile(flagFilePath, []byte(initialFileContent), os.ModePerm)
 	time.Sleep(2 * time.Second)
 
 	flagValue, _ = gff.StringVariation("test-flag", ffuser.NewUser("random-key"), "SDKdefault")

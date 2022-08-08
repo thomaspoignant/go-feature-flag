@@ -2,8 +2,8 @@ package logsexporter_test
 
 import (
 	"context"
-	"io/ioutil"
 	"log"
+	"os"
 	"testing"
 
 	"github.com/thomaspoignant/go-feature-flag/exporter/logsexporter"
@@ -86,7 +86,7 @@ func TestLog_Export(t *testing.T) {
 				LogFormat: tt.fields.LogFormat,
 			}
 
-			logFile, _ := ioutil.TempFile("", "")
+			logFile, _ := os.CreateTemp("", "")
 			logger := log.New(logFile, "", 0)
 
 			err := f.Export(context.Background(), logger, tt.args.featureEvents)
@@ -98,7 +98,7 @@ func TestLog_Export(t *testing.T) {
 
 			assert.NoError(t, err, "Exporter exporter should not throw errors")
 
-			logContent, _ := ioutil.ReadFile(logFile.Name())
+			logContent, _ := os.ReadFile(logFile.Name())
 			assert.Regexp(t, tt.expectedLog, string(logContent))
 		})
 	}

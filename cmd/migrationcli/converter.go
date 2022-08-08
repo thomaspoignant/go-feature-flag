@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/pelletier/go-toml"
@@ -22,7 +22,7 @@ type FlagConverter struct {
 
 func (f *FlagConverter) Migrate() error {
 	// Read content of the file
-	content, err := ioutil.ReadFile(f.InputFile)
+	content, err := os.ReadFile(f.InputFile)
 	if err != nil {
 		return fmt.Errorf("file %v is impossible to find", f.InputFile)
 	}
@@ -92,5 +92,5 @@ func (f *FlagConverter) output(fileContent []byte) error {
 		return nil
 	}
 
-	return ioutil.WriteFile(f.OutputFile, fileContent, 0o600)
+	return os.WriteFile(f.OutputFile, fileContent, os.ModePerm)
 }
