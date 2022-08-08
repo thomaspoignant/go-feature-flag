@@ -49,7 +49,7 @@ func ConvertV0DtoToInternalFlag(d DTO, isScheduledStep bool) flag.InternalFlag {
 	}
 
 	var rollout *flag.Rollout
-	if d.RolloutV0 != nil && (d.RolloutV0.Experimentation != nil || d.RolloutV0.Scheduled != nil) {
+	if d.Rollout != nil && (d.Rollout.Experimentation != nil || d.Rollout.V0Rollout.Scheduled != nil) {
 		rollout = convertRollout(d, internalFlag)
 	}
 
@@ -59,10 +59,10 @@ func ConvertV0DtoToInternalFlag(d DTO, isScheduledStep bool) flag.InternalFlag {
 
 // createDefaultLegacyRuleV0 create the default rule based on the legacy format.
 func createDefaultLegacyRuleV0(d DTO, hasTargetRule bool) *flag.Rule {
-	hasProgressiveRollout := d.RolloutV0 != nil &&
-		d.RolloutV0.Progressive != nil &&
-		d.RolloutV0.Progressive.ReleaseRamp.Start != nil &&
-		d.RolloutV0.Progressive.ReleaseRamp.End != nil
+	hasProgressiveRollout := d.Rollout != nil &&
+		d.Rollout.Progressive != nil &&
+		d.Rollout.Progressive.ReleaseRamp.Start != nil &&
+		d.Rollout.Progressive.ReleaseRamp.End != nil
 
 	if hasProgressiveRollout && !hasTargetRule {
 		return &flag.Rule{
@@ -70,13 +70,13 @@ func createDefaultLegacyRuleV0(d DTO, hasTargetRule bool) *flag.Rule {
 			ProgressiveRollout: &flag.ProgressiveRollout{
 				Initial: &flag.ProgressiveRolloutStep{
 					Variation:  &falseVariation,
-					Percentage: &d.RolloutV0.Progressive.Percentage.Initial,
-					Date:       d.RolloutV0.Progressive.ReleaseRamp.Start,
+					Percentage: &d.Rollout.Progressive.Percentage.Initial,
+					Date:       d.Rollout.Progressive.ReleaseRamp.Start,
 				},
 				End: &flag.ProgressiveRolloutStep{
 					Variation:  &trueVariation,
-					Percentage: &d.RolloutV0.Progressive.Percentage.End,
-					Date:       d.RolloutV0.Progressive.ReleaseRamp.End,
+					Percentage: &d.Rollout.Progressive.Percentage.End,
+					Date:       d.Rollout.Progressive.ReleaseRamp.End,
 				},
 			},
 		}
@@ -106,20 +106,20 @@ func createDefaultLegacyRuleV0(d DTO, hasTargetRule bool) *flag.Rule {
 func createLegacyRuleV0(d DTO) flag.Rule {
 	// Handle the specific use case of progressive rollout.
 	var progressiveRollout *flag.ProgressiveRollout
-	if d.RolloutV0 != nil &&
-		d.RolloutV0.Progressive != nil &&
-		d.RolloutV0.Progressive.ReleaseRamp.Start != nil &&
-		d.RolloutV0.Progressive.ReleaseRamp.End != nil {
+	if d.Rollout != nil &&
+		d.Rollout.Progressive != nil &&
+		d.Rollout.Progressive.ReleaseRamp.Start != nil &&
+		d.Rollout.Progressive.ReleaseRamp.End != nil {
 		progressiveRollout = &flag.ProgressiveRollout{
 			Initial: &flag.ProgressiveRolloutStep{
 				Variation:  &falseVariation,
-				Percentage: &d.RolloutV0.Progressive.Percentage.Initial,
-				Date:       d.RolloutV0.Progressive.ReleaseRamp.Start,
+				Percentage: &d.Rollout.Progressive.Percentage.Initial,
+				Date:       d.Rollout.Progressive.ReleaseRamp.Start,
 			},
 			End: &flag.ProgressiveRolloutStep{
 				Variation:  &trueVariation,
-				Percentage: &d.RolloutV0.Progressive.Percentage.End,
-				Date:       d.RolloutV0.Progressive.ReleaseRamp.End,
+				Percentage: &d.Rollout.Progressive.Percentage.End,
+				Date:       d.Rollout.Progressive.ReleaseRamp.End,
 			},
 		}
 	}
@@ -262,22 +262,25 @@ func createScheduledStep(f flag.InternalFlag, dto ScheduledStepV0) flag.Schedule
 
 func convertRollout(dto DTO, f flag.InternalFlag) *flag.Rollout {
 	r := flag.Rollout{}
-	if dto.RolloutV0.Experimentation != nil &&
-		dto.RolloutV0.Experimentation.Start != nil &&
-		dto.RolloutV0.Experimentation.End != nil {
+	if dto.Rollout.Experimentation != nil &&
+		dto.Rollout.Experimentation.Start != nil &&
+		dto.Rollout.Experimentation.End != nil {
 		r.Experimentation = &flag.ExperimentationRollout{
-			Start: dto.RolloutV0.Experimentation.Start,
-			End:   dto.RolloutV0.Experimentation.End,
+			Start: dto.Rollout.Experimentation.Start,
+			End:   dto.Rollout.Experimentation.End,
 		}
 	}
 
 	// it is not allowed to have a scheduled step inside a scheduled step
-	if dto.RolloutV0.Scheduled != nil && dto.RolloutV0.Scheduled.Steps != nil {
-		var convertedSteps []flag.ScheduledStep
-		for _, v := range dto.RolloutV0.Scheduled.Steps {
-			convertedSteps = append(convertedSteps, createScheduledStep(f, v))
+	if dto.Rollout.V0Rollout.Scheduled != nil {
+		s := *dto.Rollout.V0Rollout.Scheduled
+		if s.Steps != nil {
+			var convertedSteps []flag.ScheduledStep
+			for _, v := range s.Steps {
+				convertedSteps = append(convertedSteps, createScheduledStep(f, v))
+			}
+			r.Scheduled = &convertedSteps
 		}
-		r.Scheduled = &convertedSteps
 	}
 	return &r
 }
@@ -304,23 +307,23 @@ func deepCopyPercentages(in map[string]float64) *map[string]float64 {
 // convertProgressiveRollout convert the legacy format to the new format.
 // If we can't convert we return a nil value.
 func convertScheduledStepProgressiveRollout(dto ScheduledStepV0) *flag.ProgressiveRollout {
-	hasProgressiveRollout := dto.RolloutV0 != nil &&
-		dto.RolloutV0.Progressive != nil &&
-		dto.RolloutV0.Progressive.ReleaseRamp.End != nil &&
-		dto.RolloutV0.Progressive.ReleaseRamp.Start != nil
+	hasProgressiveRollout := dto.Rollout != nil &&
+		dto.Rollout.Progressive != nil &&
+		dto.Rollout.Progressive.ReleaseRamp.End != nil &&
+		dto.Rollout.Progressive.ReleaseRamp.Start != nil
 
 	var progressive *flag.ProgressiveRollout
 	if hasProgressiveRollout {
 		progressive = &flag.ProgressiveRollout{
 			Initial: &flag.ProgressiveRolloutStep{
 				Variation:  &falseVariation,
-				Percentage: &dto.RolloutV0.Progressive.Percentage.Initial,
-				Date:       dto.RolloutV0.Progressive.ReleaseRamp.Start,
+				Percentage: &dto.Rollout.Progressive.Percentage.Initial,
+				Date:       dto.Rollout.Progressive.ReleaseRamp.Start,
 			},
 			End: &flag.ProgressiveRolloutStep{
 				Variation:  &trueVariation,
-				Percentage: &dto.RolloutV0.Progressive.Percentage.End,
-				Date:       dto.RolloutV0.Progressive.ReleaseRamp.End,
+				Percentage: &dto.Rollout.Progressive.Percentage.End,
+				Date:       dto.Rollout.Progressive.ReleaseRamp.End,
 			},
 		}
 	}

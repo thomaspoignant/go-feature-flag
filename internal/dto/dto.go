@@ -25,7 +25,13 @@ type DTO struct {
 	// Converter (optional) is the name of converter to use, if no converter specified we try to determine
 	// which converter to use based on the fields we receive for the flag
 	Converter *string `json:"converter,omitempty" yaml:"converter,omitempty" toml:"converter,omitempty"`
+
+	// Rollout is the object to configure how the flag is rolled out.
+	// You have different rollout strategy available but only one is used at a time.
+	Rollout *Rollout `json:"rollout,omitempty" yaml:"rollout,omitempty" toml:"rollout,omitempty"`
 }
+
+// DTOv1 is the new format of the flags since version 1.X.X
 type DTOv1 struct {
 	// Variations are all the variations available for this flag. The minimum is 2 variations and, we don't have any max
 	// limit except if the variationValue is a bool, the max is 2.
@@ -38,9 +44,6 @@ type DTOv1 struct {
 	// DefaultRule is the originalRule applied after checking that any other rules
 	// matched the user.
 	DefaultRule *flag.Rule `json:"defaultRule,omitempty" yaml:"defaultRule,omitempty" toml:"defaultRule,omitempty"`
-
-	// Rollout is how we roll out the flag
-	Rollout *flag.Rollout `json:"rollout2,omitempty" yaml:"rollout2,omitempty" toml:"rollout2,omitempty"`
 }
 
 // DTOv0 describe the fields of a flag.
@@ -64,12 +67,14 @@ type DTOv0 struct {
 
 	// Default is the value return by the flag if not apply to the user (rule is evaluated to false).
 	Default *interface{} `json:"default,omitempty" yaml:"default,omitempty" toml:"default,omitempty"`
-
-	// RolloutV0 is the object to configure how the flag is rolled out.
-	// You have different rollout strategy available but only one is used at a time.
-	RolloutV0 *RolloutV0 `json:"rollout,omitempty" yaml:"rollout,omitempty" toml:"rollout,omitempty"`
 }
 
 func (d *DTO) Convert() flag.InternalFlag {
-	return ConvertV0DtoToInternalFlag(*d, false)
+	if d == nil {
+		return flag.InternalFlag{}
+	}
+	if (d.Converter != nil && *d.Converter == "v0") || d.True != nil || d.False != nil {
+		return ConvertV0DtoToInternalFlag(*d, false)
+	}
+	return ConvertV1DtoToInternalFlag(*d)
 }

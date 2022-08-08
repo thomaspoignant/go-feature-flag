@@ -6,7 +6,7 @@ type RolloutV0 struct {
 	// Experimentation is your struct to configure an experimentation, it will allow you to configure a start date and
 	// an end date for your flag.
 	// When the experimentation is not running, the flag will serve the default value.
-	Experimentation *ExperimentationV0 `json:"experimentation,omitempty" yaml:"experimentation,omitempty" toml:"experimentation,omitempty"` // nolint: lll
+	Experimentation *ExperimentationDto `json:"experimentation,omitempty" yaml:"experimentation,omitempty" toml:"experimentation,omitempty"` // nolint: lll
 
 	// Progressive is your struct to configure a progressive rollout deployment of your flag.
 	// It will allow you to ramp up the percentage of your flag over time.
@@ -18,27 +18,6 @@ type RolloutV0 struct {
 	// You can add several steps that updates the flag, this is typically used if you want to gradually add more user
 	// in your flag.
 	Scheduled *ScheduledRolloutV0 `json:"scheduled,omitempty" yaml:"scheduled,omitempty" toml:"scheduled,omitempty"` // nolint: lll
-}
-
-type ExperimentationV0 struct {
-	// Start is the starting time of the experimentation
-	Start *time.Time `json:"start,omitempty" yaml:"start,omitempty" toml:"start,omitempty"`
-
-	// End is the ending time of the experimentation
-	End *time.Time `json:"end,omitempty" yaml:"end,omitempty" toml:"end,omitempty"`
-}
-
-// ProgressiveV0 is the configuration struct to define a progressive rollout.
-type ProgressiveV0 struct {
-	// Percentage is where you can configure at what percentage your progressive rollout start
-	// and at what percentage it ends.
-	// This field is optional
-	Percentage ProgressivePercentageV0 `json:"percentage,omitempty" yaml:"percentage,omitempty" toml:"percentage,omitempty"` // nolint: lll
-
-	// ReleaseRamp is the defining when the progressive rollout starts and ends.
-	// This field is mandatory if you want to use a progressive rollout.
-	// If any field missing we ignore the progressive rollout.
-	ReleaseRamp ProgressiveReleaseRampV0 `json:"releaseRamp,omitempty" yaml:"releaseRamp,omitempty" toml:"releaseRamp,omitempty"` // nolint: lll
 }
 
 type ProgressivePercentageV0 struct {
