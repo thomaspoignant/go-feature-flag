@@ -990,3 +990,136 @@ func TestFlag_ProgressiveRollout(t *testing.T) {
 	v3, _ := f.Value(flagName, user, flag.EvaluationContext{})
 	assert.Equal(t, f.GetVariationValue("variation_B"), v3)
 }
+
+func TestInternalFlag_GetVariations(t *testing.T) {
+	tests := []struct {
+		name string
+		flag flag.InternalFlag
+		want map[string]*interface{}
+	}{
+		{
+			name: "Should return empty map if variations nil",
+			flag: flag.InternalFlag{Variations: nil},
+			want: map[string]*interface{}{},
+		},
+		{
+			name: "Should return empty map if variations empty map",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{},
+			},
+			want: map[string]*interface{}{},
+		},
+		{
+			name: "Should return variations if map is not empty",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"varA": testconvert.Interface("valueA"),
+					"varB": testconvert.Interface("valueB"),
+				},
+			},
+			want: map[string]*interface{}{
+				"varA": testconvert.Interface("valueA"),
+				"varB": testconvert.Interface("valueB"),
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equalf(t, tt.want, tt.flag.GetVariations(), "GetVariations()")
+		})
+	}
+}
+
+func TestInternalFlag_GetRuleIndexByName(t *testing.T) {
+	tests := []struct {
+		name     string
+		flag     flag.InternalFlag
+		ruleName string
+		want     *int
+	}{
+		{
+			name: "Should return nil if no rules in flag",
+			flag: flag.InternalFlag{
+				Rules: nil,
+			},
+			ruleName: "rule1",
+			want:     nil,
+		},
+		{
+			name: "Should return nil if empty slide of rule",
+			flag: flag.InternalFlag{
+				Rules: &[]flag.Rule{},
+			},
+			ruleName: "rule1",
+			want:     nil,
+		},
+		{
+			name: "Should return nil if empty slide of rule",
+			flag: flag.InternalFlag{
+				Rules: &[]flag.Rule{
+					{
+						Name: testconvert.String("rule0"),
+					},
+					{
+						Name: testconvert.String("rule1"),
+					},
+				},
+			},
+			ruleName: "rule1",
+			want:     testconvert.Int(1),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equalf(t, tt.want, tt.flag.GetRuleIndexByName(tt.ruleName), "GetRuleIndexByName(%v)", tt.ruleName)
+		})
+	}
+}
+
+func TestInternalFlag_GetVariationValue(t *testing.T) {
+	tests := []struct {
+		name      string
+		flag      flag.InternalFlag
+		variation string
+		want      interface{}
+	}{
+		{
+			name: "Should return nil if variation does not exists",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"varA": testconvert.Interface("valueA"),
+					"varB": testconvert.Interface("valueB"),
+				},
+			},
+			variation: "varC",
+			want:      nil,
+		},
+		{
+			name: "Should return variation value if exists",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"varA": testconvert.Interface("valueA"),
+					"varB": testconvert.Interface("valueB"),
+				},
+			},
+			variation: "varA",
+			want:      "valueA",
+		},
+		{
+			name: "Should return nil if variation value is nil",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"varA": testconvert.Interface(nil),
+					"varB": testconvert.Interface("valueB"),
+				},
+			},
+			variation: "varA",
+			want:      nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equalf(t, tt.want, tt.flag.GetVariationValue(tt.variation), "GetVariationValue(%v)", tt.variation)
+		})
+	}
+}

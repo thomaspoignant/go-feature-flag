@@ -222,11 +222,6 @@ func (f *InternalFlag) GetVersion() string {
 	return *f.Version
 }
 
-// GetRollout is the getter for the field Rollout
-func (f *InternalFlag) GetRollout() *Rollout {
-	return f.Rollout
-}
-
 // GetVariationValue return the value of variation from his name
 func (f *InternalFlag) GetVariationValue(name string) interface{} {
 	for k, v := range f.GetVariations() {
