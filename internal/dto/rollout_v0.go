@@ -67,6 +67,6 @@ type ScheduledRolloutV0 struct {
 }
 
 type ScheduledStepV0 struct {
-	DTOv0 `yaml:",inline"`
-	Date  *time.Time `json:"date,omitempty" yaml:"date,omitempty" toml:"date,omitempty"`
+	DTO  `yaml:",inline"`
+	Date *time.Time `json:"date,omitempty" yaml:"date,omitempty" toml:"date,omitempty"`
 }

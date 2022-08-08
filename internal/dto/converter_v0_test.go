@@ -18,16 +18,16 @@ import (
 func TestConvertV0DtoToInternalFlag(t *testing.T) {
 	tests := []struct {
 		name string
-		d    dto.DTOv0
+		d    dto.DTO
 		want flag.InternalFlag
 	}{
 		{
 			name: "Simplest flag, no converter provided",
-			d: dto.DTOv0{
+			d: dto.DTO{DTOv0: dto.DTOv0{
 				True:    testconvert.Interface("true"),
 				False:   testconvert.Interface("false"),
 				Default: testconvert.Interface("default"),
-			},
+			}},
 			want: flag.InternalFlag{
 				Variations: &map[string]*interface{}{
 					"Default": testconvert.Interface("default"),
@@ -46,12 +46,12 @@ func TestConvertV0DtoToInternalFlag(t *testing.T) {
 		},
 		{
 			name: "Flag with percentage",
-			d: dto.DTOv0{
+			d: dto.DTO{DTOv0: dto.DTOv0{
 				Percentage: testconvert.Float64(10),
 				True:       testconvert.Interface("true"),
 				False:      testconvert.Interface("false"),
 				Default:    testconvert.Interface("default"),
-			},
+			}},
 			want: flag.InternalFlag{
 				Variations: &map[string]*interface{}{
 					"Default": testconvert.Interface("default"),
@@ -69,12 +69,12 @@ func TestConvertV0DtoToInternalFlag(t *testing.T) {
 		},
 		{
 			name: "Flag with 100 percentage",
-			d: dto.DTOv0{
+			d: dto.DTO{DTOv0: dto.DTOv0{
 				Percentage: testconvert.Float64(100),
 				True:       testconvert.Interface("true"),
 				False:      testconvert.Interface("false"),
 				Default:    testconvert.Interface("default"),
-			},
+			}},
 			want: flag.InternalFlag{
 				Variations: &map[string]*interface{}{
 					"Default": testconvert.Interface("default"),
@@ -93,12 +93,12 @@ func TestConvertV0DtoToInternalFlag(t *testing.T) {
 		},
 		{
 			name: "Flag with rule not match",
-			d: dto.DTOv0{
+			d: dto.DTO{DTOv0: dto.DTOv0{
 				Rule:    testconvert.String("key eq \"random\""),
 				True:    testconvert.Interface("true"),
 				False:   testconvert.Interface("false"),
 				Default: testconvert.Interface("default"),
-			},
+			}},
 			want: flag.InternalFlag{
 				Variations: &map[string]*interface{}{
 					"Default": testconvert.Interface("default"),
@@ -123,12 +123,12 @@ func TestConvertV0DtoToInternalFlag(t *testing.T) {
 		},
 		{
 			name: "Flag with rule match",
-			d: dto.DTOv0{
+			d: dto.DTO{DTOv0: dto.DTOv0{
 				Rule:    testconvert.String("key eq \"test-user\""),
 				True:    testconvert.Interface("true"),
 				False:   testconvert.Interface("false"),
 				Default: testconvert.Interface("default"),
-			},
+			}},
 			want: flag.InternalFlag{
 				Variations: &map[string]*interface{}{
 					"Default": testconvert.Interface("default"),
@@ -153,13 +153,13 @@ func TestConvertV0DtoToInternalFlag(t *testing.T) {
 		},
 		{
 			name: "Flag with rule match + 10% percentage",
-			d: dto.DTOv0{
+			d: dto.DTO{DTOv0: dto.DTOv0{
 				Rule:       testconvert.String("key eq \"test-user\""),
 				Percentage: testconvert.Float64(10),
 				True:       testconvert.Interface("true"),
 				False:      testconvert.Interface("false"),
 				Default:    testconvert.Interface("default"),
-			},
+			}},
 			want: flag.InternalFlag{
 				Variations: &map[string]*interface{}{
 					"Default": testconvert.Interface("default"),
@@ -184,19 +184,19 @@ func TestConvertV0DtoToInternalFlag(t *testing.T) {
 		},
 		{
 			name: "Flag with query + experimentation rollout",
-			d: dto.DTOv0{
+			d: dto.DTO{DTOv0: dto.DTOv0{
 				Rule:       testconvert.String("key eq \"test-user\""),
 				Percentage: testconvert.Float64(100),
 				True:       testconvert.Interface("true"),
 				False:      testconvert.Interface("false"),
 				Default:    testconvert.Interface("default"),
-				Rollout: &dto.RolloutV0{
+				RolloutV0: &dto.RolloutV0{
 					Experimentation: &dto.ExperimentationV0{
 						Start: testconvert.Time(time.Date(2021, time.February, 1, 10, 10, 10, 10, time.UTC)),
 						End:   testconvert.Time(time.Date(2021, time.February, 2, 10, 10, 10, 10, time.UTC)),
 					},
 				},
-			},
+			}},
 			want: flag.InternalFlag{
 				Variations: &map[string]*interface{}{
 					"Default": testconvert.Interface("default"),
@@ -227,13 +227,13 @@ func TestConvertV0DtoToInternalFlag(t *testing.T) {
 		},
 		{
 			name: "Flag with query + progressive rollout",
-			d: dto.DTOv0{
+			d: dto.DTO{DTOv0: dto.DTOv0{
 				Rule:       testconvert.String("key eq \"test-user\""),
 				Percentage: testconvert.Float64(100),
 				True:       testconvert.Interface("true"),
 				False:      testconvert.Interface("false"),
 				Default:    testconvert.Interface("default"),
-				Rollout: &dto.RolloutV0{
+				RolloutV0: &dto.RolloutV0{
 					Progressive: &dto.ProgressiveV0{
 						Percentage: dto.ProgressivePercentageV0{
 							Initial: 0,
@@ -245,7 +245,7 @@ func TestConvertV0DtoToInternalFlag(t *testing.T) {
 						},
 					},
 				},
-			},
+			}},
 			want: flag.InternalFlag{
 				Variations: &map[string]*interface{}{
 					"Default": testconvert.Interface("default"),
@@ -278,11 +278,11 @@ func TestConvertV0DtoToInternalFlag(t *testing.T) {
 		},
 		{
 			name: "Flag without query + progressive rollout",
-			d: dto.DTOv0{
+			d: dto.DTO{DTOv0: dto.DTOv0{
 				True:    testconvert.Interface("true"),
 				False:   testconvert.Interface("false"),
 				Default: testconvert.Interface("default"),
-				Rollout: &dto.RolloutV0{
+				RolloutV0: &dto.RolloutV0{
 					Progressive: &dto.ProgressiveV0{
 						Percentage: dto.ProgressivePercentageV0{
 							Initial: 0,
@@ -294,7 +294,7 @@ func TestConvertV0DtoToInternalFlag(t *testing.T) {
 						},
 					},
 				},
-			},
+			}},
 			want: flag.InternalFlag{
 				Variations: &map[string]*interface{}{
 					"Default": testconvert.Interface("default"),
@@ -343,12 +343,12 @@ func TestConvertV0ScheduleStep(t *testing.T) {
 					False:      testconvert.Interface("false"),
 					Default:    testconvert.Interface("default"),
 					Percentage: testconvert.Float64(95),
-					Rollout: &dto.RolloutV0{
+					RolloutV0: &dto.RolloutV0{
 						Scheduled: &dto.ScheduledRolloutV0{Steps: []dto.ScheduledStepV0{
 							{
-								DTOv0: dto.DTOv0{
+								DTO: dto.DTO{DTOv0: dto.DTOv0{
 									Rule: testconvert.String("anonymous eq false"),
-								},
+								}},
 								Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
 							},
 						}},
@@ -365,13 +365,13 @@ func TestConvertV0ScheduleStep(t *testing.T) {
 					False:      testconvert.Interface("false"),
 					Default:    testconvert.Interface("default"),
 					Percentage: testconvert.Float64(95),
-					Rollout: &dto.RolloutV0{
+					RolloutV0: &dto.RolloutV0{
 						Scheduled: &dto.ScheduledRolloutV0{Steps: []dto.ScheduledStepV0{
 							{
-								DTOv0: dto.DTOv0{
+								DTO: dto.DTO{DTOv0: dto.DTOv0{
 									Rule:       testconvert.String("anonymous eq false"),
 									Percentage: testconvert.Float64(5),
-								},
+								}},
 								Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
 							},
 						}},
@@ -387,12 +387,12 @@ func TestConvertV0ScheduleStep(t *testing.T) {
 					False:      testconvert.Interface("false"),
 					Default:    testconvert.Interface("default"),
 					Percentage: testconvert.Float64(100),
-					Rollout: &dto.RolloutV0{
+					RolloutV0: &dto.RolloutV0{
 						Scheduled: &dto.ScheduledRolloutV0{Steps: []dto.ScheduledStepV0{
 							{
-								DTOv0: dto.DTOv0{
+								DTO: dto.DTO{DTOv0: dto.DTOv0{
 									Percentage: testconvert.Float64(10),
-								},
+								}},
 								Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
 							},
 						}},
@@ -408,12 +408,12 @@ func TestConvertV0ScheduleStep(t *testing.T) {
 					False:      testconvert.Interface("false"),
 					Default:    testconvert.Interface("default"),
 					Percentage: testconvert.Float64(100),
-					Rollout: &dto.RolloutV0{
+					RolloutV0: &dto.RolloutV0{
 						Scheduled: &dto.ScheduledRolloutV0{Steps: []dto.ScheduledStepV0{
 							{
-								DTOv0: dto.DTOv0{
+								DTO: dto.DTO{DTOv0: dto.DTOv0{
 									Rule: testconvert.String("key eq \"ko\""),
-								},
+								}},
 								Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
 							},
 						}},
@@ -429,12 +429,12 @@ func TestConvertV0ScheduleStep(t *testing.T) {
 					False:      testconvert.Interface("false"),
 					Default:    testconvert.Interface("default"),
 					Percentage: testconvert.Float64(100),
-					Rollout: &dto.RolloutV0{
+					RolloutV0: &dto.RolloutV0{
 						Scheduled: &dto.ScheduledRolloutV0{Steps: []dto.ScheduledStepV0{
 							{
-								DTOv0: dto.DTOv0{
+								DTO: dto.DTO{DTOv0: dto.DTOv0{
 									Rule: testconvert.String("key eq \"yo\""),
-								},
+								}},
 								Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
 							},
 						}},
@@ -450,12 +450,12 @@ func TestConvertV0ScheduleStep(t *testing.T) {
 					False:      testconvert.Interface("false"),
 					Default:    testconvert.Interface("default"),
 					Percentage: testconvert.Float64(100),
-					Rollout: &dto.RolloutV0{
+					RolloutV0: &dto.RolloutV0{
 						Scheduled: &dto.ScheduledRolloutV0{Steps: []dto.ScheduledStepV0{
 							{
-								DTOv0: dto.DTOv0{
+								DTO: dto.DTO{DTOv0: dto.DTOv0{
 									True: testconvert.Interface("newValue"),
-								},
+								}},
 								Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
 							},
 						}},
@@ -471,12 +471,12 @@ func TestConvertV0ScheduleStep(t *testing.T) {
 					False:      testconvert.Interface("false"),
 					Default:    testconvert.Interface("default"),
 					Percentage: testconvert.Float64(100),
-					Rollout: &dto.RolloutV0{
+					RolloutV0: &dto.RolloutV0{
 						Scheduled: &dto.ScheduledRolloutV0{Steps: []dto.ScheduledStepV0{
 							{
-								DTOv0: dto.DTOv0{
+								DTO: dto.DTO{DTOv0: dto.DTOv0{
 									Percentage: testconvert.Float64(10),
-								},
+								}},
 								Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
 							},
 						}},
@@ -492,13 +492,13 @@ func TestConvertV0ScheduleStep(t *testing.T) {
 					False:      testconvert.Interface("false"),
 					Default:    testconvert.Interface("default"),
 					Percentage: testconvert.Float64(100),
-					Rollout: &dto.RolloutV0{
+					RolloutV0: &dto.RolloutV0{
 						Scheduled: &dto.ScheduledRolloutV0{Steps: []dto.ScheduledStepV0{
 							{
-								DTOv0: dto.DTOv0{
+								DTO: dto.DTO{DTOv0: dto.DTOv0{
 									Rule:       testconvert.String("key eq \"yo\""),
 									Percentage: testconvert.Float64(10),
-								},
+								}},
 								Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
 							},
 						}},
@@ -514,13 +514,13 @@ func TestConvertV0ScheduleStep(t *testing.T) {
 					False:      testconvert.Interface("false"),
 					Default:    testconvert.Interface("default"),
 					Percentage: testconvert.Float64(100),
-					Rollout: &dto.RolloutV0{
+					RolloutV0: &dto.RolloutV0{
 						Scheduled: &dto.ScheduledRolloutV0{Steps: []dto.ScheduledStepV0{
 							{
-								DTOv0: dto.DTOv0{
+								DTO: dto.DTO{DTOv0: dto.DTOv0{
 									Rule:       testconvert.String("key eq \"yo\""),
 									Percentage: testconvert.Float64(50),
-								},
+								}},
 								Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
 							},
 						}},
@@ -537,24 +537,24 @@ func TestConvertV0ScheduleStep(t *testing.T) {
 					Default:    testconvert.Interface("default"),
 					Rule:       testconvert.String("key eq \"yo\""),
 					Percentage: testconvert.Float64(100),
-					Rollout: &dto.RolloutV0{
+					RolloutV0: &dto.RolloutV0{
 						Scheduled: &dto.ScheduledRolloutV0{Steps: []dto.ScheduledStepV0{
 							{
-								DTOv0: dto.DTOv0{
+								DTO: dto.DTO{DTOv0: dto.DTOv0{
 									Rule: testconvert.String("key eq \"yo\""),
-								},
+								}},
 								Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
 							},
 							{
-								DTOv0: dto.DTOv0{
+								DTO: dto.DTO{DTOv0: dto.DTOv0{
 									Rule: testconvert.String(""),
-								},
+								}},
 								Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
 							},
 							{
-								DTOv0: dto.DTOv0{
+								DTO: dto.DTO{DTOv0: dto.DTOv0{
 									Percentage: testconvert.Float64(10),
-								},
+								}},
 								Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
 							},
 						}},
@@ -571,12 +571,12 @@ func TestConvertV0ScheduleStep(t *testing.T) {
 					Default:    testconvert.Interface("default"),
 					Rule:       testconvert.String("key eq \"yo\""),
 					Percentage: testconvert.Float64(95),
-					Rollout: &dto.RolloutV0{
+					RolloutV0: &dto.RolloutV0{
 						Scheduled: &dto.ScheduledRolloutV0{Steps: []dto.ScheduledStepV0{
 							{
-								DTOv0: dto.DTOv0{
+								DTO: dto.DTO{DTOv0: dto.DTOv0{
 									Rule: testconvert.String(""),
-								},
+								}},
 								Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
 							},
 						}},
@@ -593,12 +593,12 @@ func TestConvertV0ScheduleStep(t *testing.T) {
 					Default:    testconvert.Interface("default"),
 					Rule:       testconvert.String("key eq \"yo\""),
 					Percentage: testconvert.Float64(95),
-					Rollout: &dto.RolloutV0{
+					RolloutV0: &dto.RolloutV0{
 						Scheduled: &dto.ScheduledRolloutV0{Steps: []dto.ScheduledStepV0{
 							{
-								DTOv0: dto.DTOv0{
+								DTO: dto.DTO{DTOv0: dto.DTOv0{
 									Rule: testconvert.String(""),
-								},
+								}},
 								Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
 							},
 						}},
@@ -615,11 +615,11 @@ func TestConvertV0ScheduleStep(t *testing.T) {
 					Default:    testconvert.Interface("default"),
 					Rule:       testconvert.String("key eq \"yo\""),
 					Percentage: testconvert.Float64(0),
-					Rollout: &dto.RolloutV0{
+					RolloutV0: &dto.RolloutV0{
 						Scheduled: &dto.ScheduledRolloutV0{Steps: []dto.ScheduledStepV0{
 							{
-								DTOv0: dto.DTOv0{
-									Rollout: &dto.RolloutV0{
+								DTO: dto.DTO{DTOv0: dto.DTOv0{
+									RolloutV0: &dto.RolloutV0{
 										Progressive: &dto.ProgressiveV0{
 											Percentage: dto.ProgressivePercentageV0{
 												Initial: 0,
@@ -631,7 +631,7 @@ func TestConvertV0ScheduleStep(t *testing.T) {
 											},
 										},
 									},
-								},
+								}},
 								Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
 							},
 						}},
@@ -648,11 +648,11 @@ func TestConvertV0ScheduleStep(t *testing.T) {
 					Default:    testconvert.Interface("default"),
 					Rule:       testconvert.String("key eq \"yo\""),
 					Percentage: testconvert.Float64(0),
-					Rollout: &dto.RolloutV0{
+					RolloutV0: &dto.RolloutV0{
 						Scheduled: &dto.ScheduledRolloutV0{Steps: []dto.ScheduledStepV0{
 							{
-								DTOv0: dto.DTOv0{
-									Rollout: &dto.RolloutV0{
+								DTO: dto.DTO{DTOv0: dto.DTOv0{
+									RolloutV0: &dto.RolloutV0{
 										Progressive: &dto.ProgressiveV0{
 											Percentage: dto.ProgressivePercentageV0{
 												Initial: 0,
@@ -664,7 +664,7 @@ func TestConvertV0ScheduleStep(t *testing.T) {
 											},
 										},
 									},
-								},
+								}},
 								Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
 							},
 						}},
@@ -681,18 +681,18 @@ func TestConvertV0ScheduleStep(t *testing.T) {
 					Default:    testconvert.Interface("default"),
 					Rule:       testconvert.String("key eq \"yo\""),
 					Percentage: testconvert.Float64(0),
-					Rollout: &dto.RolloutV0{
+					RolloutV0: &dto.RolloutV0{
 						Scheduled: &dto.ScheduledRolloutV0{Steps: []dto.ScheduledStepV0{
 							{
-								DTOv0: dto.DTOv0{
+								DTO: dto.DTO{DTOv0: dto.DTOv0{
 									Percentage: testconvert.Float64(100),
-									Rollout: &dto.RolloutV0{
+									RolloutV0: &dto.RolloutV0{
 										Experimentation: &dto.ExperimentationV0{
 											Start: testconvert.Time(time.Now().Add(-1 * time.Second)),
 											End:   testconvert.Time(time.Now().Add(600 * time.Second)),
 										},
 									},
-								},
+								}},
 								Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
 							},
 						}},
@@ -709,72 +709,74 @@ func TestConvertV0ScheduleStep(t *testing.T) {
 					Default:    testconvert.Interface("default"),
 					Rule:       testconvert.String("key eq \"yo\""),
 					Percentage: testconvert.Float64(100),
-					Rollout: &dto.RolloutV0{
+					RolloutV0: &dto.RolloutV0{
 						Scheduled: &dto.ScheduledRolloutV0{Steps: []dto.ScheduledStepV0{
 							{
-								DTOv0: dto.DTOv0{
+								DTO: dto.DTO{DTOv0: dto.DTOv0{
 									Percentage: testconvert.Float64(10),
-								},
+								}},
 								Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
 							},
 							{
-								DTOv0: dto.DTOv0{
+								DTO: dto.DTO{DTOv0: dto.DTOv0{
 									Rule: testconvert.String("key eq \"yo\""),
-								},
+								}},
 								Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
 							},
 							{
-								DTOv0: dto.DTOv0{
+								DTO: dto.DTO{DTOv0: dto.DTOv0{
 									True: testconvert.Interface("newValue"),
-								},
+								}},
 								Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
 							},
 							{
-								DTOv0: dto.DTOv0{
+								DTO: dto.DTO{DTOv0: dto.DTOv0{
 									Percentage: testconvert.Float64(10),
-								},
+								}},
 								Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
 							},
 							{
-								DTOv0: dto.DTOv0{
+								DTO: dto.DTO{DTOv0: dto.DTOv0{
 									Rule:       testconvert.String(""),
 									Percentage: testconvert.Float64(100),
-								},
+								}},
 								Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
 							},
 							{
-								DTOv0: dto.DTOv0{
+								DTO: dto.DTO{
 									Disable: testconvert.Bool(true),
 								},
 								Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
 							},
 							{
-								DTOv0: dto.DTOv0{
-									Disable:    testconvert.Bool(false),
-									Rule:       testconvert.String("anonymous eq false"),
-									Percentage: testconvert.Float64(100),
+								DTO: dto.DTO{
+									Disable: testconvert.Bool(false),
+									DTOv0: dto.DTOv0{
+										Rule:       testconvert.String("anonymous eq false"),
+										Percentage: testconvert.Float64(100),
+									},
 								},
 								Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
 							},
 							{
-								DTOv0: dto.DTOv0{
-									Rollout: &dto.RolloutV0{
+								DTO: dto.DTO{DTOv0: dto.DTOv0{
+									RolloutV0: &dto.RolloutV0{
 										Experimentation: &dto.ExperimentationV0{
 											Start: testconvert.Time(time.Now().Add(-2 * time.Second)),
 											End:   testconvert.Time(time.Now().Add(2 * time.Second)),
 										},
 									},
-								},
+								}},
 								Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
 							},
 							{
-								DTOv0: dto.DTOv0{
-									Rollout: &dto.RolloutV0{
+								DTO: dto.DTO{DTOv0: dto.DTOv0{
+									RolloutV0: &dto.RolloutV0{
 										Experimentation: &dto.ExperimentationV0{
 											End: testconvert.Time(time.Now().Add(-2 * time.Second)),
 										},
 									},
-								},
+								}},
 								Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
 							},
 						}},
@@ -790,13 +792,13 @@ func TestConvertV0ScheduleStep(t *testing.T) {
 					False:      testconvert.Interface("false"),
 					Default:    testconvert.Interface("default"),
 					Percentage: testconvert.Float64(100),
-					Rollout: &dto.RolloutV0{
+					RolloutV0: &dto.RolloutV0{
 						Scheduled: &dto.ScheduledRolloutV0{Steps: []dto.ScheduledStepV0{
 							{
-								DTOv0: dto.DTOv0{
+								DTO: dto.DTO{DTOv0: dto.DTOv0{
 									Rule:       testconvert.String(""),
 									Percentage: testconvert.Float64(95),
-								},
+								}},
 								Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
 							},
 						}},
@@ -811,11 +813,11 @@ func TestConvertV0ScheduleStep(t *testing.T) {
 					True:    testconvert.Interface("true"),
 					False:   testconvert.Interface("false"),
 					Default: testconvert.Interface("default"),
-					Rollout: &dto.RolloutV0{
+					RolloutV0: &dto.RolloutV0{
 						Scheduled: &dto.ScheduledRolloutV0{Steps: []dto.ScheduledStepV0{
 							{
-								DTOv0: dto.DTOv0{
-									Rollout: &dto.RolloutV0{
+								DTO: dto.DTO{DTOv0: dto.DTOv0{
+									RolloutV0: &dto.RolloutV0{
 										Progressive: &dto.ProgressiveV0{
 											Percentage: dto.ProgressivePercentageV0{
 												Initial: 0,
@@ -827,7 +829,7 @@ func TestConvertV0ScheduleStep(t *testing.T) {
 											},
 										},
 									},
-								},
+								}},
 								Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
 							},
 						}},
@@ -843,22 +845,24 @@ func TestConvertV0ScheduleStep(t *testing.T) {
 					False:   testconvert.Interface("false"),
 					Default: testconvert.Interface("default"),
 					Rule:    testconvert.String("key eq \"yo\""),
-					Rollout: &dto.RolloutV0{
+					RolloutV0: &dto.RolloutV0{
 						Scheduled: &dto.ScheduledRolloutV0{Steps: []dto.ScheduledStepV0{
 							{
-								DTOv0: dto.DTOv0{
-									Rule:        testconvert.String("anonymous eq false"),
+								DTO: dto.DTO{
 									TrackEvents: testconvert.Bool(true),
 									Version:     testconvert.String("1.0.1"),
-									Rollout: &dto.RolloutV0{
-										Progressive: &dto.ProgressiveV0{
-											Percentage: dto.ProgressivePercentageV0{
-												Initial: 0,
-												End:     100,
-											},
-											ReleaseRamp: dto.ProgressiveReleaseRampV0{
-												Start: testconvert.Time(time.Now().Add(-10 * time.Minute)),
-												End:   testconvert.Time(time.Now().Add(0 * time.Minute)),
+									DTOv0: dto.DTOv0{
+										Rule: testconvert.String("anonymous eq false"),
+										RolloutV0: &dto.RolloutV0{
+											Progressive: &dto.ProgressiveV0{
+												Percentage: dto.ProgressivePercentageV0{
+													Initial: 0,
+													End:     100,
+												},
+												ReleaseRamp: dto.ProgressiveReleaseRampV0{
+													Start: testconvert.Time(time.Now().Add(-10 * time.Minute)),
+													End:   testconvert.Time(time.Now().Add(0 * time.Minute)),
+												},
 											},
 										},
 									},
@@ -877,22 +881,25 @@ func TestConvertV0ScheduleStep(t *testing.T) {
 					True:    testconvert.Interface("true"),
 					False:   testconvert.Interface("false"),
 					Default: testconvert.Interface("default"),
-					Rollout: &dto.RolloutV0{
+					RolloutV0: &dto.RolloutV0{
 						Scheduled: &dto.ScheduledRolloutV0{Steps: []dto.ScheduledStepV0{
 							{
-								DTOv0: dto.DTOv0{
-									Rule:        testconvert.String("anonymous eq false"),
+								DTO: dto.DTO{
 									TrackEvents: testconvert.Bool(true),
 									Version:     testconvert.String("1.0.1"),
-									Rollout: &dto.RolloutV0{
-										Progressive: &dto.ProgressiveV0{
-											Percentage: dto.ProgressivePercentageV0{
-												Initial: 0,
-												End:     100,
-											},
-											ReleaseRamp: dto.ProgressiveReleaseRampV0{
-												Start: testconvert.Time(time.Now().Add(-10 * time.Minute)),
-												End:   testconvert.Time(time.Now().Add(0 * time.Minute)),
+									DTOv0: dto.DTOv0{
+										Rule: testconvert.String("anonymous eq false"),
+
+										RolloutV0: &dto.RolloutV0{
+											Progressive: &dto.ProgressiveV0{
+												Percentage: dto.ProgressivePercentageV0{
+													Initial: 0,
+													End:     100,
+												},
+												ReleaseRamp: dto.ProgressiveReleaseRampV0{
+													Start: testconvert.Time(time.Now().Add(-10 * time.Minute)),
+													End:   testconvert.Time(time.Now().Add(0 * time.Minute)),
+												},
 											},
 										},
 									},
@@ -911,22 +918,25 @@ func TestConvertV0ScheduleStep(t *testing.T) {
 					True:    testconvert.Interface("true"),
 					False:   testconvert.Interface("false"),
 					Default: testconvert.Interface("default"),
-					Rollout: &dto.RolloutV0{
+					RolloutV0: &dto.RolloutV0{
 						Scheduled: &dto.ScheduledRolloutV0{Steps: []dto.ScheduledStepV0{
 							{
-								DTOv0: dto.DTOv0{
-									Rule:        testconvert.String(""),
+								DTO: dto.DTO{
 									TrackEvents: testconvert.Bool(true),
 									Version:     testconvert.String("1.0.1"),
-									Rollout: &dto.RolloutV0{
-										Progressive: &dto.ProgressiveV0{
-											Percentage: dto.ProgressivePercentageV0{
-												Initial: 0,
-												End:     100,
-											},
-											ReleaseRamp: dto.ProgressiveReleaseRampV0{
-												Start: testconvert.Time(time.Now().Add(-10 * time.Minute)),
-												End:   testconvert.Time(time.Now().Add(0 * time.Minute)),
+									DTOv0: dto.DTOv0{
+										Rule: testconvert.String(""),
+
+										RolloutV0: &dto.RolloutV0{
+											Progressive: &dto.ProgressiveV0{
+												Percentage: dto.ProgressivePercentageV0{
+													Initial: 0,
+													End:     100,
+												},
+												ReleaseRamp: dto.ProgressiveReleaseRampV0{
+													Start: testconvert.Time(time.Now().Add(-10 * time.Minute)),
+													End:   testconvert.Time(time.Now().Add(0 * time.Minute)),
+												},
 											},
 										},
 									},
@@ -947,7 +957,7 @@ func TestConvertV0ScheduleStep(t *testing.T) {
 			convertInternalFlag := tt.dto.Convert()
 			gotInternalFlag, resolutionDetails := convertInternalFlag.Value(flagName, u, flag.EvaluationContext{})
 
-			convertFlagv1 := flagv1.ConvertDtoToV1(tt.dto.DTOv0)
+			convertFlagv1 := flagv1.ConvertDtoToV1(tt.dto)
 			gotFlagV1, resolutionDetails1 := convertFlagv1.Value(flagName, u, flag.EvaluationContext{})
 
 			fmt.Println(gotFlagV1, gotInternalFlag)

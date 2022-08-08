@@ -362,9 +362,9 @@ func (f *FlagData) GetRawValues() map[string]string {
 	rawValues["Percentage"] = fmt.Sprintf("%.2f", f.getPercentage())
 
 	if f.getRollout() == nil {
-		rawValues["Rollout"] = ""
+		rawValues["RolloutV0"] = ""
 	} else {
-		rawValues["Rollout"] = fmt.Sprintf("%v", f.getRollout())
+		rawValues["RolloutV0"] = fmt.Sprintf("%v", f.getRollout())
 	}
 	rawValues["True"] = convertNilEmpty(f.getTrue())
 	rawValues["False"] = convertNilEmpty(f.getFalse())

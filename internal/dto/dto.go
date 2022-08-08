@@ -7,10 +7,40 @@ import (
 // DTO is representing all the fields we can have in a flag.
 // This DTO supports all flag formats and convert them into an InternalFlag using a converter.
 type DTO struct {
+	DTOv1 `json:",inline" yaml:",inline" toml:",inline"`
 	DTOv0 `json:",inline" yaml:",inline" toml:",inline"`
+
+	// TrackEvents is false if you don't want to export the data in your data exporter.
+	// Default value is true
+	TrackEvents *bool `json:"trackEvents,omitempty" yaml:"trackEvents,omitempty" toml:"trackEvents,omitempty"`
+
+	// Disable is true if the flag is disabled.
+	Disable *bool `json:"disable,omitempty" yaml:"disable,omitempty" toml:"disable,omitempty"`
+
+	// Version (optional) This field contains the version of the flag.
+	// The version is manually managed when you configure your flags and, it is used to display the information
+	// in the notifications and data collection.
+	Version *string `json:"version,omitempty" yaml:"version,omitempty" toml:"version,omitempty"`
+
 	// Converter (optional) is the name of converter to use, if no converter specified we try to determine
 	// which converter to use based on the fields we receive for the flag
 	Converter *string `json:"converter,omitempty" yaml:"converter,omitempty" toml:"converter,omitempty"`
+}
+type DTOv1 struct {
+	// Variations are all the variations available for this flag. The minimum is 2 variations and, we don't have any max
+	// limit except if the variationValue is a bool, the max is 2.
+	Variations *map[string]*interface{} `json:"variations,omitempty" yaml:"variations,omitempty" toml:"variations,omitempty"` // nolint:lll
+
+	// Rules is the list of Rule for this flag.
+	// This an optional field.
+	Rules *[]flag.Rule `json:"targeting,omitempty" yaml:"targeting,omitempty" toml:"targeting,omitempty"`
+
+	// DefaultRule is the originalRule applied after checking that any other rules
+	// matched the user.
+	DefaultRule *flag.Rule `json:"defaultRule,omitempty" yaml:"defaultRule,omitempty" toml:"defaultRule,omitempty"`
+
+	// Rollout is how we roll out the flag
+	Rollout *flag.Rollout `json:"rollout2,omitempty" yaml:"rollout2,omitempty" toml:"rollout2,omitempty"`
 }
 
 // DTOv0 describe the fields of a flag.
@@ -35,23 +65,11 @@ type DTOv0 struct {
 	// Default is the value return by the flag if not apply to the user (rule is evaluated to false).
 	Default *interface{} `json:"default,omitempty" yaml:"default,omitempty" toml:"default,omitempty"`
 
-	// TrackEvents is false if you don't want to export the data in your data exporter.
-	// Default value is true
-	TrackEvents *bool `json:"trackEvents,omitempty" yaml:"trackEvents,omitempty" toml:"trackEvents,omitempty"`
-
-	// Disable is true if the flag is disabled.
-	Disable *bool `json:"disable,omitempty" yaml:"disable,omitempty" toml:"disable,omitempty"`
-
-	// Rollout is the object to configure how the flag is rolled out.
+	// RolloutV0 is the object to configure how the flag is rolled out.
 	// You have different rollout strategy available but only one is used at a time.
-	Rollout *RolloutV0 `json:"rollout,omitempty" yaml:"rollout,omitempty" toml:"rollout,omitempty"`
-
-	// Version (optional) This field contains the version of the flag.
-	// The version is manually managed when you configure your flags and, it is used to display the information
-	// in the notifications and data collection.
-	Version *string `json:"version,omitempty" yaml:"version,omitempty" toml:"version,omitempty"`
+	RolloutV0 *RolloutV0 `json:"rollout,omitempty" yaml:"rollout,omitempty" toml:"rollout,omitempty"`
 }
 
 func (d *DTO) Convert() flag.InternalFlag {
-	return ConvertV0DtoToInternalFlag(d.DTOv0, false)
+	return ConvertV0DtoToInternalFlag(*d, false)
 }

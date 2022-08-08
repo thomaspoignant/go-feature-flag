@@ -2,25 +2,25 @@ package flagv1
 
 import "github.com/thomaspoignant/go-feature-flag/internal/dto"
 
-func ConvertDtoToV1(d dto.DTOv0) FlagData {
+func ConvertDtoToV1(d dto.DTO) FlagData {
 	var r Rollout
 
-	if d.Rollout != nil {
+	if d.RolloutV0 != nil {
 		r = Rollout{}
 
-		if d.Rollout.Progressive != nil {
+		if d.RolloutV0.Progressive != nil {
 			r.Progressive = &Progressive{}
-			r.Progressive.ReleaseRamp.Start = d.Rollout.Progressive.ReleaseRamp.Start
-			r.Progressive.ReleaseRamp.End = d.Rollout.Progressive.ReleaseRamp.End
-			r.Progressive.Percentage.End = d.Rollout.Progressive.Percentage.End
-			r.Progressive.Percentage.Initial = d.Rollout.Progressive.Percentage.Initial
+			r.Progressive.ReleaseRamp.Start = d.RolloutV0.Progressive.ReleaseRamp.Start
+			r.Progressive.ReleaseRamp.End = d.RolloutV0.Progressive.ReleaseRamp.End
+			r.Progressive.Percentage.End = d.RolloutV0.Progressive.Percentage.End
+			r.Progressive.Percentage.Initial = d.RolloutV0.Progressive.Percentage.Initial
 		}
 
-		if d.Rollout.Scheduled != nil {
+		if d.RolloutV0.Scheduled != nil {
 			r.Scheduled = &ScheduledRollout{}
-			if d.Rollout.Scheduled.Steps != nil {
+			if d.RolloutV0.Scheduled.Steps != nil {
 				r.Scheduled.Steps = []ScheduledStep{}
-				for _, step := range d.Rollout.Scheduled.Steps {
+				for _, step := range d.RolloutV0.Scheduled.Steps {
 					f := FlagData{
 						Rule:        step.Rule,
 						Percentage:  step.Percentage,
@@ -30,16 +30,16 @@ func ConvertDtoToV1(d dto.DTOv0) FlagData {
 						TrackEvents: step.TrackEvents,
 						Disable:     step.Disable,
 					}
-					if step.Rollout != nil && step.Rollout.Progressive != nil {
+					if step.RolloutV0 != nil && step.RolloutV0.Progressive != nil {
 						f.Rollout = &Rollout{
 							Progressive: &Progressive{
 								ReleaseRamp: ProgressiveReleaseRamp{
-									Start: step.Rollout.Progressive.ReleaseRamp.Start,
-									End:   step.Rollout.Progressive.ReleaseRamp.End,
+									Start: step.RolloutV0.Progressive.ReleaseRamp.Start,
+									End:   step.RolloutV0.Progressive.ReleaseRamp.End,
 								},
 								Percentage: ProgressivePercentage{
-									Initial: step.Rollout.Progressive.Percentage.Initial,
-									End:     step.Rollout.Progressive.Percentage.End,
+									Initial: step.RolloutV0.Progressive.Percentage.Initial,
+									End:     step.RolloutV0.Progressive.Percentage.End,
 								},
 							},
 						}
@@ -54,13 +54,13 @@ func ConvertDtoToV1(d dto.DTOv0) FlagData {
 			}
 		}
 
-		if d.Rollout.Experimentation != nil {
+		if d.RolloutV0.Experimentation != nil {
 			r.Experimentation = &Experimentation{}
-			if d.Rollout.Experimentation.Start != nil {
-				r.Experimentation.Start = d.Rollout.Experimentation.Start
+			if d.RolloutV0.Experimentation.Start != nil {
+				r.Experimentation.Start = d.RolloutV0.Experimentation.Start
 			}
-			if d.Rollout.Experimentation.End != nil {
-				r.Experimentation.End = d.Rollout.Experimentation.End
+			if d.RolloutV0.Experimentation.End != nil {
+				r.Experimentation.End = d.RolloutV0.Experimentation.End
 			}
 		}
 	}
