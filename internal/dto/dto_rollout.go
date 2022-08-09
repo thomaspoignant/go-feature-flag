@@ -67,15 +67,34 @@ func (p *Rollout) UnmarshalJSON(data []byte) error {
 
 	var v1 V1Rollout
 	// we ignore the unmarshal errors because they are expected since we have multiple format
-	_ = json.Unmarshal(data, &v1)
-	p.V1Rollout = v1
+	err = json.Unmarshal(data, &v1)
+	if err != nil {
+		// TODO: add log in debug only
+	}
+	if v1.Scheduled != nil && *v1.Scheduled != nil {
+		p.V1Rollout = v1
+	}
 
 	var v0 V0Rollout
 	// we ignore the unmarshal errors because they are expected since we have multiple format
-	_ = json.Unmarshal(data, &v0)
+	err = json.Unmarshal(data, &v0)
+	if err != nil {
+		// TODO: add log in debug only
+	}
 	p.V0Rollout = v0
 
 	return nil
+}
+
+// UnmarshalTOML is used for TOML unmarshalling, the lib is not calling directly UnmarshalJSON,
+// so we are calling it after marshaling input in JSON string
+func (p *Rollout) UnmarshalTOML(input interface{}) error {
+	jsonStr, err := json.Marshal(input)
+	if err != nil {
+		// TODO: add log in debug only
+		return err
+	}
+	return p.UnmarshalJSON(jsonStr)
 }
 
 type ScheduledRolloutV0 struct {

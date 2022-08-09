@@ -8,12 +8,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/BurntSushi/toml"
+
 	"github.com/thomaspoignant/go-feature-flag/internal/dto"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"gopkg.in/yaml.v3"
-
-	"github.com/pelletier/go-toml"
 )
 
 type Manager interface {

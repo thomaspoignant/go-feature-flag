@@ -1,12 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
 
-	"github.com/pelletier/go-toml"
+	"github.com/BurntSushi/toml"
+
 	"github.com/thomaspoignant/go-feature-flag/internal/dto"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"gopkg.in/yaml.v3"
@@ -27,12 +29,12 @@ func (f *FlagConverter) Migrate() error {
 		return fmt.Errorf("file %v is impossible to find", f.InputFile)
 	}
 
-	flags, err := f.marshall(content)
+	flags, err := f.unmarshall(content)
 	if err != nil {
 		return err
 	}
 
-	newFileContent, err := f.unmarshall(f.convert(flags))
+	newFileContent, err := f.marshall(f.convert(flags))
 	if err != nil {
 		return err
 	}
@@ -45,7 +47,7 @@ func (f *FlagConverter) Migrate() error {
 	return nil
 }
 
-func (f *FlagConverter) marshall(content []byte) (map[string]dto.DTO, error) {
+func (f *FlagConverter) unmarshall(content []byte) (map[string]dto.DTO, error) {
 	var flags map[string]dto.DTO
 	switch strings.ToLower(f.InputFormat) {
 	case "toml":
@@ -75,10 +77,12 @@ func (f *FlagConverter) convert(flags map[string]dto.DTO) map[string]flag.Intern
 	return convertedFlags
 }
 
-func (f *FlagConverter) unmarshall(convertedFlags map[string]flag.InternalFlag) ([]byte, error) {
+func (f *FlagConverter) marshall(convertedFlags map[string]flag.InternalFlag) ([]byte, error) {
 	switch strings.ToLower(f.OutputFormat) {
 	case "toml":
-		return toml.Marshal(convertedFlags)
+		buf := new(bytes.Buffer)
+		_ = toml.NewEncoder(buf).Encode(convertedFlags)
+		return buf.Bytes(), nil
 	case "json":
 		return json.Marshal(convertedFlags)
 	default:

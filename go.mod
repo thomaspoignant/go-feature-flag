@@ -4,13 +4,13 @@ go 1.17
 
 require (
 	cloud.google.com/go/storage v1.24.0
+	github.com/BurntSushi/toml v1.2.0
 	github.com/aws/aws-sdk-go v1.44.70
 	github.com/gdexlab/go-render v1.0.1
 	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.5.8
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/nikunjy/rules v1.1.0
-	github.com/pelletier/go-toml v1.9.5
 	github.com/r3labs/diff/v3 v3.0.0
 	github.com/stretchr/testify v1.8.0
 	golang.org/x/oauth2 v0.0.0-20220622183110-fd043fe589d2
