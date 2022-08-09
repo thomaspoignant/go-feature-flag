@@ -15,9 +15,14 @@ type ProgressiveRollout struct {
 
 // ProgressiveRolloutStep define a progressive rollout step (initial and end)
 type ProgressiveRolloutStep struct {
-	Variation  *string
-	Percentage *float64
-	Date       *time.Time
+	// Variation - name of the variation for this step
+	Variation *string `json:"variation,omitempty" yaml:"variation,omitempty" toml:"variation,omitempty"`
+
+	// Percentage is the percentage (initial or end) for the progressive rollout
+	Percentage *float64 `json:"percentage,omitempty" yaml:"percentage,omitempty" toml:"percentage,omitempty"`
+
+	// Date is the time it starts or ends.
+	Date *time.Time `json:"date,omitempty" yaml:"date,omitempty" toml:"date,omitempty"`
 }
 
 func (p *ProgressiveRolloutStep) getVariation() string {
