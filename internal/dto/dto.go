@@ -70,7 +70,7 @@ type DTOv0 struct {
 }
 
 func (d *DTO) Convert() flag.InternalFlag {
-	if d == nil {
+	if d == nil || (DTO{}) == *d {
 		return flag.InternalFlag{}
 	}
 	if (d.Converter != nil && *d.Converter == "v0") || d.True != nil || d.False != nil {

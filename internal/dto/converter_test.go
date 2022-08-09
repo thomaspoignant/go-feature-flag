@@ -20,7 +20,11 @@ func TestConvertV0DtoToInternalFlag(t *testing.T) {
 		want flag.InternalFlag
 	}{
 		{
-			name: "Simplest flag, no converter provided",
+			name: "Should return empty if flag dto is nil",
+			want: flag.InternalFlag{},
+		},
+		{
+			name: "[v0] Simplest flag, no converter provided",
 			d: dto.DTO{DTOv0: dto.DTOv0{
 				True:    testconvert.Interface("true"),
 				False:   testconvert.Interface("false"),
@@ -43,7 +47,7 @@ func TestConvertV0DtoToInternalFlag(t *testing.T) {
 			},
 		},
 		{
-			name: "Flag with percentage",
+			name: "[v0] Flag with percentage",
 			d: dto.DTO{DTOv0: dto.DTOv0{
 				Percentage: testconvert.Float64(10),
 				True:       testconvert.Interface("true"),
@@ -66,7 +70,7 @@ func TestConvertV0DtoToInternalFlag(t *testing.T) {
 			},
 		},
 		{
-			name: "Flag with 100 percentage",
+			name: "[v0] Flag with 100 percentage",
 			d: dto.DTO{DTOv0: dto.DTOv0{
 				Percentage: testconvert.Float64(100),
 				True:       testconvert.Interface("true"),
@@ -90,7 +94,7 @@ func TestConvertV0DtoToInternalFlag(t *testing.T) {
 			},
 		},
 		{
-			name: "Flag with rule not match",
+			name: "[v0] Flag with rule not match",
 			d: dto.DTO{DTOv0: dto.DTOv0{
 				Rule:    testconvert.String("key eq \"random\""),
 				True:    testconvert.Interface("true"),
@@ -120,7 +124,7 @@ func TestConvertV0DtoToInternalFlag(t *testing.T) {
 			},
 		},
 		{
-			name: "Flag with rule match",
+			name: "[v0] Flag with rule match",
 			d: dto.DTO{DTOv0: dto.DTOv0{
 				Rule:    testconvert.String("key eq \"test-user\""),
 				True:    testconvert.Interface("true"),
@@ -150,7 +154,7 @@ func TestConvertV0DtoToInternalFlag(t *testing.T) {
 			},
 		},
 		{
-			name: "Flag with rule match + 10% percentage",
+			name: "[v0] Flag with rule match + 10% percentage",
 			d: dto.DTO{DTOv0: dto.DTOv0{
 				Rule:       testconvert.String("key eq \"test-user\""),
 				Percentage: testconvert.Float64(10),
@@ -181,7 +185,7 @@ func TestConvertV0DtoToInternalFlag(t *testing.T) {
 			},
 		},
 		{
-			name: "Flag with query + experimentation rollout",
+			name: "[v0] Flag with query + experimentation rollout",
 			d: dto.DTO{
 				DTOv0: dto.DTOv0{
 					Rule:       testconvert.String("key eq \"test-user\""),
@@ -228,7 +232,7 @@ func TestConvertV0DtoToInternalFlag(t *testing.T) {
 			},
 		},
 		{
-			name: "Flag with query + progressive rollout",
+			name: "[v0] Flag with query + progressive rollout",
 			d: dto.DTO{
 				DTOv0: dto.DTOv0{
 					Rule:       testconvert.String("key eq \"test-user\""),
@@ -283,7 +287,7 @@ func TestConvertV0DtoToInternalFlag(t *testing.T) {
 			},
 		},
 		{
-			name: "Flag without query + progressive rollout",
+			name: "[v0] Flag without query + progressive rollout",
 			d: dto.DTO{
 				DTOv0: dto.DTOv0{
 					True:    testconvert.Interface("true"),
@@ -328,10 +332,121 @@ func TestConvertV0DtoToInternalFlag(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "[v1] Complete and complex flag v1",
+			d: dto.DTO{
+				DTOv1: dto.DTOv1{
+					Variations: &map[string]*interface{}{
+						"VariationDefault": testconvert.Interface(false),
+						"VariationBar":     testconvert.Interface(false),
+						"VariationFoo":     testconvert.Interface(true),
+					},
+					Rules: &[]flag.Rule{
+						{
+							Name:  testconvert.String("rule-number-1"),
+							Query: testconvert.String("key eq \"random-key\""),
+							Percentages: &map[string]float64{
+								"VariationBar": 0,
+								"VariationFoo": 100,
+							},
+						},
+						{
+							Name:  testconvert.String("rule-number-2"),
+							Query: testconvert.String("key eq \"other-random-key\""),
+							ProgressiveRollout: &flag.ProgressiveRollout{
+								Initial: &flag.ProgressiveRolloutStep{
+									Variation:  testconvert.String("VariationBar"),
+									Percentage: testconvert.Float64(0),
+									Date:       testconvert.Time(time.Date(2021, time.February, 1, 10, 10, 10, 10, time.UTC)),
+								},
+								End: &flag.ProgressiveRolloutStep{
+									Variation:  testconvert.String("VariationFoo"),
+									Percentage: testconvert.Float64(100),
+									Date:       testconvert.Time(time.Date(2021, time.February, 2, 10, 10, 10, 10, time.UTC)),
+								},
+							},
+						},
+					},
+					DefaultRule: &flag.Rule{
+						VariationResult: testconvert.String("VariationDefault"),
+					},
+				},
+				Rollout: &dto.Rollout{
+					CommonRollout: dto.CommonRollout{
+						Experimentation: &dto.ExperimentationDto{
+							Start: testconvert.Time(time.Date(2021, time.February, 1, 10, 10, 10, 10, time.UTC)),
+							End:   testconvert.Time(time.Date(2021, time.February, 2, 10, 10, 10, 10, time.UTC)),
+						},
+					},
+					V1Rollout: dto.V1Rollout{Scheduled: &[]flag.ScheduledStep{
+						{
+							InternalFlag: flag.InternalFlag{
+								Variations: &map[string]*interface{}{
+									"VariationDefault": testconvert.Interface(true),
+								},
+							},
+							Date: testconvert.Time(time.Date(2021, time.February, 2, 10, 10, 10, 10, time.UTC)),
+						},
+					}},
+				},
+			},
+			want: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"VariationDefault": testconvert.Interface(false),
+					"VariationBar":     testconvert.Interface(false),
+					"VariationFoo":     testconvert.Interface(true),
+				},
+				Rules: &[]flag.Rule{
+					{
+						Name:  testconvert.String("rule-number-1"),
+						Query: testconvert.String("key eq \"random-key\""),
+						Percentages: &map[string]float64{
+							"VariationBar": 0,
+							"VariationFoo": 100,
+						},
+					},
+					{
+						Name:  testconvert.String("rule-number-2"),
+						Query: testconvert.String("key eq \"other-random-key\""),
+						ProgressiveRollout: &flag.ProgressiveRollout{
+							Initial: &flag.ProgressiveRolloutStep{
+								Variation:  testconvert.String("VariationBar"),
+								Percentage: testconvert.Float64(0),
+								Date:       testconvert.Time(time.Date(2021, time.February, 1, 10, 10, 10, 10, time.UTC)),
+							},
+							End: &flag.ProgressiveRolloutStep{
+								Variation:  testconvert.String("VariationFoo"),
+								Percentage: testconvert.Float64(100),
+								Date:       testconvert.Time(time.Date(2021, time.February, 2, 10, 10, 10, 10, time.UTC)),
+							},
+						},
+					},
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("VariationDefault"),
+				},
+				Rollout: &flag.Rollout{
+					Experimentation: &flag.ExperimentationRollout{
+						Start: testconvert.Time(time.Date(2021, time.February, 1, 10, 10, 10, 10, time.UTC)),
+						End:   testconvert.Time(time.Date(2021, time.February, 2, 10, 10, 10, 10, time.UTC)),
+					},
+					Scheduled: &[]flag.ScheduledStep{
+						{
+							InternalFlag: flag.InternalFlag{
+								Variations: &map[string]*interface{}{
+									"VariationDefault": testconvert.Interface(true),
+								},
+							},
+							Date: testconvert.Time(time.Date(2021, time.February, 2, 10, 10, 10, 10, time.UTC)),
+						},
+					},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want, dto.ConvertV0DtoToInternalFlag(tt.d, false))
+			assert.Equal(t, tt.want, tt.d.Convert())
 		})
 	}
 }
