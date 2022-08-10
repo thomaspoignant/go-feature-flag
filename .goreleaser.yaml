@@ -1,0 +1,92 @@
+before:
+  hooks:
+    - go mod tidy
+    - go generate ./...
+
+dist: release
+
+builds:
+  - id: relay-proxy
+    main: ./cmd/relayproxy
+    binary: go-feature-flag-relay-proxy
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - 386
+      - arm
+      - arm64
+      - amd64
+    ldflags:
+      - -s -w -X main.version={{.Version}}
+
+#  - id: migration-cli
+#    main: ./cmd/migrationcli
+#    binary: go-feature-flag-migration-cli
+#    goos:
+#      - linux
+#      - windows
+#      - darwin
+#    goarch:
+#      - 386
+#      - arm
+#      - arm64
+#      - amd64
+
+dockers:
+  - goos: linux
+    ids:
+      - relay-proxy
+    dockerfile: ./cmd/relayproxy/DockerfileGoreleaser
+    image_templates:
+      - thomaspoignant/{{.ProjectName}}:latest
+      - thomaspoignant/{{.ProjectName}}:{{ .Tag }}
+      - thomaspoignant/{{.ProjectName}}:v{{ .Major }}
+      - thomaspoignant/{{.ProjectName}}:v{{ .Major }}.{{ .Minor }}
+
+brews:
+  - tap:
+      owner: thomaspoignant
+      name: homebrew-tap
+    ids:
+      - go-feature-flag-relay-proxy
+    caveats: "GO-feature-flag-relay-proxy is a proxy application to manage your feature flags."
+    homepage: "https://github.com/thomaspoignant/go-feature-flag"
+    description: "GO-feature-flag-relay-proxy is a proxy application to manage your feature flags."
+    skip_upload: auto
+
+scoop:
+  ids:
+    - go-feature-flag-relay-proxy
+  url_template: "https://github.com/thomaspoignant/go-feature-flag/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+  bucket:
+    owner: thomaspoignant
+    name: scoop
+  commit_msg_template: "Scoop update for {{ .ProjectName }} version {{ .Tag }}"
+  homepage: "https://github.com/thomaspoignant/go-feature-flag"
+  description: "GO-feature-flag-relay-proxy is a proxy application to manage your feature flags."
+  license: MIT
+
+archives:
+  - replacements:
+      darwin: Darwin
+      linux: Linux
+      windows: Windows
+      386: i386
+      amd64: x86_64
+
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^testdata:'
+      - '^.github'
