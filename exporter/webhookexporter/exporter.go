@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -94,7 +94,7 @@ func (f *Exporter) Export(ctx context.Context, logger *log.Logger, featureEvents
 	}
 
 	request, err := http.NewRequestWithContext(
-		ctx, http.MethodPost, f.EndpointURL, ioutil.NopCloser(bytes.NewReader(payload)))
+		ctx, http.MethodPost, f.EndpointURL, io.NopCloser(bytes.NewReader(payload)))
 	if err != nil {
 		return err
 	}

@@ -3,7 +3,7 @@ package mock
 import (
 	"bytes"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 )
@@ -17,7 +17,7 @@ func (m *HTTP) Do(req *http.Request) (*http.Response, error) {
 	success := &http.Response{
 		Status:     "OK",
 		StatusCode: http.StatusOK,
-		Body: ioutil.NopCloser(bytes.NewReader([]byte(`test-flag:
+		Body: io.NopCloser(bytes.NewReader([]byte(`test-flag:
  rule: key eq "random-key"
  percentage: 100
  true: true
@@ -29,7 +29,7 @@ func (m *HTTP) Do(req *http.Request) (*http.Response, error) {
 	error := &http.Response{
 		Status:     "KO",
 		StatusCode: http.StatusInternalServerError,
-		Body:       ioutil.NopCloser(bytes.NewReader([]byte(""))),
+		Body:       io.NopCloser(bytes.NewReader([]byte(""))),
 	}
 
 	if strings.HasSuffix(req.URL.String(), "error") {

@@ -3,7 +3,7 @@ package testutils
 import (
 	"errors"
 	"io"
-	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -20,7 +20,7 @@ func (s *S3ManagerMock) Download(at io.WriterAt, input *s3.GetObjectInput,
 	f ...func(*s3manager.Downloader),
 ) (int64, error) {
 	if *input.Key == "valid" {
-		res, _ := ioutil.ReadFile(s.TestDataLocation + "/flag-config.yaml")
+		res, _ := os.ReadFile(s.TestDataLocation + "/flag-config.yaml")
 		_, _ = at.WriteAt(res, 0)
 		return 1, nil
 	} else if *input.Key == "no-file" {

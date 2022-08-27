@@ -2,7 +2,6 @@ package s3exporter
 
 import (
 	"context"
-	"io/ioutil"
 	"log"
 	"os"
 	"testing"
@@ -187,7 +186,7 @@ func TestS3_Export(t *testing.T) {
 
 			assert.NoError(t, err, "Export should not error")
 			assert.Equal(t, 1, len(s3ManagerMock.S3ManagerMockFileSystem), "we should have 1 file in our mock")
-			expectedContent, _ := ioutil.ReadFile(tt.expectedFile)
+			expectedContent, _ := os.ReadFile(tt.expectedFile)
 			for k, v := range s3ManagerMock.S3ManagerMockFileSystem {
 				assert.Equal(t, string(expectedContent), v, "invalid file content")
 				assert.Regexp(t, tt.expectedName, k, "invalid file name")

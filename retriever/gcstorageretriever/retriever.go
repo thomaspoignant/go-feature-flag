@@ -6,7 +6,6 @@ import (
 	"crypto/md5" //nolint: gosec
 	"fmt"
 	"io"
-	"io/ioutil"
 
 	"cloud.google.com/go/storage"
 
@@ -76,7 +75,7 @@ func (retriever *Retriever) Retrieve(ctx context.Context) (content []byte, err e
 	defer retriever.rC.Close()
 
 	// Read all contents from the Reader.
-	content, err = ioutil.ReadAll(retriever.rC)
+	content, err = io.ReadAll(retriever.rC)
 	if err != nil {
 		return nil, fmt.Errorf(
 			"unable to read from GCP Object %s in Bucket %s, error: %s", retriever.Bucket, retriever.Object, err,
