@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 
@@ -64,7 +63,7 @@ func (f *Exporter) Export(ctx context.Context, logger *log.Logger, featureEvents
 	}
 
 	// Create a temp directory to store the file we will produce
-	outputDir, err := ioutil.TempDir("", "go_feature_flag_GoogleCloudStorage_export")
+	outputDir, err := os.MkdirTemp("", "go_feature_flag_GoogleCloudStorage_export")
 	if err != nil {
 		return err
 	}
@@ -84,7 +83,7 @@ func (f *Exporter) Export(ctx context.Context, logger *log.Logger, featureEvents
 	}
 
 	// Upload all the files in the folder to google storage
-	files, err := ioutil.ReadDir(outputDir)
+	files, err := os.ReadDir(outputDir)
 	if err != nil {
 		return err
 	}

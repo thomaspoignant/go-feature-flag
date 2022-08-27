@@ -3,7 +3,7 @@ package testutils
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 )
 
 type GCStorageReaderMock struct {
@@ -24,7 +24,7 @@ func (r *GCStorageReaderMock) Read(p []byte) (n int, err error) {
 
 	// Set the mocked data to be read.
 	if r.data == nil {
-		r.data, err = ioutil.ReadFile(r.FileToRead)
+		r.data, err = os.ReadFile(r.FileToRead)
 		if err != nil {
 			return 0, err
 		}

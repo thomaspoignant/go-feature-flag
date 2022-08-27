@@ -3,7 +3,7 @@ package ffclient_test
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"testing"
 	"text/template"
 	"time"
@@ -19,7 +19,7 @@ var client *ffclient.GoFeatureFlag
 
 // init is creating a flag file for this test with the expected date.
 func init() {
-	content, _ := ioutil.ReadFile("testdata/benchmark/flag-config.yaml")
+	content, _ := os.ReadFile("testdata/benchmark/flag-config.yaml")
 	t, _ := template.New("example-flag-config").Parse(string(content))
 
 	var buf bytes.Buffer
@@ -33,8 +33,8 @@ func init() {
 		DateAfter:  time.Now().Add(3 * time.Second).Format(time.RFC3339),
 	})
 
-	flagFile, _ := ioutil.TempFile("", "")
-	_ = ioutil.WriteFile(flagFile.Name(), buf.Bytes(), 0o600)
+	flagFile, _ := os.CreateTemp("", "")
+	_ = os.WriteFile(flagFile.Name(), buf.Bytes(), 0o600)
 
 	client, _ = ffclient.New(ffclient.Config{
 		PollingInterval: 1 * time.Second,
