@@ -2,7 +2,6 @@ package fileexporter_test
 
 import (
 	"context"
-	"io/ioutil"
 	"log"
 	"os"
 	"testing"
@@ -215,7 +214,7 @@ func TestFile_Export(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			outputDir := tt.fields.OutputDir
 			if tt.fields.OutputDir == "" {
-				outputDir, _ = ioutil.TempDir("", "fileExporter")
+				outputDir, _ = os.MkdirTemp("", "fileExporter")
 				defer os.Remove(outputDir)
 			}
 
@@ -231,12 +230,12 @@ func TestFile_Export(t *testing.T) {
 				return
 			}
 
-			files, _ := ioutil.ReadDir(outputDir)
+			files, _ := os.ReadDir(outputDir)
 			assert.Equal(t, 1, len(files), "Directory %s should have only one file", outputDir)
 			assert.Regexp(t, tt.expected.fileNameRegex, files[0].Name(), "Invalid file name")
 
-			expectedContent, _ := ioutil.ReadFile(tt.expected.content)
-			gotContent, _ := ioutil.ReadFile(outputDir + "/" + files[0].Name())
+			expectedContent, _ := os.ReadFile(tt.expected.content)
+			gotContent, _ := os.ReadFile(outputDir + "/" + files[0].Name())
 			assert.Equal(t, string(expectedContent), string(gotContent), "Wrong content in the output file")
 		})
 	}

@@ -2,8 +2,8 @@ package webhooknotifier
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"net/http"
+	"os"
 	"sync"
 	"testing"
 
@@ -172,7 +172,7 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 				assert.ErrorContains(t, err, tt.expected.errorMsg)
 			} else {
 				assert.NoError(t, err)
-				content, _ := ioutil.ReadFile(tt.expected.bodyPath)
+				content, _ := os.ReadFile(tt.expected.bodyPath)
 				assert.JSONEq(t, string(content), mockHTTPClient.Body)
 				assert.Equal(t, tt.expected.signature, mockHTTPClient.Signature)
 			}

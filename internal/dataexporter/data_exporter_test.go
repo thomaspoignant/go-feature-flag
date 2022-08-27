@@ -3,7 +3,6 @@ package dataexporter_test
 import (
 	"context"
 	"errors"
-	"io/ioutil"
 	"log"
 	"os"
 	"testing"
@@ -79,7 +78,7 @@ func TestDataExporterScheduler_defaultFlush(t *testing.T) {
 func TestDataExporterScheduler_exporterReturnError(t *testing.T) {
 	mockExporter := mock.Exporter{Err: errors.New("random err"), ExpectedNumberErr: 1, Bulk: true}
 
-	file, _ := ioutil.TempFile("", "log")
+	file, _ := os.CreateTemp("", "log")
 	defer file.Close()
 	defer os.Remove(file.Name())
 	logger := log.New(file, "", 0)
@@ -100,7 +99,7 @@ func TestDataExporterScheduler_exporterReturnError(t *testing.T) {
 	assert.Equal(t, inputEvents[:201], mockExporter.GetExportedEvents())
 
 	// read log
-	logs, _ := ioutil.ReadFile(file.Name())
+	logs, _ := os.ReadFile(file.Name())
 	assert.Regexp(t, "\\["+testutils.RFC3339Regex+"\\] error while exporting data: random err\\n", string(logs))
 }
 

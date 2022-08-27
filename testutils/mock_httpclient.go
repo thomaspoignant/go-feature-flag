@@ -3,7 +3,7 @@ package testutils
 import (
 	"bytes"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
 )
 
@@ -19,11 +19,11 @@ func (h *HTTPClientMock) Do(req *http.Request) (*http.Response, error) {
 		return nil, errors.New("random error")
 	}
 
-	b, _ := ioutil.ReadAll(req.Body)
+	b, _ := io.ReadAll(req.Body)
 	h.Body = string(b)
 	h.Signature = req.Header.Get("X-Hub-Signature-256")
 	resp := &http.Response{
-		Body: ioutil.NopCloser(bytes.NewReader([]byte(""))),
+		Body: io.NopCloser(bytes.NewReader([]byte(""))),
 	}
 	resp.StatusCode = h.StatusCode
 	return resp, nil
