@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -133,7 +133,7 @@ func (c *Notifier) Notify(diff notifier.DiffCache, wg *sync.WaitGroup) error {
 		Method: "POST",
 		URL:    endpointURL,
 		Header: headers,
-		Body:   ioutil.NopCloser(bytes.NewReader(payload)),
+		Body:   io.NopCloser(bytes.NewReader(payload)),
 	}
 	response, err := c.httpClient.Do(&request)
 	// Log if something went wrong while calling the webhook.

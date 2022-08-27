@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"log"
 	"os"
 	"testing"
@@ -217,7 +216,7 @@ func TestBoolVariation(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// init logger
-			file, _ := ioutil.TempFile("", "log")
+			file, _ := os.CreateTemp("", "log")
 			logger := log.New(file, "", 0)
 
 			ff = &GoFeatureFlag{
@@ -238,7 +237,7 @@ func TestBoolVariation(t *testing.T) {
 			got, err := BoolVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
-				content, _ := ioutil.ReadFile(file.Name())
+				content, _ := os.ReadFile(file.Name())
 				assert.Regexp(t, tt.expectedLog, string(content))
 			}
 
@@ -419,7 +418,7 @@ func TestFloat64Variation(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// init logger
-			file, _ := ioutil.TempFile("", "log")
+			file, _ := os.CreateTemp("", "log")
 			logger := log.New(file, "", 0)
 
 			ff = &GoFeatureFlag{
@@ -440,7 +439,7 @@ func TestFloat64Variation(t *testing.T) {
 			got, err := Float64Variation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
-				content, _ := ioutil.ReadFile(file.Name())
+				content, _ := os.ReadFile(file.Name())
 				assert.Regexp(t, tt.expectedLog, string(content))
 			}
 			if tt.wantErr {
@@ -638,7 +637,7 @@ func TestJSONArrayVariation(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// init logger
-			file, _ := ioutil.TempFile("", "log")
+			file, _ := os.CreateTemp("", "log")
 			logger := log.New(file, "", 0)
 
 			ff = &GoFeatureFlag{
@@ -661,7 +660,7 @@ func TestJSONArrayVariation(t *testing.T) {
 			}
 			assert.Equal(t, tt.want, got, "JSONArrayVariation() got = %v, want %v", got, tt.want)
 			if tt.expectedLog != "" {
-				content, _ := ioutil.ReadFile(file.Name())
+				content, _ := os.ReadFile(file.Name())
 				assert.Regexp(t, tt.expectedLog, string(content))
 			}
 			// clean logger
@@ -816,7 +815,7 @@ func TestJSONVariation(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// init logger
-			file, _ := ioutil.TempFile("", "log")
+			file, _ := os.CreateTemp("", "log")
 			logger := log.New(file, "", 0)
 
 			ff = &GoFeatureFlag{
@@ -837,7 +836,7 @@ func TestJSONVariation(t *testing.T) {
 			got, err := JSONVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
-				content, _ := ioutil.ReadFile(file.Name())
+				content, _ := os.ReadFile(file.Name())
 				assert.Regexp(t, tt.expectedLog, string(content))
 			}
 
@@ -1001,7 +1000,7 @@ func TestStringVariation(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// init logger
-			file, _ := ioutil.TempFile("", "log")
+			file, _ := os.CreateTemp("", "log")
 			logger := log.New(file, "", 0)
 
 			ff = &GoFeatureFlag{
@@ -1021,7 +1020,7 @@ func TestStringVariation(t *testing.T) {
 			got, err := StringVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
-				content, _ := ioutil.ReadFile(file.Name())
+				content, _ := os.ReadFile(file.Name())
 				assert.Regexp(t, tt.expectedLog, string(content))
 			}
 
@@ -1202,7 +1201,7 @@ func TestIntVariation(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// init logger
-			file, _ := ioutil.TempFile("", "log")
+			file, _ := os.CreateTemp("", "log")
 			logger := log.New(file, "", 0)
 
 			ff = &GoFeatureFlag{
@@ -1222,7 +1221,7 @@ func TestIntVariation(t *testing.T) {
 			got, err := IntVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
-				content, _ := ioutil.ReadFile(file.Name())
+				content, _ := os.ReadFile(file.Name())
 				assert.Regexp(t, tt.expectedLog, string(content))
 			}
 
@@ -1296,7 +1295,7 @@ func TestAllFlagsState(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// init logger
-			exportDir, _ := ioutil.TempDir("", "export")
+			exportDir, _ := os.MkdirTemp("", "export")
 			tt.config.DataExporter = DataExporter{
 				FlushInterval:    1000,
 				MaxEventInMemory: 1,
@@ -1320,7 +1319,7 @@ func TestAllFlagsState(t *testing.T) {
 			assert.Equal(t, tt.valid, allFlagsState.IsValid())
 
 			// expected JSON output - we force the timestamp
-			expected, _ := ioutil.ReadFile(tt.jsonOutput)
+			expected, _ := os.ReadFile(tt.jsonOutput)
 			var f map[string]interface{}
 			_ = json.Unmarshal(expected, &f)
 			if expectedFlags, ok := f["flags"].(map[string]interface{}); ok {
@@ -1607,7 +1606,7 @@ func TestRawVariation(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// init logger
-			file, _ := ioutil.TempFile("", "log")
+			file, _ := os.CreateTemp("", "log")
 			logger := log.New(file, "", 0)
 
 			ff = &GoFeatureFlag{
@@ -1628,7 +1627,7 @@ func TestRawVariation(t *testing.T) {
 			got, err := ff.RawVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
-				content, _ := ioutil.ReadFile(file.Name())
+				content, _ := os.ReadFile(file.Name())
 				assert.Regexp(t, tt.expectedLog, string(content))
 			}
 
