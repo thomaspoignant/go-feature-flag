@@ -1,7 +1,6 @@
 package logsnotifier
 
 import (
-	"io/ioutil"
 	"log"
 	"os"
 	"sync"
@@ -156,7 +155,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			logOutput, _ := ioutil.TempFile("", "")
+			logOutput, _ := os.CreateTemp("", "")
 			defer os.Remove(logOutput.Name())
 
 			c := &Notifier{
@@ -164,7 +163,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 			}
 			tt.args.wg.Add(1)
 			_ = c.Notify(tt.args.diff, tt.args.wg)
-			log, _ := ioutil.ReadFile(logOutput.Name())
+			log, _ := os.ReadFile(logOutput.Name())
 			assert.Regexp(t, tt.expected, string(log))
 		})
 	}
