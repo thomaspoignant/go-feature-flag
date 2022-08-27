@@ -101,7 +101,7 @@ func TestRetriever_Retrieve(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mockedStorage := newMockedGCS(t)
 			mockedStorage.withFiles(t, tt.storage.bucket, tt.storage.files)
-      
+
 			retriever := &Retriever{
 				Bucket: tt.fields.Bucket,
 				Object: tt.fields.Object,
