@@ -175,7 +175,5 @@ func encodedMd5Hash(content []byte) string {
 	h := md5.New() //nolint: gosec
 	h.Write(content)
 
-	b64Hash := base64.StdEncoding.EncodeToString(h.Sum(nil))
-
-	return b64Hash
+	return base64.StdEncoding.EncodeToString(h.Sum(nil))
 }
