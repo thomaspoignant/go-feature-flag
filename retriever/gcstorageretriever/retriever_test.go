@@ -3,154 +3,177 @@ package gcstorageretriever
 import (
 	"context"
 	"crypto/md5" //nolint: gosec
-	"io"
+	"encoding/base64"
 	"os"
 	"testing"
 
-	"cloud.google.com/go/storage"
-
-	"github.com/golang/mock/gomock"
+	"github.com/fsouza/fake-gcs-server/fakestorage"
 	"github.com/stretchr/testify/assert"
-	"github.com/thomaspoignant/go-feature-flag/testutils"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 )
 
-func TestGCStorageRetriever_Retrieve(t *testing.T) {
+func TestRetriever_Retrieve(t *testing.T) {
+	ctx := context.Background()
+
+	bucketFiles := map[string]string{
+		"testdata/flag-config.yaml": "flag-config.yaml",
+	}
+
+	bucketName := "flags"
+
 	type fields struct {
-		Options []option.ClientOption
-		Bucket  string
-		Object  string
-		rC      io.ReadCloser
+		Bucket string
+		Object string
 	}
-	type args struct {
-		ctx context.Context
+	type storageConfig struct {
+		bucket       string
+		files        map[string]string
+		updatedFiles map[string]string
 	}
-	mockCtrl := gomock.NewController(t)
 
 	tests := []struct {
-		name                  string
-		fields                fields
-		args                  args
-		want                  string
-		wantErr               bool
-		wantReadDataFromCache bool
+		name            string
+		fields          fields
+		storage         storageConfig
+		want            string
+		wantWhenUpdated string
+		wantFromCache   bool
+		wantUpdated     bool
+		wantErr         bool
 	}{
 		{
-			name: "File on Object Not in Cache",
+			name: "first bootstrap of cloud storage retriever",
+			storage: storageConfig{
+				bucket: bucketName,
+				files:  bucketFiles,
+			},
 			fields: fields{
-				Options: []option.ClientOption{option.WithCredentials(&google.Credentials{})},
-				Bucket:  "bucket",
-				Object:  "Object",
-				rC: &testutils.GCStorageReaderMock{
-					ShouldFail: false,
-					FileToRead: "./testdata/flag-config-updated.yaml",
-				},
+				Bucket: bucketName,
+				Object: "flag-config.yaml",
 			},
-			args: args{
-				ctx: context.Background(),
-			},
-			wantErr:               false,
-			wantReadDataFromCache: false,
+			want: "testdata/flag-config.yaml",
 		},
 		{
-			name: "File on Object in Cache",
+			name: "get content from cache",
+			storage: storageConfig{
+				bucket: bucketName,
+				files:  bucketFiles,
+			},
 			fields: fields{
-				Options: []option.ClientOption{option.WithCredentials(&google.Credentials{})},
-				Bucket:  "bucket",
-				Object:  "Object",
-				rC: &testutils.GCStorageReaderMock{
-					ShouldFail: true,
-				},
+				Bucket: bucketName,
+				Object: "flag-config.yaml",
 			},
-			args: args{
-				ctx: context.Background(),
-			},
-			wantErr:               false,
-			wantReadDataFromCache: true,
+			want:          "testdata/flag-config.yaml",
+			wantFromCache: true,
 		},
 		{
-			name: "File not On Object",
-			fields: fields{
-				Options: []option.ClientOption{option.WithCredentials(&google.Credentials{})},
-				Bucket:  "bucket",
-				Object:  "Object",
-				rC: &testutils.GCStorageReaderMock{
-					ShouldFail: true,
+			name: "retriver update file when it changes in bucket",
+			storage: storageConfig{
+				bucket: bucketName,
+				files:  bucketFiles,
+				updatedFiles: map[string]string{
+					"testdata/flag-config-updated.yaml": "flag-config.yaml",
 				},
 			},
-			args: args{
-				ctx: context.Background(),
+			fields: fields{
+				Bucket: bucketName,
+				Object: "flag-config.yaml",
 			},
-			wantErr:               true,
-			wantReadDataFromCache: false,
+			want:            "testdata/flag-config.yaml",
+			wantWhenUpdated: "testdata/flag-config-updated.yaml",
+			wantUpdated:     true,
 		},
 		{
-			name: "Option Without Auth",
+			name: "object not found in bucket",
+			storage: storageConfig{
+				bucket: bucketName,
+				files:  bucketFiles,
+			},
 			fields: fields{
-				Options: []option.ClientOption{option.WithoutAuthentication()},
-				Bucket:  "bucket",
-				Object:  "Object",
-				rC: &testutils.GCStorageReaderMock{
-					ShouldFail: false,
-					FileToRead: "./testdata/flag-config-updated.yaml",
-				},
+				Bucket: bucketName,
+				Object: "fake-flag-config.yaml",
 			},
-			args: args{
-				ctx: context.Background(),
-			},
-			wantErr:               false,
-			wantReadDataFromCache: false,
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := &Retriever{
-				Options: tt.fields.Options,
-				Bucket:  tt.fields.Bucket,
-				Object:  tt.fields.Object,
-				rC:      tt.fields.rC,
-				md5:     make([]byte, 16),
+			mockedStorage := newMockedGCS(t)
+			mockedStorage.withFiles(t, tt.storage.bucket, tt.storage.files)
+
+			retriever := &Retriever{
+				Bucket: tt.fields.Bucket,
+				Object: tt.fields.Object,
+				Options: []option.ClientOption{
+					option.WithCredentials(&google.Credentials{}),
+					option.WithHTTPClient(mockedStorage.Server.HTTPClient()),
+				},
 			}
 
-			// Read default file.
-			want, err := os.ReadFile("./testdata/flag-config.yaml")
-			assert.NoError(t, err)
-			r.cache = want
+			assertRetrieve := func(want string) {
+				gotContent, err := retriever.Retrieve(ctx)
+				assert.Equal(t, tt.wantErr, err != nil, "Retrieve() error = %v, wantErr %v", err, tt.wantErr)
 
-			// Compute Hash of this file data.
-			md5Hash := md5.Sum(want) //nolint: gosec
-			wantedMd5 := md5Hash[:]
-			copy(r.md5, wantedMd5)
+				if err == nil {
+					wantContent, err := os.ReadFile(want)
+					assert.NoError(t, err)
 
-			obj := testutils.NewMockobject(mockCtrl)
-			if tt.wantReadDataFromCache {
-				// If expect the data to be in cache, mock the
-				// remote hash of the local data.
-				obj.EXPECT().Attrs(context.Background()).Return(&storage.ObjectAttrs{MD5: r.md5}, nil).Times(1)
-			} else {
-				// If expect data not to be in cache, mock the
-				// remote hash to a different one that the local hash.
-
-				want, err = os.ReadFile("./testdata/flag-config-updated.yaml")
-				assert.NoError(t, err)
-
-				md5Hash = md5.Sum(want) //nolint: gosec
-				wantedMd5 = md5Hash[:]
-				obj.EXPECT().Attrs(context.Background()).Return(&storage.ObjectAttrs{MD5: wantedMd5}, nil).Times(1)
+					assert.Equal(t, wantContent, gotContent, "Retrieve() got = %v, want %v", gotContent, wantContent)
+				}
 			}
 
-			r.obj = obj
+			assertRetrieve(tt.want)
 
-			got, err := r.Retrieve(tt.args.ctx)
+			if tt.wantFromCache {
+				assertRetrieve(tt.want)
+			}
 
-			assert.Equal(t, tt.wantErr, err != nil, "Retrieve() error = %v, wantErr %v", err, tt.wantErr)
-
-			if err == nil {
-				assert.Equal(t, want, got, "Retrieve() got = %v, want %v", got, tt.want)
-				assert.Equal(t, want, r.cache, "Retrieve() got = Retriever{cache: %v} want = Retriever{cache: %v}", r.cache, want)
-				assert.Equal(t, wantedMd5, r.md5, "Retrieve() got = Retriever{md5: %v} want = Retriever{md5: %v}", r.md5, wantedMd5)
+			if tt.wantUpdated {
+				mockedStorage.withFiles(t, tt.storage.bucket, tt.storage.updatedFiles)
+				assertRetrieve(tt.wantWhenUpdated)
 			}
 		})
 	}
+}
+
+type mockedStorage struct {
+	Server *fakestorage.Server
+}
+
+func newMockedGCS(t *testing.T) mockedStorage {
+	server := fakestorage.NewServer(nil)
+	t.Cleanup(func() {
+		server.Stop()
+	})
+
+	return mockedStorage{
+		Server: server,
+	}
+}
+
+func (m mockedStorage) withFiles(t *testing.T, bucketName string, files map[string]string) {
+	for filename, name := range files {
+		content, err := os.ReadFile(filename)
+		if err != nil {
+			t.Fatalf("could not read testfile: %v", err)
+		}
+
+		object := fakestorage.Object{
+			Content: content,
+			ObjectAttrs: fakestorage.ObjectAttrs{
+				BucketName: bucketName,
+				Name:       name,
+				Md5Hash:    encodedMd5Hash(content),
+			},
+		}
+		m.Server.CreateObject(object)
+	}
+}
+
+func encodedMd5Hash(content []byte) string {
+	h := md5.New() //nolint: gosec
+	h.Write(content)
+
+	return base64.StdEncoding.EncodeToString(h.Sum(nil))
 }
