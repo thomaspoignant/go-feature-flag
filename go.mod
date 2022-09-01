@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	cloud.google.com/go/storage v1.26.0
-	github.com/aws/aws-sdk-go v1.44.88
+	github.com/aws/aws-sdk-go v1.44.89
 	github.com/fsouza/fake-gcs-server v1.39.0
 	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.5.8
