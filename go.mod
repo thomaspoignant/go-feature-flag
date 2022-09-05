@@ -5,7 +5,7 @@ go 1.17
 require (
 	cloud.google.com/go/storage v1.26.0
 	github.com/aws/aws-sdk-go v1.44.91
-	github.com/fsouza/fake-gcs-server v1.39.0
+	github.com/fsouza/fake-gcs-server v1.40.1
 	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.5.8
 	github.com/nikunjy/rules v1.1.0
@@ -26,6 +26,7 @@ require (
 	cloud.google.com/go/pubsub v1.25.1 // indirect
 	github.com/PuerkitoBio/purell v1.1.1 // indirect
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
+	github.com/alexbrainman/goissue34681 v0.0.0-20191006012335-3fc7a47baff5 // indirect
 	github.com/antlr/antlr4/runtime/Go/antlr v0.0.0-20220626175859-9abda183db8e // indirect
 	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
