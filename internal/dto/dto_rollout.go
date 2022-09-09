@@ -67,20 +67,20 @@ func (p *Rollout) UnmarshalJSON(data []byte) error {
 
 	var v1 V1Rollout
 	// we ignore the unmarshal errors because they are expected since we have multiple format
-	err = json.Unmarshal(data, &v1)
-	if err != nil {
-		// TODO: add log in debug only
-	}
+	_ = json.Unmarshal(data, &v1)
+	// if err != nil {
+	//	// TODO: add log in debug only
+	//}
 	if v1.Scheduled != nil && *v1.Scheduled != nil {
 		p.V1Rollout = v1
 	}
 
 	var v0 V0Rollout
 	// we ignore the unmarshal errors because they are expected since we have multiple format
-	err = json.Unmarshal(data, &v0)
-	if err != nil {
-		// TODO: add log in debug only
-	}
+	_ = json.Unmarshal(data, &v0)
+	// if err != nil {
+	//	// TODO: add log in debug only
+	//}
 	p.V0Rollout = v0
 
 	return nil

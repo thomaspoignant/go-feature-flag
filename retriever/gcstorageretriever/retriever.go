@@ -31,15 +31,7 @@ type Retriever struct {
 	md5 []byte
 
 	// Internal field used to fetch metadata of the file.
-	obj object
-
-	// Internal field used to read from the file.
-	rC io.ReadCloser
-}
-
-type object interface {
-	Attrs(ctx context.Context) (*storage.ObjectAttrs, error)
-	NewReader(ctx context.Context) (*storage.Reader, error)
+	obj *storage.ObjectHandle
 }
 
 func (retriever *Retriever) Retrieve(ctx context.Context) (content []byte, err error) {
@@ -66,20 +58,17 @@ func (retriever *Retriever) Retrieve(ctx context.Context) (content []byte, err e
 	}
 
 	// When cache is outdated download file and create Reader to read from it.
-	if retriever.rC == nil {
-		retriever.rC, err = retriever.obj.NewReader(ctx)
-		if err != nil {
-			return nil, err
-		}
+	reader, err := retriever.obj.NewReader(ctx)
+	if err != nil {
+		return nil, err
 	}
-	defer retriever.rC.Close()
+	defer reader.Close()
 
 	// Read all contents from the Reader.
-	content, err = io.ReadAll(retriever.rC)
+	content, err = io.ReadAll(reader)
 	if err != nil {
-		return nil, fmt.Errorf(
-			"unable to read from GCP Object %s in Bucket %s, error: %s", retriever.Bucket, retriever.Object, err,
-		)
+		return nil,
+			fmt.Errorf("unable to read from GCP Object %s in Bucket %s, error: %s", retriever.Bucket, retriever.Object, err)
 	}
 
 	// Update Cache along with its hash.
