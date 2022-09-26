@@ -29,11 +29,13 @@ type cacheManagerImpl struct {
 	mutex               sync.RWMutex
 	notificationService Service
 	latestUpdate        time.Time
+	logger              *log.Logger
 }
 
-func New(notificationService Service) Manager {
+func New(notificationService Service, logger *log.Logger) Manager {
 	return &cacheManagerImpl{
-		inMemoryCache:       NewInMemoryCache(),
+		logger:              logger,
+		inMemoryCache:       NewInMemoryCache(logger),
 		mutex:               sync.RWMutex{},
 		notificationService: notificationService,
 	}
@@ -55,7 +57,7 @@ func (c *cacheManagerImpl) UpdateCache(loadedFlags []byte, fileFormat string, lo
 		return err
 	}
 
-	newCache := NewInMemoryCache()
+	newCache := NewInMemoryCache(c.logger)
 	newCache.Init(newFlags)
 	newCacheFlags := newCache.All()
 	oldCacheFlags := map[string]flag.Flag{}

@@ -1,6 +1,7 @@
 package flag_test
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -1120,6 +1121,250 @@ func TestInternalFlag_GetVariationValue(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			assert.Equalf(t, tt.want, tt.flag.GetVariationValue(tt.variation), "GetVariationValue(%v)", tt.variation)
+		})
+	}
+}
+
+func TestInternalFlag_IsValid(t *testing.T) {
+	type fields struct {
+		Variations  *map[string]*interface{}
+		Rules       *[]flag.Rule
+		DefaultRule *flag.Rule
+		Rollout     *flag.Rollout
+		TrackEvents *bool
+		Disable     *bool
+		Version     *string
+	}
+	tests := []struct {
+		name     string
+		fields   fields
+		wantErr  assert.ErrorAssertionFunc
+		errorMsg string
+	}{
+		{
+			name: "no variation",
+			fields: fields{
+				Variations: &map[string]*interface{}{},
+			},
+			wantErr:  assert.Error,
+			errorMsg: "no variation available",
+		},
+		{
+			name: "no default rule",
+			fields: fields{
+				Variations: &map[string]*interface{}{
+					"A": testconvert.Interface("A"),
+				},
+				Rules: &[]flag.Rule{
+					{
+						Name:            testconvert.String("Rule1"),
+						Query:           testconvert.String("key eq 1"),
+						VariationResult: testconvert.String("A"),
+					},
+				},
+			},
+			errorMsg: "missing default rule",
+			wantErr:  assert.Error,
+		},
+		{
+			name: "multiple rule with same name",
+			fields: fields{
+				Variations: &map[string]*interface{}{
+					"A": testconvert.Interface("A"),
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("A"),
+				},
+				Rules: &[]flag.Rule{
+					{
+						Name:            testconvert.String("Rule1"),
+						Query:           testconvert.String("key eq 1"),
+						VariationResult: testconvert.String("A"),
+					},
+					{
+						Name:            testconvert.String(""),
+						Query:           testconvert.String("key eq 3"),
+						VariationResult: testconvert.String("A"),
+					},
+					{
+						Name:            testconvert.String("Rule2"),
+						Query:           testconvert.String("key eq 2"),
+						VariationResult: testconvert.String("A"),
+					},
+					{
+						Name:            testconvert.String(""),
+						Query:           testconvert.String("key eq 3"),
+						VariationResult: testconvert.String("A"),
+					},
+					{
+						Name:            testconvert.String("Rule1"),
+						Query:           testconvert.String("key eq 4"),
+						VariationResult: testconvert.String("A"),
+					},
+					{
+						Name:            testconvert.String(""),
+						Query:           testconvert.String("key eq 5"),
+						VariationResult: testconvert.String("A"),
+					},
+				},
+			},
+			errorMsg: "duplicated rule name: Rule1",
+			wantErr:  assert.Error,
+		},
+		{
+			name: "wrong percentages for default rule",
+			fields: fields{
+				Variations: &map[string]*interface{}{
+					"A": testconvert.Interface("A"),
+					"B": testconvert.Interface("B"),
+				},
+				DefaultRule: &flag.Rule{
+					Percentages: &map[string]float64{
+						"A": 90,
+						"B": 20,
+					},
+				},
+			},
+			errorMsg: "invalid percentages",
+			wantErr:  assert.Error,
+		},
+		{
+			name: "wrong percentages for targeting",
+			fields: fields{
+				Variations: &map[string]*interface{}{
+					"A": testconvert.Interface("A"),
+				},
+				DefaultRule: &flag.Rule{
+					Percentages: &map[string]float64{
+						"A": 90,
+						"B": 10,
+					},
+				},
+				Rules: &[]flag.Rule{
+					{
+						Name:  testconvert.String("Rule1"),
+						Query: testconvert.String("key eq 5"),
+						Percentages: &map[string]float64{
+							"A": 90,
+							"B": 20,
+						},
+					},
+				},
+			},
+			errorMsg: "invalid percentages",
+			wantErr:  assert.Error,
+		},
+		{
+			name: "targeting without query",
+			fields: fields{
+				Variations: &map[string]*interface{}{
+					"A": testconvert.Interface("A"),
+				},
+				DefaultRule: &flag.Rule{
+					Percentages: &map[string]float64{
+						"A": 90,
+						"B": 10,
+					},
+				},
+				Rules: &[]flag.Rule{
+					{
+						Name: testconvert.String("Rule1"),
+						Percentages: &map[string]float64{
+							"A": 90,
+							"B": 10,
+						},
+					},
+				},
+			},
+			errorMsg: "each targeting should have a query",
+			wantErr:  assert.Error,
+		},
+		{
+			name: "Nothing to return in rule",
+			fields: fields{
+				Variations: &map[string]*interface{}{
+					"A": testconvert.Interface("A"),
+					"B": testconvert.Interface("B"),
+				},
+				DefaultRule: &flag.Rule{
+					Name: testconvert.String("nothing to return"),
+				},
+			},
+			errorMsg: "impossible to return value",
+			wantErr:  assert.Error,
+		},
+		{
+			name: "progressive rollout percentage initial > end",
+			fields: fields{
+				Variations: &map[string]*interface{}{
+					"A": testconvert.Interface("A"),
+					"B": testconvert.Interface("B"),
+				},
+				DefaultRule: &flag.Rule{
+					Name: testconvert.String("nothing to return"),
+					ProgressiveRollout: &flag.ProgressiveRollout{
+						Initial: &flag.ProgressiveRolloutStep{
+							Variation:  testconvert.String("A"),
+							Percentage: testconvert.Float64(30),
+							Date:       testconvert.Time(time.Now().Add(-2 * time.Second)),
+						},
+						End: &flag.ProgressiveRolloutStep{
+							Variation:  testconvert.String("A"),
+							Percentage: testconvert.Float64(20),
+							Date:       testconvert.Time(time.Now().Add(2 * time.Second)),
+						},
+					},
+				},
+			},
+			errorMsg: "invalid progressive rollout, initial percentage should be lower than end percentage: 30/20",
+			wantErr:  assert.Error,
+		},
+		{
+			name: "ignore invalid rule if disabled",
+			fields: fields{
+				Variations: &map[string]*interface{}{
+					"A": testconvert.Interface("A"),
+					"B": testconvert.Interface("B"),
+				},
+				Rules: &[]flag.Rule{
+					{
+						Name:    testconvert.String("Rule1"),
+						Query:   testconvert.String("key eq 5"),
+						Disable: testconvert.Bool(true),
+						Percentages: &map[string]float64{
+							"A": 90,
+							"B": 20,
+						},
+					},
+				},
+				DefaultRule: &flag.Rule{
+					Name:            testconvert.String("nothing to return"),
+					VariationResult: testconvert.String("A"),
+				},
+			},
+			errorMsg: "",
+			wantErr:  assert.NoError,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			f := &flag.InternalFlag{
+				Variations:  tt.fields.Variations,
+				Rules:       tt.fields.Rules,
+				DefaultRule: tt.fields.DefaultRule,
+				Rollout:     tt.fields.Rollout,
+				TrackEvents: tt.fields.TrackEvents,
+				Disable:     tt.fields.Disable,
+				Version:     tt.fields.Version,
+			}
+			err := f.IsValid()
+			errMsg := ""
+			if err != nil {
+				errMsg = err.Error()
+			}
+			tt.wantErr(t, err, fmt.Sprintf("IsValid(): %s", err))
+			assert.Equal(t, tt.errorMsg, errMsg)
 		})
 	}
 }

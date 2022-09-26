@@ -199,6 +199,43 @@ func (r *Rule) MergeRules(updatedRule Rule) {
 	}
 }
 
+// IsValid is checking if the rule is valid
+func (r *Rule) IsValid(defaultRule bool) error {
+	if !defaultRule && r.IsDisable() {
+		return nil
+	}
+
+	if r.Percentages == nil && r.ProgressiveRollout == nil && r.VariationResult == nil {
+		return fmt.Errorf("impossible to return value")
+	}
+
+	// targeting without query
+	if !defaultRule && r.Query == nil {
+		return fmt.Errorf("each targeting should have a query")
+	}
+
+	// Validate the percentage of the rule
+	if r.Percentages != nil {
+		count := float64(0)
+		for _, p := range r.GetPercentages() {
+			count += p
+		}
+
+		if count != 100 {
+			return fmt.Errorf("invalid percentages")
+		}
+	}
+
+	// Progressive rollout: check that initial is lower than end
+	if r.ProgressiveRollout != nil &&
+		(r.GetProgressiveRollout().End.getPercentage() < r.GetProgressiveRollout().Initial.getPercentage()) {
+		return fmt.Errorf("invalid progressive rollout, initial percentage should be lower "+
+			"than end percentage: %v/%v",
+			r.GetProgressiveRollout().Initial.getPercentage(), r.GetProgressiveRollout().End.getPercentage())
+	}
+	return nil
+}
+
 func (r *Rule) GetQuery() string {
 	if r.Query == nil {
 		return ""

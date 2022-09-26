@@ -14,14 +14,14 @@ import (
 )
 
 func Test_FlagCacheNotInit(t *testing.T) {
-	fCache := cache.New(nil)
+	fCache := cache.New(nil, nil)
 	fCache.Close()
 	_, err := fCache.GetFlag("test-flag")
 	assert.Error(t, err, "We should have an error if the cache is not init")
 }
 
 func Test_GetFlagNotExist(t *testing.T) {
-	fCache := cache.New(nil)
+	fCache := cache.New(nil, nil)
 	_, err := fCache.GetFlag("not-exists-flag")
 	assert.Error(t, err, "We should have an error if the flag does not exists")
 }
@@ -208,7 +208,7 @@ func Test_FlagCache(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fCache := cache.New(cache.NewNotificationService([]notifier.Notifier{}))
+			fCache := cache.New(cache.NewNotificationService([]notifier.Notifier{}), nil)
 			err := fCache.UpdateCache(tt.args.loadedFlags, tt.flagFormat, log.New(os.Stdout, "", 0))
 			if tt.wantErr {
 				assert.Error(t, err, "UpdateCache() error = %v, wantErr %v", err, tt.wantErr)
@@ -358,7 +358,7 @@ test-flag2:
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fCache := cache.New(cache.NewNotificationService([]notifier.Notifier{}))
+			fCache := cache.New(cache.NewNotificationService([]notifier.Notifier{}), nil)
 			_ = fCache.UpdateCache(tt.args.loadedFlags, tt.flagFormat, log.New(os.Stdout, "", 0))
 
 			allFlags, err := fCache.AllFlags()
@@ -388,7 +388,7 @@ func Test_cacheManagerImpl_GetLatestUpdateDate(t *testing.T) {
   trackEvents: false
 `)
 
-	fCache := cache.New(cache.NewNotificationService([]notifier.Notifier{}))
+	fCache := cache.New(cache.NewNotificationService([]notifier.Notifier{}), nil)
 	timeBefore := fCache.GetLatestUpdateDate()
 	_ = fCache.UpdateCache(loadedFlags, "yaml", log.New(os.Stdout, "", 0))
 	timeAfter := fCache.GetLatestUpdateDate()

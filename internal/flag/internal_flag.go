@@ -169,6 +169,40 @@ func (f *InternalFlag) isExperimentationOver() bool {
 			(f.Rollout.Experimentation.End != nil && now.After(*f.Rollout.Experimentation.End)))
 }
 
+// IsValid is checking if the current flag is valid.
+func (f *InternalFlag) IsValid() error {
+	if len(f.GetVariations()) == 0 {
+		return fmt.Errorf("no variation available")
+	}
+
+	// Validate that we have a default Rule
+	if f.GetDefaultRule() == nil {
+		return fmt.Errorf("missing default rule")
+	}
+
+	const isDefaultRule = true
+	// Validate rules
+	if err := f.GetDefaultRule().IsValid(isDefaultRule); err != nil {
+		return err
+	}
+
+	ruleNames := map[string]interface{}{}
+	for _, rule := range f.GetRules() {
+		if err := rule.IsValid(!isDefaultRule); err != nil {
+			return err
+		}
+
+		// Check if we have duplicated rule name
+		if _, ok := ruleNames[rule.GetName()]; ok && rule.GetName() != "" {
+			return fmt.Errorf("duplicated rule name: %s", rule.GetName())
+		} else if rule.GetName() != "" {
+			ruleNames[rule.GetName()] = nil
+		}
+	}
+
+	return nil
+}
+
 // GetVariations is the getter of the field Variations
 func (f *InternalFlag) GetVariations() map[string]*interface{} {
 	if f.Variations == nil {
