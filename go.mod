@@ -3,7 +3,7 @@ module github.com/thomaspoignant/go-feature-flag
 go 1.17
 
 require (
-	cloud.google.com/go/storage v1.26.0
+	cloud.google.com/go/storage v1.27.0
 	github.com/aws/aws-sdk-go v1.44.100
 	github.com/fsouza/fake-gcs-server v1.40.1
 	github.com/golang/mock v1.6.0
@@ -11,8 +11,8 @@ require (
 	github.com/nikunjy/rules v1.0.1-0.20220920033320-71e8e569642c
 	github.com/pelletier/go-toml v1.9.5
 	github.com/stretchr/testify v1.8.0
-	golang.org/x/oauth2 v0.0.0-20220822191816-0ebed06d0094
-	google.golang.org/api v0.96.0
+	golang.org/x/oauth2 v0.0.0-20220909003341-f21342109be1
+	google.golang.org/api v0.97.0
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.25.1
 	k8s.io/apimachinery v0.25.1
@@ -44,7 +44,7 @@ require (
 	github.com/google/gofuzz v1.1.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.1.0 // indirect
-	github.com/googleapis/gax-go/v2 v2.4.0 // indirect
+	github.com/googleapis/gax-go/v2 v2.5.1 // indirect
 	github.com/gorilla/handlers v1.5.1 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
@@ -68,8 +68,8 @@ require (
 	golang.org/x/time v0.0.0-20220609170525-579cf78fd858 // indirect
 	golang.org/x/xerrors v0.0.0-20220609144429-65e65417b02f // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20220822174746-9e6da59bd2fc // indirect
-	google.golang.org/grpc v1.48.0 // indirect
+	google.golang.org/genproto v0.0.0-20220920201722-2b89144ce006 // indirect
+	google.golang.org/grpc v1.49.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
