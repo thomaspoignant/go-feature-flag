@@ -58,7 +58,7 @@ _The code of this demo is available in [`thomaspoignant/go-feature-flag-demo`](h
 
 ## Can I use GO Feature Flag with another language?
 
-Originally GO Feature Flag was build to be a GOlang only libraries, but it limits too much the echo system.  
+Originally GO Feature Flag was built to be a GOlang only library, but it limits the ecsystem too much.  
 To be compatible with more language we have implemented the [GO Feature Flag Relay Proxy](https://github.com/thomaspoignant/go-feature-flag-relay-proxy).
 It is a service you can host that provides an API to evaluate your flags, you can call it using HTTP to get your variation.
 
