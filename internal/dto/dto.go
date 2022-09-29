@@ -44,6 +44,16 @@ type DTOv1 struct {
 	// DefaultRule is the originalRule applied after checking that any other rules
 	// matched the user.
 	DefaultRule *flag.Rule `json:"defaultRule,omitempty" yaml:"defaultRule,omitempty" toml:"defaultRule,omitempty"`
+
+	// Scheduled is your struct to configure an update on some fields of your flag over time.
+	// You can add several steps that updates the flag, this is typically used if you want to gradually add more user
+	// in your flag.
+	Scheduled *[]flag.ScheduledStep `json:"scheduledRollout,omitempty" yaml:"scheduledRollout,omitempty" toml:"scheduledRollout,omitempty"` // nolint: lll
+
+	// Experimentation is your struct to configure an experimentation, it will allow you to configure a start date and
+	// an end date for your flag.
+	// When the experimentation is not running, the flag will serve the default value.
+	Experimentation *ExperimentationDto `json:"experimentation,omitempty" yaml:"experimentation,omitempty" toml:"experimentation,omitempty"` // nolint: lll
 }
 
 // DTOv0 describe the fields of a flag.

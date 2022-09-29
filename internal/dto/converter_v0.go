@@ -51,9 +51,10 @@ func ConvertV0DtoToInternalFlag(d DTO, isScheduledStep bool) flag.InternalFlag {
 	var rollout *flag.Rollout
 	if d.Rollout != nil && (d.Rollout.Experimentation != nil || d.Rollout.V0Rollout.Scheduled != nil) {
 		rollout = convertRollout(d, internalFlag)
+		internalFlag.Scheduled = rollout.Scheduled
+		internalFlag.Experimentation = rollout.Experimentation
 	}
 
-	internalFlag.Rollout = rollout
 	return internalFlag
 }
 

@@ -95,11 +95,9 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Should return sdk default value when experimentation rollout not started",
 			flag: flag.InternalFlag{
-				Rollout: &flag.Rollout{
-					Experimentation: &flag.ExperimentationRollout{
-						Start: testconvert.Time(time.Now().Add(1 * time.Second)),
-						End:   testconvert.Time(time.Now().Add(5 * time.Second)),
-					},
+				Experimentation: &flag.ExperimentationRollout{
+					Start: testconvert.Time(time.Now().Add(1 * time.Second)),
+					End:   testconvert.Time(time.Now().Add(5 * time.Second)),
 				},
 			},
 			args: args{
@@ -118,11 +116,9 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Should return sdk default value when experimentation rollout ended",
 			flag: flag.InternalFlag{
-				Rollout: &flag.Rollout{
-					Experimentation: &flag.ExperimentationRollout{
-						Start: testconvert.Time(time.Now().Add(-15 * time.Second)),
-						End:   testconvert.Time(time.Now().Add(-5 * time.Second)),
-					},
+				Experimentation: &flag.ExperimentationRollout{
+					Start: testconvert.Time(time.Now().Add(-15 * time.Second)),
+					End:   testconvert.Time(time.Now().Add(-5 * time.Second)),
 				},
 			},
 			args: args{
@@ -438,24 +434,22 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Rollout: &flag.Rollout{
-					Scheduled: &[]flag.ScheduledStep{
-						{
-							InternalFlag: flag.InternalFlag{
-								DefaultRule: &flag.Rule{
-									VariationResult: testconvert.String("variation_B"),
-								},
+				Scheduled: &[]flag.ScheduledStep{
+					{
+						InternalFlag: flag.InternalFlag{
+							DefaultRule: &flag.Rule{
+								VariationResult: testconvert.String("variation_B"),
 							},
-							Date: testconvert.Time(time.Now().Add(1 * time.Second)),
 						},
-						{
-							InternalFlag: flag.InternalFlag{
-								Variations: &map[string]*interface{}{
-									"variation_A": testconvert.Interface("value_QWERTY"),
-								},
+						Date: testconvert.Time(time.Now().Add(1 * time.Second)),
+					},
+					{
+						InternalFlag: flag.InternalFlag{
+							Variations: &map[string]*interface{}{
+								"variation_A": testconvert.Interface("value_QWERTY"),
 							},
-							Date: testconvert.Time(time.Now().Add(2 * time.Second)),
 						},
+						Date: testconvert.Time(time.Now().Add(2 * time.Second)),
 					},
 				},
 			},
@@ -482,24 +476,22 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Rollout: &flag.Rollout{
-					Scheduled: &[]flag.ScheduledStep{
-						{
-							InternalFlag: flag.InternalFlag{
-								DefaultRule: &flag.Rule{
-									VariationResult: testconvert.String("variation_B"),
-								},
+				Scheduled: &[]flag.ScheduledStep{
+					{
+						InternalFlag: flag.InternalFlag{
+							DefaultRule: &flag.Rule{
+								VariationResult: testconvert.String("variation_B"),
 							},
-							Date: testconvert.Time(time.Now().Add(-1 * time.Second)),
 						},
-						{
-							InternalFlag: flag.InternalFlag{
-								Variations: &map[string]*interface{}{
-									"variation_B": testconvert.Interface("value_QWERTY"),
-								},
+						Date: testconvert.Time(time.Now().Add(-1 * time.Second)),
+					},
+					{
+						InternalFlag: flag.InternalFlag{
+							Variations: &map[string]*interface{}{
+								"variation_B": testconvert.Interface("value_QWERTY"),
 							},
-							Date: testconvert.Time(time.Now().Add(2 * time.Second)),
 						},
+						Date: testconvert.Time(time.Now().Add(2 * time.Second)),
 					},
 				},
 			},
@@ -526,24 +518,22 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Rollout: &flag.Rollout{
-					Scheduled: &[]flag.ScheduledStep{
-						{
-							InternalFlag: flag.InternalFlag{
-								DefaultRule: &flag.Rule{
-									VariationResult: testconvert.String("variation_B"),
-								},
+				Scheduled: &[]flag.ScheduledStep{
+					{
+						InternalFlag: flag.InternalFlag{
+							DefaultRule: &flag.Rule{
+								VariationResult: testconvert.String("variation_B"),
 							},
-							Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
 						},
-						{
-							InternalFlag: flag.InternalFlag{
-								Variations: &map[string]*interface{}{
-									"variation_B": testconvert.Interface("value_QWERTY"),
-								},
+						Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
+					},
+					{
+						InternalFlag: flag.InternalFlag{
+							Variations: &map[string]*interface{}{
+								"variation_B": testconvert.Interface("value_QWERTY"),
 							},
-							Date: testconvert.Time(time.Now().Add(-1 * time.Second)),
 						},
+						Date: testconvert.Time(time.Now().Add(-1 * time.Second)),
 					},
 				},
 			},
@@ -570,13 +560,11 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Rollout: &flag.Rollout{
-					Scheduled: &[]flag.ScheduledStep{
-						{
-							InternalFlag: flag.InternalFlag{
-								Variations: &map[string]*interface{}{
-									"variation_A": testconvert.Interface("value_QWERTY"),
-								},
+				Scheduled: &[]flag.ScheduledStep{
+					{
+						InternalFlag: flag.InternalFlag{
+							Variations: &map[string]*interface{}{
+								"variation_A": testconvert.Interface("value_QWERTY"),
 							},
 						},
 					},
@@ -612,19 +600,17 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Rollout: &flag.Rollout{
-					Scheduled: &[]flag.ScheduledStep{
-						{
-							Date: testconvert.Time(time.Now().Add(-1 * time.Second)),
-							InternalFlag: flag.InternalFlag{
-								Variations: &map[string]*interface{}{
-									"variation_C": testconvert.Interface("value_C"),
-								},
-								Rules: &[]flag.Rule{
-									{
-										Name:            testconvert.String("rule1"),
-										VariationResult: testconvert.String("variation_C"),
-									},
+				Scheduled: &[]flag.ScheduledStep{
+					{
+						Date: testconvert.Time(time.Now().Add(-1 * time.Second)),
+						InternalFlag: flag.InternalFlag{
+							Variations: &map[string]*interface{}{
+								"variation_C": testconvert.Interface("value_C"),
+							},
+							Rules: &[]flag.Rule{
+								{
+									Name:            testconvert.String("rule1"),
+									VariationResult: testconvert.String("variation_C"),
 								},
 							},
 						},
@@ -660,16 +646,14 @@ func TestInternalFlag_Value(t *testing.T) {
 						"variation_B": 90,
 					},
 				},
-				Rollout: &flag.Rollout{
-					Scheduled: &[]flag.ScheduledStep{
-						{
-							Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
-							InternalFlag: flag.InternalFlag{
-								DefaultRule: &flag.Rule{
-									Percentages: &map[string]float64{
-										"variation_B": 20,
-										"variation_C": 70,
-									},
+				Scheduled: &[]flag.ScheduledStep{
+					{
+						Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
+						InternalFlag: flag.InternalFlag{
+							DefaultRule: &flag.Rule{
+								Percentages: &map[string]float64{
+									"variation_B": 20,
+									"variation_C": 70,
 								},
 							},
 						},
@@ -706,20 +690,18 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Rollout: &flag.Rollout{
-					Scheduled: &[]flag.ScheduledStep{
-						{
-							Date: testconvert.Time(time.Now().Add(-1 * time.Second)),
-							InternalFlag: flag.InternalFlag{
-								Variations: &map[string]*interface{}{
-									"variation_C": testconvert.Interface("value_C"),
-								},
-								Rules: &[]flag.Rule{
-									{
-										Name:            testconvert.String("rule2"),
-										Query:           testconvert.String("key eq \"user-key-123\""),
-										VariationResult: testconvert.String("variation_C"),
-									},
+				Scheduled: &[]flag.ScheduledStep{
+					{
+						Date: testconvert.Time(time.Now().Add(-1 * time.Second)),
+						InternalFlag: flag.InternalFlag{
+							Variations: &map[string]*interface{}{
+								"variation_C": testconvert.Interface("value_C"),
+							},
+							Rules: &[]flag.Rule{
+								{
+									Name:            testconvert.String("rule2"),
+									Query:           testconvert.String("key eq \"user-key-123\""),
+									VariationResult: testconvert.String("variation_C"),
 								},
 							},
 						},
@@ -751,24 +733,22 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Rollout: &flag.Rollout{
-					Scheduled: &[]flag.ScheduledStep{
-						{
-							InternalFlag: flag.InternalFlag{
-								DefaultRule: &flag.Rule{
-									VariationResult: testconvert.String("variation_B"),
-								},
+				Scheduled: &[]flag.ScheduledStep{
+					{
+						InternalFlag: flag.InternalFlag{
+							DefaultRule: &flag.Rule{
+								VariationResult: testconvert.String("variation_B"),
 							},
-							Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
 						},
-						{
-							InternalFlag: flag.InternalFlag{
-								Variations: &map[string]*interface{}{
-									"variation_B": testconvert.Interface("value_QWERTY"),
-								},
+						Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
+					},
+					{
+						InternalFlag: flag.InternalFlag{
+							Variations: &map[string]*interface{}{
+								"variation_B": testconvert.Interface("value_QWERTY"),
 							},
-							Date: testconvert.Time(time.Now().Add(-1 * time.Second)),
 						},
+						Date: testconvert.Time(time.Now().Add(-1 * time.Second)),
 					},
 				},
 			},
@@ -795,16 +775,14 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Rollout: &flag.Rollout{
-					Scheduled: &[]flag.ScheduledStep{
-						{
-							InternalFlag: flag.InternalFlag{
-								Disable:     testconvert.Bool(true),
-								TrackEvents: testconvert.Bool(false),
-								Version:     testconvert.String("1.0.0"),
-							},
-							Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
+				Scheduled: &[]flag.ScheduledStep{
+					{
+						InternalFlag: flag.InternalFlag{
+							Disable:     testconvert.Bool(true),
+							TrackEvents: testconvert.Bool(false),
+							Version:     testconvert.String("1.0.0"),
 						},
+						Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
 					},
 				},
 			},
@@ -831,19 +809,15 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Rollout: &flag.Rollout{
-					Scheduled: &[]flag.ScheduledStep{
-						{
-							InternalFlag: flag.InternalFlag{
-								Rollout: &flag.Rollout{
-									Experimentation: &flag.ExperimentationRollout{
-										Start: testconvert.Time(time.Now().Add(-2 * time.Second)),
-										End:   testconvert.Time(time.Now().Add(2 * time.Second)),
-									},
-								},
+				Scheduled: &[]flag.ScheduledStep{
+					{
+						InternalFlag: flag.InternalFlag{
+							Experimentation: &flag.ExperimentationRollout{
+								Start: testconvert.Time(time.Now().Add(-2 * time.Second)),
+								End:   testconvert.Time(time.Now().Add(2 * time.Second)),
 							},
-							Date: testconvert.Time(time.Now().Add(-1 * time.Second)),
 						},
+						Date: testconvert.Time(time.Now().Add(-1 * time.Second)),
 					},
 				},
 			},
@@ -870,29 +844,25 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Rollout: &flag.Rollout{
-					Scheduled: &[]flag.ScheduledStep{
-						{
-							InternalFlag: flag.InternalFlag{
-								Variations: &map[string]*interface{}{
-									"variation_A": testconvert.Interface("value_AB"),
-									"variation_B": testconvert.Interface("value_B"),
-								},
-								Rollout: &flag.Rollout{
-									Scheduled: &[]flag.ScheduledStep{
-										{
-											InternalFlag: flag.InternalFlag{
-												Variations: &map[string]*interface{}{
-													"variation_A": testconvert.Interface("value_ABC"),
-												},
-											},
-											Date: testconvert.Time(time.Now().Add(-3 * time.Second)),
+				Scheduled: &[]flag.ScheduledStep{
+					{
+						InternalFlag: flag.InternalFlag{
+							Variations: &map[string]*interface{}{
+								"variation_A": testconvert.Interface("value_AB"),
+								"variation_B": testconvert.Interface("value_B"),
+							},
+							Scheduled: &[]flag.ScheduledStep{
+								{
+									InternalFlag: flag.InternalFlag{
+										Variations: &map[string]*interface{}{
+											"variation_A": testconvert.Interface("value_ABC"),
 										},
 									},
+									Date: testconvert.Time(time.Now().Add(-3 * time.Second)),
 								},
 							},
-							Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
 						},
+						Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
 					},
 				},
 			},
@@ -1127,13 +1097,15 @@ func TestInternalFlag_GetVariationValue(t *testing.T) {
 
 func TestInternalFlag_IsValid(t *testing.T) {
 	type fields struct {
-		Variations  *map[string]*interface{}
-		Rules       *[]flag.Rule
-		DefaultRule *flag.Rule
-		Rollout     *flag.Rollout
-		TrackEvents *bool
-		Disable     *bool
-		Version     *string
+		Variations      *map[string]*interface{}
+		Rules           *[]flag.Rule
+		DefaultRule     *flag.Rule
+		Rollout         *flag.Rollout
+		TrackEvents     *bool
+		Disable         *bool
+		Version         *string
+		Experimentation *flag.ExperimentationRollout
+		Scheduled       *[]flag.ScheduledStep
 	}
 	tests := []struct {
 		name     string
@@ -1350,13 +1322,14 @@ func TestInternalFlag_IsValid(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			f := &flag.InternalFlag{
-				Variations:  tt.fields.Variations,
-				Rules:       tt.fields.Rules,
-				DefaultRule: tt.fields.DefaultRule,
-				Rollout:     tt.fields.Rollout,
-				TrackEvents: tt.fields.TrackEvents,
-				Disable:     tt.fields.Disable,
-				Version:     tt.fields.Version,
+				Variations:      tt.fields.Variations,
+				Rules:           tt.fields.Rules,
+				DefaultRule:     tt.fields.DefaultRule,
+				TrackEvents:     tt.fields.TrackEvents,
+				Disable:         tt.fields.Disable,
+				Version:         tt.fields.Version,
+				Scheduled:       tt.fields.Scheduled,
+				Experimentation: tt.fields.Experimentation,
 			}
 			err := f.IsValid()
 			errMsg := ""

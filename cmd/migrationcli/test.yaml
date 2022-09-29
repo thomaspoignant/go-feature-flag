@@ -1,0 +1,21 @@
+test-flag:
+  percentage: 100
+  rule: key eq "random-key"
+  true: true
+  false: false
+  default: false
+  disable: false
+  trackEvents: true
+  version: 1
+  rollout:
+    experimentation:
+      start: 2021-03-20T00:00:00.10-05:00
+      end: 2021-03-21T00:00:00.10-05:00
+
+  test-flag2:
+    rule: key eq "not-a-key"
+    percentage: 100
+    true: true
+    false: false
+    default: false
+    version: 12

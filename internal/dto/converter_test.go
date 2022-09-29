@@ -4,6 +4,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
+
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
 	"github.com/thomaspoignant/go-feature-flag/testutils/flagv1"
 
@@ -223,11 +225,9 @@ func TestConvertV0DtoToInternalFlag(t *testing.T) {
 					Name:            testconvert.String("legacyDefaultRule"),
 					VariationResult: testconvert.String("Default"),
 				},
-				Rollout: &flag.Rollout{
-					Experimentation: &flag.ExperimentationRollout{
-						Start: testconvert.Time(time.Date(2021, time.February, 1, 10, 10, 10, 10, time.UTC)),
-						End:   testconvert.Time(time.Date(2021, time.February, 2, 10, 10, 10, 10, time.UTC)),
-					},
+				Experimentation: &flag.ExperimentationRollout{
+					Start: testconvert.Time(time.Date(2021, time.February, 1, 10, 10, 10, 10, time.UTC)),
+					End:   testconvert.Time(time.Date(2021, time.February, 2, 10, 10, 10, 10, time.UTC)),
 				},
 			},
 		},
@@ -370,15 +370,11 @@ func TestConvertV0DtoToInternalFlag(t *testing.T) {
 					DefaultRule: &flag.Rule{
 						VariationResult: testconvert.String("VariationDefault"),
 					},
-				},
-				Rollout: &dto.Rollout{
-					CommonRollout: dto.CommonRollout{
-						Experimentation: &dto.ExperimentationDto{
-							Start: testconvert.Time(time.Date(2021, time.February, 1, 10, 10, 10, 10, time.UTC)),
-							End:   testconvert.Time(time.Date(2021, time.February, 2, 10, 10, 10, 10, time.UTC)),
-						},
+					Experimentation: &dto.ExperimentationDto{
+						Start: testconvert.Time(time.Date(2021, time.February, 1, 10, 10, 10, 10, time.UTC)),
+						End:   testconvert.Time(time.Date(2021, time.February, 2, 10, 10, 10, 10, time.UTC)),
 					},
-					V1Rollout: dto.V1Rollout{Scheduled: &[]flag.ScheduledStep{
+					Scheduled: &[]flag.ScheduledStep{
 						{
 							InternalFlag: flag.InternalFlag{
 								Variations: &map[string]*interface{}{
@@ -387,7 +383,7 @@ func TestConvertV0DtoToInternalFlag(t *testing.T) {
 							},
 							Date: testconvert.Time(time.Date(2021, time.February, 2, 10, 10, 10, 10, time.UTC)),
 						},
-					}},
+					},
 				},
 			},
 			want: flag.InternalFlag{
@@ -425,20 +421,18 @@ func TestConvertV0DtoToInternalFlag(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("VariationDefault"),
 				},
-				Rollout: &flag.Rollout{
-					Experimentation: &flag.ExperimentationRollout{
-						Start: testconvert.Time(time.Date(2021, time.February, 1, 10, 10, 10, 10, time.UTC)),
-						End:   testconvert.Time(time.Date(2021, time.February, 2, 10, 10, 10, 10, time.UTC)),
-					},
-					Scheduled: &[]flag.ScheduledStep{
-						{
-							InternalFlag: flag.InternalFlag{
-								Variations: &map[string]*interface{}{
-									"VariationDefault": testconvert.Interface(true),
-								},
+				Experimentation: &flag.ExperimentationRollout{
+					Start: testconvert.Time(time.Date(2021, time.February, 1, 10, 10, 10, 10, time.UTC)),
+					End:   testconvert.Time(time.Date(2021, time.February, 2, 10, 10, 10, 10, time.UTC)),
+				},
+				Scheduled: &[]flag.ScheduledStep{
+					{
+						InternalFlag: flag.InternalFlag{
+							Variations: &map[string]*interface{}{
+								"VariationDefault": testconvert.Interface(true),
 							},
-							Date: testconvert.Time(time.Date(2021, time.February, 2, 10, 10, 10, 10, time.UTC)),
 						},
+						Date: testconvert.Time(time.Date(2021, time.February, 2, 10, 10, 10, 10, time.UTC)),
 					},
 				},
 			},
@@ -446,7 +440,7 @@ func TestConvertV0DtoToInternalFlag(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want, tt.d.Convert())
+			assert.Equal(t, tt.want, tt.d.Convert(), cmp.Diff(tt.want, tt.d.Convert()))
 		})
 	}
 }

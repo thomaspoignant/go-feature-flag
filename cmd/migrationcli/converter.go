@@ -49,23 +49,20 @@ func (f *FlagConverter) Migrate() error {
 
 func (f *FlagConverter) unmarshall(content []byte) (map[string]dto.DTO, error) {
 	var flags map[string]dto.DTO
+	var err error
 	switch strings.ToLower(f.InputFormat) {
 	case "toml":
-		err := toml.Unmarshal(content, &flags)
-		if err != nil {
-			return nil, err
-		}
+		err = toml.Unmarshal(content, &flags)
 	case "json":
-		err := json.Unmarshal(content, &flags)
-		if err != nil {
-			return nil, err
-		}
+		err = json.Unmarshal(content, &flags)
 	default:
-		err := yaml.Unmarshal(content, &flags)
-		if err != nil {
-			return nil, err
-		}
+		// default unmarshaller is YAML
+		err = yaml.Unmarshal(content, &flags)
 	}
+	if err != nil {
+		return nil, err
+	}
+
 	return flags, nil
 }
 

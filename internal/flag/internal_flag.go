@@ -30,8 +30,15 @@ type InternalFlag struct {
 	// matched the user.
 	DefaultRule *Rule `json:"defaultRule,omitempty" yaml:"defaultRule,omitempty" toml:"defaultRule,omitempty"`
 
-	// Rollout is how we roll out the flag
-	Rollout *Rollout `json:"rollout,omitempty" yaml:"rollout,omitempty" toml:"rollout,omitempty"`
+	// Experimentation is your struct to configure an experimentation, it will allow you to configure a start date and
+	// an end date for your flag.
+	// When the experimentation is not running, the flag will serve the default value.
+	Experimentation *ExperimentationRollout `json:"experimentation,omitempty" yaml:"experimentation,omitempty" toml:"experimentation,omitempty"` // nolint: lll
+
+	// Scheduled is your struct to configure an update on some fields of your flag over time.
+	// You can add several steps that updates the flag, this is typically used if you want to gradually add more user
+	// in your flag.
+	Scheduled *[]ScheduledStep `json:"scheduledRollout,omitempty" yaml:"scheduledRollout,omitempty" toml:"scheduledRollout,omitempty"` // nolint: lll
 
 	// TrackEvents is false if you don't want to export the data in your data exporter.
 	// Default value is true
@@ -118,8 +125,8 @@ func (f *InternalFlag) selectVariation(flagName string, user ffuser.User) (*vari
 // If yes we merge the changes to the current flag.
 func (f *InternalFlag) applyScheduledRolloutSteps() {
 	evaluationDate := time.Now()
-	if f.Rollout != nil && f.Rollout.Scheduled != nil {
-		for _, steps := range *f.Rollout.Scheduled {
+	if f.Scheduled != nil {
+		for _, steps := range *f.Scheduled {
 			if steps.Date != nil && steps.Date.Before(evaluationDate) {
 				f.Rules = MergeSetOfRules(f.GetRules(), steps.GetRules())
 				if steps.Disable != nil {
@@ -144,15 +151,15 @@ func (f *InternalFlag) applyScheduledRolloutSteps() {
 					f.Version = steps.Version
 				}
 
-				if steps.Rollout != nil && steps.Rollout.Experimentation != nil {
-					if f.Rollout.Experimentation == nil {
-						f.Rollout.Experimentation = &ExperimentationRollout{}
+				if steps.Experimentation != nil {
+					if f.Experimentation == nil {
+						f.Experimentation = &ExperimentationRollout{}
 					}
-					if steps.Rollout.Experimentation.Start != nil {
-						f.Rollout.Experimentation.End = steps.Rollout.Experimentation.End
+					if steps.Experimentation.Start != nil {
+						f.Experimentation.End = steps.Experimentation.End
 					}
-					if steps.Rollout.Experimentation.End != nil {
-						f.Rollout.Experimentation.End = steps.Rollout.Experimentation.End
+					if steps.Experimentation.End != nil {
+						f.Experimentation.End = steps.Experimentation.End
 					}
 				}
 			}
@@ -163,10 +170,9 @@ func (f *InternalFlag) applyScheduledRolloutSteps() {
 // isExperimentationOver checks if we are in an experimentation or not
 func (f *InternalFlag) isExperimentationOver() bool {
 	now := time.Now()
-	return f.Rollout != nil &&
-		f.Rollout.Experimentation != nil &&
-		((f.Rollout.Experimentation.Start != nil && now.Before(*f.Rollout.Experimentation.Start)) ||
-			(f.Rollout.Experimentation.End != nil && now.After(*f.Rollout.Experimentation.End)))
+	return f.Experimentation != nil &&
+		((f.Experimentation.Start != nil && now.Before(*f.Experimentation.Start)) ||
+			(f.Experimentation.End != nil && now.After(*f.Experimentation.End)))
 }
 
 // IsValid is checking if the current flag is valid.

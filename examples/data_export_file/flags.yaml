@@ -4,6 +4,7 @@ new-admin-access:
   false: false
   default: false
 
+
 flag-only-for-admin:
   rule: admin eq true
   percentage: 100

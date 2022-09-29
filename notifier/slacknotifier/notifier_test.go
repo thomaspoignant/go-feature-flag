@@ -107,11 +107,9 @@ func TestSlackNotifier_Notify(t *testing.T) {
 										"True":  100,
 									},
 								},
-								Rollout: &flag.Rollout{
-									Experimentation: &flag.ExperimentationRollout{
-										Start: testconvert.Time(time.Unix(1095379400, 0)),
-										End:   testconvert.Time(time.Unix(1095371000, 0)),
-									},
+								Experimentation: &flag.ExperimentationRollout{
+									Start: testconvert.Time(time.Unix(1095379400, 0)),
+									End:   testconvert.Time(time.Unix(1095371000, 0)),
 								},
 							},
 							After: &flag.InternalFlag{

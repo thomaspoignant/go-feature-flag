@@ -1,10 +1,7 @@
 package dto
 
 import (
-	"encoding/json"
 	"time"
-
-	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 )
 
 type ExperimentationDto struct {
@@ -19,9 +16,6 @@ type Rollout struct {
 	// CommonRollout is the struct containing the configuration for rollout that applies for
 	// all types of flag in your input file.
 	CommonRollout `json:",inline" yaml:",inline" toml:",inline"`
-
-	// V1Rollout contains the configuration available only for the flags version v1.X.X
-	V1Rollout `json:",inline" yaml:",inline" toml:",inline"`
 
 	// V0Rollout contains the configuration available only for the flags version v0.X.X
 	V0Rollout `json:",inline" yaml:",inline" toml:",inline"` // nolint: govet
@@ -40,61 +34,11 @@ type CommonRollout struct {
 	Progressive *ProgressiveV0 `json:"progressive,omitempty" yaml:"progressive,omitempty" toml:"progressive,omitempty"` // nolint: lll
 }
 
-type V1Rollout struct {
-	// Scheduled is your struct to configure an update on some fields of your flag over time.
-	// You can add several steps that updates the flag, this is typically used if you want to gradually add more user
-	// in your flag.
-	Scheduled *[]flag.ScheduledStep `json:"scheduled,omitempty" yaml:"scheduled,omitempty" toml:"scheduled,omitempty"` // nolint: lll
-}
-
 type V0Rollout struct {
 	// Scheduled is your struct to configure an update on some fields of your flag over time.
 	// You can add several steps that updates the flag, this is typically used if you want to gradually add more user
 	// in your flag.
 	Scheduled *ScheduledRolloutV0 `json:"scheduled,omitempty" yaml:"scheduled,omitempty" toml:"scheduled,omitempty"` // nolint: lll
-}
-
-// UnmarshalJSON is dealing with the fact that we have 2 different entry called scheduled
-// in different format, this can cause an issue when unmarshalling the data.
-// This is the reason why we have a custom unmarshalling function for this struct.
-func (p *Rollout) UnmarshalJSON(data []byte) error {
-	var c CommonRollout
-	err := json.Unmarshal(data, &c)
-	if err != nil {
-		return err
-	}
-	p.CommonRollout = c
-
-	var v1 V1Rollout
-	// we ignore the unmarshal errors because they are expected since we have multiple format
-	_ = json.Unmarshal(data, &v1)
-	// if err != nil {
-	//	// TODO: add log in debug only
-	//}
-	if v1.Scheduled != nil && *v1.Scheduled != nil {
-		p.V1Rollout = v1
-	}
-
-	var v0 V0Rollout
-	// we ignore the unmarshal errors because they are expected since we have multiple format
-	_ = json.Unmarshal(data, &v0)
-	// if err != nil {
-	//	// TODO: add log in debug only
-	//}
-	p.V0Rollout = v0
-
-	return nil
-}
-
-// UnmarshalTOML is used for TOML unmarshalling, the lib is not calling directly UnmarshalJSON,
-// so we are calling it after marshaling input in JSON string
-func (p *Rollout) UnmarshalTOML(input interface{}) error {
-	jsonStr, err := json.Marshal(input)
-	if err != nil {
-		// TODO: add log in debug only
-		return err
-	}
-	return p.UnmarshalJSON(jsonStr)
 }
 
 type ScheduledRolloutV0 struct {
