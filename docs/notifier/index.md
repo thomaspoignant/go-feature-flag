@@ -13,5 +13,5 @@ A notifier will send one notification to the targeted system to inform them that
 
 Available notifiers are:
 
-- [Slack](slack.md) - Get a slack message with the changes.
+- [Slack](slack.md) - Get a Slack message with the changes.
 - [Webhook](webhook.md) - Call an API with the changes.

@@ -13,69 +13,106 @@ For example, you may want to turn a feature ON for internal testing tomorrow and
 
 === "YAML"
 
-```yaml linenums="1" hl_lines="6-13"
+```yaml linenums="1" hl_lines="10-22"
 scheduled-flag:
-  true: "B"
-  false: "A"
-  default: "Default"
-  rollout:
-    scheduled:
-      steps:
-        - date: 2020-04-10T00:00:00.10+02:00
-          rule: beta eq "true"
-          percentage: 100
-        
-        - date: 2022-05-12T15:36:00.10+02:00
-          rule: beta eq "false"
+  variations:
+    variationA: A
+    variationB: B
+  defaultRule:
+    name: legacyDefaultRule
+    percentage:
+      variationA: 100
+      variationB: 0
+  scheduledRollout:
+    - date: 2020-04-10T00:00:00.1+02:00
+      targeting:
+        - name: legacyRuleV0
+          query: beta eq "true"
+          percentage:
+            variationA: 0
+            variationB: 100
+      
+    - date: 2022-05-12T15:36:00.1+02:00
+      targeting:
+        - name: legacyRuleV0
+          query: beta eq "false"
 ```
 
 === "JSON"
 
-```json linenums="1" hl_lines="6-19"
+```json linenums="1" hl_lines="14-39"
 {
   "scheduled-flag": {
-    "true": "B",
-    "false": "A",
-    "default": "Default",
-    "rollout": {
-      "scheduled": {
-        "steps": [
+    "variations": {
+      "variationA": "A",
+      "variationB": "B"
+    },
+    "defaultRule": {
+      "name": "legacyDefaultRule",
+      "percentage": {
+        "variationA": 100,
+        "variationB": 0
+      }
+    },
+    "scheduledRollout": [
+      {
+        "date": "2020-04-09T22:00:00.100Z",
+        "targeting": [
           {
-            "date": "2020-04-09T22:00:00.100Z",
-            "rule": "beta eq \"true\"",
-            "percentage": 100
-          },
+            "name": "legacyRuleV0",
+            "query": "beta eq \"true\"",
+            "percentage": {
+              "variationA": 0,
+              "variationB": 100
+            }
+          }
+        ]
+      },
+      {
+        "date": "2022-05-12T13:36:00.100Z",
+        "targeting": [
           {
-            "date": "2022-05-12T13:36:00.100Z",
-            "rule": "beta eq \"false\""
+            "name": "legacyRuleV0",
+            "query": "beta eq \"false\""
           }
         ]
       }
-    }
+    ]
   }
 }
 ```
 
 === "TOML"
 
-```toml linenums="1" hl_lines="6-17"
-[scheduled-flag]
-true = "B"
-false = "A"
-default = "Default"
+```toml linenums="1" hl_lines="12-28"
+[scheduled-flag.variations]
+variationA = "A"
+variationB = "B"
 
-  [scheduled-flag.rollout]
+[scheduled-flag.defaultRule]
+name = "legacyDefaultRule"
 
-    [scheduled-flag.rollout.scheduled]
+  [scheduled-flag.defaultRule.percentage]
+  variationA = 100
+  variationB = 0
 
-      [[scheduled-flag.rollout.scheduled.steps]]
-      date = 2020-04-09T22:00:00.100Z
-      rule = "beta eq \"true\""
-      percentage = 100.0
+[[scheduled-flag.scheduledRollout]]
+date = 2020-04-09T22:00:00.100Z
 
-      [[scheduled-flag.rollout.scheduled.steps]]
-      date = 2022-05-12T13:36:00.100Z
-      rule = "beta eq \"false\""
+  [[scheduled-flag.scheduledRollout.targeting]]
+  name = "legacyRuleV0"
+  query = 'beta eq "true"'
+
+    [scheduled-flag.scheduledRollout.targeting.percentage]
+    variationA = 0
+    variationB = 100
+
+[[scheduled-flag.scheduledRollout]]
+date = 2022-05-12T13:36:00.100Z
+
+  [[scheduled-flag.scheduledRollout.targeting]]
+  name = "legacyRuleV0"
+  query = 'beta eq "false"'
 ```
 
 ## Configuration fields

@@ -33,6 +33,6 @@ ffclient.Config{
 
 ### Configuration fields
 
-| Field  | Description  |
-|---|---|
-|`SlackWebhookURL`   | The complete URL of your incoming webhook configured in Slack.  |
+| Field             | Description                                                    |
+|-------------------|----------------------------------------------------------------|
+| `SlackWebhookURL` | The complete URL of your incoming webhook configured in Slack. |

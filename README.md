@@ -30,7 +30,7 @@ go get github.com/thomaspoignant/go-feature-flag
 ```
 ## What is go-feature-flag?
 
-A simple and complete feature flag solution, without any complex backend system to install, all you need is a file as your backend.
+GO Feature Flag is the easiest way to start with feature flag without any complex backend system to install, all you need is a file as your backend.
 
 No server is needed, just add a file to your central system and all your services will react to the changes in this file.
 
@@ -58,7 +58,7 @@ _The code of this demo is available in [`thomaspoignant/go-feature-flag-demo`](h
 
 ## Can I use GO Feature Flag with another language?
 
-Originally GO Feature Flag was built to be a GOlang only library, but it limits the ecsystem too much.  
+Originally GO Feature Flag was built to be a GOlang only library, but it limits the ecosystem too much.  
 To be compatible with more language we have implemented the [GO Feature Flag Relay Proxy](https://github.com/thomaspoignant/go-feature-flag-relay-proxy).
 It is a service you can host that provides an API to evaluate your flags, you can call it using HTTP to get your variation.
 
@@ -169,27 +169,38 @@ If you prefer to do it manually please follow instruction bellow.
 <summary>YAML</summary>
 
 ```yaml
-test-flag:
-  percentage: 100
-  rule: key eq "random-key"
-  true: true
-  false: false
-  default: false
-  disable: false
-  trackEvents: true
-  version: 1
-  rollout:
-    experimentation:
-      start: 2021-03-20T00:00:00.10-05:00
-      end: 2021-03-21T00:00:00.10-05:00
+# This is your configuration for your first flag
+first-flag:
+  variations: # All possible return value for your feature flag
+    A: false
+    B: true
+  targeting: # If you want to target a subset of your users in particular
+    - query: key eq "random-key"
+      percentage:
+        A: 0
+        B: 100
+  defaultRule: # When no targeting match we use the defaultRule
+    variation: A
 
-  test-flag2:
-    rule: key eq "not-a-key"
-    percentage: 100
-    true: true
-    false: false
-    default: false
-    version: 12
+# A second example of a flag configuration
+second-flag:
+  variations:
+    A: "valueA"
+    B: "valueB"
+    defaultValue: "a default value"
+  targeting:
+    - name: legacyRuleV0
+      query: key eq "not-a-key"
+      percentage:
+        A: 10
+        B: 90
+  defaultRule:
+    name: legacyDefaultRule
+    variation: defaultValue
+  version: "12"
+  experimentation: 
+    start: 2021-03-20T00:00:00.1-05:00
+    end: 2021-03-21T00:00:00.1-05:00
 ```
 </details>
 <details>
@@ -197,29 +208,50 @@ test-flag:
 
 ```json
 {
-  "test-flag": {
-    "percentage": 100,
-    "rule": "key eq \"random-key\"",
-    "true": true,
-    "false": false,
-    "default": false,
-    "disable": false,
-    "trackEvents": true,
-    "version": 1,
-    "rollout": {
-      "experimentation": {
-        "start": "2021-03-20T05:00:00.100Z",
-        "end": "2021-03-21T05:00:00.100Z"
+  "first-flag": {
+    "variations": {
+      "A": false,
+      "B": true
+    },
+    "targeting": [
+      {
+        "query": "key eq \"random-key\"",
+        "percentage": {
+          "A": 0,
+          "B": 100
+        }
       }
+    ],
+    "defaultRule": {
+      "variation": "A"
     }
   },
-  "test-flag2": {
-    "rule": "key eq \"not-a-key\"",
-    "percentage": 100,
-    "true": true,
-    "false": false,
-    "default": false,
-    "version": 12
+  
+  "second-flag": {
+    "variations": {
+      "A": "valueA",
+      "B": "valueB",
+      "defaultValue": "a default value"
+    },
+    "targeting": [
+      {
+        "name": "legacyRuleV0",
+        "query": "key eq \"not-a-key\"",
+        "percentage": {
+          "A": 10,
+          "B": 90
+        }
+      }
+    ],
+    "defaultRule": {
+      "name": "legacyDefaultRule",
+      "variation": "defaultValue"
+    },
+    "version": "12",
+    "experimentation": {
+      "start": "2021-03-20T05:00:00.100Z",
+      "end": "2021-03-21T05:00:00.100Z"
+    }
   }
 }
 ```
@@ -230,29 +262,43 @@ test-flag:
 <summary>TOML</summary>
 
 ```toml
-[test-flag]
-percentage = 100.0
-rule = "key eq \"random-key\""
-true = true
-false = false
-default = false
-disable = false
-trackEvents = true
-version = 1.0
+[first-flag.variations]
+A = false
+B = true
 
-[test-flag.rollout]
+[[first-flag.targeting]]
+query = 'key eq "random-key"'
 
-  [test-flag.rollout.experimentation]
+  [first-flag.targeting.percentage]
+  A = 0
+  B = 100
+
+[first-flag.defaultRule]
+variation = "A"
+
+[second-flag]
+version = "12"
+
+  [second-flag.variations]
+  A = "valueA"
+  B = "valueB"
+  defaultValue = "a default value"
+
+  [[second-flag.targeting]]
+  name = "legacyRuleV0"
+  query = 'key eq "not-a-key"'
+
+    [second-flag.targeting.percentage]
+    A = 10
+    B = 90
+
+  [second-flag.defaultRule]
+  name = "legacyDefaultRule"
+  variation = "defaultValue"
+
+  [second-flag.experimentation]
   start = 2021-03-20T05:00:00.100Z
   end = 2021-03-21T05:00:00.100Z
-
-[test-flag2]
-rule = "key eq \"not-a-key\""
-percentage = 100.0
-true = true
-false = false
-default = false
-version = 12.0
 ```
 
 </details>
@@ -261,7 +307,7 @@ All the fields to create a flag are described in the [documentation](https://doc
 
 ## Rule format
 
-The rule format is based on the [`nikunjy/rules`](https://github.com/nikunjy/rules) library.
+The query format is based on the [`nikunjy/rules`](https://github.com/nikunjy/rules) library.
 
 All the operations can be written capitalized or lowercase (ex: `eq` or `EQ` can be used).  
 Logical Operations supported are `AND` `OR`.
