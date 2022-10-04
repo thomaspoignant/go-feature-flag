@@ -18,8 +18,7 @@ const (
 // All the flags in your configuration files can have different format but will be
 // converted into an InternalFlag to be used in the library.
 type InternalFlag struct {
-	// Variations are all the variations available for this flag. The minimum is 2 variations and, we don't have any max
-	// limit except if the variationValue is a bool, the max is 2.
+	// Variations are all the variations available for this flag. You can have as many variation as needed.
 	Variations *map[string]*interface{} `json:"variations,omitempty" yaml:"variations,omitempty" toml:"variations,omitempty"` // nolint:lll
 
 	// Rules is the list of Rule for this flag.

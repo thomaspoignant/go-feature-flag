@@ -34,7 +34,8 @@ func (f *FlagConverter) Migrate() error {
 		return err
 	}
 
-	newFileContent, err := f.marshall(f.convert(flags))
+	convertedFlag := f.convert(flags)
+	newFileContent, err := f.marshall(convertedFlag)
 	if err != nil {
 		return err
 	}
@@ -66,15 +67,16 @@ func (f *FlagConverter) unmarshall(content []byte) (map[string]dto.DTO, error) {
 	return flags, nil
 }
 
-func (f *FlagConverter) convert(flags map[string]dto.DTO) map[string]flag.InternalFlag {
-	convertedFlags := make(map[string]flag.InternalFlag, len(flags))
+func (f *FlagConverter) convert(flags map[string]dto.DTO) map[string]dto.DTO {
+	convertedFlags := make(map[string]dto.DTO, len(flags))
 	for k, v := range flags {
-		convertedFlags[k] = v.Convert()
+		// convert to internal Flag
+		convertedFlags[k] = convertToDto(v.Convert())
 	}
 	return convertedFlags
 }
 
-func (f *FlagConverter) marshall(convertedFlags map[string]flag.InternalFlag) ([]byte, error) {
+func (f *FlagConverter) marshall(convertedFlags map[string]dto.DTO) ([]byte, error) {
 	switch strings.ToLower(f.OutputFormat) {
 	case "toml":
 		buf := new(bytes.Buffer)
@@ -94,4 +96,27 @@ func (f *FlagConverter) output(fileContent []byte) error {
 	}
 
 	return os.WriteFile(f.OutputFile, fileContent, os.ModePerm)
+}
+
+func convertToDto(internalFlag flag.InternalFlag) dto.DTO {
+	var experimentation *dto.ExperimentationDto
+	if internalFlag.Experimentation != nil {
+		experimentation = &dto.ExperimentationDto{
+			Start: internalFlag.Experimentation.Start,
+			End:   internalFlag.Experimentation.End,
+		}
+	}
+
+	return dto.DTO{
+		TrackEvents: internalFlag.TrackEvents,
+		Disable:     internalFlag.Disable,
+		Version:     internalFlag.Version,
+		DTOv1: dto.DTOv1{
+			Variations:      internalFlag.Variations,
+			Rules:           internalFlag.Rules,
+			DefaultRule:     internalFlag.DefaultRule,
+			Scheduled:       internalFlag.Scheduled,
+			Experimentation: experimentation,
+		},
+	}
 }

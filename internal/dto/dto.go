@@ -25,10 +25,6 @@ type DTO struct {
 	// Converter (optional) is the name of converter to use, if no converter specified we try to determine
 	// which converter to use based on the fields we receive for the flag
 	Converter *string `json:"converter,omitempty" yaml:"converter,omitempty" toml:"converter,omitempty"`
-
-	// Rollout is the object to configure how the flag is rolled out.
-	// You have different rollout strategy available but only one is used at a time.
-	Rollout *Rollout `json:"rollout,omitempty" yaml:"rollout,omitempty" toml:"rollout,omitempty"`
 }
 
 // DTOv1 is the new format of the flags since version 1.X.X
@@ -77,6 +73,10 @@ type DTOv0 struct {
 
 	// Default is the value return by the flag if not apply to the user (rule is evaluated to false).
 	Default *interface{} `json:"default,omitempty" yaml:"default,omitempty" toml:"default,omitempty"`
+
+	// Rollout is the object to configure how the flag is rolled out.
+	// You have different rollout strategy available but only one is used at a time.
+	Rollout *Rollout `json:"rollout,omitempty" yaml:"rollout,omitempty" toml:"rollout,omitempty"`
 }
 
 func (d *DTO) Convert() flag.InternalFlag {
