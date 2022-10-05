@@ -59,6 +59,7 @@ func TestBoolVariation(t *testing.T) {
 		defaultValue bool
 		cacheMock    cache.Manager
 		offline      bool
+		disableInit  bool
 	}
 	tests := []struct {
 		name        string
@@ -67,6 +68,24 @@ func TestBoolVariation(t *testing.T) {
 		wantErr     bool
 		expectedLog string
 	}{
+		{
+			name: "Call variation before init of SDK",
+			args: args{
+				flagKey:      "key-not-exist",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: false,
+				cacheMock: NewCacheMock(&flagv1.FlagData{
+					Rule:       testconvert.String("key eq \"key\""),
+					Percentage: testconvert.Float64(100),
+					Default:    testconvert.Interface(true),
+					True:       testconvert.Interface(false),
+					False:      testconvert.Interface(false),
+				}, nil),
+				disableInit: true,
+			},
+			want:    false,
+			wantErr: true,
+		},
 		{
 			name: "Get default value if flag disable",
 			args: args{
@@ -82,7 +101,7 @@ func TestBoolVariation(t *testing.T) {
 			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"disable-flag\", value=\"true\", variation=\"SdkDefault\"\n",
 		},
 		{
-			name: "Get error when not init",
+			name: "Get error when cache not init",
 			args: args{
 				flagKey:      "key-not-exist",
 				user:         ffuser.NewUser("random-key"),
@@ -219,19 +238,21 @@ func TestBoolVariation(t *testing.T) {
 			file, _ := os.CreateTemp("", "log")
 			logger := log.New(file, "", 0)
 
-			ff = &GoFeatureFlag{
-				bgUpdater: newBackgroundUpdater(5),
-				cache:     tt.args.cacheMock,
-				config: Config{
-					PollingInterval: 0,
-					Logger:          logger,
-					Offline:         tt.args.offline,
-				},
-				dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
-					&logsexporter.Exporter{
-						LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
-							"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
-					}, logger),
+			if !tt.args.disableInit {
+				ff = &GoFeatureFlag{
+					bgUpdater: newBackgroundUpdater(5),
+					cache:     tt.args.cacheMock,
+					config: Config{
+						PollingInterval: 0,
+						Logger:          logger,
+						Offline:         tt.args.offline,
+					},
+					dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
+						&logsexporter.Exporter{
+							LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+						}, logger),
+				}
 			}
 
 			got, err := BoolVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
@@ -261,6 +282,7 @@ func TestFloat64Variation(t *testing.T) {
 		defaultValue float64
 		cacheMock    cache.Manager
 		offline      bool
+		disableInit  bool
 	}
 	tests := []struct {
 		name        string
@@ -269,6 +291,24 @@ func TestFloat64Variation(t *testing.T) {
 		wantErr     bool
 		expectedLog string
 	}{
+		{
+			name: "Call variation before init of SDK",
+			args: args{
+				flagKey:      "key-not-exist",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: 123.3,
+				cacheMock: NewCacheMock(&flagv1.FlagData{
+					Rule:       testconvert.String("key eq \"key\""),
+					Percentage: testconvert.Float64(100),
+					Default:    testconvert.Interface(true),
+					True:       testconvert.Interface(false),
+					False:      testconvert.Interface(false),
+				}, nil),
+				disableInit: true,
+			},
+			want:    123.3,
+			wantErr: true,
+		},
 		{
 			name: "Get default value if flag disable",
 			args: args{
@@ -284,7 +324,7 @@ func TestFloat64Variation(t *testing.T) {
 			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"disable-flag\", value=\"120.12\", variation=\"SdkDefault\"\n",
 		},
 		{
-			name: "Get error when not init",
+			name: "Get error when cache not init",
 			args: args{
 				flagKey:      "key-not-exist",
 				user:         ffuser.NewUser("random-key"),
@@ -421,19 +461,21 @@ func TestFloat64Variation(t *testing.T) {
 			file, _ := os.CreateTemp("", "log")
 			logger := log.New(file, "", 0)
 
-			ff = &GoFeatureFlag{
-				bgUpdater: newBackgroundUpdater(5),
-				cache:     tt.args.cacheMock,
-				config: Config{
-					PollingInterval: 0,
-					Logger:          logger,
-					Offline:         tt.args.offline,
-				},
-				dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
-					&logsexporter.Exporter{
-						LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
-							"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
-					}, logger),
+			if !tt.args.disableInit {
+				ff = &GoFeatureFlag{
+					bgUpdater: newBackgroundUpdater(5),
+					cache:     tt.args.cacheMock,
+					config: Config{
+						PollingInterval: 0,
+						Logger:          logger,
+						Offline:         tt.args.offline,
+					},
+					dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
+						&logsexporter.Exporter{
+							LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+						}, logger),
+				}
 			}
 
 			got, err := Float64Variation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
@@ -462,6 +504,7 @@ func TestJSONArrayVariation(t *testing.T) {
 		defaultValue []interface{}
 		cacheMock    cache.Manager
 		offline      bool
+		disableInit  bool
 	}
 	tests := []struct {
 		name        string
@@ -470,6 +513,24 @@ func TestJSONArrayVariation(t *testing.T) {
 		wantErr     bool
 		expectedLog string
 	}{
+		{
+			name: "Call variation before init of SDK",
+			args: args{
+				flagKey:      "key-not-exist",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: []interface{}{},
+				cacheMock: NewCacheMock(&flagv1.FlagData{
+					Rule:       testconvert.String("key eq \"key\""),
+					Percentage: testconvert.Float64(100),
+					Default:    testconvert.Interface(true),
+					True:       testconvert.Interface(false),
+					False:      testconvert.Interface(false),
+				}, nil),
+				disableInit: true,
+			},
+			want:    []interface{}{},
+			wantErr: true,
+		},
 		{
 			name: "Get default value if flag disable",
 			args: args{
@@ -485,7 +546,7 @@ func TestJSONArrayVariation(t *testing.T) {
 			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"disable-flag\", value=\"\\[toto\\]\"\n",
 		},
 		{
-			name: "Get error when not init",
+			name: "Get error when cache not init",
 			args: args{
 				flagKey:      "key-not-exist",
 				user:         ffuser.NewUser("random-key"),
@@ -640,16 +701,18 @@ func TestJSONArrayVariation(t *testing.T) {
 			file, _ := os.CreateTemp("", "log")
 			logger := log.New(file, "", 0)
 
-			ff = &GoFeatureFlag{
-				bgUpdater: newBackgroundUpdater(5),
-				cache:     tt.args.cacheMock,
-				config: Config{
-					PollingInterval: 0,
-					Logger:          logger,
-					Offline:         tt.args.offline,
-				},
-				dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
-					&logsexporter.Exporter{}, logger),
+			if !tt.args.disableInit {
+				ff = &GoFeatureFlag{
+					bgUpdater: newBackgroundUpdater(5),
+					cache:     tt.args.cacheMock,
+					config: Config{
+						PollingInterval: 0,
+						Logger:          logger,
+						Offline:         tt.args.offline,
+					},
+					dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
+						&logsexporter.Exporter{}, logger),
+				}
 			}
 
 			got, err := JSONArrayVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
@@ -677,6 +740,7 @@ func TestJSONVariation(t *testing.T) {
 		defaultValue map[string]interface{}
 		cacheMock    cache.Manager
 		offline      bool
+		disableInit  bool
 	}
 	tests := []struct {
 		name        string
@@ -685,6 +749,24 @@ func TestJSONVariation(t *testing.T) {
 		wantErr     bool
 		expectedLog string
 	}{
+		{
+			name: "Call variation before init of SDK",
+			args: args{
+				flagKey:      "key-not-exist",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: map[string]interface{}{},
+				cacheMock: NewCacheMock(&flagv1.FlagData{
+					Rule:       testconvert.String("key eq \"key\""),
+					Percentage: testconvert.Float64(100),
+					Default:    testconvert.Interface(true),
+					True:       testconvert.Interface(false),
+					False:      testconvert.Interface(false),
+				}, nil),
+				disableInit: true,
+			},
+			want:    map[string]interface{}{},
+			wantErr: true,
+		},
 		{
 			name: "Get default value if flag disable",
 			args: args{
@@ -700,7 +782,7 @@ func TestJSONVariation(t *testing.T) {
 			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"disable-flag\", value=\"map\\[default-notkey:true\\]\", variation=\"SdkDefault\"\n",
 		},
 		{
-			name: "Get error when not init",
+			name: "Get error when cache not init",
 			args: args{
 				flagKey:      "key-not-exist",
 				user:         ffuser.NewUser("random-key"),
@@ -818,19 +900,21 @@ func TestJSONVariation(t *testing.T) {
 			file, _ := os.CreateTemp("", "log")
 			logger := log.New(file, "", 0)
 
-			ff = &GoFeatureFlag{
-				bgUpdater: newBackgroundUpdater(5),
-				cache:     tt.args.cacheMock,
-				config: Config{
-					PollingInterval: 0,
-					Logger:          logger,
-					Offline:         tt.args.offline,
-				},
-				dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
-					&logsexporter.Exporter{
-						LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
-							"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
-					}, logger),
+			if !tt.args.disableInit {
+				ff = &GoFeatureFlag{
+					bgUpdater: newBackgroundUpdater(5),
+					cache:     tt.args.cacheMock,
+					config: Config{
+						PollingInterval: 0,
+						Logger:          logger,
+						Offline:         tt.args.offline,
+					},
+					dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
+						&logsexporter.Exporter{
+							LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+						}, logger),
+				}
 			}
 
 			got, err := JSONVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
@@ -860,6 +944,7 @@ func TestStringVariation(t *testing.T) {
 		defaultValue string
 		cacheMock    cache.Manager
 		offline      bool
+		disableInit  bool
 	}
 	tests := []struct {
 		name        string
@@ -868,6 +953,24 @@ func TestStringVariation(t *testing.T) {
 		wantErr     bool
 		expectedLog string
 	}{
+		{
+			name: "Call variation before init of SDK",
+			args: args{
+				flagKey:      "key-not-exist",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: "",
+				cacheMock: NewCacheMock(&flagv1.FlagData{
+					Rule:       testconvert.String("key eq \"key\""),
+					Percentage: testconvert.Float64(100),
+					Default:    testconvert.Interface(true),
+					True:       testconvert.Interface(false),
+					False:      testconvert.Interface(false),
+				}, nil),
+				disableInit: true,
+			},
+			want:    "",
+			wantErr: true,
+		},
 		{
 			name: "Get default value if flag disable",
 			args: args{
@@ -883,7 +986,7 @@ func TestStringVariation(t *testing.T) {
 			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"disable-flag\", value=\"default-notkey\", variation=\"SdkDefault\"\n",
 		},
 		{
-			name: "Get error when not init",
+			name: "Get error when cache not init",
 			args: args{
 				flagKey:      "key-not-exist",
 				user:         ffuser.NewUser("random-key"),
@@ -1003,19 +1106,21 @@ func TestStringVariation(t *testing.T) {
 			file, _ := os.CreateTemp("", "log")
 			logger := log.New(file, "", 0)
 
-			ff = &GoFeatureFlag{
-				bgUpdater: newBackgroundUpdater(5),
-				cache:     tt.args.cacheMock,
-				config: Config{
-					PollingInterval: 0,
-					Logger:          logger,
-					Offline:         tt.args.offline,
-				},
-				dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
-					&logsexporter.Exporter{
-						LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
-							"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
-					}, logger),
+			if !tt.args.disableInit {
+				ff = &GoFeatureFlag{
+					bgUpdater: newBackgroundUpdater(5),
+					cache:     tt.args.cacheMock,
+					config: Config{
+						PollingInterval: 0,
+						Logger:          logger,
+						Offline:         tt.args.offline,
+					},
+					dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
+						&logsexporter.Exporter{
+							LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+						}, logger),
+				}
 			}
 			got, err := StringVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
@@ -1044,6 +1149,7 @@ func TestIntVariation(t *testing.T) {
 		defaultValue int
 		cacheMock    cache.Manager
 		offline      bool
+		disableInit  bool
 	}
 	tests := []struct {
 		name        string
@@ -1052,6 +1158,24 @@ func TestIntVariation(t *testing.T) {
 		wantErr     bool
 		expectedLog string
 	}{
+		{
+			name: "Call variation before init of SDK",
+			args: args{
+				flagKey:      "key-not-exist",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: 1,
+				cacheMock: NewCacheMock(&flagv1.FlagData{
+					Rule:       testconvert.String("key eq \"key\""),
+					Percentage: testconvert.Float64(100),
+					Default:    testconvert.Interface(true),
+					True:       testconvert.Interface(false),
+					False:      testconvert.Interface(false),
+				}, nil),
+				disableInit: true,
+			},
+			want:    1,
+			wantErr: true,
+		},
 		{
 			name: "Get default value if flag disable",
 			args: args{
@@ -1067,7 +1191,7 @@ func TestIntVariation(t *testing.T) {
 			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"disable-flag\", value=\"125\", variation=\"SdkDefault\"\n",
 		},
 		{
-			name: "Get error when not init",
+			name: "Get error when cache not init",
 			args: args{
 				flagKey:      "key-not-exist",
 				user:         ffuser.NewUser("random-key"),
@@ -1204,19 +1328,21 @@ func TestIntVariation(t *testing.T) {
 			file, _ := os.CreateTemp("", "log")
 			logger := log.New(file, "", 0)
 
-			ff = &GoFeatureFlag{
-				bgUpdater: newBackgroundUpdater(5),
-				cache:     tt.args.cacheMock,
-				config: Config{
-					PollingInterval: 0,
-					Logger:          logger,
-					Offline:         tt.args.offline,
-				},
-				dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
-					&logsexporter.Exporter{
-						LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
-							"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
-					}, logger),
+			if !tt.args.disableInit {
+				ff = &GoFeatureFlag{
+					bgUpdater: newBackgroundUpdater(5),
+					cache:     tt.args.cacheMock,
+					config: Config{
+						PollingInterval: 0,
+						Logger:          logger,
+						Offline:         tt.args.offline,
+					},
+					dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
+						&logsexporter.Exporter{
+							LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+						}, logger),
+				}
 			}
 			got, err := IntVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
@@ -1401,6 +1527,7 @@ func TestRawVariation(t *testing.T) {
 		defaultValue interface{}
 		cacheMock    cache.Manager
 		offline      bool
+		disableInit  bool
 	}
 	tests := []struct {
 		name        string
@@ -1409,6 +1536,27 @@ func TestRawVariation(t *testing.T) {
 		wantErr     bool
 		expectedLog string
 	}{
+		{
+			name: "Call variation before init of SDK",
+			args: args{
+				flagKey:      "key-not-exist",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: "",
+				cacheMock: NewCacheMock(&flagv1.FlagData{
+					Rule:       testconvert.String("key eq \"key\""),
+					Percentage: testconvert.Float64(100),
+					Default:    testconvert.Interface(true),
+					True:       testconvert.Interface(false),
+					False:      testconvert.Interface(false),
+				}, nil),
+				disableInit: true,
+			},
+			wantErr: true,
+			want: model.RawVarResult{
+				VariationResult: notInitVariationResult,
+				Value:           "",
+			},
+		},
 		{
 			name: "Get default value if flag disable",
 			args: args{
@@ -1432,7 +1580,7 @@ func TestRawVariation(t *testing.T) {
 			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"disable-flag\", value=\"true\", variation=\"SdkDefault\"\n",
 		},
 		{
-			name: "Get error when not init",
+			name: "Get error when cache not init",
 			args: args{
 				flagKey:      "key-not-exist",
 				user:         ffuser.NewUser("random-key"),
@@ -1595,7 +1743,7 @@ func TestRawVariation(t *testing.T) {
 				Value: false,
 				VariationResult: model.VariationResult{
 					VariationType: flag.VariationSDKDefault,
-					Failed:        true,
+					Failed:        false,
 					TrackEvents:   false,
 				},
 			},
@@ -1609,19 +1757,21 @@ func TestRawVariation(t *testing.T) {
 			file, _ := os.CreateTemp("", "log")
 			logger := log.New(file, "", 0)
 
-			ff = &GoFeatureFlag{
-				bgUpdater: newBackgroundUpdater(5),
-				cache:     tt.args.cacheMock,
-				config: Config{
-					PollingInterval: 0,
-					Logger:          logger,
-					Offline:         tt.args.offline,
-				},
-				dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
-					&logsexporter.Exporter{
-						LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
-							"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
-					}, logger),
+			if !tt.args.disableInit {
+				ff = &GoFeatureFlag{
+					bgUpdater: newBackgroundUpdater(5),
+					cache:     tt.args.cacheMock,
+					config: Config{
+						PollingInterval: 0,
+						Logger:          logger,
+						Offline:         tt.args.offline,
+					},
+					dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
+						&logsexporter.Exporter{
+							LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+						}, logger),
+				}
 			}
 
 			got, err := ff.RawVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
