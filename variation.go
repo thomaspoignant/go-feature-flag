@@ -17,7 +17,15 @@ const (
 	errorWrongVariation   = "wrong variation used for flag %v"
 )
 
-var offlineVariationResult = model.VariationResult{VariationType: flag.VariationSDKDefault, Failed: true}
+var (
+	offlineVariationResult = model.VariationResult{VariationType: flag.VariationSDKDefault, Failed: false}
+	notInitVariationResult = model.VariationResult{
+		VariationType: flag.VariationSDKDefault,
+		Failed:        true,
+		Reason:        flag.ReasonError,
+		ErrorCode:     flag.ErrorCodeProviderNotReady,
+	}
+)
 
 // BoolVariation return the value of the flag in boolean.
 // An error is return if you don't have init the library before calling the function.
@@ -143,6 +151,10 @@ func (g *GoFeatureFlag) JSONVariation(
 // AllFlagsState return a flagstate.AllFlags that contains all the flags for a specific user.
 func (g *GoFeatureFlag) AllFlagsState(user ffuser.User) flagstate.AllFlags {
 	flags := map[string]flag.Flag{}
+	if g == nil {
+		// empty AllFlags will set valid to false
+		return flagstate.AllFlags{}
+	}
 
 	if !g.config.Offline {
 		var err error
@@ -214,6 +226,11 @@ func (g *GoFeatureFlag) GetFlagsFromCache() (map[string]flag.Flag, error) {
 // the result will always contain a valid model.BoolVarResult
 func (g *GoFeatureFlag) boolVariation(flagKey string, user ffuser.User, sdkDefaultValue bool,
 ) (model.BoolVarResult, error) {
+	if g == nil {
+		return model.BoolVarResult{Value: sdkDefaultValue, VariationResult: notInitVariationResult},
+			fmt.Errorf("go-feature-flag is not initialised, default value is used")
+	}
+
 	if g.config.Offline {
 		return model.BoolVarResult{Value: sdkDefaultValue, VariationResult: offlineVariationResult}, nil
 	}
@@ -254,6 +271,11 @@ func (g *GoFeatureFlag) boolVariation(flagKey string, user ffuser.User, sdkDefau
 // the result will always contain a valid model.IntVarResult
 func (g *GoFeatureFlag) intVariation(flagKey string, user ffuser.User, sdkDefaultValue int,
 ) (model.IntVarResult, error) {
+	if g == nil {
+		return model.IntVarResult{Value: sdkDefaultValue, VariationResult: notInitVariationResult},
+			fmt.Errorf("go-feature-flag is not initialised, default value is used")
+	}
+
 	if g.config.Offline {
 		return model.IntVarResult{Value: sdkDefaultValue, VariationResult: offlineVariationResult}, nil
 	}
@@ -298,9 +320,14 @@ func (g *GoFeatureFlag) intVariation(flagKey string, user ffuser.User, sdkDefaul
 }
 
 // float64Variation is the internal func that handle the logic of a variation with a float64 value
-// the result will always contains a valid model.Float64VarResult
+// the result will always contain a valid model.Float64VarResult
 func (g *GoFeatureFlag) float64Variation(flagKey string, user ffuser.User, sdkDefaultValue float64,
 ) (model.Float64VarResult, error) {
+	if g == nil {
+		return model.Float64VarResult{Value: sdkDefaultValue, VariationResult: notInitVariationResult},
+			fmt.Errorf("go-feature-flag is not initialised, default value is used")
+	}
+
 	if g.config.Offline {
 		return model.Float64VarResult{Value: sdkDefaultValue, VariationResult: offlineVariationResult}, nil
 	}
@@ -337,9 +364,14 @@ func (g *GoFeatureFlag) float64Variation(flagKey string, user ffuser.User, sdkDe
 }
 
 // stringVariation is the internal func that handle the logic of a variation with a string value
-// the result will always contains a valid model.StringVarResult
+// the result will always contain a valid model.StringVarResult
 func (g *GoFeatureFlag) stringVariation(flagKey string, user ffuser.User, sdkDefaultValue string,
 ) (model.StringVarResult, error) {
+	if g == nil {
+		return model.StringVarResult{Value: sdkDefaultValue, VariationResult: notInitVariationResult},
+			fmt.Errorf("go-feature-flag is not initialised, default value is used")
+	}
+
 	if g.config.Offline {
 		return model.StringVarResult{Value: sdkDefaultValue, VariationResult: offlineVariationResult}, nil
 	}
@@ -376,9 +408,14 @@ func (g *GoFeatureFlag) stringVariation(flagKey string, user ffuser.User, sdkDef
 }
 
 // jsonArrayVariation is the internal func that handle the logic of a variation with a json value
-// the result will always contains a valid model.JSONArrayVarResult
+// the result will always contain a valid model.JSONArrayVarResult
 func (g *GoFeatureFlag) jsonArrayVariation(flagKey string, user ffuser.User, sdkDefaultValue []interface{},
 ) (model.JSONArrayVarResult, error) {
+	if g == nil {
+		return model.JSONArrayVarResult{Value: sdkDefaultValue, VariationResult: notInitVariationResult},
+			fmt.Errorf("go-feature-flag is not initialised, default value is used")
+	}
+
 	if g.config.Offline {
 		return model.JSONArrayVarResult{Value: sdkDefaultValue, VariationResult: offlineVariationResult}, nil
 	}
@@ -415,9 +452,14 @@ func (g *GoFeatureFlag) jsonArrayVariation(flagKey string, user ffuser.User, sdk
 }
 
 // jsonVariation is the internal func that handle the logic of a variation with a json value
-// the result will always contains a valid model.JSONVarResult
+// the result will always contain a valid model.JSONVarResult
 func (g *GoFeatureFlag) jsonVariation(flagKey string, user ffuser.User, sdkDefaultValue map[string]interface{},
 ) (model.JSONVarResult, error) {
+	if g == nil {
+		return model.JSONVarResult{Value: sdkDefaultValue, VariationResult: notInitVariationResult},
+			fmt.Errorf("go-feature-flag is not initialised, default value is used")
+	}
+
 	if g.config.Offline {
 		return model.JSONVarResult{Value: sdkDefaultValue, VariationResult: offlineVariationResult}, nil
 	}
@@ -477,6 +519,11 @@ func computeVariationResult(flag flag.Flag, resolutionDetails flag.ResolutionDet
 // Note: Use this function only if you are using multiple go-feature-flag instances.
 func (g *GoFeatureFlag) RawVariation(flagKey string, user ffuser.User, sdkDefaultValue interface{},
 ) (model.RawVarResult, error) {
+	if g == nil {
+		return model.RawVarResult{Value: sdkDefaultValue, VariationResult: notInitVariationResult},
+			fmt.Errorf("go-feature-flag is not initialised, default value is used")
+	}
+
 	if g.config.Offline {
 		return model.RawVarResult{Value: sdkDefaultValue, VariationResult: offlineVariationResult}, nil
 	}
