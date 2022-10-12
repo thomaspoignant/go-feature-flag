@@ -67,6 +67,7 @@ dockers:
 brews:
   - ids:
       - go-feature-flag-migration-cli
+    name: go-feature-flag-migration-cli
     tap:
       owner: thomaspoignant
       name: homebrew-tap
