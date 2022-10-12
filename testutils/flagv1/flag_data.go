@@ -173,7 +173,7 @@ func (f FlagData) String() string {
 	return strings.Join(toString, ", ")
 }
 
-// getActualPercentage return the the actual percentage of the flag.
+// getActualPercentage return the actual percentage of the flag.
 // the result value is the version with the percentageMultiplier.
 func (f *FlagData) getActualPercentage() float64 {
 	flagPercentage := f.getPercentage() * percentageMultiplier
