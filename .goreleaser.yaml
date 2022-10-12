@@ -10,14 +10,48 @@ builds:
     main: ./cmd/migrationcli
     binary: go-feature-flag-migration-cli
     goos:
+      - darwin
       - linux
       - windows
-      - darwin
     goarch:
       - 386
-      - arm
-      - arm64
       - amd64
+      - arm64
+      - arm
+    goarm:
+      - 6
+      - 7
+    ignore:
+      - goos: darwin
+        goarch: 386
+      - goos: linux
+        goarch: arm
+        goarm: 6
+
+archives:
+  - id: go-feature-flag-migration-cli
+    builds:
+      - go-feature-flag-migration-cli
+    replacements:
+      darwin: Darwin
+      linux: Linux
+      windows: Windows
+      386: i386
+      amd64: x86_64
+
+checksum:
+  name_template: 'checksums.txt'
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^testdata:'
+      - '^.github'
+      - '^examples'
+      - 'vendor'
 
 dockers:
   - goos: linux
@@ -31,11 +65,11 @@ dockers:
       - thomaspoignant/go-feature-flag-migration-cli:v{{ .Major }}.{{ .Minor }}
 
 brews:
-  - tap:
+  - ids:
+      - go-feature-flag-migration-cli
+    tap:
       owner: thomaspoignant
       name: homebrew-tap
-    ids:
-      - go-feature-flag-migration-cli
     caveats: "A migration command line to move your feature flag configuration file from format GO Feature Flag v0.X to v1.X"
     homepage: "https://github.com/thomaspoignant/go-feature-flag/cmd/migrationcli"
     description: "A migration command line to move your feature flag configuration file from format GO Feature Flag v0.X to v1.X"
@@ -50,25 +84,5 @@ scoop:
   homepage: "https://gofeatureflag.org"
   license: MIT
 
-archives:
-  - replacements:
-      darwin: Darwin
-      linux: Linux
-      windows: Windows
-      386: i386
-      amd64: x86_64
-
-checksum:
-  name_template: 'checksums.txt'
 snapshot:
   name_template: "{{ incpatch .Version }}-next"
-changelog:
-  sort: asc
-  filters:
-    exclude:
-      - '^docs:'
-      - '^test:'
-      - '^testdata:'
-      - '^.github'
-      - '^examples'
-      - 'vendor'
