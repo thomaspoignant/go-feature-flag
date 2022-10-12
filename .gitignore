@@ -16,6 +16,10 @@ bin/
 # CI deployment folder
 .deployment
 
+# goreleaser
+dist/
+release/
+
 vendor/
 
 # venv created for the documentation script

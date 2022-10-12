@@ -1,0 +1,187 @@
+basePath: /
+definitions:
+  echo.HTTPError:
+    properties:
+      message: {}
+    type: object
+  model.FlagEval:
+    properties:
+      value: {}
+    type: object
+  model.HealthResponse:
+    properties:
+      initialized:
+        type: boolean
+    type: object
+  model.InfoResponse:
+    properties:
+      cacheRefresh:
+        type: string
+    type: object
+  model.RelayProxyRequest:
+    properties:
+      defaultValue: {}
+      user:
+        $ref: '#/definitions/model.UserRequest'
+    type: object
+  model.UserRequest:
+    properties:
+      anonymous:
+        description: Anonymous set if this is a logged-in user or not.
+        type: boolean
+      custom:
+        additionalProperties: true
+        description: Custom is a map containing all extra information for this user.
+        type: object
+      key:
+        description: Key is the identifier of the UserRequest.
+        type: string
+    type: object
+  modeldocs.AllFlags:
+    description: AllFlags contains the full list of all the flags available for the
+      user
+    properties:
+      flags:
+        additionalProperties:
+          $ref: '#/definitions/modeldocs.FlagState'
+        description: flags is the list of flag for the user.
+        type: object
+      valid:
+        description: |-
+          Valid if false it means there was an error (such as the data store not being available),
+          in which case no flag data is in this object.
+        example: false
+        type: boolean
+    type: object
+  modeldocs.FlagState:
+    properties:
+      timestamp:
+        description: Timestamp is the time when the flag was evaluated.
+        example: 1652113076
+        type: integer
+      trackEvents:
+        description: TrackEvents this flag is trackable.
+        example: false
+        type: boolean
+      value:
+        description: Value is the flag value, it can be any JSON types.
+      variationType:
+        description: VariationType is the name of the variation used to have the flag
+          value.
+        example: variation-A
+        type: string
+    type: object
+info:
+  contact:
+    name: GO feature flag relay proxy
+    url: https://github.com/thomaspoignant/go-feature-flag-relay-proxy
+  description: |-
+    Swagger for the go-feature-flag relay proxy.
+
+    go-feature-flag relay proxy is using thomaspoignant/go-feature-flag to handle your feature flagging.
+    It is a proxy to your flags, you can get the values of your flags using APIs.
+  license:
+    name: MIT
+    url: https://github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/blob/main/LICENSE
+  title: go-feature-flag relay proxy
+paths:
+  /health:
+    get:
+      description: Health is the status endpoint of the relay proxy, you should call
+        it to check if the relay proxy is up.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.HealthResponse'
+      summary: Health, status endpoint
+      tags:
+      - monitoring
+  /info:
+    get:
+      description: Info, give information about the instance of go-feature-flag relay
+        proxy
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.InfoResponse'
+      summary: Info, give information about the instance of go-feature-flag relay
+        proxy
+      tags:
+      - monitoring
+  /v1/allflags:
+    post:
+      consumes:
+      - application/json
+      description: allflags returns all the flag for a specific user.
+      parameters:
+      - description: Payload of the user we want to challenge against the flag.
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.RelayProxyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/modeldocs.AllFlags'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: allflags returns all the flag for a specific user.
+      tags:
+      - flags
+  /v1/feature/{flag_key}/eval:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Evaluate the users with the corresponding flag and return the value for the user.
+        Note that you will always have a usable value in the response, you can use the field failed to know if
+        an issue has occurred during the validation of the flag, in that case the value returned will be the
+        default value.
+      parameters:
+      - description: Payload of the user we want to get all the flags from.
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.RelayProxyRequest'
+      - description: Name of your feature flag
+        in: path
+        name: flag_key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/model.FlagEval'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Evaluate the users with the corresponding flag and return the value
+        for the user.
+      tags:
+      - flags
+swagger: "2.0"
