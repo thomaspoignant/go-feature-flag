@@ -43,6 +43,11 @@ jobs:
     needs:
       - goreleaser
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
       - name: Release readme to DockerHub
         uses: ms-jpq/sync-dockerhub-readme@v1
         env:
