@@ -67,9 +67,11 @@ dockers:
 brews:
   - ids:
       - go-feature-flag-migration-cli
+    name: go-feature-flag-migration-cli
     tap:
       owner: thomaspoignant
       name: homebrew-tap
+      branch: master
     caveats: "A migration command line to move your feature flag configuration file from format GO Feature Flag v0.X to v1.X"
     homepage: "https://github.com/thomaspoignant/go-feature-flag/cmd/migrationcli"
     description: "A migration command line to move your feature flag configuration file from format GO Feature Flag v0.X to v1.X"
