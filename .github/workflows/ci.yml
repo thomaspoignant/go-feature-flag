@@ -15,7 +15,7 @@ jobs:
       - name: Setup go
         uses: actions/setup-go@v3
         with:
-          go-version: '^1.16.0'
+          go-version: '^1.18.0'
       - run: make lint
 
   Test:
@@ -26,7 +26,7 @@ jobs:
       - name: Setup go
         uses: actions/setup-go@v3
         with:
-          go-version: '^1.16.0'
+          go-version: '^1.18.0'
       - run: make test
 
   Coverage:
@@ -40,7 +40,7 @@ jobs:
       - name: Setup go
         uses: actions/setup-go@v3
         with:
-          go-version: '^1.16.0'
+          go-version: '^1.18.0'
       - run: make coverage
       - uses: shogo82148/actions-goveralls@v1
         with:
@@ -56,7 +56,7 @@ jobs:
       - name: Setup go
         uses: actions/setup-go@v3
         with:
-          go-version: '^1.16.0'
+          go-version: '^1.18.0'
       - name: Run benchmark
         run: make bench | tee bench-output.txt
       - name: Download previous benchmark data
