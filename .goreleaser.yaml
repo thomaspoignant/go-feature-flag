@@ -1,0 +1,74 @@
+before:
+  hooks:
+    - go mod tidy
+    - go generate ./...
+
+dist: release
+
+builds:
+  - id: go-feature-flag-migration-cli
+    main: ./cmd/migrationcli
+    binary: go-feature-flag-migration-cli
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - 386
+      - arm
+      - arm64
+      - amd64
+
+dockers:
+  - goos: linux
+    ids:
+      - go-feature-flag-migration-cli
+    dockerfile: ./cmd/migrationcli/Dockerfile
+    image_templates:
+      - thomaspoignant/go-feature-flag-migration-cli:latest
+      - thomaspoignant/go-feature-flag-migration-cli:{{ .Tag }}
+      - thomaspoignant/go-feature-flag-migration-cli:v{{ .Major }}
+      - thomaspoignant/go-feature-flag-migration-cli:v{{ .Major }}.{{ .Minor }}
+
+brews:
+  - tap:
+      owner: thomaspoignant
+      name: homebrew-tap
+    ids:
+      - go-feature-flag-migration-cli
+    caveats: "A migration command line to move your feature flag configuration file from format GO Feature Flag v0.X to v1.X"
+    homepage: "https://github.com/thomaspoignant/go-feature-flag/cmd/migrationcli"
+    description: "A migration command line to move your feature flag configuration file from format GO Feature Flag v0.X to v1.X"
+    skip_upload: auto
+
+scoop:
+  url_template: "https://github.com/thomaspoignant/go-feature-flag/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+  bucket:
+    owner: thomaspoignant
+    name: scoop
+  commit_msg_template: "Scoop update for {{ .ProjectName }} version {{ .Tag }}"
+  homepage: "https://gofeatureflag.org"
+  license: MIT
+
+archives:
+  - replacements:
+      darwin: Darwin
+      linux: Linux
+      windows: Windows
+      386: i386
+      amd64: x86_64
+
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^testdata:'
+      - '^.github'
+      - '^examples'
+      - 'vendor'

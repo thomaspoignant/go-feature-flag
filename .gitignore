@@ -22,4 +22,5 @@ vendor/
 .venv
 
 # binaries
+release/
 cmd/migrationcli/migrationcli
