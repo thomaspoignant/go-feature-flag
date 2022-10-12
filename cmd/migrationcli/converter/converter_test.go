@@ -162,9 +162,6 @@ func TestFlagConverter_Migrate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := tt.converter.Migrate()
 			tt.wantErr(t, err, fmt.Sprintf("Migrate(): %s", err))
-
-			fmt.Println(string(got))
-
 			if tt.wantFileLocation != "" {
 				want, err := os.ReadFile(tt.wantFileLocation)
 				assert.NoError(t, err)

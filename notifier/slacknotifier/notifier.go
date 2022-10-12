@@ -118,11 +118,7 @@ func convertUpdatedFlagsToSlackMessage(diffCache notifier.DiffCache) []attachmen
 			Fields:     []Field{},
 		}
 
-		changelog, err := diff.Diff(value.Before, value.After, diff.AllowTypeMismatch(true))
-		if err != nil {
-			fmt.Println(err)
-		}
-
+		changelog, _ := diff.Diff(value.Before, value.After, diff.AllowTypeMismatch(true))
 		for _, change := range changelog {
 			if change.Type == "update" {
 				value := fmt.Sprintf("%s => %s", render.Render(change.From), render.Render(change.To))
