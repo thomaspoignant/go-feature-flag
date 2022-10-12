@@ -13,33 +13,45 @@ You just have to select a percentage of your users in your flag, and the `True` 
 
 === "YAML"
 
-    ``` yaml linenums="1" hl_lines="5"
+    ``` yaml linenums="1" hl_lines="8"
     canary-flag:
-      true: true
-      false: false
-      default: false
-      percentage: 1
+      variations:
+        oldBehavior: false
+        canary: true
+      defaultRule:
+        percentage:
+          oldBehavior: 99
+          canary: 1
     ```
 
 === "JSON"
 
-    ``` json linenums="1" hl_lines="6"
+    ``` json linenums="1" hl_lines="10"
     {
       "canary-flag": {
-        "true": true,
-        "false": false,
-        "default": "false,
-        "percentage": 1
+        "variations": {
+          "oldBehavior": false,
+          "canary": true
+        },
+        "defaultRule": {
+          "percentage": {
+            "oldBehavior": 99,
+            "canary": 1
+          }
+        }
       }
     }
     ```
 
 === "TOML"
 
-    ``` toml linenums="1" hl_lines="5"
-    [canary-flag]
-    true = true
-    false = false
-    default = false
-    percentage = 1.0
+    ``` toml linenums="1" hl_lines="7"
+    [canary-flag.variations]
+    oldBehavior = false
+    canary = true
+    
+    [canary-flag.defaultRule.percentage]
+    oldBehavior = 99
+    canary = 1
+
     ```

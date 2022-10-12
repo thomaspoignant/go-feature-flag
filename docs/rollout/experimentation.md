@@ -5,40 +5,46 @@ sidebar_position: 3
 # Experimentation rollout / A/B Testing
 An **experimentation rollout** is when your flag is configured to be served only for a determined time.
 
-1. It means that before the rollout start date, the `default` value is served to all users.
+1. It means that before the rollout start date, the flag is considered disabled _(we serve the default value from the SDK)_.
 2. Between the dates the flag is evaluated.
-3. After the end date the `default` value is served to all users.
+3. After the end date the flag is considered disabled.
 
 ## Example
 
 === "YAML"
 
-    ``` yaml linenums="1" hl_lines="6-10"
+    ``` yaml linenums="1" hl_lines="9-11"
     experimentation-flag:
-      percentage: 50
-      true: "B"
-      false: "A"
-      default: "Default"
-      rollout:
-        experimentation:
-          start: 2021-03-20T00:00:00.10-05:00
-          end: 2021-03-21T00:00:00.10-05:00
+      variations:
+        variationA: A
+        variationB: B
+      defaultRule:
+        percentage:
+          variationA: 50
+          variationB: 50
+      experimentation:
+        start: 2021-03-20T00:00:00.1-05:00
+        end: 2021-03-21T00:00:00.1-05:00
     ```
 
 === "JSON"
 
-    ``` json linenums="1" hl_lines="7-12"
+    ``` json linenums="1" hl_lines="13-16"
     {
       "experimentation-flag": {
-        "percentage": 50,
-        "true": "B",
-        "false": "A",
-        "default": "Default",
-        "rollout": {
-          "experimentation": {
-            "start": "2021-03-20 00:00:00 -0500",
-            "end": "2021-03-21 00:00:00 -0500"
+        "variations": {
+          "variationA": "A",
+          "variationB": "B"
+        },
+        "defaultRule": {
+          "percentage": {
+            "variationA": 50,
+            "variationB": 50
           }
+        },
+        "experimentation": {
+          "start": "2021-03-20T05:00:00.100Z",
+          "end": "2021-03-21T05:00:00.100Z"
         }
       }
     }
@@ -46,18 +52,18 @@ An **experimentation rollout** is when your flag is configured to be served only
 
 === "TOML"
 
-    ``` toml linenums="1" hl_lines="7-11" 
-    [experimentation-flag]
-    percentage = 50.0
-    true = "B"
-    false = "A"
-    default = "Default"
+    ``` toml linenums="1" hl_lines="9-11" 
+    [experimentation-flag.variations]
+    variationA = "A"
+    variationB = "B"
     
-    [experimentation-flag.rollout]
+    [experimentation-flag.defaultRule.percentage]
+    variationA = 50
+    variationB = 50
     
-        [experimentation-flag.rollout.experimentation]
-        start = 2021-03-20T05:00:00.100Z
-        end = 2021-03-21T05:00:00.100Z
+    [experimentation-flag.experimentation]
+    start = 2021-03-20T05:00:00.100Z
+    end = 2021-03-21T05:00:00.100Z
     ```
  
 Check this [example](https://github.com/thomaspoignant/go-feature-flag/tree/main/examples/rollout_scheduled) to see how it works. 
@@ -67,10 +73,10 @@ Check this [example](https://github.com/thomaspoignant/go-feature-flag/tree/main
 !!! Info
     The dates are in the format supported natively by your flag file format.
 
-| Field | Description |
-|---|---|
-|**`start`**| The date the flag will be started to be served.|
-|**`end`**| The date the flag will be stopped to be served.|
+| Field       | Description                                     |
+|-------------|-------------------------------------------------|
+| **`start`** | The date the flag will be started to be served. |
+| **`end`**   | The date the flag will be stopped to be served. |
 
 ## A/B testing
 

@@ -7,7 +7,7 @@ A critical part of every new feature release is orchestrating the actual launch 
 
 Delivering powerful user experiences typically requires software teams to manage complex releases and make manual updates at inconvenient times.
 
-But it doesn’t have to, having a complex **rollout** strategy allows you to have lifecycle for your flags.
+But it does not have to, having a complex **rollout** strategy allows you to have lifecycle for your flags.
 
 ## Complex rollout strategy available
 

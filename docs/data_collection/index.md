@@ -37,16 +37,16 @@ It represents individual flag evaluations and are considered "full fidelity" eve
 
 ### Configuration fields
 
-| Field              | Description                                                                                                                                                                                                                                                                                         |
-|--------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **`kind`**         | The kind for a feature event is feature. A feature event will only be generated if the trackEvents attribute of the flag is set to true.                                                                                                                                                            |
-| **`contextKind`**  | The kind of context which generated an event. This will only be "**anonymousUser**" for events generated on behalf of an anonymous user or the reserved word "**user**" for events generated on behalf of a non-anonymous user                                                                      |
-| **`userKey`**      | The key of the user object used in a feature flag evaluation.                                                                                                                                                                                                                                       |
-| **`creationDate`** | When the feature flag was requested at Unix epoch time in milliseconds.                                                                                                                                                                                                                             |
-| **`key`**          | The key of the feature flag requested.                                                                                                                                                                                                                                                              |
+| Field              | Description                                                                                                                                                                                                                                                                                             |
+|--------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`kind`**         | The kind for a feature event is feature. A feature event will only be generated if the trackEvents attribute of the flag is set to true.                                                                                                                                                                |
+| **`contextKind`**  | The kind of context which generated an event. This will only be "**anonymousUser**" for events generated on behalf of an anonymous user or the reserved word "**user**" for events generated on behalf of a non-anonymous user                                                                          |
+| **`userKey`**      | The key of the user object used in a feature flag evaluation.                                                                                                                                                                                                                                           |
+| **`creationDate`** | When the feature flag was requested at Unix epoch time in milliseconds.                                                                                                                                                                                                                                 |
+| **`key`**          | The key of the feature flag requested.                                                                                                                                                                                                                                                                  |
 | **`variation`**    | The variation of the flag requested. Available values are:<br/>**True**: if the flag was evaluated to True <br/>**False**: if the flag was evaluated to False<br/>**Dafault**: if the flag was evaluated to Default<br/>**SdkDefault**: if something wrong happened and the SDK default value was used. |
-| **`value`**        | The value of the feature flag returned by feature flag evaluation.                                                                                                                                                                                                                                  |
-| **`default`**      | (Optional) This value is set to true if feature flag evaluation failed, in which case the value returned was the default value passed to variation.                                                                                                                                                 |
+| **`value`**        | The value of the feature flag returned by feature flag evaluation.                                                                                                                                                                                                                                      |
+| **`default`**      | (Optional) This value is set to true if feature flag evaluation failed, in which case the value returned was the default value passed to variation.                                                                                                                                                     |
 
 Events are collected and send in bulk to avoid spamming your exporter *(see details in [how to configure data export](#how-to-configure-data-export)*)
 
@@ -77,9 +77,9 @@ ffclient.Config{
 
 ### Configuration fields
 
-| Field              |                                                                                                                                      | Description |
-|--------------------|--------------------------------------------------------------------------------------------------------------------------------------|-------------|
-| `Exporter`         | The configuration of the exporter you want to use. All the exporters are available in the `exporter` package.                        |
+| Field              |                                                                                                                                        | Description |
+|--------------------|----------------------------------------------------------------------------------------------------------------------------------------|-------------|
+| `Exporter`         | The configuration of the exporter you want to use. All the exporters are available in the `exporter` package.                          |
 | `FlushInterval`    | *(optional)*<br/>Time to wait before exporting the data.<br/>**Default: 60 seconds**.                                                  |
 | `MaxEventInMemory` | *(optional)*<br/>If `MaxEventInMemory` is reach before the `FlushInterval` a intermediary export will be done<br/>**Default: 100000**. |
 
@@ -92,23 +92,32 @@ If you want to exclude a specific flag from the data export, you can set the pro
 === "YAML"
 
 ``` yaml linenums="1" hl_lines="6"
-test-flag:
-  percentage: 50
-  true: "B"
-  false: "A"
-  default: "Default"
-  trackEvents: false
+untracked-flag:
+  variations:
+    A: false
+    B: true
+  defaultRule: 
+    percentage:
+      A: 0
+      B: 100
+  trackEvents: false # Deactivate tracking
 ```
 
 === "JSON"
 
 ``` json linenums="1"  hl_lines="7"
 {
-  "test-flag": {
-    "percentage": 50,
-    "true": "B",
-    "false": "A",
-    "default": "Default",
+  "untracked-flag": {
+    "variations": {
+      "A": false,
+      "B": true
+    },
+    "defaultRule": {
+      "percentage": {
+        "A": 0,
+        "B": 100
+      }
+    },
     "trackEvents": false
   }
 }
@@ -117,10 +126,14 @@ test-flag:
 === "TOML"
 
 ``` toml linenums="1" hl_lines="6"
-[test-flag]
-percentage = 50.0
-true = "B"
-false = "A"
-default = "Default"
+[untracked-flag]
 trackEvents = false
+
+  [untracked-flag.variations]
+  A = false
+  B = true
+
+[untracked-flag.defaultRule.percentage]
+A = 0
+B = 100
 ```

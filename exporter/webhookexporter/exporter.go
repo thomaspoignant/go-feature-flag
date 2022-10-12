@@ -104,7 +104,7 @@ func (f *Exporter) Export(ctx context.Context, logger *log.Logger, featureEvents
 	if err != nil {
 		return err
 	}
-	defer response.Body.Close()
+	defer func() { _ = response.Body.Close() }()
 	if response.StatusCode > 399 {
 		return fmt.Errorf(
 			"error while calling the webhook, HTTP Code %d received, response: %v", response.StatusCode, response.Body)

@@ -48,7 +48,7 @@ func TestFile_Export(t *testing.T) {
 					},
 					{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
-						Variation: "Default", Value: "YO2", Default: false, Version: 127,
+						Variation: "Default", Value: "YO2", Default: false, Version: "127",
 					},
 				},
 			},
@@ -142,7 +142,7 @@ func TestFile_Export(t *testing.T) {
 					},
 					{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
-						Variation: "Default", Value: "YO2", Default: false, Version: 127,
+						Variation: "Default", Value: "YO2", Default: false, Version: "127",
 					},
 				},
 			},

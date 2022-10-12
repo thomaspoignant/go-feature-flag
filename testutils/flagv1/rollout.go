@@ -24,14 +24,6 @@ type Rollout struct {
 	Scheduled *ScheduledRollout `json:"scheduled,omitempty" yaml:"scheduled,omitempty" toml:"scheduled,omitempty"` // nolint: lll
 }
 
-func (e Rollout) String() string {
-	// TODO: other rollout
-	if e.Experimentation == nil {
-		return ""
-	}
-	return "experimentation: " + e.Experimentation.String()
-}
-
 type Experimentation struct {
 	// Start is the starting time of the experimentation
 	Start *time.Time `json:"start,omitempty" yaml:"start,omitempty" toml:"start,omitempty"`

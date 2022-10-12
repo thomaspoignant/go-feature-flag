@@ -5,7 +5,7 @@
       "timestamp": 1622206239,
       "variationType": "True",
       "trackEvents": true,
-      "reason":"TARGETING_MATCH",
+      "reason":"DEFAULT",
       "errorCode": ""
     },
     "test-flag1": {
@@ -13,7 +13,7 @@
       "timestamp": 1622206239,
       "variationType": "True",
       "trackEvents": true,
-      "reason":"TARGETING_MATCH",
+      "reason":"DEFAULT",
       "errorCode": ""
     },
     "test-flag2": {
@@ -21,7 +21,7 @@
       "timestamp": 1622206239,
       "variationType": "True",
       "trackEvents": true,
-      "reason":"TARGETING_MATCH",
+      "reason":"DEFAULT",
       "errorCode": ""
     },
     "test-flag3": {
@@ -32,7 +32,7 @@
       "timestamp": 1622206239,
       "variationType": "True",
       "trackEvents": true,
-      "reason":"TARGETING_MATCH",
+      "reason":"DEFAULT",
       "errorCode": ""
     },
     "test-flag4": {
@@ -42,7 +42,7 @@
       "timestamp": 1622206239,
       "variationType": "True",
       "trackEvents": true,
-      "reason":"TARGETING_MATCH",
+      "reason":"DEFAULT",
       "errorCode": ""
     },
     "test-flag5": {
@@ -50,7 +50,7 @@
       "timestamp": 1622206239,
       "variationType": "True",
       "trackEvents": false,
-      "reason":"TARGETING_MATCH",
+      "reason":"DEFAULT",
       "errorCode": ""
     },
     "test-flag6": {

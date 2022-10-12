@@ -25,6 +25,6 @@ defer ffclient.Close()
 ## Configuration fields
 To configure your File retriever:
 
-| Field | Description |
-|---|---|
-|**`Path`**| location of your file on the file system.|
+| Field      | Description                               |
+|------------|-------------------------------------------|
+| **`Path`** | location of your file on the file system. |

@@ -28,9 +28,9 @@ ffclient.Config{
 
 ## Configuration fields
 
-| Field         | Description                                                                                                                                                                                                                                          |
-|---------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `EndpointURL` | The complete URL of your API *(we will send a POST request to this URL, [see format](#format))*                                                                                                                                                      |
+| Field         | Description                                                                                                                                                                                                                                           |
+|---------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `EndpointURL` | The complete URL of your API *(we will send a POST request to this URL, [see format](#format))*                                                                                                                                                       |
 | `Secret`      | *(optional)*<br/>A secret key you can share with your webhook. We will use this key to sign the request *(see [signature section](#signature) for more details)*.                                                                                     |
 | `Meta`        | *(optional)*<br/>A list of key value that will be add in your request, this is super useful if you want to add information on the current running instance of your app.<br/><br/>**By default the hostname is always added in the meta information.** |
 
@@ -61,47 +61,70 @@ If you have configured a webhook, a `POST` request will be sent to the `Endpoint
 
 ```json linenums="1"
 {
-   "meta":{
-       "hostname": "server01"
-   },
-   "flags":{
-       "deleted": {
-           "test-flag": {
-               "rule": "key eq \"random-key\"",
-               "percentage": 100,
-               "true": true,
-               "false": false,
-               "default": false
-           }
-       },
-       "added": {
-           "test-flag3": {
-               "percentage": 5,
-               "true": "test",
-               "false": "false",
-               "default": "default"
-           }
-       },
-       "updated": {
-           "test-flag2": {
-               "old_value": {
-                   "rule": "key eq \"not-a-key\"",
-                   "percentage": 100,
-                   "true": true,
-                   "false": false,
-                   "default": false
-               },
-               "new_value": {
-                   "disable": true,
-                   "rule": "key eq \"not-a-key\"",
-                   "percentage": 100,
-                   "true": true,
-                   "false": false,
-                   "default": false
-               }
-           }
-       }
-   }
+  "meta": {
+    "hostname": "server01"
+  },
+  "flags": {
+    "deleted": {
+      "untracked-flag": {
+        "variations": {
+          "A": false,
+          "B": true
+        },
+        "defaultRule": {
+          "percentage": {
+            "A": 0,
+            "B": 100
+          }
+        }
+      }
+    },
+    "added": {
+      "test-flag3": {
+        "variations": {
+          "A": false,
+          "B": true
+        },
+        "defaultRule": {
+          "percentage": {
+            "A": 80,
+            "B": 20
+          }
+        },
+        "trackEvents": false
+      }
+    },
+    "updated": {
+      "test-flag2": {
+        "old-value": {
+          "variations": {
+            "A": false,
+            "B": true
+          },
+          "defaultRule": {
+            "percentage": {
+              "A": 80,
+              "B": 20
+            }
+          },
+          "trackEvents": false
+        }
+         "new_value": {
+          "variations": {
+            "A": false,
+            "B": true
+          },
+          "defaultRule": {
+            "percentage": {
+              "A": 80,
+              "B": 20
+            }
+          },
+          "trackEvents": true
+        }
+      }
+    }
+  }
 }
 ```
 

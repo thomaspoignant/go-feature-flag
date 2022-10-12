@@ -1,15 +1,18 @@
 module github.com/thomaspoignant/go-feature-flag
 
-go 1.17
+go 1.18
 
 require (
 	cloud.google.com/go/storage v1.27.0
+	github.com/BurntSushi/toml v0.3.1
 	github.com/aws/aws-sdk-go v1.44.114
 	github.com/fsouza/fake-gcs-server v1.40.2
+	github.com/gdexlab/go-render v1.0.1
 	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.5.9
-	github.com/nikunjy/rules v1.0.1-0.20220920033320-71e8e569642c
-	github.com/pelletier/go-toml v1.9.5
+	github.com/jessevdk/go-flags v1.5.0
+	github.com/nikunjy/rules v1.1.0
+	github.com/r3labs/diff/v3 v3.0.0
 	github.com/stretchr/testify v1.8.0
 	golang.org/x/oauth2 v0.0.0-20220909003341-f21342109be1
 	google.golang.org/api v0.98.0
@@ -27,7 +30,7 @@ require (
 	github.com/PuerkitoBio/purell v1.1.1 // indirect
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
 	github.com/alexbrainman/goissue34681 v0.0.0-20191006012335-3fc7a47baff5 // indirect
-	github.com/antlr/antlr4/runtime/Go/antlr/v4 v4.0.0-20220911224424-aa1f1f12a846 // indirect
+	github.com/antlr/antlr4/runtime/Go/antlr v0.0.0-20220415221154-79c36419192d // indirect
 	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/emicklei/go-restful/v3 v3.8.0 // indirect
@@ -58,8 +61,8 @@ require (
 	github.com/pkg/xattr v0.4.9 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
+	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
 	go.opencensus.io v0.23.0 // indirect
-	golang.org/x/exp v0.0.0-20220722155223-a9213eeb770e // indirect
 	golang.org/x/net v0.0.0-20220909164309-bea034e7d591 // indirect
 	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f // indirect
 	golang.org/x/sys v0.0.0-20220728004956-3c1f35247d10 // indirect
