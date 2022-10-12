@@ -20,8 +20,7 @@ build-migrationcli: ## Build the migration cli out/bin/
 	GO111MODULE=on $(GOCMD) build -mod vendor -o out/bin/migrationcli ./cmd/migrationcli/
 
 clean: ## Remove build related file
-	rm -fr ./bin
-	rm -fr ./out
+	rm -fr ./bin ./out ./release
 	rm -f ./junit-report.xml checkstyle-report.xml ./coverage.xml ./profile.cov yamllint-checkstyle.xml
 
 vendor: ## Copy of all packages needed to support builds and tests in the vendor directory
