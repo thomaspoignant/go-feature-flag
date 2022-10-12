@@ -1,4 +1,4 @@
-package main
+package converter
 
 import (
 	"bytes"
@@ -18,34 +18,24 @@ import (
 type FlagConverter struct {
 	InputFile    string
 	InputFormat  string
-	OutputFile   string
 	OutputFormat string
 }
 
-func (f *FlagConverter) Migrate() error {
+func (f *FlagConverter) Migrate() ([]byte, error) {
 	// Read content of the file
 	content, err := os.ReadFile(f.InputFile)
 	if err != nil {
-		return fmt.Errorf("file %v is impossible to find", f.InputFile)
+		return nil, fmt.Errorf("file %v is impossible to find", f.InputFile)
 	}
 
 	flags, err := f.unmarshall(content)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	convertedFlag := f.convert(flags)
 	newFileContent, err := f.marshall(convertedFlag)
-	if err != nil {
-		return err
-	}
-
-	err = f.output(newFileContent)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return newFileContent, err
 }
 
 func (f *FlagConverter) unmarshall(content []byte) (map[string]dto.DTO, error) {
@@ -56,9 +46,10 @@ func (f *FlagConverter) unmarshall(content []byte) (map[string]dto.DTO, error) {
 		err = toml.Unmarshal(content, &flags)
 	case "json":
 		err = json.Unmarshal(content, &flags)
-	default:
-		// default unmarshaller is YAML
+	case "yaml":
 		err = yaml.Unmarshal(content, &flags)
+	default:
+		err = fmt.Errorf("invalid input format %s", f.InputFormat)
 	}
 	if err != nil {
 		return nil, err
@@ -83,19 +74,10 @@ func (f *FlagConverter) marshall(convertedFlags map[string]dto.DTO) ([]byte, err
 		_ = toml.NewEncoder(buf).Encode(convertedFlags)
 		return buf.Bytes(), nil
 	case "json":
-		return json.Marshal(convertedFlags)
+		return json.MarshalIndent(convertedFlags, "", "  ")
 	default:
 		return yaml.Marshal(convertedFlags)
 	}
-}
-
-func (f *FlagConverter) output(fileContent []byte) error {
-	if f.OutputFile == "" {
-		fmt.Println(string(fileContent))
-		return nil
-	}
-
-	return os.WriteFile(f.OutputFile, fileContent, os.ModePerm)
 }
 
 func convertToDto(internalFlag flag.InternalFlag) dto.DTO {
