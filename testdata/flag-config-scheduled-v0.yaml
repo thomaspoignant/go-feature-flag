@@ -1,26 +1,52 @@
 test-flag:
-  rule: key eq "random-key"
-  percentage: 100
-  true: true
-  false: false
-  default: false
-  rollout:
-    scheduled:
-    - date: 2022-08-01T00:00:00.10+02:00
-      rule: beta eq "true"
-      percentage: 100
-
-    - date: 2022-05-12T15:36:00.10+02:00
-      rule: beta eq "false"
-      percentage: 0
-
-    - date: 2022-05-12T15:36:00.10+02:00
-      rule: ""
-
-
+  variations:
+    Default: false
+    "False": false
+    "True": true
+  targeting:
+    - name: legacyRuleV0
+      query: key eq "random-key"
+      percentage:
+        "False": 0
+        "True": 100
+  defaultRule:
+    name: legacyDefaultRule
+    variation: Default
+  scheduledRollout:
+    - targeting:
+        - name: legacyRuleV0
+          query: beta eq "true"
+          variation: ""
+          percentage:
+            "False": 0
+            "True": 100
+          disable: false
+      date: 2022-08-01T00:00:00.1+02:00
+    - targeting:
+        - name: legacyRuleV0
+          query: beta eq "false"
+          variation: ""
+          percentage:
+            "False": 100
+            "True": 0
+          disable: false
+      date: 2022-05-12T15:36:00.1+02:00
+    - targeting:
+        - name: legacyRuleV0
+          query: ""
+          disable: false
+      date: 2022-05-12T15:36:00.1+02:00
 test-flag2:
-  rule: key eq "not-a-key"
-  percentage: 100
-  true: true
-  false: false
-  default: false
+  variations:
+    Default: false
+    "False": false
+    "True": true
+  targeting:
+    - name: legacyRuleV0
+      query: key eq "not-a-key"
+      percentage:
+        "False": 0
+        "True": 100
+  defaultRule:
+    name: legacyDefaultRule
+    variation: Default
