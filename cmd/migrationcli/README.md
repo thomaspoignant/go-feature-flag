@@ -5,19 +5,33 @@ The migration command line purpose is to migrate your configuration file from th
 We changed the format to extend the capabilities of **GO Feature Flag**, despite that the old format will still be
 supported, it is better to update your configuration file.
 
-## How to use this image
+## How to install the cli
 
+### Install using Homebrew (mac and linux)
 ```shell
-docker run \
-  -v $(pwd)/your/configuration_folder:/config \
-  thomaspoignant/go-feature-flag-migration-cli:latest \
-  --input-format=yaml \
-  --input-file=/config/my-go-feature-flag-config-v0.x.x.yaml \
-  --output-format=yaml \
-  --output-file=/config/my-go-feature-flag-config-v1.x.x.yaml
+brew tap thomaspoignant/homebrew-tap
+brew install go-feature-flag-migration-cli
 ```
 
-### Params description
+### Install using Scoop (windows)
+```shell
+scoop bucket add org https://github.com/thomaspoignant/scoop.git
+scoop install go-feature-flag-migration-cli
+```
+
+### Install using docker
+```shell
+docker pull thomaspoignant/go-feature-flag-migration-cli
+```
+More information about the usage of the container in the [dockerhub page](https://hub.docker.com/r/thomaspoignant/go-feature-flag-migration-cli).
+
+
+## How to use the cli
+
+```shell
+# example:
+go-feature-flag-migration-cli --input-format=yaml --input-file=/input/my-go-feature-flag-config-v0.x.x.yaml --output-format=yaml --output-file=input/my-go-feature-flag-config-v1.x.x.yaml
+```
 
 The command line has 4 parameters:
 
