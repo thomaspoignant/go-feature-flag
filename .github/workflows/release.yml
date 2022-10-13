@@ -37,7 +37,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
-  upload_dockerhub_readme:
+  dockerhub-migration-cli:
     runs-on: ubuntu-latest
     name: Upload dockerhub readme
     needs:
@@ -58,3 +58,25 @@ jobs:
           password: ${DOCKER_PASSWORD}
           repository: thomaspoignant/go-feature-flag-migration-cli
           readme: "./cmd/migrationcli/DOCKERHUB.md"
+
+  dockerhub-relay-proxy:
+    runs-on: ubuntu-latest
+    name: Upload dockerhub readme
+    needs:
+      - goreleaser
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Release readme to DockerHub
+        uses: ms-jpq/sync-dockerhub-readme@v1
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        with:
+          username: ${DOCKER_USERNAME}
+          password: ${DOCKER_PASSWORD}
+          repository: thomaspoignant/go-feature-flag-relay-proxy
+          readme: "./cmd/relayproxy/DOCKERHUB.md"

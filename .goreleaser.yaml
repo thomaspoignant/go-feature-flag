@@ -28,10 +28,41 @@ builds:
         goarch: arm
         goarm: 6
 
+  - id: go-feature-flag-relay-proxy
+    main: ./cmd/relayproxy
+    binary: go-feature-flag-relay-proxy
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - 386
+      - amd64
+      - arm64
+      - arm
+    goarm:
+      - 6
+      - 7
+    ignore:
+      - goos: darwin
+        goarch: 386
+      - goos: linux
+        goarch: arm
+        goarm: 6
+
 archives:
   - id: go-feature-flag-migration-cli
     builds:
       - go-feature-flag-migration-cli
+    replacements:
+      darwin: Darwin
+      linux: Linux
+      windows: Windows
+      386: i386
+      amd64: x86_64
+  - id: go-feature-flag-relay-proxy
+    builds:
+      - go-feature-flag-relay-proxy
     replacements:
       darwin: Darwin
       linux: Linux
@@ -63,6 +94,15 @@ dockers:
       - thomaspoignant/go-feature-flag-migration-cli:{{ .Tag }}
       - thomaspoignant/go-feature-flag-migration-cli:v{{ .Major }}
       - thomaspoignant/go-feature-flag-migration-cli:v{{ .Major }}.{{ .Minor }}
+  - goos: linux
+    ids:
+      - go-feature-flag-relay-proxy
+    dockerfile: ./cmd/relayproxy/DockerfileGoreleaser
+    image_templates:
+      - thomaspoignant/go-feature-flag-relay-proxy:latest
+      - thomaspoignant/go-feature-flag-relay-proxy:{{ .Tag }}
+      - thomaspoignant/go-feature-flag-relay-proxy:v{{ .Major }}
+      - thomaspoignant/go-feature-flag-relay-proxy:v{{ .Major }}.{{ .Minor }}
 
 brews:
   - ids:
@@ -75,6 +115,17 @@ brews:
     caveats: "A migration command line to move your feature flag configuration file from format GO Feature Flag v0.X to v1.X"
     homepage: "https://github.com/thomaspoignant/go-feature-flag/cmd/migrationcli"
     description: "A migration command line to move your feature flag configuration file from format GO Feature Flag v0.X to v1.X"
+    skip_upload: auto
+  - ids:
+      - go-feature-flag-relay-proxy
+    name: go-feature-flag-relay-proxy
+    tap:
+      owner: thomaspoignant
+      name: homebrew-tap
+      branch: master
+    caveats: "A stand alone server to run GO Feature Flag"
+    homepage: "https://gofeatureflag.org"
+    description: "A stand alone server to run GO Feature Flag"
     skip_upload: auto
 
 scoop:
