@@ -1,3 +1,5 @@
-# go-feature-flag-migration-cli
+# GO Feature Flag Migration cli
 
-A migration command line to move your feature flag configuration file from format GO Feature Flag v0.X to v1.X
+```shell
+docker run -v $(pwd)/cmd/migrationcli/testdata:/input thomaspoignant/go-feature-flag-migration-cli:latest --input-format=yaml --input-file=/input/input-simple.yaml
+```
