@@ -28,7 +28,7 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 				Host:            "localhost",
 				Retriever: &config.RetrieverConf{
 					Kind:       "http",
-					URL:        "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/file/flags.yaml",
+					URL:        "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.yaml",
 					HTTPMethod: "GET",
 					Timeout:    10000,
 				},
@@ -114,7 +114,7 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 				Host:            "localhost",
 				Retriever: &config.RetrieverConf{
 					Kind:       "http",
-					URL:        "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/file/flags.yaml",
+					URL:        "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.yaml",
 					HTTPMethod: "GET",
 					Timeout:    10000,
 				},

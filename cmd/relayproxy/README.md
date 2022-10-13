@@ -4,8 +4,8 @@
 </p>
 
 <p align="center">
-    <a href="https://github.com/thomaspoignant/go-feature-flag-relay-proxy/actions/workflows/ci.yml"><img src="https://github.com/thomaspoignant/go-feature-flag-relay-proxy/actions/workflows/ci.yml/badge.svg" alt="Build Status" /></a>
-    <a href="https://coveralls.io/github/thomaspoignant/go-feature-flag-relay-proxy"><img src="https://coveralls.io/repos/github/thomaspoignant/go-feature-flag-relay-proxy/badge.svg" alt="Coverage Status" /></a>
+    <a href="https://github.com/thomaspoignant/go-feature-flag/actions/workflows/ci.yml"><img src="https://github.com/thomaspoignant/go-feature-flag/actions/workflows/ci.yml/badge.svg" alt="Build Status" /></a>
+    <a href="https://coveralls.io/github/thomaspoignant/go-feature-flag"><img src="https://coveralls.io/repos/github/thomaspoignant/go-feature-flag/badge.svg" alt="Coverage Status" /></a>
     <a href="https://sonarcloud.io/dashboard?id=thomaspoignant_go-feature-flag-relay-proxy"><img src="https://sonarcloud.io/api/project_badges/measure?project=thomaspoignant_go-feature-flag-relay-proxy&metric=alert_status" alt="Sonarcloud Status" /></a>
     <a href="https://github.com/thomaspoignant/go-feature-flag-relay-proxy/releases"><img src="https://img.shields.io/github/v/release/thomaspoignant/go-feature-flag-relay-proxy" alt="Release version" /></a>
     <a href="https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag-relay-proxy"><img src="https://godoc.org/github.com/thomaspoignant/go-feature-flag-relay-proxy?status.svg" alt="GoDoc" /></a>

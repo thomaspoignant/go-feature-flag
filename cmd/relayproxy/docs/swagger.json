@@ -9,7 +9,7 @@
         },
         "license": {
             "name": "MIT",
-            "url": "https://github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/blob/main/LICENSE"
+            "url": "https://github.com/thomaspoignant/go-feature-flag/blob/main/LICENSE"
         }
     },
     "basePath": "/",
@@ -88,13 +88,13 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
+                            "$ref": "#/definitions/modeldocs.HTTPError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
+                            "$ref": "#/definitions/modeldocs.HTTPError"
                         }
                     }
                 }
@@ -141,13 +141,13 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
+                            "$ref": "#/definitions/modeldocs.HTTPError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
+                            "$ref": "#/definitions/modeldocs.HTTPError"
                         }
                     }
                 }
@@ -155,12 +155,6 @@
         }
     },
     "definitions": {
-        "echo.HTTPError": {
-            "type": "object",
-            "properties": {
-                "message": {}
-            }
-        },
         "model.FlagEval": {
             "type": "object",
             "properties": {
@@ -248,6 +242,14 @@
                     "description": "VariationType is the name of the variation used to have the flag value.",
                     "type": "string",
                     "example": "variation-A"
+                }
+            }
+        },
+        "modeldocs.HTTPError": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "description": "Message of your error"
                 }
             }
         }

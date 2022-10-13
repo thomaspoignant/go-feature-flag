@@ -16,7 +16,7 @@ const docTemplate = `{
         },
         "license": {
             "name": "MIT",
-            "url": "https://github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/blob/main/LICENSE"
+            "url": "https://github.com/thomaspoignant/go-feature-flag/blob/main/LICENSE"
         },
         "version": "{{.Version}}"
     },
@@ -97,13 +97,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
+                            "$ref": "#/definitions/modeldocs.HTTPError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
+                            "$ref": "#/definitions/modeldocs.HTTPError"
                         }
                     }
                 }
@@ -150,13 +150,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
+                            "$ref": "#/definitions/modeldocs.HTTPError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/echo.HTTPError"
+                            "$ref": "#/definitions/modeldocs.HTTPError"
                         }
                     }
                 }
@@ -164,12 +164,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "echo.HTTPError": {
-            "type": "object",
-            "properties": {
-                "message": {}
-            }
-        },
         "model.FlagEval": {
             "type": "object",
             "properties": {
@@ -257,6 +251,14 @@ const docTemplate = `{
                     "description": "VariationType is the name of the variation used to have the flag value.",
                     "type": "string",
                     "example": "variation-A"
+                }
+            }
+        },
+        "modeldocs.HTTPError": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "description": "Message of your error"
                 }
             }
         }

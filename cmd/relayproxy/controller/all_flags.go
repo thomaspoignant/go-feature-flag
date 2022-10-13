@@ -26,8 +26,8 @@ func NewAllFlags(goFF *ffclient.GoFeatureFlag) Controller {
 // @Accept			 json
 // @Param 			 data body model.RelayProxyRequest true "Payload of the user we want to challenge against the flag."
 // @Success      200  {object}   modeldocs.AllFlags "Success"
-// @Failure 		 400 {object} echo.HTTPError "Bad Request"
-// @Failure      500 {object} echo.HTTPError "Internal server error"
+// @Failure 		 400 {object} modeldocs.HTTPError "Bad Request"
+// @Failure      500 {object} modeldocs.HTTPError "Internal server error"
 // @Router       /v1/allflags [post]
 func (h *allFlags) Handler(c echo.Context) error {
 	reqBody := new(model.RelayProxyRequest)

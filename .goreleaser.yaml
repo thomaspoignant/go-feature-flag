@@ -27,6 +27,7 @@ builds:
       - goos: linux
         goarch: arm
         goarm: 6
+
   - id: go-feature-flag-relay-proxy
     main: ./cmd/relayproxy
     binary: go-feature-flag-relay-proxy

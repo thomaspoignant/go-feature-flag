@@ -1,9 +1,5 @@
 basePath: /
 definitions:
-  echo.HTTPError:
-    properties:
-      message: {}
-    type: object
   model.FlagEval:
     properties:
       value: {}
@@ -71,6 +67,11 @@ definitions:
         example: variation-A
         type: string
     type: object
+  modeldocs.HTTPError:
+    properties:
+      message:
+        description: Message of your error
+    type: object
 info:
   contact:
     name: GO feature flag relay proxy
@@ -82,7 +83,7 @@ info:
     It is a proxy to your flags, you can get the values of your flags using APIs.
   license:
     name: MIT
-    url: https://github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/blob/main/LICENSE
+    url: https://github.com/thomaspoignant/go-feature-flag/blob/main/LICENSE
   title: go-feature-flag relay proxy
 paths:
   /health:
@@ -136,11 +137,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/echo.HTTPError'
+            $ref: '#/definitions/modeldocs.HTTPError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/echo.HTTPError'
+            $ref: '#/definitions/modeldocs.HTTPError'
       summary: allflags returns all the flag for a specific user.
       tags:
       - flags
@@ -175,11 +176,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/echo.HTTPError'
+            $ref: '#/definitions/modeldocs.HTTPError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/echo.HTTPError'
+            $ref: '#/definitions/modeldocs.HTTPError'
       summary: Evaluate the users with the corresponding flag and return the value
         for the user.
       tags:

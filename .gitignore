@@ -28,3 +28,9 @@ vendor/
 # binaries
 release/
 cmd/migrationcli/migrationcli
+cmd/relayproxy/relayproxy
+tmp/
+
+# Local dev files
+goff-proxy.yaml
+flags.yaml

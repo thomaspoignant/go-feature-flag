@@ -31,8 +31,8 @@ func NewFlagEval(goFF *ffclient.GoFeatureFlag) Controller {
 // @Param 			 data body model.RelayProxyRequest true "Payload of the user we want to get all the flags from."
 // @Param        flag_key path string true "Name of your feature flag"
 // @Success      200  {object}   model.FlagEval "Success"
-// @Failure 		 400 {object} echo.HTTPError "Bad Request"
-// @Failure      500 {object} echo.HTTPError "Internal server error"
+// @Failure 		 400 {object} modeldocs.HTTPError "Bad Request"
+// @Failure      500 {object} modeldocs.HTTPError "Internal server error"
 // @Router       /v1/feature/{flag_key}/eval [post]
 func (h *flagEval) Handler(c echo.Context) error {
 	reqBody := new(model.RelayProxyRequest)
