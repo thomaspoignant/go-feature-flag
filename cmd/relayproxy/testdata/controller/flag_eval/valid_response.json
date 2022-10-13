@@ -1,7 +1,9 @@
 {
-  "failed": false,
   "trackEvents": true,
-  "value": false,
   "variationType": "Default",
-  "version": 0
+  "failed": false,
+  "version": "",
+  "reason": "DEFAULT",
+  "errorCode": "",
+  "value": false
 }

@@ -8,31 +8,41 @@
       ],
       "timestamp": 1652273630,
       "variationType": "Default",
-      "trackEvents": true
+      "trackEvents": true,
+      "errorCode": "",
+      "reason": "DEFAULT"
     },
     "disable-flag": {
-      "value": "default",
+      "value": null,
       "timestamp": 1652273630,
-      "variationType": "Default",
-      "trackEvents": true
+      "variationType": "",
+      "trackEvents": true,
+      "errorCode": "",
+      "reason": "DISABLED"
     },
     "flag-only-for-admin": {
       "value": false,
       "timestamp": 1652273630,
       "variationType": "Default",
-      "trackEvents": true
+      "trackEvents": true,
+      "errorCode": "",
+      "reason": "DEFAULT"
     },
     "new-admin-access": {
       "value": true,
       "timestamp": 1652273630,
       "variationType": "True",
-      "trackEvents": true
+      "trackEvents": true,
+      "errorCode": "",
+      "reason": "DEFAULT"
     },
     "number-flag": {
       "value": 1,
       "timestamp": 1652273630,
       "variationType": "Default",
-      "trackEvents": true
+      "trackEvents": true,
+      "errorCode": "",
+      "reason": "DEFAULT"
     },
     "test-flag-rule-apply": {
       "value": {
@@ -40,7 +50,9 @@
       },
       "timestamp": 1652273630,
       "variationType": "Default",
-      "trackEvents": true
+      "trackEvents": true,
+      "errorCode": "",
+      "reason": "DEFAULT"
     },
     "test-flag-rule-apply-false": {
       "value": {
@@ -48,7 +60,9 @@
       },
       "timestamp": 1652273630,
       "variationType": "Default",
-      "trackEvents": true
+      "trackEvents": true,
+      "errorCode": "",
+      "reason": "DEFAULT"
     },
     "test-flag-rule-not-apply": {
       "value": {
@@ -56,7 +70,9 @@
       },
       "timestamp": 1652273630,
       "variationType": "Default",
-      "trackEvents": true
+      "trackEvents": true,
+      "errorCode": "",
+      "reason": "DEFAULT"
     }
   },
   "valid": true

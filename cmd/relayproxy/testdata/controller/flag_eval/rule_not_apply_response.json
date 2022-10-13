@@ -1,9 +1,11 @@
 {
-  "failed": false,
   "trackEvents": true,
+  "variationType": "Default",
+  "failed": false,
+  "version": "",
+  "reason": "DEFAULT",
+  "errorCode": "",
   "value": {
     "test": "test"
-  },
-  "variationType": "Default",
-  "version": 0
+  }
 }

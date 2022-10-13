@@ -1,9 +1,11 @@
 {
-  "failed": false,
   "trackEvents": true,
+  "variationType": "False",
+  "failed": false,
+  "version": "",
+  "reason": "TARGETING_MATCH",
+  "errorCode": "",
   "value": {
     "test3": "test"
-  },
-  "variationType": "False",
-  "version": 0
+  }
 }
