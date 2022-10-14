@@ -1,0 +1,51 @@
+.heroBanner {
+  display: flex;
+  align-items: center;
+  padding: 2rem 0;
+  width: 100%;
+  background-color: var(--goff-background-header);
+  text-align: center;
+}
+
+.title {
+  margin-top: 2rem;
+  font-size: 3rem;
+  line-height: 2.5rem;
+  color: var(--goff-main-title-color);
+  font-family: poppins,sans-serif;
+  font-weight: 700;
+  letter-spacing: -.15rem;
+}
+
+.subtitle {
+  font-size: 2rem;
+  line-height: 1rem;
+  color: var(--goff-main-subtitle-color);
+}
+
+.stars img {
+  height: 2rem;
+  margin: 1.5rem 0 1.5rem 0;
+}
+
+.button {
+  font-family: system-ui,-apple-system,sans-serif;
+  border-radius: 0.7rem;
+  font-weight: 500;
+  font-size: 1rem;
+  color: white;
+  width: 200px;
+  margin: 0 0.5rem 0 0.5rem;
+}
+.getstarted {
+  background: var(--goff-getstarted-bg);
+}
+
+.github {
+  background: var(--goff-github-bg);
+  color: black;
+}
+
+.sponsor {
+  background: var(--goff-sponsor-bg);
+}
