@@ -30,7 +30,7 @@ for v in sorted_versions:
     regex_group = regexMatcher.search(v['version'])
     minor = '{}{}.{}'.format(regex_group.group(1), regex_group.group(2), regex_group.group(3))
     with_minor = list(filter(lambda version: version.startswith(minor), keep))
-    if len(with_minor) == 0:
+    if len(with_minor) == 0 and "beta" not in with_minor:
         keep.append(v['version'])
     else:
         to_delete.append(v['version'])
