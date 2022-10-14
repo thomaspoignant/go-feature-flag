@@ -52,6 +52,7 @@ builds:
 
 archives:
   - id: go-feature-flag-migration-cli
+    name_template: go-feature-flag-migration-cli_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}_{{ . }}{{ end }}{{ if not (eq .Amd64 "v1") }}{{ .Amd64 }}{{ end }}
     builds:
       - go-feature-flag-migration-cli
     replacements:
@@ -61,6 +62,7 @@ archives:
       386: i386
       amd64: x86_64
   - id: go-feature-flag-relay-proxy
+    name_template: go-feature-flag-relay-proxy_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}_{{ . }}{{ end }}{{ if not (eq .Amd64 "v1") }}{{ .Amd64 }}{{ end }}
     builds:
       - go-feature-flag-relay-proxy
     replacements:
