@@ -21,7 +21,8 @@ const config = {
   customFields:{
     logo: "img/logo/logo.png",
     github: "https://github.com/thomaspoignant/go-feature-flag",
-    sponsor: "https://github.com/sponsors/thomaspoignant"
+    sponsor: "https://github.com/sponsors/thomaspoignant",
+    openfeature: "https://openfeature.dev"
   },
   // Even if you don't use internalization, you can use this field to set useful
   // metadata like html lang. For example, if your site is Chinese, you may want
@@ -56,7 +57,11 @@ const config = {
       }),
     ],
   ],
-
+  stylesheets: [
+    'https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css',
+    'https://fonts.googleapis.com/css?family=Poppins:400,700',
+    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css'
+  ],
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
