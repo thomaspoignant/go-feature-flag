@@ -1,0 +1,27 @@
+.whatis{
+  background-color: var(--goff-whatis-bg);
+  padding: 2rem 0 2rem 0;
+}
+
+.description{
+  margin: auto;
+  max-width: 60rem;
+  padding: 10px;
+  font-family: poppins, sans-serif;
+}
+
+.button {
+  font-family: system-ui,-apple-system,sans-serif;
+  border-radius: 0.7rem;
+  font-weight: 500;
+  font-size: 0.78rem;
+  color: white;
+  width: 200px;
+  margin: 0.5rem 0.5rem 0.5rem 0.5rem;
+  padding: 0.75rem 0 0.75rem 0;
+}
+@media screen and (max-width: 996px) {
+  .description {
+    width: 100%;
+  }
+}

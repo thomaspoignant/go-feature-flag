@@ -9,17 +9,25 @@
   --site-primary-hue-saturation: 167 68%;
   --site-primary-hue-saturation-light: 167 56%;
 
-  --goff-background-header: #fff;
+  --goff-header-background: #fff;
+  --goff-header-text-color: #273437;
+
+  --goff-main-subtitle-color: #9fbeb3;
   --goff-main-title-color: #273437;
-  --goff-main-subtitle-color: #273437;
+  --goff-main-ff-description: #8c8c94;
   --goff-getstarted-bg: #b93a01;
   --goff-github-bg: #555;
   --goff-sponsor-bg: #a0bfb5;
+  --goff-whatis-bg: #f9f9f9;
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme='dark'] {
 
+}
+
+body {
+  font-family: poppins,sans-serif;
 }
 
 /* Github icon top right */
@@ -65,4 +73,22 @@ div[class^="announcementBar_"] {
   border-radius: 0.7rem;
   font-weight: 600;
   font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+}
+
+.goffMainTitle {
+  margin-top: 2rem;
+  font-size: 3rem;
+  line-height: 2.5rem;
+  color: var(--goff-main-title-color);
+  font-family: Poppins,sans-serif;
+  font-weight: 800;
+  letter-spacing: -.18rem;
+}
+
+.goffMainSubtitle {
+  color: var(--goff-main-subtitle-color);
+  font-family: Poppins,sans-serif;
+  font-weight: 700;
+  letter-spacing: -.18rem;
+  font-size: 3rem;
 }

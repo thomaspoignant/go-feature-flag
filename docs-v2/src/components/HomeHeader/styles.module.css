@@ -1,51 +1,67 @@
-.heroBanner {
-  display: flex;
-  align-items: center;
-  padding: 2rem 0;
-  width: 100%;
-  background-color: var(--goff-background-header);
-  text-align: center;
+/*@import "https://gofeatureflag.org/scss/critical.min.css";*/
+
+
+.hero {
+    align-items: center;
+    background-color: var(--goff-header-background);
+    color: var(--goff-header-text-color);
+    display: flex;
+    padding: 4rem 2rem;
+    margin: 4rem 0 4rem 0;
 }
 
-.title {
-  margin-top: 2rem;
-  font-size: 3rem;
-  line-height: 2.5rem;
-  color: var(--goff-main-title-color);
-  font-family: poppins,sans-serif;
-  font-weight: 700;
-  letter-spacing: -.15rem;
+.heroShape {
+    position: absolute;
+    width: 100%;
+    top: 0;
+    left: 0;
 }
 
-.subtitle {
-  font-size: 2rem;
-  line-height: 1rem;
-  color: var(--goff-main-subtitle-color);
+.container {
+    z-index: 100;
 }
 
-.stars img {
-  height: 2rem;
-  margin: 1.5rem 0 1.5rem 0;
+.heroShape svg:first-child {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 48%;
 }
 
-.button {
-  font-family: system-ui,-apple-system,sans-serif;
-  border-radius: 0.7rem;
-  font-weight: 500;
-  font-size: 1rem;
-  color: white;
-  width: 200px;
-  margin: 0 0.5rem 0 0.5rem;
-}
-.getstarted {
-  background: var(--goff-getstarted-bg);
+.heroShape svg:last-child {
+    width: 10%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    max-width: 150px;
 }
 
-.github {
-  background: var(--goff-github-bg);
-  color: black;
+svg:not(:root) {
+    overflow: hidden;
 }
 
-.sponsor {
-  background: var(--goff-sponsor-bg);
+.container {
+    width: 100%;
+    padding-right: 15px;
+    padding-left: 15px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+
+
+
+
+.heroContent p{
+    font-size: 1.05rem;
+    line-height: 2rem;
+    font-weight: 400;
+    margin-bottom: 3rem;
+    color: var(--goff-main-ff-description);
+}
+
+.availableGH {
+    font-size: 1rem;
+    text-align: center;
 }
