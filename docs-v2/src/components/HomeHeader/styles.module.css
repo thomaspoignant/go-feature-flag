@@ -1,10 +1,5 @@
-/*@import "https://gofeatureflag.org/scss/critical.min.css";*/
-
-
 .hero {
     align-items: center;
-    background-color: var(--goff-header-background);
-    color: var(--goff-header-text-color);
     display: flex;
     padding: 4rem 2rem;
     margin: 4rem 0 4rem 0;
