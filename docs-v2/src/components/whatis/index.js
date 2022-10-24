@@ -15,7 +15,7 @@ export function Whatis() {
             <p>GO Feature Flag is a lightweight feature flag solution build in GO.</p>
             <p>You don't need a complex infrastructure to install, you just have a single configuration file you can host
               anywhere (<code>HTTP</code>, <code>S3</code>, <code>Kubernetes</code>, <code>file</code>, ...).
-              GO Feature Flag can be used directly and without any server in your GO application <i>(using the SDK)</i>, but
+              GO Feature Flag can be used directly and without any server in your GO application <i>(using the library)</i>, but
               can also be used with different languages (<code>JAVA</code>, <code>TypeScript</code>, <code>JavaScript</code>, ...)
               with the usage of the relay proxy and the <Link to={siteConfig.customFields.openfeature}>Openfeature</Link> SDKs.
             </p>

@@ -7,7 +7,7 @@ import {Whatis} from "@site/src//components/whatis";
 import HomepageFeatures from "../components/HomepageFeatures";
 import {HomeHeader} from "../components/HomeHeader"
 import {Benefit} from "../components/benefit";
-
+import {Features} from "../components/features";
 
 export default function Home() {
   const {siteConfig} = useDocusaurusContext();
@@ -18,8 +18,8 @@ export default function Home() {
       <HomeHeader />
       <main>
         <Whatis />
+        <Features />
         <Benefit />
-        <HomepageFeatures />
       </main>
     </Layout>
   );

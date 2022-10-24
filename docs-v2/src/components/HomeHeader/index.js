@@ -7,7 +7,7 @@ import clsx from "clsx";
 export function HomeHeader() {
   const {siteConfig} = useDocusaurusContext();
   return (
-    <section className={clsx(styles.hero, "homepage")}>
+    <section className={styles.hero}>
       <div className={styles.heroShape}>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 898.595 671.33">
           <g data-name="Group 1168">
@@ -52,7 +52,11 @@ export function HomeHeader() {
               <span className="goffMainSubtitle">Ship Faster, Reduce Risk, and Build Scale</span>
               <p>Feature flags lets you modify system behavior without changing code. Deploy every day, release when you are ready. Reduce risk by releasing your features progressively.</p>
             </div>
+            <div className={styles.ghStars}>
+              <Link to={siteConfig.customFields.github}><img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/thomaspoignant/go-feature-flag?style=social"/></Link>
+            </div>
             <div className={styles.availableGH}>
+
               <Link to={siteConfig.customFields.github} type="button" className={clsx("btn btn-dark btn-labeled btn-lg")}>
                 <span className="btn-label"><i className="fa-brands fa-github"></i></span> Available on GitHub
               </Link>
