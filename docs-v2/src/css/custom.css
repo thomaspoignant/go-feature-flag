@@ -52,6 +52,8 @@
   --goff-main-title-color: #fff;
   --goff-feature-list-text-color: #fff;
   --goff-whatis-bg: #363636;
+  --goff-benefits-postitem-bg: #363636;
+  --goff-benif-bg: #87a8a7;
 }
 
 body {

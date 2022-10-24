@@ -14,7 +14,7 @@ const config = {
   baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
-  favicon: 'img/favicon.png',
+  favicon: 'img/favicon/favicon.png',
   organizationName: 'thomaspoignant',
   projectName: 'go-feature-flag', // Usually your repo name.
 
@@ -58,7 +58,7 @@ const config = {
     ],
   ],
   stylesheets: [
-    'css/pushy-button.css', //https://github.com/iRaul/pushy-buttons
+    'css/pushy-buttons.css', //https://github.com/iRaul/pushy-buttons
     'css/simplegrid.css',
     'https://fonts.googleapis.com/css?family=Poppins:400,500,700',
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css'
@@ -99,31 +99,37 @@ const config = {
         ],
       },
       footer: {
-        style: 'dark',
+        logo: {
+          alt: 'GO Feature Flag logo',
+          src: 'img/logo/logo.png',
+          href: 'https://gofeatureflag.org',
+          width: 100,
+        },
         links: [
           {
-            title: 'Docs',
+            title: 'Documentation',
             items: [
               {
-                label: 'Tutorial',
+                label: 'Docs',
                 to: '/docs/intro',
               },
             ],
           },
+
           {
             title: 'Community',
             items: [
               {
-                label: 'Stack Overflow',
-                href: 'https://stackoverflow.com/questions/tagged/docusaurus',
-              },
-              {
-                label: 'Discord',
-                href: 'https://discordapp.com/invite/docusaurus',
+                label: 'Slack',
+                href: 'http://gophers.slack.com/messages/go-feature-flag',
               },
               {
                 label: 'Twitter',
                 href: 'https://twitter.com/gofeatureflag',
+              },
+              {
+                label: 'Github',
+                href: 'https://github.com/thomaspoignant/go-feature-flag',
               },
             ],
           },
@@ -140,8 +146,9 @@ const config = {
               },
             ],
           },
+
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
+        copyright: `Copyright © ${new Date().getFullYear()} GO Feature Flag.`,
       },
       prism: {
         theme: lightCodeTheme,
