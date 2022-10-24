@@ -57,7 +57,7 @@ export function HomeHeader() {
             </div>
             <div className={styles.availableGH}>
               <Link to={siteConfig.customFields.github} type="button" className={clsx("btn btn-dark btn-labeled btn-lg")}>
-                <button className="pushy__btn pushy__btn--md pushy__btn--black"><span className="btn-label"><i className="fa-brands fa-github"></i></span> Available on GitHub</button>
+                <button className="pushy__btn pushy__btn--df pushy__btn--black"><span className="btn-label"><i className="fa-brands fa-github"></i></span> Available on GitHub</button>
               </Link>
             </div>
           </div>
