@@ -16,11 +16,12 @@ export default function Home() {
       title={`${siteConfig.title}`}
       description="Description will go into a meta tag in <head />">
       <HomeHeader />
-      <main>
-        <Whatis />
-        <Features />
-        <Benefit />
-      </main>
+      {/*<main>*/}
+      <Whatis />
+      <Features />
+      <Benefit />
+
+      {/*</main>*/}
     </Layout>
   );
 }

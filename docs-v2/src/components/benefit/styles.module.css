@@ -30,6 +30,18 @@
   color: var(--goff-main-ff-description);
 }
 
+.benefitsPostItemRow {
+  margin: 0 0.1rem 0 0.1rem;
+}
+
+.benefitsPostItemRow img {
+  border-radius: 10px;
+}
+
+.title {
+  text-align: center;
+}
+
 .title p {
   margin-top: 2rem;
 }

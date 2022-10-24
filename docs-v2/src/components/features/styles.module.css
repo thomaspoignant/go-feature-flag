@@ -2,6 +2,11 @@
     margin: 5rem 0 5rem 0;
 }
 
+.soc {
+    padding-top: 5rem;
+}
+
+
 .socialIcon {
     display: flex;
     align-items: center;
@@ -37,6 +42,7 @@
 .tooltip {
     position: relative;
     display: inline-block;
+    z-index: 100;
 }
 
 /* Tooltip text */
@@ -116,4 +122,9 @@
 
 .featureImage img {
     border-radius: 1rem;
+}
+
+.imgRollout {
+    margin: auto;
+    top: 0; left: 0; bottom: 0; right: 0;
 }

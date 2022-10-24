@@ -8,8 +8,8 @@ export function Whatis() {
   const {siteConfig} = useDocusaurusContext();
   return (
     <section className={styles.whatis}>
-      <div className="container">
-        <div className="text-center mr-6">
+      <div className="grid grid-pad">
+        <div className={clsx("col-1-1")}>
           <span className="goffMainTitle">What is GO Feature Flag?</span>
           <div className={styles.description}>
             <p>GO Feature Flag is a lightweight feature flag solution build in GO.</p>
@@ -20,8 +20,11 @@ export function Whatis() {
               with the usage of the relay proxy and the <Link to={siteConfig.customFields.openfeature}>Openfeature</Link> SDKs.
             </p>
           </div>
-          <Link to="/docs/intro" type="button" className={clsx("btn btn-danger btn-labeled btn-xs")}>
-            Dive into GO Feature Flag
+          <Link to="/docs/intro">
+
+            <button className="pushy__btn pushy__btn--md pushy__btn--red">
+              <i className="fa-solid fa-screwdriver-wrench"></i> Dive into GO Feature Flag
+            </button>
           </Link>
         </div>
       </div>

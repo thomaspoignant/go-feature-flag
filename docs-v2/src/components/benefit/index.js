@@ -2,12 +2,29 @@ import React from 'react';
 import styles from './styles.module.css';
 import clsx from "clsx";
 
+
+function BenefitCard(props) {
+  return (
+    <div className="col-1-5 mobile-col-1-2">
+      <article className={styles.benefitsPostItem}>
+        <div className={styles.benefitsPostItemRow}>
+          <img src={props.img} alt="post-thumb"/>
+        </div>
+        <div className={styles.benefitsPostItemRow}>
+          <h2>{props.title}</h2>
+          <p>{props.description}</p>
+        </div>
+      </article>
+    </div>
+  );
+}
+
 export function Benefit() {
   return (
     <section className={styles.benefits}>
       <div className="container">
         <div className="row">
-          <div className={clsx("col-lg-8 mx-auto text-center", styles.title)}>
+          <div className={clsx("col-1-1", styles.title)}>
             <div>
               <span className="goffMainTitle">Why use feature flags?</span><br/>
               <p>
@@ -17,63 +34,32 @@ export function Benefit() {
           </div>
         </div>
       </div>
-        <div className="mx-auto row align-self-center">
-          <div className="offset-xl-1 col-xl-2 offset-lg-0 col-lg-4 col-md-6 text-center">
-            <article className={styles.benefitsPostItem}>
-              <div className="row">
-                <img src="img/benefits/rocket.jpg" alt="post-thumb"/>
-              </div>
-              <div className="row">
-                <h2>Test in production</h2>
-                <p>Test directly in production with your real data by enabling the features to your QA. Decrease incident by disabling the feature as soon as a bug arise.</p>
-              </div>
-            </article>
-          </div>
-          <div className="col-xl-2 col-lg-4 col-md-6 text-center">
-            <article className={styles.benefitsPostItem}>
-              <div className="row">
-                <img src="img/benefits/pm.jpg" alt="post-thumb"/>
-              </div>
-              <div className="row">
-                <h2>Give autonomy to stakeholders</h2>
-                <p>You don't need a software engineer to release a new feature, empower business stakeholders, no development skills are needed.</p>
-              </div>
-            </article>
-          </div>
-          <div className="col-xl-2 col-lg-4 col-md-6 text-center">
-            <article className={styles.benefitsPostItem}>
-              <div className="row">
-                <img src="img/benefits/inovate.jpg" alt="post-thumb"/>
-              </div>
-              <div className="row">
-                <h2>Innovate faster</h2>
-                <p>Deploy code when it is convenient (several times a day). Release when it is ready and it brings value. Deliver software to target audiences progressively.</p>
-              </div>
-            </article>
-          </div>
-          <div className="col-xl-2 col-lg-4 col-md-6 text-center">
-            <article className={styles.benefitsPostItem}>
-              <div className="row">
-                <img src="img/benefits/data.jpg" alt="post-thumb"/>
-              </div>
-              <div className="row">
-                <h2>Experiment and learn</h2>
-                <p>Try new features and measure their success while running A/B test. Export who was using which variation and learn what is successful for your business.</p>
-              </div>
-            </article>
-          </div>
-          <div className="col-xl-2 col-lg-4 col-md-6 text-center">
-            <article className={styles.benefitsPostItem}>
-              <div className="row">
-                <img src="img/benefits/devteam.jpg" alt="post-thumb"/>
-              </div>
-              <div className="row">
-                <h2>Make engineers happy and productive</h2>
-                <p>Have a better developer experience with simplifying how to release, test and deploy your software.</p>
-              </div>
-            </article>
-          </div>
-        </div>
+      <div className="grid grid-pad">
+        <BenefitCard
+          img="img/benefits/rocket.jpg"
+          title="Test in production"
+          description="Test directly in production with your real data by enabling the features to your QA. Decrease incident by disabling the feature as soon as a bug arise." />
+
+        <BenefitCard
+          img="img/benefits/pm.jpg"
+          title="Give autonomy to stakeholders"
+          description="You don't need a software engineer to release a new feature, empower business stakeholders, no development skills are needed." />
+
+        <BenefitCard
+          img="img/benefits/inovate.jpg"
+          title="Innovate faster"
+          description="Deploy code when it is convenient (several times a day). Release when it is ready and it brings value. Deliver software to target audiences progressively." />
+
+        <BenefitCard
+          img="img/benefits/data.jpg"
+          title="Experiment and learn"
+          description="Try new features and measure their success while running A/B test. Export who was using which variation and learn what is successful for your business." />
+
+        <BenefitCard
+          img="img/benefits/devteam.jpg"
+          title="Make engineers happy and productive"
+          description="Have a better developer experience with simplifying how to release, test and deploy your software." />
+      </div>
     </section>
   );
 }
