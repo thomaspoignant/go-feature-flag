@@ -49,16 +49,21 @@ svg:not(:root) {
     margin-left: auto;
 }
 
-
-
-
-
 .heroContent p{
     font-size: 1.05rem;
     line-height: 2rem;
     font-weight: 400;
     margin-bottom: 3rem;
     color: var(--goff-main-ff-description);
+}
+
+.ghStars{
+    text-align: center;
+}
+
+.ghStars img{
+    margin-bottom: 1rem;
+    height:1.8rem;
 }
 
 .availableGH {

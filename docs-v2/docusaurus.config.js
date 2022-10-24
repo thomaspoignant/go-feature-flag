@@ -10,7 +10,7 @@ const TwitterSvg =
 const config = {
   title: 'GO Feature Flag',
   tagline: 'Ship Faster, Reduce Risk, and Build Scale.',
-  url: 'https://docs.gofeatureflag.org',
+  url: 'https://gofeatureflag.org',
   baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
@@ -59,7 +59,7 @@ const config = {
   ],
   stylesheets: [
     'https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css',
-    'https://fonts.googleapis.com/css?family=Poppins:400,700',
+    'https://fonts.googleapis.com/css?family=Poppins:400,500,700',
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css'
   ],
   themeConfig:

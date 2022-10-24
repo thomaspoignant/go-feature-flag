@@ -5,6 +5,7 @@
  */
 
 /* You can override the default Infima variables here. */
+
 :root {
   --site-primary-hue-saturation: 167 68%;
   --site-primary-hue-saturation-light: 167 56%;
@@ -19,10 +20,17 @@
   --goff-github-bg: #555;
   --goff-sponsor-bg: #a0bfb5;
   --goff-whatis-bg: #f9f9f9;
+  --goff-benif-bg: #dff1f4;
+  --goff-feature-list-arrow-color: #9fbeb3;
+  --goff-feature-list-text-color: var(--goff-header-text-color);
+  --goff-benefits-postitem-bg: #fff;
 }
-
 /* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme='dark'] {
+  --goff-header-background: #000;
+  --goff-main-subtitle-color: #9fbeb3;
+  --goff-main-title-color: #fff;
+  --goff-feature-list-text-color: #fff;
 
 }
 
@@ -92,3 +100,5 @@ div[class^="announcementBar_"] {
   letter-spacing: -.18rem;
   font-size: 3rem;
 }
+
+
