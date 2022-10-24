@@ -10,7 +10,7 @@ require (
 	github.com/google/go-cmp v0.5.9
 	github.com/nikunjy/rules v1.0.1-0.20220920033320-71e8e569642c
 	github.com/pelletier/go-toml v1.9.5
-	github.com/stretchr/testify v1.8.0
+	github.com/stretchr/testify v1.8.1
 	golang.org/x/oauth2 v0.0.0-20221014153046-6fdb5e3db783
 	google.golang.org/api v0.100.0
 	gopkg.in/yaml.v3 v3.0.1
