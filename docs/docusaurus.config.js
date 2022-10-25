@@ -10,7 +10,7 @@ const TwitterSvg =
 const config = {
   title: 'GO Feature Flag',
   tagline: 'Ship Faster, Reduce Risk, and Build Scale.',
-  url: 'https://gofeatureflag.org',
+  url: 'https://docs.gofeatureflag.org',
   baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
