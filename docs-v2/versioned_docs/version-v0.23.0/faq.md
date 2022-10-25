@@ -1,6 +1,3 @@
----
-sidebar_position: 80
----
 # Frequently Asked Questions
 
 ### Why using feature flags?

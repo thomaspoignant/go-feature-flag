@@ -17,7 +17,7 @@ To configure your HTTP endpoint:
 
 | Field | Description |
 |---|---|
-|**`URL`**| Location where to retrieve the file <br/> _(ex: http://mydomain.io/flag.yaml)_.|
+|**`URL`**| location of your file.|
 |**`Method`**| the HTTP method you want to use <br/>*(default is GET)*.|
 |**`Body`**| *(optional)*<br/>If you need a body to get the flags.|
 |**`Header`**| *(optional)*<br/>Header you should pass while calling the endpoint *(useful for authorization)*.|
