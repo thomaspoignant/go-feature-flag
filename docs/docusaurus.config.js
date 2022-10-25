@@ -101,7 +101,7 @@ const config = {
             "aria-label": "Twitter",
           },
           {
-            href: 'http://gophers.slack.com/messages/go-feature-flag',
+            href: 'https://gophers.slack.com/messages/go-feature-flag',
             position: 'right',
             className: "header-slack-link navbar__right",
             "aria-label": "Slack",
@@ -137,7 +137,7 @@ const config = {
             items: [
               {
                 label: 'Slack',
-                href: 'http://gophers.slack.com/messages/go-feature-flag',
+                href: 'https://gophers.slack.com/messages/go-feature-flag',
               },
               {
                 label: 'Twitter',
