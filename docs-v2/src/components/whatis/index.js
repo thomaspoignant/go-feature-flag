@@ -20,7 +20,7 @@ export function Whatis() {
               with the usage of the relay proxy and the <Link to={siteConfig.customFields.openfeature}>Openfeature</Link> SDKs.
             </p>
           </div>
-          <Link to="/docs/intro">
+          <Link to="/docs/">
 
             <button className="pushy__btn pushy__btn--md pushy__btn--red">
               <i className="fa-solid fa-screwdriver-wrench"></i> Dive into GO Feature Flag
