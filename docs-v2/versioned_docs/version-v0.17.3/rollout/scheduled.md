@@ -86,4 +86,4 @@ Since your configuration has not been changed manually, it does not trigger any 
 
 | Field | Description |
 |---|---|
-|**`steps`**| The only mandatory field in a **step** is the `date`.<br/>**If no date is provided the step will be skipped.**<br/><br/>The other attributes of your `step` are what you want to update your flag, so every field available in the [flag format](../../flag_format) can be updated.<br/>The new value in a field will override the existing one. |
+|**`steps`**| The only mandatory field in a **step** is the `date`.<br/>**If no date is provided the step will be skipped.**<br/><br/>The other attributes of your `step` are what you want to update your flag, so every field available in the [flag format](../flag_format) can be updated.<br/>The new value in a field will override the existing one. |
