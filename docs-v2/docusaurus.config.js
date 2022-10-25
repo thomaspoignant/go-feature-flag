@@ -22,8 +22,9 @@ const config = {
     logo: "img/logo/logo.png",
     github: "https://github.com/thomaspoignant/go-feature-flag",
     sponsor: "https://github.com/sponsors/thomaspoignant",
-    openfeature: "https://openfeature.dev"
-  },
+    openfeature: "https://openfeature.dev",
+    mailchimpURL: "//gofeatureflag.us14.list-manage.com/subscribe/post?u=86acc1a78e371bf66a9683672&amp;id=f42abfec51&amp"
+   },
   // Even if you don't use internalization, you can use this field to set useful
   // metadata like html lang. For example, if your site is Chinese, you may want
   // to replace "en" with "zh-Hans".

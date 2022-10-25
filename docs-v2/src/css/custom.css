@@ -35,6 +35,8 @@
   --goff-feature-list-arrow-color: #9fbeb3;
   --goff-feature-list-text-color: var(--goff-header-text-color);
   --goff-benefits-postitem-bg: #fff;
+  --goff-message-error: #ec7063;
+  --goff-message-success: #73c6b6;
 }
 /* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme='dark'] {
