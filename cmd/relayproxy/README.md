@@ -10,7 +10,7 @@
     <a href="https://github.com/thomaspoignant/go-feature-flag-relay-proxy/releases"><img src="https://img.shields.io/github/v/release/thomaspoignant/go-feature-flag-relay-proxy" alt="Release version" /></a>
     <a href="https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag-relay-proxy"><img src="https://godoc.org/github.com/thomaspoignant/go-feature-flag-relay-proxy?status.svg" alt="GoDoc" /></a>
     <img src="https://img.shields.io/github/go-mod/go-version/thomaspoignant/go-feature-flag-relay-proxy?logo=go%20version" alt="Go version"/>
-    <a href="LICENSE"><img src="https://img.shields.io/github/license/thomaspoignant/go-feature-flag-relay-proxy" alt="License"/></a>
+    <a href="https://github.com/thomaspoignant/go-feature-flag/blob/main/LICENSE"><img src="https://img.shields.io/github/license/thomaspoignant/go-feature-flag-relay-proxy" alt="License"/></a>
     <a href="https://gophers.slack.com/messages/go-feature-flag"><img src="https://img.shields.io/badge/join-us%20on%20slack-gray.svg?longCache=true&logo=slack&colorB=green" alt="Join us on slack"></a> 
 </p>
 
