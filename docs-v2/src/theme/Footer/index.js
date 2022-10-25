@@ -4,9 +4,11 @@ import styles from './styles.module.css'
 import MailchimpSubscribe from "react-mailchimp-subscribe"
 import clsx from "clsx";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
+import useIsBrowser from '@docusaurus/useIsBrowser';
 
 export default function FooterWrapper(props) {
-  const page = window.location;
+  const isBrowser = useIsBrowser();
+  const page = isBrowser? window.location : "not_reachable";
   const {siteConfig} = useDocusaurusContext();
   const url = `${siteConfig.customFields.mailchimpURL};SIGNUP=${page}`;
 

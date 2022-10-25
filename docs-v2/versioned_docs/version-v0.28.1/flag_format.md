@@ -163,7 +163,7 @@ Compare Expression and their definitions (`a|b` means you can use either one of 
 
 ## Environments
 
-When you initialise `go-feature-flag` you can set an [environment](../configuration/#option_environment) for the instance of this SDK.
+When you initialise `go-feature-flag` you can set an environment for the instance of this SDK.
 
 ```go linenums="1"
 ffclient.Init(ffclient.Config{ 

@@ -83,7 +83,7 @@ A/B tests are widely considered the simplest form of controlled experiment.
 
 _**(source wikipedia)**_
 :::
-To have a proper A/B testing solution with the module you should use the experimentation rollout combined with the [export of your data](../../data_collection/).
+To have a proper A/B testing solution with the module you should use the experimentation rollout combined with the [export of your data](../data_collection/).
 
 This combination will allow to have your experimentation running for a dedicated time, and you will have the data to knows exactly which user was on which version of the flag.
 
