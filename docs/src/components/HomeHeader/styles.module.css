@@ -12,10 +12,6 @@
     left: 0;
 }
 
-.container {
-    z-index: 100;
-}
-
 .heroShape svg:first-child {
     position: absolute;
     top: 0;
@@ -37,6 +33,7 @@ svg:not(:root) {
 }
 
 .container {
+    z-index: 100;
     width: 100%;
     padding-right: 15px;
     padding-left: 15px;
