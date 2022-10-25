@@ -15,3 +15,9 @@ slorber:
   title: Docusaurus maintainer
   url: https://sebastienlorber.com
   image_url: https://github.com/slorber.png
+
+thomaspoignant:
+  name: Thomas Poignant
+  title: GO Feature Flag owner
+  url: https://github.com/thomaspoignant
+  image_url: https://github.com/thomaspoignant.png
