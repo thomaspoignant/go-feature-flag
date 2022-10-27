@@ -17,9 +17,9 @@ jobs:
         with:
           fetch-depth: 0
       - name: setup git config
-          run: |
-            git config user.name "GitHub Actions Bot"
-            git config user.email "noreply@gofeatureflag.org"
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "noreply@gofeatureflag.org"
       - uses: actions/setup-node@v3
       - run: |
           cd docs
