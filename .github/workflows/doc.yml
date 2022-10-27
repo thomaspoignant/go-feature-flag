@@ -14,11 +14,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v3
-        working-directory: ./docs
-        with:
-          node-version: 18
-          cache: npm
-
       - name: Install dependencies
         working-directory: ./docs
         run: npm install
