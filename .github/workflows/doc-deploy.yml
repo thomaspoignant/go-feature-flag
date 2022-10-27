@@ -12,7 +12,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v3
-        working-directory: ./docs
       - name: Install dependencies
         working-directory: ./docs
         run: npm install
