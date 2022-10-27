@@ -11,6 +11,9 @@ jobs:
   deploy:
     name: Deploy to GitHub Pages
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: 'docs'
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v3
@@ -19,9 +22,9 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: cd docs && npm install
+        run: npm install
       - name: Build website
-        run: cd docs && npm run build
+        run: npm run build
 
       # Popular action to deploy to GitHub Pages:
       # Docs: https://github.com/peaceiris/actions-gh-pages#%EF%B8%8F-docusaurus
@@ -30,4 +33,4 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           # Build output to publish to the `gh-pages` branch:
-          publish_dir: ./docs/build
+          publish_dir: ./build
