@@ -9,7 +9,9 @@ jobs:
   Documentation:
     runs-on: ubuntu-latest
     env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GIT_PASS: ${{ secrets.GITHUB_TOKEN }}
+      GIT_USER: thomaspoignant
+      CURRENT_BRANCH: main
     steps:
       - uses: actions/checkout@v2
         with:
@@ -18,4 +20,4 @@ jobs:
       - run: |
           cd docs
           npm install
-          GIT_USER=thomaspoignant npm run deploy
+          npm run deploy
