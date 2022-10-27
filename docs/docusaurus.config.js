@@ -16,7 +16,8 @@ const config = {
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon/favicon.png',
   organizationName: 'thomaspoignant',
-  projectName: 'go-feature-flag', // Usually your repo name.
+  projectName: 'go-feature-flag',
+  trailingSlash: false,
 
   customFields:{
     logo: "img/logo/logo.png",

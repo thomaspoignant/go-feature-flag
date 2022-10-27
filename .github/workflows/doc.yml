@@ -1,25 +1,33 @@
-name: Docs new version release
+name: Deploy to GitHub Pages
 
 on:
   push:
     branches:
       - main
+    # Review gh actions docs if you want to further define triggers, paths, etc
+    # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#on
 
 jobs:
-  Documentation:
+  deploy:
+    name: Deploy to GitHub Pages
     runs-on: ubuntu-latest
-    env:
-      GIT_PASS: ${{ secrets.GITHUB_TOKEN }}
-      GIT_USER: thomaspoignant
-      CURRENT_BRANCH: main
     steps:
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
       - uses: actions/setup-node@v3
-      - run: |
-          git config user.name "GitHub Actions Bot"
-          git config user.email "noreply@gofeatureflag.org"
-          cd docs
-          npm install
-          npm run deploy
+        with:
+          node-version: 18
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+      - name: Build website
+        run: npm run build
+
+      # Popular action to deploy to GitHub Pages:
+      # Docs: https://github.com/peaceiris/actions-gh-pages#%EF%B8%8F-docusaurus
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # Build output to publish to the `gh-pages` branch:
+          publish_dir: ./build
