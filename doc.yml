@@ -1,0 +1,35 @@
+name: Docs new version release
+
+on:
+  release:
+    types: [ published ]
+
+jobs:
+  Documentation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: "3.8"
+      - name: Install dependencies
+        run: pip install mike mkdocs mkdocs-material
+      - name: Setup doc deploy
+        env:
+          GH_USERNAME: ${{ github.actor }}
+        run: |
+          #
+          git config --global user.email "${GH_USERNAME}@users.noreply.github.com"
+          git config --global user.name "${GH_USERNAME}"
+      - name: Release docs website and API reference
+        run: |
+          echo ${{ github.event.release.tag_name }}
+          mike deploy --push --update-aliases ${{ github.event.release.tag_name }} latest
+          mike set-default --push latest
+      - name: Clean old doc version
+        run: |
+          chmod +x .github/ci/doc_to_delete.py
+          mike list --json | .github/ci/doc_to_delete.py | xargs -n1 mike delete --push
