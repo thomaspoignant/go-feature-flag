@@ -13,6 +13,7 @@ jobs:
         with:
           fetch-depth: 0
       - uses: actions/setup-node@v3
-      - run: cd docs
-      - run: npm install
-      - run: GIT_USER=thomaspoignant npm run deploy
+      - run: |
+          cd docs
+          npm install
+          GIT_USER=thomaspoignant npm run deploy
