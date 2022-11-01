@@ -16,7 +16,8 @@ const config = {
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon/favicon.png',
   organizationName: 'thomaspoignant',
-  projectName: 'go-feature-flag', // Usually your repo name.
+  projectName: 'go-feature-flag',
+  trailingSlash: false,
 
   customFields:{
     logo: "img/logo/logo.png",
@@ -38,6 +39,10 @@ const config = {
       'classic',
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
+        googleAnalytics: {
+          trackingID: 'G-YMBZZ2GYSK',
+          anonymizeIP: true,
+        },
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
           // Please change this to your repo.
