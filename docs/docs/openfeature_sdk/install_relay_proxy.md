@@ -1,6 +1,6 @@
 ---
 sidebar_position: 20
-description: Relay proxy is the component that will challenge the flags, this page explain how to install it.
+description: Relay proxy is the component that will evaluate the flags, this page explain how to install it.
 ---
 
 # Install the relay proxy
