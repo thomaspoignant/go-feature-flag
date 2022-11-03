@@ -10,58 +10,75 @@ An **experimentation rollout** is when your flag is configured to be served only
 ### YAML
 ```yaml
 experimentation-flag:
-  percentage: 50
-  true: "B"
-  false: "A"
-  default: "Default"
+  variations:
+    variationA: A
+    variationB: B
+  defaultRule:
+    percentage:
+      variationA: 50
+      variationB: 50
   # highlight-start
-  rollout:
-    experimentation:
-      start: 2021-03-20T00:00:00.10-05:00
-      end: 2021-03-21T00:00:00.10-05:00
+  experimentation:
+    start: 2021-03-20T00:00:00.1-05:00
+    end: 2021-03-21T00:00:00.1-05:00
   # highlight-end
 ```
 
 ### JSON
 
+<details>
+  <summary>JSON example</summary>
+
 ```json
 {
   "experimentation-flag": {
-    "percentage": 50,
-    "true": "B",
-    "false": "A",
-    "default": "Default",
-    // highlight-start
-    "rollout": {
-      "experimentation": {
-        "start": "2021-03-20 00:00:00 -0500",
-        "end": "2021-03-21 00:00:00 -0500"
+    "variations": {
+      "variationA": "A",
+      "variationB": "B"
+    },
+    "defaultRule": {
+      "percentage": {
+        "variationA": 50,
+        "variationB": 50
       }
     },
-    // highlight-end
+# highlight-start
+    "experimentation": {
+      "start": "2021-03-20T05:00:00.100Z",
+      "end": "2021-03-21T05:00:00.100Z"
+    },
+# highlight-end
   }
 }
 ```
 
+</details>
+
 ### TOML
 
+<details>
+  <summary>TOML example</summary>
+
 ```toml 
-[experimentation-flag]
-percentage = 50.0
-true = "B"
-false = "A"
-default = "Default"
+[experimentation-flag.variations]
+variationA = "A"
+variationB = "B"
+
+[experimentation-flag.defaultRule.percentage]
+variationA = 50
+variationB = 50
 
 # highlight-start
-[experimentation-flag.rollout]
-
-    [experimentation-flag.rollout.experimentation]
-    start = 2021-03-20T05:00:00.100Z
-    end = 2021-03-21T05:00:00.100Z
+[experimentation-flag.experimentation]
+start = 2021-03-20T05:00:00.100Z
+end = 2021-03-21T05:00:00.100Z
 # highlight-end
 ```
- 
-Check this [example](https://github.com/thomaspoignant/go-feature-flag/tree/main/examples/rollout_scheduled) to see how it works. 
+
+</details>
+
+
+Check this [example](https://github.com/thomaspoignant/go-feature-flag/tree/main/examples/rollout_experimentation) to see how it works. 
 
 ## Configuration fields
 
@@ -69,10 +86,10 @@ Check this [example](https://github.com/thomaspoignant/go-feature-flag/tree/main
 The dates are in the format supported natively by your flag file format.
 :::
 
-| Field | Description |
-|---|---|
-|**`start`**| The date the flag will be started to be served.|
-|**`end`**| The date the flag will be stopped to be served.|
+| Field       | Description                                     |
+|-------------|-------------------------------------------------|
+| **`start`** | The date the flag will be started to be served. |
+| **`end`**   | The date the flag will be stopped to be served. |
 
 ## A/B testing
 
@@ -83,6 +100,7 @@ A/B tests are widely considered the simplest form of controlled experiment.
 
 _**(source wikipedia)**_
 :::
+
 To have a proper A/B testing solution with the module you should use the experimentation rollout combined with the [export of your data](../../go_module/data_collection/).
 
 This combination will allow to have your experimentation running for a dedicated time, and you will have the data to knows exactly which user was on which version of the flag.

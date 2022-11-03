@@ -102,6 +102,9 @@ test-flag:
 
 ### JSON
 
+<details>
+  <summary>JSON example</summary>
+
 ```json
 {
   "test-flag": {
@@ -115,7 +118,12 @@ test-flag:
 }
 ```
 
+</details>
+
 ### TOML
+
+<details>
+  <summary>TOML example</summary>
 
 ```toml
 [test-flag]
@@ -126,3 +134,5 @@ default = "Default"
 # highlight-next-line
 trackEvents = false
 ```
+
+</details>

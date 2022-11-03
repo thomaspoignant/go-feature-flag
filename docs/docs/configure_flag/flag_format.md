@@ -1,5 +1,5 @@
 ---
-sidebar_position: 10
+sidebar_position: 20
 description: What is a flag and how you can create them.
 ---
 
@@ -14,15 +14,15 @@ Your file must be a valid `YAML`, `JSON` or `TOML` file with a list of flags
 
 :::tip
 The easiest way to create your configuration file is to used
-[**GO Feature Flag Editor** available at https://editor.gofeatureflag.org](https://editor.gofeatureflag.org/).
-
+[**GO Feature Flag Editor** available at [https://editor.gofeatureflag.org](https://editor.gofeatureflag.org).
+  
 If you prefer to do it manually please follow instruction bellow.
 :::
 
 ## Editor
 
 Creating the first version of the flag is not always pleasant, that's why we have created
-[**GO Feature Flag Editor**](https://thomaspoignant.github.io/go-feature-flag-editor/) a simple editor to create your files.  
+[**GO Feature Flag Editor**](https://editor.gofeatureflag.org) a simple editor to create your files.  
 
 ## Example
 
@@ -30,176 +30,235 @@ A flag configuration looks like:
 
 ### YAML
 
-``` yaml
-test-flag:
-  percentage: 100
-  rule: key eq "random-key"
-  true: true
-  false: false
-  default: false
-  disable: false
-  trackEvents: true
-  version: 1
-  rollout:
-    experimentation:
-      start: 2021-03-20T00:00:00.10-05:00
-      end: 2021-03-21T00:00:00.10-05:00
+```yaml
+# This is your configuration for your first flag
+first-flag:
+  variations: # All possible return value for your feature flag
+    A: false
+    B: true
+  targeting: # If you want to target a subset of your users in particular
+    - query: key eq "random-key"
+      percentage:
+        A: 0
+        B: 100
+  defaultRule: # When no targeting match we use the defaultRule
+    variation: A
 
-test-flag2:
-  rule: key eq "not-a-key"
-  percentage: 100
-  true: true
-  false: false
-  default: false
-  version: 12
+# A second example of a flag configuration
+second-flag:
+  variations:
+    A: "valueA"
+    B: "valueB"
+    defaultValue: "a default value"
+  targeting:
+    - name: legacyRuleV0
+      query: key eq "not-a-key"
+      percentage:
+        A: 10
+        B: 90
+  defaultRule:
+    name: legacyDefaultRule
+    variation: defaultValue
+  version: "12"
+  experimentation: 
+    start: 2021-03-20T00:00:00.1-05:00
+    end: 2021-03-21T00:00:00.1-05:00
 ```
 
-### JSON
 
-``` json
+### JSON
+<details>
+  <summary>JSON example</summary>
+
+```json
 {
-  "test-flag": {
-    "percentage": 100,
-    "rule": "key eq \"random-key\"",
-    "true": true,
-    "false": false,
-    "default": false,
-    "disable": false,
-    "trackEvents": true,
-    "version": 1,
-    "rollout": {
-      "experimentation": {
-        "start": "2021-03-20T05:00:00.100Z",
-        "end": "2021-03-21T05:00:00.100Z"
+  "first-flag": {
+    "variations": {
+      "A": false,
+      "B": true
+    },
+    "targeting": [
+      {
+        "query": "key eq \"random-key\"",
+        "percentage": {
+          "A": 0,
+          "B": 100
+        }
       }
+    ],
+    "defaultRule": {
+      "variation": "A"
     }
   },
-  "test-flag2": {
-    "rule": "key eq \"not-a-key\"",
-    "percentage": 100,
-    "true": true,
-    "false": false,
-    "default": false,
-    "version": 12
+  
+  "second-flag": {
+    "variations": {
+      "A": "valueA",
+      "B": "valueB",
+      "defaultValue": "a default value"
+    },
+    "targeting": [
+      {
+        "name": "legacyRuleV0",
+        "query": "key eq \"not-a-key\"",
+        "percentage": {
+          "A": 10,
+          "B": 90
+        }
+      }
+    ],
+    "defaultRule": {
+      "name": "legacyDefaultRule",
+      "variation": "defaultValue"
+    },
+    "version": "12",
+    "experimentation": {
+      "start": "2021-03-20T05:00:00.100Z",
+      "end": "2021-03-21T05:00:00.100Z"
+    }
   }
 }
 ```
+</details>
 
 ### TOML
+<details>
+  <summary>TOML example</summary>
 
-``` toml
-[test-flag]
-percentage = 100.0
-rule = "key eq \"random-key\""
-true = true
-false = false
-default = false
-disable = false
-trackEvents = true
-version = 1.0
+```toml
+[first-flag.variations]
+A = false
+B = true
 
-[test-flag.rollout]
+[[first-flag.targeting]]
+query = 'key eq "random-key"'
 
-    [test-flag.rollout.experimentation]
-    start = 2021-03-20T05:00:00.100Z
-    end = 2021-03-21T05:00:00.100Z
+  [first-flag.targeting.percentage]
+  A = 0
+  B = 100
 
-[test-flag2]
-rule = "key eq \"not-a-key\""
-percentage = 100.0
-true = true
-false = false
-default = false
-version = 12.0
+[first-flag.defaultRule]
+variation = "A"
+
+[second-flag]
+version = "12"
+
+  [second-flag.variations]
+  A = "valueA"
+  B = "valueB"
+  defaultValue = "a default value"
+
+  [[second-flag.targeting]]
+  name = "legacyRuleV0"
+  query = 'key eq "not-a-key"'
+
+    [second-flag.targeting.percentage]
+    A = 10
+    B = 90
+
+  [second-flag.defaultRule]
+  name = "legacyDefaultRule"
+  variation = "defaultValue"
+
+  [second-flag.experimentation]
+  start = 2021-03-20T05:00:00.100Z
+  end = 2021-03-21T05:00:00.100Z
 ```
+
+</details>
 
 ## Format details
 
-|     Field     | Description                                                                                                                                                                                                                                            |
-|:-------------:|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **flag-key**  | Name of your flag.<br/> It must be unique.<br/>*On the example the flag keys are **`test-flag`** and **`test-flag2`**.*                                                                                                                                |
-|    `true`     | Value returned by the flag if apply to the user *(rule is evaluated to true)* and the user is in the active percentage.                                                                                                                                |
-|    `false`    | Value returned by the flag if apply to the user *(rule is evaluated to true)* and the user is **not** in the active percentage.                                                                                                                        |
-|   `default`   | Value returned by the flag if not apply to the user *(rule is evaluated to false).*                                                                                                                                                                    |
-| `percentage`  | *(optional)*<br/>Percentage of the users who should be affected by the flag.<br/>**Default: 0**<br/><br/>The percentage is computed by calculating a hash of the user key *(100000 variations)*, it means that you can have 3 numbers after the comma. |
-|    `rule`     | *(optional)*<br/>Condition to determine on which user the flag should be applied.<br/>Rule format is described in the [rule format section](#rule-format).<br/>**If no rule is set, the flag applies to all users *(percentage still apply)*.**        |
-|   `disable`   | *(optional)*<br/>True if the flag is disabled.<br/>**Default: `false`**                                                                                                                                                                                |
-| `trackEvents` | *(optional)*<br/>False if you don't want to export the data in your data exporter.<br/>**Default: `true`**                                                                                                                                             |
-|   `version`   | *(optional)*<br/>The version is the version of your flag.<br/>This number is used to display the information in the notifiers and data collection, you have to update it your self.<br/>**Default: 0**                                                 |
-|   `rollout`   | *(optional)*<br/><code>rollout</code> contains a specific rollout strategy you want to use.<br/>**See [rollout section](./rollout/index.md) for more details.**                                                                                        |
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td width="20%"><strong>flag-key</strong></td>
+      <td>Name of your flag.<br/><i>It must be unique.<br/>On the example the flag keys are <code>test-flag</code> and <code>test-flag2</code>.</i></td>
+    </tr>
+    <tr>
+      <td><code>variations</code></td>
+      <td>
+        <p>Variations are all the variations available for this flag.</p>
+        <p>It is represented as a key/value element. The key is the name of the variation and the value could be any types available (<code>string</code>, <code>float</code>, <code>int</code>, <code>map</code>, <code>array</code>, <code>bool</code>).</p>
+        <p>You can have as many variation as needed.</p>
+         <pre># Some examples<br/>
+         variationString: test<br/>
+         variationBool: true<br/>
+         variationInt: 1000<br/>
+         variationFloat: 1000.23<br/>
+         variationArray: <br/>  - item1<br/>  - item2<br/>
+         variationObj:<br/>  item1: 123<br/>  item2: this is a string<br/>  item3: false<br/>
+         </pre>
+      </td>
+    </tr>
+    <tr>
+      <td><code>targeting</code><br/><i>(optional)</i></td>
+      <td>
+        <p>
+          Targeting contains the list of rules you have to target a subset of your users.
+          <br/>You can have as many target as needed.
+        </p>
+        <p>This field is an <code>array</code> and contains a list of rules.</p>
+        <p><i>See <a href="./rule_format">rules format</a> to have more info on how to write a rule.</i></p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>defaultRule</code></td>
+      <td>
+        <p>DefaultRule is the rule that is applied if the user does not match in any targeting.</p>
+        <p><i>See <a href="./rule_format">rules format</a> to have more info on how to write a rule.</i></p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>trackEvents</code><br/><i>(optional)</i></td>
+      <td>
+        <p><code>false</code> if you don't want to export the data in your data exporter.</p>
+        <p><b>Default:</b> <code>true</code></p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>disable</code><br/><i>(optional)</i></td>
+      <td>
+        <p><code>true</code> if the flag is disabled.</p>
+        <p><b>Default:</b> <code>false</code></p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>version</code><br/><i>(optional)</i></td>
+      <td>
+        <p>The version is the version of your flag.<br/>This string is used to display the information in the notifiers and data collection, you have to update it your self.</p>
+        <p><b>Default:</b> <code>""</code></p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>scheduledRollout</code><br/><i>(optional)</i></td>
+      <td>
+        <p>Scheduled allow to patch your flag over time.</p>
+        <p>You can add several steps that updates the flag, this is typically used if you want to gradually add more user in your flag.</p>
+        <p><i>See <a href="../rollout/scheduled/">Scheduled rollout</a> to have more info on how to use it.</i></p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>experimentation</code><br/><i>(optional)</i></td>
+      <td>
+        <p>Experimentation allow you to configure a start date and an end date for your flag. When the experimentation is not running, the flag will serve the default value.</p>
+        <p><i>See <a href="../rollout/experimentation/">Experimentation rollout</a> to have more info on how to use it.</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
 
-## Rule format
 
-The rule format is based on the [`nikunjy/rules`](https://github.com/nikunjy/rules) library.
 
-All the operations can be written capitalized or lowercase (ex: `eq` or `EQ` can be used).  
-Logical Operations supported are `AND` `OR`.
-
-Compare Expression and their definitions (`a|b` means you can use either one of the two `a` or `b`):
-
-|  Operator  | Description                 |
-|:----------:|-----------------------------|
-| `eq`, `==` | equals to                   |
-| `ne`, `!=` | not equals to               |
-| `lt`, `<`  | less than                   |
-| `gt`, `>`  | greater than                |
-| `le`, `<=` | less than equal to          |
-| `ge`, `>=` | greater than equal to       |
-|    `co`    | contains                    |
-|    `sw`    | starts with                 |
-|    `ew`    | ends with                   |
-|    `in`    | in a list                   |
-|    `pr`    | present                     |
-|   `not`    | not of a logical expression |
-
-### Examples
-
-- Select a specific user: `key eq "example@example.com"`
-- Select all identified users: `anonymous ne true`
-- Select a user with a custom property: `userId eq "12345"`
-- Select on multiple criteria:  
-  *All users with ids finishing by `@test.com` that have the role `backend engineer` in the `pro` environment for the
-  company `go-feature-flag`*
-
-  ```bash
-  (key ew "@test.com") and (role eq "backend engineer") and (env eq "pro") and (company eq "go-feature-flag")`
-  ```
-
-## Environments
-
-When you initialise `go-feature-flag` you can set an environment for the instance of this SDK.
-
-```go linenums="1"
-ffclient.Init(ffclient.Config{ 
-    // ...
-    Environment:    "prod",
-    // ...
-})
-```
-
-When an environment is set, it adds a new field in your user called **`env`** that you can use in your rules.  
-It means that you can decide to activate a flag only for some **environment**.
-
-**Example of rules based on the environment:**
-
-```yaml
-# Flag activate only in dev
-rule: env == "dev"
-```
-
-```yaml
-# Flag used only in dev and staging environment
-rule: (env == "dev") or (env == "staging")
-```
-
-```yaml
-# Flag used on non prod environments except for the user 1234 in prod
-rule: (env != "prod") or (user_id == 1234)
-```
 
 ## Advanced configurations
 
 You can have advanced configurations for your flag to have specific behavior for them, such as:
-
 - [Specific rollout strategies](./rollout/index.md)
 - [Don't track a flag](../go_module/data_collection/index.md#dont-track-a-flag)

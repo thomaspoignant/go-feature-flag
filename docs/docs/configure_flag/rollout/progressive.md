@@ -2,76 +2,89 @@
 
 A **progressive rollout** allows you to increase the percentage of your flag over time.
 
-You can select a **release ramp** where the percentage of your flag will increase progressively between the start date and the end date.
+You can select a **release ramp** where the percentage of your flag will increase progressively between the start date
+and the end date.
 
 ## Example
 
 ### YAML
 
-``` yaml
+```yaml
 progressive-flag:
-  true: "B"
-  false: "A"
-  default: "Default"
-  # highlight-start
-  rollout:
-    progressive:
-      percentage:
-        initial: 0
-        end: 100
-      releaseRamp:
-        start: 2021-03-20T00:00:00.10-05:00
-        end: 2021-03-21T00:00:00.10-05:00
-  # highlight-end
+  variations:
+    variationA: A
+    variationB: B
+  defaultRule:
+# highlight-start
+    progressiveRollout:
+      initial:
+        variation: variationB
+        percentage: 0
+        date: 2021-03-20T00:00:00.1-05:00
+      end:
+        variation: variationB
+        percentage: 100
+        date: 2021-03-21T00:00:00.1-05:00
+# highlight-end
 ```
 
 ### JSON
 
-``` json
+<details>
+  <summary>JSON example</summary>
+
+```json
 {
   "progressive-flag": {
-    "true": "B",
-    "false": "A",
-    "default": "Default",
-    # highlight-start
-    "rollout": {
-      "progressive": {
-        "percentage": {
-          "initial": 0,
-          "end": 100
+    "variations": {
+      "variationA": "A",
+      "variationB": "B"
+    },
+    "defaultRule": {
+# highlight-start
+      "progressiveRollout": {
+        "initial": {
+          "variation": "variationB",
+          "percentage": 0,
+          "date": "2021-03-20T05:00:00.100Z"
         },
-        "releaseRamp": {
-          "start": "2021-03-20T05:00:00.100Z",
-          "end": "2021-03-21T05:00:00.100Z"
+        "end": {
+          "variation": "variationB",
+          "percentage": 100,
+          "date": "2021-03-21T05:00:00.100Z"
         }
-      }
+      },
+# highlight-end
     }
-    # highlight-end
   }
 }
 ```
 
+</details>
+
 ### TOML
 
-``` toml
-[progressive-flag]
-true = "B"
-false = "A"
-default = "Default"
+
+<details>
+  <summary>TOML example</summary>
+
+```toml
+[progressive-flag.variations]
+variationA = "A"
+variationB = "B"
 # highlight-start
-  [progressive-flag.rollout]
+[progressive-flag.defaultRule.progressiveRollout.initial]
+variation = "variationB"
+percentage = 0
+date = 2021-03-20T05:00:00.100Z
 
-    [progressive-flag.rollout.progressive]
-
-      [progressive-flag.rollout.progressive.percentage]
-      initial = 0.0
-      end = 100.0
-
-      [progressive-flag.rollout.progressive.releaseRamp]
-      start = 2021-03-20T05:00:00.100Z
-      end = 2021-03-21T05:00:00.100Z
+[progressive-flag.defaultRule.progressiveRollout.end]
+variation = "variationB"
+percentage = 100
+date = 2021-03-21T05:00:00.100Z
 # highlight-end
 ```
+</details>
 
 ## Configuration fields
 

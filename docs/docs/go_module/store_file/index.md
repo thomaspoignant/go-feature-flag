@@ -2,7 +2,7 @@
 sidebar_position: 1
 ---
 
-# Store your feature flag file
+# Retrieve your feature flags configuration
 The module supports different ways of retrieving the flag file.  
 Available retriever are:
 

@@ -2,10 +2,10 @@
 sidebar_position: 20
 description: How to select who should have the flag activated.
 ---
-# Target a user with a flag
+# Performing flag evaluations
 
 ## Users
-Feature flag targeting and rollouts are all determined by the user you pass to your Variation calls.
+Feature flag targeting and rollouts are all determined by the user you pass to your **Variation** calls.
 The SDK defines a [`User`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/ffuser#User) struct and a [`UserBuilder`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/ffuser#UserBuilder) to make this easy.
 
 Here's an example:

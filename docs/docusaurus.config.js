@@ -91,6 +91,12 @@ const config = {
           },
           {to: '/blog', label: 'Blog', position: 'left'},
           {to: 'https://editor.gofeatureflag.org', html: 'Flag Editor <i class="fas fa-external-link-alt"></i>', position: 'left'},
+          // {
+          //   type: 'doc',
+          //   docId:'migrate_v0_v1',
+          //   label: 'v1.x.x migration',
+          //   position: 'left'
+          // },
           {to: 'https://github.com/sponsors/thomaspoignant', label: 'Sponsor us ❤️', position: 'right'},
           {type: 'docsVersionDropdown', position: 'right'},
           {

@@ -9,36 +9,61 @@ You just have to select a percentage of your users in your flag, and the `True` 
 
 ### YAML
 
-``` yaml linenums="1"
+```yaml
 canary-flag:
-  true: true
-  false: false
-  default: false
-  # highlight-next-line
-  percentage: 1
+  variations:
+    oldBehavior: false
+    canary: true
+  defaultRule:
+  # highlight-start
+    percentage:
+      oldBehavior: 99
+      canary: 1
+  # highlight-end
 ```
 
 ### JSON
 
-``` json
-{
+<details>
+  <summary>JSON example</summary>
+
+```json
+ {
   "canary-flag": {
-    "true": true,
-    "false": false,
-    "default": "false,
-    # highlight-next-line
-    "percentage": 1
+    "variations": {
+      "oldBehavior": false,
+      "canary": true
+    },
+    "defaultRule": {
+# highlight-start
+      "percentage": {
+        "oldBehavior": 99,
+        "canary": 1
+      }
+# highlight-end
+    }
   }
 }
 ```
 
+</details>
+
+
 ### TOML
 
-``` toml
-[canary-flag]
-true = true
-false = false
-default = false
-# highlight-next-line
-percentage = 1.0
+<details>
+  <summary>TOML example</summary>
+
+```toml
+[canary-flag.variations]
+oldBehavior = false
+canary = true
+
+# highlight-start
+[canary-flag.defaultRule.percentage]
+oldBehavior = 99
+canary = 1
+# highlight-end
 ```
+
+</details>
