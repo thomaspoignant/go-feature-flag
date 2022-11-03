@@ -1,0 +1,10 @@
+{
+  "position": 50,
+  "label":"Relay proxy",
+  "collapsible": true,
+  "collapsed": true,
+  "link": {
+    "type": "generated-index",
+    "title": "Relay proxy"
+  }
+}
