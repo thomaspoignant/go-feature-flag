@@ -3,7 +3,7 @@ sidebar_position: 21
 description: Getting started with the relay proxy.
 ---
 
-# Getting started with the relay proxy
+# Getting started
 
 Before starting your **relay proxy** you will need to create a minimal configuration file.  
 
