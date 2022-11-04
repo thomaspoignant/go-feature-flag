@@ -58,8 +58,8 @@ Originally GO Feature Flag was built to be a GOlang only library, but it limits 
 To be compatible with more language we have implemented the [GO Feature Flag Relay Proxy](https://github.com/thomaspoignant/go-feature-flag-relay-proxy).
 It is a service you can host that provides an API to evaluate your flags, you can call it using HTTP to get your variation.
 
-Since we believe in standardization we are also implementing [Open-feature](https://github.com/open-feature) providers to interact with this API in the language of your choice.  
-_(Open-feature is still at an early stage, so not all languages are supported and expect some changes in the future)_
+Since we believe in standardization we are also implementing [OpenFeature](https://github.com/open-feature) providers to interact with this API in the language of your choice.  
+_(OpenFeature is still at an early stage, so not all languages are supported and expect some changes in the future)_
 
 ## Getting started
 First, you need to initialize the `ffclient` with the location of your backend file.

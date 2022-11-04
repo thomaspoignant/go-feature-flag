@@ -25,15 +25,14 @@ const banner = `█▀▀ █▀█   █▀▀ █▀▀ ▄▀█ 
 GO Feature Flag Relay Proxy
 _____________________________________________`
 
-// @title go-feature-flag relay proxy
-// @description Swagger for the go-feature-flag relay proxy.
-// @description
-// @description go-feature-flag relay proxy is using thomaspoignant/go-feature-flag to handle your feature flagging.
-// @description It is a proxy to your flags, you can get the values of your flags using APIs.
+// @title GO Feature Flag relay proxy endpoints
+// @description.markdown
 // @contact.name GO feature flag relay proxy
-// @contact.url https://github.com/thomaspoignant/go-feature-flag-relay-proxy
+// @contact.url https://gofeatureflag.org
+// @contact.email contact@gofeatureflag.org
 // @license.name MIT
 // @license.url https://github.com/thomaspoignant/go-feature-flag/blob/main/LICENSE
+// @x-logo {"url":"https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png"}
 // @BasePath /
 func main() {
 	// Init pFlag for config file

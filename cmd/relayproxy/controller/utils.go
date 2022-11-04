@@ -10,7 +10,7 @@ import (
 )
 
 // assertRequest is the function which validates the request, if not valid an echo.HTTPError is return.
-func assertRequest(u *model.RelayProxyRequest) *echo.HTTPError {
+func assertRequest(u *model.AllFlagRequest) *echo.HTTPError {
 	if u == nil || u.User == nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "assertRequest: impossible to find user in request")
 	}
@@ -25,7 +25,7 @@ func assertUserKey(userKey string) *echo.HTTPError {
 	return nil
 }
 
-// userRequestToUser convert a user from the request model.RelayProxyRequest to a go-feature-flag ffuser.User
+// userRequestToUser convert a user from the request model.AllFlagRequest to a go-feature-flag ffuser.User
 func userRequestToUser(u *model.UserRequest) (ffuser.User, error) {
 	if u == nil {
 		return ffuser.User{}, fmt.Errorf("userRequestToUser: impossible to convert user, userRequest nil")

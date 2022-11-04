@@ -1,0 +1,13 @@
+/**
+ * CSS files with the .module.css suffix will be treated as CSS modules
+ * and scoped locally.
+ */
+
+.redocContainer {
+  /*background-color: var(--goff-sponsor-bg);*/
+  background-color: white;
+}
+
+.redocContainer h1{
+  /*font-size: 13rem;*/
+}

@@ -43,7 +43,7 @@ watch-relayproxy: ## Launch the relay proxy in watch mode.
 
 swagger: ## Build swagger documentation
 	$(GOCMD) install github.com/swaggo/swag/cmd/swag@latest
-	cd cmd/relayproxy && swag init --parseDependency --parseDepth 2
+	cd cmd/relayproxy && swag init --markdownFiles docs
 
 ## Test:
 test: ## Run the tests of the project
