@@ -6,8 +6,7 @@ type AllFlags struct {
 	// flags is the list of flag for the user.
 	Flags map[string]FlagState `json:"flags"`
 
-	// Valid if false it means there was an error (such as the data store not being available),
-	// in which case no flag data is in this object.
+	// `true` if something went wrong in the relay proxy (flag does not exists, ...) and we serve the defaultValue.
 	Valid bool `json:"valid" example:"false"`
 }
 

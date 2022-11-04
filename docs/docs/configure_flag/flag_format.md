@@ -241,14 +241,14 @@ version = "12"
       <td>
         <p>Scheduled allow to patch your flag over time.</p>
         <p>You can add several steps that updates the flag, this is typically used if you want to gradually add more user in your flag.</p>
-        <p><i>See <a href="../rollout/scheduled/">Scheduled rollout</a> to have more info on how to use it.</i></p>
+        <p><i>See <a href="./rollout/scheduled/">Scheduled rollout</a> to have more info on how to use it.</i></p>
       </td>
     </tr>
     <tr>
       <td><code>experimentation</code><br/><i>(optional)</i></td>
       <td>
         <p>Experimentation allow you to configure a start date and an end date for your flag. When the experimentation is not running, the flag will serve the default value.</p>
-        <p><i>See <a href="../rollout/experimentation/">Experimentation rollout</a> to have more info on how to use it.</i></p>
+        <p><i>See <a href="./rollout/experimentation/">Experimentation rollout</a> to have more info on how to use it.</i></p>
       </td>
     </tr>
   </tbody>

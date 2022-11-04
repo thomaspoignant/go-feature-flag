@@ -21,7 +21,7 @@ A rule is a configuration that allows to serve a variation based on some conditi
   <tbody>
     <tr>
       <td><code>name</code><br/><i>(optional)</i></td>
-      <td>Name of your rule.<br/>This is needed when your are updating a rule using a <a href="../rollout/scheduled">scheduled rollout</a>.</td>
+      <td>Name of your rule.<br/>This is needed when your are updating a rule using a <a href="./rollout/scheduled">scheduled rollout</a>.</td>
     </tr>
     <tr>
       <td><code>query</code></td>
@@ -56,7 +56,7 @@ A rule is a configuration that allows to serve a variation based on some conditi
         <p>You can decide at which percentage you starts with and at what percentage you ends with in your release ramp.
           Before the start date we will serve the initial percentage and, after we will serve the end percentage.
         </p>
-        <p><i>See <a href="../rollout/progressive">progressive rollout</a> to have more info on how to use it.</i></p>
+        <p><i>See <a href="./rollout/progressive">progressive rollout</a> to have more info on how to use it.</i></p>
       </td>
     </tr>
     <tr>
@@ -116,7 +116,7 @@ Compare Expression and their definitions (`a|b` means you can use either one of 
 
 ## Environments
 
-When you initialise `go-feature-flag` you can set an [environment](../configuration/#option_environment) for the instance of this SDK.
+When you initialise `go-feature-flag` you can set an [environment](../go_module/configuration/#option_environment) for the instance of this SDK.
 
 ```go linenums="1"
 ffclient.Init(ffclient.Config{

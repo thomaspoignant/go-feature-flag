@@ -25,7 +25,7 @@ I've also written an [article](https://medium.com/better-programming/feature-fla
 
 ## What can I do with GO Feature Flag?
 
-- Storing your configuration flags file on various locations ([`HTTP`](./store_file/http.md), [`S3`](./store_file/s3.md), [`GitHub`](./store_file/github.md), [`file`](./store_file/file.md)).
+- Storing your configuration flags file on various locations (`HTTP`, `S3`, `Kubernetes`, [_see full list_](configure_flag/store_your_flags.md).
 - Configuring your flags in various [format](configure_flag/flag_format.md) (`JSON`, `TOML` and `YAML`).
 - Adding complex [rules](configure_flag/flag_format.md#rule-format) to target your users.
 - Use complex rollout strategy for your flags :

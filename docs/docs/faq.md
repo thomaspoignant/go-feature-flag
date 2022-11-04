@@ -17,7 +17,7 @@ lifecycle of features.
 The lifecycle of your flags is key if you don't want to have un-used things everywhere in your code. 
 
 1. Start by creating the flag in your configuration file *(with 0% to avoid affecting your users)*.
-2. Evaluate the flag in your code *(see [variation](./configure_flag/target_user.md#variation))*.
+2. Evaluate the flag in your code *(see [variation](./go_module/target_user.md#variation))*.
 3. Deploy your application with the variation check.
 4. Start rolling out your flag.
 5. When 100% of your users have access to the new feature, remove the call to the variation from your code base.

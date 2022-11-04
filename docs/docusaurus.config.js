@@ -24,7 +24,8 @@ const config = {
     github: "https://github.com/thomaspoignant/go-feature-flag",
     sponsor: "https://github.com/sponsors/thomaspoignant",
     openfeature: "https://openfeature.dev",
-    mailchimpURL: "//gofeatureflag.us14.list-manage.com/subscribe/post?u=86acc1a78e371bf66a9683672&amp;id=f42abfec51&amp"
+    mailchimpURL: "//gofeatureflag.us14.list-manage.com/subscribe/post?u=86acc1a78e371bf66a9683672&amp;id=f42abfec51&amp",
+    swaggerURL: "https://github.com/thomaspoignant/go-feature-flag/blob/main/cmd/relayproxy/docs/swagger.yaml"
    },
   // Even if you don't use internalization, you can use this field to set useful
   // metadata like html lang. For example, if your site is Chinese, you may want

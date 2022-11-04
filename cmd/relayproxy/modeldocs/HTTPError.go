@@ -1,6 +1,6 @@
 package modeldocs
 
-type HTTPError struct {
+type HTTPErrorDoc struct {
 	// Message of your error
-	Message interface{} `json:"message"`
+	Message string `json:"message" example:"An error occurred"`
 }
