@@ -20,5 +20,5 @@ type UserRequest struct {
 	Anonymous bool `json:"anonymous" xml:"anonymous" form:"anonymous" query:"anonymous" example:"false"`
 
 	// Custom is a map containing all extra information for this user.
-	Custom map[string]interface{} `json:"custom" xml:"custom" form:"custom" query:"custom"  swaggertype:"object,string" example:"email:contact@gofeatureflag.org,firstname:John,lastname:Doe,company:GO Feature Flag"`
+	Custom map[string]interface{} `json:"custom" xml:"custom" form:"custom" query:"custom"  swaggertype:"object,string" example:"email:contact@gofeatureflag.org,firstname:John,lastname:Doe,company:GO Feature Flag"` // nolint: lll
 }

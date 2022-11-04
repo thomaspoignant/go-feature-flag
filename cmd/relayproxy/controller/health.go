@@ -20,7 +20,8 @@ func NewHealth(monitoring service.Monitoring) Controller {
 
 // Handler is the entry point for this API
 // @Summary      Health
-// @Description Making a **GET** request to the URL path `/health` will tell you if the relay proxy is ready to serve traffic.
+// @Description Making a **GET** request to the URL path `/health` will tell you if the relay proxy is ready to serve
+// @Description traffic.
 // @Description
 // @Description This is useful especially for loadbalancer to know that they can send traffic to the service.
 // @Produce      json

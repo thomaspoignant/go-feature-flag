@@ -32,7 +32,7 @@ _____________________________________________`
 // @contact.email contact@gofeatureflag.org
 // @license.name MIT
 // @license.url https://github.com/thomaspoignant/go-feature-flag/blob/main/LICENSE
-// @x-logo {"url":"https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png", "altText": "GO Feature Flag logo"}
+// @x-logo {"url":"https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png"}
 // @BasePath /
 func main() {
 	// Init pFlag for config file

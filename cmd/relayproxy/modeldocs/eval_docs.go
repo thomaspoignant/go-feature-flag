@@ -6,7 +6,7 @@ type EvalFlagDoc struct {
 	TrackEvents bool `json:"trackEvents" example:"true"`
 	// The variation used to give you this value.
 	VariationType string `json:"variationType" example:"variation-A"`
-	//`true` if something went wrong in the relay proxy (flag does not exists, ...) and we serve the defaultValue.
+	// `true` if something went wrong in the relay proxy (flag does not exists, ...) and we serve the defaultValue.
 	Failed bool `json:"failed" example:"false"`
 	// The version of the flag used.
 	Version string `json:"version" example:"1.0"`
