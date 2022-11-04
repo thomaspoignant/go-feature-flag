@@ -1,29 +1,31 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "Swagger for the go-feature-flag relay proxy.\n\ngo-feature-flag relay proxy is using thomaspoignant/go-feature-flag to handle your feature flagging.\nIt is a proxy to your flags, you can get the values of your flags using APIs.",
-        "title": "go-feature-flag relay proxy",
+        "description": "# Introduction\n\nThis API is documented in **OpenAPI format** and describe the REST API of the **GO Feature Flag relay proxy**.\n\nThe relay proxy is a component to evaluate your feature flags remotely when using **GO Feature Flag**.  \nThis API is mostly used by all the OpenFeature providers.\n",
+        "title": "GO Feature Flag relay proxy endpoints",
         "contact": {
             "name": "GO feature flag relay proxy",
-            "url": "https://github.com/thomaspoignant/go-feature-flag-relay-proxy"
+            "url": "https://gofeatureflag.org",
+            "email": "contact@gofeatureflag.org"
         },
         "license": {
             "name": "MIT",
             "url": "https://github.com/thomaspoignant/go-feature-flag/blob/main/LICENSE"
+        },
+        "x-logo": {
+            "altText": "GO Feature Flag logo",
+            "url": "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png"
         }
     },
     "basePath": "/",
     "paths": {
         "/health": {
             "get": {
-                "description": "Health is the status endpoint of the relay proxy, you should call it to check if the relay proxy is up.",
+                "description": "Making a **GET** request to the URL path `/health` will tell you if the relay proxy is ready to serve traffic.\n\nThis is useful especially for loadbalancer to know that they can send traffic to the service.",
                 "produces": [
                     "application/json"
                 ],
-                "tags": [
-                    "monitoring"
-                ],
-                "summary": "Health, status endpoint",
+                "summary": "Health",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -36,14 +38,11 @@
         },
         "/info": {
             "get": {
-                "description": "Info, give information about the instance of go-feature-flag relay proxy",
+                "description": "Making a **GET** request to the URL path `/info` will tell give you information about the actual state of the relay proxy.\n\nAs of Today the level of information is small be we can improve this endpoint to returns more information.",
                 "produces": [
                     "application/json"
                 ],
-                "tags": [
-                    "monitoring"
-                ],
-                "summary": "Info, give information about the instance of go-feature-flag relay proxy",
+                "summary": "Info",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -56,17 +55,14 @@
         },
         "/v1/allflags": {
             "post": {
-                "description": "allflags returns all the flag for a specific user.",
+                "description": "Making a **POST** request to the URL `/v1/allflags` will give you the values of all the flags for\nthis user.\n\nTo get a variation you should provide information about the user.\nFor that you should provide some user information in JSON in the request body.",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "tags": [
-                    "flags"
-                ],
-                "summary": "allflags returns all the flag for a specific user.",
+                "summary": "All flags variations for a user",
                 "parameters": [
                     {
                         "description": "Payload of the user we want to challenge against the flag.",
@@ -74,7 +70,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.RelayProxyRequest"
+                            "$ref": "#/definitions/model.AllFlagRequest"
                         }
                     }
                 ],
@@ -88,13 +84,13 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/modeldocs.HTTPError"
+                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/modeldocs.HTTPError"
+                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
                         }
                     }
                 }
@@ -102,17 +98,14 @@
         },
         "/v1/feature/{flag_key}/eval": {
             "post": {
-                "description": "Evaluate the users with the corresponding flag and return the value for the user.\nNote that you will always have a usable value in the response, you can use the field failed to know if\nan issue has occurred during the validation of the flag, in that case the value returned will be the\ndefault value.",
+                "description": "Making a **POST** request to the URL `/v1/feature/\u003cyour_flag_name\u003e/eval` will give you the value of the\nflag for this user.\n\nTo get a variation you should provide information about the user:\n- User information in JSON in the request body.\n- A default value in case there is an error while evaluating the flag.\n\nNote that you will always have a usable value in the response, you can use the field `failed` to know if\nan issue has occurred during the validation of the flag, in that case the value returned will be the\ndefault value.",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "tags": [
-                    "flags"
-                ],
-                "summary": "Evaluate the users with the corresponding flag and return the value for the user.",
+                "summary": "Evaluate a feature flag",
                 "parameters": [
                     {
                         "description": "Payload of the user we want to get all the flags from.",
@@ -120,7 +113,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.RelayProxyRequest"
+                            "$ref": "#/definitions/model.EvalFlagRequest"
                         }
                     },
                     {
@@ -135,19 +128,19 @@
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "$ref": "#/definitions/model.FlagEval"
+                            "$ref": "#/definitions/modeldocs.EvalFlagDoc"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/modeldocs.HTTPError"
+                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/modeldocs.HTTPError"
+                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
                         }
                     }
                 }
@@ -155,17 +148,34 @@
         }
     },
     "definitions": {
-        "model.FlagEval": {
+        "model.AllFlagRequest": {
             "type": "object",
             "properties": {
-                "value": {}
+                "user": {
+                    "description": "User The representation of a user for your feature flag system.",
+                    "$ref": "#/definitions/model.UserRequest"
+                }
+            }
+        },
+        "model.EvalFlagRequest": {
+            "type": "object",
+            "properties": {
+                "defaultValue": {
+                    "description": "The value will we use if we are not able to get the variation of the flag."
+                },
+                "user": {
+                    "description": "User The representation of a user for your feature flag system.",
+                    "$ref": "#/definitions/model.UserRequest"
+                }
             }
         },
         "model.HealthResponse": {
             "type": "object",
             "properties": {
                 "initialized": {
-                    "type": "boolean"
+                    "description": "Set to true if the HTTP server is started",
+                    "type": "boolean",
+                    "example": true
                 }
             }
         },
@@ -173,16 +183,9 @@
             "type": "object",
             "properties": {
                 "cacheRefresh": {
-                    "type": "string"
-                }
-            }
-        },
-        "model.RelayProxyRequest": {
-            "type": "object",
-            "properties": {
-                "defaultValue": {},
-                "user": {
-                    "$ref": "#/definitions/model.UserRequest"
+                    "description": "This is the last time when your flag file was read and store in the internal cache.",
+                    "type": "string",
+                    "example": "2022-06-13T11:22:55.941628+02:00"
                 }
             }
         },
@@ -191,16 +194,26 @@
             "properties": {
                 "anonymous": {
                     "description": "Anonymous set if this is a logged-in user or not.",
-                    "type": "boolean"
+                    "type": "boolean",
+                    "example": false
                 },
                 "custom": {
                     "description": "Custom is a map containing all extra information for this user.",
                     "type": "object",
-                    "additionalProperties": true
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "example": {
+                        "company": "GO Feature Flag",
+                        "email": "contact@gofeatureflag.org",
+                        "firstname": "John",
+                        "lastname": "Doe"
+                    }
                 },
                 "key": {
                     "description": "Key is the identifier of the UserRequest.",
-                    "type": "string"
+                    "type": "string",
+                    "example": "08b5ffb7-7109-42f4-a6f2-b85560fbd20f"
                 }
             }
         },
@@ -216,9 +229,47 @@
                     }
                 },
                 "valid": {
-                    "description": "Valid if false it means there was an error (such as the data store not being available),\nin which case no flag data is in this object.",
+                    "description": "`true` if something went wrong in the relay proxy (flag does not exists, ...) and we serve the defaultValue.",
                     "type": "boolean",
                     "example": false
+                }
+            }
+        },
+        "modeldocs.EvalFlagDoc": {
+            "type": "object",
+            "properties": {
+                "errorCode": {
+                    "description": "Code of the error returned by the server.",
+                    "type": "string",
+                    "example": ""
+                },
+                "failed": {
+                    "description": "`true` if something went wrong in the relay proxy (flag does not exists, ...) and we serve the defaultValue.",
+                    "type": "boolean",
+                    "example": false
+                },
+                "reason": {
+                    "description": "reason why we have returned this value.",
+                    "type": "string",
+                    "example": "TARGETING_MATCH"
+                },
+                "trackEvents": {
+                    "description": "`true` if the event was tracked by the relay proxy.",
+                    "type": "boolean",
+                    "example": true
+                },
+                "value": {
+                    "description": "The flag value for this user."
+                },
+                "variationType": {
+                    "description": "The variation used to give you this value.",
+                    "type": "string",
+                    "example": "variation-A"
+                },
+                "version": {
+                    "description": "The version of the flag used.",
+                    "type": "string",
+                    "example": "1.0"
                 }
             }
         },
@@ -245,11 +296,13 @@
                 }
             }
         },
-        "modeldocs.HTTPError": {
+        "modeldocs.HTTPErrorDoc": {
             "type": "object",
             "properties": {
                 "message": {
-                    "description": "Message of your error"
+                    "description": "Message of your error",
+                    "type": "string",
+                    "example": "An error occurred"
                 }
             }
         }

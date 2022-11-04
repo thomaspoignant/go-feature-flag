@@ -19,18 +19,21 @@ func NewAllFlags(goFF *ffclient.GoFeatureFlag) Controller {
 }
 
 // Handler is the entry point for the allFlags endpoint
-// @Summary      allflags returns all the flag for a specific user.
-// @Description  allflags returns all the flag for a specific user.
-// @Tags         flags
+// @Summary      All flags variations for a user
+// @Description  Making a **POST** request to the URL `/v1/allflags` will give you the values of all the flags for
+// @Description this user.
+// @Description
+// @Description To get a variation you should provide information about the user.
+// @Description For that you should provide some user information in JSON in the request body.
 // @Produce      json
 // @Accept			 json
-// @Param 			 data body model.RelayProxyRequest true "Payload of the user we want to challenge against the flag."
+// @Param 			 data body model.AllFlagRequest true "Payload of the user we want to challenge against the flag."
 // @Success      200  {object}   modeldocs.AllFlags "Success"
-// @Failure 		 400 {object} modeldocs.HTTPError "Bad Request"
-// @Failure      500 {object} modeldocs.HTTPError "Internal server error"
+// @Failure 		 400 {object} modeldocs.HTTPErrorDoc "Bad Request"
+// @Failure      500 {object} modeldocs.HTTPErrorDoc "Internal server error"
 // @Router       /v1/allflags [post]
 func (h *allFlags) Handler(c echo.Context) error {
-	reqBody := new(model.RelayProxyRequest)
+	reqBody := new(model.AllFlagRequest)
 	if err := c.Bind(reqBody); err != nil {
 		return err
 	}
