@@ -1,4 +1,4 @@
-package ffclient
+package ffclient3
 
 import (
 	"context"
