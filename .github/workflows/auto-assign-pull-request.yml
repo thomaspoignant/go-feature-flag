@@ -1,0 +1,15 @@
+name: PR assignment
+on:
+  pull_request:
+    types: [opened, reopened]
+
+jobs:
+  auto-assign:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Auto-assign issue'
+        uses: pozil/auto-assign-issue@v1
+        with:
+          assignees: thomaspoignant
+          numOfAssignee: 1
+          allowSelfAssign: false
