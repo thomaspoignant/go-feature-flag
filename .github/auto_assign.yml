@@ -1,7 +1,0 @@
-addReviewers: true
-addAssignees: true
-reviewers:
-  - thomaspoignant
-skipKeywords:
-  - wip
-numberOfReviewers: 0
