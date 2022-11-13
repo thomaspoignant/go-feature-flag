@@ -435,6 +435,8 @@ github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e h1:fD57ERR4JtEqsWb
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e/go.mod h1:zD1mROLANZcx1PVRCS0qkT7pwLkGfwJo4zjcN/Tysno=
 github.com/nikunjy/rules v1.0.1-0.20220920033320-71e8e569642c h1:984E5FSs5smzVlxNcl9t9s8xgkrdXPgmLlpLoaK3/zI=
 github.com/nikunjy/rules v1.0.1-0.20220920033320-71e8e569642c/go.mod h1:Up4dDdLmEJoIttEZll8NtFuo6EmFrMxAwF0VRLcdlLU=
+github.com/nikunjy/rules v1.2.0 h1:5BhojNDpsHLgFlvVRT8e9wKIPcWehUf4nf+cOKlrRxc=
+github.com/nikunjy/rules v1.2.0/go.mod h1:Up4dDdLmEJoIttEZll8NtFuo6EmFrMxAwF0VRLcdlLU=
 github.com/nxadm/tail v1.4.4/go.mod h1:kenIhsEOeOJmVchQTgglprH7qJGnHDVpk1VPCcaMI8A=
 github.com/nxadm/tail v1.4.8/go.mod h1:+ncqLTQzXmGhMZNUePPaPqPvBxHAIsmXswZKocGu+AU=
 github.com/onsi/ginkgo v1.6.0/go.mod h1:lLunBs/Ym6LB5Z9jYTR76FiuTmxDTDusOGeTQH+WWjE=
