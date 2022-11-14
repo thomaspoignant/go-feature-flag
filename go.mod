@@ -3,7 +3,7 @@ module github.com/thomaspoignant/go-feature-flag
 go 1.17
 
 require (
-	cloud.google.com/go/storage v1.27.0
+	cloud.google.com/go/storage v1.28.0
 	github.com/aws/aws-sdk-go v1.44.136
 	github.com/fsouza/fake-gcs-server v1.42.0
 	github.com/golang/mock v1.6.0
