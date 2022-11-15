@@ -49,15 +49,6 @@ https://user-images.githubusercontent.com/17908063/168597893-e957e648-b795-4b5f-
 
 _The code of this demo is available in [`thomaspoignant/go-feature-flag-demo`](https://github.com/thomaspoignant/go-feature-flag-demo) repository_.
 
-## Can I use GO Feature Flag with any language?
-
-Originally GO Feature Flag was built to be a GOlang only library, but it limits the ecosystem too much.  
-To be compatible with more language we have implemented the [GO Feature Flag Relay Proxy](https://github.com/thomaspoignant/go-feature-flag-relay-proxy).
-It is a service you can host that provides an API to evaluate your flags, you can call it using HTTP to get your variation.
-
-Since we believe in standardization we are also implementing [OpenFeature](https://github.com/open-feature) providers to interact with this API in the language of your choice.  
-_(OpenFeature is still at an early stage, so not all languages are supported and expect some changes in the future)_
-
 ## Getting started
 
 Before starting using **GO Feature Flag** you should decide if you want to use the GO Module directly or if you want to install the relay proxy.
@@ -231,6 +222,17 @@ if (adminFlag) {
 ```
 
 </details>
+
+## Can I use GO Feature Flag with any language?
+
+Originally GO Feature Flag was built to be a GOlang only library, but it limits the ecosystem too much.  
+To be compatible with more language we have implemented the [GO Feature Flag Relay Proxy](https://github.com/thomaspoignant/go-feature-flag-relay-proxy).
+It is a service you can host that provides an API to evaluate your flags, you can call it using HTTP to get your variation.
+
+Since we believe in standardization we are also implementing [OpenFeature](https://github.com/open-feature) providers to interact with this API in the language of your choice.  
+_(OpenFeature is still at an early stage, so not all languages are supported and expect some changes in the future)_
+
+
 
 ## Where do I store my flags file?
 The module supports different ways of retrieving the flag file .  
