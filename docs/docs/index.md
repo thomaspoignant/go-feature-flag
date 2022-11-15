@@ -26,12 +26,12 @@ I've also written an [article](https://medium.com/better-programming/feature-fla
 ## What can I do with GO Feature Flag?
 
 - Storing your configuration flags file on various locations (`HTTP`, `S3`, `Kubernetes`, [_see full list_](configure_flag/store_your_flags.md).
-- Configuring your flags in various [format](configure_flag/flag_format.md) (`JSON`, `TOML` and `YAML`).
-- Adding complex [rules](configure_flag/flag_format.md#rule-format) to target your users.
+- Configuring your flags in various [format](configure_flag/flag_format.mdx) (`JSON`, `TOML` and `YAML`).
+- Adding complex [rules](configure_flag/flag_format.mdx#rule-format) to target your users.
 - Use complex rollout strategy for your flags :
-    - [Run A/B testing experimentation](configure_flag/rollout/experimentation.md).
-    - [Progressively rollout a feature](configure_flag/rollout/progressive.md).
-    - [Schedule your flag updates](configure_flag/rollout/scheduled.md).
+    - [Run A/B testing experimentation](configure_flag/rollout/experimentation.mdx).
+    - [Progressively rollout a feature](configure_flag/rollout/progressive.mdx).
+    - [Schedule your flag updates](configure_flag/rollout/scheduled.mdx).
 - Exporting your flags usage data ([`s3`](go_module/data_collection/s3.md), [`log`](go_module/data_collection/log.md) and [`file`](go_module/data_collection/file.md)).
 - Getting notified when a flag has been changed ([`webhook`](go_module/notifier/webhook.md) and [`slack`](go_module/notifier/slack.md)).
 - Use GO Feature Flag in several languages.

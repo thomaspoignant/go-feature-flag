@@ -2,10 +2,13 @@
 sidebar_position: 20
 description: What is a flag and how you can create them.
 ---
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 
 # How to configure a flag
 
-**GO Feature Flag** core feature is to centralize all your feature flags in a source file, and to avoid hosting and maintaining a backend server to manage them.  
+**GO Feature Flag** core feature is to centralize all your feature flags in a source file, and to avoid hosting and maintaining a backend server to manage them.
 
 Your file must be a valid `YAML`, `JSON` or `TOML` file with a list of flags
 *(examples: [`YAML`](https://github.com/thomaspoignant/go-feature-flag/tree/main/testdata/flag-config.yaml),
@@ -15,20 +18,22 @@ Your file must be a valid `YAML`, `JSON` or `TOML` file with a list of flags
 :::tip
 The easiest way to create your configuration file is to used
 [**GO Feature Flag Editor** available at [https://editor.gofeatureflag.org](https://editor.gofeatureflag.org).
-  
+
 If you prefer to do it manually please follow instruction bellow.
 :::
 
 ## Editor
 
 Creating the first version of the flag is not always pleasant, that's why we have created
-[**GO Feature Flag Editor**](https://editor.gofeatureflag.org) a simple editor to create your files.  
+[**GO Feature Flag Editor**](https://editor.gofeatureflag.org) a simple editor to create your files.
 
 ## Example
 
 A flag configuration looks like:
 
-### YAML
+
+<Tabs groupId="code">
+  <TabItem value="yaml" label="YAML">
 
 ```yaml
 # This is your configuration for your first flag
@@ -60,15 +65,13 @@ second-flag:
     name: legacyDefaultRule
     variation: defaultValue
   version: "12"
-  experimentation: 
+  experimentation:
     start: 2021-03-20T00:00:00.1-05:00
     end: 2021-03-21T00:00:00.1-05:00
 ```
 
-
-### JSON
-<details>
-  <summary>JSON example</summary>
+  </TabItem>
+  <TabItem value="json" label="JSON">
 
 ```json
 {
@@ -90,7 +93,7 @@ second-flag:
       "variation": "A"
     }
   },
-  
+
   "second-flag": {
     "variations": {
       "A": "valueA",
@@ -119,11 +122,9 @@ second-flag:
   }
 }
 ```
-</details>
 
-### TOML
-<details>
-  <summary>TOML example</summary>
+  </TabItem>
+  <TabItem value="toml" label="TOML">
 
 ```toml
 [first-flag.variations]
@@ -165,7 +166,8 @@ version = "12"
   end = 2021-03-21T05:00:00.100Z
 ```
 
-</details>
+  </TabItem>
+</Tabs>
 
 ## Format details
 
@@ -260,5 +262,5 @@ version = "12"
 ## Advanced configurations
 
 You can have advanced configurations for your flag to have specific behavior for them, such as:
-- [Specific rollout strategies](./rollout/index.md)
+- [Specific rollout strategies](../category/rollout-strategies/)
 - [Don't track a flag](../go_module/data_collection/index.md#dont-track-a-flag)
