@@ -1,3 +1,6 @@
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 # Experimentation rollout / A/B Testing
 An **experimentation rollout** is when your flag is configured to be served only for a determined time.
 
@@ -7,7 +10,9 @@ An **experimentation rollout** is when your flag is configured to be served only
 
 ## Example
 
-### YAML
+<Tabs groupId="code">
+  <TabItem value="yaml" label="YAML">
+
 ```yaml
 experimentation-flag:
   variations:
@@ -24,10 +29,8 @@ experimentation-flag:
   # highlight-end
 ```
 
-### JSON
-
-<details>
-  <summary>JSON example</summary>
+  </TabItem>
+  <TabItem value="json" label="JSON">
 
 ```json
 {
@@ -52,14 +55,10 @@ experimentation-flag:
 }
 ```
 
-</details>
+  </TabItem>
+  <TabItem value="toml" label="TOML">
 
-### TOML
-
-<details>
-  <summary>TOML example</summary>
-
-```toml 
+```toml
 [experimentation-flag.variations]
 variationA = "A"
 variationB = "B"
@@ -75,10 +74,10 @@ end = 2021-03-21T05:00:00.100Z
 # highlight-end
 ```
 
-</details>
+  </TabItem>
+</Tabs>
 
-
-Check this [example](https://github.com/thomaspoignant/go-feature-flag/tree/main/examples/rollout_experimentation) to see how it works. 
+Check this [example](https://github.com/thomaspoignant/go-feature-flag/tree/main/examples/rollout_experimentation) to see how it works.
 
 ## Configuration fields
 
@@ -94,8 +93,8 @@ The dates are in the format supported natively by your flag file format.
 ## A/B testing
 
 :::info
-A/B test is the shorthand for a simple controlled experiment.  
-As the name implies, two versions (A and B) of a single variable are compared, which are identical except for one variation that might affect a user's behavior.  
+A/B test is the shorthand for a simple controlled experiment.
+As the name implies, two versions (A and B) of a single variable are compared, which are identical except for one variation that might affect a user's behavior.
 A/B tests are widely considered the simplest form of controlled experiment.
 
 _**(source wikipedia)**_

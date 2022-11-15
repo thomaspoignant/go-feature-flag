@@ -1,3 +1,6 @@
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 # Progressive rollout
 
 A **progressive rollout** allows you to increase the percentage of your flag over time.
@@ -7,7 +10,8 @@ and the end date.
 
 ## Example
 
-### YAML
+<Tabs groupId="code">
+  <TabItem value="yaml" label="YAML">
 
 ```yaml
 progressive-flag:
@@ -28,10 +32,8 @@ progressive-flag:
 # highlight-end
 ```
 
-### JSON
-
-<details>
-  <summary>JSON example</summary>
+  </TabItem>
+  <TabItem value="json" label="JSON">
 
 ```json
 {
@@ -60,13 +62,8 @@ progressive-flag:
 }
 ```
 
-</details>
-
-### TOML
-
-
-<details>
-  <summary>TOML example</summary>
+  </TabItem>
+  <TabItem value="toml" label="TOML">
 
 ```toml
 [progressive-flag.variations]
@@ -84,7 +81,9 @@ percentage = 100
 date = 2021-03-21T05:00:00.100Z
 # highlight-end
 ```
-</details>
+
+  </TabItem>
+</Tabs>
 
 ## Configuration fields
 

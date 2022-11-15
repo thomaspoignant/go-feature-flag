@@ -1,13 +1,17 @@
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 # Scheduled rollout
 
-Scheduling introduces the ability for users to changes their flags for future points in time.  
+Scheduling introduces the ability for users to changes their flags for future points in time.
 While this sounds deceptively straightforward, it unlocks the potential for users to create complex release strategies by scheduling the incremental steps in advance.
 
 For example, you may want to turn a feature ON for internal testing tomorrow and then enable it for your ‘beta’ user segment four days later.
 
 ## Example
 
-### YAML
+<Tabs groupId="code">
+  <TabItem value="yaml" label="YAML">
 
 ```yaml
 scheduled-flag:
@@ -28,7 +32,7 @@ scheduled-flag:
           percentage:
             variationA: 0
             variationB: 100
-      
+
     - date: 2022-05-12T15:36:00.1+02:00
       targeting:
         - name: legacyRuleV0
@@ -36,61 +40,55 @@ scheduled-flag:
 # highlight-end
 ```
 
-### JSON
-
-<details>
-  <summary>JSON example</summary>
+  </TabItem>
+  <TabItem value="json" label="JSON">
 
 ```json
 {
   "scheduled-flag": {
     "variations": {
-      "variationA": "A",
-      "variationB": "B"
-    },
+    "variationA": "A",
+    "variationB": "B"
+  },
     "defaultRule": {
-      "name": "legacyDefaultRule",
-      "percentage": {
-        "variationA": 100,
-        "variationB": 0
-      }
-    },
-# highlight-start
+    "name": "legacyDefaultRule",
+    "percentage": {
+    "variationA": 100,
+    "variationB": 0
+  }
+  },
+    # highlight-start
     "scheduledRollout": [
-      {
-        "date": "2020-04-09T22:00:00.100Z",
-        "targeting": [
-          {
-            "name": "legacyRuleV0",
-            "query": "beta eq \"true\"",
-            "percentage": {
-              "variationA": 0,
-              "variationB": 100
-            }
-          }
-        ]
-      },
-      {
-        "date": "2022-05-12T13:36:00.100Z",
-        "targeting": [
-          {
-            "name": "legacyRuleV0",
-            "query": "beta eq \"false\""
-          }
-        ]
-      }
+  {
+    "date": "2020-04-09T22:00:00.100Z",
+    "targeting": [
+  {
+    "name": "legacyRuleV0",
+    "query": "beta eq \"true\"",
+    "percentage": {
+    "variationA": 0,
+    "variationB": 100
+  }
+  }
+    ]
+  },
+  {
+    "date": "2022-05-12T13:36:00.100Z",
+    "targeting": [
+  {
+    "name": "legacyRuleV0",
+    "query": "beta eq \"false\""
+  }
+    ]
+  }
     ],
-# highlight-end
+    # highlight-end
   }
 }
 ```
 
-</details>
-
-### TOML
-
-<details>
-  <summary>TOML example</summary>
+  </TabItem>
+  <TabItem value="toml" label="TOML">
 
 ```toml
 [scheduled-flag.variations]
@@ -100,37 +98,38 @@ variationB = "B"
 [scheduled-flag.defaultRule]
 name = "legacyDefaultRule"
 
-  [scheduled-flag.defaultRule.percentage]
-  variationA = 100
-  variationB = 0
+[scheduled-flag.defaultRule.percentage]
+variationA = 100
+variationB = 0
 
 # highlight-start
 [[scheduled-flag.scheduledRollout]]
 date = 2020-04-09T22:00:00.100Z
 
-  [[scheduled-flag.scheduledRollout.targeting]]
-  name = "legacyRuleV0"
-  query = 'beta eq "true"'
+[[scheduled-flag.scheduledRollout.targeting]]
+name = "legacyRuleV0"
+query = 'beta eq "true"'
 
-    [scheduled-flag.scheduledRollout.targeting.percentage]
-    variationA = 0
-    variationB = 100
+[scheduled-flag.scheduledRollout.targeting.percentage]
+variationA = 0
+variationB = 100
 
 [[scheduled-flag.scheduledRollout]]
 date = 2022-05-12T13:36:00.100Z
 
-  [[scheduled-flag.scheduledRollout.targeting]]
-  name = "legacyRuleV0"
-  query = 'beta eq "false"'
+[[scheduled-flag.scheduledRollout.targeting]]
+name = "legacyRuleV0"
+query = 'beta eq "false"'
 # highlight-end
 ```
 
-</details>
+  </TabItem>
+</Tabs>
 
 ## Configuration fields
 
 :::info
-You can change any fields that are available on your flag.  
+You can change any fields that are available on your flag.
 Since your configuration has not been changed manually, it does not trigger any notifier.
 :::
 
