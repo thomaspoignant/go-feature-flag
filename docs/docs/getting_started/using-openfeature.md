@@ -2,7 +2,7 @@
 sidebar_position: 20
 description: Deploy the relay proxy and use the OpenFeature SDKs 
 ---
-# Using OpenFeature SDKs
+# Using Open Feature SDKs
 
 :::note
 OpenFeature provides a shared, standardized feature flagging client - _an SDK_ - which can be plugged into various 3rd-party feature flagging providers.
@@ -18,14 +18,40 @@ When the **relay proxy** is running in your infrastructure, you can use the **Op
 This schema is an overview on how **Open Feature** is working, you can have more information about all the concepts in the **[Open Feature documentation](https://docs.openfeature.dev)**.
 ![](../../static/docs/openfeature/concepts.jpg)
 
-## Install the relay proxy
+## Create a feature flag configuration
 
-First of all we will download a configuration file for the relay proxy.
+Create a new `YAML` file containing your first flag configuration.
 
-```shell
-# Download an example of a basic configuration file.
-curl https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/cmd/relayproxy/testdata/config/valid-file.yaml -o goff-proxy.yaml
+```yaml title="flag-config.yaml"
+# 20% of the users will use the variation "my-new-feature"
+test-flag:
+  variations:
+    my-new-feature: true
+    my-old-feature: false
+  defaultRule:
+    percentage:
+      my-new-feature: 20
+      my-old-feature: 80
 ```
+
+This flag split the usage of this flag, 20% will use the variation `my-new-feature` and 80% the variation `my-old-feature`.
+
+## Create a relay proxy configuration file
+
+Create a new `YAML` file containing the configuration of your relay proxy.
+
+```yaml title="goff-proxy.yaml"
+listen: 1031
+pollingInterval: 1000
+startWithRetrieverError: false
+retriever:
+  kind: file
+  path: /goff/flag-config.yaml
+exporter:
+  kind: log
+```
+
+## Install the relay proxy
 
 And we will run the **relay proxy** locally to make the API available.  
 The default port will be `1031`.
@@ -34,6 +60,7 @@ The default port will be `1031`.
 # Launch the container
 docker run \
   -p 1031:1031 \
+  -v $(pwd)/flag-config.yaml:/goff/flag-config.yaml \
   -v $(pwd)/goff-proxy.yaml:/goff/goff-proxy.yaml \
   thomaspoignant/go-feature-flag-relay-proxy:latest
 
