@@ -7,9 +7,10 @@ jobs:
   auto-assign:
     runs-on: ubuntu-latest
     steps:
-      - name: 'Auto-assign issue'
+      - name: 'Auto-assign PR'
         uses: pozil/auto-assign-issue@v1
         with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
           assignees: thomaspoignant
           numOfAssignee: 1
           allowSelfAssign: false
