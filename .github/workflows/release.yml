@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
@@ -43,7 +43,7 @@ jobs:
       - goreleaser
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
@@ -65,7 +65,7 @@ jobs:
       - goreleaser
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
@@ -79,3 +79,51 @@ jobs:
           password: ${DOCKER_PASSWORD}
           repository: thomaspoignant/go-feature-flag-relay-proxy
           readme: "./cmd/relayproxy/DOCKERHUB.md"
+
+  doc-release:
+    # doc release will create a new tag of the documentation en commit it in
+    # the main branch. This new version of the doc will be release to gh-pages
+    # when the GitHub Action called "Deploy to GitHub Pages" will be executed.
+    runs-on: ubuntu-latest
+    env:
+      MAIN_BRANCH_NAME: main
+      WEBSITE_DIR: docs
+    name: Create new documentation tag
+    needs:
+      - goreleaser
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          path: release
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v3
+
+      - name: Install dependencies
+        working-directory: ./release/${{ env.WEBSITE_DIR }}
+        run: npm install
+
+      - name: Get tag name
+        uses: olegtarasov/get-tag@v2.1.2
+
+      - name: Tagging a new version
+        working-directory: ./release/${{ env.WEBSITE_DIR }}
+        run: npm run docusaurus docs:version $GIT_TAG_NAME
+
+      - name: Checkout main branch
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.MAIN_BRANCH_NAME }}
+          path: ${{ env.MAIN_BRANCH_NAME }}
+          fetch-depth: 0
+
+      - name: Copy version to main branch
+        run: cp -rf release/${{ env.WEBSITE_DIR }}/ $MAIN_BRANCH_NAME
+
+      - name: Commit new doc version
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Commit new doc version
+          branch: ${{ env.MAIN_BRANCH_NAME }}
+          repository: ./${{ env.MAIN_BRANCH_NAME }}
