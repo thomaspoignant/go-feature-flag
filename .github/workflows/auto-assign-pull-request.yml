@@ -13,4 +13,3 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           assignees: thomaspoignant
           numOfAssignee: 1
-          allowSelfAssign: false
