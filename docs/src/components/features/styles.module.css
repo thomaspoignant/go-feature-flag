@@ -6,7 +6,6 @@
     padding-top: 5rem;
 }
 
-
 .socialIcon {
     display: flex;
     align-items: center;
@@ -14,14 +13,13 @@
     position: relative;
     width: 80px;
     height: 80px;
-    margin: 0 .5rem;
+    margin: .5rem .5rem;
     border-radius: 50%;
     cursor: pointer;
     font-family: helvetica neue,helvetica,arial,sans-serif;
     font-size: 2.5rem;
     text-decoration: none;
     transition: all .15s ease;
-
 }
 .socialIconBlue {
     background-color: cornflowerblue;
@@ -29,6 +27,10 @@
 
 .socialIconBlack {
     background-color: #000000;
+}
+
+.socialIconCyan {
+    background-color: #cdf7e7;
 }
 
 .socialIconPurple {

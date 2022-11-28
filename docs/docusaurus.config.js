@@ -68,8 +68,9 @@ const config = {
     'css/pushy-buttons.css', //https://github.com/iRaul/pushy-buttons
     'css/simplegrid.css',
     'https://fonts.googleapis.com/css?family=Poppins:400,500,700',
-    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css'
-  ],
+    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css',
+    'https://cdn.jsdelivr.net/gh/devicons/devicon@v2.15.1/devicon.min.css', // https://devicon.dev/
+    ],
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
