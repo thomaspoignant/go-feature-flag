@@ -1,0 +1,21 @@
+*{
+    margin:0;
+    padding:0;
+    border:0;
+}
+table{
+    height:100%;
+    position:absolute;
+}
+.red{
+    background-color: red;
+    border: 1px black solid;
+}
+.green{
+    background-color: lawngreen;
+    border: 1px black solid;
+}
+.grey{
+    background-color: lightgrey;
+    border: 1px black solid;
+}
