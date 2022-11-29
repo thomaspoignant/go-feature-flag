@@ -12,13 +12,9 @@ export function Whatis() {
         <div className={clsx("col-1-1")}>
           <span className="goffMainTitle">What is GO Feature Flag?</span>
           <div className={styles.description}>
-            <p>GO Feature Flag is a lightweight feature flag solution build in GO.</p>
-            <p>You don't need a complex infrastructure to install, you just have a single configuration file you can host
-              anywhere (<code>HTTP</code>, <code>S3</code>, <code>Kubernetes</code>, <code>file</code>, ...).
-              GO Feature Flag can be used directly and without any server in your GO application <i>(using the library)</i>, but
-              can also be used with different languages (<code>JAVA</code>, <code>TypeScript</code>, <code>JavaScript</code>, ...)
-              with the usage of the relay proxy and the <Link to={siteConfig.customFields.openfeature}>Openfeature</Link> SDKs.
-            </p>
+            <p>GO Feature Flag believes in simplicity and offers a simple and lightweight solution to use feature flags. Our focus is to avoid any complex infrastructure work to use GO Feature Flag.</p>
+            <p>This is a complete feature flagging solution with the possibility to target only a group of users, use any types of flags, store your configuration in various location and advanced rollout functionality. You can also collect usage data of your flags and be notified of configuration changes.</p>
+            <p>The solution can be used in 2 different ways, directly using the GO module in your code (you will have no backend to install) or via the <Link to={siteConfig.customFields.openfeature}>OpenFeature</Link> standard which allows to use vendor agnostic SDKs.</p>
           </div>
           <Link to="/docs/">
 
