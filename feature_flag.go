@@ -13,6 +13,10 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 )
 
+// ff is the default object for go-feature-flag
+var ff *GoFeatureFlag
+var muFF sync.Mutex
+
 // Init the feature flag component with the configuration of ffclient.Config
 //
 //  func main() {
@@ -24,16 +28,24 @@ import (
 //           })
 //    defer ffclient.Close()
 func Init(config Config) error {
+	muFF.Lock()
+	defer muFF.Unlock()
+
+	if ff != nil {
+		return fmt.Errorf("global feature flags already initialized")
+	}
 	var err error
-	onceFF.Do(func() {
-		ff, err = New(config)
-	})
+	ff, err = New(config)
 	return err
 }
 
 // Close the component by stopping the background refresh and clean the cache.
 func Close() {
+	muFF.Lock()
+	defer muFF.Unlock()
+
 	ff.Close()
+	ff = nil
 }
 
 // GoFeatureFlag is the main object of the library
@@ -44,10 +56,6 @@ type GoFeatureFlag struct {
 	bgUpdater    backgroundUpdater
 	dataExporter *dataexporter.Scheduler
 }
-
-// ff is the default object for go-feature-flag
-var ff *GoFeatureFlag
-var onceFF sync.Once
 
 // New creates a new go-feature-flag instance that retrieve the config from a YAML file
 // and return everything you need to manage your flags.
@@ -102,7 +110,6 @@ func New(config Config) (*GoFeatureFlag, error) {
 
 // Close wait until thread are done
 func (g *GoFeatureFlag) Close() {
-	onceFF = sync.Once{}
 	if g != nil {
 		if g.cache != nil {
 			// clear the cache
