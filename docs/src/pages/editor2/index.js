@@ -12,7 +12,7 @@ function App() {
       GOFeatureFlagEditor: [{
         flagName:"test flag",
         variations: [{name:"v1", value:true},{name:"v2", value:false}],
-        targeting: [ {name: 'Rule 1'}]
+        targetings: [ {name: 'Rule 1'}]
       },
       ]
     }

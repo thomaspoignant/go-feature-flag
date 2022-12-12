@@ -4,16 +4,19 @@ import React from "react";
 import {Switch} from "../Switch";
 import clsx from "clsx";
 import {Select} from "../Select";
-import {Variations} from "../variations";
+import {Variations} from "../Variation";
+import {useFormContext} from "react-hook-form";
+import {Targeting} from "../Targeting";
 
 export function FlagForm({label}){
+  const { watch } = useFormContext();
   const typeSelectorContent = [
     {value: "boolean", displayName: "☑️ boolean"},
     {value: "string", displayName: "🔤 string"},
     {value: "number", displayName: "🔢 number"},
     {value: "json", displayName: "🖥 JSON"},
   ];
-  const colors = ["🟢","🟠","🔴","🟣","⚪️","🔵","⚫️","🟡","🟤"];
+
 
   return(
     <div className={styles.flagContainer}>
@@ -46,7 +49,9 @@ export function FlagForm({label}){
         </div>
       </div>
       <Variations label={`${label}.variations`}
-                  colors={colors}/>
+                  type={watch(`${label}.type`)} />
+      <Targeting label={`${label}.targetings`}
+                 variations={watch(`${label}.variations`)} />
     </div>
   );
 }
