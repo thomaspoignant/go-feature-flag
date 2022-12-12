@@ -37,6 +37,18 @@
   --goff-benefits-postitem-bg: #fff;
   --goff-message-error: #ec7063;
   --goff-message-success: #73c6b6;
+
+  --goff-editor-container-bg: var(--goff-whatis-bg);
+  --goff-editor-title-bg: #f1f1f1;
+  --goff-editor-placeholder: #f1f1f1;
+  --goff-editor-input-placeholder: #73c6b6;
+  --goff-editor-input-text: #f1f1f1;
+  --goff-editor-form-bg: var(--goff-editor-title-bg);
+  --goff-switch-bg-on: #555;
+  --goff-switch-bg-off: #555;
+  --goff-variation-plus-button-bg: var(--goff-editor-input-placeholder);
+
+
 }
 /* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme='dark'] {
@@ -56,7 +68,14 @@
   --goff-whatis-bg: #363636;
   --goff-benefits-postitem-bg: #363636;
   --goff-benif-bg: #87a8a7;
+
+
+  --goff-editor-title-bg: #444444;
+
 }
+
+
+
 
 body {
   font-family: poppins,sans-serif;

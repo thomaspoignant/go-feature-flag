@@ -1,0 +1,21 @@
+.flagContainer{
+    background-color: var(--goff-editor-container-bg);
+    border-radius: 0.3rem;
+    box-sizing: border-box;
+    padding: 1rem 1rem;
+}
+
+.flagContainer h1{
+    font-size: 1.3rem;
+    padding: 0.3rem 1rem 0.3rem;
+    background-color: var(--goff-editor-title-bg);
+    font-family: poppins,sans-serif;
+    font-weight: 400;
+    border-radius: 0.3rem;
+    box-sizing: border-box;
+}
+
+
+h2{
+    margin-top: 1.5rem;
+}
