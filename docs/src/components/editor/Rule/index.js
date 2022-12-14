@@ -76,7 +76,12 @@ export function Rule({ variations, label, isDefaultRule}){
           selectedVar={watch(`${label}.selectedVar`)}
           variations={variations}
           label={`${label}.percentages`}
-        />
+          />
+        <ProgressiveRollout
+          selectedVar={watch(`${label}.selectedVar`)}
+          variations={variations}
+          label={`${label}.progressive`}
+          />
       </div>
     </div>
   );
@@ -100,16 +105,14 @@ function PercentagesForm({variations, label, selectedVar, colors}){
       return (<div className={styles.error}>The total percentage cannot be more than 100%</div>);
     }
 
-    return(<Progress
-      className={styles.progress}
-      percent={sum} />);
+    return(<Progress percent={sum} />);
   }
 
-  return (<div>
-    <ul>
+  return (<div className={"col-1-2"}>
+    <ul className={styles.percentageContainer}>
     {variations.map((field, index)=>(
       <li key={`${label}.${index}`} >
-        <input className={styles.editorInput}
+        <input className={styles.percentageInput}
                type="number" {...register(`${label}.${index}.value`,{required: true, valueAsNumber:true, min: 0, max: 100})}
                defaultValue={0} /> {Colors[index % Colors.length]} {field.name}
         <input type="hidden" {...register(`${label}.${index}.name`)} value={field.name} />
@@ -118,5 +121,50 @@ function PercentagesForm({variations, label, selectedVar, colors}){
     }
     </ul>
     <ProgressBar percentages={watch(label)}/>
+
+  </div>);
+}
+
+function ProgressiveRollout({variations, label, selectedVar, colors}){
+  const {register} = useFormContext()
+  if(selectedVar !== 'progressive') {
+    return null;
+  }
+
+  console.log(variations);
+
+  // initial:
+  //   variation: variationB
+  // percentage: 0
+  // date: 2021-03-20T00:00:00.1-05:00
+  // end:
+  //   variation: variationB
+  // percentage: 100
+  // date: 2021-03-21T00:00:00.1-05:00
+
+  function ProgressiveStep({name, initialValue, label, variations}){
+    return(
+      <div  className={"grid"}>
+        <div className={"col-2-12"}>{name}</div>
+        <div className={"col-3-12"}>
+          <Select
+            title="Variation"
+            content={variations
+              .map((item, index) => {
+                return {"value": item.name, "displayName": `${Colors[index%Colors.length]} ${item.name}`}
+              }).filter(item => item.value !== undefined && item.value !== '') || []}
+            register={register}
+            label={`${label}.selectedVar`}
+            required={true}
+          />
+        </div>
+      </div>
+    )
+  }
+
+
+  return (<div>
+    <ProgressiveStep name={"initial"} label={`${label}.initial`} variations={variations} register={register}/>
+    <ProgressiveStep name={"end"} label={`${label}.end`} variations={variations} register={register}/>
   </div>);
 }

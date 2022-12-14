@@ -1,13 +1,15 @@
 import clsx from "clsx";
 import React from "react";
 import styles from "./styles.module.css"
+import {useFormContext} from "react-hook-form";
 
-export function Input({ label, id, register, required, displayText, className}) {
+export function Input({ label, displayText, className, required}) {
+  const { register } = useFormContext();
   return(
     <div className={clsx(styles.editorInputContainer, className)}>
-      <input id={id} className={styles.editorInput} type="text"  placeholder=" " {...register(label, { required })}/>
+      <input id={`${label}.input`} className={styles.editorInput} type="text"  placeholder=" " {...register(label, { required })}/>
       <div className={styles.editorCut}></div>
-      <label htmlFor={id} className={clsx(styles.editorPlaceholder, className)}>{displayText}</label>
+      <label htmlFor={`${label}.input`} className={clsx(styles.editorPlaceholder, className)}>{displayText}</label>
     </div>
   );
 }

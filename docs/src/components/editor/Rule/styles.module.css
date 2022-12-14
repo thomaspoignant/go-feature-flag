@@ -38,22 +38,22 @@
 }
 
 
-.editorInput {
+.percentageInput {
     background-color: var(--goff-editor-form-bg);
     border-radius: 0.25rem;
     border: 0;
     box-sizing: border-box;
     outline: 0;
-    padding: 0.6rem 1rem;
+    padding: 0.25rem 0.5rem;
     font-size: 1rem;
-    width: 6rem;
-    margin-top: 1rem;
+    width: 4.5rem;
+    margin-top: 0.25rem;
+}
+
+.percentageContainer{
+    margin-top: 0.5rem;
 }
 
 .error{
     color: var(--goff-message-error);
-}
-
-.progress > .react-sweet-progress-symbol{
-    color: red;
 }

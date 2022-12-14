@@ -92,7 +92,7 @@ const config = {
             label: 'Docs',
           },
           {to: '/blog', label: 'Blog', position: 'left'},
-          {to: 'https://editor.gofeatureflag.org', html: 'Flag Editor <i class="fas fa-external-link-alt"></i>', position: 'left'},
+          {to: '/editor', html: 'Flag Editor', position: 'left'},
           // {
           //   type: 'doc',
           //   docId:'migrate_v0_v1',

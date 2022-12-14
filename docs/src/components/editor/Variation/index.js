@@ -53,7 +53,6 @@ function Variation({type, label, remove, index, icon}){
   }
 
   const handleOnClick = ()=> remove(index)
-
   return(
     <div className={styles.variation}>
       <div className="col-3-12 mobile-col-3-12">
@@ -74,12 +73,12 @@ function Variation({type, label, remove, index, icon}){
         <div className={styles.icon}>{icon}</div>
       </div>
       <div className="col-1-12 mobile-col-1-12">
-        <button className={styles.buttonPlus} onMouseDown={handleOnClick}>
+        {<button className={styles.buttonPlus} onMouseDown={handleOnClick}>
           <span className="fa-stack fa-1x">
             <i className={clsx("fa-solid fa-circle fa-stack-2x", styles.bg)}></i>
             <i className="fa-solid fa-minus fa-stack-1x fa-inverse"></i>
           </span>
-        </button>
+        </button>}
       </div>
     </div>
   );

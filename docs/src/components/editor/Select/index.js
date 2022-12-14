@@ -1,7 +1,9 @@
 import styles from "./styles.module.css";
 import React from "react";
+import {useFormContext} from "react-hook-form";
 
-export function Select({title, content, register, label, required, onChange}){
+export function Select({title, content, label, required}){
+  const { register } = useFormContext();
   return(
     <div className={styles.selector}>
       <select name="typeSelector" defaultValue="0" {...register(label, required)}>
