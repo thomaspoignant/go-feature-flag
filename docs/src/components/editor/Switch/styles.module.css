@@ -1,8 +1,13 @@
+.container{
+    padding-top: 1rem;
+    display: flex;
+}
+
 .switch {
     position: relative;
     width: 3.7rem;
     height: 1.8rem;
-    margin: -1rem 0 0 0;
+    margin: -1rem 0 0 1rem;
     overflow: hidden;
 }
 

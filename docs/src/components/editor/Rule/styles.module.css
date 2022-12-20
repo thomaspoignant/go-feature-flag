@@ -2,7 +2,7 @@
     border: var(--goff-message-success) 1px solid;
     border-radius: 0.25rem;
     margin-bottom: 1rem;
-    padding: 2rem 1rem 1rem 1rem;
+    padding: 0rem 1rem 1rem 1rem;
 }
 
 .ruleName input{
@@ -10,6 +10,8 @@
 }
 
 .ruleName {
+    padding-top: 2rem;
+    margin-bottom: 2rem;
 }
 
 .circle {
@@ -47,13 +49,41 @@
     padding: 0.25rem 0.5rem;
     font-size: 1rem;
     width: 4.5rem;
-    margin-top: 0.25rem;
+}
+
+.dateInput {
+    background-color: var(--goff-editor-form-bg);
+    border-radius: 0.25rem;
+    border: 0;
+    box-sizing: border-box;
+    outline: 0;
+    padding: 0.25rem 0.5rem;
+    font-size: 1rem;
+    width: 100%;
 }
 
 .percentageContainer{
     margin-top: 0.5rem;
 }
+.percentageContainer li{
+    margin-top: 0.25rem;
+}
 
 .error{
     color: var(--goff-message-error);
+}
+
+.rolloutDesc {
+    font-style: italic;
+    font-size: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.progressiveRollout{
+    margin-bottom: 1rem;
+    display: flex;
+}
+
+.progressiveRollout div{
+    margin-right: 2rem;
 }

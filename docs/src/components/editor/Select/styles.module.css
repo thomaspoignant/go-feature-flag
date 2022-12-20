@@ -8,12 +8,12 @@
     font: inherit;
     /* Personalize */
     width: 100%;
-    height: 2em;
+    height: 2rem;
     padding: 0 4em 0 1rem;
-    background: url(https://upload.wikimedia.org/wikipedia/commons/9/9d/Caret_down_font_awesome_whitevariation.svg) no-repeat right 0.8em center/1.4em, linear-gradient(to left, rgba(255, 255, 255, 0.2) 3em, rgba(255, 255, 255, 0.1) 3em);
+    background: url(https://upload.wikimedia.org/wikipedia/commons/9/9d/Caret_down_font_awesome_whitevariation.svg) no-repeat right 0.8em center/1.4em, linear-gradient(to left, var(--goff-editor-form-field-bg) 3em, var(--goff-editor-form-field-bg) 3em);
     color: var(--goff-editor-input-placeholder);
     border-radius: 0.25em;
-    box-shadow: 0 0 1em 0 rgba(0, 0, 0, 0.2);
+    /*box-shadow: 0 0 1em 0 rgba(0, 0, 0, 0.2);*/
     cursor: pointer;
 }
 .selector select option {

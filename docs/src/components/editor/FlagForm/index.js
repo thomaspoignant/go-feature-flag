@@ -7,6 +7,7 @@ import {Select} from "../Select";
 import {Variations} from "../Variation";
 import {useFormContext} from "react-hook-form";
 import {Targeting} from "../Targeting";
+import {Rule} from "../Rule";
 
 export function FlagForm({label}){
   const { watch } = useFormContext();
@@ -21,16 +22,23 @@ export function FlagForm({label}){
   return(
     <div className={styles.flagContainer}>
       <div className="grid-pad grid">
-        <div className="col-1-2 mobile-col-1-2" >
+        <div className="col-6-12 mobile-col-1-2" >
           <Input displayText="Flag Name"
                  label={`${label}.flagName`}
                  required={true}
                  />
         </div>
-        <div className="col-1-2 mobile-col-1-2">
+        <div className="col-3-12 mobile-col-1-2">
           <Switch id="disable"
                   label={`${label}.disable`}
                   displayText="Disable" />
+        </div>
+        <div className="col-3-12 mobile-col-1-2">
+          <Switch id="disable"
+                  label={`${label}.trackEvents`}
+                  displayText="Track event"
+                  defaultChecked={true}
+          />
         </div>
       </div>
       <div className="grid-pad grid">
@@ -50,8 +58,12 @@ export function FlagForm({label}){
       </div>
       <Variations label={`${label}.variations`}
                   type={watch(`${label}.type`)} />
-      <Targeting label={`${label}.targetings`}
+      <Targeting label={`${label}.targeting`}
                  variations={watch(`${label}.variations`)} />
+      <div>
+        <h2>Default</h2>
+        <Rule label={`${label}.defaultRule`} variations={watch(`${label}.variations`)} isDefaultRule={true} />
+      </div>
     </div>
   );
 }

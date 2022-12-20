@@ -4,11 +4,13 @@ import {Input} from "../Input";
 import {Select} from "../Select";
 import React from "react";
 import Link from "@docusaurus/Link";
-import { useFormContext } from "react-hook-form";
+import { useFormContext, Controller } from "react-hook-form";
 import {isArray} from "redoc";
 import { Progress } from 'react-sweet-progress';
 import "react-sweet-progress/lib/style.css";
 import {Colors} from "../Colors";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 export function Rule({ variations, label, isDefaultRule}){
   const { register, watch } = useFormContext();
@@ -16,16 +18,35 @@ export function Rule({ variations, label, isDefaultRule}){
     { value: "percentage", "displayName": "️↗️ a percentage rollout"},
     { value: "progressive", "displayName": "↗️ a progressive rollout"},
   ];
-  function getVariationList(variations, colors){
+  function getVariationList(variations){
     const availableVariations = variations
       .map((item, index) => {
-        return {"value": item.name, "displayName": `${colors[index%colors.length]} ${item.name}`}
+        return {"value": item.name, "displayName": `${Colors[index%Colors.length]} ${item.name}`}
       }).filter(item => item.value !== undefined && item.value !== '') || [];
     return availableVariations;
   }
 
-  function Query({label, register}) {
-    return(
+  function getSelectorList(variations){
+    const filteredVariations = getVariationList(variations);
+    if (filteredVariations.length >=2){
+      return [...filteredVariations, ...otherOptions];
+    }
+    return filteredVariations;
+  }
+
+  return(
+    <div className={clsx("grid-pad grid", styles.ruleContainer)}>
+      {!isDefaultRule && <div className={"col-1-1"}>
+        <div className={"content"}>
+          <Input
+            label={`${label}.name`}
+            displayText={"Rule name"}
+            className={styles.ruleName}
+            required={true}
+          />
+        </div>
+      </div> }
+      {!isDefaultRule &&
       <div className={clsx("grid")}>
         <div className={"col-9-12"}>
           <div className={clsx("content", styles.inputQuery)}>
@@ -33,9 +54,9 @@ export function Rule({ variations, label, isDefaultRule}){
               <div className={clsx(styles.circle)}>IF</div>
             </div>
             <Input
-              label={`${label}`}
-              register={register}
+              label={`${label}.query`}
               displayText={"Query"}
+              required={true}
             />
             <Link to={'/docs/configure_flag/rule_format'} target={"_blank"}>
               <i className="fa-regular fa-circle-question"></i>
@@ -43,28 +64,13 @@ export function Rule({ variations, label, isDefaultRule}){
           </div>
         </div>
       </div>
-    );
-  }
-  return(
-    <div className={clsx("grid-pad grid", styles.ruleContainer)}>
-      <div className={"col-1-1"}>
-        <div className={"content"}>
-          <Input
-            label={`${label}.name`}
-            register={register}
-            displayText={"Rule name"}
-            className={styles.ruleName}/>
-        </div>
-      </div>
-      <Query
-        label={`${label}.query`}
-        register={register}/>
+      }
       <div className={"col-5-12"}>
         <div className={clsx("content",styles.serve)}>
           <div className={styles.serveTitle}>Serve</div>
           <Select
             title="Variation"
-            content={[...getVariationList(variations, Colors), ...otherOptions]}
+            content={getSelectorList(variations)}
             register={register}
             label={`${label}.selectedVar`}
             required={true}
@@ -87,7 +93,7 @@ export function Rule({ variations, label, isDefaultRule}){
   );
 }
 
-function PercentagesForm({variations, label, selectedVar, colors}){
+function PercentagesForm({variations, label, selectedVar}){
   const {register, watch} = useFormContext()
   if(selectedVar !== 'percentage') {
     return null;
@@ -108,45 +114,57 @@ function PercentagesForm({variations, label, selectedVar, colors}){
     return(<Progress percent={sum} />);
   }
 
-  return (<div className={"col-1-2"}>
-    <ul className={styles.percentageContainer}>
-    {variations.map((field, index)=>(
-      <li key={`${label}.${index}`} >
-        <input className={styles.percentageInput}
-               type="number" {...register(`${label}.${index}.value`,{required: true, valueAsNumber:true, min: 0, max: 100})}
-               defaultValue={0} /> {Colors[index % Colors.length]} {field.name}
-        <input type="hidden" {...register(`${label}.${index}.name`)} value={field.name} />
-      </li>
-      ))
-    }
-    </ul>
-    <ProgressBar percentages={watch(label)}/>
-
-  </div>);
+  return (
+    <div className={"grid-pad grid"}>
+      <div className={clsx("col-1-1", styles.rolloutDesc)}>
+        A percentage rollout means that your users are divided in different buckets and you serve different variations
+        to them. Note that a user will always have the same variation.
+      </div>
+      <div className={"col-1-2"}>
+        <ul className={styles.percentageContainer}>
+        {variations.map((field, index)=>(
+          <li key={`${label}.${index}`} >
+            <PercentageInput label={`${label}.${index}.value`} required={true} initialValue={0} title={`${Colors[index % Colors.length]} ${field.name}`}  />
+            <input type="hidden" {...register(`${label}.${index}.name`)} value={field.name} />
+          </li>
+          ))
+        }
+        </ul>
+        <ProgressBar percentages={watch(label)}/>
+      </div>
+    </div>
+  );
 }
 
-function ProgressiveRollout({variations, label, selectedVar, colors}){
+function ProgressiveRollout({variations, label, selectedVar}){
   const {register} = useFormContext()
   if(selectedVar !== 'progressive') {
     return null;
   }
 
-  console.log(variations);
-
-  // initial:
-  //   variation: variationB
-  // percentage: 0
-  // date: 2021-03-20T00:00:00.1-05:00
-  // end:
-  //   variation: variationB
-  // percentage: 100
-  // date: 2021-03-21T00:00:00.1-05:00
-
-  function ProgressiveStep({name, initialValue, label, variations}){
+  function ProgressiveStep({name, initialValue, label, variations, infoToolTip}){
+    const {register, control} = useFormContext();
     return(
-      <div  className={"grid"}>
-        <div className={"col-2-12"}>{name}</div>
-        <div className={"col-3-12"}>
+      <div className={clsx("grid", styles.progressiveRollout)}>
+        <div>{name}</div>
+        <div>
+          <Controller
+            control={control}
+            name={`${label}.date`}
+            render={({ field }) => (
+              <DatePicker
+                className={styles.dateInput}
+                placeholderText='Select date'
+                showTimeSelect
+                onChange={(date) => field.onChange(date)}
+                selected={field.value}
+                dateFormat="Pp"
+              />
+            )}
+          />
+        </div>
+        <div>and serve</div>
+        <div>
           <Select
             title="Variation"
             content={variations
@@ -158,13 +176,35 @@ function ProgressiveRollout({variations, label, selectedVar, colors}){
             required={true}
           />
         </div>
+        <div>
+          <PercentageInput label={`${label}.percentage`} required={true} initialValue={initialValue} />
+        </div>
+        <div>
+          <Link to={'/docs/configure_flag/rollout/progressive'} target={"_blank"}>
+            <i className="fa-regular fa-circle-question"></i>
+          </Link>
+        </div>
       </div>
     )
   }
 
 
-  return (<div>
-    <ProgressiveStep name={"initial"} label={`${label}.initial`} variations={variations} register={register}/>
-    <ProgressiveStep name={"end"} label={`${label}.end`} variations={variations} register={register}/>
+  return (
+  <div className={"grid grid-pad"}>
+    <div className={clsx("col-1-1", styles.rolloutDesc)}>A progressive rollout allows you to increase the percentage of your flag over time.<br/>
+      You can select a release ramp where the percentage of your flag will increase progressively between the start date and the end date.</div>
+    <ProgressiveStep name={"Start on the"} label={`${label}.initial`} variations={variations} register={register} initialValue={0}/>
+    <ProgressiveStep name={"Stop on the"} label={`${label}.end`} variations={variations} register={register} initialValue={100}/>
   </div>);
+}
+
+
+function PercentageInput({label, initialValue, required, title}){
+  const {register} = useFormContext();
+  return (
+    <div>
+      <input min={0} max={100} className={styles.percentageInput} type="number" {...register(`${label}`,{required: required, valueAsNumber:true, min: 0, max: 100})}
+             defaultValue={initialValue} />% {title}
+    </div>
+  );
 }

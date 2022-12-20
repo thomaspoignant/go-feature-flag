@@ -15,11 +15,6 @@ export function Targeting({label, variations}){
   const removeCurrent = (index)=> remove(index);
 
 
-  function Rules(){
-
-  }
-
-
   return(
     <div>
       <h2>Target specific users</h2>

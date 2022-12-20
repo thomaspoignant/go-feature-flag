@@ -3,14 +3,14 @@ import styles from "./styles.module.css"
 import React from "react";
 import {useFormContext} from "react-hook-form";
 
-export function Switch({label, displayText}){
+export function Switch({label, displayText, defaultChecked=false}){
   const { register } = useFormContext();
   return(
-    <div className="grid grid-pad">
-      <div className={clsx("col-3-12", styles.displayText)}>{displayText}</div>
-      <div className="col-2-12">
+    <div className={styles.container}>
+      <div className={clsx(styles.displayText)}>{displayText}</div>
+      <div>
         <div className={clsx(styles.switch, styles.r)}>
-          <input type="checkbox" className={styles.checkbox} {...register(label)}/>
+          <input type="checkbox" className={styles.checkbox} {...register(label)} defaultChecked={defaultChecked}/>
           <div className={styles.knobs}></div>
           <div className={styles.layer}></div>
         </div>
