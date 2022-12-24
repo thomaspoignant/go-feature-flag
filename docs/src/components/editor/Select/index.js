@@ -18,7 +18,7 @@ export function Select({title, content, label, required}) {
           {title}
         </option>
         {content.map((item, index) => (
-          <option value={item.value} key={`variation_type_${item}`}>
+          <option value={item.value} key={`variation_type_${item.value}_${item.displayText}`}>
             {item.displayName}
           </option>
         ))}

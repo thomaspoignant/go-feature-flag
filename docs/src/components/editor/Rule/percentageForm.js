@@ -29,25 +29,6 @@ export function PercentagesForm({variations, label, selectedVar = ''}) {
     return sum;
   }
 
-  ProgressBar.propTypes = {
-    percentages: PropTypes.array,
-  };
-  function ProgressBar({percentages}) {
-    if (!percentages || !isArray(percentages) || percentages.length <= 0) {
-      return null;
-    }
-    const sum = computePercentages(percentages);
-    if (sum > 100) {
-      return (
-        <div className={styles.error}>
-          The total percentage cannot be more than 100%
-        </div>
-      );
-    }
-
-    return <Progress percent={sum} />;
-  }
-
   return (
     <div className={'grid-pad grid'}>
       <div className={clsx('col-1-1', styles.rolloutDesc)}>
@@ -98,4 +79,23 @@ export function PercentagesForm({variations, label, selectedVar = ''}) {
       </div>
     </div>
   );
+}
+
+ProgressBar.propTypes = {
+  percentages: PropTypes.array,
+};
+function ProgressBar({percentages}) {
+  if (!percentages || !isArray(percentages) || percentages.length <= 0) {
+    return null;
+  }
+  const sum = computePercentages(percentages);
+  if (sum > 100) {
+    return (
+      <div className={styles.error}>
+        The total percentage cannot be more than 100%
+      </div>
+    );
+  }
+
+  return <Progress percent={sum} />;
 }
