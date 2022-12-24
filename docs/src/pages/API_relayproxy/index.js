@@ -1,12 +1,12 @@
-import { RedocStandalone } from 'redoc';
+import {RedocStandalone} from 'redoc';
 import React from 'react';
 import Layout from '@theme/Layout';
-import styles from './index.module.css'
+import styles from './index.module.css';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 
 export default function Redoc() {
   const {siteConfig} = useDocusaurusContext();
-  return(
+  return (
     <Layout title="Relay proxy endpoints documentation">
       <div className={styles.redocContainer}>
         <RedocStandalone

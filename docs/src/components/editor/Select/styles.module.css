@@ -1,28 +1,34 @@
 .selector select {
-    /* Reset */
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    border: 0;
-    outline: 0;
-    font: inherit;
-    /* Personalize */
-    width: 100%;
-    height: 2rem;
-    padding: 0 4em 0 1rem;
-    background: url(https://upload.wikimedia.org/wikipedia/commons/9/9d/Caret_down_font_awesome_whitevariation.svg) no-repeat right 0.8em center/1.4em, linear-gradient(to left, var(--goff-editor-form-field-bg) 3em, var(--goff-editor-form-field-bg) 3em);
-    color: var(--goff-editor-input-placeholder);
-    border-radius: 0.25em;
-    /*box-shadow: 0 0 1em 0 rgba(0, 0, 0, 0.2);*/
-    cursor: pointer;
+  /* Reset */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border: 0;
+  outline: 0;
+  font: inherit;
+  /* Personalize */
+  width: 100%;
+  height: 2rem;
+  padding: 0 4em 0 1rem;
+  background: url(https://upload.wikimedia.org/wikipedia/commons/9/9d/Caret_down_font_awesome_whitevariation.svg)
+      no-repeat right 0.8em center/1.4em,
+    linear-gradient(
+      to left,
+      var(--goff-editor-form-field-bg) 3em,
+      var(--goff-editor-form-field-bg) 3em
+    );
+  color: var(--goff-editor-input-placeholder);
+  border-radius: 0.25em;
+  /*box-shadow: 0 0 1em 0 rgba(0, 0, 0, 0.2);*/
+  cursor: pointer;
 }
 .selector select option {
-    color: inherit;
-    background-color: var(--goff-editor-form-bg);
+  color: inherit;
+  background-color: var(--goff-editor-form-bg);
 }
 .selector select:focus {
-    outline: none;
+  outline: none;
 }
 .selector select::-ms-expand {
-    display: none;
+  display: none;
 }
