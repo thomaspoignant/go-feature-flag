@@ -109,6 +109,15 @@ function formToGoFeatureFlag(formData) {
   return goffFlags;
 }
 
+function ErrorInForm() {
+  // TODO: best looking error here
+  return (
+    <div className={styles.invalidForm}>
+      Error in your configuration, please review the form.
+    </div>
+  );
+}
+
 export function FlagDisplay() {
   const {
     watch,
@@ -131,14 +140,6 @@ export function FlagDisplay() {
     }
   }
 
-  function ErrorInForm() {
-    // TODO: best looking error here
-    return (
-      <div className={styles.invalidForm}>
-        Error in your configuration, please review the form.
-      </div>
-    );
-  }
   const select = [
     {value: 'yaml', displayName: 'YAML'},
     {value: 'json', displayName: 'JSON'},

@@ -13,10 +13,6 @@
   padding-top: 0.3px;
 }
 
-.button .bg {
-  color: var(--goff-variation-plus-button-bg);
-}
-
 .variation {
   display: flex;
   padding-bottom: 1.2rem;
@@ -33,8 +29,4 @@
 .icon {
   font-size: 0.8rem;
   padding-top: 0.3rem;
-}
-
-.targeting {
-  display: flex;
 }

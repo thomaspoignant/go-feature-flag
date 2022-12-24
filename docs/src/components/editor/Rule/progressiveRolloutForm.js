@@ -24,21 +24,6 @@ function ProgressiveStep({name, initialValue, label, variations, defaultDate}) {
     formState: {errors},
   } = useFormContext();
 
-  function DisplayErrors() {
-    const stepErrors = _.get(errors, label);
-    if (_.isNil(stepErrors)) {
-      return null;
-    }
-
-    return (
-      <ul className={styles.formError}>
-        {Object.keys(stepErrors).map(key => (
-          <li key={key}>{stepErrors[key].message}</li>
-        ))}
-      </ul>
-    );
-  }
-
   return (
     <div>
       <div className={clsx('grid', styles.progressiveRollout)}>
@@ -120,6 +105,21 @@ function ProgressiveStep({name, initialValue, label, variations, defaultDate}) {
         <DisplayErrors />
       </div>
     </div>
+  );
+}
+
+function DisplayErrors() {
+  const stepErrors = _.get(errors, label);
+  if (_.isNil(stepErrors)) {
+    return null;
+  }
+
+  return (
+    <ul className={styles.formError}>
+      {Object.keys(stepErrors).map(key => (
+        <li key={key}>{stepErrors[key].message}</li>
+      ))}
+    </ul>
   );
 }
 
