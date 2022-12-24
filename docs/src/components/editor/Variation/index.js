@@ -8,7 +8,7 @@ import {Colors} from '../Colors';
 import PropTypes from 'prop-types';
 
 Variations.propTypes = {
-  type: PropTypes.string.isRequired,
+  type: PropTypes.string,
   label: PropTypes.string.isRequired,
 };
 export function Variations({type, label}) {
@@ -48,7 +48,7 @@ export function Variations({type, label}) {
 }
 
 Variation.propTypes = {
-  type: PropTypes.string.isRequired,
+  type: PropTypes.string,
   label: PropTypes.string.isRequired,
   remove: PropTypes.func.isRequired,
   index: PropTypes.number.isRequired,

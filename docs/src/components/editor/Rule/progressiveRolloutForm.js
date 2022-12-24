@@ -14,7 +14,7 @@ ProgressiveStep.propTypes = {
   name: PropTypes.string,
   initialValue: PropTypes.number,
   label: PropTypes.string.isRequired,
-  variations: PropTypes.object,
+  variations: PropTypes.array,
   defaultDate: PropTypes.any,
 };
 function ProgressiveStep({name, initialValue, label, variations, defaultDate}) {
@@ -124,7 +124,7 @@ function ProgressiveStep({name, initialValue, label, variations, defaultDate}) {
 }
 
 ProgressiveRollout.propTypes = {
-  variations: PropTypes.object,
+  variations: PropTypes.array,
   label: PropTypes.string.isRequired,
   selectedVar: PropTypes.string,
 };

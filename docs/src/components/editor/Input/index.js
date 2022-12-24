@@ -10,7 +10,7 @@ Input.propTypes = {
   displayText: PropTypes.string,
   className: PropTypes.string,
   required: PropTypes.bool,
-  type: PropTypes.string.isRequired,
+  type: PropTypes.string,
   validation: PropTypes.object,
   defaultValue: PropTypes.any,
   disablePlaceholder: PropTypes.bool,

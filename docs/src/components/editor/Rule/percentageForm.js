@@ -9,9 +9,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 PercentagesForm.propTypes = {
-  variations: PropTypes.object,
+  variations: PropTypes.array,
   label: PropTypes.string.isRequired,
-  selectedVar: PropTypes.string.isRequired,
+  selectedVar: PropTypes.string,
 };
 export function PercentagesForm({variations, label, selectedVar = ''}) {
   const {register, watch} = useFormContext();
@@ -58,7 +58,7 @@ export function PercentagesForm({variations, label, selectedVar = ''}) {
       <div className={'col-1-2'}>
         <ul className={styles.percentageContainer}>
           {variations.map((field, index) => (
-            <li key={`${label}.${index}`}>
+            <li key={`${field}`}>
               <Input
                 label={`${label}.${index}.value`}
                 required={true}

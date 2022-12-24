@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 
 Targeting.propTypes = {
   label: PropTypes.string.isRequired,
-  variations: PropTypes.object.isRequired,
+  variations: PropTypes.array,
 };
 export function Targeting({label, variations}) {
   const {control} = useFormContext();

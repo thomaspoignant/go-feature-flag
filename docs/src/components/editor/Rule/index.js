@@ -14,7 +14,7 @@ import {PercentagesForm} from './percentageForm';
 import {ProgressiveRollout} from './progressiveRolloutForm';
 
 Rule.propTypes = {
-  variations: PropTypes.object,
+  variations: PropTypes.array,
   label: PropTypes.string.isRequired,
   isDefaultRule: PropTypes.bool,
 };
