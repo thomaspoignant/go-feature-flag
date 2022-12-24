@@ -46,31 +46,29 @@ function Variation({type, label, remove, index, icon}){
     if(isJson){
       return <JsonEditor register={register} required={true} label={label} />
     }
-    return <Input displayText="Value"
+    return <Input displayText="Flag Value"
                   label={label}
                   register={register}
+                  type={type}
                   required={true}/>
   }
 
-  const handleOnClick = ()=> remove(index)
+  const handleOnClick = event => {
+    event.preventDefault();
+    remove(index)
+  }
   return(
     <div className={styles.variation}>
-      <div className="col-3-12 mobile-col-3-12">
+      <div className={clsx("col-4-12 mobile-col-5-12", styles.icons)}>
+        <div className={styles.icon}>{icon}</div>
         <Input displayText="Name"
                label={`${label}.name`}
                register={register}
                required={true}/>
       </div>
-      <div className="col-3-12 mobile-col-3-12">
+      <div className={clsx("col-6-12 mobile-col-7-12")}>
         {valueField(type, label+'.value', register)}
-      </div>
-      <div className={clsx("col-5-12 mobile-col-5-12", styles.icons)}>
-        <Input id="description"
-               displayText="Description"
-               label={`${label}.description`}
-               register={register}
-               required={false}/>
-        <div className={styles.icon}>{icon}</div>
+
       </div>
       <div className="col-1-12 mobile-col-1-12">
         {<button className={styles.buttonPlus} onMouseDown={handleOnClick}>

@@ -5,7 +5,7 @@
     padding-right: 1rem;
 }
 
-.editorInput {
+.editorInputContainer input {
     background-color: var(--goff-editor-form-bg);
     border-radius: 0.25rem;
     border: 0;
@@ -27,6 +27,10 @@
     transform: translateY(0);
     transition: transform 200ms;
     width: 5rem;
+}
+
+.error{
+    border: 0.1rem solid var(--goff-message-error);
 }
 
 .editorPlaceholder {
@@ -59,3 +63,15 @@
     color: var(--goff-editor-placeholder);
 }
 
+.editorInputContainer .errorMessage{
+    width: 100%;
+    text-align: right;
+    color: var(--goff-message-error);
+    font-family: sans-serif;
+    line-height: 1rem;
+    pointer-events: none;
+    position: absolute;
+    top: -1rem;
+    padding-right: 1rem;
+    font-size: 0.80rem;
+}

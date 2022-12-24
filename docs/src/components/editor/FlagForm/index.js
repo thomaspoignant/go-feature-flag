@@ -8,9 +8,10 @@ import {Variations} from "../Variation";
 import {useFormContext} from "react-hook-form";
 import {Targeting} from "../Targeting";
 import {Rule} from "../Rule";
+import {ErrorMessage} from "@hookform/error-message";
 
 export function FlagForm({label}){
-  const { watch } = useFormContext();
+  const { watch, register } = useFormContext();
   const typeSelectorContent = [
     {value: "boolean", displayName: "☑️ boolean"},
     {value: "string", displayName: "🔤 string"},

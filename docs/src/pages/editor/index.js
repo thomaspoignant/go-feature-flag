@@ -1,15 +1,17 @@
 import React from "react";
-import {useForm, FormProvider, handleSummit, useFieldArray} from "react-hook-form";
+import {useForm, FormProvider, handleSummit, useFieldArray, useFormContext} from "react-hook-form";
 import Layout from "@theme/Layout";
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import {FlagForm} from "../../components/editor/FlagForm";
 import {FlagDisplay} from "../../components/editor/FlagDisplay";
 import styles from "../../components/editor/Targeting/styles.module.css";
 import clsx from "clsx";
+import {ErrorMessage} from "@hookform/error-message";
 
 function App() {
   const EDITOR_NAME = 'GOFeatureFlagEditor';
   const methods = useForm({
+    mode: 'onChange',
     defaultValues: {
       GOFeatureFlagEditor: [{
         flagName:"x",
@@ -33,7 +35,7 @@ function App() {
   const addNewFlag = event => {
     event.preventDefault();
     append({
-      flagName:`new flag ${fields.length}`,
+      flagName:`new-flag-${fields.length}`,
       variations: [
         {name: "Variation_1", value: true},
         {name: "Variation_2", value: false}
@@ -43,12 +45,15 @@ function App() {
     });
   }
 
+  const onSubmit = event => {
+    event.preventDefault();
+  };
 
   return (
     <div className="grid-pad grid">
       <FormProvider {...methods} >
         <div className="col-8-12">
-            <form>
+            <form onSubmit={methods.handleSubmit(onSubmit)}>
               {fields.map((field, index) => (
                 <FlagForm
                   label={`${EDITOR_NAME}.${index}`}
@@ -60,14 +65,13 @@ function App() {
                   <i className={clsx("fa-solid fa-circle fa-stack-2x", styles.bg)}></i>
                   <i className="fa-solid fa-plus fa-stack-1x fa-inverse"></i>
                 </span>
+
                 Add another flag
               </button>
 
             </form>
         </div>
-        <div className="col-4-12">
-          <FlagDisplay />
-        </div>
+        <FlagDisplay />
       </FormProvider>
     </div>
   );

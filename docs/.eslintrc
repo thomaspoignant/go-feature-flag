@@ -1,0 +1,22 @@
+{
+  "plugins": ["prettier"],
+  "extends": ["plugin:prettier/recommended"],
+  "ignorePatterns": ["build/"],
+  "overrides": [
+    {
+      "files": ["*.md", "*.mdx"],
+      "extends": ["plugin:mdx/recommended"]
+    }
+  ],
+  "parserOptions": {
+    "sourceType": "module",
+    "ecmaVersion": "latest",
+    "ecmaFeatures": {
+      "jsx": true,
+      "modules": true
+    }
+  },
+  "settings": {
+    "mdx/code-blocks": false
+  }
+}

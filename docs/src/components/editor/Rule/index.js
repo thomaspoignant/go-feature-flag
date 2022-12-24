@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import styles from "./styles.module.css";
+import inputStyles from '../Input/styles.module.css'
 import {Input} from "../Input";
 import {Select} from "../Select";
 import React from "react";
@@ -11,6 +12,7 @@ import "react-sweet-progress/lib/style.css";
 import {Colors} from "../Colors";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import _ from 'lodash';
 
 export function Rule({ variations, label, isDefaultRule}){
   const { register, watch } = useFormContext();
@@ -41,7 +43,7 @@ export function Rule({ variations, label, isDefaultRule}){
           <Input
             label={`${label}.name`}
             displayText={"Rule name"}
-            className={styles.ruleName}
+            className={clsx(inputStyles.editorInputContainer, styles.ruleName)}
             required={true}
           />
         </div>
@@ -99,14 +101,18 @@ function PercentagesForm({variations, label, selectedVar}){
     return null;
   }
 
+  function computePercentages(percentages){
+    const sum = percentages.filter(item => item && !isNaN(item.value)).reduce(
+      (accumulator, currentValue) => accumulator + currentValue.value, 0);
+    console.log(sum)
+    return sum;
+  }
+
   function ProgressBar({percentages}){
     if (!percentages || !isArray(percentages) || percentages.length <= 0) {
       return null;
     }
-
-    const sum = percentages.filter(item => item && !isNaN(item.value)).reduce(
-      (accumulator, currentValue) => accumulator + currentValue.value, 0);
-
+    const sum = computePercentages(percentages);
     if (sum > 100) {
       return (<div className={styles.error}>The total percentage cannot be more than 100%</div>);
     }
@@ -124,7 +130,20 @@ function PercentagesForm({variations, label, selectedVar}){
         <ul className={styles.percentageContainer}>
         {variations.map((field, index)=>(
           <li key={`${label}.${index}`} >
-            <PercentageInput label={`${label}.${index}.value`} required={true} initialValue={0} title={`${Colors[index % Colors.length]} ${field.name}`}  />
+            <Input label={`${label}.${index}.value`}
+                   required={true}
+                   defaultValue={0}
+                   type="number"
+                   displayText={`%  ${Colors[index % Colors.length]} ${field.name}`}
+                   className={styles.percentageInput}
+                   disablePlaceholder={true}
+                   disableInlineErr={true}
+                   validation={{
+                     valueAsNumber: true,
+                     required: { value: true, message: "Percentage field is required"},
+                     min: {value:0, message:"Percentage should be between 0 and 100"},
+                     max:{value:100, message:"Percentage should be between 0 and 100"}
+                   }}/>
             <input type="hidden" {...register(`${label}.${index}.name`)} value={field.name} />
           </li>
           ))
@@ -136,21 +155,31 @@ function PercentagesForm({variations, label, selectedVar}){
   );
 }
 
-function ProgressiveRollout({variations, label, selectedVar}){
-  const {register} = useFormContext()
-  if(selectedVar !== 'progressive') {
-    return null;
+function ProgressiveStep({name, initialValue, label, variations, defaultDate}){
+  const {register, control, formState: {errors}, setError, resetField } = useFormContext();
+
+  function DisplayErrors(){
+    const stepErrors = _.get(errors, label);
+    if (_.isNil(stepErrors)) {
+      return null;
+    }
+
+    return(<ul className={styles.formError}>
+      {Object.keys(stepErrors)
+        .map(key => ( <li>{stepErrors[key].message}</li>))}
+    </ul>);
   }
 
-  function ProgressiveStep({name, initialValue, label, variations, infoToolTip}){
-    const {register, control} = useFormContext();
-    return(
+  return(
+    <div>
       <div className={clsx("grid", styles.progressiveRollout)}>
         <div>{name}</div>
         <div>
           <Controller
             control={control}
             name={`${label}.date`}
+            defaultValue={defaultDate}
+            rules={{required: { value: true, message: "Date field is required"},}}
             render={({ field }) => (
               <DatePicker
                 className={styles.dateInput}
@@ -176,8 +205,20 @@ function ProgressiveRollout({variations, label, selectedVar}){
             required={true}
           />
         </div>
-        <div>
-          <PercentageInput label={`${label}.percentage`} required={true} initialValue={initialValue} />
+        <div className={styles.progressiveRolloutPercentage}>
+          to&nbsp;<Input label={`${label}.percentage`}
+                         required={true}
+                         defaultValue={initialValue}
+                         type="number"
+                         displayText="%"
+                         className={styles.percentageInput}
+                         disablePlaceholder={true}
+                         disableInlineErr={true}
+                         validation={{
+                           valueAsNumber: true,
+                           min: {value:0, message:"Percentage should be between 0 and 100"},
+                           max:{value:100, message:"Percentage should be between 0 and 100"}
+                         }}/>
         </div>
         <div>
           <Link to={'/docs/configure_flag/rollout/progressive'} target={"_blank"}>
@@ -185,26 +226,40 @@ function ProgressiveRollout({variations, label, selectedVar}){
           </Link>
         </div>
       </div>
-    )
+      <div>
+        <DisplayErrors />
+      </div>
+    </div>
+  )
+}
+
+function ProgressiveRollout({variations, label, selectedVar}){
+  if(selectedVar !== 'progressive') {
+    return null;
   }
 
 
+
+  let endDateDefault = new Date();
+  endDateDefault = endDateDefault.setDate(endDateDefault.getDate() + 10);
   return (
   <div className={"grid grid-pad"}>
     <div className={clsx("col-1-1", styles.rolloutDesc)}>A progressive rollout allows you to increase the percentage of your flag over time.<br/>
       You can select a release ramp where the percentage of your flag will increase progressively between the start date and the end date.</div>
-    <ProgressiveStep name={"Start on the"} label={`${label}.initial`} variations={variations} register={register} initialValue={0}/>
-    <ProgressiveStep name={"Stop on the"} label={`${label}.end`} variations={variations} register={register} initialValue={100}/>
+    <ProgressiveStep
+      name={"Start on the"}
+      label={`${label}.initial`}
+      variations={variations}
+      initialValue={0}
+      defaultDate={new Date()}
+    />
+
+    <ProgressiveStep
+      name={"Stop on the"}
+      label={`${label}.end`}
+      variations={variations}
+      initialValue={100}
+      defaultDate={new Date(endDateDefault)}
+    />
   </div>);
-}
-
-
-function PercentageInput({label, initialValue, required, title}){
-  const {register} = useFormContext();
-  return (
-    <div>
-      <input min={0} max={100} className={styles.percentageInput} type="number" {...register(`${label}`,{required: required, valueAsNumber:true, min: 0, max: 100})}
-             defaultValue={initialValue} />% {title}
-    </div>
-  );
 }

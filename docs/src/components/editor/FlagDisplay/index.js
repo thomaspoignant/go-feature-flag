@@ -1,55 +1,14 @@
-import React from "react";
-import {useFormContext} from "react-hook-form";
-import Highlight from 'react-highlight'
-import 'highlight.js/styles/a11y-dark.css'
-
-
+import React, {useEffect} from "react";
+import {useFormContext, useFormState} from "react-hook-form";
+import Highlight from 'react-highlight';
+import 'highlight.js/styles/a11y-dark.css';
+import YAML from 'yaml';
+import * as TOML from '@iarna/toml';
+import styles from './styles.module.css';
+import {Select} from "../Select";
+import _ from 'lodash';
 
 function formToGoFeatureFlag(formData){
-  // {
-  //   "GOFeatureFlagEditor": [
-  //   {
-  //     "targetings": [
-  //       {
-  //         "name": "Rule 1",
-  //         "query": "xYOxd",
-  //         "selectedVar": "Variation_1"
-  //       },
-  //       {
-  //         "name": "Rule 2",
-  //         "query": "dd",
-  //         "selectedVar": "progressive",
-  //         "progressive": {
-  //           "initial": {
-  //             "date": "2022-11-28T23:00:00.000Z",
-  //             "selectedVar": "Variation_1",
-  //             "percentage": 0
-  //           },
-  //           "end": {
-  //             "date": "2022-12-19T18:00:00.261Z",
-  //             "selectedVar": "Variation_2",
-  //             "percentage": 100
-  //           }
-  //         }
-  //       }
-  //     ],
-  //     "defaultRule": {
-  //       "selectedVar": "percentage",
-  //       "percentages": [
-  //         {
-  //           "name": "Variation_1",
-  //           "value": 10
-  //         },
-  //         {
-  //           "name": "Variation_2",
-  //           "value": 90
-  //         }
-  //       ]
-  //     }
-  //   }
-  // ]
-  // }
-
   function convertValueIntoType(value, type){
     switch(type) {
       case 'json':
@@ -70,7 +29,6 @@ function formToGoFeatureFlag(formData){
 
   function convertRule(ruleForm){
     let variation, percentage, progressiveRollout = undefined;
-    console.log(ruleForm);
     const { selectedVar } = ruleForm;
     switch(selectedVar){
       case "percentage":
@@ -81,12 +39,12 @@ function formToGoFeatureFlag(formData){
         progressiveRollout = {
           initial: {
             variation: ruleForm.progressive.initial.selectedVar,
-            percentage: ruleForm.progressive.initial.percentage,
+            percentage: ruleForm.progressive.initial.percentage || 0,
             date: ruleForm.progressive.initial.date,
           },
           end: {
             variation: ruleForm.progressive.end.selectedVar,
-            percentage: ruleForm.progressive.end.percentage,
+            percentage: ruleForm.progressive.end.percentage || 100,
             date: ruleForm.progressive.end.date,
           },
         };
@@ -138,14 +96,56 @@ function formToGoFeatureFlag(formData){
   return goffFlags;
 }
 
+
+
+
 export function FlagDisplay(){
-  const { watch } = useFormContext();
+  const { watch, register, formState: { errors } } = useFormContext();
   const data = watch();
+  const isValid = errors && Object.keys(errors).length === 0 && Object.getPrototypeOf(errors) === Object.prototype;
+
+  // useEffect(() => {
+  //   const initTOML = async () => {
+  //     await TOML.default();
+  //   };
+  //   initTOML();
+  // }, []);
+
+  function formatFlagFile(config, format){
+    switch(format){
+      case 'json':
+        return JSON.stringify(config, null, 2);
+      case 'toml':
+        return TOML.stringify(config);
+      default:
+        return YAML.stringify(config, null, 2);
+    }
+  }
+
+  function ErrorInForm(){
+    // TODO: best looking error here
+    return (<div className={styles.invalidForm}>Error in your configuration, please review the form.</div>);
+  }
+  const select = [
+    {value: "yaml", displayName: "YAML"},
+    {value: "json", displayName: "JSON"},
+    {value: "toml", displayName: "TOML"},
+  ];
+
   return(
-    <div>
-      <Highlight className='JSON'>
-        {JSON.stringify(formToGoFeatureFlag(data), null, 2)}
+    <div className="col-4-12">
+      {!isValid && <ErrorInForm />}
+      <Select
+        title={"Format"}
+        content={select}
+        required={false}
+        label={"flagFormat"}
+      />
+
+      {isValid && <Highlight className='JSON'>
+        {formatFlagFile(formToGoFeatureFlag(data), data.flagFormat)}
       </Highlight>
+      }
     </div>
   );
 }

@@ -93,7 +93,7 @@ function OpenFeature() {
             supported languages.
           </p>
           <p>
-            <Link to={"docs/category/use-with-openfeature"}> See our SDKs <i className="fa-solid fa-arrow-right"></i></Link>
+            <Link to={"/docs/next/category/use-with-openfeature"}> See our SDKs <i className="fa-solid fa-arrow-right"></i></Link>
           </p>
         </div>
       </div>
