@@ -149,12 +149,12 @@ export function FlagDisplay() {
   return (
     <div className="col-4-12">
       {!isValid && <ErrorInForm />}
-      <Select
+      {isValid && <Select
         title={'Format'}
         content={select}
         required={false}
         label={'flagFormat'}
-      />
+      />}
 
       {isValid && (
         <Highlight className="JSON">

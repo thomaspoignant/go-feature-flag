@@ -19,16 +19,6 @@ export function PercentagesForm({variations, label, selectedVar = ''}) {
     return null;
   }
 
-  function computePercentages(percentages) {
-    const sum = percentages
-      .filter(item => item && !isNaN(item.value))
-      .reduce(
-        (accumulator, currentValue) => accumulator + currentValue.value,
-        0
-      );
-    return sum;
-  }
-
   return (
     <div className={'grid-pad grid'}>
       <div className={clsx('col-1-1', styles.rolloutDesc)}>
@@ -39,8 +29,9 @@ export function PercentagesForm({variations, label, selectedVar = ''}) {
       <div className={'col-1-2'}>
         <ul className={styles.percentageContainer}>
           {variations.map((field, index) => (
-            <li key={`${field}`}>
+            <li key={`${label}.${index}.value`}>
               <Input
+
                 label={`${label}.${index}.value`}
                 required={true}
                 defaultValue={0}
@@ -88,7 +79,14 @@ function ProgressBar({percentages}) {
   if (!percentages || !isArray(percentages) || percentages.length <= 0) {
     return null;
   }
-  const sum = computePercentages(percentages);
+
+  const sum = percentages
+    .filter(item => item && !isNaN(item.value))
+    .reduce(
+      (accumulator, currentValue) => accumulator + currentValue.value,
+      0
+    );
+
   if (sum > 100) {
     return (
       <div className={styles.error}>

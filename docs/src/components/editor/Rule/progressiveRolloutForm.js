@@ -21,7 +21,26 @@ function ProgressiveStep({name, initialValue, label, variations, defaultDate}) {
   const {
     register,
     control,
+    formState: { errors },
   } = useFormContext();
+
+
+  function displayDatePicker(field) {
+    function handleOnChange(field, date){
+      field.onChange(date);
+    }
+    return (
+      <DatePicker
+        className={styles.dateInput}
+        placeholderText="Select date"
+        showTimeSelect
+        onChange={date => handleOnChange(field, date)}
+        selected={field.value}
+        dateFormat="Pp"
+      />
+    );
+  }
+
 
   return (
     <div>
@@ -33,16 +52,7 @@ function ProgressiveStep({name, initialValue, label, variations, defaultDate}) {
             name={`${label}.date`}
             defaultValue={defaultDate}
             rules={{required: {value: true, message: 'Date field is required'}}}
-            render={({field}) => (
-              <DatePicker
-                className={styles.dateInput}
-                placeholderText="Select date"
-                showTimeSelect
-                onChange={date => field.onChange(date)}
-                selected={field.value}
-                dateFormat="Pp"
-              />
-            )}
+            render={({field}) => displayDatePicker(field)}
           />
         </div>
         <div>and serve</div>
@@ -101,13 +111,13 @@ function ProgressiveStep({name, initialValue, label, variations, defaultDate}) {
         </div>
       </div>
       <div>
-        <DisplayErrors />
+        <DisplayErrors errors={errors} label={label}/>
       </div>
     </div>
   );
 }
 
-function DisplayErrors() {
+function DisplayErrors(errors, label) {
   const stepErrors = _.get(errors, label);
   if (_.isNil(stepErrors)) {
     return null;

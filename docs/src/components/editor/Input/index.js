@@ -62,11 +62,13 @@ export function Input({
       {!disableInlineErr && (
         <ErrorMessage
           name={label}
-          render={({message}) => (
-            <div className={styles.errorMessage}>{message}</div>
-          )}
+          render={inputErrorMessage}
         />
       )}
     </div>
   );
+}
+
+function inputErrorMessage({ message }){
+  return(<div className={styles.errorMessage}>{message}</div>);
 }
