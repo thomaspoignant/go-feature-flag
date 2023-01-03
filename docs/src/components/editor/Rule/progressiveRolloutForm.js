@@ -25,8 +25,8 @@ function ProgressiveStep({name, initialValue, label, variations, defaultDate}) {
   } = useFormContext();
 
 
-  function displayDatePicker(field) {
-    function handleOnChange(field, date){
+  function displayDatePicker({ field }) {
+    function handleOnChange({ date }){
       field.onChange(date);
     }
     return (
@@ -34,7 +34,7 @@ function ProgressiveStep({name, initialValue, label, variations, defaultDate}) {
         className={styles.dateInput}
         placeholderText="Select date"
         showTimeSelect
-        onChange={date => handleOnChange(field, date)}
+        onChange={handleOnChange}
         selected={field.value}
         dateFormat="Pp"
       />
@@ -52,7 +52,7 @@ function ProgressiveStep({name, initialValue, label, variations, defaultDate}) {
             name={`${label}.date`}
             defaultValue={defaultDate}
             rules={{required: {value: true, message: 'Date field is required'}}}
-            render={({field}) => displayDatePicker(field)}
+            render={displayDatePicker}
           />
         </div>
         <div>and serve</div>

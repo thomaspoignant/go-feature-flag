@@ -29,9 +29,8 @@ export function PercentagesForm({variations, label, selectedVar = ''}) {
       <div className={'col-1-2'}>
         <ul className={styles.percentageContainer}>
           {variations.map((field, index) => (
-            <li key={`${label}.${index}.value`}>
+            <li key={`${label}.${field.name}`}>
               <Input
-
                 label={`${label}.${index}.value`}
                 required={true}
                 defaultValue={0}
