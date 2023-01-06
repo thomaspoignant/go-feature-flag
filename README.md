@@ -24,11 +24,11 @@
 </p>
 
 ## What is GO Feature Flag?
-GO Feature Flag is a simple, complete and lightweight feature flag solution 100% opensource.
+GO Feature Flag is a simple, complete and lightweight feature flag solution 100% open source.
 
 The solution has been built to start experiencing the usage of feature flags in your code without having to contract with any vendor.
 
-**GO Feature Flag** has started to be a solution only for the `GO` language, but with the new standardisation of feature flags by [Openfeature](https://openfeature.dev/) project, 
+**GO Feature Flag** has started to be a solution only for the `GO` language, but with the new standardization of feature flags by [Openfeature](https://openfeature.dev/) project, 
 now the solution is available for multiple languages _(`JAVA`, `typescript`, `javascript`, ...)_ with a simple API server _(called the relay proxy)_ to host.
 
 > ℹ️ Info  
@@ -41,7 +41,7 @@ I've also written an [article](https://medium.com/better-programming/feature-fla
 - Storing your configuration flags file on various locations (`HTTP`, `S3`, `Kubernetes`, [_see full list_](https://gofeatureflag.org/docs/configure_flag/store_your_flags.md).
 - Configuring your flags in various [format](https://gofeatureflag.org/docs/configure_flag/flag_format) (`JSON`, `TOML` and `YAML`).
 - Adding complex [rules](https://gofeatureflag.org/docs/configure_flag/flag_format#rule-format) to target your users.
-- Use complex rollout strategy for your flags :
+- Use a complex rollout strategy for your flags :
     - [Run A/B testing experimentation](https://gofeatureflag.org/docs/configure_flag/rollout/experimentation).
     - [Progressively rollout a feature](https://gofeatureflag.org/docs/configure_flag/rollout/progressive).
     - [Schedule your flag updates](https://gofeatureflag.org/docs/configure_flag/rollout/scheduled).
@@ -56,7 +56,7 @@ _The code of this demo is available in [`thomaspoignant/go-feature-flag-demo`](h
 
 ## Getting started
 
-Before starting using **GO Feature Flag** you should decide if you want to use the GO Module directly or if you want to install the relay proxy.
+Before starting to use **GO Feature Flag** you should decide if you want to use the GO Module directly or if you want to install the relay proxy.
 
 The GO module is perfect and simple to use if your need is to use GO Feature Flag only in GO, if your project has more languages I recommend you to use the Open Feature SDKs.
 
@@ -116,6 +116,7 @@ if hasFlag {
     // flag "test-flag" is false for the user
 }
 ```
+The full documentation is available on https://docs.gofeatureflag.org  
 You can find more examples in the [examples/](https://github.com/thomaspoignant/go-feature-flag/tree/main/examples) directory.
 
 </details>
@@ -176,7 +177,7 @@ _If you don't want to use docker to install the **relay proxy** you can follow t
 
 ### Use Open Feature SDK
 
-_In this example we are using the javascript SDK, but it is still relevant for all the languages_.
+_In this example, we are using the javascript SDK, but it is still relevant for all the languages_.
 
 #### Install dependencies
 
@@ -186,7 +187,7 @@ npm i @openfeature/js-sdk @openfeature/go-feature-flag-provider
 
 #### Init your Open Feature client
 
-In your app initialization your have to create a client using the Open Feature SDK and initialize it.
+In your app initialization you have to create a client using the Open Feature SDK and initialize it.
 
 ```javascript
 const {OpenFeature} = require("@openfeature/js-sdk");
@@ -231,16 +232,22 @@ if (adminFlag) {
 ## Can I use GO Feature Flag with any language?
 
 Originally GO Feature Flag was built to be a GOlang only library, but it limits the ecosystem too much.  
-To be compatible with more language we have implemented the [GO Feature Flag Relay Proxy](https://github.com/thomaspoignant/go-feature-flag-relay-proxy).
+To be compatible with more languages we have implemented the [GO Feature Flag Relay Proxy](https://github.com/thomaspoignant/go-feature-flag-relay-proxy).
 It is a service you can host that provides an API to evaluate your flags, you can call it using HTTP to get your variation.
 
 Since we believe in standardization we are also implementing [OpenFeature](https://github.com/open-feature) providers to interact with this API in the language of your choice.  
 _(OpenFeature is still at an early stage, so not all languages are supported and expect some changes in the future)_
 
+<<<<<<< HEAD
+=======
+In all the examples above, they demonstrate using `go-feature-flag` in its singleton style approach.  
+You can also create many `go-feature-flag` clients to use in your application.  
+[See the documentation for more details.](https://docs.gofeatureflag.org/docs/configuration#multiple-configuration-flag-files)
+>>>>>>> origin/main
 
 
 ## Where do I store my flags file?
-The module supports different ways of retrieving the flag file .  
+The module supports different ways of retrieving the flag file.  
 Available retrievers are:
 - **GitHub**
 - **HTTP endpoint**
@@ -249,17 +256,28 @@ Available retrievers are:
 - **Google Cloud Storage**
 - **Kubernetes ConfigMaps**
 
+<<<<<<< HEAD
 _[See full list and more information.](https://gofeatureflag.org/docs/configure_flag/store_your_flags)_
+=======
+- [From GitHub](https://docs.gofeatureflag.org/docs/flag_file/github)
+- [From an HTTP endpoint](https://docs.gofeatureflag.org/docs/flag_file/http)
+- [From a S3 Bucket](https://docs.gofeatureflag.org/docs/flag_file/s3)
+- [From a file](https://docs.gofeatureflag.org/docs/flag_file/file)
+- [From Google Cloud Storage](https://docs.gofeatureflag.org/docs/flag_file/google_cloud_storage)
+- [From Kubernetes ConfigMaps](https://docs.gofeatureflag.org/docs/flag_file/kubernetes_configmaps)
+
+You can also [create your own retriever](https://docs.gofeatureflag.org/docs/flag_file/custom).
+>>>>>>> origin/main
 
 ## Flags file format
-**GO Feature Flag** core feature is to centralize all your feature flags in a single file, and to avoid hosting and maintaining a backend server to manage them.
+**GO Feature Flag** core feature is to centralize all your feature flags in a single file and to avoid hosting and maintaining a backend server to manage them.
 
 Your file should be a `YAML`, `JSON` or `TOML` file with a list of flags *(examples: [`YAML`](testdata/flag-config.yaml), [`JSON`](testdata/flag-config.json), [`TOML`](testdata/flag-config.toml))*.
 
-The easiest way to create your configuration file is to used **GO Feature Flag Editor** available at https://editor.gofeatureflag.org.  
-If you prefer to do it manually please follow instruction bellow.
+The easiest way to create your configuration file is to use **GO Feature Flag Editor** available at https://editor.gofeatureflag.org.  
+If you prefer to do it manually please follow the instruction bellow.
 
-**A flag configuration looks like:**
+**A flag configuration looks like this:**
 
 <details open>
 <summary>YAML</summary>
@@ -405,7 +423,7 @@ All the fields to create a flag are described in the [documentation](https://doc
 
 The query format is based on the [`nikunjy/rules`](https://github.com/nikunjy/rules) library.
 
-All the operations can be written capitalized or lowercase (ex: `eq` or `EQ` can be used).  
+All the operations can be written in capitalized or lowercase (ex: `eq` or `EQ` can be used).  
 Logical Operations supported are `AND` `OR`.
 
 Compare Expression and their definitions (`a|b` means you can use either one of the two `a` or `b`):
@@ -442,10 +460,15 @@ All the other attributes are optional.
 Since it is useful to make complex queries on your flag, you can add as many information fields you want to your user.
 It will be used when testing the targeting rules.
 
+<<<<<<< HEAD
 ## Variations
+=======
+You can also distinguish logged-in users from anonymous users in the SDK ([check documentation about anonymous users](https://docs.gofeatureflag.org/docs/users#anonymous-users)).
+>>>>>>> origin/main
 
 The Variation methods determine whether a flag is enabled or not for a specific user.
 
+<<<<<<< HEAD
 GO Feature Flag can manage more than `boolean`, the value of your flag can be any of these types:
 - `bool`
 - `int`
@@ -453,20 +476,52 @@ GO Feature Flag can manage more than `boolean`, the value of your flag can be an
 - `string`
 - `json array`
 - `json object`
+=======
+```go linenums="1"
+result, _ := ffclient.BoolVariation("your.feature.key", user, false)
+
+// result is now true or false depending on the setting of
+// this boolean feature flag
+```
+Variation methods take the feature **flag key**, a **user**, and a **default value**.
+
+The default value is returned when an error is encountered _(`ffclient` not initialized, variation with wrong type, flag does not exist ...)._
+
+In the example, if the flag `your.feature.key` does not exist, the result will be `false`.  
+Not that you will always have a usable value in the result.
+
+## Get all flags for a specific user
+If you want to send the information about a specific user to a front-end, you will want a snapshot of all the flags for
+this user at a specific time.
+
+The method `ffclient.AllFlagsState` returns a snapshot of flag values and metadata.  
+The function is evaluating all available flags for the user and returns a `flagstate.AllFlagsState` object containing the
+information you need.
+
+The `MarshalJSON()` function will return a JSON Object, that can be directly used by your front-end application.  
+[More details in the documentation.](https://docs.gofeatureflag.org/docs/users#get-all-flags-for-a-specific-user)
+>>>>>>> origin/main
 
 ## Rollout
-A critical part of every new feature release is orchestrating the actual launch schedule between Product, Engineering, and Marketing teams.
+A critical part of every new feature release is orchestrating the actual launch schedule between the Product, Engineering, and Marketing teams.
 
 Delivering powerful user experiences typically requires software teams to manage complex releases and make manual updates at inconvenient times.
 
-But it does not have to, having a complex **rollout** strategy allows you to have lifecycle for your flags.
+But it does not have to, having a complex **rollout** strategy allows you to have a lifecycle for your flags.
 
 ### Complex rollout strategy available
 
+<<<<<<< HEAD
 - [Canary releases](https://gofeatureflag.org/docs/configure_flag/rollout/canary) - impact randomly a subset of your users.
 - [Progressive rollout](https://gofeatureflag.org/docs/configure_flag/rollout/progressive) - increase the percentage of your flag over time.
 - [Scheduled rollout](https://gofeatureflag.org/docs/configure_flag/rollout/scheduled/) - update your flag over time.
 - [Experimentation rollout](https://gofeatureflag.org/docs/configure_flag/rollout/experimentation) - serve your feature only for a determined time *(perfect for A/B testing)*.
+=======
+- [Canary releases](https://docs.gofeatureflag.org/docs/rollout/canary) - impact randomly a subset of your users.
+- [Progressive rollout](https://docs.gofeatureflag.org/docs/rollout/progressive) - increase the percentage of your flag over time.
+- [Scheduled rollout](https://docs.gofeatureflag.org/docs/rollout/scheduled) - update your flag over time.
+- [Experimentation rollout](https://docs.gofeatureflag.org/docs/rollout/experimentation) - serve your feature only for a determined time *(perfect for A/B testing)*.
+>>>>>>> origin/main
 
 ## Notifiers
 If you want to be informed when a flag has changed, you can configure a [**notifier**](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#NotifierConfig).
@@ -476,23 +531,37 @@ A notifier will send one notification to the targeted system to inform them that
 ℹ️ **GO Feature Flag** can handle more than one notifier at a time.
 
 Available notifiers are:
+<<<<<<< HEAD
 - **Slack**
 - **Webhook**
+=======
+
+- [Slack](https://docs.gofeatureflag.org/docs/notifier/slack) - Get a slack message with the changes.
+- [Webhook](https://docs.gofeatureflag.org/docs/notifier/webhook) - Call an API with the changes.
+>>>>>>> origin/main
 
 ## Export data
-**GO Feature Flag** allow you to export data about the usage of your flags.    
-It collects all the variations events and can save these events on several locations:
+**GO Feature Flag** allows you to export data about the usage of your flags.    
+It collects all the variations events and can save these events in several locations:
 
+<<<<<<< HEAD
 - **Local file** *- create local files with the variation usages.*
 - **Log** *- use your logger to write the variation usages.*
 - **AWS S3** *- export your variation usages to S3.*
 - **Google Cloud Storage** *- export your variation usages to Google Cloud Storage.*
 - **Webhook** *- export your variation usages by calling a webhook.*
+=======
+- [File](https://docs.gofeatureflag.org/docs/data_collection/file) *- create local files with the variation usages.*
+- [Log](https://docs.gofeatureflag.org/docs/data_collection/log) *- use your logger to write the variation usages.*
+- [S3](https://docs.gofeatureflag.org/docs/data_collection/s3) *- export your variation usages to S3.*
+- [Google Cloud Storage](https://docs.gofeatureflag.org/docs/data_collection/google_cloud_storage) *- export your variation usages to Google Cloud Storage.*
+- [Webhook](https://docs.gofeatureflag.org/docs/data_collection/webhook) *- export your variation usages by calling a webhook.*
+>>>>>>> origin/main
 
 Currently, we are supporting only feature events.  
-It represents individual flag evaluations and are considered "full fidelity" events.
+It represents individual flag evaluations and is considered "full fidelity" events.
 
-**An example feature event below:**
+**An example feature event bellow:**
 ```json
 {
     "kind": "feature",
@@ -505,8 +574,38 @@ It represents individual flag evaluations and are considered "full fidelity" eve
     "default": false
 }
 ```
+<<<<<<< HEAD
 The format of the data is [described in the documentation](https://gofeatureflag.org/docs/).
-Events are collected and send in bulk to avoid spamming your exporter.
+Events are collected and sent in bulk to avoid spamming your exporter.
+=======
+The format of the data is [described in the documentation](https://docs.gofeatureflag.org/docs/data_collection#data-format).
+
+Events are collected and sent in bulk to avoid spamming your exporter *(_see details on [how to](#how-to-configure-data-export)_ configure data export](#how-to-configure-data-export)*).
+
+### How to configure data export?
+In your `ffclient.Config` add the `DataExporter` field and configure your export location.
+
+To avoid spamming your location every time you have a variation called, `go-feature-flag` is storing in memory all the events and send them in bulk to the exporter.  
+You can decide the threshold on when to send the data with the properties `FlushInterval` and `MaxEventInMemory`. The first threshold hit will export the data.
+
+If there are some flags you don't want to export, you can use `trackEvents` fields on these specific flags to disable the data export *(see [flag file format](https://docs.gofeatureflag.org/docs/flag_format))*.
+
+### Example
+```go  linenums="1"
+ffclient.Config{ 
+    // ...
+   DataExporter: ffclient.DataExporter{
+        FlushInterval:   10 * time.Second,
+        MaxEventInMemory: 1000,
+        Exporter: &fileexporter.Exporter{
+            OutputDir: "/output-data/",
+        },
+    },
+    // ...
+}
+```
+The full configuration is [described in the documentation](https://docs.gofeatureflag.org/docs/data_collection#how-to-configure-data-export).
+>>>>>>> origin/main
 
 # How can I contribute?
 This project is open for contribution, see the [contributor's guide](CONTRIBUTING.md) for some helpful tips.

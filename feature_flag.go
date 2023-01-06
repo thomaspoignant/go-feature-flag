@@ -33,6 +33,7 @@ func Init(config Config) error {
 
 // Close the component by stopping the background refresh and clean the cache.
 func Close() {
+	onceFF = sync.Once{}
 	ff.Close()
 }
 
@@ -102,7 +103,6 @@ func New(config Config) (*GoFeatureFlag, error) {
 
 // Close wait until thread are done
 func (g *GoFeatureFlag) Close() {
-	onceFF = sync.Once{}
 	if g != nil {
 		if g.cache != nil {
 			// clear the cache
