@@ -24,24 +24,6 @@ function ProgressiveStep({name, initialValue, label, variations, defaultDate}) {
     formState: { errors },
   } = useFormContext();
 
-
-  function displayDatePicker({ field }) {
-    function handleOnChange({ date }){
-      field.onChange(date);
-    }
-    return (
-      <DatePicker
-        className={styles.dateInput}
-        placeholderText="Select date"
-        showTimeSelect
-        onChange={handleOnChange}
-        selected={field.value}
-        dateFormat="Pp"
-      />
-    );
-  }
-
-
   return (
     <div>
       <div className={clsx('grid', styles.progressiveRollout)}>
@@ -52,7 +34,16 @@ function ProgressiveStep({name, initialValue, label, variations, defaultDate}) {
             name={`${label}.date`}
             defaultValue={defaultDate}
             rules={{required: {value: true, message: 'Date field is required'}}}
-            render={displayDatePicker}
+            render={({field}) => (
+              <DatePicker
+                className={styles.dateInput}
+                placeholderText="Select date"
+                showTimeSelect
+                onChange={date => field.onChange(date)}
+                selected={field.value}
+                dateFormat="Pp"
+              />
+            )}
           />
         </div>
         <div>and serve</div>
