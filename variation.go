@@ -1,4 +1,4 @@
-//nolint:,dupl
+//nolint: dupl
 package ffclient
 
 import (
@@ -176,7 +176,7 @@ func (g *GoFeatureFlag) AllFlagsState(user ffuser.User) flagstate.AllFlags {
 		if resolutionDetails.Reason == flag.ReasonDisabled {
 			allFlags.AddFlag(key, flagstate.FlagState{
 				Timestamp:   time.Now().Unix(),
-				TrackEvents: currentFlag.GetTrackEvents(),
+				TrackEvents: currentFlag.IsTrackEvents(),
 				Failed:      resolutionDetails.ErrorCode != "",
 				ErrorCode:   resolutionDetails.ErrorCode,
 				Reason:      resolutionDetails.Reason,
@@ -190,14 +190,14 @@ func (g *GoFeatureFlag) AllFlagsState(user ffuser.User) flagstate.AllFlags {
 				Value:         v,
 				Timestamp:     time.Now().Unix(),
 				VariationType: resolutionDetails.Variant,
-				TrackEvents:   currentFlag.GetTrackEvents(),
+				TrackEvents:   currentFlag.IsTrackEvents(),
 				Failed:        resolutionDetails.ErrorCode != "",
 				ErrorCode:     resolutionDetails.ErrorCode,
 				Reason:        resolutionDetails.Reason,
 			})
 
 		default:
-			defaultVariationName := currentFlag.GetDefaultVariation()
+			defaultVariationName := flag.VariationSDKDefault
 			defaultVariationValue := currentFlag.GetVariationValue(defaultVariationName)
 			allFlags.AddFlag(
 				key,
@@ -205,7 +205,7 @@ func (g *GoFeatureFlag) AllFlagsState(user ffuser.User) flagstate.AllFlags {
 					Value:         defaultVariationValue,
 					Timestamp:     time.Now().Unix(),
 					VariationType: defaultVariationName,
-					TrackEvents:   currentFlag.GetTrackEvents(),
+					TrackEvents:   currentFlag.IsTrackEvents(),
 					Failed:        true,
 					ErrorCode:     flag.ErrorCodeTypeMismatch,
 					Reason:        flag.ReasonError,
@@ -505,7 +505,7 @@ func computeVariationResult(flag flag.Flag, resolutionDetails flag.ResolutionDet
 	}
 
 	if flag != nil {
-		varResult.TrackEvents = flag.GetTrackEvents()
+		varResult.TrackEvents = flag.IsTrackEvents()
 		varResult.Version = flag.GetVersion()
 	}
 

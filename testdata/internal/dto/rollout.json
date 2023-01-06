@@ -1,0 +1,20 @@
+{
+  "scheduled": [
+    {
+      "date": "2021-02-01T10:10:10.00000001Z",
+      "variations": {
+        "VariationDefault": true
+      }
+    },
+    {
+      "date": "2021-02-02T10:10:10.00000001Z",
+      "variations": {
+        "VariationDefault": false
+      }
+    }
+  ],
+  "experimentation": {
+    "start": "2021-02-01T10:10:10.00000001Z",
+    "end": "2021-03-01T10:10:10.00000001Z"
+  }
+}

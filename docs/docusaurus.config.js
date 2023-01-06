@@ -19,13 +19,16 @@ const config = {
   projectName: 'go-feature-flag',
   trailingSlash: false,
 
-  customFields:{
-    logo: "img/logo/logo.png",
-    github: "https://github.com/thomaspoignant/go-feature-flag",
-    sponsor: "https://github.com/sponsors/thomaspoignant",
-    openfeature: "https://openfeature.dev",
-    mailchimpURL: "//gofeatureflag.us14.list-manage.com/subscribe/post?u=86acc1a78e371bf66a9683672&amp;id=f42abfec51&amp"
-   },
+  customFields: {
+    logo: 'img/logo/logo.png',
+    github: 'https://github.com/thomaspoignant/go-feature-flag',
+    sponsor: 'https://github.com/sponsors/thomaspoignant',
+    openfeature: 'https://openfeature.dev',
+    mailchimpURL:
+      '//gofeatureflag.us14.list-manage.com/subscribe/post?u=86acc1a78e371bf66a9683672&amp;id=f42abfec51&amp',
+    swaggerURL:
+      'https://github.com/thomaspoignant/go-feature-flag/blob/main/cmd/relayproxy/docs/swagger.yaml',
+  },
   // Even if you don't use internalization, you can use this field to set useful
   // metadata like html lang. For example, if your site is Chinese, you may want
   // to replace "en" with "zh-Hans".
@@ -65,9 +68,10 @@ const config = {
   ],
   stylesheets: [
     'css/pushy-buttons.css', //https://github.com/iRaul/pushy-buttons
-    'css/simplegrid.css',
+    'css/simplegrid.css', //https://thisisdallas.github.io/Simple-Grid/
     'https://fonts.googleapis.com/css?family=Poppins:400,500,700',
-    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css'
+    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css',
+    'https://cdn.jsdelivr.net/gh/devicons/devicon@v2.15.1/devicon.min.css', // https://devicon.dev/
   ],
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
@@ -90,32 +94,42 @@ const config = {
             label: 'Docs',
           },
           {to: '/blog', label: 'Blog', position: 'left'},
-          {to: 'https://editor.gofeatureflag.org', html: 'Flag Editor <i class="fas fa-external-link-alt"></i>', position: 'left'},
-          {to: 'https://github.com/sponsors/thomaspoignant', label: 'Sponsor us ❤️', position: 'right'},
+          {to: '/editor', html: 'Flag Editor', position: 'left'},
+          // {
+          //   type: 'doc',
+          //   docId:'migrate_v0_v1',
+          //   label: 'v1.x.x migration',
+          //   position: 'left'
+          // },
+          {
+            to: 'https://github.com/sponsors/thomaspoignant',
+            label: 'Sponsor us ❤️',
+            position: 'right',
+          },
           {type: 'docsVersionDropdown', position: 'right'},
           {
             href: 'https://github.com/thomaspoignant/go-feature-flag',
             position: 'right',
-            className: "header-github-link navbar__right",
-            "aria-label": "GitHub repository",
+            className: 'header-github-link navbar__right',
+            'aria-label': 'GitHub repository',
           },
           {
             href: 'https://twitter.com/gofeatureflag',
             position: 'right',
-            className: "header-twitter-link navbar__right",
-            "aria-label": "Twitter",
+            className: 'header-twitter-link navbar__right',
+            'aria-label': 'Twitter',
           },
           {
             href: 'https://gophers.slack.com/messages/go-feature-flag',
             position: 'right',
-            className: "header-slack-link navbar__right",
-            "aria-label": "Slack",
+            className: 'header-slack-link navbar__right',
+            'aria-label': 'Slack',
           },
           {
             href: 'mailto:contact@gofeatureflag.org',
             position: 'right',
-            className: "header-email-link navbar__right",
-            "aria-label": "Email",
+            className: 'header-email-link navbar__right',
+            'aria-label': 'Email',
           },
         ],
       },
@@ -167,13 +181,13 @@ const config = {
               },
             ],
           },
-
         ],
         copyright: `Copyright © ${new Date().getFullYear()} GO Feature Flag.`,
       },
       prism: {
         theme: lightCodeTheme,
         darkTheme: darkCodeTheme,
+        additionalLanguages: ['toml', 'php'],
       },
     }),
 };

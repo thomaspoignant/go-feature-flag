@@ -33,6 +33,7 @@ func Init(config Config) error {
 
 // Close the component by stopping the background refresh and clean the cache.
 func Close() {
+	onceFF = sync.Once{}
 	ff.Close()
 }
 
@@ -78,7 +79,7 @@ func New(config Config) (*GoFeatureFlag, error) {
 
 		notificationService := cache.NewNotificationService(notifiers)
 		goFF.bgUpdater = newBackgroundUpdater(config.PollingInterval)
-		goFF.cache = cache.New(notificationService)
+		goFF.cache = cache.New(notificationService, config.Logger)
 
 		err := retrieveFlagsAndUpdateCache(goFF.config, goFF.cache)
 		if err != nil && !config.StartWithRetrieverError {
@@ -102,7 +103,6 @@ func New(config Config) (*GoFeatureFlag, error) {
 
 // Close wait until thread are done
 func (g *GoFeatureFlag) Close() {
-	onceFF = sync.Once{}
 	if g != nil {
 		if g.cache != nil {
 			// clear the cache

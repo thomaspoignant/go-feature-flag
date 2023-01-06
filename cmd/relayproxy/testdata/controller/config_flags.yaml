@@ -1,0 +1,73 @@
+new-admin-access:
+  percentage: 30
+  true: true
+  false: false
+  default: false
+
+flag-only-for-admin:
+  rule: admin eq true
+  percentage: 100
+  true: true
+  false: false
+  default: false
+
+disable-flag:
+  rule: admin eq true
+  percentage: 100
+  true: "true"
+  false: "false"
+  default: "default"
+  disable: true
+
+test-flag-rule-not-apply:
+  rule: key eq \"key\"
+  percentage: 100
+  default:
+    test: test
+  "true":
+    test2: test
+  "false":
+    test3: test
+
+test-flag-rule-apply:
+  rule: key eq "random-key"
+  percentage: 100
+  default:
+    test: test
+  "true":
+    test2: test
+  "false":
+    test3: test
+
+test-flag-rule-apply-false:
+  rule: anonymous eq true
+  percentage: 10
+  default:
+    test: test
+  "true":
+    test2: test
+  "false":
+    test3: test
+
+number-flag:
+  rule: anonymous eq true
+  percentage: 100
+  default: 1
+  "true": 2
+  "false": 3
+
+array-flag:
+  rule: anonymous eq true
+  percentage: 10
+  default:
+    - batmanDefault
+    - supermanDefault
+    - superherosDefault
+  "true":
+    - batmanTrue
+    - supermanTrue
+    - superherosTrue
+  "false":
+    - batmanFalse
+    - supermanFalse
+    - superherosFalse

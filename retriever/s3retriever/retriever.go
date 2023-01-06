@@ -3,7 +3,6 @@ package s3retriever
 import (
 	"context"
 	"fmt"
-	"io"
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -65,7 +64,7 @@ func (s *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	}
 
 	// Read file content
-	content, err := io.ReadAll(file)
+	content, err := os.ReadFile(file.Name())
 	if err != nil {
 		return nil, err
 	}

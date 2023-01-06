@@ -1,6 +1,6 @@
 name: PR assignment
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, reopened]
 
 jobs:
@@ -13,4 +13,3 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           assignees: thomaspoignant
           numOfAssignee: 1
-          allowSelfAssign: false
