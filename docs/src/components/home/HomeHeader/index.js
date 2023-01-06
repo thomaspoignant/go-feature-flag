@@ -1,8 +1,8 @@
 import React from 'react';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import styles from './styles.module.css';
-import  Link from '@docusaurus/Link';
-import clsx from "clsx";
+import Link from '@docusaurus/Link';
+import clsx from 'clsx';
 
 export function HomeHeader() {
   const {siteConfig} = useDocusaurusContext();
@@ -44,26 +44,46 @@ export function HomeHeader() {
           </g>
         </svg>
       </div>
-      <div className={clsx("container", styles.container)}>
+      <div className={clsx('container', styles.container)}>
         <div className="grid grid-pad">
           <div className="col-1-2">
             <div className={styles.heroContent}>
-              <span className="goffMainTitle">GO Feature Flag</span><br/>
-              <span className="goffMainSubtitle">Ship Faster, Reduce Risk, and Build Scale</span>
-              <p>Feature flags lets you modify system behavior without changing code. Deploy every day, release when you are ready. Reduce risk by releasing your features progressively.</p>
+              <span className="goffMainTitle">GO Feature Flag</span>
+              <br />
+              <span className="goffMainSubtitle">
+                Ship Faster, Reduce Risk, and Build Scale
+              </span>
+              <p>
+                Feature flags lets you modify system behavior without changing
+                code. Deploy every day, release when you are ready. Reduce risk
+                by releasing your features progressively.
+              </p>
             </div>
             <div className={styles.ghStars}>
-              <Link to={siteConfig.customFields.github}><img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/thomaspoignant/go-feature-flag?style=social"/></Link>
+              <Link to={siteConfig.customFields.github}>
+                <img
+                  alt="GitHub Repo stars"
+                  src="https://img.shields.io/github/stars/thomaspoignant/go-feature-flag?style=social"
+                />
+              </Link>
             </div>
             <div className={styles.availableGH}>
-              <Link to={siteConfig.customFields.github} type="button" className={clsx("btn btn-dark btn-labeled btn-lg")}>
-                <button className="pushy__btn pushy__btn--df pushy__btn--black"><span className="btn-label"><i className="fa-brands fa-github"></i></span> Available on GitHub</button>
+              <Link
+                to={siteConfig.customFields.github}
+                type="button"
+                className={clsx('btn btn-dark btn-labeled btn-lg')}>
+                <button className="pushy__btn pushy__btn--df pushy__btn--black">
+                  <span className="btn-label">
+                    <i className="fa-brands fa-github"></i>
+                  </span>{' '}
+                  Available on GitHub
+                </button>
               </Link>
             </div>
           </div>
           <div className="col-1-2">
             <div className="hero-image">
-              <img src={siteConfig.customFields.logo} alt="hero-img"/>
+              <img src={siteConfig.customFields.logo} alt="hero-img" />
             </div>
           </div>
         </div>
