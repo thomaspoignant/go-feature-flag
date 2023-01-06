@@ -45,6 +45,14 @@ watch-relayproxy: ## Launch the relay proxy in watch mode.
 		--build.cmd "go build -mod vendor -o out/bin/relayproxy ./cmd/relayproxy/" \
 		--build.bin "./out/bin/relayproxy"
 
+watch-doc: ## Launch a local server to work on the documentation
+	cd website; \
+    	npm i && npx docusaurus start
+
+serve-doc: ## Serve the doc build by the build-doc target
+	cd website; \
+		npm run serve
+
 swagger: ## Build swagger documentation
 	$(GOCMD) install github.com/swaggo/swag/cmd/swag@latest
 	cd cmd/relayproxy && swag init --markdownFiles docs
