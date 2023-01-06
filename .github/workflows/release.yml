@@ -128,7 +128,7 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4
         with:
-          branch: create-new-doc-version
+          branch: create-new-doc-version-${{ env.GIT_TAG_NAME }}
           title: Create a new documentation version ${{ env.GIT_TAG_NAME }}
           body: Automated pull request to create a new documentation version ${{ env.GIT_TAG_NAME }}
           labels: automerge
@@ -137,7 +137,7 @@ jobs:
           draft: false
           signoff: true
           delete-branch: true
-          path: ${{ env.MAIN_BRANCH_NAME }}-${{ env.GIT_TAG_NAME }}
+          path: ${{ env.MAIN_BRANCH_NAME }}
 
 
 #      - name: Commit new doc version
