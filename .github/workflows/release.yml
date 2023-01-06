@@ -89,8 +89,8 @@ jobs:
       MAIN_BRANCH_NAME: main
       WEBSITE_DIR: website
     name: Create new documentation tag
-    needs:
-      - goreleaser
+#    needs:
+#      - goreleaser
     steps:
       - name: Checkout
         uses: actions/checkout@v3
