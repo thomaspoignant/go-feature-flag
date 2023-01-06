@@ -87,7 +87,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       MAIN_BRANCH_NAME: main
-      WEBSITE_DIR: docs
+      WEBSITE_DIR: website
     name: Create new documentation tag
     needs:
       - goreleaser

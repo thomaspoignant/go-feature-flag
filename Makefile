@@ -25,7 +25,7 @@ build-relayproxy: ## Build the relay proxy in out/bin/
 	GO111MODULE=on $(GOCMD) build -mod vendor -o out/bin/relayproxy ./cmd/relayproxy/
 
 build-doc: ## Build the documentation
-	cd docs; \
+	cd website; \
 	npm i && npm run build
 
 clean: ## Remove build related file
