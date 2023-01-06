@@ -4,81 +4,81 @@ on:
     types: [ published ]
 
 jobs:
-#  goreleaser:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Checkout
-#        uses: actions/checkout@v3
-#        with:
-#          fetch-depth: 0
-#
-#      - name: Fetch all tags
-#        run: git fetch --force --tags
-#
-#      - name: Set up Go
-#        uses: actions/setup-go@v2
-#        with:
-#          go-version: '^1.18.0'
-#
-#      - name: Docker login
-#        env:
-#          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-#          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-#        run: |
-#          echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
-#
-#      - name: Run GoReleaser
-#        uses: goreleaser/goreleaser-action@v3
-#        with:
-#          distribution: goreleaser
-#          version: latest
-#          args: release --rm-dist
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
-#
-#  dockerhub-migration-cli:
-#    runs-on: ubuntu-latest
-#    name: Upload dockerhub readme
-#    needs:
-#      - goreleaser
-#    steps:
-#      - name: Checkout
-#        uses: actions/checkout@v3
-#        with:
-#          fetch-depth: 0
-#
-#      - name: Release readme to DockerHub
-#        uses: ms-jpq/sync-dockerhub-readme@v1
-#        env:
-#          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-#          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-#        with:
-#          username: ${DOCKER_USERNAME}
-#          password: ${DOCKER_PASSWORD}
-#          repository: thomaspoignant/go-feature-flag-migration-cli
-#          readme: "./cmd/migrationcli/DOCKERHUB.md"
-#
-#  dockerhub-relay-proxy:
-#    runs-on: ubuntu-latest
-#    name: Upload dockerhub readme
-#    needs:
-#      - goreleaser
-#    steps:
-#      - name: Checkout
-#        uses: actions/checkout@v3
-#        with:
-#          fetch-depth: 0
-#
-#      - name: Release readme to DockerHub
-#        uses: ms-jpq/sync-dockerhub-readme@v1
-#        env:
-#          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-#          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-#        with:
-#          username: ${DOCKER_USERNAME}
-#          password: ${DOCKER_PASSWORD}
-#          repository: thomaspoignant/go-feature-flag-relay-proxy
-#          readme: "./cmd/relayproxy/DOCKERHUB.md"
+  goreleaser:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Fetch all tags
+        run: git fetch --force --tags
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '^1.18.0'
+
+      - name: Docker login
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: |
+          echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
+
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v3
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --rm-dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+
+  dockerhub-migration-cli:
+    runs-on: ubuntu-latest
+    name: Upload dockerhub readme
+    needs:
+      - goreleaser
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Release readme to DockerHub
+        uses: ms-jpq/sync-dockerhub-readme@v1
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        with:
+          username: ${DOCKER_USERNAME}
+          password: ${DOCKER_PASSWORD}
+          repository: thomaspoignant/go-feature-flag-migration-cli
+          readme: "./cmd/migrationcli/DOCKERHUB.md"
+
+  dockerhub-relay-proxy:
+    runs-on: ubuntu-latest
+    name: Upload dockerhub readme
+    needs:
+      - goreleaser
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Release readme to DockerHub
+        uses: ms-jpq/sync-dockerhub-readme@v1
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        with:
+          username: ${DOCKER_USERNAME}
+          password: ${DOCKER_PASSWORD}
+          repository: thomaspoignant/go-feature-flag-relay-proxy
+          readme: "./cmd/relayproxy/DOCKERHUB.md"
 
   doc-release:
     # doc release will create a new tag of the documentation en commit it in
@@ -89,8 +89,8 @@ jobs:
       MAIN_BRANCH_NAME: main
       WEBSITE_DIR: website
     name: Create new documentation tag
-#    needs:
-#      - goreleaser
+    needs:
+      - goreleaser
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -138,11 +138,3 @@ jobs:
           signoff: true
           delete-branch: true
           path: ${{ env.MAIN_BRANCH_NAME }}
-
-
-#      - name: Commit new doc version
-#        uses: stefanzweifel/git-auto-commit-action@v4
-#        with:
-#          commit_message: Commit new doc version
-#          branch: ${{ env.MAIN_BRANCH_NAME }}
-#          repository: ./${{ env.MAIN_BRANCH_NAME }}
