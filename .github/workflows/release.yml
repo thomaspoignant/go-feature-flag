@@ -131,7 +131,7 @@ jobs:
           branch: create-new-doc-version
           title: Create a new documentation version ${{ env.GIT_TAG_NAME }}
           body: Automated pull request to create a new documentation version ${{ env.GIT_TAG_NAME }}
-          labels: [automerge]
+          labels: automerge
           assignees: thomaspoignant
           reviewers: thomaspoignant
           draft: false
