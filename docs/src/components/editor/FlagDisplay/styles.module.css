@@ -1,3 +1,7 @@
 .invalidForm {
   color: var(--goff-message-error);
 }
+
+.space{
+  height: 1rem;
+}

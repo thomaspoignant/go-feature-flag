@@ -110,7 +110,6 @@ function formToGoFeatureFlag(formData) {
 }
 
 function ErrorInForm() {
-  // TODO: best looking error here
   return (
     <div className={styles.invalidForm}>
       Error in your configuration, please review the form.
@@ -155,7 +154,7 @@ export function FlagDisplay() {
         required={false}
         label={'flagFormat'}
       />}
-
+      <div className={styles.space}></div>
       {isValid && (
         <Highlight className="JSON">
           {formatFlagFile(formToGoFeatureFlag(data), data.flagFormat)}
