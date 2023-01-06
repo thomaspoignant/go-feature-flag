@@ -134,6 +134,8 @@ jobs:
           reviewers: thomaspoignant
           draft: false
           signoff: true
+          delete-branch: true
+          base: $MAIN_BRANCH_NAME
 
 
 #      - name: Commit new doc version
