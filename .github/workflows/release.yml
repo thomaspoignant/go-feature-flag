@@ -120,6 +120,8 @@ jobs:
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
           fetch-depth: 0
 
+      - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
       - name: Copy version to main branch
         run: cp -rf release/${{ env.WEBSITE_DIR }}/ $MAIN_BRANCH_NAME
 
@@ -136,6 +138,7 @@ jobs:
           signoff: true
           delete-branch: true
           base: $MAIN_BRANCH_NAME
+          path: ${{ env.MAIN_BRANCH_NAME }}
 
 
 #      - name: Commit new doc version
