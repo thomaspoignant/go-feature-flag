@@ -21,7 +21,7 @@ func main() {
 		Logger:          log.New(os.Stdout, "", 0),
 		Context:         context.Background(),
 		Retriever: &fileretriever.Retriever{
-			Path: "examples/retrfile/flags.yaml",
+			Path: "examples/retriever_file/flags.yaml",
 		},
 		DataExporter: ffclient.DataExporter{
 			FlushInterval:    1 * time.Second,

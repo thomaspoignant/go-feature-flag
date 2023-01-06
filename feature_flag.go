@@ -79,7 +79,7 @@ func New(config Config) (*GoFeatureFlag, error) {
 
 		notificationService := cache.NewNotificationService(notifiers)
 		goFF.bgUpdater = newBackgroundUpdater(config.PollingInterval)
-		goFF.cache = cache.New(notificationService)
+		goFF.cache = cache.New(notificationService, config.Logger)
 
 		err := retrieveFlagsAndUpdateCache(goFF.config, goFF.cache)
 		if err != nil && !config.StartWithRetrieverError {
