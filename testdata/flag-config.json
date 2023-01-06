@@ -1,44 +1,16 @@
 {
   "test-flag": {
-    "variations": {
-      "Default": false,
-      "false": false,
-      "true": true
-    },
-    "targeting": [
-      {
-        "name": "legacyRuleV0",
-        "query": "key eq \"random-key\"",
-        "percentage": {
-          "false": 0,
-          "true": 100
-        }
-      }
-    ],
-    "defaultRule": {
-      "name": "legacyDefaultRule",
-      "variation": "Default"
-    }
+    "rule": "key eq \"random-key\"",
+    "percentage": 100,
+    "true": true,
+    "false": false,
+    "default": false
   },
   "test-flag2": {
-    "variations": {
-      "Default": false,
-      "false": false,
-      "true": true
-    },
-    "targeting": [
-      {
-        "name": "legacyRuleV0",
-        "query": "key eq \"not-a-key\"",
-        "percentage": {
-          "false": 0,
-          "true": 100
-        }
-      }
-    ],
-    "defaultRule": {
-      "name": "legacyDefaultRule",
-      "variation": "Default"
-    }
+    "rule": "key eq \"not-a-key\"",
+    "percentage": 100,
+    "true": true,
+    "false": false,
+    "default": false
   }
 }

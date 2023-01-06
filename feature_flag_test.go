@@ -174,7 +174,7 @@ func TestUpdateFlag(t *testing.T) {
   default: false`
 
 	flagFile, _ := os.CreateTemp("", "")
-	_ = os.WriteFile(flagFile.Name(), []byte(initialFileContent), os.ModePerm)
+	_ = os.WriteFile(flagFile.Name(), []byte(initialFileContent), 0o600)
 
 	gffClient1, _ := ffclient.New(ffclient.Config{
 		PollingInterval: 1 * time.Second,
@@ -193,7 +193,7 @@ func TestUpdateFlag(t *testing.T) {
   false: false
   default: false`
 
-	_ = os.WriteFile(flagFile.Name(), []byte(updatedFileContent), os.ModePerm)
+	_ = os.WriteFile(flagFile.Name(), []byte(updatedFileContent), 0o600)
 
 	flagValue, _ = gffClient1.BoolVariation("test-flag", ffuser.NewUser("random-key"), false)
 	assert.True(t, flagValue)
@@ -213,7 +213,7 @@ func TestImpossibleToLoadfile(t *testing.T) {
   default: false`
 
 	flagFile, _ := os.CreateTemp("", "impossible")
-	_ = os.WriteFile(flagFile.Name(), []byte(initialFileContent), os.ModePerm)
+	_ = os.WriteFile(flagFile.Name(), []byte(initialFileContent), 0o600)
 
 	gffClient1, _ := ffclient.New(ffclient.Config{
 		PollingInterval: 1 * time.Second,
@@ -261,7 +261,7 @@ func TestFlagFileUnreachable(t *testing.T) {
 	flagValue, _ := gff.StringVariation("test-flag", ffuser.NewUser("random-key"), "SDKdefault")
 	assert.Equal(t, "SDKdefault", flagValue, "should use the SDK default value")
 
-	_ = os.WriteFile(flagFilePath, []byte(initialFileContent), os.ModePerm)
+	_ = os.WriteFile(flagFilePath, []byte(initialFileContent), 0o600)
 	time.Sleep(2 * time.Second)
 
 	flagValue, _ = gff.StringVariation("test-flag", ffuser.NewUser("random-key"), "SDKdefault")

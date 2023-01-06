@@ -3,7 +3,6 @@ on:
   pull_request:
     branches:
       - main
-      - v1.0.0
 
 jobs:
   test-deploy:
@@ -12,5 +11,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
+      - name: Install dependencies
+        working-directory: ./docs
+        run: npm install
       - name: Test Build website
-        run: make build-doc
+        working-directory: ./docs
+        run: npm run build

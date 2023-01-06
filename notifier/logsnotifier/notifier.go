@@ -24,17 +24,17 @@ func (c *Notifier) Notify(diff notifier.DiffCache, wg *sync.WaitGroup) error {
 	}
 
 	for key, flagDiff := range diff.Updated {
-		if flagDiff.After.IsDisable() != flagDiff.Before.IsDisable() {
-			if flagDiff.After.IsDisable() {
+		if flagDiff.After.GetDisable() != flagDiff.Before.GetDisable() {
+			if flagDiff.After.GetDisable() {
 				// Flag is disabled
 				fflog.Printf(c.Logger, "flag %v is turned OFF\n", key)
 				continue
 			}
-			fflog.Printf(c.Logger, "flag %v is turned ON\n", key)
+			fflog.Printf(c.Logger, "flag %v is turned ON (flag=[%v])  \n", key, flagDiff.After)
 			continue
 		}
 		// key has changed in cache
-		fflog.Printf(c.Logger, "flag %s updated\n", key)
+		fflog.Printf(c.Logger, "flag %s updated, old=[%v], new=[%v]\n", key, flagDiff.Before, flagDiff.After)
 	}
 
 	return nil

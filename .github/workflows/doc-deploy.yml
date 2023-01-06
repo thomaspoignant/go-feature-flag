@@ -13,10 +13,10 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
       - name: Install dependencies
-        working-directory: ./website
+        working-directory: ./docs
         run: npm install
       - name: Build website
-        working-directory: ./website
+        working-directory: ./docs
         run: npm run build
 
       # Popular action to deploy to GitHub Pages:
@@ -26,4 +26,4 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           # Build output to publish to the `gh-pages` branch:
-          publish_dir: ./website/build
+          publish_dir: ./docs/build

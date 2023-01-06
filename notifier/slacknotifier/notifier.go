@@ -9,13 +9,10 @@ import (
 	"net/url"
 	"os"
 	"sort"
-	"strings"
 	"sync"
 
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 
-	"github.com/gdexlab/go-render/render"
-	"github.com/r3labs/diff/v3"
 	"github.com/thomaspoignant/go-feature-flag/internal"
 )
 
@@ -80,11 +77,11 @@ func (c *Notifier) Notify(diff notifier.DiffCache, wg *sync.WaitGroup) error {
 	return nil
 }
 
-func convertToSlackMessage(diffCache notifier.DiffCache) slackMessage {
+func convertToSlackMessage(diff notifier.DiffCache) slackMessage {
 	hostname, _ := os.Hostname()
-	attachments := convertDeletedFlagsToSlackMessage(diffCache)
-	attachments = append(attachments, convertUpdatedFlagsToSlackMessage(diffCache)...)
-	attachments = append(attachments, convertAddedFlagsToSlackMessage(diffCache)...)
+	attachments := convertDeletedFlagsToSlackMessage(diff)
+	attachments = append(attachments, convertUpdatedFlagsToSlackMessage(diff)...)
+	attachments = append(attachments, convertAddedFlagsToSlackMessage(diff)...)
 	res := slackMessage{
 		Text:        fmt.Sprintf("Changes detected in your feature flag file on: *%s*", hostname),
 		IconURL:     goFFLogo,
@@ -93,9 +90,9 @@ func convertToSlackMessage(diffCache notifier.DiffCache) slackMessage {
 	return res
 }
 
-func convertDeletedFlagsToSlackMessage(diffCache notifier.DiffCache) []attachment {
+func convertDeletedFlagsToSlackMessage(diff notifier.DiffCache) []attachment {
 	attachments := make([]attachment, 0)
-	for key := range diffCache.Deleted {
+	for key := range diff.Deleted {
 		attachment := attachment{
 			Title:      fmt.Sprintf("❌ Flag \"%s\" deleted", key),
 			Color:      colorDeleted,
@@ -107,9 +104,9 @@ func convertDeletedFlagsToSlackMessage(diffCache notifier.DiffCache) []attachmen
 	return attachments
 }
 
-func convertUpdatedFlagsToSlackMessage(diffCache notifier.DiffCache) []attachment {
+func convertUpdatedFlagsToSlackMessage(diff notifier.DiffCache) []attachment {
 	attachments := make([]attachment, 0)
-	for key, value := range diffCache.Updated {
+	for key, value := range diff.Updated {
 		attachment := attachment{
 			Title:      fmt.Sprintf("✏️ Flag \"%s\" updated", key),
 			Color:      colorUpdated,
@@ -118,20 +115,24 @@ func convertUpdatedFlagsToSlackMessage(diffCache notifier.DiffCache) []attachmen
 			Fields:     []Field{},
 		}
 
-		changelog, _ := diff.Diff(value.Before, value.After, diff.AllowTypeMismatch(true))
-		for _, change := range changelog {
-			if change.Type == "update" {
-				value := fmt.Sprintf("%s => %s", render.Render(change.From), render.Render(change.To))
+		before := value.Before.GetRawValues()
+		after := value.After.GetRawValues()
+		sortedKey := sortedKeys(before)
+		for _, bKey := range sortedKey {
+			if before[bKey] != after[bKey] {
+				// format output if empty
+				if before[bKey] == "" {
+					before[bKey] = "<empty>"
+				}
+				if after[bKey] == "" {
+					after[bKey] = "<empty>"
+				}
+
+				value := fmt.Sprintf("%v => %v", before[bKey], after[bKey])
 				short := len(value) < longSlackAttachment
-				attachment.Fields = append(
-					attachment.Fields,
-					Field{Title: strings.Join(change.Path, "."), Short: short, Value: value},
-				)
+				attachment.Fields = append(attachment.Fields, Field{Title: bKey, Short: short, Value: value})
 			}
 		}
-
-		sort.Sort(ByTitle(attachment.Fields))
-
 		attachments = append(attachments, attachment)
 	}
 	return attachments
@@ -139,12 +140,23 @@ func convertUpdatedFlagsToSlackMessage(diffCache notifier.DiffCache) []attachmen
 
 func convertAddedFlagsToSlackMessage(diff notifier.DiffCache) []attachment {
 	attachments := make([]attachment, 0)
-	for key := range diff.Added {
+	for key, value := range diff.Added {
 		attachment := attachment{
 			Title:      fmt.Sprintf("🆕 Flag \"%s\" created", key),
 			Color:      colorAdded,
 			FooterIcon: goFFLogo,
 			Footer:     slackFooter,
+			Fields:     []Field{},
+		}
+
+		rawValues := value.GetRawValues()
+		sortedKey := sortedKeys(rawValues)
+		for _, bKey := range sortedKey {
+			if rawValues[bKey] != "" {
+				value := fmt.Sprintf("%v", rawValues[bKey])
+				short := len(value) < longSlackAttachment
+				attachment.Fields = append(attachment.Fields, Field{Title: bKey, Short: short, Value: value})
+			}
 		}
 		attachments = append(attachments, attachment)
 	}
@@ -171,8 +183,13 @@ type Field struct {
 	Short bool   `json:"short"`
 }
 
-type ByTitle []Field
-
-func (a ByTitle) Len() int           { return len(a) }
-func (a ByTitle) Less(i, j int) bool { return a[i].Title < a[j].Title }
-func (a ByTitle) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func sortedKeys(m map[string]string) []string {
+	keys := make([]string, len(m))
+	i := 0
+	for k := range m {
+		keys[i] = k
+		i++
+	}
+	sort.Strings(keys)
+	return keys
+}

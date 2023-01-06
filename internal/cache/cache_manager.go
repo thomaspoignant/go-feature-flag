@@ -8,12 +8,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/BurntSushi/toml"
-
-	"github.com/thomaspoignant/go-feature-flag/internal/dto"
-
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
+	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
 	"gopkg.in/yaml.v3"
+
+	"github.com/pelletier/go-toml"
 )
 
 type Manager interface {
@@ -29,20 +28,18 @@ type cacheManagerImpl struct {
 	mutex               sync.RWMutex
 	notificationService Service
 	latestUpdate        time.Time
-	logger              *log.Logger
 }
 
-func New(notificationService Service, logger *log.Logger) Manager {
+func New(notificationService Service) Manager {
 	return &cacheManagerImpl{
-		logger:              logger,
-		inMemoryCache:       NewInMemoryCache(logger),
+		inMemoryCache:       NewInMemoryCache(),
 		mutex:               sync.RWMutex{},
 		notificationService: notificationService,
 	}
 }
 
 func (c *cacheManagerImpl) UpdateCache(loadedFlags []byte, fileFormat string, log *log.Logger) error {
-	var newFlags map[string]dto.DTO
+	var newFlags map[string]flagv1.FlagData
 	var err error
 	switch strings.ToLower(fileFormat) {
 	case "toml":
@@ -57,7 +54,7 @@ func (c *cacheManagerImpl) UpdateCache(loadedFlags []byte, fileFormat string, lo
 		return err
 	}
 
-	newCache := NewInMemoryCache(c.logger)
+	newCache := NewInMemoryCache()
 	newCache.Init(newFlags)
 	newCacheFlags := newCache.All()
 	oldCacheFlags := map[string]flag.Flag{}

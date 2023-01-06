@@ -26,9 +26,9 @@ Every feature or bug should come with an associate test to keep the coverage as 
 
 We are maintaining 2 documentations:
 - [README.md](README.md) which contains everything you need to know to start working with the module.
-- [go-feature-flag website](https://gofeatureflag.org) which is the full detail website containing the documentation.
+- [go-feature-flag website](https://thomaspoignant.github.io/go-feature-flag/) which is the full detail documentation of the module.
 
-If your contribution has impact on the documentation, please check both version. You can check how to work on the documentation [here](./website/README.md).
+If your contribution has impact on the documentation, please check both version.
 
 ### How to run the documentation website locally
 

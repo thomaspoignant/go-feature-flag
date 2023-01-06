@@ -12,7 +12,7 @@
       "variation": "Default",
       "value": "YO",
       "default": false,
-      "version": ""
+      "version": 0
     },
     {
       "kind": "feature",
@@ -23,7 +23,7 @@
       "variation": "Default",
       "value": "YO2",
       "default": false,
-      "version": "127"
+      "version": 127
     }
   ]
 }

@@ -37,8 +37,6 @@ linters-settings:
       - singleCaseSwitch
   golint:
     min-confidence: 0.6
-  gosimple:
-    checks: ["all","-S1023"]
   gofumpt:
     module-path: github.com/thomaspoignant/go-feature-flag
     lang-version: "1.17"

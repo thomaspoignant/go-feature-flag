@@ -34,7 +34,7 @@ func init() {
 	})
 
 	flagFile, _ := os.CreateTemp("", "")
-	_ = os.WriteFile(flagFile.Name(), buf.Bytes(), os.ModePerm)
+	_ = os.WriteFile(flagFile.Name(), buf.Bytes(), 0o600)
 
 	client, _ = ffclient.New(ffclient.Config{
 		PollingInterval: 1 * time.Second,

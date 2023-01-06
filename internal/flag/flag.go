@@ -8,18 +8,29 @@ type Flag interface {
 	// Value is returning the Value associate to the flag (True / False / Default )
 	Value(flagName string, user ffuser.User, evaluationCtx EvaluationContext) (interface{}, ResolutionDetails)
 
+	// String display correctly a flag with the right formatting
+	String() string
+
 	// GetVersion is the getter for the field Version
 	// Default: 0.0
-	GetVersion() string
+	GetVersion() float64
 
-	// IsTrackEvents is the getter of the field TrackEvents
+	// GetTrackEvents is the getter of the field TrackEvents
 	// Default: true
-	IsTrackEvents() bool
+	GetTrackEvents() bool
 
-	// IsDisable is the getter for the field Disable
+	// GetDisable is the getter for the field Disable
 	// Default: false
-	IsDisable() bool
+	GetDisable() bool
+
+	// GetDefaultVariation return the name of the default variation (if something goes wrong)
+	GetDefaultVariation() string
 
 	// GetVariationValue return the value of variation from his name
-	GetVariationValue(name string) interface{}
+	GetVariationValue(variationName string) interface{}
+
+	// GetRawValues is returning a raw value of the Flag used by the notifiers
+	// We should not have any logic based on these values, this is only to
+	// display  the information.
+	GetRawValues() map[string]string
 }

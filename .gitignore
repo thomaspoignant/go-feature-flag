@@ -16,21 +16,7 @@ bin/
 # CI deployment folder
 .deployment
 
-# goreleaser
-dist/
-release/
-
 vendor/
 
 # venv created for the documentation script
 .venv
-
-# binaries
-release/
-cmd/migrationcli/migrationcli
-cmd/relayproxy/relayproxy
-tmp/
-
-# Local dev files
-goff-proxy.yaml
-flags.yaml

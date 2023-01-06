@@ -1,9 +1,0 @@
-{
-  "trackEvents": true,
-  "variationType": "SdkDefault",
-  "failed": false,
-  "version": "",
-  "reason": "DISABLED",
-  "errorCode": "",
-  "value": "mydefaultFlagValue"
-}

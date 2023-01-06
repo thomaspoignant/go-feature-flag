@@ -17,11 +17,6 @@ func Float64(t float64) *float64 {
 	return &t
 }
 
-// Int returns a pointer to the float64 value passed in.
-func Int(t int) *int {
-	return &t
-}
-
 func Interface(v interface{}) *interface{} {
 	return &v
 }
