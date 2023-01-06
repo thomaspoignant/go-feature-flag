@@ -2,7 +2,7 @@ import styles from './styles.module.css';
 import {Input} from '../Input';
 import clsx from 'clsx';
 import React from 'react';
-import {JsonEditor} from '../jsonEditor';
+import {JsonEditor} from '../JsonEditor';
 import {useFieldArray, useFormContext} from 'react-hook-form';
 import {Colors} from '../Colors';
 import PropTypes from 'prop-types';
