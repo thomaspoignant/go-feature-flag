@@ -1,0 +1,30 @@
+{
+  "plugins": ["prettier", "unused-imports", "react"],
+  "extends": ["plugin:prettier/recommended", "plugin:react/recommended"],
+  "ignorePatterns": ["build/"],
+  "overrides": [
+    {
+      "files": ["*.md", "*.mdx"],
+      "extends": ["plugin:mdx/recommended"]
+    }
+  ],
+  "parserOptions": {
+    "sourceType": "module",
+    "ecmaVersion": "latest",
+    "ecmaFeatures": {
+      "jsx": true,
+      "modules": true
+    }
+  },
+  "settings": {
+    "mdx/code-blocks": false
+  },
+  "rules": {
+    "no-unused-vars": "off", // or "@typescript-eslint/no-unused-vars": "off",
+    "unused-imports/no-unused-imports": "error",
+    "unused-imports/no-unused-vars": [
+      "warn",
+      { "vars": "all", "varsIgnorePattern": "^_", "args": "after-used", "argsIgnorePattern": "^_" }
+    ]
+  }
+}

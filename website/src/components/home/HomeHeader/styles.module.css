@@ -1,0 +1,65 @@
+.hero {
+  align-items: center;
+  display: flex;
+  padding: 4rem 2rem;
+  margin: 4rem 0 4rem 0;
+}
+
+.heroShape {
+  position: absolute;
+  width: 100%;
+  top: 0;
+  left: 0;
+  z-index: -1;
+}
+
+.heroShape svg:first-child {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 48%;
+}
+
+.heroShape svg:last-child {
+  width: 10%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  max-width: 150px;
+}
+
+svg:not(:root) {
+  overflow: hidden;
+}
+
+.container {
+  z-index: 100;
+  width: 100%;
+  padding-right: 15px;
+  padding-left: 15px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.heroContent p {
+  font-size: 1.05rem;
+  line-height: 2rem;
+  font-weight: 400;
+  margin-bottom: 3rem;
+  color: var(--goff-main-ff-description);
+}
+
+.ghStars {
+  text-align: center;
+}
+
+.ghStars img {
+  margin-bottom: 1rem;
+  height: 1.8rem;
+}
+
+.availableGH {
+  font-size: 1rem;
+  text-align: center;
+}
