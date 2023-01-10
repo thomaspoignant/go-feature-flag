@@ -401,7 +401,7 @@ version = "12"
 
 </details>
 
-All the fields to create a flag are described in the [documentation](https://docs.gofeatureflag.org/v0.27.1/flag_format/). 
+All the fields to create a flag are described in the [documentation](https://gofeatureflag.org/docs/flag_format/). 
 
 ## Rule format
 
@@ -444,7 +444,7 @@ All the other attributes are optional.
 Since it is useful to make complex queries on your flag, you can add as many information fields you want to your user.
 It will be used when testing the targeting rules.
 
-You can also distinguish logged-in users from anonymous users in the SDK ([check documentation about anonymous users](https://docs.gofeatureflag.org/docs/users#anonymous-users)).
+You can also distinguish logged-in users from anonymous users in the SDK ([check documentation about anonymous users](https://gofeatureflag.org/docs/users#anonymous-users)).
 
 ## Variations
 The Variation methods determine whether a flag is enabled or not for a specific user.
@@ -480,7 +480,7 @@ The function is evaluating all available flags for the user and returns a `flags
 information you need.
 
 The `MarshalJSON()` function will return a JSON Object, that can be directly used by your front-end application.  
-[More details in the documentation.](https://docs.gofeatureflag.org/docs/users#get-all-flags-for-a-specific-user)
+[More details in the documentation.](https://gofeatureflag.org/docs/users#get-all-flags-for-a-specific-user)
 
 ## Rollout
 A critical part of every new feature release is orchestrating the actual launch schedule between the Product, Engineering, and Marketing teams.
