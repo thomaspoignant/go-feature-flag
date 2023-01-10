@@ -50,7 +50,7 @@ I've also written an [article](https://medium.com/better-programming/feature-fla
 - Use **GO Feature Flag** in several languages with **Open Feature SDKs**.
 
 
-https://user-images.githubusercontent.com/17908063/168597893-e957e648-b795-4b5f-94d5-265d272a2137.mp4
+https://user-images.githubusercontent.com/17908063/211581747-f6354a9d-8be6-4e52-aa53-7f0d6a40827e.mp4
 
 _The code of this demo is available in [`thomaspoignant/go-feature-flag-demo`](https://github.com/thomaspoignant/go-feature-flag-demo) repository_.
 
