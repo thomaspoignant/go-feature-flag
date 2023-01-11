@@ -22,7 +22,7 @@ func main() {
 		Retriever: &githubretriever.Retriever{
 			RepositorySlug: "thomaspoignant/go-feature-flag",
 			Branch:         "main",
-			FilePath:       "examples/github/flags.yaml",
+			FilePath:       "examples/retriever_github/flags.yaml",
 			Timeout:        3 * time.Second,
 		},
 	})
