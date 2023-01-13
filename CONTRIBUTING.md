@@ -30,14 +30,19 @@ We are maintaining 2 documentations:
 
 If your contribution has impact on the documentation, please check both version. You can check how to work on the documentation [here](./website/README.md).
 
-### How to run the documentation website locally
+## How to run the documentation website locally
 
-For the documentation website we are using [mkdocs](https://www.mkdocs.org/) with the "[Material for MkDocs](https://squidfunk.github.io/mkdocs-material/)" theme.
-To run it locally just use the docker image:
+For the documentation website we are using [Docusaurus 2](https://docusaurus.io/).  
+Everything is available in the [`website/docs`](website/docs) directory.
+
+Your can start locally the website.
+
+1. Open a terminal and go to the root project of this repository.
+2. Launch the command bellow, it will install the dependencies and run the local server for the documentation.
 ```shell
-docker run --rm -it -p 8000:8000 -v ${PWD}:/docs squidfunk/mkdocs-material
+make watch-doc
 ```
-The website will be available on http://localhost:8000/
+3. You can now access to the documentation directly in your browser: [http://localhost:3000/](http://localhost:3000/).
 
 ## Sonar
 
