@@ -15,7 +15,7 @@ The first things we will do is install the **Open Feature SDK** and the **GO Fea
 
 ## Initialize your Open Feature client
 
-To evaluate the flags you need to have an Open Feature configured in you app.
+To evaluate the flags you need to have an Open Feature configured in you app.  
 This code block shows you how you can create a client that you can use in your application.
 
 ```ptython
