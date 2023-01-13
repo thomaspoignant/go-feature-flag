@@ -57,7 +57,7 @@ I've also written an [article](https://medium.com/better-programming/feature-fla
 
 https://user-images.githubusercontent.com/17908063/211581747-f6354a9d-8be6-4e52-aa53-7f0d6a40827e.mp4
 
-_The code of this demo is available in [`thomaspoignant/go-feature-flag-demo`](https://github.com/thomaspoignant/go-feature-flag-demo) repository_.
+_The code of this demo is available in [`examples/demo`](examples/demo) repository_.
 
 ## Getting started
 
