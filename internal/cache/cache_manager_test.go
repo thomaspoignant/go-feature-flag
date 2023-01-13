@@ -27,33 +27,59 @@ func Test_GetFlagNotExist(t *testing.T) {
 }
 
 func Test_FlagCache(t *testing.T) {
-	yamlFile := []byte(`test-flag:
-  rule: key eq "random-key"
-  percentage: 100
-  true: true
-  false: false
-  default: false
-  trackEvents: false
-`)
+	yamlFile := []byte(`
+test-flag:
+  variations:
+    true_var: true
+    false_var: false
+  targeting:
+    - query: key eq "random-key"
+      percentage:
+        true_var: 100
+        false_var: 0
+  defaultRule:
+    variation: false_var	
+  trackEvents: false`)
 
 	jsonFile := []byte(`{
-	 "test-flag": {
-	   "rule": "key eq \"random-key\"",
-	   "percentage": 100,
-	   "true": true,
-	   "false": false,
-	   "default": false
-	 }
-	}
+  "test-flag": {
+    "variations": {
+      "true_var": true,
+      "false_var": false
+    },
+    "targeting": [
+      {
+        "query": "key eq \"random-key\"",
+        "percentage": {
+          "true_var": 100,
+          "false_var": 0
+        }
+      }
+    ],
+    "defaultRule": {
+      "variation": "false_var"
+    },
+		"trackEvents": false
+  }
+}
 	`)
 
 	tomlFile := []byte(`[test-flag]
-	rule = "key eq \"random-key\""
-	percentage = 100.0
-	true = true
-	false = false
-	default = false
-	disable = false`)
+trackEvents = false
+
+  [test-flag.variations]
+  true_var = true
+  false_var = false
+
+  [[test-flag.targeting]]
+  query = 'key eq "random-key"'
+
+    [test-flag.targeting.percentage]
+    true_var = 100.00
+    false_var = 0.00
+
+  [test-flag.defaultRule]
+  variation = "false_var"`)
 
 	type args struct {
 		loadedFlags []byte
@@ -75,22 +101,19 @@ func Test_FlagCache(t *testing.T) {
 				"test-flag": {
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
 							Query: testconvert.String("key eq \"random-key\""),
 							Percentages: &map[string]float64{
-								"False": 0,
-								"True":  100,
+								"false_var": 0,
+								"true_var":  100,
 							},
 						},
 					},
 					Variations: &map[string]*interface{}{
-						"Default": testconvert.Interface(false),
-						"False":   testconvert.Interface(false),
-						"True":    testconvert.Interface(true),
+						"false_var": testconvert.Interface(false),
+						"true_var":  testconvert.Interface(true),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
-						VariationResult: testconvert.String("Default"),
+						VariationResult: testconvert.String("false_var"),
 					},
 					TrackEvents: testconvert.Bool(false),
 				},
@@ -101,13 +124,17 @@ func Test_FlagCache(t *testing.T) {
 			name:       "Yaml invalid file",
 			flagFormat: "yaml",
 			args: args{
-				loadedFlags: []byte(`test-flag:
-		 rule: key eq "random-key"
-		 percentage: "toot"
-		 true: true
-		 false: false
-		 default: false
-		`),
+				loadedFlags: []byte(`
+test-flag:
+  variations:
+    true_var: true
+    false_var: false
+  targeting:
+    - query: key eq "random-key"
+      percentage: "toto"
+  defaultRule:
+    variation: false_var	
+  trackEvents: false`),
 			},
 			wantErr: true,
 		},
@@ -121,23 +148,21 @@ func Test_FlagCache(t *testing.T) {
 				"test-flag": {
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
 							Query: testconvert.String("key eq \"random-key\""),
 							Percentages: &map[string]float64{
-								"False": 0,
-								"True":  100,
+								"false_var": 0,
+								"true_var":  100,
 							},
 						},
 					},
 					Variations: &map[string]*interface{}{
-						"Default": testconvert.Interface(false),
-						"False":   testconvert.Interface(false),
-						"True":    testconvert.Interface(true),
+						"false_var": testconvert.Interface(false),
+						"true_var":  testconvert.Interface(true),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
-						VariationResult: testconvert.String("Default"),
+						VariationResult: testconvert.String("false_var"),
 					},
+					TrackEvents: testconvert.Bool(false),
 				},
 			},
 			wantErr: false,
@@ -147,14 +172,23 @@ func Test_FlagCache(t *testing.T) {
 			flagFormat: "json",
 			args: args{
 				loadedFlags: []byte(`{
-		"test-flag": {
-		  "rule": "key eq \"random-key\"",
-		  "percentage": 100,
-		  "true": true,
-		  "false": false,
-		  "default": false"
-		}
-		}`),
+  "test-flag": {
+    "variations": {
+      "true_var": true,
+      "false_var": false
+    },
+    "targeting": [
+      {
+        "query": "key eq \"random-key\"",
+        "percentage": "toto"
+      }
+    ],
+    "defaultRule": {
+      "variation": "false_var"
+    },
+    "trackEvents": false
+  }
+}`),
 			},
 			wantErr: true,
 		},
@@ -166,26 +200,23 @@ func Test_FlagCache(t *testing.T) {
 			flagFormat: "toml",
 			expected: map[string]flag.InternalFlag{
 				"test-flag": {
-					Disable: testconvert.Bool(false),
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
 							Query: testconvert.String("key eq \"random-key\""),
 							Percentages: &map[string]float64{
-								"False": 0,
-								"True":  100,
+								"false_var": 0,
+								"true_var":  100,
 							},
 						},
 					},
 					Variations: &map[string]*interface{}{
-						"Default": testconvert.Interface(false),
-						"False":   testconvert.Interface(false),
-						"True":    testconvert.Interface(true),
+						"false_var": testconvert.Interface(false),
+						"true_var":  testconvert.Interface(true),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
-						VariationResult: testconvert.String("Default"),
+						VariationResult: testconvert.String("false_var"),
 					},
+					TrackEvents: testconvert.Bool(false),
 				},
 			},
 			wantErr: false,
@@ -193,13 +224,18 @@ func Test_FlagCache(t *testing.T) {
 		{
 			name: "TOML invalid file",
 			args: args{
-				loadedFlags: []byte(`[test-flag]
-		rule = "key eq \"random-key\""
-		percentage = 100.0
-		true = true
-		false = false
-		default = false"
-		disable = false`),
+				loadedFlags: []byte(`
+[test-flag]
+trackEvents = false
+[test-flag.variations]
+true_var = true
+false_var = false
+[[test-flag.targeting]]
+query = 'key eq "random-key"'
+percentage = "toto
+[test-flag.defaultRule]
+variation = "false_var"
+`),
 			},
 			flagFormat: "toml",
 			wantErr:    true,
@@ -226,14 +262,19 @@ func Test_FlagCache(t *testing.T) {
 }
 
 func Test_AllFlags(t *testing.T) {
-	yamlFile := []byte(`test-flag:
-  rule: key eq "random-key"
-  percentage: 100
-  true: true
-  false: false
-  default: false
-  trackEvents: false
-`)
+	yamlFile := []byte(`
+test-flag:
+  variations:
+    true_var: true
+    false_var: false
+  targeting:
+    - query: key eq "random-key"
+      percentage:
+        true_var: 100
+        false_var: 0
+  defaultRule:
+    variation: false_var	
+  trackEvents: false`)
 
 	type args struct {
 		loadedFlags []byte
@@ -254,23 +295,20 @@ func Test_AllFlags(t *testing.T) {
 			expected: map[string]flag.InternalFlag{
 				"test-flag": {
 					Variations: &map[string]*interface{}{
-						"Default": testconvert.Interface(false),
-						"False":   testconvert.Interface(false),
-						"True":    testconvert.Interface(true),
+						"false_var": testconvert.Interface(false),
+						"true_var":  testconvert.Interface(true),
 					},
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
 							Query: testconvert.String("key eq \"random-key\""),
 							Percentages: &map[string]float64{
-								"False": 0,
-								"True":  100,
+								"false_var": 0,
+								"true_var":  100,
 							},
 						},
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
-						VariationResult: testconvert.String("Default"),
+						VariationResult: testconvert.String("false_var"),
 					},
 					TrackEvents: testconvert.Bool(false),
 				},
@@ -281,64 +319,70 @@ func Test_AllFlags(t *testing.T) {
 			name:       "Yaml multiple flags",
 			flagFormat: "yaml",
 			args: args{
-				loadedFlags: []byte(`test-flag:
-  rule: key eq "random-key"
-  percentage: 100
-  true: true
-  false: false
-  default: false
+				loadedFlags: []byte(`
+test-flag:
+  variations:
+    true_var: true
+    false_var: false
+  targeting:
+    - query: key eq "random-key"
+      percentage:
+        true_var: 100
+        false_var: 0
+  defaultRule:
+    variation: false_var	
   trackEvents: false
+
 test-flag2:
-  rule: key eq "random-key"
-  percentage: 0
-  true: "true"
-  false: "false"
-  default: "false"
+  variations:
+    true_var: "true"
+    false_var: "false"
+  targeting:
+    - query: key eq "random-key"
+      percentage:
+        true_var: 0
+        false_var: 100
+  defaultRule:
+    variation: false_var  
   trackEvents: false
 `),
 			},
 			expected: map[string]flag.InternalFlag{
 				"test-flag": {
 					Variations: &map[string]*interface{}{
-						"Default": testconvert.Interface(false),
-						"False":   testconvert.Interface(false),
-						"True":    testconvert.Interface(true),
+						"false_var": testconvert.Interface(false),
+						"true_var":  testconvert.Interface(true),
 					},
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
 							Query: testconvert.String("key eq \"random-key\""),
 							Percentages: &map[string]float64{
-								"False": 0,
-								"True":  100,
+								"false_var": 0,
+								"true_var":  100,
 							},
 						},
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
-						VariationResult: testconvert.String("Default"),
+						VariationResult: testconvert.String("false_var"),
 					},
 					TrackEvents: testconvert.Bool(false),
 				},
 				"test-flag2": {
 					Variations: &map[string]*interface{}{
-						"Default": testconvert.Interface("false"),
-						"False":   testconvert.Interface("false"),
-						"True":    testconvert.Interface("true"),
+						"false_var": testconvert.Interface("false"),
+						"true_var":  testconvert.Interface("true"),
 					},
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
 							Query: testconvert.String("key eq \"random-key\""),
 							Percentages: &map[string]float64{
-								"False": 100,
-								"True":  0,
+								"false_var": 100,
+								"true_var":  0,
 							},
 						},
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
-						VariationResult: testconvert.String("Default"),
+						VariationResult: testconvert.String("false_var"),
 					},
 					TrackEvents: testconvert.Bool(false),
 				},
@@ -359,7 +403,8 @@ test-flag2:
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			fCache := cache.New(cache.NewNotificationService([]notifier.Notifier{}), nil)
-			_ = fCache.UpdateCache(tt.args.loadedFlags, tt.flagFormat, log.New(os.Stdout, "", 0))
+			err := fCache.UpdateCache(tt.args.loadedFlags, tt.flagFormat, log.New(os.Stdout, "", 0))
+			assert.NoError(t, err)
 
 			allFlags, err := fCache.AllFlags()
 			if tt.wantErr {
@@ -380,11 +425,16 @@ test-flag2:
 
 func Test_cacheManagerImpl_GetLatestUpdateDate(t *testing.T) {
 	loadedFlags := []byte(`test-flag:
-  rule: key eq "random-key"
-  percentage: 100
-  true: true
-  false: false
-  default: false
+  variations:
+    true_var: true
+    false_var: false
+  targeting:
+    - query: key eq "random-key"
+      percentage:
+        true_var: 100
+        false_var: 0
+  defaultRule:
+    variation: false_var	
   trackEvents: false
 `)
 
