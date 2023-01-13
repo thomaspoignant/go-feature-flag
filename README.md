@@ -292,13 +292,12 @@ second-flag:
     B: "valueB"
     defaultValue: "a default value"
   targeting:
-    - name: legacyRuleV0
+    - name: notkey_rule
       query: key eq "not-a-key"
       percentage:
         A: 10
         B: 90
   defaultRule:
-    name: legacyDefaultRule
     variation: defaultValue
   version: "12"
   experimentation: 
@@ -338,7 +337,7 @@ second-flag:
     },
     "targeting": [
       {
-        "name": "legacyRuleV0",
+        "name": "notkey_rule",
         "query": "key eq \"not-a-key\"",
         "percentage": {
           "A": 10,
@@ -347,7 +346,6 @@ second-flag:
       }
     ],
     "defaultRule": {
-      "name": "legacyDefaultRule",
       "variation": "defaultValue"
     },
     "version": "12",
@@ -388,7 +386,7 @@ version = "12"
   defaultValue = "a default value"
 
   [[second-flag.targeting]]
-  name = "legacyRuleV0"
+  name = "notkey_rule"
   query = 'key eq "not-a-key"'
 
     [second-flag.targeting.percentage]
@@ -396,7 +394,6 @@ version = "12"
     B = 90
 
   [second-flag.defaultRule]
-  name = "legacyDefaultRule"
   variation = "defaultValue"
 
   [second-flag.experimentation]
