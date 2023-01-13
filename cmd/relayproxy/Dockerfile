@@ -1,6 +1,6 @@
 FROM golang:1.18 AS build
 
-ARG VERSION=127.0.0.1
+ARG VERSION=0.0.0-SNAPSHOT
 
 WORKDIR /go/src/app
 COPY . /go/src/app
