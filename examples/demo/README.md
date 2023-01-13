@@ -6,7 +6,7 @@ Each square is a different user and can be change by modifying the feature flag 
 
 With this demo app you can modify your flag and visually see which users are impacted by the change.
 
-https://user-images.githubusercontent.com/17908063/168597717-489d64e6-3e52-4d3c-aa7c-86f89dabd278.mp4
+https://user-images.githubusercontent.com/17908063/211581747-f6354a9d-8be6-4e52-aa53-7f0d6a40827e.mp4
 
 In this example we can see how randomly the flag apply to only a percentage of the users.
 
@@ -28,5 +28,3 @@ go build .
 
 ## Report a problem
 If you have any issue with this demo app you can open an issue.
-
-If the problem is related to the SDK please open the issue in the [`thomaspoignant/go-feature-flag`](https://github.com/thomaspoignant/go-feature-flag/issues/new/choose) repository.
