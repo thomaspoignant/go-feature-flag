@@ -9,7 +9,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 
@@ -45,45 +44,95 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 			},
 			expected: expected{
 				bodyPath:  "./testdata/should_call_webhook_and_have_valid_results.json",
-				signature: "sha256=23effe4da9927ab72df5202a3146e6be39c12b7f6cee99f8d2e19326d8806b81",
+				signature: "sha256=366472030e941aa3a8ebe0e715552261f714992dec10f857da23f7e6d39c7e1d",
 			},
 			args: args{
 				url:        "http://webhook.example/hook",
 				statusCode: http.StatusOK,
 				diff: notifier.DiffCache{
 					Added: map[string]flag.Flag{
-						"test-flag3": &flagv1.FlagData{
-							Percentage: testconvert.Float64(5),
-							True:       testconvert.Interface("test"),
-							False:      testconvert.Interface("false"),
-							Default:    testconvert.Interface("default"),
+						"test-flag3": &flag.InternalFlag{
+							Variations: &map[string]*interface{}{
+								"Default": testconvert.Interface("default"),
+								"False":   testconvert.Interface("false"),
+								"True":    testconvert.Interface("test"),
+							},
+							DefaultRule: &flag.Rule{
+								Name: testconvert.String("legacyDefaultRule"),
+								Percentages: &map[string]float64{
+									"False": 95,
+									"True":  5,
+								},
+							},
 						},
 					},
 					Deleted: map[string]flag.Flag{
-						"test-flag": &flagv1.FlagData{
-							Rule:       testconvert.String("key eq \"random-key\""),
-							Percentage: testconvert.Float64(100),
-							True:       testconvert.Interface(true),
-							False:      testconvert.Interface(false),
-							Default:    testconvert.Interface(false),
+						"test-flag": &flag.InternalFlag{
+							Rules: &[]flag.Rule{
+								{
+									Name:  testconvert.String("legacyRuleV0"),
+									Query: testconvert.String("key eq \"random-key\""),
+									Percentages: &map[string]float64{
+										"False": 0,
+										"True":  100,
+									},
+								},
+							},
+							Variations: &map[string]*interface{}{
+								"Default": testconvert.Interface(false),
+								"False":   testconvert.Interface(false),
+								"True":    testconvert.Interface(true),
+							},
+							DefaultRule: &flag.Rule{
+								Name:            testconvert.String("legacyDefaultRule"),
+								VariationResult: testconvert.String("Default"),
+							},
 						},
 					},
 					Updated: map[string]notifier.DiffUpdated{
 						"test-flag2": {
-							Before: &flagv1.FlagData{
-								Rule:       testconvert.String("key eq \"not-a-key\""),
-								Percentage: testconvert.Float64(100),
-								True:       testconvert.Interface(true),
-								False:      testconvert.Interface(false),
-								Default:    testconvert.Interface(false),
+							Before: &flag.InternalFlag{
+								Rules: &[]flag.Rule{
+									{
+										Name:  testconvert.String("legacyRuleV0"),
+										Query: testconvert.String("key eq \"not-a-key\""),
+										Percentages: &map[string]float64{
+											"False": 0,
+											"True":  100,
+										},
+									},
+								},
+								Variations: &map[string]*interface{}{
+									"Default": testconvert.Interface(false),
+									"False":   testconvert.Interface(false),
+									"True":    testconvert.Interface(true),
+								},
+								DefaultRule: &flag.Rule{
+									Name:            testconvert.String("legacyDefaultRule"),
+									VariationResult: testconvert.String("Default"),
+								},
 							},
-							After: &flagv1.FlagData{
-								Rule:       testconvert.String("key eq \"not-a-key\""),
-								Percentage: testconvert.Float64(100),
-								True:       testconvert.Interface(true),
-								False:      testconvert.Interface(false),
-								Default:    testconvert.Interface(false),
-								Disable:    testconvert.Bool(true),
+							After: &flag.InternalFlag{
+								Rules: &[]flag.Rule{
+									{
+										Name:  testconvert.String("legacyRuleV0"),
+										Query: testconvert.String("key eq \"not-a-key\""),
+										Percentages: &map[string]float64{
+											"False": 0,
+											"True":  100,
+										},
+									},
+								},
+								Variations: &map[string]*interface{}{
+									"Default": testconvert.Interface(false),
+									"False":   testconvert.Interface(false),
+									"True":    testconvert.Interface(true),
+								},
+								DefaultRule: &flag.Rule{
+									Name:            testconvert.String("legacyDefaultRule"),
+									VariationResult: testconvert.String("Default"),
+								},
+								Disable: testconvert.Bool(true),
 							},
 						},
 					},
@@ -101,11 +150,19 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 				statusCode: http.StatusOK,
 				diff: notifier.DiffCache{
 					Added: map[string]flag.Flag{
-						"test-flag3": &flagv1.FlagData{
-							Percentage: testconvert.Float64(5),
-							True:       testconvert.Interface("test"),
-							False:      testconvert.Interface("false"),
-							Default:    testconvert.Interface("default"),
+						"test-flag3": &flag.InternalFlag{
+							Variations: &map[string]*interface{}{
+								"Default": testconvert.Interface("default"),
+								"False":   testconvert.Interface("false"),
+								"True":    testconvert.Interface("test"),
+							},
+							DefaultRule: &flag.Rule{
+								Name: testconvert.String("legacyDefaultRule"),
+								Percentages: &map[string]float64{
+									"False": 95,
+									"True":  5,
+								},
+							},
 						},
 					},
 					Deleted: map[string]flag.Flag{},
@@ -184,11 +241,19 @@ func Test_webhookNotifier_no_meta_data(t *testing.T) {
 	mockHTTPClient := &testutils.HTTPClientMock{StatusCode: 200, ForceError: false}
 	diff := notifier.DiffCache{
 		Added: map[string]flag.Flag{
-			"test-flag3": &flagv1.FlagData{
-				Percentage: testconvert.Float64(5),
-				True:       testconvert.Interface("test"),
-				False:      testconvert.Interface("false"),
-				Default:    testconvert.Interface("default"),
+			"test-flag3": &flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"Default": testconvert.Interface("default"),
+					"False":   testconvert.Interface("false"),
+					"True":    testconvert.Interface("test"),
+				},
+				DefaultRule: &flag.Rule{
+					Name: testconvert.String("legacyDefaultRule"),
+					Percentages: &map[string]float64{
+						"False": 95,
+						"True":  5,
+					},
+				},
 			},
 		},
 		Deleted: map[string]flag.Flag{},

@@ -16,7 +16,7 @@ func TestNewFeatureEvent(t *testing.T) {
 		value     interface{}
 		variation string
 		failed    bool
-		version   float64
+		version   string
 	}
 	tests := []struct {
 		name string
@@ -31,7 +31,7 @@ func TestNewFeatureEvent(t *testing.T) {
 				value:     "YO",
 				variation: "Default",
 				failed:    false,
-				version:   0,
+				version:   "",
 			},
 			want: exporter.FeatureEvent{
 				Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: time.Now().Unix(), Key: "random-key",

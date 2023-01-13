@@ -5,7 +5,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	flagv1 "github.com/thomaspoignant/go-feature-flag/internal/flagv1"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 )
@@ -39,11 +38,19 @@ func TestDiffCache_HasDiff(t *testing.T) {
 			name: "only Deleted",
 			fields: fields{
 				Deleted: map[string]flag.Flag{
-					"flag": &flagv1.FlagData{
-						Percentage: testconvert.Float64(100),
-						True:       testconvert.Interface(true),
-						False:      testconvert.Interface(true),
-						Default:    testconvert.Interface(true),
+					"flag": &flag.InternalFlag{
+						Variations: &map[string]*interface{}{
+							"Default": testconvert.Interface(true),
+							"True":    testconvert.Interface(true),
+							"False":   testconvert.Interface(true),
+						},
+						DefaultRule: &flag.Rule{
+							Name: testconvert.String("legacyDefaultRule"),
+							Percentages: &map[string]float64{
+								"False": 0,
+								"True":  100,
+							},
+						},
 					},
 				},
 				Added:   map[string]flag.Flag{},
@@ -55,11 +62,19 @@ func TestDiffCache_HasDiff(t *testing.T) {
 			name: "only Added",
 			fields: fields{
 				Added: map[string]flag.Flag{
-					"flag": &flagv1.FlagData{
-						Percentage: testconvert.Float64(100),
-						True:       testconvert.Interface(true),
-						False:      testconvert.Interface(true),
-						Default:    testconvert.Interface(true),
+					"flag": &flag.InternalFlag{
+						Variations: &map[string]*interface{}{
+							"Default": testconvert.Interface(true),
+							"True":    testconvert.Interface(true),
+							"False":   testconvert.Interface(true),
+						},
+						DefaultRule: &flag.Rule{
+							Name: testconvert.String("legacyDefaultRule"),
+							Percentages: &map[string]float64{
+								"False": 0,
+								"True":  100,
+							},
+						},
 					},
 				},
 				Deleted: map[string]flag.Flag{},
@@ -74,17 +89,33 @@ func TestDiffCache_HasDiff(t *testing.T) {
 				Deleted: map[string]flag.Flag{},
 				Updated: map[string]notifier.DiffUpdated{
 					"flag": {
-						Before: &flagv1.FlagData{
-							Percentage: testconvert.Float64(100),
-							True:       testconvert.Interface(true),
-							False:      testconvert.Interface(true),
-							Default:    testconvert.Interface(true),
+						Before: &flag.InternalFlag{
+							Variations: &map[string]*interface{}{
+								"Default": testconvert.Interface(true),
+								"True":    testconvert.Interface(true),
+								"False":   testconvert.Interface(true),
+							},
+							DefaultRule: &flag.Rule{
+								Name: testconvert.String("legacyDefaultRule"),
+								Percentages: &map[string]float64{
+									"False": 0,
+									"True":  100,
+								},
+							},
 						},
-						After: &flagv1.FlagData{
-							Percentage: testconvert.Float64(100),
-							True:       testconvert.Interface(true),
-							False:      testconvert.Interface(true),
-							Default:    testconvert.Interface(false),
+						After: &flag.InternalFlag{
+							Variations: &map[string]*interface{}{
+								"Default": testconvert.Interface(false),
+								"True":    testconvert.Interface(true),
+								"False":   testconvert.Interface(true),
+							},
+							DefaultRule: &flag.Rule{
+								Name: testconvert.String("legacyDefaultRule"),
+								Percentages: &map[string]float64{
+									"False": 0,
+									"True":  100,
+								},
+							},
 						},
 					},
 				},
@@ -95,34 +126,66 @@ func TestDiffCache_HasDiff(t *testing.T) {
 			name: "all fields",
 			fields: fields{
 				Added: map[string]flag.Flag{
-					"flag": &flagv1.FlagData{
-						Percentage: testconvert.Float64(100),
-						True:       testconvert.Interface(true),
-						False:      testconvert.Interface(true),
-						Default:    testconvert.Interface(true),
+					"flag": &flag.InternalFlag{
+						Variations: &map[string]*interface{}{
+							"Default": testconvert.Interface(true),
+							"True":    testconvert.Interface(true),
+							"False":   testconvert.Interface(true),
+						},
+						DefaultRule: &flag.Rule{
+							Name: testconvert.String("legacyDefaultRule"),
+							Percentages: &map[string]float64{
+								"False": 0,
+								"True":  100,
+							},
+						},
 					},
 				},
 				Deleted: map[string]flag.Flag{
-					"flag": &flagv1.FlagData{
-						Percentage: testconvert.Float64(100),
-						True:       testconvert.Interface(true),
-						False:      testconvert.Interface(true),
-						Default:    testconvert.Interface(true),
+					"flag": &flag.InternalFlag{
+						Variations: &map[string]*interface{}{
+							"Default": testconvert.Interface(true),
+							"True":    testconvert.Interface(true),
+							"False":   testconvert.Interface(true),
+						},
+						DefaultRule: &flag.Rule{
+							Name: testconvert.String("legacyDefaultRule"),
+							Percentages: &map[string]float64{
+								"False": 0,
+								"True":  100,
+							},
+						},
 					},
 				},
 				Updated: map[string]notifier.DiffUpdated{
 					"flag": {
-						Before: &flagv1.FlagData{
-							Percentage: testconvert.Float64(100),
-							True:       testconvert.Interface(true),
-							False:      testconvert.Interface(true),
-							Default:    testconvert.Interface(true),
+						Before: &flag.InternalFlag{
+							Variations: &map[string]*interface{}{
+								"Default": testconvert.Interface(true),
+								"True":    testconvert.Interface(true),
+								"False":   testconvert.Interface(true),
+							},
+							DefaultRule: &flag.Rule{
+								Name: testconvert.String("legacyDefaultRule"),
+								Percentages: &map[string]float64{
+									"False": 0,
+									"True":  100,
+								},
+							},
 						},
-						After: &flagv1.FlagData{
-							Percentage: testconvert.Float64(100),
-							True:       testconvert.Interface(true),
-							False:      testconvert.Interface(true),
-							Default:    testconvert.Interface(false),
+						After: &flag.InternalFlag{
+							Variations: &map[string]*interface{}{
+								"Default": testconvert.Interface(false),
+								"True":    testconvert.Interface(true),
+								"False":   testconvert.Interface(true),
+							},
+							DefaultRule: &flag.Rule{
+								Name: testconvert.String("legacyDefaultRule"),
+								Percentages: &map[string]float64{
+									"False": 0,
+									"True":  100,
+								},
+							},
 						},
 					},
 				},

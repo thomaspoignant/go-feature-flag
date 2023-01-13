@@ -1,0 +1,140 @@
+name: Release
+on:
+  release:
+    types: [ published ]
+
+jobs:
+  goreleaser:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Fetch all tags
+        run: git fetch --force --tags
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '^1.18.0'
+
+      - name: Docker login
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: |
+          echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
+
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v3
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --rm-dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+
+  dockerhub-migration-cli:
+    runs-on: ubuntu-latest
+    name: Upload dockerhub readme
+    needs:
+      - goreleaser
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Release readme to DockerHub
+        uses: ms-jpq/sync-dockerhub-readme@v1
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        with:
+          username: ${DOCKER_USERNAME}
+          password: ${DOCKER_PASSWORD}
+          repository: thomaspoignant/go-feature-flag-migration-cli
+          readme: "./cmd/migrationcli/DOCKERHUB.md"
+
+  dockerhub-relay-proxy:
+    runs-on: ubuntu-latest
+    name: Upload dockerhub readme
+    needs:
+      - goreleaser
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Release readme to DockerHub
+        uses: ms-jpq/sync-dockerhub-readme@v1
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        with:
+          username: ${DOCKER_USERNAME}
+          password: ${DOCKER_PASSWORD}
+          repository: thomaspoignant/go-feature-flag-relay-proxy
+          readme: "./cmd/relayproxy/DOCKERHUB.md"
+
+  doc-release:
+    # doc release will create a new tag of the documentation en commit it in
+    # the main branch. This new version of the doc will be release to gh-pages
+    # when the GitHub Action called "Deploy to GitHub Pages" will be executed.
+    runs-on: ubuntu-latest
+    env:
+      MAIN_BRANCH_NAME: main
+      WEBSITE_DIR: website
+    name: Create new documentation tag
+    needs:
+      - goreleaser
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          path: release
+          fetch-depth: 0
+          token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v3
+
+      - name: Install dependencies
+        working-directory: ./release/${{ env.WEBSITE_DIR }}
+        run: npm install
+
+      - name: Get tag name
+        uses: olegtarasov/get-tag@v2.1.2
+
+      - name: Tagging a new version
+        working-directory: ./release/${{ env.WEBSITE_DIR }}
+        run: npm run docusaurus docs:version $GIT_TAG_NAME
+
+      - name: Checkout main branch
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.MAIN_BRANCH_NAME }}
+          path: ${{ env.MAIN_BRANCH_NAME }}
+          token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Copy version to main branch
+        run: cp -rf release/${{ env.WEBSITE_DIR }}/ $MAIN_BRANCH_NAME
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v4
+        with:
+          branch: create-new-doc-version-${{ env.GIT_TAG_NAME }}
+          title: Create a new documentation version ${{ env.GIT_TAG_NAME }}
+          body: Automated pull request to create a new documentation version ${{ env.GIT_TAG_NAME }}
+          labels: automerge
+          assignees: thomaspoignant
+          reviewers: thomaspoignant
+          draft: false
+          signoff: true
+          delete-branch: true
+          path: ${{ env.MAIN_BRANCH_NAME }}

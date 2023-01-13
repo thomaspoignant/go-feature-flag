@@ -11,9 +11,5 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
-      - name: Install dependencies
-        working-directory: ./docs
-        run: npm install
       - name: Test Build website
-        working-directory: ./docs
-        run: npm run build
+        run: make build-doc

@@ -6,7 +6,7 @@ type VariationResult struct {
 	TrackEvents   bool                  `json:"trackEvents"`
 	VariationType string                `json:"variationType"`
 	Failed        bool                  `json:"failed"`
-	Version       float64               `json:"version"`
+	Version       string                `json:"version"`
 	Reason        flag.ResolutionReason `json:"reason"`
 	ErrorCode     flag.ErrorCode        `json:"errorCode"`
 }

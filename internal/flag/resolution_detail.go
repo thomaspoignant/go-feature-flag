@@ -1,5 +1,7 @@
 package flag
 
+// ResolutionDetails is the object used to manipulate the data internally, it allows to retrieve
+// the details of your evaluation.
 type ResolutionDetails struct {
 	// Variant indicates the name of the variant used when evaluating the flag
 	Variant string
@@ -9,4 +11,10 @@ type ResolutionDetails struct {
 
 	// ErrorCode indicates the error code for this evaluation
 	ErrorCode ErrorCode
+
+	// RuleIndex indicates which rules applied
+	RuleIndex *int
+
+	// RuleName (optional) is the name of the associated rule if we have one
+	RuleName *string
 }

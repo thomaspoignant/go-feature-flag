@@ -166,15 +166,21 @@ func Test2GoFeatureFlagInstance(t *testing.T) {
 }
 
 func TestUpdateFlag(t *testing.T) {
-	initialFileContent := `test-flag:
-  rule: key eq "random-key"
-  percentage: 100
-  true: true
-  false: false
-  default: false`
+	initialFileContent := `
+test-flag:
+  variations:
+    true_var: true
+    false_var: false
+  targeting:
+    - query: key eq "random-key"
+      percentage:
+        true_var: 100
+        false_var: 0
+  defaultRule:
+    variation: false_var`
 
 	flagFile, _ := os.CreateTemp("", "")
-	_ = os.WriteFile(flagFile.Name(), []byte(initialFileContent), 0o600)
+	_ = os.WriteFile(flagFile.Name(), []byte(initialFileContent), os.ModePerm)
 
 	gffClient1, _ := ffclient.New(ffclient.Config{
 		PollingInterval: 1 * time.Second,
@@ -186,14 +192,20 @@ func TestUpdateFlag(t *testing.T) {
 	flagValue, _ := gffClient1.BoolVariation("test-flag", ffuser.NewUser("random-key"), false)
 	assert.True(t, flagValue)
 
-	updatedFileContent := `test-flag:
-  rule: key eq "random-key2"
-  percentage: 100
-  true: true
-  false: false
-  default: false`
+	updatedFileContent := `
+test-flag:
+  variations:
+    true_var: true
+    false_var: false
+  targeting:
+    - query: key eq "random-key2"
+      percentage:
+        true_var: 100
+        false_var: 0
+  defaultRule:
+    variation: false_var`
 
-	_ = os.WriteFile(flagFile.Name(), []byte(updatedFileContent), 0o600)
+	_ = os.WriteFile(flagFile.Name(), []byte(updatedFileContent), os.ModePerm)
 
 	flagValue, _ = gffClient1.BoolVariation("test-flag", ffuser.NewUser("random-key"), false)
 	assert.True(t, flagValue)
@@ -205,15 +217,21 @@ func TestUpdateFlag(t *testing.T) {
 }
 
 func TestImpossibleToLoadfile(t *testing.T) {
-	initialFileContent := `test-flag:
-  rule: key eq "random-key"
-  percentage: 100
-  true: true
-  false: false
-  default: false`
+	initialFileContent := `
+test-flag:
+  variations:
+    true_var: true
+    false_var: false
+  targeting:
+    - query: key eq "random-key"
+      percentage:
+        true_var: 100
+        false_var: 0
+  defaultRule:
+    variation: false_var`
 
 	flagFile, _ := os.CreateTemp("", "impossible")
-	_ = os.WriteFile(flagFile.Name(), []byte(initialFileContent), 0o600)
+	_ = os.WriteFile(flagFile.Name(), []byte(initialFileContent), os.ModePerm)
 
 	gffClient1, _ := ffclient.New(ffclient.Config{
 		PollingInterval: 1 * time.Second,
@@ -237,12 +255,18 @@ func TestImpossibleToLoadfile(t *testing.T) {
 }
 
 func TestFlagFileUnreachable(t *testing.T) {
-	initialFileContent := `test-flag:
-  rule: key eq "random-key"
-  percentage: 100
-  true: "true"
-  false: "false"
-  default: "false"`
+	initialFileContent := `
+test-flag:
+  variations:
+    true_var: "true"
+    false_var: "false"
+  targeting:
+    - query: key eq "random-key"
+      percentage:
+        true_var: 100
+        false_var: 0
+  defaultRule:
+    variation: false_var`
 
 	tempDir, _ := os.MkdirTemp("", "")
 	defer os.Remove(tempDir)
@@ -261,7 +285,7 @@ func TestFlagFileUnreachable(t *testing.T) {
 	flagValue, _ := gff.StringVariation("test-flag", ffuser.NewUser("random-key"), "SDKdefault")
 	assert.Equal(t, "SDKdefault", flagValue, "should use the SDK default value")
 
-	_ = os.WriteFile(flagFilePath, []byte(initialFileContent), 0o600)
+	_ = os.WriteFile(flagFilePath, []byte(initialFileContent), os.ModePerm)
 	time.Sleep(2 * time.Second)
 
 	flagValue, _ = gff.StringVariation("test-flag", ffuser.NewUser("random-key"), "SDKdefault")

@@ -1,13 +1,33 @@
-[test-flag]
-rule = "key eq \"random-key\""
-percentage = 100.0
-true = true
+[test-flag.variations]
+Default = false
 false = false
-default = false
+true = true
 
-[test-flag2]
-rule = "key eq \"not-a-key\""
-percentage = 100.0
-true = true
+[[test-flag.targeting]]
+name = "legacyRuleV0"
+query = 'key eq "random-key"'
+
+[test-flag.targeting.percentage]
+false = 0.0
+true = 100.0
+
+[test-flag.defaultRule]
+name = "legacyDefaultRule"
+variation = "Default"
+
+[test-flag2.variations]
+Default = false
 false = false
-default = false
+true = true
+
+[[test-flag2.targeting]]
+name = "legacyRuleV0"
+query = 'key eq "not-a-key"'
+
+[test-flag2.targeting.percentage]
+false = 0.0
+true = 100.0
+
+[test-flag2.defaultRule]
+name = "legacyDefaultRule"
+variation = "Default"

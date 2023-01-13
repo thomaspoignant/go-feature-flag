@@ -1,12 +1,14 @@
 progressive-flag:
-  true: true
-  false: false
-  default: false
-  rollout:
-    progressive:
-      percentage:
-        initial: 0
-        end: 100
-      releaseRamp:
-        start: 2021-03-20T00:00:00.10-05:00
-        end: 2021-03-21T00:00:00.10-05:00
+  variations:
+    A_var: true
+    B_var: false
+  defaultRule:
+    progressiveRollout:
+      initial:
+        variation: A_var
+        percentage: 0
+        date: 2021-03-20T00:00:00.10-05:00
+      end:
+        variation: B_var
+        percentage: 100
+        date: 2021-03-21T00:00:00.10-05:00
