@@ -43,7 +43,7 @@ I've also written an [article](https://medium.com/better-programming/feature-fla
 
 ## What can I do with GO Feature Flag?
 
-- Storing your configuration flags file on various locations (`HTTP`, `S3`, `Kubernetes`, [_see full list_](https://gofeatureflag.org/docs/configure_flag/store_your_flags.md).
+- Storing your configuration flags file on various locations (`HTTP`, `S3`, `Kubernetes`, [_see full list_](https://gofeatureflag.org/docs/configure_flag/store_your_flags).
 - Configuring your flags in various [format](https://gofeatureflag.org/docs/configure_flag/flag_format) (`JSON`, `TOML` and `YAML`).
 - Adding complex [rules](https://gofeatureflag.org/docs/configure_flag/flag_format#rule-format) to target your users.
 - Use a complex rollout strategy for your flags :
@@ -178,7 +178,7 @@ docker run \
 
 ```
 
-_If you don't want to use docker to install the **relay proxy** you can follow the [documentation](../relay_proxy/install_relay_proxy.md)_.
+_If you don't want to use docker to install the **relay proxy** you can go to [docker hub](https://hub.docker.com/r/thomaspoignant/go-feature-flag-relay-proxy)_.
 
 ### Use Open Feature SDK
 
@@ -237,7 +237,7 @@ if (adminFlag) {
 ## Can I use GO Feature Flag with any language?
 
 Originally GO Feature Flag was built to be a GOlang only library, but it limits the ecosystem too much.  
-To be compatible with more languages we have implemented the [GO Feature Flag Relay Proxy](https://github.com/thomaspoignant/go-feature-flag-relay-proxy).
+To be compatible with more languages we have implemented the [GO Feature Flag Relay Proxy](cmd/relayproxy/).
 It is a service you can host that provides an API to evaluate your flags, you can call it using HTTP to get your variation.
 
 Since we believe in standardization we are also implementing [OpenFeature](https://github.com/open-feature) providers to interact with this API in the language of your choice.  
@@ -403,7 +403,7 @@ version = "12"
 
 </details>
 
-All the fields to create a flag are described in the [documentation](https://gofeatureflag.org/docs/flag_format/). 
+All the fields to create a flag are described in the [documentation](https://gofeatureflag.org/docs/configure_flag/flag_format). 
 
 ## Rule format
 
@@ -446,7 +446,7 @@ All the other attributes are optional.
 Since it is useful to make complex queries on your flag, you can add as many information fields you want to your user.
 It will be used when testing the targeting rules.
 
-You can also distinguish logged-in users from anonymous users in the SDK ([check documentation about anonymous users](https://gofeatureflag.org/docs/users#anonymous-users)).
+You can also distinguish logged-in users from anonymous users in the SDK ([check documentation about anonymous users](https://gofeatureflag.org/docs/go_module/target_user#anonymous-users)).
 
 ## Variations
 The Variation methods determine whether a flag is enabled or not for a specific user.
@@ -482,7 +482,7 @@ The function is evaluating all available flags for the user and returns a `flags
 information you need.
 
 The `MarshalJSON()` function will return a JSON Object, that can be directly used by your front-end application.  
-[More details in the documentation.](https://gofeatureflag.org/docs/users#get-all-flags-for-a-specific-user)
+[More details in the documentation.](https://gofeatureflag.org/docs/go_module/target_user#get-all-flags-for-a-specific-user)
 
 ## Rollout
 A critical part of every new feature release is orchestrating the actual launch schedule between the Product, Engineering, and Marketing teams.
