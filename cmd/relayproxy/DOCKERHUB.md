@@ -30,13 +30,13 @@ For more information about GO Feature Flag Relay Proxy, please visit [github.com
 - This default distribution is the official distribution for `go-feature-flag-relay-proxy`.
 
 - Where to file issues: 
-  [https://github.com/thomaspoignant/go-feature-flag/issues/](https://github.com/thomaspoignant/go-feature-flag/issues/new?assignees=&labels=bug%2C+docker%2C+needs-triage&template=bug.md&title=(bug%20docker)).
+  [https://github.com/thomaspoignant/go-feature-flag/issues/](https://github.com/thomaspoignant/go-feature-flag/issues/new?assignees=&labels=bug%2C+relay-proxy%2C+docker%2C+needs-triage&template=bug.md&title=(bug%20docker)).
 
-- Source are available in [`go-feature-flag-relay-proxy` repo](https://github.com/thomaspoignant/go-feature-flag-relay-proxy).
+- Source are available in [`go-feature-flag` repo](https://github.com/thomaspoignant/go-feature-flag/tree/main/cmd/relayproxy).
 
 - All versions are available in the [tags](https://hub.docker.com/r/thomaspoignant/go-feature-flag-relay-proxy/tags).
 
-- Release notes are available [here](https://github.com/thomaspoignant/go-feature-flag-relay-proxy/releases).
+- Release notes are available [here](https://github.com/thomaspoignant/go-feature-flag/releases).
 
 
 # How to use this image
