@@ -94,34 +94,39 @@ function OpenFeature() {
       <div className="col-1-2">
         <div className={clsx('grid grid-pad', styles.soc)}>
           <SocialIcon
-            colorClassName={styles.socialIconCyan}
+            colorClassName={styles.socialIconGrey}
             fontAwesomeIcon="devicon-go-original-wordmark colored"
             tooltipText="GO"
           />
 
           <SocialIcon
-            colorClassName={styles.socialIconCyan}
+            colorClassName={styles.socialIconGrey}
             fontAwesomeIcon="devicon-java-plain-wordmark colored"
             tooltipText="Java"
           />
 
           <SocialIcon
-            colorClassName={styles.socialIconCyan}
+            colorClassName={styles.socialIconGrey}
             fontAwesomeIcon="devicon-javascript-plain colored"
             tooltipText="Javascript"
           />
 
           <SocialIcon
-            colorClassName={styles.socialIconCyan}
+            colorClassName={styles.socialIconGrey}
             fontAwesomeIcon="devicon-typescript-plain colored"
             tooltipText="Typescript"
           />
 
           <SocialIcon
-            colorClassName={styles.socialIconCyan}
+            colorClassName={styles.socialIconGrey}
             fontAwesomeIcon="devicon-dot-net-plain-wordmark colored"
             tooltipText=".NET"
           />
+
+          <SocialIcon
+            colorClassName={styles.socialIconGrey}
+            fontAwesomeIcon="devicon-python-plain-wordmark colored"
+            tooltipText="Python" />
         </div>
       </div>
       <div className="col-1-2">
