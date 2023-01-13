@@ -16,7 +16,7 @@ To be compatible with Open Feature, **GO Feature Flag** is providing a lightweig
 When the **relay proxy** is running in your infrastructure, you can use the **Open Feature SDKs** in combination with **GO Feature Flag providers** to evaluate your flags. 
 
 This schema is an overview on how **Open Feature** is working, you can have more information about all the concepts in the **[Open Feature documentation](https://docs.openfeature.dev)**.
-![](../../static/docs/openfeature/concepts.jpg)
+![](/docs/openfeature/concepts.jpg)
 
 ## Create a feature flag configuration
 
