@@ -4,10 +4,10 @@ go 1.18
 
 require (
 	cloud.google.com/go/storage v1.28.1
-	github.com/BurntSushi/toml v0.3.1
+	github.com/BurntSushi/toml v1.2.1
 	github.com/aws/aws-sdk-go v1.44.175
 	github.com/brpaz/echozap v1.1.3
-	github.com/fsouza/fake-gcs-server v1.43.0
+	github.com/fsouza/fake-gcs-server v1.44.0
 	github.com/gdexlab/go-render v1.0.1
 	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.5.9
