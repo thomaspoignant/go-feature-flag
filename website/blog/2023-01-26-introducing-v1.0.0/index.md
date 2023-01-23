@@ -1,7 +1,7 @@
 ---
 title: "🚀 Announcing GO Feature Flag v1.0.0"
 authors: [thomaspoignant]
-tags: [GO Feature Flag, Open Feature, Annoub]
+tags: [GO Feature Flag, Open Feature, release]
 ---
 ![GO Feature Flag logo](banner.png)
 
