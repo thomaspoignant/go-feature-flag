@@ -77,15 +77,15 @@ user-background-color:
   variations:
     pro: #ff1f00
     enterprise: #114f03
-		free_grey: #b0b3af
-		free_yellow: #ecec0a
-		default: #ffffff
+    free_grey: #b0b3af
+    free_yellow: #ecec0a
+    default: #ffffff
   targeting:
-		- query: type eq "pro"
-			variation: pro
-		- query: type eq "enterprise"
-			variation: enterprise
-		- query: type eq "free"
+    - query: type eq "pro"
+      variation: pro
+    - query: type eq "enterprise"
+      variation: enterprise
+    - query: type eq "free"
       percentage:
         free_grey: 40
         free_yellow: 60
