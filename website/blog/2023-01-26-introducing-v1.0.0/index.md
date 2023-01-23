@@ -7,7 +7,7 @@ tags: [GO Feature Flag, Open Feature, Annoub]
 
 # Announcing GO Feature Flag v1.0.0, get more from your feature flags
 
-We are so happy to finally announce that **GO Feature Flag** v1.0.0 is released. 🎉  🥳  🚀
+We are so happy to finally announce that **GO Feature Flag** v1.0.0 is released. 🎉 🥳 🚀
 
 It was a long journey before this release but we are happy to propose you an even better experience with feature flags always keeping simplicity in mind and building a lightweight solution.
 
@@ -73,7 +73,7 @@ Let’s take a real life example, we want to get the background color for our we
 We can come-up with a flag, the configuration will look like this:
 
 ```yaml
-**user-background-color:**
+user-background-color:
   variations:
     pro: #ff1f00
     enterprise: #114f03
@@ -95,7 +95,7 @@ We can come-up with a flag, the configuration will look like this:
 
 As you can see we can have a way more advanced flag configuration with this new format. This format is solving all the limitation we had with the version `v0.x.x` of **GO Feature Flag**.
 
-### **Migrate from v0.x.x to v1.x.x**
+### Migrate from v0.x.x to v1.x.x
 
 First of all you should know that all flags from the version `v0.x.x` are still compatible with this new version of **GO Feature Flag**. We made it possible to reduce the disagreement to have to convert all your flag directly.
 
@@ -115,10 +115,10 @@ docker run \
 
 ## Documentation
 
-We use the opportunity of the `v1.0.0` to revamp our documentation and to highlight how you can use ********************************GO Feature Flag******************************** in 2 different modes.
+We use the opportunity of the `v1.0.0` to revamp our documentation and to highlight how you can use **GO Feature Flag** in 2 different modes.
 
 - **The GO module**, this is where we started and this is the core of what we propose. In the documentation you will find all the information on how to use the module into your GO project.
-- Using **Open-Feature**, the new open-source vendor agnostic standard for feature flags. You can use the `relay-proxy` our server component that allows to use **GO Feature Flag** with multiple languages *(for now we support `javascript`, `typescript`, `java`, `GO` and `.Net`)*. In the documentation you will find how to use the **************************************************GO Feature Flag providers************************************************** in combination with the **********Open Feature SDKs.**********
+- Using **Open-Feature**, the new open-source vendor agnostic standard for feature flags. You can use the `relay-proxy` our server component that allows to use **GO Feature Flag** with multiple languages *(for now we support `javascript`, `typescript`, `java`, `GO` and `.Net`)*. In the documentation you will find how to use the **GO Feature Flag providers** in combination with the **Open Feature SDKs**.
 
 ## Flag Editor
 
@@ -140,7 +140,7 @@ Our main points of attention where the following:
 - All `retrievers` and data `exporters` have not changed and are still working exactly the same way as before.
 - You can continue using **GO Feature Flags** with your old flags.
 - Moving to the version `v1.0.0` is transparent and you just have to change the version.
-- You can still use our advance rollout capabilities such as ******************************experimentation******************************, ********************************************************************************scheduled rollout, progressive rollout …********************************************************************************
+- You can still use our advance rollout capabilities such as **experimentation**, **scheduled rollout**, **progressive rollout …**
 
 # Feedback
 
