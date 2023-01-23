@@ -11,9 +11,10 @@ We are so happy to finally announce that **GO Feature Flag** v1.0.0 is released.
 
 It was a long journey before this release but we are happy to propose you an even better experience with feature flags always keeping simplicity in mind and building a lightweight solution.
 
-Our goal is still the same, we want you to experience the world of feature flags with a lightweight self hosted solution.
+Our goal is still the same, we want you to experience the world of feature flags with a lightweight self-hosted solution.
 
-with this new version you will now be able to enhance your usage of feature flagging with opening the creation of more complex and more advance toggles.
+With this new version you will now be able to enhance your usage of feature flagging with opening the creation of more complex and more advance toggles.
+<!-- truncate -->
 
 # What is changing?
 
