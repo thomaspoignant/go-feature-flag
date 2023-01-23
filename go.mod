@@ -15,7 +15,7 @@ require (
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/labstack/echo/v4 v4.10.0
 	github.com/nikunjy/rules v1.2.0
-	github.com/r3labs/diff/v3 v3.0.0
+	github.com/r3labs/diff/v3 v3.0.1
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.14.0
 	github.com/stretchr/testify v1.8.1
@@ -87,7 +87,8 @@ require (
 	github.com/swaggo/files v0.0.0-20220728132757-551d4a08d97a // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
-	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
+	github.com/vmihailenco/msgpack/v5 v5.3.5 // indirect
+	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
