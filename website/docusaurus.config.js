@@ -45,6 +45,9 @@ const config = {
         googleAnalytics: {
           trackingID: 'G-LEJBB94YBE'
         },
+        gtag: {
+          trackingID: 'G-LEJBB94YBE'
+        },
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
           // Please change this to your repo.
