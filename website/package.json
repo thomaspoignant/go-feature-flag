@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@docusaurus/core": "^2.2.0",
+    "@docusaurus/plugin-google-gtag": "^2.3.0",
     "@docusaurus/preset-classic": "^2.2.0",
     "@hookform/error-message": "^2.0.1",
     "@iarna/toml": "^2.2.5",
