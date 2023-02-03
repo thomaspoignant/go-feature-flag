@@ -17,39 +17,39 @@ The first things we will do is install the **Open Feature SDK** and the **GO Fea
   <TabItem value="netcli" label=".NET CLI">
 
 ```shell
-dotnet add package OpenFeature.Contrib.Providers.GOFeatureFlag
+dotnet add package OpenFeature.Contrib.GOFeatureFlag
 ```
 
   </TabItem>
   <TabItem value="pm" label="Package Manager">
 
 ```shell
-NuGet\Install-Package OpenFeature.Contrib.Providers.GOFeatureFlag
+NuGet\Install-Package OpenFeature.Contrib.GOFeatureFlag
 ```
 
   </TabItem>
   <TabItem value="pr" label="Package Reference">
 
 ```xml
-<PackageReference Include="OpenFeature.Contrib.Providers.GOFeatureFlag" />
+<PackageReference Include="OpenFeature.Contrib.GOFeatureFlag" />
 ```
 
   </TabItem>
   <TabItem value="pc" label="Packet cli">
 
 ```shell
-paket add OpenFeature.Contrib.Providers.GOFeatureFlag
+paket add OpenFeature.Contrib.GOFeatureFlag
 ```
 
   </TabItem>
   <TabItem value="cake" label="Cake">
 
 ```shell
-// Install OpenFeature.Contrib.Providers.GOFeatureFlag as a Cake Addin
-#addin nuget:?package=OpenFeature.Contrib.Providers.GOFeatureFlag
+// Install OpenFeature.Contrib.GOFeatureFlag as a Cake Addin
+#addin nuget:?package=OpenFeature.Contrib.GOFeatureFlag
 
-// Install OpenFeature.Contrib.Providers.GOFeatureFlag as a Cake Tool
-#tool nuget:?package=OpenFeature.Contrib.Providers.GOFeatureFlag
+// Install OpenFeature.Contrib.GOFeatureFlag as a Cake Tool
+#tool nuget:?package=OpenFeature.Contrib.GOFeatureFlag
 ```
 
   </TabItem>
@@ -66,7 +66,7 @@ This code block shows you how you can create a client that you can use in your a
 
 ```csharp
 using OpenFeature;
-using OpenFeature.Contrib.Providers.GOFeatureFlag;
+using OpenFeature.Contrib.GOFeatureFlag;
 
 // ...
 
