@@ -187,9 +187,9 @@ const config = {
         copyright: `Copyright © ${new Date().getFullYear()} GO Feature Flag.`,
       },
       prism: {
-        theme: lightCodeTheme,
-        darkTheme: darkCodeTheme,
-        additionalLanguages: ['toml', 'php'],
+        theme: require("prism-react-renderer/themes/vsLight"),
+        darkTheme: require("prism-react-renderer/themes/vsDark"),
+        additionalLanguages: ['java', 'scala', 'toml', 'php', 'go', 'csharp', 'yaml', 'python'],
       },
     }),
 };
