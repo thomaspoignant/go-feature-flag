@@ -74,7 +74,6 @@ func (f *InternalFlag) Value(
 			}
 	}
 
-	fmt.Println("yo")
 	return f.GetVariationValue(variationSelection.name), ResolutionDetails{
 		Variant:   variationSelection.name,
 		Reason:    variationSelection.reason,
