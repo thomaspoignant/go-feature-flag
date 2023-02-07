@@ -71,7 +71,7 @@ bench: ## Launch the benchmark test
 lint: ## Use golintci-lint on your project
 	mkdir -p ./bin
 	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s latest # Install linters
-	./bin/golangci-lint run --deadline=3m --timeout=3m ./... # Run linters
+	./bin/golangci-lint run --deadline=5m --timeout=3m ./... # Run linters
 
 ## Help:
 help: ## Show this help.
