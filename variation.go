@@ -1,4 +1,3 @@
-// nolint: dupl
 package ffclient
 
 import (
@@ -221,17 +220,7 @@ func (g *GoFeatureFlag) RawVariation(flagKey string, user ffuser.User, sdkDefaul
 ) (model.RawVarResult, error) {
 	res, err := getVariation[interface{}](g, flagKey, user, sdkDefaultValue, "interface{}")
 	notifyVariation(g, flagKey, user, res)
-	return model.RawVarResult{
-		VariationResult: model.VariationResult{
-			TrackEvents:   res.TrackEvents,
-			VariationType: res.VariationType,
-			Failed:        res.Failed,
-			Version:       res.Version,
-			Reason:        res.Reason,
-			ErrorCode:     res.ErrorCode,
-		},
-		Value: res.Value,
-	}, err
+	return model.RawVarResult(res), err
 }
 
 // getFlagFromCache try to get the flag from the cache.
@@ -250,7 +239,7 @@ func notifyVariation[T model.JSONType](
 	g *GoFeatureFlag,
 	flagKey string,
 	user ffuser.User,
-	result model.GenericVariationResult[T],
+	result model.VariationResult[T],
 ) {
 	if result.TrackEvents {
 		event := exporter.NewFeatureEvent(user, flagKey, result.Value, result.VariationType, result.Failed, result.Version)
@@ -263,12 +252,12 @@ func notifyVariation[T model.JSONType](
 }
 
 // getVariation is the internal generic func that handle the logic of a variation the result will always
-// contain a valid model.GenericVariationResult
+// contain a valid model.VariationResult
 func getVariation[T model.JSONType](
 	g *GoFeatureFlag, flagKey string, user ffuser.User, sdkDefaultValue T, expectedType string,
-) (model.GenericVariationResult[T], error) {
+) (model.VariationResult[T], error) {
 	if g == nil {
-		return model.GenericVariationResult[T]{
+		return model.VariationResult[T]{
 			Value:         sdkDefaultValue,
 			VariationType: flag.VariationSDKDefault,
 			Failed:        true,
@@ -278,7 +267,7 @@ func getVariation[T model.JSONType](
 	}
 
 	if g.config.Offline {
-		return model.GenericVariationResult[T]{
+		return model.VariationResult[T]{
 			Value:         sdkDefaultValue,
 			VariationType: flag.VariationSDKDefault,
 			Failed:        false,
@@ -287,7 +276,7 @@ func getVariation[T model.JSONType](
 
 	f, err := g.getFlagFromCache(flagKey)
 	if err != nil {
-		varResult := model.GenericVariationResult[T]{
+		varResult := model.VariationResult[T]{
 			Value:         sdkDefaultValue,
 			VariationType: flag.VariationSDKDefault,
 			ErrorCode:     flag.ErrorCodeFlagNotFound,
@@ -322,7 +311,7 @@ func getVariation[T model.JSONType](
 	case T:
 		v = val
 	default:
-		return model.GenericVariationResult[T]{
+		return model.VariationResult[T]{
 			Value:         sdkDefaultValue,
 			VariationType: flag.VariationSDKDefault,
 			Reason:        flag.ReasonError,
@@ -333,7 +322,7 @@ func getVariation[T model.JSONType](
 		}, fmt.Errorf(errorWrongVariation, flagKey)
 	}
 
-	return model.GenericVariationResult[T]{
+	return model.VariationResult[T]{
 		Value:         v,
 		VariationType: resolutionDetails.Variant,
 		Reason:        resolutionDetails.Reason,
