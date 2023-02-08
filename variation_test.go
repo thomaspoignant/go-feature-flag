@@ -1918,8 +1918,13 @@ func TestRawVariation(t *testing.T) {
 			},
 			wantErr: true,
 			want: model.RawVarResult{
-				VariationResult: notInitVariationResult,
-				Value:           "",
+				VariationResult: model.VariationResult{
+					VariationType: flag.VariationSDKDefault,
+					Failed:        true,
+					Reason:        flag.ReasonError,
+					ErrorCode:     flag.ErrorCodeProviderNotReady,
+				},
+				Value: "",
 			},
 		},
 		{

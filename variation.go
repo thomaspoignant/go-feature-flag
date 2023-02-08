@@ -1,11 +1,11 @@
-//nolint: dupl
+// nolint: dupl
 package ffclient
 
 import (
 	"fmt"
+	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"time"
 
-	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/internal/flagstate"
@@ -17,21 +17,21 @@ const (
 	errorWrongVariation   = "wrong variation used for flag %v"
 )
 
-var (
-	offlineVariationResult = model.VariationResult{VariationType: flag.VariationSDKDefault, Failed: false}
-	notInitVariationResult = model.VariationResult{
-		VariationType: flag.VariationSDKDefault,
-		Failed:        true,
-		Reason:        flag.ReasonError,
-		ErrorCode:     flag.ErrorCodeProviderNotReady,
-	}
-)
-
 // BoolVariation return the value of the flag in boolean.
 // An error is return if you don't have init the library before calling the function.
 // If the key does not exist we return the default value.
 func BoolVariation(flagKey string, user ffuser.User, defaultValue bool) (bool, error) {
 	return ff.BoolVariation(flagKey, user, defaultValue)
+}
+
+// BoolVariation return the value of the flag in boolean.
+// An error is return if you don't have init the library before calling the function.
+// If the key does not exist we return the default value.
+// Note: Use this function only if you are using multiple go-feature-flag instances.
+func (g *GoFeatureFlag) BoolVariation(flagKey string, user ffuser.User, defaultValue bool) (bool, error) {
+	res, err := getVariation[bool](g, flagKey, user, defaultValue, "bool")
+	notifyVariation(g, flagKey, user, res)
+	return res.Value, err
 }
 
 // IntVariation return the value of the flag in int.
@@ -41,11 +41,31 @@ func IntVariation(flagKey string, user ffuser.User, defaultValue int) (int, erro
 	return ff.IntVariation(flagKey, user, defaultValue)
 }
 
+// IntVariation return the value of the flag in int.
+// An error is return if you don't have init the library before calling the function.
+// If the key does not exist we return the default value.
+// Note: Use this function only if you are using multiple go-feature-flag instances.
+func (g *GoFeatureFlag) IntVariation(flagKey string, user ffuser.User, defaultValue int) (int, error) {
+	res, err := getVariation[int](g, flagKey, user, defaultValue, "int")
+	notifyVariation(g, flagKey, user, res)
+	return res.Value, err
+}
+
 // Float64Variation return the value of the flag in float64.
 // An error is return if you don't have init the library before calling the function.
 // If the key does not exist we return the default value.
 func Float64Variation(flagKey string, user ffuser.User, defaultValue float64) (float64, error) {
 	return ff.Float64Variation(flagKey, user, defaultValue)
+}
+
+// Float64Variation return the value of the flag in float64.
+// An error is return if you don't have init the library before calling the function.
+// If the key does not exist we return the default value.
+// Note: Use this function only if you are using multiple go-feature-flag instances.
+func (g *GoFeatureFlag) Float64Variation(flagKey string, user ffuser.User, defaultValue float64) (float64, error) {
+	res, err := getVariation[float64](g, flagKey, user, defaultValue, "float64")
+	notifyVariation(g, flagKey, user, res)
+	return res.Value, err
 }
 
 // StringVariation return the value of the flag in string.
@@ -55,11 +75,33 @@ func StringVariation(flagKey string, user ffuser.User, defaultValue string) (str
 	return ff.StringVariation(flagKey, user, defaultValue)
 }
 
+// StringVariation return the value of the flag in string.
+// An error is return if you don't have init the library before calling the function.
+// If the key does not exist we return the default value.
+// Note: Use this function only if you are using multiple go-feature-flag instances.
+func (g *GoFeatureFlag) StringVariation(flagKey string, user ffuser.User, defaultValue string) (string, error) {
+	res, err := getVariation[string](g, flagKey, user, defaultValue, "string")
+	notifyVariation(g, flagKey, user, res)
+	return res.Value, err
+}
+
 // JSONArrayVariation return the value of the flag in []interface{}.
 // An error is return if you don't have init the library before calling the function.
 // If the key does not exist we return the default value.
 func JSONArrayVariation(flagKey string, user ffuser.User, defaultValue []interface{}) ([]interface{}, error) {
 	return ff.JSONArrayVariation(flagKey, user, defaultValue)
+}
+
+// JSONArrayVariation return the value of the flag in []interface{}.
+// An error is return if you don't have init the library before calling the function.
+// If the key does not exist we return the default value.
+// Note: Use this function only if you are using multiple go-feature-flag instances.
+func (g *GoFeatureFlag) JSONArrayVariation(
+	flagKey string, user ffuser.User, defaultValue []interface{},
+) ([]interface{}, error) {
+	res, err := getVariation[[]interface{}](g, flagKey, user, defaultValue, "[]interface{}")
+	notifyVariation(g, flagKey, user, res)
+	return res.Value, err
 }
 
 // JSONVariation return the value of the flag in map[string]interface{}.
@@ -69,6 +111,18 @@ func JSONVariation(
 	flagKey string, user ffuser.User, defaultValue map[string]interface{},
 ) (map[string]interface{}, error) {
 	return ff.JSONVariation(flagKey, user, defaultValue)
+}
+
+// JSONVariation return the value of the flag in map[string]interface{}.
+// An error is return if you don't have init the library before calling the function.
+// If the key does not exist we return the default value.
+// Note: Use this function only if you are using multiple go-feature-flag instances.
+func (g *GoFeatureFlag) JSONVariation(
+	flagKey string, user ffuser.User, defaultValue map[string]interface{},
+) (map[string]interface{}, error) {
+	res, err := getVariation[map[string]interface{}](g, flagKey, user, defaultValue, "map[string]interface{}")
+	notifyVariation(g, flagKey, user, res)
+	return res.Value, err
 }
 
 // AllFlagsState return the values of all the flags for a specific user.
@@ -82,70 +136,6 @@ func AllFlagsState(user ffuser.User) flagstate.AllFlags {
 // error reporting this is returned.
 func GetFlagsFromCache() (map[string]flag.Flag, error) {
 	return ff.GetFlagsFromCache()
-}
-
-// BoolVariation return the value of the flag in boolean.
-// An error is return if you don't have init the library before calling the function.
-// If the key does not exist we return the default value.
-// Note: Use this function only if you are using multiple go-feature-flag instances.
-func (g *GoFeatureFlag) BoolVariation(flagKey string, user ffuser.User, defaultValue bool) (bool, error) {
-	res, err := g.boolVariation(flagKey, user, defaultValue)
-	g.notifyVariation(flagKey, user, res.VariationResult, res.Value)
-	return res.Value, err
-}
-
-// IntVariation return the value of the flag in int.
-// An error is return if you don't have init the library before calling the function.
-// If the key does not exist we return the default value.
-// Note: Use this function only if you are using multiple go-feature-flag instances.
-func (g *GoFeatureFlag) IntVariation(flagKey string, user ffuser.User, defaultValue int) (int, error) {
-	res, err := g.intVariation(flagKey, user, defaultValue)
-	g.notifyVariation(flagKey, user, res.VariationResult, res.Value)
-	return res.Value, err
-}
-
-// Float64Variation return the value of the flag in float64.
-// An error is return if you don't have init the library before calling the function.
-// If the key does not exist we return the default value.
-// Note: Use this function only if you are using multiple go-feature-flag instances.
-func (g *GoFeatureFlag) Float64Variation(flagKey string, user ffuser.User, defaultValue float64) (float64, error) {
-	res, err := g.float64Variation(flagKey, user, defaultValue)
-	g.notifyVariation(flagKey, user, res.VariationResult, res.Value)
-	return res.Value, err
-}
-
-// StringVariation return the value of the flag in string.
-// An error is return if you don't have init the library before calling the function.
-// If the key does not exist we return the default value.
-// Note: Use this function only if you are using multiple go-feature-flag instances.
-func (g *GoFeatureFlag) StringVariation(flagKey string, user ffuser.User, defaultValue string) (string, error) {
-	res, err := g.stringVariation(flagKey, user, defaultValue)
-	g.notifyVariation(flagKey, user, res.VariationResult, res.Value)
-	return res.Value, err
-}
-
-// JSONArrayVariation return the value of the flag in []interface{}.
-// An error is return if you don't have init the library before calling the function.
-// If the key does not exist we return the default value.
-// Note: Use this function only if you are using multiple go-feature-flag instances.
-func (g *GoFeatureFlag) JSONArrayVariation(
-	flagKey string, user ffuser.User, defaultValue []interface{},
-) ([]interface{}, error) {
-	res, err := g.jsonArrayVariation(flagKey, user, defaultValue)
-	g.notifyVariation(flagKey, user, res.VariationResult, res.Value)
-	return res.Value, err
-}
-
-// JSONVariation return the value of the flag in map[string]interface{}.
-// An error is return if you don't have init the library before calling the function.
-// If the key does not exist we return the default value.
-// Note: Use this function only if you are using multiple go-feature-flag instances.
-func (g *GoFeatureFlag) JSONVariation(
-	flagKey string, user ffuser.User, defaultValue map[string]interface{},
-) (map[string]interface{}, error) {
-	res, err := g.jsonVariation(flagKey, user, defaultValue)
-	g.notifyVariation(flagKey, user, res.VariationResult, res.Value)
-	return res.Value, err
 }
 
 // AllFlagsState return a flagstate.AllFlags that contains all the flags for a specific user.
@@ -222,296 +212,6 @@ func (g *GoFeatureFlag) GetFlagsFromCache() (map[string]flag.Flag, error) {
 	return g.cache.AllFlags()
 }
 
-// boolVariation is the internal func that handle the logic of a variation with a bool value
-// the result will always contain a valid model.BoolVarResult
-func (g *GoFeatureFlag) boolVariation(flagKey string, user ffuser.User, sdkDefaultValue bool,
-) (model.BoolVarResult, error) {
-	if g == nil {
-		return model.BoolVarResult{Value: sdkDefaultValue, VariationResult: notInitVariationResult},
-			fmt.Errorf("go-feature-flag is not initialised, default value is used")
-	}
-
-	if g.config.Offline {
-		return model.BoolVarResult{Value: sdkDefaultValue, VariationResult: offlineVariationResult}, nil
-	}
-
-	f, err := g.getFlagFromCache(flagKey)
-	if err != nil {
-		return model.BoolVarResult{
-			Value: sdkDefaultValue,
-			VariationResult: computeVariationResult(f, flag.ResolutionDetails{
-				Variant:   flag.VariationSDKDefault,
-				Reason:    flag.ReasonError,
-				ErrorCode: flag.ErrorCodeFlagNotFound,
-			}),
-		}, err
-	}
-
-	flagValue, resolutionDetails := f.Value(flagKey, user,
-		flag.EvaluationContext{Environment: g.config.Environment, DefaultSdkValue: sdkDefaultValue})
-	res, ok := flagValue.(bool)
-	if !ok {
-		return model.BoolVarResult{
-			Value: sdkDefaultValue,
-			VariationResult: computeVariationResult(f,
-				flag.ResolutionDetails{
-					Variant:   flag.VariationSDKDefault,
-					Reason:    flag.ReasonError,
-					ErrorCode: flag.ErrorCodeTypeMismatch,
-				}),
-		}, fmt.Errorf(errorWrongVariation, flagKey)
-	}
-	return model.BoolVarResult{
-		Value:           res,
-		VariationResult: computeVariationResult(f, resolutionDetails),
-	}, nil
-}
-
-// intVariation is the internal func that handle the logic of a variation with an int value
-// the result will always contain a valid model.IntVarResult
-func (g *GoFeatureFlag) intVariation(flagKey string, user ffuser.User, sdkDefaultValue int,
-) (model.IntVarResult, error) {
-	if g == nil {
-		return model.IntVarResult{Value: sdkDefaultValue, VariationResult: notInitVariationResult},
-			fmt.Errorf("go-feature-flag is not initialised, default value is used")
-	}
-
-	if g.config.Offline {
-		return model.IntVarResult{Value: sdkDefaultValue, VariationResult: offlineVariationResult}, nil
-	}
-
-	f, err := g.getFlagFromCache(flagKey)
-	if err != nil {
-		return model.IntVarResult{
-			Value: sdkDefaultValue,
-			VariationResult: computeVariationResult(f, flag.ResolutionDetails{
-				Variant:   flag.VariationSDKDefault,
-				Reason:    flag.ReasonError,
-				ErrorCode: flag.ErrorCodeFlagNotFound,
-			}),
-		}, err
-	}
-
-	flagValue, resolutionDetails := f.Value(flagKey, user,
-		flag.EvaluationContext{Environment: g.config.Environment, DefaultSdkValue: sdkDefaultValue})
-	res, ok := flagValue.(int)
-	if !ok {
-		// if this is a float64 we convert it to int
-		if resFloat, okFloat := flagValue.(float64); okFloat {
-			return model.IntVarResult{
-				Value:           int(resFloat),
-				VariationResult: computeVariationResult(f, resolutionDetails),
-			}, nil
-		}
-
-		return model.IntVarResult{
-			Value: sdkDefaultValue,
-			VariationResult: computeVariationResult(f, flag.ResolutionDetails{
-				Variant:   flag.VariationSDKDefault,
-				Reason:    flag.ReasonError,
-				ErrorCode: flag.ErrorCodeTypeMismatch,
-			}),
-		}, fmt.Errorf(errorWrongVariation, flagKey)
-	}
-	return model.IntVarResult{
-		Value:           res,
-		VariationResult: computeVariationResult(f, resolutionDetails),
-	}, nil
-}
-
-// float64Variation is the internal func that handle the logic of a variation with a float64 value
-// the result will always contain a valid model.Float64VarResult
-func (g *GoFeatureFlag) float64Variation(flagKey string, user ffuser.User, sdkDefaultValue float64,
-) (model.Float64VarResult, error) {
-	if g == nil {
-		return model.Float64VarResult{Value: sdkDefaultValue, VariationResult: notInitVariationResult},
-			fmt.Errorf("go-feature-flag is not initialised, default value is used")
-	}
-
-	if g.config.Offline {
-		return model.Float64VarResult{Value: sdkDefaultValue, VariationResult: offlineVariationResult}, nil
-	}
-
-	f, err := g.getFlagFromCache(flagKey)
-	if err != nil {
-		return model.Float64VarResult{
-			Value: sdkDefaultValue,
-			VariationResult: computeVariationResult(f, flag.ResolutionDetails{
-				Variant:   flag.VariationSDKDefault,
-				Reason:    flag.ReasonError,
-				ErrorCode: flag.ErrorCodeFlagNotFound,
-			}),
-		}, err
-	}
-
-	flagValue, resolutionDetails := f.Value(flagKey, user,
-		flag.EvaluationContext{Environment: g.config.Environment, DefaultSdkValue: sdkDefaultValue})
-	res, ok := flagValue.(float64)
-	if !ok {
-		return model.Float64VarResult{
-			Value: sdkDefaultValue,
-			VariationResult: computeVariationResult(f, flag.ResolutionDetails{
-				Variant:   flag.VariationSDKDefault,
-				Reason:    flag.ReasonError,
-				ErrorCode: flag.ErrorCodeTypeMismatch,
-			}),
-		}, fmt.Errorf(errorWrongVariation, flagKey)
-	}
-	return model.Float64VarResult{
-		Value:           res,
-		VariationResult: computeVariationResult(f, resolutionDetails),
-	}, nil
-}
-
-// stringVariation is the internal func that handle the logic of a variation with a string value
-// the result will always contain a valid model.StringVarResult
-func (g *GoFeatureFlag) stringVariation(flagKey string, user ffuser.User, sdkDefaultValue string,
-) (model.StringVarResult, error) {
-	if g == nil {
-		return model.StringVarResult{Value: sdkDefaultValue, VariationResult: notInitVariationResult},
-			fmt.Errorf("go-feature-flag is not initialised, default value is used")
-	}
-
-	if g.config.Offline {
-		return model.StringVarResult{Value: sdkDefaultValue, VariationResult: offlineVariationResult}, nil
-	}
-
-	f, err := g.getFlagFromCache(flagKey)
-	if err != nil {
-		return model.StringVarResult{
-			Value: sdkDefaultValue,
-			VariationResult: computeVariationResult(f, flag.ResolutionDetails{
-				Variant:   flag.VariationSDKDefault,
-				Reason:    flag.ReasonError,
-				ErrorCode: flag.ErrorCodeFlagNotFound,
-			}),
-		}, err
-	}
-
-	flagValue, resolutionDetails := f.Value(flagKey, user,
-		flag.EvaluationContext{Environment: g.config.Environment, DefaultSdkValue: sdkDefaultValue})
-	res, ok := flagValue.(string)
-	if !ok {
-		return model.StringVarResult{
-			Value: sdkDefaultValue,
-			VariationResult: computeVariationResult(f, flag.ResolutionDetails{
-				Variant:   flag.VariationSDKDefault,
-				Reason:    flag.ReasonError,
-				ErrorCode: flag.ErrorCodeTypeMismatch,
-			}),
-		}, fmt.Errorf(errorWrongVariation, flagKey)
-	}
-	return model.StringVarResult{
-		Value:           res,
-		VariationResult: computeVariationResult(f, resolutionDetails),
-	}, nil
-}
-
-// jsonArrayVariation is the internal func that handle the logic of a variation with a json value
-// the result will always contain a valid model.JSONArrayVarResult
-func (g *GoFeatureFlag) jsonArrayVariation(flagKey string, user ffuser.User, sdkDefaultValue []interface{},
-) (model.JSONArrayVarResult, error) {
-	if g == nil {
-		return model.JSONArrayVarResult{Value: sdkDefaultValue, VariationResult: notInitVariationResult},
-			fmt.Errorf("go-feature-flag is not initialised, default value is used")
-	}
-
-	if g.config.Offline {
-		return model.JSONArrayVarResult{Value: sdkDefaultValue, VariationResult: offlineVariationResult}, nil
-	}
-
-	f, err := g.getFlagFromCache(flagKey)
-	if err != nil {
-		return model.JSONArrayVarResult{
-			Value: sdkDefaultValue,
-			VariationResult: computeVariationResult(f, flag.ResolutionDetails{
-				Variant:   flag.VariationSDKDefault,
-				Reason:    flag.ReasonError,
-				ErrorCode: flag.ErrorCodeFlagNotFound,
-			}),
-		}, err
-	}
-
-	flagValue, resolutionDetails := f.Value(flagKey, user,
-		flag.EvaluationContext{Environment: g.config.Environment, DefaultSdkValue: sdkDefaultValue})
-	res, ok := flagValue.([]interface{})
-	if !ok {
-		return model.JSONArrayVarResult{
-			Value: sdkDefaultValue,
-			VariationResult: computeVariationResult(f, flag.ResolutionDetails{
-				Variant:   flag.VariationSDKDefault,
-				Reason:    flag.ReasonError,
-				ErrorCode: flag.ErrorCodeTypeMismatch,
-			}),
-		}, fmt.Errorf(errorWrongVariation, flagKey)
-	}
-	return model.JSONArrayVarResult{
-		Value:           res,
-		VariationResult: computeVariationResult(f, resolutionDetails),
-	}, nil
-}
-
-// jsonVariation is the internal func that handle the logic of a variation with a json value
-// the result will always contain a valid model.JSONVarResult
-func (g *GoFeatureFlag) jsonVariation(flagKey string, user ffuser.User, sdkDefaultValue map[string]interface{},
-) (model.JSONVarResult, error) {
-	if g == nil {
-		return model.JSONVarResult{Value: sdkDefaultValue, VariationResult: notInitVariationResult},
-			fmt.Errorf("go-feature-flag is not initialised, default value is used")
-	}
-
-	if g.config.Offline {
-		return model.JSONVarResult{Value: sdkDefaultValue, VariationResult: offlineVariationResult}, nil
-	}
-
-	f, err := g.getFlagFromCache(flagKey)
-	if err != nil {
-		return model.JSONVarResult{
-			Value: sdkDefaultValue,
-			VariationResult: computeVariationResult(f, flag.ResolutionDetails{
-				Variant:   flag.VariationSDKDefault,
-				Reason:    flag.ReasonError,
-				ErrorCode: flag.ErrorCodeFlagNotFound,
-			}),
-		}, err
-	}
-
-	flagValue, resolutionDetails := f.Value(flagKey, user,
-		flag.EvaluationContext{Environment: g.config.Environment, DefaultSdkValue: sdkDefaultValue})
-	res, ok := flagValue.(map[string]interface{})
-	if !ok {
-		return model.JSONVarResult{
-			Value: sdkDefaultValue,
-			VariationResult: computeVariationResult(f, flag.ResolutionDetails{
-				Variant:   flag.VariationSDKDefault,
-				Reason:    flag.ReasonError,
-				ErrorCode: flag.ErrorCodeTypeMismatch,
-			}),
-		}, fmt.Errorf(errorWrongVariation, flagKey)
-	}
-	return model.JSONVarResult{
-		Value:           res,
-		VariationResult: computeVariationResult(f, resolutionDetails),
-	}, nil
-}
-
-// computeVariationResult is creating a model.VariationResult
-func computeVariationResult(flag flag.Flag, resolutionDetails flag.ResolutionDetails) model.VariationResult {
-	varResult := model.VariationResult{
-		VariationType: resolutionDetails.Variant,
-		Failed:        resolutionDetails.ErrorCode != "",
-		Reason:        resolutionDetails.Reason,
-		ErrorCode:     resolutionDetails.ErrorCode,
-	}
-
-	if flag != nil {
-		varResult.TrackEvents = flag.IsTrackEvents()
-		varResult.Version = flag.GetVersion()
-	}
-
-	return varResult
-}
-
 // RawVariation return the raw value of the flag (without any types).
 // This raw result is mostly used by software built on top of go-feature-flag such as
 // go-feature-flag relay proxy.
@@ -519,55 +219,19 @@ func computeVariationResult(flag flag.Flag, resolutionDetails flag.ResolutionDet
 // Note: Use this function only if you are using multiple go-feature-flag instances.
 func (g *GoFeatureFlag) RawVariation(flagKey string, user ffuser.User, sdkDefaultValue interface{},
 ) (model.RawVarResult, error) {
-	if g == nil {
-		return model.RawVarResult{Value: sdkDefaultValue, VariationResult: notInitVariationResult},
-			fmt.Errorf("go-feature-flag is not initialised, default value is used")
-	}
-
-	if g.config.Offline {
-		return model.RawVarResult{Value: sdkDefaultValue, VariationResult: offlineVariationResult}, nil
-	}
-
-	f, err := g.getFlagFromCache(flagKey)
-	if err != nil {
-		res := model.RawVarResult{
-			Value: sdkDefaultValue,
-			VariationResult: computeVariationResult(f, flag.ResolutionDetails{
-				Variant:   flag.VariationSDKDefault,
-				Reason:    flag.ReasonError,
-				ErrorCode: flag.ErrorCodeFlagNotFound,
-			}),
-		}
-		g.notifyVariation(flagKey, user, res.VariationResult, res.Value)
-		return res, err
-	}
-
-	flagValue, resolutionDetails := f.Value(flagKey, user,
-		flag.EvaluationContext{Environment: g.config.Environment, DefaultSdkValue: sdkDefaultValue})
-	res := model.RawVarResult{
-		Value:           flagValue,
-		VariationResult: computeVariationResult(f, resolutionDetails),
-	}
-	g.notifyVariation(flagKey, user, res.VariationResult, res.Value)
-	return res, nil
-}
-
-// notifyVariation is logging the evaluation result for a flag
-// if no logger is provided in the configuration we are not logging anything.
-func (g *GoFeatureFlag) notifyVariation(
-	flagKey string,
-	user ffuser.User,
-	result model.VariationResult,
-	value interface{},
-) {
-	if result.TrackEvents {
-		event := exporter.NewFeatureEvent(user, flagKey, value, result.VariationType, result.Failed, result.Version)
-
-		// Add event in the exporter
-		if g.dataExporter != nil {
-			g.dataExporter.AddEvent(event)
-		}
-	}
+	res, err := getVariation[interface{}](g, flagKey, user, sdkDefaultValue, "interface{}")
+	notifyVariation(g, flagKey, user, res)
+	return model.RawVarResult{
+		VariationResult: model.VariationResult{
+			TrackEvents:   res.TrackEvents,
+			VariationType: res.VariationType,
+			Failed:        res.Failed,
+			Version:       res.Version,
+			Reason:        res.Reason,
+			ErrorCode:     res.ErrorCode,
+		},
+		Value: res.Value,
+	}, err
 }
 
 // getFlagFromCache try to get the flag from the cache.
@@ -578,4 +242,104 @@ func (g *GoFeatureFlag) getFlagFromCache(flagKey string) (flag.Flag, error) {
 		return f, fmt.Errorf(errorFlagNotAvailable, flagKey)
 	}
 	return f, nil
+}
+
+// notifyVariation is logging the evaluation result for a flag
+// if no logger is provided in the configuration we are not logging anything.
+func notifyVariation[T model.JSONType](
+	g *GoFeatureFlag,
+	flagKey string,
+	user ffuser.User,
+	result model.GenericVariationResult[T],
+) {
+	if result.TrackEvents {
+		event := exporter.NewFeatureEvent(user, flagKey, result.Value, result.VariationType, result.Failed, result.Version)
+
+		// Add event in the exporter
+		if g != nil && g.dataExporter != nil {
+			g.dataExporter.AddEvent(event)
+		}
+	}
+}
+
+// getVariation is the internal generic func that handle the logic of a variation the result will always
+// contain a valid model.GenericVariationResult
+func getVariation[T model.JSONType](
+	g *GoFeatureFlag, flagKey string, user ffuser.User, sdkDefaultValue T, expectedType string,
+) (model.GenericVariationResult[T], error) {
+	if g == nil {
+		return model.GenericVariationResult[T]{
+			Value:         sdkDefaultValue,
+			VariationType: flag.VariationSDKDefault,
+			Failed:        true,
+			Reason:        flag.ReasonError,
+			ErrorCode:     flag.ErrorCodeProviderNotReady,
+		}, fmt.Errorf("go-feature-flag is not initialised, default value is used")
+	}
+
+	if g.config.Offline {
+		return model.GenericVariationResult[T]{
+			Value:         sdkDefaultValue,
+			VariationType: flag.VariationSDKDefault,
+			Failed:        false,
+		}, nil
+	}
+
+	f, err := g.getFlagFromCache(flagKey)
+	if err != nil {
+		varResult := model.GenericVariationResult[T]{
+			Value:         sdkDefaultValue,
+			VariationType: flag.VariationSDKDefault,
+			ErrorCode:     flag.ErrorCodeFlagNotFound,
+			Failed:        true,
+			Reason:        flag.ReasonError,
+		}
+		if f != nil {
+			varResult.TrackEvents = f.IsTrackEvents()
+			varResult.Version = f.GetVersion()
+		}
+		return varResult, err
+	}
+
+	flagValue, resolutionDetails := f.Value(flagKey, user,
+		flag.EvaluationContext{Environment: g.config.Environment, DefaultSdkValue: sdkDefaultValue})
+
+	var convertedValue interface{}
+	switch value := flagValue.(type) {
+	case float64:
+		// this part ensure that we convert float64 value into int if we call IntVariation on a float64 value.
+		if expectedType == "int" {
+			convertedValue = int(value)
+		} else {
+			convertedValue = value
+		}
+	default:
+		convertedValue = value
+	}
+
+	var v T
+	switch val := convertedValue.(type) {
+	case T:
+		v = val
+	default:
+		return model.GenericVariationResult[T]{
+			Value:         sdkDefaultValue,
+			VariationType: flag.VariationSDKDefault,
+			Reason:        flag.ReasonError,
+			ErrorCode:     flag.ErrorCodeTypeMismatch,
+			Failed:        true,
+			TrackEvents:   f.IsTrackEvents(),
+			Version:       f.GetVersion(),
+		}, fmt.Errorf(errorWrongVariation, flagKey)
+	}
+
+	return model.GenericVariationResult[T]{
+		Value:         v,
+		VariationType: resolutionDetails.Variant,
+		Reason:        resolutionDetails.Reason,
+		ErrorCode:     resolutionDetails.ErrorCode,
+		Failed:        resolutionDetails.ErrorCode != "",
+		TrackEvents:   f.IsTrackEvents(),
+		Version:       f.GetVersion(),
+	}, nil
 }

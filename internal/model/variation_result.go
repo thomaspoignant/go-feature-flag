@@ -50,7 +50,7 @@ type JSONVarResult struct {
 // This is used by the ffclient.JSONArrayVariation functions and by the ffclient.AllFlagsState function
 type JSONArrayVarResult struct {
 	VariationResult
-	Value []interface{}
+	Value []interface{} `json:"value"`
 }
 
 // RawVarResult is the result of the raw variation call.
