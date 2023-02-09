@@ -347,6 +347,301 @@ func TestBoolVariation(t *testing.T) {
 	}
 }
 
+func TestBoolVariationDetails(t *testing.T) {
+	type args struct {
+		flagKey      string
+		user         ffuser.User
+		defaultValue bool
+		cacheMock    cache.Manager
+		offline      bool
+		disableInit  bool
+	}
+	tests := []struct {
+		name        string
+		args        args
+		want        model.VariationResult[bool]
+		wantErr     bool
+		expectedLog string
+	}{
+		{
+			name: "Call variation before init of SDK",
+			args: args{
+				flagKey:      "key-not-exist",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: false,
+				cacheMock: NewCacheMock(&flagv1.FlagData{
+					Rule:       testconvert.String("key eq \"key\""),
+					Percentage: testconvert.Float64(100),
+					Default:    testconvert.Interface(true),
+					True:       testconvert.Interface(false),
+					False:      testconvert.Interface(false),
+				}, nil),
+				disableInit: true,
+			},
+			wantErr: true,
+		},
+		{
+			name: "Get default value if flag disable",
+			args: args{
+				flagKey:      "disable-flag",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: true,
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Disable: testconvert.Bool(true),
+				}, nil),
+			},
+			want: model.VariationResult[bool]{
+				VariationType: flag.VariationSDKDefault,
+				Failed:        false,
+				Reason:        flag.ReasonDisabled,
+				Value:         true,
+				TrackEvents:   true,
+			},
+			wantErr:     false,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"disable-flag\", value=\"true\", variation=\"SdkDefault\"\n",
+		},
+		{
+			name: "Get error when cache not init",
+			args: args{
+				flagKey:      "key-not-exist",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: true,
+				cacheMock: NewCacheMock(
+					&flag.InternalFlag{},
+					errors.New("impossible to read the toggle before the initialisation")),
+			},
+			wantErr:     true,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"true\", variation=\"SdkDefault\"\n",
+		},
+		{
+			name: "Get default value with key not exist",
+			args: args{
+				flagKey:      "key-not-exist",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: true,
+				cacheMock:    NewCacheMock(&flag.InternalFlag{}, errors.New("flag [key-not-exist] does not exists")),
+			},
+			wantErr:     true,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"true\", variation=\"SdkDefault\"\n",
+		},
+		{
+			name: "Get default value, rule not apply",
+			args: args{
+				flagKey:      "test-flag",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: true,
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Rules: &[]flag.Rule{
+						{
+							Name:  testconvert.String("legacyRuleV0"),
+							Query: testconvert.String("key eq \"key\""),
+							Percentages: &map[string]float64{
+								"False": 0,
+								"True":  100,
+							},
+						},
+					},
+					Variations: &map[string]*interface{}{
+						"Default": testconvert.Interface(true),
+						"False":   testconvert.Interface(false),
+						"True":    testconvert.Interface(true),
+					},
+					DefaultRule: &flag.Rule{
+						Name:            testconvert.String("legacyDefaultRule"),
+						VariationResult: testconvert.String("Default"),
+					},
+				}, nil),
+			},
+			want: model.VariationResult[bool]{
+				VariationType: "Default",
+				Failed:        false,
+				Reason:        flag.ReasonDefault,
+				Value:         true,
+				TrackEvents:   true,
+			},
+			wantErr:     false,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"true\", variation=\"Default\"\n",
+		},
+		{
+			name: "Get true value, rule apply",
+			args: args{
+				flagKey:      "test-flag",
+				user:         ffuser.NewAnonymousUser("random-key"),
+				defaultValue: true,
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Rules: &[]flag.Rule{
+						{
+							Name:  testconvert.String("legacyRuleV0"),
+							Query: testconvert.String("key eq \"random-key\""),
+							Percentages: &map[string]float64{
+								"False": 0,
+								"True":  100,
+							},
+						},
+					},
+					Variations: &map[string]*interface{}{
+						"Default": testconvert.Interface(false),
+						"False":   testconvert.Interface(false),
+						"True":    testconvert.Interface(true),
+					},
+					DefaultRule: &flag.Rule{
+						Name:            testconvert.String("legacyDefaultRule"),
+						VariationResult: testconvert.String("Default"),
+					},
+				}, nil),
+			},
+			want: model.VariationResult[bool]{
+				VariationType: "True",
+				Failed:        false,
+				Reason:        flag.ReasonTargetingMatch,
+				Value:         true,
+				TrackEvents:   true,
+			},
+			wantErr:     false,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"true\", variation=\"True\"\n",
+		},
+		{
+			name: "Get false value, rule apply",
+			args: args{
+				flagKey:      "test-flag",
+				user:         ffuser.NewAnonymousUser("random-key-ssss1"),
+				defaultValue: true,
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Rules: &[]flag.Rule{
+						{
+							Name:  testconvert.String("legacyRuleV0"),
+							Query: testconvert.String("anonymous eq true"),
+							Percentages: &map[string]float64{
+								"False": 90,
+								"True":  10,
+							},
+						},
+					},
+					Variations: &map[string]*interface{}{
+						"Default": testconvert.Interface(false),
+						"False":   testconvert.Interface(false),
+						"True":    testconvert.Interface(true),
+					},
+					DefaultRule: &flag.Rule{
+						Name:            testconvert.String("legacyDefaultRule"),
+						VariationResult: testconvert.String("Default"),
+					},
+				}, nil),
+			},
+			want: model.VariationResult[bool]{
+				VariationType: "False",
+				Failed:        false,
+				Reason:        flag.ReasonTargetingMatch,
+				Value:         false,
+				TrackEvents:   true,
+			},
+			wantErr:     false,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"false\", variation=\"False\"\n",
+		},
+		{
+			name: "Get default value, when rule apply and not right type",
+			args: args{
+				flagKey:      "test-flag",
+				user:         ffuser.NewUser("random-key-ssss1"),
+				defaultValue: true,
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Rules: &[]flag.Rule{
+						{
+							Name:  testconvert.String("legacyRuleV0"),
+							Query: testconvert.String("key eq \"random-key\""),
+							Percentages: &map[string]float64{
+								"False": 0,
+								"True":  100,
+							},
+						},
+					},
+					Variations: &map[string]*interface{}{
+						"Default": testconvert.Interface("xxx"),
+						"False":   testconvert.Interface("xxx"),
+						"True":    testconvert.Interface("xxx"),
+					},
+					DefaultRule: &flag.Rule{
+						Name:            testconvert.String("legacyDefaultRule"),
+						VariationResult: testconvert.String("Default"),
+					},
+				}, nil),
+			},
+			want: model.VariationResult[bool]{
+				VariationType: flag.VariationSDKDefault,
+				Failed:        true,
+				Reason:        flag.ReasonError,
+				ErrorCode:     flag.ErrorCodeTypeMismatch,
+				Value:         false,
+				TrackEvents:   true,
+			},
+			wantErr:     true,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"true\", variation=\"SdkDefault\"\n",
+		},
+		{
+			name: "Get sdk default value if offline",
+			args: args{
+				offline:      true,
+				flagKey:      "disable-flag",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: false,
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Disable: testconvert.Bool(true),
+				}, nil),
+			},
+			want: model.VariationResult[bool]{
+				VariationType: flag.VariationSDKDefault,
+				Failed:        false,
+				Reason:        flag.ReasonOffline,
+				Value:         false,
+				TrackEvents:   false,
+			},
+			wantErr:     false,
+			expectedLog: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// init logger
+			file, _ := os.CreateTemp("", "log")
+			logger := log.New(file, "", 0)
+
+			if !tt.args.disableInit {
+				ff = &GoFeatureFlag{
+					bgUpdater: newBackgroundUpdater(5),
+					cache:     tt.args.cacheMock,
+					config: Config{
+						PollingInterval: 0,
+						Logger:          logger,
+						Offline:         tt.args.offline,
+					},
+					dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
+						&logsexporter.Exporter{
+							LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+						}, logger),
+				}
+			}
+
+			got, err := BoolVariationDetails(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
+
+			if tt.expectedLog != "" {
+				content, _ := os.ReadFile(file.Name())
+				assert.Regexp(t, tt.expectedLog, string(content))
+			}
+
+			if tt.wantErr {
+				assert.Error(t, err, "BoolVariationDetails() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			assert.Equal(t, tt.want, got, "BoolVariationDetails() got = %v, want %v", got, tt.want)
+
+			// clean logger
+			ff = nil
+			_ = file.Close()
+		})
+	}
+}
+
 func TestFloat64Variation(t *testing.T) {
 	type args struct {
 		flagKey      string
@@ -640,6 +935,299 @@ func TestFloat64Variation(t *testing.T) {
 	}
 }
 
+func TestFloat64VariationDetails(t *testing.T) {
+	type args struct {
+		flagKey      string
+		user         ffuser.User
+		defaultValue float64
+		cacheMock    cache.Manager
+		offline      bool
+		disableInit  bool
+	}
+	tests := []struct {
+		name        string
+		args        args
+		want        model.VariationResult[float64]
+		wantErr     bool
+		expectedLog string
+	}{
+		{
+			name: "Call variation before init of SDK",
+			args: args{
+				flagKey:      "key-not-exist",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: 123.3,
+				cacheMock: NewCacheMock(&flagv1.FlagData{
+					Rule:       testconvert.String("key eq \"key\""),
+					Percentage: testconvert.Float64(100),
+					Default:    testconvert.Interface(true),
+					True:       testconvert.Interface(false),
+					False:      testconvert.Interface(false),
+				}, nil),
+				disableInit: true,
+			},
+			wantErr: true,
+		},
+		{
+			name: "Get default value if flag disable",
+			args: args{
+				flagKey:      "disable-flag",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: 120.12,
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Disable: testconvert.Bool(true),
+				}, nil),
+			},
+			want: model.VariationResult[float64]{
+				Value:         120.12,
+				TrackEvents:   true,
+				VariationType: flag.VariationSDKDefault,
+				Failed:        false,
+				Reason:        flag.ReasonDisabled,
+			},
+			wantErr:     false,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"disable-flag\", value=\"120.12\", variation=\"SdkDefault\"\n",
+		},
+		{
+			name: "Get error when cache not init",
+			args: args{
+				flagKey:      "key-not-exist",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: 118.12,
+				cacheMock: NewCacheMock(
+					&flag.InternalFlag{},
+					errors.New("impossible to read the toggle before the initialisation")),
+			},
+			wantErr:     true,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"118.12\", variation=\"SdkDefault\"\n",
+		},
+		{
+			name: "Get default value with key not exist",
+			args: args{
+				flagKey:      "key-not-exist",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: 118.12,
+				cacheMock:    NewCacheMock(&flag.InternalFlag{}, errors.New("flag [key-not-exist] does not exists")),
+			},
+			wantErr:     true,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"118.12\", variation=\"SdkDefault\"\n",
+		},
+		{
+			name: "Get default value, rule not apply",
+			args: args{
+				flagKey:      "test-flag",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: 118.12,
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Rules: &[]flag.Rule{
+						{
+							Name:  testconvert.String("legacyRuleV0"),
+							Query: testconvert.String("key eq \"key\""),
+							Percentages: &map[string]float64{
+								"False": 0,
+								"True":  100,
+							},
+						},
+					},
+					Variations: &map[string]*interface{}{
+						"Default": testconvert.Interface(119.12),
+						"False":   testconvert.Interface(121.12),
+						"True":    testconvert.Interface(120.12),
+					},
+					DefaultRule: &flag.Rule{
+						Name:            testconvert.String("legacyDefaultRule"),
+						VariationResult: testconvert.String("Default"),
+					},
+				}, nil),
+			},
+			want: model.VariationResult[float64]{
+				Value:         119.12,
+				TrackEvents:   true,
+				VariationType: "Default",
+				Failed:        false,
+				Reason:        flag.ReasonDefault,
+			},
+			wantErr:     false,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"119.12\", variation=\"Default\"\n",
+		},
+		{
+			name: "Get true value, rule apply",
+			args: args{
+				flagKey:      "test-flag",
+				user:         ffuser.NewAnonymousUser("random-key"),
+				defaultValue: 118.12,
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Rules: &[]flag.Rule{
+						{
+							Name:  testconvert.String("legacyRuleV0"),
+							Query: testconvert.String("key eq \"random-key\""),
+							Percentages: &map[string]float64{
+								"False": 0,
+								"True":  100,
+							},
+						},
+					},
+					Variations: &map[string]*interface{}{
+						"Default": testconvert.Interface(119.12),
+						"False":   testconvert.Interface(121.12),
+						"True":    testconvert.Interface(120.12),
+					},
+					DefaultRule: &flag.Rule{
+						Name:            testconvert.String("legacyDefaultRule"),
+						VariationResult: testconvert.String("Default"),
+					},
+				}, nil),
+			},
+			want: model.VariationResult[float64]{
+				Value:         120.12,
+				TrackEvents:   true,
+				VariationType: "True",
+				Failed:        false,
+				Reason:        flag.ReasonTargetingMatch,
+			},
+			wantErr:     false,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"120.12\", variation=\"True\"\n",
+		},
+		{
+			name: "Get false value, rule apply",
+			args: args{
+				flagKey:      "test-flag",
+				user:         ffuser.NewAnonymousUser("random-key-ssss1"),
+				defaultValue: 118.12,
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Rules: &[]flag.Rule{
+						{
+							Name:  testconvert.String("legacyRuleV0"),
+							Query: testconvert.String("anonymous eq true"),
+							Percentages: &map[string]float64{
+								"False": 90,
+								"True":  10,
+							},
+						},
+					},
+					Variations: &map[string]*interface{}{
+						"Default": testconvert.Interface(119.12),
+						"False":   testconvert.Interface(121.12),
+						"True":    testconvert.Interface(120.12),
+					},
+					DefaultRule: &flag.Rule{
+						Name:            testconvert.String("legacyDefaultRule"),
+						VariationResult: testconvert.String("Default"),
+					},
+				}, nil),
+			},
+			want: model.VariationResult[float64]{
+				Value:         121.12,
+				TrackEvents:   true,
+				VariationType: "False",
+				Failed:        false,
+				Reason:        flag.ReasonTargetingMatch,
+			},
+			wantErr:     false,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"121.12\", variation=\"False\"\n",
+		},
+		{
+			name: "Get default value, when rule apply and not right type",
+			args: args{
+				flagKey:      "test-flag",
+				user:         ffuser.NewUser("random-key-ssss1"),
+				defaultValue: 118.12,
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Rules: &[]flag.Rule{
+						{
+							Name:  testconvert.String("legacyRuleV0"),
+							Query: testconvert.String("key eq \"random-key\""),
+							Percentages: &map[string]float64{
+								"False": 0,
+								"True":  100,
+							},
+						},
+					},
+					Variations: &map[string]*interface{}{
+						"Default": testconvert.Interface("xxx"),
+						"False":   testconvert.Interface("xxx"),
+						"True":    testconvert.Interface("xxx"),
+					},
+					DefaultRule: &flag.Rule{
+						Name:            testconvert.String("legacyDefaultRule"),
+						VariationResult: testconvert.String("Default"),
+					},
+				}, nil),
+			},
+			want: model.VariationResult[float64]{
+				Value:         118.12,
+				TrackEvents:   true,
+				VariationType: "Default",
+				Failed:        false,
+				Reason:        flag.ReasonDefault,
+			},
+			wantErr:     true,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"118.12\", variation=\"SdkDefault\"\n",
+		},
+		{
+			name: "Get sdk default value if offline",
+			args: args{
+				offline:      true,
+				flagKey:      "disable-flag",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: 118.12,
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Disable: testconvert.Bool(true),
+				}, nil),
+			},
+			want: model.VariationResult[float64]{
+				Value:         118.12,
+				TrackEvents:   false,
+				VariationType: flag.VariationSDKDefault,
+				Failed:        false,
+				Reason:        flag.ReasonOffline,
+			},
+			wantErr:     false,
+			expectedLog: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// init logger
+			file, _ := os.CreateTemp("", "log")
+			logger := log.New(file, "", 0)
+
+			if !tt.args.disableInit {
+				ff = &GoFeatureFlag{
+					bgUpdater: newBackgroundUpdater(5),
+					cache:     tt.args.cacheMock,
+					config: Config{
+						PollingInterval: 0,
+						Logger:          logger,
+						Offline:         tt.args.offline,
+					},
+					dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
+						&logsexporter.Exporter{
+							LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+						}, logger),
+				}
+			}
+
+			got, err := Float64VariationDetails(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
+
+			if tt.expectedLog != "" {
+				content, _ := os.ReadFile(file.Name())
+				assert.Regexp(t, tt.expectedLog, string(content))
+			}
+			if tt.wantErr {
+				assert.Error(t, err, "Float64Variation() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			assert.Equal(t, tt.want, got, "Float64Variation() got = %v, want %v", got, tt.want)
+
+			// clean logger
+			ff = nil
+			_ = file.Close()
+		})
+	}
+}
+
 func TestJSONArrayVariation(t *testing.T) {
 	type args struct {
 		flagKey      string
@@ -898,6 +1486,288 @@ func TestJSONArrayVariation(t *testing.T) {
 			}
 
 			got, err := JSONArrayVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
+
+			if tt.wantErr {
+				assert.Error(t, err, "JSONArrayVariation() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			assert.Equal(t, tt.want, got, "JSONArrayVariation() got = %v, want %v", got, tt.want)
+			if tt.expectedLog != "" {
+				content, _ := os.ReadFile(file.Name())
+				assert.Regexp(t, tt.expectedLog, string(content))
+			}
+			// clean logger
+			ff = nil
+			_ = file.Close()
+		})
+	}
+}
+
+func TestJSONArrayVariationDetails(t *testing.T) {
+	type args struct {
+		flagKey      string
+		user         ffuser.User
+		defaultValue []interface{}
+		cacheMock    cache.Manager
+		offline      bool
+		disableInit  bool
+	}
+	tests := []struct {
+		name        string
+		args        args
+		want        model.VariationResult[[]interface{}]
+		wantErr     bool
+		expectedLog string
+	}{
+		{
+			name: "Call variation before init of SDK",
+			args: args{
+				flagKey:      "key-not-exist",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: []interface{}{},
+				cacheMock: NewCacheMock(&flagv1.FlagData{
+					Rule:       testconvert.String("key eq \"key\""),
+					Percentage: testconvert.Float64(100),
+					Default:    testconvert.Interface(true),
+					True:       testconvert.Interface(false),
+					False:      testconvert.Interface(false),
+				}, nil),
+				disableInit: true,
+			},
+			wantErr: true,
+		},
+		{
+			name: "Get default value if flag disable",
+			args: args{
+				flagKey:      "disable-flag",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: []interface{}{"toto"},
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Disable: testconvert.Bool(true),
+				}, nil),
+			},
+			want: model.VariationResult[[]interface{}]{
+				TrackEvents:   true,
+				VariationType: flag.VariationSDKDefault,
+				Failed:        false,
+				Reason:        flag.ReasonDisabled,
+				Value:         []interface{}{"toto"},
+			},
+			wantErr:     false,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"disable-flag\", value=\"\\[toto\\]\"\n",
+		},
+		{
+			name: "Get error when cache not init",
+			args: args{
+				flagKey:      "key-not-exist",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: []interface{}{"toto"},
+				cacheMock: NewCacheMock(
+					&flag.InternalFlag{},
+					errors.New("impossible to read the toggle before the initialisation")),
+			},
+			wantErr:     true,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"\\[toto\\]\"\n",
+		},
+		{
+			name: "Get default value with key not exist",
+			args: args{
+				flagKey:      "key-not-exist",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: []interface{}{"toto"},
+				cacheMock:    NewCacheMock(&flag.InternalFlag{}, errors.New("flag [key-not-exist] does not exists")),
+			},
+			wantErr:     true,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"\\[toto\\]\"\n",
+		},
+		{
+			name: "Get default value, rule not apply",
+			args: args{
+				flagKey:      "test-flag",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: []interface{}{"toto"},
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Rules: &[]flag.Rule{
+						{
+							Name:  testconvert.String("legacyRuleV0"),
+							Query: testconvert.String("key eq \"key\""),
+							Percentages: &map[string]float64{
+								"False": 0,
+								"True":  100,
+							},
+						},
+					},
+					Variations: &map[string]*interface{}{
+						"Default": testconvert.Interface([]interface{}{"default"}),
+						"True":    testconvert.Interface([]interface{}{"true"}),
+						"False":   testconvert.Interface([]interface{}{"false"}),
+					},
+					DefaultRule: &flag.Rule{
+						Name:            testconvert.String("legacyDefaultRule"),
+						VariationResult: testconvert.String("Default"),
+					},
+				}, nil),
+			},
+			want: model.VariationResult[[]interface{}]{
+				TrackEvents:   true,
+				VariationType: "Default",
+				Failed:        false,
+				Reason:        flag.ReasonDefault,
+				Value:         []interface{}{"default"},
+			},
+			wantErr:     false,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"\\[default\\]\"\n",
+		},
+		{
+			name: "Get true value, rule apply",
+			args: args{
+				flagKey:      "test-flag",
+				user:         ffuser.NewAnonymousUser("random-key"),
+				defaultValue: []interface{}{"toto"},
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Rules: &[]flag.Rule{
+						{
+							Name:  testconvert.String("legacyRuleV0"),
+							Query: testconvert.String("key eq \"random-key\""),
+							Percentages: &map[string]float64{
+								"False": 0,
+								"True":  100,
+							},
+						},
+					},
+					Variations: &map[string]*interface{}{
+						"Default": testconvert.Interface([]interface{}{"default"}),
+						"True":    testconvert.Interface([]interface{}{"true"}),
+						"False":   testconvert.Interface([]interface{}{"false"}),
+					},
+					DefaultRule: &flag.Rule{
+						Name:            testconvert.String("legacyDefaultRule"),
+						VariationResult: testconvert.String("Default"),
+					},
+				}, nil),
+			},
+			want: model.VariationResult[[]interface{}]{
+				TrackEvents:   true,
+				VariationType: "True",
+				Failed:        false,
+				Reason:        flag.ReasonTargetingMatch,
+				Value:         []interface{}{"true"},
+			},
+			wantErr:     false,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"\\[true\\]\"\n",
+		},
+		{
+			name: "Get false value, rule apply",
+			args: args{
+				flagKey:      "test-flag",
+				user:         ffuser.NewAnonymousUser("random-key-ssss1"),
+				defaultValue: []interface{}{"toto"},
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Variations: &map[string]*interface{}{
+						"Default": testconvert.Interface([]interface{}{"default"}),
+						"True":    testconvert.Interface([]interface{}{"true"}),
+						"False":   testconvert.Interface([]interface{}{"false"}),
+					},
+					DefaultRule: &flag.Rule{
+						Name: testconvert.String("legacyDefaultRule"),
+						Percentages: &map[string]float64{
+							"False": 90,
+							"True":  10,
+						},
+					},
+				}, nil),
+			},
+			want: model.VariationResult[[]interface{}]{
+				TrackEvents:   true,
+				VariationType: "False",
+				Failed:        false,
+				Reason:        flag.ReasonDefault,
+				Value:         []interface{}{"false"},
+			},
+			wantErr:     false,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"\\[false\\]\"\n",
+		},
+		{
+			name: "Get default value, when rule apply and not right type",
+			args: args{
+				flagKey:      "test-flag",
+				user:         ffuser.NewUser("random-key-ssss1"),
+				defaultValue: []interface{}{"toto"},
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Rules: &[]flag.Rule{
+						{
+							Name:  testconvert.String("legacyRuleV0"),
+							Query: testconvert.String("key eq \"key\""),
+							Percentages: &map[string]float64{
+								"False": 0,
+								"True":  100,
+							},
+						},
+					},
+					Variations: &map[string]*interface{}{
+						"Default": testconvert.Interface("xxx"),
+						"False":   testconvert.Interface("xxx"),
+						"True":    testconvert.Interface("xxx"),
+					},
+					DefaultRule: &flag.Rule{
+						Name:            testconvert.String("legacyDefaultRule"),
+						VariationResult: testconvert.String("Default"),
+					},
+				}, nil),
+			},
+			want: model.VariationResult[[]interface{}]{
+				TrackEvents:   true,
+				VariationType: "Default",
+				Failed:        false,
+				Reason:        flag.ReasonDefault,
+				Value:         []interface{}{"toto"},
+			},
+			wantErr:     true,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"\\[toto\\]\"\n",
+		},
+		{
+			name: "Get sdk default value if offline",
+			args: args{
+				offline:      true,
+				flagKey:      "disable-flag",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: []interface{}{"toto"},
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Disable: testconvert.Bool(true),
+				}, nil),
+			},
+			want: model.VariationResult[[]interface{}]{
+				TrackEvents:   false,
+				VariationType: flag.VariationSDKDefault,
+				Failed:        false,
+				Reason:        flag.ReasonOffline,
+				Value:         []interface{}{"toto"},
+			},
+			wantErr:     false,
+			expectedLog: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// init logger
+			file, _ := os.CreateTemp("", "log")
+			logger := log.New(file, "", 0)
+
+			if !tt.args.disableInit {
+				ff = &GoFeatureFlag{
+					bgUpdater: newBackgroundUpdater(5),
+					cache:     tt.args.cacheMock,
+					config: Config{
+						PollingInterval: 0,
+						Logger:          logger,
+						Offline:         tt.args.offline,
+					},
+					dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
+						&logsexporter.Exporter{}, logger),
+				}
+			}
+
+			got, err := JSONArrayVariationDetails(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
 			if tt.wantErr {
 				assert.Error(t, err, "JSONArrayVariation() error = %v, wantErr %v", err, tt.wantErr)
@@ -1176,6 +2046,221 @@ func TestJSONVariation(t *testing.T) {
 	}
 }
 
+func TestJSONVariationDetails(t *testing.T) {
+	type args struct {
+		flagKey      string
+		user         ffuser.User
+		defaultValue map[string]interface{}
+		cacheMock    cache.Manager
+		offline      bool
+		disableInit  bool
+	}
+	tests := []struct {
+		name        string
+		args        args
+		want        model.VariationResult[map[string]interface{}]
+		wantErr     bool
+		expectedLog string
+	}{
+		{
+			name: "Get default value if flag disable",
+			args: args{
+				flagKey:      "disable-flag",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: map[string]interface{}{"default-notkey": true},
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Disable: testconvert.Bool(true),
+				}, nil),
+			},
+			want: model.VariationResult[map[string]interface{}]{
+				TrackEvents:   true,
+				VariationType: flag.VariationSDKDefault,
+				Failed:        false,
+				Reason:        flag.ReasonDisabled,
+				Value:         map[string]interface{}{"default-notkey": true},
+			},
+			wantErr:     false,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"disable-flag\", value=\"map\\[default-notkey:true\\]\", variation=\"SdkDefault\"\n",
+		},
+		{
+			name: "Get default value, rule not apply",
+			args: args{
+				flagKey:      "test-flag",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: map[string]interface{}{"default-notkey": true},
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Rules: &[]flag.Rule{
+						{
+							Name:  testconvert.String("legacyRuleV0"),
+							Query: testconvert.String("key eq \"key\""),
+							Percentages: &map[string]float64{
+								"False": 0,
+								"True":  100,
+							},
+						},
+					},
+					Variations: &map[string]*interface{}{
+						"Default": testconvert.Interface(map[string]interface{}{"default": true}),
+						"True":    testconvert.Interface(map[string]interface{}{"true": true}),
+						"False":   testconvert.Interface(map[string]interface{}{"false": true}),
+					},
+					DefaultRule: &flag.Rule{
+						Name:            testconvert.String("legacyDefaultRule"),
+						VariationResult: testconvert.String("Default"),
+					},
+				}, nil),
+			},
+			want: model.VariationResult[map[string]interface{}]{
+				TrackEvents:   true,
+				VariationType: "Default",
+				Failed:        false,
+				Reason:        flag.ReasonDefault,
+				Value:         map[string]interface{}{"default": true},
+			},
+			wantErr:     false,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"map\\[default:true\\]\", variation=\"Default\"\n",
+		},
+		{
+			name: "Get true value, rule apply",
+			args: args{
+				flagKey:      "test-flag",
+				user:         ffuser.NewAnonymousUser("random-key"),
+				defaultValue: map[string]interface{}{"default-notkey": true},
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Rules: &[]flag.Rule{
+						{
+							Name:  testconvert.String("legacyRuleV0"),
+							Query: testconvert.String("key eq \"random-key\""),
+							Percentages: &map[string]float64{
+								"False": 0,
+								"True":  100,
+							},
+						},
+					},
+					Variations: &map[string]*interface{}{
+						"Default": testconvert.Interface(map[string]interface{}{"default": true}),
+						"True":    testconvert.Interface(map[string]interface{}{"true": true}),
+						"False":   testconvert.Interface(map[string]interface{}{"false": true}),
+					},
+					DefaultRule: &flag.Rule{
+						Name:            testconvert.String("legacyDefaultRule"),
+						VariationResult: testconvert.String("Default"),
+					},
+				}, nil),
+			},
+			want: model.VariationResult[map[string]interface{}]{
+				TrackEvents:   true,
+				VariationType: "True",
+				Failed:        false,
+				Reason:        flag.ReasonTargetingMatch,
+				Value:         map[string]interface{}{"true": true},
+			},
+			wantErr:     false,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"map\\[true:true\\]\", variation=\"True\"\n",
+		},
+		{
+			name: "Get false value, rule apply",
+			args: args{
+				flagKey:      "test-flag",
+				user:         ffuser.NewAnonymousUser("random-key-ssss1"),
+				defaultValue: map[string]interface{}{"default-notkey": true},
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Rules: &[]flag.Rule{
+						{
+							Name:  testconvert.String("legacyRuleV0"),
+							Query: testconvert.String("anonymous eq true"),
+							Percentages: &map[string]float64{
+								"False": 90,
+								"True":  10,
+							},
+						},
+					},
+					Variations: &map[string]*interface{}{
+						"Default": testconvert.Interface(map[string]interface{}{"default": true}),
+						"True":    testconvert.Interface(map[string]interface{}{"true": true}),
+						"False":   testconvert.Interface(map[string]interface{}{"false": true}),
+					},
+					DefaultRule: &flag.Rule{
+						Name:            testconvert.String("legacyDefaultRule"),
+						VariationResult: testconvert.String("Default"),
+					},
+				}, nil),
+			},
+			want: model.VariationResult[map[string]interface{}]{
+				TrackEvents:   true,
+				VariationType: "False",
+				Failed:        false,
+				Reason:        flag.ReasonTargetingMatch,
+				Value:         map[string]interface{}{"false": true},
+			},
+			wantErr:     false,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"map\\[false:true\\]\", variation=\"False\"\n",
+		},
+		{
+			name: "Get sdk default value if offline",
+			args: args{
+				offline:      true,
+				flagKey:      "disable-flag",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: map[string]interface{}{"default-notkey": true},
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Disable: testconvert.Bool(true),
+				}, nil),
+			},
+			want: model.VariationResult[map[string]interface{}]{
+				TrackEvents:   false,
+				VariationType: flag.VariationSDKDefault,
+				Failed:        false,
+				Reason:        flag.ReasonOffline,
+				Value:         map[string]interface{}{"default-notkey": true},
+			},
+			wantErr:     false,
+			expectedLog: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// init logger
+			file, _ := os.CreateTemp("", "log")
+			logger := log.New(file, "", 0)
+
+			if !tt.args.disableInit {
+				ff = &GoFeatureFlag{
+					bgUpdater: newBackgroundUpdater(5),
+					cache:     tt.args.cacheMock,
+					config: Config{
+						PollingInterval: 0,
+						Logger:          logger,
+						Offline:         tt.args.offline,
+					},
+					dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
+						&logsexporter.Exporter{
+							LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+						}, logger),
+				}
+			}
+
+			got, err := JSONVariationDetails(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
+
+			if tt.expectedLog != "" {
+				content, _ := os.ReadFile(file.Name())
+				assert.Regexp(t, tt.expectedLog, string(content))
+			}
+
+			if tt.wantErr {
+				assert.Error(t, err, "JSONVariation() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			assert.Equal(t, tt.want, got, "JSONVariation() got = %v, want %v", got, tt.want)
+
+			// clean logger
+			ff = nil
+			_ = file.Close()
+		})
+	}
+}
+
 func TestStringVariation(t *testing.T) {
 	type args struct {
 		flagKey      string
@@ -1418,6 +2503,220 @@ func TestStringVariation(t *testing.T) {
 				}
 			}
 			got, err := StringVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
+
+			if tt.expectedLog != "" {
+				content, _ := os.ReadFile(file.Name())
+				assert.Regexp(t, tt.expectedLog, string(content))
+			}
+
+			if tt.wantErr {
+				assert.Error(t, err, "StringVariation() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			assert.Equal(t, tt.want, got, "StringVariation() got = %v, want %v", got, tt.want)
+
+			// clean logger
+			ff = nil
+			_ = file.Close()
+		})
+	}
+}
+
+func TestStringVariationDetails(t *testing.T) {
+	type args struct {
+		flagKey      string
+		user         ffuser.User
+		defaultValue string
+		cacheMock    cache.Manager
+		offline      bool
+		disableInit  bool
+	}
+	tests := []struct {
+		name        string
+		args        args
+		want        model.VariationResult[string]
+		wantErr     bool
+		expectedLog string
+	}{
+		{
+			name: "Get default value if flag disable",
+			args: args{
+				flagKey:      "disable-flag",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: "default-notkey",
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Disable: testconvert.Bool(true),
+				}, nil),
+			},
+			want: model.VariationResult[string]{
+				TrackEvents:   true,
+				VariationType: flag.VariationSDKDefault,
+				Failed:        false,
+				Reason:        flag.ReasonDisabled,
+				Value:         "default-notkey",
+			},
+			wantErr:     false,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"disable-flag\", value=\"default-notkey\", variation=\"SdkDefault\"\n",
+		},
+		{
+			name: "Get default value, rule not apply",
+			args: args{
+				flagKey:      "test-flag",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: "default-notkey",
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Rules: &[]flag.Rule{
+						{
+							Name:  testconvert.String("legacyRuleV0"),
+							Query: testconvert.String("key eq \"key\""),
+							Percentages: &map[string]float64{
+								"False": 0,
+								"True":  100,
+							},
+						},
+					},
+					Variations: &map[string]*interface{}{
+						"Default": testconvert.Interface("default"),
+						"True":    testconvert.Interface("true"),
+						"False":   testconvert.Interface("false"),
+					},
+					DefaultRule: &flag.Rule{
+						Name:            testconvert.String("legacyDefaultRule"),
+						VariationResult: testconvert.String("Default"),
+					},
+				}, nil),
+			},
+			want: model.VariationResult[string]{
+				TrackEvents:   true,
+				VariationType: "Default",
+				Failed:        false,
+				Reason:        flag.ReasonDefault,
+				Value:         "default",
+			},
+			wantErr:     false,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"default\", variation=\"Default\"\n",
+		},
+		{
+			name: "Get true value, rule apply",
+			args: args{
+				flagKey:      "test-flag",
+				user:         ffuser.NewAnonymousUser("random-key"),
+				defaultValue: "default-notkey",
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Rules: &[]flag.Rule{
+						{
+							Name:  testconvert.String("legacyRuleV0"),
+							Query: testconvert.String("key eq \"random-key\""),
+							Percentages: &map[string]float64{
+								"False": 0,
+								"True":  100,
+							},
+						},
+					},
+					Variations: &map[string]*interface{}{
+						"Default": testconvert.Interface("default"),
+						"True":    testconvert.Interface("true"),
+						"False":   testconvert.Interface("false"),
+					},
+					DefaultRule: &flag.Rule{
+						Name:            testconvert.String("legacyDefaultRule"),
+						VariationResult: testconvert.String("Default"),
+					},
+				}, nil),
+			},
+			want: model.VariationResult[string]{
+				TrackEvents:   true,
+				VariationType: "True",
+				Failed:        false,
+				Reason:        flag.ReasonTargetingMatch,
+				Value:         "true",
+			},
+			wantErr:     false,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"true\", variation=\"True\"\n",
+		},
+		{
+			name: "Get false value, rule apply",
+			args: args{
+				flagKey:      "test-flag",
+				user:         ffuser.NewAnonymousUser("random-key-ssss1"),
+				defaultValue: "default-notkey",
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Rules: &[]flag.Rule{
+						{
+							Name:  testconvert.String("legacyRuleV0"),
+							Query: testconvert.String("anonymous eq true"),
+							Percentages: &map[string]float64{
+								"False": 90,
+								"True":  10,
+							},
+						},
+					},
+					Variations: &map[string]*interface{}{
+						"Default": testconvert.Interface("default"),
+						"True":    testconvert.Interface("true"),
+						"False":   testconvert.Interface("false"),
+					},
+					DefaultRule: &flag.Rule{
+						Name:            testconvert.String("legacyDefaultRule"),
+						VariationResult: testconvert.String("Default"),
+					},
+				}, nil),
+			},
+			want: model.VariationResult[string]{
+				TrackEvents:   true,
+				VariationType: "False",
+				Failed:        false,
+				Reason:        flag.ReasonTargetingMatch,
+				Value:         "false",
+			},
+			wantErr:     false,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"false\", variation=\"False\"\n",
+		},
+		{
+			name: "Get sdk default value if offline",
+			args: args{
+				offline:      true,
+				flagKey:      "disable-flag",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: "default-notkey",
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Disable: testconvert.Bool(true),
+				}, nil),
+			},
+			want: model.VariationResult[string]{
+				TrackEvents:   false,
+				VariationType: flag.VariationSDKDefault,
+				Failed:        false,
+				Reason:        flag.ReasonOffline,
+				Value:         "default-notkey",
+			},
+			wantErr:     false,
+			expectedLog: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// init logger
+			file, _ := os.CreateTemp("", "log")
+			logger := log.New(file, "", 0)
+
+			if !tt.args.disableInit {
+				ff = &GoFeatureFlag{
+					bgUpdater: newBackgroundUpdater(5),
+					cache:     tt.args.cacheMock,
+					config: Config{
+						PollingInterval: 0,
+						Logger:          logger,
+						Offline:         tt.args.offline,
+					},
+					dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
+						&logsexporter.Exporter{
+							LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+						}, logger),
+				}
+			}
+			got, err := StringVariationDetails(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
 				content, _ := os.ReadFile(file.Name())
@@ -1710,6 +3009,258 @@ func TestIntVariation(t *testing.T) {
 				}
 			}
 			got, err := IntVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
+
+			if tt.expectedLog != "" {
+				content, _ := os.ReadFile(file.Name())
+				assert.Regexp(t, tt.expectedLog, string(content))
+			}
+
+			if tt.wantErr {
+				assert.Error(t, err, "IntVariation() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			assert.Equal(t, tt.want, got, "IntVariation() got = %v, want %v", got, tt.want)
+
+			// clean logger
+			ff = nil
+			_ = file.Close()
+		})
+	}
+}
+
+func TestIntVariationDetails(t *testing.T) {
+	type args struct {
+		flagKey      string
+		user         ffuser.User
+		defaultValue int
+		cacheMock    cache.Manager
+		offline      bool
+		disableInit  bool
+	}
+	tests := []struct {
+		name        string
+		args        args
+		want        model.VariationResult[int]
+		wantErr     bool
+		expectedLog string
+	}{
+		{
+			name: "Get default value if flag disable",
+			args: args{
+				flagKey:      "disable-flag",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: 125,
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Disable: testconvert.Bool(true),
+				}, nil),
+			},
+			want: model.VariationResult[int]{
+				TrackEvents:   true,
+				VariationType: flag.VariationSDKDefault,
+				Failed:        false,
+				Reason:        flag.ReasonDisabled,
+				Value:         125,
+			},
+			wantErr:     false,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"disable-flag\", value=\"125\", variation=\"SdkDefault\"\n",
+		},
+		{
+			name: "Get default value rule not apply",
+			args: args{
+				flagKey:      "test-flag",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: 118,
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Rules: &[]flag.Rule{
+						{
+							Name:  testconvert.String("legacyRuleV0"),
+							Query: testconvert.String("key eq \"key\""),
+							Percentages: &map[string]float64{
+								"False": 0,
+								"True":  100,
+							},
+						},
+					},
+					Variations: &map[string]*interface{}{
+						"Default": testconvert.Interface(119),
+						"True":    testconvert.Interface(120),
+						"False":   testconvert.Interface(121),
+					},
+					DefaultRule: &flag.Rule{
+						Name:            testconvert.String("legacyDefaultRule"),
+						VariationResult: testconvert.String("Default"),
+					},
+				}, nil),
+			},
+			want: model.VariationResult[int]{
+				TrackEvents:   true,
+				VariationType: "Default",
+				Failed:        false,
+				Reason:        flag.ReasonDefault,
+				Value:         119,
+			},
+			wantErr:     false,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"119\", variation=\"Default\"\n",
+		},
+		{
+			name: "Get true value, rule apply",
+			args: args{
+				flagKey:      "test-flag",
+				user:         ffuser.NewAnonymousUser("random-key"),
+				defaultValue: 118,
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Rules: &[]flag.Rule{
+						{
+							Name:  testconvert.String("legacyRuleV0"),
+							Query: testconvert.String("key eq \"random-key\""),
+							Percentages: &map[string]float64{
+								"False": 0,
+								"True":  100,
+							},
+						},
+					},
+					Variations: &map[string]*interface{}{
+						"Default": testconvert.Interface(119),
+						"True":    testconvert.Interface(120),
+						"False":   testconvert.Interface(121),
+					},
+					DefaultRule: &flag.Rule{
+						Name:            testconvert.String("legacyDefaultRule"),
+						VariationResult: testconvert.String("Default"),
+					},
+				}, nil),
+			},
+			want: model.VariationResult[int]{
+				TrackEvents:   true,
+				VariationType: "True",
+				Failed:        false,
+				Reason:        flag.ReasonTargetingMatch,
+				Value:         120,
+			},
+			wantErr:     false,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"120\", variation=\"True\"\n",
+		},
+		{
+			name: "Get false value, rule apply",
+			args: args{
+				flagKey:      "test-flag",
+				user:         ffuser.NewAnonymousUser("random-key-ssss1"),
+				defaultValue: 118,
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Rules: &[]flag.Rule{
+						{
+							Name:  testconvert.String("legacyRuleV0"),
+							Query: testconvert.String("anonymous eq true"),
+							Percentages: &map[string]float64{
+								"False": 90,
+								"True":  10,
+							},
+						},
+					},
+					Variations: &map[string]*interface{}{
+						"Default": testconvert.Interface(119),
+						"True":    testconvert.Interface(120),
+						"False":   testconvert.Interface(121),
+					},
+					DefaultRule: &flag.Rule{
+						Name:            testconvert.String("legacyDefaultRule"),
+						VariationResult: testconvert.String("Default"),
+					},
+				}, nil),
+			},
+			want: model.VariationResult[int]{
+				TrackEvents:   true,
+				VariationType: "False",
+				Failed:        false,
+				Reason:        flag.ReasonTargetingMatch,
+				Value:         121,
+			},
+			wantErr:     false,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"121\", variation=\"False\"\n",
+		},
+		{
+			name: "Convert float to Int",
+			args: args{
+				flagKey:      "test-flag",
+				user:         ffuser.NewAnonymousUser("random-key"),
+				defaultValue: 118,
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Rules: &[]flag.Rule{
+						{
+							Name:  testconvert.String("legacyRuleV0"),
+							Query: testconvert.String("key eq \"random-key\""),
+							Percentages: &map[string]float64{
+								"False": 0,
+								"True":  100,
+							},
+						},
+					},
+					Variations: &map[string]*interface{}{
+						"Default": testconvert.Interface(119.1),
+						"True":    testconvert.Interface(120.1),
+						"False":   testconvert.Interface(121.1),
+					},
+					DefaultRule: &flag.Rule{
+						Name:            testconvert.String("legacyDefaultRule"),
+						VariationResult: testconvert.String("Default"),
+					},
+				}, nil),
+			},
+			want: model.VariationResult[int]{
+				TrackEvents:   true,
+				VariationType: "True",
+				Failed:        false,
+				Reason:        flag.ReasonTargetingMatch,
+				Value:         120,
+			},
+			wantErr:     false,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"120\", variation=\"True\"\n",
+		},
+		{
+			name: "Get sdk default value if offline",
+			args: args{
+				offline:      true,
+				flagKey:      "disable-flag",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: 125,
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Disable: testconvert.Bool(true),
+				}, nil),
+			},
+			want: model.VariationResult[int]{
+				TrackEvents:   false,
+				VariationType: flag.VariationSDKDefault,
+				Failed:        false,
+				Reason:        flag.ReasonOffline,
+				Value:         125,
+			},
+			wantErr:     false,
+			expectedLog: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// init logger
+			file, _ := os.CreateTemp("", "log")
+			logger := log.New(file, "", 0)
+
+			if !tt.args.disableInit {
+				ff = &GoFeatureFlag{
+					bgUpdater: newBackgroundUpdater(5),
+					cache:     tt.args.cacheMock,
+					config: Config{
+						PollingInterval: 0,
+						Logger:          logger,
+						Offline:         tt.args.offline,
+					},
+					dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
+						&logsexporter.Exporter{
+							LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+						}, logger),
+				}
+			}
+			got, err := IntVariationDetails(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
 				content, _ := os.ReadFile(file.Name())
@@ -2154,6 +3705,7 @@ func TestRawVariation(t *testing.T) {
 				VariationType: flag.VariationSDKDefault,
 				Failed:        false,
 				TrackEvents:   false,
+				Reason:        flag.ReasonOffline,
 			},
 			wantErr:     false,
 			expectedLog: "",
