@@ -5,7 +5,7 @@ import (
 )
 
 type Flag interface {
-	// Value is returning the Value associate to the flag (True / False / Default )
+	// Value is returning the Value associate to the flag
 	Value(flagName string, user ffuser.User, evaluationCtx EvaluationContext) (interface{}, ResolutionDetails)
 
 	// GetVersion is the getter for the field Version
