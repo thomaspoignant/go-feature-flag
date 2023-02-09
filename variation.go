@@ -43,7 +43,8 @@ func BoolVariationDetails(flagKey string, user ffuser.User, defaultValue bool) (
 // An error is return if you don't have init the library before calling the function.
 // If the key does not exist we return the default value.
 // Note: Use this function only if you are using multiple go-feature-flag instances.
-func (g *GoFeatureFlag) BoolVariationDetails(flagKey string, user ffuser.User, defaultValue bool) (model.VariationResult[bool], error) {
+func (g *GoFeatureFlag) BoolVariationDetails(flagKey string, user ffuser.User, defaultValue bool,
+) (model.VariationResult[bool], error) {
 	res, err := getVariation[bool](g, flagKey, user, defaultValue, "bool")
 	notifyVariation(g, flagKey, user, res)
 	return res, err
@@ -76,7 +77,8 @@ func IntVariationDetails(flagKey string, user ffuser.User, defaultValue int) (mo
 // An error is return if you don't have init the library before calling the function.
 // If the key does not exist we return the default value.
 // Note: Use this function only if you are using multiple go-feature-flag instances.
-func (g *GoFeatureFlag) IntVariationDetails(flagKey string, user ffuser.User, defaultValue int) (model.VariationResult[int], error) {
+func (g *GoFeatureFlag) IntVariationDetails(flagKey string, user ffuser.User, defaultValue int,
+) (model.VariationResult[int], error) {
 	res, err := getVariation[int](g, flagKey, user, defaultValue, "int")
 	notifyVariation(g, flagKey, user, res)
 	return res, err
@@ -101,7 +103,8 @@ func (g *GoFeatureFlag) Float64Variation(flagKey string, user ffuser.User, defau
 // Float64VariationDetails return the details of the evaluation for float64 flag.
 // An error is return if you don't have init the library before calling the function.
 // If the key does not exist we return the default value.
-func Float64VariationDetails(flagKey string, user ffuser.User, defaultValue float64) (model.VariationResult[float64], error) {
+func Float64VariationDetails(flagKey string, user ffuser.User, defaultValue float64,
+) (model.VariationResult[float64], error) {
 	return ff.Float64VariationDetails(flagKey, user, defaultValue)
 }
 
@@ -109,7 +112,8 @@ func Float64VariationDetails(flagKey string, user ffuser.User, defaultValue floa
 // An error is return if you don't have init the library before calling the function.
 // If the key does not exist we return the default value.
 // Note: Use this function only if you are using multiple go-feature-flag instances.
-func (g *GoFeatureFlag) Float64VariationDetails(flagKey string, user ffuser.User, defaultValue float64) (model.VariationResult[float64], error) {
+func (g *GoFeatureFlag) Float64VariationDetails(flagKey string, user ffuser.User, defaultValue float64,
+) (model.VariationResult[float64], error) {
 	res, err := getVariation[float64](g, flagKey, user, defaultValue, "float64")
 	notifyVariation(g, flagKey, user, res)
 	return res, err
@@ -134,7 +138,8 @@ func (g *GoFeatureFlag) StringVariation(flagKey string, user ffuser.User, defaul
 // StringVariationDetails return the details of the evaluation for string flag.
 // An error is return if you don't have init the library before calling the function.
 // If the key does not exist we return the default value.
-func StringVariationDetails(flagKey string, user ffuser.User, defaultValue string) (model.VariationResult[string], error) {
+func StringVariationDetails(flagKey string, user ffuser.User, defaultValue string,
+) (model.VariationResult[string], error) {
 	return ff.StringVariationDetails(flagKey, user, defaultValue)
 }
 
@@ -142,7 +147,8 @@ func StringVariationDetails(flagKey string, user ffuser.User, defaultValue strin
 // An error is return if you don't have init the library before calling the function.
 // If the key does not exist we return the default value.
 // Note: Use this function only if you are using multiple go-feature-flag instances.
-func (g *GoFeatureFlag) StringVariationDetails(flagKey string, user ffuser.User, defaultValue string) (model.VariationResult[string], error) {
+func (g *GoFeatureFlag) StringVariationDetails(flagKey string, user ffuser.User, defaultValue string,
+) (model.VariationResult[string], error) {
 	res, err := getVariation[string](g, flagKey, user, defaultValue, "string")
 	notifyVariation(g, flagKey, user, res)
 	return res, err
@@ -169,7 +175,8 @@ func (g *GoFeatureFlag) JSONArrayVariation(
 // JSONArrayVariationDetails return the details of the evaluation for []interface{} flag.
 // An error is return if you don't have init the library before calling the function.
 // If the key does not exist we return the default value.
-func JSONArrayVariationDetails(flagKey string, user ffuser.User, defaultValue []interface{}) (model.VariationResult[[]interface{}], error) {
+func JSONArrayVariationDetails(flagKey string, user ffuser.User, defaultValue []interface{},
+) (model.VariationResult[[]interface{}], error) {
 	return ff.JSONArrayVariationDetails(flagKey, user, defaultValue)
 }
 
@@ -177,7 +184,8 @@ func JSONArrayVariationDetails(flagKey string, user ffuser.User, defaultValue []
 // An error is return if you don't have init the library before calling the function.
 // If the key does not exist we return the default value.
 // Note: Use this function only if you are using multiple go-feature-flag instances.
-func (g *GoFeatureFlag) JSONArrayVariationDetails(flagKey string, user ffuser.User, defaultValue []interface{}) (model.VariationResult[[]interface{}], error) {
+func (g *GoFeatureFlag) JSONArrayVariationDetails(flagKey string, user ffuser.User, defaultValue []interface{},
+) (model.VariationResult[[]interface{}], error) {
 	res, err := getVariation[[]interface{}](g, flagKey, user, defaultValue, "[]interface{}")
 	notifyVariation(g, flagKey, user, res)
 	return res, err
@@ -206,7 +214,8 @@ func (g *GoFeatureFlag) JSONVariation(
 // JSONVariationDetails return the details of the evaluation for map[string]interface{} flag.
 // An error is return if you don't have init the library before calling the function.
 // If the key does not exist we return the default value.
-func JSONVariationDetails(flagKey string, user ffuser.User, defaultValue map[string]interface{}) (model.VariationResult[map[string]interface{}], error) {
+func JSONVariationDetails(flagKey string, user ffuser.User, defaultValue map[string]interface{},
+) (model.VariationResult[map[string]interface{}], error) {
 	return ff.JSONVariationDetails(flagKey, user, defaultValue)
 }
 
@@ -214,7 +223,8 @@ func JSONVariationDetails(flagKey string, user ffuser.User, defaultValue map[str
 // An error is return if you don't have init the library before calling the function.
 // If the key does not exist we return the default value.
 // Note: Use this function only if you are using multiple go-feature-flag instances.
-func (g *GoFeatureFlag) JSONVariationDetails(flagKey string, user ffuser.User, defaultValue map[string]interface{}) (model.VariationResult[map[string]interface{}], error) {
+func (g *GoFeatureFlag) JSONVariationDetails(flagKey string, user ffuser.User, defaultValue map[string]interface{},
+) (model.VariationResult[map[string]interface{}], error) {
 	res, err := getVariation[map[string]interface{}](g, flagKey, user, defaultValue, "bool")
 	notifyVariation(g, flagKey, user, res)
 	return res, err
