@@ -200,7 +200,6 @@ func (g *GoFeatureFlag) JSONVariation(
 	flagKey string, user ffuser.User, defaultValue map[string]interface{},
 ) (map[string]interface{}, error) {
 	res, err := g.JSONVariationDetails(flagKey, user, defaultValue)
-	notifyVariation(g, flagKey, user, res)
 	return res.Value, err
 }
 
