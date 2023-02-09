@@ -33,4 +33,6 @@ const (
 	// ReasonError Indicates that an error occurred during evaluation
 	// Note: The `errorCode`-field contains the details of this error
 	ReasonError ResolutionReason = "ERROR"
+
+	ReasonOffline ResolutionReason = "OFFLINE"
 )
