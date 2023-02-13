@@ -43,10 +43,10 @@ const config = {
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
         googleAnalytics: {
-          trackingID: 'G-LEJBB94YBE'
+          trackingID: 'G-LEJBB94YBE',
         },
         gtag: {
-          trackingID: 'G-LEJBB94YBE'
+          trackingID: 'G-LEJBB94YBE',
         },
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
@@ -74,6 +74,18 @@ const config = {
     'https://fonts.googleapis.com/css?family=Poppins:400,500,700',
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css',
     'https://cdn.jsdelivr.net/gh/devicons/devicon@v2.15.1/devicon.min.css', // https://devicon.dev/
+  ],
+  themes: [
+    [
+      '@easyops-cn/docusaurus-search-local',
+      /** @type {import("@easyops-cn/docusaurus-search-local").PluginOptions} */
+      ({
+        hashed: true,
+        language: ['en', 'zh'],
+        highlightSearchTermsOnTargetPage: true,
+        explicitSearchResultPath: true,
+      }),
+    ],
   ],
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
@@ -106,6 +118,10 @@ const config = {
           {
             to: 'https://github.com/sponsors/thomaspoignant',
             label: 'Sponsor us ❤️',
+            position: 'right',
+          },
+          {
+            type: 'search',
             position: 'right',
           },
           {type: 'docsVersionDropdown', position: 'right'},
@@ -187,9 +203,9 @@ const config = {
         copyright: `Copyright © ${new Date().getFullYear()} GO Feature Flag.`,
       },
       prism: {
-        theme: lightCodeTheme,
-        darkTheme: darkCodeTheme,
-        additionalLanguages: ['toml', 'php'],
+        theme: require("prism-react-renderer/themes/vsLight"),
+        darkTheme: require("prism-react-renderer/themes/vsDark"),
+        additionalLanguages: ['java', 'scala', 'toml', 'php', 'go', 'csharp', 'yaml', 'python'],
       },
     }),
 };
