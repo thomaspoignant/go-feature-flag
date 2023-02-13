@@ -30,9 +30,6 @@ jobs:
       - run: make test
 
   Coverage:
-    needs: Test
-    env:
-      COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
