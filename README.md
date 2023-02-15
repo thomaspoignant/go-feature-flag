@@ -533,6 +533,9 @@ It represents individual flag evaluations and is considered "full fidelity" even
 The format of the data is [described in the documentation](https://gofeatureflag.org/docs/).
 Events are collected and sent in bulk to avoid spamming your exporter.
 
+## Linter
+A command line tool is available to help you lint your configuration file: [go-feature-flag-lint-cli](cmd/lint/README.md).
+
 # How can I contribute?
 This project is open for contribution, see the [contributor's guide](CONTRIBUTING.md) for some helpful tips.
 
