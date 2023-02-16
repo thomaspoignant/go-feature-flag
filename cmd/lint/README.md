@@ -1,6 +1,6 @@
 # GO Feature Flag Lint cli
 
-The lint command lint tool validates that a flags file can be parsed by GO Feature Flag.
+The lint command line tool validates that a flags file can be parsed by GO Feature Flag.
 
 ## How to install the cli
 
