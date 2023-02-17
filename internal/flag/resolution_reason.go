@@ -4,20 +4,24 @@ package flag
 type ResolutionReason = string
 
 const (
-	// ReasonTargetingMatch Indicates that the feature flag is targeting
-	// 100% of the targeting audience,
-	// e.g. 100% rollout percentage
+	// ReasonTargetingMatch The resolved value was the result of a dynamic evaluation,
+	// such as a rule or specific user-targeting.
+	// ex: serve variation A if username is Thomas
 	ReasonTargetingMatch ResolutionReason = "TARGETING_MATCH"
 
-	// ReasonSplit Indicates that the feature flag is targeting
-	// a subset of the targeting audience,
-	// e.g. less than 100% rollout percentage
+	// ReasonTargetingMatchSplit The resolved value was the result of a dynamic evaluation,
+	// that is serving a percentage.
+	// ex: serve variation A to 10% of users with the username Thomas
+	ReasonTargetingMatchSplit ResolutionReason = "TARGETING_MATCH_SPLIT"
+
+	// ReasonSplit The resolved value was the result of pseudorandom assignment.
+	// ex: serve variation A to 10% of all the users.
 	ReasonSplit ResolutionReason = "SPLIT"
 
 	// ReasonDisabled Indicates that the feature flag is disabled
 	ReasonDisabled ResolutionReason = "DISABLED"
 
-	// ReasonDefault Indicates that the feature flag evaluated to the default value
+	// ReasonDefault The resolved value was the result of the flag being disabled in the management system.
 	ReasonDefault ResolutionReason = "DEFAULT"
 
 	// ReasonStatic	Indicates that the feature flag evaluated to a

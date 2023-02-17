@@ -369,6 +369,7 @@ func getVariation[T model.JSONType](
 			Failed:        true,
 			Reason:        flag.ReasonError,
 			ErrorCode:     flag.ErrorCodeProviderNotReady,
+			Cacheable:     false,
 		}, fmt.Errorf("go-feature-flag is not initialised, default value is used")
 	}
 
@@ -378,6 +379,7 @@ func getVariation[T model.JSONType](
 			VariationType: flag.VariationSDKDefault,
 			Failed:        false,
 			Reason:        flag.ReasonOffline,
+			Cacheable:     false,
 		}, nil
 	}
 
@@ -389,6 +391,7 @@ func getVariation[T model.JSONType](
 			ErrorCode:     flag.ErrorCodeFlagNotFound,
 			Failed:        true,
 			Reason:        flag.ReasonError,
+			Cacheable:     true,
 		}
 		if f != nil {
 			varResult.TrackEvents = f.IsTrackEvents()
@@ -426,6 +429,7 @@ func getVariation[T model.JSONType](
 			Failed:        true,
 			TrackEvents:   f.IsTrackEvents(),
 			Version:       f.GetVersion(),
+			Cacheable:     false,
 		}, fmt.Errorf(errorWrongVariation, flagKey)
 	}
 
@@ -437,5 +441,6 @@ func getVariation[T model.JSONType](
 		Failed:        resolutionDetails.ErrorCode != "",
 		TrackEvents:   f.IsTrackEvents(),
 		Version:       f.GetVersion(),
+		Cacheable:     resolutionDetails.Cacheable,
 	}, nil
 }
