@@ -61,7 +61,7 @@ func (f *InternalFlag) Value(
 	f.applyScheduledRolloutSteps()
 
 	if f.IsDisable() || f.isExperimentationOver() {
-		return evaluationCtx.DefaultSdkValue, ResolutionDetails{Variant: VariationSDKDefault, Reason: ReasonDisabled, Cacheable: true}
+		return evaluationCtx.DefaultSdkValue, ResolutionDetails{Variant: VariationSDKDefault, Reason: ReasonDisabled, Cacheable: f.isCacheable()}
 	}
 
 	variationSelection, err := f.selectVariation(flagName, user)
@@ -104,13 +104,9 @@ func selectEvaluationReason(hasRule bool, targetingMatch bool, isDynamic bool, i
 	return ReasonUnknown
 }
 
-func (f *InternalFlag) isCacheable(reason ResolutionReason) bool {
-	switch reason {
-	case ReasonStatic, ReasonDisabled:
-		return f.Scheduled == nil || len(*f.Scheduled) == 0
-	default:
-		return false
-	}
+func (f *InternalFlag) isCacheable() bool {
+	isDynamic := (f.Scheduled != nil && len(*f.Scheduled) >= 0) || f.Experimentation != nil
+	return !isDynamic
 }
 
 // selectVariation is doing the magic to select the variation that should be used for this specific user
@@ -130,12 +126,16 @@ func (f *InternalFlag) selectVariation(flagName string, user ffuser.User) (*vari
 				return nil, err
 			}
 			reason := selectEvaluationReason(hasRule, true, target.IsDynamic(), false)
+			cacheable := f.isCacheable()
+			if target.ProgressiveRollout != nil {
+				cacheable = false
+			}
 			return &variationSelection{
 				name:      variationName,
 				reason:    reason,
 				ruleIndex: &ruleIndex,
 				ruleName:  f.GetRules()[ruleIndex].Name,
-				cacheable: f.isCacheable(reason),
+				cacheable: cacheable,
 			}, err
 		}
 	}
@@ -150,10 +150,14 @@ func (f *InternalFlag) selectVariation(flagName string, user ffuser.User) (*vari
 	}
 
 	reason := selectEvaluationReason(hasRule, false, f.GetDefaultRule().IsDynamic(), true)
+	cacheable := f.isCacheable()
+	if f.GetDefaultRule().ProgressiveRollout != nil {
+		cacheable = false
+	}
 	return &variationSelection{
 		name:      variationName,
 		reason:    reason,
-		cacheable: f.isCacheable(reason),
+		cacheable: cacheable,
 	}, nil
 }
 

@@ -391,7 +391,7 @@ func getVariation[T model.JSONType](
 			ErrorCode:     flag.ErrorCodeFlagNotFound,
 			Failed:        true,
 			Reason:        flag.ReasonError,
-			Cacheable:     true,
+			Cacheable:     false,
 		}
 		if f != nil {
 			varResult.TrackEvents = f.IsTrackEvents()

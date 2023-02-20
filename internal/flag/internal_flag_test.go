@@ -90,8 +90,9 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			want: "default-sdk",
 			want1: flag.ResolutionDetails{
-				Variant: "SdkDefault",
-				Reason:  flag.ReasonDisabled,
+				Variant:   "SdkDefault",
+				Reason:    flag.ReasonDisabled,
+				Cacheable: true,
 			},
 		},
 		{
@@ -111,8 +112,9 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			want: "default-sdk",
 			want1: flag.ResolutionDetails{
-				Variant: "SdkDefault",
-				Reason:  flag.ReasonDisabled,
+				Variant:   "SdkDefault",
+				Reason:    flag.ReasonDisabled,
+				Cacheable: false,
 			},
 		},
 		{
@@ -132,8 +134,9 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			want: "default-sdk",
 			want1: flag.ResolutionDetails{
-				Variant: "SdkDefault",
-				Reason:  flag.ReasonDisabled,
+				Variant:   "SdkDefault",
+				Reason:    flag.ReasonDisabled,
+				Cacheable: false,
 			},
 		},
 		{
@@ -167,6 +170,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				Reason:    flag.ReasonTargetingMatch,
 				RuleIndex: testconvert.Int(0),
 				RuleName:  testconvert.String("rule1"),
+				Cacheable: true,
 			},
 		},
 		{
@@ -206,6 +210,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				Reason:    flag.ReasonTargetingMatch,
 				RuleIndex: testconvert.Int(1),
 				RuleName:  testconvert.String("rule2"),
+				Cacheable: true,
 			},
 		},
 		{
@@ -242,6 +247,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				Variant:   "variation_C",
 				Reason:    flag.ReasonTargetingMatch,
 				RuleIndex: testconvert.Int(1),
+				Cacheable: true,
 			},
 		},
 		{
@@ -283,6 +289,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				Variant:   "variation_D",
 				Reason:    flag.ReasonTargetingMatch,
 				RuleIndex: testconvert.Int(1),
+				Cacheable: true,
 			},
 		},
 		{
@@ -325,6 +332,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				Variant:   "variation_C",
 				Reason:    flag.ReasonTargetingMatch,
 				RuleIndex: testconvert.Int(2),
+				Cacheable: true,
 			},
 		},
 		{
@@ -909,8 +917,9 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			want: "value_A",
 			want1: flag.ResolutionDetails{
-				Variant: "variation_A",
-				Reason:  flag.ReasonSplit,
+				Variant:   "variation_A",
+				Reason:    flag.ReasonSplit,
+				Cacheable: false,
 			},
 		},
 		{
@@ -944,6 +953,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				Reason:    flag.ReasonTargetingMatch,
 				RuleIndex: testconvert.Int(0),
 				RuleName:  testconvert.String("test-rule"),
+				Cacheable: true,
 			},
 		},
 		{
@@ -980,6 +990,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				Reason:    flag.ReasonTargetingMatchSplit,
 				RuleIndex: testconvert.Int(0),
 				RuleName:  testconvert.String("test-rule"),
+				Cacheable: true,
 			},
 		},
 		{
@@ -1025,6 +1036,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				Reason:    flag.ReasonTargetingMatchSplit,
 				RuleIndex: testconvert.Int(0),
 				RuleName:  testconvert.String("test-rule"),
+				Cacheable: false,
 			},
 		},
 		{
@@ -1057,8 +1069,9 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			want: "value_A",
 			want1: flag.ResolutionDetails{
-				Variant: "variation_A",
-				Reason:  flag.ReasonSplit,
+				Variant:   "variation_A",
+				Reason:    flag.ReasonSplit,
+				Cacheable: true,
 			},
 		},
 		{
@@ -1088,8 +1101,9 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			want: "value_A",
 			want1: flag.ResolutionDetails{
-				Variant: "variation_A",
-				Reason:  flag.ReasonDefault,
+				Variant:   "variation_A",
+				Reason:    flag.ReasonDefault,
+				Cacheable: true,
 			},
 		},
 		{
@@ -1112,8 +1126,9 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			want: "value_A",
 			want1: flag.ResolutionDetails{
-				Variant: "variation_A",
-				Reason:  flag.ReasonStatic,
+				Variant:   "variation_A",
+				Reason:    flag.ReasonStatic,
+				Cacheable: true,
 			},
 		},
 		{

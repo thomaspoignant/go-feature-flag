@@ -5,5 +5,6 @@
   "version": "",
   "reason": "DEFAULT",
   "errorCode": "",
-  "value": false
+  "value": false,
+  "cacheable": true
 }
