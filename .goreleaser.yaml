@@ -50,9 +50,9 @@ builds:
         goarch: arm
         goarm: 6
 
-  - id: go-feature-flag-lint-cli
+  - id: go-feature-flag-lint
     main: ./cmd/lint
-    binary: go-feature-flag-lint-cli
+    binary: go-feature-flag-lint
     goos:
       - darwin
       - linux
@@ -93,10 +93,10 @@ archives:
       windows: Windows
       386: i386
       amd64: x86_64
-  - id: go-feature-flag-lint-cli
-    name_template: go-feature-flag-lint-cli_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}_{{ . }}{{ end }}{{ if not (eq .Amd64 "v1") }}{{ .Amd64 }}{{ end }}
+  - id: go-feature-flag-lint
+    name_template: go-feature-flag-lint_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}_{{ . }}{{ end }}{{ if not (eq .Amd64 "v1") }}{{ .Amd64 }}{{ end }}
     builds:
-      - go-feature-flag-lint-cli
+      - go-feature-flag-lint
     replacements:
       darwin: Darwin
       linux: Linux
@@ -139,13 +139,13 @@ dockers:
       - thomaspoignant/go-feature-flag-relay-proxy:v{{ .Major }}.{{ .Minor }}
   - goos: linux
     ids:
-      - go-feature-flag-lint-cli
+      - go-feature-flag-lint
     dockerfile: ./cmd/lint/Dockerfile
     image_templates:
-      - thomaspoignant/go-feature-flag-lint-cli:latest
-      - thomaspoignant/go-feature-flag-lint-cli:{{ .Tag }}
-      - thomaspoignant/go-feature-flag-lint-cli:v{{ .Major }}
-      - thomaspoignant/go-feature-flag-lint-cli:v{{ .Major }}.{{ .Minor }}
+      - thomaspoignant/go-feature-flag-lint:latest
+      - thomaspoignant/go-feature-flag-lint:{{ .Tag }}
+      - thomaspoignant/go-feature-flag-lint:v{{ .Major }}
+      - thomaspoignant/go-feature-flag-lint:v{{ .Major }}.{{ .Minor }}
 
 brews:
   - ids:
@@ -171,8 +171,8 @@ brews:
     description: "A stand alone server to run GO Feature Flag"
     skip_upload: auto
   - ids:
-      - go-feature-flag-lint-cli
-    name: go-feature-flag-lint-cli
+      - go-feature-flag-lint
+    name: go-feature-flag-lint
     tap:
       owner: thomaspoignant
       name: homebrew-tap

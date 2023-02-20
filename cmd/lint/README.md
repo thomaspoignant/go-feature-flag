@@ -7,12 +7,12 @@ The lint command line tool validates that a flags file can be parsed by GO Featu
 ### Install using Homebrew (mac and linux)
 ```shell
 brew tap thomaspoignant/homebrew-tap
-brew install go-feature-flag-lint-cli
+brew install go-feature-flag-lint
 ```
 
 ### Install using docker
 ```shell
-docker pull thomaspoignant/go-feature-flag-lint-cli
+docker pull thomaspoignant/go-feature-flag-lint
 ```
 More information about the usage of the container in the [dockerhub page](https://hub.docker.com/r/thomaspoignant/go-feature-flag-lint-cli).
 
