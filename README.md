@@ -534,7 +534,7 @@ The format of the data is [described in the documentation](https://gofeatureflag
 Events are collected and sent in bulk to avoid spamming your exporter.
 
 ## Linter
-A command line tool is available to help you lint your configuration file: [go-feature-flag-lint-cli](cmd/lint/README.md).
+A command line tool is available to help you lint your configuration file: [go-feature-flag-lint](cmd/lint/README.md).
 
 # How can I contribute?
 This project is open for contribution, see the [contributor's guide](CONTRIBUTING.md) for some helpful tips.

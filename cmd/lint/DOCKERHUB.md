@@ -7,7 +7,7 @@ The lint command lint tool validates that a flags file can be parsed by GO Featu
 ```shell
 docker run \
   -v $(pwd)/your/configuration_folder:/config \
-  thomaspoignant/go-feature-flag-lint-cli:latest \
+  thomaspoignant/go-feature-flag-lint:latest \
   --input-file=/config/my-go-feature-flag-config.yaml \
   --input-format=yaml
 ```
