@@ -126,16 +126,12 @@ func (f *InternalFlag) selectVariation(flagName string, user ffuser.User) (*vari
 				return nil, err
 			}
 			reason := selectEvaluationReason(hasRule, true, target.IsDynamic(), false)
-			cacheable := f.isCacheable()
-			if target.ProgressiveRollout != nil {
-				cacheable = false
-			}
 			return &variationSelection{
 				name:      variationName,
 				reason:    reason,
 				ruleIndex: &ruleIndex,
 				ruleName:  f.GetRules()[ruleIndex].Name,
-				cacheable: cacheable,
+				cacheable: f.isCacheable() && target.ProgressiveRollout == nil,
 			}, err
 		}
 	}
@@ -150,14 +146,10 @@ func (f *InternalFlag) selectVariation(flagName string, user ffuser.User) (*vari
 	}
 
 	reason := selectEvaluationReason(hasRule, false, f.GetDefaultRule().IsDynamic(), true)
-	cacheable := f.isCacheable()
-	if f.GetDefaultRule().ProgressiveRollout != nil {
-		cacheable = false
-	}
 	return &variationSelection{
 		name:      variationName,
 		reason:    reason,
-		cacheable: cacheable,
+		cacheable: f.isCacheable() && f.GetDefaultRule().ProgressiveRollout == nil,
 	}, nil
 }
 
