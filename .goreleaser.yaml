@@ -50,6 +50,28 @@ builds:
         goarch: arm
         goarm: 6
 
+  - id: go-feature-flag-lint
+    main: ./cmd/lint
+    binary: go-feature-flag-lint
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - 386
+      - amd64
+      - arm64
+      - arm
+    goarm:
+      - 6
+      - 7
+    ignore:
+      - goos: darwin
+        goarch: 386
+      - goos: linux
+        goarch: arm
+        goarm: 6
+
 archives:
   - id: go-feature-flag-migration-cli
     name_template: go-feature-flag-migration-cli_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}_{{ . }}{{ end }}{{ if not (eq .Amd64 "v1") }}{{ .Amd64 }}{{ end }}
@@ -65,6 +87,16 @@ archives:
     name_template: go-feature-flag-relay-proxy_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}_{{ . }}{{ end }}{{ if not (eq .Amd64 "v1") }}{{ .Amd64 }}{{ end }}
     builds:
       - go-feature-flag-relay-proxy
+    replacements:
+      darwin: Darwin
+      linux: Linux
+      windows: Windows
+      386: i386
+      amd64: x86_64
+  - id: go-feature-flag-lint
+    name_template: go-feature-flag-lint_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}_{{ . }}{{ end }}{{ if not (eq .Amd64 "v1") }}{{ .Amd64 }}{{ end }}
+    builds:
+      - go-feature-flag-lint
     replacements:
       darwin: Darwin
       linux: Linux
@@ -105,6 +137,15 @@ dockers:
       - thomaspoignant/go-feature-flag-relay-proxy:{{ .Tag }}
       - thomaspoignant/go-feature-flag-relay-proxy:v{{ .Major }}
       - thomaspoignant/go-feature-flag-relay-proxy:v{{ .Major }}.{{ .Minor }}
+  - goos: linux
+    ids:
+      - go-feature-flag-lint
+    dockerfile: ./cmd/lint/Dockerfile
+    image_templates:
+      - thomaspoignant/go-feature-flag-lint:latest
+      - thomaspoignant/go-feature-flag-lint:{{ .Tag }}
+      - thomaspoignant/go-feature-flag-lint:v{{ .Major }}
+      - thomaspoignant/go-feature-flag-lint:v{{ .Major }}.{{ .Minor }}
 
 brews:
   - ids:
@@ -128,6 +169,17 @@ brews:
     caveats: "A stand alone server to run GO Feature Flag"
     homepage: "https://gofeatureflag.org"
     description: "A stand alone server to run GO Feature Flag"
+    skip_upload: auto
+  - ids:
+      - go-feature-flag-lint
+    name: go-feature-flag-lint
+    tap:
+      owner: thomaspoignant
+      name: homebrew-tap
+      branch: master
+    caveats: "A command line tool to lint your feature flag configuration file"
+    homepage: "https://gofeatureflag.org"
+    description: "A command line tool to lint your feature flag configuration file"
     skip_upload: auto
 
 scoop:

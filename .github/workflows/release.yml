@@ -58,6 +58,28 @@ jobs:
           repository: thomaspoignant/go-feature-flag-migration-cli
           readme: "./cmd/migrationcli/DOCKERHUB.md"
 
+  dockerhub-lint:
+    runs-on: ubuntu-latest
+    name: Upload dockerhub readme
+    needs:
+      - goreleaser
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Release readme to DockerHub
+        uses: ms-jpq/sync-dockerhub-readme@v1
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        with:
+          username: ${DOCKER_USERNAME}
+          password: ${DOCKER_PASSWORD}
+          repository: thomaspoignant/go-feature-flag-lint
+          readme: "./cmd/lint/DOCKERHUB.md"
+
   dockerhub-relay-proxy:
     runs-on: ubuntu-latest
     name: Upload dockerhub readme

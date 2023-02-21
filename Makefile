@@ -14,7 +14,7 @@ RESET  := $(shell tput -Txterm sgr0)
 
 all: help
 ## Build:
-build: build-migrationcli build-relayproxy ## Build all the binaries and put the output in out/bin/
+build: build-migrationcli build-relayproxy build-lint ## Build all the binaries and put the output in out/bin/
 
 build-migrationcli: ## Build the migration cli in out/bin/
 	mkdir -p out/bin
@@ -23,6 +23,10 @@ build-migrationcli: ## Build the migration cli in out/bin/
 build-relayproxy: ## Build the relay proxy in out/bin/
 	mkdir -p out/bin
 	GO111MODULE=on $(GOCMD) build -mod vendor -o out/bin/relayproxy ./cmd/relayproxy/
+
+build-lint: ## Build the linter in out/bin/
+	mkdir -p out/bin
+	GO111MODULE=on $(GOCMD) build -mod vendor -o out/bin/lint ./cmd/lint/
 
 build-doc: ## Build the documentation
 	cd website; \
