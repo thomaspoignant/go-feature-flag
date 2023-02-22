@@ -45,3 +45,18 @@ The command line has 2 arguments you should specify.
 |------------------|-------------------------------------------------------------------------------------------------------------------|
 | `--input-file`   | **(mandatory)** The location of your configuration file.                                                          |
 | `--input-format` | **(mandatory)** The format of your current configuration file. <br/>Available formats are `yaml`, `json`, `toml`. |
+
+## GitHub Actions
+
+You can run `go-feature-flag-lint` using GitHub actions:
+
+```yaml
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker://thomaspoignant/go-feature-flag-lint:latest
+        with:
+          args: --input-file=/github/workspace/path/to/your/config.yaml --input-format=yaml
+```
