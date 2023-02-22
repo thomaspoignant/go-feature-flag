@@ -418,15 +418,17 @@ func getVariation[T model.JSONType](
 	case T:
 		v = val
 	default:
-		return model.VariationResult[T]{
-			Value:         sdkDefaultValue,
-			VariationType: flag.VariationSDKDefault,
-			Reason:        flag.ReasonError,
-			ErrorCode:     flag.ErrorCodeTypeMismatch,
-			Failed:        true,
-			TrackEvents:   f.IsTrackEvents(),
-			Version:       f.GetVersion(),
-		}, fmt.Errorf(errorWrongVariation, flagKey)
+		if val != nil {
+			return model.VariationResult[T]{
+				Value:         sdkDefaultValue,
+				VariationType: flag.VariationSDKDefault,
+				Reason:        flag.ReasonError,
+				ErrorCode:     flag.ErrorCodeTypeMismatch,
+				Failed:        true,
+				TrackEvents:   f.IsTrackEvents(),
+				Version:       f.GetVersion(),
+			}, fmt.Errorf(errorWrongVariation, flagKey)
+		}
 	}
 
 	return model.VariationResult[T]{
