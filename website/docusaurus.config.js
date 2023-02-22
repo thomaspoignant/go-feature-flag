@@ -27,7 +27,7 @@ const config = {
     mailchimpURL:
       '//gofeatureflag.us14.list-manage.com/subscribe/post?u=86acc1a78e371bf66a9683672&amp;id=f42abfec51&amp',
     swaggerURL:
-      'https://github.com/thomaspoignant/go-feature-flag/blob/main/cmd/relayproxy/docs/swagger.yaml',
+      'https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/cmd/relayproxy/docs/swagger.yaml',
   },
   // Even if you don't use internalization, you can use this field to set useful
   // metadata like html lang. For example, if your site is Chinese, you may want

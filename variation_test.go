@@ -3741,6 +3741,26 @@ func TestRawVariation(t *testing.T) {
 			wantErr:     false,
 			expectedLog: "",
 		},
+		{
+			name: "should use interface default value if the flag is disabled",
+			args: args{
+				flagKey:      "disable-flag",
+				user:         ffuser.NewUser("random-key"),
+				defaultValue: nil,
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Disable: testconvert.Bool(true),
+				}, nil),
+			},
+			want: model.RawVarResult{
+				TrackEvents:   true,
+				VariationType: flag.VariationSDKDefault,
+				Failed:        false,
+				Reason:        flag.ReasonDisabled,
+				Value:         nil,
+			},
+			wantErr:     false,
+			expectedLog: "",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

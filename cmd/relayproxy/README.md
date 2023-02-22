@@ -1,6 +1,6 @@
 # GO feature flag relay proxy
 <p align="center">
-  <img width="250" height="238" src="logo.png" alt="go-feature-flag logo" />
+  <img width="250" height="238" src="../../logo.png" alt="go-feature-flag logo" />
 </p>
 
 <p align="center">
