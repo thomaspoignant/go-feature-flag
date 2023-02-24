@@ -61,7 +61,11 @@ func (f *InternalFlag) Value(
 	f.applyScheduledRolloutSteps()
 
 	if f.IsDisable() || f.isExperimentationOver() {
-		return evaluationCtx.DefaultSdkValue, ResolutionDetails{Variant: VariationSDKDefault, Reason: ReasonDisabled, Cacheable: f.isCacheable()}
+		return evaluationCtx.DefaultSdkValue, ResolutionDetails{
+			Variant:   VariationSDKDefault,
+			Reason:    ReasonDisabled,
+			Cacheable: f.isCacheable(),
+		}
 	}
 
 	variationSelection, err := f.selectVariation(flagName, user)
@@ -105,7 +109,7 @@ func selectEvaluationReason(hasRule bool, targetingMatch bool, isDynamic bool, i
 }
 
 func (f *InternalFlag) isCacheable() bool {
-	isDynamic := (f.Scheduled != nil && len(*f.Scheduled) >= 0) || f.Experimentation != nil
+	isDynamic := (f.Scheduled != nil && len(*f.Scheduled) > 0) || f.Experimentation != nil
 	return !isDynamic
 }
 
