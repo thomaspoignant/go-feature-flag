@@ -8,12 +8,13 @@ description: How to configure the relay proxy to serve your feature flags.
 ## Global configuration
 The configuration of the **relay proxy** is based on a configuration file that you have to provide.  
 
-:::tips
+:::tip Use environment variables.
 You can also override these file configuration by using environment variables.
 
 Note that all environment variables should be uppercase.  
-If you want to replace a nested fields, please use `_` to separate each field (ex: `RETRIEVER_KIND`).
+If you want to replace a nested fields, please use `_` to separate each field _(ex: `RETRIEVER_KIND`)_.
 :::
+
 
 | Field name                | Type                    | Default     | Description                                                                                                                                                                                                                                                                                   |
 |---------------------------|-------------------------|-------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
