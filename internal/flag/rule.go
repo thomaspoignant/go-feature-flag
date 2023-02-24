@@ -71,6 +71,18 @@ func (r *Rule) Evaluate(user ffuser.User, hashID uint32, isDefault bool,
 	return "", fmt.Errorf("error in the configuration, no variation available for this originalRule")
 }
 
+// IsDynamic is a function that allows to know if the rule has a dynamic result or not.
+func (r *Rule) IsDynamic() bool {
+	hasPercentage100 := false
+	for _, percentage := range r.GetPercentages() {
+		if percentage == 100 {
+			hasPercentage100 = true
+			break
+		}
+	}
+	return r.ProgressiveRollout != nil || (r.Percentages != nil && len(r.GetPercentages()) > 0 && !hasPercentage100)
+}
+
 func (r *Rule) getVariationFromProgressiveRollout(hash uint32) (string, error) {
 	isRolloutValid := r.ProgressiveRollout != nil &&
 		r.ProgressiveRollout.Initial != nil &&

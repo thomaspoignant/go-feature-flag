@@ -14,4 +14,7 @@ type variationSelection struct {
 
 	// ruleName (optional) is the name of the associated rule if we have one
 	ruleName *string
+
+	// cacheable is set to true if a provider/SDK can cache the value
+	cacheable bool
 }
