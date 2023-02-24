@@ -3757,6 +3757,7 @@ func TestRawVariation(t *testing.T) {
 				Failed:        false,
 				Reason:        flag.ReasonDisabled,
 				Value:         nil,
+				Cacheable:     true,
 			},
 			wantErr:     false,
 			expectedLog: "",
