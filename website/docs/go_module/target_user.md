@@ -86,15 +86,16 @@ There is a Variation method for each type:
 You can use these functions the same way as the other variation functions BUT it will return a generic object `model.VariationResult[<type>]` containing your result.  
 This object will contain these fields:
 
-| field           | type                     | description                                            |
-|-----------------|--------------------------|--------------------------------------------------------|
-| `TrackEvents`   | `bool`                   | `true` if this evaluation was tracked.                 |
-| `VariationType` | `string`                 | The name of the variation used to get this value.      |
-| `Failed`        | `bool`                   | `true` if an error occurred during the evaluation.     |
-| `Version`       | `string`                 | The **version** of the flag used to do the evaluation. |
-| `Reason`        | `flag.ResolutionReason`  | The reason used for this evaluation.                   |
-| `ErrorCode`     | `flag.ErrorCode`         | Error code in case we have an error.                   |
-| `Value`         | `<type T>`               | Value of the flag in the expected type.                |
+| field           | type                    | description                                                                    |
+|-----------------|-------------------------|--------------------------------------------------------------------------------|
+| `TrackEvents`   | `bool`                  | `true` if this evaluation was tracked.                                         |
+| `VariationType` | `string`                | The name of the variation used to get this value.                              |
+| `Failed`        | `bool`                  | `true` if an error occurred during the evaluation.                             |
+| `Version`       | `string`                | The **version** of the flag used to do the evaluation.                         |
+| `Reason`        | `flag.ResolutionReason` | The reason used for this evaluation.                                           |
+| `ErrorCode`     | `flag.ErrorCode`        | Error code in case we have an error.                                           |
+| `Value`         | `<type T>`              | Value of the flag in the expected type.                                        |
+| `Cacheable`     | `bool`                  | `true` if it can be cached (by user or for everyone depending on the reason).  |
 
 
 ### Reason
