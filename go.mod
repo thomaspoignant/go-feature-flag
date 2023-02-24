@@ -5,7 +5,7 @@ go 1.18
 require (
 	cloud.google.com/go/storage v1.29.0
 	github.com/BurntSushi/toml v1.2.1
-	github.com/aws/aws-sdk-go v1.44.204
+	github.com/aws/aws-sdk-go v1.44.208
 	github.com/brpaz/echozap v1.1.3
 	github.com/fsouza/fake-gcs-server v1.44.0
 	github.com/gdexlab/go-render v1.0.1
@@ -13,7 +13,7 @@ require (
 	github.com/google/go-cmp v0.5.9
 	github.com/google/uuid v1.3.0
 	github.com/jessevdk/go-flags v1.5.0
-	github.com/labstack/echo/v4 v4.10.1
+	github.com/labstack/echo/v4 v4.10.2
 	github.com/nikunjy/rules v1.2.0
 	github.com/r3labs/diff/v3 v3.0.1
 	github.com/spf13/pflag v1.0.5
