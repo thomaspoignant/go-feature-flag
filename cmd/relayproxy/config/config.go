@@ -2,17 +2,17 @@ package config
 
 import (
 	"fmt"
+	"github.com/spf13/pflag"
 	"net/http"
+	"strings"
 	"time"
 
-	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
 
 // ParseConfig is reading the configuration file
 func ParseConfig(log *zap.Logger, version string) (*Config, error) {
-	setViperDefault()
 	viper.Set("version", version)
 
 	errBindFlag := viper.BindPFlags(pflag.CommandLine)
@@ -32,11 +32,15 @@ func ParseConfig(log *zap.Logger, version string) (*Config, error) {
 		viper.AddConfigPath("/goff/")
 		viper.AddConfigPath("/etc/opt/goff/")
 	}
+
+	viper.SetEnvKeyReplacer(strings.NewReplacer(`.`, `_`))
+	viper.AutomaticEnv()
+	setViperDefault()
+
 	err := viper.ReadInConfig()
 	if err != nil {
 		return nil, err
 	}
-
 	proxyConf := &Config{}
 	err = viper.Unmarshal(proxyConf)
 	if err != nil {
