@@ -38,5 +38,6 @@ const (
 	// Note: The `errorCode`-field contains the details of this error
 	ReasonError ResolutionReason = "ERROR"
 
+	// ReasonOffline Indicates that GO Feature Flag is currently evaluating in offline mode.
 	ReasonOffline ResolutionReason = "OFFLINE"
 )
