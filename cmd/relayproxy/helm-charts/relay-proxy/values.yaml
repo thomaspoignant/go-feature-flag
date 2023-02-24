@@ -1,6 +1,13 @@
 relayproxy:
-  # Location of your relay-proxy configuration file (should be a YAML file and should be located in the same folder)
-  configurationFile: goff-proxy.yml
+  config: # This is a configuration example for the relay-proxy
+    listen: 1031
+    pollingInterval: 1000
+    startWithRetrieverError: false
+    retriever:
+      kind: http
+      url: https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.yaml
+    exporter:
+      kind: log
 
 replicaCount: 1
 

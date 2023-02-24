@@ -7,7 +7,7 @@ for any issues or missing features.
 
 
 ## How to use the chart.
-Please replace the file `goff-proxy.yml` in this folder by your `relay-proxy` configuration file.  
+Please replace the keys `relayproxy.config` in  the `Values.yaml` to fit your configuration.   
 This file will be stored as `configmap` in your cluster and be mount as a volume for the `relay-proxy`.
 
 After in the current folder run:
