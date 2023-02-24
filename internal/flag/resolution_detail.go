@@ -17,4 +17,7 @@ type ResolutionDetails struct {
 
 	// RuleName (optional) is the name of the associated rule if we have one
 	RuleName *string
+
+	// Cacheable is set to true if an SDK/provider can cache the value locally.
+	Cacheable bool
 }

@@ -86,15 +86,33 @@ There is a Variation method for each type:
 You can use these functions the same way as the other variation functions BUT it will return a generic object `model.VariationResult[<type>]` containing your result.  
 This object will contain these fields:
 
-| field           | type                     | description                                            |
-|-----------------|--------------------------|--------------------------------------------------------|
-| `TrackEvents`   | `bool`                   | true` if this evaluation was tracked.                  |
-| `VariationType` | `string`                 | The name of the variation used to get this value.      |
-| `Failed`        | `bool`                   | `true` if an error occurred during the evaluation.     |
-| `Version`       | `string`                 | The **version** of the flag used to do the evaluation. |
-| `Reason`        | `flag.ResolutionReason`  | The reason used for this evaluation.                   |
-| `ErrorCode`     | `flag.ErrorCode`         | Error code in case we have an error.                   |
-| `Value`         | `<type T>`               | Value of the flag in the expected type.                |
+| field           | type                    | description                                                                    |
+|-----------------|-------------------------|--------------------------------------------------------------------------------|
+| `TrackEvents`   | `bool`                  | `true` if this evaluation was tracked.                                         |
+| `VariationType` | `string`                | The name of the variation used to get this value.                              |
+| `Failed`        | `bool`                  | `true` if an error occurred during the evaluation.                             |
+| `Version`       | `string`                | The **version** of the flag used to do the evaluation.                         |
+| `Reason`        | `flag.ResolutionReason` | The reason used for this evaluation.                                           |
+| `ErrorCode`     | `flag.ErrorCode`        | Error code in case we have an error.                                           |
+| `Value`         | `<type T>`              | Value of the flag in the expected type.                                        |
+| `Cacheable`     | `bool`                  | `true` if it can be cached (by user or for everyone depending on the reason).  |
+
+
+### Reason
+GO Feature Flag can furnish you with diverse reasons in the variation details, giving you insight into the evaluation process of your feature flag.
+Here is the full list of reason available:
+
+| Reason                  | description                                                                                                                                                                                           |
+|-------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `TARGETING_MATCH`       | The resolved value was the result of a dynamic evaluation, such as a rule or specific user-targeting. _(ex: serve variation A if username is Thomas)_                                                 |
+| `TARGETING_MATCH_SPLIT` | The resolved value was the result of a dynamic evaluation, that is serving a percentage. _(ex: serve variation A to 10% of users with the username Thomas)_                                           |
+| `SPLIT`                 | The resolved value was the result of pseudorandom assignment. _(ex: serve variation A to 10% of all the users.)_                                                                                      |
+| `DISABLED`              | Indicates that the feature flag is disabled                                                                                                                                                           |
+| `DEFAULT`               | The resolved value was the result of the flag being disabled in the management system.                                                                                                                |
+| `STATIC`                | Indicates that the feature flag evaluated to a static value, for example, the default value for the flag. _(Note: Typically means that no dynamic evaluation has been executed for the feature flag)_ |
+| `UNKNOWN`               | Indicates an unknown issue occurred during evaluation                                                                                                                                                 |
+| `ERROR`                 | Indicates that an error occurred during evaluation *(Note: The `errorCode` field contains the details of this error)*                                                                                 |
+| `OFFLINE`               | Indicates that GO Feature Flag is currently evaluating in offline mode.                                                                                                                               |
 
 
 ## Get all flags for a specific user
