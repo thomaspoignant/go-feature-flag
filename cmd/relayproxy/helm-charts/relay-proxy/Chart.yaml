@@ -4,4 +4,4 @@ home: https://gofeatureflag.org
 description: A Helm chart to deploy go-feature-flag-relay proxy into Kubernetes
 type: application
 version: 0.1.0
-appVersion: "v1.2.2"
+appVersion: "v1.3.0"
