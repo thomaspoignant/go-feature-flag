@@ -1,0 +1,35 @@
+name: "Helm checks"
+on:
+  push:
+    branches:
+      - relay-proxy-helm-chart
+  pull_request_target:
+    types: [ opened, synchronize, reopened ]
+
+jobs:
+  Lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Run chart-testing (lint)
+        id: lint
+        uses: HexF/chart-testing-action@v3.0.0
+        working-directory: ./cmd/relayproxy/helm-charts/relay-proxy/
+        with:
+          command: lint
+
+      - name: Create kind cluster
+        uses: helm/kind-action@v1.0.0-alpha.3
+        working-directory: ./cmd/relayproxy/helm-charts/relay-proxy/
+        with:
+          install_local_path_provisioner: true
+        # Only build a kind cluster if there are chart changes to test.
+        if: steps.lint.outputs.changed == 'true'
+
+      - name: Run chart-testing (install)
+        uses: HexF/chart-testing-action@v3.0.0
+        working-directory: ./cmd/relayproxy/helm-charts/relay-proxy/
+        with:
+          command: install
