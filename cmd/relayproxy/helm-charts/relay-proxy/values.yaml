@@ -1,5 +1,5 @@
 relayproxy:
-  config: # This is a configuration example for the relay-proxy
+  config: | # This is a configuration example for the relay-proxy
     listen: 1031
     pollingInterval: 1000
     startWithRetrieverError: false
@@ -16,8 +16,6 @@ image:
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
-
-
 
 imagePullSecrets: []
 nameOverride: ""
@@ -79,5 +77,3 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
-
-

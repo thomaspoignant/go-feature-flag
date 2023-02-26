@@ -8,5 +8,4 @@ metadata:
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
 data:
-  goff-proxy.yml:
-    {{- toYaml .Values.relayproxy.config | nindent 4 }}
+  goff-proxy.yml: {{- toYaml .Values.relayproxy.config | nindent 4 }}
