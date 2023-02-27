@@ -185,9 +185,13 @@ jobs:
       - name: Get tag name
         uses: olegtarasov/get-tag@v2.1.2
 
-      - name: Bump version
+      - name: Bump chart appVersion
         working-directory: ./release/
         run: yq -i '.appVersion="$GIT_TAG_NAME"' $CHART_YAML_FILE_LOCATION
+
+      - name: Bump chart version
+        working-directory: ./release/
+        run: yq -i '.version="${GIT_TAG_NAME#v}"' $CHART_YAML_FILE_LOCATION
 
       - name: Checkout main branch
         uses: actions/checkout@v3
