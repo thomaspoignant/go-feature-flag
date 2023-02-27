@@ -5,7 +5,7 @@ go 1.18
 require (
 	cloud.google.com/go/storage v1.29.0
 	github.com/BurntSushi/toml v1.2.1
-	github.com/aws/aws-sdk-go v1.44.208
+	github.com/aws/aws-sdk-go v1.44.209
 	github.com/brpaz/echozap v1.1.3
 	github.com/fsouza/fake-gcs-server v1.44.0
 	github.com/gdexlab/go-render v1.0.1
@@ -18,7 +18,7 @@ require (
 	github.com/r3labs/diff/v3 v3.0.1
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.15.0
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.2
 	github.com/swaggo/echo-swagger v1.3.5
 	github.com/swaggo/swag v1.8.10
 	go.uber.org/zap v1.24.0
