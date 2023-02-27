@@ -94,6 +94,7 @@ const config = {
         id: 'support_usz', // Increment on change
         content: `⭐️ If you like GO Feature Flag, give it a star on <a target="_blank" rel="noopener noreferrer" href="https://github.com/thomaspoignant/go-feature-flag">GitHub</a> and follow us on <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/gofeatureflag">Twitter ${TwitterSvg}</a>`,
       },
+      image: 'img/logo/logo.png',
       navbar: {
         title: 'GO Feature Flag',
         logo: {
