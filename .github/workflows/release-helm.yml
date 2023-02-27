@@ -29,6 +29,6 @@ jobs:
           owner: go-feature-flag
           repository: helm-charts
           branch: gh-pages
-          target_dir: charts
+          target_dir: ./
           commit_username: thomaspoignant
           commit_email: thomaspoignant@goferatureflag.org
