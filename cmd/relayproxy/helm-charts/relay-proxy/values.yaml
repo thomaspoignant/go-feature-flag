@@ -64,7 +64,7 @@ ingress:
   #      - chart-example.local
 
 resources:
-  request:
+  requests:
     memory: "128Mi"
     cpu: "500m"
 
