@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/brpaz/echozap"
+	"github.com/labstack/echo-contrib/prometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
@@ -86,6 +87,10 @@ func (s *Server) Start() {
 		"Starting go-feature-flag relay proxy ...",
 		zap.String("address", address),
 		zap.String("version", s.config.Version))
+
+	// configure prometheus middleware for echo
+	p := prometheus.NewPrometheus("gofeatureflag", nil)
+	p.Use(s.echoInstance)
 
 	err := s.echoInstance.Start(address)
 	if err != nil {
