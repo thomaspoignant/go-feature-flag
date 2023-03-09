@@ -2,10 +2,11 @@ package api
 
 import (
 	"fmt"
+	"github.com/labstack/echo-contrib/prometheus"
+	"github.com/thomaspoignant/go-feature-flag/cmd/metric"
 	"time"
 
 	"github.com/brpaz/echozap"
-	"github.com/labstack/echo-contrib/prometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
@@ -48,6 +49,12 @@ func (s *Server) init() {
 	s.echoInstance.HidePort = true
 	s.echoInstance.Debug = s.config.Debug
 
+	// Prometheus
+	metrics := metric.NewMetrics()
+	prometheus := prometheus.NewPrometheus("gofeatureflag", nil, metrics.MetricList())
+	prometheus.Use(s.echoInstance)
+	s.echoInstance.Use(metrics.AddCustomMetricsMiddleware)
+
 	// Middlewares
 	s.echoInstance.Use(echozap.ZapLogger(s.zapLog))
 	s.echoInstance.Use(middleware.Recover())
@@ -87,10 +94,6 @@ func (s *Server) Start() {
 		"Starting go-feature-flag relay proxy ...",
 		zap.String("address", address),
 		zap.String("version", s.config.Version))
-
-	// configure prometheus middleware for echo
-	p := prometheus.NewPrometheus("gofeatureflag", nil)
-	p.Use(s.echoInstance)
 
 	err := s.echoInstance.Start(address)
 	if err != nil {
