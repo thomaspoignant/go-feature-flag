@@ -2,6 +2,7 @@ package ffclient
 
 import (
 	"fmt"
+	"github.com/thomaspoignant/go-feature-flag/internal/dto"
 	"log"
 	"sync"
 	"time"
@@ -15,14 +16,14 @@ import (
 
 // Init the feature flag component with the configuration of ffclient.Config
 //
-//  func main() {
-//    err := ffclient.Init(ffclient.Config{
-//             PollingInterval: 3 * time.Second,
-//             Retriever: &httpretriever.Retriever{
-//               URL:    "http://example.com/flag-config.yaml",
-//             },
-//           })
-//    defer ffclient.Close()
+//	func main() {
+//	  err := ffclient.Init(ffclient.Config{
+//	           PollingInterval: 3 * time.Second,
+//	           Retriever: &httpretriever.Retriever{
+//	             URL:    "http://example.com/flag-config.yaml",
+//	           },
+//	         })
+//	  defer ffclient.Close()
 func Init(config Config) error {
 	var err error
 	onceFF.Do(func() {
@@ -135,19 +136,32 @@ func (g *GoFeatureFlag) startFlagUpdaterDaemon() {
 
 // retrieveFlagsAndUpdateCache is called every X seconds to refresh the cache flag.
 func retrieveFlagsAndUpdateCache(config Config, cache cache.Manager) error {
-	retriever, err := config.GetRetriever()
+	retrievers, err := config.GetRetrievers()
 	if err != nil {
 		log.Printf("error while getting the file retriever: %v", err)
 		return err
 	}
 
-	loadedFlags, err := retriever.Retrieve(config.Context)
-	if err != nil {
-		log.Printf("error: impossible to retrieve flags from the config file: %v", err)
-		return err
+	newFlags := make(map[string]dto.DTO)
+	for _, retriever := range retrievers {
+		loadedFlags, err := retriever.Retrieve(config.Context)
+		if err != nil {
+			log.Printf("error: impossible to retrieve flags from the config file: %v", err)
+			return err
+		}
+		convertedFlag, err := cache.ConvertToFlagStruct(loadedFlags, config.FileFormat)
+		if err != nil {
+			log.Printf("error: impossible to convert the flags to insert them in the cache: %v", err)
+			return err
+		}
+
+		// we add all flags to global map that contains the flag from all the files
+		for flagName, value := range convertedFlag {
+			newFlags[flagName] = value
+		}
 	}
 
-	err = cache.UpdateCache(loadedFlags, config.FileFormat, config.Logger)
+	err = cache.UpdateCache(newFlags, config.Logger)
 	if err != nil {
 		log.Printf("error: impossible to update the cache of the flags: %v", err)
 		return err

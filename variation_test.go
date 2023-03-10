@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/thomaspoignant/go-feature-flag/internal/dto"
 	"log"
 	"os"
 	"testing"
@@ -44,7 +45,10 @@ func (c *cacheMock) GetLatestUpdateDate() time.Time {
 	return time.Now()
 }
 
-func (c *cacheMock) UpdateCache(loadedFlags []byte, fileFormat string, log *log.Logger) error {
+func (c *cacheMock) ConvertToFlagStruct(loadedFlags []byte, fileFormat string) (map[string]dto.DTO, error) {
+	return nil, nil
+}
+func (c *cacheMock) UpdateCache(newFlags map[string]dto.DTO, log *log.Logger) error {
 	return nil
 }
 func (c *cacheMock) Close() {}

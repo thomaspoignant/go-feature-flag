@@ -34,6 +34,14 @@ type Config struct {
 	// Retriever is the component in charge to retrieve your flag file
 	Retriever retriever.Retriever
 
+	// Retrievers is the list of components in charge to retrieving your flag files.
+	// We are dealing with config files in order, if you have the same flag name in multiple files it will be override
+	// based of the order of the retrievers in the slice.
+	//
+	// Note: If both Retriever and Retrievers are set, we will start by calling the Retriever and,
+	// after we will use the order of Retrievers.
+	Retrievers []retriever.Retriever
+
 	// Notifiers (optional) is the list of notifiers called when a flag change
 	Notifiers []notifier.Notifier
 
@@ -51,15 +59,18 @@ type Config struct {
 	StartWithRetrieverError bool
 
 	// Offline (optional) If true, the SDK will not try to retrieve the flag file and will not export any data.
-	// No notification will be send neither.
+	// No notification will be sent neither.
 	// Default: false
 	Offline bool
 }
 
-// GetRetriever returns a retriever.FlagRetriever configure with the retriever available in the config.
-func (c *Config) GetRetriever() (retriever.Retriever, error) {
-	if c.Retriever == nil {
+// GetRetrievers returns a retriever.Retriever configure with the retriever available in the config.
+func (c *Config) GetRetrievers() ([]retriever.Retriever, error) {
+	if c.Retriever == nil && (c.Retrievers == nil || len(c.Retrievers) == 0) {
 		return nil, errors.New("no retriever in the configuration, impossible to get the flags")
 	}
-	return c.Retriever, nil
+
+	// TODO: Test that it is working correctly
+	retrievers := append([]retriever.Retriever{c.Retriever}, c.Retrievers...)
+	return retrievers, nil
 }

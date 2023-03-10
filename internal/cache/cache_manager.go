@@ -17,7 +17,8 @@ import (
 )
 
 type Manager interface {
-	UpdateCache(loadedFlags []byte, fileFormat string, log *log.Logger) error
+	ConvertToFlagStruct(loadedFlags []byte, fileFormat string) (map[string]dto.DTO, error)
+	UpdateCache(newFlags map[string]dto.DTO, log *log.Logger) error
 	Close()
 	GetFlag(key string) (flag.Flag, error)
 	AllFlags() (map[string]flag.Flag, error)
@@ -41,7 +42,7 @@ func New(notificationService Service, logger *log.Logger) Manager {
 	}
 }
 
-func (c *cacheManagerImpl) UpdateCache(loadedFlags []byte, fileFormat string, log *log.Logger) error {
+func (c *cacheManagerImpl) ConvertToFlagStruct(loadedFlags []byte, fileFormat string) (map[string]dto.DTO, error) {
 	var newFlags map[string]dto.DTO
 	var err error
 	switch strings.ToLower(fileFormat) {
@@ -53,10 +54,10 @@ func (c *cacheManagerImpl) UpdateCache(loadedFlags []byte, fileFormat string, lo
 		// default unmarshaller is YAML
 		err = yaml.Unmarshal(loadedFlags, &newFlags)
 	}
-	if err != nil {
-		return err
-	}
+	return newFlags, err
+}
 
+func (c *cacheManagerImpl) UpdateCache(newFlags map[string]dto.DTO, log *log.Logger) error {
 	newCache := NewInMemoryCache(c.logger)
 	newCache.Init(newFlags)
 	newCacheFlags := newCache.All()
