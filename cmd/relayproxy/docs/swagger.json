@@ -13,7 +13,6 @@
             "url": "https://github.com/thomaspoignant/go-feature-flag/blob/main/LICENSE"
         },
         "x-logo": {
-            "altText": "GO Feature Flag logo",
             "url": "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png"
         }
     },
@@ -21,7 +20,7 @@
     "paths": {
         "/health": {
             "get": {
-                "description": "Making a **GET** request to the URL path `/health` will tell you if the relay proxy is ready to serve traffic.\n\nThis is useful especially for loadbalancer to know that they can send traffic to the service.",
+                "description": "Making a **GET** request to the URL path `/health` will tell you if the relay proxy is ready to serve\ntraffic.\n\nThis is useful especially for loadbalancer to know that they can send traffic to the service.",
                 "produces": [
                     "application/json"
                 ],
@@ -38,7 +37,7 @@
         },
         "/info": {
             "get": {
-                "description": "Making a **GET** request to the URL path `/info` will tell give you information about the actual state of the relay proxy.\n\nAs of Today the level of information is small be we can improve this endpoint to returns more information.",
+                "description": "Making a **GET** request to the URL path `/info` will give you information about the actual state\nof the relay proxy.\n\nAs of Today the level of information is small be we can improve this endpoint to returns more\ninformation.",
                 "produces": [
                     "application/json"
                 ],
@@ -48,6 +47,23 @@
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/model.InfoResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/metrics": {
+            "get": {
+                "description": "This endpoint is providing metrics about the relay proxy in the prometheus format.",
+                "produces": [
+                    "text/plain"
+                ],
+                "summary": "Prometheus endpoint",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
                         }
                     }
                 }
@@ -153,7 +169,11 @@
             "properties": {
                 "user": {
                     "description": "User The representation of a user for your feature flag system.",
-                    "$ref": "#/definitions/model.UserRequest"
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.UserRequest"
+                        }
+                    ]
                 }
             }
         },
@@ -165,7 +185,11 @@
                 },
                 "user": {
                     "description": "User The representation of a user for your feature flag system.",
-                    "$ref": "#/definitions/model.UserRequest"
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.UserRequest"
+                        }
+                    ]
                 }
             }
         },
