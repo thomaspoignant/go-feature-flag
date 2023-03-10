@@ -218,6 +218,26 @@ func (f *InternalFlag) IsValid() error {
 		return fmt.Errorf("no variation available")
 	}
 
+	// Check that all variation have the same types
+	expectedVarType := ""
+	for _, value := range f.GetVariations() {
+		if expectedVarType != "" {
+			currentType, err := utils.JSONTypeExtractor(*value)
+			if err != nil {
+				return err
+			}
+			if currentType != expectedVarType {
+				return fmt.Errorf("all variations should have the same type")
+			}
+		} else {
+			var err error
+			expectedVarType, err = utils.JSONTypeExtractor(*value)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	// Validate that we have a default Rule
 	if f.GetDefaultRule() == nil {
 		return fmt.Errorf("missing default rule")

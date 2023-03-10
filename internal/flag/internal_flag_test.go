@@ -1367,6 +1367,34 @@ func TestInternalFlag_IsValid(t *testing.T) {
 			errorMsg: "no variation available",
 		},
 		{
+			name: "different types in variation",
+			fields: fields{
+				Variations: &map[string]*interface{}{
+					"A": testconvert.Interface("A"),
+					"C": testconvert.Interface("C"),
+					"B": testconvert.Interface(120.1),
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("A"),
+				},
+			},
+			errorMsg: "all variations should have the same type",
+			wantErr:  assert.Error,
+		},
+		{
+			name: "different types in variation int/float should be ok",
+			fields: fields{
+				Variations: &map[string]*interface{}{
+					"A": testconvert.Interface(120),
+					"B": testconvert.Interface(120.1),
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("A"),
+				},
+			},
+			wantErr: assert.NoError,
+		},
+		{
 			name: "no default rule",
 			fields: fields{
 				Variations: &map[string]*interface{}{
