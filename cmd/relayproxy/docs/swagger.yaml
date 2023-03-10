@@ -3,7 +3,8 @@ definitions:
   model.AllFlagRequest:
     properties:
       user:
-        $ref: '#/definitions/model.UserRequest'
+        allOf:
+        - $ref: '#/definitions/model.UserRequest'
         description: User The representation of a user for your feature flag system.
     type: object
   model.EvalFlagRequest:
@@ -12,7 +13,8 @@ definitions:
         description: The value will we use if we are not able to get the variation
           of the flag.
       user:
-        $ref: '#/definitions/model.UserRequest'
+        allOf:
+        - $ref: '#/definitions/model.UserRequest'
         description: User The representation of a user for your feature flag system.
     type: object
   model.HealthResponse:
@@ -135,13 +137,13 @@ info:
     url: https://github.com/thomaspoignant/go-feature-flag/blob/main/LICENSE
   title: GO Feature Flag relay proxy endpoints
   x-logo:
-    altText: GO Feature Flag logo
     url: https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png
 paths:
   /health:
     get:
       description: |-
-        Making a **GET** request to the URL path `/health` will tell you if the relay proxy is ready to serve traffic.
+        Making a **GET** request to the URL path `/health` will tell you if the relay proxy is ready to serve
+        traffic.
 
         This is useful especially for loadbalancer to know that they can send traffic to the service.
       produces:
@@ -155,9 +157,11 @@ paths:
   /info:
     get:
       description: |-
-        Making a **GET** request to the URL path `/info` will tell give you information about the actual state of the relay proxy.
+        Making a **GET** request to the URL path `/info` will give you information about the actual state
+        of the relay proxy.
 
-        As of Today the level of information is small be we can improve this endpoint to returns more information.
+        As of Today the level of information is small be we can improve this endpoint to returns more
+        information.
       produces:
       - application/json
       responses:
@@ -166,6 +170,18 @@ paths:
           schema:
             $ref: '#/definitions/model.InfoResponse'
       summary: Info
+  /metrics:
+    get:
+      description: This endpoint is providing metrics about the relay proxy in the
+        prometheus format.
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Prometheus endpoint
   /v1/allflags:
     post:
       consumes:

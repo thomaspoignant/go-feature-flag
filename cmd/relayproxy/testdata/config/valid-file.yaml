@@ -6,3 +6,4 @@ retriever:
   url: https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.yaml
 exporter:
   kind: log
+enableSwagger: true
