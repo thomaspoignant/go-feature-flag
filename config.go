@@ -53,7 +53,7 @@ type Config struct {
 	DataExporter DataExporter
 
 	// StartWithRetrieverError (optional) If true, the SDK will start even if we did not get any flags from the retriever.
-	// It will serve only default values until the retriever returns the flags.
+	// It will serve only default values until all the retrievers returns the flags.
 	// The init method will not return any error if the flag file is unreachable.
 	// Default: false
 	StartWithRetrieverError bool
