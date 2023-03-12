@@ -70,7 +70,14 @@ func (c *Config) GetRetrievers() ([]retriever.Retriever, error) {
 		return nil, errors.New("no retriever in the configuration, impossible to get the flags")
 	}
 
-	// TODO: Test that it is working correctly
-	retrievers := append([]retriever.Retriever{c.Retriever}, c.Retrievers...)
+	retrievers := make([]retriever.Retriever, 0)
+	// If we have both Retriever and Retrievers fields configured we are 1st looking at what is available
+	// in Retriever before looking at what is in Retrievers.
+	if c.Retriever != nil {
+		retrievers = append(retrievers, c.Retriever)
+	}
+	if c.Retrievers != nil && len(c.Retrievers) > 0 {
+		retrievers = append(retrievers, c.Retrievers...)
+	}
 	return retrievers, nil
 }
