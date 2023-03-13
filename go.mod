@@ -5,7 +5,7 @@ go 1.18
 require (
 	cloud.google.com/go/storage v1.29.0
 	github.com/BurntSushi/toml v1.2.1
-	github.com/aws/aws-sdk-go v1.44.214
+	github.com/aws/aws-sdk-go v1.44.219
 	github.com/brpaz/echozap v1.1.3
 	github.com/fsouza/fake-gcs-server v1.44.0
 	github.com/gdexlab/go-render v1.0.1
@@ -26,7 +26,7 @@ require (
 	go.uber.org/zap v1.24.0
 	golang.org/x/net v0.8.0
 	golang.org/x/oauth2 v0.6.0
-	google.golang.org/api v0.111.0
+	google.golang.org/api v0.112.0
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.26.2
 	k8s.io/apimachinery v0.26.2
@@ -34,10 +34,10 @@ require (
 )
 
 require (
-	cloud.google.com/go v0.107.0 // indirect
+	cloud.google.com/go v0.110.0 // indirect
 	cloud.google.com/go/compute v1.18.0 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
-	cloud.google.com/go/iam v0.11.0 // indirect
+	cloud.google.com/go/iam v0.12.0 // indirect
 	cloud.google.com/go/pubsub v1.28.0 // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/antlr/antlr4/runtime/Go/antlr/v4 v4.0.0-20220911224424-aa1f1f12a846 // indirect
@@ -109,7 +109,7 @@ require (
 	golang.org/x/tools v0.6.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20230223222841-637eb2293923 // indirect
+	google.golang.org/genproto v0.0.0-20230303212802-e74f57abe488 // indirect
 	google.golang.org/grpc v1.53.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
