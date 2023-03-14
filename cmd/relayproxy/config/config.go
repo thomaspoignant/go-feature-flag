@@ -107,6 +107,14 @@ type Config struct {
 	// Retriever is the configuration on how to retrieve the file
 	Retriever *RetrieverConf `mapstructure:"retriever"`
 
+	// Retrievers is the exact same things than Retriever but allows to give more than 1 retriever at the time.
+	// We are dealing with config files in order, if you have the same flag name in multiple files it will be override
+	// based of the order of the retrievers in the slice.
+	//
+	// Note: If both Retriever and Retrievers are set, we will start by calling the Retriever and,
+	// after we will use the order of Retrievers.
+	Retrievers *[]RetrieverConf `mapstructure:"retrievers"`
+
 	// Exporter is the configuration on how to export data
 	Exporter *ExporterConf `mapstructure:"exporter"`
 

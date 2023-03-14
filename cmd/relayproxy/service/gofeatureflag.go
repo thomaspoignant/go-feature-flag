@@ -27,9 +27,21 @@ import (
 )
 
 func NewGoFeatureFlagClient(proxyConf *config.Config, logger *zap.Logger) (*ffclient.GoFeatureFlag, error) {
-	retriever, err := initRetriever(proxyConf.Retriever)
+	mainRetriever, err := initRetriever(proxyConf.Retriever)
 	if err != nil {
 		return nil, err
+	}
+
+	// Manage if we have more than 1 retriver
+	retrievers := make([]retriever.Retriever, 0)
+	if proxyConf.Retrievers != nil {
+		for _, r := range *proxyConf.Retrievers {
+			currentRetriever, err := initRetriever(&r)
+			if err != nil {
+				return nil, err
+			}
+			retrievers = append(retrievers, currentRetriever)
+		}
 	}
 
 	var exp ffclient.DataExporter
@@ -52,7 +64,8 @@ func NewGoFeatureFlagClient(proxyConf *config.Config, logger *zap.Logger) (*ffcl
 		PollingInterval:         time.Duration(proxyConf.PollingInterval) * time.Millisecond,
 		Logger:                  zap.NewStdLog(logger),
 		Context:                 context.Background(),
-		Retriever:               retriever,
+		Retriever:               mainRetriever,
+		Retrievers:              retrievers,
 		Notifiers:               notif,
 		FileFormat:              proxyConf.FileFormat,
 		DataExporter:            exp,
