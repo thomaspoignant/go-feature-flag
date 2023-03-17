@@ -80,7 +80,7 @@ func NewGoFeatureFlagClient(proxyConf *config.Config, logger *zap.Logger) (*ffcl
 }
 
 func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
-	retrieverTimeout := config.DefaultRetrieverTimeout
+	retrieverTimeout := config.DefaultRetriever.Timeout
 	if c.Timeout != 0 {
 		retrieverTimeout = time.Duration(c.Timeout) * time.Millisecond
 	}
@@ -90,10 +90,15 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 	case config.GitHubRetriever:
 		return &githubretriever.Retriever{
 			RepositorySlug: c.RepositorySlug,
-			Branch:         c.Branch,
-			FilePath:       c.Path,
-			GithubToken:    c.GithubToken,
-			Timeout:        retrieverTimeout,
+			Branch: func() string {
+				if c.Branch == "" {
+					return config.DefaultRetriever.GithubBranch
+				}
+				return c.Branch
+			}(),
+			FilePath:    c.Path,
+			GithubToken: c.GithubToken,
+			Timeout:     retrieverTimeout,
 		}, nil
 
 	case config.FileRetriever:
@@ -112,7 +117,7 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 			URL: c.URL,
 			Method: func() string {
 				if c.HTTPMethod == "" {
-					return config.DefaultHTTPMethod
+					return config.DefaultRetriever.HTTPMethod
 				}
 				return c.HTTPMethod
 			}(),

@@ -10,8 +10,16 @@ import (
 	"time"
 )
 
-const DefaultRetrieverTimeout = time.Duration(10 * time.Second)
-const DefaultHTTPMethod = http.MethodGet
+var DefaultRetriever = struct {
+	Timeout      time.Duration
+	HTTPMethod   string
+	GithubBranch string
+}{
+	Timeout:      time.Duration(10 * time.Second),
+	HTTPMethod:   http.MethodGet,
+	GithubBranch: "main",
+}
+
 const DefaultExporterFormat = "JSON"
 const DefaultExporterLogFormat = "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", value=\"{{ .Value}}\""
 const DefaultExporterFileName = "flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}"
