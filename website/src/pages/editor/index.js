@@ -77,7 +77,6 @@ function App() {
 }
 
 export default function Page() {
-  const {siteConfig} = useDocusaurusContext();
   return (
     <Layout
       title="Edit Your Flag"
