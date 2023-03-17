@@ -27,9 +27,25 @@ import (
 )
 
 func NewGoFeatureFlagClient(proxyConf *config.Config, logger *zap.Logger) (*ffclient.GoFeatureFlag, error) {
-	retriever, err := initRetriever(proxyConf.Retriever)
-	if err != nil {
-		return nil, err
+	var mainRetriever retriever.Retriever
+	var err error
+	if proxyConf.Retriever != nil {
+		mainRetriever, err = initRetriever(proxyConf.Retriever)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// Manage if we have more than 1 retriver
+	retrievers := make([]retriever.Retriever, 0)
+	if proxyConf.Retrievers != nil {
+		for _, r := range *proxyConf.Retrievers {
+			currentRetriever, err := initRetriever(&r)
+			if err != nil {
+				return nil, err
+			}
+			retrievers = append(retrievers, currentRetriever)
+		}
 	}
 
 	var exp ffclient.DataExporter
@@ -52,7 +68,8 @@ func NewGoFeatureFlagClient(proxyConf *config.Config, logger *zap.Logger) (*ffcl
 		PollingInterval:         time.Duration(proxyConf.PollingInterval) * time.Millisecond,
 		Logger:                  zap.NewStdLog(logger),
 		Context:                 context.Background(),
-		Retriever:               retriever,
+		Retriever:               mainRetriever,
+		Retrievers:              retrievers,
 		Notifiers:               notif,
 		FileFormat:              proxyConf.FileFormat,
 		DataExporter:            exp,
@@ -63,15 +80,25 @@ func NewGoFeatureFlagClient(proxyConf *config.Config, logger *zap.Logger) (*ffcl
 }
 
 func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
+	retrieverTimeout := config.DefaultRetriever.Timeout
+	if c.Timeout != 0 {
+		retrieverTimeout = time.Duration(c.Timeout) * time.Millisecond
+	}
+
 	// Conversions
 	switch c.Kind {
 	case config.GitHubRetriever:
 		return &githubretriever.Retriever{
 			RepositorySlug: c.RepositorySlug,
-			Branch:         c.Branch,
-			FilePath:       c.Path,
-			GithubToken:    c.GithubToken,
-			Timeout:        time.Duration(c.Timeout) * time.Millisecond,
+			Branch: func() string {
+				if c.Branch == "" {
+					return config.DefaultRetriever.GithubBranch
+				}
+				return c.Branch
+			}(),
+			FilePath:    c.Path,
+			GithubToken: c.GithubToken,
+			Timeout:     retrieverTimeout,
 		}, nil
 
 	case config.FileRetriever:
@@ -87,11 +114,16 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 
 	case config.HTTPRetriever:
 		return &httpretriever.Retriever{
-			URL:     c.URL,
-			Method:  c.HTTPMethod,
+			URL: c.URL,
+			Method: func() string {
+				if c.HTTPMethod == "" {
+					return config.DefaultRetriever.HTTPMethod
+				}
+				return c.HTTPMethod
+			}(),
 			Body:    c.HTTPBody,
 			Header:  c.HTTPHeaders,
-			Timeout: time.Duration(c.Timeout) * time.Millisecond,
+			Timeout: retrieverTimeout,
 		}, nil
 
 	case config.GoogleStorageRetriever:
@@ -119,9 +151,34 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 }
 
 func initExporter(c *config.ExporterConf) (ffclient.DataExporter, error) {
+	format := config.DefaultExporter.Format
+	if c.Format != "" {
+		format = c.Format
+	}
+
+	filename := config.DefaultExporter.FileName
+	if c.Filename != "" {
+		filename = c.Filename
+	}
+
+	csvTemplate := config.DefaultExporter.CsvFormat
+	if c.CsvTemplate != "" {
+		csvTemplate = c.CsvTemplate
+	}
+
 	dataExp := ffclient.DataExporter{
-		FlushInterval:    time.Duration(c.FlushInterval) * time.Millisecond,
-		MaxEventInMemory: c.MaxEventInMemory,
+		FlushInterval: func() time.Duration {
+			if c.FlushInterval != 0 {
+				return time.Duration(c.FlushInterval) * time.Millisecond
+			}
+			return config.DefaultExporter.FlushInterval
+		}(),
+		MaxEventInMemory: func() int64 {
+			if c.MaxEventInMemory != 0 {
+				return c.MaxEventInMemory
+			}
+			return config.DefaultExporter.MaxEventInMemory
+		}(),
 	}
 
 	switch c.Kind {
@@ -135,36 +192,41 @@ func initExporter(c *config.ExporterConf) (ffclient.DataExporter, error) {
 
 	case config.FileExporter:
 		dataExp.Exporter = &fileexporter.Exporter{
-			Format:      c.Format,
+			Format:      format,
 			OutputDir:   c.OutputDir,
-			Filename:    c.Filename,
-			CsvTemplate: c.CsvTemplate,
+			Filename:    filename,
+			CsvTemplate: csvTemplate,
 		}
 		return dataExp, nil
 
 	case config.LogExporter:
 		dataExp.Exporter = &logsexporter.Exporter{
-			LogFormat: c.LogFormat,
+			LogFormat: func() string {
+				if c.LogFormat != "" {
+					return c.LogFormat
+				}
+				return config.DefaultExporter.LogFormat
+			}(),
 		}
 		return dataExp, nil
 
 	case config.S3Exporter:
 		dataExp.Exporter = &s3exporter.Exporter{
 			Bucket:      c.Bucket,
-			Format:      c.Format,
+			Format:      format,
 			S3Path:      c.Path,
-			Filename:    c.Filename,
-			CsvTemplate: c.CsvTemplate,
+			Filename:    filename,
+			CsvTemplate: csvTemplate,
 		}
 		return dataExp, nil
 
 	case config.GoogleStorageExporter:
 		dataExp.Exporter = &gcstorageexporter.Exporter{
 			Bucket:      c.Bucket,
-			Format:      c.Format,
+			Format:      format,
 			Path:        c.Path,
-			Filename:    c.Filename,
-			CsvTemplate: c.CsvTemplate,
+			Filename:    filename,
+			CsvTemplate: csvTemplate,
 		}
 		return dataExp, nil
 

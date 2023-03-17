@@ -1,6 +1,8 @@
 package ffclient_test
 
 import (
+	"github.com/thomaspoignant/go-feature-flag/internal/flag"
+	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"log"
 	"os"
 	"testing"
@@ -23,6 +25,51 @@ func TestStartWithoutRetriever(t *testing.T) {
 		Logger:          log.New(os.Stdout, "", 0),
 	})
 	assert.Error(t, err)
+}
+
+func TestMultipleRetrievers(t *testing.T) {
+	client, err := ffclient.New(ffclient.Config{
+		PollingInterval: 60 * time.Second,
+		Logger:          log.New(os.Stdout, "", 0),
+		Retrievers: []retriever.Retriever{
+			&fileretriever.Retriever{Path: "testdata/flag-config-2nd-file.yaml"},
+			&fileretriever.Retriever{Path: "testdata/flag-config.yaml"},
+		},
+	})
+	assert.NoError(t, err)
+	defer client.Close()
+	user := ffuser.NewUser("random-key")
+	flagRes1, err := client.BoolVariationDetails("foo-flag", user, false)
+	assert.NoError(t, err)
+	assert.True(t, flagRes1.Value)
+	assert.NotEqual(t, flag.ErrorCodeFlagNotFound, flagRes1.ErrorCode)
+
+	flagRes2, err := client.BoolVariationDetails("test-flag", user, false)
+	assert.NoError(t, err)
+	assert.True(t, flagRes2.Value)
+	assert.NotEqual(t, flag.ErrorCodeFlagNotFound, flagRes2.ErrorCode)
+}
+func TestMultipleRetrieversWithOverrideFlag(t *testing.T) {
+	client, err := ffclient.New(ffclient.Config{
+		PollingInterval: 60 * time.Second,
+		Logger:          log.New(os.Stdout, "", 0),
+		Retriever:       &fileretriever.Retriever{Path: "testdata/multiple_files/config-1.yaml"},
+		Retrievers: []retriever.Retriever{
+			&fileretriever.Retriever{Path: "testdata/multiple_files/config-2.yaml"},
+		},
+	})
+	assert.NoError(t, err)
+	defer client.Close()
+	user := ffuser.NewUser("random-key")
+	flagRes1, err := client.BoolVariationDetails("my-flag", user, false)
+	assert.NoError(t, err)
+	assert.False(t, flagRes1.Value)
+	assert.NotEqual(t, flag.ErrorCodeFlagNotFound, flagRes1.ErrorCode)
+
+	flagRes2, err := client.BoolVariationDetails("my-3rd-flag", user, false)
+	assert.NoError(t, err)
+	assert.True(t, flagRes2.Value)
+	assert.NotEqual(t, flag.ErrorCodeFlagNotFound, flagRes2.ErrorCode)
 }
 
 func TestStartWithNegativeInterval(t *testing.T) {

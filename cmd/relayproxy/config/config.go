@@ -3,13 +3,38 @@ package config
 import (
 	"fmt"
 	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
+	"go.uber.org/zap"
 	"net/http"
 	"strings"
 	"time"
-
-	"github.com/spf13/viper"
-	"go.uber.org/zap"
 )
+
+var DefaultRetriever = struct {
+	Timeout      time.Duration
+	HTTPMethod   string
+	GithubBranch string
+}{
+	Timeout:      time.Duration(10 * time.Second),
+	HTTPMethod:   http.MethodGet,
+	GithubBranch: "main",
+}
+
+var DefaultExporter = struct {
+	Format           string
+	LogFormat        string
+	FileName         string
+	CsvFormat        string
+	FlushInterval    time.Duration
+	MaxEventInMemory int64
+}{
+	Format:           "JSON",
+	LogFormat:        "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", value=\"{{ .Value}}\"",
+	FileName:         "flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}",
+	CsvFormat:        "{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}}\\n",
+	FlushInterval:    time.Duration(60000 * time.Millisecond),
+	MaxEventInMemory: 100000,
+}
 
 // ParseConfig is reading the configuration file
 func ParseConfig(log *zap.Logger, version string) (*Config, error) {
@@ -56,21 +81,6 @@ func setViperDefault() {
 	viper.SetDefault("fileFormat", "yaml")
 	viper.SetDefault("pollingInterval", 60000)
 	viper.SetDefault("restApiTimeout", 5000)
-
-	// retriever
-	viper.SetDefault("retriever.timeout", int64(10*time.Second/time.Millisecond))
-	viper.SetDefault("retriever.method", http.MethodGet)
-	viper.SetDefault("retriever.body", "")
-
-	// exporter
-	viper.SetDefault("exporter.format", "JSON")
-	viper.SetDefault("exporter.logFormat",
-		"[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", value=\"{{ .Value}}\"")
-	viper.SetDefault("exporter.filename", "flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}")
-	viper.SetDefault("exporter.csvTemplate",
-		"{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}}\\n")
-	viper.SetDefault("exporter.flushInterval", 60000)
-	viper.SetDefault("exporter.maxEventInMemory", 100000)
 }
 
 type Config struct {
@@ -107,6 +117,14 @@ type Config struct {
 	// Retriever is the configuration on how to retrieve the file
 	Retriever *RetrieverConf `mapstructure:"retriever"`
 
+	// Retrievers is the exact same things than Retriever but allows to give more than 1 retriever at the time.
+	// We are dealing with config files in order, if you have the same flag name in multiple files it will be override
+	// based of the order of the retrievers in the slice.
+	//
+	// Note: If both Retriever and Retrievers are set, we will start by calling the Retriever and,
+	// after we will use the order of Retrievers.
+	Retrievers *[]RetrieverConf `mapstructure:"retrievers"`
+
 	// Exporter is the configuration on how to export data
 	Exporter *ExporterConf `mapstructure:"exporter"`
 
@@ -126,9 +144,24 @@ func (c *Config) IsValid() error {
 		return fmt.Errorf("invalid port %d", c.ListenPort)
 	}
 
-	if err := c.Retriever.IsValid(); err != nil {
-		return err
+	if c.Retriever == nil && c.Retrievers == nil {
+		return fmt.Errorf("no retriever available in the configuration")
 	}
+
+	if c.Retriever != nil {
+		if err := c.Retriever.IsValid(); err != nil {
+			return err
+		}
+	}
+
+	if c.Retrievers != nil {
+		for _, retriever := range *c.Retrievers {
+			if err := retriever.IsValid(); err != nil {
+				return err
+			}
+		}
+	}
+
 	// Exporter is optional
 	if c.Exporter != nil {
 		if err := c.Exporter.IsValid(); err != nil {
