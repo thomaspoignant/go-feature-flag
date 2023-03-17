@@ -1,7 +1,6 @@
 import React from 'react';
 import {useForm, FormProvider, useFieldArray} from 'react-hook-form';
 import Layout from '@theme/Layout';
-import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import {FlagForm} from '../../components/editor/FlagForm';
 import {FlagDisplay} from '../../components/editor/FlagDisplay';
 import styles from '../../components/editor/Targeting/styles.module.css';
