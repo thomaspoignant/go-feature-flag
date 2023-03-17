@@ -2,7 +2,7 @@ package controller
 
 import (
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/cmd/metric"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"net/http"
 
 	"github.com/labstack/echo/v4"

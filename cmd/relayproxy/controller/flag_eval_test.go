@@ -3,7 +3,7 @@ package controller_test
 import (
 	"context"
 	"github.com/labstack/echo-contrib/prometheus"
-	"github.com/thomaspoignant/go-feature-flag/cmd/metric"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"io"
 	"io/ioutil"
 	"log"
