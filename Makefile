@@ -63,7 +63,7 @@ swagger: ## Build swagger documentation
 
 ## Test:
 test: ## Run the tests of the project
-	$(GOTEST) -v -race $($(GOCMD) list ./... | grep -v /vendor/ | grep -v /examples/)
+	$(GOTEST) -v -race ./...
 
 coverage: ## Run the tests of the project and export the coverage
 	$(GOTEST) -cover -covermode=count -coverprofile=coverage.cov $($(GOCMD) list ./... | grep -v /vendor/ | grep -v /examples/)
