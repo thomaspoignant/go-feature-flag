@@ -1,7 +1,6 @@
 import React from 'react';
 import {useForm, FormProvider, useFieldArray} from 'react-hook-form';
 import Layout from '@theme/Layout';
-import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import {FlagForm} from '../../components/editor/FlagForm';
 import {FlagDisplay} from '../../components/editor/FlagDisplay';
 import styles from '../../components/editor/Targeting/styles.module.css';
@@ -77,11 +76,10 @@ function App() {
 }
 
 export default function Page() {
-  const {siteConfig} = useDocusaurusContext();
   return (
     <Layout
-      title={`${siteConfig.title}`}
-      description="Description will go into a meta tag in <head />">
+      title="Edit Your Flag"
+      description="GO Feature Flag editor is the simplest way to configure your feature flags.">
       <App />
     </Layout>
   );
