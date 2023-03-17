@@ -20,12 +20,21 @@ var DefaultRetriever = struct {
 	GithubBranch: "main",
 }
 
-const DefaultExporterFormat = "JSON"
-const DefaultExporterLogFormat = "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", value=\"{{ .Value}}\""
-const DefaultExporterFileName = "flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}"
-const DefaultExporterCsvFormat = "{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}}\\n"
-const DefaultExporterFlushInterval = time.Duration(60000 * time.Millisecond)
-const DefaultExporterMaxEventInMemory = 100000
+var DefaultExporter = struct {
+	Format           string
+	LogFormat        string
+	FileName         string
+	CsvFormat        string
+	FlushInterval    time.Duration
+	MaxEventInMemory int64
+}{
+	Format:           "JSON",
+	LogFormat:        "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", value=\"{{ .Value}}\"",
+	FileName:         "flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}",
+	CsvFormat:        "{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}}\\n",
+	FlushInterval:    time.Duration(60000 * time.Millisecond),
+	MaxEventInMemory: 100000,
+}
 
 // ParseConfig is reading the configuration file
 func ParseConfig(log *zap.Logger, version string) (*Config, error) {

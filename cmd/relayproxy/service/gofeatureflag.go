@@ -151,20 +151,17 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 }
 
 func initExporter(c *config.ExporterConf) (ffclient.DataExporter, error) {
-	// exporter
-	//viper.SetDefault("exporter.maxEventInMemory", 100000)
-
-	format := config.DefaultExporterFormat
+	format := config.DefaultExporter.Format
 	if c.Format != "" {
 		format = c.Format
 	}
 
-	filename := config.DefaultExporterFileName
+	filename := config.DefaultExporter.FileName
 	if c.Filename != "" {
 		filename = c.Filename
 	}
 
-	csvTemplate := config.DefaultExporterCsvFormat
+	csvTemplate := config.DefaultExporter.CsvFormat
 	if c.CsvTemplate != "" {
 		csvTemplate = c.CsvTemplate
 	}
@@ -174,13 +171,13 @@ func initExporter(c *config.ExporterConf) (ffclient.DataExporter, error) {
 			if c.FlushInterval != 0 {
 				return time.Duration(c.FlushInterval) * time.Millisecond
 			}
-			return config.DefaultExporterFlushInterval
+			return config.DefaultExporter.FlushInterval
 		}(),
 		MaxEventInMemory: func() int64 {
 			if c.MaxEventInMemory != 0 {
 				return c.MaxEventInMemory
 			}
-			return config.DefaultExporterMaxEventInMemory
+			return config.DefaultExporter.MaxEventInMemory
 		}(),
 	}
 
@@ -208,7 +205,7 @@ func initExporter(c *config.ExporterConf) (ffclient.DataExporter, error) {
 				if c.LogFormat != "" {
 					return c.LogFormat
 				}
-				return config.DefaultExporterLogFormat
+				return config.DefaultExporter.LogFormat
 			}(),
 		}
 		return dataExp, nil
