@@ -3,7 +3,7 @@ package api
 import (
 	"fmt"
 	"github.com/labstack/echo-contrib/prometheus"
-	"github.com/thomaspoignant/go-feature-flag/cmd/metric"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"time"
 
 	"github.com/brpaz/echozap"
