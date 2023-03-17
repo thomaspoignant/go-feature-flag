@@ -15,7 +15,7 @@ var DefaultRetriever = struct {
 	HTTPMethod   string
 	GithubBranch string
 }{
-	Timeout:      time.Duration(10 * time.Second),
+	Timeout:      10 * time.Second,
 	HTTPMethod:   http.MethodGet,
 	GithubBranch: "main",
 }
@@ -28,11 +28,12 @@ var DefaultExporter = struct {
 	FlushInterval    time.Duration
 	MaxEventInMemory int64
 }{
-	Format:           "JSON",
-	LogFormat:        "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", value=\"{{ .Value}}\"",
-	FileName:         "flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}",
-	CsvFormat:        "{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}}\\n",
-	FlushInterval:    time.Duration(60000 * time.Millisecond),
+	Format:    "JSON",
+	LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", value=\"{{ .Value}}\"",
+	FileName:  "flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}",
+	CsvFormat: "{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};" +
+		"{{ .Value}};{{ .Default}}\\n",
+	FlushInterval:    60000 * time.Millisecond,
 	MaxEventInMemory: 100000,
 }
 
