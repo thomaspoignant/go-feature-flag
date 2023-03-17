@@ -30,7 +30,7 @@ func Test_FlagCache(t *testing.T) {
 	yamlFile := []byte(`
 test-flag:
   variations:
-    true_var: true
+    true_var: false
     false_var: false
   targeting:
     - query: key eq "random-key"
