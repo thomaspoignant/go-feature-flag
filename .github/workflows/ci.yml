@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
       - name: Setup go
         uses: actions/setup-go@v3
         with:
@@ -23,6 +25,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
       - name: Setup go
         uses: actions/setup-go@v3
         with:
@@ -34,6 +38,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
       - name: Setup go
         uses: actions/setup-go@v3
         with:
@@ -49,6 +55,8 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
       - name: Setup go
         uses: actions/setup-go@v3
         with:
