@@ -63,10 +63,10 @@ swagger: ## Build swagger documentation
 
 ## Test:
 test: ## Run the tests of the project
-	$(GOTEST) -v -race ./...
+	$(GOTEST) -v -race $($(GOCMD) list ./... | grep -v /vendor/ | grep -v /examples/)
 
 coverage: ## Run the tests of the project and export the coverage
-	$(GOTEST) -cover -covermode=count -coverprofile=coverage.cov ./...
+	$(GOTEST) -cover -covermode=count -coverprofile=coverage.cov $($(GOCMD) list ./... | grep -v /vendor/ | grep -v /examples/)
 
 bench: ## Launch the benchmark test
 	 $(GOTEST) -bench Benchmark -cpu 2 -run=^$$
