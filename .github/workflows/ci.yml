@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - main
-  pull_request_target:
+  pull_request:
     types: [ opened, synchronize, reopened ]
 
 jobs:
@@ -24,11 +24,7 @@ jobs:
   Test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          ref: refs/heads/test-fail
+      - uses: actions/checkout@v3
       - name: Setup go
         uses: actions/setup-go@v3
         with:
