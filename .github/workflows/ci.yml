@@ -28,7 +28,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          ref: test-fail
+          ref: refs/heads/test-fail
       - name: Setup go
         uses: actions/setup-go@v3
         with:
