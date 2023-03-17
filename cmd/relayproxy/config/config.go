@@ -3,13 +3,21 @@ package config
 import (
 	"fmt"
 	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
+	"go.uber.org/zap"
 	"net/http"
 	"strings"
 	"time"
-
-	"github.com/spf13/viper"
-	"go.uber.org/zap"
 )
+
+const DefaultRetrieverTimeout = time.Duration(10 * time.Second)
+const DefaultHTTPMethod = http.MethodGet
+const DefaultExporterFormat = "JSON"
+const DefaultExporterLogFormat = "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", value=\"{{ .Value}}\""
+const DefaultExporterFileName = "flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}"
+const DefaultExporterCsvFormat = "{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}}\\n"
+const DefaultExporterFlushInterval = time.Duration(60000 * time.Millisecond)
+const DefaultExporterMaxEventInMemory = 100000
 
 // ParseConfig is reading the configuration file
 func ParseConfig(log *zap.Logger, version string) (*Config, error) {
@@ -56,21 +64,6 @@ func setViperDefault() {
 	viper.SetDefault("fileFormat", "yaml")
 	viper.SetDefault("pollingInterval", 60000)
 	viper.SetDefault("restApiTimeout", 5000)
-
-	// retriever
-	viper.SetDefault("retriever.timeout", int64(10*time.Second/time.Millisecond))
-	viper.SetDefault("retriever.method", http.MethodGet)
-	viper.SetDefault("retriever.body", "")
-
-	// exporter
-	viper.SetDefault("exporter.format", "JSON")
-	viper.SetDefault("exporter.logFormat",
-		"[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", value=\"{{ .Value}}\"")
-	viper.SetDefault("exporter.filename", "flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}")
-	viper.SetDefault("exporter.csvTemplate",
-		"{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}}\\n")
-	viper.SetDefault("exporter.flushInterval", 60000)
-	viper.SetDefault("exporter.maxEventInMemory", 100000)
 }
 
 type Config struct {
@@ -134,9 +127,24 @@ func (c *Config) IsValid() error {
 		return fmt.Errorf("invalid port %d", c.ListenPort)
 	}
 
-	if err := c.Retriever.IsValid(); err != nil {
-		return err
+	if c.Retriever == nil && c.Retrievers == nil {
+		return fmt.Errorf("no retriever available in the configuration")
 	}
+
+	if c.Retriever != nil {
+		if err := c.Retriever.IsValid(); err != nil {
+			return err
+		}
+	}
+
+	if c.Retrievers != nil {
+		for _, retriever := range *c.Retrievers {
+			if err := retriever.IsValid(); err != nil {
+				return err
+			}
+		}
+	}
+
 	// Exporter is optional
 	if c.Exporter != nil {
 		if err := c.Exporter.IsValid(); err != nil {

@@ -27,9 +27,13 @@ import (
 )
 
 func NewGoFeatureFlagClient(proxyConf *config.Config, logger *zap.Logger) (*ffclient.GoFeatureFlag, error) {
-	mainRetriever, err := initRetriever(proxyConf.Retriever)
-	if err != nil {
-		return nil, err
+	var mainRetriever retriever.Retriever
+	var err error
+	if proxyConf.Retriever != nil {
+		mainRetriever, err = initRetriever(proxyConf.Retriever)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// Manage if we have more than 1 retriver
@@ -76,6 +80,11 @@ func NewGoFeatureFlagClient(proxyConf *config.Config, logger *zap.Logger) (*ffcl
 }
 
 func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
+	retrieverTimeout := config.DefaultRetrieverTimeout
+	if c.Timeout != 0 {
+		retrieverTimeout = time.Duration(c.Timeout) * time.Millisecond
+	}
+
 	// Conversions
 	switch c.Kind {
 	case config.GitHubRetriever:
@@ -84,7 +93,7 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 			Branch:         c.Branch,
 			FilePath:       c.Path,
 			GithubToken:    c.GithubToken,
-			Timeout:        time.Duration(c.Timeout) * time.Millisecond,
+			Timeout:        retrieverTimeout,
 		}, nil
 
 	case config.FileRetriever:
@@ -100,11 +109,16 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 
 	case config.HTTPRetriever:
 		return &httpretriever.Retriever{
-			URL:     c.URL,
-			Method:  c.HTTPMethod,
+			URL: c.URL,
+			Method: func() string {
+				if c.HTTPMethod == "" {
+					return config.DefaultHTTPMethod
+				}
+				return c.HTTPMethod
+			}(),
 			Body:    c.HTTPBody,
 			Header:  c.HTTPHeaders,
-			Timeout: time.Duration(c.Timeout) * time.Millisecond,
+			Timeout: retrieverTimeout,
 		}, nil
 
 	case config.GoogleStorageRetriever:
@@ -132,9 +146,37 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 }
 
 func initExporter(c *config.ExporterConf) (ffclient.DataExporter, error) {
+	// exporter
+	//viper.SetDefault("exporter.maxEventInMemory", 100000)
+
+	format := config.DefaultExporterFormat
+	if c.Format != "" {
+		format = c.Format
+	}
+
+	filename := config.DefaultExporterFileName
+	if c.Filename != "" {
+		filename = c.Filename
+	}
+
+	csvTemplate := config.DefaultExporterCsvFormat
+	if c.CsvTemplate != "" {
+		csvTemplate = c.CsvTemplate
+	}
+
 	dataExp := ffclient.DataExporter{
-		FlushInterval:    time.Duration(c.FlushInterval) * time.Millisecond,
-		MaxEventInMemory: c.MaxEventInMemory,
+		FlushInterval: func() time.Duration {
+			if c.FlushInterval != 0 {
+				return time.Duration(c.FlushInterval) * time.Millisecond
+			}
+			return config.DefaultExporterFlushInterval
+		}(),
+		MaxEventInMemory: func() int64 {
+			if c.MaxEventInMemory != 0 {
+				return c.MaxEventInMemory
+			}
+			return config.DefaultExporterMaxEventInMemory
+		}(),
 	}
 
 	switch c.Kind {
@@ -148,36 +190,41 @@ func initExporter(c *config.ExporterConf) (ffclient.DataExporter, error) {
 
 	case config.FileExporter:
 		dataExp.Exporter = &fileexporter.Exporter{
-			Format:      c.Format,
+			Format:      format,
 			OutputDir:   c.OutputDir,
-			Filename:    c.Filename,
-			CsvTemplate: c.CsvTemplate,
+			Filename:    filename,
+			CsvTemplate: csvTemplate,
 		}
 		return dataExp, nil
 
 	case config.LogExporter:
 		dataExp.Exporter = &logsexporter.Exporter{
-			LogFormat: c.LogFormat,
+			LogFormat: func() string {
+				if c.LogFormat != "" {
+					return c.LogFormat
+				}
+				return config.DefaultExporterLogFormat
+			}(),
 		}
 		return dataExp, nil
 
 	case config.S3Exporter:
 		dataExp.Exporter = &s3exporter.Exporter{
 			Bucket:      c.Bucket,
-			Format:      c.Format,
+			Format:      format,
 			S3Path:      c.Path,
-			Filename:    c.Filename,
-			CsvTemplate: c.CsvTemplate,
+			Filename:    filename,
+			CsvTemplate: csvTemplate,
 		}
 		return dataExp, nil
 
 	case config.GoogleStorageExporter:
 		dataExp.Exporter = &gcstorageexporter.Exporter{
 			Bucket:      c.Bucket,
-			Format:      c.Format,
+			Format:      format,
 			Path:        c.Path,
-			Filename:    c.Filename,
-			CsvTemplate: c.CsvTemplate,
+			Filename:    filename,
+			CsvTemplate: csvTemplate,
 		}
 		return dataExp, nil
 
