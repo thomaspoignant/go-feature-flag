@@ -7,7 +7,7 @@ on:
     types: [ opened, synchronize, reopened ]
 
 jobs:
-  Code analysis:
+  Code-analysis:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
