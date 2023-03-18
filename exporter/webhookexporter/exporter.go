@@ -59,7 +59,7 @@ type webhookPayload struct {
 }
 
 // Export is sending a collection of events in a webhook call.
-func (f *Exporter) Export(ctx context.Context, logger *log.Logger, featureEvents []exporter.FeatureEvent) error {
+func (f *Exporter) Export(ctx context.Context, _ *log.Logger, featureEvents []exporter.FeatureEvent) error {
 	f.init.Do(func() {
 		if f.httpClient == nil {
 			f.httpClient = internal.DefaultHTTPClient()
