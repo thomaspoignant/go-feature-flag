@@ -65,7 +65,7 @@ func TestAddCustomMetricsMiddleware(t *testing.T) {
 
 	// Add the custom metrics middleware and call the handler function
 	middleware := metrics.AddCustomMetricsMiddleware(handler)
-	middleware(e.NewContext(req, rec))
+	_ = middleware(e.NewContext(req, rec))
 
 	expectedLabels := prom.Labels{"flag_name": "name"}
 	gotFlagEvaluation := testutil.ToFloat64(metrics.flagEvaluationCounter.MetricCollector.(*prom.CounterVec).With(expectedLabels))
