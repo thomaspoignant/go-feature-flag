@@ -9,6 +9,6 @@ import "github.com/labstack/echo/v4"
 // @Produce      plain
 // @Success      200 {object}	string
 // @Router       /metrics [get]
-func FakeMetricsController(c echo.Context) {
+func FakeMetricsController(_ echo.Context) {
 	// This is a fake controller, the real entry point is provided by the prometheus middleware.
 }

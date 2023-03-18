@@ -11,7 +11,7 @@ type Retriever struct {
 }
 
 // Retrieve is reading the file and return the content
-func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
+func (r *Retriever) Retrieve(_ context.Context) ([]byte, error) {
 	content, err := os.ReadFile(r.Path)
 	if err != nil {
 		return nil, err

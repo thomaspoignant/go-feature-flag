@@ -34,13 +34,14 @@ func Test_initRetriever(t *testing.T) {
 				Kind:           "github",
 				RepositorySlug: "thomaspoignant/go-feature-flag",
 				Path:           "testdata/flag-config.yaml",
+				Timeout:        20,
 			},
 			want: &githubretriever.Retriever{
 				RepositorySlug: "thomaspoignant/go-feature-flag",
 				Branch:         "main",
 				FilePath:       "testdata/flag-config.yaml",
 				GithubToken:    "",
-				Timeout:        10 * time.Second,
+				Timeout:        20 * time.Millisecond,
 			},
 		},
 		{
