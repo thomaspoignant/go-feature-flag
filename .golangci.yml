@@ -58,3 +58,19 @@ issues:
         - gochecknoinits
         - dupl
         - staticcheck
+        - revive
+    - path: _mock.go
+      linters:
+        - funlen
+        - maligned
+        - noctx
+        - scopelint
+        - bodyclose
+        - lll
+        - goconst
+        - gocognit
+        - gocyclo
+        - gochecknoinits
+        - dupl
+        - staticcheck
+        - revive

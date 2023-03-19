@@ -92,6 +92,14 @@ func TestLinter_Lint(t *testing.T) {
 			},
 			wantErr: assert.Error,
 		},
+		{
+			name: "invalid file",
+			linter: Linter{
+				InputFile:   "testdata/unknown.yaml",
+				InputFormat: "yaml",
+			},
+			wantErr: assert.Error,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
