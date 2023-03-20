@@ -17,7 +17,7 @@ func Test_Invalid_input_file(t *testing.T) {
 		runAppMain(inputFile, inputFormat)
 		return
 	}
-
+	// nolint: gosec
 	cmd := exec.Command(os.Args[0], "-test.run="+testName)
 	cmd.Env = append(os.Environ(), "SHOULD_CRASH=true")
 	err := cmd.Run()
