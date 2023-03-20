@@ -3,7 +3,7 @@ module github.com/thomaspoignant/go-feature-flag
 go 1.18
 
 require (
-	cloud.google.com/go/storage v1.29.0
+	cloud.google.com/go/storage v1.30.0
 	github.com/BurntSushi/toml v1.2.1
 	github.com/aws/aws-sdk-go v1.44.224
 	github.com/brpaz/echozap v1.1.3
