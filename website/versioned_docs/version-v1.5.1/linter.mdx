@@ -1,0 +1,115 @@
+---
+sidebar_position: 91
+description: Lint your config
+---
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import styles from '../blog/2023-02-20-lint-your-feature-flags/styles.module.css';
+
+# Lint your config
+
+A faulty configuration could make **GO Feature Flag** not the way you expect.  
+This is why we have introduced the `go-feature-flag-lint` a command line tool validates that a flags file can be parsed by **GO Feature Flag**.
+
+:::tip
+We recommend you to use this command line in your CI/CD pipelines to avoid any disappointment.
+:::
+
+## Install the linter
+
+### Install using Homebrew (mac and linux)
+```shell
+brew tap thomaspoignant/homebrew-tap
+brew install go-feature-flag-lint
+```
+ 
+### Install using Scoop (windows)
+```shell
+scoop bucket add org https://github.com/thomaspoignant/scoop.git
+scoop install go-feature-flag-lint
+```
+
+### Install using Docker
+```shell
+docker pull thomaspoignant/go-feature-flag-lint:latest
+```
+
+## Use the linter
+
+```shell
+./go-feature-flag-lint \
+  --input-format=yaml \
+  --input-file=/input/my-go-feature-flag-config.yaml
+```
+
+The command line has 2 arguments you should specify.
+
+| param            | description                                                                                                       |
+|------------------|-------------------------------------------------------------------------------------------------------------------|
+| `--input-file`   | **(mandatory)** The location of your configuration file.                                                          |
+| `--input-format` | **(mandatory)** The format of your current configuration file. <br/>Available formats are `yaml`, `json`, `toml`. |
+
+## Use the linter in your CI (continuous integration)
+
+
+
+You can run `go-feature-flag-lint` using GitHub actions:
+
+<Tabs groupId="code">
+    <TabItem value="githubaction" label="Github Action" attributes={{className: styles.github}}>
+
+```yaml
+name: "Build"
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [ opened, synchronize, reopened ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker://thomaspoignant/go-feature-flag-lint:latest
+        with:
+          args: --input-file=/github/workspace/path/to/your/config.yaml --input-format=yaml
+```
+
+  </TabItem>
+    <TabItem value="circleci" label="CircleCi" attributes={{className: styles.circleci}}>
+
+```yaml
+version: 2.1
+jobs:
+  build:
+    docker:
+     - image: cimg/base:2022.05
+
+    steps:
+      - checkout
+      - run: curl -L $(curl -s https://api.github.com/repos/thomaspoignant/go-feature-flag/releases/latest | jq -r '.assets[] | select(.name|match("Linux_x86_64.tar.gz$")) | .browser_download_url' | grep 'go-feature-flag-lint') --output release.tar.gz && tar -zxvf release.tar.gz
+      - run: ./go-feature-flag-lint --input-format=yaml --input-file=flag-config.yaml # please put the right file name
+```
+
+  </TabItem>
+    <TabItem value="gitlab" label="Gitlab" attributes={{className: styles.gitlab}}>
+
+```yaml
+image: ubuntu
+lint-job:
+  stage: build
+
+  before_script:
+    - apt-get -qq update
+    - apt-get install -y jq curl
+
+  script:
+    - curl -L $(curl -s https://api.github.com/repos/thomaspoignant/go-feature-flag/releases/latest | jq -r '.assets[] | select(.name|match("Linux_x86_64.tar.gz$")) | .browser_download_url' | grep 'go-feature-flag-lint') --output release.tar.gz && tar -zxvf release.tar.gz
+    - ./go-feature-flag-lint --input-format=yaml --input-file=flag-config.yaml # please put the right file name
+```
+
+  </TabItem>
+
+</Tabs>
