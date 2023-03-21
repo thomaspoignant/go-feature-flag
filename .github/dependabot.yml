@@ -9,3 +9,13 @@ updates:
   labels:
     - "dependencies"
     - "automerge"
+
+- package-ecosystem: gomod
+  directory: "/openfeature/provider_tests/"
+  schedule:
+    interval: weekly
+    time: "04:00"
+  open-pull-requests-limit: 30
+  labels:
+    - "dependencies"
+    - "automerge"
