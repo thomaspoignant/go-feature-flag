@@ -4,7 +4,24 @@ on:
     types: [ published ]
 
 jobs:
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Setup go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '^1.18.0'
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: 3.8.2
+      - run: make vendor
+      - run: make provider-tests
   goreleaser:
+    needs: integration-tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

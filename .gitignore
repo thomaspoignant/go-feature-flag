@@ -35,6 +35,3 @@ tmp/
 goff-proxy.yaml
 flags.yaml
 
-# Java
-*.class
-openfeature/provider_tests/java-integration-tests/target

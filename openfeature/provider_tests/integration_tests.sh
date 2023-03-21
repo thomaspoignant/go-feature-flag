@@ -1,8 +1,7 @@
 #!/bin/bash
 
-
 make build-relayproxy
-./out/bin/relayproxy --config ./openfeature/provider_tests/goff-proxy.yaml &
+./out/bin/relayproxy --config $(pwd)/openfeature/provider_tests/goff-proxy.yaml &
 
 # Waiting for the relay proxy to be ready
 NB_ITERATION=10
@@ -13,7 +12,7 @@ while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:1031/health)" != 
 done
 
 # Launch java integration tests
-mvn -f ./openfeature/provider_tests/java-integration-tests/pom.xml test
+mvn -f $(pwd)/openfeature/provider_tests/java-integration-tests/pom.xml test
 
 # Kill all process launched by the script (here the relay-proxy)
 kill -KILL %1

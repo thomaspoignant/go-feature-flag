@@ -1,0 +1,6 @@
+!flags.yaml
+!goff-proxy.yaml
+
+# Java
+*.class
+target/
