@@ -65,6 +65,9 @@ swagger: ## Build swagger documentation
 test: ## Run the tests of the project
 	$(GOTEST) -v -race ./...
 
+provider-tests:
+	./openfeature/provider_tests/integration_tests.sh
+
 coverage: ## Run the tests of the project and export the coverage
 	$(GOTEST) -cover -covermode=count -coverprofile=coverage.cov.tmp ./... \
 	&& cat coverage.cov.tmp | grep -v "/examples/" > coverage.cov
