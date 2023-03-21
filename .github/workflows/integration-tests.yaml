@@ -2,7 +2,7 @@ name: "Integration Tests"
 on:
   push:
     paths:
-      - 'openfeature/provider_tests'
+      - 'openfeature/provider_tests/**'
 
 jobs:
   integration-tests:
