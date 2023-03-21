@@ -13,7 +13,7 @@ const portRelayProxy = "1031"
 const timeoutRelayProxyReady = 1 * time.Minute
 const containerNameRelayProxy = "relayproxyintegrationtests"
 
-var testCommands = []string{"ls"}
+var testCommands = []string{"ls", "make help"}
 
 func main() {
 	relayProxyConfigFile := "/Users/thomas.poignant/dev/thomaspoignant/go-feature-flag/cmd/relayproxy/testdata/config/valid-file.yaml"
