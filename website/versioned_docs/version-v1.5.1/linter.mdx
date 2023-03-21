@@ -2,9 +2,11 @@
 sidebar_position: 91
 description: Lint your config
 ---
+
+
+
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
-import styles from '../blog/2023-02-20-lint-your-feature-flags/styles.module.css';
 
 # Lint your config
 
@@ -56,7 +58,7 @@ The command line has 2 arguments you should specify.
 You can run `go-feature-flag-lint` using GitHub actions:
 
 <Tabs groupId="code">
-    <TabItem value="githubaction" label="Github Action" attributes={{className: styles.github}}>
+    <TabItem value="githubaction" label="Github Action">
 
 ```yaml
 name: "Build"
@@ -78,7 +80,7 @@ jobs:
 ```
 
   </TabItem>
-    <TabItem value="circleci" label="CircleCi" attributes={{className: styles.circleci}}>
+    <TabItem value="circleci" label="CircleCi">
 
 ```yaml
 version: 2.1
@@ -94,7 +96,7 @@ jobs:
 ```
 
   </TabItem>
-    <TabItem value="gitlab" label="Gitlab" attributes={{className: styles.gitlab}}>
+    <TabItem value="gitlab" label="Gitlab">
 
 ```yaml
 image: ubuntu
