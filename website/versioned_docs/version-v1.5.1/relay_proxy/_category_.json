@@ -1,0 +1,10 @@
+{
+  "position": 50,
+  "label":"Use the relay proxy",
+  "collapsible": true,
+  "collapsed": true,
+  "link": {
+    "type": "generated-index",
+    "title": "Use the relay proxy"
+  }
+}
