@@ -1,12 +1,12 @@
 name: "Integration Tests"
 on:
-  pull_request:
-    types: [ opened, synchronize, reopened ]
+  push:
+    paths:
+      - 'openfeature/provider_tests'
 
 jobs:
   integration-tests:
     name: Integration Tests
-    if: startsWith( github.ref_name, 'dependabot/maven/openfeature/provider_tests')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
