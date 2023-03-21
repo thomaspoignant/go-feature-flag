@@ -34,3 +34,6 @@ tmp/
 # Local dev files
 goff-proxy.yaml
 flags.yaml
+
+# Java
+*.class
