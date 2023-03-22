@@ -4,3 +4,6 @@
 # Java
 *.class
 target/
+
+# JS
+node_modules/

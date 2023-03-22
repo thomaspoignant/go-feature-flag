@@ -44,7 +44,7 @@ public class ProviderTests {
 
     @DisplayName("bool: should resolve a valid boolean flag with TARGETING_MATCH reason")
     @Test
-    void boolShouldResolveAValidBooleanFlagWithTargetingMatchReason() {
+    void shouldResolveAValidBooleanFlagWithTargetingMatchReason() {
         String flagKey = "bool_targeting_match";
         FlagEvaluationDetails expected = FlagEvaluationDetails.builder()
                 .flagKey(flagKey)
@@ -58,12 +58,13 @@ public class ProviderTests {
 
     @DisplayName("bool: should use boolean default value if the flag is disabled")
     @Test
-    void boolShouldUseBooleanDefaultValueIfTheFlagIsDisabled() {
+    void shouldUseBooleanDefaultValueIfTheFlagIsDisabled() {
         String flagKey = "disabled_bool";
         FlagEvaluationDetails expected = FlagEvaluationDetails.builder()
                 .flagKey(flagKey)
                 .reason(Reason.DISABLED.toString())
                 .value(false)
+                .variant("SdkDefault")
                 .build();
         FlagEvaluationDetails<Boolean> got = goffClient.getBooleanDetails(flagKey, false, defaultEvaluationContext);
         assertEquals(expected, got);
@@ -71,7 +72,7 @@ public class ProviderTests {
 
     @DisplayName("bool: should error if we expect a boolean and got another type")
     @Test
-    void boolShouldErrorIfWeExpectABooleanAndGotAnotherType() {
+    void shouldErrorIfWeExpectABooleanAndGotAnotherType() {
         FlagEvaluationDetails expected = FlagEvaluationDetails.builder()
                 .reason(Reason.ERROR.toString())
                 .value(false)
@@ -97,7 +98,7 @@ public class ProviderTests {
 
     @DisplayName("string: should resolve a valid string flag with TARGETING_MATCH reason")
     @Test
-    void stringShouldResolveAValidStringFlagWithTargetingMatchReason() {
+    void shouldResolveAValidStringFlagWithTargetingMatchReason() {
         String flagKey = "string_key";
         FlagEvaluationDetails expected = FlagEvaluationDetails.builder()
                 .reason(Reason.TARGETING_MATCH.toString())
@@ -111,12 +112,13 @@ public class ProviderTests {
 
     @DisplayName("string: should use string default value if the flag is disabled")
     @Test
-    void stringShouldUseStringDefaultValueIfTheFlagIsDisabled() {
+    void shouldUseStringDefaultValueIfTheFlagIsDisabled() {
         String flagKey = "disabled_string";
         FlagEvaluationDetails expected = FlagEvaluationDetails.builder()
                 .flagKey(flagKey)
                 .reason(Reason.DISABLED.toString())
                 .value("default")
+                .variant("SdkDefault")
                 .build();
         FlagEvaluationDetails<String> got = goffClient.getStringDetails(flagKey, "default", defaultEvaluationContext);
         assertEquals(expected, got);
@@ -124,7 +126,7 @@ public class ProviderTests {
 
     @DisplayName("string: should error if we expect a string and got another type")
     @Test
-    void stringShouldErrorIfWeExpectAStringAndGotAnotherType() {
+    void shouldErrorIfWeExpectAStringAndGotAnotherType() {
         String flagKey = "bool_targeting_match";
         FlagEvaluationDetails expected = FlagEvaluationDetails.builder()
                 .reason(Reason.ERROR.toString())
@@ -150,9 +152,9 @@ public class ProviderTests {
         assertEquals(expected, got);
     }
 
-    @DisplayName("double: should resolve a valid string flag with TARGETING_MATCH reason")
+    @DisplayName("double: should resolve a valid double flag with TARGETING_MATCH reason")
     @Test
-    void doubleShouldResolveAValidStringFlagWithTargetingMatchReason() {
+    void shouldResolveAValidDoubleFlagWithTargetingMatchReason() {
         String flagKey = "double_key";
         FlagEvaluationDetails expected = FlagEvaluationDetails.builder()
                 .reason(Reason.TARGETING_MATCH.toString())
@@ -164,22 +166,23 @@ public class ProviderTests {
         assertEquals(expected, got);
     }
 
-    @DisplayName("double: should use string default value if the flag is disabled")
+    @DisplayName("double: should use double default value if the flag is disabled")
     @Test
-    void doubleShouldUseStringDefaultValueIfTheFlagIsDisabled() {
+    void shouldUseDoubleDefaultValueIfTheFlagIsDisabled() {
         String flagKey = "disabled_float";
         FlagEvaluationDetails expected = FlagEvaluationDetails.builder()
                 .flagKey(flagKey)
                 .reason(Reason.DISABLED.toString())
                 .value(123.45)
+                .variant("SdkDefault")
                 .build();
         FlagEvaluationDetails<Double> got = goffClient.getDoubleDetails(flagKey, 123.45, defaultEvaluationContext);
         assertEquals(expected, got);
     }
 
-    @DisplayName("double: should error if we expect a string and got another type")
+    @DisplayName("double: should error if we expect a double and got another type")
     @Test
-    void doubleShouldErrorIfWeExpectAStringAndGotAnotherType() {
+    void shouldErrorIfWeExpectADoubleAndGotAnotherType() {
         String flagKey = "bool_targeting_match";
         FlagEvaluationDetails expected = FlagEvaluationDetails.builder()
                 .reason(Reason.ERROR.toString())
@@ -205,9 +208,9 @@ public class ProviderTests {
         assertEquals(expected, got);
     }
 
-    @DisplayName("int: should resolve a valid string flag with TARGETING_MATCH reason")
+    @DisplayName("int: should resolve a valid integer flag with TARGETING_MATCH reason")
     @Test
-    void intShouldResolveAValidStringFlagWithTargetingMatchReason() {
+    void shouldResolveAValidIntFlagWithTargetingMatchReason() {
         String flagKey = "integer_key";
         FlagEvaluationDetails expected = FlagEvaluationDetails.builder()
                 .reason(Reason.TARGETING_MATCH.toString())
@@ -219,22 +222,23 @@ public class ProviderTests {
         assertEquals(expected, got);
     }
 
-    @DisplayName("int: should use string default value if the flag is disabled")
+    @DisplayName("int: should use integer default value if the flag is disabled")
     @Test
-    void intShouldUseStringDefaultValueIfTheFlagIsDisabled() {
+    void shouldUseIntDefaultValueIfTheFlagIsDisabled() {
         String flagKey = "disabled_int";
         FlagEvaluationDetails expected = FlagEvaluationDetails.builder()
                 .flagKey(flagKey)
                 .reason(Reason.DISABLED.toString())
                 .value(123)
+                .variant("SdkDefault")
                 .build();
         FlagEvaluationDetails<Integer> got = goffClient.getIntegerDetails(flagKey, 123, defaultEvaluationContext);
         assertEquals(expected, got);
     }
 
-    @DisplayName("int: should error if we expect a string and got another type")
+    @DisplayName("int: should error if we expect a integer and got another type")
     @Test
-    void intShouldErrorIfWeExpectAStringAndGotAnotherType() {
+    void shouldErrorIfWeExpectAIntAndGotAnotherType() {
         String flagKey = "bool_targeting_match";
         FlagEvaluationDetails expected = FlagEvaluationDetails.builder()
                 .reason(Reason.ERROR.toString())
@@ -262,7 +266,7 @@ public class ProviderTests {
 
     @DisplayName("object: should resolve a valid object flag with TARGETING_MATCH reason")
     @Test
-    void objectShouldResolveAValidObjectFlagWithTargetingMatchReason() {
+    void shouldResolveAValidObjectFlagWithTargetingMatchReason() {
         String flagKey = "object_key";
         Structure expectedValue = new MutableStructure().add("test4", 1).add("test2", false).add("test3", 123.3).add("test", "test1");
         FlagEvaluationDetails expected = FlagEvaluationDetails.builder()
@@ -277,12 +281,13 @@ public class ProviderTests {
 
     @DisplayName("object: should use object default value if the flag is disabled")
     @Test
-    void objectShouldUseStringDefaultValueIfTheFlagIsDisabled() {
+    void shouldUseObjectDefaultValueIfTheFlagIsDisabled() {
         String flagKey = "disabled_int";
         FlagEvaluationDetails expected = FlagEvaluationDetails.builder()
                 .flagKey(flagKey)
                 .reason(Reason.DISABLED.toString())
                 .value(new Value(123))
+                .variant("SdkDefault")
                 .build();
         FlagEvaluationDetails<Value> got = goffClient.getObjectDetails(flagKey, new Value(123), defaultEvaluationContext);
         assertEquals(expected, got);

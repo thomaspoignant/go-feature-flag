@@ -1,0 +1,20 @@
+{
+  "name": "js-integration-tests",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "jest": "^29.5.0"
+  },
+  "dependencies": {
+    "@jest/globals": "^29.5.0",
+    "@openfeature/go-feature-flag-provider": "^0.5.4",
+    "@openfeature/js-sdk": "^1.1.1"
+  }
+}
