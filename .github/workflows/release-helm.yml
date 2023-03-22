@@ -1,0 +1,34 @@
+name: Release Charts
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  helm-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files in the docs folder
+        id: changed-files-specific
+        uses: tj-actions/changed-files@v35
+        with:
+          files: ./cmd/relayproxy/helm-charts/**
+
+      - name: Publish Helm chart
+        if: steps.changed-files-specific.outputs.any_changed == 'true'
+        uses: stefanprodan/helm-gh-pages@master
+        with:
+          token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+          charts_dir: ./cmd/relayproxy/helm-charts/
+          charts_url: https://charts.gofeatureflag.org
+          owner: go-feature-flag
+          repository: helm-charts
+          branch: gh-pages
+          target_dir: ./
+          commit_username: thomaspoignant
+          commit_email: thomaspoignant@goferatureflag.org

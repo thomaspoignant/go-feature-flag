@@ -39,6 +39,8 @@ func main() {
 	}
 }
 
+// outputResult is the function that display the result of the command line.
+// it can put the result directly in the console or in a file depending on the flags.
 func outputResult(content []byte, outputFile string) error {
 	if outputFile == "" {
 		fmt.Println(string(content))

@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -40,6 +41,14 @@ func NewFlagEval(goFF *ffclient.GoFeatureFlag) Controller {
 // @Failure      500 {object} modeldocs.HTTPErrorDoc "Internal server error"
 // @Router       /v1/feature/{flag_key}/eval [post]
 func (h *flagEval) Handler(c echo.Context) error {
+	flagKey := c.Param("flagKey")
+	if flagKey == "" {
+		return fmt.Errorf("impossible to find the flag key in the URL")
+	}
+
+	metrics := c.Get(metric.CustomMetrics).(*metric.Metrics)
+	metrics.IncFlagEvaluation(flagKey)
+
 	reqBody := new(model.EvalFlagRequest)
 	if err := c.Bind(reqBody); err != nil {
 		return err
@@ -51,15 +60,10 @@ func (h *flagEval) Handler(c echo.Context) error {
 	}
 	goFFUser, err := userRequestToUser(reqBody.User)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	// get flag name from the URL
-	flagKey := c.Param("flagKey")
-	if flagKey == "" {
-		return fmt.Errorf("impossible to find the flag key in the URL")
-	}
-
 	flagValue, _ := h.goFF.RawVariation(flagKey, goFFUser, reqBody.DefaultValue)
 	return c.JSON(http.StatusOK, flagValue)
 }

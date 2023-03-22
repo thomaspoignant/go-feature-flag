@@ -61,7 +61,11 @@ func (f *InternalFlag) Value(
 	f.applyScheduledRolloutSteps()
 
 	if f.IsDisable() || f.isExperimentationOver() {
-		return evaluationCtx.DefaultSdkValue, ResolutionDetails{Variant: VariationSDKDefault, Reason: ReasonDisabled}
+		return evaluationCtx.DefaultSdkValue, ResolutionDetails{
+			Variant:   VariationSDKDefault,
+			Reason:    ReasonDisabled,
+			Cacheable: f.isCacheable(),
+		}
 	}
 
 	variationSelection, err := f.selectVariation(flagName, user)
@@ -79,16 +83,43 @@ func (f *InternalFlag) Value(
 		Reason:    variationSelection.reason,
 		RuleIndex: variationSelection.ruleIndex,
 		RuleName:  variationSelection.ruleName,
+		Cacheable: variationSelection.cacheable,
 	}
+}
+
+// selectEvaluationReason is choosing which reason has been chosen for the evaluation.
+func selectEvaluationReason(hasRule bool, targetingMatch bool, isDynamic bool, isDefaultRule bool) ResolutionReason {
+	if hasRule && targetingMatch {
+		if isDynamic {
+			return ReasonTargetingMatchSplit
+		}
+		return ReasonTargetingMatch
+	}
+
+	if isDefaultRule {
+		if isDynamic {
+			return ReasonSplit
+		}
+		if hasRule {
+			return ReasonDefault
+		}
+		return ReasonStatic
+	}
+	return ReasonUnknown
+}
+
+func (f *InternalFlag) isCacheable() bool {
+	isDynamic := (f.Scheduled != nil && len(*f.Scheduled) > 0) || f.Experimentation != nil
+	return !isDynamic
 }
 
 // selectVariation is doing the magic to select the variation that should be used for this specific user
 // to always affect the user to the same segment we are using a hash of the flag name + key
 func (f *InternalFlag) selectVariation(flagName string, user ffuser.User) (*variationSelection, error) {
 	hashID := utils.Hash(flagName+user.GetKey()) % MaxPercentage
-
+	hasRule := len(f.GetRules()) != 0
 	// Check all targeting in order, the first to match will be the one used.
-	if len(f.GetRules()) != 0 {
+	if hasRule {
 		for ruleIndex, target := range f.GetRules() {
 			variationName, err := target.Evaluate(user, hashID, false)
 			if err != nil {
@@ -98,11 +129,13 @@ func (f *InternalFlag) selectVariation(flagName string, user ffuser.User) (*vari
 				}
 				return nil, err
 			}
+			reason := selectEvaluationReason(hasRule, true, target.IsDynamic(), false)
 			return &variationSelection{
 				name:      variationName,
-				reason:    ReasonTargetingMatch,
+				reason:    reason,
 				ruleIndex: &ruleIndex,
 				ruleName:  f.GetRules()[ruleIndex].Name,
+				cacheable: f.isCacheable() && target.ProgressiveRollout == nil,
 			}, err
 		}
 	}
@@ -116,7 +149,12 @@ func (f *InternalFlag) selectVariation(flagName string, user ffuser.User) (*vari
 		return nil, err
 	}
 
-	return &variationSelection{name: variationName, reason: ReasonDefault}, nil
+	reason := selectEvaluationReason(hasRule, false, f.GetDefaultRule().IsDynamic(), true)
+	return &variationSelection{
+		name:      variationName,
+		reason:    reason,
+		cacheable: f.isCacheable() && f.GetDefaultRule().ProgressiveRollout == nil,
+	}, nil
 }
 
 // nolint: gocognit
@@ -178,6 +216,26 @@ func (f *InternalFlag) isExperimentationOver() bool {
 func (f *InternalFlag) IsValid() error {
 	if len(f.GetVariations()) == 0 {
 		return fmt.Errorf("no variation available")
+	}
+
+	// Check that all variation have the same types
+	expectedVarType := ""
+	for _, value := range f.GetVariations() {
+		if expectedVarType != "" {
+			currentType, err := utils.JSONTypeExtractor(*value)
+			if err != nil {
+				return err
+			}
+			if currentType != expectedVarType {
+				return fmt.Errorf("all variations should have the same type")
+			}
+		} else {
+			var err error
+			expectedVarType, err = utils.JSONTypeExtractor(*value)
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	// Validate that we have a default Rule

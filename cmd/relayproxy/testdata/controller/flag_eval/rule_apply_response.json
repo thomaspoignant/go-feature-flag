@@ -7,5 +7,6 @@
   "errorCode": "",
   "value": {
     "test2": "test"
-  }
+  },
+  "cacheable": true
 }

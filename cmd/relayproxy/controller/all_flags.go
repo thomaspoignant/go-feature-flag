@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -33,6 +34,9 @@ func NewAllFlags(goFF *ffclient.GoFeatureFlag) Controller {
 // @Failure      500 {object} modeldocs.HTTPErrorDoc "Internal server error"
 // @Router       /v1/allflags [post]
 func (h *allFlags) Handler(c echo.Context) error {
+	metrics := c.Get(metric.CustomMetrics).(*metric.Metrics)
+	metrics.IncAllFlag()
+
 	reqBody := new(model.AllFlagRequest)
 	if err := c.Bind(reqBody); err != nil {
 		return err

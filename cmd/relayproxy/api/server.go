@@ -2,6 +2,8 @@ package api
 
 import (
 	"fmt"
+	"github.com/labstack/echo-contrib/prometheus"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"time"
 
 	"github.com/brpaz/echozap"
@@ -46,6 +48,12 @@ func (s *Server) init() {
 	s.echoInstance.HideBanner = true
 	s.echoInstance.HidePort = true
 	s.echoInstance.Debug = s.config.Debug
+
+	// Prometheus
+	metrics := metric.NewMetrics()
+	prometheus := prometheus.NewPrometheus("gofeatureflag", nil, metrics.MetricList())
+	prometheus.Use(s.echoInstance)
+	s.echoInstance.Use(metrics.AddCustomMetricsMiddleware)
 
 	// Middlewares
 	s.echoInstance.Use(echozap.ZapLogger(s.zapLog))

@@ -245,7 +245,12 @@ variation = "false_var"
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			fCache := cache.New(cache.NewNotificationService([]notifier.Notifier{}), nil)
-			err := fCache.UpdateCache(tt.args.loadedFlags, tt.flagFormat, log.New(os.Stdout, "", 0))
+			newFlags, err := fCache.ConvertToFlagStruct(tt.args.loadedFlags, tt.flagFormat)
+			if tt.wantErr {
+				assert.Error(t, err)
+				return
+			}
+			err = fCache.UpdateCache(newFlags, log.New(os.Stdout, "", 0))
 			if tt.wantErr {
 				assert.Error(t, err, "UpdateCache() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -403,7 +408,12 @@ test-flag2:
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			fCache := cache.New(cache.NewNotificationService([]notifier.Notifier{}), nil)
-			err := fCache.UpdateCache(tt.args.loadedFlags, tt.flagFormat, log.New(os.Stdout, "", 0))
+			newFlags, err := fCache.ConvertToFlagStruct(tt.args.loadedFlags, tt.flagFormat)
+			if tt.wantErr {
+				assert.Error(t, err)
+				return
+			}
+			err = fCache.UpdateCache(newFlags, log.New(os.Stdout, "", 0))
 			assert.NoError(t, err)
 
 			allFlags, err := fCache.AllFlags()
@@ -440,7 +450,8 @@ func Test_cacheManagerImpl_GetLatestUpdateDate(t *testing.T) {
 
 	fCache := cache.New(cache.NewNotificationService([]notifier.Notifier{}), nil)
 	timeBefore := fCache.GetLatestUpdateDate()
-	_ = fCache.UpdateCache(loadedFlags, "yaml", log.New(os.Stdout, "", 0))
+	newFlags, _ := fCache.ConvertToFlagStruct(loadedFlags, "yaml")
+	_ = fCache.UpdateCache(newFlags, log.New(os.Stdout, "", 0))
 	timeAfter := fCache.GetLatestUpdateDate()
 
 	assert.True(t, timeBefore.Before(timeAfter))

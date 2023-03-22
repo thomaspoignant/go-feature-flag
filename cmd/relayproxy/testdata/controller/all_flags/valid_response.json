@@ -34,7 +34,7 @@
       "variationType": "True",
       "trackEvents": true,
       "errorCode": "",
-      "reason": "DEFAULT"
+      "reason": "SPLIT"
     },
     "number-flag": {
       "value": 1,

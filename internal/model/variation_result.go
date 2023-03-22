@@ -16,6 +16,7 @@ type VariationResult[T JSONType] struct {
 	Reason        flag.ResolutionReason `json:"reason"`
 	ErrorCode     flag.ErrorCode        `json:"errorCode"`
 	Value         T                     `json:"value"`
+	Cacheable     bool                  `json:"cacheable"`
 }
 
 // RawVarResult is the result of the raw variation call.
@@ -28,4 +29,5 @@ type RawVarResult struct {
 	Reason        flag.ResolutionReason `json:"reason"`
 	ErrorCode     flag.ErrorCode        `json:"errorCode"`
 	Value         interface{}           `json:"value"`
+	Cacheable     bool                  `json:"cacheable"`
 }

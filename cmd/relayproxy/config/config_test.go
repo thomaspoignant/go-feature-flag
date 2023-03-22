@@ -27,23 +27,16 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 				FileFormat:      "yaml",
 				Host:            "localhost",
 				Retriever: &config.RetrieverConf{
-					Kind:       "http",
-					URL:        "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.yaml",
-					HTTPMethod: "GET",
-					Timeout:    10000,
+					Kind: "http",
+					URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.yaml",
 				},
 				Exporter: &config.ExporterConf{
-					Kind:             "log",
-					Filename:         "flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}",
-					CsvTemplate:      `{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}}\n`,
-					Format:           "JSON",
-					LogFormat:        `[{{ .FormattedDate}}] user="{{ .UserKey}}", flag="{{ .Key}}", value="{{ .Value}}"`,
-					FlushInterval:    60000,
-					MaxEventInMemory: 100000,
+					Kind: "log",
 				},
 				StartWithRetrieverError: false,
 				RestAPITimeout:          5000,
 				Version:                 "1.X.X",
+				EnableSwagger:           true,
 			},
 			wantErr: assert.NoError,
 		},
@@ -51,22 +44,10 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 			name:         "All default",
 			fileLocation: "../testdata/config/all-default.yaml",
 			want: &config.Config{
-				ListenPort:      1031,
-				PollingInterval: 60000,
-				FileFormat:      "yaml",
-				Host:            "localhost",
-				Retriever: &config.RetrieverConf{
-					HTTPMethod: "GET",
-					Timeout:    10000,
-				},
-				Exporter: &config.ExporterConf{
-					Filename:         "flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}",
-					CsvTemplate:      `{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}}\n`,
-					Format:           "JSON",
-					LogFormat:        `[{{ .FormattedDate}}] user="{{ .UserKey}}", flag="{{ .Key}}", value="{{ .Value}}"`,
-					FlushInterval:    60000,
-					MaxEventInMemory: 100000,
-				},
+				ListenPort:              1031,
+				PollingInterval:         60000,
+				FileFormat:              "yaml",
+				Host:                    "localhost",
 				StartWithRetrieverError: false,
 				RestAPITimeout:          5000,
 				Version:                 "1.X.X",
@@ -113,23 +94,16 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 				FileFormat:      "yaml",
 				Host:            "localhost",
 				Retriever: &config.RetrieverConf{
-					Kind:       "http",
-					URL:        "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.yaml",
-					HTTPMethod: "GET",
-					Timeout:    10000,
+					Kind: "http",
+					URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.yaml",
 				},
 				Exporter: &config.ExporterConf{
-					Kind:             "log",
-					Filename:         "flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}",
-					CsvTemplate:      `{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}}\n`,
-					Format:           "JSON",
-					LogFormat:        `[{{ .FormattedDate}}] user="{{ .UserKey}}", flag="{{ .Key}}", value="{{ .Value}}"`,
-					FlushInterval:    60000,
-					MaxEventInMemory: 100000,
+					Kind: "log",
 				},
 				StartWithRetrieverError: false,
 				RestAPITimeout:          5000,
 				Version:                 "1.X.X",
+				EnableSwagger:           true,
 			},
 			wantErr: assert.NoError,
 		},
@@ -137,22 +111,10 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 			name:         "All default",
 			fileLocation: "../testdata/config/all-default.yaml",
 			want: &config.Config{
-				ListenPort:      1031,
-				PollingInterval: 60000,
-				FileFormat:      "yaml",
-				Host:            "localhost",
-				Retriever: &config.RetrieverConf{
-					HTTPMethod: "GET",
-					Timeout:    10000,
-				},
-				Exporter: &config.ExporterConf{
-					Filename:         "flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}",
-					CsvTemplate:      `{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}}\n`,
-					Format:           "JSON",
-					LogFormat:        `[{{ .FormattedDate}}] user="{{ .UserKey}}", flag="{{ .Key}}", value="{{ .Value}}"`,
-					FlushInterval:    60000,
-					MaxEventInMemory: 100000,
-				},
+				ListenPort:              1031,
+				PollingInterval:         60000,
+				FileFormat:              "yaml",
+				Host:                    "localhost",
 				StartWithRetrieverError: false,
 				RestAPITimeout:          5000,
 				Version:                 "1.X.X",
@@ -195,6 +157,7 @@ func TestConfig_IsValid(t *testing.T) {
 		FileFormat              string
 		StartWithRetrieverError bool
 		Retriever               *config.RetrieverConf
+		Retrievers              *[]config.RetrieverConf
 		Exporter                *config.ExporterConf
 		Notifiers               []config.NotifierConf
 	}
@@ -206,6 +169,24 @@ func TestConfig_IsValid(t *testing.T) {
 		{
 			name:    "invalid port",
 			fields:  fields{ListenPort: 0},
+			wantErr: assert.Error,
+		},
+		{
+			name: "no retriever",
+			fields: fields{
+				ListenPort: 8080,
+				Notifiers: []config.NotifierConf{
+					{
+						Kind:        "webhook",
+						EndpointURL: "https://hooktest.com/",
+						Secret:      "xxxx",
+					},
+					{
+						Kind:            "slack",
+						SlackWebhookURL: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
+					},
+				},
+			},
 			wantErr: assert.Error,
 		},
 		{
@@ -244,6 +225,26 @@ func TestConfig_IsValid(t *testing.T) {
 				ListenPort: 8080,
 				Retriever: &config.RetrieverConf{
 					Kind: "file",
+				},
+			},
+			wantErr: assert.Error,
+		},
+		{
+			name: "1 invalid retriever in the list of retrievers",
+			fields: fields{
+				ListenPort: 8080,
+				Retrievers: &[]config.RetrieverConf{
+					{
+						Kind: "file",
+						Path: "../testdata/config/valid-file.yaml",
+					},
+					{
+						Kind: "file",
+					},
+					{
+						Kind: "file",
+						Path: "../testdata/config/valid-file.yaml",
+					},
 				},
 			},
 			wantErr: assert.Error,
@@ -293,6 +294,7 @@ func TestConfig_IsValid(t *testing.T) {
 				Retriever:               tt.fields.Retriever,
 				Exporter:                tt.fields.Exporter,
 				Notifiers:               tt.fields.Notifiers,
+				Retrievers:              tt.fields.Retrievers,
 			}
 			tt.wantErr(t, c.IsValid(), "invalid configuration")
 		})

@@ -30,8 +30,8 @@ func (s *S3ManagerMock) Download(at io.WriterAt, input *s3.GetObjectInput,
 	return 1, nil
 }
 
-func (s *S3ManagerMock) DownloadWithContext(context aws.Context, at io.WriterAt,
-	input *s3.GetObjectInput, f ...func(*s3manager.Downloader),
+func (s *S3ManagerMock) DownloadWithContext(_ aws.Context, at io.WriterAt,
+	input *s3.GetObjectInput, _ ...func(*s3manager.Downloader),
 ) (int64, error) {
 	return s.Download(at, input)
 }

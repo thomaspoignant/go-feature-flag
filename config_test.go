@@ -18,7 +18,7 @@ import (
 	ffClient "github.com/thomaspoignant/go-feature-flag"
 )
 
-func TestConfig_GetRetriever(t *testing.T) {
+func TestConfig_GetRetrievers(t *testing.T) {
 	type fields struct {
 		PollingInterval time.Duration
 		Retriever       retriever.Retriever
@@ -92,10 +92,10 @@ func TestConfig_GetRetriever(t *testing.T) {
 				PollingInterval: tt.fields.PollingInterval,
 				Retriever:       tt.fields.Retriever,
 			}
-			got, err := c.GetRetriever()
+			got, err := c.GetRetrievers()
 			assert.Equal(t, tt.wantErr, err != nil)
 			if err == nil {
-				assert.Equal(t, tt.want, reflect.ValueOf(got).Type().String())
+				assert.Equal(t, tt.want, reflect.ValueOf(got[0]).Type().String())
 			}
 		})
 	}

@@ -1,7 +1,10 @@
 package ffclient
 
 import (
+	"context"
 	"fmt"
+	"github.com/thomaspoignant/go-feature-flag/internal/dto"
+	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"log"
 	"sync"
 	"time"
@@ -15,14 +18,14 @@ import (
 
 // Init the feature flag component with the configuration of ffclient.Config
 //
-//  func main() {
-//    err := ffclient.Init(ffclient.Config{
-//             PollingInterval: 3 * time.Second,
-//             Retriever: &httpretriever.Retriever{
-//               URL:    "http://example.com/flag-config.yaml",
-//             },
-//           })
-//    defer ffclient.Close()
+//	func main() {
+//	  err := ffclient.Init(ffclient.Config{
+//	           PollingInterval: 3 * time.Second,
+//	           Retriever: &httpretriever.Retriever{
+//	             URL:    "http://example.com/flag-config.yaml",
+//	           },
+//	         })
+//	  defer ffclient.Close()
 func Init(config Config) error {
 	var err error
 	onceFF.Do(func() {
@@ -135,19 +138,63 @@ func (g *GoFeatureFlag) startFlagUpdaterDaemon() {
 
 // retrieveFlagsAndUpdateCache is called every X seconds to refresh the cache flag.
 func retrieveFlagsAndUpdateCache(config Config, cache cache.Manager) error {
-	retriever, err := config.GetRetriever()
+	retrievers, err := config.GetRetrievers()
 	if err != nil {
 		log.Printf("error while getting the file retriever: %v", err)
 		return err
 	}
 
-	loadedFlags, err := retriever.Retrieve(config.Context)
-	if err != nil {
-		log.Printf("error: impossible to retrieve flags from the config file: %v", err)
-		return err
+	// Results is the type that will receive the results when calling
+	// all the retrievers.
+	type Results struct {
+		Error error
+		Value map[string]dto.DTO
+		Index int
 	}
 
-	err = cache.UpdateCache(loadedFlags, config.FileFormat, config.Logger)
+	// resultsChan is the channel that will receive all the results.
+	resultsChan := make(chan Results)
+	var wg sync.WaitGroup
+	wg.Add(len(retrievers))
+
+	// Launching a goroutine that will wait until the waiting group is complete.
+	// It closes the channel when ready
+	go func() {
+		wg.Wait()
+		close(resultsChan)
+	}()
+
+	for index, r := range retrievers {
+		// Launching GO routines to retrieve all files in parallel.
+		go func(r retriever.Retriever, format string, index int, ctx context.Context) {
+			defer wg.Done()
+			rawValue, err := r.Retrieve(ctx)
+			if err != nil {
+				resultsChan <- Results{Error: err, Value: nil, Index: index}
+				return
+			}
+			convertedFlag, err := cache.ConvertToFlagStruct(rawValue, format)
+			resultsChan <- Results{Error: err, Value: convertedFlag, Index: index}
+		}(r, config.FileFormat, index, config.Context)
+	}
+
+	retrieversResults := make([]map[string]dto.DTO, len(retrievers))
+	for v := range resultsChan {
+		if v.Error != nil {
+			return v.Error
+		}
+		retrieversResults[v.Index] = v.Value
+	}
+
+	// merge all the flags
+	newFlags := map[string]dto.DTO{}
+	for _, flags := range retrieversResults {
+		for flagName, value := range flags {
+			newFlags[flagName] = value
+		}
+	}
+
+	err = cache.UpdateCache(newFlags, config.Logger)
 	if err != nil {
 		log.Printf("error: impossible to update the cache of the flags: %v", err)
 		return err

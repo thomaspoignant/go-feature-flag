@@ -18,15 +18,15 @@ build: build-migrationcli build-relayproxy build-lint ## Build all the binaries 
 
 build-migrationcli: ## Build the migration cli in out/bin/
 	mkdir -p out/bin
-	GO111MODULE=on $(GOCMD) build -mod vendor -o out/bin/migrationcli ./cmd/migrationcli/
+	CGO_ENABLED=0 GO111MODULE=on $(GOCMD) build -mod vendor -o out/bin/migrationcli ./cmd/migrationcli/
 
 build-relayproxy: ## Build the relay proxy in out/bin/
 	mkdir -p out/bin
-	GO111MODULE=on $(GOCMD) build -mod vendor -o out/bin/relayproxy ./cmd/relayproxy/
+	CGO_ENABLED=0 GO111MODULE=on $(GOCMD) build -mod vendor -o out/bin/relayproxy ./cmd/relayproxy/
 
 build-lint: ## Build the linter in out/bin/
 	mkdir -p out/bin
-	GO111MODULE=on $(GOCMD) build -mod vendor -o out/bin/lint ./cmd/lint/
+	CGO_ENABLED=0 GO111MODULE=on $(GOCMD) build -mod vendor -o out/bin/lint ./cmd/lint/
 
 build-doc: ## Build the documentation
 	cd website; \
@@ -65,8 +65,12 @@ swagger: ## Build swagger documentation
 test: ## Run the tests of the project
 	$(GOTEST) -v -race ./...
 
+provider-tests:
+	./openfeature/provider_tests/integration_tests.sh
+
 coverage: ## Run the tests of the project and export the coverage
-	$(GOTEST) -cover -covermode=count -coverprofile=coverage.cov ./...
+	$(GOTEST) -cover -covermode=count -coverprofile=coverage.cov.tmp ./... \
+	&& cat coverage.cov.tmp | grep -v "/examples/" > coverage.cov
 
 bench: ## Launch the benchmark test
 	 $(GOTEST) -bench Benchmark -cpu 2 -run=^$$

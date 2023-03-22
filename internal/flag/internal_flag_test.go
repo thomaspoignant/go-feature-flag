@@ -45,8 +45,9 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			want: true,
 			want1: flag.ResolutionDetails{
-				Variant: "variation_A",
-				Reason:  flag.ReasonDefault,
+				Variant:   "variation_A",
+				Reason:    flag.ReasonStatic,
+				Cacheable: true,
 			},
 		},
 		{
@@ -70,8 +71,9 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			want: true,
 			want1: flag.ResolutionDetails{
-				Variant: "variation_A",
-				Reason:  flag.ReasonDefault,
+				Variant:   "variation_A",
+				Reason:    flag.ReasonStatic,
+				Cacheable: true,
 			},
 		},
 		{
@@ -88,8 +90,9 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			want: "default-sdk",
 			want1: flag.ResolutionDetails{
-				Variant: "SdkDefault",
-				Reason:  flag.ReasonDisabled,
+				Variant:   "SdkDefault",
+				Reason:    flag.ReasonDisabled,
+				Cacheable: true,
 			},
 		},
 		{
@@ -109,8 +112,9 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			want: "default-sdk",
 			want1: flag.ResolutionDetails{
-				Variant: "SdkDefault",
-				Reason:  flag.ReasonDisabled,
+				Variant:   "SdkDefault",
+				Reason:    flag.ReasonDisabled,
+				Cacheable: false,
 			},
 		},
 		{
@@ -130,8 +134,9 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			want: "default-sdk",
 			want1: flag.ResolutionDetails{
-				Variant: "SdkDefault",
-				Reason:  flag.ReasonDisabled,
+				Variant:   "SdkDefault",
+				Reason:    flag.ReasonDisabled,
+				Cacheable: false,
 			},
 		},
 		{
@@ -165,6 +170,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				Reason:    flag.ReasonTargetingMatch,
 				RuleIndex: testconvert.Int(0),
 				RuleName:  testconvert.String("rule1"),
+				Cacheable: true,
 			},
 		},
 		{
@@ -204,6 +210,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				Reason:    flag.ReasonTargetingMatch,
 				RuleIndex: testconvert.Int(1),
 				RuleName:  testconvert.String("rule2"),
+				Cacheable: true,
 			},
 		},
 		{
@@ -240,6 +247,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				Variant:   "variation_C",
 				Reason:    flag.ReasonTargetingMatch,
 				RuleIndex: testconvert.Int(1),
+				Cacheable: true,
 			},
 		},
 		{
@@ -281,6 +289,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				Variant:   "variation_D",
 				Reason:    flag.ReasonTargetingMatch,
 				RuleIndex: testconvert.Int(1),
+				Cacheable: true,
 			},
 		},
 		{
@@ -323,6 +332,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				Variant:   "variation_C",
 				Reason:    flag.ReasonTargetingMatch,
 				RuleIndex: testconvert.Int(2),
+				Cacheable: true,
 			},
 		},
 		{
@@ -463,7 +473,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			want: "value_A",
 			want1: flag.ResolutionDetails{
 				Variant: "variation_A",
-				Reason:  flag.ReasonDefault,
+				Reason:  flag.ReasonStatic,
 			},
 		},
 		{
@@ -505,7 +515,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			want: "value_B",
 			want1: flag.ResolutionDetails{
 				Variant: "variation_B",
-				Reason:  flag.ReasonDefault,
+				Reason:  flag.ReasonStatic,
 			},
 		},
 		{
@@ -547,7 +557,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			want: "value_QWERTY",
 			want1: flag.ResolutionDetails{
 				Variant: "variation_B",
-				Reason:  flag.ReasonDefault,
+				Reason:  flag.ReasonStatic,
 			},
 		},
 		{
@@ -580,7 +590,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			want: "value_A",
 			want1: flag.ResolutionDetails{
 				Variant: "variation_A",
-				Reason:  flag.ReasonDefault,
+				Reason:  flag.ReasonStatic,
 			},
 		},
 		{
@@ -641,10 +651,7 @@ func TestInternalFlag_Value(t *testing.T) {
 					"variation_C": testconvert.Interface("value_C"),
 				},
 				DefaultRule: &flag.Rule{
-					Percentages: &map[string]float64{
-						"variation_A": 10,
-						"variation_B": 90,
-					},
+					VariationResult: testconvert.String("variation_C"),
 				},
 				Scheduled: &[]flag.ScheduledStep{
 					{
@@ -652,7 +659,7 @@ func TestInternalFlag_Value(t *testing.T) {
 						InternalFlag: flag.InternalFlag{
 							DefaultRule: &flag.Rule{
 								Percentages: &map[string]float64{
-									"variation_B": 20,
+									"variation_B": 30,
 									"variation_C": 70,
 								},
 							},
@@ -670,7 +677,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			want: "value_C",
 			want1: flag.ResolutionDetails{
 				Variant: "variation_C",
-				Reason:  flag.ReasonDefault,
+				Reason:  flag.ReasonSplit,
 			},
 		},
 		{
@@ -762,7 +769,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			want: "value_QWERTY",
 			want1: flag.ResolutionDetails{
 				Variant: "variation_B",
-				Reason:  flag.ReasonDefault,
+				Reason:  flag.ReasonStatic,
 			},
 		},
 		{
@@ -831,7 +838,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			want: "value_A",
 			want1: flag.ResolutionDetails{
 				Variant: "variation_A",
-				Reason:  flag.ReasonDefault,
+				Reason:  flag.ReasonStatic,
 			},
 		},
 		{
@@ -876,7 +883,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			want: "value_AB",
 			want1: flag.ResolutionDetails{
 				Variant: "variation_A",
-				Reason:  flag.ReasonDefault,
+				Reason:  flag.ReasonStatic,
 			},
 		},
 		{
@@ -910,8 +917,246 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			want: "value_A",
 			want1: flag.ResolutionDetails{
-				Variant: "variation_A",
-				Reason:  flag.ReasonDefault,
+				Variant:   "variation_A",
+				Reason:    flag.ReasonSplit,
+				Cacheable: false,
+			},
+		},
+		{
+			name: "Should return the reason TARGETING_MATCH if rule apply and return a simple variation",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"variation_A": testconvert.Interface("value_A"),
+					"variation_B": testconvert.Interface("value_B"),
+				},
+				Rules: &[]flag.Rule{
+					{
+						Name:            testconvert.String("test-rule"),
+						Query:           testconvert.String("key eq \"user-key\""),
+						VariationResult: testconvert.String("variation_A"),
+					},
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("variation_A"),
+				},
+			},
+			args: args{
+				flagName: "my-flag",
+				user:     ffuser.NewUserBuilder("user-key").Build(),
+				evaluationCtx: flag.EvaluationContext{
+					DefaultSdkValue: "value_default",
+				},
+			},
+			want: "value_A",
+			want1: flag.ResolutionDetails{
+				Variant:   "variation_A",
+				Reason:    flag.ReasonTargetingMatch,
+				RuleIndex: testconvert.Int(0),
+				RuleName:  testconvert.String("test-rule"),
+				Cacheable: true,
+			},
+		},
+		{
+			name: "Should return the reason TARGETING_MATCH_SPLIT if rule apply and has percentage",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"variation_A": testconvert.Interface("value_A"),
+					"variation_B": testconvert.Interface("value_B"),
+				},
+				Rules: &[]flag.Rule{
+					{
+						Name:  testconvert.String("test-rule"),
+						Query: testconvert.String("key eq \"user-key\""),
+						Percentages: &map[string]float64{
+							"variation_A": 50,
+							"variation_B": 50,
+						},
+					},
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("variation_A"),
+				},
+			},
+			args: args{
+				flagName: "my-flag",
+				user:     ffuser.NewUserBuilder("user-key").Build(),
+				evaluationCtx: flag.EvaluationContext{
+					DefaultSdkValue: "value_default",
+				},
+			},
+			want: "value_A",
+			want1: flag.ResolutionDetails{
+				Variant:   "variation_A",
+				Reason:    flag.ReasonTargetingMatchSplit,
+				RuleIndex: testconvert.Int(0),
+				RuleName:  testconvert.String("test-rule"),
+				Cacheable: true,
+			},
+		},
+		{
+
+			name: "Should return the reason TARGETING_MATCH_SPLIT if rule apply and has progressive rollout",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"variation_A": testconvert.Interface("value_A"),
+					"variation_B": testconvert.Interface("value_B"),
+				},
+				Rules: &[]flag.Rule{
+					{
+						Name:  testconvert.String("test-rule"),
+						Query: testconvert.String("key eq \"user-key\""),
+						ProgressiveRollout: &flag.ProgressiveRollout{
+							Initial: &flag.ProgressiveRolloutStep{
+								Variation:  testconvert.String("variation_A"),
+								Percentage: testconvert.Float64(0),
+								Date:       testconvert.Time(time.Now()),
+							},
+							End: &flag.ProgressiveRolloutStep{
+								Variation:  testconvert.String("variation_B"),
+								Percentage: testconvert.Float64(100),
+								Date:       testconvert.Time(time.Now().Add(1 * time.Minute)),
+							},
+						},
+					},
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("variation_A"),
+				},
+			},
+			args: args{
+				flagName: "my-flag",
+				user:     ffuser.NewUserBuilder("user-key").Build(),
+				evaluationCtx: flag.EvaluationContext{
+					DefaultSdkValue: "value_default",
+				},
+			},
+			want: "value_A",
+			want1: flag.ResolutionDetails{
+				Variant:   "variation_A",
+				Reason:    flag.ReasonTargetingMatchSplit,
+				RuleIndex: testconvert.Int(0),
+				RuleName:  testconvert.String("test-rule"),
+				Cacheable: false,
+			},
+		},
+		{
+			name: "Should return the reason SPLIT if rule not apply and has percentage",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"variation_A": testconvert.Interface("value_A"),
+					"variation_B": testconvert.Interface("value_B"),
+				},
+				Rules: &[]flag.Rule{
+					{
+						Name:            testconvert.String("test-rule"),
+						Query:           testconvert.String("key eq \"user-key2\""),
+						VariationResult: testconvert.String("variation_B"),
+					},
+				},
+				DefaultRule: &flag.Rule{
+					Percentages: &map[string]float64{
+						"variation_A": 50,
+						"variation_B": 50,
+					},
+				},
+			},
+			args: args{
+				flagName: "my-flag",
+				user:     ffuser.NewUserBuilder("user-key").Build(),
+				evaluationCtx: flag.EvaluationContext{
+					DefaultSdkValue: "value_default",
+				},
+			},
+			want: "value_A",
+			want1: flag.ResolutionDetails{
+				Variant:   "variation_A",
+				Reason:    flag.ReasonSplit,
+				Cacheable: true,
+			},
+		},
+		{
+			name: "Should return the reason DEFAULT if rule not apply and has default variation",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"variation_A": testconvert.Interface("value_A"),
+					"variation_B": testconvert.Interface("value_B"),
+				},
+				Rules: &[]flag.Rule{
+					{
+						Name:            testconvert.String("test-rule"),
+						Query:           testconvert.String("key eq \"user-key2\""),
+						VariationResult: testconvert.String("variation_B"),
+					},
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("variation_A"),
+				},
+			},
+			args: args{
+				flagName: "my-flag",
+				user:     ffuser.NewUserBuilder("user-key").Build(),
+				evaluationCtx: flag.EvaluationContext{
+					DefaultSdkValue: "value_default",
+				},
+			},
+			want: "value_A",
+			want1: flag.ResolutionDetails{
+				Variant:   "variation_A",
+				Reason:    flag.ReasonDefault,
+				Cacheable: true,
+			},
+		},
+		{
+			name: "Should return the reason STATIC if no rule and has default variation",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"variation_A": testconvert.Interface("value_A"),
+					"variation_B": testconvert.Interface("value_B"),
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("variation_A"),
+				},
+			},
+			args: args{
+				flagName: "my-flag",
+				user:     ffuser.NewUserBuilder("user-key").Build(),
+				evaluationCtx: flag.EvaluationContext{
+					DefaultSdkValue: "value_default",
+				},
+			},
+			want: "value_A",
+			want1: flag.ResolutionDetails{
+				Variant:   "variation_A",
+				Reason:    flag.ReasonStatic,
+				Cacheable: true,
+			},
+		},
+		{
+			name: "Should return the reason STATIC if no rule and has default percentage to 100%",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"variation_A": testconvert.Interface("value_A"),
+					"variation_B": testconvert.Interface("value_B"),
+				},
+				DefaultRule: &flag.Rule{
+					Percentages: &map[string]float64{
+						"variation_A": 100,
+						"variation_B": 0,
+					},
+				},
+			},
+			args: args{
+				flagName: "my-flag",
+				user:     ffuser.NewUserBuilder("user-key").Build(),
+				evaluationCtx: flag.EvaluationContext{
+					DefaultSdkValue: "value_default",
+				},
+			},
+			want: "value_A",
+			want1: flag.ResolutionDetails{
+				Variant:   "variation_A",
+				Reason:    flag.ReasonStatic,
+				Cacheable: true,
 			},
 		},
 	}
@@ -1120,6 +1365,34 @@ func TestInternalFlag_IsValid(t *testing.T) {
 			},
 			wantErr:  assert.Error,
 			errorMsg: "no variation available",
+		},
+		{
+			name: "different types in variation",
+			fields: fields{
+				Variations: &map[string]*interface{}{
+					"A": testconvert.Interface("A"),
+					"C": testconvert.Interface("C"),
+					"B": testconvert.Interface(120.1),
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("A"),
+				},
+			},
+			errorMsg: "all variations should have the same type",
+			wantErr:  assert.Error,
+		},
+		{
+			name: "different types in variation int/float should be ok",
+			fields: fields{
+				Variations: &map[string]*interface{}{
+					"A": testconvert.Interface(120),
+					"B": testconvert.Interface(120.1),
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("A"),
+				},
+			},
+			wantErr: assert.NoError,
 		},
 		{
 			name: "no default rule",
