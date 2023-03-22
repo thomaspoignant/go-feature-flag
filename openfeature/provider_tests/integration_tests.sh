@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# exit when any command fails
+set -e
+
+# build and launch relay proxy
+make vendor
 make build-relayproxy
 ./out/bin/relayproxy --config $(pwd)/openfeature/provider_tests/goff-proxy.yaml &
 
@@ -13,6 +18,9 @@ done
 
 # Launch java integration tests
 mvn -f $(pwd)/openfeature/provider_tests/java-integration-tests/pom.xml test
+
+# Launch js integration tests
+npm run test --prefix $(pwd)/openfeature/provider_tests/js-integration-tests/
 
 # Kill all process launched by the script (here the relay-proxy)
 kill -KILL %1
