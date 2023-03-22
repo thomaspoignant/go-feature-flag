@@ -65,7 +65,6 @@ jobs:
         uses: stCarolas/setup-maven@v4.5
         with:
           maven-version: 3.8.2
-          steps:
       - uses: actions/setup-node@v3
         with:
           node-version: 16
