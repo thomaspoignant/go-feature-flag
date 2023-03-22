@@ -20,6 +20,7 @@ done
 mvn -f $(pwd)/openfeature/provider_tests/java-integration-tests/pom.xml test
 
 # Launch js integration tests
+npm install --prefix $(pwd)/openfeature/provider_tests/js-integration-tests/
 npm run test --prefix $(pwd)/openfeature/provider_tests/js-integration-tests/
 
 # Kill all process launched by the script (here the relay-proxy)
