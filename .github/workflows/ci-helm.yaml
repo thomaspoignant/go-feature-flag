@@ -1,7 +1,8 @@
 name: Helm Lint and Test Charts
 on: pull_request
 jobs:
-  lint-test:
+  lint-helm-chart:
+    name: Lint Helm Chart
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
