@@ -33,6 +33,11 @@ spec:
             name: {{ include "relay-proxy.fullname" . }}
       containers:
         - name: {{ .Chart.Name }}
+          env:
+            {{- range $name, $item := .Values.env }}
+            - name: {{ $name }}
+              {{- $item | toYaml | nindent 14 }}
+            {{- end }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
