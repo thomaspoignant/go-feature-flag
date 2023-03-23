@@ -9,8 +9,9 @@ relayproxy:
     exporter:
       kind: log
 
-env: {} # Environment variables to pass to the relay proxy
-  ## Examples:
+# Environment variables to pass to the relay proxy
+env: {}
+  # Examples:
   # ENV_VARIABLE_EXAMPLE:
   #   value: my value
   #
