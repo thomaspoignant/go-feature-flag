@@ -9,6 +9,18 @@ relayproxy:
     exporter:
       kind: log
 
+# Environment variables to pass to the relay proxy
+env: {}
+  # Examples:
+  # ENV_VARIABLE_EXAMPLE:
+  #   value: my value
+  #
+  # ENV_VARIABLE_FROM_SECRET:
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name: my-secret-name
+  #       key: my-secret-key
+
 replicaCount: 1
 
 image:
