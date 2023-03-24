@@ -41,5 +41,6 @@ go mod tidy
 go test . -tags=integration
 cd "${CURRENT_FOLDER}"
 
+
 # Stop the relay proxy PID
 kill ${RELAY_PROXY_PID}
