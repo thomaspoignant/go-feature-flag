@@ -13,7 +13,6 @@ description: Relay proxy is the component that will evaluate the flags, this pag
 
 ## Install using Homebrew (mac and linux)
 ```shell
-brew tap thomaspoignant/homebrew-tap
 brew install go-feature-flag-relay-proxy
 ```
 

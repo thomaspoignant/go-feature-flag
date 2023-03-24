@@ -30,7 +30,6 @@ This can be useful if you want to use the same feature flags configuration file 
 ## Installation
 ### Install using Homebrew (mac and linux)
 ```shell
-brew tap thomaspoignant/homebrew-tap
 brew install go-feature-flag-relay-proxy
 ```
 
