@@ -16,7 +16,7 @@ jobs:
       - uses: mislav/bump-homebrew-formula-action@v2
         with:
           formula-name: go-feature-flag-relay-proxy
-          tag-name: v1.6.0
+          tag-name: "v1.6.0"
           download-url: https://github.com/${{ github.repository }}.git
           commit-message: |
             {{formulaName}} {{version}}
