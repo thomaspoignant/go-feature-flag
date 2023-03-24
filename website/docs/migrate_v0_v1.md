@@ -18,13 +18,13 @@ A command line is available to help you to convert your actual configuration fil
 ### Install using Homebrew (mac and linux)
 ```shell
 brew tap thomaspoignant/homebrew-tap
-brew install go-feature-flag-relay-proxy
+brew install go-feature-flag-migration-cli
 ```
  
 ### Install using Scoop (windows)
 ```shell
 scoop bucket add org https://github.com/thomaspoignant/scoop.git
-scoop install go-feature-flag-relay-proxy
+scoop install go-feature-flag-migration-cli
 ```
 
 ### Install using Docker
@@ -35,7 +35,7 @@ docker pull thomaspoignant/go-feature-flag-migration-cli:latest
 ## Use the migration command line
 
 ```shell
-./go-feature-flag-relay-proxy \
+./go-feature-flag-migration-cli \
   --input-format=yaml \
   --input-file=/config/my-go-feature-flag-config-v0.x.x.yaml \
   --output-format=yaml \
