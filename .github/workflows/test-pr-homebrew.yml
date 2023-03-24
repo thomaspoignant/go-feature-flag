@@ -20,6 +20,10 @@ jobs:
           download-url: https://github.com/${{ github.repository }}.git
           commit-message: |
             {{formulaName}} {{version}}
+            
+            Version `{{version}}` of the go-feature-flag-relay-proxy is available.
+            This PR bump the version in homebrew.
+            
             Created by https://github.com/mislav/bump-homebrew-formula-action
         env:
           COMMITTER_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
