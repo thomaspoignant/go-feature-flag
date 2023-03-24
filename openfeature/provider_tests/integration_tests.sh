@@ -7,6 +7,7 @@ set -e
 make vendor
 make build-relayproxy
 ./out/bin/relayproxy --config $(pwd)/openfeature/provider_tests/goff-proxy.yaml &
+RELAY_PROXY_PID=$!
 
 # Waiting for the relay proxy to be ready
 NB_ITERATION=10
@@ -40,5 +41,5 @@ go mod tidy
 go test . -tags=integration
 cd "${CURRENT_FOLDER}"
 
-# Kill all process launched by the script (here the relay-proxy)
-kill -KILL %1
+# Stop the relay proxy PID
+kill ${RELAY_PROXY_PID}
