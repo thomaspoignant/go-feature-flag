@@ -37,7 +37,7 @@ CURRENT_FOLDER=$(pwd)
 cd openfeature/provider_tests/go-integration-tests
 go mod vendor
 go mod tidy
-go test .
+go test . -tags=integration
 cd "${CURRENT_FOLDER}"
 
 # Kill all process launched by the script (here the relay-proxy)
