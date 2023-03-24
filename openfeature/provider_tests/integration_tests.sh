@@ -40,6 +40,5 @@ go mod tidy
 go test .
 cd "${CURRENT_FOLDER}"
 
-
 # Kill all process launched by the script (here the relay-proxy)
 kill -KILL %1
