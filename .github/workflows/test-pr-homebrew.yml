@@ -1,0 +1,25 @@
+name: "Brew"
+on:
+  pull_request:
+    types: [ opened, synchronize, reopened ]
+
+jobs:
+  homebrew:
+    name: Bump homebrew-core formula
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get tag name
+        uses: olegtarasov/get-tag@v2.1.2
+
+      - run: echo "${{ github.repository }}"
+        
+      - uses: mislav/bump-homebrew-formula-action@v2
+        with:
+          formula-name: go-feature-flag-relay-proxy
+          tag-name: v1.6.0
+          download-url: https://github.com/${{ github.repository }}.git
+          commit-message: |
+            {{formulaName}} {{version}}
+            Created by https://github.com/mislav/bump-homebrew-formula-action
+        env:
+          COMMITTER_TOKEN: ${{ secrets.COMMITTER_TOKEN }}
