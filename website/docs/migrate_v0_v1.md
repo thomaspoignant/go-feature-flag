@@ -17,7 +17,6 @@ A command line is available to help you to convert your actual configuration fil
 
 ### Install using Homebrew (mac and linux)
 ```shell
-brew tap thomaspoignant/homebrew-tap
 brew install go-feature-flag-relay-proxy
 ```
  
