@@ -13,26 +13,19 @@ jobs:
 
       - run: echo "${{ github.repository }}"
 
-#      - uses: mislav/bump-homebrew-formula-action@v2
-#        with:
-#          formula-name: go-feature-flag-relay-proxy
-#          tag-name: $GIT_TAG_NAME
-#          download-url: https://github.com/${{ github.repository }}.git
-#          commit-message: |
-#            {{formulaName}} {{version}}
-#
-#            Version `{{version}}` of the go-feature-flag-relay-proxy is available.
-#            This PR bump the version in homebrew.
-#
-#            Check https://gofeatureflag.org if you want to have more information about GO Feature Flag.
-#
-#            Created by https://github.com/mislav/bump-homebrew-formula-action
-#        env:
-#          COMMITTER_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
-      - name: Update Homebrew formula
-        uses: dawidd6/action-homebrew-bump-formula@v3
+      - uses: mislav/bump-homebrew-formula-action@v2
         with:
-          token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
-          formula: go-feature-flag-relay-proxy
-          # Optional, will be determined automatically
-          tag: "v1.6.0"
+          formula-name: go-feature-flag-relay-proxy
+          tag-name: $GIT_TAG_NAME
+          download-url: https://github.com/${{ github.repository }}.git
+          commit-message: |
+            {{formulaName}} {{version}}
+
+            Version `{{version}}` of the go-feature-flag-relay-proxy is available.
+            This PR bump the version in homebrew.
+
+            Check https://gofeatureflag.org if you want to have more information about GO Feature Flag.
+
+            Created by https://github.com/mislav/bump-homebrew-formula-action
+        env:
+          COMMITTER_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
