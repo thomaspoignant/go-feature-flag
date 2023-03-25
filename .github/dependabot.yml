@@ -10,6 +10,16 @@ updates:
       - "dependencies"
       - "automerge"
 
+  - package-ecosystem: npm
+    directory: "/website/"
+    schedule:
+      interval: weekly
+      time: "04:00"
+    open-pull-requests-limit: 30
+    labels:
+      - "dependencies"
+      - "automerge"
+
   - package-ecosystem: maven
     directory: "/openfeature/provider_tests/java-integration-tests"
     schedule:
