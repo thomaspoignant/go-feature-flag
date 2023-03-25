@@ -25,7 +25,7 @@
     "@mdx-js/react": "^1.6.22",
     "@uiw/react-textarea-code-editor": "^2.1.1",
     "clsx": "^1.2.1",
-    "core-js": "^3.26.0",
+    "core-js": "^3.29.1",
     "json2toml": "^4.0.1",
     "lodash": "^4.17.21",
     "mobx": "^6.9.0",
