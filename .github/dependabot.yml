@@ -18,7 +18,7 @@ updates:
     open-pull-requests-limit: 30
     labels:
       - "dependencies"
-      - "automerge"
+#       - "automerge"
 
   - package-ecosystem: maven
     directory: "/openfeature/provider_tests/java-integration-tests"
