@@ -23,7 +23,7 @@
     "@hookform/error-message": "^2.0.1",
     "@iarna/toml": "^2.2.5",
     "@mdx-js/react": "^1.6.22",
-    "@uiw/react-textarea-code-editor": "^2.0.6",
+    "@uiw/react-textarea-code-editor": "^2.1.1",
     "clsx": "^1.2.1",
     "core-js": "^3.26.0",
     "json2toml": "^4.0.1",
