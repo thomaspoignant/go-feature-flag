@@ -16,7 +16,7 @@
     "eslint:fix": "eslint \"**/*.js\" --fix"
   },
   "dependencies": {
-    "@docusaurus/core": "^2.3.1",
+    "@docusaurus/core": "^2.4.0",
     "@docusaurus/plugin-google-gtag": "^2.3.1",
     "@docusaurus/preset-classic": "^2.3.1",
     "@easyops-cn/docusaurus-search-local": "^0.33.6",
