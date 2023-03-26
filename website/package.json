@@ -18,7 +18,7 @@
   "dependencies": {
     "@docusaurus/core": "^2.4.0",
     "@docusaurus/plugin-google-gtag": "^2.4.0",
-    "@docusaurus/preset-classic": "^2.3.1",
+    "@docusaurus/preset-classic": "^2.4.0",
     "@easyops-cn/docusaurus-search-local": "^0.35.0",
     "@hookform/error-message": "^2.0.1",
     "@iarna/toml": "^2.2.5",
