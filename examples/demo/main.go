@@ -18,7 +18,7 @@ import (
 var users = make(map[string]ffuser.User, 2500)
 
 func main() {
-	configFile := flag.String("configFile", "./flags.yaml", "flags.yaml")
+	configFile := flag.String("configFile", "./demo-flags.yaml", "flags.yaml")
 	flag.Parse()
 
 	_ = ffclient.Init(ffclient.Config{
