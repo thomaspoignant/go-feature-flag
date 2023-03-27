@@ -19,9 +19,7 @@ export function Variations({type, label}) {
     rules: {minLength: 1},
   });
 
-  function removeVariation({ index }) {
-    remove(index);
-  }
+  const removeVariation = index => remove(index);
   const handleOnClick = () => append({});
 
   return (
