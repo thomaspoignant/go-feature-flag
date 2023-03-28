@@ -103,19 +103,48 @@ const config = {
         },
         items: [
           {
-            type: 'doc',
-            docId: 'index',
             position: 'left',
-            label: 'Docs',
+            label: 'Product',
+            items: [
+              {
+                to: 'https://github.com/sponsors/thomaspoignant',
+                label: 'What is the feature management?',
+              },
+              {
+                to: 'https://github.com/sponsors/thomaspoignant',
+                label: 'Why GO Feature Flag?',
+              },
+              {
+                to: 'https://github.com/sponsors/thomaspoignant',
+                label: 'Understand GO Feature Flag architecture',
+              },
+              {
+                to: 'https://github.com/sponsors/thomaspoignant',
+                label: 'Open Feature adoption',
+              }
+            ]
           },
+          {
+            position: 'left',
+            label: 'Developers',
+            items: [
+              {
+                to: 'https://github.com/sponsors/thomaspoignant',
+                label: 'Start using GO Feature Flag in 5 minutes',
+              },
+              {
+                to: 'https://github.com/sponsors/thomaspoignant',
+                label: 'Feature Flag Best practice',
+              },
+              {
+                to: 'https://github.com/sponsors/thomaspoignant',
+                label: 'Community',
+              }
+            ]
+          },
+          {type: 'doc', docId: 'index', position: 'left', label: 'Docs'},
           {to: '/blog', label: 'Blog', position: 'left'},
           {to: '/editor', html: 'Flag Editor', position: 'left'},
-          // {
-          //   type: 'doc',
-          //   docId:'migrate_v0_v1',
-          //   label: 'v1.x.x migration',
-          //   position: 'left'
-          // },
           {
             to: 'https://github.com/sponsors/thomaspoignant',
             label: 'Sponsor us ❤️',
