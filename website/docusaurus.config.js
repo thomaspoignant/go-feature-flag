@@ -111,42 +111,38 @@ const config = {
                 label: 'What is Feature Management?',
               },
               {
-                to: 'https://github.com/sponsors/thomaspoignant',
+                to: '/product/why_go_feature_flag',
                 label: 'Why GO Feature Flag?',
               },
-              {
-                to: 'https://github.com/sponsors/thomaspoignant',
-                label: 'Understand GO Feature Flag architecture',
-              },
-              {
-                to: 'https://github.com/sponsors/thomaspoignant',
-                label: 'Open Feature adoption',
-              }
-            ]
-          },
-          {
-            position: 'left',
-            label: 'Developers',
-            items: [
-              {
-                to: 'https://github.com/sponsors/thomaspoignant',
-                label: 'Start using GO Feature Flag in 5 minutes',
-              },
-              {
-                to: 'https://github.com/sponsors/thomaspoignant',
-                label: 'Feature Flag Best practice',
-              },
-              {label: 'Documentation', type: 'doc', docId: 'index'},
               // {
               //   to: 'https://github.com/sponsors/thomaspoignant',
-              //   html: 'Community <i class="fa fa-external-link" aria-hidden="true"></i>',
-              // },
-              {
-                to: 'https://github.com/thomaspoignant/go-feature-flag/releases',
-                html: 'Changelog <i class="fa fa-external-link" aria-hidden="true"></i>',
-              }
+              //   label: 'Open Feature adoption',
+              // }
             ]
           },
+          // {
+          //   position: 'left',
+          //   label: 'Developers',
+          //   items: [
+          //     {
+          //       to: 'https://github.com/sponsors/thomaspoignant',
+          //       label: 'Start using GO Feature Flag in 5 minutes',
+          //     },
+          //     {
+          //       to: 'https://github.com/sponsors/thomaspoignant',
+          //       label: 'Feature Flag Best practice',
+          //     },
+          //     {label: 'Documentation', type: 'doc', docId: 'index'},
+          //     // {
+          //     //   to: 'https://github.com/sponsors/thomaspoignant',
+          //     //   html: 'Community <i class="fa fa-external-link" aria-hidden="true"></i>',
+          //     // },
+          //     {
+          //       to: 'https://github.com/thomaspoignant/go-feature-flag/releases',
+          //       html: 'Changelog <i class="fa fa-external-link" aria-hidden="true"></i>',
+          //     }
+          //   ]
+          // },
           {type: 'doc', docId: 'index', position: 'left', label: 'Docs'},
           {to: '/blog', label: 'Blog', position: 'left'},
           {to: '/editor', label: 'Flag Editor', position: 'left'},
