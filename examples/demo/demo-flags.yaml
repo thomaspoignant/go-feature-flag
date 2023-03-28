@@ -1,0 +1,7 @@
+color-box:
+  percentage: 10
+  #  rule: key ew "9" # All the user with an ID starting with 9
+  #  rule: key eq "123e4567-e89b-12d3-a456-426614174000" # Target a specific id
+  true: green
+  false: red
+  default: grey
