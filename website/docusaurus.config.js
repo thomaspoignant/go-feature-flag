@@ -107,8 +107,8 @@ const config = {
             label: 'Product',
             items: [
               {
-                to: 'https://github.com/sponsors/thomaspoignant',
-                label: 'What is the feature management?',
+                to: '/product/what_is_feature_management',
+                label: 'What is Feature Management?',
               },
               {
                 to: 'https://github.com/sponsors/thomaspoignant',
@@ -137,19 +137,19 @@ const config = {
                 label: 'Feature Flag Best practice',
               },
               {label: 'Documentation', type: 'doc', docId: 'index'},
-              {
-                to: 'https://github.com/sponsors/thomaspoignant',
-                label: 'Community',
-              },
+              // {
+              //   to: 'https://github.com/sponsors/thomaspoignant',
+              //   html: 'Community <i class="fa fa-external-link" aria-hidden="true"></i>',
+              // },
               {
                 to: 'https://github.com/thomaspoignant/go-feature-flag/releases',
-                label: 'Changelog',
+                html: 'Changelog <i class="fa fa-external-link" aria-hidden="true"></i>',
               }
             ]
           },
           {type: 'doc', docId: 'index', position: 'left', label: 'Docs'},
           {to: '/blog', label: 'Blog', position: 'left'},
-          {to: '/editor', html: 'Flag Editor', position: 'left'},
+          {to: '/editor', label: 'Flag Editor', position: 'left'},
           {
             to: 'https://github.com/sponsors/thomaspoignant',
             label: 'Sponsor us ❤️',
