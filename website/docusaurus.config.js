@@ -120,29 +120,30 @@ const config = {
               }
             ]
           },
-          // {
-          //   position: 'left',
-          //   label: 'Developers',
-          //   items: [
-          //     {
-          //       to: 'https://github.com/sponsors/thomaspoignant',
-          //       label: 'Start using GO Feature Flag in 5 minutes',
-          //     },
-          //     {
-          //       to: 'https://github.com/sponsors/thomaspoignant',
-          //       label: 'Feature Flag Best practice',
-          //     },
-          //     {label: 'Documentation', type: 'doc', docId: 'index'},
-          //     // {
-          //     //   to: 'https://github.com/sponsors/thomaspoignant',
-          //     //   html: 'Community <i class="fa fa-external-link" aria-hidden="true"></i>',
-          //     // },
-          //     {
-          //       to: 'https://github.com/thomaspoignant/go-feature-flag/releases',
-          //       html: 'Changelog <i class="fa fa-external-link" aria-hidden="true"></i>',
-          //     }
-          //   ]
-          // },
+          {
+            position: 'left',
+            label: 'Developers',
+            items: [
+              {
+                to: '/docs/category/getting-started',
+                label: 'Getting Started',
+              },
+              {
+                to: '/docs/next/category/use-with-openfeature',
+                label: 'SDKs',
+              },
+              {label: 'Feature Flag Best Practices', to: '/developers/best_practice'},
+              {label: 'Documentation', type: 'doc', docId: 'index'},
+              {
+                to: 'https://gophers.slack.com/messages/go-feature-flag',
+                html: 'Community <i class="fa fa-external-link" aria-hidden="true"></i>',
+              },
+              {
+                to: 'https://github.com/thomaspoignant/go-feature-flag/releases',
+                html: 'Changelog <i class="fa fa-external-link" aria-hidden="true"></i>',
+              }
+            ]
+          },
           {type: 'doc', docId: 'index', position: 'left', label: 'Docs'},
           {to: '/blog', label: 'Blog', position: 'left'},
           {to: '/editor', label: 'Flag Editor', position: 'left'},
