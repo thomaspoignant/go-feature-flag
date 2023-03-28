@@ -79,7 +79,7 @@ func TestProvider_module_BooleanEvaluation(t *testing.T) {
 					FlagKey:  "disabled_bool",
 					FlagType: of.Boolean,
 					ResolutionDetail: of.ResolutionDetail{
-						Variant:      "defaultSdk",
+						Variant:      "SdkDefault",
 						Reason:       of.DisabledReason,
 						ErrorCode:    "",
 						ErrorMessage: "",
@@ -198,7 +198,7 @@ func TestProvider_module_StringEvaluation(t *testing.T) {
 					FlagKey:  "disabled_string",
 					FlagType: of.String,
 					ResolutionDetail: of.ResolutionDetail{
-						Variant:      "defaultSdk",
+						Variant:      "SdkDefault",
 						Reason:       of.DisabledReason,
 						ErrorCode:    "",
 						ErrorMessage: "",
@@ -317,7 +317,7 @@ func TestProvider_module_FloatEvaluation(t *testing.T) {
 					FlagKey:  "disabled_float",
 					FlagType: of.Float,
 					ResolutionDetail: of.ResolutionDetail{
-						Variant:      "defaultSdk",
+						Variant:      "SdkDefault",
 						Reason:       of.DisabledReason,
 						ErrorCode:    "",
 						ErrorMessage: "",
@@ -436,7 +436,7 @@ func TestProvider_module_IntEvaluation(t *testing.T) {
 					FlagKey:  "disabled_int",
 					FlagType: of.Int,
 					ResolutionDetail: of.ResolutionDetail{
-						Variant:      "defaultSdk",
+						Variant:      "SdkDefault",
 						Reason:       of.DisabledReason,
 						ErrorCode:    "",
 						ErrorMessage: "",
@@ -560,7 +560,7 @@ func TestProvider_module_ObjectEvaluation(t *testing.T) {
 					FlagKey:  "disabled_interface",
 					FlagType: of.Object,
 					ResolutionDetail: of.ResolutionDetail{
-						Variant:      "defaultSdk",
+						Variant:      "SdkDefault",
 						Reason:       of.DisabledReason,
 						ErrorCode:    "",
 						ErrorMessage: "",
