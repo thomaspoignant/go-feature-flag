@@ -1,0 +1,45 @@
+.title {
+    text-align: center;
+    font-size: 3rem;
+    color: var(--goff-main-subtitle-color);
+    text-transform: capitalize;
+}
+
+.subtitle {
+    text-align: center;
+    color: var(--goff-main-title-color);
+    margin: auto;
+    width: 70%;
+}
+.space1 {
+    height: 1rem;
+}
+.space3 {
+    height: 3rem;
+}
+.space5 {
+    height: 5rem;
+}
+
+.roundImg {
+    border-radius: 1rem;
+    max-width: 40rem;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.logo {
+    width: 1rem;
+}
+
+.openfeaturelogo svg{
+    max-width: 15rem;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.openfeaturelogo svg path {
+    fill: var(--goff-main-title-color);
+}

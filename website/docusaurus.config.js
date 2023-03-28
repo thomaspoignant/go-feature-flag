@@ -103,19 +103,49 @@ const config = {
         },
         items: [
           {
-            type: 'doc',
-            docId: 'index',
             position: 'left',
-            label: 'Docs',
+            label: 'Product',
+            items: [
+              {
+                to: '/product/what_is_feature_management',
+                label: 'What is Feature Management?',
+              },
+              {
+                to: '/product/why_go_feature_flag',
+                label: 'Why GO Feature Flag?',
+              },
+              {
+                to: '/product/open_feature_support',
+                label: 'Open Feature Support',
+              }
+            ]
           },
-          {to: '/blog', label: 'Blog', position: 'left'},
-          {to: '/editor', html: 'Flag Editor', position: 'left'},
           // {
-          //   type: 'doc',
-          //   docId:'migrate_v0_v1',
-          //   label: 'v1.x.x migration',
-          //   position: 'left'
+          //   position: 'left',
+          //   label: 'Developers',
+          //   items: [
+          //     {
+          //       to: 'https://github.com/sponsors/thomaspoignant',
+          //       label: 'Start using GO Feature Flag in 5 minutes',
+          //     },
+          //     {
+          //       to: 'https://github.com/sponsors/thomaspoignant',
+          //       label: 'Feature Flag Best practice',
+          //     },
+          //     {label: 'Documentation', type: 'doc', docId: 'index'},
+          //     // {
+          //     //   to: 'https://github.com/sponsors/thomaspoignant',
+          //     //   html: 'Community <i class="fa fa-external-link" aria-hidden="true"></i>',
+          //     // },
+          //     {
+          //       to: 'https://github.com/thomaspoignant/go-feature-flag/releases',
+          //       html: 'Changelog <i class="fa fa-external-link" aria-hidden="true"></i>',
+          //     }
+          //   ]
           // },
+          {type: 'doc', docId: 'index', position: 'left', label: 'Docs'},
+          {to: '/blog', label: 'Blog', position: 'left'},
+          {to: '/editor', label: 'Flag Editor', position: 'left'},
           {
             to: 'https://github.com/sponsors/thomaspoignant',
             label: 'Sponsor us ❤️',
