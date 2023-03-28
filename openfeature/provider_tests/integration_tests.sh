@@ -41,6 +41,11 @@ go mod tidy
 go test . -tags=integration
 cd "${CURRENT_FOLDER}"
 
+# Launch .NET integration test
+echo "------------------------------------------------------------------------------------------------"
+echo "------------- .NET PROVIDER TESTS --------------------------------------------------------------"
+echo "------------------------------------------------------------------------------------------------"
+dotnet test openfeature/provider_tests/dotnet-integration-tests
 
 # Stop the relay proxy PID
 kill ${RELAY_PROXY_PID}
