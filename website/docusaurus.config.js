@@ -136,9 +136,14 @@ const config = {
                 to: 'https://github.com/sponsors/thomaspoignant',
                 label: 'Feature Flag Best practice',
               },
+              {label: 'Documentation', type: 'doc', docId: 'index'},
               {
                 to: 'https://github.com/sponsors/thomaspoignant',
                 label: 'Community',
+              },
+              {
+                to: 'https://github.com/thomaspoignant/go-feature-flag/releases',
+                label: 'Changelog',
               }
             ]
           },
