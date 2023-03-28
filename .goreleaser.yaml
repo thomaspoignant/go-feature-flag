@@ -80,8 +80,7 @@ builds:
 
 archives:
   - id: go-feature-flag-migration-cli
-    name_template: "
-      go-feature-flag-migration-cli_\
+    name_template: "go-feature-flag-migration-cli_\
       {{ .Version }}_\
       {{- title .Os }}_\
       {{- if eq .Arch \"amd64\" }}x86_64\
@@ -93,8 +92,7 @@ archives:
     builds:
       - go-feature-flag-migration-cli
   - id: go-feature-flag-relay-proxy
-    name_template: "
-      go-feature-flag-relay-proxy_\
+    name_template: "go-feature-flag-relay-proxy_\
       {{ .Version }}_\
       {{- title .Os }}_\
       {{- if eq .Arch \"amd64\" }}x86_64\
@@ -106,8 +104,7 @@ archives:
     builds:
       - go-feature-flag-relay-proxy
   - id: go-feature-flag-lint
-    name_template: "
-      go-feature-flag-lint_\
+    name_template: "go-feature-flag-lint_\
       {{ .Version }}_\
       {{- title .Os }}_\
       {{- if eq .Arch \"amd64\" }}x86_64\
