@@ -114,10 +114,10 @@ const config = {
                 to: '/product/why_go_feature_flag',
                 label: 'Why GO Feature Flag?',
               },
-              // {
-              //   to: 'https://github.com/sponsors/thomaspoignant',
-              //   label: 'Open Feature adoption',
-              // }
+              {
+                to: '/product/open_feature_support',
+                label: 'Open Feature Support',
+              }
             ]
           },
           // {

@@ -32,3 +32,14 @@
 .logo {
     width: 1rem;
 }
+
+.openfeaturelogo svg{
+    max-width: 15rem;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.openfeaturelogo svg path {
+    fill: var(--goff-main-title-color);
+}
