@@ -5,7 +5,7 @@ go 1.18
 require (
 	cloud.google.com/go/storage v1.30.1
 	github.com/BurntSushi/toml v1.2.1
-	github.com/aws/aws-sdk-go v1.44.229
+	github.com/aws/aws-sdk-go v1.44.230
 	github.com/brpaz/echozap v1.1.3
 	github.com/fsouza/fake-gcs-server v1.44.1
 	github.com/gdexlab/go-render v1.0.1
@@ -21,8 +21,8 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.15.0
 	github.com/stretchr/testify v1.8.2
-	github.com/swaggo/echo-swagger v1.3.5
-	github.com/swaggo/swag v1.8.11
+	github.com/swaggo/echo-swagger v1.4.0
+	github.com/swaggo/swag v1.8.12
 	go.uber.org/zap v1.24.0
 	golang.org/x/net v0.8.0
 	golang.org/x/oauth2 v0.6.0
@@ -91,7 +91,7 @@ require (
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/subosito/gotenv v1.4.2 // indirect
-	github.com/swaggo/files v0.0.0-20220728132757-551d4a08d97a // indirect
+	github.com/swaggo/files/v2 v2.0.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.3.5 // indirect
@@ -106,7 +106,7 @@ require (
 	golang.org/x/term v0.6.0 // indirect
 	golang.org/x/text v0.8.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
-	golang.org/x/tools v0.6.0 // indirect
+	golang.org/x/tools v0.7.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20230320184635-7606e756e683 // indirect
