@@ -132,7 +132,7 @@ const config = {
                 to: '/docs/next/category/use-with-openfeature',
                 label: 'SDKs',
               },
-              {label: 'Feature Flag Best Practices', to: '/developers/best_practice'},
+              {label: 'Feature Flag Best Practice', to: '/blog/feature-flag-best-practice'},
               {label: 'Documentation', type: 'doc', docId: 'index'},
               {
                 to: 'https://gophers.slack.com/messages/go-feature-flag',
