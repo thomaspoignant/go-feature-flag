@@ -188,3 +188,7 @@ div[class^="announcementBar_"] {
   letter-spacing: -0.18rem;
   font-size: 3rem;
 }
+
+.menu-icon{
+  color: #73c6b6;
+}
