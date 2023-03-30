@@ -2,18 +2,19 @@ package api
 
 import (
 	"fmt"
-	"github.com/labstack/echo-contrib/prometheus"
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"time"
 
 	"github.com/brpaz/echozap"
+	"github.com/labstack/echo-contrib/prometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/controller"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/internal/apikey"
 	"go.uber.org/zap"
 )
 
@@ -40,6 +41,7 @@ type Server struct {
 	monitoringService service.Monitoring
 	goFF              *ffclient.GoFeatureFlag
 	zapLog            *zap.Logger
+	apiKeyStorage     apikey.Storage
 }
 
 // init initialize the configuration of our API server (using echo)
@@ -48,6 +50,8 @@ func (s *Server) init() {
 	s.echoInstance.HideBanner = true
 	s.echoInstance.HidePort = true
 	s.echoInstance.Debug = s.config.Debug
+
+	s.apiKeyStorage = apikey.NewStorage(s.config.AdminAPIKeys)
 
 	// Prometheus
 	metrics := metric.NewMetrics()
@@ -61,6 +65,26 @@ func (s *Server) init() {
 	s.echoInstance.Use(middleware.TimeoutWithConfig(
 		middleware.TimeoutConfig{Timeout: time.Duration(s.config.RestAPITimeout) * time.Millisecond}),
 	)
+	s.echoInstance.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
+		Skipper: func(c echo.Context) bool {
+			if !s.config.EnableAPIKeysAuthorization {
+				return true
+			}
+			skips := map[string]struct{}{
+				"/health":  {},
+				"/info":    {},
+				"/metrics": {},
+			}
+			_, ok := skips[c.Path()]
+			return ok
+		},
+		KeyLookup:  middleware.DefaultKeyAuthConfig.KeyLookup,
+		AuthScheme: middleware.DefaultKeyAuthConfig.AuthScheme,
+		Validator: func(key string, c echo.Context) (bool, error) {
+			_, ok := s.apiKeyStorage.Read(key)
+			return ok, nil
+		},
+	}))
 
 	// Init controllers
 	cHealth := controller.NewHealth(s.monitoringService)

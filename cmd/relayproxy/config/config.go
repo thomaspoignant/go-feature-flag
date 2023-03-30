@@ -1,13 +1,15 @@
 package config
 
 import (
+	"errors"
 	"fmt"
-	"github.com/spf13/pflag"
-	"github.com/spf13/viper"
-	"go.uber.org/zap"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
+	"go.uber.org/zap"
 )
 
 var DefaultRetriever = struct {
@@ -137,6 +139,12 @@ type Config struct {
 
 	// Version is the version of the relay-proxy
 	Version string
+
+	// EnableAPIKeysAuthorization when it's enabled will validate Authorization headers in request
+	EnableAPIKeysAuthorization bool `mapstructure:"enableAPIKeysAuthorization"`
+
+	// AdminAPIKeys list of API keys that authorized to use API key endpoints
+	AdminAPIKeys []string `mapstructure:"adminAPIKeys"`
 }
 
 // IsValid contains all the validation of the configuration.
@@ -175,6 +183,12 @@ func (c *Config) IsValid() error {
 			if err := notif.IsValid(); err != nil {
 				return err
 			}
+		}
+	}
+
+	if c.EnableAPIKeysAuthorization {
+		if len(c.AdminAPIKeys) == 0 {
+			return errors.New("there should be at least 1 admin")
 		}
 	}
 
