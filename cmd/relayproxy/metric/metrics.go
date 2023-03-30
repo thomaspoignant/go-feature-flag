@@ -24,13 +24,20 @@ func NewMetrics() *Metrics {
 			Type:        "counter_vec",
 			Args:        []string{},
 		},
+		collectEvalDataCounter: &prometheus.Metric{
+			Name:        "collect_eval_data_total",
+			Description: "Counter events for data collector.",
+			Type:        "counter_vec",
+			Args:        []string{},
+		},
 	}
 }
 
 // Metrics is a struct containing all custom prometheus metrics
 type Metrics struct {
-	flagEvaluationCounter *prometheus.Metric
-	allFlagCounter        *prometheus.Metric
+	flagEvaluationCounter  *prometheus.Metric
+	allFlagCounter         *prometheus.Metric
+	collectEvalDataCounter *prometheus.Metric
 }
 
 // MetricList return the available metrics
@@ -38,6 +45,7 @@ func (m *Metrics) MetricList() []*prometheus.Metric {
 	return []*prometheus.Metric{
 		m.flagEvaluationCounter,
 		m.allFlagCounter,
+		m.collectEvalDataCounter,
 	}
 }
 
@@ -59,4 +67,10 @@ func (m *Metrics) IncFlagEvaluation(flagName string) {
 func (m *Metrics) IncAllFlag() {
 	labels := prom.Labels{}
 	m.allFlagCounter.MetricCollector.(*prom.CounterVec).With(labels).Inc()
+}
+
+// IncCollectEvalData add new
+func (m *Metrics) IncCollectEvalData(numberEvents float64) {
+	labels := prom.Labels{}
+	m.collectEvalDataCounter.MetricCollector.(*prom.CounterVec).With(labels).Add(numberEvents)
 }
