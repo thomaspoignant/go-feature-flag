@@ -339,6 +339,14 @@ func (g *GoFeatureFlag) getFlagFromCache(flagKey string) (flag.Flag, error) {
 	return f, nil
 }
 
+// CollectEventData is collecting events and sending them to the data exporter to be stored.
+func (g *GoFeatureFlag) CollectEventData(event exporter.FeatureEvent) {
+	if g != nil && g.dataExporter != nil {
+		// Add event in the exporter
+		g.dataExporter.AddEvent(event)
+	}
+}
+
 // notifyVariation is logging the evaluation result for a flag
 // if no logger is provided in the configuration we are not logging anything.
 func notifyVariation[T model.JSONType](
@@ -349,11 +357,7 @@ func notifyVariation[T model.JSONType](
 ) {
 	if result.TrackEvents {
 		event := exporter.NewFeatureEvent(user, flagKey, result.Value, result.VariationType, result.Failed, result.Version)
-
-		// Add event in the exporter
-		if g != nil && g.dataExporter != nil {
-			g.dataExporter.AddEvent(event)
-		}
+		g.CollectEventData(event)
 	}
 }
 

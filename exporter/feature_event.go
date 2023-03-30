@@ -32,6 +32,7 @@ func NewFeatureEvent(
 	}
 }
 
+// FeatureEvent represent an event that we store in the data storage
 type FeatureEvent struct {
 	// Kind for a feature event is feature.
 	// A feature event will only be generated if the trackEvents attribute of the flag is set to true.

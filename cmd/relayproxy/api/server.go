@@ -67,6 +67,7 @@ func (s *Server) init() {
 	cInfo := controller.NewInfo(s.monitoringService)
 	cAllFlags := controller.NewAllFlags(s.goFF)
 	cFlagEval := controller.NewFlagEval(s.goFF)
+	cEvalDataCollector := controller.NewCollectEvalData(s.goFF)
 
 	// health Routes
 	s.echoInstance.GET("/health", cHealth.Handler)
@@ -81,6 +82,7 @@ func (s *Server) init() {
 	v1 := s.echoInstance.Group("/v1")
 	v1.POST("/allflags", cAllFlags.Handler)
 	v1.POST("/feature/:flagKey/eval", cFlagEval.Handler)
+	v1.POST("/data/collector", cEvalDataCollector.Handler)
 }
 
 // Start launch the API server
