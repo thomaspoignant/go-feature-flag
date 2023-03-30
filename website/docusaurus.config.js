@@ -108,15 +108,15 @@ const config = {
             items: [
               {
                 to: '/product/what_is_feature_management',
-                label: 'What is Feature Management?',
+                html: '<i class="fa-solid fa-list-check menu-icon"></i> What is Feature Management?',
               },
               {
                 to: '/product/why_go_feature_flag',
-                label: 'Why GO Feature Flag?',
+                html: '<i class="fa-solid fa-laptop-code menu-icon"></i> Why GO Feature Flag?',
               },
               {
                 to: '/product/open_feature_support',
-                label: 'Open Feature Support',
+                html: '<i class="fa-solid fa-toggle-on menu-icon"></i> Open Feature Support',
               }
             ]
           },
@@ -126,27 +126,34 @@ const config = {
             items: [
               {
                 to: '/docs/category/getting-started',
-                label: 'Getting Started',
+                html: '<i class="fa-solid fa-rocket menu-icon"></i> Getting Started',
               },
               {
                 to: '/docs/next/category/use-with-openfeature',
-                label: 'SDKs',
+                html: '<i class="fa-solid fa-code menu-icon"></i> SDKs',
               },
-              {label: 'Feature Flag Best Practice', to: '/blog/feature-flag-best-practice'},
-              {label: 'Documentation', type: 'doc', docId: 'index'},
+              {
+                html: '<i class="fa-solid fa-star menu-icon"></i> Feature Flag Best Practice',
+                to: '/blog/feature-flag-best-practice'
+              },
+              {
+                html: '<i class="fa-solid fa-book menu-icon"></i> Documentation',
+                type: 'doc',
+                docId: 'index'
+              },
               {
                 to: 'https://gophers.slack.com/messages/go-feature-flag',
-                html: 'Community <i class="fa fa-external-link" aria-hidden="true"></i>',
+                html: '<i class="fa-brands fa-slack menu-icon"></i> Community <i class="fa fa-external-link" aria-hidden="true"></i>',
               },
               {
                 to: 'https://github.com/thomaspoignant/go-feature-flag/releases',
-                html: 'Changelog <i class="fa fa-external-link" aria-hidden="true"></i>',
+                html: '<i class="fa-brands fa-github menu-icon"></i> Changelog <i class="fa fa-external-link" aria-hidden="true"></i>',
               }
             ]
           },
-          {type: 'doc', docId: 'index', position: 'left', label: 'Docs'},
+          {type: 'doc', docId: 'index', position: 'left', html: '<i class="fa-solid fa-book menu-icon"></i>  Docs'},
           {to: '/blog', label: 'Blog', position: 'left'},
-          {to: '/editor', label: 'Flag Editor', position: 'left'},
+          {to: '/editor', html: 'Flag Editor', position: 'left'},
           {
             to: 'https://github.com/sponsors/thomaspoignant',
             label: 'Sponsor us ❤️',
