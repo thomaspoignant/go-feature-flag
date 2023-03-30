@@ -4,7 +4,6 @@ import (
 	"github.com/labstack/echo/v4"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/model"
-	_ "github.com/thomaspoignant/go-feature-flag/exporter"
 	"net/http"
 )
 
