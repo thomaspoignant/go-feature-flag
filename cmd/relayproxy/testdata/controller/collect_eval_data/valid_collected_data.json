@@ -1,0 +1,1 @@
+{"kind":"feature","contextKind":"user","userKey":"94a25909-20d8-40cc-8500-fee99b569345","creationDate":1680246000011,"key":"my-feature-flag","variation":"admin-variation","value":"string","default":false,"version":"v1.0.0"}

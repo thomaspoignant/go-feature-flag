@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/labstack/echo/v4"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
@@ -35,9 +36,11 @@ func NewCollectEvalData(goFF *ffclient.GoFeatureFlag) Controller {
 func (h *collectEvalData) Handler(c echo.Context) error {
 	reqBody := new(model.CollectEvalDataRequest)
 	if err := c.Bind(reqBody); err != nil {
-		return err
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			fmt.Sprintf("collectEvalData: invalid input data %v", err))
 	}
-	if reqBody == nil && reqBody.Data != nil {
+	if reqBody == nil || reqBody.Data == nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "collectEvalData: invalid input data")
 	}
 
