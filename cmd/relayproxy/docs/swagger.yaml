@@ -6,28 +6,34 @@ definitions:
         description: |-
           ContextKind is the kind of context which generated an event. This will only be "anonymousUser" for events generated
           on behalf of an anonymous user or the reserved word "user" for events generated on behalf of a non-anonymous user
+        example: user
         type: string
       creationDate:
         description: CreationDate When the feature flag was requested at Unix epoch
           time in milliseconds.
+        example: 1680246000011
         type: integer
       default:
         description: |-
           Default value is set to true if feature flag evaluation failed, in which case the value returned was the default
           value passed to variation. If the default field is omitted, it is assumed to be false.
+        example: false
         type: boolean
       key:
         description: Key of the feature flag requested.
+        example: my-feature-flag
         type: string
       kind:
         description: |-
           Kind for a feature event is feature.
           A feature event will only be generated if the trackEvents attribute of the flag is set to true.
+        example: feature
         type: string
       userKey:
         description: |-
           UserKey The key of the user object used in a feature flag evaluation. Details for the user object used in a feature
           flag evaluation as reported by the "feature" event are transmitted periodically with a separate index event.
+        example: 94a25909-20d8-40cc-8500-fee99b569345
         type: string
       value:
         description: Value of the feature flag returned by feature flag evaluation.
@@ -36,11 +42,13 @@ definitions:
           Variation  of the flag requested. Flag variation values can be "True", "False", "Default" or "SdkDefault"
           depending on which value was taken during flag evaluation. "SdkDefault" is used when an error is detected and the
           default value passed during the call to your variation is used.
+        example: admin-variation
         type: string
       version:
         description: |-
           Version contains the version of the flag. If the field is omitted for the flag in the configuration file
           the default version will be 0.
+        example: v1.0.0
         type: string
     type: object
   model.AllFlagRequest:
