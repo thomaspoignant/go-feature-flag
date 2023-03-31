@@ -73,6 +73,12 @@
   --goff-editor-input-text: #f1f1f1;
 }
 
+
+.menu__link {
+  font-weight: normal;
+  font-size: 0.95rem;
+}
+
 body {
   font-family: poppins, sans-serif;
 }
