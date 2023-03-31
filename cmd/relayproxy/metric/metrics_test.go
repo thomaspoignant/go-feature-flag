@@ -23,11 +23,18 @@ func TestNewMetrics(t *testing.T) {
 	assert.Equal(t, "all_flag_evaluations_total", metrics.allFlagCounter.Name, "Unexpected all flag counter name")
 	assert.Equal(t, "counter_vec", metrics.allFlagCounter.Type, "Unexpected all flag counter type")
 
+	// Ensure that the data collector counter has the expected name and type
+	assert.Equal(t, "collect_eval_data_total", metrics.collectEvalDataCounter.Name, "Unexpected collect eval data counter name")
+	assert.Equal(t, "counter_vec", metrics.collectEvalDataCounter.Type, "Unexpected all flag counter type")
+
 	// Ensure that the flag evaluation counter has the expected argument label
 	assert.Equal(t, []string{"flag_name"}, metrics.flagEvaluationCounter.Args, "Unexpected flag evaluation counter argument label")
 
 	// Ensure that the all flag counter has no argument labels
 	assert.Equal(t, []string{}, metrics.allFlagCounter.Args, "Unexpected all flag counter argument labels")
+
+	// Ensure that the collect eval data counter has no argument labels
+	assert.Equal(t, []string{}, metrics.collectEvalDataCounter.Args, "Unexpected all flag counter argument labels")
 }
 
 // Test that MetricList returns all of the available metrics
@@ -38,6 +45,7 @@ func TestMetricList(t *testing.T) {
 	expectedMetrics := []*prometheus.Metric{
 		metrics.flagEvaluationCounter,
 		metrics.allFlagCounter,
+		metrics.collectEvalDataCounter,
 	}
 	assert.ElementsMatch(t, expectedMetrics, metrics.MetricList(), "Unexpected metrics returned by MetricList")
 }
@@ -60,6 +68,7 @@ func TestAddCustomMetricsMiddleware(t *testing.T) {
 		metrics.IncAllFlag()
 		metrics.IncFlagEvaluation("name")
 		metrics.IncFlagEvaluation("name")
+		metrics.IncCollectEvalData(float64(64))
 		return c.NoContent(200)
 	}
 
@@ -70,6 +79,8 @@ func TestAddCustomMetricsMiddleware(t *testing.T) {
 	expectedLabels := prom.Labels{"flag_name": "name"}
 	gotFlagEvaluation := testutil.ToFloat64(metrics.flagEvaluationCounter.MetricCollector.(*prom.CounterVec).With(expectedLabels))
 	gotAllFlag := testutil.ToFloat64(metrics.allFlagCounter.MetricCollector.(*prom.CounterVec))
+	gotCollectFlagData := testutil.ToFloat64(metrics.collectEvalDataCounter.MetricCollector.(*prom.CounterVec))
 	assert.Equal(t, float64(2), gotFlagEvaluation, "Unexpected flag evaluation count")
 	assert.Equal(t, float64(1), gotAllFlag, "Unexpected all flag count")
+	assert.Equal(t, float64(64), gotCollectFlagData, "Unexpected collect eval data count")
 }

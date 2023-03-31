@@ -59,7 +59,7 @@ serve-doc: ## Serve the doc build by the build-doc target
 
 swagger: ## Build swagger documentation
 	$(GOCMD) install github.com/swaggo/swag/cmd/swag@latest
-	cd cmd/relayproxy && swag init --markdownFiles docs
+	cd cmd/relayproxy && swag init --parseDependency --parseDepth=1 --parseInternal --markdownFiles docs
 
 ## Test:
 test: ## Run the tests of the project

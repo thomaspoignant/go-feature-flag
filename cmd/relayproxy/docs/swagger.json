@@ -112,6 +112,49 @@
                 }
             }
         },
+        "/v1/data/collector": {
+            "post": {
+                "description": "This endpoint is receiving the events of your flags usage to send them in the data collector.\n\nIt is used by the different Open Feature providers to send in bulk all the cached events to avoid\nto lose track of what happen when a cached flag is used.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Endpoint to send usage of your flags to be collected",
+                "parameters": [
+                    {
+                        "description": "List of flag evaluation that be passed to the data exporter",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.CollectEvalDataRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/model.CollectEvalDataResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/feature/{flag_key}/eval": {
             "post": {
                 "description": "Making a **POST** request to the URL `/v1/feature/\u003cyour_flag_name\u003e/eval` will give you the value of the\nflag for this user.\n\nTo get a variation you should provide information about the user:\n- User information in JSON in the request body.\n- A default value in case there is an error while evaluating the flag.\n\nNote that you will always have a usable value in the response, you can use the field `failed` to know if\nan issue has occurred during the validation of the flag, in that case the value returned will be the\ndefault value.",
@@ -164,6 +207,54 @@
         }
     },
     "definitions": {
+        "exporter.FeatureEvent": {
+            "type": "object",
+            "properties": {
+                "contextKind": {
+                    "description": "ContextKind is the kind of context which generated an event. This will only be \"anonymousUser\" for events generated\non behalf of an anonymous user or the reserved word \"user\" for events generated on behalf of a non-anonymous user",
+                    "type": "string",
+                    "example": "user"
+                },
+                "creationDate": {
+                    "description": "CreationDate When the feature flag was requested at Unix epoch time in milliseconds.",
+                    "type": "integer",
+                    "example": 1680246000011
+                },
+                "default": {
+                    "description": "Default value is set to true if feature flag evaluation failed, in which case the value returned was the default\nvalue passed to variation. If the default field is omitted, it is assumed to be false.",
+                    "type": "boolean",
+                    "example": false
+                },
+                "key": {
+                    "description": "Key of the feature flag requested.",
+                    "type": "string",
+                    "example": "my-feature-flag"
+                },
+                "kind": {
+                    "description": "Kind for a feature event is feature.\nA feature event will only be generated if the trackEvents attribute of the flag is set to true.",
+                    "type": "string",
+                    "example": "feature"
+                },
+                "userKey": {
+                    "description": "UserKey The key of the user object used in a feature flag evaluation. Details for the user object used in a feature\nflag evaluation as reported by the \"feature\" event are transmitted periodically with a separate index event.",
+                    "type": "string",
+                    "example": "94a25909-20d8-40cc-8500-fee99b569345"
+                },
+                "value": {
+                    "description": "Value of the feature flag returned by feature flag evaluation."
+                },
+                "variation": {
+                    "description": "Variation  of the flag requested. Flag variation values can be \"True\", \"False\", \"Default\" or \"SdkDefault\"\ndepending on which value was taken during flag evaluation. \"SdkDefault\" is used when an error is detected and the\ndefault value passed during the call to your variation is used.",
+                    "type": "string",
+                    "example": "admin-variation"
+                },
+                "version": {
+                    "description": "Version contains the version of the flag. If the field is omitted for the flag in the configuration file\nthe default version will be 0.",
+                    "type": "string",
+                    "example": "v1.0.0"
+                }
+            }
+        },
         "model.AllFlagRequest": {
             "type": "object",
             "properties": {
@@ -174,6 +265,27 @@
                             "$ref": "#/definitions/model.UserRequest"
                         }
                     ]
+                }
+            }
+        },
+        "model.CollectEvalDataRequest": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "Data contains the list of feature event that we want to store",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/exporter.FeatureEvent"
+                    }
+                }
+            }
+        },
+        "model.CollectEvalDataResponse": {
+            "type": "object",
+            "properties": {
+                "ingestedContentCount": {
+                    "description": "IngestedContentCount number of model.FeatureEvents that have been sent to the data exporter",
+                    "type": "integer"
                 }
             }
         },

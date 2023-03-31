@@ -1,0 +1,14 @@
+{
+  "data": [
+    {
+      "contextKind": "user",
+      "creationDate": 1680246000011,
+      "default": false,
+      "key": "my-feature-flag",
+      "kind": "feature",
+      "userKey": "94a25909-20d8-40cc-8500-fee99b569345",
+      "value": "string",
+      "variation": "admin-variation",
+      "version": "v1.0.0"
+    }
+}
