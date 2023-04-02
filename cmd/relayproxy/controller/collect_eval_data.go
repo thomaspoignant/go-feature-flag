@@ -2,11 +2,12 @@ package controller
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/labstack/echo/v4"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/model"
-	"net/http"
 )
 
 type collectEvalData struct {
@@ -26,6 +27,7 @@ func NewCollectEvalData(goFF *ffclient.GoFeatureFlag) Controller {
 // @Description
 // @Description  It is used by the different Open Feature providers to send in bulk all the cached events to avoid
 // @Description  to lose track of what happen when a cached flag is used.
+// @Security     ApiKeyAuth
 // @Produce      json
 // @Accept		 json
 // @Param 		 data body model.CollectEvalDataRequest true "List of flag evaluation that be passed to the data exporter"

@@ -29,6 +29,11 @@ const docTemplate = `{
     "paths": {
         "/health": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Making a **GET** request to the URL path ` + "`" + `/health` + "`" + ` will tell you if the relay proxy is ready to serve\ntraffic.\n\nThis is useful especially for loadbalancer to know that they can send traffic to the service.",
                 "produces": [
                     "application/json"
@@ -450,6 +455,14 @@ const docTemplate = `{
                     "example": "An error occurred"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "description": "Use configured APIKeys in yaml config as authorization keys, disabled when this yaml config is not set.",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`

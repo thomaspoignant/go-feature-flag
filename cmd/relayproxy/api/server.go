@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/brpaz/echozap"
@@ -68,7 +69,8 @@ func (s *Server) init() {
 					"/health":  true,
 					"/info":    true,
 					"/metrics": true,
-				}[c.Path()]
+				}[c.Path()] ||
+					strings.HasPrefix(c.Path(), "/swagger/")
 			},
 			Validator: func(key string, c echo.Context) (bool, error) {
 				return s.config.APIKeys[key], nil

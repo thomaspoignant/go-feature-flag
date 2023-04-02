@@ -219,6 +219,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.HealthResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Health
   /info:
     get:
@@ -356,4 +358,11 @@ paths:
           schema:
             $ref: '#/definitions/modeldocs.HTTPErrorDoc'
       summary: Evaluate a feature flag
+securityDefinitions:
+  ApiKeyAuth:
+    description: Use configured APIKeys in yaml config as authorization keys, disabled
+      when this yaml config is not set.
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

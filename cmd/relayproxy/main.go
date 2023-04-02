@@ -34,6 +34,11 @@ _____________________________________________`
 // @license.url https://github.com/thomaspoignant/go-feature-flag/blob/main/LICENSE
 // @x-logo {"url":"https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png"}
 // @BasePath /
+
+// @securitydefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+// @description Use configured APIKeys in yaml config as authorization keys, disabled when this yaml config is not set.
 func main() {
 	// Init pFlag for config file
 	flag.String("config", "", "Location of your config file")

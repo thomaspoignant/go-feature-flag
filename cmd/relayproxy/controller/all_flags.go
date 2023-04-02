@@ -1,11 +1,11 @@
 package controller
 
 import (
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/model"
 )
 
@@ -26,6 +26,7 @@ func NewAllFlags(goFF *ffclient.GoFeatureFlag) Controller {
 // @Description
 // @Description To get a variation you should provide information about the user.
 // @Description For that you should provide some user information in JSON in the request body.
+// @Security     ApiKeyAuth
 // @Produce      json
 // @Accept			 json
 // @Param 			 data body model.AllFlagRequest true "Payload of the user we want to challenge against the flag."
