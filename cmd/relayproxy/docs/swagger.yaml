@@ -219,8 +219,6 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.HealthResponse'
-      security:
-      - ApiKeyAuth: []
       summary: Health
   /info:
     get:
@@ -282,6 +280,8 @@ paths:
           description: Internal server error
           schema:
             $ref: '#/definitions/modeldocs.HTTPErrorDoc'
+      security:
+      - ApiKeyAuth: []
       summary: All flags variations for a user
   /v1/data/collector:
     post:
@@ -314,6 +314,8 @@ paths:
           description: Internal server error
           schema:
             $ref: '#/definitions/modeldocs.HTTPErrorDoc'
+      security:
+      - ApiKeyAuth: []
       summary: Endpoint to send usage of your flags to be collected
   /v1/feature/{flag_key}/eval:
     post:
@@ -357,6 +359,8 @@ paths:
           description: Internal server error
           schema:
             $ref: '#/definitions/modeldocs.HTTPErrorDoc'
+      security:
+      - ApiKeyAuth: []
       summary: Evaluate a feature flag
 securityDefinitions:
   ApiKeyAuth:
