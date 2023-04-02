@@ -16,6 +16,7 @@ The configuration of the **relay proxy** is based on a configuration file that y
 | `startWithRetrieverError` | boolean                 | `false`     | By default the **relay proxy** will crash if he is not able to retrieve the flags from the configuration.<br>If you don't want your relay proxy to crash, you can set `startWithRetrieverError` to true. Until the flag is retrievable the relay proxy will only answer with default values. |
 | `exporter`                | [exporter](#exporter)   | **none**    | Exporter is the configuration on how to export data.                                                                                                                                                                                                                                         |
 | `notifier`                | [notifier](#notifier)   | **none**    | Notifiers is the configuration on where to notify a flag change.                                                                                                                                                                                                                             |
+| `apiKeys` | map[string]bool | **none** | List of authorized API keys. Each request will need to provide one of authorized key inside `Authorization` header with `Bearer` prefix. There will be no authorization when this config is not configured |
 
 
 <a name="retriever"></a>
