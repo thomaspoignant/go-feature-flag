@@ -61,19 +61,20 @@ func (s *Server) init() {
 	s.echoInstance.Use(middleware.TimeoutWithConfig(
 		middleware.TimeoutConfig{Timeout: time.Duration(s.config.RestAPITimeout) * time.Millisecond}),
 	)
-	s.echoInstance.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
-		Skipper: func(c echo.Context) bool {
-			return len(s.config.APIKeys) == 0 || // skip when no APIKeys configured
-				map[string]bool{
+	if len(s.config.APIKeys) > 0 {
+		s.echoInstance.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
+			Skipper: func(c echo.Context) bool {
+				return map[string]bool{
 					"/health":  true,
 					"/info":    true,
 					"/metrics": true,
 				}[c.Path()]
-		},
-		Validator: func(key string, c echo.Context) (bool, error) {
-			return s.config.APIKeys[key], nil
-		},
-	}))
+			},
+			Validator: func(key string, c echo.Context) (bool, error) {
+				return s.config.APIKeys[key], nil
+			},
+		}))
+	}
 
 	// Init controllers
 	cHealth := controller.NewHealth(s.monitoringService)
