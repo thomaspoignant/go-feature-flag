@@ -14,7 +14,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/controller"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
-	"github.com/thomaspoignant/go-feature-flag/internal/apikey"
 	"go.uber.org/zap"
 )
 
@@ -41,7 +40,6 @@ type Server struct {
 	monitoringService service.Monitoring
 	goFF              *ffclient.GoFeatureFlag
 	zapLog            *zap.Logger
-	apiKeyStorage     apikey.Storage
 }
 
 // init initialize the configuration of our API server (using echo)
@@ -50,8 +48,6 @@ func (s *Server) init() {
 	s.echoInstance.HideBanner = true
 	s.echoInstance.HidePort = true
 	s.echoInstance.Debug = s.config.Debug
-
-	s.apiKeyStorage = apikey.NewStorage(s.config.AdminAPIKeys)
 
 	// Prometheus
 	metrics := metric.NewMetrics()
@@ -67,22 +63,15 @@ func (s *Server) init() {
 	)
 	s.echoInstance.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
 		Skipper: func(c echo.Context) bool {
-			if !s.config.EnableAPIKeysAuthorization {
-				return true
-			}
-			skips := map[string]struct{}{
-				"/health":  {},
-				"/info":    {},
-				"/metrics": {},
-			}
-			_, ok := skips[c.Path()]
-			return ok
+			return len(s.config.APIKeys) == 0 || // skip when no APIKeys configured
+				map[string]bool{
+					"/health":  true,
+					"/info":    true,
+					"/metrics": true,
+				}[c.Path()]
 		},
-		KeyLookup:  middleware.DefaultKeyAuthConfig.KeyLookup,
-		AuthScheme: middleware.DefaultKeyAuthConfig.AuthScheme,
 		Validator: func(key string, c echo.Context) (bool, error) {
-			_, ok := s.apiKeyStorage.Read(key)
-			return ok, nil
+			return s.config.APIKeys[key], nil
 		},
 	}))
 
