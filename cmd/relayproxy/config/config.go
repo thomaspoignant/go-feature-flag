@@ -140,7 +140,7 @@ type Config struct {
 	Version string
 
 	// APIKeys list of API keys that authorized to use endpoints
-	APIKeys map[string]bool `mapstructure:"apiKeys"`
+	APIKeys []string `mapstructure:"apiKeys"`
 }
 
 // IsValid contains all the validation of the configuration.

@@ -65,15 +65,20 @@ func (s *Server) init() {
 	if len(s.config.APIKeys) > 0 {
 		s.echoInstance.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
 			Skipper: func(c echo.Context) bool {
-				return map[string]bool{
-					"/health":  true,
-					"/info":    true,
-					"/metrics": true,
-				}[c.Path()] ||
-					strings.HasPrefix(c.Path(), "/swagger/")
+				_, ok := map[string]struct{}{
+					"/health":  {},
+					"/info":    {},
+					"/metrics": {},
+				}[c.Path()]
+				return ok || strings.HasPrefix(c.Path(), "/swagger/")
 			},
 			Validator: func(key string, c echo.Context) (bool, error) {
-				return s.config.APIKeys[key], nil
+				for _, k := range s.config.APIKeys {
+					if k == key {
+						return true, nil
+					}
+				}
+				return false, nil
 			},
 		}))
 	}

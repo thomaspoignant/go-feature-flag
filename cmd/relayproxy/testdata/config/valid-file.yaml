@@ -8,5 +8,5 @@ exporter:
   kind: log
 enableSwagger: true
 apiKeys:
-  apikey1: true
-  apikey2: true
+  - apikey1 # owner: userID1
+  - apikey2 # owner: userID2

@@ -77,12 +77,12 @@ But if you don't provide this option, the relay proxy will look in these folders
 - `/goff/`
 - `/etc/opt/goff/`
 
-To learn how to configure the relay proxy, read [Configuration](docs/configuration.md).
+To learn how to configure the relay proxy, read [Configuration](https://gofeatureflag.org/docs/relay_proxy/configure_relay_proxy).
 
 ## Exporting metrics and traces
 
 To export the data you can use all the capabilities of `go-feature-flag` SDK.  
-To configure it please refer to the [type `exporter` section](docs/configuration.md#exporter) of the configuration.
+To configure it please refer to the [type `exporter` section](https://gofeatureflag.org/docs/relay_proxy/configure_relay_proxy#exporter) of the configuration.
 
 
 ## Service endpoints
