@@ -141,6 +141,26 @@ type Config struct {
 
 	// APIKeys list of API keys that authorized to use endpoints
 	APIKeys []string `mapstructure:"apiKeys"`
+
+	// ---- private fields
+
+	// apiKeySet is the internal representation of the list of api keys configured
+	// we store them in a set to be
+	apiKeysSet map[string]interface{}
+}
+
+// APIKeyExists is checking if an API Key exist in the relay proxy configuration
+func (c *Config) APIKeyExists(apiKey string) bool {
+	if c.apiKeysSet == nil {
+		apiKeySet := make(map[string]interface{})
+		for _, currentAPIKey := range c.APIKeys {
+			apiKeySet[currentAPIKey] = new(interface{})
+		}
+		c.apiKeysSet = apiKeySet
+	}
+
+	_, ok := c.apiKeysSet[apiKey]
+	return ok
 }
 
 // IsValid contains all the validation of the configuration.
