@@ -129,7 +129,7 @@ const config = {
                 html: '<i class="fa-solid fa-rocket menu-icon"></i> Getting Started',
               },
               {
-                to: '/docs/next/category/use-with-openfeature',
+                to: '/docs/category/use-with-openfeature',
                 html: '<i class="fa-solid fa-code menu-icon"></i> SDKs',
               },
               {
