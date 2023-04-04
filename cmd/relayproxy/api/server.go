@@ -2,17 +2,18 @@ package api
 
 import (
 	"fmt"
-	"github.com/labstack/echo-contrib/prometheus"
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
+	"strings"
 	"time"
 
 	"github.com/brpaz/echozap"
+	"github.com/labstack/echo-contrib/prometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/controller"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"go.uber.org/zap"
 )
@@ -61,6 +62,26 @@ func (s *Server) init() {
 	s.echoInstance.Use(middleware.TimeoutWithConfig(
 		middleware.TimeoutConfig{Timeout: time.Duration(s.config.RestAPITimeout) * time.Millisecond}),
 	)
+	if len(s.config.APIKeys) > 0 {
+		s.echoInstance.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
+			Skipper: func(c echo.Context) bool {
+				_, ok := map[string]struct{}{
+					"/health":  {},
+					"/info":    {},
+					"/metrics": {},
+				}[c.Path()]
+				return ok || strings.HasPrefix(c.Path(), "/swagger/")
+			},
+			Validator: func(key string, c echo.Context) (bool, error) {
+				for _, k := range s.config.APIKeys {
+					if k == key {
+						return true, nil
+					}
+				}
+				return false, nil
+			},
+		}))
+	}
 
 	// Init controllers
 	cHealth := controller.NewHealth(s.monitoringService)

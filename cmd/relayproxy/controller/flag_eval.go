@@ -2,11 +2,11 @@ package controller
 
 import (
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/model"
 )
 
@@ -32,6 +32,7 @@ func NewFlagEval(goFF *ffclient.GoFeatureFlag) Controller {
 // @Description Note that you will always have a usable value in the response, you can use the field `failed` to know if
 // @Description an issue has occurred during the validation of the flag, in that case the value returned will be the
 // @Description default value.
+// @Security     ApiKeyAuth
 // @Produce      json
 // @Accept			 json
 // @Param 			 data body model.EvalFlagRequest true "Payload of the user we want to get all the flags from."

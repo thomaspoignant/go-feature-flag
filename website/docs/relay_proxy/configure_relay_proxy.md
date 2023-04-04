@@ -31,6 +31,7 @@ If you want to replace a nested fields, please use `_` to separate each field _(
 | `startWithRetrieverError` | boolean                   | `false`     | By default the **relay proxy** will crash if he is not able to retrieve the flags from the configuration.<br/>If you don't want your relay proxy to crash, you can set `startWithRetrieverError` to true. Until the flag is retrievable the relay proxy will only answer with default values. |
 | `exporter`                | [exporter](#exporter)     | **none**    | Exporter is the configuration on how to export data.                                                                                                                                                                                                                                          |
 | `notifier`                | [notifier](#notifier)     | **none**    | Notifiers is the configuration on where to notify a flag change.                                                                                                                                                                                                                              |
+| `apiKeys` | []string | **none** | List of authorized API keys. Each request will need to provide one of authorized key inside `Authorization` header with format `Bearer <api-key>`. There will be no authorization when this config is not configured.<br /><br />_Note: there will be no authorization when this config is not set._ |
 
 
 <a name="retriever"></a>

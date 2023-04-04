@@ -71,6 +71,11 @@
         },
         "/v1/allflags": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Making a **POST** request to the URL `/v1/allflags` will give you the values of all the flags for\nthis user.\n\nTo get a variation you should provide information about the user.\nFor that you should provide some user information in JSON in the request body.",
                 "consumes": [
                     "application/json"
@@ -114,6 +119,11 @@
         },
         "/v1/data/collector": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "This endpoint is receiving the events of your flags usage to send them in the data collector.\n\nIt is used by the different Open Feature providers to send in bulk all the cached events to avoid\nto lose track of what happen when a cached flag is used.",
                 "consumes": [
                     "application/json"
@@ -157,6 +167,11 @@
         },
         "/v1/feature/{flag_key}/eval": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Making a **POST** request to the URL `/v1/feature/\u003cyour_flag_name\u003e/eval` will give you the value of the\nflag for this user.\n\nTo get a variation you should provide information about the user:\n- User information in JSON in the request body.\n- A default value in case there is an error while evaluating the flag.\n\nNote that you will always have a usable value in the response, you can use the field `failed` to know if\nan issue has occurred during the validation of the flag, in that case the value returned will be the\ndefault value.",
                 "consumes": [
                     "application/json"
@@ -441,6 +456,14 @@
                     "example": "An error occurred"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "description": "Use configured APIKeys in yaml config as authorization keys, disabled when this yaml config is not set.",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }

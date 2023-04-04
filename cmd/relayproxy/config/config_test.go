@@ -37,6 +37,10 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 				RestAPITimeout:          5000,
 				Version:                 "1.X.X",
 				EnableSwagger:           true,
+				APIKeys: []string{
+					"apikey1",
+					"apikey2",
+				},
 			},
 			wantErr: assert.NoError,
 		},
@@ -104,6 +108,10 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 				RestAPITimeout:          5000,
 				Version:                 "1.X.X",
 				EnableSwagger:           true,
+				APIKeys: []string{
+					"apikey1",
+					"apikey2",
+				},
 			},
 			wantErr: assert.NoError,
 		},

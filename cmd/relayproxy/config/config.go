@@ -2,12 +2,13 @@ package config
 
 import (
 	"fmt"
-	"github.com/spf13/pflag"
-	"github.com/spf13/viper"
-	"go.uber.org/zap"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
+	"go.uber.org/zap"
 )
 
 var DefaultRetriever = struct {
@@ -137,6 +138,9 @@ type Config struct {
 
 	// Version is the version of the relay-proxy
 	Version string
+
+	// APIKeys list of API keys that authorized to use endpoints
+	APIKeys []string `mapstructure:"apiKeys"`
 }
 
 // IsValid contains all the validation of the configuration.
