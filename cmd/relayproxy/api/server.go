@@ -73,12 +73,7 @@ func (s *Server) init() {
 				return ok || strings.HasPrefix(c.Path(), "/swagger/")
 			},
 			Validator: func(key string, c echo.Context) (bool, error) {
-				for _, k := range s.config.APIKeys {
-					if k == key {
-						return true, nil
-					}
-				}
-				return false, nil
+				return s.config.APIKeyExists(key), nil
 			},
 		}))
 	}
