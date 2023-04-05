@@ -308,3 +308,82 @@ func TestConfig_IsValid(t *testing.T) {
 		})
 	}
 }
+
+func TestConfig_APIKeyExists(t *testing.T) {
+	tests := []struct {
+		name   string
+		config config.Config
+		apiKey string
+		want   bool
+	}{
+		{
+			name: "no key in the config",
+			config: config.Config{
+				APIKeys: []string{},
+			},
+			apiKey: "49b67ab9-20fc-42ac-ac53-b36e29834c7",
+			want:   false,
+		},
+		{
+			name:   "key exists in a list of keys",
+			apiKey: "49b67ab9-20fc-42ac-ac53-b36e29834c7",
+			config: config.Config{
+				APIKeys: []string{
+					"0359cdb3-5fb5-4d65-b25f-b8909ec3c44",
+					"fb124cf9-e058-4f34-8385-ad225ff85a3",
+					"d05087dd-efff-4144-b9a6-89476a14695",
+					"5082a8df-cc67-48b4-aca4-26ce1425645",
+					"04d9f1b7-f50c-4407-83bb-e9c4ddc5d45",
+					"62507779-bd2d-4170-b715-8d93ee7110f",
+					"e0dcb798-4f97-4646-a1a9-57a6c69c235",
+					"6bfd6b61-f8a9-45b3-9ca8-37125438be4",
+					"aecd6aea-1350-46af-a7b9-231e9a609fd",
+					"49b67ab9-20fc-42ac-ac53-b36e29834c7",
+				},
+			},
+			want: true,
+		},
+		{
+			name: "no api key passed in the function",
+			config: config.Config{
+				APIKeys: []string{
+					"0359cdb3-5fb5-4d65-b25f-b8909ec3c44",
+					"fb124cf9-e058-4f34-8385-ad225ff85a3",
+					"d05087dd-efff-4144-b9a6-89476a14695",
+					"5082a8df-cc67-48b4-aca4-26ce1425645",
+					"04d9f1b7-f50c-4407-83bb-e9c4ddc5d45",
+					"62507779-bd2d-4170-b715-8d93ee7110f",
+					"e0dcb798-4f97-4646-a1a9-57a6c69c235",
+					"6bfd6b61-f8a9-45b3-9ca8-37125438be4",
+					"aecd6aea-1350-46af-a7b9-231e9a609fd",
+					"49b67ab9-20fc-42ac-ac53-b36e29834c7",
+				},
+			},
+			want: false,
+		},
+		{
+			name:   "empty key passed in the function",
+			apiKey: "",
+			config: config.Config{
+				APIKeys: []string{
+					"0359cdb3-5fb5-4d65-b25f-b8909ec3c44",
+					"fb124cf9-e058-4f34-8385-ad225ff85a3",
+					"d05087dd-efff-4144-b9a6-89476a14695",
+					"5082a8df-cc67-48b4-aca4-26ce1425645",
+					"04d9f1b7-f50c-4407-83bb-e9c4ddc5d45",
+					"62507779-bd2d-4170-b715-8d93ee7110f",
+					"e0dcb798-4f97-4646-a1a9-57a6c69c235",
+					"6bfd6b61-f8a9-45b3-9ca8-37125438be4",
+					"aecd6aea-1350-46af-a7b9-231e9a609fd",
+					"49b67ab9-20fc-42ac-ac53-b36e29834c7",
+				},
+			},
+			want: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equalf(t, tt.want, tt.config.APIKeyExists(tt.apiKey), "APIKeyExists(%v)", tt.apiKey)
+		})
+	}
+}
