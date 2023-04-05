@@ -244,12 +244,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Get tag name
+        id: tagName
         uses: olegtarasov/get-tag@v2.1.2
 
       - uses: mislav/bump-homebrew-formula-action@v2
         with:
           formula-name: go-feature-flag-relay-proxy
-          tag-name: $GIT_TAG_NAME
+          tag-name: ${{ steps.tagName.outputs.tag }}
           download-url: https://github.com/${{ github.repository }}.git
           commit-message: |
             {{formulaName}} {{version}}
