@@ -63,14 +63,16 @@ const config = {
             'https://github.com/thomaspoignant/go-feature-flag/tree/main/website/',
         },
         theme: {
-          customCss: require.resolve('./src/css/custom.css'),
+          customCss: [
+            require.resolve('./src/css/custom.css'),
+            require.resolve('./src/css/pushy-buttons.css'), //https://github.com/iRaul/pushy-buttons
+            require.resolve('./src/css/simplegrid.css'), //https://thisisdallas.github.io/Simple-Grid/
+          ],
         },
       }),
     ],
   ],
   stylesheets: [
-    'css/pushy-buttons.css', //https://github.com/iRaul/pushy-buttons
-    'css/simplegrid.css', //https://thisisdallas.github.io/Simple-Grid/
     'https://fonts.googleapis.com/css?family=Poppins:400,500,700',
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css',
     'https://cdn.jsdelivr.net/gh/devicons/devicon@v2.15.1/devicon.min.css', // https://devicon.dev/

@@ -1,0 +1,65 @@
+.title{
+    font-size: 1.2rem;
+    height: 5rem;
+    max-height: 5rem;
+    font-weight: bold;
+
+}
+
+.description{
+    font-size: 0.8rem;
+}
+
+.cardLogo {
+    width: 100%;
+    border-radius: 12px;
+    height: 125px;
+    object-fit: contain;
+
+}
+
+.container {
+    margin: 0 auto;
+}
+.card {
+    background-color: var(--ifm-card-background-color);
+    border: 1px solid var(--ifm-color-primary);
+    padding: 8px;
+    border-radius: 12px;
+    width: 100%;
+    margin: 0 .5em 0.5rem;
+    /* optional */
+    min-height: 100%;
+}
+
+
+/* Style button element */
+.button {
+    width: 100%;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-weight: 600;
+    color: #0077ff;
+    background-color: #e0efff;
+    margin: 0 auto;
+    display: block;
+
+    /* Button is a clickable element, therefore it should have a pointer cursor */
+    cursor: pointer;
+}
+
+.cardDetails {
+    /* Add space around the details */
+    padding: 16px 8px 8px 8px;
+}
+
+button:focus,
+button:hover {
+    background-color: #0077ff;
+    color: #e0efff;
+}
+
+.linkBox button {
+    margin-bottom: 1rem;
+}

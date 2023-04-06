@@ -3,10 +3,20 @@ sidebar_position: 4
 ---
 
 # Kubernetes configmaps
+A ConfigMap is an API object used to store non-confidential data in key-value pairs inside kubernetes.  
+GO Feature Flag can read directly in a configmap in your namespace.
+
 The [**Kubernetes Retriever**](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/retriever/k8sretriever/#Retriever)
 will access flags in a Kubernetes ConfigMap via the [Kubernetes Go client](https://github.com/kubernetes/client-go)
 
-## Example
+
+## Add your config file as configmap
+
+```shell
+kubectl create configmap goff --from-file=examples/retriever_configmap/flags.yaml
+```
+
+## Configuration Example
 ```go linenums="1"
 import (
     restclient "k8s.io/client-go/rest"
