@@ -1,17 +1,17 @@
-  test-flag:
-    variations:
-      Default: false
-      False: false
-      True: true
-    targeting:
-      - name: legacyRuleV0
-        query: key eq "random-key"
-        percentage:
-          False: 0
-          True: 100
-    defaultRule:
-      name: legacyDefaultRule
-      variation: Default
+test-flag:
+  variations:
+    Default: false
+    False: false
+    True: true
+  targeting:
+    - name: legacyRuleV0
+      query: key eq "random-key"
+      percentage:
+        False: 0
+        True: 100
+  defaultRule:
+    name: legacyDefaultRule
+    variation: Default
 
 test-flag2:
   variations:
