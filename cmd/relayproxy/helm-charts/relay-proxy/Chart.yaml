@@ -3,8 +3,8 @@ name: relay-proxy
 home: https://gofeatureflag.org
 description: A Helm chart to deploy go-feature-flag-relay proxy into Kubernetes
 type: application
-version: 1.6.0
-appVersion: "v1.6.0"
+version: 1.7.0
+appVersion: "v1.7.0"
 icon: https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo.png
 maintainers:
   - name: thomaspoignant
