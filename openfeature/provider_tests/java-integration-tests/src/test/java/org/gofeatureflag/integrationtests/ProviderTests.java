@@ -353,7 +353,7 @@ public class ProviderTests {
 
     @DisplayName("authenticated relay proxy: invalid api key")
     @Test
-    void authenticatedRelayProxyEmptyToken() throws InvalidOptions {
+    void authenticatedRelayProxyInvalidToken() throws InvalidOptions {
         GoFeatureFlagProviderOptions options = GoFeatureFlagProviderOptions.builder()
                 .apiKey("invalid-api-key").endpoint(relayProxyAuthenticatedEndpoint).build();
         GoFeatureFlagProvider provider = new GoFeatureFlagProvider(options);
