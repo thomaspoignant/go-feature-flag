@@ -78,7 +78,6 @@ describe('Provider tests', () => {
       expect(expected).toEqual(got)
     })
   })
-
   describe("string", () => {
     it('should resolve a valid string flag with TARGETING_MATCH reason', async () => {
       const flagKey = "string_key"
@@ -234,4 +233,64 @@ describe('Provider tests', () => {
       expect(expected).toEqual(got)
     })
   })
-})
+  describe("authenticated relay proxy", () => {
+    it('should resolve a valid flag with an apiKey', async () => {
+      const goFeatureFlagProvider = new GoFeatureFlagProvider({
+        endpoint: 'http://localhost:1032/',
+        apiKey: "authorized_token"
+      });
+      goffClient = OpenFeature.getClient('my-app')
+      OpenFeature.setProvider(goFeatureFlagProvider);
+
+      const flagKey = "bool_targeting_match"
+      const expected = {
+        flagKey: flagKey,
+        reason: "TARGETING_MATCH",
+        value: true,
+        variant: "True",
+      }
+      const got = await goffClient.getBooleanDetails(flagKey, false, userCtx)
+      expect(expected).toEqual(got)
+    });
+
+    it('should resolve a default value with an invalid apiKey', async () => {
+      const goFeatureFlagProvider = new GoFeatureFlagProvider({
+        endpoint: 'http://localhost:1032/',
+        apiKey: "invalid-api-key"
+      });
+      goffClient = OpenFeature.getClient('my-app')
+      OpenFeature.setProvider(goFeatureFlagProvider);
+
+      const flagKey = "bool_targeting_match"
+      const expected = {
+        flagKey: flagKey,
+        reason: "ERROR",
+        value: false,
+        errorCode: "GENERAL",
+        errorMessage: "invalid token used to contact GO Feature Flag relay proxy instance"
+      }
+      const got = await goffClient.getBooleanDetails(flagKey, false, userCtx)
+      expect(expected).toEqual(got)
+    });
+
+    it('should resolve a default value with an empty apiKey', async () => {
+      const goFeatureFlagProvider = new GoFeatureFlagProvider({
+        endpoint: 'http://localhost:1032/',
+        apiKey: ""
+      });
+      goffClient = OpenFeature.getClient('my-app')
+      OpenFeature.setProvider(goFeatureFlagProvider);
+
+      const flagKey = "bool_targeting_match"
+      const expected = {
+        flagKey: flagKey,
+        reason: "ERROR",
+        value: false,
+        errorCode: "GENERAL",
+        errorMessage: "invalid token used to contact GO Feature Flag relay proxy instance"
+      }
+      const got = await goffClient.getBooleanDetails(flagKey, false, userCtx)
+      expect(expected).toEqual(got)
+    });
+  });
+});

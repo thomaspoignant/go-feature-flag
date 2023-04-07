@@ -332,4 +332,72 @@ public class ProviderTests
         var got = await client.GetObjectDetails(flagKey,  new Value(123), defaultEvaluationContext);
         want.Should().BeEquivalentTo(got);
     }
+    
+    [Test]
+    public async Task Should_resolve_a_valid_flag_with_an_apiKey()
+    {
+        GoFeatureFlagProvider authenticatedProvider = new GoFeatureFlagProvider(new GoFeatureFlagProviderOptions
+        {
+            Endpoint = "http://localhost:1032/",
+            Timeout = new TimeSpan(1000 * TimeSpan.TicksPerMillisecond),
+            ApiKey = "authorized_token"
+        });
+        Api.Instance.SetProvider(authenticatedProvider);
+        FeatureClient authenticatedClient = Api.Instance.GetClient("my-app");
+        var flagKey = "bool_targeting_match";
+        var want = new FlagEvaluationDetails<bool>(
+            flagKey, 
+            true, 
+            ErrorType.None, 
+            Reason.TargetingMatch,
+            "True",
+            null);
+        var got = await authenticatedClient.GetBooleanDetails(flagKey, false, defaultEvaluationContext);
+        want.Should().BeEquivalentTo(got);
+    }
+    
+    [Test]
+    public async Task Should_resolve_a_default_value_with_an_invalid_apiKey()
+    {
+        GoFeatureFlagProvider authenticatedProvider = new GoFeatureFlagProvider(new GoFeatureFlagProviderOptions
+        {
+            Endpoint = "http://localhost:1032/",
+            Timeout = new TimeSpan(1000 * TimeSpan.TicksPerMillisecond),
+            ApiKey = "invalid_api_key"
+        });
+        Api.Instance.SetProvider(authenticatedProvider);
+        FeatureClient authenticatedClient = Api.Instance.GetClient("my-app");
+        var flagKey = "bool_targeting_match";
+        var want = new FlagEvaluationDetails<bool>(
+            flagKey, 
+            false, 
+            ErrorType.General, 
+            Reason.Error,
+            "True",
+            "invalid api key, impossible to authenticate the provider");
+        var got = await authenticatedClient.GetBooleanDetails(flagKey, false, defaultEvaluationContext);
+        want.Should().BeEquivalentTo(got);
+    }
+    [Test]
+    public async Task Should_resolve_a_default_value_with_an_empty_apiKey()
+    {
+        GoFeatureFlagProvider authenticatedProvider = new GoFeatureFlagProvider(new GoFeatureFlagProviderOptions
+        {
+            Endpoint = "http://localhost:1032/",
+            Timeout = new TimeSpan(1000 * TimeSpan.TicksPerMillisecond),
+            ApiKey = ""
+        });
+        Api.Instance.SetProvider(authenticatedProvider);
+        FeatureClient authenticatedClient = Api.Instance.GetClient("my-app");
+        var flagKey = "bool_targeting_match";
+        var want = new FlagEvaluationDetails<bool>(
+            flagKey, 
+            false, 
+            ErrorType.General, 
+            Reason.Error,
+            "True",
+            "invalid api key, impossible to authenticate the provider");
+        var got = await authenticatedClient.GetBooleanDetails(flagKey, false, defaultEvaluationContext);
+        want.Should().BeEquivalentTo(got);
+    }
 }

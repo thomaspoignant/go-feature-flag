@@ -612,3 +612,94 @@ func TestProvider_module_ObjectEvaluation(t *testing.T) {
 		})
 	}
 }
+
+func TestProvider_apikey_relay_proxy(t *testing.T) {
+	type args struct {
+		apiKey string
+	}
+	tests := []struct {
+		name string
+		args args
+		want of.BooleanEvaluationDetails
+	}{
+		{
+			name: "should resolve a valid flag with an apiKey",
+			args: args{
+				apiKey: "authorized_token",
+			},
+			want: of.BooleanEvaluationDetails{
+				Value: true,
+				EvaluationDetails: of.EvaluationDetails{
+					FlagKey:  "bool_targeting_match",
+					FlagType: of.Boolean,
+					ResolutionDetail: of.ResolutionDetail{
+						Variant:      "True",
+						Reason:       of.TargetingMatchReason,
+						ErrorCode:    "",
+						ErrorMessage: "",
+					},
+				},
+			},
+		},
+		{
+			name: "should resolve a default value with an invalid apiKey",
+			args: args{
+				apiKey: "invalid_token",
+			},
+			want: of.BooleanEvaluationDetails{
+				Value: false,
+				EvaluationDetails: of.EvaluationDetails{
+					FlagKey:  "bool_targeting_match",
+					FlagType: of.Boolean,
+					ResolutionDetail: of.ResolutionDetail{
+						Variant:      "",
+						Reason:       of.ErrorReason,
+						ErrorCode:    of.GeneralCode,
+						ErrorMessage: "invalid token used to contact GO Feature Flag relay proxy instance",
+					},
+				},
+			},
+		},
+		{
+			name: "should resolve a default value with no apiKey",
+			args: args{
+				apiKey: "",
+			},
+			want: of.BooleanEvaluationDetails{
+				Value: false,
+				EvaluationDetails: of.EvaluationDetails{
+					FlagKey:  "bool_targeting_match",
+					FlagType: of.Boolean,
+					ResolutionDetail: of.ResolutionDetail{
+						Variant:      "",
+						Reason:       of.ErrorReason,
+						ErrorCode:    of.GeneralCode,
+						ErrorMessage: "invalid token used to contact GO Feature Flag relay proxy instance",
+					},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			provider, err := gofeatureflag.NewProvider(gofeatureflag.ProviderOptions{
+				Endpoint: "http://localhost:1032/",
+				APIKey:   tt.args.apiKey,
+			})
+			assert.NoError(t, err)
+			of.SetProvider(provider)
+			client := of.NewClient("test-app")
+			value, err := client.BooleanValueDetails(context.TODO(), "bool_targeting_match", false, defaultEvaluationCtx())
+
+			if tt.want.ErrorCode != "" {
+				assert.Error(t, err)
+				want := fmt.Sprintf("error code: %s: %s", tt.want.ErrorCode, tt.want.ErrorMessage)
+				assert.Equal(t, want, err.Error())
+			} else {
+				assert.NoError(t, err)
+			}
+
+			assert.Equal(t, tt.want, value)
+		})
+	}
+}
