@@ -374,7 +374,7 @@ public class ProviderTests
             ErrorType.General, 
             Reason.Error,
             "True",
-            "invalid api key, impossible to authenticate the provider");
+            "invalid token used to contact GO Feature Flag relay proxy instance");
         var got = await authenticatedClient.GetBooleanDetails(flagKey, false, defaultEvaluationContext);
         want.Should().BeEquivalentTo(got);
     }
@@ -396,7 +396,7 @@ public class ProviderTests
             ErrorType.General, 
             Reason.Error,
             "True",
-            "invalid api key, impossible to authenticate the provider");
+            "invalid token used to contact GO Feature Flag relay proxy instance");
         var got = await authenticatedClient.GetBooleanDetails(flagKey, false, defaultEvaluationContext);
         want.Should().BeEquivalentTo(got);
     }
