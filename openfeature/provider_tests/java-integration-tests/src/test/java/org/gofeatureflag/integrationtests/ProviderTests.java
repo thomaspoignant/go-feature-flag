@@ -341,7 +341,6 @@ public class ProviderTests {
 
         String flagKey = "bool_targeting_match";
         FlagEvaluationDetails expected = FlagEvaluationDetails.builder()
-                .flagKey(flagKey)
                 .reason(Reason.ERROR.toString())
                 .value(false)
                 .errorCode(ErrorCode.GENERAL)
@@ -363,7 +362,6 @@ public class ProviderTests {
 
         String flagKey = "bool_targeting_match";
         FlagEvaluationDetails expected = FlagEvaluationDetails.builder()
-                .flagKey(flagKey)
                 .reason(Reason.ERROR.toString())
                 .value(false)
                 .errorCode(ErrorCode.GENERAL)
