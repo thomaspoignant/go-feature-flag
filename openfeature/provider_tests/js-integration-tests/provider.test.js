@@ -287,7 +287,7 @@ describe('Provider tests', () => {
         reason: "ERROR",
         value: false,
         errorCode: "GENERAL",
-        errorMessage: "invalid token used to contact GO Feature Flag relay proxy instance"
+        errorMessage: "unknown error while retrieving flag bool_targeting_match for user d45e303a-38c2-11ed-a261-0242ac120002: AxiosError: Request failed with status code 400"
       }
       const got = await goffClient.getBooleanDetails(flagKey, false, userCtx)
       expect(expected).toEqual(got)
