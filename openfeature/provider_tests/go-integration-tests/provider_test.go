@@ -674,7 +674,7 @@ func TestProvider_apikey_relay_proxy(t *testing.T) {
 						Variant:      "",
 						Reason:       of.ErrorReason,
 						ErrorCode:    of.GeneralCode,
-						ErrorMessage: "invalid token used to contact GO Feature Flag relay proxy instance",
+						ErrorMessage: "unexpected answer from the relay proxy",
 					},
 				},
 			},
