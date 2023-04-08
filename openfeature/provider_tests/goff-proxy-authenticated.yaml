@@ -1,4 +1,4 @@
-listen: 1031
+listen: 1032
 pollingInterval: 1000
 startWithRetrieverError: false
 retriever:
@@ -6,4 +6,5 @@ retriever:
   path: ./openfeature/provider_tests/flags.yaml
 exporter:
   kind: log
-enableSwagger: true
+apiKeys:
+  - authorized_token

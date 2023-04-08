@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ProviderTests {
     private static final String relayProxyEndpoint = "http://localhost:1031";
+    private static final String relayProxyAuthenticatedEndpoint = "http://localhost:1032";
     private EvaluationContext defaultEvaluationContext;
     private Client goffClient;
 
@@ -304,6 +305,69 @@ public class ProviderTests {
                 .value(new Value(123))
                 .build();
         FlagEvaluationDetails<Value> got = goffClient.getObjectDetails(flagKey, new Value(123), defaultEvaluationContext);
+        assertEquals(expected, got);
+    }
+
+    @DisplayName("authenticated relay proxy: valid")
+    @Test
+    void authenticatedRelayProxyValid() throws InvalidOptions {
+        GoFeatureFlagProviderOptions options = GoFeatureFlagProviderOptions.builder()
+                .apiKey("authorized_token").endpoint(relayProxyAuthenticatedEndpoint).build();
+        GoFeatureFlagProvider provider = new GoFeatureFlagProvider(options);
+        OpenFeatureAPI.getInstance().setProvider(provider);
+        OpenFeatureAPI api = OpenFeatureAPI.getInstance();
+        goffClient = api.getClient();
+
+        String flagKey = "bool_targeting_match";
+        FlagEvaluationDetails expected = FlagEvaluationDetails.builder()
+                .flagKey(flagKey)
+                .reason(Reason.TARGETING_MATCH.toString())
+                .value(true)
+                .variant("True")
+                .build();
+        FlagEvaluationDetails<Boolean> got = goffClient.getBooleanDetails(flagKey, false, defaultEvaluationContext);
+        assertEquals(expected, got);
+    }
+
+    @DisplayName("authenticated relay proxy: empty api key")
+    @Test
+    void authenticatedRelayProxyEmptyToken() throws InvalidOptions {
+        GoFeatureFlagProviderOptions options = GoFeatureFlagProviderOptions.builder()
+                .apiKey("").endpoint(relayProxyAuthenticatedEndpoint).build();
+        GoFeatureFlagProvider provider = new GoFeatureFlagProvider(options);
+        OpenFeatureAPI.getInstance().setProvider(provider);
+        OpenFeatureAPI api = OpenFeatureAPI.getInstance();
+        goffClient = api.getClient();
+
+        String flagKey = "bool_targeting_match";
+        FlagEvaluationDetails expected = FlagEvaluationDetails.builder()
+                .reason(Reason.ERROR.toString())
+                .value(false)
+                .errorCode(ErrorCode.GENERAL)
+                .errorMessage("impossible to contact GO Feature Flag relay proxy instance")
+                .build();
+        FlagEvaluationDetails<Boolean> got = goffClient.getBooleanDetails(flagKey, false, defaultEvaluationContext);
+        assertEquals(expected, got);
+    }
+
+    @DisplayName("authenticated relay proxy: invalid api key")
+    @Test
+    void authenticatedRelayProxyInvalidToken() throws InvalidOptions {
+        GoFeatureFlagProviderOptions options = GoFeatureFlagProviderOptions.builder()
+                .apiKey("invalid-api-key").endpoint(relayProxyAuthenticatedEndpoint).build();
+        GoFeatureFlagProvider provider = new GoFeatureFlagProvider(options);
+        OpenFeatureAPI.getInstance().setProvider(provider);
+        OpenFeatureAPI api = OpenFeatureAPI.getInstance();
+        goffClient = api.getClient();
+
+        String flagKey = "bool_targeting_match";
+        FlagEvaluationDetails expected = FlagEvaluationDetails.builder()
+                .reason(Reason.ERROR.toString())
+                .value(false)
+                .errorCode(ErrorCode.GENERAL)
+                .errorMessage("invalid token used to contact GO Feature Flag relay proxy instance")
+                .build();
+        FlagEvaluationDetails<Boolean> got = goffClient.getBooleanDetails(flagKey, false, defaultEvaluationContext);
         assertEquals(expected, got);
     }
 }

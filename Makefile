@@ -65,7 +65,7 @@ swagger: ## Build swagger documentation
 test: ## Run the tests of the project
 	$(GOTEST) -v -race ./...
 
-provider-tests:
+provider-tests: ## Run the integration tests for the Open Feature Providers
 	./openfeature/provider_tests/integration_tests.sh
 
 coverage: ## Run the tests of the project and export the coverage
