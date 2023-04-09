@@ -146,7 +146,7 @@ func TestFile_Export(t *testing.T) {
 			wantErr: false,
 			fields: fields{
 				Format:                  "parquet",
-				ParquetCompressionCodec: parquet.CompressionCodec_SNAPPY.String(),
+				ParquetCompressionCodec: parquet.CompressionCodec_UNCOMPRESSED.String(),
 			},
 			args: args{
 				featureEvents: []exporter.FeatureEvent{
