@@ -135,7 +135,10 @@ func (f *Exporter) writeParquet(filePath string, featureEvents []exporter.Featur
 	}
 
 	for _, event := range featureEvents {
-		if err = pw.Write(event.ConvertInterfaceToString()); err != nil {
+		if err := event.MarshalInterface(); err != nil {
+			return err
+		}
+		if err = pw.Write(event); err != nil {
 			return fmt.Errorf("error while writing the export file: %v", err)
 		}
 	}

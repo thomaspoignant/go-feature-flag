@@ -108,11 +108,11 @@ func TestFile_Export(t *testing.T) {
 				featureEvents: []exporter.FeatureEvent{
 					{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-						Variation: "Default", Value: "YO", Default: false,
+						Variation: "Default", Value: `"YO"`, Default: false,
 					},
 					{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
-						Variation: "Default", Value: "YO2", Default: false, Version: "127",
+						Variation: "Default", Value: `"YO2"`, Default: false, Version: "127",
 					},
 				},
 			},
@@ -177,7 +177,7 @@ func TestFile_Export(t *testing.T) {
 						CreationDate: 1617970547,
 						Key:          "random-key",
 						Variation:    "Default",
-						Value:        "map[bool:true float:1.23 int:1 string:string]",
+						Value:        `{"bool":true,"float":1.23,"int":1,"string":"string"}`,
 						Default:      false,
 					},
 				},

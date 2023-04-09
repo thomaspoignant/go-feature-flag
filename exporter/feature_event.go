@@ -1,7 +1,7 @@
 package exporter
 
 import (
-	"fmt"
+	"encoding/json"
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
@@ -71,10 +71,15 @@ type FeatureEvent struct {
 	Version string `json:"version" example:"v1.0.0" parquet:"name=version, type=BYTE_ARRAY, convertedtype=UTF8"`
 }
 
-func (f *FeatureEvent) ConvertInterfaceToString() *FeatureEvent {
+// MarshalInterface marshals all interface type fields in FeatureEvent into JSON-encoded string.
+func (f *FeatureEvent) MarshalInterface() error {
 	if f == nil {
 		return nil
 	}
-	f.Value = fmt.Sprintf("%v", f.Value)
-	return f
+	b, err := json.Marshal(f.Value)
+	if err != nil {
+		return err
+	}
+	f.Value = string(b)
+	return nil
 }
