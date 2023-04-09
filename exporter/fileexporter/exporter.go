@@ -128,7 +128,6 @@ func (f *Exporter) writeParquet(filePath string, featureEvents []exporter.Featur
 	if err != nil {
 		return err
 	}
-	defer pw.WriteStop()
 
 	pw.CompressionType = parquet.CompressionCodec_SNAPPY
 	if ct, err := parquet.CompressionCodecFromString(f.ParquetCompressionCodec); err == nil {
@@ -136,10 +135,10 @@ func (f *Exporter) writeParquet(filePath string, featureEvents []exporter.Featur
 	}
 
 	for _, event := range featureEvents {
-		if err = pw.Write(event); err != nil {
+		if err = pw.Write(event.ConvertInterfaceToString()); err != nil {
 			return fmt.Errorf("error while writing the export file: %v", err)
 		}
 	}
 
-	return nil
+	return pw.WriteStop()
 }

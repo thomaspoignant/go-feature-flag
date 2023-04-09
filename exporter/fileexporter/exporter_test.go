@@ -31,6 +31,7 @@ func TestFile_Export(t *testing.T) {
 	type expected struct {
 		fileNameRegex string
 		content       string
+		featureEvents []exporter.FeatureEvent
 	}
 	tests := []struct {
 		name     string
@@ -104,6 +105,16 @@ func TestFile_Export(t *testing.T) {
 			},
 			expected: expected{
 				fileNameRegex: "^flag-variation-" + hostname + "-[0-9]*\\.parquet$",
+				featureEvents: []exporter.FeatureEvent{
+					{
+						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
+						Variation: "Default", Value: "YO", Default: false,
+					},
+					{
+						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
+						Variation: "Default", Value: "YO2", Default: false, Version: "127",
+					},
+				},
 			},
 		},
 		{
@@ -128,6 +139,48 @@ func TestFile_Export(t *testing.T) {
 			expected: expected{
 				fileNameRegex: "^flag-variation-" + hostname + "-[0-9]*\\.csv",
 				content:       "./testdata/custom_csv_format.csv",
+			},
+		},
+		{
+			name:    "complex parquet value",
+			wantErr: false,
+			fields: fields{
+				Format:                  "parquet",
+				ParquetCompressionCodec: parquet.CompressionCodec_SNAPPY.String(),
+			},
+			args: args{
+				featureEvents: []exporter.FeatureEvent{
+					{
+						Kind:         "feature",
+						ContextKind:  "anonymousUser",
+						UserKey:      "ABCD",
+						CreationDate: 1617970547,
+						Key:          "random-key",
+						Variation:    "Default",
+						Value: map[string]interface{}{
+							"string": "string",
+							"bool":   true,
+							"float":  1.23,
+							"int":    1,
+						},
+						Default: false,
+					},
+				},
+			},
+			expected: expected{
+				fileNameRegex: "^flag-variation-" + hostname + "-[0-9]*\\.parquet$",
+				featureEvents: []exporter.FeatureEvent{
+					{
+						Kind:         "feature",
+						ContextKind:  "anonymousUser",
+						UserKey:      "ABCD",
+						CreationDate: 1617970547,
+						Key:          "random-key",
+						Variation:    "Default",
+						Value:        "map[bool:true float:1.23 int:1 string:string]",
+						Default:      false,
+					},
+				},
 			},
 		},
 		{
@@ -280,7 +333,7 @@ func TestFile_Export(t *testing.T) {
 				gotFeatureEvents := make([]exporter.FeatureEvent, pr.GetNumRows())
 				err = pr.Read(&gotFeatureEvents)
 				assert.NoError(t, err)
-				assert.ElementsMatch(t, tt.args.featureEvents, gotFeatureEvents)
+				assert.ElementsMatch(t, tt.expected.featureEvents, gotFeatureEvents)
 				return
 			}
 

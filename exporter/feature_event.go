@@ -1,6 +1,7 @@
 package exporter
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
@@ -68,4 +69,12 @@ type FeatureEvent struct {
 	// Version contains the version of the flag. If the field is omitted for the flag in the configuration file
 	// the default version will be 0.
 	Version string `json:"version" example:"v1.0.0" parquet:"name=version, type=BYTE_ARRAY, convertedtype=UTF8"`
+}
+
+func (f *FeatureEvent) ConvertInterfaceToString() *FeatureEvent {
+	if f == nil {
+		return nil
+	}
+	f.Value = fmt.Sprintf("%v", f.Value)
+	return f
 }
