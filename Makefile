@@ -61,6 +61,10 @@ swagger: ## Build swagger documentation
 	$(GOCMD) install github.com/swaggo/swag/cmd/swag@latest
 	cd cmd/relayproxy && swag init --parseDependency --parseDepth=1 --parseInternal --markdownFiles docs
 
+generate-helm-docs: ## Generates helm documentation for the project
+	$(GOCMD) install github.com/norwoodj/helm-docs/cmd/helm-docs@latest
+	helm-docs
+
 ## Test:
 test: ## Run the tests of the project
 	$(GOTEST) -v -race ./...
