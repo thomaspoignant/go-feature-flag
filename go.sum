@@ -101,8 +101,8 @@ github.com/felixge/httpsnoop v1.0.2/go.mod h1:m8KPJKqk1gH5J9DgRY2ASl2lWCfGKXixSw
 github.com/frankban/quicktest v1.14.3 h1:FJKSZTDHjyhriyC81FLQ0LY93eSai0ZyR/ZIkd3ZUKE=
 github.com/fsnotify/fsnotify v1.6.0 h1:n+5WquG0fcWoWp6xPWfHdbskMCQaFnG6PfBrh1Ky4HY=
 github.com/fsnotify/fsnotify v1.6.0/go.mod h1:sl3t1tCWJFWoRz9R8WJCbQihKKwmorjAbSClcnxKAGw=
-github.com/fsouza/fake-gcs-server v1.44.1 h1:G9tKIlnUNd6F9YIcrevq518nQk9FvOgUqHv7xsjGGRU=
-github.com/fsouza/fake-gcs-server v1.44.1/go.mod h1:HXlPE6QOJUoty9PTUlbT/w2iwVxH2HX6AZ459pAmCBE=
+github.com/fsouza/fake-gcs-server v1.44.2 h1:i0SFjrC3ALr5FmxWdUgeQQ5myXFY+VMCPGVDj25XXXo=
+github.com/fsouza/fake-gcs-server v1.44.2/go.mod h1:eKmKIfPvl24wxEWVng4Hsh/+BwUTMhrFtQkNJxLAgSI=
 github.com/gdexlab/go-render v1.0.1 h1:rxqB3vo5s4n1kF0ySmoNeSPRYkEsyHgln4jFIQY7v0U=
 github.com/gdexlab/go-render v1.0.1/go.mod h1:wRi5nW2qfjiGj4mPukH4UV0IknS1cHD4VgFTmJX5JzM=
 github.com/go-gl/glfw v0.0.0-20190409004039-e6da0acd62b1/go.mod h1:vR7hzQXu2zJy9AVAgeJqvqgH9Q5CA+iKCZ2gyEVpxRU=
