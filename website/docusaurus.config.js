@@ -199,12 +199,24 @@ const config = {
         },
         links: [
           {
-            title: 'Documentation',
+            title: 'Docs',
             items: [
               {
-                label: 'Docs',
-                to: '/docs/',
+                label: 'Getting Started',
+                to: '/docs/category/getting-started',
               },
+              {
+                label: 'GO Module',
+                to: '/docs/category/use-as-a-go-module'
+              },
+              {
+                label: 'SDKs',
+                to: '/docs/category/use-with-openfeature'
+              },
+              {
+                label: 'Relay Proxy',
+                to: '/docs/category/use-the-relay-proxy'
+              }
             ],
           },
 
