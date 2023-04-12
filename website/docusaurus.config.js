@@ -135,6 +135,10 @@ const config = {
                 html: '<i class="fa-solid fa-code menu-icon"></i> SDKs',
               },
               {
+                to: '/editor',
+                html: '<i class="fa-solid fa-pencil menu-icon"></i> Flag Editor',
+              },
+              {
                 html: '<i class="fa-solid fa-star menu-icon"></i> Feature Flag Best Practice',
                 to: '/blog/feature-flag-best-practice'
               },
@@ -153,9 +157,9 @@ const config = {
               }
             ]
           },
-          {type: 'doc', docId: 'index', position: 'left', html: '<i class="fa-solid fa-book menu-icon"></i>  Docs'},
+          {type: 'doc', docId: 'index', position: 'left', html: 'Docs'},
           {to: '/blog', label: 'Blog', position: 'left'},
-          {to: '/editor', html: 'Flag Editor', position: 'left'},
+          {to: '/editor', html: 'Editor', position: 'left'},
           {
             to: 'https://github.com/sponsors/thomaspoignant',
             label: 'Sponsor us ❤️',
@@ -183,13 +187,7 @@ const config = {
             position: 'right',
             className: 'header-slack-link navbar__right',
             'aria-label': 'Slack',
-          },
-          {
-            href: 'mailto:contact@gofeatureflag.org',
-            position: 'right',
-            className: 'header-email-link navbar__right',
-            'aria-label': 'Email',
-          },
+          }
         ],
       },
       footer: {
@@ -214,17 +212,29 @@ const config = {
             title: 'Community',
             items: [
               {
-                label: 'Slack',
-                href: 'https://gophers.slack.com/messages/go-feature-flag',
+                html: `
+                <a href="https://gophers.slack.com/messages/go-feature-flag" target="_blank" rel="noreferrer noopener">
+                  <i class="fa-brands fa-slack"></i> Slack&nbsp;&nbsp;<i class="fa-solid fa-arrow-up-right-from-square"></i>
+                </a>`,
               },
               {
-                label: 'Twitter',
-                href: 'https://twitter.com/gofeatureflag',
+                html: `
+                <a href="https://twitter.com/gofeatureflag" target="_blank" rel="noreferrer noopener">
+                  <i class="fa-brands fa-twitter"></i> Twitter&nbsp;&nbsp;<i class="fa-solid fa-arrow-up-right-from-square"></i>
+                </a>`,
               },
               {
-                label: 'Github',
-                href: 'https://github.com/thomaspoignant/go-feature-flag',
+                html: `
+                <a href="https://github.com/thomaspoignant/go-feature-flag" target="_blank" rel="noreferrer noopener">
+                  <i class="fa-brands fa-github"></i> Github&nbsp;&nbsp;<i class="fa-solid fa-arrow-up-right-from-square"></i>
+                </a>`,
               },
+              {
+                html: `
+                <a href="mailto:contact@gofeatureflag.org" target="_blank" rel="noreferrer noopener">
+                  <i class="fa-regular fa-envelope"></i> Email&nbsp;&nbsp;<i class="fa-solid fa-arrow-up-right-from-square"></i>
+                </a>`,
+              }
             ],
           },
           {
@@ -233,11 +243,7 @@ const config = {
               {
                 label: 'Blog',
                 to: '/blog',
-              },
-              {
-                label: 'GitHub',
-                href: 'https://github.com/thomaspoignant/go-feature-flag',
-              },
+              }
             ],
           },
         ],
