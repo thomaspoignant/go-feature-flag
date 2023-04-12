@@ -126,22 +126,24 @@ ffclient.Init(ffclient.Config{
 })
 ```
 
-When an environment is set, it adds a new field in your user called **`env`** that you can use in your rules.
+When an environment is set, it adds a new field in your user called **`env`** that you can use in your queries.
 It means that you can decide to activate a flag only for some **environment**.
 
-**Example of rules based on the environment:**
+**Example of flag configuration based on the environment:**
 
 ```yaml
-# Flag activate only in dev
-rule: env == "dev"
-```
-
-```yaml
-# Flag used only in dev and staging environment
-rule: (env == "dev") or (env == "staging")
-```
-
-```yaml
-# Flag used on non prod environments except for the user 1234 in prod
-rule: (env != "prod") or (user_id == 1234)
+my-flag:
+  variations:
+    A: "A"
+    B: "B"
+    C: "C"
+  targeting:
+    - name: Target pre environment
+      query: env eq "pre"
+      variation: A
+    - name: Target pro environment
+      query: env eq "pro"
+      variation: B
+  defaultRule:
+    variation: C
 ```
