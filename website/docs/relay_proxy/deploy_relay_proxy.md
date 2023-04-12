@@ -26,7 +26,8 @@ helm repo add go-feature-flag https://charts.gofeatureflag.org/
 
 ### Step 2: Install the Chart
 
-Install the Helm Chart with the Helm install command and provide the custom repository name, the chart name and any necessary values files.
+Install the Helm Chart with the Helm install command and provide the custom repository name, the chart name and any necessary values files.  
+You can look at the [helm doc](https://github.com/thomaspoignant/go-feature-flag/blob/main/cmd/relayproxy/helm-charts/relay-proxy/README.md) to know exactly what you can change in the values.yaml file.
 
 ```shell
 helm install go-feature-flag/relay-proxy -f values.yaml
