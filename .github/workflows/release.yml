@@ -210,6 +210,10 @@ jobs:
         working-directory: ./release/
         run: yq -i ".version=\"${GIT_TAG_NAME#v}\"" $CHART_YAML_FILE_LOCATION
 
+      - name: Update chart README
+        working-directory: ./release/
+        run: make generate-helm-docs
+
       - name: Checkout main branch
         uses: actions/checkout@v3
         with:
