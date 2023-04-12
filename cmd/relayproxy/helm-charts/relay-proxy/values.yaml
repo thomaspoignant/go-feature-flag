@@ -1,4 +1,6 @@
 relayproxy:
+  # -- (tpl/object) Define this for extra Django environment variables
+  # @notationType -- tpl
   config: | # This is a configuration example for the relay-proxy
     listen: 1031
     pollingInterval: 1000
@@ -9,7 +11,7 @@ relayproxy:
     exporter:
       kind: log
 
-# Environment variables to pass to the relay proxy
+# -- Environment variables to pass to the relay proxy
 env: {}
   # Examples:
   # ENV_VARIABLE_EXAMPLE:
@@ -21,32 +23,41 @@ env: {}
   #       name: my-secret-name
   #       key: my-secret-key
 
+# -- The number of replicas to create for the deployment
 replicaCount: 1
 
 image:
+  # -- The image repository to pull from
   repository: thomaspoignant/go-feature-flag-relay-proxy
+  # -- The image is pulled only if it is not already present locally
   pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
+  # -- Overrides the image tag whose default is the chart appVersion
   tag: ""
 
+# -- Specify imagePullSecrets to be used for the deployment
 imagePullSecrets: []
+# -- replaces the name of the chart in the Chart.yaml file
 nameOverride: ""
+# -- Completely override the deployment name for kubernetes objects
 fullnameOverride: ""
 
 serviceAccount:
-  # Specifies whether a service account should be created
+  # -- Specifies whether a service account should be created
   create: true
-  # Annotations to add to the service account
+  # -- Annotations to add to the service account
   annotations: {}
-  # The name of the service account to use.
+  # -- The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
   name: ""
 
+# -- Pod annotations to add to the deployment
 podAnnotations: {}
 
+# -- A security context defines privilege and access control settings for a Pod
 podSecurityContext: {}
   # fsGroup: 2000
 
+# -- A security context defines privilege and access control settings for a Container
 securityContext: {}
   # capabilities:
   #   drop:
@@ -56,12 +67,18 @@ securityContext: {}
   # runAsUser: 1000
 
 service:
+  # -- The type of service to create
   type: ClusterIP
+  # -- The port to expose on the service
   port: 1031
 
+# -- Ingress configuration
 ingress:
+  # -- Enable ingress
   enabled: false
+  # -- Ingress class name
   className: ""
+  # -- Annotations to add to the ingress
   annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
@@ -77,18 +94,29 @@ ingress:
 
 resources:
   requests:
+    # -- The amount of memory to request for the container
     memory: "128Mi"
+    # -- The amount of cpu to request for the container
     cpu: "500m"
 
+# -- automatically scale the deployment up and down based on observed CPU and memory utilization
 autoscaling:
+  # -- enable autoscaling
   enabled: false
+  # -- min replicas to scale to
   minReplicas: 1
+  # -- max replicas to scale to
   maxReplicas: 100
+  # -- target CPU utilization percentage to spin up new pods
   targetCPUUtilizationPercentage: 80
+  # -- target memory utilization percentage to spin up new pods
   targetMemoryUtilizationPercentage: 80
 
+# -- Node labels for pod assignment
 nodeSelector: {}
 
+# -- Tolerations for pod assignment
 tolerations: []
 
+# -- Affinity settings for pod assignment to nodes
 affinity: {}
