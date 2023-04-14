@@ -47,17 +47,6 @@ func TestNewFeatureEvent(t *testing.T) {
 }
 
 func TestFeatureEvent_MarshalInterface(t *testing.T) {
-	type fields struct {
-		Kind         string
-		ContextKind  string
-		UserKey      string
-		CreationDate int64
-		Key          string
-		Variation    string
-		Value        interface{}
-		Default      bool
-		Version      string
-	}
 	tests := []struct {
 		name         string
 		featureEvent *exporter.FeatureEvent
