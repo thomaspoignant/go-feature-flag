@@ -4,6 +4,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"io"
 	"os"
+	"os/exec"
+	"strings"
 	"testing"
 )
 
@@ -53,4 +55,30 @@ func Test_OutputResult_file(t *testing.T) {
 		assert.NoError(t, err, "Unexpected error reading file")
 	}
 	assert.Equal(t, string(content), string(fileContent))
+}
+
+func Test_Migration_Cli_Invalid_input_file(t *testing.T) {
+	inputFile := "testdata/invalid-rule.yaml"
+	inputFormat := "yaml"
+	testName := "Test_Migration_Cli_Invalid_input_file"
+
+	if os.Getenv("SHOULD_CRASH") == "true" {
+		runAppMain(inputFile, inputFormat)
+		return
+	}
+	// nolint: gosec
+	cmd := exec.Command(os.Args[0], "-test.run="+testName)
+	cmd.Env = append(os.Environ(), "SHOULD_CRASH=true")
+	err := cmd.Run()
+
+	e, ok := err.(*exec.ExitError)
+	assert.True(t, ok && !e.Success())
+}
+
+func runAppMain(fileName string, format string) {
+	args := strings.Split(os.Getenv("SHOULD_CRASH"), " ")
+	os.Args = append([]string{os.Args[0]}, args...)
+	os.Args = append(os.Args, "--input-file="+fileName)
+	os.Args = append(os.Args, "--input-format="+format)
+	main()
 }
