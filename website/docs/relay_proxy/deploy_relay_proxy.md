@@ -40,3 +40,20 @@ Verify the Helm Chart installation with the Helm list command. For example:
 ```shell
 helm list
 ```
+
+## Deploy as AWS Lambda
+The GO Feature Flag relay proxy can easily be launched as an AWS Lambda function.
+To do this, simply set the `startAsAwsLambda` option in your configuration file to `true`, like so:
+
+```yaml
+# ...
+startAsAwsLambda: true
+```
+
+Once you've updated your configuration file, you can deploy your function in AWS and configure it to be accessible 
+via HTTP. This can be achieved by creating an API Gateway or an Application Load Balancer (ALB) and linking it to 
+your Lambda function.
+
+By configuring your GO Feature Flag relay proxy to run as an AWS Lambda function, you can take advantage of the many
+benefits of serverless computing, including automatic scaling, reduced infrastructure costs, and simplified 
+deployment and management.

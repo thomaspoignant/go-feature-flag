@@ -140,7 +140,10 @@ type Config struct {
 	Version string
 
 	// APIKeys list of API keys that authorized to use endpoints
-	APIKeys []string `mapstructure:"apiKeys"`
+	APIKeys []string
+
+	// StartAsAwsLambda (optional) if true the relay proxy will start ready to be launch as AWS Lambda
+	StartAsAwsLambda bool `mapstructure:"startAsAwsLambda"`
 
 	// ---- private fields
 
