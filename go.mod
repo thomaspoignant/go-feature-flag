@@ -5,7 +5,7 @@ go 1.18
 require (
 	cloud.google.com/go/storage v1.30.1
 	github.com/BurntSushi/toml v1.2.1
-	github.com/aws/aws-lambda-go v1.19.1
+	github.com/aws/aws-lambda-go v1.40.0
 	github.com/aws/aws-sdk-go v1.44.244
 	github.com/awslabs/aws-lambda-go-api-proxy v0.14.0
 	github.com/brpaz/echozap v1.1.3
