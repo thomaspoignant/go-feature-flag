@@ -10,6 +10,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/githubretriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever/gitlabretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/httpretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/s3retriever"
 
@@ -76,6 +77,19 @@ func TestConfig_GetRetrievers(t *testing.T) {
 				},
 			},
 			want:    "*githubretriever.Retriever",
+			wantErr: false,
+		},
+		{
+			name: "Gitlab retriever",
+			fields: fields{
+				PollingInterval: 3 * time.Second,
+				Retriever: &gitlabretriever.Retriever{
+					URL:         "https://gitlab.com/ruairi2/go-feature-flags-config",
+					FilePath:    "flag-config.yaml",
+					GitlabToken: "XXX",
+				},
+			},
+			want:    "*gitlabretriever.Retriever",
 			wantErr: false,
 		},
 		{

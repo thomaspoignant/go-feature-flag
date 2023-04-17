@@ -1,6 +1,10 @@
 package service
 
 import (
+	"net/http"
+	"testing"
+	"time"
+
 	"github.com/stretchr/testify/assert"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
@@ -13,11 +17,9 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/gcstorageretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/githubretriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever/gitlabretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/httpretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/s3retriever"
-	"net/http"
-	"testing"
-	"time"
 )
 
 func Test_initRetriever(t *testing.T) {
@@ -42,6 +44,23 @@ func Test_initRetriever(t *testing.T) {
 				FilePath:       "testdata/flag-config.yaml",
 				GithubToken:    "",
 				Timeout:        20 * time.Millisecond,
+			},
+		},
+		{
+			name:    "Convert Gitlab Retriever",
+			wantErr: assert.NoError,
+			conf: &config.RetrieverConf{
+				Kind:    "gitlab",
+				URL:     "http://localhost",
+				Path:    "flag-config.yaml",
+				Timeout: 20,
+			},
+			want: &gitlabretriever.Retriever{
+				URL:         "http://localhost",
+				Branch:      "main",
+				FilePath:    "flag-config.yaml",
+				GitlabToken: "",
+				Timeout:     20 * time.Millisecond,
 			},
 		},
 		{

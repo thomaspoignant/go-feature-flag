@@ -18,6 +18,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/gcstorageretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/githubretriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever/gitlabretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/httpretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/k8sretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/s3retriever"
@@ -93,7 +94,7 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 			RepositorySlug: c.RepositorySlug,
 			Branch: func() string {
 				if c.Branch == "" {
-					return config.DefaultRetriever.GithubBranch
+					return config.DefaultRetriever.GitBranch
 				}
 				return c.Branch
 			}(),
@@ -101,7 +102,19 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 			GithubToken: c.GithubToken,
 			Timeout:     retrieverTimeout,
 		}, nil
-
+	case config.GitlabRetriever:
+		return &gitlabretriever.Retriever{
+			URL: c.URL,
+			Branch: func() string {
+				if c.Branch == "" {
+					return config.DefaultRetriever.GitBranch
+				}
+				return c.Branch
+			}(),
+			FilePath:    c.Path,
+			GitlabToken: c.GitlabToken,
+			Timeout:     retrieverTimeout,
+		}, nil
 	case config.FileRetriever:
 		return &fileretriever.Retriever{
 			Path: c.Path,
