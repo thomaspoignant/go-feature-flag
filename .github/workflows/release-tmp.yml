@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Bump Relay Proxy Helm Chart appVersion
     env:
+      CHART_LOCATION: cmd/relayproxy/helm-charts/relay-proxy/
       CHART_YAML_FILE_LOCATION: cmd/relayproxy/helm-charts/relay-proxy/Chart.yaml
       MAIN_BRANCH_NAME: main
       GIT_TAG_NAME: v1.8.0
@@ -57,7 +58,8 @@ jobs:
       - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: Copy version to main branch
-        run: cp -rf release/$CHART_YAML_FILE_LOCATION $MAIN_BRANCH_NAME/$CHART_YAML_FILE_LOCATION
+        run: cp -rf release/$CHART_LOCATION/* $MAIN_BRANCH_NAME/$CHART_LOCATION/*
+
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4
