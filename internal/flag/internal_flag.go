@@ -60,6 +60,10 @@ func (f *InternalFlag) Value(
 ) (interface{}, ResolutionDetails) {
 	f.applyScheduledRolloutSteps()
 
+	if evaluationCtx.Environment != "" {
+		user.AddCustomAttribute("env", evaluationCtx.Environment)
+	}
+
 	if f.IsDisable() || f.isExperimentationOver() {
 		return evaluationCtx.DefaultSdkValue, ResolutionDetails{
 			Variant:   VariationSDKDefault,
