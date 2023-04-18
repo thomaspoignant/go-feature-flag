@@ -12,8 +12,6 @@ jobs:
     # in the Chart.yaml file of the helm-chart.
     runs-on: ubuntu-latest
     name: Bump Relay Proxy Helm Chart appVersion
-    needs:
-      - goreleaser
     env:
       CHART_YAML_FILE_LOCATION: cmd/relayproxy/helm-charts/relay-proxy/Chart.yaml
       MAIN_BRANCH_NAME: main
