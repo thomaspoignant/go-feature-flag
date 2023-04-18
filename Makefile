@@ -62,9 +62,9 @@ swagger: ## Build swagger documentation
 	cd cmd/relayproxy && swag init --parseDependency --parseDepth=1 --parseInternal --markdownFiles docs
 
 generate-helm-docs: ## Generates helm documentation for the project
-	#$(GOCMD) install github.com/norwoodj/helm-docs/cmd/helm-docs@latest
-	#helm-docs
-	docker run --rm --volume "$(pwd):/helm-docs" -u $(id -u) jnorwood/helm-docs:latest
+#	$(GOCMD) install github.com/norwoodj/helm-docs/cmd/helm-docs@latest
+#	helm-docs
+	docker run --rm --volume "$(pwd):/helm-docs" jnorwood/helm-docs:latest
 
 ## Test:
 test: ## Run the tests of the project
