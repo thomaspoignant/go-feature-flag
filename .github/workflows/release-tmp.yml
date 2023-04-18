@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - fix-helm-doc-ci
+  pull_request:
+    types: [ opened, synchronize, reopened ]
 
 jobs:
   bump-relay-proxy-helm-chart:
