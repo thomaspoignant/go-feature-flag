@@ -58,7 +58,7 @@ jobs:
       - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: Copy version to main branch
-        run: cp -rf release/$CHART_LOCATION/* $MAIN_BRANCH_NAME/$CHART_LOCATION/*
+        run: cp -rf release/$CHART_LOCATION/* $MAIN_BRANCH_NAME/$CHART_LOCATION
 
 
       - name: Create Pull Request
