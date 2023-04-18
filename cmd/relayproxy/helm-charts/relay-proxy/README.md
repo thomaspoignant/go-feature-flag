@@ -1,6 +1,6 @@
 # relay-proxy
 
-![Version: 1.7.0](https://img.shields.io/badge/Version-1.7.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.7.0](https://img.shields.io/badge/AppVersion-v1.7.0-informational?style=flat-square) 
+![Version: 1.8.0](https://img.shields.io/badge/Version-1.8.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.8.0](https://img.shields.io/badge/AppVersion-v1.8.0-informational?style=flat-square)
 
 A Helm chart to deploy go-feature-flag-relay proxy into Kubernetes
 
@@ -27,14 +27,9 @@ It will install the chart in your cluster.
 | ---- | ------ | --- |
 | thomaspoignant | <thomas.poignant@gofeatureflag.org> | <https://gofeatureflag.org> |
 
+## Source Code
 
-
-
-
-
-
-
-
+* <https://github.com/thomaspoignant/go-feature-flag>
 
 ## Values
 
@@ -465,7 +460,7 @@ relayproxy.config: |
     url: https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.yaml
   exporter:
     kind: log
-  
+ 
 </pre>
 </div>
 			</td>
@@ -655,8 +650,6 @@ list
 		</tr>
 	</tbody>
 </table>
-
-
 
 ## Advanced
 You can edit the `values.yaml` file to enable an ingress or the autoscaling.
