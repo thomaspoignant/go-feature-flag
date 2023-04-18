@@ -1,6 +1,8 @@
 name: Release-tmp
 on:
-  branch: fix-helm-doc-ci
+  push:
+    branches:
+      - fix-helm-doc-ci
 
 jobs:
   bump-relay-proxy-helm-chart:
