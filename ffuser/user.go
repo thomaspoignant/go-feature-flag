@@ -39,3 +39,9 @@ func (u *User) IsAnonymous() bool {
 func (u *User) GetCustom() map[string]interface{} {
 	return u.custom
 }
+
+func (u *User) AddCustomAttribute(name string, value interface{}) {
+	if name != "" {
+		u.custom[name] = value
+	}
+}

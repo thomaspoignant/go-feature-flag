@@ -1159,6 +1159,44 @@ func TestInternalFlag_Value(t *testing.T) {
 				Cacheable: true,
 			},
 		},
+		{
+			name: "Should use the environment as a rule criteria",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"A": testconvert.Interface(false),
+					"B": testconvert.Interface(true),
+				},
+				Rules: &[]flag.Rule{
+					{
+						Query:           testconvert.String("env == \"development\""),
+						VariationResult: testconvert.String("A"),
+					},
+					{
+						Query: testconvert.String("(env == \"production\") " +
+							"or (env == \"staging\") or (env == \"qa\")"),
+						VariationResult: testconvert.String("B"),
+					},
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("B"),
+				},
+			},
+			args: args{
+				flagName: "feature",
+				user:     ffuser.NewUserBuilder("1").Build(),
+				evaluationCtx: flag.EvaluationContext{
+					DefaultSdkValue: true,
+					Environment:     "development",
+				},
+			},
+			want: false,
+			want1: flag.ResolutionDetails{
+				Variant:   "A",
+				Reason:    flag.ReasonTargetingMatch,
+				Cacheable: true,
+				RuleIndex: testconvert.Int(0),
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
