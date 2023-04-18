@@ -35,3 +35,4 @@ tmp/
 goff-proxy.yaml
 flags.yaml
 
+go-feature-flag-relay-proxy/

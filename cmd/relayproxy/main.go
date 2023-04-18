@@ -77,6 +77,11 @@ func main() {
 
 	// Init API server
 	apiServer := api.New(proxyConf, monitoringService, goff, zapLog)
-	apiServer.Start()
-	defer func() { _ = apiServer.Stop }()
+
+	if proxyConf.StartAsAwsLambda {
+		apiServer.StartAwsLambda()
+	} else {
+		apiServer.Start()
+		defer func() { _ = apiServer.Stop }()
+	}
 }
