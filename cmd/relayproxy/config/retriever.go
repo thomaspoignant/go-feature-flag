@@ -35,6 +35,9 @@ func (c *RetrieverConf) IsValid() error {
 	if c.Kind == GitlabRetriever && c.URL == "" {
 		return fmt.Errorf("invalid retriever: no \"URL\" property found for kind \"%s\"", c.Kind)
 	}
+	if c.Kind == GitlabRetriever && c.RepositorySlug == "" {
+		return fmt.Errorf("invalid retriever: no \"repositorySlug\" property found for kind \"%s\"", c.Kind)
+	}
 	if c.Kind == S3Retriever && c.Item == "" {
 		return fmt.Errorf("invalid retriever: no \"item\" property found for kind \"%s\"", c.Kind)
 	}
@@ -78,7 +81,8 @@ const (
 // IsValid is checking if the value is part of the enum
 func (r RetrieverKind) IsValid() error {
 	switch r {
-	case HTTPRetriever, GitHubRetriever, GitlabRetriever, S3Retriever, FileRetriever, GoogleStorageRetriever, KubernetesRetriever:
+	case HTTPRetriever, GitHubRetriever, GitlabRetriever, S3Retriever,
+		FileRetriever, GoogleStorageRetriever, KubernetesRetriever:
 		return nil
 	}
 	return fmt.Errorf("invalid retriever: kind \"%s\" is not supported", r)

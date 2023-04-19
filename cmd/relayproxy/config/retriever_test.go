@@ -52,6 +52,16 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 				URL:  "XXX",
 			},
 			wantErr:  true,
+			errValue: "invalid retriever: no \"repositorySlug\" property found for kind \"gitlab\"",
+		},
+		{
+			name: "kind GitlabRetriever, with URL but without path",
+			fields: config.RetrieverConf{
+				Kind:           "gitlab",
+				RepositorySlug: "aaa/bbb",
+				URL:            "XXX",
+			},
+			wantErr:  true,
 			errValue: "invalid retriever: no \"path\" property found for kind \"gitlab\"",
 		},
 		{

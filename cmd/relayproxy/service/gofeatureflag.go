@@ -111,9 +111,10 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 				}
 				return c.Branch
 			}(),
-			FilePath:    c.Path,
-			GitlabToken: c.GitlabToken,
-			Timeout:     retrieverTimeout,
+			FilePath:       c.Path,
+			GitlabToken:    c.GitlabToken,
+			RepositorySlug: c.RepositorySlug,
+			Timeout:        retrieverTimeout,
 		}, nil
 	case config.FileRetriever:
 		return &fileretriever.Retriever{
