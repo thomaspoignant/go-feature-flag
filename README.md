@@ -1,8 +1,3 @@
-> ## v0.x.x to v1.x.x migration
-> Version v1.0.0 has introduced a new flag format that push the limits of GO Feature Flag even further.
-> **BUT** the flag format from all the versions v0.x.x are still compatible and supported by the v1.0.0.
-> **We recommend you to migrate your configuration file following the [migration guide](https://gofeatureflag.org/docs/migrate_v0_v1).**  
-
 <p align="center">
   <img width="250" height="238" src="logo.png" alt="go-feature-flag logo" />
 </p>
