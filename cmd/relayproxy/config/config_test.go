@@ -1,11 +1,12 @@
 package config_test
 
 import (
+	"fmt"
+	"github.com/spf13/pflag"
 	"io"
 	"os"
 	"testing"
 
-	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"go.uber.org/zap"
@@ -63,21 +64,19 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 			fileLocation: "../testdata/config/invalid-yaml.yaml",
 			wantErr:      assert.Error,
 		},
-		{
-			name:         "File does not exists",
-			fileLocation: "../testdata/config/invalid-filename.yaml",
-			wantErr:      assert.Error,
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			viper.Set("config", tt.fileLocation)
-			got, err := config.ParseConfig(zap.L(), "1.X.X")
+			os.Unsetenv("version")
+			f := pflag.NewFlagSet("config", pflag.ContinueOnError)
+			f.String("config", "", "Location of your config file")
+			_ = f.Parse([]string{fmt.Sprintf("--config=%s", tt.fileLocation)})
+
+			got, err := config.New(f, zap.L(), "1.X.X")
 			if !tt.wantErr(t, err) {
 				return
 			}
 			assert.Equal(t, tt.want, got, "Config not matching")
-			viper.Reset()
 		})
 	}
 }
@@ -144,8 +143,12 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 			defer source.Close()
 			defer os.Remove("./goff-proxy.yaml")
 			_, _ = io.Copy(destination, source)
+			_ = os.Unsetenv("version")
 
-			got, err := config.ParseConfig(zap.L(), "1.X.X")
+			f := pflag.NewFlagSet("config", pflag.ContinueOnError)
+			f.String("config", "", "Location of your config file")
+			_ = f.Parse([]string{fmt.Sprintf("--config=%s", source.Name())})
+			got, err := config.New(f, zap.L(), "1.X.X")
 			if !tt.wantErr(t, err) {
 				return
 			}

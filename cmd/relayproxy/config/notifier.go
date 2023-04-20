@@ -3,11 +3,11 @@ package config
 import "fmt"
 
 type NotifierConf struct {
-	Kind            NotifierKind      `mapstruct:"notifier"`
-	SlackWebhookURL string            `mapstruct:"slackWebhookUrl"`
-	EndpointURL     string            `mapstruct:"endpointUrl"`
-	Secret          string            `mapstruct:"secret"`
-	Meta            map[string]string `mapstruct:"meta"`
+	Kind            NotifierKind      `mapstructure:"notifier" koanf:"notifier"`
+	SlackWebhookURL string            `mapstructure:"slackWebhookUrl" koanf:"slackWebhookUrl"`
+	EndpointURL     string            `mapstructure:"endpointUrl" koanf:"endpointUrl"`
+	Secret          string            `mapstructure:"secret" koanf:"secret"`
+	Meta            map[string]string `mapstructure:"meta" koanf:"meta"`
 }
 
 func (c *NotifierConf) IsValid() error {
