@@ -184,6 +184,34 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 			fileLocation: "../testdata/config/invalid-yaml.yaml",
 			wantErr:      assert.Error,
 		},
+		{
+			name:         "Should return all default if file does not exist",
+			fileLocation: "../testdata/config/file-not-exist.yaml",
+			wantErr:      assert.NoError,
+			want: &config.Config{
+				ListenPort:              1031,
+				PollingInterval:         60000,
+				FileFormat:              "yaml",
+				Host:                    "localhost",
+				StartWithRetrieverError: false,
+				RestAPITimeout:          5000,
+				Version:                 "1.X.X",
+			},
+		},
+		{
+			name:         "Should return all default if no file in the command line",
+			fileLocation: "",
+			wantErr:      assert.NoError,
+			want: &config.Config{
+				ListenPort:              1031,
+				PollingInterval:         60000,
+				FileFormat:              "yaml",
+				Host:                    "localhost",
+				StartWithRetrieverError: false,
+				RestAPITimeout:          5000,
+				Version:                 "1.X.X",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -194,11 +222,9 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 			defer source.Close()
 			defer os.Remove("./goff-proxy.yaml")
 			_, _ = io.Copy(destination, source)
-			t.Setenv("version", "1.X.X")
-
 			f := pflag.NewFlagSet("config", pflag.ContinueOnError)
 			f.String("config", "", "Location of your config file")
-			_ = f.Parse([]string{fmt.Sprintf("--config=%s", source.Name())})
+			_ = f.Parse([]string{fmt.Sprintf("--config=%s", tt.fileLocation)})
 			got, err := config.New(f, zap.L(), "1.X.X")
 			if !tt.wantErr(t, err) {
 				return
