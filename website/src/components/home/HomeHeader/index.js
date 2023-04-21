@@ -51,9 +51,10 @@ export function HomeHeader() {
               <span className="goffMainTitle">GO Feature Flag</span>
               <br />
               <span className="goffMainSubtitle">
-                Ship Faster, Reduce Risk, and Build Scale
+              {`${siteConfig.tagline}`}
               </span>
               <p>
+                <span className={styles.descriptionFirstLine}>Ship Faster, Reduce Risk, and Build Scale</span><br/>
                 Feature flags lets you modify system behavior without changing
                 code. Deploy every day, release when you are ready. Reduce risk
                 by releasing your features progressively.

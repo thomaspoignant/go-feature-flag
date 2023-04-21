@@ -179,7 +179,7 @@ div[class^="announcementBar_"] {
 /* NEW CSS*/
 .goffMainTitle {
   margin-top: 2rem;
-  font-size: 3rem;
+  font-size: 4rem;
   line-height: 2.5rem;
   color: var(--goff-main-title-color);
   font-family: Poppins, sans-serif;
@@ -192,7 +192,7 @@ div[class^="announcementBar_"] {
   font-family: Poppins, sans-serif;
   font-weight: 700;
   letter-spacing: -0.18rem;
-  font-size: 3rem;
+  font-size: 2.95rem;
 }
 
 .menu-icon{

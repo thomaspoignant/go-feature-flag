@@ -9,7 +9,7 @@ const TwitterSvg =
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'GO Feature Flag',
-  tagline: 'GO Feature Flag is a simple, complete and lightweight feature flag solution 100% Open Source.',
+  tagline: 'Simple Feature Flagging for All',
   url: 'https://gofeatureflag.org',
   baseUrl: '/',
   onBrokenLinks: 'throw',
@@ -20,6 +20,7 @@ const config = {
   trailingSlash: false,
 
   customFields: {
+    description: 'GO Feature Flag is a simple, complete and lightweight feature flag solution 100% Open Source.',
     logo: 'img/logo/logo.png',
     github: 'https://github.com/thomaspoignant/go-feature-flag',
     sponsor: 'https://github.com/sponsors/thomaspoignant',
