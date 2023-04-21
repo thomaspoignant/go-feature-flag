@@ -51,7 +51,6 @@ var DefaultExporter = struct {
 // New is reading the configuration file
 func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, error) {
 	k.Delete("")
-	_ = k.Set("version", version)
 
 	// Default values
 	_ = k.Load(confmap.Provider(map[string]interface{}{
@@ -94,6 +93,8 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 	_ = k.Load(env.Provider("", ".", func(s string) string {
 		return strings.ReplaceAll(strings.ToLower(s), "_", ".")
 	}), nil)
+
+	_ = k.Set("version", version)
 
 	proxyConf := &Config{}
 	errUnmarshal := k.Unmarshal("", &proxyConf)

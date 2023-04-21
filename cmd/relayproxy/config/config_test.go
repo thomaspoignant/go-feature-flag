@@ -3,13 +3,12 @@ package config_test
 import (
 	"fmt"
 	"github.com/spf13/pflag"
-	"io"
-	"os"
-	"testing"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"go.uber.org/zap"
+	"io"
+	"os"
+	"testing"
 )
 
 func TestParseConfig_fileFromPflag(t *testing.T) {
@@ -20,8 +19,60 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 		wantErr      assert.ErrorAssertionFunc
 	}{
 		{
-			name:         "Valid file",
+			name:         "Valid yaml file",
 			fileLocation: "../testdata/config/valid-file.yaml",
+			want: &config.Config{
+				ListenPort:      1031,
+				PollingInterval: 1000,
+				FileFormat:      "yaml",
+				Host:            "localhost",
+				Retriever: &config.RetrieverConf{
+					Kind: "http",
+					URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.yaml",
+				},
+				Exporter: &config.ExporterConf{
+					Kind: "log",
+				},
+				StartWithRetrieverError: false,
+				RestAPITimeout:          5000,
+				Version:                 "1.X.X",
+				EnableSwagger:           true,
+				APIKeys: []string{
+					"apikey1",
+					"apikey2",
+				},
+			},
+			wantErr: assert.NoError,
+		},
+		{
+			name:         "Valid json file",
+			fileLocation: "../testdata/config/valid-file.json",
+			want: &config.Config{
+				ListenPort:      1031,
+				PollingInterval: 1000,
+				FileFormat:      "yaml",
+				Host:            "localhost",
+				Retriever: &config.RetrieverConf{
+					Kind: "http",
+					URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.yaml",
+				},
+				Exporter: &config.ExporterConf{
+					Kind: "log",
+				},
+				StartWithRetrieverError: false,
+				RestAPITimeout:          5000,
+				Version:                 "1.X.X",
+				EnableSwagger:           true,
+				APIKeys: []string{
+					"apikey1",
+					"apikey2",
+				},
+			},
+			wantErr: assert.NoError,
+		},
+		{
+			name:         "Valid toml file",
+			fileLocation: "../testdata/config/valid-file.toml",
 			want: &config.Config{
 				ListenPort:      1031,
 				PollingInterval: 1000,
@@ -67,7 +118,7 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			os.Unsetenv("version")
+			t.Setenv("version", "1.X.X")
 			f := pflag.NewFlagSet("config", pflag.ContinueOnError)
 			f.String("config", "", "Location of your config file")
 			_ = f.Parse([]string{fmt.Sprintf("--config=%s", tt.fileLocation)})
@@ -143,7 +194,7 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 			defer source.Close()
 			defer os.Remove("./goff-proxy.yaml")
 			_, _ = io.Copy(destination, source)
-			_ = os.Unsetenv("version")
+			t.Setenv("version", "1.X.X")
 
 			f := pflag.NewFlagSet("config", pflag.ContinueOnError)
 			f.String("config", "", "Location of your config file")
