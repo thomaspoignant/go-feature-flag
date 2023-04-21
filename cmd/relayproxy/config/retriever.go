@@ -4,22 +4,22 @@ import "fmt"
 
 // RetrieverConf contains all the field to configure a retriever
 type RetrieverConf struct {
-	Kind           RetrieverKind       `mapstructure:"kind"`
-	RepositorySlug string              `mapstructure:"repositorySlug"`
-	Branch         string              `mapstructure:"branch"`
-	Path           string              `mapstructure:"path"`
-	GithubToken    string              `mapstructure:"githubToken"`
-	URL            string              `mapstructure:"url"`
-	Timeout        int64               `mapstructure:"timeout"`
-	HTTPMethod     string              `mapstructure:"method"`
-	HTTPBody       string              `mapstructure:"body"`
-	HTTPHeaders    map[string][]string `mapstructure:"headers"`
-	Bucket         string              `mapstructure:"bucket"`
-	Object         string              `mapstructure:"object"`
-	Item           string              `mapstructure:"item"`
-	Namespace      string              `mapstructure:"namespace"`
-	ConfigMap      string              `mapstructure:"configmap"`
-	Key            string              `mapstructure:"key"`
+	Kind           RetrieverKind       `mapstructure:"kind" koanf:"kind"`
+	RepositorySlug string              `mapstructure:"repositorySlug" koanf:"repositoryslug"`
+	Branch         string              `mapstructure:"branch" koanf:"branch"`
+	Path           string              `mapstructure:"path" koanf:"path"`
+	GithubToken    string              `mapstructure:"githubToken" koanf:"githubtoken"`
+	URL            string              `mapstructure:"url" koanf:"url"`
+	Timeout        int64               `mapstructure:"timeout" koanf:"timeout"`
+	HTTPMethod     string              `mapstructure:"method" koanf:"method"`
+	HTTPBody       string              `mapstructure:"body" koanf:"body"`
+	HTTPHeaders    map[string][]string `mapstructure:"headers" koanf:"headers"`
+	Bucket         string              `mapstructure:"bucket" koanf:"bucket"`
+	Object         string              `mapstructure:"bucket" koanf:"bucket"`
+	Item           string              `mapstructure:"item" koanf:"item"`
+	Namespace      string              `mapstructure:"namespace" koanf:"namespace"`
+	ConfigMap      string              `mapstructure:"configmap" koanf:"configmap"`
+	Key            string              `mapstructure:"key" koanf:"key"`
 }
 
 // IsValid validate the configuration of the retriever
