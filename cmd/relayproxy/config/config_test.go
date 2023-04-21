@@ -134,10 +134,11 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 
 func TestParseConfig_fileFromFolder(t *testing.T) {
 	tests := []struct {
-		name         string
-		want         *config.Config
-		fileLocation string
-		wantErr      assert.ErrorAssertionFunc
+		name                       string
+		want                       *config.Config
+		fileLocation               string
+		wantErr                    assert.ErrorAssertionFunc
+		disableDefaultFileCreation bool
 	}{
 		{
 			name:         "Valid file",
@@ -212,16 +213,33 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 				Version:                 "1.X.X",
 			},
 		},
+		{
+			name:         "Should return all default if no file and no default",
+			fileLocation: "",
+			wantErr:      assert.NoError,
+			want: &config.Config{
+				ListenPort:              1031,
+				PollingInterval:         60000,
+				FileFormat:              "yaml",
+				Host:                    "localhost",
+				StartWithRetrieverError: false,
+				RestAPITimeout:          5000,
+				Version:                 "1.X.X",
+			},
+			disableDefaultFileCreation: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			_ = os.Remove("./goff-proxy.yaml")
-			source, _ := os.Open(tt.fileLocation)
-			destination, _ := os.Create("./goff-proxy.yaml")
-			defer destination.Close()
-			defer source.Close()
-			defer os.Remove("./goff-proxy.yaml")
-			_, _ = io.Copy(destination, source)
+			if !tt.disableDefaultFileCreation {
+				source, _ := os.Open(tt.fileLocation)
+				destination, _ := os.Create("./goff-proxy.yaml")
+				defer destination.Close()
+				defer source.Close()
+				defer os.Remove("./goff-proxy.yaml")
+				_, _ = io.Copy(destination, source)
+			}
 			f := pflag.NewFlagSet("config", pflag.ContinueOnError)
 			f.String("config", "", "Location of your config file")
 			_ = f.Parse([]string{fmt.Sprintf("--config=%s", tt.fileLocation)})
