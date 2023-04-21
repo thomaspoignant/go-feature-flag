@@ -11,7 +11,7 @@ export default function Home() {
   return (
     <Layout
       title={`${siteConfig.title}`}
-      description="Description will go into a meta tag in <head />">
+      description="A simple and complete Open Source feature flag solution, super easy to install.">
       <HomeHeader />
       <Whatis />
       <Features />
