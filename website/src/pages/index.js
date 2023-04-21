@@ -10,8 +10,8 @@ export default function Home() {
   const {siteConfig} = useDocusaurusContext();
   return (
     <Layout
-      title={`${siteConfig.title}`}
-      description="A simple and complete Open Source feature flag solution, super easy to install.">
+      title="A Simple Open Source Feature Flag Solution"
+      description={`${siteConfig.tagline}`}>
       <HomeHeader />
       <Whatis />
       <Features />

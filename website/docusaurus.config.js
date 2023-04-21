@@ -9,7 +9,7 @@ const TwitterSvg =
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'GO Feature Flag',
-  tagline: 'Ship Faster, Reduce Risk, and Build Scale.',
+  tagline: 'GO Feature Flag is a simple, complete and lightweight feature flag solution 100% Open Source.',
   url: 'https://gofeatureflag.org',
   baseUrl: '/',
   onBrokenLinks: 'throw',
