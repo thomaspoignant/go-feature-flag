@@ -10,7 +10,7 @@ export default function Home() {
   const {siteConfig} = useDocusaurusContext();
   return (
     <Layout
-      title="Seamless Feature Flagging for All"
+      title="Simple Feature Flagging for All"
       description={`${siteConfig.tagline}`}>
       <HomeHeader />
       <Whatis />
