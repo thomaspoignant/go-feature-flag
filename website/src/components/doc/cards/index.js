@@ -1,11 +1,11 @@
 import React from 'react';
 import clsx from "clsx";
-import styles from "@site/src/components/doc/retrievers/styles.module.css";
+import styles from "@site/src/components/doc/cards/styles.module.css";
 import Link from "@docusaurus/Link";
 
-export function Retrievers(props) {
+export function Cards(props) {
 
-  const listItems = props.test.map((item, index) =>  <Retriever {...item} key={index} />);
+  const listItems = props.test.map((item, index) =>  <Card {...item} key={index} />);
 
   return(
     <div className="grid grid-pad">
@@ -14,7 +14,7 @@ export function Retrievers(props) {
   );
 }
 
-function Retriever(item){
+function Card(item){
   return(
     <div className={clsx("col-1-3 mobile-col-1-2", styles.container)}>
       <div className={styles.card}>

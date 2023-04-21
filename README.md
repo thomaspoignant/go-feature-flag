@@ -33,14 +33,14 @@ I've also written an [article](https://medium.com/better-programming/feature-fla
 
 ## What can I do with GO Feature Flag?
 
-- Storing your configuration flags file on various locations (`HTTP`, `S3`, `Kubernetes`, [_see full list_](https://gofeatureflag.org/docs/configure_flag/store_your_flags).
+- Storing your configuration flags file on various locations (`HTTP`, `S3`, `Kubernetes`, [_see full list_](https://gofeatureflag.org/docs/configure_flag/store_your_flags)).
 - Configuring your flags in various [format](https://gofeatureflag.org/docs/configure_flag/flag_format) (`JSON`, `TOML` and `YAML`).
 - Adding complex [rules](https://gofeatureflag.org/docs/configure_flag/flag_format#rule-format) to target your users.
 - Use a complex rollout strategy for your flags :
     - [Run A/B testing experimentation](https://gofeatureflag.org/docs/configure_flag/rollout/experimentation).
     - [Progressively rollout a feature](https://gofeatureflag.org/docs/configure_flag/rollout/progressive).
     - [Schedule your flag updates](https://gofeatureflag.org/docs/configure_flag/rollout/scheduled).
-- Exporting your flags usage data _(`S3`, `Google cloud storage`, `file`, ...)_.
+- Exporting your flags usage data _(`S3`, `Google cloud storage`, `file`, [_see full list_](https://gofeatureflag.org/docs/configure_flag/export_flags_usage))_.
 - Getting notified when a flag has been changed _(`webhook` and `slack`)_.
 - Use **GO Feature Flag** in several languages with **Open Feature SDKs**.
 
