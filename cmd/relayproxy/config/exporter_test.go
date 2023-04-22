@@ -128,6 +128,17 @@ func TestExporterConf_IsValid(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "invalid parquetCompressionCodec",
+			fields: fields{
+				Kind:                    "googleStorage",
+				Bucket:                  "testbucket",
+				Format:                  "parquet",
+				ParquetCompressionCodec: "invalid",
+			},
+			wantErr:  true,
+			errValue: "invalid exporter: \"parquetCompressionCodec\" err: not a valid CompressionCodec string",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

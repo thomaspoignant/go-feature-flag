@@ -2,6 +2,8 @@ package config
 
 import (
 	"fmt"
+
+	"github.com/xitongsys/parquet-go/parquet"
 )
 
 // ExporterConf contains all the field to configure an exporter
@@ -34,6 +36,11 @@ func (c *ExporterConf) IsValid() error {
 	}
 	if c.Kind == WebhookExporter && c.EndpointURL == "" {
 		return fmt.Errorf("invalid exporter: no \"endpointUrl\" property found for kind \"%s\"", c.Kind)
+	}
+	if len(c.ParquetCompressionCodec) > 0 {
+		if _, err := parquet.CompressionCodecFromString(c.ParquetCompressionCodec); err != nil {
+			return fmt.Errorf("invalid exporter: \"parquetCompressionCodec\" err: %v", err)
+		}
 	}
 	return nil
 }
