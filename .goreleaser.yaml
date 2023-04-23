@@ -98,25 +98,25 @@ dockers:
 docker_manifests:
   # https://goreleaser.com/customization/docker_manifest/
   - name_template: thomaspoignant/test-repository:latest
-    id: go-feature-flag-relay-proxy
+    id: go-feature-flag-relay-proxy-latest
     image_templates:
       - thomaspoignant/test-repository:v{{ .Major }}.{{ .Minor }}-arm64v8
       - thomaspoignant/test-repository:v{{ .Major }}.{{ .Minor }}-armv7
       - thomaspoignant/test-repository:v{{ .Major }}.{{ .Minor }}-amd64
   - name_template: thomaspoignant/go-feature-flag-lint:{{ .Tag }}
-    id: go-feature-flag-relay-proxy
+    id: go-feature-flag-relay-proxy-tag
     image_templates:
       - thomaspoignant/test-repository:v{{ .Major }}.{{ .Minor }}-arm64v8
       - thomaspoignant/test-repository:v{{ .Major }}.{{ .Minor }}-armv7
       - thomaspoignant/test-repository:v{{ .Major }}.{{ .Minor }}-amd64
   - name_template: thomaspoignant/test-repository:v{{ .Major }}
-    id: go-feature-flag-relay-proxy
+    id: go-feature-flag-relay-proxy-major
     image_templates:
       - thomaspoignant/test-repository:v{{ .Major }}.{{ .Minor }}-arm64v8
       - thomaspoignant/test-repository:v{{ .Major }}.{{ .Minor }}-armv7
       - thomaspoignant/test-repository:v{{ .Major }}.{{ .Minor }}-amd64
   - name_template: thomaspoignant/test-repository:v{{ .Major }}.{{ .Minor }}
-    id: go-feature-flag-relay-proxy
+    id: go-feature-flag-relay-proxy-major-minor
     image_templates:
       - thomaspoignant/test-repository:v{{ .Major }}.{{ .Minor }}-arm64v8
       - thomaspoignant/test-repository:v{{ .Major }}.{{ .Minor }}-armv7
