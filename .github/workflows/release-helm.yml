@@ -8,7 +8,7 @@ jobs:
   helm-release:
     runs-on: ubuntu-latest
     env:
-      CHART_YAML_FILE_LOCATION: cmd/relayproxy/helm-charts/relay-proxy/Chart.yaml
+      CHART_README_LOCATION: cmd/relayproxy/helm-charts/relay-proxy/README.md
       MAIN_BRANCH_NAME: main
     steps:
       - name: Checkout
@@ -54,8 +54,8 @@ jobs:
 
       - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
-      - name: Copy version to main branch
-        run: cp -rf $CHART_YAML_FILE_LOCATION $MAIN_BRANCH_NAME/$CHART_YAML_FILE_LOCATION
+      - name: Copy README to main branch
+        run: cp -rf $CHART_README_LOCATION $MAIN_BRANCH_NAME/$CHART_README_LOCATION
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4
