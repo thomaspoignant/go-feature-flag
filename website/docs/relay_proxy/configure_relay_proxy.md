@@ -36,7 +36,7 @@ If you want to replace a nested fields, please use `_` to separate each field _(
 
 <a name="retriever"></a>
 
-## type `retriver`
+## type `retriever`
 
 `go-feature-flag` is supporting different kind of retriever such as S3, Google store, etc ...  
 In this section we will present all the available retriever configuration available.
