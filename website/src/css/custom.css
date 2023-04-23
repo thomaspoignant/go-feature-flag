@@ -192,7 +192,8 @@ div[class^="announcementBar_"] {
   font-family: Poppins, sans-serif;
   font-weight: 700;
   letter-spacing: -0.18rem;
-  font-size: 2.95rem;
+  font-size: 2.80rem;
+  line-height: 2.5rem;
 }
 
 .menu-icon{
