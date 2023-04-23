@@ -2,6 +2,12 @@ package config
 
 import (
 	"fmt"
+	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
+	"time"
+
 	"github.com/knadh/koanf/parsers/json"
 	"github.com/knadh/koanf/parsers/toml"
 	"github.com/knadh/koanf/parsers/yaml"
@@ -10,13 +16,8 @@ import (
 	"github.com/knadh/koanf/providers/file"
 	"github.com/knadh/koanf/providers/posflag"
 	"github.com/knadh/koanf/v2"
-	"net/http"
-	"os"
-	"path/filepath"
-	"strings"
-	"time"
-
 	"github.com/spf13/pflag"
+	"github.com/xitongsys/parquet-go/parquet"
 	"go.uber.org/zap"
 )
 
@@ -32,20 +33,22 @@ var DefaultRetriever = struct {
 }
 
 var DefaultExporter = struct {
-	Format           string
-	LogFormat        string
-	FileName         string
-	CsvFormat        string
-	FlushInterval    time.Duration
-	MaxEventInMemory int64
+	Format                  string
+	LogFormat               string
+	FileName                string
+	CsvFormat               string
+	FlushInterval           time.Duration
+	MaxEventInMemory        int64
+	ParquetCompressionCodec string
 }{
 	Format:    "JSON",
 	LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", value=\"{{ .Value}}\"",
 	FileName:  "flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}",
 	CsvFormat: "{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};" +
 		"{{ .Value}};{{ .Default}}\\n",
-	FlushInterval:    60000 * time.Millisecond,
-	MaxEventInMemory: 100000,
+	FlushInterval:           60000 * time.Millisecond,
+	MaxEventInMemory:        100000,
+	ParquetCompressionCodec: parquet.CompressionCodec_SNAPPY.String(),
 }
 
 // New is reading the configuration file
