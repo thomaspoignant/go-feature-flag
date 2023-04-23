@@ -167,6 +167,11 @@ func initExporter(c *config.ExporterConf) (ffclient.DataExporter, error) {
 		csvTemplate = c.CsvTemplate
 	}
 
+	parquetCompressionCodec := config.DefaultExporter.ParquetCompressionCodec
+	if c.ParquetCompressionCodec != "" {
+		parquetCompressionCodec = c.ParquetCompressionCodec
+	}
+
 	dataExp := ffclient.DataExporter{
 		FlushInterval: func() time.Duration {
 			if c.FlushInterval != 0 {
@@ -193,10 +198,11 @@ func initExporter(c *config.ExporterConf) (ffclient.DataExporter, error) {
 
 	case config.FileExporter:
 		dataExp.Exporter = &fileexporter.Exporter{
-			Format:      format,
-			OutputDir:   c.OutputDir,
-			Filename:    filename,
-			CsvTemplate: csvTemplate,
+			Format:                  format,
+			OutputDir:               c.OutputDir,
+			Filename:                filename,
+			CsvTemplate:             csvTemplate,
+			ParquetCompressionCodec: parquetCompressionCodec,
 		}
 		return dataExp, nil
 
@@ -213,21 +219,23 @@ func initExporter(c *config.ExporterConf) (ffclient.DataExporter, error) {
 
 	case config.S3Exporter:
 		dataExp.Exporter = &s3exporter.Exporter{
-			Bucket:      c.Bucket,
-			Format:      format,
-			S3Path:      c.Path,
-			Filename:    filename,
-			CsvTemplate: csvTemplate,
+			Bucket:                  c.Bucket,
+			Format:                  format,
+			S3Path:                  c.Path,
+			Filename:                filename,
+			CsvTemplate:             csvTemplate,
+			ParquetCompressionCodec: parquetCompressionCodec,
 		}
 		return dataExp, nil
 
 	case config.GoogleStorageExporter:
 		dataExp.Exporter = &gcstorageexporter.Exporter{
-			Bucket:      c.Bucket,
-			Format:      format,
-			Path:        c.Path,
-			Filename:    filename,
-			CsvTemplate: csvTemplate,
+			Bucket:                  c.Bucket,
+			Format:                  format,
+			Path:                    c.Path,
+			Filename:                filename,
+			CsvTemplate:             csvTemplate,
+			ParquetCompressionCodec: parquetCompressionCodec,
 		}
 		return dataExp, nil
 
