@@ -40,6 +40,7 @@ builds:
     goarch:
       - amd64
       - arm64
+      - arm
     goarm:
       - 6
       - 7
@@ -63,7 +64,6 @@ dockers:
   - use: buildx
     goos: linux
     goarch: amd64
-    goarm: 8
     ids:
       - go-feature-flag-relay-proxy
     dockerfile: ./cmd/relayproxy/DockerfileGoreleaser
@@ -75,6 +75,7 @@ dockers:
   - use: buildx
     goos: linux
     goarch: arm64
+    goarm: 8
     ids:
       - go-feature-flag-relay-proxy
     dockerfile: ./cmd/relayproxy/DockerfileGoreleaser
