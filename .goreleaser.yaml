@@ -6,30 +6,6 @@ before:
 dist: release
 
 builds:
-#  - id: go-feature-flag-migration-cli
-#    main: ./cmd/migrationcli
-#    binary: go-feature-flag-migration-cli
-#    env:
-#      - CGO_ENABLED=0
-#    goos:
-#      - darwin
-#      - linux
-#      - windows
-#    goarch:
-#      - 386
-#      - amd64
-#      - arm64
-#      - arm
-#    goarm:
-#      - 6
-#      - 7
-#    ignore:
-#      - goos: darwin
-#        goarch: 386
-#      - goos: linux
-#        goarch: arm
-#        goarm: 6
-
   - id: go-feature-flag-relay-proxy
     main: ./cmd/relayproxy
     binary: go-feature-flag-relay-proxy
@@ -44,7 +20,6 @@ builds:
     goarm:
       - 6
       - 7
-      - 8
 
 checksum:
   name_template: 'checksums.txt'
@@ -75,7 +50,6 @@ dockers:
   - use: buildx
     goos: linux
     goarch: arm64
-    goarm: 8
     ids:
       - go-feature-flag-relay-proxy
     dockerfile: ./cmd/relayproxy/DockerfileGoreleaser
