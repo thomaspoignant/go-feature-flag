@@ -21,7 +21,7 @@ type ExporterConf struct {
 	LogFormat               string            `mapstructure:"logFormat" koanf:"logformat"`
 	FlushInterval           int64             `mapstructure:"flushInterval" koanf:"flushinterval"`
 	MaxEventInMemory        int64             `mapstructure:"maxEventInMemory" koanf:"maxeventinmemory"`
-	ParquetCompressionCodec string            `mapstructure:"parquetcompressioncodec" koanf:"parquetCompressionCodec"`
+	ParquetCompressionCodec string            `mapstructure:"parquetCompressionCodec" koanf:"parquetcompressioncodec"`
 }
 
 func (c *ExporterConf) IsValid() error {
