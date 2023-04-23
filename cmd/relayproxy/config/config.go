@@ -242,6 +242,7 @@ func locateConfigFile(inputFilePath string) (string, error) {
 		"yaml",
 		"toml",
 		"json",
+		"yml",
 	}
 
 	if inputFilePath != "" {
