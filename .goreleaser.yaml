@@ -6,29 +6,29 @@ before:
 dist: release
 
 builds:
-  - id: go-feature-flag-migration-cli
-    main: ./cmd/migrationcli
-    binary: go-feature-flag-migration-cli
-    env:
-      - CGO_ENABLED=0
-    goos:
-      - darwin
-      - linux
-      - windows
-    goarch:
-      - 386
-      - amd64
-      - arm64
-      - arm
-    goarm:
-      - 6
-      - 7
-    ignore:
-      - goos: darwin
-        goarch: 386
-      - goos: linux
-        goarch: arm
-        goarm: 6
+#  - id: go-feature-flag-migration-cli
+#    main: ./cmd/migrationcli
+#    binary: go-feature-flag-migration-cli
+#    env:
+#      - CGO_ENABLED=0
+#    goos:
+#      - darwin
+#      - linux
+#      - windows
+#    goarch:
+#      - 386
+#      - amd64
+#      - arm64
+#      - arm
+#    goarm:
+#      - 6
+#      - 7
+#    ignore:
+#      - goos: darwin
+#        goarch: 386
+#      - goos: linux
+#        goarch: arm
+#        goarm: 6
 
   - id: go-feature-flag-relay-proxy
     main: ./cmd/relayproxy
@@ -54,67 +54,67 @@ builds:
         goarch: arm
         goarm: 6
 
-  - id: go-feature-flag-lint
-    main: ./cmd/lint
-    binary: go-feature-flag-lint
-    env:
-      - CGO_ENABLED=0
-    goos:
-      - darwin
-      - linux
-      - windows
-    goarch:
-      - 386
-      - amd64
-      - arm64
-      - arm
-    goarm:
-      - 6
-      - 7
-    ignore:
-      - goos: darwin
-        goarch: 386
-      - goos: linux
-        goarch: arm
-        goarm: 6
+#  - id: go-feature-flag-lint
+#    main: ./cmd/lint
+#    binary: go-feature-flag-lint
+#    env:
+#      - CGO_ENABLED=0
+#    goos:
+#      - darwin
+#      - linux
+#      - windows
+#    goarch:
+#      - 386
+#      - amd64
+#      - arm64
+#      - arm
+#    goarm:
+#      - 6
+#      - 7
+#    ignore:
+#      - goos: darwin
+#        goarch: 386
+#      - goos: linux
+#        goarch: arm
+#        goarm: 6
 
-archives:
-  - id: go-feature-flag-migration-cli
-    name_template: "go-feature-flag-migration-cli_\
-      {{ .Version }}_\
-      {{- title .Os }}_\
-      {{- if eq .Arch \"amd64\" }}x86_64\
-      {{- else if eq .Arch \"386\" }}i386\
-      {{- else }}{{ .Arch }}{{ end }}\
-      {{- with .Arm }}v{{ . }}{{ end }}\
-      {{- with .Mips }}_{{ . }}{{ end }}\
-      {{- if not (eq .Amd64 \"v1\") }}{{ .Amd64 }}{{ end }}"
-    builds:
-      - go-feature-flag-migration-cli
-  - id: go-feature-flag-relay-proxy
-    name_template: "go-feature-flag-relay-proxy_\
-      {{ .Version }}_\
-      {{- title .Os }}_\
-      {{- if eq .Arch \"amd64\" }}x86_64\
-      {{- else if eq .Arch \"386\" }}i386\
-      {{- else }}{{ .Arch }}{{ end }}\
-      {{- with .Arm }}v{{ . }}{{ end }}\
-      {{- with .Mips }}_{{ . }}{{ end }}\
-      {{- if not (eq .Amd64 \"v1\") }}{{ .Amd64 }}{{ end }}"
-    builds:
-      - go-feature-flag-relay-proxy
-  - id: go-feature-flag-lint
-    name_template: "go-feature-flag-lint_\
-      {{ .Version }}_\
-      {{- title .Os }}_\
-      {{- if eq .Arch \"amd64\" }}x86_64\
-      {{- else if eq .Arch \"386\" }}i386\
-      {{- else }}{{ .Arch }}{{ end }}\
-      {{- with .Arm }}v{{ . }}{{ end }}\
-      {{- with .Mips }}_{{ . }}{{ end }}\
-      {{- if not (eq .Amd64 \"v1\") }}{{ .Amd64 }}{{ end }}"
-    builds:
-      - go-feature-flag-lint
+#archives:
+#  - id: go-feature-flag-migration-cli
+#    name_template: "go-feature-flag-migration-cli_\
+#      {{ .Version }}_\
+#      {{- title .Os }}_\
+#      {{- if eq .Arch \"amd64\" }}x86_64\
+#      {{- else if eq .Arch \"386\" }}i386\
+#      {{- else }}{{ .Arch }}{{ end }}\
+#      {{- with .Arm }}v{{ . }}{{ end }}\
+#      {{- with .Mips }}_{{ . }}{{ end }}\
+#      {{- if not (eq .Amd64 \"v1\") }}{{ .Amd64 }}{{ end }}"
+#    builds:
+#      - go-feature-flag-migration-cli
+#  - id: go-feature-flag-relay-proxy
+#    name_template: "go-feature-flag-relay-proxy_\
+#      {{ .Version }}_\
+#      {{- title .Os }}_\
+#      {{- if eq .Arch \"amd64\" }}x86_64\
+#      {{- else if eq .Arch \"386\" }}i386\
+#      {{- else }}{{ .Arch }}{{ end }}\
+#      {{- with .Arm }}v{{ . }}{{ end }}\
+#      {{- with .Mips }}_{{ . }}{{ end }}\
+#      {{- if not (eq .Amd64 \"v1\") }}{{ .Amd64 }}{{ end }}"
+#    builds:
+#      - go-feature-flag-relay-proxy
+#  - id: go-feature-flag-lint
+#    name_template: "go-feature-flag-lint_\
+#      {{ .Version }}_\
+#      {{- title .Os }}_\
+#      {{- if eq .Arch \"amd64\" }}x86_64\
+#      {{- else if eq .Arch \"386\" }}i386\
+#      {{- else }}{{ .Arch }}{{ end }}\
+#      {{- with .Arm }}v{{ . }}{{ end }}\
+#      {{- with .Mips }}_{{ . }}{{ end }}\
+#      {{- if not (eq .Amd64 \"v1\") }}{{ .Amd64 }}{{ end }}"
+#    builds:
+#      - go-feature-flag-lint
 
 checksum:
   name_template: 'checksums.txt'
@@ -131,77 +131,97 @@ changelog:
       - 'vendor'
 
 dockers:
-  - goos: linux
-    ids:
-      - go-feature-flag-migration-cli
-    dockerfile: ./cmd/migrationcli/Dockerfile
-    image_templates:
-      - thomaspoignant/go-feature-flag-migration-cli:latest
-      - thomaspoignant/go-feature-flag-migration-cli:{{ .Tag }}
-      - thomaspoignant/go-feature-flag-migration-cli:v{{ .Major }}
-      - thomaspoignant/go-feature-flag-migration-cli:v{{ .Major }}.{{ .Minor }}
-  - goos: linux
+#  - goos: linux
+#    ids:
+#      - go-feature-flag-migration-cli
+#    dockerfile: ./cmd/migrationcli/Dockerfile
+#    image_templates:
+#      - thomaspoignant/go-feature-flag-migration-cli:latest
+#      - thomaspoignant/go-feature-flag-migration-cli:{{ .Tag }}
+#      - thomaspoignant/go-feature-flag-migration-cli:v{{ .Major }}
+#      - thomaspoignant/go-feature-flag-migration-cli:v{{ .Major }}.{{ .Minor }}
+#  - goos: linux
+#    ids:
+#      - go-feature-flag-lint
+#    dockerfile: ./cmd/lint/Dockerfile
+#    image_templates:
+#      - thomaspoignant/go-feature-flag-lint:latest
+#      - thomaspoignant/go-feature-flag-lint:{{ .Tag }}
+#      - thomaspoignant/go-feature-flag-lint:v{{ .Major }}
+#      - thomaspoignant/go-feature-flag-lint:v{{ .Major }}.{{ .Minor }}
+  - use: buildx
+    goos: linux
+    goarch: amd64
     ids:
       - go-feature-flag-relay-proxy
     dockerfile: ./cmd/relayproxy/DockerfileGoreleaser
     image_templates:
-      - thomaspoignant/go-feature-flag-relay-proxy:latest
-      - thomaspoignant/go-feature-flag-relay-proxy:{{ .Tag }}
-      - thomaspoignant/go-feature-flag-relay-proxy:v{{ .Major }}
-      - thomaspoignant/go-feature-flag-relay-proxy:v{{ .Major }}.{{ .Minor }}
-  - goos: linux
+      - thomaspoignant/test-repository:latest-amd64
+      - thomaspoignant/test-repository:v{{ .Major }}.{{ .Minor }}-amd64
+    build_flag_templates:
+      - "--platform=linux/amd64"
+  - use: buildx
+    goos: linux
+    goarch: arm64
     ids:
-      - go-feature-flag-lint
-    dockerfile: ./cmd/lint/Dockerfile
-    image_templates:
-      - thomaspoignant/go-feature-flag-lint:latest
-      - thomaspoignant/go-feature-flag-lint:{{ .Tag }}
-      - thomaspoignant/go-feature-flag-lint:v{{ .Major }}
-      - thomaspoignant/go-feature-flag-lint:v{{ .Major }}.{{ .Minor }}
-
-brews:
-  - ids:
-      - go-feature-flag-migration-cli
-    name: go-feature-flag-migration-cli
-    tap:
-      owner: thomaspoignant
-      name: homebrew-tap
-      branch: master
-    caveats: "A migration command line to move your feature flag configuration file from format GO Feature Flag v0.X to v1.X"
-    homepage: "https://github.com/thomaspoignant/go-feature-flag/cmd/migrationcli"
-    description: "A migration command line to move your feature flag configuration file from format GO Feature Flag v0.X to v1.X"
-    skip_upload: auto
-  - ids:
       - go-feature-flag-relay-proxy
-    name: go-feature-flag-relay-proxy
-    tap:
-      owner: thomaspoignant
-      name: homebrew-tap
-      branch: master
-    caveats: "A stand alone server to run GO Feature Flag"
-    homepage: "https://gofeatureflag.org"
-    description: "A stand alone server to run GO Feature Flag"
-    skip_upload: auto
-  - ids:
-      - go-feature-flag-lint
-    name: go-feature-flag-lint
-    tap:
-      owner: thomaspoignant
-      name: homebrew-tap
-      branch: master
-    caveats: "A command line tool to lint your feature flag configuration file"
-    homepage: "https://gofeatureflag.org"
-    description: "A command line tool to lint your feature flag configuration file"
-    skip_upload: auto
+    dockerfile: ./cmd/relayproxy/DockerfileGoreleaser
+    image_templates:
+      - thomaspoignant/test-repository:latest-arm64v8
+      - thomaspoignant/test-repository:v{{ .Major }}.{{ .Minor }}-arm64v8
+    build_flag_templates:
+      - "--platform=linux/arm64/v8"
+docker_manifests:
+  # https://goreleaser.com/customization/docker_manifest/
+  - name_template: thomaspoignant/test-repository:v{{ .Major }}.{{ .Minor }}
+    id: go-feature-flag-relay-proxy
+    image_templates:
+      - thomaspoignant/test-repository:v{{ .Major }}.{{ .Minor }}-arm64v8
+      - thomaspoignant/test-repository:v{{ .Major }}.{{ .Minor }}-amd64
 
-scoop:
-  url_template: "https://github.com/thomaspoignant/go-feature-flag/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
-  bucket:
-    owner: thomaspoignant
-    name: scoop
-  commit_msg_template: "Scoop update for {{ .ProjectName }} version {{ .Tag }}"
-  homepage: "https://gofeatureflag.org"
-  license: MIT
-
-snapshot:
-  name_template: "{{ incpatch .Version }}-next"
+#brews:
+#  - ids:
+#      - go-feature-flag-migration-cli
+#    name: go-feature-flag-migration-cli
+#    tap:
+#      owner: thomaspoignant
+#      name: homebrew-tap
+#      branch: master
+#    caveats: "A migration command line to move your feature flag configuration file from format GO Feature Flag v0.X to v1.X"
+#    homepage: "https://github.com/thomaspoignant/go-feature-flag/cmd/migrationcli"
+#    description: "A migration command line to move your feature flag configuration file from format GO Feature Flag v0.X to v1.X"
+#    skip_upload: auto
+#  - ids:
+#      - go-feature-flag-relay-proxy
+#    name: go-feature-flag-relay-proxy
+#    tap:
+#      owner: thomaspoignant
+#      name: homebrew-tap
+#      branch: master
+#    caveats: "A stand alone server to run GO Feature Flag"
+#    homepage: "https://gofeatureflag.org"
+#    description: "A stand alone server to run GO Feature Flag"
+#    skip_upload: auto
+#  - ids:
+#      - go-feature-flag-lint
+#    name: go-feature-flag-lint
+#    tap:
+#      owner: thomaspoignant
+#      name: homebrew-tap
+#      branch: master
+#    caveats: "A command line tool to lint your feature flag configuration file"
+#    homepage: "https://gofeatureflag.org"
+#    description: "A command line tool to lint your feature flag configuration file"
+#    skip_upload: auto
+#
+#scoop:
+#  url_template: "https://github.com/thomaspoignant/go-feature-flag/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+#  bucket:
+#    owner: thomaspoignant
+#    name: scoop
+#  commit_msg_template: "Scoop update for {{ .ProjectName }} version {{ .Tag }}"
+#  homepage: "https://gofeatureflag.org"
+#  license: MIT
+#
+#snapshot:
+#  name_template: "{{ incpatch .Version }}-next"
