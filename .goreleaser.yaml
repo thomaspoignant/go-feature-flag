@@ -6,20 +6,115 @@ before:
 dist: release
 
 builds:
-  - id: go-feature-flag-relay-proxy
-    main: ./cmd/relayproxy
-    binary: go-feature-flag-relay-proxy
+  - id: go-feature-flag-migration-cli
+    main: ./cmd/migrationcli
+    binary: go-feature-flag-migration-cli
     env:
       - CGO_ENABLED=0
     goos:
+      - darwin
       - linux
+      - windows
     goarch:
+      - 386
       - amd64
       - arm64
       - arm
     goarm:
       - 6
       - 7
+    ignore:
+      - goos: darwin
+        goarch: 386
+      - goos: linux
+        goarch: arm
+        goarm: 6
+
+  - id: go-feature-flag-relay-proxy
+    main: ./cmd/relayproxy
+    binary: go-feature-flag-relay-proxy
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - 386
+      - amd64
+      - arm64
+      - arm
+    goarm:
+      - 6
+      - 7
+    ignore:
+      - goos: darwin
+        goarch: 386
+      - goos: linux
+        goarch: arm
+        goarm: 6
+
+  - id: go-feature-flag-lint
+    main: ./cmd/lint
+    binary: go-feature-flag-lint
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - 386
+      - amd64
+      - arm64
+      - arm
+    goarm:
+      - 6
+      - 7
+    ignore:
+      - goos: darwin
+        goarch: 386
+      - goos: linux
+        goarch: arm
+        goarm: 6
+
+archives:
+  - id: go-feature-flag-migration-cli
+    name_template: "go-feature-flag-migration-cli_\
+      {{ .Version }}_\
+      {{- title .Os }}_\
+      {{- if eq .Arch \"amd64\" }}x86_64\
+      {{- else if eq .Arch \"386\" }}i386\
+      {{- else }}{{ .Arch }}{{ end }}\
+      {{- with .Arm }}v{{ . }}{{ end }}\
+      {{- with .Mips }}_{{ . }}{{ end }}\
+      {{- if not (eq .Amd64 \"v1\") }}{{ .Amd64 }}{{ end }}"
+    builds:
+      - go-feature-flag-migration-cli
+  - id: go-feature-flag-relay-proxy
+    name_template: "go-feature-flag-relay-proxy_\
+      {{ .Version }}_\
+      {{- title .Os }}_\
+      {{- if eq .Arch \"amd64\" }}x86_64\
+      {{- else if eq .Arch \"386\" }}i386\
+      {{- else }}{{ .Arch }}{{ end }}\
+      {{- with .Arm }}v{{ . }}{{ end }}\
+      {{- with .Mips }}_{{ . }}{{ end }}\
+      {{- if not (eq .Amd64 \"v1\") }}{{ .Amd64 }}{{ end }}"
+    builds:
+      - go-feature-flag-relay-proxy
+  - id: go-feature-flag-lint
+    name_template: "go-feature-flag-lint_\
+      {{ .Version }}_\
+      {{- title .Os }}_\
+      {{- if eq .Arch \"amd64\" }}x86_64\
+      {{- else if eq .Arch \"386\" }}i386\
+      {{- else }}{{ .Arch }}{{ end }}\
+      {{- with .Arm }}v{{ . }}{{ end }}\
+      {{- with .Mips }}_{{ . }}{{ end }}\
+      {{- if not (eq .Amd64 \"v1\") }}{{ .Amd64 }}{{ end }}"
+    builds:
+      - go-feature-flag-lint
 
 checksum:
   name_template: 'checksums.txt'
@@ -36,6 +131,7 @@ changelog:
       - 'vendor'
 
 dockers:
+# relay-proxy
   - use: buildx
     goos: linux
     goarch: amd64
@@ -43,8 +139,7 @@ dockers:
       - go-feature-flag-relay-proxy
     dockerfile: ./cmd/relayproxy/DockerfileGoreleaser
     image_templates:
-      - thomaspoignant/test-repository:latest-amd64
-      - thomaspoignant/test-repository:v{{ .Major }}.{{ .Minor }}-amd64
+      - thomaspoignant/go-feature-flag-relay-proxy:v{{ .Major }}.{{ .Minor }}-amd64
     build_flag_templates:
       - "--platform=linux/amd64"
   - use: buildx
@@ -54,8 +149,7 @@ dockers:
       - go-feature-flag-relay-proxy
     dockerfile: ./cmd/relayproxy/DockerfileGoreleaser
     image_templates:
-      - thomaspoignant/test-repository:latest-arm64v8
-      - thomaspoignant/test-repository:v{{ .Major }}.{{ .Minor }}-arm64v8
+      - thomaspoignant/go-feature-flag-relay-proxy:v{{ .Major }}.{{ .Minor }}-arm64v8
     build_flag_templates:
       - "--platform=linux/arm64/v8"
   - use: buildx
@@ -66,33 +160,196 @@ dockers:
       - go-feature-flag-relay-proxy
     dockerfile: ./cmd/relayproxy/DockerfileGoreleaser
     image_templates:
-      - thomaspoignant/test-repository:latest-armv7
-      - thomaspoignant/test-repository:v{{ .Major }}.{{ .Minor }}-armv7
+      - thomaspoignant/go-feature-flag-relay-proxy:v{{ .Major }}.{{ .Minor }}-armv7
     build_flag_templates:
       - "--platform=linux/arm/v7"
+
+# migration-cli
+  - use: buildx
+    goos: linux
+    goarch: amd64
+    ids:
+      - go-feature-flag-migration-cli
+    dockerfile: ./cmd/migrationcli/Dockerfile
+    image_templates:
+      - thomaspoignant/go-feature-flag-migration-cli:v{{ .Major }}.{{ .Minor }}-amd64
+    build_flag_templates:
+      - "--platform=linux/amd64"
+  - use: buildx
+    goos: linux
+    goarch: arm64
+    ids:
+      - go-feature-flag-migration-cli
+    dockerfile: ./cmd/migrationcli/Dockerfile
+    image_templates:
+      - thomaspoignant/go-feature-flag-migration-cli:v{{ .Major }}.{{ .Minor }}-arm64v8
+    build_flag_templates:
+      - "--platform=linux/arm64/v8"
+  - use: buildx
+    goos: linux
+    goarch: arm
+    goarm: 7
+    ids:
+      - go-feature-flag-migration-cli
+    dockerfile: ./cmd/migrationcli/Dockerfile
+    image_templates:
+      - thomaspoignant/go-feature-flag-migration-cli:v{{ .Major }}.{{ .Minor }}-armv7
+    build_flag_templates:
+      - "--platform=linux/arm/v7"
+
+# lint
+  - use: buildx
+    goos: linux
+    goarch: amd64
+    ids:
+      - go-feature-flag-lint
+    dockerfile: ./cmd/lint/Dockerfile
+    image_templates:
+      - thomaspoignant/go-feature-flag-lint:v{{ .Major }}.{{ .Minor }}-amd64
+    build_flag_templates:
+      - "--platform=linux/amd64"
+  - use: buildx
+    goos: linux
+    goarch: arm64
+    ids:
+      - go-feature-flag-lint
+    dockerfile: ./cmd/lint/Dockerfile
+    image_templates:
+      - thomaspoignant/go-feature-flag-lint:v{{ .Major }}.{{ .Minor }}-arm64v8
+    build_flag_templates:
+      - "--platform=linux/arm64/v8"
+  - use: buildx
+    goos: linux
+    goarch: arm
+    goarm: 7
+    ids:
+      - go-feature-flag-lint
+    dockerfile: ./cmd/lint/Dockerfile
+    image_templates:
+      - thomaspoignant/go-feature-flag-lint:v{{ .Major }}.{{ .Minor }}-armv7
+    build_flag_templates:
+      - "--platform=linux/arm/v7"
+
 docker_manifests:
-  # https://goreleaser.com/customization/docker_manifest/
-  - name_template: thomaspoignant/test-repository:latest
+# rely-proxy
+  - name_template: thomaspoignant/go-feature-flag-relay-proxy:latest
     id: go-feature-flag-relay-proxy-latest
     image_templates:
-      - thomaspoignant/test-repository:v{{ .Major }}.{{ .Minor }}-arm64v8
-      - thomaspoignant/test-repository:v{{ .Major }}.{{ .Minor }}-armv7
-      - thomaspoignant/test-repository:v{{ .Major }}.{{ .Minor }}-amd64
-  - name_template: thomaspoignant/test-repository:{{ .Tag }}
+      - thomaspoignant/go-feature-flag-relay-proxy:v{{ .Major }}.{{ .Minor }}-arm64v8
+      - thomaspoignant/go-feature-flag-relay-proxy:v{{ .Major }}.{{ .Minor }}-armv7
+      - thomaspoignant/go-feature-flag-relay-proxy:v{{ .Major }}.{{ .Minor }}-amd64
+  - name_template: thomaspoignant/go-feature-flag-relay-proxy:{{ .Tag }}
     id: go-feature-flag-relay-proxy-tag
     image_templates:
-      - thomaspoignant/test-repository:v{{ .Major }}.{{ .Minor }}-arm64v8
-      - thomaspoignant/test-repository:v{{ .Major }}.{{ .Minor }}-armv7
-      - thomaspoignant/test-repository:v{{ .Major }}.{{ .Minor }}-amd64
-  - name_template: thomaspoignant/test-repository:v{{ .Major }}
+      - thomaspoignant/go-feature-flag-relay-proxy:v{{ .Major }}.{{ .Minor }}-arm64v8
+      - thomaspoignant/go-feature-flag-relay-proxy:v{{ .Major }}.{{ .Minor }}-armv7
+      - thomaspoignant/go-feature-flag-relay-proxy:v{{ .Major }}.{{ .Minor }}-amd64
+  - name_template: thomaspoignant/go-feature-flag-relay-proxy:v{{ .Major }}
     id: go-feature-flag-relay-proxy-major
     image_templates:
-      - thomaspoignant/test-repository:v{{ .Major }}.{{ .Minor }}-arm64v8
-      - thomaspoignant/test-repository:v{{ .Major }}.{{ .Minor }}-armv7
-      - thomaspoignant/test-repository:v{{ .Major }}.{{ .Minor }}-amd64
-  - name_template: thomaspoignant/test-repository:v{{ .Major }}.{{ .Minor }}
+      - thomaspoignant/go-feature-flag-relay-proxy:v{{ .Major }}.{{ .Minor }}-arm64v8
+      - thomaspoignant/go-feature-flag-relay-proxy:v{{ .Major }}.{{ .Minor }}-armv7
+      - thomaspoignant/go-feature-flag-relay-proxy:v{{ .Major }}.{{ .Minor }}-amd64
+  - name_template: thomaspoignant/go-feature-flag-relay-proxy:v{{ .Major }}.{{ .Minor }}
     id: go-feature-flag-relay-proxy-major-minor
     image_templates:
-      - thomaspoignant/test-repository:v{{ .Major }}.{{ .Minor }}-arm64v8
-      - thomaspoignant/test-repository:v{{ .Major }}.{{ .Minor }}-armv7
-      - thomaspoignant/test-repository:v{{ .Major }}.{{ .Minor }}-amd64
+      - thomaspoignant/go-feature-flag-relay-proxy:v{{ .Major }}.{{ .Minor }}-arm64v8
+      - thomaspoignant/go-feature-flag-relay-proxy:v{{ .Major }}.{{ .Minor }}-armv7
+      - thomaspoignant/go-feature-flag-relay-proxy:v{{ .Major }}.{{ .Minor }}-amd64
+# migration-cli
+  - name_template: thomaspoignant/go-feature-flag-migration-cli:latest
+    id: go-feature-flag-migration-cli-latest
+    image_templates:
+      - thomaspoignant/go-feature-flag-migration-cli:v{{ .Major }}.{{ .Minor }}-arm64v8
+      - thomaspoignant/go-feature-flag-migration-cli:v{{ .Major }}.{{ .Minor }}-armv7
+      - thomaspoignant/go-feature-flag-migration-cli:v{{ .Major }}.{{ .Minor }}-amd64
+  - name_template: thomaspoignant/go-feature-flag-migration-cli:{{ .Tag }}
+    id: go-feature-flag-migration-cli-tag
+    image_templates:
+      - thomaspoignant/go-feature-flag-migration-cli:v{{ .Major }}.{{ .Minor }}-arm64v8
+      - thomaspoignant/go-feature-flag-migration-cli:v{{ .Major }}.{{ .Minor }}-armv7
+      - thomaspoignant/go-feature-flag-migration-cli:v{{ .Major }}.{{ .Minor }}-amd64
+  - name_template: thomaspoignant/go-feature-flag-migration-cli:v{{ .Major }}
+    id: go-feature-flag-migration-cli-major
+    image_templates:
+      - thomaspoignant/go-feature-flag-migration-cli:v{{ .Major }}.{{ .Minor }}-arm64v8
+      - thomaspoignant/go-feature-flag-migration-cli:v{{ .Major }}.{{ .Minor }}-armv7
+      - thomaspoignant/go-feature-flag-migration-cli:v{{ .Major }}.{{ .Minor }}-amd64
+  - name_template: thomaspoignant/go-feature-flag-migration-cli:v{{ .Major }}.{{ .Minor }}
+    id: go-feature-flag-migration-cli-major-minor
+    image_templates:
+      - thomaspoignant/go-feature-flag-migration-cli:v{{ .Major }}.{{ .Minor }}-arm64v8
+      - thomaspoignant/go-feature-flag-migration-cli:v{{ .Major }}.{{ .Minor }}-armv7
+      - thomaspoignant/go-feature-flag-migration-cli:v{{ .Major }}.{{ .Minor }}-amd64
+# lint
+  - name_template: thomaspoignant/go-feature-flag-lint:latest
+    id: go-feature-flag-lint-latest
+    image_templates:
+      - thomaspoignant/go-feature-flag-lint:v{{ .Major }}.{{ .Minor }}-arm64v8
+      - thomaspoignant/go-feature-flag-lint:v{{ .Major }}.{{ .Minor }}-armv7
+      - thomaspoignant/go-feature-flag-lint:v{{ .Major }}.{{ .Minor }}-amd64
+  - name_template: thomaspoignant/go-feature-flag-lint:{{ .Tag }}
+    id: go-feature-flag-lint-tag
+    image_templates:
+      - thomaspoignant/go-feature-flag-lint:v{{ .Major }}.{{ .Minor }}-arm64v8
+      - thomaspoignant/go-feature-flag-lint:v{{ .Major }}.{{ .Minor }}-armv7
+      - thomaspoignant/go-feature-flag-lint:v{{ .Major }}.{{ .Minor }}-amd64
+  - name_template: thomaspoignant/go-feature-flag-lint:v{{ .Major }}
+    id: go-feature-flag-lint-major
+    image_templates:
+      - thomaspoignant/go-feature-flag-lint:v{{ .Major }}.{{ .Minor }}-arm64v8
+      - thomaspoignant/go-feature-flag-lint:v{{ .Major }}.{{ .Minor }}-armv7
+      - thomaspoignant/go-feature-flag-lint:v{{ .Major }}.{{ .Minor }}-amd64
+  - name_template: thomaspoignant/go-feature-flag-lint:v{{ .Major }}.{{ .Minor }}
+    id: go-feature-flag-lint-major-minor
+    image_templates:
+      - thomaspoignant/go-feature-flag-lint:v{{ .Major }}.{{ .Minor }}-arm64v8
+      - thomaspoignant/go-feature-flag-lint:v{{ .Major }}.{{ .Minor }}-armv7
+      - thomaspoignant/go-feature-flag-lint:v{{ .Major }}.{{ .Minor }}-amd64
+
+brews:
+  - ids:
+      - go-feature-flag-migration-cli
+    name: go-feature-flag-migration-cli
+    tap:
+      owner: thomaspoignant
+      name: homebrew-tap
+      branch: master
+    caveats: "A migration command line to move your feature flag configuration file from format GO Feature Flag v0.X to v1.X"
+    homepage: "https://github.com/thomaspoignant/go-feature-flag/cmd/migrationcli"
+    description: "A migration command line to move your feature flag configuration file from format GO Feature Flag v0.X to v1.X"
+    skip_upload: auto
+  - ids:
+      - go-feature-flag-relay-proxy
+    name: go-feature-flag-relay-proxy
+    tap:
+      owner: thomaspoignant
+      name: homebrew-tap
+      branch: master
+    caveats: "A stand alone server to run GO Feature Flag"
+    homepage: "https://gofeatureflag.org"
+    description: "A stand alone server to run GO Feature Flag"
+    skip_upload: auto
+  - ids:
+      - go-feature-flag-lint
+    name: go-feature-flag-lint
+    tap:
+      owner: thomaspoignant
+      name: homebrew-tap
+      branch: master
+    caveats: "A command line tool to lint your feature flag configuration file"
+    homepage: "https://gofeatureflag.org"
+    description: "A command line tool to lint your feature flag configuration file"
+    skip_upload: auto
+
+scoop:
+  url_template: "https://github.com/thomaspoignant/go-feature-flag/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+  bucket:
+    owner: thomaspoignant
+    name: scoop
+  commit_msg_template: "Scoop update for {{ .ProjectName }} version {{ .Tag }}"
+  homepage: "https://gofeatureflag.org"
+  license: MIT
+
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
