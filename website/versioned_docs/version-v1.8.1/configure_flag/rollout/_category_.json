@@ -1,0 +1,11 @@
+{
+  "position": 30,
+  "collapsible": true,
+  "collapsed": true,
+  "label": "Rollout strategies",
+  "link": {
+    "type": "generated-index",
+    "title": "Rollout strategies",
+    "description": "A critical part of every new feature release is orchestrating the actual launch schedule between Product, Engineering, and Marketing teams. Delivering powerful user experiences typically requires software teams to manage complex releases and make manual updates at inconvenient times. But it does’t have to, having a complex rollout strategy allows you to have lifecycle for your flags."
+  }
+}
