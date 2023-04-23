@@ -9,16 +9,17 @@ import (
 
 func TestExporterConf_IsValid(t *testing.T) {
 	type fields struct {
-		Kind        string
-		OutputDir   string
-		Format      string
-		Filename    string
-		CsvTemplate string
-		Bucket      string
-		Path        string
-		EndpointURL string
-		Secret      string
-		Meta        map[string]string
+		Kind                    string
+		OutputDir               string
+		Format                  string
+		Filename                string
+		CsvTemplate             string
+		Bucket                  string
+		Path                    string
+		EndpointURL             string
+		Secret                  string
+		Meta                    map[string]string
+		ParquetCompressionCodec string
 	}
 	tests := []struct {
 		name     string
@@ -127,20 +128,32 @@ func TestExporterConf_IsValid(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "invalid parquetCompressionCodec",
+			fields: fields{
+				Kind:                    "googleStorage",
+				Bucket:                  "testbucket",
+				Format:                  "parquet",
+				ParquetCompressionCodec: "invalid",
+			},
+			wantErr:  true,
+			errValue: "invalid exporter: \"parquetCompressionCodec\" err: not a valid CompressionCodec string",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &config.ExporterConf{
-				Kind:        config.ExporterKind(tt.fields.Kind),
-				OutputDir:   tt.fields.OutputDir,
-				Format:      tt.fields.Format,
-				Filename:    tt.fields.Filename,
-				CsvTemplate: tt.fields.CsvTemplate,
-				Bucket:      tt.fields.Bucket,
-				Path:        tt.fields.Path,
-				EndpointURL: tt.fields.EndpointURL,
-				Secret:      tt.fields.Secret,
-				Meta:        tt.fields.Meta,
+				Kind:                    config.ExporterKind(tt.fields.Kind),
+				OutputDir:               tt.fields.OutputDir,
+				Format:                  tt.fields.Format,
+				Filename:                tt.fields.Filename,
+				CsvTemplate:             tt.fields.CsvTemplate,
+				Bucket:                  tt.fields.Bucket,
+				Path:                    tt.fields.Path,
+				EndpointURL:             tt.fields.EndpointURL,
+				Secret:                  tt.fields.Secret,
+				Meta:                    tt.fields.Meta,
+				ParquetCompressionCodec: tt.fields.ParquetCompressionCodec,
 			}
 			err := c.IsValid()
 			assert.Equal(t, tt.wantErr, err != nil)
