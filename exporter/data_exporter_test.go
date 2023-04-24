@@ -1,17 +1,15 @@
-package dataexporter_test
+package exporter_test
 
 import (
 	"context"
 	"errors"
+	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"log"
 	"os"
 	"testing"
 	"time"
 
-	"github.com/thomaspoignant/go-feature-flag/internal/dataexporter"
-
 	"github.com/stretchr/testify/assert"
-	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/testutils/mock"
 
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
@@ -20,7 +18,7 @@ import (
 
 func TestDataExporterScheduler_flushWithTime(t *testing.T) {
 	mockExporter := mock.Exporter{Bulk: true}
-	dc := dataexporter.NewScheduler(
+	dc := exporter.NewScheduler(
 		context.Background(), 10*time.Millisecond, 1000, &mockExporter, log.New(os.Stdout, "", 0))
 	go dc.StartDaemon()
 	defer dc.Close()
@@ -40,7 +38,7 @@ func TestDataExporterScheduler_flushWithTime(t *testing.T) {
 
 func TestDataExporterScheduler_flushWithNumberOfEvents(t *testing.T) {
 	mockExporter := mock.Exporter{Bulk: true}
-	dc := dataexporter.NewScheduler(
+	dc := exporter.NewScheduler(
 		context.Background(), 10*time.Minute, 100, &mockExporter, log.New(os.Stdout, "", 0))
 	go dc.StartDaemon()
 	defer dc.Close()
@@ -58,7 +56,7 @@ func TestDataExporterScheduler_flushWithNumberOfEvents(t *testing.T) {
 
 func TestDataExporterScheduler_defaultFlush(t *testing.T) {
 	mockExporter := mock.Exporter{Bulk: true}
-	dc := dataexporter.NewScheduler(
+	dc := exporter.NewScheduler(
 		context.Background(), 0, 0, &mockExporter, log.New(os.Stdout, "", 0))
 	go dc.StartDaemon()
 	defer dc.Close()
@@ -82,7 +80,7 @@ func TestDataExporterScheduler_exporterReturnError(t *testing.T) {
 	defer os.Remove(file.Name())
 	logger := log.New(file, "", 0)
 
-	dc := dataexporter.NewScheduler(
+	dc := exporter.NewScheduler(
 		context.Background(), 0, 100, &mockExporter, logger)
 	go dc.StartDaemon()
 	defer dc.Close()
@@ -104,7 +102,7 @@ func TestDataExporterScheduler_exporterReturnError(t *testing.T) {
 
 func TestDataExporterScheduler_nonBulkExporter(t *testing.T) {
 	mockExporter := mock.Exporter{Bulk: false}
-	dc := dataexporter.NewScheduler(
+	dc := exporter.NewScheduler(
 		context.Background(), 0, 0, &mockExporter, log.New(os.Stdout, "", 0))
 	defer dc.Close()
 

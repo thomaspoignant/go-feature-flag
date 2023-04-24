@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/internal/dto"
 	"log"
 	"os"
@@ -17,8 +18,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
 
 	"github.com/thomaspoignant/go-feature-flag/exporter/logsexporter"
-	"github.com/thomaspoignant/go-feature-flag/internal/dataexporter"
-
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 
 	"github.com/stretchr/testify/assert"
@@ -323,7 +322,7 @@ func TestBoolVariation(t *testing.T) {
 						Logger:          logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
+					dataExporter: exporter.NewScheduler(context.Background(), 0, 0,
 						&logsexporter.Exporter{
 							LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
 								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
@@ -622,7 +621,7 @@ func TestBoolVariationDetails(t *testing.T) {
 						Logger:          logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
+					dataExporter: exporter.NewScheduler(context.Background(), 0, 0,
 						&logsexporter.Exporter{
 							LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
 								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
@@ -916,7 +915,7 @@ func TestFloat64Variation(t *testing.T) {
 						Logger:          logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
+					dataExporter: exporter.NewScheduler(context.Background(), 0, 0,
 						&logsexporter.Exporter{
 							LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
 								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
@@ -1213,7 +1212,7 @@ func TestFloat64VariationDetails(t *testing.T) {
 						Logger:          logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
+					dataExporter: exporter.NewScheduler(context.Background(), 0, 0,
 						&logsexporter.Exporter{
 							LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
 								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
@@ -1492,7 +1491,7 @@ func TestJSONArrayVariation(t *testing.T) {
 						Logger:          logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
+					dataExporter: exporter.NewScheduler(context.Background(), 0, 0,
 						&logsexporter.Exporter{}, logger),
 				}
 			}
@@ -1778,7 +1777,7 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 						Logger:          logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
+					dataExporter: exporter.NewScheduler(context.Background(), 0, 0,
 						&logsexporter.Exporter{}, logger),
 				}
 			}
@@ -2034,7 +2033,7 @@ func TestJSONVariation(t *testing.T) {
 						Logger:          logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
+					dataExporter: exporter.NewScheduler(context.Background(), 0, 0,
 						&logsexporter.Exporter{
 							LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
 								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
@@ -2253,7 +2252,7 @@ func TestJSONVariationDetails(t *testing.T) {
 						Logger:          logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
+					dataExporter: exporter.NewScheduler(context.Background(), 0, 0,
 						&logsexporter.Exporter{
 							LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
 								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
@@ -2515,7 +2514,7 @@ func TestStringVariation(t *testing.T) {
 						Logger:          logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
+					dataExporter: exporter.NewScheduler(context.Background(), 0, 0,
 						&logsexporter.Exporter{
 							LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
 								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
@@ -2733,7 +2732,7 @@ func TestStringVariationDetails(t *testing.T) {
 						Logger:          logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
+					dataExporter: exporter.NewScheduler(context.Background(), 0, 0,
 						&logsexporter.Exporter{
 							LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
 								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
@@ -3025,7 +3024,7 @@ func TestIntVariation(t *testing.T) {
 						Logger:          logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
+					dataExporter: exporter.NewScheduler(context.Background(), 0, 0,
 						&logsexporter.Exporter{
 							LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
 								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
@@ -3282,7 +3281,7 @@ func TestIntVariationDetails(t *testing.T) {
 						Logger:          logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
+					dataExporter: exporter.NewScheduler(context.Background(), 0, 0,
 						&logsexporter.Exporter{
 							LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
 								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
@@ -3782,7 +3781,7 @@ func TestRawVariation(t *testing.T) {
 						Logger:          logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: dataexporter.NewScheduler(context.Background(), 0, 0,
+					dataExporter: exporter.NewScheduler(context.Background(), 0, 0,
 						&logsexporter.Exporter{
 							LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
 								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
