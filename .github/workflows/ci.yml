@@ -64,12 +64,7 @@ jobs:
         with:
           go-version: '^1.18.0'
       - run: make swagger
-      - name: Get diff
-        id: git-diff
-        uses: technote-space/get-diff-action@v6
-      - name: Exit if changes
-        if: steps.git-diff.outputs.diff
-        run: echo "Please run make swagger and commit the change" && exit 123
+      - run: git commit --dry-run && echo exit 1 || exit 0
 
   integration-tests:
     name: Integration Tests
