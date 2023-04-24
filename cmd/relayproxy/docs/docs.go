@@ -296,7 +296,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "events": {
-                    "description": "events is the list of the event we send in the payload",
+                    "description": "Events is the list of the event we send in the payload",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/exporter.FeatureEvent"
