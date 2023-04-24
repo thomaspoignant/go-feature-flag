@@ -57,7 +57,7 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 			want: want{
 				handlerErr: true,
 				httpCode:   http.StatusBadRequest,
-				errorMsg: "collectEvalData: invalid input data code=400, message=Syntax error: offset=320, " +
+				errorMsg: "collectEvalData: invalid input data code=400, message=Syntax error: offset=322, " +
 					"error=invalid character '}' after array element, internal=invalid character '}' after array " +
 					"element",
 				errorCode: http.StatusBadRequest,

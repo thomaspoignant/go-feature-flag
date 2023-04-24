@@ -42,19 +42,19 @@ func (h *collectEvalData) Handler(c echo.Context) error {
 			http.StatusBadRequest,
 			fmt.Sprintf("collectEvalData: invalid input data %v", err))
 	}
-	if reqBody == nil || reqBody.Data == nil {
+	if reqBody == nil || reqBody.Events == nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "collectEvalData: invalid input data")
 	}
 
-	for _, event := range reqBody.Data {
+	for _, event := range reqBody.Events {
 		h.goFF.CollectEventData(event)
 	}
 
 	// send metric
 	metrics := c.Get(metric.CustomMetrics).(*metric.Metrics)
-	metrics.IncCollectEvalData(float64(len(reqBody.Data)))
+	metrics.IncCollectEvalData(float64(len(reqBody.Events)))
 
 	return c.JSON(http.StatusOK, model.CollectEvalDataResponse{
-		IngestedContentCount: len(reqBody.Data),
+		IngestedContentCount: len(reqBody.Events),
 	})
 }
