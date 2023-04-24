@@ -36,3 +36,6 @@ goff-proxy.yaml
 flags.yaml
 
 go-feature-flag-relay-proxy/
+
+# AWS SAM build folder
+.aws-sam

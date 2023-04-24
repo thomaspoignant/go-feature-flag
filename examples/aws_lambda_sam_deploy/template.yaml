@@ -1,0 +1,57 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  go-feature-flag-relay-proxy SAM Template for go-feature-flag-relay-proxy
+  
+  This example is for testing only, it has never been prepared to be production ready.
+
+Globals:
+  Function:
+    Timeout: 5
+    MemorySize: 128
+
+Resources:
+  RelayProxyFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../../cmd/relayproxy/
+      Handler: relayproxy
+      Runtime: go1.x
+      Architectures:
+        - x86_64
+      Events:
+        Info:
+          Type: HttpApi
+          Properties:
+            Path: /info
+            Method: GET
+        Health:
+          Type: HttpApi
+          Properties:
+            Path: /health
+            Method: GET
+        Eval:
+          Type: HttpApi
+          Properties:
+            Path: /v1/feature/{flagKey}/eval
+            Method: POST
+        AllFlags:
+          Type: HttpApi
+          Properties:
+            Path: /v1/allflags
+            Method: POST
+        DataCollector:
+          Type: HttpApi
+          Properties:
+            Path: /v1/data/collector
+            Method: POST
+        Metrics:
+          Type: HttpApi
+          Properties:
+            Path: /metrics
+            Method: GET
+      Environment:
+        Variables:
+          RETRIEVER_KIND: http
+          RETRIEVER_URL: https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.yaml
+          STARTASAWSLAMBDA: true
