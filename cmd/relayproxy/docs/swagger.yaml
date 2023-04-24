@@ -61,7 +61,7 @@ definitions:
   model.CollectEvalDataRequest:
     properties:
       events:
-        description: events is the list of the event we send in the payload
+        description: Events is the list of the event we send in the payload
         items:
           $ref: '#/definitions/exporter.FeatureEvent'
         type: array
