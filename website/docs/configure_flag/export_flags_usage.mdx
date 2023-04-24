@@ -1,6 +1,6 @@
 ---
 sidebar_position: 40
-description: How to export data on how feature flags were used?
+description: How to export evaluation data?
 ---
 import {Cards} from '@site/src/components/doc/cards';
 import customlogo from '@site/static/docs/collectors/custom.png';
@@ -10,9 +10,16 @@ import loglogo from '@site/static/docs/collectors/log.png';
 import s3logo from '@site/static/docs/collectors/s3.png';
 import webhooklogo from '@site/static/docs/collectors/webhook.png';
 
-# How to export data on how feature flags were used
+# How to export evaluation data
+GO Feature Flag allows for the collection of flag usage data.
+During flag evaluation, the key, flag variation and other non-sensitive information used are collected and cached for a
+configurable period of time.
 
-To understand better on how feature flags were used, we can export and analyse the usage with these ways:
+The usage data is then written to a file in a chosen format (`parquet`, `JSON` or `CSV`) at a specified interval and
+exported to your desired location. This provides a single source for easy processing of the data. The feature can be
+configured with options for file format, flush interval, and file location.
+
+To use, simply configure, use the feature flag as normal, and analyze the collected usage data.
 
 ## Available exporters
 
