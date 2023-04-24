@@ -69,7 +69,7 @@ jobs:
         uses: tj-actions/changed-files@v35
         with:
           files: cmd/relayproxy/docs/**
-      - run: pwd
+      - run: git diff
       - name: Exit if changes
         if: steps.changed-files-specific.outputs.any_changed == 'true'
         run: echo "Please run make swagger and commit the change" && exit 123
