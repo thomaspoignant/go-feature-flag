@@ -64,6 +64,7 @@ jobs:
           branch: update-relay-proxy-chart-readme-${{ env.GIT_TAG_NAME }}
           title: Update relay proxy helm README ${{ env.GIT_TAG_NAME }}
           body: Automated pull request to update relay-proxy helm chart README ${{ env.GIT_TAG_NAME }}
+          commit-message: Update relay proxy helm README ${{ env.GIT_TAG_NAME }}
           labels: automerge
           assignees: thomaspoignant
           reviewers: thomaspoignant
@@ -71,3 +72,4 @@ jobs:
           signoff: true
           delete-branch: true
           path: ${{ env.MAIN_BRANCH_NAME }}
+          token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
