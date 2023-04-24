@@ -64,7 +64,7 @@ jobs:
         with:
           go-version: '^1.18.0'
       - run: make swagger
-      - run: git commit --dry-run && echo exit 1 || exit 0
+      - run: git diff --exit-code --quiet
 
   integration-tests:
     name: Integration Tests
