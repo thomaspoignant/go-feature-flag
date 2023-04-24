@@ -64,14 +64,11 @@ jobs:
         with:
           go-version: '^1.18.0'
       - run: make swagger
-      - name: Get changed files in the docs folder
-        id: changed-files-specific
-        uses: tj-actions/changed-files@v35
-        with:
-          files: cmd/relayproxy/docs/**
-      - run: git diff
+      - name: Get diff
+        id: git-diff
+        uses: technote-space/get-diff-action@v6
       - name: Exit if changes
-        if: steps.changed-files-specific.outputs.any_changed == 'true'
+        if: steps.git-diff.outputs.diff
         run: echo "Please run make swagger and commit the change" && exit 123
 
   integration-tests:
