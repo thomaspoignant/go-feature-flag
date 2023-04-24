@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "# Introduction\n\nThis API is documented in **OpenAPI format** and describe the REST API of the **GO Feature Flag relay proxy**.\n\nThe relay proxy is a component to evaluate your feature flags remotely when using **GO Feature Flag**.  \nThis API is mostly used by all the OpenFeature providers.\n",
+        "description": "# Introduction\n\nThis API is documented in **OpenAPI format** and describe the REST API of the **GO Feature Flag relay proxy**.\n\nThe relay proxy is a component to evaluate your feature flags remotely when using **GO Feature Flag**.  \nThis API is mostly used by all the OpenFeature providers.",
         "title": "GO Feature Flag relay proxy endpoints",
         "contact": {
             "name": "GO feature flag relay proxy",
@@ -286,11 +286,18 @@
         "model.CollectEvalDataRequest": {
             "type": "object",
             "properties": {
-                "data": {
-                    "description": "Data contains the list of feature event that we want to store",
+                "events": {
+                    "description": "events is the list of the event we send in the payload",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/exporter.FeatureEvent"
+                    }
+                },
+                "meta": {
+                    "description": "Meta are the extra information added during the configuration",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
                     }
                 }
             }
