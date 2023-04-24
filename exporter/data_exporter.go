@@ -1,12 +1,10 @@
-package dataexporter
+package exporter
 
 import (
 	"context"
 	"log"
 	"sync"
 	"time"
-
-	"github.com/thomaspoignant/go-feature-flag/exporter"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 )
@@ -33,7 +31,7 @@ func NewScheduler(ctx context.Context, flushInterval time.Duration, maxEventInMe
 	}
 
 	return &Scheduler{
-		localCache:      make([]exporter.FeatureEvent, 0),
+		localCache:      make([]FeatureEvent, 0),
 		mutex:           sync.Mutex{},
 		maxEventInCache: maxEventInMemory,
 		exporter:        exp,
@@ -46,7 +44,7 @@ func NewScheduler(ctx context.Context, flushInterval time.Duration, maxEventInMe
 
 // Scheduler is the struct that handle the data collection.
 type Scheduler struct {
-	localCache      []exporter.FeatureEvent
+	localCache      []FeatureEvent
 	mutex           sync.Mutex
 	daemonChan      chan struct{}
 	ticker          *time.Ticker
@@ -58,7 +56,7 @@ type Scheduler struct {
 
 // AddEvent allow to add an event to the local cache and to call the exporter if we reach
 // the maximum number of events that can be present in the cache.
-func (dc *Scheduler) AddEvent(event exporter.FeatureEvent) {
+func (dc *Scheduler) AddEvent(event FeatureEvent) {
 	dc.mutex.Lock()
 	defer dc.mutex.Unlock()
 
@@ -115,5 +113,5 @@ func (dc *Scheduler) flush() {
 		}
 	}
 	// Clear the cache
-	dc.localCache = make([]exporter.FeatureEvent, 0)
+	dc.localCache = make([]FeatureEvent, 0)
 }
