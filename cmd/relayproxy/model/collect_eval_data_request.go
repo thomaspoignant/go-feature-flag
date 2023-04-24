@@ -9,6 +9,6 @@ type CollectEvalDataRequest struct {
 	// Meta are the extra information added during the configuration
 	Meta map[string]string `json:"meta"`
 
-	// events is the list of the event we send in the payload
+	// Events is the list of the event we send in the payload
 	Events []exporter.FeatureEvent `json:"events"`
 }
