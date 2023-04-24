@@ -6,6 +6,9 @@ import (
 
 // CollectEvalDataRequest is the request to collect data in
 type CollectEvalDataRequest struct {
-	// Data contains the list of feature event that we want to store
-	Data []exporter.FeatureEvent `json:"data"`
+	// Meta are the extra information added during the configuration
+	Meta map[string]string `json:"meta"`
+
+	// events is the list of the event we send in the payload
+	Events []exporter.FeatureEvent `json:"events"`
 }
