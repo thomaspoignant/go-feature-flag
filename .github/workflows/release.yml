@@ -4,8 +4,21 @@ on:
     types: [ published ]
 
 jobs:
+  pre-version-check:
+    name: pre version check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Stop if pre-release
+        run: |
+          if [[ "${{ github.event.release.tag_name }}" =~ - ]]; then
+            echo "This is a pre-release version, stopping workflow..."
+            exit 1
+          fi
+
   integration-tests:
     name: Integration Tests
+    needs:
+      - pre-version-check
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
