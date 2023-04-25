@@ -2,6 +2,7 @@ package s3exporter
 
 import (
 	"context"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"log"
 	"os"
 	"sync"
@@ -13,8 +14,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager/s3manageriface"
-
-	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 )
 
 type Exporter struct {

@@ -2,6 +2,7 @@ package exporter
 
 import (
 	"context"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"log"
 	"sync"
 	"time"
@@ -106,6 +107,7 @@ func (dc *Scheduler) flush() {
 	if len(dc.localCache) > 0 {
 		err := dc.exporter.Export(dc.ctx, dc.logger, dc.localCache)
 		if err != nil {
+			fflog.Printf(dc.logger, "error while exporting data: %v\n", err)
 			return
 		}
 	}

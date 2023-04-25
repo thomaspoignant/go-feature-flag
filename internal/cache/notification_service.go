@@ -1,10 +1,9 @@
 package cache
 
 import (
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"log"
 	"sync"
-
-	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"

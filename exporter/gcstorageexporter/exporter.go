@@ -3,6 +3,7 @@ package gcstorageexporter
 import (
 	"context"
 	"fmt"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"io"
 	"log"
 	"os"
@@ -12,7 +13,6 @@ import (
 
 	"cloud.google.com/go/storage"
 
-	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 	"google.golang.org/api/option"
 )
 
