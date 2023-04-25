@@ -1,13 +1,12 @@
 package fflog_test
 
 import (
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"log"
 	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
-	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 )
 
 func TestPrintf(t *testing.T) {
