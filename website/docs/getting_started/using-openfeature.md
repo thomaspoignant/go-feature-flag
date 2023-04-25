@@ -12,7 +12,7 @@ _[Documentation](https://docs.openfeature.dev)_
 
 GO Feature Flag believe in **OpenSource** and **standardization**, this is the reason why we decided not implementing any custom SDK and rely only on **Open Feature**.
 
-To be compatible with Open Feature, **GO Feature Flag** is providing a lightweight self-hosted API server *(called [relay proxy](../relay_proxy))* that is using the GO Feature Flag module internally.  
+To be compatible with Open Feature, **GO Feature Flag** is providing a lightweight self-hosted API server *(called [relay proxy](../category/use-the-relay-proxy))* that is using the GO Feature Flag module internally.  
 When the **relay proxy** is running in your infrastructure, you can use the **Open Feature SDKs** in combination with **GO Feature Flag providers** to evaluate your flags. 
 
 This schema is an overview on how **Open Feature** is working, you can have more information about all the concepts in the **[Open Feature documentation](https://docs.openfeature.dev)**.
