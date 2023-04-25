@@ -5,6 +5,7 @@
   "collapsed": true,
   "link": {
     "type": "generated-index",
-    "title": "Use the relay proxy"
+    "title": "Use the relay proxy",
+    "description": "GO Feature Flag Relay Proxy is a powerful tool that allows developers to easily integrate feature flagging functionality into their applications. It is a simple API service that can be called directly through the API or via the available OpenFeature providers. The service wraps the GO Feature Flag golang module to evaluate your flags and allows it to be used with all the available languages."
   }
 }
