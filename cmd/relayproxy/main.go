@@ -1,8 +1,8 @@
 package main
 
 import (
-	"flag"
 	"fmt"
+	"os"
 
 	"github.com/spf13/pflag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api"
@@ -41,16 +41,16 @@ _____________________________________________`
 // @description Use configured APIKeys in yaml config as authorization keys, disabled when this yaml config is not set.
 func main() {
 	// Init pFlag for config file
-	flag.String("config", "", "Location of your config file")
-	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
-	pflag.Parse()
+	f := pflag.NewFlagSet("config", pflag.ContinueOnError)
+	f.String("config", "", "Location of your config file")
+	_ = f.Parse(os.Args[1:])
 
 	// Init logger
 	zapLog := log.InitLogger()
 	defer func() { _ = zapLog.Sync() }()
 
 	// Loading the configuration in viper
-	proxyConf, err := config.ParseConfig(zapLog, version)
+	proxyConf, err := config.New(f, zapLog, version)
 	if err != nil {
 		zapLog.Fatal("error while reading configuration", zap.Error(err))
 	}

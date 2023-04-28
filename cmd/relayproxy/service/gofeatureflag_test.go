@@ -20,6 +20,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/retriever/gitlabretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/httpretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/s3retriever"
+	"github.com/xitongsys/parquet-go/parquet"
 )
 
 func Test_initRetriever(t *testing.T) {
@@ -168,17 +169,19 @@ func Test_initExporter(t *testing.T) {
 			name:    "Convert FileExporter",
 			wantErr: assert.NoError,
 			conf: &config.ExporterConf{
-				Kind:      "file",
-				OutputDir: "/outputfolder/",
+				Kind:                    "file",
+				OutputDir:               "/outputfolder/",
+				ParquetCompressionCodec: parquet.CompressionCodec_UNCOMPRESSED.String(),
 			},
 			want: ffclient.DataExporter{
 				FlushInterval:    config.DefaultExporter.FlushInterval,
 				MaxEventInMemory: config.DefaultExporter.MaxEventInMemory,
 				Exporter: &fileexporter.Exporter{
-					Format:      config.DefaultExporter.Format,
-					OutputDir:   "/outputfolder/",
-					Filename:    config.DefaultExporter.FileName,
-					CsvTemplate: config.DefaultExporter.CsvFormat,
+					Format:                  config.DefaultExporter.Format,
+					OutputDir:               "/outputfolder/",
+					Filename:                config.DefaultExporter.FileName,
+					CsvTemplate:             config.DefaultExporter.CsvFormat,
+					ParquetCompressionCodec: parquet.CompressionCodec_UNCOMPRESSED.String(),
 				},
 			},
 		},
@@ -209,11 +212,12 @@ func Test_initExporter(t *testing.T) {
 				FlushInterval:    10 * time.Millisecond,
 				MaxEventInMemory: config.DefaultExporter.MaxEventInMemory,
 				Exporter: &s3exporter.Exporter{
-					Bucket:      "my-bucket",
-					Format:      config.DefaultExporter.Format,
-					S3Path:      "/my-path/",
-					Filename:    config.DefaultExporter.FileName,
-					CsvTemplate: config.DefaultExporter.CsvFormat,
+					Bucket:                  "my-bucket",
+					Format:                  config.DefaultExporter.Format,
+					S3Path:                  "/my-path/",
+					Filename:                config.DefaultExporter.FileName,
+					CsvTemplate:             config.DefaultExporter.CsvFormat,
+					ParquetCompressionCodec: config.DefaultExporter.ParquetCompressionCodec,
 				},
 			},
 		},
@@ -230,11 +234,12 @@ func Test_initExporter(t *testing.T) {
 				FlushInterval:    config.DefaultExporter.FlushInterval,
 				MaxEventInMemory: 1990,
 				Exporter: &gcstorageexporter.Exporter{
-					Bucket:      "my-bucket",
-					Format:      config.DefaultExporter.Format,
-					Path:        "/my-path/",
-					Filename:    config.DefaultExporter.FileName,
-					CsvTemplate: config.DefaultExporter.CsvFormat,
+					Bucket:                  "my-bucket",
+					Format:                  config.DefaultExporter.Format,
+					Path:                    "/my-path/",
+					Filename:                config.DefaultExporter.FileName,
+					CsvTemplate:             config.DefaultExporter.CsvFormat,
+					ParquetCompressionCodec: config.DefaultExporter.ParquetCompressionCodec,
 				},
 			},
 		},

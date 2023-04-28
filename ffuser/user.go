@@ -39,3 +39,10 @@ func (u *User) IsAnonymous() bool {
 func (u *User) GetCustom() map[string]interface{} {
 	return u.custom
 }
+
+// AddCustomAttribute allows to add a custom attribute into the user.
+func (u *User) AddCustomAttribute(name string, value interface{}) {
+	if name != "" {
+		u.custom[name] = value
+	}
+}

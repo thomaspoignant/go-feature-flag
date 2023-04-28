@@ -7,6 +7,9 @@ on:
 jobs:
   helm-release:
     runs-on: ubuntu-latest
+    env:
+      CHART_README_LOCATION: cmd/relayproxy/helm-charts/relay-proxy/README.md
+      MAIN_BRANCH_NAME: main
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -32,3 +35,41 @@ jobs:
           target_dir: ./
           commit_username: thomaspoignant
           commit_email: thomaspoignant@goferatureflag.org
+
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '>=1.17.0'
+
+      - name: Update chart README
+        if: steps.changed-files-specific.outputs.any_changed == 'true'
+        run: make generate-helm-docs
+
+      - name: Checkout main branch
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.MAIN_BRANCH_NAME }}
+          path: ${{ env.MAIN_BRANCH_NAME }}
+          token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Copy README to main branch
+        run: cp -rf $CHART_README_LOCATION $MAIN_BRANCH_NAME/$CHART_README_LOCATION
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v4
+        if: steps.changed-files-specific.outputs.any_changed == 'true'
+        with:
+          branch: update-relay-proxy-chart-readme-${{ env.GIT_TAG_NAME }}
+          title: Update relay proxy helm README ${{ env.GIT_TAG_NAME }}
+          body: Automated pull request to update relay-proxy helm chart README ${{ env.GIT_TAG_NAME }}
+          commit-message: Update relay proxy helm README ${{ env.GIT_TAG_NAME }}
+          labels: automerge
+          assignees: thomaspoignant
+          reviewers: thomaspoignant
+          draft: false
+          signoff: true
+          delete-branch: true
+          path: ${{ env.MAIN_BRANCH_NAME }}
+          token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}

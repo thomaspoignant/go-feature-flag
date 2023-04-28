@@ -1,0 +1,10 @@
+{
+  "position": 50,
+  "label":"Use with OpenFeature",
+  "collapsible": true,
+  "collapsed": true,
+  "link": {
+    "type": "generated-index",
+    "title": "Use with OpenFeature"
+  }
+}

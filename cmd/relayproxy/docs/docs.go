@@ -295,11 +295,18 @@ const docTemplate = `{
         "model.CollectEvalDataRequest": {
             "type": "object",
             "properties": {
-                "data": {
-                    "description": "Data contains the list of feature event that we want to store",
+                "events": {
+                    "description": "Events is the list of the event we send in the payload",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/exporter.FeatureEvent"
+                    }
+                },
+                "meta": {
+                    "description": "Meta are the extra information added during the configuration",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
                     }
                 }
             }
@@ -484,9 +491,11 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "GO Feature Flag relay proxy endpoints",
-	Description:      "# Introduction\n\nThis API is documented in **OpenAPI format** and describe the REST API of the **GO Feature Flag relay proxy**.\n\nThe relay proxy is a component to evaluate your feature flags remotely when using **GO Feature Flag**.  \nThis API is mostly used by all the OpenFeature providers.\n",
+	Description:      "# Introduction\n\nThis API is documented in **OpenAPI format** and describe the REST API of the **GO Feature Flag relay proxy**.\n\nThe relay proxy is a component to evaluate your feature flags remotely when using **GO Feature Flag**.  \nThis API is mostly used by all the OpenFeature providers.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
+	LeftDelim:        "{{",
+	RightDelim:       "}}",
 }
 
 func init() {

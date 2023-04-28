@@ -60,11 +60,16 @@ definitions:
     type: object
   model.CollectEvalDataRequest:
     properties:
-      data:
-        description: Data contains the list of feature event that we want to store
+      events:
+        description: Events is the list of the event we send in the payload
         items:
           $ref: '#/definitions/exporter.FeatureEvent'
         type: array
+      meta:
+        additionalProperties:
+          type: string
+        description: Meta are the extra information added during the configuration
+        type: object
     type: object
   model.CollectEvalDataResponse:
     properties:
@@ -197,7 +202,7 @@ info:
   description: "# Introduction\n\nThis API is documented in **OpenAPI format** and
     describe the REST API of the **GO Feature Flag relay proxy**.\n\nThe relay proxy
     is a component to evaluate your feature flags remotely when using **GO Feature
-    Flag**.  \nThis API is mostly used by all the OpenFeature providers.\n"
+    Flag**.  \nThis API is mostly used by all the OpenFeature providers."
   license:
     name: MIT
     url: https://github.com/thomaspoignant/go-feature-flag/blob/main/LICENSE

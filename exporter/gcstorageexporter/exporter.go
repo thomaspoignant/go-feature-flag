@@ -3,6 +3,7 @@ package gcstorageexporter
 import (
 	"context"
 	"fmt"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"io"
 	"log"
 	"os"
@@ -12,7 +13,6 @@ import (
 
 	"cloud.google.com/go/storage"
 
-	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 	"google.golang.org/api/option"
 )
 
@@ -24,7 +24,7 @@ type Exporter struct {
 	Options []option.ClientOption
 
 	// Format is the output format you want in your exported file.
-	// Available format are JSON and CSV.
+	// Available format are JSON, CSV, and Parquet.
 	// Default: JSON
 	Format string
 
@@ -44,6 +44,11 @@ type Exporter struct {
 	// Default:
 	// {{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}}\n
 	CsvTemplate string
+
+	// ParquetCompressionCodec is the parquet compression codec for better space efficiency.
+	// Available options https://github.com/apache/parquet-format/blob/master/Compression.md
+	// Default: SNAPPY
+	ParquetCompressionCodec string
 }
 
 func (f *Exporter) IsBulk() bool {
@@ -72,10 +77,11 @@ func (f *Exporter) Export(ctx context.Context, logger *log.Logger, featureEvents
 	// We call the File data exporter to get the file in the right format.
 	// Files will be put in the temp directory, so we will be able to upload them to S3 from there.
 	fileExporter := fileexporter.Exporter{
-		Format:      f.Format,
-		OutputDir:   outputDir,
-		Filename:    f.Filename,
-		CsvTemplate: f.CsvTemplate,
+		Format:                  f.Format,
+		OutputDir:               outputDir,
+		Filename:                f.Filename,
+		CsvTemplate:             f.CsvTemplate,
+		ParquetCompressionCodec: f.ParquetCompressionCodec,
 	}
 	err = fileExporter.Export(ctx, logger, featureEvents)
 	if err != nil {

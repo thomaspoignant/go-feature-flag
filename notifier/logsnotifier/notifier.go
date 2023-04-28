@@ -1,12 +1,11 @@
 package logsnotifier
 
 import (
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"log"
 	"sync"
 
 	"github.com/thomaspoignant/go-feature-flag/notifier"
-
-	"github.com/thomaspoignant/go-feature-flag/internal/fflog"
 )
 
 type Notifier struct {

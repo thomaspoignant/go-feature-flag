@@ -1,22 +1,27 @@
 package config
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/xitongsys/parquet-go/parquet"
+)
 
 // ExporterConf contains all the field to configure an exporter
 type ExporterConf struct {
-	Kind             ExporterKind      `mapstructure:"kind"`
-	OutputDir        string            `mapstructure:"outputDir"`
-	Format           string            `mapstructure:"format"`
-	Filename         string            `mapstructure:"filename"`
-	CsvTemplate      string            `mapstructure:"csvTemplate"`
-	Bucket           string            `mapstructure:"bucket"`
-	Path             string            `mapstructure:"path"`
-	EndpointURL      string            `mapstructure:"endpointUrl"`
-	Secret           string            `mapstructure:"secret"`
-	Meta             map[string]string `mapstructure:"meta"`
-	LogFormat        string            `mapstructure:"logFormat"`
-	FlushInterval    int64             `mapstructure:"flushInterval"`
-	MaxEventInMemory int64             `mapstructure:"maxEventInMemory"`
+	Kind                    ExporterKind      `mapstructure:"kind" koanf:"kind"`
+	OutputDir               string            `mapstructure:"outputDir" koanf:"outputdir"`
+	Format                  string            `mapstructure:"format" koanf:"format"`
+	Filename                string            `mapstructure:"filename" koanf:"filename"`
+	CsvTemplate             string            `mapstructure:"csvTemplate" koanf:"csvtemplate"`
+	Bucket                  string            `mapstructure:"bucket" koanf:"bucket"`
+	Path                    string            `mapstructure:"path" koanf:"path"`
+	EndpointURL             string            `mapstructure:"endpointUrl" koanf:"endpointurl"`
+	Secret                  string            `mapstructure:"secret" koanf:"secret"`
+	Meta                    map[string]string `mapstructure:"meta" koanf:"meta"`
+	LogFormat               string            `mapstructure:"logFormat" koanf:"logformat"`
+	FlushInterval           int64             `mapstructure:"flushInterval" koanf:"flushinterval"`
+	MaxEventInMemory        int64             `mapstructure:"maxEventInMemory" koanf:"maxeventinmemory"`
+	ParquetCompressionCodec string            `mapstructure:"parquetCompressionCodec" koanf:"parquetcompressioncodec"`
 }
 
 func (c *ExporterConf) IsValid() error {
@@ -31,6 +36,11 @@ func (c *ExporterConf) IsValid() error {
 	}
 	if c.Kind == WebhookExporter && c.EndpointURL == "" {
 		return fmt.Errorf("invalid exporter: no \"endpointUrl\" property found for kind \"%s\"", c.Kind)
+	}
+	if len(c.ParquetCompressionCodec) > 0 {
+		if _, err := parquet.CompressionCodecFromString(c.ParquetCompressionCodec); err != nil {
+			return fmt.Errorf("invalid exporter: \"parquetCompressionCodec\" err: %v", err)
+		}
 	}
 	return nil
 }

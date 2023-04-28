@@ -1,14 +1,14 @@
 package config_test
 
 import (
-	"io"
-	"os"
-	"testing"
-
-	"github.com/spf13/viper"
+	"fmt"
+	"github.com/spf13/pflag"
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"go.uber.org/zap"
+	"io"
+	"os"
+	"testing"
 )
 
 func TestParseConfig_fileFromPflag(t *testing.T) {
@@ -19,8 +19,60 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 		wantErr      assert.ErrorAssertionFunc
 	}{
 		{
-			name:         "Valid file",
+			name:         "Valid yaml file",
 			fileLocation: "../testdata/config/valid-file.yaml",
+			want: &config.Config{
+				ListenPort:      1031,
+				PollingInterval: 1000,
+				FileFormat:      "yaml",
+				Host:            "localhost",
+				Retriever: &config.RetrieverConf{
+					Kind: "http",
+					URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.yaml",
+				},
+				Exporter: &config.ExporterConf{
+					Kind: "log",
+				},
+				StartWithRetrieverError: false,
+				RestAPITimeout:          5000,
+				Version:                 "1.X.X",
+				EnableSwagger:           true,
+				APIKeys: []string{
+					"apikey1",
+					"apikey2",
+				},
+			},
+			wantErr: assert.NoError,
+		},
+		{
+			name:         "Valid json file",
+			fileLocation: "../testdata/config/valid-file.json",
+			want: &config.Config{
+				ListenPort:      1031,
+				PollingInterval: 1000,
+				FileFormat:      "yaml",
+				Host:            "localhost",
+				Retriever: &config.RetrieverConf{
+					Kind: "http",
+					URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.yaml",
+				},
+				Exporter: &config.ExporterConf{
+					Kind: "log",
+				},
+				StartWithRetrieverError: false,
+				RestAPITimeout:          5000,
+				Version:                 "1.X.X",
+				EnableSwagger:           true,
+				APIKeys: []string{
+					"apikey1",
+					"apikey2",
+				},
+			},
+			wantErr: assert.NoError,
+		},
+		{
+			name:         "Valid toml file",
+			fileLocation: "../testdata/config/valid-file.toml",
 			want: &config.Config{
 				ListenPort:      1031,
 				PollingInterval: 1000,
@@ -63,31 +115,30 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 			fileLocation: "../testdata/config/invalid-yaml.yaml",
 			wantErr:      assert.Error,
 		},
-		{
-			name:         "File does not exists",
-			fileLocation: "../testdata/config/invalid-filename.yaml",
-			wantErr:      assert.Error,
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			viper.Set("config", tt.fileLocation)
-			got, err := config.ParseConfig(zap.L(), "1.X.X")
+			t.Setenv("version", "1.X.X")
+			f := pflag.NewFlagSet("config", pflag.ContinueOnError)
+			f.String("config", "", "Location of your config file")
+			_ = f.Parse([]string{fmt.Sprintf("--config=%s", tt.fileLocation)})
+
+			got, err := config.New(f, zap.L(), "1.X.X")
 			if !tt.wantErr(t, err) {
 				return
 			}
 			assert.Equal(t, tt.want, got, "Config not matching")
-			viper.Reset()
 		})
 	}
 }
 
 func TestParseConfig_fileFromFolder(t *testing.T) {
 	tests := []struct {
-		name         string
-		want         *config.Config
-		fileLocation string
-		wantErr      assert.ErrorAssertionFunc
+		name                       string
+		want                       *config.Config
+		fileLocation               string
+		wantErr                    assert.ErrorAssertionFunc
+		disableDefaultFileCreation bool
 	}{
 		{
 			name:         "Valid file",
@@ -134,18 +185,65 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 			fileLocation: "../testdata/config/invalid-yaml.yaml",
 			wantErr:      assert.Error,
 		},
+		{
+			name:         "Should return all default if file does not exist",
+			fileLocation: "../testdata/config/file-not-exist.yaml",
+			wantErr:      assert.NoError,
+			want: &config.Config{
+				ListenPort:              1031,
+				PollingInterval:         60000,
+				FileFormat:              "yaml",
+				Host:                    "localhost",
+				StartWithRetrieverError: false,
+				RestAPITimeout:          5000,
+				Version:                 "1.X.X",
+			},
+		},
+		{
+			name:         "Should return all default if no file in the command line",
+			fileLocation: "",
+			wantErr:      assert.NoError,
+			want: &config.Config{
+				ListenPort:              1031,
+				PollingInterval:         60000,
+				FileFormat:              "yaml",
+				Host:                    "localhost",
+				StartWithRetrieverError: false,
+				RestAPITimeout:          5000,
+				Version:                 "1.X.X",
+			},
+		},
+		{
+			name:         "Should return all default if no file and no default",
+			fileLocation: "",
+			wantErr:      assert.NoError,
+			want: &config.Config{
+				ListenPort:              1031,
+				PollingInterval:         60000,
+				FileFormat:              "yaml",
+				Host:                    "localhost",
+				StartWithRetrieverError: false,
+				RestAPITimeout:          5000,
+				Version:                 "1.X.X",
+			},
+			disableDefaultFileCreation: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			_ = os.Remove("./goff-proxy.yaml")
-			source, _ := os.Open(tt.fileLocation)
-			destination, _ := os.Create("./goff-proxy.yaml")
-			defer destination.Close()
-			defer source.Close()
-			defer os.Remove("./goff-proxy.yaml")
-			_, _ = io.Copy(destination, source)
-
-			got, err := config.ParseConfig(zap.L(), "1.X.X")
+			if !tt.disableDefaultFileCreation {
+				source, _ := os.Open(tt.fileLocation)
+				destination, _ := os.Create("./goff-proxy.yaml")
+				defer destination.Close()
+				defer source.Close()
+				defer os.Remove("./goff-proxy.yaml")
+				_, _ = io.Copy(destination, source)
+			}
+			f := pflag.NewFlagSet("config", pflag.ContinueOnError)
+			f.String("config", "", "Location of your config file")
+			_ = f.Parse([]string{fmt.Sprintf("--config=%s", tt.fileLocation)})
+			got, err := config.New(f, zap.L(), "1.X.X")
 			if !tt.wantErr(t, err) {
 				return
 			}

@@ -4,8 +4,21 @@ on:
     types: [ published ]
 
 jobs:
+  pre-version-check:
+    name: pre version check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Stop if pre-release
+        run: |
+          if [[ "${{ github.event.release.tag_name }}" =~ - ]]; then
+            echo "This is a pre-release version, stopping workflow..."
+            exit 1
+          fi
+
   integration-tests:
     name: Integration Tests
+    needs:
+      - pre-version-check
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -36,6 +49,9 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: '^1.18.0'
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
       - name: Docker login
         env:
@@ -170,6 +186,7 @@ jobs:
           branch: create-new-doc-version-${{ env.GIT_TAG_NAME }}
           title: Create a new documentation version ${{ env.GIT_TAG_NAME }}
           body: Automated pull request to create a new documentation version ${{ env.GIT_TAG_NAME }}
+          commit-message: Create a new documentation version ${{ env.GIT_TAG_NAME }}
           labels: automerge
           assignees: thomaspoignant
           reviewers: thomaspoignant
@@ -177,6 +194,7 @@ jobs:
           signoff: true
           delete-branch: true
           path: ${{ env.MAIN_BRANCH_NAME }}
+          token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
   bump-relay-proxy-helm-chart:
     # bump-relay-proxy-helm-chart is opening a pull request to bump the appVersion field
@@ -210,10 +228,6 @@ jobs:
         working-directory: ./release/
         run: yq -i ".version=\"${GIT_TAG_NAME#v}\"" $CHART_YAML_FILE_LOCATION
 
-      - name: Update chart README
-        working-directory: ./release/
-        run: make generate-helm-docs
-
       - name: Checkout main branch
         uses: actions/checkout@v3
         with:
@@ -233,6 +247,7 @@ jobs:
           branch: bump-relay-proxy-helm-chart-${{ env.GIT_TAG_NAME }}
           title: Bump relay-proxy helm chart version ${{ env.GIT_TAG_NAME }}
           body: Automated pull request to bump relay-proxy helm chart version ${{ env.GIT_TAG_NAME }}
+          commit-message: Bump relay-proxy helm chart version ${{ env.GIT_TAG_NAME }}
           labels: automerge
           assignees: thomaspoignant
           reviewers: thomaspoignant
@@ -240,6 +255,7 @@ jobs:
           signoff: true
           delete-branch: true
           path: ${{ env.MAIN_BRANCH_NAME }}
+          token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
   homebrew:
     name: Bump homebrew-core formula
