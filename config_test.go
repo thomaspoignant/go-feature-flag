@@ -84,9 +84,10 @@ func TestConfig_GetRetrievers(t *testing.T) {
 			fields: fields{
 				PollingInterval: 3 * time.Second,
 				Retriever: &gitlabretriever.Retriever{
-					URL:         "https://gitlab.com/ruairi2/go-feature-flags-config",
-					FilePath:    "flag-config.yaml",
-					GitlabToken: "XXX",
+					BaseURL:        "https://gitlab.com/",
+					RepositorySlug: "ruairi2/go-feature-flags-config",
+					FilePath:       "flag-config.yaml",
+					GitlabToken:    "XXX",
 				},
 			},
 			want:    "*gitlabretriever.Retriever",
