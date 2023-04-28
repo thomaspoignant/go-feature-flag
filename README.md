@@ -18,6 +18,9 @@
     <a href="https://gophers.slack.com/messages/go-feature-flag"><img src="https://img.shields.io/badge/join-us%20on%20slack-gray.svg?longCache=true&logo=slack&colorB=green" alt="Join us on slack"></a>
 </p>
 
+:pray: If you are using **GO Feature Flag** we've launched the [GO Feature Flag Usage Survey](https://forms.gle/cD4Rj7gJSMStg1Hc9), it would be awesome and super helpful if you can fill it.
+
+
 ## What is GO Feature Flag?
 GO Feature Flag is a simple, complete and lightweight feature flag solution 100% open source.
 
@@ -27,9 +30,7 @@ The solution has been built to start experiencing the usage of feature flags in 
 now the solution is available for multiple languages _(`JAVA`, `typescript`, `javascript`, ...)_ with a simple API server _(called the relay proxy)_ to host.
 
 > ℹ️ Info  
-If you are not familiar with feature flags, also called feature toggles, you can read this [article from Martin Fowler](https://www.martinfowler.com/articles/feature-toggles.html)
-where he explains why this is a great pattern.  
-I've also written an [article](https://medium.com/better-programming/feature-flags-and-how-to-iterate-quickly-7e3371b9986) which explains why feature flags can fasten your iteration cycle.
+If you are not familiar with feature flags, I've written an [article](https://medium.com/better-programming/feature-flags-and-how-to-iterate-quickly-7e3371b9986) which explains why feature flags can fasten your iteration cycle.
 
 ## What can I do with GO Feature Flag?
 
