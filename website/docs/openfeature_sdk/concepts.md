@@ -23,7 +23,7 @@ To be compatible with our solution, we offer [`providers`](https://docs.openfeat
 To use the OpenFeature SDKs you need what we call a provider.  
 A **provider** is responsible for performing flag evaluations. It provides an abstraction between **GO Feature Flag** and the OpenFeature SDK.
 
-A provider need a backend service to perform the flag evaluation. This is why we have introduced the [**relay proxy**](../relay_proxy).  
+A provider need a backend service to perform the flag evaluation. This is why we have introduced the [**relay proxy**](../category/use-the-relay-proxy).  
 This component retrieve your feature flag configuration file using the GO module and expose APIs to get your flags variations.
 
 ![](/docs/openfeature/concepts.jpg)
