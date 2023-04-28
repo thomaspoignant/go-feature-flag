@@ -20,6 +20,8 @@ type RetrieverConf struct {
 	Namespace      string              `mapstructure:"namespace" koanf:"namespace"`
 	ConfigMap      string              `mapstructure:"configmap" koanf:"configmap"`
 	Key            string              `mapstructure:"key" koanf:"key"`
+	BaseURL        string              `mapstructure:"baseUrl" koanf:"baseurl"`
+	AuthToken      string              `mapstructure:"token" koanf:"token"`
 }
 
 // IsValid validate the configuration of the retriever
@@ -31,6 +33,12 @@ func (c *RetrieverConf) IsValid() error {
 	if c.Kind == GitHubRetriever && c.RepositorySlug == "" {
 		return fmt.Errorf("invalid retriever: no \"repositorySlug\" property found for kind \"%s\"", c.Kind)
 	}
+	if c.Kind == GitlabRetriever && c.URL == "" {
+		return fmt.Errorf("invalid retriever: no \"URL\" property found for kind \"%s\"", c.Kind)
+	}
+	if c.Kind == GitlabRetriever && c.RepositorySlug == "" {
+		return fmt.Errorf("invalid retriever: no \"repositorySlug\" property found for kind \"%s\"", c.Kind)
+	}
 	if c.Kind == S3Retriever && c.Item == "" {
 		return fmt.Errorf("invalid retriever: no \"item\" property found for kind \"%s\"", c.Kind)
 	}
@@ -40,7 +48,7 @@ func (c *RetrieverConf) IsValid() error {
 	if c.Kind == GoogleStorageRetriever && c.Object == "" {
 		return fmt.Errorf("invalid retriever: no \"object\" property found for kind \"%s\"", c.Kind)
 	}
-	if (c.Kind == GitHubRetriever || c.Kind == FileRetriever) && c.Path == "" {
+	if (c.Kind == GitHubRetriever || c.Kind == FileRetriever || c.Kind == GitlabRetriever) && c.Path == "" {
 		return fmt.Errorf("invalid retriever: no \"path\" property found for kind \"%s\"", c.Kind)
 	}
 	if (c.Kind == S3Retriever || c.Kind == GoogleStorageRetriever) && c.Bucket == "" {
@@ -64,6 +72,7 @@ type RetrieverKind string
 const (
 	HTTPRetriever          RetrieverKind = "http"
 	GitHubRetriever        RetrieverKind = "github"
+	GitlabRetriever        RetrieverKind = "gitlab"
 	S3Retriever            RetrieverKind = "s3"
 	FileRetriever          RetrieverKind = "file"
 	GoogleStorageRetriever RetrieverKind = "googleStorage"
@@ -73,7 +82,8 @@ const (
 // IsValid is checking if the value is part of the enum
 func (r RetrieverKind) IsValid() error {
 	switch r {
-	case HTTPRetriever, GitHubRetriever, S3Retriever, FileRetriever, GoogleStorageRetriever, KubernetesRetriever:
+	case HTTPRetriever, GitHubRetriever, GitlabRetriever, S3Retriever,
+		FileRetriever, GoogleStorageRetriever, KubernetesRetriever:
 		return nil
 	}
 	return fmt.Errorf("invalid retriever: kind \"%s\" is not supported", r)

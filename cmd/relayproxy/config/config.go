@@ -23,13 +23,13 @@ import (
 
 var k = koanf.New(".")
 var DefaultRetriever = struct {
-	Timeout      time.Duration
-	HTTPMethod   string
-	GithubBranch string
+	Timeout    time.Duration
+	HTTPMethod string
+	GitBranch  string
 }{
-	Timeout:      10 * time.Second,
-	HTTPMethod:   http.MethodGet,
-	GithubBranch: "main",
+	Timeout:    10 * time.Second,
+	HTTPMethod: http.MethodGet,
+	GitBranch:  "main",
 }
 
 var DefaultExporter = struct {

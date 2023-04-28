@@ -17,6 +17,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/gcstorageretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/githubretriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever/gitlabretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/httpretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/s3retriever"
 	"github.com/xitongsys/parquet-go/parquet"
@@ -43,6 +44,25 @@ func Test_initRetriever(t *testing.T) {
 				Branch:         "main",
 				FilePath:       "testdata/flag-config.yaml",
 				GithubToken:    "",
+				Timeout:        20 * time.Millisecond,
+			},
+		},
+		{
+			name:    "Convert Gitlab Retriever",
+			wantErr: assert.NoError,
+			conf: &config.RetrieverConf{
+				Kind:           "gitlab",
+				BaseURL:        "http://localhost",
+				Path:           "flag-config.yaml",
+				RepositorySlug: "thomaspoignant/go-feature-flag",
+				Timeout:        20,
+			},
+			want: &gitlabretriever.Retriever{
+				BaseURL:        "http://localhost",
+				Branch:         "main",
+				FilePath:       "flag-config.yaml",
+				RepositorySlug: "thomaspoignant/go-feature-flag",
+				GitlabToken:    "",
 				Timeout:        20 * time.Millisecond,
 			},
 		},

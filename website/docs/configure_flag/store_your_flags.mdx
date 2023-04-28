@@ -7,6 +7,7 @@ import httplogo from '@site/static/docs/retrievers/http.png';
 import customlogo from '@site/static/docs/retrievers/custom.png';
 import filelogo from '@site/static/docs/retrievers/file.png';
 import githublogo from '@site/static/docs/retrievers/github.png';
+import gitlablogo from '@site/static/docs/retrievers/gitlab.png';
 import googlelogo from '@site/static/docs/retrievers/google.png';
 import s3logo from '@site/static/docs/retrievers/s3.png';
 import k8slogo from '@site/static/docs/retrievers/k8s.png';
@@ -40,43 +41,49 @@ configuration file and will evaluate your feature flags based on this configurat
     {
       name:"Kubernetes Configmap",
       logo: k8slogo,
-      relayproxy: '/docs/relay_proxy/configure_relay_proxy#kubernetes-configmap',
-      gomodule: '/docs/go_module/store_file/kubernetes_configmaps'
+      relayproxy: '../relay_proxy/configure_relay_proxy#kubernetes-configmap',
+      gomodule: '../go_module/store_file/kubernetes_configmaps'
     },
     {
       name:"AWS S3",
       logo: s3logo,
-      relayproxy: '/docs/relay_proxy/configure_relay_proxy#s3',
-      gomodule: '/docs/go_module/store_file/s3'
+      relayproxy: '../relay_proxy/configure_relay_proxy#s3',
+      gomodule: '../go_module/store_file/s3'
     },
     {
       name:"Google Storage",
       logo: googlelogo,
-      relayproxy: '/docs/relay_proxy/configure_relay_proxy#google-storage',
-      gomodule: '/docs/go_module/store_file/google_cloud_storage'
+      relayproxy: '../relay_proxy/configure_relay_proxy#google-storage',
+      gomodule: '../go_module/store_file/google_cloud_storage'
     },
     {
       name:"HTTP/HTTPS",
       logo: httplogo,
-      relayproxy: '/docs/relay_proxy/configure_relay_proxy#http',
-      gomodule: '/docs/go_module/store_file/http'
+      relayproxy: '../relay_proxy/configure_relay_proxy#http',
+      gomodule: '../go_module/store_file/http'
     },
     {
       name:"GitHub",
       logo: githublogo,
-      relayproxy: '/docs/relay_proxy/configure_relay_proxy#github',
-      gomodule: '/docs/go_module/store_file/github'
+      relayproxy: '../relay_proxy/configure_relay_proxy#github',
+      gomodule: '../go_module/store_file/github'
+    },
+    {
+      name:"Gitlab",
+      logo: gitlablogo,
+      relayproxy: '../relay_proxy/configure_relay_proxy#gitlab',
+      gomodule: '../go_module/store_file/gitlab'
     },
     {
       name:"Local File",
       logo: filelogo,
-      relayproxy: '/docs/relay_proxy/configure_relay_proxy#file',
-      gomodule: '/docs/go_module/store_file/file'
+      relayproxy: '../relay_proxy/configure_relay_proxy#file',
+      gomodule: '../go_module/store_file/file'
     },
     {
       name:"Custom retriever",
       logo: customlogo,
-      gomodule: '/docs/go_module/store_file/custom'
+      gomodule: '../go_module/store_file/custom'
     }
   ]}/>
 
