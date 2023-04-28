@@ -104,7 +104,7 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 		}, nil
 	case config.GitlabRetriever:
 		return &gitlabretriever.Retriever{
-			URL: c.URL,
+			BaseURL: c.BaseURL,
 			Branch: func() string {
 				if c.Branch == "" {
 					return config.DefaultRetriever.GitBranch
@@ -112,7 +112,7 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 				return c.Branch
 			}(),
 			FilePath:       c.Path,
-			GitlabToken:    c.GitlabToken,
+			GitlabToken:    c.AuthToken,
 			RepositorySlug: c.RepositorySlug,
 			Timeout:        retrieverTimeout,
 		}, nil

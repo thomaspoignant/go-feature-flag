@@ -9,7 +9,6 @@ type RetrieverConf struct {
 	Branch         string              `mapstructure:"branch"`
 	Path           string              `mapstructure:"path"`
 	GithubToken    string              `mapstructure:"githubToken"`
-	GitlabToken    string              `mapstructure:"gitlabToken"`
 	URL            string              `mapstructure:"url"`
 	Timeout        int64               `mapstructure:"timeout"`
 	HTTPMethod     string              `mapstructure:"method"`
@@ -21,6 +20,8 @@ type RetrieverConf struct {
 	Namespace      string              `mapstructure:"namespace"`
 	ConfigMap      string              `mapstructure:"configmap"`
 	Key            string              `mapstructure:"key"`
+	BaseURL        string              `mapstructure:"baseUrl"`
+	AuthToken      string              `mapstructure:"token"`
 }
 
 // IsValid validate the configuration of the retriever

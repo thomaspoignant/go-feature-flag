@@ -7,6 +7,7 @@ import httplogo from '@site/static/docs/retrievers/http.png';
 import customlogo from '@site/static/docs/retrievers/custom.png';
 import filelogo from '@site/static/docs/retrievers/file.png';
 import githublogo from '@site/static/docs/retrievers/github.png';
+import gitlablogo from '@site/static/docs/retrievers/gitlab.png';
 import googlelogo from '@site/static/docs/retrievers/google.png';
 import s3logo from '@site/static/docs/retrievers/s3.png';
 import k8slogo from '@site/static/docs/retrievers/k8s.png';
@@ -66,6 +67,12 @@ configuration file and will evaluate your feature flags based on this configurat
       logo: githublogo,
       relayproxy: '/docs/relay_proxy/configure_relay_proxy#github',
       gomodule: '/docs/go_module/store_file/github'
+    },
+    {
+      name:"Gitlab",
+      logo: gitlablogo,
+      relayproxy: '/docs/relay_proxy/configure_relay_proxy#gitlab',
+      gomodule: '/docs/go_module/store_file/gitlab'
     },
     {
       name:"Local File",

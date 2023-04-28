@@ -33,8 +33,9 @@ func Test_gitlab_Retrieve(t *testing.T) {
 
 		filePath       string
 		gitlabToken    string
-		RepositorySlug string
-		URL            string
+		repositorySlug string
+		baseURL        string
+		branch         string
 	}
 	tests := []struct {
 		name    string
@@ -46,8 +47,8 @@ func Test_gitlab_Retrieve(t *testing.T) {
 			name: "Success",
 			fields: fields{
 				httpClient:     mock.HTTP{},
-				URL:            "https://gitlab.com",
-				RepositorySlug: "aa/go-feature-flags-config",
+				baseURL:        "https://gitlab.com",
+				repositorySlug: "aa/go-feature-flags-config",
 				filePath:       "flag-config.yaml",
 			},
 			want:    []byte(sampleText()),
@@ -57,8 +58,8 @@ func Test_gitlab_Retrieve(t *testing.T) {
 			name: "Success with context",
 			fields: fields{
 				httpClient:     mock.HTTP{},
-				URL:            "https://gitlab.com",
-				RepositorySlug: "aa/go-feature-flags-config",
+				baseURL:        "https://gitlab.com",
+				repositorySlug: "aa/go-feature-flags-config",
 				filePath:       "flag-config.yaml",
 				context:        context.Background(),
 			},
@@ -69,28 +70,29 @@ func Test_gitlab_Retrieve(t *testing.T) {
 			name: "Success with default method",
 			fields: fields{
 				httpClient:     mock.HTTP{},
-				URL:            "https://gitlab.com",
-				RepositorySlug: "aa/go-feature-flags-config",
+				baseURL:        "https://gitlab.com",
+				repositorySlug: "aa/go-feature-flags-config",
 				filePath:       "flag-config.yaml",
 			},
 			want:    []byte(sampleText()),
 			wantErr: false,
 		},
-		// {
-		// 	name: "HTTP Error",
-		// 	fields: fields{
-		// 		httpClient:     mock.HTTP{},
-		// 		URL:            "https://gitlab.com/error",
-		// 		RepositorySlug: "aa/go-feature-flags-config",
-		// 		filePath:       "bad-file/file.yaml",
-		// 	},
-		// 	wantErr: true,
-		// },
+		{
+			name: "HTTP Error",
+			fields: fields{
+				httpClient:     mock.HTTP{},
+				baseURL:        "https://gitlab.com/error",
+				repositorySlug: "aa/go-feature-flags-config",
+				filePath:       "bad-file/file.yaml",
+				branch:         "error",
+			},
+			wantErr: true,
+		},
 		{
 			name: "Error missing slug",
 			fields: fields{
 				httpClient: mock.HTTP{},
-				URL:        "",
+				baseURL:    "",
 				filePath:   "flag-config.yaml",
 			},
 			wantErr: true,
@@ -99,7 +101,7 @@ func Test_gitlab_Retrieve(t *testing.T) {
 			name: "Error missing file path",
 			fields: fields{
 				httpClient: mock.HTTP{},
-				URL:        "https://gitlab.com/",
+				baseURL:    "https://gitlab.com/",
 				filePath:   "",
 			},
 			wantErr: true,
@@ -107,10 +109,33 @@ func Test_gitlab_Retrieve(t *testing.T) {
 		{
 			name: "Use gitlab token",
 			fields: fields{
-				httpClient:  mock.HTTP{},
-				URL:         "https://gitlab.com",
-				filePath:    "flag-config.yaml",
-				gitlabToken: "XXX",
+				httpClient:     mock.HTTP{},
+				baseURL:        "https://gitlab.com",
+				filePath:       "flag-config.yaml",
+				gitlabToken:    "XXX",
+				repositorySlug: "aa/go-feature-flags-config",
+			},
+			want:    []byte(sampleText()),
+			wantErr: false,
+		},
+		{
+			name: "Impossible to parse URL",
+			fields: fields{
+				httpClient:     mock.HTTP{},
+				baseURL:        "https://user:abc{DEf1=ghi@example.com:5432/",
+				filePath:       "flag-config.yaml",
+				gitlabToken:    "XXX",
+				repositorySlug: "aa/go-feature-flags-config",
+			},
+			want:    []byte(sampleText()),
+			wantErr: true,
+		},
+		{
+			name: "Use default values",
+			fields: fields{
+				httpClient:     mock.HTTP{},
+				filePath:       "flag-config.yaml",
+				repositorySlug: "aa/go-feature-flags-config",
 			},
 			want:    []byte(sampleText()),
 			wantErr: false,
@@ -119,11 +144,12 @@ func Test_gitlab_Retrieve(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			h := gitlabretriever.Retriever{
-				URL:         tt.fields.URL,
-				FilePath:    tt.fields.filePath,
-				GitlabToken: tt.fields.gitlabToken,
+				BaseURL:        tt.fields.baseURL,
+				FilePath:       tt.fields.filePath,
+				GitlabToken:    tt.fields.gitlabToken,
+				Branch:         tt.fields.branch,
+				RepositorySlug: tt.fields.repositorySlug,
 			}
-
 			h.SetHTTPClient(&tt.fields.httpClient)
 			got, err := h.Retrieve(tt.fields.context)
 			assert.Equal(t, tt.wantErr, err != nil, "Retrieve() error = %v, wantErr %v", err, tt.wantErr)

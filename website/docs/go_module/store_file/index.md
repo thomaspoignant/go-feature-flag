@@ -9,6 +9,7 @@ Available retriever are:
 - [S3 Bucket](./s3.md)
 - [HTTP endpoint](./http.md)
 - [Github](./github.md)
+- [Gitlab](./gitlab.md)
 - [File](./file.md)
 - [Kubernetes configmap](./kubernetes_configmaps.md)
 - [Google Cloud storage](./google_cloud_storage.md)
