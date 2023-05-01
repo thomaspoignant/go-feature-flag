@@ -207,6 +207,7 @@ func initExporter(c *config.ExporterConf) (ffclient.DataExporter, error) {
 			EndpointURL: c.EndpointURL,
 			Secret:      c.Secret,
 			Meta:        c.Meta,
+			Headers:     c.Headers,
 		}
 		return dataExp, nil
 
@@ -268,7 +269,12 @@ func initNotifier(c []config.NotifierConf) ([]notifier.Notifier, error) {
 
 		case config.WebhookNotifier:
 			notifiers = append(notifiers,
-				&webhooknotifier.Notifier{Secret: cNotif.Secret, EndpointURL: cNotif.EndpointURL, Meta: cNotif.Meta},
+				&webhooknotifier.Notifier{
+					Secret:      cNotif.Secret,
+					EndpointURL: cNotif.EndpointURL,
+					Meta:        cNotif.Meta,
+					Headers:     cNotif.Headers,
+				},
 			)
 
 		default:
