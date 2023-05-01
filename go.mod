@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go/storage v1.30.1
 	github.com/BurntSushi/toml v1.2.1
 	github.com/aws/aws-lambda-go v1.40.0
-	github.com/aws/aws-sdk-go v1.44.248
+	github.com/aws/aws-sdk-go v1.44.253
 	github.com/awslabs/aws-lambda-go-api-proxy v0.14.0
 	github.com/brpaz/echozap v1.1.3
 	github.com/fsouza/fake-gcs-server v1.44.2
