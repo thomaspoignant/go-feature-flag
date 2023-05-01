@@ -12,6 +12,7 @@ type HTTPClientMock struct {
 	StatusCode int
 	Body       string
 	Signature  string
+	Headers    map[string][]string
 }
 
 func (h *HTTPClientMock) Do(req *http.Request) (*http.Response, error) {
@@ -25,6 +26,7 @@ func (h *HTTPClientMock) Do(req *http.Request) (*http.Response, error) {
 	resp := &http.Response{
 		Body: io.NopCloser(bytes.NewReader([]byte(""))),
 	}
+	h.Headers = req.Header.Clone()
 	resp.StatusCode = h.StatusCode
 	return resp, nil
 }

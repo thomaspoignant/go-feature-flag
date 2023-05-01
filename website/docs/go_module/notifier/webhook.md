@@ -19,6 +19,9 @@ ffclient.Config{
             Meta: map[string]string{
                 "app.name": "my app",
             },
+            Headers: map[string][]string{
+                "Authorization": {"Bearer auth_token"},
+            },
         },
         // ...
     },
@@ -31,6 +34,7 @@ ffclient.Config{
 | `EndpointURL` | The complete URL of your API *(we will send a POST request to this URL, [see format](#format))*                                                                                                                                                       |
 | `Secret`      | *(optional)*<br/>A secret key you can share with your webhook. We will use this key to sign the request *(see [signature section](#signature) for more details)*.                                                                                     |
 | `Meta`        | *(optional)*<br/>A list of key value that will be add in your request, this is super useful if you want to add information on the current running instance of your app.<br/><br/>**By default the hostname is always added in the meta information.** |
+| `Headers`     | *(optional)*<br/> the list of Headers to send to the endpoint                                                                                                                                                                                         |
 
 ## Format
 If you have configured a webhook, a `POST` request will be sent to the `EndpointURL` with a body in this format:

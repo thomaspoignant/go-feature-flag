@@ -204,20 +204,12 @@ func initExporter(c *config.ExporterConf) (ffclient.DataExporter, error) {
 	switch c.Kind {
 	case config.WebhookExporter:
 		dataExp.Exporter = &webhookexporter.Exporter{
-			EndpointURL: c.EndpointURL,
-			Secret:      c.Secret,
-			Meta:        c.Meta,
-		}
+			EndpointURL: c.EndpointURL, Secret: c.Secret, Meta: c.Meta, Headers: c.Headers}
 		return dataExp, nil
 
 	case config.FileExporter:
-		dataExp.Exporter = &fileexporter.Exporter{
-			Format:                  format,
-			OutputDir:               c.OutputDir,
-			Filename:                filename,
-			CsvTemplate:             csvTemplate,
-			ParquetCompressionCodec: parquetCompressionCodec,
-		}
+		dataExp.Exporter = &fileexporter.Exporter{Format: format, OutputDir: c.OutputDir, Filename: filename,
+			CsvTemplate: csvTemplate, ParquetCompressionCodec: parquetCompressionCodec}
 		return dataExp, nil
 
 	case config.LogExporter:
@@ -268,7 +260,12 @@ func initNotifier(c []config.NotifierConf) ([]notifier.Notifier, error) {
 
 		case config.WebhookNotifier:
 			notifiers = append(notifiers,
-				&webhooknotifier.Notifier{Secret: cNotif.Secret, EndpointURL: cNotif.EndpointURL, Meta: cNotif.Meta},
+				&webhooknotifier.Notifier{
+					Secret:      cNotif.Secret,
+					EndpointURL: cNotif.EndpointURL,
+					Meta:        cNotif.Meta,
+					Headers:     cNotif.Headers,
+				},
 			)
 
 		default:

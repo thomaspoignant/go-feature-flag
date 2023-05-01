@@ -44,6 +44,8 @@ type Exporter struct {
 	Secret string
 	// Meta information that you want to send to your webhook (not mandatory)
 	Meta map[string]string
+	// Headers (optional) the list of Headers to send to the endpoint
+	Headers map[string][]string
 
 	httpClient internal.HTTPClient
 	init       sync.Once
@@ -84,13 +86,14 @@ func (f *Exporter) Export(ctx context.Context, _ *log.Logger, featureEvents []ex
 		return err
 	}
 
-	headers := http.Header{
-		"Content-Type": []string{"application/json"},
+	if f.Headers == nil {
+		f.Headers = map[string][]string{}
 	}
+	f.Headers["Content-Type"] = []string{"application/json"}
 
 	// if a secret is provided we sign the body and add this signature as a header.
 	if f.Secret != "" {
-		headers["X-Hub-Signature-256"] = []string{signer.Sign(payload, []byte(f.Secret))}
+		f.Headers["X-Hub-Signature-256"] = []string{signer.Sign(payload, []byte(f.Secret))}
 	}
 
 	request, err := http.NewRequestWithContext(
@@ -98,7 +101,7 @@ func (f *Exporter) Export(ctx context.Context, _ *log.Logger, featureEvents []ex
 	if err != nil {
 		return err
 	}
-	request.Header = headers
+	request.Header = f.Headers
 	response, err := f.httpClient.Do(request)
 	// Log if something went wrong while calling the webhook.
 	if err != nil {

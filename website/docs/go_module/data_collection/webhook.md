@@ -21,6 +21,9 @@ ffclient.Config{
             Secret:      "secret-for-signing",
             Meta:        map[string]string{
                 "extraInfo": "info",
+            }, 
+            Headers: map[string][]string{
+                "Authorization": {"Bearer auth_token"},
             },
         },
     },
@@ -28,11 +31,12 @@ ffclient.Config{
 }
 ```
 ## Configuration fields
-| Field  | Description  |
-|---|---|
-|`EndpointURL `   | EndpointURL of your webhook |
-|`Secret `   |  *(optional)*<br/>Secret used to sign your request body and fill the `X-Hub-Signature-256` header.<br/>See [signature section](#signature) for more details.  |
-|`Meta`   |   *(optional)*<br/>Add all the information you want to see in your request. |
+| Field          | Description                                                                                                                                                  |
+|----------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `EndpointURL ` | EndpointURL of your webhook                                                                                                                                  |
+| `Secret `      | *(optional)*<br/>Secret used to sign your request body and fill the `X-Hub-Signature-256` header.<br/>See [signature section](#signature) for more details.  |
+| `Meta`         | *(optional)*<br/>Add all the information you want to see in your request.                                                                                    |
+| `Headers`      | *(optional)*<br/> the list of Headers to send to the endpoint                                                                                                |
 
 
 ## Webhook format
