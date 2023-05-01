@@ -204,21 +204,12 @@ func initExporter(c *config.ExporterConf) (ffclient.DataExporter, error) {
 	switch c.Kind {
 	case config.WebhookExporter:
 		dataExp.Exporter = &webhookexporter.Exporter{
-			EndpointURL: c.EndpointURL,
-			Secret:      c.Secret,
-			Meta:        c.Meta,
-			Headers:     c.Headers,
-		}
+			EndpointURL: c.EndpointURL, Secret: c.Secret, Meta: c.Meta, Headers: c.Headers}
 		return dataExp, nil
 
 	case config.FileExporter:
-		dataExp.Exporter = &fileexporter.Exporter{
-			Format:                  format,
-			OutputDir:               c.OutputDir,
-			Filename:                filename,
-			CsvTemplate:             csvTemplate,
-			ParquetCompressionCodec: parquetCompressionCodec,
-		}
+		dataExp.Exporter = &fileexporter.Exporter{Format: format, OutputDir: c.OutputDir, Filename: filename,
+			CsvTemplate: csvTemplate, ParquetCompressionCodec: parquetCompressionCodec}
 		return dataExp, nil
 
 	case config.LogExporter:
