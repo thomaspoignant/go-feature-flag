@@ -22,7 +22,7 @@ ffclient.Config{
             Meta:        map[string]string{
                 "extraInfo": "info",
             }, 
-			      Headers: map[string][]string{
+            Headers: map[string][]string{
                 "Authorization": {"Bearer auth_token"},
             },
         },
