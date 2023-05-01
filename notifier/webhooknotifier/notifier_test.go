@@ -24,12 +24,14 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 		errorMsg  string
 		bodyPath  string
 		signature string
+		headers   map[string][]string
 	}
 	type args struct {
 		diff       notifier.DiffCache
 		statusCode int
 		forceError bool
 		url        string
+		headers    map[string][]string
 	}
 	tests := []struct {
 		name     string
@@ -208,6 +210,44 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 				forceError: true,
 			},
 		},
+		{
+			name: "should use custom Headers",
+			expected: expected{
+				bodyPath:  "./testdata/should_not_be_signed_if_no_secret.json",
+				signature: "",
+				headers: map[string][]string{
+					"Authorization": {"Bearer auth_token"},
+					"Content-Type":  {"application/json"},
+				},
+			},
+			args: args{
+				url:        "http://webhook.example/hook",
+				statusCode: http.StatusOK,
+				headers: map[string][]string{
+					"Authorization": {"Bearer auth_token"},
+				},
+				diff: notifier.DiffCache{
+					Added: map[string]flag.Flag{
+						"test-flag3": &flag.InternalFlag{
+							Variations: &map[string]*interface{}{
+								"Default": testconvert.Interface("default"),
+								"False":   testconvert.Interface("false"),
+								"True":    testconvert.Interface("test"),
+							},
+							DefaultRule: &flag.Rule{
+								Name: testconvert.String("legacyDefaultRule"),
+								Percentages: &map[string]float64{
+									"False": 95,
+									"True":  5,
+								},
+							},
+						},
+					},
+					Deleted: map[string]flag.Flag{},
+					Updated: map[string]notifier.DiffUpdated{},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -219,6 +259,7 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 				Meta:        map[string]string{"hostname": "toto"},
 				httpClient:  mockHTTPClient,
 				init:        sync.Once{},
+				Headers:     tt.args.headers,
 			}
 
 			w := sync.WaitGroup{}
@@ -232,6 +273,9 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 				content, _ := os.ReadFile(tt.expected.bodyPath)
 				assert.JSONEq(t, string(content), mockHTTPClient.Body)
 				assert.Equal(t, tt.expected.signature, mockHTTPClient.Signature)
+				if tt.expected.headers != nil {
+					assert.Equal(t, tt.expected.headers, mockHTTPClient.Headers)
+				}
 			}
 		})
 	}

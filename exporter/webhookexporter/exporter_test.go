@@ -25,6 +25,7 @@ func TestWebhook_Export(t *testing.T) {
 		Secret      string
 		Meta        map[string]string
 		httpClient  testutils.HTTPClientMock
+		Headers     map[string][]string
 	}
 	type args struct {
 		logger        *log.Logger
@@ -33,6 +34,7 @@ func TestWebhook_Export(t *testing.T) {
 	type expected struct {
 		bodyFilePath string
 		signHeader   string
+		headers      map[string][]string
 	}
 	tests := []struct {
 		name     string
@@ -147,6 +149,36 @@ func TestWebhook_Export(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name: "expect exporter to send custom headers",
+			fields: fields{
+				EndpointURL: "http://valid.com/webhook",
+				httpClient:  testutils.HTTPClientMock{StatusCode: 200, ForceError: false},
+				Meta:        map[string]string{"hostname": "hostname"},
+				Headers:     map[string][]string{"Authorization": {"Bearer auth_token"}},
+			},
+			args: args{
+				logger: logger,
+				featureEvents: []exporter.FeatureEvent{
+					{
+						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
+						Variation: "Default", Value: "YO", Default: false,
+					},
+					{
+						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
+						Variation: "Default", Value: "YO2", Default: false, Version: "127",
+					},
+				},
+			},
+			expected: expected{
+				bodyFilePath: "./testdata/valid_without_signature.json",
+				signHeader:   "",
+				headers: map[string][]string{
+					"Authorization": {"Bearer auth_token"},
+					"Content-Type":  {"application/json"}},
+			},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -155,6 +187,7 @@ func TestWebhook_Export(t *testing.T) {
 				Secret:      tt.fields.Secret,
 				Meta:        tt.fields.Meta,
 				httpClient:  &tt.fields.httpClient,
+				Headers:     tt.fields.Headers,
 			}
 			err := f.Export(context.Background(), tt.args.logger, tt.args.featureEvents)
 			if tt.wantErr {
@@ -171,6 +204,10 @@ func TestWebhook_Export(t *testing.T) {
 
 			if tt.expected.signHeader != "" {
 				assert.Equal(t, tt.expected.signHeader, tt.fields.httpClient.Signature)
+			}
+
+			if tt.expected.headers != nil {
+				assert.Equal(t, tt.expected.headers, tt.fields.httpClient.Headers)
 			}
 		})
 	}
