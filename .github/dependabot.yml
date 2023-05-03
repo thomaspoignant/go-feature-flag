@@ -51,10 +51,9 @@ updates:
       - "automerge"
 
   - package-ecosystem: "github-actions"
-      directory: "/"
-      schedule:
-        interval: weekly
-        time: "04:00"
-      open-pull-requests-limit: 30
-      labels:
+    directory: "/"
+    schedule:
+      time: "04:00"
+    open-pull-requests-limit: 30
+    labels:
       - "dependencies"
