@@ -215,7 +215,7 @@ jobs:
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
       - name: yq - portable yaml processor
-        uses: mikefarah/yq@v4.31.1
+        uses: mikefarah/yq@v4.33.3
 
       - name: Get tag name
         uses: olegtarasov/get-tag@v2.1.2
