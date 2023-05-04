@@ -6,7 +6,7 @@ new-admin-access:
   defaultRule:
     percentage:
       A: 100
-      B: 30
+      B: 0
 
 flag-only-for-admin:
   variations:
