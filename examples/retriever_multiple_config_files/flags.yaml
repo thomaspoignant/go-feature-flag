@@ -1,0 +1,12 @@
+flag-only-for-admin:
+  variations:
+    default_var: false
+    false_var: false
+    true_var: true
+  targeting:
+    - query: admin eq true
+      percentage:
+        false_var: 100
+        true_var: 0
+  defaultRule:
+    variation: Default
