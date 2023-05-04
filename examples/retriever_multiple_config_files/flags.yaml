@@ -1,13 +1,3 @@
-new-admin-access:
-  variations:
-    A: false
-    B: false
-    C: true
-  defaultRule:
-    percentage:
-      A: 100
-      B: 0
-
 flag-only-for-admin:
   variations:
     default_var: false
@@ -16,7 +6,7 @@ flag-only-for-admin:
   targeting:
     - query: admin eq true
       percentage:
-        false_var: 0
-        true_var: 100
+        false_var: 100
+        true_var: 0
   defaultRule:
     variation: Default
