@@ -97,7 +97,7 @@ func TestDataExporterScheduler_exporterReturnError(t *testing.T) {
 
 	// read log
 	logs, _ := os.ReadFile(file.Name())
-	assert.Regexp(t, "\\["+testutils.RFC3339Regex+"\\] error while exporting data: random err\\n", string(logs))
+	assert.Regexp(t, "\\["+testutils.RFC3339Regex+"\\] error while exporting data: random err\n", string(logs))
 }
 
 func TestDataExporterScheduler_nonBulkExporter(t *testing.T) {
