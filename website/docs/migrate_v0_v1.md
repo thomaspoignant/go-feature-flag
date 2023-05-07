@@ -23,7 +23,7 @@ brew install go-feature-flag-migration-cli
  
 ### Install using Scoop (windows)
 ```shell
-scoop bucket add org https://github.com/thomaspoignant/scoop.git
+scoop bucket add org https://github.com/go-feature-flag/scoop.git
 scoop install go-feature-flag-migration-cli
 ```
 
