@@ -189,7 +189,6 @@ jobs:
           commit-message: Create a new documentation version ${{ env.GIT_TAG_NAME }}
           labels: automerge
           assignees: thomaspoignant
-          reviewers: thomaspoignant
           draft: false
           signoff: true
           delete-branch: true
@@ -250,7 +249,6 @@ jobs:
           commit-message: Bump relay-proxy helm chart version ${{ env.GIT_TAG_NAME }}
           labels: automerge
           assignees: thomaspoignant
-          reviewers: thomaspoignant
           draft: false
           signoff: true
           delete-branch: true
