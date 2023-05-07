@@ -342,14 +342,36 @@ brews:
     description: "A command line tool to lint your feature flag configuration file"
     skip_upload: auto
 
-scoop:
-  url_template: "https://github.com/thomaspoignant/go-feature-flag/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
-  bucket:
-    owner: thomaspoignant
-    name: scoop
-  commit_msg_template: "Scoop update for {{ .ProjectName }} version {{ .Tag }}"
-  homepage: "https://gofeatureflag.org"
-  license: MIT
+scoops:
+  - url_template: https://github.com/thomaspoignant/go-feature-flag/releases/download/{{ .Tag }}/{{ .ArtifactName }}
+    ids: [go-feature-flag-migration-cli ]
+    name: go-feature-flag-migration-cli
+    bucket:
+      owner: go-feature-flag
+      name: scoop
+    commit_msg_template: "Scoop update for {{ .ProjectName }} version {{ .Tag }}"
+    homepage: "https://gofeatureflag.org"
+    license: MIT
+
+  - url_template: https://github.com/thomaspoignant/go-feature-flag/releases/download/{{ .Tag }}/{{ .ArtifactName }}
+    ids: [go-feature-flag-relay-proxy ]
+    name: go-feature-flag-relay-proxy
+    bucket:
+      owner: go-feature-flag
+      name: scoop
+    commit_msg_template: "Scoop update for {{ .ProjectName }} version {{ .Tag }}"
+    homepage: "https://gofeatureflag.org"
+    license: MIT
+
+  - url_template: https://github.com/thomaspoignant/go-feature-flag/releases/download/{{ .Tag }}/{{ .ArtifactName }}
+    ids: [ go-feature-flag-lint ]
+    name: go-feature-flag-lint
+    bucket:
+      owner: go-feature-flag
+      name: scoop
+    commit_msg_template: "Scoop update for {{ .ProjectName }} version {{ .Tag }}"
+    homepage: "https://gofeatureflag.org"
+    license: MIT
 
 snapshot:
   name_template: "{{ incpatch .Version }}-next"
