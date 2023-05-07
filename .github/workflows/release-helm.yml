@@ -67,7 +67,6 @@ jobs:
           commit-message: Update relay proxy helm README ${{ env.GIT_TAG_NAME }}
           labels: automerge
           assignees: thomaspoignant
-          reviewers: thomaspoignant
           draft: false
           signoff: true
           delete-branch: true
