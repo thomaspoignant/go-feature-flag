@@ -90,6 +90,10 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 	// Conversions
 	switch c.Kind {
 	case config.GitHubRetriever:
+		token := c.AuthToken
+		if token == "" && c.GithubToken != "" { // nolint: staticcheck
+			token = c.GithubToken // nolint: staticcheck
+		}
 		return &githubretriever.Retriever{
 			RepositorySlug: c.RepositorySlug,
 			Branch: func() string {
@@ -99,7 +103,7 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 				return c.Branch
 			}(),
 			FilePath:    c.Path,
-			GithubToken: c.GithubToken,
+			GithubToken: token,
 			Timeout:     retrieverTimeout,
 		}, nil
 	case config.GitlabRetriever:
