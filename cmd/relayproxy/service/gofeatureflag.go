@@ -91,8 +91,8 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 	switch c.Kind {
 	case config.GitHubRetriever:
 		token := c.AuthToken
-		if token == "" && c.GithubToken != "" {
-			token = c.GithubToken
+		if token == "" && c.GithubToken != "" { // nolint: staticcheck
+			token = c.GithubToken // nolint: staticcheck
 		}
 		return &githubretriever.Retriever{
 			RepositorySlug: c.RepositorySlug,
