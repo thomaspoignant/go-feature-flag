@@ -52,14 +52,14 @@ In this section we will present all the available retriever configuration availa
 
 ### GitHub
 
-| Field name       | Type   | Default  | Description                                                                                                                                                                                                                           |
-|------------------|--------|----------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `kind`           | string | **none** | **(mandatory)** Value should be **`github`**.<br/>_This field is mandatory and describe which retriever you are using._                                                                                                                |
-| `repositorySlug` | string | **none** | **(mandatory)** The repository slug of the GitHub repository where your file is located _(ex: `thomaspoignant/go-feature-flag`)_.                                                                                                     |
-| `path`           | string | **none** | **(mandatory)** Path to the file inside the repository _(ex: `config/flag/my-flags.yaml`)_.                                                                                                                                           |
-| `branch`         | string | `main`   | The branch we should check in the repository.                                                                                                                                                                                         |
-| `githubToken`    | string | **none** | Github token is used to access a private repository, you need the repo permission ([how to create a GitHub token](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token)). |
-| `timeout`        | string | `10000`  | Timeout in millisecond used when calling GitHub.                                                                                                                                                                                      |
+| Field name       | Type   | Default  | Description                                                                                                                                                                                                                          |
+|------------------|--------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `kind`           | string | **none** | **(mandatory)** Value should be **`github`**.<br/>_This field is mandatory and describe which retriever you are using._                                                                                                               |
+| `repositorySlug` | string | **none** | **(mandatory)** The repository slug of the GitHub repository where your file is located _(ex: `thomaspoignant/go-feature-flag`)_.                                                                                                    |
+| `path`           | string | **none** | **(mandatory)** Path to the file inside the repository _(ex: `config/flag/my-flags.yaml`)_.                                                                                                                                          |
+| `branch`         | string | `main`   | The branch we should check in the repository.                                                                                                                                                                                        |
+| `token`          | string | **none** | Github token used to access a private repository, you need the repo permission ([how to create a GitHub token](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token)). |
+| `timeout`        | string | `10000`  | Timeout in millisecond used when calling GitHub.                                                                                                                                                                                     |
 
 ### GitLab
 

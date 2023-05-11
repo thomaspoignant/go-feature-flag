@@ -48,6 +48,42 @@ func Test_initRetriever(t *testing.T) {
 			},
 		},
 		{
+			name:    "Convert Github Retriever with token",
+			wantErr: assert.NoError,
+			conf: &config.RetrieverConf{
+				Kind:           "github",
+				RepositorySlug: "thomaspoignant/go-feature-flag",
+				Path:           "testdata/flag-config.yaml",
+				Timeout:        20,
+				AuthToken:      "xxx",
+			},
+			want: &githubretriever.Retriever{
+				RepositorySlug: "thomaspoignant/go-feature-flag",
+				Branch:         "main",
+				FilePath:       "testdata/flag-config.yaml",
+				GithubToken:    "xxx",
+				Timeout:        20 * time.Millisecond,
+			},
+		},
+		{
+			name:    "Convert Github Retriever with deprecated token",
+			wantErr: assert.NoError,
+			conf: &config.RetrieverConf{
+				Kind:           "github",
+				RepositorySlug: "thomaspoignant/go-feature-flag",
+				Path:           "testdata/flag-config.yaml",
+				Timeout:        20,
+				GithubToken:    "xxx",
+			},
+			want: &githubretriever.Retriever{
+				RepositorySlug: "thomaspoignant/go-feature-flag",
+				Branch:         "main",
+				FilePath:       "testdata/flag-config.yaml",
+				GithubToken:    "xxx",
+				Timeout:        20 * time.Millisecond,
+			},
+		},
+		{
 			name:    "Convert Gitlab Retriever",
 			wantErr: assert.NoError,
 			conf: &config.RetrieverConf{
