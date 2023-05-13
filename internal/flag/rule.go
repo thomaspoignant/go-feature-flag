@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/nikunjy/rules/parser"
@@ -44,7 +45,7 @@ type Rule struct {
 func (r *Rule) Evaluate(user ffuser.User, hashID uint32, isDefault bool,
 ) (string, error) {
 	// Check if the originalRule apply for this user
-	ruleApply := isDefault || r.GetQuery() == "" || parser.Evaluate(r.GetQuery(), utils.UserToMap(user))
+	ruleApply := isDefault || r.GetQuery() == "" || parser.Evaluate(r.GetTrimmedQuery(), utils.UserToMap(user))
 	if !ruleApply || (!isDefault && r.IsDisable()) {
 		return "", &internalerror.RuleNotApply{User: user}
 	}
@@ -248,10 +249,20 @@ func (r *Rule) IsValid(defaultRule bool) error {
 	return nil
 }
 
+// GetTrimmedQuery is removing the break lines and return
+func (r *Rule) GetTrimmedQuery() string {
+	splitQuery := strings.Split(r.GetQuery(), "\n")
+	for index, item := range splitQuery {
+		splitQuery[index] = strings.TrimLeft(item, " ")
+	}
+	return strings.Join(splitQuery, "")
+}
+
 func (r *Rule) GetQuery() string {
 	if r.Query == nil {
 		return ""
 	}
+
 	return *r.Query
 }
 
