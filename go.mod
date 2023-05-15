@@ -8,7 +8,6 @@ require (
 	github.com/aws/aws-lambda-go v1.41.0
 	github.com/aws/aws-sdk-go v1.44.262
 	github.com/awslabs/aws-lambda-go-api-proxy v0.14.0
-	github.com/brpaz/echozap v1.1.3
 	github.com/fsouza/fake-gcs-server v1.45.1
 	github.com/gdexlab/go-render v1.0.1
 	github.com/golang/mock v1.6.0
