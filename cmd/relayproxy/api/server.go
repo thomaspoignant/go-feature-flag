@@ -2,10 +2,10 @@ package api
 
 import (
 	"fmt"
+	custommiddleware "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"
 	"strings"
 	"time"
 
-	"github.com/brpaz/echozap"
 	"github.com/labstack/echo-contrib/prometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -57,7 +57,7 @@ func (s *Server) init() {
 	s.echoInstance.Use(metrics.AddCustomMetricsMiddleware)
 
 	// Middlewares
-	s.echoInstance.Use(echozap.ZapLogger(s.zapLog))
+	s.echoInstance.Use(custommiddleware.ZapLogger(s.zapLog, s.config))
 	s.echoInstance.Use(middleware.Recover())
 	s.echoInstance.Use(middleware.TimeoutWithConfig(
 		middleware.TimeoutConfig{Timeout: time.Duration(s.config.RestAPITimeout) * time.Millisecond}),
