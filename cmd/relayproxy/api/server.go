@@ -104,7 +104,7 @@ func (s *Server) init() {
 // Start launch the API server
 func (s *Server) Start() {
 	if s.config.ListenPort == 0 {
-		s.config.ListenPort = 3000
+		s.config.ListenPort = 1031
 	}
 	address := fmt.Sprintf("0.0.0.0:%d", s.config.ListenPort)
 
