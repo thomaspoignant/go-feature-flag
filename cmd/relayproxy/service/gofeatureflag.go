@@ -27,7 +27,11 @@ import (
 	"k8s.io/client-go/rest"
 )
 
-func NewGoFeatureFlagClient(proxyConf *config.Config, logger *zap.Logger) (*ffclient.GoFeatureFlag, error) {
+func NewGoFeatureFlagClient(
+	proxyConf *config.Config,
+	logger *zap.Logger,
+	proxyNotifier notifier.Notifier,
+) (*ffclient.GoFeatureFlag, error) {
 	var mainRetriever retriever.Retriever
 	var err error
 	if proxyConf.Retriever != nil {
@@ -65,6 +69,7 @@ func NewGoFeatureFlagClient(proxyConf *config.Config, logger *zap.Logger) (*ffcl
 			return nil, err
 		}
 	}
+	notif = append(notif, proxyNotifier)
 
 	f := ffclient.Config{
 		PollingInterval:         time.Duration(proxyConf.PollingInterval) * time.Millisecond,

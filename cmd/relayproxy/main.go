@@ -68,15 +68,20 @@ func main() {
 	docs.SwaggerInfo.Host = fmt.Sprintf("%s:%d", proxyConf.Host, proxyConf.ListenPort)
 
 	// Init services
-	goff, err := service.NewGoFeatureFlagClient(proxyConf, zapLog)
+	wsService := service.NewWebsocketService()
+	proxyNotifier := service.NewNotifierRelayProxy(wsService)
+	goff, err := service.NewGoFeatureFlagClient(proxyConf, zapLog, proxyNotifier)
 	if err != nil {
 		panic(err)
 	}
 
-	monitoringService := service.NewMonitoring(goff)
-
+	services := service.Services{
+		MonitoringService:    service.NewMonitoring(goff),
+		WebsocketService:     wsService,
+		GOFeatureFlagService: goff,
+	}
 	// Init API server
-	apiServer := api.New(proxyConf, monitoringService, goff, zapLog)
+	apiServer := api.New(proxyConf, services, zapLog)
 
 	if proxyConf.StartAsAwsLambda {
 		apiServer.StartAwsLambda()
