@@ -12,6 +12,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import PropTypes from 'prop-types';
 import {PercentagesForm} from './percentageForm';
 import {ProgressiveRollout} from './progressiveRolloutForm';
+import {TextArea} from '../TextArea';
 
 Rule.propTypes = {
   variations: PropTypes.array,
@@ -69,7 +70,7 @@ export function Rule({variations, label, isDefaultRule}) {
               <div className={styles.ifContainer}>
                 <div className={clsx(styles.circle)}>IF</div>
               </div>
-              <Input
+              <TextArea
                 label={`${label}.query`}
                 displayText={'Query'}
                 required={true}
