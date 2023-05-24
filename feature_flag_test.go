@@ -1,12 +1,13 @@
 package ffclient_test
 
 import (
-	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"log"
 	"os"
 	"testing"
 	"time"
+
+	"github.com/thomaspoignant/go-feature-flag/internal/flag"
+	"github.com/thomaspoignant/go-feature-flag/retriever"
 
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/s3retriever"
@@ -155,6 +156,25 @@ func TestValidUseCaseJson(t *testing.T) {
 	gffClient, err := ffclient.New(ffclient.Config{
 		PollingInterval: 5 * time.Second,
 		Retriever:       &fileretriever.Retriever{Path: "testdata/flag-config.json"},
+		Logger:          log.New(os.Stdout, "", 0),
+		FileFormat:      "json",
+	})
+	defer gffClient.Close()
+
+	assert.NoError(t, err)
+	user := ffuser.NewUser("random-key")
+	hasTestFlag, _ := gffClient.BoolVariation("test-flag", user, false)
+	assert.True(t, hasTestFlag, "User should have test flag")
+	hasUnknownFlag, _ := gffClient.BoolVariation("unknown-flag", user, false)
+	assert.False(t, hasUnknownFlag, "User should use default value if flag does not exists")
+	assert.NotEqual(t, time.Time{}, gffClient.GetCacheRefreshDate())
+}
+
+func TestValidUseCaseMultilineQueryJson(t *testing.T) {
+	// Valid use case
+	gffClient, err := ffclient.New(ffclient.Config{
+		PollingInterval: 5 * time.Second,
+		Retriever:       &fileretriever.Retriever{Path: "testdata/flag-config-multiline-query.json"},
 		Logger:          log.New(os.Stdout, "", 0),
 		FileFormat:      "json",
 	})
