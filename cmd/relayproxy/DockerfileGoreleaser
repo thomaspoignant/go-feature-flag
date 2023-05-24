@@ -1,3 +1,3 @@
 FROM gcr.io/distroless/base-debian11:latest
-COPY ./go-feature-flag-relay-proxy /go-feature-flag-relay-proxy
-CMD ["/go-feature-flag-relay-proxy"]
+COPY ./go-feature-flag /go-feature-flag
+CMD ["/go-feature-flag"]

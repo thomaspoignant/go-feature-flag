@@ -30,9 +30,35 @@ builds:
         goarch: arm
         goarm: 6
 
+  # DEPRECATED: check go-feature-flag
+  # We aim to deprecate the name relay proxy, so the main build should be called go-feature-flag
   - id: go-feature-flag-relay-proxy
     main: ./cmd/relayproxy
     binary: go-feature-flag-relay-proxy
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - 386
+      - amd64
+      - arm64
+      - arm
+    goarm:
+      - 6
+      - 7
+    ignore:
+      - goos: darwin
+        goarch: 386
+      - goos: linux
+        goarch: arm
+        goarm: 6
+
+  - id: go-feature-flag
+    main: ./cmd/relayproxy
+    binary: go-feature-flag
     env:
       - CGO_ENABLED=0
     goos:
@@ -91,6 +117,8 @@ archives:
       {{- if not (eq .Amd64 \"v1\") }}{{ .Amd64 }}{{ end }}"
     builds:
       - go-feature-flag-migration-cli
+
+  # DEPRECATED: check go-feature-flag
   - id: go-feature-flag-relay-proxy
     name_template: "go-feature-flag-relay-proxy_\
       {{ .Version }}_\
@@ -103,6 +131,19 @@ archives:
       {{- if not (eq .Amd64 \"v1\") }}{{ .Amd64 }}{{ end }}"
     builds:
       - go-feature-flag-relay-proxy
+
+  - id: go-feature-flag
+    name_template: "go-feature-flag_\
+      {{ .Version }}_\
+      {{- title .Os }}_\
+      {{- if eq .Arch \"amd64\" }}x86_64\
+      {{- else if eq .Arch \"386\" }}i386\
+      {{- else }}{{ .Arch }}{{ end }}\
+      {{- with .Arm }}v{{ . }}{{ end }}\
+      {{- with .Mips }}_{{ . }}{{ end }}\
+      {{- if not (eq .Amd64 \"v1\") }}{{ .Amd64 }}{{ end }}"
+    builds:
+      - go-feature-flag
   - id: go-feature-flag-lint
     name_template: "go-feature-flag-lint_\
       {{ .Version }}_\
@@ -131,13 +172,13 @@ changelog:
       - 'vendor'
 
 dockers:
-# relay-proxy
+# DEPRECATED: check go-feature-flag
   - use: buildx
     goos: linux
     goarch: amd64
     ids:
       - go-feature-flag-relay-proxy
-    dockerfile: ./cmd/relayproxy/DockerfileGoreleaser
+    dockerfile: ./cmd/relayproxy/DockerfileGoreleaserRelayProxy
     image_templates:
       - thomaspoignant/go-feature-flag-relay-proxy:v{{ .RawVersion }}-amd64
     build_flag_templates:
@@ -147,7 +188,7 @@ dockers:
     goarch: arm64
     ids:
       - go-feature-flag-relay-proxy
-    dockerfile: ./cmd/relayproxy/DockerfileGoreleaser
+    dockerfile: ./cmd/relayproxy/DockerfileGoreleaserRelayProxy
     image_templates:
       - thomaspoignant/go-feature-flag-relay-proxy:v{{ .RawVersion }}-arm64v8
     build_flag_templates:
@@ -158,9 +199,42 @@ dockers:
     goarm: 7
     ids:
       - go-feature-flag-relay-proxy
-    dockerfile: ./cmd/relayproxy/DockerfileGoreleaser
+    dockerfile: ./cmd/relayproxy/DockerfileGoreleaserRelayProxy
     image_templates:
       - thomaspoignant/go-feature-flag-relay-proxy:v{{ .RawVersion }}-armv7
+    build_flag_templates:
+      - "--platform=linux/arm/v7"
+
+# go-feature-flag
+  - use: buildx
+    goos: linux
+    goarch: amd64
+    ids:
+      - go-feature-flag
+    dockerfile: ./cmd/relayproxy/DockerfileGoreleaser
+    image_templates:
+      - thomaspoignant/go-feature-flag:v{{ .RawVersion }}-amd64
+    build_flag_templates:
+      - "--platform=linux/amd64"
+  - use: buildx
+    goos: linux
+    goarch: arm64
+    ids:
+      - go-feature-flag
+    dockerfile: ./cmd/relayproxy/DockerfileGoreleaser
+    image_templates:
+      - thomaspoignant/go-feature-flag:v{{ .RawVersion }}-arm64v8
+    build_flag_templates:
+      - "--platform=linux/arm64/v8"
+  - use: buildx
+    goos: linux
+    goarch: arm
+    goarm: 7
+    ids:
+      - go-feature-flag
+    dockerfile: ./cmd/relayproxy/DockerfileGoreleaser
+    image_templates:
+      - thomaspoignant/go-feature-flag:v{{ .RawVersion }}-armv7
     build_flag_templates:
       - "--platform=linux/arm/v7"
 
@@ -231,7 +305,7 @@ dockers:
       - "--platform=linux/arm/v7"
 
 docker_manifests:
-# rely-proxy
+  # DEPRECATED: check go-feature-flag
   - name_template: thomaspoignant/go-feature-flag-relay-proxy:latest
     id: go-feature-flag-relay-proxy-latest
     image_templates:
@@ -256,6 +330,32 @@ docker_manifests:
       - thomaspoignant/go-feature-flag-relay-proxy:v{{ .RawVersion }}-arm64v8
       - thomaspoignant/go-feature-flag-relay-proxy:v{{ .RawVersion }}-armv7
       - thomaspoignant/go-feature-flag-relay-proxy:v{{ .RawVersion }}-amd64
+
+  # go-feature-flag
+  - name_template: thomaspoignant/go-feature-flag:latest
+    id: go-feature-flag-latest
+    image_templates:
+      - thomaspoignant/go-feature-flag:v{{ .RawVersion }}-arm64v8
+      - thomaspoignant/go-feature-flag:v{{ .RawVersion }}-armv7
+      - thomaspoignant/go-feature-flag:v{{ .RawVersion }}-amd64
+  - name_template: thomaspoignant/go-feature-flag:v{{ .RawVersion }}
+    id: go-feature-flag-tag
+    image_templates:
+      - thomaspoignant/go-feature-flag:v{{ .RawVersion }}-arm64v8
+      - thomaspoignant/go-feature-flag:v{{ .RawVersion }}-armv7
+      - thomaspoignant/go-feature-flag:v{{ .RawVersion }}-amd64
+  - name_template: thomaspoignant/go-feature-flag:v{{ .Major }}
+    id: go-feature-flag-major
+    image_templates:
+      - thomaspoignant/go-feature-flag:v{{ .RawVersion }}-arm64v8
+      - thomaspoignant/go-feature-flag:v{{ .RawVersion }}-armv7
+      - thomaspoignant/go-feature-flag:v{{ .RawVersion }}-amd64
+  - name_template: thomaspoignant/go-feature-flag:v{{ .Major }}.{{ .Minor }}
+    id: go-feature-flag-minor
+    image_templates:
+      - thomaspoignant/go-feature-flag:v{{ .RawVersion }}-arm64v8
+      - thomaspoignant/go-feature-flag:v{{ .RawVersion }}-armv7
+      - thomaspoignant/go-feature-flag:v{{ .RawVersion }}-amd64
 # migration-cli
   - name_template: thomaspoignant/go-feature-flag-migration-cli:latest
     id: go-feature-flag-migration-cli-latest
@@ -319,9 +419,21 @@ brews:
     homepage: "https://github.com/thomaspoignant/go-feature-flag/cmd/migrationcli"
     description: "A migration command line to move your feature flag configuration file from format GO Feature Flag v0.X to v1.X"
     skip_upload: auto
+  # DEPRECATED: check go-feature-flag
   - ids:
       - go-feature-flag-relay-proxy
     name: go-feature-flag-relay-proxy
+    tap:
+      owner: thomaspoignant
+      name: homebrew-tap
+      branch: master
+    caveats: "A stand alone server to run GO Feature Flag"
+    homepage: "https://gofeatureflag.org"
+    description: "A stand alone server to run GO Feature Flag"
+    skip_upload: auto
+  - ids:
+      - go-feature-flag
+    name: go-feature-flag
     tap:
       owner: thomaspoignant
       name: homebrew-tap
@@ -343,6 +455,7 @@ brews:
     skip_upload: auto
 
 scoops:
+
   - url_template: https://github.com/thomaspoignant/go-feature-flag/releases/download/{{ .Tag }}/{{ .ArtifactName }}
     ids: [go-feature-flag-migration-cli ]
     name: go-feature-flag-migration-cli
@@ -353,9 +466,20 @@ scoops:
     homepage: "https://gofeatureflag.org"
     license: MIT
 
+  # DEPRECATED: check go-feature-flag
   - url_template: https://github.com/thomaspoignant/go-feature-flag/releases/download/{{ .Tag }}/{{ .ArtifactName }}
     ids: [go-feature-flag-relay-proxy ]
     name: go-feature-flag-relay-proxy
+    bucket:
+      owner: go-feature-flag
+      name: scoop
+    commit_msg_template: "Scoop update for {{ .ProjectName }} version {{ .Tag }}"
+    homepage: "https://gofeatureflag.org"
+    license: MIT
+
+  - url_template: https://github.com/thomaspoignant/go-feature-flag/releases/download/{{ .Tag }}/{{ .ArtifactName }}
+    ids: [go-feature-flag ]
+    name: go-feature-flag
     bucket:
       owner: go-feature-flag
       name: scoop
