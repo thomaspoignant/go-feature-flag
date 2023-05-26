@@ -39,3 +39,5 @@ go-feature-flag-relay-proxy/
 
 # AWS SAM build folder
 .aws-sam
+
+node_modules/

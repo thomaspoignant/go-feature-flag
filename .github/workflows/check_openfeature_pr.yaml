@@ -1,0 +1,16 @@
+name: "Check open-feature pull request"
+on:
+  schedule:
+    - cron:  '0 10 * * *'
+jobs:
+  check_prs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+      - name: Install dependencies
+        working-directory: ./openfeature/ci_scripts
+        run: npm install
+      - name: Check PRs
+        working-directory: ./openfeature/ci_scripts
+        run: npm run ci:check_prs_and_open_issue
