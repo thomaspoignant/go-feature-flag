@@ -2,7 +2,7 @@ name: "Check open-feature pull request"
 on:
   schedule:
     - cron:  '9 11 * * *'
-
+  workflow_dispatch:
 jobs:
   check_prs:
     runs-on: ubuntu-latest
