@@ -91,6 +91,12 @@ async function main(repos){
         }
     }
 
+    if(waitingPR !== "" && notifIssue !== undefined){
+        // Closing issue if no PR + issue open
+        await octokit.request(`PATCH /repos/${goffSlug}/issues/${notifIssue.number}`, {
+            state: 'closed',
+        })
+    }
 }
 
 main(repos).then(_ => console.log("success")).catch(err => console.log(err) && process.exit(1))
