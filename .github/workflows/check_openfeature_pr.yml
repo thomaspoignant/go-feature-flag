@@ -1,7 +1,7 @@
 name: "Check open-feature pull request"
 on:
   schedule:
-    - cron:  '0 11 6 * *'
+    - cron:  '8 11 * * *'
 
 jobs:
   check_prs:
