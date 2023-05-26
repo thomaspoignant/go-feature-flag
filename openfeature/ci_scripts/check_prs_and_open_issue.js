@@ -19,7 +19,6 @@ const octokit = new Octokit({
 });
 
 async function fetchGOFFPullRequests(repoSlug, prefix){
-    const goffPR = []
     const pulls = await octokit.request(`GET /repos/${repoSlug}/pulls?state=open`, {
         per_page: 100
     });
@@ -34,8 +33,8 @@ async function fetchGOFFPullRequests(repoSlug, prefix){
 
 async function findAllPR(repos){
     let allPR= {}
-    for (let index = 0; index < repos.length; index++) {
-        const {slug, prefix} = repos[index]
+    for (let value of repos) {
+        const {slug, prefix} = value
         const open_prs = await fetchGOFFPullRequests(slug, prefix)
         const newObj = {
             [slug]: open_prs
@@ -94,7 +93,4 @@ async function main(repos){
 
 }
 
-main(repos).then(console.log("success")).catch(err => {
-    console.log(err)
-    process.exit(1)
-})
+main(repos).then(_ => console.log("success")).catch(err => console.log(err) && process.exit(1))
