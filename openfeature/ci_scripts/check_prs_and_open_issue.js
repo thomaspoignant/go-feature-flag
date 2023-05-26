@@ -68,26 +68,30 @@ async function main(repos){
         per_page: 1000
     });
     const notifIssue = issues.data.find(({title}) => title === issueTitle)
-    if (notifIssue === undefined){
-        // Create new Issue
-        await octokit.request(`POST /repos/${goffSlug}/issues`, {
-            title: issueTitle,
-            body: `${issueHeader} ${await displayOpenPR(repos)}`,
-            assignees: [
-                goffOwner
-            ],
-            labels: [
-                'dependencies'
-            ]
-        })
-        console.log('issue created')
-    } else {
-        // Add comment in the issue
-        await octokit.request(`POST /repos/${goffSlug}/issues/${notifIssue.number}/comments`, {
-            body: `${commentHeader} ${await displayOpenPR(repos)}`
-        })
-        console.log('comment added')
+    const waitingPR = await displayOpenPR(repos)
+    if (waitingPR !== ""){
+        if (notifIssue === undefined){
+            // Create new Issue
+            await octokit.request(`POST /repos/${goffSlug}/issues`, {
+                title: issueTitle,
+                body: `${issueHeader} ${waitingPR}`,
+                assignees: [
+                    goffOwner
+                ],
+                labels: [
+                    'dependencies'
+                ]
+            })
+            console.log('issue created')
+        } else {
+            // Add comment in the issue
+            await octokit.request(`POST /repos/${goffSlug}/issues/${notifIssue.number}/comments`, {
+                body: `${commentHeader} ${waitingPR}`
+            })
+            console.log('comment added')
+        }
     }
+
 }
 
 main(repos).then(console.log("success")).catch(err => {
