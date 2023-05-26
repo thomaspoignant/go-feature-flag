@@ -91,11 +91,12 @@ async function main(repos){
         }
     }
 
-    if(waitingPR !== "" && notifIssue !== undefined){
+    if(waitingPR === "" && notifIssue !== undefined){
         // Closing issue if no PR + issue open
         await octokit.request(`PATCH /repos/${goffSlug}/issues/${notifIssue.number}`, {
             state: 'closed',
         })
+        console.log("issue closed")
     }
 }
 
