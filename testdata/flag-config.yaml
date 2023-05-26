@@ -12,6 +12,9 @@ test-flag:
   defaultRule:
     name: legacyDefaultRule
     variation: Default
+  metadata:
+    description: this is a simple feature flag
+    issue-link: https://jira.xxx/GOFF-01
 
 test-flag2:
   variations:

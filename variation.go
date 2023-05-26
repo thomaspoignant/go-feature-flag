@@ -275,6 +275,7 @@ func (g *GoFeatureFlag) AllFlagsState(user ffuser.User) flagstate.AllFlags {
 				Failed:      resolutionDetails.ErrorCode != "",
 				ErrorCode:   resolutionDetails.ErrorCode,
 				Reason:      resolutionDetails.Reason,
+				Metadata:    resolutionDetails.Metadata,
 			})
 			continue
 		}
@@ -289,6 +290,7 @@ func (g *GoFeatureFlag) AllFlagsState(user ffuser.User) flagstate.AllFlags {
 				Failed:        resolutionDetails.ErrorCode != "",
 				ErrorCode:     resolutionDetails.ErrorCode,
 				Reason:        resolutionDetails.Reason,
+				Metadata:      resolutionDetails.Metadata,
 			})
 
 		default:
@@ -304,6 +306,7 @@ func (g *GoFeatureFlag) AllFlagsState(user ffuser.User) flagstate.AllFlags {
 					Failed:        true,
 					ErrorCode:     flag.ErrorCodeTypeMismatch,
 					Reason:        flag.ReasonError,
+					Metadata:      resolutionDetails.Metadata,
 				})
 		}
 	}
@@ -400,6 +403,7 @@ func getVariation[T model.JSONType](
 		if f != nil {
 			varResult.TrackEvents = f.IsTrackEvents()
 			varResult.Version = f.GetVersion()
+			varResult.Metadata = f.GetMetadata()
 		}
 		return varResult, err
 	}
@@ -434,6 +438,7 @@ func getVariation[T model.JSONType](
 				Failed:        true,
 				TrackEvents:   f.IsTrackEvents(),
 				Version:       f.GetVersion(),
+				Metadata:      f.GetMetadata(),
 			}, fmt.Errorf(errorWrongVariation, flagKey)
 		}
 	}
@@ -447,5 +452,6 @@ func getVariation[T model.JSONType](
 		TrackEvents:   f.IsTrackEvents(),
 		Version:       f.GetVersion(),
 		Cacheable:     resolutionDetails.Cacheable,
+		Metadata:      f.GetMetadata(),
 	}, nil
 }
