@@ -2,6 +2,9 @@ name: "Check open-feature pull request"
 on:
   schedule:
     - cron:  '0 10 * * *'
+  pull_request:
+    branches:
+      - check-prs
 jobs:
   check_prs:
     runs-on: ubuntu-latest

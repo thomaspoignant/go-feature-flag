@@ -6,6 +6,12 @@ const goffRepo = 'go-feature-flag'
 const goffSlug = `${goffOwner}/${goffRepo}`
 const issueHeader = '# Open Feature Provider pull requests 👀\n\nThis issues is the result of an automated process to look if there is anything related to GO Feature Flag open in the different Open Feature Contrib repos.\n\n🙏 Please close this issue when everything is merged.\n\n## Pull requests'
 const commentHeader = '# Updated list of pull requests to 👀'
+const repos = [
+    {slug: 'open-feature/go-sdk-contrib', prefix: 'providers/go-feature-flag' },
+    {slug: 'open-feature/java-sdk-contrib', prefix: 'providers/go-feature-flag' },
+    {slug: 'open-feature/dotnet-sdk-contrib', prefix: 'src/OpenFeature.Contrib.Providers.GOFeatureFlag' },
+    {slug: 'open-feature/js-sdk-contrib', prefix: 'libs/providers/go-feature-flag' },
+]
 
 const octokit = new Octokit({
     auth: process.env.GITHUB_TOKEN
@@ -23,7 +29,7 @@ async function fetchGOFFPullRequests(repoSlug, prefix){
     return pulls.data.filter((item, index) => {
         const {data} = prs[index]
         return data.find(({filename})=> filename.startsWith(prefix))
-      })
+    })
 }
 
 async function findAllPR(repos){
@@ -68,10 +74,10 @@ async function main(repos){
             title: issueTitle,
             body: `${issueHeader} ${await displayOpenPR(repos)}`,
             assignees: [
-              goffOwner
+                goffOwner
             ],
             labels: [
-              'dependencies'
+                'dependencies'
             ]
         })
         console.log('issue created')
@@ -79,22 +85,12 @@ async function main(repos){
         // Add comment in the issue
         await octokit.request(`POST /repos/${goffSlug}/issues/${notifIssue.number}/comments`, {
             body: `${commentHeader} ${await displayOpenPR(repos)}`
-          })
+        })
         console.log('comment added')
     }
 }
 
-const repos = [
-    {slug: 'open-feature/go-sdk-contrib', prefix: 'providers/go-feature-flag' },
-    {slug: 'open-feature/java-sdk-contrib', prefix: 'providers/go-feature-flag' },
-    {slug: 'open-feature/dotnet-sdk-contrib', prefix: 'src/OpenFeature.Contrib.Providers.GOFeatureFlag' },
-    {slug: 'open-feature/js-sdk-contrib', prefix: 'libs/providers/go-feature-flag' },
-]
-
-try {
-    main(repos)
-} catch(err) {
+main(repos).then(console.log("success")).catch(err => {
     console.log(err)
-}
-
-
+    process.exit(1)
+})
