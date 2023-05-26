@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/gorilla/websocket"
+	"github.com/thomaspoignant/go-feature-flag/notifier"
 )
 
 // WebsocketService is the service interface that handle the websocket connections
@@ -11,8 +12,8 @@ type WebsocketService interface {
 	Register(c *websocket.Conn)
 	// Deregister is removing the connection from the list of open connection.
 	Deregister(c *websocket.Conn)
-	// BroadcastText is sending a string to all the open connection.
-	BroadcastText(s string)
+	// BroadcastFlagChanges is sending the diff cache struct to the client.
+	BroadcastFlagChanges(diff notifier.DiffCache)
 }
 
 // NewWebsocketService is a constructor to create a new WebsocketService.
@@ -27,10 +28,10 @@ type websocketServiceImpl struct {
 	clients map[*websocket.Conn]interface{}
 }
 
-// BroadcastText is sending a string to all the open connection.
-func (w *websocketServiceImpl) BroadcastText(_ string) {
+// BroadcastFlagChanges is sending a string to all the open connection.
+func (w *websocketServiceImpl) BroadcastFlagChanges(diff notifier.DiffCache) {
 	for c := range w.clients {
-		err := c.WriteMessage(websocket.TextMessage, []byte("toto"))
+		err := c.WriteJSON(diff)
 		if err != nil {
 			w.Deregister(c)
 		}

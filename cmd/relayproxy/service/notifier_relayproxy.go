@@ -15,8 +15,8 @@ func NewNotifierRelayProxy(websocketService WebsocketService) notifier.Notifier 
 	}
 }
 
-func (n *notifierRelayProxy) Notify(_ notifier.DiffCache, waitGroup *sync.WaitGroup) error {
+func (n *notifierRelayProxy) Notify(diff notifier.DiffCache, waitGroup *sync.WaitGroup) error {
 	defer waitGroup.Done()
-	n.websocketService.BroadcastText("test broadcast")
+	n.websocketService.BroadcastFlagChanges(diff)
 	return nil
 }
