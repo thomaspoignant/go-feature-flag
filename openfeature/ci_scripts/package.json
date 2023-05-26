@@ -1,0 +1,14 @@
+{
+  "name": "ci_scripts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "ci:check_prs_and_open_issue": "node check_prs_and_open_issue.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "octokit": "^2.0.14"
+  }
+}

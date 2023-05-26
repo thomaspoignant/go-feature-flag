@@ -1,0 +1,22 @@
+{
+  "test-flag": {
+    "variations": {
+      "false": false,
+      "true": true
+    },
+    "targeting": [
+      {
+        "name": "legacyRuleV0",
+        "query": "key in [\n\"random-key\",\n\"random-key-1\",\n\"random-key-2\"\n]",
+        "percentage": {
+          "false": 0,
+          "true": 100
+        }
+      }
+    ],
+    "defaultRule": {
+      "name": "legacyDefaultRule",
+      "variation": "false"
+    }
+  }
+}
