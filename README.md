@@ -25,16 +25,8 @@
 - [What is GO Feature Flag?](#what-is-go-feature-flag)
 - [What can I do with GO Feature Flag?](#what-can-i-do-with-go-feature-flag)
 - [Getting started](#getting-started)
-    - Using the GO Module
-      - [Installation](#installation)
-      - [Create a feature flag configuration](#create-a-feature-flag-configuration)
-      - [SDK Initialisation](#sdk-initialisation)
-      - [Evaluate your flags](#evaluate-your-flags)
-    - Using Open Feature SDKs
-      - [Create a feature flag configuration](#create-a-feature-flag-configuration-1)
-      - [Create a relay proxy configuration file](#create-a-relay-proxy-configuration-file)
-      - [Install the relay proxy](#install-the-relay-proxy)
-      - [Use Open Feature SDK](#use-open-feature-sdk)
+    - [Using the GO Module](#using-go-module)
+    - [Using Open Feature SDKs](#using-open-feature)
 - [Can I use GO Feature Flag with any language?](#can-i-use-go-feature-flag-with-any-language)
 - [Where do I store my flags file?](#where-do-i-store-my-flags-file)
 - [Flags file format](#flags-file-format)
@@ -84,6 +76,7 @@ Before starting to use **GO Feature Flag** you should decide if you want to use 
 
 The GO module is ideal for using GO Feature Flag exclusively in GO projects. If your project involves multiple languages, we recommend using the Open Feature SDKs.
 
+<a id="using-go-module"></a>
 <details>
 <summary><b>Using the GO Module</b></summary>
 
@@ -146,6 +139,7 @@ You can find more examples in the [examples/](https://github.com/thomaspoignant/
 </details>
 
 
+<a id="using-open-feature"></a>
 <details>
 <summary><b>Using Open Feature SDKs</b></summary>
 
