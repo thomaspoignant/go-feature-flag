@@ -39,8 +39,8 @@ github.com/open-feature/go-sdk-contrib/providers/go-feature-flag v0.1.17/go.mod 
 github.com/pierrec/lz4/v4 v4.1.8 h1:ieHkV+i2BRzngO4Wd/3HGowuZStgq6QkPsD1eolNAO4=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
-github.com/stretchr/testify v1.8.3 h1:RP3t2pwF7cMEbC1dqtB6poj3niw/9gnV4Cjg5oW5gtY=
-github.com/stretchr/testify v1.8.3/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
+github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=
+github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
 github.com/thomaspoignant/go-feature-flag v1.10.4 h1:nMnG0ADTgR689V7GoWaQ2jLh3FjpcnN0EVLbDR7lukw=
 github.com/thomaspoignant/go-feature-flag v1.10.4/go.mod h1:Z7kw6gCQUKOEm8H69mx99yWfpTAZQxBozQMEcmosR6Q=
 github.com/xitongsys/parquet-go v1.6.2 h1:MhCaXii4eqceKPu9BwrjLqyK10oX9WF+xGhwvwbw7xM=
