@@ -150,6 +150,11 @@ definitions:
           not exists, ...) and we serve the defaultValue.'
         example: false
         type: boolean
+      metadata:
+        additionalProperties: true
+        description: Metadata is a field containing information about your flag such
+          as an issue tracker link, a description, etc ...
+        type: object
       reason:
         description: reason why we have returned this value.
         example: TARGETING_MATCH

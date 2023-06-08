@@ -406,6 +406,11 @@
                     "type": "boolean",
                     "example": false
                 },
+                "metadata": {
+                    "description": "Metadata is a field containing information about your flag such as an issue tracker link, a description, etc ...",
+                    "type": "object",
+                    "additionalProperties": true
+                },
                 "reason": {
                     "description": "reason why we have returned this value.",
                     "type": "string",
