@@ -30,6 +30,13 @@ function formToGoFeatureFlag(formData) {
     }
   }
 
+  function convertMetadata(metadata) {
+    if (metadata === undefined || metadata === {} || metadata.filter(({name})=>name !== "").length === 0) {
+      return undefined
+    }
+    return Object.assign({}, ...metadata.map(({name, value}) => ({[name]: value})))
+  }
+
   function convertRule(ruleForm) {
     let variation,
       percentage,
@@ -98,6 +105,7 @@ function formToGoFeatureFlag(formData) {
       version: flagFormData.version === '' ? undefined : flagFormData.version,
       targeting: targeting.length > 0 ? targeting : undefined,
       defaultRule,
+      metadata: convertMetadata(flagFormData.metadata),
     };
   }
 

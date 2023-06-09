@@ -6,11 +6,12 @@ import (
 
 // FlagState represents the state of an individual feature flag, with regard to a specific user, when it was called.
 type FlagState struct {
-	Value         interface{}           `json:"value"`
-	Timestamp     int64                 `json:"timestamp"`
-	VariationType string                `json:"variationType"`
-	TrackEvents   bool                  `json:"trackEvents"`
-	Failed        bool                  `json:"-"`
-	ErrorCode     flag.ErrorCode        `json:"errorCode"`
-	Reason        flag.ResolutionReason `json:"reason"`
+	Value         interface{}            `json:"value"`
+	Timestamp     int64                  `json:"timestamp"`
+	VariationType string                 `json:"variationType"`
+	TrackEvents   bool                   `json:"trackEvents"`
+	Failed        bool                   `json:"-"`
+	ErrorCode     flag.ErrorCode         `json:"errorCode"`
+	Reason        flag.ResolutionReason  `json:"reason"`
+	Metadata      map[string]interface{} `json:"metadata,omitempty"`
 }

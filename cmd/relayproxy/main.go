@@ -34,7 +34,6 @@ _____________________________________________`
 // @license.url https://github.com/thomaspoignant/go-feature-flag/blob/main/LICENSE
 // @x-logo {"url":"https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png"}
 // @BasePath /
-
 // @securitydefinitions.apikey ApiKeyAuth
 // @in header
 // @name Authorization

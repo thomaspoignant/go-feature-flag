@@ -9,6 +9,7 @@ import {useFormContext} from 'react-hook-form';
 import {Targeting} from '../Targeting';
 import {Rule} from '../Rule';
 import PropTypes from 'prop-types';
+import { Metadata } from "../Metadata";
 
 FlagForm.propTypes = {
   label: PropTypes.string.isRequired,
@@ -79,6 +80,7 @@ export function FlagForm({label}) {
           isDefaultRule={true}
         />
       </div>
+      <Metadata label={`${label}.metadata`} />
     </div>
   );
 }

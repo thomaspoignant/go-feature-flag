@@ -1,0 +1,62 @@
+---
+title: Enhancing Flag Configuration with Flag Metadata
+description: Empowering developers to attach additional information directly to flag configurations for enhanced management and code efficiency.
+authors: [thomaspoignant]
+tags: [feature flag, relay-proxy, metadata]
+image: http://gofeatureflag.org/assets/images/3819075-0f37048ae26af73edc44747cd03d9eb7.png
+---
+![metadata](3819075.png)
+
+In the ever-evolving world of software development, feature flag solutions have become instrumental in enabling continuous integration and deployment.
+These solutions allow developers to toggle features on and off without deploying new code, providing flexibility and control over feature releases.
+
+But sometimes you need to give context about your flag, is it linked to an issue? Do you need a precise description? ...
+To respond to this, **GO Feature Flag** has recently introduced an exciting new feature: **the ability to add metadata to each flag configuration**.
+
+With the version `v1.11.0` of GO Feature Flag, developers can now add valuable metadata to their flag configurations.
+This metadata serves as additional information linked directly to each flag, allowing for a more comprehensive understanding of its purpose and context.
+This metadata can include essential details such as issue tracker links, descriptions, or any other information that developers deem relevant.
+
+<!-- truncate -->
+
+## Improved Code Efficiency
+The inclusion of metadata in flag configurations brings substantial benefits in terms of code efficiency and reusability.
+By using the `VariationDetails` functions, developers can easily retrieve the associated metadata when working with the flag.
+
+This eliminates the need for additional queries or requests to obtain essential information related to a specific flag.
+Developers can conveniently leverage this information within their code, leading to streamlined development processes and improved overall efficiency.
+
+## How to add the metadata?
+We have introduced a new field in the configuration of your flag
+
+```yaml
+example_flag:
+  variations:
+    A: true
+    B: false
+  defaultRule:
+    variation: B
+  metadata:
+    description: this is a super simple example feature flag
+    issue-link: https://jira.xxx/GOFF-01
+```
+
+Now that you have this field available you can read the metadata in your `VariationDetails` when the evaluation is done.
+
+GO Feature Flag relay-proxy also enable seamless access to the added metadata.
+
+## Open Feature SDK Compatibility
+To further enhance the usability and compatibility of GO Feature Flag, the new metadata feature aligns with the **v0.6.0** version of the Open Feature specification.
+This update ensures that the metadata can be retrieved seamlessly using the Open Feature SDKs.
+
+As soon as the SDKs will compatible with the metadata we will support it in the different GO Feature Flag providers.
+
+## Conclusion
+The introduction of metadata support in GO Feature Flag marks a significant milestone in feature flag solutions.
+Enabling developers to attach relevant information directly to their flag configurations opens up new possibilities for
+enhanced flag management and streamlined development processes.
+With the ability to retrieve metadata, developers can access essential information with ease.
+
+The compatibility with the Open Feature SDK further solidifies the integration capabilities and ensures seamless utilization of metadata throughout the development cycle.
+Embrace the power of metadata and unlock a new level of control and efficiency in your feature flag management with GO Feature Flag's latest update.
+

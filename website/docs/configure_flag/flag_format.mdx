@@ -48,6 +48,9 @@ first-flag:
         B: 100
   defaultRule: # When no targeting match we use the defaultRule
     variation: A
+  metadata:
+    issue_link: https://github.com/thomaspoignant/go-feature-flag/issues/XXX
+    description: this is my first feature flag
 
 # A second example of a flag configuration
 second-flag:
@@ -91,6 +94,10 @@ second-flag:
     ],
     "defaultRule": {
       "variation": "A"
+    },
+    "metadata": {
+      "issue_link": "https://github.com/thomaspoignant/go-feature-flag/issues/XXX",
+      "description": "this is my first feature flag"
     }
   },
 
@@ -140,6 +147,10 @@ query = 'key eq "random-key"'
 
 [first-flag.defaultRule]
 variation = "A"
+
+[first-flag.metadata]
+issue_link = "https://github.com/thomaspoignant/go-feature-flag/issues/XXX"
+description = "this is my first feature flag"
 
 [second-flag]
 version = "12"
@@ -236,6 +247,12 @@ version = "12"
       <td>
         <p>The version is the version of your flag.<br/>This string is used to display the information in the notifiers and data collection, you have to update it your self.</p>
         <p><b>Default:</b> <code>""</code></p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>metadata</code><br/><i>(optional)</i></td>
+      <td>
+        <p>This field allows adding a wealth of information about a particular feature flag, such as a configuration URL or the originating Jira issue.</p>
       </td>
     </tr>
     <tr>

@@ -35,6 +35,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 			args: args{
 				flagName: "my-flag",
@@ -48,6 +52,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				Variant:   "variation_A",
 				Reason:    flag.ReasonStatic,
 				Cacheable: true,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 		},
 		{
@@ -61,6 +69,10 @@ func TestInternalFlag_Value(t *testing.T) {
 					VariationResult: testconvert.String("variation_A"),
 					Percentages:     &map[string]float64{},
 				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 			args: args{
 				flagName: "my-flag",
@@ -74,12 +86,20 @@ func TestInternalFlag_Value(t *testing.T) {
 				Variant:   "variation_A",
 				Reason:    flag.ReasonStatic,
 				Cacheable: true,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 		},
 		{
 			name: "Should return sdk default value when flag is disabled",
 			flag: flag.InternalFlag{
 				Disable: testconvert.Bool(true),
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 			args: args{
 				flagName: "my-flag",
@@ -93,6 +113,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				Variant:   "SdkDefault",
 				Reason:    flag.ReasonDisabled,
 				Cacheable: true,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 		},
 		{
@@ -102,6 +126,10 @@ func TestInternalFlag_Value(t *testing.T) {
 					Start: testconvert.Time(time.Now().Add(1 * time.Second)),
 					End:   testconvert.Time(time.Now().Add(5 * time.Second)),
 				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 			args: args{
 				flagName: "my-flag",
@@ -115,6 +143,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				Variant:   "SdkDefault",
 				Reason:    flag.ReasonDisabled,
 				Cacheable: false,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 		},
 		{
@@ -124,6 +156,10 @@ func TestInternalFlag_Value(t *testing.T) {
 					Start: testconvert.Time(time.Now().Add(-15 * time.Second)),
 					End:   testconvert.Time(time.Now().Add(-5 * time.Second)),
 				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 			args: args{
 				flagName: "my-flag",
@@ -137,6 +173,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				Variant:   "SdkDefault",
 				Reason:    flag.ReasonDisabled,
 				Cacheable: false,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 		},
 		{
@@ -156,6 +196,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 			args: args{
 				flagName: "my-flag",
@@ -171,6 +215,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				RuleIndex: testconvert.Int(0),
 				RuleName:  testconvert.String("rule1"),
 				Cacheable: true,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 		},
 		{
@@ -196,6 +244,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 			args: args{
 				flagName: "my-flag",
@@ -211,6 +263,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				RuleIndex: testconvert.Int(1),
 				RuleName:  testconvert.String("rule2"),
 				Cacheable: true,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 		},
 		{
@@ -234,6 +290,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 			args: args{
 				flagName: "my-flag",
@@ -248,6 +308,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				Reason:    flag.ReasonTargetingMatch,
 				RuleIndex: testconvert.Int(1),
 				Cacheable: true,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 		},
 		{
@@ -276,6 +340,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 			args: args{
 				flagName: "my-flag",
@@ -290,6 +358,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				Reason:    flag.ReasonTargetingMatch,
 				RuleIndex: testconvert.Int(1),
 				Cacheable: true,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 		},
 		{
@@ -319,6 +391,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 			args: args{
 				flagName: "my-flag",
@@ -333,6 +409,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				Reason:    flag.ReasonTargetingMatch,
 				RuleIndex: testconvert.Int(2),
 				Cacheable: true,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 		},
 		{
@@ -356,6 +436,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 			args: args{
 				flagName: "my-flag",
@@ -369,6 +453,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				Variant:   flag.VariationSDKDefault,
 				Reason:    flag.ReasonError,
 				ErrorCode: flag.ErrorFlagConfiguration,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 		},
 		{
@@ -389,6 +477,10 @@ func TestInternalFlag_Value(t *testing.T) {
 						},
 					},
 				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 			args: args{
 				flagName: "my-flag",
@@ -402,6 +494,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				Variant:   flag.VariationSDKDefault,
 				Reason:    flag.ReasonError,
 				ErrorCode: flag.ErrorFlagConfiguration,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 		},
 		{
@@ -419,6 +515,10 @@ func TestInternalFlag_Value(t *testing.T) {
 						"variation_B": 100,
 					},
 				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 			args: args{
 				flagName: "my-flag",
@@ -432,6 +532,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				Variant:   flag.VariationSDKDefault,
 				Reason:    flag.ReasonError,
 				ErrorCode: flag.ErrorFlagConfiguration,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 		},
 		{
@@ -443,6 +547,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				},
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
+				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
 				},
 				Scheduled: &[]flag.ScheduledStep{
 					{
@@ -474,6 +582,10 @@ func TestInternalFlag_Value(t *testing.T) {
 			want1: flag.ResolutionDetails{
 				Variant: "variation_A",
 				Reason:  flag.ReasonStatic,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 		},
 		{
@@ -485,6 +597,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				},
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
+				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
 				},
 				Scheduled: &[]flag.ScheduledStep{
 					{
@@ -516,6 +632,10 @@ func TestInternalFlag_Value(t *testing.T) {
 			want1: flag.ResolutionDetails{
 				Variant: "variation_B",
 				Reason:  flag.ReasonStatic,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 		},
 		{
@@ -527,6 +647,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				},
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
+				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
 				},
 				Scheduled: &[]flag.ScheduledStep{
 					{
@@ -558,6 +682,10 @@ func TestInternalFlag_Value(t *testing.T) {
 			want1: flag.ResolutionDetails{
 				Variant: "variation_B",
 				Reason:  flag.ReasonStatic,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 		},
 		{
@@ -569,6 +697,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				},
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
+				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
 				},
 				Scheduled: &[]flag.ScheduledStep{
 					{
@@ -591,6 +723,10 @@ func TestInternalFlag_Value(t *testing.T) {
 			want1: flag.ResolutionDetails{
 				Variant: "variation_A",
 				Reason:  flag.ReasonStatic,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 		},
 		{
@@ -609,6 +745,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				},
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
+				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
 				},
 				Scheduled: &[]flag.ScheduledStep{
 					{
@@ -640,6 +780,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				Reason:    flag.ReasonTargetingMatch,
 				RuleIndex: testconvert.Int(0),
 				RuleName:  testconvert.String("rule1"),
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 		},
 		{
@@ -652,6 +796,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				},
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_C"),
+				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
 				},
 				Scheduled: &[]flag.ScheduledStep{
 					{
@@ -678,6 +826,10 @@ func TestInternalFlag_Value(t *testing.T) {
 			want1: flag.ResolutionDetails{
 				Variant: "variation_C",
 				Reason:  flag.ReasonSplit,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 		},
 		{
@@ -693,6 +845,10 @@ func TestInternalFlag_Value(t *testing.T) {
 						Query:           testconvert.String("key eq \"user-key\""),
 						VariationResult: testconvert.String("variation_B"),
 					},
+				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
 				},
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
@@ -728,6 +884,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				Reason:    flag.ReasonTargetingMatch,
 				RuleIndex: testconvert.Int(1),
 				RuleName:  testconvert.String("rule2"),
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 		},
 		{
@@ -739,6 +899,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				},
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
+				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
 				},
 				Scheduled: &[]flag.ScheduledStep{
 					{
@@ -770,6 +934,10 @@ func TestInternalFlag_Value(t *testing.T) {
 			want1: flag.ResolutionDetails{
 				Variant: "variation_B",
 				Reason:  flag.ReasonStatic,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 		},
 		{
@@ -781,6 +949,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				},
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
+				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
 				},
 				Scheduled: &[]flag.ScheduledStep{
 					{
@@ -804,6 +976,10 @@ func TestInternalFlag_Value(t *testing.T) {
 			want1: flag.ResolutionDetails{
 				Variant: flag.VariationSDKDefault,
 				Reason:  flag.ReasonDisabled,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 		},
 		{
@@ -815,6 +991,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				},
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
+				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
 				},
 				Scheduled: &[]flag.ScheduledStep{
 					{
@@ -839,6 +1019,10 @@ func TestInternalFlag_Value(t *testing.T) {
 			want1: flag.ResolutionDetails{
 				Variant: "variation_A",
 				Reason:  flag.ReasonStatic,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 		},
 		{
@@ -850,6 +1034,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				},
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
+				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
 				},
 				Scheduled: &[]flag.ScheduledStep{
 					{
@@ -884,6 +1072,10 @@ func TestInternalFlag_Value(t *testing.T) {
 			want1: flag.ResolutionDetails{
 				Variant: "variation_A",
 				Reason:  flag.ReasonStatic,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 		},
 		{
@@ -907,6 +1099,10 @@ func TestInternalFlag_Value(t *testing.T) {
 						},
 					},
 				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 			args: args{
 				flagName: "my-flag",
@@ -920,6 +1116,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				Variant:   "variation_A",
 				Reason:    flag.ReasonSplit,
 				Cacheable: false,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 		},
 		{
@@ -939,6 +1139,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 			args: args{
 				flagName: "my-flag",
@@ -954,6 +1158,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				RuleIndex: testconvert.Int(0),
 				RuleName:  testconvert.String("test-rule"),
 				Cacheable: true,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 		},
 		{
@@ -976,6 +1184,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 			args: args{
 				flagName: "my-flag",
@@ -991,6 +1203,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				RuleIndex: testconvert.Int(0),
 				RuleName:  testconvert.String("test-rule"),
 				Cacheable: true,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 		},
 		{
@@ -1022,6 +1238,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 			args: args{
 				flagName: "my-flag",
@@ -1037,6 +1257,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				RuleIndex: testconvert.Int(0),
 				RuleName:  testconvert.String("test-rule"),
 				Cacheable: false,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 		},
 		{
@@ -1059,6 +1283,10 @@ func TestInternalFlag_Value(t *testing.T) {
 						"variation_B": 50,
 					},
 				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 			args: args{
 				flagName: "my-flag",
@@ -1072,6 +1300,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				Variant:   "variation_A",
 				Reason:    flag.ReasonSplit,
 				Cacheable: true,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 		},
 		{
@@ -1091,6 +1323,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 			args: args{
 				flagName: "my-flag",
@@ -1104,6 +1340,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				Variant:   "variation_A",
 				Reason:    flag.ReasonDefault,
 				Cacheable: true,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 		},
 		{
@@ -1115,6 +1355,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				},
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
+				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
 				},
 			},
 			args: args{
@@ -1129,6 +1373,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				Variant:   "variation_A",
 				Reason:    flag.ReasonStatic,
 				Cacheable: true,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 		},
 		{
@@ -1144,6 +1392,10 @@ func TestInternalFlag_Value(t *testing.T) {
 						"variation_B": 0,
 					},
 				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 			args: args{
 				flagName: "my-flag",
@@ -1157,6 +1409,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				Variant:   "variation_A",
 				Reason:    flag.ReasonStatic,
 				Cacheable: true,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 		},
 		{
@@ -1180,6 +1436,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("B"),
 				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 			args: args{
 				flagName: "feature",
@@ -1195,6 +1455,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				Reason:    flag.ReasonTargetingMatch,
 				Cacheable: true,
 				RuleIndex: testconvert.Int(0),
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 		},
 	}
@@ -1389,6 +1653,7 @@ func TestInternalFlag_IsValid(t *testing.T) {
 		Version         *string
 		Experimentation *flag.ExperimentationRollout
 		Scheduled       *[]flag.ScheduledStep
+		Metadata        *map[string]interface{}
 	}
 	tests := []struct {
 		name     string
@@ -1415,6 +1680,10 @@ func TestInternalFlag_IsValid(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("A"),
 				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 			errorMsg: "all variations should have the same type",
 			wantErr:  assert.Error,
@@ -1428,6 +1697,10 @@ func TestInternalFlag_IsValid(t *testing.T) {
 				},
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("A"),
+				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
 				},
 			},
 			wantErr: assert.NoError,
@@ -1445,6 +1718,10 @@ func TestInternalFlag_IsValid(t *testing.T) {
 						VariationResult: testconvert.String("A"),
 					},
 				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 			errorMsg: "missing default rule",
 			wantErr:  assert.Error,
@@ -1457,6 +1734,10 @@ func TestInternalFlag_IsValid(t *testing.T) {
 				},
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("A"),
+				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
 				},
 				Rules: &[]flag.Rule{
 					{
@@ -1507,6 +1788,10 @@ func TestInternalFlag_IsValid(t *testing.T) {
 						"B": 20,
 					},
 				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 			errorMsg: "invalid percentages",
 			wantErr:  assert.Error,
@@ -1522,6 +1807,10 @@ func TestInternalFlag_IsValid(t *testing.T) {
 						"A": 90,
 						"B": 10,
 					},
+				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
 				},
 				Rules: &[]flag.Rule{
 					{
@@ -1558,6 +1847,10 @@ func TestInternalFlag_IsValid(t *testing.T) {
 						},
 					},
 				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 			errorMsg: "each targeting should have a query",
 			wantErr:  assert.Error,
@@ -1568,6 +1861,10 @@ func TestInternalFlag_IsValid(t *testing.T) {
 				Variations: &map[string]*interface{}{
 					"A": testconvert.Interface("A"),
 					"B": testconvert.Interface("B"),
+				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
 				},
 				DefaultRule: &flag.Rule{
 					Name: testconvert.String("nothing to return"),
@@ -1582,6 +1879,10 @@ func TestInternalFlag_IsValid(t *testing.T) {
 				Variations: &map[string]*interface{}{
 					"A": testconvert.Interface("A"),
 					"B": testconvert.Interface("B"),
+				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
 				},
 				DefaultRule: &flag.Rule{
 					Name: testconvert.String("nothing to return"),
@@ -1608,6 +1909,10 @@ func TestInternalFlag_IsValid(t *testing.T) {
 				Variations: &map[string]*interface{}{
 					"A": testconvert.Interface("A"),
 					"B": testconvert.Interface("B"),
+				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
 				},
 				Rules: &[]flag.Rule{
 					{
