@@ -38,7 +38,7 @@
 - [Notifiers](#notifiers)
 - [Export data](#export-data)
 - [Linter](#linter)
-- [How can I contribute?](#how-can-i-contribute?)
+- [How can I contribute?](#how-can-i-contribute)
 - [Contributors](#contributors)
 
 ## What is GO Feature Flag?
