@@ -26,22 +26,22 @@ type User struct {
 }
 
 // GetKey return the unique key for the user.
-func (u *User) GetKey() string {
+func (u User) GetKey() string {
 	return u.key
 }
 
 // IsAnonymous return if the user is anonymous or not.
-func (u *User) IsAnonymous() bool {
+func (u User) IsAnonymous() bool {
 	return u.anonymous
 }
 
 // GetCustom return all the custom properties of a user.
-func (u *User) GetCustom() map[string]interface{} {
+func (u User) GetCustom() map[string]interface{} {
 	return u.custom
 }
 
 // AddCustomAttribute allows to add a custom attribute into the user.
-func (u *User) AddCustomAttribute(name string, value interface{}) {
+func (u User) AddCustomAttribute(name string, value interface{}) {
 	if name != "" {
 		u.custom[name] = value
 	}
