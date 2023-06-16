@@ -2,9 +2,9 @@ package flag
 
 import (
 	"fmt"
+	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"time"
 
-	"github.com/thomaspoignant/go-feature-flag/ffuser"
 	"github.com/thomaspoignant/go-feature-flag/internal/internalerror"
 	"github.com/thomaspoignant/go-feature-flag/internal/utils"
 )
@@ -58,13 +58,13 @@ type InternalFlag struct {
 // Value is returning the Value associate to the flag
 func (f *InternalFlag) Value(
 	flagName string,
-	user ffuser.User,
+	ctx ffcontext.Context,
 	evaluationCtx EvaluationContext,
 ) (interface{}, ResolutionDetails) {
 	f.applyScheduledRolloutSteps()
 
 	if evaluationCtx.Environment != "" {
-		user.AddCustomAttribute("env", evaluationCtx.Environment)
+		ctx.AddCustomAttribute("env", evaluationCtx.Environment)
 	}
 
 	if f.IsDisable() || f.isExperimentationOver() {
@@ -76,7 +76,7 @@ func (f *InternalFlag) Value(
 		}
 	}
 
-	variationSelection, err := f.selectVariation(flagName, user)
+	variationSelection, err := f.selectVariation(flagName, ctx)
 	if err != nil {
 		return evaluationCtx.DefaultSdkValue,
 			ResolutionDetails{
@@ -125,13 +125,13 @@ func (f *InternalFlag) isCacheable() bool {
 
 // selectVariation is doing the magic to select the variation that should be used for this specific user
 // to always affect the user to the same segment we are using a hash of the flag name + key
-func (f *InternalFlag) selectVariation(flagName string, user ffuser.User) (*variationSelection, error) {
-	hashID := utils.Hash(flagName+user.GetKey()) % MaxPercentage
+func (f *InternalFlag) selectVariation(flagName string, ctx ffcontext.Context) (*variationSelection, error) {
+	hashID := utils.Hash(flagName+ctx.GetKey()) % MaxPercentage
 	hasRule := len(f.GetRules()) != 0
 	// Check all targeting in order, the first to match will be the one used.
 	if hasRule {
 		for ruleIndex, target := range f.GetRules() {
-			variationName, err := target.Evaluate(user, hashID, false)
+			variationName, err := target.Evaluate(ctx, hashID, false)
 			if err != nil {
 				// the targeting does not apply
 				if _, ok := err.(*internalerror.RuleNotApply); ok {
@@ -154,7 +154,7 @@ func (f *InternalFlag) selectVariation(flagName string, user ffuser.User) (*vari
 		return nil, fmt.Errorf("no default targeting for the flag")
 	}
 
-	variationName, err := f.GetDefaultRule().Evaluate(user, hashID, true)
+	variationName, err := f.GetDefaultRule().Evaluate(ctx, hashID, true)
 	if err != nil {
 		return nil, err
 	}

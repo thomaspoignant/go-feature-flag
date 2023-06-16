@@ -1,12 +1,12 @@
 package flag
 
 import (
-	"github.com/thomaspoignant/go-feature-flag/ffuser"
+	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 )
 
 type Flag interface {
 	// Value is returning the Value associate to the flag
-	Value(flagName string, user ffuser.User, evaluationCtx EvaluationContext) (interface{}, ResolutionDetails)
+	Value(flagName string, ctx ffcontext.Context, evaluationCtx EvaluationContext) (interface{}, ResolutionDetails)
 
 	// GetVersion is the getter for the field Version
 	// Default: 0.0
