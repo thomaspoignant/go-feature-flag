@@ -3,16 +3,22 @@ package ffuser
 // value is a type to define custom attribute.
 type value map[string]interface{}
 
+// Deprecated: NewUser, please use ffcontext.NewEvaluationContext instead
+//
 // NewUser creates a new user identified by the given key.
 func NewUser(key string) User {
 	return User{key: key, custom: map[string]interface{}{}}
 }
 
+// Deprecated: NewAnonymousUser, please use ffcontext.NewAnonymousEvaluationContext instead.
+//
 // NewAnonymousUser creates a new anonymous user identified by the given key.
 func NewAnonymousUser(key string) User {
 	return User{key: key, anonymous: true, custom: map[string]interface{}{}}
 }
 
+// Deprecated: User, please use ffcontext.EvaluationContext instead.
+//
 // A User contains specific attributes of a user browsing your site. The only mandatory property is the Key,
 // which must uniquely identify each user. For authenticated users, this may be a username or e-mail address.
 // For anonymous users, this could be an IP address or session ID.
