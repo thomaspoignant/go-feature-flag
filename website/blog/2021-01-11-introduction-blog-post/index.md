@@ -74,7 +74,7 @@ defer ffclient.Close()
 - Now that you’ve done an init on go-feature-flag, you can see the value of the flag for your users, with something like this:
 
 ```go
-user := ffuser.NewUser("user-unique-key")
+user := ffcontext.NewEvaluationContext("user-unique-key")
 hasFlag, _ := ffclient.BoolVariation("test-flag", user, false)
 if hasFlag {
     // flag "test-flag" is true for the user
@@ -88,7 +88,7 @@ if hasFlag {
 - It’s a basic example, but you can put as many properties as you want for your User to make complex queries on your flag
 
 ```go
-user = ffuser.NewUserBuilder("user-unique-key").
+user = ffcontext.NewEvaluationContextBuilder("user-unique-key").
  AddCustom("firstname", "John").
  AddCustom("lastname", "Doe").
  AddCustom("email", "john.doe@example.com").

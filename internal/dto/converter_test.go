@@ -1,12 +1,12 @@
 package dto_test
 
 import (
+	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"testing"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/thomaspoignant/go-feature-flag/ffuser"
 	"github.com/thomaspoignant/go-feature-flag/testutils/flagv1"
 
 	"github.com/stretchr/testify/assert"
@@ -1139,7 +1139,7 @@ func TestConvertV0ScheduleStep(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			u := ffuser.NewUser("yo")
+			u := ffcontext.NewEvaluationContext("yo")
 			flagName := "yo"
 
 			convertInternalFlag := tt.dto.Convert()

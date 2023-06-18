@@ -2,12 +2,12 @@ package flag_test
 
 import (
 	"fmt"
+	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"testing"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
-	"github.com/thomaspoignant/go-feature-flag/ffuser"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 )
@@ -15,7 +15,7 @@ import (
 func TestInternalFlag_Value(t *testing.T) {
 	type args struct {
 		flagName      string
-		user          ffuser.User
+		user          ffcontext.Context
 		evaluationCtx flag.Context
 	}
 	tests := []struct {
@@ -42,7 +42,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffuser.NewUser("user-key"),
+				user:     ffcontext.NewEvaluationContext("user-key"),
 				evaluationCtx: flag.Context{
 					DefaultSdkValue: false,
 				},
@@ -76,7 +76,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffuser.NewUser("user-key"),
+				user:     ffcontext.NewEvaluationContext("user-key"),
 				evaluationCtx: flag.Context{
 					DefaultSdkValue: false,
 				},
@@ -103,7 +103,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffuser.NewUser("user-key"),
+				user:     ffcontext.NewEvaluationContext("user-key"),
 				evaluationCtx: flag.Context{
 					DefaultSdkValue: "default-sdk",
 				},
@@ -133,7 +133,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffuser.NewUser("user-key"),
+				user:     ffcontext.NewEvaluationContext("user-key"),
 				evaluationCtx: flag.Context{
 					DefaultSdkValue: "default-sdk",
 				},
@@ -163,7 +163,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffuser.NewUser("user-key"),
+				user:     ffcontext.NewEvaluationContext("user-key"),
 				evaluationCtx: flag.Context{
 					DefaultSdkValue: "default-sdk",
 				},
@@ -203,7 +203,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffuser.NewUser("user-key"),
+				user:     ffcontext.NewEvaluationContext("user-key"),
 				evaluationCtx: flag.Context{
 					DefaultSdkValue: false,
 				},
@@ -251,7 +251,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffuser.NewUser("user-key"),
+				user:     ffcontext.NewEvaluationContext("user-key"),
 				evaluationCtx: flag.Context{
 					DefaultSdkValue: "value_default",
 				},
@@ -297,7 +297,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffuser.NewUser("user-key"),
+				user:     ffcontext.NewEvaluationContext("user-key"),
 				evaluationCtx: flag.Context{
 					DefaultSdkValue: "value_default",
 				},
@@ -347,7 +347,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffuser.NewUserBuilder("user-key").AddCustom("company", "go-feature-flag").Build(),
+				user:     ffcontext.NewEvaluationContextBuilder("user-key").AddCustom("company", "go-feature-flag").Build(),
 				evaluationCtx: flag.Context{
 					DefaultSdkValue: "value_default",
 				},
@@ -398,7 +398,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffuser.NewUserBuilder("user-key").AddCustom("company", "go-feature-flag").Build(),
+				user:     ffcontext.NewEvaluationContextBuilder("user-key").AddCustom("company", "go-feature-flag").Build(),
 				evaluationCtx: flag.Context{
 					DefaultSdkValue: "value_default",
 				},
@@ -443,7 +443,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffuser.NewUserBuilder("user-key").Build(),
+				user:     ffcontext.NewEvaluationContextBuilder("user-key").Build(),
 				evaluationCtx: flag.Context{
 					DefaultSdkValue: "value_default",
 				},
@@ -484,7 +484,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffuser.NewUserBuilder("user-key").Build(),
+				user:     ffcontext.NewEvaluationContextBuilder("user-key").Build(),
 				evaluationCtx: flag.Context{
 					DefaultSdkValue: "value_default",
 				},
@@ -522,7 +522,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffuser.NewUserBuilder("user-key").Build(),
+				user:     ffcontext.NewEvaluationContextBuilder("user-key").Build(),
 				evaluationCtx: flag.Context{
 					DefaultSdkValue: "value_default",
 				},
@@ -573,7 +573,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffuser.NewUserBuilder("user-key").Build(),
+				user:     ffcontext.NewEvaluationContextBuilder("user-key").Build(),
 				evaluationCtx: flag.Context{
 					DefaultSdkValue: "value_default",
 				},
@@ -623,7 +623,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffuser.NewUserBuilder("user-key").Build(),
+				user:     ffcontext.NewEvaluationContextBuilder("user-key").Build(),
 				evaluationCtx: flag.Context{
 					DefaultSdkValue: "value_default",
 				},
@@ -673,7 +673,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffuser.NewUserBuilder("user-key").Build(),
+				user:     ffcontext.NewEvaluationContextBuilder("user-key").Build(),
 				evaluationCtx: flag.Context{
 					DefaultSdkValue: "value_default",
 				},
@@ -714,7 +714,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffuser.NewUserBuilder("user-key").Build(),
+				user:     ffcontext.NewEvaluationContextBuilder("user-key").Build(),
 				evaluationCtx: flag.Context{
 					DefaultSdkValue: "value_default",
 				},
@@ -769,7 +769,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffuser.NewUserBuilder("user-key").Build(),
+				user:     ffcontext.NewEvaluationContextBuilder("user-key").Build(),
 				evaluationCtx: flag.Context{
 					DefaultSdkValue: "value_default",
 				},
@@ -817,7 +817,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffuser.NewUserBuilder("user-key-123").Build(),
+				user:     ffcontext.NewEvaluationContextBuilder("user-key-123").Build(),
 				evaluationCtx: flag.Context{
 					DefaultSdkValue: "value_default",
 				},
@@ -873,7 +873,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffuser.NewUserBuilder("user-key-123").Build(),
+				user:     ffcontext.NewEvaluationContextBuilder("user-key-123").Build(),
 				evaluationCtx: flag.Context{
 					DefaultSdkValue: "value_default",
 				},
@@ -925,7 +925,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffuser.NewUserBuilder("user-key").Build(),
+				user:     ffcontext.NewEvaluationContextBuilder("user-key").Build(),
 				evaluationCtx: flag.Context{
 					DefaultSdkValue: "value_default",
 				},
@@ -967,7 +967,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffuser.NewUserBuilder("user-key").Build(),
+				user:     ffcontext.NewEvaluationContextBuilder("user-key").Build(),
 				evaluationCtx: flag.Context{
 					DefaultSdkValue: "value_default",
 				},
@@ -1010,7 +1010,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffuser.NewUserBuilder("user-key").Build(),
+				user:     ffcontext.NewEvaluationContextBuilder("user-key").Build(),
 				evaluationCtx: flag.Context{
 					DefaultSdkValue: "value_default",
 				},
@@ -1063,7 +1063,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffuser.NewUserBuilder("user-key").Build(),
+				user:     ffcontext.NewEvaluationContextBuilder("user-key").Build(),
 				evaluationCtx: flag.Context{
 					DefaultSdkValue: "value_default",
 				},
@@ -1106,7 +1106,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffuser.NewUserBuilder("user-key").Build(),
+				user:     ffcontext.NewEvaluationContextBuilder("user-key").Build(),
 				evaluationCtx: flag.Context{
 					DefaultSdkValue: "value_default",
 				},
@@ -1146,7 +1146,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffuser.NewUserBuilder("user-key").Build(),
+				user:     ffcontext.NewEvaluationContextBuilder("user-key").Build(),
 				evaluationCtx: flag.Context{
 					DefaultSdkValue: "value_default",
 				},
@@ -1191,7 +1191,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffuser.NewUserBuilder("user-key").Build(),
+				user:     ffcontext.NewEvaluationContextBuilder("user-key").Build(),
 				evaluationCtx: flag.Context{
 					DefaultSdkValue: "value_default",
 				},
@@ -1245,7 +1245,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffuser.NewUserBuilder("user-key").Build(),
+				user:     ffcontext.NewEvaluationContextBuilder("user-key").Build(),
 				evaluationCtx: flag.Context{
 					DefaultSdkValue: "value_default",
 				},
@@ -1290,7 +1290,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffuser.NewUserBuilder("user-key").Build(),
+				user:     ffcontext.NewEvaluationContextBuilder("user-key").Build(),
 				evaluationCtx: flag.Context{
 					DefaultSdkValue: "value_default",
 				},
@@ -1330,7 +1330,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffuser.NewUserBuilder("user-key").Build(),
+				user:     ffcontext.NewEvaluationContextBuilder("user-key").Build(),
 				evaluationCtx: flag.Context{
 					DefaultSdkValue: "value_default",
 				},
@@ -1363,7 +1363,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffuser.NewUserBuilder("user-key").Build(),
+				user:     ffcontext.NewEvaluationContextBuilder("user-key").Build(),
 				evaluationCtx: flag.Context{
 					DefaultSdkValue: "value_default",
 				},
@@ -1399,7 +1399,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffuser.NewUserBuilder("user-key").Build(),
+				user:     ffcontext.NewEvaluationContextBuilder("user-key").Build(),
 				evaluationCtx: flag.Context{
 					DefaultSdkValue: "value_default",
 				},
@@ -1443,7 +1443,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "feature",
-				user:     ffuser.NewUserBuilder("1").Build(),
+				user:     ffcontext.NewEvaluationContextBuilder("1").Build(),
 				evaluationCtx: flag.Context{
 					DefaultSdkValue: true,
 					Environment:     "development",
@@ -1493,7 +1493,7 @@ func TestFlag_ProgressiveRollout(t *testing.T) {
 		},
 	}
 
-	user := ffuser.NewAnonymousUser("test")
+	user := ffcontext.NewEvaluationContextBuilder("test").AddCustom("anonymous", true).Build()
 	flagName := "test-flag"
 
 	// We evaluate the same flag multiple time overtime.

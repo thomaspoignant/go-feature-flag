@@ -1,22 +1,25 @@
 package utils_test
 
 import (
+	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/thomaspoignant/go-feature-flag/ffuser"
 	"github.com/thomaspoignant/go-feature-flag/internal/utils"
 )
 
 func TestUserToMap(t *testing.T) {
 	tests := []struct {
 		name string
-		u    ffuser.User
+		u    ffcontext.Context
 		want map[string]interface{}
 	}{
 		{
 			name: "complete user",
-			u:    ffuser.NewUserBuilder("key").Anonymous(false).AddCustom("email", "contact@gofeatureflag.org").Build(),
+			u: ffcontext.NewEvaluationContextBuilder("key").
+				AddCustom("anonymous", false).
+				AddCustom("email", "contact@gofeatureflag.org").
+				Build(),
 			want: map[string]interface{}{
 				"key":       "key",
 				"anonymous": false,
@@ -25,7 +28,9 @@ func TestUserToMap(t *testing.T) {
 		},
 		{
 			name: "anonymous user",
-			u:    ffuser.NewAnonymousUser("key"),
+			u: ffcontext.NewEvaluationContextBuilder("key").
+				AddCustom("anonymous", true).
+				Build(),
 			want: map[string]interface{}{
 				"key":       "key",
 				"anonymous": true,

@@ -41,7 +41,7 @@ defer ffclient.Close()
 3. Put your new features conditionally based on the flag value:
 
 ```go
-user := ffuser.NewUser("user-unique-key")
+user := ffcontext.NewEvaluationContext("user-unique-key")
 hasFlag, _ := ffclient.BoolVariation("test-flag", user, false)
 if hasFlag {
     // flag "test-flag" is true for the user
