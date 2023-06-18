@@ -14,7 +14,7 @@ brew install go-feature-flag-lint
 ```shell
 docker pull thomaspoignant/go-feature-flag-lint
 ```
-More information about the usage of the container in the [dockerhub page](https://hub.docker.com/r/thomaspoignant/go-feature-flag-lint-cli).
+More information about the usage of the container in the [dockerhub page](https://hub.docker.com/r/thomaspoignant/go-feature-flag-lint).
 
 ## How to use the cli
 
