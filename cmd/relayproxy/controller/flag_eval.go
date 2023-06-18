@@ -59,12 +59,12 @@ func (h *flagEval) Handler(c echo.Context) error {
 	if err := assertRequest(&reqBody.AllFlagRequest); err != nil {
 		return err
 	}
-	goFFUser, err := userRequestToUser(reqBody.User)
+	evaluationCtx, err := evaluationContextFromRequest(&reqBody.AllFlagRequest)
 	if err != nil {
 		return err
 	}
 
 	// get flag name from the URL
-	flagValue, _ := h.goFF.RawVariation(flagKey, goFFUser, reqBody.DefaultValue)
+	flagValue, _ := h.goFF.RawVariation(flagKey, evaluationCtx, reqBody.DefaultValue)
 	return c.JSON(http.StatusOK, flagValue)
 }

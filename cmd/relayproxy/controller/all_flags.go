@@ -47,11 +47,11 @@ func (h *allFlags) Handler(c echo.Context) error {
 		return err
 	}
 
-	goFFUser, err := userRequestToUser(reqBody.User)
+	evaluationCtx, err := evaluationContextFromRequest(reqBody)
 	if err != nil {
 		return err
 	}
 
-	allFlags := h.goFF.AllFlagsState(goFFUser)
+	allFlags := h.goFF.AllFlagsState(evaluationCtx)
 	return c.JSON(http.StatusOK, allFlags)
 }
