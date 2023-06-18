@@ -53,10 +53,16 @@ definitions:
     type: object
   model.AllFlagRequest:
     properties:
+      evaluationContext:
+        allOf:
+        - $ref: '#/definitions/model.EvaluationContextRequest'
+        description: EvaluationContext The representation of a EvaluationContext for
+          your feature flag system.
       user:
         allOf:
         - $ref: '#/definitions/model.UserRequest'
-        description: User The representation of a user for your feature flag system.
+        description: 'Deprecated: User The representation of a user for your feature
+          flag system.'
     type: object
   model.CollectEvalDataRequest:
     properties:
@@ -83,10 +89,33 @@ definitions:
       defaultValue:
         description: The value will we use if we are not able to get the variation
           of the flag.
+      evaluationContext:
+        allOf:
+        - $ref: '#/definitions/model.EvaluationContextRequest'
+        description: EvaluationContext The representation of a EvaluationContext for
+          your feature flag system.
       user:
         allOf:
         - $ref: '#/definitions/model.UserRequest'
-        description: User The representation of a user for your feature flag system.
+        description: 'Deprecated: User The representation of a user for your feature
+          flag system.'
+    type: object
+  model.EvaluationContextRequest:
+    properties:
+      custom:
+        additionalProperties:
+          type: string
+        description: Custom is a map containing all extra information for this user.
+        example:
+          company: GO Feature Flag
+          email: contact@gofeatureflag.org
+          firstname: John
+          lastname: Doe
+        type: object
+      key:
+        description: Key is the identifier of the UserRequest.
+        example: 08b5ffb7-7109-42f4-a6f2-b85560fbd20f
+        type: string
     type: object
   model.HealthResponse:
     properties:

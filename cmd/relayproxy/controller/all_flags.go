@@ -28,10 +28,10 @@ func NewAllFlags(goFF *ffclient.GoFeatureFlag) Controller {
 // @Description For that you should provide some user information in JSON in the request body.
 // @Security     ApiKeyAuth
 // @Produce      json
-// @Accept			 json
-// @Param 			 data body model.AllFlagRequest true "Payload of the user we want to challenge against the flag."
+// @Accept		 json
+// @Param 	     data body model.AllFlagRequest true "Payload of the user we want to challenge against the flag."
 // @Success      200  {object}   modeldocs.AllFlags "Success"
-// @Failure 		 400 {object} modeldocs.HTTPErrorDoc "Bad Request"
+// @Failure      400 {object} modeldocs.HTTPErrorDoc "Bad Request"
 // @Failure      500 {object} modeldocs.HTTPErrorDoc "Internal server error"
 // @Router       /v1/allflags [post]
 func (h *allFlags) Handler(c echo.Context) error {
