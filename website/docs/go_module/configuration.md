@@ -76,7 +76,7 @@ defer x.Close()
 y, err := ffclient.New(Config{ Retriever: &httpretriever.Retriever{{URL: "http://example.com/test2.yaml",}})
 defer y.Close()
 
-user := ffuser.NewUser("user-key")
+user := ffcontext.NewEvaluationContext("user-key")
 x.BoolVariation("test-flag", user, false)
 y.BoolVariation("test-flag", user, false)
 

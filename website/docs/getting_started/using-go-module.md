@@ -51,7 +51,7 @@ Look at the list of available options in the [**Store your feature flag file** p
 Now you can evaluate your flags anywhere in your code.
 
 ```go linenums="1"
-user := ffuser.NewUser("user-unique-key")
+user := ffcontext.NewEvaluationContext("user-unique-key")
 hasFlag, _ := ffclient.BoolVariation("test-flag", user, false)
 if hasFlag {
     // flag "test-flag" is true for the user
