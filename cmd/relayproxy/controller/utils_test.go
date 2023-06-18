@@ -22,6 +22,11 @@ func Test_assertRequest_request_without_user(t *testing.T) {
 	want := echo.NewHTTPError(http.StatusBadRequest, "assertRequest: impossible to find user in request")
 	assert.Equal(t, want, got)
 }
+func Test_assertRequest_request_without_context(t *testing.T) {
+	got := assertRequest(&model.AllFlagRequest{EvaluationContext: nil})
+	want := echo.NewHTTPError(http.StatusBadRequest, "assertRequest: impossible to find user in request")
+	assert.Equal(t, want, got)
+}
 
 func Test_userRequestToUser_nil_user(t *testing.T) {
 	_, got := userRequestToUser(nil)

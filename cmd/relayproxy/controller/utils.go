@@ -12,10 +12,15 @@ import (
 
 // assertRequest is the function which validates the request, if not valid an echo.HTTPError is return.
 func assertRequest(u *model.AllFlagRequest) *echo.HTTPError {
-	if u == nil || u.User == nil {
+	// nolint: staticcheck
+	if u == nil || (u.User == nil && u.EvaluationContext == nil) {
 		return echo.NewHTTPError(http.StatusBadRequest, "assertRequest: impossible to find user in request")
 	}
-	return assertUserKey(u.User.Key)
+
+	if u.EvaluationContext != nil {
+		return assertUserKey(u.EvaluationContext.Key)
+	}
+	return assertUserKey(u.User.Key) // nolint: staticcheck
 }
 
 // assertUserKey is checking that the user key is valid, if not an echo.HTTPError is return.
@@ -42,11 +47,14 @@ func evaluationContextFromRequest(req *model.AllFlagRequest) (ffcontext.Context,
 }
 
 // userRequestToUser convert a user from the request model.AllFlagRequest to a go-feature-flag ffuser.User
+// nolint: staticcheck
 func userRequestToUser(u *model.UserRequest) (ffuser.User, error) {
 	if u == nil {
+		// nolint: staticcheck
 		return ffuser.User{}, fmt.Errorf("userRequestToUser: impossible to convert user, userRequest nil")
 	}
-	uBuilder := ffuser.NewUserBuilder(u.Key).Anonymous(u.Anonymous)
+
+	uBuilder := ffuser.NewUserBuilder(u.Key).Anonymous(u.Anonymous) // nolint: staticcheck
 	for key, val := range u.Custom {
 		uBuilder.AddCustom(key, val)
 	}
