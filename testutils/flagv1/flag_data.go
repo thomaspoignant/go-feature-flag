@@ -61,7 +61,7 @@ type FlagData struct {
 func (f *FlagData) Value(
 	flagName string,
 	user ffcontext.Context,
-	evaluationCtx flag.EvaluationContext,
+	evaluationCtx flag.Context,
 ) (interface{}, flag.ResolutionDetails) {
 	f.updateFlagStage()
 	if f.isExperimentationOver() {

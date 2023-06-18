@@ -1143,10 +1143,10 @@ func TestConvertV0ScheduleStep(t *testing.T) {
 			flagName := "yo"
 
 			convertInternalFlag := tt.dto.Convert()
-			gotInternalFlag, resolutionDetails := convertInternalFlag.Value(flagName, u, flag.EvaluationContext{})
+			gotInternalFlag, resolutionDetails := convertInternalFlag.Value(flagName, u, flag.Context{})
 
 			convertFlagv1 := flagv1.ConvertDtoToV1(tt.dto)
-			gotFlagV1, resolutionDetails1 := convertFlagv1.Value(flagName, u, flag.EvaluationContext{})
+			gotFlagV1, resolutionDetails1 := convertFlagv1.Value(flagName, u, flag.Context{})
 
 			assert.Equal(t, gotFlagV1, gotInternalFlag)
 			assert.Equal(t, resolutionDetails.Variant, resolutionDetails1.Variant)

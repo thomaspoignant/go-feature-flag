@@ -58,17 +58,17 @@ type InternalFlag struct {
 // Value is returning the Value associate to the flag
 func (f *InternalFlag) Value(
 	flagName string,
-	ctx ffcontext.Context,
-	evaluationCtx EvaluationContext,
+	evaluationCtx ffcontext.Context,
+	flagContext Context,
 ) (interface{}, ResolutionDetails) {
 	f.applyScheduledRolloutSteps()
 
-	if evaluationCtx.Environment != "" {
-		ctx.AddCustomAttribute("env", evaluationCtx.Environment)
+	if flagContext.Environment != "" {
+		evaluationCtx.AddCustomAttribute("env", flagContext.Environment)
 	}
 
 	if f.IsDisable() || f.isExperimentationOver() {
-		return evaluationCtx.DefaultSdkValue, ResolutionDetails{
+		return flagContext.DefaultSdkValue, ResolutionDetails{
 			Variant:   VariationSDKDefault,
 			Reason:    ReasonDisabled,
 			Cacheable: f.isCacheable(),
@@ -76,9 +76,9 @@ func (f *InternalFlag) Value(
 		}
 	}
 
-	variationSelection, err := f.selectVariation(flagName, ctx)
+	variationSelection, err := f.selectVariation(flagName, evaluationCtx)
 	if err != nil {
-		return evaluationCtx.DefaultSdkValue,
+		return flagContext.DefaultSdkValue,
 			ResolutionDetails{
 				Variant:   VariationSDKDefault,
 				Reason:    ReasonError,

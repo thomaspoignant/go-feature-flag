@@ -263,7 +263,7 @@ func (g *GoFeatureFlag) AllFlagsState(ctx ffcontext.Context) flagstate.AllFlags 
 
 	allFlags := flagstate.NewAllFlags()
 	for key, currentFlag := range flags {
-		flagValue, resolutionDetails := currentFlag.Value(key, ctx, flag.EvaluationContext{
+		flagValue, resolutionDetails := currentFlag.Value(key, ctx, flag.Context{
 			Environment:     g.config.Environment,
 			DefaultSdkValue: nil,
 		})
@@ -410,7 +410,7 @@ func getVariation[T model.JSONType](
 	}
 
 	flagValue, resolutionDetails := f.Value(flagKey, ctx,
-		flag.EvaluationContext{Environment: g.config.Environment, DefaultSdkValue: sdkDefaultValue})
+		flag.Context{Environment: g.config.Environment, DefaultSdkValue: sdkDefaultValue})
 
 	var convertedValue interface{}
 	switch value := flagValue.(type) {
