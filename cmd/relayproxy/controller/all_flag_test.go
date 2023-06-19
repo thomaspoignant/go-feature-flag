@@ -72,7 +72,7 @@ func Test_all_flag_Handler(t *testing.T) {
 			},
 			want: want{
 				handlerErr: true,
-				errorMsg:   "empty key for user, impossible to retrieve flags",
+				errorMsg:   "empty key for evaluation context, impossible to retrieve flags",
 				errorCode:  http.StatusBadRequest,
 			},
 		},

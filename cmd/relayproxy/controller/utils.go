@@ -18,22 +18,26 @@ func assertRequest(u *model.AllFlagRequest) *echo.HTTPError {
 	}
 
 	if u.EvaluationContext != nil {
-		return assertUserKey(u.EvaluationContext.Key)
+		return assertContextKey(u.EvaluationContext.Key)
 	}
-	return assertUserKey(u.User.Key) // nolint: staticcheck
+	return assertContextKey(u.User.Key) // nolint: staticcheck
 }
 
-// assertUserKey is checking that the user key is valid, if not an echo.HTTPError is return.
-func assertUserKey(userKey string) *echo.HTTPError {
-	if len(userKey) == 0 {
-		return &echo.HTTPError{Code: http.StatusBadRequest, Message: "empty key for user, impossible to retrieve flags"}
+// assertContextKey is checking that the user key is valid, if not an echo.HTTPError is return.
+func assertContextKey(key string) *echo.HTTPError {
+	if len(key) == 0 {
+		return &echo.HTTPError{
+			Code:    http.StatusBadRequest,
+			Message: "empty key for evaluation context, impossible to retrieve flags",
+		}
 	}
 	return nil
 }
 
 func evaluationContextFromRequest(req *model.AllFlagRequest) (ffcontext.Context, error) {
 	if req == nil {
-		return ffcontext.EvaluationContext{}, fmt.Errorf("evaluationContextFromRequest: impossible to convert user, req nil")
+		return ffcontext.EvaluationContext{},
+			echo.NewHTTPError(http.StatusBadRequest, "evaluationContextFromRequest: impossible to convert the request, req nil")
 	}
 	if req.EvaluationContext != nil {
 		u := req.EvaluationContext
