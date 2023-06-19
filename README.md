@@ -20,14 +20,34 @@
 
 :pray: If you are using **GO Feature Flag** we've launched the [GO Feature Flag Usage Survey](https://forms.gle/cD4Rj7gJSMStg1Hc9), it would be awesome and super helpful if you can fill it.
 
+## Table of Contents
+
+- [What is GO Feature Flag?](#what-is-go-feature-flag)
+- [What can I do with GO Feature Flag?](#what-can-i-do-with-go-feature-flag)
+- [Getting started](#getting-started)
+    - [Using the GO Module](#using-go-module)
+    - [Using Open Feature SDKs](#using-open-feature)
+- [Can I use GO Feature Flag with any language?](#can-i-use-go-feature-flag-with-any-language)
+- [Where do I store my flags file?](#where-do-i-store-my-flags-file)
+- [Flags file format](#flags-file-format)
+- [Rule format](#rule-format)
+- [Users](#users)
+- [Variations](#variations)
+- [Get all flags for a specific user](#get-all-flags-for-a-specific-user)
+- [Rollout](#rollout)
+- [Notifiers](#notifiers)
+- [Export data](#export-data)
+- [Linter](#linter)
+- [How can I contribute?](#how-can-i-contribute)
+- [Contributors](#contributors)
 
 ## What is GO Feature Flag?
-GO Feature Flag is a simple, complete and lightweight feature flag solution 100% open source.
 
-The solution has been built to start experiencing the usage of feature flags in your code without having to contract with any vendor.
+GO Feature Flag is a lightweight and open-source solution that provides a simple and complete feature flag implementation.
 
-**GO Feature Flag** has started to be a solution only for the `GO` language, but with the new standardization of feature flags by [Openfeature](https://openfeature.dev/) project, 
-now the solution is available for multiple languages _(`JAVA`, `typescript`, `javascript`, ...)_ with a simple API server _(called the relay proxy)_ to host.
+The solution has been built to facilitate the usage of feature flags in your code without having to contact any vendor.
+
+Originally, **GO Feature Flag** was designed as a solution exclusively for the `GO` language. With the new standardization of feature flags by the [Openfeature](https://openfeature.dev/) project, the solution is now available for multiple languages _(`JAVA`, `typescript`, `javascript`, ...)_ through a simple API server called the relay proxy, which can be hosted.
 
 > ℹ️ Info  
 If you are not familiar with feature flags, I've written an [article](https://medium.com/better-programming/feature-flags-and-how-to-iterate-quickly-7e3371b9986) which explains why feature flags can fasten your iteration cycle.
@@ -41,7 +61,7 @@ If you are not familiar with feature flags, I've written an [article](https://me
     - [Run A/B testing experimentation](https://gofeatureflag.org/docs/configure_flag/rollout/experimentation).
     - [Progressively rollout a feature](https://gofeatureflag.org/docs/configure_flag/rollout/progressive).
     - [Schedule your flag updates](https://gofeatureflag.org/docs/configure_flag/rollout/scheduled).
-- Exporting your flags usage data _(`S3`, `Google cloud storage`, `file`, [_see full list_](https://gofeatureflag.org/docs/configure_flag/export_flags_usage))_.
+- Exporting your flags usage data to various destinations such as _(`S3`, `Google cloud storage`, `file`, see the [_full list_](https://gofeatureflag.org/docs/configure_flag/export_flags_usage))_.
 - Getting notified when a flag has been changed _(`webhook` and `slack`)_.
 - Use **GO Feature Flag** in several languages with **Open Feature SDKs**.
 
@@ -54,8 +74,9 @@ _The code of this demo is available in [`examples/demo`](examples/demo) reposito
 
 Before starting to use **GO Feature Flag** you should decide if you want to use the GO Module directly or if you want to install the relay proxy.
 
-The GO module is perfect and simple to use if your need is to use GO Feature Flag only in GO, if your project has more languages I recommend you to use the Open Feature SDKs.
+The GO module is ideal for using GO Feature Flag exclusively in GO projects. If your project involves multiple languages, we recommend using the Open Feature SDKs.
 
+<a id="using-go-module"></a>
 <details>
 <summary><b>Using the GO Module</b></summary>
 
@@ -118,6 +139,7 @@ You can find more examples in the [examples/](https://github.com/thomaspoignant/
 </details>
 
 
+<a id="using-open-feature"></a>
 <details>
 <summary><b>Using Open Feature SDKs</b></summary>
 
@@ -238,8 +260,9 @@ For now, we have providers for `python`, `java`, `typescript`, `javascript`, `GO
 
 
 ## Where do I store my flags file?
+
 The module supports different ways of retrieving the flag file.  
-Available retrievers are:
+The available retrievers are:
 - **GitHub**
 - **HTTP endpoint**
 - **AWS S3**
@@ -394,7 +417,7 @@ version = "12"
 
 </details>
 
-All the fields to create a flag are described in the [documentation](https://gofeatureflag.org/docs/configure_flag/flag_format). 
+For detailed information on the fields required to create a flag, please refer to the [documentation](https://gofeatureflag.org/docs/configure_flag/flag_format). 
 
 ## Rule format
 
@@ -440,9 +463,10 @@ It will be used when testing the targeting rules.
 You can also distinguish logged-in users from anonymous users in the SDK ([check documentation about anonymous users](https://gofeatureflag.org/docs/go_module/target_user#anonymous-users)).
 
 ## Variations
+
 The Variation methods determine whether a flag is enabled or not for a specific user.
 
-GO Feature Flag can manage more than `boolean`, the value of your flag can be any of these types:
+GO Feature Flag can manage more than just `boolean` values; the value of your flag can be any of the following types:
 - `bool`
 - `int`
 - `float`
@@ -462,9 +486,10 @@ Variation methods take the feature **flag key**, a **user**, and a **default val
 The default value is returned when an error is encountered _(`ffclient` not initialized, variation with wrong type, flag does not exist ...)._
 
 In the example, if the flag `your.feature.key` does not exist, the result will be `false`.  
-Not that you will always have a usable value in the result.
+Note that the result will always provide a usable value.
 
 ## Get all flags for a specific user
+
 If you want to send the information about a specific user to a front-end, you will want a snapshot of all the flags for
 this user at a specific time.
 
@@ -476,6 +501,7 @@ The `MarshalJSON()` function will return a JSON Object, that can be directly use
 [More details in the documentation.](https://gofeatureflag.org/docs/go_module/target_user#get-all-flags-for-a-specific-user)
 
 ## Rollout
+
 A critical part of every new feature release is orchestrating the actual launch schedule between the Product, Engineering, and Marketing teams.
 
 Delivering powerful user experiences typically requires software teams to manage complex releases and make manual updates at inconvenient times.
@@ -502,7 +528,7 @@ Available notifiers are:
 
 ## Export data
 **GO Feature Flag** allows you to export data about the usage of your flags.    
-It collects all the variations events and can save these events in several locations:
+It collects all variation events and can save these events in several locations:
 
 - **Local file** *- create local files with the variation usages.*
 - **Log** *- use your logger to write the variation usages.*
@@ -533,7 +559,8 @@ Events are collected and sent in bulk to avoid spamming your exporter.
 A command line tool is available to help you lint your configuration file: [go-feature-flag-lint](cmd/lint/README.md).
 
 # How can I contribute?
-This project is open for contribution, see the [contributor's guide](CONTRIBUTING.md) for some helpful tips.
+
+This project welcomes contributions from the community. If you're interested in contributing, see the [contributors' guide](CONTRIBUTING.md) for some helpful tips.
 
 ## Contributors
 

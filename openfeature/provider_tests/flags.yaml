@@ -10,6 +10,8 @@ bool_targeting_match:
     percentage:
       "False": 0
       "True": 100
+  metadata:
+    description: this is a test flag
 disabled_bool:
   variations:
     Default: false

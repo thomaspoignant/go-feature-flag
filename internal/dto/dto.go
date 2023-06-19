@@ -50,6 +50,9 @@ type DTOv1 struct {
 	// an end date for your flag.
 	// When the experimentation is not running, the flag will serve the default value.
 	Experimentation *ExperimentationDto `json:"experimentation,omitempty" yaml:"experimentation,omitempty" toml:"experimentation,omitempty"` // nolint: lll
+
+	// Metadata is a field containing information about your flag such as an issue tracker link, a description, etc ...
+	Metadata *map[string]interface{} `json:"metadata,omitempty" yaml:"metadata,omitempty" toml:"metadata,omitempty"`
 }
 
 // DTOv0 describe the fields of a flag.

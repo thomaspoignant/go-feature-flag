@@ -36,6 +36,7 @@ describe('Provider tests', () => {
         reason: "TARGETING_MATCH",
         value: true,
         variant: "True",
+        flagMetadata: {},
       }
       const got = await goffClient.getBooleanDetails(flagKey, false, userCtx)
       expect(got).toEqual(expected)
@@ -46,19 +47,21 @@ describe('Provider tests', () => {
       const expected = {
         flagKey: flagKey,
         reason: "DISABLED",
+        flagMetadata: {},
         value: false,
       }
       const got = await goffClient.getBooleanDetails(flagKey, false, userCtx)
       expect(got).toEqual(expected)
     })
 
-    it('should use boolean default value if the flag is disabled', async () => {
+    it('should error if type_mismatch', async () => {
       const flagKey = "string_key"
       const expected = {
         flagKey: flagKey,
         reason: "ERROR",
         value: false,
         errorCode: "TYPE_MISMATCH",
+        flagMetadata: {},
         errorMessage: "Flag value string_key had unexpected type string, expected boolean."
       }
       const got = await goffClient.getBooleanDetails(flagKey, false, userCtx)
@@ -72,6 +75,7 @@ describe('Provider tests', () => {
         reason: "ERROR",
         value: false,
         errorCode: "FLAG_NOT_FOUND",
+        flagMetadata: {},
         errorMessage: "Flag does_not_exists was not found in your configuration"
       }
       const got = await goffClient.getBooleanDetails(flagKey, false, userCtx)
@@ -86,6 +90,7 @@ describe('Provider tests', () => {
         reason: "TARGETING_MATCH",
         value: "CC0000",
         variant: "True",
+        flagMetadata: {},
       }
       const got = await goffClient.getStringDetails(flagKey, "default", userCtx)
       expect(got).toEqual(expected)
@@ -97,6 +102,7 @@ describe('Provider tests', () => {
         flagKey: flagKey,
         reason: "DISABLED",
         value: "default",
+        flagMetadata: {},
       }
       const got = await goffClient.getStringDetails(flagKey, "default", userCtx)
       expect(got).toEqual(expected)
@@ -109,6 +115,7 @@ describe('Provider tests', () => {
         reason: "ERROR",
         errorCode: "TYPE_MISMATCH",
         value: "default",
+        flagMetadata: {},
         errorMessage: "Flag value bool_targeting_match had unexpected type boolean, expected string."
       }
       const got = await goffClient.getStringDetails(flagKey, "default", userCtx)
@@ -122,6 +129,7 @@ describe('Provider tests', () => {
         reason: "ERROR",
         errorCode: "FLAG_NOT_FOUND",
         value: "default",
+        flagMetadata: {},
         errorMessage: "Flag does_not_exists was not found in your configuration"
       }
       const got = await goffClient.getStringDetails(flagKey, "default", userCtx)
@@ -136,6 +144,7 @@ describe('Provider tests', () => {
         reason: "TARGETING_MATCH",
         value: 100.25,
         variant: "True",
+        flagMetadata: {},
       }
       const got = await goffClient.getNumberDetails(flagKey, 123.45, userCtx)
       expect(got).toEqual(expected)
@@ -147,6 +156,7 @@ describe('Provider tests', () => {
         flagKey: flagKey,
         reason: "DISABLED",
         value: 123.45,
+        flagMetadata: {},
       }
       const got = await goffClient.getNumberDetails(flagKey, 123.45, userCtx)
       expect(got).toEqual(expected)
@@ -160,6 +170,7 @@ describe('Provider tests', () => {
         errorCode: "TYPE_MISMATCH",
         errorMessage: "Flag value bool_targeting_match had unexpected type boolean, expected number.",
         value: 123.45,
+        flagMetadata: {},
       }
       const got = await goffClient.getNumberDetails(flagKey, 123.45, userCtx)
       expect(got).toEqual(expected)
@@ -173,6 +184,7 @@ describe('Provider tests', () => {
         errorCode: "FLAG_NOT_FOUND",
         errorMessage: "Flag does_not_exists was not found in your configuration",
         value: 123.45,
+        flagMetadata: {},
       }
       const got = await goffClient.getNumberDetails(flagKey, 123.45, userCtx)
       expect(got).toEqual(expected)
@@ -184,6 +196,7 @@ describe('Provider tests', () => {
       const expected = {
         flagKey: flagKey,
         reason: "TARGETING_MATCH",
+        flagMetadata: {},
         value: {
           test4: 1,
           test2: false,
@@ -202,6 +215,7 @@ describe('Provider tests', () => {
         flagKey: flagKey,
         reason: "DISABLED",
         value: {"test":1234},
+        flagMetadata: {},
       }
       const got = await goffClient.getObjectDetails(flagKey, {"test":1234}, userCtx)
       expect(got).toEqual(expected)
@@ -215,6 +229,7 @@ describe('Provider tests', () => {
         errorCode: "TYPE_MISMATCH",
         errorMessage: "Flag value bool_targeting_match had unexpected type boolean, expected object.",
         value: {"test":1234},
+        flagMetadata: {},
       }
       const got = await goffClient.getObjectDetails(flagKey, {"test":1234}, userCtx)
       expect(got).toEqual(expected)
@@ -228,6 +243,7 @@ describe('Provider tests', () => {
         errorCode: "FLAG_NOT_FOUND",
         errorMessage: "Flag does_not_exists was not found in your configuration",
         value: {"test":1234},
+        flagMetadata: {},
       }
       const got = await goffClient.getObjectDetails(flagKey, {"test":1234}, userCtx)
       expect(got).toEqual(expected)
@@ -248,6 +264,7 @@ describe('Provider tests', () => {
         reason: "TARGETING_MATCH",
         value: true,
         variant: "True",
+        flagMetadata: {},
       }
       const got = await goffClient.getBooleanDetails(flagKey, false, userCtx)
       expect(got).toEqual(expected)
@@ -267,6 +284,7 @@ describe('Provider tests', () => {
         reason: "ERROR",
         value: false,
         errorCode: "GENERAL",
+        flagMetadata: {},
         errorMessage: "invalid token used to contact GO Feature Flag relay proxy instance"
       }
       const got = await goffClient.getBooleanDetails(flagKey, false, userCtx)
@@ -287,6 +305,7 @@ describe('Provider tests', () => {
         reason: "ERROR",
         value: false,
         errorCode: "GENERAL",
+        flagMetadata: {},
         errorMessage: "invalid token used to contact GO Feature Flag relay proxy instance"
       }
       const got = await goffClient.getBooleanDetails(flagKey, false, userCtx)

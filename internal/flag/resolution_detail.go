@@ -20,4 +20,7 @@ type ResolutionDetails struct {
 
 	// Cacheable is set to true if an SDK/provider can cache the value locally.
 	Cacheable bool
+
+	// Metadata is a field containing information about your flag such as an issue tracker link, a description, etc ...
+	Metadata map[string]interface{}
 }

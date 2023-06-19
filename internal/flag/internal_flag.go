@@ -50,6 +50,9 @@ type InternalFlag struct {
 	// The version is manually managed when you configure your flags, and it is used to display the information
 	// in the notifications and data collection.
 	Version *string `json:"version,omitempty" yaml:"version,omitempty" toml:"version,omitempty"`
+
+	// Metadata is a field containing information about your flag such as an issue tracker link, a description, etc ...
+	Metadata *map[string]interface{} `json:"metadata,omitempty" yaml:"metadata,omitempty" toml:"metadata,omitempty"`
 }
 
 // Value is returning the Value associate to the flag
@@ -69,6 +72,7 @@ func (f *InternalFlag) Value(
 			Variant:   VariationSDKDefault,
 			Reason:    ReasonDisabled,
 			Cacheable: f.isCacheable(),
+			Metadata:  f.GetMetadata(),
 		}
 	}
 
@@ -79,6 +83,7 @@ func (f *InternalFlag) Value(
 				Variant:   VariationSDKDefault,
 				Reason:    ReasonError,
 				ErrorCode: ErrorFlagConfiguration,
+				Metadata:  f.GetMetadata(),
 			}
 	}
 
@@ -88,6 +93,7 @@ func (f *InternalFlag) Value(
 		RuleIndex: variationSelection.ruleIndex,
 		RuleName:  variationSelection.ruleName,
 		Cacheable: variationSelection.cacheable,
+		Metadata:  f.GetMetadata(),
 	}
 }
 
@@ -331,4 +337,12 @@ func (f *InternalFlag) GetVariationValue(name string) interface{} {
 		}
 	}
 	return nil
+}
+
+// GetMetadata return the metadata associated to the flag
+func (f *InternalFlag) GetMetadata() map[string]interface{} {
+	if f.Metadata == nil {
+		return nil
+	}
+	return *f.Metadata
 }

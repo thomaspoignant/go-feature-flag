@@ -21,5 +21,6 @@ func ConvertV1DtoToInternalFlag(dto DTO) flag.InternalFlag {
 		Version:         dto.Version,
 		Scheduled:       dto.Scheduled,
 		Experimentation: experimentation,
+		Metadata:        dto.Metadata,
 	}
 }

@@ -16,4 +16,6 @@ type EvalFlagDoc struct {
 	ErrorCode string `json:"errorCode" example:""`
 	// The flag value for this user.
 	Value interface{} `json:"value"`
+	// Metadata is a field containing information about your flag such as an issue tracker link, a description, etc ...
+	Metadata *map[string]interface{} `json:"metadata" yaml:"metadata,omitempty" toml:"metadata,omitempty"`
 }

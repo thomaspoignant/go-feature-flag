@@ -22,4 +22,7 @@ type Flag interface {
 
 	// GetVariationValue return the value of variation from his name
 	GetVariationValue(name string) interface{}
+
+	// GetMetadata return the metadata associated to the flag
+	GetMetadata() map[string]interface{}
 }

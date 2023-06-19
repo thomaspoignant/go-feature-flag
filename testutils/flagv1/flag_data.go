@@ -381,3 +381,7 @@ func convertNilEmpty(input interface{}) string {
 	}
 	return fmt.Sprintf("%v", input)
 }
+
+func (f *FlagData) GetMetadata() map[string]interface{} {
+	return nil
+}
