@@ -1,4 +1,4 @@
-const {describe, expect, it, beforeEach} = require('@jest/globals');
+const {describe, expect, it, beforeEach, afterEach } = require('@jest/globals');
 const {OpenFeature} = require("@openfeature/js-sdk");
 const {GoFeatureFlagProvider} = require("@openfeature/go-feature-flag-provider");
 describe('Provider tests', () => {
@@ -28,6 +28,10 @@ describe('Provider tests', () => {
     };
   });
 
+  afterEach(()=>{
+    OpenFeature.close()
+  })
+
   describe("bool", () => {
     it('should resolve a valid boolean flag with TARGETING_MATCH reason', async () => {
       const flagKey = "bool_targeting_match"
@@ -36,7 +40,9 @@ describe('Provider tests', () => {
         reason: "TARGETING_MATCH",
         value: true,
         variant: "True",
-        flagMetadata: {},
+        flagMetadata: {
+          description: "this is a test flag",
+        },
       }
       const got = await goffClient.getBooleanDetails(flagKey, false, userCtx)
       expect(got).toEqual(expected)
@@ -264,7 +270,9 @@ describe('Provider tests', () => {
         reason: "TARGETING_MATCH",
         value: true,
         variant: "True",
-        flagMetadata: {},
+        flagMetadata: {
+          description: "this is a test flag",
+        },
       }
       const got = await goffClient.getBooleanDetails(flagKey, false, userCtx)
       expect(got).toEqual(expected)
