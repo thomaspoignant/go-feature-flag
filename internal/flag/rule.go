@@ -3,12 +3,12 @@ package flag
 import (
 	"errors"
 	"fmt"
+	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"sort"
 	"strings"
 	"time"
 
 	"github.com/nikunjy/rules/parser"
-	"github.com/thomaspoignant/go-feature-flag/ffuser"
 	"github.com/thomaspoignant/go-feature-flag/internal/internalerror"
 	"github.com/thomaspoignant/go-feature-flag/internal/utils"
 )
@@ -42,12 +42,12 @@ type Rule struct {
 
 // Evaluate is checking if the originalRule apply to for the user.
 // If yes it returns the variation you should use for this originalRule.
-func (r *Rule) Evaluate(user ffuser.User, hashID uint32, isDefault bool,
+func (r *Rule) Evaluate(ctx ffcontext.Context, hashID uint32, isDefault bool,
 ) (string, error) {
 	// Check if the originalRule apply for this user
-	ruleApply := isDefault || r.GetQuery() == "" || parser.Evaluate(r.GetTrimmedQuery(), utils.UserToMap(user))
+	ruleApply := isDefault || r.GetQuery() == "" || parser.Evaluate(r.GetTrimmedQuery(), utils.ContextToMap(ctx))
 	if !ruleApply || (!isDefault && r.IsDisable()) {
-		return "", &internalerror.RuleNotApply{User: user}
+		return "", &internalerror.RuleNotApply{Context: ctx}
 	}
 
 	if r.ProgressiveRollout != nil {

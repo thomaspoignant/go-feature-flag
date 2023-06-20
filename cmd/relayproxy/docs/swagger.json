@@ -273,8 +273,16 @@
         "model.AllFlagRequest": {
             "type": "object",
             "properties": {
+                "evaluationContext": {
+                    "description": "EvaluationContext The representation of a EvaluationContext for your feature flag system.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.EvaluationContextRequest"
+                        }
+                    ]
+                },
                 "user": {
-                    "description": "User The representation of a user for your feature flag system.",
+                    "description": "Deprecated: User The representation of a user for your feature flag system.",
                     "allOf": [
                         {
                             "$ref": "#/definitions/model.UserRequest"
@@ -317,13 +325,44 @@
                 "defaultValue": {
                     "description": "The value will we use if we are not able to get the variation of the flag."
                 },
+                "evaluationContext": {
+                    "description": "EvaluationContext The representation of a EvaluationContext for your feature flag system.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.EvaluationContextRequest"
+                        }
+                    ]
+                },
                 "user": {
-                    "description": "User The representation of a user for your feature flag system.",
+                    "description": "Deprecated: User The representation of a user for your feature flag system.",
                     "allOf": [
                         {
                             "$ref": "#/definitions/model.UserRequest"
                         }
                     ]
+                }
+            }
+        },
+        "model.EvaluationContextRequest": {
+            "type": "object",
+            "properties": {
+                "custom": {
+                    "description": "Custom is a map containing all extra information for this user.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "example": {
+                        "company": "GO Feature Flag",
+                        "email": "contact@gofeatureflag.org",
+                        "firstname": "John",
+                        "lastname": "Doe"
+                    }
+                },
+                "key": {
+                    "description": "Key is the identifier of the UserRequest.",
+                    "type": "string",
+                    "example": "08b5ffb7-7109-42f4-a6f2-b85560fbd20f"
                 }
             }
         },

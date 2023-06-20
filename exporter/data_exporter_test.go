@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
+	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"log"
 	"os"
 	"testing"
@@ -12,7 +13,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/testutils/mock"
 
-	"github.com/thomaspoignant/go-feature-flag/ffuser"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
 )
 
@@ -24,7 +24,8 @@ func TestDataExporterScheduler_flushWithTime(t *testing.T) {
 	defer dc.Close()
 
 	inputEvents := []exporter.FeatureEvent{
-		exporter.NewFeatureEvent(ffuser.NewAnonymousUser("ABCD"), "random-key",
+		exporter.NewFeatureEvent(
+			ffcontext.NewEvaluationContextBuilder("ABCD").AddCustom("anonymous", true).Build(), "random-key",
 			"YO", "defaultVar", false, ""),
 	}
 
@@ -45,7 +46,8 @@ func TestDataExporterScheduler_flushWithNumberOfEvents(t *testing.T) {
 
 	var inputEvents []exporter.FeatureEvent
 	for i := 0; i <= 100; i++ {
-		inputEvents = append(inputEvents, exporter.NewFeatureEvent(ffuser.NewAnonymousUser("ABCD"),
+		inputEvents = append(inputEvents, exporter.NewFeatureEvent(
+			ffcontext.NewEvaluationContextBuilder("ABCD").AddCustom("anonymous", true).Build(),
 			"random-key", "YO", "defaultVar", false, ""))
 	}
 	for _, event := range inputEvents {
@@ -63,7 +65,8 @@ func TestDataExporterScheduler_defaultFlush(t *testing.T) {
 
 	var inputEvents []exporter.FeatureEvent
 	for i := 0; i <= 100000; i++ {
-		inputEvents = append(inputEvents, exporter.NewFeatureEvent(ffuser.NewAnonymousUser("ABCD"),
+		inputEvents = append(inputEvents, exporter.NewFeatureEvent(
+			ffcontext.NewEvaluationContextBuilder("ABCD").AddCustom("anonymous", true).Build(),
 			"random-key", "YO", "defaultVar", false, ""))
 	}
 	for _, event := range inputEvents {
@@ -87,7 +90,8 @@ func TestDataExporterScheduler_exporterReturnError(t *testing.T) {
 
 	var inputEvents []exporter.FeatureEvent
 	for i := 0; i <= 200; i++ {
-		inputEvents = append(inputEvents, exporter.NewFeatureEvent(ffuser.NewAnonymousUser("ABCD"),
+		inputEvents = append(inputEvents, exporter.NewFeatureEvent(
+			ffcontext.NewEvaluationContextBuilder("ABCD").AddCustom("anonymous", true).Build(),
 			"random-key", "YO", "defaultVar", false, ""))
 	}
 	for _, event := range inputEvents {
@@ -108,7 +112,8 @@ func TestDataExporterScheduler_nonBulkExporter(t *testing.T) {
 
 	var inputEvents []exporter.FeatureEvent
 	for i := 0; i < 100; i++ {
-		inputEvents = append(inputEvents, exporter.NewFeatureEvent(ffuser.NewAnonymousUser("ABCD"),
+		inputEvents = append(inputEvents, exporter.NewFeatureEvent(
+			ffcontext.NewEvaluationContextBuilder("ABCD").AddCustom("anonymous", true).Build(),
 			"random-key", "YO", "defaultVar", false, ""))
 	}
 	for _, event := range inputEvents {

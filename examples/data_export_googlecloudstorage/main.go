@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"log"
 	"os"
 	"time"
@@ -11,7 +12,6 @@ import (
 	"google.golang.org/api/option"
 
 	ffclient "github.com/thomaspoignant/go-feature-flag"
-	"github.com/thomaspoignant/go-feature-flag/ffuser"
 )
 
 func main() {
@@ -50,8 +50,11 @@ func main() {
 	defer ffclient.Close()
 
 	// create users
-	user1 := ffuser.NewAnonymousUser("aea2fdc1-b9a0-417a-b707-0c9083de68e3")
-	user2 := ffuser.NewUser("332460b9-a8aa-4f7a-bc5d-9cc33632df9a")
+	user1 := ffcontext.
+		NewEvaluationContextBuilder("aea2fdc1-b9a0-417a-b707-0c9083de68e3").
+		AddCustom("anonymous", true).
+		Build()
+	user2 := ffcontext.NewEvaluationContext("332460b9-a8aa-4f7a-bc5d-9cc33632df9a")
 
 	_, _ = ffclient.BoolVariation("new-admin-access", user1, false)
 	_, _ = ffclient.BoolVariation("new-admin-access", user2, false)

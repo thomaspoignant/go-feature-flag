@@ -2,6 +2,7 @@ package flagv1
 
 import (
 	"fmt"
+	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"math"
 	"strconv"
 	"strings"
@@ -10,7 +11,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 
 	"github.com/nikunjy/rules/parser"
-	"github.com/thomaspoignant/go-feature-flag/ffuser"
 	"github.com/thomaspoignant/go-feature-flag/internal/utils"
 )
 
@@ -60,8 +60,8 @@ type FlagData struct {
 // if the toggle apply to the user or not.
 func (f *FlagData) Value(
 	flagName string,
-	user ffuser.User,
-	evaluationCtx flag.EvaluationContext,
+	user ffcontext.Context,
+	evaluationCtx flag.Context,
 ) (interface{}, flag.ResolutionDetails) {
 	f.updateFlagStage()
 	if f.isExperimentationOver() {
@@ -118,7 +118,7 @@ func (f *FlagData) isExperimentationOver() bool {
 }
 
 // isInPercentage check if the user is in the cohort for the toggle.
-func (f *FlagData) isInPercentage(flagName string, user ffuser.User) bool {
+func (f *FlagData) isInPercentage(flagName string, user ffcontext.Context) bool {
 	percentage := int32(f.getActualPercentage())
 	maxPercentage := uint32(100 * percentageMultiplier)
 
@@ -136,14 +136,14 @@ func (f *FlagData) isInPercentage(flagName string, user ffuser.User) bool {
 }
 
 // evaluateRule is checking if the rule can apply to a specific user.
-func (f *FlagData) evaluateRule(user ffuser.User, environment string) bool {
+func (f *FlagData) evaluateRule(user ffcontext.Context, environment string) bool {
 	// No rule means that all user can be impacted.
 	if f.getRule() == "" {
 		return true
 	}
 
 	// Evaluate the rule on the user.
-	userMap := utils.UserToMap(user)
+	userMap := utils.ContextToMap(user)
 	if environment != "" {
 		userMap["env"] = environment
 	}

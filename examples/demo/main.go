@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
-	"github.com/thomaspoignant/go-feature-flag/ffuser"
+	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"html/template"
 	"io"
@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-var users = make(map[string]ffuser.User, 2500)
+var users = make(map[string]ffcontext.EvaluationContext, 2500)
 
 func main() {
 	configFile := flag.String("configFile", "./demo-flags.yaml", "flags.yaml")
@@ -39,7 +39,7 @@ func main() {
 	// init users
 	for i := 0; i < 2500; i++ {
 		id := uuid.New()
-		u := ffuser.NewUser(id.String())
+		u := ffcontext.NewEvaluationContext(id.String())
 		users[fmt.Sprintf("user%d", i)] = u
 	}
 

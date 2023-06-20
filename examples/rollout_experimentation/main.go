@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"log"
 	"os"
 	"time"
@@ -10,7 +11,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 
 	ffclient "github.com/thomaspoignant/go-feature-flag"
-	"github.com/thomaspoignant/go-feature-flag/ffuser"
 )
 
 func main() {
@@ -41,8 +41,11 @@ func main() {
 	defer ffclient.Close()
 
 	// create users
-	user1 := ffuser.NewAnonymousUser("332460b9-a8aa-4f7a-bc5d-9cc33632df9a")
-	user2 := ffuser.NewAnonymousUser("91ff5618-6cbb-4f54-a038-3e99b078f560")
+	user1 := ffcontext.
+		NewEvaluationContextBuilder("aea2fdc1-b9a0-417a-b707-0c9083de68e3").
+		AddCustom("anonymous", true).
+		Build()
+	user2 := ffcontext.NewEvaluationContext("332460b9-a8aa-4f7a-bc5d-9cc33632df9a")
 	_, _ = ffclient.StringVariation("experimentation-flag", user1, "error")
 	_, _ = ffclient.StringVariation("experimentation-flag", user2, "error")
 

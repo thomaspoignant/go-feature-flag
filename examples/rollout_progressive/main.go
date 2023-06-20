@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"log"
 	"os"
 	"time"
@@ -10,7 +11,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 
 	ffclient "github.com/thomaspoignant/go-feature-flag"
-	"github.com/thomaspoignant/go-feature-flag/ffuser"
 )
 
 func main() {
@@ -33,7 +33,7 @@ func main() {
 	defer ffclient.Close()
 
 	// create users
-	user := ffuser.NewUserBuilder("785a14bf-d2c5-4caa-9c70-2bbc4e3732a5").
+	user := ffcontext.NewEvaluationContextBuilder("785a14bf-d2c5-4caa-9c70-2bbc4e3732a5").
 		AddCustom("beta", "true").
 		Build()
 
