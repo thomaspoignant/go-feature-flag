@@ -12,10 +12,10 @@ Here's an example:
 
 ```go linenums="1"
 // User with only a key
-user1 := ffuser.NewUser("user1-key")
+user1 := ffcontext.NewEvaluationContext("user1-key")
 
 // User with a key plus other attributes
-user2 = ffuser.NewUserBuilder("user2-key").
+user2 = ffcontext.NewEvaluationContextBuilder("user2-key").
  AddCustom("firstname", "John").
  AddCustom("lastname", "Doe").
  AddCustom("email", "john.doe@example.com").
@@ -37,10 +37,10 @@ You can also distinguish logged-in users from anonymous users in the SDK, as fol
 
 ```go linenums="1"
 // User with only a key
-user1 := ffuser.NewAnonymousUser("user1-key")
+user1 := ffcontext.NewAnonymousEvaluationContext("user1-key")
 
 // User with a key plus other attributes
-user2 = ffuser.NewUserBuilder("user2-key").
+user2 = ffcontext.NewEvaluationContextBuilder("user2-key").
   Anonymous(true).
   AddCustom("firstname", "John").
   AddCustom("lastname", "Doe").
@@ -124,7 +124,7 @@ The function is evaluating all available flags for the user and return a `flagst
 information you need.
 
 ```go linenums="1"
-user := ffuser.NewUser("example")
+user := ffcontext.NewEvaluationContext("example")
 // AllFlagsState will give you the value for all the flags available.
 allFlagsState := ffclient.AllFlagsState(u)
 

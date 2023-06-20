@@ -34,12 +34,12 @@ func NewFlagEval(goFF *ffclient.GoFeatureFlag) Controller {
 // @Description default value.
 // @Security     ApiKeyAuth
 // @Produce      json
-// @Accept			 json
-// @Param 			 data body model.EvalFlagRequest true "Payload of the user we want to get all the flags from."
+// @Accept	 	 json
+// @Param 		 data body model.EvalFlagRequest true "Payload of the user we want to get all the flags from."
 // @Param        flag_key path string true "Name of your feature flag"
-// @Success      200  {object}   modeldocs.EvalFlagDoc "Success"
-// @Failure 		 400 {object} modeldocs.HTTPErrorDoc "Bad Request"
-// @Failure      500 {object} modeldocs.HTTPErrorDoc "Internal server error"
+// @Success      200  {object} modeldocs.EvalFlagDoc "Success"
+// @Failure      400 {object}  modeldocs.HTTPErrorDoc "Bad Request"
+// @Failure      500 {object}  modeldocs.HTTPErrorDoc "Internal server error"
 // @Router       /v1/feature/{flag_key}/eval [post]
 func (h *flagEval) Handler(c echo.Context) error {
 	flagKey := c.Param("flagKey")
@@ -59,12 +59,12 @@ func (h *flagEval) Handler(c echo.Context) error {
 	if err := assertRequest(&reqBody.AllFlagRequest); err != nil {
 		return err
 	}
-	goFFUser, err := userRequestToUser(reqBody.User)
+	evaluationCtx, err := evaluationContextFromRequest(&reqBody.AllFlagRequest)
 	if err != nil {
 		return err
 	}
 
 	// get flag name from the URL
-	flagValue, _ := h.goFF.RawVariation(flagKey, goFFUser, reqBody.DefaultValue)
+	flagValue, _ := h.goFF.RawVariation(flagKey, evaluationCtx, reqBody.DefaultValue)
 	return c.JSON(http.StatusOK, flagValue)
 }

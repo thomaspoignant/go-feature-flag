@@ -2,11 +2,11 @@ package flag_test
 
 import (
 	"fmt"
+	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/thomaspoignant/go-feature-flag/ffuser"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/internal/utils"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
@@ -14,7 +14,7 @@ import (
 
 func TestRule_Evaluate(t *testing.T) {
 	type args struct {
-		user      ffuser.User
+		user      ffcontext.Context
 		hashID    uint32
 		isDefault bool
 	}
@@ -44,7 +44,7 @@ func TestRule_Evaluate(t *testing.T) {
 			},
 			args: args{
 				isDefault: true,
-				user:      ffuser.NewUser("abc"),
+				user:      ffcontext.NewEvaluationContext("abc"),
 			},
 			want:    "variation_A",
 			wantErr: assert.NoError,
@@ -58,7 +58,7 @@ func TestRule_Evaluate(t *testing.T) {
 			},
 			args: args{
 				isDefault: false,
-				user:      ffuser.NewUser("abc"),
+				user:      ffcontext.NewEvaluationContext("abc"),
 			},
 			wantErr: assert.Error,
 		},
@@ -71,7 +71,7 @@ func TestRule_Evaluate(t *testing.T) {
 			},
 			args: args{
 				isDefault: false,
-				user:      ffuser.NewUser("abc"),
+				user:      ffcontext.NewEvaluationContext("abc"),
 			},
 			want:    "variation_A",
 			wantErr: assert.NoError,
@@ -95,7 +95,7 @@ func TestRule_Evaluate(t *testing.T) {
 				},
 			},
 			args: args{
-				user:   ffuser.NewUser("userkey"),
+				user:   ffcontext.NewEvaluationContext("userkey"),
 				hashID: utils.Hash("flagname+userkey") % flag.MaxPercentage,
 			},
 			wantErr: assert.NoError,
@@ -135,7 +135,7 @@ func TestRule_Evaluate(t *testing.T) {
 				},
 			},
 			args: args{
-				user:   ffuser.NewUser("userkey"),
+				user:   ffcontext.NewEvaluationContext("userkey"),
 				hashID: utils.Hash("flagname+userkey") % flag.MaxPercentage,
 			},
 			wantErr: assert.NoError,
@@ -152,7 +152,7 @@ func TestRule_Evaluate(t *testing.T) {
 				},
 			},
 			args: args{
-				user:   ffuser.NewUser("randomUserID"),
+				user:   ffcontext.NewEvaluationContext("randomUserID"),
 				hashID: utils.Hash("flagname+randomUserID") % flag.MaxPercentage,
 			},
 			wantErr: assert.NoError,
@@ -169,7 +169,7 @@ func TestRule_Evaluate(t *testing.T) {
 				},
 			},
 			args: args{
-				user:   ffuser.NewUser("userkey"),
+				user:   ffcontext.NewEvaluationContext("userkey"),
 				hashID: utils.Hash("flagname+96ac59e6-7492-436b-b15a-ba1d797d2423") % flag.MaxPercentage,
 			},
 			wantErr: assert.NoError,
@@ -184,7 +184,7 @@ func TestRule_Evaluate(t *testing.T) {
 				},
 			},
 			args: args{
-				user:   ffuser.NewUser("userkey"),
+				user:   ffcontext.NewEvaluationContext("userkey"),
 				hashID: flag.MaxPercentage + 1,
 			},
 			wantErr: assert.Error,
@@ -201,7 +201,7 @@ func TestRule_Evaluate(t *testing.T) {
 				Query: testconvert.String("key eq \"userkey\""),
 			},
 			args: args{
-				user:   ffuser.NewUser("userkey"),
+				user:   ffcontext.NewEvaluationContext("userkey"),
 				hashID: utils.Hash("flagname+96ac59e6-7492-436b-b15a-ba1d797d2423") % flag.MaxPercentage,
 			},
 			wantErr: assert.NoError,
@@ -228,7 +228,7 @@ func TestRule_Evaluate(t *testing.T) {
 				},
 			},
 			args: args{
-				user:   ffuser.NewUser("userkey"),
+				user:   ffcontext.NewEvaluationContext("userkey"),
 				hashID: utils.Hash("flagname+userKey") % flag.MaxPercentage,
 			},
 			wantErr: assert.NoError,
@@ -252,7 +252,7 @@ func TestRule_Evaluate(t *testing.T) {
 				},
 			},
 			args: args{
-				user:   ffuser.NewUser("userkey"),
+				user:   ffcontext.NewEvaluationContext("userkey"),
 				hashID: utils.Hash("flagname+userKey") % flag.MaxPercentage,
 			},
 			wantErr: assert.NoError,
@@ -276,7 +276,7 @@ func TestRule_Evaluate(t *testing.T) {
 				},
 			},
 			args: args{
-				user:   ffuser.NewUser("userkey"),
+				user:   ffcontext.NewEvaluationContext("userkey"),
 				hashID: utils.Hash("flagname+userKey") % flag.MaxPercentage,
 			},
 			wantErr: assert.NoError,
@@ -300,7 +300,7 @@ func TestRule_Evaluate(t *testing.T) {
 				},
 			},
 			args: args{
-				user:   ffuser.NewUser("userkey"),
+				user:   ffcontext.NewEvaluationContext("userkey"),
 				hashID: utils.Hash("flagname+userKey") % flag.MaxPercentage,
 			},
 			wantErr: assert.NoError,
@@ -324,7 +324,7 @@ func TestRule_Evaluate(t *testing.T) {
 				},
 			},
 			args: args{
-				user:   ffuser.NewUser("userkey"),
+				user:   ffcontext.NewEvaluationContext("userkey"),
 				hashID: utils.Hash("flagname+userKey") % flag.MaxPercentage,
 			},
 			wantErr: assert.NoError,
@@ -346,7 +346,7 @@ func TestRule_Evaluate(t *testing.T) {
 				},
 			},
 			args: args{
-				user:   ffuser.NewUser("userkey"),
+				user:   ffcontext.NewEvaluationContext("userkey"),
 				hashID: utils.Hash("flagname+userKey") % flag.MaxPercentage,
 			},
 			wantErr: assert.NoError,

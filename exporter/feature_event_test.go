@@ -1,17 +1,17 @@
 package exporter_test
 
 import (
+	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
-	"github.com/thomaspoignant/go-feature-flag/ffuser"
 )
 
 func TestNewFeatureEvent(t *testing.T) {
 	type args struct {
-		user      ffuser.User
+		user      ffcontext.Context
 		flagKey   string
 		value     interface{}
 		variation string
@@ -26,7 +26,7 @@ func TestNewFeatureEvent(t *testing.T) {
 		{
 			name: "anonymous user",
 			args: args{
-				user:      ffuser.NewAnonymousUser("ABCD"),
+				user:      ffcontext.NewEvaluationContextBuilder("ABCD").AddCustom("anonymous", true).Build(),
 				flagKey:   "random-key",
 				value:     "YO",
 				variation: "Default",

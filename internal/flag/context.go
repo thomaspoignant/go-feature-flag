@@ -1,6 +1,6 @@
 package flag
 
-type EvaluationContext struct {
+type Context struct {
 	// Environment is the name of your current env
 	// this value will be added to the custom information of your user and,
 	// it will allow to create rules based on this environment,

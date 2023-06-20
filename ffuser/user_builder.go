@@ -1,5 +1,7 @@
 package ffuser
 
+// Deprecated: NewUserBuilder, please use ffcontext.NewEvaluationContextBuilder instead.
+//
 // NewUserBuilder constructs a new UserBuilder, specifying the user key.
 //
 // For authenticated users, the key may be a username or e-mail address. For anonymous users,
@@ -11,6 +13,8 @@ func NewUserBuilder(key string) UserBuilder {
 	}
 }
 
+// Deprecated: UserBuilder, please use ffcontext.EvaluationContextBuilder instead.
+//
 // UserBuilder is a builder to create a User.
 type UserBuilder interface {
 	Anonymous(bool) UserBuilder

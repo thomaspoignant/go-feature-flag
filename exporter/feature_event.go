@@ -2,13 +2,12 @@ package exporter
 
 import (
 	"encoding/json"
+	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"time"
-
-	"github.com/thomaspoignant/go-feature-flag/ffuser"
 )
 
 func NewFeatureEvent(
-	user ffuser.User,
+	ctx ffcontext.Context,
 	flagKey string,
 	value interface{},
 	variation string,
@@ -16,14 +15,14 @@ func NewFeatureEvent(
 	version string,
 ) FeatureEvent {
 	contextKind := "user"
-	if user.IsAnonymous() {
+	if ctx.IsAnonymous() {
 		contextKind = "anonymousUser"
 	}
 
 	return FeatureEvent{
 		Kind:         "feature",
 		ContextKind:  contextKind,
-		UserKey:      user.GetKey(),
+		UserKey:      ctx.GetKey(),
 		CreationDate: time.Now().Unix(),
 		Key:          flagKey,
 		Variation:    variation,

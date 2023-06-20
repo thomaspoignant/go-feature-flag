@@ -1,6 +1,7 @@
 package ffclient_test
 
 import (
+	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"log"
 	"os"
 	"testing"
@@ -16,8 +17,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/testutils/mock"
-
-	"github.com/thomaspoignant/go-feature-flag/ffuser"
 )
 
 func TestStartWithoutRetriever(t *testing.T) {
@@ -39,7 +38,7 @@ func TestMultipleRetrievers(t *testing.T) {
 	})
 	assert.NoError(t, err)
 	defer client.Close()
-	user := ffuser.NewUser("random-key")
+	user := ffcontext.NewEvaluationContext("random-key")
 	flagRes1, err := client.BoolVariationDetails("foo-flag", user, false)
 	assert.NoError(t, err)
 	assert.True(t, flagRes1.Value)
@@ -61,7 +60,7 @@ func TestMultipleRetrieversWithOverrideFlag(t *testing.T) {
 	})
 	assert.NoError(t, err)
 	defer client.Close()
-	user := ffuser.NewUser("random-key")
+	user := ffcontext.NewEvaluationContext("random-key")
 	flagRes1, err := client.BoolVariationDetails("my-flag", user, false)
 	assert.NoError(t, err)
 	assert.False(t, flagRes1.Value)
@@ -108,7 +107,7 @@ func TestValidUseCase(t *testing.T) {
 	defer ffclient.Close()
 
 	assert.NoError(t, err)
-	user := ffuser.NewUser("random-key")
+	user := ffcontext.NewEvaluationContext("random-key")
 	hasTestFlag, _ := ffclient.BoolVariation("test-flag", user, false)
 	assert.True(t, hasTestFlag, "User should have test flag")
 	hasUnknownFlag, _ := ffclient.BoolVariation("unknown-flag", user, false)
@@ -144,7 +143,7 @@ func TestValidUseCaseToml(t *testing.T) {
 	defer gffClient.Close()
 
 	assert.NoError(t, err)
-	user := ffuser.NewUser("random-key")
+	user := ffcontext.NewEvaluationContext("random-key")
 	hasTestFlag, _ := gffClient.BoolVariation("test-flag", user, false)
 	assert.True(t, hasTestFlag, "User should have test flag")
 	hasUnknownFlag, _ := gffClient.BoolVariation("unknown-flag", user, false)
@@ -162,7 +161,7 @@ func TestValidUseCaseJson(t *testing.T) {
 	defer gffClient.Close()
 
 	assert.NoError(t, err)
-	user := ffuser.NewUser("random-key")
+	user := ffcontext.NewEvaluationContext("random-key")
 	hasTestFlag, _ := gffClient.BoolVariation("test-flag", user, false)
 	assert.True(t, hasTestFlag, "User should have test flag")
 	hasUnknownFlag, _ := gffClient.BoolVariation("unknown-flag", user, false)
@@ -181,7 +180,7 @@ func TestValidUseCaseMultilineQueryJson(t *testing.T) {
 	defer gffClient.Close()
 
 	assert.NoError(t, err)
-	user := ffuser.NewUser("random-key")
+	user := ffcontext.NewEvaluationContext("random-key")
 	hasTestFlag, _ := gffClient.BoolVariation("test-flag", user, false)
 	assert.True(t, hasTestFlag, "User should have test flag")
 	hasUnknownFlag, _ := gffClient.BoolVariation("unknown-flag", user, false)
@@ -221,7 +220,7 @@ func Test2GoFeatureFlagInstance(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NoError(t, err2)
 
-	user := ffuser.NewUser("random-key")
+	user := ffcontext.NewEvaluationContext("random-key")
 
 	// Client1 is supposed to have the flag at true
 	hasTestFlagClient1, _ := gffClient1.BoolVariation("test-flag", user, false)
@@ -256,7 +255,7 @@ test-flag:
 	})
 	defer gffClient1.Close()
 
-	flagValue, _ := gffClient1.BoolVariation("test-flag", ffuser.NewUser("random-key"), false)
+	flagValue, _ := gffClient1.BoolVariation("test-flag", ffcontext.NewEvaluationContext("random-key"), false)
 	assert.True(t, flagValue)
 
 	updatedFileContent := `
@@ -274,12 +273,12 @@ test-flag:
 
 	_ = os.WriteFile(flagFile.Name(), []byte(updatedFileContent), os.ModePerm)
 
-	flagValue, _ = gffClient1.BoolVariation("test-flag", ffuser.NewUser("random-key"), false)
+	flagValue, _ = gffClient1.BoolVariation("test-flag", ffcontext.NewEvaluationContext("random-key"), false)
 	assert.True(t, flagValue)
 
 	time.Sleep(2 * time.Second)
 
-	flagValue, _ = gffClient1.BoolVariation("test-flag", ffuser.NewUser("random-key"), false)
+	flagValue, _ = gffClient1.BoolVariation("test-flag", ffcontext.NewEvaluationContext("random-key"), false)
 	assert.False(t, flagValue)
 }
 
@@ -307,17 +306,17 @@ test-flag:
 	})
 	defer gffClient1.Close()
 
-	flagValue, _ := gffClient1.BoolVariation("test-flag", ffuser.NewUser("random-key"), false)
+	flagValue, _ := gffClient1.BoolVariation("test-flag", ffcontext.NewEvaluationContext("random-key"), false)
 	assert.True(t, flagValue)
 
-	flagValue, _ = gffClient1.BoolVariation("test-flag", ffuser.NewUser("random-key"), false)
+	flagValue, _ = gffClient1.BoolVariation("test-flag", ffcontext.NewEvaluationContext("random-key"), false)
 	assert.True(t, flagValue)
 
 	// remove file we should still take the last version in consideration
 	os.Remove(flagFile.Name())
 	time.Sleep(2 * time.Second)
 
-	flagValue, _ = gffClient1.BoolVariation("test-flag", ffuser.NewUser("random-key"), false)
+	flagValue, _ = gffClient1.BoolVariation("test-flag", ffcontext.NewEvaluationContext("random-key"), false)
 	assert.True(t, flagValue)
 }
 
@@ -349,13 +348,13 @@ test-flag:
 
 	assert.NoError(t, err, "should not return any error even if we can't retrieve the file")
 
-	flagValue, _ := gff.StringVariation("test-flag", ffuser.NewUser("random-key"), "SDKdefault")
+	flagValue, _ := gff.StringVariation("test-flag", ffcontext.NewEvaluationContext("random-key"), "SDKdefault")
 	assert.Equal(t, "SDKdefault", flagValue, "should use the SDK default value")
 
 	_ = os.WriteFile(flagFilePath, []byte(initialFileContent), os.ModePerm)
 	time.Sleep(2 * time.Second)
 
-	flagValue, _ = gff.StringVariation("test-flag", ffuser.NewUser("random-key"), "SDKdefault")
+	flagValue, _ = gff.StringVariation("test-flag", ffcontext.NewEvaluationContext("random-key"), "SDKdefault")
 	assert.Equal(t, "true", flagValue, "should use the true value")
 }
 
@@ -368,7 +367,7 @@ func TestValidUseCaseBigFlagFile(t *testing.T) {
 	defer gff.Close()
 
 	assert.NoError(t, err)
-	user := ffuser.NewUser("random-key")
+	user := ffcontext.NewEvaluationContext("random-key")
 	hasTestFlag, _ := gff.BoolVariation("test-flag99", user, false)
 	assert.True(t, hasTestFlag, "User should have test flag")
 	hasUnknownFlag, _ := gff.BoolVariation("unknown-flag", user, false)

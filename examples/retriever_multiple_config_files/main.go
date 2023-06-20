@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"log"
 	"os"
@@ -12,7 +13,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 
 	ffclient "github.com/thomaspoignant/go-feature-flag"
-	"github.com/thomaspoignant/go-feature-flag/ffuser"
 )
 
 func main() {
@@ -45,7 +45,10 @@ func main() {
 	defer ffclient.Close()
 
 	// create users
-	user1 := ffuser.NewAnonymousUser("aea2fdc1-b9a0-417a-b707-0c9083de68e3")
+	user1 := ffcontext.
+		NewEvaluationContextBuilder("aea2fdc1-b9a0-417a-b707-0c9083de68e3").
+		AddCustom("anonymous", true).
+		Build()
 
 	// user1
 	user1HasAccessToNewAdmin, err := ffclient.BoolVariation("new-admin-access", user1, false)
