@@ -36,7 +36,9 @@ describe('Provider tests', () => {
         reason: "TARGETING_MATCH",
         value: true,
         variant: "True",
-        flagMetadata: {},
+        flagMetadata: {
+          description: "this is a test flag",
+        },
       }
       const got = await goffClient.getBooleanDetails(flagKey, false, userCtx)
       expect(got).toEqual(expected)
@@ -264,7 +266,9 @@ describe('Provider tests', () => {
         reason: "TARGETING_MATCH",
         value: true,
         variant: "True",
-        flagMetadata: {},
+        flagMetadata: {
+          description: "this is a test flag",
+        },
       }
       const got = await goffClient.getBooleanDetails(flagKey, false, userCtx)
       expect(got).toEqual(expected)
