@@ -1,4 +1,4 @@
-const {describe, expect, it, beforeEach} = require('@jest/globals');
+const {describe, expect, it, beforeEach, afterEach } = require('@jest/globals');
 const {OpenFeature} = require("@openfeature/js-sdk");
 const {GoFeatureFlagProvider} = require("@openfeature/go-feature-flag-provider");
 describe('Provider tests', () => {
@@ -27,6 +27,10 @@ describe('Provider tests', () => {
       company_info: {name: "my_company", "size": 120}
     };
   });
+
+  afterEach(()=>{
+    OpenFeature.close()
+  })
 
   describe("bool", () => {
     it('should resolve a valid boolean flag with TARGETING_MATCH reason', async () => {
