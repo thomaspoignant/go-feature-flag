@@ -2,7 +2,7 @@
 sidebar_position: 6
 ---
 
-# Github
+# GitLab
 
 The [**Gitlab Retriever**](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/retriever/gitlabretriever/#Retriever)
 will perform an HTTP Request to the Gitlab API to get your flags.
@@ -29,7 +29,7 @@ defer ffclient.Close()
 
 ## Configuration fields
 
-To configure the access to your GitHub file:
+To configure the access to your GitLab file:
 
 | Field                | Description                                                                               |
 |----------------------|-------------------------------------------------------------------------------------------|
