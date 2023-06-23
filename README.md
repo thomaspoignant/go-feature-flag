@@ -264,6 +264,7 @@ For now, we have providers for `python`, `java`, `typescript`, `javascript`, `GO
 The module supports different ways of retrieving the flag file.  
 The available retrievers are:
 - **GitHub**
+- **GitLab**
 - **HTTP endpoint**
 - **AWS S3**
 - **Local file**
