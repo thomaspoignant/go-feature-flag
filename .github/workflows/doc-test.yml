@@ -13,7 +13,7 @@ jobs:
       - uses: actions/setup-node@v3
       - name: Get changed files in the docs folder
         id: changed-files-specific
-        uses: tj-actions/changed-files@v36
+        uses: tj-actions/changed-files@v37
         with:
           files: ./website/
       - name: Test Build website
