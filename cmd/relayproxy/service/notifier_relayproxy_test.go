@@ -1,7 +1,6 @@
 package service_test
 
 import (
-	"github.com/gorilla/websocket"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
@@ -18,11 +17,11 @@ type mockWebsocketService struct {
 	nbConnection int
 }
 
-func (m *mockWebsocketService) Register(c *websocket.Conn) {
+func (m *mockWebsocketService) Register(c service.WebsocketConn) {
 	m.nbConnection++
 }
 
-func (m *mockWebsocketService) Deregister(c *websocket.Conn) {
+func (m *mockWebsocketService) Deregister(c service.WebsocketConn) {
 	m.nbConnection--
 }
 
