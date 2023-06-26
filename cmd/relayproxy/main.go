@@ -68,6 +68,7 @@ func main() {
 
 	// Init services
 	wsService := service.NewWebsocketService()
+	defer wsService.Close() // close all the open connections
 	proxyNotifier := service.NewNotifierRelayProxy(wsService)
 	goff, err := service.NewGoFeatureFlagClient(proxyConf, zapLog, proxyNotifier)
 	if err != nil {
