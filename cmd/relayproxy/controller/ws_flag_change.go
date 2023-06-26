@@ -10,10 +10,10 @@ import (
 	"time"
 )
 
-// NewFlagReload is the constructor to create a new controller to handle websocket
+// NewWsFlagChange is the constructor to create a new controller to handle websocket
 // request to be notified about flag changes.
-func NewFlagReload(websocketService service.WebsocketService, logger *zap.Logger) Controller {
-	return &flagReload{
+func NewWsFlagChange(websocketService service.WebsocketService, logger *zap.Logger) Controller {
+	return &wsFlagChange{
 		websocketService: websocketService,
 		upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
@@ -24,15 +24,15 @@ func NewFlagReload(websocketService service.WebsocketService, logger *zap.Logger
 	}
 }
 
-// flagReload is the implementation of the controller
-type flagReload struct {
+// wsFlagChange is the implementation of the controller
+type wsFlagChange struct {
 	websocketService service.WebsocketService
 	upgrader         websocket.Upgrader
 	logger           *zap.Logger
 }
 
 // TODO: add doc for swagger
-func (f *flagReload) Handler(c echo.Context) error {
+func (f *wsFlagChange) Handler(c echo.Context) error {
 	conn, err := f.upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
 		return err
@@ -60,7 +60,7 @@ func (f *flagReload) Handler(c echo.Context) error {
 // pingPongLoop is a keep-alive call to the client.
 // It calls the client to ensure that the connection is still active.
 // If the ping is not working we are closing the session.
-func (f *flagReload) pingPongLoop(conn *websocket.Conn) {
+func (f *wsFlagChange) pingPongLoop(conn *websocket.Conn) {
 	// Ping interval duration
 	pingInterval := 10 * time.Second
 	// Create a ticker to send pings at regular intervals

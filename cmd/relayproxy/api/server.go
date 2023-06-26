@@ -107,10 +107,10 @@ func (s *Server) initPublicEndpoints() {
 
 // initWebsocketsEndpoints initialize the websocket endpoints
 func (s *Server) initWebsocketsEndpoints() {
-	cFlagReload := controller.NewFlagReload(s.services.WebsocketService, s.zapLog)
+	cFlagReload := controller.NewWsFlagChange(s.services.WebsocketService, s.zapLog)
 	v1 := s.echoInstance.Group("/ws/v1")
 	v1.Use(custommiddleware.WebsocketAuthorizer(s.config))
-	v1.GET("/feature/reload", cFlagReload.Handler)
+	v1.GET("/flag/change", cFlagReload.Handler)
 }
 
 // Start launch the API server
