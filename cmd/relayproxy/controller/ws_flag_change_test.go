@@ -103,6 +103,7 @@ func Test_websocket_flag_change(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			websocketService := service.NewWebsocketService()
+			defer websocketService.Close()
 			log := zap.L()
 			ctrl := controller.NewWsFlagChange(websocketService, log)
 

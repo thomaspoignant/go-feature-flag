@@ -39,6 +39,7 @@ func (f *wsFlagChange) Handler(c echo.Context) error {
 	}
 	defer func() { _ = conn.Close() }()
 	f.websocketService.Register(conn)
+	defer f.websocketService.Deregister(conn)
 	f.logger.Debug("registering new websocket connection", zap.Any("connection", conn))
 
 	// Start the ping pong loop
@@ -62,7 +63,7 @@ func (f *wsFlagChange) Handler(c echo.Context) error {
 // If the ping is not working we are closing the session.
 func (f *wsFlagChange) pingPongLoop(conn *websocket.Conn) {
 	// Ping interval duration
-	pingInterval := 10 * time.Second
+	pingInterval := 1 * time.Second
 	// Create a ticker to send pings at regular intervals
 	ticker := time.NewTicker(pingInterval)
 	defer ticker.Stop()
