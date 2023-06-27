@@ -1,6 +1,10 @@
 package service
 
 import (
+	"fmt"
+	"github.com/thomaspoignant/go-feature-flag/notifier"
+	"github.com/thomaspoignant/go-feature-flag/notifier/slacknotifier"
+	"github.com/thomaspoignant/go-feature-flag/notifier/webhooknotifier"
 	"net/http"
 	"testing"
 	"time"
@@ -289,6 +293,48 @@ func Test_initExporter(t *testing.T) {
 			if err == nil {
 				assert.Equal(t, tt.want, got)
 			}
+		})
+	}
+}
+
+func Test_initNotifier(t *testing.T) {
+	type args struct {
+		c []config.NotifierConf
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    []notifier.Notifier
+		wantErr assert.ErrorAssertionFunc
+	}{
+		{
+			name: "valid",
+			args: args{
+				c: []config.NotifierConf{
+					{
+						Kind:            config.SlackNotifier,
+						SlackWebhookURL: "http:xxxx.xxx",
+					},
+					{
+						Kind:        config.WebhookNotifier,
+						EndpointURL: "http:yyyy.yyy",
+					},
+				},
+			},
+			want: []notifier.Notifier{
+				&slacknotifier.Notifier{SlackWebhookURL: "http:xxxx.xxx"},
+				&webhooknotifier.Notifier{EndpointURL: "http:yyyy.yyy"},
+			},
+			wantErr: assert.NoError,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := initNotifier(tt.args.c)
+			if !tt.wantErr(t, err, fmt.Sprintf("initNotifier(%v)", tt.args.c)) {
+				return
+			}
+			assert.Equalf(t, tt.want, got, "initNotifier(%v)", tt.args.c)
 		})
 	}
 }

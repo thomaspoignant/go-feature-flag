@@ -51,6 +51,20 @@ definitions:
         example: v1.0.0
         type: string
     type: object
+  flag.Flag:
+    properties:
+      defValue:
+        description: default value (as text); for usage message
+        type: string
+      name:
+        description: name as it appears on command line
+        type: string
+      usage:
+        description: help message
+        type: string
+      value:
+        description: value as set
+    type: object
   model.AllFlagRequest:
     properties:
       evaluationContext:
@@ -228,6 +242,28 @@ definitions:
         example: An error occurred
         type: string
     type: object
+  notifier.DiffCache:
+    properties:
+      added:
+        additionalProperties:
+          $ref: '#/definitions/flag.Flag'
+        type: object
+      deleted:
+        additionalProperties:
+          $ref: '#/definitions/flag.Flag'
+        type: object
+      updated:
+        additionalProperties:
+          $ref: '#/definitions/notifier.DiffUpdated'
+        type: object
+    type: object
+  notifier.DiffUpdated:
+    properties:
+      new_value:
+        $ref: '#/definitions/flag.Flag'
+      old_value:
+        $ref: '#/definitions/flag.Flag'
+    type: object
 info:
   contact:
     email: contact@gofeatureflag.org
@@ -401,6 +437,34 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Evaluate a feature flag
+  /ws/v1/flag/change:
+    post:
+      consumes:
+      - application/json
+      description: |
+        This endpoint is a websocket endpoint to be notified about flag changes, every change
+        will send a request to the client with a model.DiffCache format.
+      parameters:
+      - description: apiKey use authorize the connection to the relay proxy
+        in: query
+        name: apiKey
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/notifier.DiffCache'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/modeldocs.HTTPErrorDoc'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/modeldocs.HTTPErrorDoc'
+      summary: Websocket endpoint to be notified about flag changes
 securityDefinitions:
   ApiKeyAuth:
     description: Use configured APIKeys in yaml config as authorization keys, disabled

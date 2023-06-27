@@ -228,6 +228,46 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/ws/v1/flag/change": {
+            "post": {
+                "description": "This endpoint is a websocket endpoint to be notified about flag changes, every change\nwill send a request to the client with a model.DiffCache format.\n",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Websocket endpoint to be notified about flag changes",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "apiKey use authorize the connection to the relay proxy",
+                        "name": "apiKey",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/notifier.DiffCache"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -276,6 +316,26 @@ const docTemplate = `{
                     "description": "Version contains the version of the flag. If the field is omitted for the flag in the configuration file\nthe default version will be 0.",
                     "type": "string",
                     "example": "v1.0.0"
+                }
+            }
+        },
+        "flag.Flag": {
+            "type": "object",
+            "properties": {
+                "defValue": {
+                    "description": "default value (as text); for usage message",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "name as it appears on command line",
+                    "type": "string"
+                },
+                "usage": {
+                    "description": "help message",
+                    "type": "string"
+                },
+                "value": {
+                    "description": "value as set"
                 }
             }
         },
@@ -514,6 +574,40 @@ const docTemplate = `{
                     "description": "Message of your error",
                     "type": "string",
                     "example": "An error occurred"
+                }
+            }
+        },
+        "notifier.DiffCache": {
+            "type": "object",
+            "properties": {
+                "added": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/flag.Flag"
+                    }
+                },
+                "deleted": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/flag.Flag"
+                    }
+                },
+                "updated": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/notifier.DiffUpdated"
+                    }
+                }
+            }
+        },
+        "notifier.DiffUpdated": {
+            "type": "object",
+            "properties": {
+                "new_value": {
+                    "$ref": "#/definitions/flag.Flag"
+                },
+                "old_value": {
+                    "$ref": "#/definitions/flag.Flag"
                 }
             }
         }
