@@ -4,12 +4,12 @@ go 1.20
 
 require (
 	github.com/open-feature/go-sdk v1.4.0
-	github.com/open-feature/go-sdk-contrib/providers/go-feature-flag v0.1.20
+	github.com/open-feature/go-sdk-contrib/providers/go-feature-flag v0.1.21
 	github.com/stretchr/testify v1.8.4
 )
 
 require (
-	github.com/BurntSushi/toml v1.3.0 // indirect
+	github.com/BurntSushi/toml v1.3.2 // indirect
 	github.com/antlr/antlr4/runtime/Go/antlr/v4 v4.0.0-20220911224424-aa1f1f12a846 // indirect
 	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/bluele/gcache v0.0.2 // indirect
@@ -20,7 +20,7 @@ require (
 	github.com/nikunjy/rules v1.2.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.10.0 // indirect
-	github.com/thomaspoignant/go-feature-flag v1.11.0 // indirect
+	github.com/thomaspoignant/go-feature-flag v1.12.0 // indirect
 	golang.org/x/exp v0.0.0-20220823124025-807a23277127 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
