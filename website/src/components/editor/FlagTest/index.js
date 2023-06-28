@@ -11,7 +11,6 @@ export function FlagTest({flagInfo}) {
   const {siteConfig} = useDocusaurusContext();
   const {
     watch,
-    formState: {errors},
   } = useFormContext()
   let result = watch();
   let keys = flagInfo.split('.')
