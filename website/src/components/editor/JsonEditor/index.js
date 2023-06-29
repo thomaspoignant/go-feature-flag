@@ -8,14 +8,14 @@ import PropTypes from 'prop-types';
 JsonEditor.propTypes = {
   label: PropTypes.string.isRequired,
 };
-export function JsonEditor({label}) {
+export function JsonEditor({label, value}) {
   const {register} = useFormContext();
   const {colorMode} = useColorMode();
   const {onChange, onBlur, name, ref} = register(`${label}.value`);
   return (
     <div className={styles.container} data-color-mode={colorMode}>
       <CodeEditor
-        value=""
+        value={value || ""}
         language="json"
         placeholder=" Please enter JSON."
         padding={7}
@@ -24,6 +24,7 @@ export function JsonEditor({label}) {
         onBlur={onBlur}
         name={name}
         ref={ref}
+        data-color-mode={colorMode}
         style={{
           fontFamily:
             'ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace',

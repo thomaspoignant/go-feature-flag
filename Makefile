@@ -28,6 +28,10 @@ build-lint: ## Build the linter in out/bin/
 	mkdir -p out/bin
 	CGO_ENABLED=0 GO111MODULE=on $(GOCMD) build -mod vendor -o out/bin/lint ./cmd/lint/
 
+build-editor-api: ## Build the linter in out/bin/
+	mkdir -p out/bin
+	CGO_ENABLED=0 GO111MODULE=on $(GOCMD) build -mod vendor -o out/bin/editor-api ./cmd/editor/
+
 build-doc: ## Build the documentation
 	cd website; \
 	npm i && npm run build

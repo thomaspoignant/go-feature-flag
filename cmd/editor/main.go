@@ -1,0 +1,82 @@
+package main
+
+import (
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"github.com/thomaspoignant/go-feature-flag/ffcontext"
+	"github.com/thomaspoignant/go-feature-flag/internal/dto"
+	"github.com/thomaspoignant/go-feature-flag/internal/flag"
+	"github.com/thomaspoignant/go-feature-flag/internal/model"
+	"net/http"
+)
+
+// This service is an API used to evaluate a flag with an evaluation context
+// This API is made for the Flag Editor to be able to evaluate a flag remotely and see if the configuration
+// of the flag is working as expected.
+
+func main() {
+	e := echo.New()
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{
+			"http://gofeatureflag.org",
+			"https://gofeatureflag.org",
+			"http://www.gofeatureflag.org",
+			"https://www.gofeatureflag.org",
+		},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+	}))
+
+	g := e.Group("/v1")
+	g.POST("/feature/evaluate", Handler)
+	e.Logger.Fatal(e.Start(":1323"))
+}
+
+func (c *ContextWrapper) toEvaluationContext() ffcontext.Context {
+	evalCtx := ffcontext.NewEvaluationContext(c.Key)
+	if c.Custom != nil {
+		for k, v := range c.Custom {
+			evalCtx.AddCustomAttribute(k, v)
+		}
+	}
+	return evalCtx
+}
+
+// Handler is the function called when calling the endpoint /v1/flag/test
+// It will perform a flag evaluation and return the resolutionDetails and the value.
+func Handler(c echo.Context) error {
+	u := new(editorEvaluateRequest)
+	if err := c.Bind(u); err != nil {
+		return err
+	}
+	f := u.Flag.Convert()
+	value, resolutionDetails := f.Value(
+		u.FlagName,
+		u.Context.toEvaluationContext(),
+		flag.Context{
+			DefaultSdkValue: nil,
+		},
+	)
+	resp := model.VariationResult[interface{}]{
+		Value:         value,
+		VariationType: resolutionDetails.Variant,
+		Reason:        resolutionDetails.Reason,
+		ErrorCode:     resolutionDetails.ErrorCode,
+		Failed:        resolutionDetails.ErrorCode != "",
+		Cacheable:     resolutionDetails.Cacheable,
+		Metadata:      f.GetMetadata(),
+	}
+	return c.JSON(http.StatusOK, resp)
+}
+
+// editorEvaluateRequest is the format expected to receive from the editor to test the flag.
+type editorEvaluateRequest struct {
+	Context  ContextWrapper `json:"context,omitempty"`
+	Flag     dto.DTO        `json:"flag,omitempty"`
+	FlagName string         `json:"flagName,omitempty"`
+}
+
+// ContextWrapper is a struct to migrate the API request to an actual evaluation context.
+type ContextWrapper struct {
+	Key    string `json:"key,omitempty"`
+	Custom map[string]interface{}
+}
