@@ -56,7 +56,7 @@ function convertValueIntoType(value, type) {
 }
 
 function convertMetadata(metadata) {
-  if (metadata === undefined || metadata === {} || metadata.filter(({name})=>name !== "").length === 0) {
+  if (metadata === undefined || metadata.filter(({name})=>name !== "").length === 0) {
     return undefined
   }
   return Object.assign({}, ...metadata.map(({name, value}) => ({[name]: value})))
