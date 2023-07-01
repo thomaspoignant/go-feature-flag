@@ -27,7 +27,8 @@ func main() {
 	}))
 
 	g := e.Group("/v1")
-	g.POST("/feature/evaluate", Handler)
+	g.POST("/feature/evaluate", EvaluateHandler)
+	e.GET("/health", HealthHandler)
 	e.Logger.Fatal(e.Start(":1323"))
 }
 
@@ -41,9 +42,9 @@ func (c *ContextWrapper) toEvaluationContext() ffcontext.Context {
 	return evalCtx
 }
 
-// Handler is the function called when calling the endpoint /v1/flag/test
+// EvaluateHandler is the function called when calling the endpoint /v1/feature/evaluate.
 // It will perform a flag evaluation and return the resolutionDetails and the value.
-func Handler(c echo.Context) error {
+func EvaluateHandler(c echo.Context) error {
 	u := new(editorEvaluateRequest)
 	if err := c.Bind(u); err != nil {
 		return err
@@ -66,6 +67,11 @@ func Handler(c echo.Context) error {
 		Metadata:      f.GetMetadata(),
 	}
 	return c.JSON(http.StatusOK, resp)
+}
+
+// HealthHandler endpoint to validate that the service is up and running.
+func HealthHandler(c echo.Context) error {
+	return c.String(http.StatusOK, "OK")
 }
 
 // editorEvaluateRequest is the format expected to receive from the editor to test the flag.
