@@ -10,7 +10,7 @@ import {Targeting} from '../Targeting';
 import {Rule} from '../Rule';
 import PropTypes from 'prop-types';
 import { Metadata } from "../Metadata";
-// import { FlagTest } from "../FlagTest";
+import { FlagTest } from "../FlagTest";
 
 FlagForm.propTypes = {
   label: PropTypes.string.isRequired,
