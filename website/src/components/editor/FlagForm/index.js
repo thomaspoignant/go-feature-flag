@@ -82,10 +82,7 @@ export function FlagForm({label}) {
         />
       </div>
       <Metadata label={`${label}.metadata`} />
-      {/*
-      TODO: uncomment this to enable the flag testing editor
       <FlagTest flagInfo={label} />
-      */}
     </div>
   );
 }
