@@ -3,6 +3,8 @@ package main
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	custommiddleware "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/log"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/internal/dto"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
@@ -15,7 +17,10 @@ import (
 // of the flag is working as expected.
 
 func main() {
+	zapLog := log.InitLogger()
+	defer func() { _ = zapLog.Sync() }()
 	e := echo.New()
+	e.Use(custommiddleware.ZapLogger(zapLog, nil))
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{
 			"http://gofeatureflag.org",
