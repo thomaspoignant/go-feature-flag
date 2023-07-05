@@ -29,6 +29,7 @@ vendor/
 release/
 cmd/migrationcli/migrationcli
 cmd/relayproxy/relayproxy
+cmd/server/server
 tmp/
 
 # Local dev files
