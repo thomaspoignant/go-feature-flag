@@ -20,9 +20,9 @@ build-migrationcli: ## Build the migration cli in out/bin/
 	mkdir -p out/bin
 	CGO_ENABLED=0 GO111MODULE=on $(GOCMD) build -mod vendor -o out/bin/migrationcli ./cmd/migrationcli/
 
-build-relayproxy: ## Build the relay proxy in out/bin/
+build-server: ## Build the relay proxy in out/bin/
 	mkdir -p out/bin
-	CGO_ENABLED=0 GO111MODULE=on $(GOCMD) build -mod vendor -o out/bin/relayproxy ./cmd/relayproxy/
+	CGO_ENABLED=0 GO111MODULE=on $(GOCMD) build -mod vendor -o out/bin/server ./cmd/server/
 
 build-lint: ## Build the linter in out/bin/
 	mkdir -p out/bin
