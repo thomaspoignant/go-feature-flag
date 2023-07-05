@@ -113,7 +113,7 @@ jobs:
           repository: thomaspoignant/go-feature-flag-lint
           readme: "./cmd/lint/DOCKERHUB.md"
 
-  dockerhub-relay-proxy:
+  dockerhub-readme-update:
     runs-on: ubuntu-latest
     name: Upload dockerhub readme
     needs:
@@ -124,7 +124,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Release readme to DockerHub
+      - name: Release readme to DockerHub (legacy)
         uses: ms-jpq/sync-dockerhub-readme@v1
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -133,18 +133,7 @@ jobs:
           username: ${DOCKER_USERNAME}
           password: ${DOCKER_PASSWORD}
           repository: thomaspoignant/go-feature-flag-relay-proxy
-          readme: "./cmd/relayproxy/DOCKERHUB_deprecated.md"
-
-  dockerhub-go-feature-flag-server:
-    runs-on: ubuntu-latest
-    name: Upload dockerhub readme
-    needs:
-      - goreleaser
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+          readme: "./cmd/server/DOCKERHUB_deprecated.md"
 
       - name: Release readme to DockerHub
         uses: ms-jpq/sync-dockerhub-readme@v1
@@ -155,7 +144,7 @@ jobs:
           username: ${DOCKER_USERNAME}
           password: ${DOCKER_PASSWORD}
           repository: thomaspoignant/go-feature-flag
-          readme: "./cmd/relayproxy/DOCKERHUB.md"
+          readme: "./cmd/server/DOCKERHUB.md"
 
   doc-release:
     # doc release will create a new tag of the documentation en commit it in
@@ -217,15 +206,16 @@ jobs:
           path: ${{ env.MAIN_BRANCH_NAME }}
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
-  bump-relay-proxy-helm-chart:
-    # bump-relay-proxy-helm-chart is opening a pull request to bump the appVersion field
+  bump-helm-chart:
+    # bump-helm-chart is opening a pull request to bump the appVersion field
     # in the Chart.yaml file of the helm-chart.
     runs-on: ubuntu-latest
-    name: Bump Relay Proxy Helm Chart appVersion
+    name: Bump Helm Chart appVersion
     needs:
       - goreleaser
     env:
-      CHART_YAML_FILE_LOCATION: cmd/relayproxy/helm-charts/relay-proxy/Chart.yaml
+      CHART_YAML_FILE_LOCATION_LEGACY: cmd/server/helm-charts/relay-proxy/Chart.yaml
+      CHART_YAML_FILE_LOCATION: cmd/server/helm-charts/go-feature-flag/Chart.yaml
       MAIN_BRANCH_NAME: main
     steps:
       - name: Checkout
@@ -245,6 +235,14 @@ jobs:
         working-directory: ./release/
         run: yq -i ".appVersion=\"$GIT_TAG_NAME\"" $CHART_YAML_FILE_LOCATION
 
+      - name: Bump chart appVersion - legacy
+        working-directory: ./release/
+        run: yq -i ".appVersion=\"$GIT_TAG_NAME\"" $CHART_YAML_FILE_LOCATION_LEGACY
+
+      - name: Bump chart version - legacy
+        working-directory: ./release/
+        run: yq -i ".version=\"${GIT_TAG_NAME#v}\"" $CHART_YAML_FILE_LOCATION_LEGACY
+
       - name: Bump chart version
         working-directory: ./release/
         run: yq -i ".version=\"${GIT_TAG_NAME#v}\"" $CHART_YAML_FILE_LOCATION
@@ -262,13 +260,16 @@ jobs:
       - name: Copy version to main branch
         run: cp -rf release/$CHART_YAML_FILE_LOCATION $MAIN_BRANCH_NAME/$CHART_YAML_FILE_LOCATION
 
+      - name: Copy version to main branch - legacy
+        run: cp -rf release/$CHART_YAML_FILE_LOCATION_LEGACY $MAIN_BRANCH_NAME/$CHART_YAML_FILE_LOCATION_LEGACY
+
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
-          branch: bump-relay-proxy-helm-chart-${{ env.GIT_TAG_NAME }}
-          title: Bump relay-proxy helm chart version ${{ env.GIT_TAG_NAME }}
-          body: Automated pull request to bump relay-proxy helm chart version ${{ env.GIT_TAG_NAME }}
-          commit-message: Bump relay-proxy helm chart version ${{ env.GIT_TAG_NAME }}
+          branch: bump-helm-chart-${{ env.GIT_TAG_NAME }}
+          title: Bump helm chart version ${{ env.GIT_TAG_NAME }}
+          body: Automated pull request to bump helm chart version ${{ env.GIT_TAG_NAME }}
+          commit-message: Bump helm chart version ${{ env.GIT_TAG_NAME }}
           labels: automerge
           assignees: thomaspoignant
           draft: false
@@ -277,29 +278,29 @@ jobs:
           path: ${{ env.MAIN_BRANCH_NAME }}
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
-  homebrew:
-    name: Bump homebrew-core formula
-    needs:
-      - goreleaser
-    runs-on: ubuntu-latest
-    steps:
-      - name: Get tag name
-        id: tagName
-        uses: olegtarasov/get-tag@v2.1.2
-
-      - uses: mislav/bump-homebrew-formula-action@v2
-        with:
-          formula-name: go-feature-flag-relay-proxy
-          tag-name: ${{ steps.tagName.outputs.tag }}
-          download-url: https://github.com/${{ github.repository }}.git
-          commit-message: |
-            {{formulaName}} {{version}}
-            
-            Version `{{version}}` of the go-feature-flag-relay-proxy is available.
-            This PR bump the version in homebrew.
-            
-            Check https://gofeatureflag.org if you want to have more information about GO Feature Flag.
-            
-            Created by https://github.com/mislav/bump-homebrew-formula-action
-        env:
-          COMMITTER_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+#  homebrew:
+#    name: Bump homebrew-core formula
+#    needs:
+#      - goreleaser
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Get tag name
+#        id: tagName
+#        uses: olegtarasov/get-tag@v2.1.2
+#
+#      - uses: mislav/bump-homebrew-formula-action@v2
+#        with:
+#          formula-name: go-feature-flag-relay-proxy
+#          tag-name: ${{ steps.tagName.outputs.tag }}
+#          download-url: https://github.com/${{ github.repository }}.git
+#          commit-message: |
+#            {{formulaName}} {{version}}
+#
+#            Version `{{version}}` of the go-feature-flag-relay-proxy is available.
+#            This PR bump the version in homebrew.
+#
+#            Check https://gofeatureflag.org if you want to have more information about GO Feature Flag.
+#
+#            Created by https://github.com/mislav/bump-homebrew-formula-action
+#        env:
+#          COMMITTER_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}

@@ -27,17 +27,26 @@ jobs:
         id: changed-files-specific
         uses: tj-actions/changed-files@v37
         with:
-          files: ./cmd/relayproxy/helm-charts/**
+          files: ./cmd/server/helm-charts/**
+
+      - name: Run chart-testing (lint) - legacy
+        working-directory: ./cmd/server/helm-charts/relay-proxy/
+        run: ct lint --chart-dirs . --charts .
 
       - name: Run chart-testing (lint)
-        working-directory: ./cmd/relayproxy/helm-charts/relay-proxy/
+        working-directory: ./cmd/server/helm-charts/go-feature-flag/
         run: ct lint --chart-dirs . --charts .
 
       - name: Create kind cluster
         uses: helm/kind-action@v1.7.0
         if: steps.changed-files-specific.outputs.any_changed == 'true'
 
+      - name: Run chart-testing (install) - legacy
+        working-directory: ./cmd/server/helm-charts/relay-proxy/
+        run: ct install --chart-dirs . --charts .
+        if: steps.changed-files-specific.outputs.any_changed == 'true'
+
       - name: Run chart-testing (install)
-        working-directory: ./cmd/relayproxy/helm-charts/relay-proxy/
+        working-directory: ./cmd/server/helm-charts/go-feature-flag/
         run: ct install --chart-dirs . --charts .
         if: steps.changed-files-specific.outputs.any_changed == 'true'

@@ -1,0 +1,14 @@
+apiVersion: v2
+name: relay-proxy
+home: https://gofeatureflag.org
+sources:
+  - "https://github.com/thomaspoignant/go-feature-flag"
+description: A Helm chart to deploy go-feature-flag server into Kubernetes
+type: application
+version: 1.12.0
+appVersion: "v1.12.0"
+icon: https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo.png
+maintainers:
+  - name: thomaspoignant
+    email: thomas.poignant@gofeatureflag.org
+    url: https://gofeatureflag.org

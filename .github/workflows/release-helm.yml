@@ -5,10 +5,10 @@ on:
       - main
 
 jobs:
-  helm-release:
+  helm-release-go-feature-flag:
     runs-on: ubuntu-latest
     env:
-      CHART_README_LOCATION: cmd/relayproxy/helm-charts/relay-proxy/README.md
+      CHART_README_LOCATION: cmd/server/helm-charts/go-feature-flag/README.md
       MAIN_BRANCH_NAME: main
     steps:
       - name: Checkout
@@ -20,14 +20,14 @@ jobs:
         id: changed-files-specific
         uses: tj-actions/changed-files@v37
         with:
-          files: ./cmd/relayproxy/helm-charts/**
+          files: ./cmd/server/helm-charts/**
 
       - name: Publish Helm chart
         if: steps.changed-files-specific.outputs.any_changed == 'true'
         uses: stefanprodan/helm-gh-pages@master
         with:
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
-          charts_dir: ./cmd/relayproxy/helm-charts/
+          charts_dir: ./cmd/server/helm-charts/
           charts_url: https://charts.gofeatureflag.org
           owner: go-feature-flag
           repository: helm-charts
@@ -61,10 +61,10 @@ jobs:
         uses: peter-evans/create-pull-request@v5
         if: steps.changed-files-specific.outputs.any_changed == 'true'
         with:
-          branch: update-relay-proxy-chart-readme-${{ env.GIT_TAG_NAME }}
-          title: Update relay proxy helm README ${{ env.GIT_TAG_NAME }}
-          body: Automated pull request to update relay-proxy helm chart README ${{ env.GIT_TAG_NAME }}
-          commit-message: Update relay proxy helm README ${{ env.GIT_TAG_NAME }}
+          branch: update-chart-readme-${{ env.GIT_TAG_NAME }}
+          title: Update helm README ${{ env.GIT_TAG_NAME }}
+          body: Automated pull request to update helm chart README ${{ env.GIT_TAG_NAME }}
+          commit-message: Update helm README ${{ env.GIT_TAG_NAME }}
           labels: automerge
           assignees: thomaspoignant
           draft: false
