@@ -33,7 +33,7 @@ builds:
   # DEPRECATED: check go-feature-flag
   # We aim to deprecate the name relay proxy, so the main build should be called go-feature-flag
   - id: go-feature-flag-relay-proxy
-    main: ./cmd/relayproxy
+    main: ./cmd/server
     binary: go-feature-flag-relay-proxy
     env:
       - CGO_ENABLED=0
@@ -57,7 +57,7 @@ builds:
         goarm: 6
 
   - id: go-feature-flag
-    main: ./cmd/relayproxy
+    main: ./cmd/server
     binary: go-feature-flag
     env:
       - CGO_ENABLED=0
@@ -118,20 +118,6 @@ archives:
     builds:
       - go-feature-flag-migration-cli
 
-  # DEPRECATED: check go-feature-flag
-  - id: go-feature-flag-relay-proxy
-    name_template: "go-feature-flag-relay-proxy_\
-      {{ .Version }}_\
-      {{- title .Os }}_\
-      {{- if eq .Arch \"amd64\" }}x86_64\
-      {{- else if eq .Arch \"386\" }}i386\
-      {{- else }}{{ .Arch }}{{ end }}\
-      {{- with .Arm }}v{{ . }}{{ end }}\
-      {{- with .Mips }}_{{ . }}{{ end }}\
-      {{- if not (eq .Amd64 \"v1\") }}{{ .Amd64 }}{{ end }}"
-    builds:
-      - go-feature-flag-relay-proxy
-
   - id: go-feature-flag
     name_template: "go-feature-flag_\
       {{ .Version }}_\
@@ -178,7 +164,7 @@ dockers:
     goarch: amd64
     ids:
       - go-feature-flag-relay-proxy
-    dockerfile: ./cmd/relayproxy/DockerfileGoreleaserRelayProxy
+    dockerfile: ./cmd/server/DockerfileGoreleaser
     image_templates:
       - thomaspoignant/go-feature-flag-relay-proxy:v{{ .RawVersion }}-amd64
     build_flag_templates:
@@ -188,7 +174,7 @@ dockers:
     goarch: arm64
     ids:
       - go-feature-flag-relay-proxy
-    dockerfile: ./cmd/relayproxy/DockerfileGoreleaserRelayProxy
+    dockerfile: ./cmd/server/DockerfileGoreleaser
     image_templates:
       - thomaspoignant/go-feature-flag-relay-proxy:v{{ .RawVersion }}-arm64v8
     build_flag_templates:
@@ -199,7 +185,7 @@ dockers:
     goarm: 7
     ids:
       - go-feature-flag-relay-proxy
-    dockerfile: ./cmd/relayproxy/DockerfileGoreleaserRelayProxy
+    dockerfile: ./cmd/server/DockerfileGoreleaser
     image_templates:
       - thomaspoignant/go-feature-flag-relay-proxy:v{{ .RawVersion }}-armv7
     build_flag_templates:
@@ -211,7 +197,7 @@ dockers:
     goarch: amd64
     ids:
       - go-feature-flag
-    dockerfile: ./cmd/relayproxy/DockerfileGoreleaser
+    dockerfile: ./cmd/server/DockerfileGoreleaser
     image_templates:
       - thomaspoignant/go-feature-flag:v{{ .RawVersion }}-amd64
     build_flag_templates:
@@ -221,7 +207,7 @@ dockers:
     goarch: arm64
     ids:
       - go-feature-flag
-    dockerfile: ./cmd/relayproxy/DockerfileGoreleaser
+    dockerfile: ./cmd/server/DockerfileGoreleaser
     image_templates:
       - thomaspoignant/go-feature-flag:v{{ .RawVersion }}-arm64v8
     build_flag_templates:
@@ -232,7 +218,7 @@ dockers:
     goarm: 7
     ids:
       - go-feature-flag
-    dockerfile: ./cmd/relayproxy/DockerfileGoreleaser
+    dockerfile: ./cmd/server/DockerfileGoreleaser
     image_templates:
       - thomaspoignant/go-feature-flag:v{{ .RawVersion }}-armv7
     build_flag_templates:
