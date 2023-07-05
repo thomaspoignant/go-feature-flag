@@ -1,4 +1,4 @@
-# GO Feature Flag Relay Proxy
+# GO Feature Flag Server
 
 <p align="center">
   <img width="250" height="238" src="https://github.com/thomaspoignant/go-feature-flag/raw/main/logo.png" alt="go-feature-flag logo" />
@@ -15,33 +15,43 @@
 
 --- 
 
-# What is GO Feature Flag Relay Proxy?
+# What is GO Feature Flag?
 
-The GO Feature Flag Relay Proxy retrieve your feature flag configuration file using [`thomaspoignant/go-feature-flag`](https://github.com/thomaspoignant/go-feature-flag) SDK and expose APIs to get your flags variations.  
-It lets a number of servers to connect to a single configuration file.
+GO Feature Flag is a lightweight and open-source solution that provides a simple and complete feature flag implementation.
 
-This can be useful if you want to use the same feature flags configuration file for frontend and backend, this allows to be language agnostic by using standard protocol.
+The solution has been built to facilitate the usage of feature flags in your code without having to contact any vendor.
 
-For more information about GO Feature Flag Relay Proxy, please visit [github.com/thomaspoignant/go-feature-flag](https://github.com/thomaspoignant/go-feature-flag/tree/main/cmd/relayproxy).
+## What can I do with GO Feature Flag?
+
+- Storing your configuration flags file on various locations (HTTP, S3, Kubernetes, see full list).
+- Configuring your flags in various format (JSON, TOML and YAML).
+- Adding complex rules to target your users.
+- Use a complex rollout strategy for your flags :
+  - Run A/B testing experimentation.
+  - Progressively rollout a feature.
+  - Schedule your flag updates.
+- Exporting your flags usage data to various destinations such as (S3, Google cloud storage, file, see the full list).
+- Getting notified when a flag has been changed (webhook and slack).
+- Use GO Feature Flag in several languages with Open Feature SDKs.
 
 
 # Quick reference
 
-- This default distribution is the official distribution for `go-feature-flag-relay-proxy`.
+- This default distribution is the official distribution for `go-feature-flag`.
 
 - Where to file issues: 
-  [https://github.com/thomaspoignant/go-feature-flag/issues/](https://github.com/thomaspoignant/go-feature-flag/issues/new?assignees=&labels=bug%2C+relay-proxy%2C+docker%2C+needs-triage&template=bug.md&title=(bug%20docker)).
+  [https://github.com/thomaspoignant/go-feature-flag/issues/](https://github.com/thomaspoignant/go-feature-flag/issues/new?assignees=&labels=bug%2C+server%2C+docker%2C+needs-triage&template=bug.md&title=(bug%20docker)).
 
-- Source are available in [`go-feature-flag` repo](https://github.com/thomaspoignant/go-feature-flag/tree/main/cmd/relayproxy).
+- Source are available in [`go-feature-flag` repo](https://github.com/thomaspoignant/go-feature-flag/tree/main/cmd/server).
 
-- All versions are available in the [tags](https://hub.docker.com/r/thomaspoignant/go-feature-flag-relay-proxy/tags).
+- All versions are available in the [tags](https://hub.docker.com/r/thomaspoignant/go-feature-flag/tags).
 
 - Release notes are available [here](https://github.com/thomaspoignant/go-feature-flag/releases).
 
 
 # How to use this image
 
-**`go-feature-flag-relay-proxy`** requires a configuration file to be used.
+**`go-feature-flag`** requires a configuration file to be used.
 
 By default, we expect to have this configuration file in the `/goff` directory of the container and the file should be named `goff-proxy.yaml`.  
 
@@ -50,12 +60,12 @@ The default port used for the service is `1031`.
 ```shell
 docker run \
   -v $(pwd)/goff-proxy.yaml:/goff/goff-proxy.yaml \
-  thomaspoignant/go-feature-flag-relay-proxy:latest
+  thomaspoignant/go-feature-flag:latest
 ```
 
 ## Test it locally
 
-This is a small example on how to run `go-feature-flag-relay-proxy` locally.
+This is a small example on how to run `go-feature-flag` locally.
 
 ```shell
 # Download an example of a basic configuration file.
@@ -65,7 +75,7 @@ curl https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/cmd/r
 docker run \
   -p 1031:1031 \
   -v $(pwd)/goff-proxy.yaml:/goff/goff-proxy.yaml \
-  thomaspoignant/go-feature-flag-relay-proxy:latest
+  thomaspoignant/go-feature-flag:latest
   
 # Call the API
 curl -X 'POST' \
