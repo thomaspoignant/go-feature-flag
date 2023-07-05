@@ -3,8 +3,8 @@ package main
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	custommiddleware "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/log"
+	custommiddleware "github.com/thomaspoignant/go-feature-flag/cmd/server/api/middleware"
+	"github.com/thomaspoignant/go-feature-flag/cmd/server/log"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/internal/dto"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
