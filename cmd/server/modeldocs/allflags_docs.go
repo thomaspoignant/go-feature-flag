@@ -6,7 +6,7 @@ type AllFlags struct {
 	// flags is the list of flag for the user.
 	Flags map[string]FlagState `json:"flags"`
 
-	// `true` if something went wrong in the relay proxy (flag does not exists, ...) and we serve the defaultValue.
+	// `true` if something went wrong in go-feature-flag (flag does not exists, ...) and we serve the defaultValue.
 	Valid bool `json:"valid" example:"false"`
 }
 

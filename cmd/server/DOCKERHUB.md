@@ -5,9 +5,9 @@
 </p>
 
 <p align="center">
-  <img alt="Docker Image Version" src="https://img.shields.io/docker/v/thomaspoignant/go-feature-flag-relay-proxy?sort=semver&color=green"/>
-  <img alt="Docker Image Size" src="https://img.shields.io/docker/image-size/thomaspoignant/go-feature-flag-relay-proxy?sort=semver"/>
-  <img alt="Docker Hub downloads" src="https://img.shields.io/docker/pulls/thomaspoignant/go-feature-flag-relay-proxy?logo=docker"/>
+  <img alt="Docker Image Version" src="https://img.shields.io/docker/v/thomaspoignant/go-feature-flag?sort=semver&color=green"/>
+  <img alt="Docker Image Size" src="https://img.shields.io/docker/image-size/thomaspoignant/go-feature-flag?sort=semver"/>
+  <img alt="Docker Hub downloads" src="https://img.shields.io/docker/pulls/thomaspoignant/go-feature-flag?logo=docker"/>
   <a href="https://github.com/thomaspoignant/go-feature-flag/blob/main/LICENSE"><img src="https://img.shields.io/github/license/thomaspoignant/go-feature-flag" alt="License"/></a>
   <a href="https://gophers.slack.com/messages/go-feature-flag"><img src="https://img.shields.io/badge/join-us%20on%20slack-gray.svg?longCache=true&logo=slack&colorB=green" alt="Join us on slack"></a> 
 </p>

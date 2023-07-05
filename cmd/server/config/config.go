@@ -99,19 +99,19 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 
 	_ = k.Set("version", version)
 
-	proxyConf := &Config{}
-	errUnmarshal := k.Unmarshal("", &proxyConf)
+	conf := &Config{}
+	errUnmarshal := k.Unmarshal("", &conf)
 	if errUnmarshal != nil {
 		return nil, errUnmarshal
 	}
-	return proxyConf, nil
+	return conf, nil
 }
 
 type Config struct {
-	// ListenPort (optional) is the port we are using to start the proxy
+	// ListenPort (optional) is the port we are using to start the server
 	ListenPort int `mapstructure:"listen" koanf:"listen"`
 
-	// HideBanner (optional) if true, we don't display the go-feature-flag relay proxy banner
+	// HideBanner (optional) if true, we don't display the go-feature-flag banner
 	HideBanner bool `mapstructure:"hideBanner" koanf:"hidebanner"`
 
 	// EnableSwagger (optional) to have access to the swagger
@@ -120,7 +120,7 @@ type Config struct {
 	// Host should be set if you are using swagger (default is localhost)
 	Host string `mapstructure:"host" koanf:"host"`
 
-	// Debug (optional) if true, go-feature-flag relay proxy will run on debug mode, with more logs and custom responses
+	// Debug (optional) if true, go-feature-flag server will run on debug mode, with more logs and custom responses
 	Debug bool `mapstructure:"debug" koanf:"debug"`
 
 	// PollingInterval (optional) Poll every X time
@@ -132,7 +132,7 @@ type Config struct {
 	// Default: YAML
 	FileFormat string `mapstructure:"fileFormat" koanf:"fileformat"`
 
-	// StartWithRetrieverError (optional) If true, the relay proxy will start even if we did not get any flags from
+	// StartWithRetrieverError (optional) If true, the server will start even if we did not get any flags from
 	// the retriever. It will serve only default values until the retriever returns the flags.
 	// The init method will not return any error if the flag file is unreachable.
 	// Default: false
@@ -158,13 +158,13 @@ type Config struct {
 	// RestAPITimeout is the timeout on the API.
 	RestAPITimeout int `mapstructure:"restApiTimeout" koanf:"restapitimeout"`
 
-	// Version is the version of the relay-proxy
+	// Version is the version of the server
 	Version string `mapstructure:"version" koanf:"version"`
 
 	// APIKeys list of API keys that authorized to use endpoints
 	APIKeys []string `mapstructure:"apiKeys" koanf:"apikeys"`
 
-	// StartAsAwsLambda (optional) if true the relay proxy will start ready to be launch as AWS Lambda
+	// StartAsAwsLambda (optional) if true the server will start ready to be launched as AWS Lambda
 	StartAsAwsLambda bool `mapstructure:"startAsAwsLambda" koanf:"startasawslambda"`
 
 	// ---- private fields
@@ -174,7 +174,7 @@ type Config struct {
 	apiKeysSet map[string]interface{}
 }
 
-// APIKeyExists is checking if an API Key exist in the relay proxy configuration
+// APIKeyExists is checking if an API Key exist in the server configuration
 func (c *Config) APIKeyExists(apiKey string) bool {
 	if c.apiKeysSet == nil {
 		apiKeySet := make(map[string]interface{})

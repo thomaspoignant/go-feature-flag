@@ -30,7 +30,7 @@ func (m *monitoringImpl) Health() model.HealthResponse {
 	}
 }
 
-// Info returns information about the relay-proxy
+// Info returns information about go-feature-flag server
 func (m *monitoringImpl) Info() model.InfoResponse {
 	return model.InfoResponse{
 		LatestCacheRefresh: m.goFF.GetCacheRefreshDate(),

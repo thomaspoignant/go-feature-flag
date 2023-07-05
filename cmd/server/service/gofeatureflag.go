@@ -28,14 +28,14 @@ import (
 )
 
 func NewGoFeatureFlagClient(
-	proxyConf *config.Config,
+	conf *config.Config,
 	logger *zap.Logger,
-	proxyNotifier notifier.Notifier,
+	websocketNotifier notifier.Notifier,
 ) (*ffclient.GoFeatureFlag, error) {
 	var mainRetriever retriever.Retriever
 	var err error
-	if proxyConf.Retriever != nil {
-		mainRetriever, err = initRetriever(proxyConf.Retriever)
+	if conf.Retriever != nil {
+		mainRetriever, err = initRetriever(conf.Retriever)
 		if err != nil {
 			return nil, err
 		}
@@ -43,8 +43,8 @@ func NewGoFeatureFlagClient(
 
 	// Manage if we have more than 1 retriver
 	retrievers := make([]retriever.Retriever, 0)
-	if proxyConf.Retrievers != nil {
-		for _, r := range *proxyConf.Retrievers {
+	if conf.Retrievers != nil {
+		for _, r := range *conf.Retrievers {
 			r := r
 			currentRetriever, err := initRetriever(&r)
 			if err != nil {
@@ -55,32 +55,32 @@ func NewGoFeatureFlagClient(
 	}
 
 	var exp ffclient.DataExporter
-	if proxyConf.Exporter != nil {
-		exp, err = initExporter(proxyConf.Exporter)
+	if conf.Exporter != nil {
+		exp, err = initExporter(conf.Exporter)
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	var notif []notifier.Notifier
-	if proxyConf.Notifiers != nil {
-		notif, err = initNotifier(proxyConf.Notifiers)
+	if conf.Notifiers != nil {
+		notif, err = initNotifier(conf.Notifiers)
 		if err != nil {
 			return nil, err
 		}
 	}
-	notif = append(notif, proxyNotifier)
+	notif = append(notif, websocketNotifier)
 
 	f := ffclient.Config{
-		PollingInterval:         time.Duration(proxyConf.PollingInterval) * time.Millisecond,
+		PollingInterval:         time.Duration(conf.PollingInterval) * time.Millisecond,
 		Logger:                  zap.NewStdLog(logger),
 		Context:                 context.Background(),
 		Retriever:               mainRetriever,
 		Retrievers:              retrievers,
 		Notifiers:               notif,
-		FileFormat:              proxyConf.FileFormat,
+		FileFormat:              conf.FileFormat,
 		DataExporter:            exp,
-		StartWithRetrieverError: proxyConf.StartWithRetrieverError,
+		StartWithRetrieverError: conf.StartWithRetrieverError,
 	}
 
 	return ffclient.New(f)

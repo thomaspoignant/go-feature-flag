@@ -10,11 +10,11 @@ Please replace the keys `relayproxy.config` in  the `Values.yaml` to fit
 your configuration. This file will be stored as `configmap` in your cluster and
 be mount as a volume for the `relay-proxy`.
 
-After changing the working directory to `cmd/relayproxy/helm-charts/relay-proxy`,
+After changing the working directory to `cmd/server/helm-charts/relay-proxy`,
 run the below command:
 
 ```shell
-helm install . --name-template=go-feature-flag-relay-proxy
+helm install . --name-template=go-feature-flag
 ```
 
 It will install the chart in your cluster.

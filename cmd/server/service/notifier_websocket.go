@@ -5,17 +5,17 @@ import (
 	"sync"
 )
 
-type notifierRelayProxy struct {
+type websocketNotifier struct {
 	websocketService WebsocketService
 }
 
-func NewNotifierRelayProxy(websocketService WebsocketService) notifier.Notifier {
-	return &notifierRelayProxy{
+func NewWebsocketNotifier(websocketService WebsocketService) notifier.Notifier {
+	return &websocketNotifier{
 		websocketService: websocketService,
 	}
 }
 
-func (n *notifierRelayProxy) Notify(diff notifier.DiffCache, waitGroup *sync.WaitGroup) error {
+func (n *websocketNotifier) Notify(diff notifier.DiffCache, waitGroup *sync.WaitGroup) error {
 	defer waitGroup.Done()
 	n.websocketService.BroadcastFlagChanges(diff)
 	return nil

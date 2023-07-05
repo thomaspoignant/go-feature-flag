@@ -19,15 +19,12 @@ var version = "localdev"
 const banner = `█▀▀ █▀█   █▀▀ █▀▀ ▄▀█ ▀█▀ █ █ █▀█ █▀▀   █▀▀ █   ▄▀█ █▀▀
 █▄█ █▄█   █▀  ██▄ █▀█  █  █▄█ █▀▄ ██▄   █▀  █▄▄ █▀█ █▄█
 
-     █▀█ █▀▀ █   ▄▀█ █▄█   █▀█ █▀█ █▀█ ▀▄▀ █▄█
-     █▀▄ ██▄ █▄▄ █▀█  █    █▀▀ █▀▄ █▄█ █ █  █ 
-
-GO Feature Flag Relay Proxy
+GO Feature Flag 
 _____________________________________________`
 
-// @title GO Feature Flag relay proxy endpoints
+// @title GO Feature Flag server endpoints
 // @description.markdown
-// @contact.name GO feature flag relay proxy
+// @contact.name GO feature flag Server
 // @contact.url https://gofeatureflag.org
 // @contact.email contact@gofeatureflag.org
 // @license.name MIT
@@ -49,28 +46,28 @@ func main() {
 	defer func() { _ = zapLog.Sync() }()
 
 	// Loading the configuration in viper
-	proxyConf, err := config.New(f, zapLog, version)
+	conf, err := config.New(f, zapLog, version)
 	if err != nil {
 		zapLog.Fatal("error while reading configuration", zap.Error(err))
 	}
 
-	if err := proxyConf.IsValid(); err != nil {
+	if err := conf.IsValid(); err != nil {
 		zapLog.Fatal("configuration error", zap.Error(err))
 	}
 
-	if !proxyConf.HideBanner {
+	if !conf.HideBanner {
 		fmt.Println(banner)
 	}
 
 	// Init swagger
-	docs.SwaggerInfo.Version = proxyConf.Version
-	docs.SwaggerInfo.Host = fmt.Sprintf("%s:%d", proxyConf.Host, proxyConf.ListenPort)
+	docs.SwaggerInfo.Version = conf.Version
+	docs.SwaggerInfo.Host = fmt.Sprintf("%s:%d", conf.Host, conf.ListenPort)
 
 	// Init services
 	wsService := service.NewWebsocketService()
 	defer wsService.Close() // close all the open connections
-	proxyNotifier := service.NewNotifierRelayProxy(wsService)
-	goff, err := service.NewGoFeatureFlagClient(proxyConf, zapLog, proxyNotifier)
+	websocketNotifier := service.NewWebsocketNotifier(wsService)
+	goff, err := service.NewGoFeatureFlagClient(conf, zapLog, websocketNotifier)
 	if err != nil {
 		panic(err)
 	}
@@ -81,9 +78,9 @@ func main() {
 		GOFeatureFlagService: goff,
 	}
 	// Init API server
-	apiServer := api.New(proxyConf, services, zapLog)
+	apiServer := api.New(conf, services, zapLog)
 
-	if proxyConf.StartAsAwsLambda {
+	if conf.StartAsAwsLambda {
 		apiServer.StartAwsLambda()
 	} else {
 		apiServer.Start()

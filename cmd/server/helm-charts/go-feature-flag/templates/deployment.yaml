@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "relay-proxy.fullname" . }}
+  name: {{ include "go-feature-flag.fullname" . }}
   labels:
-    {{- include "relay-proxy.labels" . | nindent 4 }}
+    {{- include "go-feature-flag.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "relay-proxy.selectorLabels" . | nindent 6 }}
+      {{- include "go-feature-flag.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -18,19 +18,19 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "relay-proxy.selectorLabels" . | nindent 8 }}
+        {{- include "go-feature-flag.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "relay-proxy.serviceAccountName" . }}
+      serviceAccountName: {{ include "go-feature-flag.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       volumes:
-        - name: relay-proxy-config-volume
+        - name: go-feature-flag-config-volume
           configMap:
-            name: {{ include "relay-proxy.fullname" . }}
+            name: {{ include "go-feature-flag.fullname" . }}
       containers:
         - name: {{ .Chart.Name }}
           env:
@@ -43,7 +43,7 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           volumeMounts:
-            - name: relay-proxy-config-volume
+            - name: go-feature-flag-config-volume
               mountPath: /goff
           ports:
             - name: http

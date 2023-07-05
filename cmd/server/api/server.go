@@ -121,17 +121,17 @@ func (s *Server) Start() {
 	address := fmt.Sprintf("0.0.0.0:%d", s.config.ListenPort)
 
 	s.zapLog.Info(
-		"Starting go-feature-flag relay proxy ...",
+		"Starting go-feature-flag ...",
 		zap.String("address", address),
 		zap.String("version", s.config.Version))
 
 	err := s.echoInstance.Start(address)
 	if err != nil {
-		s.zapLog.Fatal("impossible to start the proxy", zap.Error(err))
+		s.zapLog.Fatal("impossible to start go-feature-flag", zap.Error(err))
 	}
 }
 
-// StartAwsLambda is starting the relay proxy as an AWS Lambda
+// StartAwsLambda is starting the server as an AWS Lambda
 func (s *Server) StartAwsLambda() {
 	adapter := newAwsLambdaHandler(s.echoInstance)
 	adapter.Start()
@@ -141,6 +141,6 @@ func (s *Server) StartAwsLambda() {
 func (s *Server) Stop() {
 	err := s.echoInstance.Close()
 	if err != nil {
-		s.zapLog.Fatal("impossible to stop go-feature-flag relay proxy", zap.Error(err))
+		s.zapLog.Fatal("impossible to stop go-feature-flag", zap.Error(err))
 	}
 }

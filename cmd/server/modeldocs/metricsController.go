@@ -5,7 +5,7 @@ import "github.com/labstack/echo/v4"
 // FakeMetricsController is the entry point for the allFlags endpoint
 //
 // @Summary      Prometheus endpoint
-// @Description  This endpoint is providing metrics about the relay proxy in the prometheus format.
+// @Description  This endpoint is providing metrics in the prometheus format.
 // @Produce      plain
 // @Success      200 {object}	string
 // @Router       /metrics [get]

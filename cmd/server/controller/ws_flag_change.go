@@ -37,7 +37,7 @@ type wsFlagChange struct {
 // @Description
 // @Produce      json
 // @Accept		 json
-// @Param 	     apiKey query string false "apiKey use authorize the connection to the relay proxy"
+// @Param 	     apiKey query string false "apiKey use authorize the connection to the server"
 // @Success      200  {object} notifier.DiffCache "Success"
 // @Failure      400 {object} modeldocs.HTTPErrorDoc "Bad Request"
 // @Failure      500 {object} modeldocs.HTTPErrorDoc "Internal server error"

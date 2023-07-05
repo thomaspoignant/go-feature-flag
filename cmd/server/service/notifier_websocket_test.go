@@ -37,8 +37,8 @@ func TestNotify(t *testing.T) {
 	// Create a mock WebsocketService
 	mockService := &mockWebsocketService{}
 
-	// Create the notifierRelayProxy instance with the mock service
-	n := service.NewNotifierRelayProxy(mockService)
+	// Create the websocketNotifier instance with the mock service
+	n := service.NewWebsocketNotifier(mockService)
 
 	// Prepare the input data
 	diff := notifier.DiffCache{

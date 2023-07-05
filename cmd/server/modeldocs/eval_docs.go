@@ -2,11 +2,11 @@ package modeldocs
 
 // EvalFlagDoc is the documentation struct for the Swagger doc.
 type EvalFlagDoc struct {
-	// `true` if the event was tracked by the relay proxy.
+	// `true` if the event was tracked.
 	TrackEvents bool `json:"trackEvents" example:"true"`
 	// The variation used to give you this value.
 	VariationType string `json:"variationType" example:"variation-A"`
-	// `true` if something went wrong in the relay proxy (flag does not exists, ...) and we serve the defaultValue.
+	// `true` if something went wrong (flag does not exists, ...) and we serve the defaultValue.
 	Failed bool `json:"failed" example:"false"`
 	// The version of the flag used.
 	Version string `json:"version" example:"1.0"`

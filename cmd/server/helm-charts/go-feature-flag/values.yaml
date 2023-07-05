@@ -1,7 +1,7 @@
 gofeatureflag:
   # -- (tpl/object) Define this for extra Django environment variables
   # @notationType -- tpl
-  config: | # This is a configuration example for the relay-proxy
+  config: | # This is a configuration example for go-feature-flag
     listen: 1031
     pollingInterval: 1000
     startWithRetrieverError: false
@@ -11,7 +11,7 @@ gofeatureflag:
     exporter:
       kind: log
 
-# -- Environment variables to pass to the relay proxy
+# -- Environment variables to pass to go-feature-flag
 env: {}
   # Examples:
   # ENV_VARIABLE_EXAMPLE:
@@ -28,7 +28,7 @@ replicaCount: 1
 
 image:
   # -- The image repository to pull from
-  repository: thomaspoignant/go-feature-flag-relay-proxy
+  repository: thomaspoignant/go-feature-flag
   # -- The image is pulled only if it is not already present locally
   pullPolicy: IfNotPresent
   # -- Overrides the image tag whose default is the chart appVersion
