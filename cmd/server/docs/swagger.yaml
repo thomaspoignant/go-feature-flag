@@ -177,7 +177,7 @@ definitions:
         description: flags is the list of flag for the user.
         type: object
       valid:
-        description: '`true` if something went wrong in the relay proxy (flag does
+        description: '`true` if something went wrong in go-feature-flag (flag does
           not exists, ...) and we serve the defaultValue.'
         example: false
         type: boolean
@@ -189,8 +189,8 @@ definitions:
         example: ""
         type: string
       failed:
-        description: '`true` if something went wrong in the relay proxy (flag does
-          not exists, ...) and we serve the defaultValue.'
+        description: '`true` if something went wrong (flag does not exists, ...) and
+          we serve the defaultValue.'
         example: false
         type: boolean
       metadata:
@@ -203,7 +203,7 @@ definitions:
         example: TARGETING_MATCH
         type: string
       trackEvents:
-        description: '`true` if the event was tracked by the relay proxy.'
+        description: '`true` if the event was tracked.'
         example: true
         type: boolean
       value:
@@ -267,7 +267,7 @@ definitions:
 info:
   contact:
     email: contact@gofeatureflag.org
-    name: GO feature flag relay proxy
+    name: GO feature flag Server
     url: https://gofeatureflag.org
   description: "# Introduction\n\nThis API is documented in **OpenAPI format** and
     describe the REST API of the **GO Feature Flag relay proxy**.\n\nThe relay proxy
@@ -276,14 +276,14 @@ info:
   license:
     name: MIT
     url: https://github.com/thomaspoignant/go-feature-flag/blob/main/LICENSE
-  title: GO Feature Flag relay proxy endpoints
+  title: GO Feature Flag server endpoints
   x-logo:
     url: https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png
 paths:
   /health:
     get:
       description: |-
-        Making a **GET** request to the URL path `/health` will tell you if the relay proxy is ready to serve
+        Making a **GET** request to the URL path `/health` will tell you if the server is ready to serve
         traffic.
 
         This is useful especially for loadbalancer to know that they can send traffic to the service.
@@ -299,7 +299,7 @@ paths:
     get:
       description: |-
         Making a **GET** request to the URL path `/info` will give you information about the actual state
-        of the relay proxy.
+        of the server.
 
         As of Today the level of information is small be we can improve this endpoint to returns more
         information.
@@ -313,8 +313,7 @@ paths:
       summary: Info
   /metrics:
     get:
-      description: This endpoint is providing metrics about the relay proxy in the
-        prometheus format.
+      description: This endpoint is providing metrics in the prometheus format.
       produces:
       - text/plain
       responses:
@@ -445,7 +444,7 @@ paths:
         This endpoint is a websocket endpoint to be notified about flag changes, every change
         will send a request to the client with a model.DiffCache format.
       parameters:
-      - description: apiKey use authorize the connection to the relay proxy
+      - description: apiKey use authorize the connection to the server
         in: query
         name: apiKey
         type: string

@@ -11,7 +11,7 @@ const docTemplate = `{
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
         "contact": {
-            "name": "GO feature flag relay proxy",
+            "name": "GO feature flag Server",
             "url": "https://gofeatureflag.org",
             "email": "contact@gofeatureflag.org"
         },
@@ -29,7 +29,7 @@ const docTemplate = `{
     "paths": {
         "/health": {
             "get": {
-                "description": "Making a **GET** request to the URL path ` + "`" + `/health` + "`" + ` will tell you if the relay proxy is ready to serve\ntraffic.\n\nThis is useful especially for loadbalancer to know that they can send traffic to the service.",
+                "description": "Making a **GET** request to the URL path ` + "`" + `/health` + "`" + ` will tell you if the server is ready to serve\ntraffic.\n\nThis is useful especially for loadbalancer to know that they can send traffic to the service.",
                 "produces": [
                     "application/json"
                 ],
@@ -46,7 +46,7 @@ const docTemplate = `{
         },
         "/info": {
             "get": {
-                "description": "Making a **GET** request to the URL path ` + "`" + `/info` + "`" + ` will give you information about the actual state\nof the relay proxy.\n\nAs of Today the level of information is small be we can improve this endpoint to returns more\ninformation.",
+                "description": "Making a **GET** request to the URL path ` + "`" + `/info` + "`" + ` will give you information about the actual state\nof the server.\n\nAs of Today the level of information is small be we can improve this endpoint to returns more\ninformation.",
                 "produces": [
                     "application/json"
                 ],
@@ -63,7 +63,7 @@ const docTemplate = `{
         },
         "/metrics": {
             "get": {
-                "description": "This endpoint is providing metrics about the relay proxy in the prometheus format.",
+                "description": "This endpoint is providing metrics in the prometheus format.",
                 "produces": [
                     "text/plain"
                 ],
@@ -242,7 +242,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "apiKey use authorize the connection to the relay proxy",
+                        "description": "apiKey use authorize the connection to the server",
                         "name": "apiKey",
                         "in": "query"
                     }
@@ -495,7 +495,7 @@ const docTemplate = `{
                     }
                 },
                 "valid": {
-                    "description": "` + "`" + `true` + "`" + ` if something went wrong in the relay proxy (flag does not exists, ...) and we serve the defaultValue.",
+                    "description": "` + "`" + `true` + "`" + ` if something went wrong in go-feature-flag (flag does not exists, ...) and we serve the defaultValue.",
                     "type": "boolean",
                     "example": false
                 }
@@ -510,7 +510,7 @@ const docTemplate = `{
                     "example": ""
                 },
                 "failed": {
-                    "description": "` + "`" + `true` + "`" + ` if something went wrong in the relay proxy (flag does not exists, ...) and we serve the defaultValue.",
+                    "description": "` + "`" + `true` + "`" + ` if something went wrong (flag does not exists, ...) and we serve the defaultValue.",
                     "type": "boolean",
                     "example": false
                 },
@@ -525,7 +525,7 @@ const docTemplate = `{
                     "example": "TARGETING_MATCH"
                 },
                 "trackEvents": {
-                    "description": "` + "`" + `true` + "`" + ` if the event was tracked by the relay proxy.",
+                    "description": "` + "`" + `true` + "`" + ` if the event was tracked.",
                     "type": "boolean",
                     "example": true
                 },
@@ -628,7 +628,7 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "",
 	BasePath:         "/",
 	Schemes:          []string{},
-	Title:            "GO Feature Flag relay proxy endpoints",
+	Title:            "GO Feature Flag server endpoints",
 	Description:      "# Introduction\n\nThis API is documented in **OpenAPI format** and describe the REST API of the **GO Feature Flag relay proxy**.\n\nThe relay proxy is a component to evaluate your feature flags remotely when using **GO Feature Flag**.  \nThis API is mostly used by all the OpenFeature providers.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
