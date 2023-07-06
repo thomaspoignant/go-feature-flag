@@ -171,12 +171,17 @@ const config = {
             type: 'search',
             position: 'right',
           },
-          {type: 'docsVersionDropdown', position: 'right'},
+          {
+            type: 'docsVersionDropdown',
+            position: 'right',
+            dropdownItemsAfter: [{to: '/versions', label: 'All versions'}],
+          },
           {
             href: 'https://github.com/thomaspoignant/go-feature-flag',
             position: 'right',
             className: 'header-github-link navbar__right',
             'aria-label': 'GitHub repository',
+            dropdownItemsAfter: [{to: '/versions', label: 'All versions'}],
           },
           {
             href: 'https://twitter.com/gofeatureflag',
