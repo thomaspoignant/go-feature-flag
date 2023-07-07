@@ -29,9 +29,8 @@ export default function DocsVersionDropdownNavbarItem({
   let versionToKeep =
     getListVersionsToDisplay(versions.filter(item => item.name !== "current").map(i => i.name));
 
-
   versions = versions.filter(item =>{
-    return item.name === "current" || versionToKeep.includes(item.name.replace("v",""))
+    return versionToKeep.includes(item.name.replace("v",""))
   })
   const {savePreferredVersionName} = useDocsPreferredVersion(docsPluginId);
   const versionLinks = versions.map((version) => {
