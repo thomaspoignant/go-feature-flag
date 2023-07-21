@@ -37,7 +37,7 @@ func (m *HTTP) Do(req *http.Request) (*http.Response, error) {
 		Body:       io.NopCloser(bytes.NewReader([]byte(""))),
 	}
 
-	if strings.HasSuffix(req.URL.String(), "error") {
+	if strings.Contains(req.URL.String(), "error") {
 		return nil, errors.New("http error")
 	} else if strings.HasSuffix(req.URL.String(), "httpError") {
 		return error, nil
