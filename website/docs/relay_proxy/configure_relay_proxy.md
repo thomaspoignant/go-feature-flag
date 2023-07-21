@@ -5,8 +5,18 @@ description: How to configure the relay proxy to serve your feature flags.
 
 # Configure the relay proxy
 
+## Getting Started
+The configuration of the **relay proxy** is based on a configuration file that you have to provide.
+
+The only mandatory information you need to start the server is to provide where to retrieve your feature flags configuration.
+
+```yaml
+retriever:
+  kind: file
+  path: /goff/flags.yaml # Location of your feature flag files
+```
+
 ## Global configuration
-The configuration of the **relay proxy** is based on a configuration file that you have to provide.  
 
 :::tip Use environment variables.
 You can also override these file configuration by using environment variables.
