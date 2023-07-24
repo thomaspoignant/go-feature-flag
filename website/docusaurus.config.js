@@ -244,6 +244,12 @@ const config = {
               },
               {
                 html: `
+                <a href="https://youtube.com/@gofeatureflag" target="_blank" rel="noreferrer noopener">
+                  <i class="fa-brands fa-youtube"></i> Youtube &nbsp;<i class="fa-solid fa-arrow-up-right-from-square"></i>
+                </a>`,
+              },
+              {
+                html: `
                 <a href="https://github.com/thomaspoignant/go-feature-flag" target="_blank" rel="noreferrer noopener">
                   <i class="fa-brands fa-github"></i> Github&nbsp;&nbsp;<i class="fa-solid fa-arrow-up-right-from-square"></i>
                 </a>`,
@@ -253,7 +259,7 @@ const config = {
                 <a href="mailto:contact@gofeatureflag.org" target="_blank" rel="noreferrer noopener">
                   <i class="fa-regular fa-envelope"></i> Email&nbsp;&nbsp;<i class="fa-solid fa-arrow-up-right-from-square"></i>
                 </a>`,
-              }
+              },
             ],
           },
           {
