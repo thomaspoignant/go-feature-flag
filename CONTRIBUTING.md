@@ -8,18 +8,16 @@ Please take a moment to review the following guidelines.
 
 ## Table of Contents
 
-1. [Code of Conduct](#code-of-conduct)
-2. [How Can I Contribute?](#how-can-i-contribute)
-  - [Bug Reports](#bug-reports)
-  - [Feature Requests](#feature-requests)
-  - [Pull Requests](#pull-requests)
-3. [Development Setup](#development-setup)
-4. [Documentation](#documentation)
-5. [License](#license)
+1. [Code of Conduct](#-code-of-conduct)
+2. [How Can I Contribute?](#-how-can-i-contribute)
+3. [Development Setup](#-development-setup)
+4. [Documentation](#-documentation)
+5. [License](#-license)
 
 
 ## 🚓 Code of Conduct
-We expect all contributors to abide by our [Code of Conduct](CODE_OF_CONDUCT.md). Please read it thoroughly before contributing.
+We expect all contributors to abide by our [Code of Conduct](CODE_OF_CONDUCT.md).  
+Please read it thoroughly before contributing.
 
 ## 🙇 How Can I Contribute?
 
@@ -109,7 +107,7 @@ make watch-doc
 ```
 3. You can now access to the documentation directly in your browser: [http://localhost:3000/](http://localhost:3000/).
 
-## License
+## 🪪 License
 
 By contributing to this repository, you agree that your contributions will be licensed under the [LICENSE](LICENSE) of the project.
 
