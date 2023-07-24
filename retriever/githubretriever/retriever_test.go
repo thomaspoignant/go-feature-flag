@@ -154,7 +154,7 @@ func Test_github_Retrieve(t *testing.T) {
 				assert.Equal(t, http.MethodGet, tt.fields.httpClient.Req.Method)
 				assert.Equal(t, tt.want, got)
 				if tt.fields.githubToken != "" {
-					assert.Equal(t, "token "+tt.fields.githubToken, tt.fields.httpClient.Req.Header.Get("Authorization"))
+					assert.Equal(t, "Bearer "+tt.fields.githubToken, tt.fields.httpClient.Req.Header.Get("Authorization"))
 				}
 			}
 		})

@@ -25,8 +25,8 @@
 - [What is GO Feature Flag?](#what-is-go-feature-flag)
 - [What can I do with GO Feature Flag?](#what-can-i-do-with-go-feature-flag)
 - [Getting started](#getting-started)
-    - [Using the GO Module](#using-go-module)
-    - [Using Open Feature SDKs](#using-open-feature)
+  - [Using the GO Module](#using-go-module)
+  - [Using Open Feature SDKs](#using-open-feature)
 - [Can I use GO Feature Flag with any language?](#can-i-use-go-feature-flag-with-any-language)
 - [Where do I store my flags file?](#where-do-i-store-my-flags-file)
 - [Flags file format](#flags-file-format)
@@ -58,9 +58,9 @@ If you are not familiar with feature flags, I've written an [article](https://me
 - Configuring your flags in various [format](https://gofeatureflag.org/docs/configure_flag/flag_format) (`JSON`, `TOML` and `YAML`).
 - Adding complex [rules](https://gofeatureflag.org/docs/configure_flag/flag_format#rule-format) to target your users.
 - Use a complex rollout strategy for your flags :
-    - [Run A/B testing experimentation](https://gofeatureflag.org/docs/configure_flag/rollout/experimentation).
-    - [Progressively rollout a feature](https://gofeatureflag.org/docs/configure_flag/rollout/progressive).
-    - [Schedule your flag updates](https://gofeatureflag.org/docs/configure_flag/rollout/scheduled).
+  - [Run A/B testing experimentation](https://gofeatureflag.org/docs/configure_flag/rollout/experimentation).
+  - [Progressively rollout a feature](https://gofeatureflag.org/docs/configure_flag/rollout/progressive).
+  - [Schedule your flag updates](https://gofeatureflag.org/docs/configure_flag/rollout/scheduled).
 - Exporting your flags usage data to various destinations such as _(`S3`, `Google cloud storage`, `file`, see the [_full list_](https://gofeatureflag.org/docs/configure_flag/export_flags_usage))_.
 - Getting notified when a flag has been changed _(`webhook` and `slack`)_.
 - Use **GO Feature Flag** in several languages with **Open Feature SDKs**.
@@ -107,10 +107,10 @@ This flag split the usage of this flag, 20% will use the variation `my-new-featu
 First, you need to initialize the `ffclient` with the location of your backend file.
 ```go linenums="1"
 err := ffclient.Init(ffclient.Config{
-    PollingInterval: 3 * time.Second,
-    Retriever:      &fileretriever.Retriever{
-        Path: "flag-config.yaml",
-    },
+PollingInterval: 3 * time.Second,
+Retriever:      &fileretriever.Retriever{
+Path: "flag-config.yaml",
+},
 })
 defer ffclient.Close()
 ```
@@ -128,9 +128,9 @@ Now you can evaluate your flags anywhere in your code.
 user := ffcontext.NewEvaluationContext("user-unique-key")
 hasFlag, _ := ffclient.BoolVariation("test-flag", user, false)
 if hasFlag {
-    // flag "test-flag" is true for the user
+// flag "test-flag" is true for the user
 } else {
-    // flag "test-flag" is false for the user
+// flag "test-flag" is false for the user
 }
 ```
 The full documentation is available on https://docs.gofeatureflag.org  
@@ -238,7 +238,7 @@ const userContext = {
 
 const adminFlag = await featureFlagClient.getBooleanValue('flag-only-for-admin', false, userContext);
 if (adminFlag) {
-   // flag "flag-only-for-admin" is true for the user
+  // flag "flag-only-for-admin" is true for the user
   console.log("new feature");
 } else {
   // flag "flag-only-for-admin" is false for the user
@@ -258,6 +258,15 @@ _(OpenFeature is still at an early stage, so not all languages are supported and
 
 For now, we have providers for `python`, `java`, `typescript`, `javascript`, `GO` and `.NET`.
 
+| Language              | Provider                                                                                                                                                                                                                    |
+ |-----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Go                    | [Go Provider](https://github.com/open-feature/go-sdk-contrib/tree/main/providers/go-feature-flag)                                                                                                                           |
+| Java                  | [Java Provider](https://github.com/open-feature/java-sdk-contrib/tree/main/providers/go-feature-flag)                                                                                                                       |
+| Javascript/Typescript | [Server provider](https://github.com/open-feature/js-sdk-contrib/tree/main/libs/providers/go-feature-flag) / [Client provider](https://github.com/open-feature/js-sdk-contrib/tree/main/libs/providers/go-feature-flag-web) |
+| PHP                   | Not currently available [help by contributing here](https://github.com/open-feature/php-sdk-contrib/)                                                                                                                       |
+| Python                | [Python provider](https://github.com/thomaspoignant/gofeatureflag-python-provider) ![WIP](https://img.shields.io/badge/status-WIP-red.svg)                                                                                  |
+| .Net                  | [.Net Provider](https://github.com/open-feature/dotnet-sdk-contrib/tree/main/src/OpenFeature.Contrib.Providers.GOFeatureFlag)                                                                                               |
+| Ruby                  | Not currently available [help by contributing here](https://github.com/open-feature/ruby-sdk-contrib)                                                                                                                       |
 
 ## Where do I store my flags file?
 
@@ -315,7 +324,7 @@ second-flag:
   defaultRule:
     variation: defaultValue
   version: "12"
-  experimentation: 
+  experimentation:
     start: 2021-03-20T00:00:00.1-05:00
     end: 2021-03-21T00:00:00.1-05:00
 ```
@@ -343,7 +352,7 @@ second-flag:
       "variation": "A"
     }
   },
-  
+
   "second-flag": {
     "variations": {
       "A": "valueA",
@@ -385,9 +394,9 @@ B = true
 [[first-flag.targeting]]
 query = 'key eq "random-key"'
 
-  [first-flag.targeting.percentage]
-  A = 0
-  B = 100
+[first-flag.targeting.percentage]
+A = 0
+B = 100
 
 [first-flag.defaultRule]
 variation = "A"
@@ -395,30 +404,30 @@ variation = "A"
 [second-flag]
 version = "12"
 
-  [second-flag.variations]
-  A = "valueA"
-  B = "valueB"
-  defaultValue = "a default value"
+[second-flag.variations]
+A = "valueA"
+B = "valueB"
+defaultValue = "a default value"
 
-  [[second-flag.targeting]]
-  name = "notkey_rule"
-  query = 'key eq "not-a-key"'
+[[second-flag.targeting]]
+name = "notkey_rule"
+query = 'key eq "not-a-key"'
 
-    [second-flag.targeting.percentage]
-    A = 10
-    B = 90
+[second-flag.targeting.percentage]
+A = 10
+B = 90
 
-  [second-flag.defaultRule]
-  variation = "defaultValue"
+[second-flag.defaultRule]
+variation = "defaultValue"
 
-  [second-flag.experimentation]
-  start = 2021-03-20T05:00:00.100Z
-  end = 2021-03-21T05:00:00.100Z
+[second-flag.experimentation]
+start = 2021-03-20T05:00:00.100Z
+end = 2021-03-21T05:00:00.100Z
 ```
 
 </details>
 
-For detailed information on the fields required to create a flag, please refer to the [documentation](https://gofeatureflag.org/docs/configure_flag/flag_format). 
+For detailed information on the fields required to create a flag, please refer to the [documentation](https://gofeatureflag.org/docs/configure_flag/flag_format).
 
 ## Rule format
 
@@ -543,14 +552,14 @@ It represents individual flag evaluations and is considered "full fidelity" even
 **An example feature event below:**
 ```json
 {
-    "kind": "feature",
-    "contextKind": "anonymousUser",
-    "userKey": "ABCD",
-    "creationDate": 1618228297,
-    "key": "test-flag",
-    "variation": "Default",
-    "value": false,
-    "default": false
+  "kind": "feature",
+  "contextKind": "anonymousUser",
+  "userKey": "ABCD",
+  "creationDate": 1618228297,
+  "key": "test-flag",
+  "variation": "Default",
+  "value": false,
+  "default": false
 }
 ```
 The format of the data is [described in the documentation](https://gofeatureflag.org/docs/).

@@ -34,17 +34,19 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 		branch = "main"
 	}
 
-	// add header for Github Token if specified
 	header := http.Header{}
+	header.Add("Accept", "application/vnd.github.raw")
+	header.Add("X-GitHub-Api-Version", "2022-11-28")
+	// add header for GitHub Token if specified
 	if r.GithubToken != "" {
-		header.Add("Authorization", fmt.Sprintf("token %s", r.GithubToken))
+		header.Add("Authorization", fmt.Sprintf("Bearer %s", r.GithubToken))
 	}
 
 	URL := fmt.Sprintf(
-		"https://raw.githubusercontent.com/%s/%s/%s",
+		"https://api.github.com/repos/%s/contents/%s?ref=%s",
 		r.RepositorySlug,
-		branch,
-		r.FilePath)
+		r.FilePath,
+		branch)
 
 	httpRetriever := httpretriever.Retriever{
 		URL:     URL,
