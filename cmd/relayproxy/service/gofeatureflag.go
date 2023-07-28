@@ -81,6 +81,7 @@ func NewGoFeatureFlagClient(
 		FileFormat:              proxyConf.FileFormat,
 		DataExporter:            exp,
 		StartWithRetrieverError: proxyConf.StartWithRetrieverError,
+		EnablePollingJitter:     proxyConf.EnablePollingJitter,
 	}
 
 	return ffclient.New(f)
