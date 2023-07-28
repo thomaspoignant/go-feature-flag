@@ -262,9 +262,7 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 				Headers:     tt.args.headers,
 			}
 
-			w := sync.WaitGroup{}
-			w.Add(1)
-			err := c.Notify(tt.args.diff, &w)
+			err := c.Notify(tt.args.diff)
 
 			if tt.expected.err {
 				assert.ErrorContains(t, err, tt.expected.errorMsg)
@@ -311,9 +309,7 @@ func Test_webhookNotifier_no_meta_data(t *testing.T) {
 		init:        sync.Once{},
 	}
 
-	w := sync.WaitGroup{}
-	w.Add(1)
-	err := c.Notify(diff, &w)
+	err := c.Notify(diff)
 
 	assert.NoError(t, err)
 	var m map[string]interface{}

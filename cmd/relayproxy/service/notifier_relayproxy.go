@@ -2,7 +2,6 @@ package service
 
 import (
 	"github.com/thomaspoignant/go-feature-flag/notifier"
-	"sync"
 )
 
 type notifierRelayProxy struct {
@@ -15,8 +14,7 @@ func NewNotifierRelayProxy(websocketService WebsocketService) notifier.Notifier 
 	}
 }
 
-func (n *notifierRelayProxy) Notify(diff notifier.DiffCache, waitGroup *sync.WaitGroup) error {
-	defer waitGroup.Done()
+func (n *notifierRelayProxy) Notify(diff notifier.DiffCache) error {
 	n.websocketService.BroadcastFlagChanges(diff)
 	return nil
 }

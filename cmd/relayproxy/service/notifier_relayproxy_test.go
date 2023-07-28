@@ -4,7 +4,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
-	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -88,15 +87,8 @@ func TestNotify(t *testing.T) {
 		},
 	}
 
-	// Create a WaitGroup to ensure the goroutine completes before asserting the results
-	waitGroup := &sync.WaitGroup{}
-	waitGroup.Add(1)
-
 	// Call the Notify function
-	err := n.Notify(diff, waitGroup)
-
-	// Wait for the goroutine to complete
-	waitGroup.Wait()
+	err := n.Notify(diff)
 
 	// Assertions
 	assert.NoError(t, err)
