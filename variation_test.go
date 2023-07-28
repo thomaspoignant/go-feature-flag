@@ -315,7 +315,7 @@ func TestBoolVariation(t *testing.T) {
 
 			if !tt.args.disableInit {
 				ff = &GoFeatureFlag{
-					bgUpdater: newBackgroundUpdater(5),
+					bgUpdater: newBackgroundUpdater(5, false),
 					cache:     tt.args.cacheMock,
 					config: Config{
 						PollingInterval: 0,
@@ -614,7 +614,7 @@ func TestBoolVariationDetails(t *testing.T) {
 
 			if !tt.args.disableInit {
 				ff = &GoFeatureFlag{
-					bgUpdater: newBackgroundUpdater(5),
+					bgUpdater: newBackgroundUpdater(5, false),
 					cache:     tt.args.cacheMock,
 					config: Config{
 						PollingInterval: 0,
@@ -908,7 +908,7 @@ func TestFloat64Variation(t *testing.T) {
 
 			if !tt.args.disableInit {
 				ff = &GoFeatureFlag{
-					bgUpdater: newBackgroundUpdater(5),
+					bgUpdater: newBackgroundUpdater(5, false),
 					cache:     tt.args.cacheMock,
 					config: Config{
 						PollingInterval: 0,
@@ -1205,7 +1205,7 @@ func TestFloat64VariationDetails(t *testing.T) {
 
 			if !tt.args.disableInit {
 				ff = &GoFeatureFlag{
-					bgUpdater: newBackgroundUpdater(5),
+					bgUpdater: newBackgroundUpdater(5, false),
 					cache:     tt.args.cacheMock,
 					config: Config{
 						PollingInterval: 0,
@@ -1484,7 +1484,7 @@ func TestJSONArrayVariation(t *testing.T) {
 
 			if !tt.args.disableInit {
 				ff = &GoFeatureFlag{
-					bgUpdater: newBackgroundUpdater(5),
+					bgUpdater: newBackgroundUpdater(5, false),
 					cache:     tt.args.cacheMock,
 					config: Config{
 						PollingInterval: 0,
@@ -1770,7 +1770,7 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 
 			if !tt.args.disableInit {
 				ff = &GoFeatureFlag{
-					bgUpdater: newBackgroundUpdater(5),
+					bgUpdater: newBackgroundUpdater(5, false),
 					cache:     tt.args.cacheMock,
 					config: Config{
 						PollingInterval: 0,
@@ -2026,7 +2026,7 @@ func TestJSONVariation(t *testing.T) {
 
 			if !tt.args.disableInit {
 				ff = &GoFeatureFlag{
-					bgUpdater: newBackgroundUpdater(5),
+					bgUpdater: newBackgroundUpdater(5, false),
 					cache:     tt.args.cacheMock,
 					config: Config{
 						PollingInterval: 0,
@@ -2245,7 +2245,7 @@ func TestJSONVariationDetails(t *testing.T) {
 
 			if !tt.args.disableInit {
 				ff = &GoFeatureFlag{
-					bgUpdater: newBackgroundUpdater(5),
+					bgUpdater: newBackgroundUpdater(5, false),
 					cache:     tt.args.cacheMock,
 					config: Config{
 						PollingInterval: 0,
@@ -2507,7 +2507,7 @@ func TestStringVariation(t *testing.T) {
 
 			if !tt.args.disableInit {
 				ff = &GoFeatureFlag{
-					bgUpdater: newBackgroundUpdater(5),
+					bgUpdater: newBackgroundUpdater(5, false),
 					cache:     tt.args.cacheMock,
 					config: Config{
 						PollingInterval: 0,
@@ -2725,7 +2725,7 @@ func TestStringVariationDetails(t *testing.T) {
 
 			if !tt.args.disableInit {
 				ff = &GoFeatureFlag{
-					bgUpdater: newBackgroundUpdater(5),
+					bgUpdater: newBackgroundUpdater(5, false),
 					cache:     tt.args.cacheMock,
 					config: Config{
 						PollingInterval: 0,
@@ -3017,7 +3017,7 @@ func TestIntVariation(t *testing.T) {
 
 			if !tt.args.disableInit {
 				ff = &GoFeatureFlag{
-					bgUpdater: newBackgroundUpdater(5),
+					bgUpdater: newBackgroundUpdater(5, false),
 					cache:     tt.args.cacheMock,
 					config: Config{
 						PollingInterval: 0,
@@ -3274,7 +3274,7 @@ func TestIntVariationDetails(t *testing.T) {
 
 			if !tt.args.disableInit {
 				ff = &GoFeatureFlag{
-					bgUpdater: newBackgroundUpdater(5),
+					bgUpdater: newBackgroundUpdater(5, false),
 					cache:     tt.args.cacheMock,
 					config: Config{
 						PollingInterval: 0,
@@ -3774,7 +3774,7 @@ func TestRawVariation(t *testing.T) {
 
 			if !tt.args.disableInit {
 				ff = &GoFeatureFlag{
-					bgUpdater: newBackgroundUpdater(5),
+					bgUpdater: newBackgroundUpdater(5, false),
 					cache:     tt.args.cacheMock,
 					config: Config{
 						PollingInterval: 0,
