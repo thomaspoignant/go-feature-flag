@@ -24,49 +24,49 @@ type webhookReqBody struct {
 
 // Notifier will call your endpoint URL with a POST request with the following format
 //
-// {
-//   "meta": {
-//     "hostname": "server01"
-//   },
-//   "flags": {
-//     "deleted": {
-//       "test-flag": {
-//         "rule": "key eq \"random-key\"",
-//         "percentage": 100,
-//         "true": true,
-//         "false": false,
-//         "default": false
-//       }
-//     },
-//     "added": {
-//       "test-flag3": {
-//         "percentage": 5,
-//         "true": "test",
-//         "false": "false",
-//         "default": "default"
-//       }
-//     },
-//     "updated": {
-//       "test-flag2": {
-//         "old_value": {
-//           "rule": "key eq \"not-a-key\"",
-//           "percentage": 100,
-//           "true": true,
-//           "false": false,
-//           "default": false
-//         },
-//         "new_value": {
-//           "disable": true,
-//           "rule": "key eq \"not-a-key\"",
-//           "percentage": 100,
-//           "true": true,
-//           "false": false,
-//           "default": false
-//         }
-//       }
-//     }
-//   }
-// }
+//	{
+//	  "meta": {
+//	    "hostname": "server01"
+//	  },
+//	  "flags": {
+//	    "deleted": {
+//	      "test-flag": {
+//	        "rule": "key eq \"random-key\"",
+//	        "percentage": 100,
+//	        "true": true,
+//	        "false": false,
+//	        "default": false
+//	      }
+//	    },
+//	    "added": {
+//	      "test-flag3": {
+//	        "percentage": 5,
+//	        "true": "test",
+//	        "false": "false",
+//	        "default": "default"
+//	      }
+//	    },
+//	    "updated": {
+//	      "test-flag2": {
+//	        "old_value": {
+//	          "rule": "key eq \"not-a-key\"",
+//	          "percentage": 100,
+//	          "true": true,
+//	          "false": false,
+//	          "default": false
+//	        },
+//	        "new_value": {
+//	          "disable": true,
+//	          "rule": "key eq \"not-a-key\"",
+//	          "percentage": 100,
+//	          "true": true,
+//	          "false": false,
+//	          "default": false
+//	        }
+//	      }
+//	    }
+//	  }
+//	}
 type Notifier struct {
 	// EndpointURL of your webhook
 	EndpointURL string
@@ -84,8 +84,7 @@ type Notifier struct {
 	init       sync.Once
 }
 
-func (c *Notifier) Notify(diff notifier.DiffCache, wg *sync.WaitGroup) error {
-	defer wg.Done()
+func (c *Notifier) Notify(diff notifier.DiffCache) error {
 	if c.EndpointURL == "" {
 		return fmt.Errorf("invalid notifier configuration, no endpointURL provided for the webhook notifier")
 	}
