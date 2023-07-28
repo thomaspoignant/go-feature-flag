@@ -19,6 +19,13 @@ type Config struct {
 	// Default: 60 seconds
 	PollingInterval time.Duration
 
+	// EnablePollingJitter (optional) set to true if you want to avoid having true periodicity when
+	// retrieving your flags. It is useful to avoid having spike on your flag configuration storage
+	// in case your application is starting multiple instance at the same time.
+	// We ensure a deviation that is maximum + or - 10% of your polling interval.
+	// Default: false
+	EnablePollingJitter bool
+
 	// Logger (optional) logger use by the library
 	// Default: No log
 	Logger *log.Logger

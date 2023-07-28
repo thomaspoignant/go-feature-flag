@@ -30,6 +30,7 @@ func main() {
 				OutputDir: "./",
 			},
 		},
+		EnablePollingJitter: true,
 	})
 	// Check init errors.
 	if err != nil {
