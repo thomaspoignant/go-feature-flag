@@ -411,7 +411,7 @@ brews:
   - ids:
       - go-feature-flag-migration-cli
     name: go-feature-flag-migration-cli
-    tap:
+    repository:
       owner: thomaspoignant
       name: homebrew-tap
       branch: master
@@ -423,7 +423,7 @@ brews:
   - ids:
       - go-feature-flag-relay-proxy
     name: go-feature-flag-relay-proxy
-    tap:
+    repository:
       owner: thomaspoignant
       name: homebrew-tap
       branch: master
@@ -434,7 +434,7 @@ brews:
   - ids:
       - go-feature-flag
     name: go-feature-flag
-    tap:
+    repository:
       owner: thomaspoignant
       name: homebrew-tap
       branch: master
@@ -445,7 +445,7 @@ brews:
   - ids:
       - go-feature-flag-lint
     name: go-feature-flag-lint
-    tap:
+    repository:
       owner: thomaspoignant
       name: homebrew-tap
       branch: master
@@ -459,7 +459,7 @@ scoops:
   - url_template: https://github.com/thomaspoignant/go-feature-flag/releases/download/{{ .Tag }}/{{ .ArtifactName }}
     ids: [go-feature-flag-migration-cli ]
     name: go-feature-flag-migration-cli
-    bucket:
+    repository:
       owner: go-feature-flag
       name: scoop
     commit_msg_template: "Scoop update for {{ .ProjectName }} version {{ .Tag }}"
@@ -470,7 +470,7 @@ scoops:
   - url_template: https://github.com/thomaspoignant/go-feature-flag/releases/download/{{ .Tag }}/{{ .ArtifactName }}
     ids: [go-feature-flag-relay-proxy ]
     name: go-feature-flag-relay-proxy
-    bucket:
+    repository:
       owner: go-feature-flag
       name: scoop
     commit_msg_template: "Scoop update for {{ .ProjectName }} version {{ .Tag }}"
@@ -480,7 +480,7 @@ scoops:
   - url_template: https://github.com/thomaspoignant/go-feature-flag/releases/download/{{ .Tag }}/{{ .ArtifactName }}
     ids: [go-feature-flag ]
     name: go-feature-flag
-    bucket:
+    repository:
       owner: go-feature-flag
       name: scoop
     commit_msg_template: "Scoop update for {{ .ProjectName }} version {{ .Tag }}"
@@ -490,7 +490,7 @@ scoops:
   - url_template: https://github.com/thomaspoignant/go-feature-flag/releases/download/{{ .Tag }}/{{ .ArtifactName }}
     ids: [ go-feature-flag-lint ]
     name: go-feature-flag-lint
-    bucket:
+    repository:
       owner: go-feature-flag
       name: scoop
     commit_msg_template: "Scoop update for {{ .ProjectName }} version {{ .Tag }}"
