@@ -41,3 +41,4 @@ go-feature-flag-relay-proxy/
 .aws-sam
 
 node_modules/
+oryxBuildBinary
