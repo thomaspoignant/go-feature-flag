@@ -9,6 +9,7 @@ import googlelogo from '@site/static/docs/collectors/google.png';
 import loglogo from '@site/static/docs/collectors/log.png';
 import s3logo from '@site/static/docs/collectors/s3.png';
 import webhooklogo from '@site/static/docs/collectors/webhook.png';
+import sqslogo from '@site/static/docs/collectors/sqs.png';
 
 # How to export evaluation data
 GO Feature Flag allows for the collection of flag usage data.
@@ -54,6 +55,12 @@ To use, simply configure, use the feature flag as normal, and analyze the collec
       logo: googlelogo,
       relayproxy: '/docs/relay_proxy/configure_relay_proxy#google-storage-1',
       gomodule: '/docs/go_module/data_collection/google_cloud_storage'
+    },
+    {
+      name:"AWS SQS",
+      logo: sqslogo,
+      relayproxy: '/docs/relay_proxy/configure_relay_proxy#sqs',
+      gomodule: '/docs/go_module/data_collection/sqs'
     },
     {
       name:"Custom exporter",
