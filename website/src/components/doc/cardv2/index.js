@@ -48,7 +48,7 @@ export function Card(props) {
             {props.badges.map((item, i) => {
               return (<span className={clsx(styles.badge, styles.badgeInfo)} key={item}>{item}</span>)
             })}
-            {props.warningBadges && props.warningBadges.map((item, i) => {
+            {props?.warningBadges.map((item, i) => {
               return (<span className={clsx(styles.badge, styles.badgeWarning)} key={item}>{item}</span>)
             })}
           </div>
