@@ -545,6 +545,7 @@ It collects all variation events and can save these events in several locations:
 - **AWS S3** *- export your variation usages to S3.*
 - **Google Cloud Storage** *- export your variation usages to Google Cloud Storage.*
 - **Webhook** *- export your variation usages by calling a webhook.*
+- **AWS SQS** *- export your variation usages by sending events to SQS.*
 
 Currently, we are supporting only feature events.  
 It represents individual flag evaluations and is considered "full fidelity" events.

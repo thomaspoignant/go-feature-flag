@@ -20,6 +20,7 @@ func TestExporterConf_IsValid(t *testing.T) {
 		Secret                  string
 		Meta                    map[string]string
 		ParquetCompressionCodec string
+		QueueURL                string
 	}
 	tests := []struct {
 		name     string
@@ -139,6 +140,23 @@ func TestExporterConf_IsValid(t *testing.T) {
 			wantErr:  true,
 			errValue: "invalid exporter: \"parquetCompressionCodec\" err: not a valid CompressionCodec string",
 		},
+		{
+			name: "kind SQS valid",
+			fields: fields{
+				Kind:     "sqs",
+				QueueURL: "https://sqs.eu-west-1.amazonaws.com/XXX/test-queue",
+			},
+			wantErr: false,
+		},
+		{
+			name: "kind SQS with queueURL",
+			fields: fields{
+				Kind:     "sqs",
+				QueueURL: "",
+			},
+			wantErr:  true,
+			errValue: "invalid exporter: no \"queueUrl\" property found for kind \"sqs\"",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -154,6 +172,7 @@ func TestExporterConf_IsValid(t *testing.T) {
 				Secret:                  tt.fields.Secret,
 				Meta:                    tt.fields.Meta,
 				ParquetCompressionCodec: tt.fields.ParquetCompressionCodec,
+				QueueURL:                tt.fields.QueueURL,
 			}
 			err := c.IsValid()
 			assert.Equal(t, tt.wantErr, err != nil)

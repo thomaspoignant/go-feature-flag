@@ -40,6 +40,14 @@
   background-color: #34a853;
 }
 
+.socialIconAws {
+  background-color: rgb(255, 153, 0);
+}
+
+.socialIconGitlab {
+  background-color: #e2432a;
+}
+
 .tooltip {
   position: relative;
   display: inline-block;
