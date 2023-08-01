@@ -46,10 +46,10 @@ export function Card(props) {
           </p>
           <div className={styles.badgeSection}>
             {props.badges.map((item, i) => {
-              return (<span className={clsx(styles.badge, styles.badgeInfo)}>{item}</span>)
+              return (<span className={clsx(styles.badge, styles.badgeInfo)} key={item}>{item}</span>)
             })}
             {props.warningBadges && props.warningBadges.map((item, i) => {
-              return (<span className={clsx(styles.badge, styles.badgeWarning)}>{item}</span>)
+              return (<span className={clsx(styles.badge, styles.badgeWarning)} key={item}>{item}</span>)
             })}
           </div>
         </div>
