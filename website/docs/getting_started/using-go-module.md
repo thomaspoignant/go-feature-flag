@@ -1,5 +1,5 @@
 ---
-sidebar_position: 10
+sidebar_position: 20
 description: Use the module in your GO application with nothing to install. 
 ---
 # Using the GO module

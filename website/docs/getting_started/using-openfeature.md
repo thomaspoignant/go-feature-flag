@@ -1,5 +1,5 @@
 ---
-sidebar_position: 20
+sidebar_position: 10
 description: Deploy the relay proxy and use the OpenFeature SDKs 
 ---
 # Using Open Feature SDKs
