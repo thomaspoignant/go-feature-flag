@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"github.com/thomaspoignant/go-feature-flag/exporter/sqsexporter"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"github.com/thomaspoignant/go-feature-flag/notifier/slacknotifier"
 	"github.com/thomaspoignant/go-feature-flag/notifier/webhooknotifier"
@@ -260,6 +261,22 @@ func Test_initExporter(t *testing.T) {
 					Filename:                config.DefaultExporter.FileName,
 					CsvTemplate:             config.DefaultExporter.CsvFormat,
 					ParquetCompressionCodec: config.DefaultExporter.ParquetCompressionCodec,
+				},
+			},
+		},
+		{
+			name:    "Convert SQSExporter",
+			wantErr: assert.NoError,
+			conf: &config.ExporterConf{
+				Kind:          "sqs",
+				QueueURL:      "https://sqs.eu-west-1.amazonaws.com/XXX/test-queue",
+				FlushInterval: 10,
+			},
+			want: ffclient.DataExporter{
+				FlushInterval:    10 * time.Millisecond,
+				MaxEventInMemory: config.DefaultExporter.MaxEventInMemory,
+				Exporter: &sqsexporter.Exporter{
+					QueueURL: "https://sqs.eu-west-1.amazonaws.com/XXX/test-queue",
 				},
 			},
 		},
