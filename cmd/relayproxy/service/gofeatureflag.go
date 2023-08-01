@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"github.com/thomaspoignant/go-feature-flag/exporter/sqsexporter"
 	"time"
 
 	ffclient "github.com/thomaspoignant/go-feature-flag"
@@ -253,6 +254,10 @@ func initExporter(c *config.ExporterConf) (ffclient.DataExporter, error) {
 			CsvTemplate:             csvTemplate,
 			ParquetCompressionCodec: parquetCompressionCodec,
 		}
+		return dataExp, nil
+
+	case config.SQSExporter:
+		dataExp.Exporter = &sqsexporter.Exporter{QueueURL: c.QueueURL}
 		return dataExp, nil
 
 	default:

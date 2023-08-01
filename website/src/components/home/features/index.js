@@ -3,10 +3,14 @@ import styles from './styles.module.css';
 import clsx from 'clsx';
 import Link from '@docusaurus/Link';
 import PropTypes from 'prop-types';
+import sqslogo from '@site/static/docs/collectors/sqs.png';
+import s3logo from '@site/static/docs/collectors/s3.png';
+import webhooklogo from '@site/static/docs/collectors/webhook.png';
 
 SocialIcon.propTypes = {
   colorClassName: PropTypes.string.isRequired,
-  fontAwesomeIcon: PropTypes.string.isRequired,
+  fontAwesomeIcon: PropTypes.string,
+  img: PropTypes.string,
   tooltipText: PropTypes.string.isRequired,
 };
 function SocialIcon(props) {
@@ -14,7 +18,8 @@ function SocialIcon(props) {
     <div className="col-1-4 mobile-col-1-4">
       <div className={styles.tooltip}>
         <span className={clsx(styles.socialIcon, props.colorClassName)}>
-          <i className={props.fontAwesomeIcon}></i>
+          {props.fontAwesomeIcon && <i className={props.fontAwesomeIcon}></i>}
+          {props.img && <img src={props.img} width="36"/>}
         </span>
         <span className={styles.tooltiptext}>{props.tooltipText}</span>
       </div>
@@ -201,6 +206,12 @@ function Integration() {
           />
 
           <SocialIcon
+            colorClassName={styles.socialIconAws}
+            img={s3logo}
+            tooltipText="AWS S3"
+          />
+
+          <SocialIcon
             colorClassName={styles.socialIconPurple}
             fontAwesomeIcon="fab fa-slack fa-stack-1x fa-inverse"
             tooltipText="Slack"
@@ -225,10 +236,24 @@ function Integration() {
           />
 
           <SocialIcon
-            colorClassName={styles.socialIconBlack}
-            fontAwesomeIcon="fas fa-arrow-right-arrow-left fa-stack-1x fa-inverse"
+            colorClassName={styles.socialIconGreen}
+            img={webhooklogo}
             tooltipText="Webhooks"
           />
+
+          <SocialIcon
+            colorClassName={styles.socialIconAws}
+            img={sqslogo}
+            tooltipText="AWS SQS"
+          />
+
+          <SocialIcon
+            colorClassName={styles.socialIconGitlab}
+            fontAwesomeIcon="devicon-gitlab-plain"
+            tooltipText="Gitlab"
+          />
+
+
         </div>
       </div>
     </div>
