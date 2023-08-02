@@ -3,7 +3,6 @@ package logsnotifier
 import (
 	"log"
 	"os"
-	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -16,157 +15,44 @@ import (
 
 func TestLogNotifier_Notify(t *testing.T) {
 	type args struct {
-		diff notifier.DiffCache
-		wg   *sync.WaitGroup
 	}
 	tests := []struct {
 		name     string
 		args     args
+		diff     notifier.DiffCache
 		expected string
 	}{
 		{
 			name: "Flag deleted",
-			args: args{
-				diff: notifier.DiffCache{
-					Deleted: map[string]flag.Flag{
-						"test-flag": &flag.InternalFlag{
-							Variations: &map[string]*interface{}{
-								"Default": testconvert.Interface(false),
-								"False":   testconvert.Interface(false),
-								"True":    testconvert.Interface(true),
-							},
-							DefaultRule: &flag.Rule{
-								Name: testconvert.String("legacyDefaultRule"),
-								Percentages: &map[string]float64{
-									"False": 0,
-									"True":  100,
-								},
+			diff: notifier.DiffCache{
+				Deleted: map[string]flag.Flag{
+					"test-flag": &flag.InternalFlag{
+						Variations: &map[string]*interface{}{
+							"Default": testconvert.Interface(false),
+							"False":   testconvert.Interface(false),
+							"True":    testconvert.Interface(true),
+						},
+						DefaultRule: &flag.Rule{
+							Name: testconvert.String("legacyDefaultRule"),
+							Percentages: &map[string]float64{
+								"False": 0,
+								"True":  100,
 							},
 						},
 					},
-					Updated: map[string]notifier.DiffUpdated{},
-					Added:   map[string]flag.Flag{},
 				},
-				wg: &sync.WaitGroup{},
+				Updated: map[string]notifier.DiffUpdated{},
+				Added:   map[string]flag.Flag{},
 			},
 			expected: "^\\[" + testutils.RFC3339Regex + "\\] flag test-flag removed",
 		},
 		{
 			name: "Update flag",
-			args: args{
-				diff: notifier.DiffCache{
-					Deleted: map[string]flag.Flag{},
-					Updated: map[string]notifier.DiffUpdated{
-						"test-flag": {
-							Before: &flag.InternalFlag{
-								Rules: &[]flag.Rule{
-									{
-										Name:  testconvert.String("legacyRuleV0"),
-										Query: testconvert.String("key eq \"random-key\""),
-										Percentages: &map[string]float64{
-											"False": 0,
-											"True":  100,
-										},
-									},
-								},
-								Variations: &map[string]*interface{}{
-									"Default": testconvert.Interface(false),
-									"False":   testconvert.Interface(false),
-									"True":    testconvert.Interface(true),
-								},
-								DefaultRule: &flag.Rule{
-									Name:            testconvert.String("legacyDefaultRule"),
-									VariationResult: testconvert.String("Default"),
-								},
-							},
-							After: &flag.InternalFlag{
-								Variations: &map[string]*interface{}{
-									"Default": testconvert.Interface(false),
-									"False":   testconvert.Interface(false),
-									"True":    testconvert.Interface(true),
-								},
-								DefaultRule: &flag.Rule{
-									Name: testconvert.String("legacyDefaultRule"),
-									Percentages: &map[string]float64{
-										"False": 0,
-										"True":  100,
-									},
-								},
-							},
-						},
-					},
-					Added: map[string]flag.Flag{},
-				},
-				wg: &sync.WaitGroup{},
-			},
-			expected: "^\\[" + testutils.RFC3339Regex + "\\] flag test-flag updated",
-		},
-		{
-			name: "Disable flag",
-			args: args{
-				diff: notifier.DiffCache{
-					Deleted: map[string]flag.Flag{},
-					Updated: map[string]notifier.DiffUpdated{
-						"test-flag": {
-							Before: &flag.InternalFlag{
-								Rules: &[]flag.Rule{
-									{
-										Name:  testconvert.String("legacyRuleV0"),
-										Query: testconvert.String("key eq \"random-key\""),
-										Percentages: &map[string]float64{
-											"False": 0,
-											"True":  100,
-										},
-									},
-								},
-								Variations: &map[string]*interface{}{
-									"Default": testconvert.Interface(false),
-									"False":   testconvert.Interface(false),
-									"True":    testconvert.Interface(true),
-								},
-								DefaultRule: &flag.Rule{
-									Name:            testconvert.String("legacyDefaultRule"),
-									VariationResult: testconvert.String("Default"),
-								},
-							},
-							After: &flag.InternalFlag{
-								Rules: &[]flag.Rule{
-									{
-										Name:  testconvert.String("legacyRuleV0"),
-										Query: testconvert.String("key eq \"random-key\""),
-										Percentages: &map[string]float64{
-											"False": 0,
-											"True":  100,
-										},
-									},
-								},
-								Variations: &map[string]*interface{}{
-									"Default": testconvert.Interface(false),
-									"False":   testconvert.Interface(false),
-									"True":    testconvert.Interface(true),
-								},
-								DefaultRule: &flag.Rule{
-									Name:            testconvert.String("legacyDefaultRule"),
-									VariationResult: testconvert.String("Default"),
-								},
-								Disable: testconvert.Bool(true),
-							},
-						},
-					},
-					Added: map[string]flag.Flag{},
-				},
-				wg: &sync.WaitGroup{},
-			},
-			expected: "^\\[" + testutils.RFC3339Regex + "\\] flag test-flag is turned OFF",
-		},
-		{
-			name: "Add flag",
-			args: args{
-				diff: notifier.DiffCache{
-					Deleted: map[string]flag.Flag{},
-					Updated: map[string]notifier.DiffUpdated{},
-					Added: map[string]flag.Flag{
-						"add-test-flag": &flag.InternalFlag{
+			diff: notifier.DiffCache{
+				Deleted: map[string]flag.Flag{},
+				Updated: map[string]notifier.DiffUpdated{
+					"test-flag": {
+						Before: &flag.InternalFlag{
 							Rules: &[]flag.Rule{
 								{
 									Name:  testconvert.String("legacyRuleV0"),
@@ -187,67 +73,164 @@ func TestLogNotifier_Notify(t *testing.T) {
 								VariationResult: testconvert.String("Default"),
 							},
 						},
+						After: &flag.InternalFlag{
+							Variations: &map[string]*interface{}{
+								"Default": testconvert.Interface(false),
+								"False":   testconvert.Interface(false),
+								"True":    testconvert.Interface(true),
+							},
+							DefaultRule: &flag.Rule{
+								Name: testconvert.String("legacyDefaultRule"),
+								Percentages: &map[string]float64{
+									"False": 0,
+									"True":  100,
+								},
+							},
+						},
 					},
 				},
-				wg: &sync.WaitGroup{},
+				Added: map[string]flag.Flag{},
+			},
+			expected: "^\\[" + testutils.RFC3339Regex + "\\] flag test-flag updated",
+		},
+		{
+			name: "Disable flag",
+			diff: notifier.DiffCache{
+				Deleted: map[string]flag.Flag{},
+				Updated: map[string]notifier.DiffUpdated{
+					"test-flag": {
+						Before: &flag.InternalFlag{
+							Rules: &[]flag.Rule{
+								{
+									Name:  testconvert.String("legacyRuleV0"),
+									Query: testconvert.String("key eq \"random-key\""),
+									Percentages: &map[string]float64{
+										"False": 0,
+										"True":  100,
+									},
+								},
+							},
+							Variations: &map[string]*interface{}{
+								"Default": testconvert.Interface(false),
+								"False":   testconvert.Interface(false),
+								"True":    testconvert.Interface(true),
+							},
+							DefaultRule: &flag.Rule{
+								Name:            testconvert.String("legacyDefaultRule"),
+								VariationResult: testconvert.String("Default"),
+							},
+						},
+						After: &flag.InternalFlag{
+							Rules: &[]flag.Rule{
+								{
+									Name:  testconvert.String("legacyRuleV0"),
+									Query: testconvert.String("key eq \"random-key\""),
+									Percentages: &map[string]float64{
+										"False": 0,
+										"True":  100,
+									},
+								},
+							},
+							Variations: &map[string]*interface{}{
+								"Default": testconvert.Interface(false),
+								"False":   testconvert.Interface(false),
+								"True":    testconvert.Interface(true),
+							},
+							DefaultRule: &flag.Rule{
+								Name:            testconvert.String("legacyDefaultRule"),
+								VariationResult: testconvert.String("Default"),
+							},
+							Disable: testconvert.Bool(true),
+						},
+					},
+				},
+				Added: map[string]flag.Flag{},
+			},
+			expected: "^\\[" + testutils.RFC3339Regex + "\\] flag test-flag is turned OFF",
+		},
+		{
+			name: "Add flag",
+			diff: notifier.DiffCache{
+				Deleted: map[string]flag.Flag{},
+				Updated: map[string]notifier.DiffUpdated{},
+				Added: map[string]flag.Flag{
+					"add-test-flag": &flag.InternalFlag{
+						Rules: &[]flag.Rule{
+							{
+								Name:  testconvert.String("legacyRuleV0"),
+								Query: testconvert.String("key eq \"random-key\""),
+								Percentages: &map[string]float64{
+									"False": 0,
+									"True":  100,
+								},
+							},
+						},
+						Variations: &map[string]*interface{}{
+							"Default": testconvert.Interface(false),
+							"False":   testconvert.Interface(false),
+							"True":    testconvert.Interface(true),
+						},
+						DefaultRule: &flag.Rule{
+							Name:            testconvert.String("legacyDefaultRule"),
+							VariationResult: testconvert.String("Default"),
+						},
+					},
+				},
 			},
 			expected: "^\\[" + testutils.RFC3339Regex + "\\] flag add-test-flag added",
 		},
 		{
 			name: "Enable flag",
-			args: args{
-				diff: notifier.DiffCache{
-					Deleted: map[string]flag.Flag{},
-					Updated: map[string]notifier.DiffUpdated{
-						"test-flag": {
-							After: &flag.InternalFlag{
-								Rules: &[]flag.Rule{
-									{
-										Name:  testconvert.String("legacyRuleV0"),
-										Query: testconvert.String("key eq \"random-key\""),
-										Percentages: &map[string]float64{
-											"False": 0,
-											"True":  100,
-										},
+			diff: notifier.DiffCache{
+				Deleted: map[string]flag.Flag{},
+				Updated: map[string]notifier.DiffUpdated{
+					"test-flag": {
+						After: &flag.InternalFlag{
+							Rules: &[]flag.Rule{
+								{
+									Name:  testconvert.String("legacyRuleV0"),
+									Query: testconvert.String("key eq \"random-key\""),
+									Percentages: &map[string]float64{
+										"False": 0,
+										"True":  100,
 									},
-								},
-								Variations: &map[string]*interface{}{
-									"Default": testconvert.Interface(false),
-									"False":   testconvert.Interface(false),
-									"True":    testconvert.Interface(true),
-								},
-								DefaultRule: &flag.Rule{
-									Name:            testconvert.String("legacyDefaultRule"),
-									VariationResult: testconvert.String("Default"),
 								},
 							},
-							Before: &flag.InternalFlag{
-								Rules: &[]flag.Rule{
-									{
-										Name:  testconvert.String("legacyRuleV0"),
-										Query: testconvert.String("key eq \"random-key\""),
-										Percentages: &map[string]float64{
-											"False": 0,
-											"True":  100,
-										},
-									},
-								},
-								Variations: &map[string]*interface{}{
-									"Default": testconvert.Interface(false),
-									"False":   testconvert.Interface(false),
-									"True":    testconvert.Interface(true),
-								},
-								DefaultRule: &flag.Rule{
-									Name:            testconvert.String("legacyDefaultRule"),
-									VariationResult: testconvert.String("Default"),
-								},
-								Disable: testconvert.Bool(true),
+							Variations: &map[string]*interface{}{
+								"Default": testconvert.Interface(false),
+								"False":   testconvert.Interface(false),
+								"True":    testconvert.Interface(true),
+							},
+							DefaultRule: &flag.Rule{
+								Name:            testconvert.String("legacyDefaultRule"),
+								VariationResult: testconvert.String("Default"),
 							},
 						},
+						Before: &flag.InternalFlag{
+							Rules: &[]flag.Rule{
+								{
+									Name:  testconvert.String("legacyRuleV0"),
+									Query: testconvert.String("key eq \"random-key\""),
+									Percentages: &map[string]float64{
+										"False": 0,
+										"True":  100,
+									},
+								},
+							},
+							Variations: &map[string]*interface{}{
+								"Default": testconvert.Interface(false),
+								"False":   testconvert.Interface(false),
+								"True":    testconvert.Interface(true),
+							},
+							DefaultRule: &flag.Rule{
+								Name:            testconvert.String("legacyDefaultRule"),
+								VariationResult: testconvert.String("Default"),
+							},
+							Disable: testconvert.Bool(true),
+						},
 					},
-					Added: map[string]flag.Flag{},
 				},
-				wg: &sync.WaitGroup{},
+				Added: map[string]flag.Flag{},
 			},
 			expected: "^\\[" + testutils.RFC3339Regex + "\\] flag test-flag is turned ON",
 		},
@@ -260,8 +243,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 			c := &Notifier{
 				Logger: log.New(logOutput, "", 0),
 			}
-			tt.args.wg.Add(1)
-			_ = c.Notify(tt.args.diff, tt.args.wg)
+			_ = c.Notify(tt.diff)
 			log, _ := os.ReadFile(logOutput.Name())
 			assert.Regexp(t, tt.expected, string(log))
 		})

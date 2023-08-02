@@ -81,7 +81,7 @@ func New(config Config) (*GoFeatureFlag, error) {
 		}
 
 		notificationService := cache.NewNotificationService(notifiers)
-		goFF.bgUpdater = newBackgroundUpdater(config.PollingInterval)
+		goFF.bgUpdater = newBackgroundUpdater(config.PollingInterval, config.EnablePollingJitter)
 		goFF.cache = cache.New(notificationService, config.Logger)
 
 		err := retrieveFlagsAndUpdateCache(goFF.config, goFF.cache)

@@ -126,7 +126,14 @@ type Config struct {
 	// PollingInterval (optional) Poll every X time
 	// The minimum possible is 1 second
 	// Default: 60 seconds
-	PollingInterval int `koanf:"pollinginterval" mapstructure:"pollingInterval"`
+	PollingInterval int `mapstructure:"pollingInterval" koanf:"pollinginterval"`
+
+	// EnablePollingJitter (optional) set to true if you want to avoid having true periodicity when
+	// retrieving your flags. It is useful to avoid having spike on your flag configuration storage
+	// in case your application is starting multiple instance at the same time.
+	// We ensure a deviation that is maximum + or - 10% of your polling interval.
+	// Default: false
+	EnablePollingJitter bool `mapstructure:"enablePollingJitter" koanf:"enablepollingjitter"`
 
 	// FileFormat (optional) is the format of the file to retrieve (available YAML, TOML and JSON)
 	// Default: YAML

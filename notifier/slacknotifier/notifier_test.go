@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"sync"
 	"testing"
 	"time"
 
@@ -199,9 +198,7 @@ func TestSlackNotifier_Notify(t *testing.T) {
 				httpClient:      mockHTTPClient,
 			}
 
-			w := sync.WaitGroup{}
-			w.Add(1)
-			err := c.Notify(tt.args.diff, &w)
+			err := c.Notify(tt.args.diff)
 
 			if tt.expected.err {
 				assert.ErrorContains(t, err, tt.expected.errMsg)

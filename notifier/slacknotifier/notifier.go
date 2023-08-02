@@ -35,9 +35,7 @@ type Notifier struct {
 	init       sync.Once
 }
 
-func (c *Notifier) Notify(diff notifier.DiffCache, wg *sync.WaitGroup) error {
-	defer wg.Done()
-
+func (c *Notifier) Notify(diff notifier.DiffCache) error {
 	if c.SlackWebhookURL == "" {
 		return fmt.Errorf("error: (Slack Notifier) invalid notifier configuration, no " +
 			"SlackWebhookURL provided for the slack notifier")

@@ -23,6 +23,7 @@ type ExporterConf struct {
 	MaxEventInMemory        int64               `mapstructure:"maxEventInMemory" koanf:"maxeventinmemory"`
 	ParquetCompressionCodec string              `mapstructure:"parquetCompressionCodec" koanf:"parquetcompressioncodec"`
 	Headers                 map[string][]string `mapstructure:"headers" koanf:"headers"`
+	QueueURL                string              `mapstructure:"queueUrl" koanf:"queueurl"`
 }
 
 func (c *ExporterConf) IsValid() error {
@@ -43,6 +44,9 @@ func (c *ExporterConf) IsValid() error {
 			return fmt.Errorf("invalid exporter: \"parquetCompressionCodec\" err: %v", err)
 		}
 	}
+	if c.Kind == SQSExporter && c.QueueURL == "" {
+		return fmt.Errorf("invalid exporter: no \"queueUrl\" property found for kind \"%s\"", c.Kind)
+	}
 	return nil
 }
 
@@ -54,12 +58,13 @@ const (
 	LogExporter           ExporterKind = "log"
 	S3Exporter            ExporterKind = "s3"
 	GoogleStorageExporter ExporterKind = "googleStorage"
+	SQSExporter           ExporterKind = "sqs"
 )
 
 // IsValid is checking if the value is part of the enum
 func (r ExporterKind) IsValid() error {
 	switch r {
-	case FileExporter, WebhookExporter, LogExporter, S3Exporter, GoogleStorageExporter:
+	case FileExporter, WebhookExporter, LogExporter, S3Exporter, GoogleStorageExporter, SQSExporter:
 		return nil
 	}
 	return fmt.Errorf("invalid exporter: kind \"%s\" is not supported", r)
