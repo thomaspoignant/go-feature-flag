@@ -21,4 +21,4 @@ It is your responsibility to store them where you want.
 
 `IsBulk` function should return `false` if the exporter can handle the results in stream mode.  
 If you decide to manage it in streaming mode, everytime we call a variation the `Export` function will be called
-with only on event in the list.
+with only one event in the list.
