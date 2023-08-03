@@ -276,30 +276,3 @@ jobs:
           delete-branch: true
           path: ${{ env.MAIN_BRANCH_NAME }}
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
-
-  homebrew:
-    name: Bump homebrew-core formula
-    needs:
-      - goreleaser
-    runs-on: ubuntu-latest
-    steps:
-      - name: Get tag name
-        id: tagName
-        uses: olegtarasov/get-tag@v2.1.2
-
-      - uses: mislav/bump-homebrew-formula-action@v2
-        with:
-          formula-name: go-feature-flag-relay-proxy
-          tag-name: ${{ steps.tagName.outputs.tag }}
-          download-url: https://github.com/${{ github.repository }}.git
-          commit-message: |
-            {{formulaName}} {{version}}
-            
-            Version `{{version}}` of the go-feature-flag-relay-proxy is available.
-            This PR bump the version in homebrew.
-            
-            Check https://gofeatureflag.org if you want to have more information about GO Feature Flag.
-            
-            Created by https://github.com/mislav/bump-homebrew-formula-action
-        env:
-          COMMITTER_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
