@@ -1,5 +1,6 @@
 ---
 sidebar_position: 80
+title: Monitoring
 description: Monitor the relay proxy.
 ---
 

@@ -1,5 +1,6 @@
 ---
 sidebar_position: 30
+title: Configuration
 description: How to configure the relay proxy to serve your feature flags.
 ---
 

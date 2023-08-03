@@ -1,5 +1,6 @@
 ---
 sidebar_position: 19
+title: Getting started
 description: Getting started with the relay proxy.
 ---
 

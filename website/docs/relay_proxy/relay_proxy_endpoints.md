@@ -1,5 +1,6 @@
 ---
 sidebar_position: 60
+title: API endpoints
 description: Description of the available endpoints in the relay proxy.
 ---
 
