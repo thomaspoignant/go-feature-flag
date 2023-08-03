@@ -26,16 +26,17 @@ Card.propTypes = {
 };
 export function Card(props) {
   return (
-    <div className={clsx("col-1-3 mobile-col-1-2")}>
+    <div className={clsx("col-1-3 mobile-col-1-1")}>
       <Link to={props.docLink} className={styles.link}>
         <div className={styles.card}>
+
           <div className={styles.header}>
             <span className={styles.socialIcon}>
               <i className={props.logo}></i>
             </span>
-            <div>
-              <p className={styles.name}>{props.language}</p>
-            </div>
+          </div>
+          <div>
+            <p className={styles.name}>{props.language}</p>
           </div>
           <p className={styles.message}>
             {featureIcon(props.features, "remoteEval")} Remote evaluation <br />

@@ -1,5 +1,5 @@
 ---
-sidebar_position: 21
+sidebar_position: 19
 description: Getting started with the relay proxy.
 ---
 
@@ -26,9 +26,13 @@ After that you can use all the available endpoints _(see **Service endpoints** s
 ## Deployment options
 
 A common way to run **go-feature-flag relay proxy** is to use the Docker Container.  
-An image is available on docker Hub [`thomaspoignant/go-feature-flag-relay-proxy`](https://hub.docker.com/r/thomaspoignant/go-feature-flag-relay-proxy).
+An image is available on docker Hub [`thomaspoignant/go-feature-flag`](https://hub.docker.com/r/thomaspoignant/go-feature-flag).
 
-You can also run it as a service in your application following the **Installation** section.
+You can also run it as a service in your application following the [**Installation**](install_relay_proxy) page.
+
+```shell
+docker run  -v $(pwd)/goff-proxy.yaml:/goff/goff-proxy.yaml thomaspoignant/go-feature-flag-relay-proxy:latest
+```
 
 ## Specifying a configuration
 
