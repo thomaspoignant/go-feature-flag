@@ -1,5 +1,6 @@
 ---
 sidebar_position: 20
+title: Installation
 description: Relay proxy is the component that will evaluate the flags, this page explain how to install it.
 ---
 

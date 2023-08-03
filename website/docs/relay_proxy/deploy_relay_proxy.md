@@ -1,5 +1,6 @@
 ---
 sidebar_position: 70
+title: Deployment
 description: Deploy the relay proxy.
 ---
 
