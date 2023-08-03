@@ -141,7 +141,7 @@ function OpenFeature() {
             allow you to use GO Feature Flag with all supported languages.
           </p>
           <p>
-            <Link to={'/docs/next/category/use-with-openfeature'}>
+            <Link to={'/docs/openfeature_sdk/sdk'}>
               {' '}
               See our SDKs <i className="fa-solid fa-arrow-right"></i>
             </Link>
