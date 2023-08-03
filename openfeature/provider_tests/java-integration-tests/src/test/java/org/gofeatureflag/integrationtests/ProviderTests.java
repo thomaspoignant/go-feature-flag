@@ -355,7 +355,6 @@ public class ProviderTests {
                 .value(false)
                 .errorCode(ErrorCode.GENERAL)
                 .errorMessage("impossible to contact GO Feature Flag relay proxy instance")
-                .flagMetadata(defaultMetadata)
                 .build();
         FlagEvaluationDetails<Boolean> got = goffClient.getBooleanDetails(flagKey, false, defaultEvaluationContext);
         assertEquals(expected, got);
