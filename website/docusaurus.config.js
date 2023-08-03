@@ -218,7 +218,7 @@ const config = {
               },
               {
                 label: 'SDKs',
-                to: '/docs/category/use-with-openfeature'
+                to: '/docs/openfeature_sdk/sdk',
               },
               {
                 label: 'Relay Proxy',
