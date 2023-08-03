@@ -237,7 +237,7 @@ string
 			<td>
 				<div style="max-width: 300px;">
 <pre lang="json">
-"thomaspoignant/go-feature-flag-relay-proxy"
+"thomaspoignant/go-feature-flag"
 </pre>
 </div>
 			</td>
