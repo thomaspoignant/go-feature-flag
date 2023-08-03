@@ -4,8 +4,6 @@ import styles from './styles.module.css';
 import clsx from "clsx";
 import PropTypes from "prop-types";
 
-
-
 Cards.prototype = {
   cards: PropTypes.array.isRequired
 }
