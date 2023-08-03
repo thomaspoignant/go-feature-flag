@@ -1,0 +1,83 @@
+---
+sidebar_position: 1
+description: Use GO Feature Flag with Openfeature SDKs
+---
+
+import { Cards } from "../../src/components/doc/cardv2";
+
+# SDKs
+
+**GO Feature Flag** stands out as a feature flag solution, distinct from others, due to our decision to fully support the [`Openfeature`](https://openfeature.dev) CNCF project.
+
+The benefit of choosing OpenFeature lies in its framework-agnostic nature. When utilizing OpenFeature SDKs, you minimize the effort required for switching to a different feature flag provider. This flexibility empowers you to make changes without being tied down to a particular vendor.
+
+To show our commitment to this initiative, **GO Feature Flag has opted not to develop any custom SDKs and instead relies entirely on OpenFeature SDKs**.
+In order to seamlessly integrate with our solution, we offer [`providers`](https://docs.openfeature.dev/docs/reference/concepts/provider) for GO Feature Flag in multiple programming languages.
+
+Rest assured, working with OpenFeature SDKs alongside GO Feature Flag providers is as straightforward as using any other feature flag solution. The added advantage is that you now adhere to a standard approach and avoid any vendor lock-in!
+
+## Server Providers
+<Cards cards={[
+  {
+    logo: "devicon-go-original-wordmark colored",
+    language:"GO",
+    badges:["Server"],
+    features:["remoteEval", "localCache"],
+    docLink: "./server_providers/openfeature_go"
+  },
+  {
+    logo: "devicon-typescript-plain colored",
+    language:"Typescript",
+    badges:["Server"],
+    features:["remoteEval", "localCache"],
+    docLink: "./server_providers/openfeature_javascript"
+  },
+  {
+    logo: "devicon-java-plain colored",
+    language:"Java",
+    badges:["Server"],
+    features:["remoteEval"],
+    docLink: "./server_providers/openfeature_java"
+  },
+  {
+    logo: "devicon-dot-net-plain-wordmark colored",
+    language:".Net",
+    badges:["Server"],
+    features:["remoteEval"],
+    docLink: "./server_providers/openfeature_javascript"
+  },
+  {
+    logo: "devicon-python-plain colored",
+    language:"Python",
+    badges:["Server"],
+    warningBadges: ["WIP"],
+    features:["remoteEval"],
+    docLink: "https://github.com/thomaspoignant/gofeatureflag-python-provider"
+  }
+]}/>
+
+## Client Providers
+<Cards cards={[
+  {
+    logo: "devicon-typescript-plain colored",
+    language:"Typescript",
+    badges:["Client"],
+    features:["remoteEval", "localCache", "dynamicRefresh"],
+    docLink: "./client_providers/openfeature_javascript"
+  }
+]}/>
+
+
+## How OpenFeature and GO Feature Flag are working together?
+
+To use the OpenFeature SDKs you need what we call a provider.
+A **provider** is responsible for performing flag evaluations. It provides an abstraction between **GO Feature Flag** and the OpenFeature SDK.
+
+A provider need a backend service to perform the flag evaluation. This is why we have introduced the [**relay proxy**](../category/use-the-relay-proxy).
+This component retrieve your feature flag configuration file using the GO module and expose APIs to get your flags variations.
+
+![](/docs/openfeature/concepts.jpg)
+
+With this simple architecture you have a central component _(the relay proxy)_ that is in charge of the flag evaluation, while the SDKs and providers are responsible to communicate with the relay proxy.
+
+This supports different languages the same way and makes you able to use GO Feature Flag with all your favorite languages.
