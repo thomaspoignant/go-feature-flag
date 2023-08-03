@@ -19,6 +19,10 @@ public class ProviderTests {
     private EvaluationContext defaultEvaluationContext;
     private Client goffClient;
 
+    private ImmutableMetadata defaultMetadata = ImmutableMetadata.builder()
+            .addString("description", "this is a test")
+            .addString("pr_link", "https://github.com/thomaspoignant/go-feature-flag/pull/916")
+            .build();
     @BeforeEach
     void init() throws InvalidOptions {
         MutableContext userContext = new MutableContext()
@@ -52,6 +56,7 @@ public class ProviderTests {
                 .reason(Reason.TARGETING_MATCH.toString())
                 .value(true)
                 .variant("True")
+                .flagMetadata(defaultMetadata)
                 .build();
         FlagEvaluationDetails<Boolean> got = goffClient.getBooleanDetails(flagKey, false, defaultEvaluationContext);
         assertEquals(expected, got);
@@ -106,6 +111,7 @@ public class ProviderTests {
                 .flagKey(flagKey)
                 .value("CC0000")
                 .variant("True")
+                .flagMetadata(defaultMetadata)
                 .build();
         FlagEvaluationDetails<String> got = goffClient.getStringDetails(flagKey, "default", defaultEvaluationContext);
         assertEquals(expected, got);
@@ -162,6 +168,7 @@ public class ProviderTests {
                 .flagKey(flagKey)
                 .value(100.25)
                 .variant("True")
+                .flagMetadata(defaultMetadata)
                 .build();
         FlagEvaluationDetails<Double> got = goffClient.getDoubleDetails(flagKey, 123.45, defaultEvaluationContext);
         assertEquals(expected, got);
@@ -218,6 +225,7 @@ public class ProviderTests {
                 .flagKey(flagKey)
                 .value(100)
                 .variant("True")
+                .flagMetadata(defaultMetadata)
                 .build();
         FlagEvaluationDetails<Integer> got = goffClient.getIntegerDetails(flagKey, 123, defaultEvaluationContext);
         assertEquals(expected, got);
@@ -275,6 +283,7 @@ public class ProviderTests {
                 .flagKey(flagKey)
                 .value(new Value(expectedValue))
                 .variant("True")
+                .flagMetadata(defaultMetadata)
                 .build();
         FlagEvaluationDetails<Value> got = goffClient.getObjectDetails(flagKey, new Value(123), defaultEvaluationContext);
         assertEquals(expected, got);
@@ -324,6 +333,7 @@ public class ProviderTests {
                 .reason(Reason.TARGETING_MATCH.toString())
                 .value(true)
                 .variant("True")
+                .flagMetadata(defaultMetadata)
                 .build();
         FlagEvaluationDetails<Boolean> got = goffClient.getBooleanDetails(flagKey, false, defaultEvaluationContext);
         assertEquals(expected, got);
@@ -348,6 +358,7 @@ public class ProviderTests {
                 .build();
         FlagEvaluationDetails<Boolean> got = goffClient.getBooleanDetails(flagKey, false, defaultEvaluationContext);
         assertEquals(expected, got);
+
     }
 
     @DisplayName("authenticated relay proxy: invalid api key")

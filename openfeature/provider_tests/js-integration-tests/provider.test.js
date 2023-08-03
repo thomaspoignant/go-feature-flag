@@ -41,7 +41,8 @@ describe('Provider tests', () => {
         value: true,
         variant: "True",
         flagMetadata: {
-          description: "this is a test flag",
+          description: "this is a test",
+          pr_link: "https://github.com/thomaspoignant/go-feature-flag/pull/916"
         },
       }
       const got = await goffClient.getBooleanDetails(flagKey, false, userCtx)
@@ -96,7 +97,10 @@ describe('Provider tests', () => {
         reason: "TARGETING_MATCH",
         value: "CC0000",
         variant: "True",
-        flagMetadata: {},
+        flagMetadata: {
+          description: "this is a test",
+          pr_link: "https://github.com/thomaspoignant/go-feature-flag/pull/916"
+        },
       }
       const got = await goffClient.getStringDetails(flagKey, "default", userCtx)
       expect(got).toEqual(expected)
@@ -150,7 +154,10 @@ describe('Provider tests', () => {
         reason: "TARGETING_MATCH",
         value: 100.25,
         variant: "True",
-        flagMetadata: {},
+        flagMetadata: {
+          description: "this is a test",
+          pr_link: "https://github.com/thomaspoignant/go-feature-flag/pull/916"
+        },
       }
       const got = await goffClient.getNumberDetails(flagKey, 123.45, userCtx)
       expect(got).toEqual(expected)
@@ -202,7 +209,10 @@ describe('Provider tests', () => {
       const expected = {
         flagKey: flagKey,
         reason: "TARGETING_MATCH",
-        flagMetadata: {},
+        flagMetadata: {
+          description: "this is a test",
+          pr_link: "https://github.com/thomaspoignant/go-feature-flag/pull/916"
+        },
         value: {
           test4: 1,
           test2: false,
@@ -271,7 +281,8 @@ describe('Provider tests', () => {
         value: true,
         variant: "True",
         flagMetadata: {
-          description: "this is a test flag",
+          description: "this is a test",
+          pr_link: "https://github.com/thomaspoignant/go-feature-flag/pull/916"
         },
       }
       const got = await goffClient.getBooleanDetails(flagKey, false, userCtx)

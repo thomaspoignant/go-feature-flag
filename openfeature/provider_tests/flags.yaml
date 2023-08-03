@@ -11,7 +11,8 @@ bool_targeting_match:
       "False": 0
       "True": 100
   metadata:
-    description: this is a test flag
+    description: this is a test
+    pr_link: https://github.com/thomaspoignant/go-feature-flag/pull/916
 disabled_bool:
   variations:
     Default: false
@@ -22,6 +23,9 @@ disabled_bool:
       "False": 0
       "True": 100
   disable: true
+  metadata:
+    description: this is a test
+    pr_link: https://github.com/thomaspoignant/go-feature-flag/pull/916
 disabled_float:
   variations:
     Default: 103.25
@@ -32,6 +36,9 @@ disabled_float:
       "False": 0
       "True": 100
   disable: true
+  metadata:
+    description: this is a test
+    pr_link: https://github.com/thomaspoignant/go-feature-flag/pull/916
 disabled_int:
   variations:
     Default: 103
@@ -42,6 +49,9 @@ disabled_int:
       "False": 0
       "True": 100
   disable: true
+  metadata:
+    description: this is a test
+    pr_link: https://github.com/thomaspoignant/go-feature-flag/pull/916
 disabled_interface:
   variations:
     Default:
@@ -58,6 +68,9 @@ disabled_interface:
       "False": 0
       "True": 100
   disable: true
+  metadata:
+    description: this is a test
+    pr_link: https://github.com/thomaspoignant/go-feature-flag/pull/916
 disabled_string:
   variations:
     Default: CC0002
@@ -68,6 +81,9 @@ disabled_string:
       "False": 0
       "True": 100
   disable: true
+  metadata:
+    description: this is a test
+    pr_link: https://github.com/thomaspoignant/go-feature-flag/pull/916
 double_key:
   variations:
     Default: 103.25
@@ -80,6 +96,9 @@ double_key:
     percentage:
       "False": 0
       "True": 100
+  metadata:
+    description: this is a test
+    pr_link: https://github.com/thomaspoignant/go-feature-flag/pull/916
 integer_key:
   variations:
     Default: 103
@@ -92,6 +111,9 @@ integer_key:
     percentage:
       "False": 0
       "True": 100
+  metadata:
+    description: this is a test
+    pr_link: https://github.com/thomaspoignant/go-feature-flag/pull/916
 object_key:
   variations:
     Default:
@@ -110,6 +132,9 @@ object_key:
     percentage:
       "False": 0
       "True": 100
+  metadata:
+    description: this is a test
+    pr_link: https://github.com/thomaspoignant/go-feature-flag/pull/916
 string_key:
   variations:
     Default: CC0002
@@ -122,6 +147,9 @@ string_key:
     percentage:
       "False": 0
       "True": 100
+  metadata:
+    description: this is a test
+    pr_link: https://github.com/thomaspoignant/go-feature-flag/pull/916
 string_key_with_version:
   variations:
     Default: CC0002
@@ -134,3 +162,6 @@ string_key_with_version:
     percentage:
       "False": 0
       "True": 100
+  metadata:
+    description: this is a test
+    pr_link: https://github.com/thomaspoignant/go-feature-flag/pull/916
