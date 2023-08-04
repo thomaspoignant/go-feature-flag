@@ -1,0 +1,7 @@
+.green {
+    color: var(--goff-message-success);
+}
+
+.orange {
+    color: var(--goff-message-error);
+}

@@ -17,34 +17,32 @@ export function Cards(props) {
 }
 
 Card.propTypes = {
-  language: PropTypes.string.isRequired,
-  badges: PropTypes.array.isRequired,
+  title: PropTypes.string.isRequired,
+  badges: PropTypes.array,
   warningBadges: PropTypes.array,
-  features: PropTypes.array.isRequired,
-  logo: PropTypes.string.isRequired,
-  docLink: PropTypes.string.isRequired,
+  logoCss: PropTypes.string,
+  logoImg: PropTypes.string,
+  docLink: PropTypes.string,
 };
 export function Card(props) {
   return (
     <div className={clsx("col-1-3 mobile-col-1-1")}>
       <Link to={props.docLink} className={styles.link}>
         <div className={styles.card}>
-
           <div className={styles.header}>
             <span className={styles.socialIcon}>
-              <i className={props.logo}></i>
+              {props.logoCss && <i className={props.logoCss}></i>}
+              {props.logoImg && <img src={props.logoImg} className={styles.logoImg}/>}
             </span>
           </div>
           <div>
-            <p className={styles.name}>{props.language}</p>
+            <p className={styles.name}>{props.title}</p>
           </div>
           <p className={styles.message}>
-            {featureIcon(props.features, "remoteEval")} Remote evaluation <br />
-            {featureIcon(props.features, "localCache")} Local cache<br />
-            {featureIcon(props.features, "dynamicRefresh")} Dynamic cache refresh<br />
+            {props.content}
           </p>
           <div className={styles.badgeSection}>
-            {props.badges.map((item, i) => {
+            {props.badges && props.badges.map((item, i) => {
               return (<span className={clsx(styles.badge, styles.badgeInfo)} key={item}>{item}</span>)
             })}
             {props.warningBadges && props.warningBadges.map((item, i) => {
@@ -58,9 +56,3 @@ export function Card(props) {
 }
 
 
-function featureIcon(features, key) {
-  if(features.includes(key)){
-    return <i className={clsx("fa-solid fa-circle-check", styles.green)}></i>;
-  }
-  return <i className={clsx("fa-solid fa-person-digging", styles.orange)}></i>;
-}

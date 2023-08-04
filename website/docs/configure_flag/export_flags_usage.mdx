@@ -2,7 +2,8 @@
 sidebar_position: 40
 description: How to export evaluation data?
 ---
-import {Cards} from '@site/src/components/doc/cards';
+import {Cards} from '@site/src/components/doc/cardv2';
+import { ConfigCardContent } from "@site/src/components/doc/configCardContent";
 import customlogo from '@site/static/docs/collectors/custom.png';
 import filelogo from '@site/static/docs/collectors/file.png';
 import googlelogo from '@site/static/docs/collectors/google.png';
@@ -23,48 +24,60 @@ configured with options for file format, flush interval, and file location.
 To use, simply configure, use the feature flag as normal, and analyze the collected usage data.
 
 ## Available exporters
-
-<Cards test={
-  [
-    {
-      name:"Local File",
-      logo: filelogo,
-      relayproxy: '../relay_proxy/configure_relay_proxy#file-1',
-      gomodule: '../go_module/data_collection/file'
-    },
-    {
-      name:"Log",
-      logo: loglogo,
-      relayproxy: '../relay_proxy/configure_relay_proxy#log',
-      gomodule: '../go_module/data_collection/log'
-    },
-    {
-      name:"AWS S3",
-      logo: s3logo,
-      relayproxy: '../relay_proxy/configure_relay_proxy#s3-1',
-      gomodule: '../go_module/data_collection/s3'
-    },
-    {
-      name:"Webhook",
-      logo: webhooklogo,
-      relayproxy: '../relay_proxy/configure_relay_proxy#webhook',
-      gomodule: '../go_module/data_collection/webhook'
-    },
-    {
-      name:"Google Cloud Storage",
-      logo: googlelogo,
-      relayproxy: '../relay_proxy/configure_relay_proxy#google-storage-1',
-      gomodule: '../go_module/data_collection/google_cloud_storage'
-    },
-    {
-      name:"AWS SQS",
-      logo: sqslogo,
-      relayproxy: '../relay_proxy/configure_relay_proxy#sqs',
-      gomodule: '../go_module/data_collection/sqs'
-    },
-    {
-      name:"Custom exporter",
-      logo: customlogo,
-      gomodule: '../go_module/data_collection/custom'
-    }
-  ]}/>
+<Cards cards={[
+  {
+    logoImg: s3logo,
+    title:"AWS S3",
+    content: <ConfigCardContent
+      relayproxyLink={'../relay_proxy/configure_relay_proxy#s3-1'}
+      goModuleLink={'../go_module/data_collection/s3'}
+    />
+  },
+  {
+    logoImg: sqslogo,
+    title:"AWS SQS",
+    content: <ConfigCardContent
+      relayproxyLink={'../relay_proxy/configure_relay_proxy#sqs'}
+      goModuleLink={'../go_module/data_collection/sqs'}
+    />
+  },
+  {
+    logoImg: googlelogo,
+    title:"Google Storage",
+    content: <ConfigCardContent
+      relayproxyLink={'../relay_proxy/configure_relay_proxy#google-storage-1'}
+      goModuleLink={'../go_module/data_collection/google_cloud_storage'}
+    />
+  },
+  {
+    logoImg: webhooklogo,
+    title:"Webhook",
+    content: <ConfigCardContent
+      relayproxyLink={'../relay_proxy/configure_relay_proxy#webhook'}
+      goModuleLink={'../go_module/data_collection/webhook'}
+    />
+  },
+  {
+    logoImg: filelogo,
+    title:"Local File",
+    content: <ConfigCardContent
+      relayproxyLink={'../relay_proxy/configure_relay_proxy#file-1'}
+      goModuleLink={'../go_module/data_collection/file'}
+    />
+  },
+  {
+    logoImg: loglogo,
+    title:"Webhook",
+    content: <ConfigCardContent
+      relayproxyLink={'../relay_proxy/configure_relay_proxy#log'}
+      goModuleLink={'../go_module/data_collection/log'}
+    />
+  },
+  {
+    logoImg: customlogo,
+    title:"Custom ...",
+    content: <ConfigCardContent
+      goModuleLink={'../go_module/data_collection/custom'}
+    />
+  },
+]} />
