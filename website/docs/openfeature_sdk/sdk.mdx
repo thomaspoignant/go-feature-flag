@@ -3,6 +3,7 @@ sidebar_position: 1
 description: Use GO Feature Flag with Openfeature SDKs
 ---
 import { Cards } from "@site/src/components/doc/cardv2";
+import { SdkCardContent} from "@site/src/components/doc/sdkCardContent";
 
 # SDKs
 
@@ -18,51 +19,51 @@ Rest assured, working with OpenFeature SDKs alongside GO Feature Flag providers 
 ## Server Providers
 <Cards cards={[
   {
-    logo: "devicon-go-original-wordmark colored",
-    language:"GO",
+    logoCss: "devicon-go-original-wordmark colored",
+    title:"GO",
     badges:["Server"],
-    features:["remoteEval", "localCache"],
-    docLink: "./server_providers/openfeature_go"
+    docLink: "./server_providers/openfeature_go",
+    content: <SdkCardContent features={["remoteEval", "localCache"]}/>
   },
   {
-    logo: "devicon-typescript-plain colored",
-    language:"Typescript",
+    logoCss: "devicon-typescript-plain colored",
+    title:"Typescript",
     badges:["Server"],
-    features:["remoteEval", "localCache"],
-    docLink: "./server_providers/openfeature_javascript"
+    docLink: "./server_providers/openfeature_javascript",
+    content: <SdkCardContent features={["remoteEval", "localCache"]}/>
   },
   {
-    logo: "devicon-java-plain colored",
-    language:"Java",
+    logoCss: "devicon-java-plain colored",
+    title:"Java",
     badges:["Server"],
-    features:["remoteEval"],
-    docLink: "./server_providers/openfeature_java"
+    docLink: "./server_providers/openfeature_java",
+    content: <SdkCardContent features={["remoteEval"]}/>
   },
   {
-    logo: "devicon-dot-net-plain-wordmark colored",
-    language:".Net",
+    logoCss: "devicon-dot-net-plain-wordmark colored",
+    title:".Net",
     badges:["Server"],
-    features:["remoteEval"],
-    docLink: "./server_providers/openfeature_javascript"
+    docLink: "./server_providers/openfeature_javascript",
+    content: <SdkCardContent features={["remoteEval"]}/>
   },
   {
-    logo: "devicon-python-plain colored",
-    language:"Python",
+    logoCss: "devicon-python-plain colored",
+    title:"Python",
     badges:["Server"],
     warningBadges: ["WIP"],
-    features:["remoteEval"],
-    docLink: "https://github.com/thomaspoignant/gofeatureflag-python-provider"
+    docLink: "https://github.com/thomaspoignant/gofeatureflag-python-provider",
+    content: <SdkCardContent features={["remoteEval"]}/>
   }
 ]}/>
 
 ## Client Providers
 <Cards cards={[
   {
-    logo: "devicon-typescript-plain colored",
-    language:"Typescript",
+    logoCss: "devicon-typescript-plain colored",
+    title:"Typescript",
     badges:["Client"],
-    features:["remoteEval", "localCache", "dynamicRefresh"],
-    docLink: "./client_providers/openfeature_javascript"
+    docLink: "./client_providers/openfeature_javascript",
+    content: <SdkCardContent features={["remoteEval", "localCache", "dynamicRefresh"]}/>
   }
 ]}/>
 

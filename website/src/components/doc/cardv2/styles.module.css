@@ -1,10 +1,10 @@
 .card {
-    background-color: rgba(243, 244, 246, 1);
+    background-color: var(--goff-card-bg-color);
     padding: 2rem;
     max-width: 320px;
     border-radius: 10px;
     box-shadow: 0 20px 30px -20px rgba(5, 5, 5, 0.24);
-    border: 5px solid rgba(243, 244, 246, 1);
+    border: 5px solid var(--goff-card-bg-color);
     margin-bottom: 2rem;
 }
 
@@ -30,7 +30,6 @@
     line-height: 1.75rem;
     font-weight: 600;
     --tw-text-opacity: 1;
-    color: rgba(55, 65, 81, 1);
 }
 
 .message {
@@ -60,21 +59,13 @@
 }
 
 .badgeInfo {
-    background-color: rgb(55 65 81);
-    color: rgb(209 213 219);
+    background-color: var(--goff-card-bg-badge-info);
+    color: var(--goff-header-text-color)
 }
 
 .badgeWarning {
-    background-color: rgb(119 29 29);
-    color: rgb(248 180 180);
-}
-
-.green {
-    color: #198754;
-}
-
-.orange {
-    color: #FFC107;
+    background-color: var(--goff-message-error);
+    color: var(--goff-header-text-color)
 }
 
 .socialIcon {
@@ -89,5 +80,9 @@
     font-size: 3rem;
     text-decoration: none;
     transition: all 0.15s ease;
-    background-color: rgb(55 65 81);
+    background-color: var(--goff-card-round-color);
+}
+
+.logoImg {
+    padding: 1rem;
 }
