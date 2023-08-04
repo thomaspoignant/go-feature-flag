@@ -26,7 +26,7 @@ providers that is compatible with GO Feature Flag.
 6. When there is no entry in the cache, we should query the relay proxy and update the cache with this entry.
 7. When we have reached the max time for a cache entry, it should not be possible to retrieve it.
 8. When we have reached the max size of the cache we should remove the oldest entry.
-9. We should collect all the flags usage and call the API `/v1/data/collector` for statistics reason.
-10. The data collection should be activated by default, but it should be possible to deactivate it in the configuration.
-11. We should not call the relay proxy API `/v1/data/collector` for every evaluation, but call it in bulk with a periodic threshold.
-12. The threshold should be configurable by the user of the provider.
+9. We should collect the cache evaluations and call the API `/v1/data/collector` for statistics reason. If we perform a remote evaluation *(meaning that the flag is evaluated by the server)*, we should not collect the usage because the evaluation data is already tracked on the server side.
+11. The data collection should be activated by default, but it should be possible to deactivate it in the configuration.
+12. We should not call the relay proxy API `/v1/data/collector` for every evaluation, but call it in bulk with a periodic threshold.
+13. The threshold should be configurable by the user of the provider.
