@@ -11,7 +11,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.18.30
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.23.4
 	github.com/awslabs/aws-lambda-go-api-proxy v0.14.0
-	github.com/fsouza/fake-gcs-server v1.46.0
+	github.com/fsouza/fake-gcs-server v1.47.4
 	github.com/gdexlab/go-render v1.0.1
 	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.5.9
