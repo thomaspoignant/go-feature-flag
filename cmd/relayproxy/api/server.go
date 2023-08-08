@@ -51,6 +51,7 @@ func (s *Server) init() {
 	prom.Use(s.echoInstance)
 	s.echoInstance.Use(metrics.AddCustomMetricsMiddleware)
 	s.echoInstance.Use(custommiddleware.ZapLogger(s.zapLog, s.config))
+	s.echoInstance.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
 	s.echoInstance.Use(middleware.Recover())
 	s.echoInstance.Use(middleware.TimeoutWithConfig(
 		middleware.TimeoutConfig{
