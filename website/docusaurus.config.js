@@ -222,7 +222,7 @@ const config = {
               },
               {
                 label: 'Relay Proxy',
-                to: '/docs/category/use-the-relay-proxy'
+                to: '/docs/relay_proxy'
               }
             ],
           },
