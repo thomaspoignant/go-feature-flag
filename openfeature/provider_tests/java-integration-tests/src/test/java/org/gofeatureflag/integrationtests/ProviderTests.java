@@ -10,6 +10,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -24,7 +27,7 @@ public class ProviderTests {
             .addString("pr_link", "https://github.com/thomaspoignant/go-feature-flag/pull/916")
             .build();
     @BeforeEach
-    void init() throws InvalidOptions {
+    void init() throws InvalidOptions, ExecutionException, InterruptedException {
         MutableContext userContext = new MutableContext()
                 .add("email", "john.doe@gofeatureflag.org")
                 .add("firstname", "john")
@@ -44,6 +47,7 @@ public class ProviderTests {
         OpenFeatureAPI.getInstance().setProvider(provider);
         OpenFeatureAPI api = OpenFeatureAPI.getInstance();
         goffClient = api.getClient();
+        this.waitProviderReady();
     }
 
 
@@ -319,13 +323,14 @@ public class ProviderTests {
 
     @DisplayName("authenticated relay proxy: valid")
     @Test
-    void authenticatedRelayProxyValid() throws InvalidOptions {
+    void authenticatedRelayProxyValid() throws InvalidOptions, ExecutionException, InterruptedException {
         GoFeatureFlagProviderOptions options = GoFeatureFlagProviderOptions.builder()
                 .apiKey("authorized_token").endpoint(relayProxyAuthenticatedEndpoint).build();
         GoFeatureFlagProvider provider = new GoFeatureFlagProvider(options);
         OpenFeatureAPI.getInstance().setProvider(provider);
         OpenFeatureAPI api = OpenFeatureAPI.getInstance();
         goffClient = api.getClient();
+        this.waitProviderReady();
 
         String flagKey = "bool_targeting_match";
         FlagEvaluationDetails expected = FlagEvaluationDetails.builder()
@@ -341,13 +346,14 @@ public class ProviderTests {
 
     @DisplayName("authenticated relay proxy: empty api key")
     @Test
-    void authenticatedRelayProxyEmptyToken() throws InvalidOptions {
+    void authenticatedRelayProxyEmptyToken() throws InvalidOptions, ExecutionException, InterruptedException {
         GoFeatureFlagProviderOptions options = GoFeatureFlagProviderOptions.builder()
                 .apiKey("").endpoint(relayProxyAuthenticatedEndpoint).build();
         GoFeatureFlagProvider provider = new GoFeatureFlagProvider(options);
         OpenFeatureAPI.getInstance().setProvider(provider);
         OpenFeatureAPI api = OpenFeatureAPI.getInstance();
         goffClient = api.getClient();
+        this.waitProviderReady();
 
         String flagKey = "bool_targeting_match";
         FlagEvaluationDetails expected = FlagEvaluationDetails.builder()
@@ -363,13 +369,14 @@ public class ProviderTests {
 
     @DisplayName("authenticated relay proxy: invalid api key")
     @Test
-    void authenticatedRelayProxyInvalidToken() throws InvalidOptions {
+    void authenticatedRelayProxyInvalidToken() throws InvalidOptions, ExecutionException, InterruptedException {
         GoFeatureFlagProviderOptions options = GoFeatureFlagProviderOptions.builder()
                 .apiKey("invalid-api-key").endpoint(relayProxyAuthenticatedEndpoint).build();
         GoFeatureFlagProvider provider = new GoFeatureFlagProvider(options);
         OpenFeatureAPI.getInstance().setProvider(provider);
         OpenFeatureAPI api = OpenFeatureAPI.getInstance();
         goffClient = api.getClient();
+        this.waitProviderReady();
 
         String flagKey = "bool_targeting_match";
         FlagEvaluationDetails expected = FlagEvaluationDetails.builder()
@@ -381,5 +388,18 @@ public class ProviderTests {
         FlagEvaluationDetails<Boolean> got = goffClient.getBooleanDetails(flagKey, false, defaultEvaluationContext);
         assertEquals(expected, got);
     }
+
+    private void waitProviderReady() throws ExecutionException, InterruptedException {
+        CompletableFuture<EventDetails> completableFuture = new CompletableFuture<>();
+        OpenFeatureAPI.getInstance().onProviderReady(new Consumer<EventDetails>() {
+            @Override
+            public void accept(EventDetails eventDetails) {
+                completableFuture.complete(eventDetails);
+            }
+        });
+        completableFuture.get();
+    }
 }
+
+
 
