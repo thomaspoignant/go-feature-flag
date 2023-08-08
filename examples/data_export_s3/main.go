@@ -2,16 +2,14 @@ package main
 
 import (
 	"context"
+	"github.com/aws/aws-sdk-go-v2/config"
+	ffclient "github.com/thomaspoignant/go-feature-flag"
+	"github.com/thomaspoignant/go-feature-flag/exporter/s3exporterv2"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
+	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"log"
 	"os"
 	"time"
-
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/thomaspoignant/go-feature-flag/exporter/s3exporter"
-	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
-
-	ffclient "github.com/thomaspoignant/go-feature-flag"
 )
 
 func main() {
@@ -23,6 +21,7 @@ func main() {
 			   - /go-feature-flag/variations/flag-variation-EXAMPLE-<timestamp>.json
 			   - /go-feature-flag/variations/flag-variation-EXAMPLE-<timestamp>.json
 	*/
+	awsConfig, _ := config.LoadDefaultConfig(context.Background())
 	err := ffclient.Init(ffclient.Config{
 		PollingInterval: 10 * time.Second,
 		Logger:          log.New(os.Stdout, "", 0),
@@ -33,14 +32,12 @@ func main() {
 		DataExporter: ffclient.DataExporter{
 			FlushInterval:    1 * time.Second,
 			MaxEventInMemory: 100,
-			Exporter: &s3exporter.Exporter{
-				Format:   "json",
-				Bucket:   "my-test-bucket",
-				S3Path:   "/go-feature-flag/variations/",
-				Filename: "flag-variation-{{ .Timestamp}}.{{ .Format}}",
-				AwsConfig: &aws.Config{
-					Region: aws.String("eu-west-1"),
-				},
+			Exporter: &s3exporterv2.Exporter{
+				Format:    "json",
+				Bucket:    "my-test-bucket",
+				S3Path:    "/go-feature-flag/variations/",
+				Filename:  "flag-variation-{{ .Timestamp}}.{{ .Format}}",
+				AwsConfig: &awsConfig,
 			},
 		},
 	})
