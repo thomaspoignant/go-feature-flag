@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"github.com/thomaspoignant/go-feature-flag/exporter/s3exporterv2"
 	"github.com/thomaspoignant/go-feature-flag/exporter/sqsexporter"
 	"time"
 
@@ -10,7 +11,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/gcstorageexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/logsexporter"
-	"github.com/thomaspoignant/go-feature-flag/exporter/s3exporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/webhookexporter"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"github.com/thomaspoignant/go-feature-flag/notifier/slacknotifier"
@@ -26,6 +26,8 @@ import (
 	"go.uber.org/zap"
 	"golang.org/x/net/context"
 	"k8s.io/client-go/rest"
+
+	awsConf "github.com/aws/aws-sdk-go-v2/config"
 )
 
 func NewGoFeatureFlagClient(
@@ -235,13 +237,18 @@ func initExporter(c *config.ExporterConf) (ffclient.DataExporter, error) {
 		return dataExp, nil
 
 	case config.S3Exporter:
-		dataExp.Exporter = &s3exporter.Exporter{
+		awsConfig, err := awsConf.LoadDefaultConfig(context.Background())
+		if err != nil {
+			return dataExp, err
+		}
+		dataExp.Exporter = &s3exporterv2.Exporter{
 			Bucket:                  c.Bucket,
 			Format:                  format,
 			S3Path:                  c.Path,
 			Filename:                filename,
 			CsvTemplate:             csvTemplate,
 			ParquetCompressionCodec: parquetCompressionCodec,
+			AwsConfig:               &awsConfig,
 		}
 		return dataExp, nil
 
@@ -257,7 +264,14 @@ func initExporter(c *config.ExporterConf) (ffclient.DataExporter, error) {
 		return dataExp, nil
 
 	case config.SQSExporter:
-		dataExp.Exporter = &sqsexporter.Exporter{QueueURL: c.QueueURL}
+		awsConfig, err := awsConf.LoadDefaultConfig(context.Background())
+		if err != nil {
+			return dataExp, err
+		}
+		dataExp.Exporter = &sqsexporter.Exporter{
+			QueueURL:  c.QueueURL,
+			AwsConfig: &awsConfig,
+		}
 		return dataExp, nil
 
 	default:
