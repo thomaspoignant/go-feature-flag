@@ -1,22 +1,20 @@
-package s3exporter
+package s3exporterv2
 
 import (
 	"context"
+	"fmt"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/thomaspoignant/go-feature-flag/exporter"
+	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"log"
 	"os"
 	"sync"
-
-	"github.com/thomaspoignant/go-feature-flag/exporter"
-	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
-
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager/s3manageriface"
 )
 
-// Deprecated: Please use s3exporterv2.Exporter instead, it will use the go-aws-sdk-v2.
 type Exporter struct {
 	// Bucket is the name of your Exporter Bucket.
 	Bucket string
@@ -52,21 +50,32 @@ type Exporter struct {
 	// Default: SNAPPY
 	ParquetCompressionCodec string
 
-	s3Uploader s3manageriface.UploaderAPI
+	s3Uploader UploaderAPI
 	init       sync.Once
+}
+
+func (f *Exporter) initializeUploader(ctx context.Context) error {
+	var initErr error
+	f.init.Do(func() {
+		if f.AwsConfig == nil {
+			cfg, err := config.LoadDefaultConfig(ctx)
+			if err != nil {
+				initErr = fmt.Errorf("impossible to init S3 exporter: %v", err)
+				return
+			}
+			f.AwsConfig = &cfg
+		}
+
+		client := s3.NewFromConfig(*f.AwsConfig)
+		f.s3Uploader = manager.NewUploader(client)
+	})
+	return initErr
 }
 
 // Export is saving a collection of events in a file.
 func (f *Exporter) Export(ctx context.Context, logger *log.Logger, featureEvents []exporter.FeatureEvent) error {
-	// init the s3 uploader
 	if f.s3Uploader == nil {
-		var initErr error
-		f.init.Do(func() {
-			var sess *session.Session
-			sess, initErr = session.NewSession(f.AwsConfig)
-			f.s3Uploader = s3manager.NewUploader(sess)
-		})
-		// Check that we don't have error in the init.Do()
+		initErr := f.initializeUploader(ctx)
 		if initErr != nil {
 			return initErr
 		}
@@ -106,13 +115,12 @@ func (f *Exporter) Export(ctx context.Context, logger *log.Logger, featureEvents
 			continue
 		}
 
-		result, err := f.s3Uploader.UploadWithContext(
-			ctx,
-			&s3manager.UploadInput{
-				Bucket: aws.String(f.Bucket),
-				Key:    aws.String(f.S3Path + "/" + file.Name()),
-				Body:   of,
-			})
+		result, err := f.s3Uploader.Upload(ctx, &s3.PutObjectInput{
+			Bucket: aws.String(f.Bucket),
+			Key:    aws.String(f.S3Path + "/" + file.Name()),
+			Body:   of,
+		})
+
 		if err != nil {
 			return err
 		}

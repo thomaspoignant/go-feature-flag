@@ -2,6 +2,8 @@ package service
 
 import (
 	"fmt"
+	"github.com/thomaspoignant/go-feature-flag/exporter"
+	"github.com/thomaspoignant/go-feature-flag/exporter/s3exporterv2"
 	"github.com/thomaspoignant/go-feature-flag/exporter/sqsexporter"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"github.com/thomaspoignant/go-feature-flag/notifier/slacknotifier"
@@ -16,7 +18,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/gcstorageexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/logsexporter"
-	"github.com/thomaspoignant/go-feature-flag/exporter/s3exporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/webhookexporter"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
@@ -178,10 +179,12 @@ func Test_initRetriever(t *testing.T) {
 
 func Test_initExporter(t *testing.T) {
 	tests := []struct {
-		name    string
-		conf    *config.ExporterConf
-		want    ffclient.DataExporter
-		wantErr assert.ErrorAssertionFunc
+		name                   string
+		conf                   *config.ExporterConf
+		want                   ffclient.DataExporter
+		wantErr                assert.ErrorAssertionFunc
+		wantType               exporter.Exporter
+		skipCompleteValidation bool
 	}{
 		{
 			name:    "Convert unknown Exporter",
@@ -207,6 +210,7 @@ func Test_initExporter(t *testing.T) {
 					Meta:        nil,
 				},
 			},
+			wantType: &webhookexporter.Exporter{},
 		},
 		{
 			name:    "Convert FileExporter",
@@ -227,6 +231,7 @@ func Test_initExporter(t *testing.T) {
 					ParquetCompressionCodec: parquet.CompressionCodec_UNCOMPRESSED.String(),
 				},
 			},
+			wantType: &fileexporter.Exporter{},
 		},
 		{
 			name:    "Convert LogExporter",
@@ -241,6 +246,7 @@ func Test_initExporter(t *testing.T) {
 					LogFormat: config.DefaultExporter.LogFormat,
 				},
 			},
+			wantType: &logsexporter.Exporter{},
 		},
 		{
 			name:    "Convert S3Exporter",
@@ -254,7 +260,7 @@ func Test_initExporter(t *testing.T) {
 			want: ffclient.DataExporter{
 				FlushInterval:    10 * time.Millisecond,
 				MaxEventInMemory: config.DefaultExporter.MaxEventInMemory,
-				Exporter: &s3exporter.Exporter{
+				Exporter: &s3exporterv2.Exporter{
 					Bucket:                  "my-bucket",
 					Format:                  config.DefaultExporter.Format,
 					S3Path:                  "/my-path/",
@@ -263,6 +269,8 @@ func Test_initExporter(t *testing.T) {
 					ParquetCompressionCodec: config.DefaultExporter.ParquetCompressionCodec,
 				},
 			},
+			wantType:               &s3exporterv2.Exporter{},
+			skipCompleteValidation: true,
 		},
 		{
 			name:    "Convert SQSExporter",
@@ -279,6 +287,8 @@ func Test_initExporter(t *testing.T) {
 					QueueURL: "https://sqs.eu-west-1.amazonaws.com/XXX/test-queue",
 				},
 			},
+			wantType:               &sqsexporter.Exporter{},
+			skipCompleteValidation: true,
 		},
 		{
 			name:    "Convert GoogleStorageExporter",
@@ -301,13 +311,15 @@ func Test_initExporter(t *testing.T) {
 					ParquetCompressionCodec: config.DefaultExporter.ParquetCompressionCodec,
 				},
 			},
+			wantType: &gcstorageexporter.Exporter{},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := initExporter(tt.conf)
 			tt.wantErr(t, err)
-			if err == nil {
+			assert.IsType(t, tt.wantType, got.Exporter)
+			if err == nil && !tt.skipCompleteValidation {
 				assert.Equal(t, tt.want, got)
 			}
 		})
