@@ -130,16 +130,9 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 			Timeout:        retrieverTimeout,
 		}, nil
 	case config.FileRetriever:
-		return &fileretriever.Retriever{
-			Path: c.Path,
-		}, nil
-
+		return &fileretriever.Retriever{Path: c.Path}, nil
 	case config.S3Retriever:
-		return &s3retriever.Retriever{
-			Bucket: c.Bucket,
-			Item:   c.Item,
-		}, nil
-
+		return &s3retriever.Retriever{Bucket: c.Bucket, Item: c.Item}, nil
 	case config.HTTPRetriever:
 		return &httpretriever.Retriever{
 			URL: c.URL,
@@ -148,30 +141,16 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 					return config.DefaultRetriever.HTTPMethod
 				}
 				return c.HTTPMethod
-			}(),
-			Body:    c.HTTPBody,
-			Header:  c.HTTPHeaders,
-			Timeout: retrieverTimeout,
-		}, nil
-
+			}(), Body: c.HTTPBody, Header: c.HTTPHeaders, Timeout: retrieverTimeout}, nil
 	case config.GoogleStorageRetriever:
-		return &gcstorageretriever.Retriever{
-			Bucket: c.Bucket,
-			Object: c.Object,
-		}, nil
-
+		return &gcstorageretriever.Retriever{Bucket: c.Bucket, Object: c.Object}, nil
 	case config.KubernetesRetriever:
 		client, err := rest.InClusterConfig()
 		if err != nil {
 			return nil, err
 		}
-		return &k8sretriever.Retriever{
-			Namespace:     c.Namespace,
-			ConfigMapName: c.ConfigMap,
-			Key:           c.Key,
-			ClientConfig:  *client,
-		}, nil
-
+		return &k8sretriever.Retriever{Namespace: c.Namespace, ConfigMapName: c.ConfigMap, Key: c.Key,
+			ClientConfig: *client}, nil
 	default:
 		return nil, fmt.Errorf("invalid retriever: kind \"%s\" "+
 			"is not supported, accepted kind: [googleStorage, http, s3, file, github]", c.Kind)
@@ -183,22 +162,18 @@ func initExporter(c *config.ExporterConf) (ffclient.DataExporter, error) {
 	if c.Format != "" {
 		format = c.Format
 	}
-
 	filename := config.DefaultExporter.FileName
 	if c.Filename != "" {
 		filename = c.Filename
 	}
-
 	csvTemplate := config.DefaultExporter.CsvFormat
 	if c.CsvTemplate != "" {
 		csvTemplate = c.CsvTemplate
 	}
-
 	parquetCompressionCodec := config.DefaultExporter.ParquetCompressionCodec
 	if c.ParquetCompressionCodec != "" {
 		parquetCompressionCodec = c.ParquetCompressionCodec
 	}
-
 	dataExp := ffclient.DataExporter{
 		FlushInterval: func() time.Duration {
 			if c.FlushInterval != 0 {
@@ -219,12 +194,10 @@ func initExporter(c *config.ExporterConf) (ffclient.DataExporter, error) {
 		dataExp.Exporter = &webhookexporter.Exporter{
 			EndpointURL: c.EndpointURL, Secret: c.Secret, Meta: c.Meta, Headers: c.Headers}
 		return dataExp, nil
-
 	case config.FileExporter:
 		dataExp.Exporter = &fileexporter.Exporter{Format: format, OutputDir: c.OutputDir, Filename: filename,
 			CsvTemplate: csvTemplate, ParquetCompressionCodec: parquetCompressionCodec}
 		return dataExp, nil
-
 	case config.LogExporter:
 		dataExp.Exporter = &logsexporter.Exporter{
 			LogFormat: func() string {
@@ -235,7 +208,6 @@ func initExporter(c *config.ExporterConf) (ffclient.DataExporter, error) {
 			}(),
 		}
 		return dataExp, nil
-
 	case config.S3Exporter:
 		awsConfig, err := awsConf.LoadDefaultConfig(context.Background())
 		if err != nil {
@@ -251,7 +223,6 @@ func initExporter(c *config.ExporterConf) (ffclient.DataExporter, error) {
 			AwsConfig:               &awsConfig,
 		}
 		return dataExp, nil
-
 	case config.GoogleStorageExporter:
 		dataExp.Exporter = &gcstorageexporter.Exporter{
 			Bucket:                  c.Bucket,
@@ -262,16 +233,12 @@ func initExporter(c *config.ExporterConf) (ffclient.DataExporter, error) {
 			ParquetCompressionCodec: parquetCompressionCodec,
 		}
 		return dataExp, nil
-
 	case config.SQSExporter:
 		awsConfig, err := awsConf.LoadDefaultConfig(context.Background())
 		if err != nil {
 			return dataExp, err
 		}
-		dataExp.Exporter = &sqsexporter.Exporter{
-			QueueURL:  c.QueueURL,
-			AwsConfig: &awsConfig,
-		}
+		dataExp.Exporter = &sqsexporter.Exporter{QueueURL: c.QueueURL, AwsConfig: &awsConfig}
 		return dataExp, nil
 
 	default:
