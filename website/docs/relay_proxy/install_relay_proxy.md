@@ -14,19 +14,18 @@ description: Relay proxy is the component that will evaluate the flags, this pag
 
 ## Install using Homebrew (mac and linux)
 ```shell
-brew install go-feature-flag-relay-proxy
+brew install go-feature-flag
 ```
 
 ## Install using Scoop (windows)
 ```shell
-scoop bucket add org https://github.com/go-feature-flag/scoop.git
-scoop install go-feature-flag-relay-proxy
+scoop install go-feature-flag
 ```
 
 ## Install using docker
 ```shell
-docker pull thomaspoignant/go-feature-flag-relay-proxy:latest
+docker pull thomaspoignant/go-feature-flag:latest
 ```
 :::info
-More info in the [dockerhub page](https://hub.docker.com/r/thomaspoignant/go-feature-flag-relay-proxy).
+More info in the [dockerhub page](https://hub.docker.com/r/thomaspoignant/go-feature-flag).
 :::
