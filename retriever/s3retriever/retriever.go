@@ -13,6 +13,7 @@ import (
 )
 
 // Retriever is a configuration struct for a S3 retriever.
+// Deprecated: use s3retrieverv2.Retriever instead.
 type Retriever struct {
 	// Bucket is the name of your S3 Bucket.
 	Bucket string
