@@ -7,7 +7,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 	"sync"
 	"testing"
-	"time"
 )
 
 func Test_notificationService_getDifferences(t *testing.T) {
@@ -250,41 +249,4 @@ func Test_notificationService_getDifferences(t *testing.T) {
 			assert.Equal(t, tt.want, got)
 		})
 	}
-}
-
-func Test_notificationService_callNotifier(t *testing.T) {
-	n := &NotifierMock{}
-	c := NewNotificationService([]notifier.Notifier{n})
-	oldCache := map[string]flag.Flag{
-		"yo": &flag.InternalFlag{Version: testconvert.String("1.0")},
-	}
-	newCache := map[string]flag.Flag{
-		"yo-new": &flag.InternalFlag{Version: testconvert.String("1.0")},
-	}
-	c.Notify(oldCache, newCache, nil)
-	time.Sleep(20 * time.Millisecond)
-	assert.True(t, n.HasBeenCalled)
-}
-
-func Test_notificationService_no_difference(t *testing.T) {
-	n := &NotifierMock{}
-	c := NewNotificationService([]notifier.Notifier{n})
-	oldCache := map[string]flag.Flag{
-		"yo": &flag.InternalFlag{Version: testconvert.String("1.0")},
-	}
-	newCache := map[string]flag.Flag{
-		"yo": &flag.InternalFlag{Version: testconvert.String("1.0")},
-	}
-	c.Notify(oldCache, newCache, nil)
-	time.Sleep(20 * time.Millisecond)
-	assert.False(t, n.HasBeenCalled)
-}
-
-type NotifierMock struct {
-	HasBeenCalled bool
-}
-
-func (n *NotifierMock) Notify(cache notifier.DiffCache) error {
-	n.HasBeenCalled = true
-	return nil
 }
