@@ -1,0 +1,14 @@
+my-new-feature:
+  variations:
+    legacy: false
+    new: true
+#  targeting:
+#    - query: email eq "user1@gofeatureflag.org"
+#      variation: legacy
+  defaultRule:
+    percentage:
+      legacy: 60
+      new: 40
+  metadata:
+    description: this is a test
+    pr_link: https://github.com/thomaspoignant/go-feature-flag/pull/916

@@ -1,0 +1,20 @@
+{
+  "name": "go-feature-flag-nodejs-demo",
+  "version": "1.0.0",
+  "description": "A nodejs demo application for GO Feature Flag",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "NODE_OPTIONS=--experimental-vm-modules NODE_NO_WARNINGS=1 node --loader ts-node/esm index.ts"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@openfeature/go-feature-flag-provider": "^0.5.14",
+    "@openfeature/js-sdk": "^1.4.2"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.1",
+    "typescript": "^5.1.6"
+  }
+}
