@@ -5,6 +5,7 @@ import dev.openfeature.contrib.providers.gofeatureflag.GoFeatureFlagProvider;
 import dev.openfeature.contrib.providers.gofeatureflag.GoFeatureFlagProviderOptions;
 import dev.openfeature.contrib.providers.gofeatureflag.exception.InvalidOptions;
 import dev.openfeature.sdk.*;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -48,6 +49,11 @@ public class ProviderTests {
         OpenFeatureAPI api = OpenFeatureAPI.getInstance();
         goffClient = api.getClient();
         this.waitProviderReady();
+    }
+
+    @AfterEach
+    void shutdown() {
+        OpenFeatureAPI.getInstance().shutdown();
     }
 
 
