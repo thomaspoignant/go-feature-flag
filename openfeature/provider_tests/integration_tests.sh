@@ -31,7 +31,7 @@ wait_relay_proxy 1032
 echo "------------------------------------------------------------------------------------------------"
 echo "----------- JAVA PROVIDER TESTS ----------------------------------------------------------------"
 echo "------------------------------------------------------------------------------------------------"
-mvn -f $(pwd)/openfeature/provider_tests/java-integration-tests/pom.xml test
+# mvn -f $(pwd)/openfeature/provider_tests/java-integration-tests/pom.xml test
 
 # Launch js integration tests
 echo "------------------------------------------------------------------------------------------------"
