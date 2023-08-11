@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/thomaspoignant/go-feature-flag/exporter/s3exporterv2"
 	"github.com/thomaspoignant/go-feature-flag/exporter/sqsexporter"
+	"github.com/thomaspoignant/go-feature-flag/retriever/s3retrieverv2"
 	"time"
 
 	ffclient "github.com/thomaspoignant/go-feature-flag"
@@ -22,7 +23,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/retriever/gitlabretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/httpretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/k8sretriever"
-	"github.com/thomaspoignant/go-feature-flag/retriever/s3retriever"
 	"go.uber.org/zap"
 	"golang.org/x/net/context"
 	"k8s.io/client-go/rest"
@@ -132,7 +132,8 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 	case config.FileRetriever:
 		return &fileretriever.Retriever{Path: c.Path}, nil
 	case config.S3Retriever:
-		return &s3retriever.Retriever{Bucket: c.Bucket, Item: c.Item}, nil
+		awsConfig, err := awsConf.LoadDefaultConfig(context.Background())
+		return &s3retrieverv2.Retriever{Bucket: c.Bucket, Item: c.Item, AwsConfig: &awsConfig}, err
 	case config.HTTPRetriever:
 		return &httpretriever.Retriever{
 			URL: c.URL,

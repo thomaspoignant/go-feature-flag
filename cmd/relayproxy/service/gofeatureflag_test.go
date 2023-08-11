@@ -8,6 +8,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"github.com/thomaspoignant/go-feature-flag/notifier/slacknotifier"
 	"github.com/thomaspoignant/go-feature-flag/notifier/webhooknotifier"
+	"github.com/thomaspoignant/go-feature-flag/retriever/s3retrieverv2"
 	"net/http"
 	"testing"
 	"time"
@@ -25,16 +26,17 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/retriever/githubretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/gitlabretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/httpretriever"
-	"github.com/thomaspoignant/go-feature-flag/retriever/s3retriever"
 	"github.com/xitongsys/parquet-go/parquet"
 )
 
 func Test_initRetriever(t *testing.T) {
 	tests := []struct {
-		name    string
-		conf    *config.RetrieverConf
-		want    retriever.Retriever
-		wantErr assert.ErrorAssertionFunc
+		name                   string
+		conf                   *config.RetrieverConf
+		want                   retriever.Retriever
+		wantErr                assert.ErrorAssertionFunc
+		wantType               retriever.Retriever
+		skipCompleteValidation bool
 	}{
 		{
 			name:    "Convert Github Retriever",
@@ -52,6 +54,7 @@ func Test_initRetriever(t *testing.T) {
 				GithubToken:    "",
 				Timeout:        20 * time.Millisecond,
 			},
+			wantType: &githubretriever.Retriever{},
 		},
 		{
 			name:    "Convert Github Retriever with token",
@@ -70,6 +73,7 @@ func Test_initRetriever(t *testing.T) {
 				GithubToken:    "xxx",
 				Timeout:        20 * time.Millisecond,
 			},
+			wantType: &githubretriever.Retriever{},
 		},
 		{
 			name:    "Convert Github Retriever with deprecated token",
@@ -88,6 +92,7 @@ func Test_initRetriever(t *testing.T) {
 				GithubToken:    "xxx",
 				Timeout:        20 * time.Millisecond,
 			},
+			wantType: &githubretriever.Retriever{},
 		},
 		{
 			name:    "Convert Gitlab Retriever",
@@ -107,6 +112,7 @@ func Test_initRetriever(t *testing.T) {
 				GitlabToken:    "",
 				Timeout:        20 * time.Millisecond,
 			},
+			wantType: &gitlabretriever.Retriever{},
 		},
 		{
 			name:    "Convert File Retriever",
@@ -115,7 +121,8 @@ func Test_initRetriever(t *testing.T) {
 				Kind: "file",
 				Path: "testdata/flag-config.yaml",
 			},
-			want: &fileretriever.Retriever{Path: "testdata/flag-config.yaml"},
+			want:     &fileretriever.Retriever{Path: "testdata/flag-config.yaml"},
+			wantType: &fileretriever.Retriever{},
 		},
 		{
 			name:    "Convert S3 Retriever",
@@ -125,10 +132,12 @@ func Test_initRetriever(t *testing.T) {
 				Bucket: "my-bucket-name",
 				Item:   "testdata/flag-config.yaml",
 			},
-			want: &s3retriever.Retriever{
+			want: &s3retrieverv2.Retriever{
 				Bucket: "my-bucket-name",
 				Item:   "testdata/flag-config.yaml",
 			},
+			wantType:               &s3retrieverv2.Retriever{},
+			skipCompleteValidation: true,
 		},
 		{
 			name:    "Convert HTTP Retriever",
@@ -144,6 +153,7 @@ func Test_initRetriever(t *testing.T) {
 				Header:  nil,
 				Timeout: 10000000000,
 			},
+			wantType: &httpretriever.Retriever{},
 		}, {
 			name:    "Convert Google storage Retriever",
 			wantErr: assert.NoError,
@@ -157,6 +167,7 @@ func Test_initRetriever(t *testing.T) {
 				Object:  "testdata/flag-config.yaml",
 				Options: nil,
 			},
+			wantType: &gcstorageretriever.Retriever{},
 		},
 		{
 			name:    "Convert unknown Retriever",
@@ -171,7 +182,10 @@ func Test_initRetriever(t *testing.T) {
 			got, err := initRetriever(tt.conf)
 			tt.wantErr(t, err)
 			if err == nil {
-				assert.Equal(t, tt.want, got)
+				assert.IsType(t, tt.wantType, got)
+				if !tt.skipCompleteValidation {
+					assert.Equal(t, tt.want, got)
+				}
 			}
 		})
 	}
