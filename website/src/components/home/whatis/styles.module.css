@@ -6,9 +6,18 @@
 
 .description {
   margin: auto;
-  max-width: 60rem;
-  padding: 10px;
+  max-width: 90%;
+  padding: 2rem 0;
   font-family: poppins, sans-serif;
+  text-align: left;
+}
+
+.description p{
+  margin-bottom: 0.6rem;
+}
+
+.description i {
+  color: var(--goff-main-subtitle-color);
 }
 
 .button {
