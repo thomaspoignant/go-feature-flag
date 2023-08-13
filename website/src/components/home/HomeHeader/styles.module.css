@@ -64,9 +64,17 @@ svg:not(:root) {
   text-align: center;
 }
 
+.availableGH button {
+  margin-right: 1rem;
+}
+
 .descriptionFirstLine{
   font-weight: 100;
   font-size: 1.4rem;
   text-transform:capitalize;
   filter: brightness(1.25);
+}
+
+.pushy__btnGoff{
+  background-color: var(--goff-main-subtitle-color)
 }
