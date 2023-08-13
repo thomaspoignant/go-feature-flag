@@ -25,7 +25,7 @@ export function Whatis() {
             </div>
             <div className={"col-1-3  mobile-col-1-1"}>
               <h2><i className="fa-solid fa-terminal"></i> Developer Optimized</h2>
-              <p>100% Opensource, no vendor locking, supports all your favorite languages and is pushing for standardisation with the support of <Link to={siteConfig.customFields.openfeature}>OpenFeature</Link>.</p>
+              <p>100% Opensource, no vendor locking, supports your favorite languages and is pushing for standardisation with the support of <Link to={siteConfig.customFields.openfeature}>OpenFeature</Link>.</p>
               <p>File based configuration, integrated with the tools that you already use.</p>
             </div>
           </div>
