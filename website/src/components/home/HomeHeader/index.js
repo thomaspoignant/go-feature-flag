@@ -80,6 +80,17 @@ export function HomeHeader() {
                   Available on GitHub
                 </button>
               </Link>
+              <Link
+                to={"/docs"}
+                type="button"
+                className={clsx('btn btn-dark btn-labeled btn-lg')}>
+                <button className={clsx("pushy__btn pushy__btn--df", styles.pushy__btnGoff)}>
+                  <span className="btn-label">
+                    <i className="fa-solid fa-circle-right"></i>
+                  </span>{' '}
+                  Get Started
+                </button>
+              </Link>
             </div>
           </div>
           <div className="col-1-2">
