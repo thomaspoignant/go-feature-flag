@@ -6,10 +6,11 @@ require (
 	cloud.google.com/go/storage v1.31.0
 	github.com/BurntSushi/toml v1.3.2
 	github.com/aws/aws-lambda-go v1.41.0
-	github.com/aws/aws-sdk-go v1.44.317
+	github.com/aws/aws-sdk-go v1.44.322
 	github.com/aws/aws-sdk-go-v2 v1.20.1
 	github.com/aws/aws-sdk-go-v2/config v1.18.33
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.11.77
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.38.2
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.24.1
 	github.com/awslabs/aws-lambda-go-api-proxy v0.14.0
 	github.com/fsouza/fake-gcs-server v1.47.4
@@ -69,7 +70,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.1.33 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.9.32 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.15.1 // indirect
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.38.2 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.13.2 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.15.2 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.21.2 // indirect
