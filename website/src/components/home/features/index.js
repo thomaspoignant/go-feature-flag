@@ -6,6 +6,7 @@ import PropTypes from 'prop-types';
 import sqslogo from '@site/static/docs/collectors/sqs.png';
 import s3logo from '@site/static/docs/collectors/s3.png';
 import webhooklogo from '@site/static/docs/collectors/webhook.png';
+import { Headline } from "../headline";
 
 SocialIcon.propTypes = {
   colorClassName: PropTypes.string.isRequired,
@@ -29,7 +30,7 @@ function SocialIcon(props) {
 
 function Rollout() {
   return (
-    <div className="row">
+    <div className="grid grid-pad">
       <div className="col-1-2">
         <div className={clsx(styles.featureContent, 'mr-25')}>
           <h2>Advanced rollout capabilities</h2>
@@ -168,7 +169,7 @@ function Integration() {
                 <i className="fa-solid fa-circle-arrow-right"></i>
                 <p>
                   Retrieve your file from S3, Google Cloud, Github, Kubernetes,
-                  and more ...
+                  and more.
                 </p>
               </li>
               <li>
@@ -263,8 +264,9 @@ export function Features() {
   return (
     <section className={styles.feature}>
       <div className="container">
-        <Integration />
         <OpenFeature />
+        <Integration />
+        <Headline />
         <Rollout />
       </div>
     </section>

@@ -52,6 +52,10 @@
   --goff-card-txt-badge-info: var(--goff-sponsor-bg);
   --goff-card-bg-badge-info: var(--goff-card-round-color);
   --goff-card-bg-color: #F6F6F6;
+
+  --goff-headline-green: var(--goff-variation-plus-button-bg);
+  --goff-headline-purple: #6c46f2;
+
 }
 /* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme="dark"] {
@@ -78,7 +82,7 @@
   --goff-editor-input-text: #f1f1f1;
 
   --goff-card-bg-color: var(--goff-editor-form-field-bg);
-
+  --goff-headline-title: #A9A9A9;
 
 }
 
