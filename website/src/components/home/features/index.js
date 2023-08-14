@@ -169,7 +169,7 @@ function Integration() {
                 <i className="fa-solid fa-circle-arrow-right"></i>
                 <p>
                   Retrieve your file from S3, Google Cloud, Github, Kubernetes,
-                  and more ...
+                  and more.
                 </p>
               </li>
               <li>
@@ -264,8 +264,8 @@ export function Features() {
   return (
     <section className={styles.feature}>
       <div className="container">
-        <Integration />
         <OpenFeature />
+        <Integration />
         <Headline />
         <Rollout />
       </div>
