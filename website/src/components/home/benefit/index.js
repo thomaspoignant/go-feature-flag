@@ -10,7 +10,7 @@ BenefitCard.propTypes = {
 };
 function BenefitCard({img, title, description}) {
   return (
-    <div className="col-1-5 mobile-col-1-2">
+    <div className="col-1-5 mobile-col-1-1">
       <article className={styles.benefitsPostItem}>
         <div className={styles.benefitsPostItemRow}>
           <img src={img} alt="post-thumb" />
