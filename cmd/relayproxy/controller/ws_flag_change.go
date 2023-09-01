@@ -53,11 +53,13 @@ func (f *wsFlagChange) Handler(c echo.Context) error {
 	f.logger.Debug("registering new websocket connection", zap.Any("connection", conn))
 
 	// Start the ping pong loop
-	go f.pingPongLoop(conn)
+	stopper := make(chan struct{}, 1)
+	go f.pingPongLoop(stopper, conn)
 	isOpen := true
 	for isOpen {
 		_, _, err := conn.ReadMessage()
 		if err != nil {
+			close(stopper)
 			f.websocketService.Deregister(conn)
 			f.logger.Debug("closing websocket connection", zap.Error(err), zap.Any("connection", conn))
 			isOpen = false
@@ -69,7 +71,7 @@ func (f *wsFlagChange) Handler(c echo.Context) error {
 // pingPongLoop is a keep-alive call to the client.
 // It calls the client to ensure that the connection is still active.
 // If the ping is not working we are closing the session.
-func (f *wsFlagChange) pingPongLoop(conn *websocket.Conn) {
+func (f *wsFlagChange) pingPongLoop(stopper chan struct{}, conn *websocket.Conn) {
 	// Ping interval duration
 	pingInterval := 1 * time.Second
 	// Create a ticker to send pings at regular intervals
@@ -83,10 +85,13 @@ func (f *wsFlagChange) pingPongLoop(conn *websocket.Conn) {
 			// Send a ping message to the client
 			err := conn.WriteMessage(websocket.PingMessage, nil)
 			if err != nil {
-				f.websocketService.Deregister(conn)
 				f.logger.Debug("closing websocket connection", zap.Error(err), zap.Any("connection", conn))
+				f.websocketService.Deregister(conn)
 				return
 			}
+		case <-stopper:
+			f.logger.Debug("stopping ping pong loop")
+			return
 		}
 	}
 }
