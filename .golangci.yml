@@ -59,6 +59,7 @@ issues:
         - dupl
         - staticcheck
         - revive
+        - gosec
     - path: _mock.go
       linters:
         - funlen
