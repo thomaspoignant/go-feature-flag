@@ -17,7 +17,7 @@ require (
 	github.com/gdexlab/go-render v1.0.1
 	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.5.9
-	github.com/google/uuid v1.3.0
+	github.com/google/uuid v1.3.1
 	github.com/gorilla/websocket v1.5.0
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/knadh/koanf/parsers/json v0.1.0
@@ -44,8 +44,8 @@ require (
 	golang.org/x/oauth2 v0.11.0
 	google.golang.org/api v0.138.0
 	gopkg.in/yaml.v3 v3.0.1
-	k8s.io/api v0.28.0
-	k8s.io/apimachinery v0.28.0
+	k8s.io/api v0.28.1
+	k8s.io/apimachinery v0.28.1
 	k8s.io/client-go v0.28.0
 )
 
