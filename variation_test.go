@@ -14,7 +14,7 @@ import (
 
 	"github.com/thomaspoignant/go-feature-flag/testutils/flagv1"
 
-	"github.com/thomaspoignant/go-feature-flag/internal/model"
+	"github.com/thomaspoignant/go-feature-flag/model"
 
 	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
 
