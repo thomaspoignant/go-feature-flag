@@ -9,11 +9,11 @@ jobs:
     name: Test documentation build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
       - name: Get changed files in the docs folder
         id: changed-files-specific
-        uses: tj-actions/changed-files@v38
+        uses: tj-actions/changed-files@v39
         with:
           files: ./website/
       - name: Test Build website
