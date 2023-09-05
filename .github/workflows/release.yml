@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup go
         uses: actions/setup-go@v4
         with:
@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -76,7 +76,7 @@ jobs:
       - goreleaser
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -98,7 +98,7 @@ jobs:
       - goreleaser
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -120,7 +120,7 @@ jobs:
       - goreleaser
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -142,7 +142,7 @@ jobs:
       - goreleaser
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -170,7 +170,7 @@ jobs:
       - goreleaser
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: release
           fetch-depth: 0
@@ -190,7 +190,7 @@ jobs:
         run: npm run docusaurus docs:version $GIT_TAG_NAME
 
       - name: Checkout main branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ env.MAIN_BRANCH_NAME }}
           path: ${{ env.MAIN_BRANCH_NAME }}
@@ -229,7 +229,7 @@ jobs:
       MAIN_BRANCH_NAME: main
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: release
           fetch-depth: 0
@@ -250,7 +250,7 @@ jobs:
         run: yq -i ".version=\"${GIT_TAG_NAME#v}\"" $CHART_YAML_FILE_LOCATION
 
       - name: Checkout main branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ env.MAIN_BRANCH_NAME }}
           path: ${{ env.MAIN_BRANCH_NAME }}
