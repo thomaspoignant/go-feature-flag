@@ -71,6 +71,12 @@ const config = {
             require.resolve('./src/css/simplegrid.css'), //https://thisisdallas.github.io/Simple-Grid/
           ],
         },
+        sitemap: {
+          changefreq: 'weekly',
+          priority: 0.5,
+          ignorePatterns: ['/tags/**'],
+          filename: 'sitemap.xml',
+        }
       }),
     ],
   ],
