@@ -104,7 +104,7 @@ const config = {
         id: 'support_usz', // Increment on change
         content: `⭐️ If you like GO Feature Flag, give it a star on <a target="_blank" rel="noopener noreferrer" href="https://github.com/thomaspoignant/go-feature-flag">GitHub</a> and follow us on <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/gofeatureflag">Twitter ${TwitterSvg}</a>`,
       },
-      image: 'img/logo/logo.png',
+      image: 'img/logo/x-card.png',
       navbar: {
         title: 'GO Feature Flag',
         logo: {
@@ -245,7 +245,7 @@ const config = {
               {
                 html: `
                 <a href="https://twitter.com/gofeatureflag" target="_blank" rel="noreferrer noopener">
-                  <i class="fa-brands fa-twitter"></i> Twitter&nbsp;&nbsp;<i class="fa-solid fa-arrow-up-right-from-square"></i>
+                  <i class="fa-brands fa-x-twitter"></i> Twitter&nbsp;&nbsp;<i class="fa-solid fa-arrow-up-right-from-square"></i>
                 </a>`,
               },
               {
