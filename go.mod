@@ -6,12 +6,12 @@ require (
 	cloud.google.com/go/storage v1.32.0
 	github.com/BurntSushi/toml v1.3.2
 	github.com/aws/aws-lambda-go v1.41.0
-	github.com/aws/aws-sdk-go v1.45.1
+	github.com/aws/aws-sdk-go v1.45.2
 	github.com/aws/aws-sdk-go-v2 v1.21.0
 	github.com/aws/aws-sdk-go-v2/config v1.18.38
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.11.82
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.38.5
-	github.com/aws/aws-sdk-go-v2/service/sqs v1.24.4
+	github.com/aws/aws-sdk-go-v2/service/sqs v1.24.5
 	github.com/awslabs/aws-lambda-go-api-proxy v0.14.0
 	github.com/fsouza/fake-gcs-server v1.47.4
 	github.com/gdexlab/go-render v1.0.1
@@ -38,7 +38,7 @@ require (
 	github.com/swaggo/echo-swagger v1.4.1
 	github.com/swaggo/swag v1.16.2
 	github.com/xitongsys/parquet-go v1.6.2
-	github.com/xitongsys/parquet-go-source v0.0.0-20200817004010-026bad9b25d0
+	github.com/xitongsys/parquet-go-source v0.0.0-20230830030807-0dd610dbff1d
 	go.uber.org/zap v1.25.0
 	golang.org/x/net v0.14.0
 	golang.org/x/oauth2 v0.11.0
