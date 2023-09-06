@@ -7,6 +7,20 @@ on:
     types: [ opened, synchronize, reopened ]
 
 jobs:
+  Build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref }}
+      - name: Setup go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '^1.18.0'
+      - run: make vendor
+      - run: make build
   Lint:
     runs-on: ubuntu-latest
     steps:

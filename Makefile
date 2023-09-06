@@ -14,7 +14,7 @@ RESET  := $(shell tput -Txterm sgr0)
 
 all: help
 ## Build:
-build: build-migrationcli build-relayproxy build-lint ## Build all the binaries and put the output in out/bin/
+build: build-migrationcli build-relayproxy build-lint build-editor-api ## Build all the binaries and put the output in out/bin/
 
 build-migrationcli: ## Build the migration cli in out/bin/
 	mkdir -p out/bin
