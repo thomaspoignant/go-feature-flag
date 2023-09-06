@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/open-feature/go-sdk v1.7.0
-	github.com/open-feature/go-sdk-contrib/providers/go-feature-flag v0.1.27
+	github.com/open-feature/go-sdk-contrib/providers/go-feature-flag v0.1.28
 	github.com/stretchr/testify v1.8.4
 )
 
@@ -20,7 +20,7 @@ require (
 	github.com/nikunjy/rules v1.2.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.10.0 // indirect
-	github.com/thomaspoignant/go-feature-flag v1.15.0 // indirect
+	github.com/thomaspoignant/go-feature-flag v1.15.1 // indirect
 	golang.org/x/exp v0.0.0-20230811145659-89c5cff77bcb // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
