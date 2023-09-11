@@ -41,7 +41,7 @@ require (
 	github.com/xitongsys/parquet-go-source v0.0.0-20230830030807-0dd610dbff1d
 	go.uber.org/zap v1.25.0
 	golang.org/x/net v0.15.0
-	golang.org/x/oauth2 v0.11.0
+	golang.org/x/oauth2 v0.12.0
 	google.golang.org/api v0.139.0
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.28.1
