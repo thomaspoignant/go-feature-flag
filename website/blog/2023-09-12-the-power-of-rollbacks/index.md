@@ -12,6 +12,8 @@ You've put in countless hours of hard work, and the moment has arrived to introd
 
 This is where feature flags come to the rescue, offering a safety net that allows you to roll back features immediately without waiting for a deployment. In this blog post, we'll explore why feature flags are an essential tool for securing your software releases.
 
+<!-- truncate -->
+
 ## The old way of doing rollbacks
 
 If you are not using feature flags, your release process probably look like this:
