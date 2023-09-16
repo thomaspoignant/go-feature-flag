@@ -2,7 +2,6 @@
 This example shows how to use GO Feature Flag in your web application using the Openfeature web SDK and the GO Feature Flag web provider.
 
 ## How to start the example?
-
 ```bash
 docker compose up
 ```
