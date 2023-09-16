@@ -1,0 +1,22 @@
+badge-title:
+  variations:
+    authentified: 'Authenticated'
+    anonymous: 'Anonymous'
+    premium: 'Premium User'
+  targeting:
+    - query: premium eq true
+      variation: premium
+    - query: anonymous eq false
+      variation: authentified
+  defaultRule:
+    variation: anonymous
+
+beta:
+  variations:
+    beta: true
+    default: false
+  targeting:
+    - query: beta eq true
+      variation: beta
+  defaultRule:
+    variation: default
