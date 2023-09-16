@@ -57,7 +57,6 @@
     "@openfeature/go-feature-flag-web-provider": "^0.1.2",
     "@openfeature/web-sdk": "^0.4.0",
     "highlight.js": "^11.8.0",
-    "jsontohtml-render": "^1.0.6",
     "uuid": "^9.0.1"
   }
 }
