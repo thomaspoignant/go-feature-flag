@@ -12,7 +12,8 @@
       "variation": "Default",
       "value": "YO",
       "default": false,
-      "version": ""
+      "version": "",
+      "source": "SERVER"
     },
     {
       "kind": "feature",
@@ -23,7 +24,8 @@
       "variation": "Default",
       "value": "YO2",
       "default": false,
-      "version": "127"
+      "version": "127",
+      "source": "SERVER"
     }
   ]
 }
