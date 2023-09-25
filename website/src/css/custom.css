@@ -212,3 +212,8 @@ div[class^="announcementBar_"] {
 .menu-icon{
   color: #73c6b6;
 }
+
+html.plugin-blog h2,
+html.plugin-blog.blog-post-page h1 {
+  font-size: 2rem;
+}

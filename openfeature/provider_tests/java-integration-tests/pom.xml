@@ -24,12 +24,12 @@
         <dependency>
             <groupId>dev.openfeature</groupId>
             <artifactId>sdk</artifactId>
-            <version>1.6.0</version>
+            <version>1.6.1</version>
         </dependency>
         <dependency>
             <groupId>dev.openfeature.contrib.providers</groupId>
             <artifactId>go-feature-flag</artifactId>
-            <version>0.2.11</version>
+            <version>0.2.12</version>
         </dependency>
     </dependencies>
 
