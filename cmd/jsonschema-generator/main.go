@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"github.com/invopop/jsonschema"
 	"github.com/jessevdk/go-flags"
 	"github.com/thomaspoignant/go-feature-flag/internal/dto"
@@ -24,11 +26,25 @@ func main() {
 	d := jsonschema.Reflect(a)
 	jsonSchema, err := d.MarshalJSON()
 	if err != nil {
-		log.Fatal("impossible to parse json schema", err)
+		log.Fatal("impossible to parse jsonschema", err)
 	}
 
-	err = os.WriteFile(opts.SchemaLocation, jsonSchema, 0600)
+	prettyJSONSchema, err := PrettyString(string(jsonSchema))
+	if err != nil {
+		log.Fatal("impossible to prettify jsonschema", err)
+	}
+
+	err = os.WriteFile(opts.SchemaLocation, []byte(prettyJSONSchema), 0600)
 	if err != nil {
 		log.Fatalf("impossible to write jsonschema file to %s: %s", opts.SchemaLocation, err)
 	}
+}
+
+// PrettyString will prettify the JSON string
+func PrettyString(str string) (string, error) {
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, []byte(str), "", "    "); err != nil {
+		return "", err
+	}
+	return prettyJSON.String(), nil
 }
