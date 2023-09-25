@@ -22,7 +22,7 @@ This schema is an overview on how **Open Feature** is working, you can have more
 
 Create a new `YAML` file containing your first flag configuration.
 
-```yaml title="flag-config.yaml"
+```yaml title="flag-config.goff.yaml"
 # 20% of the users will use the variation "my-new-feature"
 test-flag:
   variations:
@@ -46,7 +46,7 @@ pollingInterval: 1000
 startWithRetrieverError: false
 retriever:
   kind: file
-  path: /goff/flag-config.yaml
+  path: /goff/flag-config.goff.yaml
 exporter:
   kind: log
 ```
@@ -60,7 +60,7 @@ The default port will be `1031`.
 # Launch the container
 docker run \
   -p 1031:1031 \
-  -v $(pwd)/flag-config.yaml:/goff/flag-config.yaml \
+  -v $(pwd)/flag-config.goff.yaml:/goff/flag-config.goff.yaml \
   -v $(pwd)/goff-proxy.yaml:/goff/goff-proxy.yaml \
   thomaspoignant/go-feature-flag-relay-proxy:latest
 
