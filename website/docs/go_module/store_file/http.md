@@ -13,7 +13,7 @@ will perform an HTTP Request with your configuration to get your flags.
 err := ffclient.Init(ffclient.Config{
     PollingInterval: 3 * time.Second,
     Retriever: &httpretriever.Retriever{
-        URL:    "http://example.com/flag-config.yaml",
+        URL:    "http://example.com/flag-config.goff.yaml",
         Timeout: 2 * time.Second,
     },
 })

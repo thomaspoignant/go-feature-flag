@@ -1,13 +1,14 @@
 ---
-sidebar_position: 91
-description: Lint your config
+sidebar_position: 10
+title: Linter
+description: Lint your configuration file
 ---
 
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-# Lint your config
+# Lint your configuration file
 
 A faulty configuration could make **GO Feature Flag** not the way you expect.  
 This is why we have introduced the `go-feature-flag-lint` a command line tool validates that a flags file can be parsed by **GO Feature Flag**.
@@ -40,7 +41,7 @@ docker pull thomaspoignant/go-feature-flag-lint:latest
 ```shell
 ./go-feature-flag-lint \
   --input-format=yaml \
-  --input-file=/input/my-go-feature-flag-config.yaml
+  --input-file=/input/my-go-feature-flag-config.goff.yaml
 ```
 
 The command line has 2 arguments you should specify.
@@ -91,7 +92,7 @@ jobs:
     steps:
       - checkout
       - run: curl -L $(curl -s https://api.github.com/repos/thomaspoignant/go-feature-flag/releases/latest | jq -r '.assets[] | select(.name|match("Linux_x86_64.tar.gz$")) | .browser_download_url' | grep 'go-feature-flag-lint') --output release.tar.gz && tar -zxvf release.tar.gz
-      - run: ./go-feature-flag-lint --input-format=yaml --input-file=flag-config.yaml # please put the right file name
+      - run: ./go-feature-flag-lint --input-format=yaml --input-file=flag-config.goff.yaml # please put the right file name
 ```
 
   </TabItem>
@@ -108,7 +109,7 @@ lint-job:
 
   script:
     - curl -L $(curl -s https://api.github.com/repos/thomaspoignant/go-feature-flag/releases/latest | jq -r '.assets[] | select(.name|match("Linux_x86_64.tar.gz$")) | .browser_download_url' | grep 'go-feature-flag-lint') --output release.tar.gz && tar -zxvf release.tar.gz
-    - ./go-feature-flag-lint --input-format=yaml --input-file=flag-config.yaml # please put the right file name
+    - ./go-feature-flag-lint --input-format=yaml --input-file=flag-config.goff.yaml # please put the right file name
 ```
 
   </TabItem>

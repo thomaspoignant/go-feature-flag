@@ -33,7 +33,7 @@ ffclient.Init(ffclient.Config{
     Logger:         log.New(file, "/tmp/log", 0),
     Context:        context.Background(),
     Environment:    os.Getenv("MYAPP_ENV"),
-    Retriever:      &fileretriever.Retriever{Path: "testdata/flag-config.yaml"},
+    Retriever:      &fileretriever.Retriever{Path: "testdata/flag-config.goff.yaml"},
     FileFormat:     "yaml",
     Notifiers: []notifier.Notifier{
         &webhooknotifier.Notifier{
@@ -71,10 +71,10 @@ All the functions that `go-feature-flag` package supports are mirrored as method
 #### Example
 
 ```go linenums="1"
-x, err := ffclient.New(Config{ Retriever: &httpretriever.Retriever{{URL: "http://example.com/flag-config.yaml",}})
+x, err := ffclient.New(Config{ Retriever: &httpretriever.Retriever{{URL: "http://example.com/flag-config.goff.yaml",}})
 defer x.Close()
 
-y, err := ffclient.New(Config{ Retriever: &httpretriever.Retriever{{URL: "http://example.com/test2.yaml",}})
+y, err := ffclient.New(Config{ Retriever: &httpretriever.Retriever{{URL: "http://example.com/test2.goff.yaml",}})
 defer y.Close()
 
 user := ffcontext.NewEvaluationContext("user-key")

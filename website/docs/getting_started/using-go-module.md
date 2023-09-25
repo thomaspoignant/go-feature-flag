@@ -13,7 +13,7 @@ go get github.com/thomaspoignant/go-feature-flag
 
 Create a new `YAML` file containing your first flag configuration.
 
-```yaml title="flag-config.yaml"
+```yaml title="flag-config.goff.yaml"
 # 20% of the users will use the variation "my-new-feature"
 test-flag:
   variations:
@@ -33,7 +33,7 @@ First, you need to initialize the `ffclient` with the location of your backend f
 err := ffclient.Init(ffclient.Config{
     PollingInterval: 3 * time.Second,
     Retriever:      &fileretriever.Retriever{
-        Path: "flag-config.yaml",
+        Path: "flag-config.goff.yaml",
     },
 })
 defer ffclient.Close()
