@@ -36,7 +36,7 @@ docker build -f examples/retriever_configmap/Dockerfile -t goff-test-configmap .
 5. Create a `configmap` based on your `go-feature-flag` config file
 
 ```shell
-kubectl create configmap goff --from-file=examples/retriever_configmap/flags.yaml
+kubectl create configmap goff --from-file=examples/retriever_configmap/flags.goff.yaml
 ```
 
 6. Deploy your service to your kubernetes instance

@@ -29,7 +29,7 @@ func main() {
 		Retriever: &k8sretriever.Retriever{
 			Namespace:     "default",
 			ConfigMapName: "goff",
-			Key:           "flags.yaml",
+			Key:           "flags.goff.yaml",
 			ClientConfig:  *config,
 		},
 	})
