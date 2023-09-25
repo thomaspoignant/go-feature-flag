@@ -10,16 +10,16 @@ You will need to have **nodejs** installed in your machine to work with the docu
 Your can start locally the website.
 
 1. Open a terminal and go to the root project of this repository.
-2. Launch the command bellow, it will install the dependencies and run the local server for the documentation.
+2. Launch the command below, it will install the dependencies and run the local server for the documentation.
 ```shell
 make watch-doc
 ```
-3. You can now access to the documentation directly in your browser: [http://localhost:3000/](http://localhost:3000/).
+3. You can now access the documentation directly in your browser: [http://localhost:3000/](http://localhost:3000/).
 
 
 ## Build the documentation
 1. Open a terminal and go to the root project of this repository.
-2. Launch the command bellow, it will install the dependencies and build the documentation.
+2. Launch the command below, it will install the dependencies and build the documentation.
 ```shell
 make build-doc
 ```
