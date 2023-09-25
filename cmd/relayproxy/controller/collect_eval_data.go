@@ -47,6 +47,7 @@ func (h *collectEvalData) Handler(c echo.Context) error {
 	}
 
 	for _, event := range reqBody.Events {
+		event.Source = "PROVIDER_CACHE"
 		h.goFF.CollectEventData(event)
 	}
 
