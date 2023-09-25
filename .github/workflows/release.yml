@@ -301,7 +301,7 @@ jobs:
 
       - name: Build jsonschema-generator
         working-directory: ./release/
-        run: make build-jsonschema-generator
+        run: make vendor && make build-jsonschema-generator
 
       - name: Create jsonschema
         working-directory: ./release/
