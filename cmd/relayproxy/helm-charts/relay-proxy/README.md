@@ -1,6 +1,6 @@
 # relay-proxy
 
-![Version: 1.15.1](https://img.shields.io/badge/Version-1.15.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.15.1](https://img.shields.io/badge/AppVersion-v1.15.1-informational?style=flat-square)
+![Version: 1.15.2](https://img.shields.io/badge/Version-1.15.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.15.2](https://img.shields.io/badge/AppVersion-v1.15.2-informational?style=flat-square)
 
 A Helm chart to deploy go-feature-flag-relay proxy into Kubernetes
 
@@ -457,7 +457,7 @@ relayproxy.config: |
   startWithRetrieverError: false
   retriever:
     kind: http
-    url: https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.yaml
+    url: https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml
   exporter:
     kind: log
  
