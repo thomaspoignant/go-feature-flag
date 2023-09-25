@@ -41,7 +41,7 @@ func TestS3_Export(t *testing.T) {
 			events: []exporter.FeatureEvent{
 				{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-					Variation: "Default", Value: "YO", Default: false,
+					Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 				},
 			},
 			expectedFile: "./testdata/all_default.json",
@@ -56,7 +56,7 @@ func TestS3_Export(t *testing.T) {
 			events: []exporter.FeatureEvent{
 				{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-					Variation: "Default", Value: "YO", Default: false,
+					Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 				},
 			},
 			expectedFile: "./testdata/all_default.json",
@@ -71,7 +71,7 @@ func TestS3_Export(t *testing.T) {
 			events: []exporter.FeatureEvent{
 				{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-					Variation: "Default", Value: "YO", Default: false,
+					Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 				},
 			},
 			expectedFile: "./testdata/all_default.csv",
@@ -87,7 +87,7 @@ func TestS3_Export(t *testing.T) {
 			events: []exporter.FeatureEvent{
 				{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-					Variation: "Default", Value: "YO", Default: false,
+					Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 				},
 			},
 			expectedFile: "./testdata/custom_csv_format.csv",
@@ -103,7 +103,7 @@ func TestS3_Export(t *testing.T) {
 			events: []exporter.FeatureEvent{
 				{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-					Variation: "Default", Value: "YO", Default: false,
+					Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 				},
 			},
 			expectedFile: "./testdata/all_default.json",
@@ -118,7 +118,7 @@ func TestS3_Export(t *testing.T) {
 			events: []exporter.FeatureEvent{
 				{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-					Variation: "Default", Value: "YO", Default: false,
+					Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 				},
 			},
 			expectedFile: "./testdata/all_default.json",
@@ -132,7 +132,7 @@ func TestS3_Export(t *testing.T) {
 			events: []exporter.FeatureEvent{
 				{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-					Variation: "Default", Value: "YO", Default: false,
+					Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 				},
 			},
 			wantErr: true,
@@ -146,7 +146,7 @@ func TestS3_Export(t *testing.T) {
 			events: []exporter.FeatureEvent{
 				{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-					Variation: "Default", Value: "YO", Default: false,
+					Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 				},
 			},
 			wantErr: true,
@@ -160,7 +160,7 @@ func TestS3_Export(t *testing.T) {
 			events: []exporter.FeatureEvent{
 				{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-					Variation: "Default", Value: "YO", Default: false,
+					Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 				},
 			},
 			wantErr: true,
