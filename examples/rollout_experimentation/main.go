@@ -23,7 +23,7 @@ func main() {
 		Logger:          log.New(os.Stdout, "", 0),
 		Context:         context.Background(),
 		Retriever: &fileretriever.Retriever{
-			Path: "examples/rollout_experimentation/flags.yaml",
+			Path: "examples/rollout_experimentation/flags.goff.yaml",
 		},
 		DataExporter: ffclient.DataExporter{
 			FlushInterval:    10,
