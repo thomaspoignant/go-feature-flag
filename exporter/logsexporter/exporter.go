@@ -33,7 +33,7 @@ type Exporter struct {
 // Export is saving a collection of events in a file.
 func (f *Exporter) Export(_ context.Context, logger *log.Logger, featureEvents []exporter.FeatureEvent) error {
 	f.initTemplates.Do(func() {
-		// Remove bellow after deprecation of Format
+		// Remove below after deprecation of Format
 		if f.LogFormat == "" && f.Format != "" {
 			f.LogFormat = f.Format
 		}
