@@ -57,7 +57,8 @@ If you have configured a webhook, a `POST` request will be sent to the `Endpoint
             "key": "test-flag",
             "variation": "Default",
             "value": false,
-            "default": false
+            "default": false,
+            "source": "SERVER"
         },
         // ...
     ]
