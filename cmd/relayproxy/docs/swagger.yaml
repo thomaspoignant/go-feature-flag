@@ -29,6 +29,12 @@ definitions:
           A feature event will only be generated if the trackEvents attribute of the flag is set to true.
         example: feature
         type: string
+      source:
+        description: |-
+          Source indicates where the event was generated.
+          This is set to SERVER when the event was evaluated in the relay-proxy and PROVIDER_CACHE when it is evaluated from the cache.
+        example: SERVER
+        type: string
       userKey:
         description: |-
           UserKey The key of the user object used in a feature flag evaluation. Details for the user object used in a feature
