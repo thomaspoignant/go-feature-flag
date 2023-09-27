@@ -298,6 +298,11 @@ const docTemplate = `{
                     "type": "string",
                     "example": "feature"
                 },
+                "source": {
+                    "description": "Source indicates where the event was generated.\nThis is set to SERVER when the event was evaluated in the relay-proxy and PROVIDER_CACHE when it is evaluated from the cache.",
+                    "type": "string",
+                    "example": "SERVER"
+                },
                 "userKey": {
                     "description": "UserKey The key of the user object used in a feature flag evaluation. Details for the user object used in a feature\nflag evaluation as reported by the \"feature\" event are transmitted periodically with a separate index event.",
                     "type": "string",
