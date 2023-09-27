@@ -2,14 +2,6 @@ package controller_test
 
 import (
 	"context"
-	"github.com/labstack/echo-contrib/prometheus"
-	"github.com/labstack/echo/v4"
-	"github.com/stretchr/testify/assert"
-	ffclient "github.com/thomaspoignant/go-feature-flag"
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/controller"
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
-	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
-	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"io"
 	"log"
 	"net/http"
@@ -19,6 +11,15 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/labstack/echo-contrib/prometheus"
+	"github.com/labstack/echo/v4"
+	"github.com/stretchr/testify/assert"
+	ffclient "github.com/thomaspoignant/go-feature-flag"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/controller"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
+	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
+	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 )
 
 func Test_collect_eval_data_Handler(t *testing.T) {
@@ -47,6 +48,17 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 				httpCode:          http.StatusOK,
 				bodyFile:          "../testdata/controller/collect_eval_data/valid_response.json",
 				collectedDataFile: "../testdata/controller/collect_eval_data/valid_collected_data.json",
+			},
+		},
+		{
+			name: "valid with source field",
+			args: args{
+				bodyFile: "../testdata/controller/collect_eval_data/request_with_source_field.json",
+			},
+			want: want{
+				httpCode:          http.StatusOK,
+				bodyFile:          "../testdata/controller/collect_eval_data/valid_response.json",
+				collectedDataFile: "../testdata/controller/collect_eval_data/collected_data_with_source_field.json",
 			},
 		},
 		{
