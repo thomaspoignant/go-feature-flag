@@ -2,8 +2,9 @@ package exporter
 
 import (
 	"encoding/json"
-	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"time"
+
+	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 )
 
 func NewFeatureEvent(
@@ -13,6 +14,7 @@ func NewFeatureEvent(
 	variation string,
 	failed bool,
 	version string,
+	source string,
 ) FeatureEvent {
 	contextKind := "user"
 	if ctx.IsAnonymous() {
@@ -29,6 +31,7 @@ func NewFeatureEvent(
 		Value:        value,
 		Default:      failed,
 		Version:      version,
+		Source:       source,
 	}
 }
 
@@ -68,6 +71,10 @@ type FeatureEvent struct {
 	// Version contains the version of the flag. If the field is omitted for the flag in the configuration file
 	// the default version will be 0.
 	Version string `json:"version" example:"v1.0.0" parquet:"name=version, type=BYTE_ARRAY, convertedtype=UTF8"`
+
+	// Source indicates where the event was generated.
+	// This is set to SERVER when the event was evaluated in the relay-proxy and PROVIDER_CACHE when it is evaluated from the cache.
+	Source string `json:"source" example:"SERVER" parquet:"name=source, type=BYTE_ARRAY, convertedtype=UTF8"`
 }
 
 // MarshalInterface marshals all interface type fields in FeatureEvent into JSON-encoded string.

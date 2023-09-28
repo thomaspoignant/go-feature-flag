@@ -31,7 +31,8 @@ It represents individual flag evaluations and are considered "full fidelity" eve
     "key": "test-flag",
     "variation": "Default",
     "value": false,
-    "default": false
+    "default": false,
+    "source": "SERVER"
 }
 ```
 
@@ -44,8 +45,9 @@ It represents individual flag evaluations and are considered "full fidelity" eve
 | **`userKey`**      | The key of the user object used in a feature flag evaluation.                                                                                                                                                                                                                                           |
 | **`creationDate`** | When the feature flag was requested at Unix epoch time in milliseconds.                                                                                                                                                                                                                                 |
 | **`key`**          | The key of the feature flag requested.                                                                                                                                                                                                                                                                  |
-| **`variation`**    | The variation of the flag requested. Available values are:<br/>**True**: if the flag was evaluated to True <br/>**False**: if the flag was evaluated to False<br/>**Dafault**: if the flag was evaluated to Default<br/>**SdkDefault**: if something wrong happened and the SDK default value was used. |
+| **`variation`**    | The variation of the flag requested. Available values are:<br/>**True**: if the flag was evaluated to True <br/>**False**: if the flag was evaluated to False<br/>**Default**: if the flag was evaluated to Default<br/>**SdkDefault**: if something wrong happened and the SDK default value was used. |
 | **`value`**        | The value of the feature flag returned by feature flag evaluation.                                                                                                                                                                                                                                      |
+| **`source`**       | Where the event was generated. This is set to SERVER when the event was evaluated in the relay-proxy and PROVIDER_CACHE when it is evaluated from the cache.             
 | **`default`**      | (Optional) This value is set to true if feature flag evaluation failed, in which case the value returned was the default value passed to variation.                                                                                                                                                     |
 
 Events are collected and send in bulk to avoid spamming your exporter *(see details in [how to configure data export](#how-to-configure-data-export)*)

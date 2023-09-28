@@ -38,7 +38,8 @@ type Exporter struct {
 	// You can decide which fields you want in your CSV line with a go-template syntax,
 	// please check exporter/feature_event.go to see what are the fields available.
 	// Default:
-	// {{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}}\n
+	// {{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};
+	// {{ .Default}};{{ .Source}}\n
 	CsvTemplate string
 
 	// ParquetCompressionCodec is the parquet compression codec for better space efficiency.

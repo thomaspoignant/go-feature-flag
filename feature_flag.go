@@ -3,13 +3,14 @@ package ffclient
 import (
 	"context"
 	"fmt"
+	"log"
+	"sync"
+	"time"
+
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/internal/dto"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
-	"log"
-	"sync"
-	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/notifier/logsnotifier"
 
@@ -41,7 +42,7 @@ func Close() {
 }
 
 // GoFeatureFlag is the main object of the library
-// it contains the cache, the config and the update.
+// it contains the cache, the config, the updater and the exporter.
 type GoFeatureFlag struct {
 	cache        cache.Manager
 	config       Config
