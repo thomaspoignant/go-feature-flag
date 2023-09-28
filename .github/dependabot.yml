@@ -59,3 +59,23 @@ updates:
     labels:
       - "dependencies"
       - "automerge"
+
+  - package-ecosystem: npm
+    directory: "/examples/openfeature_web/webapp"
+    schedule:
+      interval: weekly
+      time: "01:00"
+    open-pull-requests-limit: 30
+    labels:
+      - "dependencies"
+      - "automerge"
+
+  - package-ecosystem: npm
+    directory: "/examples/openfeature_nodejs/nodejs-app"
+    schedule:
+      interval: weekly
+      time: "01:00"
+    open-pull-requests-limit: 30
+    labels:
+      - "dependencies"
+      - "automerge"
