@@ -1,0 +1,17 @@
+version: '3'
+services:
+  gofeatureflag:
+    image: thomaspoignant/go-feature-flag
+    ports:
+      - "1031:1031"
+    volumes:
+      - type: bind
+        source: ./
+        target: /goff/
+  
+  webapp:
+    build: webapp/.
+    ports:
+      - "3000:3000"
+    depends_on:
+      - gofeatureflag
