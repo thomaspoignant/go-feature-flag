@@ -15,6 +15,6 @@ It uses the Openfeature Web SDK and the GO Feature Flag web provider.
 
 The configuration of the server is in the `goff-proxy.yaml` file and it loads the flag configuration from the `config.goff.yaml` file.
 
-You can look at the file [`src/js/main.js`](src/js/main.js) to look how we retrieve the flags and we change the display of the page.
+You can look at the file [`webapp/src/js/main.js`](webapp/src/js/main.js) to look how we retrieve the flags and we change the display of the page.
 
 At any moment during the demo you can edit the `config.goff.yaml` file and see how it changes the behaviors of the application.
