@@ -13,38 +13,38 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/internal/utils"
 )
 
-// Rule represents a originalRule applied by the flag.
+// Rule represents a rule applied by the flag.
 type Rule struct {
-	// Name is the name of the originalRule, this field is mandatory if you want
-	// to update the originalRule during scheduled rollout
-	Name *string `json:"name,omitempty" yaml:"name,omitempty" toml:"name,omitempty"`
+	// Name is the name of the rule, this field is mandatory if you want
+	// to update the rule during scheduled rollout
+	Name *string `json:"name,omitempty" yaml:"name,omitempty" toml:"name,omitempty" jsonschema:"title=name,description=Name is the name of the rule. This field is mandatory if you want to update the rule during scheduled rollout."` // nolint: lll
 
 	// Query represents an antlr query in the nikunjy/rules format
-	Query *string `json:"query,omitempty" yaml:"query,omitempty" toml:"query,omitempty"`
+	Query *string `json:"query,omitempty" yaml:"query,omitempty" toml:"query,omitempty" jsonschema:"title=query,description=The query that allow to check in the evaluation context match. Note: in the defaultRule field query is ignored."` // nolint: lll
 
-	// VariationResult represents the variation name to use if the originalRule apply for the user.
+	// VariationResult represents the variation name to use if the rule apply for the user.
 	// In case we have a percentage field in the config VariationResult is ignored
-	VariationResult *string `json:"variation,omitempty" yaml:"variation,omitempty" toml:"variation,omitempty"` // nolint: lll
+	VariationResult *string `json:"variation,omitempty" yaml:"variation,omitempty" toml:"variation,omitempty" jsonschema:"title=variation,description=The variation name to use if the rule apply for the user. In case we have a percentage field in the config this field is ignored"` // nolint: lll
 
 	// Percentages represents the percentage we should give to each variation.
 	// example: variationA = 10%, variationB = 80%, variationC = 10%
-	Percentages *map[string]float64 `json:"percentage,omitempty" yaml:"percentage,omitempty" toml:"percentage,omitempty"` // nolint: lll
+	Percentages *map[string]float64 `json:"percentage,omitempty" yaml:"percentage,omitempty" toml:"percentage,omitempty" jsonschema:"title=percentage,description=Represents the percentage we should give to each variation."` // nolint: lll
 
 	// ProgressiveRollout is your struct to configure a progressive rollout deployment of your flag.
 	// It will allow you to ramp up the percentage of your flag over time.
 	// You can decide at which percentage you starts with and at what percentage you ends with in your release ramp.
 	// Before the start date we will serve the initial percentage and, after we will serve the end percentage.
-	ProgressiveRollout *ProgressiveRollout `json:"progressiveRollout,omitempty" yaml:"progressiveRollout,omitempty" toml:"progressiveRollout,omitempty"` // nolint: lll
+	ProgressiveRollout *ProgressiveRollout `json:"progressiveRollout,omitempty" yaml:"progressiveRollout,omitempty" toml:"progressiveRollout,omitempty" jsonschema:"title=progressiveRollout,description=Configure a progressive rollout deployment of your flag."` // nolint: lll
 
 	// Disable indicates that this rule is disabled.
-	Disable *bool `json:"disable,omitempty" yaml:"disable,omitempty" toml:"disable,omitempty"`
+	Disable *bool `json:"disable,omitempty" yaml:"disable,omitempty" toml:"disable,omitempty" jsonschema:"title=disable,description=Indicates that this rule is disabled."` // nolint: lll
 }
 
-// Evaluate is checking if the originalRule apply to for the user.
-// If yes it returns the variation you should use for this originalRule.
+// Evaluate is checking if the rule apply to for the user.
+// If yes it returns the variation you should use for this rule.
 func (r *Rule) Evaluate(ctx ffcontext.Context, hashID uint32, isDefault bool,
 ) (string, error) {
-	// Check if the originalRule apply for this user
+	// Check if the rule apply for this user
 	ruleApply := isDefault || r.GetQuery() == "" || parser.Evaluate(r.GetTrimmedQuery(), utils.ContextToMap(ctx))
 	if !ruleApply || (!isDefault && r.IsDisable()) {
 		return "", &internalerror.RuleNotApply{Context: ctx}
@@ -69,7 +69,7 @@ func (r *Rule) Evaluate(ctx ffcontext.Context, hashID uint32, isDefault bool,
 	if r.VariationResult != nil {
 		return r.GetVariationResult(), nil
 	}
-	return "", fmt.Errorf("error in the configuration, no variation available for this originalRule")
+	return "", fmt.Errorf("error in the configuration, no variation available for this rule")
 }
 
 // IsDynamic is a function that allows to know if the rule has a dynamic result or not.
@@ -137,7 +137,7 @@ func (r *Rule) getVariationFromPercentage(hash uint32) (string, error) {
 	return "", fmt.Errorf("impossible to find the variation")
 }
 
-// getPercentageBuckets compute a map containing the buckets of each variation for this originalRule.
+// getPercentageBuckets compute a map containing the buckets of each variation for this rule.
 func (r *Rule) getPercentageBuckets() (map[string]percentageBucket, error) {
 	percentageBuckets := make(map[string]percentageBucket, len(r.GetPercentages()))
 	percentage := r.GetPercentages()
@@ -168,14 +168,14 @@ func (r *Rule) getPercentageBuckets() (map[string]percentageBucket, error) {
 
 	lastElementInBuckets := percentageBuckets[variationNames[len(variationNames)-1]].end
 	if lastElementInBuckets != float64(MaxPercentage) {
-		return nil, errors.New("invalid originalRule because percentage are not representing 100%")
+		return nil, errors.New("invalid rule because percentage are not representing 100%")
 	}
 
 	return percentageBuckets, nil
 }
 
 // MergeRules is merging 2 rules.
-// It is used when we have to update a originalRule in a scheduled rollout.
+// It is used when we have to update a rule in a scheduled rollout.
 func (r *Rule) MergeRules(updatedRule Rule) {
 	if updatedRule.Query != nil {
 		r.Query = updatedRule.Query

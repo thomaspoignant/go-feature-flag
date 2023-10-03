@@ -18,7 +18,7 @@ ffclient.Config{
             OutputDir: "/output-data/",
             Format: "csv",
             FileName: "flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}",
-            CsvTemplate: "{{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}}\n"
+            CsvTemplate: "{{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}};{{ .Source}}\n"
         },
     },
     // ...

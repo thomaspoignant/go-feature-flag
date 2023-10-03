@@ -2,10 +2,11 @@ package main
 
 import (
 	"context"
-	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"log"
 	"os"
 	"time"
+
+	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 
 	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
@@ -20,7 +21,7 @@ func main() {
 		Logger:          log.New(os.Stdout, "", 0),
 		Context:         context.Background(),
 		Retriever: &fileretriever.Retriever{
-			Path: "examples/data_export_file/flags.yaml",
+			Path: "examples/data_export_file/flags.goff.yaml",
 		},
 		DataExporter: ffclient.DataExporter{
 			FlushInterval:    1 * time.Second,
@@ -60,13 +61,13 @@ func main() {
 		The output will be something like that:
 
 		flag-variation-EXAMPLE-<timestamp>.json:
-			{"kind":"feature","contextKind":"anonymousUser","userKey":"aea2fdc1-b9a0-417a-b707-0c9083de68e3","creationDate":1618234129,"key":"new-admin-access","variation":"True","value":true,"default":false}
-			{"kind":"feature","contextKind":"user","userKey":"332460b9-a8aa-4f7a-bc5d-9cc33632df9a","creationDate":1618234129,"key":"new-admin-access","variation":"False","value":false,"default":false}
-			{"kind":"feature","contextKind":"anonymousUser","userKey":"aea2fdc1-b9a0-417a-b707-0c9083de68e3","creationDate":1618234129,"key":"unknown-flag","variation":"SdkDefault","value":"defaultValue","default":true}
-			{"kind":"feature","contextKind":"anonymousUser","userKey":"aea2fdc1-b9a0-417a-b707-0c9083de68e3","creationDate":1618234129,"key":"unknown-flag-2","variation":"SdkDefault","value":{"test":"toto"},"default":true}
+			{"kind":"feature","contextKind":"anonymousUser","userKey":"aea2fdc1-b9a0-417a-b707-0c9083de68e3","creationDate":1618234129,"key":"new-admin-access","variation":"True","value":true,"default":false,"source":"SERVER"}
+			{"kind":"feature","contextKind":"user","userKey":"332460b9-a8aa-4f7a-bc5d-9cc33632df9a","creationDate":1618234129,"key":"new-admin-access","variation":"False","value":false,"default":false,"source":"SERVER"}
+			{"kind":"feature","contextKind":"anonymousUser","userKey":"aea2fdc1-b9a0-417a-b707-0c9083de68e3","creationDate":1618234129,"key":"unknown-flag","variation":"SdkDefault","value":"defaultValue","default":true,"source":"SERVER"}
+			{"kind":"feature","contextKind":"anonymousUser","userKey":"aea2fdc1-b9a0-417a-b707-0c9083de68e3","creationDate":1618234129,"key":"unknown-flag-2","variation":"SdkDefault","value":{"test":"toto"},"default":true,"source":"SERVER"}
 		----
 		flag-variation-EXAMPLE-<timestamp>.json:
-			{"kind":"feature","contextKind":"anonymousUser","userKey":"aea2fdc1-b9a0-417a-b707-0c9083de68e3","creationDate":1618234131,"key":"new-admin-access","variation":"True","value":true,"default":false}
-			{"kind":"feature","contextKind":"user","userKey":"332460b9-a8aa-4f7a-bc5d-9cc33632df9a","creationDate":1618234131,"key":"new-admin-access","variation":"False","value":false,"default":false}
+			{"kind":"feature","contextKind":"anonymousUser","userKey":"aea2fdc1-b9a0-417a-b707-0c9083de68e3","creationDate":1618234131,"key":"new-admin-access","variation":"True","value":true,"default":false,"source":"SERVER"}
+			{"kind":"feature","contextKind":"user","userKey":"332460b9-a8aa-4f7a-bc5d-9cc33632df9a","creationDate":1618234131,"key":"new-admin-access","variation":"False","value":false,"default":false,"source":"SERVER"}
 	*/
 }

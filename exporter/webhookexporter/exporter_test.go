@@ -62,11 +62,11 @@ func TestWebhook_Export(t *testing.T) {
 				featureEvents: []exporter.FeatureEvent{
 					{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-						Variation: "Default", Value: "YO", Default: false,
+						Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 					},
 					{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
-						Variation: "Default", Value: "YO2", Default: false, Version: "127",
+						Variation: "Default", Value: "YO2", Default: false, Version: "127", Source: "SERVER",
 					},
 				},
 			},
@@ -89,17 +89,17 @@ func TestWebhook_Export(t *testing.T) {
 				featureEvents: []exporter.FeatureEvent{
 					{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-						Variation: "Default", Value: "YO", Default: false,
+						Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 					},
 					{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
-						Variation: "Default", Value: "YO2", Default: false, Version: "127",
+						Variation: "Default", Value: "YO2", Default: false, Version: "127", Source: "SERVER",
 					},
 				},
 			},
 			expected: expected{
 				bodyFilePath: "./testdata/valid_with_signature.json",
-				signHeader:   "sha256=0c504fe37d423ff0a80e4dc29b93c18c2d1438a5387f36d8e6491e77fb5e70d4",
+				signHeader:   "sha256=f1f9766836d4e513035986c035ee9f091b895709be47a802b5840467007e1ec0",
 			},
 			wantErr: false,
 		},
@@ -116,11 +116,11 @@ func TestWebhook_Export(t *testing.T) {
 				featureEvents: []exporter.FeatureEvent{
 					{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-						Variation: "Default", Value: "YO", Default: false,
+						Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 					},
 					{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
-						Variation: "Default", Value: "YO2", Default: false,
+						Variation: "Default", Value: "YO2", Default: false, Source: "SERVER",
 					},
 				},
 			},
@@ -139,11 +139,11 @@ func TestWebhook_Export(t *testing.T) {
 				featureEvents: []exporter.FeatureEvent{
 					{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-						Variation: "Default", Value: "YO", Default: false,
+						Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 					},
 					{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
-						Variation: "Default", Value: "YO2", Default: false,
+						Variation: "Default", Value: "YO2", Default: false, Source: "SERVER",
 					},
 				},
 			},
@@ -162,11 +162,11 @@ func TestWebhook_Export(t *testing.T) {
 				featureEvents: []exporter.FeatureEvent{
 					{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-						Variation: "Default", Value: "YO", Default: false,
+						Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 					},
 					{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
-						Variation: "Default", Value: "YO2", Default: false, Version: "127",
+						Variation: "Default", Value: "YO2", Default: false, Version: "127", Source: "SERVER",
 					},
 				},
 			},

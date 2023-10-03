@@ -14,23 +14,25 @@ RESET  := $(shell tput -Txterm sgr0)
 
 all: help
 ## Build:
-build: build-migrationcli build-relayproxy build-lint build-editor-api ## Build all the binaries and put the output in out/bin/
+build: build-migrationcli build-relayproxy build-lint build-editor-api build-jsonschema-generator ## Build all the binaries and put the output in out/bin/
 
-build-migrationcli: ## Build the migration cli in out/bin/
+create-out-dir:
 	mkdir -p out/bin
+
+build-migrationcli: create-out-dir ## Build the migration cli in out/bin/
 	CGO_ENABLED=0 GO111MODULE=on $(GOCMD) build -mod vendor -o out/bin/migrationcli ./cmd/migrationcli/
 
-build-relayproxy: ## Build the relay proxy in out/bin/
-	mkdir -p out/bin
+build-relayproxy: create-out-dir ## Build the relay proxy in out/bin/
 	CGO_ENABLED=0 GO111MODULE=on $(GOCMD) build -mod vendor -o out/bin/relayproxy ./cmd/relayproxy/
 
-build-lint: ## Build the linter in out/bin/
-	mkdir -p out/bin
+build-lint: create-out-dir ## Build the linter in out/bin/
 	CGO_ENABLED=0 GO111MODULE=on $(GOCMD) build -mod vendor -o out/bin/lint ./cmd/lint/
 
-build-editor-api: ## Build the linter in out/bin/
-	mkdir -p out/bin
+build-editor-api: create-out-dir ## Build the linter in out/bin/
 	CGO_ENABLED=0 GO111MODULE=on $(GOCMD) build -mod vendor -o out/bin/editor-api ./cmd/editor/
+
+build-jsonschema-generator: create-out-dir ## Build the jsonschema-generator in out/bin/
+	CGO_ENABLED=0 GO111MODULE=on $(GOCMD) build -mod vendor -o out/bin/jsonschema-generator ./cmd/jsonschema-generator/
 
 build-doc: ## Build the documentation
 	cd website; \

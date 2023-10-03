@@ -9,6 +9,7 @@ body:
       description: |
         What are you trying to do?  
         Describe what you think went wrong during this.
+        Please provide as many details as possible, such as the components you are using (is it an OpenFeature provider? Which language? etc ...).
     validations:
       required: true
   - type: textarea

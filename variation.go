@@ -2,9 +2,10 @@ package ffclient
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
-	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/internal/flagstate"
@@ -360,7 +361,8 @@ func notifyVariation[T model.JSONType](
 	result model.VariationResult[T],
 ) {
 	if result.TrackEvents {
-		event := exporter.NewFeatureEvent(ctx, flagKey, result.Value, result.VariationType, result.Failed, result.Version)
+		event := exporter.NewFeatureEvent(ctx, flagKey, result.Value, result.VariationType, result.Failed, result.Version,
+			"SERVER")
 		g.CollectEventData(event)
 	}
 }

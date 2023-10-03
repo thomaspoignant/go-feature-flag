@@ -560,7 +560,8 @@ It represents individual flag evaluations and is considered "full fidelity" even
   "key": "test-flag",
   "variation": "Default",
   "value": false,
-  "default": false
+  "default": false,
+  "source": "SERVER"
 }
 ```
 The format of the data is [described in the documentation](https://gofeatureflag.org/docs/).

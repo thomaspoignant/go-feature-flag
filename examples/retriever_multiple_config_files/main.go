@@ -23,10 +23,10 @@ func main() {
 		Context:         context.Background(),
 		Retrievers: []retriever.Retriever{
 			&fileretriever.Retriever{
-				Path: "examples/retriever_multiple_config_files/flags.yaml",
+				Path: "examples/retriever_multiple_config_files/flags.goff.yaml",
 			},
 			&fileretriever.Retriever{
-				Path: "examples/retriever_multiple_config_files/flags2.yaml",
+				Path: "examples/retriever_multiple_config_files/flags2.goff.yaml",
 			},
 		},
 		DataExporter: ffclient.DataExporter{

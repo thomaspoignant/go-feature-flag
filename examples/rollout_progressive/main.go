@@ -22,7 +22,7 @@ func main() {
 		Logger:          log.New(os.Stdout, "", 0),
 		Context:         context.Background(),
 		Retriever: &fileretriever.Retriever{
-			Path: "examples/rollout_progressive/flags.yaml",
+			Path: "examples/rollout_progressive/flags.goff.yaml",
 		},
 	})
 	// Check init errors.

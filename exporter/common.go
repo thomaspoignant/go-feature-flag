@@ -11,7 +11,7 @@ import (
 )
 
 const DefaultCsvTemplate = "{{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};" +
-	"{{ .Value}};{{ .Default}}\n"
+	"{{ .Value}};{{ .Default}};{{ .Source}}\n"
 const DefaultFilenameTemplate = "flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}"
 
 // ParseTemplate is parsing the template given by the config or use the default template
