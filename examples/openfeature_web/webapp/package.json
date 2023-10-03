@@ -11,7 +11,6 @@
     "build:css": "npm run css:lint && npm run css:scss && npm run css:autoprefixer",
     "watch:css": "onchange \"src/scss\" -- npm run build:css",
     "build:images": "mkdir -p dist/images/ && cp -r src/images/* dist/images/",
-    "watch:images": "build:images",
     "build:js": "webpack --mode=production",
     "watch:js": "onchange \"src/js\" -- webpack --mode=development",
     "build:html": "posthtml -c posthtml.json",
@@ -55,7 +54,7 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
-    "@openfeature/go-feature-flag-web-provider": "0.1.1",
+    "@openfeature/go-feature-flag-web-provider": "^0.1.4",
     "@openfeature/web-sdk": "^0.4.0",
     "highlight.js": "^11.8.0",
     "uuid": "^9.0.1"
