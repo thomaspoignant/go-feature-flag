@@ -540,12 +540,14 @@ Available notifiers are:
 **GO Feature Flag** allows you to export data about the usage of your flags.    
 It collects all variation events and can save these events in several locations:
 
-- **Local file** *- create local files with the variation usages.*
-- **Log** *- use your logger to write the variation usages.*
-- **AWS S3** *- export your variation usages to S3.*
-- **Google Cloud Storage** *- export your variation usages to Google Cloud Storage.*
-- **Webhook** *- export your variation usages by calling a webhook.*
-- **AWS SQS** *- export your variation usages by sending events to SQS.*
+| Export Method            | Description                                            |
+|--------------------------|--------------------------------------------------------|
+| Local file               | Create local files with the variation usages.         |
+| Log                      | Use your logger to write the variation usages.         |
+| AWS S3                   | Export your variation usages to S3.                   |
+| Google Cloud Storage     | Export your variation usages to Google Cloud Storage. |
+| Webhook                  | Export your variation usages by calling a webhook.    |
+| AWS SQS                  | Export your variation usages by sending events to SQS.|
 
 Currently, we are supporting only feature events.  
 It represents individual flag evaluations and is considered "full fidelity" events.
