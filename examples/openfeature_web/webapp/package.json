@@ -56,7 +56,7 @@
   "dependencies": {
     "@openfeature/go-feature-flag-web-provider": "^0.1.4",
     "@openfeature/web-sdk": "^0.4.0",
-    "highlight.js": "^11.8.0",
+    "highlight.js": "^11.9.0",
     "uuid": "^9.0.1"
   }
 }
