@@ -3,7 +3,7 @@ package config
 import "fmt"
 
 type NotifierConf struct {
-	Kind            NotifierKind        `mapstructure:"notifier" koanf:"notifier"`
+	Kind            NotifierKind        `mapstructure:"kind" koanf:"kind"`
 	SlackWebhookURL string              `mapstructure:"slackWebhookUrl" koanf:"slackWebhookUrl"`
 	EndpointURL     string              `mapstructure:"endpointUrl" koanf:"endpointUrl"`
 	Secret          string              `mapstructure:"secret" koanf:"secret"`
