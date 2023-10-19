@@ -2,13 +2,14 @@ package config_test
 
 import (
 	"fmt"
+	"io"
+	"os"
+	"testing"
+
 	"github.com/spf13/pflag"
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"go.uber.org/zap"
-	"io"
-	"os"
-	"testing"
 )
 
 func TestParseConfig_fileFromPflag(t *testing.T) {
@@ -32,6 +33,38 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 				},
 				Exporter: &config.ExporterConf{
 					Kind: "log",
+				},
+				StartWithRetrieverError: false,
+				RestAPITimeout:          5000,
+				Version:                 "1.X.X",
+				EnableSwagger:           true,
+				APIKeys: []string{
+					"apikey1",
+					"apikey2",
+				},
+			},
+			wantErr: assert.NoError,
+		},
+		{
+			name:         "Valid yaml file with notifier",
+			fileLocation: "../testdata/config/valid-yaml-notifier.yaml",
+			want: &config.Config{
+				ListenPort:      1031,
+				PollingInterval: 1000,
+				FileFormat:      "yaml",
+				Host:            "localhost",
+				Retriever: &config.RetrieverConf{
+					Kind: "http",
+					URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.yaml",
+				},
+				Exporter: &config.ExporterConf{
+					Kind: "log",
+				},
+				Notifiers: []config.NotifierConf{
+					{
+						Kind:            "slack",
+						SlackWebhookURL: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
+					},
 				},
 				StartWithRetrieverError: false,
 				RestAPITimeout:          5000,
@@ -320,6 +353,25 @@ func TestConfig_IsValid(t *testing.T) {
 					{
 						Kind:            "slack",
 						SlackWebhookURL: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
+					},
+				},
+			},
+			wantErr: assert.NoError,
+		},
+		{
+			name: "valid configuration with notifier included",
+			fields: fields{
+				ListenPort: 8080,
+				Retriever: &config.RetrieverConf{
+					Kind: "file",
+					Path: "../testdata/config/valid-file-notifier.yaml",
+				},
+				Exporter: &config.ExporterConf{
+					Kind:        "webhook",
+					EndpointURL: "http://testingwebhook.com/test/",
+					Secret:      "secret-for-signing",
+					Meta: map[string]string{
+						"extraInfo": "info",
 					},
 				},
 			},
