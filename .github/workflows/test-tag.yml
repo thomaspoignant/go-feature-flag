@@ -8,4 +8,4 @@ jobs:
         runs-on: ubuntu-latest
         steps:
         - run: echo ${GITHUB_REF}
-        - run: echo ${{  github.ref_name }}"
+        - run: echo ${{  github.ref_name }}
