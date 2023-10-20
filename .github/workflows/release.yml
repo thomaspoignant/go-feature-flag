@@ -182,12 +182,9 @@ jobs:
         working-directory: ./release/${{ env.WEBSITE_DIR }}
         run: npm install
 
-      - name: Get tag name
-        uses: olegtarasov/get-tag@v2.1.2
-
       - name: Tagging a new version
         working-directory: ./release/${{ env.WEBSITE_DIR }}
-        run: npm run docusaurus docs:version $GIT_TAG_NAME
+        run: npm run docusaurus docs:version ${{  github.ref_name }}
 
       - name: Checkout main branch
         uses: actions/checkout@v4
@@ -205,10 +202,10 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
-          branch: create-new-doc-version-${{ env.GIT_TAG_NAME }}
-          title: Create a new documentation version ${{ env.GIT_TAG_NAME }}
-          body: Automated pull request to create a new documentation version ${{ env.GIT_TAG_NAME }}
-          commit-message: Create a new documentation version ${{ env.GIT_TAG_NAME }}
+          branch: create-new-doc-version-${{  github.ref_name }}
+          title: Create a new documentation version ${{  github.ref_name }}
+          body: Automated pull request to create a new documentation version ${{  github.ref_name }}
+          commit-message: Create a new documentation version ${{  github.ref_name }}
           labels: automerge
           assignees: thomaspoignant
           draft: false
@@ -238,16 +235,13 @@ jobs:
       - name: yq - portable yaml processor
         uses: mikefarah/yq@v4.35.2
 
-      - name: Get tag name
-        uses: olegtarasov/get-tag@v2.1.2
-
       - name: Bump chart appVersion
         working-directory: ./release/
-        run: yq -i ".appVersion=\"$GIT_TAG_NAME\"" $CHART_YAML_FILE_LOCATION
+        run: yq -i ".appVersion=\"${{  github.ref_name }}\"" $CHART_YAML_FILE_LOCATION
 
       - name: Bump chart version
         working-directory: ./release/
-        run: yq -i ".version=\"${GIT_TAG_NAME#v}\"" $CHART_YAML_FILE_LOCATION
+        run: GIT_TAG_NAME=${{  github.ref_name }} && yq -i ".version=\"${GIT_TAG_NAME#v}\"" $CHART_YAML_FILE_LOCATION
 
       - name: Checkout main branch
         uses: actions/checkout@v4
@@ -265,10 +259,10 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
-          branch: bump-relay-proxy-helm-chart-${{ env.GIT_TAG_NAME }}
-          title: Bump relay-proxy helm chart version ${{ env.GIT_TAG_NAME }}
-          body: Automated pull request to bump relay-proxy helm chart version ${{ env.GIT_TAG_NAME }}
-          commit-message: Bump relay-proxy helm chart version ${{ env.GIT_TAG_NAME }}
+          branch: bump-relay-proxy-helm-chart-${{  github.ref_name }}
+          title: Bump relay-proxy helm chart version ${{  github.ref_name }}
+          body: Automated pull request to bump relay-proxy helm chart version ${{  github.ref_name }}
+          commit-message: Bump relay-proxy helm chart version ${{  github.ref_name }}
           labels: automerge
           assignees: thomaspoignant
           draft: false
@@ -323,10 +317,10 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
-          branch: release-jsonschema-${{ env.GIT_TAG_NAME }}
-          title: Release a new version of the jsonschema ${{ env.GIT_TAG_NAME }}
-          body: Automated pull request to release a new version of the jsonschema ${{ env.GIT_TAG_NAME }}
-          commit-message: Release a new version of the jsonschema ${{ env.GIT_TAG_NAME }}
+          branch: release-jsonschema-${{  github.ref_name }}
+          title: Release a new version of the jsonschema ${{  github.ref_name }}
+          body: Automated pull request to release a new version of the jsonschema ${{  github.ref_name }}
+          commit-message: Release a new version of the jsonschema ${{  github.ref_name }}
           labels: automerge
           assignees: thomaspoignant
           draft: false

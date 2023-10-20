@@ -61,10 +61,10 @@ jobs:
         uses: peter-evans/create-pull-request@v5
         if: steps.changed-files-specific.outputs.any_changed == 'true'
         with:
-          branch: update-relay-proxy-chart-readme-${{ env.GIT_TAG_NAME }}
-          title: Update relay proxy helm README ${{ env.GIT_TAG_NAME }}
-          body: Automated pull request to update relay-proxy helm chart README ${{ env.GIT_TAG_NAME }}
-          commit-message: Update relay proxy helm README ${{ env.GIT_TAG_NAME }}
+          branch: update-relay-proxy-chart-readme
+          title: Update relay proxy helm README
+          body: Automated pull request to update relay-proxy helm chart README
+          commit-message: Update relay proxy helm README
           labels: automerge
           assignees: thomaspoignant
           draft: false
