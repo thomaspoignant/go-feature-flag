@@ -1,0 +1,11 @@
+name: Test_tag
+on:
+  release:
+    types: [ published ]
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        steps:
+        - run: echo ${GITHUB_REF}
+        - run: echo ${{  github.ref_name }}"
