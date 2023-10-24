@@ -176,7 +176,7 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
 
       - name: Install dependencies
         working-directory: ./release/${{ env.WEBSITE_DIR }}
