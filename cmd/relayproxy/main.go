@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"os"
 
 	"github.com/spf13/pflag"
@@ -67,6 +68,10 @@ func main() {
 	docs.SwaggerInfo.Host = fmt.Sprintf("%s:%d", proxyConf.Host, proxyConf.ListenPort)
 
 	// Init services
+	metricsV2, err := metric.NewMetrics()
+	if err != nil {
+		zapLog.Error("impossible to initialize prometheus metrics", zap.Error(err))
+	}
 	wsService := service.NewWebsocketService()
 	defer wsService.Close() // close all the open connections
 	proxyNotifier := service.NewNotifierRelayProxy(wsService)
@@ -79,6 +84,7 @@ func main() {
 		MonitoringService:    service.NewMonitoring(goff),
 		WebsocketService:     wsService,
 		GOFeatureFlagService: goff,
+		Metrics:              metricsV2,
 	}
 	// Init API server
 	apiServer := api.New(proxyConf, services, zapLog)

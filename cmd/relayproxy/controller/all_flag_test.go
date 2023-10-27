@@ -2,7 +2,6 @@ package controller_test
 
 import (
 	"context"
-	"github.com/labstack/echo-contrib/prometheus"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"io"
 	"log"
@@ -94,7 +93,7 @@ func Test_all_flag_Handler(t *testing.T) {
 				},
 			})
 			defer goFF.Close()
-			ctrl := controller.NewAllFlags(goFF)
+			ctrl := controller.NewAllFlags(goFF, metric.Metrics{})
 
 			e := echo.New()
 			rec := httptest.NewRecorder()
@@ -107,14 +106,9 @@ func Test_all_flag_Handler(t *testing.T) {
 				bodyReq = strings.NewReader(string(bodyReqContent))
 			}
 
-			metrics := metric.NewMetrics()
-			prometheus := prometheus.NewPrometheus("gofeatureflag", nil, metrics.MetricList())
-			prometheus.Use(e)
-
 			req := httptest.NewRequest(echo.POST, "/v1/allflags", bodyReq)
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			c := e.NewContext(req, rec)
-			c.Set(metric.CustomMetrics, metrics)
 			c.SetPath("/v1/allflags")
 			handlerErr := ctrl.Handler(c)
 

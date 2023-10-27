@@ -11,13 +11,15 @@ import (
 )
 
 type collectEvalData struct {
-	goFF *ffclient.GoFeatureFlag
+	goFF    *ffclient.GoFeatureFlag
+	metrics metric.Metrics
 }
 
 // NewCollectEvalData initialize the controller for the /data/collector endpoint
-func NewCollectEvalData(goFF *ffclient.GoFeatureFlag) Controller {
+func NewCollectEvalData(goFF *ffclient.GoFeatureFlag, metrics metric.Metrics) Controller {
 	return &collectEvalData{
-		goFF: goFF,
+		goFF:    goFF,
+		metrics: metrics,
 	}
 }
 
@@ -47,15 +49,13 @@ func (h *collectEvalData) Handler(c echo.Context) error {
 	}
 
 	for _, event := range reqBody.Events {
-		if event.Source == "" {		
-		    event.Source = "PROVIDER_CACHE"
+		if event.Source == "" {
+			event.Source = "PROVIDER_CACHE"
 		}
 		h.goFF.CollectEventData(event)
 	}
 
-	// send metric
-	metrics := c.Get(metric.CustomMetrics).(*metric.Metrics)
-	metrics.IncCollectEvalData(float64(len(reqBody.Events)))
+	h.metrics.IncCollectEvalData(float64(len(reqBody.Events)))
 
 	return c.JSON(http.StatusOK, model.CollectEvalDataResponse{
 		IngestedContentCount: len(reqBody.Events),

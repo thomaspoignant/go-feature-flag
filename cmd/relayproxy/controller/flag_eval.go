@@ -2,21 +2,23 @@ package controller
 
 import (
 	"fmt"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/model"
 )
 
 type flagEval struct {
-	goFF *ffclient.GoFeatureFlag
+	goFF    *ffclient.GoFeatureFlag
+	metrics metric.Metrics
 }
 
-func NewFlagEval(goFF *ffclient.GoFeatureFlag) Controller {
+func NewFlagEval(goFF *ffclient.GoFeatureFlag, metrics metric.Metrics) Controller {
 	return &flagEval{
-		goFF: goFF,
+		goFF:    goFF,
+		metrics: metrics,
 	}
 }
 
@@ -46,9 +48,7 @@ func (h *flagEval) Handler(c echo.Context) error {
 	if flagKey == "" {
 		return fmt.Errorf("impossible to find the flag key in the URL")
 	}
-
-	metrics := c.Get(metric.CustomMetrics).(*metric.Metrics)
-	metrics.IncFlagEvaluation(flagKey)
+	h.metrics.IncFlagEvaluation(flagKey)
 
 	reqBody := new(model.EvalFlagRequest)
 	if err := c.Bind(reqBody); err != nil {

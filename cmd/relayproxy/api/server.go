@@ -2,7 +2,7 @@ package api
 
 import (
 	"fmt"
-	"github.com/labstack/echo-contrib/prometheus"
+	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
@@ -46,10 +46,14 @@ func (s *Server) init() {
 	s.echoInstance.Debug = s.config.Debug
 
 	// Global Middlewares
-	metrics := metric.NewMetrics()
-	prom := prometheus.NewPrometheus("gofeatureflag", nil, metrics.MetricList())
-	prom.Use(s.echoInstance)
-	s.echoInstance.Use(metrics.AddCustomMetricsMiddleware)
+	if s.services.Metrics != (metric.Metrics{}) {
+		s.echoInstance.Use(echoprometheus.NewMiddlewareWithConfig(echoprometheus.MiddlewareConfig{
+			Subsystem:  metric.GOFFSubSystem,
+			Registerer: s.services.Metrics.Registry,
+		}))
+		s.echoInstance.GET("/metrics", echoprometheus.NewHandlerWithConfig(
+			echoprometheus.HandlerConfig{Gatherer: s.services.Metrics.Registry}))
+	}
 	s.echoInstance.Use(custommiddleware.ZapLogger(s.zapLog, s.config))
 	s.echoInstance.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
 	s.echoInstance.Use(middleware.Recover())
@@ -72,9 +76,9 @@ func (s *Server) init() {
 // initAPIEndpoints initialize the API endpoints
 func (s *Server) initAPIEndpoints() {
 	// Init controllers
-	cAllFlags := controller.NewAllFlags(s.services.GOFeatureFlagService)
-	cFlagEval := controller.NewFlagEval(s.services.GOFeatureFlagService)
-	cEvalDataCollector := controller.NewCollectEvalData(s.services.GOFeatureFlagService)
+	cAllFlags := controller.NewAllFlags(s.services.GOFeatureFlagService, s.services.Metrics)
+	cFlagEval := controller.NewFlagEval(s.services.GOFeatureFlagService, s.services.Metrics)
+	cEvalDataCollector := controller.NewCollectEvalData(s.services.GOFeatureFlagService, s.services.Metrics)
 
 	// Init routes
 	v1 := s.echoInstance.Group("/v1")
