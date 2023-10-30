@@ -141,7 +141,7 @@ func (g *GoFeatureFlag) startFlagUpdaterDaemon() {
 func retrieveFlagsAndUpdateCache(config Config, cache cache.Manager) error {
 	retrievers, err := config.GetRetrievers()
 	if err != nil {
-		log.Printf("error while getting the file retriever: %v", err)
+		fflog.Printf(config.Logger, "error while getting the file retriever: %v", err)
 		return err
 	}
 
