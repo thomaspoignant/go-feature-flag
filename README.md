@@ -288,7 +288,7 @@ _[See the full list and more information.](https://gofeatureflag.org/docs/config
 Your file should be a `YAML`, `JSON` or `TOML` file with a list of flags *(examples: [`YAML`](testdata/flag-config.yaml), [`JSON`](testdata/flag-config.json), [`TOML`](testdata/flag-config.toml))*.
 
 The easiest way to create your configuration file is to use **GO Feature Flag Editor** available at https://editor.gofeatureflag.org.  
-If you prefer to do it manually please follow the instruction bellow.
+If you prefer to do it manually please follow the instruction below.
 
 **A flag configuration looks like this:**
 
