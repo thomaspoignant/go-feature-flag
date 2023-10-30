@@ -10,12 +10,14 @@ import (
 )
 
 type allFlags struct {
-	goFF *ffclient.GoFeatureFlag
+	goFF    *ffclient.GoFeatureFlag
+	metrics metric.Metrics
 }
 
-func NewAllFlags(goFF *ffclient.GoFeatureFlag) Controller {
+func NewAllFlags(goFF *ffclient.GoFeatureFlag, metrics metric.Metrics) Controller {
 	return &allFlags{
-		goFF: goFF,
+		goFF:    goFF,
+		metrics: metrics,
 	}
 }
 
@@ -35,8 +37,7 @@ func NewAllFlags(goFF *ffclient.GoFeatureFlag) Controller {
 // @Failure      500 {object} modeldocs.HTTPErrorDoc "Internal server error"
 // @Router       /v1/allflags [post]
 func (h *allFlags) Handler(c echo.Context) error {
-	metrics := c.Get(metric.CustomMetrics).(*metric.Metrics)
-	metrics.IncAllFlag()
+	h.metrics.IncAllFlag()
 
 	reqBody := new(model.AllFlagRequest)
 	if err := c.Bind(reqBody); err != nil {

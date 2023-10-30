@@ -2,7 +2,6 @@ package controller_test
 
 import (
 	"context"
-	"github.com/labstack/echo-contrib/prometheus"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"io"
 	"io/ioutil"
@@ -163,7 +162,7 @@ func Test_flag_eval_Handler(t *testing.T) {
 			})
 			defer goFF.Close()
 
-			flagEval := controller.NewFlagEval(goFF)
+			flagEval := controller.NewFlagEval(goFF, metric.Metrics{})
 
 			e := echo.New()
 			rec := httptest.NewRecorder()
@@ -176,14 +175,9 @@ func Test_flag_eval_Handler(t *testing.T) {
 				bodyReq = strings.NewReader(string(bodyReqContent))
 			}
 
-			metrics := metric.NewMetrics()
-			prometheus := prometheus.NewPrometheus("gofeatureflag", nil, metrics.MetricList())
-			prometheus.Use(e)
-
 			req := httptest.NewRequest(echo.POST, "/v1/feature/"+tt.args.flagKey+"/eval", bodyReq)
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			c := e.NewContext(req, rec)
-			c.Set(metric.CustomMetrics, metrics)
 			c.SetPath("/v1/feature/:flagKey/eval")
 			c.SetParamNames("flagKey")
 			c.SetParamValues(tt.args.flagKey)

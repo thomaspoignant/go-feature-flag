@@ -1,6 +1,9 @@
 package service
 
-import goff "github.com/thomaspoignant/go-feature-flag"
+import (
+	goff "github.com/thomaspoignant/go-feature-flag"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
+)
 
 type Services struct {
 	// MonitoringService is the service in charge of managing the monitoring
@@ -9,4 +12,6 @@ type Services struct {
 	WebsocketService WebsocketService
 	// GOFeatureFlagService is the GO Feature Flag goff we are using in the relay proxy.
 	GOFeatureFlagService *goff.GoFeatureFlag
+	// Metrics is the service containing all the prometheus metrics
+	Metrics metric.Metrics
 }

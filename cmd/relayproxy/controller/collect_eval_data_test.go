@@ -12,7 +12,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/labstack/echo-contrib/prometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
@@ -108,7 +107,7 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 					Exporter:         &fileexporter.Exporter{Filename: exporterFile.Name()},
 				},
 			})
-			ctrl := controller.NewCollectEvalData(goFF)
+			ctrl := controller.NewCollectEvalData(goFF, metric.Metrics{})
 
 			e := echo.New()
 			rec := httptest.NewRecorder()
@@ -121,14 +120,9 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 				bodyReq = strings.NewReader(string(bodyReqContent))
 			}
 
-			metrics := metric.NewMetrics()
-			prometheus := prometheus.NewPrometheus("gofeatureflag", nil, metrics.MetricList())
-			prometheus.Use(e)
-
 			req := httptest.NewRequest(echo.POST, "/v1/data/collector", bodyReq)
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			c := e.NewContext(req, rec)
-			c.Set(metric.CustomMetrics, metrics)
 			c.SetPath("/v1/data/collector")
 			handlerErr := ctrl.Handler(c)
 
