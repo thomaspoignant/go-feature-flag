@@ -11,28 +11,36 @@ const GOFFSubSystem = "gofeatureflag"
 
 func NewMetrics() (Metrics, error) {
 	customRegistry := prom.NewRegistry()
-	metricToRegister := []prom.Collector{}
-
 	flagEvaluationCounter := prom.NewCounterVec(prom.CounterOpts{
 		Name:      "flag_evaluations_total",
 		Help:      "Counter events for number of flag evaluation.",
 		Subsystem: GOFFSubSystem,
 	}, []string{"flag_name"})
-	metricToRegister = append(metricToRegister, flagEvaluationCounter)
 
 	allFlagCounter := prom.NewCounter(prom.CounterOpts{
 		Name:      "all_flag_evaluations_total",
 		Help:      "Counter events for number of all flags requests.",
 		Subsystem: GOFFSubSystem,
 	})
-	metricToRegister = append(metricToRegister, allFlagCounter)
 
 	collectEvalDataCounter := prom.NewCounter(prom.CounterOpts{
 		Name:      "collect_eval_data_total",
 		Help:      "Counter events for data collector.",
 		Subsystem: GOFFSubSystem,
 	})
-	metricToRegister = append(metricToRegister, collectEvalDataCounter)
+
+	flagUpdateCounter := prom.NewCounter(prom.CounterOpts{
+		Name:      "flag_changes_total",
+		Help:      "Counter that counts the number of flag changes.",
+		Subsystem: GOFFSubSystem,
+	})
+
+	metricToRegister := []prom.Collector{
+		flagEvaluationCounter,
+		allFlagCounter,
+		collectEvalDataCounter,
+		flagUpdateCounter,
+	}
 
 	// register all the metric in the custom registry
 	for _, metric := range metricToRegister {
