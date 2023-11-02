@@ -1,0 +1,16 @@
+
+> docs-v-2@0.0.0 build
+> docusaurus build
+
+[INFO] [en] Creating an optimized production build...
+ℹ Compiling Client
+ℹ Compiling Server
+✔ Client: Compiled with some errors in 1.05m
+
+> docs-v-2@0.0.0 build
+> docusaurus build
+
+[INFO] [en] Creating an optimized production build...
+ℹ Compiling Client
+ℹ Compiling Server
+✔ Client: Compiled with some errors in 1.13m

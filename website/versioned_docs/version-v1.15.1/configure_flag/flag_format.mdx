@@ -197,16 +197,23 @@ version = "12"
     <tr>
       <td><code>variations</code></td>
       <td>
-        <p>Variations are all the variations available for this flag.</p>
-        <p>It is represented as a key/value element. The key is the name of the variation and the value could be any types available (<code>string</code>, <code>float</code>, <code>int</code>, <code>map</code>, <code>array</code>, <code>bool</code>).</p>
-        <p>You can have as many variation as needed.</p>
-         <pre># Some examples<br/>
-         variationString: test<br/>
-         variationBool: true<br/>
-         variationInt: 1000<br/>
-         variationFloat: 1000.23<br/>
-         variationArray: <br/>  - item1<br/>  - item2<br/>
-         variationObj:<br/>  item1: 123<br/>  item2: this is a string<br/>  item3: false<br/>
+        <p>
+          Variations are all the variations available for this flag.
+        </p>
+        <p>
+          It is represented as a key/value element. The key is the name of the variation and the value could be any types available (<code>string</code>, <code>float</code>, <code>int</code>, <code>map</code>, <code>array</code>, <code>bool</code>).
+        </p>
+        <p>
+          You can have as many variation as needed.
+        </p>
+        <pre>
+          # Some examples<br/>
+          variationString: test<br/>
+          variationBool: true<br/>
+          variationInt: 1000<br/>
+          variationFloat: 1000.23<br/>
+          variationArray: <br/>  - item1<br/>  - item2<br/>
+          variationObj:<br/>  item1: 123<br/>  item2: this is a string<br/>  item3: false<br/>
          </pre>
       </td>
     </tr>
@@ -217,7 +224,9 @@ version = "12"
           Targeting contains the list of rules you have to target a subset of your users.
           <br/>You can have as many target as needed.
         </p>
-        <p>This field is an <code>array</code> and contains a list of rules.</p>
+        <p>
+          This field is an <code>array</code> and contains a list of rules.
+        </p>
         <p><i>See <a href="./rule_format">rules format</a> to have more info on how to write a rule.</i></p>
       </td>
     </tr>
