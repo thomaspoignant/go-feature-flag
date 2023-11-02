@@ -20,55 +20,117 @@ A rule is a configuration that allows to serve a variation based on some conditi
   </thead>
   <tbody>
     <tr>
-      <td><code>name</code><br/><i>(optional)</i></td>
-      <td>Name of your rule.<br/>This is needed when your are updating a rule using a <a href="./rollout/scheduled">scheduled rollout</a>.</td>
+      <td>
+        <code>name</code>
+        <br />
+        <i>(optional)</i>
+      </td>
+      <td>
+        Name of your rule.
+        <br />
+        This is needed when your are updating a rule using a{" "}
+        <a href="./rollout/scheduled">scheduled rollout</a>.
+      </td>
     </tr>
     <tr>
-      <td><code>query</code></td>
+      <td>
+        <code>query</code>
+      </td>
       <td>
         <p>
           Query represents an antlr query in the nikunjy/rules format.
-          <br/><b>This field is mandatory in every rule used in the targeting field</b>.
+          <br />
+          <b>
+            This field is mandatory in every rule used in the targeting field
+          </b>
+          .
         </p>
-        <p><i>See <a href="#query-format">query format</a> to have the syntax.</i></p>
-        <p><i>Note: if you use the field <code>query</code> in a <code>defaultRule</code> it will be ignored.</i></p>
+        <p>
+          <i>
+            See <a href="#query-format">query format</a> to have the syntax.
+          </i>
+        </p>
+        <p>
+          <i>
+            Note: if you use the field <code>query</code> in a{" "}
+            <code>defaultRule</code> it will be ignored.
+          </i>
+        </p>
       </td>
     </tr>
     <tr>
-      <td><code>variation</code><br/><i>(optional)</i></td>
+      <td>
+        <code>variation</code>
+        <br />
+        <i>(optional)</i>
+      </td>
       <td>Name of the variation to return.</td>
     </tr>
     <tr>
-      <td><code>percentage</code><br/><i>(optional)</i></td>
+      <td>
+        <code>percentage</code>
+        <br />
+        <i>(optional)</i>
+      </td>
       <td>
         <p>Represents the percentage we should give to each variation.</p>
-          <pre>
-            percentage:<br/>  variationA: 10.59<br/>  variationB: 9.41<br/>  variationC: 80
-          </pre>
-        <p>The format is the name of the variation and the percentage for this one.</p>
-        <p><b>Note: if your total is not equals to 100% this rule will be considered as invalid.</b></p>
+        <pre>
+          percentage:
+          <br /> variationA: 10.59
+          <br /> variationB: 9.41
+          <br /> variationC: 80
+        </pre>
+        <p>
+          The format is the name of the variation and the percentage for this
+          one.
+        </p>
+        <p>
+          <b>
+            Note: if your total is not equals to 100% this rule will be
+            considered as invalid.
+          </b>
+        </p>
       </td>
     </tr>
     <tr>
-      <td><code>progressiveRollout</code><br/><i>(optional)</i></td>
+      <td>
+        <code>progressiveRollout</code>
+        <br />
+        <i>(optional)</i>
+      </td>
       <td>
         <p>Allow to ramp up the percentage of your flag over time.</p>
-        <p>You can decide at which percentage you starts with and at what percentage you ends with in your release ramp.
-          Before the start date we will serve the initial percentage and, after we will serve the end percentage.
+        <p>
+          You can decide at which percentage you starts with and at what
+          percentage you ends with in your release ramp. Before the start date
+          we will serve the initial percentage and, after we will serve the end
+          percentage.
         </p>
-        <p><i>See <a href="./rollout/progressive">progressive rollout</a> to have more info on how to use it.</i></p>
+        <p>
+          <i>
+            See <a href="./rollout/progressive">progressive rollout</a> to have
+            more info on how to use it.
+          </i>
+        </p>
       </td>
     </tr>
     <tr>
-      <td><code>disable</code><br/><i>(optional)</i></td>
       <td>
-        <p>Set to <code>true</code> if you want to disable the rule.</p>
-        <p><b>Default:</b> <code>true</code>.</p>
+        <code>disable</code>
+        <br />
+        <i>(optional)</i>
+      </td>
+      <td>
+        <p>
+          Set to <code>true</code> if you want to disable the rule.
+        </p>
+        <p>
+          <b>Default:</b> <code>true</code>.
+        </p>
       </td>
     </tr>
   </tbody>
 </table>
-
 
 :::info
 `variation`, `percentage` and `progressiveRollout` are optional but you **must have one of the 3**.
@@ -87,7 +149,7 @@ Logical Operations supported are `AND` `OR`.
 Compare Expression and their definitions (`a|b` means you can use either one of the two `a` or `b`):
 
 |  Operator  | Description                 |
-|:----------:|-----------------------------|
+| :--------: | --------------------------- |
 | `eq`, `==` | equals to                   |
 | `ne`, `!=` | not equals to               |
 | `lt`, `<`  | less than                   |
@@ -107,8 +169,8 @@ Compare Expression and their definitions (`a|b` means you can use either one of 
 - Select all identified users: `anonymous ne true`
 - Select a user with a custom property: `userId eq "12345"`
 - Select on multiple criteria:
-  *All users with ids finishing by `@test.com` that have the role `backend engineer` in the `pro` environment for the
-  company `go-feature-flag`*
+  _All users with ids finishing by `@test.com` that have the role `backend engineer` in the `pro` environment for the
+  company `go-feature-flag`_
 
   ```bash
   (key ew "@test.com") and (role eq "backend engineer") and (env eq "pro") and (company eq "go-feature-flag")
@@ -120,9 +182,9 @@ When you initialise `go-feature-flag` you can set an [environment](../go_module/
 
 ```go linenums="1"
 ffclient.Init(ffclient.Config{
-    // ...
-    Environment:    "prod",
-    // ...
+// ...
+Environment:    "prod",
+// ...
 })
 ```
 
@@ -134,9 +196,9 @@ It means that you can decide to activate a flag only for some **environment**.
 ```yaml
 my-flag:
   variations:
-    A: "A"
-    B: "B"
-    C: "C"
+    A: 'A'
+    B: 'B'
+    C: 'C'
   targeting:
     - name: Target pre environment
       query: env eq "pre"
