@@ -23,7 +23,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - uses: actions/setup-go@v4
+      - name: Setup go
+        uses: actions/setup-go@v4
         with:
           go-version-file: go.mod
           check-latest: true
@@ -45,7 +46,8 @@ jobs:
       - name: Fetch all tags
         run: git fetch --force --tags
 
-      - uses: actions/setup-go@v4
+      - name: Setup go
+        uses: actions/setup-go@v4
         with:
           go-version-file: go.mod
           check-latest: true
@@ -288,7 +290,8 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
-      - uses: actions/setup-go@v4
+      - name: Setup go
+        uses: actions/setup-go@v4
         with:
           go-version-file: go.mod
           check-latest: true
