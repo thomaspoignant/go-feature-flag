@@ -41,11 +41,15 @@ A rule is a configuration that allows to serve a variation based on some conditi
     <tr>
       <td><code>percentage</code><br/><i>(optional)</i></td>
       <td>
-        <p>Represents the percentage we should give to each variation.</p>
-          <pre>
-            percentage:<br/>  variationA: 10.59<br/>  variationB: 9.41<br/>  variationC: 80
-          </pre>
-        <p>The format is the name of the variation and the percentage for this one.</p>
+        <p>
+          Represents the percentage we should give to each variation.
+        </p>
+        <pre>
+          percentage:<br/>  variationA: 10.59<br/>  variationB: 9.41<br/>  variationC: 80
+        </pre>
+        <p>
+          The format is the name of the variation and the percentage for this one.
+        </p>
         <p><b>Note: if your total is not equals to 100% this rule will be considered as invalid.</b></p>
       </td>
     </tr>
@@ -53,7 +57,8 @@ A rule is a configuration that allows to serve a variation based on some conditi
       <td><code>progressiveRollout</code><br/><i>(optional)</i></td>
       <td>
         <p>Allow to ramp up the percentage of your flag over time.</p>
-        <p>You can decide at which percentage you starts with and at what percentage you ends with in your release ramp.
+        <p>
+          You can decide at which percentage you starts with and at what percentage you ends with in your release ramp.
           Before the start date we will serve the initial percentage and, after we will serve the end percentage.
         </p>
         <p><i>See <a href="./rollout/progressive">progressive rollout</a> to have more info on how to use it.</i></p>
@@ -68,7 +73,6 @@ A rule is a configuration that allows to serve a variation based on some conditi
     </tr>
   </tbody>
 </table>
-
 
 :::info
 `variation`, `percentage` and `progressiveRollout` are optional but you **must have one of the 3**.
@@ -87,7 +91,7 @@ Logical Operations supported are `AND` `OR`.
 Compare Expression and their definitions (`a|b` means you can use either one of the two `a` or `b`):
 
 |  Operator  | Description                 |
-|:----------:|-----------------------------|
+| :--------: | --------------------------- |
 | `eq`, `==` | equals to                   |
 | `ne`, `!=` | not equals to               |
 | `lt`, `<`  | less than                   |
@@ -107,8 +111,8 @@ Compare Expression and their definitions (`a|b` means you can use either one of 
 - Select all identified users: `anonymous ne true`
 - Select a user with a custom property: `userId eq "12345"`
 - Select on multiple criteria:
-  *All users with ids finishing by `@test.com` that have the role `backend engineer` in the `pro` environment for the
-  company `go-feature-flag`*
+  _All users with ids finishing by `@test.com` that have the role `backend engineer` in the `pro` environment for the
+  company `go-feature-flag`_
 
   ```bash
   (key ew "@test.com") and (role eq "backend engineer") and (env eq "pro") and (company eq "go-feature-flag")

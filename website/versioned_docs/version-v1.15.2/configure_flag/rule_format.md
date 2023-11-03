@@ -52,8 +52,11 @@ A rule is a configuration that allows to serve a variation based on some conditi
     <tr>
       <td><code>progressiveRollout</code><br/><i>(optional)</i></td>
       <td>
-        <p>Allow to ramp up the percentage of your flag over time.</p>
-        <p>You can decide at which percentage you starts with and at what percentage you ends with in your release ramp.
+        <p>
+          Allow to ramp up the percentage of your flag over time.
+        </p>
+        <p>
+          You can decide at which percentage you starts with and at what percentage you ends with in your release ramp.
           Before the start date we will serve the initial percentage and, after we will serve the end percentage.
         </p>
         <p><i>See <a href="./rollout/progressive">progressive rollout</a> to have more info on how to use it.</i></p>
@@ -62,7 +65,9 @@ A rule is a configuration that allows to serve a variation based on some conditi
     <tr>
       <td><code>disable</code><br/><i>(optional)</i></td>
       <td>
-        <p>Set to <code>true</code> if you want to disable the rule.</p>
+        <p>
+          Set to <code>true</code> if you want to disable the rule.
+        </p>
         <p><b>Default:</b> <code>true</code>.</p>
       </td>
     </tr>
