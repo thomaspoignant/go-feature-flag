@@ -1,6 +1,8 @@
 module github.com/thomaspoignant/go-feature-flag
 
-go 1.19
+go 1.21
+
+toolchain go1.21.3
 
 require (
 	cloud.google.com/go/storage v1.33.0
