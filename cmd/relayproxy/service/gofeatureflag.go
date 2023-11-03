@@ -33,7 +33,7 @@ import (
 func NewGoFeatureFlagClient(
 	proxyConf *config.Config,
 	logger *zap.Logger,
-	proxyNotifier notifier.Notifier,
+	notifiers []notifier.Notifier,
 ) (*ffclient.GoFeatureFlag, error) {
 	var mainRetriever retriever.Retriever
 	var err error
@@ -72,7 +72,7 @@ func NewGoFeatureFlagClient(
 			return nil, err
 		}
 	}
-	notif = append(notif, proxyNotifier)
+	notif = append(notif, notifiers...)
 
 	f := ffclient.Config{
 		PollingInterval:         time.Duration(proxyConf.PollingInterval) * time.Millisecond,

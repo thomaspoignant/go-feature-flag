@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
+	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"os"
 
 	"github.com/spf13/pflag"
@@ -74,8 +75,12 @@ func main() {
 	}
 	wsService := service.NewWebsocketService()
 	defer wsService.Close() // close all the open connections
+	prometheusNotifier := service.NewPrometheusNotifier(metricsV2)
 	proxyNotifier := service.NewNotifierWebsocket(wsService)
-	goff, err := service.NewGoFeatureFlagClient(proxyConf, zapLog, proxyNotifier)
+	goff, err := service.NewGoFeatureFlagClient(proxyConf, zapLog, []notifier.Notifier{
+		prometheusNotifier,
+		proxyNotifier,
+	})
 	if err != nil {
 		panic(err)
 	}
