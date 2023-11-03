@@ -75,7 +75,7 @@ func main() {
 	}
 	wsService := service.NewWebsocketService()
 	defer wsService.Close() // close all the open connections
-	prometheusNotifier := service.NewPrometheusNotifier(metricsV2)
+	prometheusNotifier := metric.NewPrometheusNotifier(metricsV2)
 	proxyNotifier := service.NewNotifierWebsocket(wsService)
 	goff, err := service.NewGoFeatureFlagClient(proxyConf, zapLog, []notifier.Notifier{
 		prometheusNotifier,

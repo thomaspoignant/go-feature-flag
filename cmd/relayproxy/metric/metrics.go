@@ -8,7 +8,7 @@ import (
 const GOFFSubSystem = "gofeatureflag"
 
 // NewMetrics is the constructor for the custom metrics
-
+// nolint:funlen
 func NewMetrics() (Metrics, error) {
 	customRegistry := prom.NewRegistry()
 
