@@ -1,15 +1,14 @@
-package service
+package metric
 
 import (
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 )
 
 type notifierPrometheus struct {
-	metricsService metric.Metrics
+	metricsService Metrics
 }
 
-func NewPrometheusNotifier(metricsService metric.Metrics) notifier.Notifier {
+func NewPrometheusNotifier(metricsService Metrics) notifier.Notifier {
 	return &notifierPrometheus{
 		metricsService: metricsService,
 	}
