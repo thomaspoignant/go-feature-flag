@@ -113,6 +113,12 @@ function OpenFeature() {
 
           <SocialIcon
             colorClassName={styles.socialIconCyan}
+            fontAwesomeIcon="devicon-kotlin-plain-wordmark colored"
+            tooltipText="Kotlin"
+          />
+
+          <SocialIcon
+            colorClassName={styles.socialIconCyan}
             fontAwesomeIcon="devicon-javascript-plain colored"
             tooltipText="Javascript"
           />
@@ -128,6 +134,13 @@ function OpenFeature() {
             fontAwesomeIcon="devicon-dot-net-plain-wordmark colored"
             tooltipText=".NET"
           />
+
+          <SocialIcon
+            colorClassName={styles.socialIconCyan}
+            fontAwesomeIcon="devicon-android-plain colored"
+            tooltipText="Kotlin / Android"
+          />
+
         </div>
       </div>
       <div className="col-1-2">
