@@ -14,7 +14,6 @@ allprojects {
 
 group = project.extra["groupId"].toString()
 version = project.extra["version"].toString()
-
 nexusPublishing {
     this.repositories {
         sonatype {
