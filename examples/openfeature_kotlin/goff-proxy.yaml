@@ -1,0 +1,5 @@
+listen: 1031
+pollingInterval: 1000
+retriever:
+    kind: file
+    path: /goff/config.goff.yaml
