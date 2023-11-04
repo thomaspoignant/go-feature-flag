@@ -54,7 +54,7 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
-    "@openfeature/go-feature-flag-web-provider": "^0.1.4",
+    "@openfeature/go-feature-flag-web-provider": "^0.1.5",
     "@openfeature/web-sdk": "^0.4.4",
     "highlight.js": "^11.9.0",
     "uuid": "^9.0.1"
