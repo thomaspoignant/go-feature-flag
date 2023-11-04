@@ -44,10 +44,15 @@ implementation group: 'dev.openfeature.contrib.providers', name: 'go-feature-fla
 To evaluate the flags you need to have an Open Feature configured in you app.
 This code block shows you how you can create a client that you can use in your application.
 
+<Tabs groupId="code">
+  <TabItem value="java" label="java">
+
 ```java
-import dev.openfeature.contrib.providers.gofeatureflag.*;
-import dev.openfeature.contrib.providers.gofeatureflag.exception.*;
-import dev.openfeature.sdk.*;
+import dev.openfeature.contrib.providers.gofeatureflag.GoFeatureFlagProvider;
+import dev.openfeature.contrib.providers.gofeatureflag.GoFeatureFlagProviderOptions;
+import dev.openfeature.sdk.EvaluationContext;
+import dev.openfeature.sdk.MutableContext;
+import dev.openfeature.sdk.OpenFeatureAPI;
 
 // ...
 
@@ -59,6 +64,31 @@ OpenFeatureAPI api = OpenFeatureAPI.getInstance();
 Client featureFlagClient = api.getClient();
 ```
 
+ </TabItem>
+  <TabItem value="kotlin" label="Kotlin">
+
+```kotlin
+import dev.openfeature.contrib.providers.gofeatureflag.GoFeatureFlagProvider
+import dev.openfeature.contrib.providers.gofeatureflag.GoFeatureFlagProviderOptions
+import dev.openfeature.sdk.EvaluationContext
+import dev.openfeature.sdk.MutableContext
+import dev.openfeature.sdk.OpenFeatureAPI
+
+// ...
+
+val options = GoFeatureFlagProviderOptions.builder().endpoint("http://localhost:1031/").build()
+val provider = GoFeatureFlagProvider(options)
+
+OpenFeatureAPI.getInstance().provider = provider
+// wait for the provider to be ready
+val api = OpenFeatureAPI.getInstance()
+val featureFlagClient = api.client
+```
+
+  </TabItem>
+</Tabs>
+
+
 ## Evaluate your flag
 
 This code block explain how you can create an `EvaluationContext` and use it to evaluate your flag.
@@ -69,18 +99,18 @@ In this example we are evaluating a `boolean` flag, but other types are availabl
 **Refer to the [Open Feature documentation](https://docs.openfeature.dev/docs/reference/concepts/evaluation-api#basic-evaluation) to know more about it.**
 :::
 
+<Tabs groupId="code">
+  <TabItem value="java" label="java">
+
 ```java
 // Context of your flag evaluation.
-EvaluationContext userContext = new MutableContext()
-        .add("firstname", "john")
-        .add("lastname", "doe")
-        .add("email","john.doe@gofeatureflag.org")
-        .add("admin", true)
-        .add("anonymous", false);
 // With GO Feature Flag you MUST have a targetingKey that is a unique identifier of the user.
-userContext.setTargetingKey("1d1b9238-2591-4a47-94cf-d2bc080892f1");
-
-
+EvaluationContext userContext = new MutableContext("1d1b9238-2591-4a47-94cf-d2bc080892f1")
+  .add("firstname", "john")
+  .add("lastname", "doe")
+  .add("email","john.doe@gofeatureflag.org")
+  .add("admin", true)
+  .add("anonymous", false);
 
 Boolean adminFlag = featureFlagClient.getBooleanValue("flag-only-for-admin", false, userContext);
 if (adminFlag) {
@@ -89,6 +119,30 @@ if (adminFlag) {
     // flag "flag-only-for-admin" is false for the user
 }
 ```
+
+ </TabItem>
+  <TabItem value="kotlin" label="Kotlin">
+
+```kotlin
+// Context of your flag evaluation.
+// With GO Feature Flag you MUST have a targetingKey that is a unique identifier of the user.
+val userContext: EvaluationContext = MutableContext("1d1b9238-2591-4a47-94cf-d2bc080892f1")
+  .add("firstname", "john")
+  .add("lastname", "doe")
+  .add("email", "john.doe@gofeatureflag.org")
+  .add("admin", true)
+  .add("anonymous", false)
+
+val adminFlag = featureFlagClient.getBooleanValue("bool_targeting_match", false, userContext)
+if (adminFlag) {
+    // flag "flag-only-for-admin" is true for the user
+} else {
+    // flag "flag-only-for-admin" is false for the user
+}
+```
+
+  </TabItem>
+</Tabs>
 
 ## Contribute to the provider
 You can find the source of the provider in the [`open-feature/java-sdk-contrib`](https://github.com/open-feature/java-sdk-contrib/tree/main/providers/go-feature-flag) repository.
