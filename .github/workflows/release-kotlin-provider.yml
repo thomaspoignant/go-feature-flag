@@ -41,18 +41,16 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: 17
-          distribution: 'zulu'
+          distribution: 'temurin'
 
-      - name: Grant Permission for Gradlew to Execute
-        working-directory: ./openfeature/providers/kotlin-provider
-        run: chmod +x gradlew
-
-      - name: Publish to Sonatype
+      - name: Publish package
+        uses: gradle/gradle-build-action@v1
+        with:
+          working-directory: ./openfeature/providers/kotlin-provider
+          arguments: publish
         env:
-          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
-        working-directory: ./openfeature/providers/kotlin-provider
-        run: ./gradlew publishToSonatype --no-daemon --stacktrace
+          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
 
       - name: Clean up signing secrets
         working-directory: ./openfeature/providers/kotlin-provider
