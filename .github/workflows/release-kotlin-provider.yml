@@ -30,9 +30,10 @@ jobs:
       - name: Configure GPG Key
         run: |
           echo -n "$GPG_SIGNING_KEY" | gpg --import
-          gpg --pinentry-mode=loopback --export-secret-key 83FE4262 > ~/.gnupg/secring.gpg
+          gpg --passphrase $GPG_SIGNING_KEY_PASSWORD --pinentry-mode=loopback --export-secret-key 83FE4262 > ~/.gnupg/secring.gpg
         env:
           GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+          GPG_SIGNING_KEY_PASSWORD: ${{ secrets.GPG_SIGNING_KEY_PASSWORD }}
 
       - name: Add signing secrets to gradle.properties
         run: |
