@@ -1,9 +1,8 @@
 name: test-sonatype-upload
 on:
-  pull_request:
+  push:
     branches:
       - sonatype-upload-test
-
 
 jobs:
   kotlin-release:
