@@ -26,13 +26,13 @@ jobs:
           gpg_private_key: ${{ secrets.GPG_SIGNING_KEY }}
           passphrase: ${{ secrets.GPG_SIGNING_KEY_PASSWORD }}
           fingerprint: 9ACC46AB4C1DD2104D5DFB2AFC87955F83FE4262
-      - run: ls ~/.gnupg/
-#      - name: Configure GPG Key
-#        run: |
-#          echo -n "$GPG_SIGNING_KEY" | gpg --import
-#          gpg --batch --pinentry-mode=loopback --export-secret-key 83FE4262 > ~/.gnupg/secring.gpg
-#        env:
-#          GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+
+      - name: Configure GPG Key
+        run: |
+          echo -n "$GPG_SIGNING_KEY" | gpg --import
+          gpg --batch --pinentry-mode=loopback --export-secret-key 83FE4262 > ~/.gnupg/secring.gpg
+        env:
+          GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
 
       - name: Add signing secrets to gradle.properties
         run: |
