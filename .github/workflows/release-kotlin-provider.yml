@@ -30,7 +30,7 @@ jobs:
       - name: Configure GPG Key
         run: |
           echo -n "$GPG_SIGNING_KEY" | gpg --import
-          gpg --passphrase $GPG_SIGNING_KEY_PASSWORD --pinentry-mode=loopback --export-secret-key 83FE4262 > ~/.gnupg/secring.gpg
+          gpg --passphrase $GPG_SIGNING_KEY_PASSWORD --pinentry-mode=loopback --export-secret-key 83FE4262 > /home/runner/.gnupg/secring.gpg
         env:
           GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
           GPG_SIGNING_KEY_PASSWORD: ${{ secrets.GPG_SIGNING_KEY_PASSWORD }}
@@ -38,8 +38,8 @@ jobs:
       - name: Add signing secrets to gradle.properties
         run: |
           mkdir -p ~/.gradle/
-          echo "signing.keyId=83FE4262" >> ~/.gradle/gradle.properties
-          echo "signing.secretKeyRingFile=~/.gnupg/secring.gpg" >> ~/.gradle/gradle.properties
+          echo "signing.keyId=83FE4262" >> /home/runner/.gradle/gradle.properties
+          echo "signing.secretKeyRingFile=/home/runner/.gnupg/secring.gpg" >> ~/.gradle/gradle.properties
           echo "signing.password=$GPG_SIGNING_KEY_PASSWORD" >> ~/.gradle/gradle.properties
         env:
           GPG_SIGNING_KEY_ID: ${{ secrets.GPG_SIGNING_KEY_ID }}
