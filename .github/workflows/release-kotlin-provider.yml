@@ -23,7 +23,7 @@ jobs:
       - name: Configure GPG Key
         run: |
           echo -n "$GPG_SIGNING_KEY" | gpg --import
-          gpg --pinentry-mode=loopback --export-secret-key 08C5EC5C > ~/.gnupg/secring.gpg
+          gpg --batch --pinentry-mode=loopback --export-secret-key 08C5EC5C > ~/.gnupg/secring.gpg
         env:
           GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
 
