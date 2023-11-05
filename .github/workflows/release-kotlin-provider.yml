@@ -60,7 +60,7 @@ jobs:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
         working-directory: ./openfeature/providers/kotlin-provider
-        run: ./gradlew publishToSonatype --no-daemon --stacktrace
+        run: ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository --no-daemon --stacktrace
 
       - name: Clean up signing secrets
         working-directory: ./openfeature/providers/kotlin-provider
