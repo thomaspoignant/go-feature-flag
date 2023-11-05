@@ -1,0 +1,60 @@
+name: test-sonatype-upload
+on:
+  pull_request:
+    branches:
+      - sonatype-upload-test
+
+
+jobs:
+  kotlin-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cache Gradle and wrapper
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - uses: actions/checkout@v4
+
+      - name: Configure GPG Key
+        run: |
+          echo -n "$GPG_SIGNING_KEY" | gpg --import
+          gpg --pinentry-mode=loopback --export-secret-key 08C5EC5C > ~/.gnupg/secring.gpg
+        env:
+          GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+
+      - name: Add signing secrets to gradle.properties
+        run: |
+          mkdir -p ~/.gradle/
+          echo "signing.keyId=08C5EC5C" >> ~/.gradle/gradle.properties
+          echo "signing.secretKeyRingFile=/home/runner/.gnupg/secring.gpg" >> ~/.gradle/gradle.properties
+          echo "signing.password=$GPG_SIGNING_KEY_PASSWORD" >> ~/.gradle/gradle.properties
+        env:
+          GPG_SIGNING_KEY_ID: ${{ secrets.GPG_SIGNING_KEY_ID }}
+          GPG_SIGNING_KEY_PASSWORD: ${{ secrets.GPG_SIGNING_KEY_PASSWORD }}
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: 11
+          distribution: 'zulu'
+
+      - name: Grant Permission for Gradlew to Execute
+        working-directory: ./openfeature/providers/kotlin-provider
+        run: chmod +x gradlew
+
+      - name: Publish to Sonatype
+        env:
+          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+        working-directory: ./openfeature/providers/kotlin-provider
+        run: ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository --no-daemon --stacktrace
+
+      - name: Clean up signing secrets
+        working-directory: ./openfeature/providers/kotlin-provider
+        run: rm ~/.gradle/gradle.properties
