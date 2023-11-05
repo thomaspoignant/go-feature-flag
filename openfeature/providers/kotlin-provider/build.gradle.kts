@@ -9,7 +9,7 @@ plugins {
 
 allprojects {
     extra["groupId"] = "org.gofeatureflag.openfeature"
-    ext["version"] = "0.0.1"
+    ext["version"] = "0.0.1-RC1"
 }
 
 group = project.extra["groupId"].toString()
@@ -24,3 +24,4 @@ nexusPublishing {
         }
     }
 }
+
