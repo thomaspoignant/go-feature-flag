@@ -30,7 +30,7 @@ jobs:
       - name: Add signing secrets to gradle.properties
         run: |
           mkdir -p ~/.gradle/
-          echo "signing.keyId=08C5EC5C" >> ~/.gradle/gradle.properties
+          echo "signing.keyId=4C2A92B2" >> ~/.gradle/gradle.properties
           echo "signing.secretKeyRingFile=/home/runner/.gnupg/secring.gpg" >> ~/.gradle/gradle.properties
           echo "signing.password=$GPG_SIGNING_KEY_PASSWORD" >> ~/.gradle/gradle.properties
         env:
