@@ -3,13 +3,13 @@ from typing import List, Optional, Type, Union
 
 import urllib3
 from urllib.parse import urljoin
-from pydantic import BaseModel, ValidationError, PrivateAttr
+from pydantic import ValidationError, PrivateAttr, ConfigDict
 from openfeature.evaluation_context import EvaluationContext
 from openfeature.flag_evaluation import FlagEvaluationDetails
 from openfeature.hook import Hook
 from openfeature.provider.metadata import Metadata
 from openfeature.provider.provider import AbstractProvider
-
+from gofeatureflag_python_provider.options import BaseModel
 from gofeatureflag_python_provider.metadata import GoFeatureFlagMetadata
 from gofeatureflag_python_provider.options import GoFeatureFlagOptions
 from gofeatureflag_python_provider.request_flag_evaluation import (
@@ -40,14 +40,17 @@ class GoFeatureFlagProvider(AbstractProvider, BaseModel):
         Constructor of the provider.
         It will initialize the http client for calling the GO Feature Flag relay proxy.
 
-        :param data: data comming from pydantic configuration
+        :param data: data coming from pydantic configuration
         """
         super().__init__(**data)
-        self._http_client = (
-            self.options.urllib3PoolManager
-            if self.options.urllib3PoolManager is not None
-            else _default_urllib3_poolmanager()
-        )
+        if self.options.urllib3_pool_manager is not None:
+            self._http_client = self.options.urllib3_pool_manager
+        else:
+            self._http_client = urllib3.PoolManager(
+                num_pools=100,
+                timeout=urllib3.Timeout(connect=10, read=10),
+                retries=urllib3.Retry(0),
+            )
 
     def get_metadata(self) -> Metadata:
         return GoFeatureFlagMetadata()
@@ -135,7 +138,7 @@ class GoFeatureFlagProvider(AbstractProvider, BaseModel):
                     str(self.options.endpoint), "/v1/feature/{}/eval".format(flag_key)
                 ),
                 headers={"Content-Type": "application/json"},
-                body=goff_request.json(),
+                body=goff_request.model_dump_json(),
             )
 
             if response.status == HTTPStatus.NOT_FOUND.value:
@@ -147,11 +150,8 @@ class GoFeatureFlagProvider(AbstractProvider, BaseModel):
                 raise GeneralError(
                     "impossible to contact GO Feature Flag relay proxy instance"
                 )
-
-            response_flag_evaluation = ResponseFlagEvaluation[original_type].parse_raw(
-                response.data
-            )
-
+            response_flag_evaluation = ResponseFlagEvaluation.model_validate_json(response.data)
+            print(type(response_flag_evaluation.value))
             if original_type == int:
                 response_json = json.loads(response.data)
                 # in some cases pydantic auto convert float in int.
@@ -180,6 +180,7 @@ class GoFeatureFlagProvider(AbstractProvider, BaseModel):
                 flag_metadata=response_flag_evaluation.metadata,
             )
         except ValidationError as exc:
+            print(exc)
             raise TypeMismatchError("unexpected type for flag {}".format(flag_key))
 
         except OpenFeatureError as exc:
@@ -189,17 +190,3 @@ class GoFeatureFlagProvider(AbstractProvider, BaseModel):
             raise GeneralError(
                 "unexpected error while evaluating flag {}: {}".format(flag_key, exc)
             )
-
-
-def _default_urllib3_poolmanager() -> urllib3.PoolManager:
-    """
-    _default_urllib3_poolmanager configure a default HTTP Client to call the GO Feature Flag relay proxy.
-    By default, we have a 10 seconds timeout to connect and read from the source.
-
-    :return: return the default HTTP configuration to call the GO Feature Flag relay proxy
-    """
-    return urllib3.PoolManager(
-        num_pools=100,
-        timeout=urllib3.Timeout(connect=10, read=10),
-        retries=urllib3.Retry(0),
-    )

@@ -1,4 +1,4 @@
-from typing import Optional, Any
+from typing import Optional, Any, Dict
 from pydantic import BaseModel
 from openfeature.evaluation_context import EvaluationContext
 from openfeature.exception import (
@@ -13,16 +13,18 @@ class GoFeatureFlagUser(BaseModel):
     """
 
     key: str
-    anonymous: Optional[bool]
-    custom: Optional[dict]
+    anonymous: Optional[bool] = None
+    custom: Optional[dict] = None
 
 
-def user_from_evaluation_context(ctx: EvaluationContext = {}) -> GoFeatureFlagUser:
+def user_from_evaluation_context(ctx: EvaluationContext = None) -> GoFeatureFlagUser:
     """
     user_from_evaluation_context is converting an EvaluationContext into a GoFeatureFlagUser
     :param ctx: the EvaluationContext to convert
     :return: a GoFeatureFlagUser
     """
+    if ctx is None:
+        ctx = {}
     if ctx is None:
         raise InvalidContextError("GO Feature Flag need an Evaluation context to work.")
 
@@ -44,4 +46,4 @@ def user_from_evaluation_context(ctx: EvaluationContext = {}) -> GoFeatureFlagUs
 
 class RequestFlagEvaluation(BaseModel):
     user: GoFeatureFlagUser
-    defaultValue: Any
+    defaultValue: Any = None

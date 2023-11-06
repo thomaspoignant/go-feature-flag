@@ -1,15 +1,16 @@
-from pydantic.generics import GenericModel
 from typing import Optional, Generic, Union, TypeVar
+from gofeatureflag_python_provider.options import BaseModel
+
 
 JsonType = TypeVar("JsonType", bool, int, str, float, list, Union[dict, list])
 
 
-class ResponseFlagEvaluation(GenericModel, Generic[JsonType]):
-    errorCode: Optional[str]
+class ResponseFlagEvaluation(BaseModel):
+    errorCode: Optional[str] = None
     failed: bool
     reason: str
-    trackEvents: bool
+    trackEvents: Optional[bool] = None
     value: JsonType
-    variationType: Optional[str]
-    version: Optional[str]
-    metadata: Optional[dict]
+    variationType: Optional[str] = None
+    version: Optional[str] = None
+    metadata: Optional[dict] = None

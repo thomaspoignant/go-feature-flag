@@ -2,8 +2,9 @@
   "trackEvents": true,
   "variationType": "SdkDefault",
   "failed": true,
-  "version": 0,
+  "version": "1.0.0",
   "reason": "ERROR",
   "errorCode": "FLAG_NOT_FOUND",
-  "value": true
+  "value": true,
+  "metadata": {"test": "test1", "test2": false, "test3": 123.3}
 }

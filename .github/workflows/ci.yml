@@ -174,14 +174,14 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: 3.9
-      - name: Run image
+      - name: Setup Poetry
         if: steps.changed-files-specific.outputs.any_changed == 'true'
         uses: abatilo/actions-poetry@v2
       - name: Poetry install
         if: steps.changed-files-specific.outputs.any_changed == 'true'
         working-directory: ./openfeature/providers/python-provider
         run: poetry install
-      - name: Poetry run test
+      - name: Pytest
         if: steps.changed-files-specific.outputs.any_changed == 'true'
         working-directory: ./openfeature/providers/python-provider
         run: poetry run pytest

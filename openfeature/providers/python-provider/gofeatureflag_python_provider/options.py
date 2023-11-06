@@ -1,13 +1,12 @@
 import urllib3
 import typing
-from pydantic import BaseModel as PydanticBaseModel, AnyHttpUrl
+from pydantic import AnyHttpUrl, BaseModel as PydanticBaseModel, ConfigDict
 
 
 class BaseModel(PydanticBaseModel):
-    class Config:
-        arbitrary_types_allowed = True
+    model_config: ConfigDict = ConfigDict({"arbitrary_types_allowed": True})
 
 
 class GoFeatureFlagOptions(BaseModel):
     endpoint: AnyHttpUrl
-    urllib3PoolManager: typing.Optional[urllib3.PoolManager]
+    urllib3_pool_manager: typing.Optional[urllib3.PoolManager] = None
