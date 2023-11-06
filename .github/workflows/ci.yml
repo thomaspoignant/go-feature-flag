@@ -161,3 +161,27 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           comment-on-alert: true
           alert-comment-cc-users: "@$GITHUB_ACTOR"
+
+  Python-provider:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get changed files in the docs folder
+        id: changed-files-specific
+        uses: tj-actions/changed-files@v40
+        with:
+          files: ./openfeature/providers/python-provider/**
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Run image
+        if: steps.changed-files-specific.outputs.any_changed == 'true'
+        uses: abatilo/actions-poetry@v2
+      - name: Poetry install
+        if: steps.changed-files-specific.outputs.any_changed == 'true'
+        working-directory: ./openfeature/providers/python-provider
+        run: poetry install
+      - name: Poetry run test
+        if: steps.changed-files-specific.outputs.any_changed == 'true'
+        working-directory: ./openfeature/providers/python-provider
+        run: poetry run pytest
