@@ -150,7 +150,9 @@ class GoFeatureFlagProvider(AbstractProvider, BaseModel):
                 raise GeneralError(
                     "impossible to contact GO Feature Flag relay proxy instance"
                 )
-            response_flag_evaluation = ResponseFlagEvaluation.model_validate_json(response.data)
+            response_flag_evaluation = ResponseFlagEvaluation.model_validate_json(
+                response.data
+            )
             if original_type == int:
                 response_json = json.loads(response.data)
                 # in some cases pydantic auto convert float in int.

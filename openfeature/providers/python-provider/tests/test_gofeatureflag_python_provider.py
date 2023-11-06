@@ -10,7 +10,9 @@ from gofeatureflag_python_provider.options import GoFeatureFlagOptions
 from unittest.mock import Mock, patch
 from pathlib import Path
 
-from gofeatureflag_python_provider.response_flag_evaluation import ResponseFlagEvaluation
+from gofeatureflag_python_provider.response_flag_evaluation import (
+    ResponseFlagEvaluation,
+)
 
 _default_evaluation_ctx = EvaluationContext(
     targeting_key="d45e303a-38c2-11ed-a261-0242ac120002",
@@ -29,7 +31,7 @@ _default_evaluation_ctx = EvaluationContext(
 
 
 def _generic_test(
-        mock_request, flag_key, default_value, ctx: EvaluationContext, evaluationType: str
+    mock_request, flag_key, default_value, ctx: EvaluationContext, evaluationType: str
 ):
     try:
         mock_request.return_value = Mock(status="200", data=_read_mock_file(flag_key))
@@ -105,9 +107,7 @@ def test_constructor_options_empty_endpoint():
 
 def test_constructor_options_invalid_url():
     with pytest.raises(pydantic.ValidationError):
-        GoFeatureFlagProvider(
-            options=GoFeatureFlagOptions(endpoint="not a url")
-        )
+        GoFeatureFlagProvider(options=GoFeatureFlagOptions(endpoint="not a url"))
 
 
 def test_constructor_options_valid():
@@ -158,7 +158,7 @@ def test_should_return_an_error_if_flag_does_not_exists(mock_request):
 
 @patch("urllib3.poolmanager.PoolManager.request")
 def test_should_return_an_error_if_we_expect_a_boolean_and_got_another_type(
-        mock_request,
+    mock_request,
 ):
     flag_key = "string_key"
     default_value = False
@@ -220,7 +220,7 @@ def test_should_use_boolean_default_value_if_the_flag_is_disabled(mock_request):
 
 @patch("urllib3.poolmanager.PoolManager.request")
 def test_should_return_an_error_if_we_expect_a_string_and_got_another_type(
-        mock_request,
+    mock_request,
 ):
     flag_key = "object_key"
     default_value = "default"
@@ -264,7 +264,7 @@ def test_should_use_string_default_value_if_the_flag_is_disabled(mock_request):
 
 @patch("urllib3.poolmanager.PoolManager.request")
 def test_should_return_an_error_if_we_expect_a_integer_and_got_another_type(
-        mock_request,
+    mock_request,
 ):
     flag_key = "string_key"
     default_value = 200
@@ -357,12 +357,12 @@ def test_should_resolve_a_valid_value_flag_with_targeting_match_reason(mock_requ
     )
     assert flag_key == res.flag_key
     assert {
-               "test": "test1",
-               "test2": False,
-               "test3": 123.3,
-               "test4": 1,
-               "test5": None,
-           } == res.value
+        "test": "test1",
+        "test2": False,
+        "test3": 123.3,
+        "test4": 1,
+        "test5": None,
+    } == res.value
     assert res.error_code is None
     assert Reason.TARGETING_MATCH.value == res.reason
     assert "True" == res.variant
