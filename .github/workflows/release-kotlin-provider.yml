@@ -1,4 +1,4 @@
-name: Publish kotlin SDK to Sonatype
+name: Release Kotlin SDK to Sonatype
 on:
   push:
     tags:
