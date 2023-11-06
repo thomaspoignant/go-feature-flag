@@ -9,7 +9,7 @@ plugins {
 
 allprojects {
     extra["groupId"] = "org.gofeatureflag.openfeature"
-    ext["version"] = "0.0.1"
+    ext["version"] = "0.0.1-beta.1"
 }
 
 group = project.extra["groupId"].toString()
@@ -20,7 +20,8 @@ nexusPublishing {
             nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
             snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
             username.set(System.getenv("OSSRH_USERNAME"))
-            username.set(System.getenv("OSSRH_PASSWORD"))
+            password.set(System.getenv("OSSRH_PASSWORD"))
         }
     }
 }
+
