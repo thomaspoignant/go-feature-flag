@@ -5,6 +5,7 @@ on:
 
 jobs:
   pre-version-check:
+    if:  ${{ startsWith(github.event.release.tag_name, 'v*') }}
     name: pre version check
     runs-on: ubuntu-latest
     steps:

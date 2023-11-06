@@ -22,11 +22,8 @@ jobs:
         run: |
           FULL_TAG_NAME=${{  github.ref_name }}
           VERSION=${FULL_TAG_NAME:17}
-          echo ${VERSION}
           awk '/^    ext\[\"version\"\]/ { print "    ext[\"version\"] = \"'${FULL_TAG_NAME:17}'\""; next; }; { print; }' ./openfeature/providers/kotlin-provider/build.gradle.kts > temp
           mv temp ./openfeature/providers/kotlin-provider/build.gradle.kts
-          cat ./openfeature/providers/kotlin-provider/build.gradle.kts
-          exit 1
 
       - name: Import GPG key
         uses: crazy-max/ghaction-import-gpg@v6
