@@ -181,6 +181,10 @@ jobs:
         if: steps.changed-files-specific.outputs.any_changed == 'true'
         working-directory: ./openfeature/providers/python-provider
         run: poetry install
+      - name: lint black
+        if: steps.changed-files-specific.outputs.any_changed == 'true'
+        working-directory: ./openfeature/providers/python-provider
+        run: poetry run black . --check
       - name: Pytest
         if: steps.changed-files-specific.outputs.any_changed == 'true'
         working-directory: ./openfeature/providers/python-provider
