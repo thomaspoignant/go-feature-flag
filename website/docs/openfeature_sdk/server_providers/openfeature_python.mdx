@@ -1,13 +1,10 @@
-# GO Feature Flag Python Provider
+---
+sidebar_position: 51
+title: Python
+description: How to use the OpenFeature Python SDK with GO Feature Flag
+---
 
-GO Feature Flag provider allows you to connect to your GO Feature Flag instance.  
-
-[GO Feature Flag](https://gofeatureflag.org) believes in simplicity and offers a simple and lightweight solution to use feature flags.  
-Our focus is to avoid any complex infrastructure work to use GO Feature Flag.
-
-This is a complete feature flagging solution with the possibility to target only a group of users, use any types of flags, store your configuration in various location and advanced rollout functionality. You can also collect usage data of your flags and be notified of configuration changes.
-
-# Python SDK usage
+# Python Provider
 
 ## Install dependencies
 
@@ -43,7 +40,7 @@ This code block explain how you can create an `EvaluationContext` and use it to 
 
 
 > In this example we are evaluating a `boolean` flag, but other types are available.
-> 
+>
 > **Refer to the [Open Feature documentation](https://docs.openfeature.dev/docs/reference/concepts/evaluation-api#basic-evaluation) to know more about it.**
 
 ```csharp
@@ -69,9 +66,12 @@ admin_flag = client.get_boolean_value(
           default_value=default_value,
           evaluation_context=ctx,
       )
-      
+
 if admin_flag:
   # flag "flag-only-for-admin" is true for the user
 else:
   # flag "flag-only-for-admin" is false for the user
 ```
+
+## Contribute to the provider
+You can find the source of the provider in the [`repository`](https://github.com/thomaspoignant/go-feature-flag/tree/main/openfeature/providers/python-provider).
