@@ -312,7 +312,7 @@ def test_should_resolve_a_valid_double_flag_with_targeting_match_reason(mock_req
         mock_request, flag_key, default_value, _default_evaluation_ctx, "float"
     )
     assert flag_key == res.flag_key
-    assert res.value == 100.25
+    assert res.value == pytest.approx(100.25, rel=None, abs=None, nan_ok=False)
     assert res.error_code is None
     assert res.reason == Reason.TARGETING_MATCH.value
     assert res.variant == "True"
@@ -340,7 +340,7 @@ def test_should_use_double_default_value_if_the_flag_is_disabled(mock_request):
         mock_request, flag_key, default_value, _default_evaluation_ctx, "float"
     )
     assert flag_key == res.flag_key
-    assert default_value == res.value
+    assert default_value == pytest.approx(res.value, rel=None, abs=None, nan_ok=False)
     assert res.error_code is None
     assert Reason.DISABLED == res.reason
     assert res.variant is None
