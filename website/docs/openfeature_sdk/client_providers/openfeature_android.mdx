@@ -3,6 +3,10 @@ sidebar_position: 51
 title: Android / Kotlin
 description: How to use the OpenFeature Kotlin SDK for your Android application
 ---
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+
 ![Static Badge](https://img.shields.io/badge/status-experimental-red)
 
 This OpenFeature provider is a Kotlin implementation for Android to communicate with the GO Feature
@@ -22,7 +26,26 @@ the [`Java` provider](/docs/openfeature_sdk/server_providers/openfeature_java).
 
 ## Install the provider
 
-TODO
+<Tabs groupId="code">
+  <TabItem value="gradle" label="gradle">
+
+    ```json
+    implementation("org.gofeatureflag.openfeature:gofeatureflag-kotlin-provider:0.0.1-beta.1")
+    ```
+
+  </TabItem>
+  <TabItem value="maven" label="maven">
+
+    ```xml
+    <dependency>
+      <groupId>org.gofeatureflag.openfeature</groupId>
+      <artifactId>gofeatureflag-kotlin-provider</artifactId>
+      <version>:0.0.1-beta.1</version>
+    </dependency>
+    ```
+
+  </TabItem>
+</Tabs>
 
 ## How to use the provider?
 
