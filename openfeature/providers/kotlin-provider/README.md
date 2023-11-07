@@ -30,7 +30,19 @@ changes.
 
 ## Install the provider
 
-TODO
+### Maven
+```xml
+<dependency>
+  <groupId>org.gofeatureflag.openfeature</groupId>
+  <artifactId>gofeatureflag-kotlin-provider</artifactId>
+  <version>:0.0.1-beta.1</version>
+</dependency>
+```
+
+### Gradle
+```
+implementation("org.gofeatureflag.openfeature:gofeatureflag-kotlin-provider:0.0.1-beta.1")
+```
 
 ## How to use the provider?
 
