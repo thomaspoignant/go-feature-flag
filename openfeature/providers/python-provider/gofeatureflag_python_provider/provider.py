@@ -67,6 +67,7 @@ class GoFeatureFlagProvider(AbstractProvider, BaseModel):
     def shutdown(self):
         if self._cache is not None:
             self._cache.clear()
+        self._status = ProviderStatus.NOT_READY
 
     def get_metadata(self) -> Metadata:
         return GoFeatureFlagMetadata()
