@@ -150,7 +150,7 @@ const config = {
                 docId: 'index'
               },
               {
-                html: '<i class="fa-solid fa-eye menu-icon"></i> Examples',
+                html: '<i class="fa-solid fa-eye menu-icon"></i> Examples <i class="fa fa-external-link" aria-hidden="true"></i>',
                 to: 'https://github.com/thomaspoignant/go-feature-flag/tree/main/examples',
               },
               {
