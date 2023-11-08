@@ -11,7 +11,7 @@ On this page, we will highlight the various utilization methods, aiming to assis
 ## Use GO Feature Flag with Openfeature
 - [**Use GO Feature Flag in your browser**](./openfeature_web) - Use GO Feature Flag with Openfeature in your browser.
 - [**Use GO Feature Flag with Node.js**](./openfeature_nodejs) - A simple application using GO Feature Flag with Openfeature in Node.js.
-- [**Use GO Feature Flag with Kotlin**](./openfeature_kotlin) - A simple application using GO Feature Flag with Openfeature in Kotlin.
+- [**Use GO Feature Flag with Kotlin in the Server**](./openfeature_kotlin_server) - A simple application using GO Feature Flag with Openfeature in Kotlin.
 
 ## Use GO Feature Flag server
 - [**Deploy GO Feature Flag as an AWS Lambda**](./rollout_experimentation) - An example configuration on how to run GO Feature Flag as a serverless application using AWS Lambda.

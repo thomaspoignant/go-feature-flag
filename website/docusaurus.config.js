@@ -145,13 +145,17 @@ const config = {
                 html: '<i class="fa-solid fa-pencil menu-icon"></i> Flag Editor',
               },
               {
-                html: '<i class="fa-solid fa-star menu-icon"></i> Feature Flag Best Practice',
-                to: '/blog/feature-flag-best-practice'
-              },
-              {
                 html: '<i class="fa-solid fa-book menu-icon"></i> Documentation',
                 type: 'doc',
                 docId: 'index'
+              },
+              {
+                html: '<i class="fa-solid fa-eye menu-icon"></i> Examples',
+                to: 'https://github.com/thomaspoignant/go-feature-flag/tree/main/examples',
+              },
+              {
+                html: '<i class="fa-solid fa-star menu-icon"></i> Feature Flag Best Practice',
+                to: '/blog/feature-flag-best-practice'
               },
               {
                 to: 'https://gophers.slack.com/messages/go-feature-flag',
