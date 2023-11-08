@@ -1,18 +1,18 @@
+import os
+import time
+from pathlib import Path
+from unittest.mock import Mock, patch
+
+import pydantic
+import pytest
 from openfeature import api
 from openfeature.evaluation_context import EvaluationContext
 from openfeature.exception import ErrorCode
 from openfeature.flag_evaluation import Reason, FlagEvaluationDetails
 
-import pydantic
-import pytest
-from gofeatureflag_python_provider.provider import GoFeatureFlagProvider
+from gofeatureflag_python_provider.ProviderStatus import ProviderStatus
 from gofeatureflag_python_provider.options import GoFeatureFlagOptions
-from unittest.mock import Mock, patch
-from pathlib import Path
-
-from gofeatureflag_python_provider.response_flag_evaluation import (
-    ResponseFlagEvaluation,
-)
+from gofeatureflag_python_provider.provider import GoFeatureFlagProvider
 
 _default_evaluation_ctx = EvaluationContext(
     targeting_key="d45e303a-38c2-11ed-a261-0242ac120002",
@@ -31,7 +31,7 @@ _default_evaluation_ctx = EvaluationContext(
 
 
 def _generic_test(
-    mock_request, flag_key, default_value, ctx: EvaluationContext, evaluationType: str
+        mock_request, flag_key, default_value, ctx: EvaluationContext, evaluationType: str
 ):
     try:
         mock_request.return_value = Mock(status="200", data=_read_mock_file(flag_key))
@@ -39,6 +39,7 @@ def _generic_test(
             options=GoFeatureFlagOptions(endpoint="https://gofeatureflag.org/")
         )
         api.set_provider(goff_provider)
+        wait_provider_ready(goff_provider)
         client = api.get_client(name="test-client")
 
         if evaluationType == "bool":
@@ -136,7 +137,7 @@ def test_should_return_an_error_if_endpoint_not_available(mock_request):
         )
         assert flag_key == res.flag_key
         assert res.value is False
-        assert ErrorCode.GENERAL == res.error_code
+        assert res.error_code == ErrorCode.GENERAL
         assert Reason.ERROR == res.reason
     except Exception as exc:
         assert False, f"'No exception expected {exc}"
@@ -158,7 +159,7 @@ def test_should_return_an_error_if_flag_does_not_exists(mock_request):
 
 @patch("urllib3.poolmanager.PoolManager.request")
 def test_should_return_an_error_if_we_expect_a_boolean_and_got_another_type(
-    mock_request,
+        mock_request,
 ):
     flag_key = "string_key"
     default_value = False
@@ -186,7 +187,6 @@ def test_should_resolve_a_valid_boolean_flag_with_targeting_match_reason(mock_re
         reason=Reason.TARGETING_MATCH,
         flag_metadata={"test": "test1", "test2": False, "test3": 123.3},
     )
-    print(res)
     assert res == want
 
 
@@ -220,7 +220,7 @@ def test_should_use_boolean_default_value_if_the_flag_is_disabled(mock_request):
 
 @patch("urllib3.poolmanager.PoolManager.request")
 def test_should_return_an_error_if_we_expect_a_string_and_got_another_type(
-    mock_request,
+        mock_request,
 ):
     flag_key = "object_key"
     default_value = "default"
@@ -264,7 +264,7 @@ def test_should_use_string_default_value_if_the_flag_is_disabled(mock_request):
 
 @patch("urllib3.poolmanager.PoolManager.request")
 def test_should_return_an_error_if_we_expect_a_integer_and_got_another_type(
-    mock_request,
+        mock_request,
 ):
     flag_key = "string_key"
     default_value = 200
@@ -357,12 +357,12 @@ def test_should_resolve_a_valid_value_flag_with_targeting_match_reason(mock_requ
     )
     assert flag_key == res.flag_key
     assert {
-        "test": "test1",
-        "test2": False,
-        "test3": 123.3,
-        "test4": 1,
-        "test5": None,
-    } == res.value
+               "test": "test1",
+               "test2": False,
+               "test3": 123.3,
+               "test4": 1,
+               "test5": None,
+           } == res.value
     assert res.error_code is None
     assert Reason.TARGETING_MATCH.value == res.reason
     assert "True" == res.variant
@@ -414,5 +414,62 @@ def test_should_resolve_a_valid_value_flag_with_a_list(mock_request):
     assert "True" == res.variant
 
 
+@patch("urllib3.poolmanager.PoolManager.request")
+def test_should_resolve_from_cache_if_multiple_call_to_the_same_flag_with_same_context(mock_request):
+    flag_key = "bool_targeting_match"
+    default_value = False
+
+    mock_request.return_value = Mock(status="200", data=_read_mock_file(flag_key))
+    goff_provider = GoFeatureFlagProvider(
+        options=GoFeatureFlagOptions(endpoint="https://gofeatureflag.org/")
+    )
+    api.set_provider(goff_provider)
+    wait_provider_ready(goff_provider)
+    client = api.get_client(name="test-client")
+
+    got = client.get_boolean_details(
+        flag_key=flag_key,
+        default_value=default_value,
+        evaluation_context=_default_evaluation_ctx,
+    )
+
+    want: FlagEvaluationDetails = FlagEvaluationDetails(
+        flag_key=flag_key,
+        value=True,
+        variant="True",
+        reason=Reason.TARGETING_MATCH,
+        flag_metadata={"test": "test1", "test2": False, "test3": 123.3},
+    )
+    assert got == want
+
+    got = client.get_boolean_details(
+        flag_key=flag_key,
+        default_value=default_value,
+        evaluation_context=_default_evaluation_ctx,
+    )
+    want: FlagEvaluationDetails = FlagEvaluationDetails(
+        flag_key=flag_key,
+        value=True,
+        variant="True",
+        reason=Reason.CACHED,
+        flag_metadata={"test": "test1", "test2": False, "test3": 123.3},
+    )
+    assert got == want
+
+
+def wait_provider_ready(provider: GoFeatureFlagProvider):
+    # check the provider get_status method until it returns ProviderStatus.READY or, we waited more than 5 seconds
+    start = time.time()
+    while provider.get_status() != ProviderStatus.READY:
+        time.sleep(0.1)
+        if time.time() - start > 5:
+            break
+
+
 def _read_mock_file(flag_key: str) -> str:
-    return Path("./tests/mock_responses/{}.json".format(flag_key)).read_text()
+    # This hacky if is here to make test run inside pycharm and from the root of the project
+    if os.getcwd().endswith("/tests"):
+        path_prefix = "./mock_responses/{}.json"
+    else:
+        path_prefix = "./tests/mock_responses/{}.json"
+    return Path(path_prefix.format(flag_key)).read_text()

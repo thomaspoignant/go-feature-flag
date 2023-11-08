@@ -1,39 +1,44 @@
 import json
-from typing import List, Optional, Type, Union
-
-import urllib3
-from urllib.parse import urljoin
-from pydantic import ValidationError, PrivateAttr, ConfigDict
-from openfeature.evaluation_context import EvaluationContext
-from openfeature.flag_evaluation import FlagEvaluationDetails
-from openfeature.hook import Hook
-from openfeature.provider.metadata import Metadata
-from openfeature.provider.provider import AbstractProvider
-from gofeatureflag_python_provider.options import BaseModel
-from gofeatureflag_python_provider.metadata import GoFeatureFlagMetadata
-from gofeatureflag_python_provider.options import GoFeatureFlagOptions
-from gofeatureflag_python_provider.request_flag_evaluation import (
-    RequestFlagEvaluation,
-    user_from_evaluation_context,
-)
-from gofeatureflag_python_provider.response_flag_evaluation import (
-    ResponseFlagEvaluation,
-    JsonType,
-)
-from openfeature.flag_evaluation import Reason
-from openfeature.exception import ErrorCode
 from http import HTTPStatus
+from typing import List, Optional, Type, Union
+from urllib.parse import urljoin
+
+import pylru
+import urllib3
+from openfeature.evaluation_context import EvaluationContext
+from openfeature.exception import ErrorCode
 from openfeature.exception import (
     FlagNotFoundError,
     TypeMismatchError,
     GeneralError,
     OpenFeatureError,
 )
+from openfeature.flag_evaluation import FlagEvaluationDetails
+from openfeature.flag_evaluation import Reason
+from openfeature.hook import Hook
+from openfeature.provider.metadata import Metadata
+from openfeature.provider.provider import AbstractProvider
+from pydantic import ValidationError, PrivateAttr
+
+from gofeatureflag_python_provider.ProviderStatus import ProviderStatus
+from gofeatureflag_python_provider.metadata import GoFeatureFlagMetadata
+from gofeatureflag_python_provider.options import BaseModel
+from gofeatureflag_python_provider.options import GoFeatureFlagOptions
+from gofeatureflag_python_provider.request_flag_evaluation import (
+    RequestFlagEvaluation,
+    convert_evaluation_context,
+)
+from gofeatureflag_python_provider.response_flag_evaluation import (
+    ResponseFlagEvaluation,
+    JsonType,
+)
 
 
 class GoFeatureFlagProvider(AbstractProvider, BaseModel):
     options: GoFeatureFlagOptions
     _http_client: urllib3.PoolManager = PrivateAttr()
+    _cache: pylru.lrucache = PrivateAttr()
+    _status: ProviderStatus = PrivateAttr(ProviderStatus.NOT_READY)
 
     def __init__(self, **data):
         """
@@ -52,6 +57,17 @@ class GoFeatureFlagProvider(AbstractProvider, BaseModel):
                 retries=urllib3.Retry(0),
             )
 
+    def get_status(self):
+        return self._status
+
+    def initialize(self, evaluation_context: EvaluationContext):
+        self._cache = pylru.lrucache(self.options.cache_size)
+        self._status = ProviderStatus.READY
+
+    def shutdown(self):
+        if self._cache is not None:
+            self._cache.clear()
+
     def get_metadata(self) -> Metadata:
         return GoFeatureFlagMetadata()
 
@@ -59,61 +75,61 @@ class GoFeatureFlagProvider(AbstractProvider, BaseModel):
         return []
 
     def resolve_boolean_details(
-        self,
-        flag_key: str,
-        default_value: bool,
-        evaluation_context: Optional[EvaluationContext] = None,
+            self,
+            flag_key: str,
+            default_value: bool,
+            evaluation_context: Optional[EvaluationContext] = None,
     ) -> FlagEvaluationDetails[bool]:
         return self.generic_go_feature_flag_resolver(
             bool, flag_key, default_value, evaluation_context
         )
 
     def resolve_string_details(
-        self,
-        flag_key: str,
-        default_value: str,
-        evaluation_context: Optional[EvaluationContext] = None,
+            self,
+            flag_key: str,
+            default_value: str,
+            evaluation_context: Optional[EvaluationContext] = None,
     ) -> FlagEvaluationDetails[str]:
         return self.generic_go_feature_flag_resolver(
             str, flag_key, default_value, evaluation_context
         )
 
     def resolve_integer_details(
-        self,
-        flag_key: str,
-        default_value: int,
-        evaluation_context: Optional[EvaluationContext] = None,
+            self,
+            flag_key: str,
+            default_value: int,
+            evaluation_context: Optional[EvaluationContext] = None,
     ) -> FlagEvaluationDetails[int]:
         return self.generic_go_feature_flag_resolver(
             int, flag_key, default_value, evaluation_context
         )
 
     def resolve_float_details(
-        self,
-        flag_key: str,
-        default_value: float,
-        evaluation_context: Optional[EvaluationContext] = None,
+            self,
+            flag_key: str,
+            default_value: float,
+            evaluation_context: Optional[EvaluationContext] = None,
     ) -> FlagEvaluationDetails[float]:
         return self.generic_go_feature_flag_resolver(
             float, flag_key, default_value, evaluation_context
         )
 
     def resolve_object_details(
-        self,
-        flag_key: str,
-        default_value: dict,
-        evaluation_context: Optional[EvaluationContext] = None,
+            self,
+            flag_key: str,
+            default_value: dict,
+            evaluation_context: Optional[EvaluationContext] = None,
     ) -> FlagEvaluationDetails[Union[list, dict]]:
         return self.generic_go_feature_flag_resolver(
             Union[dict, list], flag_key, default_value, evaluation_context
         )
 
     def generic_go_feature_flag_resolver(
-        self,
-        original_type: Type[JsonType],
-        flag_key: str,
-        default_value: JsonType,
-        evaluation_context: Optional[EvaluationContext] = None,
+            self,
+            original_type: Type[JsonType],
+            flag_key: str,
+            default_value: JsonType,
+            evaluation_context: Optional[EvaluationContext] = None,
     ) -> FlagEvaluationDetails[JsonType]:
         """
         generic_go_feature_flag_resolver is a generic evaluations of your flag with GO Feature Flag relay proxy it works
@@ -126,35 +142,57 @@ class GoFeatureFlagProvider(AbstractProvider, BaseModel):
         :return: a FlagEvaluationDetails object containing the response for the SDK.
         """
         try:
-            goff_user = user_from_evaluation_context(evaluation_context)
+            if self._status != ProviderStatus.READY:
+                return FlagEvaluationDetails[original_type](
+                    flag_key=flag_key,
+                    value=default_value,
+                    reason=Reason.ERROR,
+                    error_code=ErrorCode.PROVIDER_NOT_READY,
+                    error_message="GO Feature Flag provider is not ready",
+                )
+
+            goff_evaluation_context = convert_evaluation_context(evaluation_context)
             goff_request = RequestFlagEvaluation(
-                user=goff_user,
+                user=goff_evaluation_context,
                 defaultValue=default_value,
             )
+            evaluation_context_hash = goff_evaluation_context.hash()
+            is_from_cache = False
 
-            response = self._http_client.request(
-                method="POST",
-                url=urljoin(
-                    str(self.options.endpoint), "/v1/feature/{}/eval".format(flag_key)
-                ),
-                headers={"Content-Type": "application/json"},
-                body=goff_request.model_dump_json(),
-            )
-
-            if response.status == HTTPStatus.NOT_FOUND.value:
-                raise FlagNotFoundError(
-                    "flag {} was not found in your configuration".format(flag_key)
+            if evaluation_context_hash in self._cache:
+                response_body = self._cache[evaluation_context_hash]
+                is_from_cache = True
+            else:
+                response = self._http_client.request(
+                    method="POST",
+                    url=urljoin(
+                        str(self.options.endpoint), "/v1/feature/{}/eval".format(flag_key)
+                    ),
+                    headers={"Content-Type": "application/json"},
+                    body=goff_request.model_dump_json(),
                 )
 
-            if int(response.status) >= HTTPStatus.BAD_REQUEST.value:
-                raise GeneralError(
-                    "impossible to contact GO Feature Flag relay proxy instance"
-                )
+                if response.status == HTTPStatus.NOT_FOUND.value:
+                    raise FlagNotFoundError(
+                        "flag {} was not found in your configuration".format(flag_key)
+                    )
+
+                if int(response.status) >= HTTPStatus.BAD_REQUEST.value:
+                    raise GeneralError(
+                        "impossible to contact GO Feature Flag relay proxy instance"
+                    )
+                response_body = response.data
+
             response_flag_evaluation = ResponseFlagEvaluation.model_validate_json(
-                response.data
+                response_body
             )
+
+            if response_flag_evaluation.cacheable:
+                self._cache[evaluation_context_hash] = response_body
+                print(evaluation_context_hash in self._cache)
+
             if original_type == int:
-                response_json = json.loads(response.data)
+                response_json = json.loads(response_body)
                 # in some cases pydantic auto convert float in int.
                 if type(response_json.get("value")) != int:
                     raise TypeMismatchError(
@@ -177,12 +215,11 @@ class GoFeatureFlagProvider(AbstractProvider, BaseModel):
                 flag_key=flag_key,
                 value=response_flag_evaluation.value,
                 variant=response_flag_evaluation.variationType,
-                reason=response_flag_evaluation.reason,
+                reason=Reason.CACHED if is_from_cache else response_flag_evaluation.reason,
                 flag_metadata=response_flag_evaluation.metadata,
             )
         except ValidationError as exc:
-            print(exc)
-            raise TypeMismatchError("unexpected type for flag {}".format(flag_key))
+            raise TypeMismatchError("unexpected type for flag {}: {}".format(flag_key, exc))
 
         except OpenFeatureError as exc:
             raise exc
