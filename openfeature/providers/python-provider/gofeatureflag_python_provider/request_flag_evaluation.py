@@ -22,12 +22,16 @@ class GoFeatureFlagEvaluationContext(BaseModel):
 
     def hash(self):
         dhash = hashlib.md5()
-        encoded = json.dumps({"key": self.key, "custom": self.custom}, sort_keys=True).encode()
+        encoded = json.dumps(
+            {"key": self.key, "custom": self.custom}, sort_keys=True
+        ).encode()
         dhash.update(encoded)
         return dhash.hexdigest()
 
 
-def convert_evaluation_context(ctx: EvaluationContext = None) -> GoFeatureFlagEvaluationContext:
+def convert_evaluation_context(
+    ctx: EvaluationContext = None,
+) -> GoFeatureFlagEvaluationContext:
     """
     convert_evaluation_context is converting an OpenFeature EvaluationContext into a GO Feature Flag context
     :param ctx: the EvaluationContext to convert

@@ -10,9 +10,12 @@ from openfeature.flag_evaluation import FlagEvaluationDetails, Reason
 from openfeature.hook import Hook, HookContext
 
 from gofeatureflag_python_provider.options import GoFeatureFlagOptions
-from gofeatureflag_python_provider.request_data_collector import FeatureEvent, RequestDataCollector
+from gofeatureflag_python_provider.request_data_collector import (
+    FeatureEvent,
+    RequestDataCollector,
+)
 
-default_targeting_key = 'undefined-targetingKey'
+default_targeting_key = "undefined-targetingKey"
 
 
 class DataCollectorHook(Hook):
@@ -33,20 +36,27 @@ class DataCollectorHook(Hook):
         self._http_client = http_client
         self._thread_data_collector = threading.Thread(target=self.background_task)
         self._options = options
-        self._data_collector_endpoint = urljoin(str(self._options.endpoint), "/v1/data/collector")
+        self._data_collector_endpoint = urljoin(
+            str(self._options.endpoint), "/v1/data/collector"
+        )
 
-    def after(self, hook_context: HookContext, details: FlagEvaluationDetails, hints: dict):
+    def after(
+        self, hook_context: HookContext, details: FlagEvaluationDetails, hints: dict
+    ):
         if self._options.disable_data_collection or details.reason != Reason.CACHED:
             # we don't collect data if the data collection is disabled or if the flag is not cached
             return
         feature_event = FeatureEvent(
-            contextKind='anonymousUser' if hook_context.evaluation_context.attributes['anonymous'] else 'user',
+            contextKind="anonymousUser"
+            if hook_context.evaluation_context.attributes["anonymous"]
+            else "user",
             creationDate=int(datetime.datetime.now().timestamp()),
             default=False,
             key=hook_context.flag_key,
             value=details.value,
-            variation=details.variant or 'SdkDefault',
-            userKey=hook_context.evaluation_context.targeting_key or default_targeting_key,
+            variation=details.variant or "SdkDefault",
+            userKey=hook_context.evaluation_context.targeting_key
+            or default_targeting_key,
         )
         self._event_queue.append(feature_event)
 
@@ -56,13 +66,16 @@ class DataCollectorHook(Hook):
             return
 
         feature_event = FeatureEvent(
-            contextKind='anonymousUser' if hook_context.evaluation_context.attributes['anonymous'] else 'user',
+            contextKind="anonymousUser"
+            if hook_context.evaluation_context.attributes["anonymous"]
+            else "user",
             creationDate=int(datetime.datetime.now().timestamp()),
             default=True,
             key=hook_context.flag_key,
             value=hook_context.default_value,
-            variation='SdkDefault',
-            userKey=hook_context.evaluation_context.targeting_key or default_targeting_key,
+            variation="SdkDefault",
+            userKey=hook_context.evaluation_context.targeting_key
+            or default_targeting_key,
         )
         self._event_queue.append(feature_event)
 
@@ -89,15 +102,12 @@ class DataCollectorHook(Hook):
         if len(self._event_queue) > 0:
             try:
                 goff_request = RequestDataCollector(
-                    meta={'provider': 'open-feature-python-sdk'},
+                    meta={"provider": "open-feature-python-sdk"},
                     events=self._event_queue,
                 )
                 response = self._http_client.request(
                     method="POST",
-                    url=urljoin(
-                        str(self._options.endpoint),
-                        "/v1/data/collector"
-                    ),
+                    url=urljoin(str(self._options.endpoint), "/v1/data/collector"),
                     headers={"Content-Type": "application/json"},
                     body=goff_request.model_dump_json(),
                 )
@@ -105,11 +115,17 @@ class DataCollectorHook(Hook):
                 if int(response.status) >= HTTPStatus.BAD_REQUEST.value:
                     print(
                         "impossible to contact GO Feature Flag relay proxy instance to collect the data, http_code: {}".format(
-                            response.status))
+                            response.status
+                        )
+                    )
                     return
 
                 # if the response is ok, we empty the queue
                 self._event_queue = []
             except Exception as exc:
-                print("impossible to contact GO Feature Flag relay proxy instance to collect the data: {}".format(exc))
+                print(
+                    "impossible to contact GO Feature Flag relay proxy instance to collect the data: {}".format(
+                        exc
+                    )
+                )
                 return

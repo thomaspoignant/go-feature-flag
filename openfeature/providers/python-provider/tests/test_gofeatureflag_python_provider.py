@@ -31,7 +31,7 @@ _default_evaluation_ctx = EvaluationContext(
 
 
 def _generic_test(
-        mock_request, flag_key, default_value, ctx: EvaluationContext, evaluationType: str
+    mock_request, flag_key, default_value, ctx: EvaluationContext, evaluationType: str
 ):
     try:
         mock_request.return_value = Mock(status="200", data=_read_mock_file(flag_key))
@@ -93,8 +93,7 @@ def test_provider_metadata():
 def test_number_hook():
     goff_provider = GoFeatureFlagProvider(
         options=GoFeatureFlagOptions(
-            endpoint="http://localhost:1031",
-            data_flush_interval=100
+            endpoint="http://localhost:1031", data_flush_interval=100
         )
     )
     assert len(goff_provider.get_provider_hooks()) == 1
@@ -112,25 +111,23 @@ def test_constructor_options_empty():
 
 def test_constructor_options_empty_endpoint():
     with pytest.raises(pydantic.ValidationError):
-        GoFeatureFlagProvider(options=GoFeatureFlagOptions(
-            endpoint="", data_flush_interval=100
-        ))
+        GoFeatureFlagProvider(
+            options=GoFeatureFlagOptions(endpoint="", data_flush_interval=100)
+        )
 
 
 def test_constructor_options_invalid_url():
     with pytest.raises(pydantic.ValidationError):
-        GoFeatureFlagProvider(options=GoFeatureFlagOptions(
-            endpoint="not a url",
-            data_flush_interval=100
-        ))
+        GoFeatureFlagProvider(
+            options=GoFeatureFlagOptions(endpoint="not a url", data_flush_interval=100)
+        )
 
 
 def test_constructor_options_valid():
     try:
         GoFeatureFlagProvider(
             options=GoFeatureFlagOptions(
-                endpoint="https://app.gofeatureflag.org/",
-                data_flush_interval=100
+                endpoint="https://app.gofeatureflag.org/", data_flush_interval=100
             )
         )
     except Exception as exc:
@@ -144,8 +141,7 @@ def test_should_return_an_error_if_endpoint_not_available(mock_request):
         mock_request.return_value = Mock(status="500")
         goff_provider = GoFeatureFlagProvider(
             options=GoFeatureFlagOptions(
-                endpoint="https://invalidurl.com",
-                data_flush_interval=100
+                endpoint="https://invalidurl.com", data_flush_interval=100
             )
         )
         api.set_provider(goff_provider)
@@ -179,7 +175,7 @@ def test_should_return_an_error_if_flag_does_not_exists(mock_request):
 
 @patch("urllib3.poolmanager.PoolManager.request")
 def test_should_return_an_error_if_we_expect_a_boolean_and_got_another_type(
-        mock_request,
+    mock_request,
 ):
     flag_key = "string_key"
     default_value = False
@@ -240,7 +236,7 @@ def test_should_use_boolean_default_value_if_the_flag_is_disabled(mock_request):
 
 @patch("urllib3.poolmanager.PoolManager.request")
 def test_should_return_an_error_if_we_expect_a_string_and_got_another_type(
-        mock_request,
+    mock_request,
 ):
     flag_key = "object_key"
     default_value = "default"
@@ -284,7 +280,7 @@ def test_should_use_string_default_value_if_the_flag_is_disabled(mock_request):
 
 @patch("urllib3.poolmanager.PoolManager.request")
 def test_should_return_an_error_if_we_expect_a_integer_and_got_another_type(
-        mock_request,
+    mock_request,
 ):
     flag_key = "string_key"
     default_value = 200
@@ -377,12 +373,12 @@ def test_should_resolve_a_valid_value_flag_with_targeting_match_reason(mock_requ
     )
     assert flag_key == res.flag_key
     assert {
-               "test": "test1",
-               "test2": False,
-               "test3": 123.3,
-               "test4": 1,
-               "test5": None,
-           } == res.value
+        "test": "test1",
+        "test2": False,
+        "test3": 123.3,
+        "test4": 1,
+        "test5": None,
+    } == res.value
     assert res.error_code is None
     assert Reason.TARGETING_MATCH.value == res.reason
     assert "True" == res.variant
@@ -435,7 +431,9 @@ def test_should_resolve_a_valid_value_flag_with_a_list(mock_request):
 
 
 @patch("urllib3.poolmanager.PoolManager.request")
-def test_should_resolve_from_cache_if_multiple_call_to_the_same_flag_with_same_context(mock_request: Mock):
+def test_should_resolve_from_cache_if_multiple_call_to_the_same_flag_with_same_context(
+    mock_request: Mock,
+):
     flag_key = "bool_targeting_match"
     default_value = False
 
@@ -483,13 +481,17 @@ def test_should_resolve_from_cache_if_multiple_call_to_the_same_flag_with_same_c
 
 
 @patch("urllib3.poolmanager.PoolManager.request")
-def test_should_call_data_collector_multiple_times_with_cached_event_waiting_ttl(mock_request: Mock):
+def test_should_call_data_collector_multiple_times_with_cached_event_waiting_ttl(
+    mock_request: Mock,
+):
     flag_key = "bool_targeting_match"
     default_value = False
     mock_request.side_effect = [
-        Mock(status="200", data=_read_mock_file(flag_key)),  # first call to get the flag
+        Mock(
+            status="200", data=_read_mock_file(flag_key)
+        ),  # first call to get the flag
         Mock(status="200", data={}),  # second call to send the data
-        Mock(status="200", data={})
+        Mock(status="200", data={}),
     ]
     goff_provider = GoFeatureFlagProvider(
         options=GoFeatureFlagOptions(
