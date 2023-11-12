@@ -6,5 +6,6 @@
   "reason": "TARGETING_MATCH",
   "errorCode": "",
   "value": true,
-  "metadata": {"test": "test1", "test2": false, "test3": 123.3}
+  "metadata": {"test": "test1", "test2": false, "test3": 123.3},
+  "cacheable": true
 }

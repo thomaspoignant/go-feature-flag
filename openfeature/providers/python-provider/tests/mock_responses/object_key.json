@@ -11,5 +11,6 @@
     "test3": 123.3,
     "test4": 1,
     "test5": null
-  }
+  },
+  "cacheable": true
 }

@@ -14,3 +14,4 @@ class ResponseFlagEvaluation(BaseModel):
     variationType: Optional[str] = None
     version: Optional[str] = None
     metadata: Optional[dict] = None
+    cacheable: Optional[bool] = None
