@@ -7,7 +7,9 @@ from openfeature.exception import (
     TargetingKeyMissingError,
     InvalidContextError,
 )
-from pydantic import BaseModel
+from pydantic import SkipValidation
+
+from gofeatureflag_python_provider.options import BaseModel
 
 
 class GoFeatureFlagEvaluationContext(BaseModel):
@@ -49,4 +51,4 @@ def convert_evaluation_context(ctx: EvaluationContext = None) -> GoFeatureFlagEv
 
 class RequestFlagEvaluation(BaseModel):
     user: GoFeatureFlagEvaluationContext
-    defaultValue: Any = None
+    defaultValue: SkipValidation[Any] = None

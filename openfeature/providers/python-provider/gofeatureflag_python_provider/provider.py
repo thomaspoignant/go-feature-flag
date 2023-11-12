@@ -20,11 +20,11 @@ from openfeature.provider.metadata import Metadata
 from openfeature.provider.provider import AbstractProvider
 from pydantic import ValidationError, PrivateAttr
 
-from gofeatureflag_python_provider.ProviderStatus import ProviderStatus
 from gofeatureflag_python_provider.data_collector_hook import DataCollectorHook
 from gofeatureflag_python_provider.metadata import GoFeatureFlagMetadata
 from gofeatureflag_python_provider.options import BaseModel
 from gofeatureflag_python_provider.options import GoFeatureFlagOptions
+from gofeatureflag_python_provider.provider_status import ProviderStatus
 from gofeatureflag_python_provider.request_flag_evaluation import (
     RequestFlagEvaluation,
     convert_evaluation_context,
@@ -40,7 +40,7 @@ class GoFeatureFlagProvider(AbstractProvider, BaseModel):
     _http_client: urllib3.PoolManager = PrivateAttr()
     _cache: pylru.lrucache = PrivateAttr()
     _status: ProviderStatus = PrivateAttr(ProviderStatus.NOT_READY)
-    _data_collector_hook = PrivateAttr()
+    _data_collector_hook: Optional[DataCollectorHook] = PrivateAttr()
 
     def __init__(self, **data):
         """
@@ -74,9 +74,12 @@ class GoFeatureFlagProvider(AbstractProvider, BaseModel):
     def shutdown(self):
         if self._cache is not None:
             self._cache.clear()
+
+        if self._data_collector_hook is not None:
+            self._data_collector_hook.shutdown()
+            self._data_collector_hook = None
+
         self._status = ProviderStatus.NOT_READY
-        self._data_collector_hook.shutdown()
-        self._data_collector_hook = None
 
     def get_metadata(self) -> Metadata:
         return GoFeatureFlagMetadata()

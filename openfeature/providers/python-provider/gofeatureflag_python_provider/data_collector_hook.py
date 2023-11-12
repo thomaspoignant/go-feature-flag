@@ -2,6 +2,7 @@ import datetime
 import threading
 import time
 from http import HTTPStatus
+from typing import Optional
 from urllib.parse import urljoin
 
 import urllib3
@@ -15,14 +16,14 @@ default_targeting_key = 'undefined-targetingKey'
 
 
 class DataCollectorHook(Hook):
-    # _thread_stopper is used to stop the background task when we shutdown the hook
+    # _thread_stopper is used to stop the background task when we shut down the hook
     _thread_stopper: bool = True
     # _thread_data_collector is the thread used to call the relay proxy to collect data
     _thread_data_collector: threading.Thread = None
     # _options is the options of the provider
-    _options: GoFeatureFlagOptions = None
+    _options: Optional[GoFeatureFlagOptions] = None
     # _data_collector_endpoint is the endpoint of the relay proxy
-    _data_collector_endpoint: str = None
+    _data_collector_endpoint: str
     # _http_client is the http client used to call the relay proxy
     _http_client: urllib3.PoolManager = None
     # _data_event_queue is the list of data to collect
@@ -64,9 +65,9 @@ class DataCollectorHook(Hook):
             userKey=hook_context.evaluation_context.targeting_key or default_targeting_key,
         )
         self._event_queue.append(feature_event)
-        pass
 
     def initialize(self):
+        self._event_queue = []
         self._thread_stopper = False
         self._thread_data_collector.start()
 
@@ -74,7 +75,6 @@ class DataCollectorHook(Hook):
         # setting the _thread_stopper to True will stop the background task
         self._thread_stopper = True
         self._thread_data_collector.join()
-        print("shutdown")
         self._collect_data()
         self._thread_stopper = False
         self._event_queue = []
@@ -87,7 +87,6 @@ class DataCollectorHook(Hook):
 
     def _collect_data(self):
         if len(self._event_queue) > 0:
-            print("in")
             try:
                 goff_request = RequestDataCollector(
                     meta={'provider': 'open-feature-python-sdk'},

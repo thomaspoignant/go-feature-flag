@@ -1,19 +1,19 @@
-from typing import Optional
+from typing import Optional, Any
 
-from pydantic import Field
+from pydantic import Field, SkipValidation
 
 from gofeatureflag_python_provider.options import BaseModel
 
 
 class FeatureEvent(BaseModel):
-    # Kind for a feature event is feature.
+    # Kind for a feature event is "feature".
     # A feature event will only be generated if the trackEvents attribute of the flag is set to true.
-    kind: str = Field(default="feature", Literal=True)
+    kind: str = Field(default="feature")
 
-    # ContextKind is the kind of context which generated an event.
+    # ContextKind is the kind of context that generated an event.
     # This will only be "anonymousUser" for events generated
     # on behalf of an anonymous user or the reserved word "user" for events generated on behalf of a non-anonymous user
-    contextKind: str = None
+    contextKind: str
 
     # UserKey The key of the user object used in a feature flag evaluation.
     # Details for the user object used in a feature
@@ -33,16 +33,16 @@ class FeatureEvent(BaseModel):
     variation: str
 
     # Value of the feature flag returned by feature flag evaluation.
-    value: any
+    value: SkipValidation[Any]
 
     # Default value is set to true if feature flag evaluation failed, in which case the value returned was the default
     # value passed to variation. If the default field is omitted, it is assumed to be false.
     default: bool
 
-    # Source indicates where the event was generated.
+    # source indicates where the event was generated.
     # This is set to SERVER when the event was evaluated in the relay-proxy
     # and PROVIDER_CACHE when it is evaluated from the cache.
-    source: str = Field(default="PROVIDER_CACHE", Literal=True)
+    source: str = Field(default="PROVIDER_CACHE")
 
 
 class RequestDataCollector(BaseModel):

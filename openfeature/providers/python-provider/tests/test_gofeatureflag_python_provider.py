@@ -10,9 +10,9 @@ from openfeature.evaluation_context import EvaluationContext
 from openfeature.exception import ErrorCode
 from openfeature.flag_evaluation import Reason, FlagEvaluationDetails
 
-from gofeatureflag_python_provider.ProviderStatus import ProviderStatus
 from gofeatureflag_python_provider.options import GoFeatureFlagOptions
 from gofeatureflag_python_provider.provider import GoFeatureFlagProvider
+from gofeatureflag_python_provider.provider_status import ProviderStatus
 
 _default_evaluation_ctx = EvaluationContext(
     targeting_key="d45e303a-38c2-11ed-a261-0242ac120002",
@@ -36,7 +36,10 @@ def _generic_test(
     try:
         mock_request.return_value = Mock(status="200", data=_read_mock_file(flag_key))
         goff_provider = GoFeatureFlagProvider(
-            options=GoFeatureFlagOptions(endpoint="https://gofeatureflag.org/")
+            options=GoFeatureFlagOptions(
+                endpoint="https://gofeatureflag.org/",
+                data_flush_interval=100,
+            ),
         )
         api.set_provider(goff_provider)
         wait_provider_ready(goff_provider)
@@ -80,14 +83,19 @@ def _generic_test(
 
 def test_provider_metadata():
     goff_provider = GoFeatureFlagProvider(
-        options=GoFeatureFlagOptions(endpoint="http://localhost:1031")
+        options=GoFeatureFlagOptions(
+            endpoint="http://localhost:1031", data_flush_interval=100
+        )
     )
     assert goff_provider.get_metadata().name == "GO Feature Flag"
 
 
 def test_number_hook():
     goff_provider = GoFeatureFlagProvider(
-        options=GoFeatureFlagOptions(endpoint="http://localhost:1031")
+        options=GoFeatureFlagOptions(
+            endpoint="http://localhost:1031",
+            data_flush_interval=100
+        )
     )
     assert len(goff_provider.get_provider_hooks()) == 1
 
@@ -104,18 +112,26 @@ def test_constructor_options_empty():
 
 def test_constructor_options_empty_endpoint():
     with pytest.raises(pydantic.ValidationError):
-        GoFeatureFlagProvider(options=GoFeatureFlagOptions(endpoint=""))
+        GoFeatureFlagProvider(options=GoFeatureFlagOptions(
+            endpoint="", data_flush_interval=100
+        ))
 
 
 def test_constructor_options_invalid_url():
     with pytest.raises(pydantic.ValidationError):
-        GoFeatureFlagProvider(options=GoFeatureFlagOptions(endpoint="not a url"))
+        GoFeatureFlagProvider(options=GoFeatureFlagOptions(
+            endpoint="not a url",
+            data_flush_interval=100
+        ))
 
 
 def test_constructor_options_valid():
     try:
         GoFeatureFlagProvider(
-            options=GoFeatureFlagOptions(endpoint="https://app.gofeatureflag.org/")
+            options=GoFeatureFlagOptions(
+                endpoint="https://app.gofeatureflag.org/",
+                data_flush_interval=100
+            )
         )
     except Exception as exc:
         assert False, f"'constructor has raised an exception {exc}"
@@ -127,7 +143,10 @@ def test_should_return_an_error_if_endpoint_not_available(mock_request):
         flag_key = "fail_500"
         mock_request.return_value = Mock(status="500")
         goff_provider = GoFeatureFlagProvider(
-            options=GoFeatureFlagOptions(endpoint="https://invalidurl.com")
+            options=GoFeatureFlagOptions(
+                endpoint="https://invalidurl.com",
+                data_flush_interval=100
+            )
         )
         api.set_provider(goff_provider)
         client = api.get_client(name="test-client")
@@ -524,17 +543,19 @@ def test_should_not_call_data_collector_if_not_having_cache(mock_request: Mock):
     flag_key = "bool_targeting_match"
     default_value = False
     mock_request.side_effect = [
-        Mock(status="200", data=_read_mock_file(flag_key)),  # first call to get the flag
+        Mock(status="200", data=_read_mock_file(flag_key)),
     ]
+    goff_provider = None
     goff_provider = GoFeatureFlagProvider(
         options=GoFeatureFlagOptions(
             endpoint="https://gofeatureflag.org/",
-            data_flush_interval=100,
+            data_flush_interval=1000,
         )
     )
+
     api.set_provider(goff_provider)
     wait_provider_ready(goff_provider)
-    client = api.get_client(name="test_should_not_call_data_collector_if_not_having_cache")
+    client = api.get_client(name="test-client")
 
     client.get_boolean_details(
         flag_key=flag_key,
