@@ -1,6 +1,7 @@
 import datetime
 import threading
 import time
+from http import HTTPStatus
 from urllib.parse import urljoin
 
 import urllib3
@@ -34,10 +35,9 @@ class DataCollectorHook(Hook):
         self._data_collector_endpoint = urljoin(str(self._options.endpoint), "/v1/data/collector")
 
     def after(self, hook_context: HookContext, details: FlagEvaluationDetails, hints: dict):
-        if self._options.disable_data_collection or details.reason == Reason.CACHED:
+        if self._options.disable_data_collection or details.reason != Reason.CACHED:
             # we don't collect data if the data collection is disabled or if the flag is not cached
             return
-
         feature_event = FeatureEvent(
             contextKind='anonymousUser' if hook_context.evaluation_context.attributes['anonymous'] else 'user',
             creationDate=int(datetime.datetime.now().timestamp()),
@@ -50,7 +50,7 @@ class DataCollectorHook(Hook):
         self._event_queue.append(feature_event)
 
     def error(self, hook_context: HookContext, exception: Exception, hints: dict):
-        if self._options.disable_data_collection or details.reason == Reason.CACHED:
+        if self._options.disable_data_collection or details.reason != Reason.CACHED:
             # we don't collect data if the data collection is disabled or if the flag is not cached
             return
 
@@ -71,18 +71,23 @@ class DataCollectorHook(Hook):
         self._thread_data_collector.start()
 
     def shutdown(self):
-        print("shutdown")
         # setting the _thread_stopper to True will stop the background task
-        time.sleep(1)
         self._thread_stopper = True
         self._thread_data_collector.join()
+        print("shutdown")
+        self._collect_data()
+        self._thread_stopper = False
+        self._event_queue = []
 
     def background_task(self):
         while not self._thread_stopper:
-            time.sleep(self._options.data_flush_interval / 1000)
-            if len(self._event_queue) == 0:
-                continue
+            waiting_time = self._options.data_flush_interval / 1000
+            time.sleep(waiting_time)
+            self._collect_data()
 
+    def _collect_data(self):
+        if len(self._event_queue) > 0:
+            print("in")
             try:
                 goff_request = RequestDataCollector(
                     meta={'provider': 'open-feature-python-sdk'},
@@ -97,8 +102,15 @@ class DataCollectorHook(Hook):
                     headers={"Content-Type": "application/json"},
                     body=goff_request.model_dump_json(),
                 )
-                print(response.status)
+
+                if int(response.status) >= HTTPStatus.BAD_REQUEST.value:
+                    print(
+                        "impossible to contact GO Feature Flag relay proxy instance to collect the data, http_code: {}".format(
+                            response.status))
+                    return
+
+                # if the response is ok, we empty the queue
+                self._event_queue = []
             except Exception as exc:
-                print(exc)
-                continue
-        # TODO: check how to deal with mock
+                print("impossible to contact GO Feature Flag relay proxy instance to collect the data: {}".format(exc))
+                return

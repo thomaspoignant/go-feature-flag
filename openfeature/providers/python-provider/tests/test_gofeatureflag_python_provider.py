@@ -416,7 +416,7 @@ def test_should_resolve_a_valid_value_flag_with_a_list(mock_request):
 
 
 @patch("urllib3.poolmanager.PoolManager.request")
-def test_should_resolve_from_cache_if_multiple_call_to_the_same_flag_with_same_context(mock_request):
+def test_should_resolve_from_cache_if_multiple_call_to_the_same_flag_with_same_context(mock_request: Mock):
     flag_key = "bool_targeting_match"
     default_value = False
 
@@ -425,6 +425,7 @@ def test_should_resolve_from_cache_if_multiple_call_to_the_same_flag_with_same_c
         options=GoFeatureFlagOptions(
             endpoint="https://gofeatureflag.org/",
             data_flush_interval=100,
+            disable_data_collection=True,
         )
     )
     api.set_provider(goff_provider)
@@ -460,6 +461,88 @@ def test_should_resolve_from_cache_if_multiple_call_to_the_same_flag_with_same_c
     )
     assert got == want
     api.shutdown()
+
+
+@patch("urllib3.poolmanager.PoolManager.request")
+def test_should_call_data_collector_multiple_times_with_cached_event_waiting_ttl(mock_request: Mock):
+    flag_key = "bool_targeting_match"
+    default_value = False
+    mock_request.side_effect = [
+        Mock(status="200", data=_read_mock_file(flag_key)),  # first call to get the flag
+        Mock(status="200", data={}),  # second call to send the data
+        Mock(status="200", data={})
+    ]
+    goff_provider = GoFeatureFlagProvider(
+        options=GoFeatureFlagOptions(
+            endpoint="https://gofeatureflag.org/",
+            data_flush_interval=100,
+        )
+    )
+    api.set_provider(goff_provider)
+    wait_provider_ready(goff_provider)
+    client = api.get_client(name="test-client")
+
+    got = client.get_boolean_details(
+        flag_key=flag_key,
+        default_value=default_value,
+        evaluation_context=_default_evaluation_ctx,
+    )
+
+    want: FlagEvaluationDetails = FlagEvaluationDetails(
+        flag_key=flag_key,
+        value=True,
+        variant="True",
+        reason=Reason.TARGETING_MATCH,
+        flag_metadata={"test": "test1", "test2": False, "test3": 123.3},
+    )
+    assert got == want
+    got = client.get_boolean_details(
+        flag_key=flag_key,
+        default_value=default_value,
+        evaluation_context=_default_evaluation_ctx,
+    )
+    want: FlagEvaluationDetails = FlagEvaluationDetails(
+        flag_key=flag_key,
+        value=True,
+        variant="True",
+        reason=Reason.CACHED,
+        flag_metadata={"test": "test1", "test2": False, "test3": 123.3},
+    )
+    assert got == want
+    time.sleep(0.2)
+    client.get_boolean_details(
+        flag_key=flag_key,
+        default_value=default_value,
+        evaluation_context=_default_evaluation_ctx,
+    )
+    api.shutdown()
+    assert mock_request.call_count == 3
+
+
+@patch("urllib3.poolmanager.PoolManager.request")
+def test_should_not_call_data_collector_if_not_having_cache(mock_request: Mock):
+    flag_key = "bool_targeting_match"
+    default_value = False
+    mock_request.side_effect = [
+        Mock(status="200", data=_read_mock_file(flag_key)),  # first call to get the flag
+    ]
+    goff_provider = GoFeatureFlagProvider(
+        options=GoFeatureFlagOptions(
+            endpoint="https://gofeatureflag.org/",
+            data_flush_interval=100,
+        )
+    )
+    api.set_provider(goff_provider)
+    wait_provider_ready(goff_provider)
+    client = api.get_client(name="test_should_not_call_data_collector_if_not_having_cache")
+
+    client.get_boolean_details(
+        flag_key=flag_key,
+        default_value=default_value,
+        evaluation_context=_default_evaluation_ctx,
+    )
+    api.shutdown()
+    assert mock_request.call_count == 1
 
 
 def wait_provider_ready(provider: GoFeatureFlagProvider):
