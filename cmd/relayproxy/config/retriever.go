@@ -34,9 +34,6 @@ func (c *RetrieverConf) IsValid() error {
 	if c.Kind == GitHubRetriever && c.RepositorySlug == "" {
 		return fmt.Errorf("invalid retriever: no \"repositorySlug\" property found for kind \"%s\"", c.Kind)
 	}
-	if c.Kind == GitlabRetriever && c.URL == "" {
-		return fmt.Errorf("invalid retriever: no \"URL\" property found for kind \"%s\"", c.Kind)
-	}
 	if c.Kind == GitlabRetriever && c.RepositorySlug == "" {
 		return fmt.Errorf("invalid retriever: no \"repositorySlug\" property found for kind \"%s\"", c.Kind)
 	}
