@@ -21,6 +21,7 @@ from openfeature.provider.provider import AbstractProvider
 from pydantic import ValidationError, PrivateAttr
 
 from gofeatureflag_python_provider.ProviderStatus import ProviderStatus
+from gofeatureflag_python_provider.data_collector_hook import DataCollectorHook
 from gofeatureflag_python_provider.metadata import GoFeatureFlagMetadata
 from gofeatureflag_python_provider.options import BaseModel
 from gofeatureflag_python_provider.options import GoFeatureFlagOptions
@@ -39,6 +40,7 @@ class GoFeatureFlagProvider(AbstractProvider, BaseModel):
     _http_client: urllib3.PoolManager = PrivateAttr()
     _cache: pylru.lrucache = PrivateAttr()
     _status: ProviderStatus = PrivateAttr(ProviderStatus.NOT_READY)
+    _data_collector_hook = PrivateAttr()
 
     def __init__(self, **data):
         """
@@ -56,24 +58,33 @@ class GoFeatureFlagProvider(AbstractProvider, BaseModel):
                 timeout=urllib3.Timeout(connect=10, read=10),
                 retries=urllib3.Retry(0),
             )
+        self._data_collector_hook = DataCollectorHook(
+            options=self.options,
+            http_client=self._http_client,
+        )
 
     def get_status(self):
         return self._status
 
     def initialize(self, evaluation_context: EvaluationContext):
         self._cache = pylru.lrucache(self.options.cache_size)
+        self._data_collector_hook.initialize()
         self._status = ProviderStatus.READY
 
     def shutdown(self):
         if self._cache is not None:
             self._cache.clear()
         self._status = ProviderStatus.NOT_READY
+        self._data_collector_hook.shutdown()
+        self._data_collector_hook = None
 
     def get_metadata(self) -> Metadata:
         return GoFeatureFlagMetadata()
 
     def get_provider_hooks(self) -> List[Hook]:
-        return []
+        if self._data_collector_hook is None:
+            return []
+        return [self._data_collector_hook]
 
     def resolve_boolean_details(
             self,
@@ -190,7 +201,6 @@ class GoFeatureFlagProvider(AbstractProvider, BaseModel):
 
             if response_flag_evaluation.cacheable:
                 self._cache[evaluation_context_hash] = response_body
-                print(evaluation_context_hash in self._cache)
 
             if original_type == int:
                 response_json = json.loads(response_body)

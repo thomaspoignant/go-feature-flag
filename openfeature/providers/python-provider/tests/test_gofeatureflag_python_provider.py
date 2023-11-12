@@ -73,6 +73,7 @@ def _generic_test(
                 default_value=default_value,
                 evaluation_context=ctx,
             )
+        api.shutdown()
     except Exception as exc:
         assert False, f"'No exception expected {exc}"
 
@@ -84,11 +85,11 @@ def test_provider_metadata():
     assert goff_provider.get_metadata().name == "GO Feature Flag"
 
 
-def test_no_hook():
+def test_number_hook():
     goff_provider = GoFeatureFlagProvider(
         options=GoFeatureFlagOptions(endpoint="http://localhost:1031")
     )
-    assert len(goff_provider.get_provider_hooks()) == 0
+    assert len(goff_provider.get_provider_hooks()) == 1
 
 
 def test_constructor_options_none():
@@ -421,7 +422,10 @@ def test_should_resolve_from_cache_if_multiple_call_to_the_same_flag_with_same_c
 
     mock_request.return_value = Mock(status="200", data=_read_mock_file(flag_key))
     goff_provider = GoFeatureFlagProvider(
-        options=GoFeatureFlagOptions(endpoint="https://gofeatureflag.org/")
+        options=GoFeatureFlagOptions(
+            endpoint="https://gofeatureflag.org/",
+            data_flush_interval=100,
+        )
     )
     api.set_provider(goff_provider)
     wait_provider_ready(goff_provider)
@@ -455,6 +459,7 @@ def test_should_resolve_from_cache_if_multiple_call_to_the_same_flag_with_same_c
         flag_metadata={"test": "test1", "test2": False, "test3": 123.3},
     )
     assert got == want
+    api.shutdown()
 
 
 def wait_provider_ready(provider: GoFeatureFlagProvider):
