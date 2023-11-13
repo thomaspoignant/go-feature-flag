@@ -9,11 +9,11 @@ require (
 	github.com/BurntSushi/toml v1.3.2
 	github.com/aws/aws-lambda-go v1.41.0
 	github.com/aws/aws-sdk-go v1.47.3
-	github.com/aws/aws-sdk-go-v2 v1.22.1
+	github.com/aws/aws-sdk-go-v2 v1.22.2
 	github.com/aws/aws-sdk-go-v2/config v1.22.0
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.13.1
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.42.0
-	github.com/aws/aws-sdk-go-v2/service/sqs v1.26.0
+	github.com/aws/aws-sdk-go-v2/service/sqs v1.28.0
 	github.com/awslabs/aws-lambda-go-api-proxy v0.16.0
 	github.com/fsouza/fake-gcs-server v1.47.6
 	github.com/gdexlab/go-render v1.0.1
@@ -65,8 +65,8 @@ require (
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.5.0 // indirect
 	github.com/aws/aws-sdk-go-v2/credentials v1.15.1 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.14.2 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/configsources v1.2.1 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.5.1 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.2.2 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.5.2 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.5.0 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/v4a v1.2.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.10.0 // indirect
