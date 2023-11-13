@@ -30,7 +30,7 @@
   "author": "Thomas Poignant",
   "license": "MIT",
   "devDependencies": {
-    "@babel/eslint-parser": "^7.22.15",
+    "@babel/eslint-parser": "^7.23.3",
     "@babel/preset-env": "^7.23.2",
     "autoprefixer": "^10.4.16",
     "babel-loader": "^9.1.3",
