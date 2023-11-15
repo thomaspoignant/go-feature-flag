@@ -5,6 +5,7 @@ from urllib.parse import urljoin
 
 import pylru
 import urllib3
+import websocket
 from openfeature.evaluation_context import EvaluationContext
 from openfeature.exception import ErrorCode
 from openfeature.exception import (
@@ -41,6 +42,7 @@ class GoFeatureFlagProvider(AbstractProvider, BaseModel):
     _cache: pylru.lrucache = PrivateAttr()
     _status: ProviderStatus = PrivateAttr(ProviderStatus.NOT_READY)
     _data_collector_hook: Optional[DataCollectorHook] = PrivateAttr()
+    _ws: websocket.WebSocketApp = PrivateAttr()
 
     def __init__(self, **data):
         """
@@ -70,8 +72,33 @@ class GoFeatureFlagProvider(AbstractProvider, BaseModel):
         self._cache = pylru.lrucache(self.options.cache_size)
         self._data_collector_hook.initialize()
         self._status = ProviderStatus.READY
+        websocket.enableTrace(True)
+        self._ws = websocket.WebSocketApp(
+            "ws://localhost:1031/ws/v1/flag/change",
+            on_message=self.on_message,
+            on_open=self.on_open,
+        )
+        self.background_task()
+
+    def background_task(self):
+        self._ws.run_forever(reconnect=5)
+
+    def on_message(self, message):
+        print("message received", message)
+
+    def on_open(self, ws):
+        self._http_client.request(
+            method="POST",
+            url=urljoin(
+                str(self.options.endpoint),
+                "/v1/feature/{}/eval".format("yo"),
+            ),
+            headers={"Content-Type": "application/json"},
+        )
+        print("message open")
 
     def shutdown(self):
+        self._ws.close()
         if self._cache is not None:
             self._cache.clear()
 

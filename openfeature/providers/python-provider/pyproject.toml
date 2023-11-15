@@ -26,6 +26,9 @@ openfeature-sdk = "^0.4.0"
 pydantic = "^2.4.2"
 urllib3 = "^2.0.7"
 pylru = "^1.2.1"
+websocket-client = "^1.6.4"
+rel = "^0.4.9"
+asyncio = "^3.4.3"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.4"
