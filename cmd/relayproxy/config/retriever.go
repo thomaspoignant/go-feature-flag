@@ -16,7 +16,7 @@ type RetrieverConf struct {
 	HTTPBody    string              `mapstructure:"body" koanf:"body"`
 	HTTPHeaders map[string][]string `mapstructure:"headers" koanf:"headers"`
 	Bucket      string              `mapstructure:"bucket" koanf:"bucket"`
-	Object      string              `mapstructure:"bucket" koanf:"bucket"`
+	Object      string              `mapstructure:"object" koanf:"object"`
 	Item        string              `mapstructure:"item" koanf:"item"`
 	Namespace   string              `mapstructure:"namespace" koanf:"namespace"`
 	ConfigMap   string              `mapstructure:"configmap" koanf:"configmap"`
