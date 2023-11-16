@@ -294,6 +294,7 @@ jobs:
       - name: Setup go
         uses: actions/setup-go@v4
         with:
+          working-directory: ./release/
           go-version-file: go.mod
           check-latest: true
 
