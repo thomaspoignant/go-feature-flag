@@ -39,6 +39,7 @@ def _generic_test(
             options=GoFeatureFlagOptions(
                 endpoint="https://gofeatureflag.org/",
                 data_flush_interval=100,
+                disable_cache_invalidation=True,
             ),
         )
         api.set_provider(goff_provider)
@@ -141,10 +142,13 @@ def test_should_return_an_error_if_endpoint_not_available(mock_request):
         mock_request.return_value = Mock(status="500")
         goff_provider = GoFeatureFlagProvider(
             options=GoFeatureFlagOptions(
-                endpoint="https://invalidurl.com", data_flush_interval=100
+                endpoint="https://invalidurl.com",
+                data_flush_interval=100,
+                disable_cache_invalidation=True,
             )
         )
         api.set_provider(goff_provider)
+        wait_provider_ready(goff_provider)
         client = api.get_client(name="test-client")
         res = client.get_boolean_details(
             flag_key=flag_key,
@@ -443,6 +447,7 @@ def test_should_resolve_from_cache_if_multiple_call_to_the_same_flag_with_same_c
             endpoint="https://gofeatureflag.org/",
             data_flush_interval=100,
             disable_data_collection=True,
+            disable_cache_invalidation=True,
         )
     )
     api.set_provider(goff_provider)
@@ -497,6 +502,7 @@ def test_should_call_data_collector_multiple_times_with_cached_event_waiting_ttl
         options=GoFeatureFlagOptions(
             endpoint="https://gofeatureflag.org/",
             data_flush_interval=100,
+            disable_cache_invalidation=True,
         )
     )
     api.set_provider(goff_provider)
@@ -552,6 +558,7 @@ def test_should_not_call_data_collector_if_not_having_cache(mock_request: Mock):
         options=GoFeatureFlagOptions(
             endpoint="https://gofeatureflag.org/",
             data_flush_interval=1000,
+            disable_cache_invalidation=True,
         )
     )
 
@@ -575,6 +582,9 @@ def wait_provider_ready(provider: GoFeatureFlagProvider):
         time.sleep(0.1)
         if time.time() - start > 5:
             break
+
+    if provider.get_status() != ProviderStatus.READY:
+        raise Exception("Provider is not ready")
 
 
 def _read_mock_file(flag_key: str) -> str:
