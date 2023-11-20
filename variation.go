@@ -265,10 +265,10 @@ func (g *GoFeatureFlag) AllFlagsState(evaluationCtx ffcontext.Context) flagstate
 	allFlags := flagstate.NewAllFlags()
 	for key, currentFlag := range flags {
 		flagCtx := flag.Context{
-			CommonContext:   g.config.CommonEvaluationContextEnrichment,
-			DefaultSdkValue: nil,
+			EvaluationContextEnrichment: g.config.EvaluationContextEnrichment,
+			DefaultSdkValue:             nil,
 		}
-		flagCtx.AddIntoCommonContext("env", g.config.Environment)
+		flagCtx.AddIntoEvaluationContextEnrichment("env", g.config.Environment)
 		flagValue, resolutionDetails := currentFlag.Value(key, evaluationCtx, flagCtx)
 
 		// if the flag is disabled, we are ignoring it.
@@ -413,10 +413,10 @@ func getVariation[T model.JSONType](
 	}
 
 	flagCtx := flag.Context{
-		DefaultSdkValue: sdkDefaultValue,
-		CommonContext:   g.config.CommonEvaluationContextEnrichment,
+		DefaultSdkValue:             sdkDefaultValue,
+		EvaluationContextEnrichment: g.config.EvaluationContextEnrichment,
 	}
-	flagCtx.AddIntoCommonContext("env", g.config.Environment)
+	flagCtx.AddIntoEvaluationContextEnrichment("env", g.config.Environment)
 	flagValue, resolutionDetails := f.Value(flagKey, evaluationCtx, flagCtx)
 
 	var convertedValue interface{}

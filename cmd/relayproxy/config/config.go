@@ -171,8 +171,11 @@ type Config struct {
 	// APIKeys list of API keys that authorized to use endpoints
 	APIKeys []string `mapstructure:"apiKeys" koanf:"apikeys"`
 
-	// StartAsAwsLambda (optional) if true the relay proxy will start ready to be launch as AWS Lambda
+	// StartAsAwsLambda (optional) if true, the relay proxy will start ready to be launched as AWS Lambda
 	StartAsAwsLambda bool `mapstructure:"startAsAwsLambda" koanf:"startasawslambda"`
+
+	// EvaluationContextEnrichment (optional) will be merged with the evaluation context sent during the evaluation.
+	EvaluationContextEnrichment map[string]interface{} `mapstructure:"evaluationContextEnrichment" koanf:"evaluationcontextenrichment"` //nolint: lll
 
 	// ---- private fields
 

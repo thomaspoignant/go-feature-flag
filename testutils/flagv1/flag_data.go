@@ -89,8 +89,8 @@ func (f *FlagData) Value(
 	}
 
 	env := ""
-	if flagCtx.CommonContext != nil && flagCtx.CommonContext["env"] != nil {
-		env = flagCtx.CommonContext["env"].(string)
+	if flagCtx.EvaluationContextEnrichment != nil && flagCtx.EvaluationContextEnrichment["env"] != nil {
+		env = flagCtx.EvaluationContextEnrichment["env"].(string)
 	}
 	if f.evaluateRule(user, env) {
 		if f.isInPercentage(flagName, user) {

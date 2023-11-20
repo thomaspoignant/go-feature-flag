@@ -64,8 +64,8 @@ func (f *InternalFlag) Value(
 ) (interface{}, ResolutionDetails) {
 	f.applyScheduledRolloutSteps()
 
-	if flagContext.CommonContext != nil {
-		maps.Copy(evaluationCtx.GetCustom(), flagContext.CommonContext)
+	if flagContext.EvaluationContextEnrichment != nil {
+		maps.Copy(evaluationCtx.GetCustom(), flagContext.EvaluationContextEnrichment)
 	}
 
 	if f.IsDisable() || f.isExperimentationOver() {
