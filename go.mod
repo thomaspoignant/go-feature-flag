@@ -13,7 +13,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.25.3
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.14.0
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.43.0
-	github.com/aws/aws-sdk-go-v2/service/sqs v1.28.0
+	github.com/aws/aws-sdk-go-v2/service/sqs v1.28.1
 	github.com/awslabs/aws-lambda-go-api-proxy v0.16.0
 	github.com/fsouza/fake-gcs-server v1.47.6
 	github.com/gdexlab/go-render v1.0.1
