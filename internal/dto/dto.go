@@ -46,8 +46,8 @@ type DTOv1 struct {
 	// in your flag.
 	Scheduled *[]flag.ScheduledStep `json:"scheduledRollout,omitempty" yaml:"scheduledRollout,omitempty" toml:"scheduledRollout,omitempty" jsonschema:"title=scheduledRollout,description=Configure an update on some fields of your flag over time."` // nolint: lll
 
-	// Experimentation is your struct to configure an experimentation, it will allow you to configure a start date and
-	// an end date for your flag.
+	// Experimentation is your struct to configure an experimentation.
+	// It will allow you to configure a start date and an end date for your flag.
 	// When the experimentation is not running, the flag will serve the default value.
 	Experimentation *ExperimentationDto `json:"experimentation,omitempty" yaml:"experimentation,omitempty" toml:"experimentation,omitempty" jsonschema:"title=experimentation,description=Configure an experimentation. It will allow you to configure a start date and an end date for your flag."` // nolint: lll
 
