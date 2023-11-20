@@ -246,7 +246,7 @@ func GetFlagsFromCache() (map[string]flag.Flag, error) {
 }
 
 // AllFlagsState return a flagstate.AllFlags that contains all the flags for a specific user.
-func (g *GoFeatureFlag) AllFlagsState(ctx ffcontext.Context) flagstate.AllFlags {
+func (g *GoFeatureFlag) AllFlagsState(evaluationCtx ffcontext.Context) flagstate.AllFlags {
 	flags := map[string]flag.Flag{}
 	if g == nil {
 		// empty AllFlags will set valid to false
@@ -264,12 +264,14 @@ func (g *GoFeatureFlag) AllFlagsState(ctx ffcontext.Context) flagstate.AllFlags 
 
 	allFlags := flagstate.NewAllFlags()
 	for key, currentFlag := range flags {
-		flagValue, resolutionDetails := currentFlag.Value(key, ctx, flag.Context{
-			Environment:     g.config.Environment,
-			DefaultSdkValue: nil,
-		})
+		flagCtx := flag.Context{
+			EvaluationContextEnrichment: g.config.EvaluationContextEnrichment,
+			DefaultSdkValue:             nil,
+		}
+		flagCtx.AddIntoEvaluationContextEnrichment("env", g.config.Environment)
+		flagValue, resolutionDetails := currentFlag.Value(key, evaluationCtx, flagCtx)
 
-		// if the flag is disabled we are ignoring it.
+		// if the flag is disabled, we are ignoring it.
 		if resolutionDetails.Reason == flag.ReasonDisabled {
 			allFlags.AddFlag(key, flagstate.FlagState{
 				Timestamp:   time.Now().Unix(),
@@ -370,7 +372,7 @@ func notifyVariation[T model.JSONType](
 // getVariation is the internal generic func that handle the logic of a variation the result will always
 // contain a valid model.VariationResult
 func getVariation[T model.JSONType](
-	g *GoFeatureFlag, flagKey string, ctx ffcontext.Context, sdkDefaultValue T, expectedType string,
+	g *GoFeatureFlag, flagKey string, evaluationCtx ffcontext.Context, sdkDefaultValue T, expectedType string,
 ) (model.VariationResult[T], error) {
 	if g == nil {
 		return model.VariationResult[T]{
@@ -382,7 +384,6 @@ func getVariation[T model.JSONType](
 			Cacheable:     false,
 		}, fmt.Errorf("go-feature-flag is not initialised, default value is used")
 	}
-
 	if g.config.Offline {
 		return model.VariationResult[T]{
 			Value:         sdkDefaultValue,
@@ -411,13 +412,17 @@ func getVariation[T model.JSONType](
 		return varResult, err
 	}
 
-	flagValue, resolutionDetails := f.Value(flagKey, ctx,
-		flag.Context{Environment: g.config.Environment, DefaultSdkValue: sdkDefaultValue})
+	flagCtx := flag.Context{
+		DefaultSdkValue:             sdkDefaultValue,
+		EvaluationContextEnrichment: g.config.EvaluationContextEnrichment,
+	}
+	flagCtx.AddIntoEvaluationContextEnrichment("env", g.config.Environment)
+	flagValue, resolutionDetails := f.Value(flagKey, evaluationCtx, flagCtx)
 
 	var convertedValue interface{}
 	switch value := flagValue.(type) {
 	case float64:
-		// this part ensure that we convert float64 value into int if we call IntVariation on a float64 value.
+		// this part ensures that we convert float64 value into int if we call IntVariation on a float64 value.
 		if expectedType == "int" {
 			convertedValue = int(value)
 		} else {

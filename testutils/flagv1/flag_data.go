@@ -57,11 +57,11 @@ type FlagData struct {
 }
 
 // Value is returning the Value associate to the flag (True / False / Default ) based
-// if the toggle apply to the user or not.
+// if the toggle applies to the user or not.
 func (f *FlagData) Value(
 	flagName string,
 	user ffcontext.Context,
-	evaluationCtx flag.Context,
+	flagCtx flag.Context,
 ) (interface{}, flag.ResolutionDetails) {
 	f.updateFlagStage()
 	if f.isExperimentationOver() {
@@ -74,7 +74,7 @@ func (f *FlagData) Value(
 
 	// Flag disable we cannot apply it.
 	if f.IsDisable() {
-		return evaluationCtx.DefaultSdkValue, flag.ResolutionDetails{
+		return flagCtx.DefaultSdkValue, flag.ResolutionDetails{
 			Variant: flag.VariationSDKDefault,
 			Reason:  flag.ReasonDisabled,
 		}
@@ -88,7 +88,11 @@ func (f *FlagData) Value(
 		}
 	}
 
-	if f.evaluateRule(user, evaluationCtx.Environment) {
+	env := ""
+	if flagCtx.EvaluationContextEnrichment != nil && flagCtx.EvaluationContextEnrichment["env"] != nil {
+		env = flagCtx.EvaluationContextEnrichment["env"].(string)
+	}
+	if f.evaluateRule(user, env) {
 		if f.isInPercentage(flagName, user) {
 			// Rule applied and user in the cohort.
 			return f.getTrue(), flag.ResolutionDetails{

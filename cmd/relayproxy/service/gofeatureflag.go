@@ -75,16 +75,17 @@ func NewGoFeatureFlagClient(
 	notif = append(notif, notifiers...)
 
 	f := ffclient.Config{
-		PollingInterval:         time.Duration(proxyConf.PollingInterval) * time.Millisecond,
-		Logger:                  zap.NewStdLog(logger),
-		Context:                 context.Background(),
-		Retriever:               mainRetriever,
-		Retrievers:              retrievers,
-		Notifiers:               notif,
-		FileFormat:              proxyConf.FileFormat,
-		DataExporter:            exp,
-		StartWithRetrieverError: proxyConf.StartWithRetrieverError,
-		EnablePollingJitter:     proxyConf.EnablePollingJitter,
+		PollingInterval:             time.Duration(proxyConf.PollingInterval) * time.Millisecond,
+		Logger:                      zap.NewStdLog(logger),
+		Context:                     context.Background(),
+		Retriever:                   mainRetriever,
+		Retrievers:                  retrievers,
+		Notifiers:                   notif,
+		FileFormat:                  proxyConf.FileFormat,
+		DataExporter:                exp,
+		StartWithRetrieverError:     proxyConf.StartWithRetrieverError,
+		EnablePollingJitter:         proxyConf.EnablePollingJitter,
+		EvaluationContextEnrichment: proxyConf.EvaluationContextEnrichment,
 	}
 
 	return ffclient.New(f)

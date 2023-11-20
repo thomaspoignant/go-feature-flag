@@ -107,10 +107,10 @@ This flag split the usage of this flag, 20% will use the variation `my-new-featu
 First, you need to initialize the `ffclient` with the location of your backend file.
 ```go linenums="1"
 err := ffclient.Init(ffclient.Config{
-PollingInterval: 3 * time.Second,
-Retriever:      &fileretriever.Retriever{
-Path: "flag-config.yaml",
-},
+  PollingInterval: 3 * time.Second,
+  Retriever:      &fileretriever.Retriever{
+    Path: "flag-config.goff.yaml",
+  },
 })
 defer ffclient.Close()
 ```
@@ -128,9 +128,9 @@ Now you can evaluate your flags anywhere in your code.
 user := ffcontext.NewEvaluationContext("user-unique-key")
 hasFlag, _ := ffclient.BoolVariation("test-flag", user, false)
 if hasFlag {
-// flag "test-flag" is true for the user
+  // flag "test-flag" is true for the user
 } else {
-// flag "test-flag" is false for the user
+  // flag "test-flag" is false for the user
 }
 ```
 The full documentation is available on https://docs.gofeatureflag.org  
