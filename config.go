@@ -69,6 +69,14 @@ type Config struct {
 	// No notification will be sent neither.
 	// Default: false
 	Offline bool
+
+	// CommonEvaluationContext (optional) will be merged with the evaluation context sent during the evaluation.
+	// It is useful to add common attributes to all the evaluation, such as a server version, environment, ...
+	//
+	// All those fields will be included in the custom attributes of the evaluation context,
+	// if in the evaluation context you have a field with the same name, it will override the common one.
+	// Default: nil
+	CommonEvaluationContext map[string]interface{}
 }
 
 // GetRetrievers returns a retriever.Retriever configure with the retriever available in the config.

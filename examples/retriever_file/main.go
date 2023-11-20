@@ -42,6 +42,7 @@ func main() {
 	user1 := ffcontext.
 		NewEvaluationContextBuilder("aea2fdc1-b9a0-417a-b707-0c9083de68e3").
 		AddCustom("anonymous", true).
+		AddCustom("environment", "dev").
 		Build()
 	user2 := ffcontext.NewEvaluationContext("332460b9-a8aa-4f7a-bc5d-9cc33632df9a")
 	user3 := ffcontext.NewEvaluationContextBuilder("785a14bf-d2c5-4caa-9c70-2bbc4e3732a5").

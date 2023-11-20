@@ -3,6 +3,7 @@ package flag
 import (
 	"fmt"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
+	"maps"
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/internalerror"
@@ -63,8 +64,8 @@ func (f *InternalFlag) Value(
 ) (interface{}, ResolutionDetails) {
 	f.applyScheduledRolloutSteps()
 
-	if flagContext.Environment != "" {
-		evaluationCtx.AddCustomAttribute("env", flagContext.Environment)
+	if flagContext.CommonEvaluationContext != nil {
+		maps.Copy(evaluationCtx.GetCustom(), flagContext.CommonEvaluationContext)
 	}
 
 	if f.IsDisable() || f.isExperimentationOver() {
