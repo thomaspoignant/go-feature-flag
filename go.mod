@@ -13,7 +13,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.25.3
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.14.0
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.43.0
-	github.com/aws/aws-sdk-go-v2/service/sqs v1.28.0
+	github.com/aws/aws-sdk-go-v2/service/sqs v1.28.1
 	github.com/awslabs/aws-lambda-go-api-proxy v0.16.0
 	github.com/fsouza/fake-gcs-server v1.47.6
 	github.com/gdexlab/go-render v1.0.1
@@ -45,9 +45,9 @@ require (
 	go.uber.org/zap v1.26.0
 	golang.org/x/net v0.18.0
 	golang.org/x/oauth2 v0.14.0
-	google.golang.org/api v0.150.0
+	google.golang.org/api v0.151.0
 	gopkg.in/yaml.v3 v3.0.1
-	k8s.io/api v0.28.3
+	k8s.io/api v0.28.4
 	k8s.io/apimachinery v0.28.4
 	k8s.io/client-go v0.28.3
 )
