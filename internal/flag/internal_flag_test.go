@@ -1446,7 +1446,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				user:     ffcontext.NewEvaluationContextBuilder("1").Build(),
 				flagContext: flag.Context{
 					DefaultSdkValue: true,
-					CommonEvaluationContext: map[string]interface{}{
+					CommonContext: map[string]interface{}{
 						"env": "development",
 					},
 				},
@@ -1485,7 +1485,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				user:     ffcontext.NewEvaluationContext("user-key"),
 				flagContext: flag.Context{
 					DefaultSdkValue: "default-sdk",
-					CommonEvaluationContext: map[string]interface{}{
+					CommonContext: map[string]interface{}{
 						"environment": "prod",
 					},
 				},
@@ -1499,7 +1499,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 		},
 		{
-			name: "CommonEvaluationContext should override request evaluation context",
+			name: "CommonEvaluationContextEnrichment should override request evaluation context",
 			flag: flag.InternalFlag{
 				Variations: &map[string]*interface{}{
 					"A": testconvert.Interface("A"),
@@ -1520,7 +1520,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				user:     ffcontext.NewEvaluationContextBuilder("key1").AddCustom("environment", "dev").Build(),
 				flagContext: flag.Context{
 					DefaultSdkValue: "default-sdk",
-					CommonEvaluationContext: map[string]interface{}{
+					CommonContext: map[string]interface{}{
 						"environment": "prod",
 					},
 				},

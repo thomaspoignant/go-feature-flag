@@ -70,13 +70,13 @@ type Config struct {
 	// Default: false
 	Offline bool
 
-	// CommonEvaluationContext (optional) will be merged with the evaluation context sent during the evaluation.
+	// CommonEvaluationContextEnrichment (optional) will be merged with the evaluation context sent during the evaluation.
 	// It is useful to add common attributes to all the evaluation, such as a server version, environment, ...
 	//
 	// All those fields will be included in the custom attributes of the evaluation context,
 	// if in the evaluation context you have a field with the same name, it will override the common one.
 	// Default: nil
-	CommonEvaluationContext map[string]interface{}
+	CommonEvaluationContextEnrichment map[string]interface{}
 }
 
 // GetRetrievers returns a retriever.Retriever configure with the retriever available in the config.
@@ -86,7 +86,7 @@ func (c *Config) GetRetrievers() ([]retriever.Retriever, error) {
 	}
 
 	retrievers := make([]retriever.Retriever, 0)
-	// If we have both Retriever and Retrievers fields configured we are 1st looking at what is available
+	// If we have both Retriever and Retrievers fields configured, we are 1st looking at what is available
 	// in Retriever before looking at what is in Retrievers.
 	if c.Retriever != nil {
 		retrievers = append(retrievers, c.Retriever)

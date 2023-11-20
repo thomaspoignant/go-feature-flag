@@ -265,8 +265,8 @@ func (g *GoFeatureFlag) AllFlagsState(evaluationCtx ffcontext.Context) flagstate
 	allFlags := flagstate.NewAllFlags()
 	for key, currentFlag := range flags {
 		flagCtx := flag.Context{
-			CommonEvaluationContext: g.config.CommonEvaluationContext,
-			DefaultSdkValue:         nil,
+			CommonContext:   g.config.CommonEvaluationContextEnrichment,
+			DefaultSdkValue: nil,
 		}
 		flagCtx.AddIntoCommonContext("env", g.config.Environment)
 		flagValue, resolutionDetails := currentFlag.Value(key, evaluationCtx, flagCtx)
@@ -384,7 +384,6 @@ func getVariation[T model.JSONType](
 			Cacheable:     false,
 		}, fmt.Errorf("go-feature-flag is not initialised, default value is used")
 	}
-
 	if g.config.Offline {
 		return model.VariationResult[T]{
 			Value:         sdkDefaultValue,
@@ -414,8 +413,8 @@ func getVariation[T model.JSONType](
 	}
 
 	flagCtx := flag.Context{
-		DefaultSdkValue:         sdkDefaultValue,
-		CommonEvaluationContext: g.config.CommonEvaluationContext,
+		DefaultSdkValue: sdkDefaultValue,
+		CommonContext:   g.config.CommonEvaluationContextEnrichment,
 	}
 	flagCtx.AddIntoCommonContext("env", g.config.Environment)
 	flagValue, resolutionDetails := f.Value(flagKey, evaluationCtx, flagCtx)

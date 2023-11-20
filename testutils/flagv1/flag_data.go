@@ -87,10 +87,10 @@ func (f *FlagData) Value(
 			Reason:  flag.ReasonTargetingMatch,
 		}
 	}
-	
+
 	env := ""
-	if flagCtx.CommonEvaluationContext != nil && flagCtx.CommonEvaluationContext["env"] != nil {
-		env = flagCtx.CommonEvaluationContext["env"].(string)
+	if flagCtx.CommonContext != nil && flagCtx.CommonContext["env"] != nil {
+		env = flagCtx.CommonContext["env"].(string)
 	}
 	if f.evaluateRule(user, env) {
 		if f.isInPercentage(flagName, user) {
