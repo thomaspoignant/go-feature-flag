@@ -175,6 +175,12 @@ type Config struct {
 	StartAsAwsLambda bool `mapstructure:"startAsAwsLambda" koanf:"startasawslambda"`
 
 	// EvaluationContextEnrichment (optional) will be merged with the evaluation context sent during the evaluation.
+	// It is useful to add common attributes to all the evaluations, such as a server version, environment, ...
+	//
+	// All those fields will be included in the custom attributes of the evaluation context,
+	// if in the evaluation context you have a field with the same name,
+	// it will be overridden by the evaluationContextEnrichment.
+	// Default: nil
 	EvaluationContextEnrichment map[string]interface{} `mapstructure:"evaluationContextEnrichment" koanf:"evaluationcontextenrichment"` //nolint: lll
 
 	// ---- private fields
