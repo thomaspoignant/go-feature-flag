@@ -165,3 +165,12 @@ string_key_with_version:
   metadata:
     description: this is a test
     pr_link: https://github.com/thomaspoignant/go-feature-flag/pull/916
+flag-use-evaluation-context-enrichment:
+  variations:
+    A: A
+    B: B
+  targeting:
+    - query: environment eq "integration-test"
+      variation: A
+  defaultRule:
+    variation: B

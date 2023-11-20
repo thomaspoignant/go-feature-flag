@@ -7,3 +7,5 @@ retriever:
 exporter:
   kind: log
 enableSwagger: true
+evaluationContextEnrichment:
+  environment: integration-test
