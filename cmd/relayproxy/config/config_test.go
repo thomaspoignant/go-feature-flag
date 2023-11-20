@@ -29,7 +29,7 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 				Host:            "localhost",
 				Retriever: &config.RetrieverConf{
 					Kind: "http",
-					URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.yaml",
+					URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
 				},
 				Exporter: &config.ExporterConf{
 					Kind: "log",
@@ -55,7 +55,7 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 				Host:            "localhost",
 				Retriever: &config.RetrieverConf{
 					Kind: "http",
-					URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.yaml",
+					URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
 				},
 				Exporter: &config.ExporterConf{
 					Kind: "log",
@@ -87,7 +87,7 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 				Host:            "localhost",
 				Retriever: &config.RetrieverConf{
 					Kind: "http",
-					URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.yaml",
+					URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
 				},
 				Exporter: &config.ExporterConf{
 					Kind: "log",
@@ -113,7 +113,7 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 				Host:            "localhost",
 				Retriever: &config.RetrieverConf{
 					Kind: "http",
-					URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.yaml",
+					URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
 				},
 				Exporter: &config.ExporterConf{
 					Kind: "log",
@@ -183,7 +183,7 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 				Host:            "localhost",
 				Retriever: &config.RetrieverConf{
 					Kind: "http",
-					URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.yaml",
+					URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
 				},
 				Exporter: &config.ExporterConf{
 					Kind: "log",
