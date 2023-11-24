@@ -1,5 +1,6 @@
 version: 2
 updates:
+  # Main project
   - package-ecosystem: gomod
     directory: "/"
     schedule:
@@ -10,18 +11,20 @@ updates:
       - "dependencies"
       - "automerge"     
 
-  - package-ecosystem: maven
-    directory: "/openfeature/provider_tests/java-integration-tests"
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
     schedule:
-      interval: daily
+      interval: weekly
       time: "04:00"
     open-pull-requests-limit: 30
     labels:
       - "dependencies"
       - "automerge"
 
-  - package-ecosystem: npm
-    directory: "/openfeature/provider_tests/js-integration-tests"
+  # Integration tests
+  - package-ecosystem: nuget
+    directory: "/openfeature/provider_tests/dotnet-integration-tests"
     schedule:
       interval: daily
       time: "04:00"
@@ -40,8 +43,8 @@ updates:
       - "dependencies"
       - "automerge"
 
-  - package-ecosystem: nuget
-    directory: "/openfeature/provider_tests/dotnet-integration-tests"
+  - package-ecosystem: npm
+    directory: "/openfeature/provider_tests/js-integration-tests"
     schedule:
       interval: daily
       time: "04:00"
@@ -50,8 +53,8 @@ updates:
       - "dependencies"
       - "automerge"
 
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  - package-ecosystem: maven
+    directory: "/openfeature/provider_tests/java-integration-tests"
     schedule:
       interval: daily
       time: "04:00"
@@ -60,6 +63,29 @@ updates:
       - "dependencies"
       - "automerge"
 
+
+  # Providers
+  - package-ecosystem: gradle
+    directory: "/openfeature/providers/kotlin-provider/gofeatureflag-kotlin-provider"
+    schedule:
+      interval: weekly
+      time: "01:00"
+    open-pull-requests-limit: 30
+    labels:
+      - "dependencies"
+      - "automerge"
+
+  - package-ecosystem: pip
+    directory: "/openfeature/providers/python-provider"
+    schedule:
+      interval: weekly
+      time: "01:00"
+    open-pull-requests-limit: 30
+    labels:
+      - "dependencies"
+      - "automerge"
+
+  # Examples App
   - package-ecosystem: npm
     directory: "/examples/openfeature_web/webapp"
     schedule:
@@ -81,27 +107,7 @@ updates:
       - "automerge"
 
   - package-ecosystem: gradle
-    directory: "/examples/openfeature_kotlin/kotlin-app"
-    schedule:
-      interval: weekly
-      time: "01:00"
-    open-pull-requests-limit: 30
-    labels:
-      - "dependencies"
-      - "automerge"
-
-  - package-ecosystem: gradle
-    directory: "/openfeature/providers/kotlin-provider/gofeatureflag-kotlin-provider"
-    schedule:
-      interval: weekly
-      time: "01:00"
-    open-pull-requests-limit: 30
-    labels:
-      - "dependencies"
-      - "automerge"
-
-  - package-ecosystem: pip
-    directory: "/openfeature/providers/python-provider"
+    directory: "/examples/openfeature_kotlin_server/kotlin-app"
     schedule:
       interval: weekly
       time: "01:00"
