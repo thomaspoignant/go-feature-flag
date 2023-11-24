@@ -109,3 +109,23 @@ updates:
     labels:
       - "dependencies"
       - "automerge"
+
+  - package-ecosystem: gradle
+    directory: "/openfeature/providers/kotlin-provider/gofeatureflag-kotlin-provider"
+    schedule:
+      interval: weekly
+      time: "01:00"
+    open-pull-requests-limit: 30
+    labels:
+      - "dependencies"
+      - "automerge"
+
+  - package-ecosystem: pip
+    directory: "/openfeature/providers/python-provider"
+    schedule:
+      interval: weekly
+      time: "01:00"
+    open-pull-requests-limit: 30
+    labels:
+      - "dependencies"
+      - "automerge"
