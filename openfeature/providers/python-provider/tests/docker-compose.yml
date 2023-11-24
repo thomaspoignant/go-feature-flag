@@ -1,0 +1,13 @@
+version: '2'
+services:
+  goff:
+    image: "thomaspoignant/go-feature-flag"
+    ports:
+      - "1031:1031"
+    environment:
+        - LISTEN=1031
+        - POLLINGINTERVAL=1000
+        - RETRIEVER_KIND=file
+        - RETRIEVER_PATH=/config.goff.yaml
+    volumes:
+      - ./config.goff.yaml:/config.goff.yaml
