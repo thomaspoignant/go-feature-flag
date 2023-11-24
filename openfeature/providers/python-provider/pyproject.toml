@@ -30,9 +30,11 @@ websocket-client = "^1.6.4"
 rel = "^0.4.9"
 asyncio = "^3.4.3"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 pytest = "^7.4"
 black = "^23.10.1"
+pytest-docker = "^2.0.1"
+pyyaml = "^6.0.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
