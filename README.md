@@ -265,7 +265,7 @@ For now, we have providers for:
 | Kotlin / Android      | [Kotlin Provider](openfeature/providers/kotlin-provider)  ![WIP](https://img.shields.io/badge/status-beta-red.svg)                                                                                                          |
 | Javascript/Typescript | [Server provider](https://github.com/open-feature/js-sdk-contrib/tree/main/libs/providers/go-feature-flag) / [Client provider](https://github.com/open-feature/js-sdk-contrib/tree/main/libs/providers/go-feature-flag-web) |
 | PHP                   | Not currently available [help by contributing here](https://github.com/open-feature/php-sdk-contrib/)                                                                                                                       |
-| Python                | [Python provider](https://github.com/thomaspoignant/gofeatureflag-python-provider)                                                                           |
+| Python                | [Python provider](openfeature/providers/python-provider)                                                                           |
 | .Net                  | [.Net Provider](https://github.com/open-feature/dotnet-sdk-contrib/tree/main/src/OpenFeature.Contrib.Providers.GOFeatureFlag)                                                                                               |
 | Ruby                  | Not currently available [help by contributing here](https://github.com/open-feature/ruby-sdk-contrib)                                                                                                                       |
 
