@@ -81,7 +81,7 @@ updates:
       - "automerge"
 
   - package-ecosystem: gradle
-    directory: "/examples/openfeature_kotlin/kotlin-app"
+    directory: "/examples/openfeature_kotlin_server/kotlin-app"
     schedule:
       interval: weekly
       time: "01:00"
