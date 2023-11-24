@@ -39,7 +39,7 @@ client = api.get_client(name="test-client")
 
 ## Evaluate your flag
 
-This code block explain how you can create an `EvaluationContext` and use it to evaluate your flag.
+This code block explains how you can create an `EvaluationContext` and use it to evaluate your flag.
 
 
 > In this example we are evaluating a `boolean` flag, but other types are available.
