@@ -86,7 +86,7 @@ publishing {
 }
 
 dependencies {
-    implementation("dev.openfeature:kotlin-sdk:0.0.4")
+    implementation("dev.openfeature:kotlin-sdk:0.1.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.google.code.gson:gson:2.8.9")
     implementation("dev.gustavoavila:java-android-websocket-client:2.0.2")
