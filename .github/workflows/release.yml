@@ -236,7 +236,7 @@ jobs:
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
       - name: yq - portable yaml processor
-        uses: mikefarah/yq@v4.40.1
+        uses: mikefarah/yq@v4.40.3
 
       - name: Bump chart appVersion
         working-directory: ./release/
@@ -294,7 +294,7 @@ jobs:
       - name: Setup go
         uses: actions/setup-go@v4
         with:
-          go-version-file: go.mod
+          go-version-file: ./release/go.mod
           check-latest: true
 
       - name: Build jsonschema-generator

@@ -6,7 +6,7 @@ apiKeys = [ "apikey1", "apikey2" ]
 
 [retriever]
 kind = "http"
-url = "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.yaml"
+url = "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml"
 
 [exporter]
 kind = "log"

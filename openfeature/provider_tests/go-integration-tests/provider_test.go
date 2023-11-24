@@ -256,6 +256,26 @@ func TestProvider_module_StringEvaluation(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "should resolve a targeting match if rule contains filed from evaluationContextEnrichment",
+			args: args{
+				flag:         "flag-use-evaluation-context-enrichment",
+				defaultValue: "default",
+				evalCtx:      defaultEvaluationCtx(),
+			},
+			want: of.StringEvaluationDetails{
+				Value: "A",
+				EvaluationDetails: of.EvaluationDetails{
+					FlagKey:  "flag-use-evaluation-context-enrichment",
+					FlagType: of.String,
+					ResolutionDetail: of.ResolutionDetail{
+						Variant:      "A",
+						Reason:       of.TargetingMatchReason,
+						FlagMetadata: map[string]interface{}{},
+					},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
