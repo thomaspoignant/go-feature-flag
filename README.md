@@ -47,7 +47,7 @@ GO Feature Flag is a lightweight and open-source solution that provides a simple
 
 The solution has been built to facilitate the usage of feature flags in your code without having to contact any vendor.
 
-Originally, **GO Feature Flag** was designed as a solution exclusively for the `GO` language. With the new standardization of feature flags by the [Openfeature](https://openfeature.dev/) project, the solution is now available for multiple languages _(`JAVA`, `typescript`, `javascript`, ...)_ through a simple API server called the relay proxy, which can be hosted.
+Originally, **GO Feature Flag** was designed as a solution exclusively for the `GO` language. With the new standardization of feature flags by the [Openfeature](https://openfeature.dev/) project, the solution is now available for multiple languages _([list of supported languages](https://gofeatureflag.org/docs/openfeature_sdk/sdk))_ through a simple API server called the relay proxy, which can be hosted.
 
 > ℹ️ Info  
 If you are not familiar with feature flags, I've written an [article](https://medium.com/better-programming/feature-flags-and-how-to-iterate-quickly-7e3371b9986) which explains why feature flags can fasten your iteration cycle.
