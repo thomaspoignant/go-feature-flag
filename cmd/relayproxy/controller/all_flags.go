@@ -1,6 +1,9 @@
 package controller
 
 import (
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -52,7 +55,13 @@ func (h *allFlags) Handler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-
+	tracer := otel.GetTracerProvider().Tracer(config.OtelTracerName)
+	_, span := tracer.Start(c.Request().Context(), "AllFlagsState")
+	defer span.End()
 	allFlags := h.goFF.AllFlagsState(evaluationCtx)
+	span.SetAttributes(
+		attribute.Bool("AllFlagsState.valid", allFlags.IsValid()),
+		attribute.Int("AllFlagsState.numberEvaluation", len(allFlags.GetFlags())),
+	)
 	return c.JSON(http.StatusOK, allFlags)
 }

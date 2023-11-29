@@ -2,6 +2,9 @@ package controller
 
 import (
 	"fmt"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -48,6 +51,10 @@ func (h *collectEvalData) Handler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "collectEvalData: invalid input data")
 	}
 
+	tracer := otel.GetTracerProvider().Tracer(config.OtelTracerName)
+	_, span := tracer.Start(c.Request().Context(), "collectEventData")
+	defer span.End()
+	span.SetAttributes(attribute.Int("collectEventData.eventCollectionSize", len(reqBody.Events)))
 	for _, event := range reqBody.Events {
 		if event.Source == "" {
 			event.Source = "PROVIDER_CACHE"

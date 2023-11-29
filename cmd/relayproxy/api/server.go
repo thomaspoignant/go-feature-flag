@@ -1,16 +1,19 @@
 package api
 
 import (
+	"context"
 	"fmt"
 	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
 	custommiddleware "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/opentelemetry"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/controller"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
 	"go.uber.org/zap"
 	"strings"
 	"time"
@@ -22,20 +25,22 @@ func New(config *config.Config,
 	zapLog *zap.Logger,
 ) Server {
 	s := Server{
-		config:   config,
-		services: services,
-		zapLog:   zapLog,
+		config:      config,
+		services:    services,
+		zapLog:      zapLog,
+		otelService: opentelemetry.NewOtelService(),
 	}
 	s.init()
 	return s
 }
 
-// Server is the struct that represent the API server
+// Server is the struct that represents the API server
 type Server struct {
 	config       *config.Config
 	echoInstance *echo.Echo
 	services     service.Services
 	zapLog       *zap.Logger
+	otelService  opentelemetry.OtelService
 }
 
 // init initialize the configuration of our API server (using echo)
@@ -44,6 +49,14 @@ func (s *Server) init() {
 	s.echoInstance.HideBanner = true
 	s.echoInstance.HidePort = true
 	s.echoInstance.Debug = s.config.Debug
+
+	if s.config.OpenTelemetryOtlpEndpoint != "" {
+		err := s.otelService.Init(context.Background(), *s.config)
+		if err != nil {
+			s.zapLog.Error("error while initializing Otel", zap.Error(err))
+			// we can continue because otel is not mandatory to start the server
+		}
+	}
 
 	// Global Middlewares
 	if s.services.Metrics != (metric.Metrics{}) {
@@ -54,6 +67,7 @@ func (s *Server) init() {
 		s.echoInstance.GET("/metrics", echoprometheus.NewHandlerWithConfig(
 			echoprometheus.HandlerConfig{Gatherer: s.services.Metrics.Registry}))
 	}
+	s.echoInstance.Use(otelecho.Middleware("go-feature-flag"))
 	s.echoInstance.Use(custommiddleware.ZapLogger(s.zapLog, s.config))
 	s.echoInstance.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
 	s.echoInstance.Use(middleware.Recover())
@@ -144,7 +158,12 @@ func (s *Server) StartAwsLambda() {
 
 // Stop shutdown the API server
 func (s *Server) Stop() {
-	err := s.echoInstance.Close()
+	err := s.otelService.Stop()
+	if err != nil {
+		s.zapLog.Error("impossible to stop otel", zap.Error(err))
+	}
+
+	err = s.echoInstance.Close()
 	if err != nil {
 		s.zapLog.Fatal("impossible to stop go-feature-flag relay proxy", zap.Error(err))
 	}
