@@ -5,7 +5,7 @@ import {Whatis} from '../components/home/whatis';
 import {HomeHeader} from '../components/home/HomeHeader';
 import {Benefit} from '../components/home/benefit';
 import {Features} from '../components/home/features';
-import {Headline} from '../components/home/headline';
+import { UsingIt } from "../components/home/using-it";
 
 export default function Home() {
   const {siteConfig} = useDocusaurusContext();
@@ -17,6 +17,7 @@ export default function Home() {
       <Whatis />
       <Features />
       <Benefit />
+      <UsingIt />
     </Layout>
   );
 }
