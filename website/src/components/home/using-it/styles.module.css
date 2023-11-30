@@ -22,6 +22,10 @@
   min-height: 100px;
   display: flex;
   align-items: flex-end;
+  margin: 0 auto;
+  height: auto;
+  position: relative;
+  width: 100%;
 }
 
 .contactUs{

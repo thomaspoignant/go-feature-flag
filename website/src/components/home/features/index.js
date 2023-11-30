@@ -16,7 +16,7 @@ SocialIcon.propTypes = {
 };
 function SocialIcon(props) {
   return (
-    <div className="col-1-4 mobile-col-1-4">
+    <div className="col-1-4 mobile-col-1-2">
       <div className={styles.tooltip}>
         <span className={clsx(styles.socialIcon, props.colorClassName)}>
           {props.fontAwesomeIcon && <i className={props.fontAwesomeIcon}></i>}
