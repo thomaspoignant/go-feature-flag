@@ -183,9 +183,13 @@ type Config struct {
 	// Default: nil
 	EvaluationContextEnrichment map[string]interface{} `mapstructure:"evaluationContextEnrichment" koanf:"evaluationcontextenrichment"` //nolint: lll
 
+	// OpenTelemetryOtlpEndpoint (optional) is the endpoint of the OpenTelemetry collector
+	// Default: ""
+	OpenTelemetryOtlpEndpoint string `mapstructure:"openTelemetryOtlpEndpoint" koanf:"opentelemetryotlpendpoint"`
+
 	// ---- private fields
 
-	// apiKeySet is the internal representation of the list of api keys configured
+	// apiKeySet is the internal representation of an API keys list configured
 	// we store them in a set to be
 	apiKeysSet map[string]interface{}
 }
