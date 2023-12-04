@@ -1,0 +1,33 @@
+.usingit {
+  background-color: var(--goff-whatis-bg);
+  padding: 2rem 0 2rem 0;
+  text-align: center;
+}
+
+.usingit img {
+  max-height: 150px;
+  max-width: 100px;
+}
+
+.mainTitle{
+  font-size: 3rem;
+  line-height: 2.5rem;
+  color: var(--goff-main-title-color);
+  font-family: Poppins, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.18rem;
+}
+
+.logo{
+  min-height: 100px;
+  display: flex;
+  align-items: flex-end;
+  margin: 0 auto;
+  height: auto;
+  position: relative;
+  width: 100%;
+}
+
+.contactUs{
+  margin-top: 2rem;
+}

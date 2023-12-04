@@ -65,7 +65,7 @@ svg:not(:root) {
 }
 
 .availableGH button {
-  margin-right: 1rem;
+  margin: 0.5rem;
 }
 
 .descriptionFirstLine{

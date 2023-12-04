@@ -31,13 +31,13 @@
   "license": "MIT",
   "devDependencies": {
     "@babel/eslint-parser": "^7.23.3",
-    "@babel/preset-env": "^7.23.3",
+    "@babel/preset-env": "^7.23.5",
     "autoprefixer": "^10.4.16",
     "babel-loader": "^9.1.3",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-preset-env": "^1.7.0",
     "browser-sync": "^2.29.3",
-    "eslint": "^8.54.0",
+    "eslint": "^8.55.0",
     "eslint-webpack-plugin": "^4.0.1",
     "htmlnano": "^2.1.0",
     "imagemin-cli": "^7.0.0",
@@ -55,7 +55,7 @@
   },
   "dependencies": {
     "@openfeature/go-feature-flag-web-provider": "^0.1.5",
-    "@openfeature/web-sdk": "^0.4.6",
+    "@openfeature/web-sdk": "^0.4.7",
     "highlight.js": "^11.9.0",
     "uuid": "^9.0.1"
   }
