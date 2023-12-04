@@ -1,19 +1,19 @@
 ---
 sidebar_position: 10
-description: Deploy the relay proxy and use the OpenFeature SDKs 
+description: Deploy the relay proxy and use the OpenFeature SDKs
 ---
 # Using Open Feature SDKs
 
 :::note
 OpenFeature provides a shared, standardized feature flagging client - _an SDK_ - which can be plugged into various 3rd-party feature flagging providers.
-Whether you're using an open-source system or a commercial product, whether it's self-hosted or cloud-hosted, OpenFeature provides a consistent, unified API for developers to use feature flagging in their applications.  
+Whether you're using an open-source system or a commercial product, whether it's self-hosted or cloud-hosted, OpenFeature provides a consistent, unified API for developers to use feature flagging in their applications.
 _[Documentation](https://docs.openfeature.dev)_
 :::
 
 GO Feature Flag believe in **OpenSource** and **standardization**, this is the reason why we decided not implementing any custom SDK and rely only on **Open Feature**.
 
-To be compatible with Open Feature, **GO Feature Flag** is providing a lightweight self-hosted API server *(called [relay proxy](../relay_proxy))* that is using the GO Feature Flag module internally.  
-When the **relay proxy** is running in your infrastructure, you can use the **Open Feature SDKs** in combination with **GO Feature Flag providers** to evaluate your flags. 
+To be compatible with Open Feature, **GO Feature Flag** is providing a lightweight self-hosted API server *(called [relay proxy](../relay_proxy))* that is using the GO Feature Flag module internally.
+When the **relay proxy** is running in your infrastructure, you can use the **Open Feature SDKs** in combination with **GO Feature Flag providers** to evaluate your flags.
 
 This schema is an overview on how **Open Feature** is working, you can have more information about all the concepts in the **[Open Feature documentation](https://docs.openfeature.dev)**.
 ![](/docs/openfeature/concepts.jpg)
@@ -23,18 +23,20 @@ This schema is an overview on how **Open Feature** is working, you can have more
 Create a new `YAML` file containing your first flag configuration.
 
 ```yaml title="flag-config.goff.yaml"
-# 20% of the users will use the variation "my-new-feature"
-test-flag:
+# only admins will eval to true
+flag-only-for-admin:
   variations:
-    my-new-feature: true
-    my-old-feature: false
+    is-admin: true
+    not-admin: false
   defaultRule:
-    percentage:
-      my-new-feature: 20
-      my-old-feature: 80
+    variation: not-admin
+  targeting:
+    - name: check admin
+      query: admin eq true
+      variation: is-admin
 ```
 
-This flag split the usage of this flag, 20% will use the variation `my-new-feature` and 80% the variation `my-old-feature`.
+This flag split users in 2 groups. Those who were configured with `admin` attribute set to `true` will resolve to the variation `is-admin`. Otherwise, they will resolve to variation `not-admin`.
 
 ## Create a relay proxy configuration file
 
@@ -53,7 +55,7 @@ exporter:
 
 ## Install the relay proxy
 
-And we will run the **relay proxy** locally to make the API available.  
+And we will run the **relay proxy** locally to make the API available.
 The default port will be `1031`.
 
 ```shell
@@ -80,7 +82,7 @@ npm i @openfeature/js-sdk @openfeature/go-feature-flag-provider
 
 ### Init your Open Feature client
 
-In your app initialization your have to create a client using the Open Feature SDK and initialize it.
+In your app initialization you have to create a client using the Open Feature SDK and initialize it.
 
 ```javascript
 const {OpenFeature} = require("@openfeature/js-sdk");
@@ -91,8 +93,10 @@ const {GoFeatureFlagProvider} = require("@openfeature/go-feature-flag-provider")
 const goFeatureFlagProvider = new GoFeatureFlagProvider({
   endpoint: 'http://localhost:1031/' // DNS of your instance of relay proxy
 });
+// Sets the default feature flag provider
 OpenFeature.setProvider(goFeatureFlagProvider);
-const featureFlagClient = OpenFeature.getClient('my-app')
+// Gets the client that is bound to default provider
+const featureFlagClient = OpenFeature.getClient();
 ```
 
 ### Evaluate your flag
@@ -111,11 +115,16 @@ const userContext = {
   // ...
 };
 
-const adminFlag = await featureFlagClient.getBooleanValue('flag-only-for-admin', false, userContext);
-if (adminFlag) {
-   // flag "flag-only-for-admin" is true for the user
-  console.log("new feature");
-} else {
-  // flag "flag-only-for-admin" is false for the user
-}
+(async () => {
+  const adminFlag = await featureFlagClient.getBooleanValue('flag-only-for-admin', false, userContext);
+  if (adminFlag) {
+     // flag "flag-only-for-admin" is true for the user
+    console.log("new feature for admin!");
+  } else {
+    // flag "flag-only-for-admin" is false for the user
+    console.log("not an admin, no feature");
+  }
+})();
 ```
+
+Try changing the `admin` attribute in the `userContext` from `true` to `false` to see different executions flows running.
