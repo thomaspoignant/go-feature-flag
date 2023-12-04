@@ -96,7 +96,7 @@ const goFeatureFlagProvider = new GoFeatureFlagProvider({
 // Sets the default feature flag provider
 OpenFeature.setProvider(goFeatureFlagProvider);
 // Gets the client that is bound to default provider
-const featureFlagClient = OpenFeature.getClient(providerId);
+const featureFlagClient = OpenFeature.getClient();
 ```
 
 ### Evaluate your flag
