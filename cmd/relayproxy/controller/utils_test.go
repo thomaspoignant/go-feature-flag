@@ -6,7 +6,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/model"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
-	"github.com/thomaspoignant/go-feature-flag/ffuser"
 	"net/http"
 	"testing"
 )
@@ -128,7 +127,10 @@ func Test_evaluationContextFromRequest(t *testing.T) {
 					},
 				},
 			},
-			want: ffuser.NewUserBuilder("key-1").Anonymous(false).AddCustom("custom-field", true).Build(),
+			want: ffcontext.NewEvaluationContextBuilder("key-1").
+				AddCustom("anonymous", false).
+				AddCustom("custom-field", true).
+				Build(),
 		},
 	}
 

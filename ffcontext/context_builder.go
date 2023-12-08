@@ -29,7 +29,7 @@ type evaluationContextBuilderImpl struct {
 }
 
 // Deprecated: Anonymous is to flag the context for an anonymous context or not.
-// This function is here for compatibility reason, please consider to use AddCustom("anonymous", true)
+// This function is here for compatibility reason, please consider using AddCustom("anonymous", true)
 // instead of using this function.
 func (u *evaluationContextBuilderImpl) Anonymous(anonymous bool) EvaluationContextBuilder {
 	u.custom["anonymous"] = anonymous

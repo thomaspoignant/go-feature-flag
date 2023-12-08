@@ -3,7 +3,7 @@ package controller
 import (
 	"fmt"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
-	"github.com/thomaspoignant/go-feature-flag/ffuser"
+	"github.com/thomaspoignant/go-feature-flag/internal/utils"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -41,27 +41,17 @@ func evaluationContextFromRequest(req *model.AllFlagRequest) (ffcontext.Context,
 	}
 	if req.EvaluationContext != nil {
 		u := req.EvaluationContext
-		ctx := ffcontext.NewEvaluationContextBuilder(u.Key)
-		for key, val := range u.Custom {
-			ctx.AddCustom(key, val)
-		}
-		return ctx.Build(), nil
+		return utils.ConvertEvaluationCtxFromRequest(u.Key, u.Custom), nil
 	}
 	return userRequestToUser(req.User) // nolint: staticcheck
 }
 
 // userRequestToUser convert a user from the request model.AllFlagRequest to a go-feature-flag ffuser.User
 // nolint: staticcheck
-func userRequestToUser(u *model.UserRequest) (ffuser.User, error) {
+func userRequestToUser(u *model.UserRequest) (ffcontext.Context, error) {
 	if u == nil {
-		// nolint: staticcheck
-		return ffuser.User{}, fmt.Errorf("userRequestToUser: impossible to convert user, userRequest nil")
+		return ffcontext.EvaluationContext{}, fmt.Errorf("userRequestToUser: impossible to convert user, userRequest nil")
 	}
-
-	uBuilder := ffuser.NewUserBuilder(u.Key).Anonymous(u.Anonymous) // nolint: staticcheck
-	for key, val := range u.Custom {
-		uBuilder.AddCustom(key, val)
-	}
-	user := uBuilder.Build()
-	return user, nil
+	u.Custom["anonymous"] = u.Anonymous
+	return utils.ConvertEvaluationCtxFromRequest(u.Key, u.Custom), nil
 }
