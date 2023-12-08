@@ -158,7 +158,7 @@ const config = {
                 to: '/blog/feature-flag-best-practice'
               },
               {
-                to: 'https://gophers.slack.com/messages/go-feature-flag',
+                to: '/slack',
                 html: '<i class="fa-brands fa-slack menu-icon"></i> Community <i class="fa fa-external-link" aria-hidden="true"></i>',
               },
               {
@@ -198,7 +198,7 @@ const config = {
             'aria-label': 'Twitter',
           },
           {
-            href: 'https://gophers.slack.com/messages/go-feature-flag',
+            href: '/slack',
             position: 'right',
             className: 'header-slack-link navbar__right',
             'aria-label': 'Slack',
@@ -240,7 +240,7 @@ const config = {
             items: [
               {
                 html: `
-                <a href="https://gophers.slack.com/messages/go-feature-flag" target="_blank" rel="noreferrer noopener">
+                <a href="/slack" target="_blank" rel="noreferrer noopener">
                   <i class="fa-brands fa-slack"></i> Slack&nbsp;&nbsp;<i class="fa-solid fa-arrow-up-right-from-square"></i>
                 </a>`,
               },
