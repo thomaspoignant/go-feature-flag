@@ -47,7 +47,7 @@ func EvaluateHandler(c echo.Context) error {
 	f := u.Flag.Convert()
 	value, resolutionDetails := f.Value(
 		u.FlagName,
-		utils.ConvertEvaluationCtxFromReq(u.Context.Key, u.Context.Custom),
+		utils.ConvertEvaluationCtxFromRequest(u.Context.Key, u.Context.Custom),
 		flag.Context{
 			DefaultSdkValue: nil,
 		},

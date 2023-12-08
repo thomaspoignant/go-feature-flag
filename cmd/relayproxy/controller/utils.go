@@ -41,7 +41,7 @@ func evaluationContextFromRequest(req *model.AllFlagRequest) (ffcontext.Context,
 	}
 	if req.EvaluationContext != nil {
 		u := req.EvaluationContext
-		return utils.ConvertEvaluationCtxFromReq(u.Key, u.Custom), nil
+		return utils.ConvertEvaluationCtxFromRequest(u.Key, u.Custom), nil
 	}
 	return userRequestToUser(req.User) // nolint: staticcheck
 }
@@ -53,5 +53,5 @@ func userRequestToUser(u *model.UserRequest) (ffcontext.Context, error) {
 		return ffcontext.EvaluationContext{}, fmt.Errorf("userRequestToUser: impossible to convert user, userRequest nil")
 	}
 	u.Custom["anonymous"] = u.Anonymous
-	return utils.ConvertEvaluationCtxFromReq(u.Key, u.Custom), nil
+	return utils.ConvertEvaluationCtxFromRequest(u.Key, u.Custom), nil
 }
