@@ -104,6 +104,25 @@ builds:
         goarch: arm
         goarm: 6
 
+  - id: go-feature-flag-editor
+    main: ./cmd/editor
+    binary: go-feature-flag-editor
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - arm64
+    goarm:
+      - 6
+      - 7
+    ignore:
+      - goos: darwin
+        goarch: 386
+      - goos: linux
+        goarch: arm
+        goarm: 6
+
 archives:
   - id: go-feature-flag-migration-cli
     name_template: "go-feature-flag-migration-cli_\
