@@ -75,7 +75,7 @@ _In this example we are using the javascript SDK, but it is still relevant for a
 ### Install dependencies
 
 ```shell
-npm i @openfeature/js-sdk @openfeature/go-feature-flag-provider
+npm i @openfeature/server-sdk @openfeature/go-feature-flag-provider
 ```
 
 ### Init your Open Feature client
@@ -83,7 +83,7 @@ npm i @openfeature/js-sdk @openfeature/go-feature-flag-provider
 In your app initialization your have to create a client using the Open Feature SDK and initialize it.
 
 ```javascript
-const {OpenFeature} = require("@openfeature/js-sdk");
+const {OpenFeature} = require("@openfeature/server-sdk");
 const {GoFeatureFlagProvider} = require("@openfeature/go-feature-flag-provider");
 
 

@@ -18,14 +18,14 @@ The first things we will do is install the **Open Feature SDK** and the **GO Fea
   <TabItem value="yarn" label="yarn">
 
 ```shell
-yarn add @openfeature/js-sdk @openfeature/go-feature-flag-provider
+yarn add @openfeature/server-sdk @openfeature/go-feature-flag-provider
 ```
 
   </TabItem>
   <TabItem value="npm" label="npm">
 
 ```shell
-npm i @openfeature/js-sdk @openfeature/go-feature-flag-provider
+npm i @openfeature/server-sdk @openfeature/go-feature-flag-provider
 ```
 
   </TabItem>
@@ -40,7 +40,7 @@ This code block shows you how you can create a client that you can use in your a
   <TabItem value="javascript" label="JavaScript">
 
 ```javascript
-const {OpenFeature} = require("@openfeature/js-sdk");
+const {OpenFeature} = require("@openfeature/server-sdk");
 const {GoFeatureFlagProvider} = require("@openfeature/go-feature-flag-provider");
 
 
@@ -57,7 +57,7 @@ const featureFlagClient = OpenFeature.getClient('my-app')
   <TabItem value="ts" label="TypeScript">
 
 ```typescript
-import {EvaluationContext, OpenFeature} from "@openfeature/js-sdk";
+import {EvaluationContext, OpenFeature} from "@openfeature/server-sdk";
 import {GoFeatureFlagProvider} from  "@openfeature/go-feature-flag-provider";
 
 
