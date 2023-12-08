@@ -1,5 +1,5 @@
 const {describe, expect, it, beforeEach, afterEach } = require('@jest/globals');
-const {OpenFeature} = require("@openfeature/js-sdk");
+const {OpenFeature} = require("@openfeature/server-sdk");
 const {GoFeatureFlagProvider} = require("@openfeature/go-feature-flag-provider");
 describe('Provider tests', () => {
   let goffClient;
