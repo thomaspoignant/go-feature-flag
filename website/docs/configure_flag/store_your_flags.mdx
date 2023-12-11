@@ -1,6 +1,6 @@
 ---
 sidebar_position: 10
-description: Where to store your configuration flag?
+description: Where to store your flags' configuration?
 ---
 import {Cards} from '@site/src/components/doc/cardv2';
 import { ConfigCardContent } from "@site/src/components/doc/configCardContent";
@@ -14,27 +14,28 @@ import s3logo from '@site/static/docs/retrievers/s3.png';
 import k8slogo from '@site/static/docs/retrievers/k8s.png';
 
 
-# Where to store your configuration flag
+# Where to store your flags' configuration?
 **GO Feature Flag** is a tool that makes it easy to implement feature flags in your application. One of the benefits of 
 using GO Feature Flag is that it is designed to be simple and lightweight.  
-To achieve this, the solution uses a file-based approach to configure your flags.
+To achieve this, the solution offers a variety of approach to store your flags' configuration.
 
-When you use GO Feature Flag, you create one or more file(s) _(`YAML`, `TOML` or `JSON`)_ that contains your feature 
+The easiest way to get started with GO Feature Flag is to store your flags' configuration in a file.
+For this you can create one or more file(s) _(`YAML`, `TOML` or `JSON`)_ that contains your feature
 flags and their values. You can then upload this file(s) where you want, and GO Feature Flag will use it.  
 The way the solution achieves this is through the use of retrievers, which allow you to load your feature flag 
 configuration file from various sources.
 
-**Retrievers** are a core concept in GO Feature Flag. They are responsible for loading your feature flag configuration 
-file from a specified location, such as a file on your local machine or a remote storage service. This allows you to 
-store your configuration file in a location that works best for your workflow.
+**Retrievers** are a core concept in GO Feature Flag. They are responsible for loading your feature flag configuration
+from a specified location, such as a file on your local machine or a remote storage service. This allows you to
+store your configuration in a location that works best for your workflow.
 
 **GO Feature Flag** supports a variety of retrievers out of the box, including `S3`, `Google Cloud Storage`, `Github`, 
 `HTTP`, `Kubernetes config maps`, `Local file` ...  
 But you can also implement your own custom retriever if needed.
 
-Using retrievers in GO Feature Flag is straightforward. You simply specify which retriever to use in your configuration 
+Using retrievers in **GO Feature Flag** is straightforward. You specify which retriever to use in your configuration
 file, along with any required configuration options. GO Feature Flag will then use the specified retriever to load your 
-configuration file and will evaluate your feature flags based on this configuration.
+configuration and will evaluate your feature flags based on this configuration.
 
 ## Available retrievers
 
@@ -106,13 +107,12 @@ configuration file and will evaluate your feature flags based on this configurat
 
 
 
-## Use multiple configuration flag files
+## Using multiple retrievers
 Sometimes, you may need to store your feature flags in different locations.
 In such cases, you can configure multiple retrievers to retrieve the flags from different sources within your GO Feature
 Flag instance.
 
-To set this up, you need to configure the [`Retrievers`](../go_module/configuration#configuration-fields) field to
-consume from different retrievers.
+To set this up, you need to configure the [`Retrievers`](../go_module/configuration#configuration-fields) field to consume from different retrievers.
 What this does is that it calls all the retrievers in parallel and applies them in the order you have provided.
 
 Keep in mind that if a flag is defined in multiple retrievers, it can be overridden by a later flag. For instance,
