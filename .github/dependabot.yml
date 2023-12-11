@@ -5,8 +5,8 @@ updates:
     directory: "/"
     schedule:
       interval: weekly
-      time: "04:00"
-    open-pull-requests-limit: 30
+      time: "01:00"
+    open-pull-requests-limit: 20
     labels:
       - "dependencies"
       - "automerge"     
@@ -17,7 +17,7 @@ updates:
     schedule:
       interval: weekly
       time: "04:00"
-    open-pull-requests-limit: 30
+    open-pull-requests-limit: 20
     labels:
       - "dependencies"
       - "automerge"
@@ -28,7 +28,7 @@ updates:
     schedule:
       interval: daily
       time: "04:00"
-    open-pull-requests-limit: 30
+    open-pull-requests-limit: 10
     labels:
       - "dependencies"
       - "automerge"
@@ -38,7 +38,7 @@ updates:
     schedule:
       interval: daily
       time: "04:00"
-    open-pull-requests-limit: 30
+    open-pull-requests-limit: 10
     labels:
       - "dependencies"
       - "automerge"
@@ -48,7 +48,7 @@ updates:
     schedule:
       interval: daily
       time: "04:00"
-    open-pull-requests-limit: 30
+    open-pull-requests-limit: 10
     labels:
       - "dependencies"
       - "automerge"
@@ -58,7 +58,7 @@ updates:
     schedule:
       interval: daily
       time: "04:00"
-    open-pull-requests-limit: 30
+    open-pull-requests-limit: 10
     labels:
       - "dependencies"
       - "automerge"
@@ -70,7 +70,7 @@ updates:
     schedule:
       interval: weekly
       time: "01:00"
-    open-pull-requests-limit: 30
+    open-pull-requests-limit: 10
     labels:
       - "dependencies"
       - "automerge"
@@ -80,7 +80,7 @@ updates:
     schedule:
       interval: weekly
       time: "01:00"
-    open-pull-requests-limit: 30
+    open-pull-requests-limit: 10
     labels:
       - "dependencies"
       - "automerge"
@@ -91,7 +91,7 @@ updates:
     schedule:
       interval: weekly
       time: "01:00"
-    open-pull-requests-limit: 30
+    open-pull-requests-limit: 10
     labels:
       - "dependencies"
       - "automerge"
@@ -101,7 +101,7 @@ updates:
     schedule:
       interval: weekly
       time: "01:00"
-    open-pull-requests-limit: 30
+    open-pull-requests-limit: 10
     labels:
       - "dependencies"
       - "automerge"
@@ -111,7 +111,7 @@ updates:
     schedule:
       interval: weekly
       time: "01:00"
-    open-pull-requests-limit: 30
+    open-pull-requests-limit: 10
     labels:
       - "dependencies"
       - "automerge"
