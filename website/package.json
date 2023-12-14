@@ -17,9 +17,9 @@
     "generate:versionsArchived": "node src/tool/generate_versionArchived.js"
   },
   "dependencies": {
-    "@docusaurus/core": "^3.0.0",
+    "@docusaurus/core": "^3.0.1",
     "@docusaurus/plugin-google-gtag": "^3.0.0",
-    "@docusaurus/preset-classic": "^3.0.0",
+    "@docusaurus/preset-classic": "^3.0.1",
     "@easyops-cn/docusaurus-search-local": "^0.37.1",
     "@hookform/error-message": "^2.0.1",
     "@iarna/toml": "^2.2.5",
