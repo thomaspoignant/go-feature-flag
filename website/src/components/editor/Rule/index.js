@@ -12,7 +12,6 @@ import 'react-datepicker/dist/react-datepicker.css';
 import PropTypes from 'prop-types';
 import {PercentagesForm} from './percentageForm';
 import {ProgressiveRollout} from './progressiveRolloutForm';
-import {TextArea} from '../TextArea';
 
 Rule.propTypes = {
   variations: PropTypes.array,
@@ -25,6 +24,7 @@ export function Rule({variations, label, isDefaultRule}) {
     {value: 'percentage', displayName: '️↗️ a percentage rollout'},
     {value: 'progressive', displayName: '↗️ a progressive rollout'},
   ];
+
   function getVariationList(variations) {
     const availableVariations =
       variations
@@ -46,6 +46,69 @@ export function Rule({variations, label, isDefaultRule}) {
     return filteredVariations;
   }
 
+  const ruleOperators = [
+    {
+      value: '==',
+      displayName: 'Equals To',
+      displayText: 'eq',
+    },
+    {
+      value: '!=',
+      displayName: 'Not Equals To',
+      displayText: 'ne',
+    },
+    {
+      value: '<',
+      displayName: 'Less Than',
+      displayText: 'lt',
+    },
+    {
+      value: '>',
+      displayName: 'Greater Than',
+      displayText: 'gt',
+    },
+    {
+      value: '<=',
+      displayName: 'Less Than Equal To',
+      displayText: 'le',
+    },
+    {
+      value: '>=',
+      displayName: 'Greater Than Equal To',
+      displayText: 'ge',
+    },
+    {
+      value: 'co',
+      displayName: 'Contains',
+      displayText: 'co',
+    },
+    {
+      value: 'sw',
+      displayName: 'Starts With',
+      displayText: 'sw',
+    },
+    {
+      value: 'ew',
+      displayName: 'Ends With',
+      displayText: 'ew',
+    },
+    {
+      value: 'in',
+      displayName: 'In a List',
+      displayText: 'in',
+    },
+    {
+      value: 'pr',
+      displayName: 'Present',
+      displayText: 'pr',
+    },
+    {
+      value: 'not',
+      displayName: 'Not',
+      displayText: 'not',
+    },
+  ];
+
   return (
     <div className={clsx('grid-pad grid', styles.ruleContainer)}>
       {!isDefaultRule && (
@@ -65,14 +128,28 @@ export function Rule({variations, label, isDefaultRule}) {
       )}
       {!isDefaultRule && (
         <div className={clsx('grid')}>
-          <div className={'col-9-12'}>
+          <div className={'col-9-16'}>
             <div className={clsx('content', styles.inputQuery)}>
               <div className={styles.ifContainer}>
                 <div className={clsx(styles.circle)}>IF</div>
               </div>
-              <TextArea
-                label={`${label}.query`}
-                displayText={'Query'}
+              <Input
+                label={`${label}.key`}
+                displayText="Key"
+                required={true}
+              />
+              <div className={clsx(styles.operatorContainer)}>
+                <Select
+                  title="Operator"
+                  content={ruleOperators}
+                  register={register}
+                  label={`${label}.operator`}
+                  required={true}
+                />
+              </div>
+              <Input
+                label={`${label}.value`}
+                displayText="Value"
                 required={true}
               />
               <Link to={'/docs/configure_flag/rule_format'} target={'_blank'}>

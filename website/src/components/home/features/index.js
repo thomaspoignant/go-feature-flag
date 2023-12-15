@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 import sqslogo from '@site/static/docs/collectors/sqs.png';
 import s3logo from '@site/static/docs/collectors/s3.png';
 import webhooklogo from '@site/static/docs/collectors/webhook.png';
-import { Headline } from "../headline";
+import {Headline} from '../headline';
 
 SocialIcon.propTypes = {
   colorClassName: PropTypes.string.isRequired,
@@ -20,7 +20,7 @@ function SocialIcon(props) {
       <div className={styles.tooltip}>
         <span className={clsx(styles.socialIcon, props.colorClassName)}>
           {props.fontAwesomeIcon && <i className={props.fontAwesomeIcon}></i>}
-          {props.img && <img src={props.img} width="36"/>}
+          {props.img && <img src={props.img} width="36" />}
         </span>
         <span className={styles.tooltiptext}>{props.tooltipText}</span>
       </div>
@@ -140,7 +140,6 @@ function OpenFeature() {
             fontAwesomeIcon="devicon-android-plain colored"
             tooltipText="Kotlin / Android"
           />
-
         </div>
       </div>
       <div className="col-1-2">
@@ -148,10 +147,12 @@ function OpenFeature() {
           <h2>Supports your favorite languages</h2>
           <p>
             GO Feature Flag believe in OpenSource and offer providers for the
-            new standard for feature flags <Link href={'https://openfeature.dev'}>OpenFeature</Link>.
+            new standard for feature flags{' '}
+            <Link href={'https://openfeature.dev'}>OpenFeature</Link>.
             <br />
-            In combination with the <b>Open Feature SDKs</b> these <b>providers</b> will
-            allow you to use GO Feature Flag with all supported languages.
+            In combination with the <b>Open Feature SDKs</b> these{' '}
+            <b>providers</b> will allow you to use GO Feature Flag with all
+            supported languages.
           </p>
           <p>
             <Link to={'/docs/openfeature_sdk/sdk'}>
@@ -265,8 +266,6 @@ function Integration() {
             fontAwesomeIcon="devicon-gitlab-plain"
             tooltipText="Gitlab"
           />
-
-
         </div>
       </div>
     </div>

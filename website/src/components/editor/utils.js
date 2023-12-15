@@ -15,10 +15,7 @@ export function singleFlagFormConvertor(flagFormData) {
     );
 
   const targeting = flagFormData.targeting.map(t => convertRule(t));
-  const trackEvents = convertValueIntoType(
-    flagFormData.trackEvents,
-    'boolean'
-  );
+  const trackEvents = convertValueIntoType(flagFormData.trackEvents, 'boolean');
   const disable = convertValueIntoType(flagFormData.disable, 'boolean');
   const defaultRule = convertRule(flagFormData.defaultRule);
 
@@ -56,10 +53,16 @@ function convertValueIntoType(value, type) {
 }
 
 function convertMetadata(metadata) {
-  if (metadata === undefined || metadata.filter(({name})=>name !== "").length === 0) {
-    return undefined
+  if (
+    metadata === undefined ||
+    metadata.filter(({name}) => name !== '').length === 0
+  ) {
+    return undefined;
   }
-  return Object.assign({}, ...metadata.map(({name, value}) => ({[name]: value})))
+  return Object.assign(
+    {},
+    ...metadata.map(({name, value}) => ({[name]: value}))
+  );
 }
 
 function convertRule(ruleForm) {
@@ -91,9 +94,15 @@ function convertRule(ruleForm) {
       break;
   }
 
+  // TODO: Parse query
+
+  const query = ruleForm.key && ruleForm.operator && ruleForm.value && `${ruleForm.key} ${ruleForm.operator} ${ruleForm.value}`
+
+  console.log({query})
+
   return {
     name: ruleForm.name || undefined,
-    query: ruleForm.query,
+    query,
     variation,
     percentage,
     progressiveRollout,

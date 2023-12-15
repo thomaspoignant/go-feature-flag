@@ -10,6 +10,11 @@
   font-size: 1.5rem;
 }
 
+.ruleKeyValueContainer {
+  display: flex;
+  justify-content: space-between;
+}
+
 .circle {
   width: 2rem;
   height: 2rem;
@@ -28,6 +33,12 @@
 .ifContainer,
 .serveTitle {
   width: 4rem;
+  padding-right: 1rem;
+}
+
+.operatorContainer {
+  width: 100%;
+  padding-right: 1rem;
 }
 
 .serve {
