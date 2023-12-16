@@ -17,3 +17,4 @@ jobs:
         github_token: '${{ secrets.GITHUB_TOKEN }}'
         assigned_label: 📍 Assigned
         days_until_unassign: 10
+        pin_label: 📌 Pinned
