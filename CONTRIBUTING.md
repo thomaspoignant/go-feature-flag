@@ -47,6 +47,13 @@ Before opening a pull request, we kindly request you to check if there is an ope
 By doing so, we can initiate a discussion and provide feedback on your changes before proceeding with the pull request.
 This approach ensures that your efforts align with the project's goals and enhances the chances of your contribution being successfully integrated. Thank you for your understanding and cooperation!
 
+If you want to take an issue that is already open, please follow those steps:
+
+1. Check that the issue is not assigned.
+2. Assigned the issue to yourself by adding a comment on the issue containing the text `/assign-me`.
+3. This will assign you the issue automatically.
+4. After 10 days the assignation will be removed, if you need more time to work on it add a comment on the issue.
+
 To submit a pull request, follow these steps:
 
 1. Fork the repository to your GitHub account.
