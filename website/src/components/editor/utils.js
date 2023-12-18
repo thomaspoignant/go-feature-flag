@@ -94,11 +94,7 @@ function convertRule(ruleForm) {
       break;
   }
 
-  // TODO: Parse query
-
-  const query = ruleForm.key && ruleForm.operator && ruleForm.value && `${ruleForm.key} ${ruleForm.operator} ${ruleForm.value}`
-
-  console.log({query})
+  const query = ruleForm.key && `${ruleForm.key} ${ruleForm.operator} ${ruleForm.value}`
 
   return {
     name: ruleForm.name || undefined,
