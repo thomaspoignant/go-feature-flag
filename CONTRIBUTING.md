@@ -118,6 +118,10 @@ make watch-doc
 
 By contributing to this repository, you agree that your contributions will be licensed under the [LICENSE](LICENSE) of the project.
 
+
+## 📊 Stats
+
+If you want to check the stats of GO Feature Flag you can have a look at http://stats.gofeatureflag.org/report.html
 ---
 
 We encourage everyone to participate in this project and make it better for everyone. Happy contributing 🎉 
