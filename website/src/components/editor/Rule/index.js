@@ -153,6 +153,14 @@ const FieldSelector = ({
  * Parses a JSON object into a custom query language based on the nikunjy/rules library.
  *
  * @param {Object} json - The JSON object representing the query.
+ *   @property {string} combinator - The combinator used to combine multiple rules (e.g., "AND", "OR").
+ *   @property {Array} rules - An array of rule objects.
+ *     @property {string} field - The field to apply the rule on.
+ *     @property {string} operator - The operator to use for the comparison.
+ *     @property {string} [value] - The value to compare when the operator requires it.
+ *     @property {string} [combinator] - The combinator used to combine multiple sub-rules within this rule (e.g., "AND", "OR").
+ *     @property {Array} [rules] - An array of sub-rule objects.
+ *
  * @returns {string} - The custom query string.
  */
 function parseJsonToCustomQuery(json) {
@@ -160,6 +168,12 @@ function parseJsonToCustomQuery(json) {
    * Recursive helper function to process rules.
    *
    * @param {Object} rule - The rule object to process.
+   *   @property {string} field - The field to apply the rule on.
+   *   @property {string} operator - The operator to use for the comparison.
+   *   @property {string} [value] - The value to compare when the operator requires it.
+   *   @property {string} [combinator] - The combinator used to combine multiple sub-rules within this rule (e.g., "AND", "OR").
+   *   @property {Array} [rules] - An array of sub-rule objects.
+   *
    * @returns {string} - The custom query string for the rule.
    */
   function processRule(rule) {
