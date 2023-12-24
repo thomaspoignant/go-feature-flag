@@ -5,7 +5,7 @@ import * as ReactDnD from 'react-dnd';
 import * as ReactDndHtml5Backend from 'react-dnd-html5-backend';
 import {Input} from '../Input';
 import {Select} from '../Select';
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useState, useEffect} from 'react';
 import {useFormContext} from 'react-hook-form';
 import 'react-sweet-progress/lib/style.css';
 import {Colors} from '../Colors';
@@ -13,7 +13,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import PropTypes from 'prop-types';
 import {PercentagesForm} from './percentageForm';
 import {ProgressiveRollout} from './progressiveRolloutForm';
-import {QueryBuilder, remove} from 'react-querybuilder';
+import {QueryBuilder} from 'react-querybuilder';
 import {QueryBuilderDnD} from '@react-querybuilder/dnd';
 import 'react-querybuilder/dist/query-builder.css';
 import './query-builder.css';
@@ -147,18 +147,21 @@ const FieldSelector = ({
   value,
   disabled,
   testID,
-}) => (
-  <input
-    data-testid={testID}
-    type="text"
-    className={className}
-    // TODO: remove this hack and fix the issue with the query builder
-    value={value === '~' ? '' : value}
-    title={title}
-    disabled={disabled}
-    onChange={e => handleOnChange(e.target.value)}
-  />
-);
+}) => {
+  useEffect(() => handleOnChange(''), [handleOnChange]);
+
+  return (
+    <input
+      data-testid={testID}
+      type="text"
+      className={className}
+      value={value}
+      title={title}
+      disabled={disabled}
+      onChange={e => handleOnChange(e.target.value)}
+    />
+  );
+};
 
 const RemoveAction = ({handleOnClick, variant}) => {
   const getIcon = useCallback(() => {
