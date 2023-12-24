@@ -5,7 +5,7 @@ import * as ReactDnD from 'react-dnd';
 import * as ReactDndHtml5Backend from 'react-dnd-html5-backend';
 import {Input} from '../Input';
 import {Select} from '../Select';
-import React, {useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {useFormContext} from 'react-hook-form';
 import 'react-sweet-progress/lib/style.css';
 import {Colors} from '../Colors';
@@ -29,18 +29,21 @@ export function Rule({variations, label, isDefaultRule}) {
     rules: [{field: '', operator: '==', value: ''}],
   });
 
-  const parseQuery = query => {
-    const customQuery = parseJsonToCustomQuery(query);
-    console.log(query, customQuery);
-
-    setQuery(query);
-  };
-
-  const {register, watch} = useFormContext();
+  const {register, watch, setValue} = useFormContext();
   const otherOptions = [
     {value: 'percentage', displayName: '️↗️ a percentage rollout'},
     {value: 'progressive', displayName: '↗️ a progressive rollout'},
   ];
+
+  // TODO: Validate query (look for ~)
+  const parseQuery = useCallback(
+    query => {
+      setValue(`${label}.query`, parseJsonToCustomQuery(query));
+
+      setQuery(query);
+    },
+    [parseJsonToCustomQuery, setValue, setQuery, label]
+  );
 
   function getVariationList(variations) {
     const availableVariations =
@@ -81,14 +84,22 @@ export function Rule({variations, label, isDefaultRule}) {
         </div>
       )}
       {!isDefaultRule && (
-        <QueryBuilderDnD dnd={{...ReactDnD, ...ReactDndHtml5Backend}}>
-          <QueryBuilder
-            controlElements={{fieldSelector: FieldSelector}}
-            operators={ruleOperators}
-            query={query}
-            onQueryChange={parseQuery}
+        <>
+          <input
+            name={`${label}.query`}
+            type="hidden"
+            {...register(`${label}.query`)}
           />
-        </QueryBuilderDnD>
+
+          <QueryBuilderDnD dnd={{...ReactDnD, ...ReactDndHtml5Backend}}>
+            <QueryBuilder
+              controlElements={{fieldSelector: FieldSelector}}
+              operators={ruleOperators}
+              query={query}
+              onQueryChange={parseQuery}
+            />
+          </QueryBuilderDnD>
+        </>
       )}
       <div className={'col-5-12'}>
         <div className={clsx('content', styles.serve)}>
@@ -138,57 +149,6 @@ const FieldSelector = ({
   />
 );
 
-const ruleOperators = [
-  {
-    name: '==',
-    label: 'Equals To',
-  },
-  {
-    name: '!=',
-    label: 'Not Equals To',
-  },
-  {
-    name: '<',
-    label: 'Less Than',
-  },
-  {
-    name: '>',
-    label: 'Greater Than',
-  },
-  {
-    name: '<=',
-    label: 'Less Than Equal To',
-  },
-  {
-    name: '>=',
-    label: 'Greater Than Equal To',
-  },
-  {
-    name: 'co',
-    label: 'Contains',
-  },
-  {
-    name: 'sw',
-    label: 'Starts With',
-  },
-  {
-    name: 'ew',
-    label: 'Ends With',
-  },
-  {
-    name: 'in',
-    label: 'In a List',
-  },
-  {
-    name: 'pr',
-    label: 'Present',
-  },
-  {
-    name: 'not',
-    label: 'Not',
-  },
-];
-
 /**
  * Parses a JSON object into a custom query language based on the nikunjy/rules library.
  *
@@ -218,14 +178,27 @@ function parseJsonToCustomQuery(json) {
       query += ` (${subRules}) `;
     }
 
-    return query;
+    return query.trim();
   }
 
   if (!json.combinator || !json.rules || !Array.isArray(json.rules)) {
     throw new Error('Invalid JSON format for the query.');
   }
 
-  const customQuery = json.rules.map(processRule).join(` ${json.combinator} `);
-
-  return customQuery;
+  return json.rules.map(processRule).join(` ${json.combinator} `);
 }
+
+const ruleOperators = [
+  {name: '==', label: 'Equals To'},
+  {name: '!=', label: 'Not Equals To'},
+  {name: '<', label: 'Less Than'},
+  {name: '>', label: 'Greater Than'},
+  {name: '<=', label: 'Less Than Equal To'},
+  {name: '>=', label: 'Greater Than Equal To'},
+  {name: 'co', label: 'Contains'},
+  {name: 'sw', label: 'Starts With'},
+  {name: 'ew', label: 'Ends With'},
+  {name: 'in', label: 'In a List'},
+  {name: 'pr', label: 'Present'},
+  {name: 'not', label: 'Not'},
+];

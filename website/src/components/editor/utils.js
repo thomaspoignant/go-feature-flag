@@ -94,12 +94,9 @@ function convertRule(ruleForm) {
       break;
   }
 
-  const query =
-    ruleForm.key && `${ruleForm.key} ${ruleForm.operator} ${ruleForm.value}`;
-
   return {
     name: ruleForm.name || undefined,
-    query,
+    query: ruleForm.query,
     variation,
     percentage,
     progressiveRollout,
