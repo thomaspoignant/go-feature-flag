@@ -148,7 +148,7 @@ const FieldSelector = ({
   disabled,
   testID,
 }) => {
-  useEffect(() => handleOnChange(''), [handleOnChange]);
+  useEffect(() => handleOnChange(''), []);
 
   return (
     <input
