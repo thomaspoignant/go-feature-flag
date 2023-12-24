@@ -94,7 +94,8 @@ function convertRule(ruleForm) {
       break;
   }
 
-  const query = ruleForm.key && `${ruleForm.key} ${ruleForm.operator} ${ruleForm.value}`
+  const query =
+    ruleForm.key && `${ruleForm.key} ${ruleForm.operator} ${ruleForm.value}`;
 
   return {
     name: ruleForm.name || undefined,

@@ -1,10 +1,11 @@
 import clsx from 'clsx';
 import styles from './styles.module.css';
 import inputStyles from '../Input/styles.module.css';
+import * as ReactDnD from 'react-dnd';
+import * as ReactDndHtml5Backend from 'react-dnd-html5-backend';
 import {Input} from '../Input';
 import {Select} from '../Select';
-import React from 'react';
-import Link from '@docusaurus/Link';
+import React, {useState} from 'react';
 import {useFormContext} from 'react-hook-form';
 import 'react-sweet-progress/lib/style.css';
 import {Colors} from '../Colors';
@@ -12,6 +13,9 @@ import 'react-datepicker/dist/react-datepicker.css';
 import PropTypes from 'prop-types';
 import {PercentagesForm} from './percentageForm';
 import {ProgressiveRollout} from './progressiveRolloutForm';
+import {QueryBuilder} from 'react-querybuilder';
+import {QueryBuilderDnD} from '@react-querybuilder/dnd';
+import 'react-querybuilder/dist/query-builder.css';
 
 Rule.propTypes = {
   variations: PropTypes.array,
@@ -19,6 +23,19 @@ Rule.propTypes = {
   isDefaultRule: PropTypes.bool,
 };
 export function Rule({variations, label, isDefaultRule}) {
+  // TODO: Changes on field key removes the value
+  const [query, setQuery] = useState({
+    combinator: 'and',
+    rules: [{field: '', operator: '==', value: ''}],
+  });
+
+  const parseQuery = query => {
+    const customQuery = parseJsonToCustomQuery(query);
+    console.log(query, customQuery);
+
+    setQuery(query);
+  };
+
   const {register, watch} = useFormContext();
   const otherOptions = [
     {value: 'percentage', displayName: '️↗️ a percentage rollout'},
@@ -46,69 +63,6 @@ export function Rule({variations, label, isDefaultRule}) {
     return filteredVariations;
   }
 
-  const ruleOperators = [
-    {
-      value: '==',
-      displayName: 'Equals To',
-      displayText: 'eq',
-    },
-    {
-      value: '!=',
-      displayName: 'Not Equals To',
-      displayText: 'ne',
-    },
-    {
-      value: '<',
-      displayName: 'Less Than',
-      displayText: 'lt',
-    },
-    {
-      value: '>',
-      displayName: 'Greater Than',
-      displayText: 'gt',
-    },
-    {
-      value: '<=',
-      displayName: 'Less Than Equal To',
-      displayText: 'le',
-    },
-    {
-      value: '>=',
-      displayName: 'Greater Than Equal To',
-      displayText: 'ge',
-    },
-    {
-      value: 'co',
-      displayName: 'Contains',
-      displayText: 'co',
-    },
-    {
-      value: 'sw',
-      displayName: 'Starts With',
-      displayText: 'sw',
-    },
-    {
-      value: 'ew',
-      displayName: 'Ends With',
-      displayText: 'ew',
-    },
-    {
-      value: 'in',
-      displayName: 'In a List',
-      displayText: 'in',
-    },
-    {
-      value: 'pr',
-      displayName: 'Present',
-      displayText: 'pr',
-    },
-    {
-      value: 'not',
-      displayName: 'Not',
-      displayText: 'not',
-    },
-  ];
-
   return (
     <div className={clsx('grid-pad grid', styles.ruleContainer)}>
       {!isDefaultRule && (
@@ -127,37 +81,14 @@ export function Rule({variations, label, isDefaultRule}) {
         </div>
       )}
       {!isDefaultRule && (
-        <div className={clsx('grid')}>
-          <div className={'col-9-16'}>
-            <div className={clsx('content', styles.inputQuery)}>
-              <div className={styles.ifContainer}>
-                <div className={clsx(styles.circle)}>IF</div>
-              </div>
-              <Input
-                label={`${label}.key`}
-                displayText="Key"
-                required={true}
-              />
-              <div className={clsx(styles.operatorContainer)}>
-                <Select
-                  title="Operator"
-                  content={ruleOperators}
-                  register={register}
-                  label={`${label}.operator`}
-                  required={true}
-                />
-              </div>
-              <Input
-                label={`${label}.value`}
-                displayText="Value"
-                required={true}
-              />
-              <Link to={'/docs/configure_flag/rule_format'} target={'_blank'}>
-                <i className="fa-regular fa-circle-question"></i>
-              </Link>
-            </div>
-          </div>
-        </div>
+        <QueryBuilderDnD dnd={{...ReactDnD, ...ReactDndHtml5Backend}}>
+          <QueryBuilder
+            controlElements={{fieldSelector: FieldSelector}}
+            operators={ruleOperators}
+            query={query}
+            onQueryChange={parseQuery}
+          />
+        </QueryBuilderDnD>
       )}
       <div className={'col-5-12'}>
         <div className={clsx('content', styles.serve)}>
@@ -185,4 +116,116 @@ export function Rule({variations, label, isDefaultRule}) {
       </div>
     </div>
   );
+}
+
+const FieldSelector = ({
+  className,
+  handleOnChange,
+  title,
+  value,
+  disabled,
+  testID,
+}) => (
+  <input
+    data-testid={testID}
+    type="text"
+    className={className}
+    // TODO: remove this hack and fix the issue with the query builder
+    value={value === '~' ? '' : value}
+    title={title}
+    disabled={disabled}
+    onChange={e => handleOnChange(e.target.value)}
+  />
+);
+
+const ruleOperators = [
+  {
+    name: '==',
+    label: 'Equals To',
+  },
+  {
+    name: '!=',
+    label: 'Not Equals To',
+  },
+  {
+    name: '<',
+    label: 'Less Than',
+  },
+  {
+    name: '>',
+    label: 'Greater Than',
+  },
+  {
+    name: '<=',
+    label: 'Less Than Equal To',
+  },
+  {
+    name: '>=',
+    label: 'Greater Than Equal To',
+  },
+  {
+    name: 'co',
+    label: 'Contains',
+  },
+  {
+    name: 'sw',
+    label: 'Starts With',
+  },
+  {
+    name: 'ew',
+    label: 'Ends With',
+  },
+  {
+    name: 'in',
+    label: 'In a List',
+  },
+  {
+    name: 'pr',
+    label: 'Present',
+  },
+  {
+    name: 'not',
+    label: 'Not',
+  },
+];
+
+/**
+ * Parses a JSON object into a custom query language based on the nikunjy/rules library.
+ *
+ * @param {Object} json - The JSON object representing the query.
+ * @returns {string} - The custom query string.
+ */
+function parseJsonToCustomQuery(json) {
+  /**
+   * Recursive helper function to process rules.
+   *
+   * @param {Object} rule - The rule object to process.
+   * @returns {string} - The custom query string for the rule.
+   */
+  function processRule(rule) {
+    let query = '';
+
+    if (rule.field && rule.operator) {
+      query += `${rule.field} ${rule.operator}`;
+
+      if (rule.value) {
+        query += ` ${rule.value}`;
+      }
+    }
+
+    if (rule.rules && rule.rules.length > 0) {
+      const subRules = rule.rules.map(processRule).join(` ${rule.combinator} `);
+      query += ` (${subRules}) `;
+    }
+
+    return query;
+  }
+
+  if (!json.combinator || !json.rules || !Array.isArray(json.rules)) {
+    throw new Error('Invalid JSON format for the query.');
+  }
+
+  const customQuery = json.rules.map(processRule).join(` ${json.combinator} `);
+
+  return customQuery;
 }
