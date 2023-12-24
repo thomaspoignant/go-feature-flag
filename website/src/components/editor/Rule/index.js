@@ -13,9 +13,10 @@ import 'react-datepicker/dist/react-datepicker.css';
 import PropTypes from 'prop-types';
 import {PercentagesForm} from './percentageForm';
 import {ProgressiveRollout} from './progressiveRolloutForm';
-import {QueryBuilder} from 'react-querybuilder';
+import {QueryBuilder, remove} from 'react-querybuilder';
 import {QueryBuilderDnD} from '@react-querybuilder/dnd';
 import 'react-querybuilder/dist/query-builder.css';
+import './query-builder.css';
 
 Rule.propTypes = {
   variations: PropTypes.array,
@@ -23,7 +24,6 @@ Rule.propTypes = {
   isDefaultRule: PropTypes.bool,
 };
 export function Rule({variations, label, isDefaultRule}) {
-  // TODO: Changes on field key removes the value
   const [query, setQuery] = useState({
     combinator: 'and',
     rules: [{field: '', operator: '==', value: ''}],
@@ -93,7 +93,18 @@ export function Rule({variations, label, isDefaultRule}) {
 
           <QueryBuilderDnD dnd={{...ReactDnD, ...ReactDndHtml5Backend}}>
             <QueryBuilder
-              controlElements={{fieldSelector: FieldSelector}}
+              controlElements={{
+                fieldSelector: FieldSelector,
+                removeGroupAction: ({handleOnClick}) => (
+                  <RemoveAction handleOnClick={handleOnClick} variant="group" />
+                ),
+                removeRuleAction: ({handleOnClick}) => (
+                  <RemoveAction handleOnClick={handleOnClick} variant="rule" />
+                ),
+              }}
+              resetOnFieldChange={false}
+              resetOnOperatorChange={false}
+              addRuleToNewGroups={true}
               operators={ruleOperators}
               query={query}
               onQueryChange={parseQuery}
@@ -148,6 +159,26 @@ const FieldSelector = ({
     onChange={e => handleOnChange(e.target.value)}
   />
 );
+
+const RemoveAction = ({handleOnClick, variant}) => {
+  const getIcon = useCallback(() => {
+    switch (variant) {
+      case 'group':
+        return 'fa-xmark';
+      case 'rule':
+        return 'fa-minus';
+    }
+  }, [variant]);
+
+  return (
+    <button className={styles.removeButton} onClick={handleOnClick}>
+      <span className="fa-stack fa-1x">
+        <i className={clsx('fa-solid fa-circle fa-stack-2x', styles.bg)}></i>
+        <i className={`fa-solid ${getIcon()} fa-stack-1x fa-inverse`}></i>
+      </span>
+    </button>
+  );
+};
 
 /**
  * Parses a JSON object into a custom query language based on the nikunjy/rules library.

@@ -1,0 +1,20 @@
+.ruleGroup button {
+    border: none;
+    padding: 4px 8px;
+    border-radius: .5rem;
+    background-color: var(--goff-editor-form-field-bg);
+}
+
+.ruleGroup select {
+    border: none;
+    padding: 4px 8px;
+    border-radius: .5rem;
+    background-color: var(--goff-editor-form-field-bg);
+}
+
+.ruleGroup input {
+    border: none;
+    padding: 4px 8px;
+    border-radius: .4rem;
+    background-color: var(--goff-editor-form-field-bg);
+}

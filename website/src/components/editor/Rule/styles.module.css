@@ -10,6 +10,17 @@
   font-size: 1.5rem;
 }
 
+.removeButton {
+  border: none !important;
+  padding: 0 !important;
+  background: none !important;
+  cursor: pointer;
+}
+
+.removeButton .bg {
+  color: var(--goff-variation-plus-button-bg);
+}
+
 .ruleKeyValueContainer {
   display: flex;
   justify-content: space-between;
