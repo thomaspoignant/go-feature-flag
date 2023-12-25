@@ -25,7 +25,7 @@ jobs:
 
       - name: Get changed files in the docs folder
         id: changed-files-specific
-        uses: tj-actions/changed-files@v40
+        uses: tj-actions/changed-files@v41
         with:
           files: ./cmd/relayproxy/helm-charts/**
 
