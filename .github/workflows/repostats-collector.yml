@@ -2,7 +2,8 @@ name: Collect Repository Stats
 on:
   schedule:
     - cron: "0 23 * * *"
-
+  workflow_dispatch:
+  
 jobs:
   j1:
     name: repostats-for-nice-project
