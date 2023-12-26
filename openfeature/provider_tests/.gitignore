@@ -1,9 +1,0 @@
-!flags.yaml
-!goff-proxy.yaml
-
-# Java
-*.class
-target/
-
-# JS
-node_modules/

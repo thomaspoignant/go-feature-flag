@@ -1,3 +1,0 @@
-FROM gcr.io/distroless/base-debian11:latest
-COPY ./go-feature-flag /go-feature-flag
-CMD ["/go-feature-flag"]

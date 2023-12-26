@@ -1,7 +1,0 @@
-ignore:
-  - "examples"
-  - "testdata"
-  - "website"
-  - "**/_test.go"
-  - "**/_mock.go"
-  - "**/testdata/"
