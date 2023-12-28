@@ -1,7 +1,7 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$defs": {
-        "DTOv1": {
+        "DTO": {
             "properties": {
                 "variations": {
                     "additionalProperties": true,
@@ -39,6 +39,30 @@
                     "type": "object",
                     "title": "metadata",
                     "description": "A field containing information about your flag such as an issue tracker link a description etc..."
+                },
+                "rule": {
+                    "type": "string"
+                },
+                "percentage": {
+                    "type": "number"
+                },
+                "true": true,
+                "false": true,
+                "default": true,
+                "rollout": {
+                    "$ref": "#/$defs/Rollout"
+                },
+                "trackEvents": {
+                    "type": "boolean"
+                },
+                "disable": {
+                    "type": "boolean"
+                },
+                "version": {
+                    "type": "string"
+                },
+                "converter": {
+                    "type": "string"
                 }
             },
             "additionalProperties": false,
@@ -71,6 +95,32 @@
             ]
         },
         "ExperimentationRollout": {
+            "properties": {
+                "start": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "end": {
+                    "type": "string",
+                    "format": "date-time"
+                }
+            },
+            "additionalProperties": false,
+            "type": "object"
+        },
+        "ProgressivePercentageV0": {
+            "properties": {
+                "initial": {
+                    "type": "number"
+                },
+                "end": {
+                    "type": "number"
+                }
+            },
+            "additionalProperties": false,
+            "type": "object"
+        },
+        "ProgressiveReleaseRampV0": {
             "properties": {
                 "start": {
                     "type": "string",
@@ -127,6 +177,33 @@
                 "date"
             ]
         },
+        "ProgressiveV0": {
+            "properties": {
+                "percentage": {
+                    "$ref": "#/$defs/ProgressivePercentageV0"
+                },
+                "releaseRamp": {
+                    "$ref": "#/$defs/ProgressiveReleaseRampV0"
+                }
+            },
+            "additionalProperties": false,
+            "type": "object"
+        },
+        "Rollout": {
+            "properties": {
+                "experimentation": {
+                    "$ref": "#/$defs/ExperimentationDto"
+                },
+                "progressive": {
+                    "$ref": "#/$defs/ProgressiveV0"
+                },
+                "scheduled": {
+                    "$ref": "#/$defs/ScheduledRolloutV0"
+                }
+            },
+            "additionalProperties": false,
+            "type": "object"
+        },
         "Rule": {
             "properties": {
                 "name": {
@@ -161,6 +238,18 @@
                     "type": "boolean",
                     "title": "disable",
                     "description": "Indicates that this rule is disabled."
+                }
+            },
+            "additionalProperties": false,
+            "type": "object"
+        },
+        "ScheduledRolloutV0": {
+            "properties": {
+                "steps": {
+                    "items": {
+                        "$ref": "#/$defs/ScheduledStepV0"
+                    },
+                    "type": "array"
                 }
             },
             "additionalProperties": false,
@@ -209,10 +298,85 @@
             },
             "additionalProperties": false,
             "type": "object"
+        },
+        "ScheduledStepV0": {
+            "properties": {
+                "variations": {
+                    "additionalProperties": true,
+                    "type": "object",
+                    "title": "variations",
+                    "description": "All the variations available for this flag. You need at least 2 variations and it is a key value pair. All the variations should have the same type."
+                },
+                "targeting": {
+                    "items": {
+                        "$ref": "#/$defs/Rule"
+                    },
+                    "type": "array",
+                    "title": "targeting",
+                    "description": "List of rule to target a subset of the users based on the evaluation context."
+                },
+                "defaultRule": {
+                    "$ref": "#/$defs/Rule",
+                    "title": "defaultRule",
+                    "description": "How do we evaluate the flag if the user is not part of any of the targeting rule."
+                },
+                "scheduledRollout": {
+                    "items": {
+                        "$ref": "#/$defs/ScheduledStep"
+                    },
+                    "type": "array",
+                    "title": "scheduledRollout",
+                    "description": "Configure an update on some fields of your flag over time."
+                },
+                "experimentation": {
+                    "$ref": "#/$defs/ExperimentationDto",
+                    "title": "experimentation",
+                    "description": "Configure an experimentation. It will allow you to configure a start date and an end date for your flag."
+                },
+                "metadata": {
+                    "type": "object",
+                    "title": "metadata",
+                    "description": "A field containing information about your flag such as an issue tracker link a description etc..."
+                },
+                "rule": {
+                    "type": "string"
+                },
+                "percentage": {
+                    "type": "number"
+                },
+                "true": true,
+                "false": true,
+                "default": true,
+                "rollout": {
+                    "$ref": "#/$defs/Rollout"
+                },
+                "trackEvents": {
+                    "type": "boolean"
+                },
+                "disable": {
+                    "type": "boolean"
+                },
+                "version": {
+                    "type": "string"
+                },
+                "converter": {
+                    "type": "string"
+                },
+                "date": {
+                    "type": "string",
+                    "format": "date-time"
+                }
+            },
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+                "variations",
+                "defaultRule"
+            ]
         }
     },
     "additionalProperties": {
-        "$ref": "#/$defs/DTOv1"
+        "$ref": "#/$defs/DTO"
     },
     "type": "object"
 }
