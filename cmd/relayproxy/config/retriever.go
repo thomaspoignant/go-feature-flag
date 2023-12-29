@@ -23,6 +23,9 @@ type RetrieverConf struct {
 	Key         string              `mapstructure:"key" koanf:"key"`
 	BaseURL     string              `mapstructure:"baseUrl" koanf:"baseurl"`
 	AuthToken   string              `mapstructure:"token" koanf:"token"`
+	Uri         string              `mapstructure:"uri" koanf:"uri"`
+	Database    string              `mapstructure:"database" koanf:"database"`
+	Collection  string              `mapstructure:"collection" koanf:"collection"`
 }
 
 // IsValid validate the configuration of the retriever
@@ -61,6 +64,16 @@ func (c *RetrieverConf) IsValid() error {
 	if c.Kind == KubernetesRetriever && c.Key == "" {
 		return fmt.Errorf("invalid retriever: no \"key\" property found for kind \"%s\"", c.Kind)
 	}
+	if c.Kind == MongoDBRetriever && c.Collection == "" {
+		return fmt.Errorf("invalid retriever: no \"collection\" property found for kind \"%s\"", c.Kind)
+	}
+	if c.Kind == MongoDBRetriever && c.Database == ""  {
+		return fmt.Errorf("invalid retriever: no \"database\" property found for kind \"%s\"", c.Kind)
+
+	}
+	if c.Kind == MongoDBRetriever && c.Uri == "" {
+		return fmt.Errorf("invalid retriever: no \"uri\" property found for kind \"%s\"", c.Kind)
+	}
 	return nil
 }
 
@@ -75,13 +88,14 @@ const (
 	FileRetriever          RetrieverKind = "file"
 	GoogleStorageRetriever RetrieverKind = "googleStorage"
 	KubernetesRetriever    RetrieverKind = "configmap"
+	MongoDBRetriever       RetrieverKind = "mongodb"
 )
 
 // IsValid is checking if the value is part of the enum
 func (r RetrieverKind) IsValid() error {
 	switch r {
 	case HTTPRetriever, GitHubRetriever, GitlabRetriever, S3Retriever,
-		FileRetriever, GoogleStorageRetriever, KubernetesRetriever:
+		FileRetriever, GoogleStorageRetriever, KubernetesRetriever, MongoDBRetriever:
 		return nil
 	}
 	return fmt.Errorf("invalid retriever: kind \"%s\" is not supported", r)
