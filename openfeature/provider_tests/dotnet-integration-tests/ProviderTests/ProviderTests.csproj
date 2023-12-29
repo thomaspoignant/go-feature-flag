@@ -17,7 +17,7 @@
         <PackageReference Include="NUnit.Analyzers" Version="3.10.0" />
         <PackageReference Include="coverlet.collector" Version="6.0.0" />
         <PackageReference Include="OpenFeature" Version="1.3.1" />
-        <PackageReference Include="OpenFeature.Contrib.GOFeatureFlag" Version="0.1.4" />
+        <PackageReference Include="OpenFeature.Contrib.GOFeatureFlag" Version="0.1.5" />
     </ItemGroup>
 
 </Project>
