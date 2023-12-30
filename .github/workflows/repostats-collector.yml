@@ -1,0 +1,16 @@
+name: Collect Repository Stats
+on:
+  schedule:
+    - cron: "0 23 * * *"
+  workflow_dispatch:
+  
+jobs:
+  j1:
+    name: repostats-for-nice-project
+    runs-on: ubuntu-latest
+    steps:
+      - name: run-ghrs
+        uses: jgehrcke/github-repo-stats@RELEASE
+        with:
+          repository: thomaspoignant/go-feature-flag
+          ghtoken: ${{ secrets.PERSONAL_GITHUB_TOKEN }}

@@ -1,0 +1,12 @@
+name: 🤔 Question
+description: Have a burning question?🔥 Drop it like it's hot and get the answers you seek.
+title: "(question) <title>"
+labels: [question, needs-triage]
+body:
+  - type: textarea
+    attributes:
+      label: Your question
+      description: |
+        Provide a brief and clear description of your question.
+    validations:
+      required: true
