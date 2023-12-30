@@ -228,7 +228,8 @@ function parseJsonToCustomQuery(json) {
       query += `${rule.field} ${rule.operator}`;
 
       if (rule.value) {
-        query += ` ${rule.value}`;
+        if (rule.operator == 'in') query += ` [${rule.value}]`;
+        else query += ` ${rule.value}`;
       }
     }
 
