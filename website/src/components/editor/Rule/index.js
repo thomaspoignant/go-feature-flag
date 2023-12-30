@@ -35,7 +35,6 @@ export function Rule({variations, label, isDefaultRule}) {
     {value: 'progressive', displayName: '↗️ a progressive rollout'},
   ];
 
-  // TODO: Validate query (look for ~)
   const parseQuery = useCallback(
     query => {
       setValue(`${label}.query`, parseJsonToCustomQuery(query));
@@ -140,14 +139,22 @@ export function Rule({variations, label, isDefaultRule}) {
   );
 }
 
-const FieldSelector = ({
+FieldSelector.propTypes = {
+  className: PropTypes.string,
+  handleOnChange: PropTypes.func,
+  title: PropTypes.string,
+  value: PropTypes.string,
+  disabled: PropTypes.bool,
+  testID: PropTypes.string,
+};
+function FieldSelector({
   className,
   handleOnChange,
   title,
   value,
   disabled,
   testID,
-}) => {
+}) {
   useEffect(() => handleOnChange(''), []);
 
   return (
@@ -161,9 +168,13 @@ const FieldSelector = ({
       onChange={e => handleOnChange(e.target.value)}
     />
   );
-};
+}
 
-const RemoveAction = ({handleOnClick, variant}) => {
+RemoveAction.propTypes = {
+  handleOnClick: PropTypes.func,
+  variant: PropTypes.string,
+};
+function RemoveAction({handleOnClick, variant}) {
   const getIcon = useCallback(() => {
     switch (variant) {
       case 'group':
@@ -181,7 +192,7 @@ const RemoveAction = ({handleOnClick, variant}) => {
       </span>
     </button>
   );
-};
+}
 
 /**
  * Parses a JSON object into a custom query language based on the nikunjy/rules library.

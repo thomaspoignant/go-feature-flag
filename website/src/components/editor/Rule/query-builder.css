@@ -1,3 +1,7 @@
+.ruleGroup {
+  background: none;
+}
+
 .ruleGroup button {
     border: none;
     padding: 4px 8px;
