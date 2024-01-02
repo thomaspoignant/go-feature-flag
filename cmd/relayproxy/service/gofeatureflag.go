@@ -2,10 +2,12 @@ package service
 
 import (
 	"fmt"
+	"time"
+
+	"github.com/thomaspoignant/go-feature-flag/exporter/kafkaexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/s3exporterv2"
 	"github.com/thomaspoignant/go-feature-flag/exporter/sqsexporter"
 	"github.com/thomaspoignant/go-feature-flag/retriever/s3retrieverv2"
-	"time"
 
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
@@ -242,7 +244,14 @@ func initExporter(c *config.ExporterConf) (ffclient.DataExporter, error) {
 		}
 		dataExp.Exporter = &sqsexporter.Exporter{QueueURL: c.QueueURL, AwsConfig: &awsConfig}
 		return dataExp, nil
+	case config.KafkaExporter:
+		dataExp.Exporter = &kafkaexporter.Exporter{
+			Format:            format,
+			CSVTemplateString: csvTemplate,
+			Settings:          c.Kafka,
+		}
 
+		return dataExp, nil
 	default:
 		return ffclient.DataExporter{}, fmt.Errorf("invalid exporter: kind \"%s\" is not supported", c.Kind)
 	}
