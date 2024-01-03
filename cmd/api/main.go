@@ -64,7 +64,7 @@ type FeatureFlagInput struct {
 
 // FeatureFlagStatusUpdate represents the input for updating the status of a feature flag.
 type FeatureFlagStatusUpdate struct {
-	Enable bool `json:"enable"`
+	Disable bool `json:"disable"`
 }
 
 // Define a slice to store feature flags (simulating a database).
@@ -136,6 +136,7 @@ func createFeatureFlag(c echo.Context) error {
 }
 
 func getFeatureFlagByID(c echo.Context) error {
+	// time.Sleep(5 * time.Second)
 	id := c.Param("id")
 	flag, err := findFeatureFlagByID(id)
 	if err != nil {
@@ -205,7 +206,7 @@ func updateFeatureFlagStatus(c echo.Context) error {
 	}
 
 	// Update the feature flag status
-	featureFlags[flagIndex].Disable = testconvert.Bool(!statusUpdate.Enable)
+	featureFlags[flagIndex].Disable = testconvert.Bool(statusUpdate.Disable)
 	featureFlags[flagIndex].LastUpdatedDate = time.Now()
 
 	return c.JSON(http.StatusOK, featureFlags[flagIndex])
