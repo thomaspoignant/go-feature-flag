@@ -1,7 +1,9 @@
 package ffclient_test
 
 import (
+	"errors"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
+	"github.com/thomaspoignant/go-feature-flag/testutils/initializableretriever"
 	"log"
 	"os"
 	"testing"
@@ -372,6 +374,46 @@ func TestValidUseCaseBigFlagFile(t *testing.T) {
 	assert.True(t, hasTestFlag, "User should have test flag")
 	hasUnknownFlag, _ := gff.BoolVariation("unknown-flag", user, false)
 	assert.False(t, hasUnknownFlag, "User should use default value if flag does not exists")
+}
+
+func TestInitializableRetrieverWithRetrieverReady(t *testing.T) {
+	f, err := os.CreateTemp("", "")
+	assert.NoError(t, err)
+	// we delete the fileTemp to be sure that the retriever will have to create the file
+	err = os.Remove(f.Name())
+	assert.NoError(t, err)
+
+	r := initializableretriever.NewMockInitializableRetriever(f.Name(), retriever.RetrieverReady)
+	gff, err := ffclient.New(ffclient.Config{
+		PollingInterval: 5 * time.Second,
+		Retriever:       &r,
+	})
+	assert.NoError(t, err)
+	user := ffcontext.NewEvaluationContext("random-key")
+	hasTestFlag, _ := gff.BoolVariation("flag-xxxx-123", user, false)
+	assert.True(t, hasTestFlag, "User should have test flag")
+
+	gff.Close()
+	_, err = os.Stat(f.Name())
+	assert.True(t, errors.Is(err, os.ErrNotExist))
+}
+func TestInitializableRetrieverWithRetrieverNotReady(t *testing.T) {
+	f, err := os.CreateTemp("", "")
+	assert.NoError(t, err)
+	// we delete the fileTemp to be sure that the retriever will have to create the file
+	err = os.Remove(f.Name())
+	assert.NoError(t, err)
+
+	r := initializableretriever.NewMockInitializableRetriever(f.Name(), retriever.RetrieverNotReady)
+	gff, err := ffclient.New(ffclient.Config{
+		PollingInterval: 5 * time.Second,
+		Retriever:       &r,
+	})
+	defer gff.Close()
+	assert.NoError(t, err)
+	user := ffcontext.NewEvaluationContext("random-key")
+	hasTestFlag, _ := gff.BoolVariation("flag-xxxx-123", user, false)
+	assert.False(t, hasTestFlag, "User should have test flag")
 }
 
 func TestGoFeatureFlag_GetCacheRefreshDate(t *testing.T) {
