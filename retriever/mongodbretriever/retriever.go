@@ -3,25 +3,13 @@ package mongodbretriever
 import (
 	"context"
 	"encoding/json"
-	"fmt"
+	"errors"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type Targeting struct {
-	query      string          `bson:"query"`
-	percentage map[string]uint `bson:"percentage"`
-	variation  string          `bson:"variation"`
-	disable    bool            `bson:"disable"`
-}
-
-type FeatureFlag struct {
-	Flag       string                 `bson:"flag"`
-	Variations map[string]interface{} `bson:"variations"`
-	Targeting  []Targeting            `bson:"targeting"`
-}
 
 // Retriever is a configuration struct for a MongoDB connection and Collection.
 type Retriever struct {
@@ -60,7 +48,7 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	}
 	defer cursor.Close(ctx)
 
-	var ffDocs []bson.M
+	ffDocs := make(map[string]bson.M)
 
 	for cursor.Next(ctx) {
 		var doc bson.M
@@ -69,11 +57,19 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 			return nil, err
 		}
 
-		ffDocs = append(ffDocs, doc)
+		if val, ok := doc["flag"]; ok {
+			delete(doc, "flag")
+			if str, ok := val.(string); ok {
+				ffDocs[str] = doc
+			} else {
+				return nil, errors.New("flag key does not have a string as value!")
+			}
+		} else {
+			return nil, errors.New("No 'flag' entry found")
+		}
 	}
 
 	flags, err := json.Marshal(ffDocs)
-	fmt.Print(flags)
 	if err != nil {
 		return nil, err
 	}
