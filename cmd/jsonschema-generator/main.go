@@ -25,7 +25,7 @@ func main() {
 		log.Fatal("schema-location is required")
 	}
 
-	a := map[string]dto.DTOv1{}
+	a := map[string]dto.DTO{}
 	d := jsonschema.Reflect(a)
 	jsonSchema, err := d.MarshalJSON()
 	if err != nil {
