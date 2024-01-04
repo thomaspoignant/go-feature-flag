@@ -413,7 +413,7 @@ func TestInitializableRetrieverWithRetrieverNotReady(t *testing.T) {
 	assert.NoError(t, err)
 	user := ffcontext.NewEvaluationContext("random-key")
 	hasTestFlag, _ := gff.BoolVariation("flag-xxxx-123", user, false)
-	assert.False(t, hasTestFlag, "User should have test flag")
+	assert.False(t, hasTestFlag, "Should resolve to default value if retriever is not ready")
 }
 
 func TestGoFeatureFlag_GetCacheRefreshDate(t *testing.T) {
