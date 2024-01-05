@@ -67,7 +67,7 @@ func (f *Exporter) Export(_ context.Context, logger *log.Logger, featureEvents [
 }
 
 func (f *Exporter) IsBulk() bool {
-	return true
+	return false
 }
 
 func (f *Exporter) initializeWriter() error {
