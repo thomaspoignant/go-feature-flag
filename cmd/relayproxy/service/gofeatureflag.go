@@ -246,9 +246,8 @@ func initExporter(c *config.ExporterConf) (ffclient.DataExporter, error) {
 		return dataExp, nil
 	case config.KafkaExporter:
 		dataExp.Exporter = &kafkaexporter.Exporter{
-			Format:            format,
-			CSVTemplateString: csvTemplate,
-			Settings:          c.Kafka,
+			Format:   format,
+			Settings: c.Kafka,
 		}
 
 		return dataExp, nil

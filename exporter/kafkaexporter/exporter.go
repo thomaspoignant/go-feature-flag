@@ -13,19 +13,15 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
+const (
+	formatJSON = "json"
+)
+
 type Exporter struct {
 	// Format is the output format you want in your exported file.
 	// Available format are JSON, CSV and Parquet.
 	// Default: JSON
 	Format string
-
-	// CsvTemplate is used if your output format is CSV.
-	// This field will be ignored if you are using another format than CSV.
-	// You can decide which fields you want in your CSV line with a go-template syntax,
-	// please check internal/exporter/feature_event.go to see what are the fields available.
-	// Default:
-	// {{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}}\n
-	CSVTemplateString string
 
 	Settings Settings
 
@@ -78,8 +74,6 @@ func (f *Exporter) initializeWriter() error {
 			return
 		}
 
-		f.csvTemplate = exporter.ParseTemplate("csvFormat", f.CSVTemplateString, exporter.DefaultCsvTemplate)
-
 		f.sender, err = sarama.NewSyncProducer(f.Settings.Addresses, f.Settings.Config)
 		if err != nil {
 			err = fmt.Errorf("producer: %w", err)
@@ -92,9 +86,7 @@ func (f *Exporter) initializeWriter() error {
 
 func (f *Exporter) formatMessage(event exporter.FeatureEvent) ([]byte, error) {
 	switch f.Format {
-	case "csv":
-		return exporter.FormatEventInCSV(f.csvTemplate, event)
-	case "json":
+	case formatJSON:
 		fallthrough
 	default:
 		return exporter.FormatEventInJSON(event)
