@@ -1,8 +1,8 @@
 package testutils
 
 import (
-	"fmt"
 	"encoding/json"
+	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/integration/mtest"
