@@ -67,7 +67,7 @@ func (c *RetrieverConf) IsValid() error {
 	if c.Kind == MongoDBRetriever && c.Collection == "" {
 		return fmt.Errorf("invalid retriever: no \"collection\" property found for kind \"%s\"", c.Kind)
 	}
-	if c.Kind == MongoDBRetriever && c.Database == ""  {
+	if c.Kind == MongoDBRetriever && c.Database == "" {
 		return fmt.Errorf("invalid retriever: no \"database\" property found for kind \"%s\"", c.Kind)
 
 	}

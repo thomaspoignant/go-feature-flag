@@ -196,10 +196,10 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 		{
 			name: "kind mongoDB without Uri",
 			fields: config.RetrieverConf{
-				Kind: "mongodb",
-				Uri: "",
+				Kind:       "mongodb",
+				Uri:        "",
 				Collection: "xxx",
-				Database: "xxx",
+				Database:   "xxx",
 			},
 			wantErr:  true,
 			errValue: "invalid retriever: no \"uri\" property found for kind \"mongodb\"",
@@ -207,10 +207,10 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 		{
 			name: "kind mongoDB without Collection",
 			fields: config.RetrieverConf{
-				Kind: "mongodb",
-				Uri: "xxx",
+				Kind:       "mongodb",
+				Uri:        "xxx",
 				Collection: "",
-				Database: "xxx",
+				Database:   "xxx",
 			},
 			wantErr:  true,
 			errValue: "invalid retriever: no \"collection\" property found for kind \"mongodb\"",
@@ -218,10 +218,10 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 		{
 			name: "kind mongoDB without database",
 			fields: config.RetrieverConf{
-				Kind: "mongodb",
-				Uri: "xxx",
+				Kind:       "mongodb",
+				Uri:        "xxx",
 				Collection: "xxx",
-				Database: "",
+				Database:   "",
 			},
 			wantErr:  true,
 			errValue: "invalid retriever: no \"database\" property found for kind \"mongodb\"",
