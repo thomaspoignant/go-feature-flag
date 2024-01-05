@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 
+	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
-
 
 // Retriever is a configuration struct for a MongoDB connection and Collection.
 type Retriever struct {
@@ -17,25 +17,43 @@ type Retriever struct {
 	Collection   string
 	Database     string
 	dbConnection *mongo.Database
+	dbClient     *mongo.Client
+	status       string
+}
+
+// type InitializableRetriever interface {
+// 	Retrieve(ctx context.Context) ([]byte, error)
+// 	Init(ctx context.Context) error
+// 	Shutdown(ctx context.Context) error
+// 	Status() Status
+// }
+
+func (r *Retriever) Init(ctx context.Context) error {
+	if r.dbConnection == nil {
+		r.status = retriever.RetrieverNotReady
+
+		client, err := mongo.Connect(ctx, options.Client().ApplyURI(r.Uri))
+		if err != nil {
+			r.status = retriever.RetrieverError
+			return err
+		}
+		r.dbClient = client
+		r.dbConnection = client.Database(r.Database)
+		r.status = retriever.RetrieverReady
+	}
+	return nil
+}
+
+func (r *Retriever) Status(ctx context.Context) retriever.Status {
+	return r.status
+}
+
+func (r *Retriever) Shutdown(ctx context.Context) error {
+	return r.dbClient.Disconnect(ctx)
 }
 
 // Retrieve is reading flag configuration from mongodb collection and returning it
 func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
-
-	if r.dbConnection == nil {
-
-		client, err := mongo.Connect(ctx, options.Client().ApplyURI(r.Uri))
-		if err != nil {
-			return nil, err
-		}
-		r.dbConnection = client.Database(r.Database)
-	}
-	//TODO: how to gracefully disconnect?
-	// defer func () {
-	// 	if err := client.Disconnect(ctx); err != nil {
-	// 		panic(err)
-	// 	}
-	// }()
 
 	opt := options.CollectionOptions{}
 	opt.SetBSONOptions(&options.BSONOptions{OmitZeroStruct: true})

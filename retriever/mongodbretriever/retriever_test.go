@@ -5,11 +5,10 @@ import (
 	"encoding/json"
 	"testing"
 
-	"go.mongodb.org/mongo-driver/mongo/integration/mtest"
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
+	"go.mongodb.org/mongo-driver/mongo/integration/mtest"
 )
-
 
 func Test_MongoDBRetriever_Retrieve(t *testing.T) {
 	mtDB := mtest.New(t, mtest.NewOptions().ClientType(mtest.Mock))
