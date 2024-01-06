@@ -147,23 +147,15 @@ FieldSelector.propTypes = {
   disabled: PropTypes.bool,
   testID: PropTypes.string,
 };
-function FieldSelector({
-  className,
-  handleOnChange,
-  title,
-  value,
-  disabled,
-  testID,
-}) {
+function FieldSelector({handleOnChange, title, value, disabled}) {
   useEffect(() => handleOnChange(''), []);
 
   return (
-    <input
-      data-testid={testID}
-      type="text"
-      className={className}
+    <Input
       value={value}
-      title={title}
+      label={title}
+      displayText={title}
+      className={clsx()}
       disabled={disabled}
       onChange={e => handleOnChange(e.target.value)}
     />
@@ -249,12 +241,12 @@ function parseJsonToCustomQuery(json) {
 }
 
 const ruleOperators = [
-  {name: '==', label: 'Equals To'},
-  {name: '!=', label: 'Not Equals To'},
-  {name: '<', label: 'Less Than'},
-  {name: '>', label: 'Greater Than'},
-  {name: '<=', label: 'Less Than Equal To'},
-  {name: '>=', label: 'Greater Than Equal To'},
+  {name: 'eq', label: 'Equals To'},
+  {name: 'ne', label: 'Not Equals To'},
+  {name: 'lt', label: 'Less Than'},
+  {name: 'gt', label: 'Greater Than'},
+  {name: 'le', label: 'Less Than Equal To'},
+  {name: 'ge', label: 'Greater Than Equal To'},
   {name: 'co', label: 'Contains'},
   {name: 'sw', label: 'Starts With'},
   {name: 'ew', label: 'Ends With'},

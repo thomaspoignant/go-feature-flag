@@ -26,6 +26,7 @@ export function Input({
   defaultValue,
   disablePlaceholder = false,
   disableInlineErr = false,
+  ...props
 }) {
   const {register} = useFormContext();
 
@@ -51,6 +52,7 @@ export function Input({
           required: {value: required, message: 'This field is required'},
           ...validation,
         })}
+        {...props}
       />
       {disablePlaceholder && <span>{displayText}</span>}
       <div className={styles.editorCut}></div>
