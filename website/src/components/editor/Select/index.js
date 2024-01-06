@@ -19,15 +19,14 @@ export function Select({
   ...props
 }) {
   const {register} = useFormContext();
+
+  const registerProps = register(label, required);
+
   return (
     <div className={styles.selector}>
       <select
         defaultValue="0"
-        {...(controlled
-          ? {}
-          : {
-              ...register(label, required),
-            })}
+        {...(controlled ? {} : registerProps)}
         {...props}>
         <option disabled={true} defaultChecked={true} value={null}>
           {title}

@@ -119,7 +119,6 @@ export function Rule({variations, label, isDefaultRule}) {
           <Select
             title="Variation"
             content={getSelectorList(variations)}
-            register={register}
             label={`${label}.selectedVar`}
             required={true}
           />
@@ -169,8 +168,9 @@ function FieldSelector({handleOnChange, title, value, disabled}) {
 OperatorSelector.propTypes = {
   handleOnChange: PropTypes.func,
   options: PropTypes.array,
+  title: PropTypes.string,
 };
-function OperatorSelector({options, handleOnChange, ...props}) {
+function OperatorSelector({options, handleOnChange, title}) {
   const content = useMemo(
     () =>
       options.map(({name: value, label: displayName}) => ({
@@ -183,11 +183,11 @@ function OperatorSelector({options, handleOnChange, ...props}) {
   return (
     <Select
       content={content}
-      label="Operator"
-      required={false}
-      onChange={e => handleOnChange(e.target.value)}
       controlled={true}
-      {...props}
+      label="Operator"
+      onChange={e => handleOnChange(e.target.value)}
+      required={false}
+      title={title}
     />
   );
 }

@@ -65,7 +65,6 @@ function Variation({type, label, remove, index, icon}) {
       <Input
         displayText="Flag Value"
         label={label}
-        register={register}
         type={type}
         required={true}
       />
@@ -80,12 +79,7 @@ function Variation({type, label, remove, index, icon}) {
     <div className={styles.variation}>
       <div className={clsx('col-4-12 mobile-col-5-12', styles.icons)}>
         <div className={styles.icon}>{icon}</div>
-        <Input
-          displayText="Name"
-          label={`${label}.name`}
-          register={register}
-          required={true}
-        />
+        <Input displayText="Name" label={`${label}.name`} required={true} />
       </div>
       <div className={clsx('col-6-12 mobile-col-7-12')}>
         {valueField(type, label + '.value', register)}

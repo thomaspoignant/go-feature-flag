@@ -42,6 +42,11 @@ export function Input({
     }
   }
 
+  const registerProps = register(label, {
+    required: {value: required, message: 'This field is required'},
+    ...validation,
+  });
+
   return (
     <div className={clsx(className ? className : styles.editorInputContainer)}>
       <input
@@ -50,14 +55,7 @@ export function Input({
         className={styles.editorInput}
         type={inputType()}
         placeholder=" "
-        {...(controlled
-          ? {}
-          : {
-              ...register(label, {
-                required: {value: required, message: 'This field is required'},
-                ...validation,
-              }),
-            })}
+        {...(controlled ? {} : registerProps)}
         {...props}
       />
       {disablePlaceholder && <span>{displayText}</span>}
