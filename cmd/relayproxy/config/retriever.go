@@ -35,7 +35,7 @@ func (c *RetrieverConf) IsValid() error {
 		return err
 	}
 	if c.Kind == GitHubRetriever {
-		return c.validateGitHubRetriever()
+		c.validateGitHubRetriever()
 	}
 	if c.Kind == S3Retriever && c.Item == "" {
 		return fmt.Errorf("invalid retriever: no \"item\" property found for kind \"%s\"", c.Kind)
@@ -53,10 +53,10 @@ func (c *RetrieverConf) IsValid() error {
 		return fmt.Errorf("invalid retriever: no \"bucket\" property found for kind \"%s\"", c.Kind)
 	}
 	if c.Kind == KubernetesRetriever {
-		return c.validateKubernetesRetriever()
+		c.validateKubernetesRetriever()
 	}
 	if c.Kind == MongoDBRetriever {
-		return c.validateMongoDBRetriever()
+		c.validateMongoDBRetriever()
 	}
 	return nil
 }
