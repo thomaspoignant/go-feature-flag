@@ -257,7 +257,7 @@ AddAction.propTypes = {
   variant: PropTypes.string,
 };
 function AddAction({handleOnClick, variant}) {
-  const getLabel = useMemo(() => {
+  const label = useMemo(() => {
     switch (variant) {
       case 'group':
         return '+Group';
@@ -270,7 +270,7 @@ function AddAction({handleOnClick, variant}) {
     <button
       className="pushy__btn pushy__btn--md pushy__btn--black"
       onClick={handleOnClick}>
-      {getLabel}
+      {label}
     </button>
   );
 }
