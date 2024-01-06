@@ -97,6 +97,13 @@ export function Rule({variations, label, isDefaultRule}) {
                 fieldSelector: FieldSelector,
                 valueEditor: FieldSelector,
                 operatorSelector: OperatorSelector,
+                combinatorSelector: CombinatorSelector,
+                addGroupAction: ({handleOnClick}) => (
+                  <AddAction handleOnClick={handleOnClick} variant="group" />
+                ),
+                addRuleAction: ({handleOnClick}) => (
+                  <AddAction handleOnClick={handleOnClick} variant="rule" />
+                ),
                 removeGroupAction: ({handleOnClick}) => (
                   <RemoveAction handleOnClick={handleOnClick} variant="group" />
                 ),
@@ -192,6 +199,35 @@ function OperatorSelector({options, handleOnChange, title}) {
   );
 }
 
+CombinatorSelector.propTypes = {
+  handleOnChange: PropTypes.func,
+  options: PropTypes.array,
+  title: PropTypes.string,
+};
+function CombinatorSelector({options, handleOnChange, title}) {
+  const content = useMemo(
+    () =>
+      options.map(({name: value, label: displayName}) => ({
+        value,
+        displayName,
+      })),
+    [options]
+  );
+
+  return (
+    <div style={{maxWidth: '8rem'}}>
+      <Select
+        content={content}
+        controlled={true}
+        label="Operator"
+        onChange={e => handleOnChange(e.target.value)}
+        required={false}
+        title={title}
+      />
+    </div>
+  );
+}
+
 RemoveAction.propTypes = {
   handleOnClick: PropTypes.func,
   variant: PropTypes.string,
@@ -212,6 +248,29 @@ function RemoveAction({handleOnClick, variant}) {
         <i className={clsx('fa-solid fa-circle fa-stack-2x', styles.bg)}></i>
         <i className={`fa-solid ${getIcon()} fa-stack-1x fa-inverse`}></i>
       </span>
+    </button>
+  );
+}
+
+AddAction.propTypes = {
+  handleOnClick: PropTypes.func,
+  variant: PropTypes.string,
+};
+function AddAction({handleOnClick, variant}) {
+  const getLabel = useMemo(() => {
+    switch (variant) {
+      case 'group':
+        return '+Group';
+      case 'rule':
+        return '+Rule';
+    }
+  }, [variant]);
+
+  return (
+    <button
+      className="pushy__btn pushy__btn--md pushy__btn--black"
+      onClick={handleOnClick}>
+      {getLabel}
     </button>
   );
 }
