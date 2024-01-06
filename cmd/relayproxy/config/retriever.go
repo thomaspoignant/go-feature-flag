@@ -23,7 +23,7 @@ type RetrieverConf struct {
 	Key         string              `mapstructure:"key" koanf:"key"`
 	BaseURL     string              `mapstructure:"baseUrl" koanf:"baseurl"`
 	AuthToken   string              `mapstructure:"token" koanf:"token"`
-	Uri         string              `mapstructure:"uri" koanf:"uri"`
+	URI         string              `mapstructure:"uri" koanf:"uri"`
 	Database    string              `mapstructure:"database" koanf:"database"`
 	Collection  string              `mapstructure:"collection" koanf:"collection"`
 }
@@ -69,9 +69,8 @@ func (c *RetrieverConf) IsValid() error {
 	}
 	if c.Kind == MongoDBRetriever && c.Database == "" {
 		return fmt.Errorf("invalid retriever: no \"database\" property found for kind \"%s\"", c.Kind)
-
 	}
-	if c.Kind == MongoDBRetriever && c.Uri == "" {
+	if c.Kind == MongoDBRetriever && c.URI == "" {
 		return fmt.Errorf("invalid retriever: no \"uri\" property found for kind \"%s\"", c.Kind)
 	}
 	return nil

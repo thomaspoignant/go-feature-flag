@@ -47,7 +47,7 @@ func Test_MongoDBRetriever_Retrieve(t *testing.T) {
 	for _, tt := range tests {
 		mtDB.Run(tt.name, func(t *mtest.T) {
 			mdb := Retriever{
-				Uri:          "mongouri",
+				URI:          "mongouri",
 				Collection:   "collection",
 				Database:     "database",
 				dbConnection: t.DB,
@@ -65,8 +65,12 @@ func Test_MongoDBRetriever_Retrieve(t *testing.T) {
 			}
 
 			var gotUnm, wantUn interface{}
-			json.Unmarshal(tt.want, &wantUn)
-			json.Unmarshal(got, &gotUnm)
+			if err := json.Unmarshal(tt.want, &wantUn); err != nil {
+				assert.Fail(t, "could not json unmarshall wanted flag structure")
+			}
+			if err := json.Unmarshal(got, &gotUnm); err != nil {
+				assert.Fail(t, "could not json unmarshall got flag structure")
+			}
 
 			assert.Equal(t, wantUn, gotUnm)
 		})

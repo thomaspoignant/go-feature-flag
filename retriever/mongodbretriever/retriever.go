@@ -13,7 +13,8 @@ import (
 
 // Retriever is a configuration struct for a MongoDB connection and Collection.
 type Retriever struct {
-	Uri          string
+	//TODO: remap in relay proxy
+	URI          string
 	Collection   string
 	Database     string
 	dbConnection *mongo.Database
@@ -32,7 +33,7 @@ func (r *Retriever) Init(ctx context.Context) error {
 	if r.dbConnection == nil {
 		r.status = retriever.RetrieverNotReady
 
-		client, err := mongo.Connect(ctx, options.Client().ApplyURI(r.Uri))
+		client, err := mongo.Connect(ctx, options.Client().ApplyURI(r.URI))
 		if err != nil {
 			r.status = retriever.RetrieverError
 			return err
@@ -44,7 +45,7 @@ func (r *Retriever) Init(ctx context.Context) error {
 	return nil
 }
 
-func (r *Retriever) Status(ctx context.Context) retriever.Status {
+func (r *Retriever) Status(_ context.Context) retriever.Status {
 	return r.status
 }
 
@@ -54,7 +55,6 @@ func (r *Retriever) Shutdown(ctx context.Context) error {
 
 // Retrieve is reading flag configuration from mongodb collection and returning it
 func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
-
 	opt := options.CollectionOptions{}
 	opt.SetBSONOptions(&options.BSONOptions{OmitZeroStruct: true})
 
@@ -80,10 +80,10 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 			if str, ok := val.(string); ok {
 				ffDocs[str] = doc
 			} else {
-				return nil, errors.New("flag key does not have a string as value!")
+				return nil, errors.New("flag key does not have a string as value")
 			}
 		} else {
-			return nil, errors.New("No 'flag' entry found")
+			return nil, errors.New("no 'flag' entry found")
 		}
 	}
 
