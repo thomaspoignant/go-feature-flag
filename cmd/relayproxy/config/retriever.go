@@ -34,11 +34,8 @@ func (c *RetrieverConf) IsValid() error {
 	if err := c.Kind.IsValid(); err != nil {
 		return err
 	}
-	if c.Kind == GitHubRetriever && c.RepositorySlug == "" {
-		return fmt.Errorf("invalid retriever: no \"repositorySlug\" property found for kind \"%s\"", c.Kind)
-	}
-	if c.Kind == GitlabRetriever && c.RepositorySlug == "" {
-		return fmt.Errorf("invalid retriever: no \"repositorySlug\" property found for kind \"%s\"", c.Kind)
+	if c.Kind == GitHubRetriever {
+		return c.validateGitHubRetriever()
 	}
 	if c.Kind == S3Retriever && c.Item == "" {
 		return fmt.Errorf("invalid retriever: no \"item\" property found for kind \"%s\"", c.Kind)
@@ -55,22 +52,46 @@ func (c *RetrieverConf) IsValid() error {
 	if (c.Kind == S3Retriever || c.Kind == GoogleStorageRetriever) && c.Bucket == "" {
 		return fmt.Errorf("invalid retriever: no \"bucket\" property found for kind \"%s\"", c.Kind)
 	}
-	if c.Kind == KubernetesRetriever && c.ConfigMap == "" {
+	if c.Kind == KubernetesRetriever {
+		return c.validateKubernetesRetriever()
+	}
+	if c.Kind == MongoDBRetriever {
+		return c.validateMongoDBRetriever()
+	}
+	return nil
+}
+
+func (c *RetrieverConf) validateGitHubRetriever() error {
+	if c.RepositorySlug == "" {
+		return fmt.Errorf("invalid retriever: no \"repositorySlug\" property found for kind \"%s\"", c.Kind)
+	}
+	if c.RepositorySlug == "" {
+		return fmt.Errorf("invalid retriever: no \"repositorySlug\" property found for kind \"%s\"", c.Kind)
+	}
+	return nil
+}
+
+func (c *RetrieverConf) validateKubernetesRetriever() error {
+	if c.ConfigMap == "" {
 		return fmt.Errorf("invalid retriever: no \"configmap\" property found for kind \"%s\"", c.Kind)
 	}
-	if c.Kind == KubernetesRetriever && c.Namespace == "" {
+	if c.Namespace == "" {
 		return fmt.Errorf("invalid retriever: no \"namespace\" property found for kind \"%s\"", c.Kind)
 	}
-	if c.Kind == KubernetesRetriever && c.Key == "" {
+	if c.Key == "" {
 		return fmt.Errorf("invalid retriever: no \"key\" property found for kind \"%s\"", c.Kind)
 	}
-	if c.Kind == MongoDBRetriever && c.Collection == "" {
+	return nil
+}
+
+func (c *RetrieverConf) validateMongoDBRetriever() error {
+	if c.Collection == "" {
 		return fmt.Errorf("invalid retriever: no \"collection\" property found for kind \"%s\"", c.Kind)
 	}
-	if c.Kind == MongoDBRetriever && c.Database == "" {
+	if c.Database == "" {
 		return fmt.Errorf("invalid retriever: no \"database\" property found for kind \"%s\"", c.Kind)
 	}
-	if c.Kind == MongoDBRetriever && c.URI == "" {
+	if c.URI == "" {
 		return fmt.Errorf("invalid retriever: no \"uri\" property found for kind \"%s\"", c.Kind)
 	}
 	return nil
