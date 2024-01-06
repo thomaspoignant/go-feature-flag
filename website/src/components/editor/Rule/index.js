@@ -5,7 +5,7 @@ import * as ReactDnD from 'react-dnd';
 import * as ReactDndHtml5Backend from 'react-dnd-html5-backend';
 import {Input} from '../Input';
 import {Select} from '../Select';
-import React, {useCallback, useState, useEffect, useMemo} from 'react';
+import React, {useCallback, useState, useMemo, useEffect} from 'react';
 import {useFormContext} from 'react-hook-form';
 import 'react-sweet-progress/lib/style.css';
 import {Colors} from '../Colors';
@@ -148,13 +148,16 @@ FieldSelector.propTypes = {
   disabled: PropTypes.bool,
   testID: PropTypes.string,
 };
-function FieldSelector({handleOnChange, title, value, disabled}) {
-  useEffect(() => handleOnChange(''), []);
+function FieldSelector({handleOnChange, title, value, disabled, testID}) {
+  useEffect(() => {
+    if (value === '~') handleOnChange('');
+  }, [value]);
 
   return (
     <div>
       <Input
-        value={value}
+        data-testid={testID}
+        value={value === '~' ? '' : value}
         label={title}
         displayText={title}
         disabled={disabled}
@@ -246,7 +249,7 @@ function parseJsonToCustomQuery(json) {
   function processRule(rule) {
     let query = '';
 
-    if (rule.field && rule.operator) {
+    if (rule.field && rule.operator && rule.field !== '~') {
       query += `${rule.field} ${rule.operator}`;
 
       if (rule.value) {
