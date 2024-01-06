@@ -5,7 +5,7 @@ import * as ReactDnD from 'react-dnd';
 import * as ReactDndHtml5Backend from 'react-dnd-html5-backend';
 import {Input} from '../Input';
 import {Select} from '../Select';
-import React, {useCallback, useState, useEffect} from 'react';
+import React, {useCallback, useState, useEffect, useMemo} from 'react';
 import {useFormContext} from 'react-hook-form';
 import 'react-sweet-progress/lib/style.css';
 import {Colors} from '../Colors';
@@ -94,6 +94,8 @@ export function Rule({variations, label, isDefaultRule}) {
             <QueryBuilder
               controlElements={{
                 fieldSelector: FieldSelector,
+                valueEditor: FieldSelector,
+                operatorSelector: OperatorSelector,
                 removeGroupAction: ({handleOnClick}) => (
                   <RemoveAction handleOnClick={handleOnClick} variant="group" />
                 ),
@@ -151,13 +153,41 @@ function FieldSelector({handleOnChange, title, value, disabled}) {
   useEffect(() => handleOnChange(''), []);
 
   return (
-    <Input
-      value={value}
-      label={title}
-      displayText={title}
-      className={clsx()}
-      disabled={disabled}
+    <div>
+      <Input
+        value={value}
+        label={title}
+        displayText={title}
+        disabled={disabled}
+        controlled={true}
+        onChange={e => handleOnChange(e.target.value)}
+      />
+    </div>
+  );
+}
+
+OperatorSelector.propTypes = {
+  handleOnChange: PropTypes.func,
+  options: PropTypes.array,
+};
+function OperatorSelector({options, handleOnChange, ...props}) {
+  const content = useMemo(
+    () =>
+      options.map(({name: value, label: displayName}) => ({
+        value,
+        displayName,
+      })),
+    [options]
+  );
+
+  return (
+    <Select
+      content={content}
+      label="Operator"
+      required={false}
       onChange={e => handleOnChange(e.target.value)}
+      controlled={true}
+      {...props}
     />
   );
 }

@@ -3,26 +3,13 @@
 }
 
 .ruleGroup-body {
-    padding: .6rem 0;
+  padding: 0.6rem 0;
+  gap: 1.2rem !important;
 }
 
 .ruleGroup button {
-    border: none;
-    padding: 4px 8px;
-    border-radius: .5rem;
-    background-color: var(--goff-editor-form-field-bg);
-}
-
-.ruleGroup select {
-    border: none;
-    padding: 4px 8px;
-    border-radius: .5rem;
-    background-color: var(--goff-editor-form-field-bg);
-}
-
-.ruleGroup input {
-    border: none;
-    padding: 4px 8px;
-    border-radius: .4rem;
-    background-color: var(--goff-editor-form-field-bg);
+  border: none;
+  padding: 4px 8px;
+  border-radius: 0.5rem;
+  background-color: var(--goff-editor-form-field-bg);
 }
