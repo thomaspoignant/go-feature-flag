@@ -15,6 +15,7 @@ Input.propTypes = {
   defaultValue: PropTypes.any,
   disablePlaceholder: PropTypes.bool,
   disableInlineErr: PropTypes.bool,
+  controlled: PropTypes.bool,
 };
 export function Input({
   label,
@@ -24,6 +25,7 @@ export function Input({
   type,
   validation,
   defaultValue,
+  controlled = false,
   disablePlaceholder = false,
   disableInlineErr = false,
   ...props
@@ -48,10 +50,14 @@ export function Input({
         className={styles.editorInput}
         type={inputType()}
         placeholder=" "
-        {...register(label, {
-          required: {value: required, message: 'This field is required'},
-          ...validation,
-        })}
+        {...(controlled
+          ? {}
+          : {
+              ...register(label, {
+                required: {value: required, message: 'This field is required'},
+                ...validation,
+              }),
+            })}
         {...props}
       />
       {disablePlaceholder && <span>{displayText}</span>}
