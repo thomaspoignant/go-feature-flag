@@ -35,7 +35,7 @@ func (c *RetrieverConf) IsValid() error {
 		return err
 	}
 	if c.Kind == GitHubRetriever {
-		c.validateGitHubRetriever()
+		return c.validateGitHubRetriever()
 	}
 	if c.Kind == S3Retriever && c.Item == "" {
 		return fmt.Errorf("invalid retriever: no \"item\" property found for kind \"%s\"", c.Kind)
@@ -46,17 +46,17 @@ func (c *RetrieverConf) IsValid() error {
 	if c.Kind == GoogleStorageRetriever && c.Object == "" {
 		return fmt.Errorf("invalid retriever: no \"object\" property found for kind \"%s\"", c.Kind)
 	}
-	if (c.Kind == GitHubRetriever || c.Kind == FileRetriever || c.Kind == GitlabRetriever) && c.Path == "" {
+	if (c.Kind == FileRetriever || c.Kind == GitlabRetriever) && c.Path == "" {
 		return fmt.Errorf("invalid retriever: no \"path\" property found for kind \"%s\"", c.Kind)
 	}
 	if (c.Kind == S3Retriever || c.Kind == GoogleStorageRetriever) && c.Bucket == "" {
 		return fmt.Errorf("invalid retriever: no \"bucket\" property found for kind \"%s\"", c.Kind)
 	}
 	if c.Kind == KubernetesRetriever {
-		c.validateKubernetesRetriever()
+		return c.validateKubernetesRetriever()
 	}
 	if c.Kind == MongoDBRetriever {
-		c.validateMongoDBRetriever()
+		return c.validateMongoDBRetriever()
 	}
 	return nil
 }
@@ -67,6 +67,9 @@ func (c *RetrieverConf) validateGitHubRetriever() error {
 	}
 	if c.RepositorySlug == "" {
 		return fmt.Errorf("invalid retriever: no \"repositorySlug\" property found for kind \"%s\"", c.Kind)
+	}
+	if c.Path == "" {
+		return fmt.Errorf("invalid retriever: no \"path\" property found for kind \"%s\"", c.Kind)
 	}
 	return nil
 }
