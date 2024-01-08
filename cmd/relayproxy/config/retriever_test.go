@@ -194,6 +194,15 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 			errValue: "invalid retriever: no \"configmap\" property found for kind \"configmap\"",
 		},
 		{
+			name: "kind k8s valid",
+			fields: config.RetrieverConf{
+				Kind:      "configmap",
+				Namespace: "xxx",
+				Key:       "xxx",
+				ConfigMap: "xxx",
+			},
+		},
+		{
 			name: "kind mongoDB without URI",
 			fields: config.RetrieverConf{
 				Kind:       "mongodb",
@@ -225,6 +234,15 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 			},
 			wantErr:  true,
 			errValue: "invalid retriever: no \"database\" property found for kind \"mongodb\"",
+		},
+		{
+			name: "kind mongoDB valid",
+			fields: config.RetrieverConf{
+				Kind:       "mongodb",
+				URI:        "xxx",
+				Collection: "xxx",
+				Database:   "xxx",
+			},
 		},
 	}
 	for _, tt := range tests {
