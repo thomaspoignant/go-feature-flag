@@ -73,7 +73,7 @@ generate-helm-docs: ## Generates helm documentation for the project
 
 ## Test:
 test: ## Run the tests of the project
-	$(GOTEST) -v -race ./...
+	$(GOTEST) -v -race ./... -tags=docker
 
 provider-tests: ## Run the integration tests for the Open Feature Providers
 	./openfeature/provider_tests/integration_tests.sh
