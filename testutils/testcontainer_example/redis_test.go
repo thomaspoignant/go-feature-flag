@@ -1,3 +1,6 @@
+//go:build docker
+// +build docker
+
 package testcontainer_example_test
 
 import (
