@@ -44,10 +44,11 @@ func Close() {
 // GoFeatureFlag is the main object of the library
 // it contains the cache, the config, the updater and the exporter.
 type GoFeatureFlag struct {
-	cache        cache.Manager
-	config       Config
-	bgUpdater    backgroundUpdater
-	dataExporter *exporter.Scheduler
+	cache            cache.Manager
+	config           Config
+	bgUpdater        backgroundUpdater
+	dataExporter     *exporter.Scheduler
+	retrieverManager *retriever.Manager
 }
 
 // ff is the default object for go-feature-flag
@@ -85,7 +86,17 @@ func New(config Config) (*GoFeatureFlag, error) {
 		goFF.bgUpdater = newBackgroundUpdater(config.PollingInterval, config.EnablePollingJitter)
 		goFF.cache = cache.New(notificationService, config.Logger)
 
-		err := retrieveFlagsAndUpdateCache(goFF.config, goFF.cache)
+		retrievers, err := config.GetRetrievers()
+		if err != nil {
+			return nil, err
+		}
+		goFF.retrieverManager = retriever.NewManager(config.Context, retrievers)
+		err = goFF.retrieverManager.Init(config.Context)
+		if err != nil && !config.StartWithRetrieverError {
+			return nil, fmt.Errorf("impossible to initialize the retrievers, please check your configuration: %v", err)
+		}
+
+		err = retrieveFlagsAndUpdateCache(goFF.config, goFF.cache, goFF.retrieverManager)
 		if err != nil && !config.StartWithRetrieverError {
 			return nil, fmt.Errorf("impossible to retrieve the flags, please check your configuration: %v", err)
 		}
@@ -119,6 +130,9 @@ func (g *GoFeatureFlag) Close() {
 		if g.dataExporter != nil {
 			g.dataExporter.Close()
 		}
+		if g.retrieverManager != nil {
+			_ = g.retrieverManager.Shutdown(g.config.Context)
+		}
 	}
 }
 
@@ -127,7 +141,7 @@ func (g *GoFeatureFlag) startFlagUpdaterDaemon() {
 	for {
 		select {
 		case <-g.bgUpdater.ticker.C:
-			err := retrieveFlagsAndUpdateCache(g.config, g.cache)
+			err := retrieveFlagsAndUpdateCache(g.config, g.cache, g.retrieverManager)
 			if err != nil {
 				fflog.Printf(g.config.Logger, "error while updating the cache: %v\n", err)
 			}
@@ -138,13 +152,8 @@ func (g *GoFeatureFlag) startFlagUpdaterDaemon() {
 }
 
 // retrieveFlagsAndUpdateCache is called every X seconds to refresh the cache flag.
-func retrieveFlagsAndUpdateCache(config Config, cache cache.Manager) error {
-	retrievers, err := config.GetRetrievers()
-	if err != nil {
-		fflog.Printf(config.Logger, "error while getting the file retriever: %v", err)
-		return err
-	}
-
+func retrieveFlagsAndUpdateCache(config Config, cache cache.Manager, retrieverManager *retriever.Manager) error {
+	retrievers := retrieverManager.GetRetrievers()
 	// Results is the type that will receive the results when calling
 	// all the retrievers.
 	type Results struct {
@@ -169,6 +178,13 @@ func retrieveFlagsAndUpdateCache(config Config, cache cache.Manager) error {
 		// Launching GO routines to retrieve all files in parallel.
 		go func(r retriever.Retriever, format string, index int, ctx context.Context) {
 			defer wg.Done()
+
+			// If the retriever is not ready, we ignore it
+			if rr, ok := r.(retriever.InitializableRetriever); ok && rr.Status() != retriever.RetrieverReady {
+				resultsChan <- Results{Error: nil, Value: map[string]dto.DTO{}, Index: index}
+				return
+			}
+
 			rawValue, err := r.Retrieve(ctx)
 			if err != nil {
 				resultsChan <- Results{Error: err, Value: nil, Index: index}
@@ -195,7 +211,7 @@ func retrieveFlagsAndUpdateCache(config Config, cache cache.Manager) error {
 		}
 	}
 
-	err = cache.UpdateCache(newFlags, config.Logger)
+	err := cache.UpdateCache(newFlags, config.Logger)
 	if err != nil {
 		log.Printf("error: impossible to update the cache of the flags: %v", err)
 		return err
