@@ -2,11 +2,10 @@ package kafkaexporter
 
 import (
 	"context"
-	"errors"
+	"encoding/json"
 	"fmt"
 	"log"
 	"sync"
-	"text/template"
 
 	"github.com/IBM/sarama"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
@@ -25,15 +24,15 @@ type Exporter struct {
 
 	Settings Settings
 
-	sender      MessageSender
-	init        sync.Once
-	csvTemplate *template.Template
+	init   sync.Once
+	sender MessageSender
+	dialer func(addrs []string, config *sarama.Config) (MessageSender, error)
 }
 
 // Export is saving a collection of events in a file.
-func (f *Exporter) Export(_ context.Context, logger *log.Logger, featureEvents []exporter.FeatureEvent) error {
-	if f.sender == nil {
-		err := f.initializeWriter()
+func (e *Exporter) Export(_ context.Context, logger *log.Logger, featureEvents []exporter.FeatureEvent) error {
+	if e.sender == nil {
+		err := e.initializeWriter()
 		if err != nil {
 			return fmt.Errorf("writer: %w", err)
 		}
@@ -41,19 +40,19 @@ func (f *Exporter) Export(_ context.Context, logger *log.Logger, featureEvents [
 
 	var messages []*sarama.ProducerMessage
 	for _, event := range featureEvents {
-		data, err := f.formatMessage(event)
+		data, err := e.formatMessage(event)
 		if err != nil {
 			return fmt.Errorf("format: %w", err)
 		}
 
 		messages = append(messages, &sarama.ProducerMessage{
-			Topic: f.Settings.Topic,
+			Topic: e.Settings.Topic,
 			Key:   sarama.StringEncoder(event.UserKey),
 			Value: sarama.ByteEncoder(data),
 		})
 	}
 
-	err := f.sender.SendMessages(messages)
+	err := e.sender.SendMessages(messages)
 	if err != nil {
 		return fmt.Errorf("send: %w", err)
 	}
@@ -62,19 +61,26 @@ func (f *Exporter) Export(_ context.Context, logger *log.Logger, featureEvents [
 	return nil
 }
 
-func (f *Exporter) IsBulk() bool {
+func (e *Exporter) IsBulk() bool {
 	return false
 }
 
-func (f *Exporter) initializeWriter() error {
+func (e *Exporter) initializeWriter() error {
 	var err error
-	f.init.Do(func() {
-		if f.Settings.Config == nil {
-			err = errors.New("writer configuration not provided")
-			return
+	e.init.Do(func() {
+		if e.Settings.Config == nil {
+			e.Settings.Config = sarama.NewConfig()
+			e.Settings.Config.Producer.Return.Successes = true // Needs to be true for sync producers
 		}
 
-		f.sender, err = sarama.NewSyncProducer(f.Settings.Addresses, f.Settings.Config)
+		if e.dialer == nil {
+			e.dialer = func(addrs []string, config *sarama.Config) (MessageSender, error) {
+				// Adapter for the function to comply with the MessageSender interface return
+				return sarama.NewSyncProducer(addrs, config)
+			}
+		}
+
+		e.sender, err = e.dialer(e.Settings.Addresses, e.Settings.Config)
 		if err != nil {
 			err = fmt.Errorf("producer: %w", err)
 			return
@@ -84,11 +90,11 @@ func (f *Exporter) initializeWriter() error {
 	return err
 }
 
-func (f *Exporter) formatMessage(event exporter.FeatureEvent) ([]byte, error) {
-	switch f.Format {
+func (e *Exporter) formatMessage(event exporter.FeatureEvent) ([]byte, error) {
+	switch e.Format {
 	case formatJSON:
 		fallthrough
 	default:
-		return exporter.FormatEventInJSON(event)
+		return json.Marshal(event)
 	}
 }
