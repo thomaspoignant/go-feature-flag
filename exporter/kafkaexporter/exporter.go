@@ -16,33 +16,41 @@ const (
 	formatJSON = "json"
 )
 
+// MessageSender is a Kafka producer that implements the SendMessages method
 type MessageSender interface {
 	SendMessages(msgs []*sarama.ProducerMessage) error
 }
 
+// Settings contains Kafka-specific configurations needed for message creation
 type Settings struct {
 	Topic     string
 	Addresses []string
 	*sarama.Config
 }
 
+// Exporter sends events to a Kafka topic using a synchronous producer
 type Exporter struct {
-	// Format is the output format you want in your exported file.
-	// Available format are JSON, CSV and Parquet.
+	// Format is the output format for the message value.
+	// The only available format right now is JSON, and this field provided for future usage.
 	// Default: JSON
 	Format string
 
+	// Settings contains the Kafka producer's configuration. The Topic and Addresses fields are required. If
+	// no sarama.Config is provided a sensible default will be used.
 	Settings Settings
 
 	init   sync.Once
 	sender MessageSender
+	// dialer will create the producer. This field is added for dependency injection during testing as sarama
+	// has the annoying tendency to dial as soon as a producer is created.
 	dialer func(addrs []string, config *sarama.Config) (MessageSender, error)
 }
 
-// Export is saving a collection of events in a file.
+// Export will produce a message to the Kafka topic. The message's value will contain the event encoded in the
+// selected format. Messages are publish synchronously and will error immediately on failure.
 func (e *Exporter) Export(_ context.Context, logger *log.Logger, featureEvents []exporter.FeatureEvent) error {
 	if e.sender == nil {
-		err := e.initializeWriter()
+		err := e.initializeProducer()
 		if err != nil {
 			return fmt.Errorf("writer: %w", err)
 		}
@@ -71,11 +79,14 @@ func (e *Exporter) Export(_ context.Context, logger *log.Logger, featureEvents [
 	return nil
 }
 
+// IsBulk reports if the producer can handle bulk messages. Will always return false for this exporter.
 func (e *Exporter) IsBulk() bool {
 	return false
 }
 
-func (e *Exporter) initializeWriter() error {
+// initializeProducer runs only once and creates a new producer from the dialer. If the config is not populated a new
+// one will be created with sensible defaults.
+func (e *Exporter) initializeProducer() error {
 	var err error
 	e.init.Do(func() {
 		if e.Settings.Config == nil {
@@ -100,6 +111,7 @@ func (e *Exporter) initializeWriter() error {
 	return err
 }
 
+// formatMessage returns the event encoded in the selected format. Will always use JSON for now.
 func (e *Exporter) formatMessage(event exporter.FeatureEvent) ([]byte, error) {
 	switch e.Format {
 	case formatJSON:
