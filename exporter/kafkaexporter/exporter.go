@@ -16,6 +16,16 @@ const (
 	formatJSON = "json"
 )
 
+type MessageSender interface {
+	SendMessages(msgs []*sarama.ProducerMessage) error
+}
+
+type Settings struct {
+	Topic     string
+	Addresses []string
+	*sarama.Config
+}
+
 type Exporter struct {
 	// Format is the output format you want in your exported file.
 	// Available format are JSON, CSV and Parquet.
