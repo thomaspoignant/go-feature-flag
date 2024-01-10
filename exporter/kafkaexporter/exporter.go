@@ -56,7 +56,7 @@ func (e *Exporter) Export(_ context.Context, logger *log.Logger, featureEvents [
 		}
 	}
 
-	messages := make([]*sarama.ProducerMessage, len(featureEvents))
+	messages := make([]*sarama.ProducerMessage, 0, len(featureEvents))
 	for _, event := range featureEvents {
 		data, err := e.formatMessage(event)
 		if err != nil {
