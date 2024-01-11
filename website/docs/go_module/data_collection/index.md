@@ -12,6 +12,7 @@ It collects all the variations events and can save these events on several locat
 - [S3](s3.md) *- export your variation usages to S3.*
 - [Webhook](webhook.md) *- export your variation usages by calling a webhook.*
 - [Google Cloud Storage](google_cloud_storage.md) *- export your variation usages by calling a webhook.*
+- [Kafka](kafka.md) *- export your variation usages by producing messages to a Kafka topic.*
 
 If the existing exporter does not work with your system you can extend the system and use a [custom exporter](custom.md).
 
