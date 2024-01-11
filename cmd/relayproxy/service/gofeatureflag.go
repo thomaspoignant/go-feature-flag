@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/kafkaexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/s3exporterv2"
 	"github.com/thomaspoignant/go-feature-flag/exporter/sqsexporter"
@@ -61,7 +62,7 @@ func NewGoFeatureFlagClient(
 
 	var exp ffclient.DataExporter
 	if proxyConf.Exporter != nil {
-		exp, err = initExporter(proxyConf.Exporter)
+		exp, err = initDataExporter(proxyConf.Exporter)
 		if err != nil {
 			return nil, err
 		}
@@ -161,23 +162,7 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 	}
 }
 
-func initExporter(c *config.ExporterConf) (ffclient.DataExporter, error) {
-	format := config.DefaultExporter.Format
-	if c.Format != "" {
-		format = c.Format
-	}
-	filename := config.DefaultExporter.FileName
-	if c.Filename != "" {
-		filename = c.Filename
-	}
-	csvTemplate := config.DefaultExporter.CsvFormat
-	if c.CsvTemplate != "" {
-		csvTemplate = c.CsvTemplate
-	}
-	parquetCompressionCodec := config.DefaultExporter.ParquetCompressionCodec
-	if c.ParquetCompressionCodec != "" {
-		parquetCompressionCodec = c.ParquetCompressionCodec
-	}
+func initDataExporter(c *config.ExporterConf) (ffclient.DataExporter, error) {
 	dataExp := ffclient.DataExporter{
 		FlushInterval: func() time.Duration {
 			if c.FlushInterval != 0 {
@@ -193,31 +178,68 @@ func initExporter(c *config.ExporterConf) (ffclient.DataExporter, error) {
 		}(),
 	}
 
+	var err error
+	dataExp.Exporter, err = createExporter(c)
+	if err != nil {
+		return ffclient.DataExporter{}, err
+	}
+
+	return dataExp, nil
+}
+
+func createExporter(c *config.ExporterConf) (exporter.Exporter, error) {
+	format := config.DefaultExporter.Format
+	if c.Format != "" {
+		format = c.Format
+	}
+
+	filename := config.DefaultExporter.FileName
+	if c.Filename != "" {
+		filename = c.Filename
+	}
+
+	csvTemplate := config.DefaultExporter.CsvFormat
+	if c.CsvTemplate != "" {
+		csvTemplate = c.CsvTemplate
+	}
+
+	parquetCompressionCodec := config.DefaultExporter.ParquetCompressionCodec
+	if c.ParquetCompressionCodec != "" {
+		parquetCompressionCodec = c.ParquetCompressionCodec
+	}
+
 	switch c.Kind {
 	case config.WebhookExporter:
-		dataExp.Exporter = &webhookexporter.Exporter{
-			EndpointURL: c.EndpointURL, Secret: c.Secret, Meta: c.Meta, Headers: c.Headers}
-		return dataExp, nil
+		return &webhookexporter.Exporter{
+			EndpointURL: c.EndpointURL,
+			Secret:      c.Secret,
+			Meta:        c.Meta,
+			Headers:     c.Headers,
+		}, nil
 	case config.FileExporter:
-		dataExp.Exporter = &fileexporter.Exporter{Format: format, OutputDir: c.OutputDir, Filename: filename,
-			CsvTemplate: csvTemplate, ParquetCompressionCodec: parquetCompressionCodec}
-		return dataExp, nil
+		return &fileexporter.Exporter{
+			Format:                  format,
+			OutputDir:               c.OutputDir,
+			Filename:                filename,
+			CsvTemplate:             csvTemplate,
+			ParquetCompressionCodec: parquetCompressionCodec,
+		}, nil
 	case config.LogExporter:
-		dataExp.Exporter = &logsexporter.Exporter{
+		return &logsexporter.Exporter{
 			LogFormat: func() string {
 				if c.LogFormat != "" {
 					return c.LogFormat
 				}
 				return config.DefaultExporter.LogFormat
 			}(),
-		}
-		return dataExp, nil
+		}, nil
 	case config.S3Exporter:
 		awsConfig, err := awsConf.LoadDefaultConfig(context.Background())
 		if err != nil {
-			return dataExp, err
+			return nil, err
 		}
-		dataExp.Exporter = &s3exporterv2.Exporter{
+
+		return &s3exporterv2.Exporter{
 			Bucket:                  c.Bucket,
 			Format:                  format,
 			S3Path:                  c.Path,
@@ -225,34 +247,33 @@ func initExporter(c *config.ExporterConf) (ffclient.DataExporter, error) {
 			CsvTemplate:             csvTemplate,
 			ParquetCompressionCodec: parquetCompressionCodec,
 			AwsConfig:               &awsConfig,
-		}
-		return dataExp, nil
+		}, nil
 	case config.GoogleStorageExporter:
-		dataExp.Exporter = &gcstorageexporter.Exporter{
+		return &gcstorageexporter.Exporter{
 			Bucket:                  c.Bucket,
 			Format:                  format,
 			Path:                    c.Path,
 			Filename:                filename,
 			CsvTemplate:             csvTemplate,
 			ParquetCompressionCodec: parquetCompressionCodec,
-		}
-		return dataExp, nil
+		}, nil
 	case config.SQSExporter:
 		awsConfig, err := awsConf.LoadDefaultConfig(context.Background())
 		if err != nil {
-			return dataExp, err
-		}
-		dataExp.Exporter = &sqsexporter.Exporter{QueueURL: c.QueueURL, AwsConfig: &awsConfig}
-		return dataExp, nil
-	case config.KafkaExporter:
-		dataExp.Exporter = &kafkaexporter.Exporter{
-			Format:   format,
-			Settings: c.Kafka,
+			return nil, err
 		}
 
-		return dataExp, nil
+		return &sqsexporter.Exporter{
+			QueueURL:  c.QueueURL,
+			AwsConfig: &awsConfig,
+		}, nil
+	case config.KafkaExporter:
+		return &kafkaexporter.Exporter{
+			Format:   format,
+			Settings: c.Kafka,
+		}, nil
 	default:
-		return ffclient.DataExporter{}, fmt.Errorf("invalid exporter: kind \"%s\" is not supported", c.Kind)
+		return nil, fmt.Errorf("invalid exporter: kind \"%s\" is not supported", c.Kind)
 	}
 }
 

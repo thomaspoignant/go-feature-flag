@@ -357,7 +357,7 @@ func Test_initExporter(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := initExporter(tt.conf)
+			got, err := initDataExporter(tt.conf)
 			tt.wantErr(t, err)
 			assert.IsType(t, tt.wantType, got.Exporter)
 			if err == nil && !tt.skipCompleteValidation {
