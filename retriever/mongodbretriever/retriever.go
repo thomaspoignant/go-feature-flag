@@ -13,21 +13,16 @@ import (
 
 // Retriever is a configuration struct for a MongoDB connection and Collection.
 type Retriever struct {
-	//TODO: remap in relay proxy
+	// MongoDB connection URI
 	URI          string
-	Collection   string
+	// Mongodb database where flags collection is
 	Database     string
+	// Mongodb collection where flag definitions are stored
+	Collection   string
 	dbConnection *mongo.Database
 	dbClient     *mongo.Client
 	status       string
 }
-
-// type InitializableRetriever interface {
-// 	Retrieve(ctx context.Context) ([]byte, error)
-// 	Init(ctx context.Context) error
-// 	Shutdown(ctx context.Context) error
-// 	Status() Status
-// }
 
 func (r *Retriever) Init(ctx context.Context) error {
 	if r.dbConnection == nil {
@@ -45,15 +40,17 @@ func (r *Retriever) Init(ctx context.Context) error {
 	return nil
 }
 
+// returns the current status of the retriever
 func (r *Retriever) Status(_ context.Context) retriever.Status {
 	return r.status
 }
 
+// disconnects the retriever from Mongodb instance
 func (r *Retriever) Shutdown(ctx context.Context) error {
 	return r.dbClient.Disconnect(ctx)
 }
 
-// Retrieve is reading flag configuration from mongodb collection and returning it
+// Reads flag configuration from mongodb and returns it
 func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	opt := options.CollectionOptions{}
 	opt.SetBSONOptions(&options.BSONOptions{OmitZeroStruct: true})
