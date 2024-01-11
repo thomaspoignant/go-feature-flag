@@ -2,16 +2,18 @@ package service
 
 import (
 	"fmt"
+	"net/http"
+	"testing"
+	"time"
+
 	"github.com/thomaspoignant/go-feature-flag/exporter"
+	"github.com/thomaspoignant/go-feature-flag/exporter/kafkaexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/s3exporterv2"
 	"github.com/thomaspoignant/go-feature-flag/exporter/sqsexporter"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"github.com/thomaspoignant/go-feature-flag/notifier/slacknotifier"
 	"github.com/thomaspoignant/go-feature-flag/notifier/webhooknotifier"
 	"github.com/thomaspoignant/go-feature-flag/retriever/s3retrieverv2"
-	"net/http"
-	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
@@ -154,7 +156,8 @@ func Test_initRetriever(t *testing.T) {
 				Timeout: 10000000000,
 			},
 			wantType: &httpretriever.Retriever{},
-		}, {
+		},
+		{
 			name:    "Convert Google storage Retriever",
 			wantErr: assert.NoError,
 			conf: &config.RetrieverConf{
@@ -326,6 +329,30 @@ func Test_initExporter(t *testing.T) {
 				},
 			},
 			wantType: &gcstorageexporter.Exporter{},
+		},
+		{
+			name:    "Convert KafkaExporter",
+			wantErr: assert.NoError,
+			conf: &config.ExporterConf{
+				Kind:             "kafka",
+				MaxEventInMemory: 1990,
+				Kafka: kafkaexporter.Settings{
+					Topic:     "example-topic",
+					Addresses: []string{"addr1", "addr2"},
+				},
+			},
+			want: ffclient.DataExporter{
+				FlushInterval:    config.DefaultExporter.FlushInterval,
+				MaxEventInMemory: 1990,
+				Exporter: &kafkaexporter.Exporter{
+					Format: config.DefaultExporter.Format,
+					Settings: kafkaexporter.Settings{
+						Topic:     "example-topic",
+						Addresses: []string{"addr1", "addr2"},
+					},
+				},
+			},
+			wantType: &kafkaexporter.Exporter{},
 		},
 	}
 	for _, tt := range tests {
