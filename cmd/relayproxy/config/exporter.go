@@ -67,7 +67,7 @@ const (
 // IsValid is checking if the value is part of the enum
 func (r ExporterKind) IsValid() error {
 	switch r {
-	case FileExporter, WebhookExporter, LogExporter, S3Exporter, GoogleStorageExporter, SQSExporter:
+	case FileExporter, WebhookExporter, LogExporter, S3Exporter, GoogleStorageExporter, SQSExporter, KafkaExporter:
 		return nil
 	}
 	return fmt.Errorf("invalid exporter: kind \"%s\" is not supported", r)
