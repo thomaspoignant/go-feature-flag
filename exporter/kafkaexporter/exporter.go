@@ -47,7 +47,7 @@ type Exporter struct {
 }
 
 // Export will produce a message to the Kafka topic. The message's value will contain the event encoded in the
-// selected format. Messages are publish synchronously and will error immediately on failure.
+// selected format. Messages are published synchronously and will error immediately on failure.
 func (e *Exporter) Export(_ context.Context, logger *log.Logger, featureEvents []exporter.FeatureEvent) error {
 	if e.sender == nil {
 		err := e.initializeProducer()
