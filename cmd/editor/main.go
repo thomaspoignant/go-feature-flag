@@ -59,9 +59,21 @@ func EvaluateHandler(c echo.Context) error {
 		ErrorCode:     resolutionDetails.ErrorCode,
 		Failed:        resolutionDetails.ErrorCode != "",
 		Cacheable:     resolutionDetails.Cacheable,
-		Metadata:      f.GetMetadata(),
+		Metadata:      constructMetadata(f, resolutionDetails),
 	}
 	return c.JSON(http.StatusOK, resp)
+}
+
+func constructMetadata(f flag.InternalFlag, resolutionDetails flag.ResolutionDetails) map[string]interface{} {
+	metadata := f.GetMetadata()
+	if resolutionDetails.RuleName == nil || *resolutionDetails.RuleName == "" {
+		return metadata
+	}
+	if metadata == nil {
+		metadata = make(map[string]interface{})
+	}
+	metadata["evaluatedRuleName"] = resolutionDetails.RuleName
+	return metadata
 }
 
 // HealthHandler endpoint to validate that the service is up and running.
