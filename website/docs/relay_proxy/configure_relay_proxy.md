@@ -22,7 +22,7 @@ retriever:
 :::tip Use environment variables.
 You can also override these file configuration by using environment variables.
 
-Note that all environment variables should be uppercase.  
+Note that all environment variables should be uppercase.
 If you want to replace a nested fields, please use `_` to separate each field _(ex: `RETRIEVER_KIND`)_.
 :::
 
@@ -52,7 +52,7 @@ If you want to replace a nested fields, please use `_` to separate each field _(
 
 ## type `retriever`
 
-`go-feature-flag` is supporting different kind of retriever such as S3, Google store, etc ...  
+`go-feature-flag` is supporting different kind of retriever such as S3, Google store, etc ...
 In this section we will present all the available retriever configuration available.
 
 ### S3
@@ -128,6 +128,15 @@ _Note that relay proxy is only supporting this while running inside the kubernet
 | `configmap` | string | **none** | **(mandatory)** Name of the **configmap** we should read  _(ex: `feature-flag`)_.                                         |
 | `key`       | string | **none** | **(mandatory)** Name of the `key` in the **configmap** which contains the flag.                                           |
 
+### MongoDB
+
+| Field name  | Type   | Default  | Description                                                                                                               |
+|-------------|--------|----------|---------------------------------------------------------------------------------------------------------------------------|
+| `kind`      | string | **none** | **(mandatory)** Value should be **`mongodb`**.<br/>_This field is mandatory and describe which retriever you are using._ |
+| `uri` | string | **none** | **(mandatory)** This is the MongoDB URI used in order to connect to the MongoDB instajce.                  |
+| `database` | string | **none** | **(mandatory)** Name of the **database** where flags are stored.                                         |
+| `collection`       | string | **none** | **(mandatory)** Name of the **collection** where flags are stored.                                           |
+
 <a name="exporter"></a>
 
 ## type `exporter`
@@ -143,7 +152,7 @@ _Note that relay proxy is only supporting this while running inside the kubernet
 | `secret`           | string              | **none** | Secret used to sign your request body and fill the `X-Hub-Signature-256` header.<br/> See [signature section](https://thomaspoignant.github.io/go-feature-flag/latest/data_collection/webhook/#signature) for more details. |
 | `meta`             | map[string]string   | **none** | Add all the information you want to see in your request.                                                                                                                                                                    |
 | `headers`          | map[string][]string | **none** | Add all the headers you want to add while calling the endpoint                                                                                                                                                              |
-	
+
 
 ### File
 
