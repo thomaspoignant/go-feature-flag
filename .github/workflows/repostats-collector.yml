@@ -6,6 +6,7 @@ on:
   
 jobs:
   j1:
+    if: github.repository == 'thomaspoignant/go-feature-flag'
     name: repostats-for-nice-project
     runs-on: ubuntu-latest
     steps:
