@@ -150,3 +150,10 @@ my-flag:
   defaultRule:
     variation: C
 ```
+
+## Get the rule name in the metadata
+
+When you use a rule in your targeting, you can get the name of the rule in the metadata of the variation.  
+The information on what rule has been used to serve the variation is available in the metadata of the variation in the field called `evaluatedRuleName`.
+
+If you are interested about this information, you have to name your rules by adding the field `name` in your rule. This name will be extract and added in the `evaluatedRuleName` field of the metadata.
