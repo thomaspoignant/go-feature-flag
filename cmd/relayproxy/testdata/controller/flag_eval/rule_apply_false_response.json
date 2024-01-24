@@ -8,5 +8,8 @@
   "value": {
     "test3": "test"
   },
-  "cacheable": true
+  "cacheable": true,
+  "metadata": {
+    "evaluatedRuleName": "legacyRuleV0"
+  }
 }
