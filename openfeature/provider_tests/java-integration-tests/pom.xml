@@ -24,7 +24,7 @@
         <dependency>
             <groupId>dev.openfeature</groupId>
             <artifactId>sdk</artifactId>
-            <version>1.7.2</version>
+            <version>1.7.3</version>
         </dependency>
         <dependency>
             <groupId>dev.openfeature.contrib.providers</groupId>
@@ -38,7 +38,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.2.3</version>
+                <version>3.2.5</version>
             </plugin>
         </plugins>
     </build>
