@@ -41,7 +41,7 @@ func (r *Retriever) Init(ctx context.Context) error {
 }
 
 // returns the current status of the retriever
-func (r *Retriever) Status(_ context.Context) retriever.Status {
+func (r *Retriever) Status() retriever.Status {
 	return r.status
 }
 
