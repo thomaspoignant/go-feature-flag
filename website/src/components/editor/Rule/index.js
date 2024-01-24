@@ -26,7 +26,7 @@ Rule.propTypes = {
 export function Rule({variations, label, isDefaultRule}) {
   const [query, setQuery] = useState({
     combinator: 'and',
-    rules: [{field: '', operator: '==', value: ''}],
+    rules: [{field: '', operator: 'eq', value: ''}],
   });
 
   const {register, watch, setValue} = useFormContext();
@@ -166,6 +166,7 @@ function FieldSelector({handleOnChange, title, value, disabled, testID}) {
         displayText={title}
         disabled={disabled}
         controlled={true}
+        required={true}
         onChange={e => handleOnChange(e.target.value)}
       />
     </div>
@@ -309,8 +310,13 @@ function parseJsonToCustomQuery(json) {
       query += `${rule.field} ${rule.operator}`;
 
       if (rule.value) {
-        if (rule.operator == 'in') query += ` [${rule.value}]`;
-        else query += ` ${rule.value}`;
+        if (rule.operator === 'in') {
+          query += ` ${convertToFormattedArray(rule.value)}`;
+        } else {
+          query += isNumeric(rule.value)
+            ? ` ${rule.value}`
+            : ` "${rule.value}"`;
+        }
       }
     }
 
@@ -329,6 +335,46 @@ function parseJsonToCustomQuery(json) {
   return json.rules.map(processRule).join(` ${json.combinator} `);
 }
 
+/**
+ * Checks if a given value is numeric.
+ * @param {string} value - The value to check.
+ * @returns {boolean} Returns true if the value is numeric, false otherwise.
+ */
+function isNumeric(value) {
+  return /^-?\d+$/.test(value);
+}
+
+/**
+ * Converts a comma-separated string of numbers and strings into a formatted array string.
+ * @param {string} input - The input string containing comma-separated values.
+ * @returns {string} Returns the formatted array string.
+ *
+ * Example usage:
+ * const input1 = '1,2,3,4,5';
+ * const input2 = '1,"UUID-345-1234",3';
+ *
+ * const output1 = convertToFormattedArray(input1);
+ * const output2 = convertToFormattedArray(input2);
+ *
+ * console.log(output1); // Output: [1,2,3,4,5]
+ * console.log(output2); // Output: [1,"UUID-345-1234",3]
+ */
+function convertToFormattedArray(input) {
+  const elements = input.split(',');
+
+  const formattedArray = elements.map(element => {
+    const trimmedElement = element.trim();
+
+    if (isNumeric(trimmedElement)) {
+      return parseInt(trimmedElement, 10); // Ensure to specify the radix when parsing integers.
+    } else {
+      // Remove double quotes around string elements
+      return trimmedElement.replace(/^"(.*)"$/, '$1');
+    }
+  });
+
+  return JSON.stringify(formattedArray);
+}
 const ruleOperators = [
   {name: 'eq', label: 'Equals To'},
   {name: 'ne', label: 'Not Equals To'},
