@@ -130,7 +130,7 @@ _Note that relay proxy is only supporting this while running inside the kubernet
 
 ### MongoDB
 
-_To understand the format in which a flag needs to be configured in MongoDB, check the [example](../../../examples/retriever_mongodb) available._
+_To understand the format in which a flag needs to be configured in MongoDB, check the [example](/examples/retriever_mongodb) available._
 
 | Field name  | Type   | Default  | Description                                                                                                               |
 |-------------|--------|----------|---------------------------------------------------------------------------------------------------------------------------|
