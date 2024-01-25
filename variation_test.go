@@ -502,6 +502,89 @@ func TestBoolVariationDetails(t *testing.T) {
 				Value:         true,
 				TrackEvents:   true,
 				Cacheable:     true,
+				Metadata: map[string]interface{}{
+					"evaluatedRuleName": "legacyRuleV0",
+				},
+			},
+			wantErr:     false,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"true\", variation=\"True\"\n",
+		},
+		{
+			name: "Get rule name on metadata, rule apply",
+			args: args{
+				flagKey:      "test-flag",
+				user:         ffcontext.NewAnonymousEvaluationContext("random-key"),
+				defaultValue: true,
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Rules: &[]flag.Rule{
+						{
+							Name:  testconvert.String("legacyRuleV0"),
+							Query: testconvert.String("key eq \"random-key\""),
+							Percentages: &map[string]float64{
+								"False": 0,
+								"True":  100,
+							},
+						},
+					},
+					Variations: &map[string]*interface{}{
+						"Default": testconvert.Interface(false),
+						"False":   testconvert.Interface(false),
+						"True":    testconvert.Interface(true),
+					},
+					DefaultRule: &flag.Rule{
+						Name:            testconvert.String("legacyDefaultRule"),
+						VariationResult: testconvert.String("Default"),
+					},
+				}, nil),
+			},
+			want: model.VariationResult[bool]{
+				VariationType: "True",
+				Failed:        false,
+				Reason:        flag.ReasonTargetingMatch,
+				Value:         true,
+				TrackEvents:   true,
+				Cacheable:     true,
+				Metadata: map[string]interface{}{
+					"evaluatedRuleName": "legacyRuleV0",
+				},
+			},
+			wantErr:     false,
+			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"true\", variation=\"True\"\n",
+		},
+		{
+			name: "Get no rule name on metadata, rule apply has not name",
+			args: args{
+				flagKey:      "test-flag",
+				user:         ffcontext.NewAnonymousEvaluationContext("random-key"),
+				defaultValue: true,
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Rules: &[]flag.Rule{
+						{
+							Query: testconvert.String("key eq \"random-key\""),
+							Percentages: &map[string]float64{
+								"False": 0,
+								"True":  100,
+							},
+						},
+					},
+					Variations: &map[string]*interface{}{
+						"Default": testconvert.Interface(false),
+						"False":   testconvert.Interface(false),
+						"True":    testconvert.Interface(true),
+					},
+					DefaultRule: &flag.Rule{
+						Name:            testconvert.String("legacyDefaultRule"),
+						VariationResult: testconvert.String("Default"),
+					},
+				}, nil),
+			},
+			want: model.VariationResult[bool]{
+				VariationType: "True",
+				Failed:        false,
+				Reason:        flag.ReasonTargetingMatch,
+				Value:         true,
+				TrackEvents:   true,
+				Cacheable:     true,
 			},
 			wantErr:     false,
 			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"true\", variation=\"True\"\n",
@@ -541,6 +624,9 @@ func TestBoolVariationDetails(t *testing.T) {
 				Value:         false,
 				TrackEvents:   true,
 				Cacheable:     true,
+				Metadata: map[string]interface{}{
+					"evaluatedRuleName": "legacyRuleV0",
+				},
 			},
 			wantErr:     false,
 			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"false\", variation=\"False\"\n",
@@ -1094,6 +1180,9 @@ func TestFloat64VariationDetails(t *testing.T) {
 				Failed:        false,
 				Reason:        flag.ReasonTargetingMatch,
 				Cacheable:     true,
+				Metadata: map[string]interface{}{
+					"evaluatedRuleName": "legacyRuleV0",
+				},
 			},
 			wantErr:     false,
 			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"120.12\", variation=\"True\"\n",
@@ -1133,6 +1222,9 @@ func TestFloat64VariationDetails(t *testing.T) {
 				Failed:        false,
 				Reason:        flag.ReasonTargetingMatchSplit,
 				Cacheable:     true,
+				Metadata: map[string]interface{}{
+					"evaluatedRuleName": "legacyRuleV0",
+				},
 			},
 			wantErr:     false,
 			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"121.12\", variation=\"False\"\n",
@@ -1666,6 +1758,9 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 				Reason:        flag.ReasonTargetingMatch,
 				Value:         []interface{}{"true"},
 				Cacheable:     true,
+				Metadata: map[string]interface{}{
+					"evaluatedRuleName": "legacyRuleV0",
+				},
 			},
 			wantErr:     false,
 			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"\\[true\\]\"\n",
@@ -2172,6 +2267,9 @@ func TestJSONVariationDetails(t *testing.T) {
 				Reason:        flag.ReasonTargetingMatch,
 				Value:         map[string]interface{}{"true": true},
 				Cacheable:     true,
+				Metadata: map[string]interface{}{
+					"evaluatedRuleName": "legacyRuleV0",
+				},
 			},
 			wantErr:     false,
 			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"map\\[true:true\\]\", variation=\"True\"\n",
@@ -2211,6 +2309,9 @@ func TestJSONVariationDetails(t *testing.T) {
 				Reason:        flag.ReasonTargetingMatchSplit,
 				Value:         map[string]interface{}{"false": true},
 				Cacheable:     true,
+				Metadata: map[string]interface{}{
+					"evaluatedRuleName": "legacyRuleV0",
+				},
 			},
 			wantErr:     false,
 			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"map\\[false:true\\]\", variation=\"False\"\n",
@@ -2652,6 +2753,9 @@ func TestStringVariationDetails(t *testing.T) {
 				Reason:        flag.ReasonTargetingMatch,
 				Value:         "true",
 				Cacheable:     true,
+				Metadata: map[string]interface{}{
+					"evaluatedRuleName": "legacyRuleV0",
+				},
 			},
 			wantErr:     false,
 			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"true\", variation=\"True\"\n",
@@ -2691,6 +2795,9 @@ func TestStringVariationDetails(t *testing.T) {
 				Reason:        flag.ReasonTargetingMatchSplit,
 				Value:         "false",
 				Cacheable:     true,
+				Metadata: map[string]interface{}{
+					"evaluatedRuleName": "legacyRuleV0",
+				},
 			},
 			wantErr:     false,
 			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"false\", variation=\"False\"\n",
@@ -3162,6 +3269,9 @@ func TestIntVariationDetails(t *testing.T) {
 				Reason:        flag.ReasonTargetingMatch,
 				Value:         120,
 				Cacheable:     true,
+				Metadata: map[string]interface{}{
+					"evaluatedRuleName": "legacyRuleV0",
+				},
 			},
 			wantErr:     false,
 			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"120\", variation=\"True\"\n",
@@ -3201,6 +3311,9 @@ func TestIntVariationDetails(t *testing.T) {
 				Reason:        flag.ReasonTargetingMatchSplit,
 				Value:         121,
 				Cacheable:     true,
+				Metadata: map[string]interface{}{
+					"evaluatedRuleName": "legacyRuleV0",
+				},
 			},
 			wantErr:     false,
 			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"121\", variation=\"False\"\n",
@@ -3240,6 +3353,9 @@ func TestIntVariationDetails(t *testing.T) {
 				Reason:        flag.ReasonTargetingMatch,
 				Value:         120,
 				Cacheable:     true,
+				Metadata: map[string]interface{}{
+					"evaluatedRuleName": "legacyRuleV0",
+				},
 			},
 			wantErr:     false,
 			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"120\", variation=\"True\"\n",
@@ -3640,6 +3756,9 @@ func TestRawVariation(t *testing.T) {
 				TrackEvents:   true,
 				Reason:        flag.ReasonTargetingMatch,
 				Cacheable:     true,
+				Metadata: map[string]interface{}{
+					"evaluatedRuleName": "legacyRuleV0",
+				},
 			},
 			wantErr:     false,
 			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"map\\[test2:test\\]\", variation=\"True\"",
@@ -3679,6 +3798,9 @@ func TestRawVariation(t *testing.T) {
 				TrackEvents:   true,
 				Reason:        flag.ReasonTargetingMatchSplit,
 				Cacheable:     true,
+				Metadata: map[string]interface{}{
+					"evaluatedRuleName": "legacyRuleV0",
+				},
 			},
 			wantErr:     false,
 			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"map\\[test3:test\\]\", variation=\"False\"",
@@ -3719,6 +3841,9 @@ func TestRawVariation(t *testing.T) {
 				TrackEvents:   false,
 				Reason:        flag.ReasonTargetingMatch,
 				Cacheable:     true,
+				Metadata: map[string]interface{}{
+					"evaluatedRuleName": "legacyRuleV0",
+				},
 			},
 			wantErr:     false,
 			expectedLog: "^$",

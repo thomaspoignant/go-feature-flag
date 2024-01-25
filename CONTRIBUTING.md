@@ -131,7 +131,7 @@ By contributing to this repository, you agree that your contributions will be li
 
 ## 📊 Stats
 
-If you want to check the stats of GO Feature Flag you can have a look at https://stats.gofeatureflag.org/report.html
+If you want to check the stats of GO Feature Flag you can have a look at https://github-repo-stats--goff-github-stats.netlify.app/report.html
 
 ---
 
