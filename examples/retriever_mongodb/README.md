@@ -24,29 +24,42 @@ docker compose -f ./example/retriever_mongodb/docker-compose.yml up
 4. Create the `appConfig` database and the `featureFlags` collection within it. After this, insert a JSON flag definition below, where the `flag` key has the feature flag name as value.
 
 ```json
-{
-  "_id": {
-    "$oid": "65b1b65b20cf16aceb94e77f"
-  },
-  "flag": "flag-only-for-admin",
-  "variations": {
-    "default_var": false,
-    "false_var": false,
-    "true_var": true
-  },
-  "defaultRule": {
-    "variation": "Default"
-  },
-  "targeting": [
+[
     {
-      "query": "admin eq true",
-      "percentage": {
-        "false_var": 0,
-        "true_var": 100
-      }
+        "flag": "new-admin-access",
+        "variations": {
+            "default_var": false,
+            "false_var": false,
+            "true_var": true
+        },
+        "defaultRule": {
+            "percentage": {
+                "false_var": 70,
+                "true_var": 30
+            }
+        }
+    },
+    {
+        "flag": "flag-only-for-admin",
+        "variations": {
+            "default_var": false,
+            "false_var": false,
+            "true_var": true
+        },
+        "targeting": [
+            {
+                "query": "admin eq true",
+                "percentage": {
+                    "false_var": 0,
+                    "true_var": 100
+                }
+            }
+        ],
+        "defaultRule": {
+            "variation": "Default"
+        }
     }
-  ]
-}
+]
 ```
 
 5. Build the relay proxy
