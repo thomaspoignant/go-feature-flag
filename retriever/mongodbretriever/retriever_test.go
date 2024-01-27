@@ -32,10 +32,10 @@ func Test_MongoDBRetriever_Retrieve(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:    "Flag definition document 'flag' key does not have 'string' value",
+			name:    "Flag definition document 'flag' key does not have 'string' value (ignore this document)",
 			mocker:  &testutils.MockFlagNotStrResult,
-			want:    nil,
-			wantErr: true,
+			want:    []byte(testutils.FlagKeyNotStringResult),
+			wantErr: false,
 		},
 		{
 			name:    "No flags found on DB",

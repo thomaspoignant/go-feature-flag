@@ -3,7 +3,6 @@ package mongodbretriever
 import (
 	"context"
 	"encoding/json"
-	"errors"
 
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"go.mongodb.org/mongo-driver/bson"
@@ -14,9 +13,9 @@ import (
 // Retriever is a configuration struct for a MongoDB connection and Collection.
 type Retriever struct {
 	// MongoDB connection URI
-	URI          string
+	URI string
 	// Mongodb database where flags collection is
-	Database     string
+	Database string
 	// Mongodb collection where flag definitions are stored
 	Collection   string
 	dbConnection *mongo.Database
@@ -51,6 +50,7 @@ func (r *Retriever) Shutdown(ctx context.Context) error {
 }
 
 // Reads flag configuration from mongodb and returns it
+// if a document does not comply with specification it will be ignored
 func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	opt := options.CollectionOptions{}
 	opt.SetBSONOptions(&options.BSONOptions{OmitZeroStruct: true})
@@ -76,8 +76,6 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 			delete(doc, "flag")
 			if str, ok := val.(string); ok {
 				ffDocs[str] = doc
-			} else {
-				return nil, errors.New("flag key does not have a string as value")
 			}
 		}
 	}
