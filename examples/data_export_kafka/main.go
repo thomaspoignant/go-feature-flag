@@ -17,8 +17,8 @@ func main() {
 		1. Start a kafka server by running `docker-compose -f examples/data_export_kafka/docker-compose.yml up`
 		2. Create a topic: docker exec $(docker ps | grep cp-kafka |  awk '{print $1}') kafka-topics --create --topic go-feature-flag-events --bootstrap-server localhost:9092
 		3. Run this example
-			-> if you check the log, you should see the events being sent 1 by 1 to kafka.
-		4. Read the item in the topic: docker exec $(docker ps | grep cp-kafka |  awk '{print $1}')  kafka-console-consumer --bootstrap-server localhost:9092 --topic go-feature-flag-events --from-beginning
+			-> if you check the logs, you should see the events being sent 1 by 1 to kafka.
+		4. Read the items in the topic: docker exec $(docker ps | grep cp-kafka |  awk '{print $1}')  kafka-console-consumer --bootstrap-server localhost:9092 --topic go-feature-flag-events --from-beginning
 	*/
 	err := ffclient.Init(ffclient.Config{
 		PollingInterval: 10 * time.Second,
