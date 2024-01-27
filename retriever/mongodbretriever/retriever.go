@@ -79,8 +79,6 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 			} else {
 				return nil, errors.New("flag key does not have a string as value")
 			}
-		} else {
-			return nil, errors.New("no 'flag' entry found")
 		}
 	}
 
