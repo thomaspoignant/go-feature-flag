@@ -1,4 +1,4 @@
-# MongoDE example
+# MongoDB example
 
 This example contains everything you need to use **`MongoDB`** as the source for your flags.
 
