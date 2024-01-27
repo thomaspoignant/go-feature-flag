@@ -56,7 +56,7 @@ docker compose -f ./example/retriever_mongodb/docker-compose.yml up
             }
         ],
         "defaultRule": {
-            "variation": "Default"
+            "variation": "default_var"
         }
     }
 ]
