@@ -62,22 +62,10 @@ docker compose -f ./example/retriever_mongodb/docker-compose.yml up
 ]
 ```
 
-5. Build the relay proxy
-
-```shell
-make build-relayproxy
-```
-
-6. Execute the relay proxy with the example configuration
-
-```shell
-./out/bin/relayproxy --config ./examples/retriever_mongodb/mongo-retriever-config.yam
-```
-
-7. Run the example app to visualize the flags being evaluated
+5. Run the example app to visualize the flags being evaluated
 
 ```shell
 go run ./examples/retriever_mongodb/main.go
 ```
 
-8. Play with the values in the configured MongoDB documents to see different outputs
+6. Play with the values in the configured MongoDB documents to see different outputs
