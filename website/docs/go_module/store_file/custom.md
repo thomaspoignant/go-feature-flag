@@ -29,7 +29,7 @@ The only difference with the `Retriever` interface is that the `Init` func of yo
 ```go
 type InitializableRetriever interface {
 	Retrieve(ctx context.Context) ([]byte, error)
-	Init(ctx context.Context) error
+	Init(ctx context.Context, logger *log.Logger) error
 	Shutdown(ctx context.Context) error
 	Status() retriever.Status
 }
