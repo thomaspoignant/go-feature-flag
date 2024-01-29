@@ -9,11 +9,11 @@ import {translate} from '@docusaurus/Translate';
 import {useLocation} from '@docusaurus/router';
 import DefaultNavbarItem from '@theme/NavbarItem/DefaultNavbarItem';
 import DropdownNavbarItem from '@theme/NavbarItem/DropdownNavbarItem';
-import semver from "semver";
+import semver from 'semver';
 
 const maxVersionToDisplayPerMajor = 4;
-const getVersionMainDoc = (version) =>
-  version.docs.find((doc) => doc.id === version.mainDocId);
+const getVersionMainDoc = version =>
+  version.docs.find(doc => doc.id === version.mainDocId);
 export default function DocsVersionDropdownNavbarItem({
   mobile,
   docsPluginId,
@@ -26,14 +26,15 @@ export default function DocsVersionDropdownNavbarItem({
   const activeDocContext = useActiveDocContext(docsPluginId);
   let versions = useVersions(docsPluginId);
 
-  let versionToKeep =
-    getListVersionsToDisplay(versions.filter(item => item.name !== "current").map(i => i.name));
+  let versionToKeep = getListVersionsToDisplay(
+    versions.filter(item => item.name !== 'current').map(i => i.name)
+  );
 
-  versions = versions.filter(item =>{
-    return versionToKeep.includes(item.name.replace("v",""))
-  })
+  versions = versions.filter(item => {
+    return versionToKeep.includes(item.name.replace('v', ''));
+  });
   const {savePreferredVersionName} = useDocsPreferredVersion(docsPluginId);
-  const versionLinks = versions.map((version) => {
+  const versionLinks = versions.map(version => {
     // We try to link to the same doc, in another version
     // When not possible, fallback to the "main doc" of the version
     const versionDoc =
@@ -93,21 +94,20 @@ export default function DocsVersionDropdownNavbarItem({
   );
 }
 
-
-function getListVersionsToDisplay(versionToCheck){
+function getListVersionsToDisplay(versionToCheck) {
   const latestMinorVersions = new Map();
   const versionMap = new Map();
-  for ( const v of versionToCheck.map(semver.parse) ) {
+  for (const v of versionToCheck.map(semver.parse)) {
     const baseVersion = new semver.SemVer(`${v.major}.${v.minor}.0`).toString();
-    if(!versionMap.get(v.major)){
-      versionMap.set(v.major, 0)
+    if (!versionMap.get(v.major)) {
+      versionMap.set(v.major, 0);
     }
-    if (!latestMinorVersions.has( baseVersion )) {
-      versionMap.set(v.major, versionMap.get(v.major) + 1)
+    if (!latestMinorVersions.has(baseVersion)) {
+      versionMap.set(v.major, versionMap.get(v.major) + 1);
       if (versionMap.get(v.major) <= maxVersionToDisplayPerMajor) {
         latestMinorVersions.set(baseVersion, v);
       }
     }
   }
-  return Array.from(latestMinorVersions.values()).map(v => v.toString())
+  return Array.from(latestMinorVersions.values()).map(v => v.toString());
 }

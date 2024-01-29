@@ -8,17 +8,33 @@ Select.propTypes = {
   content: PropTypes.array,
   label: PropTypes.string.isRequired,
   required: PropTypes.bool,
+  controlled: PropTypes.bool,
 };
-export function Select({title, content, label, required}) {
+export function Select({
+  title,
+  content,
+  label,
+  required,
+  controlled = false,
+  ...props
+}) {
   const {register} = useFormContext();
+
+  const registerProps = register(label, required);
+
   return (
     <div className={styles.selector}>
-      <select defaultValue="0" {...register(label, required)}>
+      <select
+        defaultValue="0"
+        {...(controlled ? {} : registerProps)}
+        {...props}>
         <option disabled={true} defaultChecked={true} value={null}>
           {title}
         </option>
-        {content.map((item, index) => (
-          <option value={item.value} key={`variation_type_${item.value}_${item.displayText}`}>
+        {content.map(item => (
+          <option
+            value={item.value}
+            key={`variation_type_${item.value}_${item.displayText}`}>
             {item.displayName}
           </option>
         ))}

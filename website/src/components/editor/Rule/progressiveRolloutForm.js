@@ -21,7 +21,7 @@ function ProgressiveStep({name, initialValue, label, variations, defaultDate}) {
   const {
     register,
     control,
-    formState: { errors },
+    formState: {errors},
   } = useFormContext();
 
   return (
@@ -102,7 +102,7 @@ function ProgressiveStep({name, initialValue, label, variations, defaultDate}) {
         </div>
       </div>
       <div>
-        <DisplayErrors errors={errors} label={label}/>
+        <DisplayErrors errors={errors} label={label} />
       </div>
     </div>
   );

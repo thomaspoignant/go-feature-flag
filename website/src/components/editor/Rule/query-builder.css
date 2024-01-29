@@ -1,0 +1,12 @@
+.ruleGroup {
+  background: none;
+}
+
+.ruleGroup-body {
+  padding: 0.6rem 0;
+  gap: 1.2rem !important;
+}
+
+.ruleGroup button {
+  padding: 4px 8px;
+}

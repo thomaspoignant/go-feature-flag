@@ -81,10 +81,7 @@ function ProgressBar({percentages}) {
 
   const sum = percentages
     .filter(item => item && !isNaN(item.value))
-    .reduce(
-      (accumulator, currentValue) => accumulator + currentValue.value,
-      0
-    );
+    .reduce((accumulator, currentValue) => accumulator + currentValue.value, 0);
 
   if (sum > 100) {
     return (
