@@ -507,13 +507,13 @@ testing = ["argcomplete", "attrs (>=19.2.0)", "hypothesis (>=3.56)", "mock", "no
 
 [[package]]
 name = "pytest-docker"
-version = "2.0.1"
+version = "2.2.0"
 description = "Simple pytest fixtures for Docker and Docker Compose based tests"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "pytest-docker-2.0.1.tar.gz", hash = "sha256:1c17e9202a566f85ed5ef269fe2815bd4899e90eb639622e5d14277372ca7524"},
-    {file = "pytest_docker-2.0.1-py3-none-any.whl", hash = "sha256:7103f97b8c479c826b63d73cfb83383dc1970d35105ed1ce78a722c90c7fe650"},
+    {file = "pytest-docker-2.2.0.tar.gz", hash = "sha256:b083fd2ae69212369390033c22228d3263555a5f3b4bef87b74160e07218f377"},
+    {file = "pytest_docker-2.2.0-py3-none-any.whl", hash = "sha256:8ee9c9742d58ac079c81c03635bb830881f7f4d529f0f53f4ba2c89ffc9c7137"},
 ]
 
 [package.dependencies]
