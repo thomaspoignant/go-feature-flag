@@ -51,10 +51,13 @@ export function HomeHeader() {
               <span className="goffMainTitle">GO Feature Flag</span>
               <br />
               <span className="goffMainSubtitle">
-              {`${siteConfig.tagline}`}
+                {`${siteConfig.tagline}`}
               </span>
               <p>
-                <span className={styles.descriptionFirstLine}>Ship Faster, Reduce Risk, and Build Scale</span><br/>
+                <span className={styles.descriptionFirstLine}>
+                  Ship Faster, Reduce Risk, and Build Scale
+                </span>
+                <br />
                 Feature flags lets you modify system behavior without changing
                 code. Deploy every day, release when you are ready. Reduce risk
                 by releasing your features progressively.
@@ -81,10 +84,14 @@ export function HomeHeader() {
                 </button>
               </Link>
               <Link
-                to={"/docs"}
+                to={'/docs'}
                 type="button"
                 className={clsx('btn btn-dark btn-labeled btn-lg')}>
-                <button className={clsx("pushy__btn pushy__btn--df", styles.pushy__btnGoff)}>
+                <button
+                  className={clsx(
+                    'pushy__btn pushy__btn--df',
+                    styles.pushy__btnGoff
+                  )}>
                   <span className="btn-label">
                     <i className="fa-solid fa-circle-right"></i>
                   </span>{' '}

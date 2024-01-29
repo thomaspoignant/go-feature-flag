@@ -18,7 +18,8 @@ const config = {
   trailingSlash: false,
 
   customFields: {
-    description: 'GO Feature Flag is a simple, complete and lightweight feature flag solution 100% Open Source.',
+    description:
+      'GO Feature Flag is a simple, complete and lightweight feature flag solution 100% Open Source.',
     logo: 'img/logo/logo.png',
     github: 'https://github.com/thomaspoignant/go-feature-flag',
     sponsor: 'https://github.com/sponsors/thomaspoignant',
@@ -27,7 +28,8 @@ const config = {
       '//gofeatureflag.us14.list-manage.com/subscribe/post?u=86acc1a78e371bf66a9683672&amp;id=f42abfec51&amp',
     swaggerURL:
       'https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/cmd/relayproxy/docs/swagger.yaml',
-    playgroundEvaluationApi: 'https://fjaf6mppiu.eu-west-1.awsapprunner.com/v1/feature/evaluate',
+    playgroundEvaluationApi:
+      'https://fjaf6mppiu.eu-west-1.awsapprunner.com/v1/feature/evaluate',
   },
   // Even if you don't use internalization, you can use this field to set useful
   // metadata like html lang. For example, if your site is Chinese, you may want
@@ -74,7 +76,7 @@ const config = {
           priority: 0.5,
           ignorePatterns: ['/tags/**'],
           filename: 'sitemap.xml',
-        }
+        },
       }),
     ],
   ],
@@ -125,8 +127,8 @@ const config = {
               {
                 to: '/product/open_feature_support',
                 html: '<i class="fa-solid fa-toggle-on menu-icon"></i> Open Feature Support',
-              }
-            ]
+              },
+            ],
           },
           {
             position: 'left',
@@ -147,7 +149,7 @@ const config = {
               {
                 html: '<i class="fa-solid fa-book menu-icon"></i> Documentation',
                 type: 'doc',
-                docId: 'index'
+                docId: 'index',
               },
               {
                 html: '<i class="fa-solid fa-eye menu-icon"></i> Examples <i class="fa fa-external-link" aria-hidden="true"></i>',
@@ -155,7 +157,7 @@ const config = {
               },
               {
                 html: '<i class="fa-solid fa-star menu-icon"></i> Feature Flag Best Practice',
-                to: '/blog/feature-flag-best-practice'
+                to: '/blog/feature-flag-best-practice',
               },
               {
                 to: '/slack',
@@ -164,8 +166,8 @@ const config = {
               {
                 to: 'https://github.com/thomaspoignant/go-feature-flag/releases',
                 html: '<i class="fa-brands fa-github menu-icon"></i> Changelog <i class="fa fa-external-link" aria-hidden="true"></i>',
-              }
-            ]
+              },
+            ],
           },
           {type: 'doc', docId: 'index', position: 'left', html: 'Docs'},
           {to: '/blog', label: 'Blog', position: 'left'},
@@ -202,7 +204,7 @@ const config = {
             position: 'right',
             className: 'header-slack-link navbar__right',
             'aria-label': 'Slack',
-          }
+          },
         ],
       },
       footer: {
@@ -222,7 +224,7 @@ const config = {
               },
               {
                 label: 'GO Module',
-                to: '/docs/category/use-as-a-go-module'
+                to: '/docs/category/use-as-a-go-module',
               },
               {
                 label: 'SDKs',
@@ -230,8 +232,8 @@ const config = {
               },
               {
                 label: 'Relay Proxy',
-                to: '/docs/relay_proxy'
-              }
+                to: '/docs/relay_proxy',
+              },
             ],
           },
 
@@ -276,16 +278,25 @@ const config = {
               {
                 label: 'Blog',
                 to: '/blog',
-              }
+              },
             ],
           },
         ],
         copyright: `Copyright © ${new Date().getFullYear()} GO Feature Flag.`,
       },
       prism: {
-        theme: require("prism-react-renderer").themes.vsLight,
-        darkTheme: require("prism-react-renderer").themes.vsDark,
-        additionalLanguages: ['java', 'scala', 'toml', 'php', 'go', 'csharp', 'yaml', 'python'],
+        theme: require('prism-react-renderer').themes.vsLight,
+        darkTheme: require('prism-react-renderer').themes.vsDark,
+        additionalLanguages: [
+          'java',
+          'scala',
+          'toml',
+          'php',
+          'go',
+          'csharp',
+          'yaml',
+          'python',
+        ],
       },
     }),
 };
