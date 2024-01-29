@@ -3,7 +3,7 @@
 }
 
 .soc {
-  padding-top: 5rem;
+  /*padding-top: 5rem;*/
 }
 
 .socialIcon {
@@ -48,6 +48,10 @@
   background-color: #e2432a;
 }
 
+.socialIconMongodb {
+  background-color: #023430;
+}
+
 .tooltip {
   position: relative;
   display: inline-block;
@@ -73,7 +77,7 @@
 .tooltip:hover .tooltiptext {
   visibility: visible;
   width: 140px;
-  bottom: 105%;
+  bottom: 80%;
   left: 50%;
   margin-left: -70px;
 }

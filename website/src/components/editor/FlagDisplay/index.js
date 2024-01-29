@@ -6,7 +6,7 @@ import YAML from 'yaml';
 import * as TOML from '@iarna/toml';
 import styles from './styles.module.css';
 import {Select} from '../Select';
-import { singleFlagFormConvertor } from "../utils";
+import {singleFlagFormConvertor} from '../utils';
 
 function formToGoFeatureFlag(formData) {
   const goffFlags = {};
@@ -56,12 +56,14 @@ export function FlagDisplay() {
   return (
     <div className="col-4-12">
       {!isValid && <ErrorInForm />}
-      {isValid && <Select
-        title={'Format'}
-        content={select}
-        required={false}
-        label={'flagFormat'}
-      />}
+      {isValid && (
+        <Select
+          title={'Format'}
+          content={select}
+          required={false}
+          label={'flagFormat'}
+        />
+      )}
       <div className={styles.space}></div>
       {isValid && (
         <Highlight className="JSON">

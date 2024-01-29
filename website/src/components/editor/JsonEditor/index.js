@@ -15,7 +15,7 @@ export function JsonEditor({label, value}) {
   return (
     <div className={styles.container} data-color-mode={colorMode}>
       <CodeEditor
-        value={value || ""}
+        value={value || ''}
         language="json"
         placeholder=" Please enter JSON."
         padding={7}
