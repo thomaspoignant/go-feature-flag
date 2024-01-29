@@ -21,8 +21,8 @@ type MessageSender interface {
 
 // Settings contains Kafka-specific configurations needed for message creation
 type Settings struct {
-	Topic     string
-	Addresses []string
+	Topic     string   `json:"topic"`
+	Addresses []string `json:"addresses"`
 	*sarama.Config
 }
 
