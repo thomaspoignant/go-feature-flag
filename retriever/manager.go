@@ -3,6 +3,7 @@ package retriever
 import (
 	"context"
 	"fmt"
+	"log"
 )
 
 // Manager is a struct that managed the retrievers.
@@ -10,14 +11,16 @@ type Manager struct {
 	ctx              context.Context
 	retrievers       []Retriever
 	onErrorRetriever []Retriever
+	logger           *log.Logger
 }
 
 // NewManager create a new Manager.
-func NewManager(ctx context.Context, retrievers []Retriever) *Manager {
+func NewManager(ctx context.Context, retrievers []Retriever, logger *log.Logger) *Manager {
 	return &Manager{
 		ctx:              ctx,
 		retrievers:       retrievers,
 		onErrorRetriever: make([]Retriever, 0),
+		logger:           logger,
 	}
 }
 
@@ -32,7 +35,7 @@ func (m *Manager) initRetrievers(ctx context.Context, retrieversToInit []Retriev
 	m.onErrorRetriever = make([]Retriever, 0)
 	for _, retriever := range retrieversToInit {
 		if r, ok := retriever.(InitializableRetriever); ok {
-			err := r.Init(ctx)
+			err := r.Init(ctx, m.logger)
 			if err != nil {
 				m.onErrorRetriever = append(m.onErrorRetriever, retriever)
 			}

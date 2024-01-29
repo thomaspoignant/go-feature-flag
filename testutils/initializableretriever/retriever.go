@@ -3,6 +3,7 @@ package initializableretriever
 import (
 	"context"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
+	"log"
 	"os"
 )
 
@@ -30,7 +31,7 @@ func (r *Retriever) Retrieve(_ context.Context) ([]byte, error) {
 	return content, nil
 }
 
-func (r *Retriever) Init(_ context.Context) error {
+func (r *Retriever) Init(_ context.Context, _ *log.Logger) error {
 	yamlString := `flag-xxxx-123:
   variations:
     A: true
