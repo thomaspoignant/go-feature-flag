@@ -3,6 +3,8 @@ package mongodbretriever
 import (
 	"context"
 	"encoding/json"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
+	"log"
 
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"go.mongodb.org/mongo-driver/bson"
@@ -21,9 +23,11 @@ type Retriever struct {
 	dbConnection *mongo.Database
 	dbClient     *mongo.Client
 	status       string
+	logger       *log.Logger
 }
 
-func (r *Retriever) Init(ctx context.Context) error {
+func (r *Retriever) Init(ctx context.Context, logger *log.Logger) error {
+	r.logger = logger
 	if r.dbConnection == nil {
 		r.status = retriever.RetrieverNotReady
 
@@ -76,7 +80,11 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 			delete(doc, "flag")
 			if str, ok := val.(string); ok {
 				ffDocs[str] = doc
+			} else {
+				fflog.Printf(r.logger, "ERROR: flag key does not have a string as value")
 			}
+		} else {
+			fflog.Printf(r.logger, "ERROR: no 'flag' entry found")
 		}
 	}
 
