@@ -22,8 +22,8 @@ defer ffclient.Close()
 ## Expected format
 If you use mongodb to store your flags, you need a specific format to store your flags.
 
-We expect the flag to be store in JSON format as defined in the [flag format](../configure_flag/flag_format#format-details),
-but you should also add a new field called ` "flag` containing the name of the flag.
+We expect the flag to be store in JSON format as defined in the [flag format](../../configure_flag/flag_format#format-details),
+but you should also add a new field called `flag` containing the name of the flag.
 
 The retriever will read all the flags from the collection.
 
