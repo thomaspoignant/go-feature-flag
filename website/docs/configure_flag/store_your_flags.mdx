@@ -12,6 +12,7 @@ import gitlablogo from '@site/static/docs/retrievers/gitlab.png';
 import googlelogo from '@site/static/docs/retrievers/google.png';
 import s3logo from '@site/static/docs/retrievers/s3.png';
 import k8slogo from '@site/static/docs/retrievers/k8s.png';
+import mongodblogo from '@site/static/docs/retrievers/mongodb.png';
 
 
 # Where to store your flags' configuration?
@@ -94,6 +95,14 @@ configuration and will evaluate your feature flags based on this configuration.
     content: <ConfigCardContent
       relayproxyLink={'../relay_proxy/configure_relay_proxy#file'}
       goModuleLink={'../go_module/store_file/file'}
+    />
+  },
+  {
+    logoImg: mongodblogo,
+    title:"MongoDB",
+    content: <ConfigCardContent
+      relayproxyLink={'../relay_proxy/configure_relay_proxy#mongodb'}
+      goModuleLink={'../go_module/store_file/mongodb'}
     />
   },
   {
