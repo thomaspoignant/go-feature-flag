@@ -4,12 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
-	"sync"
-
 	"github.com/IBM/sarama"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
+	"log"
 )
 
 const (
@@ -39,7 +37,6 @@ type Exporter struct {
 	// no sarama.Config is provided a sensible default will be used.
 	Settings Settings
 
-	init   sync.Once
 	sender MessageSender
 	// dialer will create the producer. This field is added for dependency injection during testing as sarama
 	// has the annoying tendency to dial as soon as a producer is created.
@@ -87,28 +84,26 @@ func (e *Exporter) IsBulk() bool {
 // initializeProducer runs only once and creates a new producer from the dialer. If the config is not populated a new
 // one will be created with sensible defaults.
 func (e *Exporter) initializeProducer() error {
+	if e.Settings.Config == nil {
+		e.Settings.Config = sarama.NewConfig()
+		e.Settings.Config.Producer.Return.Successes = true // Needs to be true for sync producers
+	}
+
+	if e.dialer == nil {
+		e.dialer = func(addrs []string, config *sarama.Config) (MessageSender, error) {
+			// Adapter for the function to comply with the MessageSender interface return
+			return sarama.NewSyncProducer(addrs, config)
+		}
+	}
+
 	var err error
-	e.init.Do(func() {
-		if e.Settings.Config == nil {
-			e.Settings.Config = sarama.NewConfig()
-			e.Settings.Config.Producer.Return.Successes = true // Needs to be true for sync producers
-		}
+	e.sender, err = e.dialer(e.Settings.Addresses, e.Settings.Config)
+	if err != nil {
+		err = fmt.Errorf("producer: %w", err)
+		return err
+	}
 
-		if e.dialer == nil {
-			e.dialer = func(addrs []string, config *sarama.Config) (MessageSender, error) {
-				// Adapter for the function to comply with the MessageSender interface return
-				return sarama.NewSyncProducer(addrs, config)
-			}
-		}
-
-		e.sender, err = e.dialer(e.Settings.Addresses, e.Settings.Config)
-		if err != nil {
-			err = fmt.Errorf("producer: %w", err)
-			return
-		}
-	})
-
-	return err
+	return nil
 }
 
 // formatMessage returns the event encoded in the selected format. Will always use JSON for now.
