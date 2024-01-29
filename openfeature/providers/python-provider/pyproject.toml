@@ -32,7 +32,7 @@ asyncio = "^3.4.3"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4"
-black = "^23.10.1"
+black = ">=23.10.1,<25.0.0"
 requests = "^2.31.0"
 pyyaml = "^6.0.1"
 pytest-docker = "^2.0.1"
