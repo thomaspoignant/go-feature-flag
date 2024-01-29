@@ -51,7 +51,7 @@ func (c *ExporterConf) IsValid() error {
 	}
 
 	if c.Kind == KafkaExporter && (c.Kafka.Topic == "" || len(c.Kafka.Addresses) == 0) {
-		return fmt.Errorf("invalid exporter: \"kakfa.topic\" and \"kakfa.addresses\" are required for kind \"%s\"", c.Kind)
+		return fmt.Errorf("invalid exporter: \"kakfa.topic\" and \"kafka.addresses\" are required for kind \"%s\"", c.Kind)
 	}
 
 	return nil
