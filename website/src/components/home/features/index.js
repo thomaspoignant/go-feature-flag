@@ -230,6 +230,8 @@ function Integration() {
             fontAwesomeIcon="fab fa-slack fa-stack-1x fa-inverse"
             tooltipText="Slack"
           />
+        </div>
+        <div className={clsx('grid grid-pad', styles.soc)}>
 
           <SocialIcon
             colorClassName={styles.socialIconBlack}
@@ -254,17 +256,22 @@ function Integration() {
             img={webhooklogo}
             tooltipText="Webhooks"
           />
-
+        </div>
+        <div className={clsx('grid grid-pad', styles.soc)}>
           <SocialIcon
-            colorClassName={styles.socialIconAws}
-            img={sqslogo}
-            tooltipText="AWS SQS"
+            colorClassName={styles.socialIconMongodb}
+            fontAwesomeIcon="devicon-mongodb-plain-wordmark colored"
+            tooltipText="Mongodb"
           />
-
           <SocialIcon
             colorClassName={styles.socialIconGitlab}
             fontAwesomeIcon="devicon-gitlab-plain"
             tooltipText="Gitlab"
+          />
+          <SocialIcon
+            colorClassName={styles.socialIconAws}
+            img={sqslogo}
+            tooltipText="AWS SQS"
           />
         </div>
       </div>

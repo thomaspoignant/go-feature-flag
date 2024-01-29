@@ -2,6 +2,7 @@ package retriever
 
 import (
 	"context"
+	"log"
 )
 
 // Retriever is the interface to create a Retriever to load you flags.
@@ -13,7 +14,7 @@ type Retriever interface {
 // InitializableRetriever is an extended version of the retriever that can be initialized and shutdown.
 type InitializableRetriever interface {
 	Retrieve(ctx context.Context) ([]byte, error)
-	Init(ctx context.Context) error
+	Init(ctx context.Context, logger *log.Logger) error
 	Shutdown(ctx context.Context) error
 	Status() Status
 }
