@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useCallback} from 'react';
 import {useFieldArray, useFormContext} from 'react-hook-form';
 import {Rule} from '../Rule';
 import styles from './styles.module.css';
@@ -11,13 +11,16 @@ Targeting.propTypes = {
 };
 export function Targeting({label, variations}) {
   const {control} = useFormContext();
-  const {fields, append, remove} = useFieldArray({
+  const {fields, append, remove, update} = useFieldArray({
     control,
     name: label,
   });
 
-  const addNewRule = () => append({name: `Rule ${fields.length + 1}`});
-  const removeCurrent = index => remove(index);
+  const addNewRule = useCallback(
+    () => append({name: `Rule ${fields.length + 1}`}),
+    []
+  );
+  const removeCurrent = useCallback(index => remove(index), []);
 
   return (
     <div>

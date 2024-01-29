@@ -23,6 +23,9 @@ type RetrieverConf struct {
 	Key         string              `mapstructure:"key" koanf:"key"`
 	BaseURL     string              `mapstructure:"baseUrl" koanf:"baseurl"`
 	AuthToken   string              `mapstructure:"token" koanf:"token"`
+	URI         string              `mapstructure:"uri" koanf:"uri"`
+	Database    string              `mapstructure:"database" koanf:"database"`
+	Collection  string              `mapstructure:"collection" koanf:"collection"`
 }
 
 // IsValid validate the configuration of the retriever
@@ -31,11 +34,8 @@ func (c *RetrieverConf) IsValid() error {
 	if err := c.Kind.IsValid(); err != nil {
 		return err
 	}
-	if c.Kind == GitHubRetriever && c.RepositorySlug == "" {
-		return fmt.Errorf("invalid retriever: no \"repositorySlug\" property found for kind \"%s\"", c.Kind)
-	}
-	if c.Kind == GitlabRetriever && c.RepositorySlug == "" {
-		return fmt.Errorf("invalid retriever: no \"repositorySlug\" property found for kind \"%s\"", c.Kind)
+	if c.Kind == GitHubRetriever || c.Kind == GitlabRetriever{
+		return c.validateGitRetriever()
 	}
 	if c.Kind == S3Retriever && c.Item == "" {
 		return fmt.Errorf("invalid retriever: no \"item\" property found for kind \"%s\"", c.Kind)
@@ -46,20 +46,53 @@ func (c *RetrieverConf) IsValid() error {
 	if c.Kind == GoogleStorageRetriever && c.Object == "" {
 		return fmt.Errorf("invalid retriever: no \"object\" property found for kind \"%s\"", c.Kind)
 	}
-	if (c.Kind == GitHubRetriever || c.Kind == FileRetriever || c.Kind == GitlabRetriever) && c.Path == "" {
+	if c.Kind == FileRetriever  && c.Path == "" {
 		return fmt.Errorf("invalid retriever: no \"path\" property found for kind \"%s\"", c.Kind)
 	}
 	if (c.Kind == S3Retriever || c.Kind == GoogleStorageRetriever) && c.Bucket == "" {
 		return fmt.Errorf("invalid retriever: no \"bucket\" property found for kind \"%s\"", c.Kind)
 	}
-	if c.Kind == KubernetesRetriever && c.ConfigMap == "" {
+	if c.Kind == KubernetesRetriever {
+		return c.validateKubernetesRetriever()
+	}
+	if c.Kind == MongoDBRetriever {
+		return c.validateMongoDBRetriever()
+	}
+	return nil
+}
+
+func (c *RetrieverConf) validateGitRetriever() error {
+	if c.RepositorySlug == "" {
+		return fmt.Errorf("invalid retriever: no \"repositorySlug\" property found for kind \"%s\"", c.Kind)
+	}
+	if c.Path == "" {
+		return fmt.Errorf("invalid retriever: no \"path\" property found for kind \"%s\"", c.Kind)
+	}
+	return nil
+}
+
+func (c *RetrieverConf) validateKubernetesRetriever() error {
+	if c.ConfigMap == "" {
 		return fmt.Errorf("invalid retriever: no \"configmap\" property found for kind \"%s\"", c.Kind)
 	}
-	if c.Kind == KubernetesRetriever && c.Namespace == "" {
+	if c.Namespace == "" {
 		return fmt.Errorf("invalid retriever: no \"namespace\" property found for kind \"%s\"", c.Kind)
 	}
-	if c.Kind == KubernetesRetriever && c.Key == "" {
+	if c.Key == "" {
 		return fmt.Errorf("invalid retriever: no \"key\" property found for kind \"%s\"", c.Kind)
+	}
+	return nil
+}
+
+func (c *RetrieverConf) validateMongoDBRetriever() error {
+	if c.Collection == "" {
+		return fmt.Errorf("invalid retriever: no \"collection\" property found for kind \"%s\"", c.Kind)
+	}
+	if c.Database == "" {
+		return fmt.Errorf("invalid retriever: no \"database\" property found for kind \"%s\"", c.Kind)
+	}
+	if c.URI == "" {
+		return fmt.Errorf("invalid retriever: no \"uri\" property found for kind \"%s\"", c.Kind)
 	}
 	return nil
 }
@@ -75,13 +108,14 @@ const (
 	FileRetriever          RetrieverKind = "file"
 	GoogleStorageRetriever RetrieverKind = "googleStorage"
 	KubernetesRetriever    RetrieverKind = "configmap"
+	MongoDBRetriever       RetrieverKind = "mongodb"
 )
 
 // IsValid is checking if the value is part of the enum
 func (r RetrieverKind) IsValid() error {
 	switch r {
 	case HTTPRetriever, GitHubRetriever, GitlabRetriever, S3Retriever,
-		FileRetriever, GoogleStorageRetriever, KubernetesRetriever:
+		FileRetriever, GoogleStorageRetriever, KubernetesRetriever, MongoDBRetriever:
 		return nil
 	}
 	return fmt.Errorf("invalid retriever: kind \"%s\" is not supported", r)

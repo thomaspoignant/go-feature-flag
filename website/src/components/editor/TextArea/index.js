@@ -28,7 +28,8 @@ export function TextArea({
   const {register} = useFormContext();
 
   return (
-    <div className={clsx(className ? className : styles.editorTextAreaContainer)}>
+    <div
+      className={clsx(className ? className : styles.editorTextAreaContainer)}>
       <textarea
         id={`${label}.textarea`}
         defaultValue={defaultValue}
@@ -47,15 +48,12 @@ export function TextArea({
         {displayText}
       </label>
       {!disableInlineErr && (
-        <ErrorMessage
-          name={label}
-          render={textAreaErrorMessage}
-        />
+        <ErrorMessage name={label} render={textAreaErrorMessage} />
       )}
     </div>
   );
 }
 
-function textAreaErrorMessage({ message }){
-  return(<div className={styles.errorMessage}>{message}</div>);
+function textAreaErrorMessage({message}) {
+  return <div className={styles.errorMessage}>{message}</div>;
 }

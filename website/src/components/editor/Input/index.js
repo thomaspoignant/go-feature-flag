@@ -15,6 +15,7 @@ Input.propTypes = {
   defaultValue: PropTypes.any,
   disablePlaceholder: PropTypes.bool,
   disableInlineErr: PropTypes.bool,
+  controlled: PropTypes.bool,
 };
 export function Input({
   label,
@@ -24,8 +25,10 @@ export function Input({
   type,
   validation,
   defaultValue,
+  controlled = false,
   disablePlaceholder = false,
   disableInlineErr = false,
+  ...props
 }) {
   const {register} = useFormContext();
 
@@ -39,6 +42,11 @@ export function Input({
     }
   }
 
+  const registerProps = register(label, {
+    required: {value: required, message: 'This field is required'},
+    ...validation,
+  });
+
   return (
     <div className={clsx(className ? className : styles.editorInputContainer)}>
       <input
@@ -47,10 +55,8 @@ export function Input({
         className={styles.editorInput}
         type={inputType()}
         placeholder=" "
-        {...register(label, {
-          required: {value: required, message: 'This field is required'},
-          ...validation,
-        })}
+        {...(controlled ? {} : registerProps)}
+        {...props}
       />
       {disablePlaceholder && <span>{displayText}</span>}
       <div className={styles.editorCut}></div>
@@ -60,15 +66,12 @@ export function Input({
         {displayText}
       </label>
       {!disableInlineErr && (
-        <ErrorMessage
-          name={label}
-          render={inputErrorMessage}
-        />
+        <ErrorMessage name={label} render={inputErrorMessage} />
       )}
     </div>
   );
 }
 
-function inputErrorMessage({ message }){
-  return(<div className={styles.errorMessage}>{message}</div>);
+function inputErrorMessage({message}) {
+  return <div className={styles.errorMessage}>{message}</div>;
 }

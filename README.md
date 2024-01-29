@@ -280,6 +280,7 @@ The available retrievers are:
 - **Local file**
 - **Google Cloud Storage**
 - **Kubernetes ConfigMaps**
+- **MongoDB**
 
 _[See the full list and more information.](https://gofeatureflag.org/docs/configure_flag/store_your_flags)_
 

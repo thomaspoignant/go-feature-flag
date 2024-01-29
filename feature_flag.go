@@ -90,7 +90,7 @@ func New(config Config) (*GoFeatureFlag, error) {
 		if err != nil {
 			return nil, err
 		}
-		goFF.retrieverManager = retriever.NewManager(config.Context, retrievers)
+		goFF.retrieverManager = retriever.NewManager(config.Context, retrievers, config.Logger)
 		err = goFF.retrieverManager.Init(config.Context)
 		if err != nil && !config.StartWithRetrieverError {
 			return nil, fmt.Errorf("impossible to initialize the retrievers, please check your configuration: %v", err)
