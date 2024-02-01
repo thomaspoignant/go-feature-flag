@@ -56,16 +56,19 @@ type Scheduler struct {
 // AddEvent allow to add an event to the local cache and to call the exporter if we reach
 // the maximum number of events that can be present in the cache.
 func (dc *Scheduler) AddEvent(event FeatureEvent) {
-	dc.mutex.Lock()
-	defer dc.mutex.Unlock()
-
 	if !dc.exporter.IsBulk() {
+		dc.mutex.Lock()
 		// if we are not in bulk we are directly flushing the data
 		dc.localCache = append(dc.localCache, event)
-		dc.flush()
+		go func() {
+			defer dc.mutex.Unlock()
+			dc.flush()
+		}()
 		return
 	}
 
+	dc.mutex.Lock()
+	defer dc.mutex.Unlock()
 	if int64(len(dc.localCache)) >= dc.maxEventInCache {
 		dc.flush()
 	}
