@@ -195,7 +195,7 @@ func Test_flag_eval_Handler(t *testing.T) {
 				return
 			}
 
-			wantBody, err := ioutil.ReadFile(tt.want.bodyFile)
+			wantBody, err := os.ReadFile(tt.want.bodyFile)
 			assert.NoError(t, err, "Impossible the expected wantBody file %s", tt.want.bodyFile)
 			assert.Equal(t, tt.want.httpCode, rec.Code, "Invalid HTTP Code")
 			assert.JSONEq(t, string(wantBody), rec.Body.String(), "Invalid response wantBody")
