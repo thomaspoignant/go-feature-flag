@@ -62,7 +62,7 @@ func (dc *Scheduler) AddEvent(event FeatureEvent) {
 	if !dc.exporter.IsBulk() {
 		// if we are not in bulk we are directly flushing the data
 		dc.localCache = append(dc.localCache, event)
-		dc.flush()
+		go func() { dc.flush() }()
 		return
 	}
 
