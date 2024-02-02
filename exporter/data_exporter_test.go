@@ -119,6 +119,9 @@ func TestDataExporterScheduler_nonBulkExporter(t *testing.T) {
 	}
 	for _, event := range inputEvents {
 		dc.AddEvent(event)
+		// we have to wait because we are opening a new thread to slow down the flag evaluation.
+		time.Sleep(1 * time.Millisecond)
 	}
+
 	assert.Equal(t, inputEvents[:100], mockExporter.GetExportedEvents())
 }
