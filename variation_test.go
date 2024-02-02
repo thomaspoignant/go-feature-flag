@@ -333,7 +333,7 @@ func TestBoolVariation(t *testing.T) {
 			got, err := BoolVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
-				time.Sleep(20 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
+				time.Sleep(40 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
 				content, _ := os.ReadFile(file.Name())
 				assert.Regexp(t, tt.expectedLog, string(content))
 			}
@@ -719,7 +719,7 @@ func TestBoolVariationDetails(t *testing.T) {
 			got, err := BoolVariationDetails(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
-				time.Sleep(20 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
+				time.Sleep(40 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
 				content, _ := os.ReadFile(file.Name())
 				assert.Regexp(t, tt.expectedLog, string(content))
 			}
@@ -1014,7 +1014,7 @@ func TestFloat64Variation(t *testing.T) {
 			got, err := Float64Variation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
-				time.Sleep(20 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
+				time.Sleep(40 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
 				content, _ := os.ReadFile(file.Name())
 				assert.Regexp(t, tt.expectedLog, string(content))
 			}
@@ -1318,7 +1318,7 @@ func TestFloat64VariationDetails(t *testing.T) {
 			got, err := Float64VariationDetails(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
-				time.Sleep(20 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
+				time.Sleep(40 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
 				content, _ := os.ReadFile(file.Name())
 				assert.Regexp(t, tt.expectedLog, string(content))
 			}
@@ -1600,7 +1600,7 @@ func TestJSONArrayVariation(t *testing.T) {
 			}
 			assert.Equal(t, tt.want, got, "JSONArrayVariation() got = %v, want %v", got, tt.want)
 			if tt.expectedLog != "" {
-				time.Sleep(20 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
+				time.Sleep(40 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
 				content, _ := os.ReadFile(file.Name())
 				assert.Regexp(t, tt.expectedLog, string(content))
 			}
@@ -1890,7 +1890,7 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 			}
 			assert.Equal(t, tt.want, got, "JSONArrayVariation() got = %v, want %v", got, tt.want)
 			if tt.expectedLog != "" {
-				time.Sleep(20 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
+				time.Sleep(40 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
 				content, _ := os.ReadFile(file.Name())
 				assert.Regexp(t, tt.expectedLog, string(content))
 			}
@@ -2145,7 +2145,7 @@ func TestJSONVariation(t *testing.T) {
 			got, err := JSONVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
-				time.Sleep(20 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
+				time.Sleep(40 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
 				content, _ := os.ReadFile(file.Name())
 				assert.Regexp(t, tt.expectedLog, string(content))
 			}
@@ -2371,7 +2371,7 @@ func TestJSONVariationDetails(t *testing.T) {
 			got, err := JSONVariationDetails(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
-				time.Sleep(20 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
+				time.Sleep(40 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
 				content, _ := os.ReadFile(file.Name())
 				assert.Regexp(t, tt.expectedLog, string(content))
 			}
@@ -2633,7 +2633,7 @@ func TestStringVariation(t *testing.T) {
 			got, err := StringVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
-				time.Sleep(20 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
+				time.Sleep(40 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
 				content, _ := os.ReadFile(file.Name())
 				assert.Regexp(t, tt.expectedLog, string(content))
 			}
@@ -2858,7 +2858,7 @@ func TestStringVariationDetails(t *testing.T) {
 			got, err := StringVariationDetails(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
-				time.Sleep(20 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
+				time.Sleep(40 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
 				content, _ := os.ReadFile(file.Name())
 				assert.Regexp(t, tt.expectedLog, string(content))
 			}
@@ -3151,7 +3151,7 @@ func TestIntVariation(t *testing.T) {
 			got, err := IntVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
-				time.Sleep(20 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
+				time.Sleep(40 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
 				content, _ := os.ReadFile(file.Name())
 				assert.Regexp(t, tt.expectedLog, string(content))
 			}
@@ -3418,7 +3418,7 @@ func TestIntVariationDetails(t *testing.T) {
 			got, err := IntVariationDetails(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
-				time.Sleep(20 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
+				time.Sleep(40 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
 				content, _ := os.ReadFile(file.Name())
 				assert.Regexp(t, tt.expectedLog, string(content))
 			}
@@ -3929,7 +3929,7 @@ func TestRawVariation(t *testing.T) {
 			got, err := ff.RawVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
-				time.Sleep(20 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
+				time.Sleep(40 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
 				content, _ := os.ReadFile(file.Name())
 				assert.Regexp(t, tt.expectedLog, string(content))
 			}
