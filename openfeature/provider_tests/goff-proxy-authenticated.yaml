@@ -8,3 +8,4 @@ exporter:
   kind: log
 apiKeys:
   - authorized_token
+enableSwagger: true
