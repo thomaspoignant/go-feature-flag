@@ -45,11 +45,15 @@
 }
 
 .socialIconGitlab {
-  background-color: #e2432a;
+  background-color: #D1D0D3;
 }
 
 .socialIconMongodb {
   background-color: #023430;
+}
+
+.socialIconKafka {
+  background-color: #eee;
 }
 
 .tooltip {

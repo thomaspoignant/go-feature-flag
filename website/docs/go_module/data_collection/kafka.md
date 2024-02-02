@@ -12,10 +12,10 @@ ffclient.Config{
    DataExporter: ffclient.DataExporter{
         // ...
         Exporter: &kafkaexporter.Exporter{
-			Settings: kafkaexporter.Settings{
-				Topic: "go-feature-flag-events",
-                Addresses: []string{"cluster1", "cluster2"},
-            },
+           Settings: kafkaexporter.Settings{
+              Topic: "go-feature-flag-events",
+              Addresses: []string{"cluster1", "cluster2"},
+           },
         },
     },
     // ...
