@@ -40,16 +40,5 @@ of the relay proxy.
 ### `/metrics`
 This endpoint is providing metrics about the relay proxy in the prometheus format.
 
-## Use specific port for the monitoring
-You can configure a different port for the monitoring endpoints.   
-This is useful if you want to expose the monitoring endpoints on a different port than the main service.
 
-```yaml
-# ...
-monitoringPort: 1032
-# ...
-```
 
-:::note
-By default the monitoring endpoints are exposed on the same port as the main service.
-:::

@@ -187,10 +187,6 @@ type Config struct {
 	// Default: ""
 	OpenTelemetryOtlpEndpoint string `mapstructure:"openTelemetryOtlpEndpoint" koanf:"opentelemetryotlpendpoint"`
 
-	// MonitoringPort (optional) is the port we are using to expose the metrics and healthchecks
-	// If not set we will use the same port as the proxy
-	MonitoringPort int `mapstructure:"monitoringPort" koanf:"monitoringport"`
-
 	// ---- private fields
 
 	// apiKeySet is the internal representation of an API keys list configured
