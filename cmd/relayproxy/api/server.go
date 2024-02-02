@@ -180,13 +180,15 @@ func (s *Server) Stop() {
 		s.zapLog.Error("impossible to stop otel", zap.Error(err))
 	}
 
+	if s.monitoringEcho != nil {
+		err = s.monitoringEcho.Close()
+		if err != nil {
+			s.zapLog.Fatal("impossible to stop monitoring", zap.Error(err))
+		}
+	}
+
 	err = s.apiEcho.Close()
 	if err != nil {
 		s.zapLog.Fatal("impossible to stop go-feature-flag relay proxy", zap.Error(err))
-	}
-
-	err = s.monitoringEcho.Close()
-	if err != nil {
-		s.zapLog.Fatal("impossible to stop monitoring", zap.Error(err))
 	}
 }
