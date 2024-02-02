@@ -11,6 +11,8 @@ import loglogo from '@site/static/docs/collectors/log.png';
 import s3logo from '@site/static/docs/collectors/s3.png';
 import webhooklogo from '@site/static/docs/collectors/webhook.png';
 import sqslogo from '@site/static/docs/collectors/sqs.png';
+import kafkalogo from '@site/static/docs/collectors/kafka.png';
+
 
 # How to export evaluation data
 GO Feature Flag allows for the collection of flag usage data.
@@ -39,6 +41,14 @@ To use, simply configure, use the feature flag as normal, and analyze the collec
     content: <ConfigCardContent
       relayproxyLink={'../relay_proxy/configure_relay_proxy#sqs'}
       goModuleLink={'../go_module/data_collection/sqs'}
+    />
+  },
+  {
+    logoImg: kafkalogo,
+    title:"Kafka",
+    content: <ConfigCardContent
+      relayproxyLink={'../relay_proxy/configure_relay_proxy#kafka'}
+      goModuleLink={'../go_module/data_collection/kafka'}
     />
   },
   {

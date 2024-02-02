@@ -265,13 +265,18 @@ function Integration() {
           />
           <SocialIcon
             colorClassName={styles.socialIconGitlab}
-            fontAwesomeIcon="devicon-gitlab-plain"
+            fontAwesomeIcon="devicon-gitlab-plain colored"
             tooltipText="Gitlab"
           />
           <SocialIcon
             colorClassName={styles.socialIconAws}
             img={sqslogo}
             tooltipText="AWS SQS"
+          />
+          <SocialIcon
+            colorClassName={styles.socialIconKafka}
+            fontAwesomeIcon="devicon-apachekafka-original colored"
+            tooltipText="Apache Kafka"
           />
         </div>
       </div>
