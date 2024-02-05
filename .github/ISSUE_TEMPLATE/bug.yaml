@@ -5,7 +5,7 @@ labels: [bug, needs-triage]
 body:
   - type: textarea
     attributes:
-      label: Observed behavior
+      label: Observed behaviour
       description: |
         What are you trying to do?  
         Describe what you think went wrong during this.
@@ -23,6 +23,12 @@ body:
       label: Steps to reproduce
       description: |
         Describe as much as you can the problem.  
-        Please provide us scenario file, logs or anything you have that can help us to understand.
+        Please provide us with scenario files, logs or anything you have that can help us to understand.
     validations:
       required: false
+  - type: markdown
+    attributes:
+      value: |
+        -----
+        :info:
+        _If you want to work on this issue, please add a comment with `/assign-me` somewhere in your message and the issue will automatically affect you._
