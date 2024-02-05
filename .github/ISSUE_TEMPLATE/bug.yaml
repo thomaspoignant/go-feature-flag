@@ -30,4 +30,4 @@ body:
     attributes:
       value: |
         -----
-        _ℹ️If you want to work on this issue, please add a comment with `/assign-me` somewhere in your message and the issue will automatically affect you._
+        _ℹ️ If you want to work on this issue, please add a comment with `/assign-me` somewhere in your message and the issue will automatically affect you._
