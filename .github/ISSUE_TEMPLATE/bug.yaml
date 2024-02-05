@@ -26,8 +26,3 @@ body:
         Please provide us with scenario files, logs or anything you have that can help us to understand.
     validations:
       required: false
-  - type: markdown
-    attributes:
-      value: |
-        -----
-        _ℹ️ If you want to work on this issue, please add a comment with `/assign-me` somewhere in your message and the issue will automatically affect you._
