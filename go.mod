@@ -54,7 +54,7 @@ require (
 	go.uber.org/zap v1.26.0
 	golang.org/x/net v0.20.0
 	golang.org/x/oauth2 v0.16.0
-	google.golang.org/api v0.159.0
+	google.golang.org/api v0.161.0
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.29.1
 	k8s.io/apimachinery v0.29.1
