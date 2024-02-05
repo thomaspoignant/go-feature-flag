@@ -23,7 +23,7 @@ jobs:
           value: ${{ env.version }}
 
       - name: Build and publish to PyPi
-        uses: JRubics/poetry-publish@v1.17
+        uses: JRubics/poetry-publish@v2.0
         with:
           package_directory: ./openfeature/providers/python-provider
           pypi_token: ${{ secrets.PYPI_TOKEN }}
