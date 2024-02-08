@@ -17,7 +17,7 @@ go get github.com/open-feature/go-sdk-contrib/providers/go-feature-flag
 
 ## Initialize your Open Feature provider
 
-Despite other providers, this GO provider can be used with the **relay proxy** or used standalone
+Despite other providers, this GO provider can be used with the **relay proxy** or standalone
 using the **GO Feature Flag module**.
 
 ### Using the relay proxy
@@ -85,7 +85,7 @@ client := of.NewClient("my-app")
 This code block explain how you can create an `EvaluationContext` and use it to evaluate your flag.
 
 
-> In this example we are evaluating a `boolean` flag, but other types are available.
+> In this example we are evaluating a `boolean` flag, but other types are also available.
 >
 > **Refer to the [Open Feature documentation](https://docs.openfeature.dev/docs/reference/concepts/evaluation-api#basic-evaluation) to know more about it.**
 

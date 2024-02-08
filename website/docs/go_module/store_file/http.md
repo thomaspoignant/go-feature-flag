@@ -9,7 +9,7 @@ will perform an HTTP Request with your configuration to get your flags.
 
 ## Example
 
-```go linenums="1"
+```go showLineNumbers
 err := ffclient.Init(ffclient.Config{
     PollingInterval: 3 * time.Second,
     Retriever: &httpretriever.Retriever{
@@ -26,7 +26,7 @@ To configure your HTTP endpoint:
 
 | Field         | Description                                                                                                     |
 |---------------|-----------------------------------------------------------------------------------------------------------------|
-| __`URL`__     | Location where to retrieve the file <br/> _(ex: [http://mydomain.io/flag.yaml](http://mydomain.io/flag.yaml))_. |
+| __`URL`__     | Location to retrieve the file <br/> _(ex: [http://mydomain.io/flag.yaml](http://mydomain.io/flag.yaml))_. |
 | __`Method`__  | the HTTP method you want to use <br/>_(default is GET)_.                                                        |
 | __`Body`__    | _(optional)_<br/>If you need a body to get the flags.                                                           |
 | __`Header`__  | _(optional)_<br/>Header you should pass while calling the endpoint _(useful for authorization)_.                |

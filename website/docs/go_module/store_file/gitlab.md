@@ -4,15 +4,16 @@ sidebar_position: 6
 
 # GitLab
 
-The [**Gitlab Retriever**](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/retriever/gitlabretriever/#Retriever)
-will perform an HTTP Request to the Gitlab API to get your flags.
+The [**GitLab Retriever**](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/retriever/gitlabretriever/#Retriever)
+will perform an HTTP Request to the GitLab API to get your flags.
 
-!!! Tip
-    Gitlab has rate limits, be sure to correctly set your `PollingInterval` to avoid reaching the limit.
+:::tip
+GitLab has rate limits, be sure to correctly set your `PollingInterval` to avoid reaching the limit.
+:::
 
 ## Example
 
-```go linenums="1"
+```go showLineNumbers
 err := ffclient.Init(ffclient.Config{
     PollingInterval: 3 * time.Second,
     Retriever: &gitlab.Retriever{
@@ -37,5 +38,5 @@ To configure the access to your GitLab file:
 | **`RepositorySlug`** | Your Gitlab slug `org/repo-name`.                                                         |
 | **`FilePath`**       | The path of your file.                                                                    |
 | **`Branch`**         | *(optional)*<br/>The branch where your file is.<br/>Default: `main`                       |
-| **`GitlabToken`**    | *(optional)*<br/>Gitlab token is used to access a private repository                      |
+| **`GitlabToken`**    | *(optional)*<br/>GitLab token is used to access a private repository                      |
 | **`Timeout`**        | *(optional)*<br/>Timeout for the HTTP call <br/>Default: 10 seconds                       |

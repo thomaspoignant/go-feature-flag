@@ -9,18 +9,17 @@ sidebar_position: 1
 </p>
 
 ## What is GO Feature Flag?
-GO Feature Flag is a simple, complete and lightweight feature flag solution 100% opensource.
+GO Feature Flag is a completely open-source, simple and lightweight feature flag solution.
 
-The solution has been built to start experiencing the usage of feature flags in your code without having to contract with any vendor.
+The solution has been built for application of feature flags in your code without the need of any vendor.
 
-**GO Feature Flag** has started to be a solution only for the GO language, but with the new standardisation of feature flags by [Openfeature](https://openfeature.dev/) project, 
-now the solution is available for multiple languages _(`JAVA`, `typescript`, `javascript`, ...)_ with a simple server to host.
+**GO Feature Flag** was initially developed for the GO language, but with the new standardisation of feature flags by [Openfeature](https://openfeature.dev/) project, it now supports multiple languages _(`JAVA`, `typescript`, `javascript`, ...)_ with a simple server to host.
 
 :::info
 If you are not familiar with feature flags, also called feature toggles, you can read this [article from Martin Fowler](https://www.martinfowler.com/articles/feature-toggles.html)
 where he explains why this is a great pattern.
 
-I've also written an [article](https://medium.com/better-programming/feature-flags-and-how-to-iterate-quickly-7e3371b9986) which explains why feature flags can fasten your iteration cycle.
+I've also written an [article](https://medium.com/better-programming/feature-flags-and-how-to-iterate-quickly-7e3371b9986) which explains why feature flags can accelerate your iteration cycle.
 :::
 
 ## What can I do with GO Feature Flag?
@@ -34,4 +33,4 @@ I've also written an [article](https://medium.com/better-programming/feature-fla
     - [Schedule your flag updates](configure_flag/rollout/scheduled.mdx).
 - Exporting your flags usage data ([`s3`](go_module/data_collection/s3.md), [`log`](go_module/data_collection/log.md), [`file`](go_module/data_collection/file.md), [_see full list_](configure_flag/export_flags_usage.mdx)).
 - Getting notified when a flag has been changed ([`webhook`](go_module/notifier/webhook.md) and [`slack`](go_module/notifier/slack.md)).
-- Use GO Feature Flag in several languages.
+- **Cross-Language Support:** Available for use across several programming languages.

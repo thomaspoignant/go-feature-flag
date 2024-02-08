@@ -4,7 +4,7 @@ sidebar_position: 0
 
 # Export data
 
-If you want to export data about how your flag are used, you can use the **`DataExporter`**.  
+If you want to export data about how your flags are used, you can use the **`DataExporter`**.  
 It collects all the variations events and can save these events on several locations:
 
 - [File](file.md) *- create local files with the variation usages.*
@@ -19,11 +19,11 @@ If the existing exporter does not work with your system you can extend the syste
 ## Data format
 
 Currently, we are supporting only feature events.  
-It represents individual flag evaluations and are considered "full fidelity" events.
+They represent individual flag evaluations and are considered "full fidelity" events.
 
 ### Example
 
-```json linenums="1"
+```json showLineNumbers
 {
     "kind": "feature",
     "contextKind": "anonymousUser",
@@ -42,14 +42,14 @@ It represents individual flag evaluations and are considered "full fidelity" eve
 | Field              | Description                                                                                                                                                                                                                                                                                             |
 |--------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **`kind`**         | The kind for a feature event is feature. A feature event will only be generated if the trackEvents attribute of the flag is set to true.                                                                                                                                                                |
-| **`contextKind`**  | The kind of context which generated an event. This will only be "**anonymousUser**" for events generated on behalf of an anonymous user or the reserved word "**user**" for events generated on behalf of a non-anonymous user                                                                          |
+| **`contextKind`**  | The kind of context which generated an event. This will only be "**anonymousUser**" for events generated on behalf of an anonymous user or the reserved word "**user**" for events generated on behalf of a non-anonymous user.                                                                          |
 | **`userKey`**      | The key of the user object used in a feature flag evaluation.                                                                                                                                                                                                                                           |
 | **`creationDate`** | When the feature flag was requested at Unix epoch time in milliseconds.                                                                                                                                                                                                                                 |
 | **`key`**          | The key of the feature flag requested.                                                                                                                                                                                                                                                                  |
 | **`variation`**    | The variation of the flag requested. Available values are:<br/>**True**: if the flag was evaluated to True <br/>**False**: if the flag was evaluated to False<br/>**Default**: if the flag was evaluated to Default<br/>**SdkDefault**: if something wrong happened and the SDK default value was used. |
 | **`value`**        | The value of the feature flag returned by feature flag evaluation.                                                                                                                                                                                                                                      |
-| **`source`**       | Where the event was generated. This is set to SERVER when the event was evaluated in the relay-proxy and PROVIDER_CACHE when it is evaluated from the cache.             
-| **`default`**      | (Optional) This value is set to true if feature flag evaluation failed, in which case the value returned was the default value passed to variation.                                                                                                                                                     |
+| **`source`**       | Where the event is generated. This is set to SERVER when the event is evaluated from the relay-proxy and PROVIDER_CACHE when it is evaluated from the cache.             
+| **`default`**      | (Optional) This value is set to true if feature flag evaluation failed, in which case, the value returned is the default value passed to variation.                                                                                                                                                     |
 
 Events are collected and send in bulk to avoid spamming your exporter *(see details in [how to configure data export](#how-to-configure-data-export)*)
 
@@ -57,14 +57,14 @@ Events are collected and send in bulk to avoid spamming your exporter *(see deta
 
 In your `ffclient.Config` add the `DataExporter` field and configure your export location.
 
-To avoid spamming your location everytime you have a variation called, `go-feature-flag` is storing in memory all the events and send them in bulk to the exporter.
+To avoid spamming your location everytime you have a variation called, `go-feature-flag` is storing in memory all the events and sends them in bulk to the exporter.
 You can decide the threshold on when to send the data with the properties `FlushInterval` and `MaxEventInMemory`. The first threshold hit will export the data.
 
-If there are some flags you don't want to export, you can use `trackEvents` fields on these specific flags to disable the data export *(see [flag file format](../../configure_flag/flag_format.mdx))*.
+If there are some flags that you don't want to export, you can use `trackEvents` fields on these specific flags to disable the data export *(see [flag file format](../../configure_flag/flag_format.mdx))*.
 
 ### Example
 
-```go  linenums="1"
+```go showLineNumbers
 ffclient.Config{ 
     // ...
    DataExporter: ffclient.DataExporter{
@@ -80,15 +80,15 @@ ffclient.Config{
 
 ### Configuration fields
 
-| Field              |                                                                                                                                        | Description |
-|--------------------|----------------------------------------------------------------------------------------------------------------------------------------|-------------|
+| Field              | Description |
+|--------------------|-------------|
 | `Exporter`         | The configuration of the exporter you want to use. All the exporters are available in the `exporter` package.                          |
 | `FlushInterval`    | *(optional)*<br/>Time to wait before exporting the data.<br/>**Default: 60 seconds**.                                                  |
 | `MaxEventInMemory` | *(optional)*<br/>If `MaxEventInMemory` is reach before the `FlushInterval` a intermediary export will be done<br/>**Default: 100000**. |
 
 ## Don't track a flag
 
-By default, all flags are trackable, and their data are exported.
+By default, all flags are trackable, and their data is exported.
 
 If you want to exclude a specific flag from the data export, you can set the property `trackEvents` to `false` on your flag, and you will have no export for it.
 

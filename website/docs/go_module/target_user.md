@@ -10,7 +10,7 @@ The SDK defines a [`User`](https://pkg.go.dev/github.com/thomaspoignant/go-featu
 
 Here's an example:
 
-```go linenums="1"
+```go showLineNumbers
 // User with only a key
 user1 := ffcontext.NewEvaluationContext("user1-key")
 
@@ -35,7 +35,7 @@ They let you have rules on these attributes and target users according to any da
 ## Anonymous users
 You can also distinguish logged-in users from anonymous users in the SDK, as follows:
 
-```go linenums="1"
+```go showLineNumbers
 // User with only a key
 user1 := ffcontext.NewAnonymousEvaluationContext("user1-key")
 
@@ -60,7 +60,7 @@ There is a Variation method for each type:
 , [`JSONArrayVariation`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#JSONArrayVariation)
 , [`JSONVariation`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#JSONVariation)
 
-```go linenums="1"
+```go showLineNumbers
 result, _ := ffclient.BoolVariation("your.feature.key", user, false)
 
 // result is now true or false depending on the setting of
@@ -68,9 +68,9 @@ result, _ := ffclient.BoolVariation("your.feature.key", user, false)
 ```
 Variation methods take the feature **flag key**, a **user**, and a **default value**.
 
-The default value is return when an error is encountered _(`ffclient` not initialized, variation with wrong type, flag does not exist ...)._
+The default value is returned when an error is encountered _(`ffclient` not initialized, variation with wrong type, flag does not exist ...)._
 
-In the example, if the flag `your.feature.key` does not exists, result will be `false`.  
+In the example, if the flag `your.feature.key` does not exist, result will be `false`.  
 Not that you will always have a usable value in the result. 
 
 ## Variation details
@@ -110,30 +110,28 @@ Here is the full list of reason available:
 | `DISABLED`              | Indicates that the feature flag is disabled                                                                                                                                                           |
 | `DEFAULT`               | The resolved value was the result of the flag being disabled in the management system.                                                                                                                |
 | `STATIC`                | Indicates that the feature flag evaluated to a static value, for example, the default value for the flag. _(Note: Typically means that no dynamic evaluation has been executed for the feature flag)_ |
-| `UNKNOWN`               | Indicates an unknown issue occurred during evaluation                                                                                                                                                 |
+| `UNKNOWN`               | Indicates that an unknown issue occurred during evaluation                                                                                                                                                 |
 | `ERROR`                 | Indicates that an error occurred during evaluation *(Note: The `errorCode` field contains the details of this error)*                                                                                 |
 | `OFFLINE`               | Indicates that GO Feature Flag is currently evaluating in offline mode.                                                                                                                               |
 
 
 ## Get all flags for a specific user
-If you want to send the information about a specific user to a front-end, you will want a snapshot of all the flags for
-this user at a specific time.
+If you want to send the information about a specific user to the front-end, you will need a snapshot of all the flags of this user at a specific time.
 
 The method `ffclient.AllFlagsState` returns a snapshot of flag values and metadata.  
-The function is evaluating all available flags for the user and return a `flagstate.AllFlagsState` object containing the
-information you need.
+The function is evaluating all available flags for the user and returns a `flagstate.AllFlagsState` object containing the information you need.
 
-```go linenums="1"
+```go showLineNumbers
 user := ffcontext.NewEvaluationContext("example")
 // AllFlagsState will give you the value for all the flags available.
 allFlagsState := ffclient.AllFlagsState(u)
 
-// If you want to send it to a front-end you can Marshal it by calling MarshalJSON()
+// If you want to send it to the front-end you can Marshal it by calling MarshalJSON()
 forFE, err := allFlagsState.MarshalJSON()
 ```
 
-The `MarshalJSON()` function will return something like bellow, that can be directly used by your front-end application. 
-```json linenums="1"
+The `MarshalJSON()` function will return something like below, that can be directly used by your front-end application. 
+```json showLineNumbers
 {
     "flags": {
         "test-flag0": {

@@ -27,7 +27,7 @@ After that you can use all the available endpoints _(see **Service endpoints** s
 ## Deployment options
 
 A common way to run **go-feature-flag relay proxy** is to use the Docker Container.  
-An image is available on docker Hub [`thomaspoignant/go-feature-flag`](https://hub.docker.com/r/thomaspoignant/go-feature-flag).
+An image is available on Docker Hub [`thomaspoignant/go-feature-flag`](https://hub.docker.com/r/thomaspoignant/go-feature-flag).
 
 You can also run it as a service in your application following the [**Installation**](install_relay_proxy) page.
 
@@ -51,11 +51,11 @@ To learn how to configure the relay proxy, read [Configuration](./configure_rela
 ## Exporting metrics and traces
 
 To export the data you can use all the capabilities of `go-feature-flag` SDK.  
-To configure it please refer to the [type `exporter` section](./configure_relay_proxy#exporter) of the configuration.
+To configure it please refer to the [type `exporter` section](./configure_relay_proxy#exporter) of the configuration documentation.
 
 ## Service endpoints
 The Relay Proxy defines many HTTP/HTTPS endpoints. 
 Most of these are proxies for GO Feature Flag services, to be used by SDKs that connect to the Relay Proxy.  
 Others are specific to the Relay Proxy, such as for monitoring its status.
 
-Please refer to [endpoints documentation](./relay_proxy_endpoints) to get the full details of what exists in our REST API.
+Please refer to [endpoints documentation](./relay_proxy_endpoints) to get the full details on available REST API endpoints.

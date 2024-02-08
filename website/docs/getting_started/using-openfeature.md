@@ -10,7 +10,7 @@ Whether you're using an open-source system or a commercial product, whether it's
 _[Documentation](https://docs.openfeature.dev)_
 :::
 
-GO Feature Flag believe in **OpenSource** and **standardization**, this is the reason why we decided not implementing any custom SDK and rely only on **Open Feature**.
+GO Feature Flag believes in **Open-Source** and **standardization**, this is the reason why we have decided not implementing any custom SDK and rely only on **Open Feature**.
 
 To be compatible with Open Feature, **GO Feature Flag** is providing a lightweight self-hosted API server *(called [relay proxy](../relay_proxy))* that is using the GO Feature Flag module internally.
 When the **relay proxy** is running in your infrastructure, you can use the **Open Feature SDKs** in combination with **GO Feature Flag providers** to evaluate your flags.
@@ -55,7 +55,7 @@ exporter:
 
 ## Install the relay proxy
 
-And we will run the **relay proxy** locally to make the API available.
+We will run the **relay proxy** locally to make the API available.
 The default port will be `1031`.
 
 ```shell

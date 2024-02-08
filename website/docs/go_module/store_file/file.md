@@ -10,7 +10,7 @@ Using a file to store your flags is not recommend, except if it is in a shared f
 :::
 
 ## Example
-```go linenums="1"
+```go showLineNumbers
 import 	"github.com/thomaspoignant/go-feature-flag/retriever/file"
 // ...
 

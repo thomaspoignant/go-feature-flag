@@ -27,7 +27,7 @@ A rule is a configuration that allows to serve a variation based on some conditi
       <td><code>query</code></td>
       <td>
         <p>
-          Query represents an antlr query in the nikunjy/rules format.
+          Query represents an <u>antlr query</u> in the <u>nikunjy/rules</u> format.
           <br/><b>This field is mandatory in every rule used in the targeting field</b>.
         </p>
         <p><i>See <a href="#query-format">query format</a> to have the syntax.</i></p>
@@ -46,18 +46,18 @@ A rule is a configuration that allows to serve a variation based on some conditi
             percentage:<br/>  variationA: 10.59<br/>  variationB: 9.41<br/>  variationC: 80
           </pre>
         <p>The format is the name of the variation and the percentage for this one.</p>
-        <p><b>Note: if your total is not equals to 100% this rule will be considered as invalid.</b></p>
+        <p><b>Note: If your total is not equal to 100%, this rule will be considered invalid.</b></p>
       </td>
     </tr>
     <tr>
       <td><code>progressiveRollout</code><br/><i>(optional)</i></td>
       <td>
         <p>
-          Allow to ramp up the percentage of your flag over time.
+          Allows you to ramp up the percentage of your flag over time.
         </p>
         <p>
-          You can decide at which percentage you starts with and at what percentage you ends with in your release ramp.
-          Before the start date we will serve the initial percentage and, after we will serve the end percentage.
+          You can decide at which percentage you start and end with in your release ramp.
+          Before the start date we will serve the initial percentage and afterwards, we will serve the end percentage.
         </p>
         <p><i>See <a href="./rollout/progressive">progressive rollout</a> to have more info on how to use it.</i></p>
       </td>
@@ -74,9 +74,9 @@ A rule is a configuration that allows to serve a variation based on some conditi
 
 
 :::info
-`variation`, `percentage` and `progressiveRollout` are optional but you **must have one of the 3**.
+`variation`, `percentage` and `progressiveRollout` are optional but you **must have atleast one of the three**.
 
-If you have more than one field we will use the first one in that order
+If you have more than one field we will use the first one in the order
 `progressiveRollout` > `percentage` > `variation`.
 :::
 
@@ -84,10 +84,10 @@ If you have more than one field we will use the first one in that order
 
 The rule format is based on the [`nikunjy/rules`](https://github.com/nikunjy/rules) library.
 
-All the operations can be written capitalized or lowercase (ex: `eq` or `EQ` can be used).
-Logical Operations supported are `AND` `OR`.
+All the operations can be written in capitalized or lowercase characters (ex: `eq` or `EQ` can be used).
+Logical Operations supported are `AND` & `OR`.
 
-Compare Expression and their definitions (`a|b` means you can use either one of the two `a` or `b`):
+Compare Expression and their definitions (`a|b` means you can use one of either `a` or `b`):
 
 |  Operator  | Description                 |
 |:----------:|-----------------------------|

@@ -7,7 +7,7 @@ sidebar_position: 30
 ## Simple retriever
 To create a custom retriever you must have a `struct` that implements the [`Retriever`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/retriever/#Retriever) interface.
 
-```go linenums="1"
+```go showLineNumbers
 type Retriever interface {
 	Retrieve(ctx context.Context) ([]byte, error)
 }
