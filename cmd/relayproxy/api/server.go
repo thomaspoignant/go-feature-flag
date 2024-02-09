@@ -97,7 +97,7 @@ func (s *Server) initAPIEndpoint(echoInstance *echo.Echo) {
 	v1 := echoInstance.Group("/v1")
 	if len(s.config.APIKeys) > 0 {
 		v1.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
-			Validator: func(key string, c echo.Context) (bool, error) {
+			Validator: func(key string, _ echo.Context) (bool, error) {
 				return s.config.APIKeyExists(key), nil
 			},
 		}))
