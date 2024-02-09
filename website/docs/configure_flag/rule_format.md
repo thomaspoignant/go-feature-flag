@@ -27,7 +27,7 @@ A rule is a configuration that allows to serve a variation based on some conditi
       <td><code>query</code></td>
       <td>
         <p>
-          Query represents an <u>antlr query</u> in the <u>nikunjy/rules</u> format.
+          Query represents an <b>antlr query</b> in the <b>nikunjy/rules</b> format.
           <br/><b>This field is mandatory in every rule used in the targeting field</b>.
         </p>
         <p><i>See <a href="#query-format">query format</a> to have the syntax.</i></p>
@@ -74,7 +74,7 @@ A rule is a configuration that allows to serve a variation based on some conditi
 
 
 :::info
-`variation`, `percentage` and `progressiveRollout` are optional but you **must have atleast one of the three**.
+`variation`, `percentage` and `progressiveRollout` are optional but you **must have at least one of the three**.
 
 If you have more than one field we will use the first one in the order
 `progressiveRollout` > `percentage` > `variation`.
