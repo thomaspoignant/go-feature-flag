@@ -14,7 +14,7 @@ The **Slack** notifier allows you to get notification on your favorite slack cha
    It should look like: `https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX`.
 3. In your init method add a slack notifier
 
-```go linenums="1" hl_lines="5"
+```go {5}showLineNumbers
 ffclient.Config{ 
     // ...
     Notifiers: []notifier.Notifier{

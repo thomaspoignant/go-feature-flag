@@ -7,7 +7,7 @@ description: How to migrate from v0.x.x to v1.x.x
 
 :::info
 Version `v1.0.0` has introduced a new flag format that push the limits of **GO Feature Flag** even further.  
-**BUT** the flag format from all the versions `v0.x.x` are still compatible and supported by the `v1.0.0`.
+**NOTE:** The flag format from all the versions `v0.x.x` are still compatible and supported by the `v1.0.0`.
 :::
 
 A command line is available to help you to convert your actual configuration file to the version `v1.x.x`.
@@ -52,7 +52,7 @@ The command line has 4 arguments you should specify.
 
 ## Update your flag file
 
-When your file is ready, you just have to replace your file in the location where GO Feature Flag is retrieving it.
+When your file is ready, you just have to replace your file in the location where GO Feature Flag is retrieves it.
 
 :::tip
 If for any reason your file is not readable by GO Feature Flag, it will not break anything, we will keep the latest version we have in memory. 

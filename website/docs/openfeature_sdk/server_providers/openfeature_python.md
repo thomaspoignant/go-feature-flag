@@ -36,14 +36,14 @@ client = api.get_client(name="test-client")
 
 ## Evaluate your flag
 
-This code block explain how you can create an `EvaluationContext` and use it to evaluate your flag.
+This code block explains how you can create an `EvaluationContext` and use it to evaluate your flag.
 
 
-> In this example we are evaluating a `boolean` flag, but other types are available.
+> In this example, we are evaluating a `boolean` flag, but other types are also available.
 >
 > **Refer to the [Open Feature documentation](https://docs.openfeature.dev/docs/reference/concepts/evaluation-api#basic-evaluation) to know more about it.**
 
-```csharp
+```python
 // Context of your flag evaluation.
 // With GO Feature Flag you MUST have a targetingKey that is a unique identifier of the user.
 evaluation_ctx = EvaluationContext(

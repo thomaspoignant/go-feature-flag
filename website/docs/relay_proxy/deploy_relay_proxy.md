@@ -55,6 +55,6 @@ Once you've updated your configuration file, you can deploy your function in AWS
 via HTTP. This can be achieved by creating an API Gateway or an Application Load Balancer (ALB) and linking it to 
 your Lambda function.
 
-By configuring your GO Feature Flag relay proxy to run as an AWS Lambda function, you can take advantage of the many
+By configuring your GO Feature Flag relay proxy to run as an AWS Lambda function, you can take advantage of many
 benefits of serverless computing, including automatic scaling, reduced infrastructure costs, and simplified 
 deployment and management.

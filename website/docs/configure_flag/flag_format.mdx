@@ -212,13 +212,13 @@ version = "12"
         <p>Variations are all the variations available for this flag.</p>
         <p>
           It is represented as a key/value element. The key is the name of the
-          variation and the value could be any types available (
+          variation and the value could be of any types available (
           <code>string</code>, <code>float</code>, <code>int</code>,{" "}
           <code>map</code>, <code>array</code>, <code>bool</code>).
         </p>
-        <p>You can have as many variation as needed.</p>
+        <p>You can have as many variations as needed.</p>
         <pre>
-          # Some examples
+          <h2>Some examples:</h2>
           <br />
           variationString: test
           <br />
@@ -319,10 +319,10 @@ version = "12"
       </td>
       <td>
         <p>
-          The version is the version of your flag.
+          The `version` is the version of your flag.
           <br />
           This string is used to display the information in the notifiers and
-          data collection, you have to update it your self.
+          data collection, you have to update it yourself.
         </p>
         <p>
           <b>Default:</b> <code>""</code>
@@ -350,9 +350,9 @@ version = "12"
         <i>(optional)</i>
       </td>
       <td>
-        <p>Scheduled allow to patch your flag over time.</p>
+        <p>`scheduledRollout` allows to patch your flag over time.</p>
         <p>
-          You can add several steps that updates the flag, this is typically
+          You can add several steps that update the flag, this is typically
           used if you want to gradually add more user in your flag.
         </p>
         <p>
@@ -371,7 +371,7 @@ version = "12"
       </td>
       <td>
         <p>
-          Experimentation allow you to configure a start date and an end date
+          Experimentation allows you to configure a start date and an end date
           for your flag. When the experimentation is not running, the flag will
           serve the default value.
         </p>
@@ -388,7 +388,7 @@ version = "12"
 
 ## Advanced configurations
 
-You can have advanced configurations for your flag to have specific behavior for them, such as:
+You can have advanced configurations for your flag for them to have specific behavior, such as:
 
 - [Specific rollout strategies](../category/rollout-strategies/)
 - [Don't track a flag](../go_module/data_collection/index.md#dont-track-a-flag)

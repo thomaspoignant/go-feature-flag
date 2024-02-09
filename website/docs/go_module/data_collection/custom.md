@@ -11,7 +11,7 @@ type Exporter interface {
   // Export will send the data to the exporter.
   Export(context.Context, *log.Logger, []exporter.FeatureEvent) error
 
-	// IsBulk return false if we should directly send the data as soon as it is produce
+	// IsBulk return false if we should directly send the data as soon as it is produced
 	// and true if we collect the data to send them in bulk.
 	IsBulk() bool
 }

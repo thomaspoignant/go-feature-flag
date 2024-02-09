@@ -79,11 +79,11 @@ Rest assured, working with OpenFeature SDKs alongside GO Feature Flag providers 
 To use the OpenFeature SDKs you need what we call a provider.
 A **provider** is responsible for performing flag evaluations. It provides an abstraction between **GO Feature Flag** and the OpenFeature SDK.
 
-A provider need a backend service to perform the flag evaluation. This is why we have introduced the [**relay proxy**](../relay_proxy).
-This component retrieve your feature flag configuration file using the GO module and expose APIs to get your flags variations.
+A provider needs a backend service to perform the flag evaluation. This is why we have introduced the [**relay proxy**](../relay_proxy).
+This component retrieve your feature flag configuration file using the GO module and exposes APIs to get your flags variations.
 
 ![](/docs/openfeature/concepts.jpg)
 
 With this simple architecture you have a central component _(the relay proxy)_ that is in charge of the flag evaluation, while the SDKs and providers are responsible to communicate with the relay proxy.
 
-This supports different languages the same way and makes you able to use GO Feature Flag with all your favorite languages.
+This supports different languages the same way and facilitates you to use GO Feature Flag with all your favorite languages.

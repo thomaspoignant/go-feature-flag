@@ -4,7 +4,7 @@ sidebar_position: 1
 
 # Retrieve your feature flags configuration
 The module supports different ways of retrieving the flag file.  
-Available retriever are:
+Available retrievers are:
 
 - [S3 Bucket](./s3.md)
 - [HTTP endpoint](./http.md)

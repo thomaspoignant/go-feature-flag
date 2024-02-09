@@ -2,17 +2,18 @@
 sidebar_position: 6
 ---
 
-# Github
+# GitHub
 
-The [**Github Retriever**](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/retriever/githubretriever/#Retriever)
+The [**GitHub Retriever**](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/retriever/githubretriever/#Retriever)
 will perform an HTTP Request with your GitHub configuration to get your flags.
 
-!!! Tip
-    GitHub has rate limits, be sure to correctly set your `PollingInterval` to avoid reaching the limit.
+:::tip
+GitHub has rate limits, be sure to correctly set your `PollingInterval` to avoid reaching the limit.
+:::
 
 ## Example
 
-```go linenums="1"
+```go showLineNumbers
 err := ffclient.Init(ffclient.Config{
     PollingInterval: 3 * time.Second,
     Retriever: &githubretriever.Retriever{
