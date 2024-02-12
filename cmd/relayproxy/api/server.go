@@ -12,6 +12,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/controller"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/ofrep"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
 	"go.uber.org/zap"
@@ -91,6 +92,9 @@ func (s *Server) initAPIEndpoint(echoInstance *echo.Echo) {
 	// Init controllers
 	cAllFlags := controller.NewAllFlags(s.services.GOFeatureFlagService, s.services.Metrics)
 	cFlagEval := controller.NewFlagEval(s.services.GOFeatureFlagService, s.services.Metrics)
+	cFlagEvalOFREP := ofrep.NewOFREPEvaluate(s.services.GOFeatureFlagService, s.services.Metrics)
+	cFlagBulkEvalOFREP := ofrep.NewOFREPBulkEvaluate(s.services.GOFeatureFlagService, s.services.Metrics)
+	cFlagFlagChangesOFREP := ofrep.NewOFREPFlagChanges(s.services.GOFeatureFlagService, s.services.Metrics)
 	cEvalDataCollector := controller.NewCollectEvalData(s.services.GOFeatureFlagService, s.services.Metrics)
 
 	// Init routes
@@ -110,6 +114,19 @@ func (s *Server) initAPIEndpoint(echoInstance *echo.Echo) {
 	if s.config.EnableSwagger {
 		echoInstance.GET("/swagger/*", echoSwagger.WrapHandler)
 	}
+
+	// OFREP routes
+	ofrepGroup := echoInstance.Group("/ofrep/v1")
+	if len(s.config.APIKeys) > 0 {
+		ofrepGroup.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
+			Validator: func(key string, c echo.Context) (bool, error) {
+				return s.config.APIKeyExists(key), nil
+			},
+		}))
+	}
+	ofrepGroup.POST("/evaluate", cFlagBulkEvalOFREP.OFREPHandler)
+	ofrepGroup.POST("/evaluate/:flagKey", cFlagEvalOFREP.OFREPHandler)
+	ofrepGroup.POST("/flag/changes", cFlagFlagChangesOFREP.OFREPHandler)
 
 	// initWebsocketsEndpoints initialize the websocket endpoints
 	cFlagReload := controller.NewWsFlagChange(s.services.WebsocketService, s.zapLog)
@@ -145,7 +162,7 @@ func (s *Server) Start() {
 				zap.String("address", addressMonitoring))
 			err := s.monitoringEcho.Start(addressMonitoring)
 			if err != nil && !errors.Is(err, http.ErrServerClosed) {
-				s.zapLog.Fatal("Error starting monitoring", zap.Error(err))
+				s.zapLog.Fatal("err starting monitoring", zap.Error(err))
 			}
 		}()
 		defer func() { _ = s.monitoringEcho.Close() }()
@@ -163,7 +180,7 @@ func (s *Server) Start() {
 
 	err := s.apiEcho.Start(address)
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
-		s.zapLog.Fatal("Error starting relay proxy", zap.Error(err))
+		s.zapLog.Fatal("err starting relay proxy", zap.Error(err))
 	}
 }
 

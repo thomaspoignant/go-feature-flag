@@ -3456,7 +3456,7 @@ func TestAllFlagsState(t *testing.T) {
 			initModule: true,
 		},
 		{
-			name: "Error in flag-0",
+			name: "err in flag-0",
 			config: Config{
 				Retriever: &fileretriever.Retriever{
 					Path: "./testdata/ffclient/all_flags/config_flag/flag-config-with-error.yaml",

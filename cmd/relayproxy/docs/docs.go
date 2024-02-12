@@ -77,6 +77,190 @@ const docTemplate = `{
                 }
             }
         },
+        "/ofrep/v1/evaluate": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Making a **POST** request to the URL ` + "`" + `/ofrep/v1/evaluate` + "`" + ` will give you the value of the list of feature\nflags for this evaluation context.\n\nIf no flags are provided, the API will evaluate all available flags in the configuration.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Evaluate in bulk feature flags using the OpenFeature Remote Evaluation Protocol",
+                "parameters": [
+                    {
+                        "description": "Evaluation Context and list of flag for this API call",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.OFREPBulkEvalFlagRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.OFREPFlagBulkEvaluateSuccessResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.OFREPErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
+                        }
+                    }
+                }
+            }
+        },
+        "/ofrep/v1/evaluate/{flag_key}": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Making a **POST** request to the URL ` + "`" + `/ofrep/v1/evaluate/\u003cyour_flag_name\u003e` + "`" + ` will give you the value of the\nflag for this evaluation context\n",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Evaluate a feature flag using the OpenFeature Remote Evaluation Protocol",
+                "parameters": [
+                    {
+                        "description": "Evaluation Context for this API call",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.OFREPEvalFlagRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Name of your feature flag",
+                        "name": "flag_key",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/model.OFREPEvaluateSuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.OFREPEvaluateErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
+                        }
+                    },
+                    "404": {
+                        "description": "Flag Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/model.OFREPEvaluateErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
+                        }
+                    }
+                }
+            }
+        },
+        "/ofrep/v1/flag/changes": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Making a **POST** request to the URL ` + "`" + `/ofrep/v1/flag/changes` + "`" + ` will give you the value of the list of\nETags for your feature flags.\n\nIf no flags are provided, the API will compite all available flags in the configuration.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Compute all the ETag in bulk using the OpenFeature Remote Evaluation Protocol",
+                "parameters": [
+                    {
+                        "description": "List of flags to evaluate",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.OFREPFlagBulkEvaluateSuccessResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.OFREPErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/allflags": {
             "post": {
                 "security": [
@@ -456,6 +640,119 @@ const docTemplate = `{
                     "description": "This is the last time when your flag file was read and store in the internal cache.",
                     "type": "string",
                     "example": "2022-06-13T11:22:55.941628+02:00"
+                }
+            }
+        },
+        "model.OFREPBulkEvalFlagRequest": {
+            "type": "object",
+            "properties": {
+                "context": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "example": {
+                        "company": "GO Feature Flag",
+                        "firstname": "John",
+                        "lastname": "Doe",
+                        "targetingKey": "4f433951-4c8c-42b3-9f18-8c9a5ed8e9eb"
+                    }
+                },
+                "flags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "my-first-flag",
+                        "another-flag"
+                    ]
+                }
+            }
+        },
+        "model.OFREPErrorResponse": {
+            "type": "object",
+            "properties": {
+                "errorCode": {
+                    "type": "string"
+                },
+                "errorDetails": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.OFREPEvalFlagRequest": {
+            "type": "object",
+            "properties": {
+                "context": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "example": {
+                        "company": "GO Feature Flag",
+                        "firstname": "John",
+                        "lastname": "Doe",
+                        "targetingKey": "4f433951-4c8c-42b3-9f18-8c9a5ed8e9eb"
+                    }
+                }
+            }
+        },
+        "model.OFREPEvaluateErrorResponse": {
+            "type": "object",
+            "properties": {
+                "errorCode": {
+                    "type": "string"
+                },
+                "errorDetails": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.OFREPEvaluateSuccessResponse": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+                "metadata": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "reason": {
+                    "type": "string"
+                },
+                "value": {},
+                "variant": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.OFREPFlagBulkEvaluateSuccessResponse": {
+            "type": "object",
+            "properties": {
+                "errorCode": {
+                    "type": "string"
+                },
+                "errorDetails": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "metadata": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "reason": {
+                    "type": "string"
+                },
+                "value": {},
+                "variant": {
+                    "type": "string"
                 }
             }
         },
