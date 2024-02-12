@@ -7,7 +7,7 @@ toolchain go1.21.3
 require (
 	cloud.google.com/go/storage v1.37.0
 	github.com/BurntSushi/toml v1.3.2
-	github.com/IBM/sarama v1.42.1
+	github.com/IBM/sarama v1.42.2
 	github.com/aws/aws-lambda-go v1.46.0
 	github.com/aws/aws-sdk-go v1.50.10
 	github.com/aws/aws-sdk-go-v2 v1.24.1
@@ -104,7 +104,7 @@ require (
 	github.com/docker/docker v24.0.7+incompatible // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
-	github.com/eapache/go-resiliency v1.4.0 // indirect
+	github.com/eapache/go-resiliency v1.5.0 // indirect
 	github.com/eapache/go-xerial-snappy v0.0.0-20230731223053-c322873962e3 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/emicklei/go-restful/v3 v3.11.0 // indirect
@@ -168,7 +168,7 @@ require (
 	github.com/opencontainers/image-spec v1.1.0-rc5 // indirect
 	github.com/opencontainers/runc v1.1.5 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
-	github.com/pierrec/lz4/v4 v4.1.18 // indirect
+	github.com/pierrec/lz4/v4 v4.1.21 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pkg/xattr v0.4.9 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
