@@ -43,7 +43,7 @@ func succesQueryMockerFactory(queryResult string) func(t *mtest.T) {
 		// Unmarshal the JSON string into the map
 		err := json.Unmarshal([]byte(queryResult), &resultMap)
 		if err != nil {
-			fmt.Println("err:", err)
+			fmt.Println("Error:", err)
 			return
 		}
 

@@ -96,7 +96,7 @@ func Test_httpRetriever_Retrieve(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "HTTP err",
+			name: "HTTP Error",
 			fields: fields{
 				httpClient: mock.HTTP{},
 				url:        "http://localhost.example/httpError",
@@ -107,7 +107,7 @@ func Test_httpRetriever_Retrieve(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "err",
+			name: "Error",
 			fields: fields{
 				httpClient: mock.HTTP{},
 				url:        "http://localhost.example/error",

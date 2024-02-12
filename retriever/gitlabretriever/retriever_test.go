@@ -78,7 +78,7 @@ func Test_gitlab_Retrieve(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "HTTP err",
+			name: "HTTP Error",
 			fields: fields{
 				httpClient:     mock.HTTP{},
 				baseURL:        "https://gitlab.com/error",
@@ -89,7 +89,7 @@ func Test_gitlab_Retrieve(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "err missing slug",
+			name: "Error missing slug",
 			fields: fields{
 				httpClient: mock.HTTP{},
 				baseURL:    "",
@@ -98,7 +98,7 @@ func Test_gitlab_Retrieve(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "err missing file path",
+			name: "Error missing file path",
 			fields: fields{
 				httpClient: mock.HTTP{},
 				baseURL:    "https://gitlab.com/",

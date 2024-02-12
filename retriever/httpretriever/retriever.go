@@ -78,7 +78,7 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	}
 	defer resp.Body.Close()
 
-	// err if http code is more that 399
+	// Error if http code is more that 399
 	if resp.StatusCode > 399 {
 		return nil, fmt.Errorf("request to %s failed with code %d", r.URL, resp.StatusCode)
 	}

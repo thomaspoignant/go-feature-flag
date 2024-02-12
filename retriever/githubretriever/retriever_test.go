@@ -90,7 +90,7 @@ func Test_github_Retrieve(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "HTTP err",
+			name: "HTTP Error",
 			fields: fields{
 				httpClient:     mock.HTTP{},
 				repositorySlug: "thomaspoignant/go-feature-flag",
@@ -99,7 +99,7 @@ func Test_github_Retrieve(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "err missing slug",
+			name: "Error missing slug",
 			fields: fields{
 				httpClient:     mock.HTTP{},
 				repositorySlug: "",
@@ -108,7 +108,7 @@ func Test_github_Retrieve(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "err missing file path",
+			name: "Error missing file path",
 			fields: fields{
 				httpClient:     mock.HTTP{},
 				repositorySlug: "thomaspoignant/go-feature-flag",

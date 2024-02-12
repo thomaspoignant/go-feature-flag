@@ -141,7 +141,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Making a **POST** request to the URL ` + "`" + `/ofrep/v1/evaluate/\u003cyour_flag_name\u003e` + "`" + ` will give you the value of the\nflag for this evaluation context\n",
+                "description": "Making a **POST** request to the URL ` + "`" + `/ofrep/v1/evaluate/\u003cyour_flag_name\u003e` + "`" + ` will give you the value of\nthe flag for this evaluation context\n",
                 "consumes": [
                     "application/json"
                 ],

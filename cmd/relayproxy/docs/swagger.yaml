@@ -452,8 +452,8 @@ paths:
       consumes:
       - application/json
       description: |
-        Making a **POST** request to the URL `/ofrep/v1/evaluate/<your_flag_name>` will give you the value of the
-        flag for this evaluation context
+        Making a **POST** request to the URL `/ofrep/v1/evaluate/<your_flag_name>` will give you the value of
+        the flag for this evaluation context
       parameters:
       - description: Evaluation Context for this API call
         in: body

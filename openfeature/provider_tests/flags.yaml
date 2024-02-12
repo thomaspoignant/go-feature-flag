@@ -86,7 +86,7 @@ disabled_string:
     pr_link: https://github.com/thomaspoignant/go-feature-flag/pull/916
 double_key:
   variations:
-    Default: 103.24
+    Default: 103.25
     "False": 101.25
     "True": 100.25
   targeting:

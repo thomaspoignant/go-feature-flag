@@ -119,7 +119,7 @@ func (s *Server) initAPIEndpoint(echoInstance *echo.Echo) {
 	ofrepGroup := echoInstance.Group("/ofrep/v1")
 	if len(s.config.APIKeys) > 0 {
 		ofrepGroup.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
-			Validator: func(key string, c echo.Context) (bool, error) {
+			Validator: func(key string, _ echo.Context) (bool, error) {
 				return s.config.APIKeyExists(key), nil
 			},
 		}))
@@ -162,7 +162,7 @@ func (s *Server) Start() {
 				zap.String("address", addressMonitoring))
 			err := s.monitoringEcho.Start(addressMonitoring)
 			if err != nil && !errors.Is(err, http.ErrServerClosed) {
-				s.zapLog.Fatal("err starting monitoring", zap.Error(err))
+				s.zapLog.Fatal("Error starting monitoring", zap.Error(err))
 			}
 		}()
 		defer func() { _ = s.monitoringEcho.Close() }()
@@ -180,7 +180,7 @@ func (s *Server) Start() {
 
 	err := s.apiEcho.Start(address)
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
-		s.zapLog.Fatal("err starting relay proxy", zap.Error(err))
+		s.zapLog.Fatal("Error starting relay proxy", zap.Error(err))
 	}
 }
 
