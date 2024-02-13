@@ -24,9 +24,19 @@ func NewOFREPFlagChanges(goFF *ffclient.GoFeatureFlag, metrics metric.Metrics) C
 	}
 }
 
+type FlagChangeErrorCode string
+
+const (
+	FlagChangeErrorFlagNotFound FlagChangeErrorCode = "FLAG_NOT_FOUND"
+	FlagChangeErrorParseError   FlagChangeErrorCode = "PARSE_ERROR"
+	FlagChangeErrorGeneral      FlagChangeErrorCode = "GENERAL"
+)
+
 type flagChangesResponse struct {
-	ETag string `json:"ETag"`
-	Key  string `json:"Key"`
+	ETag         string              `json:"ETag"`
+	Key          string              `json:"Key"`
+	ErrorCode    FlagChangeErrorCode `json:"errorCode,omitempty"`
+	ErrorDetails string              `json:"errorDetails,omitempty"`
 }
 
 // OFREPHandler is the entry point to get the ETag in bulk of flags to implement OpenFeature Remote Evaluation Protocol.
@@ -76,6 +86,12 @@ func (h *ofrepFlagChangesCtrl) OFREPHandler(c echo.Context) error {
 			response = append(response, flagChangesResponse{
 				ETag: fmt.Sprintf("%x", flagCheckSum(f)),
 				Key:  key,
+			})
+		} else {
+			response = append(response, flagChangesResponse{
+				Key:          key,
+				ErrorCode:    FlagChangeErrorFlagNotFound,
+				ErrorDetails: fmt.Sprintf("Flag not found in the configuration: %s", key),
 			})
 		}
 	}

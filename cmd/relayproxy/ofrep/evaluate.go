@@ -49,7 +49,7 @@ func (h *ofrepEvaluateCtrl) OFREPHandler(c echo.Context) error {
 	if flagKey == "" {
 		return c.JSON(
 			http.StatusBadRequest,
-			customerr.NewOFREPEvaluateError(flagKey, "INVALID_CONTEXT",
+			customerr.NewOFREPEvaluateError(flagKey, flag.ErrorCodeGeneral,
 				"No key provided in the URL").ToOFRErrorResponse())
 	}
 	h.metrics.IncFlagEvaluation(flagKey)
@@ -58,7 +58,7 @@ func (h *ofrepEvaluateCtrl) OFREPHandler(c echo.Context) error {
 	if err := c.Bind(reqBody); err != nil {
 		return c.JSON(
 			http.StatusBadRequest,
-			customerr.NewOFREPEvaluateError(flagKey, "INVALID_CONTEXT", err.Error()).ToOFRErrorResponse())
+			customerr.NewOFREPEvaluateError(flagKey, flag.ErrorCodeInvalidContext, err.Error()).ToOFRErrorResponse())
 	}
 	if err := assertOFREPEvaluateRequest(flagKey, reqBody); err != nil {
 		return c.JSON(http.StatusBadRequest, err.ToOFRErrorResponse())

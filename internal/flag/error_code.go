@@ -10,6 +10,7 @@ const (
 	ErrorCodeParseError       ErrorCode = "PARSE_ERROR"
 	ErrorCodeTypeMismatch     ErrorCode = "TYPE_MISMATCH"
 	ErrorCodeGeneral          ErrorCode = "GENERAL"
+	ErrorCodeInvalidContext   ErrorCode = "INVALID_CONTEXT"
 
 	// Custom error code for Go Feature Flag
 

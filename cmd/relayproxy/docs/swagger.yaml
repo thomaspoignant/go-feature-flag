@@ -57,6 +57,24 @@ definitions:
         example: v1.0.0
         type: string
     type: object
+  flag.ErrorCode:
+    enum:
+    - PROVIDER_NOT_READY
+    - FLAG_NOT_FOUND
+    - PARSE_ERROR
+    - TYPE_MISMATCH
+    - GENERAL
+    - INVALID_CONTEXT
+    - FLAG_CONFIG
+    type: string
+    x-enum-varnames:
+    - ErrorCodeProviderNotReady
+    - ErrorCodeFlagNotFound
+    - ErrorCodeParseError
+    - ErrorCodeTypeMismatch
+    - ErrorCodeGeneral
+    - ErrorCodeInvalidContext
+    - ErrorFlagConfiguration
   flag.Flag:
     properties:
       defValue:
@@ -174,7 +192,7 @@ definitions:
   model.OFREPErrorResponse:
     properties:
       errorCode:
-        type: string
+        $ref: '#/definitions/flag.ErrorCode'
       errorDetails:
         type: string
     type: object
@@ -193,7 +211,7 @@ definitions:
   model.OFREPEvaluateErrorResponse:
     properties:
       errorCode:
-        type: string
+        $ref: '#/definitions/flag.ErrorCode'
       errorDetails:
         type: string
       key:

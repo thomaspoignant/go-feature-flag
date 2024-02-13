@@ -507,6 +507,27 @@ const docTemplate = `{
                 }
             }
         },
+        "flag.ErrorCode": {
+            "type": "string",
+            "enum": [
+                "PROVIDER_NOT_READY",
+                "FLAG_NOT_FOUND",
+                "PARSE_ERROR",
+                "TYPE_MISMATCH",
+                "GENERAL",
+                "INVALID_CONTEXT",
+                "FLAG_CONFIG"
+            ],
+            "x-enum-varnames": [
+                "ErrorCodeProviderNotReady",
+                "ErrorCodeFlagNotFound",
+                "ErrorCodeParseError",
+                "ErrorCodeTypeMismatch",
+                "ErrorCodeGeneral",
+                "ErrorCodeInvalidContext",
+                "ErrorFlagConfiguration"
+            ]
+        },
         "flag.Flag": {
             "type": "object",
             "properties": {
@@ -674,7 +695,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "errorCode": {
-                    "type": "string"
+                    "$ref": "#/definitions/flag.ErrorCode"
                 },
                 "errorDetails": {
                     "type": "string"
@@ -702,7 +723,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "errorCode": {
-                    "type": "string"
+                    "$ref": "#/definitions/flag.ErrorCode"
                 },
                 "errorDetails": {
                     "type": "string"
