@@ -232,19 +232,13 @@ definitions:
     type: object
   model.OFREPFlagBulkEvaluateSuccessResponse:
     properties:
+      ETag:
+        type: string
+      OFREPEvaluateSuccessResponse:
+        $ref: '#/definitions/model.OFREPEvaluateSuccessResponse'
       errorCode:
         type: string
       errorDetails:
-        type: string
-      key:
-        type: string
-      metadata:
-        additionalProperties: {}
-        type: object
-      reason:
-        type: string
-      value: {}
-      variant:
         type: string
     type: object
   model.UserRequest:

@@ -56,12 +56,15 @@ func (h *ofrepBulkEvaluateCtrl) OFREPHandler(c echo.Context) error {
 			err)
 	}
 
+	flags, _ := h.goFF.GetFlagsFromCache()
+
 	if request.Flags != nil && len(request.Flags) > 0 {
 		// if a list of flag is provided we evaluate all flags from the list
 		response := model.OFREPBulkEvaluateSuccessResponse{}
 		for _, key := range request.Flags {
 			// TODO: check to change this
 			defaultValue := "thisisadefaultvaluethatItest1233%%"
+
 			evalResp, _ := h.goFF.RawVariation(key, evalCtx, defaultValue)
 
 			value := evalResp.Value
@@ -78,6 +81,7 @@ func (h *ofrepBulkEvaluateCtrl) OFREPHandler(c echo.Context) error {
 					Metadata: evalResp.Metadata,
 				},
 				ErrorCode: evalResp.ErrorCode,
+				ETag:      flagCheckSum(flags[key]),
 			})
 		}
 		return c.JSON(http.StatusOK, response)
@@ -100,6 +104,7 @@ func (h *ofrepBulkEvaluateCtrl) OFREPHandler(c echo.Context) error {
 				Metadata: val.Metadata,
 			},
 			ErrorCode: val.ErrorCode,
+			ETag:      flagCheckSum(flags[key]),
 		})
 	}
 	return c.JSON(http.StatusOK, response)

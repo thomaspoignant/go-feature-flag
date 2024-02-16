@@ -755,24 +755,16 @@ const docTemplate = `{
         "model.OFREPFlagBulkEvaluateSuccessResponse": {
             "type": "object",
             "properties": {
+                "ETag": {
+                    "type": "string"
+                },
+                "OFREPEvaluateSuccessResponse": {
+                    "$ref": "#/definitions/model.OFREPEvaluateSuccessResponse"
+                },
                 "errorCode": {
                     "type": "string"
                 },
                 "errorDetails": {
-                    "type": "string"
-                },
-                "key": {
-                    "type": "string"
-                },
-                "metadata": {
-                    "type": "object",
-                    "additionalProperties": {}
-                },
-                "reason": {
-                    "type": "string"
-                },
-                "value": {},
-                "variant": {
                     "type": "string"
                 }
             }

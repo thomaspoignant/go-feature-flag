@@ -1,14 +1,11 @@
 package ofrep
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/labstack/echo/v4"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/ofrep/customerr"
-	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	"hash/crc32"
 	"net/http"
 )
 
@@ -73,7 +70,7 @@ func (h *ofrepFlagChangesCtrl) OFREPHandler(c echo.Context) error {
 		response := []flagChangesResponse{}
 		for k, v := range flags {
 			response = append(response, flagChangesResponse{
-				ETag: fmt.Sprintf("%x", flagCheckSum(v)),
+				ETag: flagCheckSum(v),
 				Key:  k,
 			})
 		}
@@ -96,9 +93,4 @@ func (h *ofrepFlagChangesCtrl) OFREPHandler(c echo.Context) error {
 		}
 	}
 	return c.JSON(http.StatusOK, response)
-}
-
-func flagCheckSum(f flag.Flag) string {
-	jsonData, _ := json.Marshal(f)
-	return fmt.Sprintf("%x", crc32.ChecksumIEEE(jsonData))
 }
