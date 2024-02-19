@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
-	"os"
 
 	"github.com/spf13/pflag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api"
@@ -56,6 +57,10 @@ func main() {
 		zapLog.Fatal("error while reading configuration", zap.Error(err))
 	}
 
+	if proxyConf == nil {
+		panic(fmt.Errorf("unable to set the proxy conf, and it is empty"))
+	}
+
 	if err := proxyConf.IsValid(); err != nil {
 		zapLog.Fatal("configuration error", zap.Error(err))
 	}
@@ -77,6 +82,7 @@ func main() {
 	defer wsService.Close() // close all the open connections
 	prometheusNotifier := metric.NewPrometheusNotifier(metricsV2)
 	proxyNotifier := service.NewNotifierWebsocket(wsService)
+
 	goff, err := service.NewGoFeatureFlagClient(proxyConf, zapLog, []notifier.Notifier{
 		prometheusNotifier,
 		proxyNotifier,

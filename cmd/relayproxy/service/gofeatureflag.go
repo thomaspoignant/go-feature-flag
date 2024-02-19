@@ -41,11 +41,20 @@ func NewGoFeatureFlagClient(
 ) (*ffclient.GoFeatureFlag, error) {
 	var mainRetriever retriever.Retriever
 	var err error
+
+	if proxyConf == nil {
+		return nil, fmt.Errorf("proxy config is empty")
+	}
+
 	if proxyConf.Retriever != nil {
 		mainRetriever, err = initRetriever(proxyConf.Retriever)
 		if err != nil {
 			return nil, err
 		}
+	}
+
+	if proxyConf == nil {
+		return nil, fmt.Errorf("proxy configuration is empty")
 	}
 
 	// Manage if we have more than 1 retriver
@@ -158,7 +167,7 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 		return &k8sretriever.Retriever{Namespace: c.Namespace, ConfigMapName: c.ConfigMap, Key: c.Key,
 			ClientConfig: *client}, nil
 	case config.MongoDBRetriever:
-		return &mongodbretriever.Retriever{Database: c.Database, URI: c.URI, Collection: c.Collection }, nil
+		return &mongodbretriever.Retriever{Database: c.Database, URI: c.URI, Collection: c.Collection}, nil
 	default:
 		return nil, fmt.Errorf("invalid retriever: kind \"%s\" "+
 			"is not supported, accepted kind: [googleStorage, http, s3, file, github]", c.Kind)

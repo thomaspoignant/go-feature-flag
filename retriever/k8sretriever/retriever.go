@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
 )
@@ -30,6 +30,11 @@ func (s *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 		}
 		s.client = client
 	}
+
+	if s.client == nil {
+		return nil, fmt.Errorf("client is nil after initialization")
+	}
+
 	configMap, err := s.client.CoreV1().ConfigMaps(s.Namespace).Get(ctx, s.ConfigMapName, v1.GetOptions{})
 	if err != nil {
 		return nil, fmt.Errorf(
