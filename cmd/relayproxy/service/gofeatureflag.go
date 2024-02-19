@@ -53,10 +53,6 @@ func NewGoFeatureFlagClient(
 		}
 	}
 
-	if proxyConf == nil {
-		return nil, fmt.Errorf("proxy configuration is empty")
-	}
-
 	// Manage if we have more than 1 retriver
 	retrievers := make([]retriever.Retriever, 0)
 	if proxyConf.Retrievers != nil {
