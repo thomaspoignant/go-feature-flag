@@ -91,7 +91,7 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("dev.gustavoavila:java-android-websocket-client:2.0.2")
     testImplementation("junit:junit:4.13.2")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
 }
 
