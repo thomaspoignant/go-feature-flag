@@ -19,7 +19,3 @@ func (s *Context) AddIntoEvaluationContextEnrichment(key string, value interface
 	}
 	s.EvaluationContextEnrichment[key] = value
 }
-
-func (s *Context) GetEvaluationContextEnrichment() map[string]interface{} {
-	return s.EvaluationContextEnrichment
-}

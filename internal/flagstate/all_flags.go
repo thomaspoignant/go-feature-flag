@@ -33,18 +33,13 @@ func (a *AllFlags) AddFlag(flagKey string, state FlagState) {
 	}
 }
 
-// MarshalJSON is serializing the object to JSON, it will produce a JSON you can send to your front-end.
+// MarshalJSON is serializing the object to JSON, it will produce a JSON you can sent to your front-end.
 func (a AllFlags) MarshalJSON() ([]byte, error) {
-	flagsCopy := make(map[string]FlagState, len(a.GetFlags()))
-	for k, v := range a.GetFlags() {
-		flagsCopy[k] = v
-	}
-
 	res := struct {
 		Flags map[string]FlagState `json:"flags,omitempty"`
 		Valid bool                 `json:"valid"`
 	}{
-		Flags: flagsCopy,
+		Flags: a.flags,
 		Valid: a.IsValid(),
 	}
 	return json.Marshal(res)

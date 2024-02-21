@@ -2,7 +2,6 @@ package ffclient
 
 import (
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/exporter"
@@ -263,61 +262,47 @@ func (g *GoFeatureFlag) AllFlagsState(evaluationCtx ffcontext.Context) flagstate
 		}
 	}
 
-	type FlagStateRes struct {
-		state flagstate.FlagState
-		key   string
-	}
-	semaphore := make(chan FlagStateRes, 100) // Limit concurrency to 100
-	// Adding into the evaluation context the common attributes, we are doing it only once for all the flags to avoid
-	// doing it for each flag and to avoid data race condition.
-	for k, v := range g.config.EvaluationContextEnrichment {
-		evaluationCtx.AddCustomAttribute(k, v)
-	}
-	evaluationCtx.AddCustomAttribute("env", g.config.Environment)
+	allFlags := flagstate.NewAllFlags()
+	for key, currentFlag := range flags {
+		flagCtx := flag.Context{
+			EvaluationContextEnrichment: g.config.EvaluationContextEnrichment,
+			DefaultSdkValue:             nil,
+		}
+		flagCtx.AddIntoEvaluationContextEnrichment("env", g.config.Environment)
+		flagValue, resolutionDetails := currentFlag.Value(key, evaluationCtx, flagCtx)
 
-	for key := range flags {
-		go func(key string) {
-			currentFlag, err := g.cache.GetFlag(key)
-			if err != nil {
-				fflog.Printf(g.config.Logger, "error when getting flag %v from cache: %v", key, err)
-				return
-			}
+		// if the flag is disabled, we are ignoring it.
+		if resolutionDetails.Reason == flag.ReasonDisabled {
+			allFlags.AddFlag(key, flagstate.FlagState{
+				Timestamp:   time.Now().Unix(),
+				TrackEvents: currentFlag.IsTrackEvents(),
+				Failed:      resolutionDetails.ErrorCode != "",
+				ErrorCode:   resolutionDetails.ErrorCode,
+				Reason:      resolutionDetails.Reason,
+				Metadata:    resolutionDetails.Metadata,
+			})
+			continue
+		}
 
-			flagCtx := flag.Context{DefaultSdkValue: nil}
-			flagValue, resolutionDetails := currentFlag.Value(key, evaluationCtx, flagCtx)
+		switch v := flagValue; v.(type) {
+		case int, float64, bool, string, []interface{}, map[string]interface{}:
+			allFlags.AddFlag(key, flagstate.FlagState{
+				Value:         v,
+				Timestamp:     time.Now().Unix(),
+				VariationType: resolutionDetails.Variant,
+				TrackEvents:   currentFlag.IsTrackEvents(),
+				Failed:        resolutionDetails.ErrorCode != "",
+				ErrorCode:     resolutionDetails.ErrorCode,
+				Reason:        resolutionDetails.Reason,
+				Metadata:      resolutionDetails.Metadata,
+			})
 
-			// if the flag is disabled, we are ignoring it.
-			if resolutionDetails.Reason == flag.ReasonDisabled {
-				state := flagstate.FlagState{
-					Timestamp:   time.Now().Unix(),
-					TrackEvents: currentFlag.IsTrackEvents(),
-					Failed:      resolutionDetails.ErrorCode != "",
-					ErrorCode:   resolutionDetails.ErrorCode,
-					Reason:      resolutionDetails.Reason,
-					Metadata:    resolutionDetails.Metadata,
-				}
-				semaphore <- FlagStateRes{key: key, state: state}
-				return
-			}
-
-			switch v := flagValue; v.(type) {
-			case int, float64, bool, string, []interface{}, map[string]interface{}:
-				state := flagstate.FlagState{
-					Value:         v,
-					Timestamp:     time.Now().Unix(),
-					VariationType: resolutionDetails.Variant,
-					TrackEvents:   currentFlag.IsTrackEvents(),
-					Failed:        resolutionDetails.ErrorCode != "",
-					ErrorCode:     resolutionDetails.ErrorCode,
-					Reason:        resolutionDetails.Reason,
-					Metadata:      resolutionDetails.Metadata,
-				}
-				semaphore <- FlagStateRes{key: key, state: state}
-
-			default:
-				defaultVariationName := flag.VariationSDKDefault
-				defaultVariationValue := currentFlag.GetVariationValue(defaultVariationName)
-				state := flagstate.FlagState{
+		default:
+			defaultVariationName := flag.VariationSDKDefault
+			defaultVariationValue := currentFlag.GetVariationValue(defaultVariationName)
+			allFlags.AddFlag(
+				key,
+				flagstate.FlagState{
 					Value:         defaultVariationValue,
 					Timestamp:     time.Now().Unix(),
 					VariationType: defaultVariationName,
@@ -326,16 +311,8 @@ func (g *GoFeatureFlag) AllFlagsState(evaluationCtx ffcontext.Context) flagstate
 					ErrorCode:     flag.ErrorCodeTypeMismatch,
 					Reason:        flag.ReasonError,
 					Metadata:      resolutionDetails.Metadata,
-				}
-				semaphore <- FlagStateRes{key: key, state: state}
-			}
-		}(key)
-	}
-	// Wait for all goroutines to finish
-	allFlags := flagstate.NewAllFlags()
-	for i := 0; i < len(flags); i++ {
-		res := <-semaphore
-		allFlags.AddFlag(res.key, res.state)
+				})
+		}
 	}
 	return allFlags
 }
