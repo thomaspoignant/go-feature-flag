@@ -47,11 +47,9 @@ class DataCollectorHook(Hook):
             # we don't collect data if the data collection is disabled or if the flag is not cached
             return
         feature_event = FeatureEvent(
-            contextKind=(
-                "anonymousUser"
-                if hook_context.evaluation_context.attributes["anonymous"]
-                else "user"
-            ),
+            contextKind="anonymousUser"
+            if hook_context.evaluation_context.attributes["anonymous"]
+            else "user",
             creationDate=int(datetime.datetime.now().timestamp()),
             default=False,
             key=hook_context.flag_key,
@@ -68,11 +66,9 @@ class DataCollectorHook(Hook):
             return
 
         feature_event = FeatureEvent(
-            contextKind=(
-                "anonymousUser"
-                if hook_context.evaluation_context.attributes["anonymous"]
-                else "user"
-            ),
+            contextKind="anonymousUser"
+            if hook_context.evaluation_context.attributes["anonymous"]
+            else "user",
             creationDate=int(datetime.datetime.now().timestamp()),
             default=True,
             key=hook_context.flag_key,
