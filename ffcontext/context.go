@@ -65,7 +65,7 @@ func (u EvaluationContext) GetCustom() map[string]interface{} {
 	return u.custom
 }
 
-// AddCustomAttribute allows to add a custom attribute into the user.
+// AddCustomAttribute allows adding a custom attribute into the user.
 func (u EvaluationContext) AddCustomAttribute(name string, value interface{}) {
 	if name != "" {
 		u.custom[name] = value
