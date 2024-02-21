@@ -267,9 +267,9 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
                 flag_key=flag_key,
                 value=response_flag_evaluation.value,
                 variant=response_flag_evaluation.variationType,
-                reason=Reason.CACHED
-                if is_from_cache
-                else response_flag_evaluation.reason,
+                reason=(
+                    Reason.CACHED if is_from_cache else response_flag_evaluation.reason
+                ),
                 flag_metadata=response_flag_evaluation.metadata,
             )
         except ValidationError as exc:
