@@ -268,10 +268,8 @@ func (g *GoFeatureFlag) AllFlagsState(evaluationCtx ffcontext.Context) flagstate
 		key   string
 	}
 	semaphore := make(chan FlagStateRes, 100) // Limit concurrency to 100
-
-	// Adding into the evaluation context the common attributes
-	// We are doing it only once for all the flags to avoid doing
-	// it for each flag and to avoid data race condition.
+	// Adding into the evaluation context the common attributes, we are doing it only once for all the flags to avoid
+	// doing it for each flag and to avoid data race condition.
 	for k, v := range g.config.EvaluationContextEnrichment {
 		evaluationCtx.AddCustomAttribute(k, v)
 	}
@@ -333,15 +331,10 @@ func (g *GoFeatureFlag) AllFlagsState(evaluationCtx ffcontext.Context) flagstate
 			}
 		}(key)
 	}
-
 	// Wait for all goroutines to finish
-	result := make([]FlagStateRes, len(flags))
-	for i := 0; i < len(flags); i++ {
-		result[i] = <-semaphore
-	}
-
 	allFlags := flagstate.NewAllFlags()
-	for _, res := range result {
+	for i := 0; i < len(flags); i++ {
+		res := <-semaphore
 		allFlags.AddFlag(res.key, res.state)
 	}
 	return allFlags
