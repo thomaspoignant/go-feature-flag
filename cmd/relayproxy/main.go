@@ -57,10 +57,6 @@ func main() {
 		zapLog.Fatal("error while reading configuration", zap.Error(err))
 	}
 
-	if proxyConf == nil {
-		zapLog.Fatal("unable to set the proxy conf, and it is empty")
-	}
-
 	if err := proxyConf.IsValid(); err != nil {
 		zapLog.Fatal("configuration error", zap.Error(err))
 	}
