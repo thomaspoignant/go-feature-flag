@@ -306,6 +306,11 @@ func TestConfig_IsValid(t *testing.T) {
 		wantErr assert.ErrorAssertionFunc
 	}{
 		{
+			name:    "empty config",
+			fields:  fields{},
+			wantErr: assert.Error,
+		},
+		{
 			name:    "invalid port",
 			fields:  fields{ListenPort: 0},
 			wantErr: assert.Error,

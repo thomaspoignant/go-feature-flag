@@ -32,7 +32,7 @@ func (s *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	}
 
 	if s.client == nil {
-		return nil, fmt.Errorf("client is nil after initialization")
+		return nil, fmt.Errorf("k8s client is nil after initialization")
 	}
 
 	configMap, err := s.client.CoreV1().ConfigMaps(s.Namespace).Get(ctx, s.ConfigMapName, v1.GetOptions{})

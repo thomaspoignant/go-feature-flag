@@ -58,7 +58,7 @@ func main() {
 	}
 
 	if proxyConf == nil {
-		panic(fmt.Errorf("unable to set the proxy conf, and it is empty"))
+		zapLog.Fatal("unable to set the proxy conf, and it is empty")
 	}
 
 	if err := proxyConf.IsValid(); err != nil {
