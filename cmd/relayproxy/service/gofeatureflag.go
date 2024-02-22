@@ -163,7 +163,7 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 		return &k8sretriever.Retriever{Namespace: c.Namespace, ConfigMapName: c.ConfigMap, Key: c.Key,
 			ClientConfig: *client}, nil
 	case config.MongoDBRetriever:
-		return &mongodbretriever.Retriever{Database: c.Database, URI: c.URI, Collection: c.Collection}, nil
+		return &mongodbretriever.Retriever{Database: c.Database, URI: c.URI, Collection: c.Collection }, nil
 	default:
 		return nil, fmt.Errorf("invalid retriever: kind \"%s\" "+
 			"is not supported, accepted kind: [googleStorage, http, s3, file, github]", c.Kind)

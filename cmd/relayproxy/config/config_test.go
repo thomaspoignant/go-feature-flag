@@ -459,6 +459,9 @@ func TestConfig_IsValid(t *testing.T) {
 				Notifiers:               tt.fields.Notifiers,
 				Retrievers:              tt.fields.Retrievers,
 			}
+			if tt.name == "empty config" {
+				c = nil
+			}
 			tt.wantErr(t, c.IsValid(), "invalid configuration")
 		})
 	}
