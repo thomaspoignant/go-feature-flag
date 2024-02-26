@@ -22,7 +22,7 @@ Documentation = "https://github.com/thomaspoignant/go-feature-flag/tree/main/ope
 
 [tool.poetry.dependencies]
 python = "^3.9"
-openfeature-sdk = "^0.4.1"
+openfeature-sdk = ">=0.4.1,<0.6.0"
 pydantic = "^2.5.2"
 urllib3 = "^2.1.0"
 pylru = "^1.2.1"
