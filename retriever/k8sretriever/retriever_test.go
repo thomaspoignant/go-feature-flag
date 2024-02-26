@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	api "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/fake"
@@ -121,10 +121,29 @@ func Test_kubernetesRetriever_Retrieve(t *testing.T) {
 			},
 			wantErr: errors.New("unable to read from config map ConfigMap1.Namespace, error: configmaps \"ConfigMap1\" not found"),
 		},
+		{
+			name: "k8s client is nil",
+			fields: fields{
+				object: &api.ConfigMap{
+					ObjectMeta: v1.ObjectMeta{Name: "ConfigMap1", Namespace: "Namespace"},
+					Data:       map[string]string{"valid": expectedContent},
+				},
+				namespace:     "Namespace",
+				configMapName: "ConfigMap1",
+				key:           "valid",
+			},
+			wantErr: errors.New("k8s client is nil after initialization"),
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			kubeClientProvider = kubeClientProviderFactory(tt.fields.object)
+			if tt.name == "k8s client is nil" {
+				// mocking the kubeClientProvider function
+				kubeClientProvider = func(config *restclient.Config) (kubernetes.Interface, error) {
+					return nil, nil
+				}
+			}
 			s := Retriever{
 				ConfigMapName: tt.fields.configMapName,
 				Key:           tt.fields.key,

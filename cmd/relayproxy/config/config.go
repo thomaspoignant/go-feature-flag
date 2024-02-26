@@ -214,6 +214,10 @@ func (c *Config) APIKeyExists(apiKey string) bool {
 
 // IsValid contains all the validation of the configuration.
 func (c *Config) IsValid() error {
+	if c == nil {
+		return fmt.Errorf("empty config")
+	}
+
 	if c.ListenPort == 0 {
 		return fmt.Errorf("invalid port %d", c.ListenPort)
 	}

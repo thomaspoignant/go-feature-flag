@@ -30,7 +30,11 @@ import (
 func Init(config Config) error {
 	var err error
 	onceFF.Do(func() {
-		ff, err = New(config)
+		var tmpFF *GoFeatureFlag
+		tmpFF, err = New(config)
+		if err == nil {
+			ff = tmpFF
+		}
 	})
 	return err
 }

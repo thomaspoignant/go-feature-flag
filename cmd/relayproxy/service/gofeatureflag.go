@@ -41,6 +41,11 @@ func NewGoFeatureFlagClient(
 ) (*ffclient.GoFeatureFlag, error) {
 	var mainRetriever retriever.Retriever
 	var err error
+
+	if proxyConf == nil {
+		return nil, fmt.Errorf("proxy config is empty")
+	}
+
 	if proxyConf.Retriever != nil {
 		mainRetriever, err = initRetriever(proxyConf.Retriever)
 		if err != nil {
