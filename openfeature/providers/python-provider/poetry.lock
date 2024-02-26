@@ -272,13 +272,13 @@ files = [
 
 [[package]]
 name = "openfeature-sdk"
-version = "0.4.2"
+version = "0.5.0"
 description = "Standardizing Feature Flagging for Everyone"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "openfeature_sdk-0.4.2-py3-none-any.whl", hash = "sha256:a089b5a90ec369321e1fbac87531ab8df973520789dd8b3a98d3cb2b5d50d3d1"},
-    {file = "openfeature_sdk-0.4.2.tar.gz", hash = "sha256:3ce4cf0b2251786d7557ed0972b1ca99a9ace637655136bc00e6dfe0d03330b2"},
+    {file = "openfeature_sdk-0.5.0-py3-none-any.whl", hash = "sha256:179230913f8f4357d1c102c11d3ddddd190f9b74e5b836b44810916ba3e0bac0"},
+    {file = "openfeature_sdk-0.5.0.tar.gz", hash = "sha256:0ca97346256ab180631772ad76b654307103879b1bc8db498e133521f9ad4222"},
 ]
 
 [package.extras]
@@ -459,13 +459,13 @@ files = [
 
 [[package]]
 name = "pytest"
-version = "8.0.1"
+version = "8.0.2"
 description = "pytest: simple powerful testing with Python"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pytest-8.0.1-py3-none-any.whl", hash = "sha256:3e4f16fe1c0a9dc9d9389161c127c3edc5d810c38d6793042fb81d9f48a59fca"},
-    {file = "pytest-8.0.1.tar.gz", hash = "sha256:267f6563751877d772019b13aacbe4e860d73fe8f651f28112e9ac37de7513ae"},
+    {file = "pytest-8.0.2-py3-none-any.whl", hash = "sha256:edfaaef32ce5172d5466b5127b42e0d6d35ebbe4453f0e3505d96afd93f6b096"},
+    {file = "pytest-8.0.2.tar.gz", hash = "sha256:d4051d623a2e0b7e51960ba963193b09ce6daeb9759a451844a21e4ddedfc1bd"},
 ]
 
 [package.dependencies]
@@ -647,4 +647,4 @@ test = ["websockets"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "19d977e2d6bc4f505b36ba9074b6068f7fe7cb3c9d479d05d7ae1962f381fb63"
+content-hash = "2654b94ce35d00bebf55d8371554ae740ffc39ad12ce31db86a4ff6076750303"
