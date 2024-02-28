@@ -28,7 +28,7 @@ from gofeatureflag_python_provider.options import GoFeatureFlagOptions
 from openfeature import api
 from openfeature.evaluation_context import EvaluationContext
 
-// ...
+# ...
 
 goff_provider = GoFeatureFlagProvider(
     options=GoFeatureFlagOptions(endpoint="https://gofeatureflag.org/")
