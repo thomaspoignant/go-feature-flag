@@ -10,7 +10,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"log"
 	"os"
-	"sync"
 )
 
 // Retriever is a configuration struct for a S3 retriever.
@@ -27,7 +26,6 @@ type Retriever struct {
 
 	// downloader is an internal field, it is the downloader use by the AWS-SDK
 	downloader DownloaderAPI
-	init       sync.Once
 	status     retriever.Status
 }
 
