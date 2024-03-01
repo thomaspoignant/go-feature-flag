@@ -68,6 +68,12 @@ func Test_s3Retriever_Retrieve(t *testing.T) {
 				AwsConfig:  &awsConf,
 				downloader: tt.fields.downloader,
 			}
+			err := s.Init(context.Background(), nil)
+			assert.NoError(t, err)
+			defer func() {
+				err := s.Shutdown(context.Background())
+				assert.NoError(t, err)
+			}()
 			got, err := s.Retrieve(tt.fields.context)
 			assert.Equal(t, tt.wantErr, err != nil, "Retrieve() error = %v, wantErr %v", err, tt.wantErr)
 			if err == nil {
