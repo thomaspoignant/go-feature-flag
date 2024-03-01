@@ -20,6 +20,7 @@ On this page, we will highlight the various utilization methods, aiming to assis
 - [**Retrieve config from Kubernetes**](./retriever_configmap) - A small set up with a test application that explain how to retrieve your configuration from a **configMap** in Kubernetes.
 - [**Retrieve config from a file**](./retriever_file) - A code snippet to see how to retrieve your configuration from a local file.
 - [**Retrieve config from GitHub**](./retriever_file) - A code snippet to see how to retrieve your configuration from GitHub.
+- [**Retrieve config from AWS S3**](./retriever_file) - A code snippet to see how to retrieve your configuration from AWS S3.
 - [**Retrieve config from an HTTP endpoint**](./retriever_file) - A code snippet to see how to retrieve your configuration from any HTTP endpoint.
 - [**Retrieve config from MongoDB**](./retriever_mongodb) - A small set up with a test application that explain how to retrieve your configuration from a **MongoDB** database.
 - [**Use multiple configuration file**](./retriever_file) - A code snippet to see how to use multiple configuration file.
