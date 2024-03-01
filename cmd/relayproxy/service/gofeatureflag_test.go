@@ -6,29 +6,29 @@ import (
 	"testing"
 	"time"
 
-	"github.com/thomaspoignant/go-feature-flag/exporter"
-	"github.com/thomaspoignant/go-feature-flag/exporter/kafkaexporter"
-	"github.com/thomaspoignant/go-feature-flag/exporter/s3exporterv2"
-	"github.com/thomaspoignant/go-feature-flag/exporter/sqsexporter"
-	"github.com/thomaspoignant/go-feature-flag/notifier"
-	"github.com/thomaspoignant/go-feature-flag/notifier/slacknotifier"
-	"github.com/thomaspoignant/go-feature-flag/notifier/webhooknotifier"
-	"github.com/thomaspoignant/go-feature-flag/retriever/s3retrieverv2"
-
 	"github.com/stretchr/testify/assert"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
+	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/gcstorageexporter"
+	"github.com/thomaspoignant/go-feature-flag/exporter/kafkaexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/logsexporter"
+	"github.com/thomaspoignant/go-feature-flag/exporter/s3exporterv2"
+	"github.com/thomaspoignant/go-feature-flag/exporter/sqsexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/webhookexporter"
+	"github.com/thomaspoignant/go-feature-flag/notifier"
+	"github.com/thomaspoignant/go-feature-flag/notifier/slacknotifier"
+	"github.com/thomaspoignant/go-feature-flag/notifier/webhooknotifier"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/gcstorageretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/githubretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/gitlabretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/httpretriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever/s3retrieverv2"
 	"github.com/xitongsys/parquet-go/parquet"
+	"go.uber.org/zap"
 )
 
 func Test_initRetriever(t *testing.T) {
@@ -407,4 +407,16 @@ func Test_initNotifier(t *testing.T) {
 			assert.Equalf(t, tt.want, got, "initNotifier(%v)", tt.args.c)
 		})
 	}
+}
+
+func TestNewGoFeatureFlagClient_ProxyConfNil(t *testing.T) {
+	// Create a logger for testing
+	logger := zap.NewNop()
+
+	// Call NewGoFeatureFlagClient with nil proxyConf
+	goff, err := NewGoFeatureFlagClient(nil, logger, nil)
+
+	// Assert that the function returns nil and an error
+	assert.Nil(t, goff, "Expected GoFeatureFlag client to be nil when proxyConf is nil")
+	assert.EqualError(t, err, "proxy config is empty", "Expected error message to indicate empty proxy config")
 }
