@@ -9,7 +9,7 @@ require (
 	github.com/BurntSushi/toml v1.3.2
 	github.com/IBM/sarama v1.43.0
 	github.com/aws/aws-lambda-go v1.46.0
-	github.com/aws/aws-sdk-go v1.50.25
+	github.com/aws/aws-sdk-go v1.50.30
 	github.com/aws/aws-sdk-go-v2 v1.25.2
 	github.com/aws/aws-sdk-go-v2/config v1.27.4
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.16.6
@@ -38,7 +38,7 @@ require (
 	github.com/prometheus/client_golang v1.18.0
 	github.com/r3labs/diff/v3 v3.0.1
 	github.com/spf13/pflag v1.0.5
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 	github.com/swaggo/echo-swagger v1.4.1
 	github.com/swaggo/swag v1.16.3
 	github.com/testcontainers/testcontainers-go v0.28.0
