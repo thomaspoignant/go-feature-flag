@@ -39,6 +39,10 @@ func (s *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 		return nil, err
 	}
 
+	defer func() {
+		_ = file.Close()
+		_ = os.Remove(file.Name())
+	}()
 	// Create an AWS session
 	sess, err := session.NewSession(&s.AwsConfig)
 	if err != nil {
