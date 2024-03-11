@@ -560,12 +560,12 @@ files = [
 
 [[package]]
 name = "rel"
-version = "0.4.9.6"
+version = "0.4.9.8"
 description = "Registered Event Listener. Provides standard (pyevent) interface and functionality without external dependencies"
 optional = false
 python-versions = "*"
 files = [
-    {file = "rel-0.4.9.6-py2.py3-none-any.whl", hash = "sha256:1247e7aee6ccf9dca378518a2772f77777b823f00c128736846a0c7a876b1d2d"},
+    {file = "rel-0.4.9.8-py3-none-any.whl", hash = "sha256:aa9ebad45cb3ce21fc2626557c3d6195a2a0009b2c3db628d9cf510b7b9bf0fa"},
 ]
 
 [[package]]
