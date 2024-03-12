@@ -10,11 +10,10 @@ import (
 
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
+	"github.com/thomaspoignant/go-feature-flag/testutils"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/testutils/mock"
-
-	"github.com/thomaspoignant/go-feature-flag/testutils"
 )
 
 func TestDataExporterScheduler_flushWithTime(t *testing.T) {
@@ -24,6 +23,7 @@ func TestDataExporterScheduler_flushWithTime(t *testing.T) {
 	go dc.StartDaemon()
 	defer dc.Close()
 
+	// Initialize inputEvents slice
 	inputEvents := []exporter.FeatureEvent{
 		exporter.NewFeatureEvent(
 			ffcontext.NewEvaluationContextBuilder("ABCD").AddCustom("anonymous", true).Build(), "random-key",
@@ -45,6 +45,7 @@ func TestDataExporterScheduler_flushWithNumberOfEvents(t *testing.T) {
 	go dc.StartDaemon()
 	defer dc.Close()
 
+	// Initialize inputEvents slice
 	var inputEvents []exporter.FeatureEvent
 	for i := 0; i <= 100; i++ {
 		inputEvents = append(inputEvents, exporter.NewFeatureEvent(
@@ -64,6 +65,7 @@ func TestDataExporterScheduler_defaultFlush(t *testing.T) {
 	go dc.StartDaemon()
 	defer dc.Close()
 
+	// Initialize inputEvents slice
 	var inputEvents []exporter.FeatureEvent
 	for i := 0; i <= 100000; i++ {
 		inputEvents = append(inputEvents, exporter.NewFeatureEvent(
@@ -89,6 +91,7 @@ func TestDataExporterScheduler_exporterReturnError(t *testing.T) {
 	go dc.StartDaemon()
 	defer dc.Close()
 
+	// Initialize inputEvents slice
 	var inputEvents []exporter.FeatureEvent
 	for i := 0; i <= 200; i++ {
 		inputEvents = append(inputEvents, exporter.NewFeatureEvent(
@@ -111,6 +114,7 @@ func TestDataExporterScheduler_nonBulkExporter(t *testing.T) {
 		context.Background(), 0, 0, &mockExporter, log.New(os.Stdout, "", 0))
 	defer dc.Close()
 
+	// Initialize inputEvents slice
 	var inputEvents []exporter.FeatureEvent
 	for i := 0; i < 100; i++ {
 		inputEvents = append(inputEvents, exporter.NewFeatureEvent(

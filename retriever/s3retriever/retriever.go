@@ -34,10 +34,15 @@ func (s *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	// If an error occurs, log it and exit.
 	// Otherwise, notify the user that the download succeeded.
 	file, err := os.CreateTemp("", "go_feature_flag")
+
 	if err != nil {
 		return nil, err
 	}
 
+	defer func() {
+		_ = file.Close()
+		_ = os.Remove(file.Name())
+	}()
 	// Create an AWS session
 	sess, err := session.NewSession(&s.AwsConfig)
 	if err != nil {

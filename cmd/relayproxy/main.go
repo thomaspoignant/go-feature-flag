@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
-	"os"
 
 	"github.com/spf13/pflag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api"

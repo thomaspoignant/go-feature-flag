@@ -36,8 +36,15 @@ from gofeatureflag_python_provider.response_flag_evaluation import (
     JsonType,
 )
 
+AbstractProviderMetaclass = type(AbstractProvider)
+BaseModelMetaclass = type(BaseModel)
 
-class GoFeatureFlagProvider(AbstractProvider, BaseModel):
+
+class CombinedMetaclass(AbstractProviderMetaclass, BaseModelMetaclass):
+    pass
+
+
+class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetaclass):
     options: GoFeatureFlagOptions
     _http_client: urllib3.PoolManager = PrivateAttr()
     _cache: pylru.lrucache = PrivateAttr()
@@ -260,9 +267,9 @@ class GoFeatureFlagProvider(AbstractProvider, BaseModel):
                 flag_key=flag_key,
                 value=response_flag_evaluation.value,
                 variant=response_flag_evaluation.variationType,
-                reason=Reason.CACHED
-                if is_from_cache
-                else response_flag_evaluation.reason,
+                reason=(
+                    Reason.CACHED if is_from_cache else response_flag_evaluation.reason
+                ),
                 flag_metadata=response_flag_evaluation.metadata,
             )
         except ValidationError as exc:

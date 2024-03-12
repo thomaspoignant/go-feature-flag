@@ -28,7 +28,7 @@ from gofeatureflag_python_provider.options import GoFeatureFlagOptions
 from openfeature import api
 from openfeature.evaluation_context import EvaluationContext
 
-// ...
+# ...
 
 goff_provider = GoFeatureFlagProvider(
     options=GoFeatureFlagOptions(endpoint="https://gofeatureflag.org/")
@@ -46,9 +46,9 @@ This code block explains how you can create an `EvaluationContext` and use it to
 > 
 > **Refer to the [Open Feature documentation](https://docs.openfeature.dev/docs/reference/concepts/evaluation-api#basic-evaluation) to know more about it.**
 
-```csharp
-// Context of your flag evaluation.
-// With GO Feature Flag you MUST have a targetingKey that is a unique identifier of the user.
+```python
+# Context of your flag evaluation.
+# With GO Feature Flag you MUST have a targetingKey that is a unique identifier of the user.
 evaluation_ctx = EvaluationContext(
     targeting_key="d45e303a-38c2-11ed-a261-0242ac120002",
     attributes={
