@@ -77,50 +77,59 @@ const docTemplate = `{
                 }
             }
         },
-        "/ofrep/v1/evaluate": {
+        "/ofrep/v1/evaluate/flags": {
             "post": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Making a **POST** request to the URL ` + "`" + `/ofrep/v1/evaluate` + "`" + ` will give you the value of the list of feature\nflags for this evaluation context.\n\nIf no flags are provided, the API will evaluate all available flags in the configuration.",
+                "description": "Making a **POST** request to the URL ` + "`" + `/ofrep/v1/evaluate/flags` + "`" + ` will give you the value of the list\nof feature flags for this evaluation context.\n\nIf no flags are provided, the API will evaluate all available flags in the configuration.",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Evaluate in bulk feature flags using the OpenFeature Remote Evaluation Protocol",
+                "summary": "Open-Feature Remote Evaluation Protocol bulk evaluation API.",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The request will be processed only if ETag doesn't match.",
+                        "name": "If-None-Match",
+                        "in": "header"
+                    },
                     {
                         "description": "Evaluation Context and list of flag for this API call",
                         "name": "data",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.OFREPBulkEvalFlagRequest"
+                            "$ref": "#/definitions/model.OFREPEvalFlagRequest"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Success",
+                        "description": "OFREP successful evaluation response",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/model.OFREPFlagBulkEvaluateSuccessResponse"
-                            }
+                            "$ref": "#/definitions/model.OFREPBulkEvaluateSuccessResponse"
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Bad evaluation request",
                         "schema": {
-                            "$ref": "#/definitions/model.OFREPErrorResponse"
+                            "$ref": "#/definitions/model.OFREPCommonErrorResponse"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Unauthorized - You need credentials to access the API",
+                        "schema": {
+                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - You are not authorized to access the API",
                         "schema": {
                             "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
                         }
@@ -134,14 +143,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/ofrep/v1/evaluate/{flag_key}": {
+        "/ofrep/v1/evaluate/flags/{flag_key}": {
             "post": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Making a **POST** request to the URL ` + "`" + `/ofrep/v1/evaluate/\u003cyour_flag_name\u003e` + "`" + ` will give you the value of\nthe flag for this evaluation context\n",
+                "description": "Making a **POST** request to the URL ` + "`" + `/ofrep/v1/evaluate/flags/{your_flag_name}` + "`" + ` will give you the\nvalue of the flag for this evaluation context\n",
                 "consumes": [
                     "application/json"
                 ],
@@ -190,66 +199,6 @@ const docTemplate = `{
                         "description": "Flag Not Found",
                         "schema": {
                             "$ref": "#/definitions/model.OFREPEvaluateErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
-                        }
-                    }
-                }
-            }
-        },
-        "/ofrep/v1/flag/changes": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Making a **POST** request to the URL ` + "`" + `/ofrep/v1/flag/changes` + "`" + ` will give you the value of the list of\nETags for your feature flags.\n\nIf no flags are provided, the API will compite all available flags in the configuration.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "Compute all the ETag in bulk using the OpenFeature Remote Evaluation Protocol",
-                "parameters": [
-                    {
-                        "description": "List of flags to evaluate",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/model.OFREPFlagBulkEvaluateSuccessResponse"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/model.OFREPErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
                         }
                     },
                     "500": {
@@ -516,6 +465,7 @@ const docTemplate = `{
                 "TYPE_MISMATCH",
                 "GENERAL",
                 "INVALID_CONTEXT",
+                "TARGETING_KEY_MISSING",
                 "FLAG_CONFIG"
             ],
             "x-enum-varnames": [
@@ -525,6 +475,7 @@ const docTemplate = `{
                 "ErrorCodeTypeMismatch",
                 "ErrorCodeGeneral",
                 "ErrorCodeInvalidContext",
+                "ErrorCodeTargetingKeyMissing",
                 "ErrorFlagConfiguration"
             ]
         },
@@ -664,34 +615,18 @@ const docTemplate = `{
                 }
             }
         },
-        "model.OFREPBulkEvalFlagRequest": {
+        "model.OFREPBulkEvaluateSuccessResponse": {
             "type": "object",
             "properties": {
-                "context": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    },
-                    "example": {
-                        "company": "GO Feature Flag",
-                        "firstname": "John",
-                        "lastname": "Doe",
-                        "targetingKey": "4f433951-4c8c-42b3-9f18-8c9a5ed8e9eb"
-                    }
-                },
                 "flags": {
                     "type": "array",
                     "items": {
-                        "type": "string"
-                    },
-                    "example": [
-                        "my-first-flag",
-                        "another-flag"
-                    ]
+                        "$ref": "#/definitions/model.OFREPFlagBulkEvaluateSuccessResponse"
+                    }
                 }
             }
         },
-        "model.OFREPErrorResponse": {
+        "model.OFREPCommonErrorResponse": {
             "type": "object",
             "properties": {
                 "errorCode": {
@@ -755,16 +690,24 @@ const docTemplate = `{
         "model.OFREPFlagBulkEvaluateSuccessResponse": {
             "type": "object",
             "properties": {
-                "ETag": {
-                    "type": "string"
-                },
-                "OFREPEvaluateSuccessResponse": {
-                    "$ref": "#/definitions/model.OFREPEvaluateSuccessResponse"
-                },
                 "errorCode": {
                     "type": "string"
                 },
                 "errorDetails": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "metadata": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "reason": {
+                    "type": "string"
+                },
+                "value": {},
+                "variant": {
                     "type": "string"
                 }
             }

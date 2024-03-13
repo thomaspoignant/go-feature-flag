@@ -6,6 +6,7 @@ import (
 	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	etag "github.com/pablor21/echo-etag/v4"
 	echoSwagger "github.com/swaggo/echo-swagger"
 	custommiddleware "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/opentelemetry"
@@ -93,8 +94,6 @@ func (s *Server) initAPIEndpoint(echoInstance *echo.Echo) {
 	cAllFlags := controller.NewAllFlags(s.services.GOFeatureFlagService, s.services.Metrics)
 	cFlagEval := controller.NewFlagEval(s.services.GOFeatureFlagService, s.services.Metrics)
 	cFlagEvalOFREP := ofrep.NewOFREPEvaluate(s.services.GOFeatureFlagService, s.services.Metrics)
-	cFlagBulkEvalOFREP := ofrep.NewOFREPBulkEvaluate(s.services.GOFeatureFlagService, s.services.Metrics)
-	cFlagFlagChangesOFREP := ofrep.NewOFREPFlagChanges(s.services.GOFeatureFlagService, s.services.Metrics)
 	cEvalDataCollector := controller.NewCollectEvalData(s.services.GOFeatureFlagService, s.services.Metrics)
 
 	// Init routes
@@ -117,6 +116,13 @@ func (s *Server) initAPIEndpoint(echoInstance *echo.Echo) {
 
 	// OFREP routes
 	ofrepGroup := echoInstance.Group("/ofrep/v1")
+	ofrepGroup.Use(etag.WithConfig(etag.Config{
+		Skipper: func(c echo.Context) bool {
+			return c.Path() != "/ofrep/v1/evaluate/flags"
+		},
+		Weak: false,
+	}))
+
 	if len(s.config.APIKeys) > 0 {
 		ofrepGroup.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
 			Validator: func(key string, _ echo.Context) (bool, error) {
@@ -124,9 +130,8 @@ func (s *Server) initAPIEndpoint(echoInstance *echo.Echo) {
 			},
 		}))
 	}
-	ofrepGroup.POST("/evaluate", cFlagBulkEvalOFREP.OFREPHandler)
-	ofrepGroup.POST("/evaluate/:flagKey", cFlagEvalOFREP.OFREPHandler)
-	ofrepGroup.POST("/flag/changes", cFlagFlagChangesOFREP.OFREPHandler)
+	ofrepGroup.POST("/evaluate/flags", cFlagEvalOFREP.BulkEvaluate)
+	ofrepGroup.POST("/evaluate/flags/:flagKey", cFlagEvalOFREP.Evaluate)
 
 	// initWebsocketsEndpoints initialize the websocket endpoints
 	cFlagReload := controller.NewWsFlagChange(s.services.WebsocketService, s.zapLog)

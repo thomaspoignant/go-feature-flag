@@ -65,6 +65,7 @@ definitions:
     - TYPE_MISMATCH
     - GENERAL
     - INVALID_CONTEXT
+    - TARGETING_KEY_MISSING
     - FLAG_CONFIG
     type: string
     x-enum-varnames:
@@ -74,6 +75,7 @@ definitions:
     - ErrorCodeTypeMismatch
     - ErrorCodeGeneral
     - ErrorCodeInvalidContext
+    - ErrorCodeTargetingKeyMissing
     - ErrorFlagConfiguration
   flag.Flag:
     properties:
@@ -170,26 +172,14 @@ definitions:
         example: "2022-06-13T11:22:55.941628+02:00"
         type: string
     type: object
-  model.OFREPBulkEvalFlagRequest:
+  model.OFREPBulkEvaluateSuccessResponse:
     properties:
-      context:
-        additionalProperties:
-          type: string
-        example:
-          company: GO Feature Flag
-          firstname: John
-          lastname: Doe
-          targetingKey: 4f433951-4c8c-42b3-9f18-8c9a5ed8e9eb
-        type: object
       flags:
-        example:
-        - my-first-flag
-        - another-flag
         items:
-          type: string
+          $ref: '#/definitions/model.OFREPFlagBulkEvaluateSuccessResponse'
         type: array
     type: object
-  model.OFREPErrorResponse:
+  model.OFREPCommonErrorResponse:
     properties:
       errorCode:
         $ref: '#/definitions/flag.ErrorCode'
@@ -232,13 +222,19 @@ definitions:
     type: object
   model.OFREPFlagBulkEvaluateSuccessResponse:
     properties:
-      ETag:
-        type: string
-      OFREPEvaluateSuccessResponse:
-        $ref: '#/definitions/model.OFREPEvaluateSuccessResponse'
       errorCode:
         type: string
       errorDetails:
+        type: string
+      key:
+        type: string
+      metadata:
+        additionalProperties: {}
+        type: object
+      reason:
+        type: string
+      value: {}
+      variant:
         type: string
     type: object
   model.UserRequest:
@@ -418,37 +414,43 @@ paths:
           schema:
             type: string
       summary: Prometheus endpoint
-  /ofrep/v1/evaluate:
+  /ofrep/v1/evaluate/flags:
     post:
       consumes:
       - application/json
       description: |-
-        Making a **POST** request to the URL `/ofrep/v1/evaluate` will give you the value of the list of feature
-        flags for this evaluation context.
+        Making a **POST** request to the URL `/ofrep/v1/evaluate/flags` will give you the value of the list
+        of feature flags for this evaluation context.
 
         If no flags are provided, the API will evaluate all available flags in the configuration.
       parameters:
+      - description: The request will be processed only if ETag doesn't match.
+        in: header
+        name: If-None-Match
+        type: string
       - description: Evaluation Context and list of flag for this API call
         in: body
         name: data
         required: true
         schema:
-          $ref: '#/definitions/model.OFREPBulkEvalFlagRequest'
+          $ref: '#/definitions/model.OFREPEvalFlagRequest'
       produces:
       - application/json
       responses:
         "200":
-          description: Success
+          description: OFREP successful evaluation response
           schema:
-            items:
-              $ref: '#/definitions/model.OFREPFlagBulkEvaluateSuccessResponse'
-            type: array
+            $ref: '#/definitions/model.OFREPBulkEvaluateSuccessResponse'
         "400":
-          description: Bad Request
+          description: Bad evaluation request
           schema:
-            $ref: '#/definitions/model.OFREPErrorResponse'
+            $ref: '#/definitions/model.OFREPCommonErrorResponse'
         "401":
-          description: Unauthorized
+          description: Unauthorized - You need credentials to access the API
+          schema:
+            $ref: '#/definitions/modeldocs.HTTPErrorDoc'
+        "403":
+          description: Forbidden - You are not authorized to access the API
           schema:
             $ref: '#/definitions/modeldocs.HTTPErrorDoc'
         "500":
@@ -457,15 +459,14 @@ paths:
             $ref: '#/definitions/modeldocs.HTTPErrorDoc'
       security:
       - ApiKeyAuth: []
-      summary: Evaluate in bulk feature flags using the OpenFeature Remote Evaluation
-        Protocol
-  /ofrep/v1/evaluate/{flag_key}:
+      summary: Open-Feature Remote Evaluation Protocol bulk evaluation API.
+  /ofrep/v1/evaluate/flags/{flag_key}:
     post:
       consumes:
       - application/json
       description: |
-        Making a **POST** request to the URL `/ofrep/v1/evaluate/<your_flag_name>` will give you the value of
-        the flag for this evaluation context
+        Making a **POST** request to the URL `/ofrep/v1/evaluate/flags/{your_flag_name}` will give you the
+        value of the flag for this evaluation context
       parameters:
       - description: Evaluation Context for this API call
         in: body
@@ -504,49 +505,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Evaluate a feature flag using the OpenFeature Remote Evaluation Protocol
-  /ofrep/v1/flag/changes:
-    post:
-      consumes:
-      - application/json
-      description: |-
-        Making a **POST** request to the URL `/ofrep/v1/flag/changes` will give you the value of the list of
-        ETags for your feature flags.
-
-        If no flags are provided, the API will compite all available flags in the configuration.
-      parameters:
-      - description: List of flags to evaluate
-        in: body
-        name: data
-        required: true
-        schema:
-          items:
-            type: string
-          type: array
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Success
-          schema:
-            items:
-              $ref: '#/definitions/model.OFREPFlagBulkEvaluateSuccessResponse'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/model.OFREPErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/modeldocs.HTTPErrorDoc'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/modeldocs.HTTPErrorDoc'
-      security:
-      - ApiKeyAuth: []
-      summary: Compute all the ETag in bulk using the OpenFeature Remote Evaluation
-        Protocol
   /v1/allflags:
     post:
       consumes:
