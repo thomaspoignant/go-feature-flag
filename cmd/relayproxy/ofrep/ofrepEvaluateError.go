@@ -6,12 +6,12 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 )
 
-type OfrepEvaluateError struct {
+type EvaluateError struct {
 	err model.OFREPCommonErrorResponse
 }
 
-func NewOFREPEvaluateError(errorCode flag.ErrorCode, errorDetails string) *OfrepEvaluateError {
-	return &OfrepEvaluateError{
+func NewEvaluateError(errorCode flag.ErrorCode, errorDetails string) *EvaluateError {
+	return &EvaluateError{
 		err: model.OFREPCommonErrorResponse{
 			ErrorCode:    errorCode,
 			ErrorDetails: errorDetails,
@@ -19,10 +19,10 @@ func NewOFREPEvaluateError(errorCode flag.ErrorCode, errorDetails string) *Ofrep
 	}
 }
 
-func (m *OfrepEvaluateError) Error() string {
+func (m *EvaluateError) Error() string {
 	return fmt.Sprintf("missing TargetingKey error: %v", m.err)
 }
 
-func (m *OfrepEvaluateError) ToOFRErrorResponse() model.OFREPCommonErrorResponse {
+func (m *EvaluateError) ToOFRErrorResponse() model.OFREPCommonErrorResponse {
 	return m.err
 }

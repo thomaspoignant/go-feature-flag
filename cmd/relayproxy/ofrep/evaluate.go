@@ -49,7 +49,7 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 	if flagKey == "" {
 		return c.JSON(
 			http.StatusBadRequest,
-			NewOFREPEvaluateError(flag.ErrorCodeGeneral,
+			NewEvaluateError(flag.ErrorCodeGeneral,
 				"No key provided in the URL").ToOFRErrorResponse())
 	}
 	h.metrics.IncFlagEvaluation(flagKey)
@@ -58,7 +58,7 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 	if err := c.Bind(reqBody); err != nil {
 		return c.JSON(
 			http.StatusBadRequest,
-			NewOFREPEvaluateError(flag.ErrorCodeInvalidContext, err.Error()).ToOFRErrorResponse())
+			NewEvaluateError(flag.ErrorCodeInvalidContext, err.Error()).ToOFRErrorResponse())
 	}
 	if err := assertOFREPEvaluateRequest(reqBody); err != nil {
 		return c.JSON(http.StatusBadRequest, err.ToOFRErrorResponse())
@@ -83,7 +83,7 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 		}
 		return c.JSON(
 			httpStatus,
-			NewOFREPEvaluateError(flagValue.ErrorCode,
+			NewEvaluateError(flagValue.ErrorCode,
 				fmt.Sprintf("Error while evaluating the flag: %s", flagKey)).ToOFRErrorResponse())
 	}
 
@@ -133,7 +133,7 @@ func (h *EvaluateCtrl) BulkEvaluate(c echo.Context) error {
 	if err := c.Bind(request); err != nil {
 		return c.JSON(
 			http.StatusBadRequest,
-			NewOFREPEvaluateError("INVALID_CONTEXT", err.Error()).ToOFRErrorResponse())
+			NewEvaluateError("INVALID_CONTEXT", err.Error()).ToOFRErrorResponse())
 	}
 	if err := assertOFREPEvaluateRequest(request); err != nil {
 		return c.JSON(http.StatusBadRequest, err.ToOFRErrorResponse())
@@ -183,9 +183,9 @@ func (h *EvaluateCtrl) BulkEvaluate(c echo.Context) error {
 	return c.JSON(http.StatusOK, response)
 }
 
-func assertOFREPEvaluateRequest(ofrepEvalReq *model.OFREPEvalFlagRequest) *OfrepEvaluateError {
+func assertOFREPEvaluateRequest(ofrepEvalReq *model.OFREPEvalFlagRequest) *EvaluateError {
 	if ofrepEvalReq.Context == nil || ofrepEvalReq.Context["targetingKey"] == "" {
-		return NewOFREPEvaluateError(flag.ErrorCodeTargetingKeyMissing,
+		return NewEvaluateError(flag.ErrorCodeTargetingKeyMissing,
 			"GO Feature Flag MUST have a targeting key in the request.")
 	}
 	return nil
@@ -197,6 +197,6 @@ func evaluationContextFromOFREPRequest(ctx map[string]any) (ffcontext.Context, e
 		evalCtx := utils.ConvertEvaluationCtxFromRequest(targetingKey, ctx)
 		return evalCtx, nil
 	}
-	return ffcontext.EvaluationContext{}, NewOFREPEvaluateError(
+	return ffcontext.EvaluationContext{}, NewEvaluateError(
 		flag.ErrorCodeTargetingKeyMissing, "GO Feature Flag has received a targetingKey that is not a string.")
 }
