@@ -21,7 +21,7 @@ For this, follow the instruction on how to use the relay-proxy [here](../relay_p
 
 ### Want to start even faster?
 ```shell
-curl https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/cmd/relayproxy/testdata/config/valid-file.yaml -o goff-proxy.yaml
+curl https://gist.githubusercontent.com/thomaspoignant/181a067291a04bd1fbb55468629625d2/raw/eacfc2ae1036c1cfef669b41ec7b54c119639c0c/goff-proxy.yaml -o goff-proxy.yaml
 docker run -p 1031:1031 -v $(pwd)/goff-proxy.yaml:/goff/goff-proxy.yaml thomaspoignant/go-feature-flag:latest
 ```
 
