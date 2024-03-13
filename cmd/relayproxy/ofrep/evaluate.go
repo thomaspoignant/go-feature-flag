@@ -127,7 +127,7 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 // @Failure     500 {object}  modeldocs.HTTPErrorDoc "Internal server error"
 // @Router      /ofrep/v1/evaluate/flags [post]
 func (h *EvaluateCtrl) BulkEvaluate(c echo.Context) error {
-	// h.metrics.IncFlagEvaluation(flagKey)
+	h.metrics.IncAllFlag()
 
 	request := new(model.OFREPEvalFlagRequest)
 	if err := c.Bind(request); err != nil {
@@ -149,6 +149,10 @@ func (h *EvaluateCtrl) BulkEvaluate(c echo.Context) error {
 	response := model.OFREPBulkEvaluateSuccessResponse{
 		Flags: make([]model.OFREPFlagBulkEvaluateSuccessResponse, 0),
 	}
+	tracer := otel.GetTracerProvider().Tracer(config.OtelTracerName)
+	_, span := tracer.Start(c.Request().Context(), "AllFlagsState")
+	defer span.End()
+
 	allFlagsResp := h.goFF.AllFlagsState(evalCtx)
 	for key, val := range allFlagsResp.GetFlags() {
 		value := val.Value
@@ -170,6 +174,10 @@ func (h *EvaluateCtrl) BulkEvaluate(c echo.Context) error {
 	sort.Slice(response.Flags, func(i, j int) bool {
 		return response.Flags[i].Key < response.Flags[j].Key
 	})
+
+	span.SetAttributes(
+		attribute.Int("AllFlagsState.numberEvaluation", len(response.Flags)),
+	)
 
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSONCharsetUTF8)
 	return c.JSON(http.StatusOK, response)
