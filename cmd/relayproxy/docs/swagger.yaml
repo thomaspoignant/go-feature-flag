@@ -57,6 +57,26 @@ definitions:
         example: v1.0.0
         type: string
     type: object
+  flag.ErrorCode:
+    enum:
+    - PROVIDER_NOT_READY
+    - FLAG_NOT_FOUND
+    - PARSE_ERROR
+    - TYPE_MISMATCH
+    - GENERAL
+    - INVALID_CONTEXT
+    - TARGETING_KEY_MISSING
+    - FLAG_CONFIG
+    type: string
+    x-enum-varnames:
+    - ErrorCodeProviderNotReady
+    - ErrorCodeFlagNotFound
+    - ErrorCodeParseError
+    - ErrorCodeTypeMismatch
+    - ErrorCodeGeneral
+    - ErrorCodeInvalidContext
+    - ErrorCodeTargetingKeyMissing
+    - ErrorFlagConfiguration
   flag.Flag:
     properties:
       defValue:
@@ -150,6 +170,71 @@ definitions:
         description: This is the last time when your flag file was read and store
           in the internal cache.
         example: "2022-06-13T11:22:55.941628+02:00"
+        type: string
+    type: object
+  model.OFREPBulkEvaluateSuccessResponse:
+    properties:
+      flags:
+        items:
+          $ref: '#/definitions/model.OFREPFlagBulkEvaluateSuccessResponse'
+        type: array
+    type: object
+  model.OFREPCommonErrorResponse:
+    properties:
+      errorCode:
+        $ref: '#/definitions/flag.ErrorCode'
+      errorDetails:
+        type: string
+    type: object
+  model.OFREPEvalFlagRequest:
+    properties:
+      context:
+        additionalProperties:
+          type: string
+        example:
+          company: GO Feature Flag
+          firstname: John
+          lastname: Doe
+          targetingKey: 4f433951-4c8c-42b3-9f18-8c9a5ed8e9eb
+        type: object
+    type: object
+  model.OFREPEvaluateErrorResponse:
+    properties:
+      errorCode:
+        $ref: '#/definitions/flag.ErrorCode'
+      errorDetails:
+        type: string
+      key:
+        type: string
+    type: object
+  model.OFREPEvaluateSuccessResponse:
+    properties:
+      key:
+        type: string
+      metadata:
+        additionalProperties: {}
+        type: object
+      reason:
+        type: string
+      value: {}
+      variant:
+        type: string
+    type: object
+  model.OFREPFlagBulkEvaluateSuccessResponse:
+    properties:
+      errorCode:
+        type: string
+      errorDetails:
+        type: string
+      key:
+        type: string
+      metadata:
+        additionalProperties: {}
+        type: object
+      reason:
+        type: string
+      value: {}
+      variant:
         type: string
     type: object
   model.UserRequest:
@@ -329,6 +414,97 @@ paths:
           schema:
             type: string
       summary: Prometheus endpoint
+  /ofrep/v1/evaluate/flags:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Making a **POST** request to the URL `/ofrep/v1/evaluate/flags` will give you the value of the list
+        of feature flags for this evaluation context.
+
+        If no flags are provided, the API will evaluate all available flags in the configuration.
+      parameters:
+      - description: The request will be processed only if ETag doesn't match.
+        in: header
+        name: If-None-Match
+        type: string
+      - description: Evaluation Context and list of flag for this API call
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.OFREPEvalFlagRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OFREP successful evaluation response
+          schema:
+            $ref: '#/definitions/model.OFREPBulkEvaluateSuccessResponse'
+        "400":
+          description: Bad evaluation request
+          schema:
+            $ref: '#/definitions/model.OFREPCommonErrorResponse'
+        "401":
+          description: Unauthorized - You need credentials to access the API
+          schema:
+            $ref: '#/definitions/modeldocs.HTTPErrorDoc'
+        "403":
+          description: Forbidden - You are not authorized to access the API
+          schema:
+            $ref: '#/definitions/modeldocs.HTTPErrorDoc'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/modeldocs.HTTPErrorDoc'
+      security:
+      - ApiKeyAuth: []
+      summary: Open-Feature Remote Evaluation Protocol bulk evaluation API.
+  /ofrep/v1/evaluate/flags/{flag_key}:
+    post:
+      consumes:
+      - application/json
+      description: |
+        Making a **POST** request to the URL `/ofrep/v1/evaluate/flags/{your_flag_name}` will give you the
+        value of the flag for this evaluation context
+      parameters:
+      - description: Evaluation Context for this API call
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.OFREPEvalFlagRequest'
+      - description: Name of your feature flag
+        in: path
+        name: flag_key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/model.OFREPEvaluateSuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.OFREPEvaluateErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/modeldocs.HTTPErrorDoc'
+        "404":
+          description: Flag Not Found
+          schema:
+            $ref: '#/definitions/model.OFREPEvaluateErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/modeldocs.HTTPErrorDoc'
+      security:
+      - ApiKeyAuth: []
+      summary: Evaluate a feature flag using the OpenFeature Remote Evaluation Protocol
   /v1/allflags:
     post:
       consumes:

@@ -6,12 +6,14 @@ import (
 	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	etag "github.com/pablor21/echo-etag/v4"
 	echoSwagger "github.com/swaggo/echo-swagger"
 	custommiddleware "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/opentelemetry"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/controller"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/ofrep"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
 	"go.uber.org/zap"
@@ -91,6 +93,7 @@ func (s *Server) initAPIEndpoint(echoInstance *echo.Echo) {
 	// Init controllers
 	cAllFlags := controller.NewAllFlags(s.services.GOFeatureFlagService, s.services.Metrics)
 	cFlagEval := controller.NewFlagEval(s.services.GOFeatureFlagService, s.services.Metrics)
+	cFlagEvalOFREP := ofrep.NewOFREPEvaluate(s.services.GOFeatureFlagService, s.services.Metrics)
 	cEvalDataCollector := controller.NewCollectEvalData(s.services.GOFeatureFlagService, s.services.Metrics)
 
 	// Init routes
@@ -110,6 +113,25 @@ func (s *Server) initAPIEndpoint(echoInstance *echo.Echo) {
 	if s.config.EnableSwagger {
 		echoInstance.GET("/swagger/*", echoSwagger.WrapHandler)
 	}
+
+	// OFREP routes
+	ofrepGroup := echoInstance.Group("/ofrep/v1")
+	ofrepGroup.Use(etag.WithConfig(etag.Config{
+		Skipper: func(c echo.Context) bool {
+			return c.Path() != "/ofrep/v1/evaluate/flags"
+		},
+		Weak: false,
+	}))
+
+	if len(s.config.APIKeys) > 0 {
+		ofrepGroup.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
+			Validator: func(key string, _ echo.Context) (bool, error) {
+				return s.config.APIKeyExists(key), nil
+			},
+		}))
+	}
+	ofrepGroup.POST("/evaluate/flags", cFlagEvalOFREP.BulkEvaluate)
+	ofrepGroup.POST("/evaluate/flags/:flagKey", cFlagEvalOFREP.Evaluate)
 
 	// initWebsocketsEndpoints initialize the websocket endpoints
 	cFlagReload := controller.NewWsFlagChange(s.services.WebsocketService, s.zapLog)
