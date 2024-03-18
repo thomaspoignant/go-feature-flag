@@ -5,7 +5,7 @@ go 1.21
 toolchain go1.21.3
 
 require (
-	cloud.google.com/go/storage v1.39.0
+	cloud.google.com/go/storage v1.39.1
 	github.com/BurntSushi/toml v1.3.2
 	github.com/IBM/sarama v1.43.0
 	github.com/aws/aws-lambda-go v1.46.0
@@ -13,7 +13,7 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.25.3
 	github.com/aws/aws-sdk-go-v2/config v1.27.7
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.16.9
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.51.4
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.52.1
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.31.2
 	github.com/awslabs/aws-lambda-go-api-proxy v0.16.1
 	github.com/fsouza/fake-gcs-server v1.47.8
@@ -63,7 +63,7 @@ require (
 )
 
 require (
-	cloud.google.com/go v0.112.0 // indirect
+	cloud.google.com/go v0.112.1 // indirect
 	cloud.google.com/go/compute v1.24.0 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	cloud.google.com/go/iam v1.1.6 // indirect
@@ -212,7 +212,7 @@ require (
 	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto v0.0.0-20240213162025-012b6fc9bca9 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20240221002015-b0ce06bbee7c // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20240304161311-37d4d3c04a78 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240304161311-37d4d3c04a78 // indirect
 	google.golang.org/grpc v1.62.0 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
