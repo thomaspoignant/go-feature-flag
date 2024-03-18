@@ -38,7 +38,7 @@
     "babel-preset-env": "^1.7.0",
     "browser-sync": "^3.0.2",
     "eslint": "^8.57.0",
-    "eslint-webpack-plugin": "^4.0.1",
+    "eslint-webpack-plugin": "^4.1.0",
     "htmlnano": "^2.1.0",
     "imagemin-cli": "^7.0.0",
     "node-sass": "^9.0.0",
