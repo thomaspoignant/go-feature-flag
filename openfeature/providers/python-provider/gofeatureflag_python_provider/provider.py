@@ -341,3 +341,6 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
         :return: None
         """
         self._status = ProviderStatus.STALE
+
+    def __hash__(self):
+        return id(self)
