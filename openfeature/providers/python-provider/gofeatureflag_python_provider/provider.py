@@ -8,32 +8,30 @@ import pylru
 import urllib3
 import websocket
 from openfeature.evaluation_context import EvaluationContext
-from openfeature.exception import ErrorCode
 from openfeature.exception import (
+    ErrorCode,
     FlagNotFoundError,
-    TypeMismatchError,
     GeneralError,
     OpenFeatureError,
+    TypeMismatchError,
 )
-from openfeature.flag_evaluation import FlagEvaluationDetails
-from openfeature.flag_evaluation import Reason
+from openfeature.flag_evaluation import FlagResolutionDetails, Reason
 from openfeature.hook import Hook
 from openfeature.provider.metadata import Metadata
 from openfeature.provider.provider import AbstractProvider
-from pydantic import ValidationError, PrivateAttr
+from pydantic import PrivateAttr, ValidationError
 
 from gofeatureflag_python_provider.data_collector_hook import DataCollectorHook
 from gofeatureflag_python_provider.metadata import GoFeatureFlagMetadata
-from gofeatureflag_python_provider.options import BaseModel
-from gofeatureflag_python_provider.options import GoFeatureFlagOptions
+from gofeatureflag_python_provider.options import BaseModel, GoFeatureFlagOptions
 from gofeatureflag_python_provider.provider_status import ProviderStatus
 from gofeatureflag_python_provider.request_flag_evaluation import (
     RequestFlagEvaluation,
     convert_evaluation_context,
 )
 from gofeatureflag_python_provider.response_flag_evaluation import (
-    ResponseFlagEvaluation,
     JsonType,
+    ResponseFlagEvaluation,
 )
 
 AbstractProviderMetaclass = type(AbstractProvider)
@@ -131,7 +129,7 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
         flag_key: str,
         default_value: bool,
         evaluation_context: Optional[EvaluationContext] = None,
-    ) -> FlagEvaluationDetails[bool]:
+    ) -> FlagResolutionDetails[bool]:
         return self.generic_go_feature_flag_resolver(
             bool, flag_key, default_value, evaluation_context
         )
@@ -141,7 +139,7 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
         flag_key: str,
         default_value: str,
         evaluation_context: Optional[EvaluationContext] = None,
-    ) -> FlagEvaluationDetails[str]:
+    ) -> FlagResolutionDetails[str]:
         return self.generic_go_feature_flag_resolver(
             str, flag_key, default_value, evaluation_context
         )
@@ -151,7 +149,7 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
         flag_key: str,
         default_value: int,
         evaluation_context: Optional[EvaluationContext] = None,
-    ) -> FlagEvaluationDetails[int]:
+    ) -> FlagResolutionDetails[int]:
         return self.generic_go_feature_flag_resolver(
             int, flag_key, default_value, evaluation_context
         )
@@ -161,7 +159,7 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
         flag_key: str,
         default_value: float,
         evaluation_context: Optional[EvaluationContext] = None,
-    ) -> FlagEvaluationDetails[float]:
+    ) -> FlagResolutionDetails[float]:
         return self.generic_go_feature_flag_resolver(
             float, flag_key, default_value, evaluation_context
         )
@@ -171,7 +169,7 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
         flag_key: str,
         default_value: dict,
         evaluation_context: Optional[EvaluationContext] = None,
-    ) -> FlagEvaluationDetails[Union[list, dict]]:
+    ) -> FlagResolutionDetails[Union[list, dict]]:
         return self.generic_go_feature_flag_resolver(
             Union[dict, list], flag_key, default_value, evaluation_context
         )
@@ -182,7 +180,7 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
         flag_key: str,
         default_value: JsonType,
         evaluation_context: Optional[EvaluationContext] = None,
-    ) -> FlagEvaluationDetails[JsonType]:
+    ) -> FlagResolutionDetails[JsonType]:
         """
         generic_go_feature_flag_resolver is a generic evaluations of your flag with GO Feature Flag relay proxy it works
         with all types.
@@ -191,12 +189,11 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
         :param flag_key:  name of the flag
         :param default_value: default value of the flag
         :param evaluation_context: context to evaluate the flag
-        :return: a FlagEvaluationDetails object containing the response for the SDK.
+        :return: a FlagResolutionDetails object containing the response for the SDK.
         """
         try:
             if self._status != ProviderStatus.READY:
-                return FlagEvaluationDetails[original_type](
-                    flag_key=flag_key,
+                return FlagResolutionDetails[original_type](
                     value=default_value,
                     reason=Reason.ERROR,
                     error_code=ErrorCode.PROVIDER_NOT_READY,
@@ -252,8 +249,7 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
                     )
 
             if response_flag_evaluation.reason == Reason.DISABLED.value:
-                return FlagEvaluationDetails[original_type](
-                    flag_key=flag_key,
+                return FlagResolutionDetails[original_type](
                     value=default_value,
                     reason=Reason.DISABLED,
                 )
@@ -263,8 +259,7 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
                     "flag {} was not found in your configuration".format(flag_key)
                 )
 
-            return FlagEvaluationDetails[original_type](
-                flag_key=flag_key,
+            return FlagResolutionDetails[original_type](
                 value=response_flag_evaluation.value,
                 variant=response_flag_evaluation.variationType,
                 reason=(
