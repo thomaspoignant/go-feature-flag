@@ -3,13 +3,14 @@ package s3retrieverv2
 import (
 	"context"
 	"fmt"
+	"log"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+
 	"github.com/thomaspoignant/go-feature-flag/retriever"
-	"log"
-	"os"
 )
 
 // Retriever is a configuration struct for a S3 retriever.
@@ -62,27 +63,17 @@ func (s *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	// Download the item from the bucket.
 	// If an error occurs, log it and exit.
 	// Otherwise, notify the user that the download succeeded.
-	file, err := os.CreateTemp("", "go_feature_flag")
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		_ = file.Close()
-		_ = os.Remove(file.Name())
-	}()
+	writerAt := manager.NewWriteAtBuffer([]byte{})
 
 	s3Req := &s3.GetObjectInput{
 		Bucket: aws.String(s.Bucket),
 		Key:    aws.String(s.Item),
 	}
-	_, err = s.downloader.Download(ctx, file, s3Req)
+
+	_, err := s.downloader.Download(ctx, writerAt, s3Req)
 	if err != nil {
 		return nil, fmt.Errorf("unable to download item from S3 %q, %v", s.Item, err)
 	}
-	// Read file content
-	content, err := os.ReadFile(file.Name())
-	if err != nil {
-		return nil, err
-	}
-	return content, nil
+
+	return writerAt.Bytes(), nil
 }
