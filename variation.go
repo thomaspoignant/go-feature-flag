@@ -415,7 +415,7 @@ func getVariation[T model.JSONType](
 
 	flagCtx := flag.Context{
 		DefaultSdkValue:             sdkDefaultValue,
-		EvaluationContextEnrichment: g.config.EvaluationContextEnrichment,
+		EvaluationContextEnrichment: maps.Clone(g.config.EvaluationContextEnrichment),
 	}
 	flagCtx.AddIntoEvaluationContextEnrichment("env", g.config.Environment)
 	flagValue, resolutionDetails := f.Value(flagKey, evaluationCtx, flagCtx)
