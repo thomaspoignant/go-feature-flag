@@ -4,27 +4,25 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/thomaspoignant/go-feature-flag/exporter"
-	"github.com/thomaspoignant/go-feature-flag/ffcontext"
-	"github.com/thomaspoignant/go-feature-flag/internal/dto"
+	"fmt"
 	"log"
 	"os"
+	"runtime"
 	"testing"
 	"time"
 
-	"github.com/thomaspoignant/go-feature-flag/testutils/flagv1"
-
-	"github.com/thomaspoignant/go-feature-flag/model"
-
-	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
-
-	"github.com/thomaspoignant/go-feature-flag/exporter/logsexporter"
-	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
-
 	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/exporter"
+	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
+	"github.com/thomaspoignant/go-feature-flag/exporter/logsexporter"
+	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
+	"github.com/thomaspoignant/go-feature-flag/internal/dto"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
+	"github.com/thomaspoignant/go-feature-flag/model"
+	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
+	"github.com/thomaspoignant/go-feature-flag/testutils/flagv1"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 )
 
@@ -3942,6 +3940,53 @@ func TestRawVariation(t *testing.T) {
 			// clean logger
 			ff = nil
 			_ = file.Close()
+		})
+	}
+}
+
+func Test_constructMetadataParallel(t *testing.T) {
+	sharedFlag := flag.InternalFlag{
+		Metadata: &map[string]interface{}{
+			"key1": "value1",
+		},
+	}
+
+	type args struct {
+		resolutionDetails flag.ResolutionDetails
+	}
+	tests := []struct {
+		name                  string
+		args                  args
+		wantEvaluatedRuleName string
+	}{}
+
+	runtime.GOMAXPROCS(runtime.NumCPU())
+
+	// generate test cases
+	for i := 0; i < 10_000; i++ {
+		ruleName := fmt.Sprintf("rule-%d", i)
+		tests = append(tests, struct {
+			name                  string
+			args                  args
+			wantEvaluatedRuleName string
+		}{
+			name: fmt.Sprintf("Rule %d", i),
+			args: args{
+				resolutionDetails: flag.ResolutionDetails{
+					RuleName: &ruleName,
+				},
+			},
+			wantEvaluatedRuleName: ruleName,
+		})
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			got := constructMetadata(&sharedFlag, tt.args.resolutionDetails)
+			assert.Equal(t, tt.wantEvaluatedRuleName, got["evaluatedRuleName"])
 		})
 	}
 }
