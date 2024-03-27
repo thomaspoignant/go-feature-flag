@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
 	"os"
 	"testing"
@@ -83,4 +84,37 @@ func Test_s3Retriever_Retrieve(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestRetriever_Init(t *testing.T) {
+	t.Run("With no AwsConfig", func(t *testing.T) {
+		t.Setenv("AWS_REGION", "us-west-2")
+		s := Retriever{
+			Bucket: "TestBucket",
+			Item:   "TestItem",
+		}
+		err := s.Init(context.Background(), nil)
+		assert.NoError(t, err)
+		assert.NotNil(t, s.AwsConfig)
+		assert.NotNil(t, s.downloader)
+		assert.Equal(t, "us-west-2", s.AwsConfig.Region, "Setting the region from the environment variable should be copied to the aws config")
+		assert.Equal(t, retriever.RetrieverReady, s.Status())
+	})
+
+	t.Run("With AwsConfig", func(t *testing.T) {
+		t.Setenv("AWS_REGION", "us-west-2")
+		awsConfig, err := config.LoadDefaultConfig(context.Background(), config.WithRegion("us-east-1"))
+		assert.NoError(t, err)
+		s := Retriever{
+			Bucket:    "TestBucket",
+			Item:      "TestItem",
+			AwsConfig: &awsConfig,
+		}
+		err = s.Init(context.Background(), nil)
+		assert.NoError(t, err)
+		assert.NotNil(t, s.AwsConfig)
+		assert.NotNil(t, s.downloader)
+		assert.Equal(t, "us-east-1", s.AwsConfig.Region, "Setting the region from the AwsConfig should be used over the environment variable")
+		assert.Equal(t, retriever.RetrieverReady, s.Status())
+	})
 }

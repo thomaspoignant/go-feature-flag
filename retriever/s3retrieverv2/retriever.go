@@ -33,12 +33,14 @@ type Retriever struct {
 func (s *Retriever) Init(ctx context.Context, _ *log.Logger) error {
 	s.status = retriever.RetrieverNotReady
 	if s.downloader == nil {
-		cfg, err := config.LoadDefaultConfig(ctx)
-		if err != nil {
-			s.status = retriever.RetrieverError
-			return fmt.Errorf("impossible to init S3 retriever v2: %v", err)
+		if s.AwsConfig == nil {
+			cfg, err := config.LoadDefaultConfig(ctx)
+			if err != nil {
+				s.status = retriever.RetrieverError
+				return fmt.Errorf("impossible to init S3 retriever v2: %v", err)
+			}
+			s.AwsConfig = &cfg
 		}
-		s.AwsConfig = &cfg
 		client := s3.NewFromConfig(*s.AwsConfig)
 		s.downloader = manager.NewDownloader(client)
 	}
