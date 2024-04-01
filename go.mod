@@ -7,7 +7,7 @@ toolchain go1.21.3
 require (
 	cloud.google.com/go/storage v1.39.1
 	github.com/BurntSushi/toml v1.3.2
-	github.com/IBM/sarama v1.43.0
+	github.com/IBM/sarama v1.43.1
 	github.com/aws/aws-lambda-go v1.46.0
 	github.com/aws/aws-sdk-go v1.51.6
 	github.com/aws/aws-sdk-go-v2 v1.26.0
