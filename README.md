@@ -19,7 +19,8 @@
     <a href="https://github.com/sponsors/thomaspoignant"><img src="https://img.shields.io/github/sponsors/thomaspoignant?logo=GitHub%20Sponsors" alt="Sponsords"></a>
 </p>
 
-:pray: If you are using **GO Feature Flag** we've launched the [GO Feature Flag Usage Survey](https://forms.gle/cD4Rj7gJSMStg1Hc9), it would be awesome and super helpful if you can fill it.
+> :pray: If you are using **GO Feature Flag** please consider to add yourself in the [adopters](./ADOPTERS.md) list.  
+> This simple act significantly boosts the project's visibility and credibility, making a substantial contribution to its advancement.
 
 ## Table of Contents
 
