@@ -278,6 +278,11 @@ function Integration() {
             fontAwesomeIcon="devicon-apachekafka-original colored"
             tooltipText="Apache Kafka"
           />
+          <SocialIcon
+            colorClassName={styles.socialIconBlack}
+            fontAwesomeIcon="devicon-redis-plain-wordmark colored"
+            tooltipText="Redis"
+          />
         </div>
       </div>
     </div>

@@ -13,6 +13,7 @@ import googlelogo from '@site/static/docs/retrievers/google.png';
 import s3logo from '@site/static/docs/retrievers/s3.png';
 import k8slogo from '@site/static/docs/retrievers/k8s.png';
 import mongodblogo from '@site/static/docs/retrievers/mongodb.png';
+import redislogo from '@site/static/docs/retrievers/redis.png';
 
 
 # Where to store your flags' configuration?
@@ -105,6 +106,14 @@ configuration and will evaluate your feature flags based on this configuration.
       goModuleLink={'../go_module/store_file/mongodb'}
     />
   },
+  {
+      logoImg: redislogo,
+      title:"Redis",
+      content: <ConfigCardContent
+        relayproxyLink={'../relay_proxy/configure_relay_proxy#redis'}
+        goModuleLink={'../go_module/store_file/redis'}
+      />
+    },
   {
     logoImg: customlogo,
     title:"Custom ...",
