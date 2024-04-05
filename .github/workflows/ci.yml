@@ -13,8 +13,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-          ref: ${{ github.ref }}
+          fetch-depth: 1
       - name: Setup go
         uses: actions/setup-go@v5
         with:
@@ -28,8 +27,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-          ref: ${{ github.ref }}
+          fetch-depth: 1
       - name: Setup go
         uses: actions/setup-go@v5
         with:
@@ -43,8 +41,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-          ref: ${{ github.ref }}
+          fetch-depth: 1
       - name: Setup go
         uses: actions/setup-go@v5
         with:
@@ -58,8 +55,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-          ref: ${{ github.ref }}
+          fetch-depth: 1
       - name: Setup go
         uses: actions/setup-go@v5
         with:
@@ -78,6 +74,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
       - name: Setup go
         uses: actions/setup-go@v5
         with:
@@ -92,7 +90,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 1
 
       - name: Setup go
         uses: actions/setup-go@v5
@@ -113,6 +111,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
       - name: Setup go
         uses: actions/setup-go@v5
         with:
@@ -137,8 +137,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-          ref: ${{ github.ref }}
+          fetch-depth: 1
       - name: Setup go
         uses: actions/setup-go@v5
         with:
@@ -166,6 +165,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
       - name: Get changed files in the docs folder
         id: changed-files-specific
         uses: tj-actions/changed-files@v44
