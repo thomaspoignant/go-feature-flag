@@ -23,11 +23,11 @@ type Retriever struct {
 	client *redis.Client
 }
 
-func (r *Retriever) Init(ctx context.Context, logger *log.Logger) error {
+func (r *Retriever) Init(ctx context.Context, _ *log.Logger) error {
 	r.status = retriever.RetrieverNotReady
 	client := redis.NewClient(r.Options)
 
-	_, err := client.Ping(context.Background()).Result()
+	_, err := client.Ping(ctx).Result()
 	if err != nil {
 		r.status = retriever.RetrieverError
 		return err
@@ -47,7 +47,7 @@ func (r *Retriever) Shutdown(ctx context.Context) error {
 }
 
 func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
-	var flagsData map[string]interface{} = make(map[string]interface{})
+	var flagsData = make(map[string]interface{})
 
 	iter := r.client.Scan(ctx, 0, r.Prefix+"*", 0).Iterator()
 	for iter.Next(ctx) {
