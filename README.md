@@ -298,6 +298,7 @@ The available retrievers are:
 - **Google Cloud Storage**
 - **Kubernetes ConfigMaps**
 - **MongoDB**
+- **Redis**
 
 _[See the full list and more information.](https://gofeatureflag.org/docs/configure_flag/store_your_flags)_
 
