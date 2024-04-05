@@ -133,12 +133,22 @@ _Note that relay proxy is only supporting this while running inside the kubernet
 
 _To understand the format in which a flag needs to be configured in MongoDB, check the [example](https://github.com/thomaspoignant/go-feature-flag/examples/retriever_mongodb) available._
 
-| Field name  | Type   | Default  | Description                                                                                                               |
-|-------------|--------|----------|---------------------------------------------------------------------------------------------------------------------------|
-| `kind`      | string | **none** | **(mandatory)** Value should be **`mongodb`**.<br/>_This field is mandatory and describes which retriever you are using._ |
-| `uri` | string | **none** | **(mandatory)** This is the MongoDB URI used in order to connect to the MongoDB instance.                  |
-| `database` | string | **none** | **(mandatory)** Name of the **database** where flags are stored.                                         |
-| `collection`       | string | **none** | **(mandatory)** Name of the **collection** where flags are stored.                                           |
+| Field name   | Type   | Default  | Description                                                                                                               |
+|--------------|--------|----------|---------------------------------------------------------------------------------------------------------------------------|
+| `kind`       | string | **none** | **(mandatory)** Value should be **`mongodb`**.<br/>_This field is mandatory and describes which retriever you are using._ |
+| `uri`        | string | **none** | **(mandatory)** This is the MongoDB URI used in order to connect to the MongoDB instance.                                 |
+| `database`   | string | **none** | **(mandatory)** Name of the **database** where flags are stored.                                                          |
+| `collection` | string | **none** | **(mandatory)** Name of the **collection** where flags are stored.                                                        |
+
+
+### Redis
+_To understand the format in which a flag needs to be configured in **Redis**, check the [doc](../go_module/store_file/redis#expected-format) available._
+
+| Field name   | Type   | Default  | Description                                                                                                                                                                                                                                           |
+|--------------|--------|----------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `kind`       | string | **none** | **(mandatory)** Value should be **`redis`**.<br/>_This field is mandatory and describes which retriever you are using._                                                                                                                               |
+| `options`    | object | **none** | **(mandatory)** Options used to connect to your redis instance.<br/>All the options from the `go-redis` SDK are available _([check `redis.Options`](https://github.com/redis/go-redis/blob/683f4fa6a6b0615344353a10478548969b09f89c/options.go#L31))_ |
+| `prefix`     | string | **none** | Prefix used before your flag name in the Redis DB.                                                                                                                                                                                                    |
 
 <a name="exporter"></a>
 

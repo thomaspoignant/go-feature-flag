@@ -7,7 +7,6 @@ The `mongodbRetriever` will use the mongoDB database to get your flags.
 
 ## Example
 ```go linenums="1"
-awsConfig, _ := config.LoadDefaultConfig(context.Background())
 err := ffclient.Init(ffclient.Config{
     PollingInterval: 3 * time.Second,
 	  Retriever: &mongodbretriever.Retriever{

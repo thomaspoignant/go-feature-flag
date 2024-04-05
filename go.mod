@@ -38,6 +38,7 @@ require (
 	github.com/pablor21/echo-etag/v4 v4.0.3
 	github.com/prometheus/client_golang v1.19.0
 	github.com/r3labs/diff/v3 v3.0.1
+	github.com/redis/go-redis/v9 v9.5.1
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.9.0
 	github.com/swaggo/echo-swagger v1.4.1
@@ -101,6 +102,7 @@ require (
 	github.com/containerd/log v0.1.0 // indirect
 	github.com/cpuguy83/dockercfg v0.3.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/distribution/reference v0.5.0 // indirect
 	github.com/docker/docker v25.0.3+incompatible // indirect
 	github.com/docker/go-connections v0.5.0 // indirect
