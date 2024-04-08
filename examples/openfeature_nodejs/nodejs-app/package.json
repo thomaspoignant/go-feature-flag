@@ -10,11 +10,11 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@openfeature/go-feature-flag-provider": "^0.6.2",
+    "@openfeature/go-feature-flag-provider": "^0.7.0",
     "@openfeature/js-sdk": "^1.6.1"
   },
   "devDependencies": {
     "ts-node": "^10.9.2",
-    "typescript": "^5.4.2"
+    "typescript": "^5.4.4"
   }
 }

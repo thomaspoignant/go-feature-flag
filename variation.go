@@ -2,6 +2,7 @@ package ffclient
 
 import (
 	"fmt"
+	"maps"
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/exporter"
@@ -414,7 +415,7 @@ func getVariation[T model.JSONType](
 
 	flagCtx := flag.Context{
 		DefaultSdkValue:             sdkDefaultValue,
-		EvaluationContextEnrichment: g.config.EvaluationContextEnrichment,
+		EvaluationContextEnrichment: maps.Clone(g.config.EvaluationContextEnrichment),
 	}
 	flagCtx.AddIntoEvaluationContextEnrichment("env", g.config.Environment)
 	flagValue, resolutionDetails := f.Value(flagKey, evaluationCtx, flagCtx)
@@ -468,7 +469,7 @@ func getVariation[T model.JSONType](
 // the targeting.rule's name (from configuration) to the Metadata.
 // That way, it is possible to see when a targeting rule is match during the evaluation process.
 func constructMetadata(f flag.Flag, resolutionDetails flag.ResolutionDetails) map[string]interface{} {
-	metadata := f.GetMetadata()
+	metadata := maps.Clone(f.GetMetadata())
 	if resolutionDetails.RuleName == nil || *resolutionDetails.RuleName == "" {
 		return metadata
 	}

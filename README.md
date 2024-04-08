@@ -9,37 +9,54 @@
     <a href="https://codecov.io/gh/thomaspoignant/go-feature-flag"><img src="https://codecov.io/gh/thomaspoignant/go-feature-flag/branch/main/graph/badge.svg?token=T59ACQWW1H"/></a>
     <a href="https://sonarcloud.io/dashboard?id=thomaspoignant_go-feature-flag"><img src="https://sonarcloud.io/api/project_badges/measure?project=thomaspoignant_go-feature-flag&metric=alert_status" alt="Sonarcloud Status" /></a>
     <a href="https://github.com/thomaspoignant/go-feature-flag/actions/workflows/codeql-analysis.yml"><img src="https://github.com/thomaspoignant/go-feature-flag/workflows/CodeQL/badge.svg" alt="Build Status" /></a>
+    <a href="https://github.com/thomaspoignant/go-feature-flag/blob/main/LICENSE"><img src="https://img.shields.io/github/license/thomaspoignant/go-feature-flag" alt="License"/></a>
     <br/>
     <a href="https://github.com/thomaspoignant/go-feature-flag/releases"><img src="https://img.shields.io/github/v/release/thomaspoignant/go-feature-flag" alt="Release version" /></a>
     <a href="https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag"><img src="https://godoc.org/github.com/thomaspoignant/go-feature-flag?status.svg" alt="GoDoc" /></a>
     <img src="https://img.shields.io/github/go-mod/go-version/thomaspoignant/go-feature-flag?logo=go%20version" alt="Go version"/>
-    <a href="https://github.com/thomaspoignant/go-feature-flag/blob/main/LICENSE"><img src="https://img.shields.io/github/license/thomaspoignant/go-feature-flag" alt="License"/></a>
-    <a href="https://github.com/avelino/awesome-go/#server-applications"><img src="https://awesome.re/mentioned-badge-flat.svg" alt="Mentioned in Awesome Go"></a>
+    <a href="https://github.com/avelino/awesome-go/#server-applications"><img src="https://awesome.re/mentioned-badge.svg" alt="Mentioned in Awesome Go"></a>
     <a href="https://gofeatureflag.org/slack"><img src="https://img.shields.io/badge/join-us%20on%20slack-gray.svg?longCache=true&logo=slack&colorB=green" alt="Join us on slack"></a>
+    <a href="https://github.com/sponsors/thomaspoignant"><img src="https://img.shields.io/github/sponsors/thomaspoignant?logo=GitHub%20Sponsors" alt="Sponsords"></a>
 </p>
 
-:pray: If you are using **GO Feature Flag** we've launched the [GO Feature Flag Usage Survey](https://forms.gle/cD4Rj7gJSMStg1Hc9), it would be awesome and super helpful if you can fill it.
+> :pray: If you are using **GO Feature Flag** please consider to add yourself in the [adopters](./ADOPTERS.md) list.  
+> This simple act significantly boosts the project's visibility and credibility, making a substantial contribution to its advancement.
 
 ## Table of Contents
 
-- [What is GO Feature Flag?](#what-is-go-feature-flag)
-- [What can I do with GO Feature Flag?](#what-can-i-do-with-go-feature-flag)
-- [Getting started](#getting-started)
-  - [Using the GO Module](#using-go-module)
-  - [Using Open Feature SDKs](#using-open-feature)
-- [Can I use GO Feature Flag with any language?](#can-i-use-go-feature-flag-with-any-language)
-- [Where do I store my flags file?](#where-do-i-store-my-flags-file)
-- [Flags file format](#flags-file-format)
-- [Rule format](#rule-format)
-- [Users](#users)
-- [Variations](#variations)
-- [Get all flags for a specific user](#get-all-flags-for-a-specific-user)
-- [Rollout](#rollout)
-- [Notifiers](#notifiers)
-- [Export data](#export-data)
-- [Linter](#linter)
+- [🎛️ GO Feature Flag](#️-go-feature-flag)
+  - [Table of Contents](#table-of-contents)
+  - [What is GO Feature Flag?](#what-is-go-feature-flag)
+  - [What can I do with GO Feature Flag?](#what-can-i-do-with-go-feature-flag)
+  - [Getting started](#getting-started)
+    - [Installation](#installation)
+    - [Create a feature flag configuration](#create-a-feature-flag-configuration)
+    - [SDK Initialisation](#sdk-initialisation)
+    - [Evaluate your flags](#evaluate-your-flags)
+    - [Create a feature flag configuration](#create-a-feature-flag-configuration-1)
+    - [Create a relay proxy configuration file](#create-a-relay-proxy-configuration-file)
+    - [Install the relay proxy](#install-the-relay-proxy)
+    - [Use Open Feature SDK](#use-open-feature-sdk)
+      - [Install dependencies](#install-dependencies)
+      - [Init your Open Feature client](#init-your-open-feature-client)
+      - [Evaluate your flag](#evaluate-your-flag)
+  - [Can I use GO Feature Flag with any language?](#can-i-use-go-feature-flag-with-any-language)
+  - [Where do I store my flags file?](#where-do-i-store-my-flags-file)
+  - [Flags file format](#flags-file-format)
+  - [Rule format](#rule-format)
+    - [Examples](#examples)
+  - [Users](#users)
+  - [Variations](#variations)
+    - [Example](#example)
+  - [Get all flags for a specific user](#get-all-flags-for-a-specific-user)
+  - [Rollout](#rollout)
+    - [Complex rollout strategy available](#complex-rollout-strategy-available)
+  - [Notifiers](#notifiers)
+  - [Export data](#export-data)
+  - [Linter](#linter)
 - [How can I contribute?](#how-can-i-contribute)
-- [Contributors](#contributors)
+  - [Contributors](#contributors)
+  - [Adopters](#adopters)
 
 ## What is GO Feature Flag?
 
@@ -281,6 +298,7 @@ The available retrievers are:
 - **Google Cloud Storage**
 - **Kubernetes ConfigMaps**
 - **MongoDB**
+- **Redis**
 
 _[See the full list and more information.](https://gofeatureflag.org/docs/configure_flag/store_your_flags)_
 
@@ -583,3 +601,9 @@ Thanks so much to our contributors.
 <a href="https://github.com/thomaspoignant/go-feature-flag/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=thomaspoignant/go-feature-flag" />
 </a>
+
+## Adopters
+
+If you are using `go-feature-flag`, we encourage you to include your company's name in this list. This simple act significantly boosts the project's visibility and credibility, making a substantial contribution to its advancement. To do so, kindly add yourself to [adopters](./ADOPTERS.md).
+
+Here is the list of [adopters](./ADOPTERS.md).

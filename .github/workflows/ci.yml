@@ -13,8 +13,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-          ref: ${{ github.ref }}
+          fetch-depth: 1
       - name: Setup go
         uses: actions/setup-go@v5
         with:
@@ -28,8 +27,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-          ref: ${{ github.ref }}
+          fetch-depth: 1
       - name: Setup go
         uses: actions/setup-go@v5
         with:
@@ -43,8 +41,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-          ref: ${{ github.ref }}
+          fetch-depth: 1
       - name: Setup go
         uses: actions/setup-go@v5
         with:
@@ -58,8 +55,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-          ref: ${{ github.ref }}
+          fetch-depth: 1
       - name: Setup go
         uses: actions/setup-go@v5
         with:
@@ -67,10 +63,11 @@ jobs:
           check-latest: true
       - run: make coverage
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   swagger-change:
     name: Swagger Change
@@ -78,6 +75,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
       - name: Setup go
         uses: actions/setup-go@v5
         with:
@@ -92,7 +91,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 1
 
       - name: Setup go
         uses: actions/setup-go@v5
@@ -113,6 +112,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
       - name: Setup go
         uses: actions/setup-go@v5
         with:
@@ -137,8 +138,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-          ref: ${{ github.ref }}
+          fetch-depth: 1
       - name: Setup go
         uses: actions/setup-go@v5
         with:
@@ -166,9 +166,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
       - name: Get changed files in the docs folder
         id: changed-files-specific
-        uses: tj-actions/changed-files@v43
+        uses: tj-actions/changed-files@v44
         with:
           files: ./openfeature/providers/python-provider/**
       - uses: actions/setup-python@v5

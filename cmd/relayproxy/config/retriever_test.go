@@ -214,6 +214,15 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 			errValue: "invalid retriever: no \"uri\" property found for kind \"mongodb\"",
 		},
 		{
+			name: "kind redis without options",
+			fields: config.RetrieverConf{
+				Kind:        "redis",
+				RedisPrefix: "xxx",
+			},
+			wantErr:  true,
+			errValue: "invalid retriever: no \"redisOptions\" property found for kind \"redis\"",
+		},
+		{
 			name: "kind mongoDB without Collection",
 			fields: config.RetrieverConf{
 				Kind:       "mongodb",

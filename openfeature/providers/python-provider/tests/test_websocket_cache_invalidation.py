@@ -55,7 +55,7 @@ def test_test_websocket_cache_invalidation(goff):
     )
     api.set_provider(goff_provider)
     wait_provider_ready(goff_provider)
-    client = api.get_client(name="test-client")
+    client = api.get_client(domain="test-client")
 
     want = FlagEvaluationDetails(
         flag_key=flag_key,

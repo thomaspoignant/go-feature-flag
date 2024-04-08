@@ -1,7 +1,3 @@
-run:
-  skip-dirs:
-    - (^|/)bin($|/)
-    - (^|/)examples($|/)
 linters:
   enable:
     - asciicheck
@@ -43,6 +39,9 @@ linters-settings:
     module-path: github.com/thomaspoignant/go-feature-flag
     lang-version: "1.17"
 issues:
+  exclude-dirs:
+    - (^|/)bin($|/)
+    - (^|/)examples($|/)
   exclude-rules:
     - path: _test.go
       linters:

@@ -44,7 +44,7 @@ def _generic_test(
         )
         api.set_provider(goff_provider)
         wait_provider_ready(goff_provider)
-        client = api.get_client(name="test-client")
+        client = api.get_client(domain="test-client")
 
         if evaluationType == "bool":
             t = client.get_boolean_details(
@@ -149,7 +149,7 @@ def test_should_return_an_error_if_endpoint_not_available(mock_request):
         )
         api.set_provider(goff_provider)
         wait_provider_ready(goff_provider)
-        client = api.get_client(name="test-client")
+        client = api.get_client(domain="test-client")
         res = client.get_boolean_details(
             flag_key=flag_key,
             default_value=False,
@@ -452,7 +452,7 @@ def test_should_resolve_from_cache_if_multiple_call_to_the_same_flag_with_same_c
     )
     api.set_provider(goff_provider)
     wait_provider_ready(goff_provider)
-    client = api.get_client(name="test-client")
+    client = api.get_client(domain="test-client")
 
     got = client.get_boolean_details(
         flag_key=flag_key,
@@ -507,7 +507,7 @@ def test_should_call_data_collector_multiple_times_with_cached_event_waiting_ttl
     )
     api.set_provider(goff_provider)
     wait_provider_ready(goff_provider)
-    client = api.get_client(name="test-client")
+    client = api.get_client(domain="test-client")
 
     got = client.get_boolean_details(
         flag_key=flag_key,
@@ -564,7 +564,7 @@ def test_should_not_call_data_collector_if_not_having_cache(mock_request: Mock):
 
     api.set_provider(goff_provider)
     wait_provider_ready(goff_provider)
-    client = api.get_client(name="test-client")
+    client = api.get_client(domain="test-client")
 
     client.get_boolean_details(
         flag_key=flag_key,

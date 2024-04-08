@@ -1,6 +1,9 @@
 package config
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/redis/go-redis/v9"
+)
 
 // RetrieverConf contains all the field to configure a retriever
 type RetrieverConf struct {
@@ -9,23 +12,25 @@ type RetrieverConf struct {
 	Branch         string        `mapstructure:"branch" koanf:"branch"`
 	Path           string        `mapstructure:"path" koanf:"path"`
 	// Deprecated: Please use AuthToken instead
-	GithubToken string              `mapstructure:"githubToken" koanf:"githubtoken"`
-	URL         string              `mapstructure:"url" koanf:"url"`
-	Timeout     int64               `mapstructure:"timeout" koanf:"timeout"`
-	HTTPMethod  string              `mapstructure:"method" koanf:"method"`
-	HTTPBody    string              `mapstructure:"body" koanf:"body"`
-	HTTPHeaders map[string][]string `mapstructure:"headers" koanf:"headers"`
-	Bucket      string              `mapstructure:"bucket" koanf:"bucket"`
-	Object      string              `mapstructure:"object" koanf:"object"`
-	Item        string              `mapstructure:"item" koanf:"item"`
-	Namespace   string              `mapstructure:"namespace" koanf:"namespace"`
-	ConfigMap   string              `mapstructure:"configmap" koanf:"configmap"`
-	Key         string              `mapstructure:"key" koanf:"key"`
-	BaseURL     string              `mapstructure:"baseUrl" koanf:"baseurl"`
-	AuthToken   string              `mapstructure:"token" koanf:"token"`
-	URI         string              `mapstructure:"uri" koanf:"uri"`
-	Database    string              `mapstructure:"database" koanf:"database"`
-	Collection  string              `mapstructure:"collection" koanf:"collection"`
+	GithubToken  string              `mapstructure:"githubToken" koanf:"githubtoken"`
+	URL          string              `mapstructure:"url" koanf:"url"`
+	Timeout      int64               `mapstructure:"timeout" koanf:"timeout"`
+	HTTPMethod   string              `mapstructure:"method" koanf:"method"`
+	HTTPBody     string              `mapstructure:"body" koanf:"body"`
+	HTTPHeaders  map[string][]string `mapstructure:"headers" koanf:"headers"`
+	Bucket       string              `mapstructure:"bucket" koanf:"bucket"`
+	Object       string              `mapstructure:"object" koanf:"object"`
+	Item         string              `mapstructure:"item" koanf:"item"`
+	Namespace    string              `mapstructure:"namespace" koanf:"namespace"`
+	ConfigMap    string              `mapstructure:"configmap" koanf:"configmap"`
+	Key          string              `mapstructure:"key" koanf:"key"`
+	BaseURL      string              `mapstructure:"baseUrl" koanf:"baseurl"`
+	AuthToken    string              `mapstructure:"token" koanf:"token"`
+	URI          string              `mapstructure:"uri" koanf:"uri"`
+	Database     string              `mapstructure:"database" koanf:"database"`
+	Collection   string              `mapstructure:"collection" koanf:"collection"`
+	RedisOptions *redis.Options      `mapstructure:"redisOptions" koanf:"redisOptions"`
+	RedisPrefix  string              `mapstructure:"redisPrefix" koanf:"redisPrefix"`
 }
 
 // IsValid validate the configuration of the retriever
@@ -34,7 +39,7 @@ func (c *RetrieverConf) IsValid() error {
 	if err := c.Kind.IsValid(); err != nil {
 		return err
 	}
-	if c.Kind == GitHubRetriever || c.Kind == GitlabRetriever{
+	if c.Kind == GitHubRetriever || c.Kind == GitlabRetriever {
 		return c.validateGitRetriever()
 	}
 	if c.Kind == S3Retriever && c.Item == "" {
@@ -46,7 +51,7 @@ func (c *RetrieverConf) IsValid() error {
 	if c.Kind == GoogleStorageRetriever && c.Object == "" {
 		return fmt.Errorf("invalid retriever: no \"object\" property found for kind \"%s\"", c.Kind)
 	}
-	if c.Kind == FileRetriever  && c.Path == "" {
+	if c.Kind == FileRetriever && c.Path == "" {
 		return fmt.Errorf("invalid retriever: no \"path\" property found for kind \"%s\"", c.Kind)
 	}
 	if (c.Kind == S3Retriever || c.Kind == GoogleStorageRetriever) && c.Bucket == "" {
@@ -57,6 +62,9 @@ func (c *RetrieverConf) IsValid() error {
 	}
 	if c.Kind == MongoDBRetriever {
 		return c.validateMongoDBRetriever()
+	}
+	if c.Kind == RedisRetriever {
+		return c.validateRedisRetriever()
 	}
 	return nil
 }
@@ -97,6 +105,13 @@ func (c *RetrieverConf) validateMongoDBRetriever() error {
 	return nil
 }
 
+func (c *RetrieverConf) validateRedisRetriever() error {
+	if c.RedisOptions == nil {
+		return fmt.Errorf("invalid retriever: no \"redisOptions\" property found for kind \"%s\"", c.Kind)
+	}
+	return nil
+}
+
 // RetrieverKind is an enum containing all accepted Retriever kind
 type RetrieverKind string
 
@@ -109,12 +124,13 @@ const (
 	GoogleStorageRetriever RetrieverKind = "googleStorage"
 	KubernetesRetriever    RetrieverKind = "configmap"
 	MongoDBRetriever       RetrieverKind = "mongodb"
+	RedisRetriever         RetrieverKind = "redis"
 )
 
 // IsValid is checking if the value is part of the enum
 func (r RetrieverKind) IsValid() error {
 	switch r {
-	case HTTPRetriever, GitHubRetriever, GitlabRetriever, S3Retriever,
+	case HTTPRetriever, GitHubRetriever, GitlabRetriever, S3Retriever, RedisRetriever,
 		FileRetriever, GoogleStorageRetriever, KubernetesRetriever, MongoDBRetriever:
 		return nil
 	}
