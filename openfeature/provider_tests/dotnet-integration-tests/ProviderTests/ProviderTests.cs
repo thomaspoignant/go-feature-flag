@@ -51,7 +51,7 @@ public class ProviderTests
             "True",
             null);
         var got = await client.GetBooleanDetails(flagKey, false, defaultEvaluationContext);
-        want.Should().BeEquivalentTo(got);
+        got.Should().BeEquivalentTo(want);
 
     }
     [Test]
@@ -66,7 +66,7 @@ public class ProviderTests
             null,
             null); 
         var got = await client.GetBooleanDetails(flagKey, false, defaultEvaluationContext);
-        want.Should().BeEquivalentTo(got);
+        got.Should().BeEquivalentTo(want);
     }
     
     [Test]
@@ -81,7 +81,7 @@ public class ProviderTests
             "",
             "flag value string_key had unexpected type"); 
         var got = await client.GetBooleanDetails(flagKey, false, defaultEvaluationContext);
-        want.Should().BeEquivalentTo(got);
+        got.Should().BeEquivalentTo(want);
     }
     
     [Test]
@@ -96,7 +96,7 @@ public class ProviderTests
             "",
             $"flag {flagKey} was not found in your configuration"); 
         var got = await client.GetBooleanDetails(flagKey, false, defaultEvaluationContext);
-        want.Should().BeEquivalentTo(got);
+        got.Should().BeEquivalentTo(want);
     }
     
     [Test]
@@ -111,7 +111,7 @@ public class ProviderTests
             "True",
             null); 
         var got = await client.GetStringDetails(flagKey, "default", defaultEvaluationContext);
-        want.Should().BeEquivalentTo(got);
+        got.Should().BeEquivalentTo(want);
     }
     
     [Test]
@@ -126,7 +126,7 @@ public class ProviderTests
             null,
             null); 
         var got = await client.GetStringDetails(flagKey, "default", defaultEvaluationContext);
-        want.Should().BeEquivalentTo(got);
+        got.Should().BeEquivalentTo(want);
     }
     
     [Test]
@@ -141,7 +141,7 @@ public class ProviderTests
             "",
             "flag value bool_targeting_match had unexpected type"); 
         var got = await client.GetStringDetails(flagKey, "default", defaultEvaluationContext);
-        want.Should().BeEquivalentTo(got);
+        got.Should().BeEquivalentTo(want);
     }
     
     [Test]
@@ -156,7 +156,7 @@ public class ProviderTests
             "",
             $"flag {flagKey} was not found in your configuration"); 
         var got = await client.GetStringDetails(flagKey, "default", defaultEvaluationContext);
-        want.Should().BeEquivalentTo(got);
+        got.Should().BeEquivalentTo(want);
     }
     
     [Test]
@@ -171,7 +171,7 @@ public class ProviderTests
             "True",
             null); 
         var got = await client.GetDoubleDetails(flagKey,  123.45, defaultEvaluationContext);
-        want.Should().BeEquivalentTo(got);
+        got.Should().BeEquivalentTo(want);
     }
     
     [Test]
@@ -186,7 +186,7 @@ public class ProviderTests
             null,
             null); 
         var got = await client.GetDoubleDetails(flagKey,  123.45, defaultEvaluationContext);
-        want.Should().BeEquivalentTo(got);
+        got.Should().BeEquivalentTo(want);
     }
     
     [Test]
@@ -201,7 +201,7 @@ public class ProviderTests
             "",
             "flag value bool_targeting_match had unexpected type"); 
         var got = await client.GetDoubleDetails(flagKey,  123.45, defaultEvaluationContext);
-        want.Should().BeEquivalentTo(got);
+        got.Should().BeEquivalentTo(want);
     }
     
     [Test]
@@ -216,7 +216,7 @@ public class ProviderTests
             "",
             $"flag {flagKey} was not found in your configuration"); 
         var got = await client.GetDoubleDetails(flagKey, 123.45, defaultEvaluationContext);
-        want.Should().BeEquivalentTo(got);
+        got.Should().BeEquivalentTo(want);
     }
     
     [Test]
@@ -231,7 +231,7 @@ public class ProviderTests
             "True",
             null); 
         var got = await client.GetIntegerDetails(flagKey,  123, defaultEvaluationContext);
-        want.Should().BeEquivalentTo(got);
+        got.Should().BeEquivalentTo(want);
     }
     
     [Test]
@@ -246,7 +246,7 @@ public class ProviderTests
             null,
             null); 
         var got = await client.GetIntegerDetails(flagKey,  123, defaultEvaluationContext);
-        want.Should().BeEquivalentTo(got);
+        got.Should().BeEquivalentTo(want);
     }
     
     [Test]
@@ -261,7 +261,7 @@ public class ProviderTests
             "",
             "flag value bool_targeting_match had unexpected type"); 
         var got = await client.GetIntegerDetails(flagKey,  123, defaultEvaluationContext);
-        want.Should().BeEquivalentTo(got);
+        got.Should().BeEquivalentTo(want);
     }
     
     [Test]
@@ -276,7 +276,7 @@ public class ProviderTests
             "",
             $"flag {flagKey} was not found in your configuration"); 
         var got = await client.GetIntegerDetails(flagKey,  123, defaultEvaluationContext);
-        want.Should().BeEquivalentTo(got);
+        got.Should().BeEquivalentTo(want);
     }
     
     [Test]
@@ -300,7 +300,7 @@ public class ProviderTests
             "True",
             null); 
         var got = await client.GetObjectDetails(flagKey,  new Value(123), defaultEvaluationContext);
-        want.Should().BeEquivalentTo(got);
+        got.Should().BeEquivalentTo(want);
     }
     
     [Test]
@@ -315,7 +315,7 @@ public class ProviderTests
             null,
             null); 
         var got = await client.GetObjectDetails(flagKey,  new Value(123), defaultEvaluationContext);
-        want.Should().BeEquivalentTo(got);
+        got.Should().BeEquivalentTo(want);
     }
     
     [Test]
@@ -330,7 +330,7 @@ public class ProviderTests
             "",
             $"flag {flagKey} was not found in your configuration"); 
         var got = await client.GetObjectDetails(flagKey,  new Value(123), defaultEvaluationContext);
-        want.Should().BeEquivalentTo(got);
+        got.Should().BeEquivalentTo(want);
     }
     
     [Test]
@@ -353,7 +353,7 @@ public class ProviderTests
             "True",
             null);
         var got = await authenticatedClient.GetBooleanDetails(flagKey, false, defaultEvaluationContext);
-        want.Should().BeEquivalentTo(got);
+        got.Should().BeEquivalentTo(want);
     }
     
     [Test]
@@ -376,7 +376,7 @@ public class ProviderTests
             "",
             "invalid token used to contact GO Feature Flag relay proxy instance");
         var got = await authenticatedClient.GetBooleanDetails(flagKey, false, defaultEvaluationContext);
-        want.Should().BeEquivalentTo(got);
+        got.Should().BeEquivalentTo(want);
     }
     [Test]
     public async Task Should_resolve_a_default_value_with_an_empty_apiKey()
@@ -398,6 +398,6 @@ public class ProviderTests
             "",
             "impossible to contact GO Feature Flag relay proxy instance");
         var got = await authenticatedClient.GetBooleanDetails(flagKey, false, defaultEvaluationContext);
-        want.Should().BeEquivalentTo(got);
+        got.Should().BeEquivalentTo(want);
     }
 }
