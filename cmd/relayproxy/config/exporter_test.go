@@ -21,6 +21,8 @@ func TestExporterConf_IsValid(t *testing.T) {
 		Meta                    map[string]string
 		ParquetCompressionCodec string
 		QueueURL                string
+		ProjectID               string
+		Topic                   string
 	}
 	tests := []struct {
 		name     string
@@ -157,6 +159,33 @@ func TestExporterConf_IsValid(t *testing.T) {
 			wantErr:  true,
 			errValue: "invalid exporter: no \"queueUrl\" property found for kind \"sqs\"",
 		},
+		{
+			name: "kind PubSub valid",
+			fields: fields{
+				Kind:      "pubsub",
+				ProjectID: "fake-project-id",
+				Topic:     "fake-topic",
+			},
+			wantErr: false,
+		},
+		{
+			name: "kind PubSub without project id",
+			fields: fields{
+				Kind:  "pubsub",
+				Topic: "fake-topic",
+			},
+			wantErr:  true,
+			errValue: "invalid exporter: \"projectID\" and \"topic\" are required for kind \"pubsub\"",
+		},
+		{
+			name: "kind PubSub without topic",
+			fields: fields{
+				Kind:      "pubsub",
+				ProjectID: "fake-project-id",
+			},
+			wantErr:  true,
+			errValue: "invalid exporter: \"projectID\" and \"topic\" are required for kind \"pubsub\"",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -173,6 +202,8 @@ func TestExporterConf_IsValid(t *testing.T) {
 				Meta:                    tt.fields.Meta,
 				ParquetCompressionCodec: tt.fields.ParquetCompressionCodec,
 				QueueURL:                tt.fields.QueueURL,
+				ProjectID:               tt.fields.ProjectID,
+				Topic:                   tt.fields.Topic,
 			}
 			err := c.IsValid()
 			assert.Equal(t, tt.wantErr, err != nil)

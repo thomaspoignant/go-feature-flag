@@ -2,8 +2,10 @@ package service
 
 import (
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/retriever/redisretriever"
 	"time"
+
+	"github.com/thomaspoignant/go-feature-flag/exporter/pubsubexporter"
+	"github.com/thomaspoignant/go-feature-flag/retriever/redisretriever"
 
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/kafkaexporter"
@@ -198,6 +200,7 @@ func initDataExporter(c *config.ExporterConf) (ffclient.DataExporter, error) {
 	return dataExp, nil
 }
 
+// nolint: funlen
 func createExporter(c *config.ExporterConf) (exporter.Exporter, error) {
 	format := config.DefaultExporter.Format
 	if c.Format != "" {
@@ -282,6 +285,11 @@ func createExporter(c *config.ExporterConf) (exporter.Exporter, error) {
 		return &kafkaexporter.Exporter{
 			Format:   format,
 			Settings: c.Kafka,
+		}, nil
+	case config.PubSubExporter:
+		return &pubsubexporter.Exporter{
+			ProjectID: c.ProjectID,
+			Topic:     c.Topic,
 		}, nil
 	default:
 		return nil, fmt.Errorf("invalid exporter: kind \"%s\" is not supported", c.Kind)
