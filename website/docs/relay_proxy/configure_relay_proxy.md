@@ -47,7 +47,8 @@ If you want to replace a nested fields, please use `_` to separate each field _(
 | `evaluationContextEnrichment` | object                    | **none**    | It is a free field that will be merged with the evaluation context sent during the evaluation. It is useful to add common attributes to all the evaluations, such as a server version, environment, etc.<br/><br/>These fields will be included in the custom attributes of the evaluation context.<br/><br/>If in the evaluation context you have a field with the same name, it will be overriden by the `evaluationContextEnrichment`. |
 | `openTelemetryOtlpEndpoint`   | string                    | **none**    | Endpoint of your OpenTelemetry OTLP collector, used to send traces to it and you will be able to forward them to your OpenTelemetry solution with the appropriate provider.                                                                                                                                                                                                                                                      |
 | `kafka`                       | object                    | **none**    | Settings for the Kafka exporter. Mandatory when using the 'kafka' exporter type, and ingored otherwise.                                                                                                                                                                                                                                                                                                                                       |                     
-
+| `projectID`                   | string                    | **none**    | ID of GCP project. Mandatory when using PubSub exporter.                                                                                                                                                                                                                                                                                                                                                                                  |
+| `topic`                       | string                    | **none**    | Name of PubSub topic on which messages will be published. Mandatory when using PubSub exporter.                                                                                                                                                                                                                                                                                                                                           |
 
 <a name="retriever"></a>
 
@@ -233,6 +234,13 @@ _To understand the format in which a flag needs to be configured in **Redis**, c
 | `kafka.addresses` | []string | **none**          | **(mandatory)** List of bootstrap addresses for the Kafka cluster.                                                                                                                                                                                                                                         |
 | `kafka.config`   | object   | _see description_ | This field allows fine tuning of the Kafka reader. This object should contain the [Sarama configuration](https://pkg.go.dev/github.com/IBM/sarama#Config) that the reader will use. On empty, a sensible default is created using [sarama.NewConfig()](https://pkg.go.dev/github.com/IBM/sarama#NewConfig) |
 
+
+### Google PubSub
+
+| Field name  | Type   | Default  | Description                                                      |
+|-------------|--------|----------|------------------------------------------------------------------|
+| `projectID` | string | **none** | **(mandatory)** Value should be ID of GCP project you are using. |
+| `topic`     | string | **none** | **(mandatory)** Topic name on which messages will be published.  |
 
 <a name="notifier"></a>
 
