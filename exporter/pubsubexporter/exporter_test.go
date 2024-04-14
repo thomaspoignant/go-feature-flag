@@ -184,12 +184,7 @@ func TestExporter_Export(t *testing.T) {
 
 			assert.NoError(t, err)
 			assertMessages(t, tt.featureEvents, server.Messages())
-
-			if tt.fields.publishSettings != nil {
-				assert.Equal(t, *tt.fields.publishSettings, e.publisher.PublishSettings)
-			} else {
-				assert.Equal(t, pubsub.DefaultPublishSettings, e.publisher.PublishSettings)
-			}
+			assertPublisherSettings(t, tt.fields.publishSettings, e.publisher)
 			assert.Equal(t, tt.fields.enableMessageOrdering, e.publisher.EnableMessageOrdering)
 		})
 	}
@@ -216,4 +211,12 @@ func assertMessages(t *testing.T, expectedEvents []exporter.FeatureEvent, messag
 		events[i] = event
 	}
 	assert.ElementsMatchf(t, expectedEvents, events, "events should match in any order")
+}
+
+func assertPublisherSettings(t *testing.T, expectedSettings *pubsub.PublishSettings, publisher *pubsub.Topic) {
+	if expectedSettings != nil {
+		assert.Equal(t, *expectedSettings, publisher.PublishSettings)
+	} else {
+		assert.Equal(t, pubsub.DefaultPublishSettings, publisher.PublishSettings)
+	}
 }
