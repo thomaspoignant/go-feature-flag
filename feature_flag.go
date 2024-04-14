@@ -142,6 +142,11 @@ func (g *GoFeatureFlag) Close() {
 
 // startFlagUpdaterDaemon is the daemon that refresh the cache every X seconds.
 func (g *GoFeatureFlag) startFlagUpdaterDaemon() {
+
+	if g.config.Offline {
+		return
+	}
+
 	for {
 		select {
 		case <-g.bgUpdater.ticker.C:
@@ -155,8 +160,26 @@ func (g *GoFeatureFlag) startFlagUpdaterDaemon() {
 	}
 }
 
+// SetOffline updates the config Offline paramter
+func (g *GoFeatureFlag) SetOffline(control bool) bool {
+	g.config.Offline = control
+
+	if control {
+		g.bgUpdater.close()
+	} else {
+		go g.startFlagUpdaterDaemon()
+	}
+
+	return g.config.Offline
+}
+
 // retrieveFlagsAndUpdateCache is called every X seconds to refresh the cache flag.
 func retrieveFlagsAndUpdateCache(config Config, cache cache.Manager, retrieverManager *retriever.Manager) error {
+
+	if config.Offline {
+		return nil
+	}
+
 	retrievers := retrieverManager.GetRetrievers()
 	// Results is the type that will receive the results when calling
 	// all the retrievers.
