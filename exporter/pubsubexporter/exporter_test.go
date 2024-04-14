@@ -21,7 +21,7 @@ import (
 func TestExporter_Export(t *testing.T) {
 	const (
 		projectID = "fake-project"
-		topic     = "example-topic"
+		topic     = "fake-topic"
 	)
 
 	ctx := context.TODO()
@@ -60,7 +60,7 @@ func TestExporter_Export(t *testing.T) {
 		wantErr       bool
 	}{
 		{
-			name: "should publish single message with feature event",
+			name: "should publish a single message with the feature event",
 			fields: fields{
 				topic:         topic,
 				newClientFunc: defaultNewClientFunc,
@@ -90,7 +90,7 @@ func TestExporter_Export(t *testing.T) {
 			},
 		},
 		{
-			name: "should use provided client options when creating a client",
+			name: "should use the provided client options when creating a client",
 			fields: fields{
 				topic:   topic,
 				options: []option.ClientOption{option.WithAPIKey("some-api-key")},
@@ -111,7 +111,7 @@ func TestExporter_Export(t *testing.T) {
 			},
 		},
 		{
-			name: "should use provided publisher setting for PubSub topic",
+			name: "should use the provided publisher settings for the PubSub topic",
 			fields: fields{
 				topic:           topic,
 				newClientFunc:   defaultNewClientFunc,
@@ -125,7 +125,7 @@ func TestExporter_Export(t *testing.T) {
 			},
 		},
 		{
-			name: "should enable message ordering if configuration is set",
+			name: "should enable message ordering if the configuration is set",
 			fields: fields{
 				topic:                 topic,
 				newClientFunc:         defaultNewClientFunc,
@@ -139,7 +139,7 @@ func TestExporter_Export(t *testing.T) {
 			},
 		},
 		{
-			name: "should return an error if there is a problem with creating PubSub client",
+			name: "should return an error if there is a problem with creating a PubSub client",
 			fields: fields{
 				topic: topic,
 				newClientFunc: func(_ context.Context, _ string, _ ...option.ClientOption) (*pubsub.Client, error) {

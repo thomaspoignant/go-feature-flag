@@ -10,32 +10,32 @@ import (
 	"google.golang.org/api/option"
 )
 
-// Exporter sends events to a PubSub topic.
+// Exporter publishes events on a PubSub topic.
 type Exporter struct {
-	// ProjectID is a project in which the PubSub topic exists.
+	// ProjectID is a project to which the PubSub topic belongs.
 	ProjectID string
 
-	// Topic is a name of topic to which messages will be sent.
+	// Topic is the name of a topic on which messages will be published.
 	Topic string
 
-	// Options are Google Cloud Api options to connect to PubSub.
+	// Options are Google Cloud API options to connect to PubSub.
 	Options []option.ClientOption
 
-	// PublishSettings control the bundling of published messages.
+	// PublishSettings controls the bundling of published messages.
 	// If not set pubsub.DefaultPublishSettings are used.
 	PublishSettings *pubsub.PublishSettings
 
-	// EnableMessageOrdering enables delivery of ordered keys.
+	// EnableMessageOrdering enables the delivery of ordered keys.
 	EnableMessageOrdering bool
 
-	// newClientFunc  used only for unit testing purposes.
+	// newClientFunc is used only for unit testing purposes.
 	newClientFunc func(context.Context, string, ...option.ClientOption) (*pubsub.Client, error)
 
-	// publisher allows for publishing messages on PubSub topic.
+	// publisher facilitates publishing messages on a PubSub topic.
 	publisher *pubsub.Topic
 }
 
-// Export sends PubSub message for each exporter.FeatureEvent received.
+// Export publishes a PubSub message for each exporter.FeatureEvent received.
 func (e *Exporter) Export(ctx context.Context, _ *log.Logger, featureEvents []exporter.FeatureEvent) error {
 	if e.publisher == nil {
 		if err := e.initPublisher(ctx); err != nil {
@@ -61,12 +61,12 @@ func (e *Exporter) Export(ctx context.Context, _ *log.Logger, featureEvents []ex
 	return nil
 }
 
-// IsBulk always returns false as PubSub exporter sends each exporter.FeatureEvent as separate message.
+// IsBulk always returns false as PubSub exporter sends each exporter.FeatureEvent as a separate message.
 func (e *Exporter) IsBulk() bool {
 	return false
 }
 
-// initPublisher inits PubSub topic publisher according to provided configuration.
+// initPublisher inits PubSub topic publisher according to the provided configuration.
 func (e *Exporter) initPublisher(ctx context.Context) error {
 	if e.newClientFunc == nil {
 		e.newClientFunc = pubsub.NewClient
