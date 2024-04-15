@@ -204,11 +204,11 @@ docker run \
   -p 1031:1031 \
   -v $(pwd)/flag-config.yaml:/goff/flag-config.yaml \
   -v $(pwd)/goff-proxy.yaml:/goff/goff-proxy.yaml \
-  thomaspoignant/go-feature-flag-relay-proxy:latest
+  gofeatureflag/go-feature-flag:latest
 
 ```
 
-_If you don't want to use docker to install the **relay proxy** you can go to [docker hub](https://hub.docker.com/r/thomaspoignant/go-feature-flag-relay-proxy)_.
+_If you don't want to use docker to install the **relay proxy** you can go to [docker hub](https://hub.docker.com/r/gofeatureflag/go-feature-flag)_.
 
 ### Use Open Feature SDK
 
@@ -566,6 +566,7 @@ It collects all variation events and can save these events in several locations:
 - **Google Cloud Storage** *- export your variation usages to Google Cloud Storage.*
 - **Webhook** *- export your variation usages by calling a webhook.*
 - **AWS SQS** *- export your variation usages by sending events to SQS.*
+- **Google PubSub** *- export your variation usages by publishing events to PubSub topic.*
 
 Currently, we are supporting only feature events.  
 It represents individual flag evaluations and is considered "full fidelity" events.

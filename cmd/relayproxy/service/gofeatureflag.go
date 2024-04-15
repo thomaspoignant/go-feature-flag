@@ -2,20 +2,19 @@ package service
 
 import (
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/retriever/redisretriever"
 	"time"
 
-	"github.com/thomaspoignant/go-feature-flag/exporter"
-	"github.com/thomaspoignant/go-feature-flag/exporter/kafkaexporter"
-	"github.com/thomaspoignant/go-feature-flag/exporter/s3exporterv2"
-	"github.com/thomaspoignant/go-feature-flag/exporter/sqsexporter"
-	"github.com/thomaspoignant/go-feature-flag/retriever/s3retrieverv2"
-
+	awsConf "github.com/aws/aws-sdk-go-v2/config"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
+	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/gcstorageexporter"
+	"github.com/thomaspoignant/go-feature-flag/exporter/kafkaexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/logsexporter"
+	"github.com/thomaspoignant/go-feature-flag/exporter/pubsubexporter"
+	"github.com/thomaspoignant/go-feature-flag/exporter/s3exporterv2"
+	"github.com/thomaspoignant/go-feature-flag/exporter/sqsexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/webhookexporter"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"github.com/thomaspoignant/go-feature-flag/notifier/slacknotifier"
@@ -28,11 +27,11 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/retriever/httpretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/k8sretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/mongodbretriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever/redisretriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever/s3retrieverv2"
 	"go.uber.org/zap"
 	"golang.org/x/net/context"
 	"k8s.io/client-go/rest"
-
-	awsConf "github.com/aws/aws-sdk-go-v2/config"
 )
 
 func NewGoFeatureFlagClient(
@@ -198,6 +197,7 @@ func initDataExporter(c *config.ExporterConf) (ffclient.DataExporter, error) {
 	return dataExp, nil
 }
 
+// nolint: funlen
 func createExporter(c *config.ExporterConf) (exporter.Exporter, error) {
 	format := config.DefaultExporter.Format
 	if c.Format != "" {
@@ -282,6 +282,11 @@ func createExporter(c *config.ExporterConf) (exporter.Exporter, error) {
 		return &kafkaexporter.Exporter{
 			Format:   format,
 			Settings: c.Kafka,
+		}, nil
+	case config.PubSubExporter:
+		return &pubsubexporter.Exporter{
+			ProjectID: c.ProjectID,
+			Topic:     c.Topic,
 		}, nil
 	default:
 		return nil, fmt.Errorf("invalid exporter: kind \"%s\" is not supported", c.Kind)

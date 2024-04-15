@@ -386,6 +386,8 @@ paths:
           schema:
             $ref: '#/definitions/model.HealthResponse'
       summary: Health
+      tags:
+      - Monitoring
   /info:
     get:
       description: |-
@@ -402,6 +404,8 @@ paths:
           schema:
             $ref: '#/definitions/model.InfoResponse'
       summary: Info
+      tags:
+      - Monitoring
   /metrics:
     get:
       description: This endpoint is providing metrics about the relay proxy in the
@@ -414,6 +418,8 @@ paths:
           schema:
             type: string
       summary: Prometheus endpoint
+      tags:
+      - Monitoring
   /ofrep/v1/evaluate/flags:
     post:
       consumes:
@@ -460,6 +466,8 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Open-Feature Remote Evaluation Protocol bulk evaluation API.
+      tags:
+      - OpenFeature Remote Evaluation Protocol (OFREP)
   /ofrep/v1/evaluate/flags/{flag_key}:
     post:
       consumes:
@@ -505,6 +513,8 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Evaluate a feature flag using the OpenFeature Remote Evaluation Protocol
+      tags:
+      - OpenFeature Remote Evaluation Protocol (OFREP)
   /v1/allflags:
     post:
       consumes:
@@ -540,6 +550,8 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: All flags variations for a user
+      tags:
+      - GO Feature Flag Evaluation API
   /v1/data/collector:
     post:
       consumes:
@@ -574,6 +586,8 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Endpoint to send usage of your flags to be collected
+      tags:
+      - GO Feature Flag Evaluation API
   /v1/feature/{flag_key}/eval:
     post:
       consumes:
@@ -619,6 +633,8 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Evaluate a feature flag
+      tags:
+      - GO Feature Flag Evaluation API
   /ws/v1/flag/change:
     post:
       consumes:
@@ -647,6 +663,8 @@ paths:
           schema:
             $ref: '#/definitions/modeldocs.HTTPErrorDoc'
       summary: Websocket endpoint to be notified about flag changes
+      tags:
+      - GO Feature Flag Evaluation API
 securityDefinitions:
   ApiKeyAuth:
     description: Use configured APIKeys in yaml config as authorization keys, disabled

@@ -30,7 +30,7 @@ jobs:
           go-version-file: go.mod
           check-latest: true
       - name: Set up Maven
-        uses: stCarolas/setup-maven@v4.5
+        uses: stCarolas/setup-maven@v5
         with:
           maven-version: 3.8.2
       - run: make vendor
@@ -80,9 +80,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
       - name: Release readme to DockerHub
         uses: ms-jpq/sync-dockerhub-readme@v1
         env:
@@ -92,6 +89,16 @@ jobs:
           username: ${DOCKER_USERNAME}
           password: ${DOCKER_PASSWORD}
           repository: thomaspoignant/go-feature-flag-migration-cli
+          readme: "./cmd/migrationcli/DOCKERHUB_thomaspoignant.md"
+      - name: Release readme to DockerHub gofeatureflag
+        uses: ms-jpq/sync-dockerhub-readme@v1
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        with:
+          username: ${DOCKER_USERNAME}
+          password: ${DOCKER_PASSWORD}
+          repository: gofeatureflag/go-feature-flag-migration-cli
           readme: "./cmd/migrationcli/DOCKERHUB.md"
 
   dockerhub-lint:
@@ -102,9 +109,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
       - name: Release readme to DockerHub
         uses: ms-jpq/sync-dockerhub-readme@v1
         env:
@@ -114,6 +118,16 @@ jobs:
           username: ${DOCKER_USERNAME}
           password: ${DOCKER_PASSWORD}
           repository: thomaspoignant/go-feature-flag-lint
+          readme: "./cmd/lint/DOCKERHUB_thomaspoignant.md"
+      - name: Release readme to DockerHub gofeatureflag
+        uses: ms-jpq/sync-dockerhub-readme@v1
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        with:
+          username: ${DOCKER_USERNAME}
+          password: ${DOCKER_PASSWORD}
+          repository: gofeatureflag/go-feature-flag-lint
           readme: "./cmd/lint/DOCKERHUB.md"
 
   dockerhub-relay-proxy:
@@ -124,9 +138,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
       - name: Release readme to DockerHub
         uses: ms-jpq/sync-dockerhub-readme@v1
         env:
@@ -146,9 +157,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
       - name: Release readme to DockerHub
         uses: ms-jpq/sync-dockerhub-readme@v1
         env:
@@ -158,6 +166,16 @@ jobs:
           username: ${DOCKER_USERNAME}
           password: ${DOCKER_PASSWORD}
           repository: thomaspoignant/go-feature-flag
+          readme: "./cmd/relayproxy/DOCKERHUB_thomaspoignant.md"
+      - name: Release readme to DockerHub gofeatureflag
+        uses: ms-jpq/sync-dockerhub-readme@v1
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        with:
+          username: ${DOCKER_USERNAME}
+          password: ${DOCKER_PASSWORD}
+          repository: gofeatureflag/go-feature-flag
           readme: "./cmd/relayproxy/DOCKERHUB.md"
 
   doc-release:
@@ -176,7 +194,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: release
-          fetch-depth: 0
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
       - uses: actions/setup-node@v4
@@ -195,7 +212,6 @@ jobs:
           ref: ${{ env.MAIN_BRANCH_NAME }}
           path: ${{ env.MAIN_BRANCH_NAME }}
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
-          fetch-depth: 0
 
       - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
@@ -232,7 +248,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: release
-          fetch-depth: 0
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
       - name: yq - portable yaml processor
@@ -252,7 +267,6 @@ jobs:
           ref: ${{ env.MAIN_BRANCH_NAME }}
           path: ${{ env.MAIN_BRANCH_NAME }}
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
-          fetch-depth: 0
 
       - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
@@ -288,7 +302,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: release
-          fetch-depth: 0
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
       - name: Setup go
@@ -311,7 +324,6 @@ jobs:
           ref: ${{ env.MAIN_BRANCH_NAME }}
           path: ${{ env.MAIN_BRANCH_NAME }}
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
-          fetch-depth: 0
 
       - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 

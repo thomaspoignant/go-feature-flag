@@ -26,6 +26,8 @@ type ExporterConf struct {
 	Headers                 map[string][]string    `mapstructure:"headers" koanf:"headers"`
 	QueueURL                string                 `mapstructure:"queueUrl" koanf:"queueurl"`
 	Kafka                   kafkaexporter.Settings `mapstructure:"kafka" koanf:"kafka"`
+	ProjectID               string                 `mapstructure:"projectID" koanf:"projectid"`
+	Topic                   string                 `mapstructure:"topic" koanf:"topic"`
 }
 
 func (c *ExporterConf) IsValid() error {
@@ -54,6 +56,10 @@ func (c *ExporterConf) IsValid() error {
 		return fmt.Errorf("invalid exporter: \"kakfa.topic\" and \"kafka.addresses\" are required for kind \"%s\"", c.Kind)
 	}
 
+	if c.Kind == PubSubExporter && (c.ProjectID == "" || c.Topic == "") {
+		return fmt.Errorf("invalid exporter: \"projectID\" and \"topic\" are required for kind \"%s\"", c.Kind)
+	}
+
 	return nil
 }
 
@@ -67,12 +73,14 @@ const (
 	GoogleStorageExporter ExporterKind = "googleStorage"
 	SQSExporter           ExporterKind = "sqs"
 	KafkaExporter         ExporterKind = "kafka"
+	PubSubExporter        ExporterKind = "pubsub"
 )
 
 // IsValid is checking if the value is part of the enum
 func (r ExporterKind) IsValid() error {
 	switch r {
-	case FileExporter, WebhookExporter, LogExporter, S3Exporter, GoogleStorageExporter, SQSExporter, KafkaExporter:
+	case FileExporter, WebhookExporter, LogExporter, S3Exporter, GoogleStorageExporter, SQSExporter, KafkaExporter,
+		PubSubExporter:
 		return nil
 	}
 	return fmt.Errorf("invalid exporter: kind \"%s\" is not supported", r)
