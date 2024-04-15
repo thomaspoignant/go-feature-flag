@@ -50,7 +50,7 @@ jobs:
       - run: make test
 
   Coverage:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -62,13 +62,14 @@ jobs:
           go-version-file: go.mod
           check-latest: true
       - run: make coverage
+      - name: Import GPG
+        uses: crazy-max/ghaction-import-gpg@v6.1.0
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           fail_ci_if_error: true
-          token: ${{ secrets.CODECOV_TOKEN_2 }}
         env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN_2 }}
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   swagger-change:
     name: Swagger Change
