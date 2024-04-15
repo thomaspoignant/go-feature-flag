@@ -1,0 +1,5 @@
+{
+  "errorCode": "TARGETING_KEY_MISSING",
+  "errorDetails": "GO Feature Flag MUST have a targeting key in the request.",
+  "key": "number-flag"
+}

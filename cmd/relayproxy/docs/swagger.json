@@ -24,6 +24,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Monitoring"
+                ],
                 "summary": "Health",
                 "responses": {
                     "200": {
@@ -41,6 +44,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Monitoring"
+                ],
                 "summary": "Info",
                 "responses": {
                     "200": {
@@ -57,6 +63,9 @@
                 "description": "This endpoint is providing metrics about the relay proxy in the prometheus format.",
                 "produces": [
                     "text/plain"
+                ],
+                "tags": [
+                    "Monitoring"
                 ],
                 "summary": "Prometheus endpoint",
                 "responses": {
@@ -82,6 +91,9 @@
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "OpenFeature Remote Evaluation Protocol (OFREP)"
                 ],
                 "summary": "Open-Feature Remote Evaluation Protocol bulk evaluation API.",
                 "parameters": [
@@ -148,6 +160,9 @@
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "OpenFeature Remote Evaluation Protocol (OFREP)"
                 ],
                 "summary": "Evaluate a feature flag using the OpenFeature Remote Evaluation Protocol",
                 "parameters": [
@@ -216,6 +231,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "GO Feature Flag Evaluation API"
+                ],
                 "summary": "All flags variations for a user",
                 "parameters": [
                     {
@@ -264,6 +282,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "GO Feature Flag Evaluation API"
+                ],
                 "summary": "Endpoint to send usage of your flags to be collected",
                 "parameters": [
                     {
@@ -311,6 +332,9 @@
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "GO Feature Flag Evaluation API"
                 ],
                 "summary": "Evaluate a feature flag",
                 "parameters": [
@@ -361,6 +385,9 @@
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "GO Feature Flag Evaluation API"
                 ],
                 "summary": "Websocket endpoint to be notified about flag changes",
                 "parameters": [

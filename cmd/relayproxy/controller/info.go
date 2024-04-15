@@ -19,6 +19,7 @@ func NewInfo(monitoring service.Monitoring) Controller {
 
 // Handler is the entry point for the Info API
 // @Summary      Info
+// @Tags Monitoring
 // @Description  Making a **GET** request to the URL path `/info` will give you information about the actual state
 // @Description  of the relay proxy.
 // @Description

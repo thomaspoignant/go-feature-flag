@@ -26,6 +26,7 @@ func NewAllFlags(goFF *ffclient.GoFeatureFlag, metrics metric.Metrics) Controlle
 
 // Handler is the entry point for the allFlags endpoint
 // @Summary      All flags variations for a user
+// @Tags GO Feature Flag Evaluation API
 // @Description  Making a **POST** request to the URL `/v1/allflags` will give you the values of all the flags for
 // @Description this user.
 // @Description
