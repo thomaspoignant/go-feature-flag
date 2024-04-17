@@ -1,0 +1,11 @@
+url_path,views_total,views_unique
+/thomaspoignant/go-feature-flag,503,251
+/thomaspoignant/go-feature-flag/tree/main/examples,140,32
+/thomaspoignant/go-feature-flag/issues,72,25
+/thomaspoignant/go-feature-flag/tree/main/examples/demo,61,13
+/thomaspoignant/go-feature-flag/pull/1745,56,3
+/thomaspoignant/go-feature-flag/tree/main/exporter,53,3
+/thomaspoignant/go-feature-flag/tree/main/examples/retriever_file,43,7
+/thomaspoignant/go-feature-flag/blob/main/cmd/relayproxy/metric/metrics.go,43,3
+/thomaspoignant/go-feature-flag/pulls,38,14
+/thomaspoignant/go-feature-flag/blob/main/ADOPTERS.md,36,16
