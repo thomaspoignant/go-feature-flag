@@ -24,7 +24,7 @@ scoop install go-feature-flag
 
 ## Install using docker
 ```shell
-docker pull thomaspoignant/go-feature-flag:latest
+docker pull gofeatureflag/go-feature-flag:latest
 ```
 :::info
 More info in the [dockerhub page](https://hub.docker.com/r/thomaspoignant/go-feature-flag).
