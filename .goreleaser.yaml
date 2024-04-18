@@ -388,6 +388,32 @@ docker_manifests:
       - thomaspoignant/go-feature-flag:v{{ .RawVersion }}-arm64v8
       - thomaspoignant/go-feature-flag:v{{ .RawVersion }}-armv7
       - thomaspoignant/go-feature-flag:v{{ .RawVersion }}-amd64
+
+  # go-feature-flag in organisation
+  - name_template: gofeatureflag/go-feature-flag:latest
+    id: go-feature-flag-latest
+    image_templates:
+      - gofeatureflag/go-feature-flag:v{{ .RawVersion }}-arm64v8
+      - gofeatureflag/go-feature-flag:v{{ .RawVersion }}-armv7
+      - gofeatureflag/go-feature-flag:v{{ .RawVersion }}-amd64
+  - name_template: gofeatureflag/go-feature-flag:v{{ .RawVersion }}
+    id: go-feature-flag-tag
+    image_templates:
+      - gofeatureflag/go-feature-flag:v{{ .RawVersion }}-arm64v8
+      - gofeatureflag/go-feature-flag:v{{ .RawVersion }}-armv7
+      - gofeatureflag/go-feature-flag:v{{ .RawVersion }}-amd64
+  - name_template: gofeatureflag/go-feature-flag:v{{ .Major }}
+    id: go-feature-flag-major
+    image_templates:
+      - gofeatureflag/go-feature-flag:v{{ .RawVersion }}-arm64v8
+      - gofeatureflag/go-feature-flag:v{{ .RawVersion }}-armv7
+      - gofeatureflag/go-feature-flag:v{{ .RawVersion }}-amd64
+  - name_template: gofeatureflag/go-feature-flag:v{{ .Major }}.{{ .Minor }}
+    id: go-feature-flag-minor
+    image_templates:
+      - gofeatureflag/go-feature-flag:v{{ .RawVersion }}-arm64v8
+      - gofeatureflag/go-feature-flag:v{{ .RawVersion }}-armv7
+      - gofeatureflag/go-feature-flag:v{{ .RawVersion }}-amd64
 # migration-cli
   - name_template: thomaspoignant/go-feature-flag-migration-cli:latest
     id: go-feature-flag-migration-cli-latest
@@ -413,6 +439,31 @@ docker_manifests:
       - thomaspoignant/go-feature-flag-migration-cli:v{{ .RawVersion }}-arm64v8
       - thomaspoignant/go-feature-flag-migration-cli:v{{ .RawVersion }}-armv7
       - thomaspoignant/go-feature-flag-migration-cli:v{{ .RawVersion }}-amd64
+# migration-cli gofeatureflag organisation
+  - name_template: gofeatureflag/go-feature-flag-migration-cli:latest
+    id: go-feature-flag-migration-cli-latest
+    image_templates:
+      - gofeatureflag/go-feature-flag-migration-cli:v{{ .RawVersion }}-arm64v8
+      - gofeatureflag/go-feature-flag-migration-cli:v{{ .RawVersion }}-armv7
+      - gofeatureflag/go-feature-flag-migration-cli:v{{ .RawVersion }}-amd64
+  - name_template: gofeatureflag/go-feature-flag-migration-cli:v{{ .RawVersion }}
+    id: go-feature-flag-migration-cli-tag
+    image_templates:
+      - gofeatureflag/go-feature-flag-migration-cli:v{{ .RawVersion }}-arm64v8
+      - gofeatureflag/go-feature-flag-migration-cli:v{{ .RawVersion }}-armv7
+      - gofeatureflag/go-feature-flag-migration-cli:v{{ .RawVersion }}-amd64
+  - name_template: gofeatureflag/go-feature-flag-migration-cli:v{{ .Major }}
+    id: go-feature-flag-migration-cli-major
+    image_templates:
+      - gofeatureflag/go-feature-flag-migration-cli:v{{ .RawVersion }}-arm64v8
+      - gofeatureflag/go-feature-flag-migration-cli:v{{ .RawVersion }}-armv7
+      - gofeatureflag/go-feature-flag-migration-cli:v{{ .RawVersion }}-amd64
+  - name_template: gofeatureflag/go-feature-flag-migration-cli:v{{ .Major }}.{{ .Minor }}
+    id: go-feature-flag-migration-cli-major-minor
+    image_templates:
+      - gofeatureflag/go-feature-flag-migration-cli:v{{ .RawVersion }}-arm64v8
+      - gofeatureflag/go-feature-flag-migration-cli:v{{ .RawVersion }}-armv7
+      - gofeatureflag/go-feature-flag-migration-cli:v{{ .RawVersion }}-amd64
 # lint
   - name_template: thomaspoignant/go-feature-flag-lint:latest
     id: go-feature-flag-lint-latest
@@ -438,6 +489,32 @@ docker_manifests:
       - thomaspoignant/go-feature-flag-lint:v{{ .RawVersion }}-arm64v8
       - thomaspoignant/go-feature-flag-lint:v{{ .RawVersion }}-armv7
       - thomaspoignant/go-feature-flag-lint:v{{ .RawVersion }}-amd64
+
+# lint gofeatureflag organisation
+  - name_template: gofeatureflag/go-feature-flag-lint:latest
+    id: go-feature-flag-lint-latest
+    image_templates:
+      - gofeatureflag/go-feature-flag-lint:v{{ .RawVersion }}-arm64v8
+      - gofeatureflag/go-feature-flag-lint:v{{ .RawVersion }}-armv7
+      - gofeatureflag/go-feature-flag-lint:v{{ .RawVersion }}-amd64
+  - name_template: gofeatureflag/go-feature-flag-lint:v{{ .RawVersion }}
+    id: go-feature-flag-lint-tag
+    image_templates:
+      - gofeatureflag/go-feature-flag-lint:v{{ .RawVersion }}-arm64v8
+      - gofeatureflag/go-feature-flag-lint:v{{ .RawVersion }}-armv7
+      - gofeatureflag/go-feature-flag-lint:v{{ .RawVersion }}-amd64
+  - name_template: gofeatureflag/go-feature-flag-lint:v{{ .Major }}
+    id: go-feature-flag-lint-major
+    image_templates:
+      - gofeatureflag/go-feature-flag-lint:v{{ .RawVersion }}-arm64v8
+      - gofeatureflag/go-feature-flag-lint:v{{ .RawVersion }}-armv7
+      - gofeatureflag/go-feature-flag-lint:v{{ .RawVersion }}-amd64
+  - name_template: gofeatureflag/go-feature-flag-lint:v{{ .Major }}.{{ .Minor }}
+    id: go-feature-flag-lint-major-minor
+    image_templates:
+      - gofeatureflag/go-feature-flag-lint:v{{ .RawVersion }}-arm64v8
+      - gofeatureflag/go-feature-flag-lint:v{{ .RawVersion }}-armv7
+      - gofeatureflag/go-feature-flag-lint:v{{ .RawVersion }}-amd64
 
 brews:
   - ids:
