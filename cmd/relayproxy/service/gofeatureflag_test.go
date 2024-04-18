@@ -14,6 +14,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/exporter/gcstorageexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/kafkaexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/logsexporter"
+	"github.com/thomaspoignant/go-feature-flag/exporter/pubsubexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/s3exporterv2"
 	"github.com/thomaspoignant/go-feature-flag/exporter/sqsexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/webhookexporter"
@@ -305,6 +306,23 @@ func Test_initExporter(t *testing.T) {
 				},
 			},
 			wantType:               &sqsexporter.Exporter{},
+			skipCompleteValidation: true,
+		},
+		{
+			name:    "Convert PubSubExporter",
+			wantErr: assert.NoError,
+			conf: &config.ExporterConf{
+				Kind:      "pubsub",
+				ProjectID: "fake-project-id",
+				Topic:     "fake-topic",
+			},
+			want: ffclient.DataExporter{
+				Exporter: &pubsubexporter.Exporter{
+					ProjectID: "fake-project-id",
+					Topic:     "fake-topic",
+				},
+			},
+			wantType:               &pubsubexporter.Exporter{},
 			skipCompleteValidation: true,
 		},
 		{

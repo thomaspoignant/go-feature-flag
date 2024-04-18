@@ -12,6 +12,7 @@ import s3logo from '@site/static/docs/collectors/s3.png';
 import webhooklogo from '@site/static/docs/collectors/webhook.png';
 import sqslogo from '@site/static/docs/collectors/sqs.png';
 import kafkalogo from '@site/static/docs/collectors/kafka.png';
+import pubsublogo from '@site/static/docs/collectors/pubsub.png';
 
 
 # How to export evaluation data
@@ -57,6 +58,14 @@ To use, simply configure and use the feature flag as normal, and analyze the col
     content: <ConfigCardContent
       relayproxyLink={'../relay_proxy/configure_relay_proxy#google-storage-1'}
       goModuleLink={'../go_module/data_collection/google_cloud_storage'}
+    />
+  },
+  {
+    logoImg: pubsublogo,
+    title:"Google PubSub",
+    content: <ConfigCardContent
+      relayproxyLink={'../relay_proxy/configure_relay_proxy#google-pubsub'}
+      goModuleLink={'../go_module/data_collection/google_pubsub'}
     />
   },
   {

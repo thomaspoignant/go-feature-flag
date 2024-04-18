@@ -4,6 +4,7 @@ import clsx from 'clsx';
 import Link from '@docusaurus/Link';
 import PropTypes from 'prop-types';
 import sqslogo from '@site/static/docs/collectors/sqs.png';
+import pubsublogo from '@site/static/docs/collectors/pubsub.png'
 import s3logo from '@site/static/docs/collectors/s3.png';
 import webhooklogo from '@site/static/docs/collectors/webhook.png';
 import {Headline} from '../headline';
@@ -272,6 +273,11 @@ function Integration() {
             colorClassName={styles.socialIconAws}
             img={sqslogo}
             tooltipText="AWS SQS"
+          />
+          <SocialIcon
+              colorClassName={styles.socialIconPubSub}
+              img={pubsublogo}
+              tooltipText="Google PubSub"
           />
           <SocialIcon
             colorClassName={styles.socialIconKafka}
