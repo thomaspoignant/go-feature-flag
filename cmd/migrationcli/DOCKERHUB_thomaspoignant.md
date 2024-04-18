@@ -1,5 +1,7 @@
 # GO Feature Flag Migration cli
 
+<span style="color: red">🚨 Attention: The GO Feature Flag has now transitioned to its own organization. We recommend updating your configurations to use [`gofeatureflag/go-feature-flag-migration-cli`](https://hub.docker.com/r/gofeatureflag/go-feature-flag-migration-cli:). We will continue to provide support for the original organization for a certain period of time.</span>
+
 The migration command line purpose is to migrate your configuration file from the flag format in version `v0.x.x` to the format `v1.x.x`.
 
 We changed the format to extend the capabilities of **GO Feature Flag**, despite that the old format will still be

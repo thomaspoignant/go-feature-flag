@@ -1,5 +1,7 @@
 # GO Feature Flag Relay Proxy
 
+<span style="color: red">🚨 Attention: The GO Feature Flag has now transitioned to its own organization. We recommend updating your configurations to use [`gofeatureflag/go-feature-flag`](https://hub.docker.com/r/gofeatureflag/go-feature-flag). We will continue to provide support for the original organization for a certain period of time.</span>
+
 <p align="center">
   <img width="250" height="238" src="https://github.com/thomaspoignant/go-feature-flag/raw/main/logo.png" alt="go-feature-flag logo" />
 </p>
@@ -50,7 +52,7 @@ The default port used for the service is `1031`.
 ```shell
 docker run \
   -v $(pwd)/goff-proxy.yaml:/goff/goff-proxy.yaml \
-  gofeatureflag/go-feature-flag:latest
+  thomaspoignant/go-feature-flag:latest
 ```
 
 ## Test it locally
@@ -65,7 +67,7 @@ curl https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/cmd/r
 docker run \
   -p 1031:1031 \
   -v $(pwd)/goff-proxy.yaml:/goff/goff-proxy.yaml \
-  gofeatureflag/go-feature-flag:latest
+  thomaspoignant/go-feature-flag:latest
   
 # Call the API
 curl -X 'POST' \
