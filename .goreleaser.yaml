@@ -365,25 +365,25 @@ docker_manifests:
 
   # go-feature-flag legacy
   - name_template: thomaspoignant/go-feature-flag:latest
-    id: go-feature-flag-latest
+    id: go-feature-flag-latest-legacy
     image_templates:
       - thomaspoignant/go-feature-flag:v{{ .RawVersion }}-arm64v8
       - thomaspoignant/go-feature-flag:v{{ .RawVersion }}-armv7
       - thomaspoignant/go-feature-flag:v{{ .RawVersion }}-amd64
   - name_template: thomaspoignant/go-feature-flag:v{{ .RawVersion }}
-    id: go-feature-flag-tag
+    id: go-feature-flag-tag-legacy
     image_templates:
       - thomaspoignant/go-feature-flag:v{{ .RawVersion }}-arm64v8
       - thomaspoignant/go-feature-flag:v{{ .RawVersion }}-armv7
       - thomaspoignant/go-feature-flag:v{{ .RawVersion }}-amd64
   - name_template: thomaspoignant/go-feature-flag:v{{ .Major }}
-    id: go-feature-flag-major
+    id: go-feature-flag-major-legacy
     image_templates:
       - thomaspoignant/go-feature-flag:v{{ .RawVersion }}-arm64v8
       - thomaspoignant/go-feature-flag:v{{ .RawVersion }}-armv7
       - thomaspoignant/go-feature-flag:v{{ .RawVersion }}-amd64
   - name_template: thomaspoignant/go-feature-flag:v{{ .Major }}.{{ .Minor }}
-    id: go-feature-flag-minor
+    id: go-feature-flag-minor-legacy
     image_templates:
       - thomaspoignant/go-feature-flag:v{{ .RawVersion }}-arm64v8
       - thomaspoignant/go-feature-flag:v{{ .RawVersion }}-armv7
