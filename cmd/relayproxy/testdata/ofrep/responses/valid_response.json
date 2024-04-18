@@ -1,0 +1,62 @@
+{
+  "flags": [
+    {
+      "key": "array-flag",
+      "value": [
+        "batmanDefault",
+        "supermanDefault",
+        "superherosDefault"
+      ],
+      "reason": "DEFAULT",
+      "variant": "Default"
+    },
+    {
+      "key": "disable-flag",
+      "value": null,
+      "reason": "DISABLED",
+      "variant": ""
+    },
+    {
+      "key": "flag-only-for-admin",
+      "value": false,
+      "reason": "DEFAULT",
+      "variant": "Default"
+    },
+    {
+      "key": "new-admin-access",
+      "value": true,
+      "reason": "SPLIT",
+      "variant": "True"
+    },
+    {
+      "key": "number-flag",
+      "value": 1,
+      "reason": "DEFAULT",
+      "variant": "Default"
+    },
+    {
+      "key": "test-flag-rule-apply",
+      "value": {
+        "test": "test"
+      },
+      "reason": "DEFAULT",
+      "variant": "Default"
+    },
+    {
+      "key": "test-flag-rule-apply-false",
+      "value": {
+        "test": "test"
+      },
+      "reason": "DEFAULT",
+      "variant": "Default"
+    },
+    {
+      "key": "test-flag-rule-not-apply",
+      "value": {
+        "test": "test"
+      },
+      "reason": "DEFAULT",
+      "variant": "Default"
+    }
+  ]
+}

@@ -30,6 +30,7 @@ func NewOFREPEvaluate(goFF *ffclient.GoFeatureFlag, metrics metric.Metrics) Eval
 
 // Evaluate is the entry point to evaluate a flag using the OpenFeature Remote Evaluation Protocol
 // @Summary     Evaluate a feature flag using the OpenFeature Remote Evaluation Protocol
+// @Tags OpenFeature Remote Evaluation Protocol (OFREP)
 // @Description Making a **POST** request to the URL `/ofrep/v1/evaluate/flags/{your_flag_name}` will give you the
 // @Description value of the flag for this evaluation context
 // @Description
@@ -49,8 +50,8 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 	if flagKey == "" {
 		return c.JSON(
 			http.StatusBadRequest,
-			NewEvaluateError(flag.ErrorCodeGeneral,
-				"No key provided in the URL").ToOFRErrorResponse())
+			NewEvaluateError(flagKey, flag.ErrorCodeGeneral,
+				"No key provided in the URL"))
 	}
 	h.metrics.IncFlagEvaluation(flagKey)
 
@@ -58,16 +59,25 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 	if err := c.Bind(reqBody); err != nil {
 		return c.JSON(
 			http.StatusBadRequest,
-			NewEvaluateError(flag.ErrorCodeInvalidContext, err.Error()).ToOFRErrorResponse())
+			NewEvaluateError(flagKey, flag.ErrorCodeInvalidContext, err.Error()))
 	}
 	if err := assertOFREPEvaluateRequest(reqBody); err != nil {
-		return c.JSON(http.StatusBadRequest, err.ToOFRErrorResponse())
+		return c.JSON(http.StatusBadRequest, model.OFREPEvaluateErrorResponse{
+			OFREPCommonErrorResponse: *err,
+			Key:                      flagKey,
+		})
 	}
 	evalCtx, err := evaluationContextFromOFREPRequest(reqBody.Context)
 	if err != nil {
 		return c.JSON(
 			http.StatusBadRequest,
-			err)
+			model.OFREPEvaluateErrorResponse{
+				OFREPCommonErrorResponse: model.OFREPCommonErrorResponse{
+					ErrorCode:    flag.ErrorCodeInvalidContext,
+					ErrorDetails: err.Error(),
+				},
+				Key: flagKey,
+			})
 	}
 
 	tracer := otel.GetTracerProvider().Tracer(config.OtelTracerName)
@@ -83,8 +93,8 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 		}
 		return c.JSON(
 			httpStatus,
-			NewEvaluateError(flagValue.ErrorCode,
-				fmt.Sprintf("Error while evaluating the flag: %s", flagKey)).ToOFRErrorResponse())
+			NewEvaluateError(flagKey, flagValue.ErrorCode,
+				fmt.Sprintf("Error while evaluating the flag: %s", flagKey)))
 	}
 
 	span.SetAttributes(
@@ -111,6 +121,7 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 
 // BulkEvaluate is the entry point to evaluate in bulk flags using the OpenFeature Remote Evaluation Protocol
 // @Summary     Open-Feature Remote Evaluation Protocol bulk evaluation API.
+// @Tags OpenFeature Remote Evaluation Protocol (OFREP)
 // @Description Making a **POST** request to the URL `/ofrep/v1/evaluate/flags` will give you the value of the list
 // @Description of feature flags for this evaluation context.
 // @Description
@@ -133,10 +144,10 @@ func (h *EvaluateCtrl) BulkEvaluate(c echo.Context) error {
 	if err := c.Bind(request); err != nil {
 		return c.JSON(
 			http.StatusBadRequest,
-			NewEvaluateError("INVALID_CONTEXT", err.Error()).ToOFRErrorResponse())
+			NewOFREPCommonError("INVALID_CONTEXT", err.Error()))
 	}
 	if err := assertOFREPEvaluateRequest(request); err != nil {
-		return c.JSON(http.StatusBadRequest, err.ToOFRErrorResponse())
+		return c.JSON(http.StatusBadRequest, err)
 	}
 	evalCtx, err := evaluationContextFromOFREPRequest(request.Context)
 	if err != nil {
@@ -183,9 +194,9 @@ func (h *EvaluateCtrl) BulkEvaluate(c echo.Context) error {
 	return c.JSON(http.StatusOK, response)
 }
 
-func assertOFREPEvaluateRequest(ofrepEvalReq *model.OFREPEvalFlagRequest) *EvaluateError {
+func assertOFREPEvaluateRequest(ofrepEvalReq *model.OFREPEvalFlagRequest) *model.OFREPCommonErrorResponse {
 	if ofrepEvalReq.Context == nil || ofrepEvalReq.Context["targetingKey"] == "" {
-		return NewEvaluateError(flag.ErrorCodeTargetingKeyMissing,
+		return NewOFREPCommonError(flag.ErrorCodeTargetingKeyMissing,
 			"GO Feature Flag MUST have a targeting key in the request.")
 	}
 	return nil
@@ -197,6 +208,7 @@ func evaluationContextFromOFREPRequest(ctx map[string]any) (ffcontext.Context, e
 		evalCtx := utils.ConvertEvaluationCtxFromRequest(targetingKey, ctx)
 		return evalCtx, nil
 	}
-	return ffcontext.EvaluationContext{}, NewEvaluateError(
-		flag.ErrorCodeTargetingKeyMissing, "GO Feature Flag has received a targetingKey that is not a string.")
+	return ffcontext.EvaluationContext{}, NewOFREPCommonError(
+		flag.ErrorCodeTargetingKeyMissing,
+		"GO Feature Flag has received no targetingKey or a none string value that is not a string.")
 }

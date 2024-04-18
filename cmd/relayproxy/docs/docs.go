@@ -32,6 +32,9 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Monitoring"
+                ],
                 "summary": "Health",
                 "responses": {
                     "200": {
@@ -49,6 +52,9 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Monitoring"
+                ],
                 "summary": "Info",
                 "responses": {
                     "200": {
@@ -65,6 +71,9 @@ const docTemplate = `{
                 "description": "This endpoint is providing metrics about the relay proxy in the prometheus format.",
                 "produces": [
                     "text/plain"
+                ],
+                "tags": [
+                    "Monitoring"
                 ],
                 "summary": "Prometheus endpoint",
                 "responses": {
@@ -90,6 +99,9 @@ const docTemplate = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "OpenFeature Remote Evaluation Protocol (OFREP)"
                 ],
                 "summary": "Open-Feature Remote Evaluation Protocol bulk evaluation API.",
                 "parameters": [
@@ -156,6 +168,9 @@ const docTemplate = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "OpenFeature Remote Evaluation Protocol (OFREP)"
                 ],
                 "summary": "Evaluate a feature flag using the OpenFeature Remote Evaluation Protocol",
                 "parameters": [
@@ -224,6 +239,9 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "GO Feature Flag Evaluation API"
+                ],
                 "summary": "All flags variations for a user",
                 "parameters": [
                     {
@@ -272,6 +290,9 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "GO Feature Flag Evaluation API"
+                ],
                 "summary": "Endpoint to send usage of your flags to be collected",
                 "parameters": [
                     {
@@ -319,6 +340,9 @@ const docTemplate = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "GO Feature Flag Evaluation API"
                 ],
                 "summary": "Evaluate a feature flag",
                 "parameters": [
@@ -369,6 +393,9 @@ const docTemplate = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "GO Feature Flag Evaluation API"
                 ],
                 "summary": "Websocket endpoint to be notified about flag changes",
                 "parameters": [

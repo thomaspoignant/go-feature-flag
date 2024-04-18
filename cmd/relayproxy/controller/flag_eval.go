@@ -27,6 +27,7 @@ func NewFlagEval(goFF *ffclient.GoFeatureFlag, metrics metric.Metrics) Controlle
 
 // Handler is the entry point for the flag eval endpoint
 // @Summary     Evaluate a feature flag
+// @Tags GO Feature Flag Evaluation API
 // @Description Making a **POST** request to the URL `/v1/feature/<your_flag_name>/eval` will give you the value of the
 // @Description flag for this user.
 // @Description

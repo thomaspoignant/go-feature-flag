@@ -1,28 +1,23 @@
 package ofrep
 
 import (
-	"fmt"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/model"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 )
 
-type EvaluateError struct {
-	err model.OFREPCommonErrorResponse
-}
-
-func NewEvaluateError(errorCode flag.ErrorCode, errorDetails string) *EvaluateError {
-	return &EvaluateError{
-		err: model.OFREPCommonErrorResponse{
+func NewEvaluateError(key string, errorCode flag.ErrorCode, errorDetails string) *model.OFREPEvaluateErrorResponse {
+	return &model.OFREPEvaluateErrorResponse{
+		OFREPCommonErrorResponse: model.OFREPCommonErrorResponse{
 			ErrorCode:    errorCode,
 			ErrorDetails: errorDetails,
 		},
+		Key: key,
 	}
 }
 
-func (m *EvaluateError) Error() string {
-	return fmt.Sprintf("missing TargetingKey error: %v", m.err)
-}
-
-func (m *EvaluateError) ToOFRErrorResponse() model.OFREPCommonErrorResponse {
-	return m.err
+func NewOFREPCommonError(errorCode flag.ErrorCode, errorDetails string) *model.OFREPCommonErrorResponse {
+	return &model.OFREPCommonErrorResponse{
+		ErrorCode:    errorCode,
+		ErrorDetails: errorDetails,
+	}
 }
