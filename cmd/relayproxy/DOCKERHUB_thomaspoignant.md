@@ -1,6 +1,6 @@
 # GO Feature Flag Relay Proxy
 
-<span style="color: red"> Note that GO Feature Flag has it's own organisation now, please consider update your configurations to use `gofeatureflag/go-feature-flag`</span>
+<span style="color: red">🚨 Attention: The GO Feature Flag has now transitioned to its own organization. We recommend updating your configurations to use [`gofeatureflag/go-feature-flag`](https://hub.docker.com/r/gofeatureflag/go-feature-flag). We will continue to provide support for the original organization for a certain period of time.</span>
 
 <p align="center">
   <img width="250" height="238" src="https://github.com/thomaspoignant/go-feature-flag/raw/main/logo.png" alt="go-feature-flag logo" />

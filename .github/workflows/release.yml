@@ -89,6 +89,16 @@ jobs:
           username: ${DOCKER_USERNAME}
           password: ${DOCKER_PASSWORD}
           repository: thomaspoignant/go-feature-flag-migration-cli
+          readme: "./cmd/migrationcli/DOCKERHUB_thomaspoignant.md"
+      - name: Release readme to DockerHub gofeatureflag
+        uses: ms-jpq/sync-dockerhub-readme@v1
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        with:
+          username: ${DOCKER_USERNAME}
+          password: ${DOCKER_PASSWORD}
+          repository: gofeatureflag/go-feature-flag-migration-cli
           readme: "./cmd/migrationcli/DOCKERHUB.md"
 
   dockerhub-lint:
@@ -108,6 +118,16 @@ jobs:
           username: ${DOCKER_USERNAME}
           password: ${DOCKER_PASSWORD}
           repository: thomaspoignant/go-feature-flag-lint
+          readme: "./cmd/lint/DOCKERHUB_thomaspoignant.md"
+      - name: Release readme to DockerHub gofeatureflag
+        uses: ms-jpq/sync-dockerhub-readme@v1
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        with:
+          username: ${DOCKER_USERNAME}
+          password: ${DOCKER_PASSWORD}
+          repository: gofeatureflag/go-feature-flag-lint
           readme: "./cmd/lint/DOCKERHUB.md"
 
   dockerhub-relay-proxy:
@@ -146,6 +166,16 @@ jobs:
           username: ${DOCKER_USERNAME}
           password: ${DOCKER_PASSWORD}
           repository: thomaspoignant/go-feature-flag
+          readme: "./cmd/relayproxy/DOCKERHUB_thomaspoignant.md"
+      - name: Release readme to DockerHub gofeatureflag
+        uses: ms-jpq/sync-dockerhub-readme@v1
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        with:
+          username: ${DOCKER_USERNAME}
+          password: ${DOCKER_PASSWORD}
+          repository: gofeatureflag/go-feature-flag
           readme: "./cmd/relayproxy/DOCKERHUB.md"
 
   doc-release:

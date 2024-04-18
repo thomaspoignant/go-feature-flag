@@ -21,9 +21,9 @@ scoop install go-feature-flag-migration-cli
 
 ### Install using docker
 ```shell
-docker pull thomaspoignant/go-feature-flag-migration-cli
+docker pull gofeatureflag/go-feature-flag-migration-cli
 ```
-More information about the usage of the container in the [dockerhub page](https://hub.docker.com/r/thomaspoignant/go-feature-flag-migration-cli).
+More information about the usage of the container in the [dockerhub page](https://hub.docker.com/r/gofeatureflag/go-feature-flag-migration-cli).
 
 
 ## How to use the cli

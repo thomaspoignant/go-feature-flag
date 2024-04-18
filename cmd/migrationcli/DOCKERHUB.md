@@ -10,7 +10,7 @@ supported, it is better to update your configuration file.
 ```shell
 docker run \
   -v $(pwd)/your/configuration_folder:/config \
-  thomaspoignant/go-feature-flag-migration-cli:latest \
+  gofeatureflag/go-feature-flag-migration-cli:latest \
   --input-format=yaml \
   --input-file=/config/my-go-feature-flag-config-v0.x.x.yaml \
   --output-format=yaml \

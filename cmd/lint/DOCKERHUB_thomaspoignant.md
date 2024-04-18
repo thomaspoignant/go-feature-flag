@@ -1,4 +1,5 @@
 # GO Feature Flag Lint cli
+<span style="color: red">🚨 Attention: The GO Feature Flag has now transitioned to its own organization. We recommend updating your configurations to use [`gofeatureflag/go-feature-flag-lint`](https://hub.docker.com/r/gofeatureflag/go-feature-flag-lint:). We will continue to provide support for the original organization for a certain period of time.</span>
 
 The lint command lint tool validates that a flags file can be parsed by GO Feature Flag.
 
