@@ -469,10 +469,6 @@ paths:
           description: 'Etag: \"117-0193435c612c50d93b798619d9464856263dbf9f\'
           schema:
             type: string
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/model.OFREPEvaluateErrorResponse'
         "401":
           description: Unauthorized
           schema:
