@@ -18,7 +18,7 @@ from openfeature.exception import (
 from openfeature.flag_evaluation import FlagResolutionDetails, Reason
 from openfeature.hook import Hook
 from openfeature.provider.metadata import Metadata
-from openfeature.provider.provider import AbstractProvider
+from openfeature.provider import AbstractProvider
 from pydantic import PrivateAttr, ValidationError
 
 from gofeatureflag_python_provider.data_collector_hook import DataCollectorHook
