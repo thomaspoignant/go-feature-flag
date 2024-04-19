@@ -19,7 +19,6 @@ import (
 // @Param        If-None-Match header string false "The request will be processed only if ETag doesn't match."
 // @Success      200  {object} model.OFREPConfiguration "Success"
 // @Success      304 {string} string "Etag: \"117-0193435c612c50d93b798619d9464856263dbf9f\""
-// @Failure      400 {object}  model.OFREPEvaluateErrorResponse "Bad Request"
 // @Failure      401 {object}  modeldocs.HTTPErrorDoc "Unauthorized"
 // @Failure      404 {object}  model.OFREPEvaluateErrorResponse "Flag Not Found"
 // @Failure      500 {object}  modeldocs.HTTPErrorDoc "Internal server error"
