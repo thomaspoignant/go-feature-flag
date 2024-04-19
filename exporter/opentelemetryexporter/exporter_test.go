@@ -8,7 +8,10 @@ import (
 	"testing"
 	"time"
 
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
@@ -53,6 +56,18 @@ func buildFeatureEvents() []exporter.FeatureEvent {
 	}
 }
 
+func assertResource(t *testing.T, expected resource.Resource, actual resource.Resource) {
+	var found bool
+	for _, target := range expected.Attributes() {
+		for _, attr := range actual.Attributes() {
+			if target.Key == attr.Key && target.Value == attr.Value {
+				found = true
+			}
+		}
+		assert.True(t, found)
+	}
+}
+
 func TestValueReflection(t *testing.T) {
 	v := valueToAttributes("foo", "value", 2, 0)
 	assert.Len(t, v, 1)
@@ -86,7 +101,7 @@ func TestFeatureEventsToAttributes(t *testing.T) {
 }
 
 func TestResource(t *testing.T) {
-	resource := Resource()
+	resource := defaultResource()
 	assert.NotNil(t, resource)
 	assert.NotNil(t, resource.SchemaURL())
 
@@ -95,16 +110,24 @@ func TestResource(t *testing.T) {
 }
 
 func TestExporterBuildsWithOptions(t *testing.T) {
-	resource := Resource()
-	batchOptions := sdktrace.BatchSpanProcessorOptions{MaxQueueSize: 10, MaxExportBatchSize: 100, BatchTimeout: time.Millisecond * 100}
+	userCustomResource := resource.NewWithAttributes(
+		semconv.SchemaURL, attribute.KeyValue{Key: "hello", Value: attribute.StringValue("World")})
+
+	inMemoryExporter := PersistentInMemoryExporter{}
+	inMemoryProcessor := sdktrace.NewBatchSpanProcessor(&inMemoryExporter)
 	exporter := NewExporter(
-		WithBatchSpanProcessorOption(batchOptions),
-		WithResource(resource),
+
+		WithResource(userCustomResource),
+		WithBatchSpanProcessors(&inMemoryProcessor),
 	)
 	assert.NotNil(t, exporter)
-	assert.NotNil(t, exporter.Resource)
-	assert.NotNil(t, exporter.BatchSpanProcessorOptions)
-	assert.Equal(t, exporter.BatchSpanProcessorOptions, batchOptions)
+	assert.NotNil(t, exporter.resource)
+	assert.Len(t, exporter.resource.Attributes(), 3)
+	// Check that our default resource wins the merge
+	assertResource(t, *defaultResource(), *exporter.resource)
+	// Check we didn't step on the users resource
+	assertResource(t, *userCustomResource, *exporter.resource)
+	assert.Len(t, exporter.processors, 1)
 }
 
 func TestInitProviderRequiresProcessor(t *testing.T) {
@@ -141,11 +164,10 @@ func TestExportWithMultipleProcessors(t *testing.T) {
 	inMemoryProcessor := sdktrace.NewBatchSpanProcessor(&inMemoryExporter)
 	stdoutProcessor, err := stdoutBatchSpanProcessor()
 	assert.Nil(t, err)
-	resource := Resource()
-	batchOptions := sdktrace.BatchSpanProcessorOptions{MaxQueueSize: 10, MaxExportBatchSize: 100, BatchTimeout: time.Millisecond * 100}
+	resource := defaultResource()
 
 	exp := NewExporter(
-		WithBatchSpanProcessorOption(batchOptions),
+
 		WithResource(resource),
 		WithBatchSpanProcessors(&inMemoryProcessor, &stdoutProcessor),
 	)
@@ -188,11 +210,9 @@ func TestExportToOtelCollector(t *testing.T) {
 
 	otelProcessor, err := otelCollectorBatchSpanProcessor(otelC.URI)
 	assert.Nil(t, err)
-	resource := Resource()
-	batchOptions := sdktrace.BatchSpanProcessorOptions{MaxQueueSize: 10, MaxExportBatchSize: 100, BatchTimeout: time.Millisecond * 100}
+	resource := defaultResource()
 
 	exp := NewExporter(
-		WithBatchSpanProcessorOption(batchOptions),
 		WithResource(resource),
 		WithBatchSpanProcessors(&otelProcessor),
 	)

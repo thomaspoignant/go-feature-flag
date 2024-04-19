@@ -26,6 +26,8 @@ import (
 )
 
 const (
+	serviceName            = "go-feature-flag"
+	ServiceVersion         = "0.0.1"
 	instrumentationName    = "github.com/thomaspoignant/go-feature-flag"
 	instrumentationVersion = "0.0.1"
 )
@@ -37,9 +39,8 @@ var tracer = otel.GetTracerProvider().Tracer(
 )
 
 type Exporter struct {
-	BatchSpanProcessorOptions sdktrace.BatchSpanProcessorOptions
-	Resource                  *resource.Resource
-	processors                []*sdktrace.SpanProcessor
+	resource   *resource.Resource
+	processors []*sdktrace.SpanProcessor
 }
 
 type ExporterOption func(*Exporter)
@@ -52,15 +53,13 @@ func NewExporter(opts ...ExporterOption) *Exporter {
 	return &exporter
 }
 
-func WithBatchSpanProcessorOption(options sdktrace.BatchSpanProcessorOptions) ExporterOption {
+func WithResource(customResource *resource.Resource) ExporterOption {
 	return func(exp *Exporter) {
-		exp.BatchSpanProcessorOptions = options
-	}
-}
-
-func WithResource(resource *resource.Resource) ExporterOption {
-	return func(exp *Exporter) {
-		exp.Resource = resource
+		mergedResource, err := resource.Merge(customResource, defaultResource())
+		if err != nil {
+			panic("Unable to merge resources")
+		}
+		exp.resource = mergedResource
 	}
 }
 
@@ -70,11 +69,11 @@ func WithBatchSpanProcessors(processors ...*sdktrace.SpanProcessor) ExporterOpti
 	}
 }
 
-func Resource() *resource.Resource {
+func defaultResource() *resource.Resource {
 	return resource.NewWithAttributes(
 		semconv.SchemaURL,
-		semconv.ServiceName("go-feature-flag"),
-		semconv.ServiceVersion("0.0.1"),
+		semconv.ServiceName(serviceName),
+		semconv.ServiceVersion(ServiceVersion),
 	)
 }
 
@@ -183,13 +182,11 @@ func featureEventToAttributes(featureEvent exporter.FeatureEvent) []attribute.Ke
 }
 
 func initProvider(exp *Exporter) (func(context.Context) error, error) {
-	mergedResource, err := resource.Merge(exp.Resource, Resource())
-	if err != nil {
-		return nil, err
-	}
+	// The default resource will win on merge
+
 	tracerProvider := sdktrace.NewTracerProvider(
 		sdktrace.WithSampler(sdktrace.AlwaysSample()),
-		sdktrace.WithResource(mergedResource),
+		sdktrace.WithResource(exp.resource),
 	)
 
 	if len(exp.processors) == 0 {
