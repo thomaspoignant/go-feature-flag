@@ -21,12 +21,12 @@ import (
 
 var _ trace.SpanExporter = (*PersistentInMemoryExporter)(nil)
 
-// NewInMemoryExporter returns a new InMemoryExporter.
+// NewPersistentInMemoryExporter returns a new PersistentInMemoryExporter.
 func NewPersistentInMemoryExporter() *PersistentInMemoryExporter {
 	return new(PersistentInMemoryExporter)
 }
 
-// InMemoryExporter is an exporter that stores all received spans in-memory.
+// PersistentInMemoryExporter is an exporter that stores all received spans in-memory.
 type PersistentInMemoryExporter struct {
 	mu sync.Mutex
 	ss tracetest.SpanStubs
@@ -50,7 +50,7 @@ func (imsb *PersistentInMemoryExporter) Shutdown(context.Context) error {
 func (imsb *PersistentInMemoryExporter) Reset() {
 	imsb.mu.Lock()
 	defer imsb.mu.Unlock()
-	//imsb.ss = nil
+	// imsb.ss = nil
 }
 
 // GetSpans returns the current in-memory stored spans.
@@ -62,11 +62,13 @@ func (imsb *PersistentInMemoryExporter) GetSpans() tracetest.SpanStubs {
 	return ret
 }
 
+// Clear clears the memory. In the original impl Reset does this
 func (imsb *PersistentInMemoryExporter) Clear(context.Context) error {
 	imsb.ss = nil
 	return nil
 }
 
+// SliceLogConsumer buffers log content into a slice
 type SliceLogConsumer struct {
 	logs []string
 }
@@ -76,24 +78,25 @@ func (lc *SliceLogConsumer) Accept(l testcontainers.Log) {
 	lc.logs = append(lc.logs, string(l.Content))
 }
 
+// Exists checks if the target exists anywhere in the log output
 func (lc *SliceLogConsumer) Exists(target string) bool {
 	for _, s := range lc.logs {
-
 		if strings.Contains(s, target) {
 			return true
 		}
-
 	}
-
 	return false
 }
 
+// opentelCollectorContainer struct for the test container and URI
 type opentelCollectorContainer struct {
 	testcontainers.Container
 	URI string
 }
 
-func setupotelCollectorContainer(ctx context.Context, consumer testcontainers.LogConsumer) (*opentelCollectorContainer, error) {
+// setupOtelCollectorContainer sets up an otel container with a log consumer
+func setupOtelCollectorContainer(ctx context.Context,
+	consumer testcontainers.LogConsumer) (*opentelCollectorContainer, error) {
 	req := testcontainers.ContainerRequest{
 		Image:        "otel/opentelemetry-collector:0.98.0",
 		ExposedPorts: []string{"4317/tcp", "55679/tcp"},
