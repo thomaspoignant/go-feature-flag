@@ -11,7 +11,6 @@ from openfeature.flag_evaluation import FlagEvaluationDetails, Reason
 from gofeatureflag_python_provider.options import GoFeatureFlagOptions
 from gofeatureflag_python_provider.provider import GoFeatureFlagProvider
 from tests.test_gofeatureflag_python_provider import (
-    wait_provider_ready,
     _default_evaluation_ctx,
 )
 
@@ -54,7 +53,6 @@ def test_test_websocket_cache_invalidation(goff):
         )
     )
     api.set_provider(goff_provider)
-    wait_provider_ready(goff_provider)
     client = api.get_client(domain="test-client")
 
     want = FlagEvaluationDetails(

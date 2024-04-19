@@ -12,7 +12,6 @@ from openfeature.flag_evaluation import Reason, FlagEvaluationDetails
 
 from gofeatureflag_python_provider.options import GoFeatureFlagOptions
 from gofeatureflag_python_provider.provider import GoFeatureFlagProvider
-from gofeatureflag_python_provider.provider_status import ProviderStatus
 
 _default_evaluation_ctx = EvaluationContext(
     targeting_key="d45e303a-38c2-11ed-a261-0242ac120002",
@@ -43,7 +42,6 @@ def _generic_test(
             ),
         )
         api.set_provider(goff_provider)
-        wait_provider_ready(goff_provider)
         client = api.get_client(domain="test-client")
 
         if evaluationType == "bool":
@@ -148,7 +146,6 @@ def test_should_return_an_error_if_endpoint_not_available(mock_request):
             )
         )
         api.set_provider(goff_provider)
-        wait_provider_ready(goff_provider)
         client = api.get_client(domain="test-client")
         res = client.get_boolean_details(
             flag_key=flag_key,
@@ -451,7 +448,6 @@ def test_should_resolve_from_cache_if_multiple_call_to_the_same_flag_with_same_c
         )
     )
     api.set_provider(goff_provider)
-    wait_provider_ready(goff_provider)
     client = api.get_client(domain="test-client")
 
     got = client.get_boolean_details(
@@ -506,7 +502,6 @@ def test_should_call_data_collector_multiple_times_with_cached_event_waiting_ttl
         )
     )
     api.set_provider(goff_provider)
-    wait_provider_ready(goff_provider)
     client = api.get_client(domain="test-client")
 
     got = client.get_boolean_details(
@@ -563,7 +558,6 @@ def test_should_not_call_data_collector_if_not_having_cache(mock_request: Mock):
     )
 
     api.set_provider(goff_provider)
-    wait_provider_ready(goff_provider)
     client = api.get_client(domain="test-client")
 
     client.get_boolean_details(
@@ -573,18 +567,6 @@ def test_should_not_call_data_collector_if_not_having_cache(mock_request: Mock):
     )
     api.shutdown()
     assert mock_request.call_count == 1
-
-
-def wait_provider_ready(provider: GoFeatureFlagProvider):
-    # check the provider get_status method until it returns ProviderStatus.READY or, we waited more than 5 seconds
-    start = time.time()
-    while provider.get_status() != ProviderStatus.READY:
-        time.sleep(0.1)
-        if time.time() - start > 5:
-            break
-
-    if provider.get_status() != ProviderStatus.READY:
-        raise Exception("Provider is not ready")
 
 
 def _read_mock_file(flag_key: str) -> str:
