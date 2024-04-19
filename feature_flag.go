@@ -54,6 +54,7 @@ type GoFeatureFlag struct {
 	dataExporter     *exporter.Scheduler
 	retrieverManager *retriever.Manager
 	mu               sync.Mutex
+	once             sync.Once
 }
 
 // ff is the default object for go-feature-flag
@@ -170,7 +171,7 @@ func (g *GoFeatureFlag) SetOffline(control bool) bool {
 	if control {
 		g.bgUpdater.close()
 	} else {
-		go g.startFlagUpdaterDaemon()
+		g.once.Do(g.startFlagUpdaterDaemon)
 	}
 
 	return g.config.Offline
