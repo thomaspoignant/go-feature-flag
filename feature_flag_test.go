@@ -465,3 +465,30 @@ func TestGoFeatureFlag_GetCacheRefreshDate(t *testing.T) {
 		})
 	}
 }
+
+func Test_GetPollingInterval(t *testing.T) {
+	tests := []struct {
+		name            string
+		pollingInterval time.Duration
+	}{
+		{
+			name:            "60 seconds",
+			pollingInterval: 60 * time.Second,
+		},
+		{
+			name:            "6 hour",
+			pollingInterval: 6 * time.Hour,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			goff, err := ffclient.New(ffclient.Config{
+				PollingInterval: tt.pollingInterval,
+				Retriever:       &fileretriever.Retriever{Path: "testdata/flag-config.yaml"},
+			})
+			assert.NoError(t, err)
+			assert.Equal(t, tt.pollingInterval.Milliseconds(), goff.GetPollingInterval())
+		})
+	}
+}
