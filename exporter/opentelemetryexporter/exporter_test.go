@@ -150,7 +150,7 @@ func TestExportWithMultipleProcessors(t *testing.T) {
 		WithBatchSpanProcessors(&inMemoryProcessor, &stdoutProcessor),
 	)
 	err = exp.Export(ctx, logger, featureEvents)
-	assert.NotNil(t, err)
+	assert.Nil(t, err)
 	//  We sent three spans, the parents and three child spans corresponding to events
 	assert.Len(t, inMemoryExporter.GetSpans(), 4)
 	for _, span := range inMemoryExporter.GetSpans() {
@@ -197,7 +197,7 @@ func TestExportToOtelCollector(t *testing.T) {
 		WithBatchSpanProcessors(&otelProcessor),
 	)
 	err = exp.Export(ctx, logger, featureEvents)
-	assert.NotNil(t, err)
+	assert.Nil(t, err)
 	// Sleep to give the container time to process the spans
 	time.Sleep(5 * time.Second)
 	assert.GreaterOrEqual(t, len(consumer.logs), 1)
