@@ -53,6 +53,7 @@ type GoFeatureFlag struct {
 	bgUpdater        backgroundUpdater
 	dataExporter     *exporter.Scheduler
 	retrieverManager *retriever.Manager
+	mu               sync.Mutex
 }
 
 // ff is the default object for go-feature-flag
@@ -142,6 +143,10 @@ func (g *GoFeatureFlag) Close() {
 
 // startFlagUpdaterDaemon is the daemon that refresh the cache every X seconds.
 func (g *GoFeatureFlag) startFlagUpdaterDaemon() {
+	if g.config.Offline {
+		return
+	}
+
 	for {
 		select {
 		case <-g.bgUpdater.ticker.C:
@@ -155,8 +160,28 @@ func (g *GoFeatureFlag) startFlagUpdaterDaemon() {
 	}
 }
 
+// SetOffline updates the config Offline parameter
+func (g *GoFeatureFlag) SetOffline(control bool) bool {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+
+	g.config.Offline = control
+
+	if control {
+		g.bgUpdater.close()
+	} else {
+		go g.startFlagUpdaterDaemon()
+	}
+
+	return g.config.Offline
+}
+
 // retrieveFlagsAndUpdateCache is called every X seconds to refresh the cache flag.
 func retrieveFlagsAndUpdateCache(config Config, cache cache.Manager, retrieverManager *retriever.Manager) error {
+	if config.Offline {
+		return nil
+	}
+
 	retrievers := retrieverManager.GetRetrievers()
 	// Results is the type that will receive the results when calling
 	// all the retrievers.

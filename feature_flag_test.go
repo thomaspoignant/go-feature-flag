@@ -2,22 +2,20 @@ package ffclient_test
 
 import (
 	"errors"
-	"github.com/thomaspoignant/go-feature-flag/ffcontext"
-	"github.com/thomaspoignant/go-feature-flag/testutils/initializableretriever"
 	"log"
 	"os"
 	"testing"
 	"time"
 
-	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	"github.com/thomaspoignant/go-feature-flag/retriever"
-
-	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
-	"github.com/thomaspoignant/go-feature-flag/retriever/s3retriever"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/stretchr/testify/assert"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
+	"github.com/thomaspoignant/go-feature-flag/ffcontext"
+	"github.com/thomaspoignant/go-feature-flag/internal/flag"
+	"github.com/thomaspoignant/go-feature-flag/retriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever/s3retriever"
+	"github.com/thomaspoignant/go-feature-flag/testutils/initializableretriever"
 	"github.com/thomaspoignant/go-feature-flag/testutils/mock"
 )
 
@@ -464,4 +462,34 @@ func TestGoFeatureFlag_GetCacheRefreshDate(t *testing.T) {
 			assert.Equal(t, tt.hasRefresh, date1.Before(date2))
 		})
 	}
+}
+
+func TestGoFeatureFlag_SetOffline(t *testing.T) {
+	gffClient, err := ffclient.New(ffclient.Config{
+		PollingInterval: 5 * time.Second,
+		Retriever:       &fileretriever.Retriever{Path: "testdata/flag-config.yaml"},
+		Logger:          log.New(os.Stdout, "", 0),
+		Offline:         false,
+	})
+
+	if err != nil {
+		log.Print("Failed to initialize the client")
+		t.Fatal(err) // Exit the test if initialization fails
+	}
+
+	defer gffClient.Close()
+
+	// Init should be ok
+	assert.NoError(t, err)
+
+	// Happy Path
+	got := gffClient.SetOffline(true)
+	want := true
+
+	assert.Equal(t, got, want)
+
+	// Sad Path
+	got = gffClient.SetOffline(false)
+
+	assert.NotEqual(t, got, want)
 }
