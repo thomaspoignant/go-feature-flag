@@ -71,7 +71,7 @@ func TestFile_Export(t *testing.T) {
 				featureEvents: []exporter.FeatureEvent{
 					{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-						Variation: "Default", Value: expected{content: "ssdsd"}, Default: false, Source: "SERVER",
+						Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 					},
 					{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
