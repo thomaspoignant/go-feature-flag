@@ -118,7 +118,12 @@ func (s *Server) initAPIEndpoint(echoInstance *echo.Echo) {
 	ofrepGroup := echoInstance.Group("/ofrep/v1")
 	ofrepGroup.Use(etag.WithConfig(etag.Config{
 		Skipper: func(c echo.Context) bool {
-			return c.Path() != "/ofrep/v1/evaluate/flags"
+			switch c.Path() {
+			case "/ofrep/v1/evaluate/flags", "/ofrep/v1/configuration":
+				return false
+			default:
+				return true
+			}
 		},
 		Weak: false,
 	}))
@@ -132,6 +137,7 @@ func (s *Server) initAPIEndpoint(echoInstance *echo.Echo) {
 	}
 	ofrepGroup.POST("/evaluate/flags", cFlagEvalOFREP.BulkEvaluate)
 	ofrepGroup.POST("/evaluate/flags/:flagKey", cFlagEvalOFREP.Evaluate)
+	ofrepGroup.GET("/configuration", cFlagEvalOFREP.Configuration)
 
 	// initWebsocketsEndpoints initialize the websocket endpoints
 	cFlagReload := controller.NewWsFlagChange(s.services.WebsocketService, s.zapLog)

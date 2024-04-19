@@ -186,6 +186,30 @@ definitions:
       errorDetails:
         type: string
     type: object
+  model.OFREPConfigCapabilities:
+    properties:
+      cacheInvalidation:
+        $ref: '#/definitions/model.OFREPConfigCapabilitiesCacheInvalidation'
+    type: object
+  model.OFREPConfigCapabilitiesCacheInvalidation:
+    properties:
+      polling:
+        $ref: '#/definitions/model.OFREPConfigCapabilitiesCacheInvalidationPolling'
+    type: object
+  model.OFREPConfigCapabilitiesCacheInvalidationPolling:
+    properties:
+      enabled:
+        type: boolean
+      minPollingInterval:
+        type: integer
+    type: object
+  model.OFREPConfiguration:
+    properties:
+      capabilities:
+        $ref: '#/definitions/model.OFREPConfigCapabilities'
+      name:
+        type: string
+    type: object
   model.OFREPEvalFlagRequest:
     properties:
       context:
@@ -420,6 +444,52 @@ paths:
       summary: Prometheus endpoint
       tags:
       - Monitoring
+  /ofrep/v1/configuration:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        OFREP configuration to provide information about the remote flag management system, to configure the
+        OpenFeature SDK providers.
+
+        This endpoint will be called during the initialization of the provider.
+      parameters:
+      - description: The request will be processed only if ETag doesn't match.
+        in: header
+        name: If-None-Match
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/model.OFREPConfiguration'
+        "304":
+          description: 'Etag: \"117-0193435c612c50d93b798619d9464856263dbf9f\'
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.OFREPEvaluateErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/modeldocs.HTTPErrorDoc'
+        "404":
+          description: Flag Not Found
+          schema:
+            $ref: '#/definitions/model.OFREPEvaluateErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/modeldocs.HTTPErrorDoc'
+      security:
+      - ApiKeyAuth: []
+      summary: OFREP provider configuration
+      tags:
+      - OpenFeature Remote Evaluation Protocol (OFREP)
   /ofrep/v1/evaluate/flags:
     post:
       consumes:
@@ -447,6 +517,10 @@ paths:
           description: OFREP successful evaluation response
           schema:
             $ref: '#/definitions/model.OFREPBulkEvaluateSuccessResponse'
+        "304":
+          description: 'Etag: \"117-0193435c612c50d93b798619d9464856263dbf9f\'
+          schema:
+            type: string
         "400":
           description: Bad evaluation request
           schema:

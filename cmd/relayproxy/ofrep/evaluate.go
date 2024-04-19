@@ -131,7 +131,8 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 // @Accept	 	json
 // @Param       If-None-Match header string false "The request will be processed only if ETag doesn't match."
 // @Param 		data body model.OFREPEvalFlagRequest true "Evaluation Context and list of flag for this API call"
-// @Success     200  {object} model.OFREPBulkEvaluateSuccessResponse "OFREP successful evaluation response"
+// @Success     200 {object} model.OFREPBulkEvaluateSuccessResponse "OFREP successful evaluation response"
+// @Success     304 {string} string "Etag: \"117-0193435c612c50d93b798619d9464856263dbf9f\""
 // @Failure     400 {object}  model.OFREPCommonErrorResponse "Bad evaluation request"
 // @Failure     401 {object}  modeldocs.HTTPErrorDoc "Unauthorized - You need credentials to access the API"
 // @Failure     403 {object}  modeldocs.HTTPErrorDoc "Forbidden - You are not authorized to access the API"
