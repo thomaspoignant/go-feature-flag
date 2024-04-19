@@ -14,14 +14,14 @@ public class ProviderTests
     private FeatureClient client;
     private EvaluationContext defaultEvaluationContext;
     [SetUp]
-    public void Setup()
+    public async Task Setup()
     {
         goFeatureFlagProvider = new GoFeatureFlagProvider(new GoFeatureFlagProviderOptions
         {
             Endpoint = "http://localhost:1031/",
             Timeout = new TimeSpan(1000 * TimeSpan.TicksPerMillisecond)
         });
-        Api.Instance.SetProvider(goFeatureFlagProvider);
+        await Api.Instance.SetProviderAsync(goFeatureFlagProvider);
         client = Api.Instance.GetClient("my-app");
         
         defaultEvaluationContext = EvaluationContext.Builder()
@@ -342,7 +342,7 @@ public class ProviderTests
             Timeout = new TimeSpan(1000 * TimeSpan.TicksPerMillisecond),
             ApiKey = "authorized_token"
         });
-        Api.Instance.SetProvider(authenticatedProvider);
+        await Api.Instance.SetProviderAsync(authenticatedProvider);
         FeatureClient authenticatedClient = Api.Instance.GetClient("my-app");
         var flagKey = "bool_targeting_match";
         var want = new FlagEvaluationDetails<bool>(
@@ -365,7 +365,7 @@ public class ProviderTests
             Timeout = new TimeSpan(1000 * TimeSpan.TicksPerMillisecond),
             ApiKey = "invalid_api_key"
         });
-        Api.Instance.SetProvider(authenticatedProvider);
+        await Api.Instance.SetProviderAsync(authenticatedProvider);
         FeatureClient authenticatedClient = Api.Instance.GetClient("my-app");
         var flagKey = "bool_targeting_match";
         var want = new FlagEvaluationDetails<bool>(
@@ -387,7 +387,7 @@ public class ProviderTests
             Timeout = new TimeSpan(1000 * TimeSpan.TicksPerMillisecond),
             ApiKey = ""
         });
-        Api.Instance.SetProvider(authenticatedProvider);
+        await Api.Instance.SetProviderAsync(authenticatedProvider);
         FeatureClient authenticatedClient = Api.Instance.GetClient("my-app");
         var flagKey = "bool_targeting_match";
         var want = new FlagEvaluationDetails<bool>(
