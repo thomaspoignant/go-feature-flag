@@ -142,7 +142,6 @@ func (g *GoFeatureFlag) Close() {
 
 // startFlagUpdaterDaemon is the daemon that refresh the cache every X seconds.
 func (g *GoFeatureFlag) startFlagUpdaterDaemon() {
-
 	if g.config.Offline {
 		return
 	}
@@ -160,7 +159,7 @@ func (g *GoFeatureFlag) startFlagUpdaterDaemon() {
 	}
 }
 
-// SetOffline updates the config Offline paramter
+// SetOffline updates the config Offline parameter
 func (g *GoFeatureFlag) SetOffline(control bool) bool {
 	g.config.Offline = control
 
@@ -175,7 +174,6 @@ func (g *GoFeatureFlag) SetOffline(control bool) bool {
 
 // retrieveFlagsAndUpdateCache is called every X seconds to refresh the cache flag.
 func retrieveFlagsAndUpdateCache(config Config, cache cache.Manager, retrieverManager *retriever.Manager) error {
-
 	if config.Offline {
 		return nil
 	}
