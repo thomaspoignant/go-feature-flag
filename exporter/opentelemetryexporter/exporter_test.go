@@ -38,6 +38,13 @@ type testStruct struct {
 	notExported  bool
 }
 
+func checkIfGithubActionCI() bool {
+	// https://docs.github.com/en/actions/learn-github-actions/variables#default-environment-variables
+	_, ok1 := os.LookupEnv("CI")
+	_, ok2 := os.LookupEnv("GITHUB_RUN_ID")
+	return ok1 && ok2
+}
+
 func buildFeatureEvents() []exporter.FeatureEvent {
 	return []exporter.FeatureEvent{
 		{
@@ -209,9 +216,18 @@ func TestOtelBSPNeedsOptions(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
+func TestCI(t *testing.T) {
+	assert.False(t, checkIfGithubActionCI())
+}
+
 func TestExportToOtelCollector(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test")
+	}
+	containerWaitTime := time.Second * 5
+	if checkIfGithubActionCI() {
+		log.Println("Setting timeout for CI")
+		containerWaitTime = 20
 	}
 
 	featureEvents := buildFeatureEvents()
@@ -235,7 +251,7 @@ func TestExportToOtelCollector(t *testing.T) {
 	err = exp.Export(ctx, logger, featureEvents)
 	assert.NoError(t, err)
 	// Sleep to give the container time to process the spans
-	time.Sleep(5 * time.Second)
+	time.Sleep(containerWaitTime)
 	assert.GreaterOrEqual(t, consumer.Size(), 1)
 	assert.True(t, consumer.Exists(instrumentationName))
 
