@@ -42,29 +42,33 @@ type Exporter struct {
 	processors []*sdktrace.SpanProcessor
 }
 
-type ExporterOption func(*Exporter)
+type ExporterOption func(*Exporter) error
 
-func NewExporter(opts ...ExporterOption) *Exporter {
+func NewExporter(opts ...ExporterOption) (*Exporter, error) {
 	exporter := Exporter{}
 	for _, opt := range opts {
-		opt(&exporter)
+		if err := opt(&exporter); err != nil {
+			return nil, err
+		}
 	}
-	return &exporter
+	return &exporter, nil
 }
 
 func WithResource(customResource *resource.Resource) ExporterOption {
-	return func(exp *Exporter) {
+	return func(exp *Exporter) error {
 		mergedResource, err := resource.Merge(customResource, defaultResource())
 		if err != nil {
-			panic("Unable to merge resources")
+			return errors.New("unable to merge resources")
 		}
 		exp.resource = mergedResource
+		return nil
 	}
 }
 
 func WithBatchSpanProcessors(processors ...*sdktrace.SpanProcessor) ExporterOption {
-	return func(exp *Exporter) {
+	return func(exp *Exporter) error {
 		exp.processors = processors
+		return nil
 	}
 }
 

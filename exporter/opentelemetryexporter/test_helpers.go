@@ -1,16 +1,9 @@
-// Copyright The OpenTelemetry Authors
-// SPDX-License-Identifier: Apache-2.0
-
-// Package tracetest is a testing helper package for the SDK. User can
-// configure no-op or in-memory exporters to verify different SDK behaviors or
-// custom instrumentation.
 package opentelemetryexporter
 
 import (
 	"context"
 	"fmt"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/testcontainers/testcontainers-go"
@@ -28,43 +21,10 @@ func NewPersistentInMemoryExporter() *PersistentInMemoryExporter {
 
 // PersistentInMemoryExporter is an exporter that stores all received spans in-memory.
 type PersistentInMemoryExporter struct {
-	mu sync.Mutex
-	ss tracetest.SpanStubs
+	tracetest.InMemoryExporter
 }
 
-// ExportSpans handles export of spans by storing them in memory.
-func (imsb *PersistentInMemoryExporter) ExportSpans(_ context.Context, spans []trace.ReadOnlySpan) error {
-	imsb.mu.Lock()
-	defer imsb.mu.Unlock()
-	imsb.ss = append(imsb.ss, tracetest.SpanStubsFromReadOnlySpans(spans)...)
-	return nil
-}
-
-// Shutdown stops the exporter by clearing spans held in memory.
 func (imsb *PersistentInMemoryExporter) Shutdown(context.Context) error {
-	imsb.Reset()
-	return nil
-}
-
-// Reset the current in-memory storage.
-func (imsb *PersistentInMemoryExporter) Reset() {
-	imsb.mu.Lock()
-	defer imsb.mu.Unlock()
-	// imsb.ss = nil
-}
-
-// GetSpans returns the current in-memory stored spans.
-func (imsb *PersistentInMemoryExporter) GetSpans() tracetest.SpanStubs {
-	imsb.mu.Lock()
-	defer imsb.mu.Unlock()
-	ret := make(tracetest.SpanStubs, len(imsb.ss))
-	copy(ret, imsb.ss)
-	return ret
-}
-
-// Clear clears the memory. In the original impl Reset does this
-func (imsb *PersistentInMemoryExporter) Clear(context.Context) error {
-	imsb.ss = nil
 	return nil
 }
 

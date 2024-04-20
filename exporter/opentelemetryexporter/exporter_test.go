@@ -117,11 +117,12 @@ func TestExporterBuildsWithOptions(t *testing.T) {
 
 	inMemoryExporter := PersistentInMemoryExporter{}
 	inMemoryProcessor := sdktrace.NewBatchSpanProcessor(&inMemoryExporter)
-	exporter := NewExporter(
+	exporter, err := NewExporter(
 
 		WithResource(userCustomResource),
 		WithBatchSpanProcessors(&inMemoryProcessor),
 	)
+	assert.Nil(t, err)
 	assert.NotNil(t, exporter)
 	assert.NotNil(t, exporter.resource)
 	assert.Len(t, exporter.resource.Attributes(), 3)
@@ -151,8 +152,10 @@ func TestPersistentInMemoryExporter(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Len(t, inMemorySpanExporter.GetSpans(), 1)
-	err = inMemorySpanExporter.Clear(ctx)
-	assert.Nil(t, err)
+	err = inMemorySpanExporter.Shutdown(ctx)
+	assert.NoError(t, err)
+	assert.Len(t, inMemorySpanExporter.GetSpans(), 1)
+	inMemorySpanExporter.Reset()
 	assert.Len(t, inMemorySpanExporter.GetSpans(), 0)
 }
 
@@ -168,11 +171,12 @@ func TestExportWithMultipleProcessors(t *testing.T) {
 	assert.Nil(t, err)
 	resource := defaultResource()
 
-	exp := NewExporter(
+	exp, err := NewExporter(
 
 		WithResource(resource),
 		WithBatchSpanProcessors(&inMemoryProcessor, &stdoutProcessor),
 	)
+	assert.Nil(t, err)
 	err = exp.Export(ctx, logger, featureEvents)
 	assert.Nil(t, err)
 	//  We sent three spans, the parents and three child spans corresponding to events
@@ -225,10 +229,11 @@ func TestExportToOtelCollector(t *testing.T) {
 	assert.Nil(t, err)
 	resource := defaultResource()
 
-	exp := NewExporter(
+	exp, err := NewExporter(
 		WithResource(resource),
 		WithBatchSpanProcessors(&otelProcessor),
 	)
+	assert.Nil(t, err)
 	err = exp.Export(ctx, logger, featureEvents)
 	assert.Nil(t, err)
 	// Sleep to give the container time to process the spans
