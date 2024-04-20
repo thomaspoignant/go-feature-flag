@@ -203,7 +203,6 @@ func TestExportWithMultipleProcessors(t *testing.T) {
 func TestOtelBSPNeedsOptions(t *testing.T) {
 	_, err := OtelCollectorBatchSpanProcessor("localhost")
 	assert.NotNil(t, err)
-
 }
 
 func TestExportToOtelCollector(t *testing.T) {

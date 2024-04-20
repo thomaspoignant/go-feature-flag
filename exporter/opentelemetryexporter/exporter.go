@@ -81,7 +81,6 @@ func otelExporter(uri string, opts ...grpc.DialOption) (*otlptrace.Exporter, err
 
 	if len(opts) == 0 {
 		return nil, errors.New("need credentials option")
-
 	}
 
 	conn, err := grpc.NewClient(uri, opts...)
