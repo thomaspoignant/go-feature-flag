@@ -236,7 +236,7 @@ func TestExportToOtelCollector(t *testing.T) {
 	assert.NoError(t, err)
 	// Sleep to give the container time to process the spans
 	time.Sleep(5 * time.Second)
-	assert.GreaterOrEqual(t, len(consumer.logs), 1)
+	assert.GreaterOrEqual(t, consumer.Size(), 1)
 	assert.True(t, consumer.Exists(instrumentationName))
 
 	// Clean up the container after the test is complete

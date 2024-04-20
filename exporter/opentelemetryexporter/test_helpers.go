@@ -35,6 +35,12 @@ type SliceLogConsumer struct {
 	lock sync.Mutex
 }
 
+func (lc *SliceLogConsumer) Size() int {
+	lc.lock.Lock()
+	defer lc.lock.Unlock()
+	return len(lc.logs)
+}
+
 // Accept prints the log to stdout
 func (lc *SliceLogConsumer) Accept(l testcontainers.Log) {
 	lc.lock.Lock()
