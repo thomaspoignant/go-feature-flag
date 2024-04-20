@@ -20,7 +20,6 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 
 	"log"
 )
@@ -77,9 +76,15 @@ func defaultResource() *resource.Resource {
 	)
 }
 
-func otelExporter(uri string) (*otlptrace.Exporter, error) {
+func otelExporter(uri string, opts ...grpc.DialOption) (*otlptrace.Exporter, error) {
 	// TODO creds
-	conn, err := grpc.NewClient(uri, grpc.WithTransportCredentials(insecure.NewCredentials()))
+
+	if len(opts) == 0 {
+		return nil, errors.New("need credentials option")
+
+	}
+
+	conn, err := grpc.NewClient(uri, opts...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create gRPC connection to collector: %w", err)
 	}
@@ -92,8 +97,8 @@ func otelExporter(uri string) (*otlptrace.Exporter, error) {
 	return traceExporter, nil
 }
 
-func otelCollectorBatchSpanProcessor(uri string) (sdktrace.SpanProcessor, error) {
-	otelExporter, err := otelExporter(uri)
+func OtelCollectorBatchSpanProcessor(uri string, opts ...grpc.DialOption) (sdktrace.SpanProcessor, error) {
+	otelExporter, err := otelExporter(uri, opts...)
 	if err != nil {
 		return nil, err
 	}

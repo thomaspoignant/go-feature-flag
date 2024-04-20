@@ -12,6 +12,8 @@ import (
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
@@ -189,7 +191,19 @@ func TestExportWithMultipleProcessors(t *testing.T) {
 			assert.Equal(t, span.ChildSpanCount, 3)
 		}
 		assert.NotNil(t, span.Resource)
+
+		if span.Parent.HasTraceID() {
+			assert.NotNil(t, span.Attributes)
+			// Different spans have different attributes
+			assert.GreaterOrEqual(t, len(span.Attributes), 1)
+		}
 	}
+}
+
+func TestOtelBSPNeedsOptions(t *testing.T) {
+	_, err := OtelCollectorBatchSpanProcessor("localhost")
+	assert.NotNil(t, err)
+
 }
 
 func TestExportToOtelCollector(t *testing.T) {
@@ -208,7 +222,7 @@ func TestExportToOtelCollector(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	otelProcessor, err := otelCollectorBatchSpanProcessor(otelC.URI)
+	otelProcessor, err := OtelCollectorBatchSpanProcessor(otelC.URI, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	assert.Nil(t, err)
 	resource := defaultResource()
 
