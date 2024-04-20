@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/testcontainers/testcontainers-go"
@@ -31,15 +32,20 @@ func (imsb *PersistentInMemoryExporter) Shutdown(context.Context) error {
 // SliceLogConsumer buffers log content into a slice
 type SliceLogConsumer struct {
 	logs []string
+	lock sync.Mutex
 }
 
 // Accept prints the log to stdout
 func (lc *SliceLogConsumer) Accept(l testcontainers.Log) {
+	lc.lock.Lock()
+	defer lc.lock.Unlock()
 	lc.logs = append(lc.logs, string(l.Content))
 }
 
 // Exists checks if the target exists anywhere in the log output
 func (lc *SliceLogConsumer) Exists(target string) bool {
+	lc.lock.Lock()
+	defer lc.lock.Unlock()
 	for _, s := range lc.logs {
 		if strings.Contains(s, target) {
 			return true
