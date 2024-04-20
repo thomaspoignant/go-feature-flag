@@ -122,7 +122,7 @@ func TestExporterBuildsWithOptions(t *testing.T) {
 		WithResource(userCustomResource),
 		WithBatchSpanProcessors(&inMemoryProcessor),
 	)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.NotNil(t, exporter)
 	assert.NotNil(t, exporter.resource)
 	assert.Len(t, exporter.resource.Attributes(), 3)
@@ -168,7 +168,7 @@ func TestExportWithMultipleProcessors(t *testing.T) {
 	inMemoryExporter := PersistentInMemoryExporter{}
 	inMemoryProcessor := sdktrace.NewBatchSpanProcessor(&inMemoryExporter)
 	stdoutProcessor, err := stdoutBatchSpanProcessor()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	resource := defaultResource()
 
 	exp, err := NewExporter(
@@ -176,9 +176,9 @@ func TestExportWithMultipleProcessors(t *testing.T) {
 		WithResource(resource),
 		WithBatchSpanProcessors(&inMemoryProcessor, &stdoutProcessor),
 	)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	err = exp.Export(ctx, logger, featureEvents)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	//  We sent three spans, the parents and three child spans corresponding to events
 	assert.Len(t, inMemoryExporter.GetSpans(), 4)
 	for _, span := range inMemoryExporter.GetSpans() {
@@ -221,21 +221,19 @@ func TestExportToOtelCollector(t *testing.T) {
 
 	consumer := SliceLogConsumer{}
 	otelC, err := setupOtelCollectorContainer(ctx, &consumer)
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.NoError(t, err)
 
 	otelProcessor, err := OtelCollectorBatchSpanProcessor(otelC.URI, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	resource := defaultResource()
 
 	exp, err := NewExporter(
 		WithResource(resource),
 		WithBatchSpanProcessors(&otelProcessor),
 	)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	err = exp.Export(ctx, logger, featureEvents)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	// Sleep to give the container time to process the spans
 	time.Sleep(5 * time.Second)
 	assert.GreaterOrEqual(t, len(consumer.logs), 1)
