@@ -253,6 +253,10 @@ func TestExportToOtelCollector(t *testing.T) {
 	// Sleep to give the container time to process the spans
 	time.Sleep(containerWaitTime)
 	assert.GreaterOrEqual(t, consumer.Size(), 1)
+	// Remove. I need to see what is making it in CI
+	if checkIfGithubActionCI() {
+		consumer.Display()
+	}
 	assert.True(t, consumer.Exists(instrumentationName))
 
 	// Clean up the container after the test is complete

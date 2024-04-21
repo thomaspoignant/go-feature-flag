@@ -60,6 +60,14 @@ func (lc *SliceLogConsumer) Exists(target string) bool {
 	return false
 }
 
+func (lc *SliceLogConsumer) Display() {
+	lc.lock.Lock()
+	defer lc.lock.Unlock()
+	for _, s := range lc.logs {
+		fmt.Println(s)
+	}
+}
+
 // opentelCollectorContainer struct for the test container and URI
 type opentelCollectorContainer struct {
 	testcontainers.Container
