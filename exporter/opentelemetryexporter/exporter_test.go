@@ -12,6 +12,7 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/backoff"
@@ -67,6 +68,12 @@ func buildFeatureEvents() []exporter.FeatureEvent {
 	}
 }
 
+func getSpanStubs(target string) tracetest.SpanStubs {
+	s := make(tracetest.SpanStubs, 0)
+	s = append(s, tracetest.SpanStub{Name: target, StartTime: time.Now()})
+	return s
+}
+
 func assertResource(t *testing.T, expected resource.Resource, actual resource.Resource) {
 	var found bool
 	for _, target := range expected.Attributes() {
@@ -77,6 +84,12 @@ func assertResource(t *testing.T, expected resource.Resource, actual resource.Re
 		}
 		assert.True(t, found)
 	}
+}
+
+func TestCI(t *testing.T) {
+	t.Setenv("GITHUB_RUN_ID", "does-not-matter")
+	t.Setenv("CI", "true")
+	assert.True(t, checkIfGithubActionCI())
 }
 
 func TestValueReflection(t *testing.T) {
@@ -218,10 +231,34 @@ func TestOtelBSPNeedsOptions(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
-func TestCI(t *testing.T) {
-	t.Setenv("GITHUB_RUN_ID", "does-not-matter")
-	t.Setenv("CI", "true")
-	assert.True(t, checkIfGithubActionCI())
+func TestOtelExporterDirectly(t *testing.T) {
+	ctx := context.Background()
+
+	consumer := AppendingLogConsumer{}
+	otelC, err := setupOtelCollectorContainer(ctx, &consumer)
+	assert.NoError(t, err)
+
+	connectParams := grpc.ConnectParams{
+		Backoff: backoff.Config{BaseDelay: time.Second * 2,
+			Multiplier: 2.0,
+			MaxDelay:   time.Second * 16}}
+	otelExporter, err := otelExporter(otelC.URI,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithConnectParams(connectParams))
+
+	assert.NoError(t, err)
+
+	target := "test-go-feature-flag-export"
+
+	spans := getSpanStubs(target)
+	err = otelExporter.ExportSpans(ctx, spans.Snapshots())
+	assert.NoError(t, err)
+
+	time.Sleep(10 * time.Second)
+	consumer.Display()
+	assert.True(t, consumer.Exists(target))
+
+	assert.NoError(t, err)
 }
 
 func TestExportToOtelCollector(t *testing.T) {
