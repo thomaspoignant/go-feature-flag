@@ -3,6 +3,7 @@ package opentelemetryexporter
 import (
 	"context"
 	"log"
+	"net"
 	"os"
 	"strings"
 	"testing"
@@ -236,7 +237,7 @@ func TestExportToOtelCollector(t *testing.T) {
 	ctx := context.Background()
 	logger := log.New(os.Stdout, "", 0)
 
-	consumer := SliceLogConsumer{}
+	consumer := AppendingLogConsumer{}
 	otelC, err := setupOtelCollectorContainer(ctx, &consumer)
 	assert.NoError(t, err)
 
@@ -263,6 +264,10 @@ func TestExportToOtelCollector(t *testing.T) {
 	// Remove. I need to see what is making it in CI
 	if checkIfGithubActionCI() || true {
 		consumer.Display()
+		dial := strings.Replace(otelC.URI, "/", ":", 1)
+		conn, err := net.Dial("tcp", dial)
+		assert.NoError(t, err)
+		defer conn.Close()
 	}
 	assert.True(t, consumer.Exists(instrumentationName))
 

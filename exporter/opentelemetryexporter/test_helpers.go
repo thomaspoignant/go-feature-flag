@@ -30,27 +30,27 @@ func (imsb *PersistentInMemoryExporter) Shutdown(context.Context) error {
 	return nil
 }
 
-// SliceLogConsumer buffers log content into a slice
-type SliceLogConsumer struct {
+// AppendingLogConsumer buffers log content into a slice
+type AppendingLogConsumer struct {
 	logs []string
 	lock sync.Mutex
 }
 
-func (lc *SliceLogConsumer) Size() int {
+func (lc *AppendingLogConsumer) Size() int {
 	lc.lock.Lock()
 	defer lc.lock.Unlock()
 	return len(lc.logs)
 }
 
 // Accept prints the log to stdout
-func (lc *SliceLogConsumer) Accept(l testcontainers.Log) {
+func (lc *AppendingLogConsumer) Accept(l testcontainers.Log) {
 	lc.lock.Lock()
 	defer lc.lock.Unlock()
 	lc.logs = append(lc.logs, string(l.Content))
 }
 
 // Exists checks if the target exists anywhere in the log output
-func (lc *SliceLogConsumer) Exists(target string) bool {
+func (lc *AppendingLogConsumer) Exists(target string) bool {
 	lc.lock.Lock()
 	defer lc.lock.Unlock()
 	for _, s := range lc.logs {
@@ -61,7 +61,7 @@ func (lc *SliceLogConsumer) Exists(target string) bool {
 	return false
 }
 
-func (lc *SliceLogConsumer) Display() {
+func (lc *AppendingLogConsumer) Display() {
 	lc.lock.Lock()
 	defer lc.lock.Unlock()
 	for _, s := range lc.logs {
@@ -77,8 +77,8 @@ type opentelCollectorContainer struct {
 
 // setupOtelCollectorContainer sets up an otel container with a log consumer
 func setupOtelCollectorContainer(ctx context.Context,
-
 	consumer testcontainers.LogConsumer) (*opentelCollectorContainer, error) {
+	// TODO ForListeningPort won't accept the variable as string
 	grpcPort := "4317/tcp"
 	req := testcontainers.ContainerRequest{
 		Image:        "otel/opentelemetry-collector:0.98.0",
