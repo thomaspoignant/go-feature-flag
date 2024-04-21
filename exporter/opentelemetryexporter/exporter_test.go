@@ -13,6 +13,7 @@ import (
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/backoff"
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/stretchr/testify/assert"
@@ -239,7 +240,13 @@ func TestExportToOtelCollector(t *testing.T) {
 	otelC, err := setupOtelCollectorContainer(ctx, &consumer)
 	assert.NoError(t, err)
 
-	otelProcessor, err := OtelCollectorBatchSpanProcessor(otelC.URI, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	connectParams := grpc.ConnectParams{
+		Backoff: backoff.Config{BaseDelay: time.Second * 2,
+			Multiplier: 2.0,
+			MaxDelay:   time.Second * 16}}
+	otelProcessor, err := OtelCollectorBatchSpanProcessor(otelC.URI,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithConnectParams(connectParams))
 	assert.NoError(t, err)
 	resource := defaultResource()
 
