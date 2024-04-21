@@ -217,17 +217,17 @@ func TestOtelBSPNeedsOptions(t *testing.T) {
 }
 
 func TestCI(t *testing.T) {
-	assert.False(t, checkIfGithubActionCI())
+	t.Setenv("GITHUB_RUN_ID", "does-not-matter")
+	t.Setenv("CI", "true")
+	assert.True(t, checkIfGithubActionCI())
 }
 
 func TestExportToOtelCollector(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping integration test")
-	}
 	containerWaitTime := time.Second * 5
+
 	if checkIfGithubActionCI() {
 		log.Println("Setting timeout for CI")
-		containerWaitTime = 20
+		containerWaitTime = time.Second * 20
 	}
 
 	featureEvents := buildFeatureEvents()
