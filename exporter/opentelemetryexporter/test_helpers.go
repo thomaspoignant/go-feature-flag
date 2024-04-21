@@ -76,11 +76,17 @@ type opentelCollectorContainer struct {
 
 // setupOtelCollectorContainer sets up an otel container with a log consumer
 func setupOtelCollectorContainer(ctx context.Context,
+
 	consumer testcontainers.LogConsumer) (*opentelCollectorContainer, error) {
+	// TODO ForListeningPort won't accept the variable as string
+	grpcPort := "4317/tcp"
 	req := testcontainers.ContainerRequest{
 		Image:        "otel/opentelemetry-collector:0.98.0",
-		ExposedPorts: []string{"4317/tcp", "55679/tcp"},
-		WaitingFor:   wait.ForLog("Everything is ready. Begin running and processing data"),
+		ExposedPorts: []string{grpcPort, "55679/tcp"},
+		WaitingFor: wait.ForAll(
+			wait.ForLog("Everything is ready. Begin running and processing data"),
+			wait.ForListeningPort("4317/tcp"),
+		),
 	}
 
 	logConsumerConfig := testcontainers.LogConsumerConfig{

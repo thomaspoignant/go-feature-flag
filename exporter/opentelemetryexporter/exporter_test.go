@@ -254,7 +254,7 @@ func TestExportToOtelCollector(t *testing.T) {
 	time.Sleep(containerWaitTime)
 	assert.GreaterOrEqual(t, consumer.Size(), 1)
 	// Remove. I need to see what is making it in CI
-	if checkIfGithubActionCI() {
+	if checkIfGithubActionCI() || true {
 		consumer.Display()
 	}
 	assert.True(t, consumer.Exists(instrumentationName))
