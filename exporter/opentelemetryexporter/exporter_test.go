@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -18,96 +19,14 @@ import (
 	"google.golang.org/grpc/backoff"
 	"google.golang.org/grpc/credentials/insecure"
 
+	"github.com/docker/go-connections/nat"
 	"github.com/stretchr/testify/assert"
+	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/wait"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 )
 
-type testSubStruct struct {
-	SubContent      string
-	SubTimeStamp    int64
-	SubCondition    bool
-	SubValue        float32
-	SubAnotherValue float64
-	subNotExported  bool
-}
-
-type testStruct struct {
-	Substruct    testSubStruct
-	Content      string
-	Timestamp    int64
-	Condition    bool
-	Value        float32
-	AnotherValue float64
-	notExported  bool
-}
-
-func checkIfGithubActionCI() bool {
-	// https://docs.github.com/en/actions/learn-github-actions/variables#default-environment-variables
-	_, ok1 := os.LookupEnv("CI")
-	_, ok2 := os.LookupEnv("GITHUB_RUN_ID")
-	return ok1 && ok2
-}
-
-func buildFeatureEvents() []exporter.FeatureEvent {
-	return []exporter.FeatureEvent{
-		{
-			Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-			Variation: "Default", Value: "YO", Default: false,
-		},
-		{
-			Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCDEF", CreationDate: 1617970547, Key: "random-key",
-			Variation: "Default", Value: "YO", Default: false,
-		},
-		{
-			Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCDEF", CreationDate: 1617970547, Key: "random-key",
-			Variation: "Default", Value: testStruct{
-				Timestamp: 192929922, Condition: true, Content: "hello", notExported: false, Value: 1.0, AnotherValue: 3.3,
-				Substruct: testSubStruct{SubCondition: false, SubContent: "world", SubValue: 3.0, SubAnotherValue: 44.4, subNotExported: true},
-			}, Default: false,
-		},
-	}
-}
-
-func getSpanStubs(target string) tracetest.SpanStubs {
-	s := make(tracetest.SpanStubs, 0)
-	s = append(s, tracetest.SpanStub{Name: target, StartTime: time.Now()})
-	return s
-}
-
-func assertResource(t *testing.T, expected resource.Resource, actual resource.Resource) {
-	var found bool
-	for _, target := range expected.Attributes() {
-		for _, attr := range actual.Attributes() {
-			if target.Key == attr.Key && target.Value == attr.Value {
-				found = true
-			}
-		}
-		assert.True(t, found)
-	}
-}
-
-func assertSpanReferentialIntegrity(t *testing.T, inMemoryExporter *PersistentInMemoryExporter) {
-	for _, span := range inMemoryExporter.GetSpans() {
-		assert.NotNil(t, span)
-	}
-
-	for _, span := range inMemoryExporter.GetSpans() {
-		if span.Parent.HasTraceID() {
-			assert.Equal(t, span.Parent.TraceID(), span.SpanContext.TraceID())
-			assert.NotEqual(t, span.Parent.SpanID(), span.SpanContext.SpanID())
-			assert.Equal(t, span.ChildSpanCount, 0)
-		} else {
-			assert.Equal(t, span.ChildSpanCount, 3)
-		}
-		assert.NotNil(t, span.Resource)
-
-		if span.Parent.HasTraceID() {
-			assert.NotNil(t, span.Attributes)
-			// Different spans have different attributes
-			assert.GreaterOrEqual(t, len(span.Attributes), 1)
-		}
-	}
-}
+var _ sdktrace.SpanExporter = (*PersistentInMemoryExporter)(nil)
 
 func TestCI(t *testing.T) {
 	t.Setenv("GITHUB_RUN_ID", "does-not-matter")
@@ -264,7 +183,7 @@ func TestOtelExporterDirectly(t *testing.T) {
 	err = otelExporter.ExportSpans(ctx, spans.Snapshots())
 	assert.NoError(t, err)
 
-	time.Sleep(10 * time.Second)
+	time.Sleep(5 * time.Second)
 	assert.True(t, consumer.Exists(target))
 }
 
@@ -314,4 +233,194 @@ func TestExportToOtelCollector(t *testing.T) {
 			t.Fatalf("failed to terminate container: %s", err)
 		}
 	})
+}
+
+type testSubStruct struct {
+	SubContent      string
+	SubTimeStamp    int64
+	SubCondition    bool
+	SubValue        float32
+	SubAnotherValue float64
+	subNotExported  bool
+}
+
+type testStruct struct {
+	Substruct    testSubStruct
+	Content      string
+	Timestamp    int64
+	Condition    bool
+	Value        float32
+	AnotherValue float64
+	notExported  bool
+}
+
+func checkIfGithubActionCI() bool {
+	// https://docs.github.com/en/actions/learn-github-actions/variables#default-environment-variables
+	_, ok1 := os.LookupEnv("CI")
+	_, ok2 := os.LookupEnv("GITHUB_RUN_ID")
+	return ok1 && ok2
+}
+
+func buildFeatureEvents() []exporter.FeatureEvent {
+	return []exporter.FeatureEvent{
+		{
+			Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
+			Variation: "Default", Value: "YO", Default: false,
+		},
+		{
+			Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCDEF", CreationDate: 1617970547, Key: "random-key",
+			Variation: "Default", Value: "YO", Default: false,
+		},
+		{
+			Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCDEF", CreationDate: 1617970547, Key: "random-key",
+			Variation: "Default", Value: testStruct{
+				Timestamp: 192929922, Condition: true, Content: "hello", notExported: false, Value: 1.0, AnotherValue: 3.3,
+				Substruct: testSubStruct{SubCondition: false, SubContent: "world", SubValue: 3.0, SubAnotherValue: 44.4, subNotExported: true},
+			}, Default: false,
+		},
+	}
+}
+
+func getSpanStubs(target string) tracetest.SpanStubs {
+	s := make(tracetest.SpanStubs, 0)
+	s = append(s, tracetest.SpanStub{Name: target, StartTime: time.Now()})
+	return s
+}
+
+func assertResource(t *testing.T, expected resource.Resource, actual resource.Resource) {
+	var found bool
+	for _, target := range expected.Attributes() {
+		for _, attr := range actual.Attributes() {
+			if target.Key == attr.Key && target.Value == attr.Value {
+				found = true
+			}
+		}
+		assert.True(t, found)
+	}
+}
+
+func assertSpanReferentialIntegrity(t *testing.T, inMemoryExporter *PersistentInMemoryExporter) {
+	for _, span := range inMemoryExporter.GetSpans() {
+		assert.NotNil(t, span)
+	}
+
+	for _, span := range inMemoryExporter.GetSpans() {
+		if span.Parent.HasTraceID() {
+			assert.Equal(t, span.Parent.TraceID(), span.SpanContext.TraceID())
+			assert.NotEqual(t, span.Parent.SpanID(), span.SpanContext.SpanID())
+			assert.Equal(t, span.ChildSpanCount, 0)
+		} else {
+			assert.Equal(t, span.ChildSpanCount, 3)
+		}
+		assert.NotNil(t, span.Resource)
+
+		if span.Parent.HasTraceID() {
+			assert.NotNil(t, span.Attributes)
+			// Different spans have different attributes
+			assert.GreaterOrEqual(t, len(span.Attributes), 1)
+		}
+	}
+}
+
+// NewPersistentInMemoryExporter returns a new PersistentInMemoryExporter.
+func NewPersistentInMemoryExporter() *PersistentInMemoryExporter {
+	return new(PersistentInMemoryExporter)
+}
+
+// PersistentInMemoryExporter is an exporter that stores all received spans in-memory.
+type PersistentInMemoryExporter struct {
+	tracetest.InMemoryExporter
+}
+
+func (imsb *PersistentInMemoryExporter) Shutdown(context.Context) error {
+	return nil
+}
+
+// AppendingLogConsumer buffers log content into a slice
+type AppendingLogConsumer struct {
+	logs []string
+	lock sync.Mutex
+}
+
+func (lc *AppendingLogConsumer) Size() int {
+	lc.lock.Lock()
+	defer lc.lock.Unlock()
+	return len(lc.logs)
+}
+
+// Accept prints the log to stdout
+func (lc *AppendingLogConsumer) Accept(l testcontainers.Log) {
+	lc.lock.Lock()
+	defer lc.lock.Unlock()
+	lc.logs = append(lc.logs, string(l.Content))
+}
+
+// Exists checks if the target exists anywhere in the log output
+func (lc *AppendingLogConsumer) Exists(target string) bool {
+	lc.lock.Lock()
+	defer lc.lock.Unlock()
+	for _, s := range lc.logs {
+		if strings.Contains(s, target) {
+			return true
+		}
+	}
+	return false
+}
+
+func (lc *AppendingLogConsumer) Display() {
+	lc.lock.Lock()
+	defer lc.lock.Unlock()
+	for _, s := range lc.logs {
+		fmt.Println(s)
+	}
+}
+
+// opentelCollectorContainer struct for the test container and URI
+type opentelCollectorContainer struct {
+	testcontainers.Container
+	URI string
+}
+
+// setupOtelCollectorContainer sets up an otel container with a log consumer
+func setupOtelCollectorContainer(ctx context.Context,
+	consumer testcontainers.LogConsumer) (*opentelCollectorContainer, error) {
+	// TODO ForListeningPort won't accept the variable as string
+	grpcPort := "4317/tcp"
+	req := testcontainers.ContainerRequest{
+		Image:        "otel/opentelemetry-collector:0.98.0",
+		ExposedPorts: []string{grpcPort, "55679/tcp"},
+		WaitingFor: wait.ForAll(
+			wait.ForLog("Everything is ready. Begin running and processing data"),
+			wait.ForListeningPort(nat.Port(grpcPort)),
+		),
+	}
+
+	logConsumerConfig := testcontainers.LogConsumerConfig{
+		Opts:      []testcontainers.LogProductionOption{testcontainers.WithLogProductionTimeout(10 * time.Second)},
+		Consumers: []testcontainers.LogConsumer{consumer},
+	}
+
+	request := testcontainers.GenericContainerRequest{
+		ContainerRequest: req,
+		Started:          true,
+	}
+	request.LogConsumerCfg = &logConsumerConfig
+	container, err := testcontainers.GenericContainer(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+
+	ip, err := container.Host(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	mappedPort, err := container.MappedPort(ctx, "4317")
+	if err != nil {
+		return nil, err
+	}
+
+	uri := fmt.Sprintf("%s:%s", ip, mappedPort.Port())
+
+	return &opentelCollectorContainer{Container: container, URI: uri}, nil
 }
