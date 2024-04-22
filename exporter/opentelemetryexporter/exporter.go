@@ -110,16 +110,16 @@ func OtelCollectorBatchSpanProcessor(uri string, opts ...grpc.DialOption) (sdktr
 	return sdktrace.NewBatchSpanProcessor(otelExporter), nil
 }
 
-func newstdoutExporter() (*stdouttrace.Exporter, error) {
-	exp, err := stdouttrace.New(stdouttrace.WithPrettyPrint())
+func newstdoutExporter(options ...stdouttrace.Option) (*stdouttrace.Exporter, error) {
+	exp, err := stdouttrace.New(options...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize stdouttrace exporter: %w", err)
 	}
 	return exp, nil
 }
 
-func stdoutBatchSpanProcessor() (sdktrace.SpanProcessor, error) {
-	inMemoryExporter, err := newstdoutExporter()
+func stdoutBatchSpanProcessor(options ...stdouttrace.Option) (sdktrace.SpanProcessor, error) {
+	inMemoryExporter, err := newstdoutExporter(options...)
 	if err != nil {
 		return nil, err
 	}
@@ -162,8 +162,6 @@ func valueToAttributes(data interface{}, parentName string, maxDepth int, recurs
 			subAttributes := valueToAttributes(fv.Interface(), parentName+"."+name, maxDepth, recursionDepth+1)
 			reflectedAttributes = append(reflectedAttributes, subAttributes...)
 		}
-
-	case reflect.Invalid:
 	default:
 	}
 

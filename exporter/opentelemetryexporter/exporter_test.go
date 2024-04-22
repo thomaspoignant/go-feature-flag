@@ -2,6 +2,7 @@ package opentelemetryexporter
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -11,6 +12,7 @@ import (
 	"time"
 
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
@@ -54,6 +56,13 @@ func TestValueReflection(t *testing.T) {
 	for _, attr := range structAttrs {
 		assert.True(t, strings.HasPrefix(string(attr.Key), prefix+"."))
 	}
+
+	substruct := testSubStruct{SubCondition: false, SubContent: "world", SubValue: 3.0, SubAnotherValue: 44.4, subNotExported: true}
+	slice := make([]testSubStruct, 0)
+	slice = append(slice, substruct)
+
+	// we don't handle slices or arrays
+	assert.Len(t, valueToAttributes(slice, "value", 2, 0), 0)
 }
 
 func TestFeatureEventsToAttributes(t *testing.T) {
@@ -97,6 +106,28 @@ func TestExporterBuildsWithOptions(t *testing.T) {
 	assert.Len(t, exporter.processors, 1)
 }
 
+func TestExporterOptionErrorPath(t *testing.T) {
+	exp, err := NewExporter(
+
+		func(*Exporter) error {
+			return errors.New("test error")
+		},
+	)
+	assert.Error(t, err)
+	assert.Nil(t, exp)
+
+	// This will cause a failure because of the schema mismatch
+	userCustomResource := resource.NewWithAttributes(
+		"https://opentelemetry.io/schemas/1.18.0", attribute.KeyValue{Key: "hello", Value: attribute.StringValue("World")})
+
+	exp, err = NewExporter(
+
+		WithResource(userCustomResource),
+	)
+	assert.Error(t, err)
+	assert.Nil(t, exp)
+}
+
 func TestInitProviderRequiresProcessor(t *testing.T) {
 	_, err := initProvider(&Exporter{})
 	assert.NotNil(t, err)
@@ -132,7 +163,7 @@ func TestExportWithMultipleProcessors(t *testing.T) {
 	inMemoryExporter := PersistentInMemoryExporter{}
 	inMemoryProcessor := sdktrace.NewBatchSpanProcessor(&inMemoryExporter)
 	// TODO wire up the stdout processor only if !CI
-	stdoutProcessor, err := stdoutBatchSpanProcessor()
+	stdoutProcessor, err := stdoutBatchSpanProcessor(stdouttrace.WithPrettyPrint())
 	assert.NoError(t, err)
 	resource := defaultResource()
 
@@ -157,7 +188,16 @@ func TestExportWithMultipleProcessors(t *testing.T) {
 
 func TestOtelBSPNeedsOptions(t *testing.T) {
 	_, err := OtelCollectorBatchSpanProcessor("localhost")
-	assert.NotNil(t, err)
+	assert.Error(t, err)
+	connectParams := grpc.ConnectParams{
+		Backoff: backoff.Config{BaseDelay: time.Second * 2,
+			Multiplier: 2.0,
+			MaxDelay:   time.Second * 16}}
+
+	// Fails because it needs credentials
+	_, err = OtelCollectorBatchSpanProcessor("localhost",
+		grpc.WithConnectParams(connectParams))
+	assert.Error(t, err)
 }
 
 func TestOtelExporterDirectly(t *testing.T) {
