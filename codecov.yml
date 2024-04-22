@@ -5,3 +5,5 @@ ignore:
   - "**/_test.go"
   - "**/_mock.go"
   - "**/testdata/"
+  - "**/testutils/"
+  - "**/modeldocs/"
