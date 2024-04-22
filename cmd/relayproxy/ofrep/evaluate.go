@@ -191,7 +191,7 @@ func (h *EvaluateCtrl) BulkEvaluate(c echo.Context) error {
 		attribute.Int("AllFlagsState.numberEvaluation", len(response.Flags)),
 	)
 
-	c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSONCharsetUTF8)
+	c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	return c.JSON(http.StatusOK, response)
 }
 

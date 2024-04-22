@@ -33,8 +33,8 @@ require (
 	github.com/knadh/koanf/providers/file v0.1.0
 	github.com/knadh/koanf/providers/posflag v0.1.0
 	github.com/knadh/koanf/v2 v2.1.1
-	github.com/labstack/echo-contrib v0.17.0
-	github.com/labstack/echo/v4 v4.11.4
+	github.com/labstack/echo-contrib v0.17.1
+	github.com/labstack/echo/v4 v4.12.0
 	github.com/nikunjy/rules v1.5.0
 	github.com/pablor21/echo-etag/v4 v4.0.3
 	github.com/prometheus/client_golang v1.19.0
@@ -58,7 +58,7 @@ require (
 	golang.org/x/net v0.24.0
 	golang.org/x/oauth2 v0.19.0
 	google.golang.org/api v0.172.0
-	google.golang.org/grpc v1.63.0
+	google.golang.org/grpc v1.63.2
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.29.3
 	k8s.io/apimachinery v0.29.3
@@ -98,7 +98,7 @@ require (
 	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
-	github.com/cespare/xxhash/v2 v2.2.0 // indirect
+	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/containerd/containerd v1.7.12 // indirect
 	github.com/containerd/log v0.1.0 // indirect
 	github.com/cpuguy83/dockercfg v0.3.1 // indirect
@@ -176,8 +176,8 @@ require (
 	github.com/pkg/xattr v0.4.9 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
-	github.com/prometheus/client_model v0.6.0 // indirect
-	github.com/prometheus/common v0.50.0 // indirect
+	github.com/prometheus/client_model v0.6.1 // indirect
+	github.com/prometheus/common v0.53.0 // indirect
 	github.com/prometheus/procfs v0.13.0 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
 	github.com/shirou/gopsutil/v3 v3.23.12 // indirect
