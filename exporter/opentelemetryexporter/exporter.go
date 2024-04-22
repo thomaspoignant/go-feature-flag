@@ -31,18 +31,19 @@ const (
 	instrumentationVersion = "0.0.1"
 )
 
-var tracer = otel.GetTracerProvider().Tracer(
-	instrumentationName,
-	trace.WithInstrumentationVersion(instrumentationVersion),
-	trace.WithSchemaURL(semconv.SchemaURL),
-)
-
 type Exporter struct {
 	resource   *resource.Resource
 	processors []*sdktrace.SpanProcessor
 }
 
 type ExporterOption func(*Exporter) error
+
+func getTracer() trace.Tracer {
+	return otel.GetTracerProvider().Tracer(
+		instrumentationName,
+		trace.WithInstrumentationVersion(instrumentationVersion),
+		trace.WithSchemaURL(semconv.SchemaURL))
+}
 
 func NewExporter(opts ...ExporterOption) (*Exporter, error) {
 	exporter := Exporter{}
@@ -212,17 +213,13 @@ func initProvider(exp *Exporter) (func(context.Context) error, error) {
 
 	// Shutdown will flush any remaining spans and shut down the exporter.
 	return func(ctx context.Context) error {
-		err := tracerProvider.ForceFlush(ctx)
-		if err != nil {
-			return err
-		}
-		return tracerProvider.Shutdown(ctx)
+		return tracerProvider.ForceFlush(ctx)
 	}, nil
 }
 
 func eventToSpan(ctx context.Context, featureEvent exporter.FeatureEvent) {
 	attributes := featureEventToAttributes(featureEvent)
-	_, span := tracer.Start(ctx, featureEvent.Kind)
+	_, span := getTracer().Start(ctx, featureEvent.Kind)
 	defer span.End()
 	span.SetAttributes(attributes...)
 	// How can we detect feature-flag evaluation failure?
@@ -245,7 +242,7 @@ func (exporter *Exporter) Export(ctx context.Context, _ *log.Logger, featureEven
 		}
 	}()
 
-	ctx, span := tracer.Start(ctx, "feature-flag-evaluation")
+	ctx, span := getTracer().Start(ctx, "feature-flag-evaluation")
 	defer span.End()
 	eventsToSpans(ctx, featureEvents)
 

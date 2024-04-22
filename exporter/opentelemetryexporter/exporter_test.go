@@ -2,8 +2,8 @@ package opentelemetryexporter
 
 import (
 	"context"
+	"fmt"
 	"log"
-	"net"
 	"os"
 	"strings"
 	"testing"
@@ -83,6 +83,29 @@ func assertResource(t *testing.T, expected resource.Resource, actual resource.Re
 			}
 		}
 		assert.True(t, found)
+	}
+}
+
+func assertSpanReferentialIntegrity(t *testing.T, inMemoryExporter *PersistentInMemoryExporter) {
+	for _, span := range inMemoryExporter.GetSpans() {
+		assert.NotNil(t, span)
+	}
+
+	for _, span := range inMemoryExporter.GetSpans() {
+		if span.Parent.HasTraceID() {
+			assert.Equal(t, span.Parent.TraceID(), span.SpanContext.TraceID())
+			assert.NotEqual(t, span.Parent.SpanID(), span.SpanContext.SpanID())
+			assert.Equal(t, span.ChildSpanCount, 0)
+		} else {
+			assert.Equal(t, span.ChildSpanCount, 3)
+		}
+		assert.NotNil(t, span.Resource)
+
+		if span.Parent.HasTraceID() {
+			assert.NotNil(t, span.Attributes)
+			// Different spans have different attributes
+			assert.GreaterOrEqual(t, len(span.Attributes), 1)
+		}
 	}
 }
 
@@ -189,6 +212,7 @@ func TestExportWithMultipleProcessors(t *testing.T) {
 
 	inMemoryExporter := PersistentInMemoryExporter{}
 	inMemoryProcessor := sdktrace.NewBatchSpanProcessor(&inMemoryExporter)
+	// TODO wire up the stdout processor only if !CI
 	stdoutProcessor, err := stdoutBatchSpanProcessor()
 	assert.NoError(t, err)
 	resource := defaultResource()
@@ -203,27 +227,13 @@ func TestExportWithMultipleProcessors(t *testing.T) {
 	assert.NoError(t, err)
 	//  We sent three spans, the parents and three child spans corresponding to events
 	assert.Len(t, inMemoryExporter.GetSpans(), 4)
-	for _, span := range inMemoryExporter.GetSpans() {
-		assert.NotNil(t, span)
-	}
+	assertSpanReferentialIntegrity(t, &inMemoryExporter)
 
-	// Test the referential integrity of the spans
-	for _, span := range inMemoryExporter.GetSpans() {
-		if span.Parent.HasTraceID() {
-			assert.Equal(t, span.Parent.TraceID(), span.SpanContext.TraceID())
-			assert.NotEqual(t, span.Parent.SpanID(), span.SpanContext.SpanID())
-			assert.Equal(t, span.ChildSpanCount, 0)
-		} else {
-			assert.Equal(t, span.ChildSpanCount, 3)
-		}
-		assert.NotNil(t, span.Resource)
-
-		if span.Parent.HasTraceID() {
-			assert.NotNil(t, span.Attributes)
-			// Different spans have different attributes
-			assert.GreaterOrEqual(t, len(span.Attributes), 1)
-		}
-	}
+	// Test we can send again after the first cycle
+	inMemoryExporter.Reset()
+	err = exp.Export(ctx, logger, featureEvents)
+	assert.NoError(t, err)
+	assert.Len(t, inMemoryExporter.GetSpans(), 4)
 }
 
 func TestOtelBSPNeedsOptions(t *testing.T) {
@@ -255,10 +265,7 @@ func TestOtelExporterDirectly(t *testing.T) {
 	assert.NoError(t, err)
 
 	time.Sleep(10 * time.Second)
-	consumer.Display()
 	assert.True(t, consumer.Exists(target))
-
-	assert.NoError(t, err)
 }
 
 func TestExportToOtelCollector(t *testing.T) {
@@ -266,7 +273,7 @@ func TestExportToOtelCollector(t *testing.T) {
 
 	if checkIfGithubActionCI() {
 		log.Println("Setting timeout for CI")
-		containerWaitTime = time.Second * 20
+		containerWaitTime = time.Second * 5
 	}
 
 	featureEvents := buildFeatureEvents()
@@ -298,18 +305,11 @@ func TestExportToOtelCollector(t *testing.T) {
 	// Sleep to give the container time to process the spans
 	time.Sleep(containerWaitTime)
 	assert.GreaterOrEqual(t, consumer.Size(), 1)
-	// Remove. I need to see what is making it in CI
-	if checkIfGithubActionCI() || true {
-		consumer.Display()
-		dial := strings.Replace(otelC.URI, "/", ":", 1)
-		conn, err := net.Dial("tcp", dial)
-		assert.NoError(t, err)
-		defer conn.Close()
-	}
 	assert.True(t, consumer.Exists(instrumentationName))
 
 	// Clean up the container after the test is complete
 	t.Cleanup(func() {
+		fmt.Println("Terminating container")
 		if err := otelC.Terminate(ctx); err != nil {
 			t.Fatalf("failed to terminate container: %s", err)
 		}
