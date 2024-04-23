@@ -36,6 +36,11 @@ type Exporter struct {
 	processors []*sdktrace.SpanProcessor
 }
 
+func (*Exporter) IsBulk() bool {
+
+	return true
+}
+
 type ExporterOption func(*Exporter) error
 
 func getTracer() trace.Tracer {

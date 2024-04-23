@@ -106,6 +106,18 @@ func TestExporterBuildsWithOptions(t *testing.T) {
 	assert.Len(t, exporter.processors, 1)
 }
 
+func acceptExporter(expInterface exporter.Exporter) exporter.Exporter {
+
+	return expInterface
+}
+
+func TestInterfaceCompliance(t *testing.T) {
+
+	exporter := Exporter{}
+	_ = acceptExporter(&exporter)
+	assert.True(t, exporter.IsBulk(), "Exporter exporter is a bulk exporter")
+
+}
 func TestExporterOptionErrorPath(t *testing.T) {
 	exp, err := NewExporter(
 
