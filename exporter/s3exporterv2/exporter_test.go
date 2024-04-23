@@ -207,5 +207,5 @@ func Test_errSDK(t *testing.T) {
 
 func TestS3_IsBulk(t *testing.T) {
 	exporter := Exporter{}
-	assert.True(t, exporter.IsBulk(), "Exporter exporter is not a bulk exporter")
+	assert.True(t, exporter.IsBulk(), "Exporter is a bulk exporter")
 }

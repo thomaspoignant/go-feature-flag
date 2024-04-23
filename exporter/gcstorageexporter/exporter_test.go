@@ -219,5 +219,5 @@ func (g *GoogleCloudStorageHandler) handler() http.Handler {
 
 func TestGoogleCloudStorage_IsBulk(t *testing.T) {
 	exporter := gcstorageexporter.Exporter{}
-	assert.True(t, exporter.IsBulk(), "S3 exporter is not a bulk exporter")
+	assert.True(t, exporter.IsBulk(), "exporter is a bulk exporter")
 }
