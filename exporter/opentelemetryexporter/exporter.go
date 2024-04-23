@@ -37,7 +37,6 @@ type Exporter struct {
 }
 
 func (*Exporter) IsBulk() bool {
-
 	return true
 }
 
