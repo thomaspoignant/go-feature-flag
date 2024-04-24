@@ -5,6 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
+	"github.com/thomaspoignant/go-feature-flag/exporter/opentelemetryexporter"
 )
 
 func TestExporterConf_IsValid(t *testing.T) {
@@ -21,6 +22,7 @@ func TestExporterConf_IsValid(t *testing.T) {
 		Meta                    map[string]string
 		ParquetCompressionCodec string
 		QueueURL                string
+		OpenTel                 opentelemetryexporter.Settings
 	}
 	tests := []struct {
 		name     string
@@ -157,6 +159,35 @@ func TestExporterConf_IsValid(t *testing.T) {
 			wantErr:  true,
 			errValue: "invalid exporter: no \"queueUrl\" property found for kind \"sqs\"",
 		},
+		{
+			name: "kind OpenTel with no creds",
+			fields: fields{
+				Kind:    "opentel",
+				OpenTel: opentelemetryexporter.Settings{OpentelSettings: opentelemetryexporter.OpenTelSettings{URI: "localhost"}},
+			},
+			wantErr: false,
+		},
+		{
+			name: "kind OpenTel with creds",
+			fields: fields{
+				Kind: "opentel",
+				OpenTel: opentelemetryexporter.Settings{
+					OpentelSettings: opentelemetryexporter.OpenTelSettings{URI: "localhost", CACertPath: "/tmp/does-not-exist"},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "kind OpenTel with no uri",
+			fields: fields{
+				Kind: "opentel",
+				OpenTel: opentelemetryexporter.Settings{
+					OpentelSettings: opentelemetryexporter.OpenTelSettings{CACertPath: "/tmp/does-not-exist"},
+				},
+			},
+			wantErr:  true,
+			errValue: "invalid exporter: \"opentel.uri\" is required for kind \"opentel\"",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -173,6 +204,7 @@ func TestExporterConf_IsValid(t *testing.T) {
 				Meta:                    tt.fields.Meta,
 				ParquetCompressionCodec: tt.fields.ParquetCompressionCodec,
 				QueueURL:                tt.fields.QueueURL,
+				OpenTel:                 tt.fields.OpenTel,
 			}
 			err := c.IsValid()
 			assert.Equal(t, tt.wantErr, err != nil)

@@ -90,7 +90,7 @@ func TestExporterBuildsWithOptions(t *testing.T) {
 
 	inMemoryExporter := PersistentInMemoryExporter{}
 	inMemoryProcessor := sdktrace.NewBatchSpanProcessor(&inMemoryExporter)
-	exporter, err := NewExporter(
+	exporter, err := NewExporterFromOpts(
 
 		WithResource(userCustomResource),
 		WithBatchSpanProcessors(&inMemoryProcessor),
@@ -106,17 +106,13 @@ func TestExporterBuildsWithOptions(t *testing.T) {
 	assert.Len(t, exporter.processors, 1)
 }
 
-func acceptExporter(expInterface exporter.Exporter) exporter.Exporter {
-	return expInterface
-}
-
 func TestInterfaceCompliance(t *testing.T) {
 	exporter := Exporter{}
 	_ = acceptExporter(&exporter)
 	assert.True(t, exporter.IsBulk(), "Exporter exporter is a bulk exporter")
 }
 func TestExporterOptionErrorPath(t *testing.T) {
-	exp, err := NewExporter(
+	exp, err := NewExporterFromOpts(
 
 		func(*Exporter) error {
 			return errors.New("test error")
@@ -129,7 +125,7 @@ func TestExporterOptionErrorPath(t *testing.T) {
 	userCustomResource := resource.NewWithAttributes(
 		"https://opentelemetry.io/schemas/1.18.0", attribute.KeyValue{Key: "hello", Value: attribute.StringValue("World")})
 
-	exp, err = NewExporter(
+	exp, err = NewExporterFromOpts(
 
 		WithResource(userCustomResource),
 	)
@@ -176,7 +172,7 @@ func TestExportWithMultipleProcessors(t *testing.T) {
 	assert.NoError(t, err)
 	resource := defaultResource()
 
-	exp, err := NewExporter(
+	exp, err := NewExporterFromOpts(
 
 		WithResource(resource),
 		WithBatchSpanProcessors(&inMemoryProcessor, &stdoutProcessor),
@@ -253,20 +249,9 @@ func TestExportToOtelCollector(t *testing.T) {
 	otelC, err := setupOtelCollectorContainer(ctx, &consumer)
 	assert.NoError(t, err)
 
-	connectParams := grpc.ConnectParams{
-		Backoff: backoff.Config{BaseDelay: time.Second * 2,
-			Multiplier: 2.0,
-			MaxDelay:   time.Second * 16}}
-	otelProcessor, err := OtelCollectorBatchSpanProcessor(otelC.URI,
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithConnectParams(connectParams))
-	assert.NoError(t, err)
-	resource := defaultResource()
+	settings := Settings{OpentelSettings: OpenTelSettings{URI: otelC.URI}}
+	exp, err := NewExporter(settings)
 
-	exp, err := NewExporter(
-		WithResource(resource),
-		WithBatchSpanProcessors(&otelProcessor),
-	)
 	assert.NoError(t, err)
 	err = exp.Export(ctx, logger, featureEvents)
 	assert.NoError(t, err)
@@ -301,6 +286,10 @@ type testStruct struct {
 	Value        float32
 	AnotherValue float64
 	notExported  bool
+}
+
+func acceptExporter(expInterface exporter.Exporter) exporter.Exporter {
+	return expInterface
 }
 
 func checkIfGithubActionCI() bool {

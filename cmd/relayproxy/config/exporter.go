@@ -4,28 +4,32 @@ import (
 	"fmt"
 
 	"github.com/thomaspoignant/go-feature-flag/exporter/kafkaexporter"
+	"github.com/thomaspoignant/go-feature-flag/exporter/opentelemetryexporter"
 	"github.com/xitongsys/parquet-go/parquet"
 )
 
 // ExporterConf contains all the field to configure an exporter
+// The parquet compression line is too long.
+// nolint:lll
 type ExporterConf struct {
-	Kind                    ExporterKind           `mapstructure:"kind" koanf:"kind"`
-	OutputDir               string                 `mapstructure:"outputDir" koanf:"outputdir"`
-	Format                  string                 `mapstructure:"format" koanf:"format"`
-	Filename                string                 `mapstructure:"filename" koanf:"filename"`
-	CsvTemplate             string                 `mapstructure:"csvTemplate" koanf:"csvtemplate"`
-	Bucket                  string                 `mapstructure:"bucket" koanf:"bucket"`
-	Path                    string                 `mapstructure:"path" koanf:"path"`
-	EndpointURL             string                 `mapstructure:"endpointUrl" koanf:"endpointurl"`
-	Secret                  string                 `mapstructure:"secret" koanf:"secret"`
-	Meta                    map[string]string      `mapstructure:"meta" koanf:"meta"`
-	LogFormat               string                 `mapstructure:"logFormat" koanf:"logformat"`
-	FlushInterval           int64                  `mapstructure:"flushInterval" koanf:"flushinterval"`
-	MaxEventInMemory        int64                  `mapstructure:"maxEventInMemory" koanf:"maxeventinmemory"`
-	ParquetCompressionCodec string                 `mapstructure:"parquetCompressionCodec" koanf:"parquetcompressioncodec"`
-	Headers                 map[string][]string    `mapstructure:"headers" koanf:"headers"`
-	QueueURL                string                 `mapstructure:"queueUrl" koanf:"queueurl"`
-	Kafka                   kafkaexporter.Settings `mapstructure:"kafka" koanf:"kafka"`
+	Kind                    ExporterKind                   `mapstructure:"kind" koanf:"kind"`
+	OutputDir               string                         `mapstructure:"outputDir" koanf:"outputdir"`
+	Format                  string                         `mapstructure:"format" koanf:"format"`
+	Filename                string                         `mapstructure:"filename" koanf:"filename"`
+	CsvTemplate             string                         `mapstructure:"csvTemplate" koanf:"csvtemplate"`
+	Bucket                  string                         `mapstructure:"bucket" koanf:"bucket"`
+	Path                    string                         `mapstructure:"path" koanf:"path"`
+	EndpointURL             string                         `mapstructure:"endpointUrl" koanf:"endpointurl"`
+	Secret                  string                         `mapstructure:"secret" koanf:"secret"`
+	Meta                    map[string]string              `mapstructure:"meta" koanf:"meta"`
+	LogFormat               string                         `mapstructure:"logFormat" koanf:"logformat"`
+	FlushInterval           int64                          `mapstructure:"flushInterval" koanf:"flushinterval"`
+	MaxEventInMemory        int64                          `mapstructure:"maxEventInMemory" koanf:"maxeventinmemory"`
+	ParquetCompressionCodec string                         `mapstructure:"parquetCompressionCodec" koanf:"parquetcompressioncodec"`
+	Headers                 map[string][]string            `mapstructure:"headers" koanf:"headers"`
+	QueueURL                string                         `mapstructure:"queueUrl" koanf:"queueurl"`
+	Kafka                   kafkaexporter.Settings         `mapstructure:"kafka" koanf:"kafka"`
+	OpenTel                 opentelemetryexporter.Settings `mapstructure:"opentel" koanf:"opentel"`
 }
 
 func (c *ExporterConf) IsValid() error {
@@ -54,6 +58,10 @@ func (c *ExporterConf) IsValid() error {
 		return fmt.Errorf("invalid exporter: \"kakfa.topic\" and \"kafka.addresses\" are required for kind \"%s\"", c.Kind)
 	}
 
+	if c.Kind == OpenTelExporter && (c.OpenTel.OpentelSettings.URI == "") {
+		return fmt.Errorf("invalid exporter: \"opentel.uri\" is required for kind \"%s\"", c.Kind)
+	}
+
 	return nil
 }
 
@@ -67,12 +75,14 @@ const (
 	GoogleStorageExporter ExporterKind = "googleStorage"
 	SQSExporter           ExporterKind = "sqs"
 	KafkaExporter         ExporterKind = "kafka"
+	OpenTelExporter       ExporterKind = "opentel"
 )
 
 // IsValid is checking if the value is part of the enum
 func (r ExporterKind) IsValid() error {
 	switch r {
-	case FileExporter, WebhookExporter, LogExporter, S3Exporter, GoogleStorageExporter, SQSExporter, KafkaExporter:
+	case FileExporter, WebhookExporter, LogExporter, S3Exporter,
+		GoogleStorageExporter, SQSExporter, KafkaExporter, OpenTelExporter:
 		return nil
 	}
 	return fmt.Errorf("invalid exporter: kind \"%s\" is not supported", r)

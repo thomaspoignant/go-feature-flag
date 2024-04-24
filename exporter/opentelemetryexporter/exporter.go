@@ -2,10 +2,14 @@ package opentelemetryexporter
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"errors"
 	"fmt"
+	"os"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"go.opentelemetry.io/otel"
@@ -20,6 +24,9 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/backoff"
+	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
 
 	"log"
 )
@@ -40,6 +47,16 @@ func (*Exporter) IsBulk() bool {
 	return true
 }
 
+type OpenTelSettings struct {
+	URI        string `json:"uri"`
+	CACertPath string `json:"cacertpath"`
+}
+
+type Settings struct {
+	OpentelSettings OpenTelSettings   `json:"opentelsettings"`
+	Resource        map[string]string `json:"resource"`
+}
+
 type ExporterOption func(*Exporter) error
 
 func getTracer() trace.Tracer {
@@ -49,7 +66,76 @@ func getTracer() trace.Tracer {
 		trace.WithSchemaURL(semconv.SchemaURL))
 }
 
-func NewExporter(opts ...ExporterOption) (*Exporter, error) {
+func getTransportCredentials(caCertPath string) (credentials.TransportCredentials, error) {
+	if caCertPath != "" {
+		_, err := os.Stat(caCertPath)
+		if err != nil {
+			return nil, err
+		}
+
+		pemServerCA, err := os.ReadFile(caCertPath)
+		if err != nil {
+			return nil, err
+		}
+
+		certPool := x509.NewCertPool()
+		if !certPool.AppendCertsFromPEM(pemServerCA) {
+			return nil, fmt.Errorf("failed to add server CA's certificate")
+		}
+
+		// I don't like setting the minversion, but gosec will complain otherwise
+		config := &tls.Config{
+			RootCAs:    certPool,
+			MinVersion: tls.VersionTLS12,
+		}
+
+		return credentials.NewTLS(config), nil
+	}
+	return insecure.NewCredentials(), nil
+}
+
+func NewExporter(settings Settings) (*Exporter, error) {
+	processorOptions := make([]grpc.DialOption, 0)
+	exporterOptions := make([]ExporterOption, 0)
+
+	connectParams := grpc.ConnectParams{
+		Backoff: backoff.Config{BaseDelay: time.Second * 2,
+			Multiplier: 2.0,
+			MaxDelay:   time.Second * 16}}
+
+	credentials, err := getTransportCredentials(settings.OpentelSettings.CACertPath)
+	if err != nil {
+		return nil, err
+	}
+
+	processorOptions = append(processorOptions, grpc.WithConnectParams(connectParams))
+	processorOptions = append(processorOptions, grpc.WithTransportCredentials(credentials))
+
+	exporterOptions = append(exporterOptions, WithResource(defaultResource()))
+	if len(settings.Resource) > 0 {
+		exporterOptions = append(exporterOptions, WithResource(mapToResource(settings.Resource)))
+	}
+
+	otelProcessor, err := OtelCollectorBatchSpanProcessor(settings.OpentelSettings.URI,
+		processorOptions...,
+	)
+
+	exporterOptions = append(exporterOptions, WithBatchSpanProcessors(&otelProcessor))
+
+	if err != nil {
+		return nil, err
+	}
+
+	exp, err := NewExporterFromOpts(exporterOptions...)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return exp, nil
+}
+
+func NewExporterFromOpts(opts ...ExporterOption) (*Exporter, error) {
 	exporter := Exporter{}
 	for _, opt := range opts {
 		if err := opt(&exporter); err != nil {
@@ -82,6 +168,17 @@ func defaultResource() *resource.Resource {
 		semconv.SchemaURL,
 		semconv.ServiceName(serviceName),
 		semconv.ServiceVersion(ServiceVersion),
+	)
+}
+
+func mapToResource(attrs map[string]string) *resource.Resource {
+	customKeyValues := make([]attribute.KeyValue, 0)
+	for ck, cv := range attrs {
+		customKeyValues = append(customKeyValues,
+			attribute.KeyValue{Key: attribute.Key(ck), Value: attribute.StringValue(cv)})
+	}
+	return resource.NewWithAttributes(
+		semconv.SchemaURL, customKeyValues...,
 	)
 }
 
