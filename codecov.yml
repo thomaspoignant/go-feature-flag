@@ -9,3 +9,4 @@ ignore:
   - "**/testdata/"
   - "**/testutils/"
   - "**/modeldocs/"
+  - "cmd/relayproxy/docs/"
