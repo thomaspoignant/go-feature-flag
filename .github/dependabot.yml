@@ -9,7 +9,9 @@ updates:
     open-pull-requests-limit: 20
     labels:
       - "dependencies"
-      - "automerge"     
+      - "automerge"
+    commit-message:
+      prefix: "chore"
 
   # GitHub Actions
   - package-ecosystem: "github-actions"
@@ -21,6 +23,8 @@ updates:
     labels:
       - "dependencies"
       - "automerge"
+    commit-message:
+      prefix: "chore"
 
   # Integration tests
   - package-ecosystem: nuget
@@ -32,6 +36,8 @@ updates:
     labels:
       - "dependencies"
       - "automerge"
+    commit-message:
+      prefix: "chore"
 
   - package-ecosystem: gomod
     directory: "/openfeature/provider_tests/go-integration-tests"
@@ -42,6 +48,8 @@ updates:
     labels:
       - "dependencies"
       - "automerge"
+    commit-message:
+      prefix: "chore"
 
   - package-ecosystem: npm
     directory: "/openfeature/provider_tests/js-integration-tests"
@@ -52,6 +60,8 @@ updates:
     labels:
       - "dependencies"
       - "automerge"
+    commit-message:
+      prefix: "chore"
 
   - package-ecosystem: maven
     directory: "/openfeature/provider_tests/java-integration-tests"
@@ -62,7 +72,8 @@ updates:
     labels:
       - "dependencies"
       - "automerge"
-
+    commit-message:
+      prefix: "chore"
 
   # Providers
   - package-ecosystem: gradle
@@ -74,6 +85,8 @@ updates:
     labels:
       - "dependencies"
       - "automerge"
+    commit-message:
+      prefix: "chore"
 
   - package-ecosystem: pip
     directory: "/openfeature/providers/python-provider"
@@ -84,6 +97,8 @@ updates:
     labels:
       - "dependencies"
       - "automerge"
+    commit-message:
+      prefix: "chore"
 
   # Examples App
   - package-ecosystem: npm
@@ -95,6 +110,8 @@ updates:
     labels:
       - "dependencies"
       - "automerge"
+    commit-message:
+      prefix: "chore"
 
   - package-ecosystem: npm
     directory: "/examples/openfeature_nodejs/nodejs-app"
@@ -105,6 +122,8 @@ updates:
     labels:
       - "dependencies"
       - "automerge"
+    commit-message:
+      prefix: "chore"
 
   - package-ecosystem: gradle
     directory: "/examples/openfeature_kotlin_server/kotlin-app"
@@ -115,3 +134,5 @@ updates:
     labels:
       - "dependencies"
       - "automerge"
+    commit-message:
+      prefix: "chore"
