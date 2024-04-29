@@ -10,3 +10,4 @@ ignore:
   - "**/testutils/"
   - "**/modeldocs/"
   - "cmd/relayproxy/docs/"
+  - "cmd/jsonschema-generator/"
