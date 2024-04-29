@@ -79,7 +79,7 @@ provider-tests: ## Run the integration tests for the Open Feature Providers
 	./openfeature/provider_tests/integration_tests.sh
 
 coverage: ## Run the tests of the project and export the coverage
-	$(GOTEST) -cover -covermode=count -coverprofile=coverage.cov.tmp ./... \
+	$(GOTEST) -cover -covermode=count -tags=docker -coverprofile=coverage.cov.tmp ./... \
 	&& cat coverage.cov.tmp | grep -v "/examples/" > coverage.cov
 
 bench: ## Launch the benchmark test
