@@ -11,3 +11,4 @@ ignore:
   - "**/modeldocs/"
   - "cmd/relayproxy/docs/"
   - "cmd/jsonschema-generator/"
+  - "cmd/relayproxy/modeldocs/"
