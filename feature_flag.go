@@ -235,3 +235,8 @@ func (g *GoFeatureFlag) GetCacheRefreshDate() time.Time {
 func GetCacheRefreshDate() time.Time {
 	return ff.GetCacheRefreshDate()
 }
+
+// GetPollingInterval is the polling interval between 2 refresh of the cache
+func (g *GoFeatureFlag) GetPollingInterval() int64 {
+	return g.config.PollingInterval.Milliseconds()
+}

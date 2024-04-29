@@ -262,8 +262,6 @@ func Test_Evaluate(t *testing.T) {
 
 			e.ServeHTTP(rec, req)
 			wantBody, err := os.ReadFile(tt.want.bodyFile)
-			fmt.Println(rec.Body.String())
-
 			assert.NoError(t, err, "Impossible the expected wantBody file %s", tt.want.bodyFile)
 			assert.Equal(t, tt.want.httpCode, rec.Code, "Invalid HTTP Code")
 			assert.JSONEq(t, string(wantBody), rec.Body.String(), "Invalid response wantBody")
