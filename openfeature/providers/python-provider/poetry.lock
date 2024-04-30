@@ -273,17 +273,14 @@ files = [
 
 [[package]]
 name = "openfeature-sdk"
-version = "0.6.1"
+version = "0.7.0"
 description = "Standardizing Feature Flagging for Everyone"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "openfeature_sdk-0.6.1-py3-none-any.whl", hash = "sha256:26f66848861c3dc5ad0924086e1124d2ef50429f1a932852c8d94bcf188ebb96"},
-    {file = "openfeature_sdk-0.6.1.tar.gz", hash = "sha256:eae6008efb48a6c4f594e283e30f6e5fb6baba68ba782da70ab3f5bcb13fd0d9"},
+    {file = "openfeature_sdk-0.7.0-py3-none-any.whl", hash = "sha256:cf96894eb3fae87e6e129a1d0614feafd93d56a0ffd5bbcecae837146bd28da8"},
+    {file = "openfeature_sdk-0.7.0.tar.gz", hash = "sha256:70ce29d815eae6ada9d6b0ac37ef84ab472b00e8f9a66043930ea0d18fec707e"},
 ]
-
-[package.extras]
-dev = ["pip-tools", "pre-commit", "pytest"]
 
 [[package]]
 name = "packaging"
@@ -648,4 +645,4 @@ test = ["websockets"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "622cef86e2fec22f51780fd75ac5b055b0648b816753945feb42c331807b5738"
+content-hash = "2e4df651e12eca5996a64539a295452593d325b02a3a34f8698fb24c774a2a08"
