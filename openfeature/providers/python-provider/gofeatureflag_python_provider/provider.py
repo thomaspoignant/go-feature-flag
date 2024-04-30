@@ -18,13 +18,12 @@ from openfeature.exception import (
 from openfeature.flag_evaluation import FlagResolutionDetails, Reason
 from openfeature.hook import Hook
 from openfeature.provider.metadata import Metadata
-from openfeature.provider.provider import AbstractProvider
+from openfeature.provider import AbstractProvider
 from pydantic import PrivateAttr, ValidationError
 
 from gofeatureflag_python_provider.data_collector_hook import DataCollectorHook
 from gofeatureflag_python_provider.metadata import GoFeatureFlagMetadata
 from gofeatureflag_python_provider.options import BaseModel, GoFeatureFlagOptions
-from gofeatureflag_python_provider.provider_status import ProviderStatus
 from gofeatureflag_python_provider.request_flag_evaluation import (
     RequestFlagEvaluation,
     convert_evaluation_context,
@@ -46,7 +45,6 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
     options: GoFeatureFlagOptions
     _http_client: urllib3.PoolManager = PrivateAttr()
     _cache: pylru.lrucache = PrivateAttr()
-    _status: ProviderStatus = PrivateAttr(ProviderStatus.NOT_READY)
     _data_collector_hook: Optional[DataCollectorHook] = PrivateAttr()
     _ws: websocket.WebSocketApp = PrivateAttr()
     _ws_thread: Thread = PrivateAttr()
@@ -75,17 +73,7 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
         self._ws = websocket.WebSocketApp(
             self._build_websocket_uri(),
             on_message=self._websocket_message_handler,
-            on_open=self._websocket_open_handler,
-            on_close=self._websocket_close_handler,
-            on_error=self._websocket_error_handler,
         )
-
-    def get_status(self) -> ProviderStatus:
-        """
-        get_status returns the status of the provider
-        :return: the status of the provider
-        """
-        return self._status
 
     def initialize(self, evaluation_context: EvaluationContext) -> None:
         """
@@ -99,8 +87,6 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
         if self.options.disable_cache_invalidation is False:
             self._ws_thread = Thread(target=self.run_websocket)
             self._ws_thread.start()
-        else:
-            self._status = ProviderStatus.READY
 
     def shutdown(self):
         if self.options.disable_cache_invalidation is False:
@@ -113,8 +99,6 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
         if self._data_collector_hook is not None:
             self._data_collector_hook.shutdown()
             self._data_collector_hook = None
-
-        self._status = ProviderStatus.NOT_READY
 
     def get_metadata(self) -> Metadata:
         return GoFeatureFlagMetadata()
@@ -192,14 +176,6 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
         :return: a FlagResolutionDetails object containing the response for the SDK.
         """
         try:
-            if self._status != ProviderStatus.READY:
-                return FlagResolutionDetails[original_type](
-                    value=default_value,
-                    reason=Reason.ERROR,
-                    error_code=ErrorCode.PROVIDER_NOT_READY,
-                    error_message="GO Feature Flag provider is not ready",
-                )
-
             goff_evaluation_context = convert_evaluation_context(evaluation_context)
             goff_request = RequestFlagEvaluation(
                 user=goff_evaluation_context,
@@ -309,33 +285,6 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
         """
         # when we receive a message from go-feature-flag server, we clear the cache.
         self._cache.clear()
-
-    def _websocket_open_handler(self, ws_app) -> None:
-        """
-        websocket_open_handler is the handler called when the websocket is open
-        :param ws app: the websocket app
-        :return: None
-        """
-        self._status = ProviderStatus.READY
-
-    def _websocket_error_handler(self, ws_app, error) -> None:
-        """
-        websocket_error_handler is the handler called when we receive an error from the GO Feature Flag server
-        :param ws_app: the websocket app
-        :param error: error received
-        :return: None
-        """
-        self._status = ProviderStatus.ERROR
-
-    def _websocket_close_handler(self, ws_app, close_status_code, close_msg) -> None:
-        """
-        websocket_close_handler is the handler called when the websocket is closed
-        :param wsapp: the websocket app
-        :param close_status_code: the status code of the close
-        :param close_msg: the message of the close
-        :return: None
-        """
-        self._status = ProviderStatus.STALE
 
     def __hash__(self):
         return id(self)
