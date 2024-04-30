@@ -44,6 +44,10 @@
   background-color: rgb(255, 153, 0);
 }
 
+.socialIconPubSub {
+  background-color: rgb(194, 223, 255);
+}
+
 .socialIconGitlab {
   background-color: #D1D0D3;
 }

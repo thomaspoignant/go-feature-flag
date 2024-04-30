@@ -28,6 +28,7 @@ func NewCollectEvalData(goFF *ffclient.GoFeatureFlag, metrics metric.Metrics) Co
 
 // Handler is the entry point for the data/collector endpoint
 // @Summary      Endpoint to send usage of your flags to be collected
+// @Tags GO Feature Flag Evaluation API
 // @Description  This endpoint is receiving the events of your flags usage to send them in the data collector.
 // @Description
 // @Description  It is used by the different Open Feature providers to send in bulk all the cached events to avoid

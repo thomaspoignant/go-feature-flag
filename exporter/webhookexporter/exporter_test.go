@@ -15,7 +15,7 @@ import (
 
 func TestWebhook_IsBulk(t *testing.T) {
 	exporter := Exporter{}
-	assert.True(t, exporter.IsBulk(), "Exporter exporter is not a bulk exporter")
+	assert.True(t, exporter.IsBulk(), "Exporter is a bulk exporter")
 }
 
 func TestWebhook_Export(t *testing.T) {

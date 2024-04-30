@@ -32,6 +32,9 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Monitoring"
+                ],
                 "summary": "Health",
                 "responses": {
                     "200": {
@@ -48,6 +51,9 @@ const docTemplate = `{
                 "description": "Making a **GET** request to the URL path ` + "`" + `/info` + "`" + ` will give you information about the actual state\nof the relay proxy.\n\nAs of Today the level of information is small be we can improve this endpoint to returns more\ninformation.",
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "Monitoring"
                 ],
                 "summary": "Info",
                 "responses": {
@@ -66,12 +72,75 @@ const docTemplate = `{
                 "produces": [
                     "text/plain"
                 ],
+                "tags": [
+                    "Monitoring"
+                ],
                 "summary": "Prometheus endpoint",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/ofrep/v1/configuration": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "OFREP configuration to provide information about the remote flag management system, to configure the\nOpenFeature SDK providers.\n\nThis endpoint will be called during the initialization of the provider.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "OpenFeature Remote Evaluation Protocol (OFREP)"
+                ],
+                "summary": "OFREP provider configuration",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The request will be processed only if ETag doesn't match.",
+                        "name": "If-None-Match",
+                        "in": "header"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/model.OFREPConfiguration"
+                        }
+                    },
+                    "304": {
+                        "description": "Etag: \\\"117-0193435c612c50d93b798619d9464856263dbf9f\\",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
+                        }
+                    },
+                    "404": {
+                        "description": "Flag Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/model.OFREPEvaluateErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
                         }
                     }
                 }
@@ -90,6 +159,9 @@ const docTemplate = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "OpenFeature Remote Evaluation Protocol (OFREP)"
                 ],
                 "summary": "Open-Feature Remote Evaluation Protocol bulk evaluation API.",
                 "parameters": [
@@ -114,6 +186,12 @@ const docTemplate = `{
                         "description": "OFREP successful evaluation response",
                         "schema": {
                             "$ref": "#/definitions/model.OFREPBulkEvaluateSuccessResponse"
+                        }
+                    },
+                    "304": {
+                        "description": "Etag: \\\"117-0193435c612c50d93b798619d9464856263dbf9f\\",
+                        "schema": {
+                            "type": "string"
                         }
                     },
                     "400": {
@@ -156,6 +234,9 @@ const docTemplate = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "OpenFeature Remote Evaluation Protocol (OFREP)"
                 ],
                 "summary": "Evaluate a feature flag using the OpenFeature Remote Evaluation Protocol",
                 "parameters": [
@@ -224,6 +305,9 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "GO Feature Flag Evaluation API"
+                ],
                 "summary": "All flags variations for a user",
                 "parameters": [
                     {
@@ -272,6 +356,9 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "GO Feature Flag Evaluation API"
+                ],
                 "summary": "Endpoint to send usage of your flags to be collected",
                 "parameters": [
                     {
@@ -319,6 +406,9 @@ const docTemplate = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "GO Feature Flag Evaluation API"
                 ],
                 "summary": "Evaluate a feature flag",
                 "parameters": [
@@ -369,6 +459,9 @@ const docTemplate = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "GO Feature Flag Evaluation API"
                 ],
                 "summary": "Websocket endpoint to be notified about flag changes",
                 "parameters": [
@@ -633,6 +726,44 @@ const docTemplate = `{
                     "$ref": "#/definitions/flag.ErrorCode"
                 },
                 "errorDetails": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.OFREPConfigCapabilities": {
+            "type": "object",
+            "properties": {
+                "cacheInvalidation": {
+                    "$ref": "#/definitions/model.OFREPConfigCapabilitiesCacheInvalidation"
+                }
+            }
+        },
+        "model.OFREPConfigCapabilitiesCacheInvalidation": {
+            "type": "object",
+            "properties": {
+                "polling": {
+                    "$ref": "#/definitions/model.OFREPConfigCapabilitiesCacheInvalidationPolling"
+                }
+            }
+        },
+        "model.OFREPConfigCapabilitiesCacheInvalidationPolling": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "minPollingInterval": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.OFREPConfiguration": {
+            "type": "object",
+            "properties": {
+                "capabilities": {
+                    "$ref": "#/definitions/model.OFREPConfigCapabilities"
+                },
+                "name": {
                     "type": "string"
                 }
             }

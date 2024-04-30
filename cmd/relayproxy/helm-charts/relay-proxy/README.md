@@ -1,6 +1,6 @@
 # relay-proxy
 
-![Version: 1.25.0](https://img.shields.io/badge/Version-1.25.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.25.0](https://img.shields.io/badge/AppVersion-v1.25.0-informational?style=flat-square)
+![Version: 1.26.0](https://img.shields.io/badge/Version-1.26.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.26.0](https://img.shields.io/badge/AppVersion-v1.26.0-informational?style=flat-square)
 
 A Helm chart to deploy go-feature-flag-relay proxy into Kubernetes
 
@@ -237,7 +237,7 @@ string
 			<td>
 				<div style="max-width: 300px;">
 <pre lang="json">
-"thomaspoignant/go-feature-flag"
+"gofeatureflag/go-feature-flag"
 </pre>
 </div>
 			</td>

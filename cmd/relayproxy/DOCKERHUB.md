@@ -50,7 +50,7 @@ The default port used for the service is `1031`.
 ```shell
 docker run \
   -v $(pwd)/goff-proxy.yaml:/goff/goff-proxy.yaml \
-  thomaspoignant/go-feature-flag:latest
+  gofeatureflag/go-feature-flag:latest
 ```
 
 ## Test it locally
@@ -65,7 +65,7 @@ curl https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/cmd/r
 docker run \
   -p 1031:1031 \
   -v $(pwd)/goff-proxy.yaml:/goff/goff-proxy.yaml \
-  thomaspoignant/go-feature-flag:latest
+  gofeatureflag/go-feature-flag:latest
   
 # Call the API
 curl -X 'POST' \

@@ -30,6 +30,7 @@ func NewOFREPEvaluate(goFF *ffclient.GoFeatureFlag, metrics metric.Metrics) Eval
 
 // Evaluate is the entry point to evaluate a flag using the OpenFeature Remote Evaluation Protocol
 // @Summary     Evaluate a feature flag using the OpenFeature Remote Evaluation Protocol
+// @Tags OpenFeature Remote Evaluation Protocol (OFREP)
 // @Description Making a **POST** request to the URL `/ofrep/v1/evaluate/flags/{your_flag_name}` will give you the
 // @Description value of the flag for this evaluation context
 // @Description
@@ -49,8 +50,8 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 	if flagKey == "" {
 		return c.JSON(
 			http.StatusBadRequest,
-			NewEvaluateError(flag.ErrorCodeGeneral,
-				"No key provided in the URL").ToOFRErrorResponse())
+			NewEvaluateError(flagKey, flag.ErrorCodeGeneral,
+				"No key provided in the URL"))
 	}
 	h.metrics.IncFlagEvaluation(flagKey)
 
@@ -58,16 +59,25 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 	if err := c.Bind(reqBody); err != nil {
 		return c.JSON(
 			http.StatusBadRequest,
-			NewEvaluateError(flag.ErrorCodeInvalidContext, err.Error()).ToOFRErrorResponse())
+			NewEvaluateError(flagKey, flag.ErrorCodeInvalidContext, err.Error()))
 	}
 	if err := assertOFREPEvaluateRequest(reqBody); err != nil {
-		return c.JSON(http.StatusBadRequest, err.ToOFRErrorResponse())
+		return c.JSON(http.StatusBadRequest, model.OFREPEvaluateErrorResponse{
+			OFREPCommonErrorResponse: *err,
+			Key:                      flagKey,
+		})
 	}
 	evalCtx, err := evaluationContextFromOFREPRequest(reqBody.Context)
 	if err != nil {
 		return c.JSON(
 			http.StatusBadRequest,
-			err)
+			model.OFREPEvaluateErrorResponse{
+				OFREPCommonErrorResponse: model.OFREPCommonErrorResponse{
+					ErrorCode:    flag.ErrorCodeInvalidContext,
+					ErrorDetails: err.Error(),
+				},
+				Key: flagKey,
+			})
 	}
 
 	tracer := otel.GetTracerProvider().Tracer(config.OtelTracerName)
@@ -83,8 +93,8 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 		}
 		return c.JSON(
 			httpStatus,
-			NewEvaluateError(flagValue.ErrorCode,
-				fmt.Sprintf("Error while evaluating the flag: %s", flagKey)).ToOFRErrorResponse())
+			NewEvaluateError(flagKey, flagValue.ErrorCode,
+				fmt.Sprintf("Error while evaluating the flag: %s", flagKey)))
 	}
 
 	span.SetAttributes(
@@ -111,6 +121,7 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 
 // BulkEvaluate is the entry point to evaluate in bulk flags using the OpenFeature Remote Evaluation Protocol
 // @Summary     Open-Feature Remote Evaluation Protocol bulk evaluation API.
+// @Tags OpenFeature Remote Evaluation Protocol (OFREP)
 // @Description Making a **POST** request to the URL `/ofrep/v1/evaluate/flags` will give you the value of the list
 // @Description of feature flags for this evaluation context.
 // @Description
@@ -120,7 +131,8 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 // @Accept	 	json
 // @Param       If-None-Match header string false "The request will be processed only if ETag doesn't match."
 // @Param 		data body model.OFREPEvalFlagRequest true "Evaluation Context and list of flag for this API call"
-// @Success     200  {object} model.OFREPBulkEvaluateSuccessResponse "OFREP successful evaluation response"
+// @Success     200 {object} model.OFREPBulkEvaluateSuccessResponse "OFREP successful evaluation response"
+// @Success     304 {string} string "Etag: \"117-0193435c612c50d93b798619d9464856263dbf9f\""
 // @Failure     400 {object}  model.OFREPCommonErrorResponse "Bad evaluation request"
 // @Failure     401 {object}  modeldocs.HTTPErrorDoc "Unauthorized - You need credentials to access the API"
 // @Failure     403 {object}  modeldocs.HTTPErrorDoc "Forbidden - You are not authorized to access the API"
@@ -133,10 +145,10 @@ func (h *EvaluateCtrl) BulkEvaluate(c echo.Context) error {
 	if err := c.Bind(request); err != nil {
 		return c.JSON(
 			http.StatusBadRequest,
-			NewEvaluateError("INVALID_CONTEXT", err.Error()).ToOFRErrorResponse())
+			NewOFREPCommonError("INVALID_CONTEXT", err.Error()))
 	}
 	if err := assertOFREPEvaluateRequest(request); err != nil {
-		return c.JSON(http.StatusBadRequest, err.ToOFRErrorResponse())
+		return c.JSON(http.StatusBadRequest, err)
 	}
 	evalCtx, err := evaluationContextFromOFREPRequest(request.Context)
 	if err != nil {
@@ -179,13 +191,13 @@ func (h *EvaluateCtrl) BulkEvaluate(c echo.Context) error {
 		attribute.Int("AllFlagsState.numberEvaluation", len(response.Flags)),
 	)
 
-	c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSONCharsetUTF8)
+	c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	return c.JSON(http.StatusOK, response)
 }
 
-func assertOFREPEvaluateRequest(ofrepEvalReq *model.OFREPEvalFlagRequest) *EvaluateError {
+func assertOFREPEvaluateRequest(ofrepEvalReq *model.OFREPEvalFlagRequest) *model.OFREPCommonErrorResponse {
 	if ofrepEvalReq.Context == nil || ofrepEvalReq.Context["targetingKey"] == "" {
-		return NewEvaluateError(flag.ErrorCodeTargetingKeyMissing,
+		return NewOFREPCommonError(flag.ErrorCodeTargetingKeyMissing,
 			"GO Feature Flag MUST have a targeting key in the request.")
 	}
 	return nil
@@ -197,6 +209,7 @@ func evaluationContextFromOFREPRequest(ctx map[string]any) (ffcontext.Context, e
 		evalCtx := utils.ConvertEvaluationCtxFromRequest(targetingKey, ctx)
 		return evalCtx, nil
 	}
-	return ffcontext.EvaluationContext{}, NewEvaluateError(
-		flag.ErrorCodeTargetingKeyMissing, "GO Feature Flag has received a targetingKey that is not a string.")
+	return ffcontext.EvaluationContext{}, NewOFREPCommonError(
+		flag.ErrorCodeTargetingKeyMissing,
+		"GO Feature Flag has received no targetingKey or a none string value that is not a string.")
 }

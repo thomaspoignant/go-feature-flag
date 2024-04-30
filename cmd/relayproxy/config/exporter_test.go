@@ -22,6 +22,8 @@ func TestExporterConf_IsValid(t *testing.T) {
 		Meta                    map[string]string
 		ParquetCompressionCodec string
 		QueueURL                string
+		ProjectID               string
+		Topic                   string
 		OpenTel                 opentelemetryexporter.Settings
 	}
 	tests := []struct {
@@ -160,6 +162,33 @@ func TestExporterConf_IsValid(t *testing.T) {
 			errValue: "invalid exporter: no \"queueUrl\" property found for kind \"sqs\"",
 		},
 		{
+			name: "kind PubSub valid",
+			fields: fields{
+				Kind:      "pubsub",
+				ProjectID: "fake-project-id",
+				Topic:     "fake-topic",
+			},
+			wantErr: false,
+		},
+		{
+			name: "kind PubSub without project id",
+			fields: fields{
+				Kind:  "pubsub",
+				Topic: "fake-topic",
+			},
+			wantErr:  true,
+			errValue: "invalid exporter: \"projectID\" and \"topic\" are required for kind \"pubsub\"",
+		},
+		{
+			name: "kind PubSub without topic",
+			fields: fields{
+				Kind:      "pubsub",
+				ProjectID: "fake-project-id",
+			},
+			wantErr:  true,
+			errValue: "invalid exporter: \"projectID\" and \"topic\" are required for kind \"pubsub\"",
+		},
+		{
 			name: "kind OpenTel with no creds",
 			fields: fields{
 				Kind:    "opentel",
@@ -204,6 +233,8 @@ func TestExporterConf_IsValid(t *testing.T) {
 				Meta:                    tt.fields.Meta,
 				ParquetCompressionCodec: tt.fields.ParquetCompressionCodec,
 				QueueURL:                tt.fields.QueueURL,
+				ProjectID:               tt.fields.ProjectID,
+				Topic:                   tt.fields.Topic,
 				OpenTel:                 tt.fields.OpenTel,
 			}
 			err := c.IsValid()
