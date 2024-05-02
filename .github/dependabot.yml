@@ -136,3 +136,14 @@ updates:
       - "automerge"
     commit-message:
       prefix: "chore"
+
+  - package-ecosystem: npm
+    directory: "/website"
+    schedule:
+      interval: monthly
+      time: "04:00"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "chore(website)"
