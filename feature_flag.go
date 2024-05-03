@@ -76,6 +76,10 @@ func New(config Config) (*GoFeatureFlag, error) {
 		// do nothing
 	}
 
+	if config.offlineMutex == nil {
+		config.offlineMutex = &sync.RWMutex{}
+	}
+
 	goFF := &GoFeatureFlag{
 		config: config,
 	}
@@ -145,9 +149,11 @@ func (g *GoFeatureFlag) startFlagUpdaterDaemon() {
 	for {
 		select {
 		case <-g.bgUpdater.ticker.C:
-			err := retrieveFlagsAndUpdateCache(g.config, g.cache, g.retrieverManager)
-			if err != nil {
-				fflog.Printf(g.config.Logger, "error while updating the cache: %v\n", err)
+			if !g.IsOffline() {
+				err := retrieveFlagsAndUpdateCache(g.config, g.cache, g.retrieverManager)
+				if err != nil {
+					fflog.Printf(g.config.Logger, "error while updating the cache: %v\n", err)
+				}
 			}
 		case <-g.bgUpdater.updaterChan:
 			return
