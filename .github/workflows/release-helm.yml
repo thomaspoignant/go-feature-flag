@@ -63,7 +63,7 @@ jobs:
         if: steps.changed-files-specific.outputs.any_changed == 'true'
         with:
           branch: update-relay-proxy-chart-readme
-          title: Update relay proxy helm README
+          title: docs(helm): Update relay proxy helm README
           body: Automated pull request to update relay-proxy helm chart README
           commit-message: Update relay proxy helm README
           labels: automerge
