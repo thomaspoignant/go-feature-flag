@@ -59,7 +59,7 @@ type GoFeatureFlag struct {
 var ff *GoFeatureFlag
 var onceFF sync.Once
 
-// New creates a new go-feature-flag instance that retrieve the config from a YAML file
+// New creates a new go-feature-flag instances that retrieve the config from a YAML file
 // and return everything you need to manage your flags.
 func New(config Config) (*GoFeatureFlag, error) {
 	switch {
@@ -74,6 +74,10 @@ func New(config Config) (*GoFeatureFlag, error) {
 		config.PollingInterval = time.Second
 	default:
 		// do nothing
+	}
+
+	if config.offlineMutex == nil {
+		config.offlineMutex = &sync.RWMutex{}
 	}
 
 	goFF := &GoFeatureFlag{
@@ -145,9 +149,11 @@ func (g *GoFeatureFlag) startFlagUpdaterDaemon() {
 	for {
 		select {
 		case <-g.bgUpdater.ticker.C:
-			err := retrieveFlagsAndUpdateCache(g.config, g.cache, g.retrieverManager)
-			if err != nil {
-				fflog.Printf(g.config.Logger, "error while updating the cache: %v\n", err)
+			if !g.IsOffline() {
+				err := retrieveFlagsAndUpdateCache(g.config, g.cache, g.retrieverManager)
+				if err != nil {
+					fflog.Printf(g.config.Logger, "error while updating the cache: %v\n", err)
+				}
 			}
 		case <-g.bgUpdater.updaterChan:
 			return
@@ -231,12 +237,32 @@ func (g *GoFeatureFlag) GetCacheRefreshDate() time.Time {
 	return g.cache.GetLatestUpdateDate()
 }
 
+// SetOffline updates the config Offline parameter
+func (g *GoFeatureFlag) SetOffline(control bool) {
+	g.config.SetOffline(control)
+}
+
+// IsOffline allows knowing if the feature flag is in offline mode
+func (g *GoFeatureFlag) IsOffline() bool {
+	return g.config.IsOffline()
+}
+
+// SetOffline updates the config Offline parameter
+func SetOffline(control bool) {
+	ff.SetOffline(control)
+}
+
+// IsOffline allows knowing if the feature flag is in offline mode
+func IsOffline() bool {
+	return ff.IsOffline()
+}
+
 // GetCacheRefreshDate gives the date of the latest refresh of the cache
 func GetCacheRefreshDate() time.Time {
 	return ff.GetCacheRefreshDate()
 }
 
-// GetPollingInterval is the polling interval between 2 refresh of the cache
+// GetPollingInterval is the polling interval between 2 refreshes of the cache
 func (g *GoFeatureFlag) GetPollingInterval() int64 {
 	return g.config.PollingInterval.Milliseconds()
 }

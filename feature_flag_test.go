@@ -2,22 +2,20 @@ package ffclient_test
 
 import (
 	"errors"
-	"github.com/thomaspoignant/go-feature-flag/ffcontext"
-	"github.com/thomaspoignant/go-feature-flag/testutils/initializableretriever"
 	"log"
 	"os"
 	"testing"
 	"time"
 
-	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	"github.com/thomaspoignant/go-feature-flag/retriever"
-
-	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
-	"github.com/thomaspoignant/go-feature-flag/retriever/s3retriever"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/stretchr/testify/assert"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
+	"github.com/thomaspoignant/go-feature-flag/ffcontext"
+	"github.com/thomaspoignant/go-feature-flag/internal/flag"
+	"github.com/thomaspoignant/go-feature-flag/retriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever/s3retriever"
+	"github.com/thomaspoignant/go-feature-flag/testutils/initializableretriever"
 	"github.com/thomaspoignant/go-feature-flag/testutils/mock"
 )
 
@@ -118,6 +116,11 @@ func TestValidUseCase(t *testing.T) {
 
 	allFlags := ffclient.AllFlagsState(user)
 	assert.Equal(t, 2, len(allFlags.GetFlags()))
+
+	ffclient.SetOffline(true)
+	assert.True(t, ffclient.IsOffline())
+	ffclient.SetOffline(false)
+	assert.False(t, ffclient.IsOffline())
 }
 
 func TestAllFlagsFromCache(t *testing.T) {
@@ -464,6 +467,25 @@ func TestGoFeatureFlag_GetCacheRefreshDate(t *testing.T) {
 			assert.Equal(t, tt.hasRefresh, date1.Before(date2))
 		})
 	}
+}
+
+func TestGoFeatureFlag_SetOffline(t *testing.T) {
+	gffClient, err := ffclient.New(ffclient.Config{
+		PollingInterval: 1 * time.Second,
+		Retriever:       &fileretriever.Retriever{Path: "testdata/flag-config.yaml"},
+		Logger:          log.New(os.Stdout, "", 0),
+		Offline:         false,
+	})
+	assert.NoError(t, err)
+	defer gffClient.Close()
+
+	gffClient.SetOffline(true)
+	assert.True(t, gffClient.IsOffline())
+
+	time.Sleep(2 * time.Second)
+
+	gffClient.SetOffline(false)
+	assert.False(t, gffClient.IsOffline())
 }
 
 func Test_GetPollingInterval(t *testing.T) {
