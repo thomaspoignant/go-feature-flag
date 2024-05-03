@@ -116,6 +116,11 @@ func TestValidUseCase(t *testing.T) {
 
 	allFlags := ffclient.AllFlagsState(user)
 	assert.Equal(t, 2, len(allFlags.GetFlags()))
+
+	ffclient.SetOffline(true)
+	assert.True(t, ffclient.IsOffline())
+	ffclient.SetOffline(false)
+	assert.False(t, ffclient.IsOffline())
 }
 
 func TestAllFlagsFromCache(t *testing.T) {
@@ -466,32 +471,21 @@ func TestGoFeatureFlag_GetCacheRefreshDate(t *testing.T) {
 
 func TestGoFeatureFlag_SetOffline(t *testing.T) {
 	gffClient, err := ffclient.New(ffclient.Config{
-		PollingInterval: 5 * time.Second,
+		PollingInterval: 1 * time.Second,
 		Retriever:       &fileretriever.Retriever{Path: "testdata/flag-config.yaml"},
 		Logger:          log.New(os.Stdout, "", 0),
 		Offline:         false,
 	})
-
-	if err != nil {
-		log.Print("Failed to initialize the client")
-		t.Fatal(err) // Exit the test if initialization fails
-	}
-
+	assert.NoError(t, err)
 	defer gffClient.Close()
 
-	// Init should be ok
-	assert.NoError(t, err)
+	gffClient.SetOffline(true)
+	assert.True(t, gffClient.IsOffline())
 
-	// Happy Path
-	got := gffClient.SetOffline(true)
-	want := true
+	time.Sleep(2 * time.Second)
 
-	assert.Equal(t, got, want)
-
-	// Sad Path
-	got = gffClient.SetOffline(false)
-
-	assert.NotEqual(t, got, want)
+	gffClient.SetOffline(false)
+	assert.False(t, gffClient.IsOffline())
 }
 
 func Test_GetPollingInterval(t *testing.T) {

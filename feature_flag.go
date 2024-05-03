@@ -53,15 +53,13 @@ type GoFeatureFlag struct {
 	bgUpdater        backgroundUpdater
 	dataExporter     *exporter.Scheduler
 	retrieverManager *retriever.Manager
-	mu               sync.Mutex
-	once             sync.Once
 }
 
 // ff is the default object for go-feature-flag
 var ff *GoFeatureFlag
 var onceFF sync.Once
 
-// New creates a new go-feature-flag instance that retrieve the config from a YAML file
+// New creates a new go-feature-flag instances that retrieve the config from a YAML file
 // and return everything you need to manage your flags.
 func New(config Config) (*GoFeatureFlag, error) {
 	switch {
@@ -144,10 +142,6 @@ func (g *GoFeatureFlag) Close() {
 
 // startFlagUpdaterDaemon is the daemon that refresh the cache every X seconds.
 func (g *GoFeatureFlag) startFlagUpdaterDaemon() {
-	if g.config.Offline {
-		return
-	}
-
 	for {
 		select {
 		case <-g.bgUpdater.ticker.C:
@@ -161,25 +155,9 @@ func (g *GoFeatureFlag) startFlagUpdaterDaemon() {
 	}
 }
 
-// SetOffline updates the config Offline parameter
-func (g *GoFeatureFlag) SetOffline(control bool) bool {
-	g.mu.Lock()
-	defer g.mu.Unlock()
-
-	g.config.Offline = control
-
-	if control {
-		g.bgUpdater.close()
-	} else {
-		g.once.Do(g.startFlagUpdaterDaemon)
-	}
-
-	return g.config.Offline
-}
-
 // retrieveFlagsAndUpdateCache is called every X seconds to refresh the cache flag.
 func retrieveFlagsAndUpdateCache(config Config, cache cache.Manager, retrieverManager *retriever.Manager) error {
-	if config.Offline {
+	if config.IsOffline() {
 		return nil
 	}
 
@@ -257,12 +235,32 @@ func (g *GoFeatureFlag) GetCacheRefreshDate() time.Time {
 	return g.cache.GetLatestUpdateDate()
 }
 
+// SetOffline updates the config Offline parameter
+func (g *GoFeatureFlag) SetOffline(control bool) {
+	g.config.SetOffline(control)
+}
+
+// IsOffline allows knowing if the feature flag is in offline mode
+func (g *GoFeatureFlag) IsOffline() bool {
+	return g.config.IsOffline()
+}
+
+// SetOffline updates the config Offline parameter
+func SetOffline(control bool) {
+	ff.SetOffline(control)
+}
+
+// IsOffline allows knowing if the feature flag is in offline mode
+func IsOffline() bool {
+	return ff.IsOffline()
+}
+
 // GetCacheRefreshDate gives the date of the latest refresh of the cache
 func GetCacheRefreshDate() time.Time {
 	return ff.GetCacheRefreshDate()
 }
 
-// GetPollingInterval is the polling interval between 2 refresh of the cache
+// GetPollingInterval is the polling interval between 2 refreshes of the cache
 func (g *GoFeatureFlag) GetPollingInterval() int64 {
 	return g.config.PollingInterval.Milliseconds()
 }

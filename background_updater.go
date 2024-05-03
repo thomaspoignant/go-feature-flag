@@ -37,20 +37,6 @@ func newBackgroundUpdater(pollingInterval time.Duration, useJitter bool) backgro
 
 // close stops the ticker and closes the channel.
 func (bgu *backgroundUpdater) close() {
-	if bgu.ticker != nil {
-		bgu.ticker.Stop()
-	}
-	if !bgu.isClosed() {
-		close(bgu.updaterChan)
-	}
-}
-
-// isClosed checks if the channel is closed.
-func (bgu *backgroundUpdater) isClosed() bool {
-	select {
-	case <-bgu.updaterChan:
-		return true
-	default:
-	}
-	return false
+	bgu.ticker.Stop()
+	close(bgu.updaterChan)
 }
