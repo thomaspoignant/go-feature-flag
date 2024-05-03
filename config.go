@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/retriever"
@@ -77,6 +78,9 @@ type Config struct {
 	// if in the evaluation context you have a field with the same name, it will override the common one.
 	// Default: nil
 	EvaluationContextEnrichment map[string]interface{}
+
+	// offlineMutex is a mutex to protect the Offline field.
+	offlineMutex *sync.RWMutex
 }
 
 // GetRetrievers returns a retriever.Retriever configure with the retriever available in the config.
@@ -95,4 +99,24 @@ func (c *Config) GetRetrievers() ([]retriever.Retriever, error) {
 		retrievers = append(retrievers, c.Retrievers...)
 	}
 	return retrievers, nil
+}
+
+// SetOffline set GO Feature Flag in offline mode.
+func (c *Config) SetOffline(control bool) {
+	if c.offlineMutex == nil {
+		c.offlineMutex = &sync.RWMutex{}
+	}
+	c.offlineMutex.Lock()
+	defer c.offlineMutex.Unlock()
+	c.Offline = control
+}
+
+// IsOffline return if the GO Feature Flag is in offline mode.
+func (c *Config) IsOffline() bool {
+	if c.offlineMutex == nil {
+		c.offlineMutex = &sync.RWMutex{}
+	}
+	c.offlineMutex.RLock()
+	defer c.offlineMutex.RUnlock()
+	return c.Offline
 }
