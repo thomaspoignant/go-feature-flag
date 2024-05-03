@@ -222,7 +222,7 @@ jobs:
         uses: peter-evans/create-pull-request@v6
         with:
           branch: create-new-doc-version-${{  github.ref_name }}
-          title: Create a new documentation version ${{  github.ref_name }}
+          title: "docs(docusaurus): Create a new documentation version ${{  github.ref_name }}"
           body: Automated pull request to create a new documentation version ${{  github.ref_name }}
           commit-message: Create a new documentation version ${{  github.ref_name }}
           labels: automerge
@@ -277,7 +277,7 @@ jobs:
         uses: peter-evans/create-pull-request@v6
         with:
           branch: bump-relay-proxy-helm-chart-${{  github.ref_name }}
-          title: Bump relay-proxy helm chart version ${{  github.ref_name }}
+          title: "ci(helm): Bump relay-proxy helm chart version ${{  github.ref_name }}"
           body: Automated pull request to bump relay-proxy helm chart version ${{  github.ref_name }}
           commit-message: Bump relay-proxy helm chart version ${{  github.ref_name }}
           labels: automerge
@@ -334,7 +334,7 @@ jobs:
         uses: peter-evans/create-pull-request@v6
         with:
           branch: release-jsonschema-${{  github.ref_name }}
-          title: Release a new version of the jsonschema ${{  github.ref_name }}
+          title: "feat(jsonschema): Release a new version of the jsonschema ${{  github.ref_name }}"
           body: Automated pull request to release a new version of the jsonschema ${{  github.ref_name }}
           commit-message: Release a new version of the jsonschema ${{  github.ref_name }}
           labels: automerge
