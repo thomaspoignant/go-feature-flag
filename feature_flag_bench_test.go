@@ -17,6 +17,7 @@ import (
 var client *ffclient.GoFeatureFlag
 
 // init is creating a flag file for this test with the expected date.
+// nolint
 func init() {
 	content, _ := os.ReadFile("testdata/benchmark/flag-config.yaml")
 	t, _ := template.New("example-flag-config").Parse(string(content))
@@ -342,7 +343,7 @@ func BenchmarkJSONArrayVar_RolloutScheduled(b *testing.B) {
 	}
 }
 
-/* Bemchmark list:
+/* Benchmark list:
 
 Generate a dynamic flag file in the init method
 for all tests.
@@ -356,6 +357,5 @@ for all tests.
 
 - idem for all type of variations
 - all flag with a lot of flags and different types
-
 
 */
