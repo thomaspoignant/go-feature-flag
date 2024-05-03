@@ -190,6 +190,8 @@ definitions:
     properties:
       cacheInvalidation:
         $ref: '#/definitions/model.OFREPConfigCapabilitiesCacheInvalidation'
+      flagEvaluation:
+        $ref: '#/definitions/model.OFREPConfigCapabilitiesFlagEvaluation'
     type: object
   model.OFREPConfigCapabilitiesCacheInvalidation:
     properties:
@@ -202,6 +204,13 @@ definitions:
         type: boolean
       minPollingInterval:
         type: integer
+    type: object
+  model.OFREPConfigCapabilitiesFlagEvaluation:
+    properties:
+      unsupportedTypes:
+        items:
+          type: string
+        type: array
     type: object
   model.OFREPConfiguration:
     properties:
