@@ -7,11 +7,6 @@ Please add a description of what your pull request is doing.
  - If there are breaking changes, please describe them in detail and why we cannot avoid them.
 -->
 
-# Changes include
-- [ ] Bugfix (non-breaking change that solves an issue)
-- [ ] New feature (non-breaking change that adds functionality)
-- [ ] Breaking changes (change that is not backward-compatible and/or changes current functionality)
-
 # Closes issue(s)
 <!-- 
 Please add the id of the issue this pull request is resolving.
