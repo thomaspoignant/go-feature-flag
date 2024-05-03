@@ -31,7 +31,7 @@ func (s *SQSSendMessageAPIMock) SendMessage(ctx context.Context,
 
 func TestSQS_IsBulk(t *testing.T) {
 	exporter := Exporter{}
-	assert.False(t, exporter.IsBulk(), "Exporter exporter is not a bulk exporter")
+	assert.False(t, exporter.IsBulk(), "Exporter is not a bulk exporter")
 }
 
 func TestExporter_Export(t *testing.T) {

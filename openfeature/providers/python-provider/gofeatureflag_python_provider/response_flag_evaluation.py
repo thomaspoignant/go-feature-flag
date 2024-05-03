@@ -1,4 +1,4 @@
-from typing import Optional, Generic, Union, TypeVar
+from typing import Optional, Union, TypeVar
 from gofeatureflag_python_provider.options import BaseModel
 
 

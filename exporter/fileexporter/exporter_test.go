@@ -348,5 +348,5 @@ func TestFile_Export(t *testing.T) {
 
 func TestFile_IsBulk(t *testing.T) {
 	exporter := fileexporter.Exporter{}
-	assert.True(t, exporter.IsBulk(), "Exporter exporter is a bulk exporter")
+	assert.True(t, exporter.IsBulk(), "Exporter is a bulk exporter")
 }

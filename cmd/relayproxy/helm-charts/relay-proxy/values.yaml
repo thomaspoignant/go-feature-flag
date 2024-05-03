@@ -1,6 +1,5 @@
 relayproxy:
-  # -- (tpl/object) Define this for extra Django environment variables
-  # @notationType -- tpl
+  # -- GO Feature Flag relay proxy configuration as string.
   config: | # This is a configuration example for the relay-proxy
     listen: 1031
     pollingInterval: 1000

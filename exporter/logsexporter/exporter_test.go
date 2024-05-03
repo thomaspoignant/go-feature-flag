@@ -96,7 +96,7 @@ func TestLog_Export(t *testing.T) {
 				return
 			}
 
-			assert.NoError(t, err, "Exporter exporter should not throw errors")
+			assert.NoError(t, err, "Exporter should not throw errors")
 
 			logContent, _ := os.ReadFile(logFile.Name())
 			assert.Regexp(t, tt.expectedLog, string(logContent))
