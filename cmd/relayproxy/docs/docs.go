@@ -735,6 +735,9 @@ const docTemplate = `{
             "properties": {
                 "cacheInvalidation": {
                     "$ref": "#/definitions/model.OFREPConfigCapabilitiesCacheInvalidation"
+                },
+                "flagEvaluation": {
+                    "$ref": "#/definitions/model.OFREPConfigCapabilitiesFlagEvaluation"
                 }
             }
         },
@@ -754,6 +757,17 @@ const docTemplate = `{
                 },
                 "minPollingInterval": {
                     "type": "integer"
+                }
+            }
+        },
+        "model.OFREPConfigCapabilitiesFlagEvaluation": {
+            "type": "object",
+            "properties": {
+                "unsupportedTypes": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
