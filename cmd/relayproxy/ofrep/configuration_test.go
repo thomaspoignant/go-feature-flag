@@ -31,7 +31,7 @@ func Test_Configuration(t *testing.T) {
 			goffPolling: 10 * time.Second,
 			want: want{
 				httpCode: http.StatusOK,
-				response: "{\"name\":\"GO Feature Flag\",\"capabilities\":{\"cacheInvalidation\":{\"polling\":{\"enabled\":true,\"minPollingInterval\":10000}}}}",
+				response: "{\"name\":\"GO Feature Flag\",\"capabilities\":{\"cacheInvalidation\":{\"polling\":{\"enabled\":true,\"minPollingInterval\":10000}},\"flagEvaluation\":{\"unsupportedTypes\":[]}}}",
 			},
 		},
 		{
@@ -39,7 +39,7 @@ func Test_Configuration(t *testing.T) {
 			goffPolling: 10 * time.Minute,
 			want: want{
 				httpCode: http.StatusOK,
-				response: "{\"name\":\"GO Feature Flag\",\"capabilities\":{\"cacheInvalidation\":{\"polling\":{\"enabled\":true,\"minPollingInterval\":600000}}}}",
+				response: "{\"name\":\"GO Feature Flag\",\"capabilities\":{\"cacheInvalidation\":{\"polling\":{\"enabled\":true,\"minPollingInterval\":600000}},\"flagEvaluation\":{\"unsupportedTypes\":[]}}}",
 			},
 		},
 	}
