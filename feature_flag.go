@@ -163,10 +163,6 @@ func (g *GoFeatureFlag) startFlagUpdaterDaemon() {
 
 // retrieveFlagsAndUpdateCache is called every X seconds to refresh the cache flag.
 func retrieveFlagsAndUpdateCache(config Config, cache cache.Manager, retrieverManager *retriever.Manager) error {
-	if config.IsOffline() {
-		return nil
-	}
-
 	retrievers := retrieverManager.GetRetrievers()
 	// Results is the type that will receive the results when calling
 	// all the retrievers.
