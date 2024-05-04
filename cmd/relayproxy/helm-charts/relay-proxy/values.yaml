@@ -1,5 +1,5 @@
 relayproxy:
-  # -- GO Feature Flag relay proxy configuration as string.
+  # -- GO Feature Flag relay proxy configuration as string (accept template).
   config: | # This is a configuration example for the relay-proxy
     listen: 1031
     pollingInterval: 1000
