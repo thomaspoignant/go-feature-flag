@@ -456,7 +456,7 @@ string
 </div>
 			</td>
 			<td>
-				GO Feature Flag relay proxy configuration as string.
+				GO Feature Flag relay proxy configuration as string (accept template).
 			</td>
 		</tr>
 		<tr>
