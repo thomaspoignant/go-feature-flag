@@ -2,6 +2,7 @@ package ffclient_test
 
 import (
 	"errors"
+	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"log"
 	"os"
 	"testing"
@@ -513,4 +514,51 @@ func Test_GetPollingInterval(t *testing.T) {
 			assert.Equal(t, tt.pollingInterval.Milliseconds(), goff.GetPollingInterval())
 		})
 	}
+}
+
+func Test_ForceRefreshCache(t *testing.T) {
+	tempFile, err := os.CreateTemp("", "")
+	assert.NoError(t, err)
+	defer func() { _ = os.Remove(tempFile.Name()) }()
+	content, err := os.ReadFile("testdata/flag-config.yaml")
+	assert.NoError(t, err)
+	err = os.WriteFile(tempFile.Name(), content, os.ModePerm)
+	assert.NoError(t, err)
+
+	// we start at -1 because we will call the notifier when we start the client
+	n := mock.Notifier{NumberCalls: -1}
+
+	gffClient, err := ffclient.New(ffclient.Config{
+		PollingInterval: 15 * time.Minute,
+		Retriever:       &fileretriever.Retriever{Path: tempFile.Name()},
+		Logger:          log.New(os.Stdout, "", 0),
+		Offline:         false,
+		Notifiers: []notifier.Notifier{
+			&n,
+		},
+	})
+	assert.NoError(t, err)
+	defer gffClient.Close()
+	time.Sleep(200 * time.Millisecond)
+	assert.Equal(t, 0, n.NumberCalls)
+
+	// modify the file to trigger a refresh
+	newContent, err := os.ReadFile("testdata/flag-config-2nd-file.yaml")
+	assert.NoError(t, err)
+	err = os.WriteFile(tempFile.Name(), newContent, os.ModePerm)
+	assert.NoError(t, err)
+	// checking that the number of calls does not increase if we don't force the refresh
+	time.Sleep(200 * time.Millisecond)
+	assert.Equal(t, 0, n.NumberCalls)
+
+	// checking that the number of calls increases if we force the refresh
+	gffClient.ForceRefresh()
+	time.Sleep(200 * time.Millisecond)
+	assert.Equal(t, 1, n.NumberCalls)
+
+	// checking that the number of calls does not increase if we force refresh and goff is offline
+	gffClient.SetOffline(true)
+	gffClient.ForceRefresh()
+	time.Sleep(200 * time.Millisecond)
+	assert.Equal(t, 1, n.NumberCalls)
 }
