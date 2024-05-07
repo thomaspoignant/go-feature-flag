@@ -6,8 +6,6 @@ import (
 	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	etag "github.com/pablor21/echo-etag/v4"
-	echoSwagger "github.com/swaggo/echo-swagger"
 	custommiddleware "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/opentelemetry"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
@@ -33,7 +31,8 @@ func New(config *config.Config,
 		zapLog:      zapLog,
 		otelService: opentelemetry.NewOtelService(),
 	}
-	s.init()
+	s.apiEcho = echo.New()
+	s.initRoutes(s.apiEcho)
 	return s
 }
 
@@ -47,26 +46,8 @@ type Server struct {
 	otelService    opentelemetry.OtelService
 }
 
-// init initialize the configuration of our API server (using echo)
-func (s *Server) init() {
-	s.apiEcho = echo.New()
-	s.initAPIEndpoint(s.apiEcho)
-	if s.config.MonitoringPort != 0 {
-		s.monitoringEcho = echo.New()
-		s.monitoringEcho.HideBanner = true
-		s.monitoringEcho.HidePort = true
-		s.monitoringEcho.Debug = s.config.Debug
-		s.monitoringEcho.Use(custommiddleware.ZapLogger(s.zapLog, s.config))
-		s.monitoringEcho.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
-		s.monitoringEcho.Use(middleware.Recover())
-		s.initMonitoringEndpoint(s.monitoringEcho)
-	} else {
-		s.initMonitoringEndpoint(s.apiEcho)
-	}
-}
-
-// initAPIEndpoint initialize the API endpoints that contain business logic and specificity for the relay proxy
-func (s *Server) initAPIEndpoint(echoInstance *echo.Echo) {
+// initRoutes initialize the API endpoints that contain business logic and specificity for the relay proxy
+func (s *Server) initRoutes(echoInstance *echo.Echo) {
 	echoInstance.HideBanner = true
 	echoInstance.HidePort = true
 	echoInstance.Debug = s.config.Debug
@@ -97,69 +78,10 @@ func (s *Server) initAPIEndpoint(echoInstance *echo.Echo) {
 	cEvalDataCollector := controller.NewCollectEvalData(s.services.GOFeatureFlagService, s.services.Metrics)
 
 	// Init routes
-	v1 := echoInstance.Group("/v1")
-	if len(s.config.APIKeys) > 0 {
-		v1.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
-			Validator: func(key string, _ echo.Context) (bool, error) {
-				return s.config.APIKeyExists(key), nil
-			},
-		}))
-	}
-	v1.POST("/allflags", cAllFlags.Handler)
-	v1.POST("/feature/:flagKey/eval", cFlagEval.Handler)
-	v1.POST("/data/collector", cEvalDataCollector.Handler)
-
-	// Swagger - only available if option is enabled
-	if s.config.EnableSwagger {
-		echoInstance.GET("/swagger/*", echoSwagger.WrapHandler)
-	}
-
-	// OFREP routes
-	ofrepGroup := echoInstance.Group("/ofrep/v1")
-	ofrepGroup.Use(etag.WithConfig(etag.Config{
-		Skipper: func(c echo.Context) bool {
-			switch c.Path() {
-			case "/ofrep/v1/evaluate/flags", "/ofrep/v1/configuration":
-				return false
-			default:
-				return true
-			}
-		},
-		Weak: false,
-	}))
-
-	if len(s.config.APIKeys) > 0 {
-		ofrepGroup.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
-			Validator: func(key string, _ echo.Context) (bool, error) {
-				return s.config.APIKeyExists(key), nil
-			},
-		}))
-	}
-	ofrepGroup.POST("/evaluate/flags", cFlagEvalOFREP.BulkEvaluate)
-	ofrepGroup.POST("/evaluate/flags/:flagKey", cFlagEvalOFREP.Evaluate)
-	ofrepGroup.GET("/configuration", cFlagEvalOFREP.Configuration)
-
-	// initWebsocketsEndpoints initialize the websocket endpoints
-	cFlagReload := controller.NewWsFlagChange(s.services.WebsocketService, s.zapLog)
-	wsV1 := echoInstance.Group("/ws/v1")
-	wsV1.Use(custommiddleware.WebsocketAuthorizer(s.config))
-	wsV1.GET("/flag/change", cFlagReload.Handler)
-}
-
-// initMonitoringEndpoint initialize the monitoring endpoints and associate them to the correct echo instance.
-func (s *Server) initMonitoringEndpoint(echoInstance *echo.Echo) {
-	if s.services.Metrics != (metric.Metrics{}) {
-		echoInstance.GET("/metrics", echoprometheus.NewHandlerWithConfig(
-			echoprometheus.HandlerConfig{Gatherer: s.services.Metrics.Registry}))
-	}
-
-	// Init controllers
-	cHealth := controller.NewHealth(s.services.MonitoringService)
-	cInfo := controller.NewInfo(s.services.MonitoringService)
-
-	// health Routes
-	echoInstance.GET("/health", cHealth.Handler)
-	echoInstance.GET("/info", cInfo.Handler)
+	s.InitGoffAPIRoutes(echoInstance, cAllFlags, cFlagEval, cEvalDataCollector)
+	s.InitOFREPRoutes(echoInstance, cFlagEvalOFREP)
+	s.InitWebsocketRoutes(echoInstance)
+	s.InitMonitoringRoutes()
 }
 
 // Start launch the API server
