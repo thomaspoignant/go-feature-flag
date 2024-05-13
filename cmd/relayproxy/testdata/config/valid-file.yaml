@@ -11,3 +11,5 @@ authorizedKeys:
   evaluation:
     - apikey1 # owner: userID1
     - apikey2 # owner: userID2
+  admin:
+    - apikey3
