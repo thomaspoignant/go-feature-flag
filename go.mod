@@ -3,7 +3,7 @@ module github.com/thomaspoignant/go-feature-flag
 go 1.22.0
 
 require (
-	cloud.google.com/go/pubsub v1.37.0
+	cloud.google.com/go/pubsub v1.38.0
 	cloud.google.com/go/storage v1.40.0
 	github.com/BurntSushi/toml v1.3.2
 	github.com/IBM/sarama v1.43.2
@@ -195,7 +195,7 @@ require (
 	github.com/xdg-go/stringprep v1.0.4 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20181117223130-1be2e3e5546d // indirect
 	github.com/yusufpapurcu/wmi v1.2.3 // indirect
-	go.einride.tech/aip v0.66.0 // indirect
+	go.einride.tech/aip v0.67.1 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.49.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.49.0 // indirect
