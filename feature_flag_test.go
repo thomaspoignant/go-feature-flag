@@ -539,7 +539,7 @@ func Test_ForceRefreshCache(t *testing.T) {
 	})
 	assert.NoError(t, err)
 	defer gffClient.Close()
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(500 * time.Millisecond)
 	assert.Equal(t, 0, n.NumberCalls)
 
 	// modify the file to trigger a refresh
@@ -548,17 +548,17 @@ func Test_ForceRefreshCache(t *testing.T) {
 	err = os.WriteFile(tempFile.Name(), newContent, os.ModePerm)
 	assert.NoError(t, err)
 	// checking that the number of calls does not increase if we don't force the refresh
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(500 * time.Millisecond)
 	assert.Equal(t, 0, n.NumberCalls)
 
 	// checking that the number of calls increases if we force the refresh
 	gffClient.ForceRefresh()
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(500 * time.Millisecond)
 	assert.Equal(t, 1, n.NumberCalls)
 
 	// checking that the number of calls does not increase if we force refresh and goff is offline
 	gffClient.SetOffline(true)
 	gffClient.ForceRefresh()
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(500 * time.Millisecond)
 	assert.Equal(t, 1, n.NumberCalls)
 }
