@@ -32,7 +32,7 @@ func New(config *config.Config,
 		otelService: opentelemetry.NewOtelService(),
 	}
 	s.apiEcho = echo.New()
-	s.initRoutes(s.apiEcho)
+	s.initRoutes()
 	return s
 }
 
@@ -47,21 +47,21 @@ type Server struct {
 }
 
 // initRoutes initialize the API endpoints that contain business logic and specificity for the relay proxy
-func (s *Server) initRoutes(echoInstance *echo.Echo) {
-	echoInstance.HideBanner = true
-	echoInstance.HidePort = true
-	echoInstance.Debug = s.config.Debug
+func (s *Server) initRoutes() {
+	s.apiEcho.HideBanner = true
+	s.apiEcho.HidePort = true
+	s.apiEcho.Debug = s.config.Debug
 	if s.services.Metrics != (metric.Metrics{}) {
 		s.apiEcho.Use(echoprometheus.NewMiddlewareWithConfig(echoprometheus.MiddlewareConfig{
 			Subsystem:  metric.GOFFSubSystem,
 			Registerer: s.services.Metrics.Registry,
 		}))
 	}
-	echoInstance.Use(otelecho.Middleware("go-feature-flag"))
-	echoInstance.Use(custommiddleware.ZapLogger(s.zapLog, s.config))
-	echoInstance.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
-	echoInstance.Use(middleware.Recover())
-	echoInstance.Use(middleware.TimeoutWithConfig(
+	s.apiEcho.Use(otelecho.Middleware("go-feature-flag"))
+	s.apiEcho.Use(custommiddleware.ZapLogger(s.zapLog, s.config))
+	s.apiEcho.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
+	s.apiEcho.Use(middleware.Recover())
+	s.apiEcho.Use(middleware.TimeoutWithConfig(
 		middleware.TimeoutConfig{
 			Skipper: func(c echo.Context) bool {
 				// ignore websocket in the timeout
@@ -76,12 +76,14 @@ func (s *Server) initRoutes(echoInstance *echo.Echo) {
 	cFlagEval := controller.NewFlagEval(s.services.GOFeatureFlagService, s.services.Metrics)
 	cFlagEvalOFREP := ofrep.NewOFREPEvaluate(s.services.GOFeatureFlagService, s.services.Metrics)
 	cEvalDataCollector := controller.NewCollectEvalData(s.services.GOFeatureFlagService, s.services.Metrics)
+	cRetrieverRefresh := controller.NewForceFlagsRefresh(s.services.GOFeatureFlagService, s.services.Metrics)
 
 	// Init routes
-	s.InitGoffAPIRoutes(echoInstance, cAllFlags, cFlagEval, cEvalDataCollector)
-	s.InitOFREPRoutes(echoInstance, cFlagEvalOFREP)
-	s.InitWebsocketRoutes(echoInstance)
-	s.InitMonitoringRoutes()
+	s.addGOFFRoutes(cAllFlags, cFlagEval, cEvalDataCollector)
+	s.addOFREPRoutes(cFlagEvalOFREP)
+	s.addWebsocketRoutes()
+	s.addMonitoringRoutes()
+	s.addAdminRoutes(cRetrieverRefresh)
 }
 
 // Start launch the API server

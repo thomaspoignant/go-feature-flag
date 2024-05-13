@@ -7,14 +7,14 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/controller"
 )
 
-func (s *Server) InitGoffAPIRoutes(
-	echoInstance *echo.Echo,
+func (s *Server) addGOFFRoutes(
 	cAllFlags controller.Controller,
 	cFlagEval controller.Controller,
 	cEvalDataCollector controller.Controller) {
 	// Grouping the routes
-	v1 := echoInstance.Group("/v1")
-	if len(s.config.APIKeys) > 0 {
+	v1 := s.apiEcho.Group("/v1")
+	// nolint: staticcheck
+	if len(s.config.AuthorizedKeys.Evaluation) > 0 || len(s.config.APIKeys) > 0 {
 		v1.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
 			Validator: func(key string, _ echo.Context) (bool, error) {
 				return s.config.APIKeyExists(key), nil
@@ -27,6 +27,6 @@ func (s *Server) InitGoffAPIRoutes(
 
 	// Swagger - only available if option is enabled
 	if s.config.EnableSwagger {
-		echoInstance.GET("/swagger/*", echoSwagger.WrapHandler)
+		s.apiEcho.GET("/swagger/*", echoSwagger.WrapHandler)
 	}
 }

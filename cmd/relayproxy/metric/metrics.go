@@ -130,6 +130,7 @@ type Metrics struct {
 	flagUpdateCounterVec   prom.CounterVec
 	flagDeleteCounterVec   prom.CounterVec
 	flagCreateCounterVec   prom.CounterVec
+	forceRefresh           prom.Counter
 }
 
 func (m *Metrics) IncFlagEvaluation(flagName string) {
@@ -143,6 +144,13 @@ func (m *Metrics) IncFlagEvaluation(flagName string) {
 func (m *Metrics) IncAllFlag() {
 	if m.allFlagCounter != nil {
 		m.allFlagCounter.Inc()
+	}
+}
+
+// IncForceRefresh increment the number call to ForceRefresh
+func (m *Metrics) IncForceRefresh() {
+	if m.forceRefresh != nil {
+		m.forceRefresh.Inc()
 	}
 }
 

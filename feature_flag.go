@@ -234,14 +234,16 @@ func (g *GoFeatureFlag) GetCacheRefreshDate() time.Time {
 // ForceRefresh is a function that forces to call the retrievers and refresh the configuration of flags.
 // This function can be called explicitly to refresh the flags if you know that a change has been made in
 // the configuration.
-func (g *GoFeatureFlag) ForceRefresh() {
+func (g *GoFeatureFlag) ForceRefresh() bool {
 	if g.IsOffline() {
-		return
+		return false
 	}
 	err := retrieveFlagsAndUpdateCache(g.config, g.cache, g.retrieverManager)
 	if err != nil {
 		fflog.Printf(g.config.Logger, "error while force updating the cache: %v\n", err)
+		return false
 	}
+	return true
 }
 
 // SetOffline updates the config Offline parameter

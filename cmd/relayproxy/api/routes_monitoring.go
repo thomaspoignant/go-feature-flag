@@ -9,7 +9,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 )
 
-func (s *Server) InitMonitoringRoutes() {
+func (s *Server) addMonitoringRoutes() {
 	if s.config.MonitoringPort != 0 {
 		s.monitoringEcho = echo.New()
 		s.monitoringEcho.HideBanner = true

@@ -168,8 +168,12 @@ type Config struct {
 	// Version is the version of the relay-proxy
 	Version string `mapstructure:"version" koanf:"version"`
 
+	// Deprecated: use AuthorizedKeys instead
 	// APIKeys list of API keys that authorized to use endpoints
 	APIKeys []string `mapstructure:"apiKeys" koanf:"apikeys"`
+
+	// AuthorizedKeys list of API keys that authorized to use endpoints
+	AuthorizedKeys APIKeys `mapstructure:"authorizedKeys" koanf:"authorizedkeys"`
 
 	// StartAsAwsLambda (optional) if true, the relay proxy will start ready to be launched as AWS Lambda
 	StartAsAwsLambda bool `mapstructure:"startAsAwsLambda" koanf:"startasawslambda"`
@@ -196,13 +200,41 @@ type Config struct {
 	// apiKeySet is the internal representation of an API keys list configured
 	// we store them in a set to be
 	apiKeysSet map[string]interface{}
+
+	// adminAPIKeySet is the internal representation of an admin API keys list configured
+	// we store them in a set to be
+	adminAPIKeySet map[string]interface{}
+}
+
+// APIKeysAdminExists is checking if an admin API Key exist in the relay proxy configuration
+func (c *Config) APIKeysAdminExists(apiKey string) bool {
+	if c.adminAPIKeySet == nil {
+		adminAPIKeySet := make(map[string]interface{})
+		for _, currentAPIKey := range c.AuthorizedKeys.Admin {
+			adminAPIKeySet[currentAPIKey] = new(interface{})
+		}
+		c.adminAPIKeySet = adminAPIKeySet
+	}
+
+	_, ok := c.adminAPIKeySet[apiKey]
+	return ok
 }
 
 // APIKeyExists is checking if an API Key exist in the relay proxy configuration
 func (c *Config) APIKeyExists(apiKey string) bool {
+	if c.APIKeysAdminExists(apiKey) {
+		return true
+	}
 	if c.apiKeysSet == nil {
 		apiKeySet := make(map[string]interface{})
+
+		// Remove this part when the APIKeys field is removed
 		for _, currentAPIKey := range c.APIKeys {
+			apiKeySet[currentAPIKey] = new(interface{})
+		}
+		// end of remove
+
+		for _, currentAPIKey := range c.AuthorizedKeys.Evaluation {
 			apiKeySet[currentAPIKey] = new(interface{})
 		}
 		c.apiKeysSet = apiKeySet
