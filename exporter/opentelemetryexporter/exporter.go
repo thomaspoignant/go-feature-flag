@@ -1,0 +1,349 @@
+package opentelemetryexporter
+
+import (
+	"context"
+	"crypto/tls"
+	"crypto/x509"
+	"errors"
+	"fmt"
+	"os"
+	"reflect"
+	"strings"
+	"time"
+
+	"github.com/thomaspoignant/go-feature-flag/exporter"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
+	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/sdk/resource"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
+	"go.opentelemetry.io/otel/trace"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/backoff"
+	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
+
+	"log"
+)
+
+const (
+	serviceName            = "go-feature-flag"
+	ServiceVersion         = "0.0.1"
+	instrumentationName    = "github.com/thomaspoignant/go-feature-flag"
+	instrumentationVersion = "0.0.1"
+)
+
+type Exporter struct {
+	resource   *resource.Resource
+	processors []*sdktrace.SpanProcessor
+}
+
+func (*Exporter) IsBulk() bool {
+	return true
+}
+
+type OpenTelSettings struct {
+	URI        string `json:"uri"`
+	CACertPath string `json:"cacertpath"`
+}
+
+type Settings struct {
+	OpentelSettings OpenTelSettings   `json:"opentelsettings"`
+	Resource        map[string]string `json:"resource"`
+}
+
+type ExporterOption func(*Exporter) error
+
+func getTracer() trace.Tracer {
+	return otel.GetTracerProvider().Tracer(
+		instrumentationName,
+		trace.WithInstrumentationVersion(instrumentationVersion),
+		trace.WithSchemaURL(semconv.SchemaURL))
+}
+
+func getTransportCredentials(caCertPath string) (credentials.TransportCredentials, error) {
+	if caCertPath != "" {
+		_, err := os.Stat(caCertPath)
+		if err != nil {
+			return nil, err
+		}
+
+		pemServerCA, err := os.ReadFile(caCertPath)
+		if err != nil {
+			return nil, err
+		}
+
+		certPool := x509.NewCertPool()
+		if !certPool.AppendCertsFromPEM(pemServerCA) {
+			return nil, fmt.Errorf("failed to add server CA's certificate")
+		}
+
+		// I don't like setting the minversion, but gosec will complain otherwise
+		config := &tls.Config{
+			RootCAs:    certPool,
+			MinVersion: tls.VersionTLS12,
+		}
+
+		return credentials.NewTLS(config), nil
+	}
+	return insecure.NewCredentials(), nil
+}
+
+func NewExporter(settings Settings) (*Exporter, error) {
+	processorOptions := make([]grpc.DialOption, 0)
+	exporterOptions := make([]ExporterOption, 0)
+
+	connectParams := grpc.ConnectParams{
+		Backoff: backoff.Config{BaseDelay: time.Second * 2,
+			Multiplier: 2.0,
+			MaxDelay:   time.Second * 16}}
+
+	credentials, err := getTransportCredentials(settings.OpentelSettings.CACertPath)
+	if err != nil {
+		return nil, err
+	}
+
+	processorOptions = append(processorOptions, grpc.WithConnectParams(connectParams))
+	processorOptions = append(processorOptions, grpc.WithTransportCredentials(credentials))
+
+	exporterOptions = append(exporterOptions, WithResource(defaultResource()))
+	if len(settings.Resource) > 0 {
+		exporterOptions = append(exporterOptions, WithResource(mapToResource(settings.Resource)))
+	}
+
+	otelProcessor, err := OtelCollectorBatchSpanProcessor(settings.OpentelSettings.URI,
+		processorOptions...,
+	)
+
+	exporterOptions = append(exporterOptions, WithBatchSpanProcessors(&otelProcessor))
+
+	if err != nil {
+		return nil, err
+	}
+
+	exp, err := NewExporterFromOpts(exporterOptions...)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return exp, nil
+}
+
+func NewExporterFromOpts(opts ...ExporterOption) (*Exporter, error) {
+	exporter := Exporter{}
+	for _, opt := range opts {
+		if err := opt(&exporter); err != nil {
+			return nil, err
+		}
+	}
+	return &exporter, nil
+}
+
+func WithResource(customResource *resource.Resource) ExporterOption {
+	return func(exp *Exporter) error {
+		mergedResource, err := resource.Merge(customResource, defaultResource())
+		if err != nil {
+			return errors.New("unable to merge resources")
+		}
+		exp.resource = mergedResource
+		return nil
+	}
+}
+
+func WithBatchSpanProcessors(processors ...*sdktrace.SpanProcessor) ExporterOption {
+	return func(exp *Exporter) error {
+		exp.processors = processors
+		return nil
+	}
+}
+
+func defaultResource() *resource.Resource {
+	return resource.NewWithAttributes(
+		semconv.SchemaURL,
+		semconv.ServiceName(serviceName),
+		semconv.ServiceVersion(ServiceVersion),
+	)
+}
+
+func mapToResource(attrs map[string]string) *resource.Resource {
+	customKeyValues := make([]attribute.KeyValue, 0)
+	for ck, cv := range attrs {
+		customKeyValues = append(customKeyValues,
+			attribute.KeyValue{Key: attribute.Key(ck), Value: attribute.StringValue(cv)})
+	}
+	return resource.NewWithAttributes(
+		semconv.SchemaURL, customKeyValues...,
+	)
+}
+
+func otelExporter(uri string, opts ...grpc.DialOption) (*otlptrace.Exporter, error) {
+	// TODO creds
+
+	if len(opts) == 0 {
+		return nil, errors.New("need credentials option")
+	}
+
+	conn, err := grpc.NewClient(uri, opts...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create gRPC connection to collector: %w", err)
+	}
+
+	// Set up a trace exporter
+	traceExporter, err := otlptracegrpc.New(context.Background(), otlptracegrpc.WithGRPCConn(conn))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create trace exporter: %w", err)
+	}
+	return traceExporter, nil
+}
+
+func OtelCollectorBatchSpanProcessor(uri string, opts ...grpc.DialOption) (sdktrace.SpanProcessor, error) {
+	otelExporter, err := otelExporter(uri, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	return sdktrace.NewBatchSpanProcessor(otelExporter), nil
+}
+
+func newstdoutExporter(options ...stdouttrace.Option) (*stdouttrace.Exporter, error) {
+	exp, err := stdouttrace.New(options...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize stdouttrace exporter: %w", err)
+	}
+	return exp, nil
+}
+
+func stdoutBatchSpanProcessor(options ...stdouttrace.Option) (sdktrace.SpanProcessor, error) {
+	inMemoryExporter, err := newstdoutExporter(options...)
+	if err != nil {
+		return nil, err
+	}
+
+	return sdktrace.NewBatchSpanProcessor(inMemoryExporter), nil
+}
+
+func valueToAttributes(data interface{}, parentName string, maxDepth int, recursionDepth int) []attribute.KeyValue {
+	parentName = strings.ToLower(parentName)
+	reflectedAttributes := make([]attribute.KeyValue, 0)
+
+	if recursionDepth > maxDepth {
+		return reflectedAttributes
+	}
+
+	targetType := reflect.TypeOf(data)
+	targetValue := reflect.ValueOf(data)
+	kind := targetValue.Kind()
+
+	switch kind {
+	case reflect.Float32, reflect.Float64:
+		reflectedAttributes = append(reflectedAttributes, attribute.Float64(parentName, targetValue.Float()))
+	case reflect.Int, reflect.Int8, reflect.Int16,
+		reflect.Int32, reflect.Int64:
+		reflectedAttributes = append(reflectedAttributes, attribute.Int64(parentName, targetValue.Int()))
+	case reflect.Bool:
+		reflectedAttributes = append(reflectedAttributes, attribute.Bool(parentName, targetValue.Bool()))
+	case reflect.String:
+		reflectedAttributes = append(reflectedAttributes, attribute.String(parentName, targetValue.String()))
+
+	case reflect.Struct:
+		for i := 0; i < targetType.NumField(); i++ {
+			name := targetType.Field(i).Name
+			fv := targetValue.Field(i)
+
+			if !fv.CanInterface() {
+				continue
+			}
+
+			subAttributes := valueToAttributes(fv.Interface(), parentName+"."+name, maxDepth, recursionDepth+1)
+			reflectedAttributes = append(reflectedAttributes, subAttributes...)
+		}
+	default:
+	}
+
+	return reflectedAttributes
+}
+
+func featureEventToAttributes(featureEvent exporter.FeatureEvent) []attribute.KeyValue {
+	// https://opentelemetry.io/docs/specs/semconv/feature-flags/feature-flags-spans/
+
+	attributes := make([]attribute.KeyValue, 0)
+	attributes = append(attributes, attribute.String("kind", featureEvent.Kind),
+		attribute.String("contextKind", featureEvent.ContextKind),
+		attribute.String("userKey", featureEvent.UserKey),
+		attribute.Int64("creationDate", featureEvent.CreationDate),
+		attribute.String("key", featureEvent.Key),
+		attribute.String("variation", featureEvent.Variation),
+		attribute.Bool("default", featureEvent.Default),
+		attribute.String("version", featureEvent.Version),
+		attribute.String("source", featureEvent.Source))
+
+	valueAttrs := valueToAttributes(featureEvent.Value, "value", 2, 0)
+	attributes = append(attributes, valueAttrs...)
+
+	return attributes
+}
+
+func initProvider(exp *Exporter) (func(context.Context) error, error) {
+	// The default resource will win on merge
+
+	tracerProvider := sdktrace.NewTracerProvider(
+		sdktrace.WithSampler(sdktrace.AlwaysSample()),
+		sdktrace.WithResource(exp.resource),
+	)
+
+	if len(exp.processors) == 0 {
+		return nil, errors.New("no processors provided")
+	}
+
+	for _, spanProcessor := range exp.processors {
+		tracerProvider.RegisterSpanProcessor(*spanProcessor)
+	}
+
+	otel.SetTracerProvider(tracerProvider)
+
+	// set global propagator to tracecontext (the default is no-op).
+	otel.SetTextMapPropagator(propagation.TraceContext{})
+
+	// Shutdown will flush any remaining spans and shut down the exporter.
+	return func(ctx context.Context) error {
+		return tracerProvider.ForceFlush(ctx)
+	}, nil
+}
+
+func eventToSpan(ctx context.Context, featureEvent exporter.FeatureEvent) {
+	attributes := featureEventToAttributes(featureEvent)
+	_, span := getTracer().Start(ctx, featureEvent.Kind)
+	defer span.End()
+	span.SetAttributes(attributes...)
+	// How can we detect feature-flag evaluation failure?
+	span.SetStatus(codes.Ok, "n/a")
+}
+func eventsToSpans(ctx context.Context, featureEvents []exporter.FeatureEvent) {
+	for _, featureEvent := range featureEvents {
+		eventToSpan(ctx, featureEvent)
+	}
+}
+
+func (exporter *Exporter) Export(ctx context.Context, _ *log.Logger, featureEvents []exporter.FeatureEvent) error {
+	shutdown, err := initProvider(exporter)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func() {
+		if err := shutdown(ctx); err != nil {
+			log.Fatal("failed to shutdown TracerProvider: %w", err)
+		}
+	}()
+
+	ctx, span := getTracer().Start(ctx, "feature-flag-evaluation")
+	defer span.End()
+	eventsToSpans(ctx, featureEvents)
+
+	return nil
+}
