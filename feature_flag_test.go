@@ -119,8 +119,10 @@ func TestValidUseCase(t *testing.T) {
 
 	ffclient.SetOffline(true)
 	assert.True(t, ffclient.IsOffline())
+	assert.False(t, ffclient.ForceRefresh())
 	ffclient.SetOffline(false)
 	assert.False(t, ffclient.IsOffline())
+	assert.True(t, ffclient.ForceRefresh())
 }
 
 func TestAllFlagsFromCache(t *testing.T) {

@@ -279,8 +279,8 @@ func GetCacheRefreshDate() time.Time {
 // ForceRefresh is a function that forces to call the retrievers and refresh the configuration of flags.
 // This function can be called explicitly to refresh the flags if you know that a change has been made in
 // the configuration.
-func ForceRefresh() {
-	ff.ForceRefresh()
+func ForceRefresh() bool {
+	return ff.ForceRefresh()
 }
 
 // Close the component by stopping the background refresh and clean the cache.
