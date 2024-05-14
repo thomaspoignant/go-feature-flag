@@ -69,11 +69,20 @@ In this section we will present all the available retriever configurations avail
 
 ### S3
 
-| Field name | Type   | Default  | Description                                                                                                         |
-|------------|--------|----------|---------------------------------------------------------------------------------------------------------------------|
+If you are using the S3 provider, the easiest way to provide credentials is to set environment variables. 
+It will be used by GO Feature Flag to identify to your S3 bucket.
+
+```shell
+export AWS_SECRET_ACCESS_KEY=xxxx
+export AWS_ACCESS_KEY_ID=xxx
+export AWS_DEFAULT_REGION=eu-west-1
+```
+
+| Field name | Type   | Default  | Description                                                                                                          |
+|------------|--------|----------|----------------------------------------------------------------------------------------------------------------------|
 | `kind`     | string | **none** | **(mandatory)** Value should be **`s3`**.<br/>_This field is mandatory and describes which retriever you are using._ |
-| `bucket`   | string | **none** | **(mandatory)** This is the name of your S3 bucket _(ex: `my-featureflag-bucket`)_.                                 |
-| `item`     | string | **none** | **(mandatory)** Path to the file inside the bucket _(ex: `config/flag/my-flags.yaml`)_.                             |
+| `bucket`   | string | **none** | **(mandatory)** This is the name of your S3 bucket _(ex: `my-featureflag-bucket`)_.                                  |
+| `item`     | string | **none** | **(mandatory)** Path to the file inside the bucket _(ex: `config/flag/my-flags.yaml`)_.                              |
 
 
 ### GitHub
