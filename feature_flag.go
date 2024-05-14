@@ -39,12 +39,6 @@ func Init(config Config) error {
 	return err
 }
 
-// Close the component by stopping the background refresh and clean the cache.
-func Close() {
-	onceFF = sync.Once{}
-	ff.Close()
-}
-
 // GoFeatureFlag is the main object of the library
 // it contains the cache, the config, the updater and the exporter.
 type GoFeatureFlag struct {
@@ -237,6 +231,21 @@ func (g *GoFeatureFlag) GetCacheRefreshDate() time.Time {
 	return g.cache.GetLatestUpdateDate()
 }
 
+// ForceRefresh is a function that forces to call the retrievers and refresh the configuration of flags.
+// This function can be called explicitly to refresh the flags if you know that a change has been made in
+// the configuration.
+func (g *GoFeatureFlag) ForceRefresh() bool {
+	if g.IsOffline() {
+		return false
+	}
+	err := retrieveFlagsAndUpdateCache(g.config, g.cache, g.retrieverManager)
+	if err != nil {
+		fflog.Printf(g.config.Logger, "error while force updating the cache: %v\n", err)
+		return false
+	}
+	return true
+}
+
 // SetOffline updates the config Offline parameter
 func (g *GoFeatureFlag) SetOffline(control bool) {
 	g.config.SetOffline(control)
@@ -245,6 +254,11 @@ func (g *GoFeatureFlag) SetOffline(control bool) {
 // IsOffline allows knowing if the feature flag is in offline mode
 func (g *GoFeatureFlag) IsOffline() bool {
 	return g.config.IsOffline()
+}
+
+// GetPollingInterval is the polling interval between 2 refreshes of the cache
+func (g *GoFeatureFlag) GetPollingInterval() int64 {
+	return g.config.PollingInterval.Milliseconds()
 }
 
 // SetOffline updates the config Offline parameter
@@ -262,7 +276,15 @@ func GetCacheRefreshDate() time.Time {
 	return ff.GetCacheRefreshDate()
 }
 
-// GetPollingInterval is the polling interval between 2 refreshes of the cache
-func (g *GoFeatureFlag) GetPollingInterval() int64 {
-	return g.config.PollingInterval.Milliseconds()
+// ForceRefresh is a function that forces to call the retrievers and refresh the configuration of flags.
+// This function can be called explicitly to refresh the flags if you know that a change has been made in
+// the configuration.
+func ForceRefresh() bool {
+	return ff.ForceRefresh()
+}
+
+// Close the component by stopping the background refresh and clean the cache.
+func Close() {
+	onceFF = sync.Once{}
+	ff.Close()
 }

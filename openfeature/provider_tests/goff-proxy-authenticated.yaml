@@ -6,6 +6,7 @@ retriever:
   path: ./openfeature/provider_tests/flags.yaml
 exporter:
   kind: log
-apiKeys:
-  - authorized_token
+authorizedKeys:
+  evaluation:
+    - authorized_token
 enableSwagger: true

@@ -7,9 +7,10 @@ retriever:
 exporter:
   kind: log
 enableSwagger: true
-apiKeys:
-  - apikey1 # owner: userID1
-  - apikey2 # owner: userID2
+authorizedKeys:
+  evaluation:
+    - apikey1 # owner: userID1
+    - apikey2 # owner: userID2
 notifier:
   kind: slack
   slackWebhookUrl: https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX

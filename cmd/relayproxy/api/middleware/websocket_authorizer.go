@@ -9,7 +9,8 @@ import (
 func WebsocketAuthorizer(config *config.Config) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			if len(config.APIKeys) > 0 {
+			// nolint: staticcheck
+			if len(config.AuthorizedKeys.Evaluation) > 0 || len(config.APIKeys) > 0 {
 				apiKey := c.QueryParam("apiKey")
 				if !config.APIKeyExists(apiKey) {
 					return echo.ErrUnauthorized

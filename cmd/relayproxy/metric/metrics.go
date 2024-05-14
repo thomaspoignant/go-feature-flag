@@ -82,6 +82,13 @@ func NewMetrics() (Metrics, error) {
 		Subsystem: GOFFSubSystem,
 	}, []string{"flag_name"})
 
+	// counts the number of flag updated from your configuration
+	forceRefreshCounter := prom.NewCounter(prom.CounterOpts{
+		Name:      "force_refresh",
+		Help:      "Counter that counts the number of force refresh.",
+		Subsystem: GOFFSubSystem,
+	})
+
 	metricToRegister := []prom.Collector{
 		flagEvaluationCounter,
 		allFlagCounter,
@@ -93,6 +100,7 @@ func NewMetrics() (Metrics, error) {
 		flagUpdateCounterVec,
 		flagDeleteCounterVec,
 		flagCreateCounterVec,
+		forceRefreshCounter,
 	}
 
 	// register all the metric in the custom registry
@@ -113,6 +121,7 @@ func NewMetrics() (Metrics, error) {
 		flagUpdateCounterVec:   *flagUpdateCounterVec,
 		flagDeleteCounterVec:   *flagDeleteCounterVec,
 		flagCreateCounterVec:   *flagCreateCounterVec,
+		forceRefreshCounter:    forceRefreshCounter,
 		Registry:               customRegistry,
 	}, nil
 }
@@ -130,6 +139,7 @@ type Metrics struct {
 	flagUpdateCounterVec   prom.CounterVec
 	flagDeleteCounterVec   prom.CounterVec
 	flagCreateCounterVec   prom.CounterVec
+	forceRefreshCounter    prom.Counter
 }
 
 func (m *Metrics) IncFlagEvaluation(flagName string) {
@@ -143,6 +153,13 @@ func (m *Metrics) IncFlagEvaluation(flagName string) {
 func (m *Metrics) IncAllFlag() {
 	if m.allFlagCounter != nil {
 		m.allFlagCounter.Inc()
+	}
+}
+
+// IncForceRefresh increment the number call to ForceRefresh
+func (m *Metrics) IncForceRefresh() {
+	if m.forceRefreshCounter != nil {
+		m.forceRefreshCounter.Inc()
 	}
 }
 

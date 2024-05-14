@@ -119,8 +119,10 @@ func TestValidUseCase(t *testing.T) {
 
 	ffclient.SetOffline(true)
 	assert.True(t, ffclient.IsOffline())
+	assert.False(t, ffclient.ForceRefresh())
 	ffclient.SetOffline(false)
 	assert.False(t, ffclient.IsOffline())
+	assert.True(t, ffclient.ForceRefresh())
 }
 
 func TestAllFlagsFromCache(t *testing.T) {
@@ -513,4 +515,39 @@ func Test_GetPollingInterval(t *testing.T) {
 			assert.Equal(t, tt.pollingInterval.Milliseconds(), goff.GetPollingInterval())
 		})
 	}
+}
+
+func Test_ForceRefreshCache(t *testing.T) {
+	tempFile, err := os.CreateTemp("", "")
+	assert.NoError(t, err)
+	defer func() { _ = os.Remove(tempFile.Name()) }()
+	content, err := os.ReadFile("testdata/flag-config.yaml")
+	assert.NoError(t, err)
+	err = os.WriteFile(tempFile.Name(), content, os.ModePerm)
+	assert.NoError(t, err)
+
+	gffClient, err := ffclient.New(ffclient.Config{
+		PollingInterval: 15 * time.Minute,
+		Retriever:       &fileretriever.Retriever{Path: tempFile.Name()},
+		Logger:          log.New(os.Stdout, "", 0),
+		Offline:         false,
+	})
+	assert.NoError(t, err)
+	defer gffClient.Close()
+	refreshTime := gffClient.GetCacheRefreshDate()
+
+	// modify the file to trigger a refresh
+	newContent, err := os.ReadFile("testdata/flag-config-2nd-file.yaml")
+	assert.NoError(t, err)
+	err = os.WriteFile(tempFile.Name(), newContent, os.ModePerm)
+	assert.NoError(t, err)
+	// checking that the cache has not been refreshed
+	assert.Equal(t, refreshTime, gffClient.GetCacheRefreshDate())
+
+	// checking that the cache has been refreshed
+	gffClient.ForceRefresh()
+	assert.NotEqual(t, refreshTime, gffClient.GetCacheRefreshDate())
+	gffClient.SetOffline(true)
+	gffClient.ForceRefresh()
+	assert.Equal(t, time.Time{}, gffClient.GetCacheRefreshDate())
 }

@@ -1,5 +1,10 @@
 basePath: /
 definitions:
+  controller.retrieverRefreshResponse:
+    properties:
+      refreshed:
+        type: boolean
+    type: object
   exporter.FeatureEvent:
     properties:
       contextKind:
@@ -404,6 +409,32 @@ info:
   x-logo:
     url: https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png
 paths:
+  /admin/v1/retriever/refresh:
+    post:
+      description: |-
+        This endpoint is used to force the refresh of the flags in the cache.
+        This endpoint is used when you know explicitly that a flag has changed, and you want to trigger
+        the collection of the new versions.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/controller.retrieverRefreshResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/modeldocs.HTTPErrorDoc'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/modeldocs.HTTPErrorDoc'
+      security:
+      - ApiKeyAuth: []
+      summary: This endpoint is used to force the refresh of the flags in the cache.
+      tags:
+      - Admin API to manage GO Feature Flag
   /health:
     get:
       description: |-
