@@ -78,13 +78,11 @@ export AWS_ACCESS_KEY_ID=xxx
 export AWS_DEFAULT_REGION=eu-west-1
 ```
 
-```bash
-
-| Field name | Type   | Default  | Description                                                                                                         |
-|------------|--------|----------|---------------------------------------------------------------------------------------------------------------------|
+| Field name | Type   | Default  | Description                                                                                                          |
+|------------|--------|----------|----------------------------------------------------------------------------------------------------------------------|
 | `kind`     | string | **none** | **(mandatory)** Value should be **`s3`**.<br/>_This field is mandatory and describes which retriever you are using._ |
-| `bucket`   | string | **none** | **(mandatory)** This is the name of your S3 bucket _(ex: `my-featureflag-bucket`)_.                                 |
-| `item`     | string | **none** | **(mandatory)** Path to the file inside the bucket _(ex: `config/flag/my-flags.yaml`)_.                             |
+| `bucket`   | string | **none** | **(mandatory)** This is the name of your S3 bucket _(ex: `my-featureflag-bucket`)_.                                  |
+| `item`     | string | **none** | **(mandatory)** Path to the file inside the bucket _(ex: `config/flag/my-flags.yaml`)_.                              |
 
 
 ### GitHub
