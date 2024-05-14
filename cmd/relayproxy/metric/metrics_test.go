@@ -84,3 +84,14 @@ func TestMetrics_IncFlagChange(t *testing.T) {
 
 	assert.Equal(t, 3.0, testutil.ToFloat64(metricSrv.flagChange))
 }
+
+func TestMetrics_IncForceRefresh(t *testing.T) {
+	metricSrv, err := NewMetrics()
+	assert.NoError(t, err)
+
+	metricSrv.IncForceRefresh()
+	metricSrv.IncForceRefresh()
+	metricSrv.IncForceRefresh()
+
+	assert.Equal(t, 3.0, testutil.ToFloat64(metricSrv.forceRefreshCounter))
+}

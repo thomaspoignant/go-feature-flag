@@ -18,6 +18,43 @@
     },
     "basePath": "/",
     "paths": {
+        "/admin/v1/retriever/refresh": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "This endpoint is used to force the refresh of the flags in the cache.\nThis endpoint is used when you know explicitly that a flag has changed, and you want to trigger\nthe collection of the new versions.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin API to manage GO Feature Flag"
+                ],
+                "summary": "This endpoint is used to force the refresh of the flags in the cache.",
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/controller.retrieverRefreshResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
+                        }
+                    }
+                }
+            }
+        },
         "/health": {
             "get": {
                 "description": "Making a **GET** request to the URL path `/health` will tell you if the relay proxy is ready to serve\ntraffic.\n\nThis is useful especially for loadbalancer to know that they can send traffic to the service.",
@@ -488,6 +525,14 @@
         }
     },
     "definitions": {
+        "controller.retrieverRefreshResponse": {
+            "type": "object",
+            "properties": {
+                "refreshed": {
+                    "type": "boolean"
+                }
+            }
+        },
         "exporter.FeatureEvent": {
             "type": "object",
             "properties": {
