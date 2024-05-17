@@ -136,3 +136,17 @@ updates:
       - "automerge"
     commit-message:
       prefix: "chore"
+
+
+  # Website CI scripts
+  - package-ecosystem: gomod
+    directory: "/website/.ci"
+    schedule:
+      interval: weekly
+      time: "01:00"
+    open-pull-requests-limit: 20
+    labels:
+      - "dependencies"
+      - "automerge"
+    commit-message:
+      prefix: "chore"

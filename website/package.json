@@ -13,8 +13,7 @@
     "write-translations": "docusaurus write-translations",
     "write-heading-ids": "docusaurus write-heading-ids",
     "lint": "eslint \"**/*.js\"",
-    "eslint:fix": "eslint \"**/*.js\" --fix",
-    "generate:versionsArchived": "node src/tool/generate_versionArchived.js"
+    "eslint:fix": "eslint \"**/*.js\" --fix"
   },
   "dependencies": {
     "@docusaurus/core": "^3.0.1",
