@@ -87,12 +87,9 @@ const VersionList = () => {
     return docusaurusVersions.find(docusaurusVersion => docusaurusVersion.name === version).path;
   }
 
-  function getRepoUrl() {
-    const {
-      siteConfig: { organizationName, projectName }
-    } = useDocusaurusContext();
-    return `https://github.com/${organizationName}/${projectName}`;
-  }
+  const {
+    siteConfig: { organizationName, projectName }
+  } = useDocusaurusContext();
 
   return (
     <div className="margin-bottom--lg">
@@ -119,7 +116,7 @@ const VersionList = () => {
                   </Link>}
               </td>
             <td>
-            <Link href={`${getRepoUrl()}/releases/tag/${version.version}`}>
+            <Link href={`${getRepoURL(organizationName, projectName)}/releases/tag/${version.version}`}>
                   <ReleaseNotesLabel />
                 </Link>
               </td>
@@ -131,6 +128,10 @@ const VersionList = () => {
 };
 
 
+const getRepoURL= (organizationName, projectName) =>{
+  return `https://github.com/${organizationName}/${projectName}`;
+}
+
 export default function Version() {
   const versions = useVersions(docsPluginId);
   const latestVersion = useLatestVersion(docsPluginId);
@@ -138,12 +139,9 @@ export default function Version() {
     (version) => version.name === "current"
   );
 
-  function getRepoUrl() {
-    const {
-      siteConfig: { organizationName, projectName }
-    } = useDocusaurusContext();
-    return `https://github.com/${organizationName}/${projectName}`;
-  }
+  const {
+    siteConfig: { organizationName, projectName }
+  } = useDocusaurusContext();
 
   return (
     <Layout
@@ -177,7 +175,7 @@ export default function Version() {
                 </Link>
               </td>
               <td>
-                <Link to={`${getRepoUrl()}/releases/tag/${latestVersion.name}`}>
+                <Link to={`${getRepoURL(organizationName,projectName)}/releases/tag/${latestVersion.name}`}>
                   <ReleaseNotesLabel />
                 </Link>
               </td>
