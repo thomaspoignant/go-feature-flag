@@ -206,6 +206,16 @@ jobs:
         working-directory: ./release/${{ env.WEBSITE_DIR }}
         run: npm run docusaurus docs:version ${{  github.ref_name }}
 
+      - name: Setup go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: ./release/${{ env.WEBSITE_DIR }}/.ci/go.mod
+          check-latest: true
+
+      - name: Clean up version.json
+        working-directory: ./release/${{ env.WEBSITE_DIR }}/.ci
+        run: go run versions.go
+
       - name: Checkout main branch
         uses: actions/checkout@v4
         with:
@@ -277,7 +287,7 @@ jobs:
         uses: peter-evans/create-pull-request@v6
         with:
           branch: bump-relay-proxy-helm-chart-${{  github.ref_name }}
-          title: "ci(helm): Bump relay-proxy helm chart version ${{  github.ref_name }}"
+          title: "feat(helm): Bump relay-proxy helm chart version ${{  github.ref_name }}"
           body: Automated pull request to bump relay-proxy helm chart version ${{  github.ref_name }}
           commit-message: Bump relay-proxy helm chart version ${{  github.ref_name }}
           labels: automerge
