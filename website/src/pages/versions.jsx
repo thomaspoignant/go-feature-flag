@@ -12,14 +12,6 @@ import Heading from '@theme/Heading';
 const docsPluginId = undefined; // Default docs plugin instance
 const baseGithubLinkDoc = 'https://github.com/thomaspoignant/go-feature-flag/tree/main/website/versioned_docs/version-';
 
-function getRepoUrl(){
-  const {
-    siteConfig: { organizationName, projectName }
-  } = useDocusaurusContext();
-  return `https://github.com/${organizationName}/${projectName}`;
-
-}
-
 function DocumentationLabel() {
   return (
     <Translate id="versionsPage.versionEntry.link">Documentation</Translate>
@@ -95,6 +87,13 @@ const VersionList = () => {
     return docusaurusVersions.find(docusaurusVersion => docusaurusVersion.name === version).path;
   }
 
+  function getRepoUrl() {
+    const {
+      siteConfig: { organizationName, projectName }
+    } = useDocusaurusContext();
+    return `https://github.com/${organizationName}/${projectName}`;
+  }
+
   return (
     <div className="margin-bottom--lg">
       <Heading as="h3" id="archive">
@@ -138,10 +137,13 @@ export default function Version() {
   const currentVersion = versions.find(
     (version) => version.name === "current"
   );
-  const pastVersions = versions.filter(
-    (version) => version !== latestVersion && version.name !== "current"
-  );
 
+  function getRepoUrl() {
+    const {
+      siteConfig: { organizationName, projectName }
+    } = useDocusaurusContext();
+    return `https://github.com/${organizationName}/${projectName}`;
+  }
 
   return (
     <Layout
