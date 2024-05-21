@@ -224,6 +224,18 @@ func Test_Evaluate(t *testing.T) {
 				bodyFile: "../testdata/ofrep/responses/not_found.json",
 			},
 		},
+		{
+			name: "targeting using the field targetingKey in the rules",
+			args: args{
+				bodyFile:            "../testdata/ofrep/valid_targeting_key_query_request.json",
+				configFlagsLocation: configFlagsLocation,
+				flagKey:             "targeting-key-rule",
+			},
+			want: want{
+				httpCode: http.StatusOK,
+				bodyFile: "../testdata/ofrep/responses/valid_targeting_key_query_response.json",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -1,0 +1,8 @@
+{
+  "context": {
+    "company": "GO Feature Flag",
+    "firstname": "John",
+    "lastname": "Doe",
+    "targetingKey": "specific-targeting-key"
+  }
+}
