@@ -35,6 +35,12 @@
       "variant": "Default"
     },
     {
+      "key": "targeting-key-rule",
+      "value": false,
+      "reason": "DEFAULT",
+      "variant": "false_var"
+    },
+    {
       "key": "test-flag-rule-apply",
       "value": {
         "test": "test"

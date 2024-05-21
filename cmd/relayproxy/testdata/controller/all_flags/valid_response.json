@@ -73,6 +73,14 @@
       "trackEvents": true,
       "errorCode": "",
       "reason": "DEFAULT"
+    },
+    "targeting-key-rule": {
+      "value": false,
+      "timestamp": 1652273630,
+      "variationType": "false_var",
+      "trackEvents": true,
+      "errorCode": "",
+      "reason": "DEFAULT"
     }
   },
   "valid": true
