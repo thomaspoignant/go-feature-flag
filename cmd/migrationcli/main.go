@@ -46,5 +46,5 @@ func outputResult(content []byte, outputFile string) error {
 		fmt.Println(string(content))
 		return nil
 	}
-	return os.WriteFile(outputFile, content, os.ModePerm)
+	return os.WriteFile(outputFile, content, 0600)
 }
