@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -91,10 +92,14 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 			log.Error("error loading file", zap.Error(errBindFile))
 		}
 	}
-
+	configMap := k.Raw()
 	// Map environment variables
-	_ = k.Load(env.Provider("", ".", func(s string) string {
-		return strings.ReplaceAll(strings.ToLower(s), "_", ".")
+	_ = k.Load(env.ProviderWithValue("", ".", func(s string, v string) (string, interface{}) {
+		if strings.HasPrefix(s, "RETRIEVERS") || strings.HasPrefix(s, "NOTIFIERS") {
+			_ = loadArrayEnv(s, v, configMap)
+			return s, v
+		}
+		return strings.ReplaceAll(strings.ToLower(s), "_", "."), v
 	}), nil)
 
 	_ = k.Set("version", version)
@@ -321,4 +326,46 @@ func locateConfigFile(inputFilePath string) (string, error) {
 	}
 	return "", fmt.Errorf(
 		"impossible to find config file in the default locations [%s]", strings.Join(defaultLocations, ","))
+}
+
+// Load the ENV Like:RETRIEVERS_0_HEADERS_AUTHORIZATION
+func loadArrayEnv(s string, v string, configMap map[string]interface{}) error {
+	paths := strings.Split(s, "_")
+	for i, str := range paths {
+		paths[i] = strings.ToLower(str)
+	}
+	prefixKey := paths[0]
+	if configArray, ok := configMap[prefixKey].([]interface{}); ok {
+		index, err := strconv.Atoi(paths[1])
+		if err != nil {
+			return err
+		}
+		configItem := configArray[index].(map[string]interface{})
+		keys := paths[2:]
+		currentMap := configItem
+		for i, key := range keys {
+			hasKey := false
+			lowerKey := key
+			for y := range currentMap {
+				if y != lowerKey {
+					continue
+				}
+				if nextMap, ok := currentMap[y].(map[string]interface{}); ok {
+					currentMap = nextMap
+					hasKey = true
+					break
+				}
+			}
+			if !hasKey && i != len(keys)-1 {
+				newMap := make(map[string]interface{})
+				currentMap[lowerKey] = newMap
+				currentMap = newMap
+			}
+		}
+		lastKey := keys[len(keys)-1]
+		currentMap[lastKey] = v
+		configArray[index] = configItem
+		_ = k.Set(prefixKey, configArray)
+	}
+	return nil
 }

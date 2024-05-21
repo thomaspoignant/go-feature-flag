@@ -1,0 +1,19 @@
+listen: 1031
+pollingInterval: 1000
+startWithRetrieverError: false
+retrievers:
+  - kind: http
+    url: https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml
+  - kind: file
+    path: examples/retriever_file/flags.goff.yaml
+    headers:
+      token: 11213123
+exporter:
+  kind: log
+enableSwagger: true
+authorizedKeys:
+  evaluation:
+    - apikey1 # owner: userID1
+    - apikey2 # owner: userID2
+  admin:
+    - apikey3
