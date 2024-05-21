@@ -287,7 +287,7 @@ jobs:
         uses: peter-evans/create-pull-request@v6
         with:
           branch: bump-relay-proxy-helm-chart-${{  github.ref_name }}
-          title: "feat(helm): Bump relay-proxy helm chart version ${{  github.ref_name }}"
+          title: "chore(helm): Bump relay-proxy helm chart version ${{  github.ref_name }}"
           body: Automated pull request to bump relay-proxy helm chart version ${{  github.ref_name }}
           commit-message: Bump relay-proxy helm chart version ${{  github.ref_name }}
           labels: automerge
