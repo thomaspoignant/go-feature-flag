@@ -205,7 +205,6 @@ func assertOFREPEvaluateRequest(ofrepEvalReq *model.OFREPEvalFlagRequest) *model
 
 func evaluationContextFromOFREPRequest(ctx map[string]any) (ffcontext.Context, error) {
 	if targetingKey, ok := ctx["targetingKey"].(string); ok {
-		delete(ctx, "targetingKey")
 		evalCtx := utils.ConvertEvaluationCtxFromRequest(targetingKey, ctx)
 		return evalCtx, nil
 	}

@@ -71,3 +71,13 @@ array-flag:
     - batmanFalse
     - supermanFalse
     - superherosFalse
+
+targeting-key-rule:
+  variations:
+    true_var: true
+    false_var: false
+  targeting:
+    - query: targetingKey eq "specific-targeting-key"
+      variation: true_var
+  defaultRule:
+    variation: false_var
