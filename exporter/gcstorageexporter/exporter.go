@@ -101,6 +101,7 @@ func (f *Exporter) Export(ctx context.Context, logger *log.Logger, featureEvents
 			fflog.Printf(logger, "error: [Exporter] impossible to open the file %s/%s", outputDir, file.Name())
 			continue
 		}
+		defer of.Close()
 
 		// prepend the path
 		source := file.Name()
