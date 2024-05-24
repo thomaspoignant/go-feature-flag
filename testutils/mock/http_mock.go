@@ -9,7 +9,8 @@ import (
 )
 
 type HTTP struct {
-	Req http.Request
+	Req       http.Request
+	RateLimit bool
 }
 
 func (m *HTTP) Do(req *http.Request) (*http.Response, error) {
@@ -37,8 +38,28 @@ func (m *HTTP) Do(req *http.Request) (*http.Response, error) {
 		Body:       io.NopCloser(bytes.NewReader([]byte(""))),
 	}
 
+	rateLimit := &http.Response{
+		Status:     "Rate Limit",
+		StatusCode: http.StatusTooManyRequests,
+		Body:       io.NopCloser(bytes.NewReader([]byte(""))),
+		Header: map[string][]string{
+			"X-Content-Type-Options": {"nosniff"},
+			"X-Frame-Options":        {"deny"},
+			"X-Github-Media-Type":    {"github.v3; format=json"},
+			"X-Github-Request-Id":    {"F82D:37B98C:232EF263:235C93BD:6650BDC6"},
+			"X-Ratelimit-Limit":      {"60"},
+			"X-Ratelimit-Remaining":  {"0"},
+			"X-Ratelimit-Reset":      {"1716568424"},
+			"X-Ratelimit-Resource":   {"core"},
+			"X-Ratelimit-Used":       {"60"},
+			"X-Xss-Protection":       {"1; mode=block"},
+		},
+	}
+
 	if strings.Contains(req.URL.String(), "error") {
 		return nil, errors.New("http error")
+	} else if m.RateLimit {
+		return rateLimit, nil
 	} else if strings.HasSuffix(req.URL.String(), "httpError") {
 		return error, nil
 	}

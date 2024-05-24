@@ -2,11 +2,10 @@ package httpretriever
 
 import (
 	"context"
-	"errors"
 	"fmt"
+	"github.com/thomaspoignant/go-feature-flag/retriever/shared"
 	"io"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/internal"
@@ -39,51 +38,14 @@ func (r *Retriever) SetHTTPClient(client internal.HTTPClient) {
 }
 
 func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
-	timeout := r.Timeout
-	if timeout <= 0 {
-		timeout = 10 * time.Second
-	}
-
-	if r.URL == "" {
-		return nil, errors.New("URL is a mandatory parameter when using httpretriever.Retriever")
-	}
-
-	method := r.Method
-	if method == "" {
-		method = http.MethodGet
-	}
-
-	if ctx == nil {
-		ctx = context.Background()
-	}
-
-	req, err := http.NewRequestWithContext(ctx, method, r.URL, strings.NewReader(r.Body))
+	resp, err := shared.CallHTTPAPI(ctx, r.URL, r.Method, r.Body, r.Timeout, r.Header, r.httpClient)
 	if err != nil {
 		return nil, err
 	}
-
-	// Add header if some are passed
-	if len(r.Header) > 0 {
-		req.Header = r.Header
-	}
-
-	if r.httpClient == nil {
-		r.httpClient = internal.HTTPClientWithTimeout(timeout)
-	}
-
-	// API call
-	resp, err := r.httpClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	// Error if http code is more that 399
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode > 399 {
 		return nil, fmt.Errorf("request to %s failed with code %d", r.URL, resp.StatusCode)
 	}
-
-	// read content of the URL.
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
