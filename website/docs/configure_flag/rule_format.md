@@ -5,6 +5,22 @@ description: How to create a rule to target specific users
 
 # How to target specific users
 
+## Evaluation Context
+An evaluation context in a feature flagging system is crucial for determining the output of a feature flag evaluation.
+It's a collection of pertinent data about the conditions under which the evaluation is being made.
+his data can be supplied through a mix of static information _(server name, IP, etc ...)_ and dynamic inputs
+_(information about the user performing the action, etc ...)_, along with state information that is implicitly carried 
+through the execution of the program.
+
+When using GO Feature Flag, it's often necessary to personalize the experience for different users.
+This is where the concept of a **targeting key** comes into play.
+A targeting key is a unique identifier that represents the context of the evaluation _(email, session id, a fingerprint or anything that is consistent)_,
+ensuring that they are consistently exposed to the same variation of a feature, even across multiple visits or sessions.
+
+For instance, **GO Feature Flag** ensures that in cases where a feature is being rolled out to a percentage of users, based on the targeting key, they will see the same variation each time they encounter the feature flag.
+
+The targeting key is a fundamental part of the evaluation context because it directly affects the determination of which feature variant is served to a particular user, and it maintains that continuity over time.
+
 ## Rule format
 
 A rule is a configuration that allows to serve a variation based on some conditions.
