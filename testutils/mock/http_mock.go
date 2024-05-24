@@ -55,11 +55,12 @@ func (m *HTTP) Do(req *http.Request) (*http.Response, error) {
 			"X-Xss-Protection":       {"1; mode=block"},
 		},
 	}
+	if m.RateLimit {
+		return rateLimit, nil
+	}
 
 	if strings.Contains(req.URL.String(), "error") {
 		return nil, errors.New("http error")
-	} else if m.RateLimit {
-		return rateLimit, nil
 	} else if strings.HasSuffix(req.URL.String(), "httpError") {
 		return error, nil
 	}
