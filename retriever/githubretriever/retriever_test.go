@@ -24,6 +24,7 @@ func Test_github_Retrieve(t *testing.T) {
 		fields  fields
 		want    []byte
 		wantErr bool
+		errMsg  string
 	}{
 		{
 			name: "Success",
@@ -117,6 +118,16 @@ func Test_github_Retrieve(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name: "Ratelimiting",
+			fields: fields{
+				httpClient:     mock.HTTP{RateLimit: true},
+				repositorySlug: "thomaspoignant/go-feature-flag",
+				filePath:       "testdata/flag-config.yaml",
+			},
+			errMsg:  "request to https://api.github.com/repos/thomaspoignant/go-feature-flag/contents/testdata/flag-config.yaml?ref=main failed with code 429. GitHub Headers: map[X-Content-Type-Options:nosniff X-Frame-Options:deny X-Github-Media-Type:github.v3; format=json X-Github-Request-Id:F82D:37B98C:232EF263:235C93BD:6650BDC6 X-Ratelimit-Limit:60 X-Ratelimit-Remaining:0 X-Ratelimit-Reset:1716568424 X-Ratelimit-Resource:core X-Ratelimit-Used:60 X-Xss-Protection:1; mode=block]",
+			wantErr: true,
+		},
+		{
 			name: "Use GitHub token",
 			fields: fields{
 				httpClient:     mock.HTTP{},
@@ -149,6 +160,9 @@ func Test_github_Retrieve(t *testing.T) {
 
 			h.SetHTTPClient(&tt.fields.httpClient)
 			got, err := h.Retrieve(tt.fields.context)
+			if tt.errMsg != "" {
+				assert.EqualError(t, err, tt.errMsg)
+			}
 			assert.Equal(t, tt.wantErr, err != nil, "Retrieve() error = %v, wantErr %v", err, tt.wantErr)
 			if !tt.wantErr {
 				assert.Equal(t, http.MethodGet, tt.fields.httpClient.Req.Method)

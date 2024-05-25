@@ -3,10 +3,11 @@ package githubretriever
 import (
 	"context"
 	"fmt"
+	"github.com/thomaspoignant/go-feature-flag/retriever/shared"
+	"io"
 	"net/http"
+	"strings"
 	"time"
-
-	httpretriever "github.com/thomaspoignant/go-feature-flag/retriever/httpretriever"
 
 	"github.com/thomaspoignant/go-feature-flag/internal"
 )
@@ -48,18 +49,28 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 		r.FilePath,
 		branch)
 
-	httpRetriever := httpretriever.Retriever{
-		URL:     URL,
-		Method:  http.MethodGet,
-		Header:  header,
-		Timeout: r.Timeout,
+	resp, err := shared.CallHTTPAPI(ctx, URL, http.MethodGet, "", r.Timeout, header, r.httpClient)
+	if err != nil {
+		return nil, err
 	}
+	defer func() { _ = resp.Body.Close() }()
+	if resp.StatusCode > 399 {
+		// Collect the headers to add in the error message
+		ghHeaders := map[string]string{}
+		for name := range resp.Header {
+			if strings.HasPrefix(name, "X-") {
+				ghHeaders[name] = resp.Header.Get(name)
+			}
+		}
 
-	if r.httpClient != nil {
-		httpRetriever.SetHTTPClient(r.httpClient)
+		return nil, fmt.Errorf("request to %s failed with code %d."+
+			" GitHub Headers: %v", URL, resp.StatusCode, ghHeaders)
 	}
-
-	return httpRetriever.Retrieve(ctx)
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	return body, nil
 }
 
 // SetHTTPClient is here if you want to override the default http.Client we are using.
