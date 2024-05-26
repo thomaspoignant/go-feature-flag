@@ -216,23 +216,31 @@ const config = {
         },
         links: [
           {
-            title: 'Docs',
+            title: 'Product',
             items: [
               {
                 label: 'Getting Started',
                 to: '/docs/category/getting-started',
               },
               {
-                label: 'GO Module',
-                to: '/docs/category/use-as-a-go-module',
+                label: 'OpenFeature',
+                to: '/product/open_feature_support',
+              },
+              {
+                label: 'Documentations',
+                to: '/docs',
               },
               {
                 label: 'SDKs',
                 to: '/docs/openfeature_sdk/sdk',
               },
               {
-                label: 'Relay Proxy',
-                to: '/docs/relay_proxy',
+                label: 'Blog',
+                to: '/blog',
+              },
+              {
+                label: 'Flag Editor',
+                to: '/editor',
               },
             ],
           },
@@ -273,11 +281,13 @@ const config = {
             ],
           },
           {
-            title: 'More',
+            title: ' ',
             items: [
               {
-                label: 'Blog',
-                to: '/blog',
+                html: `
+                <a href="https://www.netlify.com" target="_blank" rel="noreferrer noopener">
+                   <i class="devicon-netlify-plain colored"></i> Powered by Netlify&nbsp;&nbsp;<i class="fa-solid fa-arrow-up-right-from-square"></i>
+                </a>`,
               },
             ],
           },
