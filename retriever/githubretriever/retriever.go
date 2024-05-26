@@ -6,6 +6,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/retriever/shared"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -22,6 +23,10 @@ type Retriever struct {
 
 	// httpClient is the http.Client if you want to override it.
 	httpClient internal.HTTPClient
+
+	// rate limit fields
+	rateLimitRemaining int
+	rateLimitReset     time.Time
 }
 
 func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
@@ -43,6 +48,10 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 		header.Add("Authorization", fmt.Sprintf("Bearer %s", r.GithubToken))
 	}
 
+	if r.rateLimitRemaining <= 0 && time.Now().Before(r.rateLimitReset) {
+		return nil, fmt.Errorf("rate limit exceeded. Next call will be after %s", r.rateLimitReset)
+	}
+
 	URL := fmt.Sprintf(
 		"https://api.github.com/repos/%s/contents/%s?ref=%s",
 		r.RepositorySlug,
@@ -54,6 +63,9 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 		return nil, err
 	}
 	defer func() { _ = resp.Body.Close() }()
+
+	r.updateRateLimit(resp.Header)
+
 	if resp.StatusCode > 399 {
 		// Collect the headers to add in the error message
 		ghHeaders := map[string]string{}
@@ -77,4 +89,18 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 // It is also used for the tests.
 func (r *Retriever) SetHTTPClient(client internal.HTTPClient) {
 	r.httpClient = client
+}
+
+func (r *Retriever) updateRateLimit(headers http.Header) {
+	if remaining := headers.Get("X-RateLimit-Remaining"); remaining != "" {
+		if remainingInt, err := strconv.Atoi(remaining); err == nil {
+			r.rateLimitRemaining = remainingInt
+		}
+	}
+
+	if reset := headers.Get("X-RateLimit-Reset"); reset != "" {
+		if resetInt, err := strconv.ParseInt(reset, 10, 64); err == nil {
+			r.rateLimitReset = time.Unix(resetInt, 0)
+		}
+	}
 }
