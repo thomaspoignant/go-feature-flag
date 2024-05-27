@@ -73,6 +73,17 @@ curl -X 'POST' \
   -d '{ "user": { "key": "contact@gofeatureflag.org", "anonymous": true, "custom": { "admin": true, "email": "contact@gofeatureflag.org" }}, "defaultValue": "false"}'
 ```
 
+# Supported tags and respective `Dockerfile` links
+
+GO Feature Flag is publishing the following tags:
+- [`latest`](https://github.com/thomaspoignant/go-feature-flag/blob/main/cmd/relayproxy/DockerfileGoreleaser), [`bookworm`](https://github.com/thomaspoignant/go-feature-flag/blob/main/cmd/relayproxy/DockerfileGoreleaserBookworm), [`v1`](https://github.com/thomaspoignant/go-feature-flag/blob/main/cmd/relayproxy/DockerfileGoreleaser), [`v1-bookworm`](https://github.com/thomaspoignant/go-feature-flag/blob/main/cmd/relayproxy/DockerfileGoreleaserBookworm)
+
+The numbered version _(ex: `v1`, `1.29`, etc ...)_ are using a **`distroless`** base image,
+ensuring a minimal image size and high security.
+
+The version with `-bookworm` is using the `bookworm` debian-slim image as base,
+it allows extending it with more tools if needed.
+
 # License
 
 View [license](https://github.com/thomaspoignant/go-feature-flag/blob/main/LICENSE) information for the software contained in this image.
