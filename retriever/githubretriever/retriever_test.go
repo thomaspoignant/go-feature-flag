@@ -3,7 +3,9 @@ package githubretriever_test
 import (
 	"context"
 	"net/http"
+	"strconv"
 	"testing"
+	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/retriever/githubretriever"
 	"github.com/thomaspoignant/go-feature-flag/testutils/mock"
@@ -12,6 +14,7 @@ import (
 )
 
 func Test_github_Retrieve(t *testing.T) {
+	endRatelimit := time.Now().Add(1 * time.Hour)
 	type fields struct {
 		httpClient     mock.HTTP
 		context        context.Context
@@ -120,11 +123,11 @@ func Test_github_Retrieve(t *testing.T) {
 		{
 			name: "Ratelimiting",
 			fields: fields{
-				httpClient:     mock.HTTP{RateLimit: true},
+				httpClient:     mock.HTTP{RateLimit: true, EndRatelimit: endRatelimit},
 				repositorySlug: "thomaspoignant/go-feature-flag",
 				filePath:       "testdata/flag-config.yaml",
 			},
-			errMsg:  "request to https://api.github.com/repos/thomaspoignant/go-feature-flag/contents/testdata/flag-config.yaml?ref=main failed with code 429. GitHub Headers: map[X-Content-Type-Options:nosniff X-Frame-Options:deny X-Github-Media-Type:github.v3; format=json X-Github-Request-Id:F82D:37B98C:232EF263:235C93BD:6650BDC6 X-Ratelimit-Limit:60 X-Ratelimit-Remaining:0 X-Ratelimit-Reset:1716568424 X-Ratelimit-Resource:core X-Ratelimit-Used:60 X-Xss-Protection:1; mode=block]",
+			errMsg:  "request to https://api.github.com/repos/thomaspoignant/go-feature-flag/contents/testdata/flag-config.yaml?ref=main failed with code 429. GitHub Headers: map[X-Content-Type-Options:nosniff X-Frame-Options:deny X-Github-Media-Type:github.v3; format=json X-Github-Request-Id:F82D:37B98C:232EF263:235C93BD:6650BDC6 X-Ratelimit-Limit:60 X-Ratelimit-Remaining:0 X-Ratelimit-Reset:" + strconv.FormatInt(endRatelimit.Unix(), 10) + " X-Ratelimit-Resource:core X-Ratelimit-Used:60 X-Xss-Protection:1; mode=block]",
 			wantErr: true,
 		},
 		{
@@ -173,4 +176,29 @@ func Test_github_Retrieve(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestRateLimiting(t *testing.T) {
+	h := githubretriever.Retriever{
+		RepositorySlug: "thomaspoignant/go-feature-flag",
+		FilePath:       "testdata/flag-config.yaml",
+	}
+
+	httpClient := &mock.HTTP{}
+	h.SetHTTPClient(httpClient)
+	_, err := h.Retrieve(context.TODO())
+	assert.NoError(t, err)
+	assert.True(t, httpClient.HasBeenCalled)
+
+	httpClient = &mock.HTTP{RateLimit: true}
+	h.SetHTTPClient(httpClient)
+	_, err = h.Retrieve(context.TODO())
+	assert.Error(t, err)
+	assert.True(t, httpClient.HasBeenCalled)
+
+	httpClient = &mock.HTTP{}
+	h.SetHTTPClient(httpClient)
+	_, err = h.Retrieve(context.TODO())
+	assert.Error(t, err)
+	assert.False(t, httpClient.HasBeenCalled)
 }

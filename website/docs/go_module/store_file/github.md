@@ -9,6 +9,8 @@ will perform an HTTP Request with your GitHub configuration to get your flags.
 
 :::tip
 GitHub has rate limits, be sure to correctly set your `PollingInterval` to avoid reaching the limit.
+
+If the rate limit is reached, the retriever will return an error and will stop polling until GitHub allows it again.
 :::
 
 ## Example

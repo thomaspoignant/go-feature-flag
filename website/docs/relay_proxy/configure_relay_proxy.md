@@ -87,6 +87,12 @@ export AWS_DEFAULT_REGION=eu-west-1
 
 ### GitHub
 
+:::tip
+GitHub has rate limits, be sure to correctly set your `PollingInterval` to avoid reaching the limit.
+
+If the rate limit is reached, the retriever will return an error and will stop polling until GitHub allows it again.
+:::
+
 | Field name       | Type   | Default  | Description                                                                                                                                                                                                                        |
 |------------------|--------|----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `kind`           | string | **none** | **(mandatory)** Value should be **`github`**.<br/>_This field is mandatory and describes which retriever you are using._                                                                                                            |
