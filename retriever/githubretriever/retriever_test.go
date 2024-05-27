@@ -174,3 +174,28 @@ func Test_github_Retrieve(t *testing.T) {
 		})
 	}
 }
+
+func TestRateLimiting(t *testing.T) {
+	h := githubretriever.Retriever{
+		RepositorySlug: "thomaspoignant/go-feature-flag",
+		FilePath:       "testdata/flag-config.yaml",
+	}
+
+	httpClient := &mock.HTTP{}
+	h.SetHTTPClient(httpClient)
+	_, err := h.Retrieve(context.TODO())
+	assert.NoError(t, err)
+	assert.True(t, httpClient.HasBeenCalled)
+
+	httpClient = &mock.HTTP{RateLimit: true}
+	h.SetHTTPClient(httpClient)
+	_, err = h.Retrieve(context.TODO())
+	assert.Error(t, err)
+	assert.True(t, httpClient.HasBeenCalled)
+
+	httpClient = &mock.HTTP{}
+	h.SetHTTPClient(httpClient)
+	_, err = h.Retrieve(context.TODO())
+	assert.Error(t, err)
+	assert.False(t, httpClient.HasBeenCalled)
+}

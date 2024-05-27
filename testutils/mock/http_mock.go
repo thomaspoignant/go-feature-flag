@@ -5,15 +5,19 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
+	"time"
 )
 
 type HTTP struct {
-	Req       http.Request
-	RateLimit bool
+	Req           http.Request
+	RateLimit     bool
+	HasBeenCalled bool
 }
 
 func (m *HTTP) Do(req *http.Request) (*http.Response, error) {
+	m.HasBeenCalled = true
 	m.Req = *req
 	success := &http.Response{
 		Status:     "OK",
@@ -49,7 +53,7 @@ func (m *HTTP) Do(req *http.Request) (*http.Response, error) {
 			"X-Github-Request-Id":    {"F82D:37B98C:232EF263:235C93BD:6650BDC6"},
 			"X-Ratelimit-Limit":      {"60"},
 			"X-Ratelimit-Remaining":  {"0"},
-			"X-Ratelimit-Reset":      {"1716568424"},
+			"X-Ratelimit-Reset":      {strconv.FormatInt(time.Now().Add(1*time.Hour).Unix(), 10)},
 			"X-Ratelimit-Resource":   {"core"},
 			"X-Ratelimit-Used":       {"60"},
 			"X-Xss-Protection":       {"1; mode=block"},
