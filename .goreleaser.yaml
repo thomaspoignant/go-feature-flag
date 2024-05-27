@@ -270,6 +270,38 @@ dockers:
     build_flag_templates:
       - "--platform=linux/arm/v7"
 
+# go-feature-flag-bookworm
+  - use: buildx
+    goos: linux
+    goarch: amd64
+    ids:
+      - go-feature-flag-bookworm
+    dockerfile: ./cmd/relayproxy/DockerfileGoreleaserBookworm
+    image_templates:
+      - thomaspoignant/go-feature-flag-bookworm:v{{ .RawVersion }}-amd64
+    build_flag_templates:
+      - "--platform=linux/amd64"
+  - use: buildx
+    goos: linux
+    goarch: arm64
+    ids:
+      - go-feature-flag-bookworm
+    dockerfile: ./cmd/relayproxy/DockerfileGoreleaserBookworm
+    image_templates:
+      - thomaspoignant/go-feature-flag-bookworm:v{{ .RawVersion }}-arm64v8
+    build_flag_templates:
+      - "--platform=linux/arm64/v8"
+  - use: buildx
+    goos: linux
+    goarch: arm
+    goarm: 7
+    ids:
+      - go-feature-flag-bookworm
+    dockerfile: ./cmd/relayproxy/DockerfileGoreleaserBookworm
+    image_templates:
+      - thomaspoignant/go-feature-flag-bookworm:v{{ .RawVersion }}-armv7
+    build_flag_templates:
+      - "--platform=linux/arm/v7"
 # migration-cli
   - use: buildx
     goos: linux
@@ -414,6 +446,32 @@ docker_manifests:
       - thomaspoignant/go-feature-flag:v{{ .RawVersion }}-arm64v8
       - thomaspoignant/go-feature-flag:v{{ .RawVersion }}-armv7
       - thomaspoignant/go-feature-flag:v{{ .RawVersion }}-amd64
+
+  # go-feature-flag-bookworm
+  - name_template: gofeatureflag/go-feature-flag:bookworm
+    id: go-feature-flag-bookworm
+    image_templates:
+      - thomaspoignant/go-feature-flag-bookworm:v{{ .RawVersion }}-arm64v8
+      - thomaspoignant/go-feature-flag-bookworm:v{{ .RawVersion }}-armv7
+      - thomaspoignant/go-feature-flag-bookworm:v{{ .RawVersion }}-amd64
+  - name_template: gofeatureflag/go-feature-flag:v{{ .RawVersion }}-bookworm
+    id: go-feature-flag-bookworm-tag
+    image_templates:
+      - thomaspoignant/go-feature-flag-bookworm:v{{ .RawVersion }}-arm64v8
+      - thomaspoignant/go-feature-flag-bookworm:v{{ .RawVersion }}-armv7
+      - thomaspoignant/go-feature-flag-bookworm:v{{ .RawVersion }}-amd64
+  - name_template: gofeatureflag/go-feature-flag:v{{ .Major }}-bookworm
+    id: go-feature-flag-bookworm-major
+    image_templates:
+      - thomaspoignant/go-feature-flag-bookworm:v{{ .RawVersion }}-arm64v8
+      - thomaspoignant/go-feature-flag-bookworm:v{{ .RawVersion }}-armv7
+      - thomaspoignant/go-feature-flag-bookworm:v{{ .RawVersion }}-amd64
+  - name_template: gofeatureflag/go-feature-flag:v{{ .Major }}.{{ .Minor }}-bookworm
+    id: go-feature-flag-bookworm-minor
+    image_templates:
+      - thomaspoignant/go-feature-flag-bookworm:v{{ .RawVersion }}-arm64v8
+      - thomaspoignant/go-feature-flag-bookworm:v{{ .RawVersion }}-armv7
+      - thomaspoignant/go-feature-flag-bookworm:v{{ .RawVersion }}-amd64
 # migration-cli-legacy
   - name_template: thomaspoignant/go-feature-flag-migration-cli:latest
     id: go-feature-flag-migration-cli-latest-legacy
