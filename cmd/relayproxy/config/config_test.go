@@ -731,6 +731,14 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 							},
 						},
 					},
+					config.RetrieverConf{
+						HTTPHeaders: map[string][]string{
+
+							"authorization": []string{
+								"test1",
+							},
+						},
+					},
 				},
 				Exporter: &config.ExporterConf{
 					Kind: "log",
@@ -756,6 +764,7 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 		os.Setenv("RETRIEVERS_0_HEADERS_AUTHORIZATION", "test")
 		os.Setenv("RETRIEVERS_X_HEADERS_AUTHORIZATION", "test")
 		os.Setenv("RETRIEVERS_1_HEADERS_AUTHORIZATION", "test1")
+		os.Setenv("RETRIEVERS_2_HEADERS_AUTHORIZATION", "test1")
 		t.Run(tt.name, func(t *testing.T) {
 			_ = os.Remove("./goff-proxy.yaml")
 			if !tt.disableDefaultFileCreation {

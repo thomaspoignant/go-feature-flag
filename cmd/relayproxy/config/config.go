@@ -96,7 +96,8 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 	// Map environment variables
 	_ = k.Load(env.ProviderWithValue("", ".", func(s string, v string) (string, interface{}) {
 		if strings.HasPrefix(s, "RETRIEVERS") || strings.HasPrefix(s, "NOTIFIERS") {
-			_ = loadArrayEnv(s, v, configMap)
+			err := loadArrayEnv(s, v, configMap)
+			log.Error("config: error loading array env", zap.String("key", s), zap.String("value", v), zap.Error(err))
 			return s, v
 		}
 		return strings.ReplaceAll(strings.ToLower(s), "_", "."), v
@@ -340,7 +341,14 @@ func loadArrayEnv(s string, v string, configMap map[string]interface{}) error {
 		if err != nil {
 			return err
 		}
-		configItem := configArray[index].(map[string]interface{})
+		var configItem map[string]interface{}
+		outRange := index > len(configArray)-1
+		if outRange {
+			configItem = make(map[string]interface{})
+		} else {
+			configItem = configArray[index].(map[string]interface{})
+		}
+
 		keys := paths[2:]
 		currentMap := configItem
 		for i, key := range keys {
@@ -364,7 +372,15 @@ func loadArrayEnv(s string, v string, configMap map[string]interface{}) error {
 		}
 		lastKey := keys[len(keys)-1]
 		currentMap[lastKey] = v
-		configArray[index] = configItem
+		if outRange {
+			blank := index - len(configArray) + 1
+			for i := 0; i < blank; i++ {
+				configArray = append(configArray, make(map[string]interface{}))
+			}
+			configArray[index] = configItem
+		} else {
+			configArray[index] = configItem
+		}
 		_ = k.Set(prefixKey, configArray)
 	}
 	return nil
