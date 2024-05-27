@@ -14,6 +14,7 @@ type HTTP struct {
 	Req           http.Request
 	RateLimit     bool
 	HasBeenCalled bool
+	EndRatelimit  time.Time
 }
 
 func (m *HTTP) Do(req *http.Request) (*http.Response, error) {
@@ -42,6 +43,11 @@ func (m *HTTP) Do(req *http.Request) (*http.Response, error) {
 		Body:       io.NopCloser(bytes.NewReader([]byte(""))),
 	}
 
+	ratelimitReset := m.EndRatelimit
+	if ratelimitReset.IsZero() {
+		ratelimitReset = time.Now().Add(1 * time.Hour)
+	}
+
 	rateLimit := &http.Response{
 		Status:     "Rate Limit",
 		StatusCode: http.StatusTooManyRequests,
@@ -53,7 +59,7 @@ func (m *HTTP) Do(req *http.Request) (*http.Response, error) {
 			"X-Github-Request-Id":    {"F82D:37B98C:232EF263:235C93BD:6650BDC6"},
 			"X-Ratelimit-Limit":      {"60"},
 			"X-Ratelimit-Remaining":  {"0"},
-			"X-Ratelimit-Reset":      {strconv.FormatInt(time.Now().Add(1*time.Hour).Unix(), 10)},
+			"X-Ratelimit-Reset":      {strconv.FormatInt(ratelimitReset.Unix(), 10)},
 			"X-Ratelimit-Resource":   {"core"},
 			"X-Ratelimit-Used":       {"60"},
 			"X-Xss-Protection":       {"1; mode=block"},
