@@ -275,7 +275,7 @@ dockers:
     goos: linux
     goarch: amd64
     ids:
-      - go-feature-flag-bookworm
+      - go-feature-flag
     dockerfile: ./cmd/relayproxy/DockerfileGoreleaserBookworm
     image_templates:
       - thomaspoignant/go-feature-flag-bookworm:v{{ .RawVersion }}-amd64
@@ -285,7 +285,7 @@ dockers:
     goos: linux
     goarch: arm64
     ids:
-      - go-feature-flag-bookworm
+      - go-feature-flag
     dockerfile: ./cmd/relayproxy/DockerfileGoreleaserBookworm
     image_templates:
       - thomaspoignant/go-feature-flag-bookworm:v{{ .RawVersion }}-arm64v8
@@ -296,7 +296,7 @@ dockers:
     goarch: arm
     goarm: 7
     ids:
-      - go-feature-flag-bookworm
+      - go-feature-flag
     dockerfile: ./cmd/relayproxy/DockerfileGoreleaserBookworm
     image_templates:
       - thomaspoignant/go-feature-flag-bookworm:v{{ .RawVersion }}-armv7
