@@ -5,7 +5,7 @@ go 1.22.0
 require (
 	cloud.google.com/go/pubsub v1.38.0
 	cloud.google.com/go/storage v1.41.0
-	github.com/BurntSushi/toml v1.3.2
+	github.com/BurntSushi/toml v1.4.0
 	github.com/IBM/sarama v1.43.2
 	github.com/aws/aws-lambda-go v1.47.0
 	github.com/aws/aws-sdk-go v1.53.5
