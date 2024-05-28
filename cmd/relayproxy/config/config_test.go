@@ -738,6 +738,9 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 							"authorization": []string{
 								"test1",
 							},
+							"x-goff-custom": []string{
+								"custom",
+							},
 						},
 					},
 				},
@@ -767,6 +770,7 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 		os.Setenv("RETRIEVERS_1_HEADERS_AUTHORIZATION", "test1")
 		os.Setenv("RETRIEVERS_0_HEADERS_TOKEN", "token")
 		os.Setenv("RETRIEVERS_2_HEADERS_AUTHORIZATION", "test1")
+		os.Setenv("RETRIEVERS_2_HEADERS_X-GOFF-CUSTOM", "custom")
 		t.Run(tt.name, func(t *testing.T) {
 			_ = os.Remove("./goff-proxy.yaml")
 			if !tt.disableDefaultFileCreation {

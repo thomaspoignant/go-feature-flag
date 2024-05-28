@@ -2,13 +2,6 @@ package config
 
 import (
 	"fmt"
-	"net/http"
-	"os"
-	"path/filepath"
-	"strconv"
-	"strings"
-	"time"
-
 	"github.com/knadh/koanf/parsers/json"
 	"github.com/knadh/koanf/parsers/toml"
 	"github.com/knadh/koanf/parsers/yaml"
@@ -20,6 +13,12 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/xitongsys/parquet-go/parquet"
 	"go.uber.org/zap"
+	"net/http"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
+	"time"
 )
 
 var k = koanf.New(".")
@@ -92,10 +91,10 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 			log.Error("error loading file", zap.Error(errBindFile))
 		}
 	}
-	configMap := k.Raw()
 	// Map environment variables
 	_ = k.Load(env.ProviderWithValue("", ".", func(s string, v string) (string, interface{}) {
 		if strings.HasPrefix(s, "RETRIEVERS") || strings.HasPrefix(s, "NOTIFIERS") {
+			configMap := k.Raw()
 			err := loadArrayEnv(s, v, configMap)
 			if err != nil {
 				log.Error("config: error loading array env", zap.String("key", s), zap.String("value", v), zap.Error(err))
