@@ -2,12 +2,6 @@ package config
 
 import (
 	"fmt"
-	"net/http"
-	"os"
-	"path/filepath"
-	"strings"
-	"time"
-
 	"github.com/knadh/koanf/parsers/json"
 	"github.com/knadh/koanf/parsers/toml"
 	"github.com/knadh/koanf/parsers/yaml"
@@ -19,6 +13,12 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/xitongsys/parquet-go/parquet"
 	"go.uber.org/zap"
+	"net/http"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
+	"time"
 )
 
 var k = koanf.New(".")
@@ -91,10 +91,18 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 			log.Error("error loading file", zap.Error(errBindFile))
 		}
 	}
-
 	// Map environment variables
-	_ = k.Load(env.Provider("", ".", func(s string) string {
-		return strings.ReplaceAll(strings.ToLower(s), "_", ".")
+	_ = k.Load(env.ProviderWithValue("", ".", func(s string, v string) (string, interface{}) {
+		if strings.HasPrefix(s, "RETRIEVERS") || strings.HasPrefix(s, "NOTIFIERS") {
+			configMap := k.Raw()
+			err := loadArrayEnv(s, v, configMap)
+			if err != nil {
+				log.Error("config: error loading array env", zap.String("key", s), zap.String("value", v), zap.Error(err))
+				return s, v
+			}
+			return s, v
+		}
+		return strings.ReplaceAll(strings.ToLower(s), "_", "."), v
 	}), nil)
 
 	_ = k.Set("version", version)
@@ -321,4 +329,61 @@ func locateConfigFile(inputFilePath string) (string, error) {
 	}
 	return "", fmt.Errorf(
 		"impossible to find config file in the default locations [%s]", strings.Join(defaultLocations, ","))
+}
+
+// Load the ENV Like:RETRIEVERS_0_HEADERS_AUTHORIZATION
+func loadArrayEnv(s string, v string, configMap map[string]interface{}) error {
+	paths := strings.Split(s, "_")
+	for i, str := range paths {
+		paths[i] = strings.ToLower(str)
+	}
+	prefixKey := paths[0]
+	if configArray, ok := configMap[prefixKey].([]interface{}); ok {
+		index, err := strconv.Atoi(paths[1])
+		if err != nil {
+			return err
+		}
+		var configItem map[string]interface{}
+		outRange := index > len(configArray)-1
+		if outRange {
+			configItem = make(map[string]interface{})
+		} else {
+			configItem = configArray[index].(map[string]interface{})
+		}
+
+		keys := paths[2:]
+		currentMap := configItem
+		for i, key := range keys {
+			hasKey := false
+			lowerKey := key
+			for y := range currentMap {
+				if y != lowerKey {
+					continue
+				}
+				if nextMap, ok := currentMap[y].(map[string]interface{}); ok {
+					currentMap = nextMap
+					hasKey = true
+					break
+				}
+			}
+			if !hasKey && i != len(keys)-1 {
+				newMap := make(map[string]interface{})
+				currentMap[lowerKey] = newMap
+				currentMap = newMap
+			}
+		}
+		lastKey := keys[len(keys)-1]
+		currentMap[lastKey] = v
+		if outRange {
+			blank := index - len(configArray) + 1
+			for i := 0; i < blank; i++ {
+				configArray = append(configArray, make(map[string]interface{}))
+			}
+			configArray[index] = configItem
+		} else {
+			configArray[index] = configItem
+		}
+		_ = k.Set(prefixKey, configArray)
+	}
+	return nil
 }

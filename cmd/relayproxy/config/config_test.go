@@ -692,3 +692,104 @@ func TestConfig_APIAdminKeyExists(t *testing.T) {
 		})
 	}
 }
+
+func TestMergeConfig_FromOSEnv(t *testing.T) {
+	tests := []struct {
+		name                       string
+		want                       *config.Config
+		fileLocation               string
+		wantErr                    assert.ErrorAssertionFunc
+		disableDefaultFileCreation bool
+	}{
+		{
+			name:         "Valid file",
+			fileLocation: "../testdata/config/validate-array-env-file.yaml",
+			want: &config.Config{
+				ListenPort:      1031,
+				PollingInterval: 1000,
+				FileFormat:      "yaml",
+				Host:            "localhost",
+				Retrievers: &[]config.RetrieverConf{
+					config.RetrieverConf{
+						Kind: "http",
+						URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
+						HTTPHeaders: map[string][]string{
+							"authorization": []string{
+								"test",
+							},
+							"token": []string{"token"},
+						},
+					},
+					config.RetrieverConf{
+						Kind: "file",
+						Path: "examples/retriever_file/flags.goff.yaml",
+						HTTPHeaders: map[string][]string{
+							"token": []string{
+								"11213123",
+							},
+							"authorization": []string{
+								"test1",
+							},
+						},
+					},
+					config.RetrieverConf{
+						HTTPHeaders: map[string][]string{
+
+							"authorization": []string{
+								"test1",
+							},
+							"x-goff-custom": []string{
+								"custom",
+							},
+						},
+					},
+				},
+				Exporter: &config.ExporterConf{
+					Kind: "log",
+				},
+				StartWithRetrieverError: false,
+				RestAPITimeout:          5000,
+				Version:                 "1.X.X",
+				EnableSwagger:           true,
+				AuthorizedKeys: config.APIKeys{
+					Admin: []string{
+						"apikey3",
+					},
+					Evaluation: []string{
+						"apikey1",
+						"apikey2",
+					},
+				},
+			},
+			wantErr: assert.NoError,
+		},
+	}
+	for _, tt := range tests {
+		os.Setenv("RETRIEVERS_0_HEADERS_AUTHORIZATION", "test")
+		os.Setenv("RETRIEVERS_X_HEADERS_AUTHORIZATION", "test")
+		os.Setenv("RETRIEVERS_1_HEADERS_AUTHORIZATION", "test1")
+		os.Setenv("RETRIEVERS_0_HEADERS_TOKEN", "token")
+		os.Setenv("RETRIEVERS_2_HEADERS_AUTHORIZATION", "test1")
+		os.Setenv("RETRIEVERS_2_HEADERS_X-GOFF-CUSTOM", "custom")
+		t.Run(tt.name, func(t *testing.T) {
+			_ = os.Remove("./goff-proxy.yaml")
+			if !tt.disableDefaultFileCreation {
+				source, _ := os.Open(tt.fileLocation)
+				destination, _ := os.Create("./goff-proxy.yaml")
+				defer destination.Close()
+				defer source.Close()
+				defer os.Remove("./goff-proxy.yaml")
+				_, _ = io.Copy(destination, source)
+			}
+
+			f := pflag.NewFlagSet("config", pflag.ContinueOnError)
+			f.String("config", "", "Location of your config file")
+			_ = f.Parse([]string{fmt.Sprintf("--config=%s", tt.fileLocation)})
+			got, err := config.New(f, zap.L(), "1.X.X")
+			if !tt.wantErr(t, err) {
+				return
+			}
+			assert.Equal(t, tt.want, got, "Config not matching")
+		})
+	}
+}
