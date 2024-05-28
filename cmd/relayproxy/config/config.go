@@ -97,7 +97,10 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 	_ = k.Load(env.ProviderWithValue("", ".", func(s string, v string) (string, interface{}) {
 		if strings.HasPrefix(s, "RETRIEVERS") || strings.HasPrefix(s, "NOTIFIERS") {
 			err := loadArrayEnv(s, v, configMap)
-			log.Error("config: error loading array env", zap.String("key", s), zap.String("value", v), zap.Error(err))
+			if err != nil {
+				log.Error("config: error loading array env", zap.String("key", s), zap.String("value", v), zap.Error(err))
+				return s, v
+			}
 			return s, v
 		}
 		return strings.ReplaceAll(strings.ToLower(s), "_", "."), v
