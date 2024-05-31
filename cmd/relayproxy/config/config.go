@@ -2,6 +2,13 @@ package config
 
 import (
 	"fmt"
+	"net/http"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/knadh/koanf/parsers/json"
 	"github.com/knadh/koanf/parsers/toml"
 	"github.com/knadh/koanf/parsers/yaml"
@@ -13,12 +20,6 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/xitongsys/parquet-go/parquet"
 	"go.uber.org/zap"
-	"net/http"
-	"os"
-	"path/filepath"
-	"strconv"
-	"strings"
-	"time"
 )
 
 var k = koanf.New(".")
@@ -40,6 +41,7 @@ var DefaultExporter = struct {
 	FlushInterval           time.Duration
 	MaxEventInMemory        int64
 	ParquetCompressionCodec string
+	VerboseRequestLogging   bool
 }{
 	Format:    "JSON",
 	LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", value=\"{{ .Value}}\"",
@@ -49,6 +51,7 @@ var DefaultExporter = struct {
 	FlushInterval:           60000 * time.Millisecond,
 	MaxEventInMemory:        100000,
 	ParquetCompressionCodec: parquet.CompressionCodec_SNAPPY.String(),
+	VerboseRequestLogging:   true,
 }
 
 // New is reading the configuration file
@@ -57,11 +60,12 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 
 	// Default values
 	_ = k.Load(confmap.Provider(map[string]interface{}{
-		"listen":          "1031",
-		"host":            "localhost",
-		"fileFormat":      "yaml",
-		"restApiTimeout":  5000,
-		"pollingInterval": 60000,
+		"listen":                "1031",
+		"host":                  "localhost",
+		"fileFormat":            "yaml",
+		"restApiTimeout":        5000,
+		"pollingInterval":       60000,
+		"verboseRequestLogging": true,
 	}, "."), nil)
 
 	// mapping command line parameters to koanf
@@ -130,6 +134,10 @@ type Config struct {
 
 	// Debug (optional) if true, go-feature-flag relay proxy will run on debug mode, with more logs and custom responses
 	Debug bool `mapstructure:"debug" koanf:"debug"`
+
+	// VerboseRequestLogging (optional) sets verbosity for requests to relay, when set to true log everything, otherwise log only errors.
+	// Default: true
+	VerboseRequestLogging bool `mapstructure:"verboseRequestLogging" koanf:"verboserequestlogging"`
 
 	// PollingInterval (optional) Poll every X time
 	// The minimum possible is 1 second
