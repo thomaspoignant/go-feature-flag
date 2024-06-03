@@ -43,18 +43,18 @@ func (r *Retriever) Init(ctx context.Context, logger *log.Logger) error {
 	return nil
 }
 
-// returns the current status of the retriever
+// Status returns the current status of the retriever
 func (r *Retriever) Status() retriever.Status {
 	return r.status
 }
 
-// disconnects the retriever from Mongodb instance
+// Shutdown disconnects the retriever from Mongodb instance
 func (r *Retriever) Shutdown(ctx context.Context) error {
 	return r.dbClient.Disconnect(ctx)
 }
 
-// Reads flag configuration from mongodb and returns it
-// if a document does not comply with specification it will be ignored
+// Retrieve Reads flag configuration from mongodb and returns it
+// if a document does not comply with the specification it will be ignored
 func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	opt := options.CollectionOptions{}
 	opt.SetBSONOptions(&options.BSONOptions{OmitZeroStruct: true})
