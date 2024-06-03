@@ -135,7 +135,8 @@ type Config struct {
 	// Debug (optional) if true, go-feature-flag relay proxy will run on debug mode, with more logs and custom responses
 	Debug bool `mapstructure:"debug" koanf:"debug"`
 
-	// VerboseRequestLogging (optional) sets verbosity for requests to relay, when set to true log everything, otherwise log only errors.
+	// VerboseRequestLogging (optional) sets verbosity for logging request, when set to true log everything,
+	// otherwise log only errors
 	// Default: true
 	VerboseRequestLogging bool `mapstructure:"verboseRequestLogging" koanf:"verboserequestlogging"`
 
