@@ -770,6 +770,7 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 						"apikey2",
 					},
 				},
+				VerboseRequestLogging: true,
 			},
 			wantErr: assert.NoError,
 		},
