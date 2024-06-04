@@ -468,8 +468,15 @@ func TestConfig_IsValid(t *testing.T) {
 			wantErr: assert.Error,
 		},
 		{
-			name:    "invalid log level",
-			fields:  fields{LogLevel: "invalid"},
+			name: "invalid log level",
+			fields: fields{
+				ListenPort: 8080,
+				Retriever: &config.RetrieverConf{
+					Kind: "file",
+					Path: "../testdata/config/valid-file.yaml",
+				},
+				LogLevel: "invalid",
+			},
 			wantErr: assert.Error,
 		},
 	}
