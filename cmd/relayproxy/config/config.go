@@ -306,9 +306,8 @@ func (c *Config) IsValid() error {
 		}
 	}
 
-	_, err := zapcore.ParseLevel(c.LogLevel)
-	if err != nil {
-		return fmt.Errorf("invalid log level %s", c.LogLevel)
+	if _, err := zapcore.ParseLevel(c.LogLevel); err != nil {
+		return err
 	}
 
 	return nil
