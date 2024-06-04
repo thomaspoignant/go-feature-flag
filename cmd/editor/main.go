@@ -20,6 +20,7 @@ import (
 func main() {
 	zapLog := log.InitLogger(nil)
 	defer func() { _ = zapLog.Sync() }()
+
 	e := echo.New()
 	e.Use(custommiddleware.ZapLogger(zapLog, nil))
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
