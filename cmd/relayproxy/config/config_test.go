@@ -384,6 +384,7 @@ func TestConfig_IsValid(t *testing.T) {
 						SlackWebhookURL: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
 					},
 				},
+				LogLevel: "info",
 			},
 			wantErr: assert.NoError,
 		},
