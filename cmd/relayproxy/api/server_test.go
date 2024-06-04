@@ -23,18 +23,18 @@ func Test_Starting_RelayProxy_with_monitoring_on_same_port(t *testing.T) {
 		},
 		ListenPort: 11024,
 	}
-	zapLog := log.InitLogger(nil)
-	defer func() { _ = zapLog.Sync() }()
+	log := log.InitLogger()
+	defer func() { _ = log.ZapLogger.Sync() }()
 
 	metricsV2, err := metric.NewMetrics()
 	if err != nil {
-		zapLog.Error("impossible to initialize prometheus metrics", zap.Error(err))
+		log.ZapLogger.Error("impossible to initialize prometheus metrics", zap.Error(err))
 	}
 	wsService := service.NewWebsocketService()
 	defer wsService.Close() // close all the open connections
 	prometheusNotifier := metric.NewPrometheusNotifier(metricsV2)
 	proxyNotifier := service.NewNotifierWebsocket(wsService)
-	goff, err := service.NewGoFeatureFlagClient(proxyConf, zapLog, []notifier.Notifier{
+	goff, err := service.NewGoFeatureFlagClient(proxyConf, log.ZapLogger, []notifier.Notifier{
 		prometheusNotifier,
 		proxyNotifier,
 	})
@@ -49,7 +49,7 @@ func Test_Starting_RelayProxy_with_monitoring_on_same_port(t *testing.T) {
 		Metrics:              metricsV2,
 	}
 
-	s := api.New(proxyConf, services, zapLog)
+	s := api.New(proxyConf, services, log.ZapLogger)
 	go func() { s.Start() }()
 	defer s.Stop()
 
@@ -77,18 +77,18 @@ func Test_Starting_RelayProxy_with_monitoring_on_different_port(t *testing.T) {
 		ListenPort:     11024,
 		MonitoringPort: 11025,
 	}
-	zapLog := log.InitLogger(nil)
-	defer func() { _ = zapLog.Sync() }()
+	log := log.InitLogger()
+	defer func() { _ = log.ZapLogger.Sync() }()
 
 	metricsV2, err := metric.NewMetrics()
 	if err != nil {
-		zapLog.Error("impossible to initialize prometheus metrics", zap.Error(err))
+		log.ZapLogger.Error("impossible to initialize prometheus metrics", zap.Error(err))
 	}
 	wsService := service.NewWebsocketService()
 	defer wsService.Close() // close all the open connections
 	prometheusNotifier := metric.NewPrometheusNotifier(metricsV2)
 	proxyNotifier := service.NewNotifierWebsocket(wsService)
-	goff, err := service.NewGoFeatureFlagClient(proxyConf, zapLog, []notifier.Notifier{
+	goff, err := service.NewGoFeatureFlagClient(proxyConf, log.ZapLogger, []notifier.Notifier{
 		prometheusNotifier,
 		proxyNotifier,
 	})
@@ -103,7 +103,7 @@ func Test_Starting_RelayProxy_with_monitoring_on_different_port(t *testing.T) {
 		Metrics:              metricsV2,
 	}
 
-	s := api.New(proxyConf, services, zapLog)
+	s := api.New(proxyConf, services, log.ZapLogger)
 	go func() { s.Start() }()
 	defer s.Stop()
 

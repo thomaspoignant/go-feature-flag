@@ -48,8 +48,8 @@ func main() {
 	_ = f.Parse(os.Args[1:])
 
 	// Init logger
-	atom := zap.NewAtomicLevel()
-	zapLog := log.InitLogger(&atom)
+	logger := log.InitLogger()
+	zapLog := logger.ZapLogger
 	defer func() { _ = zapLog.Sync() }()
 
 	// Loading the configuration in viper
@@ -67,7 +67,7 @@ func main() {
 	}
 
 	// Set the log level from the config from this point
-	atom.SetLevel(proxyConf.ZapLogLevel())
+	logger.Atom.SetLevel(proxyConf.ZapLogLevel())
 
 	// Init swagger
 	docs.SwaggerInfo.Version = proxyConf.Version

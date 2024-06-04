@@ -7,19 +7,19 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-func InitLogger(a *zap.AtomicLevel) *zap.Logger {
-	var atom zap.AtomicLevel
-	if a == nil {
-		a := zap.NewAtomicLevel()
-		a.SetLevel(zap.InfoLevel)
-	}
+type Logger struct {
+	ZapLogger *zap.Logger
+	Atom      zap.AtomicLevel
+}
+
+func InitLogger() *Logger {
+	logger := &Logger{Atom: zap.NewAtomicLevel()}
 
 	encoderCfg := zap.NewProductionEncoderConfig()
-
-	logger := zap.New(zapcore.NewCore(
+	logger.ZapLogger = zap.New(zapcore.NewCore(
 		zapcore.NewJSONEncoder(encoderCfg),
 		zapcore.Lock(os.Stdout),
-		atom,
+		logger.Atom,
 	))
 
 	return logger

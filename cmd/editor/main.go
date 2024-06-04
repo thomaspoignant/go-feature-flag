@@ -18,7 +18,8 @@ import (
 // of the flag is working as expected.
 
 func main() {
-	zapLog := log.InitLogger(nil)
+	logger := log.InitLogger()
+	zapLog := logger.ZapLogger
 	defer func() { _ = zapLog.Sync() }()
 
 	e := echo.New()
