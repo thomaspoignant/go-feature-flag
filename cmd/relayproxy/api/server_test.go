@@ -1,6 +1,10 @@
 package api_test
 
 import (
+	"net/http"
+	"testing"
+	"time"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
@@ -9,9 +13,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"go.uber.org/zap"
-	"net/http"
-	"testing"
-	"time"
 )
 
 func Test_Starting_RelayProxy_with_monitoring_on_same_port(t *testing.T) {
@@ -22,7 +23,7 @@ func Test_Starting_RelayProxy_with_monitoring_on_same_port(t *testing.T) {
 		},
 		ListenPort: 11024,
 	}
-	zapLog := log.InitLogger()
+	zapLog := log.InitLogger(nil)
 	defer func() { _ = zapLog.Sync() }()
 
 	metricsV2, err := metric.NewMetrics()
@@ -76,7 +77,7 @@ func Test_Starting_RelayProxy_with_monitoring_on_different_port(t *testing.T) {
 		ListenPort:     11024,
 		MonitoringPort: 11025,
 	}
-	zapLog := log.InitLogger()
+	zapLog := log.InitLogger(nil)
 	defer func() { _ = zapLog.Sync() }()
 
 	metricsV2, err := metric.NewMetrics()

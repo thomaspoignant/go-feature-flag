@@ -12,12 +12,14 @@ import (
 
 // Test that InitLogger returns a valid *zap.Logger
 func TestInitLogger(t *testing.T) {
-	logger := log.InitLogger()
+	logger := log.InitLogger(nil)
 	assert.NotNil(t, logger, "Expected logger to not be nil")
 }
 
 // Test that the logger outputs the expected message
 func TestLoggerOutput(t *testing.T) {
+	atom := zap.NewAtomicLevel()
+	atom.SetLevel(zap.InfoLevel)
 	// Create an observer to capture logs
 	core, observedLogs := observer.New(zap.InfoLevel)
 
@@ -28,7 +30,7 @@ func TestLoggerOutput(t *testing.T) {
 	zap.ReplaceGlobals(logger)
 
 	// Initialize the logger from the package
-	log.InitLogger()
+	log.InitLogger(&atom)
 
 	// Log a message
 	zap.L().Info("test message")
