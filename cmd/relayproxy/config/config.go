@@ -20,6 +20,7 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/xitongsys/parquet-go/parquet"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 var k = koanf.New(".")
@@ -33,6 +34,8 @@ var DefaultRetriever = struct {
 	GitBranch:  "main",
 }
 
+const DefaultLogLevel = "debug"
+
 var DefaultExporter = struct {
 	Format                  string
 	LogFormat               string
@@ -41,7 +44,7 @@ var DefaultExporter = struct {
 	FlushInterval           time.Duration
 	MaxEventInMemory        int64
 	ParquetCompressionCodec string
-	VerboseRequestLogging   bool
+	LogLevel                string
 }{
 	Format:    "JSON",
 	LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", value=\"{{ .Value}}\"",
@@ -51,7 +54,7 @@ var DefaultExporter = struct {
 	FlushInterval:           60000 * time.Millisecond,
 	MaxEventInMemory:        100000,
 	ParquetCompressionCodec: parquet.CompressionCodec_SNAPPY.String(),
-	VerboseRequestLogging:   true,
+	LogLevel:                DefaultLogLevel,
 }
 
 // New is reading the configuration file
@@ -60,12 +63,12 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 
 	// Default values
 	_ = k.Load(confmap.Provider(map[string]interface{}{
-		"listen":                "1031",
-		"host":                  "localhost",
-		"fileFormat":            "yaml",
-		"restApiTimeout":        5000,
-		"pollingInterval":       60000,
-		"verboseRequestLogging": true,
+		"listen":          "1031",
+		"host":            "localhost",
+		"fileFormat":      "yaml",
+		"restApiTimeout":  5000,
+		"pollingInterval": 60000,
+		"loglevel":        DefaultLogLevel,
 	}, "."), nil)
 
 	// mapping command line parameters to koanf
@@ -116,6 +119,7 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 	if errUnmarshal != nil {
 		return nil, errUnmarshal
 	}
+
 	return proxyConf, nil
 }
 
@@ -132,13 +136,11 @@ type Config struct {
 	// Host should be set if you are using swagger (default is localhost)
 	Host string `mapstructure:"host" koanf:"host"`
 
-	// Debug (optional) if true, go-feature-flag relay proxy will run on debug mode, with more logs and custom responses
-	Debug bool `mapstructure:"debug" koanf:"debug"`
-
-	// VerboseRequestLogging (optional) sets verbosity for logging request, when set to true log everything,
-	// otherwise log only errors
-	// Default: true
-	VerboseRequestLogging bool `mapstructure:"verboseRequestLogging" koanf:"verboserequestlogging"`
+	// LogLevel (optional) sets the verbosity for logging,
+	// Possible values: debug, info, warn, error, dpanic, panic, fatal
+	// If level debug go-feature-flag relay proxy will run on debug mode, with more logs and custom responses
+	// Default: debug
+	LogLevel string `mapstructure:"loglevel" koanf:"loglevel"`
 
 	// PollingInterval (optional) Poll every X time
 	// The minimum possible is 1 second
@@ -304,6 +306,11 @@ func (c *Config) IsValid() error {
 		}
 	}
 
+	_, err := zapcore.ParseLevel(c.LogLevel)
+	if err != nil {
+		return fmt.Errorf("invalid log level %s", c.LogLevel)
+	}
+
 	return nil
 }
 
@@ -395,4 +402,16 @@ func loadArrayEnv(s string, v string, configMap map[string]interface{}) error {
 		_ = k.Set(prefixKey, configArray)
 	}
 	return nil
+}
+
+func (c *Config) Debug() bool {
+	return c.LogLevel == DefaultLogLevel
+}
+
+func (c *Config) ZapLogLevel() zapcore.Level {
+	level, err := zapcore.ParseLevel(c.LogLevel)
+	if err != nil {
+		return zapcore.DebugLevel
+	}
+	return level
 }

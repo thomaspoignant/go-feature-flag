@@ -47,7 +47,7 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 						"apikey2",
 					},
 				},
-				VerboseRequestLogging: true,
+				LogLevel: "info",
 			},
 			wantErr: assert.NoError,
 		},
@@ -83,7 +83,7 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 						"apikey2",
 					},
 				},
-				VerboseRequestLogging: true,
+				LogLevel: config.DefaultLogLevel,
 			},
 			wantErr: assert.NoError,
 		},
@@ -110,7 +110,7 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 					"apikey1",
 					"apikey2",
 				},
-				VerboseRequestLogging: true,
+				LogLevel: "error",
 			},
 			wantErr: assert.NoError,
 		},
@@ -137,7 +137,7 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 					"apikey1",
 					"apikey2",
 				},
-				VerboseRequestLogging: true,
+				LogLevel: config.DefaultLogLevel,
 			},
 			wantErr: assert.NoError,
 		},
@@ -152,7 +152,7 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 				StartWithRetrieverError: false,
 				RestAPITimeout:          5000,
 				Version:                 "1.X.X",
-				VerboseRequestLogging:   true,
+				LogLevel:                config.DefaultLogLevel,
 			},
 			wantErr: assert.NoError,
 		},
@@ -214,7 +214,7 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 						"apikey2",
 					},
 				},
-				VerboseRequestLogging: true,
+				LogLevel: "info",
 			},
 			wantErr: assert.NoError,
 		},
@@ -229,7 +229,7 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 				StartWithRetrieverError: false,
 				RestAPITimeout:          5000,
 				Version:                 "1.X.X",
-				VerboseRequestLogging:   true,
+				LogLevel:                config.DefaultLogLevel,
 			},
 			wantErr: assert.NoError,
 		},
@@ -250,7 +250,7 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 				StartWithRetrieverError: false,
 				RestAPITimeout:          5000,
 				Version:                 "1.X.X",
-				VerboseRequestLogging:   true,
+				LogLevel:                config.DefaultLogLevel,
 			},
 		},
 		{
@@ -265,7 +265,7 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 				StartWithRetrieverError: false,
 				RestAPITimeout:          5000,
 				Version:                 "1.X.X",
-				VerboseRequestLogging:   true,
+				LogLevel:                config.DefaultLogLevel,
 			},
 		},
 		{
@@ -280,7 +280,7 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 				StartWithRetrieverError: false,
 				RestAPITimeout:          5000,
 				Version:                 "1.X.X",
-				VerboseRequestLogging:   true,
+				LogLevel:                config.DefaultLogLevel,
 			},
 			disableDefaultFileCreation: true,
 		},
@@ -322,6 +322,7 @@ func TestConfig_IsValid(t *testing.T) {
 		Retrievers              *[]config.RetrieverConf
 		Exporter                *config.ExporterConf
 		Notifiers               []config.NotifierConf
+		LogLevel                string
 	}
 	tests := []struct {
 		name    string
@@ -465,6 +466,11 @@ func TestConfig_IsValid(t *testing.T) {
 			},
 			wantErr: assert.Error,
 		},
+		{
+			name:    "invalid log level",
+			fields:  fields{LogLevel: "invalid"},
+			wantErr: assert.Error,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -473,7 +479,6 @@ func TestConfig_IsValid(t *testing.T) {
 				HideBanner:              tt.fields.HideBanner,
 				EnableSwagger:           tt.fields.EnableSwagger,
 				Host:                    tt.fields.Host,
-				Debug:                   tt.fields.Debug,
 				PollingInterval:         tt.fields.PollingInterval,
 				FileFormat:              tt.fields.FileFormat,
 				StartWithRetrieverError: tt.fields.StartWithRetrieverError,
@@ -481,6 +486,7 @@ func TestConfig_IsValid(t *testing.T) {
 				Exporter:                tt.fields.Exporter,
 				Notifiers:               tt.fields.Notifiers,
 				Retrievers:              tt.fields.Retrievers,
+				LogLevel:                tt.fields.LogLevel,
 			}
 			if tt.name == "empty config" {
 				c = nil
@@ -770,7 +776,7 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 						"apikey2",
 					},
 				},
-				VerboseRequestLogging: true,
+				LogLevel: "info",
 			},
 			wantErr: assert.NoError,
 		},

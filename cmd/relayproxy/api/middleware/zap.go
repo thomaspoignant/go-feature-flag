@@ -34,7 +34,7 @@ func DebugSkipper(_ echo.Context) bool {
 func ZapLogger(log *zap.Logger, cfg *config.Config) echo.MiddlewareFunc {
 	// select the right skipper
 	skipper := DefaultSkipper
-	if cfg != nil && cfg.Debug {
+	if cfg != nil && cfg.Debug() {
 		skipper = DebugSkipper
 	}
 
@@ -66,10 +66,10 @@ func ZapLogger(log *zap.Logger, cfg *config.Config) echo.MiddlewareFunc {
 				log.With(zap.Error(v.Error)).Error("Server error", fields...)
 			case n >= 400:
 				log.With(zap.Error(v.Error)).Warn("Client error", fields...)
-			case n >= 300 && cfg.VerboseRequestLogging:
-				log.Info("Redirection", fields...)
-			case cfg.VerboseRequestLogging:
-				log.Info("Success", fields...)
+			case n >= 300:
+				log.Debug("Redirection", fields...)
+			default:
+				log.Debug("Success", fields...)
 			}
 			return nil
 		},

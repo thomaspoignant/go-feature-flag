@@ -26,9 +26,7 @@ func TestZapLogger200(t *testing.T) {
 
 	obs, logs := observer.New(zap.DebugLevel)
 	logger := zap.New(obs)
-	err := middleware.ZapLogger(logger, &config.Config{
-		VerboseRequestLogging: true,
-	})(h)(c)
+	err := middleware.ZapLogger(logger, &config.Config{})(h)(c)
 	assert.Nil(t, err)
 	logFields := logs.AllUntimed()[0].ContextMap()
 	assert.Equal(t, 1, logs.Len())
@@ -51,9 +49,7 @@ func TestZapLogger300(t *testing.T) {
 
 	obs, logs := observer.New(zap.DebugLevel)
 	logger := zap.New(obs)
-	err := middleware.ZapLogger(logger, &config.Config{
-		VerboseRequestLogging: true,
-	})(h)(c)
+	err := middleware.ZapLogger(logger, &config.Config{})(h)(c)
 	assert.Nil(t, err)
 	logFields := logs.AllUntimed()[0].ContextMap()
 	assert.Equal(t, 1, logs.Len())
@@ -96,7 +92,7 @@ func TestZapLogger500(t *testing.T) {
 		return c.String(http.StatusInternalServerError, "")
 	}
 
-	obs, logs := observer.New(zap.DebugLevel)
+	obs, logs := observer.New(zap.ErrorLevel)
 	logger := zap.New(obs)
 	err := middleware.ZapLogger(logger, &config.Config{})(h)(c)
 	assert.Nil(t, err)
@@ -138,7 +134,7 @@ func TestZapLoggerHealthDebug(t *testing.T) {
 
 	obs, logs := observer.New(zap.DebugLevel)
 	logger := zap.New(obs)
-	err := middleware.ZapLogger(logger, &config.Config{Debug: true})(h)(c)
+	err := middleware.ZapLogger(logger, &config.Config{LogLevel: config.DefaultLogLevel})(h)(c)
 	assert.Nil(t, err)
 	assert.Equal(t, 1, len(logs.AllUntimed()))
 }

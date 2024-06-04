@@ -1,8 +1,9 @@
 package log_test
 
 import (
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/log"
 	"testing"
+
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/log"
 
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
