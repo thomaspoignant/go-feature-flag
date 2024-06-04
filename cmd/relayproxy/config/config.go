@@ -405,13 +405,19 @@ func loadArrayEnv(s string, v string, configMap map[string]interface{}) error {
 }
 
 func (c *Config) Debug() bool {
+	if c == nil {
+		return false
+	}
 	return c.LogLevel == DefaultLogLevel
 }
 
 func (c *Config) ZapLogLevel() zapcore.Level {
+	if c == nil {
+		return zapcore.InvalidLevel
+	}
 	level, err := zapcore.ParseLevel(c.LogLevel)
 	if err != nil {
-		return zapcore.DebugLevel
+		return zapcore.InvalidLevel
 	}
 	return level
 }

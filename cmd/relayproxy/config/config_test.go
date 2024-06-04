@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 func TestParseConfig_fileFromPflag(t *testing.T) {
@@ -806,6 +807,68 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 				return
 			}
 			assert.Equal(t, tt.want, got, "Config not matching")
+		})
+	}
+}
+
+func TestConfig_LogLevel(t *testing.T) {
+	tests := []struct {
+		name         string
+		config       *config.Config
+		wantDebug    bool
+		wantLogLevel zapcore.Level
+	}{
+		{
+			name:         "no config",
+			wantDebug:    false,
+			wantLogLevel: zapcore.InvalidLevel,
+		},
+		{
+			name: "invalid log level",
+			config: &config.Config{
+				LogLevel: "invalid",
+			},
+			wantDebug:    false,
+			wantLogLevel: zapcore.InvalidLevel,
+		},
+		{
+			name: "debug level",
+			config: &config.Config{
+				LogLevel: "debug",
+			},
+			wantDebug:    true,
+			wantLogLevel: zapcore.DebugLevel,
+		},
+		{
+			name: "info level",
+			config: &config.Config{
+				LogLevel: "info",
+			},
+			wantDebug:    false,
+			wantLogLevel: zapcore.InfoLevel,
+		},
+		{
+			name: "error level",
+			config: &config.Config{
+				LogLevel: "error",
+			},
+			wantDebug:    false,
+			wantLogLevel: zapcore.ErrorLevel,
+		},
+		{
+			name: "panic level",
+			config: &config.Config{
+				LogLevel: "panic",
+			},
+			wantDebug:    false,
+			wantLogLevel: zapcore.PanicLevel,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equalf(t, tt.wantDebug, tt.config.Debug(), "Debug()")
+			assert.Equalf(t, tt.wantLogLevel, tt.config.ZapLogLevel(), "ZapLogLevel()")
 		})
 	}
 }
