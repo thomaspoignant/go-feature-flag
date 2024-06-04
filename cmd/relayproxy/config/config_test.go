@@ -314,7 +314,6 @@ func TestConfig_IsValid(t *testing.T) {
 		HideBanner              bool
 		EnableSwagger           bool
 		Host                    string
-		Debug                   bool
 		PollingInterval         int
 		FileFormat              string
 		StartWithRetrieverError bool
