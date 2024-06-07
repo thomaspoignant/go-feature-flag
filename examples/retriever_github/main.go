@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"log"
-	"os"
+	"log/slog"
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/retriever/githubretriever"
@@ -17,7 +17,7 @@ func main() {
 	// Init ffclient with a GitHub retriever.
 	err := ffclient.Init(ffclient.Config{
 		PollingInterval: 10 * time.Second,
-		Logger:          log.New(os.Stdout, "", 0),
+		LeveledLogger:   slog.Default(),
 		Context:         context.Background(),
 		Retriever: &githubretriever.Retriever{
 			RepositorySlug: "thomaspoignant/go-feature-flag",

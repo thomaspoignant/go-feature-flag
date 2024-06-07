@@ -3,7 +3,7 @@ package controller_test
 import (
 	"context"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -96,7 +96,7 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 			// init go-feature-flag
 			goFF, _ := ffclient.New(ffclient.Config{
 				PollingInterval: 10 * time.Second,
-				Logger:          log.New(os.Stdout, "", 0),
+				LeveledLogger:   slog.Default(),
 				Context:         context.Background(),
 				Retriever: &fileretriever.Retriever{
 					Path: configFlagsLocation,

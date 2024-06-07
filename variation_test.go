@@ -2944,7 +2944,6 @@ func TestStringVariationDetails(t *testing.T) {
 
 			// clean logger
 			ff = nil
-
 		})
 	}
 }
@@ -3245,7 +3244,6 @@ func TestIntVariation(t *testing.T) {
 
 			// clean logger
 			ff = nil
-
 		})
 	}
 }
@@ -3520,7 +3518,6 @@ func TestIntVariationDetails(t *testing.T) {
 
 			// clean logger
 			ff = nil
-
 		})
 	}
 }
@@ -4038,7 +4035,6 @@ func TestRawVariation(t *testing.T) {
 
 			// clean logger
 			ff = nil
-
 		})
 	}
 }

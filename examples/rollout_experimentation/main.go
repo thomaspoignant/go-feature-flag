@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"log"
-	"os"
+	"log/slog"
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/exporter/logsexporter"
@@ -20,7 +20,7 @@ func main() {
 	// Init ffclient with a file retriever.
 	err := ffclient.Init(ffclient.Config{
 		PollingInterval: 10 * time.Second,
-		Logger:          log.New(os.Stdout, "", 0),
+		LeveledLogger:   slog.Default(),
 		Context:         context.Background(),
 		Retriever: &fileretriever.Retriever{
 			Path: "examples/rollout_experimentation/flags.goff.yaml",

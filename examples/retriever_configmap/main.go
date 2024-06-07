@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"log"
+	"log/slog"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/retriever/k8sretriever"
@@ -24,7 +24,7 @@ func main() {
 
 	err = ffclient.Init(ffclient.Config{
 		PollingInterval: 10 * time.Second,
-		Logger:          log.New(os.Stdout, "", 0),
+		LeveledLogger:   slog.Default(),
 		Context:         context.Background(),
 		Retriever: &k8sretriever.Retriever{
 			Namespace:     "default",

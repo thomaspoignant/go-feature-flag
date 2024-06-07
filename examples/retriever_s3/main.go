@@ -7,7 +7,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/retriever/s3retrieverv2"
 	"log"
-	"os"
+	"log/slog"
 	"time"
 
 	ffclient "github.com/thomaspoignant/go-feature-flag"
@@ -22,7 +22,7 @@ func main() {
 	}
 	err = ffclient.Init(ffclient.Config{
 		PollingInterval: 10 * time.Second,
-		Logger:          log.New(os.Stdout, "", 0),
+		LeveledLogger:   slog.Default(),
 		Context:         context.Background(),
 		Retriever: &s3retrieverv2.Retriever{
 			Bucket:    "goff-test",
