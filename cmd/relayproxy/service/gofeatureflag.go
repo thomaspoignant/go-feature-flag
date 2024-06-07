@@ -53,7 +53,7 @@ func NewGoFeatureFlagClient(
 		}
 	}
 
-	// Manage if we have more than 1 retriver
+	// Manage if we have more than 1 retriever
 	retrievers := make([]retriever.Retriever, 0)
 	if proxyConf.Retrievers != nil {
 		for _, r := range *proxyConf.Retrievers {
