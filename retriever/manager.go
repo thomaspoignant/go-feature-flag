@@ -3,7 +3,8 @@ package retriever
 import (
 	"context"
 	"fmt"
-	"log"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
+	"log/slog"
 )
 
 // Manager is a struct that managed the retrievers.
@@ -11,11 +12,11 @@ type Manager struct {
 	ctx              context.Context
 	retrievers       []Retriever
 	onErrorRetriever []Retriever
-	logger           *log.Logger
+	logger           *fflog.FFLogger
 }
 
 // NewManager create a new Manager.
-func NewManager(ctx context.Context, retrievers []Retriever, logger *log.Logger) *Manager {
+func NewManager(ctx context.Context, retrievers []Retriever, logger *fflog.FFLogger) *Manager {
 	return &Manager{
 		ctx:              ctx,
 		retrievers:       retrievers,
@@ -34,6 +35,13 @@ func (m *Manager) Init(ctx context.Context) error {
 func (m *Manager) initRetrievers(ctx context.Context, retrieversToInit []Retriever) error {
 	m.onErrorRetriever = make([]Retriever, 0)
 	for _, retriever := range retrieversToInit {
+		if r, ok := retriever.(InitializableRetrieverLegacy); ok {
+			err := r.Init(ctx, m.logger.GetLogLogger(slog.LevelError))
+			if err != nil {
+				m.onErrorRetriever = append(m.onErrorRetriever, retriever)
+			}
+		}
+
 		if r, ok := retriever.(InitializableRetriever); ok {
 			err := r.Init(ctx, m.logger)
 			if err != nil {
@@ -52,7 +60,7 @@ func (m *Manager) initRetrievers(ctx context.Context, retrieversToInit []Retriev
 func (m *Manager) Shutdown(ctx context.Context) error {
 	onErrorRetriever := make([]Retriever, 0)
 	for _, retriever := range m.retrievers {
-		if r, ok := retriever.(InitializableRetriever); ok {
+		if r, ok := retriever.(CommonInitializableRetriever); ok {
 			err := r.Shutdown(ctx)
 			if err != nil {
 				onErrorRetriever = append(onErrorRetriever, retriever)

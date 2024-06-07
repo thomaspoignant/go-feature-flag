@@ -820,6 +820,8 @@ github.com/testcontainers/testcontainers-go v0.31.0 h1:W0VwIhcEVhRflwL9as3dhY6jX
 github.com/testcontainers/testcontainers-go v0.31.0/go.mod h1:D2lAoA0zUFiSY+eAflqK5mcUx/A5hrrORaEQrd0SefI=
 github.com/testcontainers/testcontainers-go/modules/redis v0.31.0 h1:5X6GhOdLwV86zcW8sxppJAMtsDC9u+r9tb3biBc9GKs=
 github.com/testcontainers/testcontainers-go/modules/redis v0.31.0/go.mod h1:dKi5xBwy1k4u8yb3saQHu7hMEJwewHXxzbcMAuLiA6o=
+github.com/thejerf/slogassert v0.3.2 h1:sE5f1vdrPr4EFkMW75s9stRePRn4zYpRGpeUbkCR+rc=
+github.com/thejerf/slogassert v0.3.2/go.mod h1:0zn9ISLVKo1aPMTqcGfG1o6dWwt+Rk574GlUxHD4rs8=
 github.com/tklauser/go-sysconf v0.3.12 h1:0QaGUFOdQaIVdPgfITYzaTegZvdCjmYO52cSFAEVmqU=
 github.com/tklauser/go-sysconf v0.3.12/go.mod h1:Ho14jnntGE1fpdOqQEEaiKRpvIavV0hSfmBq8nJbHYI=
 github.com/tklauser/numcpus v0.6.1 h1:ng9scYS7az0Bk4OZLvrNXNSAO2Pxr1XXRAPyjhIx+Fk=

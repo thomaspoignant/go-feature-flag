@@ -3,7 +3,7 @@ package cache
 import (
 	"encoding/json"
 	"errors"
-	"log"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"strings"
 	"sync"
 	"time"
@@ -18,7 +18,7 @@ import (
 
 type Manager interface {
 	ConvertToFlagStruct(loadedFlags []byte, fileFormat string) (map[string]dto.DTO, error)
-	UpdateCache(newFlags map[string]dto.DTO, log *log.Logger) error
+	UpdateCache(newFlags map[string]dto.DTO, log *fflog.FFLogger) error
 	Close()
 	GetFlag(key string) (flag.Flag, error)
 	AllFlags() (map[string]flag.Flag, error)
@@ -30,10 +30,10 @@ type cacheManagerImpl struct {
 	mutex               sync.RWMutex
 	notificationService Service
 	latestUpdate        time.Time
-	logger              *log.Logger
+	logger              *fflog.FFLogger
 }
 
-func New(notificationService Service, logger *log.Logger) Manager {
+func New(notificationService Service, logger *fflog.FFLogger) Manager {
 	return &cacheManagerImpl{
 		logger:              logger,
 		inMemoryCache:       NewInMemoryCache(logger),
@@ -57,7 +57,7 @@ func (c *cacheManagerImpl) ConvertToFlagStruct(loadedFlags []byte, fileFormat st
 	return newFlags, err
 }
 
-func (c *cacheManagerImpl) UpdateCache(newFlags map[string]dto.DTO, log *log.Logger) error {
+func (c *cacheManagerImpl) UpdateCache(newFlags map[string]dto.DTO, log *fflog.FFLogger) error {
 	newCache := NewInMemoryCache(c.logger)
 	newCache.Init(newFlags)
 	newCacheFlags := newCache.All()

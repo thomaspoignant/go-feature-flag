@@ -1,8 +1,6 @@
 package cache_test
 
 import (
-	"log"
-	"os"
 	"testing"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
@@ -250,7 +248,7 @@ variation = "false_var"
 				assert.Error(t, err)
 				return
 			}
-			err = fCache.UpdateCache(newFlags, log.New(os.Stdout, "", 0))
+			err = fCache.UpdateCache(newFlags, nil)
 			if tt.wantErr {
 				assert.Error(t, err, "UpdateCache() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -413,7 +411,7 @@ test-flag2:
 				assert.Error(t, err)
 				return
 			}
-			err = fCache.UpdateCache(newFlags, log.New(os.Stdout, "", 0))
+			err = fCache.UpdateCache(newFlags, nil)
 			assert.NoError(t, err)
 
 			allFlags, err := fCache.AllFlags()
@@ -451,7 +449,7 @@ func Test_cacheManagerImpl_GetLatestUpdateDate(t *testing.T) {
 	fCache := cache.New(cache.NewNotificationService([]notifier.Notifier{}), nil)
 	timeBefore := fCache.GetLatestUpdateDate()
 	newFlags, _ := fCache.ConvertToFlagStruct(loadedFlags, "yaml")
-	_ = fCache.UpdateCache(newFlags, log.New(os.Stdout, "", 0))
+	_ = fCache.UpdateCache(newFlags, nil)
 	timeAfter := fCache.GetLatestUpdateDate()
 
 	assert.True(t, timeBefore.Before(timeAfter))

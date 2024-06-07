@@ -1,26 +1,24 @@
 package logsnotifier
 
 import (
-	"log"
-	"os"
+	"github.com/thejerf/slogassert"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
+	"log/slog"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
-
-	"github.com/thomaspoignant/go-feature-flag/testutils"
 )
 
 func TestLogNotifier_Notify(t *testing.T) {
 	type args struct {
 	}
 	tests := []struct {
-		name     string
-		args     args
-		diff     notifier.DiffCache
-		expected string
+		name        string
+		args        args
+		diff        notifier.DiffCache
+		expectedLog *slogassert.LogMessageMatch
 	}{
 		{
 			name: "Flag deleted",
@@ -44,7 +42,14 @@ func TestLogNotifier_Notify(t *testing.T) {
 				Updated: map[string]notifier.DiffUpdated{},
 				Added:   map[string]flag.Flag{},
 			},
-			expected: "^\\[" + testutils.RFC3339Regex + "\\] flag test-flag removed",
+			expectedLog: &slogassert.LogMessageMatch{
+				Message: "flag removed",
+				Level:   slog.LevelInfo,
+				Attrs: map[string]any{
+					"key": "test-flag",
+				},
+				AllAttrsMatch: true,
+			},
 		},
 		{
 			name: "Update flag",
@@ -91,7 +96,14 @@ func TestLogNotifier_Notify(t *testing.T) {
 				},
 				Added: map[string]flag.Flag{},
 			},
-			expected: "^\\[" + testutils.RFC3339Regex + "\\] flag test-flag updated",
+			expectedLog: &slogassert.LogMessageMatch{
+				Message: "flag updated",
+				Level:   slog.LevelInfo,
+				Attrs: map[string]any{
+					"key": "test-flag",
+				},
+				AllAttrsMatch: true,
+			},
 		},
 		{
 			name: "Disable flag",
@@ -146,7 +158,14 @@ func TestLogNotifier_Notify(t *testing.T) {
 				},
 				Added: map[string]flag.Flag{},
 			},
-			expected: "^\\[" + testutils.RFC3339Regex + "\\] flag test-flag is turned OFF",
+			expectedLog: &slogassert.LogMessageMatch{
+				Message: "flag is turned OFF",
+				Level:   slog.LevelInfo,
+				Attrs: map[string]any{
+					"key": "test-flag",
+				},
+				AllAttrsMatch: true,
+			},
 		},
 		{
 			name: "Add flag",
@@ -177,7 +196,14 @@ func TestLogNotifier_Notify(t *testing.T) {
 					},
 				},
 			},
-			expected: "^\\[" + testutils.RFC3339Regex + "\\] flag add-test-flag added",
+			expectedLog: &slogassert.LogMessageMatch{
+				Message: "flag added",
+				Level:   slog.LevelInfo,
+				Attrs: map[string]any{
+					"key": "add-test-flag",
+				},
+				AllAttrsMatch: true,
+			},
 		},
 		{
 			name: "Enable flag",
@@ -232,20 +258,25 @@ func TestLogNotifier_Notify(t *testing.T) {
 				},
 				Added: map[string]flag.Flag{},
 			},
-			expected: "^\\[" + testutils.RFC3339Regex + "\\] flag test-flag is turned ON",
+			expectedLog: &slogassert.LogMessageMatch{
+				Message: "flag is turned ON",
+				Level:   slog.LevelInfo,
+				Attrs: map[string]any{
+					"key": "test-flag",
+				},
+				AllAttrsMatch: true,
+			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			logOutput, _ := os.CreateTemp("", "")
-			defer os.Remove(logOutput.Name())
-
+			handler := slogassert.New(t, slog.LevelDebug, nil)
+			logger := slog.New(handler)
 			c := &Notifier{
-				Logger: log.New(logOutput, "", 0),
+				Logger: &fflog.FFLogger{LeveledLogger: logger},
 			}
 			_ = c.Notify(tt.diff)
-			log, _ := os.ReadFile(logOutput.Name())
-			assert.Regexp(t, tt.expected, string(log))
+			handler.AssertPrecise(*tt.expectedLog)
 		})
 	}
 }

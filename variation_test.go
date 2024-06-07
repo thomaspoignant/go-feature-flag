@@ -5,13 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
-	"os"
-	"runtime"
-	"testing"
-	"time"
-
 	"github.com/stretchr/testify/assert"
+	"github.com/thejerf/slogassert"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/logsexporter"
@@ -24,6 +19,13 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/testutils"
 	"github.com/thomaspoignant/go-feature-flag/testutils/flagv1"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
+	"log/slog"
+	"os"
+	"runtime"
+	"strings"
+	"testing"
+	"time"
 )
 
 type cacheMock struct {
@@ -45,7 +47,7 @@ func (c *cacheMock) GetLatestUpdateDate() time.Time {
 func (c *cacheMock) ConvertToFlagStruct(loadedFlags []byte, fileFormat string) (map[string]dto.DTO, error) {
 	return nil, nil
 }
-func (c *cacheMock) UpdateCache(newFlags map[string]dto.DTO, log *log.Logger) error {
+func (c *cacheMock) UpdateCache(newFlags map[string]dto.DTO, _ *fflog.FFLogger) error {
 	return nil
 }
 func (c *cacheMock) Close() {}
@@ -100,7 +102,7 @@ func TestBoolVariation(t *testing.T) {
 			},
 			want:        true,
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"disable-flag\", value=\"true\", variation=\"SdkDefault\"\n",
+			expectedLog: `user="random-key", flag="disable-flag", value="true", variation="SdkDefault"`,
 		},
 		{
 			name: "Get error when cache not init",
@@ -114,7 +116,7 @@ func TestBoolVariation(t *testing.T) {
 			},
 			want:        true,
 			wantErr:     true,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"true\", variation=\"SdkDefault\"\n",
+			expectedLog: `user="random-key", flag="key-not-exist", value="true", variation="SdkDefault"`,
 		},
 		{
 			name: "Get default value with key not exist",
@@ -126,7 +128,7 @@ func TestBoolVariation(t *testing.T) {
 			},
 			want:        true,
 			wantErr:     true,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"true\", variation=\"SdkDefault\"\n",
+			expectedLog: `user="random-key", flag="key-not-exist", value="true", variation="SdkDefault"`,
 		},
 		{
 			name: "Get default value, rule not apply",
@@ -158,7 +160,7 @@ func TestBoolVariation(t *testing.T) {
 			},
 			want:        true,
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"true\", variation=\"Default\"\n",
+			expectedLog: `user="random-key", flag="test-flag", value="true", variation="Default"`,
 		},
 		{
 			name: "Get true value, rule apply",
@@ -190,7 +192,7 @@ func TestBoolVariation(t *testing.T) {
 			},
 			want:        true,
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"true\", variation=\"True\"\n",
+			expectedLog: `user="random-key", flag="test-flag", value="true", variation="True"`,
 		},
 		{
 			name: "Get false value, rule apply",
@@ -222,7 +224,7 @@ func TestBoolVariation(t *testing.T) {
 			},
 			want:        false,
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"false\", variation=\"False\"\n",
+			expectedLog: `user="random-key-ssss1", flag="test-flag", value="false", variation="False"`,
 		},
 		{
 			name: "Get default value, when rule apply and not right type",
@@ -254,7 +256,7 @@ func TestBoolVariation(t *testing.T) {
 			},
 			want:        true,
 			wantErr:     true,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"true\", variation=\"SdkDefault\"\n",
+			expectedLog: `user="random-key-ssss1", flag="test-flag", value="true", variation="SdkDefault"`,
 		},
 		{
 			name: "No exported log",
@@ -287,7 +289,7 @@ func TestBoolVariation(t *testing.T) {
 			},
 			want:        true,
 			wantErr:     false,
-			expectedLog: "^$",
+			expectedLog: "",
 		},
 		{
 			name: "Get sdk default value if offline",
@@ -307,9 +309,8 @@ func TestBoolVariation(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// init logger
-			file, _ := os.CreateTemp("", "log")
-			logger := log.New(file, "", 0)
+			handler := slogassert.New(t, slog.LevelInfo, nil)
+			logger := slog.New(handler)
 
 			if !tt.args.disableInit {
 				ff = &GoFeatureFlag{
@@ -317,14 +318,14 @@ func TestBoolVariation(t *testing.T) {
 					cache:     tt.args.cacheMock,
 					config: Config{
 						PollingInterval: 0,
-						Logger:          logger,
+						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
 					dataExporter: exporter.NewScheduler(context.Background(), 0, 0,
 						&logsexporter.Exporter{
-							LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+							LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
 								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
-						}, logger),
+						}, &fflog.FFLogger{LeveledLogger: logger}),
 				}
 			}
 
@@ -332,8 +333,17 @@ func TestBoolVariation(t *testing.T) {
 
 			if tt.expectedLog != "" {
 				time.Sleep(40 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
-				content, _ := os.ReadFile(file.Name())
-				assert.Regexp(t, tt.expectedLog, string(content))
+				if tt.expectedLog == "" {
+					handler.AssertEmpty()
+				} else {
+					handler.Assert(func(message slogassert.LogMessage) bool {
+						if !strings.Contains(message.Message, tt.expectedLog) {
+							handler.Fail("impossible to find %s in %s", tt.expectedLog, message.Message)
+							return false
+						}
+						return true
+					})
+				}
 			}
 
 			if tt.wantErr {
@@ -344,7 +354,6 @@ func TestBoolVariation(t *testing.T) {
 
 			// clean logger
 			ff = nil
-			_ = file.Close()
 		})
 	}
 }
@@ -401,7 +410,7 @@ func TestBoolVariationDetails(t *testing.T) {
 				Cacheable:     true,
 			},
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"disable-flag\", value=\"true\", variation=\"SdkDefault\"\n",
+			expectedLog: `user="random-key", flag="disable-flag", value="true", variation="SdkDefault"`,
 		},
 		{
 			name: "Get error when cache not init",
@@ -414,7 +423,7 @@ func TestBoolVariationDetails(t *testing.T) {
 					errors.New("impossible to read the toggle before the initialisation")),
 			},
 			wantErr:     true,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"true\", variation=\"SdkDefault\"\n",
+			expectedLog: `user="random-key", flag="key-not-exist", value="true", variation="SdkDefault"`,
 		},
 		{
 			name: "Get default value with key not exist",
@@ -425,7 +434,7 @@ func TestBoolVariationDetails(t *testing.T) {
 				cacheMock:    NewCacheMock(&flag.InternalFlag{}, errors.New("flag [key-not-exist] does not exists")),
 			},
 			wantErr:     true,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"true\", variation=\"SdkDefault\"\n",
+			expectedLog: `user="random-key", flag="key-not-exist", value="true", variation="SdkDefault"`,
 		},
 		{
 			name: "Get default value, rule not apply",
@@ -464,7 +473,7 @@ func TestBoolVariationDetails(t *testing.T) {
 				Cacheable:     true,
 			},
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"true\", variation=\"Default\"\n",
+			expectedLog: `user="random-key", flag="test-flag", value="true", variation="Default"`,
 		},
 		{
 			name: "Get true value, rule apply",
@@ -506,7 +515,7 @@ func TestBoolVariationDetails(t *testing.T) {
 				},
 			},
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"true\", variation=\"True\"\n",
+			expectedLog: `user="random-key", flag="test-flag", value="true", variation="True"`,
 		},
 		{
 			name: "Get rule name on metadata, rule apply",
@@ -548,7 +557,7 @@ func TestBoolVariationDetails(t *testing.T) {
 				},
 			},
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"true\", variation=\"True\"\n",
+			expectedLog: `user="random-key", flag="test-flag", value="true", variation="True"`,
 		},
 		{
 			name: "Get no rule name on metadata, rule apply has not name",
@@ -586,7 +595,7 @@ func TestBoolVariationDetails(t *testing.T) {
 				Cacheable:     true,
 			},
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"true\", variation=\"True\"\n",
+			expectedLog: `user="random-key", flag="test-flag", value="true", variation="True"`,
 		},
 		{
 			name: "Get false value, rule apply",
@@ -628,7 +637,7 @@ func TestBoolVariationDetails(t *testing.T) {
 				},
 			},
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"false\", variation=\"False\"\n",
+			expectedLog: `user="random-key-ssss1", flag="test-flag", value="false", variation="False"`,
 		},
 		{
 			name: "Get default value, when rule apply and not right type",
@@ -667,7 +676,7 @@ func TestBoolVariationDetails(t *testing.T) {
 				TrackEvents:   true,
 			},
 			wantErr:     true,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"true\", variation=\"SdkDefault\"\n",
+			expectedLog: `user="random-key-ssss1", flag="test-flag", value="true", variation="SdkDefault"`,
 		},
 		{
 			name: "Get sdk default value if offline",
@@ -693,9 +702,8 @@ func TestBoolVariationDetails(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// init logger
-			file, _ := os.CreateTemp("", "log")
-			logger := log.New(file, "", 0)
+			handler := slogassert.New(t, slog.LevelInfo, nil)
+			logger := slog.New(handler)
 
 			if !tt.args.disableInit {
 				ff = &GoFeatureFlag{
@@ -703,14 +711,14 @@ func TestBoolVariationDetails(t *testing.T) {
 					cache:     tt.args.cacheMock,
 					config: Config{
 						PollingInterval: 0,
-						Logger:          logger,
+						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
 					dataExporter: exporter.NewScheduler(context.Background(), 0, 0,
 						&logsexporter.Exporter{
-							LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+							LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
 								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
-						}, logger),
+						}, &fflog.FFLogger{LeveledLogger: logger}),
 				}
 			}
 
@@ -718,8 +726,17 @@ func TestBoolVariationDetails(t *testing.T) {
 
 			if tt.expectedLog != "" {
 				time.Sleep(40 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
-				content, _ := os.ReadFile(file.Name())
-				assert.Regexp(t, tt.expectedLog, string(content))
+				if tt.expectedLog == "" {
+					handler.AssertEmpty()
+				} else {
+					handler.Assert(func(message slogassert.LogMessage) bool {
+						if !strings.Contains(message.Message, tt.expectedLog) {
+							handler.Fail("impossible to find %s in %s", tt.expectedLog, message.Message)
+							return false
+						}
+						return true
+					})
+				}
 			}
 
 			if tt.wantErr {
@@ -730,7 +747,6 @@ func TestBoolVariationDetails(t *testing.T) {
 
 			// clean logger
 			ff = nil
-			_ = file.Close()
 		})
 	}
 }
@@ -781,7 +797,7 @@ func TestFloat64Variation(t *testing.T) {
 			},
 			want:        120.12,
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"disable-flag\", value=\"120.12\", variation=\"SdkDefault\"\n",
+			expectedLog: `user="random-key", flag="disable-flag", value="120.12", variation="SdkDefault"`,
 		},
 		{
 			name: "Get error when cache not init",
@@ -795,7 +811,7 @@ func TestFloat64Variation(t *testing.T) {
 			},
 			want:        118.12,
 			wantErr:     true,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"118.12\", variation=\"SdkDefault\"\n",
+			expectedLog: `user="random-key", flag="key-not-exist", value="118.12", variation="SdkDefault"`,
 		},
 		{
 			name: "Get default value with key not exist",
@@ -807,7 +823,7 @@ func TestFloat64Variation(t *testing.T) {
 			},
 			want:        118.12,
 			wantErr:     true,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"118.12\", variation=\"SdkDefault\"\n",
+			expectedLog: `user="random-key", flag="key-not-exist", value="118.12", variation="SdkDefault"`,
 		},
 		{
 			name: "Get default value, rule not apply",
@@ -839,7 +855,7 @@ func TestFloat64Variation(t *testing.T) {
 			},
 			want:        119.12,
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"119.12\", variation=\"Default\"\n",
+			expectedLog: `user="random-key", flag="test-flag", value="119.12", variation="Default"`,
 		},
 		{
 			name: "Get true value, rule apply",
@@ -871,7 +887,7 @@ func TestFloat64Variation(t *testing.T) {
 			},
 			want:        120.12,
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"120.12\", variation=\"True\"\n",
+			expectedLog: `user="random-key", flag="test-flag", value="120.12", variation="True"`,
 		},
 		{
 			name: "Get false value, rule apply",
@@ -903,7 +919,7 @@ func TestFloat64Variation(t *testing.T) {
 			},
 			want:        121.12,
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"121.12\", variation=\"False\"\n",
+			expectedLog: `user="random-key-ssss1", flag="test-flag", value="121.12", variation="False"`,
 		},
 		{
 			name: "Get default value, when rule apply and not right type",
@@ -935,7 +951,7 @@ func TestFloat64Variation(t *testing.T) {
 			},
 			want:        118.12,
 			wantErr:     true,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"118.12\", variation=\"SdkDefault\"\n",
+			expectedLog: `user="random-key-ssss1", flag="test-flag", value="118.12", variation="SdkDefault"`,
 		},
 		{
 			name: "No exported log",
@@ -968,7 +984,7 @@ func TestFloat64Variation(t *testing.T) {
 			},
 			want:        120.12,
 			wantErr:     false,
-			expectedLog: "^$",
+			expectedLog: "",
 		},
 		{
 			name: "Get sdk default value if offline",
@@ -988,9 +1004,8 @@ func TestFloat64Variation(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// init logger
-			file, _ := os.CreateTemp("", "log")
-			logger := log.New(file, "", 0)
+			handler := slogassert.New(t, slog.LevelInfo, nil)
+			logger := slog.New(handler)
 
 			if !tt.args.disableInit {
 				ff = &GoFeatureFlag{
@@ -998,14 +1013,14 @@ func TestFloat64Variation(t *testing.T) {
 					cache:     tt.args.cacheMock,
 					config: Config{
 						PollingInterval: 0,
-						Logger:          logger,
+						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
 					dataExporter: exporter.NewScheduler(context.Background(), 0, 0,
 						&logsexporter.Exporter{
-							LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+							LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
 								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
-						}, logger),
+						}, &fflog.FFLogger{LeveledLogger: logger}),
 				}
 			}
 
@@ -1013,8 +1028,17 @@ func TestFloat64Variation(t *testing.T) {
 
 			if tt.expectedLog != "" {
 				time.Sleep(40 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
-				content, _ := os.ReadFile(file.Name())
-				assert.Regexp(t, tt.expectedLog, string(content))
+				if tt.expectedLog == "" {
+					handler.AssertEmpty()
+				} else {
+					handler.Assert(func(message slogassert.LogMessage) bool {
+						if !strings.Contains(message.Message, tt.expectedLog) {
+							handler.Fail("impossible to find %s in %s", tt.expectedLog, message.Message)
+							return false
+						}
+						return true
+					})
+				}
 			}
 			if tt.wantErr {
 				assert.Error(t, err, "Float64Variation() error = %v, wantErr %v", err, tt.wantErr)
@@ -1024,7 +1048,6 @@ func TestFloat64Variation(t *testing.T) {
 
 			// clean logger
 			ff = nil
-			_ = file.Close()
 		})
 	}
 }
@@ -1081,7 +1104,7 @@ func TestFloat64VariationDetails(t *testing.T) {
 				Cacheable:     true,
 			},
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"disable-flag\", value=\"120.12\", variation=\"SdkDefault\"\n",
+			expectedLog: `user="random-key", flag="disable-flag", value="120.12", variation="SdkDefault"`,
 		},
 		{
 			name: "Get error when cache not init",
@@ -1094,7 +1117,7 @@ func TestFloat64VariationDetails(t *testing.T) {
 					errors.New("impossible to read the toggle before the initialisation")),
 			},
 			wantErr:     true,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"118.12\", variation=\"SdkDefault\"\n",
+			expectedLog: `user="random-key", flag="key-not-exist", value="118.12", variation="SdkDefault"`,
 		},
 		{
 			name: "Get default value with key not exist",
@@ -1105,7 +1128,7 @@ func TestFloat64VariationDetails(t *testing.T) {
 				cacheMock:    NewCacheMock(&flag.InternalFlag{}, errors.New("flag [key-not-exist] does not exists")),
 			},
 			wantErr:     true,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"118.12\", variation=\"SdkDefault\"\n",
+			expectedLog: `user="random-key", flag="key-not-exist", value="118.12", variation="SdkDefault"`,
 		},
 		{
 			name: "Get default value, rule not apply",
@@ -1144,7 +1167,7 @@ func TestFloat64VariationDetails(t *testing.T) {
 				Cacheable:     true,
 			},
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"119.12\", variation=\"Default\"\n",
+			expectedLog: `user="random-key", flag="test-flag", value="119.12", variation="Default"`,
 		},
 		{
 			name: "Get true value, rule apply",
@@ -1186,7 +1209,7 @@ func TestFloat64VariationDetails(t *testing.T) {
 				},
 			},
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"120.12\", variation=\"True\"\n",
+			expectedLog: `user="random-key", flag="test-flag", value="120.12", variation="True"`,
 		},
 		{
 			name: "Get false value, rule apply",
@@ -1228,7 +1251,7 @@ func TestFloat64VariationDetails(t *testing.T) {
 				},
 			},
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"121.12\", variation=\"False\"\n",
+			expectedLog: `user="random-key-ssss1", flag="test-flag", value="121.12", variation="False"`,
 		},
 		{
 			name: "Get default value, when rule apply and not right type",
@@ -1266,7 +1289,7 @@ func TestFloat64VariationDetails(t *testing.T) {
 				Reason:        flag.ReasonDefault,
 			},
 			wantErr:     true,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"118.12\", variation=\"SdkDefault\"\n",
+			expectedLog: `user="random-key-ssss1", flag="test-flag", value="118.12", variation="SdkDefault"`,
 		},
 		{
 			name: "Get sdk default value if offline",
@@ -1292,9 +1315,8 @@ func TestFloat64VariationDetails(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// init logger
-			file, _ := os.CreateTemp("", "log")
-			logger := log.New(file, "", 0)
+			handler := slogassert.New(t, slog.LevelInfo, nil)
+			logger := slog.New(handler)
 
 			if !tt.args.disableInit {
 				ff = &GoFeatureFlag{
@@ -1302,14 +1324,14 @@ func TestFloat64VariationDetails(t *testing.T) {
 					cache:     tt.args.cacheMock,
 					config: Config{
 						PollingInterval: 0,
-						Logger:          logger,
+						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
 					dataExporter: exporter.NewScheduler(context.Background(), 0, 0,
 						&logsexporter.Exporter{
-							LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+							LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
 								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
-						}, logger),
+						}, &fflog.FFLogger{LeveledLogger: logger}),
 				}
 			}
 
@@ -1317,8 +1339,17 @@ func TestFloat64VariationDetails(t *testing.T) {
 
 			if tt.expectedLog != "" {
 				time.Sleep(40 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
-				content, _ := os.ReadFile(file.Name())
-				assert.Regexp(t, tt.expectedLog, string(content))
+				if tt.expectedLog == "" {
+					handler.AssertEmpty()
+				} else {
+					handler.Assert(func(message slogassert.LogMessage) bool {
+						if !strings.Contains(message.Message, tt.expectedLog) {
+							handler.Fail("impossible to find %s in %s", tt.expectedLog, message.Message)
+							return false
+						}
+						return true
+					})
+				}
 			}
 			if tt.wantErr {
 				assert.Error(t, err, "Float64Variation() error = %v, wantErr %v", err, tt.wantErr)
@@ -1328,7 +1359,7 @@ func TestFloat64VariationDetails(t *testing.T) {
 
 			// clean logger
 			ff = nil
-			_ = file.Close()
+
 		})
 	}
 }
@@ -1379,7 +1410,7 @@ func TestJSONArrayVariation(t *testing.T) {
 			},
 			want:        []interface{}{"toto"},
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"disable-flag\", value=\"\\[toto\\]\"\n",
+			expectedLog: `user="random-key", flag="disable-flag", value="[toto]", variation="SdkDefault"`,
 		},
 		{
 			name: "Get error when cache not init",
@@ -1437,7 +1468,7 @@ func TestJSONArrayVariation(t *testing.T) {
 			},
 			want:        []interface{}{"default"},
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"\\[default\\]\"\n",
+			expectedLog: `user="random-key", flag="test-flag", value="[default]", variation="Default"`,
 		},
 		{
 			name: "Get true value, rule apply",
@@ -1469,7 +1500,7 @@ func TestJSONArrayVariation(t *testing.T) {
 			},
 			want:        []interface{}{"true"},
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"\\[true\\]\"\n",
+			expectedLog: `user="random-key", flag="test-flag", value="[true]", variation="True"`,
 		},
 		{
 			name: "Get false value, rule apply",
@@ -1494,7 +1525,7 @@ func TestJSONArrayVariation(t *testing.T) {
 			},
 			want:        []interface{}{"false"},
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"\\[false\\]\"\n",
+			expectedLog: `user="random-key-ssss1", flag="test-flag", value="[false]", variation="False"`,
 		},
 		{
 			name: "Get default value, when rule apply and not right type",
@@ -1552,7 +1583,7 @@ func TestJSONArrayVariation(t *testing.T) {
 			},
 			want:        []interface{}{"true"},
 			wantErr:     false,
-			expectedLog: "^$",
+			expectedLog: "",
 		},
 		{
 			name: "Get sdk default value if offline",
@@ -1572,9 +1603,8 @@ func TestJSONArrayVariation(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// init logger
-			file, _ := os.CreateTemp("", "log")
-			logger := log.New(file, "", 0)
+			handler := slogassert.New(t, slog.LevelInfo, nil)
+			logger := slog.New(handler)
 
 			if !tt.args.disableInit {
 				ff = &GoFeatureFlag{
@@ -1582,11 +1612,12 @@ func TestJSONArrayVariation(t *testing.T) {
 					cache:     tt.args.cacheMock,
 					config: Config{
 						PollingInterval: 0,
-						Logger:          logger,
+						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
 					dataExporter: exporter.NewScheduler(context.Background(), 0, 0,
-						&logsexporter.Exporter{}, logger),
+						&logsexporter.Exporter{LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+							"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\""}, &fflog.FFLogger{LeveledLogger: logger}),
 				}
 			}
 
@@ -1599,12 +1630,21 @@ func TestJSONArrayVariation(t *testing.T) {
 			assert.Equal(t, tt.want, got, "JSONArrayVariation() got = %v, want %v", got, tt.want)
 			if tt.expectedLog != "" {
 				time.Sleep(40 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
-				content, _ := os.ReadFile(file.Name())
-				assert.Regexp(t, tt.expectedLog, string(content))
+				if tt.expectedLog == "" {
+					handler.AssertEmpty()
+				} else {
+					handler.Assert(func(message slogassert.LogMessage) bool {
+						if !strings.Contains(message.Message, tt.expectedLog) {
+							handler.Fail("impossible to find %s in %s", tt.expectedLog, message.Message)
+							return false
+						}
+						return true
+					})
+				}
 			}
 			// clean logger
 			ff = nil
-			_ = file.Close()
+
 		})
 	}
 }
@@ -1661,7 +1701,7 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 				Cacheable:     true,
 			},
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"disable-flag\", value=\"\\[toto\\]\"\n",
+			expectedLog: `user="random-key", flag="disable-flag", value="[toto]", variation="SdkDefault"`,
 		},
 		{
 			name: "Get error when cache not init",
@@ -1724,7 +1764,7 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 				Cacheable:     true,
 			},
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"\\[default\\]\"\n",
+			expectedLog: `user="random-key", flag="test-flag", value="[default]", variation="Default"`,
 		},
 		{
 			name: "Get true value, rule apply",
@@ -1766,7 +1806,7 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 				},
 			},
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"\\[true\\]\"\n",
+			expectedLog: `user="random-key", flag="test-flag", value="[true]", variation="True"`,
 		},
 		{
 			name: "Get false value, rule apply",
@@ -1798,7 +1838,7 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 				Cacheable:     true,
 			},
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"\\[false\\]\"\n",
+			expectedLog: `user="random-key-ssss1", flag="test-flag", value="[false]", variation="False"`,
 		},
 		{
 			name: "Get default value, when rule apply and not right type",
@@ -1862,9 +1902,8 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// init logger
-			file, _ := os.CreateTemp("", "log")
-			logger := log.New(file, "", 0)
+			handler := slogassert.New(t, slog.LevelInfo, nil)
+			logger := slog.New(handler)
 
 			if !tt.args.disableInit {
 				ff = &GoFeatureFlag{
@@ -1872,11 +1911,12 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 					cache:     tt.args.cacheMock,
 					config: Config{
 						PollingInterval: 0,
-						Logger:          logger,
+						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
 					dataExporter: exporter.NewScheduler(context.Background(), 0, 0,
-						&logsexporter.Exporter{}, logger),
+						&logsexporter.Exporter{LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+							"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\""}, &fflog.FFLogger{LeveledLogger: logger}),
 				}
 			}
 
@@ -1889,12 +1929,20 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 			assert.Equal(t, tt.want, got, "JSONArrayVariation() got = %v, want %v", got, tt.want)
 			if tt.expectedLog != "" {
 				time.Sleep(40 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
-				content, _ := os.ReadFile(file.Name())
-				assert.Regexp(t, tt.expectedLog, string(content))
+				if tt.expectedLog == "" {
+					handler.AssertEmpty()
+				} else {
+					handler.Assert(func(message slogassert.LogMessage) bool {
+						if !strings.Contains(message.Message, tt.expectedLog) {
+							handler.Fail("impossible to find %s in %s", tt.expectedLog, message.Message)
+							return false
+						}
+						return true
+					})
+				}
 			}
 			// clean logger
 			ff = nil
-			_ = file.Close()
 		})
 	}
 }
@@ -1945,7 +1993,7 @@ func TestJSONVariation(t *testing.T) {
 			},
 			want:        map[string]interface{}{"default-notkey": true},
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"disable-flag\", value=\"map\\[default-notkey:true\\]\", variation=\"SdkDefault\"\n",
+			expectedLog: `user="random-key", flag="disable-flag", value="map[default-notkey:true]", variation="SdkDefault"`,
 		},
 		{
 			name: "Get error when cache not init",
@@ -1959,7 +2007,7 @@ func TestJSONVariation(t *testing.T) {
 			},
 			want:        map[string]interface{}{"default-notkey": true},
 			wantErr:     true,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"map\\[default-notkey:true\\]\", variation=\"SdkDefault\"\n",
+			expectedLog: `user="random-key", flag="key-not-exist", value="map[default-notkey:true]", variation="SdkDefault"`,
 		},
 		{
 			name: "Get default value with key not exist",
@@ -1971,7 +2019,7 @@ func TestJSONVariation(t *testing.T) {
 			},
 			want:        map[string]interface{}{"default-notkey": true},
 			wantErr:     true,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"map\\[default-notkey:true\\]\", variation=\"SdkDefault\"\n",
+			expectedLog: `user="random-key", flag="key-not-exist", value="map[default-notkey:true]", variation="SdkDefault"`,
 		},
 		{
 			name: "Get default value, rule not apply",
@@ -2003,7 +2051,7 @@ func TestJSONVariation(t *testing.T) {
 			},
 			want:        map[string]interface{}{"default": true},
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"map\\[default:true\\]\", variation=\"Default\"\n",
+			expectedLog: `user="random-key", flag="test-flag", value="map[default:true]", variation="Default"`,
 		},
 		{
 			name: "Get true value, rule apply",
@@ -2035,7 +2083,7 @@ func TestJSONVariation(t *testing.T) {
 			},
 			want:        map[string]interface{}{"true": true},
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"map\\[true:true\\]\", variation=\"True\"\n",
+			expectedLog: `user="random-key", flag="test-flag", value="map[true:true]", variation="True"`,
 		},
 		{
 			name: "Get false value, rule apply",
@@ -2067,7 +2115,7 @@ func TestJSONVariation(t *testing.T) {
 			},
 			want:        map[string]interface{}{"false": true},
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"map\\[false:true\\]\", variation=\"False\"\n",
+			expectedLog: `user="random-key-ssss1", flag="test-flag", value="map[false:true]", variation="False"`,
 		},
 		{
 			name: "Get default value, when rule apply and not right type",
@@ -2099,7 +2147,7 @@ func TestJSONVariation(t *testing.T) {
 			},
 			want:        map[string]interface{}{"default-notkey": true},
 			wantErr:     true,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"map\\[default-notkey:true\\]\", variation=\"SdkDefault\"\n",
+			expectedLog: `user="random-key-ssss1", flag="test-flag", value="map[default-notkey:true]", variation="SdkDefault"`,
 		},
 		{
 			name: "Get sdk default value if offline",
@@ -2119,9 +2167,8 @@ func TestJSONVariation(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// init logger
-			file, _ := os.CreateTemp("", "log")
-			logger := log.New(file, "", 0)
+			handler := slogassert.New(t, slog.LevelInfo, nil)
+			logger := slog.New(handler)
 
 			if !tt.args.disableInit {
 				ff = &GoFeatureFlag{
@@ -2129,14 +2176,14 @@ func TestJSONVariation(t *testing.T) {
 					cache:     tt.args.cacheMock,
 					config: Config{
 						PollingInterval: 0,
-						Logger:          logger,
+						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
 					dataExporter: exporter.NewScheduler(context.Background(), 0, 0,
 						&logsexporter.Exporter{
-							LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+							LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
 								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
-						}, logger),
+						}, &fflog.FFLogger{LeveledLogger: logger}),
 				}
 			}
 
@@ -2144,8 +2191,17 @@ func TestJSONVariation(t *testing.T) {
 
 			if tt.expectedLog != "" {
 				time.Sleep(40 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
-				content, _ := os.ReadFile(file.Name())
-				assert.Regexp(t, tt.expectedLog, string(content))
+				if tt.expectedLog == "" {
+					handler.AssertEmpty()
+				} else {
+					handler.Assert(func(message slogassert.LogMessage) bool {
+						if !strings.Contains(message.Message, tt.expectedLog) {
+							handler.Fail("impossible to find %s in %s", tt.expectedLog, message.Message)
+							return false
+						}
+						return true
+					})
+				}
 			}
 
 			if tt.wantErr {
@@ -2156,7 +2212,7 @@ func TestJSONVariation(t *testing.T) {
 
 			// clean logger
 			ff = nil
-			_ = file.Close()
+
 		})
 	}
 }
@@ -2196,7 +2252,7 @@ func TestJSONVariationDetails(t *testing.T) {
 				Cacheable:     true,
 			},
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"disable-flag\", value=\"map\\[default-notkey:true\\]\", variation=\"SdkDefault\"\n",
+			expectedLog: `user="random-key", flag="disable-flag", value="map[default-notkey:true]", variation="SdkDefault"`,
 		},
 		{
 			name: "Get default value, rule not apply",
@@ -2235,7 +2291,7 @@ func TestJSONVariationDetails(t *testing.T) {
 				Cacheable:     true,
 			},
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"map\\[default:true\\]\", variation=\"Default\"\n",
+			expectedLog: `user="random-key", flag="test-flag", value="map[default:true]", variation="Default"`,
 		},
 		{
 			name: "Get true value, rule apply",
@@ -2277,7 +2333,7 @@ func TestJSONVariationDetails(t *testing.T) {
 				},
 			},
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"map\\[true:true\\]\", variation=\"True\"\n",
+			expectedLog: `user="random-key", flag="test-flag", value="map[true:true]", variation="True"`,
 		},
 		{
 			name: "Get false value, rule apply",
@@ -2319,7 +2375,7 @@ func TestJSONVariationDetails(t *testing.T) {
 				},
 			},
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"map\\[false:true\\]\", variation=\"False\"\n",
+			expectedLog: `user="random-key-ssss1", flag="test-flag", value="map[false:true]", variation="False"`,
 		},
 		{
 			name: "Get sdk default value if offline",
@@ -2345,9 +2401,8 @@ func TestJSONVariationDetails(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// init logger
-			file, _ := os.CreateTemp("", "log")
-			logger := log.New(file, "", 0)
+			handler := slogassert.New(t, slog.LevelInfo, nil)
+			logger := slog.New(handler)
 
 			if !tt.args.disableInit {
 				ff = &GoFeatureFlag{
@@ -2355,14 +2410,14 @@ func TestJSONVariationDetails(t *testing.T) {
 					cache:     tt.args.cacheMock,
 					config: Config{
 						PollingInterval: 0,
-						Logger:          logger,
+						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
 					dataExporter: exporter.NewScheduler(context.Background(), 0, 0,
 						&logsexporter.Exporter{
-							LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+							LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
 								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
-						}, logger),
+						}, &fflog.FFLogger{LeveledLogger: logger}),
 				}
 			}
 
@@ -2370,8 +2425,17 @@ func TestJSONVariationDetails(t *testing.T) {
 
 			if tt.expectedLog != "" {
 				time.Sleep(40 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
-				content, _ := os.ReadFile(file.Name())
-				assert.Regexp(t, tt.expectedLog, string(content))
+				if tt.expectedLog == "" {
+					handler.AssertEmpty()
+				} else {
+					handler.Assert(func(message slogassert.LogMessage) bool {
+						if !strings.Contains(message.Message, tt.expectedLog) {
+							handler.Fail("impossible to find %s in %s", tt.expectedLog, message.Message)
+							return false
+						}
+						return true
+					})
+				}
 			}
 
 			if tt.wantErr {
@@ -2382,7 +2446,7 @@ func TestJSONVariationDetails(t *testing.T) {
 
 			// clean logger
 			ff = nil
-			_ = file.Close()
+
 		})
 	}
 }
@@ -2433,7 +2497,7 @@ func TestStringVariation(t *testing.T) {
 			},
 			want:        "default-notkey",
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"disable-flag\", value=\"default-notkey\", variation=\"SdkDefault\"\n",
+			expectedLog: `user="random-key", flag="disable-flag", value="default-notkey", variation="SdkDefault"`,
 		},
 		{
 			name: "Get error when cache not init",
@@ -2447,7 +2511,7 @@ func TestStringVariation(t *testing.T) {
 			},
 			want:        "default-notkey",
 			wantErr:     true,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"default-notkey\", variation=\"SdkDefault\"\n",
+			expectedLog: `user="random-key", flag="key-not-exist", value="default-notkey", variation="SdkDefault"`,
 		},
 		{
 			name: "Get default value with key not exist",
@@ -2459,7 +2523,7 @@ func TestStringVariation(t *testing.T) {
 			},
 			want:        "default-notkey",
 			wantErr:     true,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"default-notkey\", variation=\"SdkDefault\"\n",
+			expectedLog: `user="random-key", flag="key-not-exist", value="default-notkey", variation="SdkDefault"`,
 		},
 
 		{
@@ -2492,7 +2556,7 @@ func TestStringVariation(t *testing.T) {
 			},
 			want:        "default",
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"default\", variation=\"Default\"\n",
+			expectedLog: `user="random-key", flag="test-flag", value="default", variation="Default"`,
 		},
 		{
 			name: "Get true value, rule apply",
@@ -2524,7 +2588,7 @@ func TestStringVariation(t *testing.T) {
 			},
 			want:        "true",
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"true\", variation=\"True\"\n",
+			expectedLog: `user="random-key", flag="test-flag", value="true", variation="True"`,
 		},
 		{
 			name: "Get false value, rule apply",
@@ -2556,7 +2620,7 @@ func TestStringVariation(t *testing.T) {
 			},
 			want:        "false",
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"false\", variation=\"False\"\n",
+			expectedLog: `user="random-key-ssss1", flag="test-flag", value="false", variation="False"`,
 		},
 		{
 			name: "Get default value, when rule apply and not right type",
@@ -2588,7 +2652,7 @@ func TestStringVariation(t *testing.T) {
 			},
 			want:        "default-notkey",
 			wantErr:     true,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"default-notkey\", variation=\"SdkDefault\"\n",
+			expectedLog: `user="random-key-ssss1", flag="test-flag", value="default-notkey", variation="SdkDefault"`,
 		},
 		{
 			name: "Get sdk default value if offline",
@@ -2608,9 +2672,8 @@ func TestStringVariation(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// init logger
-			file, _ := os.CreateTemp("", "log")
-			logger := log.New(file, "", 0)
+			handler := slogassert.New(t, slog.LevelInfo, nil)
+			logger := slog.New(handler)
 
 			if !tt.args.disableInit {
 				ff = &GoFeatureFlag{
@@ -2618,22 +2681,31 @@ func TestStringVariation(t *testing.T) {
 					cache:     tt.args.cacheMock,
 					config: Config{
 						PollingInterval: 0,
-						Logger:          logger,
+						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
 					dataExporter: exporter.NewScheduler(context.Background(), 0, 0,
 						&logsexporter.Exporter{
-							LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+							LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
 								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
-						}, logger),
+						}, &fflog.FFLogger{LeveledLogger: logger}),
 				}
 			}
 			got, err := StringVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
 				time.Sleep(40 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
-				content, _ := os.ReadFile(file.Name())
-				assert.Regexp(t, tt.expectedLog, string(content))
+				if tt.expectedLog == "" {
+					handler.AssertEmpty()
+				} else {
+					handler.Assert(func(message slogassert.LogMessage) bool {
+						if !strings.Contains(message.Message, tt.expectedLog) {
+							handler.Fail("impossible to find %s in %s", tt.expectedLog, message.Message)
+							return false
+						}
+						return true
+					})
+				}
 			}
 
 			if tt.wantErr {
@@ -2644,7 +2716,7 @@ func TestStringVariation(t *testing.T) {
 
 			// clean logger
 			ff = nil
-			_ = file.Close()
+
 		})
 	}
 }
@@ -2684,7 +2756,7 @@ func TestStringVariationDetails(t *testing.T) {
 				Cacheable:     true,
 			},
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"disable-flag\", value=\"default-notkey\", variation=\"SdkDefault\"\n",
+			expectedLog: `user="random-key", flag="disable-flag", value="default-notkey", variation="SdkDefault"`,
 		},
 		{
 			name: "Get default value, rule not apply",
@@ -2723,7 +2795,7 @@ func TestStringVariationDetails(t *testing.T) {
 				Cacheable:     true,
 			},
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"default\", variation=\"Default\"\n",
+			expectedLog: `user="random-key", flag="test-flag", value="default", variation="Default"`,
 		},
 		{
 			name: "Get true value, rule apply",
@@ -2765,7 +2837,7 @@ func TestStringVariationDetails(t *testing.T) {
 				},
 			},
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"true\", variation=\"True\"\n",
+			expectedLog: `user="random-key", flag="test-flag", value="true", variation="True"`,
 		},
 		{
 			name: "Get false value, rule apply",
@@ -2807,7 +2879,7 @@ func TestStringVariationDetails(t *testing.T) {
 				},
 			},
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"false\", variation=\"False\"\n",
+			expectedLog: `user="random-key-ssss1", flag="test-flag", value="false", variation="False"`,
 		},
 		{
 			name: "Get sdk default value if offline",
@@ -2833,9 +2905,8 @@ func TestStringVariationDetails(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// init logger
-			file, _ := os.CreateTemp("", "log")
-			logger := log.New(file, "", 0)
+			handler := slogassert.New(t, slog.LevelInfo, nil)
+			logger := slog.New(handler)
 
 			if !tt.args.disableInit {
 				ff = &GoFeatureFlag{
@@ -2843,22 +2914,31 @@ func TestStringVariationDetails(t *testing.T) {
 					cache:     tt.args.cacheMock,
 					config: Config{
 						PollingInterval: 0,
-						Logger:          logger,
+						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
 					dataExporter: exporter.NewScheduler(context.Background(), 0, 0,
 						&logsexporter.Exporter{
-							LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+							LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
 								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
-						}, logger),
+						}, &fflog.FFLogger{LeveledLogger: logger}),
 				}
 			}
 			got, err := StringVariationDetails(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
 				time.Sleep(40 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
-				content, _ := os.ReadFile(file.Name())
-				assert.Regexp(t, tt.expectedLog, string(content))
+				if tt.expectedLog == "" {
+					handler.AssertEmpty()
+				} else {
+					handler.Assert(func(message slogassert.LogMessage) bool {
+						if !strings.Contains(message.Message, tt.expectedLog) {
+							handler.Fail("impossible to find %s in %s", tt.expectedLog, message.Message)
+							return false
+						}
+						return true
+					})
+				}
 			}
 
 			if tt.wantErr {
@@ -2869,7 +2949,7 @@ func TestStringVariationDetails(t *testing.T) {
 
 			// clean logger
 			ff = nil
-			_ = file.Close()
+
 		})
 	}
 }
@@ -2920,7 +3000,7 @@ func TestIntVariation(t *testing.T) {
 			},
 			want:        125,
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"disable-flag\", value=\"125\", variation=\"SdkDefault\"\n",
+			expectedLog: `user="random-key", flag="disable-flag", value="125", variation="SdkDefault"`,
 		},
 		{
 			name: "Get error when cache not init",
@@ -2934,7 +3014,7 @@ func TestIntVariation(t *testing.T) {
 			},
 			want:        118,
 			wantErr:     true,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"118\", variation=\"SdkDefault\"\n",
+			expectedLog: `user="random-key", flag="key-not-exist", value="118", variation="SdkDefault"`,
 		},
 		{
 			name: "Get default value with key not exist",
@@ -2946,7 +3026,7 @@ func TestIntVariation(t *testing.T) {
 			},
 			want:        118,
 			wantErr:     true,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"118\", variation=\"SdkDefault\"\n",
+			expectedLog: `user="random-key", flag="key-not-exist", value="118", variation="SdkDefault"`,
 		},
 		{
 			name: "Get default value rule not apply",
@@ -2978,7 +3058,7 @@ func TestIntVariation(t *testing.T) {
 			},
 			want:        119,
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"119\", variation=\"Default\"\n",
+			expectedLog: `user="random-key", flag="test-flag", value="119", variation="Default"`,
 		},
 		{
 			name: "Get true value, rule apply",
@@ -3010,7 +3090,7 @@ func TestIntVariation(t *testing.T) {
 			},
 			want:        120,
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"120\", variation=\"True\"\n",
+			expectedLog: `user="random-key", flag="test-flag", value="120", variation="True"`,
 		},
 		{
 			name: "Get false value, rule apply",
@@ -3042,7 +3122,7 @@ func TestIntVariation(t *testing.T) {
 			},
 			want:        121,
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"121\", variation=\"False\"\n",
+			expectedLog: `user="random-key-ssss1", flag="test-flag", value="121", variation="False"`,
 		},
 		{
 			name: "Get default value, when rule apply and not right type",
@@ -3074,7 +3154,7 @@ func TestIntVariation(t *testing.T) {
 			},
 			want:        118,
 			wantErr:     true,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"118\", variation=\"SdkDefault\"\n",
+			expectedLog: `user="random-key-ssss1", flag="test-flag", value="118", variation="SdkDefault"`,
 		},
 		{
 			name: "Convert float to Int",
@@ -3106,7 +3186,7 @@ func TestIntVariation(t *testing.T) {
 			},
 			want:        120,
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"120\", variation=\"True\"\n",
+			expectedLog: `user="random-key", flag="test-flag", value="120", variation="True"`,
 		},
 		{
 			name: "Get sdk default value if offline",
@@ -3126,9 +3206,8 @@ func TestIntVariation(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// init logger
-			file, _ := os.CreateTemp("", "log")
-			logger := log.New(file, "", 0)
+			handler := slogassert.New(t, slog.LevelInfo, nil)
+			logger := slog.New(handler)
 
 			if !tt.args.disableInit {
 				ff = &GoFeatureFlag{
@@ -3136,22 +3215,31 @@ func TestIntVariation(t *testing.T) {
 					cache:     tt.args.cacheMock,
 					config: Config{
 						PollingInterval: 0,
-						Logger:          logger,
+						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
 					dataExporter: exporter.NewScheduler(context.Background(), 0, 0,
 						&logsexporter.Exporter{
-							LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+							LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
 								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
-						}, logger),
+						}, &fflog.FFLogger{LeveledLogger: logger}),
 				}
 			}
 			got, err := IntVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
 				time.Sleep(40 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
-				content, _ := os.ReadFile(file.Name())
-				assert.Regexp(t, tt.expectedLog, string(content))
+				if tt.expectedLog == "" {
+					handler.AssertEmpty()
+				} else {
+					handler.Assert(func(message slogassert.LogMessage) bool {
+						if !strings.Contains(message.Message, tt.expectedLog) {
+							handler.Fail("impossible to find %s in %s", tt.expectedLog, message.Message)
+							return false
+						}
+						return true
+					})
+				}
 			}
 
 			if tt.wantErr {
@@ -3162,7 +3250,7 @@ func TestIntVariation(t *testing.T) {
 
 			// clean logger
 			ff = nil
-			_ = file.Close()
+
 		})
 	}
 }
@@ -3202,7 +3290,7 @@ func TestIntVariationDetails(t *testing.T) {
 				Cacheable:     true,
 			},
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"disable-flag\", value=\"125\", variation=\"SdkDefault\"\n",
+			expectedLog: `user="random-key", flag="disable-flag", value="125", variation="SdkDefault"`,
 		},
 		{
 			name: "Get default value rule not apply",
@@ -3241,7 +3329,7 @@ func TestIntVariationDetails(t *testing.T) {
 				Cacheable:     true,
 			},
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"119\", variation=\"Default\"\n",
+			expectedLog: `user="random-key", flag="test-flag", value="119", variation="Default"`,
 		},
 		{
 			name: "Get true value, rule apply",
@@ -3283,7 +3371,7 @@ func TestIntVariationDetails(t *testing.T) {
 				},
 			},
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"120\", variation=\"True\"\n",
+			expectedLog: `user="random-key", flag="test-flag", value="120", variation="True"`,
 		},
 		{
 			name: "Get false value, rule apply",
@@ -3325,7 +3413,7 @@ func TestIntVariationDetails(t *testing.T) {
 				},
 			},
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"121\", variation=\"False\"\n",
+			expectedLog: `user="random-key-ssss1", flag="test-flag", value="121", variation="False"`,
 		},
 		{
 			name: "Convert float to Int",
@@ -3367,7 +3455,7 @@ func TestIntVariationDetails(t *testing.T) {
 				},
 			},
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"120\", variation=\"True\"\n",
+			expectedLog: `user="random-key", flag="test-flag", value="120", variation="True"`,
 		},
 		{
 			name: "Get sdk default value if offline",
@@ -3393,9 +3481,8 @@ func TestIntVariationDetails(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// init logger
-			file, _ := os.CreateTemp("", "log")
-			logger := log.New(file, "", 0)
+			handler := slogassert.New(t, slog.LevelInfo, nil)
+			logger := slog.New(handler)
 
 			if !tt.args.disableInit {
 				ff = &GoFeatureFlag{
@@ -3403,22 +3490,31 @@ func TestIntVariationDetails(t *testing.T) {
 					cache:     tt.args.cacheMock,
 					config: Config{
 						PollingInterval: 0,
-						Logger:          logger,
+						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
 					dataExporter: exporter.NewScheduler(context.Background(), 0, 0,
 						&logsexporter.Exporter{
-							LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+							LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
 								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
-						}, logger),
+						}, &fflog.FFLogger{LeveledLogger: logger}),
 				}
 			}
 			got, err := IntVariationDetails(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
 				time.Sleep(40 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
-				content, _ := os.ReadFile(file.Name())
-				assert.Regexp(t, tt.expectedLog, string(content))
+				if tt.expectedLog == "" {
+					handler.AssertEmpty()
+				} else {
+					handler.Assert(func(message slogassert.LogMessage) bool {
+						if !strings.Contains(message.Message, tt.expectedLog) {
+							handler.Fail("impossible to find %s in %s", tt.expectedLog, message.Message)
+							return false
+						}
+						return true
+					})
+				}
 			}
 
 			if tt.wantErr {
@@ -3429,7 +3525,7 @@ func TestIntVariationDetails(t *testing.T) {
 
 			// clean logger
 			ff = nil
-			_ = file.Close()
+
 		})
 	}
 }
@@ -3649,7 +3745,7 @@ func TestRawVariation(t *testing.T) {
 				Cacheable:     true,
 			},
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"disable-flag\", value=\"true\", variation=\"SdkDefault\"\n",
+			expectedLog: `user="random-key", flag="disable-flag", value="true", variation="SdkDefault"`,
 		},
 		{
 			name: "Get error when cache not init",
@@ -3671,7 +3767,7 @@ func TestRawVariation(t *testing.T) {
 				Cacheable:     false,
 			},
 			wantErr:     true,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"defaultValue\", variation=\"SdkDefault\"\n",
+			expectedLog: `user="random-key", flag="key-not-exist", value="defaultValue", variation="SdkDefault"`,
 		},
 		{
 			name: "Get default value with key not exist",
@@ -3690,7 +3786,7 @@ func TestRawVariation(t *testing.T) {
 				ErrorCode:     flag.ErrorCodeFlagNotFound,
 			},
 			wantErr:     true,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"123456\", variation=\"SdkDefault\"\n",
+			expectedLog: `user="random-key", flag="key-not-exist", value="123456", variation="SdkDefault"`,
 		},
 		{
 			name: "Get default value, rule not apply",
@@ -3729,7 +3825,7 @@ func TestRawVariation(t *testing.T) {
 				Cacheable:     true,
 			},
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"map\\[test:test\\]\", variation=\"Default\"",
+			expectedLog: `user="random-key", flag="test-flag", value="map[test:test]", variation="Default"`,
 		},
 		{
 			name: "Get true value, rule apply",
@@ -3771,7 +3867,7 @@ func TestRawVariation(t *testing.T) {
 				},
 			},
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"test-flag\", value=\"map\\[test2:test\\]\", variation=\"True\"",
+			expectedLog: `user="random-key", flag="test-flag", value="map[test2:test]", variation="True"`,
 		},
 		{
 			name: "Get false value, rule apply",
@@ -3813,7 +3909,7 @@ func TestRawVariation(t *testing.T) {
 				},
 			},
 			wantErr:     false,
-			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"map\\[test3:test\\]\", variation=\"False\"",
+			expectedLog: `user="random-key-ssss1", flag="test-flag", value="map[test3:test]", variation="False"`,
 		},
 		{
 			name: "No exported log",
@@ -3856,7 +3952,7 @@ func TestRawVariation(t *testing.T) {
 				},
 			},
 			wantErr:     false,
-			expectedLog: "^$",
+			expectedLog: "",
 		},
 		{
 			name: "Get sdk default value if offline",
@@ -3903,9 +3999,8 @@ func TestRawVariation(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// init logger
-			file, _ := os.CreateTemp("", "log")
-			logger := log.New(file, "", 0)
+			handler := slogassert.New(t, slog.LevelInfo, nil)
+			logger := slog.New(handler)
 
 			if !tt.args.disableInit {
 				ff = &GoFeatureFlag{
@@ -3913,14 +4008,14 @@ func TestRawVariation(t *testing.T) {
 					cache:     tt.args.cacheMock,
 					config: Config{
 						PollingInterval: 0,
-						Logger:          logger,
+						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
 					dataExporter: exporter.NewScheduler(context.Background(), 0, 0,
 						&logsexporter.Exporter{
-							LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+							LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
 								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
-						}, logger),
+						}, &fflog.FFLogger{LeveledLogger: logger}),
 				}
 			}
 
@@ -3928,8 +4023,17 @@ func TestRawVariation(t *testing.T) {
 
 			if tt.expectedLog != "" {
 				time.Sleep(40 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
-				content, _ := os.ReadFile(file.Name())
-				assert.Regexp(t, tt.expectedLog, string(content))
+				if tt.expectedLog == "" {
+					handler.AssertEmpty()
+				} else {
+					handler.Assert(func(message slogassert.LogMessage) bool {
+						if !strings.Contains(message.Message, tt.expectedLog) {
+							handler.Fail("impossible to find %s in %s", tt.expectedLog, message.Message)
+							return false
+						}
+						return true
+					})
+				}
 			}
 
 			if tt.wantErr {
@@ -3939,7 +4043,7 @@ func TestRawVariation(t *testing.T) {
 
 			// clean logger
 			ff = nil
-			_ = file.Close()
+
 		})
 	}
 }

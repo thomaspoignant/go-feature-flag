@@ -91,7 +91,7 @@ func (f *Exporter) Export(ctx context.Context, _ *log.Logger, featureEvents []ex
 	}
 	f.Headers["Content-Type"] = []string{"application/json"}
 
-	// if a secret is provided we sign the body and add this signature as a header.
+	// if a secret is provided, we sign the body and add this signature as a header.
 	if f.Secret != "" {
 		f.Headers["X-Hub-Signature-256"] = []string{signer.Sign(payload, []byte(f.Secret))}
 	}

@@ -99,7 +99,8 @@ func TestLog_Export(t *testing.T) {
 			assert.NoError(t, err, "Exporter should not throw errors")
 
 			logContent, _ := os.ReadFile(logFile.Name())
-			assert.Regexp(t, tt.expectedLog, string(logContent))
+			withoutPrefix := string(logContent)[25:]
+			assert.Regexp(t, tt.expectedLog, withoutPrefix)
 		})
 	}
 }

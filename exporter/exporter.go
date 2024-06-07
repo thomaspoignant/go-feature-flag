@@ -5,7 +5,7 @@ import (
 	"log"
 )
 
-// Exporter is an interface to describe how a exporter looks like.
+// Exporter is an interface to describe how an exporter looks like.
 type Exporter interface {
 	// Export will send the data to the exporter.
 	Export(context.Context, *log.Logger, []FeatureEvent) error

@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"log"
+	"log/slog"
 	"os"
 	"sync"
 
@@ -102,7 +103,8 @@ func (f *Exporter) Export(ctx context.Context, logger *log.Logger, featureEvents
 		// read file
 		of, err := os.Open(outputDir + "/" + file.Name())
 		if err != nil {
-			fflog.Printf(logger, "error: [S3Exporter] impossible to open the file %s/%s", outputDir, file.Name())
+			fflog.ConvertToFFLogger(logger).Error("[S3Exporter] impossible to open the file",
+				slog.String("directory", outputDir), slog.String("filePath", file.Name()))
 			continue
 		}
 
@@ -117,7 +119,8 @@ func (f *Exporter) Export(ctx context.Context, logger *log.Logger, featureEvents
 			return err
 		}
 
-		fflog.Printf(logger, "info: [S3Exporter] file %s uploaded.", result.Location)
+		fflog.ConvertToFFLogger(logger).Info("[S3Exporter] file uploaded.",
+			slog.String("fileLocation", result.Location))
 	}
 	return nil
 }
