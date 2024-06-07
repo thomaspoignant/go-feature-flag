@@ -1359,7 +1359,6 @@ func TestFloat64VariationDetails(t *testing.T) {
 
 			// clean logger
 			ff = nil
-
 		})
 	}
 }
@@ -1644,7 +1643,6 @@ func TestJSONArrayVariation(t *testing.T) {
 			}
 			// clean logger
 			ff = nil
-
 		})
 	}
 }
@@ -2212,7 +2210,6 @@ func TestJSONVariation(t *testing.T) {
 
 			// clean logger
 			ff = nil
-
 		})
 	}
 }
@@ -2446,7 +2443,6 @@ func TestJSONVariationDetails(t *testing.T) {
 
 			// clean logger
 			ff = nil
-
 		})
 	}
 }
@@ -2716,7 +2712,6 @@ func TestStringVariation(t *testing.T) {
 
 			// clean logger
 			ff = nil
-
 		})
 	}
 }

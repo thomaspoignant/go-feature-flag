@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -81,7 +81,7 @@ func Test_all_flag_Handler(t *testing.T) {
 			// init go-feature-flag
 			goFF, _ := ffclient.New(ffclient.Config{
 				PollingInterval: 10 * time.Second,
-				Logger:          log.New(os.Stdout, "", 0),
+				LeveledLogger:   slog.Default(),
 				Context:         context.Background(),
 				Retriever: &fileretriever.Retriever{
 					Path: tt.args.configFlagsLocation,
