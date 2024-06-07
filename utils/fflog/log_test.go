@@ -443,3 +443,18 @@ func TestConvertToFFLogger(t *testing.T) {
 	ffl := fflog.ConvertToFFLogger(l)
 	assert.Equal(t, ffl.GetLogLogger(slog.LevelInfo), l)
 }
+
+func TestGetLogLogger(t *testing.T) {
+	l := log.New(os.Stdout, "", 0)
+	ffl := &fflog.FFLogger{
+		LeveledLogger: slog.Default(),
+		LegacyLogger:  l,
+	}
+
+	ffl2 := &fflog.FFLogger{
+		LegacyLogger: l,
+	}
+
+	assert.NotEqual(t, ffl.GetLogLogger(slog.LevelInfo), l)
+	assert.Equal(t, ffl2.GetLogLogger(slog.LevelInfo), l)
+}
