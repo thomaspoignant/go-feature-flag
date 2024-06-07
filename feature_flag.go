@@ -118,6 +118,7 @@ func New(config Config) (*GoFeatureFlag, error) {
 			}
 		}
 	}
+	config.internalLogger.Debug("GO Feature Flag is initialized")
 	return goFF, nil
 }
 
