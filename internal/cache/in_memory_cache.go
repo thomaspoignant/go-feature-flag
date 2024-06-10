@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/thomaspoignant/go-feature-flag/internal/dto"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
+	"log/slog"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 )
@@ -24,7 +25,8 @@ func (fc *InMemoryCache) addFlag(key string, value flag.InternalFlag) {
 	if err := value.IsValid(); err == nil {
 		fc.Flags[key] = value
 	} else {
-		fc.Logger.Error("[cache] invalid configuration for flag %s: %s", key, err)
+		fc.Logger.Error("[cache] invalid configuration for flag",
+			slog.String("key", key), slog.Any("error", err))
 	}
 }
 
@@ -68,7 +70,8 @@ func (fc *InMemoryCache) Init(flags map[string]dto.DTO) {
 		if err := flagToAdd.IsValid(); err == nil {
 			cache[key] = flagDto.Convert()
 		} else {
-			fc.Logger.Error("[cache] invalid configuration for flag %s: %s", key, err)
+			fc.Logger.Error("[cache] invalid configuration for flag",
+				slog.String("key", key), slog.Any("error", err))
 		}
 	}
 	fc.Flags = cache
