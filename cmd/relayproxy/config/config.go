@@ -313,7 +313,7 @@ func (c *Config) IsValid() error {
 			}
 		}
 	}
-	if !c.Debug && c.LogLevel != "" {
+	if c.LogLevel != "" {
 		if _, err := zapcore.ParseLevel(c.LogLevel); err != nil {
 			return err
 		}
