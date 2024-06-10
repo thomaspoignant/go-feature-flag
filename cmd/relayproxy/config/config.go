@@ -140,7 +140,7 @@ type Config struct {
 	// Possible values: debug, info, warn, error, dpanic, panic, fatal
 	// If level debug go-feature-flag relay proxy will run on debug mode, with more logs and custom responses
 	// Default: debug
-	LogLevel string `mapstructure:"loglevel" koanf:"loglevel"`
+	LogLevel string `mapstructure:"logLevel" koanf:"loglevel"`
 
 	// PollingInterval (optional) Poll every X time
 	// The minimum possible is 1 second

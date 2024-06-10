@@ -14,5 +14,5 @@
     "apikey1",
     "apikey2"
   ],
-  "loglevel": "error"
+  "logLevel": "error"
 }

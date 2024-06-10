@@ -15,12 +15,9 @@ type Logger struct {
 func InitLogger() *Logger {
 	logger := &Logger{Atom: zap.NewAtomicLevel()}
 
-	encoderCfg := zap.NewProductionEncoderConfig()
-	logger.ZapLogger = zap.New(zapcore.NewCore(
-		zapcore.NewJSONEncoder(encoderCfg),
-		zapcore.Lock(os.Stdout),
-		logger.Atom,
-	))
+        prodConfig := zap.NewProductionConfig()
+        prodConfig.Level = logger.Atom
+	logger.ZapLogger = prodConfig.Build()
 
 	return logger
 }
