@@ -1,10 +1,7 @@
 package log
 
 import (
-	"os"
-
 	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 )
 
 type Logger struct {
@@ -15,9 +12,10 @@ type Logger struct {
 func InitLogger() *Logger {
 	logger := &Logger{Atom: zap.NewAtomicLevel()}
 
-        prodConfig := zap.NewProductionConfig()
-        prodConfig.Level = logger.Atom
-	logger.ZapLogger = prodConfig.Build()
+	prodConfig := zap.NewProductionConfig()
+	prodConfig.Level = logger.Atom
+	zapLogger, _ := prodConfig.Build()
+	logger.ZapLogger = zapLogger
 
 	return logger
 }

@@ -323,6 +323,7 @@ func TestConfig_IsValid(t *testing.T) {
 		Exporter                *config.ExporterConf
 		Notifiers               []config.NotifierConf
 		LogLevel                string
+		Debug                   bool
 	}
 	tests := []struct {
 		name    string
@@ -478,6 +479,19 @@ func TestConfig_IsValid(t *testing.T) {
 				LogLevel: "invalid",
 			},
 			wantErr: assert.Error,
+		},
+		{
+			name: "log level is not set but debug is set",
+			fields: fields{
+				ListenPort: 8080,
+				Retriever: &config.RetrieverConf{
+					Kind: "file",
+					Path: "../testdata/config/valid-file.yaml",
+				},
+				LogLevel: "",
+				Debug:    true,
+			},
+			wantErr: assert.NoError,
 		},
 	}
 	for _, tt := range tests {
@@ -871,11 +885,28 @@ func TestConfig_LogLevel(t *testing.T) {
 			wantDebug:    false,
 			wantLogLevel: zapcore.PanicLevel,
 		},
+		{
+			name: "debug flag is set but not log level",
+			config: &config.Config{
+				Debug: true,
+			},
+			wantDebug:    true,
+			wantLogLevel: zapcore.DebugLevel,
+		},
+		{
+			name: "debug flag is set but and log level override",
+			config: &config.Config{
+				LogLevel: "info",
+				Debug:    true,
+			},
+			wantDebug:    true,
+			wantLogLevel: zapcore.DebugLevel,
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equalf(t, tt.wantDebug, tt.config.Debug(), "Debug()")
+			assert.Equalf(t, tt.wantDebug, tt.config.IsDebugEnabled(), "IsDebugEnabled()")
 			assert.Equalf(t, tt.wantLogLevel, tt.config.ZapLogLevel(), "ZapLogLevel()")
 		})
 	}

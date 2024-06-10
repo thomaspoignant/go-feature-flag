@@ -34,7 +34,7 @@ func DebugSkipper(_ echo.Context) bool {
 func ZapLogger(log *zap.Logger, cfg *config.Config) echo.MiddlewareFunc {
 	// select the right skipper
 	skipper := DefaultSkipper
-	if cfg != nil && cfg.Debug() {
+	if cfg != nil && cfg.IsDebugEnabled() {
 		skipper = DebugSkipper
 	}
 

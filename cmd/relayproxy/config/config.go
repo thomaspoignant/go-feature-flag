@@ -34,7 +34,7 @@ var DefaultRetriever = struct {
 	GitBranch:  "main",
 }
 
-const DefaultLogLevel = "debug"
+const DefaultLogLevel = "info"
 
 var DefaultExporter = struct {
 	Format                  string
@@ -68,7 +68,7 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 		"fileFormat":      "yaml",
 		"restApiTimeout":  5000,
 		"pollingInterval": 60000,
-		"loglevel":        DefaultLogLevel,
+		"logLevel":        DefaultLogLevel,
 	}, "."), nil)
 
 	// mapping command line parameters to koanf
@@ -120,6 +120,11 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 		return nil, errUnmarshal
 	}
 
+	if proxyConf.Debug && proxyConf.LogLevel == "" {
+		log.Warn(`Option Debug that you are using in your configuration file is deprecated and will be removed in future versions. 
+		Please use logLevel: debug to continue to run the relay-proxy with debug logs.`)
+	}
+
 	return proxyConf, nil
 }
 
@@ -129,6 +134,9 @@ type Config struct {
 
 	// HideBanner (optional) if true, we don't display the go-feature-flag relay proxy banner
 	HideBanner bool `mapstructure:"hideBanner" koanf:"hidebanner"`
+
+	// Debug (optional) if true, go-feature-flag relay proxy will run on debug mode, with more logs and custom responses
+	Debug bool `mapstructure:"debug" koanf:"debug"`
 
 	// EnableSwagger (optional) to have access to the swagger
 	EnableSwagger bool `mapstructure:"enableSwagger" koanf:"enableswagger"`
@@ -305,9 +313,10 @@ func (c *Config) IsValid() error {
 			}
 		}
 	}
-
-	if _, err := zapcore.ParseLevel(c.LogLevel); err != nil {
-		return err
+	if !c.Debug && c.LogLevel != "" {
+		if _, err := zapcore.ParseLevel(c.LogLevel); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -403,17 +412,22 @@ func loadArrayEnv(s string, v string, configMap map[string]interface{}) error {
 	return nil
 }
 
-func (c *Config) Debug() bool {
+func (c *Config) IsDebugEnabled() bool {
 	if c == nil {
 		return false
 	}
-	return c.LogLevel == DefaultLogLevel
+	return c.LogLevel == "debug" || c.Debug
 }
 
 func (c *Config) ZapLogLevel() zapcore.Level {
 	if c == nil {
 		return zapcore.InvalidLevel
 	}
+	// Use debug flag for backward compatibility
+	if c.Debug {
+		return zapcore.DebugLevel
+	}
+
 	level, err := zapcore.ParseLevel(c.LogLevel)
 	if err != nil {
 		return zapcore.InvalidLevel

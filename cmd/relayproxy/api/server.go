@@ -51,7 +51,7 @@ type Server struct {
 func (s *Server) initRoutes() {
 	s.apiEcho.HideBanner = true
 	s.apiEcho.HidePort = true
-	s.apiEcho.Debug = s.config.Debug()
+	s.apiEcho.Debug = s.config.IsDebugEnabled()
 	if s.services.Metrics != (metric.Metrics{}) {
 		s.apiEcho.Use(echoprometheus.NewMiddlewareWithConfig(echoprometheus.MiddlewareConfig{
 			Subsystem:  metric.GOFFSubSystem,
