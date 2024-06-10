@@ -121,8 +121,10 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 	}
 
 	if proxyConf.Debug && proxyConf.LogLevel == "" {
-		log.Warn(`Option Debug that you are using in your configuration file is deprecated and will be removed in future versions. 
-		Please use logLevel: debug to continue to run the relay-proxy with debug logs.`)
+		log.Warn(
+			"Option Debug that you are using in your configuration file is deprecated" +
+				"and will be removed in future versions." +
+				"Please use logLevel: debug to continue to run the relay-proxy with debug logs.")
 	}
 
 	return proxyConf, nil
