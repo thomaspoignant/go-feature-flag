@@ -19,11 +19,10 @@ import (
 
 func main() {
 	logger := log.InitLogger()
-	zapLog := logger.ZapLogger
-	defer func() { _ = zapLog.Sync() }()
+	defer func() { _ = logger.ZapLogger.Sync() }()
 
 	e := echo.New()
-	e.Use(custommiddleware.ZapLogger(zapLog, nil))
+	e.Use(custommiddleware.ZapLogger(logger.ZapLogger, nil))
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{
 			"http://gofeatureflag.org",
