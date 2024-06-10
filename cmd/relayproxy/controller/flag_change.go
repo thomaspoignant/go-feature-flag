@@ -32,7 +32,7 @@ type FlagChangeResponse struct {
 // @Description configuration, you can use this hash to know if the configuration has changed.
 // @Security    ApiKeyAuth
 // @Produce     json
-// @Accept	 	json
+// @Accept      json
 // @Param       If-None-Match header string false "The request will be processed only if ETag doesn't match."
 // @Success     200  {object} FlagChangeResponse "Success"
 // @Success     304 {string} string "Etag: \"117-0193435c612c50d93b798619d9464856263dbf9f\""
