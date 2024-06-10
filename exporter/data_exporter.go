@@ -114,7 +114,6 @@ func (dc *Scheduler) GetLogger(level slog.Level) *log.Logger {
 }
 
 // flush will call the data exporter and clear the cache
-// this method should always be called with a mutex
 func (dc *Scheduler) flush() {
 	if len(dc.localCache) > 0 {
 		err := dc.exporter.Export(dc.ctx, dc.GetLogger(slog.LevelError), dc.localCache)
