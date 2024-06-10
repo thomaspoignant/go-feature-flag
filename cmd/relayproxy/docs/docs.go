@@ -488,6 +488,54 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/flag/change": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Making a **GET** request to the URL ` + "`" + `/v1/flag/change` + "`" + ` will give you the hash of the current\nconfiguration, you can use this hash to know if the configuration has changed.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "GO Feature Flag Evaluation API"
+                ],
+                "summary": "Endpoint to poll if you want to know if there is a configuration change in the flags",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The request will be processed only if ETag doesn't match.",
+                        "name": "If-None-Match",
+                        "in": "header"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/controller.FlagChangeResponse"
+                        }
+                    },
+                    "304": {
+                        "description": "Etag: \\\"117-0193435c612c50d93b798619d9464856263dbf9f\\",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
+                        }
+                    }
+                }
+            }
+        },
         "/ws/v1/flag/change": {
             "post": {
                 "description": "This endpoint is a websocket endpoint to be notified about flag changes, every change\nwill send a request to the client with a model.DiffCache format.\n",
@@ -498,7 +546,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "GO Feature Flag Evaluation API"
+                    "GO Feature Flag Evaluation Websocket API"
                 ],
                 "summary": "Websocket endpoint to be notified about flag changes",
                 "parameters": [
@@ -533,6 +581,14 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "controller.FlagChangeResponse": {
+            "type": "object",
+            "properties": {
+                "hash": {
+                    "type": "integer"
+                }
+            }
+        },
         "controller.retrieverRefreshResponse": {
             "type": "object",
             "properties": {

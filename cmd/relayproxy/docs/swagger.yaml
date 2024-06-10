@@ -1,5 +1,10 @@
 basePath: /
 definitions:
+  controller.FlagChangeResponse:
+    properties:
+      hash:
+        type: integer
+    type: object
   controller.retrieverRefreshResponse:
     properties:
       refreshed:
@@ -745,6 +750,39 @@ paths:
       summary: Evaluate a feature flag
       tags:
       - GO Feature Flag Evaluation API
+  /v1/flag/change:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Making a **GET** request to the URL `/v1/flag/change` will give you the hash of the current
+        configuration, you can use this hash to know if the configuration has changed.
+      parameters:
+      - description: The request will be processed only if ETag doesn't match.
+        in: header
+        name: If-None-Match
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/controller.FlagChangeResponse'
+        "304":
+          description: 'Etag: \"117-0193435c612c50d93b798619d9464856263dbf9f\'
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/modeldocs.HTTPErrorDoc'
+      security:
+      - ApiKeyAuth: []
+      summary: Endpoint to poll if you want to know if there is a configuration change
+        in the flags
+      tags:
+      - GO Feature Flag Evaluation API
   /ws/v1/flag/change:
     post:
       consumes:
@@ -774,7 +812,7 @@ paths:
             $ref: '#/definitions/modeldocs.HTTPErrorDoc'
       summary: Websocket endpoint to be notified about flag changes
       tags:
-      - GO Feature Flag Evaluation API
+      - GO Feature Flag Evaluation Websocket API
 securityDefinitions:
   ApiKeyAuth:
     description: Use configured APIKeys in yaml config as authorization keys, disabled
