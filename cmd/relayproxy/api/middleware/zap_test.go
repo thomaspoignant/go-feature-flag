@@ -134,7 +134,7 @@ func TestZapLoggerHealthDebug(t *testing.T) {
 
 	obs, logs := observer.New(zap.DebugLevel)
 	logger := zap.New(obs)
-	err := middleware.ZapLogger(logger, &config.Config{LogLevel: config.DefaultLogLevel})(h)(c)
+	err := middleware.ZapLogger(logger, &config.Config{LogLevel: "debug"})(h)(c)
 	assert.Nil(t, err)
 	assert.Equal(t, 1, len(logs.AllUntimed()))
 }
