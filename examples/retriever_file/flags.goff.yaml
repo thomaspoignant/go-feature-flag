@@ -23,4 +23,4 @@ flag-only-for-admin:
         false_var: 0
         true_var: 100
   defaultRule:
-    variation: Default
+    variation: default_var

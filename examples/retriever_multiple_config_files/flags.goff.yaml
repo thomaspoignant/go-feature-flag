@@ -9,4 +9,4 @@ flag-only-for-admin:
         false_var: 100
         true_var: 0
   defaultRule:
-    variation: Default
+    variation: default_var

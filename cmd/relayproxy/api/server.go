@@ -61,6 +61,7 @@ func (s *Server) initRoutes() {
 	s.apiEcho.Use(otelecho.Middleware("go-feature-flag"))
 	s.apiEcho.Use(custommiddleware.ZapLogger(s.zapLog, s.config))
 	s.apiEcho.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
+	s.apiEcho.Use(custommiddleware.VersionHeader(s.config))
 	s.apiEcho.Use(middleware.Recover())
 	s.apiEcho.Use(middleware.TimeoutWithConfig(
 		middleware.TimeoutConfig{
@@ -78,9 +79,10 @@ func (s *Server) initRoutes() {
 	cFlagEvalOFREP := ofrep.NewOFREPEvaluate(s.services.GOFeatureFlagService, s.services.Metrics)
 	cEvalDataCollector := controller.NewCollectEvalData(s.services.GOFeatureFlagService, s.services.Metrics)
 	cRetrieverRefresh := controller.NewForceFlagsRefresh(s.services.GOFeatureFlagService, s.services.Metrics)
+	cFlagChangeAPI := controller.NewAPIFlagChange(s.services.GOFeatureFlagService, s.services.Metrics)
 
 	// Init routes
-	s.addGOFFRoutes(cAllFlags, cFlagEval, cEvalDataCollector)
+	s.addGOFFRoutes(cAllFlags, cFlagEval, cEvalDataCollector, cFlagChangeAPI)
 	s.addOFREPRoutes(cFlagEvalOFREP)
 	s.addWebsocketRoutes()
 	s.addMonitoringRoutes()
