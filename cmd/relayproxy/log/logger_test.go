@@ -1,8 +1,9 @@
 package log_test
 
 import (
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/log"
 	"testing"
+
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/log"
 
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
@@ -17,6 +18,8 @@ func TestInitLogger(t *testing.T) {
 
 // Test that the logger outputs the expected message
 func TestLoggerOutput(t *testing.T) {
+	atom := zap.NewAtomicLevel()
+	atom.SetLevel(zap.InfoLevel)
 	// Create an observer to capture logs
 	core, observedLogs := observer.New(zap.InfoLevel)
 

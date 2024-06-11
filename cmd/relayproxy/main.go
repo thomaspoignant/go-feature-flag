@@ -48,22 +48,25 @@ func main() {
 	_ = f.Parse(os.Args[1:])
 
 	// Init logger
-	zapLog := log.InitLogger()
-	defer func() { _ = zapLog.Sync() }()
+	logger := log.InitLogger()
+	defer func() { _ = logger.ZapLogger.Sync() }()
 
 	// Loading the configuration in viper
-	proxyConf, err := config.New(f, zapLog, version)
+	proxyConf, err := config.New(f, logger.ZapLogger, version)
 	if err != nil {
-		zapLog.Fatal("error while reading configuration", zap.Error(err))
+		logger.ZapLogger.Fatal("error while reading configuration", zap.Error(err))
 	}
 
 	if err := proxyConf.IsValid(); err != nil {
-		zapLog.Fatal("configuration error", zap.Error(err))
+		logger.ZapLogger.Fatal("configuration error", zap.Error(err))
 	}
 
 	if !proxyConf.HideBanner {
 		fmt.Println(banner)
 	}
+
+	// Set the log level from the config from this point
+	logger.Atom.SetLevel(proxyConf.ZapLogLevel())
 
 	// Init swagger
 	docs.SwaggerInfo.Version = proxyConf.Version
@@ -72,13 +75,13 @@ func main() {
 	// Init services
 	metricsV2, err := metric.NewMetrics()
 	if err != nil {
-		zapLog.Error("impossible to initialize prometheus metrics", zap.Error(err))
+		logger.ZapLogger.Error("impossible to initialize prometheus metrics", zap.Error(err))
 	}
 	wsService := service.NewWebsocketService()
 	defer wsService.Close() // close all the open connections
 	prometheusNotifier := metric.NewPrometheusNotifier(metricsV2)
 	proxyNotifier := service.NewNotifierWebsocket(wsService)
-	goff, err := service.NewGoFeatureFlagClient(proxyConf, zapLog, []notifier.Notifier{
+	goff, err := service.NewGoFeatureFlagClient(proxyConf, logger.ZapLogger, []notifier.Notifier{
 		prometheusNotifier,
 		proxyNotifier,
 	})
@@ -93,7 +96,7 @@ func main() {
 		Metrics:              metricsV2,
 	}
 	// Init API server
-	apiServer := api.New(proxyConf, services, zapLog)
+	apiServer := api.New(proxyConf, services, logger.ZapLogger)
 
 	if proxyConf.StartAsAwsLambda {
 		apiServer.StartAwsLambda()

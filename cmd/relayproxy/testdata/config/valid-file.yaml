@@ -13,3 +13,4 @@ authorizedKeys:
     - apikey2 # owner: userID2
   admin:
     - apikey3
+loglevel: info

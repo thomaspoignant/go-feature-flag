@@ -1,6 +1,8 @@
 package main
 
 import (
+	"net/http"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	custommiddleware "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"
@@ -9,7 +11,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/internal/utils"
 	"github.com/thomaspoignant/go-feature-flag/model"
-	"net/http"
 )
 
 // This service is an API used to evaluate a flag with an evaluation context
@@ -17,10 +18,11 @@ import (
 // of the flag is working as expected.
 
 func main() {
-	zapLog := log.InitLogger()
-	defer func() { _ = zapLog.Sync() }()
+	logger := log.InitLogger()
+	defer func() { _ = logger.ZapLogger.Sync() }()
+
 	e := echo.New()
-	e.Use(custommiddleware.ZapLogger(zapLog, nil))
+	e.Use(custommiddleware.ZapLogger(logger.ZapLogger, nil))
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{
 			"http://gofeatureflag.org",
