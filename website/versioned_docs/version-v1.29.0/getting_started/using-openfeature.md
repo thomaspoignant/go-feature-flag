@@ -64,7 +64,7 @@ docker run \
   -p 1031:1031 \
   -v $(pwd)/flag-config.goff.yaml:/goff/flag-config.goff.yaml \
   -v $(pwd)/goff-proxy.yaml:/goff/goff-proxy.yaml \
-  gofeatureflag/go-feature-flag-relay-proxy:latest
+  gofeatureflag/go-feature-flag:latest
 
 ```
 
