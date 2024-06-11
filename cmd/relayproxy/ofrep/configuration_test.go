@@ -1,7 +1,6 @@
 package ofrep_test
 
 import (
-	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
@@ -63,7 +62,6 @@ func Test_Configuration(t *testing.T) {
 			req := httptest.NewRequest(echo.GET, "/ofrep/v1/configuration", nil)
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			e.ServeHTTP(rec, req)
-			fmt.Println(rec.Body.String())
 			assert.Equal(t, tt.want.httpCode, rec.Code, "Invalid HTTP Code")
 			assert.JSONEq(t, tt.want.response, rec.Body.String(), "Invalid response wantBody")
 		})

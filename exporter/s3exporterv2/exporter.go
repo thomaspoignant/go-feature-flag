@@ -11,6 +11,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"log"
+	"log/slog"
 	"os"
 	"sync"
 )
@@ -52,6 +53,7 @@ type Exporter struct {
 
 	s3Uploader UploaderAPI
 	init       sync.Once
+	ffLogger   *fflog.FFLogger
 }
 
 func (f *Exporter) initializeUploader(ctx context.Context) error {
@@ -80,6 +82,7 @@ func (f *Exporter) Export(ctx context.Context, logger *log.Logger, featureEvents
 			return initErr
 		}
 	}
+	f.ffLogger = fflog.ConvertToFFLogger(logger)
 
 	// Create a temp directory to store the file we will produce
 	outputDir, err := os.MkdirTemp("", "go_feature_flag_s3_export")
@@ -111,7 +114,7 @@ func (f *Exporter) Export(ctx context.Context, logger *log.Logger, featureEvents
 		// read file
 		of, err := os.Open(outputDir + "/" + file.Name())
 		if err != nil {
-			fflog.Printf(logger, "error: [S3Exporter] impossible to open the file %s/%s", outputDir, file.Name())
+			f.ffLogger.Error("[S3Exporter] impossible to open the file", slog.String("path", outputDir+"/"+file.Name()))
 			continue
 		}
 
@@ -125,7 +128,7 @@ func (f *Exporter) Export(ctx context.Context, logger *log.Logger, featureEvents
 			return err
 		}
 
-		fflog.Printf(logger, "info: [S3Exporter] file %s uploaded.", result.Location)
+		f.ffLogger.Info("[S3Exporter] file uploaded.", slog.String("location", result.Location))
 	}
 	return nil
 }

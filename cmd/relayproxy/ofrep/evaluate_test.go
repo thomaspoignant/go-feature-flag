@@ -2,11 +2,10 @@ package ofrep_test
 
 import (
 	"context"
-	"fmt"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/ofrep"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -92,7 +91,7 @@ func Test_Bulk_Evaluation(t *testing.T) {
 			// init go-feature-flag
 			goFF, _ := ffclient.New(ffclient.Config{
 				PollingInterval: 10 * time.Second,
-				Logger:          log.New(os.Stdout, "", 0),
+				LeveledLogger:   slog.Default(),
 				Context:         context.Background(),
 				Retriever: &fileretriever.Retriever{
 					Path: tt.args.configFlagsLocation,
@@ -137,8 +136,6 @@ func Test_Bulk_Evaluation(t *testing.T) {
 			}
 
 			wantBody, err := os.ReadFile(tt.want.bodyFile)
-
-			fmt.Println(rec.Header())
 
 			assert.NoError(t, err, "Impossible the expected wantBody file %s", tt.want.bodyFile)
 			assert.Equal(t, tt.want.httpCode, rec.Code, "Invalid HTTP Code")
@@ -242,7 +239,7 @@ func Test_Evaluate(t *testing.T) {
 			// init go-feature-flag
 			goFF, _ := ffclient.New(ffclient.Config{
 				PollingInterval: 10 * time.Second,
-				Logger:          log.New(os.Stdout, "", 0),
+				LeveledLogger:   slog.Default(),
 				Context:         context.Background(),
 				Retriever: &fileretriever.Retriever{
 					Path: tt.args.configFlagsLocation,

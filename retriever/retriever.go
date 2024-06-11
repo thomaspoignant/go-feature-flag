@@ -2,6 +2,7 @@ package retriever
 
 import (
 	"context"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"log"
 )
 
@@ -11,10 +12,20 @@ type Retriever interface {
 	Retrieve(ctx context.Context) ([]byte, error)
 }
 
+// InitializableRetrieverLegacy is an extended version of the retriever that can be initialized and shutdown.
+type InitializableRetrieverLegacy interface {
+	CommonInitializableRetriever
+	Init(ctx context.Context, logger *log.Logger) error
+}
+
 // InitializableRetriever is an extended version of the retriever that can be initialized and shutdown.
 type InitializableRetriever interface {
-	Retrieve(ctx context.Context) ([]byte, error)
-	Init(ctx context.Context, logger *log.Logger) error
+	CommonInitializableRetriever
+	Init(ctx context.Context, logger *fflog.FFLogger) error
+}
+
+type CommonInitializableRetriever interface {
+	Retriever
 	Shutdown(ctx context.Context) error
 	Status() Status
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"log/slog"
 	"sync"
 	"time"
 
@@ -58,7 +59,7 @@ var onceFF sync.Once
 func New(config Config) (*GoFeatureFlag, error) {
 	switch {
 	case config.PollingInterval == 0:
-		// The default value for poll interval is 60 seconds
+		// The default value for the poll interval is 60 seconds
 		config.PollingInterval = 60 * time.Second
 	case config.PollingInterval < 0:
 		// Check that value is not negative
@@ -74,25 +75,28 @@ func New(config Config) (*GoFeatureFlag, error) {
 		config.offlineMutex = &sync.RWMutex{}
 	}
 
+	config.internalLogger = &fflog.FFLogger{
+		LeveledLogger: config.LeveledLogger,
+		LegacyLogger:  config.Logger,
+	}
+
 	goFF := &GoFeatureFlag{
 		config: config,
 	}
 
 	if !config.Offline {
 		notifiers := config.Notifiers
-		if config.Logger != nil {
-			notifiers = append(notifiers, &logsnotifier.Notifier{Logger: config.Logger})
-		}
+		notifiers = append(notifiers, &logsnotifier.Notifier{Logger: config.internalLogger})
 
 		notificationService := cache.NewNotificationService(notifiers)
 		goFF.bgUpdater = newBackgroundUpdater(config.PollingInterval, config.EnablePollingJitter)
-		goFF.cache = cache.New(notificationService, config.Logger)
+		goFF.cache = cache.New(notificationService, config.internalLogger)
 
 		retrievers, err := config.GetRetrievers()
 		if err != nil {
 			return nil, err
 		}
-		goFF.retrieverManager = retriever.NewManager(config.Context, retrievers, config.Logger)
+		goFF.retrieverManager = retriever.NewManager(config.Context, retrievers, config.internalLogger)
 		err = goFF.retrieverManager.Init(config.Context)
 		if err != nil && !config.StartWithRetrieverError {
 			return nil, fmt.Errorf("impossible to initialize the retrievers, please check your configuration: %v", err)
@@ -107,7 +111,7 @@ func New(config Config) (*GoFeatureFlag, error) {
 		if goFF.config.DataExporter.Exporter != nil {
 			// init the data exporter
 			goFF.dataExporter = exporter.NewScheduler(goFF.config.Context, goFF.config.DataExporter.FlushInterval,
-				goFF.config.DataExporter.MaxEventInMemory, goFF.config.DataExporter.Exporter, goFF.config.Logger)
+				goFF.config.DataExporter.MaxEventInMemory, goFF.config.DataExporter.Exporter, goFF.config.internalLogger)
 
 			// we start the daemon only if we have a bulk exporter
 			if goFF.config.DataExporter.Exporter.IsBulk() {
@@ -115,6 +119,7 @@ func New(config Config) (*GoFeatureFlag, error) {
 			}
 		}
 	}
+	config.internalLogger.Debug("GO Feature Flag is initialized")
 	return goFF, nil
 }
 
@@ -138,7 +143,7 @@ func (g *GoFeatureFlag) Close() {
 	}
 }
 
-// startFlagUpdaterDaemon is the daemon that refresh the cache every X seconds.
+// startFlagUpdaterDaemon is the daemon that refreshes the cache every X seconds.
 func (g *GoFeatureFlag) startFlagUpdaterDaemon() {
 	for {
 		select {
@@ -146,7 +151,7 @@ func (g *GoFeatureFlag) startFlagUpdaterDaemon() {
 			if !g.IsOffline() {
 				err := retrieveFlagsAndUpdateCache(g.config, g.cache, g.retrieverManager)
 				if err != nil {
-					fflog.Printf(g.config.Logger, "error while updating the cache: %v\n", err)
+					g.config.internalLogger.Error("error while updating the cache: %v\n", slog.Any("error", err))
 				}
 			}
 		case <-g.bgUpdater.updaterChan:
@@ -184,7 +189,7 @@ func retrieveFlagsAndUpdateCache(config Config, cache cache.Manager, retrieverMa
 			defer wg.Done()
 
 			// If the retriever is not ready, we ignore it
-			if rr, ok := r.(retriever.InitializableRetriever); ok && rr.Status() != retriever.RetrieverReady {
+			if rr, ok := r.(retriever.CommonInitializableRetriever); ok && rr.Status() != retriever.RetrieverReady {
 				resultsChan <- Results{Error: nil, Value: map[string]dto.DTO{}, Index: index}
 				return
 			}
@@ -215,7 +220,7 @@ func retrieveFlagsAndUpdateCache(config Config, cache cache.Manager, retrieverMa
 		}
 	}
 
-	err := cache.UpdateCache(newFlags, config.Logger)
+	err := cache.UpdateCache(newFlags, config.internalLogger)
 	if err != nil {
 		log.Printf("error: impossible to update the cache of the flags: %v", err)
 		return err
@@ -223,7 +228,7 @@ func retrieveFlagsAndUpdateCache(config Config, cache cache.Manager, retrieverMa
 	return nil
 }
 
-// GetCacheRefreshDate gives the date of the latest refresh of the cache
+// GetCacheRefreshDate gives the last refresh date of the cache
 func (g *GoFeatureFlag) GetCacheRefreshDate() time.Time {
 	if g.config.Offline {
 		return time.Time{}
@@ -240,7 +245,7 @@ func (g *GoFeatureFlag) ForceRefresh() bool {
 	}
 	err := retrieveFlagsAndUpdateCache(g.config, g.cache, g.retrieverManager)
 	if err != nil {
-		fflog.Printf(g.config.Logger, "error while force updating the cache: %v\n", err)
+		g.config.internalLogger.Error("error while force updating the cache: %v\n", slog.Any("error", err))
 		return false
 	}
 	return true
@@ -256,7 +261,7 @@ func (g *GoFeatureFlag) IsOffline() bool {
 	return g.config.IsOffline()
 }
 
-// GetPollingInterval is the polling interval between 2 refreshes of the cache
+// GetPollingInterval is the polling interval between two refreshes of the cache
 func (g *GoFeatureFlag) GetPollingInterval() int64 {
 	return g.config.PollingInterval.Milliseconds()
 }
@@ -271,7 +276,7 @@ func IsOffline() bool {
 	return ff.IsOffline()
 }
 
-// GetCacheRefreshDate gives the date of the latest refresh of the cache
+// GetCacheRefreshDate gives the last refresh date of the cache
 func GetCacheRefreshDate() time.Time {
 	return ff.GetCacheRefreshDate()
 }

@@ -2,9 +2,11 @@ package service
 
 import (
 	"fmt"
+	"log/slog"
 	"time"
 
 	awsConf "github.com/aws/aws-sdk-go-v2/config"
+	slogzap "github.com/samber/slog-zap/v2"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
@@ -53,7 +55,7 @@ func NewGoFeatureFlagClient(
 		}
 	}
 
-	// Manage if we have more than 1 retriver
+	// Manage if we have more than 1 retriever
 	retrievers := make([]retriever.Retriever, 0)
 	if proxyConf.Retrievers != nil {
 		for _, r := range *proxyConf.Retrievers {
@@ -85,7 +87,7 @@ func NewGoFeatureFlagClient(
 
 	f := ffclient.Config{
 		PollingInterval:             time.Duration(proxyConf.PollingInterval) * time.Millisecond,
-		Logger:                      zap.NewStdLog(logger),
+		LeveledLogger:               slog.New(slogzap.Option{Level: slog.LevelDebug, Logger: logger}.NewZapHandler()),
 		Context:                     context.Background(),
 		Retriever:                   mainRetriever,
 		Retrievers:                  retrievers,

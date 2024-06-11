@@ -3,7 +3,9 @@ package ffclient
 import (
 	"context"
 	"errors"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"log"
+	"log/slog"
 	"sync"
 	"time"
 
@@ -27,15 +29,20 @@ type Config struct {
 	// Default: false
 	EnablePollingJitter bool
 
+	// Deprecated: Use LeveledLogger instead
 	// Logger (optional) logger use by the library
 	// Default: No log
 	Logger *log.Logger
+
+	// LeveledLogger (optional) logger use by the library
+	// Default: No log
+	LeveledLogger *slog.Logger
 
 	// Context (optional) used to call other services (HTTP, S3 ...)
 	// Default: context.Background()
 	Context context.Context
 
-	// Environment (optional), can be checked in feature flag rules
+	// Environment (optional) can be checked in feature flag rules
 	// Default: ""
 	Environment string
 
@@ -81,6 +88,10 @@ type Config struct {
 
 	// offlineMutex is a mutex to protect the Offline field.
 	offlineMutex *sync.RWMutex
+
+	// internalLogger is the logger used by the library everywhere
+	// this logger is a superset of the logging system to be able to migrate easily to slog.
+	internalLogger *fflog.FFLogger
 }
 
 // GetRetrievers returns a retriever.Retriever configure with the retriever available in the config.

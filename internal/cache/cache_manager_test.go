@@ -1,8 +1,8 @@
 package cache_test
 
 import (
-	"log"
-	"os"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
+	"log/slog"
 	"testing"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
@@ -244,13 +244,14 @@ variation = "false_var"
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fCache := cache.New(cache.NewNotificationService([]notifier.Notifier{}), nil)
+			fCache := cache.New(cache.NewNotificationService([]notifier.Notifier{}),
+				&fflog.FFLogger{LeveledLogger: slog.Default()})
 			newFlags, err := fCache.ConvertToFlagStruct(tt.args.loadedFlags, tt.flagFormat)
 			if tt.wantErr {
 				assert.Error(t, err)
 				return
 			}
-			err = fCache.UpdateCache(newFlags, log.New(os.Stdout, "", 0))
+			err = fCache.UpdateCache(newFlags, nil)
 			if tt.wantErr {
 				assert.Error(t, err, "UpdateCache() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -413,7 +414,7 @@ test-flag2:
 				assert.Error(t, err)
 				return
 			}
-			err = fCache.UpdateCache(newFlags, log.New(os.Stdout, "", 0))
+			err = fCache.UpdateCache(newFlags, &fflog.FFLogger{LeveledLogger: slog.Default()})
 			assert.NoError(t, err)
 
 			allFlags, err := fCache.AllFlags()
@@ -451,7 +452,7 @@ func Test_cacheManagerImpl_GetLatestUpdateDate(t *testing.T) {
 	fCache := cache.New(cache.NewNotificationService([]notifier.Notifier{}), nil)
 	timeBefore := fCache.GetLatestUpdateDate()
 	newFlags, _ := fCache.ConvertToFlagStruct(loadedFlags, "yaml")
-	_ = fCache.UpdateCache(newFlags, log.New(os.Stdout, "", 0))
+	_ = fCache.UpdateCache(newFlags, &fflog.FFLogger{LeveledLogger: slog.Default()})
 	timeAfter := fCache.GetLatestUpdateDate()
 
 	assert.True(t, timeBefore.Before(timeAfter))

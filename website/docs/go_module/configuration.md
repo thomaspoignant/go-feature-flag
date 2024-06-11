@@ -31,7 +31,7 @@ During the initialization you must give a [`ffclient.Config{}`](https://pkg.go.d
 ```go
 ffclient.Init(ffclient.Config{ 
     PollingInterval:   3 * time.Second,
-    Logger:         log.New(file, "/tmp/log", 0),
+	  LeveledLogger:   slog.Default(),
     Context:        context.Background(),
     Environment:    os.Getenv("MYAPP_ENV"),
     Retriever:      &fileretriever.Retriever{Path: "testdata/flag-config.goff.yaml"},

@@ -3,12 +3,11 @@ package s3retrieverv2
 import (
 	"context"
 	"fmt"
-	"log"
-
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 )
@@ -30,7 +29,7 @@ type Retriever struct {
 	status     retriever.Status
 }
 
-func (s *Retriever) Init(ctx context.Context, _ *log.Logger) error {
+func (s *Retriever) Init(ctx context.Context, _ *fflog.FFLogger) error {
 	s.status = retriever.RetrieverNotReady
 	if s.downloader == nil {
 		if s.AwsConfig == nil {

@@ -229,7 +229,7 @@ func (f *InternalFlag) IsValid() error {
 		return fmt.Errorf("no variation available")
 	}
 
-	// Check that all variation have the same types
+	// Check that all variation has the same types
 	expectedVarType := ""
 	for _, value := range f.GetVariations() {
 		if expectedVarType != "" {

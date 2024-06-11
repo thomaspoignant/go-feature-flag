@@ -3,10 +3,8 @@ package mongodbretriever
 import (
 	"context"
 	"encoding/json"
-	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
-	"log"
-
 	"github.com/thomaspoignant/go-feature-flag/retriever"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -23,10 +21,10 @@ type Retriever struct {
 	dbConnection *mongo.Database
 	dbClient     *mongo.Client
 	status       string
-	logger       *log.Logger
+	logger       *fflog.FFLogger
 }
 
-func (r *Retriever) Init(ctx context.Context, logger *log.Logger) error {
+func (r *Retriever) Init(ctx context.Context, logger *fflog.FFLogger) error {
 	r.logger = logger
 	if r.dbConnection == nil {
 		r.status = retriever.RetrieverNotReady
@@ -43,18 +41,18 @@ func (r *Retriever) Init(ctx context.Context, logger *log.Logger) error {
 	return nil
 }
 
-// returns the current status of the retriever
+// Status returns the current status of the retriever
 func (r *Retriever) Status() retriever.Status {
 	return r.status
 }
 
-// disconnects the retriever from Mongodb instance
+// Shutdown disconnects the retriever from Mongodb instance
 func (r *Retriever) Shutdown(ctx context.Context) error {
 	return r.dbClient.Disconnect(ctx)
 }
 
-// Reads flag configuration from mongodb and returns it
-// if a document does not comply with specification it will be ignored
+// Retrieve Reads flag configuration from mongodb and returns it
+// if a document does not comply with the specification it will be ignored
 func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	opt := options.CollectionOptions{}
 	opt.SetBSONOptions(&options.BSONOptions{OmitZeroStruct: true})
@@ -81,10 +79,10 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 			if str, ok := val.(string); ok {
 				ffDocs[str] = doc
 			} else {
-				fflog.Printf(r.logger, "ERROR: flag key does not have a string as value")
+				r.logger.Error("flag key does not have a string as value")
 			}
 		} else {
-			fflog.Printf(r.logger, "ERROR: no 'flag' entry found")
+			r.logger.Error("no 'flag' entry found")
 		}
 	}
 

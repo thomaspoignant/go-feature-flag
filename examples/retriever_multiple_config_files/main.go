@@ -6,7 +6,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"log"
-	"os"
+	"log/slog"
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
@@ -19,7 +19,7 @@ func main() {
 	// Init ffclient with multiple file retrievers.
 	err := ffclient.Init(ffclient.Config{
 		PollingInterval: 10 * time.Second,
-		Logger:          log.New(os.Stdout, "", 0),
+		LeveledLogger:   slog.Default(),
 		Context:         context.Background(),
 		Retrievers: []retriever.Retriever{
 			&fileretriever.Retriever{

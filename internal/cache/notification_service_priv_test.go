@@ -5,13 +5,13 @@ package cache_test
 import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
+	"github.com/thejerf/slogassert"
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
-	"github.com/thomaspoignant/go-feature-flag/testutils"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
-	"log"
-	"os"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
+	"log/slog"
 	"testing"
 	"time"
 )
@@ -45,8 +45,8 @@ func Test_notificationService_no_difference(t *testing.T) {
 }
 
 func Test_notificationService_with_error(t *testing.T) {
-	tempFile, _ := os.CreateTemp("", "tempFile")
-	logger := log.New(tempFile, "", 0)
+	handler := slogassert.New(t, slog.LevelDebug, nil)
+	logger := slog.New(handler)
 	n := &NotifierMock{WithError: true}
 	c := cache.NewNotificationService([]notifier.Notifier{n})
 	oldCache := map[string]flag.Flag{
@@ -55,11 +55,10 @@ func Test_notificationService_with_error(t *testing.T) {
 	newCache := map[string]flag.Flag{
 		"yo-new": &flag.InternalFlag{Version: testconvert.String("1.0")},
 	}
-	c.Notify(oldCache, newCache, logger)
+	c.Notify(oldCache, newCache, &fflog.FFLogger{LeveledLogger: logger})
 	time.Sleep(100 * time.Millisecond)
 
-	content, _ := os.ReadFile(tempFile.Name())
-	assert.Regexp(t, "\\["+testutils.RFC3339Regex+"\\] error while calling the notifier: error\n", string(content))
+	handler.AssertMessage("error while calling the notifier")
 	assert.False(t, n.HasBeenCalled)
 }
 

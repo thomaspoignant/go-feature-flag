@@ -3,6 +3,7 @@ package mongodbretriever
 import (
 	"context"
 	"encoding/json"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -57,6 +58,7 @@ func Test_MongoDBRetriever_Retrieve(t *testing.T) {
 				(*tt.mocker)(t)
 			}
 
+			_ = mdb.Init(context.TODO(), &fflog.FFLogger{})
 			got, err := mdb.Retrieve(context.Background())
 
 			if tt.wantErr {

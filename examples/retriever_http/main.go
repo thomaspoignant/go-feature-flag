@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"log"
-	"os"
+	"log/slog"
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/retriever/httpretriever"
@@ -17,7 +17,7 @@ func main() {
 	// Init ffclient with a HTTP retriever.
 	err := ffclient.Init(ffclient.Config{
 		PollingInterval: 10 * time.Second,
-		Logger:          log.New(os.Stdout, "", 0),
+		LeveledLogger:   slog.Default(),
 		Context:         context.Background(),
 		Retriever: &httpretriever.Retriever{
 			URL:     "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_http/flags.goff.yaml",

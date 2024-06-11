@@ -6,7 +6,7 @@ import (
 	"fmt"
 	redis "github.com/redis/go-redis/v9"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
-	"log"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"strings"
 )
 
@@ -23,7 +23,7 @@ type Retriever struct {
 	client *redis.Client
 }
 
-func (r *Retriever) Init(ctx context.Context, _ *log.Logger) error {
+func (r *Retriever) Init(ctx context.Context, _ *fflog.FFLogger) error {
 	r.status = retriever.RetrieverNotReady
 	client := redis.NewClient(r.Options)
 

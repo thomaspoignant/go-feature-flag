@@ -6,6 +6,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"io"
 	"log"
+	"log/slog"
 	"os"
 
 	"github.com/thomaspoignant/go-feature-flag/exporter"
@@ -95,13 +96,13 @@ func (f *Exporter) Export(ctx context.Context, logger *log.Logger, featureEvents
 	}
 
 	for _, file := range files {
-		// read file
 		of, err := os.Open(outputDir + "/" + file.Name())
 		if err != nil {
-			fflog.Printf(logger, "error: [Exporter] impossible to open the file %s/%s", outputDir, file.Name())
+			fflog.ConvertToFFLogger(logger).Error("[GCP Exporter] impossible to open the file",
+				slog.String("path", outputDir+"/"+file.Name()))
 			continue
 		}
-		defer of.Close()
+		defer func() { _ = of.Close() }()
 
 		// prepend the path
 		source := file.Name()
@@ -116,7 +117,6 @@ func (f *Exporter) Export(ctx context.Context, logger *log.Logger, featureEvents
 			return fmt.Errorf("error: [Exporter] impossible to copy the file from %s to bucket %s: %v",
 				source, f.Bucket, err)
 		}
-		fflog.Printf(logger, "info: [Exporter] file %s uploaded.", file.Name())
 	}
 
 	return nil

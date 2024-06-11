@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
+	"log/slog"
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
@@ -19,12 +19,12 @@ func main() {
 	// Init ffclient with a file retriever.
 	err := ffclient.Init(ffclient.Config{
 		PollingInterval: 10 * time.Second,
-		Logger:          log.New(os.Stdout, "", 0),
+		LeveledLogger:   slog.Default(),
 		Context:         context.Background(),
 		Retriever: &mongodbretriever.Retriever{
 			Collection: "featureFlags",
-			Database: "appConfig",
-			URI: "mongodb://root:example@127.0.0.1:27017/",
+			Database:   "appConfig",
+			URI:        "mongodb://root:example@127.0.0.1:27017/",
 		},
 		DataExporter: ffclient.DataExporter{
 			FlushInterval:    1 * time.Second,

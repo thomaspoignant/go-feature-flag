@@ -3,6 +3,7 @@ package logsexporter
 import (
 	"bytes"
 	"context"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"log"
 	"sync"
 	"text/template"
@@ -48,7 +49,7 @@ func (f *Exporter) Export(_ context.Context, logger *log.Logger, featureEvents [
 			FormattedDate string
 		}{FeatureEvent: event, FormattedDate: time.Unix(event.CreationDate, 0).Format(time.RFC3339)})
 
-		logger.Print(log.String())
+		fflog.ConvertToFFLogger(logger).Info(log.String())
 		if err != nil {
 			return err
 		}
