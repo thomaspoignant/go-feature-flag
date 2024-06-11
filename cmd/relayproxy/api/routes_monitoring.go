@@ -17,6 +17,7 @@ func (s *Server) addMonitoringRoutes() {
 		s.monitoringEcho.Debug = s.config.Debug
 		s.monitoringEcho.Use(custommiddleware.ZapLogger(s.zapLog, s.config))
 		s.monitoringEcho.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
+		s.monitoringEcho.Use(custommiddleware.VersionHeader(s.config))
 		s.monitoringEcho.Use(middleware.Recover())
 		s.initMonitoringEndpoint(s.monitoringEcho)
 	} else {
