@@ -13,5 +13,7 @@
   "apiKeys": [
     "apikey1",
     "apikey2"
-  ]
+  ],
+  "logLevel": "",
+  "debug": true
 }

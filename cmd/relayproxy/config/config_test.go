@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 func TestParseConfig_fileFromPflag(t *testing.T) {
@@ -47,6 +48,7 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 						"apikey2",
 					},
 				},
+				LogLevel: "info",
 			},
 			wantErr: assert.NoError,
 		},
@@ -82,6 +84,7 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 						"apikey2",
 					},
 				},
+				LogLevel: config.DefaultLogLevel,
 			},
 			wantErr: assert.NoError,
 		},
@@ -108,6 +111,8 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 					"apikey1",
 					"apikey2",
 				},
+				LogLevel: "",
+				Debug:    true,
 			},
 			wantErr: assert.NoError,
 		},
@@ -134,6 +139,7 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 					"apikey1",
 					"apikey2",
 				},
+				LogLevel: config.DefaultLogLevel,
 			},
 			wantErr: assert.NoError,
 		},
@@ -148,6 +154,7 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 				StartWithRetrieverError: false,
 				RestAPITimeout:          5000,
 				Version:                 "1.X.X",
+				LogLevel:                config.DefaultLogLevel,
 			},
 			wantErr: assert.NoError,
 		},
@@ -209,6 +216,7 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 						"apikey2",
 					},
 				},
+				LogLevel: "info",
 			},
 			wantErr: assert.NoError,
 		},
@@ -223,6 +231,7 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 				StartWithRetrieverError: false,
 				RestAPITimeout:          5000,
 				Version:                 "1.X.X",
+				LogLevel:                config.DefaultLogLevel,
 			},
 			wantErr: assert.NoError,
 		},
@@ -243,6 +252,7 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 				StartWithRetrieverError: false,
 				RestAPITimeout:          5000,
 				Version:                 "1.X.X",
+				LogLevel:                config.DefaultLogLevel,
 			},
 		},
 		{
@@ -257,6 +267,7 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 				StartWithRetrieverError: false,
 				RestAPITimeout:          5000,
 				Version:                 "1.X.X",
+				LogLevel:                config.DefaultLogLevel,
 			},
 		},
 		{
@@ -271,6 +282,7 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 				StartWithRetrieverError: false,
 				RestAPITimeout:          5000,
 				Version:                 "1.X.X",
+				LogLevel:                config.DefaultLogLevel,
 			},
 			disableDefaultFileCreation: true,
 		},
@@ -304,7 +316,6 @@ func TestConfig_IsValid(t *testing.T) {
 		HideBanner              bool
 		EnableSwagger           bool
 		Host                    string
-		Debug                   bool
 		PollingInterval         int
 		FileFormat              string
 		StartWithRetrieverError bool
@@ -312,6 +323,8 @@ func TestConfig_IsValid(t *testing.T) {
 		Retrievers              *[]config.RetrieverConf
 		Exporter                *config.ExporterConf
 		Notifiers               []config.NotifierConf
+		LogLevel                string
+		Debug                   bool
 	}
 	tests := []struct {
 		name    string
@@ -373,6 +386,7 @@ func TestConfig_IsValid(t *testing.T) {
 						SlackWebhookURL: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
 					},
 				},
+				LogLevel: "info",
 			},
 			wantErr: assert.NoError,
 		},
@@ -455,6 +469,31 @@ func TestConfig_IsValid(t *testing.T) {
 			},
 			wantErr: assert.Error,
 		},
+		{
+			name: "invalid log level",
+			fields: fields{
+				ListenPort: 8080,
+				Retriever: &config.RetrieverConf{
+					Kind: "file",
+					Path: "../testdata/config/valid-file.yaml",
+				},
+				LogLevel: "invalid",
+			},
+			wantErr: assert.Error,
+		},
+		{
+			name: "log level is not set but debug is set",
+			fields: fields{
+				ListenPort: 8080,
+				Retriever: &config.RetrieverConf{
+					Kind: "file",
+					Path: "../testdata/config/valid-file.yaml",
+				},
+				LogLevel: "",
+				Debug:    true,
+			},
+			wantErr: assert.NoError,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -463,7 +502,6 @@ func TestConfig_IsValid(t *testing.T) {
 				HideBanner:              tt.fields.HideBanner,
 				EnableSwagger:           tt.fields.EnableSwagger,
 				Host:                    tt.fields.Host,
-				Debug:                   tt.fields.Debug,
 				PollingInterval:         tt.fields.PollingInterval,
 				FileFormat:              tt.fields.FileFormat,
 				StartWithRetrieverError: tt.fields.StartWithRetrieverError,
@@ -471,6 +509,7 @@ func TestConfig_IsValid(t *testing.T) {
 				Exporter:                tt.fields.Exporter,
 				Notifiers:               tt.fields.Notifiers,
 				Retrievers:              tt.fields.Retrievers,
+				LogLevel:                tt.fields.LogLevel,
 			}
 			if tt.name == "empty config" {
 				c = nil
@@ -760,6 +799,7 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 						"apikey2",
 					},
 				},
+				LogLevel: "info",
 			},
 			wantErr: assert.NoError,
 		},
@@ -790,6 +830,134 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 				return
 			}
 			assert.Equal(t, tt.want, got, "Config not matching")
+		})
+	}
+}
+
+func TestConfig_LogLevel(t *testing.T) {
+	tests := []struct {
+		name         string
+		config       *config.Config
+		wantDebug    bool
+		wantLogLevel zapcore.Level
+	}{
+		{
+			name:         "no config",
+			wantDebug:    false,
+			wantLogLevel: zapcore.InvalidLevel,
+		},
+		{
+			name: "invalid log level",
+			config: &config.Config{
+				LogLevel: "invalid",
+			},
+			wantDebug:    false,
+			wantLogLevel: zapcore.InvalidLevel,
+		},
+		{
+			name: "debug level",
+			config: &config.Config{
+				LogLevel: "debug",
+			},
+			wantDebug:    true,
+			wantLogLevel: zapcore.DebugLevel,
+		},
+		{
+			name: "info level",
+			config: &config.Config{
+				LogLevel: "info",
+			},
+			wantDebug:    false,
+			wantLogLevel: zapcore.InfoLevel,
+		},
+		{
+			name: "error level",
+			config: &config.Config{
+				LogLevel: "error",
+			},
+			wantDebug:    false,
+			wantLogLevel: zapcore.ErrorLevel,
+		},
+		{
+			name: "panic level",
+			config: &config.Config{
+				LogLevel: "panic",
+			},
+			wantDebug:    false,
+			wantLogLevel: zapcore.PanicLevel,
+		},
+		{
+			name: "debug flag is set but not log level",
+			config: &config.Config{
+				Debug: true,
+			},
+			wantDebug:    true,
+			wantLogLevel: zapcore.DebugLevel,
+		},
+		{
+			name: "debug flag is set but and log level override",
+			config: &config.Config{
+				LogLevel: "info",
+				Debug:    true,
+			},
+			wantDebug:    true,
+			wantLogLevel: zapcore.DebugLevel,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equalf(t, tt.wantDebug, tt.config.IsDebugEnabled(), "IsDebugEnabled()")
+			assert.Equalf(t, tt.wantLogLevel, tt.config.ZapLogLevel(), "ZapLogLevel()")
+		})
+	}
+}
+
+func TestConfig_IsDebugEnabled(t *testing.T) {
+	tests := []struct {
+		name string
+		cfg  config.Config
+		want bool
+	}{
+		{
+			name: "Uppercase",
+			cfg: config.Config{
+				LogLevel: "DEBUG",
+			},
+			want: true,
+		},
+		{
+			name: "Lowercase",
+			cfg: config.Config{
+				LogLevel: "debug",
+			},
+			want: true,
+		},
+		{
+			name: "Random Case",
+			cfg: config.Config{
+				LogLevel: "DeBuG",
+			},
+			want: true,
+		},
+		{
+			name: "Not debug",
+			cfg: config.Config{
+				LogLevel: "DeBu",
+			},
+			want: false,
+		},
+		{
+			name: "Empty",
+			cfg: config.Config{
+				LogLevel: "",
+			},
+			want: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equalf(t, tt.want, tt.cfg.IsDebugEnabled(), "IsDebugEnabled()")
 		})
 	}
 }

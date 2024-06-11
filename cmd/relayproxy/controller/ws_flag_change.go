@@ -32,7 +32,7 @@ type wsFlagChange struct {
 
 // Handler is the entry point for the websocket endpoint to get notified when a flag has been edited
 // @Summary      Websocket endpoint to be notified about flag changes
-// @Tags GO Feature Flag Evaluation API
+// @Tags GO Feature Flag Evaluation Websocket API
 // @Description  This endpoint is a websocket endpoint to be notified about flag changes, every change
 // @Description  will send a request to the client with a model.DiffCache format.
 // @Description

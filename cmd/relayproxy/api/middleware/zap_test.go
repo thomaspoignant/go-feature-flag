@@ -1,11 +1,12 @@
 package middleware_test
 
 import (
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
@@ -91,7 +92,7 @@ func TestZapLogger500(t *testing.T) {
 		return c.String(http.StatusInternalServerError, "")
 	}
 
-	obs, logs := observer.New(zap.DebugLevel)
+	obs, logs := observer.New(zap.ErrorLevel)
 	logger := zap.New(obs)
 	err := middleware.ZapLogger(logger, &config.Config{})(h)(c)
 	assert.Nil(t, err)
@@ -133,7 +134,7 @@ func TestZapLoggerHealthDebug(t *testing.T) {
 
 	obs, logs := observer.New(zap.DebugLevel)
 	logger := zap.New(obs)
-	err := middleware.ZapLogger(logger, &config.Config{Debug: true})(h)(c)
+	err := middleware.ZapLogger(logger, &config.Config{LogLevel: "debug"})(h)(c)
 	assert.Nil(t, err)
 	assert.Equal(t, 1, len(logs.AllUntimed()))
 }

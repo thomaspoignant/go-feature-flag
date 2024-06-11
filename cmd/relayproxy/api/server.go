@@ -3,6 +3,10 @@ package api
 import (
 	"errors"
 	"fmt"
+	"net/http"
+	"strings"
+	"time"
+
 	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -15,9 +19,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
 	"go.uber.org/zap"
-	"net/http"
-	"strings"
-	"time"
 )
 
 // New is used to create a new instance of the API server
@@ -50,16 +51,18 @@ type Server struct {
 func (s *Server) initRoutes() {
 	s.apiEcho.HideBanner = true
 	s.apiEcho.HidePort = true
-	s.apiEcho.Debug = s.config.Debug
+	s.apiEcho.Debug = s.config.IsDebugEnabled()
+	s.apiEcho.Use(custommiddleware.ZapLogger(s.zapLog, s.config))
 	if s.services.Metrics != (metric.Metrics{}) {
 		s.apiEcho.Use(echoprometheus.NewMiddlewareWithConfig(echoprometheus.MiddlewareConfig{
 			Subsystem:  metric.GOFFSubSystem,
 			Registerer: s.services.Metrics.Registry,
 		}))
 	}
+
 	s.apiEcho.Use(otelecho.Middleware("go-feature-flag"))
-	s.apiEcho.Use(custommiddleware.ZapLogger(s.zapLog, s.config))
 	s.apiEcho.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
+	s.apiEcho.Use(custommiddleware.VersionHeader(s.config))
 	s.apiEcho.Use(middleware.Recover())
 	s.apiEcho.Use(middleware.TimeoutWithConfig(
 		middleware.TimeoutConfig{
@@ -77,9 +80,10 @@ func (s *Server) initRoutes() {
 	cFlagEvalOFREP := ofrep.NewOFREPEvaluate(s.services.GOFeatureFlagService, s.services.Metrics)
 	cEvalDataCollector := controller.NewCollectEvalData(s.services.GOFeatureFlagService, s.services.Metrics)
 	cRetrieverRefresh := controller.NewForceFlagsRefresh(s.services.GOFeatureFlagService, s.services.Metrics)
+	cFlagChangeAPI := controller.NewAPIFlagChange(s.services.GOFeatureFlagService, s.services.Metrics)
 
 	// Init routes
-	s.addGOFFRoutes(cAllFlags, cFlagEval, cEvalDataCollector)
+	s.addGOFFRoutes(cAllFlags, cFlagEval, cEvalDataCollector, cFlagChangeAPI)
 	s.addOFREPRoutes(cFlagEvalOFREP)
 	s.addWebsocketRoutes()
 	s.addMonitoringRoutes()
