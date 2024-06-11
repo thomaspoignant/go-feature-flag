@@ -52,14 +52,15 @@ func (s *Server) initRoutes() {
 	s.apiEcho.HideBanner = true
 	s.apiEcho.HidePort = true
 	s.apiEcho.Debug = s.config.IsDebugEnabled()
+	s.apiEcho.Use(custommiddleware.ZapLogger(s.zapLog, s.config))
 	if s.services.Metrics != (metric.Metrics{}) {
 		s.apiEcho.Use(echoprometheus.NewMiddlewareWithConfig(echoprometheus.MiddlewareConfig{
 			Subsystem:  metric.GOFFSubSystem,
 			Registerer: s.services.Metrics.Registry,
 		}))
 	}
+
 	s.apiEcho.Use(otelecho.Middleware("go-feature-flag"))
-	s.apiEcho.Use(custommiddleware.ZapLogger(s.zapLog, s.config))
 	s.apiEcho.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
 	s.apiEcho.Use(custommiddleware.VersionHeader(s.config))
 	s.apiEcho.Use(middleware.Recover())

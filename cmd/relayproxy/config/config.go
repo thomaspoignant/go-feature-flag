@@ -120,7 +120,7 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 		return nil, errUnmarshal
 	}
 
-	if proxyConf.Debug && proxyConf.LogLevel == "" {
+	if proxyConf.Debug {
 		log.Warn(
 			"Option Debug that you are using in your configuration file is deprecated" +
 				"and will be removed in future versions." +
@@ -418,7 +418,7 @@ func (c *Config) IsDebugEnabled() bool {
 	if c == nil {
 		return false
 	}
-	return c.LogLevel == "debug" || c.Debug
+	return strings.ToLower(c.LogLevel) == "debug" || c.Debug
 }
 
 func (c *Config) ZapLogLevel() zapcore.Level {

@@ -912,3 +912,52 @@ func TestConfig_LogLevel(t *testing.T) {
 		})
 	}
 }
+
+func TestConfig_IsDebugEnabled(t *testing.T) {
+	tests := []struct {
+		name string
+		cfg  config.Config
+		want bool
+	}{
+		{
+			name: "Uppercase",
+			cfg: config.Config{
+				LogLevel: "DEBUG",
+			},
+			want: true,
+		},
+		{
+			name: "Lowercase",
+			cfg: config.Config{
+				LogLevel: "debug",
+			},
+			want: true,
+		},
+		{
+			name: "Random Case",
+			cfg: config.Config{
+				LogLevel: "DeBuG",
+			},
+			want: true,
+		},
+		{
+			name: "Not debug",
+			cfg: config.Config{
+				LogLevel: "DeBu",
+			},
+			want: false,
+		},
+		{
+			name: "Empty",
+			cfg: config.Config{
+				LogLevel: "",
+			},
+			want: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equalf(t, tt.want, tt.cfg.IsDebugEnabled(), "IsDebugEnabled()")
+		})
+	}
+}
