@@ -23,35 +23,45 @@ Rest assured, working with OpenFeature SDKs alongside GO Feature Flag providers 
     title:"GO",
     badges:["Server"],
     docLink: "./server_providers/openfeature_go",
-    content: <SdkCardContent features={["remoteEval", "localCache"]}/>
+    content: <SdkCardContent
+      badgeUrl={"https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fproxy.golang.org%2Fgithub.com%2Fopen-feature%2Fgo-sdk-contrib%2Fproviders%2Fgo-feature-flag%2F%40latest&query=%24.Version&label=GO&color=blue&style=flat-square"}
+      features={["remoteEval", "localCache"]}/>
   },
   {
     logoCss: "devicon-nodejs-plain colored",
     title:"Node.JS",
     badges:["Server"],
     docLink: "./server_providers/openfeature_javascript",
-    content: <SdkCardContent features={["remoteEval", "localCache"]}/>
+    content: <SdkCardContent
+      badgeUrl={"https://img.shields.io/npm/v/%40openfeature%2Fgo-feature-flag-provider?color=blue&style=flat-square"}
+      features={["remoteEval", "localCache"]}/>
   },
   {
     logoCss: "devicon-java-plain colored",
     title:"Java / Kotlin",
     badges:["Server"],
     docLink: "./server_providers/openfeature_java",
-    content: <SdkCardContent features={["remoteEval", "localCache"]}/>
+    content: <SdkCardContent
+      badgeUrl={"https://img.shields.io/maven-central/v/dev.openfeature.contrib.providers/go-feature-flag?color=blue&style=flat-square"}
+      features={["remoteEval", "localCache"]}/>
   },
   {
     logoCss: "devicon-dot-net-plain-wordmark colored",
     title:".Net",
     badges:["Server"],
     docLink: "./server_providers/openfeature_javascript",
-    content: <SdkCardContent features={["remoteEval"]}/>
+    content: <SdkCardContent
+      badgeUrl={"https://img.shields.io/nuget/v/OpenFeature.Contrib.GOFeatureFlag?color=blue&style=flat-square"}
+      features={["remoteEval"]}/>
   },
   {
     logoCss: "devicon-python-plain colored",
     title:"Python",
     badges:["Server"],
     docLink: "./server_providers/openfeature_python",
-    content: <SdkCardContent features={["remoteEval", "localCache", "dynamicRefresh"]}/>
+    content: <SdkCardContent
+      badgeUrl={"https://img.shields.io/pypi/v/gofeatureflag-python-provider?color=blue&style=flat-square"}
+      features={["remoteEval", "localCache", "dynamicRefresh"]}/>
   }
 ]}/>
 
@@ -62,7 +72,9 @@ Rest assured, working with OpenFeature SDKs alongside GO Feature Flag providers 
     title:"Typescript",
     badges:["Client"],
     docLink: "./client_providers/openfeature_javascript",
-    content: <SdkCardContent features={["remoteEval", "localCache", "dynamicRefresh"]}/>
+    content: <SdkCardContent
+      badgeUrl={"https://img.shields.io/npm/v/%40openfeature%2Fgo-feature-flag-web-provider?color=blue&style=flat-square"}
+      features={["remoteEval", "localCache", "dynamicRefresh"]}/>
   },
   {
     logoCss: "devicon-android-plain colored",
@@ -70,7 +82,9 @@ Rest assured, working with OpenFeature SDKs alongside GO Feature Flag providers 
     badges:["Client"],
     docLink: "./client_providers/openfeature_android",
     warningBadges: ["experimental"],
-    content: <SdkCardContent features={["remoteEval", "localCache", "dynamicRefresh"]}/>
+    content: <SdkCardContent
+      badgeUrl={"https://img.shields.io/maven-central/v/org.gofeatureflag.openfeature/gofeatureflag-kotlin-provider?color=blue&style=flat-square"}
+      features={["remoteEval", "localCache", "dynamicRefresh"]}/>
   }
 ]}/>
 

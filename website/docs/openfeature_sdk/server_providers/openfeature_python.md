@@ -5,10 +5,13 @@ description: How to use the OpenFeature Python SDK with GO Feature Flag
 ---
 
 # Python Provider
+[![PyPI - Version](https://img.shields.io/pypi/v/gofeatureflag-python-provider?color=blue&style=flat-square)](https://pypi.org/project/gofeatureflag-python-provider/)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/gofeatureflag-python-provider?style=flat-square)
+
 
 ## Install dependencies
 
-The first things we will do is install the **Open Feature SDK** and the **GO Feature Flag provider**.
+The first thing we will do is install the **Open Feature SDK** and the **GO Feature Flag provider**.
 
 ```shell
 pip install gofeatureflag-python-provider
@@ -16,7 +19,7 @@ pip install gofeatureflag-python-provider
 
 ## Initialize your Open Feature client
 
-To evaluate the flags you need to have an Open Feature configured in you app.
+To evaluate the flag you need to have an Open Feature configured in you app.
 This code block shows you how you can create a client that you can use in your application.
 
 ```python
