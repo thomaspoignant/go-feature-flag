@@ -3,7 +3,7 @@ import clsx from 'clsx';
 import styles from './styles.module.css';
 import PropTypes from 'prop-types';
 
-SdkCardContent.prototype = {
+SdkCardContent.propTypes = {
   features: PropTypes.array.isRequired,
   badgeUrl: PropTypes.string.isRequired
 };
