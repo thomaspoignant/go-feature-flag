@@ -22,4 +22,5 @@ jobs:
       - run: go run ./website/.ci/sdkVersions.go
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
+          push_options: '--force'
           commit_message: "docs(website): update SDK versions"
