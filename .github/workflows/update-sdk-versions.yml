@@ -2,7 +2,6 @@ name: 'Check all SDK versions and update the documentation'
 on:
   schedule:
     - cron: '30 8,20 * * *'
-  workflow_dispatch:
 
 jobs:
   sdk-versions:
