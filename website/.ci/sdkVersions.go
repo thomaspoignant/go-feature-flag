@@ -22,6 +22,7 @@ type Maven struct {
 	Sdk            string `json:"sdk,omitempty"`
 	KotlinProvider string `json:"providerKt,omitempty"`
 	JavaProvider   string `json:"providerJava,omitempty"`
+	Android        string `json:"android,omitempty"`
 }
 
 type Npm struct {
@@ -50,7 +51,11 @@ type GO struct {
 func main() {
 	var wg sync.WaitGroup
 	versions := Versions{}
-	wg.Add(13)
+	wg.Add(14)
+	go func() {
+		defer wg.Done()
+		versions.Maven.Android = getMavenVersion("dev.openfeature", "android-sdk")
+	}()
 	go func() {
 		defer wg.Done()
 		versions.Maven.Sdk = getMavenVersion("dev.openfeature", "sdk")
