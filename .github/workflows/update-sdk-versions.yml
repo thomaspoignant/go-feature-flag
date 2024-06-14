@@ -19,7 +19,7 @@ jobs:
         with:
           go-version-file: ./website/.ci/go.mod
           check-latest: true
-      - run: go run ./website/.ci/update-sdk-versions.go
+      - run: go run ./website/.ci/sdkVersions.go
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "docs(website): update SDK versions"
