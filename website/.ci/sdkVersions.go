@@ -122,7 +122,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = os.WriteFile("../sdk-versions.json", content, 0644)
+	err = os.WriteFile("./website/sdk-versions.json", content, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
