@@ -8,7 +8,7 @@ require (
 	github.com/BurntSushi/toml v1.4.0
 	github.com/IBM/sarama v1.43.2
 	github.com/aws/aws-lambda-go v1.47.0
-	github.com/aws/aws-sdk-go v1.53.21
+	github.com/aws/aws-sdk-go v1.54.2
 	github.com/aws/aws-sdk-go-v2 v1.27.2
 	github.com/aws/aws-sdk-go-v2/config v1.27.18
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.16.24
@@ -20,9 +20,9 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.6.0
 	github.com/google/uuid v1.6.0
-	github.com/gorilla/websocket v1.5.2
+	github.com/gorilla/websocket v1.5.3
 	github.com/invopop/jsonschema v0.12.0
-	github.com/jessevdk/go-flags v1.5.0
+	github.com/jessevdk/go-flags v1.6.1
 	github.com/knadh/koanf/parsers/json v0.1.0
 	github.com/knadh/koanf/parsers/toml v0.1.0
 	github.com/knadh/koanf/parsers/yaml v0.1.0
@@ -48,7 +48,7 @@ require (
 	github.com/thejerf/slogassert v0.3.2
 	github.com/xitongsys/parquet-go v1.6.2
 	github.com/xitongsys/parquet-go-source v0.0.0-20230830030807-0dd610dbff1d
-	go.mongodb.org/mongo-driver v1.15.0
+	go.mongodb.org/mongo-driver v1.15.1
 	go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho v0.52.0
 	go.opentelemetry.io/otel v1.27.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.27.0
@@ -57,12 +57,12 @@ require (
 	go.uber.org/zap v1.27.0
 	golang.org/x/net v0.26.0
 	golang.org/x/oauth2 v0.21.0
-	google.golang.org/api v0.183.0
+	google.golang.org/api v0.184.0
 	google.golang.org/grpc v1.64.0
 	gopkg.in/yaml.v3 v3.0.1
-	k8s.io/api v0.30.1
-	k8s.io/apimachinery v0.30.1
-	k8s.io/client-go v0.30.1
+	k8s.io/api v0.30.2
+	k8s.io/apimachinery v0.30.2
+	k8s.io/client-go v0.30.2
 )
 
 require (
@@ -217,9 +217,9 @@ require (
 	golang.org/x/time v0.5.0 // indirect
 	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d // indirect
 	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028 // indirect
-	google.golang.org/genproto v0.0.0-20240528184218-531527333157 // indirect
+	google.golang.org/genproto v0.0.0-20240604185151-ef581f913117 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240604185151-ef581f913117 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240528184218-531527333157 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240604185151-ef581f913117 // indirect
 	google.golang.org/protobuf v1.34.1 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

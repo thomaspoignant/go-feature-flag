@@ -1,0 +1,26 @@
+name: 'Check all SDK versions and update the documentation'
+on:
+  schedule:
+    - cron: '30 8,20 * * *'
+
+jobs:
+  sdk-versions:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+          fetch-depth: 1
+      - name: Setup go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: ./website/.ci/go.mod
+          check-latest: true
+      - run: go run ./website/.ci/sdkVersions.go
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          push_options: '--force'
+          commit_message: "docs(website): update SDK versions"
