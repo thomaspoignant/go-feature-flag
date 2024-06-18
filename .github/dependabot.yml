@@ -125,6 +125,18 @@ updates:
     commit-message:
       prefix: "chore"
 
+  - package-ecosystem: npm
+    directory: "/examples/openfeature_react/react-app"
+    schedule:
+      interval: weekly
+      time: "01:00"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "automerge"
+    commit-message:
+      prefix: "chore"
+
   - package-ecosystem: gradle
     directory: "/examples/openfeature_kotlin_server/kotlin-app"
     schedule:
