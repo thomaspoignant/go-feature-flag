@@ -141,6 +141,12 @@ function OpenFeature() {
             fontAwesomeIcon="devicon-android-plain colored"
             tooltipText="Kotlin / Android"
           />
+
+          <SocialIcon
+            colorClassName={styles.socialIconCyan}
+            fontAwesomeIcon="devicon-react-original colored"
+            tooltipText="React"
+          />
         </div>
       </div>
       <div className="col-1-2">
