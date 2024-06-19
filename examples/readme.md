@@ -8,10 +8,11 @@ On this page, we will highlight the various utilization methods, aiming to assis
 ## Complete demo
 - [**demo**](./demo) - A GO application serving a webpage using GO Feature Flag module and demonstrating how you can manage multiple users in the same application.
 
-## Use GO Feature Flag with Openfeature
-- [**Use GO Feature Flag in your browser**](./openfeature_web) - Use GO Feature Flag with Openfeature in your browser.
-- [**Use GO Feature Flag with Node.js**](./openfeature_nodejs) - A simple application using GO Feature Flag with Openfeature in Node.js.
-- [**Use GO Feature Flag with Kotlin in the Server**](./openfeature_kotlin_server) - A simple application using GO Feature Flag with Openfeature in Kotlin.
+## Use GO Feature Flag with OpenFeature
+- [**Use GO Feature Flag in your browser**](./openfeature_web) - Use GO Feature Flag with OpenFeature in your browser.
+- [**Use GO Feature Flag with react**](./openfeature_react) - Use GO Feature Flag with OpenFeature in your React application.
+- [**Use GO Feature Flag with Node.js**](./openfeature_nodejs) - A simple application using GO Feature Flag with OpenFeature in Node.js.
+- [**Use GO Feature Flag with Kotlin in the Server**](./openfeature_kotlin_server) - A simple application using GO Feature Flag with OpenFeature in Kotlin.
 
 ## Use GO Feature Flag server
 - [**Deploy GO Feature Flag as an AWS Lambda**](./rollout_experimentation) - An example configuration on how to run GO Feature Flag as a serverless application using AWS Lambda.
