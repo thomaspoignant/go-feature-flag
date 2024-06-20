@@ -1,13 +1,15 @@
 ---
-sidebar_position: 51
+sidebar_position: 30
 title: Android / Kotlin
 description: How to use the OpenFeature Kotlin SDK for your Android application
 ---
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+import versions from '@site/static/sdk-versions.json';
+import CodeBlock from '@theme/CodeBlock';
 
-
-![Static Badge](https://img.shields.io/badge/status-experimental-red)
+[![Maven Central Version](https://img.shields.io/maven-central/v/org.gofeatureflag.openfeature/gofeatureflag-kotlin-provider?color=blue&style=flat-square)](https://search.maven.org/artifact/org.gofeatureflag.openfeature/gofeatureflag-kotlin-provider)
+![Static Badge](https://img.shields.io/badge/status-experimental-red?style=flat-square)
 
 This OpenFeature provider has a Kotlin implementation for Android to communicate with the GO Feature
 Flag Server.
@@ -32,18 +34,35 @@ the [`Java` provider](/docs/openfeature_sdk/server_providers/openfeature_java).
     ```json
     implementation("org.gofeatureflag.openfeature:gofeatureflag-kotlin-provider:0.0.1-beta.1")
     ```
+    <CodeBlock
+      language="toml"
+      showLineNumbers>
+      {
+`api("dev.openfeature:android-sdk:${versions.maven.android}")
+implementation("org.gofeatureflag.openfeature:gofeatureflag-kotlin-provider${versions.maven.providerKt}")`
+      }
+    </CodeBlock>
+
+
 
   </TabItem>
   <TabItem value="maven" label="maven">
-
-    ```xml
-    <dependency>
-      <groupId>org.gofeatureflag.openfeature</groupId>
-      <artifactId>gofeatureflag-kotlin-provider</artifactId>
-      <version>:0.0.1-beta.1</version>
-    </dependency>
-    ```
-
+    <CodeBlock
+      language="xml"
+      showLineNumbers>
+      {
+`<dependency>
+    <groupId>dev.openfeature</groupId>
+    <artifactId>sdk</artifactId>
+    <artifactId>${versions.maven.android}</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.gofeatureflag.openfeature</groupId>
+    <artifactId>gofeatureflag-kotlin-provider</artifactId>
+    <version>${versions.maven.providerKt}</version>
+</dependency>`
+      }
+    </CodeBlock>
   </TabItem>
 </Tabs>
 
