@@ -5,43 +5,52 @@ description: How to use the OpenFeature JAVA SDK
 ---
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+import versions from '@site/static/sdk-versions.json';
+import CodeBlock from '@theme/CodeBlock';
 
 # JAVA SDK usage
+[![Maven Central Version](https://img.shields.io/maven-central/v/dev.openfeature.contrib.providers/go-feature-flag?color=blue&style=flat-square)](https://search.maven.org/artifact/dev.openfeature.contrib.providers/go-feature-flag)
 
 ## Install dependencies
 
-The first things we will do is install the **Open Feature SDK** and the **GO Feature Flag provider**.
+The first thing we will do is install the **Open Feature SDK** and the **GO Feature Flag provider**.
+
 
 <Tabs groupId="code">
   <TabItem value="maven" label="maven">
-
-```xml
-<dependency>
+    <CodeBlock
+      language="xml"
+      showLineNumbers>
+      {
+`<dependency>
     <groupId>dev.openfeature</groupId>
     <artifactId>sdk</artifactId>
-    <version>[1,)</version>
+    <artifactId>${versions.maven.sdk}</artifactId>
 </dependency>
 <dependency>
     <groupId>dev.openfeature.contrib.providers</groupId>
     <artifactId>go-feature-flag</artifactId>
-    <version>[0,)</version>
-</dependency>
-```
+    <version>${versions.maven.providerJava}</version>
+</dependency>`
+      }
+    </CodeBlock>
 
   </TabItem>
   <TabItem value="gradle" label="gradle">
-
-```gradle
-implementation group: 'dev.openfeature', name: 'javasdk', version: '0.+'
-implementation group: 'dev.openfeature.contrib.providers', name: 'go-feature-flag', version: '0.+'
-```
+    <CodeBlock
+      language="toml"
+      showLineNumbers>
+      {
+`implementation group: 'dev.openfeature', name: 'javasdk', version: '${versions.maven.sdk}'
+implementation group: 'dev.openfeature.contrib.providers', name: 'go-feature-flag', version: '${versions.maven.providerJava}'`}
+    </CodeBlock>
 
   </TabItem>
 </Tabs>
 
 
 ## Initialize your Open Feature client
-To evaluate the flags you need to have an Open Feature configured in you app.
+To evaluate the flag you need to have an Open Feature configured in your app.
 This code block shows you how you can create a client that you can use in your application.
 
 <Tabs groupId="code">
