@@ -15,7 +15,7 @@ let package = Package(
             targets: ["go-feature-flag-provider"]),
     ],
     dependencies: [
-        .package(url: "git@github.com:open-feature/swift-sdk.git", from: "0.1.0"),
+        .package(url: "https://github.com/open-feature/swift-sdk.git", from: "0.1.0"),
         .package(url: "https://github.com/SimplyDanny/SwiftLintPlugins", from: "0.55.1"),
     ],
     targets: [
