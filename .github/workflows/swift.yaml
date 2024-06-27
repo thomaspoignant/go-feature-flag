@@ -21,8 +21,9 @@ jobs:
         swift: [ "5.5", "5.10" ]
     steps:
       - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+      - name: Trust the GitHub SSH keys
+        run: |
+          for ip in $(dig @8.8.8.8 github.com +short); do ssh-keyscan github.com,$ip; ssh-keyscan $ip; done 2>/dev/null >> ~/.ssh/known_hosts
       - uses: swift-actions/setup-swift@v2
         with:
           swift-version: ${{ matrix.swift }}
