@@ -20,12 +20,14 @@ jobs:
         os: [ ubuntu-latest, macos-latest ]
         swift: [ "5.5", "5.10" ]
     steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
       - uses: swift-actions/setup-swift@v2
         with:
           swift-version: ${{ matrix.swift }}
       - name: Get swift version
         run: swift --version
-      - uses: actions/checkout@v4
       - name: Build
         working-directory: ./openfeature/providers/swift-provider
         run: swift build
