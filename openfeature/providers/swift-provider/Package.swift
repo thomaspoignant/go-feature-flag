@@ -16,15 +16,14 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/open-feature/swift-sdk.git", from: "0.1.0"),
-        .package(url: "https://github.com/SimplyDanny/SwiftLintPlugins", from: "0.55.1"),
     ],
     targets: [
         .target(
             name: "go-feature-flag-provider",
             dependencies: [
-                .product(name: "OpenFeature", package: "swift-sdk"),
+                .product(name: "OpenFeature", package: "swift-sdk")
             ],
-            plugins: [.plugin(name: "SwiftLintBuildToolPlugin", package: "SwiftLintPlugins")]
+            plugins:[]
         ),
         .testTarget(
             name: "go-feature-flag-providerTests",
