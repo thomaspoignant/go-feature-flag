@@ -1,0 +1,25 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "OpenFeature",
+        "repositoryURL": "git@github.com:open-feature/swift-sdk.git",
+        "state": {
+          "branch": null,
+          "revision": "02b033c954766e86d5706bfc8ee5248244c11e77",
+          "version": "0.1.0"
+        }
+      },
+      {
+        "package": "SwiftLintPlugins",
+        "repositoryURL": "https://github.com/SimplyDanny/SwiftLintPlugins",
+        "state": {
+          "branch": null,
+          "revision": "b8431a26655378581890d56b95a0b59aba9f62da",
+          "version": "0.55.1"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
