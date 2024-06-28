@@ -1,9 +1,10 @@
 import Foundation
 
 // Define a Codable enum that can represent any type of JSON value
-enum JSONValue: Codable {
+enum JSONValue: Codable, Equatable {
     case string(String)
-    case number(Double)
+    case integer(Int64)
+    case double(Double)
     case object([String: JSONValue])
     case array([JSONValue])
     case bool(Bool)
@@ -14,8 +15,10 @@ enum JSONValue: Codable {
         let container = try decoder.singleValueContainer()
         if let stringValue = try? container.decode(String.self) {
             self = .string(stringValue)
-        } else if let numberValue = try? container.decode(Double.self) {
-            self = .number(numberValue)
+        } else if let intValue = try? container.decode(Int64.self) {
+            self = .integer(intValue)
+        } else if let doubleValue = try? container.decode(Double.self) {
+            self = .double(doubleValue)
         } else if let boolValue = try? container.decode(Bool.self) {
             self = .bool(boolValue)
         } else if let objectValue = try? container.decode([String: JSONValue].self) {
@@ -35,7 +38,9 @@ enum JSONValue: Codable {
         switch self {
         case .string(let value):
             try container.encode(value)
-        case .number(let value):
+        case .integer(let value):
+            try container.encode(value)
+        case .double(let value):
             try container.encode(value)
         case .object(let value):
             try container.encode(value)
@@ -47,4 +52,45 @@ enum JSONValue: Codable {
             try container.encodeNil()
         }
     }
+
+    var string: String? {
+           if case .string(let value) = self {
+               return value
+           }
+           return nil
+       }
+    var bool: Bool? {
+           if case .bool(let value) = self {
+               return value
+           }
+           return nil
+       }
+    var int: Int64? {
+           if case .integer(let value) = self {
+               return value
+           }
+           return nil
+       }
+
+    var double: Double? {
+           if case .double(let value) = self {
+               return value
+           }
+           return nil
+       }
+
+    var object: [String: JSONValue]? {
+           if case .object(let value) = self {
+               return value
+           }
+           return nil
+       }
+
+    var array: [JSONValue]? {
+           if case .array(let value) = self {
+               return value
+           }
+           return nil
+       }
 }
+

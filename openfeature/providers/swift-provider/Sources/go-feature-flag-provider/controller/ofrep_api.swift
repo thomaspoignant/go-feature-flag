@@ -11,7 +11,7 @@ class OfrepAPI {
         self.options = options
     }
 
-    func bulkEvaluation(context: EvaluationContext?) async throws -> (EvaluationResponse, HTTPURLResponse) {
+    func bulkEvaluation(context: EvaluationContext?) async throws -> (OfrepEvaluationResponse, HTTPURLResponse) {
         guard let context = context else {
             throw OpenFeatureError.invalidContextError
         }
@@ -29,6 +29,10 @@ class OfrepAPI {
             forHTTPHeaderField: "Content-Type"
         )
 
+        if etag != "" {
+            request.setValue(etag, forHTTPHeaderField: "If-None-Match")
+        }
+
         let (data, response) = try await networkingService.doRequest(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse else {
@@ -44,13 +48,24 @@ class OfrepAPI {
         if httpResponse.statusCode == 429 {
             throw OfrepError.apiTooManyRequestsError(response: httpResponse)
         }
-        if httpResponse.statusCode >= 400 {
+        if httpResponse.statusCode > 400 {
             throw OfrepError.unexpectedResponseError(response: httpResponse)
+        }
+        if httpResponse.statusCode == 304 {
+            return (OfrepEvaluationResponse(flags: [], errorCode: nil, errorDetails: nil), httpResponse)
+        }
+
+        // Store ETag to use it in the next request
+        if let etagHeaderValue = httpResponse.value(forHTTPHeaderField: "ETag") {
+            if etagHeaderValue != "" && httpResponse.statusCode == 200 {
+                etag = etagHeaderValue
+            }
         }
 
         do {
-            let response = try JSONDecoder().decode(EvaluationResponse.self, from: data)
-            return (response, httpResponse)
+            let dto = try JSONDecoder().decode(EvaluationResponseDTO.self, from: data)
+            let evaluationResponse = OfrepEvaluationResponse.fromEvaluationResponseDTO(dto: dto)
+            return (evaluationResponse, httpResponse)
         } catch {
             throw OfrepError.unmarshallError(error: error)
         }
