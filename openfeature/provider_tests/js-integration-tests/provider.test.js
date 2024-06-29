@@ -1,17 +1,17 @@
 const {describe, expect, it, beforeEach, afterEach } = require('@jest/globals');
 const {OpenFeature} = require("@openfeature/server-sdk");
 const {GoFeatureFlagProvider} = require("@openfeature/go-feature-flag-provider");
-describe('Provider tests', () => {
+describe('Provider tests',  () => {
   let goffClient;
   let userCtx;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // init Open Feature SDK with GO Feature Flag provider
     const goFeatureFlagProvider = new GoFeatureFlagProvider({
       endpoint: 'http://localhost:1031/' // DNS of your instance of relay proxy
     });
     goffClient = OpenFeature.getClient('my-app')
-    OpenFeature.setProvider(goFeatureFlagProvider);
+    await OpenFeature.setProviderAndWait('my-app', goFeatureFlagProvider);
 
     userCtx = {
       targetingKey: 'd45e303a-38c2-11ed-a261-0242ac120002', // user unique identifier (mandatory)
@@ -295,7 +295,7 @@ describe('Provider tests', () => {
         apiKey: "invalid-api-key"
       });
       goffClient = OpenFeature.getClient('my-app')
-      OpenFeature.setProvider(goFeatureFlagProvider);
+      await OpenFeature.setProviderAndWait('my-app', goFeatureFlagProvider);
 
       const flagKey = "bool_targeting_match"
       const expected = {
@@ -315,8 +315,8 @@ describe('Provider tests', () => {
         endpoint: 'http://localhost:1032/',
         apiKey: ""
       });
-      goffClient = OpenFeature.getClient('my-app')
-      OpenFeature.setProvider(goFeatureFlagProvider);
+      goffClient = OpenFeature.getClient('should-resolve-a-default-value-with-an-empty-apiKey')
+      await OpenFeature.setProviderAndWait('should-resolve-a-default-value-with-an-empty-apiKey', goFeatureFlagProvider);
 
       const flagKey = "bool_targeting_match"
       const expected = {
