@@ -28,7 +28,7 @@ type RawVarResult struct {
 	Failed        bool                   `json:"failed"`
 	Version       string                 `json:"version"`
 	Reason        flag.ResolutionReason  `json:"reason"`
-	ErrorCode     flag.ErrorCode         `json:"errorCode"`
+	ErrorCode     flag.ErrorCode         `json:"errorCode,omitempty"`
 	Value         interface{}            `json:"value"`
 	Cacheable     bool                   `json:"cacheable"`
 	Metadata      map[string]interface{} `json:"metadata,omitempty"`
