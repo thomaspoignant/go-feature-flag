@@ -5,18 +5,18 @@ class OfrepAPI {
     private let networkingService: NetworkingService
     private var etag: String = ""
     private let options: GoFeatureFlagProviderOptions
-
+    
     init(networkingService: NetworkingService, options: GoFeatureFlagProviderOptions) {
         self.networkingService = networkingService
         self.options = options
     }
-
-    func bulkEvaluation(context: EvaluationContext?) async throws -> (OfrepEvaluationResponse, HTTPURLResponse) {
+    
+    func postBulkEvaluateFlags(context: EvaluationContext?) async throws -> (OfrepEvaluationResponse, HTTPURLResponse) {
         guard let context = context else {
             throw OpenFeatureError.invalidContextError
         }
         try validateContext(context: context)
-
+        
         guard let url = URL(string: options.endpoint) else {
             throw InvalidOptions.invalidEndpoint(message: "endpoint [" + options.endpoint + "] is not valid")
         }
@@ -28,17 +28,17 @@ class OfrepAPI {
             "application/json",
             forHTTPHeaderField: "Content-Type"
         )
-
+        
         if etag != "" {
             request.setValue(etag, forHTTPHeaderField: "If-None-Match")
         }
-
+        
         let (data, response) = try await networkingService.doRequest(for: request)
-
+        
         guard let httpResponse = response as? HTTPURLResponse else {
             throw OfrepError.httpResponseCastError
         }
-
+        
         if httpResponse.statusCode == 401 {
             throw OfrepError.apiUnauthorizedError(response: httpResponse)
         }
@@ -54,14 +54,14 @@ class OfrepAPI {
         if httpResponse.statusCode == 304 {
             return (OfrepEvaluationResponse(flags: [], errorCode: nil, errorDetails: nil), httpResponse)
         }
-
+        
         // Store ETag to use it in the next request
         if let etagHeaderValue = httpResponse.value(forHTTPHeaderField: "ETag") {
             if etagHeaderValue != "" && httpResponse.statusCode == 200 {
                 etag = etagHeaderValue
             }
         }
-
+        
         do {
             let dto = try JSONDecoder().decode(EvaluationResponseDTO.self, from: data)
             let evaluationResponse = OfrepEvaluationResponse.fromEvaluationResponseDTO(dto: dto)
@@ -70,7 +70,7 @@ class OfrepAPI {
             throw OfrepError.unmarshallError(error: error)
         }
     }
-
+    
     private func validateContext(context: EvaluationContext) throws {
         let targetingKey = context.getTargetingKey()
         if targetingKey.isEmpty {

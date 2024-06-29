@@ -1,4 +1,5 @@
 import Foundation
+import OpenFeature
 
 // Define a Codable enum that can represent any type of JSON value
 enum JSONValue: Codable, Equatable {
@@ -53,44 +54,45 @@ enum JSONValue: Codable, Equatable {
         }
     }
 
-    var string: String? {
-           if case .string(let value) = self {
-               return value
-           }
-           return nil
-       }
-    var bool: Bool? {
-           if case .bool(let value) = self {
-               return value
-           }
-           return nil
-       }
-    var int: Int64? {
-           if case .integer(let value) = self {
-               return value
-           }
-           return nil
-       }
+    func asString() -> String? {
+        if case .string(let value) = self {
+            return value
+        }
+        return nil
+    }
 
-    var double: Double? {
-           if case .double(let value) = self {
-               return value
-           }
-           return nil
-       }
+    func asBoolean() -> Bool? {
+        if case .bool(let value) = self {
+            return value
+        }
+        return nil
+    }
 
-    var object: [String: JSONValue]? {
-           if case .object(let value) = self {
-               return value
-           }
-           return nil
-       }
+    func asInteger() -> Int64? {
+        if case .integer(let value) = self {
+            return value
+        }
+        return nil
+    }
 
-    var array: [JSONValue]? {
-           if case .array(let value) = self {
-               return value
-           }
-           return nil
-       }
+    func asDouble() -> Double? {
+        if case .double(let value) = self {
+            return value
+        }
+        return nil
+    }
+
+    func asObject() -> [String:JSONValue]? {
+        if case .object(let value) = self {
+            return value
+        }
+        return nil
+    }
+
+    func asArray() -> [JSONValue]? {
+        if case .array(let value) = self {
+            return value
+        }
+        return nil
+    }
 }
-

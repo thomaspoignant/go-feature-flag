@@ -12,10 +12,10 @@ let package = Package(
     products: [
         .library(
             name: "go-feature-flag-provider",
-            targets: ["go-feature-flag-provider"]),
+            targets: ["go-feature-flag-provider"])
     ],
     dependencies: [
-        .package(url: "https://github.com/open-feature/swift-sdk.git", from: "0.1.0"),
+        .package(url: "https://github.com/open-feature/swift-sdk.git", from: "0.1.0")
     ],
     targets: [
         .target(
@@ -28,11 +28,8 @@ let package = Package(
         .testTarget(
             name: "go-feature-flag-providerTests",
             dependencies: [
-                "go-feature-flag-provider",
+                "go-feature-flag-provider"
             ]
         )
     ]
 )
-
-
-

@@ -1,5 +1,6 @@
 import Foundation
 
-struct GoFeatureFlagProviderOptions: Decodable {
+struct GoFeatureFlagProviderOptions {
     let endpoint: String
+    let networkService: NetworkingService? = URLSession.shared
 }

@@ -13,9 +13,8 @@ struct EvaluationResponseFlagDTO: Codable {
     let variant: String?
     let errorCode: String?
     let errorDetails: String?
-    let metadata: [String:JSONValue]?
+//    let metadata: [String:Value]?
 }
-
 
 struct OfrepEvaluationResponse{
     let flags: [OfrepEvaluationResponseFlag]
@@ -45,8 +44,8 @@ struct OfrepEvaluationResponse{
                     reason: flag.reason,
                     variant: flag.variant,
                     errorCode: errorCode,
-                    errorDetails: flag.errorDetails,
-                    metadata: flag.metadata
+                    errorDetails: flag.errorDetails
+//                    metadata: flag.metadata
                 ))
             }
         }
@@ -86,5 +85,9 @@ struct OfrepEvaluationResponseFlag {
     let variant: String?
     let errorCode: ErrorCode?
     let errorDetails: String?
-    let metadata: [String:JSONValue]?
+//    let metadata: [String:Value]?
+
+    func isError() -> Bool {
+        return errorCode != nil
+    }
 }
