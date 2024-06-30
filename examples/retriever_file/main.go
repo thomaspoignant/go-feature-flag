@@ -23,6 +23,7 @@ func main() {
 		Retriever: &fileretriever.Retriever{
 			Path: "examples/retriever_file/flags.goff.yaml",
 		},
+		PersistentFlagConfigurationFile: "bin/test_fallback/flags.goff1.yaml",
 		DataExporter: ffclient.DataExporter{
 			FlushInterval:    1 * time.Second,
 			MaxEventInMemory: 100,
