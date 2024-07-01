@@ -624,13 +624,13 @@ func Test_PersistFlagConfigurationOnDisk(t *testing.T) {
 	assert.NoError(t, err)
 
 	// 6. Modifying the failed configuration file
-	content3, err := os.ReadFile("testdata/flag-config-big.yaml")
+	content3, err := os.ReadFile("testdata/flag-config-3rd-file.yaml")
 	assert.NoError(t, err)
 	err = os.WriteFile(configFile2.Name(), content3, os.ModePerm)
 	assert.NoError(t, err)
 
 	// 7. Checking that the flags have been updated
-	time.Sleep(2000 * time.Millisecond) // Waiting to be sure that it continue to check updates
+	time.Sleep(1000 * time.Millisecond) // Waiting to be sure that it continue to check updates
 	flags2, err := gffClient2.GetFlagsFromCache()
 	assert.NoError(t, err)
 	assert.NotEqual(t, len(flags), len(flags2))

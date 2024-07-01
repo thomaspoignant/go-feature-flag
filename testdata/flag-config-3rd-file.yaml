@@ -1,0 +1,79 @@
+test-flag0:
+    variations:
+        Default: false
+        "False": false
+        "True": true
+    defaultRule:
+        name: legacyDefaultRule
+        percentage:
+            "False": 100
+            "True": 0
+test-flag1:
+    variations:
+        Default: "false"
+        "False": "false"
+        "True": "true"
+    defaultRule:
+        name: legacyDefaultRule
+        percentage:
+            "False": 99
+            "True": 1
+test-flag2:
+    variations:
+        Default: 3
+        "False": 2
+        "True": 1
+    defaultRule:
+        name: legacyDefaultRule
+        percentage:
+            "False": 98
+            "True": 2
+test-flag3:
+    variations:
+        Default:
+            - yo
+            - ya
+        "False":
+            - yo
+            - ya
+        "True":
+            - yo
+            - ya
+    defaultRule:
+        name: legacyDefaultRule
+        percentage:
+            "False": 97
+            "True": 3
+test-flag4:
+    variations:
+        Default:
+            test: yo
+        "False":
+            test: yo
+        "True":
+            test: yo
+    defaultRule:
+        name: legacyDefaultRule
+        percentage:
+            "False": 96
+            "True": 4
+test-flag5:
+    variations:
+        Default: false
+        "False": false
+        "True": true
+    defaultRule:
+        name: legacyDefaultRule
+        percentage:
+            "False": 95
+            "True": 5
+test-flag6:
+    variations:
+        Default: false
+        "False": false
+        "True": true
+    defaultRule:
+        name: legacyDefaultRule
+        percentage:
+            "False": 94
+            "True": 6
