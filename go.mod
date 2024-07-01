@@ -11,7 +11,7 @@ require (
 	github.com/aws/aws-sdk-go v1.54.11
 	github.com/aws/aws-sdk-go-v2 v1.30.1
 	github.com/aws/aws-sdk-go-v2/config v1.27.23
-	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.1
+	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.3
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.57.1
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.34.1
 	github.com/awslabs/aws-lambda-go-api-proxy v0.16.2
