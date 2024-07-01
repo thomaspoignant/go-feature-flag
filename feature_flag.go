@@ -92,7 +92,7 @@ func New(config Config) (*GoFeatureFlag, error) {
 
 		notificationService := cache.NewNotificationService(notifiers)
 		goFF.bgUpdater = newBackgroundUpdater(config.PollingInterval, config.EnablePollingJitter)
-		goFF.cache = cache.New(notificationService, config.internalLogger)
+		goFF.cache = cache.New(notificationService, config.PersistentFlagConfigurationFile, config.internalLogger)
 
 		retrievers, err := config.GetRetrievers()
 		if err != nil {
@@ -135,7 +135,7 @@ func New(config Config) (*GoFeatureFlag, error) {
 // This function will look at any pre-existent persistent configuration and start with it.
 func retrievePersistentLocalDisk(ctx context.Context, config Config, goFF *GoFeatureFlag) error {
 	if config.PersistentFlagConfigurationFile != "" {
-		config.internalLogger.Warn("Impossible to retrieve your flag configuration, trying to use the persistent"+
+		config.internalLogger.Error("Impossible to retrieve your flag configuration, trying to use the persistent"+
 			" flag configuration file.", slog.String("path", config.PersistentFlagConfigurationFile))
 		if _, err := os.Stat(config.PersistentFlagConfigurationFile); err == nil {
 			// we found the configuration file on the disk
