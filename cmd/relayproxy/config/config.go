@@ -224,6 +224,13 @@ type Config struct {
 	// If not set we will use the same port as the proxy
 	MonitoringPort int `mapstructure:"monitoringPort" koanf:"monitoringport"`
 
+	// PersistentFlagConfigurationFile (optional) if set GO Feature Flag will store flags configuration in this file
+	//  to be able to serve the flags even if none of the retrievers is available during starting time.
+	//
+	// By default, the flag configuration is not persisted and stays on the retriever system. By setting a file here,
+	// you ensure that GO Feature Flag will always start with a configuration but which can be out-dated.
+	PersistentFlagConfigurationFile string `mapstructure:"persistentFlagConfigurationFile" koanf:"persistentflagconfigurationfile"` //nolint: lll
+
 	// ---- private fields
 
 	// apiKeySet is the internal representation of an API keys list configured

@@ -552,3 +552,91 @@ func Test_ForceRefreshCache(t *testing.T) {
 	gffClient.ForceRefresh()
 	assert.Equal(t, time.Time{}, gffClient.GetCacheRefreshDate())
 }
+
+func Test_PersistFlagConfigurationOnDisk(t *testing.T) {
+	configFile1, err := os.CreateTemp("", "")
+	assert.NoError(t, err)
+
+	persistFile, err := os.CreateTemp("", "")
+	assert.NoError(t, err)
+	defer func() {
+		_ = os.Remove(configFile1.Name())
+		_ = os.Remove(persistFile.Name())
+	}()
+	content, err := os.ReadFile("testdata/flag-config.yaml")
+	assert.NoError(t, err)
+	err = os.WriteFile(configFile1.Name(), content, os.ModePerm)
+	assert.NoError(t, err)
+
+	gffClient, err := ffclient.New(ffclient.Config{
+		PollingInterval:                 1 * time.Second,
+		Retriever:                       &fileretriever.Retriever{Path: configFile1.Name()},
+		LeveledLogger:                   slog.Default(),
+		Offline:                         false,
+		PersistentFlagConfigurationFile: persistFile.Name(),
+	})
+	assert.NoError(t, err)
+
+	time.Sleep(100 * time.Millisecond) // Waiting for the go routine to write the persistent file
+	// 1. Checking that the persistence happened
+	contentP, err := os.ReadFile(persistFile.Name())
+	assert.NoError(t, err)
+	assert.NotEqual(t, 0, len(contentP))
+
+	// 2. Modifying the configuration file
+	content2, err := os.ReadFile("testdata/flag-config-2nd-file.yaml")
+	assert.NoError(t, err)
+	err = os.WriteFile(configFile1.Name(), content2, os.ModePerm)
+	assert.NoError(t, err)
+
+	time.Sleep(1 * time.Second) // Waiting for the go routine to write the persistent file
+	// 3. Checking that the persistence happened and that the content is different
+	contentP2, err := os.ReadFile(persistFile.Name())
+	assert.NoError(t, err)
+	assert.NotEqual(t, 0, len(contentP2))
+	assert.NotEqual(t, contentP, contentP2)
+
+	// 4. Stopping GO Feature Flag and restart with a retriever that will fail
+	gffClient.Close()
+
+	configFile2, err := os.CreateTemp("", "")
+	assert.NoError(t, err)
+	err = os.Remove(configFile2.Name())
+	assert.NoError(t, err)
+
+	gffClient2, err := ffclient.New(ffclient.Config{
+		PollingInterval:                 500 * time.Millisecond,
+		Retriever:                       &fileretriever.Retriever{Path: configFile2.Name()},
+		LeveledLogger:                   slog.Default(),
+		Offline:                         false,
+		PersistentFlagConfigurationFile: persistFile.Name(),
+	})
+	assert.NoError(t, err)
+	defer gffClient2.Close()
+
+	time.Sleep(100 * time.Millisecond) // Waiting for the go routine to write the persistent file
+	// 5. Checking that the flags have been loaded from the persistent file
+	details, _ := gffClient2.BoolVariationDetails("foo-flag", ffcontext.NewEvaluationContext("random-key"), false)
+	assert.NotEqual(t, "ERROR", details.Reason)
+
+	time.Sleep(2 * time.Second) // Waiting to be sure that it continue to check updates
+	flags, err := gffClient2.GetFlagsFromCache()
+	assert.NoError(t, err)
+
+	// 6. Modifying the failed configuration file
+	content3, err := os.ReadFile("testdata/flag-config-3rd-file.yaml")
+	assert.NoError(t, err)
+	err = os.WriteFile(configFile2.Name(), content3, os.ModePerm)
+	assert.NoError(t, err)
+
+	// 7. Checking that the flags have been updated
+	time.Sleep(1000 * time.Millisecond) // Waiting to be sure that it continue to check updates
+	flags2, err := gffClient2.GetFlagsFromCache()
+	assert.NoError(t, err)
+	assert.NotEqual(t, len(flags), len(flags2))
+
+	// 8. Checking that the persistence happened and that the file is different from the previous one
+	contentP3, err := os.ReadFile(persistFile.Name())
+	assert.NoError(t, err)
+	assert.NotEqual(t, contentP2, contentP3)
+}

@@ -1,9 +1,13 @@
 package cache_test
 
 import (
+	"github.com/thomaspoignant/go-feature-flag/internal/dto"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
+	"gopkg.in/yaml.v3"
 	"log/slog"
+	"os"
 	"testing"
+	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 
@@ -14,14 +18,14 @@ import (
 )
 
 func Test_FlagCacheNotInit(t *testing.T) {
-	fCache := cache.New(nil, nil)
+	fCache := cache.New(nil, "", nil)
 	fCache.Close()
 	_, err := fCache.GetFlag("test-flag")
 	assert.Error(t, err, "We should have an error if the cache is not init")
 }
 
 func Test_GetFlagNotExist(t *testing.T) {
-	fCache := cache.New(nil, nil)
+	fCache := cache.New(nil, "", nil)
 	_, err := fCache.GetFlag("not-exists-flag")
 	assert.Error(t, err, "We should have an error if the flag does not exists")
 }
@@ -244,7 +248,7 @@ variation = "false_var"
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fCache := cache.New(cache.NewNotificationService([]notifier.Notifier{}),
+			fCache := cache.New(cache.NewNotificationService([]notifier.Notifier{}), "",
 				&fflog.FFLogger{LeveledLogger: slog.Default()})
 			newFlags, err := fCache.ConvertToFlagStruct(tt.args.loadedFlags, tt.flagFormat)
 			if tt.wantErr {
@@ -408,7 +412,7 @@ test-flag2:
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fCache := cache.New(cache.NewNotificationService([]notifier.Notifier{}), nil)
+			fCache := cache.New(cache.NewNotificationService([]notifier.Notifier{}), "", nil)
 			newFlags, err := fCache.ConvertToFlagStruct(tt.args.loadedFlags, tt.flagFormat)
 			if tt.wantErr {
 				assert.Error(t, err)
@@ -449,11 +453,58 @@ func Test_cacheManagerImpl_GetLatestUpdateDate(t *testing.T) {
   trackEvents: false
 `)
 
-	fCache := cache.New(cache.NewNotificationService([]notifier.Notifier{}), nil)
+	fCache := cache.New(cache.NewNotificationService([]notifier.Notifier{}), "", nil)
 	timeBefore := fCache.GetLatestUpdateDate()
 	newFlags, _ := fCache.ConvertToFlagStruct(loadedFlags, "yaml")
 	_ = fCache.UpdateCache(newFlags, &fflog.FFLogger{LeveledLogger: slog.Default()})
 	timeAfter := fCache.GetLatestUpdateDate()
 
 	assert.True(t, timeBefore.Before(timeAfter))
+}
+
+func Test_persistCacheAndRestartCacheWithIt(t *testing.T) {
+	file, err := os.CreateTemp("", "")
+	assert.NoError(t, err)
+	defer func() { _ = file.Close() }()
+
+	// We start without any cache and we persist it on disk
+	loadedFlags := []byte(`test-flag:
+  variations:
+    true_var: true
+    false_var: false
+  targeting:
+    - query: key eq "random-key"
+      percentage:
+        true_var: 100
+        false_var: 0
+  defaultRule:
+    variation: false_var	
+  trackEvents: false
+`)
+	loadedFlagsMap := map[string]dto.DTO{}
+	err = yaml.Unmarshal(loadedFlags, &loadedFlagsMap)
+	assert.NoError(t, err)
+
+	fCache := cache.New(cache.NewNotificationService([]notifier.Notifier{}), file.Name(), nil)
+	err = fCache.UpdateCache(loadedFlagsMap, &fflog.FFLogger{LeveledLogger: slog.Default()})
+	assert.NoError(t, err)
+	allFlags1, err := fCache.AllFlags()
+	assert.NoError(t, err)
+
+	time.Sleep(100 * time.Millisecond) // waiting to let the go routine write in the file
+
+	// we start a new cache with the file persisted
+	fCache2 := cache.New(cache.NewNotificationService([]notifier.Notifier{}), "", nil)
+	content, err := os.ReadFile(file.Name())
+	assert.NoError(t, err)
+	loadedFlagsMap2 := map[string]dto.DTO{}
+	err = yaml.Unmarshal(content, &loadedFlagsMap)
+	assert.NoError(t, err)
+	err = fCache2.UpdateCache(loadedFlagsMap2, &fflog.FFLogger{LeveledLogger: slog.Default()})
+	assert.NoError(t, err)
+	allFlags2, err := fCache.AllFlags()
+	assert.NoError(t, err)
+
+	// Compare the 2 caches
+	assert.Equal(t, allFlags1, allFlags2)
 }
