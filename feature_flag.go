@@ -109,7 +109,9 @@ func New(config Config) (*GoFeatureFlag, error) {
 			// if initial retrieval failed, we are trying to start the persistent local disk configuration (if enabled).
 			errPersist := retrievePersistentLocalDisk(config.Context, config, goFF)
 			if errPersist != nil && !config.StartWithRetrieverError {
-				return nil, fmt.Errorf("impossible to retrieve the flags, please check your configuration: %v", err)
+				return nil,
+					fmt.Errorf("impossible to retrieve the flags, please check your configuration: %v",
+						errPersist)
 			}
 		}
 
