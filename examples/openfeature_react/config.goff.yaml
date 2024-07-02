@@ -3,7 +3,7 @@ hide-logo:
     var_true: true
     var_false: false
   defaultRule:
-    variation: var_false
+    variation: var_true
 
 title-flag:
   variations:
@@ -33,3 +33,15 @@ badge-class:
       variation: green
     - query: userType eq "admin"
       variation: red
+
+
+complex:
+  variations:
+    blue:
+      test: test
+    green:
+      test1: test1
+    red:
+      badge: badge-red
+  defaultRule:
+    variation: red

@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "OpenFeature",
+        "repositoryURL": "https://github.com/open-feature/swift-sdk.git",
+        "state": {
+          "branch": null,
+          "revision": "02b033c954766e86d5706bfc8ee5248244c11e77",
+          "version": "0.1.0"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
