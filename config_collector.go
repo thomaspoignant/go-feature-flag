@@ -20,5 +20,5 @@ type DataExporter struct {
 
 	// Exporter is the configuration of your exporter.
 	// You can see all available exporter in the exporter package.
-	Exporter exporter.Exporter
+	Exporter exporter.CommonExporter
 }

@@ -3,7 +3,8 @@ package gcstorageexporter_test
 import (
 	"context"
 	"crypto/tls"
-	"log"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -176,7 +177,7 @@ func TestGoogleStorage_Export(t *testing.T) {
 				},
 			}
 
-			// init Exporter
+			// init DeprecatedExporter
 			f := gcstorageexporter.Exporter{
 				Bucket: tt.fields.Bucket,
 				Options: []option.ClientOption{
@@ -190,7 +191,7 @@ func TestGoogleStorage_Export(t *testing.T) {
 				CsvTemplate: tt.fields.CsvTemplate,
 			}
 
-			err := f.Export(context.Background(), log.New(os.Stdout, "", 0), tt.events)
+			err := f.Export(context.Background(), &fflog.FFLogger{LeveledLogger: slog.Default()}, tt.events)
 			if tt.wantErr {
 				assert.Error(t, err, "Export should error")
 				return

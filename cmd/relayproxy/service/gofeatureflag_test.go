@@ -201,11 +201,11 @@ func Test_initExporter(t *testing.T) {
 		conf                   *config.ExporterConf
 		want                   ffclient.DataExporter
 		wantErr                assert.ErrorAssertionFunc
-		wantType               exporter.Exporter
+		wantType               exporter.CommonExporter
 		skipCompleteValidation bool
 	}{
 		{
-			name:    "Convert unknown Exporter",
+			name:    "Convert unknown DeprecatedExporter",
 			wantErr: assert.Error,
 			conf: &config.ExporterConf{
 				Kind: "unknown",

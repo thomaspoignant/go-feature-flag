@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/IBM/sarama"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
-	"log"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
 const (
@@ -44,7 +44,7 @@ type Exporter struct {
 
 // Export will produce a message to the Kafka topic. The message's value will contain the event encoded in the
 // selected format. Messages are published synchronously and will error immediately on failure.
-func (e *Exporter) Export(_ context.Context, _ *log.Logger, featureEvents []exporter.FeatureEvent) error {
+func (e *Exporter) Export(_ context.Context, _ *fflog.FFLogger, featureEvents []exporter.FeatureEvent) error {
 	if e.sender == nil {
 		err := e.initializeProducer()
 		if err != nil {

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
-	"log"
 	"sync"
 	"text/template"
 	"time"
@@ -32,7 +31,7 @@ type Exporter struct {
 }
 
 // Export is saving a collection of events in a file.
-func (f *Exporter) Export(_ context.Context, logger *log.Logger, featureEvents []exporter.FeatureEvent) error {
+func (f *Exporter) Export(_ context.Context, logger *fflog.FFLogger, featureEvents []exporter.FeatureEvent) error {
 	f.initTemplates.Do(func() {
 		// Remove below after deprecation of Format
 		if f.LogFormat == "" && f.Format != "" {
@@ -49,7 +48,7 @@ func (f *Exporter) Export(_ context.Context, logger *log.Logger, featureEvents [
 			FormattedDate string
 		}{FeatureEvent: event, FormattedDate: time.Unix(event.CreationDate, 0).Format(time.RFC3339)})
 
-		fflog.ConvertToFFLogger(logger).Info(log.String())
+		logger.Info(log.String())
 		if err != nil {
 			return err
 		}
