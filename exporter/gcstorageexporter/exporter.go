@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"io"
-	"log"
 	"log/slog"
 	"os"
 
@@ -57,7 +56,7 @@ func (f *Exporter) IsBulk() bool {
 }
 
 // Export is saving a collection of events in a file.
-func (f *Exporter) Export(ctx context.Context, logger *log.Logger, featureEvents []exporter.FeatureEvent) error {
+func (f *Exporter) Export(ctx context.Context, logger *fflog.FFLogger, featureEvents []exporter.FeatureEvent) error {
 	// Init google storage client
 	client, err := storage.NewClient(ctx, f.Options...)
 	if err != nil {
@@ -98,7 +97,7 @@ func (f *Exporter) Export(ctx context.Context, logger *log.Logger, featureEvents
 	for _, file := range files {
 		of, err := os.Open(outputDir + "/" + file.Name())
 		if err != nil {
-			fflog.ConvertToFFLogger(logger).Error("[GCP Exporter] impossible to open the file",
+			logger.Error("[GCP DeprecatedExporter] impossible to open the file",
 				slog.String("path", outputDir+"/"+file.Name()))
 			continue
 		}
@@ -114,7 +113,7 @@ func (f *Exporter) Export(ctx context.Context, logger *log.Logger, featureEvents
 		_, err = io.Copy(wc, of)
 		_ = wc.Close()
 		if err != nil {
-			return fmt.Errorf("error: [Exporter] impossible to copy the file from %s to bucket %s: %v",
+			return fmt.Errorf("error: [DeprecatedExporter] impossible to copy the file from %s to bucket %s: %v",
 				source, f.Bucket, err)
 		}
 	}

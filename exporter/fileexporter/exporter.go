@@ -3,7 +3,7 @@ package fileexporter
 import (
 	"context"
 	"fmt"
-	"log"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"os"
 	"runtime"
 	"strings"
@@ -53,7 +53,7 @@ type Exporter struct {
 }
 
 // Export is saving a collection of events in a file.
-func (f *Exporter) Export(_ context.Context, _ *log.Logger, featureEvents []exporter.FeatureEvent) error {
+func (f *Exporter) Export(_ context.Context, _ *fflog.FFLogger, featureEvents []exporter.FeatureEvent) error {
 	// Parse the template only once
 	f.initTemplates.Do(func() {
 		f.csvTemplate = exporter.ParseTemplate("csvFormat", f.CsvTemplate, exporter.DefaultCsvTemplate)

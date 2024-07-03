@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"log"
-	"os"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
+	"log/slog"
 	"testing"
 
 	"github.com/IBM/sarama"
@@ -25,7 +25,7 @@ func (s *messageSenderMock) SendMessages(msgs []*sarama.ProducerMessage) error {
 
 func TestExporter_IsBulk(t *testing.T) {
 	exp := Exporter{}
-	assert.False(t, exp.IsBulk(), "Exporter is not a bulk exporter")
+	assert.False(t, exp.IsBulk(), "DeprecatedExporter is not a bulk exporter")
 }
 
 func TestExporter_Export(t *testing.T) {
@@ -143,7 +143,7 @@ func TestExporter_Export(t *testing.T) {
 				dialer:   tt.dialer,
 			}
 
-			logger := log.New(os.Stdout, "", 0)
+			logger := &fflog.FFLogger{LeveledLogger: slog.Default()}
 			err := exp.Export(context.Background(), logger, tt.featureEvents)
 			if tt.wantErr {
 				assert.Error(t, err)

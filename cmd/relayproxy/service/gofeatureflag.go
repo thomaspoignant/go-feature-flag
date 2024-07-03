@@ -200,7 +200,7 @@ func initDataExporter(c *config.ExporterConf) (ffclient.DataExporter, error) {
 }
 
 // nolint: funlen
-func createExporter(c *config.ExporterConf) (exporter.Exporter, error) {
+func createExporter(c *config.ExporterConf) (exporter.CommonExporter, error) {
 	format := config.DefaultExporter.Format
 	if c.Format != "" {
 		format = c.Format

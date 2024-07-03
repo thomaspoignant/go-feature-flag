@@ -9,8 +9,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
-	"log"
-	"os"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
+	"log/slog"
 	"strings"
 	"testing"
 )
@@ -31,7 +31,7 @@ func (s *SQSSendMessageAPIMock) SendMessage(ctx context.Context,
 
 func TestSQS_IsBulk(t *testing.T) {
 	exporter := Exporter{}
-	assert.False(t, exporter.IsBulk(), "Exporter is not a bulk exporter")
+	assert.False(t, exporter.IsBulk(), "DeprecatedExporter is not a bulk exporter")
 }
 
 func TestExporter_Export(t *testing.T) {
@@ -105,7 +105,7 @@ func TestExporter_Export(t *testing.T) {
 				sqsService: &tt.fields.sqsService,
 			}
 
-			logger := log.New(os.Stdout, "", 0)
+			logger := &fflog.FFLogger{LeveledLogger: slog.Default()}
 			err := f.Export(context.TODO(), logger, tt.featureEvents)
 			if tt.wantErr {
 				assert.Error(t, err)

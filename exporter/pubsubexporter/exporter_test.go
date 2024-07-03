@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"log"
-	"os"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
+	"log/slog"
 	"testing"
 
 	"cloud.google.com/go/pubsub"
@@ -25,7 +25,7 @@ func TestExporter_Export(t *testing.T) {
 	)
 
 	ctx := context.TODO()
-	logger := log.New(os.Stdout, "", 0)
+	logger := &fflog.FFLogger{LeveledLogger: slog.Default()}
 
 	server := pstest.NewServer()
 	t.Cleanup(func() { server.Close() })

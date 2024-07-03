@@ -201,7 +201,7 @@ func Test_initExporter(t *testing.T) {
 		conf                   *config.ExporterConf
 		want                   ffclient.DataExporter
 		wantErr                assert.ErrorAssertionFunc
-		wantType               exporter.Exporter
+		wantType               exporter.CommonExporter
 		skipCompleteValidation bool
 	}{
 		{
