@@ -298,7 +298,7 @@ class OfrepApiTests: XCTestCase {
         do {
             _ = try await ofrepAPI.postBulkEvaluateFlags(context: defaultEvaluationContext)
             XCTFail("Should throw an exception")
-        } catch let error as InvalidOptions {
+        } catch _ as InvalidOptions {
             return
         } catch {
             XCTFail("Caught an unexpected error type: \(error)")

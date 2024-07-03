@@ -45,7 +45,11 @@ final class GoFeatureFlagProvider: FeatureProvider {
 
     func onContextSet(oldContext: (any OpenFeature.EvaluationContext)?,
                       newContext: any OpenFeature.EvaluationContext) {
-        print("onContextSet")
+        self.eventHandler.send(.stale)
+        self.evaluationContext = newContext
+        Task {
+            try await self.evaluateFlags(context: newContext, successEvent: .configurationChanged)
+        }
     }
 
 
@@ -133,26 +137,37 @@ final class GoFeatureFlagProvider: FeatureProvider {
     func getObjectEvaluation(key: String, defaultValue: Value,
                              context: EvaluationContext?) throws -> ProviderEvaluation<Value> {
         let flagCached = try genericEvaluation(key: key)
-        guard let value = flagCached.value?.asObject() else {
+        let objValue = flagCached.value?.asObject()
+        let arrayValue = flagCached.value?.asArray()
+
+        if objValue == nil && arrayValue == nil {
             throw OpenFeatureError.typeMismatchError
         }
 
-        // Convert JSONValue to Value
-        let encoded = try JSONEncoder().encode(value)
-        print(String(data: encoded, encoding: .utf8))
-        let decoded = try JSONDecoder().decode(Value.self, from: encoded)
+        if objValue != nil {
+            var convertedValue: [String:Value] = [:]
+            objValue?.forEach { key, value in
+                convertedValue[key]=value.toValue()
+            }
 
-        print(decoded)
+            return ProviderEvaluation<Value>(
+                value: Value.structure(convertedValue),
+                variant: flagCached.variant,
+                reason: flagCached.reason)
+        }
 
+        if arrayValue != nil {
+            var convertedValue: [Value] = []
+            arrayValue?.forEach{ item in
+                convertedValue.append(item.toValue())
+            }
+            return ProviderEvaluation<Value>(
+                value: Value.list(convertedValue),
+                variant: flagCached.variant,
+                reason: flagCached.reason)
+        }
 
-//        var flagCached = try genericEvaluation(key: key)
-//        guard let value = flagCached.value?.object else {
-//            throw OpenFeatureError.typeMismatchError
-//        }
-        return ProviderEvaluation<Value>(
-            value: decoded,
-            variant: flagCached.variant,
-            reason: flagCached.reason)
+        throw OpenFeatureError.generalError(message: "impossible to evaluate the flag because it is not a list or a dictionnary")
     }
 
     private func evaluateFlags(context: EvaluationContext?, successEvent: ProviderEvent) async throws {

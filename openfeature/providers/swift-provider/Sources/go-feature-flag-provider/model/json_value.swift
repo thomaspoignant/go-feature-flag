@@ -95,4 +95,25 @@ enum JSONValue: Codable, Equatable {
         }
         return nil
     }
+
+    func toValue() -> Value {
+            switch self {
+            case .string(let string):
+                return .string(string)
+            case .integer(let integer):
+                return .integer(integer)
+            case .double(let double):
+                return .double(double)
+            case .bool(let bool):
+                return .boolean(bool)
+            case .object(let object):
+                let transformedObject = object.mapValues { $0.toValue() }
+                return .structure(transformedObject)
+            case .array(let array):
+                let transformedArray = array.map { $0.toValue() }
+                return .list(transformedArray)
+            case .null:
+                return .null
+            }
+        }
 }

@@ -43,4 +43,21 @@ class ProviderTests: XCTestCase {
 
     }
 
+
+    /*
+     should be in FATAL status if 401 error during initialise
+     should be in FATAL status if 403 error during initialise
+     should be in ERROR status if 429 error during initialise
+     should be in ERROR status if targetingKey is missing
+     should be in ERROR status if invalid context
+     should be in ERROR status if parse error
+     should return a FLAG_NOT_FOUND error if the flag does not exist
+     should return EvaluationDetails if the flag exists
+     should return ParseError if the API return the error
+     should send a configuration changed event, when new flag is send
+     should call reconciling handler, when context changed
+     should call stale handler, when api is not responding
+     should not try to call the API before retry-after header
+     
+     */
 }
