@@ -10,7 +10,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
-	"log"
 	"log/slog"
 	"os"
 	"sync"
@@ -75,14 +74,13 @@ func (f *Exporter) initializeUploader(ctx context.Context) error {
 }
 
 // Export is saving a collection of events in a file.
-func (f *Exporter) Export(ctx context.Context, logger *log.Logger, featureEvents []exporter.FeatureEvent) error {
+func (f *Exporter) Export(ctx context.Context, logger *fflog.FFLogger, featureEvents []exporter.FeatureEvent) error {
 	if f.s3Uploader == nil {
 		initErr := f.initializeUploader(ctx)
 		if initErr != nil {
 			return initErr
 		}
 	}
-	f.ffLogger = fflog.ConvertToFFLogger(logger)
 
 	// Create a temp directory to store the file we will produce
 	outputDir, err := os.MkdirTemp("", "go_feature_flag_s3_export")
@@ -92,7 +90,7 @@ func (f *Exporter) Export(ctx context.Context, logger *log.Logger, featureEvents
 	defer func() { _ = os.Remove(outputDir) }()
 
 	// We call the File data exporter to get the file in the right format.
-	// Files will be put in the temp directory, so we will be able to upload them to Exporter from there.
+	// Files will be put in the temp directory, so we will be able to upload them to DeprecatedExporter from there.
 	fileExporter := fileexporter.Exporter{
 		Format:                  f.Format,
 		OutputDir:               outputDir,
@@ -105,7 +103,7 @@ func (f *Exporter) Export(ctx context.Context, logger *log.Logger, featureEvents
 		return err
 	}
 
-	// Upload all the files in the folder to Exporter
+	// Upload all the files in the folder to DeprecatedExporter
 	files, err := os.ReadDir(outputDir)
 	if err != nil {
 		return err

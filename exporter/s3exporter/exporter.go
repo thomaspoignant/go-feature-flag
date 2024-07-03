@@ -3,7 +3,6 @@ package s3exporter
 import (
 	"context"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
-	"log"
 	"log/slog"
 	"os"
 	"sync"
@@ -17,7 +16,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager/s3manageriface"
 )
 
-// Deprecated: Please use s3exporterv2.Exporter instead, it will use the go-aws-sdk-v2.
+// Deprecated: Please use s3exporterv2.DeprecatedExporter instead, it will use the go-aws-sdk-v2.
 type Exporter struct {
 	// Bucket is the name of your Exporter Bucket.
 	Bucket string
@@ -58,7 +57,7 @@ type Exporter struct {
 }
 
 // Export is saving a collection of events in a file.
-func (f *Exporter) Export(ctx context.Context, logger *log.Logger, featureEvents []exporter.FeatureEvent) error {
+func (f *Exporter) Export(ctx context.Context, logger *fflog.FFLogger, featureEvents []exporter.FeatureEvent) error {
 	// init the s3 uploader
 	if f.s3Uploader == nil {
 		var initErr error
@@ -81,7 +80,7 @@ func (f *Exporter) Export(ctx context.Context, logger *log.Logger, featureEvents
 	defer func() { _ = os.Remove(outputDir) }()
 
 	// We call the File data exporter to get the file in the right format.
-	// Files will be put in the temp directory, so we will be able to upload them to Exporter from there.
+	// Files will be put in the temp directory, so we will be able to upload them to DeprecatedExporter from there.
 	fileExporter := fileexporter.Exporter{
 		Format:                  f.Format,
 		OutputDir:               outputDir,
@@ -94,7 +93,7 @@ func (f *Exporter) Export(ctx context.Context, logger *log.Logger, featureEvents
 		return err
 	}
 
-	// Upload all the files in the folder to Exporter
+	// Upload all the files in the folder to DeprecatedExporter
 	files, err := os.ReadDir(outputDir)
 	if err != nil {
 		return err
@@ -103,7 +102,7 @@ func (f *Exporter) Export(ctx context.Context, logger *log.Logger, featureEvents
 		// read file
 		of, err := os.Open(outputDir + "/" + file.Name())
 		if err != nil {
-			fflog.ConvertToFFLogger(logger).Error("[S3Exporter] impossible to open the file",
+			logger.Error("[S3Exporter] impossible to open the file",
 				slog.String("directory", outputDir), slog.String("filePath", file.Name()))
 			continue
 		}
@@ -119,7 +118,7 @@ func (f *Exporter) Export(ctx context.Context, logger *log.Logger, featureEvents
 			return err
 		}
 
-		fflog.ConvertToFFLogger(logger).Info("[S3Exporter] file uploaded.",
+		logger.Info("[S3Exporter] file uploaded.",
 			slog.String("fileLocation", result.Location))
 	}
 	return nil

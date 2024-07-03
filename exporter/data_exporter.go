@@ -16,7 +16,7 @@ const (
 
 // NewScheduler allows creating a new instance of Scheduler ready to be used to export data.
 func NewScheduler(ctx context.Context, flushInterval time.Duration, maxEventInMemory int64,
-	exp Exporter, logger *fflog.FFLogger,
+	exp CommonExporter, logger *fflog.FFLogger,
 ) *Scheduler {
 	if ctx == nil {
 		ctx = context.Background()
@@ -49,7 +49,7 @@ type Scheduler struct {
 	daemonChan      chan struct{}
 	ticker          *time.Ticker
 	maxEventInCache int64
-	exporter        Exporter
+	exporter        CommonExporter
 	logger          *fflog.FFLogger
 	ctx             context.Context
 }
@@ -116,9 +116,27 @@ func (dc *Scheduler) GetLogger(level slog.Level) *log.Logger {
 // flush will call the data exporter and clear the cache
 func (dc *Scheduler) flush() {
 	if len(dc.localCache) > 0 {
-		err := dc.exporter.Export(dc.ctx, dc.GetLogger(slog.LevelError), dc.localCache)
-		if err != nil {
-			dc.logger.Error("error while exporting data", slog.Any("err", err))
+		switch exp := dc.exporter.(type) {
+		case DeprecatedExporter:
+			// use dc exporter as a DeprecatedExporter
+			err := exp.Export(dc.ctx, dc.GetLogger(slog.LevelError), dc.localCache)
+			slog.Warn("You are using an exporter with the old logger."+
+				"Please update your custom exporter to comply to the new Exporter interface.",
+				slog.Any("err", err))
+			if err != nil {
+				dc.logger.Error("error while exporting data", slog.Any("err", err))
+				return
+			}
+			break
+		case Exporter:
+			err := exp.Export(dc.ctx, dc.logger, dc.localCache)
+			if err != nil {
+				dc.logger.Error("error while exporting data", slog.Any("err", err))
+				return
+			}
+			break
+		default:
+			dc.logger.Error("this is not a valid exporter")
 			return
 		}
 	}

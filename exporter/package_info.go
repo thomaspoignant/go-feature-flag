@@ -7,7 +7,7 @@
 //	  DataExporter: ffclient.DataExporter{
 //	   FlushInterval:   10 * time.Second,
 //	   MaxEventInMemory: 1000,
-//	   Exporter: &fileexporter.Exporter{
+//	   DeprecatedExporter: &fileexporter.DeprecatedExporter{
 //	     OutputDir: "/output-data/",
 //	   },
 //	 },

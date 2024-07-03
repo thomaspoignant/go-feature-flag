@@ -2,7 +2,7 @@ package fileexporter_test
 
 import (
 	"context"
-	"log"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"os"
 	"runtime"
 	"testing"
@@ -25,7 +25,7 @@ func TestFile_Export(t *testing.T) {
 		ParquetCompressionCodec string
 	}
 	type args struct {
-		logger        *log.Logger
+		logger        *fflog.FFLogger
 		featureEvents []exporter.FeatureEvent
 	}
 	type expected struct {
@@ -348,5 +348,5 @@ func TestFile_Export(t *testing.T) {
 
 func TestFile_IsBulk(t *testing.T) {
 	exporter := fileexporter.Exporter{}
-	assert.True(t, exporter.IsBulk(), "Exporter is a bulk exporter")
+	assert.True(t, exporter.IsBulk(), "DeprecatedExporter is a bulk exporter")
 }
