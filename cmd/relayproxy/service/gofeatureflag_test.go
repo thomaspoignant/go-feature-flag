@@ -205,7 +205,7 @@ func Test_initExporter(t *testing.T) {
 		skipCompleteValidation bool
 	}{
 		{
-			name:    "Convert unknown DeprecatedExporter",
+			name:    "Convert unknown Exporter",
 			wantErr: assert.Error,
 			conf: &config.ExporterConf{
 				Kind: "unknown",

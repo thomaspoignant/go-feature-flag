@@ -116,7 +116,6 @@ func (dc *Scheduler) GetLogger(level slog.Level) *log.Logger {
 // flush will call the data exporter and clear the cache
 func (dc *Scheduler) flush() {
 	if len(dc.localCache) > 0 {
-
 		switch exp := dc.exporter.(type) {
 		case DeprecatedExporter:
 			// use dc exporter as a DeprecatedExporter
