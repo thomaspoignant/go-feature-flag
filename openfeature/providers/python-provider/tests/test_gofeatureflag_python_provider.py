@@ -208,6 +208,25 @@ def test_should_resolve_a_valid_boolean_flag_with_targeting_match_reason(mock_re
 
 
 @patch("urllib3.poolmanager.PoolManager.request")
+def test_should_resolve_a_valid_boolean_flag_with_targeting_match_reason_without_error_code(
+    mock_request,
+):
+    flag_key = "bool_targeting_match_no_error_field"
+    default_value = False
+    res = _generic_test(
+        mock_request, flag_key, default_value, _default_evaluation_ctx, "bool"
+    )
+    want: FlagEvaluationDetails = FlagEvaluationDetails(
+        flag_key=flag_key,
+        value=True,
+        variant="True",
+        reason=Reason.TARGETING_MATCH,
+        flag_metadata={"test": "test1", "test2": False, "test3": 123.3},
+    )
+    assert res == want
+
+
+@patch("urllib3.poolmanager.PoolManager.request")
 def test_should_return_custom_reason_if_returned_by_relay_proxy(mock_request):
     flag_key = "unknown_reason"
     default_value = False
