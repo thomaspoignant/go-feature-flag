@@ -3,8 +3,10 @@ package ffclient
 import (
 	"context"
 	"fmt"
+	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"log"
 	"log/slog"
+	"os"
 	"sync"
 	"time"
 
@@ -90,7 +92,7 @@ func New(config Config) (*GoFeatureFlag, error) {
 
 		notificationService := cache.NewNotificationService(notifiers)
 		goFF.bgUpdater = newBackgroundUpdater(config.PollingInterval, config.EnablePollingJitter)
-		goFF.cache = cache.New(notificationService, config.internalLogger)
+		goFF.cache = cache.New(notificationService, config.PersistentFlagConfigurationFile, config.internalLogger)
 
 		retrievers, err := config.GetRetrievers()
 		if err != nil {
@@ -103,9 +105,16 @@ func New(config Config) (*GoFeatureFlag, error) {
 		}
 
 		err = retrieveFlagsAndUpdateCache(goFF.config, goFF.cache, goFF.retrieverManager)
-		if err != nil && !config.StartWithRetrieverError {
-			return nil, fmt.Errorf("impossible to retrieve the flags, please check your configuration: %v", err)
+		if err != nil {
+			// if initial retrieval failed, we are trying to start the persistent local disk configuration (if enabled).
+			errPersist := retrievePersistentLocalDisk(config.Context, config, goFF)
+			if errPersist != nil && !config.StartWithRetrieverError {
+				return nil,
+					fmt.Errorf("impossible to retrieve the flags, please check your configuration: %v",
+						errPersist)
+			}
 		}
+
 		go goFF.startFlagUpdaterDaemon()
 
 		if goFF.config.DataExporter.Exporter != nil {
@@ -121,6 +130,35 @@ func New(config Config) (*GoFeatureFlag, error) {
 	}
 	config.internalLogger.Debug("GO Feature Flag is initialized")
 	return goFF, nil
+}
+
+// retrievePersistentLocalDisk is a function used in case we are not able to retrieve any flag when starting
+// GO Feature Flag.
+// This function will look at any pre-existent persistent configuration and start with it.
+func retrievePersistentLocalDisk(ctx context.Context, config Config, goFF *GoFeatureFlag) error {
+	if config.PersistentFlagConfigurationFile != "" {
+		config.internalLogger.Error("Impossible to retrieve your flag configuration, trying to use the persistent"+
+			" flag configuration file.", slog.String("path", config.PersistentFlagConfigurationFile))
+		if _, err := os.Stat(config.PersistentFlagConfigurationFile); err == nil {
+			// we found the configuration file on the disk
+			r := &fileretriever.Retriever{Path: config.PersistentFlagConfigurationFile}
+
+			fallBackRetrieverManager := retriever.NewManager(config.Context, []retriever.Retriever{r}, config.internalLogger)
+			err := fallBackRetrieverManager.Init(ctx)
+			if err != nil {
+				return err
+			}
+			defer func() { _ = fallBackRetrieverManager.Shutdown(ctx) }()
+			err = retrieveFlagsAndUpdateCache(goFF.config, goFF.cache, fallBackRetrieverManager)
+			if err != nil {
+				return err
+			}
+			return nil
+		}
+		config.internalLogger.Warn("No persistent flag configuration found",
+			slog.String("path", config.PersistentFlagConfigurationFile))
+	}
+	return fmt.Errorf("no persistent flag available")
 }
 
 // Close wait until thread are done

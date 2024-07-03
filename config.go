@@ -86,6 +86,13 @@ type Config struct {
 	// Default: nil
 	EvaluationContextEnrichment map[string]interface{}
 
+	// PersistentFlagConfigurationFile (optional) if set GO Feature Flag will store flags configuration in this file
+	//  to be able to serve the flags even if none of the retrievers is available during starting time.
+	//
+	// By default, the flag configuration is not persisted and stays on the retriever system. By setting a file here,
+	// you ensure that GO Feature Flag will always start with a configuration but which can be out-dated.
+	PersistentFlagConfigurationFile string
+
 	// offlineMutex is a mutex to protect the Offline field.
 	offlineMutex *sync.RWMutex
 

@@ -76,32 +76,31 @@ func NewGoFeatureFlagClient(
 		}
 	}
 
-	var notif []notifier.Notifier
-	if proxyConf.Notifiers != nil {
-		notif, err = initNotifier(proxyConf.Notifiers)
-		if err != nil {
-			return nil, err
-		}
+	notif, err := initNotifier(proxyConf.Notifiers)
+	if err != nil {
+		return nil, err
 	}
 	notif = append(notif, notifiers...)
 
 	f := ffclient.Config{
-		PollingInterval:             time.Duration(proxyConf.PollingInterval) * time.Millisecond,
-		LeveledLogger:               slog.New(slogzap.Option{Level: slog.LevelDebug, Logger: logger}.NewZapHandler()),
-		Context:                     context.Background(),
-		Retriever:                   mainRetriever,
-		Retrievers:                  retrievers,
-		Notifiers:                   notif,
-		FileFormat:                  proxyConf.FileFormat,
-		DataExporter:                exp,
-		StartWithRetrieverError:     proxyConf.StartWithRetrieverError,
-		EnablePollingJitter:         proxyConf.EnablePollingJitter,
-		EvaluationContextEnrichment: proxyConf.EvaluationContextEnrichment,
+		PollingInterval:                 time.Duration(proxyConf.PollingInterval) * time.Millisecond,
+		LeveledLogger:                   slog.New(slogzap.Option{Level: slog.LevelDebug, Logger: logger}.NewZapHandler()),
+		Context:                         context.Background(),
+		Retriever:                       mainRetriever,
+		Retrievers:                      retrievers,
+		Notifiers:                       notif,
+		FileFormat:                      proxyConf.FileFormat,
+		DataExporter:                    exp,
+		StartWithRetrieverError:         proxyConf.StartWithRetrieverError,
+		EnablePollingJitter:             proxyConf.EnablePollingJitter,
+		EvaluationContextEnrichment:     proxyConf.EvaluationContextEnrichment,
+		PersistentFlagConfigurationFile: proxyConf.PersistentFlagConfigurationFile,
 	}
 
 	return ffclient.New(f)
 }
 
+// initRetriever initialize the retriever based on the configuration
 func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 	retrieverTimeout := config.DefaultRetriever.Timeout
 	if c.Timeout != 0 {
@@ -296,6 +295,9 @@ func createExporter(c *config.ExporterConf) (exporter.CommonExporter, error) {
 }
 
 func initNotifier(c []config.NotifierConf) ([]notifier.Notifier, error) {
+	if c == nil {
+		return nil, nil
+	}
 	var notifiers []notifier.Notifier
 
 	for _, cNotif := range c {
