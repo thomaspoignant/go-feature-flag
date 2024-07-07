@@ -11,7 +11,12 @@
 		194ECB762C388B760019BB70 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 194ECB752C388B760019BB70 /* ContentView.swift */; };
 		194ECB782C388B780019BB70 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 194ECB772C388B780019BB70 /* Assets.xcassets */; };
 		194ECB7B2C388B780019BB70 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 194ECB7A2C388B780019BB70 /* Preview Assets.xcassets */; };
-		194ECB832C388BD40019BB70 /* GOFeatureFlag in Frameworks */ = {isa = PBXBuildFile; productRef = 194ECB822C388BD40019BB70 /* GOFeatureFlag */; };
+		197F2E632C3AB1C4002308DA /* GOFeatureFlag in Frameworks */ = {isa = PBXBuildFile; productRef = 197F2E622C3AB1C4002308DA /* GOFeatureFlag */; };
+		197F2E652C3AB1C4002308DA /* OFREP in Frameworks */ = {isa = PBXBuildFile; productRef = 197F2E642C3AB1C4002308DA /* OFREP */; };
+		197F2E672C3AB22B002308DA /* GOFeatureFlag in Frameworks */ = {isa = PBXBuildFile; productRef = 197F2E662C3AB22B002308DA /* GOFeatureFlag */; };
+		197F2E692C3AB22B002308DA /* OFREP in Frameworks */ = {isa = PBXBuildFile; productRef = 197F2E682C3AB22B002308DA /* OFREP */; };
+		19C87FA92C3AB2B5005D41BF /* GOFeatureFlag in Frameworks */ = {isa = PBXBuildFile; productRef = 19C87FA82C3AB2B5005D41BF /* GOFeatureFlag */; };
+		19C87FAB2C3AB2B5005D41BF /* OFREP in Frameworks */ = {isa = PBXBuildFile; productRef = 19C87FAA2C3AB2B5005D41BF /* OFREP */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -27,7 +32,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				194ECB832C388BD40019BB70 /* GOFeatureFlag in Frameworks */,
+				197F2E632C3AB1C4002308DA /* GOFeatureFlag in Frameworks */,
+				197F2E692C3AB22B002308DA /* OFREP in Frameworks */,
+				197F2E652C3AB1C4002308DA /* OFREP in Frameworks */,
+				19C87FAB2C3AB2B5005D41BF /* OFREP in Frameworks */,
+				197F2E672C3AB22B002308DA /* GOFeatureFlag in Frameworks */,
+				19C87FA92C3AB2B5005D41BF /* GOFeatureFlag in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -86,7 +96,12 @@
 			);
 			name = openfeature_swift_ios;
 			packageProductDependencies = (
-				194ECB822C388BD40019BB70 /* GOFeatureFlag */,
+				197F2E622C3AB1C4002308DA /* GOFeatureFlag */,
+				197F2E642C3AB1C4002308DA /* OFREP */,
+				197F2E662C3AB22B002308DA /* GOFeatureFlag */,
+				197F2E682C3AB22B002308DA /* OFREP */,
+				19C87FA82C3AB2B5005D41BF /* GOFeatureFlag */,
+				19C87FAA2C3AB2B5005D41BF /* OFREP */,
 			);
 			productName = openfeature_swift_ios;
 			productReference = 194ECB702C388B760019BB70 /* openfeature_swift_ios.app */;
@@ -117,7 +132,7 @@
 			);
 			mainGroup = 194ECB672C388B760019BB70;
 			packageReferences = (
-				194ECB812C388BD40019BB70 /* XCRemoteSwiftPackageReference "openfeature-swift-provider" */,
+				19C87FA72C3AB2B5005D41BF /* XCRemoteSwiftPackageReference "openfeature-swift-provider" */,
 			);
 			productRefGroup = 194ECB712C388B760019BB70 /* Products */;
 			projectDirPath = "";
@@ -352,7 +367,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		194ECB812C388BD40019BB70 /* XCRemoteSwiftPackageReference "openfeature-swift-provider" */ = {
+		19C87FA72C3AB2B5005D41BF /* XCRemoteSwiftPackageReference "openfeature-swift-provider" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/go-feature-flag/openfeature-swift-provider";
 			requirement = {
@@ -363,10 +378,31 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		194ECB822C388BD40019BB70 /* GOFeatureFlag */ = {
+		197F2E622C3AB1C4002308DA /* GOFeatureFlag */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 194ECB812C388BD40019BB70 /* XCRemoteSwiftPackageReference "openfeature-swift-provider" */;
 			productName = GOFeatureFlag;
+		};
+		197F2E642C3AB1C4002308DA /* OFREP */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = OFREP;
+		};
+		197F2E662C3AB22B002308DA /* GOFeatureFlag */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = GOFeatureFlag;
+		};
+		197F2E682C3AB22B002308DA /* OFREP */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = OFREP;
+		};
+		19C87FA82C3AB2B5005D41BF /* GOFeatureFlag */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 19C87FA72C3AB2B5005D41BF /* XCRemoteSwiftPackageReference "openfeature-swift-provider" */;
+			productName = GOFeatureFlag;
+		};
+		19C87FAA2C3AB2B5005D41BF /* OFREP */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 19C87FA72C3AB2B5005D41BF /* XCRemoteSwiftPackageReference "openfeature-swift-provider" */;
+			productName = OFREP;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
