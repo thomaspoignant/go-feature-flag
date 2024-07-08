@@ -52,7 +52,7 @@ require (
 	go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho v0.52.0
 	go.opentelemetry.io/otel v1.28.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.28.0
-	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.27.0
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.28.0
 	go.opentelemetry.io/otel/sdk v1.28.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/net v0.26.0
@@ -219,8 +219,8 @@ require (
 	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d // indirect
 	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028 // indirect
 	google.golang.org/genproto v0.0.0-20240617180043-68d350f18fd4 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20240617180043-68d350f18fd4 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240617180043-68d350f18fd4 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20240701130421-f6361c86f094 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240701130421-f6361c86f094 // indirect
 	google.golang.org/protobuf v1.34.2 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
