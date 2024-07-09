@@ -1,0 +1,24 @@
+{
+  "originHash" : "ff002a5cc0db54a9a338742bf101f206e6da4065b87478b5709a27b9aa42a721",
+  "pins" : [
+    {
+      "identity" : "openfeature-swift-provider",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/go-feature-flag/openfeature-swift-provider",
+      "state" : {
+        "branch" : "main",
+        "revision" : "a9a646b7d0aeab160e3a49dfc707a9fd6fbe5734"
+      }
+    },
+    {
+      "identity" : "swift-sdk",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/open-feature/swift-sdk.git",
+      "state" : {
+        "revision" : "02b033c954766e86d5706bfc8ee5248244c11e77",
+        "version" : "0.1.0"
+      }
+    }
+  ],
+  "version" : 3
+}
