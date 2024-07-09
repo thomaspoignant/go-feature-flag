@@ -231,7 +231,10 @@ func (f *InternalFlag) IsValid() error {
 
 	// Check that all variation has the same types
 	expectedVarType := ""
-	for _, value := range f.GetVariations() {
+	for name, value := range f.GetVariations() {
+		if value == nil {
+			return fmt.Errorf("nil value for variation: %s", name)
+		}
 		if expectedVarType != "" {
 			currentType, err := utils.JSONTypeExtractor(*value)
 			if err != nil {
