@@ -349,7 +349,7 @@ test-flag:
 	gff, err := ffclient.New(ffclient.Config{
 		PollingInterval:         1 * time.Second,
 		Retriever:               &fileretriever.Retriever{Path: flagFilePath},
-		Logger:                  log.New(os.Stdout, "", 0),
+		LeveledLogger:           slog.Default(),
 		StartWithRetrieverError: true,
 	})
 	defer gff.Close()
@@ -359,11 +359,34 @@ test-flag:
 	flagValue, _ := gff.StringVariation("test-flag", ffcontext.NewEvaluationContext("random-key"), "SDKdefault")
 	assert.Equal(t, "SDKdefault", flagValue, "should use the SDK default value")
 
-	_ = os.WriteFile(flagFilePath, []byte(initialFileContent), os.ModePerm)
+	err = os.WriteFile(flagFilePath, []byte(initialFileContent), os.ModePerm)
+	assert.NoError(t, err)
 	time.Sleep(2 * time.Second)
 
 	flagValue, _ = gff.StringVariation("test-flag", ffcontext.NewEvaluationContext("random-key"), "SDKdefault")
 	assert.Equal(t, "true", flagValue, "should use the true value")
+}
+
+func TestInvalidConf(t *testing.T) {
+	gff, err := ffclient.New(ffclient.Config{
+		PollingInterval: 1 * time.Second,
+		Retriever:       &fileretriever.Retriever{Path: "testdata/invalid-flag-config.json"},
+		LeveledLogger:   slog.Default(),
+	})
+	defer gff.Close()
+	assert.Error(t, err)
+	assert.Equal(t, err.Error(), "impossible to retrieve the flags, please check your configuration: yaml: line 43: did not find expected ',' or '}'")
+}
+
+func TestInvalidConfAndRetrieverError(t *testing.T) {
+	gff, err := ffclient.New(ffclient.Config{
+		PollingInterval:         1 * time.Second,
+		Retriever:               &fileretriever.Retriever{Path: "testdata/invalid-flag-config.json"},
+		LeveledLogger:           slog.Default(),
+		StartWithRetrieverError: true,
+	})
+	defer gff.Close()
+	assert.NoError(t, err)
 }
 
 func TestValidUseCaseBigFlagFile(t *testing.T) {
