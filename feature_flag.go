@@ -105,14 +105,16 @@ func New(config Config) (*GoFeatureFlag, error) {
 		}
 
 		err = retrieveFlagsAndUpdateCache(goFF.config, goFF.cache, goFF.retrieverManager)
-		if err != nil {
-			// if initial retrieval failed, we are trying to start the persistent local disk configuration (if enabled).
+		if err != nil && config.PersistentFlagConfigurationFile != "" {
 			errPersist := retrievePersistentLocalDisk(config.Context, config, goFF)
 			if errPersist != nil && !config.StartWithRetrieverError {
 				return nil,
-					fmt.Errorf("impossible to retrieve the flags, please check your configuration: %v",
-						errPersist)
+					fmt.Errorf(
+						"impossible to use the persistent flag configuration file: %v [original error: %v]",
+						errPersist, err)
 			}
+		} else if err != nil {
+			return nil, fmt.Errorf("impossible to retrieve the flags, please check your configuration: %v", err)
 		}
 
 		go goFF.startFlagUpdaterDaemon()

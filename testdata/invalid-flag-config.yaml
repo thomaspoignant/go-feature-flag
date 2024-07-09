@@ -1,0 +1,17 @@
+test-flag:
+  variations:
+    Default: false
+    False: false
+    True:
+  targeting:
+    - name: legacyRuleV0
+      query: key eq "random-key"
+      percentage:
+        False: 0
+        True: 100
+  defaultRule:
+    name: legacyDefaultRule
+    variation: Default
+  metadata:
+    description: this is a simple feature flag
+    issue-link: https://jira.xxx/GOFF-01
