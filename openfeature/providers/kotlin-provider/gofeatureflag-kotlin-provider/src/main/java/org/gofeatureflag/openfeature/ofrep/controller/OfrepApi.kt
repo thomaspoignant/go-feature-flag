@@ -2,8 +2,9 @@ package org.gofeatureflag.openfeature.ofrep.controller
 
 import OfrepApiRequest
 import OfrepApiResponse
-import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.google.gson.JsonSyntaxException
+import com.google.gson.ToNumberPolicy
 import dev.openfeature.sdk.EvaluationContext
 import dev.openfeature.sdk.exceptions.OpenFeatureError
 import okhttp3.ConnectionPool
@@ -19,7 +20,8 @@ import java.util.concurrent.TimeUnit
 
 class OfrepApi(private val options: OfrepOptions) {
     companion object {
-        private val gson = Gson()
+        private val gson =
+            GsonBuilder().setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE).create()
     }
 
     private var httpClient: OkHttpClient = OkHttpClient.Builder()

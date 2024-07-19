@@ -2,9 +2,9 @@
   "flags": [
     {
       "key": "badge-class2",
-      "value": "green",
+      "value": "blue",
       "reason": "DEFAULT",
-      "variant": "nocolor"
+      "variant": "xxxx"
     },
     {
       "key": "hide-logo",
