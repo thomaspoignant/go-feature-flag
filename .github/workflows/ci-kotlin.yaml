@@ -36,4 +36,4 @@ jobs:
         uses: gradle/gradle-build-action@v3
       - name: Build with Gradle
         working-directory: ./openfeature/providers/kotlin-provider
-        run: ./gradlew verify
+        run: ./gradlew test
