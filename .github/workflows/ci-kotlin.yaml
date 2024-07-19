@@ -3,8 +3,12 @@ on:
   push:
     branches:
       - main
+    paths:
+      - openfeature/providers/kotlin-provider/**
   pull_request:
     types: [ opened, synchronize, reopened ]
+    paths:
+      - openfeature/providers/kotlin-provider/**
 
 jobs:
   Build:
