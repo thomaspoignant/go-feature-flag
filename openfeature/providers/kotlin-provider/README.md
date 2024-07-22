@@ -1,93 +1,156 @@
-# GO Feature Flag Kotlin OpenFeature Provider for Android
+# GO Feature Flag - OpenFeature Android provider
+<p align="center">
+   <a href="https://search.maven.org/artifact/org.gofeatureflag.openfeature/gofeatureflag-kotlin-provider"><img src="https://img.shields.io/maven-central/v/org.gofeatureflag.openfeature/gofeatureflag-kotlin-provider?color=blue" alt="Maven Release"></a>
+   <img alt="Static Badge" src="https://img.shields.io/badge/android-version%3Fcolor%3Ablue?logo=android&logoColor=blue&logoSize=10px">
+   <a href="https://gofeatureflag.org/slack"><img src="https://img.shields.io/badge/join-us%20on%20slack-gray.svg?longCache=true&logo=slack&colorB=green" alt="Join us on slack"></a>
+</p>
 
-![Static Badge](https://img.shields.io/badge/status-experimental-red)
+This repository contains the official Kotlin OpenFeature provider for Android, to access your feature flags with [GO Feature Flag](https://gofeatureflag.org).
 
-This OpenFeature provider is a Kotlin implementation for Android to communicate with the GO Feature
-Flag Server.
+In conjuction with the [OpenFeature SDK](https://openfeature.dev/docs/reference/technologies/client/kotlin) you will be able to evaluate your feature flags in your **Android** applications.
 
-The OpenFeature Kotlin is experimental, and the provider is also experimental.  
-We don't recommend using this in production yet.
+For documentation related to flags management in GO Feature Flag, refer to the [GO Feature Flag documentation website](https://gofeatureflag.org/docs).
 
-## About this provider
+### Functionalities:
+- Manage the integration of the OpenFeature Android SDK and GO Feature Flag relay-proxy.
+- Prefetch and cache flag evaluations in order to give the flag value in an efficient way.
+- Automatic configuration changes polling, to be informed as soon as a flag configuration has changed.
+- Automatic data collection about which flags have been accessed by the application
 
-[GO Feature Flag](https://gofeatureflag.org) provider allows you to connect to your GO Feature Flag
-instance with the OpenFeature Kotlin SDK.
-
-This is a client provider made for Android, we do not recommend using it in a server environment.  
-If you want to use it in a server environment, you should use
-the [`Java` provider](https://gofeatureflag.org/docs/openfeature_sdk/server_providers/openfeature_java).
-
-## What is GO Feature Flag?
-
-GO Feature Flag is a simple, complete and lightweight self-hosted feature flag solution 100% Open
-Source.  
-Our focus is to avoid any complex infrastructure work to use GO Feature Flag.
-
-This is a complete feature flagging solution with the possibility to target only a group of users,
-use any types of flags, store your configuration in various location and advanced rollout
-functionality. You can also collect usage data of your flags and be notified of configuration
-changes.
-
-## Install the provider
-
-### Maven
-```xml
-<dependency>
-  <groupId>org.gofeatureflag.openfeature</groupId>
-  <artifactId>gofeatureflag-kotlin-provider</artifactId>
-  <version>:0.0.1-beta.1</version>
-</dependency>
-```
-
-### Gradle
-```
-implementation("org.gofeatureflag.openfeature:gofeatureflag-kotlin-provider:0.0.1-beta.1")
-```
-
-## How to use the provider?
+## Dependency Setup
 
 ```kotlin
-val evaluationContext = ImmutableContext(
-    targetingKey = "0a23d9a5-0a8f-42c9-9f5f-4de3afd6cf99",
-    attributes = mutableMapOf(
-        "region" to Value.String("us-east-1"),
-        "email" to Value.String("john.doe@gofeatureflag.org")
+dependencies {
+    api("dev.openfeature:android-sdk:0.3.0") // check on maven central to get the latest version
+    implementation("org.gofeatureflag.openfeature:gofeatureflag-kotlin-provider:0.1.0") // check on maven central to get the latest version
+}
+```
+
+## Getting started
+
+### Initialize the provider
+
+GO Feature Flag provider needs to be created and then set in the global OpenFeatureAPI.
+
+The only required option to create a `GoFeatureFlagProvider` is the URL to your GO Feature Flag relay-proxy instance.
+
+```kotlin
+import org.gofeatureflag.openfeature.bean.GoFeatureFlagOptions
+import org.gofeatureflag.openfeature.GoFeatureFlagProvider
+// ...
+
+val evaluationContext: EvaluationContext = ImmutableContext(
+        targetingKey = UUID.randomUUID().toString(),
+        attributes = mapOf( "age" to Value.Integer(22), "email" to Value.String("contact@gofeatureflag.org"))
     )
-)
 
 OpenFeatureAPI.setProvider(
     GoFeatureFlagProvider(
-        options = GoFeatureFlagOptions(
-            endpoint = "http://localhost:1031"
-        )
-    ), evaluationContext
+        options = GoFeatureFlagOptions( endpoint = "http://localhost:1031")
+    ), 
+    evaluationContext
 )
 
-val client = OpenFeatureAPI.getClient("my-client")
-if (client.getBooleanValue("my-flag", false)) {
-    println("my-flag is enabled")
+```
+
+The evaluation context is the way for the client to specify contextual data that GO Feature Flag uses to evaluate the feature flags, it allows defining rules on the flag.
+
+The `targetingKey` is mandatory for GO Feature Flag in order to evaluate the feature flag, it could be the id of a user, a session ID or anything you find relevent to use as identifier during the evaluation.
+
+The `setProvider()` function is synchronous and returns immediately however, this does not mean that the provider is ready to be used.
+An asynchronous network request to the GO Feature Flag backend to fetch all the flags configured for your application must be completed by the provider first. The provider will then emit a `READY` event indicating you can start resolving flags.
+
+If you prefer to wait until the fetch is done you can use the `suspend` compatible API available for waiting the Provider to become ready:
+
+```kotlin
+runBlocking{
+  OpenFeatureAPI.shared.setProviderAndWait(
+    provider = provider,
+    dispatcher = Dispatchers.IO,
+    initialContext = evaluationContext
+  )
 }
-OpenFeatureAPI.shutdown()
 ```
 
 ### Available options
 
-| Option name        | Type   | Default | Description                                                                                                                                                                                     |
-|--------------------|--------|---------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| endpoint           | String |         | endpoint is the URL where your GO Feature Flag server is located.                                                                                                                               |
-| timeout            | Long   | 10000   | (optional) timeout is the time in millisecond we wait for an answer from the server.                                                                                                            |
-| maxIdleConnections | Int    | 1000    | (optional) maxIdleConnections is the maximum number of connexions in the connexion pool.                                                                                                        |
-| keepAliveDuration  | Long   | 7200000 | (optional) keepAliveDuration is the time in millisecond we keep the connexion open.                                                                                                             |
-| apiKey             | String |         | (optional) If GO Feature Flag is configured to authenticate the requests, you should provide an API Key to the provider. Please ask the administrator of the relay proxy to provide an API Key. |
-| retryDelay         | Long   | 300     | (optional) delay in millisecond to wait before retrying to connect the websocket                                                                                                                |
+When initializing the provider, you can pass some options to configure the provider and how it behaves with GO Feature Flag.
 
-### Reconnection
+| Option name               | Type   | Default | Description                                                                                                                                                                                     |
+|---------------------------|--------|---------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `endpoint`                | String |         | endpoint is the URL where your GO Feature Flag server is located.                                                                                                                               |
+| `timeout`                 | Long   | 10000   | (optional) timeout is the time in millisecond we wait for an answer from the server.                                                                                                            |
+| `maxIdleConnections`      | Int    | 1000    | (optional) maxIdleConnections is the maximum number of connexions in the connexion pool.                                                                                                        |
+| `keepAliveDuration`       | Long   | 7200000 | (optional) keepAliveDuration is the time in millisecond we keep the connexion open.                                                                                                             |
+| `apiKey`                  | String |         | (optional) If GO Feature Flag is configured to authenticate the requests, you should provide an API Key to the provider. Please ask the administrator of the relay proxy to provide an API Key. |
+| `pollingIntervalInMillis` | Long   | 300000  | (optional) Polling interval in millisecond to check with GO Feature Flag relay proxy if there is a flag configuration change.                                                                   |
+| `flushIntervalMs`         | Long   | 1000    | (optional) Time to wait before calling GO Feature Flag to store all the data about the evaluation in the relay proxy.                                                                           |
 
-If the connection to the GO Feature Flag instance fails, the provider will attempt to reconnect.
+### Update the Evaluation Context
 
-### Event streaming
+During the usage of your application it may appear that the `EvaluationContext` should be updated. For example, if a not logged-in user authentify himself, you will probably have to update the evaluation context.
 
-Event streaming is not implemented yet in the GO Feature Flag provider.
+```kotlin
+val newContext: EvaluationContext = ImmutableContext(
+    targetingKey = userId,
+    attributes = mapOf( "age" to Value.Integer(32), "email" to Value.String("batman@gofeatureflag.org"))
+)
+
+OpenFeatureAPI.setEvaluationContext(newEvalCtx)
+```
+
+`setEvaluationContext()` is a synchronous function similar to `setProvider()` and will fetch the new version of the feature flags based on this new `EvaluationContext`.
+
+### Evaluate a feature flag
+The client is used to retrieve values for the current `EvaluationContext`. For example, retrieving a boolean value for the flag **"my-flag"**:
+
+```kotlin
+val client = OpenFeatureAPI.getClient()
+val result = client.getBooleanValue("my-flag", false)
+```
+
+GO Feature Flag supports different all OpenFeature supported types of feature flags, it means that you can use all the accessor directly
+```kotlin
+// Bool
+client.getBooleanValue("my-flag", false)
+
+// String
+client.getStringValue("my-flag", "default")
+
+// Integer
+client.getIntegerValue("my-flag", 1)
+
+// Double
+client.getDoubleValue("my-flag", 1.1)
+
+// Object
+client.getObjectValue("my-flag", Value.structure(mapOf("email" to Value.String("contact@gofeatureflag.org"))))
+```
+
+> [!NOTE]  
+> If you add a new flag in GO Feature Flag, expect some delay before having it available for the provider.
+> Refreshing the cache from remote happens when setting a new provider and/or evaluation context in the global OpenFeatureAPI, but also when a configuration change is detected during the polling.
+
+### Handling Provider Events
+
+When setting the provider or the context *(via `setEvaluationContext()` or `setProvider()`)* some events can be triggered to know the state of the provider.
+
+To listen to them, you can add an event handler via the `OpenFeatureAPI` shared instance:
+
+```kotlin
+val coroutineScope = CoroutineScope(Dispatchers.IO)
+coroutineScope.launch {
+    provider.observe<OpenFeatureEvents.ProviderStale>().collect {
+        providerStaleEventReceived = true
+    }
+}
+```
+
+#### Existing type of events are:
+- `ProviderReady`: Provider is ready.
+- `ProviderError`: Provider in error.
+- `ProviderStale`: Provider has not the latest version of the feature flags.
+- `ProviderNotReady`: Provider is not ready to evaluate the feature flags.
 
 ## Features status
 
@@ -97,9 +160,11 @@ Event streaming is not implemented yet in the GO Feature Flag provider.
 | ✅      | Cache invalidation | Websocket mechanism is in place to refresh the cache in case of configuration change |
 | ❌      | Logging            | Not supported by the SDK                                                             |
 | ❌      | Flag Metadata      | Not supported by the SDK                                                             |
-| ❌      | Event Streaming    | Not implemented                                                                      |
-| ❌      | Unit test          | Not implemented                                                                      |
+| ✅      | Event Streaming    | Not implemented                                                                      |
+| ✅      | Unit test          | Not implemented                                                                      |
 
 <sub>Implemented: ✅ | In-progress: ⚠️ | Not implemented yet: ❌</sub>
 
-
+## Contributing
+This project welcomes contributions from the community.
+If you're interested in contributing, see the [contributors' guide](https://github.com/thomaspoignant/go-feature-flag/blob/main/CONTRIBUTING.md) for some helpful tips.

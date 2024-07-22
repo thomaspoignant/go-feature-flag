@@ -1,0 +1,110 @@
+{
+  "flags": [
+    {
+      "key": "badge-class2",
+      "value": "green",
+      "reason": "DEFAULT",
+      "variant": "nocolor"
+    },
+    {
+      "key": "hide-logo",
+      "value": false,
+      "reason": "STATIC",
+      "variant": "var_false"
+    },
+    {
+      "key": "title-flag",
+      "value": "GO Feature Flag",
+      "reason": "DEFAULT",
+      "variant": "default_title",
+      "metadata": {
+        "description": "This flag controls the title of the feature flag",
+        "title": "Feature Flag Title"
+      }
+    },
+    {
+      "value": true,
+      "key": "my-flag",
+      "reason": "STATIC",
+      "variant": "variantA",
+      "metadata": {
+        "additionalProp1": true,
+        "additionalProp2": "value",
+        "additionalProp3": 123
+      }
+    },
+    {
+      "value": true,
+      "key": "bool-flag",
+      "reason": "TARGETING_MATCH",
+      "variant": "variantA",
+      "metadata": {
+        "additionalProp1": true,
+        "additionalProp2": "value",
+        "additionalProp3": 123
+      }
+    },
+    {
+      "value": 1234,
+      "key": "int-flag",
+      "reason": "TARGETING_MATCH",
+      "variant": "variantA",
+      "metadata": {
+        "additionalProp1": true,
+        "additionalProp2": "value",
+        "additionalProp3": 123
+      }
+    },
+    {
+      "value": 12.34,
+      "key": "double-flag",
+      "reason": "TARGETING_MATCH",
+      "variant": "variantA",
+      "metadata": {
+        "additionalProp1": true,
+        "additionalProp2": "value",
+        "additionalProp3": 123
+      }
+    },
+    {
+      "value": "1234value",
+      "key": "string-flag",
+      "reason": "TARGETING_MATCH",
+      "variant": "variantA",
+      "metadata": {
+        "additionalProp1": true,
+        "additionalProp2": "value",
+        "additionalProp3": 123
+      }
+    },
+    {
+      "value": {
+        "testValue": {
+          "toto": 1234
+        }
+      },
+      "key": "object-flag",
+      "reason": "TARGETING_MATCH",
+      "variant": "variantA",
+      "metadata": {
+        "additionalProp1": true,
+        "additionalProp2": "value",
+        "additionalProp3": 123
+      }
+    },
+    {
+      "value": [
+        1234,
+        5678
+      ],
+      "key": "array-flag",
+      "reason": "TARGETING_MATCH",
+      "variant": "variantA",
+      "metadata": {
+        "additionalProp1": true,
+        "additionalProp2": "value",
+        "additionalProp3": 123
+      }
+    }
+  ]
+}

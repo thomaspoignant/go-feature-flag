@@ -1,0 +1,39 @@
+name: "CI Kotlin Provider"
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - openfeature/providers/kotlin-provider/**
+  pull_request:
+    types: [ opened, synchronize, reopened ]
+    paths:
+      - openfeature/providers/kotlin-provider/**
+
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cache Gradle and wrapper
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: 'zulu'
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v3
+      - name: Build with Gradle
+        working-directory: ./openfeature/providers/kotlin-provider
+        run: ./gradlew test

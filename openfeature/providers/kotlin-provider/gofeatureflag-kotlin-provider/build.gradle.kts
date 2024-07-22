@@ -12,6 +12,12 @@ android {
     namespace = "org.gofeatureflag.openfeature"
     compileSdk = 33
 
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
+
     defaultConfig {
         minSdk = 21
         version = releaseVersion
@@ -40,6 +46,7 @@ android {
             withSourcesJar()
         }
     }
+
 }
 publishing {
     publications {
@@ -86,13 +93,14 @@ publishing {
 }
 
 dependencies {
-    implementation("dev.openfeature:kotlin-sdk:0.1.0")
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    implementation("com.google.code.gson:gson:2.11.0")
-    implementation("dev.gustavoavila:java-android-websocket-client:2.0.2")
+    api("dev.openfeature:android-sdk:0.3.0")
+    api("com.squareup.okhttp3:okhttp:4.12.0")
+    api("com.google.code.gson:gson:2.11.0")
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
+    testImplementation("org.skyscreamer:jsonassert:1.5.0")
 }
 
 signing {
