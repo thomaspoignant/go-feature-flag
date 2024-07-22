@@ -43,7 +43,6 @@ func NewCollectEvalData(goFF *ffclient.GoFeatureFlag, metrics metric.Metrics) Co
 func (h *collectEvalData) Handler(c echo.Context) error {
 	reqBody := new(model.CollectEvalDataRequest)
 	if err := c.Bind(reqBody); err != nil {
-		print(err)
 		return echo.NewHTTPError(
 			http.StatusBadRequest,
 			fmt.Sprintf("collectEvalData: invalid input data %v", err))
