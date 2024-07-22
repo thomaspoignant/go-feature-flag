@@ -34,5 +34,11 @@ data class OfrepOptions(
      * (optional) headers to add to the OFREP calls
      * Default: empty
      */
-    val headers: Headers? = null
+    val headers: Headers? = null,
+
+    /**
+     * (optional) polling interval in millisecond to refresh the flags
+     * Default: 300000 (5 minutes)
+     */
+    val pollingIntervalInMillis: Long = 300000
 )

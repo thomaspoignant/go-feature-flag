@@ -5,7 +5,7 @@ import dev.openfeature.sdk.exceptions.OpenFeatureError
 import kotlin.reflect.KClass
 
 data class OfrepApiResponse(
-    val flags: List<FlagDto>,
+    val flags: List<FlagDto>? = null,
     val errorCode: ErrorCode?,
     val errorDetails: String?
 )

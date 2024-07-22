@@ -26,7 +26,10 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
+import java.util.Timer
+import java.util.TimerTask
 import kotlin.reflect.KClass
+
 
 class OfrepProvider(
     private val ofrepOptions: OfrepOptions,
@@ -42,6 +45,7 @@ class OfrepProvider(
     private var evaluationContext: EvaluationContext? = null
     private var inMemoryCache: Map<String, FlagDto> = emptyMap()
     private var retryAfter: Date? = null
+    private var pollingTimer: Timer? = null
 
 
     override fun observe(): Flow<OpenFeatureEvents> = eventHandler.observe()
@@ -51,17 +55,67 @@ class OfrepProvider(
         runBlocking {
             launch {
                 try {
-                    val postBulkEvaluateFlags =
-                        evaluateFlags(initialContext ?: ImmutableContext())
+                    val bulkEvaluationStatus = evaluateFlags(initialContext ?: ImmutableContext())
+                    if (bulkEvaluationStatus == BulkEvaluationStatus.RATE_LIMITED) {
+                        eventHandler.publish(
+                            OpenFeatureEvents.ProviderError(
+                                OfrepError.ApiTooManyRequestsError(
+                                    null
+                                )
+                            )
+                        )
+                        return@launch
+                    }
                     eventHandler.publish(OpenFeatureEvents.ProviderReady)
                 } catch (e: Exception) {
-                    print(e)
                     eventHandler.publish(OpenFeatureEvents.ProviderError(e))
                 }
             }
         }
+        this.startPolling(this.ofrepOptions.pollingIntervalInMillis)
     }
 
+    /**
+     * Start polling for flag updates
+     */
+    private fun startPolling(pollingIntervalInMillis: Long) {
+        val task: TimerTask = object : TimerTask() {
+            override fun run() {
+                runBlocking {
+                    try {
+                        val resp =
+                            this@OfrepProvider.evaluateFlags(this@OfrepProvider.evaluationContext!!)
+
+                        when (resp) {
+                            BulkEvaluationStatus.RATE_LIMITED, BulkEvaluationStatus.SUCCESS_NO_CHANGE -> {
+                                // Nothing to do !
+                                //
+                                // if rate limited: the provider should already be in stale status and
+                                //    we don't need to emit an event or call again the API
+                                //
+                                // if no change: the provider should already be in ready status and
+                                //    we don't need to emit an event if nothing has changed
+                            }
+
+                            BulkEvaluationStatus.SUCCESS_UPDATED -> {
+                                // TODO: we should migrate to configuration change event when it's available
+                                // in the kotlin SDK
+                                eventHandler.publish(OpenFeatureEvents.ProviderReady)
+                            }
+                        }
+                    } catch (e: OfrepError.ApiTooManyRequestsError) {
+                        // in that case the provider is just stale because we were not able to
+                        eventHandler.publish(OpenFeatureEvents.ProviderStale)
+                    } catch (e: Throwable) {
+                        eventHandler.publish(OpenFeatureEvents.ProviderError(e))
+                    }
+                }
+            }
+        }
+        val timer = Timer()
+        timer.schedule(task, pollingIntervalInMillis, pollingIntervalInMillis)
+        this.pollingTimer = timer
+    }
 
     override fun getBooleanEvaluation(
         key: String,
@@ -133,14 +187,11 @@ class OfrepProvider(
                 }
             }
         }
-
-
     }
 
     override fun shutdown() {
-        // TODO: implement?
+        this.pollingTimer?.cancel()
     }
-
 
     private fun <T : Any> genericEvaluation(
         key: String,
@@ -200,7 +251,7 @@ class OfrepProvider(
             this.inMemoryCache = inMemoryCacheNew
             return BulkEvaluationStatus.SUCCESS_UPDATED
         } catch (e: OfrepError.ApiTooManyRequestsError) {
-            this.retryAfter = calculateRetryDate(e.response.headers["Retry-After"] ?: "")
+            this.retryAfter = calculateRetryDate(e.response?.headers?.get("Retry-After") ?: "")
             return BulkEvaluationStatus.RATE_LIMITED
         } catch (e: Throwable) {
             throw e
@@ -208,6 +259,10 @@ class OfrepProvider(
     }
 
     private fun calculateRetryDate(retryAfter: String): Date? {
+        if (retryAfter.isEmpty()) {
+            return null
+        }
+
         val retryDate: Calendar = Calendar.getInstance()
         try {
             // If retryAfter is a number, it represents seconds to wait.

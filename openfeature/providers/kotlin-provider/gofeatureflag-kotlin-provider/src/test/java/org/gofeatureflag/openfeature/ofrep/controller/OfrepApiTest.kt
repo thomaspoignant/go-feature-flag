@@ -41,7 +41,7 @@ class OfrepApiTest {
     @Test
     fun shouldReturnAValidEvaluationResponse() = runBlocking {
         val jsonFilePath =
-            javaClass.classLoader?.getResource("org.gofeatureflag.openfeature.ofrep/valid_api_response.json")?.file
+            javaClass.classLoader?.getResource("org.gofeatureflag.openfeature.ofrep/valid_api_short_response.json")?.file
         val jsonString = String(withContext(Dispatchers.IO) {
             Files.readAllBytes(Paths.get(jsonFilePath))
         })
@@ -134,8 +134,8 @@ class OfrepApiTest {
             ofrepApi.postBulkEvaluateFlags(ctx)
             assertTrue("we exited the try block without throwing an exception", false)
         } catch (e: OfrepError.ApiTooManyRequestsError) {
-            assertEquals(429, e.response.code)
-            assertEquals(e.response.headers["Retry-After"], "120")
+            assertEquals(429, e.response?.code)
+            assertEquals(e.response?.headers?.get("Retry-After"), "120")
         }
     }
 

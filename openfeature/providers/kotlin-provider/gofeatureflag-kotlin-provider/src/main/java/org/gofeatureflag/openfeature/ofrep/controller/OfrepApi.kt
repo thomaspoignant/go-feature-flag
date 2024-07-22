@@ -73,12 +73,15 @@ class OfrepApi(private val options: OfrepOptions) {
                 304 -> return PostBulkEvaluationResult(null, response)
                 in 200..299, 400 -> {
                     try {
-                        response.headers.get("ETag").let { this.etag = it }
+                        response.headers["ETag"].let { this.etag = it }
                         val ofrepResp =
                             gson.fromJson(response.body?.string(), OfrepApiResponse::class.java)
                         return PostBulkEvaluationResult(ofrepResp, response)
                     } catch (e: JsonSyntaxException) {
                         throw OfrepError.UnmarshallError(e)
+                    } catch (e: Exception) {
+                        println(e)
+                        throw OfrepError.UnexpectedResponseError(response)
                     }
                 }
 

@@ -12,6 +12,12 @@ android {
     namespace = "org.gofeatureflag.openfeature"
     compileSdk = 33
 
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
+
     defaultConfig {
         minSdk = 21
         version = releaseVersion
@@ -40,6 +46,7 @@ android {
             withSourcesJar()
         }
     }
+
 }
 publishing {
     publications {

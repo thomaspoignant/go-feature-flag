@@ -14,6 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import okhttp3.Headers
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.gofeatureflag.openfeature.ofrep.bean.OfrepOptions
@@ -42,7 +43,8 @@ class OfrepProviderTest {
         OpenFeatureAPI.shutdown()
         OpenFeatureAPI.clearProvider()
         OpenFeatureAPI.clearHooks()
-        mockWebServer!!.shutdown()
+        mockWebServer?.shutdown()
+        mockWebServer = null
     }
 
     @Test
@@ -85,9 +87,14 @@ class OfrepProviderTest {
         assert(providerErrorReceived) { "ProviderError event was not received" }
     }
 
+
     @Test
     fun `should be in Error status if 429 error during initialise`(): Unit = runBlocking {
-        enqueueMockResponse("org.gofeatureflag.openfeature.ofrep/valid_api_response.json", 429)
+        enqueueMockResponse(
+            "org.gofeatureflag.openfeature.ofrep/valid_api_response.json",
+            429,
+            Headers.headersOf("Retry-After", "3")
+        )
 
         val provider = OfrepProvider(OfrepOptions(endpoint = mockWebServer?.url("/").toString()))
         var providerErrorReceived = false
@@ -102,7 +109,7 @@ class OfrepProviderTest {
         }
         OpenFeatureAPI.setProviderAndWait(provider, Dispatchers.IO, defaultEvalCtx)
         assert(providerErrorReceived) { "ProviderError event was not received" }
-        assert(exceptionReceived is OfrepError.ApiTooManyRequestsError) { "The exception is not of type TargetingKeyMissingError" }
+        assert(exceptionReceived is OfrepError.ApiTooManyRequestsError) { "The exception is not of type ApiTooManyRequestsError" }
     }
 
 
@@ -152,7 +159,6 @@ class OfrepProviderTest {
     @Test
     fun `should be in error status if error invalid context`(): Unit = runBlocking {
         enqueueMockResponse("org.gofeatureflag.openfeature.ofrep/invalid_context.json", 400)
-
         val provider = OfrepProvider(OfrepOptions(endpoint = mockWebServer?.url("/").toString()))
         var providerErrorReceived = false
         var exceptionReceived: Throwable? = null
@@ -209,7 +215,10 @@ class OfrepProviderTest {
 
     @Test
     fun `should return evaluation details if the flag exists`(): Unit = runBlocking {
-        enqueueMockResponse("org.gofeatureflag.openfeature.ofrep/valid_api_response.json", 200)
+        enqueueMockResponse(
+            "org.gofeatureflag.openfeature.ofrep/valid_api_short_response.json",
+            200
+        )
         val provider = OfrepProvider(OfrepOptions(endpoint = mockWebServer?.url("/").toString()))
         OpenFeatureAPI.setProviderAndWait(provider, Dispatchers.IO, defaultEvalCtx)
         val client = OpenFeatureAPI.getClient()
@@ -273,29 +282,34 @@ class OfrepProviderTest {
                 providerReadyEventReceived = true
             }
         }
-
+        Thread.sleep(1000) // waiting to be sure that setEvaluationContext has been processed
         val newEvalCtx = ImmutableContext(targetingKey = UUID.randomUUID().toString())
         OpenFeatureAPI.setEvaluationContext(newEvalCtx)
-        Thread.sleep(500) // waiting to be sure that setEvaluationContext has been processed
+        Thread.sleep(1000) // waiting to be sure that setEvaluationContext has been processed
         assert(providerStaleEventReceived) { "ProviderStale event was not received" }
         assert(providerReadyEventReceived) { "ProviderReady event was not received" }
     }
 
-//    @Test
-//    fun `should not try to call the API before Retry-After header`(): Unit = runBlocking {
-//        mockWebServer!!.enqueue(
-//            MockResponse()
-//                .setResponseCode(429)
-//                .setHeader("Retry-After", "3")
-//        )
-//        val provider = OfrepProvider(OfrepOptions(endpoint = mockWebServer?.url("/").toString()))
-//        OpenFeatureAPI.setProviderAndWait(provider, Dispatchers.IO, defaultEvalCtx)
-//        val client = OpenFeatureAPI.getClient()
-//        client.getStringDetails("my-other-flag", "default")
-//        client.getStringDetails("my-other-flag", "default")
-//        Thread.sleep(2000) // we wait 2 seconds to let the polling loop run
-//        assertEquals(1, mockWebServer!!.requestCount)
-//    }
+    @Test
+    fun `should not try to call the API before Retry-After header`(): Unit = runBlocking {
+        mockWebServer!!.enqueue(
+            MockResponse()
+                .setResponseCode(429)
+                .setHeader("Retry-After", "3")
+        )
+        val provider = OfrepProvider(
+            OfrepOptions(
+                pollingIntervalInMillis = 100,
+                endpoint = mockWebServer?.url("/").toString()
+            )
+        )
+        OpenFeatureAPI.setProviderAndWait(provider, Dispatchers.IO, defaultEvalCtx)
+        val client = OpenFeatureAPI.getClient()
+        client.getStringDetails("my-other-flag", "default")
+        client.getStringDetails("my-other-flag", "default")
+        Thread.sleep(2000) // we wait 2 seconds to let the polling loop run
+        assertEquals(1, mockWebServer!!.requestCount)
+    }
 
     @Test
     fun `should return a valid evaluation for Boolean`() = runBlocking {
@@ -479,14 +493,62 @@ class OfrepProviderTest {
         assertEquals(want, got)
     }
 
-    private fun enqueueMockResponse(fileName: String, responseCode: Int = 200) {
+    @Test
+    fun `should have different result if waiting for next polling interval`(): Unit = runBlocking {
+        enqueueMockResponse(
+            "org.gofeatureflag.openfeature.ofrep/valid_api_short_response.json",
+            200
+        )
+        enqueueMockResponse(
+            "org.gofeatureflag.openfeature.ofrep/valid_api_response_2.json",
+            200
+        )
+
+        val provider = OfrepProvider(
+            OfrepOptions(
+                pollingIntervalInMillis = 100,
+                endpoint = mockWebServer?.url("/").toString()
+            )
+        )
+        OpenFeatureAPI.setProviderAndWait(provider, Dispatchers.IO, defaultEvalCtx)
+        val client = OpenFeatureAPI.getClient()
+        val got = client.getStringDetails("badge-class2", "default")
+        val want = FlagEvaluationDetails<String>(
+            flagKey = "badge-class2",
+            value = "green",
+            variant = "nocolor",
+            reason = "DEFAULT",
+            errorCode = null,
+            errorMessage = null,
+        )
+        assertEquals(want, got)
+        Thread.sleep(1000)
+        val got2 = client.getStringDetails("badge-class2", "default")
+        val want2 = FlagEvaluationDetails<String>(
+            flagKey = "badge-class2",
+            value = "blue",
+            variant = "xxxx",
+            reason = "TARGETING_MATCH",
+            errorCode = null,
+            errorMessage = null,
+        )
+        assertEquals(want2, got2)
+    }
+
+    private fun enqueueMockResponse(
+        fileName: String,
+        responseCode: Int = 200,
+        headers: Headers? = null
+    ) {
         val jsonFilePath =
             javaClass.classLoader?.getResource(fileName)?.file
         val jsonString = String(Files.readAllBytes(Paths.get(jsonFilePath)))
-        mockWebServer!!.enqueue(
-            MockResponse()
-                .setBody(jsonString.trimIndent())
-                .setResponseCode(responseCode)
-        )
+        var resp = MockResponse()
+            .setBody(jsonString.trimIndent())
+            .setResponseCode(responseCode)
+        if (headers != null) {
+            resp = resp.setHeaders(headers)
+        }
+        mockWebServer!!.enqueue(resp)
     }
 }
