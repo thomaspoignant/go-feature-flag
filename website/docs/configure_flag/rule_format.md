@@ -21,6 +21,14 @@ For instance, **GO Feature Flag** ensures that in cases where a feature is being
 
 The targeting key is a fundamental part of the evaluation context because it directly affects the determination of which feature variant is served to a particular user, and it maintains that continuity over time.
 
+### Reserved properties in the evaluation context 
+When you create an evaluation context some fields are reserved for GO Feature Flag.  
+Those fields are used by GO Feature Flag directly, you can use them as will but you should be aware that they are used by GO Feature Flag.
+
+| Field                           | Description                                                                                                                                                                                                 |
+|---------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `gofeatureflag.currentDateTime` | If this property is set, we will use this date as base for all the rollout strategies which implies dates _(experimentation, progressive and scheduled)_.<br/>**Format:** Date following the RF3339 format. |
+
 ## Rule format
 
 A rule is a configuration that allows to serve a variation based on some conditions.
