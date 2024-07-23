@@ -44,7 +44,7 @@ type Rule struct {
 // If yes it returns the variation you should use for this rule.
 func (r *Rule) Evaluate(ctx ffcontext.Context, hashID uint32, isDefault bool,
 ) (string, error) {
-	evaluationDate := time.Now()
+	evaluationDate := DateFromContextOrDefault(ctx, time.Now())
 	// Check if the rule apply for this user
 	ruleApply := isDefault || r.GetQuery() == "" || parser.Evaluate(r.GetTrimmedQuery(), utils.ContextToMap(ctx))
 	if !ruleApply || (!isDefault && r.IsDisable()) {

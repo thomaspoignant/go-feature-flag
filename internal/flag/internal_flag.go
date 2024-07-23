@@ -62,7 +62,7 @@ func (f *InternalFlag) Value(
 	evaluationCtx ffcontext.Context,
 	flagContext Context,
 ) (interface{}, ResolutionDetails) {
-	evaluationDate := time.Now()
+	evaluationDate := DateFromContextOrDefault(evaluationCtx, time.Now())
 	f.applyScheduledRolloutSteps(evaluationDate)
 
 	if flagContext.EvaluationContextEnrichment != nil {
@@ -348,4 +348,11 @@ func (f *InternalFlag) GetMetadata() map[string]interface{} {
 		return nil
 	}
 	return *f.Metadata
+}
+
+func DateFromContextOrDefault(ctx ffcontext.Context, defaultDate time.Time) time.Time {
+	if ctx == nil || ctx.ExtractGOFFProtectedFields().CurrentDateTime == nil {
+		return defaultDate
+	}
+	return *ctx.ExtractGOFFProtectedFields().CurrentDateTime
 }

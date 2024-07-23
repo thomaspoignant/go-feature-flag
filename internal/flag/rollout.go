@@ -7,7 +7,7 @@ type Rollout struct {
 	Experimentation *ExperimentationRollout `json:"experimentation,omitempty" yaml:"experimentation,omitempty" toml:"experimentation,omitempty"` // nolint: lll
 
 	// Scheduled is your struct to configure an update on some fields of your flag over time.
-	// You can add several steps that updates the flag, this is typically used if you want to gradually add more user
+	// You can add several steps that update the flag, this is typically used if you want to gradually add more user
 	// in your flag.
 	Scheduled *[]ScheduledStep `json:"scheduled,omitempty" yaml:"scheduled,omitempty" toml:"scheduled,omitempty"`
 }
