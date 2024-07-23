@@ -48,11 +48,14 @@ func Test_ExtractGOFFProtectedFields(t *testing.T) {
 	ctx := ffcontext.NewEvaluationContext("my-key")
 	ctx.AddCustomAttribute("toto", "tata")
 	ctx.AddCustomAttribute("gofeatureflag", map[string]interface{}{
-		"currentDateTime": "2022-08-01T00:00:00.1+02:00",
+		"currentDateTime": time.Date(2022, 8, 1, 0, 0, 10, 0, time.UTC).Format(time.RFC3339),
 	})
 	p := ctx.ExtractGOFFProtectedFields()
-	want := time.Date(2022, 8, 1, 0, 0, 0, 100000000, time.Local)
-	assert.Equal(t, want, *p.CurrentDateTime)
+	assert.NotNil(t, p.CurrentDateTime)
+	if p.CurrentDateTime != nil {
+		want := time.Date(2022, 8, 1, 0, 0, 10, 0, time.UTC)
+		assert.Equal(t, want, *p.CurrentDateTime)
+	}
 }
 
 func Test_ExtractGOFFProtectedFields_nil(t *testing.T) {

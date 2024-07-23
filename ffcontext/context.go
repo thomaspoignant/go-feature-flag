@@ -89,13 +89,13 @@ func (u EvaluationContext) ExtractGOFFProtectedFields() GoffContextSpecifics {
 	switch v := u.custom["gofeatureflag"].(type) {
 	case map[string]string:
 		if currentDateTimeStr, ok := v["currentDateTime"]; ok {
-			if currentDateTime, err := time.Parse(time.RFC3339, currentDateTimeStr); err == nil {
+			if currentDateTime, err := time.ParseInLocation(time.RFC3339, currentDateTimeStr, time.Local); err == nil {
 				goff.CurrentDateTime = &currentDateTime
 			}
 		}
 	case map[string]interface{}:
 		if currentDateTimeStr, ok := v["currentDateTime"].(string); ok {
-			if currentDateTime, err := time.Parse(time.RFC3339, currentDateTimeStr); err == nil {
+			if currentDateTime, err := time.ParseInLocation(time.RFC3339, currentDateTimeStr, time.Local); err == nil {
 				goff.CurrentDateTime = &currentDateTime
 			}
 		}
