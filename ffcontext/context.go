@@ -85,13 +85,23 @@ func (u EvaluationContext) AddCustomAttribute(name string, value interface{}) {
 // ExtractGOFFProtectedFields extract the goff specific attributes from the evaluation context.
 func (u EvaluationContext) ExtractGOFFProtectedFields() GoffContextSpecifics {
 	goff := GoffContextSpecifics{}
-	if goffMap, ok := u.custom["gofeatureflag"].(map[string]interface{}); ok {
-		if currentDateTimeStr, ok := goffMap["currentDateTime"].(string); ok {
+
+	switch v := u.custom["gofeatureflag"].(type) {
+	case map[string]string:
+		if currentDateTimeStr, ok := v["currentDateTime"]; ok {
 			if currentDateTime, err := time.Parse(time.RFC3339, currentDateTimeStr); err == nil {
 				goff.CurrentDateTime = &currentDateTime
 			}
 		}
-		return goff
+	case map[string]interface{}:
+		if currentDateTimeStr, ok := v["currentDateTime"].(string); ok {
+			if currentDateTime, err := time.Parse(time.RFC3339, currentDateTimeStr); err == nil {
+				goff.CurrentDateTime = &currentDateTime
+			}
+		}
+	case GoffContextSpecifics:
+		return v
 	}
+
 	return goff
 }
