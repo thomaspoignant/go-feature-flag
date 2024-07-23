@@ -10,6 +10,9 @@ spec:
   containers:
     - name: wget
       image: busybox
+      resources:
+        limits:
+          ephemeral-storage: "20Mb"
       command: ['wget']
       args: ['{{ include "relay-proxy.fullname" . }}:{{ .Values.service.port }}/health']
   restartPolicy: Never
