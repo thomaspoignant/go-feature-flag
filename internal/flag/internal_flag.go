@@ -175,7 +175,7 @@ func (f *InternalFlag) selectVariation(flagName string, ctx ffcontext.Context) (
 func (f *InternalFlag) applyScheduledRolloutSteps(evaluationDate time.Time) {
 	if f.Scheduled != nil {
 		for _, steps := range *f.Scheduled {
-			if steps.Date != nil && steps.Date.Before(evaluationDate) {
+			if steps.Date != nil && (steps.Date.Before(evaluationDate) || steps.Date.Equal(evaluationDate)) {
 				f.Rules = MergeSetOfRules(f.GetRules(), steps.GetRules())
 				if steps.Disable != nil {
 					f.Disable = steps.Disable

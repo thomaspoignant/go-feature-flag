@@ -723,6 +723,58 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 		},
 		{
+			name: "Should only apply 1 scheduled step if step at the exact same time",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"variation_A": testconvert.Interface("value_A"),
+					"variation_B": testconvert.Interface("value_B"),
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("variation_A"),
+				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
+				Scheduled: &[]flag.ScheduledStep{
+					{
+						InternalFlag: flag.InternalFlag{
+							DefaultRule: &flag.Rule{
+								VariationResult: testconvert.String("variation_B"),
+							},
+						},
+						Date: testconvert.Time(time.Date(2022, 1, 1, 12, 12, 12, 12, time.UTC)),
+					},
+					{
+						InternalFlag: flag.InternalFlag{
+							Variations: &map[string]*interface{}{
+								"variation_B": testconvert.Interface("value_QWERTY"),
+							},
+						},
+						Date: testconvert.Time(time.Now().Add(2 * time.Second)),
+					},
+				},
+			},
+			args: args{
+				flagName: "my-flag",
+				user:     ffcontext.NewEvaluationContextBuilder("user-key").AddCustom("gofeatureflag", ffcontext.GoffContextSpecifics{
+					CurrentDateTime: testconvert.Time(time.Date(2022, 1, 1, 12, 12, 12, 12, time.UTC)),
+				}).Build(),
+				flagContext: flag.Context{
+					DefaultSdkValue: "value_default",
+				},
+			},
+			want: "value_B",
+			want1: flag.ResolutionDetails{
+				Variant: "variation_B",
+				Reason:  flag.ReasonStatic,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
+			},
+		},
+		{
 			name: "Should apply all scheduled steps in the past",
 			flag: flag.InternalFlag{
 				Variations: &map[string]*interface{}{
