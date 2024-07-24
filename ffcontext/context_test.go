@@ -3,7 +3,9 @@ package ffcontext_test
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
+	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 	"testing"
+	"time"
 )
 
 func TestUser_AddCustomAttribute(t *testing.T) {
@@ -39,6 +41,63 @@ func TestUser_AddCustomAttribute(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.user.AddCustomAttribute(tt.args.name, tt.args.value)
 			assert.Equal(t, tt.want, tt.user.GetCustom())
+		})
+	}
+}
+
+func Test_ExtractGOFFProtectedFields(t *testing.T) {
+	tests := []struct {
+		name string
+		ctx  ffcontext.EvaluationContext
+		want ffcontext.GoffContextSpecifics
+	}{
+		{
+			name: "context goff specifics as map[string]string",
+			ctx: ffcontext.NewEvaluationContextBuilder("my-key").AddCustom("gofeatureflag", map[string]string{
+				"currentDateTime": time.Date(2022, 8, 1, 0, 0, 10, 0, time.UTC).Format(time.RFC3339),
+			}).Build(),
+			want: ffcontext.GoffContextSpecifics{
+				CurrentDateTime: testconvert.Time(time.Date(2022, 8, 1, 0, 0, 10, 0, time.UTC)),
+			},
+		},
+		{
+			name: "context goff specifics as map[string]interface",
+			ctx: ffcontext.NewEvaluationContextBuilder("my-key").AddCustom("gofeatureflag", map[string]interface{}{
+				"currentDateTime": time.Date(2022, 8, 1, 0, 0, 10, 0, time.UTC).Format(time.RFC3339),
+			}).Build(),
+			want: ffcontext.GoffContextSpecifics{
+				CurrentDateTime: testconvert.Time(time.Date(2022, 8, 1, 0, 0, 10, 0, time.UTC)),
+			},
+		},
+		{
+			name: "context goff specifics nil",
+			ctx:  ffcontext.NewEvaluationContextBuilder("my-key").AddCustom("gofeatureflag", nil).Build(),
+			want: ffcontext.GoffContextSpecifics{
+				CurrentDateTime: nil,
+			},
+		},
+		{
+			name: "no context goff specifics",
+			ctx:  ffcontext.NewEvaluationContextBuilder("my-key").Build(),
+			want: ffcontext.GoffContextSpecifics{
+				CurrentDateTime: nil,
+			},
+		},
+		{
+			name: "context goff specifics as GoffContextSpecifics type",
+			ctx: ffcontext.NewEvaluationContextBuilder("my-key").AddCustom("gofeatureflag", ffcontext.GoffContextSpecifics{
+				CurrentDateTime: testconvert.Time(time.Date(2022, 8, 1, 0, 0, 10, 0, time.UTC)),
+			}).Build(),
+			want: ffcontext.GoffContextSpecifics{
+				CurrentDateTime: testconvert.Time(time.Date(2022, 8, 1, 0, 0, 10, 0, time.UTC)),
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.ctx.ExtractGOFFProtectedFields()
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }

@@ -62,13 +62,14 @@ func (f *InternalFlag) Value(
 	evaluationCtx ffcontext.Context,
 	flagContext Context,
 ) (interface{}, ResolutionDetails) {
-	f.applyScheduledRolloutSteps()
+	evaluationDate := DateFromContextOrDefault(evaluationCtx, time.Now())
+	f.applyScheduledRolloutSteps(evaluationDate)
 
 	if flagContext.EvaluationContextEnrichment != nil {
 		maps.Copy(evaluationCtx.GetCustom(), flagContext.EvaluationContextEnrichment)
 	}
 
-	if f.IsDisable() || f.isExperimentationOver() {
+	if f.IsDisable() || f.isExperimentationOver(evaluationDate) {
 		return flagContext.DefaultSdkValue, ResolutionDetails{
 			Variant:   VariationSDKDefault,
 			Reason:    ReasonDisabled,
@@ -171,8 +172,7 @@ func (f *InternalFlag) selectVariation(flagName string, ctx ffcontext.Context) (
 // nolint: gocognit
 // applyScheduledRolloutSteps is checking if the flag has a scheduled rollout configured.
 // If yes we merge the changes to the current flag.
-func (f *InternalFlag) applyScheduledRolloutSteps() {
-	evaluationDate := time.Now()
+func (f *InternalFlag) applyScheduledRolloutSteps(evaluationDate time.Time) {
 	if f.Scheduled != nil {
 		for _, steps := range *f.Scheduled {
 			if steps.Date != nil && steps.Date.Before(evaluationDate) {
@@ -216,11 +216,10 @@ func (f *InternalFlag) applyScheduledRolloutSteps() {
 }
 
 // isExperimentationOver checks if we are in an experimentation or not
-func (f *InternalFlag) isExperimentationOver() bool {
-	now := time.Now()
+func (f *InternalFlag) isExperimentationOver(evaluationDate time.Time) bool {
 	return f.Experimentation != nil &&
-		((f.Experimentation.Start != nil && now.Before(*f.Experimentation.Start)) ||
-			(f.Experimentation.End != nil && now.After(*f.Experimentation.End)))
+		((f.Experimentation.Start != nil && evaluationDate.Before(*f.Experimentation.Start)) ||
+			(f.Experimentation.End != nil && evaluationDate.After(*f.Experimentation.End)))
 }
 
 // IsValid is checking if the current flag is valid.
@@ -349,4 +348,11 @@ func (f *InternalFlag) GetMetadata() map[string]interface{} {
 		return nil
 	}
 	return *f.Metadata
+}
+
+func DateFromContextOrDefault(ctx ffcontext.Context, defaultDate time.Time) time.Time {
+	if ctx == nil || ctx.ExtractGOFFProtectedFields().CurrentDateTime == nil {
+		return defaultDate
+	}
+	return *ctx.ExtractGOFFProtectedFields().CurrentDateTime
 }
