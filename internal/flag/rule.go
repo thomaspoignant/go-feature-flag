@@ -42,9 +42,14 @@ type Rule struct {
 
 // Evaluate is checking if the rule apply to for the user.
 // If yes it returns the variation you should use for this rule.
-func (r *Rule) Evaluate(ctx ffcontext.Context, hashID uint32, isDefault bool,
+func (r *Rule) Evaluate(ctx ffcontext.Context, flagName string, isDefault bool,
 ) (string, error) {
 	evaluationDate := DateFromContextOrDefault(ctx, time.Now())
+	// check that we have an evaluation context
+	if ctx == nil {
+		return "", fmt.Errorf("evaluate Rule: no evaluation context")
+	}
+
 	// Check if the rule apply for this user
 	ruleApply := isDefault || r.GetQuery() == "" || parser.Evaluate(r.GetTrimmedQuery(), utils.ContextToMap(ctx))
 	if !ruleApply || (!isDefault && r.IsDisable()) {
@@ -52,6 +57,8 @@ func (r *Rule) Evaluate(ctx ffcontext.Context, hashID uint32, isDefault bool,
 	}
 
 	if r.ProgressiveRollout != nil {
+		progressiveRolloutMaxPercentage := uint32(100 * PercentageMultiplier)
+		hashID := utils.BuildHash(flagName, ctx.GetKey(), progressiveRolloutMaxPercentage)
 		variation, err := r.getVariationFromProgressiveRollout(hashID, evaluationDate)
 		if err != nil {
 			return variation, err
@@ -60,7 +67,13 @@ func (r *Rule) Evaluate(ctx ffcontext.Context, hashID uint32, isDefault bool,
 	}
 
 	if r.Percentages != nil && len(r.GetPercentages()) > 0 {
-		variationName, err := r.getVariationFromPercentage(hashID)
+		m := 0.0
+		for _, percentage := range r.GetPercentages() {
+			m += percentage
+		}
+		maxPercentage := uint32(m * PercentageMultiplier)
+		hashID := utils.BuildHash(flagName, ctx.GetKey(), maxPercentage)
+		variationName, err := r.getVariationFromPercentage(hashID, maxPercentage)
 		if err != nil {
 			return "", err
 		}
@@ -103,11 +116,10 @@ func (r *Rule) getVariationFromProgressiveRollout(hash uint32, evaluationDate ti
 		// We are between initial and end
 		initialPercentage := r.ProgressiveRollout.Initial.getPercentage() * PercentageMultiplier
 		if r.ProgressiveRollout.End.getPercentage() == 0 || r.ProgressiveRollout.End.getPercentage() > 100 {
-			max := float64(100)
-			r.ProgressiveRollout.End.Percentage = &max
+			maxPercentage := float64(100)
+			r.ProgressiveRollout.End.Percentage = &maxPercentage
 		}
 		endPercentage := r.ProgressiveRollout.End.getPercentage() * PercentageMultiplier
-
 		nbSec := r.ProgressiveRollout.End.Date.Unix() - r.ProgressiveRollout.Initial.Date.Unix()
 		percentage := endPercentage - initialPercentage
 		percentPerSec := percentage / float64(nbSec)
@@ -123,8 +135,8 @@ func (r *Rule) getVariationFromProgressiveRollout(hash uint32, evaluationDate ti
 	return "", fmt.Errorf("error in the progressive rollout, missing params")
 }
 
-func (r *Rule) getVariationFromPercentage(hash uint32) (string, error) {
-	buckets, err := r.getPercentageBuckets()
+func (r *Rule) getVariationFromPercentage(hash uint32, maxPercentageLimit uint32) (string, error) {
+	buckets, err := r.getPercentageBuckets(maxPercentageLimit)
 	if err != nil {
 		return "", err
 	}
@@ -138,13 +150,13 @@ func (r *Rule) getVariationFromPercentage(hash uint32) (string, error) {
 }
 
 // getPercentageBuckets compute a map containing the buckets of each variation for this rule.
-func (r *Rule) getPercentageBuckets() (map[string]percentageBucket, error) {
+func (r *Rule) getPercentageBuckets(maxPercentageLimit uint32) (map[string]percentageBucket, error) {
 	percentageBuckets := make(map[string]percentageBucket, len(r.GetPercentages()))
 	percentage := r.GetPercentages()
 
 	// we need to sort the map to affect the bucket to be sure we are constantly affecting the users to the same bucket.
 	// Map are not ordered in GO, so we have to order the variationNames to be able to compute the same numbers for the
-	// buckets everytime we are in this function.
+	// buckets every time we are in this function.
 	variationNames := make([]string, 0)
 	for k := range percentage {
 		variationNames = append(variationNames, k)
@@ -167,7 +179,7 @@ func (r *Rule) getPercentageBuckets() (map[string]percentageBucket, error) {
 	}
 
 	lastElementInBuckets := percentageBuckets[variationNames[len(variationNames)-1]].end
-	if lastElementInBuckets != float64(MaxPercentage) {
+	if lastElementInBuckets != float64(maxPercentageLimit) {
 		return nil, errors.New("invalid rule because percentage are not representing 100%")
 	}
 
@@ -234,8 +246,12 @@ func (r *Rule) IsValid(defaultRule bool) error {
 			count += p
 		}
 
-		if count != 100 {
-			return fmt.Errorf("invalid percentages")
+		if len(r.GetPercentages()) == 0 {
+			return fmt.Errorf("invalid percentages: should not be empty")
+		}
+
+		if count == 0 {
+			return fmt.Errorf("invalid percentages: should not be equal to 0")
 		}
 	}
 
