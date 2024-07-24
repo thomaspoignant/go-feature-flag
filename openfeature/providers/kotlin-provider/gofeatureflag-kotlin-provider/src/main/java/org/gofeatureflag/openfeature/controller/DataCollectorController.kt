@@ -24,8 +24,7 @@ class DataCollectorManager(
                     try {
                         this@DataCollectorManager.sendToCollector()
                     } catch (e: Throwable) {
-                        print(e)
-//                        Log.e("GoFeatureFlag", "Error sending events to data collector", e)
+                        // do nothing
                     }
                 }
             }
