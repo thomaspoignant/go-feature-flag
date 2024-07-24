@@ -44,6 +44,7 @@ type Rule struct {
 // If yes it returns the variation you should use for this rule.
 func (r *Rule) Evaluate(ctx ffcontext.Context, hashID uint32, isDefault bool,
 ) (string, error) {
+	evaluationDate := DateFromContextOrDefault(ctx, time.Now())
 	// Check if the rule apply for this user
 	ruleApply := isDefault || r.GetQuery() == "" || parser.Evaluate(r.GetTrimmedQuery(), utils.ContextToMap(ctx))
 	if !ruleApply || (!isDefault && r.IsDisable()) {
@@ -51,7 +52,7 @@ func (r *Rule) Evaluate(ctx ffcontext.Context, hashID uint32, isDefault bool,
 	}
 
 	if r.ProgressiveRollout != nil {
-		variation, err := r.getVariationFromProgressiveRollout(hashID)
+		variation, err := r.getVariationFromProgressiveRollout(hashID, evaluationDate)
 		if err != nil {
 			return variation, err
 		}
@@ -84,7 +85,7 @@ func (r *Rule) IsDynamic() bool {
 	return r.ProgressiveRollout != nil || (r.Percentages != nil && len(r.GetPercentages()) > 0 && !hasPercentage100)
 }
 
-func (r *Rule) getVariationFromProgressiveRollout(hash uint32) (string, error) {
+func (r *Rule) getVariationFromProgressiveRollout(hash uint32, evaluationDate time.Time) (string, error) {
 	isRolloutValid := r.ProgressiveRollout != nil &&
 		r.ProgressiveRollout.Initial != nil &&
 		r.ProgressiveRollout.Initial.Date != nil &&
@@ -95,8 +96,7 @@ func (r *Rule) getVariationFromProgressiveRollout(hash uint32) (string, error) {
 		r.ProgressiveRollout.End.Date.After(*r.ProgressiveRollout.Initial.Date)
 
 	if isRolloutValid {
-		now := time.Now()
-		if now.Before(*r.ProgressiveRollout.Initial.Date) {
+		if evaluationDate.Before(*r.ProgressiveRollout.Initial.Date) {
 			return *r.ProgressiveRollout.Initial.Variation, nil
 		}
 
@@ -112,7 +112,7 @@ func (r *Rule) getVariationFromProgressiveRollout(hash uint32) (string, error) {
 		percentage := endPercentage - initialPercentage
 		percentPerSec := percentage / float64(nbSec)
 
-		c := now.Unix() - r.ProgressiveRollout.Initial.Date.Unix()
+		c := evaluationDate.Unix() - r.ProgressiveRollout.Initial.Date.Unix()
 		currentPercentage := float64(c)*percentPerSec + initialPercentage
 
 		if hash < uint32(currentPercentage) {

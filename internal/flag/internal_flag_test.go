@@ -150,6 +150,38 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 		},
 		{
+			name: "Should return sdk default value when experimentation rollout is now, but context date override",
+			flag: flag.InternalFlag{
+				Experimentation: &flag.ExperimentationRollout{
+					Start: testconvert.Time(time.Now().Add(-5 * time.Second)),
+					End:   testconvert.Time(time.Now().Add(5 * time.Second)),
+				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
+			},
+			args: args{
+				flagName: "my-flag",
+				user: ffcontext.NewEvaluationContextBuilder("user-key").AddCustom("gofeatureflag", map[string]interface{}{
+					"currentDateTime": time.Now().Add(6 * time.Second).Format(time.RFC3339),
+				}).Build(),
+				flagContext: flag.Context{
+					DefaultSdkValue: "default-sdk",
+				},
+			},
+			want: "default-sdk",
+			want1: flag.ResolutionDetails{
+				Variant:   "SdkDefault",
+				Reason:    flag.ReasonDisabled,
+				Cacheable: false,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
+			},
+		},
+		{
 			name: "Should return sdk default value when experimentation rollout ended",
 			flag: flag.InternalFlag{
 				Experimentation: &flag.ExperimentationRollout{
@@ -581,6 +613,58 @@ func TestInternalFlag_Value(t *testing.T) {
 			want: "value_A",
 			want1: flag.ResolutionDetails{
 				Variant: "variation_A",
+				Reason:  flag.ReasonStatic,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
+			},
+		},
+		{
+			name: "Should change if all scheduled steps are in the future BUT context override is in the future too",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"variation_A": testconvert.Interface("value_A"),
+					"variation_B": testconvert.Interface("value_B"),
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("variation_A"),
+				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
+				Scheduled: &[]flag.ScheduledStep{
+					{
+						InternalFlag: flag.InternalFlag{
+							DefaultRule: &flag.Rule{
+								VariationResult: testconvert.String("variation_B"),
+							},
+						},
+						Date: testconvert.Time(time.Now().Add(1 * time.Second)),
+					},
+					{
+						InternalFlag: flag.InternalFlag{
+							Variations: &map[string]*interface{}{
+								"variation_A": testconvert.Interface("value_QWERTY"),
+							},
+						},
+						Date: testconvert.Time(time.Now().Add(2 * time.Second)),
+					},
+				},
+			},
+			args: args{
+				flagName: "my-flag",
+				user: ffcontext.NewEvaluationContextBuilder("user-key").AddCustom("gofeatureflag", map[string]string{
+					"currentDateTime": time.Now().Add(1 * time.Minute).Format(time.RFC3339),
+				}).Build(),
+				flagContext: flag.Context{
+					DefaultSdkValue: "value_default",
+				},
+			},
+			want: "value_B",
+			want1: flag.ResolutionDetails{
+				Variant: "variation_B",
 				Reason:  flag.ReasonStatic,
 				Metadata: map[string]interface{}{
 					"description": "this is a flag",

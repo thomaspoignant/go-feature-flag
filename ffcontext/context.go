@@ -1,5 +1,9 @@
 package ffcontext
 
+import (
+	"time"
+)
+
 type Context interface {
 	// GetKey return the unique key for the context.
 	GetKey() string
@@ -9,6 +13,12 @@ type Context interface {
 	GetCustom() map[string]interface{}
 	// AddCustomAttribute allows to add a custom attribute into the context.
 	AddCustomAttribute(name string, value interface{})
+	// ExtractGOFFProtectedFields extract the goff specific attributes from the evaluation context.
+	ExtractGOFFProtectedFields() GoffContextSpecifics
+}
+
+type GoffContextSpecifics struct {
+	CurrentDateTime *time.Time `json:"currentDateTime"`
 }
 
 // value is a type to define custom attribute.
@@ -70,4 +80,28 @@ func (u EvaluationContext) AddCustomAttribute(name string, value interface{}) {
 	if name != "" {
 		u.custom[name] = value
 	}
+}
+
+// ExtractGOFFProtectedFields extract the goff specific attributes from the evaluation context.
+func (u EvaluationContext) ExtractGOFFProtectedFields() GoffContextSpecifics {
+	goff := GoffContextSpecifics{}
+
+	switch v := u.custom["gofeatureflag"].(type) {
+	case map[string]string:
+		if currentDateTimeStr, ok := v["currentDateTime"]; ok {
+			if currentDateTime, err := time.ParseInLocation(time.RFC3339, currentDateTimeStr, time.Local); err == nil {
+				goff.CurrentDateTime = &currentDateTime
+			}
+		}
+	case map[string]interface{}:
+		if currentDateTimeStr, ok := v["currentDateTime"].(string); ok {
+			if currentDateTime, err := time.ParseInLocation(time.RFC3339, currentDateTimeStr, time.Local); err == nil {
+				goff.CurrentDateTime = &currentDateTime
+			}
+		}
+	case GoffContextSpecifics:
+		return v
+	}
+
+	return goff
 }
