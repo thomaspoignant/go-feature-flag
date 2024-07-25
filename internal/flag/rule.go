@@ -72,7 +72,7 @@ func (r *Rule) Evaluate(ctx ffcontext.Context, flagName string, isDefault bool,
 		}
 		maxPercentage := uint32(m * PercentageMultiplier)
 		hashID := utils.BuildHash(flagName, ctx.GetKey(), maxPercentage)
-		variationName, err := r.getVariationFromPercentage(hashID, maxPercentage)
+		variationName, err := r.getVariationFromPercentage(hashID)
 		if err != nil {
 			return "", err
 		}
@@ -134,13 +134,8 @@ func (r *Rule) getVariationFromProgressiveRollout(hash uint32, evaluationDate ti
 	return "", fmt.Errorf("error in the progressive rollout, missing params")
 }
 
-func (r *Rule) getVariationFromPercentage(hash uint32, maxPercentageLimit uint32) (string, error) {
-	buckets, err := r.getPercentageBuckets(maxPercentageLimit)
-	if err != nil {
-		return "", err
-	}
-
-	for key, bucket := range buckets {
+func (r *Rule) getVariationFromPercentage(hash uint32) (string, error) {
+	for key, bucket := range r.getPercentageBuckets() {
 		if uint32(bucket.start) <= hash && uint32(bucket.end) > hash {
 			return key, nil
 		}
@@ -149,7 +144,7 @@ func (r *Rule) getVariationFromPercentage(hash uint32, maxPercentageLimit uint32
 }
 
 // getPercentageBuckets compute a map containing the buckets of each variation for this rule.
-func (r *Rule) getPercentageBuckets(maxPercentageLimit uint32) (map[string]percentageBucket, error) {
+func (r *Rule) getPercentageBuckets() map[string]percentageBucket {
 	percentageBuckets := make(map[string]percentageBucket, len(r.GetPercentages()))
 	percentage := r.GetPercentages()
 
@@ -175,7 +170,7 @@ func (r *Rule) getPercentageBuckets(maxPercentageLimit uint32) (map[string]perce
 			end:   endBucket,
 		}
 	}
-	return percentageBuckets, nil
+	return percentageBuckets
 }
 
 // MergeRules is merging 2 rules.
