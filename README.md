@@ -25,26 +25,15 @@
 ## Table of Contents
 
 - [🎛️ GO Feature Flag](#️-go-feature-flag)
-  - [Table of Contents](#table-of-contents)
   - [What is GO Feature Flag?](#what-is-go-feature-flag)
   - [What can I do with GO Feature Flag?](#what-can-i-do-with-go-feature-flag)
-  - [Getting started](#getting-started)
-    - [Installation](#installation)
-    - [Create a feature flag configuration](#create-a-feature-flag-configuration)
-    - [SDK Initialisation](#sdk-initialisation)
-    - [Evaluate your flags](#evaluate-your-flags)
-    - [Create a feature flag configuration](#create-a-feature-flag-configuration-1)
-    - [Create a relay proxy configuration file](#create-a-relay-proxy-configuration-file)
-    - [Install the relay proxy](#install-the-relay-proxy)
-    - [Use Open Feature SDKs](#use-open-feature-sdk)
+  - [Getting started with GO Feature Flag](#getting-started)
   - [Can I use GO Feature Flag with any language?](#can-i-use-go-feature-flag-with-any-language)
   - [Where do I store my flags file?](#where-do-i-store-my-flags-file)
   - [Flags file format](#flags-file-format)
   - [Rule format](#rule-format)
-    - [Examples](#examples)
-  - [Users](#users)
+  - [Evaluation Context](#evaluation-context)
   - [Variations](#variations)
-    - [Example](#example)
   - [Get all flags for a specific user](#get-all-flags-for-a-specific-user)
   - [Rollout](#rollout)
     - [Complex rollout strategy available](#complex-rollout-strategy-available)
@@ -90,69 +79,6 @@ _The code of this demo is available in [`examples/demo`](examples/demo) reposito
 Before starting to use **GO Feature Flag** you should decide if you want to use the GO Module directly or if you want to install the relay proxy.
 
 The GO module is ideal for using GO Feature Flag exclusively in GO projects. If your project involves multiple languages, we recommend using the Open Feature SDKs.
-
-<a id="using-go-module"></a>
-<details>
-<summary><b>Using the GO Module</b></summary>
-
-### Installation
-```bash
-go get github.com/thomaspoignant/go-feature-flag
-```
-
-### Create a feature flag configuration
-
-Create a new `YAML` file containing your first flag configuration.
-
-```yaml title="flag-config.yaml"
-# 20% of the users will use the variation "my-new-feature"
-test-flag:
-  variations:
-    my-new-feature: true
-    my-old-feature: false
-  defaultRule:
-    percentage:
-      my-new-feature: 20
-      my-old-feature: 80
-```
-
-This flag split the usage of this flag, 20% will use the variation `my-new-feature` and 80% the variation `my-old-feature`.
-
-### SDK Initialisation
-First, you need to initialize the `ffclient` with the location of your backend file.
-```go linenums="1"
-err := ffclient.Init(ffclient.Config{
-  PollingInterval: 3 * time.Second,
-  Retriever:      &fileretriever.Retriever{
-    Path: "flag-config.goff.yaml",
-  },
-})
-defer ffclient.Close()
-```
-*This example will load a file from your local computer and will refresh the flags every 3 seconds (if you omit the
-PollingInterval, the default value is 60 seconds).*
-
-> ℹ info  
-This is a basic configuration to test locally, in production it is better to use a remote place to store your feature flag configuration file.  
-Look at the list of available options in the [**Store your feature flag file** page](https://gofeatureflag.org/docs/go_module/store_file/).
-
-### Evaluate your flags
-Now you can evaluate your flags anywhere in your code.
-
-```go linenums="1"
-user := ffcontext.NewEvaluationContext("user-unique-key")
-hasFlag, _ := ffclient.BoolVariation("test-flag", user, false)
-if hasFlag {
-  // flag "test-flag" is true for the user
-} else {
-  // flag "test-flag" is false for the user
-}
-```
-The full documentation is available on https://docs.gofeatureflag.org  
-You can find more examples in the [examples/](https://github.com/thomaspoignant/go-feature-flag/tree/main/examples) directory.
-
-</details>
-
 
 <a id="using-open-feature"></a>
 <details>
@@ -259,6 +185,68 @@ if (adminFlag) {
   // flag "flag-only-for-admin" is false for the user
 }
 ```
+
+</details>
+
+<a id="using-go-module"></a>
+<details>
+<summary><b>Using the GO Module</b></summary>
+
+### Installation
+```bash
+go get github.com/thomaspoignant/go-feature-flag
+```
+
+### Create a feature flag configuration
+
+Create a new `YAML` file containing your first flag configuration.
+
+```yaml title="flag-config.yaml"
+# 20% of the users will use the variation "my-new-feature"
+test-flag:
+  variations:
+    my-new-feature: true
+    my-old-feature: false
+  defaultRule:
+    percentage:
+      my-new-feature: 20
+      my-old-feature: 80
+```
+
+This flag split the usage of this flag, 20% will use the variation `my-new-feature` and 80% the variation `my-old-feature`.
+
+### SDK Initialisation
+First, you need to initialize the `ffclient` with the location of your backend file.
+```go linenums="1"
+err := ffclient.Init(ffclient.Config{
+  PollingInterval: 3 * time.Second,
+  Retriever:      &fileretriever.Retriever{
+    Path: "flag-config.goff.yaml",
+  },
+})
+defer ffclient.Close()
+```
+*This example will load a file from your local computer and will refresh the flags every 3 seconds (if you omit the
+PollingInterval, the default value is 60 seconds).*
+
+> ℹ info  
+This is a basic configuration to test locally, in production it is better to use a remote place to store your feature flag configuration file.  
+Look at the list of available options in the [**Store your feature flag file** page](https://gofeatureflag.org/docs/go_module/store_file/).
+
+### Evaluate your flags
+Now you can evaluate your flags anywhere in your code.
+
+```go linenums="1"
+user := ffcontext.NewEvaluationContext("user-unique-key")
+hasFlag, _ := ffclient.BoolVariation("test-flag", user, false)
+if hasFlag {
+  // flag "test-flag" is true for the user
+} else {
+  // flag "test-flag" is false for the user
+}
+```
+The full documentation is available on https://docs.gofeatureflag.org  
+You can find more examples in the [examples/](https://github.com/thomaspoignant/go-feature-flag/tree/main/examples) directory.
 
 </details>
 
@@ -479,24 +467,20 @@ not: not of a logical expression
 - Select all identified users: `anonymous ne true`
 - Select a user with a custom property: `userId eq "12345"`
 
-## Users
+## Evaluation Context
+An evaluation context in a feature flagging system is crucial for determining the output of a feature flag evaluation. It's a collection of pertinent data about the conditions under which the evaluation is being made. This data can be supplied through a mix of static information _(server name, IP, etc ...)_ and dynamic inputs (information about the user performing the action, etc ...), along with state information that is implicitly carried through the execution of the program.
+
+When using GO Feature Flag, it's often necessary to personalize the experience for different users. This is where the concept of a **targeting key** comes into play. A targeting key is a unique identifier that represents the context of the evaluation _(email, session id, a fingerprint or anything that is consistent)_, ensuring that they are consistently exposed to the same variation of a feature, even across multiple visits or sessions.
+
+For instance, GO Feature Flag ensures that in cases where a feature is being rolled out to a percentage of users, based on the targeting key, they will see the same variation each time they encounter the feature flag.
+
+The targeting key is a fundamental part of the evaluation context because it directly affects the determination of which feature variant is served to a particular user, and it maintains that continuity over time. To do so GO Feature Flag to do a hash to define if the flag can apply to this evaluation context or not.  
+**We recommend using a hash if possible.**   
+
 Feature flag targeting and rollouts are all determined by the user you pass to your evaluation calls.
 
-The only required field for a user is his unique `key`, it is used by the internals of GO Feature Flag to do a hash to define
-if the flag can apply to this user or not.
-You can use a primary key, an e-mail address, or a hash, as long as the same user always has the same key.    
-**We recommend using a hash if possible.**   
-All the other attributes are optional.
-
-Since it is useful to make complex queries on your flag, you can add as many information fields you want to your user.
-It will be used when testing the targeting rules.
-
-You can also distinguish logged-in users from anonymous users in the SDK ([check documentation about anonymous users](https://gofeatureflag.org/docs/go_module/target_user#anonymous-users)).
-
 ## Variations
-
-The Variation methods determine whether a flag is enabled or not for a specific user.
-
+Variations are the different values possible for a feature flag.  
 GO Feature Flag can manage more than just `boolean` values; the value of your flag can be any of the following types:
 - `bool`
 - `int`
