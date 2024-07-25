@@ -70,7 +70,6 @@ A rule is a configuration that allows to serve a variation based on some conditi
             percentage:<br/>  variationA: 10.59<br/>  variationB: 9.41<br/>  variationC: 80
           </pre>
         <p>The format is the name of the variation and the percentage for this one.</p>
-        <p><b>Note: If your total is not equal to 100%, this rule will be considered invalid.</b></p>
       </td>
     </tr>
     <tr>

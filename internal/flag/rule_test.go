@@ -8,14 +8,12 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	"github.com/thomaspoignant/go-feature-flag/internal/utils"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 )
 
 func TestRule_Evaluate(t *testing.T) {
 	type args struct {
 		user      ffcontext.Context
-		hashID    uint32
 		isDefault bool
 	}
 	tests := []struct {
@@ -31,7 +29,9 @@ func TestRule_Evaluate(t *testing.T) {
 				Name:            testconvert.String("rule1"),
 				VariationResult: testconvert.String("variation_A"),
 			},
-			args:    args{},
+			args: args{
+				user: ffcontext.NewEvaluationContext("abc"),
+			},
 			want:    "variation_A",
 			wantErr: assert.NoError,
 		},
@@ -95,35 +95,10 @@ func TestRule_Evaluate(t *testing.T) {
 				},
 			},
 			args: args{
-				user:   ffcontext.NewEvaluationContext("userkey"),
-				hashID: utils.Hash("flagname+userkey") % flag.MaxPercentage,
+				user: ffcontext.NewEvaluationContext("userkey"),
 			},
 			wantErr: assert.NoError,
 			want:    "variation_C",
-		},
-		{
-			name: "All percentage does not fit all traffic",
-			rule: flag.Rule{
-				Name: testconvert.String("rule1"),
-				Percentages: &map[string]float64{
-					"variation_B": 0,
-					"variation_C": 99,
-				},
-			},
-			args:    args{},
-			wantErr: assert.Error,
-		},
-		{
-			name: "All percentage are more than 100%",
-			rule: flag.Rule{
-				Name: testconvert.String("rule1"),
-				Percentages: &map[string]float64{
-					"variation_B": 10,
-					"variation_C": 100,
-				},
-			},
-			args:    args{},
-			wantErr: assert.Error,
 		},
 		{
 			name: "Percentage in 1st bucket",
@@ -135,11 +110,25 @@ func TestRule_Evaluate(t *testing.T) {
 				},
 			},
 			args: args{
-				user:   ffcontext.NewEvaluationContext("userkey"),
-				hashID: utils.Hash("flagname+userkey") % flag.MaxPercentage,
+				user: ffcontext.NewEvaluationContext("userkey"),
 			},
 			wantErr: assert.NoError,
 			want:    "variation_C",
+		},
+		{
+			name: "Percentage more than 100%",
+			rule: flag.Rule{
+				Name: testconvert.String("rule1"),
+				Percentages: &map[string]float64{
+					"variation_C": 91,
+					"variation_B": 91,
+				},
+			},
+			args: args{
+				user: ffcontext.NewEvaluationContext("userkey"),
+			},
+			wantErr: assert.NoError,
+			want:    "variation_B",
 		},
 		{
 			name: "Percentage in 2nd bucket",
@@ -152,8 +141,7 @@ func TestRule_Evaluate(t *testing.T) {
 				},
 			},
 			args: args{
-				user:   ffcontext.NewEvaluationContext("randomUserID"),
-				hashID: utils.Hash("flagname+randomUserID") % flag.MaxPercentage,
+				user: ffcontext.NewEvaluationContext("randomUserID"),
 			},
 			wantErr: assert.NoError,
 			want:    "variation_C",
@@ -169,25 +157,10 @@ func TestRule_Evaluate(t *testing.T) {
 				},
 			},
 			args: args{
-				user:   ffcontext.NewEvaluationContext("userkey"),
-				hashID: utils.Hash("flagname+96ac59e6-7492-436b-b15a-ba1d797d2423") % flag.MaxPercentage,
+				user: ffcontext.NewEvaluationContext("96ac59e6-7492-436b-b15a-ba1d797d2423"),
 			},
 			wantErr: assert.NoError,
 			want:    "variation_B",
-		},
-		{
-			name: "Hash more than max (not supposed to happen)",
-			rule: flag.Rule{
-				Name: testconvert.String("rule1"),
-				Percentages: &map[string]float64{
-					"variation_B": 100,
-				},
-			},
-			args: args{
-				user:   ffcontext.NewEvaluationContext("userkey"),
-				hashID: flag.MaxPercentage + 1,
-			},
-			wantErr: assert.Error,
 		},
 		{
 			name: "Percentage + user match query",
@@ -198,11 +171,10 @@ func TestRule_Evaluate(t *testing.T) {
 					"variation_C": 10,
 					"variation_B": 20,
 				},
-				Query: testconvert.String("key eq \"userkey\""),
+				Query: testconvert.String("key eq \"96ac59e6-7492-436b-b15a-ba1d797d2423\""),
 			},
 			args: args{
-				user:   ffcontext.NewEvaluationContext("userkey"),
-				hashID: utils.Hash("flagname+96ac59e6-7492-436b-b15a-ba1d797d2423") % flag.MaxPercentage,
+				user: ffcontext.NewEvaluationContext("96ac59e6-7492-436b-b15a-ba1d797d2423"),
 			},
 			wantErr: assert.NoError,
 			want:    "variation_B",
@@ -228,8 +200,7 @@ func TestRule_Evaluate(t *testing.T) {
 				},
 			},
 			args: args{
-				user:   ffcontext.NewEvaluationContext("userkey"),
-				hashID: utils.Hash("flagname+userKey") % flag.MaxPercentage,
+				user: ffcontext.NewEvaluationContext("userkey"),
 			},
 			wantErr: assert.NoError,
 			want:    "variation_B",
@@ -252,8 +223,7 @@ func TestRule_Evaluate(t *testing.T) {
 				},
 			},
 			args: args{
-				user:   ffcontext.NewEvaluationContext("userkey"),
-				hashID: utils.Hash("flagname+userKey") % flag.MaxPercentage,
+				user: ffcontext.NewEvaluationContext("userkey"),
 			},
 			wantErr: assert.NoError,
 			want:    "variation_B",
@@ -276,8 +246,7 @@ func TestRule_Evaluate(t *testing.T) {
 				},
 			},
 			args: args{
-				user:   ffcontext.NewEvaluationContext("userkey"),
-				hashID: utils.Hash("flagname+userKey") % flag.MaxPercentage,
+				user: ffcontext.NewEvaluationContext("userkey"),
 			},
 			wantErr: assert.NoError,
 			want:    "variation_C",
@@ -300,8 +269,7 @@ func TestRule_Evaluate(t *testing.T) {
 				},
 			},
 			args: args{
-				user:   ffcontext.NewEvaluationContext("userkey"),
-				hashID: utils.Hash("flagname+userKey") % flag.MaxPercentage,
+				user: ffcontext.NewEvaluationContext("userKey"),
 			},
 			wantErr: assert.NoError,
 			want:    "variation_B",
@@ -324,8 +292,7 @@ func TestRule_Evaluate(t *testing.T) {
 				},
 			},
 			args: args{
-				user:   ffcontext.NewEvaluationContext("userkey"),
-				hashID: utils.Hash("flagname+userKey") % flag.MaxPercentage,
+				user: ffcontext.NewEvaluationContext("userkey"),
 			},
 			wantErr: assert.NoError,
 			want:    "variation_C",
@@ -346,8 +313,7 @@ func TestRule_Evaluate(t *testing.T) {
 				},
 			},
 			args: args{
-				user:   ffcontext.NewEvaluationContext("userkey"),
-				hashID: utils.Hash("flagname+userKey") % flag.MaxPercentage,
+				user: ffcontext.NewEvaluationContext("userkey"),
 			},
 			wantErr: assert.NoError,
 			want:    "variation_C",
@@ -481,11 +447,11 @@ func TestRule_Evaluate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.rule.Evaluate(tt.args.user, tt.args.hashID, tt.args.isDefault)
-			if !tt.wantErr(t, err, fmt.Sprintf("Evaluate(%v, %v, %v)", tt.args.user, tt.args.hashID, tt.args.isDefault)) {
+			got, err := tt.rule.Evaluate(tt.args.user, "flagname+", tt.args.isDefault)
+			if !tt.wantErr(t, err, fmt.Sprintf("Evaluate(%v, %v)", tt.args.user, tt.args.isDefault)) {
 				return
 			}
-			assert.Equalf(t, tt.want, got, "Evaluate(%v, %v, %v)", tt.args.user, tt.args.hashID, tt.args.isDefault)
+			assert.Equalf(t, tt.want, got, "Evaluate(%v, %v)", tt.args.user, tt.args.isDefault)
 		})
 	}
 }

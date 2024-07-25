@@ -458,11 +458,8 @@ func TestInternalFlag_Value(t *testing.T) {
 				},
 				Rules: &[]flag.Rule{
 					{
-						Query: testconvert.String("key eq \"user-key\""),
-						Percentages: &map[string]float64{
-							"variation_A": 10,
-							"variation_B": 100,
-						},
+						Query:       testconvert.String("key eq \"user-key\""),
+						Percentages: &map[string]float64{},
 					},
 				},
 				DefaultRule: &flag.Rule{
@@ -542,10 +539,7 @@ func TestInternalFlag_Value(t *testing.T) {
 					"variation_D": testconvert.Interface("value_D"),
 				},
 				DefaultRule: &flag.Rule{
-					Percentages: &map[string]float64{
-						"variation_A": 10,
-						"variation_B": 100,
-					},
+					Percentages: &map[string]float64{},
 				},
 				Metadata: &map[string]interface{}{
 					"description": "this is a flag",
@@ -757,7 +751,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffcontext.NewEvaluationContextBuilder("user-key").AddCustom("gofeatureflag", ffcontext.GoffContextSpecifics{
+				user: ffcontext.NewEvaluationContextBuilder("user-key").AddCustom("gofeatureflag", ffcontext.GoffContextSpecifics{
 					CurrentDateTime: testconvert.Time(time.Date(2022, 1, 1, 12, 12, 12, 12, time.UTC)),
 				}).Build(),
 				flagContext: flag.Context{
@@ -1992,8 +1986,8 @@ func TestInternalFlag_IsValid(t *testing.T) {
 				},
 				DefaultRule: &flag.Rule{
 					Percentages: &map[string]float64{
-						"A": 90,
-						"B": 20,
+						"A": 00,
+						"B": 0,
 					},
 				},
 				Metadata: &map[string]interface{}{
@@ -2001,7 +1995,25 @@ func TestInternalFlag_IsValid(t *testing.T) {
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
 			},
-			errorMsg: "invalid percentages",
+			errorMsg: "invalid percentages: should not be equal to 0",
+			wantErr:  assert.Error,
+		},
+		{
+			name: "empty percentages for default rule",
+			fields: fields{
+				Variations: &map[string]*interface{}{
+					"A": testconvert.Interface("A"),
+					"B": testconvert.Interface("B"),
+				},
+				DefaultRule: &flag.Rule{
+					Percentages: &map[string]float64{},
+				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
+			},
+			errorMsg: "invalid percentages: should not be empty",
 			wantErr:  assert.Error,
 		},
 		{
@@ -2012,8 +2024,8 @@ func TestInternalFlag_IsValid(t *testing.T) {
 				},
 				DefaultRule: &flag.Rule{
 					Percentages: &map[string]float64{
-						"A": 90,
-						"B": 10,
+						"A": 00,
+						"B": 00,
 					},
 				},
 				Metadata: &map[string]interface{}{
@@ -2025,13 +2037,37 @@ func TestInternalFlag_IsValid(t *testing.T) {
 						Name:  testconvert.String("Rule1"),
 						Query: testconvert.String("key eq 5"),
 						Percentages: &map[string]float64{
-							"A": 90,
-							"B": 20,
+							"A": 00,
+							"B": 0,
 						},
 					},
 				},
 			},
-			errorMsg: "invalid percentages",
+			errorMsg: "invalid percentages: should not be equal to 0",
+			wantErr:  assert.Error,
+		},
+		{
+			name: "empty percentages for targeting",
+			fields: fields{
+				Variations: &map[string]*interface{}{
+					"A": testconvert.Interface("A"),
+				},
+				DefaultRule: &flag.Rule{
+					Percentages: &map[string]float64{},
+				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
+				Rules: &[]flag.Rule{
+					{
+						Name:        testconvert.String("Rule1"),
+						Query:       testconvert.String("key eq 5"),
+						Percentages: &map[string]float64{},
+					},
+				},
+			},
+			errorMsg: "invalid percentages: should not be empty",
 			wantErr:  assert.Error,
 		},
 		{

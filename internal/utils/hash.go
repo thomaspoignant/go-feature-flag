@@ -12,3 +12,12 @@ func Hash(s string) uint32 {
 	}
 	return h.Sum32()
 }
+
+// BuildHash is building the hash based on the different properties of the evaluation.
+func BuildHash(flagName string, bucketingKey string, max uint32) uint32 {
+	// this is not supposed to happen, but to avoid a crash if max is 0 we are returning 0
+	if max == uint32(0) {
+		return uint32(0)
+	}
+	return Hash(flagName+bucketingKey) % max
+}
