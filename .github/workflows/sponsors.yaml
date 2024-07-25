@@ -1,0 +1,20 @@
+name: Generate Sponsors README
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: 30 15 * * 0-6
+permissions:
+  contents: write
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v4
+
+      - name: Generate Sponsors 💖
+        uses: JamesIves/github-sponsors-readme-action@v1
+        with:
+          token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+          file: 'README.md'
+          fallback: 'No sponsor at the moment! 😢'
