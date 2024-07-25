@@ -24,10 +24,10 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
-          branch: update-sponsors-${{  github.ref_name }}
-          title: "Update sponsors list"
-          body: Automated pull request to update readme with the sponsors list
-          commit-message: Update readme with the sponsors list
+          branch: update-sponsor-list
+          title: "docs(README): Update sponsor list"
+          body: Automated pull request to update readme with the sponsor list
+          commit-message: Update readme with the sponsor list
           labels: automerge
           assignees: thomaspoignant
           draft: false
