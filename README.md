@@ -606,6 +606,13 @@ Thanks so much to our contributors.
   <img src="https://contrib.rocks/image?repo=thomaspoignant/go-feature-flag" />
 </a>
 
+## Sponsors
+
+[Become a sponsor](https://github.com/sponsors/thomaspoignant) and show your support to GO Feature Flag.
+
+These are our really cool sponsors!
+<!-- sponsors --><!-- sponsors -->
+
 ## Adopters
 
 If you are using `go-feature-flag`, we encourage you to include your company's name in this list. This simple act significantly boosts the project's visibility and credibility, making a substantial contribution to its advancement. To do so, kindly add yourself to [adopters](./ADOPTERS.md).
