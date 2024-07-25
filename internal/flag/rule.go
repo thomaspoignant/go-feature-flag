@@ -180,7 +180,7 @@ func (r *Rule) getPercentageBuckets(maxPercentageLimit uint32) (map[string]perce
 
 	lastElementInBuckets := percentageBuckets[variationNames[len(variationNames)-1]].end
 	if lastElementInBuckets != float64(maxPercentageLimit) {
-		return nil, errors.New("invalid rule because percentage are not representing 100%")
+		return nil, errors.New("invalid rule because percentage are bellow the top limit")
 	}
 
 	return percentageBuckets, nil
