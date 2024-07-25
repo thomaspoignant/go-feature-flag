@@ -1,7 +1,6 @@
 package flag
 
 import (
-	"errors"
 	"fmt"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"sort"
@@ -171,18 +170,11 @@ func (r *Rule) getPercentageBuckets(maxPercentageLimit uint32) (map[string]perce
 			startBucket = percentageBuckets[variationNames[index-1]].end
 		}
 		endBucket := startBucket + (percentage[varName] * PercentageMultiplier)
-
 		percentageBuckets[varName] = percentageBucket{
 			start: startBucket,
 			end:   endBucket,
 		}
 	}
-
-	lastElementInBuckets := percentageBuckets[variationNames[len(variationNames)-1]].end
-	if lastElementInBuckets != float64(maxPercentageLimit) {
-		return nil, errors.New("invalid rule because percentage are bellow the top limit")
-	}
-
 	return percentageBuckets, nil
 }
 
