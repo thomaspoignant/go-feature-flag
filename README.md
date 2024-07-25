@@ -56,6 +56,7 @@
   - [Linter](#linter)
 - [How can I contribute?](#how-can-i-contribute)
   - [Contributors](#contributors)
+  - [Sponsors](#sponsors)
   - [Adopters](#adopters)
 
 ## What is GO Feature Flag?
