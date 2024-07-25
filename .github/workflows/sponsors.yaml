@@ -18,3 +18,9 @@ jobs:
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
           file: 'README.md'
           fallback: 'No sponsor at the moment! 😢'
+
+      - name: Deploy README 🚀
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: main
+          folder: '.'
