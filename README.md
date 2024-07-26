@@ -22,7 +22,7 @@
 > :pray: If you are using **GO Feature Flag** please consider to add yourself in the [adopters](./ADOPTERS.md) list.  
 > This simple act significantly boosts the project's visibility and credibility, making a substantial contribution to its advancement.
 > 
-> If you want to support me, you can also [become a sponsor](https://github.com/sponsors/thomaspoignant).
+> If you want to support me and GO Feature Flag, you can also [become a sponsor](https://github.com/sponsors/thomaspoignant).
 
 ## Table of Contents
 
