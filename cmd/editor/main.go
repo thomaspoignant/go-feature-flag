@@ -1,7 +1,9 @@
 package main
 
 import (
+	echoadapter "github.com/awslabs/aws-lambda-go-api-proxy/echo"
 	"net/http"
+	"os"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -36,7 +38,13 @@ func main() {
 	g := e.Group("/v1")
 	g.POST("/feature/evaluate", EvaluateHandler)
 	e.GET("/health", HealthHandler)
-	e.Logger.Fatal(e.Start(":1323"))
+
+	if _, exists := os.LookupEnv("RUN_AS_LAMBDA"); exists {
+		adapter := awsLambdaHandler{adapter: echoadapter.NewV2(e)}
+		adapter.Start()
+	} else {
+		e.Logger.Fatal(e.Start(":1323"))
+	}
 }
 
 // EvaluateHandler is the function called when calling the endpoint /v1/feature/evaluate.
