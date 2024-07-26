@@ -29,7 +29,7 @@ const config = {
     swaggerURL:
       'https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/cmd/relayproxy/docs/swagger.yaml',
     playgroundEvaluationApi:
-      'https://fjaf6mppiu.eu-west-1.awsapprunner.com/v1/feature/evaluate',
+      'https://editor.api.gofeatureflag.org/v1/feature/evaluate',
   },
   // Even if you don't use internalization, you can use this field to set useful
   // metadata like html lang. For example, if your site is Chinese, you may want
