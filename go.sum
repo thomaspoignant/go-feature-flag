@@ -833,8 +833,8 @@ github.com/testcontainers/testcontainers-go v0.32.0 h1:ug1aK08L3gCHdhknlTTwWjPHP
 github.com/testcontainers/testcontainers-go v0.32.0/go.mod h1:CRHrzHLQhlXUsa5gXjTOfqIEJcrK5+xMDmBr/WMI88E=
 github.com/testcontainers/testcontainers-go/modules/redis v0.32.0 h1:HW5Qo9qfLi5iwfS7cbXwG6qe8ybXGePcgGPEmVlVDlo=
 github.com/testcontainers/testcontainers-go/modules/redis v0.32.0/go.mod h1:5kltdxVKZG0aP1iegeqKz4K8HHyP0wbkW5o84qLyMjY=
-github.com/thejerf/slogassert v0.3.2 h1:sE5f1vdrPr4EFkMW75s9stRePRn4zYpRGpeUbkCR+rc=
-github.com/thejerf/slogassert v0.3.2/go.mod h1:0zn9ISLVKo1aPMTqcGfG1o6dWwt+Rk574GlUxHD4rs8=
+github.com/thejerf/slogassert v0.3.4 h1:VoTsXixRbXMrRSSxDjYTiEDCM4VWbsYPW5rB/hX24kM=
+github.com/thejerf/slogassert v0.3.4/go.mod h1:0zn9ISLVKo1aPMTqcGfG1o6dWwt+Rk574GlUxHD4rs8=
 github.com/tklauser/go-sysconf v0.3.12 h1:0QaGUFOdQaIVdPgfITYzaTegZvdCjmYO52cSFAEVmqU=
 github.com/tklauser/go-sysconf v0.3.12/go.mod h1:Ho14jnntGE1fpdOqQEEaiKRpvIavV0hSfmBq8nJbHYI=
 github.com/tklauser/numcpus v0.6.1 h1:ng9scYS7az0Bk4OZLvrNXNSAO2Pxr1XXRAPyjhIx+Fk=
