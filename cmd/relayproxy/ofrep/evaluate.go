@@ -110,12 +110,20 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 		attribute.String("flagEvaluation.value", fmt.Sprintf("%v", flagValue.Value)),
 	)
 
+	metadata := flagValue.Metadata
+	if flagValue.Cacheable {
+		if metadata == nil {
+			metadata = make(map[string]interface{})
+		}
+		metadata["gofeatureflag_cacheable"] = true
+	}
+
 	return c.JSON(http.StatusOK, model.OFREPEvaluateSuccessResponse{
 		Key:      flagKey,
 		Value:    flagValue.Value,
 		Reason:   flagValue.Reason,
 		Variant:  flagValue.VariationType,
-		Metadata: flagValue.Metadata,
+		Metadata: metadata,
 	})
 }
 
