@@ -2,5 +2,8 @@
   "key": "targeting-key-rule",
   "value": true,
   "reason": "TARGETING_MATCH",
-  "variant": "true_var"
+  "variant": "true_var",
+  "metadata": {
+    "gofeatureflag_cacheable": true
+  }
 }
