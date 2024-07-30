@@ -112,6 +112,9 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 
 	metadata := flagValue.Metadata
 	if flagValue.Cacheable {
+		if metadata == nil {
+			metadata = make(map[string]interface{})
+		}
 		metadata["gofeatureflag_cacheable"] = true
 	}
 
