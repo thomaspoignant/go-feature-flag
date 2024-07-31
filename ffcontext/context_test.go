@@ -61,6 +61,24 @@ func Test_ExtractGOFFProtectedFields(t *testing.T) {
 			},
 		},
 		{
+			name: "context goff specifics as map[string]interface and date as time.Time",
+			ctx: ffcontext.NewEvaluationContextBuilder("my-key").AddCustom("gofeatureflag", map[string]interface{}{
+				"currentDateTime": time.Date(2022, 8, 1, 0, 0, 10, 0, time.UTC),
+			}).Build(),
+			want: ffcontext.GoffContextSpecifics{
+				CurrentDateTime: testconvert.Time(time.Date(2022, 8, 1, 0, 0, 10, 0, time.UTC)),
+			},
+		},
+		{
+			name: "context goff specifics as map[string]interface and date as *time.Time",
+			ctx: ffcontext.NewEvaluationContextBuilder("my-key").AddCustom("gofeatureflag", map[string]interface{}{
+				"currentDateTime": testconvert.Time(time.Date(2022, 8, 1, 0, 0, 10, 0, time.UTC)),
+			}).Build(),
+			want: ffcontext.GoffContextSpecifics{
+				CurrentDateTime: testconvert.Time(time.Date(2022, 8, 1, 0, 0, 10, 0, time.UTC)),
+			},
+		},
+		{
 			name: "context goff specifics as map[string]interface",
 			ctx: ffcontext.NewEvaluationContextBuilder("my-key").AddCustom("gofeatureflag", map[string]interface{}{
 				"currentDateTime": time.Date(2022, 8, 1, 0, 0, 10, 0, time.UTC).Format(time.RFC3339),
@@ -90,6 +108,37 @@ func Test_ExtractGOFFProtectedFields(t *testing.T) {
 			}).Build(),
 			want: ffcontext.GoffContextSpecifics{
 				CurrentDateTime: testconvert.Time(time.Date(2022, 8, 1, 0, 0, 10, 0, time.UTC)),
+			},
+		},
+		{
+			name: "context goff specifics as GoffContextSpecifics type contains flagList",
+			ctx: ffcontext.NewEvaluationContextBuilder("my-key").AddCustom("gofeatureflag", ffcontext.GoffContextSpecifics{
+				CurrentDateTime: testconvert.Time(time.Date(2022, 8, 1, 0, 0, 10, 0, time.UTC)),
+				FlagList:        []string{"flag1", "flag2"},
+			}).Build(),
+			want: ffcontext.GoffContextSpecifics{
+				CurrentDateTime: testconvert.Time(time.Date(2022, 8, 1, 0, 0, 10, 0, time.UTC)),
+				FlagList:        []string{"flag1", "flag2"},
+			},
+		},
+		{
+			name: "context goff specifics as map[string]interface type contains flagList",
+			ctx: ffcontext.NewEvaluationContextBuilder("my-key").AddCustom("gofeatureflag", map[string]interface{}{
+				"currentDateTime": testconvert.Time(time.Date(2022, 8, 1, 0, 0, 10, 0, time.UTC)).Format(time.RFC3339),
+				"flagList":        []string{"flag1", "flag2"},
+			}).Build(),
+			want: ffcontext.GoffContextSpecifics{
+				CurrentDateTime: testconvert.Time(time.Date(2022, 8, 1, 0, 0, 10, 0, time.UTC)),
+				FlagList:        []string{"flag1", "flag2"},
+			},
+		},
+		{
+			name: "context goff specifics only flagList",
+			ctx: ffcontext.NewEvaluationContextBuilder("my-key").AddCustom("gofeatureflag", map[string]interface{}{
+				"flagList": []string{"flag1", "flag2"},
+			}).Build(),
+			want: ffcontext.GoffContextSpecifics{
+				FlagList: []string{"flag1", "flag2"},
 			},
 		},
 	}
