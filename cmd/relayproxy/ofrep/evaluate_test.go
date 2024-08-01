@@ -53,6 +53,17 @@ func Test_Bulk_Evaluation(t *testing.T) {
 			},
 		},
 		{
+			name: "specify flag list in context",
+			args: args{
+				bodyFile:            "../testdata/ofrep/valid_request_specify_flags.json",
+				configFlagsLocation: configFlagsLocation,
+			},
+			want: want{
+				httpCode: http.StatusOK,
+				bodyFile: "../testdata/ofrep/responses/valid_response_specify_flags.json",
+			},
+		},
+		{
 			name: "Invalid context",
 			args: args{
 				bodyFile:            "../testdata/ofrep/invalid_context.json",

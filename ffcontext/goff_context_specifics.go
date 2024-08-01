@@ -32,4 +32,11 @@ func (g *GoffContextSpecifics) addListFlags(flagList any) {
 	if value, ok := flagList.([]string); ok {
 		g.FlagList = value
 	}
+	if value, ok := flagList.([]interface{}); ok {
+		for _, val := range value {
+			if valAsString, ok := val.(string); ok {
+				g.FlagList = append(g.FlagList, valAsString)
+			}
+		}
+	}
 }

@@ -1,0 +1,11 @@
+{
+  "context": {
+    "company": "GO Feature Flag",
+    "firstname": "John",
+    "lastname": "Doe",
+    "targetingKey": "4f433951-4c8c-42b3-9f18-8c9a5ed8e9eb",
+    "gofeatureflag": {
+      "flagList": ["array-flag", "flag-only-for-admin"]
+    }
+  }
+}

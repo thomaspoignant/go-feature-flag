@@ -75,6 +75,17 @@ func Test_all_flag_Handler(t *testing.T) {
 				errorCode:  http.StatusBadRequest,
 			},
 		},
+		{
+			name: "specify flags in evaluation context",
+			args: args{
+				bodyFile:            "../testdata/controller/all_flags/valid_request_specify_flags.json",
+				configFlagsLocation: configFlagsLocation,
+			},
+			want: want{
+				httpCode: http.StatusOK,
+				bodyFile: "../testdata/controller/all_flags/valid_response_specify_flags.json",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
