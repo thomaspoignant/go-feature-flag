@@ -9,6 +9,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/model"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
+	"github.com/thomaspoignant/go-feature-flag/internal/flagstate"
 	"github.com/thomaspoignant/go-feature-flag/internal/utils"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -173,7 +174,13 @@ func (h *EvaluateCtrl) BulkEvaluate(c echo.Context) error {
 	_, span := tracer.Start(c.Request().Context(), "AllFlagsState")
 	defer span.End()
 
-	allFlagsResp := h.goFF.AllFlagsState(evalCtx)
+	var allFlagsResp flagstate.AllFlags
+	if len(evalCtx.ExtractGOFFProtectedFields().FlagList) > 0 {
+		// if we have a list of flags to evaluate in the evaluation context, we evaluate only those flags.
+		allFlagsResp = h.goFF.GetFlagStates(evalCtx, evalCtx.ExtractGOFFProtectedFields().FlagList)
+	} else {
+		allFlagsResp = h.goFF.AllFlagsState(evalCtx)
+	}
 	for key, val := range allFlagsResp.GetFlags() {
 		value := val.Value
 		if val.Reason == flag.ReasonError {

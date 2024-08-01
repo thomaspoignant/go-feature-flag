@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
+	"github.com/thomaspoignant/go-feature-flag/internal/flagstate"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"net/http"
@@ -59,7 +60,15 @@ func (h *allFlags) Handler(c echo.Context) error {
 	tracer := otel.GetTracerProvider().Tracer(config.OtelTracerName)
 	_, span := tracer.Start(c.Request().Context(), "AllFlagsState")
 	defer span.End()
-	allFlags := h.goFF.AllFlagsState(evaluationCtx)
+
+	var allFlags flagstate.AllFlags
+	if len(evaluationCtx.ExtractGOFFProtectedFields().FlagList) > 0 {
+		// if we have a list of flags to evaluate in the evaluation context, we evaluate only those flags.
+		allFlags = h.goFF.GetFlagStates(evaluationCtx, evaluationCtx.ExtractGOFFProtectedFields().FlagList)
+	} else {
+		allFlags = h.goFF.AllFlagsState(evaluationCtx)
+	}
+
 	span.SetAttributes(
 		attribute.Bool("AllFlagsState.valid", allFlags.IsValid()),
 		attribute.Int("AllFlagsState.numberEvaluation", len(allFlags.GetFlags())),

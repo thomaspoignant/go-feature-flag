@@ -2,14 +2,11 @@ package ffclient
 
 import (
 	"fmt"
-	"maps"
-	"time"
-
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
+	"maps"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	"github.com/thomaspoignant/go-feature-flag/internal/flagstate"
 	"github.com/thomaspoignant/go-feature-flag/model"
 )
 
@@ -231,98 +228,6 @@ func (g *GoFeatureFlag) JSONVariationDetails(flagKey string, ctx ffcontext.Conte
 	res, err := getVariation[map[string]interface{}](g, flagKey, ctx, defaultValue, "bool")
 	notifyVariation(g, flagKey, ctx, res)
 	return res, err
-}
-
-// AllFlagsState return the values of all the flags for a specific user.
-// If valid field is false it means that we had an error when checking the flags.
-func AllFlagsState(ctx ffcontext.Context) flagstate.AllFlags {
-	return ff.AllFlagsState(ctx)
-}
-
-// GetFlagsFromCache returns all the flags present in the cache with their
-// current state when calling this method. If cache hasn't been initialized, an
-// error reporting this is returned.
-func GetFlagsFromCache() (map[string]flag.Flag, error) {
-	return ff.GetFlagsFromCache()
-}
-
-// AllFlagsState return a flagstate.AllFlags that contains all the flags for a specific user.
-func (g *GoFeatureFlag) AllFlagsState(evaluationCtx ffcontext.Context) flagstate.AllFlags {
-	flags := map[string]flag.Flag{}
-	if g == nil {
-		// empty AllFlags will set valid to false
-		return flagstate.AllFlags{}
-	}
-
-	if !g.config.Offline {
-		var err error
-		flags, err = g.cache.AllFlags()
-		if err != nil {
-			// empty AllFlags will set valid to false
-			return flagstate.AllFlags{}
-		}
-	}
-
-	allFlags := flagstate.NewAllFlags()
-	for key, currentFlag := range flags {
-		flagCtx := flag.Context{
-			EvaluationContextEnrichment: g.config.EvaluationContextEnrichment,
-			DefaultSdkValue:             nil,
-		}
-		flagCtx.AddIntoEvaluationContextEnrichment("env", g.config.Environment)
-		flagValue, resolutionDetails := currentFlag.Value(key, evaluationCtx, flagCtx)
-
-		// if the flag is disabled, we are ignoring it.
-		if resolutionDetails.Reason == flag.ReasonDisabled {
-			allFlags.AddFlag(key, flagstate.FlagState{
-				Timestamp:   time.Now().Unix(),
-				TrackEvents: currentFlag.IsTrackEvents(),
-				Failed:      resolutionDetails.ErrorCode != "",
-				ErrorCode:   resolutionDetails.ErrorCode,
-				Reason:      resolutionDetails.Reason,
-				Metadata:    resolutionDetails.Metadata,
-			})
-			continue
-		}
-
-		switch v := flagValue; v.(type) {
-		case int, float64, bool, string, []interface{}, map[string]interface{}:
-			allFlags.AddFlag(key, flagstate.FlagState{
-				Value:         v,
-				Timestamp:     time.Now().Unix(),
-				VariationType: resolutionDetails.Variant,
-				TrackEvents:   currentFlag.IsTrackEvents(),
-				Failed:        resolutionDetails.ErrorCode != "",
-				ErrorCode:     resolutionDetails.ErrorCode,
-				Reason:        resolutionDetails.Reason,
-				Metadata:      resolutionDetails.Metadata,
-			})
-
-		default:
-			defaultVariationName := flag.VariationSDKDefault
-			defaultVariationValue := currentFlag.GetVariationValue(defaultVariationName)
-			allFlags.AddFlag(
-				key,
-				flagstate.FlagState{
-					Value:         defaultVariationValue,
-					Timestamp:     time.Now().Unix(),
-					VariationType: defaultVariationName,
-					TrackEvents:   currentFlag.IsTrackEvents(),
-					Failed:        true,
-					ErrorCode:     flag.ErrorCodeTypeMismatch,
-					Reason:        flag.ReasonError,
-					Metadata:      resolutionDetails.Metadata,
-				})
-		}
-	}
-	return allFlags
-}
-
-// GetFlagsFromCache returns all the flags present in the cache with their
-// current state when calling this method. If cache hasn't been initialized, an
-// error reporting this is returned.
-func (g *GoFeatureFlag) GetFlagsFromCache() (map[string]flag.Flag, error) {
-	return g.cache.AllFlags()
 }
 
 // RawVariation return the raw value of the flag (without any types).
