@@ -12,6 +12,11 @@ describe('Provider tests',  () => {
     });
     goffClient = OpenFeature.getClient('my-app')
     await OpenFeature.setProviderAndWait('my-app', goFeatureFlagProvider);
+    OpenFeature.setContext({
+      gofeatureflag:{
+        flagList: ["flag1", "flag2"]
+      }
+    })
 
     userCtx = {
       targetingKey: 'd45e303a-38c2-11ed-a261-0242ac120002', // user unique identifier (mandatory)
