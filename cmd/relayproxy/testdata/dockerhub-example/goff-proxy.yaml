@@ -10,7 +10,7 @@ pollingInterval: 1000
 # Check https://gofeatureflag.org/docs/v1.31.2/relay_proxy/configure_relay_proxy#type-retriever to see all the available retrievers.
 retriever:
   kind: http
-  url: https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/cmd/testdata/dockerhub-example/flags.goff.yaml
+  url: https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/cmd/relayproxy/testdata/dockerhub-example/flags.goff.yaml
 
 # How to export the usage of the flags. This how you specify where your telemetry data will be sent.
 # Check https://gofeatureflag.org/docs/v1.31.2/relay_proxy/configure_relay_proxy#type-exporter to see all the available exporters.
