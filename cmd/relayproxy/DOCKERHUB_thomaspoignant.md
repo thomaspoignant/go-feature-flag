@@ -61,7 +61,7 @@ This is a small example on how to run `go-feature-flag` locally.
 
 ```shell
 # Download an example of a basic configuration file.
-curl https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/cmd/relayproxy/testdata/config/valid-file.yaml -o goff-proxy.yaml
+curl https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/cmd/relayproxy/testdata/dockerhub-example/goff-proxy.yaml -o goff-proxy.yaml\
 
 # Launch the container
 docker run \
