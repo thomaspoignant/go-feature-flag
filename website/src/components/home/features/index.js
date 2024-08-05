@@ -153,6 +153,12 @@ function OpenFeature() {
             fontAwesomeIcon="devicon-swift-plain colored"
             tooltipText="Swift (iOS/tvOS/macOS)"
           />
+
+          <SocialIcon
+            colorClassName={styles.socialIconCyan}
+            fontAwesomeIcon="devicon-ruby-plain colored"
+            tooltipText="Ruby"
+          />
         </div>
       </div>
       <div className="col-1-2">
