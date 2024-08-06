@@ -9,13 +9,11 @@ OpenFeature provides a shared, standardized feature flagging client - _an SDK_ -
 Whether you're using an open-source system or a commercial product, whether it's self-hosted or cloud-hosted, OpenFeature provides a consistent, unified API for developers to use feature flagging in their applications.
 _[Documentation](https://docs.openfeature.dev)_
 :::
+GO Feature Flag is committed to **opensource** principles and **standardization**. To achieve this, we've chosen to rely solely on [OpenFeature](https://docs.openfeature.dev) and avoid building custom SDKs.
 
-GO Feature Flag believes in **Open-Source** and **standardization**, this is the reason why we have decided not implementing any custom SDK and rely only on **Open Feature**.
+To seamlessly integrate with OpenFeature, we provide a lightweight, self-hosted API server called the **relay proxy**. This proxy leverages the core GO Feature Flag module internally. By deploying the relay proxy in your infrastructure, you can utilize Open Feature SDKs in conjunction with GO Feature Flag providers to evaluate your feature flags.
 
-To be compatible with Open Feature, **GO Feature Flag** is providing a lightweight self-hosted API server *(called [relay proxy](../relay_proxy))* that is using the GO Feature Flag module internally.
-When the **relay proxy** is running in your infrastructure, you can use the **Open Feature SDKs** in combination with **GO Feature Flag providers** to evaluate your flags.
-
-This schema is an overview on how **Open Feature** is working, you can have more information about all the concepts in the **[Open Feature documentation](https://docs.openfeature.dev)**.
+For a comprehensive understanding of how Open Feature operates, please refer to the official **[Open Feature documentation](https://docs.openfeature.dev)**.tps://docs.openfeature.dev)**.
 
 ## Integration pattern
 
