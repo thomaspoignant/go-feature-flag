@@ -192,6 +192,24 @@ object
 			</td>
 		</tr>
 		<tr>
+			<td id="extraManifests">
+				<a href="./values.yaml#L125">extraManifests</a>
+            </td>
+			<td>
+list
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+[]
+</pre>
+</div>
+			</td>
+			<td>
+				Array of extra objects to deploy with the release (evaluated as a template)
+			</td>
+		</tr>
+		<tr>
 			<td id="fullnameOverride">
 				<a href="./values.yaml#L42">fullnameOverride</a>
             </td>
