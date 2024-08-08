@@ -60,3 +60,17 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Renders a value that contains template
+Usage:
+{{ include "common.tplvalues.render" ( dict "value" .Values.path.to.the.Value "context" $ ) }}
+*/}}
+{{- define "relay-proxy.render" -}}
+{{- $value := typeIs "string" .value | ternary .value (.value | toYaml) }}
+{{- if contains "{{" (toJson .value) }}
+  {{- tpl $value .context }}
+{{- else }}
+    {{- $value }}
+{{- end }}
+{{- end -}}

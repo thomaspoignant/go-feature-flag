@@ -13,10 +13,11 @@ spec:
       {{- include "relay-proxy.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
       annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+        checksum/configmap: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- if .Values.podAnnotations }}
+        {{- include "relay-proxy.render" (dict "value" .Values.podAnnotations "context" $) | nindent 8 }}
+        {{- end }}
       labels:
         {{- include "relay-proxy.selectorLabels" . | nindent 8 }}
     spec:

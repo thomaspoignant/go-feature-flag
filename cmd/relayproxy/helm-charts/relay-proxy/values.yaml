@@ -120,3 +120,29 @@ tolerations: []
 
 # -- Affinity settings for pod assignment to nodes
 affinity: {}
+
+# -- Array of extra objects to deploy with the release (evaluated as a template)
+extraManifests: []
+#  - kind: Role
+#    apiVersion: rbac.authorization.k8s.io/v1
+#    metadata:
+#      name: feature-flags-relay-proxy
+#      namespace: "{{ .Release.Namespace }}"
+#    rules:
+#      - apiGroups: [""]
+#        resources:
+#          - configmaps
+#        verbs:
+#          - get
+#  - kind: RoleBinding
+#    apiVersion: rbac.authorization.k8s.io/v1
+#    metadata:
+#      name: feature-flags-relay-proxy
+#      namespace: "{{ .Release.Namespace }}"
+#    subjects:
+#    - kind: ServiceAccount
+#      name: feature-flags-relay-proxy
+#    roleRef:
+#      kind: Role
+#      name: feature-flags-relay-proxy
+#      apiGroup: ""
