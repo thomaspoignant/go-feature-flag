@@ -306,6 +306,7 @@ const config = {
           'csharp',
           'yaml',
           'python',
+          'ruby'
         ],
       },
     }),
