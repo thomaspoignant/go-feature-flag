@@ -11,6 +11,7 @@ const repos = [
     {slug: 'open-feature/java-sdk-contrib', prefix: 'providers/go-feature-flag' },
     {slug: 'open-feature/dotnet-sdk-contrib', prefix: 'src/OpenFeature.Contrib.Providers.GOFeatureFlag' },
     {slug: 'open-feature/js-sdk-contrib', prefix: 'libs/providers/go-feature-flag' },
+    {slug: 'open-feature/php-sdk-contrib', prefix: 'providers/GoFeatureFlag' },
 ]
 
 const octokit = new Octokit({
