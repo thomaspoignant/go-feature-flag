@@ -261,7 +261,7 @@ jobs:
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
       - name: yq - portable yaml processor
-        uses: mikefarah/yq@v4.44.2
+        uses: mikefarah/yq@v4.44.3
 
       - name: Bump chart appVersion
         working-directory: ./release/
