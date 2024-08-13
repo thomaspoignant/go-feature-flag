@@ -1,8 +1,9 @@
 package utils_test
 
 import (
-	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"testing"
+
+	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/internal/utils"
@@ -39,7 +40,7 @@ func TestUserToMap(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want, utils.ContextToMap(tt.u))
+			assert.Equal(t, tt.want, utils.ContextToMap(tt.u.GetKey(), tt.u))
 		})
 	}
 }

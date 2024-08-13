@@ -2,9 +2,10 @@ package flag_test
 
 import (
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"testing"
 	"time"
+
+	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
@@ -1661,6 +1662,155 @@ func TestInternalFlag_Value(t *testing.T) {
 				Reason:    flag.ReasonTargetingMatch,
 				RuleIndex: testconvert.Int(0),
 				Cacheable: true,
+			},
+		},
+		{
+			name: "Should use custom bucketing key when set",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"variation_A": testconvert.Interface("value_A"),
+					"variation_B": testconvert.Interface("value_B"),
+					"variation_C": testconvert.Interface("value_C"),
+				},
+				BucketingKey: "teamId",
+				Rules: &[]flag.Rule{
+					{
+						Query:           testconvert.String("key eq \"teams-123\""),
+						VariationResult: testconvert.String("variation_B"),
+					},
+					{
+						Query:           testconvert.String("key eq \"user-key\""),
+						VariationResult: testconvert.String("variation_C"),
+					},
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("variation_A"),
+				},
+				Metadata: &map[string]interface{}{
+					"teamId": "team-123",
+				},
+			},
+			args: args{
+				flagName: "my-flag",
+				user:     ffcontext.NewEvaluationContextBuilder("user-key").AddCustom("teamId", "team-123").Build(),
+				flagContext: flag.Context{
+					DefaultSdkValue: "value_default",
+				},
+			},
+			want: "value_B",
+			want1: flag.ResolutionDetails{
+				Variant:   "variation_B",
+				Reason:    flag.ReasonTargetingMatch,
+				RuleIndex: testconvert.Int(1),
+				Cacheable: true,
+				Metadata: map[string]interface{}{
+					"teamId": "team-123",
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, got1 := tt.flag.Value(tt.args.flagName, tt.args.user, tt.args.flagContext)
+			assert.Equalf(t, tt.want, got, "not expected value: %s", cmp.Diff(tt.want, got))
+			assert.Equalf(t, tt.want1, got1, "not expected value: %s", cmp.Diff(tt.want1, got1))
+		})
+	}
+}
+
+func TestInternalFlag_ValueWithBucketingKey(t *testing.T) {
+	type args struct {
+		flagName    string
+		user        ffcontext.Context
+		flagContext flag.Context
+	}
+	tests := []struct {
+		name  string
+		flag  flag.InternalFlag
+		args  args
+		want  interface{}
+		want1 flag.ResolutionDetails
+	}{
+		{
+			name: "Should use custom bucketing key when set",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"variation_A": testconvert.Interface("value_A"),
+					"variation_B": testconvert.Interface("value_B"),
+					"variation_C": testconvert.Interface("value_C"),
+				},
+				BucketingKey: "teamId",
+				Rules: &[]flag.Rule{
+					{
+						Query:           testconvert.String("key eq \"team-123\""),
+						VariationResult: testconvert.String("variation_B"),
+					},
+					{
+						Query:           testconvert.String("key eq \"user-key\""),
+						VariationResult: testconvert.String("variation_C"),
+					},
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("variation_A"),
+				},
+				Metadata: &map[string]interface{}{
+					"teamId": "team-123",
+				},
+			},
+			args: args{
+				flagName: "my-flag",
+				user:     ffcontext.NewEvaluationContextBuilder("user-key").AddCustom("teamId", "team-123").Build(),
+				flagContext: flag.Context{
+					DefaultSdkValue: "value_default",
+				},
+			},
+			want: "value_B",
+			want1: flag.ResolutionDetails{
+				Variant:   "variation_B",
+				Reason:    flag.ReasonTargetingMatch,
+				RuleIndex: testconvert.Int(0),
+				Cacheable: true,
+				Metadata: map[string]interface{}{
+					"teamId": "team-123",
+				},
+			},
+		},
+		{
+			name: "Should not use user key when bucketing key is set",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"variation_A": testconvert.Interface("value_A"),
+					"variation_B": testconvert.Interface("value_B"),
+				},
+				BucketingKey: "region",
+				Rules: &[]flag.Rule{
+					{
+						Query:           testconvert.String("key eq \"user-key\""),
+						VariationResult: testconvert.String("variation_B"),
+					},
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("variation_A"),
+				},
+				Metadata: &map[string]interface{}{
+					"region": "nl-nh",
+				},
+			},
+			args: args{
+				flagName: "my-flag",
+				user:     ffcontext.NewEvaluationContextBuilder("user-key").AddCustom("region", "nl-nh").Build(),
+				flagContext: flag.Context{
+					DefaultSdkValue: "value_default",
+				},
+			},
+			want: "value_A",
+			want1: flag.ResolutionDetails{
+				Variant:   "variation_A",
+				Reason:    flag.ReasonDefault,
+				Cacheable: true,
+				Metadata: map[string]interface{}{
+					"region": "nl-nh",
+				},
 			},
 		},
 	}

@@ -12,6 +12,7 @@ const (
 	ErrorCodeGeneral             ErrorCode = "GENERAL"
 	ErrorCodeInvalidContext      ErrorCode = "INVALID_CONTEXT"
 	ErrorCodeTargetingKeyMissing ErrorCode = "TARGETING_KEY_MISSING"
+	ErrorCodeBucketingKeyMissing ErrorCode = "BUCKETING_KEY_MISSING"
 
 	// Custom error code for Go Feature Flag
 

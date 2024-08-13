@@ -2,11 +2,12 @@ package flagv1
 
 import (
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"math"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 
@@ -147,7 +148,7 @@ func (f *FlagData) evaluateRule(user ffcontext.Context, environment string) bool
 	}
 
 	// Evaluate the rule on the user.
-	userMap := utils.ContextToMap(user)
+	userMap := utils.ContextToMap(user.GetKey(), user)
 	if environment != "" {
 		userMap["env"] = environment
 	}

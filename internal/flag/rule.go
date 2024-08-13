@@ -2,10 +2,11 @@ package flag
 
 import (
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 
 	"github.com/nikunjy/rules/parser"
 	"github.com/thomaspoignant/go-feature-flag/internal/internalerror"
@@ -41,7 +42,7 @@ type Rule struct {
 
 // Evaluate is checking if the rule apply to for the user.
 // If yes it returns the variation you should use for this rule.
-func (r *Rule) Evaluate(ctx ffcontext.Context, flagName string, isDefault bool,
+func (r *Rule) Evaluate(key string, ctx ffcontext.Context, flagName string, isDefault bool,
 ) (string, error) {
 	evaluationDate := DateFromContextOrDefault(ctx, time.Now())
 	// check that we have an evaluation context
@@ -50,14 +51,14 @@ func (r *Rule) Evaluate(ctx ffcontext.Context, flagName string, isDefault bool,
 	}
 
 	// Check if the rule apply for this user
-	ruleApply := isDefault || r.GetQuery() == "" || parser.Evaluate(r.GetTrimmedQuery(), utils.ContextToMap(ctx))
+	ruleApply := isDefault || r.GetQuery() == "" || parser.Evaluate(r.GetTrimmedQuery(), utils.ContextToMap(key, ctx))
 	if !ruleApply || (!isDefault && r.IsDisable()) {
 		return "", &internalerror.RuleNotApply{Context: ctx}
 	}
 
 	if r.ProgressiveRollout != nil {
 		progressiveRolloutMaxPercentage := uint32(100 * PercentageMultiplier)
-		hashID := utils.BuildHash(flagName, ctx.GetKey(), progressiveRolloutMaxPercentage)
+		hashID := utils.BuildHash(flagName, key, progressiveRolloutMaxPercentage)
 		variation, err := r.getVariationFromProgressiveRollout(hashID, evaluationDate)
 		if err != nil {
 			return variation, err
@@ -71,7 +72,7 @@ func (r *Rule) Evaluate(ctx ffcontext.Context, flagName string, isDefault bool,
 			m += percentage
 		}
 		maxPercentage := uint32(m * PercentageMultiplier)
-		hashID := utils.BuildHash(flagName, ctx.GetKey(), maxPercentage)
+		hashID := utils.BuildHash(flagName, key, maxPercentage)
 		variationName, err := r.getVariationFromPercentage(hashID)
 		if err != nil {
 			return "", err
