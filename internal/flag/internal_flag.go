@@ -25,6 +25,9 @@ type InternalFlag struct {
 	// This an optional field.
 	Rules *[]Rule `json:"targeting,omitempty" yaml:"targeting,omitempty" toml:"targeting,omitempty"`
 
+	// BucketingKey defines a source for dynamic targeting key
+	BucketingKey string `json:"bucketingKey,omitempty" yaml:"bucketingKey,omitempty" toml:"bucketingKey,omitempty"`
+
 	// DefaultRule is the originalRule applied after checking that any other rules
 	// matched the user.
 	DefaultRule *Rule `json:"defaultRule,omitempty" yaml:"defaultRule,omitempty" toml:"defaultRule,omitempty"`
