@@ -56,6 +56,30 @@ client.addHandler(ProviderEvents.Stale, () => { //... });
 client.addHandler(ProviderEvents.ConfigurationChanged, () => { //... });
 ```
 
+### Limit the flags to evaluate
+
+By default, the provider will fetch all the flags configured in the GO Feature Flag server to be ready to evaluate them.
+If you know in advance, what are the flags you will evaluate in your application, you can specify the list of flags to evaluate in the context.
+
+You need to add in the evaluation context the restricted key `gofeatureflag.flagList` with the list of flags you want to evaluate.
+
+```typescript
+OpenFeature.setContext({
+  // ...
+  gofeatureflag: {
+    flagList: ['flag1', 'flag2']
+  }
+});
+
+await OpenFeature.setContext(evaluationCtx);
+```
+
+By setting the `gofeatureflag.flagList` key in the context, the provider will only fetch the flags specified in the list.
+
+:::warning
+When limiting the flags to evaluate, if you try to evaluate a flag not in the list, the provider will return the default value with the error `FLAG_NOT_FOUND`.
+:::
+
 ### Available options
 | Option name                   | Type   | Default        | Description                                                                                                                                                                                     |
 |-------------------------------|--------|----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
