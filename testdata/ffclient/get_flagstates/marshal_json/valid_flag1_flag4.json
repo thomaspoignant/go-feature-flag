@@ -1,0 +1,23 @@
+{
+  "flags": {
+    "test-flag1": {
+      "value": "true",
+      "timestamp": 1622206239,
+      "variationType": "True",
+      "trackEvents": true,
+      "reason":"STATIC",
+      "errorCode": ""
+    },
+    "test-flag4": {
+      "value": {
+        "test": "yo"
+      },
+      "timestamp": 1622206239,
+      "variationType": "True",
+      "trackEvents": true,
+      "reason":"STATIC",
+      "errorCode": ""
+    }
+  },
+  "valid": true
+}

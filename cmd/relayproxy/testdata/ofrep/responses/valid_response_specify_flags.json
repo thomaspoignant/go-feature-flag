@@ -1,0 +1,20 @@
+{
+  "flags": [
+    {
+      "key": "array-flag",
+      "value": [
+        "batmanDefault",
+        "supermanDefault",
+        "superherosDefault"
+      ],
+      "reason": "DEFAULT",
+      "variant": "Default"
+    },
+    {
+      "key": "flag-only-for-admin",
+      "value": false,
+      "reason": "DEFAULT",
+      "variant": "Default"
+    }
+  ]
+}

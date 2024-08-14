@@ -1,0 +1,25 @@
+{
+  "flags": {
+    "array-flag": {
+      "value": [
+        "batmanDefault",
+        "supermanDefault",
+        "superherosDefault"
+      ],
+      "timestamp": 1652273630,
+      "variationType": "Default",
+      "trackEvents": true,
+      "errorCode": "",
+      "reason": "DEFAULT"
+    },
+    "flag-only-for-admin": {
+      "value": false,
+      "timestamp": 1652273630,
+      "variationType": "Default",
+      "trackEvents": true,
+      "errorCode": "",
+      "reason": "DEFAULT"
+    }
+  },
+  "valid": true
+}

@@ -1,6 +1,6 @@
 # relay-proxy
 
-![Version: 1.31.2](https://img.shields.io/badge/Version-1.31.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.31.2](https://img.shields.io/badge/AppVersion-v1.31.2-informational?style=flat-square)
+![Version: 1.32.0](https://img.shields.io/badge/Version-1.32.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.32.0](https://img.shields.io/badge/AppVersion-v1.32.0-informational?style=flat-square)
 
 A Helm chart to deploy go-feature-flag-relay proxy into Kubernetes
 
@@ -189,6 +189,24 @@ object
 			</td>
 			<td>
 				Environment variables to pass to the relay proxy
+			</td>
+		</tr>
+		<tr>
+			<td id="extraManifests">
+				<a href="./values.yaml#L125">extraManifests</a>
+            </td>
+			<td>
+list
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+[]
+</pre>
+</div>
+			</td>
+			<td>
+				Array of extra objects to deploy with the release (evaluated as a template)
 			</td>
 		</tr>
 		<tr>
