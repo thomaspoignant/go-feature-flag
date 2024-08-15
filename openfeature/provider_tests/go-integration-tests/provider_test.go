@@ -1,13 +1,10 @@
-//go:build integration
-// +build integration
-
 package go_integration_tests
 
 import (
 	"context"
 	"fmt"
 	gofeatureflag "github.com/open-feature/go-sdk-contrib/providers/go-feature-flag/pkg"
-	of "github.com/open-feature/go-sdk/pkg/openfeature"
+	of "github.com/open-feature/go-sdk/openfeature"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -62,7 +59,11 @@ func TestProvider_module_BooleanEvaluation(t *testing.T) {
 						Reason:       of.TargetingMatchReason,
 						ErrorCode:    "",
 						ErrorMessage: "",
-						FlagMetadata: map[string]interface{}{},
+						FlagMetadata: map[string]interface{}{
+							"description":             "this is a test",
+							"gofeatureflag_cacheable": true,
+							"pr_link":                 "https://github.com/thomaspoignant/go-feature-flag/pull/916",
+						},
 					},
 				},
 			},
@@ -84,7 +85,11 @@ func TestProvider_module_BooleanEvaluation(t *testing.T) {
 						Reason:       of.DisabledReason,
 						ErrorCode:    "",
 						ErrorMessage: "",
-						FlagMetadata: map[string]interface{}{},
+						FlagMetadata: map[string]interface{}{
+							"description":             "this is a test",
+							"gofeatureflag_cacheable": true,
+							"pr_link":                 "https://github.com/thomaspoignant/go-feature-flag/pull/916",
+						},
 					},
 				},
 			},
@@ -105,7 +110,7 @@ func TestProvider_module_BooleanEvaluation(t *testing.T) {
 						Variant:      "",
 						Reason:       of.ErrorReason,
 						ErrorCode:    of.TypeMismatchCode,
-						ErrorMessage: "unexpected type for flag string_key",
+						ErrorMessage: "resolved value CC0000 is not of boolean type",
 						FlagMetadata: map[string]interface{}{},
 					},
 				},
@@ -127,7 +132,7 @@ func TestProvider_module_BooleanEvaluation(t *testing.T) {
 						Variant:      "",
 						Reason:       of.ErrorReason,
 						ErrorCode:    of.FlagNotFoundCode,
-						ErrorMessage: "flag does_not_exists was not found in GO Feature Flag",
+						ErrorMessage: "flag for key 'does_not_exists' does not exist",
 						FlagMetadata: map[string]interface{}{},
 					},
 				},
@@ -140,7 +145,8 @@ func TestProvider_module_BooleanEvaluation(t *testing.T) {
 				Endpoint: "http://localhost:1031/",
 			})
 			assert.NoError(t, err)
-			of.SetProvider(provider)
+			err = of.SetProviderAndWait(provider)
+			assert.NoError(t, err)
 			client := of.NewClient("test-app")
 			value, err := client.BooleanValueDetails(context.TODO(), tt.args.flag, tt.args.defaultValue, tt.args.evalCtx)
 
@@ -185,7 +191,11 @@ func TestProvider_module_StringEvaluation(t *testing.T) {
 						Reason:       of.TargetingMatchReason,
 						ErrorCode:    "",
 						ErrorMessage: "",
-						FlagMetadata: map[string]interface{}{},
+						FlagMetadata: map[string]interface{}{
+							"description":             "this is a test",
+							"gofeatureflag_cacheable": true,
+							"pr_link":                 "https://github.com/thomaspoignant/go-feature-flag/pull/916",
+						},
 					},
 				},
 			},
@@ -207,7 +217,11 @@ func TestProvider_module_StringEvaluation(t *testing.T) {
 						Reason:       of.DisabledReason,
 						ErrorCode:    "",
 						ErrorMessage: "",
-						FlagMetadata: map[string]interface{}{},
+						FlagMetadata: map[string]interface{}{
+							"description":             "this is a test",
+							"gofeatureflag_cacheable": true,
+							"pr_link":                 "https://github.com/thomaspoignant/go-feature-flag/pull/916",
+						},
 					},
 				},
 			},
@@ -228,7 +242,7 @@ func TestProvider_module_StringEvaluation(t *testing.T) {
 						Variant:      "",
 						Reason:       of.ErrorReason,
 						ErrorCode:    of.TypeMismatchCode,
-						ErrorMessage: "unexpected type for flag bool_targeting_match",
+						ErrorMessage: "resolved value true is not of string type",
 						FlagMetadata: map[string]interface{}{},
 					},
 				},
@@ -250,7 +264,7 @@ func TestProvider_module_StringEvaluation(t *testing.T) {
 						Variant:      "",
 						Reason:       of.ErrorReason,
 						ErrorCode:    of.FlagNotFoundCode,
-						ErrorMessage: "flag does_not_exists was not found in GO Feature Flag",
+						ErrorMessage: "flag for key 'does_not_exists' does not exist",
 						FlagMetadata: map[string]interface{}{},
 					},
 				},
@@ -269,9 +283,11 @@ func TestProvider_module_StringEvaluation(t *testing.T) {
 					FlagKey:  "flag-use-evaluation-context-enrichment",
 					FlagType: of.String,
 					ResolutionDetail: of.ResolutionDetail{
-						Variant:      "A",
-						Reason:       of.TargetingMatchReason,
-						FlagMetadata: map[string]interface{}{},
+						Variant: "A",
+						Reason:  of.TargetingMatchReason,
+						FlagMetadata: map[string]interface{}{
+							"gofeatureflag_cacheable": true,
+						},
 					},
 				},
 			},
@@ -283,7 +299,8 @@ func TestProvider_module_StringEvaluation(t *testing.T) {
 				Endpoint: "http://localhost:1031/",
 			})
 			assert.NoError(t, err)
-			of.SetProvider(provider)
+			err = of.SetProviderAndWait(provider)
+			assert.NoError(t, err)
 			client := of.NewClient("test-app")
 			value, err := client.StringValueDetails(context.TODO(), tt.args.flag, tt.args.defaultValue, tt.args.evalCtx)
 
@@ -328,7 +345,11 @@ func TestProvider_module_FloatEvaluation(t *testing.T) {
 						Reason:       of.TargetingMatchReason,
 						ErrorCode:    "",
 						ErrorMessage: "",
-						FlagMetadata: map[string]interface{}{},
+						FlagMetadata: map[string]interface{}{
+							"description":             "this is a test",
+							"gofeatureflag_cacheable": true,
+							"pr_link":                 "https://github.com/thomaspoignant/go-feature-flag/pull/916",
+						},
 					},
 				},
 			},
@@ -350,7 +371,11 @@ func TestProvider_module_FloatEvaluation(t *testing.T) {
 						Reason:       of.DisabledReason,
 						ErrorCode:    "",
 						ErrorMessage: "",
-						FlagMetadata: map[string]interface{}{},
+						FlagMetadata: map[string]interface{}{
+							"description":             "this is a test",
+							"gofeatureflag_cacheable": true,
+							"pr_link":                 "https://github.com/thomaspoignant/go-feature-flag/pull/916",
+						},
 					},
 				},
 			},
@@ -371,7 +396,7 @@ func TestProvider_module_FloatEvaluation(t *testing.T) {
 						Variant:      "",
 						Reason:       of.ErrorReason,
 						ErrorCode:    of.TypeMismatchCode,
-						ErrorMessage: "unexpected type for flag bool_targeting_match",
+						ErrorMessage: "resolved value true is not of float type",
 						FlagMetadata: map[string]interface{}{},
 					},
 				},
@@ -393,7 +418,7 @@ func TestProvider_module_FloatEvaluation(t *testing.T) {
 						Variant:      "",
 						Reason:       of.ErrorReason,
 						ErrorCode:    of.FlagNotFoundCode,
-						ErrorMessage: "flag does_not_exists was not found in GO Feature Flag",
+						ErrorMessage: "flag for key 'does_not_exists' does not exist",
 						FlagMetadata: map[string]interface{}{},
 					},
 				},
@@ -406,7 +431,8 @@ func TestProvider_module_FloatEvaluation(t *testing.T) {
 				Endpoint: "http://localhost:1031/",
 			})
 			assert.NoError(t, err)
-			of.SetProvider(provider)
+			err = of.SetProviderAndWait(provider)
+			assert.NoError(t, err)
 			client := of.NewClient("test-app")
 			value, err := client.FloatValueDetails(context.TODO(), tt.args.flag, tt.args.defaultValue, tt.args.evalCtx)
 
@@ -451,7 +477,11 @@ func TestProvider_module_IntEvaluation(t *testing.T) {
 						Reason:       of.TargetingMatchReason,
 						ErrorCode:    "",
 						ErrorMessage: "",
-						FlagMetadata: map[string]interface{}{},
+						FlagMetadata: map[string]interface{}{
+							"description":             "this is a test",
+							"gofeatureflag_cacheable": true,
+							"pr_link":                 "https://github.com/thomaspoignant/go-feature-flag/pull/916",
+						},
 					},
 				},
 			},
@@ -473,7 +503,11 @@ func TestProvider_module_IntEvaluation(t *testing.T) {
 						Reason:       of.DisabledReason,
 						ErrorCode:    "",
 						ErrorMessage: "",
-						FlagMetadata: map[string]interface{}{},
+						FlagMetadata: map[string]interface{}{
+							"description":             "this is a test",
+							"gofeatureflag_cacheable": true,
+							"pr_link":                 "https://github.com/thomaspoignant/go-feature-flag/pull/916",
+						},
 					},
 				},
 			},
@@ -494,7 +528,7 @@ func TestProvider_module_IntEvaluation(t *testing.T) {
 						Variant:      "",
 						Reason:       of.ErrorReason,
 						ErrorCode:    of.TypeMismatchCode,
-						ErrorMessage: "unexpected type for flag bool_targeting_match",
+						ErrorMessage: "resolved value true is not of integer type",
 						FlagMetadata: map[string]interface{}{},
 					},
 				},
@@ -516,7 +550,7 @@ func TestProvider_module_IntEvaluation(t *testing.T) {
 						Variant:      "",
 						Reason:       of.ErrorReason,
 						ErrorCode:    of.FlagNotFoundCode,
-						ErrorMessage: "flag does_not_exists was not found in GO Feature Flag",
+						ErrorMessage: "flag for key 'does_not_exists' does not exist",
 						FlagMetadata: map[string]interface{}{},
 					},
 				},
@@ -529,7 +563,8 @@ func TestProvider_module_IntEvaluation(t *testing.T) {
 				Endpoint: "http://localhost:1031/",
 			})
 			assert.NoError(t, err)
-			of.SetProvider(provider)
+			err = of.SetProviderAndWait(provider)
+			assert.NoError(t, err)
 			client := of.NewClient("test-app")
 			value, err := client.IntValueDetails(context.TODO(), tt.args.flag, tt.args.defaultValue, tt.args.evalCtx)
 
@@ -579,7 +614,11 @@ func TestProvider_module_ObjectEvaluation(t *testing.T) {
 						Reason:       of.TargetingMatchReason,
 						ErrorCode:    "",
 						ErrorMessage: "",
-						FlagMetadata: map[string]interface{}{},
+						FlagMetadata: map[string]interface{}{
+							"description":             "this is a test",
+							"gofeatureflag_cacheable": true,
+							"pr_link":                 "https://github.com/thomaspoignant/go-feature-flag/pull/916",
+						},
 					},
 				},
 			},
@@ -601,7 +640,11 @@ func TestProvider_module_ObjectEvaluation(t *testing.T) {
 						Reason:       of.DisabledReason,
 						ErrorCode:    "",
 						ErrorMessage: "",
-						FlagMetadata: map[string]interface{}{},
+						FlagMetadata: map[string]interface{}{
+							"description":             "this is a test",
+							"gofeatureflag_cacheable": true,
+							"pr_link":                 "https://github.com/thomaspoignant/go-feature-flag/pull/916",
+						},
 					},
 				},
 			},
@@ -622,7 +665,7 @@ func TestProvider_module_ObjectEvaluation(t *testing.T) {
 						Variant:      "",
 						Reason:       of.ErrorReason,
 						ErrorCode:    of.FlagNotFoundCode,
-						ErrorMessage: "flag does_not_exists was not found in GO Feature Flag",
+						ErrorMessage: "flag for key 'does_not_exists' does not exist",
 						FlagMetadata: map[string]interface{}{},
 					},
 				},
@@ -635,7 +678,8 @@ func TestProvider_module_ObjectEvaluation(t *testing.T) {
 				Endpoint: "http://localhost:1031/",
 			})
 			assert.NoError(t, err)
-			of.SetProvider(provider)
+			err = of.SetProviderAndWait(provider)
+			assert.NoError(t, err)
 			client := of.NewClient("test-app")
 			value, err := client.ObjectValueDetails(context.TODO(), tt.args.flag, tt.args.defaultValue, tt.args.evalCtx)
 
@@ -676,7 +720,11 @@ func TestProvider_apikey_relay_proxy(t *testing.T) {
 						Reason:       of.TargetingMatchReason,
 						ErrorCode:    "",
 						ErrorMessage: "",
-						FlagMetadata: map[string]interface{}{},
+						FlagMetadata: map[string]interface{}{
+							"description":             "this is a test",
+							"gofeatureflag_cacheable": true,
+							"pr_link":                 "https://github.com/thomaspoignant/go-feature-flag/pull/916",
+						},
 					},
 				},
 			},
@@ -695,7 +743,7 @@ func TestProvider_apikey_relay_proxy(t *testing.T) {
 						Variant:      "",
 						Reason:       of.ErrorReason,
 						ErrorCode:    of.GeneralCode,
-						ErrorMessage: "invalid token used to contact GO Feature Flag relay proxy instance",
+						ErrorMessage: "authentication/authorization error",
 						FlagMetadata: map[string]interface{}{},
 					},
 				},
@@ -715,7 +763,7 @@ func TestProvider_apikey_relay_proxy(t *testing.T) {
 						Variant:      "",
 						Reason:       of.ErrorReason,
 						ErrorCode:    of.GeneralCode,
-						ErrorMessage: "unexpected answer from the relay proxy",
+						ErrorMessage: "",
 						FlagMetadata: map[string]interface{}{},
 					},
 				},
@@ -729,7 +777,8 @@ func TestProvider_apikey_relay_proxy(t *testing.T) {
 				APIKey:   tt.args.apiKey,
 			})
 			assert.NoError(t, err)
-			of.SetProvider(provider)
+			err = of.SetProviderAndWait(provider)
+			assert.NoError(t, err)
 			client := of.NewClient("test-app")
 			value, err := client.BooleanValueDetails(context.TODO(), "bool_targeting_match", false, defaultEvaluationCtx())
 

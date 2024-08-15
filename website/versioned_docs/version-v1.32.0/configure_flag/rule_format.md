@@ -25,9 +25,10 @@ The targeting key is a fundamental part of the evaluation context because it dir
 When you create an evaluation context some fields are reserved for GO Feature Flag.  
 Those fields are used by GO Feature Flag directly, you can use them as will but you should be aware that they are used by GO Feature Flag.
 
-| Field                           | Description                                                                                                                                                                                                 |
-|---------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `gofeatureflag.currentDateTime` | If this property is set, we will use this date as base for all the rollout strategies which implies dates _(experimentation, progressive and scheduled)_.<br/>**Format:** Date following the RF3339 format. |
+| Field                           | Description                                                                                                                                                                                                                  |
+|---------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `gofeatureflag.currentDateTime` | If this property is set, we will use this date as base for all the rollout strategies which implies dates _(experimentation, progressive and scheduled)_.<br/>**Format:** Date following the RF3339 format.                  |
+| `gofeatureflag.flagList`        | If this property is set, in the bulk evaluation mode (for the client SDK) we will only evaluate the flags in this list.<br/>If empty or not set the default behavior is too evaluate all the flags.<br/>**Format:** []string |
 
 ## Rule format
 
