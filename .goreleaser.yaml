@@ -665,4 +665,4 @@ scoops:
     license: MIT
 
 snapshot:
-  name_template: "{{ incpatch .Version }}-next"
+  version_template: "{{ incpatch .Version }}-next"
