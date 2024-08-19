@@ -1,0 +1,11 @@
+url_path,views_total,views_unique
+/thomaspoignant/go-feature-flag,656,408
+/thomaspoignant/go-feature-flag/tree/main/examples,168,52
+/thomaspoignant/go-feature-flag/issues,82,25
+/thomaspoignant/go-feature-flag/tree/main/cmd/relayproxy,66,14
+/thomaspoignant/go-feature-flag/pulls,61,9
+/thomaspoignant/go-feature-flag/tree/main/examples/demo,48,15
+/thomaspoignant/go-feature-flag/tree/main/examples/openfeature_web,42,10
+/thomaspoignant/go-feature-flag/tree/main/cmd/relayproxy/helm-charts/relay-proxy,36,6
+/thomaspoignant/go-feature-flag/blob/main/examples/retriever_file/main.go,35,9
+/thomaspoignant/go-feature-flag/tree/main/cmd,33,6
