@@ -148,7 +148,7 @@ func (f *FlagData) evaluateRule(user ffcontext.Context, environment string) bool
 	}
 
 	// Evaluate the rule on the user.
-	userMap := utils.ContextToMap(user.GetKey(), user)
+	userMap := utils.ContextToMap(user)
 	if environment != "" {
 		userMap["env"] = environment
 	}

@@ -40,7 +40,7 @@ func TestUserToMap(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want, utils.ContextToMap(tt.u.GetKey(), tt.u))
+			assert.Equal(t, tt.want, utils.ContextToMap(tt.u))
 		})
 	}
 }

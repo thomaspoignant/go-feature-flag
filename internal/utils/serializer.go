@@ -5,7 +5,7 @@ import (
 )
 
 // ContextToMap convert the context to a MAP to use the query on it.
-func ContextToMap(key string, ctx ffcontext.Context) map[string]interface{} {
+func ContextToMap(ctx ffcontext.Context) map[string]interface{} {
 	// We don't have a json copy of the user.
 	userCopy := make(map[string]interface{})
 
@@ -14,6 +14,6 @@ func ContextToMap(key string, ctx ffcontext.Context) map[string]interface{} {
 		userCopy[key] = value
 	}
 	userCopy["anonymous"] = ctx.IsAnonymous()
-	userCopy["key"] = key
+	userCopy["key"] = ctx.GetKey()
 	return userCopy
 }
