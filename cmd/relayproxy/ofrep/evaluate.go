@@ -194,7 +194,8 @@ func (h *EvaluateCtrl) BulkEvaluate(c echo.Context) error {
 				Variant:  val.VariationType,
 				Metadata: val.Metadata,
 			},
-			ErrorCode: val.ErrorCode,
+			ErrorCode:    val.ErrorCode,
+			ErrorDetails: val.ErrorDetails,
 		})
 	}
 
