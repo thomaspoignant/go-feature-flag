@@ -76,10 +76,11 @@ func (f *InternalFlag) Value(
 
 	if keyError != nil {
 		return flagContext.DefaultSdkValue, ResolutionDetails{
-			Variant:   VariationSDKDefault,
-			Reason:    ReasonError,
-			ErrorCode: ErrorCodeBucketingKeyMissing,
-			Metadata:  f.GetMetadata(),
+			Variant:      VariationSDKDefault,
+			Reason:       ReasonError,
+			ErrorCode:    ErrorCodeTargetingKeyMissing,
+			ErrorMessage: keyError.Error(),
+			Metadata:     f.GetMetadata(),
 		}
 	}
 
