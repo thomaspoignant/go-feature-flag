@@ -72,7 +72,7 @@ func (f *InternalFlag) Value(
 		maps.Copy(evaluationCtx.GetCustom(), flagContext.EvaluationContextEnrichment)
 	}
 
-	key, keyError := f.GetTargetingKey(evaluationCtx)
+	key, keyError := f.GetBucketingKey(evaluationCtx)
 
 	if keyError != nil {
 		return flagContext.DefaultSdkValue, ResolutionDetails{
@@ -355,7 +355,7 @@ func (f *InternalFlag) GetVariationValue(name string) interface{} {
 	return nil
 }
 
-func (f *InternalFlag) GetTargetingKey(ctx ffcontext.Context) (string, error) {
+func (f *InternalFlag) GetBucketingKey(ctx ffcontext.Context) (string, error) {
 	if f.BucketingKey != "" {
 		value := ctx.GetCustom()[f.BucketingKey]
 		switch v := value.(type) {
