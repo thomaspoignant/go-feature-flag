@@ -12,6 +12,9 @@ type ResolutionDetails struct {
 	// ErrorCode indicates the error code for this evaluation
 	ErrorCode ErrorCode
 
+	// ErrorMessage gives more information about the error
+	ErrorMessage string
+
 	// RuleIndex indicates which rules applied
 	RuleIndex *int
 
