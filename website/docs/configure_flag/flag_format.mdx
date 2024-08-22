@@ -206,6 +206,22 @@ version = "12"
     </tr>
     <tr>
       <td>
+        <code>bucketing-key</code>
+        <br />
+        <i>(optional)</i>
+      </td> 
+      <td>
+        <p>
+          Selects a key from the evaluation context that will be used in place
+          of the <code>targetingKey</code> for the purpose of evaluating which
+          variant to serve.
+
+          If <code>bucketingKey</code> is set and the value is missing from the context, the flag will not be evaluated.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td>
         <code>variations</code>
       </td>
       <td>
