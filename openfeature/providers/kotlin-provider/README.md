@@ -85,6 +85,7 @@ When initializing the provider, you can pass some options to configure the provi
 | `apiKey`                  | String |         | (optional) If GO Feature Flag is configured to authenticate the requests, you should provide an API Key to the provider. Please ask the administrator of the relay proxy to provide an API Key. |
 | `pollingIntervalInMillis` | Long   | 300000  | (optional) Polling interval in millisecond to check with GO Feature Flag relay proxy if there is a flag configuration change.                                                                   |
 | `flushIntervalMs`         | Long   | 1000    | (optional) Time to wait before calling GO Feature Flag to store all the data about the evaluation in the relay proxy.                                                                           |
+| `pollingDelayInMillis`    | Long   |         | (optional) Polling delay in millisecond for initial check with GO Feature Flag relay proxy. If null takes [pollingIntervalInMillis]                                                             |
 
 ### Update the Evaluation Context
 

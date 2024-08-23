@@ -40,5 +40,11 @@ data class OfrepOptions(
      * (optional) polling interval in millisecond to refresh the flags
      * Default: 300000 (5 minutes)
      */
-    val pollingIntervalInMillis: Long = 300000
+    val pollingIntervalInMillis: Long = 300000,
+
+    /**
+     * (optional) initial delay for polling in millisecond to refresh the flags
+     * Default: Used from [pollingIntervalInMillis]
+     */
+    val pollingDelayInMillis: Long? = null,
 )

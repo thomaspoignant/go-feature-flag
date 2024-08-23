@@ -72,13 +72,16 @@ class OfrepProvider(
                 }
             }
         }
-        this.startPolling(this.ofrepOptions.pollingIntervalInMillis)
+        this.startPolling(
+            pollingIntervalInMillis = this.ofrepOptions.pollingIntervalInMillis,
+            initialPollingDelayInMillis = this.ofrepOptions.pollingDelayInMillis
+        )
     }
 
     /**
      * Start polling for flag updates
      */
-    private fun startPolling(pollingIntervalInMillis: Long) {
+    private fun startPolling(pollingIntervalInMillis: Long, initialPollingDelayInMillis: Long?) {
         val task: TimerTask = object : TimerTask() {
             override fun run() {
                 runBlocking {
@@ -113,7 +116,11 @@ class OfrepProvider(
             }
         }
         val timer = Timer()
-        timer.schedule(task, pollingIntervalInMillis, pollingIntervalInMillis)
+        timer.schedule(
+            /* task = */ task,
+            /* delay = */ initialPollingDelayInMillis ?: pollingIntervalInMillis,
+            /* period = */ pollingIntervalInMillis
+        )
         this.pollingTimer = timer
     }
 

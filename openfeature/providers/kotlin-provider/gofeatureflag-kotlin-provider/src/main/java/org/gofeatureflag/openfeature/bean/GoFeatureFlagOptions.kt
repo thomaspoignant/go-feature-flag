@@ -42,6 +42,12 @@ data class GoFeatureFlagOptions(
     val pollingIntervalInMillis: Long = 300000,
 
     /**
+     * (optional) initial delay for polling in millisecond to refresh the flags
+     * Default: Used from [pollingIntervalInMillis]
+     */
+    val pollingDelayInMillis: Long? = null,
+
+    /**
      * (optional) interval time we publish statistics collection data to the proxy.
      * The parameter is used only if the cache is enabled, otherwise the collection of the data is done directly
      * when calling the evaluation API.

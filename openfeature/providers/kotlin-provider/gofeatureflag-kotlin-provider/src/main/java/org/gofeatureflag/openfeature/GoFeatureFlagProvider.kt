@@ -38,6 +38,7 @@ class GoFeatureFlagProvider(private val options: GoFeatureFlagOptions) : Feature
             keepAliveDuration = options.keepAliveDuration,
             headers = authorizationHeader,
             pollingIntervalInMillis = options.pollingIntervalInMillis,
+            pollingDelayInMillis = options.pollingDelayInMillis,
         )
         this.ofrepProvider = OfrepProvider(ofrepOptions)
 
