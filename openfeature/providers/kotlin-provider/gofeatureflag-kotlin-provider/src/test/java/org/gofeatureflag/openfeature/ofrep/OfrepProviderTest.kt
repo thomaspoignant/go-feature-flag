@@ -535,6 +535,83 @@ class OfrepProviderTest {
         assertEquals(want2, got2)
     }
 
+    @Test
+    fun `should collect both responses if interval is longer then initial wait`(): Unit = runBlocking {
+        enqueueMockResponse(
+            "org.gofeatureflag.openfeature.ofrep/valid_api_short_response.json",
+            200
+        )
+        enqueueMockResponse(
+            "org.gofeatureflag.openfeature.ofrep/valid_api_response_2.json",
+            200
+        )
+
+        val provider = OfrepProvider(
+            OfrepOptions(
+                pollingIntervalInMillis = 1500,
+                pollingDelayInMillis = 100,
+                endpoint = mockWebServer?.url("/").toString()
+            )
+        )
+        OpenFeatureAPI.setProviderAndWait(provider, Dispatchers.IO, defaultEvalCtx)
+        val client = OpenFeatureAPI.getClient()
+        val got = client.getStringDetails("badge-class2", "default")
+        val want = FlagEvaluationDetails<String>(
+            flagKey = "badge-class2",
+            value = "green",
+            variant = "nocolor",
+            reason = "DEFAULT",
+            errorCode = null,
+            errorMessage = null,
+        )
+        assertEquals(want, got)
+        Thread.sleep(1000)
+        val got2 = client.getStringDetails("badge-class2", "default")
+        val want2 = FlagEvaluationDetails<String>(
+            flagKey = "badge-class2",
+            value = "blue",
+            variant = "xxxx",
+            reason = "TARGETING_MATCH",
+            errorCode = null,
+            errorMessage = null,
+        )
+        assertEquals(want2, got2)
+    }
+
+    @Test
+    fun `should collect first responses if delay is not set and interval is longer than wait`(): Unit = runBlocking {
+        enqueueMockResponse(
+            "org.gofeatureflag.openfeature.ofrep/valid_api_short_response.json",
+            200
+        )
+        enqueueMockResponse(
+            "org.gofeatureflag.openfeature.ofrep/valid_api_response_2.json",
+            200
+        )
+
+        val provider = OfrepProvider(
+            OfrepOptions(
+                pollingIntervalInMillis = 1500,
+                endpoint = mockWebServer?.url("/").toString()
+            )
+        )
+        OpenFeatureAPI.setProviderAndWait(provider, Dispatchers.IO, defaultEvalCtx)
+        val client = OpenFeatureAPI.getClient()
+        val got = client.getStringDetails("badge-class2", "default")
+        val want = FlagEvaluationDetails<String>(
+            flagKey = "badge-class2",
+            value = "green",
+            variant = "nocolor",
+            reason = "DEFAULT",
+            errorCode = null,
+            errorMessage = null,
+        )
+        assertEquals(want, got)
+        Thread.sleep(1000)
+        val got2 = client.getStringDetails("badge-class2", "default")
+        assertEquals(want, got2)
+    }
+
     private fun enqueueMockResponse(
         fileName: String,
         responseCode: Int = 200,
