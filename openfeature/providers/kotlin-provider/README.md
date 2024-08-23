@@ -168,4 +168,4 @@ coroutineScope.launch {
 
 ## Contributing
 This project welcomes contributions from the community.
-If you're interested in contributing, see the [contributors' guide](https://github.com/thomaspoignant/go-feature-flag/blob/main/CONTRIBUTING.md) for some helpful tips. 
+If you're interested in contributing, see the [contributors' guide](https://github.com/thomaspoignant/go-feature-flag/blob/main/CONTRIBUTING.md) for some helpful tips.
