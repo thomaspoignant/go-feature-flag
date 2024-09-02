@@ -59,7 +59,6 @@ func NewGoFeatureFlagClient(
 	retrievers := make([]retriever.Retriever, 0)
 	if proxyConf.Retrievers != nil {
 		for _, r := range *proxyConf.Retrievers {
-			r := r
 			currentRetriever, err := initRetriever(&r)
 			if err != nil {
 				return nil, err

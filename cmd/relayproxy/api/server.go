@@ -17,7 +17,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/ofrep"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
-	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho" // nolint
 	"go.uber.org/zap"
 )
 
