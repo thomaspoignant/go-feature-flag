@@ -1663,6 +1663,43 @@ func TestInternalFlag_Value(t *testing.T) {
 				Cacheable: true,
 			},
 		},
+		{
+			name: "Should return sdk default value when we have an error in the deep copy",
+			flag: flag.InternalFlag{
+				Experimentation: &flag.ExperimentationRollout{
+					Start: testconvert.Time(time.Now().Add(-15 * time.Second)),
+					End:   testconvert.Time(time.Now().Add(-5 * time.Second)),
+				},
+				Metadata: &map[string]interface{}{
+					"description": make(chan int),
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
+				Scheduled: &[]flag.ScheduledStep{
+					{
+						Date: testconvert.Time(time.Now().Add(-10 * time.Second)),
+						InternalFlag: flag.InternalFlag{
+							Experimentation: &flag.ExperimentationRollout{
+								Start: testconvert.Time(time.Now().Add(-5 * time.Second)),
+								End:   testconvert.Time(time.Now().Add(5 * time.Second)),
+							},
+						},
+					},
+				},
+			},
+			args: args{
+				flagName: "my-flag",
+				user:     ffcontext.NewEvaluationContext("user-key"),
+				flagContext: flag.Context{
+					DefaultSdkValue: "default-sdk",
+				},
+			},
+			want: "default-sdk",
+			want1: flag.ResolutionDetails{
+				Variant:   "SdkDefault",
+				Reason:    flag.ReasonError,
+				ErrorCode: flag.ErrorCodeGeneral,
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
