@@ -1663,6 +1663,43 @@ func TestInternalFlag_Value(t *testing.T) {
 				Cacheable: true,
 			},
 		},
+		{
+			name: "Should return sdk default value when we have an error in the deep copy",
+			flag: flag.InternalFlag{
+				Experimentation: &flag.ExperimentationRollout{
+					Start: testconvert.Time(time.Now().Add(-15 * time.Second)),
+					End:   testconvert.Time(time.Now().Add(-5 * time.Second)),
+				},
+				Metadata: &map[string]interface{}{
+					"description": make(chan int),
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
+				Scheduled: &[]flag.ScheduledStep{
+					{
+						Date: testconvert.Time(time.Now().Add(-10 * time.Second)),
+						InternalFlag: flag.InternalFlag{
+							Experimentation: &flag.ExperimentationRollout{
+								Start: testconvert.Time(time.Now().Add(-5 * time.Second)),
+								End:   testconvert.Time(time.Now().Add(5 * time.Second)),
+							},
+						},
+					},
+				},
+			},
+			args: args{
+				flagName: "my-flag",
+				user:     ffcontext.NewEvaluationContext("user-key"),
+				flagContext: flag.Context{
+					DefaultSdkValue: "default-sdk",
+				},
+			},
+			want: "default-sdk",
+			want1: flag.ResolutionDetails{
+				Variant:   "SdkDefault",
+				Reason:    flag.ReasonError,
+				ErrorCode: flag.ErrorCodeGeneral,
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -2198,6 +2235,65 @@ func TestInternalFlag_IsValid(t *testing.T) {
 			}
 			tt.wantErr(t, err, fmt.Sprintf("IsValid(): %s", err))
 			assert.Equal(t, tt.errorMsg, errMsg)
+		})
+	}
+}
+func TestInternalFlag_ApplySheduledRollout(t *testing.T) {
+	cases := 1000
+	internalFlag := flag.InternalFlag{
+		Variations: &map[string]*interface{}{
+			"variation_A": testconvert.Interface("value_A"),
+			"variation_B": testconvert.Interface("value_B"),
+		},
+		DefaultRule: &flag.Rule{
+			VariationResult: testconvert.String("variation_A"),
+		},
+		Metadata: &map[string]interface{}{
+			"description": "this is a flag",
+			"issue-link":  "https://issue.link/GOFF-1",
+		},
+		Scheduled: &[]flag.ScheduledStep{
+			{
+				InternalFlag: flag.InternalFlag{
+					DefaultRule: &flag.Rule{
+						VariationResult: testconvert.String("variation_B"),
+					},
+				},
+				Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
+			},
+			{
+				InternalFlag: flag.InternalFlag{
+					Variations: &map[string]*interface{}{
+						"variation_B": testconvert.Interface("value_QWERTY"),
+					},
+				},
+				Date: testconvert.Time(time.Now().Add(-1 * time.Second)),
+			},
+		},
+	}
+	for i := 0; i < cases; i++ {
+		t.Run("scheduledRollout", func(t *testing.T) {
+			t.Parallel()
+
+			wantResult := "value_QWERTY"
+			wantDetails := flag.ResolutionDetails{
+				Variant: "variation_B",
+				Reason:  flag.ReasonStatic,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
+			}
+
+			got, got1 := internalFlag.Value(
+				"flag",
+				ffcontext.NewEvaluationContextBuilder("user-key").Build(),
+				flag.Context{
+					DefaultSdkValue: "value_default",
+				},
+			)
+			assert.Equalf(t, wantResult, got, "not expected value: %s", cmp.Diff(wantResult, got))
+			assert.Equalf(t, wantDetails, got1, "not expected value: %s", cmp.Diff(wantDetails, got1))
 		})
 	}
 }
