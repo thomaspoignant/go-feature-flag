@@ -13,7 +13,7 @@ GO Feature Flag is committed to **opensource** principles and **standardization*
 
 To seamlessly integrate with OpenFeature, we provide a lightweight, self-hosted API server called the **relay proxy**. This proxy leverages the core GO Feature Flag module internally. By deploying the relay proxy in your infrastructure, you can utilize Open Feature SDKs in conjunction with GO Feature Flag providers to evaluate your feature flags.
 
-For a comprehensive understanding of how Open Feature operates, please refer to the official **[Open Feature documentation](https://docs.openfeature.dev)**.tps://docs.openfeature.dev)**.
+For a comprehensive understanding of how Open Feature operates, please refer to the official **[Open Feature documentation](https://docs.openfeature.dev)**.
 
 ## Integration pattern
 
