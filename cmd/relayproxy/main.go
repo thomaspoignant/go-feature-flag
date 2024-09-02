@@ -25,7 +25,7 @@ const banner = `█▀▀ █▀█   █▀▀ █▀▀ ▄▀█ 
      █▀█ █▀▀ █   ▄▀█ █▄█   █▀█ █▀█ █▀█ ▀▄▀ █▄█
      █▀▄ ██▄ █▄▄ █▀█  █    █▀▀ █▀▄ █▄█ █ █  █ 
 
-GO Feature Flag Relay Proxy
+GO Feature Flag Relay Proxy - Version %s
 _____________________________________________`
 
 // @title GO Feature Flag relay proxy endpoints
@@ -62,7 +62,7 @@ func main() {
 	}
 
 	if !proxyConf.HideBanner {
-		fmt.Println(banner)
+		fmt.Printf(banner+"\n", version)
 	}
 
 	// Set the log level from the config from this point

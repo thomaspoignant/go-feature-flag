@@ -196,7 +196,7 @@ func (g *GoFeatureFlag) startFlagUpdaterDaemon() {
 			if !g.IsOffline() {
 				err := retrieveFlagsAndUpdateCache(g.config, g.cache, g.retrieverManager)
 				if err != nil {
-					g.config.internalLogger.Error("error while updating the cache: %v\n", slog.Any("error", err))
+					g.config.internalLogger.Error("Error while updating the cache.", slog.Any("error", err))
 				}
 			}
 		case <-g.bgUpdater.updaterChan:
@@ -290,7 +290,7 @@ func (g *GoFeatureFlag) ForceRefresh() bool {
 	}
 	err := retrieveFlagsAndUpdateCache(g.config, g.cache, g.retrieverManager)
 	if err != nil {
-		g.config.internalLogger.Error("error while force updating the cache: %v\n", slog.Any("error", err))
+		g.config.internalLogger.Error("Error while force updating the cache.", slog.Any("error", err))
 		return false
 	}
 	return true

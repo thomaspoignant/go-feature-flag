@@ -39,27 +39,6 @@ options := gofeatureflag.ProviderOptions{
 provider, _ := gofeatureflag.NewProvider(options)
 ```
 
-### Using the GO module _(standalone version)_
-If you want to use the provider in standalone mode using the GO module, you should set the field `GOFeatureFlagConfig`
-in the options.
-
-You can check the [GO Feature Flag documentation website](https://docs.gofeatureflag.org) to look how to configure the
-GO module.
-
-#### Example
-```go
-options := gofeatureflag.ProviderOptions{
-  GOFeatureFlagConfig: &ffclient.Config{
-      PollingInterval: 10 * time.Second,
-      Context:         context.Background(),
-      Retriever: &fileretriever.Retriever{
-        Path: "../testutils/module/flags.yaml",
-      },
-    },
-}
-provider, _ := gofeatureflag.NewProvider(options)
-```
-
 ## Initialize your Open Feature client
 
 To evaluate the flags you need to have an Open Feature configured in you app.
@@ -84,7 +63,7 @@ client := of.NewClient("my-app")
 
 ## Evaluate your flag
 
-This code block explain how you can create an `EvaluationContext` and use it to evaluate your flag.
+This code block explains how you can create an `EvaluationContext` and use it to evaluate your flag.
 
 
 > In this example we are evaluating a `boolean` flag, but other types are also available.
