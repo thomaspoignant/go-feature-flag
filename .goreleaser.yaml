@@ -137,7 +137,7 @@ archives:
       {{- if not (eq .Amd64 \"v1\") }}{{ .Amd64 }}{{ end }}"
     builds:
       - go-feature-flag-migration-cli
-  
+
   - id: go-feature-flag-editor
     name_template: "go-feature-flag-editor_\
       {{ .Version }}_\
@@ -216,6 +216,14 @@ dockers:
       - thomaspoignant/go-feature-flag-relay-proxy:v{{ .RawVersion }}-amd64
     build_flag_templates:
       - "--platform=linux/amd64"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+      - "--label=org.opencontainers.image.description=A stand alone server to run GO Feature Flag"
+      - "--label=org.opencontainers.image.licenses=MIT"
+      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+      - "--label=org.opencontainers.image.source=https://github.com/thomaspoignant/go-feature-flag"
+      - "--label=org.opencontainers.image.title=go-feature-flag-relay-proxy"
+      - "--label=org.opencontainers.image.url=https://gofeatureflag.org/docs/relay_proxy"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
   - use: buildx
     goos: linux
     goarch: arm64
@@ -226,6 +234,14 @@ dockers:
       - thomaspoignant/go-feature-flag-relay-proxy:v{{ .RawVersion }}-arm64v8
     build_flag_templates:
       - "--platform=linux/arm64/v8"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+      - "--label=org.opencontainers.image.description=A stand alone server to run GO Feature Flag"
+      - "--label=org.opencontainers.image.licenses=MIT"
+      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+      - "--label=org.opencontainers.image.source=https://github.com/thomaspoignant/go-feature-flag"
+      - "--label=org.opencontainers.image.title=go-feature-flag-relay-proxy"
+      - "--label=org.opencontainers.image.url=https://gofeatureflag.org/docs/relay_proxy"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
   - use: buildx
     goos: linux
     goarch: arm
@@ -237,6 +253,14 @@ dockers:
       - thomaspoignant/go-feature-flag-relay-proxy:v{{ .RawVersion }}-armv7
     build_flag_templates:
       - "--platform=linux/arm/v7"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+      - "--label=org.opencontainers.image.description=A stand alone server to run GO Feature Flag"
+      - "--label=org.opencontainers.image.licenses=MIT"
+      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+      - "--label=org.opencontainers.image.source=https://github.com/thomaspoignant/go-feature-flag"
+      - "--label=org.opencontainers.image.title=go-feature-flag-relay-proxy"
+      - "--label=org.opencontainers.image.url=https://gofeatureflag.org/docs/relay_proxy"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
 
 # go-feature-flag
   - use: buildx
@@ -249,6 +273,14 @@ dockers:
       - thomaspoignant/go-feature-flag:v{{ .RawVersion }}-amd64
     build_flag_templates:
       - "--platform=linux/amd64"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+      - "--label=org.opencontainers.image.description=A stand alone server to run GO Feature Flag"
+      - "--label=org.opencontainers.image.licenses=MIT"
+      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+      - "--label=org.opencontainers.image.source=https://github.com/thomaspoignant/go-feature-flag"
+      - "--label=org.opencontainers.image.title=go-feature-flag"
+      - "--label=org.opencontainers.image.url=https://gofeatureflag.org/docs/relay_proxy"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
   - use: buildx
     goos: linux
     goarch: arm64
@@ -259,6 +291,14 @@ dockers:
       - thomaspoignant/go-feature-flag:v{{ .RawVersion }}-arm64v8
     build_flag_templates:
       - "--platform=linux/arm64/v8"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+      - "--label=org.opencontainers.image.description=A stand alone server to run GO Feature Flag"
+      - "--label=org.opencontainers.image.licenses=MIT"
+      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+      - "--label=org.opencontainers.image.source=https://github.com/thomaspoignant/go-feature-flag"
+      - "--label=org.opencontainers.image.title=go-feature-flag"
+      - "--label=org.opencontainers.image.url=https://gofeatureflag.org/docs/relay_proxy"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
   - use: buildx
     goos: linux
     goarch: arm
@@ -270,6 +310,14 @@ dockers:
       - thomaspoignant/go-feature-flag:v{{ .RawVersion }}-armv7
     build_flag_templates:
       - "--platform=linux/arm/v7"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+      - "--label=org.opencontainers.image.description=A stand alone server to run GO Feature Flag"
+      - "--label=org.opencontainers.image.licenses=MIT"
+      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+      - "--label=org.opencontainers.image.source=https://github.com/thomaspoignant/go-feature-flag"
+      - "--label=org.opencontainers.image.title=go-feature-flag"
+      - "--label=org.opencontainers.image.url=https://gofeatureflag.org/docs/relay_proxy"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
 
 # go-feature-flag-bookworm
   - use: buildx
@@ -282,6 +330,14 @@ dockers:
       - thomaspoignant/go-feature-flag-bookworm:v{{ .RawVersion }}-amd64
     build_flag_templates:
       - "--platform=linux/amd64"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+      - "--label=org.opencontainers.image.description=A stand alone server to run GO Feature Flag"
+      - "--label=org.opencontainers.image.licenses=MIT"
+      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+      - "--label=org.opencontainers.image.source=https://github.com/thomaspoignant/go-feature-flag"
+      - "--label=org.opencontainers.image.title=go-feature-flag"
+      - "--label=org.opencontainers.image.url=https://gofeatureflag.org/docs/relay_proxy"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
   - use: buildx
     goos: linux
     goarch: arm64
@@ -292,6 +348,14 @@ dockers:
       - thomaspoignant/go-feature-flag-bookworm:v{{ .RawVersion }}-arm64v8
     build_flag_templates:
       - "--platform=linux/arm64/v8"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+      - "--label=org.opencontainers.image.description=A stand alone server to run GO Feature Flag"
+      - "--label=org.opencontainers.image.licenses=MIT"
+      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+      - "--label=org.opencontainers.image.source=https://github.com/thomaspoignant/go-feature-flag"
+      - "--label=org.opencontainers.image.title=go-feature-flag"
+      - "--label=org.opencontainers.image.url=https://gofeatureflag.org/docs/relay_proxy"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
   - use: buildx
     goos: linux
     goarch: arm
@@ -303,6 +367,15 @@ dockers:
       - thomaspoignant/go-feature-flag-bookworm:v{{ .RawVersion }}-armv7
     build_flag_templates:
       - "--platform=linux/arm/v7"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+      - "--label=org.opencontainers.image.description=A stand alone server to run GO Feature Flag"
+      - "--label=org.opencontainers.image.licenses=MIT"
+      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+      - "--label=org.opencontainers.image.source=https://github.com/thomaspoignant/go-feature-flag"
+      - "--label=org.opencontainers.image.title=go-feature-flag"
+      - "--label=org.opencontainers.image.url=https://gofeatureflag.org/docs/relay_proxy"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
+
 # migration-cli
   - use: buildx
     goos: linux
@@ -314,6 +387,13 @@ dockers:
       - thomaspoignant/go-feature-flag-migration-cli:v{{ .RawVersion }}-amd64
     build_flag_templates:
       - "--platform=linux/amd64"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+      - "--label=org.opencontainers.image.description=A migration command line to move your feature flag configuration file from format GO Feature Flag v0.X to v1.X"
+      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+      - "--label=org.opencontainers.image.source=https://github.com/thomaspoignant/go-feature-flag"
+      - "--label=org.opencontainers.image.title=go-feature-flag-migration-cli"
+      - "--label=org.opencontainers.image.url=https://gofeatureflag.org/docs/tooling/migrate_v0_v1"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
   - use: buildx
     goos: linux
     goarch: arm64
@@ -324,6 +404,13 @@ dockers:
       - thomaspoignant/go-feature-flag-migration-cli:v{{ .RawVersion }}-arm64v8
     build_flag_templates:
       - "--platform=linux/arm64/v8"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+      - "--label=org.opencontainers.image.description=A migration command line to move your feature flag configuration file from format GO Feature Flag v0.X to v1.X"
+      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+      - "--label=org.opencontainers.image.source=https://github.com/thomaspoignant/go-feature-flag"
+      - "--label=org.opencontainers.image.title=go-feature-flag-migration-cli"
+      - "--label=org.opencontainers.image.url=https://gofeatureflag.org/docs/tooling/migrate_v0_v1"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
   - use: buildx
     goos: linux
     goarch: arm
@@ -335,6 +422,13 @@ dockers:
       - thomaspoignant/go-feature-flag-migration-cli:v{{ .RawVersion }}-armv7
     build_flag_templates:
       - "--platform=linux/arm/v7"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+      - "--label=org.opencontainers.image.description=A migration command line to move your feature flag configuration file from format GO Feature Flag v0.X to v1.X"
+      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+      - "--label=org.opencontainers.image.source=https://github.com/thomaspoignant/go-feature-flag"
+      - "--label=org.opencontainers.image.title=go-feature-flag-migration-cli"
+      - "--label=org.opencontainers.image.url=https://gofeatureflag.org/docs/tooling/migrate_v0_v1"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
 
 # lint
   - use: buildx
@@ -347,6 +441,13 @@ dockers:
       - thomaspoignant/go-feature-flag-lint:v{{ .RawVersion }}-amd64
     build_flag_templates:
       - "--platform=linux/amd64"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+      - "--label=org.opencontainers.image.description=A command line tool to lint your feature flag configuration file"
+      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+      - "--label=org.opencontainers.image.source=https://github.com/thomaspoignant/go-feature-flag"
+      - "--label=org.opencontainers.image.title=go-feature-flag-lint"
+      - "--label=org.opencontainers.image.url=https://gofeatureflag.org/docs/tooling/linter"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
   - use: buildx
     goos: linux
     goarch: arm64
@@ -357,6 +458,13 @@ dockers:
       - thomaspoignant/go-feature-flag-lint:v{{ .RawVersion }}-arm64v8
     build_flag_templates:
       - "--platform=linux/arm64/v8"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+      - "--label=org.opencontainers.image.description=A command line tool to lint your feature flag configuration file"
+      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+      - "--label=org.opencontainers.image.source=https://github.com/thomaspoignant/go-feature-flag"
+      - "--label=org.opencontainers.image.title=go-feature-flag-lint"
+      - "--label=org.opencontainers.image.url=https://gofeatureflag.org/docs/tooling/linter"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
   - use: buildx
     goos: linux
     goarch: arm
@@ -368,6 +476,13 @@ dockers:
       - thomaspoignant/go-feature-flag-lint:v{{ .RawVersion }}-armv7
     build_flag_templates:
       - "--platform=linux/arm/v7"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+      - "--label=org.opencontainers.image.description=A command line tool to lint your feature flag configuration file"
+      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+      - "--label=org.opencontainers.image.source=https://github.com/thomaspoignant/go-feature-flag"
+      - "--label=org.opencontainers.image.title=go-feature-flag-lint"
+      - "--label=org.opencontainers.image.url=https://gofeatureflag.org/docs/tooling/linter"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
 
 docker_manifests:
   # DEPRECATED: check go-feature-flag
@@ -583,7 +698,7 @@ brews:
       name: homebrew-tap
       branch: master
     caveats: "A migration command line to move your feature flag configuration file from format GO Feature Flag v0.X to v1.X"
-    homepage: "https://github.com/thomaspoignant/go-feature-flag/cmd/migrationcli"
+    homepage: "https://gofeatureflag.org/docs/tooling/migrate_v0_v1"
     description: "A migration command line to move your feature flag configuration file from format GO Feature Flag v0.X to v1.X"
     skip_upload: auto
   # DEPRECATED: check go-feature-flag
@@ -595,7 +710,7 @@ brews:
       name: homebrew-tap
       branch: master
     caveats: "A stand alone server to run GO Feature Flag"
-    homepage: "https://gofeatureflag.org"
+    homepage: "https://gofeatureflag.org/docs/relay_proxy"
     description: "A stand alone server to run GO Feature Flag"
     skip_upload: auto
   - ids:
@@ -606,7 +721,7 @@ brews:
       name: homebrew-tap
       branch: master
     caveats: "A stand alone server to run GO Feature Flag"
-    homepage: "https://gofeatureflag.org"
+    homepage: "https://gofeatureflag.org/docs/relay_proxy"
     description: "A stand alone server to run GO Feature Flag"
     skip_upload: auto
   - ids:
@@ -617,7 +732,7 @@ brews:
       name: homebrew-tap
       branch: master
     caveats: "A command line tool to lint your feature flag configuration file"
-    homepage: "https://gofeatureflag.org"
+    homepage: "https://gofeatureflag.org/docs/tooling/linter"
     description: "A command line tool to lint your feature flag configuration file"
     skip_upload: auto
 
@@ -630,7 +745,7 @@ scoops:
       owner: go-feature-flag
       name: scoop
     commit_msg_template: "Scoop update for {{ .ProjectName }} version {{ .Tag }}"
-    homepage: "https://gofeatureflag.org"
+    homepage: "https://gofeatureflag.org/docs/tooling/migrate_v0_v1"
     license: MIT
 
   # DEPRECATED: check go-feature-flag
@@ -641,7 +756,7 @@ scoops:
       owner: go-feature-flag
       name: scoop
     commit_msg_template: "Scoop update for {{ .ProjectName }} version {{ .Tag }}"
-    homepage: "https://gofeatureflag.org"
+    homepage: "https://gofeatureflag.org/docs/relay_proxy"
     license: MIT
 
   - url_template: https://github.com/thomaspoignant/go-feature-flag/releases/download/{{ .Tag }}/{{ .ArtifactName }}
@@ -651,7 +766,7 @@ scoops:
       owner: go-feature-flag
       name: scoop
     commit_msg_template: "Scoop update for {{ .ProjectName }} version {{ .Tag }}"
-    homepage: "https://gofeatureflag.org"
+    homepage: "https://gofeatureflag.org/docs/relay_proxy"
     license: MIT
 
   - url_template: https://github.com/thomaspoignant/go-feature-flag/releases/download/{{ .Tag }}/{{ .ArtifactName }}
@@ -661,8 +776,8 @@ scoops:
       owner: go-feature-flag
       name: scoop
     commit_msg_template: "Scoop update for {{ .ProjectName }} version {{ .Tag }}"
-    homepage: "https://gofeatureflag.org"
+    homepage: "https://gofeatureflag.org/docs/tooling/linter"
     license: MIT
 
 snapshot:
-  name_template: "{{ incpatch .Version }}-next"
+  version_template: "{{ incpatch .Version }}-next"

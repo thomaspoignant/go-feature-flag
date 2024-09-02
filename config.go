@@ -103,7 +103,7 @@ type Config struct {
 
 // GetRetrievers returns a retriever.Retriever configure with the retriever available in the config.
 func (c *Config) GetRetrievers() ([]retriever.Retriever, error) {
-	if c.Retriever == nil && (c.Retrievers == nil || len(c.Retrievers) == 0) {
+	if c.Retriever == nil && len(c.Retrievers) == 0 {
 		return nil, errors.New("no retriever in the configuration, impossible to get the flags")
 	}
 
@@ -113,7 +113,7 @@ func (c *Config) GetRetrievers() ([]retriever.Retriever, error) {
 	if c.Retriever != nil {
 		retrievers = append(retrievers, c.Retriever)
 	}
-	if c.Retrievers != nil && len(c.Retrievers) > 0 {
+	if len(c.Retrievers) > 0 {
 		retrievers = append(retrievers, c.Retrievers...)
 	}
 	return retrievers, nil
