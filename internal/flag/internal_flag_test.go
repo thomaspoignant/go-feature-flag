@@ -2201,3 +2201,62 @@ func TestInternalFlag_IsValid(t *testing.T) {
 		})
 	}
 }
+func TestInternalFlag_ApplySheduledRollout(t *testing.T) {
+	cases := 1000
+	internalFlag := flag.InternalFlag{
+		Variations: &map[string]*interface{}{
+			"variation_A": testconvert.Interface("value_A"),
+			"variation_B": testconvert.Interface("value_B"),
+		},
+		DefaultRule: &flag.Rule{
+			VariationResult: testconvert.String("variation_A"),
+		},
+		Metadata: &map[string]interface{}{
+			"description": "this is a flag",
+			"issue-link":  "https://issue.link/GOFF-1",
+		},
+		Scheduled: &[]flag.ScheduledStep{
+			{
+				InternalFlag: flag.InternalFlag{
+					DefaultRule: &flag.Rule{
+						VariationResult: testconvert.String("variation_B"),
+					},
+				},
+				Date: testconvert.Time(time.Now().Add(-2 * time.Second)),
+			},
+			{
+				InternalFlag: flag.InternalFlag{
+					Variations: &map[string]*interface{}{
+						"variation_B": testconvert.Interface("value_QWERTY"),
+					},
+				},
+				Date: testconvert.Time(time.Now().Add(-1 * time.Second)),
+			},
+		},
+	}
+	for i := 0; i < cases; i++ {
+		t.Run("scheduledRollout", func(t *testing.T) {
+			t.Parallel()
+
+			wantResult := "value_QWERTY"
+			wantDetails := flag.ResolutionDetails{
+				Variant: "variation_B",
+				Reason:  flag.ReasonStatic,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
+			}
+
+			got, got1 := internalFlag.Value(
+				"flag",
+				ffcontext.NewEvaluationContextBuilder("user-key").Build(),
+				flag.Context{
+					DefaultSdkValue: "value_default",
+				},
+			)
+			assert.Equalf(t, wantResult, got, "not expected value: %s", cmp.Diff(wantResult, got))
+			assert.Equalf(t, wantDetails, got1, "not expected value: %s", cmp.Diff(wantDetails, got1))
+		})
+	}
+}
