@@ -30,7 +30,7 @@ type RawVarResult struct {
 	Version       string                 `json:"version"`
 	Reason        flag.ResolutionReason  `json:"reason"`
 	ErrorCode     flag.ErrorCode         `json:"errorCode"`
-	ErrorDetails  string                 `json:"errorDetails"`
+	ErrorDetails  string                 `json:"errorDetails,omitempty"`
 	Value         interface{}            `json:"value"`
 	Cacheable     bool                   `json:"cacheable"`
 	Metadata      map[string]interface{} `json:"metadata,omitempty"`
