@@ -18,3 +18,4 @@ This presentation is covering the following key areas:
 By understanding these concepts, you can optimize your feature flagging strategy and drive business success.
 
 <iframe src="https://docs.google.com/presentation/d/e/2PACX-1vSt-lZkiFpntGRWB-FZ0IFMFZlWrd6kk1tjjNrh1r4oDn19C32-lFGq4qxFZbfQmaSf6MUnTZJyAtsT/embed?start=false&loop=false&delayms=3000" frameborder="0" width="960" height="569" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+<!-- truncate -->

@@ -1,6 +1,7 @@
 package flag
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"maps"
@@ -62,39 +63,47 @@ func (f *InternalFlag) Value(
 	flagContext Context,
 ) (interface{}, ResolutionDetails) {
 	evaluationDate := DateFromContextOrDefault(evaluationCtx, time.Now())
-	f.applyScheduledRolloutSteps(evaluationDate)
+	flag, err := f.applyScheduledRolloutSteps(evaluationDate)
+
+	if err != nil {
+		return flagContext.DefaultSdkValue, ResolutionDetails{
+			Variant:   VariationSDKDefault,
+			Reason:    ReasonError,
+			ErrorCode: ErrorCodeGeneral,
+		}
+	}
 
 	if flagContext.EvaluationContextEnrichment != nil {
 		maps.Copy(evaluationCtx.GetCustom(), flagContext.EvaluationContextEnrichment)
 	}
 
-	if f.IsDisable() || f.isExperimentationOver(evaluationDate) {
+	if flag.IsDisable() || flag.isExperimentationOver(evaluationDate) {
 		return flagContext.DefaultSdkValue, ResolutionDetails{
 			Variant:   VariationSDKDefault,
 			Reason:    ReasonDisabled,
-			Cacheable: f.isCacheable(),
-			Metadata:  f.GetMetadata(),
+			Cacheable: flag.isCacheable(),
+			Metadata:  flag.GetMetadata(),
 		}
 	}
 
-	variationSelection, err := f.selectVariation(flagName, evaluationCtx)
+	variationSelection, err := flag.selectVariation(flagName, evaluationCtx)
 	if err != nil {
 		return flagContext.DefaultSdkValue,
 			ResolutionDetails{
 				Variant:   VariationSDKDefault,
 				Reason:    ReasonError,
 				ErrorCode: ErrorFlagConfiguration,
-				Metadata:  f.GetMetadata(),
+				Metadata:  flag.GetMetadata(),
 			}
 	}
 
-	return f.GetVariationValue(variationSelection.name), ResolutionDetails{
+	return flag.GetVariationValue(variationSelection.name), ResolutionDetails{
 		Variant:   variationSelection.name,
 		Reason:    variationSelection.reason,
 		RuleIndex: variationSelection.ruleIndex,
 		RuleName:  variationSelection.ruleName,
 		Cacheable: variationSelection.cacheable,
-		Metadata:  f.GetMetadata(),
+		Metadata:  flag.GetMetadata(),
 	}
 }
 
@@ -170,47 +179,62 @@ func (f *InternalFlag) selectVariation(flagName string, ctx ffcontext.Context) (
 // nolint: gocognit
 // applyScheduledRolloutSteps is checking if the flag has a scheduled rollout configured.
 // If yes we merge the changes to the current flag.
-func (f *InternalFlag) applyScheduledRolloutSteps(evaluationDate time.Time) {
-	if f.Scheduled != nil {
-		for _, steps := range *f.Scheduled {
-			if steps.Date != nil && (steps.Date.Before(evaluationDate) || steps.Date.Equal(evaluationDate)) {
-				f.Rules = MergeSetOfRules(f.GetRules(), steps.GetRules())
-				if steps.Disable != nil {
-					f.Disable = steps.Disable
-				}
+func (f *InternalFlag) applyScheduledRolloutSteps(evaluationDate time.Time) (*InternalFlag, error) {
+	if f.Scheduled == nil {
+		return f, nil
+	}
 
-				if steps.TrackEvents != nil {
-					f.TrackEvents = steps.TrackEvents
-				}
+	// We are doing a deep copy the flag to avoid modifying the original flag.
+	// The deep copy is done to fix this issue https://github.com/thomaspoignant/go-feature-flag/issues/2256
+	data, err := json.Marshal(f)
+	if err != nil {
+		return &InternalFlag{}, err
+	}
+	var flagCopy *InternalFlag
+	if err := json.Unmarshal(data, &flagCopy); err != nil {
+		return &InternalFlag{}, err
+	}
 
-				if steps.DefaultRule != nil {
-					f.DefaultRule.MergeRules(*steps.DefaultRule)
-				}
+	// We apply the scheduled rollout
+	for _, steps := range *f.Scheduled {
+		if steps.Date != nil && (steps.Date.Before(evaluationDate) || steps.Date.Equal(evaluationDate)) {
+			flagCopy.Rules = MergeSetOfRules(f.GetRules(), steps.GetRules())
+			if steps.Disable != nil {
+				flagCopy.Disable = steps.Disable
+			}
 
-				if steps.Variations != nil {
-					for key, value := range steps.GetVariations() {
-						f.GetVariations()[key] = value
-					}
-				}
+			if steps.TrackEvents != nil {
+				flagCopy.TrackEvents = steps.TrackEvents
+			}
 
-				if steps.Version != nil {
-					f.Version = steps.Version
-				}
+			if steps.DefaultRule != nil {
+				flagCopy.DefaultRule.MergeRules(*steps.DefaultRule)
+			}
 
-				if steps.Experimentation != nil {
-					if f.Experimentation == nil {
-						f.Experimentation = &ExperimentationRollout{}
-					}
-					if steps.Experimentation.Start != nil {
-						f.Experimentation.End = steps.Experimentation.End
-					}
-					if steps.Experimentation.End != nil {
-						f.Experimentation.End = steps.Experimentation.End
-					}
+			if steps.Variations != nil {
+				for key, value := range steps.GetVariations() {
+					flagCopy.GetVariations()[key] = value
+				}
+			}
+
+			if steps.Version != nil {
+				flagCopy.Version = steps.Version
+			}
+
+			if steps.Experimentation != nil {
+				if flagCopy.Experimentation == nil {
+					flagCopy.Experimentation = &ExperimentationRollout{}
+				}
+				if steps.Experimentation.Start != nil {
+					flagCopy.Experimentation.End = steps.Experimentation.End
+				}
+				if steps.Experimentation.End != nil {
+					flagCopy.Experimentation.End = steps.Experimentation.End
 				}
 			}
 		}
 	}
+	return flagCopy, nil
 }
 
 // isExperimentationOver checks if we are in an experimentation or not
