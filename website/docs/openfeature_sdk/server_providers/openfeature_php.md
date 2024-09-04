@@ -4,9 +4,9 @@ title: PHP
 description: How to use the OpenFeature PHP SDK with GO Feature Flag
 ---
 
-# Python Provider
-[![Packagist - Version](https://img.shields.io/packagist/v/open-feature/go-feature-flag-provider?logo=php&color=blue&style=flat-square)](https://packagist.org/packages/open-feature/go-feature-flag)
-![Packagist - Downloads](https://img.shields.io/packagist/dt/open-feature/go-feature-flag-provider?logo=php&style=flat-square)
+# PHP Provider
+[![Packagist - Version](https://img.shields.io/packagist/v/open-feature/go-feature-flag-provider?logo=php&color=blue&style=flat-square)](https://packagist.org/packages/open-feature/go-feature-flag-provider)
+[![Packagist - Downloads](https://img.shields.io/packagist/dt/open-feature/go-feature-flag-provider?logo=php&style=flat-square)](https://packagist.org/packages/open-feature/go-feature-flag-provider)
 
 
 In conjunction with the [OpenFeature SDK](https://openfeature.dev/docs/reference/concepts/provider) you will be able
