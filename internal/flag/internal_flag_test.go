@@ -1718,11 +1718,11 @@ func TestInternalFlag_ValueWithBucketingKey(t *testing.T) {
 		flagContext flag.Context
 	}
 	tests := []struct {
-		name  string
-		flag  flag.InternalFlag
-		args  args
-		want  interface{}
-		want1 flag.ResolutionDetails
+		name                string
+		flag                flag.InternalFlag
+		args                args
+		wantForTargetingKey string
+		wantForTeamID       string
 	}{
 		{
 			name: "Should use custom bucketing key when set",
@@ -1733,21 +1733,11 @@ func TestInternalFlag_ValueWithBucketingKey(t *testing.T) {
 					"variation_C": testconvert.Interface("value_C"),
 				},
 				BucketingKey: "teamId",
-				Rules: &[]flag.Rule{
-					{
-						Query:           testconvert.String("key eq \"team-123\""),
-						VariationResult: testconvert.String("variation_B"),
-					},
-					{
-						Query:           testconvert.String("key eq \"user-key\""),
-						VariationResult: testconvert.String("variation_C"),
-					},
-				},
 				DefaultRule: &flag.Rule{
-					VariationResult: testconvert.String("variation_A"),
-				},
-				Metadata: &map[string]interface{}{
-					"teamId": "team-123",
+					Percentages: &map[string]float64{
+						"variation_A": 33,
+						"variation_B": 67,
+					},
 				},
 			},
 			args: args{
@@ -1757,63 +1747,49 @@ func TestInternalFlag_ValueWithBucketingKey(t *testing.T) {
 					DefaultSdkValue: "value_default",
 				},
 			},
-			want: "value_B",
-			want1: flag.ResolutionDetails{
-				Variant:   "variation_B",
-				Reason:    flag.ReasonTargetingMatch,
-				RuleIndex: testconvert.Int(0),
-				Cacheable: true,
-				Metadata: map[string]interface{}{
-					"teamId": "team-123",
-				},
-			},
-		},
-		{
-			name: "Should not use user key when bucketing key is set",
-			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
-					"variation_A": testconvert.Interface("value_A"),
-					"variation_B": testconvert.Interface("value_B"),
-				},
-				BucketingKey: "region",
-				Rules: &[]flag.Rule{
-					{
-						Query:           testconvert.String("key eq \"user-key\""),
-						VariationResult: testconvert.String("variation_B"),
-					},
-				},
-				DefaultRule: &flag.Rule{
-					VariationResult: testconvert.String("variation_A"),
-				},
-				Metadata: &map[string]interface{}{
-					"region": "nl-nh",
-				},
-			},
-			args: args{
-				flagName: "my-flag",
-				user:     ffcontext.NewEvaluationContextBuilder("user-key").AddCustom("region", "nl-nh").Build(),
-				flagContext: flag.Context{
-					DefaultSdkValue: "value_default",
-				},
-			},
-			want: "value_A",
-			want1: flag.ResolutionDetails{
-				Variant:   "variation_A",
-				Reason:    flag.ReasonDefault,
-				Cacheable: true,
-				Metadata: map[string]interface{}{
-					"region": "nl-nh",
-				},
-			},
+			wantForTargetingKey: "variation_A",
+			wantForTeamID:       "variation_B",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, got1 := tt.flag.Value(tt.args.flagName, tt.args.user, tt.args.flagContext)
-			assert.Equalf(t, tt.want, got, "not expected value: %s", cmp.Diff(tt.want, got))
-			assert.Equalf(t, tt.want1, got1, "not expected value: %s", cmp.Diff(tt.want1, got1))
+			flagWithBucketingKey := tt.flag
+
+			_, got := flagWithBucketingKey.Value(tt.args.flagName, tt.args.user, tt.args.flagContext)
+			assert.Equal(t, tt.wantForTeamID, got.Variant)
+
+			flagWithoutBucketingKey := tt.flag
+			flagWithoutBucketingKey.BucketingKey = ""
+			_, got = flagWithoutBucketingKey.Value(tt.args.flagName, tt.args.user, tt.args.flagContext)
+
+			assert.Equal(t, tt.wantForTargetingKey, got.Variant)
 		})
 	}
+}
+
+func TestInternalFlag_ValueWithBucketingKeyNotFound(t *testing.T) {
+	f := &flag.InternalFlag{
+		Variations: &map[string]*interface{}{
+			"variation_A": testconvert.Interface("value_A"),
+			"variation_B": testconvert.Interface("value_B"),
+			"variation_C": testconvert.Interface("value_C"),
+		},
+		BucketingKey: "teamId",
+		DefaultRule: &flag.Rule{
+			Percentages: &map[string]float64{
+				"variation_A": 33,
+				"variation_B": 67,
+			},
+		},
+	}
+	_, got := f.Value("my-flag", ffcontext.NewEvaluationContextBuilder("user-key").Build(), flag.Context{})
+	want := flag.ResolutionDetails{
+		Variant:      "SdkDefault",
+		Reason:       flag.ReasonError,
+		ErrorCode:    flag.ErrorCodeTargetingKeyMissing,
+		ErrorMessage: "invalid bucketing key",
+	}
+	assert.Equal(t, want, got)
 }
 
 func TestFlag_ProgressiveRollout(t *testing.T) {
