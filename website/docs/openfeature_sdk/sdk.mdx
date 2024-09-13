@@ -25,7 +25,7 @@ Rest assured, working with OpenFeature SDKs alongside GO Feature Flag providers 
     docLink: "./server_providers/openfeature_go",
     content: <SdkCardContent
       badgeUrl={"https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fproxy.golang.org%2Fgithub.com%2Fopen-feature%2Fgo-sdk-contrib%2Fproviders%2Fgo-feature-flag%2F%40latest&query=%24.Version&label=GO&color=blue&style=flat-square&log=go"}
-      features={["remoteEval", "localCache"]}/>
+      features={["remoteEval", "localCache", "dynamicRefresh"]}/>
   },
   {
     logoCss: "devicon-nodejs-plain colored",
@@ -62,6 +62,15 @@ Rest assured, working with OpenFeature SDKs alongside GO Feature Flag providers 
     content: <SdkCardContent
       badgeUrl={"https://img.shields.io/pypi/v/gofeatureflag-python-provider?color=blue&style=flat-square&logo=pypi"}
       features={["remoteEval", "localCache", "dynamicRefresh"]}/>
+  },
+  {
+    logoCss: "devicon-php-plain colored",
+    title:"PHP",
+    badges:["Server"],
+    docLink: "./server_providers/openfeature_php",
+    content: <SdkCardContent
+      badgeUrl={"https://img.shields.io/packagist/v/open-feature/go-feature-flag-provider?logo=php&color=blue&style=flat-square"}
+      features={["remoteEval"]}/>
   },
   {
     logoCss: "devicon-ruby-plain colored",

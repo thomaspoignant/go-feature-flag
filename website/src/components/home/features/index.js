@@ -156,6 +156,12 @@ function OpenFeature() {
 
           <SocialIcon
             colorClassName={styles.socialIconCyan}
+            fontAwesomeIcon="devicon-php-plain colored"
+            tooltipText="PHP"
+          />
+
+          <SocialIcon
+            colorClassName={styles.socialIconCyan}
             fontAwesomeIcon="devicon-ruby-plain colored"
             tooltipText="Ruby"
           />

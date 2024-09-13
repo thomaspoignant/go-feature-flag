@@ -229,7 +229,7 @@ jobs:
         run: cp -rf release/${{ env.WEBSITE_DIR }}/ $MAIN_BRANCH_NAME
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v7
         with:
           branch: create-new-doc-version-${{  github.ref_name }}
           title: "docs(docusaurus): Create a new documentation version ${{  github.ref_name }}"
@@ -284,7 +284,7 @@ jobs:
         run: cp -rf release/$CHART_YAML_FILE_LOCATION $MAIN_BRANCH_NAME/$CHART_YAML_FILE_LOCATION
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v7
         with:
           branch: bump-relay-proxy-helm-chart-${{  github.ref_name }}
           title: "chore(helm): Bump relay-proxy helm chart version ${{  github.ref_name }}"
@@ -341,7 +341,7 @@ jobs:
         run: cp -rf release/$SCHEMA_LOCATION $MAIN_BRANCH_NAME/$SCHEMA_LOCATION
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v7
         with:
           branch: release-jsonschema-${{  github.ref_name }}
           title: "feat(jsonschema): Release a new version of the jsonschema ${{  github.ref_name }}"
