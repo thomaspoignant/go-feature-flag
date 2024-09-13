@@ -448,7 +448,12 @@ func TestRule_Evaluate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.rule.Evaluate(tt.args.user.GetKey(), tt.args.user, "flagname+", tt.args.isDefault)
+			key := ""
+			if tt.args.user != nil {
+				key = tt.args.user.GetKey()
+			}
+			got, err := tt.rule.Evaluate(key, tt.args.user, "flagname+", tt.args.isDefault)
+
 			if !tt.wantErr(t, err, fmt.Sprintf("Evaluate(%v, %v)", tt.args.user, tt.args.isDefault)) {
 				return
 			}

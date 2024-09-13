@@ -40,50 +40,61 @@ type Rule struct {
 	Disable *bool `json:"disable,omitempty" yaml:"disable,omitempty" toml:"disable,omitempty" jsonschema:"title=disable,description=Indicates that this rule is disabled."` // nolint: lll
 }
 
-// Evaluate is checking if the rule apply to for the user.
-// If yes it returns the variation you should use for this rule.
+// Evaluate is checking if the rule applies to for the user.
+// If yes, it returns the variation you should use for this rule.
 func (r *Rule) Evaluate(key string, ctx ffcontext.Context, flagName string, isDefault bool,
 ) (string, error) {
+	if key == "" {
+		return "", fmt.Errorf("evaluate Rule: no key")
+	}
+
 	evaluationDate := DateFromContextOrDefault(ctx, time.Now())
 	// check that we have an evaluation context
 	if ctx == nil {
 		return "", fmt.Errorf("evaluate Rule: no evaluation context")
 	}
 
-	// Check if the rule apply for this user
+	// Check if the rule applies for this user
 	ruleApply := isDefault || r.GetQuery() == "" || parser.Evaluate(r.GetTrimmedQuery(), utils.ContextToMap(ctx))
 	if !ruleApply || (!isDefault && r.IsDisable()) {
 		return "", &internalerror.RuleNotApply{Context: ctx}
 	}
-
 	if r.ProgressiveRollout != nil {
-		progressiveRolloutMaxPercentage := uint32(100 * PercentageMultiplier)
-		hashID := utils.BuildHash(flagName, key, progressiveRolloutMaxPercentage)
-		variation, err := r.getVariationFromProgressiveRollout(hashID, evaluationDate)
-		if err != nil {
-			return variation, err
-		}
-		return variation, nil
+		return r.EvaluateProgressiveRollout(key, flagName, evaluationDate)
 	}
-
 	if r.Percentages != nil && len(r.GetPercentages()) > 0 {
-		m := 0.0
-		for _, percentage := range r.GetPercentages() {
-			m += percentage
-		}
-		maxPercentage := uint32(m * PercentageMultiplier)
-		hashID := utils.BuildHash(flagName, key, maxPercentage)
-		variationName, err := r.getVariationFromPercentage(hashID)
-		if err != nil {
-			return "", err
-		}
-		return variationName, nil
+		return r.EvaluatePercentageRollout(key, flagName)
 	}
-
 	if r.VariationResult != nil {
 		return r.GetVariationResult(), nil
 	}
 	return "", fmt.Errorf("error in the configuration, no variation available for this rule")
+}
+
+// EvaluateProgressiveRollout is evaluating the progressive rollout for the rule.
+func (r *Rule) EvaluateProgressiveRollout(key string, flagName string, evaluationDate time.Time) (string, error) {
+	progressiveRolloutMaxPercentage := uint32(100 * PercentageMultiplier)
+	hashID := utils.BuildHash(flagName, key, progressiveRolloutMaxPercentage)
+	variation, err := r.getVariationFromProgressiveRollout(hashID, evaluationDate)
+	if err != nil {
+		return variation, err
+	}
+	return variation, nil
+}
+
+// EvaluatePercentageRollout is evaluating the percentage rollout for the rule.
+func (r *Rule) EvaluatePercentageRollout(key string, flagName string) (string, error) {
+	m := 0.0
+	for _, percentage := range r.GetPercentages() {
+		m += percentage
+	}
+	maxPercentage := uint32(m * PercentageMultiplier)
+	hashID := utils.BuildHash(flagName, key, maxPercentage)
+	variationName, err := r.getVariationFromPercentage(hashID)
+	if err != nil {
+		return "", err
+	}
+	return variationName, nil
 }
 
 // IsDynamic is a function that allows to know if the rule has a dynamic result or not.
