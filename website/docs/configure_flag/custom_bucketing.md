@@ -1,5 +1,5 @@
 ---
-sidebar_position: 15
+sidebar_position: 22
 description: How to bucket users based on a custom identifier
 ---
 
