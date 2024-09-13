@@ -17,6 +17,9 @@
                     "title": "targeting",
                     "description": "List of rule to target a subset of the users based on the evaluation context."
                 },
+                "bucketingKey": {
+                    "type": "string"
+                },
                 "defaultRule": {
                     "$ref": "#/$defs/Rule",
                     "title": "defaultRule",
@@ -267,6 +270,9 @@
                     },
                     "type": "array"
                 },
+                "bucketingKey": {
+                    "type": "string"
+                },
                 "defaultRule": {
                     "$ref": "#/$defs/Rule"
                 },
@@ -314,6 +320,9 @@
                     "type": "array",
                     "title": "targeting",
                     "description": "List of rule to target a subset of the users based on the evaluation context."
+                },
+                "bucketingKey": {
+                    "type": "string"
                 },
                 "defaultRule": {
                     "$ref": "#/$defs/Rule",
