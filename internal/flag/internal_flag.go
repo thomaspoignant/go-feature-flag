@@ -26,6 +26,9 @@ type InternalFlag struct {
 	// This an optional field.
 	Rules *[]Rule `json:"targeting,omitempty" yaml:"targeting,omitempty" toml:"targeting,omitempty"`
 
+	// BucketingKey defines a source for a dynamic targeting key
+	BucketingKey string `json:"bucketingKey,omitempty" yaml:"bucketingKey,omitempty" toml:"bucketingKey,omitempty"`
+
 	// DefaultRule is the originalRule applied after checking that any other rules
 	// matched the user.
 	DefaultRule *Rule `json:"defaultRule,omitempty" yaml:"defaultRule,omitempty" toml:"defaultRule,omitempty"`
@@ -77,16 +80,28 @@ func (f *InternalFlag) Value(
 		maps.Copy(evaluationCtx.GetCustom(), flagContext.EvaluationContextEnrichment)
 	}
 
+	key, keyError := flag.GetBucketingKey(evaluationCtx)
+
+	if keyError != nil {
+		return flagContext.DefaultSdkValue, ResolutionDetails{
+			Variant:      VariationSDKDefault,
+			Reason:       ReasonError,
+			ErrorCode:    ErrorCodeTargetingKeyMissing,
+			ErrorMessage: keyError.Error(),
+			Metadata:     f.GetMetadata(),
+		}
+	}
+
 	if flag.IsDisable() || flag.isExperimentationOver(evaluationDate) {
 		return flagContext.DefaultSdkValue, ResolutionDetails{
 			Variant:   VariationSDKDefault,
 			Reason:    ReasonDisabled,
-			Cacheable: flag.isCacheable(),
-			Metadata:  flag.GetMetadata(),
+			Cacheable: f.isCacheable(),
+			Metadata:  f.GetMetadata(),
 		}
 	}
 
-	variationSelection, err := flag.selectVariation(flagName, evaluationCtx)
+	variationSelection, err := flag.selectVariation(flagName, key, evaluationCtx)
 	if err != nil {
 		return flagContext.DefaultSdkValue,
 			ResolutionDetails{
@@ -135,12 +150,13 @@ func (f *InternalFlag) isCacheable() bool {
 
 // selectVariation is doing the magic to select the variation that should be used for this specific user
 // to always affect the user to the same segment we are using a hash of the flag name + key
-func (f *InternalFlag) selectVariation(flagName string, ctx ffcontext.Context) (*variationSelection, error) {
+func (f *InternalFlag) selectVariation(
+	flagName string, key string, ctx ffcontext.Context) (*variationSelection, error) {
 	hasRule := len(f.GetRules()) != 0
 	// Check all targeting in order, the first to match will be the one used.
 	if hasRule {
 		for ruleIndex, target := range f.GetRules() {
-			variationName, err := target.Evaluate(ctx, flagName, false)
+			variationName, err := target.Evaluate(key, ctx, flagName, false)
 			if err != nil {
 				// the targeting does not apply
 				if _, ok := err.(*internalerror.RuleNotApply); ok {
@@ -163,7 +179,7 @@ func (f *InternalFlag) selectVariation(flagName string, ctx ffcontext.Context) (
 		return nil, fmt.Errorf("no default targeting for the flag")
 	}
 
-	variationName, err := f.GetDefaultRule().Evaluate(ctx, flagName, true)
+	variationName, err := f.GetDefaultRule().Evaluate(key, ctx, flagName, true)
 	if err != nil {
 		return nil, err
 	}
@@ -362,6 +378,20 @@ func (f *InternalFlag) GetVariationValue(name string) interface{} {
 		}
 	}
 	return nil
+}
+
+func (f *InternalFlag) GetBucketingKey(ctx ffcontext.Context) (string, error) {
+	if f.BucketingKey != "" {
+		value := ctx.GetCustom()[f.BucketingKey]
+		switch v := value.(type) {
+		case string:
+			return v, nil
+		default:
+			return "", fmt.Errorf("invalid bucketing key")
+		}
+	}
+
+	return ctx.GetKey(), nil
 }
 
 // GetMetadata return the metadata associated to the flag

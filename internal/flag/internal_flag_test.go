@@ -2,9 +2,10 @@ package flag_test
 
 import (
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"testing"
 	"time"
+
+	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
@@ -1708,6 +1709,87 @@ func TestInternalFlag_Value(t *testing.T) {
 			assert.Equalf(t, tt.want1, got1, "not expected value: %s", cmp.Diff(tt.want1, got1))
 		})
 	}
+}
+
+func TestInternalFlag_ValueWithBucketingKey(t *testing.T) {
+	type args struct {
+		flagName    string
+		user        ffcontext.Context
+		flagContext flag.Context
+	}
+	tests := []struct {
+		name                string
+		flag                flag.InternalFlag
+		args                args
+		wantForTargetingKey string
+		wantForTeamID       string
+	}{
+		{
+			name: "Should use custom bucketing key when set",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"variation_A": testconvert.Interface("value_A"),
+					"variation_B": testconvert.Interface("value_B"),
+					"variation_C": testconvert.Interface("value_C"),
+				},
+				BucketingKey: "teamId",
+				DefaultRule: &flag.Rule{
+					Percentages: &map[string]float64{
+						"variation_A": 33,
+						"variation_B": 67,
+					},
+				},
+			},
+			args: args{
+				flagName: "my-flag",
+				user:     ffcontext.NewEvaluationContextBuilder("user-key").AddCustom("teamId", "team-123").Build(),
+				flagContext: flag.Context{
+					DefaultSdkValue: "value_default",
+				},
+			},
+			wantForTargetingKey: "variation_A",
+			wantForTeamID:       "variation_B",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			flagWithBucketingKey := tt.flag
+
+			_, got := flagWithBucketingKey.Value(tt.args.flagName, tt.args.user, tt.args.flagContext)
+			assert.Equal(t, tt.wantForTeamID, got.Variant)
+
+			flagWithoutBucketingKey := tt.flag
+			flagWithoutBucketingKey.BucketingKey = ""
+			_, got = flagWithoutBucketingKey.Value(tt.args.flagName, tt.args.user, tt.args.flagContext)
+
+			assert.Equal(t, tt.wantForTargetingKey, got.Variant)
+		})
+	}
+}
+
+func TestInternalFlag_ValueWithBucketingKeyNotFound(t *testing.T) {
+	f := &flag.InternalFlag{
+		Variations: &map[string]*interface{}{
+			"variation_A": testconvert.Interface("value_A"),
+			"variation_B": testconvert.Interface("value_B"),
+			"variation_C": testconvert.Interface("value_C"),
+		},
+		BucketingKey: "teamId",
+		DefaultRule: &flag.Rule{
+			Percentages: &map[string]float64{
+				"variation_A": 33,
+				"variation_B": 67,
+			},
+		},
+	}
+	_, got := f.Value("my-flag", ffcontext.NewEvaluationContextBuilder("user-key").Build(), flag.Context{})
+	want := flag.ResolutionDetails{
+		Variant:      "SdkDefault",
+		Reason:       flag.ReasonError,
+		ErrorCode:    flag.ErrorCodeTargetingKeyMissing,
+		ErrorMessage: "invalid bucketing key",
+	}
+	assert.Equal(t, want, got)
 }
 
 func TestFlag_ProgressiveRollout(t *testing.T) {

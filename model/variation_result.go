@@ -15,6 +15,7 @@ type VariationResult[T JSONType] struct {
 	Version       string                 `json:"version"`
 	Reason        flag.ResolutionReason  `json:"reason"`
 	ErrorCode     flag.ErrorCode         `json:"errorCode"`
+	ErrorDetails  string                 `json:"errrorDetails,omitempty"`
 	Value         T                      `json:"value"`
 	Cacheable     bool                   `json:"cacheable"`
 	Metadata      map[string]interface{} `json:"metadata,omitempty"`
@@ -29,6 +30,7 @@ type RawVarResult struct {
 	Version       string                 `json:"version"`
 	Reason        flag.ResolutionReason  `json:"reason"`
 	ErrorCode     flag.ErrorCode         `json:"errorCode"`
+	ErrorDetails  string                 `json:"errorDetails,omitempty"`
 	Value         interface{}            `json:"value"`
 	Cacheable     bool                   `json:"cacheable"`
 	Metadata      map[string]interface{} `json:"metadata,omitempty"`

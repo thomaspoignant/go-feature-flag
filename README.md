@@ -489,6 +489,12 @@ The targeting key is a fundamental part of the evaluation context because it dir
 
 Feature flag targeting and rollouts are all determined by the user you pass to your evaluation calls.
 
+## Custom bucketing
+
+In some cases, you might need to _bucket_ users based on a different key, e.g. a `teamId`, so that users within the same team get exposed to the same flag variation and get a consistent experience.
+
+This can be achieved by defining the `bucketingKey` field in the flag configuration. When present, the value corresponding to the `bucketingKey` will be extracted from the attributes, and that value used for hashing and determining the outcome in place of the `targetingKey`.
+
 ## Variations
 Variations are the different values possible for a feature flag.  
 GO Feature Flag can manage more than just `boolean` values; the value of your flag can be any of the following types:

@@ -94,6 +94,7 @@ This object will contain these fields:
 | `Version`       | `string`                | The **version** of the flag used to do the evaluation.                         |
 | `Reason`        | `flag.ResolutionReason` | The reason used for this evaluation.                                           |
 | `ErrorCode`     | `flag.ErrorCode`        | Error code in case we have an error.                                           |
+| `ErrorDetails`  | `string`                | A string providing more detail about the error.                                |
 | `Value`         | `<type T>`              | Value of the flag in the expected type.                                        |
 | `Cacheable`     | `bool`                  | `true` if it can be cached (by user or for everyone depending on the reason).  |
 

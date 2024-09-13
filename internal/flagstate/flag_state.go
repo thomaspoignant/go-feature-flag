@@ -14,6 +14,7 @@ type FlagState struct {
 	TrackEvents   bool                   `json:"trackEvents"`
 	Failed        bool                   `json:"-"`
 	ErrorCode     flag.ErrorCode         `json:"errorCode"`
+	ErrorDetails  string                 `json:"errorDetails,omitempty"`
 	Reason        flag.ResolutionReason  `json:"reason"`
 	Metadata      map[string]interface{} `json:"metadata,omitempty"`
 }
@@ -25,12 +26,13 @@ func FromFlagEvaluation(key string, evaluationCtx ffcontext.Context,
 	// if the flag is disabled, we are ignoring it.
 	if resolutionDetails.Reason == flag.ReasonDisabled {
 		return FlagState{
-			Timestamp:   time.Now().Unix(),
-			TrackEvents: currentFlag.IsTrackEvents(),
-			Failed:      resolutionDetails.ErrorCode != "",
-			ErrorCode:   resolutionDetails.ErrorCode,
-			Reason:      resolutionDetails.Reason,
-			Metadata:    resolutionDetails.Metadata,
+			Timestamp:    time.Now().Unix(),
+			TrackEvents:  currentFlag.IsTrackEvents(),
+			Failed:       resolutionDetails.ErrorCode != "",
+			ErrorCode:    resolutionDetails.ErrorCode,
+			ErrorDetails: resolutionDetails.ErrorMessage,
+			Reason:       resolutionDetails.Reason,
+			Metadata:     resolutionDetails.Metadata,
 		}
 	}
 
@@ -43,6 +45,7 @@ func FromFlagEvaluation(key string, evaluationCtx ffcontext.Context,
 			TrackEvents:   currentFlag.IsTrackEvents(),
 			Failed:        resolutionDetails.ErrorCode != "",
 			ErrorCode:     resolutionDetails.ErrorCode,
+			ErrorDetails:  resolutionDetails.ErrorMessage,
 			Reason:        resolutionDetails.Reason,
 			Metadata:      resolutionDetails.Metadata,
 		}
@@ -57,6 +60,7 @@ func FromFlagEvaluation(key string, evaluationCtx ffcontext.Context,
 			TrackEvents:   currentFlag.IsTrackEvents(),
 			Failed:        true,
 			ErrorCode:     flag.ErrorCodeTypeMismatch,
+			ErrorDetails:  resolutionDetails.ErrorMessage,
 			Reason:        flag.ReasonError,
 			Metadata:      resolutionDetails.Metadata,
 		}

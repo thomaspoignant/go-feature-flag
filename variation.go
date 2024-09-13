@@ -356,12 +356,12 @@ func getVariation[T model.JSONType](
 			}, fmt.Errorf(errorWrongVariation, flagKey)
 		}
 	}
-
 	return model.VariationResult[T]{
 		Value:         v,
 		VariationType: resolutionDetails.Variant,
 		Reason:        resolutionDetails.Reason,
 		ErrorCode:     resolutionDetails.ErrorCode,
+		ErrorDetails:  resolutionDetails.ErrorMessage,
 		Failed:        resolutionDetails.ErrorCode != "",
 		TrackEvents:   f.IsTrackEvents(),
 		Version:       f.GetVersion(),

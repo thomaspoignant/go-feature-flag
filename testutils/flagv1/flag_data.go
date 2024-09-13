@@ -2,11 +2,12 @@ package flagv1
 
 import (
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"math"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 
