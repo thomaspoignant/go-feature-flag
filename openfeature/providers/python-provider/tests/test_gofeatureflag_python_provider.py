@@ -10,6 +10,7 @@ from openfeature.evaluation_context import EvaluationContext
 from openfeature.exception import ErrorCode
 from openfeature.flag_evaluation import Reason, FlagEvaluationDetails
 
+from gofeatureflag_python_provider.data_collector_hook import DataCollectorHook
 from gofeatureflag_python_provider.options import GoFeatureFlagOptions
 from gofeatureflag_python_provider.provider import GoFeatureFlagProvider
 
@@ -587,6 +588,29 @@ def test_should_not_call_data_collector_if_not_having_cache(mock_request: Mock):
     api.shutdown()
     assert mock_request.call_count == 1
 
+def test_hook_error():
+    def _create_hook_context():
+        ctx = Mock()
+        eval_ctx = Mock()
+        eval_ctx.attributes = {
+                "anonymous": True
+            }
+        eval_ctx.targeting_key = "test_user_key"
+        ctx.evaluation_context = eval_ctx
+        ctx.flag_key = "test_key"
+        return ctx
+    hook = DataCollectorHook(
+        options=GoFeatureFlagOptions(
+            endpoint="http://test.com"
+        ),
+        http_client=Mock()
+    )
+    hook.error(
+        hook_context=_create_hook_context(),
+        exception=Exception("test exception raised"),
+        hints={}
+    )
+    assert len(hook._event_queue) == 1
 
 def _read_mock_file(flag_key: str) -> str:
     # This hacky if is here to make test run inside pycharm and from the root of the project
