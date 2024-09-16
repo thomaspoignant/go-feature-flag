@@ -80,7 +80,7 @@ evaluationCtx := of.NewEvaluationContext(
       "admin", true,
       "anonymous", false,
     })
-adminFlag, _ := client.BoolValue(context.TODO(), "flag-only-for-admin", false, evaluationCtx)
+adminFlag, _ := client.BooleanValue(context.TODO(), "flag-only-for-admin", false, evaluationCtx)
 if adminFlag {
    // flag "flag-only-for-admin" is true for the user
 } else {
