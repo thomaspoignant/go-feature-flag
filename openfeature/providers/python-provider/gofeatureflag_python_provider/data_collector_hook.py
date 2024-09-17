@@ -63,8 +63,8 @@ class DataCollectorHook(Hook):
         self._event_queue.append(feature_event)
 
     def error(self, hook_context: HookContext, exception: Exception, hints: dict):
-        if self._options.disable_data_collection or details.reason != Reason.CACHED:
-            # we don't collect data if the data collection is disabled or if the flag is not cached
+        if self._options.disable_data_collection:
+            # we don't collect data if the data collection is disabled
             return
 
         feature_event = FeatureEvent(
