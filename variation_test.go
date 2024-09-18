@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/thejerf/slogassert"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/logsexporter"
@@ -13,11 +14,13 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/internal/dto"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/model"
+	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
 	"github.com/thomaspoignant/go-feature-flag/testutils/flagv1"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"log/slog"
+	"os"
 	"runtime"
 	"strings"
 	"testing"
@@ -3889,11 +3892,11 @@ func Test_constructMetadataParallel(t *testing.T) {
 	type args struct {
 		resolutionDetails flag.ResolutionDetails
 	}
-	tests := []struct {
+	var tests []struct {
 		name                  string
 		args                  args
 		wantEvaluatedRuleName string
-	}{}
+	}
 
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
@@ -3924,4 +3927,64 @@ func Test_constructMetadataParallel(t *testing.T) {
 			assert.Equal(t, tt.wantEvaluatedRuleName, got["evaluatedRuleName"])
 		})
 	}
+}
+
+func Test_OverrideContextEnrichmentWithEnvironment(t *testing.T) {
+	tempFile, err := os.CreateTemp("", "")
+	require.NoError(t, err)
+	defer tempFile.Close()
+
+	err = os.WriteFile(tempFile.Name(), []byte(`
+flag1:
+  variations:
+    enabled: true
+    disabled: false
+  targeting:
+    - query: env eq "staging"
+      variation: enabled
+  defaultRule:
+    variation: disabled
+
+`), 0644)
+	require.NoError(t, err)
+
+	goff, err := New(Config{
+		PollingInterval: 500 * time.Millisecond,
+		Retriever:       &fileretriever.Retriever{Path: tempFile.Name()},
+		EvaluationContextEnrichment: map[string]interface{}{
+			"env": "staging",
+		},
+	})
+	require.NoError(t, err)
+
+	res, err1 := goff.BoolVariation("flag1", ffcontext.NewEvaluationContextBuilder("my-key").Build(), false)
+	assert.Equal(t, true, res)
+	assert.NoError(t, err1)
+
+	goff2, err2 := New(Config{
+		PollingInterval: 500 * time.Millisecond,
+		Retriever:       &fileretriever.Retriever{Path: tempFile.Name()},
+		Environment:     "staging",
+		EvaluationContextEnrichment: map[string]interface{}{
+			"env": "staging",
+		},
+	})
+	require.NoError(t, err2)
+	res2, err3 := goff2.BoolVariation("flag1", ffcontext.NewEvaluationContextBuilder("my-key").Build(), false)
+	assert.Equal(t, true, res2)
+	assert.NoError(t, err3)
+
+	// Explicit environment should override the environment from the enrichment
+	goff3, err4 := New(Config{
+		PollingInterval: 500 * time.Millisecond,
+		Retriever:       &fileretriever.Retriever{Path: tempFile.Name()},
+		Environment:     "staging",
+		EvaluationContextEnrichment: map[string]interface{}{
+			"env": "prod",
+		},
+	})
+	require.NoError(t, err4)
+	res3, err5 := goff3.BoolVariation("flag1", ffcontext.NewEvaluationContextBuilder("my-key").Build(), false)
+	assert.Equal(t, true, res3)
+	assert.NoError(t, err5)
 }

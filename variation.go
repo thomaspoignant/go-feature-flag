@@ -322,7 +322,9 @@ func getVariation[T model.JSONType](
 		DefaultSdkValue:             sdkDefaultValue,
 		EvaluationContextEnrichment: maps.Clone(g.config.EvaluationContextEnrichment),
 	}
-	flagCtx.AddIntoEvaluationContextEnrichment("env", g.config.Environment)
+	if g.config.Environment != "" {
+		flagCtx.AddIntoEvaluationContextEnrichment("env", g.config.Environment)
+	}
 	flagValue, resolutionDetails := f.Value(flagKey, evaluationCtx, flagCtx)
 
 	var convertedValue interface{}
