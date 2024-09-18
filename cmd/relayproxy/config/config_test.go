@@ -2,6 +2,7 @@ package config_test
 
 import (
 	"fmt"
+	"github.com/stretchr/testify/require"
 	"io"
 	"os"
 	"testing"
@@ -832,6 +833,21 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 			assert.Equal(t, tt.want, got, "Config not matching")
 		})
 	}
+}
+
+func TestSetAPIKeysFromEnv(t *testing.T) {
+	os.Setenv("AUTHORIZEDKEYS_EVALUATION", "key1,key2,key 3")
+	os.Setenv("AUTHORIZEDKEYS_ADMIN", "key4,key5")
+
+	fileLocation := "../testdata/config/valid-file.yaml"
+	f := pflag.NewFlagSet("config", pflag.ContinueOnError)
+	f.String("config", "", "Location of your config file")
+	_ = f.Parse([]string{fmt.Sprintf("--config=%s", fileLocation)})
+
+	got, err := config.New(f, zap.L(), "1.X.X")
+	require.NoError(t, err)
+	assert.Equal(t, []string{"key1", "key2", "key 3"}, got.AuthorizedKeys.Evaluation)
+	assert.Equal(t, []string{"key4", "key5"}, got.AuthorizedKeys.Admin)
 }
 
 func TestConfig_LogLevel(t *testing.T) {
