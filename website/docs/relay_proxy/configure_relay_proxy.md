@@ -24,6 +24,8 @@ You can override file configurations using environment variables.
 
 Note that all environment variables should be uppercase.
 If you want to replace a nested fields, please use `_` to separate each field _(ex: `RETRIEVER_KIND`)_.
+
+In case of an array of string, you can add multiple values separated by a comma _(ex: `AUTHORIZEDKEYS_EVALUATION=my-first-key,my-second-key`)_.
 :::
 
 

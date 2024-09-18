@@ -100,7 +100,8 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 	}
 	// Map environment variables
 	_ = k.Load(env.ProviderWithValue("", ".", func(s string, v string) (string, interface{}) {
-		if strings.HasPrefix(s, "RETRIEVERS") || strings.HasPrefix(s, "NOTIFIERS") {
+		if strings.HasPrefix(s, "RETRIEVERS") ||
+			strings.HasPrefix(s, "NOTIFIERS") {
 			configMap := k.Raw()
 			err := loadArrayEnv(s, v, configMap)
 			if err != nil {
@@ -109,6 +110,14 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 			}
 			return s, v
 		}
+
+		if strings.HasPrefix(s, "AUTHORIZEDKEYS_EVALUATION") {
+			return "authorizedKeys.evaluation", strings.Split(v, ",")
+		}
+		if strings.HasPrefix(s, "AUTHORIZEDKEYS_ADMIN") {
+			return "authorizedKeys.admin", strings.Split(v, ",")
+		}
+
 		return strings.ReplaceAll(strings.ToLower(s), "_", "."), v
 	}), nil)
 
