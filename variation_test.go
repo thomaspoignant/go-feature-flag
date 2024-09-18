@@ -3958,8 +3958,10 @@ flag1:
 	require.NoError(t, err)
 
 	res, err1 := goff.BoolVariation("flag1", ffcontext.NewEvaluationContextBuilder("my-key").Build(), false)
-	assert.Equal(t, true, res)
+	assert.True(t, res)
 	assert.NoError(t, err1)
+	allFlags := goff.AllFlagsState(ffcontext.NewEvaluationContextBuilder("my-key").Build())
+	assert.Equal(t, true, allFlags.GetFlags()["flag1"].Value)
 
 	goff2, err2 := New(Config{
 		PollingInterval: 500 * time.Millisecond,
@@ -3971,8 +3973,10 @@ flag1:
 	})
 	require.NoError(t, err2)
 	res2, err3 := goff2.BoolVariation("flag1", ffcontext.NewEvaluationContextBuilder("my-key").Build(), false)
-	assert.Equal(t, true, res2)
+	assert.True(t, res2)
 	assert.NoError(t, err3)
+	allFlags2 := goff2.AllFlagsState(ffcontext.NewEvaluationContextBuilder("my-key").Build())
+	assert.Equal(t, true, allFlags2.GetFlags()["flag1"].Value)
 
 	// Explicit environment should override the environment from the enrichment
 	goff3, err4 := New(Config{
@@ -3985,6 +3989,9 @@ flag1:
 	})
 	require.NoError(t, err4)
 	res3, err5 := goff3.BoolVariation("flag1", ffcontext.NewEvaluationContextBuilder("my-key").Build(), false)
-	assert.Equal(t, true, res3)
+	assert.True(t, res3)
 	assert.NoError(t, err5)
+
+	allFlags3 := goff3.AllFlagsState(ffcontext.NewEvaluationContextBuilder("my-key").Build())
+	assert.Equal(t, true, allFlags3.GetFlags()["flag1"].Value)
 }
