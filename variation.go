@@ -277,6 +277,7 @@ func notifyVariation[T model.JSONType](
 
 // getVariation is the internal generic func that handle the logic of a variation the result will always
 // contain a valid model.VariationResult
+// nolint:funlen
 func getVariation[T model.JSONType](
 	g *GoFeatureFlag, flagKey string, evaluationCtx ffcontext.Context, sdkDefaultValue T, expectedType string,
 ) (model.VariationResult[T], error) {
@@ -322,7 +323,9 @@ func getVariation[T model.JSONType](
 		DefaultSdkValue:             sdkDefaultValue,
 		EvaluationContextEnrichment: maps.Clone(g.config.EvaluationContextEnrichment),
 	}
-	flagCtx.AddIntoEvaluationContextEnrichment("env", g.config.Environment)
+	if g.config.Environment != "" {
+		flagCtx.AddIntoEvaluationContextEnrichment("env", g.config.Environment)
+	}
 	flagValue, resolutionDetails := f.Value(flagKey, evaluationCtx, flagCtx)
 
 	var convertedValue interface{}

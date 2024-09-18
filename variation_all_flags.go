@@ -34,7 +34,9 @@ func (g *GoFeatureFlag) GetFlagStates(evaluationCtx ffcontext.Context, flagsToEv
 		EvaluationContextEnrichment: g.config.EvaluationContextEnrichment,
 		DefaultSdkValue:             nil,
 	}
-	flagCtx.AddIntoEvaluationContextEnrichment("env", g.config.Environment)
+	if g.config.Environment != "" {
+		flagCtx.AddIntoEvaluationContextEnrichment("env", g.config.Environment)
+	}
 
 	// Evaluate only the flags in flagsToEvaluate
 	if len(flagsToEvaluate) != 0 {
