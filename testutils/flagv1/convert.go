@@ -1,7 +1,7 @@
 package flagv1
 
 import (
-	"github.com/thomaspoignant/go-feature-flag/dto"
+	"github.com/thomaspoignant/go-feature-flag/model/dto"
 )
 
 func ConvertDtoToV1(d dto.DTO) FlagData {

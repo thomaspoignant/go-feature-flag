@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/dto"
+	"github.com/thomaspoignant/go-feature-flag/model/dto"
 	"os"
 	"strings"
 

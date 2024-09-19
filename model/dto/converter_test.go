@@ -1,8 +1,8 @@
 package dto_test
 
 import (
-	"github.com/thomaspoignant/go-feature-flag/dto"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
+	"github.com/thomaspoignant/go-feature-flag/model/dto"
 	"testing"
 	"time"
 

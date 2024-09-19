@@ -3,7 +3,7 @@ package ffclient
 import (
 	"context"
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/dto"
+	"github.com/thomaspoignant/go-feature-flag/model/dto"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"log"
 	"log/slog"

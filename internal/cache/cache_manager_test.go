@@ -1,7 +1,7 @@
 package cache_test
 
 import (
-	"github.com/thomaspoignant/go-feature-flag/dto"
+	"github.com/thomaspoignant/go-feature-flag/model/dto"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"gopkg.in/yaml.v3"
 	"log/slog"

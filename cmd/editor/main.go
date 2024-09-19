@@ -2,7 +2,7 @@ package main
 
 import (
 	echoadapter "github.com/awslabs/aws-lambda-go-api-proxy/echo"
-	"github.com/thomaspoignant/go-feature-flag/dto"
+	"github.com/thomaspoignant/go-feature-flag/model/dto"
 	"net/http"
 	"os"
 

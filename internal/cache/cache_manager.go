@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/google/go-cmp/cmp"
-	"github.com/thomaspoignant/go-feature-flag/dto"
+	"github.com/thomaspoignant/go-feature-flag/model/dto"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"log/slog"
 	"os"
