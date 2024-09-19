@@ -2,7 +2,7 @@ package cache
 
 import (
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/internal/dto"
+	"github.com/thomaspoignant/go-feature-flag/model/dto"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"log/slog"
 

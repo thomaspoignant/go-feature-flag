@@ -2,6 +2,7 @@ package dto_test
 
 import (
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
+	"github.com/thomaspoignant/go-feature-flag/model/dto"
 	"testing"
 	"time"
 
@@ -10,7 +11,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/testutils/flagv1"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/thomaspoignant/go-feature-flag/internal/dto"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 )

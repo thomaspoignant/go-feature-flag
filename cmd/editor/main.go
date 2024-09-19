@@ -2,6 +2,7 @@ package main
 
 import (
 	echoadapter "github.com/awslabs/aws-lambda-go-api-proxy/echo"
+	"github.com/thomaspoignant/go-feature-flag/model/dto"
 	"net/http"
 	"os"
 
@@ -9,7 +10,6 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	custommiddleware "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/log"
-	"github.com/thomaspoignant/go-feature-flag/internal/dto"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/internal/utils"
 	"github.com/thomaspoignant/go-feature-flag/model"

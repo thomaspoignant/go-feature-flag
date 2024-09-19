@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/invopop/jsonschema"
 	"github.com/jessevdk/go-flags"
-	"github.com/thomaspoignant/go-feature-flag/internal/dto"
+	"github.com/thomaspoignant/go-feature-flag/model/dto"
 	"log"
 	"os"
 )
