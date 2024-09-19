@@ -1,7 +1,7 @@
 package cache
 
 import (
-	"github.com/thomaspoignant/go-feature-flag/internal/dto"
+	"github.com/thomaspoignant/go-feature-flag/dto"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 )
 

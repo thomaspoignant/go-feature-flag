@@ -1,6 +1,8 @@
 package flagv1
 
-import "github.com/thomaspoignant/go-feature-flag/internal/dto"
+import (
+	"github.com/thomaspoignant/go-feature-flag/dto"
+)
 
 func ConvertDtoToV1(d dto.DTO) FlagData {
 	var r Rollout

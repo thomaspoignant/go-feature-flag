@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/google/go-cmp/cmp"
+	"github.com/thomaspoignant/go-feature-flag/dto"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"log/slog"
 	"os"
@@ -12,8 +13,6 @@ import (
 	"time"
 
 	"github.com/BurntSushi/toml"
-
-	"github.com/thomaspoignant/go-feature-flag/internal/dto"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"gopkg.in/yaml.v3"
