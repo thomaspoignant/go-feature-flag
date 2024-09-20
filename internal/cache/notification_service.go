@@ -1,13 +1,13 @@
 package cache
 
 import (
-	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"log/slog"
 	"sync"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
 type Service interface {

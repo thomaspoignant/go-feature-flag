@@ -3,12 +3,12 @@ package httpretriever
 import (
 	"context"
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/retriever/shared"
 	"io"
 	"net/http"
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/internal"
+	"github.com/thomaspoignant/go-feature-flag/retriever/shared"
 )
 
 // Retriever is a configuration struct for an HTTP endpoint retriever.

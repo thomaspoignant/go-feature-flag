@@ -1,9 +1,10 @@
 package pubsubexporter
 
 import (
-	"cloud.google.com/go/pubsub"
 	"context"
 	"encoding/json"
+
+	"cloud.google.com/go/pubsub"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"google.golang.org/api/option"

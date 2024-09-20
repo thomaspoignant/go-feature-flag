@@ -1,9 +1,10 @@
 package internalerror
 
 import (
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
-	"testing"
 )
 
 func TestRuleNotApply_Error(t *testing.T) {

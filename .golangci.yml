@@ -23,6 +23,8 @@ linters:
     - unconvert
     - unparam
     - whitespace
+    - gofmt
+    - gci
 #    - gofumpt
 linters-settings:
   funlen:
@@ -37,6 +39,9 @@ linters-settings:
     checks: ["all","-S1023"]
   gofumpt:
     module-path: github.com/thomaspoignant/go-feature-flag
+  gci:
+    skip-generated: true
+    no-lex-order: true
 issues:
   exclude-dirs:
     - (^|/)bin($|/)

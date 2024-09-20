@@ -1,14 +1,14 @@
 package logsnotifier
 
 import (
-	"github.com/thejerf/slogassert"
-	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"log/slog"
 	"testing"
 
+	"github.com/thejerf/slogassert"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
 func TestLogNotifier_Notify(t *testing.T) {

@@ -2,12 +2,13 @@ package s3retrieverv2
 
 import (
 	"context"
+	"os"
+	"testing"
+
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
-	"os"
-	"testing"
 )
 
 func Test_s3Retriever_Retrieve(t *testing.T) {

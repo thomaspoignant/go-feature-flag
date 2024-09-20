@@ -2,9 +2,10 @@ package initializableretriever
 
 import (
 	"context"
+	"os"
+
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
-	"os"
 )
 
 func NewMockInitializableRetriever(path string, status retriever.Status) Retriever {

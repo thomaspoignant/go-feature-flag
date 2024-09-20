@@ -2,8 +2,9 @@ package retriever
 
 import (
 	"context"
-	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"log"
+
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
 // Retriever is the interface to create a Retriever to load you flags.

@@ -5,16 +5,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"io"
 	"net/http"
 	"os"
 	"sync"
 
 	"github.com/thomaspoignant/go-feature-flag/exporter"
-
 	"github.com/thomaspoignant/go-feature-flag/internal"
 	"github.com/thomaspoignant/go-feature-flag/internal/signer"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
 // Exporter is the exporter of your data to a webhook.

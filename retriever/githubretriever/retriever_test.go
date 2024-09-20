@@ -7,10 +7,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/retriever/githubretriever"
 	"github.com/thomaspoignant/go-feature-flag/testutils/mock"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func Test_github_Retrieve(t *testing.T) {

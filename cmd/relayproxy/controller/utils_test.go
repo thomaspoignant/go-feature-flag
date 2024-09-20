@@ -2,12 +2,13 @@ package controller
 
 import (
 	"fmt"
+	"net/http"
+	"testing"
+
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/model"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
-	"net/http"
-	"testing"
 )
 
 func Test_assertRequest(t *testing.T) {

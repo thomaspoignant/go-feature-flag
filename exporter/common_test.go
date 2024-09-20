@@ -6,9 +6,8 @@ import (
 	"testing"
 	"text/template"
 
-	"github.com/thomaspoignant/go-feature-flag/exporter"
-
 	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/exporter"
 )
 
 func Test_ParseTemplate(t *testing.T) {

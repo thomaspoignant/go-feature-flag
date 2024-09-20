@@ -1,12 +1,13 @@
 package controller
 
 import (
+	"net/http"
+	"time"
+
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"go.uber.org/zap"
-	"net/http"
-	"time"
 )
 
 // NewWsFlagChange is the constructor to create a new controller to handle websocket

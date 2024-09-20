@@ -1,6 +1,12 @@
 package controller_test
 
 import (
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"testing"
+	"time"
+
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
@@ -8,11 +14,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"golang.org/x/net/context"
-	"net/http"
-	"net/http/httptest"
-	"os"
-	"testing"
-	"time"
 )
 
 func TestPIFlagChange_WithConfigChange(t *testing.T) {

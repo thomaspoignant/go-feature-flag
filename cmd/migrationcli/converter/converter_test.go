@@ -6,9 +6,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-
 	"github.com/stretchr/testify/assert"
-
 	"github.com/thomaspoignant/go-feature-flag/cmd/migrationcli/converter"
 )
 

@@ -1,14 +1,13 @@
 package service_test
 
 import (
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
-	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
+	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 )
 
 type mockWebsocketService struct {
@@ -64,7 +63,7 @@ func TestNotify(t *testing.T) {
 			},
 		},
 		Updated: map[string]notifier.DiffUpdated{
-			"my-flag": notifier.DiffUpdated{
+			"my-flag": {
 				Before: &flag.InternalFlag{
 					Variations: &map[string]*interface{}{
 						"A": testconvert.Interface(true),

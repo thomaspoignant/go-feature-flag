@@ -1,9 +1,10 @@
 package ffuser_test
 
 import (
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/ffuser"
-	"testing"
 )
 
 func TestUser_AddCustomAttribute(t *testing.T) {

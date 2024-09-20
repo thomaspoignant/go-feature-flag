@@ -3,13 +3,13 @@ package s3retrieverv2
 import (
 	"context"
 	"fmt"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
-
 	"github.com/thomaspoignant/go-feature-flag/retriever"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
 // Retriever is a configuration struct for a S3 retriever.

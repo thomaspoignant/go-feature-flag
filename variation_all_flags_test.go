@@ -2,13 +2,14 @@ package ffclient
 
 import (
 	"encoding/json"
+	"os"
+	"testing"
+	"time"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
-	"os"
-	"testing"
-	"time"
 )
 
 func TestAllFlagsState(t *testing.T) {

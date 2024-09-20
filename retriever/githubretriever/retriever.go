@@ -3,7 +3,6 @@ package githubretriever
 import (
 	"context"
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/retriever/shared"
 	"io"
 	"net/http"
 	"strconv"
@@ -11,6 +10,7 @@ import (
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/internal"
+	"github.com/thomaspoignant/go-feature-flag/retriever/shared"
 )
 
 // Retriever is a configuration struct for a GitHub retriever.
