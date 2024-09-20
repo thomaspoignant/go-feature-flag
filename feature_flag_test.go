@@ -2,7 +2,6 @@ package ffclient_test
 
 import (
 	"errors"
-	"github.com/thomaspoignant/go-feature-flag/model"
 	"log"
 	"log/slog"
 	"os"
@@ -14,6 +13,7 @@ import (
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
+	"github.com/thomaspoignant/go-feature-flag/model"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/s3retriever"
