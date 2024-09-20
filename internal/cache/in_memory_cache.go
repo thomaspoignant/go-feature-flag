@@ -2,11 +2,11 @@ package cache
 
 import (
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/model/dto"
-	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"log/slog"
 
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
+	"github.com/thomaspoignant/go-feature-flag/model/dto"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
 type InMemoryCache struct {

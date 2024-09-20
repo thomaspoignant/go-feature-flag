@@ -2,8 +2,9 @@ package exporter
 
 import (
 	"context"
-	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"log"
+
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
 // DeprecatedExporter is an interface to describe how an exporter looks like.

@@ -2,11 +2,12 @@ package shared
 
 import (
 	"errors"
-	"github.com/thomaspoignant/go-feature-flag/internal"
-	"golang.org/x/net/context"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/thomaspoignant/go-feature-flag/internal"
+	"golang.org/x/net/context"
 )
 
 func CallHTTPAPI(

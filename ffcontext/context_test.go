@@ -1,11 +1,12 @@
 package ffcontext_test
 
 import (
+	"testing"
+	"time"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
-	"testing"
-	"time"
 )
 
 func TestUser_AddCustomAttribute(t *testing.T) {

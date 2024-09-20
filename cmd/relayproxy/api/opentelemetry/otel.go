@@ -2,6 +2,8 @@ package opentelemetry
 
 import (
 	"context"
+	"net/url"
+
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -9,7 +11,6 @@ import (
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	"net/url"
 )
 
 type OtelService struct {

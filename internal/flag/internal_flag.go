@@ -3,10 +3,10 @@ package flag
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"maps"
 	"time"
 
+	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/internal/internalerror"
 	"github.com/thomaspoignant/go-feature-flag/internal/utils"
 )

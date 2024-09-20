@@ -4,6 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
+	"os"
+	"runtime"
+	"strings"
+	"testing"
+	"time"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/thejerf/slogassert"
@@ -19,12 +26,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/testutils/flagv1"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
-	"log/slog"
-	"os"
-	"runtime"
-	"strings"
-	"testing"
-	"time"
 )
 
 type cacheMock struct {

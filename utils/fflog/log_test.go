@@ -1,12 +1,13 @@
 package fflog_test
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"log"
 	"log/slog"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
 func TestFFLogger_Error(t *testing.T) {

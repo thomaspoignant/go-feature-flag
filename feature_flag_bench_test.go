@@ -3,15 +3,14 @@ package ffclient_test
 import (
 	"bytes"
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"os"
 	"testing"
 	"text/template"
 	"time"
 
-	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
-
 	ffclient "github.com/thomaspoignant/go-feature-flag"
+	"github.com/thomaspoignant/go-feature-flag/ffcontext"
+	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 )
 
 var client *ffclient.GoFeatureFlag

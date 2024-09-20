@@ -3,17 +3,17 @@ package exporter_test
 import (
 	"context"
 	"errors"
-	"github.com/thejerf/slogassert"
-	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"log/slog"
 	"os"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/thejerf/slogassert"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/testutils/mock"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
 func TestDataExporterScheduler_flushWithTime(t *testing.T) {

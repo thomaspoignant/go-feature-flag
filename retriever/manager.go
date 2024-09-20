@@ -3,8 +3,9 @@ package retriever
 import (
 	"context"
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"log/slog"
+
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
 // Manager is a struct that managed the retrievers.

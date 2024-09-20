@@ -3,12 +3,12 @@ package logsexporter
 import (
 	"bytes"
 	"context"
-	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"sync"
 	"text/template"
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/exporter"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
 const defaultLoggerFormat = "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", value=\"{{ .Value}}\""

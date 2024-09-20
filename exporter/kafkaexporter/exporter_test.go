@@ -4,13 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"log/slog"
 	"testing"
 
 	"github.com/IBM/sarama"
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
 type messageSenderMock struct {

@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 )
-import "testing"
 
 func TestLinter_Lint(t *testing.T) {
 	tests := []struct {

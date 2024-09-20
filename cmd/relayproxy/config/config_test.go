@@ -2,13 +2,13 @@ package config_test
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/require"
 	"io"
 	"os"
 	"testing"
 
 	"github.com/spf13/pflag"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -750,35 +750,35 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 				FileFormat:      "yaml",
 				Host:            "localhost",
 				Retrievers: &[]config.RetrieverConf{
-					config.RetrieverConf{
+					{
 						Kind: "http",
 						URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
 						HTTPHeaders: map[string][]string{
-							"authorization": []string{
+							"authorization": {
 								"test",
 							},
-							"token": []string{"token"},
+							"token": {"token"},
 						},
 					},
-					config.RetrieverConf{
+					{
 						Kind: "file",
 						Path: "examples/retriever_file/flags.goff.yaml",
 						HTTPHeaders: map[string][]string{
-							"token": []string{
+							"token": {
 								"11213123",
 							},
-							"authorization": []string{
+							"authorization": {
 								"test1",
 							},
 						},
 					},
-					config.RetrieverConf{
+					{
 						HTTPHeaders: map[string][]string{
 
-							"authorization": []string{
+							"authorization": {
 								"test1",
 							},
-							"x-goff-custom": []string{
+							"x-goff-custom": {
 								"custom",
 							},
 						},

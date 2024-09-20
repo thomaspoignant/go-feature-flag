@@ -2,6 +2,7 @@ package internalerror
 
 import (
 	"fmt"
+
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 )
 

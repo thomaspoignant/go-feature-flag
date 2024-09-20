@@ -1,11 +1,10 @@
 package main
 
 import (
-	echoadapter "github.com/awslabs/aws-lambda-go-api-proxy/echo"
-	"github.com/thomaspoignant/go-feature-flag/model/dto"
 	"net/http"
 	"os"
 
+	echoadapter "github.com/awslabs/aws-lambda-go-api-proxy/echo"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	custommiddleware "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"
@@ -13,6 +12,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/internal/utils"
 	"github.com/thomaspoignant/go-feature-flag/model"
+	"github.com/thomaspoignant/go-feature-flag/model/dto"
 )
 
 // This service is an API used to evaluate a flag with an evaluation context

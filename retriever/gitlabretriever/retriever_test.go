@@ -6,10 +6,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/retriever/gitlabretriever"
 	"github.com/thomaspoignant/go-feature-flag/testutils/mock"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func sampleText() string {

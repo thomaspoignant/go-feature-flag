@@ -2,11 +2,12 @@ package exporter
 
 import (
 	"context"
-	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"log"
 	"log/slog"
 	"sync"
 	"time"
+
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
 const (

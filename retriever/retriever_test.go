@@ -1,14 +1,15 @@
 package retriever_test
 
 import (
+	"log"
+	"testing"
+	"time"
+
 	"github.com/stretchr/testify/assert"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"golang.org/x/net/context"
-	"log"
-	"testing"
-	"time"
 )
 
 func TestMixLegacyTypesOfRetrievers(t *testing.T) {

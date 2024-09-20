@@ -1,6 +1,11 @@
 package ofrep_test
 
 import (
+	"net/http"
+	"net/http/httptest"
+	"testing"
+	"time"
+
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
@@ -8,10 +13,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/ofrep"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"golang.org/x/net/context"
-	"net/http"
-	"net/http/httptest"
-	"testing"
-	"time"
 )
 
 func Test_Configuration(t *testing.T) {

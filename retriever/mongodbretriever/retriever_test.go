@@ -3,11 +3,11 @@ package mongodbretriever
 import (
 	"context"
 	"encoding/json"
-	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"go.mongodb.org/mongo-driver/mongo/integration/mtest"
 )
 

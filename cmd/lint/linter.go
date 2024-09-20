@@ -3,11 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/model/dto"
 	"os"
 	"strings"
 
 	"github.com/BurntSushi/toml"
+	"github.com/thomaspoignant/go-feature-flag/model/dto"
 	"k8s.io/apimachinery/pkg/util/yaml"
 )
 

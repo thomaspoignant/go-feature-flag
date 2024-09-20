@@ -2,13 +2,13 @@ package service_test
 
 import (
 	"context"
-	"github.com/stretchr/testify/assert"
-	ffclient "github.com/thomaspoignant/go-feature-flag"
-	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
+	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 )
 
 // Mock implementation of GoFeatureFlag for testing

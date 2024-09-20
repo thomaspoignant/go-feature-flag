@@ -1,16 +1,16 @@
 package controller
 
 import (
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
-	"github.com/thomaspoignant/go-feature-flag/internal/flagstate"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/model"
+	"github.com/thomaspoignant/go-feature-flag/internal/flagstate"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 )
 
 type allFlags struct {
