@@ -13,6 +13,7 @@ import (
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
+	"github.com/thomaspoignant/go-feature-flag/model"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/s3retriever"
@@ -662,4 +663,46 @@ func Test_PersistFlagConfigurationOnDisk(t *testing.T) {
 	contentP3, err := os.ReadFile(persistFile.Name())
 	assert.NoError(t, err)
 	assert.NotEqual(t, contentP2, contentP3)
+}
+
+func Test_UseCustomBucketingKey(t *testing.T) {
+	gffClient, err := ffclient.New(ffclient.Config{
+		PollingInterval: 1 * time.Second,
+		Retriever:       &fileretriever.Retriever{Path: "testdata/flag-config-custom-bucketingkey.yaml"},
+		LeveledLogger:   slog.Default(),
+		Offline:         false,
+	})
+	assert.NoError(t, err)
+
+	{
+		got, err := gffClient.StringVariationDetails("my-flag", ffcontext.NewEvaluationContext("random-key"), "default")
+		assert.NoError(t, err)
+		want := model.VariationResult[string]{
+			Value:         "default",
+			TrackEvents:   true,
+			VariationType: "SdkDefault",
+			Failed:        true,
+			Reason:        flag.ReasonError,
+			ErrorCode:     flag.ErrorCodeTargetingKeyMissing,
+			ErrorDetails:  "invalid bucketing key",
+		}
+		assert.Equal(t, want, got)
+	}
+
+	{
+		got, err := gffClient.StringVariationDetails(
+			"my-flag",
+			ffcontext.NewEvaluationContextBuilder("random-key").AddCustom("teamId", "team-123").Build(),
+			"default")
+		assert.NoError(t, err)
+		want := model.VariationResult[string]{
+			Value:         "value_A",
+			TrackEvents:   true,
+			VariationType: "variation_A",
+			Failed:        false,
+			Reason:        flag.ReasonStatic,
+			Cacheable:     true,
+		}
+		assert.Equal(t, want, got)
+	}
 }
