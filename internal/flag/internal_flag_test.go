@@ -1731,7 +1731,7 @@ func TestInternalFlag_ValueWithBucketingKey(t *testing.T) {
 					"variation_B": testconvert.Interface("value_B"),
 					"variation_C": testconvert.Interface("value_C"),
 				},
-				BucketingKey: "teamId",
+				BucketingKey: testconvert.String("teamId"),
 				DefaultRule: &flag.Rule{
 					Percentages: &map[string]float64{
 						"variation_A": 33,
@@ -1758,7 +1758,7 @@ func TestInternalFlag_ValueWithBucketingKey(t *testing.T) {
 			assert.Equal(t, tt.wantForTeamID, got.Variant)
 
 			flagWithoutBucketingKey := tt.flag
-			flagWithoutBucketingKey.BucketingKey = ""
+			flagWithoutBucketingKey.BucketingKey = testconvert.String("")
 			_, got = flagWithoutBucketingKey.Value(tt.args.flagName, tt.args.user, tt.args.flagContext)
 
 			assert.Equal(t, tt.wantForTargetingKey, got.Variant)
@@ -1773,7 +1773,7 @@ func TestInternalFlag_ValueWithBucketingKeyNotFound(t *testing.T) {
 			"variation_B": testconvert.Interface("value_B"),
 			"variation_C": testconvert.Interface("value_C"),
 		},
-		BucketingKey: "teamId",
+		BucketingKey: testconvert.String("teamId"),
 		DefaultRule: &flag.Rule{
 			Percentages: &map[string]float64{
 				"variation_A": 33,

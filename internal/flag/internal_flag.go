@@ -27,7 +27,7 @@ type InternalFlag struct {
 	Rules *[]Rule `json:"targeting,omitempty" yaml:"targeting,omitempty" toml:"targeting,omitempty"`
 
 	// BucketingKey defines a source for a dynamic targeting key
-	BucketingKey string `json:"bucketingKey,omitempty" yaml:"bucketingKey,omitempty" toml:"bucketingKey,omitempty"`
+	BucketingKey *string `json:"bucketingKey,omitempty" yaml:"bucketingKey,omitempty" toml:"bucketingKey,omitempty"`
 
 	// DefaultRule is the originalRule applied after checking that any other rules
 	// matched the user.
@@ -80,7 +80,7 @@ func (f *InternalFlag) Value(
 		maps.Copy(evaluationCtx.GetCustom(), flagContext.EvaluationContextEnrichment)
 	}
 
-	key, keyError := flag.GetBucketingKey(evaluationCtx)
+	key, keyError := flag.GetBucketingKeyValue(evaluationCtx)
 
 	if keyError != nil {
 		return flagContext.DefaultSdkValue, ResolutionDetails{
@@ -380,9 +380,22 @@ func (f *InternalFlag) GetVariationValue(name string) interface{} {
 	return nil
 }
 
-func (f *InternalFlag) GetBucketingKey(ctx ffcontext.Context) (string, error) {
-	if f.BucketingKey != "" {
-		value := ctx.GetCustom()[f.BucketingKey]
+// GetBucketingKey return the name of the custom bucketing key if we are using one.
+func (f *InternalFlag) GetBucketingKey() string {
+	if f.BucketingKey == nil {
+		return ""
+	}
+	return *f.BucketingKey
+}
+
+// GetBucketingKeyValue return the value of the bucketing key from the context
+func (f *InternalFlag) GetBucketingKeyValue(ctx ffcontext.Context) (string, error) {
+	if f.BucketingKey != nil {
+		key := f.GetBucketingKey()
+		if key == "" {
+			return ctx.GetKey(), nil
+		}
+		value := ctx.GetCustom()[key]
 		switch v := value.(type) {
 		case string:
 			return v, nil
@@ -390,7 +403,6 @@ func (f *InternalFlag) GetBucketingKey(ctx ffcontext.Context) (string, error) {
 			return "", fmt.Errorf("invalid bucketing key")
 		}
 	}
-
 	return ctx.GetKey(), nil
 }
 
