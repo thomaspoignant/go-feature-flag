@@ -38,7 +38,7 @@ type DTOv1 struct {
 	Rules *[]flag.Rule `json:"targeting,omitempty" yaml:"targeting,omitempty" toml:"targeting,omitempty" jsonschema:"title=targeting,description=List of rule to target a subset of the users based on the evaluation context."` // nolint: lll
 
 	// BucketingKey defines a source for a dynamic targeting key
-	BucketingKey string `json:"bucketingKey,omitempty" yaml:"bucketingKey,omitempty" toml:"bucketingKey,omitempty"`
+	BucketingKey *string `json:"bucketingKey,omitempty" yaml:"bucketingKey,omitempty" toml:"bucketingKey,omitempty"`
 
 	// DefaultRule is the rule applied after checking that any other rules
 	// matched the user.
