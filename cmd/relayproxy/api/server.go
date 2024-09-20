@@ -53,6 +53,7 @@ func (s *Server) initRoutes() {
 	s.apiEcho.HidePort = true
 	s.apiEcho.Debug = s.config.IsDebugEnabled()
 	s.apiEcho.Use(custommiddleware.ZapLogger(s.zapLog, s.config))
+	s.apiEcho.Use(custommiddleware.BodyLogger(s.zapLog, s.config))
 	if s.services.Metrics != (metric.Metrics{}) {
 		s.apiEcho.Use(echoprometheus.NewMiddlewareWithConfig(echoprometheus.MiddlewareConfig{
 			Subsystem:  metric.GOFFSubSystem,
