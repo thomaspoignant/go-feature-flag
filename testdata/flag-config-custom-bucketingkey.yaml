@@ -1,0 +1,11 @@
+my-flag:
+  variations:
+    variation_A: value_A
+    variation_B: value_B
+    variation_C: value_C
+  bucketingKey: teamId
+  defaultRule:
+      variation: variation_A
+      percentage:
+      variation_A: 33
+      variation_B: 67
