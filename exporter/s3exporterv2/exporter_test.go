@@ -2,18 +2,15 @@ package s3exporterv2
 
 import (
 	"context"
-	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"log/slog"
 	"os"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-
-	"github.com/thomaspoignant/go-feature-flag/exporter"
-
 	"github.com/stretchr/testify/assert"
-
+	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
 func TestS3_Export(t *testing.T) {

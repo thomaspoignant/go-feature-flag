@@ -4,13 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/model/dto"
 	"os"
 	"strings"
 
 	"github.com/BurntSushi/toml"
-
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
+	"github.com/thomaspoignant/go-feature-flag/model/dto"
 	"gopkg.in/yaml.v3"
 )
 

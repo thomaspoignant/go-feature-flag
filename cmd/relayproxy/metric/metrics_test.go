@@ -1,9 +1,10 @@
 package metric
 
 import (
+	"testing"
+
 	"github.com/prometheus/client_golang/prometheus/testutil"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestMetrics_IncAllFlag(t *testing.T) {

@@ -2,16 +2,14 @@ package webhookexporter
 
 import (
 	"context"
-	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"log/slog"
 	"os"
 	"testing"
 
-	"github.com/thomaspoignant/go-feature-flag/exporter"
-
 	"github.com/stretchr/testify/assert"
-
+	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
 func TestWebhook_IsBulk(t *testing.T) {

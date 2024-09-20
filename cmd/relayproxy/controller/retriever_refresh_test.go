@@ -1,15 +1,16 @@
 package controller_test
 
 import (
+	"net/http/httptest"
+	"testing"
+	"time"
+
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/controller"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
-	"net/http/httptest"
-	"testing"
-	"time"
 )
 
 func Test_retriever_refresh_Handler_no_goff(t *testing.T) {

@@ -3,7 +3,6 @@ package fileexporter
 import (
 	"context"
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"os"
 	"runtime"
 	"strings"
@@ -11,6 +10,7 @@ import (
 	"text/template"
 
 	"github.com/thomaspoignant/go-feature-flag/exporter"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"github.com/xitongsys/parquet-go-source/local"
 	"github.com/xitongsys/parquet-go/parquet"
 	"github.com/xitongsys/parquet-go/writer"

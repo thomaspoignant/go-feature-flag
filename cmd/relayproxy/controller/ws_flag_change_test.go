@@ -2,6 +2,10 @@ package controller_test
 
 import (
 	"encoding/json"
+	"net/http/httptest"
+	"strings"
+	"testing"
+
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
@@ -11,9 +15,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 	"go.uber.org/zap"
-	"net/http/httptest"
-	"strings"
-	"testing"
 )
 
 func Test_websocket_flag_change(t *testing.T) {
@@ -27,7 +28,7 @@ func Test_websocket_flag_change(t *testing.T) {
 				Deleted: nil,
 				Added:   nil,
 				Updated: map[string]notifier.DiffUpdated{
-					"my-flag": notifier.DiffUpdated{
+					"my-flag": {
 						Before: &flag.InternalFlag{
 							Variations: &map[string]*interface{}{
 								"A": testconvert.Interface(true),
@@ -76,7 +77,7 @@ func Test_websocket_flag_change(t *testing.T) {
 					},
 				},
 				Updated: map[string]notifier.DiffUpdated{
-					"my-flag": notifier.DiffUpdated{
+					"my-flag": {
 						Before: &flag.InternalFlag{
 							Variations: &map[string]*interface{}{
 								"A": testconvert.Interface(true),

@@ -3,15 +3,14 @@ package ffclient
 import (
 	"context"
 	"errors"
-	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"log"
 	"log/slog"
 	"sync"
 	"time"
 
-	"github.com/thomaspoignant/go-feature-flag/retriever"
-
 	"github.com/thomaspoignant/go-feature-flag/notifier"
+	"github.com/thomaspoignant/go-feature-flag/retriever"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
 // Config is the configuration of go-feature-flag.

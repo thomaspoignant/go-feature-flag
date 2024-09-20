@@ -3,9 +3,8 @@ package log_test
 import (
 	"testing"
 
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/log"
-
 	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/log"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest/observer"
 )

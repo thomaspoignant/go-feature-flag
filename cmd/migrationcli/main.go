@@ -5,9 +5,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/thomaspoignant/go-feature-flag/cmd/migrationcli/converter"
-
 	"github.com/jessevdk/go-flags"
+	"github.com/thomaspoignant/go-feature-flag/cmd/migrationcli/converter"
 )
 
 func main() {

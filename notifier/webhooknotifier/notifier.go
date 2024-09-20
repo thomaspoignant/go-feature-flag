@@ -10,10 +10,9 @@ import (
 	"os"
 	"sync"
 
-	"github.com/thomaspoignant/go-feature-flag/notifier"
-
 	"github.com/thomaspoignant/go-feature-flag/internal"
 	"github.com/thomaspoignant/go-feature-flag/internal/signer"
+	"github.com/thomaspoignant/go-feature-flag/notifier"
 )
 
 // webhookReqBody is the format we are sending to the webhook

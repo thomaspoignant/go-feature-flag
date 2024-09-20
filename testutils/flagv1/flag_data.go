@@ -7,11 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/thomaspoignant/go-feature-flag/ffcontext"
-
-	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-
 	"github.com/nikunjy/rules/parser"
+	"github.com/thomaspoignant/go-feature-flag/ffcontext"
+	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/internal/utils"
 )
 

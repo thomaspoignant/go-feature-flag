@@ -3,6 +3,7 @@ package mongodbretriever
 import (
 	"context"
 	"encoding/json"
+
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"go.mongodb.org/mongo-driver/bson"

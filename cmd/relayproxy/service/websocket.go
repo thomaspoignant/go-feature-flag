@@ -1,8 +1,9 @@
 package service
 
 import (
-	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"sync"
+
+	"github.com/thomaspoignant/go-feature-flag/notifier"
 )
 
 // WebsocketConn is an interface to be able to mock websocket.Conn

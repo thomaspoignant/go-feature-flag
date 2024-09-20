@@ -3,8 +3,6 @@ package ffclient
 import (
 	"context"
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/model/dto"
-	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"log"
 	"log/slog"
 	"os"
@@ -12,12 +10,12 @@ import (
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/exporter"
-	"github.com/thomaspoignant/go-feature-flag/retriever"
-	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
-
-	"github.com/thomaspoignant/go-feature-flag/notifier/logsnotifier"
-
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
+	"github.com/thomaspoignant/go-feature-flag/model/dto"
+	"github.com/thomaspoignant/go-feature-flag/notifier/logsnotifier"
+	"github.com/thomaspoignant/go-feature-flag/retriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
 // Init the feature flag component with the configuration of ffclient.Config

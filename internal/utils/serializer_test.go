@@ -3,9 +3,8 @@ package utils_test
 import (
 	"testing"
 
-	"github.com/thomaspoignant/go-feature-flag/ffcontext"
-
 	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/internal/utils"
 )
 

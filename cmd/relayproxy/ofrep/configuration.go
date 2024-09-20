@@ -1,9 +1,10 @@
 package ofrep
 
 import (
+	"net/http"
+
 	"github.com/labstack/echo/v4"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/model"
-	"net/http"
 )
 
 // Configuration is the entry point to get the configuration for OFREP.

@@ -1,12 +1,11 @@
 package service_test
 
 import (
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
-
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 )
 

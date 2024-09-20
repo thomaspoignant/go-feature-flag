@@ -4,13 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sync"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
-	"sync"
 )
 
 type Exporter struct {
@@ -55,7 +56,7 @@ func (f *Exporter) Export(ctx context.Context, _ *fflog.FFLogger, featureEvents 
 			MessageBody: aws.String(string(messageBody)),
 			QueueUrl:    aws.String(f.QueueURL),
 			MessageAttributes: map[string]types.MessageAttributeValue{
-				"emitter": types.MessageAttributeValue{
+				"emitter": {
 					DataType:    aws.String("String"),
 					StringValue: aws.String("GO Feature Flag"),
 				},

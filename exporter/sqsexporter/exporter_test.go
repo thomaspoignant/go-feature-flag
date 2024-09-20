@@ -4,15 +4,16 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
+	"strings"
+	"testing"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
-	"log/slog"
-	"strings"
-	"testing"
 )
 
 type SQSSendMessageAPIMock struct {
@@ -121,7 +122,7 @@ func TestExporter_Export(t *testing.T) {
 					QueueUrl:     aws.String(tt.fields.QueueURL),
 					DelaySeconds: 0,
 					MessageAttributes: map[string]types.MessageAttributeValue{
-						"emitter": types.MessageAttributeValue{
+						"emitter": {
 							DataType:    aws.String("String"),
 							StringValue: aws.String("GO Feature Flag"),
 						},

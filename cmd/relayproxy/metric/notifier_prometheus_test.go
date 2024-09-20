@@ -1,11 +1,12 @@
 package metric
 
 import (
+	"testing"
+
 	"github.com/prometheus/client_golang/prometheus/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
-	"testing"
 )
 
 func TestPrometheusNotifier_with_diff(t *testing.T) {

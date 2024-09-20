@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 )
 

@@ -1,9 +1,10 @@
 package slogutil
 
 import (
-	"golang.org/x/net/context"
 	"log/slog"
 	"os"
+
+	"golang.org/x/net/context"
 )
 
 type MessageOnlyHandler struct {
