@@ -13,6 +13,7 @@ func ConvertV1DtoToInternalFlag(dto DTO) flag.InternalFlag {
 	}
 
 	return flag.InternalFlag{
+		BucketingKey:    dto.BucketingKey,
 		Variations:      dto.Variations,
 		Rules:           dto.Rules,
 		DefaultRule:     dto.DefaultRule,

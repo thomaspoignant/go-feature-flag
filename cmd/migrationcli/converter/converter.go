@@ -93,6 +93,7 @@ func convertToDto(internalFlag flag.InternalFlag) dto.DTO {
 		Disable:     internalFlag.Disable,
 		Version:     internalFlag.Version,
 		DTOv1: dto.DTOv1{
+			BucketingKey:    internalFlag.BucketingKey,
 			Variations:      internalFlag.Variations,
 			Rules:           internalFlag.Rules,
 			DefaultRule:     internalFlag.DefaultRule,
