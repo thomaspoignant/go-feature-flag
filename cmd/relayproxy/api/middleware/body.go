@@ -8,7 +8,7 @@ import (
 )
 
 func BodyLogger(log *zap.Logger, cfg *config.Config) echo.MiddlewareFunc {
-	skipper := func(c echo.Context) bool { return !cfg.IsDebugEnabled() }
+	skipper := func(_ echo.Context) bool { return !cfg.IsDebugEnabled() }
 
 	return middleware.BodyDumpWithConfig(middleware.BodyDumpConfig{
 		Skipper: skipper,
