@@ -15,7 +15,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.63.0
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.34.9
 	github.com/awslabs/aws-lambda-go-api-proxy v0.16.2
-	github.com/fsouza/fake-gcs-server v1.49.3
+	github.com/fsouza/fake-gcs-server v1.50.0
 	github.com/gdexlab/go-render v1.0.1
 	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.6.0
@@ -70,7 +70,7 @@ require (
 	cloud.google.com/go/auth v0.9.4 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.4 // indirect
 	cloud.google.com/go/compute/metadata v0.5.1 // indirect
-	cloud.google.com/go/iam v1.2.0 // indirect
+	cloud.google.com/go/iam v1.2.1 // indirect
 	dario.cat/mergo v1.0.0 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect
