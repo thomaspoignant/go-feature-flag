@@ -12,7 +12,7 @@ func BodyLogger(log *zap.Logger, cfg *config.Config) echo.MiddlewareFunc {
 
 	return middleware.BodyDumpWithConfig(middleware.BodyDumpConfig{
 		Skipper: skipper,
-		Handler: func(c echo.Context, req []byte, _ []byte) {
+		Handler: func(_ echo.Context, req []byte, _ []byte) {
 			log.Debug("Request", zap.ByteString("body", req))
 		},
 	})
