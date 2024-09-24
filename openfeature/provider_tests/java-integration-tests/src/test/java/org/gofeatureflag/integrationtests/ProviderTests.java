@@ -45,10 +45,9 @@ public class ProviderTests {
 
         GoFeatureFlagProviderOptions options = GoFeatureFlagProviderOptions.builder().endpoint(relayProxyEndpoint).build();
         GoFeatureFlagProvider provider = new GoFeatureFlagProvider(options);
-        OpenFeatureAPI.getInstance().setProvider(provider);
+        OpenFeatureAPI.getInstance().setProviderAndWait(provider);
         OpenFeatureAPI api = OpenFeatureAPI.getInstance();
         goffClient = api.getClient();
-        this.waitProviderReady();
     }
 
     @AfterEach
@@ -333,10 +332,9 @@ public class ProviderTests {
         GoFeatureFlagProviderOptions options = GoFeatureFlagProviderOptions.builder()
                 .apiKey("authorized_token").endpoint(relayProxyAuthenticatedEndpoint).build();
         GoFeatureFlagProvider provider = new GoFeatureFlagProvider(options);
-        OpenFeatureAPI.getInstance().setProvider(provider);
+        OpenFeatureAPI.getInstance().setProviderAndWait(provider);
         OpenFeatureAPI api = OpenFeatureAPI.getInstance();
         goffClient = api.getClient();
-        this.waitProviderReady();
 
         String flagKey = "bool_targeting_match";
         FlagEvaluationDetails expected = FlagEvaluationDetails.builder()
@@ -356,10 +354,9 @@ public class ProviderTests {
         GoFeatureFlagProviderOptions options = GoFeatureFlagProviderOptions.builder()
                 .apiKey("").endpoint(relayProxyAuthenticatedEndpoint).build();
         GoFeatureFlagProvider provider = new GoFeatureFlagProvider(options);
-        OpenFeatureAPI.getInstance().setProvider(provider);
+        OpenFeatureAPI.getInstance().setProviderAndWait(provider);
         OpenFeatureAPI api = OpenFeatureAPI.getInstance();
         goffClient = api.getClient();
-        this.waitProviderReady();
 
         String flagKey = "bool_targeting_match";
         FlagEvaluationDetails expected = FlagEvaluationDetails.builder()
@@ -379,10 +376,9 @@ public class ProviderTests {
         GoFeatureFlagProviderOptions options = GoFeatureFlagProviderOptions.builder()
                 .apiKey("invalid-api-key").endpoint(relayProxyAuthenticatedEndpoint).build();
         GoFeatureFlagProvider provider = new GoFeatureFlagProvider(options);
-        OpenFeatureAPI.getInstance().setProvider(provider);
+        OpenFeatureAPI.getInstance().setProviderAndWait(provider);
         OpenFeatureAPI api = OpenFeatureAPI.getInstance();
         goffClient = api.getClient();
-        this.waitProviderReady();
 
         String flagKey = "bool_targeting_match";
         FlagEvaluationDetails expected = FlagEvaluationDetails.builder()
@@ -393,17 +389,6 @@ public class ProviderTests {
                 .build();
         FlagEvaluationDetails<Boolean> got = goffClient.getBooleanDetails(flagKey, false, defaultEvaluationContext);
         assertEquals(expected, got);
-    }
-
-    private void waitProviderReady() throws ExecutionException, InterruptedException {
-        CompletableFuture<EventDetails> completableFuture = new CompletableFuture<>();
-        OpenFeatureAPI.getInstance().onProviderReady(new Consumer<EventDetails>() {
-            @Override
-            public void accept(EventDetails eventDetails) {
-                completableFuture.complete(eventDetails);
-            }
-        });
-        completableFuture.get();
     }
 }
 
