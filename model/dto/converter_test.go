@@ -11,6 +11,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/model/dto"
 	"github.com/thomaspoignant/go-feature-flag/testutils/flagv1"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
 func TestConvertV0DtoToInternalFlag(t *testing.T) {
@@ -438,7 +439,9 @@ func TestConvertV0DtoToInternalFlag(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want, tt.d.Convert(), cmp.Diff(tt.want, tt.d.Convert()))
+			logger := fflog.FFLogger{}
+			flagName := "random-flag-name"
+			assert.Equal(t, tt.want, tt.d.Convert(&logger, flagName), cmp.Diff(tt.want, tt.d.Convert(&logger, flagName)))
 		})
 	}
 }
@@ -1139,8 +1142,8 @@ func TestConvertV0ScheduleStep(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			u := ffcontext.NewEvaluationContext("yo")
 			flagName := "yo"
-
-			convertInternalFlag := tt.dto.Convert()
+			logger := fflog.FFLogger{}
+			convertInternalFlag := tt.dto.Convert(&logger, flagName)
 			gotInternalFlag, resolutionDetails := convertInternalFlag.Value(flagName, u, flag.Context{})
 
 			convertFlagv1 := flagv1.ConvertDtoToV1(tt.dto)
