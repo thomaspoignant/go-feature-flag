@@ -1,7 +1,10 @@
 package dto
 
 import (
+	"fmt"
+
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
 // DTO is representing all the fields we can have in a flag.
@@ -85,11 +88,14 @@ type DTOv0 struct {
 	Rollout *Rollout `json:"rollout,omitempty" yaml:"rollout,omitempty" toml:"rollout,omitempty"`
 }
 
-func (d *DTO) Convert() flag.InternalFlag {
+func (d *DTO) Convert(log *fflog.FFLogger, flagName string) flag.InternalFlag {
 	if d == nil || (DTO{}) == *d {
 		return flag.InternalFlag{}
 	}
 	if (d.Converter != nil && *d.Converter == "v0") || d.True != nil || d.False != nil {
+		log.Error(fmt.Sprintf("your flag %v is using GO Feature Flag flag format v0.x.x. The support of this "+
+			"format will be removed soon, please consider migrating to the v1 format "+
+			"(see https://gofeatureflag.org/docs/tooling/migrate_v0_v1).", flagName))
 		return ConvertV0DtoToInternalFlag(*d, false)
 	}
 	return ConvertV1DtoToInternalFlag(*d)

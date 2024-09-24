@@ -3,11 +3,13 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"os"
 	"strings"
 
 	"github.com/BurntSushi/toml"
 	"github.com/thomaspoignant/go-feature-flag/model/dto"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"k8s.io/apimachinery/pkg/util/yaml"
 )
 
@@ -39,7 +41,10 @@ func (l *Linter) Lint() []error {
 
 	errs := make([]error, 0)
 	for key, flagDto := range flags {
-		flag := flagDto.Convert()
+		logger := fflog.FFLogger{
+			LeveledLogger: slog.Default(),
+		}
+		flag := flagDto.Convert(&logger, key)
 		if err := flag.IsValid(); err != nil {
 			errs = append(errs, fmt.Errorf("%s: invalid flag %s: %w", l.InputFile, key, err))
 		}

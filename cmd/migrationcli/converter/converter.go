@@ -10,6 +10,7 @@ import (
 	"github.com/BurntSushi/toml"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/model/dto"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"gopkg.in/yaml.v3"
 )
 
@@ -60,8 +61,9 @@ func (f *FlagConverter) unmarshall(content []byte) (map[string]dto.DTO, error) {
 func (f *FlagConverter) convert(flags map[string]dto.DTO) map[string]dto.DTO {
 	convertedFlags := make(map[string]dto.DTO, len(flags))
 	for k, v := range flags {
-		// convert to internal Flag
-		convertedFlags[k] = convertToDto(v.Convert())
+		// we don't set a logger on purpose here, because this is not accurate in the migration context.
+		logger := fflog.FFLogger{}
+		convertedFlags[k] = convertToDto(v.Convert(&logger, k))
 	}
 	return convertedFlags
 }

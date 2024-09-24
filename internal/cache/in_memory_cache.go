@@ -64,11 +64,11 @@ func (fc *InMemoryCache) All() map[string]flag.Flag {
 }
 
 func (fc *InMemoryCache) Init(flags map[string]dto.DTO) {
-	cache := make(map[string]flag.InternalFlag, 0)
+	cache := make(map[string]flag.InternalFlag)
 	for key, flagDto := range flags {
-		flagToAdd := flagDto.Convert()
+		flagToAdd := flagDto.Convert(fc.Logger, key)
 		if err := flagToAdd.IsValid(); err == nil {
-			cache[key] = flagDto.Convert()
+			cache[key] = flagToAdd
 		} else {
 			fc.Logger.Error("[cache] invalid configuration for flag",
 				slog.String("key", key), slog.Any("error", err))
