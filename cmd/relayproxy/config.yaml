@@ -1,8 +1,0 @@
-enableSwagger: true
-host: localhost
-
-logLevel: info
-
-retriever:
-  kind: http
-  url: http://localhost:3000/config/gff/svc-vcarrier

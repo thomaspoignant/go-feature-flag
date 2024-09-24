@@ -55,7 +55,7 @@ func (s *Server) initRoutes() {
 	s.apiEcho.Use(custommiddleware.ZapLogger(s.zapLog, s.config))
 
 	s.apiEcho.Use(middleware.BodyDumpWithConfig(middleware.BodyDumpConfig{
-		Skipper: func(c echo.Context) bool {
+		Skipper: func(_ echo.Context) bool {
 			return !s.zapLog.Core().Enabled(zap.DebugLevel)
 		},
 		Handler: func(_ echo.Context, reqBody []byte, _ []byte) {
