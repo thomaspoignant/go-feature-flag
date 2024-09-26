@@ -7,30 +7,6 @@ before:
 dist: release
 
 builds:
-  - id: go-feature-flag-migration-cli
-    main: ./cmd/migrationcli
-    binary: go-feature-flag-migration-cli
-    env:
-      - CGO_ENABLED=0
-    goos:
-      - darwin
-      - linux
-      - windows
-    goarch:
-      - 386
-      - amd64
-      - arm64
-      - arm
-    goarm:
-      - 6
-      - 7
-    ignore:
-      - goos: darwin
-        goarch: 386
-      - goos: linux
-        goarch: arm
-        goarm: 6
-
   # DEPRECATED: check go-feature-flag
   # We aim to deprecate the name relay proxy, so the main build should be called go-feature-flag
   - id: go-feature-flag-relay-proxy
@@ -138,19 +114,6 @@ builds:
       - "7"
 
 archives:
-  - id: go-feature-flag-migration-cli
-    name_template: "go-feature-flag-migration-cli_\
-      {{ .Version }}_\
-      {{- title .Os }}_\
-      {{- if eq .Arch \"amd64\" }}x86_64\
-      {{- else if eq .Arch \"386\" }}i386\
-      {{- else }}{{ .Arch }}{{ end }}\
-      {{- with .Arm }}v{{ . }}{{ end }}\
-      {{- with .Mips }}_{{ . }}{{ end }}\
-      {{- if not (eq .Amd64 \"v1\") }}{{ .Amd64 }}{{ end }}"
-    builds:
-      - go-feature-flag-migration-cli
-
   - id: go-feature-flag-editor
     name_template: "go-feature-flag-editor_\
       {{ .Version }}_\
@@ -395,60 +358,6 @@ dockers:
       - "--label=org.opencontainers.image.url=https://gofeatureflag.org/docs/relay_proxy"
       - "--label=org.opencontainers.image.version={{ .Version }}"
 
-# migration-cli
-  - use: buildx
-    goos: linux
-    goarch: amd64
-    ids:
-      - go-feature-flag-migration-cli
-    dockerfile: ./cmd/migrationcli/Dockerfile
-    image_templates:
-      - thomaspoignant/go-feature-flag-migration-cli:v{{ .RawVersion }}-amd64
-    build_flag_templates:
-      - "--platform=linux/amd64"
-      - "--label=org.opencontainers.image.created={{ .Date }}"
-      - "--label=org.opencontainers.image.description=A migration command line to move your feature flag configuration file from format GO Feature Flag v0.X to v1.X"
-      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
-      - "--label=org.opencontainers.image.source=https://github.com/thomaspoignant/go-feature-flag"
-      - "--label=org.opencontainers.image.title=go-feature-flag-migration-cli"
-      - "--label=org.opencontainers.image.url=https://gofeatureflag.org/docs/tooling/migrate_v0_v1"
-      - "--label=org.opencontainers.image.version={{ .Version }}"
-  - use: buildx
-    goos: linux
-    goarch: arm64
-    ids:
-      - go-feature-flag-migration-cli
-    dockerfile: ./cmd/migrationcli/Dockerfile
-    image_templates:
-      - thomaspoignant/go-feature-flag-migration-cli:v{{ .RawVersion }}-arm64v8
-    build_flag_templates:
-      - "--platform=linux/arm64/v8"
-      - "--label=org.opencontainers.image.created={{ .Date }}"
-      - "--label=org.opencontainers.image.description=A migration command line to move your feature flag configuration file from format GO Feature Flag v0.X to v1.X"
-      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
-      - "--label=org.opencontainers.image.source=https://github.com/thomaspoignant/go-feature-flag"
-      - "--label=org.opencontainers.image.title=go-feature-flag-migration-cli"
-      - "--label=org.opencontainers.image.url=https://gofeatureflag.org/docs/tooling/migrate_v0_v1"
-      - "--label=org.opencontainers.image.version={{ .Version }}"
-  - use: buildx
-    goos: linux
-    goarch: arm
-    goarm: 7
-    ids:
-      - go-feature-flag-migration-cli
-    dockerfile: ./cmd/migrationcli/Dockerfile
-    image_templates:
-      - thomaspoignant/go-feature-flag-migration-cli:v{{ .RawVersion }}-armv7
-    build_flag_templates:
-      - "--platform=linux/arm/v7"
-      - "--label=org.opencontainers.image.created={{ .Date }}"
-      - "--label=org.opencontainers.image.description=A migration command line to move your feature flag configuration file from format GO Feature Flag v0.X to v1.X"
-      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
-      - "--label=org.opencontainers.image.source=https://github.com/thomaspoignant/go-feature-flag"
-      - "--label=org.opencontainers.image.title=go-feature-flag-migration-cli"
-      - "--label=org.opencontainers.image.url=https://gofeatureflag.org/docs/tooling/migrate_v0_v1"
-      - "--label=org.opencontainers.image.version={{ .Version }}"
-
 # lint
   - use: buildx
     goos: linux
@@ -607,56 +516,6 @@ docker_manifests:
       - thomaspoignant/go-feature-flag-bookworm:v{{ .RawVersion }}-arm64v8
       - thomaspoignant/go-feature-flag-bookworm:v{{ .RawVersion }}-armv7
       - thomaspoignant/go-feature-flag-bookworm:v{{ .RawVersion }}-amd64
-# migration-cli-legacy
-  - name_template: thomaspoignant/go-feature-flag-migration-cli:latest
-    id: go-feature-flag-migration-cli-latest-legacy
-    image_templates:
-      - thomaspoignant/go-feature-flag-migration-cli:v{{ .RawVersion }}-arm64v8
-      - thomaspoignant/go-feature-flag-migration-cli:v{{ .RawVersion }}-armv7
-      - thomaspoignant/go-feature-flag-migration-cli:v{{ .RawVersion }}-amd64
-  - name_template: thomaspoignant/go-feature-flag-migration-cli:v{{ .RawVersion }}
-    id: go-feature-flag-migration-cli-tag-legacy
-    image_templates:
-      - thomaspoignant/go-feature-flag-migration-cli:v{{ .RawVersion }}-arm64v8
-      - thomaspoignant/go-feature-flag-migration-cli:v{{ .RawVersion }}-armv7
-      - thomaspoignant/go-feature-flag-migration-cli:v{{ .RawVersion }}-amd64
-  - name_template: thomaspoignant/go-feature-flag-migration-cli:v{{ .Major }}
-    id: go-feature-flag-migration-cli-major-legacy
-    image_templates:
-      - thomaspoignant/go-feature-flag-migration-cli:v{{ .RawVersion }}-arm64v8
-      - thomaspoignant/go-feature-flag-migration-cli:v{{ .RawVersion }}-armv7
-      - thomaspoignant/go-feature-flag-migration-cli:v{{ .RawVersion }}-amd64
-  - name_template: thomaspoignant/go-feature-flag-migration-cli:v{{ .Major }}.{{ .Minor }}
-    id: go-feature-flag-migration-cli-major-minor-legacy
-    image_templates:
-      - thomaspoignant/go-feature-flag-migration-cli:v{{ .RawVersion }}-arm64v8
-      - thomaspoignant/go-feature-flag-migration-cli:v{{ .RawVersion }}-armv7
-      - thomaspoignant/go-feature-flag-migration-cli:v{{ .RawVersion }}-amd64
-  # migration-cli
-  - name_template: gofeatureflag/go-feature-flag-migration-cli:latest
-    id: go-feature-flag-migration-cli-latest
-    image_templates:
-      - thomaspoignant/go-feature-flag-migration-cli:v{{ .RawVersion }}-arm64v8
-      - thomaspoignant/go-feature-flag-migration-cli:v{{ .RawVersion }}-armv7
-      - thomaspoignant/go-feature-flag-migration-cli:v{{ .RawVersion }}-amd64
-  - name_template: gofeatureflag/go-feature-flag-migration-cli:v{{ .RawVersion }}
-    id: go-feature-flag-migration-cli-tag
-    image_templates:
-      - thomaspoignant/go-feature-flag-migration-cli:v{{ .RawVersion }}-arm64v8
-      - thomaspoignant/go-feature-flag-migration-cli:v{{ .RawVersion }}-armv7
-      - thomaspoignant/go-feature-flag-migration-cli:v{{ .RawVersion }}-amd64
-  - name_template: gofeatureflag/go-feature-flag-migration-cli:v{{ .Major }}
-    id: go-feature-flag-migration-cli-major
-    image_templates:
-      - thomaspoignant/go-feature-flag-migration-cli:v{{ .RawVersion }}-arm64v8
-      - thomaspoignant/go-feature-flag-migration-cli:v{{ .RawVersion }}-armv7
-      - thomaspoignant/go-feature-flag-migration-cli:v{{ .RawVersion }}-amd64
-  - name_template: gofeatureflag/go-feature-flag-migration-cli:v{{ .Major }}.{{ .Minor }}
-    id: go-feature-flag-migration-cli-major-minor
-    image_templates:
-      - thomaspoignant/go-feature-flag-migration-cli:v{{ .RawVersion }}-arm64v8
-      - thomaspoignant/go-feature-flag-migration-cli:v{{ .RawVersion }}-armv7
-      - thomaspoignant/go-feature-flag-migration-cli:v{{ .RawVersion }}-amd64
 # lint-legacy
   - name_template: thomaspoignant/go-feature-flag-lint:latest
     id: go-feature-flag-lint-latest-legacy
@@ -709,17 +568,6 @@ docker_manifests:
       - thomaspoignant/go-feature-flag-lint:v{{ .RawVersion }}-amd64
 
 brews:
-  - ids:
-      - go-feature-flag-migration-cli
-    name: go-feature-flag-migration-cli
-    repository:
-      owner: thomaspoignant
-      name: homebrew-tap
-      branch: master
-    caveats: "A migration command line to move your feature flag configuration file from format GO Feature Flag v0.X to v1.X"
-    homepage: "https://gofeatureflag.org/docs/tooling/migrate_v0_v1"
-    description: "A migration command line to move your feature flag configuration file from format GO Feature Flag v0.X to v1.X"
-    skip_upload: auto
   # DEPRECATED: check go-feature-flag
   - ids:
       - go-feature-flag-relay-proxy
@@ -756,17 +604,6 @@ brews:
     skip_upload: auto
 
 scoops:
-
-  - url_template: https://github.com/thomaspoignant/go-feature-flag/releases/download/{{ .Tag }}/{{ .ArtifactName }}
-    ids: [go-feature-flag-migration-cli ]
-    name: go-feature-flag-migration-cli
-    repository:
-      owner: go-feature-flag
-      name: scoop
-    commit_msg_template: "Scoop update for {{ .ProjectName }} version {{ .Tag }}"
-    homepage: "https://gofeatureflag.org/docs/tooling/migrate_v0_v1"
-    license: MIT
-
   # DEPRECATED: check go-feature-flag
   - url_template: https://github.com/thomaspoignant/go-feature-flag/releases/download/{{ .Tag }}/{{ .ArtifactName }}
     ids: [go-feature-flag-relay-proxy ]

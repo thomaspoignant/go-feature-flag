@@ -3,6 +3,11 @@ sidebar_position: 90
 description: How to migrate from v0.x.x to v1.x.x
 ---
 
+---
+**⚠️ Version `v1.35.0` will be the last version of the cli.**.  
+**Why? Because it is feature complete and because it has been decided to stop supporting `v0.x.x` format.**
+---
+
 # Migrate from v0.x.x to v1.x.x 
 
 :::info

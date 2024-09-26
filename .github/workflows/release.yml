@@ -72,35 +72,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
-  dockerhub-migration-cli:
-    runs-on: ubuntu-latest
-    name: Upload dockerhub readme
-    needs:
-      - goreleaser
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Release readme to DockerHub
-        uses: ms-jpq/sync-dockerhub-readme@v1
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        with:
-          username: ${DOCKER_USERNAME}
-          password: ${DOCKER_PASSWORD}
-          repository: thomaspoignant/go-feature-flag-migration-cli
-          readme: "./cmd/migrationcli/DOCKERHUB_thomaspoignant.md"
-      - name: Release readme to DockerHub gofeatureflag
-        uses: ms-jpq/sync-dockerhub-readme@v1
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        with:
-          username: ${DOCKER_USERNAME}
-          password: ${DOCKER_PASSWORD}
-          repository: gofeatureflag/go-feature-flag-migration-cli
-          readme: "./cmd/migrationcli/DOCKERHUB.md"
-
   dockerhub-lint:
     runs-on: ubuntu-latest
     name: Upload dockerhub readme
