@@ -58,3 +58,9 @@ your Lambda function.
 By configuring your GO Feature Flag relay proxy to run as an AWS Lambda function, you can take advantage of many
 benefits of serverless computing, including automatic scaling, reduced infrastructure costs, and simplified 
 deployment and management.
+
+:::info
+As part of our release process, we are building an archive ready to be deployed as AWS lambda.  
+You can find it in the [GitHub release page](https://github.com/thomaspoignant/go-feature-flag/releases),and you can use the assets named `go-feature-flag-aws-lambda_<version>.zip`.
+:::
+

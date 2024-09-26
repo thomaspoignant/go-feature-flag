@@ -100,6 +100,19 @@ builds:
         goarch: arm
         goarm: 6
 
+  # Build an AWS lambda compatible binary
+  - id: go-feature-flag-lambda
+    main: ./cmd/relayproxy
+    binary: bootstrap
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - arm64
+    goarm:
+      - "7"
+
 archives:
   - id: go-feature-flag-editor
     name_template: "go-feature-flag-editor_\
@@ -152,6 +165,12 @@ archives:
       {{- if not (eq .Amd64 \"v1\") }}{{ .Amd64 }}{{ end }}"
     builds:
       - go-feature-flag-lint
+
+  - id: goff-lambda
+    name_template: "go-feature-flag-aws-lambda_{{ .Version }}"
+    format: zip
+    builds:
+      - go-feature-flag-lambda
 
 checksum:
   name_template: 'checksums.txt'
