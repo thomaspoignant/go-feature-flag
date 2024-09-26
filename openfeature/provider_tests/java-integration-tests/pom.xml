@@ -29,7 +29,7 @@
         <dependency>
             <groupId>dev.openfeature.contrib.providers</groupId>
             <artifactId>go-feature-flag</artifactId>
-            <version>0.2.23</version>
+            <version>0.3.0</version>
         </dependency>
     </dependencies>
 
