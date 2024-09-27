@@ -587,7 +587,7 @@ This project welcomes contributions from the community. If you're interested in 
 
 ## Community meetings
 Since everyone's voice is important we want to hear back from the community.  
-For this reason, we are launching a community meeting every 2 weeks and it is the perfect place to discuss the future of GO Feature Flag, but also 
+For this reason, we are launching a community meeting every 2 weeks and it is the perfect place to discuss the future of GO Feature Flag and help you use it at full potential.
 
 | Name | Meeting Time | Meeting Notes | Discussions |
 | ---- | ------------ | ------------- | ----------- |
