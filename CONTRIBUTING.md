@@ -106,7 +106,7 @@ If you want to contribute and you have any questions you can use different ways 
 
 ## 🎤 Community Meeting
 Since everyone's voice is important we want to hear back from the community.  
-For this reason we are launching a community meeting every 2 weeks and it is the perfect place to discuss future of GO Feature Flag, but also 
+For this reason, we are launching a community meeting every 2 weeks and it is the perfect place to discuss the future of GO Feature Flag and help you use it at full potential.
 
 | Name | Meeting Time | Meeting Notes | Discussions |
 | ---- | ------------ | ------------- | ----------- |
