@@ -11,9 +11,10 @@ Please take a moment to review the following guidelines.
 1. [Code of Conduct](#-code-of-conduct)
 2. [How Can I Contribute?](#-how-can-i-contribute)
 3. [Where can I ask questions about the project?](#-where-can-i-ask-questions-about-the-project)
-4. [Development Setup](#-development-setup)
-5. [Documentation](#-documentation)
-6. [License](#-license)
+4. [Community Meetings](#-community-meeting)
+5. [Development Setup](#-development-setup)
+6. [Documentation](#-documentation)
+7. [License](#-license)
 
 
 ## 🚓 Code of Conduct
@@ -102,6 +103,19 @@ If you want to contribute and you have any questions you can use different ways 
    - Request an invitation [here](https://invite.slack.golangbridge.org/)
    - Join the [`#go-feature-flag`](https://gophers.slack.com/archives/C029TH8KDFG) channel.
 4. Send us an email to contact@gofeatureflag.org
+
+## 🎤 Community Meeting
+Since everyone's voice is important we want to hear back from the community.  
+For this reason we are launching a community meeting every 2 weeks and it is the perfect place to discuss future of GO Feature Flag, but also 
+
+| Name | Meeting Time | Meeting Notes | Discussions |
+| ---- | ------------ | ------------- | ----------- |
+| GO Feature Flag Community Meeting | Every other Thursday at 10:00 am ET / 16:00 CET | [Google Doc](https://docs.google.com/document/d/13hVS1Eoq6iHwegdk4lveTE3jV4mUehVGqUtf5TLH2pY/edit) | [VC Link (meet)](https://meet.google.com/fpg-ckxs-vmr) |
+
+- [Calendar](https://bit.ly/gofeatureflag-calendar)
+- [ICS](https://calendar.google.com/calendar/ical/30ba1a7fbba6dc31596a2686f6ab22e9971e8785289033f8bb32319c93dd3b59%40group.calendar.google.com/public/basic.ics)
+- [Web](https://calendar.google.com/calendar/embed?src=30ba1a7fbba6dc31596a2686f6ab22e9971e8785289033f8bb32319c93dd3b59%40group.calendar.google.com&ctz=Europe%2FParis)
+
 
 ## 📚 Documentation
 
