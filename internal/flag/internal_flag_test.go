@@ -1700,6 +1700,77 @@ func TestInternalFlag_Value(t *testing.T) {
 				ErrorCode: flag.ErrorCodeGeneral,
 			},
 		},
+		{
+			name: "Empty targeting key",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"variation_A": testconvert.Interface(true),
+					"variation_B": testconvert.Interface(false),
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("variation_A"),
+				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
+			},
+			args: args{
+				flagName: "my-flag",
+				user:     ffcontext.NewEvaluationContext(""),
+				flagContext: flag.Context{
+					DefaultSdkValue: false,
+				},
+			},
+			want: false,
+			want1: flag.ResolutionDetails{
+				Variant:      "SdkDefault",
+				Reason:       flag.ReasonError,
+				ErrorCode:    flag.ErrorCodeTargetingKeyMissing,
+				ErrorMessage: "Error: Empty targeting key",
+				Cacheable:    false,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
+			},
+		},
+		{
+			name: "Empty bucketing key",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"variation_A": testconvert.Interface(true),
+					"variation_B": testconvert.Interface(false),
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("variation_A"),
+				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
+				BucketingKey: testconvert.String("teamId"),
+			},
+			args: args{
+				flagName: "my-flag",
+				user:     ffcontext.NewEvaluationContextBuilder("toto").AddCustom("teamId", "").Build(),
+				flagContext: flag.Context{
+					DefaultSdkValue: false,
+				},
+			},
+			want: false,
+			want1: flag.ResolutionDetails{
+				Variant:      "SdkDefault",
+				Reason:       flag.ReasonError,
+				ErrorCode:    flag.ErrorCodeTargetingKeyMissing,
+				ErrorMessage: "Error: Empty bucketing key",
+				Cacheable:    false,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
