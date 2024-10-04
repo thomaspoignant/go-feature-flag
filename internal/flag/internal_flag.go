@@ -3,6 +3,7 @@ package flag
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/thomaspoignant/go-feature-flag/gofferror"
 	"maps"
 	"time"
 
@@ -67,7 +68,6 @@ func (f *InternalFlag) Value(
 ) (interface{}, ResolutionDetails) {
 	evaluationDate := DateFromContextOrDefault(evaluationCtx, time.Now())
 	flag, err := f.applyScheduledRolloutSteps(evaluationDate)
-
 	if err != nil {
 		return flagContext.DefaultSdkValue, ResolutionDetails{
 			Variant:   VariationSDKDefault,
@@ -81,7 +81,6 @@ func (f *InternalFlag) Value(
 	}
 
 	key, keyError := flag.GetBucketingKeyValue(evaluationCtx)
-
 	if keyError != nil {
 		return flagContext.DefaultSdkValue, ResolutionDetails{
 			Variant:      VariationSDKDefault,
@@ -398,11 +397,19 @@ func (f *InternalFlag) GetBucketingKeyValue(ctx ffcontext.Context) (string, erro
 		value := ctx.GetCustom()[key]
 		switch v := value.(type) {
 		case string:
+			if v == "" {
+				return "", &gofferror.EmptyBucketingKeyError{Message: "Empty bucketing key"}
+			}
 			return v, nil
 		default:
 			return "", fmt.Errorf("invalid bucketing key")
 		}
 	}
+
+	if ctx.GetKey() == "" {
+		return "", &gofferror.EmptyBucketingKeyError{Message: "Empty bucketing key"}
+	}
+
 	return ctx.GetKey(), nil
 }
 

@@ -37,6 +37,18 @@ func FromFlagEvaluation(key string, evaluationCtx ffcontext.Context,
 		}
 	}
 
+	if resolutionDetails.Reason == flag.ReasonError {
+		return FlagState{
+			Timestamp:    time.Now().Unix(),
+			TrackEvents:  currentFlag.IsTrackEvents(),
+			Failed:       resolutionDetails.ErrorCode != "",
+			ErrorCode:    resolutionDetails.ErrorCode,
+			ErrorDetails: resolutionDetails.ErrorMessage,
+			Reason:       resolutionDetails.Reason,
+			Metadata:     resolutionDetails.Metadata,
+		}
+	}
+
 	switch v := flagValue; v.(type) {
 	case int, float64, bool, string, []interface{}, map[string]interface{}:
 		return FlagState{
