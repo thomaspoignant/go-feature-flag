@@ -63,6 +63,56 @@ func TestFromFlagEvaluation(t *testing.T) {
 				Metadata:     nil,
 			},
 		},
+		{
+			name:          "Flag evaluation valid type",
+			key:           "test-key",
+			evaluationCtx: ffcontext.NewEvaluationContext("my-key"),
+			flagCtx:       flag.Context{},
+			currentFlag: &flag.InternalFlag{
+				Disable: testconvert.Bool(false),
+				Variations: &map[string]*interface{}{
+					"var1": testconvert.Interface(1),
+					"var2": testconvert.Interface(2),
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("var1"),
+				},
+			},
+			expected: flagstate.FlagState{
+				Value:         1,
+				VariationType: "var1",
+				Timestamp:     time.Now().Unix(),
+				TrackEvents:   true,
+				Failed:        false,
+				Reason:        flag.ReasonStatic,
+				Metadata:      nil,
+			},
+		},
+		{
+			name:          "Flag evaluation invalid type",
+			key:           "test-key",
+			evaluationCtx: ffcontext.NewEvaluationContext("my-key"),
+			flagCtx:       flag.Context{},
+			currentFlag: &flag.InternalFlag{
+				Disable: testconvert.Bool(false),
+				Variations: &map[string]*interface{}{
+					"var1": testconvert.Interface(map[bool]*interface{}{true: testconvert.Interface(1)}),
+					"var2": testconvert.Interface(map[bool]*interface{}{true: testconvert.Interface(2)}),
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("var1"),
+				},
+			},
+			expected: flagstate.FlagState{
+				VariationType: "SdkDefault",
+				Timestamp:     time.Now().Unix(),
+				TrackEvents:   true,
+				Failed:        true,
+				Reason:        flag.ReasonError,
+				ErrorCode:     flag.ErrorCodeTypeMismatch,
+				Metadata:      nil,
+			},
+		},
 	}
 
 	for _, tt := range tests {
