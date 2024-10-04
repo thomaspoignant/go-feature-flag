@@ -1,7 +1,6 @@
 package flagstate_test
 
 import (
-	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 	"testing"
 	"time"
 
@@ -9,6 +8,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/internal/flagstate"
+	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 )
 
 func TestFromFlagEvaluation(t *testing.T) {
@@ -58,7 +58,7 @@ func TestFromFlagEvaluation(t *testing.T) {
 				TrackEvents:  true,
 				Failed:       true,
 				ErrorCode:    flag.ErrorCodeTargetingKeyMissing,
-				ErrorDetails: "Error: Empty bucketing key",
+				ErrorDetails: "Error: Empty targeting key",
 				Reason:       flag.ReasonError,
 				Metadata:     nil,
 			},

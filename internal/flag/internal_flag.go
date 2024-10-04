@@ -3,11 +3,11 @@ package flag
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/gofferror"
 	"maps"
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
+	"github.com/thomaspoignant/go-feature-flag/gofferror"
 	"github.com/thomaspoignant/go-feature-flag/internal/internalerror"
 	"github.com/thomaspoignant/go-feature-flag/internal/utils"
 )
@@ -407,7 +407,7 @@ func (f *InternalFlag) GetBucketingKeyValue(ctx ffcontext.Context) (string, erro
 	}
 
 	if ctx.GetKey() == "" {
-		return "", &gofferror.EmptyBucketingKeyError{Message: "Empty bucketing key"}
+		return "", &gofferror.EmptyBucketingKeyError{Message: "Empty targeting key"}
 	}
 
 	return ctx.GetKey(), nil
