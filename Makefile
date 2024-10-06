@@ -14,13 +14,10 @@ RESET  := $(shell tput -Txterm sgr0)
 
 all: help
 ## Build:
-build: build-migrationcli build-relayproxy build-lint build-editor-api build-jsonschema-generator ## Build all the binaries and put the output in out/bin/
+build: build-relayproxy build-lint build-editor-api build-jsonschema-generator ## Build all the binaries and put the output in out/bin/
 
 create-out-dir:
 	mkdir -p out/bin
-
-build-migrationcli: create-out-dir ## Build the migration cli in out/bin/
-	CGO_ENABLED=0 GO111MODULE=on $(GOCMD) build -mod vendor -o out/bin/migrationcli ./cmd/migrationcli/
 
 build-relayproxy: create-out-dir ## Build the relay proxy in out/bin/
 	CGO_ENABLED=0 GO111MODULE=on $(GOCMD) build -mod vendor -o out/bin/relayproxy ./cmd/relayproxy/
