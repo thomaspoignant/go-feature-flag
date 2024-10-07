@@ -1,83 +1,136 @@
-new-admin-access:
-  percentage: 30
-  true: true
-  false: false
-  default: false
-
-flag-only-for-admin:
-  rule: admin eq true
-  percentage: 100
-  true: true
-  false: false
-  default: false
-
-disable-flag:
-  rule: admin eq true
-  percentage: 100
-  true: "true"
-  false: "false"
-  default: "default"
-  disable: true
-
-test-flag-rule-not-apply:
-  rule: key eq \"key\"
-  percentage: 100
-  default:
-    test: test
-  "true":
-    test2: test
-  "false":
-    test3: test
-
-test-flag-rule-apply:
-  rule: key eq "random-key"
-  percentage: 100
-  default:
-    test: test
-  "true":
-    test2: test
-  "false":
-    test3: test
-
-test-flag-rule-apply-false:
-  rule: anonymous eq true
-  percentage: 10
-  default:
-    test: test
-  "true":
-    test2: test
-  "false":
-    test3: test
-
-number-flag:
-  rule: anonymous eq true
-  percentage: 100
-  default: 1
-  "true": 2
-  "false": 3
-
 array-flag:
-  rule: anonymous eq true
-  percentage: 10
-  default:
-    - batmanDefault
-    - supermanDefault
-    - superherosDefault
-  "true":
-    - batmanTrue
-    - supermanTrue
-    - superherosTrue
-  "false":
-    - batmanFalse
-    - supermanFalse
-    - superherosFalse
-
+    variations:
+        Default:
+            - batmanDefault
+            - supermanDefault
+            - superherosDefault
+        "False":
+            - batmanFalse
+            - supermanFalse
+            - superherosFalse
+        "True":
+            - batmanTrue
+            - supermanTrue
+            - superherosTrue
+    targeting:
+        - name: legacyRuleV0
+          query: anonymous eq true
+          percentage:
+            "False": 90
+            "True": 10
+    defaultRule:
+        name: legacyDefaultRule
+        variation: Default
+disable-flag:
+    variations:
+        Default: default
+        "False": "false"
+        "True": "true"
+    targeting:
+        - name: legacyRuleV0
+          query: admin eq true
+          percentage:
+            "False": 0
+            "True": 100
+    defaultRule:
+        name: legacyDefaultRule
+        variation: Default
+    disable: true
+flag-only-for-admin:
+    variations:
+        Default: false
+        "False": false
+        "True": true
+    targeting:
+        - name: legacyRuleV0
+          query: admin eq true
+          percentage:
+            "False": 0
+            "True": 100
+    defaultRule:
+        name: legacyDefaultRule
+        variation: Default
+new-admin-access:
+    variations:
+        Default: false
+        "False": false
+        "True": true
+    defaultRule:
+        name: legacyDefaultRule
+        percentage:
+            "False": 70
+            "True": 30
+number-flag:
+    variations:
+        Default: 1
+        "False": 3
+        "True": 2
+    targeting:
+        - name: legacyRuleV0
+          query: anonymous eq true
+          percentage:
+            "False": 0
+            "True": 100
+    defaultRule:
+        name: legacyDefaultRule
+        variation: Default
 targeting-key-rule:
-  variations:
-    true_var: true
-    false_var: false
-  targeting:
-    - query: targetingKey eq "specific-targeting-key"
-      variation: true_var
-  defaultRule:
-    variation: false_var
+    variations:
+        false_var: false
+        true_var: true
+    targeting:
+        - query: targetingKey eq "specific-targeting-key"
+          variation: true_var
+    defaultRule:
+        variation: false_var
+test-flag-rule-apply:
+    variations:
+        Default:
+            test: test
+        "False":
+            test3: test
+        "True":
+            test2: test
+    targeting:
+        - name: legacyRuleV0
+          query: key eq "random-key"
+          percentage:
+            "False": 0
+            "True": 100
+    defaultRule:
+        name: legacyDefaultRule
+        variation: Default
+test-flag-rule-apply-false:
+    variations:
+        Default:
+            test: test
+        "False":
+            test3: test
+        "True":
+            test2: test
+    targeting:
+        - name: legacyRuleV0
+          query: anonymous eq true
+          percentage:
+            "False": 90
+            "True": 10
+    defaultRule:
+        name: legacyDefaultRule
+        variation: Default
+test-flag-rule-not-apply:
+    variations:
+        Default:
+            test: test
+        "False":
+            test3: test
+        "True":
+            test2: test
+    targeting:
+        - name: legacyRuleV0
+          query: key eq \"key\"
+          percentage:
+            "False": 0
+            "True": 100
+    defaultRule:
+        name: legacyDefaultRule
+        variation: Default
