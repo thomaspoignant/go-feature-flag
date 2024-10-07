@@ -13,7 +13,7 @@ array-flag:
             - supermanTrue
             - superherosTrue
     targeting:
-        - name: legacyRuleV0
+        - name: rule1
           query: anonymous eq true
           percentage:
             "False": 90
@@ -27,7 +27,7 @@ disable-flag:
         "False": "false"
         "True": "true"
     targeting:
-        - name: legacyRuleV0
+        - name: rule1
           query: admin eq true
           percentage:
             "False": 0
@@ -42,7 +42,7 @@ flag-only-for-admin:
         "False": false
         "True": true
     targeting:
-        - name: legacyRuleV0
+        - name: rule1
           query: admin eq true
           percentage:
             "False": 0
@@ -66,7 +66,7 @@ number-flag:
         "False": 3
         "True": 2
     targeting:
-        - name: legacyRuleV0
+        - name: rule1
           query: anonymous eq true
           percentage:
             "False": 0
@@ -92,7 +92,7 @@ test-flag-rule-apply:
         "True":
             test2: test
     targeting:
-        - name: legacyRuleV0
+        - name: rule1
           query: key eq "random-key"
           percentage:
             "False": 0
@@ -109,7 +109,7 @@ test-flag-rule-apply-false:
         "True":
             test2: test
     targeting:
-        - name: legacyRuleV0
+        - name: rule1
           query: anonymous eq true
           percentage:
             "False": 90
@@ -126,7 +126,7 @@ test-flag-rule-not-apply:
         "True":
             test2: test
     targeting:
-        - name: legacyRuleV0
+        - name: rule1
           query: key eq \"key\"
           percentage:
             "False": 0

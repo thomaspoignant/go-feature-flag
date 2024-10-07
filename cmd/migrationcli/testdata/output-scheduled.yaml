@@ -10,7 +10,7 @@ scheduled-flag:
             "True": 0
     scheduledRollout:
         - targeting:
-            - name: legacyRuleV0
+            - name: rule1
               query: beta eq "true"
               percentage:
                 "False": 0
@@ -24,7 +24,7 @@ scheduled-flag:
                 "True": -1
           date: 2020-04-10T00:00:00.1+02:00
         - targeting:
-            - name: legacyRuleV0
+            - name: rule1
               query: beta eq "false"
               percentage:
                 "False": 100

@@ -12,7 +12,7 @@ my-3rd-flag:
     False: false
     True: true
   targeting:
-    - name: legacyRuleV0
+    - name: rule1
       query: key eq "random-key"
       percentage:
         False: 0

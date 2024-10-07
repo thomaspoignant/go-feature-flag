@@ -4,7 +4,7 @@ flag-only-for-admin:
         "False": false
         "True": true
     targeting:
-        - name: legacyRuleV0
+        - name: rule1
           query: admin eq true
           percentage:
             "False": 0

@@ -27,7 +27,7 @@ scheduled-flag:
   scheduledRollout:
     - date: 2020-04-10T00:00:00.1+02:00
       targeting:
-        - name: legacyRuleV0
+        - name: rule1
           query: beta eq "true"
           percentage:
             variationA: 0
@@ -35,7 +35,7 @@ scheduled-flag:
 
     - date: 2022-05-12T15:36:00.1+02:00
       targeting:
-        - name: legacyRuleV0
+        - name: rule1
           query: beta eq "false"
 # highlight-end
 ```
@@ -63,7 +63,7 @@ scheduled-flag:
     "date": "2020-04-09T22:00:00.100Z",
     "targeting": [
   {
-    "name": "legacyRuleV0",
+    "name": "rule1",
     "query": "beta eq \"true\"",
     "percentage": {
     "variationA": 0,
@@ -76,7 +76,7 @@ scheduled-flag:
     "date": "2022-05-12T13:36:00.100Z",
     "targeting": [
   {
-    "name": "legacyRuleV0",
+    "name": "rule1",
     "query": "beta eq \"false\""
   }
     ]
@@ -107,7 +107,7 @@ variationB = 0
 date = 2020-04-09T22:00:00.100Z
 
 [[scheduled-flag.scheduledRollout.targeting]]
-name = "legacyRuleV0"
+name = "rule1"
 query = 'beta eq "true"'
 
 [scheduled-flag.scheduledRollout.targeting.percentage]
@@ -118,7 +118,7 @@ variationB = 100
 date = 2022-05-12T13:36:00.100Z
 
 [[scheduled-flag.scheduledRollout.targeting]]
-name = "legacyRuleV0"
+name = "rule1"
 query = 'beta eq "false"'
 # highlight-end
 ```

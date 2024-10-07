@@ -58,7 +58,7 @@ A flag configuration looks like:
     B: "valueB"
     defaultValue: "a default value"
     targeting:
-    - name: legacyRuleV0
+    - name: rule1
     query: key eq "not-a-key"
     percentage:
     A: 10
@@ -108,7 +108,7 @@ A flag configuration looks like:
     },
       "targeting": [
     {
-      "name": "legacyRuleV0",
+      "name": "rule1",
       "query": "key eq \"not-a-key\"",
       "percentage": {
       "A": 10,
@@ -160,7 +160,7 @@ A flag configuration looks like:
     defaultValue = "a default value"
 
     [[second-flag.targeting]]
-    name = "legacyRuleV0"
+    name = "rule1"
     query = 'key eq "not-a-key"'
 
     [second-flag.targeting.percentage]

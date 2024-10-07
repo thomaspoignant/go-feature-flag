@@ -145,7 +145,7 @@ func TestBoolVariation(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -177,7 +177,7 @@ func TestBoolVariation(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"random-key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -209,7 +209,7 @@ func TestBoolVariation(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("anonymous eq true"),
 							Percentages: &map[string]float64{
 								"False": 90,
@@ -241,7 +241,7 @@ func TestBoolVariation(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"random-key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -273,7 +273,7 @@ func TestBoolVariation(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"random-key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -458,7 +458,7 @@ func TestBoolVariationDetails(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -497,7 +497,7 @@ func TestBoolVariationDetails(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"random-key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -524,7 +524,7 @@ func TestBoolVariationDetails(t *testing.T) {
 				TrackEvents:   true,
 				Cacheable:     true,
 				Metadata: map[string]interface{}{
-					"evaluatedRuleName": "legacyRuleV0",
+					"evaluatedRuleName": "rule1",
 				},
 			},
 			wantErr:     false,
@@ -539,7 +539,7 @@ func TestBoolVariationDetails(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"random-key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -566,7 +566,7 @@ func TestBoolVariationDetails(t *testing.T) {
 				TrackEvents:   true,
 				Cacheable:     true,
 				Metadata: map[string]interface{}{
-					"evaluatedRuleName": "legacyRuleV0",
+					"evaluatedRuleName": "rule1",
 				},
 			},
 			wantErr:     false,
@@ -619,7 +619,7 @@ func TestBoolVariationDetails(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("anonymous eq true"),
 							Percentages: &map[string]float64{
 								"False": 90,
@@ -646,7 +646,7 @@ func TestBoolVariationDetails(t *testing.T) {
 				TrackEvents:   true,
 				Cacheable:     true,
 				Metadata: map[string]interface{}{
-					"evaluatedRuleName": "legacyRuleV0",
+					"evaluatedRuleName": "rule1",
 				},
 			},
 			wantErr:     false,
@@ -661,7 +661,7 @@ func TestBoolVariationDetails(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"random-key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -854,7 +854,7 @@ func TestFloat64Variation(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -886,7 +886,7 @@ func TestFloat64Variation(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"random-key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -918,7 +918,7 @@ func TestFloat64Variation(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("anonymous eq true"),
 							Percentages: &map[string]float64{
 								"False": 90,
@@ -950,7 +950,7 @@ func TestFloat64Variation(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"random-key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -982,7 +982,7 @@ func TestFloat64Variation(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"random-key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -1166,7 +1166,7 @@ func TestFloat64VariationDetails(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -1205,7 +1205,7 @@ func TestFloat64VariationDetails(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"random-key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -1232,7 +1232,7 @@ func TestFloat64VariationDetails(t *testing.T) {
 				Reason:        flag.ReasonTargetingMatch,
 				Cacheable:     true,
 				Metadata: map[string]interface{}{
-					"evaluatedRuleName": "legacyRuleV0",
+					"evaluatedRuleName": "rule1",
 				},
 			},
 			wantErr:     false,
@@ -1247,7 +1247,7 @@ func TestFloat64VariationDetails(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("anonymous eq true"),
 							Percentages: &map[string]float64{
 								"False": 90,
@@ -1274,7 +1274,7 @@ func TestFloat64VariationDetails(t *testing.T) {
 				Reason:        flag.ReasonTargetingMatchSplit,
 				Cacheable:     true,
 				Metadata: map[string]interface{}{
-					"evaluatedRuleName": "legacyRuleV0",
+					"evaluatedRuleName": "rule1",
 				},
 			},
 			wantErr:     false,
@@ -1289,7 +1289,7 @@ func TestFloat64VariationDetails(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"random-key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -1480,7 +1480,7 @@ func TestJSONArrayVariation(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -1512,7 +1512,7 @@ func TestJSONArrayVariation(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"random-key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -1569,7 +1569,7 @@ func TestJSONArrayVariation(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -1775,7 +1775,7 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -1814,7 +1814,7 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"random-key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -1841,7 +1841,7 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 				Value:         []interface{}{"true"},
 				Cacheable:     true,
 				Metadata: map[string]interface{}{
-					"evaluatedRuleName": "legacyRuleV0",
+					"evaluatedRuleName": "rule1",
 				},
 			},
 			wantErr:     false,
@@ -1888,7 +1888,7 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -2076,7 +2076,7 @@ func TestJSONVariation(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -2108,7 +2108,7 @@ func TestJSONVariation(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"random-key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -2140,7 +2140,7 @@ func TestJSONVariation(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("anonymous eq true"),
 							Percentages: &map[string]float64{
 								"False": 90,
@@ -2172,7 +2172,7 @@ func TestJSONVariation(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -2308,7 +2308,7 @@ func TestJSONVariationDetails(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -2347,7 +2347,7 @@ func TestJSONVariationDetails(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"random-key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -2374,7 +2374,7 @@ func TestJSONVariationDetails(t *testing.T) {
 				Value:         map[string]interface{}{"true": true},
 				Cacheable:     true,
 				Metadata: map[string]interface{}{
-					"evaluatedRuleName": "legacyRuleV0",
+					"evaluatedRuleName": "rule1",
 				},
 			},
 			wantErr:     false,
@@ -2389,7 +2389,7 @@ func TestJSONVariationDetails(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("anonymous eq true"),
 							Percentages: &map[string]float64{
 								"False": 90,
@@ -2416,7 +2416,7 @@ func TestJSONVariationDetails(t *testing.T) {
 				Value:         map[string]interface{}{"false": true},
 				Cacheable:     true,
 				Metadata: map[string]interface{}{
-					"evaluatedRuleName": "legacyRuleV0",
+					"evaluatedRuleName": "rule1",
 				},
 			},
 			wantErr:     false,
@@ -2586,7 +2586,7 @@ func TestStringVariation(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -2618,7 +2618,7 @@ func TestStringVariation(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"random-key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -2650,7 +2650,7 @@ func TestStringVariation(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("anonymous eq true"),
 							Percentages: &map[string]float64{
 								"False": 90,
@@ -2682,7 +2682,7 @@ func TestStringVariation(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -2817,7 +2817,7 @@ func TestStringVariationDetails(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -2856,7 +2856,7 @@ func TestStringVariationDetails(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"random-key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -2883,7 +2883,7 @@ func TestStringVariationDetails(t *testing.T) {
 				Value:         "true",
 				Cacheable:     true,
 				Metadata: map[string]interface{}{
-					"evaluatedRuleName": "legacyRuleV0",
+					"evaluatedRuleName": "rule1",
 				},
 			},
 			wantErr:     false,
@@ -2898,7 +2898,7 @@ func TestStringVariationDetails(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("anonymous eq true"),
 							Percentages: &map[string]float64{
 								"False": 90,
@@ -2925,7 +2925,7 @@ func TestStringVariationDetails(t *testing.T) {
 				Value:         "false",
 				Cacheable:     true,
 				Metadata: map[string]interface{}{
-					"evaluatedRuleName": "legacyRuleV0",
+					"evaluatedRuleName": "rule1",
 				},
 			},
 			wantErr:     false,
@@ -3093,7 +3093,7 @@ func TestIntVariation(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -3125,7 +3125,7 @@ func TestIntVariation(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"random-key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -3157,7 +3157,7 @@ func TestIntVariation(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("anonymous eq true"),
 							Percentages: &map[string]float64{
 								"False": 90,
@@ -3189,7 +3189,7 @@ func TestIntVariation(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -3221,7 +3221,7 @@ func TestIntVariation(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"random-key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -3356,7 +3356,7 @@ func TestIntVariationDetails(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -3395,7 +3395,7 @@ func TestIntVariationDetails(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"random-key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -3422,7 +3422,7 @@ func TestIntVariationDetails(t *testing.T) {
 				Value:         120,
 				Cacheable:     true,
 				Metadata: map[string]interface{}{
-					"evaluatedRuleName": "legacyRuleV0",
+					"evaluatedRuleName": "rule1",
 				},
 			},
 			wantErr:     false,
@@ -3437,7 +3437,7 @@ func TestIntVariationDetails(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("anonymous eq true"),
 							Percentages: &map[string]float64{
 								"False": 90,
@@ -3464,7 +3464,7 @@ func TestIntVariationDetails(t *testing.T) {
 				Value:         121,
 				Cacheable:     true,
 				Metadata: map[string]interface{}{
-					"evaluatedRuleName": "legacyRuleV0",
+					"evaluatedRuleName": "rule1",
 				},
 			},
 			wantErr:     false,
@@ -3479,7 +3479,7 @@ func TestIntVariationDetails(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"random-key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -3506,7 +3506,7 @@ func TestIntVariationDetails(t *testing.T) {
 				Value:         120,
 				Cacheable:     true,
 				Metadata: map[string]interface{}{
-					"evaluatedRuleName": "legacyRuleV0",
+					"evaluatedRuleName": "rule1",
 				},
 			},
 			wantErr:     false,
@@ -3702,7 +3702,7 @@ func TestRawVariation(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -3741,7 +3741,7 @@ func TestRawVariation(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"random-key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -3768,7 +3768,7 @@ func TestRawVariation(t *testing.T) {
 				Reason:        flag.ReasonTargetingMatch,
 				Cacheable:     true,
 				Metadata: map[string]interface{}{
-					"evaluatedRuleName": "legacyRuleV0",
+					"evaluatedRuleName": "rule1",
 				},
 			},
 			wantErr:     false,
@@ -3783,7 +3783,7 @@ func TestRawVariation(t *testing.T) {
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("anonymous eq true"),
 							Percentages: &map[string]float64{
 								"False": 90,
@@ -3810,7 +3810,7 @@ func TestRawVariation(t *testing.T) {
 				Reason:        flag.ReasonTargetingMatchSplit,
 				Cacheable:     true,
 				Metadata: map[string]interface{}{
-					"evaluatedRuleName": "legacyRuleV0",
+					"evaluatedRuleName": "rule1",
 				},
 			},
 			wantErr:     false,
@@ -3830,7 +3830,7 @@ func TestRawVariation(t *testing.T) {
 					},
 					Rules: &[]flag.Rule{
 						{
-							Name:  testconvert.String("legacyRuleV0"),
+							Name:  testconvert.String("rule1"),
 							Query: testconvert.String("key eq \"random-key\""),
 							Percentages: &map[string]float64{
 								"False": 0,
@@ -3853,7 +3853,7 @@ func TestRawVariation(t *testing.T) {
 				Reason:        flag.ReasonTargetingMatch,
 				Cacheable:     true,
 				Metadata: map[string]interface{}{
-					"evaluatedRuleName": "legacyRuleV0",
+					"evaluatedRuleName": "rule1",
 				},
 			},
 			wantErr:     false,

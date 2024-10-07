@@ -6,7 +6,7 @@
   },
   "targeting": [
     {
-      "name": "legacyRuleV0",
+      "name": "rule1",
       "query": "key eq \"random-key\"",
       "percentage": {
         "false": 0,

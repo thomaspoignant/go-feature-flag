@@ -7,7 +7,7 @@
     },
     "targeting": [
       {
-        "name": "legacyRuleV0",
+        "name": "rule1",
         "query": "key eq \"random-key\"",
         "percentage": {
           "false": 0,
@@ -28,7 +28,7 @@
     },
     "targeting": [
       {
-        "name": "legacyRuleV0",
+        "name": "rule1",
         "query": "key eq \"not-a-key\"",
         "percentage": {
           "false": 0,

@@ -60,7 +60,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 						Before: &flag.InternalFlag{
 							Rules: &[]flag.Rule{
 								{
-									Name:  testconvert.String("legacyRuleV0"),
+									Name:  testconvert.String("rule1"),
 									Query: testconvert.String("key eq \"random-key\""),
 									Percentages: &map[string]float64{
 										"False": 0,
@@ -114,7 +114,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 						Before: &flag.InternalFlag{
 							Rules: &[]flag.Rule{
 								{
-									Name:  testconvert.String("legacyRuleV0"),
+									Name:  testconvert.String("rule1"),
 									Query: testconvert.String("key eq \"random-key\""),
 									Percentages: &map[string]float64{
 										"False": 0,
@@ -135,7 +135,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 						After: &flag.InternalFlag{
 							Rules: &[]flag.Rule{
 								{
-									Name:  testconvert.String("legacyRuleV0"),
+									Name:  testconvert.String("rule1"),
 									Query: testconvert.String("key eq \"random-key\""),
 									Percentages: &map[string]float64{
 										"False": 0,
@@ -176,7 +176,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 					"add-test-flag": &flag.InternalFlag{
 						Rules: &[]flag.Rule{
 							{
-								Name:  testconvert.String("legacyRuleV0"),
+								Name:  testconvert.String("rule1"),
 								Query: testconvert.String("key eq \"random-key\""),
 								Percentages: &map[string]float64{
 									"False": 0,
@@ -214,7 +214,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 						After: &flag.InternalFlag{
 							Rules: &[]flag.Rule{
 								{
-									Name:  testconvert.String("legacyRuleV0"),
+									Name:  testconvert.String("rule1"),
 									Query: testconvert.String("key eq \"random-key\""),
 									Percentages: &map[string]float64{
 										"False": 0,
@@ -235,7 +235,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 						Before: &flag.InternalFlag{
 							Rules: &[]flag.Rule{
 								{
-									Name:  testconvert.String("legacyRuleV0"),
+									Name:  testconvert.String("rule1"),
 									Query: testconvert.String("key eq \"random-key\""),
 									Percentages: &map[string]float64{
 										"False": 0,

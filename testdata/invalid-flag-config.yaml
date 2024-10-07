@@ -4,7 +4,7 @@ test-flag:
     False: false
     True:
   targeting:
-    - name: legacyRuleV0
+    - name: rule1
       query: key eq "random-key"
       percentage:
         False: 0
