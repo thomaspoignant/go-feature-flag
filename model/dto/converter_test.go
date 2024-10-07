@@ -137,7 +137,7 @@ func TestConvertV1DtoToInternalFlag(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := dto.ConvertV1DtoToInternalFlag(tt.input)
+			result := tt.input.Convert(nil, "random-flag-name")
 			assert.Equal(t, tt.expected, result)
 		})
 	}

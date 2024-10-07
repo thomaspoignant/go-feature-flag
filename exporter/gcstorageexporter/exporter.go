@@ -95,7 +95,7 @@ func (f *Exporter) Export(ctx context.Context, logger *fflog.FFLogger, featureEv
 	for _, file := range files {
 		of, err := os.Open(outputDir + "/" + file.Name())
 		if err != nil {
-			logger.Error("[GCP DeprecatedExporter] impossible to open the file",
+			logger.Error("[GCP Exporter] impossible to open the file",
 				slog.String("path", outputDir+"/"+file.Name()))
 			continue
 		}
@@ -111,7 +111,7 @@ func (f *Exporter) Export(ctx context.Context, logger *fflog.FFLogger, featureEv
 		_, err = io.Copy(wc, of)
 		_ = wc.Close()
 		if err != nil {
-			return fmt.Errorf("error: [DeprecatedExporter] impossible to copy the file from %s to bucket %s: %v",
+			return fmt.Errorf("error: [GCP Exporter] impossible to copy the file from %s to bucket %s: %v",
 				source, f.Bucket, err)
 		}
 	}

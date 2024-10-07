@@ -113,3 +113,12 @@ func TestConfig_GetRetrievers(t *testing.T) {
 		})
 	}
 }
+
+func TestOfflineConfig(t *testing.T) {
+	c := ffClient.Config{
+		Offline: true,
+	}
+	assert.True(t, c.IsOffline())
+	c.SetOffline(false)
+	assert.False(t, c.IsOffline())
+}
