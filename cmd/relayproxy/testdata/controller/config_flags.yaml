@@ -19,7 +19,7 @@ array-flag:
             "False": 90
             "True": 10
     defaultRule:
-        name: legacyDefaultRule
+        name: defaultRule
         variation: Default
 disable-flag:
     variations:
@@ -33,7 +33,7 @@ disable-flag:
             "False": 0
             "True": 100
     defaultRule:
-        name: legacyDefaultRule
+        name: defaultRule
         variation: Default
     disable: true
 flag-only-for-admin:
@@ -48,7 +48,7 @@ flag-only-for-admin:
             "False": 0
             "True": 100
     defaultRule:
-        name: legacyDefaultRule
+        name: defaultRule
         variation: Default
 new-admin-access:
     variations:
@@ -56,7 +56,7 @@ new-admin-access:
         "False": false
         "True": true
     defaultRule:
-        name: legacyDefaultRule
+        name: defaultRule
         percentage:
             "False": 70
             "True": 30
@@ -72,7 +72,7 @@ number-flag:
             "False": 0
             "True": 100
     defaultRule:
-        name: legacyDefaultRule
+        name: defaultRule
         variation: Default
 targeting-key-rule:
     variations:
@@ -98,7 +98,7 @@ test-flag-rule-apply:
             "False": 0
             "True": 100
     defaultRule:
-        name: legacyDefaultRule
+        name: defaultRule
         variation: Default
 test-flag-rule-apply-false:
     variations:
@@ -115,7 +115,7 @@ test-flag-rule-apply-false:
             "False": 90
             "True": 10
     defaultRule:
-        name: legacyDefaultRule
+        name: defaultRule
         variation: Default
 test-flag-rule-not-apply:
     variations:
@@ -132,5 +132,5 @@ test-flag-rule-not-apply:
             "False": 0
             "True": 100
     defaultRule:
-        name: legacyDefaultRule
+        name: defaultRule
         variation: Default

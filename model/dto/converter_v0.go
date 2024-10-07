@@ -6,7 +6,7 @@ import (
 
 var (
 	LegacyRuleName  = "legacyRuleV0"
-	defaultRuleName = "legacyDefaultRule"
+	defaultRuleName = "defaultRule"
 
 	trueVariation     = "True"
 	falseVariation    = "False"

@@ -50,7 +50,7 @@ func TestPIFlagChange_WithConfigChange(t *testing.T) {
 	handlerErr := ctrl.Handler(c)
 	assert.NoError(t, handlerErr)
 
-	want := "{\"hash\":1312362910}\n"
+	want := "{\"hash\":1224205780}\n"
 	assert.Equal(t, want, rec.Body.String())
 	assert.Equal(t, http.StatusOK, rec.Code)
 
@@ -104,7 +104,7 @@ func TestPIFlagChange_WithoutConfigChange(t *testing.T) {
 	handlerErr := ctrl.Handler(c)
 	assert.NoError(t, handlerErr)
 
-	want := "{\"hash\":1312362910}\n"
+	want := "{\"hash\":1224205780}\n"
 	assert.Equal(t, want, rec.Body.String())
 	assert.Equal(t, http.StatusOK, rec.Code)
 

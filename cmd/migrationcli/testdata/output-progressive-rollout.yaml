@@ -4,7 +4,7 @@ progressive-flag:
         "False": A
         "True": B
     defaultRule:
-        name: legacyDefaultRule
+        name: defaultRule
         progressiveRollout:
             initial:
                 variation: "False"

@@ -45,7 +45,7 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 			},
 			expected: expected{
 				bodyPath:  "./testdata/should_call_webhook_and_have_valid_results.json",
-				signature: "sha256=366472030e941aa3a8ebe0e715552261f714992dec10f857da23f7e6d39c7e1d",
+				signature: "sha256=2630025dcde05453758848ccfbd6acc47667e0e63473285037b9d3b6a578b260",
 			},
 			args: args{
 				url:        "http://webhook.example/hook",
@@ -59,7 +59,7 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 								"True":    testconvert.Interface("test"),
 							},
 							DefaultRule: &flag.Rule{
-								Name: testconvert.String("legacyDefaultRule"),
+								Name: testconvert.String("defaultRule"),
 								Percentages: &map[string]float64{
 									"False": 95,
 									"True":  5,
@@ -85,7 +85,7 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 								"True":    testconvert.Interface(true),
 							},
 							DefaultRule: &flag.Rule{
-								Name:            testconvert.String("legacyDefaultRule"),
+								Name:            testconvert.String("defaultRule"),
 								VariationResult: testconvert.String("Default"),
 							},
 						},
@@ -109,7 +109,7 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 									"True":    testconvert.Interface(true),
 								},
 								DefaultRule: &flag.Rule{
-									Name:            testconvert.String("legacyDefaultRule"),
+									Name:            testconvert.String("defaultRule"),
 									VariationResult: testconvert.String("Default"),
 								},
 							},
@@ -130,7 +130,7 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 									"True":    testconvert.Interface(true),
 								},
 								DefaultRule: &flag.Rule{
-									Name:            testconvert.String("legacyDefaultRule"),
+									Name:            testconvert.String("defaultRule"),
 									VariationResult: testconvert.String("Default"),
 								},
 								Disable: testconvert.Bool(true),
@@ -158,7 +158,7 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 								"True":    testconvert.Interface("test"),
 							},
 							DefaultRule: &flag.Rule{
-								Name: testconvert.String("legacyDefaultRule"),
+								Name: testconvert.String("defaultRule"),
 								Percentages: &map[string]float64{
 									"False": 95,
 									"True":  5,
@@ -234,7 +234,7 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 								"True":    testconvert.Interface("test"),
 							},
 							DefaultRule: &flag.Rule{
-								Name: testconvert.String("legacyDefaultRule"),
+								Name: testconvert.String("defaultRule"),
 								Percentages: &map[string]float64{
 									"False": 95,
 									"True":  5,
@@ -289,7 +289,7 @@ func Test_webhookNotifier_no_meta_data(t *testing.T) {
 					"True":    testconvert.Interface("test"),
 				},
 				DefaultRule: &flag.Rule{
-					Name: testconvert.String("legacyDefaultRule"),
+					Name: testconvert.String("defaultRule"),
 					Percentages: &map[string]float64{
 						"False": 95,
 						"True":  5,

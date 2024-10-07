@@ -31,7 +31,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 							"True":    testconvert.Interface(true),
 						},
 						DefaultRule: &flag.Rule{
-							Name: testconvert.String("legacyDefaultRule"),
+							Name: testconvert.String("defaultRule"),
 							Percentages: &map[string]float64{
 								"False": 0,
 								"True":  100,
@@ -74,7 +74,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 								"True":    testconvert.Interface(true),
 							},
 							DefaultRule: &flag.Rule{
-								Name:            testconvert.String("legacyDefaultRule"),
+								Name:            testconvert.String("defaultRule"),
 								VariationResult: testconvert.String("Default"),
 							},
 						},
@@ -85,7 +85,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 								"True":    testconvert.Interface(true),
 							},
 							DefaultRule: &flag.Rule{
-								Name: testconvert.String("legacyDefaultRule"),
+								Name: testconvert.String("defaultRule"),
 								Percentages: &map[string]float64{
 									"False": 0,
 									"True":  100,
@@ -128,7 +128,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 								"True":    testconvert.Interface(true),
 							},
 							DefaultRule: &flag.Rule{
-								Name:            testconvert.String("legacyDefaultRule"),
+								Name:            testconvert.String("defaultRule"),
 								VariationResult: testconvert.String("Default"),
 							},
 						},
@@ -149,7 +149,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 								"True":    testconvert.Interface(true),
 							},
 							DefaultRule: &flag.Rule{
-								Name:            testconvert.String("legacyDefaultRule"),
+								Name:            testconvert.String("defaultRule"),
 								VariationResult: testconvert.String("Default"),
 							},
 							Disable: testconvert.Bool(true),
@@ -190,7 +190,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 							"True":    testconvert.Interface(true),
 						},
 						DefaultRule: &flag.Rule{
-							Name:            testconvert.String("legacyDefaultRule"),
+							Name:            testconvert.String("defaultRule"),
 							VariationResult: testconvert.String("Default"),
 						},
 					},
@@ -228,7 +228,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 								"True":    testconvert.Interface(true),
 							},
 							DefaultRule: &flag.Rule{
-								Name:            testconvert.String("legacyDefaultRule"),
+								Name:            testconvert.String("defaultRule"),
 								VariationResult: testconvert.String("Default"),
 							},
 						},
@@ -249,7 +249,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 								"True":    testconvert.Interface(true),
 							},
 							DefaultRule: &flag.Rule{
-								Name:            testconvert.String("legacyDefaultRule"),
+								Name:            testconvert.String("defaultRule"),
 								VariationResult: testconvert.String("Default"),
 							},
 							Disable: testconvert.Bool(true),

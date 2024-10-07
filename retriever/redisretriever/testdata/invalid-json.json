@@ -15,6 +15,6 @@
     }
   ],
   "defaultRule": {
-    "name": "legacyDefaultRule",
+    "name": "defaultRule",
     "variation": "Default"
   }

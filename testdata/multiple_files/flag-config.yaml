@@ -10,7 +10,7 @@ initial-flag:
         False: 0
         True: 100
   defaultRule:
-    name: legacyDefaultRule
+    name: defaultRule
     variation: Default
 
 test-flag2:
@@ -25,5 +25,5 @@ test-flag2:
         False: 0
         True: 100
   defaultRule:
-    name: legacyDefaultRule
+    name: defaultRule
     variation: Default

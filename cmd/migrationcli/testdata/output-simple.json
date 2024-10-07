@@ -16,7 +16,7 @@
       }
     ],
     "defaultRule": {
-      "name": "legacyDefaultRule",
+      "name": "defaultRule",
       "variation": "Default"
     },
     "version": "12"

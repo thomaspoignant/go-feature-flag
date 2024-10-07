@@ -12,7 +12,7 @@ false = 0.0
 true = 100.0
 
 [test-flag.defaultRule]
-name = "legacyDefaultRule"
+name = "defaultRule"
 variation = "Default"
 
 [test-flag2.variations]
@@ -29,5 +29,5 @@ false = 0.0
 true = 100.0
 
 [test-flag2.defaultRule]
-name = "legacyDefaultRule"
+name = "defaultRule"
 variation = "Default"

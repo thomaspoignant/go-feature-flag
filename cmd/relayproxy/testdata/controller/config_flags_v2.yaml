@@ -10,7 +10,7 @@ flag-only-for-admin:
             "False": 0
             "True": 100
     defaultRule:
-        name: legacyDefaultRule
+        name: defaultRule
         variation: Default
 new-admin-access:
     variations:
@@ -18,7 +18,7 @@ new-admin-access:
         "False": false
         "True": true
     defaultRule:
-        name: legacyDefaultRule
+        name: defaultRule
         percentage:
             "False": 70
             "True": 30

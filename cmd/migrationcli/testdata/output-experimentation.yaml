@@ -4,7 +4,7 @@ experimentation-flag:
         "False": A
         "True": B
     defaultRule:
-        name: legacyDefaultRule
+        name: defaultRule
         percentage:
             "False": 50
             "True": 50

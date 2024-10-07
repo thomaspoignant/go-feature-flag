@@ -10,7 +10,7 @@ foo-flag:
         False: 0
         True: 100
   defaultRule:
-    name: legacyDefaultRule
+    name: defaultRule
     variation: Default
 
 bar-flag:
@@ -25,5 +25,5 @@ bar-flag:
         False: 0
         True: 100
   defaultRule:
-    name: legacyDefaultRule
+    name: defaultRule
     variation: Default

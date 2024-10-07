@@ -159,7 +159,7 @@ func TestBoolVariation(t *testing.T) {
 						"True":    testconvert.Interface(true),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -191,7 +191,7 @@ func TestBoolVariation(t *testing.T) {
 						"True":    testconvert.Interface(true),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -223,7 +223,7 @@ func TestBoolVariation(t *testing.T) {
 						"True":    testconvert.Interface(true),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -255,7 +255,7 @@ func TestBoolVariation(t *testing.T) {
 						"True":    testconvert.Interface("xxx"),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -287,7 +287,7 @@ func TestBoolVariation(t *testing.T) {
 						"True":    testconvert.Interface(true),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 					TrackEvents: testconvert.Bool(false),
@@ -472,7 +472,7 @@ func TestBoolVariationDetails(t *testing.T) {
 						"True":    testconvert.Interface(true),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -511,7 +511,7 @@ func TestBoolVariationDetails(t *testing.T) {
 						"True":    testconvert.Interface(true),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -553,7 +553,7 @@ func TestBoolVariationDetails(t *testing.T) {
 						"True":    testconvert.Interface(true),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -594,7 +594,7 @@ func TestBoolVariationDetails(t *testing.T) {
 						"True":    testconvert.Interface(true),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -633,7 +633,7 @@ func TestBoolVariationDetails(t *testing.T) {
 						"True":    testconvert.Interface(true),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -675,7 +675,7 @@ func TestBoolVariationDetails(t *testing.T) {
 						"True":    testconvert.Interface("xxx"),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -868,7 +868,7 @@ func TestFloat64Variation(t *testing.T) {
 						"True":    testconvert.Interface(120.12),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -900,7 +900,7 @@ func TestFloat64Variation(t *testing.T) {
 						"True":    testconvert.Interface(120.12),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -932,7 +932,7 @@ func TestFloat64Variation(t *testing.T) {
 						"True":    testconvert.Interface(120.12),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -964,7 +964,7 @@ func TestFloat64Variation(t *testing.T) {
 						"True":    testconvert.Interface("xxx"),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -996,7 +996,7 @@ func TestFloat64Variation(t *testing.T) {
 						"True":    testconvert.Interface(120.12),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 					TrackEvents: testconvert.Bool(false),
@@ -1180,7 +1180,7 @@ func TestFloat64VariationDetails(t *testing.T) {
 						"True":    testconvert.Interface(120.12),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -1219,7 +1219,7 @@ func TestFloat64VariationDetails(t *testing.T) {
 						"True":    testconvert.Interface(120.12),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -1261,7 +1261,7 @@ func TestFloat64VariationDetails(t *testing.T) {
 						"True":    testconvert.Interface(120.12),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -1303,7 +1303,7 @@ func TestFloat64VariationDetails(t *testing.T) {
 						"True":    testconvert.Interface("xxx"),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -1494,7 +1494,7 @@ func TestJSONArrayVariation(t *testing.T) {
 						"False":   testconvert.Interface([]interface{}{"false"}),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -1526,7 +1526,7 @@ func TestJSONArrayVariation(t *testing.T) {
 						"False":   testconvert.Interface([]interface{}{"false"}),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -1548,7 +1548,7 @@ func TestJSONArrayVariation(t *testing.T) {
 						"False":   testconvert.Interface([]interface{}{"false"}),
 					},
 					DefaultRule: &flag.Rule{
-						Name: testconvert.String("legacyDefaultRule"),
+						Name: testconvert.String("defaultRule"),
 						Percentages: &map[string]float64{
 							"False": 90,
 							"True":  10,
@@ -1583,7 +1583,7 @@ func TestJSONArrayVariation(t *testing.T) {
 						"True":    testconvert.Interface("xxx"),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -1605,7 +1605,7 @@ func TestJSONArrayVariation(t *testing.T) {
 						"False":   testconvert.Interface([]interface{}{"false"}),
 					},
 					DefaultRule: &flag.Rule{
-						Name: testconvert.String("legacyDefaultRule"),
+						Name: testconvert.String("defaultRule"),
 						Percentages: &map[string]float64{
 							"False": 0,
 							"True":  100,
@@ -1789,7 +1789,7 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 						"False":   testconvert.Interface([]interface{}{"false"}),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -1828,7 +1828,7 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 						"False":   testconvert.Interface([]interface{}{"false"}),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -1860,7 +1860,7 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 						"False":   testconvert.Interface([]interface{}{"false"}),
 					},
 					DefaultRule: &flag.Rule{
-						Name: testconvert.String("legacyDefaultRule"),
+						Name: testconvert.String("defaultRule"),
 						Percentages: &map[string]float64{
 							"False": 90,
 							"True":  10,
@@ -1902,7 +1902,7 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 						"True":    testconvert.Interface("xxx"),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -2090,7 +2090,7 @@ func TestJSONVariation(t *testing.T) {
 						"False":   testconvert.Interface(map[string]interface{}{"false": true}),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -2122,7 +2122,7 @@ func TestJSONVariation(t *testing.T) {
 						"False":   testconvert.Interface(map[string]interface{}{"false": true}),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -2154,7 +2154,7 @@ func TestJSONVariation(t *testing.T) {
 						"False":   testconvert.Interface(map[string]interface{}{"false": true}),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -2186,7 +2186,7 @@ func TestJSONVariation(t *testing.T) {
 						"True":    testconvert.Interface("xxx"),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -2322,7 +2322,7 @@ func TestJSONVariationDetails(t *testing.T) {
 						"False":   testconvert.Interface(map[string]interface{}{"false": true}),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -2361,7 +2361,7 @@ func TestJSONVariationDetails(t *testing.T) {
 						"False":   testconvert.Interface(map[string]interface{}{"false": true}),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -2403,7 +2403,7 @@ func TestJSONVariationDetails(t *testing.T) {
 						"False":   testconvert.Interface(map[string]interface{}{"false": true}),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -2600,7 +2600,7 @@ func TestStringVariation(t *testing.T) {
 						"False":   testconvert.Interface("false"),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -2632,7 +2632,7 @@ func TestStringVariation(t *testing.T) {
 						"False":   testconvert.Interface("false"),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -2664,7 +2664,7 @@ func TestStringVariation(t *testing.T) {
 						"False":   testconvert.Interface("false"),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -2696,7 +2696,7 @@ func TestStringVariation(t *testing.T) {
 						"True":    testconvert.Interface(3),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -2831,7 +2831,7 @@ func TestStringVariationDetails(t *testing.T) {
 						"False":   testconvert.Interface("false"),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -2870,7 +2870,7 @@ func TestStringVariationDetails(t *testing.T) {
 						"False":   testconvert.Interface("false"),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -2912,7 +2912,7 @@ func TestStringVariationDetails(t *testing.T) {
 						"False":   testconvert.Interface("false"),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -3107,7 +3107,7 @@ func TestIntVariation(t *testing.T) {
 						"False":   testconvert.Interface(121),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -3139,7 +3139,7 @@ func TestIntVariation(t *testing.T) {
 						"False":   testconvert.Interface(121),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -3171,7 +3171,7 @@ func TestIntVariation(t *testing.T) {
 						"False":   testconvert.Interface(121),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -3203,7 +3203,7 @@ func TestIntVariation(t *testing.T) {
 						"True":    testconvert.Interface("xxx"),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -3235,7 +3235,7 @@ func TestIntVariation(t *testing.T) {
 						"False":   testconvert.Interface(121.1),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -3370,7 +3370,7 @@ func TestIntVariationDetails(t *testing.T) {
 						"False":   testconvert.Interface(121),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -3409,7 +3409,7 @@ func TestIntVariationDetails(t *testing.T) {
 						"False":   testconvert.Interface(121),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -3451,7 +3451,7 @@ func TestIntVariationDetails(t *testing.T) {
 						"False":   testconvert.Interface(121),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -3493,7 +3493,7 @@ func TestIntVariationDetails(t *testing.T) {
 						"False":   testconvert.Interface(121.1),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -3716,7 +3716,7 @@ func TestRawVariation(t *testing.T) {
 						"False":   testconvert.Interface(map[string]interface{}{"test3": "test"}),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -3755,7 +3755,7 @@ func TestRawVariation(t *testing.T) {
 						"False":   testconvert.Interface(map[string]interface{}{"test3": "test"}),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -3797,7 +3797,7 @@ func TestRawVariation(t *testing.T) {
 						"False":   testconvert.Interface(map[string]interface{}{"test3": "test"}),
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 				}, nil),
@@ -3839,7 +3839,7 @@ func TestRawVariation(t *testing.T) {
 						},
 					},
 					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("legacyDefaultRule"),
+						Name:            testconvert.String("defaultRule"),
 						VariationResult: testconvert.String("Default"),
 					},
 					TrackEvents: testconvert.Bool(false),

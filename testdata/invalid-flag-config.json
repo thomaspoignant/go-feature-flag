@@ -16,7 +16,7 @@
       }
     ],
     "defaultRule": {
-      "name": "legacyDefaultRule",
+      "name": "defaultRule",
       "variation": "Default"
     }
   },
@@ -37,7 +37,7 @@
       }
     ],
     "defaultRule": {
-      "name": "legacyDefaultRule",
+      "name": "defaultRule",
       "variation": "Default"
     }
   }

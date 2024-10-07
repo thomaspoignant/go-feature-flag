@@ -21,7 +21,7 @@
           }
         ],
         "defaultRule": {
-          "name": "legacyDefaultRule",
+          "name": "defaultRule",
           "variation": "Default"
         }
       }
@@ -34,7 +34,7 @@
           "True": "test"
         },
         "defaultRule": {
-          "name": "legacyDefaultRule",
+          "name": "defaultRule",
           "percentage": {
             "False": 95,
             "True": 5
@@ -61,7 +61,7 @@
             }
           ],
           "defaultRule": {
-            "name": "legacyDefaultRule",
+            "name": "defaultRule",
             "variation": "Default"
           }
         },
@@ -82,7 +82,7 @@
             }
           ],
           "defaultRule": {
-            "name": "legacyDefaultRule",
+            "name": "defaultRule",
             "variation": "Default"
           },
           "disable": true

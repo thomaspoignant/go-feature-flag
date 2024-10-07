@@ -62,7 +62,7 @@ func TestAll(t *testing.T) {
 							"Default": testconvert.Interface("default"),
 						},
 						DefaultRule: &flag.Rule{
-							Name: testconvert.String("legacyDefaultRule"),
+							Name: testconvert.String("defaultRule"),
 							Percentages: &map[string]float64{
 								"True":  40,
 								"False": 60,
@@ -78,7 +78,7 @@ func TestAll(t *testing.T) {
 							"Default": testconvert.Interface(false),
 						},
 						DefaultRule: &flag.Rule{
-							Name: testconvert.String("legacyDefaultRule"),
+							Name: testconvert.String("defaultRule"),
 							Percentages: &map[string]float64{
 								"True":  30,
 								"False": 70,
@@ -95,7 +95,7 @@ func TestAll(t *testing.T) {
 						"True":    testconvert.Interface("true"),
 					},
 					DefaultRule: &flag.Rule{
-						Name: testconvert.String("legacyDefaultRule"),
+						Name: testconvert.String("defaultRule"),
 						Percentages: &map[string]float64{
 							"False": 60,
 							"True":  40,
@@ -109,7 +109,7 @@ func TestAll(t *testing.T) {
 						"True":    testconvert.Interface(true),
 					},
 					DefaultRule: &flag.Rule{
-						Name: testconvert.String("legacyDefaultRule"),
+						Name: testconvert.String("defaultRule"),
 						Percentages: &map[string]float64{
 							"False": 70,
 							"True":  30,
@@ -149,7 +149,7 @@ func TestCopy(t *testing.T) {
 							"Default": testconvert.Interface("default"),
 						},
 						DefaultRule: &flag.Rule{
-							Name: testconvert.String("legacyDefaultRule"),
+							Name: testconvert.String("defaultRule"),
 							Percentages: &map[string]float64{
 								"True":  40,
 								"False": 60,

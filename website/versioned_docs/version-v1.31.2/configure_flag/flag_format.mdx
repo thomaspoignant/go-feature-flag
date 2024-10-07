@@ -64,7 +64,7 @@ second-flag:
         A: 10
         B: 90
   defaultRule:
-    name: legacyDefaultRule
+    name: defaultRule
     variation: defaultValue
   version: "12"
   experimentation:
@@ -117,7 +117,7 @@ second-flag:
       }
     ],
     "defaultRule": {
-      "name": "legacyDefaultRule",
+      "name": "defaultRule",
       "variation": "defaultValue"
     },
     "version": "12",
@@ -168,7 +168,7 @@ version = "12"
     B = 90
 
   [second-flag.defaultRule]
-  name = "legacyDefaultRule"
+  name = "defaultRule"
   variation = "defaultValue"
 
   [second-flag.experimentation]
