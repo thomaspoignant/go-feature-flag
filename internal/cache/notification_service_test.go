@@ -35,7 +35,7 @@ func Test_notificationService_getDifferences(t *testing.T) {
 							"True":    testconvert.Interface(true),
 						},
 						DefaultRule: &flag.Rule{
-							Name: testconvert.String("legacyRuleV0"),
+							Name: testconvert.String("rule1"),
 							Percentages: &map[string]float64{
 								"False": 0,
 								"True":  100,
@@ -49,7 +49,7 @@ func Test_notificationService_getDifferences(t *testing.T) {
 							"True":    testconvert.Interface(true),
 						},
 						DefaultRule: &flag.Rule{
-							Name: testconvert.String("legacyRuleV0"),
+							Name: testconvert.String("rule1"),
 							Percentages: &map[string]float64{
 								"False": 0,
 								"True":  100,
@@ -65,7 +65,7 @@ func Test_notificationService_getDifferences(t *testing.T) {
 							"True":    testconvert.Interface(true),
 						},
 						DefaultRule: &flag.Rule{
-							Name: testconvert.String("legacyRuleV0"),
+							Name: testconvert.String("rule1"),
 							Percentages: &map[string]float64{
 								"False": 0,
 								"True":  100,
@@ -83,7 +83,7 @@ func Test_notificationService_getDifferences(t *testing.T) {
 							"True":    testconvert.Interface(true),
 						},
 						DefaultRule: &flag.Rule{
-							Name: testconvert.String("legacyRuleV0"),
+							Name: testconvert.String("rule1"),
 							Percentages: &map[string]float64{
 								"False": 0,
 								"True":  100,
@@ -106,7 +106,7 @@ func Test_notificationService_getDifferences(t *testing.T) {
 							"True":    testconvert.Interface(true),
 						},
 						DefaultRule: &flag.Rule{
-							Name: testconvert.String("legacyRuleV0"),
+							Name: testconvert.String("rule1"),
 							Percentages: &map[string]float64{
 								"False": 0,
 								"True":  100,
@@ -122,7 +122,7 @@ func Test_notificationService_getDifferences(t *testing.T) {
 							"True":    testconvert.Interface(true),
 						},
 						DefaultRule: &flag.Rule{
-							Name: testconvert.String("legacyRuleV0"),
+							Name: testconvert.String("rule1"),
 							Percentages: &map[string]float64{
 								"False": 0,
 								"True":  100,
@@ -136,7 +136,7 @@ func Test_notificationService_getDifferences(t *testing.T) {
 							"True":    testconvert.Interface(true),
 						},
 						DefaultRule: &flag.Rule{
-							Name: testconvert.String("legacyRuleV0"),
+							Name: testconvert.String("rule1"),
 							Percentages: &map[string]float64{
 								"False": 0,
 								"True":  100,
@@ -154,7 +154,7 @@ func Test_notificationService_getDifferences(t *testing.T) {
 							"True":    testconvert.Interface(true),
 						},
 						DefaultRule: &flag.Rule{
-							Name: testconvert.String("legacyRuleV0"),
+							Name: testconvert.String("rule1"),
 							Percentages: &map[string]float64{
 								"False": 0,
 								"True":  100,
@@ -177,7 +177,7 @@ func Test_notificationService_getDifferences(t *testing.T) {
 							"True":    testconvert.Interface(true),
 						},
 						DefaultRule: &flag.Rule{
-							Name: testconvert.String("legacyRuleV0"),
+							Name: testconvert.String("rule1"),
 							Percentages: &map[string]float64{
 								"False": 0,
 								"True":  100,
@@ -193,7 +193,7 @@ func Test_notificationService_getDifferences(t *testing.T) {
 							"True":    testconvert.Interface(true),
 						},
 						DefaultRule: &flag.Rule{
-							Name: testconvert.String("legacyRuleV0"),
+							Name: testconvert.String("rule1"),
 							Percentages: &map[string]float64{
 								"False": 0,
 								"True":  100,
@@ -214,7 +214,7 @@ func Test_notificationService_getDifferences(t *testing.T) {
 								"True":    testconvert.Interface(true),
 							},
 							DefaultRule: &flag.Rule{
-								Name: testconvert.String("legacyRuleV0"),
+								Name: testconvert.String("rule1"),
 								Percentages: &map[string]float64{
 									"False": 0,
 									"True":  100,
@@ -228,7 +228,7 @@ func Test_notificationService_getDifferences(t *testing.T) {
 								"True":    testconvert.Interface(true),
 							},
 							DefaultRule: &flag.Rule{
-								Name: testconvert.String("legacyRuleV0"),
+								Name: testconvert.String("rule1"),
 								Percentages: &map[string]float64{
 									"False": 0,
 									"True":  100,

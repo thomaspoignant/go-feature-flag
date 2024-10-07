@@ -5,8 +5,8 @@ import (
 )
 
 var (
-	LegacyRuleName  = "legacyRuleV0"
-	defaultRuleName = "legacyDefaultRule"
+	LegacyRuleName  = "rule1"
+	defaultRuleName = "defaultRule"
 
 	trueVariation     = "True"
 	falseVariation    = "False"
@@ -32,11 +32,11 @@ func ConvertV0DtoToInternalFlag(d DTO, isScheduledStep bool) flag.InternalFlag {
 	var rules *[]flag.Rule
 	var defaultRule *flag.Rule
 	if d.Rule != nil && *d.Rule != "" {
-		rules = &[]flag.Rule{createLegacyRuleV0(d)}
-		defaultRule = createDefaultLegacyRuleV0(d, true)
+		rules = &[]flag.Rule{createrule1(d)}
+		defaultRule = createDefaultrule1(d, true)
 	} else {
 		rules = nil
-		defaultRule = createDefaultLegacyRuleV0(d, false)
+		defaultRule = createDefaultrule1(d, false)
 	}
 
 	internalFlag := flag.InternalFlag{
@@ -58,8 +58,8 @@ func ConvertV0DtoToInternalFlag(d DTO, isScheduledStep bool) flag.InternalFlag {
 	return internalFlag
 }
 
-// createDefaultLegacyRuleV0 create the default rule based on the legacy format.
-func createDefaultLegacyRuleV0(d DTO, hasTargetRule bool) *flag.Rule {
+// createDefaultrule1 create the default rule based on the legacy format.
+func createDefaultrule1(d DTO, hasTargetRule bool) *flag.Rule {
 	hasProgressiveRollout := d.Rollout != nil &&
 		d.Rollout.Progressive != nil &&
 		d.Rollout.Progressive.ReleaseRamp.Start != nil &&
@@ -103,8 +103,8 @@ func createDefaultLegacyRuleV0(d DTO, hasTargetRule bool) *flag.Rule {
 	}
 }
 
-// createLegacyRuleV0 will create a rule based on the previous format
-func createLegacyRuleV0(d DTO) flag.Rule {
+// createrule1 will create a rule based on the previous format
+func createrule1(d DTO) flag.Rule {
 	// Handle the specific use case of progressive rollout.
 	var progressiveRollout *flag.ProgressiveRollout
 	if d.Rollout != nil &&

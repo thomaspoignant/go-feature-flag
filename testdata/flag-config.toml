@@ -4,7 +4,7 @@ false = false
 true = true
 
 [[test-flag.targeting]]
-name = "legacyRuleV0"
+name = "rule1"
 query = 'key eq "random-key"'
 
 [test-flag.targeting.percentage]
@@ -12,7 +12,7 @@ false = 0.0
 true = 100.0
 
 [test-flag.defaultRule]
-name = "legacyDefaultRule"
+name = "defaultRule"
 variation = "Default"
 
 [test-flag2.variations]
@@ -21,7 +21,7 @@ false = false
 true = true
 
 [[test-flag2.targeting]]
-name = "legacyRuleV0"
+name = "rule1"
 query = 'key eq "not-a-key"'
 
 [test-flag2.targeting.percentage]
@@ -29,5 +29,5 @@ false = 0.0
 true = 100.0
 
 [test-flag2.defaultRule]
-name = "legacyDefaultRule"
+name = "defaultRule"
 variation = "Default"
