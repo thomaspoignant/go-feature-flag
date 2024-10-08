@@ -2449,3 +2449,31 @@ func TestInternalFlag_ApplySheduledRollout(t *testing.T) {
 		})
 	}
 }
+
+func TestInternalFlag_GetVersion(t *testing.T) {
+	tests := []struct {
+		name string
+		flag flag.InternalFlag
+		want string
+	}{
+		{
+			name: "Should return empty string if version is nil",
+			flag: flag.InternalFlag{
+				Version: nil,
+			},
+			want: "",
+		},
+		{
+			name: "Should return version if not nil",
+			flag: flag.InternalFlag{
+				Version: testconvert.String("1.0.0"),
+			},
+			want: "1.0.0",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equalf(t, tt.want, tt.flag.GetVersion(), "GetVersion()")
+		})
+	}
+}
