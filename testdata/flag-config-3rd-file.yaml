@@ -4,7 +4,7 @@ test-flag0:
         "False": false
         "True": true
     defaultRule:
-        name: legacyDefaultRule
+        name: defaultRule
         percentage:
             "False": 100
             "True": 0
@@ -14,7 +14,7 @@ test-flag1:
         "False": "false"
         "True": "true"
     defaultRule:
-        name: legacyDefaultRule
+        name: defaultRule
         percentage:
             "False": 99
             "True": 1
@@ -24,7 +24,7 @@ test-flag2:
         "False": 2
         "True": 1
     defaultRule:
-        name: legacyDefaultRule
+        name: defaultRule
         percentage:
             "False": 98
             "True": 2
@@ -40,7 +40,7 @@ test-flag3:
             - yo
             - ya
     defaultRule:
-        name: legacyDefaultRule
+        name: defaultRule
         percentage:
             "False": 97
             "True": 3
@@ -53,7 +53,7 @@ test-flag4:
         "True":
             test: yo
     defaultRule:
-        name: legacyDefaultRule
+        name: defaultRule
         percentage:
             "False": 96
             "True": 4
@@ -63,7 +63,7 @@ test-flag5:
         "False": false
         "True": true
     defaultRule:
-        name: legacyDefaultRule
+        name: defaultRule
         percentage:
             "False": 95
             "True": 5
@@ -73,7 +73,7 @@ test-flag6:
         "False": false
         "True": true
     defaultRule:
-        name: legacyDefaultRule
+        name: defaultRule
         percentage:
             "False": 94
             "True": 6

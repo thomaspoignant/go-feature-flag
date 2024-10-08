@@ -20,11 +20,18 @@ func TestAll(t *testing.T) {
 			name: "all with 1 flag",
 			param: map[string]dto.DTO{
 				"test": {
-					DTOv0: dto.DTOv0{
-						Percentage: testconvert.Float64(40),
-						True:       testconvert.Interface("true"),
-						False:      testconvert.Interface("false"),
-						Default:    testconvert.Interface("default"),
+					DTOv1: dto.DTOv1{
+						Variations: &map[string]*interface{}{
+							"True":    testconvert.Interface("true"),
+							"False":   testconvert.Interface("false"),
+							"Default": testconvert.Interface("default"),
+						},
+						DefaultRule: &flag.Rule{
+							Percentages: &map[string]float64{
+								"True":  40,
+								"False": 60,
+							},
+						},
 					},
 				},
 			},
@@ -36,7 +43,6 @@ func TestAll(t *testing.T) {
 						"True":    testconvert.Interface("true"),
 					},
 					DefaultRule: &flag.Rule{
-						Name: testconvert.String("legacyDefaultRule"),
 						Percentages: &map[string]float64{
 							"False": 60,
 							"True":  40,
@@ -49,19 +55,35 @@ func TestAll(t *testing.T) {
 			name: "all with multiple flags",
 			param: map[string]dto.DTO{
 				"test": {
-					DTOv0: dto.DTOv0{
-						Percentage: testconvert.Float64(40),
-						True:       testconvert.Interface("true"),
-						False:      testconvert.Interface("false"),
-						Default:    testconvert.Interface("default"),
+					DTOv1: dto.DTOv1{
+						Variations: &map[string]*interface{}{
+							"True":    testconvert.Interface("true"),
+							"False":   testconvert.Interface("false"),
+							"Default": testconvert.Interface("default"),
+						},
+						DefaultRule: &flag.Rule{
+							Name: testconvert.String("defaultRule"),
+							Percentages: &map[string]float64{
+								"True":  40,
+								"False": 60,
+							},
+						},
 					},
 				},
 				"test1": {
-					DTOv0: dto.DTOv0{
-						Percentage: testconvert.Float64(30),
-						True:       testconvert.Interface(true),
-						False:      testconvert.Interface(false),
-						Default:    testconvert.Interface(false),
+					DTOv1: dto.DTOv1{
+						Variations: &map[string]*interface{}{
+							"True":    testconvert.Interface(true),
+							"False":   testconvert.Interface(false),
+							"Default": testconvert.Interface(false),
+						},
+						DefaultRule: &flag.Rule{
+							Name: testconvert.String("defaultRule"),
+							Percentages: &map[string]float64{
+								"True":  30,
+								"False": 70,
+							},
+						},
 					},
 				},
 			},
@@ -73,7 +95,7 @@ func TestAll(t *testing.T) {
 						"True":    testconvert.Interface("true"),
 					},
 					DefaultRule: &flag.Rule{
-						Name: testconvert.String("legacyDefaultRule"),
+						Name: testconvert.String("defaultRule"),
 						Percentages: &map[string]float64{
 							"False": 60,
 							"True":  40,
@@ -87,7 +109,7 @@ func TestAll(t *testing.T) {
 						"True":    testconvert.Interface(true),
 					},
 					DefaultRule: &flag.Rule{
-						Name: testconvert.String("legacyDefaultRule"),
+						Name: testconvert.String("defaultRule"),
 						Percentages: &map[string]float64{
 							"False": 70,
 							"True":  30,
@@ -120,11 +142,19 @@ func TestCopy(t *testing.T) {
 			name: "copy with 1 flag",
 			param: map[string]dto.DTO{
 				"test": {
-					DTOv0: dto.DTOv0{
-						Percentage: testconvert.Float64(40),
-						True:       testconvert.Interface("true"),
-						False:      testconvert.Interface("false"),
-						Default:    testconvert.Interface("default"),
+					DTOv1: dto.DTOv1{
+						Variations: &map[string]*interface{}{
+							"True":    testconvert.Interface("true"),
+							"False":   testconvert.Interface("false"),
+							"Default": testconvert.Interface("default"),
+						},
+						DefaultRule: &flag.Rule{
+							Name: testconvert.String("defaultRule"),
+							Percentages: &map[string]float64{
+								"True":  40,
+								"False": 60,
+							},
+						},
 					},
 				},
 			},

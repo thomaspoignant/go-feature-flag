@@ -1,12 +1,24 @@
-new-admin-access:
-  percentage: 30
-  true: true
-  false: false
-  default: false
-
 flag-only-for-admin:
-  rule: admin eq true
-  percentage: 100
-  true: true
-  false: false
-  default: false
+    variations:
+        Default: false
+        "False": false
+        "True": true
+    targeting:
+        - name: rule1
+          query: admin eq true
+          percentage:
+            "False": 0
+            "True": 100
+    defaultRule:
+        name: defaultRule
+        variation: Default
+new-admin-access:
+    variations:
+        Default: false
+        "False": false
+        "True": true
+    defaultRule:
+        name: defaultRule
+        percentage:
+            "False": 70
+            "True": 30

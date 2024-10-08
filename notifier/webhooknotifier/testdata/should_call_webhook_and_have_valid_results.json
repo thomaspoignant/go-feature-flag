@@ -12,7 +12,7 @@
         },
         "targeting": [
           {
-            "name": "legacyRuleV0",
+            "name": "rule1",
             "query": "key eq \"random-key\"",
             "percentage": {
               "False": 0,
@@ -21,7 +21,7 @@
           }
         ],
         "defaultRule": {
-          "name": "legacyDefaultRule",
+          "name": "defaultRule",
           "variation": "Default"
         }
       }
@@ -34,7 +34,7 @@
           "True": "test"
         },
         "defaultRule": {
-          "name": "legacyDefaultRule",
+          "name": "defaultRule",
           "percentage": {
             "False": 95,
             "True": 5
@@ -52,7 +52,7 @@
           },
           "targeting": [
             {
-              "name": "legacyRuleV0",
+              "name": "rule1",
               "query": "key eq \"not-a-key\"",
               "percentage": {
                 "False": 0,
@@ -61,7 +61,7 @@
             }
           ],
           "defaultRule": {
-            "name": "legacyDefaultRule",
+            "name": "defaultRule",
             "variation": "Default"
           }
         },
@@ -73,7 +73,7 @@
           },
           "targeting": [
             {
-              "name": "legacyRuleV0",
+              "name": "rule1",
               "query": "key eq \"not-a-key\"",
               "percentage": {
                 "False": 0,
@@ -82,7 +82,7 @@
             }
           ],
           "defaultRule": {
-            "name": "legacyDefaultRule",
+            "name": "defaultRule",
             "variation": "Default"
           },
           "disable": true
