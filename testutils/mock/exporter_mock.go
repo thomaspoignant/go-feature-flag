@@ -2,10 +2,10 @@ package mock
 
 import (
 	"context"
-	"log"
 	"sync"
 
 	"github.com/thomaspoignant/go-feature-flag/exporter"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
 type Exporter struct {
@@ -19,7 +19,7 @@ type Exporter struct {
 	once  sync.Once
 }
 
-func (m *Exporter) Export(ctx context.Context, logger *log.Logger, events []exporter.FeatureEvent) error {
+func (m *Exporter) Export(ctx context.Context, _ *fflog.FFLogger, events []exporter.FeatureEvent) error {
 	m.once.Do(m.initMutex)
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
