@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
@@ -13,10 +14,11 @@ import (
 
 func Test_s3Retriever_Retrieve(t *testing.T) {
 	type fields struct {
-		downloader DownloaderAPI
-		bucket     string
-		item       string
-		context    context.Context
+		downloader      DownloaderAPI
+		bucket          string
+		item            string
+		context         context.Context
+		S3ClientOptions []func(*s3.Options)
 	}
 	tests := []struct {
 		name    string
@@ -60,15 +62,33 @@ func Test_s3Retriever_Retrieve(t *testing.T) {
 			want:    "./testdata/flag-config.yaml",
 			wantErr: false,
 		},
+		{
+			name: "With S3 Client Options",
+			fields: fields{
+				downloader: &testutils.S3ManagerV2Mock{
+					TestDataLocation: "./testdata",
+				},
+				bucket: "Bucket",
+				item:   "valid",
+				S3ClientOptions: []func(*s3.Options){
+					func(o *s3.Options) {
+						o.UseAccelerate = true
+					},
+				},
+			},
+			want:    "./testdata/flag-config.yaml",
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			awsConf, _ := config.LoadDefaultConfig(context.TODO())
 			s := Retriever{
-				Bucket:     tt.fields.bucket,
-				Item:       tt.fields.item,
-				AwsConfig:  &awsConf,
-				downloader: tt.fields.downloader,
+				Bucket:          tt.fields.bucket,
+				Item:            tt.fields.item,
+				AwsConfig:       &awsConf,
+				downloader:      tt.fields.downloader,
+				S3ClientOptions: tt.fields.S3ClientOptions,
 			}
 			err := s.Init(context.Background(), nil)
 			assert.NoError(t, err)
@@ -76,6 +96,12 @@ func Test_s3Retriever_Retrieve(t *testing.T) {
 				err := s.Shutdown(context.Background())
 				assert.NoError(t, err)
 			}()
+
+			// Verify that S3ClientOptions are correctly set on the Retriever
+			if tt.fields.S3ClientOptions != nil {
+				assert.Equal(t, tt.fields.S3ClientOptions, s.S3ClientOptions, "S3ClientOptions should be set correctly on the Retriever")
+			}
+
 			got, err := s.Retrieve(tt.fields.context)
 			assert.Equal(t, tt.wantErr, err != nil, "Retrieve() error = %v, wantErr %v", err, tt.wantErr)
 			if err == nil {
@@ -117,5 +143,26 @@ func TestRetriever_Init(t *testing.T) {
 		assert.NotNil(t, s.downloader)
 		assert.Equal(t, "us-east-1", s.AwsConfig.Region, "Setting the region from the AwsConfig should be used over the environment variable")
 		assert.Equal(t, retriever.RetrieverReady, s.Status())
+	})
+
+	t.Run("With S3 Client Options", func(t *testing.T) {
+		t.Setenv("AWS_REGION", "us-west-2")
+		s := Retriever{
+			Bucket: "TestBucket",
+			Item:   "TestItem",
+			S3ClientOptions: []func(*s3.Options){
+				func(o *s3.Options) {
+					o.UseAccelerate = true
+				},
+			},
+		}
+		err := s.Init(context.Background(), nil)
+		assert.NoError(t, err)
+		assert.NotNil(t, s.AwsConfig)
+		assert.NotNil(t, s.downloader)
+		assert.Equal(t, "us-west-2", s.AwsConfig.Region, "Setting the region from the environment variable should be copied to the aws config")
+		assert.Equal(t, retriever.RetrieverReady, s.Status())
+		assert.NotNil(t, s.S3ClientOptions, "S3ClientOptions should be set")
+		assert.Len(t, s.S3ClientOptions, 1, "S3ClientOptions should have one option")
 	})
 }

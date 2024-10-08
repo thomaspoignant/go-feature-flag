@@ -24,6 +24,13 @@ type Retriever struct {
 	// download your feature flag configuration file.
 	AwsConfig *aws.Config
 
+	// S3ClientOptions is a list of functional options to configure the S3 client.
+	// Provide additional functional options to further configure the behavior of the client,
+	// such as changing the client's endpoint or adding custom middleware behavior.
+	// For more information about the options, please check:
+	// https://pkg.go.dev/github.com/aws/aws-sdk-go-v2/service/s3#Options
+	S3ClientOptions []func(*s3.Options)
+
 	// downloader is an internal field, it is the downloader use by the AWS-SDK
 	downloader DownloaderAPI
 	status     retriever.Status
@@ -40,7 +47,7 @@ func (s *Retriever) Init(ctx context.Context, _ *fflog.FFLogger) error {
 			}
 			s.AwsConfig = &cfg
 		}
-		client := s3.NewFromConfig(*s.AwsConfig)
+		client := s3.NewFromConfig(*s.AwsConfig, s.S3ClientOptions...)
 		s.downloader = manager.NewDownloader(client)
 	}
 	s.status = retriever.RetrieverReady

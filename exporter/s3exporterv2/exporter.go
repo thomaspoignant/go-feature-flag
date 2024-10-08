@@ -51,6 +51,13 @@ type Exporter struct {
 	// Default: SNAPPY
 	ParquetCompressionCodec string
 
+	// S3ClientOptions is a list of functional options to configure the S3 client.
+	// Provide additional functional options to further configure the behavior of the client,
+	// such as changing the client's endpoint or adding custom middleware behavior.
+	// For more information about the options, please check:
+	// https://pkg.go.dev/github.com/aws/aws-sdk-go-v2/service/s3#Options
+	S3ClientOptions []func(*s3.Options)
+
 	s3Uploader UploaderAPI
 	init       sync.Once
 	ffLogger   *fflog.FFLogger
@@ -68,7 +75,7 @@ func (f *Exporter) initializeUploader(ctx context.Context) error {
 			f.AwsConfig = &cfg
 		}
 
-		client := s3.NewFromConfig(*f.AwsConfig)
+		client := s3.NewFromConfig(*f.AwsConfig, f.S3ClientOptions...)
 		f.s3Uploader = manager.NewUploader(client)
 	})
 	return initErr
