@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -117,6 +118,13 @@ func (s *Server) Start() {
 		defer func() { _ = s.monitoringEcho.Close() }()
 	}
 
+	// start the OpenTelemetry tracing service
+	err := s.otelService.Init(context.Background(), *s.config)
+	if err != nil {
+		s.zapLog.Error("error while initializing Otel", zap.Error(err))
+		// we can continue because otel is not mandatory to start the server
+	}
+
 	// starting the main application
 	if s.config.ListenPort == 0 {
 		s.config.ListenPort = 1031
@@ -127,7 +135,7 @@ func (s *Server) Start() {
 		zap.String("address", address),
 		zap.String("version", s.config.Version))
 
-	err := s.apiEcho.Start(address)
+	err = s.apiEcho.Start(address)
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		s.zapLog.Fatal("Error starting relay proxy", zap.Error(err))
 	}
