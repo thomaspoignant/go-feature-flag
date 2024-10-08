@@ -1,11 +1,21 @@
-package mongodbretriever
+//go:build docker
+// +build docker
+
+package mongodbretriever_test
 
 import (
 	"context"
 	"encoding/json"
+	"github.com/stretchr/testify/require"
+	"github.com/thomaspoignant/go-feature-flag/retriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever/mongodbretriever"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/testcontainers/testcontainers-go/modules/mongodb"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"go.mongodb.org/mongo-driver/mongo/integration/mtest"
@@ -17,64 +27,120 @@ func Test_MongoDBRetriever_Retrieve(t *testing.T) {
 	tests := []struct {
 		name    string
 		want    []byte
-		mocker  *func(t *mtest.T)
+		data    string
 		wantErr bool
 	}{
 		{
 			name:    "Returns well formed flag definition document",
-			mocker:  &testutils.MockSuccessFind,
+			data:    testutils.MongoFindResultString,
 			want:    []byte(testutils.QueryResult),
 			wantErr: false,
 		},
 		{
 			name:    "One of the Flag definition document does not have 'flag' key/value (ignore this document)",
-			mocker:  &testutils.MockNoFlagKeyResult,
+			data:    testutils.MongoMissingFlagKey,
 			want:    []byte(testutils.MissingFlagKeyResult),
 			wantErr: false,
 		},
 		{
 			name:    "Flag definition document 'flag' key does not have 'string' value (ignore this document)",
-			mocker:  &testutils.MockFlagNotStrResult,
+			data:    testutils.MongoFindResultFlagNoStr,
 			want:    []byte(testutils.FlagKeyNotStringResult),
 			wantErr: false,
 		},
 		{
 			name:    "No flags found on DB",
-			mocker:  &testutils.MockNoFlags,
-			want:    nil,
+			want:    []byte("{}"),
 			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
 		mtDB.Run(tt.name, func(t *mtest.T) {
-			mdb := Retriever{
-				URI:          "mongouri",
-				Collection:   "collection",
-				Database:     "database",
-				dbConnection: t.DB,
+			mongodbContainer, err := mongodb.Run(context.TODO(), "mongo:6")
+			require.NoError(t, err)
+			defer func() {
+				err := mongodbContainer.Terminate(context.TODO())
+				require.NoError(t, err)
+			}()
+
+			uri, err := mongodbContainer.ConnectionString(context.Background())
+
+			if tt.data != "" {
+				// insert data
+				client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
+				coll := client.Database("database").Collection("collection")
+				var documents []bson.M
+				err = json.Unmarshal([]byte(tt.data), &documents)
+				require.NoError(t, err)
+
+				for _, doc := range documents {
+					_, err := coll.InsertOne(context.TODO(), doc)
+					require.NoError(t, err)
+				}
 			}
 
-			if tt.mocker != nil {
-				(*tt.mocker)(t)
+			// retriever
+			mdb := mongodbretriever.Retriever{
+				URI:        uri,
+				Collection: "collection",
+				Database:   "database",
 			}
+			assert.Equal(t, retriever.RetrieverNotReady, mdb.Status())
+			err = mdb.Init(context.TODO(), &fflog.FFLogger{})
+			assert.NoError(t, err)
+			defer func() { _ = mdb.Shutdown(context.TODO()) }()
+			assert.Equal(t, retriever.RetrieverReady, mdb.Status())
 
-			_ = mdb.Init(context.TODO(), &fflog.FFLogger{})
 			got, err := mdb.Retrieve(context.Background())
-
-			if tt.wantErr {
-				assert.Error(t, err, "Retrieve() error = %v, wantErr %v", err, tt.wantErr)
-				return
+			if tt.want == nil {
+				assert.Nil(t, got)
+			} else {
+				modifiedGot, err := removeIDFromJSON(string(got))
+				require.NoError(t, err)
+				assert.JSONEq(t, string(tt.want), modifiedGot)
 			}
-
-			var gotUnm, wantUn interface{}
-			if err := json.Unmarshal(tt.want, &wantUn); err != nil {
-				assert.Fail(t, "could not json unmarshall wanted flag structure")
-			}
-			if err := json.Unmarshal(got, &gotUnm); err != nil {
-				assert.Fail(t, "could not json unmarshall got flag structure")
-			}
-
-			assert.Equal(t, wantUn, gotUnm)
 		})
+	}
+}
+
+func Test_MongoDBRetriever_InvalidURI(t *testing.T) {
+	mdb := mongodbretriever.Retriever{
+		URI:        "invalidURI",
+		Collection: "collection",
+		Database:   "database",
+	}
+	assert.Equal(t, retriever.RetrieverNotReady, mdb.Status())
+	err := mdb.Init(context.TODO(), &fflog.FFLogger{})
+	assert.Error(t, err)
+	assert.Equal(t, retriever.RetrieverError, mdb.Status())
+}
+
+func removeIDFromJSON(jsonStr string) (string, error) {
+	var data interface{}
+	if err := json.Unmarshal([]byte(jsonStr), &data); err != nil {
+		return "", err
+	}
+
+	removeIDFields(data)
+
+	modifiedJSON, err := json.Marshal(data)
+	if err != nil {
+		return "", err
+	}
+
+	return string(modifiedJSON), nil
+}
+
+func removeIDFields(data interface{}) {
+	switch v := data.(type) {
+	case map[string]interface{}:
+		delete(v, "_id")
+		for _, value := range v {
+			removeIDFields(value)
+		}
+	case []interface{}:
+		for _, item := range v {
+			removeIDFields(item)
+		}
 	}
 }
