@@ -12,7 +12,7 @@ const config = {
   baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
-  favicon: 'img/favicon/gofeatureflag.svg',
+  favicon: 'img/favicon/favicon.ico',
   organizationName: 'thomaspoignant',
   projectName: 'go-feature-flag',
   trailingSlash: false,
