@@ -27,7 +27,6 @@ vendor/
 
 # binaries
 release/
-cmd/migrationcli/migrationcli
 cmd/relayproxy/relayproxy
 tmp/
 
