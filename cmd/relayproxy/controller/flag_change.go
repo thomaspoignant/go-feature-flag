@@ -23,7 +23,8 @@ func NewAPIFlagChange(goFF *ffclient.GoFeatureFlag, metrics metric.Metrics) Cont
 }
 
 type FlagChangeResponse struct {
-	Hash uint32 `json:"hash"`
+	Hash  uint32            `json:"hash"`
+	Flags map[string]uint32 `json:"flags"`
 }
 
 // Handler is the endpoint to poll if you want to know if there is a configuration change in the flags
@@ -48,5 +49,12 @@ func (h *FlagChangeAPICtrl) Handler(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
-	return c.JSON(http.StatusOK, FlagChangeResponse{Hash: utils.Hash(string(res))})
+
+	flagHashes := map[string]uint32{}
+	for key, flag := range flags {
+		jsonFlag, _ := json.Marshal(flag)
+		flagHashes[key] = utils.Hash(string(jsonFlag))
+	}
+
+	return c.JSON(http.StatusOK, FlagChangeResponse{Hash: utils.Hash(string(res)), Flags: flagHashes})
 }
