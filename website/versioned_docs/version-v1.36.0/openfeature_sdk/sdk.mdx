@@ -1,0 +1,138 @@
+---
+sidebar_position: 1
+description: Use GO Feature Flag with Openfeature SDKs
+---
+import { Cards } from "@site/src/components/doc/cardv2";
+import { SdkCardContent} from "@site/src/components/doc/sdkCardContent";
+
+# SDKs
+
+**GO Feature Flag** stands out as a feature flag solution, distinct from others, due to our decision to fully support the [`Openfeature`](https://openfeature.dev) CNCF project.
+
+The benefit of choosing OpenFeature lies in its framework-agnostic nature. When utilizing OpenFeature SDKs, you minimize the effort required for switching to a different feature flag provider. This flexibility empowers you to make changes without being tied down to a particular vendor.
+
+To show our commitment to this initiative, **GO Feature Flag has opted not to develop any custom SDKs and instead relies entirely on OpenFeature SDKs**.
+In order to seamlessly integrate with our solution, we offer [`providers`](https://docs.openfeature.dev/docs/reference/concepts/provider) for GO Feature Flag in multiple programming languages.
+
+Rest assured, working with OpenFeature SDKs alongside GO Feature Flag providers is as straightforward as using any other feature flag solution. The added advantage is that you now adhere to a standard approach and avoid any vendor lock-in!
+
+## Server Providers
+<Cards cards={[
+  {
+    logoCss: "devicon-go-original-wordmark colored",
+    title:"GO",
+    badges:["Server"],
+    docLink: "./server_providers/openfeature_go",
+    content: <SdkCardContent
+      badgeUrl={"https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fproxy.golang.org%2Fgithub.com%2Fopen-feature%2Fgo-sdk-contrib%2Fproviders%2Fgo-feature-flag%2F%40latest&query=%24.Version&label=GO&color=blue&style=flat-square&log=go"}
+      features={["remoteEval", "localCache", "dynamicRefresh"]}/>
+  },
+  {
+    logoCss: "devicon-nodejs-plain colored",
+    title:"Node.JS",
+    badges:["Server"],
+    docLink: "./server_providers/openfeature_javascript",
+    content: <SdkCardContent
+      badgeUrl={"https://img.shields.io/npm/v/%40openfeature%2Fgo-feature-flag-provider?color=blue&style=flat-square&logo=npm"}
+      features={["remoteEval", "localCache", "dynamicRefresh"]}/>
+  },
+  {
+    logoCss: "devicon-java-plain colored",
+    title:"Java / Kotlin",
+    badges:["Server"],
+    docLink: "./server_providers/openfeature_java",
+    content: <SdkCardContent
+      badgeUrl={"https://img.shields.io/maven-central/v/dev.openfeature.contrib.providers/go-feature-flag?color=blue&style=flat-square&logo=java"}
+      features={["remoteEval", "localCache", "dynamicRefresh"]}/>
+  },
+  {
+    logoCss: "devicon-dot-net-plain-wordmark colored",
+    title:".Net",
+    badges:["Server"],
+    docLink: "./server_providers/openfeature_dotnet",
+    content: <SdkCardContent
+      badgeUrl={"https://img.shields.io/nuget/v/OpenFeature.Contrib.GOFeatureFlag?color=blue&style=flat-square&logo=nuget"}
+      features={["remoteEval"]}/>
+  },
+  {
+    logoCss: "devicon-python-plain colored",
+    title:"Python",
+    badges:["Server"],
+    docLink: "./server_providers/openfeature_python",
+    content: <SdkCardContent
+      badgeUrl={"https://img.shields.io/pypi/v/gofeatureflag-python-provider?color=blue&style=flat-square&logo=pypi"}
+      features={["remoteEval", "localCache", "dynamicRefresh"]}/>
+  },
+  {
+    logoCss: "devicon-php-plain colored",
+    title:"PHP",
+    badges:["Server"],
+    docLink: "./server_providers/openfeature_php",
+    content: <SdkCardContent
+      badgeUrl={"https://img.shields.io/packagist/v/open-feature/go-feature-flag-provider?logo=php&color=blue&style=flat-square"}
+      features={["remoteEval"]}/>
+  },
+  {
+    logoCss: "devicon-ruby-plain colored",
+    title:"Ruby",
+    badges:["Server"],
+    docLink: "./server_providers/openfeature_ruby",
+    content: <SdkCardContent
+      badgeUrl={"https://img.shields.io/gem/v/openfeature-go-feature-flag-provider?color=blue&style=flat-square&logo=ruby"}
+      features={["remoteEval"]}/>
+  }
+]}/>
+
+## Client Providers
+<Cards cards={[
+  {
+    logoCss: "devicon-typescript-plain colored",
+    title:"Typescript",
+    badges:["Client"],
+    docLink: "./client_providers/openfeature_javascript",
+    content: <SdkCardContent
+      badgeUrl={"https://img.shields.io/npm/v/%40openfeature%2Fgo-feature-flag-web-provider?color=blue&style=flat-square&logo=npm"}
+      features={["remoteEval", "localCache", "dynamicRefresh"]}/>
+  },
+  {
+    logoCss: "devicon-react-original-wordmark colored",
+    title:"React",
+    badges:["Client"],
+    docLink: "./client_providers/openfeature_react",
+    content: <SdkCardContent
+      badgeUrl={"https://img.shields.io/npm/v/%40openfeature%2Fgo-feature-flag-web-provider?color=blue&style=flat-square&logo=npm"}
+      features={["remoteEval", "localCache", "dynamicRefresh"]}/>
+  },
+  {
+    logoCss: "devicon-swift-plain colored",
+    title:"Swift (iOS/tvOS/macOS)",
+    badges:["Client"],
+    docLink: "./client_providers/openfeature_swift",
+    content: <SdkCardContent
+      badgeUrl={"https://img.shields.io/github/v/release/go-feature-flag/openfeature-swift-provider?label=Swift&amp;display_name=tag&style=flat-square&logo=Swift"}
+      features={["remoteEval", "localCache", "dynamicRefresh"]}/>
+  },
+  {
+    logoCss: "devicon-android-plain colored",
+    title:"Android / Kotlin",
+    badges:["Client"],
+    docLink: "./client_providers/openfeature_android",
+    content: <SdkCardContent
+      badgeUrl={"https://img.shields.io/maven-central/v/org.gofeatureflag.openfeature/gofeatureflag-kotlin-provider?color=blue&style=flat-square&logo=android"}
+      features={["remoteEval", "localCache", "dynamicRefresh"]}/>
+  }
+]}/>
+
+## How OpenFeature and GO Feature Flag are working together?
+
+To use the OpenFeature SDKs you need what we call a provider.
+A **provider** is responsible for performing flag evaluations. It provides an abstraction between **GO Feature Flag** and the OpenFeature SDK.
+
+A provider needs a backend service to perform the flag evaluation. This is why we have introduced the [**relay proxy**](../relay_proxy).
+This component retrieve your feature flag configuration file using the GO module and exposes APIs to get your flags variations.
+
+![](/docs/openfeature/concepts.png)
+
+With this simple architecture you have a central component _(the relay proxy)_ that is in charge of the flag evaluation, while the SDKs and providers are responsible to communicate with the relay proxy.
+
+This supports different languages the same way and facilitates you to use GO Feature Flag with all your favorite languages.
