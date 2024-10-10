@@ -60,7 +60,6 @@ func TestAllFlagsState(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			//init logger
 			exportDir, _ := os.MkdirTemp("", "export")
 			tt.config.DataExporter = ffclient.DataExporter{
 				FlushInterval:    1000,
