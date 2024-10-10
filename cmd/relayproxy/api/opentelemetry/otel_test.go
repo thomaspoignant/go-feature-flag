@@ -1,0 +1,188 @@
+package opentelemetry
+
+import (
+	"context"
+	"errors"
+	"os"
+	"strconv"
+	"testing"
+	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/log"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/trace/noop"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+	"go.uber.org/zap/zaptest/observer"
+)
+
+func TestInitSampler(t *testing.T) {
+	t.Run("OTEL_TRACES_SAMPLER unset", func(t *testing.T) {
+		sampler, err := initSampler("test")
+		require.NoError(t, err)
+		assert.Equal(t, sdktrace.AlwaysSample(), sampler)
+	})
+
+	t.Run("OTEL_TRACES_SAMPLER set to non-jaeger_remote", func(t *testing.T) {
+		t.Setenv("OTEL_TRACES_SAMPLER", "always_on")
+		sampler, err := initSampler("test")
+		require.NoError(t, err)
+		assert.Nil(t, sampler)
+	})
+
+	t.Run("OTEL_TRACES_SAMPLER set to jaeger_remote", func(t *testing.T) {
+		t.Setenv("OTEL_TRACES_SAMPLER", "jaeger_remote")
+		sampler, err := initSampler("test")
+		require.NoError(t, err)
+
+		// not really any way to assert on the sampler other than calling
+		// Description()...
+		assert.Equal(t, "JaegerRemoteSampler{}", sampler.Description())
+	})
+}
+
+func TestJaegerRemoteSamplerOpts(t *testing.T) {
+	t.Run("defaults", func(t *testing.T) {
+		url, refreshInterval, maxOperations, err := jaegerRemoteSamplerOpts()
+		require.NoError(t, err)
+		assert.Equal(t, defaultSamplerURL, url)
+		assert.Equal(t, defaultSamplingRefreshInterval, refreshInterval)
+		assert.Equal(t, defaultSamplingMaxOperations, maxOperations)
+	})
+
+	t.Run("JAEGER_SAMPLER_MANAGER_HOST_PORT set", func(t *testing.T) {
+		expected := "http://example.com:1234"
+		t.Setenv("JAEGER_SAMPLER_MANAGER_HOST_PORT", expected)
+
+		url, _, _, err := jaegerRemoteSamplerOpts()
+		require.NoError(t, err)
+		assert.Equal(t, expected, url)
+	})
+
+	t.Run("JAEGER_SAMPLER_REFRESH_INTERVAL set", func(t *testing.T) {
+		expected := 42 * time.Second
+		t.Setenv("JAEGER_SAMPLER_REFRESH_INTERVAL", expected.String())
+
+		_, refreshInterval, _, err := jaegerRemoteSamplerOpts()
+		require.NoError(t, err)
+		assert.Equal(t, expected, refreshInterval)
+	})
+
+	t.Run("JAEGER_SAMPLER_MAX_OPERATIONS set", func(t *testing.T) {
+		expected := 42
+		t.Setenv("JAEGER_SAMPLER_MAX_OPERATIONS", strconv.Itoa(expected))
+
+		_, _, maxOperations, err := jaegerRemoteSamplerOpts()
+		require.NoError(t, err)
+		assert.Equal(t, expected, maxOperations)
+	})
+
+	t.Run("invalid JAEGER_SAMPLER_REFRESH_INTERVAL", func(t *testing.T) {
+		t.Setenv("JAEGER_SAMPLER_REFRESH_INTERVAL", "bogus")
+
+		_, _, _, err := jaegerRemoteSamplerOpts()
+		require.Error(t, err)
+	})
+
+	t.Run("invalid JAEGER_SAMPLER_MAX_OPERATIONS", func(t *testing.T) {
+		t.Setenv("JAEGER_SAMPLER_MAX_OPERATIONS", "bogus")
+
+		_, _, _, err := jaegerRemoteSamplerOpts()
+		require.Error(t, err)
+	})
+}
+
+func TestInitResource(t *testing.T) {
+	t.Run("defaults, no env", func(t *testing.T) {
+		res, err := initResource(context.Background(), "test", "1.2.3")
+		require.NoError(t, err)
+
+		rmap := map[string]attribute.Value{}
+		for _, attr := range res.Attributes() {
+			rmap[string(attr.Key)] = attr.Value
+		}
+
+		// just spot-check a few things
+		assert.Equal(t, "test", rmap["service.name"].AsString())
+		assert.Equal(t, "1.2.3", rmap["service.version"].AsString())
+		assert.Equal(t, "go", rmap["process.runtime.name"].AsString())
+	})
+
+	t.Run("with OTEL_RESOURCE_ATTRIBUTES set", func(t *testing.T) {
+		t.Setenv("OTEL_RESOURCE_ATTRIBUTES", "key1=val1,key2=val2")
+
+		res, err := initResource(context.Background(), "test", "1.2.3")
+		require.NoError(t, err)
+
+		rmap := map[string]attribute.Value{}
+		for _, attr := range res.Attributes() {
+			rmap[string(attr.Key)] = attr.Value
+		}
+
+		assert.Equal(t, "val1", rmap["key1"].AsString())
+		assert.Equal(t, "val2", rmap["key2"].AsString())
+	})
+}
+
+func TestInit(t *testing.T) {
+	logger := log.InitLogger().ZapLogger
+
+	svc := NewOtelService()
+
+	t.Run("no config", func(t *testing.T) {
+		err := svc.Init(context.Background(), logger, config.Config{})
+		require.NoError(t, err)
+		assert.NotNil(t, otel.GetTracerProvider())
+	})
+
+	t.Run("disabled", func(t *testing.T) {
+		t.Setenv("OTEL_SDK_DISABLED", "true")
+		err := svc.Init(context.Background(), logger, config.Config{})
+		require.NoError(t, err)
+		assert.Equal(t, noop.NewTracerProvider(), otel.GetTracerProvider())
+	})
+
+	t.Run("support openTelemetryOtlpEndpoint", func(t *testing.T) {
+		err := svc.Init(context.Background(), logger, config.Config{
+			OpenTelemetryOtlpEndpoint: "https://example.com:4318",
+		})
+		require.NoError(t, err)
+		assert.Equal(t, "https://example.com:4318", os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT"))
+	})
+
+	t.Run("OTEL_EXPORTER_OTLP_ENDPOINT takes precedence", func(t *testing.T) {
+		t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "https://example.com:4318")
+
+		err := svc.Init(context.Background(), logger, config.Config{
+			OpenTelemetryOtlpEndpoint: "https://bogus.com:4317",
+		})
+		require.NoError(t, err)
+		assert.Equal(t, "https://example.com:4318", os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT"))
+	})
+
+	t.Run("error handler logs to zap", func(t *testing.T) {
+		obs, logs := observer.New(zap.InfoLevel)
+		testLogger := zap.New(obs)
+
+		expectedErr := errors.New("test error")
+
+		err := svc.Init(context.Background(), testLogger, config.Config{})
+		require.NoError(t, err)
+
+		otel.GetErrorHandler().Handle(expectedErr)
+
+		require.Len(t, logs.All(), 1)
+
+		want := []observer.LoggedEntry{{
+			Entry:   zapcore.Entry{Level: zap.ErrorLevel, Message: "OTel error"},
+			Context: []zapcore.Field{zap.Error(expectedErr)},
+		}}
+
+		assert.Equal(t, want, logs.AllUntimed())
+	})
+}
