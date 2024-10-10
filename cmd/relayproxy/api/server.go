@@ -144,7 +144,7 @@ func (s *Server) Start() {
 // StartAwsLambda is starting the relay proxy as an AWS Lambda
 func (s *Server) StartAwsLambda() {
 	adapter := newAwsLambdaHandler(s.apiEcho)
-	adapter.Start()
+	adapter.Start(s.config.AwsLambdaAdapter)
 }
 
 // Stop shutdown the API server
