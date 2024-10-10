@@ -2,6 +2,10 @@ basePath: /
 definitions:
   controller.FlagChangeResponse:
     properties:
+      flags:
+        additionalProperties:
+          type: integer
+        type: object
       hash:
         type: integer
     type: object
