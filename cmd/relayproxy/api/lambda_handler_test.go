@@ -79,7 +79,7 @@ func TestAwsLambdaHandler_GetAdapter(t *testing.T) {
 				AwsLambdaAdapter: tt.mode,
 				Retriever: &config.RetrieverConf{
 					Kind: "file",
-					Path: "/Users/thomas.poignant/dev/thomaspoignant/go-feature-flag/testdata/flag-config.yaml",
+					Path: "../../../testdata/flag-config.yaml",
 				},
 			}
 			goff, err := service.NewGoFeatureFlagClient(c, z, []notifier.Notifier{})
