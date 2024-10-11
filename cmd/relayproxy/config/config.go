@@ -216,6 +216,11 @@ type Config struct {
 	// StartAsAwsLambda (optional) if true, the relay proxy will start ready to be launched as AWS Lambda
 	StartAsAwsLambda bool `mapstructure:"startAsAwsLambda" koanf:"startasawslambda"`
 
+	// AwsLambdaAdapter (optional) is the adapter to use when the relay proxy is started as an AWS Lambda.
+	// Possible values are "APIGatewayV1", "APIGatewayV2" and "ALB"
+	// Default: "APIGatewayV2"
+	AwsLambdaAdapter string `mapstructure:"awsLambdaAdapter" koanf:"awslambdaadapter"`
+
 	// EvaluationContextEnrichment (optional) will be merged with the evaluation context sent during the evaluation.
 	// It is useful to add common attributes to all the evaluations, such as a server version, environment, ...
 	//

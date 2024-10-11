@@ -2,31 +2,54 @@ package api
 
 import (
 	"context"
+	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
-	"github.com/aws/aws-lambda-go/lambda"
 	echoadapter "github.com/awslabs/aws-lambda-go-api-proxy/echo"
 	"github.com/labstack/echo/v4"
 )
 
-// newAwsLambdaHandler is creating a new awsLambdaHandler struct with the echoadapter
+// newAwsLambdaHandlerManager is creating a new awsLambdaHandler struct with the echoadapter
 // to proxy all lambda event to echo.
-func newAwsLambdaHandler(echoInstance *echo.Echo) awsLambdaHandler {
+func newAwsLambdaHandlerManager(echoInstance *echo.Echo) awsLambdaHandler {
 	return awsLambdaHandler{
-		adapter: echoadapter.NewV2(echoInstance),
+		adapterAPIGtwV2: echoadapter.NewV2(echoInstance),
+		adapterALB:      echoadapter.NewALB(echoInstance),
+		adapterAPIGtwV1: echoadapter.New(echoInstance),
 	}
 }
 
 type awsLambdaHandler struct {
-	adapter *echoadapter.EchoLambdaV2
+	adapterAPIGtwV2 *echoadapter.EchoLambdaV2
+	adapterAPIGtwV1 *echoadapter.EchoLambda
+	adapterALB      *echoadapter.EchoLambdaALB
 }
 
-func (h *awsLambdaHandler) Start() {
-	lambda.Start(h.Handler)
+func (h *awsLambdaHandler) GetAdapter(mode string) interface{} {
+	switch strings.ToUpper(mode) {
+	case "APIGATEWAYV1":
+		return h.HandlerAPIGatewayV1
+	case "ALB":
+		return h.HandlerALB
+	default:
+		return h.HandlerAPIGatewayV2
+	}
 }
 
-// Handler is the function that proxy the lambda events to echo calls.
-func (h *awsLambdaHandler) Handler(ctx context.Context, req events.APIGatewayV2HTTPRequest) (
+// HandlerAPIGatewayV2 is the function that proxy the lambda events to echo calls for API Gateway V2.
+func (h *awsLambdaHandler) HandlerAPIGatewayV2(ctx context.Context, req events.APIGatewayV2HTTPRequest) (
 	events.APIGatewayV2HTTPResponse, error) {
-	return h.adapter.ProxyWithContext(ctx, req)
+	return h.adapterAPIGtwV2.ProxyWithContext(ctx, req)
+}
+
+// HandlerAPIGatewayV1 is the function that proxy the lambda events to echo calls for API Gateway V1.
+func (h *awsLambdaHandler) HandlerAPIGatewayV1(ctx context.Context, req events.APIGatewayProxyRequest) (
+	events.APIGatewayProxyResponse, error) {
+	return h.adapterAPIGtwV1.ProxyWithContext(ctx, req)
+}
+
+// HandlerALB is the function that proxy the lambda events to echo calls for API Gateway V1.
+func (h *awsLambdaHandler) HandlerALB(ctx context.Context, req events.ALBTargetGroupRequest) (
+	events.ALBTargetGroupResponse, error) {
+	return h.adapterALB.ProxyWithContext(ctx, req)
 }

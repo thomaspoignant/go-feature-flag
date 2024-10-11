@@ -584,6 +584,12 @@ const docTemplate = `{
         "controller.FlagChangeResponse": {
             "type": "object",
             "properties": {
+                "flags": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer"
+                    }
+                },
                 "hash": {
                     "type": "integer"
                 }
