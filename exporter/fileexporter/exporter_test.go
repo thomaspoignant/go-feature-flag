@@ -3,6 +3,7 @@ package fileexporter_test
 import (
 	"context"
 	"os"
+	"path/filepath"
 	"runtime"
 	"testing"
 
@@ -16,6 +17,13 @@ import (
 )
 
 func TestFile_Export(t *testing.T) {
+	// Create a temporary directory for test file operations
+	tempDir, err := os.MkdirTemp("", "fileexporter-test")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tempDir) // Clean up after tests
+
 	hostname, _ := os.Hostname()
 	type fields struct {
 		Format                  string
@@ -39,6 +47,8 @@ func TestFile_Export(t *testing.T) {
 		args     args
 		wantErr  bool
 		expected expected
+		setup    func(t *testing.T, dir string)
+		teardown func(t *testing.T, dir string)
 	}{
 		{
 			name:    "all default json",
@@ -233,10 +243,10 @@ func TestFile_Export(t *testing.T) {
 			},
 		},
 		{
-			name:    "invalid outputdir",
-			wantErr: true,
+			name:    "non-existent outputdir",
+			wantErr: false,
 			fields: fields{
-				OutputDir: "/tmp/foo/bar/",
+				OutputDir: filepath.Join(tempDir, "non-existent-dir"),
 			},
 			args: args{
 				featureEvents: []exporter.FeatureEvent{
@@ -246,9 +256,13 @@ func TestFile_Export(t *testing.T) {
 					},
 					{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
-						Variation: "Default", Value: "YO2", Default: false, Source: "SERVER",
+						Variation: "Default", Value: "YO2", Default: false, Version: "127", Source: "SERVER",
 					},
 				},
+			},
+			expected: expected{
+				fileNameRegex: "^flag-variation-" + hostname + "-[0-9]*\\.json$",
+				content:       "./testdata/all_default.json",
 			},
 		},
 		{
@@ -291,13 +305,54 @@ func TestFile_Export(t *testing.T) {
 			},
 		},
 		{
-			name:    "invalid parquet outputdir",
+			name:    "outputdir with invalid permissions",
 			wantErr: true,
 			fields: fields{
 				Format:    "parquet",
-				OutputDir: "/tmp/foo/bar/",
+				OutputDir: filepath.Join(tempDir, "invalid-permissions-dir"),
 			},
-			args: args{},
+			args: args{
+				featureEvents: []exporter.FeatureEvent{
+					{
+						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
+						Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
+					},
+				},
+			},
+			setup: func(t *testing.T, dir string) {
+				err := os.MkdirAll(dir, 0755)
+				assert.NoError(t, err)
+				err = os.Chmod(dir, 0000) // Remove all permissions
+				assert.NoError(t, err)
+			},
+			teardown: func(t *testing.T, dir string) {
+				err := os.Chmod(dir, 0755) // Restore permissions for cleanup
+				assert.NoError(t, err)
+			},
+		},
+		{
+			name:    "outputdir with trailing slash",
+			wantErr: false,
+			fields: fields{
+				Format:    "json",
+				OutputDir: filepath.Join(tempDir, "dir-with-trailing-slash") + "/",
+			},
+			args: args{
+				featureEvents: []exporter.FeatureEvent{
+					{
+						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
+						Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
+					},
+					{
+						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
+						Variation: "Default", Value: "YO2", Default: false, Version: "127", Source: "SERVER",
+					},
+				},
+			},
+			expected: expected{
+				fileNameRegex: "^flag-variation-" + hostname + "-[0-9]*\\.json$",
+				content:       "./testdata/all_default.json",
+			},
 		},
 	}
 	for _, tt := range tests {
@@ -306,6 +361,14 @@ func TestFile_Export(t *testing.T) {
 			if tt.fields.OutputDir == "" {
 				outputDir, _ = os.MkdirTemp("", "fileExporter")
 				defer os.Remove(outputDir)
+			}
+
+			if tt.setup != nil {
+				tt.setup(t, outputDir)
+			}
+
+			if tt.teardown != nil {
+				defer tt.teardown(t, outputDir)
 			}
 
 			f := &fileexporter.Exporter{
@@ -320,6 +383,12 @@ func TestFile_Export(t *testing.T) {
 				assert.Error(t, err, "export method should error")
 				return
 			}
+
+			assert.NoError(t, err)
+
+			// Check if the directory was created
+			_, err = os.Stat(outputDir)
+			assert.NoError(t, err, "Output directory should exist")
 
 			files, _ := os.ReadDir(outputDir)
 			assert.Equal(t, 1, len(files), "Directory %s should have only one file", outputDir)
