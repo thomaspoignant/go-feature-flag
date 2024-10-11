@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -143,8 +144,12 @@ func (s *Server) Start() {
 
 // StartAwsLambda is starting the relay proxy as an AWS Lambda
 func (s *Server) StartAwsLambda() {
-	adapter := newAwsLambdaHandler(s.apiEcho)
-	adapter.Start()
+	lambda.Start(s.getLambdaHandler())
+}
+
+func (s *Server) getLambdaHandler() interface{} {
+	handlerMngr := newAwsLambdaHandlerManager(s.apiEcho)
+	return handlerMngr.GetAdapter(s.config.AwsLambdaAdapter)
 }
 
 // Stop shutdown the API server
