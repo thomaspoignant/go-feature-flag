@@ -44,5 +44,4 @@ func (s *Server) initMonitoringEndpoint(echoInstance *echo.Echo) {
 	if s.config.Debug {
 		pprof.Register(echoInstance)
 	}
-
 }
