@@ -14,7 +14,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func TestXXX(t *testing.T) {
+func TestPprofEndpointsStarts(t *testing.T) {
 	type test struct {
 		name               string
 		MonitoringPort     int
@@ -30,13 +30,13 @@ func TestXXX(t *testing.T) {
 		{
 			name:               "pprof available in monitoring port",
 			Debug:              true,
-			MonitoringPort:     46000,
+			MonitoringPort:     1032,
 			expectedStatusCode: http.StatusOK,
 		},
 		{
 			name:               "pprof not available ii debug not enabled",
 			Debug:              false,
-			MonitoringPort:     46000,
+			MonitoringPort:     1032,
 			expectedStatusCode: http.StatusNotFound,
 		},
 	}
@@ -51,7 +51,7 @@ func TestXXX(t *testing.T) {
 					Path: "../../../testdata/flag-config.yaml",
 				},
 				MonitoringPort: tt.MonitoringPort,
-				ListenPort:     46001,
+				ListenPort:     1031,
 				Debug:          tt.Debug,
 			}
 
