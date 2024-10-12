@@ -5,9 +5,11 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
@@ -418,4 +420,33 @@ func TestFile_Export(t *testing.T) {
 func TestFile_IsBulk(t *testing.T) {
 	exporter := fileexporter.Exporter{}
 	assert.True(t, exporter.IsBulk(), "DeprecatedExporter is a bulk exporter")
+}
+
+func TestExportWithoutOutputDir(t *testing.T) {
+	featureEvents := []exporter.FeatureEvent{{
+		Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
+		Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
+	}}
+
+	filePrefix := "test-flag-variation-EXAMPLE-"
+	e := fileexporter.Exporter{
+		Format:   "json",
+		Filename: filePrefix + "{{ .Timestamp}}.{{ .Format}}",
+	}
+	err := e.Export(context.Background(), nil, featureEvents)
+	require.NoError(t, err)
+
+	// check that a file exist
+	files, err := os.ReadDir("./")
+	require.NoError(t, err)
+
+	countFileWithPrefix := 0
+	for _, file := range files {
+		if strings.HasPrefix(file.Name(), filePrefix) {
+			countFileWithPrefix++
+			err := os.Remove(file.Name())
+			require.NoError(t, err)
+		}
+	}
+	assert.True(t, countFileWithPrefix > 0, "At least one file should have been created")
 }
