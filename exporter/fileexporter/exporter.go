@@ -80,7 +80,7 @@ func (f *Exporter) Export(_ context.Context, _ *fflog.FFLogger, featureEvents []
 		filePath = filename
 	} else {
 		// Ensure OutputDir exists or create it
-		if err := os.MkdirAll(outputDir, 0755); err != nil {
+		if err := os.MkdirAll(outputDir, 0o644); err != nil {
 			return fmt.Errorf("failed to create output directory: %v", err)
 		}
 		filePath = filepath.Join(outputDir, filename)
