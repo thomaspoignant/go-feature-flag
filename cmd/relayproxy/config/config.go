@@ -146,7 +146,9 @@ type Config struct {
 	// HideBanner (optional) if true, we don't display the go-feature-flag relay proxy banner
 	HideBanner bool `mapstructure:"hideBanner" koanf:"hidebanner"`
 
-	// Debug (optional) if true, go-feature-flag relay proxy will run on debug mode, with more logs and custom responses
+	// Debug (optional) if true, go-feature-flag relay proxy will run on debug mode, with more logs and custom responses.
+	// It will also start the pprof endpoints on the same port as the monitoring.
+	// Default: false
 	Debug bool `mapstructure:"debug" koanf:"debug"`
 
 	// EnableSwagger (optional) to have access to the swagger

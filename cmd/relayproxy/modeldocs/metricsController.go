@@ -2,7 +2,7 @@ package modeldocs
 
 import "github.com/labstack/echo/v4"
 
-// FakeMetricsController is the entry point for the allFlags endpoint
+// FakeMetricsController is a fake entry point for swagger documentation
 //
 // @Summary      Prometheus endpoint
 // @Tags Monitoring
