@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"sync"
@@ -23,7 +24,6 @@ type Exporter struct {
 	Format string
 
 	// OutputDir is the location of the directory where to store the exported files
-	// It should finish with a /
 	// Default: the current directory
 	OutputDir string
 
@@ -72,7 +72,19 @@ func (f *Exporter) Export(_ context.Context, _ *fflog.FFLogger, featureEvents []
 		return err
 	}
 
-	filePath := f.OutputDir + "/" + filename
+	// Handle empty OutputDir and remove trailing slash
+	outputDir := strings.TrimRight(f.OutputDir, "/")
+
+	var filePath string
+	if outputDir == "" {
+		filePath = filename
+	} else {
+		// Ensure OutputDir exists or create it
+		if err := os.MkdirAll(outputDir, 0755); err != nil {
+			return fmt.Errorf("failed to create output directory: %v", err)
+		}
+		filePath = filepath.Join(outputDir, filename)
+	}
 
 	if f.Format == "parquet" {
 		return f.writeParquet(filePath, featureEvents)
