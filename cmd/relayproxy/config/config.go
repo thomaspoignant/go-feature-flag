@@ -146,7 +146,9 @@ type Config struct {
 	// HideBanner (optional) if true, we don't display the go-feature-flag relay proxy banner
 	HideBanner bool `mapstructure:"hideBanner" koanf:"hidebanner"`
 
-	// Debug (optional) if true, go-feature-flag relay proxy will run on debug mode, with more logs and custom responses
+	// Debug (optional) if true, go-feature-flag relay proxy will run on debug mode, with more logs and custom responses.
+	// It will also start the pprof endpoints on the same port as the monitoring.
+	// Default: false
 	Debug bool `mapstructure:"debug" koanf:"debug"`
 
 	// EnableSwagger (optional) to have access to the swagger
@@ -215,6 +217,11 @@ type Config struct {
 
 	// StartAsAwsLambda (optional) if true, the relay proxy will start ready to be launched as AWS Lambda
 	StartAsAwsLambda bool `mapstructure:"startAsAwsLambda" koanf:"startasawslambda"`
+
+	// AwsLambdaAdapter (optional) is the adapter to use when the relay proxy is started as an AWS Lambda.
+	// Possible values are "APIGatewayV1", "APIGatewayV2" and "ALB"
+	// Default: "APIGatewayV2"
+	AwsLambdaAdapter string `mapstructure:"awsLambdaAdapter" koanf:"awslambdaadapter"`
 
 	// EvaluationContextEnrichment (optional) will be merged with the evaluation context sent during the evaluation.
 	// It is useful to add common attributes to all the evaluations, such as a server version, environment, ...

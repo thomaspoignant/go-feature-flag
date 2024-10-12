@@ -29,7 +29,7 @@ ffclient.Config{
 
 | Field  | Description  |
 |---|---|
-|`OutputDir`   | OutputDir is the location of the directory to store the exported files.<br/>It should finish with a `/`.  |
+|`OutputDir`   | OutputDir is the location of the directory to store the exported files.  |
 |`Format`   |   _(Optional)_ Format is the output format you want in your exported file.<br/>Available format: **`JSON`**, **`CSV`**, **`Parquet`**.<br/>**Default: `JSON`** |
 |`Filename`   | _(Optional)_ Filename is the name of your output file.<br/>You can use a templated config to define the name of your exported files.<br/>Available replacements are `{{ .Hostname}}`, `{{ .Timestamp}}` and `{{ .Format}}`<br/>**Default: `flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}`**|
 |`CsvTemplate`   | _(Optional)_ CsvTemplate is used if your output format is CSV.<br/>This field will be ignored if you are using format other than CSV.<br/>You can decide which fields you want in your CSV line with a go-template syntax, please check [internal/exporter/feature_event.go](https://github.com/thomaspoignant/go-feature-flag/blob/main/internal/exporter/feature_event.go) to see the available fields.<br/>**Default:** `{{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}}\n` |

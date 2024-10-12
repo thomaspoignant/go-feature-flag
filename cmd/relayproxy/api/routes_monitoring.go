@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/labstack/echo-contrib/echoprometheus"
+	"github.com/labstack/echo-contrib/pprof"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	custommiddleware "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"
@@ -39,4 +40,8 @@ func (s *Server) initMonitoringEndpoint(echoInstance *echo.Echo) {
 	// health Routes
 	echoInstance.GET("/health", cHealth.Handler)
 	echoInstance.GET("/info", cInfo.Handler)
+
+	if s.config.Debug {
+		pprof.Register(echoInstance)
+	}
 }

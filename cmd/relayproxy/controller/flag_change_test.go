@@ -50,8 +50,8 @@ func TestPIFlagChange_WithConfigChange(t *testing.T) {
 	handlerErr := ctrl.Handler(c)
 	assert.NoError(t, handlerErr)
 
-	want := "{\"hash\":2343199996}\n"
-	assert.Equal(t, want, rec.Body.String())
+	want, _ := os.ReadFile("../testdata/controller/flag_change/flag_change_with_config_change.json")
+	assert.JSONEq(t, string(want), rec.Body.String())
 	assert.Equal(t, http.StatusOK, rec.Code)
 
 	content, err = os.ReadFile("../testdata/controller/config_flags_v2.yaml")
@@ -104,8 +104,8 @@ func TestPIFlagChange_WithoutConfigChange(t *testing.T) {
 	handlerErr := ctrl.Handler(c)
 	assert.NoError(t, handlerErr)
 
-	want := "{\"hash\":2343199996}\n"
-	assert.Equal(t, want, rec.Body.String())
+	want, _ := os.ReadFile("../testdata/controller/flag_change/flag_change_without_config_change.json")
+	assert.JSONEq(t, string(want), rec.Body.String())
 	assert.Equal(t, http.StatusOK, rec.Code)
 
 	time.Sleep(1500 * time.Millisecond)
@@ -115,5 +115,5 @@ func TestPIFlagChange_WithoutConfigChange(t *testing.T) {
 	c2.SetPath("/v1/flag/change")
 	handlerErr2 := ctrl.Handler(c2)
 	assert.NoError(t, handlerErr2)
-	assert.Equal(t, want, rec2.Body.String())
+	assert.JSONEq(t, string(want), rec2.Body.String())
 }

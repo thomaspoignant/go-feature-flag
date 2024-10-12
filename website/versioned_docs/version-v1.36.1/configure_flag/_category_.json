@@ -1,0 +1,10 @@
+{
+  "position": 20,
+  "collapsible": true,
+  "collapsed": true,
+  "label": "Configure your feature flags",
+  "link": {
+    "type": "generated-index",
+    "title": "Configure your feature flags"
+  }
+}

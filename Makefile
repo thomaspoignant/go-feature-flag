@@ -80,7 +80,7 @@ coverage: ## Run the tests of the project and export the coverage
 	&& cat coverage.cov.tmp | grep -v "/examples/" > coverage.cov
 
 bench: ## Launch the benchmark test
-	 $(GOTEST) -bench Benchmark -cpu 2 -run=^$$
+	 $(GOTEST) -tags=bench -bench Benchmark -cpu 2 -run=^$$
 
 ## Lint:
 lint: ## Use golintci-lint on your project

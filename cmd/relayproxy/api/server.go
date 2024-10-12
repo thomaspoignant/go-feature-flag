@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -119,10 +120,12 @@ func (s *Server) Start() {
 	}
 
 	// start the OpenTelemetry tracing service
-	err := s.otelService.Init(context.Background(), s.zapLog, *s.config)
-	if err != nil {
-		s.zapLog.Error("error while initializing Otel", zap.Error(err))
-		// we can continue because otel is not mandatory to start the server
+	if s.config.OpenTelemetryOtlpEndpoint != "" {
+		err := s.otelService.Init(context.Background(), *s.config)
+		if err != nil {
+			s.zapLog.Error("error while initializing Otel", zap.Error(err))
+			// we can continue because otel is not mandatory to start the server
+		}
 	}
 
 	// starting the main application
@@ -135,7 +138,7 @@ func (s *Server) Start() {
 		zap.String("address", address),
 		zap.String("version", s.config.Version))
 
-	err = s.apiEcho.Start(address)
+	err := s.apiEcho.Start(address)
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		s.zapLog.Fatal("Error starting relay proxy", zap.Error(err))
 	}
@@ -143,8 +146,12 @@ func (s *Server) Start() {
 
 // StartAwsLambda is starting the relay proxy as an AWS Lambda
 func (s *Server) StartAwsLambda() {
-	adapter := newAwsLambdaHandler(s.apiEcho)
-	adapter.Start()
+	lambda.Start(s.getLambdaHandler())
+}
+
+func (s *Server) getLambdaHandler() interface{} {
+	handlerMngr := newAwsLambdaHandlerManager(s.apiEcho)
+	return handlerMngr.GetAdapter(s.config.AwsLambdaAdapter)
 }
 
 // Stop shutdown the API server
