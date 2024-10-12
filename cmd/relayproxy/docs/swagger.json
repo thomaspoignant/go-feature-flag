@@ -55,6 +55,26 @@
                 }
             }
         },
+        "/debug/pprof/": {
+            "get": {
+                "description": "This endpoint is provided by the echo pprof middleware.\nTo know more please check this blogpost from the GO team https://go.dev/blog/pprof.\nVisit the page /debug/pprof/ to see the available endpoints, all endpoint are not in the swagger documentation because they are standard pprof endpoints.\nThis endpoint is only available in debug mode.",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Profiling"
+                ],
+                "summary": "pprof endpoint",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/health": {
             "get": {
                 "description": "Making a **GET** request to the URL path `/health` will tell you if the relay proxy is ready to serve\ntraffic.\n\nThis is useful especially for loadbalancer to know that they can send traffic to the service.",

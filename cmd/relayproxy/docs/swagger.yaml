@@ -444,6 +444,23 @@ paths:
       summary: This endpoint is used to force the refresh of the flags in the cache.
       tags:
       - Admin API to manage GO Feature Flag
+  /debug/pprof/:
+    get:
+      description: |-
+        This endpoint is provided by the echo pprof middleware.
+        To know more please check this blogpost from the GO team https://go.dev/blog/pprof.
+        Visit the page /debug/pprof/ to see the available endpoints, all endpoint are not in the swagger documentation because they are standard pprof endpoints.
+        This endpoint is only available in debug mode.
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: pprof endpoint
+      tags:
+      - Profiling
   /health:
     get:
       description: |-
