@@ -3,6 +3,7 @@
 
 const lightCodeTheme = require('prism-react-renderer').themes.github;
 const darkCodeTheme = require('prism-react-renderer').themes.dracula;
+const tailwindPlugin = require('./tailwind-config.cjs');
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -16,6 +17,7 @@ const config = {
   organizationName: 'thomaspoignant',
   projectName: 'go-feature-flag',
   trailingSlash: false,
+  plugins: [tailwindPlugin],
 
   customFields: {
     description:
@@ -98,7 +100,7 @@ const config = {
     ],
   ],
   themeConfig:
-    /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
+  /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       announcementBar: {
         id: 'support_usz', // Increment on change
