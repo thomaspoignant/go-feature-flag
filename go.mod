@@ -3,7 +3,7 @@ module github.com/thomaspoignant/go-feature-flag
 go 1.22.8
 
 require (
-	cloud.google.com/go/pubsub v1.43.0
+	cloud.google.com/go/pubsub v1.44.0
 	cloud.google.com/go/storage v1.44.0
 	github.com/BurntSushi/toml v1.4.0
 	github.com/IBM/sarama v1.43.3
