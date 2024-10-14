@@ -6,7 +6,7 @@ import { RiOpenSourceFill } from "react-icons/ri";
 
 export default function Pricing() {
   return (
-    <div className="relative isolate px-6 py-24 sm:py-32 lg:px-8">
+    <div className="relative isolate px-6 py-6 sm:py-12 lg:px-8">
       <div
         className="absolute inset-x-0 -top-3 -z-10 transform-gpu overflow-hidden px-36 blur-3xl"
         aria-hidden="true"

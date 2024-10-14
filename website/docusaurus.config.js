@@ -3,7 +3,6 @@
 
 const lightCodeTheme = require('prism-react-renderer').themes.github;
 const darkCodeTheme = require('prism-react-renderer').themes.dracula;
-const tailwindPlugin = require('./tailwind-config.cjs');
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -17,7 +16,19 @@ const config = {
   organizationName: 'thomaspoignant',
   projectName: 'go-feature-flag',
   trailingSlash: false,
-  plugins: [tailwindPlugin],
+  plugins: [
+    async function myPlugin(context, options) {
+      return {
+        name: 'docusaurus-tailwindcss',
+        configurePostCss(postcssOptions) {
+          // Appends TailwindCSS and AutoPrefixer.
+          postcssOptions.plugins.push(require('tailwindcss'));
+          postcssOptions.plugins.push(require('autoprefixer'));
+          return postcssOptions;
+        },
+      };
+    },
+  ],
 
   customFields: {
     description:
@@ -70,7 +81,6 @@ const config = {
           customCss: [
             require.resolve('./src/css/custom.css'),
             require.resolve('./src/css/pushy-buttons.css'), //https://github.com/iRaul/pushy-buttons
-            require.resolve('./src/css/simplegrid.css'), //https://thisisdallas.github.io/Simple-Grid/
           ],
         },
         sitemap: {
@@ -100,7 +110,7 @@ const config = {
     ],
   ],
   themeConfig:
-  /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
+    /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       announcementBar: {
         id: 'support_usz', // Increment on change
@@ -308,7 +318,7 @@ const config = {
           'csharp',
           'yaml',
           'python',
-          'ruby'
+          'ruby',
         ],
       },
     }),

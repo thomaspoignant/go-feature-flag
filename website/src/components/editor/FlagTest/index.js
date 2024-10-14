@@ -59,22 +59,22 @@ export function FlagTest({flagInfo}) {
   return (
     <div>
       <h2>Test your flag</h2>
-      <div className="grid-pad grid">
-        <div className="col-5-12">
+      <div className="grid grid-cols-12">
+        <div className="col-span-5">
           <h4>Evaluation Context</h4>
           <JsonEditor
             label={`${flagInfo}.context`}
             value={JSON.stringify(defaultContext, ' ', 2)}
           />
         </div>
-        <div className={clsx('col-2-12', styles.buttonContainer)}>
+        <div className={clsx('col-span-2', styles.buttonContainer)}>
           <button
             className="pushy__btn pushy__btn--md pushy__btn--black"
             onClick={submit}>
             Evaluate Flag
           </button>
         </div>
-        <div className="col-5-12">
+        <div className="col-span-5">
           <h4>Flag evaluation Details</h4>
           <div>
             {data.resolutionDetail !== undefined && (

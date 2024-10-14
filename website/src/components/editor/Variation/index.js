@@ -11,6 +11,7 @@ Variations.propTypes = {
   type: PropTypes.string,
   label: PropTypes.string.isRequired,
 };
+
 export function Variations({type, label}) {
   const {control} = useFormContext();
   const {fields, append, remove} = useFieldArray({
@@ -25,7 +26,7 @@ export function Variations({type, label}) {
   return (
     <div>
       <h2>Variations</h2>
-      <div className="grid grid-pad">
+      <div className="grid grid-cols-12">
         {fields.map((field, index) => (
           <Variation
             type={type}
@@ -54,6 +55,7 @@ Variation.propTypes = {
   index: PropTypes.number.isRequired,
   icon: PropTypes.string,
 };
+
 function Variation({type, label, remove, index, icon}) {
   const {register} = useFormContext();
   const valueField = (type, label, register) => {
@@ -76,15 +78,15 @@ function Variation({type, label, remove, index, icon}) {
     remove(index);
   };
   return (
-    <div className={styles.variation}>
-      <div className={clsx('col-4-12 mobile-col-5-12', styles.icons)}>
+    <>
+      <div className={clsx('col-span-5 mb-5 pb-1', styles.icons)}>
         <div className={styles.icon}>{icon}</div>
         <Input displayText="Name" label={`${label}.name`} required={true} />
       </div>
-      <div className={clsx('col-6-12 mobile-col-7-12')}>
+      <div className={clsx('col-span-6')}>
         {valueField(type, label + '.value', register)}
       </div>
-      <div className="col-1-12 mobile-col-1-12">
+      <div className="col-span-1">
         {
           <button className={styles.buttonPlus} onMouseDown={handleOnClick}>
             <span className="fa-stack fa-1x">
@@ -98,6 +100,6 @@ function Variation({type, label, remove, index, icon}) {
           </button>
         }
       </div>
-    </div>
+    </>
   );
 }
