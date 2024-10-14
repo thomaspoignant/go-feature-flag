@@ -155,8 +155,8 @@ func (s *Server) getLambdaHandler() interface{} {
 }
 
 // Stop shutdown the API server
-func (s *Server) Stop() {
-	err := s.otelService.Stop()
+func (s *Server) Stop(ctx context.Context) {
+	err := s.otelService.Stop(ctx)
 	if err != nil {
 		s.zapLog.Error("impossible to stop otel", zap.Error(err))
 	}
