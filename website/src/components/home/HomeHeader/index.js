@@ -45,8 +45,8 @@ export function HomeHeader() {
         </svg>
       </div>
       <div className={clsx('container', styles.container)}>
-        <div className="grid grid-pad">
-          <div className="col-1-2">
+        <div className="row">
+          <div className="col col--6">
             <div className={styles.heroContent}>
               <span className="goffMainTitle">GO Feature Flag</span>
               <br />
@@ -100,7 +100,7 @@ export function HomeHeader() {
               </Link>
             </div>
           </div>
-          <div className="col-1-2">
+          <div className="col col--6">
             <div className="hero-image">
               <img src={siteConfig.customFields.logo} alt="hero-img" />
             </div>
