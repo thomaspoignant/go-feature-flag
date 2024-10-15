@@ -68,6 +68,12 @@ export default function Pricing() {
           >
             Get started today
           </Link>
+          <Link
+            to={"https://github.com/sponsors/thomaspoignant"}
+            className="mt-1 block rounded-md px-3.5 py-2.5 text-center text-sm font-semibold text-indigo-600 ring-1 ring-inset ring-indigo-200 hover:ring-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:mt-1"
+          >
+            Sponsor us ❤️
+          </Link>
         </div>
         <div className="relative rounded-3xl bg-gray-900 p-8 shadow-2xl ring-1 ring-gray-900/10 sm:p-10">
           <h3
