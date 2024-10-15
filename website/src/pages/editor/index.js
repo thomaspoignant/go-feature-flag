@@ -1,5 +1,5 @@
 import React from 'react';
-import {useForm, FormProvider, useFieldArray} from 'react-hook-form';
+import {FormProvider, useFieldArray, useForm} from 'react-hook-form';
 import Layout from '@theme/Layout';
 import {FlagForm} from '../../components/editor/FlagForm';
 import {FlagDisplay} from '../../components/editor/FlagDisplay';
@@ -49,9 +49,9 @@ function App() {
   };
 
   return (
-    <div className="grid-pad grid">
+    <div className="grid grid-cols-12 gap-4 my-4 ">
       <FormProvider {...methods}>
-        <div className="col-8-12">
+        <div className="col-span-8">
           <form onSubmit={methods.handleSubmit(onSubmit)}>
             {fields.map((field, index) => (
               <FlagForm label={`${EDITOR_NAME}.${index}`} key={field.id} />
@@ -69,7 +69,9 @@ function App() {
             </button>
           </form>
         </div>
-        <FlagDisplay />
+        <div className={'col-span-4 ml-1'}>
+          <FlagDisplay />
+        </div>
       </FormProvider>
     </div>
   );

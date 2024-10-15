@@ -2,7 +2,6 @@ import styles from './styles.module.css';
 import {Input} from '../Input';
 import React from 'react';
 import {Switch} from '../Switch';
-import clsx from 'clsx';
 import {Select} from '../Select';
 import {Variations} from '../Variation';
 import {useFormContext} from 'react-hook-form';
@@ -15,6 +14,7 @@ import {FlagTest} from '../FlagTest';
 FlagForm.propTypes = {
   label: PropTypes.string.isRequired,
 };
+
 export function FlagForm({label}) {
   const {watch} = useFormContext();
   const typeSelectorContent = [
@@ -26,22 +26,22 @@ export function FlagForm({label}) {
 
   return (
     <div className={styles.flagContainer}>
-      <div className="grid-pad grid">
-        <div className="col-6-12 mobile-col-1-2">
+      <div className="grid grid-cols-12">
+        <div className="xl:col-span-6 col-span-2 mb-4">
           <Input
             displayText="Flag Name"
             label={`${label}.flagName`}
             required={true}
           />
         </div>
-        <div className="col-3-12 mobile-col-1-2">
+        <div className="col-span-3">
           <Switch
             id="disable"
             label={`${label}.disable`}
             displayText="Disable"
           />
         </div>
-        <div className="col-3-12 mobile-col-1-2">
+        <div className="col-span-3">
           <Switch
             id="disable"
             label={`${label}.trackEvents`}
@@ -49,9 +49,7 @@ export function FlagForm({label}) {
             defaultChecked={true}
           />
         </div>
-      </div>
-      <div className="grid-pad grid">
-        <div className={clsx('col-3-12 mobile-col-1-2')}>
+        <div className={'col-span-3'}>
           <Select
             title="Flag type"
             content={typeSelectorContent}
@@ -59,8 +57,7 @@ export function FlagForm({label}) {
             required={true}
           />
         </div>
-        <div className={clsx('col-1-12', 'mobile-col-1-1')}></div>
-        <div className="col-2-12 mobile-col-1-2">
+        <div className="col-start-5 col-span-3">
           <Input
             id="version"
             label={`${label}.version`}

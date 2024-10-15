@@ -7,11 +7,16 @@ import PropTypes from 'prop-types';
 Cards.prototype = {
   cards: PropTypes.array.isRequired,
 };
+
 export function Cards(props) {
   const listItems = props.cards.map((item, index) => (
     <Card {...item} key={index} />
   ));
-  return <div className="grid grid-pad">{listItems}</div>;
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 xl:grid-cols-3">
+      {listItems}
+    </div>
+  );
 }
 
 Card.propTypes = {
@@ -22,47 +27,46 @@ Card.propTypes = {
   logoImg: PropTypes.string,
   docLink: PropTypes.string,
 };
+
 export function Card(props) {
   return (
-    <div className={clsx('col-1-3 mobile-col-1-1')}>
-      <Link to={props.docLink} className={styles.link}>
-        <div className={styles.card}>
-          <div className={styles.header}>
-            <span className={styles.socialIcon}>
-              {props.logoCss && <i className={props.logoCss}></i>}
-              {props.logoImg && (
-                <img src={props.logoImg} className={styles.logoImg} />
-              )}
-            </span>
-          </div>
-          <div>
-            <p className={styles.name}>{props.title}</p>
-          </div>
-          <p className={styles.message}>{props.content}</p>
-          <div className={styles.badgeSection}>
-            {props.badges &&
-              props.badges.map((item, i) => {
-                return (
-                  <span
-                    className={clsx(styles.badge, styles.badgeInfo)}
-                    key={item}>
-                    {item}
-                  </span>
-                );
-              })}
-            {props.warningBadges &&
-              props.warningBadges.map((item, i) => {
-                return (
-                  <span
-                    className={clsx(styles.badge, styles.badgeWarning)}
-                    key={item}>
-                    {item}
-                  </span>
-                );
-              })}
-          </div>
+    <Link to={props.docLink} className={styles.link}>
+      <div className={styles.card}>
+        <div className={styles.header}>
+          <span className={styles.socialIcon}>
+            {props.logoCss && <i className={props.logoCss}></i>}
+            {props.logoImg && (
+              <img src={props.logoImg} className={styles.logoImg} />
+            )}
+          </span>
         </div>
-      </Link>
-    </div>
+        <div>
+          <p className={styles.name}>{props.title}</p>
+        </div>
+        <p className={styles.message}>{props.content}</p>
+        <div className={styles.badgeSection}>
+          {props.badges &&
+            props.badges.map((item, i) => {
+              return (
+                <span
+                  className={clsx(styles.badge, styles.badgeInfo)}
+                  key={item}>
+                  {item}
+                </span>
+              );
+            })}
+          {props.warningBadges &&
+            props.warningBadges.map((item, i) => {
+              return (
+                <span
+                  className={clsx(styles.badge, styles.badgeWarning)}
+                  key={item}>
+                  {item}
+                </span>
+              );
+            })}
+        </div>
+      </div>
+    </Link>
   );
 }
