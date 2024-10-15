@@ -1,4 +1,4 @@
-name: Unassign Issues
+name: Assign and Unassign Issues
 
 on:
   schedule:
@@ -7,14 +7,124 @@ on:
     types: [created]
   workflow_dispatch:
 
+
+env:
+  DAYS_UNTIL_STALE: 10 # Number of days before marking as stale
+  ASSIGNED_LABEL: "📍 Assigned"
+  PINNED_LABEL: "📌 Pinned"
+  STALE_LABEL: "Stale"
+
 jobs:
-  assign:
+  assign_issue:
+    if: github.event_name == 'issue_comment'
     runs-on: ubuntu-latest
     steps:
-    - name: Assign the user or unassign stale assignments
-      uses: takanome-dev/assign-issue-action@v2.1.1
-      with:
-        github_token: '${{ secrets.GITHUB_TOKEN }}'
-        assigned_label: 📍 Assigned
-        days_until_unassign: 10
-        pin_label: 📌 Pinned
+      - name: Check for /assign-me comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const comment = context.payload.comment.body;
+            const totalDays = process.env.DAYS_UNTIL_STALE;
+            const assignedLabel = process.env.ASSIGNED_LABEL;
+            const pinnedLabel = process.env.PINNED_LABEL;
+
+            async function addComment(body) {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
+
+            async function addLabels(labels) {
+              await github.rest.issues.addLabels({ owner, repo, issue_number, labels });
+            }
+
+            if (comment.includes('/assign-me')) {
+              try {
+                // Get the current issue details
+                const issue = await github.rest.issues.get({ owner, repo, issue_number });
+
+                if (issue.data.assignees.length === 0) {
+                  // Issue is not assigned, proceed with assignment
+                  await github.rest.issues.addAssignees({ owner, repo, issue_number, assignees: [context.actor] });
+
+                  // Add the '📍 Assigned' label to the issue
+                  await addLabels([assignedLabel]);
+
+                  // Add the custom comment to notify the user of the assignment
+                  const successMessage = `👋 Hey @${context.actor}, thanks for your interest in this issue! 🎉\n\n`
+                    + `⚠ Note that this issue will become unassigned if it isn't closed within **${totalDays} days**.\n\n`
+                    + `🔧 A maintainer can also add the **${pinnedLabel}** label to prevent it from being unassigned automatically.`;
+
+                  await addComment(successMessage);
+                  console.log(`Assigned issue #${issue_number} to ${context.actor}`);
+                } else {
+                  // Issue is already assigned
+                  const currentAssignee = issue.data.assignees[0].login;
+                  const alreadyAssignedMessage = `👋 Hey @${context.actor}, this issue is already assigned to @${currentAssignee}.\n\n`
+                    + `⚠️ It will become unassigned if it isn't closed within **${totalDays} days**.\n\n`
+                    + `🔧 A maintainer can also add you to the list of assignees or swap you with the current assignee.`;
+
+                  await addComment(alreadyAssignedMessage);
+                  console.log(`Failed to assign issue #${issue_number} to ${context.actor} as it's already assigned to ${currentAssignee}`);
+                }
+              } catch (error) {
+                console.error(`Error assigning issue #${issue_number}: ${error.message}`);
+              }
+            }
+
+  unassign_stale:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mark stale issues
+        uses: actions/stale@v9
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          stale-issue-message: "This issue has been automatically unassigned due to inactivity."
+          days-before-stale: ${{ env.DAYS_UNTIL_STALE }} # Number of days before marking as stale
+          days-before-close: -1 # Don't close stale issues
+          exempt-issue-labels: ${{ env.PINNED_LABEL }}
+          remove-stale-when-updated: false
+          only-labels: ${{ env.ASSIGNED_LABEL }}
+
+      - name: Unassign stale issues and remove labels
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { owner, repo } = context.repo;
+            const assignedLabel = process.env.ASSIGNED_LABEL;
+            const staleLabel = process.env.STALE_LABEL;
+
+            async function removeLabel(issue_number, name) {
+              try {
+                await github.rest.issues.removeLabel({ owner, repo, issue_number, name });
+              } catch (error) {
+                console.log(`Failed to remove ${name} label from issue #${issue_number}: ${error.message}`);
+              }
+            }
+
+            const staleIssues = await github.paginate(github.rest.issues.listForRepo, {
+              owner, repo,
+              state: 'open',
+              labels: staleLabel,
+              assignee: '*'
+            });
+              
+            for (const issue of staleIssues) {
+              try {
+                // Remove assignees
+                await github.rest.issues.removeAssignees({
+                  owner, repo, issue_number: issue.number,
+                  assignees: issue.assignees.map(a => a.login)
+                });
+
+                // Remove 'Assigned' and 'Stale' labels
+                await removeLabel(issue.number, assignedLabel);
+                await removeLabel(issue.number, staleLabel);
+                
+                console.log(`Unassigned issue #${issue.number}`);
+              } catch (error) {
+                console.error(`Error unassigning issue #${issue.number}: ${error.message}`);
+              }
+            }

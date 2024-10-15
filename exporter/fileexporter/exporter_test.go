@@ -49,8 +49,8 @@ func TestFile_Export(t *testing.T) {
 		args     args
 		wantErr  bool
 		expected expected
-		setup    func(t *testing.T, dir string)
-		teardown func(t *testing.T, dir string)
+		setup    func(t *testing.T, fields fields)
+		teardown func(t *testing.T, fields fields)
 	}{
 		{
 			name:    "all default json",
@@ -321,14 +321,40 @@ func TestFile_Export(t *testing.T) {
 					},
 				},
 			},
-			setup: func(t *testing.T, dir string) {
-				err := os.MkdirAll(dir, 0755)
+			setup: func(t *testing.T, fields fields) {
+				err := os.MkdirAll(fields.OutputDir, 0755)
 				assert.NoError(t, err)
-				err = os.Chmod(dir, 0000) // Remove all permissions
+				err = os.Chmod(fields.OutputDir, 0000) // Remove all permissions
 				assert.NoError(t, err)
 			},
-			teardown: func(t *testing.T, dir string) {
-				err := os.Chmod(dir, 0755) // Restore permissions for cleanup
+			teardown: func(t *testing.T, fields fields) {
+				err := os.Chmod(fields.OutputDir, 0755) // Restore permissions for cleanup
+				assert.NoError(t, err)
+			},
+		},
+		{
+			name:    "outputdir with invalid parent folder",
+			wantErr: true,
+			fields: fields{
+				Format:    "parquet",
+				OutputDir: filepath.Join(tempDir, "invalid-parent-dir"),
+			},
+			args: args{
+				featureEvents: []exporter.FeatureEvent{
+					{
+						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
+						Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
+					},
+				},
+			},
+			setup: func(t *testing.T, fields fields) {
+				err := os.MkdirAll(tempDir, 0755)
+				assert.NoError(t, err)
+				err = os.Chmod(tempDir, 0000) // Remove all permissions
+				assert.NoError(t, err)
+			},
+			teardown: func(t *testing.T, fields fields) {
+				err := os.Chmod(tempDir, 0755) // Restore permissions for cleanup
 				assert.NoError(t, err)
 			},
 		},
@@ -366,11 +392,11 @@ func TestFile_Export(t *testing.T) {
 			}
 
 			if tt.setup != nil {
-				tt.setup(t, outputDir)
+				tt.setup(t, tt.fields)
 			}
 
 			if tt.teardown != nil {
-				defer tt.teardown(t, outputDir)
+				defer tt.teardown(t, tt.fields)
 			}
 
 			f := &fileexporter.Exporter{
