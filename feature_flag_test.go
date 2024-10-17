@@ -14,6 +14,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/model"
+	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/s3retriever"
@@ -705,4 +706,63 @@ func Test_UseCustomBucketingKey(t *testing.T) {
 		}
 		assert.Equal(t, want, got)
 	}
+}
+
+func Test_DisableNotificationOnInit(t *testing.T) {
+	tests := []struct {
+		name                 string
+		config               *ffclient.Config
+		disableNotification  bool
+		expectedNotifyCalled bool
+	}{
+		{
+			name: "DisableNotificationOnInit is true",
+			config: &ffclient.Config{
+				PollingInterval:           60 * time.Second,
+				Retriever:                 &fileretriever.Retriever{Path: "testdata/flag-config.yaml"},
+				DisableNotificationOnInit: true,
+			},
+			expectedNotifyCalled: false,
+		},
+		{
+			name: "DisableNotificationOnInit is false",
+			config: &ffclient.Config{
+				PollingInterval:           60 * time.Second,
+				Retriever:                 &fileretriever.Retriever{Path: "testdata/flag-config.yaml"},
+				DisableNotificationOnInit: false,
+			},
+			expectedNotifyCalled: true,
+		},
+		{
+			name: "DisableNotificationOnInit is not set",
+			config: &ffclient.Config{
+				PollingInterval: 60 * time.Second,
+				Retriever:       &fileretriever.Retriever{Path: "testdata/flag-config.yaml"},
+			},
+			expectedNotifyCalled: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockNotifier := &mockNotificationService{}
+			tt.config.Notifiers = []notifier.Notifier{mockNotifier}
+
+			gffClient, err := ffclient.New(*tt.config)
+			assert.NoError(t, err)
+			defer gffClient.Close()
+
+			time.Sleep(1 * time.Second) // wait for the goroutine to call Notify()
+			assert.Equal(t, tt.expectedNotifyCalled, mockNotifier.notifyCalled)
+		})
+	}
+}
+
+type mockNotificationService struct {
+	notifyCalled bool
+}
+
+func (m *mockNotificationService) Notify(diff notifier.DiffCache) error {
+	m.notifyCalled = true
+	return nil
 }

@@ -102,7 +102,7 @@ func New(config Config) (*GoFeatureFlag, error) {
 			return nil, fmt.Errorf("impossible to initialize the retrievers, please check your configuration: %v", err)
 		}
 
-		err = retrieveFlagsAndUpdateCache(goFF.config, goFF.cache, goFF.retrieverManager)
+		err = retrieveFlagsAndInitializeCache(goFF.config, goFF.cache, goFF.retrieverManager)
 		if err != nil {
 			switch {
 			case config.PersistentFlagConfigurationFile != "":
@@ -154,7 +154,7 @@ func retrievePersistentLocalDisk(ctx context.Context, config Config, goFF *GoFea
 				return err
 			}
 			defer func() { _ = fallBackRetrieverManager.Shutdown(ctx) }()
-			err = retrieveFlagsAndUpdateCache(goFF.config, goFF.cache, fallBackRetrieverManager)
+			err = retrieveFlagsAndInitializeCache(goFF.config, goFF.cache, fallBackRetrieverManager)
 			if err != nil {
 				return err
 			}
@@ -203,8 +203,7 @@ func (g *GoFeatureFlag) startFlagUpdaterDaemon() {
 	}
 }
 
-// retrieveFlagsAndUpdateCache is called every X seconds to refresh the cache flag.
-func retrieveFlagsAndUpdateCache(config Config, cache cache.Manager, retrieverManager *retriever.Manager) error {
+func retreiveFlags(config Config, cache cache.Manager, retrieverManager *retriever.Manager) (map[string]dto.DTO, error) {
 	retrievers := retrieverManager.GetRetrievers()
 	// Results is the type that will receive the results when calling
 	// all the retrievers.
@@ -250,7 +249,7 @@ func retrieveFlagsAndUpdateCache(config Config, cache cache.Manager, retrieverMa
 	retrieversResults := make([]map[string]dto.DTO, len(retrievers))
 	for v := range resultsChan {
 		if v.Error != nil {
-			return v.Error
+			return nil, v.Error
 		}
 		retrieversResults[v.Index] = v.Value
 	}
@@ -262,8 +261,38 @@ func retrieveFlagsAndUpdateCache(config Config, cache cache.Manager, retrieverMa
 			newFlags[flagName] = value
 		}
 	}
+	return newFlags, nil
+}
 
-	err := cache.UpdateCacheAndNotify(newFlags, config.internalLogger)
+// retrieveFlagsAndInitializeCache is called when the feature flag is initialized
+func retrieveFlagsAndInitializeCache(config Config, cache cache.Manager, retrieverManager *retriever.Manager) error {
+	newFlags, err := retreiveFlags(config, cache, retrieverManager)
+	if err != nil {
+		return err
+	}
+
+	if config.DisableNotificationOnInit {
+		err = cache.UpdateCache(newFlags, config.internalLogger)
+	} else {
+		err = cache.UpdateCacheAndNotify(newFlags, config.internalLogger)
+	}
+
+	if err != nil {
+		log.Printf("error: impossible to initialize the cache of the flags: %v", err)
+		return err
+	}
+
+	return nil
+}
+
+// retrieveFlagsAndUpdateCache is called every X seconds to refresh the cache flag.
+func retrieveFlagsAndUpdateCache(config Config, cache cache.Manager, retrieverManager *retriever.Manager) error {
+	newFlags, err := retreiveFlags(config, cache, retrieverManager)
+	if err != nil {
+		return err
+	}
+
+	err = cache.UpdateCacheAndNotify(newFlags, config.internalLogger)
 	if err != nil {
 		log.Printf("error: impossible to update the cache of the flags: %v", err)
 		return err
