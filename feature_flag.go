@@ -203,7 +203,11 @@ func (g *GoFeatureFlag) startFlagUpdaterDaemon() {
 	}
 }
 
-func retreiveFlags(config Config, cache cache.Manager, retrieverManager *retriever.Manager) (map[string]dto.DTO, error) {
+func retreiveFlags(
+	config Config,
+	cache cache.Manager,
+	retrieverManager *retriever.Manager,
+) (map[string]dto.DTO, error) {
 	retrievers := retrieverManager.GetRetrievers()
 	// Results is the type that will receive the results when calling
 	// all the retrievers.
