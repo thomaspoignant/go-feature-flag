@@ -5,6 +5,7 @@ import (
 	"log"
 	"log/slog"
 	"os"
+	"sync"
 	"testing"
 	"time"
 
@@ -760,9 +761,18 @@ func Test_DisableNotificationOnInit(t *testing.T) {
 
 type mockNotificationService struct {
 	notifyCalled bool
+	mu           sync.Mutex
 }
 
 func (m *mockNotificationService) Notify(diff notifier.DiffCache) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	m.notifyCalled = true
 	return nil
+}
+
+func (m *mockNotificationService) wasNotifyCalled() bool {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return m.notifyCalled
 }
