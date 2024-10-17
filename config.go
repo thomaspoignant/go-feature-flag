@@ -28,6 +28,12 @@ type Config struct {
 	// Default: false
 	EnablePollingJitter bool
 
+	// DisableNotificationOnInit (optional) set to true if you do not want to send a notification when the flags are loaded.
+	// This is useful if you do not want a Slack/Webhook notification saying that the flags have been added every time you start the application.
+	// Default is set to false for backward compatibility.
+	// Default: false
+	DisableNotificationOnInit bool
+
 	// Deprecated: Use LeveledLogger instead
 	// Logger (optional) logger use by the library
 	// Default: No log
