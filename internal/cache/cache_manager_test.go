@@ -254,7 +254,7 @@ variation = "false_var"
 				assert.Error(t, err)
 				return
 			}
-			err = fCache.UpdateCache(newFlags, nil)
+			err = fCache.UpdateCacheAndNotify(newFlags, nil)
 			if tt.wantErr {
 				assert.Error(t, err, "UpdateCache() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -417,7 +417,7 @@ test-flag2:
 				assert.Error(t, err)
 				return
 			}
-			err = fCache.UpdateCache(newFlags, &fflog.FFLogger{LeveledLogger: slog.Default()})
+			err = fCache.UpdateCacheAndNotify(newFlags, &fflog.FFLogger{LeveledLogger: slog.Default()})
 			assert.NoError(t, err)
 
 			allFlags, err := fCache.AllFlags()
@@ -455,7 +455,7 @@ func Test_cacheManagerImpl_GetLatestUpdateDate(t *testing.T) {
 	fCache := cache.New(cache.NewNotificationService([]notifier.Notifier{}), "", nil)
 	timeBefore := fCache.GetLatestUpdateDate()
 	newFlags, _ := fCache.ConvertToFlagStruct(loadedFlags, "yaml")
-	_ = fCache.UpdateCache(newFlags, &fflog.FFLogger{LeveledLogger: slog.Default()})
+	_ = fCache.UpdateCacheAndNotify(newFlags, &fflog.FFLogger{LeveledLogger: slog.Default()})
 	timeAfter := fCache.GetLatestUpdateDate()
 
 	assert.True(t, timeBefore.Before(timeAfter))
@@ -485,7 +485,7 @@ func Test_persistCacheAndRestartCacheWithIt(t *testing.T) {
 	assert.NoError(t, err)
 
 	fCache := cache.New(cache.NewNotificationService([]notifier.Notifier{}), file.Name(), nil)
-	err = fCache.UpdateCache(loadedFlagsMap, &fflog.FFLogger{LeveledLogger: slog.Default()})
+	err = fCache.UpdateCacheAndNotify(loadedFlagsMap, &fflog.FFLogger{LeveledLogger: slog.Default()})
 	assert.NoError(t, err)
 	allFlags1, err := fCache.AllFlags()
 	assert.NoError(t, err)
@@ -499,7 +499,7 @@ func Test_persistCacheAndRestartCacheWithIt(t *testing.T) {
 	loadedFlagsMap2 := map[string]dto.DTO{}
 	err = yaml.Unmarshal(content, &loadedFlagsMap)
 	assert.NoError(t, err)
-	err = fCache2.UpdateCache(loadedFlagsMap2, &fflog.FFLogger{LeveledLogger: slog.Default()})
+	err = fCache2.UpdateCacheAndNotify(loadedFlagsMap2, &fflog.FFLogger{LeveledLogger: slog.Default()})
 	assert.NoError(t, err)
 	allFlags2, err := fCache.AllFlags()
 	assert.NoError(t, err)

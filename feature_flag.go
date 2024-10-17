@@ -263,7 +263,7 @@ func retrieveFlagsAndUpdateCache(config Config, cache cache.Manager, retrieverMa
 		}
 	}
 
-	err := cache.UpdateCache(newFlags, config.internalLogger)
+	err := cache.UpdateCacheAndNotify(newFlags, config.internalLogger)
 	if err != nil {
 		log.Printf("error: impossible to update the cache of the flags: %v", err)
 		return err
