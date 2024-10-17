@@ -438,3 +438,85 @@ func TestNewGoFeatureFlagClient_ProxyConfNil(t *testing.T) {
 	assert.Nil(t, goff, "Expected GoFeatureFlag client to be nil when proxyConf is nil")
 	assert.EqualError(t, err, "proxy config is empty", "Expected error message to indicate empty proxy config")
 }
+
+func TestNewGoFeatureFlagClient(t *testing.T) {
+	// Create a logger for testing
+	logger := zap.NewNop()
+
+	tests := []struct {
+		name      string
+		proxyConf *config.Config
+		notifiers []notifier.Notifier
+		wantErr   bool
+	}{
+		{
+			name: "Valid configuration with HTTP retriever and webhook exporter",
+			proxyConf: &config.Config{
+				ListenPort:      8080,
+				PollingInterval: 50000,
+				FileFormat:      "yaml",
+				Retriever: &config.RetrieverConf{
+					Kind: "http",
+					URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
+				},
+				Exporter: &config.ExporterConf{
+					Kind:        "webhook",
+					EndpointURL: "https://example.com/webhook",
+					Secret:      "secret123",
+				},
+			},
+			notifiers: nil,
+			wantErr:   false,
+		},
+		{
+			name: "Valid configuration with multiple retrievers and exporters",
+			proxyConf: &config.Config{
+				ListenPort:      8080,
+				PollingInterval: 60000,
+				FileFormat:      "yaml",
+				Retrievers: &[]config.RetrieverConf{
+					{
+						Kind: "http",
+						URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
+					},
+				},
+				Exporters: &[]config.ExporterConf{
+					{
+						Kind: "log",
+					},
+				},
+			},
+			notifiers: nil,
+			wantErr:   false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client, err := NewGoFeatureFlagClient(tt.proxyConf, logger, tt.notifiers)
+
+			if tt.wantErr {
+				assert.Error(t, err)
+				assert.Nil(t, client)
+			} else {
+				assert.NoError(t, err)
+				assert.NotNil(t, client)
+
+				// Additional checks on the client configuration
+				assert.Equal(t, int64(tt.proxyConf.PollingInterval), client.GetPollingInterval())
+
+				// Check if the client is not offline
+				assert.False(t, client.IsOffline())
+
+				// Force a refresh and check if it succeeds
+				assert.True(t, client.ForceRefresh())
+
+				// Check if the cache refresh date is recent
+				assert.WithinDuration(t, time.Now(), client.GetCacheRefreshDate(), 5*time.Second)
+
+				// Clean up
+				client.Close()
+			}
+		})
+	}
+}

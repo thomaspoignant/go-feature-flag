@@ -66,8 +66,8 @@ type Config struct {
 	// DataExporter (optional) is the configuration where we store how we should output the flags variations results
 	DataExporter DataExporter
 
-	// DataExporters (optional) is the list of configurations where we store how we should output the flags variations results
-	// Multiple exporters can be used to send the data to multiple destinations in parallel without interfering with each other.
+	// DataExporters (optional) are configurations where we store how to output the flags variations results
+	// Multiple exporters can be used to send data to multiple destinations in parallel without interference.
 	DataExporters []DataExporter
 
 	// StartWithRetrieverError (optional) If true, the SDK will start even if we did not get any flags from the retriever.
