@@ -1,19 +1,11 @@
 {
   "flags": {
-    "test-flag0": {
-      "timestamp": 1622206239,
-      "variationType": "SdkDefault",
-      "trackEvents": true,
-      "reason":"ERROR",
-      "errorCode": "TYPE_MISMATCH",
-      "value": null
-    },
     "test-flag1": {
       "value": "true",
       "timestamp": 1622206239,
       "variationType": "True",
       "trackEvents": true,
-      "reason":"STATIC",
+      "reason": "STATIC",
       "errorCode": ""
     },
     "test-flag2": {
@@ -21,7 +13,7 @@
       "timestamp": 1622206239,
       "variationType": "True",
       "trackEvents": true,
-      "reason":"STATIC",
+      "reason": "STATIC",
       "errorCode": ""
     },
     "test-flag3": {
@@ -32,7 +24,7 @@
       "timestamp": 1622206239,
       "variationType": "True",
       "trackEvents": true,
-      "reason":"STATIC",
+      "reason": "STATIC",
       "errorCode": ""
     },
     "test-flag4": {
@@ -42,7 +34,7 @@
       "timestamp": 1622206239,
       "variationType": "True",
       "trackEvents": true,
-      "reason":"STATIC",
+      "reason": "STATIC",
       "errorCode": ""
     },
     "test-flag5": {
@@ -50,7 +42,7 @@
       "timestamp": 1622206239,
       "variationType": "True",
       "trackEvents": false,
-      "reason":"STATIC",
+      "reason": "STATIC",
       "errorCode": ""
     }
   },
