@@ -90,6 +90,86 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 			wantErr: assert.NoError,
 		},
 		{
+			name:         "Valid yaml file with multiple exporters",
+			fileLocation: "../testdata/config/valid-yaml-multiple-exporters.yaml",
+			want: &config.Config{
+				ListenPort:      1031,
+				PollingInterval: 1000,
+				FileFormat:      "yaml",
+				Host:            "localhost",
+				Retriever: &config.RetrieverConf{
+					Kind: "http",
+					URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
+				},
+				Exporters: &[]config.ExporterConf{
+					{
+						Kind: "log",
+					},
+					{
+						Kind:      "file",
+						OutputDir: "./",
+					},
+				},
+				StartWithRetrieverError: false,
+				RestAPITimeout:          5000,
+				Version:                 "1.X.X",
+				EnableSwagger:           true,
+				AuthorizedKeys: config.APIKeys{
+					Admin: []string{
+						"apikey3",
+					},
+					Evaluation: []string{
+						"apikey1",
+						"apikey2",
+					},
+				},
+				LogLevel: "info",
+			},
+			wantErr: assert.NoError,
+		},
+		{
+			name:         "Valid yaml file with both exporter and exporters",
+			fileLocation: "../testdata/config/valid-yaml-exporter-and-exporters.yaml",
+			want: &config.Config{
+				ListenPort:      1031,
+				PollingInterval: 1000,
+				FileFormat:      "yaml",
+				Host:            "localhost",
+				Retriever: &config.RetrieverConf{
+					Kind: "http",
+					URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
+				},
+				Exporter: &config.ExporterConf{
+					Kind: "log",
+				},
+				Exporters: &[]config.ExporterConf{
+					{
+						Kind:        "webhook",
+						EndpointURL: "https://example.com/webhook",
+					},
+					{
+						Kind:      "file",
+						OutputDir: "./",
+					},
+				},
+				StartWithRetrieverError: false,
+				RestAPITimeout:          5000,
+				Version:                 "1.X.X",
+				EnableSwagger:           true,
+				AuthorizedKeys: config.APIKeys{
+					Admin: []string{
+						"apikey3",
+					},
+					Evaluation: []string{
+						"apikey1",
+						"apikey2",
+					},
+				},
+				LogLevel: "info",
+			},
+			wantErr: assert.NoError,
+		},
+		{
 			name:         "Valid json file",
 			fileLocation: "../testdata/config/valid-file.json",
 			want: &config.Config{
@@ -323,6 +403,7 @@ func TestConfig_IsValid(t *testing.T) {
 		Retriever               *config.RetrieverConf
 		Retrievers              *[]config.RetrieverConf
 		Exporter                *config.ExporterConf
+		Exporters               *[]config.ExporterConf
 		Notifiers               []config.NotifierConf
 		LogLevel                string
 		Debug                   bool
@@ -455,6 +536,26 @@ func TestConfig_IsValid(t *testing.T) {
 			wantErr: assert.Error,
 		},
 		{
+			name: "invalid exporter in the list of exporters",
+			fields: fields{
+				ListenPort: 8080,
+				Retriever: &config.RetrieverConf{
+					Kind: "file",
+					Path: "../testdata/config/valid-file.yaml",
+				},
+				Exporters: &[]config.ExporterConf{
+					{
+						Kind:        "webhook",
+						EndpointURL: "https://example.com/webhook",
+					},
+					{
+						Kind: "file",
+					},
+				},
+			},
+			wantErr: assert.Error,
+		},
+		{
 			name: "invalid notifier",
 			fields: fields{
 				ListenPort: 8080,
@@ -508,6 +609,7 @@ func TestConfig_IsValid(t *testing.T) {
 				StartWithRetrieverError: tt.fields.StartWithRetrieverError,
 				Retriever:               tt.fields.Retriever,
 				Exporter:                tt.fields.Exporter,
+				Exporters:               tt.fields.Exporters,
 				Notifiers:               tt.fields.Notifiers,
 				Retrievers:              tt.fields.Retrievers,
 				LogLevel:                tt.fields.LogLevel,

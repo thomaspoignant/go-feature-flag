@@ -43,11 +43,11 @@ func Init(config Config) error {
 // GoFeatureFlag is the main object of the library
 // it contains the cache, the config, the updater and the exporter.
 type GoFeatureFlag struct {
-	cache            cache.Manager
-	config           Config
-	bgUpdater        backgroundUpdater
-	dataExporter     *exporter.Scheduler
-	retrieverManager *retriever.Manager
+	cache                  cache.Manager
+	config                 Config
+	bgUpdater              backgroundUpdater
+	dataExporterSchedulers []*exporter.Scheduler
+	retrieverManager       *retriever.Manager
 }
 
 // ff is the default object for go-feature-flag
@@ -122,14 +122,24 @@ func New(config Config) (*GoFeatureFlag, error) {
 
 		go goFF.startFlagUpdaterDaemon()
 
-		if goFF.config.DataExporter.Exporter != nil {
-			// init the data exporter
-			goFF.dataExporter = exporter.NewScheduler(goFF.config.Context, goFF.config.DataExporter.FlushInterval,
-				goFF.config.DataExporter.MaxEventInMemory, goFF.config.DataExporter.Exporter, goFF.config.internalLogger)
+		dataExporters := config.GetDataExporters()
 
-			// we start the daemon only if we have a bulk exporter
-			if goFF.config.DataExporter.Exporter.IsBulk() {
-				go goFF.dataExporter.StartDaemon()
+		// Initialize a Scheduler for each DataExporter, if any DataExporter is configured.
+		if len(dataExporters) > 0 {
+			goFF.dataExporterSchedulers = make([]*exporter.Scheduler, len(dataExporters))
+			for i, dataExporter := range dataExporters {
+				goFF.dataExporterSchedulers[i] = exporter.NewScheduler(
+					goFF.config.Context,
+					dataExporter.FlushInterval,
+					dataExporter.MaxEventInMemory,
+					dataExporter.Exporter,
+					goFF.config.internalLogger,
+				)
+
+				// Start daemon if it's a bulk exporter
+				if dataExporter.Exporter.IsBulk() {
+					go goFF.dataExporterSchedulers[i].StartDaemon()
+				}
 			}
 		}
 	}
@@ -177,9 +187,12 @@ func (g *GoFeatureFlag) Close() {
 			g.bgUpdater.close()
 		}
 
-		if g.dataExporter != nil {
-			g.dataExporter.Close()
+		for _, dataExporterScheduler := range g.dataExporterSchedulers {
+			if dataExporterScheduler != nil {
+				dataExporterScheduler.Close()
+			}
 		}
+
 		if g.retrieverManager != nil {
 			_ = g.retrieverManager.Shutdown(g.config.Context)
 		}

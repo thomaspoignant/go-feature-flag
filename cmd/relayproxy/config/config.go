@@ -199,6 +199,9 @@ type Config struct {
 	// Exporter is the configuration on how to export data
 	Exporter *ExporterConf `mapstructure:"exporter" koanf:"exporter"`
 
+	// Exporters is the exact same things than Exporter but allows to give more than 1 exporter at the time.
+	Exporters *[]ExporterConf `mapstructure:"exporters" koanf:"exporters"`
+
 	// Notifiers is the configuration on where to notify a flag change
 	Notifiers []NotifierConf `mapstructure:"notifier" koanf:"notifier"`
 
@@ -328,6 +331,14 @@ func (c *Config) IsValid() error {
 	if c.Exporter != nil {
 		if err := c.Exporter.IsValid(); err != nil {
 			return err
+		}
+	}
+
+	if c.Exporters != nil {
+		for _, exporter := range *c.Exporters {
+			if err := exporter.IsValid(); err != nil {
+				return err
+			}
 		}
 	}
 

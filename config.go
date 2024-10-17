@@ -66,6 +66,10 @@ type Config struct {
 	// DataExporter (optional) is the configuration where we store how we should output the flags variations results
 	DataExporter DataExporter
 
+	// DataExporters (optional) is the list of configurations where we store how we should output the flags variations results
+	// Multiple exporters can be used to send the data to multiple destinations in parallel without interfering with each other.
+	DataExporters []DataExporter
+
 	// StartWithRetrieverError (optional) If true, the SDK will start even if we did not get any flags from the retriever.
 	// It will serve only default values until all the retrievers returns the flags.
 	// The init method will not return any error if the flag file is unreachable.
@@ -116,6 +120,20 @@ func (c *Config) GetRetrievers() ([]retriever.Retriever, error) {
 		retrievers = append(retrievers, c.Retrievers...)
 	}
 	return retrievers, nil
+}
+
+// GetDataExporters returns the list of DataExporter configured.
+func (c *Config) GetDataExporters() []DataExporter {
+	dataExporters := make([]DataExporter, 0)
+	// If we have both DataExporter and DataExporters fields configured, we are first looking at what is available
+	// in DataExporter before looking at what is in DataExporters.
+	if c.DataExporter != (DataExporter{}) {
+		dataExporters = append(dataExporters, c.DataExporter)
+	}
+	if len(c.DataExporters) > 0 {
+		dataExporters = append(dataExporters, c.DataExporters...)
+	}
+	return dataExporters
 }
 
 // SetOffline set GO Feature Flag in offline mode.

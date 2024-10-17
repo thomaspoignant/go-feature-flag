@@ -254,9 +254,10 @@ func (g *GoFeatureFlag) getFlagFromCache(flagKey string) (flag.Flag, error) {
 
 // CollectEventData is collecting events and sending them to the data exporter to be stored.
 func (g *GoFeatureFlag) CollectEventData(event exporter.FeatureEvent) {
-	if g != nil && g.dataExporter != nil {
-		// Add event in the exporter
-		g.dataExporter.AddEvent(event)
+	for _, dataExporterScheduler := range g.dataExporterSchedulers {
+		if dataExporterScheduler != nil {
+			dataExporterScheduler.AddEvent(event)
+		}
 	}
 }
 
