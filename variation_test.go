@@ -46,6 +46,9 @@ func (c *cacheMock) GetLatestUpdateDate() time.Time {
 func (c *cacheMock) ConvertToFlagStruct(_ []byte, _ string) (map[string]dto.DTO, error) {
 	return nil, nil
 }
+func (c *cacheMock) UpdateCache(_ map[string]dto.DTO, _ *fflog.FFLogger) error {
+	return nil
+}
 func (c *cacheMock) UpdateCacheAndNotify(_ map[string]dto.DTO, _ *fflog.FFLogger) error {
 	return nil
 }
