@@ -754,7 +754,7 @@ func Test_DisableNotificationOnInit(t *testing.T) {
 			defer gffClient.Close()
 
 			time.Sleep(2 * time.Second) // wait for the goroutine to call Notify()
-			assert.Equal(t, tt.expectedNotifyCalled, mockNotifier.notifyCalled)
+			assert.Equal(t, tt.expectedNotifyCalled, mockNotifier.wasNotifyCalled())
 		})
 	}
 }
