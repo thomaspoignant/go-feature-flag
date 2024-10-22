@@ -107,7 +107,8 @@ jobs:
             const staleIssues = await github.paginate(github.rest.issues.listForRepo, {
               owner, repo,
               state: 'open',
-              labels: staleLabel
+              labels: staleLabel,
+              assignee: '*'
             });
               
             for (const issue of staleIssues) {
