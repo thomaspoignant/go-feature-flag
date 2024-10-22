@@ -276,9 +276,9 @@ func retrieveFlagsAndInitializeCache(config Config, cache cache.Manager, retriev
 	}
 
 	if config.DisableNotifierOnInit {
-		err = cache.UpdateCache(newFlags, config.internalLogger)
+		err = cache.UpdateCache(newFlags, config.internalLogger, false)
 	} else {
-		err = cache.UpdateCacheAndNotify(newFlags, config.internalLogger)
+		err = cache.UpdateCache(newFlags, config.internalLogger, true)
 	}
 
 	if err != nil {
@@ -296,7 +296,7 @@ func retrieveFlagsAndUpdateCache(config Config, cache cache.Manager, retrieverMa
 		return err
 	}
 
-	err = cache.UpdateCacheAndNotify(newFlags, config.internalLogger)
+	err = cache.UpdateCache(newFlags, config.internalLogger, true)
 	if err != nil {
 		log.Printf("error: impossible to update the cache of the flags: %v", err)
 		return err

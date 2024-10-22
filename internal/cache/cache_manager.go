@@ -19,8 +19,7 @@ import (
 
 type Manager interface {
 	ConvertToFlagStruct(loadedFlags []byte, fileFormat string) (map[string]dto.DTO, error)
-	UpdateCache(newFlags map[string]dto.DTO, log *fflog.FFLogger) error
-	UpdateCacheAndNotify(newFlags map[string]dto.DTO, log *fflog.FFLogger) error
+	UpdateCache(newFlags map[string]dto.DTO, log *fflog.FFLogger, notifyChanges bool) error
 	Close()
 	GetFlag(key string) (flag.Flag, error)
 	AllFlags() (map[string]flag.Flag, error)
@@ -61,15 +60,7 @@ func (c *cacheManagerImpl) ConvertToFlagStruct(loadedFlags []byte, fileFormat st
 	return newFlags, err
 }
 
-func (c *cacheManagerImpl) UpdateCache(newFlags map[string]dto.DTO, log *fflog.FFLogger) error {
-	return c.updateCache(newFlags, log, false)
-}
-
-func (c *cacheManagerImpl) UpdateCacheAndNotify(newFlags map[string]dto.DTO, log *fflog.FFLogger) error {
-	return c.updateCache(newFlags, log, true)
-}
-
-func (c *cacheManagerImpl) updateCache(newFlags map[string]dto.DTO, log *fflog.FFLogger, notifyChanges bool) error {
+func (c *cacheManagerImpl) UpdateCache(newFlags map[string]dto.DTO, log *fflog.FFLogger, notifyChanges bool) error {
 	newCache := NewInMemoryCache(c.logger)
 	newCache.Init(newFlags)
 	newCacheFlags := newCache.All()
