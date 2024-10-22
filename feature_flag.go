@@ -102,7 +102,7 @@ func New(config Config) (*GoFeatureFlag, error) {
 			return nil, fmt.Errorf("impossible to initialize the retrievers, please check your configuration: %v", err)
 		}
 
-		err = retrieveFlagsAndInitializeCache(goFF.config, goFF.cache, goFF.retrieverManager)
+		err = retrieveFlagsAndUpdateCache(goFF.config, goFF.cache, goFF.retrieverManager, true)
 		if err != nil {
 			switch {
 			case config.PersistentFlagConfigurationFile != "":
@@ -154,7 +154,7 @@ func retrievePersistentLocalDisk(ctx context.Context, config Config, goFF *GoFea
 				return err
 			}
 			defer func() { _ = fallBackRetrieverManager.Shutdown(ctx) }()
-			err = retrieveFlagsAndInitializeCache(goFF.config, goFF.cache, fallBackRetrieverManager)
+			err = retrieveFlagsAndUpdateCache(goFF.config, goFF.cache, fallBackRetrieverManager, true)
 			if err != nil {
 				return err
 			}
@@ -192,7 +192,7 @@ func (g *GoFeatureFlag) startFlagUpdaterDaemon() {
 		select {
 		case <-g.bgUpdater.ticker.C:
 			if !g.IsOffline() {
-				err := retrieveFlagsAndUpdateCache(g.config, g.cache, g.retrieverManager)
+				err := retrieveFlagsAndUpdateCache(g.config, g.cache, g.retrieverManager, false)
 				if err != nil {
 					g.config.internalLogger.Error("Error while updating the cache.", slog.Any("error", err))
 				}
@@ -268,35 +268,15 @@ func retreiveFlags(
 	return newFlags, nil
 }
 
-// retrieveFlagsAndInitializeCache is called when the feature flag is initialized
-func retrieveFlagsAndInitializeCache(config Config, cache cache.Manager, retrieverManager *retriever.Manager) error {
+// retrieveFlagsAndUpdateCache is a function that retrieves the flags from the retrievers,
+// and update the cache with the new flags.
+func retrieveFlagsAndUpdateCache(config Config, cache cache.Manager, retrieverManager *retriever.Manager, isInit bool) error {
 	newFlags, err := retreiveFlags(config, cache, retrieverManager)
 	if err != nil {
 		return err
 	}
 
-	if config.DisableNotifierOnInit {
-		err = cache.UpdateCache(newFlags, config.internalLogger, false)
-	} else {
-		err = cache.UpdateCache(newFlags, config.internalLogger, true)
-	}
-
-	if err != nil {
-		log.Printf("error: impossible to initialize the cache of the flags: %v", err)
-		return err
-	}
-
-	return nil
-}
-
-// retrieveFlagsAndUpdateCache is called every X seconds to refresh the cache flag.
-func retrieveFlagsAndUpdateCache(config Config, cache cache.Manager, retrieverManager *retriever.Manager) error {
-	newFlags, err := retreiveFlags(config, cache, retrieverManager)
-	if err != nil {
-		return err
-	}
-
-	err = cache.UpdateCache(newFlags, config.internalLogger, true)
+	err = cache.UpdateCache(newFlags, config.internalLogger, isInit && !config.DisableNotifierOnInit)
 	if err != nil {
 		log.Printf("error: impossible to update the cache of the flags: %v", err)
 		return err
@@ -319,7 +299,7 @@ func (g *GoFeatureFlag) ForceRefresh() bool {
 	if g.IsOffline() {
 		return false
 	}
-	err := retrieveFlagsAndUpdateCache(g.config, g.cache, g.retrieverManager)
+	err := retrieveFlagsAndUpdateCache(g.config, g.cache, g.retrieverManager, false)
 	if err != nil {
 		g.config.internalLogger.Error("Error while force updating the cache.", slog.Any("error", err))
 		return false
