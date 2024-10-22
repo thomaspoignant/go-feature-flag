@@ -203,6 +203,8 @@ func (g *GoFeatureFlag) startFlagUpdaterDaemon() {
 	}
 }
 
+// retreiveFlags is a function that will retrieve the flags from the retrievers,
+// merge them and convert them to the flag struct.
 func retreiveFlags(
 	config Config,
 	cache cache.Manager,
