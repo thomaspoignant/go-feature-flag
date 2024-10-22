@@ -709,7 +709,7 @@ func Test_UseCustomBucketingKey(t *testing.T) {
 	}
 }
 
-func Test_DisableNotificationOnInit(t *testing.T) {
+func Test_DisableNotifierOnInit(t *testing.T) {
 	tests := []struct {
 		name                 string
 		config               *ffclient.Config
@@ -717,25 +717,25 @@ func Test_DisableNotificationOnInit(t *testing.T) {
 		expectedNotifyCalled bool
 	}{
 		{
-			name: "DisableNotificationOnInit is true",
+			name: "DisableNotifierOnInit is true",
 			config: &ffclient.Config{
-				PollingInterval:           60 * time.Second,
-				Retriever:                 &fileretriever.Retriever{Path: "testdata/flag-config.yaml"},
-				DisableNotificationOnInit: true,
+				PollingInterval:       60 * time.Second,
+				Retriever:             &fileretriever.Retriever{Path: "testdata/flag-config.yaml"},
+				DisableNotifierOnInit: true,
 			},
 			expectedNotifyCalled: false,
 		},
 		{
-			name: "DisableNotificationOnInit is false",
+			name: "DisableNotifierOnInit is false",
 			config: &ffclient.Config{
-				PollingInterval:           60 * time.Second,
-				Retriever:                 &fileretriever.Retriever{Path: "testdata/flag-config.yaml"},
-				DisableNotificationOnInit: false,
+				PollingInterval:       60 * time.Second,
+				Retriever:             &fileretriever.Retriever{Path: "testdata/flag-config.yaml"},
+				DisableNotifierOnInit: false,
 			},
 			expectedNotifyCalled: true,
 		},
 		{
-			name: "DisableNotificationOnInit is not set",
+			name: "DisableNotifierOnInit is not set",
 			config: &ffclient.Config{
 				PollingInterval: 60 * time.Second,
 				Retriever:       &fileretriever.Retriever{Path: "testdata/flag-config.yaml"},

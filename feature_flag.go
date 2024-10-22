@@ -275,7 +275,7 @@ func retrieveFlagsAndInitializeCache(config Config, cache cache.Manager, retriev
 		return err
 	}
 
-	if config.DisableNotificationOnInit {
+	if config.DisableNotifierOnInit {
 		err = cache.UpdateCache(newFlags, config.internalLogger)
 	} else {
 		err = cache.UpdateCacheAndNotify(newFlags, config.internalLogger)
