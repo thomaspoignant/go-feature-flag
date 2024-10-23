@@ -2210,6 +2210,7 @@ func TestInternalFlag_IsValid(t *testing.T) {
 			fields: fields{
 				Variations: &map[string]*interface{}{
 					"A": testconvert.Interface("A"),
+					"B": testconvert.Interface("B"),
 				},
 				DefaultRule: &flag.Rule{
 					Percentages: &map[string]float64{
@@ -2264,6 +2265,7 @@ func TestInternalFlag_IsValid(t *testing.T) {
 			fields: fields{
 				Variations: &map[string]*interface{}{
 					"A": testconvert.Interface("A"),
+					"B": testconvert.Interface("B"),
 				},
 				DefaultRule: &flag.Rule{
 					Percentages: &map[string]float64{
@@ -2365,6 +2367,194 @@ func TestInternalFlag_IsValid(t *testing.T) {
 			},
 			errorMsg: "",
 			wantErr:  assert.NoError,
+		},
+		{
+			name: "should error if default rule referencing a variation that does not exist",
+			fields: fields{
+				Variations: &map[string]*interface{}{
+					"A": testconvert.Interface("A"),
+					"B": testconvert.Interface("B"),
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("C"),
+				},
+			},
+			errorMsg: "invalid variation: C does not exists",
+			wantErr:  assert.Error,
+		},
+		{
+			name: "should error if default percentage rule referencing a variation that does not exist",
+			fields: fields{
+				Variations: &map[string]*interface{}{
+					"A": testconvert.Interface("A"),
+					"B": testconvert.Interface("B"),
+				},
+				DefaultRule: &flag.Rule{
+					Percentages: &map[string]float64{
+						"A": 90,
+						"B": 5,
+						"C": 5,
+					},
+				},
+			},
+			errorMsg: "invalid percentage: variation C does not exists",
+			wantErr:  assert.Error,
+		},
+		{
+			name: "should error if default progressive rule end rollout step referencing a variation that does not exist",
+			fields: fields{
+				Variations: &map[string]*interface{}{
+					"A": testconvert.Interface("A"),
+					"B": testconvert.Interface("B"),
+				},
+				DefaultRule: &flag.Rule{
+					ProgressiveRollout: &flag.ProgressiveRollout{
+						Initial: &flag.ProgressiveRolloutStep{
+							Variation:  testconvert.String("A"),
+							Percentage: testconvert.Float64(0),
+							Date:       testconvert.Time(time.Now().Add(1 * time.Second)),
+						},
+						End: &flag.ProgressiveRolloutStep{
+							Variation:  testconvert.String("C"),
+							Percentage: testconvert.Float64(100),
+							Date:       testconvert.Time(time.Now().Add(2 * time.Second)),
+						},
+					},
+				},
+			},
+			errorMsg: "invalid progressive rollout, end variation C does not exists",
+			wantErr:  assert.Error,
+		},
+		{
+			name: "should error if default progressive rule initial rollout step referencing a variation that does not exist",
+			fields: fields{
+				Variations: &map[string]*interface{}{
+					"A": testconvert.Interface("A"),
+					"B": testconvert.Interface("B"),
+				},
+				DefaultRule: &flag.Rule{
+					ProgressiveRollout: &flag.ProgressiveRollout{
+						Initial: &flag.ProgressiveRolloutStep{
+							Variation:  testconvert.String("C"),
+							Percentage: testconvert.Float64(0),
+							Date:       testconvert.Time(time.Now().Add(1 * time.Second)),
+						},
+						End: &flag.ProgressiveRolloutStep{
+							Variation:  testconvert.String("A"),
+							Percentage: testconvert.Float64(100),
+							Date:       testconvert.Time(time.Now().Add(2 * time.Second)),
+						},
+					},
+				},
+			},
+			errorMsg: "invalid progressive rollout, initial variation C does not exists",
+			wantErr:  assert.Error,
+		},
+		{
+			name: "should error if targeting rule referencing a variation that does not exist",
+			fields: fields{
+				Variations: &map[string]*interface{}{
+					"A": testconvert.Interface("A"),
+					"B": testconvert.Interface("B"),
+				},
+				Rules: &[]flag.Rule{
+					{
+						Query:           testconvert.String("targetingKey eq 1"),
+						VariationResult: testconvert.String("C"),
+					},
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("A"),
+				},
+			},
+			errorMsg: "invalid variation: C does not exists",
+			wantErr:  assert.Error,
+		},
+		{
+			name: "should error if percentage in targeting rule referencing a variation that does not exist",
+			fields: fields{
+				Variations: &map[string]*interface{}{
+					"A": testconvert.Interface("A"),
+					"B": testconvert.Interface("B"),
+				},
+				Rules: &[]flag.Rule{
+					{
+						Query: testconvert.String("targetingKey eq 1"),
+						Percentages: &map[string]float64{
+							"A": 90,
+							"B": 5,
+							"C": 5,
+						},
+					},
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("A"),
+				},
+			},
+			errorMsg: "invalid percentage: variation C does not exists",
+			wantErr:  assert.Error,
+		},
+		{
+			name: "should error if progressive rollout in targeting rule referencing an initial variation that does not exist",
+			fields: fields{
+				Variations: &map[string]*interface{}{
+					"A": testconvert.Interface("A"),
+					"B": testconvert.Interface("B"),
+				},
+				Rules: &[]flag.Rule{
+					{
+						Query: testconvert.String("targetingKey eq 1"),
+						ProgressiveRollout: &flag.ProgressiveRollout{
+							Initial: &flag.ProgressiveRolloutStep{
+								Variation:  testconvert.String("C"),
+								Percentage: testconvert.Float64(0),
+								Date:       testconvert.Time(time.Now().Add(1 * time.Second)),
+							},
+							End: &flag.ProgressiveRolloutStep{
+								Variation:  testconvert.String("A"),
+								Percentage: testconvert.Float64(100),
+								Date:       testconvert.Time(time.Now().Add(2 * time.Second)),
+							},
+						},
+					},
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("A"),
+				},
+			},
+			errorMsg: "invalid progressive rollout, initial variation C does not exists",
+			wantErr:  assert.Error,
+		},
+		{
+			name: "should error if progressive rollout in targeting rule referencing an end variation that does not exist",
+			fields: fields{
+				Variations: &map[string]*interface{}{
+					"A": testconvert.Interface("A"),
+					"B": testconvert.Interface("B"),
+				},
+				Rules: &[]flag.Rule{
+					{
+						Query: testconvert.String("targetingKey eq 1"),
+						ProgressiveRollout: &flag.ProgressiveRollout{
+							Initial: &flag.ProgressiveRolloutStep{
+								Variation:  testconvert.String("A"),
+								Percentage: testconvert.Float64(0),
+								Date:       testconvert.Time(time.Now().Add(1 * time.Second)),
+							},
+							End: &flag.ProgressiveRolloutStep{
+								Variation:  testconvert.String("C"),
+								Percentage: testconvert.Float64(100),
+								Date:       testconvert.Time(time.Now().Add(2 * time.Second)),
+							},
+						},
+					},
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("A"),
+				},
+			},
+			errorMsg: "invalid progressive rollout, end variation C does not exists",
+			wantErr:  assert.Error,
 		},
 	}
 

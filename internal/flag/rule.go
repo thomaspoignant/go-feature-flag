@@ -223,7 +223,7 @@ func (r *Rule) MergeRules(updatedRule Rule) {
 }
 
 // IsValid is checking if the rule is valid
-func (r *Rule) IsValid(defaultRule bool) error {
+func (r *Rule) IsValid(defaultRule bool, variations map[string]*interface{}) error {
 	if !defaultRule && r.IsDisable() {
 		return nil
 	}
@@ -240,8 +240,11 @@ func (r *Rule) IsValid(defaultRule bool) error {
 	// Validate the percentage of the rule
 	if r.Percentages != nil {
 		count := float64(0)
-		for _, p := range r.GetPercentages() {
+		for k, p := range r.GetPercentages() {
 			count += p
+			if _, ok := variations[k]; !ok {
+				return fmt.Errorf("invalid percentage: variation %s does not exists", k)
+			}
 		}
 
 		if len(r.GetPercentages()) == 0 {
@@ -254,11 +257,29 @@ func (r *Rule) IsValid(defaultRule bool) error {
 	}
 
 	// Progressive rollout: check that initial is lower than end
-	if r.ProgressiveRollout != nil &&
-		(r.GetProgressiveRollout().End.getPercentage() < r.GetProgressiveRollout().Initial.getPercentage()) {
-		return fmt.Errorf("invalid progressive rollout, initial percentage should be lower "+
-			"than end percentage: %v/%v",
-			r.GetProgressiveRollout().Initial.getPercentage(), r.GetProgressiveRollout().End.getPercentage())
+	if r.ProgressiveRollout != nil {
+		if r.GetProgressiveRollout().End.getPercentage() < r.GetProgressiveRollout().Initial.getPercentage() {
+			return fmt.Errorf("invalid progressive rollout, initial percentage should be lower "+
+				"than end percentage: %v/%v",
+				r.GetProgressiveRollout().Initial.getPercentage(), r.GetProgressiveRollout().End.getPercentage())
+		}
+
+		endVar := r.GetProgressiveRollout().End.getVariation()
+		if _, ok := variations[endVar]; !ok {
+			return fmt.Errorf("invalid progressive rollout, end variation %s does not exists", endVar)
+		}
+
+		initialVar := r.GetProgressiveRollout().Initial.getVariation()
+		if _, ok := variations[initialVar]; !ok {
+			return fmt.Errorf("invalid progressive rollout, initial variation %s does not exists", initialVar)
+		}
+	}
+
+	// Check that the variation exists
+	if r.Percentages == nil && r.ProgressiveRollout == nil && r.VariationResult != nil {
+		if _, ok := variations[r.GetVariationResult()]; !ok {
+			return fmt.Errorf("invalid variation: %s does not exists", r.GetVariationResult())
+		}
 	}
 	return nil
 }
