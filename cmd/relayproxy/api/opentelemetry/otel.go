@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
@@ -31,15 +30,16 @@ func NewOtelService() OtelService {
 func (s *OtelService) Init(ctx context.Context, zapLog *zap.Logger, config config.Config) error {
 	// OTEL_SDK_DISABLED is not supported by the Go SDK, but is a standard env
 	// var defined by the OTel spec. We'll use it to disable the trace provider.
-	if disabled, _ := strconv.ParseBool(os.Getenv("OTEL_SDK_DISABLED")); disabled {
+	if config.OtelConfig.SDK.Disabled {
 		otel.SetTracerProvider(noop.NewTracerProvider())
 		return nil
 	}
 
 	// support the openTelemetryOtlpEndpoint config element
 	if config.OpenTelemetryOtlpEndpoint != "" &&
-		os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT") == "" {
-		os.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", config.OpenTelemetryOtlpEndpoint)
+		config.OtelConfig.Exporter.Otlp.Endpoint == "" {
+		config.OtelConfig.Exporter.Otlp.Endpoint = config.OpenTelemetryOtlpEndpoint
+		_ = os.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", config.OpenTelemetryOtlpEndpoint)
 	}
 
 	exporter, err := autoexport.NewSpanExporter(ctx)
@@ -48,11 +48,11 @@ func (s *OtelService) Init(ctx context.Context, zapLog *zap.Logger, config confi
 	}
 
 	serviceName := "go-feature-flag"
-	if v := os.Getenv("OTEL_SERVICE_NAME"); v != "" {
+	if v := config.OtelConfig.Service.Name; v != "" {
 		serviceName = v
 	}
 
-	sampler, err := initSampler(serviceName)
+	sampler, err := initSampler(serviceName, config)
 	if err != nil {
 		return fmt.Errorf("initializing OTel sampler: %w", err)
 	}
@@ -87,7 +87,7 @@ func (o otelErrHandler) Handle(err error) {
 
 var _ otel.ErrorHandler = otelErrHandler(nil)
 
-func initResource(ctx context.Context, serviceName, version string) (*resource.Resource, error) {
+func initResource(ctx context.Context, serviceName string, version string) (*resource.Resource, error) {
 	return resource.New(ctx,
 		resource.WithFromEnv(),
 		resource.WithProcessPID(),
@@ -115,9 +115,9 @@ func initResource(ctx context.Context, serviceName, version string) (*resource.R
 // JAEGER_SAMPLER_MAX_OPERATIONS).
 // If it's set to any other value, we return nil and sdktrace.NewTracerProvider
 // will set up the initSampler from the environment.
-func initSampler(serviceName string) (sdktrace.Sampler, error) {
-	sampler, ok := os.LookupEnv("OTEL_TRACES_SAMPLER")
-	if !ok {
+func initSampler(serviceName string, conf config.Config) (sdktrace.Sampler, error) {
+	sampler := conf.OtelConfig.Traces.Sampler
+	if sampler == "" {
 		return sdktrace.AlwaysSample(), nil
 	}
 
@@ -125,7 +125,7 @@ func initSampler(serviceName string) (sdktrace.Sampler, error) {
 		return nil, nil
 	}
 
-	samplerURL, samplerRefreshInterval, maxOperations, err := jaegerRemoteSamplerOpts()
+	samplerURL, samplerRefreshInterval, maxOperations, err := jaegerRemoteSamplerOpts(conf)
 	if err != nil {
 		return nil, err
 	}
@@ -145,14 +145,14 @@ const (
 	defaultSamplingMaxOperations   = 256
 )
 
-func jaegerRemoteSamplerOpts() (string, time.Duration, int, error) {
+func jaegerRemoteSamplerOpts(conf config.Config) (string, time.Duration, int, error) {
 	samplerURL := defaultSamplerURL
-	if v := os.Getenv("JAEGER_SAMPLER_MANAGER_HOST_PORT"); v != "" {
-		samplerURL = v
+	if host := conf.JaegerConfig.Sampler.Manager.Host.Port; host != "" {
+		samplerURL = host
 	}
 
 	samplerRefreshInterval := defaultSamplingRefreshInterval
-	if v := os.Getenv("JAEGER_SAMPLER_REFRESH_INTERVAL"); v != "" {
+	if v := conf.JaegerConfig.Sampler.Refresh.Interval; v != "" {
 		d, err := time.ParseDuration(v)
 		if err != nil {
 			return "", 0, 0, fmt.Errorf("parsing JAEGER_SAMPLER_REFRESH_INTERVAL: %w", err)
@@ -161,14 +161,9 @@ func jaegerRemoteSamplerOpts() (string, time.Duration, int, error) {
 	}
 
 	maxOperations := defaultSamplingMaxOperations
-	if v := os.Getenv("JAEGER_SAMPLER_MAX_OPERATIONS"); v != "" {
-		i, err := strconv.Atoi(v)
-		if err != nil {
-			return "", 0, 0, fmt.Errorf("parsing JAEGER_SAMPLER_MAX_OPERATIONS: %w", err)
-		}
-		maxOperations = i
+	if v := conf.JaegerConfig.Sampler.Max.Operations; v != 0 {
+		maxOperations = v
 	}
-
 	return samplerURL, samplerRefreshInterval, maxOperations, nil
 }
 

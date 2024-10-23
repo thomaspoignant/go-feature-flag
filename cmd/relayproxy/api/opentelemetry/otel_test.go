@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/spf13/pflag"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
@@ -23,21 +24,33 @@ import (
 
 func TestInitSampler(t *testing.T) {
 	t.Run("OTEL_TRACES_SAMPLER unset", func(t *testing.T) {
-		sampler, err := initSampler("test")
+		f := pflag.NewFlagSet("config", pflag.ContinueOnError)
+		c, errC := config.New(f, zap.L(), "1.X.X")
+		require.NoError(t, errC)
+
+		sampler, err := initSampler("test", *c)
 		require.NoError(t, err)
 		assert.Equal(t, sdktrace.AlwaysSample(), sampler)
 	})
 
 	t.Run("OTEL_TRACES_SAMPLER set to non-jaeger_remote", func(t *testing.T) {
 		t.Setenv("OTEL_TRACES_SAMPLER", "always_on")
-		sampler, err := initSampler("test")
+		f := pflag.NewFlagSet("config", pflag.ContinueOnError)
+		c, errC := config.New(f, zap.L(), "1.X.X")
+		require.NoError(t, errC)
+
+		sampler, err := initSampler("test", *c)
 		require.NoError(t, err)
 		assert.Nil(t, sampler)
 	})
 
 	t.Run("OTEL_TRACES_SAMPLER set to jaeger_remote", func(t *testing.T) {
 		t.Setenv("OTEL_TRACES_SAMPLER", "jaeger_remote")
-		sampler, err := initSampler("test")
+		f := pflag.NewFlagSet("config", pflag.ContinueOnError)
+		c, errC := config.New(f, zap.L(), "1.X.X")
+		require.NoError(t, errC)
+
+		sampler, err := initSampler("test", *c)
 		require.NoError(t, err)
 
 		// not really any way to assert on the sampler other than calling
@@ -48,7 +61,11 @@ func TestInitSampler(t *testing.T) {
 
 func TestJaegerRemoteSamplerOpts(t *testing.T) {
 	t.Run("defaults", func(t *testing.T) {
-		url, refreshInterval, maxOperations, err := jaegerRemoteSamplerOpts()
+		f := pflag.NewFlagSet("config", pflag.ContinueOnError)
+		c, errC := config.New(f, zap.L(), "1.X.X")
+		require.NoError(t, errC)
+
+		url, refreshInterval, maxOperations, err := jaegerRemoteSamplerOpts(*c)
 		require.NoError(t, err)
 		assert.Equal(t, defaultSamplerURL, url)
 		assert.Equal(t, defaultSamplingRefreshInterval, refreshInterval)
@@ -59,7 +76,11 @@ func TestJaegerRemoteSamplerOpts(t *testing.T) {
 		expected := "http://example.com:1234"
 		t.Setenv("JAEGER_SAMPLER_MANAGER_HOST_PORT", expected)
 
-		url, _, _, err := jaegerRemoteSamplerOpts()
+		f := pflag.NewFlagSet("config", pflag.ContinueOnError)
+		c, errC := config.New(f, zap.L(), "1.X.X")
+		require.NoError(t, errC)
+
+		url, _, _, err := jaegerRemoteSamplerOpts(*c)
 		require.NoError(t, err)
 		assert.Equal(t, expected, url)
 	})
@@ -68,7 +89,11 @@ func TestJaegerRemoteSamplerOpts(t *testing.T) {
 		expected := 42 * time.Second
 		t.Setenv("JAEGER_SAMPLER_REFRESH_INTERVAL", expected.String())
 
-		_, refreshInterval, _, err := jaegerRemoteSamplerOpts()
+		f := pflag.NewFlagSet("config", pflag.ContinueOnError)
+		c, errC := config.New(f, zap.L(), "1.X.X")
+		require.NoError(t, errC)
+
+		_, refreshInterval, _, err := jaegerRemoteSamplerOpts(*c)
 		require.NoError(t, err)
 		assert.Equal(t, expected, refreshInterval)
 	})
@@ -77,7 +102,11 @@ func TestJaegerRemoteSamplerOpts(t *testing.T) {
 		expected := 42
 		t.Setenv("JAEGER_SAMPLER_MAX_OPERATIONS", strconv.Itoa(expected))
 
-		_, _, maxOperations, err := jaegerRemoteSamplerOpts()
+		f := pflag.NewFlagSet("config", pflag.ContinueOnError)
+		c, errC := config.New(f, zap.L(), "1.X.X")
+		require.NoError(t, errC)
+
+		_, _, maxOperations, err := jaegerRemoteSamplerOpts(*c)
 		require.NoError(t, err)
 		assert.Equal(t, expected, maxOperations)
 	})
@@ -85,15 +114,20 @@ func TestJaegerRemoteSamplerOpts(t *testing.T) {
 	t.Run("invalid JAEGER_SAMPLER_REFRESH_INTERVAL", func(t *testing.T) {
 		t.Setenv("JAEGER_SAMPLER_REFRESH_INTERVAL", "bogus")
 
-		_, _, _, err := jaegerRemoteSamplerOpts()
+		f := pflag.NewFlagSet("config", pflag.ContinueOnError)
+		c, errC := config.New(f, zap.L(), "1.X.X")
+		require.NoError(t, errC)
+
+		_, _, _, err := jaegerRemoteSamplerOpts(*c)
 		require.Error(t, err)
 	})
 
 	t.Run("invalid JAEGER_SAMPLER_MAX_OPERATIONS", func(t *testing.T) {
 		t.Setenv("JAEGER_SAMPLER_MAX_OPERATIONS", "bogus")
 
-		_, _, _, err := jaegerRemoteSamplerOpts()
-		require.Error(t, err)
+		f := pflag.NewFlagSet("config", pflag.ContinueOnError)
+		_, errC := config.New(f, zap.L(), "1.X.X")
+		require.Error(t, errC)
 	})
 }
 
@@ -137,13 +171,18 @@ func TestInit(t *testing.T) {
 	t.Run("no config", func(t *testing.T) {
 		err := svc.Init(context.Background(), logger, config.Config{})
 		require.NoError(t, err)
+		defer func() { _ = svc.Stop(context.Background()) }()
 		assert.NotNil(t, otel.GetTracerProvider())
 	})
 
 	t.Run("disabled", func(t *testing.T) {
 		t.Setenv("OTEL_SDK_DISABLED", "true")
-		err := svc.Init(context.Background(), logger, config.Config{})
+		f := pflag.NewFlagSet("config", pflag.ContinueOnError)
+		c, errC := config.New(f, zap.L(), "1.X.X")
+		require.NoError(t, errC)
+		err := svc.Init(context.Background(), logger, *c)
 		require.NoError(t, err)
+		defer func() { _ = svc.Stop(context.Background()) }()
 		assert.Equal(t, noop.NewTracerProvider(), otel.GetTracerProvider())
 	})
 
@@ -152,16 +191,19 @@ func TestInit(t *testing.T) {
 			OpenTelemetryOtlpEndpoint: "https://example.com:4318",
 		})
 		require.NoError(t, err)
+		defer func() { _ = svc.Stop(context.Background()) }()
 		assert.Equal(t, "https://example.com:4318", os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT"))
 	})
 
 	t.Run("OTEL_EXPORTER_OTLP_ENDPOINT takes precedence", func(t *testing.T) {
 		t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "https://example.com:4318")
-
-		err := svc.Init(context.Background(), logger, config.Config{
-			OpenTelemetryOtlpEndpoint: "https://bogus.com:4317",
-		})
+		f := pflag.NewFlagSet("config", pflag.ContinueOnError)
+		c, errC := config.New(f, zap.L(), "1.X.X")
+		require.NoError(t, errC)
+		c.OpenTelemetryOtlpEndpoint = "https://bogus.com:4317"
+		err := svc.Init(context.Background(), logger, *c)
 		require.NoError(t, err)
+		defer func() { _ = svc.Stop(context.Background()) }()
 		assert.Equal(t, "https://example.com:4318", os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT"))
 	})
 
@@ -173,7 +215,7 @@ func TestInit(t *testing.T) {
 
 		err := svc.Init(context.Background(), testLogger, config.Config{})
 		require.NoError(t, err)
-
+		defer func() { _ = svc.Stop(context.Background()) }()
 		otel.GetErrorHandler().Handle(expectedErr)
 
 		require.Len(t, logs.All(), 1)
