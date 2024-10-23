@@ -1,6 +1,7 @@
 package api_test
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"testing"
@@ -70,7 +71,7 @@ func TestPprofEndpointsStarts(t *testing.T) {
 			}
 
 			go apiServer.Start()
-			defer apiServer.Stop()
+			defer apiServer.Stop(context.Background())
 			resp, err := http.Get(fmt.Sprintf("http://localhost:%d/debug/pprof/heap", portToCheck))
 			require.NoError(t, err)
 			require.Equal(t, tt.expectedStatusCode, resp.StatusCode)
