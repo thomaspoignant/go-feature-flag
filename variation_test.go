@@ -49,9 +49,7 @@ func (c *cacheMock) ConvertToFlagStruct(_ []byte, _ string) (map[string]dto.DTO,
 func (c *cacheMock) UpdateCache(_ map[string]dto.DTO, _ *fflog.FFLogger, _ bool) error {
 	return nil
 }
-func (c *cacheMock) UpdateCacheAndNotify(_ map[string]dto.DTO, _ *fflog.FFLogger) error {
-	return nil
-}
+
 func (c *cacheMock) Close() {}
 func (c *cacheMock) GetFlag(_ string) (flag.Flag, error) {
 	return c.flag, c.err

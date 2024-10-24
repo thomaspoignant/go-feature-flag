@@ -607,7 +607,7 @@ func TestCacheManager_UpdateCache(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Test UpdateCache
+			// Test UpdateCache without notification
 			mockNotificationService := &mock.NotificationService{}
 			cm := cache.New(mockNotificationService, "", &fflog.FFLogger{LeveledLogger: slog.Default()})
 
@@ -622,7 +622,7 @@ func TestCacheManager_UpdateCache(t *testing.T) {
 			assert.NoError(t, err)
 			assert.Len(t, flags, len(tt.updatedFlags), "Cache should be updated with correct number of flags")
 
-			// Test UpdateCacheAndNotify
+			// Test UpdateCacache with notification
 			mockNotificationService = &mock.NotificationService{}
 			cm = cache.New(mockNotificationService, "", &fflog.FFLogger{LeveledLogger: slog.Default()})
 
@@ -631,7 +631,7 @@ func TestCacheManager_UpdateCache(t *testing.T) {
 
 			err = cm.UpdateCache(tt.updatedFlags, nil, true)
 			assert.NoError(t, err)
-			assert.Equal(t, 1, mockNotificationService.GetNotifyCalls(), "Notify should be called once for UpdateCacheAndNotify")
+			assert.Equal(t, 1, mockNotificationService.GetNotifyCalls(), "Notify should be called once for UpdateCache with notification")
 
 			flags, err = cm.AllFlags()
 			assert.NoError(t, err)
