@@ -255,6 +255,12 @@ type Config struct {
 	// you ensure that GO Feature Flag will always start with a configuration but which can be out-dated.
 	PersistentFlagConfigurationFile string `mapstructure:"persistentFlagConfigurationFile" koanf:"persistentflagconfigurationfile"` //nolint: lll
 
+	// OtelConfig is the configuration for the OpenTelemetry part of the relay proxy
+	OtelConfig OpenTelemetryConfiguration `mapstructure:"otel" koanf:"otel"`
+
+	// JaegerConfig is the configuration for the Jaeger sampling of the relay proxy
+	JaegerConfig JaegerSamplerConfiguration `mapstructure:"jaeger" koanf:"jaeger"`
+
 	// ---- private fields
 
 	// apiKeySet is the internal representation of an API keys list configured
@@ -264,6 +270,48 @@ type Config struct {
 	// adminAPIKeySet is the internal representation of an admin API keys list configured
 	// we store them in a set to be
 	adminAPIKeySet map[string]interface{}
+}
+
+// OpenTelemetryConfiguration is the configuration for the OpenTelemetry part of the relay proxy
+// It is used to configure the OpenTelemetry SDK and the OpenTelemetry Exporter
+// Most of the time this configuration is set using environment variables.
+type OpenTelemetryConfiguration struct {
+	SDK struct {
+		Disabled bool `mapstructure:"disabled" koanf:"disabled"`
+	} `mapstructure:"sdk" koanf:"sdk"`
+	Exporter struct {
+		Otlp struct {
+			Endpoint string `mapstructure:"endpoint" koanf:"endpoint"`
+			Protocol string `mapstructure:"protocol" koanf:"protocol"`
+		} `mapstructure:"otlp" koanf:"otlp"`
+	} `mapstructure:"exporter" koanf:"exporter"`
+	Service struct {
+		Name string `mapstructure:"name" koanf:"name"`
+	} `mapstructure:"service" koanf:"service"`
+	Traces struct {
+		Sampler string `mapstructure:"sampler" koanf:"sampler"`
+	} `mapstructure:"traces" koanf:"traces"`
+	Resource struct {
+		Attributes map[string]string `mapstructure:"attributes" koanf:"attributes"`
+	} `mapstructure:"resource" koanf:"resource"`
+}
+
+// JaegerSamplerConfiguration is the configuration object to configure the sampling.
+// Most of the time this configuration is set using environment variables.
+type JaegerSamplerConfiguration struct {
+	Sampler struct {
+		Manager struct {
+			Host struct {
+				Port string `mapstructure:"port" koanf:"port"`
+			} `mapstructure:"host" koanf:"host"`
+		} `mapstructure:"manager" koanf:"manager"`
+		Refresh struct {
+			Interval string `mapstructure:"interval" koanf:"interval"`
+		} `mapstructure:"refresh" koanf:"refresh"`
+		Max struct {
+			Operations int `mapstructure:"operations" koanf:"operations"`
+		} `mapstructure:"max" koanf:"max"`
+	} `mapstructure:"sampler" koanf:"sampler"`
 }
 
 // APIKeysAdminExists is checking if an admin API Key exist in the relay proxy configuration
