@@ -243,7 +243,7 @@ func (r *Rule) IsValid(defaultRule bool, variations map[string]*interface{}) err
 		for k, p := range r.GetPercentages() {
 			count += p
 			if _, ok := variations[k]; !ok {
-				return fmt.Errorf("invalid percentage: variation %s does not exists", k)
+				return fmt.Errorf("invalid percentage: variation %s does not exist", k)
 			}
 		}
 
@@ -266,19 +266,19 @@ func (r *Rule) IsValid(defaultRule bool, variations map[string]*interface{}) err
 
 		endVar := r.GetProgressiveRollout().End.getVariation()
 		if _, ok := variations[endVar]; !ok {
-			return fmt.Errorf("invalid progressive rollout, end variation %s does not exists", endVar)
+			return fmt.Errorf("invalid progressive rollout, end variation %s does not exist", endVar)
 		}
 
 		initialVar := r.GetProgressiveRollout().Initial.getVariation()
 		if _, ok := variations[initialVar]; !ok {
-			return fmt.Errorf("invalid progressive rollout, initial variation %s does not exists", initialVar)
+			return fmt.Errorf("invalid progressive rollout, initial variation %s does not exist", initialVar)
 		}
 	}
 
 	// Check that the variation exists
 	if r.Percentages == nil && r.ProgressiveRollout == nil && r.VariationResult != nil {
 		if _, ok := variations[r.GetVariationResult()]; !ok {
-			return fmt.Errorf("invalid variation: %s does not exists", r.GetVariationResult())
+			return fmt.Errorf("invalid variation: %s does not exist", r.GetVariationResult())
 		}
 	}
 	return nil

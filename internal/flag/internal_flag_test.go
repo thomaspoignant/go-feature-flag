@@ -1993,7 +1993,7 @@ func TestInternalFlag_GetVariationValue(t *testing.T) {
 		want      interface{}
 	}{
 		{
-			name: "Should return nil if variation does not exists",
+			name: "Should return nil if variation does not exist",
 			flag: flag.InternalFlag{
 				Variations: &map[string]*interface{}{
 					"varA": testconvert.Interface("valueA"),
@@ -2379,7 +2379,7 @@ func TestInternalFlag_IsValid(t *testing.T) {
 					VariationResult: testconvert.String("C"),
 				},
 			},
-			errorMsg: "invalid variation: C does not exists",
+			errorMsg: "invalid variation: C does not exist",
 			wantErr:  assert.Error,
 		},
 		{
@@ -2397,7 +2397,7 @@ func TestInternalFlag_IsValid(t *testing.T) {
 					},
 				},
 			},
-			errorMsg: "invalid percentage: variation C does not exists",
+			errorMsg: "invalid percentage: variation C does not exist",
 			wantErr:  assert.Error,
 		},
 		{
@@ -2422,7 +2422,7 @@ func TestInternalFlag_IsValid(t *testing.T) {
 					},
 				},
 			},
-			errorMsg: "invalid progressive rollout, end variation C does not exists",
+			errorMsg: "invalid progressive rollout, end variation C does not exist",
 			wantErr:  assert.Error,
 		},
 		{
@@ -2447,7 +2447,7 @@ func TestInternalFlag_IsValid(t *testing.T) {
 					},
 				},
 			},
-			errorMsg: "invalid progressive rollout, initial variation C does not exists",
+			errorMsg: "invalid progressive rollout, initial variation C does not exist",
 			wantErr:  assert.Error,
 		},
 		{
@@ -2467,7 +2467,7 @@ func TestInternalFlag_IsValid(t *testing.T) {
 					VariationResult: testconvert.String("A"),
 				},
 			},
-			errorMsg: "invalid variation: C does not exists",
+			errorMsg: "invalid variation: C does not exist",
 			wantErr:  assert.Error,
 		},
 		{
@@ -2491,7 +2491,7 @@ func TestInternalFlag_IsValid(t *testing.T) {
 					VariationResult: testconvert.String("A"),
 				},
 			},
-			errorMsg: "invalid percentage: variation C does not exists",
+			errorMsg: "invalid percentage: variation C does not exist",
 			wantErr:  assert.Error,
 		},
 		{
@@ -2522,7 +2522,7 @@ func TestInternalFlag_IsValid(t *testing.T) {
 					VariationResult: testconvert.String("A"),
 				},
 			},
-			errorMsg: "invalid progressive rollout, initial variation C does not exists",
+			errorMsg: "invalid progressive rollout, initial variation C does not exist",
 			wantErr:  assert.Error,
 		},
 		{
@@ -2553,7 +2553,7 @@ func TestInternalFlag_IsValid(t *testing.T) {
 					VariationResult: testconvert.String("A"),
 				},
 			},
-			errorMsg: "invalid progressive rollout, end variation C does not exists",
+			errorMsg: "invalid progressive rollout, end variation C does not exist",
 			wantErr:  assert.Error,
 		},
 	}
