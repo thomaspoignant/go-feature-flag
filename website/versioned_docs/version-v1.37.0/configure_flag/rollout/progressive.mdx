@@ -1,0 +1,164 @@
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Progressive rollout
+
+A **progressive rollout** allows you to change the value of your flag over time.
+
+## Example
+
+<Tabs groupId="code">
+  <TabItem value="yaml" label="YAML">
+
+```yaml
+progressive-flag:
+  variations:
+    variationA: A
+    variationB: B
+  defaultRule:
+# highlight-start
+    progressiveRollout:
+      initial:
+        variation: variationA
+        date: 2024-01-01T05:00:00.100Z
+      end:
+        variation: variationB
+        date: 2024-01-05T05:00:00.100Z
+# highlight-end
+```
+
+  </TabItem>
+  <TabItem value="json" label="JSON">
+
+```json
+{
+  "progressive-flag": {
+    "variations": {
+      "variationA": "A",
+      "variationB": "B"
+    },
+    "defaultRule": {
+# highlight-start
+      "progressiveRollout": {
+        "initial": {
+          "variation": "variationA",
+          "date": "2024-01-01T05:00:00.100Z"
+        },
+        "end": {
+          "variation": "variationB",
+          "date": "2024-01-05T05:00:00.100Z"
+        }
+      },
+# highlight-end
+    }
+  }
+}
+```
+
+  </TabItem>
+  <TabItem value="toml" label="TOML">
+
+```toml
+[progressive-flag.variations]
+variationA = "A"
+variationB = "B"
+# highlight-start
+[progressive-flag.defaultRule.progressiveRollout.initial]
+variation = "variationA"
+date = 2024-01-01T05:00:00.100Z
+
+[progressive-flag.defaultRule.progressiveRollout.end]
+variation = "variationB"
+date = 2024-01-05T05:00:00.100Z
+# highlight-end
+```
+
+  </TabItem>
+</Tabs>
+
+- Before the `initial` date, the flag will return variationA
+- Between the `initial` and `end` date, the flag will gradually shift to return variationB instead of variationA.
+- After the `end` date, the flag will return variationB.
+
+### Using the percentage field (advanced)
+If you intend to partially rollout or keep both features.
+
+<Tabs groupId="code">
+  <TabItem value="yaml" label="YAML">
+
+```yaml
+    progressiveRollout:
+      initial:
+        variation: variationA
+        # highlight-start
+        percentage: 20   
+        # highlight-end
+        date: 2024-01-01T05:00:00.100Z
+      end:
+        variation: variationB
+        # highlight-start
+        percentage: 80
+        # highlight-end
+        date: 2024-01-05T05:00:00.100Z
+```
+
+  </TabItem>
+  <TabItem value="json" label="JSON">
+
+```json
+      "progressiveRollout": {
+        "initial": {
+          "variation": "variationA",
+          # highlight-start
+          "percentage": 20,
+          # highlight-end
+          "date": "2024-01-01T05:00:00.100Z"
+        },
+        "end": {
+          "variation": "variationB",
+          # highlight-start
+          "percentage": 80,
+          # highlight-end
+          "date": "2024-01-05T05:00:00.100Z"
+        }
+      }
+```
+
+  </TabItem>
+  <TabItem value="toml" label="TOML">
+
+```toml
+[progressive-flag.defaultRule.progressiveRollout.initial]
+variation = "variationA"
+# highlight-start
+percentage = 20
+# highlight-end
+date = 2024-01-01T05:00:00.100Z
+
+[progressive-flag.defaultRule.progressiveRollout.end]
+variation = "variationB"
+# highlight-start
+percentage = 80
+# highlight-end
+date = 2024-01-05T05:00:00.100Z
+```
+
+  </TabItem>
+</Tabs>
+
+- Before the `initial` date, the flag will return **variationB 20% of the time** and **variationA 80% of the time**.
+- Between the `initial` and `end` date, the flag will gradually shift to return variationB more instead of variationA.
+- After the `end` date, the flag will return **variationB 80% of the time** and **variationA 20% of the time**.
+- This may not be intuitive. It starts with variationA as the dominant response and gradually shifts towards variationB.
+
+## Configuration fields
+
+:::info
+The dates are in the format supported natively by your flag file format.
+:::
+
+| Field                              | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+|------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`initial`**                      | The initial state of this flag.<br/>`variation` is the variation you intend to switch from.<br/>`date` is the date to start the rollout.<br/>             |
+| **`end`**                          | The end state of this flag.<br/>`variation` is the variation you intend to switch to.<br/>`date` is the date when rollout is completed.<br/>               |
+| **`percentage`**<br/>*(optional)*  | It represents the ramp of progress, at which level the flag starts (`initial`) and ends (`end`).<br/>**Default: `initial` = `0` and `end` = `100`**.     |
