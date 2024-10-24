@@ -66,7 +66,7 @@ func (fc *InMemoryCache) All() map[string]flag.Flag {
 func (fc *InMemoryCache) Init(flags map[string]dto.DTO) {
 	cache := make(map[string]flag.InternalFlag)
 	for key, flagDto := range flags {
-		flagToAdd := flagDto.Convert(fc.Logger, key)
+		flagToAdd := flagDto.Convert()
 		if err := flagToAdd.IsValid(); err == nil {
 			cache[key] = flagToAdd
 		} else {
