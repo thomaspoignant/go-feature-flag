@@ -5,7 +5,6 @@ import (
 	"log"
 	"log/slog"
 	"os"
-	"sync"
 	"testing"
 	"time"
 
@@ -746,7 +745,7 @@ func Test_DisableNotifierOnInit(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mockNotifier := &mockNotificationService{}
+			mockNotifier := &mock.Notifier{}
 			tt.config.Notifiers = []notifier.Notifier{mockNotifier}
 
 			gffClient, err := ffclient.New(*tt.config)
@@ -754,25 +753,7 @@ func Test_DisableNotifierOnInit(t *testing.T) {
 			defer gffClient.Close()
 
 			time.Sleep(2 * time.Second) // wait for the goroutine to call Notify()
-			assert.Equal(t, tt.expectedNotifyCalled, mockNotifier.wasNotifyCalled())
+			assert.Equal(t, tt.expectedNotifyCalled, mockNotifier.GetNotifyCalls() > 0)
 		})
 	}
-}
-
-type mockNotificationService struct {
-	notifyCalled bool
-	mu           sync.Mutex
-}
-
-func (m *mockNotificationService) Notify(diff notifier.DiffCache) error {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	m.notifyCalled = true
-	return nil
-}
-
-func (m *mockNotificationService) wasNotifyCalled() bool {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	return m.notifyCalled
 }

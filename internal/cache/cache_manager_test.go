@@ -11,6 +11,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/model/dto"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
+	"github.com/thomaspoignant/go-feature-flag/testutils/mock"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"gopkg.in/yaml.v3"
@@ -607,30 +608,30 @@ func TestCacheManager_UpdateCache(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Test UpdateCache
-			mockNotifier := &mockNotificationService{}
-			cm := cache.New(mockNotifier, "", &fflog.FFLogger{LeveledLogger: slog.Default()})
+			mockNotificationService := &mock.NotificationService{}
+			cm := cache.New(mockNotificationService, "", &fflog.FFLogger{LeveledLogger: slog.Default()})
 
 			err := cm.UpdateCache(tt.initialFlags, nil, false)
 			assert.NoError(t, err)
 
 			err = cm.UpdateCache(tt.updatedFlags, nil, false)
 			assert.NoError(t, err)
-			assert.Equal(t, 0, mockNotifier.notifyCalled, "Notify should not be called for UpdateCache")
+			assert.Equal(t, 0, mockNotificationService.GetNotifyCalls(), "Notify should not be called for UpdateCache")
 
 			flags, err := cm.AllFlags()
 			assert.NoError(t, err)
 			assert.Len(t, flags, len(tt.updatedFlags), "Cache should be updated with correct number of flags")
 
 			// Test UpdateCacheAndNotify
-			mockNotifier = &mockNotificationService{}
-			cm = cache.New(mockNotifier, "", &fflog.FFLogger{LeveledLogger: slog.Default()})
+			mockNotificationService = &mock.NotificationService{}
+			cm = cache.New(mockNotificationService, "", &fflog.FFLogger{LeveledLogger: slog.Default()})
 
 			err = cm.UpdateCache(tt.initialFlags, nil, false)
 			assert.NoError(t, err)
 
 			err = cm.UpdateCache(tt.updatedFlags, nil, true)
 			assert.NoError(t, err)
-			assert.Equal(t, 1, mockNotifier.notifyCalled, "Notify should be called once for UpdateCacheAndNotify")
+			assert.Equal(t, 1, mockNotificationService.GetNotifyCalls(), "Notify should be called once for UpdateCacheAndNotify")
 
 			flags, err = cm.AllFlags()
 			assert.NoError(t, err)
@@ -638,13 +639,3 @@ func TestCacheManager_UpdateCache(t *testing.T) {
 		})
 	}
 }
-
-type mockNotificationService struct {
-	notifyCalled int
-}
-
-func (m *mockNotificationService) Notify(oldFlags, newFlags map[string]flag.Flag, logger *fflog.FFLogger) {
-	m.notifyCalled++
-}
-
-func (m *mockNotificationService) Close() {}
