@@ -19,7 +19,7 @@ import (
 
 type Manager interface {
 	ConvertToFlagStruct(loadedFlags []byte, fileFormat string) (map[string]dto.DTO, error)
-	UpdateCache(newFlags map[string]dto.DTO, log *fflog.FFLogger) error
+	UpdateCache(newFlags map[string]dto.DTO, log *fflog.FFLogger, notifyChanges bool) error
 	Close()
 	GetFlag(key string) (flag.Flag, error)
 	AllFlags() (map[string]flag.Flag, error)
@@ -60,7 +60,7 @@ func (c *cacheManagerImpl) ConvertToFlagStruct(loadedFlags []byte, fileFormat st
 	return newFlags, err
 }
 
-func (c *cacheManagerImpl) UpdateCache(newFlags map[string]dto.DTO, log *fflog.FFLogger) error {
+func (c *cacheManagerImpl) UpdateCache(newFlags map[string]dto.DTO, log *fflog.FFLogger, notifyChanges bool) error {
 	newCache := NewInMemoryCache(c.logger)
 	newCache.Init(newFlags)
 	newCacheFlags := newCache.All()
@@ -75,8 +75,10 @@ func (c *cacheManagerImpl) UpdateCache(newFlags map[string]dto.DTO, log *fflog.F
 	c.latestUpdate = time.Now()
 	c.mutex.Unlock()
 
-	// notify the changes
-	c.notificationService.Notify(oldCacheFlags, newCacheFlags, log)
+	if notifyChanges {
+		// notify the changes
+		c.notificationService.Notify(oldCacheFlags, newCacheFlags, log)
+	}
 	// persist the cache on disk
 	if c.persistentFlagConfigurationFile != "" {
 		c.PersistCache(oldCacheFlags, newCacheFlags)

@@ -175,6 +175,14 @@ type Config struct {
 	// Default: false
 	EnablePollingJitter bool `mapstructure:"enablePollingJitter" koanf:"enablepollingjitter"`
 
+	// DisableNotifierOnInit (optional) set to true if you do not want to call any notifier
+	// when the flags are loaded.
+	// This is useful if you do not want a Slack/Webhook notification saying that
+	// the flags have been added every time you start the application.
+	// Default is set to false for backward compatibility.
+	// Default: false
+	DisableNotifierOnInit bool `mapstructure:"DisableNotifierOnInit" koanf:"DisableNotifierOnInit"`
+
 	// FileFormat (optional) is the format of the file to retrieve (available YAML, TOML and JSON)
 	// Default: YAML
 	FileFormat string `mapstructure:"fileFormat" koanf:"fileformat"`

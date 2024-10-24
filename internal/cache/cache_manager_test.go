@@ -11,6 +11,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/model/dto"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
+	"github.com/thomaspoignant/go-feature-flag/testutils/mock"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"gopkg.in/yaml.v3"
@@ -254,7 +255,7 @@ variation = "false_var"
 				assert.Error(t, err)
 				return
 			}
-			err = fCache.UpdateCache(newFlags, nil)
+			err = fCache.UpdateCache(newFlags, nil, true)
 			if tt.wantErr {
 				assert.Error(t, err, "UpdateCache() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -417,7 +418,7 @@ test-flag2:
 				assert.Error(t, err)
 				return
 			}
-			err = fCache.UpdateCache(newFlags, &fflog.FFLogger{LeveledLogger: slog.Default()})
+			err = fCache.UpdateCache(newFlags, &fflog.FFLogger{LeveledLogger: slog.Default()}, true)
 			assert.NoError(t, err)
 
 			allFlags, err := fCache.AllFlags()
@@ -455,7 +456,7 @@ func Test_cacheManagerImpl_GetLatestUpdateDate(t *testing.T) {
 	fCache := cache.New(cache.NewNotificationService([]notifier.Notifier{}), "", nil)
 	timeBefore := fCache.GetLatestUpdateDate()
 	newFlags, _ := fCache.ConvertToFlagStruct(loadedFlags, "yaml")
-	_ = fCache.UpdateCache(newFlags, &fflog.FFLogger{LeveledLogger: slog.Default()})
+	_ = fCache.UpdateCache(newFlags, &fflog.FFLogger{LeveledLogger: slog.Default()}, true)
 	timeAfter := fCache.GetLatestUpdateDate()
 
 	assert.True(t, timeBefore.Before(timeAfter))
@@ -485,7 +486,7 @@ func Test_persistCacheAndRestartCacheWithIt(t *testing.T) {
 	assert.NoError(t, err)
 
 	fCache := cache.New(cache.NewNotificationService([]notifier.Notifier{}), file.Name(), nil)
-	err = fCache.UpdateCache(loadedFlagsMap, &fflog.FFLogger{LeveledLogger: slog.Default()})
+	err = fCache.UpdateCache(loadedFlagsMap, &fflog.FFLogger{LeveledLogger: slog.Default()}, true)
 	assert.NoError(t, err)
 	allFlags1, err := fCache.AllFlags()
 	assert.NoError(t, err)
@@ -499,11 +500,142 @@ func Test_persistCacheAndRestartCacheWithIt(t *testing.T) {
 	loadedFlagsMap2 := map[string]dto.DTO{}
 	err = yaml.Unmarshal(content, &loadedFlagsMap)
 	assert.NoError(t, err)
-	err = fCache2.UpdateCache(loadedFlagsMap2, &fflog.FFLogger{LeveledLogger: slog.Default()})
+	err = fCache2.UpdateCache(loadedFlagsMap2, &fflog.FFLogger{LeveledLogger: slog.Default()}, true)
 	assert.NoError(t, err)
 	allFlags2, err := fCache.AllFlags()
 	assert.NoError(t, err)
 
 	// Compare the 2 caches
 	assert.Equal(t, allFlags1, allFlags2)
+}
+
+func TestCacheManager_UpdateCache(t *testing.T) {
+	tests := []struct {
+		name         string
+		initialFlags map[string]dto.DTO
+		updatedFlags map[string]dto.DTO
+	}{
+		{
+			name: "Update existing flags",
+			initialFlags: map[string]dto.DTO{
+				"flag1": {
+					DTOv1: dto.DTOv1{
+						Variations: &map[string]*interface{}{},
+						DefaultRule: &flag.Rule{
+							VariationResult: testconvert.String("true"),
+						},
+					},
+				},
+			},
+			updatedFlags: map[string]dto.DTO{
+				"flag1": {
+					DTOv1: dto.DTOv1{
+						Variations: &map[string]*interface{}{
+							"true": testconvert.Interface(true),
+						},
+						DefaultRule: &flag.Rule{
+							VariationResult: testconvert.String("true"),
+						},
+					},
+				},
+				"flag2": {
+					DTOv1: dto.DTOv1{
+						Variations: &map[string]*interface{}{
+							"false": testconvert.Interface(false),
+						},
+						DefaultRule: &flag.Rule{
+							VariationResult: testconvert.String("false"),
+						},
+					},
+				},
+			},
+		},
+		{
+			name:         "Empty initial flags",
+			initialFlags: map[string]dto.DTO{},
+			updatedFlags: map[string]dto.DTO{
+				"flag1": {
+					DTOv1: dto.DTOv1{
+						Variations: &map[string]*interface{}{
+							"true": testconvert.Interface(true),
+						},
+						DefaultRule: &flag.Rule{
+							VariationResult: testconvert.String("true"),
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "Remove a flag",
+			initialFlags: map[string]dto.DTO{
+				"flag1": {
+					DTOv1: dto.DTOv1{
+						Variations: &map[string]*interface{}{
+							"true": testconvert.Interface(true),
+						},
+						DefaultRule: &flag.Rule{
+							VariationResult: testconvert.String("true"),
+						},
+					},
+				},
+				"flag2": {
+					DTOv1: dto.DTOv1{
+						Variations: &map[string]*interface{}{
+							"false": testconvert.Interface(false),
+						},
+						DefaultRule: &flag.Rule{
+							VariationResult: testconvert.String("false"),
+						},
+					},
+				},
+			},
+			updatedFlags: map[string]dto.DTO{
+				"flag1": {
+					DTOv1: dto.DTOv1{
+						Variations: &map[string]*interface{}{
+							"true": testconvert.Interface(true),
+						},
+						DefaultRule: &flag.Rule{
+							VariationResult: testconvert.String("true"),
+						},
+					},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Test UpdateCache without notification
+			mockNotificationService := &mock.NotificationService{}
+			cm := cache.New(mockNotificationService, "", &fflog.FFLogger{LeveledLogger: slog.Default()})
+
+			err := cm.UpdateCache(tt.initialFlags, nil, false)
+			assert.NoError(t, err)
+
+			err = cm.UpdateCache(tt.updatedFlags, nil, false)
+			assert.NoError(t, err)
+			assert.Equal(t, 0, mockNotificationService.GetNotifyCalls(), "Notify should not be called for UpdateCache")
+
+			flags, err := cm.AllFlags()
+			assert.NoError(t, err)
+			assert.Len(t, flags, len(tt.updatedFlags), "Cache should be updated with correct number of flags")
+
+			// Test UpdateCacache with notification
+			mockNotificationService = &mock.NotificationService{}
+			cm = cache.New(mockNotificationService, "", &fflog.FFLogger{LeveledLogger: slog.Default()})
+
+			err = cm.UpdateCache(tt.initialFlags, nil, false)
+			assert.NoError(t, err)
+
+			err = cm.UpdateCache(tt.updatedFlags, nil, true)
+			assert.NoError(t, err)
+			assert.Equal(t, 1, mockNotificationService.GetNotifyCalls(), "Notify should be called once for UpdateCache with notification")
+
+			flags, err = cm.AllFlags()
+			assert.NoError(t, err)
+			assert.Len(t, flags, len(tt.updatedFlags), "Cache should be updated with correct number of flags")
+		})
+	}
 }
