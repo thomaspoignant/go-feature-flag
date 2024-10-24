@@ -12,7 +12,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/gdexlab/go-render/render"
+	"github.com/luci/go-render/render"
 	"github.com/r3labs/diff/v3"
 	"github.com/thomaspoignant/go-feature-flag/internal"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
