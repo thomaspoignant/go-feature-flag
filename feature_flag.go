@@ -272,7 +272,8 @@ func retreiveFlags(
 
 // retrieveFlagsAndUpdateCache is a function that retrieves the flags from the retrievers,
 // and update the cache with the new flags.
-func retrieveFlagsAndUpdateCache(config Config, cache cache.Manager, retrieverManager *retriever.Manager, isInit bool) error {
+func retrieveFlagsAndUpdateCache(config Config, cache cache.Manager,
+	retrieverManager *retriever.Manager, isInit bool) error {
 	newFlags, err := retreiveFlags(config, cache, retrieverManager)
 	if err != nil {
 		return err
