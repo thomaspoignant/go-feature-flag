@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api"
@@ -72,6 +73,7 @@ func TestPprofEndpointsStarts(t *testing.T) {
 
 			go apiServer.Start()
 			defer apiServer.Stop(context.Background())
+			time.Sleep(1 * time.Second) // waiting for the apiServer to start
 			resp, err := http.Get(fmt.Sprintf("http://localhost:%d/debug/pprof/heap", portToCheck))
 			require.NoError(t, err)
 			require.Equal(t, tt.expectedStatusCode, resp.StatusCode)
