@@ -1,6 +1,7 @@
 package api_test
 
 import (
+	"context"
 	"net/http"
 	"strings"
 	"testing"
@@ -52,7 +53,7 @@ func Test_Starting_RelayProxy_with_monitoring_on_same_port(t *testing.T) {
 
 	s := api.New(proxyConf, services, log.ZapLogger)
 	go func() { s.Start() }()
-	defer s.Stop()
+	defer s.Stop(context.Background())
 
 	time.Sleep(10 * time.Millisecond)
 
@@ -106,7 +107,7 @@ func Test_Starting_RelayProxy_with_monitoring_on_different_port(t *testing.T) {
 
 	s := api.New(proxyConf, services, log.ZapLogger)
 	go func() { s.Start() }()
-	defer s.Stop()
+	defer s.Stop(context.Background())
 
 	time.Sleep(10 * time.Millisecond)
 
@@ -175,7 +176,7 @@ func Test_CheckOFREPAPIExists(t *testing.T) {
 
 	s := api.New(proxyConf, services, log.ZapLogger)
 	go func() { s.Start() }()
-	defer s.Stop()
+	defer s.Stop(context.Background())
 
 	time.Sleep(10 * time.Millisecond)
 

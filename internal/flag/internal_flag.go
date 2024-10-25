@@ -295,13 +295,13 @@ func (f *InternalFlag) IsValid() error {
 
 	const isDefaultRule = true
 	// Validate rules
-	if err := f.GetDefaultRule().IsValid(isDefaultRule); err != nil {
+	if err := f.GetDefaultRule().IsValid(isDefaultRule, f.GetVariations()); err != nil {
 		return err
 	}
 
 	ruleNames := map[string]interface{}{}
 	for _, rule := range f.GetRules() {
-		if err := rule.IsValid(!isDefaultRule); err != nil {
+		if err := rule.IsValid(!isDefaultRule, f.GetVariations()); err != nil {
 			return err
 		}
 

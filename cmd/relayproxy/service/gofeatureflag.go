@@ -72,6 +72,7 @@ func NewGoFeatureFlagClient(
 		DataExporters:                   dataExporters,
 		StartWithRetrieverError:         proxyConf.StartWithRetrieverError,
 		EnablePollingJitter:             proxyConf.EnablePollingJitter,
+		DisableNotifierOnInit:           proxyConf.DisableNotifierOnInit,
 		EvaluationContextEnrichment:     proxyConf.EvaluationContextEnrichment,
 		PersistentFlagConfigurationFile: proxyConf.PersistentFlagConfigurationFile,
 	}
