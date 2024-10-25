@@ -553,6 +553,7 @@ It collects all variation events and can save these events in several locations:
 - **Local file** *- create local files with the variation usages.*
 - **Log** *- use your logger to write the variation usages.*
 - **AWS S3** *- export your variation usages to S3.*
+- **AWS S3** *- publish your variation usages to AWS Kinesis Stream.*
 - **Google Cloud Storage** *- export your variation usages to Google Cloud Storage.*
 - **Webhook** *- export your variation usages by calling a webhook.*
 - **AWS SQS** *- export your variation usages by sending events to SQS.*

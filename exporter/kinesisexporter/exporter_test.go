@@ -1,4 +1,4 @@
-package kinesysexporter
+package kinesisexporter
 
 import (
 	"context"
@@ -23,9 +23,9 @@ func TestExporter_IsBulk(t *testing.T) {
 func TestExporter_ExportBasicWithStreamName(t *testing.T) {
 	mock := MockKinesisSender{}
 	exp := Exporter{
-		Format:     "json",
-		sender:     &mock,
-		StreamName: aws.String("test-stream"),
+		Format:   "json",
+		sender:   &mock,
+		Settings: NewSettings(WithStreamName("test-stream")),
 	}
 
 	logger := &fflog.FFLogger{LeveledLogger: slog.Default()}
@@ -45,8 +45,8 @@ func TestExporter_ExportBasicWithStreamName(t *testing.T) {
 	assert.Len(t, mock.PutRecordsInputs, 1)
 	assert.Len(t, mock.PutRecordsInputs[0].Records, 3)
 	for idx := range mock.PutRecordsInputs {
-		assert.Equal(t, mock.PutRecordsInputs[idx].StreamName, exp.StreamName)
-		assert.Equal(t, mock.PutRecordsInputs[idx].StreamARN, exp.StreamArn)
+		assert.Equal(t, mock.PutRecordsInputs[idx].StreamName, exp.Settings.StreamName)
+		assert.Equal(t, mock.PutRecordsInputs[idx].StreamARN, exp.Settings.StreamArn)
 	}
 
 	assert.NotNil(t, exp.AwsConfig)
@@ -56,9 +56,9 @@ func TestExporter_ExportBasicWithStreamName(t *testing.T) {
 func TestExporter_ExportBasicWithStreamArn(t *testing.T) {
 	mock := MockKinesisSender{}
 	exp := Exporter{
-		Format:    "json",
-		sender:    &mock,
-		StreamArn: aws.String("test-stream"),
+		Format:   "json",
+		sender:   &mock,
+		Settings: NewSettings(WithStreamArn("test-stream")),
 	}
 
 	logger := &fflog.FFLogger{LeveledLogger: slog.Default()}
@@ -78,8 +78,8 @@ func TestExporter_ExportBasicWithStreamArn(t *testing.T) {
 	assert.Len(t, mock.PutRecordsInputs, 1)
 	assert.Len(t, mock.PutRecordsInputs[0].Records, 3)
 	for idx := range mock.PutRecordsInputs {
-		assert.Equal(t, mock.PutRecordsInputs[idx].StreamName, exp.StreamName)
-		assert.Equal(t, mock.PutRecordsInputs[idx].StreamARN, exp.StreamArn)
+		assert.Equal(t, mock.PutRecordsInputs[idx].StreamName, exp.Settings.StreamName)
+		assert.Equal(t, mock.PutRecordsInputs[idx].StreamARN, exp.Settings.StreamArn)
 	}
 
 	assert.NotNil(t, exp.AwsConfig)
@@ -110,9 +110,9 @@ func TestExporter_ShouldRaiseErrorIfNoStreamIsSpecified(t *testing.T) {
 func TestExporter_ExportAWSConfigurationCustomisation(t *testing.T) {
 	mock := MockKinesisSender{}
 	exp := Exporter{
-		Format:     "json",
-		sender:     &mock,
-		StreamName: aws.String("test-stream"),
+		Format:   "json",
+		sender:   &mock,
+		Settings: NewSettings(WithStreamName("test-stream")),
 		AwsConfig: &aws.Config{
 			Region: "unexistent-region",
 		},
@@ -136,9 +136,9 @@ func TestExporter_ExportSenderError(t *testing.T) {
 	mock := MockKinesisSenderWithError{}
 
 	exp := Exporter{
-		Format:     "json",
-		sender:     &mock,
-		StreamName: aws.String("test-stream"),
+		Format:   "json",
+		sender:   &mock,
+		Settings: NewSettings(WithStreamName("test-stream")),
 	}
 
 	logger := &fflog.FFLogger{LeveledLogger: slog.Default()}

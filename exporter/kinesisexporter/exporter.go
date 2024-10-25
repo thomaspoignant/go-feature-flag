@@ -1,9 +1,7 @@
-package kinesysexporter
+package kinesisexporter
 
 import (
 	"context"
-	"crypto/md5"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"sync"
@@ -17,8 +15,9 @@ import (
 )
 
 const (
-	formatJSON = "json"
-	Mb         = 1024 * 1024
+	formatJSON          = "json"
+	Mb                  = 1024 * 1024
+	DefaultPartitionKey = "default"
 )
 
 type MessageSender interface {
@@ -50,12 +49,60 @@ type Exporter struct {
 	// https://pkg.go.dev/github.com/aws/aws-sdk-go-v2/service/kinesis#Options
 	KinesisOptions []func(*kinesis.Options)
 
-	StreamName *string
-	StreamArn  *string
+	Settings Settings
 
 	init sync.Once
 
 	sender MessageSender
+}
+
+type Settings struct {
+	StreamName      *string
+	StreamArn       *string
+	PartitionKey    *string
+	ExplicitHashKey *string
+}
+
+type Option = func(Settings) Settings
+
+func WithPartitionKey(partitionKey string) Option {
+	return func(s Settings) Settings {
+		s.PartitionKey = &partitionKey
+		return s
+	}
+}
+
+func WithExplicitHashKey(hashKey string) Option {
+	return func(s Settings) Settings {
+		s.ExplicitHashKey = &hashKey
+		return s
+	}
+}
+
+func WithStreamName(streamName string) Option {
+	return func(s Settings) Settings {
+		s.StreamArn = nil
+		s.StreamName = &streamName
+		return s
+	}
+}
+
+func WithStreamArn(streamArn string) Option {
+	return func(s Settings) Settings {
+		s.StreamArn = &streamArn
+		s.StreamName = nil
+		return s
+	}
+}
+
+func NewSettings(options ...Option) Settings {
+	settings := Settings{
+		PartitionKey: aws.String(DefaultPartitionKey),
+	}
+	for _, option := range options {
+		settings = option(settings)
+	}
+	return settings
 }
 
 func (e *Exporter) initializeProducer(ctx context.Context) error {
@@ -98,11 +145,10 @@ func (e *Exporter) Export(ctx context.Context, logger *fflog.FFLogger, featureEv
 			continue
 		}
 
-		partitionKey := hex.EncodeToString(md5.New().Sum(formattedEvent))
-
 		records = append(records, types.PutRecordsRequestEntry{
 			Data:            formattedEvent,
-			ExplicitHashKey: &partitionKey,
+			PartitionKey:    e.Settings.PartitionKey,
+			ExplicitHashKey: e.Settings.ExplicitHashKey,
 		})
 	}
 
@@ -110,10 +156,10 @@ func (e *Exporter) Export(ctx context.Context, logger *fflog.FFLogger, featureEv
 		Records: records,
 	}
 
-	if e.StreamArn != nil {
-		input.StreamARN = e.StreamArn
-	} else if e.StreamName != nil {
-		input.StreamName = e.StreamName
+	if e.Settings.StreamArn != nil {
+		input.StreamARN = e.Settings.StreamArn
+	} else if e.Settings.StreamName != nil {
+		input.StreamName = e.Settings.StreamName
 	} else {
 		return fmt.Errorf("send: no StreamName or StreamArn provided")
 	}
