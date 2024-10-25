@@ -1,4 +1,4 @@
-package kinesys
+package kinesysexporter
 
 import (
 	"context"
@@ -18,7 +18,20 @@ import (
 
 const (
 	formatJSON = "json"
+	Mb         = 1024 * 1024
 )
+
+type MessageSender interface {
+	SendMessages(ctx context.Context, msgs *kinesis.PutRecordsInput) (*kinesis.PutRecordsOutput, error)
+}
+
+type DefaultKinesisSender struct {
+	*kinesis.Client
+}
+
+func (k *DefaultKinesisSender) SendMessages(ctx context.Context, msgs *kinesis.PutRecordsInput) (*kinesis.PutRecordsOutput, error) {
+	return k.PutRecords(ctx, msgs)
+}
 
 type Exporter struct {
 	// AwsConfig is the AWS SDK configuration object we will use to
@@ -30,11 +43,11 @@ type Exporter struct {
 	// Default: JSON
 	Format string
 
-	// S3ClientOptions is a list of functional options to configure the S3 client.
+	// kinesis.Options is a list of functional options to configure the Kinesis client.
 	// Provide additional functional options to further configure the behavior of the client,
 	// such as changing the client's endpoint or adding custom middleware behavior.
 	// For more information about the options, please check:
-	// https://pkg.go.dev/github.com/aws/aws-sdk-go-v2/service/s3#Options
+	// https://pkg.go.dev/github.com/aws/aws-sdk-go-v2/service/kinesis#Options
 	KinesisOptions []func(*kinesis.Options)
 
 	StreamName *string
@@ -42,10 +55,7 @@ type Exporter struct {
 
 	init sync.Once
 
-	sender *kinesis.Client
-	// dialer will create the producer. This field is added for dependency injection during testing as sarama
-	// has the annoying tendency to dial as soon as a producer is created.
-	// dialer func(addrs []string, config *sarama.Config) (MessageSender, error)
+	sender MessageSender
 }
 
 func (e *Exporter) initializeProducer(ctx context.Context) error {
@@ -59,19 +69,19 @@ func (e *Exporter) initializeProducer(ctx context.Context) error {
 			}
 			e.AwsConfig = &cfg
 		}
-
-		e.sender = kinesis.NewFromConfig(*e.AwsConfig, e.KinesisOptions...)
-
+		if e.sender == nil {
+			e.sender = &DefaultKinesisSender{
+				kinesis.NewFromConfig(*e.AwsConfig, e.KinesisOptions...),
+			}
+		}
 	})
 	return initErr
 }
 
 func (e *Exporter) Export(ctx context.Context, logger *fflog.FFLogger, featureEvents []exporter.FeatureEvent) error {
-	if e.sender == nil {
-		err := e.initializeProducer(ctx)
-		if err != nil {
-			return fmt.Errorf("writer: %w", err)
-		}
+	err := e.initializeProducer(ctx)
+	if err != nil {
+		return fmt.Errorf("writer: %w", err)
 	}
 
 	records := make([]types.PutRecordsRequestEntry, 0, len(featureEvents))
@@ -83,6 +93,11 @@ func (e *Exporter) Export(ctx context.Context, logger *fflog.FFLogger, featureEv
 			return fmt.Errorf("format: %w", err)
 		}
 
+		if len(formattedEvent) >= Mb {
+			logger.Error("format: Event is too large, skipping", err)
+			continue
+		}
+
 		partitionKey := hex.EncodeToString(md5.New().Sum(formattedEvent))
 
 		records = append(records, types.PutRecordsRequestEntry{
@@ -91,21 +106,36 @@ func (e *Exporter) Export(ctx context.Context, logger *fflog.FFLogger, featureEv
 		})
 	}
 
-	output, err := e.sender.PutRecords(
-		ctx, &kinesis.PutRecordsInput{
-			Records:    records,
-			StreamARN:  e.StreamArn,
-			StreamName: e.StreamName,
-		},
-	)
+	input := &kinesis.PutRecordsInput{
+		Records: records,
+	}
 
-	// Logging
-	logger.Info("Blah blah blah {}", output.FailedRecordCount)
-	logger.Info("Blah blah blah {}", output.Records[0].ErrorCode)
-	logger.Info("Blah blah blah {}", output.Records[0].ErrorMessage)
+	if e.StreamArn != nil {
+		input.StreamARN = e.StreamArn
+	} else if e.StreamName != nil {
+		input.StreamName = e.StreamName
+	} else {
+		return fmt.Errorf("send: no StreamName or StreamArn provided")
+	}
+
+	output, err := e.sender.SendMessages(ctx, input)
 
 	if err != nil {
 		return fmt.Errorf("send: %w", err)
+	}
+
+	if *output.FailedRecordCount > 0 {
+		logger.Error("send: couldn't send %d records to Kinesis", output.FailedRecordCount)
+	}
+
+	for _, record := range output.Records {
+		if record.ErrorCode != nil || record.ErrorMessage != nil {
+			logger.Error(
+				"send: couldn't send event to Kinesis: ErrorCode: %s, ErrorMessage: %s",
+				record.ErrorCode,
+				record.ErrorMessage,
+			)
+		}
 	}
 
 	return nil
@@ -119,4 +149,9 @@ func (e *Exporter) formatMessage(event exporter.FeatureEvent) ([]byte, error) {
 	default:
 		return json.Marshal(event)
 	}
+}
+
+// IsBulk reports if the producer can handle bulk messages. Will always return false for this exporter.
+func (f *Exporter) IsBulk() bool {
+	return false
 }
