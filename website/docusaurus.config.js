@@ -184,6 +184,7 @@ const config = {
           {type: 'doc', docId: 'index', position: 'left', html: 'Docs'},
           {to: '/blog', label: 'Blog', position: 'left'},
           {to: '/editor', html: 'Editor', position: 'left'},
+          {to: '/pricing', html: 'Pricing', position: 'left'},
           {
             to: 'https://github.com/sponsors/thomaspoignant',
             label: 'Sponsor us ❤️',
