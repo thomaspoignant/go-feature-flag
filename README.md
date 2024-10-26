@@ -610,7 +610,7 @@ Thanks so much to our contributors.
 [Become a sponsor](https://github.com/sponsors/thomaspoignant) and show your support to GO Feature Flag.
 
 These are our really cool sponsors!
-<!-- sponsors --><a href="https://github.com/cybozu"><img src="https:&#x2F;&#x2F;avatars.githubusercontent.com&#x2F;u&#x2F;2433152?v&#x3D;4" width="60px" alt="Cybozu" /></a><!-- sponsors -->
+<!-- sponsors --><a href="https://github.com/cybozu"><img src="https:&#x2F;&#x2F;avatars.githubusercontent.com&#x2F;u&#x2F;2433152?v&#x3D;4" width="60px" alt="Cybozu" /></a><a href="https://github.com/clemsau"><img src="https:&#x2F;&#x2F;avatars.githubusercontent.com&#x2F;u&#x2F;36474372?u&#x3D;792957256f1997cbdad8a6c6e7b60c2db0205a8f&amp;v&#x3D;4" width="60px" alt="Clément Sauvage" /></a><!-- sponsors -->
 
 ## Adopters
 
