@@ -15,10 +15,13 @@ import (
 )
 
 const (
-	formatJSON          = "json"
-	Mb                  = 1024 * 1024
-	DefaultPartitionKey = "default"
+	formatJSON = "json"
+	Mb         = 1024 * 1024
 )
+
+var DefaultPartitionKey = func(event exporter.FeatureEvent) string {
+	return "default"
+}
 
 type MessageSender interface {
 	SendMessages(ctx context.Context, msgs *kinesis.PutRecordsInput) (*kinesis.PutRecordsOutput, error)
@@ -49,25 +52,27 @@ type Exporter struct {
 	// https://pkg.go.dev/github.com/aws/aws-sdk-go-v2/service/kinesis#Options
 	KinesisOptions []func(*kinesis.Options)
 
-	Settings Settings
+	Settings *Settings
 
 	init sync.Once
 
 	sender MessageSender
 }
 
+type PartitionKeyFunc = func(exporter.FeatureEvent) string
+
 type Settings struct {
 	StreamName      *string
 	StreamArn       *string
-	PartitionKey    *string
+	PartitionKey    PartitionKeyFunc
 	ExplicitHashKey *string
 }
 
 type Option = func(Settings) Settings
 
-func WithPartitionKey(partitionKey string) Option {
+func WithPartitionKey(partitionKey PartitionKeyFunc) Option {
 	return func(s Settings) Settings {
-		s.PartitionKey = &partitionKey
+		s.PartitionKey = partitionKey
 		return s
 	}
 }
@@ -81,6 +86,9 @@ func WithExplicitHashKey(hashKey string) Option {
 
 func WithStreamName(streamName string) Option {
 	return func(s Settings) Settings {
+		if streamName == "" {
+			return s
+		}
 		s.StreamArn = nil
 		s.StreamName = &streamName
 		return s
@@ -89,25 +97,32 @@ func WithStreamName(streamName string) Option {
 
 func WithStreamArn(streamArn string) Option {
 	return func(s Settings) Settings {
+		if streamArn == "" {
+			return s
+		}
 		s.StreamArn = &streamArn
 		s.StreamName = nil
 		return s
 	}
 }
 
-func NewSettings(options ...Option) Settings {
+func NewSettings(options ...Option) *Settings {
 	settings := Settings{
-		PartitionKey: aws.String(DefaultPartitionKey),
+		PartitionKey: DefaultPartitionKey,
 	}
 	for _, option := range options {
 		settings = option(settings)
 	}
-	return settings
+	return &settings
 }
 
 func (e *Exporter) initializeProducer(ctx context.Context) error {
 	var initErr error
 	e.init.Do(func() {
+		if e.Settings == nil {
+			e.Settings = NewSettings()
+		}
+
 		if e.AwsConfig == nil {
 			cfg, err := config.LoadDefaultConfig(ctx)
 			if err != nil {
@@ -145,9 +160,11 @@ func (e *Exporter) Export(ctx context.Context, logger *fflog.FFLogger, featureEv
 			continue
 		}
 
+		partitionKey := e.Settings.PartitionKey(event)
+
 		records = append(records, types.PutRecordsRequestEntry{
 			Data:            formattedEvent,
-			PartitionKey:    e.Settings.PartitionKey,
+			PartitionKey:    &partitionKey,
 			ExplicitHashKey: e.Settings.ExplicitHashKey,
 		})
 	}

@@ -109,10 +109,14 @@ func TestExporter_ShouldRaiseErrorIfNoStreamIsSpecified(t *testing.T) {
 
 func TestExporter_ExportAWSConfigurationCustomisation(t *testing.T) {
 	mock := MockKinesisSender{}
+
 	exp := Exporter{
-		Format:   "json",
-		sender:   &mock,
-		Settings: NewSettings(WithStreamName("test-stream")),
+		Format: "json",
+		sender: &mock,
+		Settings: NewSettings(
+			WithStreamName("test-stream"),
+			WithPartitionKey(func(e exporter.FeatureEvent) string { return "test-key" }),
+		),
 		AwsConfig: &aws.Config{
 			Region: "unexistent-region",
 		},
@@ -129,6 +133,7 @@ func TestExporter_ExportAWSConfigurationCustomisation(t *testing.T) {
 	)
 
 	assert.NoError(t, err)
+	assert.Equal(t, *mock.PutRecordsInputs[0].Records[0].PartitionKey, "test-key")
 	assert.Equal(t, exp.AwsConfig.Region, "unexistent-region")
 }
 
