@@ -853,8 +853,8 @@ github.com/testcontainers/testcontainers-go v0.34.0 h1:5fbgF0vIN5u+nD3IWabQwRybu
 github.com/testcontainers/testcontainers-go v0.34.0/go.mod h1:6P/kMkQe8yqPHfPWNulFGdFHTD8HB2vLq/231xY2iPQ=
 github.com/testcontainers/testcontainers-go/modules/mongodb v0.33.0 h1:iXVA84s5hKMS5gn01GWOYHE3ymy/2b+0YkpFeTxB2XY=
 github.com/testcontainers/testcontainers-go/modules/mongodb v0.33.0/go.mod h1:R6tMjTojRiaoo89fh/hf7tOmfzohdqSU17R9DwSVSog=
-github.com/testcontainers/testcontainers-go/modules/redis v0.33.0 h1:S/QvMOwpr00MM2aWH+krzP73Erlp/Ug0dr2rkgZYI5s=
-github.com/testcontainers/testcontainers-go/modules/redis v0.33.0/go.mod h1:gudb3+6uZ9SsAysOVoLs7nazbjGlkHegBW8nqPXvDMI=
+github.com/testcontainers/testcontainers-go/modules/redis v0.34.0 h1:HkkKZPi6W2I+ywqplvnKOYRBKXQgpdxErBbdgx8F8nw=
+github.com/testcontainers/testcontainers-go/modules/redis v0.34.0/go.mod h1:iUkbN75F4E8WC5C1MfHbGOHOuKU7gOJfHjtwMT8G9QE=
 github.com/thejerf/slogassert v0.3.4 h1:VoTsXixRbXMrRSSxDjYTiEDCM4VWbsYPW5rB/hX24kM=
 github.com/thejerf/slogassert v0.3.4/go.mod h1:0zn9ISLVKo1aPMTqcGfG1o6dWwt+Rk574GlUxHD4rs8=
 github.com/tklauser/go-sysconf v0.3.12 h1:0QaGUFOdQaIVdPgfITYzaTegZvdCjmYO52cSFAEVmqU=
