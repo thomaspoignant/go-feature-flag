@@ -52,7 +52,7 @@ require (
 	go.mongodb.org/mongo-driver v1.17.1
 	go.opentelemetry.io/contrib/exporters/autoexport v0.56.0
 	go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho v0.56.0
-	go.opentelemetry.io/contrib/samplers/jaegerremote v0.24.0
+	go.opentelemetry.io/contrib/samplers/jaegerremote v0.25.0
 	go.opentelemetry.io/otel v1.31.0
 	go.opentelemetry.io/otel/sdk v1.31.0
 	go.opentelemetry.io/otel/trace v1.31.0
