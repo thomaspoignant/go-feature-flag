@@ -21,12 +21,14 @@ func TestMicrosoftTeamsNotifier_Notify(t *testing.T) {
 		forceError bool
 		url        string
 	}
+
 	type expected struct {
 		err       bool
 		errMsg    string
 		bodyPath  string
 		signature string
 	}
+	
 	tests := []struct {
 		name     string
 		args     args
