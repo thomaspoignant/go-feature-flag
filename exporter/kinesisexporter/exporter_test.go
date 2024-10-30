@@ -35,9 +35,9 @@ func TestExporter_ExportBasicWithStreamName(t *testing.T) {
 		context.Background(),
 		logger,
 		[]exporter.FeatureEvent{
-			NewFeatureEvent(),
-			NewFeatureEvent(),
-			NewFeatureEvent(),
+			*NewFeatureEvent(),
+			*NewFeatureEvent(),
+			*NewFeatureEvent(),
 		},
 	)
 
@@ -68,9 +68,9 @@ func TestExporter_ExportBasicWithStreamArn(t *testing.T) {
 		context.Background(),
 		logger,
 		[]exporter.FeatureEvent{
-			NewFeatureEvent(),
-			NewFeatureEvent(),
-			NewFeatureEvent(),
+			*NewFeatureEvent(),
+			*NewFeatureEvent(),
+			*NewFeatureEvent(),
 		},
 	)
 
@@ -101,7 +101,7 @@ func TestExporter_ShouldRaiseErrorIfNoStreamIsSpecified(t *testing.T) {
 	err := exp.Export(
 		context.Background(),
 		logger,
-		[]exporter.FeatureEvent{NewFeatureEvent()},
+		[]exporter.FeatureEvent{*NewFeatureEvent()},
 	)
 
 	assert.Error(t, err)
@@ -115,7 +115,9 @@ func TestExporter_ExportAWSConfigurationCustomisation(t *testing.T) {
 		sender: &mock,
 		Settings: NewSettings(
 			WithStreamName("test-stream"),
-			WithPartitionKey(func(e exporter.FeatureEvent) string { return "test-key" }),
+			WithPartitionKey(func(context.Context, exporter.FeatureEvent) string {
+				return "test-key"
+			}),
 		),
 		AwsConfig: &aws.Config{
 			Region: "unexistent-region",
@@ -128,7 +130,7 @@ func TestExporter_ExportAWSConfigurationCustomisation(t *testing.T) {
 		context.Background(),
 		logger,
 		[]exporter.FeatureEvent{
-			NewFeatureEvent(),
+			*NewFeatureEvent(),
 		},
 	)
 
@@ -152,15 +154,95 @@ func TestExporter_ExportSenderError(t *testing.T) {
 		context.Background(),
 		logger,
 		[]exporter.FeatureEvent{
-			NewFeatureEvent(),
+			*NewFeatureEvent(),
 		},
 	)
 
 	assert.Error(t, err)
 }
 
-func NewFeatureEvent() exporter.FeatureEvent {
-	return exporter.FeatureEvent{
+func TestExporterSettingsCreation(t *testing.T) {
+	{
+		settings := NewSettings()
+		assert.Equal(t, settings.PartitionKey(context.TODO(), *NewFeatureEvent()), "default")
+		assert.Nil(t, settings.StreamName)
+		assert.Nil(t, settings.StreamArn)
+		assert.Nil(t, settings.ExplicitHashKey)
+	}
+	{
+		settings := NewSettings(WithStreamArn("test-stream-arn"))
+		assert.Equal(t, settings.PartitionKey(context.TODO(), *NewFeatureEvent()), "default")
+		assert.Nil(t, settings.StreamName)
+		assert.Equal(t, *settings.StreamArn, "test-stream-arn")
+		assert.Nil(t, settings.ExplicitHashKey)
+	}
+	{
+		settings := NewSettings(WithStreamName("test-stream-name"))
+		assert.Equal(t, settings.PartitionKey(context.TODO(), *NewFeatureEvent()), "default")
+		assert.Equal(t, *settings.StreamName, "test-stream-name")
+		assert.Nil(t, settings.StreamArn)
+		assert.Nil(t, settings.ExplicitHashKey)
+	}
+	{
+		settings := NewSettings(WithExplicitHashKey("test-explicit-hash-key"))
+		assert.Equal(t, settings.PartitionKey(context.TODO(), *NewFeatureEvent()), "default")
+		assert.Nil(t, settings.StreamName)
+		assert.Nil(t, settings.StreamArn)
+		assert.Equal(t, *settings.ExplicitHashKey, "test-explicit-hash-key")
+	}
+	{
+		settings := NewSettings(
+			WithStreamName("test-stream-name"),
+			WithStreamArn("test-stream-arn"),
+			WithExplicitHashKey("test-explicit-hash-key"),
+			WithPartitionKey(func(_ context.Context, _ exporter.FeatureEvent) string { return "non-default" }),
+		)
+		assert.Equal(t, settings.PartitionKey(context.TODO(), *NewFeatureEvent()), "non-default")
+		assert.Nil(t, settings.StreamName) // overwritten by streamArn
+		assert.Equal(t, *settings.StreamArn, "test-stream-arn")
+		assert.Equal(t, *settings.ExplicitHashKey, "test-explicit-hash-key")
+	}
+	{
+		settings := NewSettings(
+			WithStreamArn("test-stream-arn"),
+			WithStreamName("test-stream-name"),
+		)
+		assert.Nil(t, settings.StreamArn) // overwritten by streamName
+		assert.Equal(t, *settings.StreamName, "test-stream-name")
+	}
+}
+
+func TestHugeMessageExportFlow(t *testing.T) {
+	event := NewFeatureEvent()
+	event.Value = string(make([]byte, Mb))
+
+	mock := MockKinesisSender{}
+
+	exp := Exporter{
+		Format:   "json",
+		sender:   &mock,
+		Settings: NewSettings(WithStreamName("test-stream")),
+	}
+
+	logger := &fflog.FFLogger{LeveledLogger: slog.Default()}
+
+	err := exp.Export(
+		context.Background(),
+		logger,
+		[]exporter.FeatureEvent{
+			*event,
+			*event,
+			*event,
+			*event,
+		},
+	)
+
+	assert.NoError(t, err)
+	assert.Len(t, mock.PutRecordsInputs, 0)
+}
+
+func NewFeatureEvent() *exporter.FeatureEvent {
+	return &exporter.FeatureEvent{
 		Kind:         "feature",
 		ContextKind:  "anonymousUser",
 		UserKey:      "ABCD",

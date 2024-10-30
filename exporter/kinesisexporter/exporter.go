@@ -19,7 +19,9 @@ const (
 	Mb         = 1024 * 1024
 )
 
-var DefaultPartitionKey = func(event exporter.FeatureEvent) string {
+var DefaultPartitionKey = func(context context.Context, _ exporter.FeatureEvent) string {
+	context.Value("feature")
+
 	return "default"
 }
 
@@ -31,7 +33,10 @@ type DefaultKinesisSender struct {
 	*kinesis.Client
 }
 
-func (k *DefaultKinesisSender) SendMessages(ctx context.Context, msgs *kinesis.PutRecordsInput) (*kinesis.PutRecordsOutput, error) {
+func (k *DefaultKinesisSender) SendMessages(
+	ctx context.Context,
+	msgs *kinesis.PutRecordsInput,
+) (*kinesis.PutRecordsOutput, error) {
 	return k.PutRecords(ctx, msgs)
 }
 
@@ -59,7 +64,7 @@ type Exporter struct {
 	sender MessageSender
 }
 
-type PartitionKeyFunc = func(exporter.FeatureEvent) string
+type PartitionKeyFunc = func(context.Context, exporter.FeatureEvent) string
 
 type Settings struct {
 	StreamName      *string
@@ -160,7 +165,7 @@ func (e *Exporter) Export(ctx context.Context, logger *fflog.FFLogger, featureEv
 			continue
 		}
 
-		partitionKey := e.Settings.PartitionKey(event)
+		partitionKey := e.Settings.PartitionKey(ctx, event)
 
 		records = append(records, types.PutRecordsRequestEntry{
 			Data:            formattedEvent,
@@ -173,12 +178,18 @@ func (e *Exporter) Export(ctx context.Context, logger *fflog.FFLogger, featureEv
 		Records: records,
 	}
 
-	if e.Settings.StreamArn != nil {
+	switch {
+	case e.Settings.StreamArn != nil:
 		input.StreamARN = e.Settings.StreamArn
-	} else if e.Settings.StreamName != nil {
+	case e.Settings.StreamName != nil:
 		input.StreamName = e.Settings.StreamName
-	} else {
+	default:
 		return fmt.Errorf("send: no StreamName or StreamArn provided")
+	}
+
+	if len(input.Records) == 0 {
+		// nothing to send
+		return nil
 	}
 
 	output, err := e.sender.SendMessages(ctx, input)
@@ -215,6 +226,6 @@ func (e *Exporter) formatMessage(event exporter.FeatureEvent) ([]byte, error) {
 }
 
 // IsBulk reports if the producer can handle bulk messages. Will always return false for this exporter.
-func (f *Exporter) IsBulk() bool {
+func (e *Exporter) IsBulk() bool {
 	return false
 }
