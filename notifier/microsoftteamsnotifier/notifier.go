@@ -58,11 +58,15 @@ func (c *Notifier) Notify(diff notifier.DiffCache) error {
 	if err != nil {
 		return fmt.Errorf("error: (Microsoft Teams Notifier) impossible to read differences; %v", err)
 	}
+	microsoftTeamAccessToken := os.Getenv("MICROSOFT_TEAMS_ACCESS_TOKEN")
 	request := http.Request{
 		Method: http.MethodPost,
 		URL:    microsoftteamsURL,
 		Body:   io.NopCloser(bytes.NewReader(payload)),
-		Header: map[string][]string{"Content-type": {"application/json"}},
+		Header: map[string][]string{
+			"Content-Type":  {"application/json"},
+			"Authorization": {"Bearer " + microsoftTeamAccessToken},
+		},
 	}
 	response, err := c.httpClient.Do(&request)
 	if err != nil {
@@ -83,26 +87,13 @@ func convertToMicrosoftTeamsMessage(diffCache notifier.DiffCache) microsoftteams
 	attachments := convertDeletedFlagsToMicrosoftTeamsMessage(diffCache)
 	attachments = append(attachments, convertUpdatedFlagsToMicrosoftTeamsMessage(diffCache)...)
 	attachments = append(attachments, convertAddedFlagsToMicrosoftTeamsMessage(diffCache)...)
-	currentDate := time.Now().Format("YYYY-MM-DD")
-	res := []map[string]interface{}{
-		"@type":    "MessageCard",
-		"@context": "https://schema.org/extensions",
-		"summary":  "Changes detected in your feature flag",
-		"sections": []map[string]interface{}{
-			{
-				"activityTitle":    "Changes detected in your feature flag",
-				"activitySubtitle": fmt.Sprintf("On flag file: *%s*", hostname),
-				"activityImage":    goFFLogo,
-				"text":             fmt.Sprintf("Changes detected in your feature flag file on: *%s*", hostname),
-				"facts": []map[string]string{
-					{"name": "Date", "value": currentDate},
-				},
-			},
-		},
-		"attachments": []Attachment{attachments}, 
-		// "attachments": attachments,
+	res := microsoftteamsMessage{
+		IconURL:     goFFLogo,
+		Body: MessageBody{Content: fmt.Sprintf("Changes detected in your feature flag file on: *%s*", hostname)},
+		Attachments: attachments
 	}
 	return res
+	
 }
 
 func convertDeletedFlagsToMicrosoftTeamsMessage(diffCache notifier.DiffCache) []attachment {
@@ -163,12 +154,6 @@ func convertAddedFlagsToMicrosoftTeamsMessage(diff notifier.DiffCache) []attachm
 	return attachments
 }
 
-type microsoftteamsMessage struct {
-	IconURL     string       `json:"icon_url"`
-	Text        string       `json:"text"`
-	Attachments []attachment `json:"attachments"`
-}
-
 type attachment struct {
 	Color      string  `json:"color"`
 	Title      string  `json:"title"`
@@ -181,6 +166,14 @@ type Field struct {
 	Title string `json:"title"`
 	Value string `json:"value"`
 	Short bool   `json:"short"`
+}
+type MessageBody struct {
+	Content string `json:"content"`
+}
+type microsoftteamsMessage struct {
+	IconURL     string       `json:"icon_url"`
+	Body        MessageBody  `json:"body"`
+	Attachments []attachment `json:"attachments"`
 }
 
 type ByTitle []Field
