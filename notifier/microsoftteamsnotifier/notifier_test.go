@@ -40,7 +40,7 @@ func TestMicrosoftTeamsNotifier_Notify(t *testing.T) {
 				bodyPath: "./testdata/should_call_webhook_and_have_valid_results.json",
 			},
 			args: args{
-				url:        "https://outlook.office.com/webhook/ZZZZ",
+				url:        "https://graph.microsoft.com/teams/XXXXXX/channels/YYYYYY/messages",
 				statusCode: http.StatusOK,
 				diff: notifier.DiffCache{
 					Added: map[string]flag.Flag{
@@ -148,7 +148,7 @@ func TestMicrosoftTeamsNotifier_Notify(t *testing.T) {
 				errMsg: "error: (Microsoft Teams Notifier) while calling microsoft teams webhook, statusCode = 400",
 			},
 			args: args{
-				url:        "https://outlook.office.com/webhook/ZZZZ",
+				url:        "https://graph.microsoft.com/teams/XXXXXX/channels/YYYYYY/messages",
 				statusCode: http.StatusBadRequest,
 				diff:       notifier.DiffCache{},
 			},
@@ -160,7 +160,7 @@ func TestMicrosoftTeamsNotifier_Notify(t *testing.T) {
 				errMsg: "error: (Microsoft Teams Notifier) error: while calling webhook: random error",
 			},
 			args: args{
-				url:        "https://outlook.office.com/webhook/ZZZZ",
+				url:        "https://graph.microsoft.com/teams/XXXXXX/channels/YYYYYY/messages",
 				statusCode: http.StatusOK,
 				diff:       notifier.DiffCache{},
 				forceError: true,
@@ -181,10 +181,10 @@ func TestMicrosoftTeamsNotifier_Notify(t *testing.T) {
 			name: "invalid microsoft teams url",
 			expected: expected{
 				err:    true,
-				errMsg: "error: (Microsoft Teams Notifier) invalid MicrosoftTeamsWebhookURL: https://{}outlook.office.com/webhook/ZZZZ",
+				errMsg: "error: (Microsoft Teams Notifier) invalid MicrosoftTeamsWebhookURL: https://{}graph.microsoft.com/teams/XXXXXX/channels/YYYYYY/messages",
 			},
 			args: args{
-				url:        "https://{}outlook.office.com/webhook/ZZZZ",
+				url:        "https://{}graph.microsoft.com/teams/XXXXXX/channels/YYYYYY/messages",
 				statusCode: http.StatusOK,
 				diff:       notifier.DiffCache{},
 			},
