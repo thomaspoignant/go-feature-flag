@@ -46,7 +46,7 @@ require (
 	github.com/swaggo/echo-swagger v1.4.1
 	github.com/swaggo/swag v1.16.4
 	github.com/testcontainers/testcontainers-go v0.34.0
-	github.com/testcontainers/testcontainers-go/modules/mongodb v0.33.0
+	github.com/testcontainers/testcontainers-go/modules/mongodb v0.34.0
 	github.com/testcontainers/testcontainers-go/modules/redis v0.34.0
 	github.com/thejerf/slogassert v0.3.4
 	github.com/xitongsys/parquet-go v1.6.2
