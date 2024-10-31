@@ -6,6 +6,7 @@ import PropTypes from 'prop-types';
 import sqslogo from '@site/static/docs/collectors/sqs.png';
 import pubsublogo from '@site/static/docs/collectors/pubsub.png';
 import s3logo from '@site/static/docs/collectors/s3.png';
+import kinesislogo from '@site/static/docs/collectors/kinesis.png';
 import webhooklogo from '@site/static/docs/collectors/webhook.png';
 import {Headline} from '../headline';
 
@@ -307,6 +308,11 @@ function Integration() {
               colorClassName={styles.socialIconBlack}
               fontAwesomeIcon="devicon-redis-plain-wordmark colored"
               tooltipText="Redis"
+            />
+            <SocialIcon
+              colorClassName={styles.socialIconAws}
+              img={kinesislogo}
+              tooltipText="AWS Kinesis"
             />
           </div>
         </div>
