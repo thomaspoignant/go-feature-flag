@@ -10,6 +10,7 @@ import (
 	"go.opentelemetry.io/contrib/exporters/autoexport"
 	"go.opentelemetry.io/contrib/samplers/jaegerremote"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
@@ -57,7 +58,7 @@ func (s *OtelService) Init(ctx context.Context, zapLog *zap.Logger, config confi
 		return fmt.Errorf("initializing OTel sampler: %w", err)
 	}
 
-	resource, err := initResource(ctx, serviceName, config.Version)
+	resource, err := initResource(ctx, serviceName, config.Version, config.OtelConfig.Resource.Attributes)
 	if err != nil {
 		return fmt.Errorf("initializing OTel resources: %w", err)
 	}
@@ -87,9 +88,15 @@ func (o otelErrHandler) Handle(err error) {
 
 var _ otel.ErrorHandler = otelErrHandler(nil)
 
-func initResource(ctx context.Context, serviceName string, version string) (*resource.Resource, error) {
+func initResource(ctx context.Context, serviceName, version string,
+	attribs map[string]string) (*resource.Resource, error) {
+	attrs := make([]attribute.KeyValue, 0, len(attribs))
+	for k, v := range attribs {
+		attrs = append(attrs, attribute.String(k, v))
+	}
+
 	return resource.New(ctx,
-		resource.WithFromEnv(),
+		resource.WithAttributes(attrs...),
 		resource.WithProcessPID(),
 		resource.WithProcessExecutableName(),
 		resource.WithProcessExecutablePath(),
