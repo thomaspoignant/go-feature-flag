@@ -17,7 +17,7 @@ repositories {
 dependencies {
     testImplementation(kotlin("test"))
     implementation("dev.openfeature.contrib.providers:go-feature-flag:0.3.0")
-    implementation("dev.openfeature:sdk:1.12.1")
+    implementation("dev.openfeature:sdk:1.12.2")
 }
 
 tasks.test {

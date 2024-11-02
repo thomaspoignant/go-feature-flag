@@ -13,6 +13,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/gcstorageexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/kafkaexporter"
+	"github.com/thomaspoignant/go-feature-flag/exporter/kinesisexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/logsexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/pubsubexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/s3exporterv2"
@@ -260,6 +261,19 @@ func createExporter(c *config.ExporterConf) (exporter.CommonExporter, error) {
 			ParquetCompressionCodec: parquetCompressionCodec,
 			AwsConfig:               &awsConfig,
 		}, nil
+	case config.KinesisExporter:
+		awsConfig, err := awsConf.LoadDefaultConfig(context.Background())
+		if err != nil {
+			return nil, err
+		}
+		return &kinesisexporter.Exporter{
+			Format:    format,
+			AwsConfig: &awsConfig,
+			Settings: kinesisexporter.NewSettings(
+				kinesisexporter.WithStreamArn(c.StreamArn),
+				kinesisexporter.WithStreamName(c.StreamName),
+			),
+		}, nil
 	case config.GoogleStorageExporter:
 		return &gcstorageexporter.Exporter{
 			Bucket:                  c.Bucket,
@@ -274,7 +288,6 @@ func createExporter(c *config.ExporterConf) (exporter.CommonExporter, error) {
 		if err != nil {
 			return nil, err
 		}
-
 		return &sqsexporter.Exporter{
 			QueueURL:  c.QueueURL,
 			AwsConfig: &awsConfig,
