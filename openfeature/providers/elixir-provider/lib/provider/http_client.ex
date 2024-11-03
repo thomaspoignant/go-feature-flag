@@ -12,9 +12,8 @@ defmodule ElixirProvider.HttpClient do
           headers: list()
         }
 
-  @spec start_http_connection(client :: t()) :: {:ok, t()} | {:error, any()}
-  def start_http_connection(client) do
-    uri = URI.parse(client.endpoint)
+  def start_http_connection(options) do
+    uri = URI.parse(options.endpoint)
     scheme = if uri.scheme == "https", do: :https, else: :http
 
     case Mint.HTTP.connect(scheme, uri.host, uri.port) do
@@ -22,7 +21,7 @@ defmodule ElixirProvider.HttpClient do
         # Create the struct with the connection, endpoint, and default headers
         config = %__MODULE__{
           conn: conn,
-          endpoint: client.endpoint,
+          endpoint: options.endpoint,
           headers: [{"content-type", "application/json"}]
         }
 

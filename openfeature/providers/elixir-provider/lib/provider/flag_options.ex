@@ -15,7 +15,7 @@ defmodule ElixirProvider.GoFeatureFlagOptions do
           endpoint: String.t(),
           cache_size: integer() | nil,
           data_flush_interval: integer() | nil,
-          disable_data_collection: integer() | nil,
+          disable_data_collection: boolean(),
           reconnect_interval: integer() | nil,
           disable_cache_invalidation: boolean() | nil
         }

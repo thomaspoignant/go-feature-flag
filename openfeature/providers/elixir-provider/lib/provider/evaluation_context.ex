@@ -1,4 +1,4 @@
-defmodule ElixirProvider.EvaluationContext do
+defmodule ElixirProvider.GofEvaluationContext do
   @moduledoc """
   GoFeatureFlagEvaluationContext is an object representing a user context for evaluation.
   """

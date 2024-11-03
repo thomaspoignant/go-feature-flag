@@ -26,4 +26,19 @@ defmodule ElixirProvider.ResponseFlagEvaluation do
           metadata: map() | nil,
           cacheable: boolean() | nil
         }
+
+  @spec decode(map()) :: t()
+  def decode(response) when is_map(response) do
+    %__MODULE__{
+      failed: response["failed"] || false,
+      value: response["value"],
+      variation_type: response["variationType"],
+      reason: response["reason"] || "",
+      error_code: response["errorCode"],
+      metadata: response["metadata"] || %{},
+      cacheable: Map.get(response, "cacheable", false),
+      track_events: response["track_events"],
+      version: response["version"]
+    }
+  end
 end

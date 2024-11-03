@@ -1,4 +1,4 @@
-defmodule DataCollectorHook do
+defmodule ElixirProvider.DataCollectorHook do
   use GenServer
   require Logger
 
@@ -25,12 +25,32 @@ defmodule DataCollectorHook do
         }
 
   # Starts the GenServer and initializes with options
-  def start_link(state) do
-    GenServer.start_link(__MODULE__, state, name: __MODULE__)
+  def start_link(options, http_client) do
+    GenServer.start_link(__MODULE__, {options, http_client: http_client}, name: __MODULE__)
+  end
+
+  def shutdown(state) do
+    GenServer.stop(__MODULE__)
+    collect_data(state.data_flush_interval)
+    %__MODULE__{
+      http_client: state.http_client,
+      data_collector_endpoint: state.data_collector_endpoint,
+      disable_data_collection: state.disable_data_collection,
+      data_flush_interval: state.data_flush_interval,
+      event_queue: []
+    }
   end
 
   # Initializes GenServer state and schedules the first flush
-  def init(state) do
+  def init(args) do
+    state = %__MODULE__{
+      http_client: args.http_client,
+      data_collector_endpoint: args.options.endpoint,
+      disable_data_collection: args.options.disable_data_collection || false,
+      data_flush_interval: args.options.data_flush_interval || 60_000,
+      event_queue: []
+    }
+
     schedule_collect_data(state.data_flush_interval)
     {:ok, state}
   end
@@ -39,6 +59,8 @@ defmodule DataCollectorHook do
   defp schedule_collect_data(interval) do
     Process.send_after(self(), :collect_data, interval)
   end
+
+  ### Hook Implementations
 
   def after_hook(hook, hook_context, flag_evaluation_details, _hints) do
     if hook.disable_data_collection or flag_evaluation_details.reason != :CACHED do
@@ -103,9 +125,8 @@ defmodule DataCollectorHook do
         meta: %{"provider" => "open-feature-elixir-sdk"},
         events: event_queue
       }
-      |> Jason.encode!()
 
-      case http_client.post(http_client, endpoint, body) do
+      case HttpClient.post(http_client, endpoint, body) do
         {:ok, response} ->
           Logger.info("Data sent successfully: #{inspect(response)}")
           :ok

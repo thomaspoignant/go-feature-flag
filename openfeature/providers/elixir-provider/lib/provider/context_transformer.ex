@@ -2,7 +2,7 @@ defmodule ElixirProvider.ContextTransformer do
   @moduledoc """
   Converts an OpenFeature EvaluationContext into a GO Feature Flag context.
   """
-  alias ElixirProvider.EvaluationContext
+  alias ElixirProvider.GofEvaluationContext
   alias OpenFeature.Types
 
   @doc """
@@ -16,14 +16,14 @@ defmodule ElixirProvider.ContextTransformer do
   end
 
   @doc """
-  Converts an EvaluationContext map into a ElixirProvider.EvaluationContext struct.
+  Converts an EvaluationContext map into a ElixirProvider.GofEvaluationContext struct.
   Returns `{:ok, context}` on success, or `{:error, reason}` on failure.
   """
-  @spec transform_context(Types.context()) :: {:ok, EvaluationContext.t()} | {:error, String.t()}
+  @spec transform_context(Types.context()) :: {:ok, GofEvaluationContext.t()} | {:error, String.t()}
   def transform_context(ctx) do
     case get_any_value(ctx) do
       {:ok, {key, value}} ->
-        {:ok, %EvaluationContext{
+        {:ok, %GofEvaluationContext{
           key: key,
           custom: value
         }}
