@@ -1,0 +1,6 @@
+%{
+  "elixir_sdk": {:git, "https://github.com/open-feature/elixir-sdk.git", "8e08041085aedec5d661b9a9a942cdf9f2606422", []},
+  "jason": {:hex, :jason, "1.4.4", "b9226785a9aa77b6857ca22832cffa5d5011a667207eb2a0ad56adb5db443b8a", [:mix], [{:decimal, "~> 1.0 or ~> 2.0", [hex: :decimal, repo: "hexpm", optional: true]}], "hexpm", "c5eb0cab91f094599f94d55bc63409236a8ec69a21a67814529e8d5f6cc90b3b"},
+  "open_feature": {:git, "https://github.com/open-feature/elixir-sdk.git", "8e08041085aedec5d661b9a9a942cdf9f2606422", []},
+  "websockex": {:hex, :websockex, "0.4.3", "92b7905769c79c6480c02daacaca2ddd49de936d912976a4d3c923723b647bf0", [:mix], [], "hexpm", "95f2e7072b85a3a4cc385602d42115b73ce0b74a9121d0d6dbbf557645ac53e4"},
+}
