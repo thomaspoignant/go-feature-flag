@@ -1,24 +1,46 @@
 defmodule ElixirProvider.HttpClient do
-
   @moduledoc """
   Handles HTTP requests to the GO Feature Flag API.
   """
 
-  @type t :: Mint.HTTP.t()
+  # Define a struct to store HTTP connection, endpoint, and other configuration details
+  defstruct [:conn, :endpoint, :headers]
 
-  @spec start_http_connection(String.t()) :: {:ok, Mint.HTTP.t()} | {:error, any()}
-  def start_http_connection(endpoint) do
-    uri = URI.parse(endpoint)
+  @type t :: %__MODULE__{
+          conn: Mint.HTTP.t() | nil,
+          endpoint: String.t(),
+          headers: list()
+        }
+
+  @spec start_http_connection(client :: t()) :: {:ok, t()} | {:error, any()}
+  def start_http_connection(client) do
+    uri = URI.parse(client.endpoint)
     scheme = if uri.scheme == "https", do: :https, else: :http
-    Mint.HTTP.connect(scheme, uri.host, uri.port)
+
+    case Mint.HTTP.connect(scheme, uri.host, uri.port) do
+      {:ok, conn} ->
+        # Create the struct with the connection, endpoint, and default headers
+        config = %__MODULE__{
+          conn: conn,
+          endpoint: client.endpoint,
+          headers: [{"content-type", "application/json"}]
+        }
+
+        {:ok, config}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
   end
 
-  @spec post(Mint.HTTP.t(), String.t(), map()) :: {:ok, map()} | {:error, any()}
-  def post(conn, path, data) do
-    headers = [{"content-type", "application/json"}]
+  @spec post(t(), String.t(), map()) :: {:ok, map()} | {:error, any()}
+  def post(%__MODULE__{conn: conn, endpoint: endpoint, headers: headers}, path, data) do
+    # Full URL path
+    url = URI.merge(endpoint, path) |> URI.to_string()
     body = Jason.encode!(data)
 
-    with {:ok, conn, request_ref} <- Mint.HTTP.request(conn, "POST", path, headers, body),
+    # Make the POST request using the existing connection
+    with {:ok, conn, request_ref} <- Mint.HTTP.request(conn, "POST", url, headers, body),
          {:ok, response} <- read_response(conn, request_ref) do
       Jason.decode(response)
     else
@@ -56,5 +78,4 @@ defmodule ElixirProvider.HttpClient do
       5_000 -> {:error, :timeout}
     end
   end
-
 end

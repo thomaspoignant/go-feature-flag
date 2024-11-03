@@ -2,7 +2,7 @@ defmodule ElixirProvider.FeatureEvent do
   @moduledoc """
   Represents a feature event with details about the feature flag evaluation.
   """
-  @enforce_keys [:kind, :context_kind, :user_key, :creation_date, :key, :variation]
+  @enforce_keys [:context_kind, :user_key, :creation_date, :key, :variation]
   defstruct [kind: "feature",
             context_kind: "",
             user_key: "",
