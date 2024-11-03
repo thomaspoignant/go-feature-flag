@@ -1,6 +1,4 @@
 defmodule ElixirProvider do
-  use WebSockex
-
   alias OpenFeature.EvaluationDetails
   alias ElixirProvider.ResponseFlagEvaluation
   alias ElixirProvider.GoFeatureFlagMetadata
@@ -9,6 +7,8 @@ defmodule ElixirProvider do
   alias ElixirProvider.GoFeatureFlagOptions
   alias ElixirProvider.Types
   alias ElixirProvider.CacheController
+  alias ElixirProvider.GoFWebSocketClient
+  alias ElixirProvider.HttpClient
 
   @moduledoc """
   The provider for GO Feature Flag, managing HTTP requests, caching, and flag evaluation.
@@ -17,17 +17,15 @@ defmodule ElixirProvider do
   defstruct [
     :options,
     :_http_client,
-    _cache_controller: nil,
     _data_collector_hook: nil,
     _ws: nil,
   ]
 
   @type t :: %__MODULE__{
-    options: GoFeatureFlagOptions,
-    _cache_controller: CacheController,
-    _http_client: any(),
+    options: GoFeatureFlagOptions.t(),
+    _http_client: HttpClient.t(),
     _data_collector_hook: any(),
-    _ws: WebSockex,
+    _ws: GoFWebSocketClient.t(),
   }
 
 
