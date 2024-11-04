@@ -67,9 +67,7 @@ func (c *Notifier) Notify(diff notifier.DiffCache) error {
 	defer response.Body.Close()
 	if response.StatusCode > 399 {
 		return fmt.Errorf("error: (Discord Notifier) webhook call failed with statusCode = %d", response.StatusCode)
-
 	}
-
 	return nil
 }
 
@@ -86,7 +84,7 @@ func convertToDiscordMessage(diffCache notifier.DiffCache) discordMessage {
 	if len(embeds) > 10 {
 		embeds = embeds[:9]
 		embeds = append(embeds, embed{
-			Title: fmt.Sprintf("Wow, lots of updates!\nToo many to fit here. 😔\n\nCheck the logs for the full list."),
+			Title: "Wow, lots of updates!\nToo many to fit here. 😔\n\nCheck the logs for the full list.",
 			Color: colorDeleted,
 		})
 	}
