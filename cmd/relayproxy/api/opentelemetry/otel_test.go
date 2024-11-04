@@ -213,7 +213,12 @@ func TestInit(t *testing.T) {
 
 		expectedErr := errors.New("test error")
 
-		err := svc.Init(context.Background(), testLogger, config.Config{})
+		t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "https://example.com:4318")
+		f := pflag.NewFlagSet("config", pflag.ContinueOnError)
+		c, errC := config.New(f, zap.L(), "1.X.X")
+		require.NoError(t, errC)
+		c.OpenTelemetryOtlpEndpoint = "https://bogus.com:4317"
+		err := svc.Init(context.Background(), testLogger, *c)
 		require.NoError(t, err)
 		defer func() { _ = svc.Stop(context.Background()) }()
 		otel.GetErrorHandler().Handle(expectedErr)
