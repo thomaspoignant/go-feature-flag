@@ -284,10 +284,17 @@ the [doc](../go_module/store_file/redis#expected-format) available._
 
 ### Slack
 
-| Field name        | Type   | Default  | Description                                                                                                            |
-|-------------------|--------|----------|------------------------------------------------------------------------------------------------------------------------|
-| `kind`            | string | **none** | **(mandatory)** Value should be **`slack`**.<br/>_This field is mandatory and describe which retriever you are using._ |
-| `slackWebhookUrl` | string | **none** | **(mandatory)** The complete URL of your incoming webhook configured in Slack.                                         |
+| Field name   | Type   | Default  | Description                                                                                                            |
+|--------------|--------|----------|------------------------------------------------------------------------------------------------------------------------|
+| `kind`       | string | **none** | **(mandatory)** Value should be **`slack`**.<br/>_This field is mandatory and describe which retriever you are using._ |
+| `webhookUrl` | string | **none** | **(mandatory)** The complete URL of your incoming webhook configured in Slack.                                         |
+
+### Discord
+
+| Field name   | Type   | Default  | Description                                                                                                              |
+|--------------|--------|----------|--------------------------------------------------------------------------------------------------------------------------|
+| `kind`       | string | **none** | **(mandatory)** Value should be **`discord`**.<br/>_This field is mandatory and describe which retriever you are using._ |
+| `webhookUrl` | string | **none** | **(mandatory)** The complete URL of your incoming webhook configured in Discord.                                         |
 
 ### Webhook
 
