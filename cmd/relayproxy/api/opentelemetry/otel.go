@@ -28,9 +28,9 @@ func NewOtelService() OtelService {
 
 // Init the OpenTelemetry service
 func (s *OtelService) Init(ctx context.Context, zapLog *zap.Logger, config config.Config) error {
-	// OTEL_SDK_DISABLED is not supported by the Go SDK, but is a standard env
-	// var defined by the OTel spec. We'll use it to disable the trace provider.
-	if config.OtelConfig.SDK.Disabled {
+	// Require the endpoint to be set either by the openTelemetryOtlpEndpoint
+	// config element or otel.exporter.otlp.endpoint
+	if config.OpenTelemetryOtlpEndpoint == "" && config.OtelConfig.Exporter.Otlp.Endpoint == "" {
 		otel.SetTracerProvider(noop.NewTracerProvider())
 		return nil
 	}
@@ -40,6 +40,8 @@ func (s *OtelService) Init(ctx context.Context, zapLog *zap.Logger, config confi
 		config.OtelConfig.Exporter.Otlp.Endpoint == "" {
 		config.OtelConfig.Exporter.Otlp.Endpoint = config.OpenTelemetryOtlpEndpoint
 		_ = os.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", config.OpenTelemetryOtlpEndpoint)
+	} else if config.OtelConfig.Exporter.Otlp.Endpoint != "" && os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT") == "" {
+		_ = os.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", config.OtelConfig.Exporter.Otlp.Endpoint)
 	}
 
 	exporter, err := autoexport.NewSpanExporter(ctx)

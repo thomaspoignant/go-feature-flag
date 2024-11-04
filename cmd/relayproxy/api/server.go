@@ -120,12 +120,10 @@ func (s *Server) Start() {
 	}
 
 	// start the OpenTelemetry tracing service
-	if s.config.OpenTelemetryOtlpEndpoint != "" {
-		err := s.otelService.Init(context.Background(), s.zapLog, *s.config)
-		if err != nil {
-			s.zapLog.Error("error while initializing Otel", zap.Error(err))
-			// we can continue because otel is not mandatory to start the server
-		}
+	err := s.otelService.Init(context.Background(), s.zapLog, *s.config)
+	if err != nil {
+		s.zapLog.Error("error while initializing OTel, continuing without tracing enabled", zap.Error(err))
+		// we can continue because otel is not mandatory to start the server
 	}
 
 	// starting the main application
@@ -138,7 +136,7 @@ func (s *Server) Start() {
 		zap.String("address", address),
 		zap.String("version", s.config.Version))
 
-	err := s.apiEcho.Start(address)
+	err = s.apiEcho.Start(address)
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		s.zapLog.Fatal("Error starting relay proxy", zap.Error(err))
 	}
