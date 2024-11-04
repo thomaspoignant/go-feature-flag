@@ -133,7 +133,7 @@ func TestJaegerRemoteSamplerOpts(t *testing.T) {
 
 func TestInitResource(t *testing.T) {
 	t.Run("defaults, no env", func(t *testing.T) {
-		res, err := initResource(context.Background(), "test", "1.2.3")
+		res, err := initResource(context.Background(), "test", "1.2.3", nil)
 		require.NoError(t, err)
 
 		rmap := map[string]attribute.Value{}
@@ -147,10 +147,13 @@ func TestInitResource(t *testing.T) {
 		assert.Equal(t, "go", rmap["process.runtime.name"].AsString())
 	})
 
-	t.Run("with OTEL_RESOURCE_ATTRIBUTES set", func(t *testing.T) {
-		t.Setenv("OTEL_RESOURCE_ATTRIBUTES", "key1=val1,key2=val2")
+	t.Run("with config map set", func(t *testing.T) {
+		attribs := map[string]string{
+			"key1": "val1",
+			"key2": "val2",
+		}
 
-		res, err := initResource(context.Background(), "test", "1.2.3")
+		res, err := initResource(context.Background(), "test", "1.2.3", attribs)
 		require.NoError(t, err)
 
 		rmap := map[string]attribute.Value{}
