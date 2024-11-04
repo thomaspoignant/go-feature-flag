@@ -30,7 +30,8 @@ func NewOtelService() OtelService {
 func (s *OtelService) Init(ctx context.Context, zapLog *zap.Logger, config config.Config) error {
 	// Require the endpoint to be set either by the openTelemetryOtlpEndpoint
 	// config element or otel.exporter.otlp.endpoint
-	if config.OpenTelemetryOtlpEndpoint == "" && config.OtelConfig.Exporter.Otlp.Endpoint == "" {
+	if (config.OpenTelemetryOtlpEndpoint == "" && config.OtelConfig.Exporter.Otlp.Endpoint == "") ||
+		config.OtelConfig.SDK.Disabled {
 		otel.SetTracerProvider(noop.NewTracerProvider())
 		return nil
 	}
