@@ -1,5 +1,9 @@
 # GO Feature Flag demo
 
+> [!CAUTION]
+> This demo is using the GO Feature Flag module directly.
+> We recommend to use OpenFeature instead for a better integration with different technologies.
+
 This repository contains a demo app using the library [`thomaspoignant/go-feature-flag`](https://github.com/thomaspoignant/go-feature-flag) which display a webapp containing a grid of users.  
 Each square is a different user and can be change by modifying the feature flag `color-box`.
 

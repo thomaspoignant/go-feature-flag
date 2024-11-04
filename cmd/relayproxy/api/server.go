@@ -120,9 +120,9 @@ func (s *Server) Start() {
 	}
 
 	// start the OpenTelemetry tracing service
-	err := s.otelService.Init(context.Background(), *s.config)
+	err := s.otelService.Init(context.Background(), s.zapLog, *s.config)
 	if err != nil {
-		s.zapLog.Error("error while initializing Otel", zap.Error(err))
+		s.zapLog.Error("error while initializing OTel, continuing without tracing enabled", zap.Error(err))
 		// we can continue because otel is not mandatory to start the server
 	}
 
@@ -153,8 +153,8 @@ func (s *Server) getLambdaHandler() interface{} {
 }
 
 // Stop shutdown the API server
-func (s *Server) Stop() {
-	err := s.otelService.Stop()
+func (s *Server) Stop(ctx context.Context) {
+	err := s.otelService.Stop(ctx)
 	if err != nil {
 		s.zapLog.Error("impossible to stop otel", zap.Error(err))
 	}

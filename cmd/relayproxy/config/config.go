@@ -118,6 +118,11 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 			return "authorizedKeys.admin", strings.Split(v, ",")
 		}
 
+		if s == "OTEL_RESOURCE_ATTRIBUTES" {
+			parseOtelResourceAttributes(v, log)
+			return s, v
+		}
+
 		return strings.ReplaceAll(strings.ToLower(s), "_", "."), v
 	}), nil)
 
@@ -139,6 +144,40 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 	return proxyConf, nil
 }
 
+func parseOtelResourceAttributes(attributes string, log *zap.Logger) {
+	configMap := k.Raw()
+	otel, ok := configMap["otel"].(map[string]interface{})
+	if !ok {
+		configMap["otel"] = make(map[string]interface{})
+		otel = configMap["otel"].(map[string]interface{})
+	}
+
+	resource, ok := otel["resource"].(map[string]interface{})
+	if !ok {
+		otel["resource"] = make(map[string]interface{})
+		resource = otel["resource"].(map[string]interface{})
+	}
+
+	attrs, ok := resource["attributes"].(map[string]interface{})
+	if !ok {
+		resource["attributes"] = make(map[string]interface{})
+		attrs = resource["attributes"].(map[string]interface{})
+	}
+
+	for _, attr := range strings.Split(attributes, ",") {
+		k, v, found := strings.Cut(attr, "=")
+		if !found {
+			log.Error("config: error loading OTEL_RESOURCE_ATTRIBUTES - incorrect format",
+				zap.String("key", k), zap.String("value", v))
+			continue
+		}
+
+		attrs[k] = v
+	}
+
+	_ = k.Set("otel", otel)
+}
+
 type Config struct {
 	// ListenPort (optional) is the port we are using to start the proxy
 	ListenPort int `mapstructure:"listen" koanf:"listen"`
@@ -146,7 +185,9 @@ type Config struct {
 	// HideBanner (optional) if true, we don't display the go-feature-flag relay proxy banner
 	HideBanner bool `mapstructure:"hideBanner" koanf:"hidebanner"`
 
-	// Debug (optional) if true, go-feature-flag relay proxy will run on debug mode, with more logs and custom responses
+	// Debug (optional) if true, go-feature-flag relay proxy will run on debug mode, with more logs and custom responses.
+	// It will also start the pprof endpoints on the same port as the monitoring.
+	// Default: false
 	Debug bool `mapstructure:"debug" koanf:"debug"`
 
 	// EnableSwagger (optional) to have access to the swagger
@@ -172,6 +213,14 @@ type Config struct {
 	// We ensure a deviation that is maximum + or - 10% of your polling interval.
 	// Default: false
 	EnablePollingJitter bool `mapstructure:"enablePollingJitter" koanf:"enablepollingjitter"`
+
+	// DisableNotifierOnInit (optional) set to true if you do not want to call any notifier
+	// when the flags are loaded.
+	// This is useful if you do not want a Slack/Webhook notification saying that
+	// the flags have been added every time you start the application.
+	// Default is set to false for backward compatibility.
+	// Default: false
+	DisableNotifierOnInit bool `mapstructure:"DisableNotifierOnInit" koanf:"DisableNotifierOnInit"`
 
 	// FileFormat (optional) is the format of the file to retrieve (available YAML, TOML and JSON)
 	// Default: YAML
@@ -245,6 +294,12 @@ type Config struct {
 	// you ensure that GO Feature Flag will always start with a configuration but which can be out-dated.
 	PersistentFlagConfigurationFile string `mapstructure:"persistentFlagConfigurationFile" koanf:"persistentflagconfigurationfile"` //nolint: lll
 
+	// OtelConfig is the configuration for the OpenTelemetry part of the relay proxy
+	OtelConfig OpenTelemetryConfiguration `mapstructure:"otel" koanf:"otel"`
+
+	// JaegerConfig is the configuration for the Jaeger sampling of the relay proxy
+	JaegerConfig JaegerSamplerConfiguration `mapstructure:"jaeger" koanf:"jaeger"`
+
 	// ---- private fields
 
 	// apiKeySet is the internal representation of an API keys list configured
@@ -254,6 +309,54 @@ type Config struct {
 	// adminAPIKeySet is the internal representation of an admin API keys list configured
 	// we store them in a set to be
 	adminAPIKeySet map[string]interface{}
+}
+
+// OpenTelemetryConfiguration is the configuration for the OpenTelemetry part of the relay proxy
+// It is used to configure the OpenTelemetry SDK and the OpenTelemetry Exporter
+// Most of the time this configuration is set using environment variables.
+type OpenTelemetryConfiguration struct {
+	SDK struct {
+		Disabled bool `mapstructure:"disabled" koanf:"disabled"`
+	} `mapstructure:"sdk" koanf:"sdk"`
+	Exporter OtelExporter `mapstructure:"exporter" koanf:"exporter"`
+	Service  struct {
+		Name string `mapstructure:"name" koanf:"name"`
+	} `mapstructure:"service" koanf:"service"`
+	Traces struct {
+		Sampler string `mapstructure:"sampler" koanf:"sampler"`
+	} `mapstructure:"traces" koanf:"traces"`
+	Resource OtelResource `mapstructure:"resource" koanf:"resource"`
+}
+
+type OtelExporter struct {
+	Otlp OtelExporterOtlp `mapstructure:"otlp" koanf:"otlp"`
+}
+
+type OtelExporterOtlp struct {
+	Endpoint string `mapstructure:"endpoint" koanf:"endpoint"`
+	Protocol string `mapstructure:"protocol" koanf:"protocol"`
+}
+
+type OtelResource struct {
+	Attributes map[string]string `mapstructure:"attributes" koanf:"attributes"`
+}
+
+// JaegerSamplerConfiguration is the configuration object to configure the sampling.
+// Most of the time this configuration is set using environment variables.
+type JaegerSamplerConfiguration struct {
+	Sampler struct {
+		Manager struct {
+			Host struct {
+				Port string `mapstructure:"port" koanf:"port"`
+			} `mapstructure:"host" koanf:"host"`
+		} `mapstructure:"manager" koanf:"manager"`
+		Refresh struct {
+			Interval string `mapstructure:"interval" koanf:"interval"`
+		} `mapstructure:"refresh" koanf:"refresh"`
+		Max struct {
+			Operations int `mapstructure:"operations" koanf:"operations"`
+		} `mapstructure:"max" koanf:"max"`
+	} `mapstructure:"sampler" koanf:"sampler"`
 }
 
 // APIKeysAdminExists is checking if an admin API Key exist in the relay proxy configuration

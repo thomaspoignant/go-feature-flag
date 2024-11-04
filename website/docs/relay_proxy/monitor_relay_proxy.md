@@ -9,18 +9,22 @@ description: Monitoring and Tracing of the relay proxy.
 The **relay proxy** is able to trace the requests it is handling. This is done by using OpenTelemetry.
 
 ### Configuration
-To configure the tracing, you need to set in the configuration the endpoint to your OTLP collector.
-```yaml
-# ...
-openTelemetryOtlpEndpoint: http://localhost:4318
-# ...
-```
+
+The relay proxy will attempt to send traces to an OpenTelemetry collector or
+compatible agent if an OpenTelemetry exporter endpoint is configured.
+
+To set the endpoint, set the `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable
+or set `otel.exporter.otlp.endpoint` in the configuration file.
+
+To override the protocol, set the `OTEL_EXPORTER_OTLP_PROTOCOL` environment variable (`http/protobuf` is the default) or set `otel.exporter.otlp.protocol` in the configuration file.
+
+See [the OpenTelemetry documentation](https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/) for more information.
 
 All your requests will be traced and sent to the collector with the service name **`go-feature-flag`**.
 
 :::note
 If you want to try the OpenTelemetry integration locally, follow this [README](https://github.com/thomaspoignant/go-feature-flag/tree/main/cmd/relayproxy/testdata/opentelemetry)
-to setup Jaeger and see your traces. 
+to setup Jaeger and see your traces.
 :::
 
 ## Monitoring

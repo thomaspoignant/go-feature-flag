@@ -8,6 +8,7 @@ BenefitCard.propTypes = {
   title: PropTypes.string.isRequired,
   description: PropTypes.string.isRequired,
 };
+
 function BenefitCard({img, title, description}) {
   return (
     <div className="col-1-5 mobile-col-1-1">
@@ -42,7 +43,7 @@ export function Benefit() {
           </div>
         </div>
       </div>
-      <div className="grid grid-pad">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-2 px-3">
         <BenefitCard
           img="img/benefits/rocket.jpg"
           title="Test in production"

@@ -14,6 +14,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/model"
+	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/s3retriever"
@@ -690,5 +691,55 @@ func Test_UseCustomBucketingKey(t *testing.T) {
 			Cacheable:     true,
 		}
 		assert.Equal(t, want, got)
+	}
+}
+
+func Test_DisableNotifierOnInit(t *testing.T) {
+	tests := []struct {
+		name                 string
+		config               *ffclient.Config
+		disableNotification  bool
+		expectedNotifyCalled bool
+	}{
+		{
+			name: "DisableNotifierOnInit is true",
+			config: &ffclient.Config{
+				PollingInterval:       60 * time.Second,
+				Retriever:             &fileretriever.Retriever{Path: "testdata/flag-config.yaml"},
+				DisableNotifierOnInit: true,
+			},
+			expectedNotifyCalled: false,
+		},
+		{
+			name: "DisableNotifierOnInit is false",
+			config: &ffclient.Config{
+				PollingInterval:       60 * time.Second,
+				Retriever:             &fileretriever.Retriever{Path: "testdata/flag-config.yaml"},
+				DisableNotifierOnInit: false,
+			},
+			expectedNotifyCalled: true,
+		},
+		{
+			name: "DisableNotifierOnInit is not set",
+			config: &ffclient.Config{
+				PollingInterval: 60 * time.Second,
+				Retriever:       &fileretriever.Retriever{Path: "testdata/flag-config.yaml"},
+			},
+			expectedNotifyCalled: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockNotifier := &mock.Notifier{}
+			tt.config.Notifiers = []notifier.Notifier{mockNotifier}
+
+			gffClient, err := ffclient.New(*tt.config)
+			assert.NoError(t, err)
+			defer gffClient.Close()
+
+			time.Sleep(2 * time.Second) // wait for the goroutine to call Notify()
+			assert.Equal(t, tt.expectedNotifyCalled, mockNotifier.GetNotifyCalls() > 0)
+		})
 	}
 }

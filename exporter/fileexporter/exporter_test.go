@@ -3,10 +3,13 @@ package fileexporter_test
 import (
 	"context"
 	"os"
+	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
@@ -16,6 +19,13 @@ import (
 )
 
 func TestFile_Export(t *testing.T) {
+	// Create a temporary directory for test file operations
+	tempDir, err := os.MkdirTemp("", "fileexporter-test")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tempDir) // Clean up after tests
+
 	hostname, _ := os.Hostname()
 	type fields struct {
 		Format                  string
@@ -39,6 +49,8 @@ func TestFile_Export(t *testing.T) {
 		args     args
 		wantErr  bool
 		expected expected
+		setup    func(t *testing.T, fields fields)
+		teardown func(t *testing.T, fields fields)
 	}{
 		{
 			name:    "all default json",
@@ -233,10 +245,10 @@ func TestFile_Export(t *testing.T) {
 			},
 		},
 		{
-			name:    "invalid outputdir",
-			wantErr: true,
+			name:    "non-existent outputdir",
+			wantErr: false,
 			fields: fields{
-				OutputDir: "/tmp/foo/bar/",
+				OutputDir: filepath.Join(tempDir, "non-existent-dir"),
 			},
 			args: args{
 				featureEvents: []exporter.FeatureEvent{
@@ -246,9 +258,13 @@ func TestFile_Export(t *testing.T) {
 					},
 					{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
-						Variation: "Default", Value: "YO2", Default: false, Source: "SERVER",
+						Variation: "Default", Value: "YO2", Default: false, Version: "127", Source: "SERVER",
 					},
 				},
+			},
+			expected: expected{
+				fileNameRegex: "^flag-variation-" + hostname + "-[0-9]*\\.json$",
+				content:       "./testdata/all_default.json",
 			},
 		},
 		{
@@ -291,13 +307,80 @@ func TestFile_Export(t *testing.T) {
 			},
 		},
 		{
-			name:    "invalid parquet outputdir",
+			name:    "outputdir with invalid permissions",
 			wantErr: true,
 			fields: fields{
 				Format:    "parquet",
-				OutputDir: "/tmp/foo/bar/",
+				OutputDir: filepath.Join(tempDir, "invalid-permissions-dir"),
 			},
-			args: args{},
+			args: args{
+				featureEvents: []exporter.FeatureEvent{
+					{
+						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
+						Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
+					},
+				},
+			},
+			setup: func(t *testing.T, fields fields) {
+				err := os.MkdirAll(fields.OutputDir, 0755)
+				assert.NoError(t, err)
+				err = os.Chmod(fields.OutputDir, 0000) // Remove all permissions
+				assert.NoError(t, err)
+			},
+			teardown: func(t *testing.T, fields fields) {
+				err := os.Chmod(fields.OutputDir, 0755) // Restore permissions for cleanup
+				assert.NoError(t, err)
+			},
+		},
+		{
+			name:    "outputdir with invalid parent folder",
+			wantErr: true,
+			fields: fields{
+				Format:    "parquet",
+				OutputDir: filepath.Join(tempDir, "invalid-parent-dir"),
+			},
+			args: args{
+				featureEvents: []exporter.FeatureEvent{
+					{
+						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
+						Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
+					},
+				},
+			},
+			setup: func(t *testing.T, fields fields) {
+				err := os.MkdirAll(tempDir, 0755)
+				assert.NoError(t, err)
+				err = os.Chmod(tempDir, 0000) // Remove all permissions
+				assert.NoError(t, err)
+			},
+			teardown: func(t *testing.T, fields fields) {
+				err := os.Chmod(tempDir, 0755) // Restore permissions for cleanup
+				assert.NoError(t, err)
+			},
+		},
+		{
+			name:    "outputdir with trailing slash",
+			wantErr: false,
+			fields: fields{
+				Format:    "json",
+				OutputDir: filepath.Join(tempDir, "dir-with-trailing-slash") + "/",
+			},
+			args: args{
+				featureEvents: []exporter.FeatureEvent{
+					{
+						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
+						Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
+					},
+					{
+						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
+						Variation: "Default", Value: "YO2", Default: false, Version: "127", Source: "SERVER",
+					},
+				},
+			},
+			expected: expected{
+				fileNameRegex: "^flag-variation-" + hostname + "-[0-9]*\\.json$",
+				content:       "./testdata/all_default.json",
+			},
 		},
 	}
 	for _, tt := range tests {
@@ -306,6 +389,14 @@ func TestFile_Export(t *testing.T) {
 			if tt.fields.OutputDir == "" {
 				outputDir, _ = os.MkdirTemp("", "fileExporter")
 				defer os.Remove(outputDir)
+			}
+
+			if tt.setup != nil {
+				tt.setup(t, tt.fields)
+			}
+
+			if tt.teardown != nil {
+				defer tt.teardown(t, tt.fields)
 			}
 
 			f := &fileexporter.Exporter{
@@ -320,6 +411,12 @@ func TestFile_Export(t *testing.T) {
 				assert.Error(t, err, "export method should error")
 				return
 			}
+
+			assert.NoError(t, err)
+
+			// Check if the directory was created
+			_, err = os.Stat(outputDir)
+			assert.NoError(t, err, "Output directory should exist")
 
 			files, _ := os.ReadDir(outputDir)
 			assert.Equal(t, 1, len(files), "Directory %s should have only one file", outputDir)
@@ -349,4 +446,33 @@ func TestFile_Export(t *testing.T) {
 func TestFile_IsBulk(t *testing.T) {
 	exporter := fileexporter.Exporter{}
 	assert.True(t, exporter.IsBulk(), "DeprecatedExporter is a bulk exporter")
+}
+
+func TestExportWithoutOutputDir(t *testing.T) {
+	featureEvents := []exporter.FeatureEvent{{
+		Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
+		Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
+	}}
+
+	filePrefix := "test-flag-variation-EXAMPLE-"
+	e := fileexporter.Exporter{
+		Format:   "json",
+		Filename: filePrefix + "{{ .Timestamp}}.{{ .Format}}",
+	}
+	err := e.Export(context.Background(), nil, featureEvents)
+	require.NoError(t, err)
+
+	// check that a file exist
+	files, err := os.ReadDir("./")
+	require.NoError(t, err)
+
+	countFileWithPrefix := 0
+	for _, file := range files {
+		if strings.HasPrefix(file.Name(), filePrefix) {
+			countFileWithPrefix++
+			err := os.Remove(file.Name())
+			require.NoError(t, err)
+		}
+	}
+	assert.True(t, countFileWithPrefix > 0, "At least one file should have been created")
 }

@@ -16,6 +16,19 @@ const config = {
   organizationName: 'thomaspoignant',
   projectName: 'go-feature-flag',
   trailingSlash: false,
+  plugins: [
+    async function myPlugin(context, options) {
+      return {
+        name: 'docusaurus-tailwindcss',
+        configurePostCss(postcssOptions) {
+          // Appends TailwindCSS and AutoPrefixer.
+          postcssOptions.plugins.push(require('tailwindcss'));
+          postcssOptions.plugins.push(require('autoprefixer'));
+          return postcssOptions;
+        },
+      };
+    },
+  ],
 
   customFields: {
     description:
@@ -68,7 +81,6 @@ const config = {
           customCss: [
             require.resolve('./src/css/custom.css'),
             require.resolve('./src/css/pushy-buttons.css'), //https://github.com/iRaul/pushy-buttons
-            require.resolve('./src/css/simplegrid.css'), //https://thisisdallas.github.io/Simple-Grid/
           ],
         },
         sitemap: {
@@ -172,6 +184,7 @@ const config = {
           {type: 'doc', docId: 'index', position: 'left', html: 'Docs'},
           {to: '/blog', label: 'Blog', position: 'left'},
           {to: '/editor', html: 'Editor', position: 'left'},
+          {to: '/pricing', html: 'Pricing', position: 'left'},
           {
             to: 'https://github.com/sponsors/thomaspoignant',
             label: 'Sponsor us ❤️',
@@ -306,7 +319,7 @@ const config = {
           'csharp',
           'yaml',
           'python',
-          'ruby'
+          'ruby',
         ],
       },
     }),
