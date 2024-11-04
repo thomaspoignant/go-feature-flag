@@ -19,10 +19,9 @@ import (
 )
 
 const (
-	goFFLogo        = "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png"
-	colorDeleted    = 15158332  
-	colorUpdated    = 16753920  
-	colorAdded      = 32768     
+	colorDeleted     = 15158332
+	colorUpdated     = 16753920
+	colorAdded       = 32768
 	longDiscordField = 35
 )
 
@@ -113,7 +112,7 @@ func convertUpdatedFlagsToDiscordEmbed(diffCache notifier.DiffCache) []embed {
 				})
 			}
 		}
-		sort.Sort(ByTitle(fields))
+		sort.Sort(byTitle(fields))
 		embeds = append(embeds, embed{
 			Title:  fmt.Sprintf("✏️ Flag \"%s\" updated", key),
 			Color:  colorUpdated,
@@ -151,8 +150,8 @@ type embedField struct {
 	Inline bool   `json:"inline"`
 }
 
-type ByTitle []embedField
+type byTitle []embedField
 
-func (a ByTitle) Len() int           { return len(a) }
-func (a ByTitle) Less(i, j int) bool { return a[i].Name < a[j].Name }
-func (a ByTitle) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a byTitle) Len() int           { return len(a) }
+func (a byTitle) Less(i, j int) bool { return a[i].Name < a[j].Name }
+func (a byTitle) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }

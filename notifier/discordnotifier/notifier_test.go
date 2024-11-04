@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
@@ -143,7 +144,7 @@ func TestDiscordNotifier_Notify(t *testing.T) {
 			name: "should err if http code is superior to 399",
 			expected: expected{
 				err:    true,
-				errMsg: "error: (Discord Notifier) while calling discord webhook, statusCode = 400",
+				errMsg: "error: (Discord Notifier) webhook call failed with statusCode = 400",
 			},
 			args: args{
 				url:        "https://discord.com/api/webhooks/000000000000000000/XXXXXXXXXXXXXXXXXXXXXXXX",
@@ -155,7 +156,7 @@ func TestDiscordNotifier_Notify(t *testing.T) {
 			name: "should err if error while calling webhook",
 			expected: expected{
 				err:    true,
-				errMsg: "error: (Discord Notifier) error: while calling webhook: random error",
+				errMsg: "error: (Discord Notifier) error calling webhook: random error",
 			},
 			args: args{
 				url:        "https://discord.com/api/webhooks/000000000000000000/XXXXXXXXXXXXXXXXXXXXXXXX",
@@ -204,7 +205,8 @@ func TestDiscordNotifier_Notify(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 				hostname, _ := os.Hostname()
-				content, _ := os.ReadFile(tt.expected.bodyPath)
+				content, err := os.ReadFile(tt.expected.bodyPath)
+				require.NoError(t, err)
 				expectedContent := strings.ReplaceAll(string(content), "{{hostname}}", hostname)
 				assert.JSONEq(t, expectedContent, mockHTTPClient.Body)
 				assert.Equal(t, tt.expected.signature, mockHTTPClient.Signature)
