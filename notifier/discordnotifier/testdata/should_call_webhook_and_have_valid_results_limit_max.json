@@ -1,0 +1,45 @@
+{
+  "content": "Changes detected in your feature flag file on: **{{hostname}}**",
+  "embeds": [
+    {
+      "title": "❌ Flag \"test-flag\" deleted",
+      "color": 15158332
+    },
+    {
+      "title": "❌ Flag \"test-flag1\" deleted",
+      "color": 15158332
+    },
+    {
+      "title": "❌ Flag \"test-flag10\" deleted",
+      "color": 15158332
+    },
+    {
+      "title": "❌ Flag \"test-flag2\" deleted",
+      "color": 15158332
+    },
+    {
+      "title": "❌ Flag \"test-flag7\" deleted",
+      "color": 15158332
+    },
+    {
+      "title": "❌ Flag \"test-flag8\" deleted",
+      "color": 15158332
+    },
+    {
+      "title": "❌ Flag \"test-flag9\" deleted",
+      "color": 15158332
+    },
+    {
+      "title": "🆕 Flag \"test-flag3\" created",
+      "color": 32768
+    },
+    {
+      "title": "🆕 Flag \"test-flag4\" created",
+      "color": 32768
+    },
+    {
+      "title": "Wow, lots of updates!\nToo many to fit here. 😔\n\nCheck the logs for the full list.",
+      "color": 15158332
+    }
+  ]
+}
