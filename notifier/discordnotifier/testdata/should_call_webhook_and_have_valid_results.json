@@ -1,10 +1,6 @@
 {
-  "content": "Changes detected in your feature flag file on: **MacBook-Pro-de-Thomas.local**",
+  "content": "Changes detected in your feature flag file on: **{{hostname}}**",
   "embeds": [
-    {
-      "title": "❌ Flag \"test-flag\" deleted",
-      "color": 15158332
-    },
     {
       "title": "✏️ Flag \"test-flag2\" updated",
       "color": 16753920,
@@ -60,6 +56,10 @@
           "inline": true
         }
       ]
+    },
+    {
+      "title": "❌ Flag \"test-flag\" deleted",
+      "color": 15158332
     },
     {
       "title": "🆕 Flag \"test-flag3\" created",

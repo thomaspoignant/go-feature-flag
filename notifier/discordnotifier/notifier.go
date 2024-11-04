@@ -64,10 +64,10 @@ func (c *Notifier) Notify(diff notifier.DiffCache) error {
 	if err != nil {
 		return fmt.Errorf("error: (Discord Notifier) error calling webhook: %v", err)
 	}
-
 	defer response.Body.Close()
 	if response.StatusCode > 399 {
 		return fmt.Errorf("error: (Discord Notifier) webhook call failed with statusCode = %d", response.StatusCode)
+
 	}
 
 	return nil
@@ -78,6 +78,18 @@ func convertToDiscordMessage(diffCache notifier.DiffCache) discordMessage {
 	embeds := convertDeletedFlagsToDiscordEmbed(diffCache)
 	embeds = append(embeds, convertUpdatedFlagsToDiscordEmbed(diffCache)...)
 	embeds = append(embeds, convertAddedFlagsToDiscordEmbed(diffCache)...)
+
+	sort.Slice(embeds, func(i, j int) bool {
+		return embeds[i].Title < embeds[j].Title
+	})
+
+	if len(embeds) > 10 {
+		embeds = embeds[:9]
+		embeds = append(embeds, embed{
+			Title: fmt.Sprintf("Wow, lots of updates!\nToo many to fit here. 😔\n\nCheck the logs for the full list."),
+			Color: colorDeleted,
+		})
+	}
 
 	return discordMessage{
 		Content: fmt.Sprintf("Changes detected in your feature flag file on: **%s**", hostname),

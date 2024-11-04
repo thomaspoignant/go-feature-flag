@@ -545,6 +545,7 @@ A notifier will send one notification to the targeted system to inform them that
 Available notifiers are:
 - **Slack**
 - **Webhook**
+- **Discord**
 
 ## Export data
 **GO Feature Flag** allows you to export data about the usage of your flags.    

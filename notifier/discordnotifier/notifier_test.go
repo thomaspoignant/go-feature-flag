@@ -16,6 +16,31 @@ import (
 )
 
 func TestDiscordNotifier_Notify(t *testing.T) {
+	genericFlag := &flag.InternalFlag{
+		Rules: &[]flag.Rule{
+			{
+				Name:  testconvert.String("rule1"),
+				Query: testconvert.String("key eq \"random-key\""),
+				Percentages: &map[string]float64{
+					"False": 95,
+					"True":  5,
+				},
+			},
+		},
+		Variations: &map[string]*interface{}{
+			"Default": testconvert.Interface("default"),
+			"False":   testconvert.Interface("false"),
+			"True":    testconvert.Interface("test"),
+		},
+		DefaultRule: &flag.Rule{
+			Name:            testconvert.String("defaultRule"),
+			VariationResult: testconvert.String("Default"),
+		},
+		TrackEvents: testconvert.Bool(true),
+		Disable:     testconvert.Bool(false),
+		Version:     testconvert.String("1.1"),
+	}
+
 	type args struct {
 		diff       notifier.DiffCache
 		statusCode int
@@ -136,6 +161,33 @@ func TestDiscordNotifier_Notify(t *testing.T) {
 								Version:     testconvert.String("1.1"),
 							},
 						},
+					},
+				},
+			},
+		},
+		{
+			name: "should not display all the flags if reached the limit of embeds",
+			expected: expected{
+				bodyPath: "./testdata/should_call_webhook_and_have_valid_results_limit_max.json",
+			},
+			args: args{
+				url:        "https://discord.com/api/webhooks/000000000000000000/XXXXXXXXXXXXXXXXXXXXXXXX",
+				statusCode: http.StatusOK,
+				diff: notifier.DiffCache{
+					Added: map[string]flag.Flag{
+						"test-flag3": genericFlag,
+						"test-flag4": genericFlag,
+						"test-flag5": genericFlag,
+						"test-flag6": genericFlag,
+					},
+					Deleted: map[string]flag.Flag{
+						"test-flag":   genericFlag,
+						"test-flag1":  genericFlag,
+						"test-flag2":  genericFlag,
+						"test-flag7":  genericFlag,
+						"test-flag8":  genericFlag,
+						"test-flag9":  genericFlag,
+						"test-flag10": genericFlag,
 					},
 				},
 			},
