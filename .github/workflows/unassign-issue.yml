@@ -9,7 +9,7 @@ on:
 
 
 env:
-  DAYS_UNTIL_STALE: 10 # Number of days before marking as stale
+  DAYS_UNTIL_STALE: 20 # Number of days before marking as stale
   ASSIGNED_LABEL: "📍 Assigned"
   PINNED_LABEL: "📌 Pinned"
   STALE_LABEL: "Stale"
