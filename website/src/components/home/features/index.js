@@ -310,6 +310,11 @@ function Integration() {
               tooltipText="Redis"
             />
             <SocialIcon
+              colorClassName={styles.socialIconDiscord}
+              fontAwesomeIcon="fa-brands fa-discord"
+              tooltipText="Discord"
+            />
+            <SocialIcon
               colorClassName={styles.socialIconAws}
               img={kinesislogo}
               tooltipText="AWS Kinesis"
