@@ -11,7 +11,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
-	
+
 	"github.com/luci/go-render/render"
 	"github.com/r3labs/diff/v3"
 	"github.com/thomaspoignant/go-feature-flag/internal"
@@ -19,11 +19,11 @@ import (
 )
 
 const (
-	goFFLogo            = "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png"
+	goFFLogo                     = "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png"
 	microsoftteamsFooter         = "go-feature-flag"
-	colorDeleted        = "#FF0000"
-	colorUpdated        = "#FFA500"
-	colorAdded          = "#008000"
+	colorDeleted                 = "#FF0000"
+	colorUpdated                 = "#FFA500"
+	colorAdded                   = "#008000"
 	longMicrosoftTeamsAttachment = 35
 )
 
@@ -88,10 +88,10 @@ func convertToMicrosoftTeamsMessage(diffCache notifier.DiffCache) microsoftteams
 	attachments = append(attachments, convertAddedFlagsToMicrosoftTeamsMessage(diffCache)...)
 	res := microsoftteamsMessage{
 		IconURL:     goFFLogo,
-		Body: MessageBody{Content: fmt.Sprintf("Changes detected in your feature flag file on: *%s*", hostname)},
+		Body:        MessageBody{Content: fmt.Sprintf("Changes detected in your feature flag file on: *%s*", hostname)},
 		Attachments: attachments,
 	}
-	return res	
+	return res
 }
 
 func convertDeletedFlagsToMicrosoftTeamsMessage(diffCache notifier.DiffCache) []attachment {

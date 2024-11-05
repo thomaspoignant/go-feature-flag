@@ -194,7 +194,7 @@ func TestMicrosoftTeamsNotifier_Notify(t *testing.T) {
 
 			c := Notifier{
 				MicrosoftTeamsWebhookURL: tt.args.url,
-				httpClient:      mockHTTPClient,
+				httpClient:               mockHTTPClient,
 			}
 
 			err := c.Notify(tt.args.diff)
