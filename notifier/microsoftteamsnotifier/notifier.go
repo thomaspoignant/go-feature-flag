@@ -91,8 +91,7 @@ func convertToMicrosoftTeamsMessage(diffCache notifier.DiffCache) microsoftteams
 		Body: MessageBody{Content: fmt.Sprintf("Changes detected in your feature flag file on: *%s*", hostname)},
 		Attachments: attachments,
 	}
-	return res
-	
+	return res	
 }
 
 func convertDeletedFlagsToMicrosoftTeamsMessage(diffCache notifier.DiffCache) []attachment {
