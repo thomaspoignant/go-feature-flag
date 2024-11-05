@@ -28,6 +28,8 @@ type ExporterConf struct {
 	Kafka                   kafkaexporter.Settings `mapstructure:"kafka" koanf:"kafka"`
 	ProjectID               string                 `mapstructure:"projectID" koanf:"projectid"`
 	Topic                   string                 `mapstructure:"topic" koanf:"topic"`
+	StreamArn               string                 `mapstructure:"streamArn" koanf:"streamarn"`
+	StreamName              string                 `mapstructure:"streamName" koanf:"streamname"`
 }
 
 func (c *ExporterConf) IsValid() error {
@@ -39,6 +41,9 @@ func (c *ExporterConf) IsValid() error {
 	}
 	if (c.Kind == S3Exporter || c.Kind == GoogleStorageExporter) && c.Bucket == "" {
 		return fmt.Errorf("invalid exporter: no \"bucket\" property found for kind \"%s\"", c.Kind)
+	}
+	if (c.Kind == KinesisExporter) && (c.StreamArn == "" && c.StreamName == "") {
+		return fmt.Errorf("invalid exporter: no \"streamArn\" or \"streamName\" property found for kind \"%s\"", c.Kind)
 	}
 	if c.Kind == WebhookExporter && c.EndpointURL == "" {
 		return fmt.Errorf("invalid exporter: no \"endpointUrl\" property found for kind \"%s\"", c.Kind)
@@ -70,6 +75,7 @@ const (
 	WebhookExporter       ExporterKind = "webhook"
 	LogExporter           ExporterKind = "log"
 	S3Exporter            ExporterKind = "s3"
+	KinesisExporter       ExporterKind = "kinesis"
 	GoogleStorageExporter ExporterKind = "googleStorage"
 	SQSExporter           ExporterKind = "sqs"
 	KafkaExporter         ExporterKind = "kafka"
@@ -80,7 +86,7 @@ const (
 func (r ExporterKind) IsValid() error {
 	switch r {
 	case FileExporter, WebhookExporter, LogExporter, S3Exporter, GoogleStorageExporter, SQSExporter, KafkaExporter,
-		PubSubExporter:
+		PubSubExporter, KinesisExporter:
 		return nil
 	}
 	return fmt.Errorf("invalid exporter: kind \"%s\" is not supported", r)

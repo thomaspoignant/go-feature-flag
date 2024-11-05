@@ -13,6 +13,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/gcstorageexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/kafkaexporter"
+	"github.com/thomaspoignant/go-feature-flag/exporter/kinesisexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/logsexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/pubsubexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/s3exporterv2"
@@ -372,6 +373,26 @@ func Test_initExporter(t *testing.T) {
 				},
 			},
 			wantType: &kafkaexporter.Exporter{},
+		},
+		{
+			name:    "AWS Kinesis Exporter",
+			wantErr: assert.NoError,
+			conf: &config.ExporterConf{
+				Kind:       "kinesis",
+				StreamName: "my-stream",
+			},
+			want: ffclient.DataExporter{
+				FlushInterval:    10 * time.Millisecond,
+				MaxEventInMemory: config.DefaultExporter.MaxEventInMemory,
+				Exporter: &kinesisexporter.Exporter{
+					Format: config.DefaultExporter.Format,
+					Settings: kinesisexporter.NewSettings(
+						kinesisexporter.WithStreamArn("my-stream"),
+					),
+				},
+			},
+			wantType:               &kinesisexporter.Exporter{},
+			skipCompleteValidation: true,
 		},
 	}
 	for _, tt := range tests {

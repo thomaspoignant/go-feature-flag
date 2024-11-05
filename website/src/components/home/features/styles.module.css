@@ -38,7 +38,7 @@
 }
 
 .socialIconAws {
-    background-color: rgb(255, 153, 0);
+    background-color: #222e3c;
 }
 
 .socialIconPubSub {
@@ -57,6 +57,9 @@
     background-color: #eee;
 }
 
+.socialIconDiscord {
+    background-color: #5661ea;
+}
 
 .tooltip {
     position: relative;
