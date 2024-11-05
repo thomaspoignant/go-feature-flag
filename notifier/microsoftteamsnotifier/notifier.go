@@ -49,7 +49,8 @@ func (c *Notifier) Notify(diff notifier.DiffCache) error {
 
 	microsoftteamsURL, err := url.Parse(c.MicrosoftTeamsWebhookURL)
 	if err != nil {
-		return fmt.Errorf("error: (Microsoft Teams Notifier) invalid MicrosoftTeamsWebhookURL: %v", c.MicrosoftTeamsWebhookURL)
+		return fmt.Errorf("error: (Microsoft Teams Notifier) invalid MicrosoftTeamsWebhookURL: %v",
+		c.MicrosoftTeamsWebhookURL)
 	}
 
 	reqBody := convertToMicrosoftTeamsMessage(diff)
