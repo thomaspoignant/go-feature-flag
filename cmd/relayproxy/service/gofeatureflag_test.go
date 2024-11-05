@@ -21,6 +21,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/exporter/webhookexporter"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"github.com/thomaspoignant/go-feature-flag/notifier/slacknotifier"
+	"github.com/thomaspoignant/go-feature-flag/notifier/microsoftteamsnotifier"
 	"github.com/thomaspoignant/go-feature-flag/notifier/webhooknotifier"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
@@ -425,6 +426,10 @@ func Test_initNotifier(t *testing.T) {
 						SlackWebhookURL: "http:xxxx.xxx",
 					},
 					{
+						Kind:            config.MicrosoftTeamsNotifier,
+						MicrosoftTeamsWebhookURL: "http:zzzz.zzz",
+					},
+					{
 						Kind:        config.WebhookNotifier,
 						EndpointURL: "http:yyyy.yyy",
 					},
@@ -432,6 +437,7 @@ func Test_initNotifier(t *testing.T) {
 			},
 			want: []notifier.Notifier{
 				&slacknotifier.Notifier{SlackWebhookURL: "http:xxxx.xxx"},
+				&microsoftteamsnotifier.Notifier{MicrosoftTeamsWebhookURL: "http:zzzz.zzz"},
 				&webhooknotifier.Notifier{EndpointURL: "http:yyyy.yyy"},
 			},
 			wantErr: assert.NoError,
