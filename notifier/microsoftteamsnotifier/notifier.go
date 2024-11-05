@@ -11,8 +11,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
-	"time"
-
+	
 	"github.com/luci/go-render/render"
 	"github.com/r3labs/diff/v3"
 	"github.com/thomaspoignant/go-feature-flag/internal"
@@ -90,7 +89,7 @@ func convertToMicrosoftTeamsMessage(diffCache notifier.DiffCache) microsoftteams
 	res := microsoftteamsMessage{
 		IconURL:     goFFLogo,
 		Body: MessageBody{Content: fmt.Sprintf("Changes detected in your feature flag file on: *%s*", hostname)},
-		Attachments: attachments
+		Attachments: attachments,
 	}
 	return res
 	
