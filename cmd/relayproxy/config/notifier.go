@@ -5,12 +5,12 @@ import "fmt"
 type NotifierConf struct {
 	Kind NotifierKind `mapstructure:"kind" koanf:"kind"`
 	// Deprecated: Use WebhookURL instead
-	SlackWebhookURL          string              `mapstructure:"slackWebhookUrl" koanf:"slackWebhookUrl"`
-	EndpointURL              string              `mapstructure:"endpointUrl" koanf:"endpointUrl"`
-	Secret                   string              `mapstructure:"secret" koanf:"secret"`
-	Meta                     map[string]string   `mapstructure:"meta" koanf:"meta"`
-	Headers                  map[string][]string `mapstructure:"headers" koanf:"headers"`
-	WebhookURL               string              `mapstructure:"webhookUrl" koanf:"webhookurl"`
+	SlackWebhookURL string              `mapstructure:"slackWebhookUrl" koanf:"slackWebhookUrl"`
+	EndpointURL     string              `mapstructure:"endpointUrl" koanf:"endpointUrl"`
+	Secret          string              `mapstructure:"secret" koanf:"secret"`
+	Meta            map[string]string   `mapstructure:"meta" koanf:"meta"`
+	Headers         map[string][]string `mapstructure:"headers" koanf:"headers"`
+	WebhookURL      string              `mapstructure:"webhookUrl" koanf:"webhookurl"`
 }
 
 func (c *NotifierConf) IsValid() error {
