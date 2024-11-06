@@ -1,24 +1,20 @@
 {
-  "icon_url": "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png",
-  "body": {
-    "content": "Changes detected in your feature flag file on: *{{hostname}}*"
-  },
-  "attachments": [
+  "@context": "https://schema.org/extensions",
+  "@type": "MessageCard",
+  "summary": "Changes detected in your feature flag file on: *{{hostname}}*",
+  "sections": [
     {
       "color": "#FF0000",
-      "title": "❌ Flag \"test-flag\" deleted",
-      "fields": null,
-      "footer_icon": "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png",
-      "footer": "go-feature-flag"
+      "title": "❌ Flag \"test-flag\" deleted"
     },
     {
       "color": "#FFA500",
       "title": "✏️ Flag \"test-flag2\" updated",
-      "fields": [
+      "facts": [
         {
           "title": "DefaultRule.Percentages",
           "value": "(*map[string]float64){\"False\":0, \"True\":100} =\u003e nil",
-          "short": false
+          "short": true
         },
         {
           "title": "DefaultRule.VariationResult",
@@ -65,16 +61,11 @@
           "value": "nil =\u003e (*string)(\"1.1\")",
           "short": true
         }
-      ],
-      "footer_icon": "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png",
-      "footer": "go-feature-flag"
+      ]
     },
     {
       "color": "#008000",
-      "title": "🆕 Flag \"test-flag3\" created",
-      "fields": null,
-      "footer_icon": "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png",
-      "footer": "go-feature-flag"
+      "title": "🆕 Flag \"test-flag3\" created"
     }
   ]
 }
