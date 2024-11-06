@@ -40,7 +40,7 @@ func (c *RetrieverConf) IsValid() error {
 	if err := c.Kind.IsValid(); err != nil {
 		return err
 	}
-	if c.Kind == GitHubRetriever || c.Kind == GitlabRetriever {
+	if c.Kind == GitHubRetriever || c.Kind == GitlabRetriever || c.Kind == BitbucketRetriever {
 		return c.validateGitRetriever()
 	}
 	if c.Kind == S3Retriever && c.Item == "" {
@@ -126,13 +126,14 @@ const (
 	KubernetesRetriever    RetrieverKind = "configmap"
 	MongoDBRetriever       RetrieverKind = "mongodb"
 	RedisRetriever         RetrieverKind = "redis"
+	BitbucketRetriever     RetrieverKind = "bitbucket"
 )
 
 // IsValid is checking if the value is part of the enum
 func (r RetrieverKind) IsValid() error {
 	switch r {
 	case HTTPRetriever, GitHubRetriever, GitlabRetriever, S3Retriever, RedisRetriever,
-		FileRetriever, GoogleStorageRetriever, KubernetesRetriever, MongoDBRetriever:
+		FileRetriever, GoogleStorageRetriever, KubernetesRetriever, MongoDBRetriever, BitbucketRetriever:
 		return nil
 	}
 	return fmt.Errorf("invalid retriever: kind \"%s\" is not supported", r)
