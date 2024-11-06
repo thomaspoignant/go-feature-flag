@@ -7,8 +7,6 @@ sidebar_position: 11
 The microsoft teams notifier allows to get notified on your favorite microsoft teams channel when an instance of `go-feature-flag` is
 detecting changes in the configuration of your flags.
 
-![Microsoft Teams Notification](/docs/notifier/microsoftteams1.png)
-
 ## Configure Microsoft Teams Notifications
 
 https://learn.microsoft.com/en-us/graph/api/chatmessage-post
