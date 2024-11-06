@@ -21,8 +21,8 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/exporter/webhookexporter"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"github.com/thomaspoignant/go-feature-flag/notifier/discordnotifier"
-	"github.com/thomaspoignant/go-feature-flag/notifier/slacknotifier"
 	"github.com/thomaspoignant/go-feature-flag/notifier/microsoftteamsnotifier"
+	"github.com/thomaspoignant/go-feature-flag/notifier/slacknotifier"
 	"github.com/thomaspoignant/go-feature-flag/notifier/webhooknotifier"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
@@ -323,7 +323,12 @@ func initNotifier(c []config.NotifierConf) ([]notifier.Notifier, error) {
 			}
 			notifiers = append(notifiers, &slacknotifier.Notifier{SlackWebhookURL: cNotif.WebhookURL})
 		case config.MicrosoftTeamsNotifier:
-			notifiers = append(notifiers, &microsoftteamsnotifier.Notifier{MicrosoftTeamsWebhookURL: cNotif.MicrosoftTeamsWebhookURL})
+			notifiers = append(
+				notifiers,
+				&microsoftteamsnotifier.Notifier{
+					MicrosoftTeamsWebhookURL: cNotif.MicrosoftTeamsWebhookURL,
+				},
+			)
 		case config.WebhookNotifier:
 			notifiers = append(notifiers,
 				&webhooknotifier.Notifier{

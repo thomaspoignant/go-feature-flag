@@ -3,14 +3,15 @@ package config
 import "fmt"
 
 type NotifierConf struct {
-	Kind            NotifierKind        `mapstructure:"kind" koanf:"kind"`
-	SlackWebhookURL string              `mapstructure:"slackWebhookUrl" koanf:"slackWebhookUrl"`
+	Kind NotifierKind `mapstructure:"kind" koanf:"kind"`
+	// Deprecated: Use WebhookURL instead
+	SlackWebhookURL          string              `mapstructure:"slackWebhookUrl" koanf:"slackWebhookUrl"`
 	MicrosoftTeamsWebhookURL string              `mapstructure:"microsoftteamsWebhookUrl" koanf:"microsoftteamsWebhookUrl"`
-	EndpointURL     string              `mapstructure:"endpointUrl" koanf:"endpointUrl"`
-	Secret          string              `mapstructure:"secret" koanf:"secret"`
-	Meta            map[string]string   `mapstructure:"meta" koanf:"meta"`
-	Headers         map[string][]string `mapstructure:"headers" koanf:"headers"`
-	WebhookURL      string              `mapstructure:"webhookUrl" koanf:"webhookurl"`
+	EndpointURL              string              `mapstructure:"endpointUrl" koanf:"endpointUrl"`
+	Secret                   string              `mapstructure:"secret" koanf:"secret"`
+	Meta                     map[string]string   `mapstructure:"meta" koanf:"meta"`
+	Headers                  map[string][]string `mapstructure:"headers" koanf:"headers"`
+	WebhookURL               string              `mapstructure:"webhookUrl" koanf:"webhookurl"`
 }
 
 func (c *NotifierConf) IsValid() error {
@@ -35,10 +36,10 @@ func (c *NotifierConf) IsValid() error {
 type NotifierKind string
 
 const (
-	SlackNotifier   NotifierKind = "slack"
-	MicrosoftTeamsNotifier   NotifierKind = "microsoftteams"
-	WebhookNotifier NotifierKind = "webhook"
-	DiscordNotifier NotifierKind = "discord"
+	SlackNotifier          NotifierKind = "slack"
+	MicrosoftTeamsNotifier NotifierKind = "microsoftteams"
+	WebhookNotifier        NotifierKind = "webhook"
+	DiscordNotifier        NotifierKind = "discord"
 )
 
 // IsValid is checking if the value is part of the enum
