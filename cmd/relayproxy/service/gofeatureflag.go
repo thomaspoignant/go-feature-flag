@@ -327,7 +327,7 @@ func initNotifier(c []config.NotifierConf) ([]notifier.Notifier, error) {
 			notifiers = append(
 				notifiers,
 				&microsoftteamsnotifier.Notifier{
-					MicrosoftTeamsWebhookURL: cNotif.MicrosoftTeamsWebhookURL,
+					MicrosoftTeamsWebhookURL: cNotif.WebhookURL,
 				},
 			)
 		case config.WebhookNotifier:
