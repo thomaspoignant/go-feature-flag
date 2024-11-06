@@ -33,7 +33,7 @@ func TestMicrosoftTeamsNotifier_Notify(t *testing.T) {
 		expected expected
 	}{
 		{
-			name: "should call webhook and have valid results",
+			name: "should call webhook and have valid result",
 			expected: expected{
 				bodyPath: "./testdata/should_call_webhook_and_have_valid_results.json",
 			},
