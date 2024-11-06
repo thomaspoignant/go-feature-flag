@@ -318,7 +318,7 @@ func initNotifier(c []config.NotifierConf) ([]notifier.Notifier, error) {
 		switch cNotif.Kind {
 		case config.SlackNotifier:
 			if cNotif.WebhookURL == "" && cNotif.SlackWebhookURL != "" { // nolint
-				cNotif.WebhookURL = cNotif.SlackWebhookURL // nolint
+				zap.L().Warn("slackWebhookURL field is deprecated, please use webhookURL instead")
 			}
 			notifiers = append(notifiers, &slacknotifier.Notifier{SlackWebhookURL: cNotif.WebhookURL})
 
