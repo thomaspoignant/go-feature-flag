@@ -1,9 +1,9 @@
 defmodule ElixirProvider.DataCollectorHook do
+
   use GenServer
   require Logger
 
   alias ElixirProvider.HttpClient
-  # alias OpenFeature.{EvaluationDetails, HookContext}
   alias ElixirProvider.{FeatureEvent, RequestDataCollector}
 
   @default_targeting_key "undefined-targetingKey"
@@ -25,11 +25,11 @@ defmodule ElixirProvider.DataCollectorHook do
         }
 
   # Starts the GenServer and initializes with options
-  def start_link(options, http_client) do
-    GenServer.start_link(__MODULE__, {options, http_client: http_client}, name: __MODULE__)
+  def start_link() do
+    GenServer.start_link(__MODULE__, [], name: __MODULE__)
   end
 
-  def shutdown(state) do
+  def stop(state) do
     GenServer.stop(__MODULE__)
     collect_data(state.data_flush_interval)
     %__MODULE__{
@@ -41,13 +41,18 @@ defmodule ElixirProvider.DataCollectorHook do
     }
   end
 
-  # Initializes GenServer state and schedules the first flush
-  def init(args) do
+  @impl true
+  def init([]) do
+    {:ok, %__MODULE__{}}
+  end
+
+  # Initializes the state with the provided options
+  def start(options, http_client) do
     state = %__MODULE__{
-      http_client: args.http_client,
-      data_collector_endpoint: args.options.endpoint,
-      disable_data_collection: args.options.disable_data_collection || false,
-      data_flush_interval: args.options.data_flush_interval || 60_000,
+      http_client: http_client,
+      data_collector_endpoint: options.endpoint,
+      disable_data_collection: options.disable_data_collection || false,
+      data_flush_interval: options.data_flush_interval || 60_000,
       event_queue: []
     }
 
@@ -55,13 +60,12 @@ defmodule ElixirProvider.DataCollectorHook do
     {:ok, state}
   end
 
-  # Schedule periodic flush based on the interval
+  # Schedule periodic data collection based on the interval
   defp schedule_collect_data(interval) do
     Process.send_after(self(), :collect_data, interval)
   end
 
   ### Hook Implementations
-
   def after_hook(hook, hook_context, flag_evaluation_details, _hints) do
     if hook.disable_data_collection or flag_evaluation_details.reason != :CACHED do
       :ok
@@ -76,12 +80,11 @@ defmodule ElixirProvider.DataCollectorHook do
         user_key: Map.get(hook_context.evaluation_context, "targeting_key") || @default_targeting_key
       }
 
-      # Send event to GenServer process to append to queue
       GenServer.cast(__MODULE__, {:add_event, feature_event})
     end
   end
 
-  def error_hook(hook, hook_context, _hints) do
+  def error(hook, hook_context, _hints) do
     if hook.disable_data_collection do
       :ok
     else
@@ -95,24 +98,24 @@ defmodule ElixirProvider.DataCollectorHook do
         user_key: Map.get(hook_context.context, "targeting_key") || @default_targeting_key
       }
 
-      # Send error event to GenServer process to append to queue
       GenServer.call(__MODULE__, {:add_event, feature_event})
     end
   end
 
   ### GenServer Callbacks
-  def handle_call({:add_event, feature_event}, state) do
-    {:noreply, %{state | event_queue: [feature_event | state.event_queue]}}
+  @impl true
+  def handle_call({:add_event, feature_event}, _from, state) do
+    {:reply, :ok, %{state | event_queue: [feature_event | state.event_queue]}}
   end
 
   # Handle the periodic flush
+  @impl true
   def handle_info(:collect_data, state) do
     case collect_data(state) do
       :ok -> Logger.info("Data collected and sent successfully.")
       {:error, reason} -> Logger.error("Failed to send data: #{inspect(reason)}")
     end
 
-    # Schedule the next flush
     schedule_collect_data(state.data_flush_interval)
     {:noreply, %{state | event_queue: []}}
   end

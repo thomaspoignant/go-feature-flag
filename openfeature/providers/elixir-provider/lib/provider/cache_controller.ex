@@ -6,10 +6,9 @@ defmodule ElixirProvider.CacheController do
   use GenServer
   @flag_table :flag_cache
 
-  @spec start_link(Keyword.t()) :: GenServer.on_start()
-  def start_link(opts) do
-    name = Keyword.get(opts, :name, __MODULE__)
-    GenServer.start_link(__MODULE__, :ok, name: name)
+  @spec start_link() :: GenServer.on_start()
+  def start_link() do
+    GenServer.start_link(__MODULE__, :ok, name:  __MODULE__)
   end
 
   def get(flag_key, evaluation_hash) do
@@ -27,6 +26,7 @@ defmodule ElixirProvider.CacheController do
   end
 
   def clear do
+    GenServer.stop(__MODULE__)
     :ets.delete_all_objects(@flag_table)
     :ets.insert(@flag_table, {:context, %{}})
     :ok
