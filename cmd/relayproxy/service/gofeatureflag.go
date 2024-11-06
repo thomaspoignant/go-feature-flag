@@ -323,8 +323,12 @@ func initNotifier(c []config.NotifierConf) ([]notifier.Notifier, error) {
 			}
 			notifiers = append(notifiers, &slacknotifier.Notifier{SlackWebhookURL: cNotif.WebhookURL})
 		case config.MicrosoftTeamsNotifier:
-			notifiers = append(notifiers, &microsoftteamsnotifier.Notifier{MicrosoftTeamsWebhookURL: 
-			cNotif.MicrosoftTeamsWebhookURL})
+			notifiers = append(
+				notifiers,
+				&microsoftteamsnotifier.Notifier{
+					MicrosoftTeamsWebhookURL: cNotif.MicrosoftTeamsWebhookURL,
+				},
+			)
 		case config.WebhookNotifier:
 			notifiers = append(notifiers,
 				&webhooknotifier.Notifier{

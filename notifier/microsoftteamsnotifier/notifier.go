@@ -19,11 +19,11 @@ import (
 )
 
 const (
-	colorDeleted            = "#FF0000"
-	colorUpdated            = "#FFA500"
-	colorAdded              = "#008000"
-	goFFLogo                = "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png"
-	microsoftteamsFooter    = "go-feature-flag"
+	colorDeleted                 = "#FF0000"
+	colorUpdated                 = "#FFA500"
+	colorAdded                   = "#008000"
+	goFFLogo                     = "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png"
+	microsoftteamsFooter         = "go-feature-flag"
 	longMicrosoftTeamsAttachment = 100
 )
 
@@ -50,7 +50,7 @@ func (c *Notifier) Notify(diff notifier.DiffCache) error {
 	microsoftteamsURL, err := url.Parse(c.MicrosoftTeamsWebhookURL)
 	if err != nil {
 		return fmt.Errorf("error: (Microsoft Teams Notifier) invalid MicrosoftTeamsWebhookURL: %v",
-		c.MicrosoftTeamsWebhookURL)
+			c.MicrosoftTeamsWebhookURL)
 	}
 
 	reqBody := convertToMicrosoftTeamsMessage(diff)
@@ -89,10 +89,10 @@ func convertToMicrosoftTeamsMessage(diffCache notifier.DiffCache) AdaptiveCard {
 	attachments = append(attachments, convertAddedFlagsToMicrosoftTeamsMessage(diffCache)...)
 	sections := attachmentsToSections(attachments)
 	res := AdaptiveCard{
-        Type:    "MessageCard",
-        Context: "https://schema.org/extensions",
-        Summary: fmt.Sprintf("Changes detected in your feature flag file on: *%s*", hostname),
-        Sections: sections,
+		Type:     "MessageCard",
+		Context:  "https://schema.org/extensions",
+		Summary:  fmt.Sprintf("Changes detected in your feature flag file on: *%s*", hostname),
+		Sections: sections,
 	}
 	return res
 }
@@ -173,10 +173,10 @@ func attachmentsToSections(attachments []attachment) []Section {
 }
 
 type AdaptiveCard struct {
-	Type       string    `json:"@type"`
-	Context    string    `json:"@context"`
-	Summary    string    `json:"summary"`
-	Sections   []Section `json:"sections"`
+	Type     string    `json:"@type"`
+	Context  string    `json:"@context"`
+	Summary  string    `json:"summary"`
+	Sections []Section `json:"sections"`
 }
 
 type Section struct {
