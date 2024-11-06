@@ -134,7 +134,7 @@ func convertUpdatedFlagsToMicrosoftTeamsMessage(diffCache notifier.DiffCache) []
 			}
 		}
 
-		sort.Sort(ByTitle(attachment.Fields))
+		sort.Sort(byTitle(attachment.Fields))
 
 		attachments = append(attachments, attachment)
 	}
@@ -205,8 +205,8 @@ type Field struct {
 	Short bool   `json:"short"`
 }
 
-type ByTitle []Field
+type byTitle []Field
 
-func (a ByTitle) Len() int           { return len(a) }
-func (a ByTitle) Less(i, j int) bool { return a[i].Title < a[j].Title }
-func (a ByTitle) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a byTitle) Len() int           { return len(a) }
+func (a byTitle) Less(i, j int) bool { return a[i].Title < a[j].Title }
+func (a byTitle) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }

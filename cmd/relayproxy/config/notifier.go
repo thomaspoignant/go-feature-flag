@@ -6,7 +6,6 @@ type NotifierConf struct {
 	Kind NotifierKind `mapstructure:"kind" koanf:"kind"`
 	// Deprecated: Use WebhookURL instead
 	SlackWebhookURL          string              `mapstructure:"slackWebhookUrl" koanf:"slackWebhookUrl"`
-	MicrosoftTeamsWebhookURL string              `mapstructure:"microsoftteamsWebhookUrl" koanf:"microsoftteamsWebhookUrl"`
 	EndpointURL              string              `mapstructure:"endpointUrl" koanf:"endpointUrl"`
 	Secret                   string              `mapstructure:"secret" koanf:"secret"`
 	Meta                     map[string]string   `mapstructure:"meta" koanf:"meta"`
@@ -18,11 +17,11 @@ func (c *NotifierConf) IsValid() error {
 	if err := c.Kind.IsValid(); err != nil {
 		return err
 	}
-	if c.Kind == SlackNotifier && c.SlackWebhookURL == "" {
+	if c.Kind == SlackNotifier && (c.SlackWebhookURL == "" && c.WebhookURL == "") {
 		return fmt.Errorf("invalid notifier: no \"slackWebhookUrl\" property found for kind \"%s\"", c.Kind)
 	}
-	if c.Kind == MicrosoftTeamsNotifier && c.MicrosoftTeamsWebhookURL == "" {
-		return fmt.Errorf("invalid notifier: no \"microsoftteamsWebhookUrl\" property found for kind \"%s\"", c.Kind)
+	if c.Kind == MicrosoftTeamsNotifier && c.WebhookURL == "" {
+		return fmt.Errorf("invalid notifier: no \"webhookURL\" property found for kind \"%s\"", c.Kind)
 	}
 	if c.Kind == WebhookNotifier && c.EndpointURL == "" {
 		return fmt.Errorf("invalid notifier: no \"endpointUrl\" property found for kind \"%s\"", c.Kind)

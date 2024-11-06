@@ -422,8 +422,8 @@ func Test_initNotifier(t *testing.T) {
 			args: args{
 				c: []config.NotifierConf{
 					{
-						Kind:            config.SlackNotifier,
-						SlackWebhookURL: "http:xxxx.xxx",
+						Kind:       config.SlackNotifier,
+						WebhookURL: "http:xxxx.xxx",
 					},
 					{
 						Kind:                     config.MicrosoftTeamsNotifier,
