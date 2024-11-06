@@ -3,6 +3,8 @@ defmodule ElixirProvider.HttpClient do
   Handles HTTP requests to the GO Feature Flag API.
   """
 
+  use GenServer
+
   # Define a struct to store HTTP connection, endpoint, and other configuration details
   defstruct [:conn, :endpoint, :headers]
 
@@ -12,6 +14,29 @@ defmodule ElixirProvider.HttpClient do
           headers: list()
         }
 
+  @spec start_link() :: GenServer.on_start()
+  def start_link() do
+    GenServer.start_link(__MODULE__, :ok, name:  __MODULE__)
+  end
+
+  def stop() do
+    GenServer.stop(__MODULE__)
+  end
+
+  @impl true
+  def init([]) do
+    {:ok, %__MODULE__{}}
+  end
+
+  @spec start_http_connection(any()) ::
+          {:error,
+           %{
+             :__exception__ => true,
+             :__struct__ => Mint.HTTPError | Mint.TransportError,
+             :reason => any(),
+             optional(:module) => any()
+           }}
+          | {:ok, ElixirProvider.HttpClient.t()}
   def start_http_connection(options) do
     uri = URI.parse(options.endpoint)
     scheme = if uri.scheme == "https", do: :https, else: :http

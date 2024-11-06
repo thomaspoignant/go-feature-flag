@@ -35,7 +35,6 @@ defmodule ElixirProvider.Provider do
   @impl true
   def initialize(%__MODULE__{} = provider, domain, _context) do
     {:ok, http_client} = HttpClient.start_http_connection(provider.options)
-    CacheController.start_link()
     {:ok, data_collector_hook} = DataCollectorHook.start(provider.options, http_client)
     {:ok, ws} = GoFWebSocketClient.connect(provider.options.endpoint)
 
