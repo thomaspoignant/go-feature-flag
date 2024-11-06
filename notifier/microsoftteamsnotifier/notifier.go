@@ -19,12 +19,12 @@ import (
 )
 
 const (
-	goFFLogo            = "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png"
-	microsoftteamsFooter         = "go-feature-flag"
-	colorDeleted        = "#FF0000"
-	colorUpdated        = "#FFA500"
-	colorAdded          = "#008000"
-	longMicrosoftTeamsAttachment = 35
+	colorDeleted            = "#FF0000"
+	colorUpdated            = "#FFA500"
+	colorAdded              = "#008000"
+	goFFLogo                = "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png"
+	microsoftteamsFooter    = "go-feature-flag"
+	longMicrosoftTeamsAttachment = 100
 )
 
 type Notifier struct {
@@ -81,15 +81,17 @@ func (c *Notifier) Notify(diff notifier.DiffCache) error {
 	return nil
 }
 
-func convertToMicrosoftTeamsMessage(diffCache notifier.DiffCache) microsoftteamsMessage {
+func convertToMicrosoftTeamsMessage(diffCache notifier.DiffCache) AdaptiveCard {
 	hostname, _ := os.Hostname()
 	attachments := convertDeletedFlagsToMicrosoftTeamsMessage(diffCache)
 	attachments = append(attachments, convertUpdatedFlagsToMicrosoftTeamsMessage(diffCache)...)
 	attachments = append(attachments, convertAddedFlagsToMicrosoftTeamsMessage(diffCache)...)
-	res := microsoftteamsMessage{
-		IconURL:     goFFLogo,
-		Body: MessageBody{Content: fmt.Sprintf("Changes detected in your feature flag file on: *%s*", hostname)},
-		Attachments: attachments,
+	sections := attachmentsToSections(attachments)
+	res := AdaptiveCard{
+        Type:    "MessageCard",
+        Context: "https://schema.org/extensions",
+        Summary: fmt.Sprintf("Changes detected in your feature flag file on: *%s*", hostname),
+        Sections: sections,
 	}
 	return res
 	
@@ -153,26 +155,54 @@ func convertAddedFlagsToMicrosoftTeamsMessage(diff notifier.DiffCache) []attachm
 	return attachments
 }
 
+func attachmentsToSections(attachments []attachment) []Section {
+	sections := make([]Section, len(attachments))
+	for i, att := range attachments {
+		facts := make([]Fact, len(att.Fields))
+		for j, field := range att.Fields {
+			facts[j] = Fact(field)
+		}
+
+		sections[i] = Section{
+			Title: att.Title,
+			Color: att.Color,
+			Facts: facts,
+		}
+	}
+	return sections
+}
+
+type AdaptiveCard struct {
+	Type       string    `json:"@type"`
+	Context    string    `json:"@context"`
+	Summary    string    `json:"summary"`
+	Sections   []Section `json:"sections"`
+}
+
+type Section struct {
+	Title string `json:"title,omitempty"`
+	Text  string `json:"text,omitempty"`
+	Color string `json:"color,omitempty"`
+	Facts []Fact `json:"facts,omitempty"`
+}
+
+type Fact struct {
+	Title string `json:"title"`
+	Value string `json:"value"`
+	Short bool   `json:"short"`
+}
 type attachment struct {
-	Color      string  `json:"color"`
 	Title      string  `json:"title"`
-	Fields     []Field `json:"fields"`
-	FooterIcon string  `json:"footer_icon,omitempty"`
-	Footer     string  `json:"footer,omitempty"`
+	Color      string  `json:"color"`
+	FooterIcon string  `json:"footer_icon"`
+	Footer     string  `json:"footer"`
+	Fields     []Field `json:"fields,omitempty"`
 }
 
 type Field struct {
 	Title string `json:"title"`
 	Value string `json:"value"`
 	Short bool   `json:"short"`
-}
-type MessageBody struct {
-	Content string `json:"content"`
-}
-type microsoftteamsMessage struct {
-	IconURL     string       `json:"icon_url"`
-	Body        MessageBody  `json:"body"`
-	Attachments []attachment `json:"attachments"`
 }
 
 type ByTitle []Field
