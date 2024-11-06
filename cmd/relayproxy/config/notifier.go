@@ -17,7 +17,7 @@ func (c *NotifierConf) IsValid() error {
 	if err := c.Kind.IsValid(); err != nil {
 		return err
 	}
-	if c.Kind == SlackNotifier && c.SlackWebhookURL == "" {
+	if c.Kind == SlackNotifier && (c.SlackWebhookURL == "" && c.WebhookURL == "") {
 		return fmt.Errorf("invalid notifier: no \"slackWebhookUrl\" property found for kind \"%s\"", c.Kind)
 	}
 	if c.Kind == MicrosoftTeamsNotifier && c.WebhookURL == "" {

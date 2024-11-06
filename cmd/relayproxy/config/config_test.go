@@ -70,8 +70,8 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 				},
 				Notifiers: []config.NotifierConf{
 					{
-						Kind:            "slack",
-						SlackWebhookURL: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
+						Kind:       "slack",
+						WebhookURL: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
 					},
 				},
 				StartWithRetrieverError: false,
@@ -386,8 +386,8 @@ func TestConfig_IsValid(t *testing.T) {
 						Secret:      "xxxx",
 					},
 					{
-						Kind:            "slack",
-						SlackWebhookURL: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
+						Kind:       "slack",
+						WebhookURL: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
 					},
 				},
 			},
@@ -416,8 +416,8 @@ func TestConfig_IsValid(t *testing.T) {
 						Secret:      "xxxx",
 					},
 					{
-						Kind:            "slack",
-						SlackWebhookURL: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
+						Kind:       "slack",
+						WebhookURL: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
 					},
 				},
 				LogLevel: "info",
