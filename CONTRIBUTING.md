@@ -36,7 +36,7 @@ If you encounter any bugs or issues with the project, please [create a new issue
 
 ### Feature Requests
 
-If you have a feature idea that you would like to see implemented, please [create a new issue](<../../issues/new?assignees=&labels=enhancement%2Cneeds-triage&projects=&template=feature.yaml&title=(feature)+<title>>) with the following information:
+If you have a feature idea that you would like to see implemented, please [create a new issue](../../issues/new?assignees=&labels=enhancement%2Cneeds-triage&projects=&template=feature.yaml&title=(feature)+<title>) with the following information:
 
 - A clear and descriptive title
 - A detailed description of the feature
