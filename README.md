@@ -19,9 +19,9 @@
     <a href="https://github.com/sponsors/thomaspoignant"><img src="https://img.shields.io/github/sponsors/thomaspoignant?logo=GitHub%20Sponsors" alt="Sponsords"></a>
 </p>
 
-> :pray: If you are using **GO Feature Flag** please consider to add yourself in the [adopters](./ADOPTERS.md) list.  
+> :pray: If you are using **GO Feature Flag** please consider to add yourself in the [adopters](./ADOPTERS.md) list.
 > This simple act significantly boosts the project's visibility and credibility, making a substantial contribution to its advancement.
-> 
+>
 > If you want to support me and GO Feature Flag, you can also [become a sponsor](https://github.com/sponsors/thomaspoignant).
 
 ## Table of Contents
@@ -82,11 +82,11 @@ _The code of this demo is available in [`examples/demo`](examples/demo) reposito
 > [!IMPORTANT]
 > Before starting to use **GO Feature Flag** you should decide
 > if you want to use Open Feature SDKs or if you want to use GO Feature Flag as a GO Module.
-> 
+>
 > We recommend using the relay-proxy for a central flag management and evaluation solution,
-> it enables the multi-languages support, and it integrates seamlessly with the Open Feature SDKs.  
+> it enables the multi-languages support, and it integrates seamlessly with the Open Feature SDKs.
 > This is the best way to get full potential of GO Feature Flag.
-> 
+>
 > If your project is exclusively in GO, the GO module is an option. It will perform the flag evaluation directly in your GO code.
 
 <a id="using-open-feature"></a>
@@ -128,7 +128,7 @@ exporter:
 
 ### Install the relay proxy
 
-And we will run the **relay proxy** locally to make the API available.  
+And we will run the **relay proxy** locally to make the API available.
 The default port will be `1031`.
 
 ```shell
@@ -239,8 +239,8 @@ defer ffclient.Close()
 *This example will load a file from your local computer and will refresh the flags every 3 seconds (if you omit the
 PollingInterval, the default value is 60 seconds).*
 
-> ℹ info  
-This is a basic configuration to test locally, in production it is better to use a remote place to store your feature flag configuration file.  
+> ℹ info
+This is a basic configuration to test locally, in production it is better to use a remote place to store your feature flag configuration file.
 Look at the list of available options in the [**Store your feature flag file** page](https://gofeatureflag.org/docs/go_module/store_file/).
 
 ### Evaluate your flags
@@ -255,18 +255,18 @@ if hasFlag {
   // flag "test-flag" is false for the user
 }
 ```
-The full documentation is available on https://docs.gofeatureflag.org  
+The full documentation is available on https://docs.gofeatureflag.org
 You can find more examples in the [examples/](https://github.com/thomaspoignant/go-feature-flag/tree/main/examples) directory.
 
 </details>
 
 ## Can I use GO Feature Flag with any language?
 
-Originally GO Feature Flag was built to be a GOlang only library, but it limits the ecosystem too much.  
+Originally GO Feature Flag was built to be a GOlang only library, but it limits the ecosystem too much.
 To be compatible with more languages we have implemented the [GO Feature Flag Relay Proxy](cmd/relayproxy/).
 It is a service you can host that provides an API to evaluate your flags, you can call it using HTTP to get your variation.
 
-Since we believe in standardization we are also implementing [OpenFeature](https://github.com/open-feature) providers to interact with this API in the language of your choice.  
+Since we believe in standardization we are also implementing [OpenFeature](https://github.com/open-feature) providers to interact with this API in the language of your choice.
 _(OpenFeature is still at an early stage, so not all languages are supported and expect some changes in the future)_
 
 For now, we have providers for:
@@ -275,7 +275,7 @@ For now, we have providers for:
 |--------------------------------|-------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Go                             | [Go Provider](https://github.com/open-feature/go-sdk-contrib/tree/main/providers/go-feature-flag)                             | [![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fproxy.golang.org%2Fgithub.com%2Fopen-feature%2Fgo-sdk-contrib%2Fproviders%2Fgo-feature-flag%2F%40latest&query=%24.Version&label=GO&color=blue&style=flat-square&logo=golang)](https://github.com/open-feature/go-sdk-contrib/tree/main/providers/go-feature-flag) |
 | Java / Kotlin (server)         | [Java Provider](https://github.com/open-feature/java-sdk-contrib/tree/main/providers/go-feature-flag)                         | [![version](https://img.shields.io/maven-central/v/dev.openfeature.contrib.providers/go-feature-flag?color=blue&style=flat-square&logo=java)](https://central.sonatype.com/artifact/dev.openfeature.contrib.providers/go-feature-flag)                                                                                                    |
-| Android / Kotlin (client)      | [Kotlin Provider](openfeature/providers/kotlin-provider)                                                                      | [![version](https://img.shields.io/maven-central/v/org.gofeatureflag.openfeature/gofeatureflag-kotlin-provider?color=blue&style=flat-square&logo=android)](https://central.sonatype.com/artifact/org.gofeatureflag.openfeature/gofeatureflag-kotlin-provider)                                                                             |                                                                                                    
+| Android / Kotlin (client)      | [Kotlin Provider](openfeature/providers/kotlin-provider)                                                                      | [![version](https://img.shields.io/maven-central/v/org.gofeatureflag.openfeature/gofeatureflag-kotlin-provider?color=blue&style=flat-square&logo=android)](https://central.sonatype.com/artifact/org.gofeatureflag.openfeature/gofeatureflag-kotlin-provider)                                                                             |
 | Javascript/Typescript (server) | [Server Provider](https://github.com/open-feature/js-sdk-contrib/tree/main/libs/providers/go-feature-flag)                    | [![version](https://img.shields.io/npm/v/%40openfeature%2Fgo-feature-flag-provider?color=blue&style=flat-square&logo=npm)](https://www.npmjs.com/package/@openfeature/go-feature-flag-provider)                                                                                                                                           |
 | Javascript/Typescript (client) | [Client Provider](https://github.com/open-feature/js-sdk-contrib/tree/main/libs/providers/go-feature-flag-web)                | [![version](https://img.shields.io/npm/v/%40openfeature%2Fgo-feature-flag-web-provider?color=blue&style=flat-square&logo=npm)](https://www.npmjs.com/package/@openfeature/go-feature-flag-web-provider)                                                                                                                                   |
 | Python                         | [Python Provider](openfeature/providers/python-provider)                                                                      | [![version](https://img.shields.io/pypi/v/gofeatureflag-python-provider?color=blue&style=flat-square&logo=pypi)](https://pypi.org/project/gofeatureflag-python-provider/)                                                                                                                                                                 |
@@ -283,11 +283,11 @@ For now, we have providers for:
 | Ruby                           | [Ruby Provider](https://github.com/open-feature/ruby-sdk-contrib/tree/main/providers/openfeature-go-feature-flag-provider)    | [![version](https://img.shields.io/gem/v/openfeature-go-feature-flag-provider?color=blue&style=flat-square&logo=ruby)](https://rubygems.org/gems/openfeature-go-feature-flag-provider)                                                                                                                                                    |
 | Swift                          | [Swift Provider](https://github.com/go-feature-flag/openfeature-swift-provider)                                               | [![version](https://img.shields.io/github/v/release/go-feature-flag/openfeature-swift-provider?label=Swift&amp;display_name=tag&style=flat-square&logo=Swift)](https://github.com/go-feature-flag/openfeature-swift-provider)                                                                                                             |
 | PHP                            | [PHP Provider](https://github.com/open-feature/php-sdk-contrib/tree/main/providers/GoFeatureFlag)                             | [![version](https://img.shields.io/packagist/v/open-feature/go-feature-flag-provider?logo=php&color=blue&style=flat-square)](https://packagist.org/packages/open-feature/go-feature-flag-provider)                                                                                                                                                 |
-                                                                                                                                                                                                                                        
+
 
 ## Where do I store my flags file?
 
-The module supports different ways of retrieving the flag file.  
+The module supports different ways of retrieving the flag file.
 The available retrievers are:
 - **GitHub**
 - **GitLab**
@@ -307,7 +307,7 @@ _[See the full list and more information.](https://gofeatureflag.org/docs/config
 
 Your file should be a `YAML`, `JSON` or `TOML` file with a list of flags *(examples: [`YAML`](testdata/flag-config.yaml), [`JSON`](testdata/flag-config.json), [`TOML`](testdata/flag-config.toml))*.
 
-The easiest way to create your configuration file is to use **GO Feature Flag Editor** available at https://editor.gofeatureflag.org.  
+The easiest way to create your configuration file is to use **GO Feature Flag Editor** available at https://editor.gofeatureflag.org.
 If you prefer to do it manually please follow the instruction below.
 
 **A flag configuration looks like this:**
@@ -453,20 +453,20 @@ For detailed information on the fields required to create a flag, please refer t
 
 The query format is based on the [`nikunjy/rules`](https://github.com/nikunjy/rules) library.
 
-All the operations can be written in capitalized or lowercase (ex: `eq` or `EQ` can be used).  
+All the operations can be written in capitalized or lowercase (ex: `eq` or `EQ` can be used).
 Logical Operations supported are `AND` `OR`.
 
 Compare Expression and their definitions (`a|b` means you can use either one of the two `a` or `b`):
 
 ```
-eq|==: equals to 
+eq|==: equals to
 ne|!=: not equals to
-lt|<: less than 
+lt|<: less than
 gt|>: greater than
 le|<=: less than equal to
-ge|>=: greater than equal to 
-co: contains 
-sw: starts with 
+ge|>=: greater than equal to
+co: contains
+sw: starts with
 ew: ends with
 in: in a list
 pr: present
@@ -485,8 +485,8 @@ When using GO Feature Flag, it's often necessary to personalize the experience f
 
 For instance, GO Feature Flag ensures that in cases where a feature is being rolled out to a percentage of users, based on the targeting key, they will see the same variation each time they encounter the feature flag.
 
-The targeting key is a fundamental part of the evaluation context because it directly affects the determination of which feature variant is served to a particular user, and it maintains that continuity over time. To do so GO Feature Flag to do a hash to define if the flag can apply to this evaluation context or not.  
-**We recommend using a hash if possible.**   
+The targeting key is a fundamental part of the evaluation context because it directly affects the determination of which feature variant is served to a particular user, and it maintains that continuity over time. To do so GO Feature Flag to do a hash to define if the flag can apply to this evaluation context or not.
+**We recommend using a hash if possible.**
 
 Feature flag targeting and rollouts are all determined by the user you pass to your evaluation calls.
 
@@ -497,7 +497,7 @@ In some cases, you might need to _bucket_ users based on a different key, e.g. a
 This can be achieved by defining the `bucketingKey` field in the flag configuration. When present, the value corresponding to the `bucketingKey` will be extracted from the attributes, and that value used for hashing and determining the outcome in place of the `targetingKey`.
 
 ## Variations
-Variations are the different values possible for a feature flag.  
+Variations are the different values possible for a feature flag.
 GO Feature Flag can manage more than just `boolean` values; the value of your flag can be any of the following types:
 - `bool`
 - `int`
@@ -517,7 +517,7 @@ Variation methods take the feature **flag key**, an **evaluation context**, and 
 
 **Why do we need a default value?** If we have any error during the evaluation of the flag, we will return the default value, you will always get a value return from the function and we will never throw an error.
 
-In the example, if the flag `your.feature.key` does not exist, the result will be `false`.  
+In the example, if the flag `your.feature.key` does not exist, the result will be `false`.
 Note that the result will always provide a usable value.
 
 ## Rollout
@@ -548,7 +548,7 @@ Available notifiers are:
 - **Discord**
 
 ## Export data
-**GO Feature Flag** allows you to export data about the usage of your flags.    
+**GO Feature Flag** allows you to export data about the usage of your flags.
 It collects all variation events and can save these events in several locations:
 
 - **Local file** *- create local files with the variation usages.*
@@ -559,8 +559,9 @@ It collects all variation events and can save these events in several locations:
 - **Webhook** *- export your variation usages by calling a webhook.*
 - **AWS SQS** *- export your variation usages by sending events to SQS.*
 - **Google PubSub** *- export your variation usages by publishing events to PubSub topic.*
+- **AzureBlobStorage** *- export your variation usages to Azure Blob Storage.*
 
-Currently, we are supporting only feature events.  
+Currently, we are supporting only feature events.
 It represents individual flag evaluations and is considered "full fidelity" events.
 
 **An example feature event below:**
@@ -588,7 +589,7 @@ A command line tool is available to help you lint your configuration file: [go-f
 This project welcomes contributions from the community. If you're interested in contributing, see the [contributors' guide](CONTRIBUTING.md) for some helpful tips.
 
 ## Community meetings
-Since everyone's voice is important we want to hear back from the community.  
+Since everyone's voice is important we want to hear back from the community.
 For this reason, we are launching a community meeting every 2 weeks and it is the perfect place to discuss the future of GO Feature Flag and help you use it at full potential.
 
 | Name | Meeting Time | Meeting Notes | Discussions |

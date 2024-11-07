@@ -24,6 +24,7 @@ func TestExporterConf_IsValid(t *testing.T) {
 		ProjectID               string
 		Topic                   string
 		StreamName              string
+		Container               string
 	}
 	tests := []struct {
 		name     string
@@ -76,6 +77,14 @@ func TestExporterConf_IsValid(t *testing.T) {
 			},
 			wantErr:  true,
 			errValue: "invalid exporter: no \"bucket\" property found for kind \"googleStorage\"",
+		},
+		{
+			name: "kind azureBlobStorage without container",
+			fields: fields{
+				Kind: "azureBlobStorage",
+			},
+			wantErr:  true,
+			errValue: "invalid exporter: no \"container\" property found for kind \"azureBlobStorage\"",
 		},
 		{
 			name: "kind webhook without bucket",
