@@ -20,6 +20,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/exporter/sqsexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/webhookexporter"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
+	"github.com/thomaspoignant/go-feature-flag/notifier/discordnotifier"
 	"github.com/thomaspoignant/go-feature-flag/notifier/slacknotifier"
 	"github.com/thomaspoignant/go-feature-flag/notifier/webhooknotifier"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
@@ -336,7 +337,8 @@ func initNotifier(c []config.NotifierConf) ([]notifier.Notifier, error) {
 					Headers:     cNotif.Headers,
 				},
 			)
-
+		case config.DiscordNotifier:
+			notifiers = append(notifiers, &discordnotifier.Notifier{DiscordWebhookURL: cNotif.WebhookURL})
 		default:
 			return nil, fmt.Errorf("invalid notifier: kind \"%s\" is not supported", cNotif.Kind)
 		}
