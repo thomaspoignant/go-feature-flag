@@ -91,7 +91,8 @@ func (r *Retriever) SetHTTPClient(client internal.HTTPClient) {
 	r.httpClient = client
 }
 
-// updateRateLimit update the rate limit information from the headers to avoid calling the API if the rate limit is reached
+// updateRateLimit update the rate limit information from the headers to avoid calling the API if
+// the rate limit is reached
 func (r *Retriever) updateRateLimit(headers http.Header) {
 	if remaining := headers.Get("X-RateLimit-Limit"); remaining != "" {
 		if remainingInt, err := strconv.Atoi(remaining); err == nil {
