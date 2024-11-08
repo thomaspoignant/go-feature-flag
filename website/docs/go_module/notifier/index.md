@@ -15,3 +15,5 @@ Available notifiers are:
 
 - [Slack](slack.md) - Get a slack message with the changes.
 - [Webhook](webhook.md) - Call an API with the changes.
+- [Discord](discord.md) - Get a discord message with the changes.
+- [Microsoft Teams](microsoft-teams.md) - Get a Microsoft Teams message with the changes.

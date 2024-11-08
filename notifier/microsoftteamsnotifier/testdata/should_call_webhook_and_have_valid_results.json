@@ -1,71 +1,29 @@
 {
-  "@context": "https://schema.org/extensions",
-  "@type": "MessageCard",
-  "summary": "Changes detected in your feature flag file on: *{{hostname}}*",
-  "sections": [
+  "type": "message",
+  "attachments": [
     {
-      "color": "#FF0000",
-      "title": "❌ Flag \"test-flag\" deleted"
-    },
-    {
-      "color": "#FFA500",
-      "title": "✏️ Flag \"test-flag2\" updated",
-      "facts": [
-        {
-          "title": "DefaultRule.Percentages",
-          "value": "(*map[string]float64){\"False\":0, \"True\":100} =\u003e nil",
-          "short": true
-        },
-        {
-          "title": "DefaultRule.VariationResult",
-          "value": "nil =\u003e (*string)(\"Default\")",
-          "short": true
-        },
-        {
-          "title": "Disable",
-          "value": "nil =\u003e (*bool)(true)",
-          "short": true
-        },
-        {
-          "title": "Experimentation",
-          "value": "(*flag.ExperimentationRollout){Start:(*time.Time){wall:0, ext:63230976200, loc:(*time.Location){name:\"\", zone:[]time.zone(nil), tx:[]time.zoneTrans(nil), extend:\"\", cacheStart:0, cacheEnd:0, cacheZone:(*time.zone)(nil)}}, End:(*time.Time){wall:0, ext:63230967800, loc:(*time.Location){name:\"\", zone:[]time.zone(nil), tx:[]time.zoneTrans(nil), extend:\"\", cacheStart:0, cacheEnd:0, cacheZone:(*time.zone)(nil)}}} =\u003e nil",
-          "short": false
-        },
-        {
-          "title": "Rules",
-          "value": "nil =\u003e (*[]flag.Rule){flag.Rule{Name:(*string)(\"rule1\"), Query:(*string)(\"key eq \\\"not-a-ke\\\"\"), VariationResult:(*string)(nil), Percentages:(*map[string]float64){\"False\":20, \"True\":80}, ProgressiveRollout:(*flag.ProgressiveRollout)(nil), Disable:(*bool)(nil)}}",
-          "short": false
-        },
-        {
-          "title": "TrackEvents",
-          "value": "nil =\u003e (*bool)(false)",
-          "short": true
-        },
-        {
-          "title": "Variations.Default",
-          "value": "false =\u003e \"strDefault\"",
-          "short": true
-        },
-        {
-          "title": "Variations.False",
-          "value": "false =\u003e \"strFalse\"",
-          "short": true
-        },
-        {
-          "title": "Variations.True",
-          "value": "true =\u003e \"strTrue\"",
-          "short": true
-        },
-        {
-          "title": "Version",
-          "value": "nil =\u003e (*string)(\"1.1\")",
-          "short": true
-        }
-      ]
-    },
-    {
-      "color": "#008000",
-      "title": "🆕 Flag \"test-flag3\" created"
+      "contentType": "application/vnd.microsoft.card.adaptive",
+      "content": {
+        "type": "AdaptiveCard",
+        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+        "version": "1.4",
+        "body": [
+          {
+            "type": "TextBlock",
+            "text": "GO Feature Flag",
+            "size": "large",
+            "weight": "bolder",
+            "style": "heading",
+            "wrap": true
+          },
+          {
+            "type": "TextBlock",
+            "text": "Changes detected in your feature flag file on: **{{hostname}}**\n * ❌ Flag **test-flag** deleted\n * 🆕 Flag **test-flag3** created\n * ✏️ Flag **test-flag2** updated\n   * Variations.Default: false =\u003e \"strDefault\"\n   * Variations.False: false =\u003e \"strFalse\"\n   * Variations.True: true =\u003e \"strTrue\"\n   * Rules: nil =\u003e (*[]flag.Rule){flag.Rule{Name:(*string)(\"rule1\"), Query:(*string)(\"key eq \\\"not-a-ke\\\"\"), VariationResult:(*string)(nil), Percentages:(*map[string]float64){\"False\":20, \"True\":80}, ProgressiveRollout:(*flag.ProgressiveRollout)(nil), Disable:(*bool)(nil)}}\n   * DefaultRule.VariationResult: nil =\u003e (*string)(\"Default\")\n   * DefaultRule.Percentages: (*map[string]float64){\"False\":0, \"True\":100} =\u003e nil\n   * Experimentation: (*flag.ExperimentationRollout){Start:(*time.Time){wall:0, ext:63230976200, loc:(*time.Location){name:\"\", zone:[]time.zone(nil), tx:[]time.zoneTrans(nil), extend:\"\", cacheStart:0, cacheEnd:0, cacheZone:(*time.zone)(nil)}}, End:(*time.Time){wall:0, ext:63230967800, loc:(*time.Location){name:\"\", zone:[]time.zone(nil), tx:[]time.zoneTrans(nil), extend:\"\", cacheStart:0, cacheEnd:0, cacheZone:(*time.zone)(nil)}}} =\u003e nil\n   * TrackEvents: nil =\u003e (*bool)(false)\n   * Disable: nil =\u003e (*bool)(true)\n   * Version: nil =\u003e (*string)(\"1.1\")",
+            "wrap": true
+          }
+        ],
+        "msteams": {}
+      }
     }
   ]
 }
