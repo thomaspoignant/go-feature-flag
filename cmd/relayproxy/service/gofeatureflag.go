@@ -25,6 +25,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/notifier/slacknotifier"
 	"github.com/thomaspoignant/go-feature-flag/notifier/webhooknotifier"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever/bitbucketretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/gcstorageretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/githubretriever"
@@ -141,6 +142,20 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 			FilePath:       c.Path,
 			GitlabToken:    c.AuthToken,
 			RepositorySlug: c.RepositorySlug,
+			Timeout:        retrieverTimeout,
+		}, nil
+	case config.BitbucketRetriever:
+		return &bitbucketretriever.Retriever{
+			RepositorySlug: c.RepositorySlug,
+			Branch: func() string {
+				if c.Branch == "" {
+					return config.DefaultRetriever.GitBranch
+				}
+				return c.Branch
+			}(),
+			FilePath:       c.Path,
+			BitBucketToken: c.AuthToken,
+			BaseURL:        c.BaseURL,
 			Timeout:        retrieverTimeout,
 		}, nil
 	case config.FileRetriever:
