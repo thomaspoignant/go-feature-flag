@@ -16,7 +16,7 @@ GitLab has rate limits, be sure to correctly set your `PollingInterval` to avoid
 ```go showLineNumbers
 err := ffclient.Init(ffclient.Config{
     PollingInterval: 3 * time.Second,
-    Retriever: &gitlab.Retriever{
+    Retriever: &gitlabretriever.Retriever{
         RepositorySlug: "thomaspoignant/go-feature-flag",
         Branch: "main",
         FilePath: "testdata/flag-config.goff.yaml",
@@ -32,11 +32,11 @@ defer ffclient.Close()
 
 To configure the access to your GitLab file:
 
-| Field                | Description                                                                               |
-|----------------------|-------------------------------------------------------------------------------------------|
-| **`BaseURL`**        | *(optional)*<br/>The domain name of your Gitlab instance <br/>Default: https://gitlab.com |
-| **`RepositorySlug`** | Your Gitlab slug `org/repo-name`.                                                         |
-| **`FilePath`**       | The path of your file.                                                                    |
-| **`Branch`**         | *(optional)*<br/>The branch where your file is.<br/>Default: `main`                       |
-| **`GitlabToken`**    | *(optional)*<br/>GitLab token is used to access a private repository                      |
-| **`Timeout`**        | *(optional)*<br/>Timeout for the HTTP call <br/>Default: 10 seconds                       |
+| Field                | Description                                                                                 |
+|----------------------|---------------------------------------------------------------------------------------------|
+| **`BaseURL`**        | *(optional)*<br/>The domain name of your Gitlab instance <br/>Default: `https://gitlab.com` |
+| **`RepositorySlug`** | Your Gitlab slug `org/repo-name`.                                                           |
+| **`FilePath`**       | The path of your file.                                                                      |
+| **`Branch`**         | *(optional)*<br/>The branch where your file is.<br/>Default: `main`                         |
+| **`GitlabToken`**    | *(optional)*<br/>GitLab token is used to access a private repository                        |
+| **`Timeout`**        | *(optional)*<br/>Timeout for the HTTP call <br/>Default: 10 seconds                         |

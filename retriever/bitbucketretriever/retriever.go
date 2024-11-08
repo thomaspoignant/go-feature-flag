@@ -18,6 +18,7 @@ type Retriever struct {
 	FilePath           string
 	Branch             string
 	BitBucketToken     string
+	BaseURL            string
 	Timeout            time.Duration
 	httpClient         internal.HTTPClient
 	rateLimitRemaining int
@@ -25,6 +26,7 @@ type Retriever struct {
 	rateLimitReset     time.Time
 }
 
+// Retrieve get the content of the file from the Bitbucket API
 func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	if r.FilePath == "" || r.RepositorySlug == "" {
 		return nil, fmt.Errorf("missing mandatory information filePath=%s, repositorySlug=%s", r.FilePath, r.RepositorySlug)
@@ -46,8 +48,13 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 		return nil, fmt.Errorf("rate limit exceeded. Next call will be after %s", r.rateLimitReset)
 	}
 
+	if r.BaseURL == "" {
+		r.BaseURL = "https://api.bitbucket.org"
+	}
+
 	URL := fmt.Sprintf(
-		"https://api.bitbucket.org/2.0/repositories/%s/src/%s/%s",
+		"%s/2.0/repositories/%s/src/%s/%s",
+		r.BaseURL,
 		r.RepositorySlug,
 		branch,
 		r.FilePath)
@@ -68,7 +75,6 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 				bitbucketHeaders[name] = resp.Header.Get(name)
 			}
 		}
-
 		return nil, fmt.Errorf("request to %s failed with code %d."+
 			" Bitbucket Headers: %v", URL, resp.StatusCode, bitbucketHeaders)
 	}
@@ -77,14 +83,15 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return body, nil
 }
 
+// SetHTTPClient set the HTTP client to use for the API call if you don't want to use the default one
 func (r *Retriever) SetHTTPClient(client internal.HTTPClient) {
 	r.httpClient = client
 }
 
+// updateRateLimit update the rate limit information from the headers to avoid calling the API if the rate limit is reached
 func (r *Retriever) updateRateLimit(headers http.Header) {
 	if remaining := headers.Get("X-RateLimit-Limit"); remaining != "" {
 		if remainingInt, err := strconv.Atoi(remaining); err == nil {

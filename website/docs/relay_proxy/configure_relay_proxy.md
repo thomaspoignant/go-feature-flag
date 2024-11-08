@@ -180,6 +180,18 @@ the [doc](../go_module/store_file/redis#expected-format) available._
 | `options`  | object | **none** | **(mandatory)** Options used to connect to your redis instance.<br/>All the options from the `go-redis` SDK are available _([check `redis.Options`](https://github.com/redis/go-redis/blob/683f4fa6a6b0615344353a10478548969b09f89c/options.go#L31))_ |
 | `prefix`   | string | **none** | Prefix used before your flag name in the Redis DB.                                                                                                                                                                                                    |
 
+### Bitbucket
+
+| Field name       | Type   | Default              | Description                                                                                                                                                                       |
+|------------------|--------|----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `kind`           | string | **none**             | **(mandatory)** Value should be **`bitbucket`**.<br/>_This field is mandatory and describes which retriever you are using._                                                       |
+| `repositorySlug` | string | **none**             | **(mandatory)** The repository slug of the Bitbucket repository where your file is located _(ex: `thomaspoignant/go-feature-flag`)_.                                              |
+| `path`           | string | **none**             | **(mandatory)** Path to the file inside the repository _(ex: `config/flag/my-flags.yaml`)_.                                                                                       |
+| `baseUrl`        | string | `https://gitlab.com` | The base URL of your Bitbucket instance<br/>By default we are using the public API `https://api.bitbucket.org`.                                                                   |
+| `branch`         | string | `main`               | The branch we should check in the repository.                                                                                                                                     |
+| `token`          | string | **none**             | Bitbucket token used to access a private repository ([_Create a Repository Access Token_](https://support.atlassian.com/bitbucket-cloud/docs/create-a-repository-access-token/)). |
+| `timeout`        | string | `10000`              | Timeout in millisecond used when calling GitLab.                                                                                                                                  |
+
 <a name="exporter"></a>
 
 ## type `exporter`

@@ -8,6 +8,7 @@ import pubsublogo from '@site/static/docs/collectors/pubsub.png';
 import s3logo from '@site/static/docs/collectors/s3.png';
 import kinesislogo from '@site/static/docs/collectors/kinesis.png';
 import webhooklogo from '@site/static/docs/collectors/webhook.png';
+import bitbucketlogo from '@site/static/docs/retrievers/bitbucket.png';
 import {Headline} from '../headline';
 
 SocialIcon.propTypes = {
@@ -318,6 +319,11 @@ function Integration() {
               colorClassName={styles.socialIconAws}
               img={kinesislogo}
               tooltipText="AWS Kinesis"
+            />
+            <SocialIcon
+              colorClassName={styles.socialIconBitbucket}
+              img={bitbucketlogo}
+              tooltipText="Bitbucket"
             />
           </div>
         </div>

@@ -146,9 +146,15 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 	case config.BitbucketRetriever:
 		return &bitbucketretriever.Retriever{
 			RepositorySlug: c.RepositorySlug,
-			Branch: c.Branch,
+			Branch: func() string {
+				if c.Branch == "" {
+					return config.DefaultRetriever.GitBranch
+				}
+				return c.Branch
+			}(),
 			FilePath:       c.Path,
 			BitBucketToken: c.AuthToken,
+			BaseURL:        c.BaseURL,
 			Timeout:        retrieverTimeout,
 		}, nil
 	case config.FileRetriever:
@@ -326,7 +332,11 @@ func initNotifier(c []config.NotifierConf) ([]notifier.Notifier, error) {
 	for _, cNotif := range c {
 		switch cNotif.Kind {
 		case config.SlackNotifier:
-			notifiers = append(notifiers, &slacknotifier.Notifier{SlackWebhookURL: cNotif.SlackWebhookURL})
+			if cNotif.WebhookURL == "" && cNotif.SlackWebhookURL != "" { // nolint
+				zap.L().Warn("slackWebhookURL field is deprecated, please use webhookURL instead")
+				cNotif.WebhookURL = cNotif.SlackWebhookURL // nolint
+			}
+			notifiers = append(notifiers, &slacknotifier.Notifier{SlackWebhookURL: cNotif.WebhookURL})
 
 		case config.WebhookNotifier:
 			notifiers = append(notifiers,
