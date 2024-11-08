@@ -61,6 +61,11 @@
     background-color: #5661ea;
 }
 
+.socialIconBitbucket {
+    background-color: #0052cc;
+}
+
+
 .tooltip {
     position: relative;
     display: inline-block;

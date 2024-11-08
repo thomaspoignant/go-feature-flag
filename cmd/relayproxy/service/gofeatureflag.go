@@ -22,9 +22,11 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/exporter/webhookexporter"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"github.com/thomaspoignant/go-feature-flag/notifier/discordnotifier"
+	"github.com/thomaspoignant/go-feature-flag/notifier/microsoftteamsnotifier"
 	"github.com/thomaspoignant/go-feature-flag/notifier/slacknotifier"
 	"github.com/thomaspoignant/go-feature-flag/notifier/webhooknotifier"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever/bitbucketretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/gcstorageretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/githubretriever"
@@ -141,6 +143,20 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 			FilePath:       c.Path,
 			GitlabToken:    c.AuthToken,
 			RepositorySlug: c.RepositorySlug,
+			Timeout:        retrieverTimeout,
+		}, nil
+	case config.BitbucketRetriever:
+		return &bitbucketretriever.Retriever{
+			RepositorySlug: c.RepositorySlug,
+			Branch: func() string {
+				if c.Branch == "" {
+					return config.DefaultRetriever.GitBranch
+				}
+				return c.Branch
+			}(),
+			FilePath:       c.Path,
+			BitBucketToken: c.AuthToken,
+			BaseURL:        c.BaseURL,
 			Timeout:        retrieverTimeout,
 		}, nil
 	case config.FileRetriever:
@@ -332,7 +348,13 @@ func initNotifier(c []config.NotifierConf) ([]notifier.Notifier, error) {
 				cNotif.WebhookURL = cNotif.SlackWebhookURL // nolint
 			}
 			notifiers = append(notifiers, &slacknotifier.Notifier{SlackWebhookURL: cNotif.WebhookURL})
-
+		case config.MicrosoftTeamsNotifier:
+			notifiers = append(
+				notifiers,
+				&microsoftteamsnotifier.Notifier{
+					MicrosoftTeamsWebhookURL: cNotif.WebhookURL,
+				},
+			)
 		case config.WebhookNotifier:
 			notifiers = append(notifiers,
 				&webhooknotifier.Notifier{

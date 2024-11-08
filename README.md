@@ -298,6 +298,7 @@ The available retrievers are:
 - **Kubernetes ConfigMaps**
 - **MongoDB**
 - **Redis**
+- **BitBucket**
 - ...
 
 _[See the full list and more information.](https://gofeatureflag.org/docs/configure_flag/store_your_flags)_
@@ -546,6 +547,7 @@ Available notifiers are:
 - **Slack**
 - **Webhook**
 - **Discord**
+- **Microsoft Teams**
 
 ## Export data
 **GO Feature Flag** allows you to export data about the usage of your flags.
