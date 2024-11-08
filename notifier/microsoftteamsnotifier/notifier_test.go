@@ -173,7 +173,7 @@ func TestMicrosoftTeamsNotifier_Notify(t *testing.T) {
 			hostname, _ := os.Hostname()
 			wantBody, err := os.ReadFile(tt.want)
 			require.NoError(t, err)
-			assert.JSONEq(t, strings.Replace(string(wantBody), "{{hostname}}", hostname, -1), tt.roundTripper.requestBody)
+			assert.JSONEq(t, strings.ReplaceAll(string(wantBody), "{{hostname}}", hostname), tt.roundTripper.requestBody)
 		})
 	}
 }

@@ -32,7 +32,6 @@ func (c *Notifier) Notify(diff notifier.DiffCache) error {
 		c.teamsClient = goteamsnotify.NewTeamsClient()
 	}
 	return c.teamsClient.Send(c.MicrosoftTeamsWebhookURL, msg)
-
 }
 
 func convertToMicrosoftTeamsMessage(diffCache notifier.DiffCache) string {
@@ -51,7 +50,8 @@ func convertToMicrosoftTeamsMessage(diffCache notifier.DiffCache) string {
 		changelog, _ := diff.Diff(value.Before, value.After, diff.AllowTypeMismatch(true))
 		for _, change := range changelog {
 			if change.Type == "update" {
-				msgText += fmt.Sprintf("\n   * %s: %s => %s", strings.Join(change.Path, "."), render.Render(change.From), render.Render(change.To))
+				msgText += fmt.Sprintf("\n   * %s: %s => %s", strings.Join(change.Path, "."),
+					render.Render(change.From), render.Render(change.To))
 			}
 		}
 	}
