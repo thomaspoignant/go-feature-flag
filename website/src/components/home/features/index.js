@@ -7,6 +7,7 @@ import sqslogo from '@site/static/docs/collectors/sqs.png';
 import pubsublogo from '@site/static/docs/collectors/pubsub.png';
 import s3logo from '@site/static/docs/collectors/s3.png';
 import kinesislogo from '@site/static/docs/collectors/kinesis.png';
+import teamslogo from '@site/static/docs/notifier/teams.png';
 import webhooklogo from '@site/static/docs/collectors/webhook.png';
 import bitbucketlogo from '@site/static/docs/retrievers/bitbucket.png';
 import {Headline} from '../headline';
@@ -324,6 +325,11 @@ function Integration() {
               colorClassName={styles.socialIconBitbucket}
               img={bitbucketlogo}
               tooltipText="Bitbucket"
+            />
+            <SocialIcon
+              colorClassName={styles.socialIconAws}
+              img={teamslogo}
+              tooltipText="Microsoft Teams"
             />
           </div>
         </div>

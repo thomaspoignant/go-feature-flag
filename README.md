@@ -547,6 +547,7 @@ Available notifiers are:
 - **Slack**
 - **Webhook**
 - **Discord**
+- **Microsoft Teams**
 
 ## Export data
 **GO Feature Flag** allows you to export data about the usage of your flags.    

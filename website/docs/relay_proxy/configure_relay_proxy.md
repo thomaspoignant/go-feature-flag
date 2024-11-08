@@ -308,6 +308,13 @@ the [doc](../go_module/store_file/redis#expected-format) available._
 | `kind`       | string | **none** | **(mandatory)** Value should be **`discord`**.<br/>_This field is mandatory and describe which retriever you are using._ |
 | `webhookUrl` | string | **none** | **(mandatory)** The complete URL of your incoming webhook configured in Discord.                                         |
 
+### Microsoft Teams
+
+| Field name   | Type   | Default  | Description                                                                                                                     |
+|--------------|--------|----------|---------------------------------------------------------------------------------------------------------------------------------|
+| `kind`       | string | **none** | **(mandatory)** Value should be **`microsoftteams`**.<br/>_This field is mandatory and describe which retriever you are using._ |
+| `webhookUrl` | string | **none** | **(mandatory)** The complete URL of your incoming webhook configured in Discord.                                                |
+
 ### Webhook
 
 | Field name    | Type                | Default  | Description                                                                                                                                                                                                                 |

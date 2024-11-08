@@ -70,6 +70,15 @@ func TestNotifierConf_IsValid(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "kind microsoftteams without webhookURL",
+			fields: fields{
+				Kind:       "microsoftteams",
+				WebhookURL: "",
+			},
+			wantErr:  true,
+			errValue: `invalid notifier: no "WebhookURL" property found for kind "microsoftteams"`,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
