@@ -71,6 +71,9 @@ func (c *ExporterConf) IsValid() error {
 	if c.Kind == AzureExporter && c.Container == "" {
 		return fmt.Errorf("invalid exporter: no \"container\" property found for kind \"%s\"", c.Kind)
 	}
+	if c.Kind == AzureExporter && c.AccountName == "" {
+		return fmt.Errorf("invalid exporter: no \"accountName\" property found for kind \"%s\"", c.Kind)
+	}
 
 	return nil
 }

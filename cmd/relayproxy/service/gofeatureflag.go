@@ -328,6 +328,8 @@ func createExporter(c *config.ExporterConf) (exporter.CommonExporter, error) {
 			Filename:                filename,
 			CsvTemplate:             csvTemplate,
 			ParquetCompressionCodec: parquetCompressionCodec,
+			AccountKey:              c.AccountKey,
+			AccountName:             c.AccountName,
 		}, nil
 	default:
 		return nil, fmt.Errorf("invalid exporter: kind \"%s\" is not supported", c.Kind)
