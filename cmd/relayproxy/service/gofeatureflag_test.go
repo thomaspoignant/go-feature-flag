@@ -10,6 +10,7 @@ import (
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
+	"github.com/thomaspoignant/go-feature-flag/exporter/azureexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/gcstorageexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/kafkaexporter"
@@ -436,6 +437,29 @@ func Test_initExporter(t *testing.T) {
 			},
 			wantType:               &kinesisexporter.Exporter{},
 			skipCompleteValidation: true,
+		},
+		{
+			name:    "Azure Blob Storage Exporter",
+			wantErr: assert.NoError,
+			conf: &config.ExporterConf{
+				Kind:             "azureBlobStorage",
+				Container:        "my-container",
+				Path:             "/my-path/",
+				MaxEventInMemory: 1990,
+			},
+			want: ffclient.DataExporter{
+				FlushInterval:    config.DefaultExporter.FlushInterval,
+				MaxEventInMemory: 1990,
+				Exporter: &azureexporter.Exporter{
+					Container:               "my-container",
+					Format:                  config.DefaultExporter.Format,
+					Path:                    "/my-path/",
+					Filename:                config.DefaultExporter.FileName,
+					CsvTemplate:             config.DefaultExporter.CsvFormat,
+					ParquetCompressionCodec: config.DefaultExporter.ParquetCompressionCodec,
+				},
+			},
+			wantType: &azureexporter.Exporter{},
 		},
 	}
 	for _, tt := range tests {

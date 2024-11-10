@@ -10,6 +10,7 @@ import (
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
+	"github.com/thomaspoignant/go-feature-flag/exporter/azureexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/gcstorageexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/kafkaexporter"
@@ -318,6 +319,17 @@ func createExporter(c *config.ExporterConf) (exporter.CommonExporter, error) {
 		return &pubsubexporter.Exporter{
 			ProjectID: c.ProjectID,
 			Topic:     c.Topic,
+		}, nil
+	case config.AzureExporter:
+		return &azureexporter.Exporter{
+			Container:               c.Container,
+			Format:                  format,
+			Path:                    c.Path,
+			Filename:                filename,
+			CsvTemplate:             csvTemplate,
+			ParquetCompressionCodec: parquetCompressionCodec,
+			AccountKey:              c.AccountKey,
+			AccountName:             c.AccountName,
 		}, nil
 	default:
 		return nil, fmt.Errorf("invalid exporter: kind \"%s\" is not supported", c.Kind)
