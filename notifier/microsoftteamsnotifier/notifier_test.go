@@ -2,6 +2,7 @@ package microsoftteamsnotifier
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -100,9 +101,9 @@ func TestMicrosoftTeamsNotifier_Notify(t *testing.T) {
 						},
 						After: &flag.InternalFlag{
 							Variations: &map[string]*interface{}{
-								"Default": testconvert.Interface("strDefault"),
-								"False":   testconvert.Interface("strFalse"),
-								"True":    testconvert.Interface("strTrue"),
+								"Default": testconvert.Interface(true),
+								"False":   testconvert.Interface(false),
+								"True":    testconvert.Interface(true),
 							},
 							Rules: &[]flag.Rule{
 								{
@@ -173,6 +174,7 @@ func TestMicrosoftTeamsNotifier_Notify(t *testing.T) {
 			hostname, _ := os.Hostname()
 			wantBody, err := os.ReadFile(tt.want)
 			require.NoError(t, err)
+			fmt.Println(tt.roundTripper.requestBody)
 			assert.JSONEq(t, strings.ReplaceAll(string(wantBody), "{{hostname}}", hostname), tt.roundTripper.requestBody)
 		})
 	}
