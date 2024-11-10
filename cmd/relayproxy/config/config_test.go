@@ -70,8 +70,8 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 				},
 				Notifiers: []config.NotifierConf{
 					{
-						Kind:            "slack",
-						SlackWebhookURL: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
+						Kind:       "slack",
+						WebhookURL: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
 					},
 				},
 				StartWithRetrieverError: false,
@@ -163,6 +163,39 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 			name:         "Invalid yaml",
 			fileLocation: "../testdata/config/invalid-yaml.yaml",
 			wantErr:      assert.Error,
+		},
+		{
+			name:         "Valid YAML with OTel config",
+			fileLocation: "../testdata/config/valid-otel.yaml",
+			want: &config.Config{
+				ListenPort:      1031,
+				PollingInterval: 60000,
+				FileFormat:      "yaml",
+				Host:            "localhost",
+				RestAPITimeout:  5000,
+				LogLevel:        config.DefaultLogLevel,
+				Version:         "1.X.X",
+				Retrievers: &[]config.RetrieverConf{
+					{
+						Kind: "file",
+						Path: "examples/retriever_file/flags.goff.yaml",
+					},
+				},
+				OtelConfig: config.OpenTelemetryConfiguration{
+					Exporter: config.OtelExporter{
+						Otlp: config.OtelExporterOtlp{
+							Endpoint: "http://example.com:4317",
+						},
+					},
+					Resource: config.OtelResource{
+						Attributes: map[string]string{
+							"foo.bar": "baz",
+							"foo.baz": "bar",
+						},
+					},
+				},
+			},
+			wantErr: assert.NoError,
 		},
 	}
 	for _, tt := range tests {
@@ -353,8 +386,8 @@ func TestConfig_IsValid(t *testing.T) {
 						Secret:      "xxxx",
 					},
 					{
-						Kind:            "slack",
-						SlackWebhookURL: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
+						Kind:       "slack",
+						WebhookURL: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
 					},
 				},
 			},
@@ -383,8 +416,8 @@ func TestConfig_IsValid(t *testing.T) {
 						Secret:      "xxxx",
 					},
 					{
-						Kind:            "slack",
-						SlackWebhookURL: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
+						Kind:       "slack",
+						WebhookURL: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
 					},
 				},
 				LogLevel: "info",
@@ -740,6 +773,7 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 		fileLocation               string
 		wantErr                    assert.ErrorAssertionFunc
 		disableDefaultFileCreation bool
+		envVars                    map[string]string
 	}{
 		{
 			name:         "Valid file",
@@ -803,16 +837,61 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 				LogLevel: "info",
 			},
 			wantErr: assert.NoError,
+			envVars: map[string]string{
+				"RETRIEVERS_0_HEADERS_AUTHORIZATION": "test",
+				"RETRIEVERS_X_HEADERS_AUTHORIZATION": "test",
+				"RETRIEVERS_1_HEADERS_AUTHORIZATION": "test1",
+				"RETRIEVERS_0_HEADERS_TOKEN":         "token",
+				"RETRIEVERS_2_HEADERS_AUTHORIZATION": "test1",
+				"RETRIEVERS_2_HEADERS_X-GOFF-CUSTOM": "custom",
+			},
+		},
+		{
+			name:                       "Valid YAML with OTel config",
+			fileLocation:               "../testdata/config/valid-otel.yaml",
+			disableDefaultFileCreation: true,
+			want: &config.Config{
+				ListenPort:      1031,
+				PollingInterval: 60000,
+				FileFormat:      "yaml",
+				Host:            "localhost",
+				RestAPITimeout:  5000,
+				LogLevel:        config.DefaultLogLevel,
+				Version:         "1.X.X",
+				Retrievers: &[]config.RetrieverConf{
+					{
+						Kind: "file",
+						Path: "examples/retriever_file/flags.goff.yaml",
+					},
+				},
+				OtelConfig: config.OpenTelemetryConfiguration{
+					Exporter: config.OtelExporter{
+						Otlp: config.OtelExporterOtlp{
+							Endpoint: "http://localhost:4317",
+						},
+					},
+					Resource: config.OtelResource{
+						Attributes: map[string]string{
+							"foo.bar": "baz",
+							"foo.baz": "qux",
+							"foo.qux": "quux",
+						},
+					},
+				},
+			},
+			wantErr: assert.NoError,
+			envVars: map[string]string{
+				"OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4317",
+				"OTEL_RESOURCE_ATTRIBUTES":    "foo.baz=qux,foo.qux=quux,ignored.key",
+			},
 		},
 	}
 	for _, tt := range tests {
-		os.Setenv("RETRIEVERS_0_HEADERS_AUTHORIZATION", "test")
-		os.Setenv("RETRIEVERS_X_HEADERS_AUTHORIZATION", "test")
-		os.Setenv("RETRIEVERS_1_HEADERS_AUTHORIZATION", "test1")
-		os.Setenv("RETRIEVERS_0_HEADERS_TOKEN", "token")
-		os.Setenv("RETRIEVERS_2_HEADERS_AUTHORIZATION", "test1")
-		os.Setenv("RETRIEVERS_2_HEADERS_X-GOFF-CUSTOM", "custom")
 		t.Run(tt.name, func(t *testing.T) {
+			for k, v := range tt.envVars {
+				t.Setenv(k, v)
+			}
+
 			_ = os.Remove("./goff-proxy.yaml")
 			if !tt.disableDefaultFileCreation {
 				source, _ := os.Open(tt.fileLocation)

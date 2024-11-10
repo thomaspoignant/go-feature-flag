@@ -20,9 +20,12 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/exporter/sqsexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/webhookexporter"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
+	"github.com/thomaspoignant/go-feature-flag/notifier/discordnotifier"
+	"github.com/thomaspoignant/go-feature-flag/notifier/microsoftteamsnotifier"
 	"github.com/thomaspoignant/go-feature-flag/notifier/slacknotifier"
 	"github.com/thomaspoignant/go-feature-flag/notifier/webhooknotifier"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever/bitbucketretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/gcstorageretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/githubretriever"
@@ -139,6 +142,20 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 			FilePath:       c.Path,
 			GitlabToken:    c.AuthToken,
 			RepositorySlug: c.RepositorySlug,
+			Timeout:        retrieverTimeout,
+		}, nil
+	case config.BitbucketRetriever:
+		return &bitbucketretriever.Retriever{
+			RepositorySlug: c.RepositorySlug,
+			Branch: func() string {
+				if c.Branch == "" {
+					return config.DefaultRetriever.GitBranch
+				}
+				return c.Branch
+			}(),
+			FilePath:       c.Path,
+			BitBucketToken: c.AuthToken,
+			BaseURL:        c.BaseURL,
 			Timeout:        retrieverTimeout,
 		}, nil
 	case config.FileRetriever:
@@ -316,8 +333,18 @@ func initNotifier(c []config.NotifierConf) ([]notifier.Notifier, error) {
 	for _, cNotif := range c {
 		switch cNotif.Kind {
 		case config.SlackNotifier:
-			notifiers = append(notifiers, &slacknotifier.Notifier{SlackWebhookURL: cNotif.SlackWebhookURL})
-
+			if cNotif.WebhookURL == "" && cNotif.SlackWebhookURL != "" { // nolint
+				zap.L().Warn("slackWebhookURL field is deprecated, please use webhookURL instead")
+				cNotif.WebhookURL = cNotif.SlackWebhookURL // nolint
+			}
+			notifiers = append(notifiers, &slacknotifier.Notifier{SlackWebhookURL: cNotif.WebhookURL})
+		case config.MicrosoftTeamsNotifier:
+			notifiers = append(
+				notifiers,
+				&microsoftteamsnotifier.Notifier{
+					MicrosoftTeamsWebhookURL: cNotif.WebhookURL,
+				},
+			)
 		case config.WebhookNotifier:
 			notifiers = append(notifiers,
 				&webhooknotifier.Notifier{
@@ -327,7 +354,8 @@ func initNotifier(c []config.NotifierConf) ([]notifier.Notifier, error) {
 					Headers:     cNotif.Headers,
 				},
 			)
-
+		case config.DiscordNotifier:
+			notifiers = append(notifiers, &discordnotifier.Notifier{DiscordWebhookURL: cNotif.WebhookURL})
 		default:
 			return nil, fmt.Errorf("invalid notifier: kind \"%s\" is not supported", cNotif.Kind)
 		}

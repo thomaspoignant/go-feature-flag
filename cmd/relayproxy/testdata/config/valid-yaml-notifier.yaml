@@ -13,4 +13,4 @@ authorizedKeys:
     - apikey2 # owner: userID2
 notifier:
   kind: slack
-  slackWebhookUrl: https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
+  webhookUrl: https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
