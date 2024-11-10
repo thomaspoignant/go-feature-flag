@@ -26,11 +26,18 @@ type Exporter struct {
 	Filename                string
 	CsvTemplate             string
 	ParquetCompressionCodec string
+
+	// ServiceURL is the URL of the storage account e.g. https://<account>.blob.core.windows.net/
+	// It can be overridden by the user to use a custom URL.
+	// Default: https://<account>.blob.core.windows.net/
+	ServiceURL string
 }
 
 func (f *Exporter) initializeAzureClient() (*azblob.Client, error) {
 	url := fmt.Sprintf("https://%s.blob.core.windows.net/", f.AccountName)
-
+	if f.ServiceURL != "" {
+		url = f.ServiceURL
+	}
 	if f.AccountKey == "" {
 		cred, err := azidentity.NewDefaultAzureCredential(nil)
 		if err != nil {
@@ -46,6 +53,10 @@ func (f *Exporter) initializeAzureClient() (*azblob.Client, error) {
 }
 
 func (f *Exporter) Export(ctx context.Context, logger *fflog.FFLogger, featureEvents []exporter.FeatureEvent) error {
+	if f.AccountName == "" {
+		return fmt.Errorf("you should specify an AccountName. %v is invalid", f.AccountName)
+	}
+
 	client, err := f.initializeAzureClient()
 	if err != nil {
 		return err
@@ -59,7 +70,6 @@ func (f *Exporter) Export(ctx context.Context, logger *fflog.FFLogger, featureEv
 	if err != nil {
 		return err
 	}
-	defer func() { _ = os.Remove(outputDir) }()
 
 	fileExporter := fileexporter.Exporter{
 		Format:                  f.Format,
@@ -80,7 +90,7 @@ func (f *Exporter) Export(ctx context.Context, logger *fflog.FFLogger, featureEv
 
 	for _, file := range files {
 		fileName := file.Name()
-		of, err := os.Open(outputDir + fileName)
+		of, err := os.Open(outputDir + "/" + fileName)
 		if err != nil {
 			logger.Error("[Azure Exporter] impossible to open file", slog.String("path", outputDir+"/"+fileName))
 			continue
