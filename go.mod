@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go/pubsub v1.45.1
 	cloud.google.com/go/storage v1.46.0
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.8.0
-	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.3.2
+	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.4.1
 	github.com/BurntSushi/toml v1.4.0
 	github.com/IBM/sarama v1.43.3
 	github.com/atc0005/go-teams-notify/v2 v2.13.0
