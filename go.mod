@@ -4,7 +4,7 @@ go 1.22.8
 
 require (
 	cloud.google.com/go/pubsub v1.45.1
-	cloud.google.com/go/storage v1.46.0
+	cloud.google.com/go/storage v1.47.0
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.8.0
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.5.0
 	github.com/BurntSushi/toml v1.4.0
@@ -77,7 +77,7 @@ require (
 require (
 	cel.dev/expr v0.16.1 // indirect
 	cloud.google.com/go v0.116.0 // indirect
-	cloud.google.com/go/auth v0.10.1 // indirect
+	cloud.google.com/go/auth v0.10.2 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.5 // indirect
 	cloud.google.com/go/compute/metadata v0.5.2 // indirect
 	cloud.google.com/go/iam v1.2.1 // indirect
