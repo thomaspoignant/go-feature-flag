@@ -70,14 +70,8 @@ func (c *RetrieverConf) IsValid() error {
 	if c.Kind == RedisRetriever {
 		return c.validateRedisRetriever()
 	}
-	if c.Kind == AzBlobStorageRetriever && c.AccountName == "" {
-		return fmt.Errorf("invalid retriever: no \"accountName\" property found for kind \"%s\"", c.Kind)
-	}
-	if c.Kind == AzBlobStorageRetriever && c.Container == "" {
-		return fmt.Errorf("invalid retriever: no \"container\" property found for kind \"%s\"", c.Kind)
-	}
-	if c.Kind == AzBlobStorageRetriever && c.Object == "" {
-		return fmt.Errorf("invalid retriever: no \"object\" property found for kind \"%s\"", c.Kind)
+	if c.Kind == AzBlobStorageRetriever {
+		return c.validateAzBlobStorageRetriever()
 	}
 	return nil
 }
@@ -121,6 +115,19 @@ func (c *RetrieverConf) validateMongoDBRetriever() error {
 func (c *RetrieverConf) validateRedisRetriever() error {
 	if c.RedisOptions == nil {
 		return fmt.Errorf("invalid retriever: no \"redisOptions\" property found for kind \"%s\"", c.Kind)
+	}
+	return nil
+}
+
+func (c *RetrieverConf) validateAzBlobStorageRetriever() error {
+	if c.AccountName == "" {
+		return fmt.Errorf("invalid retriever: no \"accountName\" property found for kind \"%s\"", c.Kind)
+	}
+	if c.Container == "" {
+		return fmt.Errorf("invalid retriever: no \"container\" property found for kind \"%s\"", c.Kind)
+	}
+	if c.Object == "" {
+		return fmt.Errorf("invalid retriever: no \"object\" property found for kind \"%s\"", c.Kind)
 	}
 	return nil
 }

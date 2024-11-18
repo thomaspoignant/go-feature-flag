@@ -7,6 +7,8 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob"
+	"github.com/thomaspoignant/go-feature-flag/retriever"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
 type Retriever struct {
@@ -24,38 +26,76 @@ type Retriever struct {
 
 	// Object is the name of your file in your container.
 	Object string
+
+	// client is a pointer to an Azure Blob Storage client.
+	// It provides access to Azure Blob Storage services for operations like
+	// creating, reading, updating, and deleting blobs.
+	client *azblob.Client
+	status retriever.Status
 }
 
-func (f *Retriever) initializeAzureClient() (*azblob.Client, error) {
-	url := fmt.Sprintf("https://%s.blob.core.windows.net/", f.AccountName)
-	if f.ServiceURL != "" {
-		url = f.ServiceURL
+func (r *Retriever) Init(_ context.Context, _ *fflog.FFLogger) error {
+	if r.AccountName == "" {
+		return fmt.Errorf("unable to connect to Azure Blob Storage, \"AccountName\" cannot be empty")
 	}
-	if f.AccountKey == "" {
-		cred, err := azidentity.NewDefaultAzureCredential(nil)
+
+	url := r.ServiceURL
+	if url == "" {
+		url = fmt.Sprintf("https://%s.blob.core.windows.net/", r.AccountName)
+	}
+
+	var client *azblob.Client
+	var err error
+
+	if r.AccountKey == "" {
+		var cred *azidentity.DefaultAzureCredential
+		cred, err = azidentity.NewDefaultAzureCredential(nil)
 		if err != nil {
-			return nil, err
+			r.status = retriever.RetrieverError
+			return err
 		}
-		return azblob.NewClient(url, cred, nil)
+		client, err = azblob.NewClient(url, cred, nil)
+	} else {
+		var cred *azblob.SharedKeyCredential
+		cred, err = azblob.NewSharedKeyCredential(r.AccountName, r.AccountKey)
+		if err != nil {
+			r.status = retriever.RetrieverError
+			return err
+		}
+		client, err = azblob.NewClientWithSharedKeyCredential(url, cred, nil)
 	}
-	cred, err := azblob.NewSharedKeyCredential(f.AccountName, f.AccountKey)
+
 	if err != nil {
-		return nil, err
+		r.status = retriever.RetrieverError
+		return err
 	}
-	return azblob.NewClientWithSharedKeyCredential(url, cred, nil)
+
+	r.client = client
+	r.status = retriever.RetrieverReady
+	return nil
+}
+
+func (r *Retriever) Shutdown(_ context.Context) error {
+	r.status = retriever.RetrieverNotReady
+	r.client = nil
+	return nil
+}
+
+func (r *Retriever) Status() retriever.Status {
+	return r.status
 }
 
 func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
+	if r.client == nil {
+		r.status = retriever.RetrieverError
+		return nil, fmt.Errorf("client is not initialized")
+	}
+
 	if r.Object == "" || r.Container == "" {
 		return nil, fmt.Errorf("missing mandatory information filePath=%s, repositorySlug=%s", r.Object, r.Container)
 	}
 
-	client, err := r.initializeAzureClient()
-	if err != nil {
-		return nil, err
-	}
-
-	fileStream, err := client.DownloadStream(ctx, r.Container, r.Object, nil)
+	fileStream, err := r.client.DownloadStream(ctx, r.Container, r.Object, nil)
 	if err != nil {
 		return nil, err
 	}

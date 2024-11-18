@@ -1,7 +1,7 @@
 //go:build docker
 // +build docker
 
-package azblobretriever
+package azblobretriever_test
 
 import (
 	"context"
@@ -81,6 +81,12 @@ func TestAzureBlobStorageRetriever(t *testing.T) {
 				ServiceURL:  serviceURL,
 				Object:      tt.fields.object,
 			}
+			err := r.Init(context.Background(), nil)
+			assert.NoError(t, err)
+			defer func() {
+				err := r.Shutdown(context.Background())
+				assert.NoError(t, err)
+			}()
 			got, err := r.Retrieve(tt.context)
 			assert.Equal(t, tt.wantErr, err != nil, "Retrieve() error = %v, wantErr %v", err, tt.wantErr)
 			if err == nil {
