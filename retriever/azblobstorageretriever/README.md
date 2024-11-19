@@ -68,8 +68,8 @@ func main() {
     ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
     defer cancel()
 
-    err := retriever.Init(context.Background(), nil)
-    defer func() { _ = r.Shutdown(context.Background()) }()
+    err := retriever.Init(ctx, nil)
+    defer func() { _ = r.Shutdown(ctx) }()
     if err != nil {
         log.Fatalf("Failed to initialize retriever:", err)
     }

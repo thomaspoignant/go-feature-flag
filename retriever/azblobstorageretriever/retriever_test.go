@@ -6,6 +6,7 @@ package azblobretriever_test
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"os"
 	"strings"
 	"testing"
@@ -15,43 +16,38 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/azurite"
+	"github.com/thomaspoignant/go-feature-flag/retriever/azblobstorageretriever"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
 var containerName = "testcontainer"
 
 func TestAzureBlobStorageRetriever(t *testing.T) {
-	type fields struct {
-		container   string
-		accountName string
-		accountKey  string
-		object      string
-		serviceURL  string
-	}
 	tests := []struct {
-		name    string
-		fields  fields
-		want    string
-		wantErr bool
-		context context.Context
+		name      string
+		want      string
+		wantErr   bool
+		context   context.Context
+		retriever azblobretriever.Retriever
 	}{
 		{
-			name: "File on Container",
-			fields: fields{
-				container:   containerName,
-				accountName: azurite.AccountName,
-				accountKey:  azurite.AccountKey,
-				object:      "flag-config.yaml",
-			},
+			name:    "File on Container",
 			want:    "./testdata/flag-config.yaml",
 			wantErr: false,
+			retriever: azblobretriever.Retriever{
+				Container:   containerName,
+				AccountName: azurite.AccountName,
+				AccountKey:  azurite.AccountKey,
+				Object:      "flag-config.yaml",
+			},
 		},
 		{
 			name: "File on Container with Context",
-			fields: fields{
-				container:   containerName,
-				accountName: azurite.AccountName,
-				accountKey:  azurite.AccountKey,
-				object:      "flag-config.yaml",
+			retriever: azblobretriever.Retriever{
+				Container:   containerName,
+				AccountName: azurite.AccountName,
+				AccountKey:  azurite.AccountKey,
+				Object:      "flag-config.yaml",
 			},
 			want:    "./testdata/flag-config.yaml",
 			context: context.Background(),
@@ -59,11 +55,20 @@ func TestAzureBlobStorageRetriever(t *testing.T) {
 		},
 		{
 			name: "File not on Container",
-			fields: fields{
-				container:   containerName,
-				accountName: azurite.AccountName,
-				accountKey:  azurite.AccountKey,
-				object:      "feature-config.csv",
+			retriever: azblobretriever.Retriever{
+				Container:   containerName,
+				AccountName: azurite.AccountName,
+				AccountKey:  azurite.AccountKey,
+				Object:      "feature-config.csv",
+			},
+			wantErr: true,
+		},
+		{
+			name: "Should Err on Empty container",
+			retriever: azblobretriever.Retriever{
+				AccountName: azurite.AccountName,
+				AccountKey:  azurite.AccountKey,
+				Object:      "feature-config.csv",
 			},
 			wantErr: true,
 		},
@@ -73,21 +78,14 @@ func TestAzureBlobStorageRetriever(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			container, _ := setupTest(t)
 			defer tearDown(t, container)
-			serviceURL := fmt.Sprintf("%s/%s", container.MustServiceURL(context.Background(), azurite.BlobService), azurite.AccountName)
-			r := &Retriever{
-				Container:   tt.fields.container,
-				AccountName: tt.fields.accountName,
-				AccountKey:  tt.fields.accountKey,
-				ServiceURL:  serviceURL,
-				Object:      tt.fields.object,
-			}
-			err := r.Init(context.Background(), nil)
+			tt.retriever.ServiceURL = fmt.Sprintf("%s/%s", container.MustServiceURL(context.Background(), azurite.BlobService), azurite.AccountName)
+			err := tt.retriever.Init(context.Background(), &fflog.FFLogger{LeveledLogger: slog.Default()})
 			assert.NoError(t, err)
 			defer func() {
-				err := r.Shutdown(context.Background())
+				err := tt.retriever.Shutdown(context.Background())
 				assert.NoError(t, err)
 			}()
-			got, err := r.Retrieve(tt.context)
+			got, err := tt.retriever.Retrieve(context.Background())
 			assert.Equal(t, tt.wantErr, err != nil, "Retrieve() error = %v, wantErr %v", err, tt.wantErr)
 			if err == nil {
 				want, err := os.ReadFile(tt.want)
