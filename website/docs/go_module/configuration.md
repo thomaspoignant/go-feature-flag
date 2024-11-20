@@ -32,23 +32,23 @@ During the initialization you must give a [`ffclient.Config{}`](https://pkg.go.d
 ## Example
 ```go
 ffclient.Init(ffclient.Config{ 
-    PollingInterval:   3 * time.Second,
-	  LeveledLogger:   slog.Default(),
-    Context:        context.Background(),
-    Environment:    os.Getenv("MYAPP_ENV"),
-    Retriever:      &fileretriever.Retriever{Path: "testdata/flag-config.goff.yaml"},
-    FileFormat:     "yaml",
+    PollingInterval: 3 * time.Second,
+    LeveledLogger:   slog.Default(),
+    Context:         context.Background(),
+    Environment:     os.Getenv("MYAPP_ENV"),
+    Retriever:       &fileretriever.Retriever{Path: "testdata/flag-config.goff.yaml"},
+    FileFormat:      "yaml",
     Notifiers: []notifier.Notifier{
         &webhooknotifier.Notifier{
-            EndpointURL: " https://example.com/hook",
-            Secret:     "Secret",
+            EndpointURL: "https://example.com/hook",
+            Secret:      "Secret",
             Meta: map[string]string{
                 "app.name": "my app",
             },
         },
     },
     DataExporter: ffclient.DataExporter{
-        FlushInterval:   10 * time.Second,
+        FlushInterval:    10 * time.Second,
         MaxEventInMemory: 1000,
         Exporter: &file.Exporter{
             OutputDir: "/output-data/",
