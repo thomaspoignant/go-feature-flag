@@ -9,6 +9,7 @@ import s3logo from '@site/static/docs/collectors/s3.png';
 import kinesislogo from '@site/static/docs/collectors/kinesis.png';
 import teamslogo from '@site/static/docs/notifier/teams.png';
 import webhooklogo from '@site/static/docs/collectors/webhook.png';
+import azbloblogo from '@site/static/docs/collectors/azblob.png';
 import bitbucketlogo from '@site/static/docs/retrievers/bitbucket.png';
 import {Headline} from '../headline';
 
@@ -320,6 +321,11 @@ function Integration() {
               colorClassName={styles.socialIconAws}
               img={kinesislogo}
               tooltipText="AWS Kinesis"
+            />
+            <SocialIcon
+              colorClassName={styles.socialIconBlue}
+              img={azbloblogo}
+              tooltipText="Azure Blob Storage"
             />
             <SocialIcon
               colorClassName={styles.socialIconBitbucket}

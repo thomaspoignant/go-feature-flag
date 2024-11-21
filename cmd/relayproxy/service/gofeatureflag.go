@@ -10,6 +10,7 @@ import (
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
+	"github.com/thomaspoignant/go-feature-flag/exporter/azureexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/gcstorageexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/kafkaexporter"
@@ -25,6 +26,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/notifier/slacknotifier"
 	"github.com/thomaspoignant/go-feature-flag/notifier/webhooknotifier"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever/azblobstorageretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/bitbucketretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/gcstorageretriever"
@@ -185,6 +187,13 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 		return &mongodbretriever.Retriever{Database: c.Database, URI: c.URI, Collection: c.Collection}, nil
 	case config.RedisRetriever:
 		return &redisretriever.Retriever{Options: c.RedisOptions, Prefix: c.RedisPrefix}, nil
+	case config.AzBlobStorageRetriever:
+		return &azblobretriever.Retriever{
+			Container:   c.Container,
+			Object:      c.Object,
+			AccountName: c.AccountName,
+			AccountKey:  c.AccountKey,
+		}, nil
 	default:
 		return nil, fmt.Errorf("invalid retriever: kind \"%s\" "+
 			"is not supported", c.Kind)
@@ -318,6 +327,17 @@ func createExporter(c *config.ExporterConf) (exporter.CommonExporter, error) {
 		return &pubsubexporter.Exporter{
 			ProjectID: c.ProjectID,
 			Topic:     c.Topic,
+		}, nil
+	case config.AzureExporter:
+		return &azureexporter.Exporter{
+			Container:               c.Container,
+			Format:                  format,
+			Path:                    c.Path,
+			Filename:                filename,
+			CsvTemplate:             csvTemplate,
+			ParquetCompressionCodec: parquetCompressionCodec,
+			AccountKey:              c.AccountKey,
+			AccountName:             c.AccountName,
 		}, nil
 	default:
 		return nil, fmt.Errorf("invalid exporter: kind \"%s\" is not supported", c.Kind)

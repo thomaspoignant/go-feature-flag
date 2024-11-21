@@ -30,6 +30,9 @@ type ExporterConf struct {
 	Topic                   string                 `mapstructure:"topic" koanf:"topic"`
 	StreamArn               string                 `mapstructure:"streamArn" koanf:"streamarn"`
 	StreamName              string                 `mapstructure:"streamName" koanf:"streamname"`
+	AccountName             string                 `mapstructure:"accountName" koanf:"accountname"`
+	AccountKey              string                 `mapstructure:"accountKey" koanf:"accountkey"`
+	Container               string                 `mapstructure:"container" koanf:"container"`
 }
 
 func (c *ExporterConf) IsValid() error {
@@ -65,6 +68,13 @@ func (c *ExporterConf) IsValid() error {
 		return fmt.Errorf("invalid exporter: \"projectID\" and \"topic\" are required for kind \"%s\"", c.Kind)
 	}
 
+	if c.Kind == AzureExporter && c.Container == "" {
+		return fmt.Errorf("invalid exporter: no \"container\" property found for kind \"%s\"", c.Kind)
+	}
+	if c.Kind == AzureExporter && c.AccountName == "" {
+		return fmt.Errorf("invalid exporter: no \"accountName\" property found for kind \"%s\"", c.Kind)
+	}
+
 	return nil
 }
 
@@ -80,13 +90,14 @@ const (
 	SQSExporter           ExporterKind = "sqs"
 	KafkaExporter         ExporterKind = "kafka"
 	PubSubExporter        ExporterKind = "pubsub"
+	AzureExporter         ExporterKind = "azureBlobStorage"
 )
 
 // IsValid is checking if the value is part of the enum
 func (r ExporterKind) IsValid() error {
 	switch r {
 	case FileExporter, WebhookExporter, LogExporter, S3Exporter, GoogleStorageExporter, SQSExporter, KafkaExporter,
-		PubSubExporter, KinesisExporter:
+		PubSubExporter, KinesisExporter, AzureExporter:
 		return nil
 	}
 	return fmt.Errorf("invalid exporter: kind \"%s\" is not supported", r)
