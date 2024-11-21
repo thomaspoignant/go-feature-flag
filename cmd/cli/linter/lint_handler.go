@@ -19,7 +19,7 @@ func RunLint(_ *cobra.Command, args []string, lintFlagFormat string) error {
 		for _, err := range errs {
 			_, _ = fmt.Fprintf(os.Stderr, "%s\n", err)
 		}
-		os.Exit(len(errs))
+		panic("Configuration is invalid")
 	}
 	fmt.Println("Configuration is valid")
 	return nil

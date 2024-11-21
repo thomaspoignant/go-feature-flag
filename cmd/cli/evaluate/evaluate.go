@@ -4,11 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"time"
 
 	ffclient "github.com/thomaspoignant/go-feature-flag"
-	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/internal/utils"
 	"github.com/thomaspoignant/go-feature-flag/model"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
@@ -36,42 +34,25 @@ func (e evaluate) Evaluate() (map[string]model.RawVarResult, error) {
 	}
 
 	var ctxAsMap map[string]interface{}
+	result := map[string]model.RawVarResult{}
 	err = json.Unmarshal([]byte(e.evaluationCtx), &ctxAsMap)
 	if targetingKey, ok := ctxAsMap["targetingKey"].(string); ok {
 		convertedEvaluationCtx := utils.ConvertEvaluationCtxFromRequest(targetingKey, ctxAsMap)
+		listFLags := make([]string, 0)
 		if e.flag != "" {
-			return e.evaluateSingleFlag(goff, convertedEvaluationCtx, e.flag)
+			listFLags = append(listFLags, e.flag)
 		} else {
-			return e.evaluateBulk(goff, convertedEvaluationCtx)
+			flags, _ := goff.GetFlagsFromCache()
+			for key, _ := range flags {
+				listFLags = append(listFLags, key)
+			}
 		}
+
+		for _, flag := range listFLags {
+			res, _ := goff.RawVariation(flag, convertedEvaluationCtx, nil)
+			result[flag] = res
+		}
+		return result, nil
 	}
 	return nil, errors.New("invalid evaluation context (missing targeting key)")
-}
-
-func (e evaluate) evaluateSingleFlag(goff *ffclient.GoFeatureFlag, evalCtx ffcontext.Context, flag string) (map[string]model.RawVarResult, error) {
-	res, _ := goff.RawVariation(flag, evalCtx, nil)
-	detailed, err := json.MarshalIndent(res, "", "  ")
-	if err != nil {
-		return err
-	}
-	fmt.Println(string(detailed))
-	return nil
-}
-
-func (e evaluate) evaluateBulk(goff *ffclient.GoFeatureFlag, evalCtx ffcontext.Context) (map[string]model.RawVarResult, error) {
-
-	flags, err := goff.GetFlagsFromCache()
-	if err != nil {
-		return err
-	}
-
-	for flagName, _ := range flags {
-		fmt.Println("Flag:", flagName)
-		err := e.evaluateSingleFlag(goff, evalCtx, flagName)
-		if err != nil {
-			return err
-		}
-		fmt.Println("--------------")
-	}
-	return nil
 }

@@ -1,6 +1,11 @@
 package evaluate
 
-import "github.com/spf13/cobra"
+import (
+	"encoding/json"
+	"fmt"
+
+	"github.com/spf13/cobra"
+)
 
 func RunEvaluate(
 	_ *cobra.Command,
@@ -15,8 +20,16 @@ func RunEvaluate(
 		flag:          flag,
 		evaluationCtx: ctx,
 	}
-	if err := e.Evaluate(); err != nil {
+	result, err := e.Evaluate()
+	if err != nil {
 		return err
 	}
+
+	detailed, err := json.MarshalIndent(result, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(string(detailed))
 	return nil
 }
