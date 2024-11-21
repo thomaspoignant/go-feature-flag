@@ -299,6 +299,7 @@ The available retrievers are:
 - **MongoDB**
 - **Redis**
 - **BitBucket**
+- **AzBlobStorage**
 - ...
 
 _[See the full list and more information.](https://gofeatureflag.org/docs/configure_flag/store_your_flags)_

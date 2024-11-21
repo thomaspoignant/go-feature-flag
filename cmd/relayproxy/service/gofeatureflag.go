@@ -26,6 +26,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/notifier/slacknotifier"
 	"github.com/thomaspoignant/go-feature-flag/notifier/webhooknotifier"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever/azblobstorageretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/bitbucketretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/gcstorageretriever"
@@ -186,6 +187,13 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 		return &mongodbretriever.Retriever{Database: c.Database, URI: c.URI, Collection: c.Collection}, nil
 	case config.RedisRetriever:
 		return &redisretriever.Retriever{Options: c.RedisOptions, Prefix: c.RedisPrefix}, nil
+	case config.AzBlobStorageRetriever:
+		return &azblobretriever.Retriever{
+			Container:   c.Container,
+			Object:      c.Object,
+			AccountName: c.AccountName,
+			AccountKey:  c.AccountKey,
+		}, nil
 	default:
 		return nil, fmt.Errorf("invalid retriever: kind \"%s\" "+
 			"is not supported", c.Kind)

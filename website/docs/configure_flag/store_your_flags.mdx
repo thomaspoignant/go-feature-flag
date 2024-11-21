@@ -18,6 +18,7 @@ import k8slogo from '@site/static/docs/retrievers/k8s.png';
 import mongodblogo from '@site/static/docs/retrievers/mongodb.png';
 import redislogo from '@site/static/docs/retrievers/redis.png';
 import bitbucketlogo from '@site/static/docs/retrievers/bitbucket.png';
+import azBloblogo from '@site/static/docs/collectors/azblob.png';
 
 
 # Where to store your flags' configuration?
@@ -124,6 +125,14 @@ configuration and will evaluate your feature flags based on this configuration.
     content: <ConfigCardContent
       relayproxyLink={'../relay_proxy/configure_relay_proxy#bitbucket'}
       goModuleLink={'../go_module/store_file/bitbucket'}
+    />
+  },
+  {
+    logoImg: azBloblogo,
+    title: "Azure Blob Storage",
+    content: <ConfigCardContent
+      relayproxyLink={'../relay_proxy/configure_relay_proxy#azure-blob-storage'}
+      goModuleLink={'../go_module/store_file/azureblobstorage'}
     />
   },
   {

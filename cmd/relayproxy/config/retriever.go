@@ -32,6 +32,9 @@ type RetrieverConf struct {
 	Collection   string              `mapstructure:"collection" koanf:"collection"`
 	RedisOptions *redis.Options      `mapstructure:"redisOptions" koanf:"redisOptions"`
 	RedisPrefix  string              `mapstructure:"redisPrefix" koanf:"redisPrefix"`
+	AccountName  string              `mapstructure:"accountName" koanf:"accountname"`
+	AccountKey   string              `mapstructure:"accountKey" koanf:"accountkey"`
+	Container    string              `mapstructure:"container" koanf:"container"`
 }
 
 // IsValid validate the configuration of the retriever
@@ -66,6 +69,9 @@ func (c *RetrieverConf) IsValid() error {
 	}
 	if c.Kind == RedisRetriever {
 		return c.validateRedisRetriever()
+	}
+	if c.Kind == AzBlobStorageRetriever {
+		return c.validateAzBlobStorageRetriever()
 	}
 	return nil
 }
@@ -113,6 +119,19 @@ func (c *RetrieverConf) validateRedisRetriever() error {
 	return nil
 }
 
+func (c *RetrieverConf) validateAzBlobStorageRetriever() error {
+	if c.AccountName == "" {
+		return fmt.Errorf("invalid retriever: no \"accountName\" property found for kind \"%s\"", c.Kind)
+	}
+	if c.Container == "" {
+		return fmt.Errorf("invalid retriever: no \"container\" property found for kind \"%s\"", c.Kind)
+	}
+	if c.Object == "" {
+		return fmt.Errorf("invalid retriever: no \"object\" property found for kind \"%s\"", c.Kind)
+	}
+	return nil
+}
+
 // RetrieverKind is an enum containing all accepted Retriever kind
 type RetrieverKind string
 
@@ -127,13 +146,15 @@ const (
 	MongoDBRetriever       RetrieverKind = "mongodb"
 	RedisRetriever         RetrieverKind = "redis"
 	BitbucketRetriever     RetrieverKind = "bitbucket"
+	AzBlobStorageRetriever RetrieverKind = "azureBlobStorage"
 )
 
 // IsValid is checking if the value is part of the enum
 func (r RetrieverKind) IsValid() error {
 	switch r {
 	case HTTPRetriever, GitHubRetriever, GitlabRetriever, S3Retriever, RedisRetriever,
-		FileRetriever, GoogleStorageRetriever, KubernetesRetriever, MongoDBRetriever, BitbucketRetriever:
+		FileRetriever, GoogleStorageRetriever, KubernetesRetriever, MongoDBRetriever,
+		BitbucketRetriever, AzBlobStorageRetriever:
 		return nil
 	}
 	return fmt.Errorf("invalid retriever: kind \"%s\" is not supported", r)

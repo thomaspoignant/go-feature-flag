@@ -192,6 +192,16 @@ the [doc](../go_module/store_file/redis#expected-format) available._
 | `token`          | string | **none**             | Bitbucket token used to access a private repository ([_Create a Repository Access Token_](https://support.atlassian.com/bitbucket-cloud/docs/create-a-repository-access-token/)). |
 | `timeout`        | string | `10000`              | Timeout in millisecond used when calling GitLab.                                                                                                                                  |
 
+### Azure Blob Storage
+
+| Field name    | Type   | Default   | Description                                                                                                                        |
+|---------------|--------|-----------|------------------------------------------------------------------------------------------------------------------------------------|
+| `kind`        | string | **none**  | **(mandatory)** Value should be **`azureBlobStorage`**.<br/>_This field is mandatory and describes which retriever you are using._ |
+| `container`   | string | **none**  | **(mandatory)** This is the name of your Azure Blob Storage container _(ex: `my-featureflag-container`)_.                          |
+| `accountName` | string | **none**  | **(mandatory)** This is the name of your Azure Blob Storage account.                                                               |
+| `accountKey`  | string | **none**  | This is the secret key of your Azure Blob Storage account.                                                                         |
+| `object`      | string | **none**  | **(mandatory)** Location of your configuration file.                                                                               |
+
 <a name="exporter"></a>
 
 ## type `exporter`
