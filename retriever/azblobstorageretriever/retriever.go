@@ -76,8 +76,8 @@ func (r *Retriever) Init(_ context.Context, _ *fflog.FFLogger) error {
 }
 
 func (r *Retriever) Shutdown(_ context.Context) error {
-	r.status = retriever.RetrieverNotReady
 	r.client = nil
+	r.status = retriever.RetrieverNotReady
 	return nil
 }
 
@@ -92,7 +92,7 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	}
 
 	if r.Object == "" || r.Container == "" {
-		return nil, fmt.Errorf("missing mandatory information filePath=%s, repositorySlug=%s", r.Object, r.Container)
+		return nil, fmt.Errorf("missing mandatory information object=%s, repositorySlug=%s", r.Object, r.Container)
 	}
 
 	fileStream, err := r.client.DownloadStream(ctx, r.Container, r.Object, nil)
@@ -106,7 +106,7 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	body, err := io.ReadAll(retryReader)
 	if err != nil {
 		return nil,
-			fmt.Errorf("unable to read from Azure Blob Storage Object %s in Container %s, error: %s", r.Container, r.Object, err)
+			fmt.Errorf("unable to read from Azure Blob Storage Object %s in Container %s, error: %s", r.Object, r.Container, err)
 	}
 
 	return body, nil

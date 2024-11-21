@@ -189,10 +189,10 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 		return &redisretriever.Retriever{Options: c.RedisOptions, Prefix: c.RedisPrefix}, nil
 	case config.AzBlobStorageRetriever:
 		return &azblobretriever.Retriever{
-			Container: c.Container, 
-			Object: c.Object, 
-			AccountName: c.AccountName, 
-			AccountKey: c.AccountKey,
+			Container:   c.Container,
+			Object:      c.Object,
+			AccountName: c.AccountName,
+			AccountKey:  c.AccountKey,
 		}, nil
 	default:
 		return nil, fmt.Errorf("invalid retriever: kind \"%s\" "+

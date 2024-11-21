@@ -96,6 +96,30 @@ func TestAzureBlobStorageRetriever(t *testing.T) {
 	}
 }
 
+func TestInit(t *testing.T) {
+	t.Run("Should error when no account name", func(t *testing.T) {
+		retriever := azblobretriever.Retriever{
+			Container:  containerName,
+			AccountKey: azurite.AccountKey,
+			Object:     "flag-config.yaml",
+		}
+		err := retriever.Init(context.Background(), &fflog.FFLogger{LeveledLogger: slog.Default()})
+		assert.Error(t, err)
+	})
+
+	t.Run("Should error when calling retrieve without init", func(t *testing.T) {
+		retriever := azblobretriever.Retriever{
+			Container:   containerName,
+			AccountName: azurite.AccountName,
+			AccountKey:  azurite.AccountKey,
+			Object:      "flag-config.yaml",
+		}
+		_, err := retriever.Retrieve(context.Background())
+		assert.Error(t, err)
+	})
+
+}
+
 func setupTest(t *testing.T) (*azurite.AzuriteContainer, *azblob.Client) {
 	ctx := context.Background()
 	azuriteContainer, err := azurite.Run(
