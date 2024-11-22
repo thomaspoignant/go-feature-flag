@@ -33,9 +33,17 @@ func (e evaluate) Evaluate() (map[string]model.RawVarResult, error) {
 		return nil, err
 	}
 
+	if e.evaluationCtx == "" {
+		return nil, errors.New("invalid evaluation context (missing targeting key)")
+	}
+
 	var ctxAsMap map[string]interface{}
 	result := map[string]model.RawVarResult{}
 	err = json.Unmarshal([]byte(e.evaluationCtx), &ctxAsMap)
+	if err != nil {
+		return nil, err
+	}
+
 	if targetingKey, ok := ctxAsMap["targetingKey"].(string); ok {
 		convertedEvaluationCtx := utils.ConvertEvaluationCtxFromRequest(targetingKey, ctxAsMap)
 		listFLags := make([]string, 0)
@@ -43,7 +51,7 @@ func (e evaluate) Evaluate() (map[string]model.RawVarResult, error) {
 			listFLags = append(listFLags, e.flag)
 		} else {
 			flags, _ := goff.GetFlagsFromCache()
-			for key, _ := range flags {
+			for key := range flags {
 				listFLags = append(listFLags, key)
 			}
 		}
