@@ -70,9 +70,9 @@ require (
 	google.golang.org/api v0.209.0
 	google.golang.org/grpc v1.68.0
 	gopkg.in/yaml.v3 v3.0.1
-	k8s.io/api v0.31.2
+	k8s.io/api v0.31.3
 	k8s.io/apimachinery v0.31.3
-	k8s.io/client-go v0.31.2
+	k8s.io/client-go v0.31.3
 )
 
 require (
