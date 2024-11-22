@@ -5,7 +5,7 @@ on:
 
 jobs:
   pre-version-check:
-    if:  ${{ startsWith(github.event.release.tag_name, 'v') }}
+    if: ${{ startsWith(github.event.release.tag_name, 'v') }}
     name: pre version check
     runs-on: ubuntu-latest
     steps:
@@ -99,6 +99,25 @@ jobs:
           username: ${DOCKER_USERNAME}
           password: ${DOCKER_PASSWORD}
           repository: gofeatureflag/go-feature-flag-lint
+          readme: "./cmd/lint/DOCKERHUB.md"
+
+  dockerhub-cli:
+    runs-on: ubuntu-latest
+    name: Upload dockerhub readme
+    needs:
+      - goreleaser
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Release readme to DockerHub
+        uses: ms-jpq/sync-dockerhub-readme@v1
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        with:
+          username: ${DOCKER_USERNAME}
+          password: ${DOCKER_PASSWORD}
+          repository: gofeatureflag/go-feature-flag-cli
           readme: "./cmd/lint/DOCKERHUB.md"
 
   dockerhub-relay-proxy:
