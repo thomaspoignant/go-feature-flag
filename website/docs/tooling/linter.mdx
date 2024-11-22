@@ -11,49 +11,27 @@ import TabItem from '@theme/TabItem';
 # Lint your configuration file
 
 Ensuring the accuracy of your configuration is vital for the **GO Feature Flag** to function as expected.
-This is why we have introduced the `go-feature-flag-lint`, a command line tool that validates whether a flag file can be parsed by **GO Feature Flag**.
+This is why you can lint your configuration file using the [`go-feature-flag-cli`](./cli), a command line tool that allow to interact with GO Feature Flag in your terminal. The `lint` command validates whether a flag file can be parsed by **GO Feature Flag**.
 
 :::tip
 We recommend you to use this command line in your CI/CD pipelines to avoid any unforeseen issues.
 :::
 
-## Install the linter
+## Install the Command Line
 
-### Install using Homebrew (mac and linux)
-```shell
-brew tap thomaspoignant/homebrew-tap
-brew install go-feature-flag-lint
-```
- 
-### Install using Scoop (windows)
-```shell
-scoop bucket add org https://github.com/go-feature-flag/scoop.git
-scoop install go-feature-flag-lint
-```
-
-### Install using Docker
-```shell
-docker pull thomaspoignant/go-feature-flag-lint:latest
-```
+Check the [installation guide](./cli) to install the `go-feature-flag-cli`.
 
 ## Use the linter
 
 ```shell
-./go-feature-flag-lint \
-  --input-format=yaml \
-  --input-file=/input/my-go-feature-flag-config.goff.yaml
+./go-feature-flag-cli lint /input/my-go-feature-flag-config.goff.yaml --format=yaml
 ```
 
-The command line has 2 arguments you should specify.
-
-| param            | description                                                                                                       |
-|------------------|-------------------------------------------------------------------------------------------------------------------|
-| `--input-file`   | **(mandatory)** The location of your configuration file.                                                          |
-| `--input-format` | **(mandatory)** The format of your current configuration file. <br/>Available formats are `yaml`, `json`, `toml`. |
+You have to pass the location of your configuration file and the format of your current configuration file _(available formats are `yaml`, `json`, `toml`)_.
 
 ## Use the linter in your CI (continuous integration)
 
-You can run `go-feature-flag-lint` directly in your CI:
+You can run `go-feature-flag-cli` directly in your CI:
 
 <Tabs groupId="code">
     <TabItem value="githubaction" label="Github Action">
@@ -92,8 +70,8 @@ jobs:
 
     steps:
       - checkout
-      - run: curl -L $(curl -s https://api.github.com/repos/thomaspoignant/go-feature-flag/releases/latest | jq -r '.assets[] | select(.name|match("Linux_x86_64.tar.gz$")) | .browser_download_url' | grep 'go-feature-flag-lint') --output release.tar.gz && tar -zxvf release.tar.gz
-      - run: ./go-feature-flag-lint --input-format=yaml --input-file=flag-config.goff.yaml # please put the right file name
+      - run: curl -L $(curl -s https://api.github.com/repos/thomaspoignant/go-feature-flag/releases/latest | jq -r '.assets[] | select(.name|match("Linux_x86_64.tar.gz$")) | .browser_download_url' | grep 'go-feature-flag-cli') --output release.tar.gz && tar -zxvf release.tar.gz
+      - run: ./go-feature-flag-cli lint flag-config.goff.yaml --format=yaml # please put the right file name
 ```
 
   </TabItem>
@@ -109,8 +87,8 @@ lint-job:
     - apt-get install -y jq curl
 
   script:
-    - curl -L $(curl -s https://api.github.com/repos/thomaspoignant/go-feature-flag/releases/latest | jq -r '.assets[] | select(.name|match("Linux_x86_64.tar.gz$")) | .browser_download_url' | grep 'go-feature-flag-lint') --output release.tar.gz && tar -zxvf release.tar.gz
-    - ./go-feature-flag-lint --input-format=yaml --input-file=flag-config.goff.yaml # please put the right file name
+    - curl -L $(curl -s https://api.github.com/repos/thomaspoignant/go-feature-flag/releases/latest | jq -r '.assets[] | select(.name|match("Linux_x86_64.tar.gz$")) | .browser_download_url' | grep 'go-feature-flag-cli') --output release.tar.gz && tar -zxvf release.tar.gz
+    - ./go-feature-flag-cli lint flag-config.goff.yaml --format=yaml # please put the right file name
 ```
 
   </TabItem>

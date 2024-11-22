@@ -1,0 +1,16 @@
+{
+  "test-flag": {
+    "trackEvents": true,
+    "variationType": "Default",
+    "failed": false,
+    "version": "",
+    "reason": "DEFAULT",
+    "errorCode": "",
+    "value": false,
+    "cacheable": true,
+    "metadata": {
+      "description": "this is a simple feature flag",
+      "issue-link": "https://jira.xxx/GOFF-01"
+    }
+  }
+}

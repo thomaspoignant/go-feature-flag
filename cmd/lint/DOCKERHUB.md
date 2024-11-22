@@ -1,5 +1,11 @@
 # GO Feature Flag Lint cli
 
+![Status](https://img.shields.io/badge/status-deprecated-red)
+
+> [!WARNING]  
+> The linter command has been deprecated in favor of the GO Feature Flag Command Line.
+> Check the documentation for the [GO Feature Flag Command Line](http://gofeatureflag.org/docs/tooling/linter) for more information.
+
 The lint command lint tool validates that a flags file can be parsed by GO Feature Flag.
 
 ## How to use this image
