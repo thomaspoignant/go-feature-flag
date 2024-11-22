@@ -191,13 +191,14 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
                 headers = {"Content-Type": "application/json"}
                 if self.options.api_key is not None:
                     headers["Authorization"] = "Bearer {}".format(self.options.api_key)
+                url = "{}{}".format(
+                    str(self.options.endpoint).rstrip("/"),
+                    "/v1/feature/{}/eval".format(flag_key),
+                )
 
                 response = self._http_client.request(
                     method="POST",
-                    url=urljoin(
-                        str(self.options.endpoint),
-                        "/v1/feature/{}/eval".format(flag_key),
-                    ),
+                    url=url,
                     headers=headers,
                     body=goff_request.model_dump_json(),
                 )
@@ -269,10 +270,11 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
         if self.options.api_key is not None:
             url = "{}?apiKey={}".format(url, self.options.api_key)
 
-        http_uri = urljoin(
-            str(self.options.endpoint),
+        http_uri = "{}{}".format(
+            str(self.options.endpoint).rstrip("/"),
             url,
         )
+
         http_uri = http_uri.replace("http", "ws")
         http_uri = http_uri.replace("https", "wss")
         return http_uri
