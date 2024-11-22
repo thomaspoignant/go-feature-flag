@@ -1,21 +1,40 @@
 package log
 
 import (
+	// register logfmt encoder
+	_ "github.com/jsternberg/zap-logfmt"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 type Logger struct {
 	ZapLogger *zap.Logger
-	Atom      zap.AtomicLevel
+	config    zap.Config
 }
 
 func InitLogger() *Logger {
-	logger := &Logger{Atom: zap.NewAtomicLevel()}
+	zapConfig := zap.NewProductionConfig()
+	zapLogger, _ := zapConfig.Build()
 
-	prodConfig := zap.NewProductionConfig()
-	prodConfig.Level = logger.Atom
-	zapLogger, _ := prodConfig.Build()
-	logger.ZapLogger = zapLogger
+	logger := Logger{
+		ZapLogger: zapLogger,
+		config:    zapConfig,
+	}
 
-	return logger
+	return &logger
+}
+
+// Update the logger with a new format and level. Replaces the underlying
+// zap.Logger with a new one. Not safe for concurrent use.
+func (l *Logger) Update(format string, level zapcore.Level) {
+	if format == "" {
+		format = "json"
+	}
+
+	l.config.Level.SetLevel(level)
+	l.config.Encoding = format
+
+	zapLogger, _ := l.config.Build()
+
+	l.ZapLogger = zapLogger
 }
