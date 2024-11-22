@@ -50,6 +50,7 @@ def test_test_websocket_cache_invalidation(goff):
             endpoint=goff,
             data_flush_interval=100,
             disable_data_collection=True,
+            api_key="apikey1",
         )
     )
     api.set_provider(goff_provider)

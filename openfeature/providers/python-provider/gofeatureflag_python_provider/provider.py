@@ -188,13 +188,17 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
                 response_body = self._cache[evaluation_context_hash]
                 is_from_cache = True
             else:
+                headers = {"Content-Type": "application/json"}
+                if self.options.api_key is not None:
+                    headers["Authorization"] = "Bearer {}".format(self.options.api_key)
+
                 response = self._http_client.request(
                     method="POST",
                     url=urljoin(
                         str(self.options.endpoint),
                         "/v1/feature/{}/eval".format(flag_key),
                     ),
-                    headers={"Content-Type": "application/json"},
+                    headers=headers,
                     body=goff_request.model_dump_json(),
                 )
 
@@ -261,9 +265,13 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
         _build_websocket_uri is a helper to build the websocket uri to connect to the GO Feature Flag relay proxy.
         :return: a string representing the websocket uri
         """
+        url = "/ws/v1/flag/change"
+        if self.options.api_key is not None:
+            url = "{}?apiKey={}".format(url, self.options.api_key)
+
         http_uri = urljoin(
             str(self.options.endpoint),
-            "/ws/v1/flag/change",
+            url,
         )
         http_uri = http_uri.replace("http", "ws")
         http_uri = http_uri.replace("https", "wss")

@@ -40,6 +40,7 @@ def _generic_test(
                 endpoint="https://gofeatureflag.org/",
                 data_flush_interval=100,
                 disable_cache_invalidation=True,
+                api_key="apikey1",
             ),
         )
         api.set_provider(goff_provider)
