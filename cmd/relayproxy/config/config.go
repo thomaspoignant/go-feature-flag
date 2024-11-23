@@ -251,6 +251,9 @@ type Config struct {
 	// Exporter is the configuration on how to export data
 	Exporter *ExporterConf `mapstructure:"exporter" koanf:"exporter"`
 
+	// Exporters is the exact same things than Exporter but allows to give more than 1 exporter at the time.
+	Exporters *[]ExporterConf `mapstructure:"exporters" koanf:"exporters"`
+
 	// Notifiers is the configuration on where to notify a flag change
 	Notifiers []NotifierConf `mapstructure:"notifier" koanf:"notifier"`
 
@@ -412,6 +415,28 @@ func (c *Config) IsValid() error {
 		return fmt.Errorf("invalid port %d", c.ListenPort)
 	}
 
+	if err := c.validateRetrievers(); err != nil {
+		return err
+	}
+
+	if err := c.validateExporters(); err != nil {
+		return err
+	}
+
+	if err := c.validateNotifiers(); err != nil {
+		return err
+	}
+
+	if c.LogLevel != "" {
+		if _, err := zapcore.ParseLevel(c.LogLevel); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (c *Config) validateRetrievers() error {
 	if c.Retriever == nil && c.Retrievers == nil {
 		return fmt.Errorf("no retriever available in the configuration")
 	}
@@ -430,13 +455,28 @@ func (c *Config) IsValid() error {
 		}
 	}
 
-	// Exporter is optional
+	return nil
+}
+
+func (c *Config) validateExporters() error {
 	if c.Exporter != nil {
 		if err := c.Exporter.IsValid(); err != nil {
 			return err
 		}
 	}
 
+	if c.Exporters != nil {
+		for _, exporter := range *c.Exporters {
+			if err := exporter.IsValid(); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func (c *Config) validateNotifiers() error {
 	if c.Notifiers != nil {
 		for _, notif := range c.Notifiers {
 			if err := notif.IsValid(); err != nil {
@@ -444,12 +484,6 @@ func (c *Config) IsValid() error {
 			}
 		}
 	}
-	if c.LogLevel != "" {
-		if _, err := zapcore.ParseLevel(c.LogLevel); err != nil {
-			return err
-		}
-	}
-
 	return nil
 }
 
