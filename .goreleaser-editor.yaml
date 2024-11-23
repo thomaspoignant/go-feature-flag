@@ -1,0 +1,58 @@
+version: 2
+before:
+  hooks:
+    - go mod tidy
+    - go generate ./...
+
+dist: release
+
+builds:
+  - id: go-feature-flag-editor
+    main: ./cmd/editor
+    binary: go-feature-flag-editor
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - arm64
+    goarm:
+      - 6
+      - 7
+    ignore:
+      - goos: darwin
+        goarch: 386
+      - goos: linux
+        goarch: arm
+        goarm: 6
+
+archives:
+  - id: go-feature-flag-editor
+    name_template: "go-feature-flag-editor_\
+      {{ .Version }}_\
+      {{- title .Os }}_\
+      {{- if eq .Arch \"amd64\" }}x86_64\
+      {{- else if eq .Arch \"386\" }}i386\
+      {{- else }}{{ .Arch }}{{ end }}\
+      {{- with .Arm }}v{{ . }}{{ end }}\
+      {{- with .Mips }}_{{ . }}{{ end }}\
+      {{- if not (eq .Amd64 \"v1\") }}{{ .Amd64 }}{{ end }}"
+    builds:
+      - go-feature-flag-editor
+
+checksum:
+  name_template: 'checksums-editor.txt'
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^testdata:'
+      - '^.github'
+      - '^examples'
+      - 'vendor'
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
