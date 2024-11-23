@@ -359,6 +359,7 @@ func TestConfig_IsValid(t *testing.T) {
 		Notifiers               []config.NotifierConf
 		LogLevel                string
 		Debug                   bool
+		LogFormat               string
 	}
 	tests := []struct {
 		name    string
@@ -528,6 +529,19 @@ func TestConfig_IsValid(t *testing.T) {
 			},
 			wantErr: assert.NoError,
 		},
+		{
+			name: "invalid logFormat",
+			fields: fields{
+				LogFormat:  "unknown",
+				ListenPort: 8080,
+				Retriever: &config.RetrieverConf{
+					Kind: "file",
+					Path: "../testdata/config/valid-file.yaml",
+				},
+				LogLevel: "info",
+			},
+			wantErr: assert.Error,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -544,6 +558,7 @@ func TestConfig_IsValid(t *testing.T) {
 				Notifiers:               tt.fields.Notifiers,
 				Retrievers:              tt.fields.Retrievers,
 				LogLevel:                tt.fields.LogLevel,
+				LogFormat:               tt.fields.LogFormat,
 			}
 			if tt.name == "empty config" {
 				c = nil
