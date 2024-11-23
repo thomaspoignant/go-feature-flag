@@ -70,7 +70,7 @@ jobs:
         with:
           distribution: goreleaser
           version: ~> v2
-          args: release --clean --timeout 60m --config .goreleaser.yml
+          args: release --clean --timeout 60m --config .goreleaser.yaml
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
@@ -107,7 +107,7 @@ jobs:
         with:
           distribution: goreleaser
           version: ~> v2
-          args: release --clean --timeout 60m --config .goreleaser-cli.yml
+          args: release --clean --timeout 60m --config .goreleaser-cli.yaml
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
@@ -144,7 +144,7 @@ jobs:
         with:
           distribution: goreleaser
           version: ~> v2
-          args: release --clean --timeout 60m --config .goreleaser-editor.yml
+          args: release --clean --timeout 60m --config .goreleaser-editor.yaml
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
