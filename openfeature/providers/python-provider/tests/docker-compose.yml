@@ -9,5 +9,6 @@ services:
         - POLLINGINTERVAL=1000
         - RETRIEVER_KIND=file
         - RETRIEVER_PATH=/config.goff.yaml
+        - AUTHORIZEDKEYS_EVALUATION=apikey1
     volumes:
       - ./config.goff.yaml:/config.goff.yaml
