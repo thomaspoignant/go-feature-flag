@@ -109,10 +109,14 @@ class DataCollectorHook(Hook):
                     meta={"provider": "open-feature-python-sdk"},
                     events=self._event_queue,
                 )
+                headers = {"Content-Type": "application/json"}
+                if self._options.api_key:
+                    headers["Authorization"] = "Bearer {}".format(self._options.api_key)
+
                 response = self._http_client.request(
                     method="POST",
                     url=urljoin(str(self._options.endpoint), "/v1/data/collector"),
-                    headers={"Content-Type": "application/json"},
+                    headers=headers,
                     body=goff_request.model_dump_json(),
                 )
 

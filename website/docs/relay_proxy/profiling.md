@@ -13,20 +13,21 @@ The information are exposed on the `/debug/pprof` endpoint, and we are using the
 to expose the information.
 
 :::warning
-By default the profiling endpoints are disabled.  
-You have to run the relay proxy in debug mode if you want to enable them.
+By default the profiling endpoints are disabled, and must be enabled in the configuration file.
 :::
 
 List of endpoints exposed is available http://localhost:1031/debug/pprof/
 
 ### Enable profiling
 
-In your relay proxy configuration file you need to set the `debug` field to `true`.
+In your relay proxy configuration file you need to set the `enablePprof` field to `true`.
 
 ```yaml {5}
 retriever:
   kind: file
   path: /goff/flags.yaml # Location of your feature flag files
 #  ...
-debug: true
+enablePprof: true
 ```
+
+_Note: the `debug` field also enables profiling, but it is deprecated._
