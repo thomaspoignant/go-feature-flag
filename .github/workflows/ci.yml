@@ -100,12 +100,26 @@ jobs:
           go-version-file: go.mod
           check-latest: true
 
-      - name: Run GoReleaser
+      - name: Run GoReleaser .goreleaser.yml check
         uses: goreleaser/goreleaser-action@v6
         with:
           distribution: goreleaser
           version: latest
-          args: check
+          args: check --config .goreleaser.yml
+
+      - name: Run GoReleaser .goreleaser-cli.yml check
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: latest
+          args: check --config .goreleaser-cli.yml
+
+      - name: Run GoReleaser .goreleaser-editor.yml check
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: latest
+          args: check --config .goreleaser-editor.yml
 
   integration-tests:
     name: Integration Tests
