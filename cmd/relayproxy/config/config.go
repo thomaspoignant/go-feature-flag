@@ -451,7 +451,11 @@ func (c *Config) IsValid() error {
 		}
 	}
 
-	if c.LogFormat != "" && c.LogFormat != "json" && c.LogFormat != "logfmt" {
+	// log format validation
+	switch strings.ToLower(c.LogFormat) {
+	case "json", "logfmt", "":
+		break
+	default:
 		return fmt.Errorf("invalid log format %s", c.LogFormat)
 	}
 
