@@ -107,20 +107,6 @@ jobs:
           version: latest
           args: check --config .goreleaser.yaml
 
-      - name: Run GoReleaser .goreleaser-cli.yaml check
-        uses: goreleaser/goreleaser-action@v6
-        with:
-          distribution: goreleaser
-          version: latest
-          args: check --config .goreleaser-cli.yaml
-
-      - name: Run GoReleaser .goreleaser-editor.yaml check
-        uses: goreleaser/goreleaser-action@v6
-        with:
-          distribution: goreleaser
-          version: latest
-          args: check --config .goreleaser-editor.yaml
-
   integration-tests:
     name: Integration Tests
     runs-on: ubuntu-latest

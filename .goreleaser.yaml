@@ -57,6 +57,73 @@ builds:
         goarch: arm
         goarm: 6
 
+  - id: go-feature-flag-lint
+    main: ./cmd/lint
+    binary: go-feature-flag-lint
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - 386
+      - amd64
+      - arm64
+      - arm
+    goarm:
+      - 6
+      - 7
+    ignore:
+      - goos: darwin
+        goarch: 386
+      - goos: linux
+        goarch: arm
+        goarm: 6
+
+  - id: go-feature-flag-cli
+    main: ./cmd/cli
+    binary: go-feature-flag-cli
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - 386
+      - amd64
+      - arm64
+      - arm
+    goarm:
+      - 6
+      - 7
+    ignore:
+      - goos: darwin
+        goarch: 386
+      - goos: linux
+        goarch: arm
+        goarm: 6
+
+  - id: go-feature-flag-editor
+    main: ./cmd/editor
+    binary: go-feature-flag-editor
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - arm64
+    goarm:
+      - 6
+      - 7
+    ignore:
+      - goos: darwin
+        goarch: 386
+      - goos: linux
+        goarch: arm
+        goarm: 6
+
   # Build an AWS lambda compatible binary
   - id: go-feature-flag-lambda
     main: ./cmd/relayproxy
@@ -71,6 +138,19 @@ builds:
       - "7"
 
 archives:
+  - id: go-feature-flag-editor
+    name_template: "go-feature-flag-editor_\
+      {{ .Version }}_\
+      {{- title .Os }}_\
+      {{- if eq .Arch \"amd64\" }}x86_64\
+      {{- else if eq .Arch \"386\" }}i386\
+      {{- else }}{{ .Arch }}{{ end }}\
+      {{- with .Arm }}v{{ . }}{{ end }}\
+      {{- with .Mips }}_{{ . }}{{ end }}\
+      {{- if not (eq .Amd64 \"v1\") }}{{ .Amd64 }}{{ end }}"
+    builds:
+      - go-feature-flag-editor
+
   # DEPRECATED: check go-feature-flag
   - id: go-feature-flag-relay-proxy
     name_template: "go-feature-flag-relay-proxy_\
@@ -97,6 +177,31 @@ archives:
       {{- if not (eq .Amd64 \"v1\") }}{{ .Amd64 }}{{ end }}"
     builds:
       - go-feature-flag
+  - id: go-feature-flag-lint
+    name_template: "go-feature-flag-lint_\
+      {{ .Version }}_\
+      {{- title .Os }}_\
+      {{- if eq .Arch \"amd64\" }}x86_64\
+      {{- else if eq .Arch \"386\" }}i386\
+      {{- else }}{{ .Arch }}{{ end }}\
+      {{- with .Arm }}v{{ . }}{{ end }}\
+      {{- with .Mips }}_{{ . }}{{ end }}\
+      {{- if not (eq .Amd64 \"v1\") }}{{ .Amd64 }}{{ end }}"
+    builds:
+      - go-feature-flag-lint
+
+  - id: go-feature-flag-cli
+    name_template: "go-feature-flag-cli_\
+      {{ .Version }}_\
+      {{- title .Os }}_\
+      {{- if eq .Arch \"amd64\" }}x86_64\
+      {{- else if eq .Arch \"386\" }}i386\
+      {{- else }}{{ .Arch }}{{ end }}\
+      {{- with .Arm }}v{{ . }}{{ end }}\
+      {{- with .Mips }}_{{ . }}{{ end }}\
+      {{- if not (eq .Amd64 \"v1\") }}{{ .Amd64 }}{{ end }}"
+    builds:
+      - go-feature-flag-cli
 
   - id: goff-lambda
     name_template: "go-feature-flag-aws-lambda_{{ .Version }}"
@@ -290,6 +395,115 @@ dockers:
       - "--label=org.opencontainers.image.url=https://gofeatureflag.org/docs/relay_proxy"
       - "--label=org.opencontainers.image.version={{ .Version }}"
 
+  # lint
+  - use: buildx
+    goos: linux
+    goarch: amd64
+    ids:
+      - go-feature-flag-lint
+    dockerfile: ./cmd/lint/Dockerfile
+    image_templates:
+      - thomaspoignant/go-feature-flag-lint:v{{ .RawVersion }}-amd64
+    build_flag_templates:
+      - "--platform=linux/amd64"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+      - "--label=org.opencontainers.image.description=A command line tool to lint your feature flag configuration file"
+      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+      - "--label=org.opencontainers.image.source=https://github.com/thomaspoignant/go-feature-flag"
+      - "--label=org.opencontainers.image.title=go-feature-flag-lint"
+      - "--label=org.opencontainers.image.url=https://gofeatureflag.org/docs/tooling/linter"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
+  - use: buildx
+    goos: linux
+    goarch: arm64
+    ids:
+      - go-feature-flag-lint
+    dockerfile: ./cmd/lint/Dockerfile
+    image_templates:
+      - thomaspoignant/go-feature-flag-lint:v{{ .RawVersion }}-arm64v8
+    build_flag_templates:
+      - "--platform=linux/arm64/v8"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+      - "--label=org.opencontainers.image.description=A command line tool to lint your feature flag configuration file"
+      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+      - "--label=org.opencontainers.image.source=https://github.com/thomaspoignant/go-feature-flag"
+      - "--label=org.opencontainers.image.title=go-feature-flag-lint"
+      - "--label=org.opencontainers.image.url=https://gofeatureflag.org/docs/tooling/linter"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
+  - use: buildx
+    goos: linux
+    goarch: arm
+    goarm: 7
+    ids:
+      - go-feature-flag-lint
+    dockerfile: ./cmd/lint/Dockerfile
+    image_templates:
+      - thomaspoignant/go-feature-flag-lint:v{{ .RawVersion }}-armv7
+    build_flag_templates:
+      - "--platform=linux/arm/v7"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+      - "--label=org.opencontainers.image.description=A command line tool to lint your feature flag configuration file"
+      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+      - "--label=org.opencontainers.image.source=https://github.com/thomaspoignant/go-feature-flag"
+      - "--label=org.opencontainers.image.title=go-feature-flag-lint"
+      - "--label=org.opencontainers.image.url=https://gofeatureflag.org/docs/tooling/linter"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
+
+  # cli
+  - use: buildx
+    goos: linux
+    goarch: amd64
+    ids:
+      - go-feature-flag-cli
+    dockerfile: ./cmd/cli/Dockerfile
+    image_templates:
+      - thomaspoignant/go-feature-flag-cli:v{{ .RawVersion }}-amd64
+    build_flag_templates:
+      - "--platform=linux/amd64"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+      - "--label=org.opencontainers.image.description=A command line tool to manage GO Feature Flag from your terminal"
+      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+      - "--label=org.opencontainers.image.source=https://github.com/thomaspoignant/go-feature-flag"
+      - "--label=org.opencontainers.image.title=go-feature-flag-cli"
+      - "--label=org.opencontainers.image.url=https://gofeatureflag.org/docs/tooling/cli"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
+  - use: buildx
+    goos: linux
+    goarch: arm64
+    ids:
+      - go-feature-flag-cli
+    dockerfile: ./cmd/cli/Dockerfile
+    image_templates:
+      - thomaspoignant/go-feature-flag-cli:v{{ .RawVersion }}-arm64v8
+    build_flag_templates:
+      - "--platform=linux/arm64/v8"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+      - "--label=org.opencontainers.image.description=A command line tool to manage GO Feature Flag from your terminal"
+      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+      - "--label=org.opencontainers.image.source=https://github.com/thomaspoignant/go-feature-flag"
+      - "--label=org.opencontainers.image.title=go-feature-flag-cli"
+      - "--label=org.opencontainers.image.url=https://gofeatureflag.org/docs/tooling/cli"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
+  - use: buildx
+    goos: linux
+    goarch: arm
+    goarm: 7
+    ids:
+      - go-feature-flag-cli
+    dockerfile: ./cmd/cli/Dockerfile
+    image_templates:
+      - thomaspoignant/go-feature-flag-cli:v{{ .RawVersion }}-armv7
+    build_flag_templates:
+      - "--platform=linux/arm/v7"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+      - "--label=org.opencontainers.image.description=A command line tool to manage GO Feature Flag from your terminal"
+      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+      - "--label=org.opencontainers.image.source=https://github.com/thomaspoignant/go-feature-flag"
+      - "--label=org.opencontainers.image.title=go-feature-flag-cli"
+      - "--label=org.opencontainers.image.url=https://gofeatureflag.org/docs/tooling/cli"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
+
+
 docker_manifests:
   # DEPRECATED: check go-feature-flag
   - name_template: thomaspoignant/go-feature-flag-relay-proxy:latest
@@ -394,7 +608,82 @@ docker_manifests:
       - thomaspoignant/go-feature-flag-bookworm:v{{ .RawVersion }}-arm64v8
       - thomaspoignant/go-feature-flag-bookworm:v{{ .RawVersion }}-armv7
       - thomaspoignant/go-feature-flag-bookworm:v{{ .RawVersion }}-amd64
+  # lint-legacy
+  - name_template: thomaspoignant/go-feature-flag-lint:latest
+    id: go-feature-flag-lint-latest-legacy
+    image_templates:
+      - thomaspoignant/go-feature-flag-lint:v{{ .RawVersion }}-arm64v8
+      - thomaspoignant/go-feature-flag-lint:v{{ .RawVersion }}-armv7
+      - thomaspoignant/go-feature-flag-lint:v{{ .RawVersion }}-amd64
+  - name_template: thomaspoignant/go-feature-flag-lint:v{{ .RawVersion }}
+    id: go-feature-flag-lint-tag-legacy
+    image_templates:
+      - thomaspoignant/go-feature-flag-lint:v{{ .RawVersion }}-arm64v8
+      - thomaspoignant/go-feature-flag-lint:v{{ .RawVersion }}-armv7
+      - thomaspoignant/go-feature-flag-lint:v{{ .RawVersion }}-amd64
+  - name_template: thomaspoignant/go-feature-flag-lint:v{{ .Major }}
+    id: go-feature-flag-lint-major-legacy
+    image_templates:
+      - thomaspoignant/go-feature-flag-lint:v{{ .RawVersion }}-arm64v8
+      - thomaspoignant/go-feature-flag-lint:v{{ .RawVersion }}-armv7
+      - thomaspoignant/go-feature-flag-lint:v{{ .RawVersion }}-amd64
+  - name_template: thomaspoignant/go-feature-flag-lint:v{{ .Major }}.{{ .Minor }}
+    id: go-feature-flag-lint-major-minor-legacy
+    image_templates:
+      - thomaspoignant/go-feature-flag-lint:v{{ .RawVersion }}-arm64v8
+      - thomaspoignant/go-feature-flag-lint:v{{ .RawVersion }}-armv7
+      - thomaspoignant/go-feature-flag-lint:v{{ .RawVersion }}-amd64
+  # lint
+  - name_template: gofeatureflag/go-feature-flag-lint:latest
+    id: go-feature-flag-lint-latest
+    image_templates:
+      - thomaspoignant/go-feature-flag-lint:v{{ .RawVersion }}-arm64v8
+      - thomaspoignant/go-feature-flag-lint:v{{ .RawVersion }}-armv7
+      - thomaspoignant/go-feature-flag-lint:v{{ .RawVersion }}-amd64
+  - name_template: gofeatureflag/go-feature-flag-lint:v{{ .RawVersion }}
+    id: go-feature-flag-lint-tag
+    image_templates:
+      - thomaspoignant/go-feature-flag-lint:v{{ .RawVersion }}-arm64v8
+      - thomaspoignant/go-feature-flag-lint:v{{ .RawVersion }}-armv7
+      - thomaspoignant/go-feature-flag-lint:v{{ .RawVersion }}-amd64
+  - name_template: gofeatureflag/go-feature-flag-lint:v{{ .Major }}
+    id: go-feature-flag-lint-major
+    image_templates:
+      - thomaspoignant/go-feature-flag-lint:v{{ .RawVersion }}-arm64v8
+      - thomaspoignant/go-feature-flag-lint:v{{ .RawVersion }}-armv7
+      - thomaspoignant/go-feature-flag-lint:v{{ .RawVersion }}-amd64
+  - name_template: gofeatureflag/go-feature-flag-lint:v{{ .Major }}.{{ .Minor }}
+    id: go-feature-flag-lint-major-minor
+    image_templates:
+      - thomaspoignant/go-feature-flag-lint:v{{ .RawVersion }}-arm64v8
+      - thomaspoignant/go-feature-flag-lint:v{{ .RawVersion }}-armv7
+      - thomaspoignant/go-feature-flag-lint:v{{ .RawVersion }}-amd64
 
+  # cli
+  - name_template: gofeatureflag/go-feature-flag-cli:latest
+    id: go-feature-flag-cli-latest
+    image_templates:
+      - thomaspoignant/go-feature-flag-cli:v{{ .RawVersion }}-arm64v8
+      - thomaspoignant/go-feature-flag-cli:v{{ .RawVersion }}-armv7
+      - thomaspoignant/go-feature-flag-cli:v{{ .RawVersion }}-amd64
+  - name_template: gofeatureflag/go-feature-flag-cli:v{{ .RawVersion }}
+    id: go-feature-flag-cli-tag
+    image_templates:
+      - thomaspoignant/go-feature-flag-cli:v{{ .RawVersion }}-arm64v8
+      - thomaspoignant/go-feature-flag-cli:v{{ .RawVersion }}-armv7
+      - thomaspoignant/go-feature-flag-cli:v{{ .RawVersion }}-amd64
+  - name_template: gofeatureflag/go-feature-flag-cli:v{{ .Major }}
+    id: go-feature-flag-cli-major
+    image_templates:
+      - thomaspoignant/go-feature-flag-cli:v{{ .RawVersion }}-arm64v8
+      - thomaspoignant/go-feature-flag-cli:v{{ .RawVersion }}-armv7
+      - thomaspoignant/go-feature-flag-cli:v{{ .RawVersion }}-amd64
+  - name_template: gofeatureflag/go-feature-flag-cli:v{{ .Major }}.{{ .Minor }}
+    id: go-feature-flag-cli-major-minor
+    image_templates:
+      - thomaspoignant/go-feature-flag-cli:v{{ .RawVersion }}-arm64v8
+      - thomaspoignant/go-feature-flag-cli:v{{ .RawVersion }}-armv7
+      - thomaspoignant/go-feature-flag-cli:v{{ .RawVersion }}-amd64
 brews:
   # DEPRECATED: check go-feature-flag
   - ids:
@@ -419,6 +708,28 @@ brews:
     homepage: "https://gofeatureflag.org/docs/relay_proxy"
     description: "A stand alone server to run GO Feature Flag"
     skip_upload: auto
+  - ids:
+      - go-feature-flag-lint
+    name: go-feature-flag-lint
+    repository:
+      owner: thomaspoignant
+      name: homebrew-tap
+      branch: master
+    caveats: "A command line tool to lint your feature flag configuration file"
+    homepage: "https://gofeatureflag.org/docs/tooling/linter"
+    description: "A command line tool to lint your feature flag configuration file"
+    skip_upload: auto
+  - ids:
+      - go-feature-flag-cli
+    name: go-feature-flag-cli
+    repository:
+      owner: thomaspoignant
+      name: homebrew-tap
+      branch: master
+    caveats: "A command line tool to manage GO Feature Flag from your terminal"
+    homepage: "https://gofeatureflag.org/docs/tooling/cli"
+    description: "A command line tool to manage GO Feature Flag from your terminal"
+    skip_upload: auto
 
 scoops:
   # DEPRECATED: check go-feature-flag
@@ -440,6 +751,26 @@ scoops:
       name: scoop
     commit_msg_template: "Scoop update for {{ .ProjectName }} version {{ .Tag }}"
     homepage: "https://gofeatureflag.org/docs/relay_proxy"
+    license: MIT
+
+  - url_template: https://github.com/thomaspoignant/go-feature-flag/releases/download/{{ .Tag }}/{{ .ArtifactName }}
+    ids: [ go-feature-flag-lint ]
+    name: go-feature-flag-lint
+    repository:
+      owner: go-feature-flag
+      name: scoop
+    commit_msg_template: "Scoop update for {{ .ProjectName }} version {{ .Tag }}"
+    homepage: "https://gofeatureflag.org/docs/tooling/linter"
+    license: MIT
+
+  - url_template: https://github.com/thomaspoignant/go-feature-flag/releases/download/{{ .Tag }}/{{ .ArtifactName }}
+    ids: [ go-feature-flag-cli ]
+    name: go-feature-flag-cli
+    repository:
+      owner: go-feature-flag
+      name: scoop
+    commit_msg_template: "Scoop update for {{ .ProjectName }} version {{ .Tag }}"
+    homepage: "https://gofeatureflag.org/docs/tooling/cli"
     license: MIT
 
 snapshot:

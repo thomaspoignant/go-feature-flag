@@ -16,7 +16,6 @@ jobs:
             exit 1
           fi
 
-
   integration-tests:
     name: Integration Tests
     needs:
@@ -36,7 +35,6 @@ jobs:
           maven-version: 3.8.2
       - run: make vendor
       - run: make provider-tests
-
   goreleaser:
     needs: integration-tests
     runs-on: ubuntu-latest
@@ -72,82 +70,8 @@ jobs:
         uses: goreleaser/goreleaser-action@v6
         with:
           distribution: goreleaser
-          version: ~> v2
-          args: release --clean --timeout 60m --config .goreleaser.yaml
-        env:
-          GITHUB_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
-
-  goreleaser-lint:
-    needs: integration-tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Fetch all tags
-        run: git fetch --force --tags
-
-      - name: Setup go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-          check-latest: true
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Docker login
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        run: |
-          echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
-
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v6
-        with:
-          distribution: goreleaser
-          version: ~> v2
-          args: release --clean --timeout 60m --config .goreleaser-cli.yaml
-        env:
-          GITHUB_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
-
-  goreleaser-editor:
-    needs: integration-tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Fetch all tags
-        run: git fetch --force --tags
-
-      - name: Setup go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-          check-latest: true
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Docker login
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        run: |
-          echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
-
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v6
-        with:
-          distribution: goreleaser
-          version: ~> v2
-          args: release --clean --timeout 60m --config .goreleaser-editor.yaml
+          version: latest
+          args: release --clean --timeout 60m
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
@@ -156,8 +80,6 @@ jobs:
     name: Upload dockerhub readme
     needs:
       - goreleaser
-      - goreleaser-editor
-      - goreleaser-lint
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -187,8 +109,6 @@ jobs:
     name: Upload dockerhub readme
     needs:
       - goreleaser
-      - goreleaser-editor
-      - goreleaser-lint
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -208,8 +128,6 @@ jobs:
     name: Upload dockerhub readme
     needs:
       - goreleaser
-      - goreleaser-editor
-      - goreleaser-lint
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -229,8 +147,6 @@ jobs:
     name: Upload dockerhub readme
     needs:
       - goreleaser
-      - goreleaser-editor
-      - goreleaser-lint
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -266,8 +182,6 @@ jobs:
     name: Create new documentation tag
     needs:
       - goreleaser
-      - goreleaser-editor
-      - goreleaser-lint
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -329,8 +243,6 @@ jobs:
     name: Bump Relay Proxy Helm Chart appVersion
     needs:
       - goreleaser
-      - goreleaser-editor
-      - goreleaser-lint
     env:
       CHART_YAML_FILE_LOCATION: cmd/relayproxy/helm-charts/relay-proxy/Chart.yaml
       MAIN_BRANCH_NAME: main
@@ -385,8 +297,6 @@ jobs:
     name: Release jsonschema
     needs:
       - goreleaser
-      - goreleaser-editor
-      - goreleaser-lint
     env:
       SCHEMA_LOCATION: .schema/flag-schema.json
       MAIN_BRANCH_NAME: main
