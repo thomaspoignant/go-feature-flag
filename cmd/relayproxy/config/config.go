@@ -191,6 +191,11 @@ type Config struct {
 	// Default: false
 	Debug bool `mapstructure:"debug" koanf:"debug"`
 
+	// EnablePprof (optional) if true, go-feature-flag relay proxy will start
+	// the pprof endpoints on the same port as the monitoring.
+	// Default: false
+	EnablePprof bool `mapstructure:"enablePprof" koanf:"enablepprof"`
+
 	// EnableSwagger (optional) to have access to the swagger
 	EnableSwagger bool `mapstructure:"enableSwagger" koanf:"enableswagger"`
 

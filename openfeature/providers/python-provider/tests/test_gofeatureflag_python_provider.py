@@ -40,6 +40,7 @@ def _generic_test(
                 endpoint="https://gofeatureflag.org/",
                 data_flush_interval=100,
                 disable_cache_invalidation=True,
+                api_key="apikey1",
             ),
         )
         api.set_provider(goff_provider)
@@ -608,6 +609,31 @@ def test_hook_error():
         hints={},
     )
     assert len(hook._event_queue) == 1
+
+
+@patch("urllib3.poolmanager.PoolManager.request")
+def test_url_parsing(mock_request):
+    flag_key = "bool_targeting_match"
+    mock_request.return_value = Mock(status="200", data=_read_mock_file(flag_key))
+    default_value = False
+    goff_provider = GoFeatureFlagProvider(
+        options=GoFeatureFlagOptions(
+            endpoint="https://gofeatureflag.org/ff/",
+            data_flush_interval=100,
+            disable_cache_invalidation=True,
+            api_key="apikey1",
+        ),
+    )
+    api.set_provider(goff_provider)
+    client = api.get_client(domain="test-client")
+    t = client.get_boolean_details(
+        flag_key=flag_key,
+        default_value=default_value,
+        evaluation_context=_default_evaluation_ctx,
+    )
+    got = mock_request.call_args[1]["url"]
+    want = "https://gofeatureflag.org/ff/v1/feature/bool_targeting_match/eval"
+    assert got == want
 
 
 def _read_mock_file(flag_key: str) -> str:
