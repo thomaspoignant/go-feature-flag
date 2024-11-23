@@ -46,6 +46,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Free space on runner
+        run: ./.github/ci-scripts/free_space.sh
+
       - name: Fetch all tags
         run: git fetch --force --tags
 
