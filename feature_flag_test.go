@@ -128,20 +128,6 @@ func TestValidUseCase(t *testing.T) {
 	assert.True(t, ffclient.ForceRefresh())
 }
 
-func TestAllFlagsFromCache(t *testing.T) {
-	err := ffclient.Init(ffclient.Config{
-		Retriever:       &fileretriever.Retriever{Path: "testdata/flag-config.yaml"},
-		PollingInterval: 5 * time.Second,
-	})
-	defer ffclient.Close()
-
-	assert.NoError(t, err)
-	flags, err := ffclient.GetFlagsFromCache()
-
-	assert.NoError(t, err)
-	assert.Len(t, flags, 2)
-}
-
 func TestValidUseCaseToml(t *testing.T) {
 	// Valid use case
 	gffClient, err := ffclient.New(ffclient.Config{

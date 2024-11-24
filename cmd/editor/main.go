@@ -13,7 +13,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/internal/utils"
 	"github.com/thomaspoignant/go-feature-flag/model"
 	"github.com/thomaspoignant/go-feature-flag/model/dto"
-	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
 // This service is an API used to evaluate a flag with an evaluation context
@@ -55,8 +54,7 @@ func EvaluateHandler(c echo.Context) error {
 	if err := c.Bind(u); err != nil {
 		return err
 	}
-	logger := fflog.FFLogger{}
-	f := u.Flag.Convert(&logger, u.FlagName)
+	f := u.Flag.Convert()
 	value, resolutionDetails := f.Value(
 		u.FlagName,
 		utils.ConvertEvaluationCtxFromRequest(u.Context.Key, u.Context.Custom),

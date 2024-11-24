@@ -519,33 +519,27 @@ func TestCacheManager_UpdateCache(t *testing.T) {
 			name: "Update existing flags",
 			initialFlags: map[string]dto.DTO{
 				"flag1": {
-					DTOv1: dto.DTOv1{
-						Variations: &map[string]*interface{}{},
-						DefaultRule: &flag.Rule{
-							VariationResult: testconvert.String("true"),
-						},
+					Variations: &map[string]*interface{}{},
+					DefaultRule: &flag.Rule{
+						VariationResult: testconvert.String("true"),
 					},
 				},
 			},
 			updatedFlags: map[string]dto.DTO{
 				"flag1": {
-					DTOv1: dto.DTOv1{
-						Variations: &map[string]*interface{}{
-							"true": testconvert.Interface(true),
-						},
-						DefaultRule: &flag.Rule{
-							VariationResult: testconvert.String("true"),
-						},
+					Variations: &map[string]*interface{}{
+						"true": testconvert.Interface(true),
+					},
+					DefaultRule: &flag.Rule{
+						VariationResult: testconvert.String("true"),
 					},
 				},
 				"flag2": {
-					DTOv1: dto.DTOv1{
-						Variations: &map[string]*interface{}{
-							"false": testconvert.Interface(false),
-						},
-						DefaultRule: &flag.Rule{
-							VariationResult: testconvert.String("false"),
-						},
+					Variations: &map[string]*interface{}{
+						"false": testconvert.Interface(false),
+					},
+					DefaultRule: &flag.Rule{
+						VariationResult: testconvert.String("false"),
 					},
 				},
 			},
@@ -555,13 +549,11 @@ func TestCacheManager_UpdateCache(t *testing.T) {
 			initialFlags: map[string]dto.DTO{},
 			updatedFlags: map[string]dto.DTO{
 				"flag1": {
-					DTOv1: dto.DTOv1{
-						Variations: &map[string]*interface{}{
-							"true": testconvert.Interface(true),
-						},
-						DefaultRule: &flag.Rule{
-							VariationResult: testconvert.String("true"),
-						},
+					Variations: &map[string]*interface{}{
+						"true": testconvert.Interface(true),
+					},
+					DefaultRule: &flag.Rule{
+						VariationResult: testconvert.String("true"),
 					},
 				},
 			},
@@ -570,35 +562,29 @@ func TestCacheManager_UpdateCache(t *testing.T) {
 			name: "Remove a flag",
 			initialFlags: map[string]dto.DTO{
 				"flag1": {
-					DTOv1: dto.DTOv1{
-						Variations: &map[string]*interface{}{
-							"true": testconvert.Interface(true),
-						},
-						DefaultRule: &flag.Rule{
-							VariationResult: testconvert.String("true"),
-						},
+					Variations: &map[string]*interface{}{
+						"true": testconvert.Interface(true),
+					},
+					DefaultRule: &flag.Rule{
+						VariationResult: testconvert.String("true"),
 					},
 				},
 				"flag2": {
-					DTOv1: dto.DTOv1{
-						Variations: &map[string]*interface{}{
-							"false": testconvert.Interface(false),
-						},
-						DefaultRule: &flag.Rule{
-							VariationResult: testconvert.String("false"),
-						},
+					Variations: &map[string]*interface{}{
+						"false": testconvert.Interface(false),
+					},
+					DefaultRule: &flag.Rule{
+						VariationResult: testconvert.String("false"),
 					},
 				},
 			},
 			updatedFlags: map[string]dto.DTO{
 				"flag1": {
-					DTOv1: dto.DTOv1{
-						Variations: &map[string]*interface{}{
-							"true": testconvert.Interface(true),
-						},
-						DefaultRule: &flag.Rule{
-							VariationResult: testconvert.String("true"),
-						},
+					Variations: &map[string]*interface{}{
+						"true": testconvert.Interface(true),
+					},
+					DefaultRule: &flag.Rule{
+						VariationResult: testconvert.String("true"),
 					},
 				},
 			},

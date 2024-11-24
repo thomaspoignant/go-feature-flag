@@ -1,18 +1,12 @@
 package dto
 
 import (
-	"fmt"
-
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
 // DTO is representing all the fields we can have in a flag.
 // This DTO supports all flag formats and convert them into an InternalFlag using a converter.
 type DTO struct {
-	DTOv1 `json:",inline" yaml:",inline" toml:",inline"`
-	DTOv0 `json:",inline" yaml:",inline" toml:",inline"`
-
 	// TrackEvents is false if you don't want to export the data in your data exporter.
 	// Default value is true
 	TrackEvents *bool `json:"trackEvents,omitempty" yaml:"trackEvents,omitempty" toml:"trackEvents,omitempty"`
@@ -28,10 +22,7 @@ type DTO struct {
 	// Converter (optional) is the name of converter to use, if no converter specified we try to determine
 	// which converter to use based on the fields we receive for the flag
 	Converter *string `json:"converter,omitempty" yaml:"converter,omitempty" toml:"converter,omitempty"`
-}
 
-// DTOv1 is the new format of the flags since version 1.X.X
-type DTOv1 struct {
 	// Variations are all the variations available for this flag. The minimum is 2 variations and, we don't have any max
 	// limit except if the variationValue is a bool, the max is 2.
 	Variations *map[string]*interface{} `json:"variations,omitempty" yaml:"variations,omitempty" toml:"variations,omitempty"  jsonschema:"required,title=variations,description=All the variations available for this flag. You need at least 2 variations and it is a key value pair. All the variations should have the same type."` // nolint:lll
@@ -61,42 +52,10 @@ type DTOv1 struct {
 	Metadata *map[string]interface{} `json:"metadata,omitempty" yaml:"metadata,omitempty" toml:"metadata,omitempty" jsonschema:"title=metadata,description=A field containing information about your flag such as an issue tracker link a description etc..."` // nolint: lll
 }
 
-// DTOv0 describe the fields of a flag.
-type DTOv0 struct {
-	// Rule is the query use to select on which user the flag should apply.
-	// Rule format is based on the nikunjy/rules module.
-	// If no rule set, the flag apply to all users (percentage still apply).
-	Rule *string `json:"rule,omitempty" yaml:"rule,omitempty" toml:"rule,omitempty"`
-
-	// Percentage of the users affected by the flag.
-	// Default value is 0
-	Percentage *float64 `json:"percentage,omitempty" yaml:"percentage,omitempty" toml:"percentage,omitempty"`
-
-	// True is the value return by the flag if apply to the user (rule is evaluated to true)
-	// and user is in the active percentage.
-	True *interface{} `json:"true,omitempty" yaml:"true,omitempty" toml:"true,omitempty"`
-
-	// False is the value return by the flag if apply to the user (rule is evaluated to true)
-	// and user is not in the active percentage.
-	False *interface{} `json:"false,omitempty" yaml:"false,omitempty" toml:"false,omitempty"`
-
-	// Default is the value return by the flag if not apply to the user (rule is evaluated to false).
-	Default *interface{} `json:"default,omitempty" yaml:"default,omitempty" toml:"default,omitempty"`
-
-	// Rollout is the object to configure how the flag is rolled out.
-	// You have different rollout strategy available but only one is used at a time.
-	Rollout *Rollout `json:"rollout,omitempty" yaml:"rollout,omitempty" toml:"rollout,omitempty"`
-}
-
-func (d *DTO) Convert(log *fflog.FFLogger, flagName string) flag.InternalFlag {
+// Convert is converting the DTO into a flag.InternalFlag.
+func (d *DTO) Convert() flag.InternalFlag {
 	if d == nil || (DTO{}) == *d {
 		return flag.InternalFlag{}
 	}
-	if (d.Converter != nil && *d.Converter == "v0") || d.True != nil || d.False != nil {
-		log.Error(fmt.Sprintf("your flag %v is using GO Feature Flag flag format v0.x.x. The support of this "+
-			"format will be removed soon, please consider migrating to the v1 format "+
-			"(see https://gofeatureflag.org/docs/tooling/migrate_v0_v1).", flagName))
-		return ConvertV0DtoToInternalFlag(*d, false)
-	}
-	return ConvertV1DtoToInternalFlag(*d)
+	return ConvertDtoToInternalFlag(*d)
 }
