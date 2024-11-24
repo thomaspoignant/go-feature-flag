@@ -45,3 +45,8 @@ class GoFeatureFlagOptions(BaseModel):
     # config changes.
     # default: false
     disable_cache_invalidation: typing.Optional[bool] = False
+
+    # api_key (optional) If the relay proxy is configured to authenticate the requests, you should provide
+    # an API Key to the provider. Please ask the administrator of the relay proxy to provide an API Key.
+    # Default: None
+    api_key: typing.Optional[str] = None

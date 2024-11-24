@@ -2,6 +2,7 @@ package metric
 
 import (
 	prom "github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/collectors"
 )
 
 // GOFFSubSystem is the name of the prefix we are using for all the metrics
@@ -101,6 +102,8 @@ func NewMetrics() (Metrics, error) {
 		flagDeleteCounterVec,
 		flagCreateCounterVec,
 		forceRefreshCounter,
+		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
+		collectors.NewGoCollector(),
 	}
 
 	// register all the metric in the custom registry

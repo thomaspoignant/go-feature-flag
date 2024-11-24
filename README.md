@@ -298,6 +298,8 @@ The available retrievers are:
 - **Kubernetes ConfigMaps**
 - **MongoDB**
 - **Redis**
+- **BitBucket**
+- **AzBlobStorage**
 - ...
 
 _[See the full list and more information.](https://gofeatureflag.org/docs/configure_flag/store_your_flags)_
@@ -546,6 +548,7 @@ Available notifiers are:
 - **Slack**
 - **Webhook**
 - **Discord**
+- **Microsoft Teams**
 
 ## Export data
 **GO Feature Flag** allows you to export data about the usage of your flags.    
@@ -581,7 +584,7 @@ The format of the data is [described in the documentation](https://gofeatureflag
 Events are collected and sent in bulk to avoid spamming your exporter.
 
 ## Linter
-A command line tool is available to help you lint your configuration file: [go-feature-flag-lint](cmd/lint/README.md).
+A command line tool is available to help you lint your configuration file: [go-feature-flag-lint](cmd/cli/README.md).
 
 # How can I contribute?
 
@@ -612,7 +615,7 @@ Thanks so much to our contributors.
 [Become a sponsor](https://github.com/sponsors/thomaspoignant) and show your support to GO Feature Flag.
 
 These are our really cool sponsors!
-<!-- sponsors --><a href="https://github.com/cybozu"><img src="https:&#x2F;&#x2F;avatars.githubusercontent.com&#x2F;u&#x2F;2433152?v&#x3D;4" width="60px" alt="Cybozu" /></a><a href="https://github.com/clemsau"><img src="https:&#x2F;&#x2F;avatars.githubusercontent.com&#x2F;u&#x2F;36474372?u&#x3D;792957256f1997cbdad8a6c6e7b60c2db0205a8f&amp;v&#x3D;4" width="60px" alt="Clément Sauvage" /></a><!-- sponsors -->
+<!-- sponsors --><a href="https://github.com/cybozu"><img src="https:&#x2F;&#x2F;avatars.githubusercontent.com&#x2F;u&#x2F;2433152?v&#x3D;4" width="60px" alt="Cybozu" /></a><a href="https://github.com/clemsau"><img src="https:&#x2F;&#x2F;avatars.githubusercontent.com&#x2F;u&#x2F;36474372?u&#x3D;792957256f1997cbdad8a6c6e7b60c2db0205a8f&amp;v&#x3D;4" width="60px" alt="Clément Sauvage" /></a><a href="https://github.com/efugier"><img src="https:&#x2F;&#x2F;avatars.githubusercontent.com&#x2F;u&#x2F;17067968?u&#x3D;aa2eeb4971f0b2d7b4448964bf687fb039a573df&amp;v&#x3D;4" width="60px" alt="Emilien Fugier" /></a><a href="https://github.com/giulbia"><img src="https:&#x2F;&#x2F;avatars.githubusercontent.com&#x2F;u&#x2F;11477672?u&#x3D;ab78754a59e3b3ea681035fe3459df5b0ccf7f5f&amp;v&#x3D;4" width="60px" alt="Giulia" /></a><!-- sponsors -->
 
 ## Adopters
 

@@ -70,8 +70,8 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 				},
 				Notifiers: []config.NotifierConf{
 					{
-						Kind:            "slack",
-						SlackWebhookURL: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
+						Kind:       "slack",
+						WebhookURL: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
 					},
 				},
 				StartWithRetrieverError: false,
@@ -359,6 +359,7 @@ func TestConfig_IsValid(t *testing.T) {
 		Notifiers               []config.NotifierConf
 		LogLevel                string
 		Debug                   bool
+		LogFormat               string
 	}
 	tests := []struct {
 		name    string
@@ -386,8 +387,8 @@ func TestConfig_IsValid(t *testing.T) {
 						Secret:      "xxxx",
 					},
 					{
-						Kind:            "slack",
-						SlackWebhookURL: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
+						Kind:       "slack",
+						WebhookURL: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
 					},
 				},
 			},
@@ -416,8 +417,8 @@ func TestConfig_IsValid(t *testing.T) {
 						Secret:      "xxxx",
 					},
 					{
-						Kind:            "slack",
-						SlackWebhookURL: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
+						Kind:       "slack",
+						WebhookURL: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
 					},
 				},
 				LogLevel: "info",
@@ -528,6 +529,19 @@ func TestConfig_IsValid(t *testing.T) {
 			},
 			wantErr: assert.NoError,
 		},
+		{
+			name: "invalid logFormat",
+			fields: fields{
+				LogFormat:  "unknown",
+				ListenPort: 8080,
+				Retriever: &config.RetrieverConf{
+					Kind: "file",
+					Path: "../testdata/config/valid-file.yaml",
+				},
+				LogLevel: "info",
+			},
+			wantErr: assert.Error,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -544,6 +558,7 @@ func TestConfig_IsValid(t *testing.T) {
 				Notifiers:               tt.fields.Notifiers,
 				Retrievers:              tt.fields.Retrievers,
 				LogLevel:                tt.fields.LogLevel,
+				LogFormat:               tt.fields.LogFormat,
 			}
 			if tt.name == "empty config" {
 				c = nil

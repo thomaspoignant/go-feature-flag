@@ -98,6 +98,7 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 			log.Error("error loading file", zap.Error(errBindFile))
 		}
 	}
+
 	// Map environment variables
 	_ = k.Load(env.ProviderWithValue("", ".", func(s string, v string) (string, interface{}) {
 		if strings.HasPrefix(s, "RETRIEVERS") ||
@@ -190,6 +191,11 @@ type Config struct {
 	// Default: false
 	Debug bool `mapstructure:"debug" koanf:"debug"`
 
+	// EnablePprof (optional) if true, go-feature-flag relay proxy will start
+	// the pprof endpoints on the same port as the monitoring.
+	// Default: false
+	EnablePprof bool `mapstructure:"enablePprof" koanf:"enablepprof"`
+
 	// EnableSwagger (optional) to have access to the swagger
 	EnableSwagger bool `mapstructure:"enableSwagger" koanf:"enableswagger"`
 
@@ -201,6 +207,11 @@ type Config struct {
 	// If level debug go-feature-flag relay proxy will run on debug mode, with more logs and custom responses
 	// Default: debug
 	LogLevel string `mapstructure:"logLevel" koanf:"loglevel"`
+
+	// LogFormat (optional) sets the log message format
+	// Possible values: json, logfmt
+	// Default: json
+	LogFormat string `mapstructure:"logFormat" koanf:"logformat"`
 
 	// PollingInterval (optional) Poll every X time
 	// The minimum possible is 1 second
@@ -443,6 +454,14 @@ func (c *Config) IsValid() error {
 		if _, err := zapcore.ParseLevel(c.LogLevel); err != nil {
 			return err
 		}
+	}
+
+	// log format validation
+	switch strings.ToLower(c.LogFormat) {
+	case "json", "logfmt", "":
+		break
+	default:
+		return fmt.Errorf("invalid log format %s", c.LogFormat)
 	}
 
 	return nil
