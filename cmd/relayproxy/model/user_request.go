@@ -2,7 +2,7 @@ package model
 
 type AllFlagRequest struct {
 	// Deprecated: User The representation of a user for your feature flag system.
-	User *UserRequest `json:"user,omitempty" xml:"user,omitempty" form:"user" query:"user" deprecated:"true"`
+	User *UserRequest `json:"user,omitempty" xml:"user,omitempty" form:"user" query:"user" deprecated:"true" swaggerignore:"true"`
 	// EvaluationContext The representation of a EvaluationContext for your feature flag system.
 	EvaluationContext *EvaluationContextRequest `json:"evaluationContext,omitempty" xml:"evaluationContext,omitempty" form:"evaluationContext" query:"evaluationContext"` // nolint: lll
 }
