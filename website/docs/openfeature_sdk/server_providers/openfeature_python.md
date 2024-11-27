@@ -34,7 +34,7 @@ goff_provider = GoFeatureFlagProvider(
     options=GoFeatureFlagOptions(endpoint="https://gofeatureflag.org/")
 )
 api.set_provider(goff_provider)
-client = api.get_client(name="test-client")
+client = api.get_client(domain="test-client")
 ```
 
 ## Evaluate your flag
