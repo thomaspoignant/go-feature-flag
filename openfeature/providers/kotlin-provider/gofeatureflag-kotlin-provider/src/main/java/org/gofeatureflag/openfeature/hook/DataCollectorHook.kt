@@ -4,7 +4,7 @@ import dev.openfeature.sdk.FlagEvaluationDetails
 import dev.openfeature.sdk.Hook
 import dev.openfeature.sdk.HookContext
 import org.gofeatureflag.openfeature.controller.DataCollectorManager
-import java.time.Instant
+import java.util.Date
 
 class DataCollectorHook<T>(private val collectorManager: DataCollectorManager) : Hook<T> {
     override fun after(
@@ -14,7 +14,7 @@ class DataCollectorHook<T>(private val collectorManager: DataCollectorManager) :
     ) {
         val event = Event(
             contextKind = "user",
-            creationDate = Instant.now().epochSecond,
+            creationDate = Date().time / 1000L,
             key = ctx.flagKey,
             kind = "feature",
             userKey = ctx.ctx?.getTargetingKey(),
@@ -29,7 +29,7 @@ class DataCollectorHook<T>(private val collectorManager: DataCollectorManager) :
     override fun error(ctx: HookContext<T>, error: Exception, hints: Map<String, Any>) {
         val event = Event(
             contextKind = "user",
-            creationDate = Instant.now().epochSecond,
+            creationDate = Date().time / 1000L,
             key = ctx.flagKey,
             kind = "feature",
             userKey = ctx.ctx?.getTargetingKey(),
