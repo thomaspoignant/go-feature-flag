@@ -11,7 +11,7 @@
       "variation": "enabled"
     }
   ],
-  "metadata": {
+  "meta": {
     "provider": "android",
     "openfeature": "true"
   }
