@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
@@ -51,7 +52,6 @@ func (h *collectEvalData) Handler(c echo.Context) error {
 	if reqBody == nil || reqBody.Events == nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "collectEvalData: invalid input data")
 	}
-
 	tracer := otel.GetTracerProvider().Tracer(config.OtelTracerName)
 	_, span := tracer.Start(c.Request().Context(), "collectEventData")
 	defer span.End()
@@ -59,6 +59,14 @@ func (h *collectEvalData) Handler(c echo.Context) error {
 	for _, event := range reqBody.Events {
 		if event.Source == "" {
 			event.Source = "PROVIDER_CACHE"
+		}
+		// force the creation date to be a unix timestamp
+		if event.CreationDate > 9999999999 {
+			// if we receive a timestamp in milliseconds, we convert it to seconds
+			// but since it is totally possible to have a timestamp in seconds that is bigger than 9999999999
+			// we will accept timestamp up to 9999999999 (2286-11-20 18:46:39 +0100 CET)
+			event.CreationDate, _ = strconv.ParseInt(
+				strconv.FormatInt(event.CreationDate, 10)[:10], 10, 64)
 		}
 		h.goFF.CollectEventData(event)
 	}
