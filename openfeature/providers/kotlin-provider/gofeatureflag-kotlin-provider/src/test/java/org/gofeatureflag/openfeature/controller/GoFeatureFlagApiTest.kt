@@ -21,7 +21,7 @@ class GoFeatureFlagApiTest {
     private var defaultEventList: List<Event> = listOf(
         Event(
             contextKind = "contextKind",
-            creationDate = 1721650841108,
+            creationDate = 1721650841,
             key = "flag-1",
             kind = "feature",
             userKey = "981f2662-1fb4-4732-ac6d-8399d9205aa9",
