@@ -166,7 +166,6 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 			assert.Equal(t, tt.want.httpCode, rec.Code, "Invalid HTTP Code")
 			assert.JSONEq(t, string(wantBody), replacedStr, "Invalid response wantBody")
 			assert.JSONEq(t, string(wantCollectData), string(exportedData), "Invalid exported data")
-
 		})
 	}
 }
