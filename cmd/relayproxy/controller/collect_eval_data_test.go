@@ -14,11 +14,13 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/controller"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
+	"go.uber.org/zap"
 )
 
 func Test_collect_eval_data_Handler(t *testing.T) {
@@ -118,7 +120,9 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 					Exporter:         &fileexporter.Exporter{Filename: exporterFile.Name()},
 				},
 			})
-			ctrl := controller.NewCollectEvalData(goFF, metric.Metrics{})
+			logger, err := zap.NewDevelopment()
+			require.NoError(t, err)
+			ctrl := controller.NewCollectEvalData(goFF, metric.Metrics{}, logger)
 
 			e := echo.New()
 			rec := httptest.NewRecorder()

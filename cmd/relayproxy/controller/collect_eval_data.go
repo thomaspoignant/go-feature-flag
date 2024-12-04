@@ -12,18 +12,21 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/model"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
+	"go.uber.org/zap"
 )
 
 type collectEvalData struct {
 	goFF    *ffclient.GoFeatureFlag
 	metrics metric.Metrics
+	logger  *zap.Logger
 }
 
 // NewCollectEvalData initialize the controller for the /data/collector endpoint
-func NewCollectEvalData(goFF *ffclient.GoFeatureFlag, metrics metric.Metrics) Controller {
+func NewCollectEvalData(goFF *ffclient.GoFeatureFlag, metrics metric.Metrics, logger *zap.Logger) Controller {
 	return &collectEvalData{
 		goFF:    goFF,
 		metrics: metrics,
+		logger:  logger,
 	}
 }
 
@@ -62,6 +65,9 @@ func (h *collectEvalData) Handler(c echo.Context) error {
 		}
 		// force the creation date to be a unix timestamp
 		if event.CreationDate > 9999999999 {
+			h.logger.Warn(
+				"creationDate received is in milliseconds, we convert it to seconds",
+				zap.Int64("creationDate", event.CreationDate))
 			// if we receive a timestamp in milliseconds, we convert it to seconds
 			// but since it is totally possible to have a timestamp in seconds that is bigger than 9999999999
 			// we will accept timestamp up to 9999999999 (2286-11-20 18:46:39 +0100 CET)
