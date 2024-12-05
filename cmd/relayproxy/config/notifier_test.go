@@ -9,11 +9,11 @@ import (
 
 func TestNotifierConf_IsValid(t *testing.T) {
 	type fields struct {
-		Kind            string
-		SlackWebhookURL string
-		EndpointURL     string
-		Secret          string
-		Meta            map[string]string
+		Kind        string
+		WebhookURL  string
+		EndpointURL string
+		Secret      string
+		Meta        map[string]string
 	}
 	tests := []struct {
 		name     string
@@ -38,8 +38,8 @@ func TestNotifierConf_IsValid(t *testing.T) {
 		{
 			name: "kind slack without URL",
 			fields: fields{
-				Kind:            "slack",
-				SlackWebhookURL: "",
+				Kind:       "slack",
+				WebhookURL: "",
 			},
 			wantErr:  true,
 			errValue: "invalid notifier: no \"slackWebhookUrl\" property found for kind \"slack\"",
@@ -56,8 +56,8 @@ func TestNotifierConf_IsValid(t *testing.T) {
 		{
 			name: "valid use-case slack",
 			fields: fields{
-				Kind:            "slack",
-				SlackWebhookURL: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
+				Kind:       "slack",
+				WebhookURL: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
 			},
 			wantErr: false,
 		},
@@ -70,15 +70,24 @@ func TestNotifierConf_IsValid(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "kind microsoftteams without webhookURL",
+			fields: fields{
+				Kind:       "microsoftteams",
+				WebhookURL: "",
+			},
+			wantErr:  true,
+			errValue: `invalid notifier: no "WebhookURL" property found for kind "microsoftteams"`,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &config.NotifierConf{
-				Kind:            config.NotifierKind(tt.fields.Kind),
-				SlackWebhookURL: tt.fields.SlackWebhookURL,
-				EndpointURL:     tt.fields.EndpointURL,
-				Secret:          tt.fields.Secret,
-				Meta:            tt.fields.Meta,
+				Kind:        config.NotifierKind(tt.fields.Kind),
+				WebhookURL:  tt.fields.WebhookURL,
+				EndpointURL: tt.fields.EndpointURL,
+				Secret:      tt.fields.Secret,
+				Meta:        tt.fields.Meta,
 			}
 			err := c.IsValid()
 			assert.Equal(t, tt.wantErr, err != nil)

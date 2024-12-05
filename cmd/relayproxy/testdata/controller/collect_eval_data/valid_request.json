@@ -2,7 +2,7 @@
   "events": [
     {
       "contextKind": "user",
-      "creationDate": 1680246000011,
+      "creationDate": 1680246000,
       "default": false,
       "key": "my-feature-flag",
       "kind": "feature",

@@ -21,6 +21,7 @@ func TestPprofEndpointsStarts(t *testing.T) {
 		name               string
 		MonitoringPort     int
 		Debug              bool
+		EnablePprof        bool
 		expectedStatusCode int
 	}
 	tests := []test{
@@ -36,10 +37,17 @@ func TestPprofEndpointsStarts(t *testing.T) {
 			expectedStatusCode: http.StatusOK,
 		},
 		{
-			name:               "pprof not available ii debug not enabled",
+			name:               "pprof not available if debug not enabled",
 			Debug:              false,
 			MonitoringPort:     1032,
 			expectedStatusCode: http.StatusNotFound,
+		},
+		{
+			name:               "pprof available when enablePprof is true",
+			Debug:              false,
+			EnablePprof:        true,
+			MonitoringPort:     1032,
+			expectedStatusCode: http.StatusOK,
 		},
 	}
 
@@ -55,6 +63,7 @@ func TestPprofEndpointsStarts(t *testing.T) {
 				MonitoringPort: tt.MonitoringPort,
 				ListenPort:     1031,
 				Debug:          tt.Debug,
+				EnablePprof:    tt.EnablePprof,
 			}
 
 			goff, err := service.NewGoFeatureFlagClient(c, z, []notifier.Notifier{})

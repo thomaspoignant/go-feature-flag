@@ -729,14 +729,6 @@ const docTemplate = `{
                             "$ref": "#/definitions/model.EvaluationContextRequest"
                         }
                     ]
-                },
-                "user": {
-                    "description": "Deprecated: User The representation of a user for your feature flag system.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/model.UserRequest"
-                        }
-                    ]
                 }
             }
         },
@@ -779,14 +771,6 @@ const docTemplate = `{
                     "allOf": [
                         {
                             "$ref": "#/definitions/model.EvaluationContextRequest"
-                        }
-                    ]
-                },
-                "user": {
-                    "description": "Deprecated: User The representation of a user for your feature flag system.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/model.UserRequest"
                         }
                     ]
                 }
@@ -981,34 +965,6 @@ const docTemplate = `{
                 "value": {},
                 "variant": {
                     "type": "string"
-                }
-            }
-        },
-        "model.UserRequest": {
-            "type": "object",
-            "properties": {
-                "anonymous": {
-                    "description": "Anonymous set if this is a logged-in user or not.",
-                    "type": "boolean",
-                    "example": false
-                },
-                "custom": {
-                    "description": "Custom is a map containing all extra information for this user.",
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    },
-                    "example": {
-                        "company": "GO Feature Flag",
-                        "email": "contact@gofeatureflag.org",
-                        "firstname": "John",
-                        "lastname": "Doe"
-                    }
-                },
-                "key": {
-                    "description": "Key is the identifier of the UserRequest.",
-                    "type": "string",
-                    "example": "08b5ffb7-7109-42f4-a6f2-b85560fbd20f"
                 }
             }
         },

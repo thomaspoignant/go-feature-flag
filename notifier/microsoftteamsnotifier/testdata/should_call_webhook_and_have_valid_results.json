@@ -1,0 +1,29 @@
+{
+  "type": "message",
+  "attachments": [
+    {
+      "contentType": "application/vnd.microsoft.card.adaptive",
+      "content": {
+        "type": "AdaptiveCard",
+        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+        "version": "1.4",
+        "body": [
+          {
+            "type": "TextBlock",
+            "text": "GO Feature Flag",
+            "size": "large",
+            "weight": "bolder",
+            "style": "heading",
+            "wrap": true
+          },
+          {
+            "type": "TextBlock",
+            "text": "Changes detected in your feature flag file on: **{{hostname}}**\n * ❌ Flag **test-flag** deleted\n * 🆕 Flag **test-flag3** created\n * ✏️ Flag **test-flag2** updated\n   * DefaultRule.Percentages: (*map[string]float64){\"False\":0, \"True\":100} =\u003e nil\n   * DefaultRule.VariationResult: nil =\u003e (*string)(\"Default\")\n   * Disable: nil =\u003e (*bool)(true)\n   * Experimentation: (*flag.ExperimentationRollout){Start:(*time.Time){wall:0, ext:63230976200, loc:(*time.Location){name:\"\", zone:[]time.zone(nil), tx:[]time.zoneTrans(nil), extend:\"\", cacheStart:0, cacheEnd:0, cacheZone:(*time.zone)(nil)}}, End:(*time.Time){wall:0, ext:63230967800, loc:(*time.Location){name:\"\", zone:[]time.zone(nil), tx:[]time.zoneTrans(nil), extend:\"\", cacheStart:0, cacheEnd:0, cacheZone:(*time.zone)(nil)}}} =\u003e nil\n   * Rules: nil =\u003e (*[]flag.Rule){flag.Rule{Name:(*string)(\"rule1\"), Query:(*string)(\"key eq \\\"not-a-ke\\\"\"), VariationResult:(*string)(nil), Percentages:(*map[string]float64){\"False\":20, \"True\":80}, ProgressiveRollout:(*flag.ProgressiveRollout)(nil), Disable:(*bool)(nil)}}\n   * TrackEvents: nil =\u003e (*bool)(false)\n   * Variations.Default: false =\u003e true\n   * Version: nil =\u003e (*string)(\"1.1\")",
+            "wrap": true
+          }
+        ],
+        "msteams": {}
+      }
+    }
+  ]
+}

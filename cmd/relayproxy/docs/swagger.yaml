@@ -112,11 +112,6 @@ definitions:
         - $ref: '#/definitions/model.EvaluationContextRequest'
         description: EvaluationContext The representation of a EvaluationContext for
           your feature flag system.
-      user:
-        allOf:
-        - $ref: '#/definitions/model.UserRequest'
-        description: 'Deprecated: User The representation of a user for your feature
-          flag system.'
     type: object
   model.CollectEvalDataRequest:
     properties:
@@ -148,11 +143,6 @@ definitions:
         - $ref: '#/definitions/model.EvaluationContextRequest'
         description: EvaluationContext The representation of a EvaluationContext for
           your feature flag system.
-      user:
-        allOf:
-        - $ref: '#/definitions/model.UserRequest'
-        description: 'Deprecated: User The representation of a user for your feature
-          flag system.'
     type: object
   model.EvaluationContextRequest:
     properties:
@@ -282,27 +272,6 @@ definitions:
         type: string
       value: {}
       variant:
-        type: string
-    type: object
-  model.UserRequest:
-    properties:
-      anonymous:
-        description: Anonymous set if this is a logged-in user or not.
-        example: false
-        type: boolean
-      custom:
-        additionalProperties:
-          type: string
-        description: Custom is a map containing all extra information for this user.
-        example:
-          company: GO Feature Flag
-          email: contact@gofeatureflag.org
-          firstname: John
-          lastname: Doe
-        type: object
-      key:
-        description: Key is the identifier of the UserRequest.
-        example: 08b5ffb7-7109-42f4-a6f2-b85560fbd20f
         type: string
     type: object
   modeldocs.AllFlags:

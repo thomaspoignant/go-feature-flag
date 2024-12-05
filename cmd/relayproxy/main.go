@@ -66,8 +66,8 @@ func main() {
 		fmt.Printf(banner+"\n", version)
 	}
 
-	// Set the log level from the config from this point
-	logger.Atom.SetLevel(proxyConf.ZapLogLevel())
+	// Update the logger's format and level from the config
+	logger.Update(proxyConf.LogFormat, proxyConf.ZapLogLevel())
 
 	// Init swagger
 	docs.SwaggerInfo.Version = proxyConf.Version

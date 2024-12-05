@@ -1,0 +1,12 @@
+{
+  "kind": "feature",
+  "contextKind": "user",
+  "userKey": "94a25909-20d8-40cc-8500-fee99b569345",
+  "creationDate": 1733230547,
+  "key": "my-feature-flag",
+  "variation": "admin-variation",
+  "value": "string",
+  "default": false,
+  "version": "v1.0.0",
+  "source": "PROVIDER_CACHE"
+}

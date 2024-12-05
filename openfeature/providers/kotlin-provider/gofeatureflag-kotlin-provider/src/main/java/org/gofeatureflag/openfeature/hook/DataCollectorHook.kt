@@ -14,7 +14,7 @@ class DataCollectorHook<T>(private val collectorManager: DataCollectorManager) :
     ) {
         val event = Event(
             contextKind = "user",
-            creationDate = Date().time,
+            creationDate = Date().time / 1000L,
             key = ctx.flagKey,
             kind = "feature",
             userKey = ctx.ctx?.getTargetingKey(),
@@ -29,7 +29,7 @@ class DataCollectorHook<T>(private val collectorManager: DataCollectorManager) :
     override fun error(ctx: HookContext<T>, error: Exception, hints: Map<String, Any>) {
         val event = Event(
             contextKind = "user",
-            creationDate = Date().time,
+            creationDate = Date().time / 1000L,
             key = ctx.flagKey,
             kind = "feature",
             userKey = ctx.ctx?.getTargetingKey(),

@@ -98,6 +98,7 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 			log.Error("error loading file", zap.Error(errBindFile))
 		}
 	}
+
 	// Map environment variables
 	_ = k.Load(env.ProviderWithValue("", ".", func(s string, v string) (string, interface{}) {
 		if strings.HasPrefix(s, "RETRIEVERS") ||
@@ -116,6 +117,11 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 		}
 		if strings.HasPrefix(s, "AUTHORIZEDKEYS_ADMIN") {
 			return "authorizedKeys.admin", strings.Split(v, ",")
+		}
+
+		if s == "OTEL_RESOURCE_ATTRIBUTES" {
+			parseOtelResourceAttributes(v, log)
+			return s, v
 		}
 
 		return strings.ReplaceAll(strings.ToLower(s), "_", "."), v
@@ -139,6 +145,40 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 	return proxyConf, nil
 }
 
+func parseOtelResourceAttributes(attributes string, log *zap.Logger) {
+	configMap := k.Raw()
+	otel, ok := configMap["otel"].(map[string]interface{})
+	if !ok {
+		configMap["otel"] = make(map[string]interface{})
+		otel = configMap["otel"].(map[string]interface{})
+	}
+
+	resource, ok := otel["resource"].(map[string]interface{})
+	if !ok {
+		otel["resource"] = make(map[string]interface{})
+		resource = otel["resource"].(map[string]interface{})
+	}
+
+	attrs, ok := resource["attributes"].(map[string]interface{})
+	if !ok {
+		resource["attributes"] = make(map[string]interface{})
+		attrs = resource["attributes"].(map[string]interface{})
+	}
+
+	for _, attr := range strings.Split(attributes, ",") {
+		k, v, found := strings.Cut(attr, "=")
+		if !found {
+			log.Error("config: error loading OTEL_RESOURCE_ATTRIBUTES - incorrect format",
+				zap.String("key", k), zap.String("value", v))
+			continue
+		}
+
+		attrs[k] = v
+	}
+
+	_ = k.Set("otel", otel)
+}
+
 type Config struct {
 	// ListenPort (optional) is the port we are using to start the proxy
 	ListenPort int `mapstructure:"listen" koanf:"listen"`
@@ -151,6 +191,11 @@ type Config struct {
 	// Default: false
 	Debug bool `mapstructure:"debug" koanf:"debug"`
 
+	// EnablePprof (optional) if true, go-feature-flag relay proxy will start
+	// the pprof endpoints on the same port as the monitoring.
+	// Default: false
+	EnablePprof bool `mapstructure:"enablePprof" koanf:"enablepprof"`
+
 	// EnableSwagger (optional) to have access to the swagger
 	EnableSwagger bool `mapstructure:"enableSwagger" koanf:"enableswagger"`
 
@@ -162,6 +207,11 @@ type Config struct {
 	// If level debug go-feature-flag relay proxy will run on debug mode, with more logs and custom responses
 	// Default: debug
 	LogLevel string `mapstructure:"logLevel" koanf:"loglevel"`
+
+	// LogFormat (optional) sets the log message format
+	// Possible values: json, logfmt
+	// Default: json
+	LogFormat string `mapstructure:"logFormat" koanf:"logformat"`
 
 	// PollingInterval (optional) Poll every X time
 	// The minimum possible is 1 second
@@ -279,21 +329,27 @@ type OpenTelemetryConfiguration struct {
 	SDK struct {
 		Disabled bool `mapstructure:"disabled" koanf:"disabled"`
 	} `mapstructure:"sdk" koanf:"sdk"`
-	Exporter struct {
-		Otlp struct {
-			Endpoint string `mapstructure:"endpoint" koanf:"endpoint"`
-			Protocol string `mapstructure:"protocol" koanf:"protocol"`
-		} `mapstructure:"otlp" koanf:"otlp"`
-	} `mapstructure:"exporter" koanf:"exporter"`
-	Service struct {
+	Exporter OtelExporter `mapstructure:"exporter" koanf:"exporter"`
+	Service  struct {
 		Name string `mapstructure:"name" koanf:"name"`
 	} `mapstructure:"service" koanf:"service"`
 	Traces struct {
 		Sampler string `mapstructure:"sampler" koanf:"sampler"`
 	} `mapstructure:"traces" koanf:"traces"`
-	Resource struct {
-		Attributes map[string]string `mapstructure:"attributes" koanf:"attributes"`
-	} `mapstructure:"resource" koanf:"resource"`
+	Resource OtelResource `mapstructure:"resource" koanf:"resource"`
+}
+
+type OtelExporter struct {
+	Otlp OtelExporterOtlp `mapstructure:"otlp" koanf:"otlp"`
+}
+
+type OtelExporterOtlp struct {
+	Endpoint string `mapstructure:"endpoint" koanf:"endpoint"`
+	Protocol string `mapstructure:"protocol" koanf:"protocol"`
+}
+
+type OtelResource struct {
+	Attributes map[string]string `mapstructure:"attributes" koanf:"attributes"`
 }
 
 // JaegerSamplerConfiguration is the configuration object to configure the sampling.
@@ -398,6 +454,14 @@ func (c *Config) IsValid() error {
 		if _, err := zapcore.ParseLevel(c.LogLevel); err != nil {
 			return err
 		}
+	}
+
+	// log format validation
+	switch strings.ToLower(c.LogFormat) {
+	case "json", "logfmt", "":
+		break
+	default:
+		return fmt.Errorf("invalid log format %s", c.LogFormat)
 	}
 
 	return nil

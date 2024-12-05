@@ -10,6 +10,7 @@ import (
 	"go.opentelemetry.io/contrib/exporters/autoexport"
 	"go.opentelemetry.io/contrib/samplers/jaegerremote"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
@@ -28,9 +29,10 @@ func NewOtelService() OtelService {
 
 // Init the OpenTelemetry service
 func (s *OtelService) Init(ctx context.Context, zapLog *zap.Logger, config config.Config) error {
-	// OTEL_SDK_DISABLED is not supported by the Go SDK, but is a standard env
-	// var defined by the OTel spec. We'll use it to disable the trace provider.
-	if config.OtelConfig.SDK.Disabled {
+	// Require the endpoint to be set either by the openTelemetryOtlpEndpoint
+	// config element or otel.exporter.otlp.endpoint
+	if (config.OpenTelemetryOtlpEndpoint == "" && config.OtelConfig.Exporter.Otlp.Endpoint == "") ||
+		config.OtelConfig.SDK.Disabled {
 		otel.SetTracerProvider(noop.NewTracerProvider())
 		return nil
 	}
@@ -40,6 +42,8 @@ func (s *OtelService) Init(ctx context.Context, zapLog *zap.Logger, config confi
 		config.OtelConfig.Exporter.Otlp.Endpoint == "" {
 		config.OtelConfig.Exporter.Otlp.Endpoint = config.OpenTelemetryOtlpEndpoint
 		_ = os.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", config.OpenTelemetryOtlpEndpoint)
+	} else if config.OtelConfig.Exporter.Otlp.Endpoint != "" && os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT") == "" {
+		_ = os.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", config.OtelConfig.Exporter.Otlp.Endpoint)
 	}
 
 	exporter, err := autoexport.NewSpanExporter(ctx)
@@ -57,7 +61,7 @@ func (s *OtelService) Init(ctx context.Context, zapLog *zap.Logger, config confi
 		return fmt.Errorf("initializing OTel sampler: %w", err)
 	}
 
-	resource, err := initResource(ctx, serviceName, config.Version)
+	resource, err := initResource(ctx, serviceName, config.Version, config.OtelConfig.Resource.Attributes)
 	if err != nil {
 		return fmt.Errorf("initializing OTel resources: %w", err)
 	}
@@ -87,9 +91,15 @@ func (o otelErrHandler) Handle(err error) {
 
 var _ otel.ErrorHandler = otelErrHandler(nil)
 
-func initResource(ctx context.Context, serviceName string, version string) (*resource.Resource, error) {
+func initResource(ctx context.Context, serviceName, version string,
+	attribs map[string]string) (*resource.Resource, error) {
+	attrs := make([]attribute.KeyValue, 0, len(attribs))
+	for k, v := range attribs {
+		attrs = append(attrs, attribute.String(k, v))
+	}
+
 	return resource.New(ctx,
-		resource.WithFromEnv(),
+		resource.WithAttributes(attrs...),
 		resource.WithProcessPID(),
 		resource.WithProcessExecutableName(),
 		resource.WithProcessExecutablePath(),

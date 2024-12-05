@@ -57,6 +57,14 @@
     background-color: #eee;
 }
 
+.socialIconDiscord {
+    background-color: #5661ea;
+}
+
+.socialIconBitbucket {
+    background-color: #0052cc;
+}
+
 
 .tooltip {
     position: relative;
