@@ -1,16 +1,16 @@
 defmodule ElixirProvider.Provider do
   @behaviour OpenFeature.Provider
 
-  alias OpenFeature.ResolutionDetails
-  alias ElixirProvider.GoFeatureFlagOptions
-  alias ElixirProvider.HttpClient
-  alias ElixirProvider.DataCollectorHook
   alias ElixirProvider.CacheController
-  alias ElixirProvider.ResponseFlagEvaluation
-  alias ElixirProvider.GoFWebSocketClient
-  alias ElixirProvider.RequestFlagEvaluation
   alias ElixirProvider.ContextTransformer
+  alias ElixirProvider.DataCollectorHook
+  alias ElixirProvider.GoFeatureFlagOptions
   alias ElixirProvider.GofEvaluationContext
+  alias ElixirProvider.GoFWebSocketClient
+  alias ElixirProvider.HttpClient
+  alias ElixirProvider.RequestFlagEvaluation
+  alias ElixirProvider.ResponseFlagEvaluation
+  alias OpenFeature.ResolutionDetails
 
   @moduledoc """
   The GO Feature Flag provider for OpenFeature, managing HTTP requests, caching, and flag evaluation.
@@ -54,7 +54,11 @@ defmodule ElixirProvider.Provider do
     Process.exit(ws, :normal)
     CacheController.clear()
     if(GenServer.whereis(GoFWebSocketClient), do: GoFWebSocketClient.stop())
-    if(GenServer.whereis(DataCollectorHook), do: DataCollectorHook.stop(provider.data_collector_hook))
+
+    if(GenServer.whereis(DataCollectorHook),
+      do: DataCollectorHook.stop(provider.data_collector_hook)
+    )
+
     :ok
   end
 
@@ -128,12 +132,13 @@ defmodule ElixirProvider.Provider do
             {:ok, %ResolutionDetails{value: val, reason: reason}}
 
           _ ->
-            {:error, {:variant_not_found, "Expected #{type} but got #{inspect(value)} for flag #{flag_key}"}}
+            {:error,
+             {:variant_not_found,
+              "Expected #{type} but got #{inspect(value)} for flag #{flag_key}"}}
         end
 
       _ ->
         {:error, {:flag_not_found, "Flag #{flag_key} not found"}}
     end
   end
-
 end

@@ -7,7 +7,7 @@ defmodule ElixirProvider.MixProject do
       version: "0.1.0",
       elixir: "~> 1.17",
       start_permanent: Mix.env() == :prod,
-      deps: deps(),
+      deps: deps()
     ]
   end
 
@@ -24,7 +24,8 @@ defmodule ElixirProvider.MixProject do
       {:open_feature, git: "https://github.com/open-feature/elixir-sdk.git"},
       {:jason, "~> 1.4"},
       {:mint, "~> 1.6"},
-      {:mint_web_socket, "~> 1.0"}
+      {:mint_web_socket, "~> 1.0"},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false}
     ]
   end
 end

@@ -7,12 +7,13 @@ defmodule ElixirProvider.CacheController do
   @flag_table :flag_cache
 
   @spec start_link() :: GenServer.on_start()
-  def start_link() do
-    GenServer.start_link(__MODULE__, :ok, name:  __MODULE__)
+  def start_link do
+    GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
   end
 
   def get(flag_key, evaluation_hash) do
     cache_key = build_cache_key(flag_key, evaluation_hash)
+
     case :ets.lookup(@flag_table, cache_key) do
       [{^cache_key, cached_value}] -> {:ok, cached_value}
       [] -> :miss

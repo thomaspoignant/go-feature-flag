@@ -14,14 +14,14 @@ defmodule ElixirProvider.GoFWebSocketClient do
   defstruct [:conn, :websocket, :request_ref, :status, :caller, :resp_headers, :closing?]
 
   @type t :: %__MODULE__{
-    conn: Mint.HTTP.t() | nil,
-    websocket: Mint.WebSocket.t() | nil,
-    request_ref: reference() | nil,
-    caller: {pid(), GenServer.from()} | nil,
-    status: integer() | nil,
-    resp_headers: list({String.t(), String.t()}) | nil,
-    closing?: boolean()
-  }
+          conn: Mint.HTTP.t() | nil,
+          websocket: Mint.WebSocket.t() | nil,
+          request_ref: reference() | nil,
+          caller: {pid(), GenServer.from()} | nil,
+          status: integer() | nil,
+          resp_headers: list({String.t(), String.t()}) | nil,
+          closing?: boolean()
+        }
 
   @websocket_uri "/ws/v1/flag/change"
 
@@ -32,7 +32,7 @@ defmodule ElixirProvider.GoFWebSocketClient do
     end
   end
 
-  def stop() do
+  def stop do
     GenServer.stop(__MODULE__)
   end
 
@@ -118,16 +118,16 @@ defmodule ElixirProvider.GoFWebSocketClient do
          {:data, ref, data} | rest
        ])
        when websocket != nil do
-        case Mint.WebSocket.decode(websocket, data) do
-          {:ok, websocket, frames} ->
-            put_in(state.websocket, websocket)
-            |> handle_frames(frames)
-            |> handle_responses(rest)
+    case Mint.WebSocket.decode(websocket, data) do
+      {:ok, websocket, frames} ->
+        put_in(state.websocket, websocket)
+        |> handle_frames(frames)
+        |> handle_responses(rest)
 
-          {:error, websocket, reason} ->
-            put_in(state.websocket, websocket)
-            |> reply({:error, reason})
-        end
+      {:error, websocket, reason} ->
+        put_in(state.websocket, websocket)
+        |> reply({:error, reason})
+    end
   end
 
   defp handle_responses(state, [_response | rest]) do
@@ -143,7 +143,6 @@ defmodule ElixirProvider.GoFWebSocketClient do
         %{state | closing?: true}
 
       {:text, text}, state ->
-
         response = Jason.decode!(text)
 
         case Map.get(response, "type") do
@@ -152,7 +151,8 @@ defmodule ElixirProvider.GoFWebSocketClient do
             CacheController.clear()
             Logger.info("Cache cleared due to configuration change notification.")
 
-          _ -> nil
+          _ ->
+            nil
         end
 
         state

@@ -1,4 +1,7 @@
 defmodule ElixirProvider.ServerSupervisor do
+  @moduledoc """
+    Supervisor
+  """
   use Supervisor
 
   def start_link(args) do

@@ -1,4 +1,7 @@
 defmodule ElixirProvider.DataCollectorHook do
+  @moduledoc """
+  Data collector hook
+  """
 
   use GenServer
   require Logger
@@ -25,13 +28,14 @@ defmodule ElixirProvider.DataCollectorHook do
         }
 
   # Starts the GenServer and initializes with options
-  def start_link() do
+  def start_link do
     GenServer.start_link(__MODULE__, [], name: __MODULE__)
   end
 
   def stop(state) do
     GenServer.stop(__MODULE__)
     collect_data(state.data_flush_interval)
+
     %__MODULE__{
       http_client: state.http_client,
       data_collector_endpoint: state.data_collector_endpoint,
@@ -71,13 +75,15 @@ defmodule ElixirProvider.DataCollectorHook do
       :ok
     else
       feature_event = %FeatureEvent{
-        context_kind: if(Map.get(hook_context.context, "anonymous"), do: "anonymousUser", else: "user"),
+        context_kind:
+          if(Map.get(hook_context.context, "anonymous"), do: "anonymousUser", else: "user"),
         creation_date: DateTime.utc_now() |> DateTime.to_unix(:millisecond),
         default: false,
         key: hook_context.flag_key,
         value: flag_evaluation_details.value,
         variation: flag_evaluation_details.variant || "SdkDefault",
-        user_key: Map.get(hook_context.evaluation_context, "targeting_key") || @default_targeting_key
+        user_key:
+          Map.get(hook_context.evaluation_context, "targeting_key") || @default_targeting_key
       }
 
       GenServer.cast(__MODULE__, {:add_event, feature_event})
@@ -89,7 +95,8 @@ defmodule ElixirProvider.DataCollectorHook do
       :ok
     else
       feature_event = %FeatureEvent{
-        context_kind: if(Map.get(hook_context.context, "anonymous"), do: "anonymousUser", else: "user"),
+        context_kind:
+          if(Map.get(hook_context.context, "anonymous"), do: "anonymousUser", else: "user"),
         creation_date: DateTime.utc_now() |> DateTime.to_unix(:millisecond),
         default: true,
         key: hook_context.flag_key,
@@ -120,7 +127,11 @@ defmodule ElixirProvider.DataCollectorHook do
     {:noreply, %{state | event_queue: []}}
   end
 
-  defp collect_data(%__MODULE__{event_queue: event_queue, http_client: http_client, data_collector_endpoint: endpoint}) do
+  defp collect_data(%__MODULE__{
+         event_queue: event_queue,
+         http_client: http_client,
+         data_collector_endpoint: endpoint
+       }) do
     if Enum.empty?(event_queue) do
       :ok
     else

@@ -15,11 +15,11 @@ defmodule ElixirProvider.HttpClient do
         }
 
   @spec start_link() :: GenServer.on_start()
-  def start_link() do
-    GenServer.start_link(__MODULE__, :ok, name:  __MODULE__)
+  def start_link do
+    GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
   end
 
-  def stop() do
+  def stop do
     GenServer.stop(__MODULE__)
   end
 
