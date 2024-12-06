@@ -25,7 +25,9 @@ defmodule ElixirProvider.MixProject do
       {:jason, "~> 1.4"},
       {:mint, "~> 1.6"},
       {:mint_web_socket, "~> 1.0"},
-      {:credo, "~> 1.7", only: [:dev, :test], runtime: false}
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:bypass, "~> 2.1", only: :test},
+      {:plug, "~> 1.16", only: :test}
     ]
   end
 end

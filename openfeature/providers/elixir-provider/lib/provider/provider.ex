@@ -1,6 +1,7 @@
 defmodule ElixirProvider.Provider do
   @behaviour OpenFeature.Provider
 
+  require Logger
   alias ElixirProvider.CacheController
   alias ElixirProvider.ContextTransformer
   alias ElixirProvider.DataCollectorHook
@@ -19,15 +20,17 @@ defmodule ElixirProvider.Provider do
   defstruct [
     :options,
     :http_client,
-    :data_collector_hook,
+    :hooks,
     :ws,
-    :domain
+    :domain,
+    name: "ElixirProvider"
   ]
 
   @type t :: %__MODULE__{
+          name: String.t(),
           options: GoFeatureFlagOptions.t(),
           http_client: HttpClient.t(),
-          data_collector_hook: DataCollectorHook.t() | nil,
+          hooks: DataCollectorHook.t() | nil,
           ws: GoFWebSocketClient.t(),
           domain: String.t()
         }
@@ -35,14 +38,14 @@ defmodule ElixirProvider.Provider do
   @impl true
   def initialize(%__MODULE__{} = provider, domain, _context) do
     {:ok, http_client} = HttpClient.start_http_connection(provider.options)
-    {:ok, data_collector_hook} = DataCollectorHook.start(provider.options, http_client)
+    {:ok, hooks} = DataCollectorHook.start(provider.options, http_client)
     {:ok, ws} = GoFWebSocketClient.connect(provider.options.endpoint)
 
     updated_provider = %__MODULE__{
       provider
       | domain: domain,
         http_client: http_client,
-        data_collector_hook: data_collector_hook,
+        hooks: hooks,
         ws: ws
     }
 
@@ -56,7 +59,7 @@ defmodule ElixirProvider.Provider do
     if(GenServer.whereis(GoFWebSocketClient), do: GoFWebSocketClient.stop())
 
     if(GenServer.whereis(DataCollectorHook),
-      do: DataCollectorHook.stop(provider.data_collector_hook)
+      do: DataCollectorHook.stop(provider.hooks)
     )
 
     :ok
@@ -104,6 +107,7 @@ defmodule ElixirProvider.Provider do
   end
 
   defp handle_response(flag_key, eval_context_hash, response) do
+    Logger.debug("Unexpected frame received: #{inspect("here")}")
     # Build the flag evaluation struct directly from the response map
     flag_eval = ResponseFlagEvaluation.decode(response)
 

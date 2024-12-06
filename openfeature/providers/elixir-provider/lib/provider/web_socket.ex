@@ -23,7 +23,7 @@ defmodule ElixirProvider.GoFWebSocketClient do
           closing?: boolean()
         }
 
-  @websocket_uri "/ws/v1/flag/change"
+  @websocket_uri "ws/v1/flag/change"
 
   def connect(url) do
     with {:ok, socket} <- GenServer.start_link(__MODULE__, [], name: __MODULE__),
@@ -45,36 +45,42 @@ defmodule ElixirProvider.GoFWebSocketClient do
   def handle_call({:connect, url}, from, state) do
     uri = URI.parse(url)
 
-    http_scheme =
+    {http_scheme, ws_scheme} =
       case uri.scheme do
-        "ws" -> :http
-        "wss" -> :https
+        "ws" -> {:http, :ws}
+        "wss" -> {:https, :wss}
+        "http" -> {:http, :ws}
+        "https" -> {:https, :wss}
+        _ -> {:reply, {:error, :invalid_scheme}, state}
       end
 
-    ws_scheme =
-      case uri.scheme do
-        "ws" -> :ws
-        "wss" -> :wss
-      end
+    # Ensure the path is not nil
+    path = (uri.path || "/") <> @websocket_uri
 
-    # Construct the WebSocket path
-    path = uri.path <> @websocket_uri
-
-    with {:ok, conn} <- Mint.HTTP.connect(http_scheme, uri.host, uri.port),
+    with {:ok, conn} <-
+           Mint.HTTP.connect(http_scheme, uri.host, uri.port || default_port(http_scheme)),
          {:ok, conn, ref} <- Mint.WebSocket.upgrade(ws_scheme, conn, path, []) do
       state = %{state | conn: conn, request_ref: ref, caller: from}
+
       {:noreply, state}
     else
       {:error, reason} ->
+        Logger.info("Parsed URI path: #{inspect("hi")}")
         {:reply, {:error, reason}, state}
 
       {:error, conn, reason} ->
+        Logger.info("Parsed URI path: #{inspect(reason)}")
         {:reply, {:error, reason}, put_in(state.conn, conn)}
     end
   end
 
+  defp default_port(:http), do: 80
+  defp default_port(:https), do: 443
+
   @impl GenServer
   def handle_info(message, state) do
+    Logger.info("Received message: #{inspect(message)}")
+
     case Mint.WebSocket.stream(state.conn, message) do
       {:ok, conn, responses} ->
         state = put_in(state.conn, conn) |> handle_responses(responses)
@@ -165,7 +171,7 @@ defmodule ElixirProvider.GoFWebSocketClient do
 
   defp do_close(state) do
     Mint.HTTP.close(state.conn)
-    Logger.info("Comfy websocket closed")
+    Logger.info("Websocket closed")
     {:stop, :normal, state}
   end
 
