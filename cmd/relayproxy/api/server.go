@@ -19,7 +19,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/ofrep"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
-	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho" // nolint
+	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
 	"go.uber.org/zap"
 )
 
@@ -54,6 +54,7 @@ func (s *Server) initRoutes() {
 	s.apiEcho.HideBanner = true
 	s.apiEcho.HidePort = true
 	s.apiEcho.Debug = s.config.IsDebugEnabled()
+	s.apiEcho.Use(otelecho.Middleware("go-feature-flag"))
 	// Timeout middleware has to be the first middleware in the list
 	// (see: https://github.com/labstack/echo/blob/3b017855b4d331002e2b8b28e903679b875ae3e9/middleware/timeout.go#L17)
 	s.apiEcho.Use(middleware.TimeoutWithConfig(
@@ -66,6 +67,7 @@ func (s *Server) initRoutes() {
 			OnTimeoutRouteErrorHandler: func(err error, c echo.Context) {
 				s.zapLog.Error("Timeout on route", zap.String("route", c.Path()), zap.Error(err))
 			},
+			ErrorMessage: `Timeout on the server, please retry later`,
 		}),
 	)
 	s.apiEcho.Use(custommiddleware.ZapLogger(s.zapLog, s.config))
@@ -83,8 +85,6 @@ func (s *Server) initRoutes() {
 			Registerer: s.services.Metrics.Registry,
 		}))
 	}
-
-	s.apiEcho.Use(otelecho.Middleware("go-feature-flag"))
 	s.apiEcho.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
 	s.apiEcho.Use(custommiddleware.VersionHeader(s.config))
 	s.apiEcho.Use(middleware.Recover())
