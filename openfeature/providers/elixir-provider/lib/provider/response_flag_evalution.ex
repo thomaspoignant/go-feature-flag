@@ -5,15 +5,18 @@ defmodule ElixirProvider.ResponseFlagEvaluation do
   alias ElixirProvider.Types
 
   @enforce_keys [:value, :failed, :reason]
-  defstruct [:value, error_code: nil,
-            failed: false,
-            reason: "",
-            track_events: nil,
-            variation_type: nil,
-            version: nil,
-            metadata: nil,
-            cacheable: nil
-          ]
+  @derive Jason.Encoder
+  defstruct [
+    :value,
+    error_code: nil,
+    failed: false,
+    reason: "",
+    track_events: nil,
+    variation_type: nil,
+    version: nil,
+    metadata: nil,
+    cacheable: nil
+  ]
 
   @type t :: %__MODULE__{
           error_code: String.t() | nil,

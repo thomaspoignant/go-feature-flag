@@ -6,8 +6,8 @@ defmodule ElixirProvider.CacheController do
   use GenServer
   @flag_table :flag_cache
 
-  @spec start_link() :: GenServer.on_start()
-  def start_link do
+  @spec start_link(any()) :: GenServer.on_start()
+  def start_link(_args) do
     GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
   end
 

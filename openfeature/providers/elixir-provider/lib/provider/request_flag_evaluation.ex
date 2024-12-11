@@ -5,6 +5,7 @@ defmodule ElixirProvider.RequestFlagEvaluation do
   alias ElixirProvider.GofEvaluationContext
 
   @enforce_keys [:user]
+  @derive Jason.Encoder
   defstruct [:default_value, :user]
 
   @type t :: %__MODULE__{

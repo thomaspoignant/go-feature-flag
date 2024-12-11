@@ -1,9 +1,7 @@
 defmodule ElixirProvider.HttpClient do
   @moduledoc """
-  Handles HTTP requests to the GO Feature Flag API.
+  Implements HttpClientBehaviour using Mint for HTTP requests.
   """
-
-  use GenServer
 
   # Define a struct to store HTTP connection, endpoint, and other configuration details
   defstruct [:conn, :endpoint, :headers]
@@ -14,56 +12,28 @@ defmodule ElixirProvider.HttpClient do
           headers: list()
         }
 
-  @spec start_link() :: GenServer.on_start()
-  def start_link do
-    GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
-  end
-
-  def stop do
-    GenServer.stop(__MODULE__)
-  end
-
-  @impl true
-  def init([]) do
-    {:ok, %__MODULE__{}}
-  end
-
-  @spec start_http_connection(any()) ::
-          {:error,
-           %{
-             :__exception__ => true,
-             :__struct__ => Mint.HTTPError | Mint.TransportError,
-             :reason => any(),
-             optional(:module) => any()
-           }}
-          | {:ok, ElixirProvider.HttpClient.t()}
   def start_http_connection(options) do
     uri = URI.parse(options.endpoint)
     scheme = if uri.scheme == "https", do: :https, else: :http
 
     case Mint.HTTP.connect(scheme, uri.host, uri.port) do
       {:ok, conn} ->
-        # Create the struct with the connection, endpoint, and default headers
-        config = %__MODULE__{
-          conn: conn,
-          endpoint: options.endpoint,
-          headers: [{"content-type", "application/json"}]
-        }
-
-        {:ok, config}
+        {:ok,
+         %{
+           conn: conn,
+           endpoint: options.endpoint,
+           headers: [{"content-type", "application/json"}]
+         }}
 
       {:error, reason} ->
         {:error, reason}
     end
   end
 
-  @spec post(t(), String.t(), map()) :: {:ok, map()} | {:error, any()}
-  def post(%__MODULE__{conn: conn, endpoint: endpoint, headers: headers}, path, data) do
-    # Full URL path
+  def post(%{conn: conn, endpoint: endpoint, headers: headers}, path, data) do
     url = URI.merge(endpoint, path) |> URI.to_string()
     body = Jason.encode!(data)
 
-    # Make the POST request using the existing connection
     with {:ok, conn, request_ref} <- Mint.HTTP.request(conn, "POST", url, headers, body),
          {:ok, response} <- read_response(conn, request_ref) do
       Jason.decode(response)

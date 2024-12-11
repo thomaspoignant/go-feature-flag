@@ -3,7 +3,7 @@ defmodule ElixirProvider.FeatureEvent do
   Represents a feature event with details about the feature flag evaluation.
   """
   @enforce_keys [:context_kind, :user_key, :creation_date, :key, :variation]
-  defstruct [kind: "feature",
+  defstruct kind: "feature",
             context_kind: "",
             user_key: "",
             creation_date: 0,
@@ -11,7 +11,7 @@ defmodule ElixirProvider.FeatureEvent do
             variation: "",
             value: nil,
             default: false,
-            source: "PROVIDER_CACHE"]
+            source: "PROVIDER_CACHE"
 
   @type t :: %__MODULE__{
           kind: String.t(),

@@ -3,8 +3,8 @@ defmodule ElixirProvider.GofEvaluationContext do
   GoFeatureFlagEvaluationContext is an object representing a user context for evaluation.
   """
   alias Jason
-
-  defstruct [key: "", custom: %{}]
+  @derive Jason.Encoder
+  defstruct key: "", custom: %{}
 
   @type t :: %__MODULE__{
           key: String.t(),

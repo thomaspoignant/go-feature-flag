@@ -11,6 +11,7 @@ defmodule ElixirProvider.Provider do
   alias ElixirProvider.HttpClient
   alias ElixirProvider.RequestFlagEvaluation
   alias ElixirProvider.ResponseFlagEvaluation
+  alias OpenFeature.Hook
   alias OpenFeature.ResolutionDetails
 
   @moduledoc """
@@ -30,7 +31,7 @@ defmodule ElixirProvider.Provider do
           name: String.t(),
           options: GoFeatureFlagOptions.t(),
           http_client: HttpClient.t(),
-          hooks: DataCollectorHook.t() | nil,
+          hooks: [Hook.t()] | nil,
           ws: GoFWebSocketClient.t(),
           domain: String.t()
         }
@@ -45,7 +46,7 @@ defmodule ElixirProvider.Provider do
       provider
       | domain: domain,
         http_client: http_client,
-        hooks: hooks,
+        hooks: [hooks.base_hook],
         ws: ws
     }
 
@@ -87,8 +88,11 @@ defmodule ElixirProvider.Provider do
 
   defp generic_resolve(provider, type, flag_key, default_value, context) do
     {:ok, goff_context} = ContextTransformer.transform_context(context)
+
     goff_request = %RequestFlagEvaluation{user: goff_context, default_value: default_value}
     eval_context_hash = GofEvaluationContext.hash(goff_context)
+    http_client = provider.http_client
+    Logger.debug("Unexpected frame received: #{inspect("fires")}")
 
     response_body =
       case CacheController.get(flag_key, eval_context_hash) do
@@ -97,9 +101,12 @@ defmodule ElixirProvider.Provider do
 
         :miss ->
           # Fetch from HTTP if cache miss
-          case HttpClient.post(provider.http_client, "/v1/feature/#{flag_key}/eval", goff_request) do
-            {:ok, response} -> handle_response(flag_key, eval_context_hash, response)
-            {:error, reason} -> {:error, {:unexpected_error, reason}}
+          case HttpClient.post(http_client, "/v1/feature/#{flag_key}/eval", goff_request) do
+            {:ok, response} ->
+              handle_response(flag_key, eval_context_hash, response)
+
+            {:error, reason} ->
+              {:error, {:unexpected_error, reason}}
           end
       end
 
@@ -107,7 +114,6 @@ defmodule ElixirProvider.Provider do
   end
 
   defp handle_response(flag_key, eval_context_hash, response) do
-    Logger.debug("Unexpected frame received: #{inspect("here")}")
     # Build the flag evaluation struct directly from the response map
     flag_eval = ResponseFlagEvaluation.decode(response)
 
@@ -120,6 +126,8 @@ defmodule ElixirProvider.Provider do
   end
 
   defp handle_flag_resolution(response, type, flag_key, _default_value) do
+    Logger.debug("Unexpected frame received: #{inspect(response)}")
+
     case response do
       {:ok, %ResponseFlagEvaluation{value: value, reason: reason}} ->
         case {type, value} do
