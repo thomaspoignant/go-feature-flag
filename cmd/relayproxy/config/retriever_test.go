@@ -263,6 +263,45 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 			errValue: "invalid retriever: no \"redisOptions\" property found for kind \"redis\"",
 		},
 		{
+			name: "kind postgreSQL without Table",
+			fields: config.RetrieverConf{
+				Kind:   "postgresql",
+				URI:    "xxx",
+				Column: "xxx",
+			},
+			wantErr:  true,
+			errValue: "invalid retriever: no \"table\" property found for kind \"postgresql\"",
+		},
+		{
+			name: "kind postgreSQL without Column",
+			fields: config.RetrieverConf{
+				Kind:  "postgresql",
+				URI:   "xxx",
+				Table: "xxx",
+			},
+			wantErr:  true,
+			errValue: "invalid retriever: no \"column\" property found for kind \"postgresql\"",
+		},
+		{
+			name: "kind postgreSQL without URI",
+			fields: config.RetrieverConf{
+				Kind:   "postgresql",
+				Column: "xxx",
+				Table:  "xxx",
+			},
+			wantErr:  true,
+			errValue: "invalid retriever: no \"uri\" property found for kind \"postgresql\"",
+		},
+		{
+			name: "kind postgreSQL valid",
+			fields: config.RetrieverConf{
+				Kind:   "postgresql",
+				URI:    "xxx",
+				Table:  "xxx",
+				Column: "xxx",
+			},
+		},
+		{
 			name: "kind mongoDB without Collection",
 			fields: config.RetrieverConf{
 				Kind:       "mongodb",

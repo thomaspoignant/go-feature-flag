@@ -30,6 +30,8 @@ type RetrieverConf struct {
 	URI          string              `mapstructure:"uri" koanf:"uri"`
 	Database     string              `mapstructure:"database" koanf:"database"`
 	Collection   string              `mapstructure:"collection" koanf:"collection"`
+	Table        string              `mapstructure:"table" koanf:"table"`
+	Column       string              `mapstructure:"column" koanf:"column"`
 	RedisOptions *redis.Options      `mapstructure:"redisOptions" koanf:"redisOptions"`
 	RedisPrefix  string              `mapstructure:"redisPrefix" koanf:"redisPrefix"`
 	AccountName  string              `mapstructure:"accountName" koanf:"accountname"`
@@ -66,6 +68,9 @@ func (c *RetrieverConf) IsValid() error {
 	}
 	if c.Kind == MongoDBRetriever {
 		return c.validateMongoDBRetriever()
+	}
+	if c.Kind == PostgreSQLRetriever {
+		return c.validatePostgreSQLRetriever()
 	}
 	if c.Kind == RedisRetriever {
 		return c.validateRedisRetriever()
@@ -112,6 +117,19 @@ func (c *RetrieverConf) validateMongoDBRetriever() error {
 	return nil
 }
 
+func (c *RetrieverConf) validatePostgreSQLRetriever() error {
+	if c.Column == "" {
+		return fmt.Errorf("invalid retriever: no \"column\" property found for kind \"%s\"", c.Kind)
+	}
+	if c.Table == "" {
+		return fmt.Errorf("invalid retriever: no \"table\" property found for kind \"%s\"", c.Kind)
+	}
+	if c.URI == "" {
+		return fmt.Errorf("invalid retriever: no \"uri\" property found for kind \"%s\"", c.Kind)
+	}
+	return nil
+}
+
 func (c *RetrieverConf) validateRedisRetriever() error {
 	if c.RedisOptions == nil {
 		return fmt.Errorf("invalid retriever: no \"redisOptions\" property found for kind \"%s\"", c.Kind)
@@ -144,6 +162,7 @@ const (
 	GoogleStorageRetriever RetrieverKind = "googleStorage"
 	KubernetesRetriever    RetrieverKind = "configmap"
 	MongoDBRetriever       RetrieverKind = "mongodb"
+	PostgreSQLRetriever    RetrieverKind = "postgresql"
 	RedisRetriever         RetrieverKind = "redis"
 	BitbucketRetriever     RetrieverKind = "bitbucket"
 	AzBlobStorageRetriever RetrieverKind = "azureBlobStorage"
@@ -154,7 +173,7 @@ func (r RetrieverKind) IsValid() error {
 	switch r {
 	case HTTPRetriever, GitHubRetriever, GitlabRetriever, S3Retriever, RedisRetriever,
 		FileRetriever, GoogleStorageRetriever, KubernetesRetriever, MongoDBRetriever,
-		BitbucketRetriever, AzBlobStorageRetriever:
+		PostgreSQLRetriever, BitbucketRetriever, AzBlobStorageRetriever:
 		return nil
 	}
 	return fmt.Errorf("invalid retriever: kind \"%s\" is not supported", r)
