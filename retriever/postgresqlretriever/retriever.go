@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	_ "github.com/lib/pq"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
@@ -14,7 +13,8 @@ import (
 // Retriever is a configuration struct for a PostgreSQL connection
 type Retriever struct {
 	// PostgreSQL connection URI
-	URI string
+	URI  string
+	Type string
 	// PostgreSQL table where flag column is stored
 	Table string
 	// PostgreSQL column where flag definitions are stored
@@ -51,8 +51,8 @@ func (r *Retriever) Init(ctx context.Context, logger *fflog.FFLogger) error {
 
 		r.dbPool = pool
 		r.status = retriever.RetrieverReady
-
 	}
+
 	return nil
 }
 
@@ -65,15 +65,14 @@ func (r *Retriever) Status() retriever.Status {
 }
 
 // Shutdown disconnects the retriever from Mongodb instance
-func (r *Retriever) Shutdown(ctx context.Context) error {
+func (r *Retriever) Shutdown(_ context.Context) error {
 	r.dbPool.Close()
 	return nil
 }
 
 // Retrieve Reads flag configuration from postgreSQL and returns it
-// if a document does not comply with the specification it will be ignored
+// If a document does not comply with the specification it will be ignored
 func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
-
 	query := fmt.Sprintf("SELECT %s FROM %s WHERE %s IS NOT NULL", r.Column, r.Table, r.Column)
 	rows, err := r.dbPool.Query(ctx, query)
 	if err != nil {
@@ -117,5 +116,4 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	}
 
 	return flags, nil
-
 }

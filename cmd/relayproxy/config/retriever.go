@@ -30,6 +30,7 @@ type RetrieverConf struct {
 	URI          string              `mapstructure:"uri" koanf:"uri"`
 	Database     string              `mapstructure:"database" koanf:"database"`
 	Collection   string              `mapstructure:"collection" koanf:"collection"`
+	Type         string              `mapstructure:"type" koanf:"type"`
 	Table        string              `mapstructure:"table" koanf:"table"`
 	Column       string              `mapstructure:"column" koanf:"column"`
 	RedisOptions *redis.Options      `mapstructure:"redisOptions" koanf:"redisOptions"`
@@ -127,6 +128,10 @@ func (c *RetrieverConf) validatePostgreSQLRetriever() error {
 	if c.URI == "" {
 		return fmt.Errorf("invalid retriever: no \"uri\" property found for kind \"%s\"", c.Kind)
 	}
+	if c.Type == "" || !(c.Type == "json") {
+		return fmt.Errorf("invalid retriever: no \"type\" property or not a valid type in kind \"%s\"", c.Kind)
+	}
+
 	return nil
 }
 

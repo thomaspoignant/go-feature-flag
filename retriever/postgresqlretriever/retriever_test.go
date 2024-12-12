@@ -18,12 +18,12 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func Test_MongoDBRetriever_Retrieve(t *testing.T) {
+func Test_PostgreSQLRetriever_Retrieve(t *testing.T) {
 	ctx := context.Background()
 
-	dbName := "users"
-	dbUser := "user"
-	dbPassword := "password"
+	dbName := "flags_db"
+	dbUser := "root"
+	dbPassword := "example"
 
 	tests := []struct {
 		name    string
@@ -56,7 +56,7 @@ func Test_MongoDBRetriever_Retrieve(t *testing.T) {
 		},
 	}
 
-	// Start the postgres ctr and run any migrations on it
+	// Start the postgres container
 	ctr, err := postgres.Run(
 		ctx,
 		"postgres:16-alpine",
@@ -69,10 +69,11 @@ func Test_MongoDBRetriever_Retrieve(t *testing.T) {
 	testcontainers.CleanupContainer(t, ctr)
 	require.NoError(t, err)
 
+	// Run initialization query to create the table and the column
 	_, _, err = ctr.Exec(ctx, []string{"psql", "-U", dbUser, "-d", dbName, "-c", "CREATE TABLE flags (id SERIAL PRIMARY KEY,flag JSONB)"})
 	require.NoError(t, err)
 
-	//Create snapshot of the database, which is then restored before each test
+	// Create snapshot of the database, which is then restored before each test
 	err = ctr.Snapshot(ctx)
 	require.NoError(t, err)
 
@@ -89,7 +90,7 @@ func Test_MongoDBRetriever_Retrieve(t *testing.T) {
 		defer conn.Close(context.Background())
 
 		if item.data != "" {
-			// insert data
+			// Insert data
 			var documents []bson.M
 			err = json.Unmarshal([]byte(item.data), &documents)
 			require.NoError(t, err)
@@ -100,7 +101,7 @@ func Test_MongoDBRetriever_Retrieve(t *testing.T) {
 			}
 		}
 
-		// retriever
+		// Initialize Retriever
 		mdb := postgresqlretriever.Retriever{
 			URI:    dbURL,
 			Table:  "flags",
@@ -123,7 +124,6 @@ func Test_MongoDBRetriever_Retrieve(t *testing.T) {
 		}
 
 		require.NoError(t, err)
-
 	}
 }
 

@@ -23,6 +23,7 @@ func main() {
 		Context:         context.Background(),
 		Retriever: &postgresqlretriever.Retriever{
 			Table:  "flags",
+			Type:  "json",
 			Column: "flag",
 			URI:    "postgres://root:example@localhost:5432/flags_db?sslmode=disable",
 		},

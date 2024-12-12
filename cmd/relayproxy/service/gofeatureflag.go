@@ -26,6 +26,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/notifier/slacknotifier"
 	"github.com/thomaspoignant/go-feature-flag/notifier/webhooknotifier"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever/azblobstorageretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/bitbucketretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/gcstorageretriever"
@@ -186,7 +187,7 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 	case config.MongoDBRetriever:
 		return &mongodbretriever.Retriever{Database: c.Database, URI: c.URI, Collection: c.Collection}, nil
 	case config.PostgreSQLRetriever:
-		return &postgresqlretriever.Retriever{URI: c.URI, Table: c.Table, Column: c.Column}, nil
+		return &postgresqlretriever.Retriever{Type: c.Type, URI: c.URI, Table: c.Table, Column: c.Column}, nil
 	case config.RedisRetriever:
 		return &redisretriever.Retriever{Options: c.RedisOptions, Prefix: c.RedisPrefix}, nil
 	case config.AzBlobStorageRetriever:
