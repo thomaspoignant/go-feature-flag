@@ -233,8 +233,20 @@ func (r *Rule) IsValid(defaultRule bool, variations map[string]*interface{}) err
 	}
 
 	// targeting without query
-	if !defaultRule && r.Query == nil {
-		return fmt.Errorf("each targeting should have a query")
+	if !defaultRule {
+		if r.Query == nil {
+			return fmt.Errorf("each targeting should have a query")
+		}
+
+		// Validate the query with the parser
+		ev, err := parser.NewEvaluator(*r.Query)
+		if err != nil {
+			return err
+		}
+		_, err = ev.Process(map[string]interface{}{})
+		if err != nil {
+			return fmt.Errorf("invalid query: %w", err)
+		}
 	}
 
 	// Validate the percentage of the rule
