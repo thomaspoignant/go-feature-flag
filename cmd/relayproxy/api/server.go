@@ -72,8 +72,9 @@ func (s *Server) initRoutes() {
 	)
 	s.apiEcho.Use(custommiddleware.ZapLogger(s.zapLog, s.config))
 	s.apiEcho.Use(middleware.BodyDumpWithConfig(middleware.BodyDumpConfig{
-		Skipper: func(_ echo.Context) bool {
-			return !s.zapLog.Core().Enabled(zap.DebugLevel)
+		Skipper: func(c echo.Context) bool {
+			isSwagger := strings.HasPrefix(c.Request().URL.String(), "/swagger")
+			return isSwagger || !s.zapLog.Core().Enabled(zap.DebugLevel)
 		},
 		Handler: func(_ echo.Context, reqBody []byte, _ []byte) {
 			s.zapLog.Debug("Request info", zap.ByteString("request_body", reqBody))
