@@ -294,7 +294,7 @@ func (r *Rule) isQueryValid(defaultRule bool) error {
 	}
 
 	// Validate the query with the parser
-	ev, err := parser.NewEvaluator(*r.Query)
+	ev, err := parser.NewEvaluator(r.GetTrimmedQuery())
 	if err != nil {
 		return err
 	}
