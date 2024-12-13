@@ -103,7 +103,7 @@ func TestDataExporterScheduler_exporterReturnError(t *testing.T) {
 		dc.AddEvent(event)
 	}
 	assert.Equal(t, inputEvents[:201], mockExporter.GetExportedEvents())
-	handler.AssertMessage("error while exporting data")
+	handler.AssertMessage("error while exporting data: random err")
 }
 
 func TestDataExporterScheduler_nonBulkExporter(t *testing.T) {
