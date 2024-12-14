@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
@@ -19,37 +19,29 @@ type Retriever struct {
 	Table string
 	// PostgreSQL column where flag definitions are stored
 	Column string
-	dbPool *pgxpool.Pool
+	conn   *pgx.Conn
 	status string
 	logger *fflog.FFLogger
 }
 
 func (r *Retriever) Init(ctx context.Context, logger *fflog.FFLogger) error {
 	r.logger = logger
-	if r.dbPool == nil {
+	if r.conn == nil {
 		r.status = retriever.RetrieverNotReady
 
-		poolConfig, err := pgxpool.ParseConfig(r.URI)
-		if err != nil {
-			// This will not be a connection error, but a DSN parse error or
-			// another initialization error.
-			r.status = retriever.RetrieverError
-			return err
-		}
-
-		pool, err := pgxpool.NewWithConfig(ctx, poolConfig)
+		conn, err := pgx.Connect(ctx, r.URI)
 		if err != nil {
 			r.status = retriever.RetrieverError
 			return err
 		}
 
 		// Test the database connection
-		if err := pool.Ping(ctx); err != nil {
+		if err := conn.Ping(ctx); err != nil {
 			r.status = retriever.RetrieverError
 			return err
 		}
 
-		r.dbPool = pool
+		r.conn = conn
 		r.status = retriever.RetrieverReady
 	}
 
@@ -65,8 +57,8 @@ func (r *Retriever) Status() retriever.Status {
 }
 
 // Shutdown disconnects the retriever from Mongodb instance
-func (r *Retriever) Shutdown(_ context.Context) error {
-	r.dbPool.Close()
+func (r *Retriever) Shutdown(ctx context.Context) error {
+	r.conn.Close(ctx)
 	return nil
 }
 
@@ -74,13 +66,13 @@ func (r *Retriever) Shutdown(_ context.Context) error {
 // If a document does not comply with the specification it will be ignored
 func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	query := fmt.Sprintf("SELECT %s FROM %s WHERE %s IS NOT NULL", r.Column, r.Table, r.Column)
-	rows, err := r.dbPool.Query(ctx, query)
+	rows, err := r.conn.Query(ctx, query)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	ffDocs := make(map[string]interface{})
+	mappedFlagDocs := make(map[string]interface{})
 	for rows.Next() {
 		var jsonData []byte
 
@@ -100,16 +92,16 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 		if val, ok := doc["flag"]; ok {
 			delete(doc, "flag")
 			if str, ok := val.(string); ok {
-				ffDocs[str] = doc
+				mappedFlagDocs[str] = doc
 			} else {
 				r.logger.Error("Flag key does not have a string value")
 			}
 		} else {
-			r.logger.Error("No 'flag' entry found")
+			r.logger.Warn("No 'flag' entry found")
 		}
 	}
 
-	flags, err := json.Marshal(ffDocs)
+	flags, err := json.Marshal(mappedFlagDocs)
 
 	if err != nil {
 		return nil, err
