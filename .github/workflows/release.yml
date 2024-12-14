@@ -121,7 +121,7 @@ jobs:
           username: ${DOCKER_USERNAME}
           password: ${DOCKER_PASSWORD}
           repository: gofeatureflag/go-feature-flag-cli
-          readme: "./cmd/lint/DOCKERHUB.md"
+          readme: "./cmd/cli/DOCKERHUB.md"
 
   dockerhub-relay-proxy:
     runs-on: ubuntu-latest
