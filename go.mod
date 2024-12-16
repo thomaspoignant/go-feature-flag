@@ -27,6 +27,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/invopop/jsonschema v0.12.0
+	github.com/jackc/pgx/v5 v5.5.4
 	github.com/jessevdk/go-flags v1.6.1
 	github.com/jsternberg/zap-logfmt v1.3.0
 	github.com/knadh/koanf/parsers/json v0.1.0
@@ -39,6 +40,7 @@ require (
 	github.com/knadh/koanf/v2 v2.1.2
 	github.com/labstack/echo-contrib v0.17.1
 	github.com/labstack/echo/v4 v4.13.0
+	github.com/lib/pq v1.10.9
 	github.com/luci/go-render v0.0.0-20160219211803-9a04cc21af0f
 	github.com/nikunjy/rules v1.5.0
 	github.com/pablor21/echo-etag/v4 v4.0.3
@@ -54,6 +56,7 @@ require (
 	github.com/testcontainers/testcontainers-go v0.34.0
 	github.com/testcontainers/testcontainers-go/modules/azurite v0.34.0
 	github.com/testcontainers/testcontainers-go/modules/mongodb v0.34.0
+	github.com/testcontainers/testcontainers-go/modules/postgres v0.34.0
 	github.com/testcontainers/testcontainers-go/modules/redis v0.34.0
 	github.com/thejerf/slogassert v0.3.4
 	github.com/xitongsys/parquet-go v1.6.2
@@ -164,6 +167,9 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-uuid v1.0.3 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/jackc/pgpassfile v1.0.0 // indirect
+	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
+	github.com/jackc/puddle/v2 v2.2.1 // indirect
 	github.com/jcmturner/aescts/v2 v2.0.0 // indirect
 	github.com/jcmturner/dnsutils/v2 v2.0.0 // indirect
 	github.com/jcmturner/gofork v1.7.6 // indirect

@@ -35,6 +35,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/retriever/httpretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/k8sretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/mongodbretriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever/postgresqlretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/redisretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/s3retrieverv2"
 	"go.uber.org/zap"
@@ -185,6 +186,8 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 			ClientConfig: *client}, nil
 	case config.MongoDBRetriever:
 		return &mongodbretriever.Retriever{Database: c.Database, URI: c.URI, Collection: c.Collection}, nil
+	case config.PostgreSQLRetriever:
+		return &postgresqlretriever.Retriever{Type: c.Type, URI: c.URI, Table: c.Table, Column: c.Column}, nil
 	case config.RedisRetriever:
 		return &redisretriever.Retriever{Options: c.RedisOptions, Prefix: c.RedisPrefix}, nil
 	case config.AzBlobStorageRetriever:
