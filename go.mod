@@ -4,7 +4,7 @@ go 1.23.0
 
 require (
 	cloud.google.com/go/pubsub v1.45.3
-	cloud.google.com/go/storage v1.48.0
+	cloud.google.com/go/storage v1.46.0
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.8.0
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.5.0
 	github.com/BurntSushi/toml v1.4.0
