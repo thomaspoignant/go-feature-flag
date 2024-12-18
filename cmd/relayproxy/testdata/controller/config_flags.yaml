@@ -1,136 +1,136 @@
 array-flag:
-    variations:
-        Default:
-            - batmanDefault
-            - supermanDefault
-            - superherosDefault
-        "False":
-            - batmanFalse
-            - supermanFalse
-            - superherosFalse
-        "True":
-            - batmanTrue
-            - supermanTrue
-            - superherosTrue
-    targeting:
-        - name: rule1
-          query: anonymous eq true
-          percentage:
-            "False": 90
-            "True": 10
-    defaultRule:
-        name: defaultRule
-        variation: Default
+  variations:
+    Default:
+      - batmanDefault
+      - supermanDefault
+      - superherosDefault
+    "False":
+      - batmanFalse
+      - supermanFalse
+      - superherosFalse
+    "True":
+      - batmanTrue
+      - supermanTrue
+      - superherosTrue
+  targeting:
+    - name: rule1
+      query: anonymous eq true
+      percentage:
+        "False": 90
+        "True": 10
+  defaultRule:
+    name: defaultRule
+    variation: Default
 disable-flag:
-    variations:
-        Default: default
-        "False": "false"
-        "True": "true"
-    targeting:
-        - name: rule1
-          query: admin eq true
-          percentage:
-            "False": 0
-            "True": 100
-    defaultRule:
-        name: defaultRule
-        variation: Default
-    disable: true
+  variations:
+    Default: default
+    "False": "false"
+    "True": "true"
+  targeting:
+    - name: rule1
+      query: admin eq true
+      percentage:
+        "False": 0
+        "True": 100
+  defaultRule:
+    name: defaultRule
+    variation: Default
+  disable: true
 flag-only-for-admin:
-    variations:
-        Default: false
-        "False": false
-        "True": true
-    targeting:
-        - name: rule1
-          query: admin eq true
-          percentage:
-            "False": 0
-            "True": 100
-    defaultRule:
-        name: defaultRule
-        variation: Default
+  variations:
+    Default: false
+    "False": false
+    "True": true
+  targeting:
+    - name: rule1
+      query: admin eq true
+      percentage:
+        "False": 0
+        "True": 100
+  defaultRule:
+    name: defaultRule
+    variation: Default
 new-admin-access:
-    variations:
-        Default: false
-        "False": false
-        "True": true
-    defaultRule:
-        name: defaultRule
-        percentage:
-            "False": 70
-            "True": 30
+  variations:
+    Default: false
+    "False": false
+    "True": true
+  defaultRule:
+    name: defaultRule
+    percentage:
+      "False": 70
+      "True": 30
 number-flag:
-    variations:
-        Default: 1
-        "False": 3
-        "True": 2
-    targeting:
-        - name: rule1
-          query: anonymous eq true
-          percentage:
-            "False": 0
-            "True": 100
-    defaultRule:
-        name: defaultRule
-        variation: Default
+  variations:
+    Default: 1
+    "False": 3
+    "True": 2
+  targeting:
+    - name: rule1
+      query: anonymous eq true
+      percentage:
+        "False": 0
+        "True": 100
+  defaultRule:
+    name: defaultRule
+    variation: Default
 targeting-key-rule:
-    variations:
-        false_var: false
-        true_var: true
-    targeting:
-        - query: targetingKey eq "specific-targeting-key"
-          variation: true_var
-    defaultRule:
-        variation: false_var
+  variations:
+    false_var: false
+    true_var: true
+  targeting:
+    - query: targetingKey eq "specific-targeting-key"
+      variation: true_var
+  defaultRule:
+    variation: false_var
 test-flag-rule-apply:
-    variations:
-        Default:
-            test: test
-        "False":
-            test3: test
-        "True":
-            test2: test
-    targeting:
-        - name: rule1
-          query: key eq "random-key"
-          percentage:
-            "False": 0
-            "True": 100
-    defaultRule:
-        name: defaultRule
-        variation: Default
+  variations:
+    Default:
+      test: test
+    "False":
+      test3: test
+    "True":
+      test2: test
+  targeting:
+    - name: rule1
+      query: key eq "random-key"
+      percentage:
+        "False": 0
+        "True": 100
+  defaultRule:
+    name: defaultRule
+    variation: Default
 test-flag-rule-apply-false:
-    variations:
-        Default:
-            test: test
-        "False":
-            test3: test
-        "True":
-            test2: test
-    targeting:
-        - name: rule1
-          query: anonymous eq true
-          percentage:
-            "False": 90
-            "True": 10
-    defaultRule:
-        name: defaultRule
-        variation: Default
+  variations:
+    Default:
+      test: test
+    "False":
+      test3: test
+    "True":
+      test2: test
+  targeting:
+    - name: rule1
+      query: anonymous eq true
+      percentage:
+        "False": 90
+        "True": 10
+  defaultRule:
+    name: defaultRule
+    variation: Default
 test-flag-rule-not-apply:
-    variations:
-        Default:
-            test: test
-        "False":
-            test3: test
-        "True":
-            test2: test
-    targeting:
-        - name: rule1
-          query: key eq \"key\"
-          percentage:
-            "False": 0
-            "True": 100
-    defaultRule:
-        name: defaultRule
-        variation: Default
+  variations:
+    Default:
+      test: test
+    "False":
+      test3: test
+    "True":
+      test2: test
+  targeting:
+    - name: rule1
+      query: key eq "key"
+      percentage:
+        "False": 0
+        "True": 100
+  defaultRule:
+    name: defaultRule
+    variation: Default
