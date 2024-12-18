@@ -33,7 +33,6 @@ function Page() {
     OpenFeature.setContext(ctx);
   }
 
-
   return (
     <>
       <div className="flex justify-center items-center pt-10">
