@@ -1,9 +1,9 @@
 hide-logo:
   variations:
-    var_true: true
-    var_false: false
+    enabled: true
+    disabled: false
   defaultRule:
-    variation: var_false
+    variation: disabled
 
 title-flag:
   variations:
@@ -13,7 +13,7 @@ title-flag:
     - query: userType eq "dev"
       variation: developer_title
   defaultRule:
-      variation: default_title
+    variation: default_title
   metadata:
     title: "Feature Flag Title"
     description: "This flag controls the title of the feature flag"
