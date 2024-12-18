@@ -19,7 +19,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/ofrep"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
-	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho" // nolint
+	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
 	"go.uber.org/zap"
 )
 
@@ -54,28 +54,9 @@ func (s *Server) initRoutes() {
 	s.apiEcho.HideBanner = true
 	s.apiEcho.HidePort = true
 	s.apiEcho.Debug = s.config.IsDebugEnabled()
-	s.apiEcho.Use(custommiddleware.ZapLogger(s.zapLog, s.config))
-
-	s.apiEcho.Use(middleware.BodyDumpWithConfig(middleware.BodyDumpConfig{
-		Skipper: func(_ echo.Context) bool {
-			return !s.zapLog.Core().Enabled(zap.DebugLevel)
-		},
-		Handler: func(_ echo.Context, reqBody []byte, _ []byte) {
-			s.zapLog.Debug("Request info", zap.ByteString("request_body", reqBody))
-		},
-	}))
-
-	if s.services.Metrics != (metric.Metrics{}) {
-		s.apiEcho.Use(echoprometheus.NewMiddlewareWithConfig(echoprometheus.MiddlewareConfig{
-			Subsystem:  metric.GOFFSubSystem,
-			Registerer: s.services.Metrics.Registry,
-		}))
-	}
-
 	s.apiEcho.Use(otelecho.Middleware("go-feature-flag"))
-	s.apiEcho.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
-	s.apiEcho.Use(custommiddleware.VersionHeader(s.config))
-	s.apiEcho.Use(middleware.Recover())
+	// Timeout middleware has to be the first middleware in the list
+	// (see: https://github.com/labstack/echo/blob/3b017855b4d331002e2b8b28e903679b875ae3e9/middleware/timeout.go#L17)
 	s.apiEcho.Use(middleware.TimeoutWithConfig(
 		middleware.TimeoutConfig{
 			Skipper: func(c echo.Context) bool {
@@ -83,14 +64,37 @@ func (s *Server) initRoutes() {
 				return strings.HasPrefix(c.Request().URL.String(), "/ws")
 			},
 			Timeout: time.Duration(s.config.RestAPITimeout) * time.Millisecond,
+			OnTimeoutRouteErrorHandler: func(err error, c echo.Context) {
+				s.zapLog.Error("Timeout on route", zap.String("route", c.Path()), zap.Error(err))
+			},
+			ErrorMessage: `Timeout on the server, please retry later`,
 		}),
 	)
+	s.apiEcho.Use(custommiddleware.ZapLogger(s.zapLog, s.config))
+	s.apiEcho.Use(middleware.BodyDumpWithConfig(middleware.BodyDumpConfig{
+		Skipper: func(c echo.Context) bool {
+			isSwagger := strings.HasPrefix(c.Request().URL.String(), "/swagger")
+			return isSwagger || !s.zapLog.Core().Enabled(zap.DebugLevel)
+		},
+		Handler: func(_ echo.Context, reqBody []byte, _ []byte) {
+			s.zapLog.Debug("Request info", zap.ByteString("request_body", reqBody))
+		},
+	}))
+	if s.services.Metrics != (metric.Metrics{}) {
+		s.apiEcho.Use(echoprometheus.NewMiddlewareWithConfig(echoprometheus.MiddlewareConfig{
+			Subsystem:  metric.GOFFSubSystem,
+			Registerer: s.services.Metrics.Registry,
+		}))
+	}
+	s.apiEcho.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
+	s.apiEcho.Use(custommiddleware.VersionHeader(s.config))
+	s.apiEcho.Use(middleware.Recover())
 
 	// Init controllers
 	cAllFlags := controller.NewAllFlags(s.services.GOFeatureFlagService, s.services.Metrics)
 	cFlagEval := controller.NewFlagEval(s.services.GOFeatureFlagService, s.services.Metrics)
 	cFlagEvalOFREP := ofrep.NewOFREPEvaluate(s.services.GOFeatureFlagService, s.services.Metrics)
-	cEvalDataCollector := controller.NewCollectEvalData(s.services.GOFeatureFlagService, s.services.Metrics)
+	cEvalDataCollector := controller.NewCollectEvalData(s.services.GOFeatureFlagService, s.services.Metrics, s.zapLog)
 	cRetrieverRefresh := controller.NewForceFlagsRefresh(s.services.GOFeatureFlagService, s.services.Metrics)
 	cFlagChangeAPI := controller.NewAPIFlagChange(s.services.GOFeatureFlagService, s.services.Metrics)
 

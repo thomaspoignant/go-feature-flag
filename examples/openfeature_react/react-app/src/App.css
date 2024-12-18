@@ -1,42 +1,45 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+.badge-green {
+    @apply inline-flex;
+    @apply items-center;
+    @apply rounded-md;
+    @apply bg-green-50;
+    @apply px-2;
+    @apply py-1;
+    @apply text-xs;
+    @apply font-medium;
+    @apply text-green-700;
+    @apply ring-1;
+    @apply ring-inset;
+    @apply ring-green-600/20;
 }
 
-.logo {
-  height: 10em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #cce9e2);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #cce9e2);
+
+.badge-red {
+    @apply inline-flex;
+    @apply items-center;
+    @apply rounded-md;
+    @apply bg-red-50;
+    @apply px-2;
+    @apply py-1;
+    @apply text-xs;
+    @apply font-medium;
+    @apply text-red-700;
+    @apply ring-1;
+    @apply ring-inset;
+    @apply ring-red-600/10;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
+.badge-blue {
+    @apply inline-flex;
+    @apply items-center;
+    @apply rounded-md;
+    @apply bg-blue-50;
+    @apply px-2;
+    @apply py-1;
+    @apply text-xs;
+    @apply font-medium;
+    @apply text-blue-700;
+    @apply ring-1;
+    @apply ring-inset;
+    @apply ring-blue-700/10;
 }

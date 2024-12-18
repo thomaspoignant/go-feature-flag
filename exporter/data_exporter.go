@@ -2,6 +2,7 @@ package exporter
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"log/slog"
 	"sync"
@@ -59,13 +60,10 @@ type Scheduler struct {
 // the maximum number of events that can be present in the cache.
 func (dc *Scheduler) AddEvent(event FeatureEvent) {
 	if !dc.exporter.IsBulk() {
-		dc.mutex.Lock()
-		// if we are not in bulk we are directly flushing the data
-		dc.localCache = append(dc.localCache, event)
-		go func() {
-			defer dc.mutex.Unlock()
-			dc.flush()
-		}()
+		err := sendEvents(dc.ctx, dc.exporter, dc.logger, []FeatureEvent{event})
+		if err != nil {
+			dc.logger.Error(err.Error())
+		}
 		return
 	}
 
@@ -116,30 +114,42 @@ func (dc *Scheduler) GetLogger(level slog.Level) *log.Logger {
 
 // flush will call the data exporter and clear the cache
 func (dc *Scheduler) flush() {
-	if len(dc.localCache) > 0 {
-		switch exp := dc.exporter.(type) {
-		case DeprecatedExporter:
-			// use dc exporter as a DeprecatedExporter
-			err := exp.Export(dc.ctx, dc.GetLogger(slog.LevelError), dc.localCache)
-			slog.Warn("You are using an exporter with the old logger."+
-				"Please update your custom exporter to comply to the new Exporter interface.",
-				slog.Any("err", err))
-			if err != nil {
-				dc.logger.Error("error while exporting data", slog.Any("err", err))
-				return
-			}
-			break
-		case Exporter:
-			err := exp.Export(dc.ctx, dc.logger, dc.localCache)
-			if err != nil {
-				dc.logger.Error("error while exporting data", slog.Any("err", err))
-				return
-			}
-			break
-		default:
-			dc.logger.Error("this is not a valid exporter")
-			return
-		}
+	err := sendEvents(dc.ctx, dc.exporter, dc.logger, dc.localCache)
+	if err != nil {
+		dc.logger.Error(err.Error())
+		return
 	}
 	dc.localCache = make([]FeatureEvent, 0)
+}
+
+func sendEvents(ctx context.Context, exporter CommonExporter, logger *fflog.FFLogger, events []FeatureEvent) error {
+	if len(events) == 0 {
+		return nil
+	}
+
+	switch exp := exporter.(type) {
+	case DeprecatedExporter:
+		var legacyLogger *log.Logger
+		if logger != nil {
+			legacyLogger = logger.GetLogLogger(slog.LevelError)
+		}
+		// use dc exporter as a DeprecatedExporter
+		err := exp.Export(ctx, legacyLogger, events)
+		slog.Warn("You are using an exporter with the old logger."+
+			"Please update your custom exporter to comply to the new Exporter interface.",
+			slog.Any("err", err))
+		if err != nil {
+			return fmt.Errorf("error while exporting data: %w", err)
+		}
+		break
+	case Exporter:
+		err := exp.Export(ctx, logger, events)
+		if err != nil {
+			return fmt.Errorf("error while exporting data: %w", err)
+		}
+		break
+	default:
+		return fmt.Errorf("this is not a valid exporter")
+	}
+	return nil
 }

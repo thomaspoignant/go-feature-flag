@@ -273,13 +273,13 @@ files = [
 
 [[package]]
 name = "openfeature-sdk"
-version = "0.7.2"
+version = "0.7.4"
 description = "Standardizing Feature Flagging for Everyone"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "openfeature_sdk-0.7.2-py3-none-any.whl", hash = "sha256:433455d7d1772d12bd8e727bcb44fcbf7afe8415de8b40c0475836d69213758c"},
-    {file = "openfeature_sdk-0.7.2.tar.gz", hash = "sha256:e17723255bc8fc2bb27c360dbb87c5b933df9a882ba5ce90d34bc42e473e040d"},
+    {file = "openfeature_sdk-0.7.4-py3-none-any.whl", hash = "sha256:3a1f62a0407f05c47e28202cf90d9cbd03aba39c8f05506601aac60a2e7303c6"},
+    {file = "openfeature_sdk-0.7.4.tar.gz", hash = "sha256:e5db541167526104785a458395134b2eb926b1d1cd53b6c3f9505f28f5180acd"},
 ]
 
 [[package]]
@@ -336,13 +336,13 @@ testing = ["pytest", "pytest-benchmark"]
 
 [[package]]
 name = "pydantic"
-version = "2.10.1"
+version = "2.10.3"
 description = "Data validation using Python type hints"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pydantic-2.10.1-py3-none-any.whl", hash = "sha256:a8d20db84de64cf4a7d59e899c2caf0fe9d660c7cfc482528e7020d7dd189a7e"},
-    {file = "pydantic-2.10.1.tar.gz", hash = "sha256:a4daca2dc0aa429555e0656d6bf94873a7dc5f54ee42b1f5873d666fb3f35560"},
+    {file = "pydantic-2.10.3-py3-none-any.whl", hash = "sha256:be04d85bbc7b65651c5f8e6b9976ed9c6f41782a55524cef079a34a0bb82144d"},
+    {file = "pydantic-2.10.3.tar.gz", hash = "sha256:cb5ac360ce894ceacd69c403187900a02c4b20b693a9dd1d643e1effab9eadf9"},
 ]
 
 [package.dependencies]
@@ -479,13 +479,13 @@ files = [
 
 [[package]]
 name = "pytest"
-version = "8.3.3"
+version = "8.3.4"
 description = "pytest: simple powerful testing with Python"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pytest-8.3.3-py3-none-any.whl", hash = "sha256:a6853c7375b2663155079443d2e45de913a911a11d669df02a50814944db57b2"},
-    {file = "pytest-8.3.3.tar.gz", hash = "sha256:70b98107bd648308a7952b06e6ca9a50bc660be218d53c257cc1fc94fda10181"},
+    {file = "pytest-8.3.4-py3-none-any.whl", hash = "sha256:50e16d954148559c9a74109af1eaf0c945ba2d8f30f0a3d3335edde19788b6f6"},
+    {file = "pytest-8.3.4.tar.gz", hash = "sha256:965370d062bce11e73868e0335abac31b4d3de0e82f4007408d242b4f8610761"},
 ]
 
 [package.dependencies]

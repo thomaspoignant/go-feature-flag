@@ -121,7 +121,7 @@ jobs:
           username: ${DOCKER_USERNAME}
           password: ${DOCKER_PASSWORD}
           repository: gofeatureflag/go-feature-flag-cli
-          readme: "./cmd/lint/DOCKERHUB.md"
+          readme: "./cmd/cli/DOCKERHUB.md"
 
   dockerhub-relay-proxy:
     runs-on: ubuntu-latest
@@ -254,7 +254,7 @@ jobs:
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
       - name: yq - portable yaml processor
-        uses: mikefarah/yq@v4.44.5
+        uses: mikefarah/yq@v4.44.6
 
       - name: Bump chart appVersion
         working-directory: ./release/
