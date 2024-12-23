@@ -2,6 +2,7 @@ package flagset
 
 import (
 	"errors"
+
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"github.com/thomaspoignant/go-feature-flag/retriever"

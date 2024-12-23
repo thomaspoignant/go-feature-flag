@@ -1,6 +1,9 @@
 package flagset_test
 
 import (
+	"log/slog"
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/logsexporter"
@@ -10,8 +13,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
-	"log/slog"
-	"testing"
 )
 
 func TestFlagSetBuilder(t *testing.T) {
