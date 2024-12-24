@@ -63,6 +63,19 @@ func TestRule_Evaluate(t *testing.T) {
 			wantErr: assert.Error,
 		},
 		{
+			name: "User does not match the query (jsonlogic)",
+			rule: flag.Rule{
+				Name:            testconvert.String("rule1"),
+				VariationResult: testconvert.String("variation_A"),
+				Query:           testconvert.String(`{"==": [{"var": "key"}, "def"]}`),
+			},
+			args: args{
+				isDefault: false,
+				user:      ffcontext.NewEvaluationContext("abc"),
+			},
+			wantErr: assert.Error,
+		},
+		{
 			name: "User match the query",
 			rule: flag.Rule{
 				Name:            testconvert.String("rule1"),
@@ -75,6 +88,46 @@ func TestRule_Evaluate(t *testing.T) {
 			},
 			want:    "variation_A",
 			wantErr: assert.NoError,
+		},
+		{
+			name: "User match the query (jsonlogic)",
+			rule: flag.Rule{
+				Name:            testconvert.String("rule1"),
+				VariationResult: testconvert.String("variation_A"),
+				Query:           testconvert.String(`{"==": [{"var": "key"}, "abc"]}`),
+			},
+			args: args{
+				isDefault: false,
+				user:      ffcontext.NewEvaluationContext("abc"),
+			},
+			want:    "variation_A",
+			wantErr: assert.NoError,
+		},
+		{
+			name: "Invalid json for query",
+			rule: flag.Rule{
+				Name:            testconvert.String("rule1"),
+				VariationResult: testconvert.String("variation_A"),
+				Query:           testconvert.String(`{"==": [{"var": "key"}, "abc"]`),
+			},
+			args: args{
+				isDefault: false,
+				user:      ffcontext.NewEvaluationContext("abc"),
+			},
+			wantErr: assert.Error,
+		},
+		{
+			name: "Invalid jsonlogic query (valid JSON but invalid query format)",
+			rule: flag.Rule{
+				Name:            testconvert.String("rule1"),
+				VariationResult: testconvert.String("variation_A"),
+				Query:           testconvert.String(`{"xxx": [{"var": "key"}, "abc"]}`),
+			},
+			args: args{
+				isDefault: false,
+				user:      ffcontext.NewEvaluationContext("abc"),
+			},
+			wantErr: assert.Error,
 		},
 		{
 			name: "No match and no default variation",
