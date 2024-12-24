@@ -1,15 +1,26 @@
 package flag
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"log/slog"
 	"sort"
 	"strings"
 	"time"
 
+	jsonlogic "github.com/diegoholiveira/jsonlogic/v3"
 	"github.com/nikunjy/rules/parser"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/internal/internalerror"
 	"github.com/thomaspoignant/go-feature-flag/internal/utils"
+)
+
+type QueryFormat = string
+
+const (
+	NikunjyQueryFormat   QueryFormat = "nikunjy"
+	JSONLogicQueryFormat QueryFormat = "jsonlogic"
 )
 
 // Rule represents a rule applied by the flag.
@@ -18,7 +29,7 @@ type Rule struct {
 	// to update the rule during scheduled rollout
 	Name *string `json:"name,omitempty" yaml:"name,omitempty" toml:"name,omitempty" jsonschema:"title=name,description=Name is the name of the rule. This field is mandatory if you want to update the rule during scheduled rollout."` // nolint: lll
 
-	// Query represents an antlr query in the nikunjy/rules format
+	// Query represents the query used to target the audience of the flag.
 	Query *string `json:"query,omitempty" yaml:"query,omitempty" toml:"query,omitempty" jsonschema:"title=query,description=The query that allow to check in the evaluation context match. Note: in the defaultRule field query is ignored."` // nolint: lll
 
 	// VariationResult represents the variation name to use if the rule apply for the user.
@@ -54,7 +65,7 @@ func (r *Rule) Evaluate(key string, ctx ffcontext.Context, flagName string, isDe
 	}
 
 	// Check if the rule applies for this user
-	ruleApply := isDefault || r.GetQuery() == "" || parser.Evaluate(r.GetTrimmedQuery(), utils.ContextToMap(ctx))
+	ruleApply := isDefault || evaluateRule(r.GetTrimmedQuery(), r.GetQueryFormat(), ctx)
 	if !ruleApply || (!isDefault && r.IsDisable()) {
 		return "", &internalerror.RuleNotApply{Context: ctx}
 	}
@@ -68,6 +79,32 @@ func (r *Rule) Evaluate(key string, ctx ffcontext.Context, flagName string, isDe
 		return r.GetVariationResult(), nil
 	}
 	return "", fmt.Errorf("error in the configuration, no variation available for this rule")
+}
+
+func evaluateRule(query string, queryFormat QueryFormat, ctx ffcontext.Context) bool {
+	if query == "" {
+		return true
+	}
+	mapCtx := utils.ContextToMap(ctx)
+	switch queryFormat {
+	case JSONLogicQueryFormat:
+		strCtx, err := json.Marshal(mapCtx)
+		if err != nil {
+			slog.Error("error while marhsalling the context for the jsonlogic query",
+				slog.Any("mapCtx", mapCtx), slog.Any("error", err))
+			return false
+		}
+		var result bytes.Buffer
+		err = jsonlogic.Apply(strings.NewReader(query), strings.NewReader(string(strCtx)), &result)
+		if err != nil {
+			slog.Error("error while evaluating the jsonlogic query",
+				slog.String("query", query), slog.Any("error", err))
+			return false
+		}
+		return utils.StrTrim(result.String()) == "true"
+	default:
+		return parser.Evaluate(query, mapCtx)
+	}
 }
 
 // EvaluateProgressiveRollout is evaluating the progressive rollout for the rule.
@@ -294,7 +331,19 @@ func (r *Rule) isQueryValid(defaultRule bool) error {
 	}
 
 	// Validate the query with the parser
-	ev, err := parser.NewEvaluator(r.GetTrimmedQuery())
+	switch r.GetQueryFormat() {
+	case JSONLogicQueryFormat:
+		if !jsonlogic.IsValid(strings.NewReader(r.GetTrimmedQuery())) {
+			return fmt.Errorf("invalid jsonlogic query: %s", r.GetTrimmedQuery())
+		}
+		return nil
+	default:
+		return validateNikunjyQuery(r.GetTrimmedQuery())
+	}
+}
+
+func validateNikunjyQuery(query string) error {
+	ev, err := parser.NewEvaluator(query)
 	if err != nil {
 		return err
 	}
@@ -307,11 +356,15 @@ func (r *Rule) isQueryValid(defaultRule bool) error {
 
 // GetTrimmedQuery is removing the break lines and return
 func (r *Rule) GetTrimmedQuery() string {
-	splitQuery := strings.Split(r.GetQuery(), "\n")
-	for index, item := range splitQuery {
-		splitQuery[index] = strings.TrimLeft(item, " ")
+	return utils.StrTrim(r.GetQuery())
+}
+
+// GetQueryFormat is returning the format used for the query
+func (r *Rule) GetQueryFormat() QueryFormat {
+	if utils.IsJSONObject(r.GetTrimmedQuery()) {
+		return JSONLogicQueryFormat
 	}
-	return strings.Join(splitQuery, "")
+	return NikunjyQueryFormat
 }
 
 func (r *Rule) GetQuery() string {
