@@ -20,7 +20,7 @@ type QueryFormat = string
 
 const (
 	NikunjyQueryFormat   QueryFormat = "nikunjy"
-	JsonLogicQueryFormat QueryFormat = "json_logic"
+	JSONLogicQueryFormat QueryFormat = "jsonlogic"
 )
 
 // Rule represents a rule applied by the flag.
@@ -87,7 +87,7 @@ func evaluateRule(query string, queryFormat QueryFormat, ctx ffcontext.Context) 
 	}
 	mapCtx := utils.ContextToMap(ctx)
 	switch queryFormat {
-	case JsonLogicQueryFormat:
+	case JSONLogicQueryFormat:
 		strCtx, err := json.Marshal(mapCtx)
 		if err != nil {
 			slog.Error("error while marhsalling the context for the jsonlogic query",
@@ -333,7 +333,7 @@ func (r *Rule) isQueryValid(defaultRule bool) error {
 
 	// Validate the query with the parser
 	switch r.GetQueryFormat() {
-	case JsonLogicQueryFormat:
+	case JSONLogicQueryFormat:
 		if !jsonlogic.IsValid(strings.NewReader(r.GetTrimmedQuery())) {
 			return fmt.Errorf("invalid jsonlogic query: %s", r.GetTrimmedQuery())
 		}
@@ -363,7 +363,7 @@ func (r *Rule) GetTrimmedQuery() string {
 // GetQueryFormat is returning the format used for the query
 func (r *Rule) GetQueryFormat() QueryFormat {
 	if utils.IsJSONObject(r.GetTrimmedQuery()) {
-		return JsonLogicQueryFormat
+		return JSONLogicQueryFormat
 	}
 	return NikunjyQueryFormat
 }
