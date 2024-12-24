@@ -66,7 +66,6 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 		"listen":          "1031",
 		"host":            "localhost",
 		"fileFormat":      "yaml",
-		"restApiTimeout":  5000,
 		"pollingInterval": 60000,
 		"logLevel":        DefaultLogLevel,
 	}, "."), nil)
@@ -259,9 +258,6 @@ type Config struct {
 
 	// Notifiers is the configuration on where to notify a flag change
 	Notifiers []NotifierConf `mapstructure:"notifier" koanf:"notifier"`
-
-	// RestAPITimeout is the timeout on the API.
-	RestAPITimeout int `mapstructure:"restApiTimeout" koanf:"restapitimeout"`
 
 	// Version is the version of the relay-proxy
 	Version string `mapstructure:"version" koanf:"version"`

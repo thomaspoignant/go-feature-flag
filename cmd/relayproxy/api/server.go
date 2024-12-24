@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/labstack/echo-contrib/echoprometheus"
@@ -55,21 +54,6 @@ func (s *Server) initRoutes() {
 	s.apiEcho.HidePort = true
 	s.apiEcho.Debug = s.config.IsDebugEnabled()
 	s.apiEcho.Use(otelecho.Middleware("go-feature-flag"))
-	// Timeout middleware has to be the first middleware in the list
-	// (see: https://github.com/labstack/echo/blob/3b017855b4d331002e2b8b28e903679b875ae3e9/middleware/timeout.go#L17)
-	s.apiEcho.Use(middleware.TimeoutWithConfig(
-		middleware.TimeoutConfig{
-			Skipper: func(c echo.Context) bool {
-				// ignore websocket in the timeout
-				return strings.HasPrefix(c.Request().URL.String(), "/ws")
-			},
-			Timeout: time.Duration(s.config.RestAPITimeout) * time.Millisecond,
-			OnTimeoutRouteErrorHandler: func(err error, c echo.Context) {
-				s.zapLog.Error("Timeout on route", zap.String("route", c.Path()), zap.Error(err))
-			},
-			ErrorMessage: `Timeout on the server, please retry later`,
-		}),
-	)
 	s.apiEcho.Use(custommiddleware.ZapLogger(s.zapLog, s.config))
 	s.apiEcho.Use(middleware.BodyDumpWithConfig(middleware.BodyDumpConfig{
 		Skipper: func(c echo.Context) bool {
