@@ -138,14 +138,7 @@ class OfrepProvider(
         defaultValue: Int,
         context: EvaluationContext?
     ): ProviderEvaluation<Int> {
-        val res = genericEvaluation<Int>(key, Int::class)
-        return ProviderEvaluation<Int>(
-            value = res.value,
-            reason = res.reason,
-            variant = res.variant,
-            errorCode = res.errorCode,
-            errorMessage = res.errorMessage
-        )
+        return genericEvaluation<Int>(key, Int::class)
     }
 
     override fun getObjectEvaluation(
