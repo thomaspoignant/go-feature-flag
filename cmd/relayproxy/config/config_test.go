@@ -37,7 +37,6 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 					Kind: "log",
 				},
 				StartWithRetrieverError: false,
-				RestAPITimeout:          5000,
 				Version:                 "1.X.X",
 				EnableSwagger:           true,
 				AuthorizedKeys: config.APIKeys{
@@ -75,7 +74,6 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 					},
 				},
 				StartWithRetrieverError: false,
-				RestAPITimeout:          5000,
 				Version:                 "1.X.X",
 				EnableSwagger:           true,
 				AuthorizedKeys: config.APIKeys{
@@ -105,7 +103,6 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 					Kind: "log",
 				},
 				StartWithRetrieverError: false,
-				RestAPITimeout:          5000,
 				Version:                 "1.X.X",
 				EnableSwagger:           true,
 				APIKeys: []string{
@@ -133,7 +130,6 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 					Kind: "log",
 				},
 				StartWithRetrieverError: false,
-				RestAPITimeout:          5000,
 				Version:                 "1.X.X",
 				EnableSwagger:           true,
 				APIKeys: []string{
@@ -153,7 +149,6 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 				FileFormat:              "yaml",
 				Host:                    "localhost",
 				StartWithRetrieverError: false,
-				RestAPITimeout:          5000,
 				Version:                 "1.X.X",
 				LogLevel:                config.DefaultLogLevel,
 			},
@@ -172,7 +167,6 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 				PollingInterval: 60000,
 				FileFormat:      "yaml",
 				Host:            "localhost",
-				RestAPITimeout:  5000,
 				LogLevel:        config.DefaultLogLevel,
 				Version:         "1.X.X",
 				Retrievers: &[]config.RetrieverConf{
@@ -238,7 +232,6 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 					Kind: "log",
 				},
 				StartWithRetrieverError: false,
-				RestAPITimeout:          5000,
 				Version:                 "1.X.X",
 				EnableSwagger:           true,
 				AuthorizedKeys: config.APIKeys{
@@ -263,7 +256,6 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 				FileFormat:              "yaml",
 				Host:                    "localhost",
 				StartWithRetrieverError: false,
-				RestAPITimeout:          5000,
 				Version:                 "1.X.X",
 				LogLevel:                config.DefaultLogLevel,
 			},
@@ -284,7 +276,6 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 				FileFormat:              "yaml",
 				Host:                    "localhost",
 				StartWithRetrieverError: false,
-				RestAPITimeout:          5000,
 				Version:                 "1.X.X",
 				LogLevel:                config.DefaultLogLevel,
 			},
@@ -299,7 +290,6 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 				FileFormat:              "yaml",
 				Host:                    "localhost",
 				StartWithRetrieverError: false,
-				RestAPITimeout:          5000,
 				Version:                 "1.X.X",
 				LogLevel:                config.DefaultLogLevel,
 			},
@@ -314,7 +304,6 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 				FileFormat:              "yaml",
 				Host:                    "localhost",
 				StartWithRetrieverError: false,
-				RestAPITimeout:          5000,
 				Version:                 "1.X.X",
 				LogLevel:                config.DefaultLogLevel,
 			},
@@ -837,7 +826,6 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 					Kind: "log",
 				},
 				StartWithRetrieverError: false,
-				RestAPITimeout:          5000,
 				Version:                 "1.X.X",
 				EnableSwagger:           true,
 				AuthorizedKeys: config.APIKeys{
@@ -870,7 +858,6 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 				PollingInterval: 60000,
 				FileFormat:      "yaml",
 				Host:            "localhost",
-				RestAPITimeout:  5000,
 				LogLevel:        config.DefaultLogLevel,
 				Version:         "1.X.X",
 				Retrievers: &[]config.RetrieverConf{
