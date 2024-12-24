@@ -105,7 +105,6 @@ func evaluateRule(query string, queryFormat QueryFormat, ctx ffcontext.Context) 
 	default:
 		return parser.Evaluate(query, mapCtx)
 	}
-
 }
 
 // EvaluateProgressiveRollout is evaluating the progressive rollout for the rule.
