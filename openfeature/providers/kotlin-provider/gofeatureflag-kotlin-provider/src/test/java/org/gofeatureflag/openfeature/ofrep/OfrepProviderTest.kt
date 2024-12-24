@@ -1,6 +1,7 @@
 package org.gofeatureflag.openfeature.ofrep
 
 import dev.openfeature.sdk.EvaluationContext
+import dev.openfeature.sdk.EvaluationMetadata
 import dev.openfeature.sdk.FlagEvaluationDetails
 import dev.openfeature.sdk.ImmutableContext
 import dev.openfeature.sdk.OpenFeatureAPI
@@ -230,6 +231,10 @@ class OfrepProviderTest {
             reason = "DEFAULT",
             errorCode = null,
             errorMessage = null,
+            metadata = EvaluationMetadata.builder()
+                .putString("description", "This flag controls the title of the feature flag")
+                .putString("title", "Feature Flag Title")
+                .build()
         )
         assertEquals(want, got)
     }
@@ -312,7 +317,7 @@ class OfrepProviderTest {
     }
 
     @Test
-    fun `should return a valid evaluation for Boolean`() = runBlocking {
+    fun `should return a valid evaluation for Boolean`(): Unit = runBlocking {
         enqueueMockResponse("org.gofeatureflag.openfeature.ofrep/valid_api_response.json", 200)
         val provider = OfrepProvider(OfrepOptions(endpoint = mockWebServer?.url("/").toString()))
         OpenFeatureAPI.setProviderAndWait(provider, Dispatchers.IO, defaultEvalCtx)
@@ -325,6 +330,11 @@ class OfrepProviderTest {
             reason = "TARGETING_MATCH",
             errorCode = null,
             errorMessage = null,
+            metadata = EvaluationMetadata.builder()
+                .putBoolean("additionalProp1", true)
+                .putString("additionalProp2", "value")
+                .putInt("additionalProp3", 123)
+                .build()
         )
         assertEquals(want, got)
     }
@@ -343,6 +353,11 @@ class OfrepProviderTest {
             reason = "TARGETING_MATCH",
             errorCode = null,
             errorMessage = null,
+            metadata = EvaluationMetadata.builder()
+                .putBoolean("additionalProp1", true)
+                .putString("additionalProp2", "value")
+                .putInt("additionalProp3", 123)
+                .build()
         )
         assertEquals(want, got)
     }
@@ -361,6 +376,11 @@ class OfrepProviderTest {
             reason = "TARGETING_MATCH",
             errorCode = null,
             errorMessage = null,
+            metadata = EvaluationMetadata.builder()
+                .putBoolean("additionalProp1", true)
+                .putString("additionalProp2", "value")
+                .putInt("additionalProp3", 123)
+                .build()
         )
         assertEquals(want, got)
     }
@@ -379,6 +399,11 @@ class OfrepProviderTest {
             reason = "TARGETING_MATCH",
             errorCode = null,
             errorMessage = null,
+            metadata = EvaluationMetadata.builder()
+                .putBoolean("additionalProp1", true)
+                .putString("additionalProp2", "value")
+                .putInt("additionalProp3", 123)
+                .build()
         )
         assertEquals(want, got)
     }
@@ -401,6 +426,11 @@ class OfrepProviderTest {
             reason = "TARGETING_MATCH",
             errorCode = null,
             errorMessage = null,
+            metadata = EvaluationMetadata.builder()
+                .putBoolean("additionalProp1", true)
+                .putString("additionalProp2", "value")
+                .putInt("additionalProp3", 123)
+                .build()
         )
         assertEquals(want, got)
     }
@@ -435,6 +465,11 @@ class OfrepProviderTest {
             reason = "TARGETING_MATCH",
             errorCode = null,
             errorMessage = null,
+            metadata = EvaluationMetadata.builder()
+                .putBoolean("additionalProp1", true)
+                .putString("additionalProp2", "value")
+                .putInt("additionalProp3", 123)
+                .build()
         )
         assertEquals(want, got)
     }

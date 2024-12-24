@@ -1,3 +1,4 @@
+import dev.openfeature.sdk.EvaluationMetadata
 import dev.openfeature.sdk.ProviderEvaluation
 import dev.openfeature.sdk.Value
 import dev.openfeature.sdk.exceptions.ErrorCode
@@ -16,7 +17,8 @@ data class FlagDto(
     val reason: String,
     val variant: String,
     val errorCode: ErrorCode?,
-    val errorDetails: String?
+    val errorDetails: String?,
+    val metadata: Map<String, Any>? = emptyMap()
 ) {
     fun isError(): Boolean {
         return errorCode != null
@@ -38,7 +40,8 @@ data class FlagDto(
                 reason = reason,
                 variant = variant,
                 errorCode = errorCode,
-                errorMessage = errorDetails
+                errorMessage = errorDetails,
+                metadata = convertMetadata(metadata)
             )
         }
 
@@ -50,7 +53,8 @@ data class FlagDto(
                     reason = reason,
                     variant = variant,
                     errorCode = errorCode,
-                    errorMessage = errorDetails
+                    errorMessage = errorDetails,
+                    metadata = convertMetadata(metadata)
                 )
             } else if (value is Map<*, *>) {
                 val typedValue = convertObjectToStructure(value)
@@ -59,7 +63,8 @@ data class FlagDto(
                     reason = reason,
                     variant = variant,
                     errorCode = errorCode,
-                    errorMessage = errorDetails
+                    errorMessage = errorDetails,
+                    metadata = convertMetadata(metadata)
                 )
             } else {
                 throw IllegalArgumentException("Unsupported type for: $value")
@@ -74,8 +79,44 @@ data class FlagDto(
             reason = reason,
             variant = variant,
             errorCode = errorCode,
-            errorMessage = errorDetails
+            errorMessage = errorDetails,
+            metadata = convertMetadata(metadata)
         )
+    }
+
+    private fun convertMetadata(inputMap: Map<String, Any>?): EvaluationMetadata {
+        //check that inputMap is null or empty
+        if (inputMap.isNullOrEmpty()) {
+            return EvaluationMetadata.EMPTY
+        }
+
+        val metadataBuilder = EvaluationMetadata.builder()
+        inputMap.forEach { entry ->
+            // switch case on entry.value types
+            when (entry.value) {
+                is String -> {
+                    metadataBuilder.putString(entry.key, entry.value as String)
+                }
+
+                is Boolean -> {
+                    metadataBuilder.putBoolean(entry.key, entry.value as Boolean)
+                }
+
+                is Int -> {
+                    metadataBuilder.putInt(entry.key, entry.value as Int)
+                }
+
+                is Long -> {
+                    metadataBuilder.putInt(entry.key, (entry.value as Long).toInt())
+                }
+
+                is Double -> {
+                    metadataBuilder.putDouble(entry.key, entry.value as Double)
+                }
+            }
+        }
+
+        return metadataBuilder.build()
     }
 
     private fun convertList(inputList: List<*>): List<Value> {

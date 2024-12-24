@@ -59,6 +59,7 @@ class OfrepApiTest {
         )
         val res = ofrepApi.postBulkEvaluateFlags(ctx)
         assertEquals(200, res.httpResponse.code)
+
         val expected = OfrepApiResponse(
             flags = listOf(
                 FlagDto(
@@ -67,7 +68,8 @@ class OfrepApiTest {
                     reason = "DEFAULT",
                     variant = "nocolor",
                     errorCode = null,
-                    errorDetails = null
+                    errorDetails = null,
+                    metadata = null
                 ),
                 FlagDto(
                     key = "hide-logo",
@@ -75,7 +77,8 @@ class OfrepApiTest {
                     reason = "STATIC",
                     variant = "var_false",
                     errorCode = null,
-                    errorDetails = null
+                    errorDetails = null,
+                    metadata = null
                 ),
                 FlagDto(
                     key = "title-flag",
@@ -83,7 +86,11 @@ class OfrepApiTest {
                     reason = "DEFAULT",
                     variant = "default_title",
                     errorCode = null,
-                    errorDetails = null
+                    errorDetails = null,
+                    metadata = hashMapOf<String, Any>(
+                        "description" to "This flag controls the title of the feature flag",
+                        "title" to "Feature Flag Title"
+                    )
                 )
             ), null, null
         )
