@@ -1,0 +1,12 @@
+{
+  "non-existent-flag": {
+    "trackEvents": true,
+    "variationType": "SdkDefault",
+    "failed": true,
+    "version": "",
+    "reason": "ERROR",
+    "errorCode": "FLAG_NOT_FOUND",
+    "value": null,
+    "cacheable": false
+  }
+}

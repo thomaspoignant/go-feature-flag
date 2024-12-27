@@ -63,7 +63,7 @@ jobs:
           check-latest: true
       - run: make coverage
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -100,12 +100,12 @@ jobs:
           go-version-file: go.mod
           check-latest: true
 
-      - name: Run GoReleaser
+      - name: Run GoReleaser .goreleaser.yaml check
         uses: goreleaser/goreleaser-action@v6
         with:
           distribution: goreleaser
           version: latest
-          args: check
+          args: check --config .goreleaser.yaml
 
   integration-tests:
     name: Integration Tests
@@ -127,9 +127,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 16
+      - name: Install ICU packages
+        run: sudo apt-get update && sudo apt-get install -y libicu-dev
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '3.1.x'
+          dotnet-version: '7.0.x'
       - run: make provider-tests
 
   Benchmark:

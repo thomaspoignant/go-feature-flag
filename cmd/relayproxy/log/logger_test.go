@@ -1,41 +1,80 @@
 package log_test
 
 import (
+	"io"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/log"
 	"go.uber.org/zap"
-	"go.uber.org/zap/zaptest/observer"
 )
 
-// Test that InitLogger returns a valid *zap.Logger
-func TestInitLogger(t *testing.T) {
-	logger := log.InitLogger()
-	assert.NotNil(t, logger, "Expected logger to not be nil")
+// temporarily replace stderr so we can capture it
+// close the closer before reading from the reader
+// not safe for concurrent use!
+func replaceStderr(t *testing.T) (io.Reader, io.Closer) {
+	oldStderr := os.Stderr
+	r, w, err := os.Pipe()
+	require.NoError(t, err)
+	os.Stderr = w
+
+	t.Cleanup(func() { os.Stderr = oldStderr })
+
+	return r, w
 }
 
-// Test that the logger outputs the expected message
-func TestLoggerOutput(t *testing.T) {
-	atom := zap.NewAtomicLevel()
-	atom.SetLevel(zap.InfoLevel)
-	// Create an observer to capture logs
-	core, observedLogs := observer.New(zap.InfoLevel)
+func TestInitLogger(t *testing.T) {
+	r, w := replaceStderr(t)
 
-	// Create a new logger with the observer
-	logger := zap.New(core)
+	logger := log.InitLogger()
+	logger.ZapLogger.Info("test message")
 
-	// Set the global logger to use the new logger
-	zap.ReplaceGlobals(logger)
+	w.Close()
 
-	// Initialize the logger from the package
-	log.InitLogger()
+	b, err := io.ReadAll(r)
+	require.NoError(t, err)
 
-	// Log a message
-	zap.L().Info("test message")
+	assert.Contains(t, string(b), `"level":"info"`)
+	assert.Contains(t, string(b), `"msg":"test message"`)
+}
 
-	// Ensure that the message was logged as expected
-	logs := observedLogs.All()
-	assert.Equal(t, 1, len(logs), "Expected 1 log message, got %d", len(logs))
-	assert.Equal(t, "test message", logs[0].Message, "Unexpected log message")
+func TestLoggerUpdate(t *testing.T) {
+	t.Run("update to logfmt/warn", func(t *testing.T) {
+		r, w := replaceStderr(t)
+
+		logger := log.InitLogger()
+		logger.Update("logfmt", zap.WarnLevel)
+		logger.ZapLogger.Info("hidden")
+		logger.ZapLogger.Warn("danger, Will Robinson!")
+
+		w.Close()
+
+		b, err := io.ReadAll(r)
+		require.NoError(t, err)
+
+		assert.NotContains(t, string(b), `{`)
+		assert.NotContains(t, string(b), `info`)
+
+		assert.Contains(t, string(b), `level=warn`)
+		assert.Contains(t, string(b), `msg="danger, Will Robinson!"`)
+	})
+
+	t.Run("json by default", func(t *testing.T) {
+		r, w := replaceStderr(t)
+
+		logger := log.InitLogger()
+		logger.Update("", zap.DebugLevel)
+		logger.ZapLogger.Info("hello world")
+		logger.ZapLogger.Debug("debugging")
+
+		w.Close()
+
+		b, err := io.ReadAll(r)
+		require.NoError(t, err)
+
+		assert.Contains(t, string(b), `"level":"debug"`)
+		assert.Contains(t, string(b), `"msg":"debugging"`)
+	})
 }

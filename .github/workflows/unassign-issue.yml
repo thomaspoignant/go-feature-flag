@@ -9,7 +9,7 @@ on:
 
 
 env:
-  DAYS_UNTIL_STALE: 10 # Number of days before marking as stale
+  DAYS_UNTIL_STALE: 20 # Number of days before marking as stale
   ASSIGNED_LABEL: "📍 Assigned"
   PINNED_LABEL: "📌 Pinned"
   STALE_LABEL: "Stale"
@@ -85,7 +85,7 @@ jobs:
           days-before-close: -1 # Don't close stale issues
           exempt-issue-labels: ${{ env.PINNED_LABEL }}
           remove-stale-when-updated: false
-          only-labels: ${{ env.ASSIGNED_LABEL }}
+          include-only-assigned: true
 
       - name: Unassign stale issues and remove labels
         uses: actions/github-script@v7
@@ -107,8 +107,7 @@ jobs:
             const staleIssues = await github.paginate(github.rest.issues.listForRepo, {
               owner, repo,
               state: 'open',
-              labels: staleLabel,
-              assignee: '*'
+              labels: staleLabel
             });
               
             for (const issue of staleIssues) {

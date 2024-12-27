@@ -5,7 +5,7 @@ on:
 
 jobs:
   pre-version-check:
-    if:  ${{ startsWith(github.event.release.tag_name, 'v') }}
+    if: ${{ startsWith(github.event.release.tag_name, 'v') }}
     name: pre version check
     runs-on: ubuntu-latest
     steps:
@@ -43,6 +43,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Free space on runner
+        run: ./.github/ci-scripts/free_space.sh
 
       - name: Fetch all tags
         run: git fetch --force --tags
@@ -100,6 +103,25 @@ jobs:
           password: ${DOCKER_PASSWORD}
           repository: gofeatureflag/go-feature-flag-lint
           readme: "./cmd/lint/DOCKERHUB.md"
+
+  dockerhub-cli:
+    runs-on: ubuntu-latest
+    name: Upload dockerhub readme
+    needs:
+      - goreleaser
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Release readme to DockerHub
+        uses: ms-jpq/sync-dockerhub-readme@v1
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        with:
+          username: ${DOCKER_USERNAME}
+          password: ${DOCKER_PASSWORD}
+          repository: gofeatureflag/go-feature-flag-cli
+          readme: "./cmd/cli/DOCKERHUB.md"
 
   dockerhub-relay-proxy:
     runs-on: ubuntu-latest
@@ -232,7 +254,7 @@ jobs:
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
       - name: yq - portable yaml processor
-        uses: mikefarah/yq@v4.44.3
+        uses: mikefarah/yq@v4.44.6
 
       - name: Bump chart appVersion
         working-directory: ./release/

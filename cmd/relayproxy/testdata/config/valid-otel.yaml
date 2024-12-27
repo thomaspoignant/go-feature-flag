@@ -1,0 +1,13 @@
+listen: 1031
+retrievers:
+  - kind: file
+    path: examples/retriever_file/flags.goff.yaml
+otel:
+  exporter:
+    otlp:
+      endpoint: http://example.com:4317
+      protocl: grpc
+  resource:
+    attributes:
+      foo.bar: baz
+      foo.baz: bar

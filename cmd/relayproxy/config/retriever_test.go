@@ -55,6 +55,13 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 			},
 			wantErr:  true,
 			errValue: "invalid retriever: no \"path\" property found for kind \"gitlab\"",
+		}, {
+			name: "kind BitbucketRetriever without repo slug",
+			fields: config.RetrieverConf{
+				Kind: "bitbucket",
+			},
+			wantErr:  true,
+			errValue: "invalid retriever: no \"repositorySlug\" property found for kind \"bitbucket\"",
 		},
 		{
 			name: "kind S3Retriever without item",
@@ -114,6 +121,39 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 			},
 			wantErr:  true,
 			errValue: "invalid retriever: no \"bucket\" property found for kind \"googleStorage\"",
+		},
+		{
+			name: "kind azureBlobStorage without object",
+			fields: config.RetrieverConf{
+				Kind:        "azureBlobStorage",
+				Container:   "testcontainer",
+				AccountName: "devstoreaccount1",
+				AccountKey:  "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq",
+			},
+			wantErr:  true,
+			errValue: "invalid retriever: no \"object\" property found for kind \"azureBlobStorage\"",
+		},
+		{
+			name: "kind azureBlobStorage without accountName",
+			fields: config.RetrieverConf{
+				Kind:       "azureBlobStorage",
+				Container:  "testcontainer",
+				Object:     "flag-config.yaml",
+				AccountKey: "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq",
+			},
+			wantErr:  true,
+			errValue: "invalid retriever: no \"accountName\" property found for kind \"azureBlobStorage\"",
+		},
+		{
+			name: "kind azureBlobStorage without container",
+			fields: config.RetrieverConf{
+				Kind:        "azureBlobStorage",
+				Object:      "flag-config.yaml",
+				AccountName: "devstoreaccount1",
+				AccountKey:  "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq",
+			},
+			wantErr:  true,
+			errValue: "invalid retriever: no \"container\" property found for kind \"azureBlobStorage\"",
 		},
 		{
 			name: "valid s3",

@@ -10,18 +10,24 @@ import (
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
+	"github.com/thomaspoignant/go-feature-flag/exporter/azureexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/gcstorageexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/kafkaexporter"
+	"github.com/thomaspoignant/go-feature-flag/exporter/kinesisexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/logsexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/pubsubexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/s3exporterv2"
 	"github.com/thomaspoignant/go-feature-flag/exporter/sqsexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/webhookexporter"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
+	"github.com/thomaspoignant/go-feature-flag/notifier/discordnotifier"
+	"github.com/thomaspoignant/go-feature-flag/notifier/microsoftteamsnotifier"
 	"github.com/thomaspoignant/go-feature-flag/notifier/slacknotifier"
 	"github.com/thomaspoignant/go-feature-flag/notifier/webhooknotifier"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever/azblobstorageretriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever/bitbucketretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/gcstorageretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/githubretriever"
@@ -181,6 +187,20 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 			RepositorySlug: c.RepositorySlug,
 			Timeout:        retrieverTimeout,
 		}, nil
+	case config.BitbucketRetriever:
+		return &bitbucketretriever.Retriever{
+			RepositorySlug: c.RepositorySlug,
+			Branch: func() string {
+				if c.Branch == "" {
+					return config.DefaultRetriever.GitBranch
+				}
+				return c.Branch
+			}(),
+			FilePath:       c.Path,
+			BitBucketToken: c.AuthToken,
+			BaseURL:        c.BaseURL,
+			Timeout:        retrieverTimeout,
+		}, nil
 	case config.FileRetriever:
 		return &fileretriever.Retriever{Path: c.Path}, nil
 	case config.S3Retriever:
@@ -208,6 +228,13 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 		return &mongodbretriever.Retriever{Database: c.Database, URI: c.URI, Collection: c.Collection}, nil
 	case config.RedisRetriever:
 		return &redisretriever.Retriever{Options: c.RedisOptions, Prefix: c.RedisPrefix}, nil
+	case config.AzBlobStorageRetriever:
+		return &azblobretriever.Retriever{
+			Container:   c.Container,
+			Object:      c.Object,
+			AccountName: c.AccountName,
+			AccountKey:  c.AccountKey,
+		}, nil
 	default:
 		return nil, fmt.Errorf("invalid retriever: kind \"%s\" "+
 			"is not supported", c.Kind)
@@ -301,6 +328,19 @@ func createExporter(c *config.ExporterConf) (exporter.CommonExporter, error) {
 			ParquetCompressionCodec: parquetCompressionCodec,
 			AwsConfig:               &awsConfig,
 		}, nil
+	case config.KinesisExporter:
+		awsConfig, err := awsConf.LoadDefaultConfig(context.Background())
+		if err != nil {
+			return nil, err
+		}
+		return &kinesisexporter.Exporter{
+			Format:    format,
+			AwsConfig: &awsConfig,
+			Settings: kinesisexporter.NewSettings(
+				kinesisexporter.WithStreamArn(c.StreamArn),
+				kinesisexporter.WithStreamName(c.StreamName),
+			),
+		}, nil
 	case config.GoogleStorageExporter:
 		return &gcstorageexporter.Exporter{
 			Bucket:                  c.Bucket,
@@ -315,7 +355,6 @@ func createExporter(c *config.ExporterConf) (exporter.CommonExporter, error) {
 		if err != nil {
 			return nil, err
 		}
-
 		return &sqsexporter.Exporter{
 			QueueURL:  c.QueueURL,
 			AwsConfig: &awsConfig,
@@ -329,6 +368,17 @@ func createExporter(c *config.ExporterConf) (exporter.CommonExporter, error) {
 		return &pubsubexporter.Exporter{
 			ProjectID: c.ProjectID,
 			Topic:     c.Topic,
+		}, nil
+	case config.AzureExporter:
+		return &azureexporter.Exporter{
+			Container:               c.Container,
+			Format:                  format,
+			Path:                    c.Path,
+			Filename:                filename,
+			CsvTemplate:             csvTemplate,
+			ParquetCompressionCodec: parquetCompressionCodec,
+			AccountKey:              c.AccountKey,
+			AccountName:             c.AccountName,
 		}, nil
 	default:
 		return nil, fmt.Errorf("invalid exporter: kind \"%s\" is not supported", c.Kind)
@@ -344,8 +394,18 @@ func initNotifier(c []config.NotifierConf) ([]notifier.Notifier, error) {
 	for _, cNotif := range c {
 		switch cNotif.Kind {
 		case config.SlackNotifier:
-			notifiers = append(notifiers, &slacknotifier.Notifier{SlackWebhookURL: cNotif.SlackWebhookURL})
-
+			if cNotif.WebhookURL == "" && cNotif.SlackWebhookURL != "" { // nolint
+				zap.L().Warn("slackWebhookURL field is deprecated, please use webhookURL instead")
+				cNotif.WebhookURL = cNotif.SlackWebhookURL // nolint
+			}
+			notifiers = append(notifiers, &slacknotifier.Notifier{SlackWebhookURL: cNotif.WebhookURL})
+		case config.MicrosoftTeamsNotifier:
+			notifiers = append(
+				notifiers,
+				&microsoftteamsnotifier.Notifier{
+					MicrosoftTeamsWebhookURL: cNotif.WebhookURL,
+				},
+			)
 		case config.WebhookNotifier:
 			notifiers = append(notifiers,
 				&webhooknotifier.Notifier{
@@ -355,7 +415,8 @@ func initNotifier(c []config.NotifierConf) ([]notifier.Notifier, error) {
 					Headers:     cNotif.Headers,
 				},
 			)
-
+		case config.DiscordNotifier:
+			notifiers = append(notifiers, &discordnotifier.Notifier{DiscordWebhookURL: cNotif.WebhookURL})
 		default:
 			return nil, fmt.Errorf("invalid notifier: kind \"%s\" is not supported", cNotif.Kind)
 		}

@@ -2556,6 +2556,26 @@ func TestInternalFlag_IsValid(t *testing.T) {
 			errorMsg: "invalid progressive rollout, end variation C does not exist",
 			wantErr:  assert.Error,
 		},
+		{
+			name: "should error if rule query is not valid for the parser",
+			fields: fields{
+				Variations: &map[string]*interface{}{
+					"A": testconvert.Interface("A"),
+					"B": testconvert.Interface("B"),
+				},
+				Rules: &[]flag.Rule{
+					{
+						Query:           testconvert.String("invalid"),
+						VariationResult: testconvert.String("A"),
+					},
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("A"),
+				},
+			},
+			errorMsg: "invalid query: Invalid rule",
+			wantErr:  assert.Error,
+		},
 	}
 
 	for _, tt := range tests {

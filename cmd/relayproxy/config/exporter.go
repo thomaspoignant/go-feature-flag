@@ -28,6 +28,11 @@ type ExporterConf struct {
 	Kafka                   kafkaexporter.Settings `mapstructure:"kafka" koanf:"kafka"`
 	ProjectID               string                 `mapstructure:"projectID" koanf:"projectid"`
 	Topic                   string                 `mapstructure:"topic" koanf:"topic"`
+	StreamArn               string                 `mapstructure:"streamArn" koanf:"streamarn"`
+	StreamName              string                 `mapstructure:"streamName" koanf:"streamname"`
+	AccountName             string                 `mapstructure:"accountName" koanf:"accountname"`
+	AccountKey              string                 `mapstructure:"accountKey" koanf:"accountkey"`
+	Container               string                 `mapstructure:"container" koanf:"container"`
 }
 
 func (c *ExporterConf) IsValid() error {
@@ -39,6 +44,9 @@ func (c *ExporterConf) IsValid() error {
 	}
 	if (c.Kind == S3Exporter || c.Kind == GoogleStorageExporter) && c.Bucket == "" {
 		return fmt.Errorf("invalid exporter: no \"bucket\" property found for kind \"%s\"", c.Kind)
+	}
+	if (c.Kind == KinesisExporter) && (c.StreamArn == "" && c.StreamName == "") {
+		return fmt.Errorf("invalid exporter: no \"streamArn\" or \"streamName\" property found for kind \"%s\"", c.Kind)
 	}
 	if c.Kind == WebhookExporter && c.EndpointURL == "" {
 		return fmt.Errorf("invalid exporter: no \"endpointUrl\" property found for kind \"%s\"", c.Kind)
@@ -60,6 +68,13 @@ func (c *ExporterConf) IsValid() error {
 		return fmt.Errorf("invalid exporter: \"projectID\" and \"topic\" are required for kind \"%s\"", c.Kind)
 	}
 
+	if c.Kind == AzureExporter && c.Container == "" {
+		return fmt.Errorf("invalid exporter: no \"container\" property found for kind \"%s\"", c.Kind)
+	}
+	if c.Kind == AzureExporter && c.AccountName == "" {
+		return fmt.Errorf("invalid exporter: no \"accountName\" property found for kind \"%s\"", c.Kind)
+	}
+
 	return nil
 }
 
@@ -70,17 +85,19 @@ const (
 	WebhookExporter       ExporterKind = "webhook"
 	LogExporter           ExporterKind = "log"
 	S3Exporter            ExporterKind = "s3"
+	KinesisExporter       ExporterKind = "kinesis"
 	GoogleStorageExporter ExporterKind = "googleStorage"
 	SQSExporter           ExporterKind = "sqs"
 	KafkaExporter         ExporterKind = "kafka"
 	PubSubExporter        ExporterKind = "pubsub"
+	AzureExporter         ExporterKind = "azureBlobStorage"
 )
 
 // IsValid is checking if the value is part of the enum
 func (r ExporterKind) IsValid() error {
 	switch r {
 	case FileExporter, WebhookExporter, LogExporter, S3Exporter, GoogleStorageExporter, SQSExporter, KafkaExporter,
-		PubSubExporter:
+		PubSubExporter, KinesisExporter, AzureExporter:
 		return nil
 	}
 	return fmt.Errorf("invalid exporter: kind \"%s\" is not supported", r)

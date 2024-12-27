@@ -1,12 +1,14 @@
-package ffclient
+package ffclient_test
 
 import (
 	"encoding/json"
+	"log/slog"
 	"os"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
@@ -15,17 +17,18 @@ import (
 func TestAllFlagsState(t *testing.T) {
 	tests := []struct {
 		name       string
-		config     Config
+		config     ffclient.Config
 		valid      bool
 		jsonOutput string
 		initModule bool
 	}{
 		{
 			name: "Valid multiple types",
-			config: Config{
+			config: ffclient.Config{
 				Retriever: &fileretriever.Retriever{
 					Path: "./testdata/ffclient/all_flags/config_flag/flag-config-all-flags.yaml",
 				},
+				LeveledLogger: slog.Default(),
 			},
 			valid:      true,
 			jsonOutput: "./testdata/ffclient/all_flags/marshal_json/valid_multiple_types.json",
@@ -33,7 +36,7 @@ func TestAllFlagsState(t *testing.T) {
 		},
 		{
 			name: "module not init",
-			config: Config{
+			config: ffclient.Config{
 				Retriever: &fileretriever.Retriever{
 					Path: "./testdata/ffclient/all_flags/config_flag/flag-config-all-flags.yaml",
 				},
@@ -44,7 +47,7 @@ func TestAllFlagsState(t *testing.T) {
 		},
 		{
 			name: "offline",
-			config: Config{
+			config: ffclient.Config{
 				Offline: true,
 				Retriever: &fileretriever.Retriever{
 					Path: "./testdata/ffclient/all_flags/config_flag/flag-config-all-flags.yaml",
@@ -57,23 +60,22 @@ func TestAllFlagsState(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// init logger
 			exportDir, _ := os.MkdirTemp("", "export")
-			tt.config.DataExporter = DataExporter{
+			tt.config.DataExporter = ffclient.DataExporter{
 				FlushInterval:    1000,
 				MaxEventInMemory: 1,
 				Exporter:         &fileexporter.Exporter{OutputDir: exportDir},
 			}
 
-			var goff *GoFeatureFlag
+			var goff *ffclient.GoFeatureFlag
 			var err error
 			if tt.initModule {
-				goff, err = New(tt.config)
+				goff, err = ffclient.New(tt.config)
 				assert.NoError(t, err)
 				defer goff.Close()
 			} else {
 				// we close directly so we can test with module not init
-				goff, _ = New(tt.config)
+				goff, _ = ffclient.New(tt.config)
 				goff.Close()
 			}
 
@@ -109,7 +111,7 @@ func TestAllFlagsState(t *testing.T) {
 func TestGetFlagStates(t *testing.T) {
 	tests := []struct {
 		name              string
-		config            Config
+		config            ffclient.Config
 		valid             bool
 		jsonOutput        string
 		initModule        bool
@@ -117,7 +119,7 @@ func TestGetFlagStates(t *testing.T) {
 	}{
 		{
 			name: "Valid multiple flags",
-			config: Config{
+			config: ffclient.Config{
 				Retriever: &fileretriever.Retriever{
 					Path: "./testdata/ffclient/get_flagstates/config_flag/flag-config-all-flags.yaml",
 				},
@@ -131,7 +133,7 @@ func TestGetFlagStates(t *testing.T) {
 		},
 		{
 			name: "empty list of flags in context",
-			config: Config{
+			config: ffclient.Config{
 				Retriever: &fileretriever.Retriever{
 					Path: "./testdata/ffclient/get_flagstates/config_flag/flag-config-all-flags.yaml",
 				},
@@ -145,7 +147,7 @@ func TestGetFlagStates(t *testing.T) {
 		},
 		{
 			name: "no field in context context",
-			config: Config{
+			config: ffclient.Config{
 				Retriever: &fileretriever.Retriever{
 					Path: "./testdata/ffclient/get_flagstates/config_flag/flag-config-all-flags.yaml",
 				},
@@ -157,7 +159,7 @@ func TestGetFlagStates(t *testing.T) {
 		},
 		{
 			name: "offline",
-			config: Config{
+			config: ffclient.Config{
 				Offline: true,
 				Retriever: &fileretriever.Retriever{
 					Path: "./testdata/ffclient/all_flags/config_flag/flag-config-all-flags.yaml",
@@ -172,21 +174,21 @@ func TestGetFlagStates(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// init logger
 			exportDir, _ := os.MkdirTemp("", "export")
-			tt.config.DataExporter = DataExporter{
+			tt.config.DataExporter = ffclient.DataExporter{
 				FlushInterval:    1000,
 				MaxEventInMemory: 1,
 				Exporter:         &fileexporter.Exporter{OutputDir: exportDir},
 			}
 
-			var goff *GoFeatureFlag
+			var goff *ffclient.GoFeatureFlag
 			var err error
 			if tt.initModule {
-				goff, err = New(tt.config)
+				goff, err = ffclient.New(tt.config)
 				assert.NoError(t, err)
 				defer goff.Close()
 			} else {
 				// we close directly so we can test with module not init
-				goff, _ = New(tt.config)
+				goff, _ = ffclient.New(tt.config)
 				goff.Close()
 			}
 
@@ -221,21 +223,23 @@ func TestGetFlagStates(t *testing.T) {
 func TestAllFlagsFromCache(t *testing.T) {
 	tests := []struct {
 		name       string
-		config     Config
+		config     ffclient.Config
 		initModule bool
+		numberFlag int
 	}{
 		{
 			name: "Valid multiple types",
-			config: Config{
+			config: ffclient.Config{
 				Retriever: &fileretriever.Retriever{
 					Path: "./testdata/ffclient/all_flags/config_flag/flag-config-all-flags.yaml",
 				},
 			},
 			initModule: true,
+			numberFlag: 7,
 		},
 		{
 			name: "module not init",
-			config: Config{
+			config: ffclient.Config{
 				Retriever: &fileretriever.Retriever{
 					Path: "./testdata/ffclient/all_flags/config_flag/flag-config-all-flags.yaml",
 				},
@@ -245,21 +249,20 @@ func TestAllFlagsFromCache(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var goff *GoFeatureFlag
+			var goff *ffclient.GoFeatureFlag
 			var err error
 			if tt.initModule {
-				goff, err = New(tt.config)
+				goff, err = ffclient.New(tt.config)
 				assert.NoError(t, err)
 				defer goff.Close()
 
 				flags, err := goff.GetFlagsFromCache()
 				assert.NoError(t, err)
 
-				cf, _ := goff.cache.AllFlags()
-				assert.Equal(t, flags, cf)
+				assert.Equal(t, tt.numberFlag, len(flags))
 			} else {
 				// we close directly so we can test with module not init
-				goff, _ = New(tt.config)
+				goff, _ = ffclient.New(tt.config)
 				goff.Close()
 
 				_, err := goff.GetFlagsFromCache()

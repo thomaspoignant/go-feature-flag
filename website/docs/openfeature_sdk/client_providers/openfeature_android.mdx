@@ -197,13 +197,14 @@ coroutineScope.launch {
 
 ## Features status
 
-| Status | Feature            | Description                                                                          |
-|--------|--------------------|--------------------------------------------------------------------------------------|
-| ✅      | Flag evaluation    | It is possible to evaluate all the type of flags                                     |
-| ✅      | Cache invalidation | Websocket mechanism is in place to refresh the cache in case of configuration change |
-| ❌      | Logging            | Not supported by the SDK                                                             |
-| ❌      | Flag Metadata      | Not supported by the SDK                                                             |
-| ✅      | Event Streaming    | Not implemented                                                                      |
-| ✅      | Unit test          | Not implemented                                                                      |
+
+| Status | Feature            | Description                                                                                                                                         |
+|--------|--------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| ✅      | Flag evaluation    | It is possible to evaluate all the type of flags                                                                                                    |
+| ✅      | Cache invalidation | A polling mechanism is in place to refresh the cache in case of configuration change                                                                |
+| ❌      | Logging            | Not supported by the SDK                                                                                                                            |
+| ✅      | Flag Metadata      | You have access to your flag metadata                                                                                                               |
+| ✅      | Event Streaming    | You can register to receive some internal event from the provider                                                                                   |
+| ✅      | Unit test          | The test are running one by one, but we still have an [issue open](https://github.com/open-feature/kotlin-sdk/issues/108) to enable fully the tests |
 
 <sub>Implemented: ✅ | In-progress: ⚠️ | Not implemented yet: ❌</sub>

@@ -23,6 +23,9 @@ func TestExporterConf_IsValid(t *testing.T) {
 		QueueURL                string
 		ProjectID               string
 		Topic                   string
+		StreamName              string
+		Container               string
+		AccountName             string
 	}
 	tests := []struct {
 		name     string
@@ -61,12 +64,39 @@ func TestExporterConf_IsValid(t *testing.T) {
 			errValue: "invalid exporter: no \"bucket\" property found for kind \"s3\"",
 		},
 		{
+			name: "kind kinesis without stream",
+			fields: fields{
+				Kind: "kinesis",
+			},
+			wantErr:  true,
+			errValue: "invalid exporter: no \"streamArn\" or \"streamName\" property found for kind \"kinesis\"",
+		},
+		{
 			name: "kind googleStorage without bucket",
 			fields: fields{
 				Kind: "googleStorage",
 			},
 			wantErr:  true,
 			errValue: "invalid exporter: no \"bucket\" property found for kind \"googleStorage\"",
+		},
+		{
+			name: "kind azureBlobStorage without container",
+			fields: fields{
+				Kind:        "azureBlobStorage",
+				Container:   "",
+				AccountName: "MyAccount",
+			},
+			wantErr:  true,
+			errValue: "invalid exporter: no \"container\" property found for kind \"azureBlobStorage\"",
+		}, {
+			name: "kind azureBlobStorage without accountName",
+			fields: fields{
+				Kind:        "azureBlobStorage",
+				Container:   "MyContainer",
+				AccountName: "",
+			},
+			wantErr:  true,
+			errValue: "invalid exporter: no \"accountName\" property found for kind \"azureBlobStorage\"",
 		},
 		{
 			name: "kind webhook without bucket",
@@ -151,6 +181,14 @@ func TestExporterConf_IsValid(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "kind Kinesis valid",
+			fields: fields{
+				Kind:       "kinesis",
+				StreamName: "test-stream",
+			},
+			wantErr: false,
+		},
+		{
 			name: "kind SQS with queueURL",
 			fields: fields{
 				Kind:     "sqs",
@@ -204,6 +242,9 @@ func TestExporterConf_IsValid(t *testing.T) {
 				QueueURL:                tt.fields.QueueURL,
 				ProjectID:               tt.fields.ProjectID,
 				Topic:                   tt.fields.Topic,
+				StreamName:              tt.fields.StreamName,
+				AccountName:             tt.fields.AccountName,
+				Container:               tt.fields.Container,
 			}
 			err := c.IsValid()
 			assert.Equal(t, tt.wantErr, err != nil)

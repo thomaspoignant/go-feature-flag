@@ -38,7 +38,7 @@
 }
 
 .socialIconAws {
-    background-color: rgb(255, 153, 0);
+    background-color: #222e3c;
 }
 
 .socialIconPubSub {
@@ -55,6 +55,14 @@
 
 .socialIconKafka {
     background-color: #eee;
+}
+
+.socialIconDiscord {
+    background-color: #5661ea;
+}
+
+.socialIconBitbucket {
+    background-color: #0052cc;
 }
 
 

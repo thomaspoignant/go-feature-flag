@@ -14,11 +14,13 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/controller"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
+	"go.uber.org/zap"
 )
 
 func Test_collect_eval_data_Handler(t *testing.T) {
@@ -86,6 +88,17 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 				errorCode:  http.StatusBadRequest,
 			},
 		},
+		{
+			name: "be sure that the creation date is a unix timestamp",
+			args: args{
+				"../testdata/controller/collect_eval_data/valid_request_with_timestamp_ms.json",
+			},
+			want: want{
+				httpCode:          http.StatusOK,
+				bodyFile:          "../testdata/controller/collect_eval_data/valid_response.json",
+				collectedDataFile: "../testdata/controller/collect_eval_data/valid_collected_data_with_timestamp_ms.json",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -107,7 +120,9 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 					Exporter:         &fileexporter.Exporter{Filename: exporterFile.Name()},
 				},
 			})
-			ctrl := controller.NewCollectEvalData(goFF, metric.Metrics{})
+			logger, err := zap.NewDevelopment()
+			require.NoError(t, err)
+			ctrl := controller.NewCollectEvalData(goFF, metric.Metrics{}, logger)
 
 			e := echo.New()
 			rec := httptest.NewRecorder()
@@ -154,7 +169,7 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 			assert.NoError(t, err, "Impossible the expected wantBody file %s", tt.want.bodyFile)
 			assert.Equal(t, tt.want.httpCode, rec.Code, "Invalid HTTP Code")
 			assert.JSONEq(t, string(wantBody), replacedStr, "Invalid response wantBody")
-			assert.Equal(t, string(wantCollectData), string(exportedData), "Invalid exported data")
+			assert.JSONEq(t, string(wantCollectData), string(exportedData), "Invalid exported data")
 		})
 	}
 }
