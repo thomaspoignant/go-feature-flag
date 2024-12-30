@@ -122,14 +122,16 @@ func initExporters(proxyConf *config.Config) (ffclient.DataExporter, []ffclient.
 		}
 	}
 
-	dataExporters := make([]ffclient.DataExporter, 0)
-	if proxyConf.Exporters != nil {
-		for _, e := range *proxyConf.Exporters {
-			currentExporter, err := initDataExporter(&e)
-			if err != nil {
-				return ffclient.DataExporter{}, nil, err
-			}
-			dataExporters = append(dataExporters, currentExporter)
+	if proxyConf.Exporters == nil {
+		return mainDataExporter, nil, nil
+	}
+
+	// Initialize each exporter with its own configuration
+	dataExporters := make([]ffclient.DataExporter, len(*proxyConf.Exporters))
+	for i, e := range *proxyConf.Exporters {
+		dataExporters[i], err = initDataExporter(&e)
+		if err != nil {
+			return ffclient.DataExporter{}, nil, err
 		}
 	}
 

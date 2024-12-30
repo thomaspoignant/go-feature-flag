@@ -16,110 +16,221 @@ const (
 	defaultMaxEventInMemory = int64(100000)
 )
 
-// NewScheduler allows creating a new instance of Scheduler ready to be used to export data.
+// ExporterConfig holds the configuration for an individual exporter
+type ExporterConfig struct {
+	Exporter         CommonExporter
+	FlushInterval    time.Duration
+	MaxEventInMemory int64
+}
+
+// ExporterState maintains the state for a single exporter
+type ExporterState struct {
+	config    ExporterConfig
+	ticker    *time.Ticker
+	lastIndex int // Index of the last processed event
+}
+
+// Scheduler handles data collection for one or more exporters
+type Scheduler struct {
+	sharedCache     []FeatureEvent
+	bulkExporters   map[CommonExporter]*ExporterState // Only bulk exporters that need periodic flushing
+	directExporters []CommonExporter                  // Non-bulk exporters that flush immediately
+	mutex           sync.Mutex
+	daemonChan      chan struct{}
+	logger          *fflog.FFLogger
+	ctx             context.Context
+}
+
+// NewScheduler creates a new scheduler that handles one exporter
 func NewScheduler(ctx context.Context, flushInterval time.Duration, maxEventInMemory int64,
 	exp CommonExporter, logger *fflog.FFLogger,
+) *Scheduler {
+	// Convert single exporter parameters to ExporterConfig
+	config := ExporterConfig{
+		Exporter:         exp,
+		FlushInterval:    flushInterval,
+		MaxEventInMemory: maxEventInMemory,
+	}
+	return NewMultiScheduler(ctx, []ExporterConfig{config}, logger)
+}
+
+// NewMultiScheduler creates a scheduler that handles multiple exporters
+func NewMultiScheduler(ctx context.Context, exporterConfigs []ExporterConfig, logger *fflog.FFLogger,
 ) *Scheduler {
 	if ctx == nil {
 		ctx = context.Background()
 	}
 
-	if flushInterval == 0 {
-		flushInterval = defaultFlushInterval
-	}
+	bulkExporters := make(map[CommonExporter]*ExporterState)
+	directExporters := make([]CommonExporter, 0)
 
-	if maxEventInMemory == 0 {
-		maxEventInMemory = defaultMaxEventInMemory
+	for _, config := range exporterConfigs {
+		if config.FlushInterval == 0 {
+			config.FlushInterval = defaultFlushInterval
+		}
+		if config.MaxEventInMemory == 0 {
+			config.MaxEventInMemory = defaultMaxEventInMemory
+		}
+
+		if config.Exporter.IsBulk() {
+			state := &ExporterState{
+				config:    config,
+				lastIndex: -1,
+				ticker:    time.NewTicker(config.FlushInterval),
+			}
+			bulkExporters[config.Exporter] = state
+		} else {
+			directExporters = append(directExporters, config.Exporter)
+		}
 	}
 
 	return &Scheduler{
-		localCache:      make([]FeatureEvent, 0),
+		sharedCache:     make([]FeatureEvent, 0),
+		bulkExporters:   bulkExporters,
+		directExporters: directExporters,
 		mutex:           sync.Mutex{},
-		maxEventInCache: maxEventInMemory,
-		exporter:        exp,
 		daemonChan:      make(chan struct{}),
-		ticker:          time.NewTicker(flushInterval),
 		logger:          logger,
 		ctx:             ctx,
 	}
 }
 
-// Scheduler is the struct that handle the data collection.
-type Scheduler struct {
-	localCache      []FeatureEvent
-	mutex           sync.Mutex
-	daemonChan      chan struct{}
-	ticker          *time.Ticker
-	maxEventInCache int64
-	exporter        CommonExporter
-	logger          *fflog.FFLogger
-	ctx             context.Context
-}
+// AddEvent adds an event to the shared cache and handles immediate export for non-bulk exporters
+func (s *Scheduler) AddEvent(event FeatureEvent) {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
 
-// AddEvent allow adding an event to the local cache and to call the exporter if we reach
-// the maximum number of events that can be present in the cache.
-func (dc *Scheduler) AddEvent(event FeatureEvent) {
-	if !dc.exporter.IsBulk() {
-		err := sendEvents(dc.ctx, dc.exporter, dc.logger, []FeatureEvent{event})
+	// Handle non-bulk exporters immediately
+	for _, exporter := range s.directExporters {
+		err := sendEvents(s.ctx, exporter, s.logger, []FeatureEvent{event})
 		if err != nil {
-			dc.logger.Error(err.Error())
+			s.logger.Error(err.Error())
 		}
+	}
+
+	// If we have no bulk exporters, we're done
+	if len(s.bulkExporters) == 0 {
 		return
 	}
 
-	dc.mutex.Lock()
-	defer dc.mutex.Unlock()
-	if int64(len(dc.localCache)) >= dc.maxEventInCache {
-		dc.flush()
-	}
-	dc.localCache = append(dc.localCache, event)
-}
+	// Add event to shared cache for bulk exporters
+	s.sharedCache = append(s.sharedCache, event)
+	currentIndex := len(s.sharedCache) - 1
 
-// StartDaemon will start a goroutine to check every X seconds if we should send the data.
-// The daemon is started only if we have a bulk exporter.
-func (dc *Scheduler) StartDaemon() {
-	for {
-		select {
-		case <-dc.ticker.C:
-			// send data and clear local cache
-			dc.mutex.Lock()
-			dc.flush()
-			dc.mutex.Unlock()
-		case <-dc.daemonChan:
-			// stop the daemon
-			return
+	// Check if any bulk exporters need to flush due to max events
+	for _, state := range s.bulkExporters {
+		pendingCount := currentIndex - state.lastIndex
+		if state.config.MaxEventInMemory > 0 && int64(pendingCount) >= state.config.MaxEventInMemory {
+			s.flushExporter(state)
 		}
 	}
+
+	// Clean up events that have been processed by all exporters
+	s.cleanupProcessedEvents()
 }
 
-// Close will stop the daemon and send the data still in the cache
-func (dc *Scheduler) Close() {
-	// Close the daemon
-	dc.ticker.Stop()
-	close(dc.daemonChan)
-
-	// Send the data still in the cache
-	dc.mutex.Lock()
-	dc.flush()
-	dc.mutex.Unlock()
-}
-
-// GetLogger will return the logger used by the scheduler
-func (dc *Scheduler) GetLogger(level slog.Level) *log.Logger {
-	if dc.logger == nil {
+// getPendingEvents returns events that haven't been processed by this exporter
+func (s *Scheduler) getPendingEvents(state *ExporterState) []FeatureEvent {
+	if state.lastIndex+1 >= len(s.sharedCache) {
 		return nil
 	}
-	return dc.logger.GetLogLogger(level)
+	return s.sharedCache[state.lastIndex+1:]
 }
 
-// flush will call the data exporter and clear the cache
-func (dc *Scheduler) flush() {
-	err := sendEvents(dc.ctx, dc.exporter, dc.logger, dc.localCache)
-	if err != nil {
-		dc.logger.Error(err.Error())
+// flushExporter sends pending events to the specified exporter
+func (s *Scheduler) flushExporter(state *ExporterState) {
+	pendingEvents := s.getPendingEvents(state)
+	if len(pendingEvents) == 0 {
 		return
 	}
-	dc.localCache = make([]FeatureEvent, 0)
+
+	err := sendEvents(s.ctx, state.config.Exporter, s.logger, pendingEvents)
+	if err != nil {
+		s.logger.Error(err.Error())
+		return
+	}
+
+	// Update last processed index
+	state.lastIndex = len(s.sharedCache) - 1
+}
+
+// cleanupProcessedEvents removes events that have been processed by all bulk exporters
+func (s *Scheduler) cleanupProcessedEvents() {
+	// If no bulk exporters, we can clear the cache
+	if len(s.bulkExporters) == 0 {
+		s.sharedCache = make([]FeatureEvent, 0)
+		return
+	}
+
+	// Find minimum lastIndex among bulk exporters
+	minIndex := len(s.sharedCache)
+	for _, state := range s.bulkExporters {
+		if state.lastIndex < minIndex {
+			minIndex = state.lastIndex
+		}
+	}
+
+	// If all exporters have processed some events, we can remove them
+	if minIndex > 0 {
+		// Keep events from minIndex+1 onwards
+		s.sharedCache = s.sharedCache[minIndex+1:]
+		// Update lastIndex for all exporters
+		for _, state := range s.bulkExporters {
+			state.lastIndex -= (minIndex + 1)
+		}
+	}
+}
+
+// StartDaemon starts the periodic flush for bulk exporters
+func (s *Scheduler) StartDaemon() {
+	// If no bulk exporters, no need for daemon
+	if len(s.bulkExporters) == 0 {
+		return
+	}
+
+	for {
+		select {
+		case <-s.daemonChan:
+			return
+		default:
+			s.mutex.Lock()
+			for _, state := range s.bulkExporters {
+				select {
+				case <-state.ticker.C:
+					s.flushExporter(state)
+				default:
+					// Continue if this ticker hasn't triggered
+				}
+			}
+			s.cleanupProcessedEvents()
+			s.mutex.Unlock()
+			// Small sleep to prevent busy waiting
+			time.Sleep(100 * time.Millisecond)
+		}
+	}
+}
+
+// Close stops all tickers and flushes remaining events
+func (s *Scheduler) Close() {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
+	// Stop all tickers and flush bulk exporters
+	for _, state := range s.bulkExporters {
+		state.ticker.Stop()
+		s.flushExporter(state)
+	}
+
+	close(s.daemonChan)
+	s.sharedCache = nil
+}
+
+// GetLogger returns the logger used by the scheduler
+func (s *Scheduler) GetLogger(level slog.Level) *log.Logger {
+	if s.logger == nil {
+		return nil
+	}
+	return s.logger.GetLogLogger(level)
 }
 
 func sendEvents(ctx context.Context, exporter CommonExporter, logger *fflog.FFLogger, events []FeatureEvent) error {

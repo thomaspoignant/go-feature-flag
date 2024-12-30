@@ -126,21 +126,49 @@ func New(config Config) (*GoFeatureFlag, error) {
 
 		// Initialize a Scheduler for each DataExporter, if any DataExporter is configured.
 		if len(dataExporters) > 0 {
-			goFF.dataExporterSchedulers = make([]*exporter.Scheduler, len(dataExporters))
-			for i, dataExporter := range dataExporters {
-				goFF.dataExporterSchedulers[i] = exporter.NewScheduler(
+			var scheduler *exporter.Scheduler
+			if len(dataExporters) == 1 {
+				// Single exporter case
+				scheduler = exporter.NewScheduler(
 					goFF.config.Context,
-					dataExporter.FlushInterval,
-					dataExporter.MaxEventInMemory,
-					dataExporter.Exporter,
+					dataExporters[0].FlushInterval,
+					dataExporters[0].MaxEventInMemory,
+					dataExporters[0].Exporter,
 					goFF.config.internalLogger,
 				)
+			} else {
+				// Multiple exporters case
+				exporterConfigs := make([]exporter.ExporterConfig, len(dataExporters))
+				for i, de := range dataExporters {
+					exporterConfigs[i] = exporter.ExporterConfig{
+						Exporter:         de.Exporter,
+						FlushInterval:    de.FlushInterval,
+						MaxEventInMemory: de.MaxEventInMemory,
+					}
+				}
 
-				// Start daemon if it's a bulk exporter
-				if dataExporter.Exporter.IsBulk() {
-					go goFF.dataExporterSchedulers[i].StartDaemon()
+				scheduler = exporter.NewMultiScheduler(
+					goFF.config.Context,
+					exporterConfigs,
+					goFF.config.internalLogger,
+				)
+			}
+
+			// Start daemon if we have any bulk exporters
+			hasBulkExporters := false
+			for _, de := range dataExporters {
+				if de.Exporter.IsBulk() {
+					hasBulkExporters = true
+					break
 				}
 			}
+			if hasBulkExporters {
+				go scheduler.StartDaemon()
+			}
+
+			// Store the scheduler
+			goFF.dataExporterSchedulers = make([]*exporter.Scheduler, 1)
+			goFF.dataExporterSchedulers[0] = scheduler
 		}
 	}
 	config.internalLogger.Debug("GO Feature Flag is initialized")
