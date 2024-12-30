@@ -109,7 +109,6 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 					},
 				},
 				StartWithRetrieverError: false,
-				RestAPITimeout:          5000,
 				Version:                 "1.X.X",
 				EnableSwagger:           true,
 				AuthorizedKeys: config.APIKeys{
@@ -151,7 +150,6 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 					},
 				},
 				StartWithRetrieverError: false,
-				RestAPITimeout:          5000,
 				Version:                 "1.X.X",
 				EnableSwagger:           true,
 				AuthorizedKeys: config.APIKeys{
