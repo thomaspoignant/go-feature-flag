@@ -21,6 +21,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.37.3
 	github.com/aws/smithy-go v1.22.1
 	github.com/awslabs/aws-lambda-go-api-proxy v0.16.2
+	github.com/diegoholiveira/jsonlogic/v3 v3.6.1
 	github.com/fsouza/fake-gcs-server v1.50.2
 	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.6.0
@@ -111,6 +112,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.28.7 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.33.3 // indirect
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
+	github.com/barkimedes/go-deepcopy v0.0.0-20220514131651-17c30cfc62df // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
