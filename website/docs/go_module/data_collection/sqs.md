@@ -10,7 +10,6 @@ The **SQS exporter** will collect the data and create an event in the queue for 
 ```go
 ffclient.Config{ 
    // ...
-	 cfg, _ := config.LoadDefaultConfig(context.TODO())
    DataExporter: ffclient.DataExporter{
         // ...
         Exporter: &sqsexporter.Exporter{

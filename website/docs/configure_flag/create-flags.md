@@ -47,6 +47,7 @@ Creating the first version of the flag is not always pleasant, that's why we hav
    ```
 5. **🎉 Congrats you have your first feature flag created.**
   _This flag will return the variation `disabled` and the value `false` for all the users, but you can start targeting a specific group of users to return the variant `enabled`._
+6. Now you can [store your flag](../integrations/store-flags-configuration) file in your favorite storage and start using it in your application.
 
 
 ### 👌 Allowed types

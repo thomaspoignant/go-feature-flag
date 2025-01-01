@@ -2,7 +2,7 @@
 sidebar_position: 60
 description: Notifier are used to notified external systems that a flag configuration has changed.
 ---
-import {integrations} from "../../src/data/integrations";
+import {integrations} from "../../data/integrations";
 
 # 📣 Notifier
 
@@ -25,7 +25,6 @@ By nature, GO Feature Flag is 100% stateless, so if you run multiple instance of
 In each notification you will have the `hostname` of the instance, it can be useful if you have multiple GO Feature Flag running.
 :::
 
-
 ## Key Differences Between Notifiers and Exporters
 
 | Feature       | Notifiers                                   | Exporters                                         |
@@ -43,5 +42,6 @@ In each notification you will have the `hostname` of the instance, it can be use
   ))}
 </ul>
 
+[Check how to configure the notifiers](../integrations/notify-flags-changes)
 
 

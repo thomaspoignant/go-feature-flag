@@ -2,7 +2,7 @@
 sidebar_position: 30
 description: GO Feature Flag can be use in the server and client side, check the differences.
 ---
-import {sdk} from "../../src/data/sdk";
+import {sdk} from "../../data/sdk";
 
 # 🧩 SDK paradigms
 
@@ -32,14 +32,14 @@ GO Feature Flag supports both paradigms, and the SDKs are designed to make it ea
 
 The goal of GO Feature Flag is to bring a top level support of all the languages supported.
 
-#### Client-side SDKs
+#### Client-side Languages supported:
 <ul>
   {sdk.filter(it => it.paradigm.includes('Client')).map((client) => (
     <li>{client.name}</li>
   ))}
 </ul>
 
-#### Server-side SDKs
+#### Server-side Languages supported:
 <ul>
   {sdk.filter(it => it.paradigm.includes('Server')).map((client) => (
     <li>{client.name}</li>

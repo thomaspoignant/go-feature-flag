@@ -4,14 +4,14 @@ import clsx from 'clsx';
 import Link from '@docusaurus/Link';
 import PropTypes from 'prop-types';
 import {Headline} from '../headline';
-import {integrations} from '../../../data/integrations';
+import {integrations} from '../../../../data/integrations';
+import {sdk} from '../../../../data/sdk';
 
 SocialIcon.propTypes = {
-  colorClassName: PropTypes.string,
+  colorClassName: PropTypes.string.isRequired,
   fontAwesomeIcon: PropTypes.string,
   img: PropTypes.string,
   tooltipText: PropTypes.string.isRequired,
-  backgroundColor: PropTypes.string,
 };
 
 function SocialIcon(props) {
@@ -21,7 +21,9 @@ function SocialIcon(props) {
         className={clsx(styles.socialIcon, props.colorClassName)}
         style={{backgroundColor: props.backgroundColor}}>
         {props.fontAwesomeIcon && <i className={props.fontAwesomeIcon}></i>}
-        {props.img && <img src={props.img} width="36" />}
+        {props.img && !props.fontAwesomeIcon && (
+          <img src={props.img} width="36" alt={'logo'} />
+        )}
       </span>
       <span className={styles.tooltiptext}>{props.tooltipText}</span>
     </div>
@@ -191,26 +193,6 @@ function OpenFeature() {
 }
 
 function Integration() {
-  const allIntegrations = [
-    ...integrations.retrievers,
-    ...integrations.exporters,
-    ...integrations.notifiers,
-  ];
-
-  const displayIntegrations = allIntegrations
-    .map(({name, logo, faLogo, bgColor}) => ({name, logo, faLogo, bgColor}))
-    .filter(
-      // remove duplicates
-      (integration, index, self) =>
-        index ===
-        self.findIndex(
-          t =>
-            t.name === integration.name &&
-            t.logo === integration.logo &&
-            t.faLogo === integration.faLogo &&
-            t.bgColor === integration.bgColor
-        )
-    );
   return (
     <div className="container">
       <div className="row">
@@ -262,107 +244,6 @@ function Integration() {
                 colorClassName={''}
               />
             ))}
-            {/*<SocialIcon*/}
-            {/*  colorClassName={styles.socialIconBlue}*/}
-            {/*  fontAwesomeIcon="devicon-kubernetes-plain"*/}
-            {/*  tooltipText="Kubernetes"*/}
-            {/*/>*/}
-
-            {/*<SocialIcon*/}
-            {/*  colorClassName={styles.socialIconBlack}*/}
-            {/*  fontAwesomeIcon="fab fa-github fa-stack-1x fa-inverse"*/}
-            {/*  tooltipText="GitHub"*/}
-            {/*/>*/}
-
-            {/*<SocialIcon*/}
-            {/*  colorClassName={styles.socialIconAws}*/}
-            {/*  img={s3logo}*/}
-            {/*  tooltipText="AWS S3"*/}
-            {/*/>*/}
-
-            {/*<SocialIcon*/}
-            {/*  colorClassName={styles.socialIconPurple}*/}
-            {/*  fontAwesomeIcon="fab fa-slack fa-stack-1x fa-inverse"*/}
-            {/*  tooltipText="Slack"*/}
-            {/*/>*/}
-            {/*<SocialIcon*/}
-            {/*  colorClassName={styles.socialIconBlack}*/}
-            {/*  fontAwesomeIcon="fas fa-file fa-stack-1x fa-inverse"*/}
-            {/*  tooltipText="Local file"*/}
-            {/*/>*/}
-
-            {/*<SocialIcon*/}
-            {/*  colorClassName={styles.socialIconGreen}*/}
-            {/*  fontAwesomeIcon="fas fa-cloud-arrow-down fa-stack-1x fa-inverse"*/}
-            {/*  tooltipText="HTTP endpoint"*/}
-            {/*/>*/}
-
-            {/*<SocialIcon*/}
-            {/*  colorClassName={styles.socialIconBlue}*/}
-            {/*  fontAwesomeIcon="devicon-googlecloud-plain"*/}
-            {/*  tooltipText="Google Cloud storage"*/}
-            {/*/>*/}
-
-            {/*<SocialIcon*/}
-            {/*  colorClassName={styles.socialIconGreen}*/}
-            {/*  img={webhooklogo}*/}
-            {/*  tooltipText="Webhooks"*/}
-            {/*/>*/}
-            {/*<SocialIcon*/}
-            {/*  colorClassName={styles.socialIconMongodb}*/}
-            {/*  fontAwesomeIcon="devicon-mongodb-plain-wordmark colored"*/}
-            {/*  tooltipText="Mongodb"*/}
-            {/*/>*/}
-            {/*<SocialIcon*/}
-            {/*  colorClassName={styles.socialIconGitlab}*/}
-            {/*  fontAwesomeIcon="devicon-gitlab-plain colored"*/}
-            {/*  tooltipText="Gitlab"*/}
-            {/*/>*/}
-            {/*<SocialIcon*/}
-            {/*  colorClassName={styles.socialIconAws}*/}
-            {/*  img={sqslogo}*/}
-            {/*  tooltipText="AWS SQS"*/}
-            {/*/>*/}
-            {/*<SocialIcon*/}
-            {/*  colorClassName={styles.socialIconPubSub}*/}
-            {/*  img={pubsublogo}*/}
-            {/*  tooltipText="Google PubSub"*/}
-            {/*/>*/}
-            {/*<SocialIcon*/}
-            {/*  colorClassName={styles.socialIconKafka}*/}
-            {/*  fontAwesomeIcon="devicon-apachekafka-original colored"*/}
-            {/*  tooltipText="Apache Kafka"*/}
-            {/*/>*/}
-            {/*<SocialIcon*/}
-            {/*  colorClassName={styles.socialIconBlack}*/}
-            {/*  fontAwesomeIcon="devicon-redis-plain-wordmark colored"*/}
-            {/*  tooltipText="Redis"*/}
-            {/*/>*/}
-            {/*<SocialIcon*/}
-            {/*  colorClassName={styles.socialIconDiscord}*/}
-            {/*  fontAwesomeIcon="fa-brands fa-discord"*/}
-            {/*  tooltipText="Discord"*/}
-            {/*/>*/}
-            {/*<SocialIcon*/}
-            {/*  colorClassName={styles.socialIconAws}*/}
-            {/*  img={kinesislogo}*/}
-            {/*  tooltipText="AWS Kinesis"*/}
-            {/*/>*/}
-            {/*<SocialIcon*/}
-            {/*  colorClassName={styles.socialIconBlue}*/}
-            {/*  img={azbloblogo}*/}
-            {/*  tooltipText="Azure Blob Storage"*/}
-            {/*/>*/}
-            {/*<SocialIcon*/}
-            {/*  colorClassName={styles.socialIconBitbucket}*/}
-            {/*  img={bitbucketlogo}*/}
-            {/*  tooltipText="Bitbucket"*/}
-            {/*/>*/}
-            {/*<SocialIcon*/}
-            {/*  colorClassName={styles.socialIconAws}*/}
-            {/*  img={teamslogo}*/}
-            {/*  tooltipText="Microsoft Teams"*/}
-            {/*/>*/}
           </div>
         </div>
       </div>

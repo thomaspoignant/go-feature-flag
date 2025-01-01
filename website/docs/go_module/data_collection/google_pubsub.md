@@ -8,9 +8,11 @@ The **PubSub exporter** will collect the data and publish an event on the topic 
 
 ## Configuration example
 ```go
+
+cfg, _ := config.LoadDefaultConfig(context.TODO())
 ffclient.Config{ 
    // ... 
-    cfg, _ := config.LoadDefaultConfig(context.TODO())
+    
     DataExporter: ffclient.DataExporter{
         // ... 
         Exporter: &pubsubexporter.Exporter{

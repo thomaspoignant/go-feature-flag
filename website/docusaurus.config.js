@@ -125,7 +125,7 @@ const config = {
   stylesheets: [
     'https://fonts.googleapis.com/css?family=Poppins:400,500,700',
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css',
-    'https://cdn.jsdelivr.net/gh/devicons/devicon@v2.15.1/devicon.min.css', // https://devicon.dev/
+    'https://cdn.jsdelivr.net/gh/devicons/devicon@v2.16.0/devicon.min.css', // https://devicon.dev/
   ],
   themes: [
     [
