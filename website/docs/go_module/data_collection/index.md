@@ -60,7 +60,7 @@ In your `ffclient.Config` add the `DataExporter` field and configure your export
 To avoid spamming your location everytime you have a variation called, `go-feature-flag` is storing in memory all the events and sends them in bulk to the exporter.
 You can decide the threshold on when to send the data with the properties `FlushInterval` and `MaxEventInMemory`. The first threshold hit will export the data.
 
-If there are some flags that you don't want to export, you can use `trackEvents` fields on these specific flags to disable the data export *(see [flag file format](../../configure_flag/flag_format.mdx))*.
+If there are some flags that you don't want to export, you can use `trackEvents` fields on these specific flags to disable the data export *(see [flag file format](../../configure_flag/create-flags))*.
 
 ### Example
 

@@ -2,7 +2,7 @@
 sidebar_position: 10
 description: Deploy the relay proxy and use the OpenFeature SDKs
 ---
-# Using Open Feature SDKs
+# Using OpenFeature
 
 :::note
 OpenFeature provides a shared, standardized feature flagging client - _an SDK_ - which can be plugged into various 3rd-party feature flagging providers.

@@ -4,7 +4,7 @@
 const lightCodeTheme = require('prism-react-renderer').themes.github;
 const darkCodeTheme = require('prism-react-renderer').themes.dracula;
 
-/** @type {import('@docusaurus/types').Config} */
+/** @type {import("@docusaurus/types").Config} */
 const config = {
   title: 'GO Feature Flag',
   tagline: 'Simple Feature Flagging for All',
@@ -16,7 +16,37 @@ const config = {
   organizationName: 'thomaspoignant',
   projectName: 'go-feature-flag',
   trailingSlash: false,
+  markdown: {
+    mermaid: true,
+  },
   plugins: [
+    [
+      '@docusaurus/plugin-client-redirects',
+      {
+        redirects: [
+          {
+            to: '/docs/configure_flag/flag_format',
+            from: '/docs/category/configure-your-feature-flags',
+          },
+          {
+            to: '/docs/configure_flag/flag_format',
+            from: '/docs/configure_flag/create-flags',
+          },
+          {
+            to: '/docs/configure_flag/rule_format',
+            from: '/docs/configure_flag/target-with-flags',
+          },
+          {
+            to: '/docs/configure_flag/custom-bucketing',
+            from: '/docs/configure_flag/custom_bucketing',
+          },
+          {
+            from: '/docs/category/rollout-strategies',
+            to: '/docs/configure_flag/rollout-strategies',
+          },
+        ],
+      },
+    ],
     async function myPlugin(context, options) {
       return {
         name: 'docusaurus-tailwindcss',
@@ -55,7 +85,7 @@ const config = {
   presets: [
     [
       'classic',
-      /** @type {import('@docusaurus/preset-classic').Options} */
+      /** @type {import("@docusaurus/preset-classic").Options} */
       ({
         googleAnalytics: {
           trackingID: 'G-LEJBB94YBE',
@@ -108,9 +138,10 @@ const config = {
         explicitSearchResultPath: true,
       }),
     ],
+    ['@docusaurus/theme-mermaid', {theme: 'default'}],
   ],
   themeConfig:
-    /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
+    /** @type {import("@docusaurus/preset-classic").ThemeConfig} */
     ({
       announcementBar: {
         id: 'support_usz', // Increment on change
@@ -311,6 +342,7 @@ const config = {
         theme: require('prism-react-renderer').themes.vsLight,
         darkTheme: require('prism-react-renderer').themes.vsDark,
         additionalLanguages: [
+          'json',
           'java',
           'scala',
           'toml',
