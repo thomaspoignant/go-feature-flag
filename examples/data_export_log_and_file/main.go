@@ -160,6 +160,7 @@ func main() {
 		- Main exporter will generate 4 files containing 3, 2, 2, 1 events respectively
 		- Secondary exporter will generate 3 files containing 5, 2, 1 events respectively
 		- Tertiary exporter will generate 3 files containing 4, 3, 1 events respectively
-		- Logger will generate 8 logs
+		- Logger will generate 8 events in the logs
+			(format "IMMEDIATE - user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"")
 	*/
 }

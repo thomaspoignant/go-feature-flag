@@ -17,15 +17,15 @@ const (
 )
 
 // ExporterConfig holds the configuration for an individual exporter
-type ExporterConfig struct {
+type Config struct {
 	Exporter         CommonExporter
 	FlushInterval    time.Duration
 	MaxEventInMemory int64
 }
 
 // ExporterState maintains the state for a single exporter
-type ExporterState struct {
-	config    ExporterConfig
+type State struct {
+	config    Config
 	ticker    *time.Ticker
 	lastIndex int // Index of the last processed event
 }
@@ -33,8 +33,8 @@ type ExporterState struct {
 // Scheduler handles data collection for one or more exporters
 type Scheduler struct {
 	sharedCache     []FeatureEvent
-	bulkExporters   map[CommonExporter]*ExporterState // Only bulk exporters that need periodic flushing
-	directExporters []CommonExporter                  // Non-bulk exporters that flush immediately
+	bulkExporters   map[CommonExporter]*State // Only bulk exporters that need periodic flushing
+	directExporters []CommonExporter          // Non-bulk exporters that flush immediately
 	mutex           sync.Mutex
 	daemonChan      chan struct{}
 	logger          *fflog.FFLogger
@@ -46,22 +46,22 @@ func NewScheduler(ctx context.Context, flushInterval time.Duration, maxEventInMe
 	exp CommonExporter, logger *fflog.FFLogger,
 ) *Scheduler {
 	// Convert single exporter parameters to ExporterConfig
-	config := ExporterConfig{
+	config := Config{
 		Exporter:         exp,
 		FlushInterval:    flushInterval,
 		MaxEventInMemory: maxEventInMemory,
 	}
-	return NewMultiScheduler(ctx, []ExporterConfig{config}, logger)
+	return NewMultiScheduler(ctx, []Config{config}, logger)
 }
 
 // NewMultiScheduler creates a scheduler that handles multiple exporters
-func NewMultiScheduler(ctx context.Context, exporterConfigs []ExporterConfig, logger *fflog.FFLogger,
+func NewMultiScheduler(ctx context.Context, exporterConfigs []Config, logger *fflog.FFLogger,
 ) *Scheduler {
 	if ctx == nil {
 		ctx = context.Background()
 	}
 
-	bulkExporters := make(map[CommonExporter]*ExporterState)
+	bulkExporters := make(map[CommonExporter]*State)
 	directExporters := make([]CommonExporter, 0)
 
 	for _, config := range exporterConfigs {
@@ -73,7 +73,7 @@ func NewMultiScheduler(ctx context.Context, exporterConfigs []ExporterConfig, lo
 		}
 
 		if config.Exporter.IsBulk() {
-			state := &ExporterState{
+			state := &State{
 				config:    config,
 				lastIndex: -1,
 				ticker:    time.NewTicker(config.FlushInterval),
@@ -130,7 +130,7 @@ func (s *Scheduler) AddEvent(event FeatureEvent) {
 }
 
 // getPendingEvents returns events that haven't been processed by this exporter
-func (s *Scheduler) getPendingEvents(state *ExporterState) []FeatureEvent {
+func (s *Scheduler) getPendingEvents(state *State) []FeatureEvent {
 	if state.lastIndex+1 >= len(s.sharedCache) {
 		return nil
 	}
@@ -138,7 +138,7 @@ func (s *Scheduler) getPendingEvents(state *ExporterState) []FeatureEvent {
 }
 
 // flushExporter sends pending events to the specified exporter
-func (s *Scheduler) flushExporter(state *ExporterState) {
+func (s *Scheduler) flushExporter(state *State) {
 	pendingEvents := s.getPendingEvents(state)
 	if len(pendingEvents) == 0 {
 		return

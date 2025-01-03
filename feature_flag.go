@@ -54,21 +54,18 @@ type GoFeatureFlag struct {
 var ff *GoFeatureFlag
 var onceFF sync.Once
 
-// New creates a new go-feature-flag instances that retrieve the config from a YAML file
-// and return everything you need to manage your flags.
-func New(config Config) (*GoFeatureFlag, error) {
+// validateAndSetDefaults validates the config and sets default values
+func validateAndSetDefaults(config *Config) error {
 	switch {
 	case config.PollingInterval == 0:
 		// The default value for the poll interval is 60 seconds
 		config.PollingInterval = 60 * time.Second
 	case config.PollingInterval < 0:
 		// Check that value is not negative
-		return nil, fmt.Errorf("%d is not a valid PollingInterval value, it need to be > 0", config.PollingInterval)
+		return fmt.Errorf("%d is not a valid PollingInterval value, it need to be > 0", config.PollingInterval)
 	case config.PollingInterval < time.Second:
 		// the minimum value for the polling policy is 1 second
 		config.PollingInterval = time.Second
-	default:
-		// do nothing
 	}
 
 	if config.offlineMutex == nil {
@@ -78,6 +75,75 @@ func New(config Config) (*GoFeatureFlag, error) {
 	config.internalLogger = &fflog.FFLogger{
 		LeveledLogger: config.LeveledLogger,
 		LegacyLogger:  config.Logger,
+	}
+
+	return nil
+}
+
+// initializeRetrievers sets up and initializes the retriever manager
+func initializeRetrievers(config Config) (*retriever.Manager, error) {
+	retrievers, err := config.GetRetrievers()
+	if err != nil {
+		return nil, err
+	}
+
+	manager := retriever.NewManager(config.Context, retrievers, config.internalLogger)
+	err = manager.Init(config.Context)
+	if err != nil && !config.StartWithRetrieverError {
+		return nil, fmt.Errorf("impossible to initialize the retrievers, please check your configuration: %v", err)
+	}
+
+	return manager, nil
+}
+
+// initializeExporters sets up the data exporters and starts their daemons if needed
+func initializeExporters(config Config) []*exporter.Scheduler {
+	dataExporters := config.GetDataExporters()
+	if len(dataExporters) == 0 {
+		return nil
+	}
+
+	var scheduler *exporter.Scheduler
+	if len(dataExporters) == 1 {
+		scheduler = exporter.NewScheduler(
+			config.Context,
+			dataExporters[0].FlushInterval,
+			dataExporters[0].MaxEventInMemory,
+			dataExporters[0].Exporter,
+			config.internalLogger,
+		)
+	} else {
+		exporterConfigs := make([]exporter.Config, len(dataExporters))
+		for i, de := range dataExporters {
+			exporterConfigs[i] = exporter.Config{
+				Exporter:         de.Exporter,
+				FlushInterval:    de.FlushInterval,
+				MaxEventInMemory: de.MaxEventInMemory,
+			}
+		}
+		scheduler = exporter.NewMultiScheduler(
+			config.Context,
+			exporterConfigs,
+			config.internalLogger,
+		)
+	}
+
+	// Start daemon if we have any bulk exporters
+	for _, de := range dataExporters {
+		if de.Exporter.IsBulk() {
+			go scheduler.StartDaemon()
+			break
+		}
+	}
+
+	return []*exporter.Scheduler{scheduler}
+}
+
+// New creates a new go-feature-flag instances that retrieve the config from a YAML file
+// and return everything you need to manage your flags.
+func New(config Config) (*GoFeatureFlag, error) {
+	if err := validateAndSetDefaults(&config); err != nil {
+		return nil, err
 	}
 
 	goFF := &GoFeatureFlag{
@@ -92,15 +158,11 @@ func New(config Config) (*GoFeatureFlag, error) {
 		goFF.bgUpdater = newBackgroundUpdater(config.PollingInterval, config.EnablePollingJitter)
 		goFF.cache = cache.New(notificationService, config.PersistentFlagConfigurationFile, config.internalLogger)
 
-		retrievers, err := config.GetRetrievers()
+		retrieverManager, err := initializeRetrievers(config)
 		if err != nil {
 			return nil, err
 		}
-		goFF.retrieverManager = retriever.NewManager(config.Context, retrievers, config.internalLogger)
-		err = goFF.retrieverManager.Init(config.Context)
-		if err != nil && !config.StartWithRetrieverError {
-			return nil, fmt.Errorf("impossible to initialize the retrievers, please check your configuration: %v", err)
-		}
+		goFF.retrieverManager = retrieverManager
 
 		err = retrieveFlagsAndUpdateCache(goFF.config, goFF.cache, goFF.retrieverManager, true)
 		if err != nil {
@@ -122,55 +184,10 @@ func New(config Config) (*GoFeatureFlag, error) {
 
 		go goFF.startFlagUpdaterDaemon()
 
-		dataExporters := config.GetDataExporters()
-
-		// Initialize a Scheduler for each DataExporter, if any DataExporter is configured.
-		if len(dataExporters) > 0 {
-			var scheduler *exporter.Scheduler
-			if len(dataExporters) == 1 {
-				// Single exporter case
-				scheduler = exporter.NewScheduler(
-					goFF.config.Context,
-					dataExporters[0].FlushInterval,
-					dataExporters[0].MaxEventInMemory,
-					dataExporters[0].Exporter,
-					goFF.config.internalLogger,
-				)
-			} else {
-				// Multiple exporters case
-				exporterConfigs := make([]exporter.ExporterConfig, len(dataExporters))
-				for i, de := range dataExporters {
-					exporterConfigs[i] = exporter.ExporterConfig{
-						Exporter:         de.Exporter,
-						FlushInterval:    de.FlushInterval,
-						MaxEventInMemory: de.MaxEventInMemory,
-					}
-				}
-
-				scheduler = exporter.NewMultiScheduler(
-					goFF.config.Context,
-					exporterConfigs,
-					goFF.config.internalLogger,
-				)
-			}
-
-			// Start daemon if we have any bulk exporters
-			hasBulkExporters := false
-			for _, de := range dataExporters {
-				if de.Exporter.IsBulk() {
-					hasBulkExporters = true
-					break
-				}
-			}
-			if hasBulkExporters {
-				go scheduler.StartDaemon()
-			}
-
-			// Store the scheduler
-			goFF.dataExporterSchedulers = make([]*exporter.Scheduler, 1)
-			goFF.dataExporterSchedulers[0] = scheduler
-		}
+		schedulers := initializeExporters(config)
+		goFF.dataExporterSchedulers = schedulers
 	}
+
 	config.internalLogger.Debug("GO Feature Flag is initialized")
 	return goFF, nil
 }
