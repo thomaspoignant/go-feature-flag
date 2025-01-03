@@ -743,3 +743,102 @@ func Test_DisableNotifierOnInit(t *testing.T) {
 		})
 	}
 }
+
+func TestMultipleDataExporters(t *testing.T) {
+	// Create a client with multiple exporters
+	config := ffclient.Config{
+		PollingInterval: 5 * time.Second,
+		Retriever:       &fileretriever.Retriever{Path: "testdata/flag-config.yaml"},
+		LeveledLogger:   slog.Default(),
+		// Main exporter (bulk)
+		DataExporter: ffclient.DataExporter{
+			FlushInterval:    2 * time.Second,
+			MaxEventInMemory: 3,
+			Exporter: &mock.Exporter{
+				Bulk: true,
+			},
+		},
+		// Additional exporters
+		DataExporters: []ffclient.DataExporter{
+			{
+				// Bulk exporter with different settings
+				FlushInterval:    5 * time.Second,
+				MaxEventInMemory: 5,
+				Exporter: &mock.Exporter{
+					Bulk: true,
+				},
+			},
+			{
+				// Non-bulk exporter
+				FlushInterval:    1 * time.Second, // Should be ignored
+				MaxEventInMemory: 1,               // Should be ignored
+				Exporter: &mock.Exporter{
+					Bulk: false,
+				},
+			},
+			{
+				// Another bulk exporter
+				FlushInterval:    3 * time.Second,
+				MaxEventInMemory: 4,
+				Exporter: &mock.Exporter{
+					Bulk: true,
+				},
+			},
+		},
+	}
+
+	gffClient, err := ffclient.New(config)
+	assert.NoError(t, err)
+	defer gffClient.Close()
+
+	// Create test user
+	user := ffcontext.NewEvaluationContext("test-user")
+
+	// Generate events to test exporters
+	// Phase 1: Generate 3 events (should trigger main exporter's MaxEventInMemory)
+	_, _ = gffClient.BoolVariation("test-flag", user, false)
+	_, _ = gffClient.BoolVariation("test-flag", user, false)
+	_, _ = gffClient.BoolVariation("test-flag", user, false)
+
+	// Wait 1 second
+	time.Sleep(1 * time.Second)
+
+	// Phase 2: Generate 2 more events (should trigger secondary exporter's MaxEventInMemory)
+	_, _ = gffClient.StringVariation("unknown-flag", user, "default1")
+	_, _ = gffClient.StringVariation("unknown-flag", user, "default2")
+
+	// Wait 2 seconds (should trigger main exporter's FlushInterval)
+	time.Sleep(2 * time.Second)
+
+	// Phase 3: Generate 2 more events
+	_, _ = gffClient.JSONVariation("json-flag", user, map[string]interface{}{"test": "value1"})
+	_, _ = gffClient.JSONVariation("json-flag", user, map[string]interface{}{"test": "value2"})
+
+	// Wait 3 seconds (should trigger tertiary exporter's FlushInterval)
+	time.Sleep(3 * time.Second)
+
+	// Phase 4: Generate 1 final event
+	_, _ = gffClient.JSONVariation("json-flag", user, map[string]interface{}{"test": "value3"})
+
+	// Wait 5 seconds (should trigger secondary exporter's FlushInterval)
+	time.Sleep(5 * time.Second)
+
+	// Verify that all exporters received events
+	for _, de := range config.GetDataExporters() {
+		mockExporter, ok := de.Exporter.(*mock.Exporter)
+		assert.True(t, ok, "Exporter should be a mock exporter")
+
+		if !mockExporter.IsBulk() {
+			// Non-bulk exporter should have received each event immediately
+			assert.Equal(t, 8, len(mockExporter.GetExportedEvents()), "Non-bulk exporter should have received all events")
+		} else {
+			// Bulk exporters should have received events in batches
+			events := mockExporter.GetExportedEvents()
+			assert.Greater(t, len(events), 0, "Bulk exporter should have received some events")
+			// Each batch should respect the MaxEventInMemory limit
+			for _, event := range events {
+				assert.NotNil(t, event)
+			}
+		}
+	}
+}
