@@ -17,7 +17,7 @@ The OFREP implementation is part of the GO Feature Flag Relay Proxy.
 We have a new API endpoints `/ofrep/v1/evaluate/flags/{key}` and `/ofrep/v1/evaluate/flags` that you can use to test the protocol.
 
 You just have to start the GO Feature Flag Relay Proxy (starting from version `v1.24.0`) and use the API to evaluate your flags.
-For this, follow the instruction on how to use the relay-proxy [here](../relay_proxy/getting_started.md). 
+For this, follow the instruction on how to use the relay-proxy [here](../relay-proxy/getting_started.md). 
 
 ### Want to start even faster?
 ```shell

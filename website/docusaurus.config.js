@@ -25,24 +25,24 @@ const config = {
       {
         redirects: [
           {
-            to: '/docs/configure_flag/flag_format',
             from: '/docs/category/configure-your-feature-flags',
+            to: '/docs/next/configure_flag/create-flags',
           },
           {
-            to: '/docs/configure_flag/flag_format',
             from: '/docs/configure_flag/create-flags',
+            to: '/docs/next/configure_flag/create-flags',
           },
           {
-            to: '/docs/configure_flag/rule_format',
-            from: '/docs/configure_flag/target-with-flags',
+            from: '/docs/configure_flag/rule_format',
+            to: '/docs/next/configure_flag/target-with-flags',
           },
           {
-            to: '/docs/configure_flag/custom-bucketing',
             from: '/docs/configure_flag/custom_bucketing',
+            to: '/docs/next/configure_flag/custom-bucketing',
           },
           {
             from: '/docs/category/rollout-strategies',
-            to: '/docs/configure_flag/rollout-strategies',
+            to: '/docs/next/configure_flag/rollout-strategies',
           },
         ],
       },

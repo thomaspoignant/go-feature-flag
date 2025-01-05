@@ -69,7 +69,7 @@ docker run \
 
 ```
 
-_If you don't want to use docker to install the **relay proxy** you can follow the [documentation](../relay_proxy/install_relay_proxy.md)_.
+_If you don't want to use docker to install the **relay proxy** you can follow the [documentation](../relay-proxy/install_relay_proxy.md)_.
 
 ## Use Open Feature SDK
 

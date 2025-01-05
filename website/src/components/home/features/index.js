@@ -8,10 +8,11 @@ import {integrations} from '../../../../data/integrations';
 import {sdk} from '../../../../data/sdk';
 
 SocialIcon.propTypes = {
-  colorClassName: PropTypes.string.isRequired,
+  colorClassName: PropTypes.string,
   fontAwesomeIcon: PropTypes.string,
   img: PropTypes.string,
   tooltipText: PropTypes.string.isRequired,
+  backgroundColor: PropTypes.string,
 };
 
 function SocialIcon(props) {
@@ -100,71 +101,14 @@ function OpenFeature() {
       <div className="row">
         <div className={'col col--6'}>
           <div className={'grid grid-cols-4'}>
-            <SocialIcon
-              colorClassName={styles.socialIconCyan}
-              fontAwesomeIcon="devicon-go-original-wordmark colored"
-              tooltipText="GO"
-            />
-
-            <SocialIcon
-              colorClassName={styles.socialIconCyan}
-              fontAwesomeIcon="devicon-java-plain-wordmark colored"
-              tooltipText="Java"
-            />
-
-            <SocialIcon
-              colorClassName={styles.socialIconCyan}
-              fontAwesomeIcon="devicon-kotlin-plain-wordmark colored"
-              tooltipText="Kotlin"
-            />
-
-            <SocialIcon
-              colorClassName={styles.socialIconCyan}
-              fontAwesomeIcon="devicon-javascript-plain colored"
-              tooltipText="Javascript"
-            />
-
-            <SocialIcon
-              colorClassName={styles.socialIconCyan}
-              fontAwesomeIcon="devicon-typescript-plain colored"
-              tooltipText="Typescript"
-            />
-
-            <SocialIcon
-              colorClassName={styles.socialIconCyan}
-              fontAwesomeIcon="devicon-dot-net-plain-wordmark colored"
-              tooltipText=".NET"
-            />
-
-            <SocialIcon
-              colorClassName={styles.socialIconCyan}
-              fontAwesomeIcon="devicon-android-plain colored"
-              tooltipText="Kotlin / Android"
-            />
-
-            <SocialIcon
-              colorClassName={styles.socialIconCyan}
-              fontAwesomeIcon="devicon-react-original colored"
-              tooltipText="React"
-            />
-
-            <SocialIcon
-              colorClassName={styles.socialIconCyan}
-              fontAwesomeIcon="devicon-swift-plain colored"
-              tooltipText="Swift (iOS/tvOS/macOS)"
-            />
-
-            <SocialIcon
-              colorClassName={styles.socialIconCyan}
-              fontAwesomeIcon="devicon-php-plain colored"
-              tooltipText="PHP"
-            />
-
-            <SocialIcon
-              colorClassName={styles.socialIconCyan}
-              fontAwesomeIcon="devicon-ruby-plain colored"
-              tooltipText="Ruby"
-            />
+            {sdk.map(sdk => (
+              <SocialIcon
+                key={sdk.name}
+                backgroundColor="#cdf7e7"
+                fontAwesomeIcon={sdk.faLogo}
+                tooltipText={sdk.name}
+              />
+            ))}
           </div>
         </div>
         <div className="col col--6">
@@ -193,6 +137,26 @@ function OpenFeature() {
 }
 
 function Integration() {
+  const allIntegrations = [
+    ...integrations.retrievers,
+    ...integrations.exporters,
+    ...integrations.notifiers,
+  ];
+  const displayIntegrations = allIntegrations
+    .map(({name, logo, faLogo, bgColor}) => ({name, logo, faLogo, bgColor}))
+    .filter(
+      // remove duplicates
+      (integration, index, self) =>
+        index ===
+        self.findIndex(
+          t =>
+            t.name === integration.name &&
+            t.logo === integration.logo &&
+            t.faLogo === integration.faLogo &&
+            t.bgColor === integration.bgColor
+        )
+    );
+
   return (
     <div className="container">
       <div className="row">
