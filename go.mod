@@ -26,7 +26,7 @@ require (
 	github.com/google/go-cmp v0.6.0
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
-	github.com/invopop/jsonschema v0.12.0
+	github.com/invopop/jsonschema v0.13.0
 	github.com/jessevdk/go-flags v1.6.1
 	github.com/jsternberg/zap-logfmt v1.3.0
 	github.com/knadh/koanf/parsers/json v0.1.0
