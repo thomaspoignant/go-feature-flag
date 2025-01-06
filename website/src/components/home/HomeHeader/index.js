@@ -84,7 +84,7 @@ export function HomeHeader() {
                 </button>
               </Link>
               <Link
-                to={'/docs'}
+                to={'/docs/getting-started'}
                 type="button"
                 className={clsx('btn btn-dark btn-labeled btn-lg')}>
                 <button
