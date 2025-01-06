@@ -58,7 +58,7 @@ if hasFlag {
 ```
 
 You can have way more configuration, but I’ll let you check
-the [documentation](https://thomaspoignant.github.io/go-feature-flag/) for that.
+the [documentation](https://docs.gofeatureflag.org) for that.
 
 ---
 
@@ -76,7 +76,7 @@ handle this new load.
 
 :::warning
 The flag format bellow is the legacy format of GO Feature Flag.
-Refer to the [documentation](/docs/configure_flag/flag_format) for the latest format.
+Refer to the [documentation](/docs/configure_flag/create-flags) for the latest format.
 :::
 
 ```yaml
@@ -167,7 +167,7 @@ In this example, 50% of your users with a userId that starts with 9 will be impa
 the end dates of the experimentation.
 
 With the module, you can also collect the data of your variation (see
-the [documentation](https://thomaspoignant.github.io/go-feature-flag/data_collection/) for more info) to join them with
+the [documentation](https://docs.gofeatureflag.org/) for more info) to join them with
 the data of what you are testing.
 
 So you can see the results of your experimentation and decide whether you want to roll out this flag for real or not.

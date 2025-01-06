@@ -1,6 +1,7 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
 
+const {sdk} = require('./data/sdk');
 const lightCodeTheme = require('prism-react-renderer').themes.github;
 const darkCodeTheme = require('prism-react-renderer').themes.dracula;
 
@@ -128,7 +129,7 @@ const config = {
   ],
   stylesheets: [
     'https://fonts.googleapis.com/css?family=Poppins:400,500,700',
-    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css',
+    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css',
     'https://cdn.jsdelivr.net/gh/devicons/devicon@v2.16.0/devicon.min.css', // https://devicon.dev/
   ],
   themes: [
@@ -156,7 +157,7 @@ const config = {
         title: 'GO Feature Flag',
         logo: {
           alt: 'GO Feature Flag Logo',
-          src: 'img/logo/logo_128.png',
+          src: 'img/logo/navbar.png',
         },
         items: [
           {
@@ -182,11 +183,11 @@ const config = {
             label: 'Developers',
             items: [
               {
-                to: '/docs/category/getting-started',
+                to: '/docs/getting-started',
                 html: '<i class="fa-solid fa-rocket menu-icon"></i> Getting Started',
               },
               {
-                to: '/docs/openfeature_sdk/sdk',
+                to: '/docs/sdk',
                 html: '<i class="fa-solid fa-code menu-icon"></i> SDKs',
               },
               {
@@ -245,7 +246,7 @@ const config = {
             href: 'https://x.com/gofeatureflag',
             position: 'right',
             className: 'header-twitter-link navbar__right',
-            'aria-label': 'Twitter',
+            'aria-label': 'X',
           },
           {
             href: '/slack',
@@ -258,7 +259,7 @@ const config = {
       footer: {
         logo: {
           alt: 'GO Feature Flag logo',
-          src: 'img/logo/logo.png',
+          src: 'img/logo/logo_128.png',
           href: 'https://gofeatureflag.org',
           width: 100,
         },
@@ -268,19 +269,19 @@ const config = {
             items: [
               {
                 label: 'Getting Started',
-                to: '/docs/category/getting-started',
+                to: '/docs/getting-started',
               },
               {
                 label: 'OpenFeature',
                 to: '/product/open_feature_support',
               },
               {
-                label: 'Documentations',
+                label: 'Documentation',
                 to: '/docs',
               },
               {
                 label: 'SDKs',
-                to: '/docs/openfeature_sdk/sdk',
+                to: '/docs/sdk',
               },
               {
                 label: 'Blog',
@@ -292,55 +293,53 @@ const config = {
               },
             ],
           },
-
+          {
+            title: 'SDKs',
+            items: (function () {
+              return sdk.map(sdk => {
+                return {
+                  html: `<a href="/docs/sdk/${sdk.docLink}">${sdk.name}</a>`,
+                };
+              });
+            })(),
+          },
           {
             title: 'Community',
             items: [
               {
                 html: `
                 <a href="/slack" target="_blank" rel="noreferrer noopener">
-                  <i class="fa-brands fa-slack"></i> Slack&nbsp;&nbsp;<i class="fa-solid fa-arrow-up-right-from-square"></i>
+                  <i class="fa-brands fa-slack"></i> Slack&nbsp;&nbsp;<i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
                 </a>`,
               },
               {
                 html: `
                 <a href="https://x.com/gofeatureflag" target="_blank" rel="noreferrer noopener">
-                  <i class="fa-brands fa-x-twitter"></i> X&nbsp;&nbsp;<i class="fa-solid fa-arrow-up-right-from-square"></i>
+                  <i class="fa-brands fa-x-twitter"></i> X&nbsp;&nbsp;<i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
                 </a>`,
               },
               {
                 html: `
                 <a href="https://youtube.com/@gofeatureflag" target="_blank" rel="noreferrer noopener">
-                  <i class="fa-brands fa-youtube"></i> Youtube &nbsp;<i class="fa-solid fa-arrow-up-right-from-square"></i>
+                  <i class="fa-brands fa-youtube"></i> Youtube &nbsp;<i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
                 </a>`,
               },
               {
                 html: `
                 <a href="https://github.com/thomaspoignant/go-feature-flag" target="_blank" rel="noreferrer noopener">
-                  <i class="fa-brands fa-github"></i> Github&nbsp;&nbsp;<i class="fa-solid fa-arrow-up-right-from-square"></i>
+                  <i class="fa-brands fa-github"></i> Github&nbsp;&nbsp;<i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
                 </a>`,
               },
               {
                 html: `
                 <a href="mailto:contact@gofeatureflag.org" target="_blank" rel="noreferrer noopener">
-                  <i class="fa-regular fa-envelope"></i> Email&nbsp;&nbsp;<i class="fa-solid fa-arrow-up-right-from-square"></i>
-                </a>`,
-              },
-            ],
-          },
-          {
-            title: ' ',
-            items: [
-              {
-                html: `
-                <a href="https://www.netlify.com" target="_blank" rel="noreferrer noopener">
-                   <i class="devicon-netlify-plain colored"></i> Powered by Netlify&nbsp;&nbsp;<i class="fa-solid fa-arrow-up-right-from-square"></i>
+                  <i class="fa-regular fa-envelope"></i> Email&nbsp;&nbsp;<i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
                 </a>`,
               },
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} GO Feature Flag.`,
+        copyright: `Copyright © 2020-${new Date().getFullYear()} GO Feature Flag.<br/>Build with Docusaurus, <a href="https://www.netlify.com" target="_blank" rel="noreferrer noopener">Powered by Netlify</a>`,
       },
       prism: {
         theme: require('prism-react-renderer').themes.vsLight,

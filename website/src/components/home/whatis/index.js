@@ -9,9 +9,16 @@ export function Whatis() {
   return (
     <section className={clsx(styles.whatis)}>
       <span className="goffMainTitle">What is GO Feature Flag?</span>
-      <div className={clsx(styles.description, 'container')}>
-        <div className={clsx('row')}>
-          <div className={'col col--4'}>
+      <div
+        className={clsx(
+          styles.description,
+          'flex items-center justify-center'
+        )}>
+        <div
+          className={clsx(
+            'grid grid-cols-1 md:grid-cols-3 gap-x-5 max-w-full lg:gap-x-10 md:max-w-7xl'
+          )}>
+          <div className={''}>
             <h2>
               <i className="fa-solid fa-laptop-code"></i> Quick and Easy Setup
             </h2>
@@ -24,7 +31,7 @@ export function Whatis() {
               solution.
             </p>
           </div>
-          <div className={'col col--4'}>
+          <div className={''}>
             <h2>
               <i className="fa-solid fa-rectangle-list"></i> Complete Feature
               Flag Solution
@@ -38,7 +45,7 @@ export function Whatis() {
               configuration changes.
             </p>
           </div>
-          <div className={'col col--4'}>
+          <div className={''}>
             <h2>
               <i className="fa-solid fa-terminal"></i> Developer Optimized
             </h2>
@@ -55,7 +62,9 @@ export function Whatis() {
         </div>
       </div>
       <Link to="/docs/">
-        <button className="pushy__btn pushy__btn--md pushy__btn--red">
+        <button
+          type="button"
+          className="cursor-pointer text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
           <i className="fa-solid fa-screwdriver-wrench"></i> Dive into GO
           Feature Flag
         </button>

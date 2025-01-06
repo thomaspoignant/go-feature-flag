@@ -4,8 +4,8 @@ import clsx from 'clsx';
 import Link from '@docusaurus/Link';
 import PropTypes from 'prop-types';
 import {Headline} from '../headline';
-import {integrations} from '../../../../data/integrations';
-import {sdk} from '../../../../data/sdk';
+import {integrations} from '@site/data/integrations';
+import {sdk} from '@site/data/sdk';
 
 SocialIcon.propTypes = {
   colorClassName: PropTypes.string,
@@ -124,7 +124,7 @@ function OpenFeature() {
               supported languages.
             </p>
             <p>
-              <Link to={'/docs/openfeature_sdk/sdk'}>
+              <Link to={'/docs/sdk'}>
                 {' '}
                 See our SDKs <i className="fa-solid fa-arrow-right"></i>
               </Link>
@@ -193,6 +193,21 @@ function Integration() {
                   <p>You can also extend GO Feature Flag if needed.</p>
                 </li>
               </ul>
+              <p className={'mt-10 flex gap-2 items-center'}>
+                {' '}
+                See our integrations <i className="fa-solid fa-arrow-right"></i>
+                <Link to={'/docs/integrations/store-flags-configuration'}>
+                  Retrievers
+                </Link>
+                |
+                <Link to={'/docs/integrations/export-evaluation-data'}>
+                  Exporters
+                </Link>
+                |
+                <Link to={'/docs/integrations/notify-flags-changes'}>
+                  Notifiers
+                </Link>
+              </p>
             </div>
           </div>
         </div>

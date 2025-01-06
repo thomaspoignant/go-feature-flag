@@ -1,10 +1,10 @@
 ---
-sidebar_position: 20
-title: Auto-complete
+sidebar_position: 30
+title: 🪄 Auto-complete
 description: Flag configuration auto-complete
 ---
 
-# Flag configuration auto-complete
+# 🪄 Auto-complete
 
 GO Feature Flag offers a way to have auto-completion while creating a flag file.
 
