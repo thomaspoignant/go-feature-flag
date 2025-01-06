@@ -25,6 +25,10 @@ const config = {
       {
         redirects: [
           {
+            from: '/docs/category/getting-started',
+            to: '/docs/getting-started',
+          },
+          {
             from: '/docs/category/configure-your-feature-flags',
             to: '/docs/next/configure_flag/create-flags',
           },

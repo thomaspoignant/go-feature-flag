@@ -3,12 +3,11 @@ sidebar_position: 90
 description: How to migrate from v0.x.x to v1.x.x
 ---
 
----
+# 🔄 Migrate from v0.x to v1.x
+:::warning
 **⚠️ Version `v1.35.0` will be the last version of the cli.**.  
 **Why? Because it is feature complete and because it has been decided to stop supporting `v0.x.x` format.**
----
-
-# Migrate from v0.x.x to v1.x.x 
+:::
 
 :::info
 Version `v1.0.0` has introduced a new flag format that push the limits of **GO Feature Flag** even further.  

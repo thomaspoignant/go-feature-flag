@@ -1,9 +1,9 @@
 ---
-sidebar_position: 10
+sidebar_position: 20
 description: How to configure the GO module to use it directly in your code. 
 ---
 
-# Configuration
+# ⚙️ Configuration
 `go-feature-flag` needs to be initialized to be used.  
 During the initialization you must give a [`ffclient.Config{}`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#Config) configuration object.  
 

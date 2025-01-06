@@ -3,6 +3,7 @@ sidebar_position: 20
 description: How to configure the relay proxy to serve your feature flags.
 ---
 import {Mandatory, NotMandatory} from "../../src/components/checks/checks";
+import {integrations} from "../../data/integrations";
 
 # 🔧 Configuration
 
@@ -44,22 +45,28 @@ All the other options are optional and can be added to the configuration file to
 
 
 ## Environment variables
-
-:::warning
-# TODO
-:::
-
-
+The primary way to configure the relay proxy is through a configuration file, but you can also use environment variables if you prefer.  
 You can override file configurations using environment variables.
 
-Note that all environment variables should be uppercase.
-If you want to replace a nested fields, please use `_` to separate each field _(ex: `RETRIEVER_KIND`)_.
-
-In case of an array of string, you can add multiple values separated by a comma _(
-ex: `AUTHORIZEDKEYS_EVALUATION=my-first-key,my-second-key`)_.
-
-
-
+**Here are some things to know when you are using environment variables:**
+- To set an option, the environment variable should have the same name as the configuration option in uppercase.  
+  For example, to set the `listen` option, you can set the `LISTEN` environment variable.
+  ```shell
+  export LISTEN=8080
+  ```
+- If you want to set a nested field, you can use `_` to separate each field.  
+  For example, to set the `retrievers` option, you can set the `RETRIEVERS` environment variable.
+  ```shell
+  export RETRIEVER_KIND=github
+  ```
+- If you want to set an array of string, you can add multiple values separated by a comma.
+  ```shell
+  export AUTHORIZEDKEYS_EVALUATION=my-first-key,my-second-key
+  ```
+- If you are modifying an array of objects, you can use the index to set the value.
+  ```shell
+  export RETRIEVERS_0_KIND=github
+  ```
 ## Configuration Options
 ### `retrievers`
 This is the configuration on how to retrieve the configuration of the files.
@@ -326,12 +333,17 @@ Configuring a retriever always start by setting the kind of retriever you want t
 
 :::info
 To find the **`kind`** to use for your retriever and the **rest of the options**, check the [list of retrievers](../integrations/store-flags-configuration#available-retrievers) and go on the detail page of your choice to configure it.
+
+**Available retrievers**:
+<ul>
+{ integrations.retrievers.map((r) => (
+  <li key={r.name}><a href={`../integrations/store-flags-configuration/${r.docLink}`}>{r.name}</a></li>
+)) }
+</ul>
 :::
 
 ### type `exporter`
 An [exporter](../concepts/exporter) is the component in charge of sending your evaluation data to a remote source.
-
-Every `exporter` has its own configuration, check the [list of exporters](../integrations/export-evaluation-data#available-exporters) and go on the detail page of your choice to configure it.
 
 ```yaml title="example goff-proxy.yaml"
 # ...
@@ -339,11 +351,19 @@ exporter:
   kind: s3
   bucket: evaluation-data-bucket
 ```
+:::info
+Every `exporter` has its own configuration, check the [list of exporters](../integrations/export-evaluation-data#available-exporters) and go on the detail page of your choice to configure it.
+
+**Available exporters**:
+<ul>
+  { integrations.exporters.map((r) => (
+    <li key={r.name}><a href={`../integrations/export-evaluation-data/${r.docLink}`}>{r.name}</a></li>
+  )) }
+</ul>
+:::
 
 ### type `notifier`
 A [notifier](../concepts/notifier) is the component in charge of sending a notification when a flag changes to a remote system.
-
-Every `notifier` has its own configuration, check the [list of notifiers](../integrations/notify-flags-changes#available-notifiers) and go on the detail page of your choice to configure it.
 
 ```yaml title="example goff-proxy.yaml"
 # ...
@@ -354,3 +374,14 @@ notifier:
     webhookUrl: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX"
 # ...
 ```
+
+:::info
+Every `notifier` has its own configuration, check the [list of notifiers](../integrations/notify-flags-changes#available-notifiers) and go on the detail page of your choice to configure it.
+
+**Available notifiers**:
+<ul>
+  { integrations.notifiers.map((r) => (
+    <li key={r.name}><a href={`../integrations/notify-flags-changes/${r.docLink}`}>{r.name}</a></li>
+  )) }
+</ul>
+:::

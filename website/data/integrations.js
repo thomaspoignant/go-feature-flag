@@ -201,7 +201,7 @@ export const integrations = {
       description: 'Export evaluation data inside the application logger.',
       type: 'sync',
       bgColor: '#000000',
-      faLogo: 'fas fa-file-lines fa-stack-1x fa-inverse',
+      faLogo: 'fa-solid fa-file-lines fa-inverse',
       docLink: 'log',
     },
   ],
@@ -243,7 +243,7 @@ export const integrations = {
       name: 'Log',
       description: 'Send notifications as a log in your application logger.',
       bgColor: '#000000',
-      faLogo: 'fas fa-file-lines fa-stack-1x fa-inverse',
+      faLogo: 'fa-solid fa-file-lines fa-inverse',
     },
   ],
 };

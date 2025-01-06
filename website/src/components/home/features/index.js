@@ -115,8 +115,8 @@ function OpenFeature() {
           <div className={clsx(styles.featureContent, 'mr-25')}>
             <h2>Supports your favorite languages</h2>
             <p>
-              GO Feature Flag believe in OpenSource and offer providers for the
-              new standard for feature flags{' '}
+              GO Feature Flag believe in OpenSource, and offer providers for the
+              feature flag standard{' '}
               <Link href={'https://openfeature.dev'}>OpenFeature</Link>.
               <br />
               In combination with the <b>Open Feature SDKs</b> these{' '}
