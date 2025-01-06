@@ -11,7 +11,7 @@ To retrieve a file you need to provide a [retriever](https://pkg.go.dev/github.c
 
 **Available retrievers**:
 <ul>
-  { integrations.retrievers.map((r) => (
+  { integrations.retrievers.filter(item => item.docLink !== undefined).map((r) => (
     <li key={r.name}><a href={`../integrations/store-flags-configuration/${r.docLink}`}>{r.name}</a></li>
   )) }
 </ul>

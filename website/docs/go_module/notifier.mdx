@@ -15,7 +15,7 @@ A notifier will send one notification to the targeted system to inform them that
 
 ## Available notifiers
 <ul>
-  { integrations.notifiers.map((r) => (
+  { integrations.notifiers.filter(item => item.docLink !== undefined).map((r) => (
     <li key={r.name}><a href={`../integrations/notify-flags-changes/${r.docLink}`}>{r.name}</a></li>
   )) }
 </ul>

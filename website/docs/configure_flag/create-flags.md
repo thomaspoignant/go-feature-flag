@@ -289,7 +289,7 @@ It means that for a specific `targetingKey` the user will always see the same fl
         </p>
         <p>
           <i>
-            See <a href="./rollout/scheduled/">Scheduled rollout</a> to have
+            See <a href="./rollout-strategies/scheduled/">Scheduled rollout</a> to have
             more info on how to use it.
           </i>
         </p>
@@ -309,7 +309,7 @@ It means that for a specific `targetingKey` the user will always see the same fl
         </p>
         <p>
           <i>
-            See <a href="./rollout/experimentation/">Experimentation rollout</a>{" "}
+            See <a href="./rollout-strategies/experimentation/">Experimentation rollout</a>{" "}
             to have more info on how to use it.
           </i>
         </p>
@@ -323,7 +323,7 @@ It means that for a specific `targetingKey` the user will always see the same fl
 You can have advanced configurations for your flag for them to have specific behavior, such as:
 
 - [Target with Flags](./target-with-flags)
-- [Specific rollout strategies](../category/rollout-strategies/)
+- [Specific rollout strategies](./rollout-strategies/)
 - [Have a specific bucketing key](./custom-bucketing)
 
 ---

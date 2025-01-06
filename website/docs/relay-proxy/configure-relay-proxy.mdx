@@ -144,7 +144,7 @@ This is the port used by the relay proxy when starting the HTTP server.
 ### `monitoringPort`
 If set the monitoring endpoints will be served on this specific port.
 
-Check [_"Use specific port for the monitoring"_](./monitor_relay_proxy#use-specific-port-for-the-monitoring) to have more information.
+Check [_"Use specific port for the monitoring"_](./observability#use-specific-port-for-the-monitoring) to have more information.
 - option name: `monitoringPort`
 - type: **int**
 - default: **none**
@@ -336,7 +336,7 @@ To find the **`kind`** to use for your retriever and the **rest of the options**
 
 **Available retrievers**:
 <ul>
-{ integrations.retrievers.map((r) => (
+{ integrations.retrievers.filter(r => r.docLink !== undefined).map((r) => (
   <li key={r.name}><a href={`../integrations/store-flags-configuration/${r.docLink}`}>{r.name}</a></li>
 )) }
 </ul>
@@ -356,7 +356,7 @@ Every `exporter` has its own configuration, check the [list of exporters](../int
 
 **Available exporters**:
 <ul>
-  { integrations.exporters.map((r) => (
+  { integrations.exporters.filter(r => r.docLink !== undefined).map((r) => (
     <li key={r.name}><a href={`../integrations/export-evaluation-data/${r.docLink}`}>{r.name}</a></li>
   )) }
 </ul>
@@ -380,7 +380,7 @@ Every `notifier` has its own configuration, check the [list of notifiers](../int
 
 **Available notifiers**:
 <ul>
-  { integrations.notifiers.map((r) => (
+  { integrations.notifiers.filter(r => r.docLink !== undefined).map((r) => (
     <li key={r.name}><a href={`../integrations/notify-flags-changes/${r.docLink}`}>{r.name}</a></li>
   )) }
 </ul>

@@ -11,7 +11,7 @@ To retrieve a file you need to provide an [exporter](https://pkg.go.dev/github.c
 
 ## Available exporters:
 <ul>
-  { integrations.exporters.map((r) => (
+  { integrations.exporters.filter(item => item.docLink !== undefined).map((r) => (
     <li key={r.name}><a href={`../integrations/export-evaluation-data/${r.docLink}`}>{r.name}</a></li>
   )) }
 </ul>
