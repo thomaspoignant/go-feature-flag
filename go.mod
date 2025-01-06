@@ -18,7 +18,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.45
 	github.com/aws/aws-sdk-go-v2/service/kinesis v1.32.8
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.72.0
-	github.com/aws/aws-sdk-go-v2/service/sqs v1.37.3
+	github.com/aws/aws-sdk-go-v2/service/sqs v1.37.4
 	github.com/aws/smithy-go v1.22.1
 	github.com/awslabs/aws-lambda-go-api-proxy v0.16.2
 	github.com/fsouza/fake-gcs-server v1.51.0
@@ -26,7 +26,7 @@ require (
 	github.com/google/go-cmp v0.6.0
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
-	github.com/invopop/jsonschema v0.12.0
+	github.com/invopop/jsonschema v0.13.0
 	github.com/jessevdk/go-flags v1.6.1
 	github.com/jsternberg/zap-logfmt v1.3.0
 	github.com/knadh/koanf/parsers/json v0.1.0
@@ -67,7 +67,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.33.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/net v0.33.0
-	golang.org/x/oauth2 v0.24.0
+	golang.org/x/oauth2 v0.25.0
 	google.golang.org/api v0.214.0
 	google.golang.org/grpc v1.69.2
 	gopkg.in/yaml.v3 v3.0.1
