@@ -30,7 +30,7 @@ Creating the first version of the flag is not always pleasant, that's why we hav
 2. First, **find a name** for your feature flag (this will be the key of your flag and **it must be unique**).
 3. Define the **variations** that your flag can return.
    ```yaml title="flag-config.goff.yaml"
-   scream-level-feature:
+   display-banner:
      variations:
       enabled: true
       disabled: false
@@ -38,7 +38,7 @@ Creating the first version of the flag is not always pleasant, that's why we hav
     ```
 4. Define a **default rule**, that will be serve when no targeting match.
    ```yaml title="flag-config.goff.yaml"
-   scream-level-feature:
+   display-banner:
      variations:
       enabled: true
       disabled: false
