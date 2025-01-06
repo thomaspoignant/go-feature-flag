@@ -124,12 +124,7 @@ It means that for a specific `targetingKey` the user will always see the same fl
       <td>
         Name of your flag.
         <br />
-        <i>
-          It must be unique.
-          <br />
-          On the example the flag keys are <code>test-flag</code> and{" "}
-          <code>test-flag2</code>.
-        </i>
+        <i>It must be unique.</i>
       </td>
     </tr>
     <tr>
