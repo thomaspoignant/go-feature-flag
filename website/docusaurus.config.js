@@ -24,32 +24,206 @@ const config = {
     [
       '@docusaurus/plugin-client-redirects',
       {
-        // redirects: [
-        //   {
-        //     from: '/docs/category/getting-started',
-        //     to: '/docs/next/getting-started',
-        //   },
-        //   {
-        //     from: '/docs/category/configure-your-feature-flags',
-        //     to: '/docs/next/configure_flag/create-flags',
-        //   },
-        //   {
-        //     from: '/docs/configure_flag/create-flags',
-        //     to: '/docs/next/configure_flag/create-flags',
-        //   },
-        //   {
-        //     from: '/docs/configure_flag/rule_format',
-        //     to: '/docs/next/configure_flag/target-with-flags',
-        //   },
-        //   {
-        //     from: '/docs/configure_flag/custom_bucketing',
-        //     to: '/docs/next/configure_flag/custom-bucketing',
-        //   },
-        //   {
-        //     from: '/docs/category/rollout-strategies',
-        //     to: '/docs/next/configure_flag/rollout-strategies',
-        //   },
-        // ],
+        redirects: [
+          {
+            from: '/docs/configure_flag/flag_format',
+            to: '/docs/configure_flag/create-flags',
+          },
+          {
+            from: '/docs/configure_flag/rule_format',
+            to: '/docs/configure_flag/target-with-flags',
+          },
+          {
+            from: '/docs/configure_flag/rollout/experimentation',
+            to: '/docs/configure_flag/rollout-strategies/experimentation',
+          },
+          {
+            from: '/docs/go_module/store_file/kubernetes_configmaps',
+            to: '/docs/integrations/store-flags-configuration/kubernetes-configmap',
+          },
+          {
+            from: '/docs/getting_started/using-go-module',
+            to: '/docs/go_module/getting-started',
+          },
+          {from: '/docs/openfeature_sdk/sdk', to: '/docs/sdk'},
+          {from: '/docs/category/getting-started', to: '/docs/getting-started'},
+          {
+            from: '/docs/relay_proxy/configure_relay_proxy',
+            to: '/docs/relay-proxy/configure-relay-proxy',
+          },
+          {
+            from: '/docs/configure_flag/store_your_flags',
+            to: '/docs/integrations/store-flags-configuration',
+          },
+          {
+            from: '/docs/getting_started/using-openfeature',
+            to: '/docs/getting-started',
+          },
+          {
+            from: '/docs/configure_flag/rollout/progressive',
+            to: '/docs/configure_flag/rollout-strategies/progressive',
+          },
+          {
+            from: '/docs/go_module/store_file/github',
+            to: '/docs/integrations/store-flags-configuration/github',
+          },
+          {
+            from: '/docs/category/configure-your-feature-flags',
+            to: '/docs/configure_flag/create-flags',
+          },
+          {
+            from: '/docs/openfeature_sdk/server_providers/openfeature_go',
+            to: '/docs/sdk/server_providers/openfeature_go',
+          },
+          {
+            from: '/docs/openfeature_sdk/server_providers/openfeature_ruby',
+            to: '/docs/sdk/server_providers/openfeature_ruby',
+          },
+          {
+            from: '/docs/go_module/store_file/mongodb',
+            to: '/docs/integrations/store-flags-configuration/mongodb',
+          },
+          {
+            from: '/docs/openfeature_sdk/server_providers/openfeature_java',
+            to: '/docs/sdk/server_providers/openfeature_java',
+          },
+          {
+            from: '/docs/openfeature_sdk/server_providers/openfeature_javascript',
+            to: '/docs/sdk/server_providers/openfeature_javascript',
+          },
+          {
+            from: '/docs/relay_proxy/deploy_relay_proxy',
+            to: '/docs/relay-proxy/deployment',
+          },
+          {
+            from: '/docs/go_module/store_file/github',
+            to: '/docs/integrations/store-flags-configuration/github',
+          },
+          {
+            from: '/docs/category/configure-your-feature-flags',
+            to: '/docs/configure_flag/create-flags',
+          },
+          {
+            from: '/docs/openfeature_sdk/server_providers/openfeature_go',
+            to: '/docs/sdk/server_providers/openfeature_go',
+          },
+          {
+            from: '/docs/openfeature_sdk/server_providers/openfeature_ruby',
+            to: '/docs/sdk/server_providers/openfeature_ruby',
+          },
+          {
+            from: '/docs/go_module/store_file/mongodb',
+            to: '/docs/integrations/store-flags-configuration/mongodb',
+          },
+          {
+            from: '/docs/openfeature_sdk/server_providers/openfeature_java',
+            to: '/docs/sdk/server_providers/openfeature_java',
+          },
+          {
+            from: '/docs/openfeature_sdk/server_providers/openfeature_javascript',
+            to: '/docs/sdk/server_providers/openfeature_javascript',
+          },
+          {
+            from: '/docs/relay_proxy/deploy_relay_proxy',
+            to: '/docs/relay-proxy/deployment',
+          },
+          {
+            from: '/docs/go_module/store_file/custom',
+            to: '/docs/integrations/store-flags-configuration#custom-retriever',
+          },
+          {
+            from: '/docs/go_module/store_file/http',
+            to: '/docs/integrations/store-flags-configuration/http',
+          },
+          {
+            from: '/docs/relay_proxy/getting_started',
+            to: '/docs/relay-proxy/getting_started',
+          },
+          {
+            from: '/docs/configure_flag/rollout/scheduled',
+            to: '/docs/configure_flag/rollout-strategies/scheduled',
+          },
+          {
+            from: '/docs/openfeature_sdk/server_providers/openfeature_python',
+            to: '/docs/sdk/server_providers/openfeature_python',
+          },
+          {
+            from: '/docs/relay_proxy/advanced_usage',
+            to: '/docs/relay-proxy/advanced_usage',
+          },
+          {
+            from: '/docs/relay_proxy/relay_proxy_endpoints',
+            to: '/docs/relay-proxy/relay_proxy_endpoints',
+          },
+          {
+            from: '/docs/go_module/store_file/file',
+            to: '/docs/integrations/store-flags-configuration/file',
+          },
+          {
+            from: '/docs/openfeature_sdk/client_providers/openfeature_react',
+            to: '/docs/sdk/client_providers/openfeature_react',
+          },
+          {
+            from: '/docs/relay_proxy/monitor_relay_proxy',
+            to: '/docs/relay-proxy/observability',
+          },
+          {
+            from: '/docs/configure_flag/export_flags_usage',
+            to: '/docs/integrations/export-evaluation-data',
+          },
+          {
+            from: '/docs/experimental/ofrep',
+            to: '/API_relayproxy#tag/OpenFeature-Remote-Evaluation-Protocol-(OFREP)',
+          },
+          {
+            from: '/docs/go_module/data_collection/s3',
+            to: '/docs/integrations/export-evaluation-data/aws-s3',
+          },
+          {
+            from: '/docs/go_module/notifier/slack',
+            to: '/docs/integrations/notify-flags-changes/slack',
+          },
+          {
+            from: '/docs/go_module/notifier/webhook',
+            to: '/docs/integrations/notify-flags-changes/webhook',
+          },
+          {
+            from: '/docs/go_module/store_file/google_cloud_storage',
+            to: '/docs/integrations/store-flags-configuration/google-cloud-storage',
+          },
+          {
+            from: '/docs/go_module/store_file/redis',
+            to: '/docs/integrations/store-flags-configuration/redis',
+          },
+          {
+            from: '/docs/go_module/store_file/s3',
+            to: '/docs/integrations/store-flags-configuration/aws-s3',
+          },
+          {
+            from: '/docs/next/configure_flag/rollout/scheduled',
+            to: '/docs/configure_flag/rollout-strategies/scheduled',
+          },
+          {
+            from: '/docs/openfeature_sdk/client_providers/openfeature_javascript',
+            to: '/docs/sdk/client_providers/openfeature_javascript',
+          },
+          {
+            from: '/docs/openfeature_sdk/client_providers/openfeature_swift',
+            to: '/docs/sdk/client_providers/openfeature_swift',
+          },
+          {
+            from: '/docs/openfeature_sdk/server_providers/openfeature_dotnet',
+            to: '/docs/sdk/server_providers/openfeature_dotnet',
+          },
+          {
+            from: '/docs/openfeature_sdk/server_providers/openfeature_php',
+            to: '/docs/sdk/server_providers/openfeature_php',
+          },
+          {
+            from: '/docs/relay_proxy/install_relay_proxy',
+            to: '/docs/relay-proxy/install_relay_proxy',
+          },
+        ],
       },
     ],
     async function myPlugin(context, options) {
