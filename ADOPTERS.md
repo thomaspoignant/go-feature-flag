@@ -14,3 +14,4 @@ Thank you for trusting the `go-feature-flag` and using it in your organization.
 | HelloWorldCS         | https://helloworldcs.org                              | Feature flags for internal tools + app         |
 | Alternative Payments | https://www.alternativepayments.io                    | Feature Flagging for frontend and backend apps |
 | Mecena               | https://mecena.co                                     | FF for backend microservices                   | 
+| LandsEnd             | https://www.landsend.com                              | FF for backend and frontend apps               | 
