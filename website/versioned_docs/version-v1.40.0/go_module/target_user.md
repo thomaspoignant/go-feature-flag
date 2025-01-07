@@ -1,8 +1,8 @@
 ---
-sidebar_position: 20
+sidebar_position: 30
 description: How to select who should have the flag activated.
 ---
-# Performing flag evaluations
+# 🎯 Performing flag evaluations
 
 ## Users
 Feature flag targeting and rollouts are all determined by the user you pass to your **Variation** calls.

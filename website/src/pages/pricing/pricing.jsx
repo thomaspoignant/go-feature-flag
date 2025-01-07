@@ -63,7 +63,7 @@ export default function Pricing() {
             </li>
           </ul>
           <Link
-            to={"/docs/category/getting-started"}
+            to={"/docs/getting-started"}
             className="mt-8 block rounded-md px-3.5 py-2.5 text-center text-sm font-semibold text-indigo-600 ring-1 ring-inset ring-indigo-200 hover:ring-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:mt-10"
           >
             Get started today

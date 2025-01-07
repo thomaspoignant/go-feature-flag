@@ -1,10 +1,11 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
 
+const {sdk} = require('./data/sdk');
 const lightCodeTheme = require('prism-react-renderer').themes.github;
 const darkCodeTheme = require('prism-react-renderer').themes.dracula;
 
-/** @type {import('@docusaurus/types').Config} */
+/** @type {import("@docusaurus/types").Config} */
 const config = {
   title: 'GO Feature Flag',
   tagline: 'Simple Feature Flagging for All',
@@ -16,7 +17,215 @@ const config = {
   organizationName: 'thomaspoignant',
   projectName: 'go-feature-flag',
   trailingSlash: false,
+  markdown: {
+    mermaid: true,
+  },
   plugins: [
+    [
+      '@docusaurus/plugin-client-redirects',
+      {
+        redirects: [
+          {
+            from: '/docs/configure_flag/flag_format',
+            to: '/docs/configure_flag/create-flags',
+          },
+          {
+            from: '/docs/configure_flag/rule_format',
+            to: '/docs/configure_flag/target-with-flags',
+          },
+          {
+            from: '/docs/configure_flag/rollout/experimentation',
+            to: '/docs/configure_flag/rollout-strategies/experimentation',
+          },
+          {
+            from: '/docs/go_module/store_file/kubernetes_configmaps',
+            to: '/docs/integrations/store-flags-configuration/kubernetes-configmap',
+          },
+          {
+            from: '/docs/getting_started/using-go-module',
+            to: '/docs/go_module/getting-started',
+          },
+          {from: '/docs/openfeature_sdk/sdk', to: '/docs/sdk'},
+          {from: '/docs/category/getting-started', to: '/docs/getting-started'},
+          {
+            from: '/docs/relay_proxy/configure_relay_proxy',
+            to: '/docs/relay-proxy/configure-relay-proxy',
+          },
+          {
+            from: '/docs/configure_flag/store_your_flags',
+            to: '/docs/integrations/store-flags-configuration',
+          },
+          {
+            from: '/docs/getting_started/using-openfeature',
+            to: '/docs/getting-started',
+          },
+          {
+            from: '/docs/configure_flag/rollout/progressive',
+            to: '/docs/configure_flag/rollout-strategies/progressive',
+          },
+          {
+            from: '/docs/go_module/store_file/github',
+            to: '/docs/integrations/store-flags-configuration/github',
+          },
+          {
+            from: '/docs/category/configure-your-feature-flags',
+            to: '/docs/configure_flag/create-flags',
+          },
+          {
+            from: '/docs/openfeature_sdk/server_providers/openfeature_go',
+            to: '/docs/sdk/server_providers/openfeature_go',
+          },
+          {
+            from: '/docs/openfeature_sdk/server_providers/openfeature_ruby',
+            to: '/docs/sdk/server_providers/openfeature_ruby',
+          },
+          {
+            from: '/docs/go_module/store_file/mongodb',
+            to: '/docs/integrations/store-flags-configuration/mongodb',
+          },
+          {
+            from: '/docs/openfeature_sdk/server_providers/openfeature_java',
+            to: '/docs/sdk/server_providers/openfeature_java',
+          },
+          {
+            from: '/docs/openfeature_sdk/server_providers/openfeature_javascript',
+            to: '/docs/sdk/server_providers/openfeature_javascript',
+          },
+          {
+            from: '/docs/relay_proxy/deploy_relay_proxy',
+            to: '/docs/relay-proxy/deployment',
+          },
+          {
+            from: '/docs/go_module/store_file/github',
+            to: '/docs/integrations/store-flags-configuration/github',
+          },
+          {
+            from: '/docs/category/configure-your-feature-flags',
+            to: '/docs/configure_flag/create-flags',
+          },
+          {
+            from: '/docs/openfeature_sdk/server_providers/openfeature_go',
+            to: '/docs/sdk/server_providers/openfeature_go',
+          },
+          {
+            from: '/docs/openfeature_sdk/server_providers/openfeature_ruby',
+            to: '/docs/sdk/server_providers/openfeature_ruby',
+          },
+          {
+            from: '/docs/go_module/store_file/mongodb',
+            to: '/docs/integrations/store-flags-configuration/mongodb',
+          },
+          {
+            from: '/docs/openfeature_sdk/server_providers/openfeature_java',
+            to: '/docs/sdk/server_providers/openfeature_java',
+          },
+          {
+            from: '/docs/openfeature_sdk/server_providers/openfeature_javascript',
+            to: '/docs/sdk/server_providers/openfeature_javascript',
+          },
+          {
+            from: '/docs/relay_proxy/deploy_relay_proxy',
+            to: '/docs/relay-proxy/deployment',
+          },
+          {
+            from: '/docs/go_module/store_file/custom',
+            to: '/docs/integrations/store-flags-configuration#custom-retriever',
+          },
+          {
+            from: '/docs/go_module/store_file/http',
+            to: '/docs/integrations/store-flags-configuration/http',
+          },
+          {
+            from: '/docs/relay_proxy/getting_started',
+            to: '/docs/relay-proxy/getting_started',
+          },
+          {
+            from: '/docs/configure_flag/rollout/scheduled',
+            to: '/docs/configure_flag/rollout-strategies/scheduled',
+          },
+          {
+            from: '/docs/openfeature_sdk/server_providers/openfeature_python',
+            to: '/docs/sdk/server_providers/openfeature_python',
+          },
+          {
+            from: '/docs/relay_proxy/advanced_usage',
+            to: '/docs/relay-proxy/advanced_usage',
+          },
+          {
+            from: '/docs/relay_proxy/relay_proxy_endpoints',
+            to: '/docs/relay-proxy/relay_proxy_endpoints',
+          },
+          {
+            from: '/docs/go_module/store_file/file',
+            to: '/docs/integrations/store-flags-configuration/file',
+          },
+          {
+            from: '/docs/openfeature_sdk/client_providers/openfeature_react',
+            to: '/docs/sdk/client_providers/openfeature_react',
+          },
+          {
+            from: '/docs/relay_proxy/monitor_relay_proxy',
+            to: '/docs/relay-proxy/observability',
+          },
+          {
+            from: '/docs/configure_flag/export_flags_usage',
+            to: '/docs/integrations/export-evaluation-data',
+          },
+          {
+            from: '/docs/experimental/ofrep',
+            to: '/API_relayproxy#tag/OpenFeature-Remote-Evaluation-Protocol-(OFREP)',
+          },
+          {
+            from: '/docs/go_module/data_collection/s3',
+            to: '/docs/integrations/export-evaluation-data/aws-s3',
+          },
+          {
+            from: '/docs/go_module/notifier/slack',
+            to: '/docs/integrations/notify-flags-changes/slack',
+          },
+          {
+            from: '/docs/go_module/notifier/webhook',
+            to: '/docs/integrations/notify-flags-changes/webhook',
+          },
+          {
+            from: '/docs/go_module/store_file/google_cloud_storage',
+            to: '/docs/integrations/store-flags-configuration/google-cloud-storage',
+          },
+          {
+            from: '/docs/go_module/store_file/redis',
+            to: '/docs/integrations/store-flags-configuration/redis',
+          },
+          {
+            from: '/docs/go_module/store_file/s3',
+            to: '/docs/integrations/store-flags-configuration/aws-s3',
+          },
+          {
+            from: '/docs/next/configure_flag/rollout/scheduled',
+            to: '/docs/configure_flag/rollout-strategies/scheduled',
+          },
+          {
+            from: '/docs/openfeature_sdk/client_providers/openfeature_javascript',
+            to: '/docs/sdk/client_providers/openfeature_javascript',
+          },
+          {
+            from: '/docs/openfeature_sdk/client_providers/openfeature_swift',
+            to: '/docs/sdk/client_providers/openfeature_swift',
+          },
+          {
+            from: '/docs/openfeature_sdk/server_providers/openfeature_dotnet',
+            to: '/docs/sdk/server_providers/openfeature_dotnet',
+          },
+          {
+            from: '/docs/openfeature_sdk/server_providers/openfeature_php',
+            to: '/docs/sdk/server_providers/openfeature_php',
+          },
+          {
+            from: '/docs/relay_proxy/install_relay_proxy',
+            to: '/docs/relay-proxy/install_relay_proxy',
+          },
+        ],
+      },
+    ],
     async function myPlugin(context, options) {
       return {
         name: 'docusaurus-tailwindcss',
@@ -55,7 +264,7 @@ const config = {
   presets: [
     [
       'classic',
-      /** @type {import('@docusaurus/preset-classic').Options} */
+      /** @type {import("@docusaurus/preset-classic").Options} */
       ({
         googleAnalytics: {
           trackingID: 'G-LEJBB94YBE',
@@ -94,8 +303,8 @@ const config = {
   ],
   stylesheets: [
     'https://fonts.googleapis.com/css?family=Poppins:400,500,700',
-    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css',
-    'https://cdn.jsdelivr.net/gh/devicons/devicon@v2.15.1/devicon.min.css', // https://devicon.dev/
+    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css',
+    'https://cdn.jsdelivr.net/gh/devicons/devicon@v2.16.0/devicon.min.css', // https://devicon.dev/
   ],
   themes: [
     [
@@ -108,9 +317,10 @@ const config = {
         explicitSearchResultPath: true,
       }),
     ],
+    ['@docusaurus/theme-mermaid', {theme: 'default'}],
   ],
   themeConfig:
-    /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
+    /** @type {import("@docusaurus/preset-classic").ThemeConfig} */
     ({
       announcementBar: {
         id: 'support_usz', // Increment on change
@@ -121,7 +331,7 @@ const config = {
         title: 'GO Feature Flag',
         logo: {
           alt: 'GO Feature Flag Logo',
-          src: 'img/logo/logo_128.png',
+          src: 'img/logo/navbar.png',
         },
         items: [
           {
@@ -147,11 +357,11 @@ const config = {
             label: 'Developers',
             items: [
               {
-                to: '/docs/category/getting-started',
+                to: '/docs/getting-started',
                 html: '<i class="fa-solid fa-rocket menu-icon"></i> Getting Started',
               },
               {
-                to: '/docs/openfeature_sdk/sdk',
+                to: '/docs/sdk',
                 html: '<i class="fa-solid fa-code menu-icon"></i> SDKs',
               },
               {
@@ -210,7 +420,7 @@ const config = {
             href: 'https://x.com/gofeatureflag',
             position: 'right',
             className: 'header-twitter-link navbar__right',
-            'aria-label': 'Twitter',
+            'aria-label': 'X',
           },
           {
             href: '/slack',
@@ -223,9 +433,9 @@ const config = {
       footer: {
         logo: {
           alt: 'GO Feature Flag logo',
-          src: 'img/logo/logo.png',
+          src: 'img/logo/logo_footer.png',
           href: 'https://gofeatureflag.org',
-          width: 100,
+          width: 220,
         },
         links: [
           {
@@ -233,19 +443,19 @@ const config = {
             items: [
               {
                 label: 'Getting Started',
-                to: '/docs/category/getting-started',
+                to: '/docs/getting-started',
               },
               {
                 label: 'OpenFeature',
                 to: '/product/open_feature_support',
               },
               {
-                label: 'Documentations',
+                label: 'Documentation',
                 to: '/docs',
               },
               {
                 label: 'SDKs',
-                to: '/docs/openfeature_sdk/sdk',
+                to: '/docs/sdk',
               },
               {
                 label: 'Blog',
@@ -255,62 +465,65 @@ const config = {
                 label: 'Flag Editor',
                 to: '/editor',
               },
+              {
+                label: 'Pricing',
+                to: '/pricing',
+              },
             ],
           },
-
+          {
+            title: 'SDKs',
+            items: (function () {
+              return sdk.map(sdk => {
+                return {
+                  html: `<a href="/docs/sdk/${sdk.docLink}">${sdk.name}</a>`,
+                };
+              });
+            })(),
+          },
           {
             title: 'Community',
             items: [
               {
                 html: `
                 <a href="/slack" target="_blank" rel="noreferrer noopener">
-                  <i class="fa-brands fa-slack"></i> Slack&nbsp;&nbsp;<i class="fa-solid fa-arrow-up-right-from-square"></i>
+                  <i class="fa-brands fa-slack"></i> Slack&nbsp;&nbsp;<i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
                 </a>`,
               },
               {
                 html: `
                 <a href="https://x.com/gofeatureflag" target="_blank" rel="noreferrer noopener">
-                  <i class="fa-brands fa-x-twitter"></i> X&nbsp;&nbsp;<i class="fa-solid fa-arrow-up-right-from-square"></i>
+                  <i class="fa-brands fa-x-twitter"></i> X&nbsp;&nbsp;<i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
                 </a>`,
               },
               {
                 html: `
                 <a href="https://youtube.com/@gofeatureflag" target="_blank" rel="noreferrer noopener">
-                  <i class="fa-brands fa-youtube"></i> Youtube &nbsp;<i class="fa-solid fa-arrow-up-right-from-square"></i>
+                  <i class="fa-brands fa-youtube"></i> Youtube &nbsp;<i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
                 </a>`,
               },
               {
                 html: `
                 <a href="https://github.com/thomaspoignant/go-feature-flag" target="_blank" rel="noreferrer noopener">
-                  <i class="fa-brands fa-github"></i> Github&nbsp;&nbsp;<i class="fa-solid fa-arrow-up-right-from-square"></i>
+                  <i class="fa-brands fa-github"></i> Github&nbsp;&nbsp;<i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
                 </a>`,
               },
               {
                 html: `
                 <a href="mailto:contact@gofeatureflag.org" target="_blank" rel="noreferrer noopener">
-                  <i class="fa-regular fa-envelope"></i> Email&nbsp;&nbsp;<i class="fa-solid fa-arrow-up-right-from-square"></i>
-                </a>`,
-              },
-            ],
-          },
-          {
-            title: ' ',
-            items: [
-              {
-                html: `
-                <a href="https://www.netlify.com" target="_blank" rel="noreferrer noopener">
-                   <i class="devicon-netlify-plain colored"></i> Powered by Netlify&nbsp;&nbsp;<i class="fa-solid fa-arrow-up-right-from-square"></i>
+                  <i class="fa-regular fa-envelope"></i> Email&nbsp;&nbsp;<i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
                 </a>`,
               },
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} GO Feature Flag.`,
+        copyright: `Copyright © 2020-${new Date().getFullYear()} GO Feature Flag.<br/>Build with Docusaurus, <a href="https://www.netlify.com" target="_blank" rel="noreferrer noopener">Powered by Netlify</a>`,
       },
       prism: {
         theme: require('prism-react-renderer').themes.vsLight,
         darkTheme: require('prism-react-renderer').themes.vsDark,
         additionalLanguages: [
+          'json',
           'java',
           'scala',
           'toml',
