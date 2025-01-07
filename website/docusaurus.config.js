@@ -433,9 +433,9 @@ const config = {
       footer: {
         logo: {
           alt: 'GO Feature Flag logo',
-          src: 'img/logo/logo_128.png',
+          src: 'img/logo/logo_footer.png',
           href: 'https://gofeatureflag.org',
-          width: 100,
+          width: 220,
         },
         links: [
           {
@@ -464,6 +464,10 @@ const config = {
               {
                 label: 'Flag Editor',
                 to: '/editor',
+              },
+              {
+                label: 'Pricing',
+                to: '/pricing',
               },
             ],
           },

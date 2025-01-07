@@ -146,6 +146,15 @@ export function UsingIt() {
                 className={'h-auto max-w-full'}
               />
             </div>
+            <div>
+              <img
+                src={
+                  'https://www.landsend.com/pps/static/assets/global-header/LE_COMFY_LOGO_DesktopNavy.svg'
+                }
+                alt={"Lands'end"}
+                className={'h-auto max-w-full'}
+              />
+            </div>
           </div>
         </div>
         <div className={styles.contactUs}>
