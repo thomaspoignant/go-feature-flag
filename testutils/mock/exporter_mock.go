@@ -26,6 +26,7 @@ func (m *Exporter) Export(ctx context.Context, _ *fflog.FFLogger, events []expor
 	m.ExportedEvents = append(m.ExportedEvents, events...)
 	if m.Err != nil {
 		if m.ExpectedNumberErr > m.CurrentNumberErr {
+			m.ExportedEvents = m.ExportedEvents[:len(m.ExportedEvents)-len(events)]
 			m.CurrentNumberErr++
 			return m.Err
 		}
