@@ -64,16 +64,8 @@ const config = {
             to: '/docs/configure_flag/rollout-strategies/progressive',
           },
           {
-            from: '/docs/go_module/store_file/github',
-            to: '/docs/integrations/store-flags-configuration/github',
-          },
-          {
             from: '/docs/category/configure-your-feature-flags',
             to: '/docs/configure_flag/create-flags',
-          },
-          {
-            from: '/docs/openfeature_sdk/server_providers/openfeature_go',
-            to: '/docs/sdk/server_providers/openfeature_go',
           },
           {
             from: '/docs/openfeature_sdk/server_providers/openfeature_ruby',
@@ -84,14 +76,6 @@ const config = {
             to: '/docs/integrations/store-flags-configuration/mongodb',
           },
           {
-            from: '/docs/openfeature_sdk/server_providers/openfeature_java',
-            to: '/docs/sdk/server_providers/openfeature_java',
-          },
-          {
-            from: '/docs/openfeature_sdk/server_providers/openfeature_javascript',
-            to: '/docs/sdk/server_providers/openfeature_javascript',
-          },
-          {
             from: '/docs/relay_proxy/deploy_relay_proxy',
             to: '/docs/relay-proxy/deployment',
           },
@@ -100,20 +84,8 @@ const config = {
             to: '/docs/integrations/store-flags-configuration/github',
           },
           {
-            from: '/docs/category/configure-your-feature-flags',
-            to: '/docs/configure_flag/create-flags',
-          },
-          {
             from: '/docs/openfeature_sdk/server_providers/openfeature_go',
             to: '/docs/sdk/server_providers/openfeature_go',
-          },
-          {
-            from: '/docs/openfeature_sdk/server_providers/openfeature_ruby',
-            to: '/docs/sdk/server_providers/openfeature_ruby',
-          },
-          {
-            from: '/docs/go_module/store_file/mongodb',
-            to: '/docs/integrations/store-flags-configuration/mongodb',
           },
           {
             from: '/docs/openfeature_sdk/server_providers/openfeature_java',
@@ -122,10 +94,6 @@ const config = {
           {
             from: '/docs/openfeature_sdk/server_providers/openfeature_javascript',
             to: '/docs/sdk/server_providers/openfeature_javascript',
-          },
-          {
-            from: '/docs/relay_proxy/deploy_relay_proxy',
-            to: '/docs/relay-proxy/deployment',
           },
           {
             from: '/docs/go_module/store_file/custom',

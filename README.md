@@ -53,7 +53,7 @@ GO Feature Flag is a lightweight and open-source solution that provides a simple
 
 The solution has been built to facilitate the usage of feature flags in your code with the easiest setup possible.
 
-Originally, **GO Feature Flag** was designed as a solution exclusively for the `GO` language. With the new standardization of feature flags by the [Openfeature](https://openfeature.dev/) project, the solution is now available for multiple languages _([list of supported languages](https://gofeatureflag.org/docs/openfeature_sdk/sdk))_ through a simple API server called the relay proxy, which can be hosted.
+Originally, **GO Feature Flag** was designed as a solution exclusively for the `GO` language. With the new standardization of feature flags by the [Openfeature](https://openfeature.dev/) project, the solution is now available for multiple languages _([list of supported languages](https://gofeatureflag.org/docs/sdk))_ through a simple API server called the relay proxy, which can be hosted.
 
 > [!TIP]
 > If you are not familiar with feature flags, I've written an [article](https://medium.com/better-programming/feature-flags-and-how-to-iterate-quickly-7e3371b9986) which explains why feature flags can fasten your iteration cycle.
@@ -64,10 +64,10 @@ Originally, **GO Feature Flag** was designed as a solution exclusively for the `
 - Configuring your flags in various [format](https://gofeatureflag.org/docs/configure_flag/flag_format) (`JSON`, `TOML` and `YAML`).
 - Adding complex [rules](https://gofeatureflag.org/docs/configure_flag/flag_format#rule-format) to target your users.
 - Use a complex rollout strategy for your flags :
-  - [Run A/B testing experimentation](https://gofeatureflag.org/docs/configure_flag/rollout/experimentation).
-  - [Progressively rollout a feature](https://gofeatureflag.org/docs/configure_flag/rollout/progressive).
-  - [Schedule your flag updates](https://gofeatureflag.org/docs/configure_flag/rollout/scheduled).
-- Exporting your flags usage data to various destinations such as _(`S3`, `Google cloud storage`, `file`, see the [_full list_](https://gofeatureflag.org/docs/configure_flag/export_flags_usage))_.
+  - [Run A/B testing experimentation](https://gofeatureflag.org/docs/docs/configure_flag/rollout-strategies/experimentation).
+  - [Progressively rollout a feature](https://gofeatureflag.org/docs/docs/configure_flag/rollout-strategies/progressive).
+  - [Schedule your flag updates](https://gofeatureflag.org/docs/docs/configure_flag/rollout-strategies/scheduled).
+- Exporting your flags usage data to various destinations such as _(`S3`, `Google cloud storage`, `file`, `kubernetes`, see the [_full list_](https://gofeatureflag.org/docs/docs/integrations/store-flags-configuration#available-retrievers))_.
 - Getting notified when a flag has been changed _(`webhook` and `slack`)_.
 - Use **GO Feature Flag** in several languages with **Open Feature SDKs**.
 - Support your full stack, from the backend to the frontend including your mobile apps.
@@ -141,11 +141,11 @@ docker run \
 
 ```
 
-_If you don't want to use docker to install the **relay proxy** you can follow other ways to install it in the [documentation](https://gofeatureflag.org/docs/relay_proxy/install_relay_proxy)._
+_If you don't want to use docker to install the **relay proxy** you can follow other ways to install it in the [documentation](https://gofeatureflag.org/docs/docs/relay-proxy/install_relay_proxy)._
 
 ### Use Open Feature SDK
 
-_In this example, we are using the **nodejs SDK**, but you can check other languages [here](https://gofeatureflag.org/docs/openfeature_sdk/sdk)._
+_In this example, we are using the **nodejs SDK**, but you can check other languages [here](https://gofeatureflag.org/docs/sdk)._
 
 
 #### Install dependencies
@@ -241,7 +241,7 @@ PollingInterval, the default value is 60 seconds).*
 
 > ℹ info  
 This is a basic configuration to test locally, in production it is better to use a remote place to store your feature flag configuration file.  
-Look at the list of available options in the [**Store your feature flag file** page](https://gofeatureflag.org/docs/go_module/store_file/).
+Look at the list of available options in the [**Store your feature flag file** page](https://gofeatureflag.org/docs/docs/integrations/store-flags-configuration#available-retrievers).
 
 ### Evaluate your flags
 Now you can evaluate your flags anywhere in your code.
@@ -302,7 +302,7 @@ The available retrievers are:
 - **AzBlobStorage**
 - ...
 
-_[See the full list and more information.](https://gofeatureflag.org/docs/configure_flag/store_your_flags)_
+_[See the full list and more information.](https://gofeatureflag.org/docs/docs/integrations/store-flags-configuration#available-retrievers)_
 
 ## Flags file format
 **GO Feature Flag** core feature is to centralize all your feature flags in a single file and to avoid hosting and maintaining a backend server to manage them.
@@ -449,7 +449,7 @@ end = 2021-03-21T05:00:00.100Z
 
 </details>
 
-For detailed information on the fields required to create a flag, please refer to the [documentation](https://gofeatureflag.org/docs/configure_flag/flag_format).
+For detailed information on the fields required to create a flag, please refer to the [documentation](https://gofeatureflag.org/docs/docs/configure_flag/target-with-flags).
 
 ## Rule format
 
@@ -532,10 +532,10 @@ But it does not have to, having a complex **rollout** strategy allows you to hav
 
 ### Complex rollout strategy available
 
-- [Canary releases](https://gofeatureflag.org/docs/configure_flag/rollout/canary) - impact randomly a subset of your users.
-- [Progressive rollout](https://gofeatureflag.org/docs/configure_flag/rollout/progressive) - increase the percentage of your flag over time.
-- [Scheduled rollout](https://gofeatureflag.org/docs/configure_flag/rollout/scheduled/) - update your flag over time.
-- [Experimentation rollout](https://gofeatureflag.org/docs/configure_flag/rollout/experimentation) - serve your feature only for a determined time *(perfect for A/B testing)*.
+- [Percentages rollout](https://gofeatureflag.org/docs/docs/configure_flag/rollout-strategies/percentage) - impact randomly a subset of your users.
+- [Progressive rollout](https://gofeatureflag.org/docs/docs/configure_flag/rollout-strategies/progressive) - increase the percentage of your flag over time.
+- [Scheduled rollout](https://gofeatureflag.org/docs/docs/configure_flag/rollout-strategies/scheduled) - update your flag over time.
+- [Experimentation rollout](https://gofeatureflag.org/docs/docs/configure_flag/rollout-strategies/experimentation) - serve your feature only for a determined time *(perfect for A/B testing)*.
 
 ## Notifiers
 If you want to be informed when a flag has changed, you can configure a [**notifier**](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag#NotifierConfig).

@@ -82,7 +82,7 @@ function Rollout() {
           </ul>
         </div>
       </div>
-      <div className={clsx(styles.imgRollout)}>
+      <div className={clsx(styles.imgRollout, 'max-md:hidden')}>
         <div className={styles.featureImage}>
           <img
             src="img/features/rollout.png"
