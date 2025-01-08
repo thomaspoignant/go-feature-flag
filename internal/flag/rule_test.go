@@ -497,6 +497,50 @@ func TestRule_Evaluate(t *testing.T) {
 			args:    args{},
 			wantErr: assert.Error,
 		},
+		{
+			name: "User does not match the query (JsonLogic)",
+			rule: flag.Rule{
+				Name:            testconvert.String("rule1"),
+				VariationResult: testconvert.String("variation_A"),
+				Query:           testconvert.String(`{"==": [{"var": "key"}, "def"]}`),
+			},
+			args: args{
+				isDefault: false,
+				user:      ffcontext.NewEvaluationContext("abc"),
+			},
+			wantErr: assert.Error,
+		},
+		{
+			name: "User match the query (JsonLogic)",
+			rule: flag.Rule{
+				Name:            testconvert.String("rule1"),
+				VariationResult: testconvert.String("variation_A"),
+				Query:           testconvert.String(`{"==": [{"var": "key"}, "abc"]}`),
+			},
+			args: args{
+				isDefault: false,
+				user:      ffcontext.NewEvaluationContext("abc"),
+			},
+			want:    "variation_A",
+			wantErr: assert.NoError,
+		},
+		{
+			name: "Percentage + user match query (JsonLogic)",
+			rule: flag.Rule{
+				Name: testconvert.String("rule1"),
+				Percentages: &map[string]float64{
+					"variation_D": 70,
+					"variation_C": 10,
+					"variation_B": 20,
+				},
+				Query: testconvert.String(`{"==": [{"var": "key"}, "96ac59e6-7492-436b-b15a-ba1d797d2423"]}`),
+			},
+			args: args{
+				user: ffcontext.NewEvaluationContext("96ac59e6-7492-436b-b15a-ba1d797d2423"),
+			},
+			wantErr: assert.NoError,
+			want:    "variation_B",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

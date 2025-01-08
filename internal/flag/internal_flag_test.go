@@ -254,6 +254,48 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 		},
 		{
+			name: "Should return the variation specified in the rule if rule match (jsonLogic)",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"variation_A": testconvert.Interface(true),
+					"variation_B": testconvert.Interface(false),
+				},
+				Rules: &[]flag.Rule{
+					{
+						Name:            testconvert.String("rule1"),
+						Query:           testconvert.String(`{"==":[{"var":"key"},"user-key"]}`),
+						VariationResult: testconvert.String("variation_B"),
+					},
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("variation_A"),
+				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
+			},
+			args: args{
+				flagName: "my-flag",
+				user:     ffcontext.NewEvaluationContext("user-key"),
+				flagContext: flag.Context{
+					DefaultSdkValue: false,
+				},
+			},
+			want: false,
+			want1: flag.ResolutionDetails{
+				Variant:   "variation_B",
+				Reason:    flag.ReasonTargetingMatch,
+				RuleIndex: testconvert.Int(0),
+				RuleName:  testconvert.String("rule1"),
+				Cacheable: true,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
+			},
+		},
+		{
 			name: "Should match the 2nd rule",
 			flag: flag.InternalFlag{
 				Variations: &map[string]*interface{}{
@@ -270,6 +312,54 @@ func TestInternalFlag_Value(t *testing.T) {
 					{
 						Name:            testconvert.String("rule2"),
 						Query:           testconvert.String("key eq \"user-key\""),
+						VariationResult: testconvert.String("variation_C"),
+					},
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("variation_A"),
+				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
+			},
+			args: args{
+				flagName: "my-flag",
+				user:     ffcontext.NewEvaluationContext("user-key"),
+				flagContext: flag.Context{
+					DefaultSdkValue: "value_default",
+				},
+			},
+			want: "value_C",
+			want1: flag.ResolutionDetails{
+				Variant:   "variation_C",
+				Reason:    flag.ReasonTargetingMatch,
+				RuleIndex: testconvert.Int(1),
+				RuleName:  testconvert.String("rule2"),
+				Cacheable: true,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
+			},
+		},
+		{
+			name: "Should match the 2nd rule (jsonLogic)",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"variation_A": testconvert.Interface("value_A"),
+					"variation_B": testconvert.Interface("value_B"),
+					"variation_C": testconvert.Interface("value_C"),
+				},
+				Rules: &[]flag.Rule{
+					{
+						Name:            testconvert.String("rule1"),
+						Query:           testconvert.String(`{"==":[{"var":"key"},"not-user-key"]}`),
+						VariationResult: testconvert.String("variation_C"),
+					},
+					{
+						Name:            testconvert.String("rule2"),
+						Query:           testconvert.String(`{"==":[{"var":"key"},"user-key"]}`),
 						VariationResult: testconvert.String("variation_C"),
 					},
 				},
@@ -347,6 +437,51 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 		},
 		{
+			name: "Should match a rule with no name (jsonLogic)",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"variation_A": testconvert.Interface("value_A"),
+					"variation_B": testconvert.Interface("value_B"),
+					"variation_C": testconvert.Interface("value_C"),
+				},
+				Rules: &[]flag.Rule{
+					{
+						Query:           testconvert.String(`{"==":[{"var":"key"},"not-user-key"]}`),
+						VariationResult: testconvert.String("variation_C"),
+					},
+					{
+						Query:           testconvert.String(`{"==":[{"var":"key"},"user-key"]}`),
+						VariationResult: testconvert.String("variation_C"),
+					},
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("variation_A"),
+				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
+			},
+			args: args{
+				flagName: "my-flag",
+				user:     ffcontext.NewEvaluationContext("user-key"),
+				flagContext: flag.Context{
+					DefaultSdkValue: "value_default",
+				},
+			},
+			want: "value_C",
+			want1: flag.ResolutionDetails{
+				Variant:   "variation_C",
+				Reason:    flag.ReasonTargetingMatch,
+				RuleIndex: testconvert.Int(1),
+				Cacheable: true,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
+			},
+		},
+		{
 			name: "Should match only the first rule that apply (even if more than one can apply)",
 			flag: flag.InternalFlag{
 				Variations: &map[string]*interface{}{
@@ -366,6 +501,56 @@ func TestInternalFlag_Value(t *testing.T) {
 					},
 					{
 						Query:           testconvert.String("key eq \"user-key\""),
+						VariationResult: testconvert.String("variation_C"),
+					},
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("variation_A"),
+				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
+			},
+			args: args{
+				flagName: "my-flag",
+				user:     ffcontext.NewEvaluationContextBuilder("user-key").AddCustom("company", "go-feature-flag").Build(),
+				flagContext: flag.Context{
+					DefaultSdkValue: "value_default",
+				},
+			},
+			want: "value_D",
+			want1: flag.ResolutionDetails{
+				Variant:   "variation_D",
+				Reason:    flag.ReasonTargetingMatch,
+				RuleIndex: testconvert.Int(1),
+				Cacheable: true,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
+			},
+		},
+		{
+			name: "Should match only the first rule that apply (even if more than one can apply) (jsonLogic)",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"variation_A": testconvert.Interface("value_A"),
+					"variation_B": testconvert.Interface("value_B"),
+					"variation_C": testconvert.Interface("value_C"),
+					"variation_D": testconvert.Interface("value_D"),
+				},
+				Rules: &[]flag.Rule{
+					{
+						Query:           testconvert.String(`{"==":[{"var":"key"},"not-user-key"]}`),
+						VariationResult: testconvert.String("variation_C"),
+					},
+					{
+						Query:           testconvert.String(`{"==":[{"var":"company"},"go-feature-flag"]}`),
+						VariationResult: testconvert.String("variation_D"),
+					},
+					{
+						Query:           testconvert.String(`{"==":[{"var":"key"},"user-key"]}`),
 						VariationResult: testconvert.String("variation_C"),
 					},
 				},
@@ -459,6 +644,47 @@ func TestInternalFlag_Value(t *testing.T) {
 				Rules: &[]flag.Rule{
 					{
 						Query:       testconvert.String("key eq \"user-key\""),
+						Percentages: &map[string]float64{},
+					},
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("variation_A"),
+				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
+			},
+			args: args{
+				flagName: "my-flag",
+				user:     ffcontext.NewEvaluationContextBuilder("user-key").Build(),
+				flagContext: flag.Context{
+					DefaultSdkValue: "value_default",
+				},
+			},
+			want: "value_default",
+			want1: flag.ResolutionDetails{
+				Variant:   flag.VariationSDKDefault,
+				Reason:    flag.ReasonError,
+				ErrorCode: flag.ErrorFlagConfiguration,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
+			},
+		},
+		{
+			name: "Should return an error if rule is invalid (jsonLogic)",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"variation_A": testconvert.Interface("value_A"),
+					"variation_B": testconvert.Interface("value_B"),
+					"variation_C": testconvert.Interface("value_C"),
+					"variation_D": testconvert.Interface("value_D"),
+				},
+				Rules: &[]flag.Rule{
+					{
+						Query:       testconvert.String(`{"==":[{"var":"key"},"user-key"]}`),
 						Percentages: &map[string]float64{},
 					},
 				},
