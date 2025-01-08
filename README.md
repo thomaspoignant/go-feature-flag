@@ -449,7 +449,7 @@ end = 2021-03-21T05:00:00.100Z
 
 </details>
 
-For detailed information on the fields required to create a flag, please refer to the [documentation](https://gofeatureflag.org/docs/configure_flag/target-with-flags).
+For detailed information on the fields required to create a flag, please refer to the [documentation](https://gofeatureflag.org/docs/configure_flag/create-flags).
 
 ## Rule format
 
