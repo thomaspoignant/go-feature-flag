@@ -541,6 +541,22 @@ func TestRule_Evaluate(t *testing.T) {
 			wantErr: assert.NoError,
 			want:    "variation_B",
 		},
+		{
+			name: "Invalid JsonLogic logic rule",
+			rule: flag.Rule{
+				Name: testconvert.String("rule1"),
+				Percentages: &map[string]float64{
+					"variation_D": 70,
+					"variation_C": 10,
+					"variation_B": 20,
+				},
+				Query: testconvert.String(`{"=": [{"var": "key"}, "96ac59e6-7492-436b-b15a-ba1d797d2423"]}`),
+			},
+			args: args{
+				user: ffcontext.NewEvaluationContext("96ac59e6-7492-436b-b15a-ba1d797d2423"),
+			},
+			wantErr: assert.Error,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
