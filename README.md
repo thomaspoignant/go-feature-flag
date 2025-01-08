@@ -62,7 +62,7 @@ Originally, **GO Feature Flag** was designed as a solution exclusively for the `
 
 - Storing your configuration flags file on various locations (`HTTP`, `S3`, `Kubernetes`, [_see full list_](https://gofeatureflag.org/docs/configure_flag/store_your_flags)).
 - Configuring your flags in various [format](https://gofeatureflag.org/docs/configure_flag/flag_format) (`JSON`, `TOML` and `YAML`).
-- Adding complex [rules](https://gofeatureflag.org/docs/configure_flag/flag_format#rule-format) to target your users.
+- Adding complex [rules](https://gofeatureflag.org/docs/configure_flag/target-with-flags) to target your users.
 - Use a complex rollout strategy for your flags :
   - [Run A/B testing experimentation](https://gofeatureflag.org/docs/configure_flag/rollout-strategies/experimentation).
   - [Progressively rollout a feature](https://gofeatureflag.org/docs/configure_flag/rollout-strategies/progressive).
