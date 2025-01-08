@@ -3,29 +3,28 @@ import styles from './styles.module.css';
 import clsx from 'clsx';
 import Link from '@docusaurus/Link';
 import PropTypes from 'prop-types';
-import sqslogo from '@site/static/docs/collectors/sqs.png';
-import pubsublogo from '@site/static/docs/collectors/pubsub.png';
-import s3logo from '@site/static/docs/collectors/s3.png';
-import kinesislogo from '@site/static/docs/collectors/kinesis.png';
-import teamslogo from '@site/static/docs/notifier/teams.png';
-import webhooklogo from '@site/static/docs/collectors/webhook.png';
-import azbloblogo from '@site/static/docs/collectors/azblob.png';
-import bitbucketlogo from '@site/static/docs/retrievers/bitbucket.png';
 import {Headline} from '../headline';
+import {integrations} from '@site/data/integrations';
+import {sdk} from '@site/data/sdk';
 
 SocialIcon.propTypes = {
-  colorClassName: PropTypes.string.isRequired,
+  colorClassName: PropTypes.string,
   fontAwesomeIcon: PropTypes.string,
   img: PropTypes.string,
   tooltipText: PropTypes.string.isRequired,
+  backgroundColor: PropTypes.string,
 };
 
 function SocialIcon(props) {
   return (
     <div className={styles.tooltip}>
-      <span className={clsx(styles.socialIcon, props.colorClassName)}>
+      <span
+        className={clsx(styles.socialIcon, props.colorClassName)}
+        style={{backgroundColor: props.backgroundColor}}>
         {props.fontAwesomeIcon && <i className={props.fontAwesomeIcon}></i>}
-        {props.img && <img src={props.img} width="36" />}
+        {props.img && !props.fontAwesomeIcon && (
+          <img src={props.img} width="36" alt={'logo'} />
+        )}
       </span>
       <span className={styles.tooltiptext}>{props.tooltipText}</span>
     </div>
@@ -83,7 +82,7 @@ function Rollout() {
           </ul>
         </div>
       </div>
-      <div className={clsx(styles.imgRollout)}>
+      <div className={clsx(styles.imgRollout, 'max-md:hidden')}>
         <div className={styles.featureImage}>
           <img
             src="img/features/rollout.png"
@@ -102,79 +101,22 @@ function OpenFeature() {
       <div className="row">
         <div className={'col col--6'}>
           <div className={'grid grid-cols-4'}>
-            <SocialIcon
-              colorClassName={styles.socialIconCyan}
-              fontAwesomeIcon="devicon-go-original-wordmark colored"
-              tooltipText="GO"
-            />
-
-            <SocialIcon
-              colorClassName={styles.socialIconCyan}
-              fontAwesomeIcon="devicon-java-plain-wordmark colored"
-              tooltipText="Java"
-            />
-
-            <SocialIcon
-              colorClassName={styles.socialIconCyan}
-              fontAwesomeIcon="devicon-kotlin-plain-wordmark colored"
-              tooltipText="Kotlin"
-            />
-
-            <SocialIcon
-              colorClassName={styles.socialIconCyan}
-              fontAwesomeIcon="devicon-javascript-plain colored"
-              tooltipText="Javascript"
-            />
-
-            <SocialIcon
-              colorClassName={styles.socialIconCyan}
-              fontAwesomeIcon="devicon-typescript-plain colored"
-              tooltipText="Typescript"
-            />
-
-            <SocialIcon
-              colorClassName={styles.socialIconCyan}
-              fontAwesomeIcon="devicon-dot-net-plain-wordmark colored"
-              tooltipText=".NET"
-            />
-
-            <SocialIcon
-              colorClassName={styles.socialIconCyan}
-              fontAwesomeIcon="devicon-android-plain colored"
-              tooltipText="Kotlin / Android"
-            />
-
-            <SocialIcon
-              colorClassName={styles.socialIconCyan}
-              fontAwesomeIcon="devicon-react-original colored"
-              tooltipText="React"
-            />
-
-            <SocialIcon
-              colorClassName={styles.socialIconCyan}
-              fontAwesomeIcon="devicon-swift-plain colored"
-              tooltipText="Swift (iOS/tvOS/macOS)"
-            />
-
-            <SocialIcon
-              colorClassName={styles.socialIconCyan}
-              fontAwesomeIcon="devicon-php-plain colored"
-              tooltipText="PHP"
-            />
-
-            <SocialIcon
-              colorClassName={styles.socialIconCyan}
-              fontAwesomeIcon="devicon-ruby-plain colored"
-              tooltipText="Ruby"
-            />
+            {sdk.map(sdk => (
+              <SocialIcon
+                key={sdk.name}
+                backgroundColor="#cdf7e7"
+                fontAwesomeIcon={sdk.faLogo}
+                tooltipText={sdk.name}
+              />
+            ))}
           </div>
         </div>
         <div className="col col--6">
           <div className={clsx(styles.featureContent, 'mr-25')}>
             <h2>Supports your favorite languages</h2>
             <p>
-              GO Feature Flag believe in OpenSource and offer providers for the
-              new standard for feature flags{' '}
+              GO Feature Flag believe in OpenSource, and offer providers for the
+              feature flag standard{' '}
               <Link href={'https://openfeature.dev'}>OpenFeature</Link>.
               <br />
               In combination with the <b>Open Feature SDKs</b> these{' '}
@@ -182,7 +124,7 @@ function OpenFeature() {
               supported languages.
             </p>
             <p>
-              <Link to={'/docs/openfeature_sdk/sdk'}>
+              <Link to={'/docs/sdk'}>
                 {' '}
                 See our SDKs <i className="fa-solid fa-arrow-right"></i>
               </Link>
@@ -195,6 +137,26 @@ function OpenFeature() {
 }
 
 function Integration() {
+  const allIntegrations = [
+    ...integrations.retrievers,
+    ...integrations.exporters,
+    ...integrations.notifiers,
+  ];
+  const displayIntegrations = allIntegrations
+    .map(({name, logo, faLogo, bgColor}) => ({name, logo, faLogo, bgColor}))
+    .filter(
+      // remove duplicates
+      (integration, index, self) =>
+        index ===
+        self.findIndex(
+          t =>
+            t.name === integration.name &&
+            t.logo === integration.logo &&
+            t.faLogo === integration.faLogo &&
+            t.bgColor === integration.bgColor
+        )
+    );
+
   return (
     <div className="container">
       <div className="row">
@@ -231,112 +193,36 @@ function Integration() {
                   <p>You can also extend GO Feature Flag if needed.</p>
                 </li>
               </ul>
+              <p className={'mt-10 flex gap-2 items-center'}>
+                {' '}
+                See our integrations <i className="fa-solid fa-arrow-right"></i>
+                <Link to={'/docs/integrations/store-flags-configuration'}>
+                  Retrievers
+                </Link>
+                |
+                <Link to={'/docs/integrations/export-evaluation-data'}>
+                  Exporters
+                </Link>
+                |
+                <Link to={'/docs/integrations/notify-flags-changes'}>
+                  Notifiers
+                </Link>
+              </p>
             </div>
           </div>
         </div>
         <div className={'col col--6'}>
           <div className={'grid grid-cols-4'}>
-            <SocialIcon
-              colorClassName={styles.socialIconBlue}
-              fontAwesomeIcon="devicon-kubernetes-plain"
-              tooltipText="Kubernetes"
-            />
-
-            <SocialIcon
-              colorClassName={styles.socialIconBlack}
-              fontAwesomeIcon="fab fa-github fa-stack-1x fa-inverse"
-              tooltipText="GitHub"
-            />
-
-            <SocialIcon
-              colorClassName={styles.socialIconAws}
-              img={s3logo}
-              tooltipText="AWS S3"
-            />
-
-            <SocialIcon
-              colorClassName={styles.socialIconPurple}
-              fontAwesomeIcon="fab fa-slack fa-stack-1x fa-inverse"
-              tooltipText="Slack"
-            />
-            <SocialIcon
-              colorClassName={styles.socialIconBlack}
-              fontAwesomeIcon="fas fa-file fa-stack-1x fa-inverse"
-              tooltipText="Local file"
-            />
-
-            <SocialIcon
-              colorClassName={styles.socialIconGreen}
-              fontAwesomeIcon="fas fa-cloud-arrow-down fa-stack-1x fa-inverse"
-              tooltipText="HTTP endpoint"
-            />
-
-            <SocialIcon
-              colorClassName={styles.socialIconBlue}
-              fontAwesomeIcon="devicon-googlecloud-plain"
-              tooltipText="Google Cloud storage"
-            />
-
-            <SocialIcon
-              colorClassName={styles.socialIconGreen}
-              img={webhooklogo}
-              tooltipText="Webhooks"
-            />
-            <SocialIcon
-              colorClassName={styles.socialIconMongodb}
-              fontAwesomeIcon="devicon-mongodb-plain-wordmark colored"
-              tooltipText="Mongodb"
-            />
-            <SocialIcon
-              colorClassName={styles.socialIconGitlab}
-              fontAwesomeIcon="devicon-gitlab-plain colored"
-              tooltipText="Gitlab"
-            />
-            <SocialIcon
-              colorClassName={styles.socialIconAws}
-              img={sqslogo}
-              tooltipText="AWS SQS"
-            />
-            <SocialIcon
-              colorClassName={styles.socialIconPubSub}
-              img={pubsublogo}
-              tooltipText="Google PubSub"
-            />
-            <SocialIcon
-              colorClassName={styles.socialIconKafka}
-              fontAwesomeIcon="devicon-apachekafka-original colored"
-              tooltipText="Apache Kafka"
-            />
-            <SocialIcon
-              colorClassName={styles.socialIconBlack}
-              fontAwesomeIcon="devicon-redis-plain-wordmark colored"
-              tooltipText="Redis"
-            />
-            <SocialIcon
-              colorClassName={styles.socialIconDiscord}
-              fontAwesomeIcon="fa-brands fa-discord"
-              tooltipText="Discord"
-            />
-            <SocialIcon
-              colorClassName={styles.socialIconAws}
-              img={kinesislogo}
-              tooltipText="AWS Kinesis"
-            />
-            <SocialIcon
-              colorClassName={styles.socialIconBlue}
-              img={azbloblogo}
-              tooltipText="Azure Blob Storage"
-            />
-            <SocialIcon
-              colorClassName={styles.socialIconBitbucket}
-              img={bitbucketlogo}
-              tooltipText="Bitbucket"
-            />
-            <SocialIcon
-              colorClassName={styles.socialIconAws}
-              img={teamslogo}
-              tooltipText="Microsoft Teams"
-            />
+            {displayIntegrations.map(integration => (
+              <SocialIcon
+                key={integration.name}
+                backgroundColor={integration.bgColor}
+                fontAwesomeIcon={integration.faLogo}
+                img={integration.logo}
+                tooltipText={integration.name}
+                colorClassName={''}
+              />
+            ))}
           </div>
         </div>
       </div>

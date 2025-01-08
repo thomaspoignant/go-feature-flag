@@ -1,10 +1,10 @@
 ---
-sidebar_position: 11
-title: Evaluate command line
+sidebar_position: 30
+title: 🎯 Evaluate CLI
 description: Evaluate feature flags directly in your terminal
 ---
 
-# Evaluate feature flags directly in your terminal
+# 🎯 Evaluate feature flags in your terminal
 
 Sometimes for debug or testing purposes, you may want to be able to know what will be the variant used during the evaluation of your feature flag.
 With the GO Feature Flag Command Line, you can evaluate a feature flag directly in your terminal.
