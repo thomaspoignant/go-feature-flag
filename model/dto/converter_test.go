@@ -78,17 +78,13 @@ func TestConvertV1DtoToInternalFlag(t *testing.T) {
 					"var1": testconvert.Interface("var1"),
 					"var2": testconvert.Interface("var2"),
 				},
-				Rules: &[]flag.Rule{
+				Rules: &[]flag.Rule{{
+					Name:        testconvert.String("rule1"),
+					Query:       testconvert.String("key eq \"key\""),
+					Percentages: &map[string]float64{"var_true": 100, "var_false": 0}},
 					{
-						Name:        testconvert.String("rule1"),
-						Query:       testconvert.String("key eq \"key\""),
-						QueryFormat: flag.NikunjyQueryFormat,
-						Percentages: &map[string]float64{"var_true": 100, "var_false": 0},
-					},
-					{
-						Name:        testconvert.String("rule2"),
-						Query:       testconvert.String("key eq \"key2\""),
-						QueryFormat: flag.NikunjyQueryFormat,
+						Name:  testconvert.String("rule2"),
+						Query: testconvert.String("key eq \"key2\""),
 						ProgressiveRollout: &flag.ProgressiveRollout{
 							Initial: &flag.ProgressiveRolloutStep{
 								Variation:  testconvert.String("var1"),
@@ -105,7 +101,6 @@ func TestConvertV1DtoToInternalFlag(t *testing.T) {
 					{
 						Name:            testconvert.String("rule3"),
 						Query:           testconvert.String("key eq \"key3\""),
-						QueryFormat:     flag.NikunjyQueryFormat,
 						VariationResult: testconvert.String("var2"),
 					},
 				},

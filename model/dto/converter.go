@@ -14,21 +14,10 @@ func ConvertDtoToInternalFlag(dto DTO) flag.InternalFlag {
 		}
 	}
 
-	// We add the information of the type of query format we have
-	var rules *[]flag.Rule
-	if dto.Rules != nil {
-		rulesTmp := make([]flag.Rule, len(*dto.Rules))
-		for i, r := range *dto.Rules {
-			r.QueryFormat = flag.GetQueryFormat(r)
-			rulesTmp[i] = r
-		}
-		rules = &rulesTmp
-	}
-
 	return flag.InternalFlag{
 		BucketingKey:    dto.BucketingKey,
 		Variations:      dto.Variations,
-		Rules:           rules,
+		Rules:           dto.Rules,
 		DefaultRule:     dto.DefaultRule,
 		TrackEvents:     dto.TrackEvents,
 		Disable:         dto.Disable,
