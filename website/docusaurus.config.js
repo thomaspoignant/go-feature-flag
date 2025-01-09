@@ -466,6 +466,12 @@ const config = {
               },
               {
                 html: `
+                <a href="https://bsky.app/profile/gofeatureflag.org" target="_blank" rel="noreferrer noopener">
+                   <i class="fa-brands fa-bluesky"></i> Bluesky&nbsp;&nbsp;<i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                </a>`,
+              },
+              {
+                html: `
                 <a href="https://youtube.com/@gofeatureflag" target="_blank" rel="noreferrer noopener">
                   <i class="fa-brands fa-youtube"></i> Youtube &nbsp;<i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
                 </a>`,
