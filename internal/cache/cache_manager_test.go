@@ -105,7 +105,8 @@ trackEvents = false
 				"test-flag": {
 					Rules: &[]flag.Rule{
 						{
-							Query: testconvert.String("key eq \"random-key\""),
+							Query:       testconvert.String("key eq \"random-key\""),
+							QueryFormat: "nikunjy",
 							Percentages: &map[string]float64{
 								"false_var": 0,
 								"true_var":  100,
@@ -152,7 +153,8 @@ test-flag:
 				"test-flag": {
 					Rules: &[]flag.Rule{
 						{
-							Query: testconvert.String("key eq \"random-key\""),
+							Query:       testconvert.String("key eq \"random-key\""),
+							QueryFormat: flag.NikunjyQueryFormat,
 							Percentages: &map[string]float64{
 								"false_var": 0,
 								"true_var":  100,
@@ -206,7 +208,8 @@ test-flag:
 				"test-flag": {
 					Rules: &[]flag.Rule{
 						{
-							Query: testconvert.String("key eq \"random-key\""),
+							Query:       testconvert.String("key eq \"random-key\""),
+							QueryFormat: flag.NikunjyQueryFormat,
 							Percentages: &map[string]float64{
 								"false_var": 0,
 								"true_var":  100,
@@ -310,7 +313,8 @@ test-flag:
 					},
 					Rules: &[]flag.Rule{
 						{
-							Query: testconvert.String("key eq \"random-key\""),
+							Query:       testconvert.String("key eq \"random-key\""),
+							QueryFormat: flag.NikunjyQueryFormat,
 							Percentages: &map[string]float64{
 								"false_var": 0,
 								"true_var":  100,
@@ -365,7 +369,8 @@ test-flag2:
 					},
 					Rules: &[]flag.Rule{
 						{
-							Query: testconvert.String("key eq \"random-key\""),
+							Query:       testconvert.String("key eq \"random-key\""),
+							QueryFormat: flag.NikunjyQueryFormat,
 							Percentages: &map[string]float64{
 								"false_var": 0,
 								"true_var":  100,
@@ -384,7 +389,8 @@ test-flag2:
 					},
 					Rules: &[]flag.Rule{
 						{
-							Query: testconvert.String("key eq \"random-key\""),
+							Query:       testconvert.String("key eq \"random-key\""),
+							QueryFormat: flag.NikunjyQueryFormat,
 							Percentages: &map[string]float64{
 								"false_var": 100,
 								"true_var":  0,

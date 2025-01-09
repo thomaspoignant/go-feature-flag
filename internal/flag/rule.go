@@ -16,13 +16,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/internal/utils"
 )
 
-type QueryFormat = string
-
-const (
-	NikunjyQueryFormat   QueryFormat = "nikunjy"
-	JSONLogicQueryFormat QueryFormat = "jsonlogic"
-)
-
 // Rule represents a rule applied by the flag.
 type Rule struct {
 	// Name is the name of the rule, this field is mandatory if you want
@@ -48,6 +41,8 @@ type Rule struct {
 
 	// Disable indicates that this rule is disabled.
 	Disable *bool `json:"disable,omitempty" yaml:"disable,omitempty" toml:"disable,omitempty" jsonschema:"title=disable,description=Indicates that this rule is disabled."` // nolint: lll
+
+	QueryFormat QueryFormat `json:"-" yaml:"-" toml:"-"` // nolint: lll
 }
 
 // Evaluate is checking if the rule applies to for the user.
@@ -361,10 +356,11 @@ func (r *Rule) GetTrimmedQuery() string {
 
 // GetQueryFormat is returning the format used for the query
 func (r *Rule) GetQueryFormat() QueryFormat {
-	if utils.IsJSONObject(r.GetTrimmedQuery()) {
-		return JSONLogicQueryFormat
+	if r.QueryFormat != "" {
+		return r.QueryFormat
 	}
-	return NikunjyQueryFormat
+	r.QueryFormat = GetQueryFormat(*r)
+	return r.QueryFormat
 }
 
 func (r *Rule) GetQuery() string {
