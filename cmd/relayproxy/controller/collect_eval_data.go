@@ -74,11 +74,12 @@ func (h *collectEvalData) Handler(c echo.Context) error {
 			event.CreationDate, _ = strconv.ParseInt(
 				strconv.FormatInt(event.CreationDate, 10)[:10], 10, 64)
 		}
+		if reqBody.Meta != nil {
+			event.Metadata = reqBody.Meta
+		}
 		h.goFF.CollectEventData(event)
 	}
-
 	h.metrics.IncCollectEvalData(float64(len(reqBody.Events)))
-
 	return c.JSON(http.StatusOK, model.CollectEvalDataResponse{
 		IngestedContentCount: len(reqBody.Events),
 	})

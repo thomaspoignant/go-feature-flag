@@ -7,6 +7,8 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 )
 
+type FeatureEventMetadata = map[string]interface{}
+
 func NewFeatureEvent(
 	ctx ffcontext.Context,
 	flagKey string,
@@ -75,6 +77,9 @@ type FeatureEvent struct {
 	// Source indicates where the event was generated.
 	// This is set to SERVER when the event was evaluated in the relay-proxy and PROVIDER_CACHE when it is evaluated from the cache.
 	Source string `json:"source" example:"SERVER" parquet:"name=source, type=BYTE_ARRAY, convertedtype=UTF8"`
+
+	// Metadata are static information added in the providers to give context about the events generated.
+	Metadata FeatureEventMetadata `json:"metadata,omitempty" parquet:"name=metadata, type=MAP, keytype=BYTE_ARRAY, keyconvertedtype=UTF8, valuetype=BYTE_ARRAY, valueconvertedtype=UTF8"`
 }
 
 // MarshalInterface marshals all interface type fields in FeatureEvent into JSON-encoded string.

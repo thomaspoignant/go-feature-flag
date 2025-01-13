@@ -107,7 +107,7 @@ func TestFile_Export(t *testing.T) {
 				featureEvents: []exporter.FeatureEvent{
 					{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-						Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
+						Variation: "Default", Value: "YO", Default: false, Source: "SERVER", Metadata: map[string]interface{}{"test": "test"},
 					},
 					{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
@@ -120,11 +120,11 @@ func TestFile_Export(t *testing.T) {
 				featureEvents: []exporter.FeatureEvent{
 					{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-						Variation: "Default", Value: `"YO"`, Default: false, Source: "SERVER",
+						Variation: "Default", Value: `"YO"`, Default: false, Source: "SERVER", Metadata: map[string]interface{}{"test": "test"},
 					},
 					{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
-						Variation: "Default", Value: `"YO2"`, Default: false, Version: "127", Source: "SERVER",
+						Variation: "Default", Value: `"YO2"`, Default: false, Version: "127", Source: "SERVER", Metadata: map[string]interface{}{},
 					},
 				},
 			},
@@ -175,8 +175,9 @@ func TestFile_Export(t *testing.T) {
 							"float":  1.23,
 							"int":    1,
 						},
-						Default: false,
-						Source:  "SERVER",
+						Default:  false,
+						Source:   "SERVER",
+						Metadata: map[string]interface{}{"test": "test"},
 					},
 				},
 			},
@@ -193,6 +194,7 @@ func TestFile_Export(t *testing.T) {
 						Value:        `{"bool":true,"float":1.23,"int":1,"string":"string"}`,
 						Default:      false,
 						Source:       "SERVER",
+						Metadata:     map[string]interface{}{"test": "test"},
 					},
 				},
 			},
