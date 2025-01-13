@@ -30,14 +30,14 @@
   "author": "Thomas Poignant",
   "license": "MIT",
   "devDependencies": {
-    "@babel/eslint-parser": "^7.25.9",
+    "@babel/eslint-parser": "^7.26.5",
     "@babel/preset-env": "^7.26.0",
     "autoprefixer": "^10.4.20",
     "babel-loader": "^9.2.1",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-preset-env": "^1.7.0",
     "browser-sync": "^3.0.3",
-    "eslint": "^9.17.0",
+    "eslint": "^9.18.0",
     "eslint-webpack-plugin": "^4.2.0",
     "htmlnano": "^2.1.1",
     "imagemin-cli": "^8.0.0",
@@ -49,7 +49,7 @@
     "posthtml": "^0.16.6",
     "posthtml-cli": "^0.10.0",
     "posthtml-modules": "^0.9.1",
-    "stylelint": "^16.12.0",
+    "stylelint": "^16.13.0",
     "webpack": "^5.97.1",
     "webpack-cli": "^6.0.1"
   },
@@ -57,6 +57,6 @@
     "@openfeature/go-feature-flag-web-provider": "^0.2.3",
     "@openfeature/web-sdk": "^1.4.0",
     "highlight.js": "^11.11.1",
-    "uuid": "^11.0.4"
+    "uuid": "^11.0.5"
   }
 }
