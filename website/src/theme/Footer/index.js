@@ -75,10 +75,10 @@ const CustomForm = ({status, message, onValidated}) => {
 
 const NewsletterForm = ({url}) => (
   <div>
-    <h1 className={clsx(styles.title, 'text-center pt-0 mx-4 text-5xl')}>
+    <div className={clsx(styles.title, 'text-center pt-0 mx-4 text-5xl mb-4')}>
       <i className="fa-solid fa-envelope"></i> <br />
       Get the latest <br /> Updates
-    </h1>
+    </div>
     <div
       className={'text-md text-center text-gray-600 dark:text-gray-400 mb-2'}>
       Get all the tips, updates and contents from GO Feature Flag. Your inbox

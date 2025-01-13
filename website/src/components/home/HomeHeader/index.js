@@ -96,7 +96,10 @@ export function HomeHeader() {
           </div>
           <div className="max-md:hidden">
             <div className="hero-image">
-              <img src={siteConfig.customFields.logo} alt="hero-img" />
+              <img
+                src={siteConfig.customFields.logo}
+                alt="go-feature-flag-logo"
+              />
             </div>
           </div>
         </div>
