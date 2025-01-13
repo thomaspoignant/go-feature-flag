@@ -52,7 +52,7 @@ require (
 	github.com/stretchr/testify v1.10.0
 	github.com/swaggo/echo-swagger v1.4.1
 	github.com/swaggo/swag v1.16.4
-	github.com/testcontainers/testcontainers-go v0.34.0
+	github.com/testcontainers/testcontainers-go v0.35.0
 	github.com/testcontainers/testcontainers-go/modules/azurite v0.34.0
 	github.com/testcontainers/testcontainers-go/modules/mongodb v0.34.0
 	github.com/testcontainers/testcontainers-go/modules/redis v0.34.0
