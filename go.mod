@@ -46,7 +46,7 @@ require (
 	github.com/prometheus/client_golang v1.20.5
 	github.com/r3labs/diff/v3 v3.0.1
 	github.com/redis/go-redis/v9 v9.7.0
-	github.com/samber/slog-zap/v2 v2.6.1
+	github.com/samber/slog-zap/v2 v2.6.2
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.10.0
@@ -209,7 +209,7 @@ require (
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
 	github.com/samber/lo v1.47.0 // indirect
-	github.com/samber/slog-common v0.18.0 // indirect
+	github.com/samber/slog-common v0.18.1 // indirect
 	github.com/shirou/gopsutil/v3 v3.23.12 // indirect
 	github.com/shoenig/go-m1cpu v0.1.6 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
