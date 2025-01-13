@@ -193,7 +193,6 @@ func TestFeatureEvent_MarshalJSON(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := json.Marshal(tt.featureEvent)
-			got, err := json.Marshal(tt.featureEvent)
 			tt.wantErr(t, err)
 			if err != nil {
 				assert.JSONEq(t, tt.want, string(got))
