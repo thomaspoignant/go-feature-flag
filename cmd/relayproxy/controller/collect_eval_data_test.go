@@ -99,6 +99,17 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 				collectedDataFile: "../testdata/controller/collect_eval_data/valid_collected_data_with_timestamp_ms.json",
 			},
 		},
+		{
+			name: "should have the metadata in the exporter",
+			args: args{
+				"../testdata/controller/collect_eval_data/valid_request_metadata.json",
+			},
+			want: want{
+				httpCode:          http.StatusOK,
+				bodyFile:          "../testdata/controller/collect_eval_data/valid_response_metadata.json",
+				collectedDataFile: "../testdata/controller/collect_eval_data/valid_collected_data_metadata.json",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
