@@ -43,6 +43,11 @@ definitions:
           A feature event will only be generated if the trackEvents attribute of the flag is set to true.
         example: feature
         type: string
+      metadata:
+        allOf:
+        - $ref: '#/definitions/exporter.FeatureEventMetadata'
+        description: Metadata are static information added in the providers to give
+          context about the events generated.
       source:
         description: |-
           Source indicates where the event was generated.
@@ -70,6 +75,9 @@ definitions:
           the default version will be 0.
         example: v1.0.0
         type: string
+    type: object
+  exporter.FeatureEventMetadata:
+    additionalProperties: true
     type: object
   flag.ErrorCode:
     enum:
@@ -121,10 +129,9 @@ definitions:
           $ref: '#/definitions/exporter.FeatureEvent'
         type: array
       meta:
-        additionalProperties:
-          type: string
+        allOf:
+        - $ref: '#/definitions/exporter.FeatureEventMetadata'
         description: Meta are the extra information added during the configuration
-        type: object
     type: object
   model.CollectEvalDataResponse:
     properties:

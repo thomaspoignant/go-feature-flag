@@ -651,6 +651,14 @@ const docTemplate = `{
                     "type": "string",
                     "example": "feature"
                 },
+                "metadata": {
+                    "description": "Metadata are static information added in the providers to give context about the events generated.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/exporter.FeatureEventMetadata"
+                        }
+                    ]
+                },
                 "source": {
                     "description": "Source indicates where the event was generated.\nThis is set to SERVER when the event was evaluated in the relay-proxy and PROVIDER_CACHE when it is evaluated from the cache.",
                     "type": "string",
@@ -675,6 +683,10 @@ const docTemplate = `{
                     "example": "v1.0.0"
                 }
             }
+        },
+        "exporter.FeatureEventMetadata": {
+            "type": "object",
+            "additionalProperties": true
         },
         "flag.ErrorCode": {
             "type": "string",
@@ -744,10 +756,11 @@ const docTemplate = `{
                 },
                 "meta": {
                     "description": "Meta are the extra information added during the configuration",
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/exporter.FeatureEventMetadata"
+                        }
+                    ]
                 }
             }
         },
