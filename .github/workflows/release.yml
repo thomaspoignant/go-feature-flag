@@ -24,6 +24,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
       - name: Setup go
         uses: actions/setup-go@v5
         with:
@@ -33,6 +35,14 @@ jobs:
         uses: stCarolas/setup-maven@v5
         with:
           maven-version: 3.8.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 16
+      - name: Install ICU packages
+        run: sudo apt-get update && sudo apt-get install -y libicu-dev
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '7.0.x'
       - run: make vendor
       - run: make provider-tests
   goreleaser:
