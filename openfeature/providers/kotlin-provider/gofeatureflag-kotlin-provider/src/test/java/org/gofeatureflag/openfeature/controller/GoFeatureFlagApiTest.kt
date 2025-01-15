@@ -140,4 +140,24 @@ class GoFeatureFlagApiTest {
         val got = recordedRequest.body.readUtf8()
         JSONAssert.assertEquals(want, got, false)
     }
+
+    @Test
+    fun `should have a valid body request when using exporter metadata`(): Unit = runBlocking {
+        mockWebServer!!.enqueue(MockResponse().setBody("{}").setResponseCode(200))
+        val api =
+            GoFeatureFlagApi(
+                GoFeatureFlagOptions(
+                    endpoint = mockWebServer!!.url("/").toString(),
+                    apiKey = "my-api-key",
+                    exporterMetadata = mapOf("appVersion" to "1.0.0", "device" to "Pixel 4")
+                )
+            )
+        api.postEventsToDataCollector(defaultEventList)
+        val recordedRequest: RecordedRequest = mockWebServer!!.takeRequest()
+        val jsonFilePath =
+            javaClass.classLoader?.getResource("org/gofeatureflag/openfeature/hook/valid_result_metadata.json")?.file
+        val want = File(jsonFilePath.toString()).readText(Charsets.UTF_8)
+        val got = recordedRequest.body.readUtf8()
+        JSONAssert.assertEquals(want, got, false)
+    }
 }

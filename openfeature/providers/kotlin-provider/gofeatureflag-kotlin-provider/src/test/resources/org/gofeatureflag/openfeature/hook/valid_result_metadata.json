@@ -13,6 +13,8 @@
   ],
   "meta": {
     "provider": "android",
-    "openfeature": true
+    "openfeature": true,
+    "appVersion": "1.0.0",
+    "device": "Pixel 4"
   }
 }

@@ -52,7 +52,11 @@ class GoFeatureFlagApi(private val options: GoFeatureFlagOptions) {
         }
 
         val mediaType = "application/json".toMediaTypeOrNull()
-        val requestBody = gson.toJson(Events(events)).toRequestBody(mediaType)
+
+        val metadata = options.exporterMetadata.toMutableMap()
+        metadata["provider"] = "android"
+        metadata["openfeature"] = true
+        val requestBody = gson.toJson(Events(events, metadata)).toRequestBody(mediaType)
         val reqBuilder = okhttp3.Request.Builder()
             .url(urlBuilder.build())
             .post(requestBody)
