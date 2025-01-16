@@ -176,4 +176,59 @@ class GoFeatureFlagProviderTest {
         val got2 = Gson().fromJson(recordedRequest2.body.readUtf8(), Events::class.java)
         assertEquals(3, got2.events?.size)
     }
+
+    @Test
+    fun `should call the hook and send metadata`() {
+        val jsonFilePath =
+            javaClass.classLoader?.getResource("org.gofeatureflag.openfeature.ofrep/valid_api_response.json")?.file
+        val jsonString = String(Files.readAllBytes(Paths.get(jsonFilePath)))
+        mockWebServer!!.enqueue(MockResponse().setBody(jsonString).setResponseCode(200))
+        mockWebServer!!.enqueue(MockResponse().setBody("{}").setResponseCode(200))
+        mockWebServer!!.enqueue(MockResponse().setBody("{}").setResponseCode(200))
+        val options =
+            GoFeatureFlagOptions(
+                endpoint = mockWebServer!!.url("/").toString(),
+                flushIntervalMs = 100,
+                pollingIntervalInMillis = 10000,
+                exporterMetadata = mapOf("device" to "Pixel 4", "appVersion" to "1.0.0")
+            )
+
+        val provider = GoFeatureFlagProvider(options)
+        val ctx = ImmutableContext(targetingKey = "123")
+        runBlocking {
+            OpenFeatureAPI.setProviderAndWait(
+                provider = provider,
+                dispatcher = Dispatchers.IO,
+                initialContext = ctx
+            )
+        }
+
+        val client = OpenFeatureAPI.getClient()
+        client.getStringValue("title-flag", "default")
+        client.getStringValue("title-flag", "default")
+        client.getStringValue("title-flag", "default")
+        client.getStringValue("title-flag", "default")
+        client.getStringValue("title-flag", "default")
+        client.getStringValue("title-flag", "default")
+        Thread.sleep(1000)
+        client.getStringValue("title-flag", "default")
+        client.getStringValue("title-flag", "default")
+        client.getStringValue("title-flag", "default")
+        Thread.sleep(1000)
+        mockWebServer!!.takeRequest()
+        val recordedRequest: RecordedRequest = mockWebServer!!.takeRequest()
+        val got = Gson().fromJson(recordedRequest.body.readUtf8(), Events::class.java)
+        assertEquals(6, got.events?.size)
+        assertEquals("Pixel 4", got.meta["device"])
+        assertEquals("1.0.0", got.meta["appVersion"])
+        assertEquals("android", got.meta["provider"])
+        assertEquals(true, got.meta["openfeature"])
+        val recordedRequest2: RecordedRequest = mockWebServer!!.takeRequest()
+        val got2 = Gson().fromJson(recordedRequest2.body.readUtf8(), Events::class.java)
+        assertEquals(3, got2.events?.size)
+        assertEquals("Pixel 4", got2.meta["device"])
+        assertEquals("1.0.0", got2.meta["appVersion"])
+        assertEquals("android", got2.meta["provider"])
+        assertEquals(true, got2.meta["openfeature"])
+    }
 }

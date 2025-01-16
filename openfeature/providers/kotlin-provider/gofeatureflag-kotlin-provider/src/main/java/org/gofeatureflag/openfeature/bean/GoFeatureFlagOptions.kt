@@ -47,6 +47,15 @@ data class GoFeatureFlagOptions(
      * when calling the evaluation API.
      * default: 1000 ms
      */
-    val flushIntervalMs: Long = 300000
+    val flushIntervalMs: Long = 300000,
+
+    /**
+     *  (optional) exporter metadata is a set of key-value that will be added to the metadata when calling the
+     *  exporter API. All those informations will be added to the event produce by the exporter.
+     *
+     * ‼️Important: If you are using a GO Feature Flag relay proxy before version v1.41.0, the information
+     * of this field will not be added to your feature events.
+     */
+    val exporterMetadata: Map<String, Any> = emptyMap(),
 )
 
