@@ -33,7 +33,7 @@ scoop install go-feature-flag-migration-cli
 
 ### Install using Docker
 ```shell
-docker pull thomaspoignant/go-feature-flag-migration-cli:latest
+docker pull gofeatureflag/go-feature-flag-migration-cli:latest
 ```
 
 ## Use the migration command line
@@ -55,7 +55,6 @@ The command line has 4 arguments you should specify.
 
 
 ## Update your flag file
-
 When your file is ready, you just have to replace your file in the location where GO Feature Flag is retrieves it.
 
 :::tip
