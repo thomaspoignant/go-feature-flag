@@ -50,3 +50,10 @@ class GoFeatureFlagOptions(BaseModel):
     # an API Key to the provider. Please ask the administrator of the relay proxy to provide an API Key.
     # Default: None
     api_key: typing.Optional[str] = None
+
+    # ExporterMetadata (optional) is the metadata we send to the GO Feature Flag relay proxy when we report the
+    # evaluation data usage.
+    #
+    # ‼️Important: If you are using a GO Feature Flag relay proxy before version v1.41.0, the information of this
+    # field will not be added to your feature events.
+    exporter_metadata: typing.Optional[dict] = {}

@@ -1,19 +1,17 @@
 import datetime
 import threading
 import time
-from http import HTTPStatus
-from typing import Optional
-from urllib.parse import urljoin
-
 import urllib3
-from openfeature.flag_evaluation import FlagEvaluationDetails, Reason
-from openfeature.hook import Hook, HookContext
-
 from gofeatureflag_python_provider.options import GoFeatureFlagOptions
 from gofeatureflag_python_provider.request_data_collector import (
     FeatureEvent,
     RequestDataCollector,
 )
+from http import HTTPStatus
+from openfeature.flag_evaluation import FlagEvaluationDetails, Reason
+from openfeature.hook import Hook, HookContext
+from typing import Optional
+from urllib.parse import urljoin
 
 default_targeting_key = "undefined-targetingKey"
 
@@ -31,6 +29,8 @@ class DataCollectorHook(Hook):
     _http_client: urllib3.PoolManager = None
     # _data_event_queue is the list of data to collect
     _event_queue: list[FeatureEvent] = []
+    # _exporter_metadata is the metadata we send to the GO Feature Flag relay proxy when we report the evaluation data usage.
+    _exporter_metadata: dict = {}
 
     def __init__(self, options: GoFeatureFlagOptions, http_client: urllib3.PoolManager):
         self._http_client = http_client
@@ -39,6 +39,9 @@ class DataCollectorHook(Hook):
         self._data_collector_endpoint = urljoin(
             str(self._options.endpoint), "/v1/data/collector"
         )
+        self._exporter_metadata = options.exporter_metadata
+        self._exporter_metadata["provider"] = "python"
+        self._exporter_metadata["openfeature"] = True
 
     def after(
         self, hook_context: HookContext, details: FlagEvaluationDetails, hints: dict
@@ -106,7 +109,7 @@ class DataCollectorHook(Hook):
         if len(self._event_queue) > 0:
             try:
                 goff_request = RequestDataCollector(
-                    meta={"provider": "open-feature-python-sdk"},
+                    meta=self._exporter_metadata,
                     events=self._event_queue,
                 )
                 headers = {"Content-Type": "application/json"}

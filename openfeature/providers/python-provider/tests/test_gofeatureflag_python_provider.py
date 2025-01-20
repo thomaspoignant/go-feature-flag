@@ -1,18 +1,18 @@
+import json
 import os
-import time
-from pathlib import Path
-from unittest.mock import Mock, patch
-
 import pydantic
 import pytest
-from openfeature import api
-from openfeature.evaluation_context import EvaluationContext
-from openfeature.exception import ErrorCode
-from openfeature.flag_evaluation import Reason, FlagEvaluationDetails
-
+import time
 from gofeatureflag_python_provider.data_collector_hook import DataCollectorHook
 from gofeatureflag_python_provider.options import GoFeatureFlagOptions
 from gofeatureflag_python_provider.provider import GoFeatureFlagProvider
+from openfeature.evaluation_context import EvaluationContext
+from openfeature.exception import ErrorCode
+from openfeature.flag_evaluation import Reason, FlagEvaluationDetails
+from pathlib import Path
+from unittest.mock import Mock, patch
+
+from openfeature import api
 
 _default_evaluation_ctx = EvaluationContext(
     targeting_key="d45e303a-38c2-11ed-a261-0242ac120002",
@@ -560,6 +560,59 @@ def test_should_call_data_collector_multiple_times_with_cached_event_waiting_ttl
     )
     api.shutdown()
     assert mock_request.call_count == 3
+
+
+@patch("urllib3.poolmanager.PoolManager.request")
+def test_should_call_data_collector_with_exporter_metadata(
+    mock_request: Mock,
+):
+    flag_key = "bool_targeting_match"
+    default_value = False
+    mock_request.side_effect = [
+        Mock(
+            status="200", data=_read_mock_file(flag_key)
+        ),  # first call to get the flag
+        Mock(status="200", data={}),  # second call to send the data
+        Mock(status="200", data={}),
+    ]
+    goff_provider = GoFeatureFlagProvider(
+        options=GoFeatureFlagOptions(
+            endpoint="https://gofeatureflag.org/",
+            data_flush_interval=100,
+            disable_cache_invalidation=True,
+            exporter_metadata={"version": "1.0.0", "name": "myapp", "id": 123},
+        )
+    )
+    api.set_provider(goff_provider)
+    client = api.get_client(domain="test-client")
+
+    client.get_boolean_details(
+        flag_key=flag_key,
+        default_value=default_value,
+        evaluation_context=_default_evaluation_ctx,
+    )
+
+    client.get_boolean_details(
+        flag_key=flag_key,
+        default_value=default_value,
+        evaluation_context=_default_evaluation_ctx,
+    )
+    client.get_boolean_details(
+        flag_key=flag_key,
+        default_value=default_value,
+        evaluation_context=_default_evaluation_ctx,
+    )
+    time.sleep(0.2)
+    api.shutdown()
+    want = {
+        "provider": "python",
+        "openfeature": True,
+        "version": "1.0.0",
+        "name": "myapp",
+        "id": 123,
+    }
+    got = json.loads(mock_request.call_args[1]["body"])["meta"]
+    assert got == want
 
 
 @patch("urllib3.poolmanager.PoolManager.request")
