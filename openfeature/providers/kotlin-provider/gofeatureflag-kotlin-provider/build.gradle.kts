@@ -93,7 +93,7 @@ publishing {
 }
 
 dependencies {
-    api("dev.openfeature:android-sdk:0.3.2")
+    api("dev.openfeature:android-sdk:0.3.3")
     api("com.squareup.okhttp3:okhttp:4.12.0")
     api("com.google.code.gson:gson:2.11.0")
     api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
