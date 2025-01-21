@@ -3,15 +3,15 @@ sidebar_position: 20
 title: Swift
 description: How to use the OpenFeature Swift SDK for your iOS/tvOS/macOS application
 ---
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+import versions from '@site/static/sdk-versions.json';
+import CodeBlock from '@theme/CodeBlock';
 
 # Swift SDK
 [![version](https://img.shields.io/github/v/release/go-feature-flag/openfeature-swift-provider?label=Swift&amp;display_name=tag&style=flat-square&logo=Swift)](https://github.com/go-feature-flag/openfeature-swift-provider)
 
 In conjuction with the [OpenFeature SDK](https://openfeature.dev/docs/reference/concepts/provider) you will be able to evaluate your feature flags in your **iOS**/**tvOS**/**macOS** applications.
 
-For documentation related to flags management in GO Feasture Flag, refer to the [GO Feature Flag documentation website](https://gofeatureflag.org/docs).
+For documentation related to flags management in GO Feature Flag, refer to the [GO Feature Flag documentation website](https://gofeatureflag.org/docs).
 
 ### Functionalities:
 - Managed the integration of the OpenFeature Swift SDK and GO Feature Flag relay-proxy.
@@ -23,9 +23,11 @@ For documentation related to flags management in GO Feasture Flag, refer to the 
 ### Swift Package Manager
 
 In the dependencies section of Package.swift add:
-```swift
-.package(url: "https://github.com/go-feature-flag/openfeature-swift-provider.git", from: "0.1.0")
-```
+<CodeBlock
+  language="swift">
+  .package(url: "https://github.com/go-feature-flag/openfeature-swift-provider.git", from: "{versions.swift.provider.substr(1, versions.swift.provider.length)}")
+</CodeBlock>
+
 
 and in the target dependencies section add:
 ```swift
@@ -57,7 +59,6 @@ The only required option to create a `GoFeatureFlagProvider` is the URL to your 
 ```swift
 import GOFeatureFlag
 import OpenFeature
-
 
 let options = GoFeatureFlagProviderOptions(endpoint: "https://your_domain.io")
 let provider = GoFeatureFlagProvider(options: options)

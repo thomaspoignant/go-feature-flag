@@ -1,1 +1,29 @@
-{"maven":{"sdk":"1.13.0","providerKt":"0.2.0","providerJava":"0.4.0","android":"0.3.2"},"npm":{"core":"1.6.0","webSDK":"1.4.0","providerServer":"0.7.3","providerWeb":"0.2.3"},"pypi":{"sdk":"0.7.4","provider":"0.3.0"},"nuget":{"sdk":"2.2.0","provider":"0.2.0"},"go":{"provider":"v0.2.1","sdk":"v1.14.0"}}
+{
+  "maven": {
+    "sdk": "1.13.0",
+    "providerKt": "0.3.0",
+    "providerJava": "0.4.1",
+    "android": "0.3.2"
+  },
+  "npm": {
+    "core": "1.6.0",
+    "webSDK": "1.4.0",
+    "providerServer": "0.7.4",
+    "providerWeb": "0.2.4"
+  },
+  "pypi": {
+    "sdk": "0.7.4",
+    "provider": "0.3.0"
+  },
+  "nuget": {
+    "sdk": "2.2.0",
+    "provider": "0.2.0"
+  },
+  "go": {
+    "provider": "v0.2.1",
+    "sdk": "v1.14.0"
+  },
+  "swift": {
+    "provider": "v0.3.0"
+  }
+}
