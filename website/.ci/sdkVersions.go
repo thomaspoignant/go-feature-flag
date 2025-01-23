@@ -17,6 +17,7 @@ type Versions struct {
 	Pypi  Pypi  `json:"pypi,omitempty"`
 	Nuget Nuget `json:"nuget,omitempty"`
 	GO    GO    `json:"go,omitempty"`
+	Swift Swift `json:"swift,omitempty"`
 }
 type Maven struct {
 	Sdk            string `json:"sdk,omitempty"`
@@ -43,6 +44,10 @@ type Nuget struct {
 	Provider       string `json:"provider,omitempty"`
 }
 
+type Swift struct {
+	Provider string `json:"provider,omitempty"`
+}
+
 type GO struct {
 	Provider string `json:"provider,omitempty"`
 	SDK      string `json:"sdk,omitempty"`
@@ -51,7 +56,11 @@ type GO struct {
 func main() {
 	var wg sync.WaitGroup
 	versions := Versions{}
-	wg.Add(14)
+	wg.Add(15)
+	go func() {
+		defer wg.Done()
+		versions.Swift.Provider = getSwiftVersion("go-feature-flag/openfeature-swift-provider")
+	}()
 	go func() {
 		defer wg.Done()
 		versions.Maven.Android = getMavenVersion("dev.openfeature", "android-sdk")
@@ -295,4 +304,36 @@ func getGOVersion(packageName string) string {
 		log.Fatal(err)
 	}
 	return res.Version
+}
+
+func getSwiftVersion(repoSlug string) string {
+	//
+	u := url.URL{
+		Scheme: "https",
+		Host:   "api.github.com",
+		Path:   fmt.Sprintf("repos/%s/releases/latest", repoSlug),
+	}
+
+	resp, err := http.Get(u.String())
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	type githubRes struct {
+		TagName string `json:"tag_name,omitempty"`
+	}
+
+	var res githubRes
+	err = json.Unmarshal(body, &res)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return res.TagName
 }
