@@ -205,7 +205,7 @@ archives:
 
   - id: goff-lambda
     name_template: "go-feature-flag-aws-lambda_{{ .Version }}"
-    format: zip
+    formats: zip
     builds:
       - go-feature-flag-lambda
 
