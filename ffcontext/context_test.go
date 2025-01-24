@@ -142,6 +142,25 @@ func Test_ExtractGOFFProtectedFields(t *testing.T) {
 				FlagList: []string{"flag1", "flag2"},
 			},
 		},
+		{
+			name: "context goff specifics with exporter metadata",
+			ctx: ffcontext.NewEvaluationContextBuilder("my-key").AddCustom("gofeatureflag", map[string]interface{}{
+				"exporterMetadata": map[string]interface{}{
+					"toto": 123,
+					"titi": 123.45,
+					"tutu": true,
+					"tata": "bonjour",
+				},
+			}).Build(),
+			want: ffcontext.GoffContextSpecifics{
+				ExporterMetadata: map[string]interface{}{
+					"toto": 123,
+					"titi": 123.45,
+					"tutu": true,
+					"tata": "bonjour",
+				},
+			},
+		},
 	}
 
 	for _, tt := range tests {

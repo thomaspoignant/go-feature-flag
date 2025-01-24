@@ -7,6 +7,8 @@ type GoffContextSpecifics struct {
 	CurrentDateTime *time.Time `json:"currentDateTime"`
 	// FlagList is the list of flags to evaluate in a bulk evaluation.
 	FlagList []string `json:"flagList"`
+	// ExporterMetadata is the metadata to be used by the exporter.
+	ExporterMetadata map[string]interface{} `json:"exporterMetadata"`
 }
 
 // addCurrentDateTime adds the current date time to the context.
@@ -38,5 +40,11 @@ func (g *GoffContextSpecifics) addListFlags(flagList any) {
 				g.FlagList = append(g.FlagList, valAsString)
 			}
 		}
+	}
+}
+
+func (g *GoffContextSpecifics) addExporterMetadata(exporterMetadata any) {
+	if value, ok := exporterMetadata.(map[string]interface{}); ok {
+		g.ExporterMetadata = value
 	}
 }
