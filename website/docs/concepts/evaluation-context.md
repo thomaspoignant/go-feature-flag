@@ -67,10 +67,16 @@ The targeting key is used to ensure that a user consistently receives the same v
 For instance, **GO Feature Flag** ensures that in cases where a feature is being rolled out to a percentage of users, based on the targeting key, they will see the same variation each time they encounter the feature flag.
 
 ## Reserved properties in the evaluation context
-When you create an evaluation context some fields are reserved for GO Feature Flag.  
-Those fields are used by GO Feature Flag directly, you can use them as will in your targeting queries but you should be aware that they are used internally for GO Feature Flag.
+:::danger
+If you put a key named `gofeatureflag` in your evaluation context, it may break internal features of GO Feature Flag.
+This property name is reserved for internal use.
+:::
 
-| Field                           | Description                                                                                                                                                                                                                  |
-|---------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `gofeatureflag.currentDateTime` | If this property is set, we will use this date as base for all the rollout strategies which implies dates _(experimentation, progressive and scheduled)_.<br/>**Format:** Date following the RF3339 format.                  |
-| `gofeatureflag.flagList`        | If this property is set, in the bulk evaluation mode (for the client SDK) we will only evaluate the flags in this list.<br/>If empty or not set the default behavior is too evaluate all the flags.<br/>**Format:** []string |
+When you create an evaluation context some fields are reserved for GO Feature Flag.  
+Those fields are used by GO Feature Flag directly, you can use them as will in your targeting queries, but you should be aware that they are used internally for GO Feature Flag.
+
+| Field                            | Description                                                                                                                                                                                                                  |
+|----------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `gofeatureflag.currentDateTime`  | If this property is set, we will use this date as base for all the rollout strategies which implies dates _(experimentation, progressive and scheduled)_.<br/>**Format:** Date following the RF3339 format.                  |
+| `gofeatureflag.flagList`         | If this property is set, in the bulk evaluation mode (for the client SDK) we will only evaluate the flags in this list.<br/>If empty or not set the default behavior is too evaluate all the flags.<br/>**Format:** []string |
+| `gofeatureflag.exporterMetadata` | If this property is set, we will add all the fields in the feature event send to the provider.<br/>**Format:** map[string]string\|number\|bool                                                                               |
