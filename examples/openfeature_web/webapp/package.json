@@ -31,7 +31,7 @@
   "license": "MIT",
   "devDependencies": {
     "@babel/eslint-parser": "^7.26.5",
-    "@babel/preset-env": "^7.26.0",
+    "@babel/preset-env": "^7.26.7",
     "autoprefixer": "^10.4.20",
     "babel-loader": "^9.2.1",
     "babel-plugin-transform-class-properties": "^6.24.1",
