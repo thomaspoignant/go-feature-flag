@@ -1,15 +1,13 @@
 import hashlib
 import json
-from typing import Optional, Any
-
+from gofeatureflag_python_provider.options import BaseModel
 from openfeature.evaluation_context import EvaluationContext
 from openfeature.exception import (
     TargetingKeyMissingError,
     InvalidContextError,
 )
 from pydantic import SkipValidation
-
-from gofeatureflag_python_provider.options import BaseModel
+from typing import Optional, Any, Dict
 
 
 class GoFeatureFlagEvaluationContext(BaseModel):
@@ -56,3 +54,4 @@ def convert_evaluation_context(
 class RequestFlagEvaluation(BaseModel):
     user: GoFeatureFlagEvaluationContext
     defaultValue: SkipValidation[Any] = None
+    gofeatureflag: Optional[Dict] = {}

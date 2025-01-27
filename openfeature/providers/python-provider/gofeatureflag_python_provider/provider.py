@@ -1,26 +1,7 @@
 import json
-from http import HTTPStatus
-from threading import Thread
-from typing import List, Optional, Type, Union
-from urllib.parse import urljoin
-
 import pylru
 import urllib3
 import websocket
-from openfeature.evaluation_context import EvaluationContext
-from openfeature.exception import (
-    ErrorCode,
-    FlagNotFoundError,
-    GeneralError,
-    OpenFeatureError,
-    TypeMismatchError,
-)
-from openfeature.flag_evaluation import FlagResolutionDetails, Reason
-from openfeature.hook import Hook
-from openfeature.provider.metadata import Metadata
-from openfeature.provider import AbstractProvider
-from pydantic import PrivateAttr, ValidationError
-
 from gofeatureflag_python_provider.data_collector_hook import DataCollectorHook
 from gofeatureflag_python_provider.metadata import GoFeatureFlagMetadata
 from gofeatureflag_python_provider.options import BaseModel, GoFeatureFlagOptions
@@ -32,6 +13,22 @@ from gofeatureflag_python_provider.response_flag_evaluation import (
     JsonType,
     ResponseFlagEvaluation,
 )
+from http import HTTPStatus
+from openfeature.evaluation_context import EvaluationContext
+from openfeature.exception import (
+    ErrorCode,
+    FlagNotFoundError,
+    GeneralError,
+    OpenFeatureError,
+    TypeMismatchError,
+)
+from openfeature.flag_evaluation import FlagResolutionDetails, Reason
+from openfeature.hook import Hook
+from openfeature.provider import AbstractProvider
+from openfeature.provider.metadata import Metadata
+from pydantic import PrivateAttr, ValidationError
+from threading import Thread
+from typing import List, Optional, Type, Union
 
 AbstractProviderMetaclass = type(AbstractProvider)
 BaseModelMetaclass = type(BaseModel)
@@ -195,6 +192,16 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
                     str(self.options.endpoint).rstrip("/"),
                     "/v1/feature/{}/eval".format(flag_key),
                 )
+
+                # add exporter metadata to the context if it exists
+                if self.options.exporter_metadata:
+                    goff_request.gofeatureflag["exporterMetadata"] = (
+                        self.options.exporter_metadata
+                    )
+                    goff_request.gofeatureflag["exporterMetadata"]["openfeature"] = True
+                    goff_request.gofeatureflag["exporterMetadata"][
+                        "provider"
+                    ] = "python"
 
                 response = self._http_client.request(
                     method="POST",
