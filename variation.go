@@ -270,7 +270,7 @@ func notifyVariation[T model.JSONType](
 ) {
 	if result.TrackEvents {
 		event := exporter.NewFeatureEvent(ctx, flagKey, result.Value, result.VariationType, result.Failed, result.Version,
-			"SERVER")
+			"SERVER", ctx.ExtractGOFFProtectedFields().ExporterMetadata)
 		g.CollectEventData(event)
 	}
 }

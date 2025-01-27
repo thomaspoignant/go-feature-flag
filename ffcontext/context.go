@@ -81,12 +81,13 @@ func (u EvaluationContext) ExtractGOFFProtectedFields() GoffContextSpecifics {
 	case map[string]string:
 		goff.addCurrentDateTime(v["currentDateTime"])
 		goff.addListFlags(v["flagList"])
+		goff.addExporterMetadata(v["exporterMetadata"])
 	case map[string]interface{}:
 		goff.addCurrentDateTime(v["currentDateTime"])
 		goff.addListFlags(v["flagList"])
+		goff.addExporterMetadata(v["exporterMetadata"])
 	case GoffContextSpecifics:
 		return v
 	}
-
 	return goff
 }
