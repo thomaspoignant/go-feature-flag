@@ -12,13 +12,14 @@ import (
 
 func TestNewFeatureEvent(t *testing.T) {
 	type args struct {
-		user      ffcontext.Context
-		flagKey   string
-		value     interface{}
-		variation string
-		failed    bool
-		version   string
-		source    string
+		user             ffcontext.Context
+		flagKey          string
+		value            interface{}
+		variation        string
+		failed           bool
+		version          string
+		source           string
+		exporterMetadata exporter.FeatureEventMetadata
 	}
 	tests := []struct {
 		name string
@@ -44,7 +45,7 @@ func TestNewFeatureEvent(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equalf(t, tt.want, exporter.NewFeatureEvent(tt.args.user, tt.args.flagKey, tt.args.value, tt.args.variation, tt.args.failed, tt.args.version, tt.args.source), "NewFeatureEvent(%v, %v, %v, %v, %v, %v, %V)", tt.args.user, tt.args.flagKey, tt.args.value, tt.args.variation, tt.args.failed, tt.args.version, tt.args.source)
+			assert.Equalf(t, tt.want, exporter.NewFeatureEvent(tt.args.user, tt.args.flagKey, tt.args.value, tt.args.variation, tt.args.failed, tt.args.version, tt.args.source, tt.args.exporterMetadata), "NewFeatureEvent(%v, %v, %v, %v, %v, %v, %V)", tt.args.user, tt.args.flagKey, tt.args.value, tt.args.variation, tt.args.failed, tt.args.version, tt.args.source)
 		})
 	}
 }

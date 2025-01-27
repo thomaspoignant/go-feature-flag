@@ -689,6 +689,50 @@ def test_url_parsing(mock_request):
     assert got == want
 
 
+@patch("urllib3.poolmanager.PoolManager.request")
+def test_should_call_evaluation_api_with_exporter_metadata(
+    mock_request: Mock,
+):
+    flag_key = "bool_targeting_match"
+    default_value = False
+    mock_request.side_effect = [
+        Mock(
+            status="200", data=_read_mock_file(flag_key)
+        ),  # first call to get the flag
+        Mock(status="200", data={}),  # second call to send the data
+        Mock(status="200", data={}),
+    ]
+    goff_provider = GoFeatureFlagProvider(
+        options=GoFeatureFlagOptions(
+            endpoint="https://gofeatureflag.org/",
+            data_flush_interval=100,
+            disable_cache_invalidation=True,
+            exporter_metadata={"version": "1.0.0", "name": "myapp", "id": 123},
+        )
+    )
+    api.set_provider(goff_provider)
+    client = api.get_client(domain="test-client")
+
+    client.get_boolean_details(
+        flag_key=flag_key,
+        default_value=default_value,
+        evaluation_context=_default_evaluation_ctx,
+    )
+
+    api.shutdown()
+    got = json.loads(mock_request.call_args.kwargs["body"])["gofeatureflag"]
+    want = {
+        "exporterMetadata": {
+            "version": "1.0.0",
+            "name": "myapp",
+            "id": 123,
+            "provider": "python",
+            "openfeature": True,
+        },
+    }
+    assert got == want
+
+
 def _read_mock_file(flag_key: str) -> str:
     # This hacky if is here to make test run inside pycharm and from the root of the project
     if os.getcwd().endswith("/tests"):

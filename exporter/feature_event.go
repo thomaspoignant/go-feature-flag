@@ -17,12 +17,12 @@ func NewFeatureEvent(
 	failed bool,
 	version string,
 	source string,
+	metadata FeatureEventMetadata,
 ) FeatureEvent {
 	contextKind := "user"
 	if ctx.IsAnonymous() {
 		contextKind = "anonymousUser"
 	}
-
 	return FeatureEvent{
 		Kind:         "feature",
 		ContextKind:  contextKind,
@@ -34,6 +34,7 @@ func NewFeatureEvent(
 		Default:      failed,
 		Version:      version,
 		Source:       source,
+		Metadata:     metadata,
 	}
 }
 
