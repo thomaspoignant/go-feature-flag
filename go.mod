@@ -18,7 +18,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.54
 	github.com/aws/aws-sdk-go-v2/service/kinesis v1.32.14
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.74.1
-	github.com/aws/aws-sdk-go-v2/service/sqs v1.37.9
+	github.com/aws/aws-sdk-go-v2/service/sqs v1.37.10
 	github.com/aws/smithy-go v1.22.2
 	github.com/awslabs/aws-lambda-go-api-proxy v0.16.2
 	github.com/diegoholiveira/jsonlogic/v3 v3.7.3
