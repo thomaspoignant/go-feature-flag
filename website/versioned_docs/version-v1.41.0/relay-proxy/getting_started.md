@@ -40,7 +40,7 @@ docker run -v $(pwd)/goff-proxy.yaml:/goff/goff-proxy.yaml -p 1031:1031 gofeatur
 
 What is happening?
 - The **relay proxy** will read the configuration file and use the github retriever to load the flags from the configuration file.
-- The relay-proxy is also starting to poll the file regurarly to check if any changes are happening.
+- The relay-proxy is also starting to poll the file regularly to check if any changes are happening.
 - A set of APIs are available to evaluate the flags
 
 ## Evaluate a flag
