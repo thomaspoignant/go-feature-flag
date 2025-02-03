@@ -48,7 +48,7 @@ require (
 	github.com/redis/go-redis/v9 v9.7.0
 	github.com/samber/slog-zap/v2 v2.6.2
 	github.com/spf13/cobra v1.8.1
-	github.com/spf13/pflag v1.0.5
+	github.com/spf13/pflag v1.0.6
 	github.com/stretchr/testify v1.10.0
 	github.com/swaggo/echo-swagger v1.4.1
 	github.com/swaggo/swag v1.16.4
