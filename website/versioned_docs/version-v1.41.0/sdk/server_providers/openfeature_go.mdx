@@ -88,5 +88,35 @@ if adminFlag {
 }
 ```
 
+## Unit testing
+
+When testing code that relies on feature flags, it's crucial to have control over the flag values to simulate different scenarios and isolate your tests.
+
+The **OpenFeature in-memory provider** offers a convenient solution by allowing you to define and manipulate feature flag values directly within your tests.
+This eliminates the need to start a relay-proxy and provides a more efficient and flexible testing environment.
+
+In this example, we demonstrate how to use the in-memory provider to set the value of 2 different feature flags in a test:
+
+```go
+func TestMyTest(t *testing.T) {
+    apiInstance := openfeature.GetApiInstance()
+    apiInstance.SetProvider(
+        memprovider.NewInMemoryProvider(
+            map[string]memprovider.InMemoryFlag{
+                "my-flag-1": {Key: "my-flag-1", DefaultVariant: "var_a", Variants: map[string]any{"var_a": true}},
+                "my-flag-2": {Key: "my-flag-2", DefaultVariant: "disabled", Variants: map[string]any{"disabled": false}},
+            }
+        ))
+
+    // Your test code here
+}
+```
+By setting the in memory provider you are able to predict the value of the flag you will get when running your tests.
+This is a good way to ensure that your test is using the value you are expecting as response of your feature flag.
+
+:::note
+The in memory provider is part of the OpenFeature SDK, you don't need to export any extra dependencies to use it.
+:::
+
 ## Contribute to the provider
 You can find the source of the provider in the [`open-feature/go-sdk-contrib`](https://github.com/open-feature/go-sdk-contrib/tree/main/providers/go-feature-flag) repository.
