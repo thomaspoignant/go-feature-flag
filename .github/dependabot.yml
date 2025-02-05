@@ -76,17 +76,17 @@ updates:
       prefix: "chore"
 
   # Providers
-  - package-ecosystem: gradle
-    directory: "/openfeature/providers/kotlin-provider/gofeatureflag-kotlin-provider"
-    schedule:
-      interval: weekly
-      time: "01:00"
-    open-pull-requests-limit: 10
-    labels:
-      - "dependencies"
-      - "automerge"
-    commit-message:
-      prefix: "chore"
+  # - package-ecosystem: gradle
+  #   directory: "/openfeature/providers/kotlin-provider/gofeatureflag-kotlin-provider"
+  #   schedule:
+  #     interval: weekly
+  #     time: "01:00"
+  #   open-pull-requests-limit: 10
+  #   labels:
+  #     - "dependencies"
+  #     - "automerge"
+  #   commit-message:
+  #     prefix: "chore"
 
   - package-ecosystem: pip
     directory: "/openfeature/providers/python-provider"
