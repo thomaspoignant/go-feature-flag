@@ -11,6 +11,7 @@ import (
 	"go.opentelemetry.io/contrib/samplers/jaegerremote"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
@@ -79,6 +80,9 @@ func (s *OtelService) Init(ctx context.Context, zapLog *zap.Logger, config confi
 	otel.SetErrorHandler(otelErrHandler(func(err error) {
 		zapLog.Error("OTel error", zap.Error(err))
 	}))
+
+	propagator := propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{})
+	otel.SetTextMapPropagator(propagator)
 
 	return nil
 }
