@@ -195,7 +195,7 @@ div[class^="announcementBar_"] {
 /* NEW CSS*/
 .goffMainTitle {
     margin-top: 2rem;
-    font-size: 4rem;
+    font-size: 3rem;
     line-height: 2.5rem;
     color: var(--goff-main-title-color);
     font-family: Poppins, sans-serif;
