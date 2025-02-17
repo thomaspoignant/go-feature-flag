@@ -8,7 +8,7 @@ import {
   Integration,
   OpenFeatureEcosystem,
   Rollout,
-  SDK,
+  Sdk,
 } from '../components/home/features';
 import {UsingIt} from '../components/home/using-it';
 import {Headline} from '../components/home/headline';
@@ -23,7 +23,7 @@ export default function Home() {
       <Whatis />
       <UsingIt />
       <div className={'my-10'}></div>
-      <SDK />
+      <Sdk />
       <Integration />
       <OpenFeatureEcosystem />
       <Headline />

@@ -161,6 +161,6 @@
     right: 0;
 }
 
-.openfeaturelogo svg path {
+.openfeaturelogo {
     fill: var(--goff-main-title-color);
 }

@@ -16,7 +16,7 @@ export function UsingIt() {
       name: 'Grafana Labs',
       logo: grafana,
       url: 'https://grafana.com',
-      imgClassName: 'max-w-42',
+      imgClassName: 'max-w-48',
     },
     {
       name: 'Cast.ai',
