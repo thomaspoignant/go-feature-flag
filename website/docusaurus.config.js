@@ -509,6 +509,9 @@ const config = {
           'ruby',
         ],
       },
+      colorMode: {
+        defaultMode: 'dark',
+      },
     }),
 };
 
