@@ -1,6 +1,5 @@
 import React from 'react';
 import styles from './styles.module.css';
-import clsx from 'clsx';
 import PropTypes from 'prop-types';
 
 BenefitCard.propTypes = {
@@ -11,16 +10,16 @@ BenefitCard.propTypes = {
 
 function BenefitCard({img, title, description}) {
   return (
-    <div className="col-1-5 mobile-col-1-1">
-      <article className={styles.benefitsPostItem}>
-        <div className={styles.benefitsPostItemRow}>
-          <img src={img} alt="post-thumb" />
-        </div>
-        <div className={styles.benefitsPostItemRow}>
-          <h2>{title}</h2>
-          <p>{description}</p>
-        </div>
-      </article>
+    <div className="w-fit bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
+      <img className="rounded-t-lg p-3" src={img} alt={title} />
+      <div className="p-5">
+        <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+          {title}
+        </h5>
+        <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">
+          {description}
+        </p>
+      </div>
     </div>
   );
 }
@@ -28,20 +27,8 @@ function BenefitCard({img, title, description}) {
 export function Benefit() {
   return (
     <section className={styles.benefits}>
-      <div className="container">
-        <div className="row">
-          <div className={clsx('col-1-1', styles.title)}>
-            <div>
-              <span className="goffMainTitle">Why use feature flags?</span>
-              <br />
-              <p>
-                Feature flags is a modern software engineering technique that
-                configure select functionality during runtime, without deploying
-                new code.
-              </p>
-            </div>
-          </div>
-        </div>
+      <div className={'text-center mb-5'}>
+        <span className="goffMainTitle">The Benefits of Feature Flags</span>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-2 px-3">
         <BenefitCard
