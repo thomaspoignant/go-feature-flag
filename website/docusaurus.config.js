@@ -385,12 +385,6 @@ const config = {
             dropdownItemsAfter: [{to: '/versions', label: 'All versions'}],
           },
           {
-            href: 'https://x.com/gofeatureflag',
-            position: 'right',
-            className: 'header-twitter-link navbar__right',
-            'aria-label': 'X',
-          },
-          {
             href: '/slack',
             position: 'right',
             className: 'header-slack-link navbar__right',
@@ -508,6 +502,9 @@ const config = {
           'python',
           'ruby',
         ],
+      },
+      colorMode: {
+        defaultMode: 'dark',
       },
     }),
 };
