@@ -141,7 +141,7 @@
     font-size: 1.05rem;
     line-height: 2rem;
     font-weight: 400;
-    margin-bottom: 3rem;
+    margin-bottom: 2rem;
     color: var(--goff-main-ff-description);
 }
 
@@ -159,4 +159,8 @@
     left: 0;
     bottom: 0;
     right: 0;
+}
+
+.openfeaturelogo {
+    fill: var(--goff-main-title-color);
 }
