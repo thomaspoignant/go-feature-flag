@@ -18,7 +18,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func Test_PostgreSQLRetriever_Retrieve(t *testing.T) {
+func Test_PostgreSQLRetriever_Retrieve_JSON(t *testing.T) {
 	ctx := context.Background()
 
 	dbName := "flags_db"
@@ -33,20 +33,20 @@ func Test_PostgreSQLRetriever_Retrieve(t *testing.T) {
 	}{
 		{
 			name:    "Returns well formed flag definition document",
-			data:    testutils.MongoFindResultString,
-			want:    []byte(testutils.QueryResult),
+			data:    testutils.PostgresFindResultString,
+			want:    []byte(testutils.PostgresQueryResult),
 			wantErr: false,
 		},
 		{
 			name:    "One of the Flag definition document does not have 'flag' key/value (ignore this document)",
-			data:    testutils.MongoMissingFlagKey,
-			want:    []byte(testutils.MissingFlagKeyResult),
+			data:    testutils.PostgresMissingFlagKey,
+			want:    []byte(testutils.PostgresMissingFlagKeyResult),
 			wantErr: false,
 		},
 		{
 			name:    "Flag definition document 'flag' key does not have 'string' value (ignore this document)",
-			data:    testutils.MongoFindResultFlagNoStr,
-			want:    []byte(testutils.FlagKeyNotStringResult),
+			data:    testutils.PostgresFindResultFlagNoStr,
+			want:    []byte(testutils.PostgresFlagKeyNotStringResult),
 			wantErr: false,
 		},
 		{
@@ -106,6 +106,89 @@ func Test_PostgreSQLRetriever_Retrieve(t *testing.T) {
 			URI:    dbURL,
 			Table:  "flags",
 			Column: "flag",
+			Type:   "json",
+		}
+
+		assert.Equal(t, retriever.RetrieverNotReady, mdb.Status())
+		err = mdb.Init(context.TODO(), &fflog.FFLogger{})
+		assert.NoError(t, err)
+		defer func() { _ = mdb.Shutdown(context.TODO()) }()
+		assert.Equal(t, retriever.RetrieverReady, mdb.Status())
+
+		got, err := mdb.Retrieve(context.Background())
+		if item.want == nil {
+			assert.Nil(t, got)
+		} else {
+			modifiedGot, err := removeIDFromJSON(string(got))
+			require.NoError(t, err)
+			assert.JSONEq(t, string(item.want), modifiedGot)
+		}
+
+		require.NoError(t, err)
+	}
+}
+
+func Test_PostgreSQLRetriever_Retrieve_Relational(t *testing.T) {
+	ctx := context.Background()
+
+	dbName := "flags_db"
+	dbUser := "root"
+	dbPassword := "example"
+
+	tests := []struct {
+		name    string
+		want    []byte
+		data    string
+		wantErr bool
+	}{
+		{
+			name:    "Returns well formed flag definition document",
+			data:    testutils.PostgresQueryProperFlagsRelational,
+			want:    []byte(testutils.PostgresQueryProperFlagsRelationalResult),
+			wantErr: false,
+		},
+	}
+
+	// Start the postgres container
+	ctr, err := postgres.Run(
+		ctx,
+		"postgres:16-alpine",
+		postgres.WithDatabase(dbName),
+		postgres.WithUsername(dbUser),
+		postgres.WithPassword(dbPassword),
+		postgres.BasicWaitStrategies(),
+		postgres.WithInitScripts("create_relational_postgres_db.sql"),
+	)
+	testcontainers.CleanupContainer(t, ctr)
+	require.NoError(t, err)
+
+	dbURL, _ := ctr.ConnectionString(ctx)
+
+	// Create snapshot of the database, which is then restored before each test
+	err = ctr.Snapshot(ctx)
+	require.NoError(t, err)
+
+	require.NoError(t, err)
+
+	for _, item := range tests {
+		// Restore the database state to its snapshot
+		err = ctr.Restore(ctx)
+		require.NoError(t, err)
+
+		conn, err := pgx.Connect(ctx, dbURL)
+		require.NoError(t, err)
+		defer conn.Close(ctx)
+
+		if item.data != "" {
+			// Insert data
+			_, err = conn.Exec(ctx, item.data)
+			require.NoError(t, err)
+		}
+
+		// Initialize Retriever
+		mdb := postgresqlretriever.Retriever{
+			URI:  dbURL,
+			Type: "relational",
 		}
 
 		assert.Equal(t, retriever.RetrieverNotReady, mdb.Status())

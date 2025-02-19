@@ -318,15 +318,22 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 			wantErr:  true,
 			errValue: "invalid retriever: no \"type\" property or not a valid type in kind \"postgresql\"",
 		},
-
 		{
-			name: "kind postgreSQL valid",
+			name: "kind postgreSQL valid json type",
 			fields: config.RetrieverConf{
 				Kind:   "postgresql",
 				URI:    "xxx",
 				Table:  "xxx",
 				Type:   "json",
 				Column: "xxx",
+			},
+		},
+		{
+			name: "kind postgreSQL valid relational type",
+			fields: config.RetrieverConf{
+				Kind: "postgresql",
+				URI:  "xxx",
+				Type: "relational",
 			},
 		},
 		{

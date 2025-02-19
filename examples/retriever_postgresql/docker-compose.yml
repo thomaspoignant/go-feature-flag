@@ -2,7 +2,6 @@
 version: '3.1'
 
 services:
-
   postgres:
     container_name: goff_postgres
     hostname: postgres
@@ -15,3 +14,15 @@ services:
       - "5432:5432"
     volumes:
       - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:ro
+
+  pgadmin:
+    container_name: goff_pgadmin
+    image: dpage/pgadmin4
+    depends_on:
+      - postgres
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=root@example.com
+      - PGADMIN_DEFAULT_PASSWORD=example
+    ports:
+      - "5050:80"
+

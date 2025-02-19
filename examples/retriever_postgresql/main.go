@@ -3,16 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
+	ffclient "github.com/thomaspoignant/go-feature-flag"
+	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
+	"github.com/thomaspoignant/go-feature-flag/ffcontext"
+	"github.com/thomaspoignant/go-feature-flag/retriever/postgresqlretriever"
 	"log"
 	"log/slog"
 	"time"
-
-	"github.com/thomaspoignant/go-feature-flag/ffcontext"
-
-	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
-	"github.com/thomaspoignant/go-feature-flag/retriever/postgresqlretriever"
-
-	ffclient "github.com/thomaspoignant/go-feature-flag"
 )
 
 func main() {
@@ -23,7 +20,7 @@ func main() {
 		Context:         context.Background(),
 		Retriever: &postgresqlretriever.Retriever{
 			Table:  "flags",
-			Type:  "json",
+			Type:   "json",
 			Column: "flag",
 			URI:    "postgres://root:example@localhost:5432/flags_db?sslmode=disable",
 		},

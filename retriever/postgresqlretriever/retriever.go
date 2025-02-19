@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
@@ -65,8 +66,27 @@ func (r *Retriever) Shutdown(ctx context.Context) error {
 // Retrieve Reads flag configuration from postgreSQL and returns it
 // If a document does not comply with the specification it will be ignored
 func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
-	query := fmt.Sprintf("SELECT %s FROM %s WHERE %s IS NOT NULL", r.Column, r.Table, r.Column)
-	rows, err := r.conn.Query(ctx, query)
+	var query string
+	var err error
+
+	switch r.Type {
+	case "json":
+		query = fmt.Sprintf("SELECT %s FROM %s WHERE %s IS NOT NULL", r.Column, r.Table, r.Column)
+	case "relational":
+		query, err = loadSQL("relational_db_query.sql")
+		if err != nil {
+			return nil, err
+		}
+	default:
+		return nil, fmt.Errorf("unsupported type: %s", r.Type)
+	}
+
+	return executeQuery(ctx, r.conn, query, r.logger)
+}
+
+// Executes the given SQL query and returns the result as a slice of bytes.
+func executeQuery(ctx context.Context, conn *pgx.Conn, query string, logger *fflog.FFLogger) ([]byte, error) {
+	rows, err := conn.Query(ctx, query)
 	if err != nil {
 		return nil, err
 	}
@@ -74,18 +94,16 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 
 	mappedFlagDocs := make(map[string]interface{})
 	for rows.Next() {
-		var jsonData []byte
-
-		err := rows.Scan(&jsonData)
-		if err != nil {
-			return nil, err
+		var data []byte
+		// Assuming the data is in JSON format directly retrievable from the database
+		if err := rows.Scan(&data); err != nil {
+			logger.Error(fmt.Sprintf("Failed to scan row: %v", err))
+			continue
 		}
 
 		var doc map[string]interface{}
-		err = json.Unmarshal(jsonData, &doc)
-
-		if err != nil {
-			r.logger.Error("Failed to unmarshal row:", err)
+		if err := json.Unmarshal(data, &doc); err != nil {
+			logger.Error(fmt.Sprintf("Failed to unmarshal JSON data: %v", err))
 			continue
 		}
 
@@ -94,18 +112,35 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 			if str, ok := val.(string); ok {
 				mappedFlagDocs[str] = doc
 			} else {
-				r.logger.Error("Flag key does not have a string value")
+				logger.Error("Flag key does not have a string value")
 			}
 		} else {
-			r.logger.Warn("No 'flag' entry found")
+			logger.Warn("No 'flag' entry found")
 		}
 	}
 
-	flags, err := json.Marshal(mappedFlagDocs)
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows iteration error: %w", err)
+	}
 
+	// Only marshal if there is data to marshal
+	if len(mappedFlagDocs) == 0 {
+		return []byte("{}"), nil
+	}
+
+	flags, err := json.Marshal(mappedFlagDocs)
 	if err != nil {
 		return nil, err
 	}
 
 	return flags, nil
+}
+
+// Loads an SQL query from an external file.
+func loadSQL(filename string) (string, error) {
+	bytes, err := os.ReadFile(filename)
+	if err != nil {
+		return "", err
+	}
+	return string(bytes), nil
 }

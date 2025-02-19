@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/redis/go-redis/v9"
+	"golang.org/x/exp/slices"
 )
 
 // RetrieverConf contains all the field to configure a retriever
@@ -119,16 +120,17 @@ func (c *RetrieverConf) validateMongoDBRetriever() error {
 }
 
 func (c *RetrieverConf) validatePostgreSQLRetriever() error {
-	if c.Column == "" {
+	validTypes := []string{"json", "relational"}
+	if c.Type == "json" && c.Column == "" {
 		return fmt.Errorf("invalid retriever: no \"column\" property found for kind \"%s\"", c.Kind)
 	}
-	if c.Table == "" {
+	if c.Type == "json" && c.Table == "" {
 		return fmt.Errorf("invalid retriever: no \"table\" property found for kind \"%s\"", c.Kind)
 	}
 	if c.URI == "" {
 		return fmt.Errorf("invalid retriever: no \"uri\" property found for kind \"%s\"", c.Kind)
 	}
-	if c.Type == "" || !(c.Type == "json") {
+	if c.Type == "" || !slices.Contains(validTypes, c.Type) {
 		return fmt.Errorf("invalid retriever: no \"type\" property or not a valid type in kind \"%s\"", c.Kind)
 	}
 
