@@ -52,14 +52,17 @@ And it will look like this:
 ```
 
 ## Which Providers Support Exporter Metadata?
-To be able to use exporter metadata, you need to use the relay-proxy in version `v1.41.0` or above and as minimum the following version of the providers:
-- **GO**: `v0.2.2`
+To be able to use exporter metadata, you need to use the relay-proxy in version `v1.41.1` or above and as minimum the following version of the providers:
 - **Kotlin**: `v0.3.0`
-- **Java**: `v0.4.1`
-- **NodeJS**: `v0.7.4`
 - **Web**: `v0.2.4`
-- **Python**: `v0.4.0`
 - **Swift**: `v0.3.0`
+- **Java**: `v0.4.2`
+- **NodeJS**: `v0.7.5`
+- **PHP**: `1.1.0`
+- **Ruby**: `0.1.3`
+- **Python**: `v0.4.1`
+- **.NET**: `0.2.1`
+- **GO**: `v0.2.3`
 
 ## Conclusion
 Exporter metadata provides a powerful mechanism to enrich your evaluation events with static information in the GO Feature Flag provider for OpenFeature.
