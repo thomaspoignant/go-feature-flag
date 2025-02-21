@@ -69,7 +69,7 @@ export function UsingIt() {
   ];
 
   return (
-    <section className={'pt-5 2xl:px-64'}>
+    <section className={'pt-5 px-5'}>
       <div className="grid grid-pad text-center">
         <span className="text-3xl">Trusted by developers from</span>
         <UsingItLogos companies={companies} />

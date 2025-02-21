@@ -34,6 +34,7 @@ func runLint(cmd *cobra.Command, args []string, lintFlagFormat string) error {
 		for _, err := range errs {
 			_, _ = fmt.Fprintf(cmd.ErrOrStderr(), "%s\n", err)
 		}
+		cmd.SilenceUsage = true
 		return fmt.Errorf("invalid GO Feature Flag configuration")
 	}
 	_, err := fmt.Fprint(cmd.OutOrStdout(), "Valid GO Feature Flag configuration")
