@@ -262,6 +262,10 @@ type Config struct {
 	// Version is the version of the relay-proxy
 	Version string `mapstructure:"version" koanf:"version"`
 
+	// Disable x-gofeatureflag-version header in the relay-proxy HTTP response
+	// Default: false
+	DisableVersionHeader bool `mapstructure:"disableVersionHeader" koanf:"disableversionheader"`
+
 	// Deprecated: use AuthorizedKeys instead
 	// APIKeys list of API keys that authorized to use endpoints
 	APIKeys []string `mapstructure:"apiKeys" koanf:"apikeys"`
