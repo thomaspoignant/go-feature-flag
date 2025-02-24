@@ -24,7 +24,7 @@ require (
 	github.com/diegoholiveira/jsonlogic/v3 v3.7.4
 	github.com/fsouza/fake-gcs-server v1.52.2
 	github.com/golang/mock v1.6.0
-	github.com/google/go-cmp v0.6.0
+	github.com/google/go-cmp v0.7.0
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/invopop/jsonschema v0.13.0
