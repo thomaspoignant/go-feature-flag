@@ -63,11 +63,12 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 
 	// Default values
 	_ = k.Load(confmap.Provider(map[string]interface{}{
-		"listen":          "1031",
-		"host":            "localhost",
-		"fileFormat":      "yaml",
-		"pollingInterval": 60000,
-		"logLevel":        DefaultLogLevel,
+		"listen":              "1031",
+		"host":                "localhost",
+		"fileFormat":          "yaml",
+		"pollingInterval":     60000,
+		"logLevel":            DefaultLogLevel,
+		"enableVersionHeader": true,
 	}, "."), nil)
 
 	// mapping command line parameters to koanf
@@ -261,6 +262,10 @@ type Config struct {
 
 	// Version is the version of the relay-proxy
 	Version string `mapstructure:"version" koanf:"version"`
+
+	// Enable x-gofeatureflag-version header in the relay-proxy HTTP response
+	// Default: true
+	EnableVersionHeader bool `mapstructure:"enableVersionHeader" koanf:"enableversionheader"`
 
 	// Deprecated: use AuthorizedKeys instead
 	// APIKeys list of API keys that authorized to use endpoints

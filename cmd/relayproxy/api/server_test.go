@@ -218,3 +218,74 @@ func Test_CheckOFREPAPIExists(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 }
+
+func Test_Middleware_VersionHeader_Enabled_Default(t *testing.T) {
+	proxyConf := &config.Config{
+		Retriever: &config.RetrieverConf{
+			Kind: "file",
+			Path: "../../../testdata/flag-config.yaml",
+		},
+		ListenPort: 11024,
+	}
+	log := log.InitLogger()
+	defer func() { _ = log.ZapLogger.Sync() }()
+
+	metricsV2, _ := metric.NewMetrics()
+	wsService := service.NewWebsocketService()
+	defer wsService.Close()
+	goff, _ := service.NewGoFeatureFlagClient(proxyConf, log.ZapLogger, nil)
+
+	services := service.Services{
+		MonitoringService:    service.NewMonitoring(goff),
+		WebsocketService:     wsService,
+		GOFeatureFlagService: goff,
+		Metrics:              metricsV2,
+	}
+
+	s := api.New(proxyConf, services, log.ZapLogger)
+	go func() { s.Start() }()
+	defer s.Stop(context.Background())
+
+	time.Sleep(10 * time.Millisecond)
+
+	response, err := http.Get("http://localhost:11024/health")
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, response.StatusCode)
+	assert.Equal(t, proxyConf.Version, response.Header.Get("X-GOFEATUREFLAG-VERSION"))
+}
+
+func Test_VersionHeader_Disabled(t *testing.T) {
+	proxyConf := &config.Config{
+		Retriever: &config.RetrieverConf{
+			Kind: "file",
+			Path: "../../../testdata/flag-config.yaml",
+		},
+		ListenPort:          11024,
+		EnableVersionHeader: false,
+	}
+	log := log.InitLogger()
+	defer func() { _ = log.ZapLogger.Sync() }()
+
+	metricsV2, _ := metric.NewMetrics()
+	wsService := service.NewWebsocketService()
+	defer wsService.Close()
+	goff, _ := service.NewGoFeatureFlagClient(proxyConf, log.ZapLogger, nil)
+
+	services := service.Services{
+		MonitoringService:    service.NewMonitoring(goff),
+		WebsocketService:     wsService,
+		GOFeatureFlagService: goff,
+		Metrics:              metricsV2,
+	}
+
+	s := api.New(proxyConf, services, log.ZapLogger)
+	go func() { s.Start() }()
+	defer s.Stop(context.Background())
+
+	time.Sleep(10 * time.Millisecond)
+
+	response, err := http.Get("http://localhost:11024/health")
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, response.StatusCode)
+	assert.Empty(t, response.Header.Get("X-GOFEATUREFLAG-VERSION"))
+}

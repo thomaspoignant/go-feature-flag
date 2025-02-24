@@ -71,7 +71,9 @@ func (s *Server) initRoutes() {
 		}))
 	}
 	s.apiEcho.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
-	s.apiEcho.Use(custommiddleware.VersionHeader(s.config))
+	if s.config.EnableVersionHeader {
+		s.apiEcho.Use(custommiddleware.VersionHeader(s.config))
+	}
 	s.apiEcho.Use(middleware.Recover())
 
 	// Init controllers
