@@ -20,7 +20,9 @@ func TestVersion(t *testing.T) {
 	conf := &config.Config{
 		Version: "1.0.0",
 	}
-	middleware := middleware2.VersionHeader(conf)
+	middleware := middleware2.VersionHeader(middleware2.VersionHeaderConfig{
+		RelayProxyConfig: conf,
+	})
 	handler := middleware(func(c echo.Context) error {
 		return c.String(http.StatusOK, "Authorized")
 	})
@@ -28,4 +30,27 @@ func TestVersion(t *testing.T) {
 	err := handler(c)
 	assert.NoError(t, err)
 	assert.Equal(t, "1.0.0", rec.Header().Get("X-GOFEATUREFLAG-VERSION"))
+}
+
+func TestNoVersion(t *testing.T) {
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/whatever", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	conf := &config.Config{
+		Version:              "1.0.0",
+		DisableVersionHeader: true,
+	}
+	middleware := middleware2.VersionHeader(middleware2.VersionHeaderConfig{
+		Skipper:          middleware2.DisableVersionHeaderSkipper(conf),
+		RelayProxyConfig: conf,
+	})
+	handler := middleware(func(c echo.Context) error {
+		return c.String(http.StatusOK, "Authorized")
+	})
+
+	err := handler(c)
+	assert.NoError(t, err)
+	assert.Empty(t, rec.Header().Get("X-GOFEATUREFLAG-VERSION"))
 }

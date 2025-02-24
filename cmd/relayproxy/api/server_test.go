@@ -260,8 +260,8 @@ func Test_VersionHeader_Disabled(t *testing.T) {
 			Kind: "file",
 			Path: "../../../testdata/flag-config.yaml",
 		},
-		ListenPort:          11024,
-		EnableVersionHeader: false,
+		ListenPort:           11024,
+		DisableVersionHeader: true,
 	}
 	log := log.InitLogger()
 	defer func() { _ = log.ZapLogger.Sync() }()

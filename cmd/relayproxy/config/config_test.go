@@ -38,7 +38,6 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 				},
 				StartWithRetrieverError: false,
 				Version:                 "1.X.X",
-				EnableVersionHeader:     true,
 				EnableSwagger:           true,
 				AuthorizedKeys: config.APIKeys{
 					Admin: []string{
@@ -76,7 +75,6 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 				},
 				StartWithRetrieverError: false,
 				Version:                 "1.X.X",
-				EnableVersionHeader:     true,
 				EnableSwagger:           true,
 				AuthorizedKeys: config.APIKeys{
 					Admin: nil,
@@ -106,7 +104,6 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 				},
 				StartWithRetrieverError: false,
 				Version:                 "1.X.X",
-				EnableVersionHeader:     true,
 				EnableSwagger:           true,
 				APIKeys: []string{
 					"apikey1",
@@ -134,7 +131,6 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 				},
 				StartWithRetrieverError: false,
 				Version:                 "1.X.X",
-				EnableVersionHeader:     true,
 				EnableSwagger:           true,
 				APIKeys: []string{
 					"apikey1",
@@ -154,7 +150,6 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 				Host:                    "localhost",
 				StartWithRetrieverError: false,
 				Version:                 "1.X.X",
-				EnableVersionHeader:     true,
 				LogLevel:                config.DefaultLogLevel,
 			},
 			wantErr: assert.NoError,
@@ -168,13 +163,12 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 			name:         "Valid YAML with OTel config",
 			fileLocation: "../testdata/config/valid-otel.yaml",
 			want: &config.Config{
-				ListenPort:          1031,
-				PollingInterval:     60000,
-				FileFormat:          "yaml",
-				Host:                "localhost",
-				LogLevel:            config.DefaultLogLevel,
-				Version:             "1.X.X",
-				EnableVersionHeader: true,
+				ListenPort:      1031,
+				PollingInterval: 60000,
+				FileFormat:      "yaml",
+				Host:            "localhost",
+				LogLevel:        config.DefaultLogLevel,
+				Version:         "1.X.X",
 				Retrievers: &[]config.RetrieverConf{
 					{
 						Kind: "file",
@@ -239,7 +233,6 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 				},
 				StartWithRetrieverError: false,
 				Version:                 "1.X.X",
-				EnableVersionHeader:     true,
 				EnableSwagger:           true,
 				AuthorizedKeys: config.APIKeys{
 					Admin: []string{
@@ -264,7 +257,6 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 				Host:                    "localhost",
 				StartWithRetrieverError: false,
 				Version:                 "1.X.X",
-				EnableVersionHeader:     true,
 				LogLevel:                config.DefaultLogLevel,
 			},
 			wantErr: assert.NoError,
@@ -285,7 +277,6 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 				Host:                    "localhost",
 				StartWithRetrieverError: false,
 				Version:                 "1.X.X",
-				EnableVersionHeader:     true,
 				LogLevel:                config.DefaultLogLevel,
 			},
 		},
@@ -300,7 +291,6 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 				Host:                    "localhost",
 				StartWithRetrieverError: false,
 				Version:                 "1.X.X",
-				EnableVersionHeader:     true,
 				LogLevel:                config.DefaultLogLevel,
 			},
 		},
@@ -315,7 +305,6 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 				Host:                    "localhost",
 				StartWithRetrieverError: false,
 				Version:                 "1.X.X",
-				EnableVersionHeader:     true,
 				LogLevel:                config.DefaultLogLevel,
 			},
 			disableDefaultFileCreation: true,
@@ -838,7 +827,6 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 				},
 				StartWithRetrieverError: false,
 				Version:                 "1.X.X",
-				EnableVersionHeader:     true,
 				EnableSwagger:           true,
 				AuthorizedKeys: config.APIKeys{
 					Admin: []string{
@@ -866,13 +854,12 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 			fileLocation:               "../testdata/config/valid-otel.yaml",
 			disableDefaultFileCreation: true,
 			want: &config.Config{
-				ListenPort:          1031,
-				PollingInterval:     60000,
-				FileFormat:          "yaml",
-				Host:                "localhost",
-				LogLevel:            config.DefaultLogLevel,
-				Version:             "1.X.X",
-				EnableVersionHeader: true,
+				ListenPort:      1031,
+				PollingInterval: 60000,
+				FileFormat:      "yaml",
+				Host:            "localhost",
+				LogLevel:        config.DefaultLogLevel,
+				Version:         "1.X.X",
 				Retrievers: &[]config.RetrieverConf{
 					{
 						Kind: "file",

@@ -71,9 +71,12 @@ func (s *Server) initRoutes() {
 		}))
 	}
 	s.apiEcho.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
-	if s.config.EnableVersionHeader {
-		s.apiEcho.Use(custommiddleware.VersionHeader(s.config))
-	}
+
+	s.apiEcho.Use(custommiddleware.VersionHeader(custommiddleware.VersionHeaderConfig{
+		Skipper:          custommiddleware.DisableVersionHeaderSkipper(s.config),
+		RelayProxyConfig: s.config,
+	}))
+
 	s.apiEcho.Use(middleware.Recover())
 
 	// Init controllers
