@@ -32,13 +32,13 @@ func VersionHeader(cfg VersionHeaderConfig) echo.MiddlewareFunc {
 	}
 }
 
-func DefaultVersionHeaderSkipper(c echo.Context) bool {
+func DefaultVersionHeaderSkipper(_ echo.Context) bool {
 	return false
 }
 
 // DDisableVersionHeaderSkipper returns a middleware.Skipper function that checks config.
 func DisableVersionHeaderSkipper(relayProxyConfig *config.Config) middleware.Skipper {
-	return func(c echo.Context) bool {
+	return func(_ echo.Context) bool {
 		return relayProxyConfig.DisableVersionHeader
 	}
 }
