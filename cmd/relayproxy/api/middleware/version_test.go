@@ -43,7 +43,9 @@ func TestNoVersion(t *testing.T) {
 		DisableVersionHeader: true,
 	}
 	middleware := middleware2.VersionHeader(middleware2.VersionHeaderConfig{
-		Skipper:          middleware2.DisableVersionHeaderSkipper(conf),
+		Skipper: func(c echo.Context) bool {
+			return conf.DisableVersionHeader
+		},
 		RelayProxyConfig: conf,
 	})
 	handler := middleware(func(c echo.Context) error {
