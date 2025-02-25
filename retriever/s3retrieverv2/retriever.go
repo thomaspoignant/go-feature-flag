@@ -37,6 +37,9 @@ type Retriever struct {
 }
 
 func (s *Retriever) Init(ctx context.Context, _ *fflog.FFLogger) error {
+	if ctx == nil {
+		ctx = context.Background()
+	}
 	s.status = retriever.RetrieverNotReady
 	if s.downloader == nil {
 		if s.AwsConfig == nil {
@@ -63,6 +66,9 @@ func (s *Retriever) Status() retriever.Status {
 }
 
 func (s *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
+	if ctx == nil {
+		ctx = context.Background()
+	}
 	if s.downloader == nil {
 		s.status = retriever.RetrieverError
 		return nil, fmt.Errorf("downloader is not initialized")

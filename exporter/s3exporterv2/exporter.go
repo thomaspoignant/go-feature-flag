@@ -83,6 +83,9 @@ func (f *Exporter) initializeUploader(ctx context.Context) error {
 
 // Export is saving a collection of events in a file.
 func (f *Exporter) Export(ctx context.Context, logger *fflog.FFLogger, featureEvents []exporter.FeatureEvent) error {
+	if ctx == nil {
+		ctx = context.Background()
+	}
 	if f.s3Uploader == nil {
 		initErr := f.initializeUploader(ctx)
 		if initErr != nil {
