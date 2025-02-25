@@ -240,6 +240,9 @@ const config = {
         gtag: {
           trackingID: 'G-LEJBB94YBE',
         },
+        googleTagManager: {
+          containerId: 'GTM-MLZMZ3VT',
+        },
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
           // Please change this to your repo.
