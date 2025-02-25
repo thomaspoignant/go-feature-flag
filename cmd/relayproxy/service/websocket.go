@@ -45,7 +45,9 @@ func (w *websocketServiceImpl) BroadcastFlagChanges(diff notifier.DiffCache) {
 	for c := range w.clients {
 		err := c.WriteJSON(diff)
 		if err != nil {
+			w.mutex.RUnlock()
 			w.Deregister(c)
+			w.mutex.RLock()
 		}
 	}
 }
