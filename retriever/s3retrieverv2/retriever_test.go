@@ -32,9 +32,24 @@ func Test_s3Retriever_Retrieve(t *testing.T) {
 				downloader: &testutils.S3ManagerV2Mock{
 					TestDataLocation: "./testdata",
 				},
-				bucket: "Bucket",
-				item:   "valid",
+				bucket:  "Bucket",
+				item:    "valid",
+				context: context.TODO(),
 			},
+			want:    "./testdata/flag-config.yaml",
+			wantErr: false,
+		},
+		{
+			name: "File on S3 context nil",
+			fields: fields{
+				downloader: &testutils.S3ManagerV2Mock{
+					TestDataLocation: "./testdata",
+				},
+				bucket:  "Bucket",
+				item:    "valid",
+				context: nil,
+			},
+
 			want:    "./testdata/flag-config.yaml",
 			wantErr: false,
 		},
@@ -75,6 +90,7 @@ func Test_s3Retriever_Retrieve(t *testing.T) {
 						o.UseAccelerate = true
 					},
 				},
+				context: context.TODO(),
 			},
 			want:    "./testdata/flag-config.yaml",
 			wantErr: false,
@@ -82,7 +98,7 @@ func Test_s3Retriever_Retrieve(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			awsConf, _ := config.LoadDefaultConfig(context.TODO())
+			awsConf, _ := config.LoadDefaultConfig(tt.fields.context)
 			s := Retriever{
 				Bucket:          tt.fields.bucket,
 				Item:            tt.fields.item,
@@ -90,10 +106,10 @@ func Test_s3Retriever_Retrieve(t *testing.T) {
 				downloader:      tt.fields.downloader,
 				S3ClientOptions: tt.fields.S3ClientOptions,
 			}
-			err := s.Init(context.Background(), nil)
+			err := s.Init(tt.fields.context, nil)
 			assert.NoError(t, err)
 			defer func() {
-				err := s.Shutdown(context.Background())
+				err := s.Shutdown(tt.fields.context)
 				assert.NoError(t, err)
 			}()
 

@@ -18,6 +18,9 @@ type S3ManagerV2Mock struct {
 }
 
 func (s *S3ManagerV2Mock) Upload(ctx context.Context, uploadInput *s3.PutObjectInput, opts ...func(uploader *manager.Uploader)) (*manager.UploadOutput, error) {
+	if ctx == nil {
+		return nil, errors.New("cannot create context from nil parent")
+	}
 	if uploadInput.Bucket == nil || *uploadInput.Bucket == "" {
 		return nil, errors.New("invalid bucket")
 	}
@@ -39,6 +42,10 @@ func (s *S3ManagerV2Mock) Upload(ctx context.Context, uploadInput *s3.PutObjectI
 }
 
 func (s *S3ManagerV2Mock) Download(ctx context.Context, w io.WriterAt, input *s3.GetObjectInput, options ...func(*manager.Downloader)) (n int64, err error) {
+	if ctx == nil {
+		return -1, errors.New("cannot create context from nil parent")
+	}
+
 	if *input.Key == "valid" {
 		res, _ := os.ReadFile(s.TestDataLocation + "/flag-config.yaml")
 		_, _ = w.WriteAt(res, 0)
