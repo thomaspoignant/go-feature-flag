@@ -1,6 +1,7 @@
 package service_test
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -11,9 +12,13 @@ import (
 
 type mockConn struct {
 	writeJSONFunc func(v interface{}) error
+	throwError    bool
 }
 
 func (m *mockConn) WriteJSON(v interface{}) error {
+	if m.throwError {
+		return fmt.Errorf("error websocket connection")
+	}
 	if m.writeJSONFunc != nil {
 		return m.writeJSONFunc(v)
 	}
@@ -132,4 +137,27 @@ func TestClose(t *testing.T) {
 	// Assertions
 	assert.False(t, conn1WriteJSONCalled, "WriteJSON should not be called after closing")
 	assert.False(t, conn2WriteJSONCalled, "WriteJSON should not be called after closing")
+}
+
+func TestBroadcastFlagChangesDeadLock(t *testing.T) {
+	// Create the websocketService instance
+	websocketService := service.NewWebsocketService()
+	diff := notifier.DiffCache{} // You need to define an appropriate DiffCache
+	conn1 := &mockConn{}
+
+	// the mock will return an error when WriteJSON is called
+	// this will trigger the deregister of the connection, and the BroadcastFlagChanges will try to lock the mutex
+	// in the past we had a deadlock here (see: https://github.com/thomaspoignant/go-feature-flag/issues/3144)
+	conn2 := &mockConn{throwError: true}
+	websocketService.Register(conn1)
+	websocketService.Register(conn2)
+	conn1WriteJSONCalled := false
+	conn1.writeJSONFunc = func(v interface{}) error {
+		conn1WriteJSONCalled = true
+		return nil
+	}
+	websocketService.BroadcastFlagChanges(diff)
+	assert.True(t, conn1WriteJSONCalled, "WriteJSON should be called on conn1")
+
+	// We are not testing the error here, we are testing that the function does not deadlock
 }
