@@ -1,3 +1,4 @@
+from decimal import InvalidContext
 import json
 import pylru
 import urllib3
@@ -19,6 +20,7 @@ from openfeature.exception import (
     ErrorCode,
     FlagNotFoundError,
     GeneralError,
+    InvalidContextError,
     OpenFeatureError,
     TypeMismatchError,
 )
@@ -210,16 +212,34 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
                     body=goff_request.model_dump_json(),
                 )
 
+                response_body = response.data
+                print(response.status)
+
+                #Handle 404 error code
                 if response.status == HTTPStatus.NOT_FOUND.value:
                     raise FlagNotFoundError(
                         "flag {} was not found in your configuration".format(flag_key)
                     )
 
-                if int(response.status) >= HTTPStatus.BAD_REQUEST.value:
+                #Handle 400 error code
+                if int(response.status) == HTTPStatus.BAD_REQUEST.value:
+                    #TODO SHOW MESSAGE and get it from context
+                    response_dict = json.loads(response_body)
+                    errorMessage = response_dict.get('message')
+
+                    if errorMessage is None:
+                        errorMessage = "no error message given."
+
+                    raise InvalidContextError(
+                        "Invalid context: "+ errorMessage
+                    )
+
+                #Handle every error response above 400
+                if int(response.status) > HTTPStatus.BAD_REQUEST.value:
                     raise GeneralError(
                         "impossible to contact GO Feature Flag relay proxy instance"
                     )
-                response_body = response.data
+
 
             response_flag_evaluation = ResponseFlagEvaluation.model_validate_json(
                 response_body
