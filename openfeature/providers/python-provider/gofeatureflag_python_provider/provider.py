@@ -1,4 +1,3 @@
-from decimal import InvalidContext
 import json
 import pylru
 import urllib3
@@ -213,7 +212,6 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
                 )
 
                 response_body = response.data
-                print(response.status)
 
                 #Handle 404 error code
                 if response.status == HTTPStatus.NOT_FOUND.value:
@@ -223,7 +221,6 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
 
                 #Handle 400 error code
                 if int(response.status) == HTTPStatus.BAD_REQUEST.value:
-                    #TODO SHOW MESSAGE and get it from context
                     response_dict = json.loads(response_body)
                     errorMessage = response_dict.get('message')
 
