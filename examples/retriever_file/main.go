@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"log"
 	"log/slog"
@@ -24,7 +23,7 @@ func main() {
 		Retriever: &fileretriever.Retriever{
 			Path: "examples/retriever_file/flags.goff.yaml",
 		},
-		DataExporter: exporter.DataExporter{
+		DataExporter: ffclient.DataExporter{
 			FlushInterval:    1 * time.Second,
 			MaxEventInMemory: 100,
 			Exporter: &fileexporter.Exporter{

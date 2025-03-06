@@ -18,7 +18,6 @@ import (
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/controller"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
-	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"go.uber.org/zap"
@@ -126,7 +125,7 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 				Retriever: &fileretriever.Retriever{
 					Path: configFlagsLocation,
 				},
-				DataExporter: exporter.DataExporter{
+				DataExporter: ffclient.DataExporter{
 					FlushInterval:    10 * time.Second,
 					MaxEventInMemory: 10000,
 					Exporter:         &fileexporter.Exporter{Filename: exporterFile.Name()},

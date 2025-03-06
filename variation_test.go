@@ -328,7 +328,7 @@ func TestBoolVariation(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.DataExporter{
+					dataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.Config{
 						{
 							FlushInterval:    0,
 							MaxEventInMemory: 0,
@@ -733,7 +733,7 @@ func TestBoolVariationDetails(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.DataExporter{
+					dataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.Config{
 						{
 							FlushInterval:    0,
 							MaxEventInMemory: 0,
@@ -1047,7 +1047,7 @@ func TestFloat64Variation(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.DataExporter{
+					dataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.Config{
 						{
 							FlushInterval:    0,
 							MaxEventInMemory: 0,
@@ -1370,7 +1370,7 @@ func TestFloat64VariationDetails(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.DataExporter{
+					dataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.Config{
 						{
 							FlushInterval:    0,
 							MaxEventInMemory: 0,
@@ -1669,7 +1669,7 @@ func TestJSONArrayVariation(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.DataExporter{
+					dataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.Config{
 						{
 							FlushInterval:    0,
 							MaxEventInMemory: 0,
@@ -1981,7 +1981,7 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.DataExporter{
+					dataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.Config{
 						{
 							FlushInterval:    0,
 							MaxEventInMemory: 0,
@@ -2260,7 +2260,7 @@ func TestJSONVariation(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.DataExporter{
+					dataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.Config{
 						{
 							FlushInterval:    0,
 							MaxEventInMemory: 0,
@@ -2498,7 +2498,7 @@ func TestJSONVariationDetails(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.DataExporter{
+					dataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.Config{
 						{
 							FlushInterval:    0,
 							MaxEventInMemory: 0,
@@ -2780,7 +2780,7 @@ func TestStringVariation(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.DataExporter{
+					dataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.Config{
 						{
 							FlushInterval:    0,
 							MaxEventInMemory: 0,
@@ -3017,7 +3017,7 @@ func TestStringVariationDetails(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.DataExporter{
+					dataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.Config{
 						{
 							FlushInterval:    0,
 							MaxEventInMemory: 0,
@@ -3329,7 +3329,7 @@ func TestIntVariation(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.DataExporter{
+					dataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.Config{
 						{
 							FlushInterval:    0,
 							MaxEventInMemory: 0,
@@ -3608,7 +3608,7 @@ func TestIntVariationDetails(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.DataExporter{
+					dataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.Config{
 						{
 							FlushInterval:    0,
 							MaxEventInMemory: 0,
@@ -3981,7 +3981,7 @@ func TestRawVariation(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.DataExporter{
+					dataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.Config{
 						{
 							FlushInterval:    0,
 							MaxEventInMemory: 0,

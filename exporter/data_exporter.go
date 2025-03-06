@@ -15,18 +15,24 @@ const (
 	defaultMaxEventInMemory = int64(100000)
 )
 
+type Config struct {
+	Exporter         CommonExporter
+	FlushInterval    time.Duration
+	MaxEventInMemory int64
+}
+
 type dataExporterImpl[T any] struct {
 	ctx        context.Context
 	consumerId string
 	eventStore *EventStore[T]
 	logger     *fflog.FFLogger
-	exporter   DataExporter
+	exporter   Config
 
 	daemonChan chan struct{}
 	ticker     *time.Ticker
 }
 
-func NewDataExporter[T any](ctx context.Context, exporter DataExporter, consumerId string, eventStore *EventStore[T], logger *fflog.FFLogger) dataExporterImpl[T] {
+func NewDataExporter[T any](ctx context.Context, exporter Config, consumerId string, eventStore *EventStore[T], logger *fflog.FFLogger) dataExporterImpl[T] {
 	if ctx == nil {
 		ctx = context.Background()
 	}

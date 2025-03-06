@@ -1,7 +1,9 @@
-package exporter
+package ffclient
 
 import (
 	"time"
+
+	"github.com/thomaspoignant/go-feature-flag/exporter"
 )
 
 // DataExporter is the configuration of your export target.
@@ -19,5 +21,5 @@ type DataExporter struct {
 
 	// Exporter is the configuration of your exporter.
 	// You can see all available exporter in the exporter package.
-	Exporter CommonExporter
+	Exporter exporter.CommonExporter
 }

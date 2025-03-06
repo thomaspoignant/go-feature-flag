@@ -8,7 +8,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
@@ -73,7 +72,7 @@ type Config struct {
 	FileFormat string
 
 	// DataExporter (optional) is the configuration where we store how we should output the flags variations results
-	DataExporter exporter.DataExporter
+	DataExporter DataExporter
 
 	// StartWithRetrieverError (optional) If true, the SDK will start even if we did not get any flags from the retriever.
 	// It will serve only default values until all the retrievers returns the flags.

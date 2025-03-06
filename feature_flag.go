@@ -124,8 +124,13 @@ func New(config Config) (*GoFeatureFlag, error) {
 
 		if goFF.config.DataExporter.Exporter != nil {
 			// init the data exporter
+			c := exporter.Config{
+				Exporter:         goFF.config.DataExporter.Exporter,
+				FlushInterval:    goFF.config.DataExporter.FlushInterval,
+				MaxEventInMemory: goFF.config.DataExporter.MaxEventInMemory,
+			}
 			goFF.dataExporter =
-				exporter.NewManager[exporter.FeatureEvent](config.Context, []exporter.DataExporter{goFF.config.DataExporter}, goFF.config.internalLogger)
+				exporter.NewManager[exporter.FeatureEvent](config.Context, []exporter.Config{c}, goFF.config.internalLogger)
 
 			// we start the daemon only if we have a bulk exporter
 			if goFF.config.DataExporter.Exporter.IsBulk() {

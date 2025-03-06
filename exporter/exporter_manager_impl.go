@@ -14,7 +14,7 @@ type ManagerImpl[T any] struct {
 	eventStore *EventStore[T]
 }
 
-func NewManager[T any](ctx context.Context, exporters []DataExporter, logger *fflog.FFLogger) Manager[T] {
+func NewManager[T any](ctx context.Context, exporters []Config, logger *fflog.FFLogger) Manager[T] {
 	if ctx == nil {
 		ctx = context.Background()
 	}

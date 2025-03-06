@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"log"
 	"log/slog"
 	"time"
@@ -27,7 +26,7 @@ func main() {
 			Database:   "appConfig",
 			URI:        "mongodb://root:example@127.0.0.1:27017/",
 		},
-		DataExporter: exporter.DataExporter{
+		DataExporter: ffclient.DataExporter{
 			FlushInterval:    1 * time.Second,
 			MaxEventInMemory: 100,
 			Exporter: &fileexporter.Exporter{

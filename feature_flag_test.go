@@ -11,7 +11,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/stretchr/testify/assert"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
-	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/model"
@@ -100,7 +99,7 @@ func TestValidUseCase(t *testing.T) {
 		PollingInterval: 5 * time.Second,
 		Retriever:       &fileretriever.Retriever{Path: "testdata/flag-config.yaml"},
 		LeveledLogger:   slog.Default(),
-		DataExporter: exporter.DataExporter{
+		DataExporter: ffclient.DataExporter{
 			FlushInterval:    10 * time.Second,
 			MaxEventInMemory: 1000,
 			Exporter: &mock.Exporter{

@@ -20,7 +20,7 @@ import (
 
 func TestDataExporterManager_flushWithTime(t *testing.T) {
 	mockExporter := mock.Exporter{Bulk: true}
-	dataExporterMock := []exporter.DataExporter{
+	dataExporterMock := []exporter.Config{
 		{
 			FlushInterval:    10 * time.Millisecond,
 			MaxEventInMemory: 1000,
@@ -48,7 +48,7 @@ func TestDataExporterManager_flushWithTime(t *testing.T) {
 
 func TestDataExporterManager_flushWithNumberOfEvents(t *testing.T) {
 	mockExporter := mock.Exporter{Bulk: true}
-	dataExporterMock := []exporter.DataExporter{
+	dataExporterMock := []exporter.Config{
 		{
 			FlushInterval:    10 * time.Millisecond,
 			MaxEventInMemory: 100,
@@ -74,7 +74,7 @@ func TestDataExporterManager_flushWithNumberOfEvents(t *testing.T) {
 
 func TestDataExporterManager_defaultFlush(t *testing.T) {
 	mockExporter := mock.Exporter{Bulk: true}
-	dataExporterMock := []exporter.DataExporter{
+	dataExporterMock := []exporter.Config{
 		{
 			FlushInterval:    0,
 			MaxEventInMemory: 0,
@@ -100,7 +100,7 @@ func TestDataExporterManager_defaultFlush(t *testing.T) {
 
 func TestDataExporterManager_exporterReturnError(t *testing.T) {
 	mockExporter := mock.Exporter{Err: errors.New("random err"), ExpectedNumberErr: 1, Bulk: true}
-	dataExporterMock := []exporter.DataExporter{
+	dataExporterMock := []exporter.Config{
 		{
 			FlushInterval:    10 * time.Minute,
 			MaxEventInMemory: 100,
@@ -133,7 +133,7 @@ func TestDataExporterManager_exporterReturnError(t *testing.T) {
 
 func TestDataExporterManager_nonBulkExporter(t *testing.T) {
 	mockExporter := mock.Exporter{Bulk: false}
-	dataExporterMock := []exporter.DataExporter{
+	dataExporterMock := []exporter.Config{
 		{
 			FlushInterval:    0,
 			MaxEventInMemory: 0,
@@ -194,7 +194,7 @@ func TestAddExporterMetadataFromContextToExporter(t *testing.T) {
 			mockExporter := &mock.Exporter{}
 			config := ffclient.Config{
 				Retriever: &fileretriever.Retriever{Path: "../testdata/flag-config.yaml"},
-				DataExporter: exporter.DataExporter{
+				DataExporter: ffclient.DataExporter{
 					Exporter:      mockExporter,
 					FlushInterval: 100 * time.Millisecond,
 				},
