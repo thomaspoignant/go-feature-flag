@@ -22,10 +22,10 @@ func NewManager[T any](ctx context.Context, exporters []Config, logger *fflog.FF
 	evStore := NewEventStore[T](30 * time.Second)
 	consumers := make([]dataExporterImpl[T], len(exporters))
 	for index, exporter := range exporters {
-		consumerId := uuid.New().String()
-		exp := NewDataExporter[T](ctx, exporter, consumerId, &evStore, logger)
+		consumerID := uuid.New().String()
+		exp := NewDataExporter[T](ctx, exporter, consumerID, &evStore, logger)
 		consumers[index] = exp
-		evStore.AddConsumer(consumerId)
+		evStore.AddConsumer(consumerID)
 	}
 	return &managerImpl[T]{
 		logger:     logger,
@@ -49,7 +49,7 @@ func (m *managerImpl[T]) AddEvent(event T) {
 			continue
 		}
 
-		count, err := store.GetPendingEventCount(consumer.consumerId)
+		count, err := store.GetPendingEventCount(consumer.consumerID)
 		if err != nil {
 			m.logger.Error("error while fetching pending events", err)
 			continue

@@ -23,7 +23,7 @@ type Config struct {
 
 type dataExporterImpl[T any] struct {
 	ctx        context.Context
-	consumerId string
+	consumerID string
 	eventStore *EventStore[T]
 	logger     *fflog.FFLogger
 	exporter   Config
@@ -32,7 +32,7 @@ type dataExporterImpl[T any] struct {
 	ticker     *time.Ticker
 }
 
-func NewDataExporter[T any](ctx context.Context, exporter Config, consumerId string, eventStore *EventStore[T], logger *fflog.FFLogger) dataExporterImpl[T] {
+func NewDataExporter[T any](ctx context.Context, exporter Config, consumerID string, eventStore *EventStore[T], logger *fflog.FFLogger) dataExporterImpl[T] {
 	if ctx == nil {
 		ctx = context.Background()
 	}
@@ -47,7 +47,7 @@ func NewDataExporter[T any](ctx context.Context, exporter Config, consumerId str
 
 	return dataExporterImpl[T]{
 		ctx:        ctx,
-		consumerId: consumerId,
+		consumerID: consumerID,
 		eventStore: eventStore,
 		logger:     logger,
 		exporter:   exporter,
@@ -76,7 +76,7 @@ func (d *dataExporterImpl[T]) Stop() {
 
 func (d *dataExporterImpl[T]) Flush() {
 	store := *d.eventStore
-	eventList, err := store.FetchPendingEvents(d.consumerId)
+	eventList, err := store.FetchPendingEvents(d.consumerID)
 	if err != nil {
 		// log something here
 		d.logger.Error("error while fetching pending events", err)
@@ -87,9 +87,9 @@ func (d *dataExporterImpl[T]) Flush() {
 		d.logger.Error(err.Error())
 		return
 	}
-	err = store.UpdateConsumerOffset(d.consumerId, eventList.NewOffset)
+	err = store.UpdateConsumerOffset(d.consumerID, eventList.NewOffset)
 	if err != nil {
-		d.logger.Error(err.Error())
+		d.logger.Error("error while updating offset", err.Error())
 	}
 }
 

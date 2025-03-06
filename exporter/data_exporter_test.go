@@ -1,0 +1,118 @@
+package exporter_test
+
+import (
+	"context"
+	"fmt"
+	"log/slog"
+	"os"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/exporter"
+	"github.com/thomaspoignant/go-feature-flag/testutils/mock"
+	"github.com/thomaspoignant/go-feature-flag/testutils/slogutil"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
+)
+
+func TestDataExporterFlush_TriggerError(t *testing.T) {
+	evStore := mock.NewEventStore[exporter.FeatureEvent]()
+	for i := 0; i < 100; i++ {
+		evStore.Add(exporter.FeatureEvent{
+			Kind: "feature",
+		})
+	}
+
+	logFile, _ := os.CreateTemp("", "")
+	textHandler := slogutil.MessageOnlyHandler{Writer: logFile}
+	logger := &fflog.FFLogger{LeveledLogger: slog.New(&textHandler)}
+	defer func() { _ = os.Remove(logFile.Name()) }()
+
+	exporterMock := mock.Exporter{}
+	exp := exporter.NewDataExporter[exporter.FeatureEvent](context.TODO(), exporter.Config{
+		Exporter:         &exporterMock,
+		FlushInterval:    0,
+		MaxEventInMemory: 0,
+	}, "error", &evStore, logger)
+
+	exp.Flush()
+	// flush should error and not return any event
+	assert.Equal(t, 0, len(exporterMock.GetExportedEvents()))
+	logContent, _ := os.ReadFile(logFile.Name())
+	assert.Equal(t, "error while fetching pending events\n", string(logContent))
+}
+
+func TestDataExporterFlush_TriggerErrorOnUpdateOffset(t *testing.T) {
+	evStore := mock.NewEventStore[exporter.FeatureEvent]()
+	for i := 0; i < 100; i++ {
+		evStore.Add(exporter.FeatureEvent{
+			Kind: "feature",
+		})
+	}
+	logFile, _ := os.CreateTemp("", "")
+	textHandler := slogutil.MessageOnlyHandler{Writer: logFile}
+	logger := &fflog.FFLogger{LeveledLogger: slog.New(&textHandler)}
+	defer func() { _ = os.Remove(logFile.Name()) }()
+
+	exporterMock := mock.Exporter{}
+	exp := exporter.NewDataExporter[exporter.FeatureEvent](context.TODO(), exporter.Config{
+		Exporter:         &exporterMock,
+		FlushInterval:    0,
+		MaxEventInMemory: 0,
+	}, "error_update", &evStore, logger)
+
+	exp.Flush()
+	// flush should error and not return any event
+	assert.Equal(t, 100, len(exporterMock.GetExportedEvents()))
+	logContent, _ := os.ReadFile(logFile.Name())
+	assert.Equal(t, "error while updating offset\n", string(logContent))
+}
+
+func TestDataExporterFlush_TriggerErrorIfNotKnowType(t *testing.T) {
+	evStore := mock.NewEventStore[string]()
+	for i := 0; i < 100; i++ {
+		evStore.Add("feature")
+	}
+
+	logFile, _ := os.CreateTemp("", "")
+	textHandler := slogutil.MessageOnlyHandler{Writer: logFile}
+	logger := &fflog.FFLogger{LeveledLogger: slog.New(&textHandler)}
+	defer func() { _ = os.Remove(logFile.Name()) }()
+
+	exporterMock := mock.Exporter{}
+	exp := exporter.NewDataExporter[string](context.TODO(), exporter.Config{
+		Exporter:         &exporterMock,
+		FlushInterval:    0,
+		MaxEventInMemory: 0,
+	}, "id-consumer", &evStore, logger)
+
+	exp.Flush()
+	// flush should error and not return any event
+	assert.Equal(t, 0, len(exporterMock.GetExportedEvents()))
+	logContent, _ := os.ReadFile(logFile.Name())
+	assert.Equal(t, "trying to send unknown object to the exporter\n", string(logContent))
+}
+
+func TestDataExporterFlush_TriggerErrorIfExporterFail(t *testing.T) {
+	evStore := mock.NewEventStore[exporter.FeatureEvent]()
+	for i := 0; i < 100; i++ {
+		evStore.Add(exporter.FeatureEvent{Kind: "feature"})
+	}
+
+	logFile, _ := os.CreateTemp("", "")
+	textHandler := slogutil.MessageOnlyHandler{Writer: logFile}
+	logger := &fflog.FFLogger{LeveledLogger: slog.New(&textHandler)}
+	defer func() { _ = os.Remove(logFile.Name()) }()
+
+	exporterMock := mock.Exporter{Err: fmt.Errorf("error"), ExpectedNumberErr: 1}
+	exp := exporter.NewDataExporter[exporter.FeatureEvent](context.TODO(), exporter.Config{
+		Exporter:         &exporterMock,
+		FlushInterval:    0,
+		MaxEventInMemory: 0,
+	}, "id-consumer", &evStore, logger)
+
+	exp.Flush()
+	// flush should error and not return any event
+	assert.Equal(t, 100, len(exporterMock.GetExportedEvents()))
+	logContent, _ := os.ReadFile(logFile.Name())
+	assert.Equal(t, "error while exporting data: error\n", string(logContent))
+}
