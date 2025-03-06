@@ -222,12 +222,12 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
                 # Handle 400 error code
                 if int(response.status) == HTTPStatus.BAD_REQUEST.value:
                     response_dict = json.loads(response_body)
-                    errorMessage = response_dict.get("message")
+                    error_message = response_dict.get("message")
 
-                    if errorMessage is None:
-                        errorMessage = "no error message given."
+                    if error_message is None:
+                        error_message = "no error message given."
 
-                    raise InvalidContextError("Invalid context: " + errorMessage)
+                    raise InvalidContextError("Invalid context: " + error_message)
 
                 # Handle every error response above 400
                 if int(response.status) > HTTPStatus.BAD_REQUEST.value:
