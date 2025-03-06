@@ -212,3 +212,85 @@ func TestAddExporterMetadataFromContextToExporter(t *testing.T) {
 		})
 	}
 }
+
+func TestDataExporterManager_multipleExporters(t *testing.T) {
+	mockExporter1 := mock.Exporter{Bulk: false}
+	mockExporter2 := mock.Exporter{Bulk: true}
+	dataExporterMock := []exporter.Config{
+		{
+			FlushInterval:    0,
+			MaxEventInMemory: 0,
+			Exporter:         &mockExporter1,
+		},
+		{
+			FlushInterval:    200 * time.Millisecond,
+			MaxEventInMemory: 200,
+			Exporter:         &mockExporter2,
+		},
+	}
+	dc := exporter.NewManager[exporter.FeatureEvent](context.Background(), dataExporterMock, nil)
+	go dc.StartDaemon()
+	defer dc.Close()
+
+	// Initialize inputEvents slice
+	var inputEvents []exporter.FeatureEvent
+	for i := 0; i < 100; i++ {
+		inputEvents = append(inputEvents, exporter.NewFeatureEvent(
+			ffcontext.NewEvaluationContextBuilder("ABCD").AddCustom("anonymous", true).Build(),
+			"random-key", "YO", "defaultVar", false, "", "SERVER", nil))
+	}
+	for _, event := range inputEvents {
+		dc.AddEvent(event)
+		// we have to wait because we are opening a new thread to slow down the flag evaluation.
+		time.Sleep(1 * time.Millisecond)
+	}
+
+	assert.Equal(t, inputEvents[:100], mockExporter1.GetExportedEvents())
+	assert.Equal(t, 0, len(mockExporter2.GetExportedEvents()))
+	time.Sleep(250 * time.Millisecond)
+	assert.Equal(t, inputEvents[:100], mockExporter2.GetExportedEvents())
+}
+
+func TestDataExporterManager_multipleExportersWithDifferentFlushInterval(t *testing.T) {
+	mockExporter1 := mock.Exporter{Bulk: true}
+	mockExporter2 := mock.Exporter{Bulk: true}
+	dataExporterMock := []exporter.Config{
+		{
+			FlushInterval:    50 * time.Millisecond,
+			MaxEventInMemory: 0,
+			Exporter:         &mockExporter1,
+		},
+		{
+			FlushInterval:    0 * time.Millisecond,
+			MaxEventInMemory: 100,
+			Exporter:         &mockExporter2,
+		},
+	}
+	dc := exporter.NewManager[exporter.FeatureEvent](context.Background(), dataExporterMock, nil)
+	go dc.StartDaemon()
+	defer dc.Close()
+
+	// Initialize inputEvents slice
+	var inputEvents []exporter.FeatureEvent
+	for i := 0; i < 100; i++ {
+		inputEvents = append(inputEvents, exporter.NewFeatureEvent(
+			ffcontext.NewEvaluationContextBuilder("ABCD").AddCustom("anonymous", true).Build(),
+			"random-key", "YO", "defaultVar", false, "", "SERVER", nil))
+	}
+	go func(dc exporter.Manager[exporter.FeatureEvent]) {
+		for _, event := range inputEvents {
+			dc.AddEvent(event)
+			// we have to wait because we are opening a new thread to slow down the flag evaluation.
+			time.Sleep(1 * time.Millisecond)
+		}
+	}(dc)
+
+	assert.Equal(t, 0, len(mockExporter2.GetExportedEvents()))
+	assert.Equal(t, 0, len(mockExporter1.GetExportedEvents()))
+	time.Sleep(70 * time.Millisecond)
+	assert.True(t, len(mockExporter1.GetExportedEvents()) > 0)
+	assert.True(t, len(mockExporter2.GetExportedEvents()) == 0)
+	time.Sleep(200 * time.Millisecond)
+	assert.True(t, len(mockExporter1.GetExportedEvents()) > 0)
+	assert.True(t, len(mockExporter2.GetExportedEvents()) > 0)
+}

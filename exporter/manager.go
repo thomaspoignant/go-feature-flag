@@ -8,10 +8,10 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
-type ManagerImpl[T any] struct {
-	logger     *fflog.FFLogger
-	consumers  []dataExporterImpl[T]
-	eventStore *EventStore[T]
+type Manager[T any] interface {
+	AddEvent(event T)
+	StartDaemon()
+	Close()
 }
 
 func NewManager[T any](ctx context.Context, exporters []Config, logger *fflog.FFLogger) Manager[T] {
@@ -27,14 +27,20 @@ func NewManager[T any](ctx context.Context, exporters []Config, logger *fflog.FF
 		consumers[index] = exp
 		evStore.AddConsumer(consumerId)
 	}
-	return &ManagerImpl[T]{
+	return &managerImpl[T]{
 		logger:     logger,
 		consumers:  consumers,
 		eventStore: &evStore,
 	}
 }
 
-func (m *ManagerImpl[T]) AddEvent(event T) {
+type managerImpl[T any] struct {
+	logger     *fflog.FFLogger
+	consumers  []dataExporterImpl[T]
+	eventStore *EventStore[T]
+}
+
+func (m *managerImpl[T]) AddEvent(event T) {
 	store := *m.eventStore
 	store.Add(event)
 	for _, consumer := range m.consumers {
@@ -56,13 +62,13 @@ func (m *ManagerImpl[T]) AddEvent(event T) {
 	}
 }
 
-func (m *ManagerImpl[T]) StartDaemon() {
+func (m *managerImpl[T]) StartDaemon() {
 	for _, consumer := range m.consumers {
 		go consumer.Start()
 	}
 }
 
-func (m *ManagerImpl[T]) Close() {
+func (m *managerImpl[T]) Close() {
 	for _, consumer := range m.consumers {
 		consumer.Stop()
 	}
