@@ -68,28 +68,50 @@ func TestDataExporterFlush_TriggerErrorOnUpdateOffset(t *testing.T) {
 }
 
 func TestDataExporterFlush_TriggerErrorIfNotKnowType(t *testing.T) {
-	evStore := mock.NewEventStore[string]()
-	for i := 0; i < 100; i++ {
-		evStore.Add("feature")
+	tests := []struct {
+		name        string
+		exporter    mock.ExporterMock
+		expectedLog string
+	}{
+		{
+			name:        "classic exporter",
+			exporter:    &mock.Exporter{},
+			expectedLog: "trying to send unknown object to the exporter\n",
+		},
+		{
+			name:        "deprecated exporter",
+			exporter:    &mock.ExporterDeprecated{},
+			expectedLog: "trying to send unknown object to the exporter (deprecated)\n",
+		},
 	}
 
-	logFile, _ := os.CreateTemp("", "")
-	textHandler := slogutil.MessageOnlyHandler{Writer: logFile}
-	logger := &fflog.FFLogger{LeveledLogger: slog.New(&textHandler)}
-	defer func() { _ = os.Remove(logFile.Name()) }()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			evStore := mock.NewEventStore[string]()
+			for i := 0; i < 100; i++ {
+				evStore.Add("feature")
+			}
 
-	exporterMock := mock.Exporter{}
-	exp := exporter.NewDataExporter[string](context.TODO(), exporter.Config{
-		Exporter:         &exporterMock,
-		FlushInterval:    0,
-		MaxEventInMemory: 0,
-	}, "id-consumer", &evStore, logger)
+			logFile, _ := os.CreateTemp("", "")
+			textHandler := slogutil.MessageOnlyHandler{Writer: logFile}
+			logger := &fflog.FFLogger{LeveledLogger: slog.New(&textHandler)}
+			defer func() { _ = os.Remove(logFile.Name()) }()
 
-	exp.Flush()
-	// flush should error and not return any event
-	assert.Equal(t, 0, len(exporterMock.GetExportedEvents()))
-	logContent, _ := os.ReadFile(logFile.Name())
-	assert.Equal(t, "trying to send unknown object to the exporter\n", string(logContent))
+			exporterMock := tt.exporter
+			exp := exporter.NewDataExporter[string](context.TODO(), exporter.Config{
+				Exporter:         exporterMock,
+				FlushInterval:    0,
+				MaxEventInMemory: 0,
+			}, "id-consumer", &evStore, logger)
+
+			exp.Flush()
+			// flush should error and not return any event
+			assert.Equal(t, 0, len(exporterMock.GetExportedEvents()))
+			logContent, _ := os.ReadFile(logFile.Name())
+			assert.Equal(t, tt.expectedLog, string(logContent))
+		})
+	}
+
 }
 
 func TestDataExporterFlush_TriggerErrorIfExporterFail(t *testing.T) {
