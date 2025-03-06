@@ -114,7 +114,7 @@ func (d *dataExporterImpl[T]) sendEvents(ctx context.Context, events []T) error 
 				return fmt.Errorf("error while exporting data: %w", err)
 			}
 		default:
-			return fmt.Errorf("this is not a valid exporter")
+			return fmt.Errorf("trying to send unknown object to the exporter (deprecated)")
 		}
 		break
 	case Exporter:
@@ -125,7 +125,7 @@ func (d *dataExporterImpl[T]) sendEvents(ctx context.Context, events []T) error 
 				return fmt.Errorf("error while exporting data: %w", err)
 			}
 		default:
-			return fmt.Errorf("this is not a valid exporter")
+			return fmt.Errorf("trying to send unknown object to the exporter")
 		}
 		break
 	default:
