@@ -41,16 +41,16 @@ func NewFeatureEvent(
 // FeatureEvent represent an Event that we store in the data storage
 // nolint:lll
 type FeatureEvent struct {
-	// Kind for a feature Event is feature.
-	// A feature Event will only be generated if the trackEvents attribute of the flag is set to true.
+	// Kind for a feature event is feature.
+	// A feature event will only be generated if the trackEvents attribute of the flag is set to true.
 	Kind string `json:"kind" example:"feature" parquet:"name=kind, type=BYTE_ARRAY, convertedtype=UTF8"`
 
-	// ContextKind is the kind of context which generated an Event. This will only be "anonymousUser" for events generated
+	// ContextKind is the kind of context which generated an event. This will only be "anonymousUser" for events generated
 	// on behalf of an anonymous user or the reserved word "user" for events generated on behalf of a non-anonymous user
 	ContextKind string `json:"contextKind,omitempty" example:"user" parquet:"name=contextKind, type=BYTE_ARRAY, convertedtype=UTF8"`
 
 	// UserKey The key of the user object used in a feature flag evaluation. Details for the user object used in a feature
-	// flag evaluation as reported by the "feature" Event are transmitted periodically with a separate index Event.
+	// flag evaluation as reported by the "feature" event are transmitted periodically with a separate index event.
 	UserKey string `json:"userKey" example:"94a25909-20d8-40cc-8500-fee99b569345" parquet:"name=userKey, type=BYTE_ARRAY, convertedtype=UTF8"`
 
 	// CreationDate When the feature flag was requested at Unix epoch time in milliseconds.
@@ -75,8 +75,8 @@ type FeatureEvent struct {
 	// the default version will be 0.
 	Version string `json:"version" example:"v1.0.0" parquet:"name=version, type=BYTE_ARRAY, convertedtype=UTF8"`
 
-	// Source indicates where the Event was generated.
-	// This is set to SERVER when the Event was evaluated in the relay-proxy and PROVIDER_CACHE when it is evaluated from the cache.
+	// Source indicates where the event was generated.
+	// This is set to SERVER when the event was evaluated in the relay-proxy and PROVIDER_CACHE when it is evaluated from the cache.
 	Source string `json:"source" example:"SERVER" parquet:"name=source, type=BYTE_ARRAY, convertedtype=UTF8"`
 
 	// Metadata are static information added in the providers to give context about the events generated.

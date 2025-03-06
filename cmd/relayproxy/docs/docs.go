@@ -627,7 +627,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "contextKind": {
-                    "description": "ContextKind is the kind of context which generated an Event. This will only be \"anonymousUser\" for events generated\non behalf of an anonymous user or the reserved word \"user\" for events generated on behalf of a non-anonymous user",
+                    "description": "ContextKind is the kind of context which generated an event. This will only be \"anonymousUser\" for events generated\non behalf of an anonymous user or the reserved word \"user\" for events generated on behalf of a non-anonymous user",
                     "type": "string",
                     "example": "user"
                 },
@@ -647,7 +647,7 @@ const docTemplate = `{
                     "example": "my-feature-flag"
                 },
                 "kind": {
-                    "description": "Kind for a feature Event is feature.\nA feature Event will only be generated if the trackEvents attribute of the flag is set to true.",
+                    "description": "Kind for a feature event is feature.\nA feature event will only be generated if the trackEvents attribute of the flag is set to true.",
                     "type": "string",
                     "example": "feature"
                 },
@@ -660,12 +660,12 @@ const docTemplate = `{
                     ]
                 },
                 "source": {
-                    "description": "Source indicates where the Event was generated.\nThis is set to SERVER when the Event was evaluated in the relay-proxy and PROVIDER_CACHE when it is evaluated from the cache.",
+                    "description": "Source indicates where the event was generated.\nThis is set to SERVER when the event was evaluated in the relay-proxy and PROVIDER_CACHE when it is evaluated from the cache.",
                     "type": "string",
                     "example": "SERVER"
                 },
                 "userKey": {
-                    "description": "UserKey The key of the user object used in a feature flag evaluation. Details for the user object used in a feature\nflag evaluation as reported by the \"feature\" Event are transmitted periodically with a separate index Event.",
+                    "description": "UserKey The key of the user object used in a feature flag evaluation. Details for the user object used in a feature\nflag evaluation as reported by the \"feature\" event are transmitted periodically with a separate index event.",
                     "type": "string",
                     "example": "94a25909-20d8-40cc-8500-fee99b569345"
                 },
