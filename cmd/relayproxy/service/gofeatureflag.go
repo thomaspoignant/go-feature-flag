@@ -73,7 +73,7 @@ func NewGoFeatureFlagClient(
 		}
 	}
 
-	var exp ffclient.DataExporter
+	var exp exporter.DataExporter
 	if proxyConf.Exporter != nil {
 		exp, err = initDataExporter(proxyConf.Exporter)
 		if err != nil {
@@ -200,8 +200,8 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 	}
 }
 
-func initDataExporter(c *config.ExporterConf) (ffclient.DataExporter, error) {
-	dataExp := ffclient.DataExporter{
+func initDataExporter(c *config.ExporterConf) (exporter.DataExporter, error) {
+	dataExp := exporter.DataExporter{
 		FlushInterval: func() time.Duration {
 			if c.FlushInterval != 0 {
 				return time.Duration(c.FlushInterval) * time.Millisecond
@@ -219,7 +219,7 @@ func initDataExporter(c *config.ExporterConf) (ffclient.DataExporter, error) {
 	var err error
 	dataExp.Exporter, err = createExporter(c)
 	if err != nil {
-		return ffclient.DataExporter{}, err
+		return exporter.DataExporter{}, err
 	}
 
 	return dataExp, nil

@@ -9,6 +9,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
+	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
@@ -61,7 +62,7 @@ func TestAllFlagsState(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			exportDir, _ := os.MkdirTemp("", "export")
-			tt.config.DataExporter = ffclient.DataExporter{
+			tt.config.DataExporter = exporter.DataExporter{
 				FlushInterval:    1000,
 				MaxEventInMemory: 1,
 				Exporter:         &fileexporter.Exporter{OutputDir: exportDir},
@@ -174,7 +175,7 @@ func TestGetFlagStates(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// init logger
 			exportDir, _ := os.MkdirTemp("", "export")
-			tt.config.DataExporter = ffclient.DataExporter{
+			tt.config.DataExporter = exporter.DataExporter{
 				FlushInterval:    1000,
 				MaxEventInMemory: 1,
 				Exporter:         &fileexporter.Exporter{OutputDir: exportDir},

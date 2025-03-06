@@ -17,6 +17,7 @@ import (
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/controller"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
+	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/logsexporter"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 )
@@ -97,7 +98,7 @@ func Test_all_flag_Handler(t *testing.T) {
 				Retriever: &fileretriever.Retriever{
 					Path: tt.args.configFlagsLocation,
 				},
-				DataExporter: ffclient.DataExporter{
+				DataExporter: exporter.DataExporter{
 					FlushInterval:    10 * time.Second,
 					MaxEventInMemory: 10000,
 					Exporter:         &logsexporter.Exporter{},

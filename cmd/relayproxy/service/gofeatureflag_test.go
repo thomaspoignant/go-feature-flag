@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/azureexporter"
@@ -245,7 +244,7 @@ func Test_initExporter(t *testing.T) {
 	tests := []struct {
 		name                   string
 		conf                   *config.ExporterConf
-		want                   ffclient.DataExporter
+		want                   exporter.DataExporter
 		wantErr                assert.ErrorAssertionFunc
 		wantType               exporter.CommonExporter
 		skipCompleteValidation bool
@@ -265,7 +264,7 @@ func Test_initExporter(t *testing.T) {
 				EndpointURL: "https://gofeatureflag.org/webhook-example",
 				Secret:      "1234",
 			},
-			want: ffclient.DataExporter{
+			want: exporter.DataExporter{
 				FlushInterval:    config.DefaultExporter.FlushInterval,
 				MaxEventInMemory: config.DefaultExporter.MaxEventInMemory,
 				Exporter: &webhookexporter.Exporter{
@@ -284,7 +283,7 @@ func Test_initExporter(t *testing.T) {
 				OutputDir:               "/outputfolder/",
 				ParquetCompressionCodec: parquet.CompressionCodec_UNCOMPRESSED.String(),
 			},
-			want: ffclient.DataExporter{
+			want: exporter.DataExporter{
 				FlushInterval:    config.DefaultExporter.FlushInterval,
 				MaxEventInMemory: config.DefaultExporter.MaxEventInMemory,
 				Exporter: &fileexporter.Exporter{
@@ -303,7 +302,7 @@ func Test_initExporter(t *testing.T) {
 			conf: &config.ExporterConf{
 				Kind: "log",
 			},
-			want: ffclient.DataExporter{
+			want: exporter.DataExporter{
 				FlushInterval:    config.DefaultExporter.FlushInterval,
 				MaxEventInMemory: config.DefaultExporter.MaxEventInMemory,
 				Exporter: &logsexporter.Exporter{
@@ -321,7 +320,7 @@ func Test_initExporter(t *testing.T) {
 				Path:          "/my-path/",
 				FlushInterval: 10,
 			},
-			want: ffclient.DataExporter{
+			want: exporter.DataExporter{
 				FlushInterval:    10 * time.Millisecond,
 				MaxEventInMemory: config.DefaultExporter.MaxEventInMemory,
 				Exporter: &s3exporterv2.Exporter{
@@ -344,7 +343,7 @@ func Test_initExporter(t *testing.T) {
 				QueueURL:      "https://sqs.eu-west-1.amazonaws.com/XXX/test-queue",
 				FlushInterval: 10,
 			},
-			want: ffclient.DataExporter{
+			want: exporter.DataExporter{
 				FlushInterval:    10 * time.Millisecond,
 				MaxEventInMemory: config.DefaultExporter.MaxEventInMemory,
 				Exporter: &sqsexporter.Exporter{
@@ -362,7 +361,7 @@ func Test_initExporter(t *testing.T) {
 				ProjectID: "fake-project-id",
 				Topic:     "fake-topic",
 			},
-			want: ffclient.DataExporter{
+			want: exporter.DataExporter{
 				Exporter: &pubsubexporter.Exporter{
 					ProjectID: "fake-project-id",
 					Topic:     "fake-topic",
@@ -380,7 +379,7 @@ func Test_initExporter(t *testing.T) {
 				Path:             "/my-path/",
 				MaxEventInMemory: 1990,
 			},
-			want: ffclient.DataExporter{
+			want: exporter.DataExporter{
 				FlushInterval:    config.DefaultExporter.FlushInterval,
 				MaxEventInMemory: 1990,
 				Exporter: &gcstorageexporter.Exporter{
@@ -405,7 +404,7 @@ func Test_initExporter(t *testing.T) {
 					Addresses: []string{"addr1", "addr2"},
 				},
 			},
-			want: ffclient.DataExporter{
+			want: exporter.DataExporter{
 				FlushInterval:    config.DefaultExporter.FlushInterval,
 				MaxEventInMemory: 1990,
 				Exporter: &kafkaexporter.Exporter{
@@ -425,7 +424,7 @@ func Test_initExporter(t *testing.T) {
 				Kind:       "kinesis",
 				StreamName: "my-stream",
 			},
-			want: ffclient.DataExporter{
+			want: exporter.DataExporter{
 				FlushInterval:    10 * time.Millisecond,
 				MaxEventInMemory: config.DefaultExporter.MaxEventInMemory,
 				Exporter: &kinesisexporter.Exporter{
@@ -447,7 +446,7 @@ func Test_initExporter(t *testing.T) {
 				Path:             "/my-path/",
 				MaxEventInMemory: 1990,
 			},
-			want: ffclient.DataExporter{
+			want: exporter.DataExporter{
 				FlushInterval:    config.DefaultExporter.FlushInterval,
 				MaxEventInMemory: 1990,
 				Exporter: &azureexporter.Exporter{

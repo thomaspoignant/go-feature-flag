@@ -328,11 +328,16 @@ func TestBoolVariation(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: exporter.NewScheduler(context.Background(), 0, 0,
-						&logsexporter.Exporter{
-							LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
-								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
-						}, &fflog.FFLogger{LeveledLogger: logger}),
+					dataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.DataExporter{
+						{
+							FlushInterval:    0,
+							MaxEventInMemory: 0,
+							Exporter: &logsexporter.Exporter{
+								LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+									"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+							},
+						},
+					}, &fflog.FFLogger{LeveledLogger: logger}),
 				}
 			}
 
@@ -728,11 +733,16 @@ func TestBoolVariationDetails(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: exporter.NewScheduler(context.Background(), 0, 0,
-						&logsexporter.Exporter{
-							LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
-								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
-						}, &fflog.FFLogger{LeveledLogger: logger}),
+					dataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.DataExporter{
+						{
+							FlushInterval:    0,
+							MaxEventInMemory: 0,
+							Exporter: &logsexporter.Exporter{
+								LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+									"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+							},
+						},
+					}, &fflog.FFLogger{LeveledLogger: logger}),
 				}
 			}
 
@@ -1037,11 +1047,16 @@ func TestFloat64Variation(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: exporter.NewScheduler(context.Background(), 0, 0,
-						&logsexporter.Exporter{
-							LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
-								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
-						}, &fflog.FFLogger{LeveledLogger: logger}),
+					dataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.DataExporter{
+						{
+							FlushInterval:    0,
+							MaxEventInMemory: 0,
+							Exporter: &logsexporter.Exporter{
+								LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+									"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+							},
+						},
+					}, &fflog.FFLogger{LeveledLogger: logger}),
 				}
 			}
 
@@ -1355,11 +1370,16 @@ func TestFloat64VariationDetails(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: exporter.NewScheduler(context.Background(), 0, 0,
-						&logsexporter.Exporter{
-							LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
-								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
-						}, &fflog.FFLogger{LeveledLogger: logger}),
+					dataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.DataExporter{
+						{
+							FlushInterval:    0,
+							MaxEventInMemory: 0,
+							Exporter: &logsexporter.Exporter{
+								LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+									"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+							},
+						},
+					}, &fflog.FFLogger{LeveledLogger: logger}),
 				}
 			}
 
@@ -1649,9 +1669,16 @@ func TestJSONArrayVariation(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: exporter.NewScheduler(context.Background(), 0, 0,
-						&logsexporter.Exporter{LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
-							"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\""}, &fflog.FFLogger{LeveledLogger: logger}),
+					dataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.DataExporter{
+						{
+							FlushInterval:    0,
+							MaxEventInMemory: 0,
+							Exporter: &logsexporter.Exporter{
+								LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+									"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+							},
+						},
+					}, &fflog.FFLogger{LeveledLogger: logger}),
 				}
 			}
 
@@ -1954,9 +1981,16 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: exporter.NewScheduler(context.Background(), 0, 0,
-						&logsexporter.Exporter{LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
-							"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\""}, &fflog.FFLogger{LeveledLogger: logger}),
+					dataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.DataExporter{
+						{
+							FlushInterval:    0,
+							MaxEventInMemory: 0,
+							Exporter: &logsexporter.Exporter{
+								LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+									"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+							},
+						},
+					}, &fflog.FFLogger{LeveledLogger: logger}),
 				}
 			}
 
@@ -2226,11 +2260,16 @@ func TestJSONVariation(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: exporter.NewScheduler(context.Background(), 0, 0,
-						&logsexporter.Exporter{
-							LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
-								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
-						}, &fflog.FFLogger{LeveledLogger: logger}),
+					dataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.DataExporter{
+						{
+							FlushInterval:    0,
+							MaxEventInMemory: 0,
+							Exporter: &logsexporter.Exporter{
+								LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+									"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+							},
+						},
+					}, &fflog.FFLogger{LeveledLogger: logger}),
 				}
 			}
 
@@ -2459,11 +2498,16 @@ func TestJSONVariationDetails(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: exporter.NewScheduler(context.Background(), 0, 0,
-						&logsexporter.Exporter{
-							LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
-								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
-						}, &fflog.FFLogger{LeveledLogger: logger}),
+					dataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.DataExporter{
+						{
+							FlushInterval:    0,
+							MaxEventInMemory: 0,
+							Exporter: &logsexporter.Exporter{
+								LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+									"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+							},
+						},
+					}, &fflog.FFLogger{LeveledLogger: logger}),
 				}
 			}
 
@@ -2736,11 +2780,16 @@ func TestStringVariation(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: exporter.NewScheduler(context.Background(), 0, 0,
-						&logsexporter.Exporter{
-							LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
-								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
-						}, &fflog.FFLogger{LeveledLogger: logger}),
+					dataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.DataExporter{
+						{
+							FlushInterval:    0,
+							MaxEventInMemory: 0,
+							Exporter: &logsexporter.Exporter{
+								LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+									"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+							},
+						},
+					}, &fflog.FFLogger{LeveledLogger: logger}),
 				}
 			}
 			got, err := StringVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
@@ -2968,11 +3017,16 @@ func TestStringVariationDetails(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: exporter.NewScheduler(context.Background(), 0, 0,
-						&logsexporter.Exporter{
-							LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
-								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
-						}, &fflog.FFLogger{LeveledLogger: logger}),
+					dataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.DataExporter{
+						{
+							FlushInterval:    0,
+							MaxEventInMemory: 0,
+							Exporter: &logsexporter.Exporter{
+								LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+									"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+							},
+						},
+					}, &fflog.FFLogger{LeveledLogger: logger}),
 				}
 			}
 			got, err := StringVariationDetails(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
@@ -3275,11 +3329,16 @@ func TestIntVariation(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: exporter.NewScheduler(context.Background(), 0, 0,
-						&logsexporter.Exporter{
-							LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
-								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
-						}, &fflog.FFLogger{LeveledLogger: logger}),
+					dataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.DataExporter{
+						{
+							FlushInterval:    0,
+							MaxEventInMemory: 0,
+							Exporter: &logsexporter.Exporter{
+								LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+									"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+							},
+						},
+					}, &fflog.FFLogger{LeveledLogger: logger}),
 				}
 			}
 			got, err := IntVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
@@ -3549,11 +3608,16 @@ func TestIntVariationDetails(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: exporter.NewScheduler(context.Background(), 0, 0,
-						&logsexporter.Exporter{
-							LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
-								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
-						}, &fflog.FFLogger{LeveledLogger: logger}),
+					dataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.DataExporter{
+						{
+							FlushInterval:    0,
+							MaxEventInMemory: 0,
+							Exporter: &logsexporter.Exporter{
+								LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+									"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+							},
+						},
+					}, &fflog.FFLogger{LeveledLogger: logger}),
 				}
 			}
 			got, err := IntVariationDetails(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
@@ -3917,11 +3981,16 @@ func TestRawVariation(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: exporter.NewScheduler(context.Background(), 0, 0,
-						&logsexporter.Exporter{
-							LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
-								"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
-						}, &fflog.FFLogger{LeveledLogger: logger}),
+					dataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.DataExporter{
+						{
+							FlushInterval:    0,
+							MaxEventInMemory: 0,
+							Exporter: &logsexporter.Exporter{
+								LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+									"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+							},
+						},
+					}, &fflog.FFLogger{LeveledLogger: logger}),
 				}
 			}
 

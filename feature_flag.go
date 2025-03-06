@@ -46,7 +46,7 @@ type GoFeatureFlag struct {
 	cache            cache.Manager
 	config           Config
 	bgUpdater        backgroundUpdater
-	dataExporter     *exporter.Scheduler
+	dataExporter     exporter.Manager[exporter.FeatureEvent]
 	retrieverManager *retriever.Manager
 }
 
@@ -124,8 +124,8 @@ func New(config Config) (*GoFeatureFlag, error) {
 
 		if goFF.config.DataExporter.Exporter != nil {
 			// init the data exporter
-			goFF.dataExporter = exporter.NewScheduler(goFF.config.Context, goFF.config.DataExporter.FlushInterval,
-				goFF.config.DataExporter.MaxEventInMemory, goFF.config.DataExporter.Exporter, goFF.config.internalLogger)
+			goFF.dataExporter =
+				exporter.NewManager[exporter.FeatureEvent](config.Context, []exporter.DataExporter{goFF.config.DataExporter}, goFF.config.internalLogger)
 
 			// we start the daemon only if we have a bulk exporter
 			if goFF.config.DataExporter.Exporter.IsBulk() {

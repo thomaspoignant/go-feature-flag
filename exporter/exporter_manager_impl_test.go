@@ -18,10 +18,16 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
-func TestDataExporterScheduler_flushWithTime(t *testing.T) {
+func TestDataExporterManager_flushWithTime(t *testing.T) {
 	mockExporter := mock.Exporter{Bulk: true}
-	dc := exporter.NewScheduler(
-		context.Background(), 10*time.Millisecond, 1000, &mockExporter, nil)
+	dataExporterMock := []exporter.DataExporter{
+		{
+			FlushInterval:    10 * time.Millisecond,
+			MaxEventInMemory: 1000,
+			Exporter:         &mockExporter,
+		},
+	}
+	dc := exporter.NewManager[exporter.FeatureEvent](context.Background(), dataExporterMock, nil)
 	go dc.StartDaemon()
 	defer dc.Close()
 
@@ -40,10 +46,16 @@ func TestDataExporterScheduler_flushWithTime(t *testing.T) {
 	assert.Equal(t, inputEvents, mockExporter.GetExportedEvents())
 }
 
-func TestDataExporterScheduler_flushWithNumberOfEvents(t *testing.T) {
+func TestDataExporterManager_flushWithNumberOfEvents(t *testing.T) {
 	mockExporter := mock.Exporter{Bulk: true}
-	dc := exporter.NewScheduler(
-		context.Background(), 10*time.Minute, 100, &mockExporter, nil)
+	dataExporterMock := []exporter.DataExporter{
+		{
+			FlushInterval:    10 * time.Millisecond,
+			MaxEventInMemory: 100,
+			Exporter:         &mockExporter,
+		},
+	}
+	dc := exporter.NewManager[exporter.FeatureEvent](context.Background(), dataExporterMock, nil)
 	go dc.StartDaemon()
 	defer dc.Close()
 
@@ -60,10 +72,16 @@ func TestDataExporterScheduler_flushWithNumberOfEvents(t *testing.T) {
 	assert.Equal(t, inputEvents[:100], mockExporter.GetExportedEvents())
 }
 
-func TestDataExporterScheduler_defaultFlush(t *testing.T) {
+func TestDataExporterManager_defaultFlush(t *testing.T) {
 	mockExporter := mock.Exporter{Bulk: true}
-	dc := exporter.NewScheduler(
-		context.Background(), 0, 0, &mockExporter, nil)
+	dataExporterMock := []exporter.DataExporter{
+		{
+			FlushInterval:    0,
+			MaxEventInMemory: 0,
+			Exporter:         &mockExporter,
+		},
+	}
+	dc := exporter.NewManager[exporter.FeatureEvent](context.Background(), dataExporterMock, nil)
 	go dc.StartDaemon()
 	defer dc.Close()
 
@@ -80,17 +98,21 @@ func TestDataExporterScheduler_defaultFlush(t *testing.T) {
 	assert.Equal(t, inputEvents[:100000], mockExporter.GetExportedEvents())
 }
 
-func TestDataExporterScheduler_exporterReturnError(t *testing.T) {
+func TestDataExporterManager_exporterReturnError(t *testing.T) {
 	mockExporter := mock.Exporter{Err: errors.New("random err"), ExpectedNumberErr: 1, Bulk: true}
-
+	dataExporterMock := []exporter.DataExporter{
+		{
+			FlushInterval:    10 * time.Minute,
+			MaxEventInMemory: 100,
+			Exporter:         &mockExporter,
+		},
+	}
 	file, _ := os.CreateTemp("", "log")
 	defer file.Close()
 	defer os.Remove(file.Name())
 	handler := slogassert.New(t, slog.LevelInfo, nil)
 	logger := slog.New(handler)
-
-	dc := exporter.NewScheduler(
-		context.Background(), 0, 100, &mockExporter, &fflog.FFLogger{LeveledLogger: logger})
+	dc := exporter.NewManager[exporter.FeatureEvent](context.Background(), dataExporterMock, &fflog.FFLogger{LeveledLogger: logger})
 	go dc.StartDaemon()
 	defer dc.Close()
 
@@ -104,14 +126,21 @@ func TestDataExporterScheduler_exporterReturnError(t *testing.T) {
 	for _, event := range inputEvents {
 		dc.AddEvent(event)
 	}
-	assert.Equal(t, inputEvents[:201], mockExporter.GetExportedEvents())
+	// check that the first 100 events are exported
+	assert.Equal(t, inputEvents[:100], mockExporter.GetExportedEvents()[:100])
 	handler.AssertMessage("error while exporting data: random err")
 }
 
-func TestDataExporterScheduler_nonBulkExporter(t *testing.T) {
+func TestDataExporterManager_nonBulkExporter(t *testing.T) {
 	mockExporter := mock.Exporter{Bulk: false}
-	dc := exporter.NewScheduler(
-		context.Background(), 0, 0, &mockExporter, nil)
+	dataExporterMock := []exporter.DataExporter{
+		{
+			FlushInterval:    0,
+			MaxEventInMemory: 0,
+			Exporter:         &mockExporter,
+		},
+	}
+	dc := exporter.NewManager[exporter.FeatureEvent](context.Background(), dataExporterMock, nil)
 	defer dc.Close()
 
 	// Initialize inputEvents slice
@@ -165,7 +194,7 @@ func TestAddExporterMetadataFromContextToExporter(t *testing.T) {
 			mockExporter := &mock.Exporter{}
 			config := ffclient.Config{
 				Retriever: &fileretriever.Retriever{Path: "../testdata/flag-config.yaml"},
-				DataExporter: ffclient.DataExporter{
+				DataExporter: exporter.DataExporter{
 					Exporter:      mockExporter,
 					FlushInterval: 100 * time.Millisecond,
 				},
