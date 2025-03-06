@@ -82,8 +82,7 @@ func Test_MultipleConsumersSingleThread(t *testing.T) {
 	// start producer
 	ctx, cancelProducer1 := context.WithCancel(context.Background())
 	defer cancelProducer1()
-	go startEventProducer(ctx, eventStore, 1000, false)
-	time.Sleep(100 * time.Millisecond)
+	startEventProducer(ctx, eventStore, 1000, false)
 	cancelProducer1()
 	assert.Equal(t, int64(1000), eventStore.GetTotalEventCount())
 
@@ -100,8 +99,7 @@ func Test_MultipleConsumersSingleThread(t *testing.T) {
 	// Produce a second time
 	ctx, cancelProducer2 := context.WithCancel(context.Background())
 	defer cancelProducer2()
-	go startEventProducer(ctx, eventStore, 1000, false)
-	time.Sleep(100 * time.Millisecond)
+	startEventProducer(ctx, eventStore, 1000, false)
 	cancelProducer2()
 
 	// Check queue size
