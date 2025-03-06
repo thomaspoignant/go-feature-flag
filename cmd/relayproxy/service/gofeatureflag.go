@@ -73,11 +73,21 @@ func NewGoFeatureFlagClient(
 		}
 	}
 
-	var exp ffclient.DataExporter
+	exporters := make([]ffclient.DataExporter, 0)
 	if proxyConf.Exporter != nil {
-		exp, err = initDataExporter(proxyConf.Exporter)
+		exp, err := initDataExporter(proxyConf.Exporter)
 		if err != nil {
 			return nil, err
+		}
+		exporters = append(exporters, exp)
+	}
+	if proxyConf.Exporters != nil {
+		for _, e := range *proxyConf.Exporters {
+			currentExporter, err := initDataExporter(&e)
+			if err != nil {
+				return nil, err
+			}
+			exporters = append(exporters, currentExporter)
 		}
 	}
 
@@ -95,7 +105,7 @@ func NewGoFeatureFlagClient(
 		Retrievers:                      retrievers,
 		Notifiers:                       notif,
 		FileFormat:                      proxyConf.FileFormat,
-		DataExporter:                    exp,
+		DataExporters:                   exporters,
 		StartWithRetrieverError:         proxyConf.StartWithRetrieverError,
 		EnablePollingJitter:             proxyConf.EnablePollingJitter,
 		DisableNotifierOnInit:           proxyConf.DisableNotifierOnInit,
