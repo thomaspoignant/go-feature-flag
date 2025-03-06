@@ -15,7 +15,9 @@ func NewEventStore[T any]() exporter.EventStore[T] {
 	return store
 }
 
-func (e *implMockEventStore[T]) AddConsumer(_ string) {}
+func (e *implMockEventStore[T]) AddConsumer(_ string) {
+	// nothing to do
+}
 
 func (e *implMockEventStore[T]) Add(data T) {
 	e.store = append(e.store, data)
@@ -50,4 +52,6 @@ func (e *implMockEventStore[T]) UpdateConsumerOffset(consumerName string, offset
 	return nil
 }
 
-func (e *implMockEventStore[T]) Stop() {}
+func (e *implMockEventStore[T]) Stop() {
+	// nothing to do
+}

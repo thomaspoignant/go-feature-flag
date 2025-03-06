@@ -122,15 +122,19 @@ func New(config Config) (*GoFeatureFlag, error) {
 
 		go goFF.startFlagUpdaterDaemon()
 
-		if goFF.config.DataExporter.Exporter != nil {
+		exporters := goFF.config.GetDataExporters()
+		if len(exporters) > 0 {
 			// init the data exporter
-			c := exporter.Config{
-				Exporter:         goFF.config.DataExporter.Exporter,
-				FlushInterval:    goFF.config.DataExporter.FlushInterval,
-				MaxEventInMemory: goFF.config.DataExporter.MaxEventInMemory,
+			expConfigs := make([]exporter.Config, len(exporters))
+			for index, exp := range exporters {
+				expConfigs[index] = exporter.Config{
+					Exporter:         exp.Exporter,
+					FlushInterval:    exp.FlushInterval,
+					MaxEventInMemory: exp.MaxEventInMemory,
+				}
 			}
 			goFF.dataExporter =
-				exporter.NewManager[exporter.FeatureEvent](config.Context, []exporter.Config{c}, goFF.config.internalLogger)
+				exporter.NewManager[exporter.FeatureEvent](config.Context, expConfigs, goFF.config.internalLogger)
 
 			// we start the daemon only if we have a bulk exporter
 			if goFF.config.DataExporter.Exporter.IsBulk() {
