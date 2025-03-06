@@ -19,83 +19,132 @@ import (
 )
 
 func TestDataExporterManager_flushWithTime(t *testing.T) {
-	mockExporter := mock.Exporter{Bulk: true}
-	dataExporterMock := []exporter.Config{
+	tests := []struct {
+		name         string
+		mockExporter mock.ExporterMock
+	}{
 		{
-			FlushInterval:    10 * time.Millisecond,
-			MaxEventInMemory: 1000,
-			Exporter:         &mockExporter,
+			name:         "flushTime: classic exporter",
+			mockExporter: &mock.Exporter{Bulk: true},
+		},
+		{
+			name:         "flushTime: deprecated exporter",
+			mockExporter: &mock.ExporterDeprecated{Bulk: true},
 		},
 	}
-	dc := exporter.NewManager[exporter.FeatureEvent](context.Background(), dataExporterMock, nil)
-	go dc.StartDaemon()
-	defer dc.Close()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dataExporterMock := []exporter.Config{
+				{
+					FlushInterval:    10 * time.Millisecond,
+					MaxEventInMemory: 1000,
+					Exporter:         tt.mockExporter,
+				},
+			}
+			dc := exporter.NewManager[exporter.FeatureEvent](context.Background(), dataExporterMock, nil)
+			go dc.StartDaemon()
+			defer dc.Close()
 
-	// Initialize inputEvents slice
-	inputEvents := []exporter.FeatureEvent{
-		exporter.NewFeatureEvent(
-			ffcontext.NewEvaluationContextBuilder("ABCD").AddCustom("anonymous", true).Build(), "random-key",
-			"YO", "defaultVar", false, "", "SERVER", nil),
+			// Initialize inputEvents slice
+			inputEvents := []exporter.FeatureEvent{
+				exporter.NewFeatureEvent(
+					ffcontext.NewEvaluationContextBuilder("ABCD").AddCustom("anonymous", true).Build(), "random-key",
+					"YO", "defaultVar", false, "", "SERVER", nil),
+			}
+
+			for _, event := range inputEvents {
+				dc.AddEvent(event)
+			}
+
+			time.Sleep(500 * time.Millisecond)
+			assert.Equal(t, inputEvents, tt.mockExporter.GetExportedEvents())
+		})
 	}
-
-	for _, event := range inputEvents {
-		dc.AddEvent(event)
-	}
-
-	time.Sleep(500 * time.Millisecond)
-	assert.Equal(t, inputEvents, mockExporter.GetExportedEvents())
 }
 
 func TestDataExporterManager_flushWithNumberOfEvents(t *testing.T) {
-	mockExporter := mock.Exporter{Bulk: true}
-	dataExporterMock := []exporter.Config{
+	tests := []struct {
+		name         string
+		mockExporter mock.ExporterMock
+	}{
 		{
-			FlushInterval:    10 * time.Millisecond,
-			MaxEventInMemory: 100,
-			Exporter:         &mockExporter,
+			name:         "flushWithNumberOfEvents: classic exporter",
+			mockExporter: &mock.Exporter{Bulk: true},
+		},
+		{
+			name:         "flushWithNumberOfEvents: deprecated exporter",
+			mockExporter: &mock.ExporterDeprecated{Bulk: true},
 		},
 	}
-	dc := exporter.NewManager[exporter.FeatureEvent](context.Background(), dataExporterMock, nil)
-	go dc.StartDaemon()
-	defer dc.Close()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dataExporterMock := []exporter.Config{
+				{
+					FlushInterval:    10 * time.Millisecond,
+					MaxEventInMemory: 100,
+					Exporter:         tt.mockExporter,
+				},
+			}
+			dc := exporter.NewManager[exporter.FeatureEvent](context.Background(), dataExporterMock, nil)
+			go dc.StartDaemon()
+			defer dc.Close()
 
-	// Initialize inputEvents slice
-	var inputEvents []exporter.FeatureEvent
-	for i := 0; i <= 100; i++ {
-		inputEvents = append(inputEvents, exporter.NewFeatureEvent(
-			ffcontext.NewEvaluationContextBuilder("ABCD").AddCustom("anonymous", true).Build(),
-			"random-key", "YO", "defaultVar", false, "", "SERVER", nil))
+			// Initialize inputEvents slice
+			var inputEvents []exporter.FeatureEvent
+			for i := 0; i <= 100; i++ {
+				inputEvents = append(inputEvents, exporter.NewFeatureEvent(
+					ffcontext.NewEvaluationContextBuilder("ABCD").AddCustom("anonymous", true).Build(),
+					"random-key", "YO", "defaultVar", false, "", "SERVER", nil))
+			}
+			for _, event := range inputEvents {
+				dc.AddEvent(event)
+			}
+			assert.Equal(t, inputEvents[:100], tt.mockExporter.GetExportedEvents())
+		})
 	}
-	for _, event := range inputEvents {
-		dc.AddEvent(event)
-	}
-	assert.Equal(t, inputEvents[:100], mockExporter.GetExportedEvents())
 }
 
 func TestDataExporterManager_defaultFlush(t *testing.T) {
-	mockExporter := mock.Exporter{Bulk: true}
-	dataExporterMock := []exporter.Config{
+	tests := []struct {
+		name         string
+		mockExporter mock.ExporterMock
+	}{
 		{
-			FlushInterval:    0,
-			MaxEventInMemory: 0,
-			Exporter:         &mockExporter,
+			name:         "classic exporter",
+			mockExporter: &mock.Exporter{Bulk: true},
+		},
+		{
+			name:         "deprecated exporter",
+			mockExporter: &mock.ExporterDeprecated{Bulk: true},
 		},
 	}
-	dc := exporter.NewManager[exporter.FeatureEvent](context.Background(), dataExporterMock, nil)
-	go dc.StartDaemon()
-	defer dc.Close()
 
-	// Initialize inputEvents slice
-	var inputEvents []exporter.FeatureEvent
-	for i := 0; i <= 100000; i++ {
-		inputEvents = append(inputEvents, exporter.NewFeatureEvent(
-			ffcontext.NewEvaluationContextBuilder("ABCD").AddCustom("anonymous", true).Build(),
-			"random-key", "YO", "defaultVar", false, "", "SERVER", nil))
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dataExporterMock := []exporter.Config{
+				{
+					FlushInterval:    0,
+					MaxEventInMemory: 0,
+					Exporter:         tt.mockExporter,
+				},
+			}
+			dc := exporter.NewManager[exporter.FeatureEvent](context.Background(), dataExporterMock, nil)
+			go dc.StartDaemon()
+			defer dc.Close()
+
+			// Initialize inputEvents slice
+			var inputEvents []exporter.FeatureEvent
+			for i := 0; i <= 100000; i++ {
+				inputEvents = append(inputEvents, exporter.NewFeatureEvent(
+					ffcontext.NewEvaluationContextBuilder("ABCD").AddCustom("anonymous", true).Build(),
+					"random-key", "YO", "defaultVar", false, "", "SERVER", nil))
+			}
+			for _, event := range inputEvents {
+				dc.AddEvent(event)
+			}
+			assert.Equal(t, inputEvents[:100000], tt.mockExporter.GetExportedEvents())
+		})
 	}
-	for _, event := range inputEvents {
-		dc.AddEvent(event)
-	}
-	assert.Equal(t, inputEvents[:100000], mockExporter.GetExportedEvents())
 }
 
 func TestDataExporterManager_exporterReturnError(t *testing.T) {
