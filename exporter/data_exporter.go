@@ -111,7 +111,7 @@ func (d *dataExporterImpl[T]) sendEvents(ctx context.Context, events []T) error 
 				"Please update your custom exporter to comply to the new Exporter interface.",
 				slog.Any("err", err))
 			if err != nil {
-				return fmt.Errorf("error while exporting data: %w", err)
+				return fmt.Errorf("error while exporting data (deprecated): %w", err)
 			}
 		default:
 			return fmt.Errorf("trying to send unknown object to the exporter (deprecated)")

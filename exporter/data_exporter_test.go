@@ -115,26 +115,48 @@ func TestDataExporterFlush_TriggerErrorIfNotKnowType(t *testing.T) {
 }
 
 func TestDataExporterFlush_TriggerErrorIfExporterFail(t *testing.T) {
-	evStore := mock.NewEventStore[exporter.FeatureEvent]()
-	for i := 0; i < 100; i++ {
-		evStore.Add(exporter.FeatureEvent{Kind: "feature"})
+	tests := []struct {
+		name        string
+		exporter    mock.ExporterMock
+		expectedLog string
+	}{
+		{
+			name:        "classic exporter",
+			exporter:    &mock.Exporter{Err: fmt.Errorf("error"), ExpectedNumberErr: 1},
+			expectedLog: "error while exporting data: error\n",
+		},
+		{
+			name:        "deprecated exporter",
+			exporter:    &mock.ExporterDeprecated{Err: fmt.Errorf("error"), ExpectedNumberErr: 1},
+			expectedLog: "error while exporting data (deprecated): error\n",
+		},
 	}
 
-	logFile, _ := os.CreateTemp("", "")
-	textHandler := slogutil.MessageOnlyHandler{Writer: logFile}
-	logger := &fflog.FFLogger{LeveledLogger: slog.New(&textHandler)}
-	defer func() { _ = os.Remove(logFile.Name()) }()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			evStore := mock.NewEventStore[exporter.FeatureEvent]()
+			for i := 0; i < 100; i++ {
+				evStore.Add(exporter.FeatureEvent{Kind: "feature"})
+			}
 
-	exporterMock := mock.Exporter{Err: fmt.Errorf("error"), ExpectedNumberErr: 1}
-	exp := exporter.NewDataExporter[exporter.FeatureEvent](context.TODO(), exporter.Config{
-		Exporter:         &exporterMock,
-		FlushInterval:    0,
-		MaxEventInMemory: 0,
-	}, "id-consumer", &evStore, logger)
+			logFile, _ := os.CreateTemp("", "")
+			textHandler := slogutil.MessageOnlyHandler{Writer: logFile}
+			logger := &fflog.FFLogger{LeveledLogger: slog.New(&textHandler)}
+			defer func() { _ = os.Remove(logFile.Name()) }()
 
-	exp.Flush()
-	// flush should error and not return any event
-	assert.Equal(t, 100, len(exporterMock.GetExportedEvents()))
-	logContent, _ := os.ReadFile(logFile.Name())
-	assert.Equal(t, "error while exporting data: error\n", string(logContent))
+			exporterMock := tt.exporter
+			exp := exporter.NewDataExporter[exporter.FeatureEvent](context.TODO(), exporter.Config{
+				Exporter:         exporterMock,
+				FlushInterval:    0,
+				MaxEventInMemory: 0,
+			}, "id-consumer", &evStore, logger)
+
+			exp.Flush()
+			// flush should error and not return any event
+			assert.Equal(t, 100, len(exporterMock.GetExportedEvents()))
+			logContent, _ := os.ReadFile(logFile.Name())
+			assert.Equal(t, tt.expectedLog, string(logContent))
+		})
+	}
+
 }
