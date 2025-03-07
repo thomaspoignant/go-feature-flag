@@ -12,7 +12,7 @@ const minOffset = int64(math.MinInt64)
 
 type eventStoreImpl[T ExportableEvent] struct {
 	// events is a list of events to store
-	events []Event[T]
+	events []EventStoreItem[T]
 	// mutex to protect the events and consumers
 	mutex sync.RWMutex
 	// consumers is a map of consumers with their name as key
@@ -27,7 +27,7 @@ type eventStoreImpl[T ExportableEvent] struct {
 
 func NewEventStore[T ExportableEvent](cleanQueueInterval time.Duration) EventStore[T] {
 	store := &eventStoreImpl[T]{
-		events:               make([]Event[T], 0),
+		events:               make([]EventStoreItem[T], 0),
 		mutex:                sync.RWMutex{},
 		lastOffset:           minOffset,
 		stopPeriodicCleaning: make(chan struct{}),
@@ -68,7 +68,7 @@ type EventStore[T ExportableEvent] interface {
 	Stop()
 }
 
-type Event[T ExportableEvent] struct {
+type EventStoreItem[T ExportableEvent] struct {
 	Offset int64
 	Data   T
 }
@@ -128,7 +128,7 @@ func (e *eventStoreImpl[T]) Add(data T) {
 	e.mutex.Lock()
 	defer e.mutex.Unlock()
 	e.lastOffset++
-	e.events = append(e.events, Event[T]{Offset: e.lastOffset, Data: data})
+	e.events = append(e.events, EventStoreItem[T]{Offset: e.lastOffset, Data: data})
 }
 
 // fetchPendingEvents is returning all the available item in the Event store for this consumer.

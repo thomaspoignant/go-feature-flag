@@ -53,7 +53,7 @@ type Exporter struct {
 }
 
 // Export is saving a collection of events in a file.
-func (f *Exporter) Export(_ context.Context, _ *fflog.FFLogger, featureEvents []exporter.FeatureEvent) error {
+func (f *Exporter) Export(_ context.Context, _ *fflog.FFLogger, events []exporter.ExportableEvent) error {
 	// Parse the template only once
 	f.initTemplates.Do(func() {
 		f.csvTemplate = exporter.ParseTemplate("csvFormat", f.CsvTemplate, exporter.DefaultCsvTemplate)
@@ -86,9 +86,9 @@ func (f *Exporter) Export(_ context.Context, _ *fflog.FFLogger, featureEvents []
 	}
 
 	if f.Format == "parquet" {
-		return f.writeParquet(filePath, featureEvents)
+		return f.writeParquet(filePath, events)
 	}
-	return f.writeFile(filePath, featureEvents)
+	return f.writeFile(filePath, events)
 }
 
 // IsBulk return false if we should directly send the data as soon as it is produce
@@ -97,24 +97,24 @@ func (f *Exporter) IsBulk() bool {
 	return true
 }
 
-func (f *Exporter) writeFile(filePath string, featureEvents []exporter.FeatureEvent) error {
+func (f *Exporter) writeFile(filePath string, events []exporter.ExportableEvent) error {
 	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
-	for _, event := range featureEvents {
+	for _, event := range events {
 		var line []byte
 		var err error
 
 		// Convert the line in the right format
 		switch f.Format {
 		case "csv":
-			line, err = exporter.FormatEventInCSV(f.csvTemplate, event)
+			line, err = event.FormatInCSV(f.csvTemplate)
 		case "json":
-			line, err = exporter.FormatEventInJSON(event)
+			line, err = event.FormatInJSON()
 		default:
-			line, err = exporter.FormatEventInJSON(event)
+			line, err = event.FormatInJSON()
 		}
 
 		// Handle error and write line into the file
@@ -129,7 +129,24 @@ func (f *Exporter) writeFile(filePath string, featureEvents []exporter.FeatureEv
 	return nil
 }
 
-func (f *Exporter) writeParquet(filePath string, featureEvents []exporter.FeatureEvent) error {
+func (f *Exporter) writeParquet(filePath string, events []exporter.ExportableEvent) error {
+	parquetFeatureEvents := make([]exporter.FeatureEvent, 0)
+	for _, event := range events {
+		switch ev := any(event).(type) {
+		case exporter.FeatureEvent:
+			parquetFeatureEvents = append(parquetFeatureEvents, ev)
+			break
+		default:
+			// do nothing
+		}
+	}
+
+	// TODO: create same logic for TrackingEvents
+
+	return f.writeParquetFeatureEvent(filePath, parquetFeatureEvents)
+}
+
+func (f *Exporter) writeParquetFeatureEvent(filePath string, events []exporter.FeatureEvent) error {
 	fw, err := local.NewLocalFileWriter(filePath)
 	if err != nil {
 		return err
@@ -146,10 +163,12 @@ func (f *Exporter) writeParquet(filePath string, featureEvents []exporter.Featur
 		pw.CompressionType = ct
 	}
 
-	for _, event := range featureEvents {
-		if err := event.MarshalInterface(); err != nil {
+	for _, event := range events {
+		eventValue, err := event.ConvertValueForParquet()
+		if err != nil {
 			return err
 		}
+		event.Value = eventValue
 		if err = pw.Write(event); err != nil {
 			return fmt.Errorf("error while writing the export file: %v", err)
 		}

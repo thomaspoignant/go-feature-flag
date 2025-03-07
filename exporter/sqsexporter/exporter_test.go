@@ -32,7 +32,7 @@ func (s *SQSSendMessageAPIMock) SendMessage(ctx context.Context,
 
 func TestSQS_IsBulk(t *testing.T) {
 	exporter := Exporter{}
-	assert.False(t, exporter.IsBulk(), "DeprecatedExporter is not a bulk exporter")
+	assert.False(t, exporter.IsBulk(), "DeprecatedExporterV1 is not a bulk exporter")
 }
 
 func TestExporter_Export(t *testing.T) {
@@ -42,10 +42,10 @@ func TestExporter_Export(t *testing.T) {
 		sqsService SQSSendMessageAPIMock
 	}
 	tests := []struct {
-		name          string
-		fields        fields
-		featureEvents []exporter.FeatureEvent
-		wantErr       bool
+		name    string
+		fields  fields
+		events  []exporter.ExportableEvent
+		wantErr bool
 	}{
 		{
 			name: "should return an error if no QueueURL provided",
@@ -54,8 +54,8 @@ func TestExporter_Export(t *testing.T) {
 				sqsService: SQSSendMessageAPIMock{},
 			},
 			wantErr: true,
-			featureEvents: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false,
 				},
@@ -68,12 +68,12 @@ func TestExporter_Export(t *testing.T) {
 				sqsService: SQSSendMessageAPIMock{},
 			},
 			wantErr: false,
-			featureEvents: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false,
 				},
-				{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCDEF", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false,
 				},
@@ -86,12 +86,12 @@ func TestExporter_Export(t *testing.T) {
 				sqsService: SQSSendMessageAPIMock{},
 			},
 			wantErr: true,
-			featureEvents: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false,
 				},
-				{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCDEF", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false,
 				},
@@ -107,15 +107,15 @@ func TestExporter_Export(t *testing.T) {
 			}
 
 			logger := &fflog.FFLogger{LeveledLogger: slog.Default()}
-			err := f.Export(context.TODO(), logger, tt.featureEvents)
+			err := f.Export(context.TODO(), logger, tt.events)
 			if tt.wantErr {
 				assert.Error(t, err)
 				return
 			}
 
 			assert.NoError(t, err)
-			want := make([]sqs.SendMessageInput, len(tt.featureEvents))
-			for index, event := range tt.featureEvents {
+			want := make([]sqs.SendMessageInput, len(tt.events))
+			for index, event := range tt.events {
 				messageBody, _ := json.Marshal(event)
 				want[index] = sqs.SendMessageInput{
 					MessageBody:  aws.String(string(messageBody)),

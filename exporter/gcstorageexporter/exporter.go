@@ -54,7 +54,7 @@ func (f *Exporter) IsBulk() bool {
 }
 
 // Export is saving a collection of events in a file.
-func (f *Exporter) Export(ctx context.Context, logger *fflog.FFLogger, featureEvents []exporter.FeatureEvent) error {
+func (f *Exporter) Export(ctx context.Context, logger *fflog.FFLogger, events []exporter.ExportableEvent) error {
 	// Init google storage client
 	client, err := storage.NewClient(ctx, f.Options...)
 	if err != nil {
@@ -81,7 +81,7 @@ func (f *Exporter) Export(ctx context.Context, logger *fflog.FFLogger, featureEv
 		CsvTemplate:             f.CsvTemplate,
 		ParquetCompressionCodec: f.ParquetCompressionCodec,
 	}
-	err = fileExporter.Export(ctx, logger, featureEvents)
+	err = fileExporter.Export(ctx, logger, events)
 	if err != nil {
 		return err
 	}

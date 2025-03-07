@@ -82,7 +82,7 @@ func (f *Exporter) initializeUploader(ctx context.Context) error {
 }
 
 // Export is saving a collection of events in a file.
-func (f *Exporter) Export(ctx context.Context, logger *fflog.FFLogger, featureEvents []exporter.FeatureEvent) error {
+func (f *Exporter) Export(ctx context.Context, logger *fflog.FFLogger, events []exporter.ExportableEvent) error {
 	if ctx == nil {
 		ctx = context.Background()
 	}
@@ -101,7 +101,7 @@ func (f *Exporter) Export(ctx context.Context, logger *fflog.FFLogger, featureEv
 	defer func() { _ = os.Remove(outputDir) }()
 
 	// We call the File data exporter to get the file in the right format.
-	// Files will be put in the temp directory, so we will be able to upload them to DeprecatedExporter from there.
+	// Files will be put in the temp directory, so we will be able to upload them to export from there.
 	fileExporter := fileexporter.Exporter{
 		Format:                  f.Format,
 		OutputDir:               outputDir,
@@ -109,12 +109,12 @@ func (f *Exporter) Export(ctx context.Context, logger *fflog.FFLogger, featureEv
 		CsvTemplate:             f.CsvTemplate,
 		ParquetCompressionCodec: f.ParquetCompressionCodec,
 	}
-	err = fileExporter.Export(ctx, logger, featureEvents)
+	err = fileExporter.Export(ctx, logger, events)
 	if err != nil {
 		return err
 	}
 
-	// Upload all the files in the folder to DeprecatedExporter
+	// Upload all the files in the folder to export
 	files, err := os.ReadDir(outputDir)
 	if err != nil {
 		return err

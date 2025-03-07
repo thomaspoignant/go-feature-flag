@@ -135,14 +135,14 @@ func (d *dataExporterImpl[T]) sendEvents(ctx context.Context, events []T) error 
 		return nil
 	}
 	switch exp := d.exporter.Exporter.(type) {
-	case DeprecatedExporter:
+	case DeprecatedExporterV1:
 		var legacyLogger *log.Logger
 		if d.logger != nil {
 			legacyLogger = d.logger.GetLogLogger(slog.LevelError)
 		}
 		switch events := any(events).(type) {
 		case []FeatureEvent:
-			// use dc exporter as a DeprecatedExporter
+			// use dc exporter as a DeprecatedExporterV1
 			err := exp.Export(ctx, legacyLogger, events)
 			slog.Warn("You are using an exporter with the old logger."+
 				"Please update your custom exporter to comply to the new Exporter interface.",
@@ -154,7 +154,7 @@ func (d *dataExporterImpl[T]) sendEvents(ctx context.Context, events []T) error 
 			return fmt.Errorf("trying to send unknown object to the exporter (deprecated)")
 		}
 		break
-	case Exporter:
+	case DeprecatedExporterV2:
 		switch events := any(events).(type) {
 		case []FeatureEvent:
 			err := exp.Export(ctx, d.logger, events)
@@ -163,6 +163,16 @@ func (d *dataExporterImpl[T]) sendEvents(ctx context.Context, events []T) error 
 			}
 		default:
 			return fmt.Errorf("trying to send unknown object to the exporter")
+		}
+		break
+	case Exporter:
+		exportableEvents := make([]ExportableEvent, len(events))
+		for i, event := range events {
+			exportableEvents[i] = ExportableEvent(event)
+		}
+		err := exp.Export(ctx, d.logger, exportableEvents)
+		if err != nil {
+			return fmt.Errorf("error while exporting data: %w", err)
 		}
 		break
 	default:

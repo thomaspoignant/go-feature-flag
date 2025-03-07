@@ -31,7 +31,7 @@ func TestGoogleStorage_Export(t *testing.T) {
 	tests := []struct {
 		name         string
 		fields       fields
-		events       []exporter.FeatureEvent
+		events       []exporter.ExportableEvent
 		wantErr      bool
 		expectedName string
 	}{
@@ -40,8 +40,8 @@ func TestGoogleStorage_Export(t *testing.T) {
 			fields: fields{
 				Bucket: "test",
 			},
-			events: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false,
 				},
@@ -54,8 +54,8 @@ func TestGoogleStorage_Export(t *testing.T) {
 				Path:   "random/path",
 				Bucket: "test",
 			},
-			events: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false,
 				},
@@ -68,8 +68,8 @@ func TestGoogleStorage_Export(t *testing.T) {
 				Format: "csv",
 				Bucket: "test",
 			},
-			events: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false,
 				},
@@ -83,8 +83,8 @@ func TestGoogleStorage_Export(t *testing.T) {
 				CsvTemplate: "{{ .Kind}};{{ .ContextKind}}\n",
 				Bucket:      "test",
 			},
-			events: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false,
 				},
@@ -98,8 +98,8 @@ func TestGoogleStorage_Export(t *testing.T) {
 				Filename: "{{ .Format}}-test-{{ .Timestamp}}",
 				Bucket:   "test",
 			},
-			events: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false,
 				},
@@ -112,8 +112,8 @@ func TestGoogleStorage_Export(t *testing.T) {
 				Format: "xxx",
 				Bucket: "test",
 			},
-			events: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false,
 				},
@@ -125,8 +125,8 @@ func TestGoogleStorage_Export(t *testing.T) {
 			fields: fields{
 				Format: "xxx",
 			},
-			events: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false,
 				},
@@ -139,8 +139,8 @@ func TestGoogleStorage_Export(t *testing.T) {
 				Filename: "{{ .InvalidField}}",
 				Bucket:   "test",
 			},
-			events: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false,
 				},
@@ -153,8 +153,8 @@ func TestGoogleStorage_Export(t *testing.T) {
 				Format:      "csv",
 				CsvTemplate: "{{ .Foo}}",
 			},
-			events: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false,
 				},
@@ -176,7 +176,7 @@ func TestGoogleStorage_Export(t *testing.T) {
 				},
 			}
 
-			// init DeprecatedExporter
+			// init DeprecatedExporterV1
 			f := gcstorageexporter.Exporter{
 				Bucket: tt.fields.Bucket,
 				Options: []option.ClientOption{

@@ -2,7 +2,6 @@ package exporter
 
 import (
 	"bytes"
-	"encoding/json"
 	"os"
 	"strconv"
 	"strings"
@@ -43,16 +42,4 @@ func ComputeFilename(template *template.Template, format string) (string, error)
 		Format:    format,
 	})
 	return buf.String(), err
-}
-
-func FormatEventInCSV(csvTemplate *template.Template, event FeatureEvent) ([]byte, error) {
-	var buf bytes.Buffer
-	err := csvTemplate.Execute(&buf, event)
-	return buf.Bytes(), err
-}
-
-func FormatEventInJSON(event FeatureEvent) ([]byte, error) {
-	b, err := json.Marshal(event)
-	b = append(b, []byte("\n")...)
-	return b, err
 }

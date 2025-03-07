@@ -99,19 +99,16 @@ func TestFeatureEvent_MarshalInterface(t *testing.T) {
 			},
 			wantErr: true,
 		},
-		{
-			name:         "nil featureEvent",
-			featureEvent: nil,
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := tt.featureEvent.MarshalInterface(); (err != nil) != tt.wantErr {
+			val, err := tt.featureEvent.ConvertValueForParquet()
+			if (err != nil) != tt.wantErr {
 				t.Errorf("FeatureEvent.MarshalInterface() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.want != nil {
-				assert.Equal(t, tt.want, tt.featureEvent)
+				assert.Equal(t, tt.want.Value, val)
 			}
 		})
 	}

@@ -37,3 +37,17 @@ type TrackingEvent struct {
 	// TODO:
 	TrackingDetails TrackingEventDetails `json:"trackingEventDetails" parquet:"name=evaluationContext, type=MAP, keytype=BYTE_ARRAY, keyconvertedtype=UTF8, valuetype=BYTE_ARRAY, valueconvertedtype=UTF8"`
 }
+
+func (f TrackingEvent) GetKey() string {
+	return f.Key
+}
+
+// GetUserKey returns the user key of the event
+func (f TrackingEvent) GetUserKey() string {
+	return f.UserKey
+}
+
+// GetCreationDate returns the creationDate of the event.
+func (f TrackingEvent) GetCreationDate() int64 {
+	return f.CreationDate
+}

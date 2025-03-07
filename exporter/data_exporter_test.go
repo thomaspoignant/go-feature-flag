@@ -9,6 +9,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
+	"github.com/thomaspoignant/go-feature-flag/testutils"
 	"github.com/thomaspoignant/go-feature-flag/testutils/mock"
 	"github.com/thomaspoignant/go-feature-flag/testutils/slogutil"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
@@ -61,9 +62,9 @@ func TestDataExporterFlush_TriggerErrorIfNotKnowType(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			evStore := mock.NewEventStore[string]()
+			evStore := mock.NewEventStore[testutils.ExportableMockEvent]()
 			for i := 0; i < 100; i++ {
-				evStore.Add("feature")
+				evStore.Add(testutils.NewExportableMockEvent("feature"))
 			}
 
 			logFile, _ := os.CreateTemp("", "")
@@ -72,7 +73,7 @@ func TestDataExporterFlush_TriggerErrorIfNotKnowType(t *testing.T) {
 			defer func() { _ = os.Remove(logFile.Name()) }()
 
 			exporterMock := tt.exporter
-			exp := exporter.NewDataExporter[string](context.TODO(), exporter.Config{
+			exp := exporter.NewDataExporter[testutils.ExportableMockEvent](context.TODO(), exporter.Config{
 				Exporter:         exporterMock,
 				FlushInterval:    0,
 				MaxEventInMemory: 0,
