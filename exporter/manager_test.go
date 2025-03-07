@@ -42,8 +42,8 @@ func TestDataExporterManager_flushWithTime(t *testing.T) {
 				},
 			}
 			dc := exporter.NewManager[exporter.FeatureEvent](context.Background(), dataExporterMock, nil)
-			go dc.StartDaemon()
-			defer dc.Close()
+			go dc.Start()
+			defer dc.Stop()
 
 			// Initialize inputEvents slice
 			inputEvents := []exporter.FeatureEvent{
@@ -86,8 +86,8 @@ func TestDataExporterManager_flushWithNumberOfEvents(t *testing.T) {
 				},
 			}
 			dc := exporter.NewManager[exporter.FeatureEvent](context.Background(), dataExporterMock, nil)
-			go dc.StartDaemon()
-			defer dc.Close()
+			go dc.Start()
+			defer dc.Stop()
 
 			// Initialize inputEvents slice
 			var inputEvents []exporter.FeatureEvent
@@ -129,8 +129,8 @@ func TestDataExporterManager_defaultFlush(t *testing.T) {
 				},
 			}
 			dc := exporter.NewManager[exporter.FeatureEvent](context.Background(), dataExporterMock, nil)
-			go dc.StartDaemon()
-			defer dc.Close()
+			go dc.Start()
+			defer dc.Stop()
 
 			// Initialize inputEvents slice
 			var inputEvents []exporter.FeatureEvent
@@ -162,8 +162,8 @@ func TestDataExporterManager_exporterReturnError(t *testing.T) {
 	handler := slogassert.New(t, slog.LevelInfo, nil)
 	logger := slog.New(handler)
 	dc := exporter.NewManager[exporter.FeatureEvent](context.Background(), dataExporterMock, &fflog.FFLogger{LeveledLogger: logger})
-	go dc.StartDaemon()
-	defer dc.Close()
+	go dc.Start()
+	defer dc.Stop()
 
 	// Initialize inputEvents slice
 	var inputEvents []exporter.FeatureEvent
@@ -190,7 +190,7 @@ func TestDataExporterManager_nonBulkExporter(t *testing.T) {
 		},
 	}
 	dc := exporter.NewManager[exporter.FeatureEvent](context.Background(), dataExporterMock, nil)
-	defer dc.Close()
+	defer dc.Stop()
 
 	// Initialize inputEvents slice
 	var inputEvents []exporter.FeatureEvent
@@ -278,8 +278,8 @@ func TestDataExporterManager_multipleExporters(t *testing.T) {
 		},
 	}
 	dc := exporter.NewManager[exporter.FeatureEvent](context.Background(), dataExporterMock, nil)
-	go dc.StartDaemon()
-	defer dc.Close()
+	go dc.Start()
+	defer dc.Stop()
 
 	// Initialize inputEvents slice
 	var inputEvents []exporter.FeatureEvent
@@ -316,8 +316,8 @@ func TestDataExporterManager_multipleExportersWithDifferentFlushInterval(t *test
 		},
 	}
 	dc := exporter.NewManager[exporter.FeatureEvent](context.Background(), dataExporterMock, nil)
-	go dc.StartDaemon()
-	defer dc.Close()
+	go dc.Start()
+	defer dc.Stop()
 
 	// Initialize inputEvents slice
 	var inputEvents []exporter.FeatureEvent

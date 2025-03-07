@@ -10,8 +10,8 @@ import (
 
 type Manager[T any] interface {
 	AddEvent(event T)
-	StartDaemon()
-	Close()
+	Start()
+	Stop()
 }
 
 type managerImpl[T any] struct {
@@ -62,13 +62,13 @@ func (m *managerImpl[T]) AddEvent(event T) {
 	}
 }
 
-func (m *managerImpl[T]) StartDaemon() {
+func (m *managerImpl[T]) Start() {
 	for _, consumer := range m.consumers {
 		go consumer.Start()
 	}
 }
 
-func (m *managerImpl[T]) Close() {
+func (m *managerImpl[T]) Stop() {
 	for _, consumer := range m.consumers {
 		consumer.Stop()
 	}

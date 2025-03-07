@@ -135,7 +135,7 @@ func New(config Config) (*GoFeatureFlag, error) {
 			}
 			goFF.dataExporter =
 				exporter.NewManager[exporter.FeatureEvent](config.Context, expConfigs, goFF.config.internalLogger)
-			go goFF.dataExporter.StartDaemon()
+			go goFF.dataExporter.Start()
 		}
 	}
 	config.internalLogger.Debug("GO Feature Flag is initialized")
@@ -183,7 +183,7 @@ func (g *GoFeatureFlag) Close() {
 		}
 
 		if g.dataExporter != nil {
-			g.dataExporter.Close()
+			g.dataExporter.Stop()
 		}
 		if g.retrieverManager != nil {
 			_ = g.retrieverManager.Shutdown(g.config.Context)
