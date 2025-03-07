@@ -4,7 +4,7 @@
 //
 //	ffclient.Init(ffclient.Config{
 //	  //...
-//	   DataExporter: ffclient.dataExporterImpl{
+//	   DataExporter: ffclient.DataExporter{
 //	   FlushInterval:   10 * time.Second,
 //	   MaxEventInMemory: 1000,
 //	   Exporter: &s3exporterv2.Exporter{
