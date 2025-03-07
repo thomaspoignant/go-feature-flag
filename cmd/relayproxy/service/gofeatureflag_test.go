@@ -240,7 +240,6 @@ func Test_initRetriever(t *testing.T) {
 		})
 	}
 }
-
 func Test_initRetrievers(t *testing.T) {
 	tests := []struct {
 		name       string
@@ -295,9 +294,6 @@ func Test_initRetrievers(t *testing.T) {
 					Kind: "unknown",
 				},
 			},
-			retriever: &config.RetrieverConf{
-				Kind: "unknown",
-			},
 		},
 		{
 			name:    "only retriever",
@@ -344,6 +340,102 @@ func Test_initRetrievers(t *testing.T) {
 					nbRetriever++
 				}
 				assert.Len(t, r, nbRetriever)
+			}
+		})
+	}
+}
+
+func Test_initExporters(t *testing.T) {
+	tests := []struct {
+		name      string
+		exporters *[]config.ExporterConf
+		exporter  *config.ExporterConf
+		wantErr   assert.ErrorAssertionFunc
+	}{
+		{
+			name:    "both exporter and exporters",
+			wantErr: assert.NoError,
+			exporter: &config.ExporterConf{
+				Kind:        "webhook",
+				EndpointURL: "https://gofeatureflag.org/webhook-example",
+				Secret:      "1234",
+			},
+			exporters: &[]config.ExporterConf{
+				{
+					Kind:        "webhook",
+					EndpointURL: "https://gofeatureflag.org/webhook-example",
+					Secret:      "1234",
+				},
+			},
+		},
+		{
+			name:    "exporter only",
+			wantErr: assert.NoError,
+			exporter: &config.ExporterConf{
+				Kind:        "webhook",
+				EndpointURL: "https://gofeatureflag.org/webhook-example",
+				Secret:      "1234",
+			},
+		},
+		{
+			name:    "exporters only",
+			wantErr: assert.NoError,
+			exporters: &[]config.ExporterConf{
+				{
+					Kind:        "webhook",
+					EndpointURL: "https://gofeatureflag.org/webhook-example",
+					Secret:      "1234",
+				},
+			},
+		},
+		{
+			name:    "invalid exporter",
+			wantErr: assert.Error,
+			exporter: &config.ExporterConf{
+				Kind: "invalid",
+			},
+			exporters: &[]config.ExporterConf{
+				{
+					Kind:        "webhook",
+					EndpointURL: "https://gofeatureflag.org/webhook-example",
+					Secret:      "1234",
+				},
+			},
+		},
+		{
+			name:    "invalid exporters",
+			wantErr: assert.Error,
+			exporter: &config.ExporterConf{
+
+				Kind:        "webhook",
+				EndpointURL: "https://gofeatureflag.org/webhook-example",
+				Secret:      "1234",
+			},
+			exporters: &[]config.ExporterConf{
+				{
+					Kind: "invalid",
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			proxyConf := config.Config{
+				Exporters: tt.exporters,
+				Exporter:  tt.exporter,
+			}
+			r, err := initDataExporters(&proxyConf)
+			tt.wantErr(t, err)
+			if r != nil {
+				nbExp := 0
+				if tt.exporters != nil {
+					nbExp += len(*tt.exporters)
+				}
+				if tt.exporter != nil {
+					nbExp++
+				}
+				assert.Len(t, r, nbExp)
 			}
 		})
 	}
