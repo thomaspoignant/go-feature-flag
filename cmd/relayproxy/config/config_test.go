@@ -88,6 +88,84 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 			wantErr: assert.NoError,
 		},
 		{
+			name:         "Valid yaml file with multiple exporters",
+			fileLocation: "../testdata/config/valid-yaml-multiple-exporters.yaml",
+			want: &config.Config{
+				ListenPort:      1031,
+				PollingInterval: 1000,
+				FileFormat:      "yaml",
+				Host:            "localhost",
+				Retriever: &config.RetrieverConf{
+					Kind: "http",
+					URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
+				},
+				Exporters: &[]config.ExporterConf{
+					{
+						Kind: "log",
+					},
+					{
+						Kind:      "file",
+						OutputDir: "./",
+					},
+				},
+				StartWithRetrieverError: false,
+				Version:                 "1.X.X",
+				EnableSwagger:           true,
+				AuthorizedKeys: config.APIKeys{
+					Admin: []string{
+						"apikey3",
+					},
+					Evaluation: []string{
+						"apikey1",
+						"apikey2",
+					},
+				},
+				LogLevel: "info",
+			},
+			wantErr: assert.NoError,
+		},
+		{
+			name:         "Valid yaml file with both exporter and exporters",
+			fileLocation: "../testdata/config/valid-yaml-exporter-and-exporters.yaml",
+			want: &config.Config{
+				ListenPort:      1031,
+				PollingInterval: 1000,
+				FileFormat:      "yaml",
+				Host:            "localhost",
+				Retriever: &config.RetrieverConf{
+					Kind: "http",
+					URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
+				},
+				Exporter: &config.ExporterConf{
+					Kind: "log",
+				},
+				Exporters: &[]config.ExporterConf{
+					{
+						Kind:        "webhook",
+						EndpointURL: "https://example.com/webhook",
+					},
+					{
+						Kind:      "file",
+						OutputDir: "./",
+					},
+				},
+				StartWithRetrieverError: false,
+				Version:                 "1.X.X",
+				EnableSwagger:           true,
+				AuthorizedKeys: config.APIKeys{
+					Admin: []string{
+						"apikey3",
+					},
+					Evaluation: []string{
+						"apikey1",
+						"apikey2",
+					},
+				},
+				LogLevel: "info",
+			},
+			wantErr: assert.NoError,
+		},
+		{
 			name:         "Valid json file",
 			fileLocation: "../testdata/config/valid-file.json",
 			want: &config.Config{

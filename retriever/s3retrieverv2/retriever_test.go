@@ -98,11 +98,9 @@ func Test_s3Retriever_Retrieve(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			awsConf, _ := config.LoadDefaultConfig(tt.fields.context)
 			s := Retriever{
 				Bucket:          tt.fields.bucket,
 				Item:            tt.fields.item,
-				AwsConfig:       &awsConf,
 				downloader:      tt.fields.downloader,
 				S3ClientOptions: tt.fields.S3ClientOptions,
 			}

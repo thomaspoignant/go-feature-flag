@@ -25,10 +25,10 @@ configuration to your relay proxy configuration file:
 
 ```yaml title="goff-proxy.yaml"
 # ...
-exporter:
-  kind: azureBlobStorage
-  container: test-goff
-  accountName: goff
+exporters:
+  - kind: azureBlobStorage
+    container: test-goff
+    accountName: goff
 # ...
 ```
 

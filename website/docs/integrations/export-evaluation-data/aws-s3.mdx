@@ -27,9 +27,9 @@ configuration to your relay proxy configuration file:
 
 ```yaml title="goff-proxy.yaml"
 # ...
-exporter:
-  kind: s3
-  bucket: evaluation-data-bucket
+exporters:
+  - kind: s3
+    bucket: evaluation-data-bucket
 # ...
 ```
 

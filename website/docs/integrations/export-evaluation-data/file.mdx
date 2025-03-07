@@ -25,9 +25,9 @@ configuration to your relay proxy configuration file:
 
 ```yaml title="goff-proxy.yaml"
 # ...
-exporter:
-  kind: file
-  outputDir: /output-data/
+exporters:
+  - kind: file
+    outputDir: /output-data/
 # ...
 ```
 
