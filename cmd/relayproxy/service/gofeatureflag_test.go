@@ -241,6 +241,115 @@ func Test_initRetriever(t *testing.T) {
 	}
 }
 
+func Test_initRetrievers(t *testing.T) {
+	tests := []struct {
+		name       string
+		retrievers *[]config.RetrieverConf
+		retriever  *config.RetrieverConf
+		wantErr    assert.ErrorAssertionFunc
+	}{
+		{
+			name:    "both retriever and retrievers",
+			wantErr: assert.NoError,
+			retrievers: &[]config.RetrieverConf{
+				{
+					Kind:           "bitbucket",
+					Branch:         "develop",
+					RepositorySlug: "gofeatureflag/config-repo",
+					Path:           "flags/config.goff.yaml",
+					AuthToken:      "XXX_BITBUCKET_TOKEN",
+					BaseURL:        "https://api.bitbucket.goff.org",
+				},
+			},
+			retriever: &config.RetrieverConf{
+				Kind:           "bitbucket",
+				Branch:         "main",
+				RepositorySlug: "gofeatureflag/config-repo",
+				Path:           "flags/config.goff.yaml",
+				AuthToken:      "XXX_BITBUCKET_TOKEN",
+				BaseURL:        "https://api.bitbucket.goff.org",
+			},
+		},
+		{
+			name:    "should error with invalid retriever",
+			wantErr: assert.Error,
+			retrievers: &[]config.RetrieverConf{
+				{
+					Kind:           "bitbucket",
+					Branch:         "develop",
+					RepositorySlug: "gofeatureflag/config-repo",
+					Path:           "flags/config.goff.yaml",
+					AuthToken:      "XXX_BITBUCKET_TOKEN",
+					BaseURL:        "https://api.bitbucket.goff.org",
+				},
+			},
+			retriever: &config.RetrieverConf{
+				Kind: "unknown",
+			},
+		},
+		{
+			name:    "should error with invalid retriever",
+			wantErr: assert.Error,
+			retrievers: &[]config.RetrieverConf{
+				{
+					Kind: "unknown",
+				},
+			},
+			retriever: &config.RetrieverConf{
+				Kind: "unknown",
+			},
+		},
+		{
+			name:    "only retriever",
+			wantErr: assert.NoError,
+			retriever: &config.RetrieverConf{
+				Kind:           "bitbucket",
+				Branch:         "main",
+				RepositorySlug: "gofeatureflag/config-repo",
+				Path:           "flags/config.goff.yaml",
+				AuthToken:      "XXX_BITBUCKET_TOKEN",
+				BaseURL:        "https://api.bitbucket.goff.org",
+			},
+		},
+		{
+			name:    "only retrievers",
+			wantErr: assert.NoError,
+			retrievers: &[]config.RetrieverConf{
+				{
+					Kind:           "bitbucket",
+					Branch:         "develop",
+					RepositorySlug: "gofeatureflag/config-repo",
+					Path:           "flags/config.goff.yaml",
+					AuthToken:      "XXX_BITBUCKET_TOKEN",
+					BaseURL:        "https://api.bitbucket.goff.org",
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			proxyConf := config.Config{
+				Retrievers: tt.retrievers,
+				Retriever:  tt.retriever,
+			}
+			r, err := initRetrievers(&proxyConf)
+			tt.wantErr(t, err)
+			if r != nil {
+				nbRetriever := 0
+				if tt.retrievers != nil {
+					nbRetriever += len(*tt.retrievers)
+				}
+				if tt.retriever != nil {
+					nbRetriever++
+				}
+				assert.Len(t, r, nbRetriever)
+			}
+		})
+
+	}
+}
+
 func Test_initExporter(t *testing.T) {
 	tests := []struct {
 		name                   string
