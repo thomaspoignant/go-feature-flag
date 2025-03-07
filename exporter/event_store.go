@@ -125,7 +125,6 @@ func (e *eventStoreImpl[T]) GetPendingEventCount(consumerID string) (int64, erro
 
 // Add is adding item of type T in the Event store.
 func (e *eventStoreImpl[T]) Add(data T) {
-	fmt.Println("add", e.lastOffset)
 	e.mutex.Lock()
 	defer e.mutex.Unlock()
 	e.lastOffset++
