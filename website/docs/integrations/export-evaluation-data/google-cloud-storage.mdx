@@ -25,9 +25,9 @@ configuration to your relay proxy configuration file:
 
 ```yaml title="goff-proxy.yaml"
 # ...
-exporter:
-  kind: googleStorage
-  bucket: test-goff
+exporters:
+  - kind: googleStorage
+    bucket: test-goff
 # ...
 ```
 

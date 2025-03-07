@@ -22,10 +22,10 @@ configuration to your relay proxy configuration file:
 
 ```yaml title="goff-proxy.yaml"
 # ...
-exporter:
-  kind: pubsub
-  projectID: "my-project-id"
-  topic: "goff-feature-events"
+exporters:
+  - kind: pubsub
+    projectID: "my-project-id"
+    topic: "goff-feature-events"
 # ...
 ```
 

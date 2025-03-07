@@ -122,3 +122,105 @@ func TestOfflineConfig(t *testing.T) {
 	c.SetOffline(false)
 	assert.False(t, c.IsOffline())
 }
+
+func TestConfig_GetDataExporters(t *testing.T) {
+	type fields struct {
+		DataExporter  ffClient.DataExporter
+		DataExporters []ffClient.DataExporter
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   []ffClient.DataExporter
+	}{
+		{
+			name:   "No data exporter",
+			fields: fields{},
+			want:   []ffClient.DataExporter{},
+		},
+		{
+			name: "Single data exporter",
+			fields: fields{
+				DataExporter: ffClient.DataExporter{
+					FlushInterval:    10 * time.Second,
+					MaxEventInMemory: 100,
+				},
+			},
+			want: []ffClient.DataExporter{
+				{
+					FlushInterval:    10 * time.Second,
+					MaxEventInMemory: 100,
+				},
+			},
+		},
+		{
+			name: "Multiple data exporters",
+			fields: fields{
+				DataExporters: []ffClient.DataExporter{
+					{
+						FlushInterval:    20 * time.Second,
+						MaxEventInMemory: 200,
+					},
+					{
+						FlushInterval:    30 * time.Second,
+						MaxEventInMemory: 300,
+					},
+				},
+			},
+			want: []ffClient.DataExporter{
+				{
+					FlushInterval:    20 * time.Second,
+					MaxEventInMemory: 200,
+				},
+				{
+					FlushInterval:    30 * time.Second,
+					MaxEventInMemory: 300,
+				},
+			},
+		},
+		{
+			name: "Both single and multiple data exporters",
+			fields: fields{
+				DataExporter: ffClient.DataExporter{
+					FlushInterval:    10 * time.Second,
+					MaxEventInMemory: 100,
+				},
+				DataExporters: []ffClient.DataExporter{
+					{
+						FlushInterval:    20 * time.Second,
+						MaxEventInMemory: 200,
+					},
+					{
+						FlushInterval:    30 * time.Second,
+						MaxEventInMemory: 300,
+					},
+				},
+			},
+			want: []ffClient.DataExporter{
+				{
+					FlushInterval:    10 * time.Second,
+					MaxEventInMemory: 100,
+				},
+				{
+					FlushInterval:    20 * time.Second,
+					MaxEventInMemory: 200,
+				},
+				{
+					FlushInterval:    30 * time.Second,
+					MaxEventInMemory: 300,
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &ffClient.Config{
+				DataExporter:  tt.fields.DataExporter,
+				DataExporters: tt.fields.DataExporters,
+			}
+			got := c.GetDataExporters()
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
