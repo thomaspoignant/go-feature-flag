@@ -47,48 +47,19 @@ func NewGoFeatureFlagClient(
 	logger *zap.Logger,
 	notifiers []notifier.Notifier,
 ) (*ffclient.GoFeatureFlag, error) {
-	var mainRetriever retriever.Retriever
 	var err error
-
 	if proxyConf == nil {
 		return nil, fmt.Errorf("proxy config is empty")
 	}
 
-	if proxyConf.Retriever != nil {
-		mainRetriever, err = initRetriever(proxyConf.Retriever)
-		if err != nil {
-			return nil, err
-		}
+	retrievers, err := initRetrievers(proxyConf)
+	if err != nil {
+		return nil, err
 	}
 
-	// Manage if we have more than 1 retriever
-	retrievers := make([]retriever.Retriever, 0)
-	if proxyConf.Retrievers != nil {
-		for _, r := range *proxyConf.Retrievers {
-			currentRetriever, err := initRetriever(&r)
-			if err != nil {
-				return nil, err
-			}
-			retrievers = append(retrievers, currentRetriever)
-		}
-	}
-
-	exporters := make([]ffclient.DataExporter, 0)
-	if proxyConf.Exporter != nil {
-		exp, err := initDataExporter(proxyConf.Exporter)
-		if err != nil {
-			return nil, err
-		}
-		exporters = append(exporters, exp)
-	}
-	if proxyConf.Exporters != nil {
-		for _, e := range *proxyConf.Exporters {
-			currentExporter, err := initDataExporter(&e)
-			if err != nil {
-				return nil, err
-			}
-			exporters = append(exporters, currentExporter)
-		}
+	exporters, err := initDataExporters(proxyConf)
+	if err != nil {
+		return nil, err
 	}
 
 	notif, err := initNotifier(proxyConf.Notifiers)
@@ -101,7 +72,6 @@ func NewGoFeatureFlagClient(
 		PollingInterval:                 time.Duration(proxyConf.PollingInterval) * time.Millisecond,
 		LeveledLogger:                   slog.New(slogzap.Option{Level: slog.LevelDebug, Logger: logger}.NewZapHandler()),
 		Context:                         context.Background(),
-		Retriever:                       mainRetriever,
 		Retrievers:                      retrievers,
 		Notifiers:                       notif,
 		FileFormat:                      proxyConf.FileFormat,
@@ -114,6 +84,29 @@ func NewGoFeatureFlagClient(
 	}
 
 	return ffclient.New(f)
+}
+
+// initRetrievers initialize the retrievers based on the configuration
+// it handles both the `retriever` and `retrievers` fields
+func initRetrievers(proxyConf *config.Config) ([]retriever.Retriever, error) {
+	retrievers := make([]retriever.Retriever, 0)
+	if proxyConf.Retriever != nil {
+		currentRetriever, err := initRetriever(proxyConf.Retriever)
+		if err != nil {
+			return nil, err
+		}
+		retrievers = append(retrievers, currentRetriever)
+	}
+	if proxyConf.Retrievers != nil {
+		for _, r := range *proxyConf.Retrievers {
+			currentRetriever, err := initRetriever(&r)
+			if err != nil {
+				return nil, err
+			}
+			retrievers = append(retrievers, currentRetriever)
+		}
+	}
+	return retrievers, nil
 }
 
 // initRetriever initialize the retriever based on the configuration
@@ -208,6 +201,29 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 		return nil, fmt.Errorf("invalid retriever: kind \"%s\" "+
 			"is not supported", c.Kind)
 	}
+}
+
+// initDataExporters initialize the exporters based on the configuration
+// it handles both the `exporter` and `exporters` fields.
+func initDataExporters(proxyConf *config.Config) ([]ffclient.DataExporter, error) {
+	exporters := make([]ffclient.DataExporter, 0)
+	if proxyConf.Exporter != nil {
+		exp, err := initDataExporter(proxyConf.Exporter)
+		if err != nil {
+			return nil, err
+		}
+		exporters = append(exporters, exp)
+	}
+	if proxyConf.Exporters != nil {
+		for _, e := range *proxyConf.Exporters {
+			currentExporter, err := initDataExporter(&e)
+			if err != nil {
+				return nil, err
+			}
+			exporters = append(exporters, currentExporter)
+		}
+	}
+	return exporters, nil
 }
 
 func initDataExporter(c *config.ExporterConf) (ffclient.DataExporter, error) {

@@ -8,6 +8,8 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
+const DefaultExporterCleanQueueInterval = 1 * time.Minute
+
 type Manager[T any] interface {
 	AddEvent(event T)
 	Start()
@@ -20,17 +22,17 @@ type managerImpl[T any] struct {
 	eventStore *EventStore[T]
 }
 
-func NewManager[T any](ctx context.Context, exporters []Config, ExporterCleanQueueInterval time.Duration, logger *fflog.FFLogger) Manager[T] {
+func NewManager[T any](ctx context.Context, exporters []Config, exporterCleanQueueInterval time.Duration, logger *fflog.FFLogger) Manager[T] {
 	if ctx == nil {
 		ctx = context.Background()
 	}
 
-	if ExporterCleanQueueInterval == 0 {
+	if exporterCleanQueueInterval == 0 {
 		// default value for the exporterCleanQueueDuration is 1 minute
-		ExporterCleanQueueInterval = 1 * time.Minute
+		exporterCleanQueueInterval = DefaultExporterCleanQueueInterval
 	}
 
-	evStore := NewEventStore[T](ExporterCleanQueueInterval)
+	evStore := NewEventStore[T](exporterCleanQueueInterval)
 	consumers := make([]DataExporter[T], len(exporters))
 	for index, exporter := range exporters {
 		consumerID := uuid.New().String()

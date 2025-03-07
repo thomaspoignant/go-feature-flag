@@ -41,7 +41,7 @@ func TestDataExporterManager_flushWithTime(t *testing.T) {
 					Exporter:         tt.mockExporter,
 				},
 			}
-			dc := exporter.NewManager[exporter.FeatureEvent](context.Background(), dataExporterMock, nil)
+			dc := exporter.NewManager[exporter.FeatureEvent](context.Background(), dataExporterMock, exporter.DefaultExporterCleanQueueInterval, nil)
 			go dc.Start()
 			defer dc.Stop()
 
@@ -85,7 +85,7 @@ func TestDataExporterManager_flushWithNumberOfEvents(t *testing.T) {
 					Exporter:         tt.mockExporter,
 				},
 			}
-			dc := exporter.NewManager[exporter.FeatureEvent](context.Background(), dataExporterMock, nil)
+			dc := exporter.NewManager[exporter.FeatureEvent](context.Background(), dataExporterMock, exporter.DefaultExporterCleanQueueInterval, nil)
 			go dc.Start()
 			defer dc.Stop()
 
@@ -128,7 +128,8 @@ func TestDataExporterManager_defaultFlush(t *testing.T) {
 					Exporter:         tt.mockExporter,
 				},
 			}
-			dc := exporter.NewManager[exporter.FeatureEvent](context.Background(), dataExporterMock, nil)
+			dc := exporter.NewManager[exporter.FeatureEvent](context.Background(),
+				dataExporterMock, exporter.DefaultExporterCleanQueueInterval, nil)
 			go dc.Start()
 			defer dc.Stop()
 
@@ -157,11 +158,12 @@ func TestDataExporterManager_exporterReturnError(t *testing.T) {
 		},
 	}
 	file, _ := os.CreateTemp("", "log")
-	defer file.Close()
-	defer os.Remove(file.Name())
+	defer func() { _ = file.Close() }()
+	defer func() { _ = os.Remove(file.Name()) }()
 	handler := slogassert.New(t, slog.LevelInfo, nil)
 	logger := slog.New(handler)
-	dc := exporter.NewManager[exporter.FeatureEvent](context.Background(), dataExporterMock, &fflog.FFLogger{LeveledLogger: logger})
+	dc := exporter.NewManager[exporter.FeatureEvent](context.Background(), dataExporterMock,
+		exporter.DefaultExporterCleanQueueInterval, &fflog.FFLogger{LeveledLogger: logger})
 	go dc.Start()
 	defer dc.Stop()
 
@@ -189,7 +191,8 @@ func TestDataExporterManager_nonBulkExporter(t *testing.T) {
 			Exporter:         &mockExporter,
 		},
 	}
-	dc := exporter.NewManager[exporter.FeatureEvent](context.Background(), dataExporterMock, nil)
+	dc := exporter.NewManager[exporter.FeatureEvent](context.Background(),
+		dataExporterMock, exporter.DefaultExporterCleanQueueInterval, nil)
 	defer dc.Stop()
 
 	// Initialize inputEvents slice
@@ -277,7 +280,8 @@ func TestDataExporterManager_multipleExporters(t *testing.T) {
 			Exporter:         &mockExporter2,
 		},
 	}
-	dc := exporter.NewManager[exporter.FeatureEvent](context.Background(), dataExporterMock, nil)
+	dc := exporter.NewManager[exporter.FeatureEvent](context.Background(),
+		dataExporterMock, exporter.DefaultExporterCleanQueueInterval, nil)
 	go dc.Start()
 	defer dc.Stop()
 
@@ -315,7 +319,8 @@ func TestDataExporterManager_multipleExportersWithDifferentFlushInterval(t *test
 			Exporter:         &mockExporter2,
 		},
 	}
-	dc := exporter.NewManager[exporter.FeatureEvent](context.Background(), dataExporterMock, nil)
+	dc := exporter.NewManager[exporter.FeatureEvent](context.Background(),
+		dataExporterMock, exporter.DefaultExporterCleanQueueInterval, nil)
 	go dc.Start()
 	defer dc.Stop()
 
