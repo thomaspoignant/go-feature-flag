@@ -72,6 +72,11 @@ func NewDataExporter[T any](ctx context.Context, exporter Config, consumerID str
 }
 
 func (d *dataExporterImpl[T]) Start() {
+	// we don't start the daemon if we are not in bulk mode
+	if !d.IsBulk() {
+		return
+	}
+
 	for {
 		select {
 		case <-d.ticker.C:
@@ -84,6 +89,11 @@ func (d *dataExporterImpl[T]) Start() {
 }
 
 func (d *dataExporterImpl[T]) Stop() {
+	// we don't start the daemon if we are not in bulk mode
+	if !d.IsBulk() {
+		d.Flush()
+		return
+	}
 	d.ticker.Stop()
 	close(d.daemonChan)
 	d.Flush()

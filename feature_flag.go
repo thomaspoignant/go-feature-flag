@@ -135,11 +135,7 @@ func New(config Config) (*GoFeatureFlag, error) {
 			}
 			goFF.dataExporter =
 				exporter.NewManager[exporter.FeatureEvent](config.Context, expConfigs, goFF.config.internalLogger)
-
-			// we start the daemon only if we have a bulk exporter
-			if goFF.config.DataExporter.Exporter.IsBulk() {
-				go goFF.dataExporter.StartDaemon()
-			}
+			go goFF.dataExporter.StartDaemon()
 		}
 	}
 	config.internalLogger.Debug("GO Feature Flag is initialized")
