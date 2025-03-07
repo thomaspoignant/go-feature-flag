@@ -14,13 +14,19 @@ type Manager[T any] interface {
 	Close()
 }
 
+type managerImpl[T any] struct {
+	logger     *fflog.FFLogger
+	consumers  []DataExporter[T]
+	eventStore *EventStore[T]
+}
+
 func NewManager[T any](ctx context.Context, exporters []Config, logger *fflog.FFLogger) Manager[T] {
 	if ctx == nil {
 		ctx = context.Background()
 	}
 
 	evStore := NewEventStore[T](30 * time.Second)
-	consumers := make([]dataExporterImpl[T], len(exporters))
+	consumers := make([]DataExporter[T], len(exporters))
 	for index, exporter := range exporters {
 		consumerID := uuid.New().String()
 		exp := NewDataExporter[T](ctx, exporter, consumerID, &evStore, logger)
@@ -34,28 +40,22 @@ func NewManager[T any](ctx context.Context, exporters []Config, logger *fflog.FF
 	}
 }
 
-type managerImpl[T any] struct {
-	logger     *fflog.FFLogger
-	consumers  []dataExporterImpl[T]
-	eventStore *EventStore[T]
-}
-
 func (m *managerImpl[T]) AddEvent(event T) {
 	store := *m.eventStore
 	store.Add(event)
 	for _, consumer := range m.consumers {
-		if !consumer.exporter.Exporter.IsBulk() {
+		if !consumer.IsBulk() {
 			consumer.Flush()
 			continue
 		}
 
-		count, err := store.GetPendingEventCount(consumer.consumerID)
+		count, err := store.GetPendingEventCount(consumer.GetConsumerID())
 		if err != nil {
 			m.logger.Error("error while fetching pending events", err)
 			continue
 		}
 
-		if count >= consumer.exporter.MaxEventInMemory {
+		if count >= consumer.GetMaxEventInMemory() {
 			consumer.Flush()
 			continue
 		}

@@ -111,7 +111,6 @@ func TestDataExporterFlush_TriggerErrorIfNotKnowType(t *testing.T) {
 			assert.Equal(t, tt.expectedLog, string(logContent))
 		})
 	}
-
 }
 
 func TestDataExporterFlush_TriggerErrorIfExporterFail(t *testing.T) {
@@ -158,5 +157,4 @@ func TestDataExporterFlush_TriggerErrorIfExporterFail(t *testing.T) {
 			assert.Equal(t, tt.expectedLog, string(logContent))
 		})
 	}
-
 }

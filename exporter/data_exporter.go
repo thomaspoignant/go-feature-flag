@@ -15,6 +15,20 @@ const (
 	defaultMaxEventInMemory = int64(100000)
 )
 
+type DataExporter[T any] interface {
+	// Start is launching the ticker to periodically flush the data
+	Start()
+	// Stop is stopping the ticker
+	Stop()
+	// Flush is sending the data to the exporter
+	Flush()
+	// IsBulk return false if we should directly send the data as soon as it is produce
+	IsBulk() bool
+	// GetConsumerID return the consumer ID used in the event store
+	GetConsumerID() string
+	// GetMaxEventInMemory return the maximum number of event you keep in the cache before calling Flush()
+	GetMaxEventInMemory() int64
+}
 type Config struct {
 	Exporter         CommonExporter
 	FlushInterval    time.Duration
@@ -32,7 +46,8 @@ type dataExporterImpl[T any] struct {
 	ticker     *time.Ticker
 }
 
-func NewDataExporter[T any](ctx context.Context, exporter Config, consumerID string, eventStore *EventStore[T], logger *fflog.FFLogger) dataExporterImpl[T] {
+func NewDataExporter[T any](ctx context.Context, exporter Config, consumerID string,
+	eventStore *EventStore[T], logger *fflog.FFLogger) DataExporter[T] {
 	if ctx == nil {
 		ctx = context.Background()
 	}
@@ -45,7 +60,7 @@ func NewDataExporter[T any](ctx context.Context, exporter Config, consumerID str
 		exporter.MaxEventInMemory = defaultMaxEventInMemory
 	}
 
-	return dataExporterImpl[T]{
+	return &dataExporterImpl[T]{
 		ctx:        ctx,
 		consumerID: consumerID,
 		eventStore: eventStore,
@@ -91,6 +106,17 @@ func (d *dataExporterImpl[T]) Flush() {
 	if err != nil {
 		d.logger.Error("error while updating offset", err.Error())
 	}
+}
+
+func (d *dataExporterImpl[T]) IsBulk() bool {
+	return d.exporter.Exporter.IsBulk()
+}
+
+func (d *dataExporterImpl[T]) GetConsumerID() string {
+	return d.consumerID
+}
+func (d *dataExporterImpl[T]) GetMaxEventInMemory() int64 {
+	return d.exporter.MaxEventInMemory
 }
 
 func (d *dataExporterImpl[T]) sendEvents(ctx context.Context, events []T) error {

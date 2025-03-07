@@ -141,7 +141,7 @@ func (e *eventStoreImpl[T]) UpdateConsumerOffset(consumerName string, offset int
 func (e *eventStoreImpl[T]) cleanQueue() {
 	e.mutex.Lock()
 	defer e.mutex.Unlock()
-	if e.events == nil || len(e.events) == 0 {
+	if len(e.events) == 0 {
 		// nothing to remove
 		return
 	}
@@ -162,7 +162,6 @@ func (e *eventStoreImpl[T]) cleanQueue() {
 			break
 		}
 	}
-
 }
 
 // periodicCleanQueue periodically cleans the queue
