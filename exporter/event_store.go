@@ -128,7 +128,7 @@ func (e *eventStoreImpl[T]) Add(data T) {
 	fmt.Println("add", e.lastOffset)
 	e.mutex.Lock()
 	defer e.mutex.Unlock()
-	e.lastOffset = e.lastOffset + 1
+	e.lastOffset++
 	e.events = append(e.events, Event[T]{Offset: e.lastOffset, Data: data})
 }
 

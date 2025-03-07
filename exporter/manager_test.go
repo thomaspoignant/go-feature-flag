@@ -392,5 +392,4 @@ func TestDataExporterManager_ValidateNumberOfEvents(t *testing.T) {
 			assert.Equal(t, 6, len(mockExporter.GetExportedEvents()))
 		})
 	}
-
 }

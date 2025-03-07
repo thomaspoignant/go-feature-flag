@@ -26,7 +26,8 @@ func (e *implMockEventStore[T]) Add(data T) {
 	e.store = append(e.store, data)
 }
 
-func (e *implMockEventStore[T]) ProcessPendingEvents(consumerID string, processFunc func(context.Context, []T) error) error {
+func (e *implMockEventStore[T]) ProcessPendingEvents(consumerID string,
+	processFunc func(context.Context, []T) error) error {
 	if consumerID == consumerNameError {
 		return fmt.Errorf("error")
 	}
