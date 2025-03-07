@@ -107,20 +107,10 @@ func (d *dataExporterImpl[T]) Stop() {
 // Flush is sending the data to the exporter
 func (d *dataExporterImpl[T]) Flush() {
 	store := *d.eventStore
-	eventList, err := store.FetchPendingEvents(d.consumerID)
-	if err != nil {
-		// log something here
-		d.logger.Error("error while fetching pending events", err)
-		return
-	}
-	err = d.sendEvents(d.ctx, eventList.Events)
+	err := store.ProcessPendingEvents(d.consumerID, d.sendEvents)
 	if err != nil {
 		d.logger.Error(err.Error())
 		return
-	}
-	err = store.UpdateConsumerOffset(d.consumerID, eventList.NewOffset)
-	if err != nil {
-		d.logger.Error("error while updating offset", err.Error())
 	}
 }
 

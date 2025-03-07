@@ -12,28 +12,30 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 )
 
-const defaultCleanQueueDuration = 100 * time.Millisecond
+const defaultTestCleanQueueDuration = 100 * time.Millisecond
 
 func Test_ConsumerNameInvalid(t *testing.T) {
 	t.Run("GetPendingEventCount: should return an error if the consumer name is invalid", func(t *testing.T) {
-		eventStore := exporter.NewEventStore[string](defaultCleanQueueDuration)
+		eventStore := exporter.NewEventStore[string](defaultTestCleanQueueDuration)
 		eventStore.AddConsumer("consumer1")
 		defer eventStore.Stop()
 		_, err := eventStore.GetPendingEventCount("wrong name")
 		assert.NotNil(t, err)
 	})
-	t.Run("GetPendingEventCount: should return an error if the consumer name is invalid", func(t *testing.T) {
-		eventStore := exporter.NewEventStore[string](defaultCleanQueueDuration)
+	t.Run("ProcessPendingEvents: should return an error if the consumer name is invalid", func(t *testing.T) {
+		eventStore := exporter.NewEventStore[string](defaultTestCleanQueueDuration)
 		eventStore.AddConsumer("consumer1")
 		defer eventStore.Stop()
-		_, err := eventStore.FetchPendingEvents("wrong name")
+		err := eventStore.ProcessPendingEvents(
+			"wrong name",
+			func(ctx context.Context, events []string) error { return nil })
 		assert.NotNil(t, err)
 	})
 }
 
 func Test_SingleConsumer(t *testing.T) {
 	consumerName := "consumer1"
-	eventStore := exporter.NewEventStore[string](defaultCleanQueueDuration)
+	eventStore := exporter.NewEventStore[string](defaultTestCleanQueueDuration)
 	eventStore.AddConsumer(consumerName)
 	defer eventStore.Stop()
 	got, _ := eventStore.GetPendingEventCount(consumerName)
@@ -49,9 +51,10 @@ func Test_SingleConsumer(t *testing.T) {
 	cancel() // stop producing
 
 	// Consume
-	events, _ := eventStore.FetchPendingEvents(consumerName)
-	assert.Equal(t, 100, len(events.Events))
-	err := eventStore.UpdateConsumerOffset(consumerName, events.NewOffset)
+	err := eventStore.ProcessPendingEvents(consumerName, func(ctx context.Context, events []string) error {
+		assert.Equal(t, 100, len(events))
+		return nil
+	})
 	assert.Nil(t, err)
 	got, _ = eventStore.GetPendingEventCount(consumerName)
 	assert.Equal(t, int64(0), got)
@@ -63,10 +66,12 @@ func Test_SingleConsumer(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
 	got, _ = eventStore.GetPendingEventCount(consumerName)
 	assert.Equal(t, int64(91), got)
-	events, _ = eventStore.FetchPendingEvents(consumerName)
-	err = eventStore.UpdateConsumerOffset(consumerName, events.NewOffset)
+
+	err = eventStore.ProcessPendingEvents(consumerName, func(ctx context.Context, events []string) error {
+		assert.Equal(t, 91, len(events))
+		return nil
+	})
 	assert.Nil(t, err)
-	assert.Equal(t, 91, len(events.Events))
 
 	time.Sleep(120 * time.Millisecond) // to wait until garbage collector remove the events
 	assert.Equal(t, int64(0), eventStore.GetTotalEventCount())
@@ -74,7 +79,7 @@ func Test_SingleConsumer(t *testing.T) {
 
 func Test_MultipleConsumersSingleThread(t *testing.T) {
 	consumerNames := []string{"consumer1", "consumer2"}
-	eventStore := exporter.NewEventStore[string](defaultCleanQueueDuration)
+	eventStore := exporter.NewEventStore[string](defaultTestCleanQueueDuration)
 	for _, name := range consumerNames {
 		eventStore.AddConsumer(name)
 	}
@@ -90,10 +95,10 @@ func Test_MultipleConsumersSingleThread(t *testing.T) {
 	consumer1Size, err := eventStore.GetPendingEventCount(consumerNames[0])
 	assert.Nil(t, err)
 	assert.Equal(t, int64(1000), consumer1Size)
-	eventsConsumer1, err := eventStore.FetchPendingEvents(consumerNames[0])
-	assert.Nil(t, err)
-	assert.Equal(t, 1000, len(eventsConsumer1.Events))
-	err = eventStore.UpdateConsumerOffset(consumerNames[0], eventsConsumer1.NewOffset)
+	err = eventStore.ProcessPendingEvents(consumerNames[0], func(ctx context.Context, events []string) error {
+		assert.Equal(t, 1000, len(events))
+		return nil
+	})
 	assert.Nil(t, err)
 
 	// Produce a second time
@@ -112,15 +117,16 @@ func Test_MultipleConsumersSingleThread(t *testing.T) {
 	assert.Equal(t, int64(2000), consumer2Size)
 
 	// Consumer with Consumer1 and Consumer2
-	eventsConsumer1, err = eventStore.FetchPendingEvents(consumerNames[0])
+	err = eventStore.ProcessPendingEvents(consumerNames[0], func(ctx context.Context, events []string) error {
+		assert.Equal(t, 1000, len(events))
+		return nil
+	})
 	assert.Nil(t, err)
-	assert.Equal(t, 1000, len(eventsConsumer1.Events))
-	err = eventStore.UpdateConsumerOffset(consumerNames[0], eventsConsumer1.NewOffset)
-	assert.Nil(t, err)
-	eventsConsumer2, err := eventStore.FetchPendingEvents(consumerNames[1])
-	assert.Nil(t, err)
-	assert.Equal(t, 2000, len(eventsConsumer2.Events))
-	err = eventStore.UpdateConsumerOffset(consumerNames[1], eventsConsumer1.NewOffset)
+
+	err = eventStore.ProcessPendingEvents(consumerNames[1], func(ctx context.Context, events []string) error {
+		assert.Equal(t, 2000, len(events))
+		return nil
+	})
 	assert.Nil(t, err)
 
 	// Check garbage collector
@@ -130,7 +136,7 @@ func Test_MultipleConsumersSingleThread(t *testing.T) {
 
 func Test_MultipleConsumersMultipleGORoutines(t *testing.T) {
 	consumerNames := []string{"consumer1", "consumer2"}
-	eventStore := exporter.NewEventStore[string](defaultCleanQueueDuration)
+	eventStore := exporter.NewEventStore[string](defaultTestCleanQueueDuration)
 	for _, name := range consumerNames {
 		eventStore.AddConsumer(name)
 	}
@@ -145,18 +151,19 @@ func Test_MultipleConsumersMultipleGORoutines(t *testing.T) {
 	consumFunc := func(eventStore exporter.EventStore[string], consumerName string) {
 		wg.Add(1)
 		defer wg.Done()
-		events, err := eventStore.FetchPendingEvents(consumerName)
-		assert.Nil(t, err)
-		err = eventStore.UpdateConsumerOffset(consumerName, events.NewOffset)
-		assert.Nil(t, err)
 
-		assert.True(t, len(events.Events) > 0)
+		err := eventStore.ProcessPendingEvents(consumerName, func(ctx context.Context, events []string) error {
+			assert.True(t, len(events) > 0)
+			return nil
+		})
+		assert.Nil(t, err)
 		time.Sleep(50 * time.Millisecond) // we wait to be sure that the producer has produce new events
-		events, err = eventStore.FetchPendingEvents(consumerName)
+
+		err = eventStore.ProcessPendingEvents(consumerName, func(ctx context.Context, events []string) error {
+			assert.True(t, len(events) > 0)
+			return nil
+		})
 		assert.Nil(t, err)
-		err = eventStore.UpdateConsumerOffset(consumerName, events.NewOffset)
-		assert.Nil(t, err)
-		assert.True(t, len(events.Events) > 0)
 	}
 
 	go consumFunc(eventStore, consumerNames[0])
@@ -164,82 +171,47 @@ func Test_MultipleConsumersMultipleGORoutines(t *testing.T) {
 	wg.Wait()
 }
 
-func Test_MultipleGetEventsWithoutSettingOffset(t *testing.T) {
-	consumerNames := []string{"consumer1"}
-	eventStore := exporter.NewEventStore[string](defaultCleanQueueDuration)
-	for _, name := range consumerNames {
-		eventStore.AddConsumer(name)
-	}
+func Test_ProcessPendingEventInError(t *testing.T) {
+	consumerName := "consumer1"
+	eventStore := exporter.NewEventStore[string](defaultTestCleanQueueDuration)
+	eventStore.AddConsumer(consumerName)
 	defer eventStore.Stop()
-
 	// start producer
-	ctx := context.Background()
-	startEventProducer(ctx, eventStore, 100, false)
+	startEventProducer(context.TODO(), eventStore, 1000, false)
+	assert.Equal(t, int64(1000), eventStore.GetTotalEventCount())
 
-	firstCall, err := eventStore.FetchPendingEvents(consumerNames[0])
+	consumer1Size, err := eventStore.GetPendingEventCount(consumerName)
+	assert.Equal(t, 1000, int(consumer1Size))
 	assert.Nil(t, err)
-	secondCall, err := eventStore.FetchPendingEvents(consumerNames[0])
-	assert.Nil(t, err)
-	assert.Equal(t, firstCall, secondCall)
-}
 
-func Test_UpdateWithInvalidOffset(t *testing.T) {
-	consumerNames := []string{"consumer1"}
-	eventStore := exporter.NewEventStore[string](defaultCleanQueueDuration)
-	for _, name := range consumerNames {
-		eventStore.AddConsumer(name)
-	}
-	defer eventStore.Stop()
-
-	// start producer
-	ctx := context.Background()
-	startEventProducer(ctx, eventStore, 100, false)
-
-	eventList, err := eventStore.FetchPendingEvents(consumerNames[0])
-	assert.Nil(t, err)
-	errUpdate := eventStore.UpdateConsumerOffset(consumerNames[0], eventList.NewOffset+100)
-	assert.NotNil(t, errUpdate)
-}
-
-func Test_UpdateWithInvalidConsumerName(t *testing.T) {
-	t.Run("should error if calling FetchPendingEvents with invalid consumer name", func(t *testing.T) {
-		consumerNames := []string{"consumer1"}
-		eventStore := exporter.NewEventStore[string](defaultCleanQueueDuration)
-		for _, name := range consumerNames {
-			eventStore.AddConsumer(name)
-		}
-		defer eventStore.Stop()
-
-		// start producer
-		ctx := context.Background()
-		startEventProducer(ctx, eventStore, 100, false)
-
-		_, err := eventStore.FetchPendingEvents("wrong consumer name")
-		assert.NotNil(t, err)
+	// process is in error, so we are not able to update the offset
+	err = eventStore.ProcessPendingEvents(consumerName, func(ctx context.Context, events []string) error {
+		assert.Equal(t, 1000, len(events))
+		return fmt.Errorf("error")
 	})
+	assert.NotNil(t, err)
 
-	t.Run("should error if calling UpdateConsumerOffset with invalid consumer name", func(t *testing.T) {
-		consumerNames := []string{"consumer1"}
-		eventStore := exporter.NewEventStore[string](defaultCleanQueueDuration)
-		for _, name := range consumerNames {
-			eventStore.AddConsumer(name)
-		}
-		defer eventStore.Stop()
+	// We still have the same number of items waiting for next process
+	consumer1Size, err = eventStore.GetPendingEventCount(consumerName)
+	assert.Equal(t, 1000, int(consumer1Size))
+	assert.Nil(t, err)
 
-		// start producer
-		ctx := context.Background()
-		startEventProducer(ctx, eventStore, 100, false)
-
-		eventList, err := eventStore.FetchPendingEvents(consumerNames[0])
-		assert.Nil(t, err)
-		errUpdate := eventStore.UpdateConsumerOffset("wrong consumer name", eventList.NewOffset)
-		assert.NotNil(t, errUpdate)
+	// process is not in error anymore
+	err = eventStore.ProcessPendingEvents(consumerName, func(ctx context.Context, events []string) error {
+		assert.Equal(t, 1000, len(events))
+		return nil
 	})
+	assert.Nil(t, err)
+
+	// we have consume all the items
+	consumer1Size, err = eventStore.GetPendingEventCount(consumerName)
+	assert.Equal(t, 0, int(consumer1Size))
+	assert.Nil(t, err)
 }
 
 func Test_WaitForEmptyClean(t *testing.T) {
 	consumerNames := []string{"consumer1"}
-	eventStore := exporter.NewEventStore[string](defaultCleanQueueDuration)
+	eventStore := exporter.NewEventStore[string](defaultTestCleanQueueDuration)
 	for _, name := range consumerNames {
 		eventStore.AddConsumer(name)
 	}
@@ -248,9 +220,13 @@ func Test_WaitForEmptyClean(t *testing.T) {
 	// start producer
 	ctx := context.Background()
 	startEventProducer(ctx, eventStore, 100, false)
-	list, _ := eventStore.FetchPendingEvents(consumerNames[0])
-	_ = eventStore.UpdateConsumerOffset(consumerNames[0], list.NewOffset)
-	time.Sleep(3 * defaultCleanQueueDuration)
+	err := eventStore.ProcessPendingEvents(consumerNames[0], func(ctx context.Context, events []string) error {
+		assert.Equal(t, 100, len(events))
+		return nil
+	})
+	assert.Nil(t, err)
+	assert.True(t, eventStore.GetTotalEventCount() > 0)
+	time.Sleep(3 * defaultTestCleanQueueDuration)
 	assert.Equal(t, int64(0), eventStore.GetTotalEventCount())
 }
 

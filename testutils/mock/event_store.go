@@ -1,6 +1,7 @@
 package mock
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/thomaspoignant/go-feature-flag/exporter"
@@ -25,15 +26,14 @@ func (e *implMockEventStore[T]) Add(data T) {
 	e.store = append(e.store, data)
 }
 
-func (e *implMockEventStore[T]) FetchPendingEvents(consumerName string) (*exporter.EventList[T], error) {
-	if consumerName == consumerNameError {
-		return nil, fmt.Errorf("error")
+func (e *implMockEventStore[T]) ProcessPendingEvents(consumerID string, processFunc func(context.Context, []T) error) error {
+	if consumerID == consumerNameError {
+		return fmt.Errorf("error")
 	}
-	return &exporter.EventList[T]{
-		InitialOffset: 0,
-		NewOffset:     1,
-		Events:        e.store,
-	}, nil
+	if err := processFunc(context.TODO(), e.store); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (e *implMockEventStore[T]) GetPendingEventCount(consumerName string) (int64, error) {
@@ -45,13 +45,6 @@ func (e *implMockEventStore[T]) GetPendingEventCount(consumerName string) (int64
 
 func (e *implMockEventStore[T]) GetTotalEventCount() int64 {
 	return int64(len(e.store))
-}
-
-func (e *implMockEventStore[T]) UpdateConsumerOffset(consumerName string, _ int64) error {
-	if consumerName == consumerNameError || consumerName == "error_update" {
-		return fmt.Errorf("error")
-	}
-	return nil
 }
 
 func (e *implMockEventStore[T]) Stop() {

@@ -1,6 +1,7 @@
 package exporter
 
 import (
+	"context"
 	"fmt"
 	"math"
 	"sync"
@@ -43,25 +44,25 @@ type EventList[T any] struct {
 	NewOffset     int64
 }
 
+// EventStore is the interface to store events and consume them.
+// It is a simple implementation of a queue with offsets.
 type EventStore[T any] interface {
 	// AddConsumer is adding a new consumer to the Event store.
 	// note that you can't add a consumer after the Event store has been started.
-	AddConsumer(consumerName string)
+	AddConsumer(consumerID string)
 
 	// Add is adding item of type T in the Event store.
 	Add(data T)
 
-	// FetchPendingEvents is returning all the available item in the Event store for this consumer.
-	FetchPendingEvents(consumerName string) (*EventList[T], error)
-
 	// GetPendingEventCount is returning the number items available in the Event store for this consumer.
-	GetPendingEventCount(consumerName string) (int64, error)
+	GetPendingEventCount(consumerID string) (int64, error)
 
 	// GetTotalEventCount returns the total number of events in the store.
 	GetTotalEventCount() int64
 
-	// UpdateConsumerOffset updates the offset of the consumer to the new offset.
-	UpdateConsumerOffset(consumerName string, offset int64) error
+	// ProcessPendingEvents is processing all the available item in the Event store for this consumer
+	// with the process events function in parameter,
+	ProcessPendingEvents(consumerID string, processEventsFunc func(context.Context, []T) error) error
 
 	// Stop is closing the Event store and stop the periodic cleaning.
 	Stop()
@@ -76,8 +77,32 @@ type consumer struct {
 	Offset int64
 }
 
-func (e *eventStoreImpl[T]) AddConsumer(consumerName string) {
-	e.consumers[consumerName] = &consumer{Offset: e.lastOffset}
+// AddConsumer is adding a new consumer to the Event store.
+// note that you can't add a consumer after the Event store has been started.
+func (e *eventStoreImpl[T]) AddConsumer(consumerID string) {
+	e.consumers[consumerID] = &consumer{Offset: e.lastOffset}
+}
+
+// ProcessPendingEvents is processing all the available item in the Event store for this consumer
+// with the process events function in parameter,
+func (e *eventStoreImpl[T]) ProcessPendingEvents(
+	consumerID string, processEventsFunc func(context.Context, []T) error) error {
+	e.mutex.Lock()
+	defer e.mutex.Unlock()
+
+	eventList, err := e.fetchPendingEvents(consumerID)
+	if err != nil {
+		return err
+	}
+	err = processEventsFunc(context.Background(), eventList.Events)
+	if err != nil {
+		return err
+	}
+	err = e.updateConsumerOffset(consumerID, eventList.NewOffset)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // GetTotalEventCount returns the total number of events in the store.
@@ -88,31 +113,31 @@ func (e *eventStoreImpl[T]) GetTotalEventCount() int64 {
 }
 
 // GetPendingEventCount is returning the number items available in the Event store for this consumer.
-func (e *eventStoreImpl[T]) GetPendingEventCount(consumerName string) (int64, error) {
+func (e *eventStoreImpl[T]) GetPendingEventCount(consumerID string) (int64, error) {
 	e.mutex.RLock()
 	defer e.mutex.RUnlock()
-	consumer, ok := e.consumers[consumerName]
+	consumer, ok := e.consumers[consumerID]
 	if !ok {
-		return 0, fmt.Errorf("consumer with name %s not found", consumerName)
+		return 0, fmt.Errorf("consumer with name %s not found", consumerID)
 	}
 	return e.lastOffset - consumer.Offset, nil
 }
 
 // Add is adding item of type T in the Event store.
 func (e *eventStoreImpl[T]) Add(data T) {
+	fmt.Println("add", e.lastOffset)
 	e.mutex.Lock()
 	defer e.mutex.Unlock()
-	e.lastOffset++
+	e.lastOffset = e.lastOffset + 1
 	e.events = append(e.events, Event[T]{Offset: e.lastOffset, Data: data})
 }
 
-// FetchPendingEvents is returning all the available item in the Event store for this consumer.
-func (e *eventStoreImpl[T]) FetchPendingEvents(consumerName string) (*EventList[T], error) {
-	e.mutex.RLock()
-	defer e.mutex.RUnlock()
-	currentConsumer, ok := e.consumers[consumerName]
+// fetchPendingEvents is returning all the available item in the Event store for this consumer.
+// WARNING: please call this function only in a function that has locked the mutex first.
+func (e *eventStoreImpl[T]) fetchPendingEvents(consumerID string) (*EventList[T], error) {
+	currentConsumer, ok := e.consumers[consumerID]
 	if !ok {
-		return nil, fmt.Errorf("consumer with name %s not found", consumerName)
+		return nil, fmt.Errorf("consumer with name %s not found", consumerID)
 	}
 	events := make([]T, 0)
 	for _, event := range e.events {
@@ -123,17 +148,16 @@ func (e *eventStoreImpl[T]) FetchPendingEvents(consumerName string) (*EventList[
 	return &EventList[T]{Events: events, InitialOffset: currentConsumer.Offset, NewOffset: e.lastOffset}, nil
 }
 
-// UpdateConsumerOffset updates the offset of the consumer to the new offset.
-func (e *eventStoreImpl[T]) UpdateConsumerOffset(consumerName string, offset int64) error {
-	e.mutex.Lock()
-	defer e.mutex.Unlock()
+// updateConsumerOffset updates the offset of the consumer to the new offset.
+// WARNING: please call this function only in a function that has locked the mutex first.
+func (e *eventStoreImpl[T]) updateConsumerOffset(consumerID string, offset int64) error {
 	if offset > e.lastOffset {
 		return fmt.Errorf("invalid offset: offset %d is greater than the last offset %d", offset, e.lastOffset)
 	}
-	if _, ok := e.consumers[consumerName]; !ok {
-		return fmt.Errorf("invalid offset consumerName %s", consumerName)
+	if _, ok := e.consumers[consumerID]; !ok {
+		return fmt.Errorf("invalid offset consumerID %s", consumerID)
 	}
-	e.consumers[consumerName].Offset = e.lastOffset
+	e.consumers[consumerID].Offset = e.lastOffset
 	return nil
 }
 

@@ -3,6 +3,7 @@ package exporter_test
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"os"
 	"testing"
@@ -347,4 +348,49 @@ func TestDataExporterManager_multipleExportersWithDifferentFlushInterval(t *test
 	time.Sleep(200 * time.Millisecond)
 	assert.True(t, len(mockExporter1.GetExportedEvents()) > 0)
 	assert.True(t, len(mockExporter2.GetExportedEvents()) > 0)
+}
+
+func TestDataExporterManager_ValidateNumberOfEvents(t *testing.T) {
+	// We are running the same test multiple times to have more chance to have a race condition.
+	for i := 1; i < 20; i++ {
+		t.Run(fmt.Sprintf("ValidateNumberOfEvents #%d", i), func(t *testing.T) {
+			mockExporter := mock.Exporter{Bulk: true}
+			// Init ffclient with a file retriever.
+			err := ffclient.Init(ffclient.Config{
+				PollingInterval: 10 * time.Second,
+				LeveledLogger:   slog.Default(),
+				Context:         context.Background(),
+				Retriever: &fileretriever.Retriever{
+					Path: "../testdata/flag-config.yaml",
+				},
+				DataExporter: ffclient.DataExporter{
+					FlushInterval:    150 * time.Millisecond,
+					MaxEventInMemory: 100,
+					Exporter:         &mockExporter,
+				},
+			})
+			assert.NoError(t, err)
+
+			// create users
+			user1 := ffcontext.
+				NewEvaluationContextBuilder("aea2fdc1-b9a0-417a-b707-0c9083de68e3").
+				AddCustom("anonymous", true).
+				Build()
+			user2 := ffcontext.NewEvaluationContext("332460b9-a8aa-4f7a-bc5d-9cc33632df9a")
+
+			_, _ = ffclient.BoolVariation("test-flag", user1, false)
+			_, _ = ffclient.BoolVariation("test-flag", user2, false)
+			_, _ = ffclient.StringVariation("test-flag2", user1, "defaultValue")
+			_, _ = ffclient.JSONVariation("test-flag2", user1, map[string]interface{}{"test": "toto"})
+			time.Sleep(300 * time.Millisecond)
+			assert.Equal(t, 4, len(mockExporter.GetExportedEvents()))
+
+			// Wait 2 seconds to have a second file
+			_, _ = ffclient.BoolVariation("test-flag", user1, false)
+			_, _ = ffclient.BoolVariation("test-flag", user2, false)
+			ffclient.Close() // a flush is triggered here
+			assert.Equal(t, 6, len(mockExporter.GetExportedEvents()))
+		})
+	}
+
 }

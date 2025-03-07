@@ -62,7 +62,6 @@ func (m *managerImpl[T]) AddEvent(event T) {
 			m.logger.Error("error while fetching pending events", err)
 			continue
 		}
-
 		if count >= consumer.GetMaxEventInMemory() {
 			consumer.Flush()
 			continue

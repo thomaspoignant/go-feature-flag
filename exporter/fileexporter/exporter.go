@@ -74,7 +74,6 @@ func (f *Exporter) Export(_ context.Context, _ *fflog.FFLogger, featureEvents []
 
 	// Handle empty OutputDir and remove trailing slash
 	outputDir := strings.TrimRight(f.OutputDir, "/")
-
 	var filePath string
 	if outputDir == "" {
 		filePath = filename

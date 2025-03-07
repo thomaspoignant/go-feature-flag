@@ -38,33 +38,7 @@ func TestDataExporterFlush_TriggerError(t *testing.T) {
 	// flush should error and not return any event
 	assert.Equal(t, 0, len(exporterMock.GetExportedEvents()))
 	logContent, _ := os.ReadFile(logFile.Name())
-	assert.Equal(t, "error while fetching pending events\n", string(logContent))
-}
-
-func TestDataExporterFlush_TriggerErrorOnUpdateOffset(t *testing.T) {
-	evStore := mock.NewEventStore[exporter.FeatureEvent]()
-	for i := 0; i < 100; i++ {
-		evStore.Add(exporter.FeatureEvent{
-			Kind: "feature",
-		})
-	}
-	logFile, _ := os.CreateTemp("", "")
-	textHandler := slogutil.MessageOnlyHandler{Writer: logFile}
-	logger := &fflog.FFLogger{LeveledLogger: slog.New(&textHandler)}
-	defer func() { _ = os.Remove(logFile.Name()) }()
-
-	exporterMock := mock.Exporter{}
-	exp := exporter.NewDataExporter[exporter.FeatureEvent](context.TODO(), exporter.Config{
-		Exporter:         &exporterMock,
-		FlushInterval:    0,
-		MaxEventInMemory: 0,
-	}, "error_update", &evStore, logger)
-
-	exp.Flush()
-	// flush should error and not return any event
-	assert.Equal(t, 100, len(exporterMock.GetExportedEvents()))
-	logContent, _ := os.ReadFile(logFile.Name())
-	assert.Equal(t, "error while updating offset\n", string(logContent))
+	assert.Equal(t, "error\n", string(logContent))
 }
 
 func TestDataExporterFlush_TriggerErrorIfNotKnowType(t *testing.T) {
