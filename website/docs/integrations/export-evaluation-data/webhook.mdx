@@ -59,9 +59,9 @@ configuration to your relay proxy configuration file:
 
 ```yaml title="goff-proxy.yaml"
 # ...
-exporter:
-  kind: webhook
-  endpointUrl: https://your-webhook-url.com/
+exporters:
+  - kind: webhook
+    endpointUrl: https://your-webhook-url.com/
 # ...
 ```
 
