@@ -133,8 +133,8 @@ func New(config Config) (*GoFeatureFlag, error) {
 					MaxEventInMemory: exp.MaxEventInMemory,
 				}
 			}
-			goFF.dataExporter =
-				exporter.NewManager[exporter.FeatureEvent](config.Context, expConfigs, goFF.config.internalLogger)
+			goFF.dataExporter = exporter.NewManager[exporter.FeatureEvent](
+				config.Context, expConfigs, config.ExporterCleanQueueInterval, goFF.config.internalLogger)
 			go goFF.dataExporter.Start()
 		}
 	}

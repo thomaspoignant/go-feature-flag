@@ -20,17 +20,17 @@ type eventStoreImpl[T any] struct {
 	lastOffset int64
 	// stopPeriodicCleaning is a channel to stop the periodic cleaning goroutine
 	stopPeriodicCleaning chan struct{}
-	// cleanQueueDuration is the duration between each cleaning
-	cleanQueueDuration time.Duration
+	// cleanQueueInterval is the duration between each cleaning
+	cleanQueueInterval time.Duration
 }
 
-func NewEventStore[T any](cleanQueueDuration time.Duration) EventStore[T] {
+func NewEventStore[T any](cleanQueueInterval time.Duration) EventStore[T] {
 	store := &eventStoreImpl[T]{
 		events:               make([]Event[T], 0),
 		mutex:                sync.RWMutex{},
 		lastOffset:           minOffset,
 		stopPeriodicCleaning: make(chan struct{}),
-		cleanQueueDuration:   cleanQueueDuration,
+		cleanQueueInterval:   cleanQueueInterval,
 		consumers:            make(map[string]*consumer),
 	}
 	go store.periodicCleanQueue()
@@ -166,7 +166,7 @@ func (e *eventStoreImpl[T]) cleanQueue() {
 
 // periodicCleanQueue periodically cleans the queue
 func (e *eventStoreImpl[T]) periodicCleanQueue() {
-	ticker := time.NewTicker(e.cleanQueueDuration)
+	ticker := time.NewTicker(e.cleanQueueInterval)
 	defer ticker.Stop()
 	for {
 		select {

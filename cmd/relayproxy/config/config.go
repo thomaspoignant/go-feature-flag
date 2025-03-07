@@ -259,6 +259,11 @@ type Config struct {
 	// Exporters is the exact same things than Exporter but allows to give more than 1 exporter at the time.
 	Exporters *[]ExporterConf `mapstructure:"exporters" koanf:"exporters"`
 
+	// ExporterCleanQueueInterval (optional) is the duration between each cleaning of the queue by the thread in charge
+	// of removing the old events.
+	// Default: 1 minute
+	ExporterCleanQueueInterval time.Duration `mapstructure:"exporterCleanQueueInterval" koanf:"exportercleanqueueinterval"`
+
 	// Notifiers is the configuration on where to notify a flag change
 	Notifiers []NotifierConf `mapstructure:"notifier" koanf:"notifier"`
 

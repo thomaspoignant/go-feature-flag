@@ -20,12 +20,17 @@ type managerImpl[T any] struct {
 	eventStore *EventStore[T]
 }
 
-func NewManager[T any](ctx context.Context, exporters []Config, logger *fflog.FFLogger) Manager[T] {
+func NewManager[T any](ctx context.Context, exporters []Config, ExporterCleanQueueInterval time.Duration, logger *fflog.FFLogger) Manager[T] {
 	if ctx == nil {
 		ctx = context.Background()
 	}
 
-	evStore := NewEventStore[T](30 * time.Second)
+	if ExporterCleanQueueInterval == 0 {
+		// default value for the exporterCleanQueueDuration is 1 minute
+		ExporterCleanQueueInterval = 1 * time.Minute
+	}
+
+	evStore := NewEventStore[T](ExporterCleanQueueInterval)
 	consumers := make([]DataExporter[T], len(exporters))
 	for index, exporter := range exporters {
 		consumerID := uuid.New().String()

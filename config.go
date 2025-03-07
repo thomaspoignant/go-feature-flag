@@ -78,6 +78,11 @@ type Config struct {
 	// Multiple exporters can be used to send data to multiple destinations in parallel without interference.
 	DataExporters []DataExporter
 
+	// ExporterCleanQueueInterval (optional) is the duration between each cleaning of the queue by the thread in charge
+	// of removing the old events.
+	// Default: 1 minute
+	ExporterCleanQueueInterval time.Duration
+
 	// StartWithRetrieverError (optional) If true, the SDK will start even if we did not get any flags from the retriever.
 	// It will serve only default values until all the retrievers returns the flags.
 	// The init method will not return any error if the flag file is unreachable.
