@@ -116,9 +116,9 @@ func (e *eventStoreImpl[T]) GetTotalEventCount() int64 {
 func (e *eventStoreImpl[T]) GetPendingEventCount(consumerID string) (int64, error) {
 	e.mutex.RLock()
 	defer e.mutex.RUnlock()
-	consumer, ok := e.consumers[consumerID]
-	if !ok {
-		return 0, fmt.Errorf("consumer with name %s not found", consumerID)
+	consumer, err := e.getConsumer(consumerID)
+	if err != nil {
+		return 0, err
 	}
 	return e.lastOffset - consumer.Offset, nil
 }
@@ -135,9 +135,9 @@ func (e *eventStoreImpl[T]) Add(data T) {
 // fetchPendingEvents is returning all the available item in the Event store for this consumer.
 // WARNING: please call this function only in a function that has locked the mutex first.
 func (e *eventStoreImpl[T]) fetchPendingEvents(consumerID string) (*EventList[T], error) {
-	currentConsumer, ok := e.consumers[consumerID]
-	if !ok {
-		return nil, fmt.Errorf("consumer with name %s not found", consumerID)
+	currentConsumer, err := e.getConsumer(consumerID)
+	if err != nil {
+		return nil, err
 	}
 	events := make([]T, 0)
 	for _, event := range e.events {
@@ -148,16 +148,26 @@ func (e *eventStoreImpl[T]) fetchPendingEvents(consumerID string) (*EventList[T]
 	return &EventList[T]{Events: events, InitialOffset: currentConsumer.Offset, NewOffset: e.lastOffset}, nil
 }
 
+// getConsumer checks if the consumer exists and returns it.
+func (e *eventStoreImpl[T]) getConsumer(consumerID string) (*consumer, error) {
+	currentConsumer, ok := e.consumers[consumerID]
+	if !ok {
+		return nil, fmt.Errorf("consumer with name %s not found", consumerID)
+	}
+	return currentConsumer, nil
+}
+
 // updateConsumerOffset updates the offset of the consumer to the new offset.
 // WARNING: please call this function only in a function that has locked the mutex first.
 func (e *eventStoreImpl[T]) updateConsumerOffset(consumerID string, offset int64) error {
 	if offset > e.lastOffset {
 		return fmt.Errorf("invalid offset: offset %d is greater than the last offset %d", offset, e.lastOffset)
 	}
-	if _, ok := e.consumers[consumerID]; !ok {
-		return fmt.Errorf("invalid offset consumerID %s", consumerID)
+	currentConsumer, err := e.getConsumer(consumerID)
+	if err != nil {
+		return err
 	}
-	e.consumers[consumerID].Offset = e.lastOffset
+	currentConsumer.Offset = e.lastOffset
 	return nil
 }
 
