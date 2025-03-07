@@ -346,7 +346,6 @@ func Test_initRetrievers(t *testing.T) {
 				assert.Len(t, r, nbRetriever)
 			}
 		})
-
 	}
 }
 
