@@ -10,7 +10,7 @@ import (
 
 const minOffset = int64(math.MinInt64)
 
-type eventStoreImpl[T any] struct {
+type eventStoreImpl[T ExportableEvent] struct {
 	// events is a list of events to store
 	events []Event[T]
 	// mutex to protect the events and consumers
@@ -25,7 +25,7 @@ type eventStoreImpl[T any] struct {
 	cleanQueueInterval time.Duration
 }
 
-func NewEventStore[T any](cleanQueueInterval time.Duration) EventStore[T] {
+func NewEventStore[T ExportableEvent](cleanQueueInterval time.Duration) EventStore[T] {
 	store := &eventStoreImpl[T]{
 		events:               make([]Event[T], 0),
 		mutex:                sync.RWMutex{},
@@ -38,7 +38,7 @@ func NewEventStore[T any](cleanQueueInterval time.Duration) EventStore[T] {
 	return store
 }
 
-type EventList[T any] struct {
+type EventList[T ExportableEvent] struct {
 	Events        []T
 	InitialOffset int64
 	NewOffset     int64
@@ -46,7 +46,7 @@ type EventList[T any] struct {
 
 // EventStore is the interface to store events and consume them.
 // It is a simple implementation of a queue with offsets.
-type EventStore[T any] interface {
+type EventStore[T ExportableEvent] interface {
 	// AddConsumer is adding a new consumer to the Event store.
 	// note that you can't add a consumer after the Event store has been started.
 	AddConsumer(consumerID string)
@@ -68,7 +68,7 @@ type EventStore[T any] interface {
 	Stop()
 }
 
-type Event[T any] struct {
+type Event[T ExportableEvent] struct {
 	Offset int64
 	Data   T
 }

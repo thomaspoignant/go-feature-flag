@@ -15,7 +15,7 @@ const (
 	defaultMaxEventInMemory = int64(100000)
 )
 
-type DataExporter[T any] interface {
+type DataExporter[T ExportableEvent] interface {
 	// Start is launching the ticker to periodically flush the data
 	Start()
 	// Stop is stopping the ticker
@@ -35,7 +35,7 @@ type Config struct {
 	MaxEventInMemory int64
 }
 
-type dataExporterImpl[T any] struct {
+type dataExporterImpl[T ExportableEvent] struct {
 	ctx        context.Context
 	consumerID string
 	eventStore *EventStore[T]
@@ -48,7 +48,7 @@ type dataExporterImpl[T any] struct {
 
 // NewDataExporter create a new DataExporter with the given exporter and his consumer information to consume the data
 // from the shared event store.
-func NewDataExporter[T any](ctx context.Context, exporter Config, consumerID string,
+func NewDataExporter[T ExportableEvent](ctx context.Context, exporter Config, consumerID string,
 	eventStore *EventStore[T], logger *fflog.FFLogger) DataExporter[T] {
 	if ctx == nil {
 		ctx = context.Background()
