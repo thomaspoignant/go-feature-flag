@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	ffclient "github.com/thomaspoignant/go-feature-flag"
+	"github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/azureexporter"
@@ -236,6 +236,206 @@ func Test_initRetriever(t *testing.T) {
 				if !tt.skipCompleteValidation {
 					assert.Equal(t, tt.want, got)
 				}
+			}
+		})
+	}
+}
+func Test_initRetrievers(t *testing.T) {
+	tests := []struct {
+		name       string
+		retrievers *[]config.RetrieverConf
+		retriever  *config.RetrieverConf
+		wantErr    assert.ErrorAssertionFunc
+	}{
+		{
+			name:    "both retriever and retrievers",
+			wantErr: assert.NoError,
+			retrievers: &[]config.RetrieverConf{
+				{
+					Kind:           "bitbucket",
+					Branch:         "develop",
+					RepositorySlug: "gofeatureflag/config-repo",
+					Path:           "flags/config.goff.yaml",
+					AuthToken:      "XXX_BITBUCKET_TOKEN",
+					BaseURL:        "https://api.bitbucket.goff.org",
+				},
+			},
+			retriever: &config.RetrieverConf{
+				Kind:           "bitbucket",
+				Branch:         "main",
+				RepositorySlug: "gofeatureflag/config-repo",
+				Path:           "flags/config.goff.yaml",
+				AuthToken:      "XXX_BITBUCKET_TOKEN",
+				BaseURL:        "https://api.bitbucket.goff.org",
+			},
+		},
+		{
+			name:    "should error with invalid retriever",
+			wantErr: assert.Error,
+			retrievers: &[]config.RetrieverConf{
+				{
+					Kind:           "bitbucket",
+					Branch:         "develop",
+					RepositorySlug: "gofeatureflag/config-repo",
+					Path:           "flags/config.goff.yaml",
+					AuthToken:      "XXX_BITBUCKET_TOKEN",
+					BaseURL:        "https://api.bitbucket.goff.org",
+				},
+			},
+			retriever: &config.RetrieverConf{
+				Kind: "unknown",
+			},
+		},
+		{
+			name:    "should error with invalid retriever",
+			wantErr: assert.Error,
+			retrievers: &[]config.RetrieverConf{
+				{
+					Kind: "unknown",
+				},
+			},
+		},
+		{
+			name:    "only retriever",
+			wantErr: assert.NoError,
+			retriever: &config.RetrieverConf{
+				Kind:           "bitbucket",
+				Branch:         "main",
+				RepositorySlug: "gofeatureflag/config-repo",
+				Path:           "flags/config.goff.yaml",
+				AuthToken:      "XXX_BITBUCKET_TOKEN",
+				BaseURL:        "https://api.bitbucket.goff.org",
+			},
+		},
+		{
+			name:    "only retrievers",
+			wantErr: assert.NoError,
+			retrievers: &[]config.RetrieverConf{
+				{
+					Kind:           "bitbucket",
+					Branch:         "develop",
+					RepositorySlug: "gofeatureflag/config-repo",
+					Path:           "flags/config.goff.yaml",
+					AuthToken:      "XXX_BITBUCKET_TOKEN",
+					BaseURL:        "https://api.bitbucket.goff.org",
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			proxyConf := config.Config{
+				Retrievers: tt.retrievers,
+				Retriever:  tt.retriever,
+			}
+			r, err := initRetrievers(&proxyConf)
+			tt.wantErr(t, err)
+			if r != nil {
+				nbRetriever := 0
+				if tt.retrievers != nil {
+					nbRetriever += len(*tt.retrievers)
+				}
+				if tt.retriever != nil {
+					nbRetriever++
+				}
+				assert.Len(t, r, nbRetriever)
+			}
+		})
+	}
+}
+
+func Test_initExporters(t *testing.T) {
+	tests := []struct {
+		name      string
+		exporters *[]config.ExporterConf
+		exporter  *config.ExporterConf
+		wantErr   assert.ErrorAssertionFunc
+	}{
+		{
+			name:    "both exporter and exporters",
+			wantErr: assert.NoError,
+			exporter: &config.ExporterConf{
+				Kind:        "webhook",
+				EndpointURL: "https://gofeatureflag.org/webhook-example",
+				Secret:      "1234",
+			},
+			exporters: &[]config.ExporterConf{
+				{
+					Kind:        "webhook",
+					EndpointURL: "https://gofeatureflag.org/webhook-example",
+					Secret:      "1234",
+				},
+			},
+		},
+		{
+			name:    "exporter only",
+			wantErr: assert.NoError,
+			exporter: &config.ExporterConf{
+				Kind:        "webhook",
+				EndpointURL: "https://gofeatureflag.org/webhook-example",
+				Secret:      "1234",
+			},
+		},
+		{
+			name:    "exporters only",
+			wantErr: assert.NoError,
+			exporters: &[]config.ExporterConf{
+				{
+					Kind:        "webhook",
+					EndpointURL: "https://gofeatureflag.org/webhook-example",
+					Secret:      "1234",
+				},
+			},
+		},
+		{
+			name:    "invalid exporter",
+			wantErr: assert.Error,
+			exporter: &config.ExporterConf{
+				Kind: "invalid",
+			},
+			exporters: &[]config.ExporterConf{
+				{
+					Kind:        "webhook",
+					EndpointURL: "https://gofeatureflag.org/webhook-example",
+					Secret:      "1234",
+				},
+			},
+		},
+		{
+			name:    "invalid exporters",
+			wantErr: assert.Error,
+			exporter: &config.ExporterConf{
+
+				Kind:        "webhook",
+				EndpointURL: "https://gofeatureflag.org/webhook-example",
+				Secret:      "1234",
+			},
+			exporters: &[]config.ExporterConf{
+				{
+					Kind: "invalid",
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			proxyConf := config.Config{
+				Exporters: tt.exporters,
+				Exporter:  tt.exporter,
+			}
+			r, err := initDataExporters(&proxyConf)
+			tt.wantErr(t, err)
+			if r != nil {
+				nbExp := 0
+				if tt.exporters != nil {
+					nbExp += len(*tt.exporters)
+				}
+				if tt.exporter != nil {
+					nbExp++
+				}
+				assert.Len(t, r, nbExp)
 			}
 		})
 	}

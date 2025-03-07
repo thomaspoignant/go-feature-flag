@@ -22,9 +22,9 @@ configuration to your relay proxy configuration file:
 
 ```yaml title="goff-proxy.yaml"
 # ...
-exporter:
-  kind: sqs
-  queueUrl: "https://sqs.us-east-1.amazonaws/XXXX/test-queue"
+exporters:
+  - kind: sqs
+    queueUrl: "https://sqs.us-east-1.amazonaws/XXXX/test-queue"
 # ...
 ```
 | Field name |   Mandatory   | Type   | Default  | Description                                                                                           |
