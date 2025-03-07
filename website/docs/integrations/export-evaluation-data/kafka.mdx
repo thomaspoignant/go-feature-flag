@@ -22,12 +22,12 @@ configuration to your relay proxy configuration file:
 
 ```yaml title="goff-proxy.yaml"
 # ...
-exporter:
-  kind: kafka
-  kafka:
-    topic: "go-feature-flag-events"
-    addresses:
-      - "localhost:9092"
+exporters:
+  - kind: kafka
+    kafka:
+      topic: "go-feature-flag-events"
+      addresses:
+        - "localhost:9092"
 # ...
 ```
 

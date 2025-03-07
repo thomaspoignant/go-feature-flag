@@ -46,7 +46,7 @@ type GoFeatureFlag struct {
 	cache            cache.Manager
 	config           Config
 	bgUpdater        backgroundUpdater
-	dataExporter     *exporter.Scheduler
+	dataExporter     exporter.Manager[exporter.FeatureEvent]
 	retrieverManager *retriever.Manager
 }
 
@@ -122,15 +122,20 @@ func New(config Config) (*GoFeatureFlag, error) {
 
 		go goFF.startFlagUpdaterDaemon()
 
-		if goFF.config.DataExporter.Exporter != nil {
+		exporters := goFF.config.GetDataExporters()
+		if len(exporters) > 0 {
 			// init the data exporter
-			goFF.dataExporter = exporter.NewScheduler(goFF.config.Context, goFF.config.DataExporter.FlushInterval,
-				goFF.config.DataExporter.MaxEventInMemory, goFF.config.DataExporter.Exporter, goFF.config.internalLogger)
-
-			// we start the daemon only if we have a bulk exporter
-			if goFF.config.DataExporter.Exporter.IsBulk() {
-				go goFF.dataExporter.StartDaemon()
+			expConfigs := make([]exporter.Config, len(exporters))
+			for index, exp := range exporters {
+				expConfigs[index] = exporter.Config{
+					Exporter:         exp.Exporter,
+					FlushInterval:    exp.FlushInterval,
+					MaxEventInMemory: exp.MaxEventInMemory,
+				}
 			}
+			goFF.dataExporter = exporter.NewManager[exporter.FeatureEvent](
+				config.Context, expConfigs, config.ExporterCleanQueueInterval, goFF.config.internalLogger)
+			go goFF.dataExporter.Start()
 		}
 	}
 	config.internalLogger.Debug("GO Feature Flag is initialized")
@@ -178,7 +183,7 @@ func (g *GoFeatureFlag) Close() {
 		}
 
 		if g.dataExporter != nil {
-			g.dataExporter.Close()
+			g.dataExporter.Stop()
 		}
 		if g.retrieverManager != nil {
 			_ = g.retrieverManager.Shutdown(g.config.Context)

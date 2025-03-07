@@ -38,7 +38,7 @@ func NewFeatureEvent(
 	}
 }
 
-// FeatureEvent represent an event that we store in the data storage
+// FeatureEvent represent an Event that we store in the data storage
 // nolint:lll
 type FeatureEvent struct {
 	// Kind for a feature event is feature.

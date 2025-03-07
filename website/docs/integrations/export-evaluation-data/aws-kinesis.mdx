@@ -22,9 +22,9 @@ configuration to your relay proxy configuration file:
 
 ```yaml title="goff-proxy.yaml"
 # ...
-exporter:
-  kind: kinesis
-  streamArn: "arn:aws:kinesis:us-east-1:XXXX:stream/test-stream"
+exporters:
+  - kind: kinesis
+    streamArn: "arn:aws:kinesis:us-east-1:XXXX:stream/test-stream"
 # ...
 ```
 
