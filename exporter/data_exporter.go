@@ -46,6 +46,8 @@ type dataExporterImpl[T any] struct {
 	ticker     *time.Ticker
 }
 
+// NewDataExporter create a new DataExporter with the given exporter and his consumer information to consume the data
+// from the shared event store.
 func NewDataExporter[T any](ctx context.Context, exporter Config, consumerID string,
 	eventStore *EventStore[T], logger *fflog.FFLogger) DataExporter[T] {
 	if ctx == nil {
@@ -71,6 +73,8 @@ func NewDataExporter[T any](ctx context.Context, exporter Config, consumerID str
 	}
 }
 
+// Start is launching the ticker to periodically flush the data
+// If we have a live exporter we don't start the daemon.
 func (d *dataExporterImpl[T]) Start() {
 	// we don't start the daemon if we are not in bulk mode
 	if !d.IsBulk() {
@@ -88,6 +92,7 @@ func (d *dataExporterImpl[T]) Start() {
 	}
 }
 
+// Stop is flushing the daya and stopping the ticker
 func (d *dataExporterImpl[T]) Stop() {
 	// we don't start the daemon if we are not in bulk mode
 	if !d.IsBulk() {
@@ -99,6 +104,7 @@ func (d *dataExporterImpl[T]) Stop() {
 	d.Flush()
 }
 
+// Flush is sending the data to the exporter
 func (d *dataExporterImpl[T]) Flush() {
 	store := *d.eventStore
 	eventList, err := store.FetchPendingEvents(d.consumerID)
@@ -118,17 +124,22 @@ func (d *dataExporterImpl[T]) Flush() {
 	}
 }
 
+// IsBulk return false if we should directly send the data as soon as it is produce
 func (d *dataExporterImpl[T]) IsBulk() bool {
 	return d.exporter.Exporter.IsBulk()
 }
 
+// GetConsumerID return the consumer ID used in the event store
 func (d *dataExporterImpl[T]) GetConsumerID() string {
 	return d.consumerID
 }
+
+// GetMaxEventInMemory return the maximum number of event you keep in the cache before calling Flush()
 func (d *dataExporterImpl[T]) GetMaxEventInMemory() int64 {
 	return d.exporter.MaxEventInMemory
 }
 
+// sendEvents is sending the events to the exporter.
 func (d *dataExporterImpl[T]) sendEvents(ctx context.Context, events []T) error {
 	if len(events) == 0 {
 		return nil
