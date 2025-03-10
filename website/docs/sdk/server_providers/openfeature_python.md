@@ -65,9 +65,9 @@ evaluation_ctx = EvaluationContext(
 )
 
 admin_flag = client.get_boolean_value(
-          flag_key=flag_key,
-          default_value=default_value,
-          evaluation_context=ctx,
+          flag_key="flag-only-for-admin",
+          default_value=False,
+          evaluation_context=evaluation_ctx,
       )
 
 if admin_flag:
