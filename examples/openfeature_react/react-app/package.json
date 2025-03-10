@@ -21,7 +21,7 @@
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@typescript-eslint/eslint-plugin": "^8.26.0",
-    "@typescript-eslint/parser": "^8.25.0",
+    "@typescript-eslint/parser": "^8.26.0",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
     "eslint": "^9.21.0",
