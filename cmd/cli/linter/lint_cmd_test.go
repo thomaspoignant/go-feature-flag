@@ -27,7 +27,7 @@ func TestCmdLint(t *testing.T) {
 			name:          "invalid configuration",
 			args:          []string{"testdata/invalid.json", "--format=json"},
 			wantErr:       assert.Error,
-			expectedError: "testdata/invalid.json: could not parse file: invalid character ':' after top-level value\nError: invalid GO Feature Flag configuration\n",
+			expectedError: "testdata/invalid.json: could not parse file (json): invalid character ':' after top-level value\nError: invalid GO Feature Flag configuration\n",
 		},
 		{
 			name:    "valid configuration",
