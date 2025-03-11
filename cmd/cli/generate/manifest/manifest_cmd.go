@@ -13,8 +13,8 @@ var (
 func NewManifestCmd() *cobra.Command {
 	manifestCmd := &cobra.Command{
 		Use:   "manifest",
-		Short: "📄 Generate an OpenFeature flag manifest based on your flag configuration.",
-		Long: "📄 Generate an OpenFeature flag manifest based on your flag configuration. " +
+		Short: "📄 (experimental) Generate an OpenFeature flag manifest based on your flags configuration.",
+		Long: "📄 (experimental) Generate an OpenFeature flag manifest based on your flags configuration. " +
 			"⚠️ note that this is an experimental feature and we may change this command line without warning.",
 
 		RunE: func(cmd *cobra.Command, args []string) error {
