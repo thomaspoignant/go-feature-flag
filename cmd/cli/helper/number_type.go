@@ -18,7 +18,7 @@ func GetFlagTypeFromVariations(variations map[string]*interface{}) (model.FlagTy
 			continue
 		}
 		vv := *val
-		switch v := vv.(type) {
+		switch vv.(type) {
 		case bool:
 			variationTypes[model.FlagTypeBoolean] = interface{}(nil)
 			break
@@ -35,7 +35,7 @@ func GetFlagTypeFromVariations(variations map[string]*interface{}) (model.FlagTy
 			variationTypes[model.FlagTypeObject] = interface{}(nil)
 			break
 		default:
-			fmt.Printf("Unknown type, value: %v\n", v)
+			// do nothing here
 			continue
 		}
 	}
