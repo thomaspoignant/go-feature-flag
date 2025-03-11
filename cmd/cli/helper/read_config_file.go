@@ -53,20 +53,20 @@ func readConfigFile(configFile string, configFormat string) (map[string]dto.DTO,
 	case "toml":
 		err := toml.Unmarshal(dat, &flags)
 		if err != nil {
-			return nil, fmt.Errorf("%s: could not parse file: %w", configFile, err)
+			return nil, fmt.Errorf("%s: could not parse file (toml): %w", configFile, err)
 		}
 		return flags, nil
 	case "json":
 		err := json.Unmarshal(dat, &flags)
 		if err != nil {
-			return nil, fmt.Errorf("%s: could not parse file: %w", configFile, err)
+			return nil, fmt.Errorf("%s: could not parse file (json): %w", configFile, err)
 		}
 		return flags, nil
 	default:
 		// default is YAML
 		err := yaml.Unmarshal(dat, &flags)
 		if err != nil {
-			return nil, fmt.Errorf("%s: could not parse file: %w", configFile, err)
+			return nil, fmt.Errorf("%s: could not parse file (yaml): %w", configFile, err)
 		}
 		return flags, nil
 	}
