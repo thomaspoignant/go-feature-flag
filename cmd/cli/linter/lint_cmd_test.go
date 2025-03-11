@@ -21,7 +21,7 @@ func TestCmdLint(t *testing.T) {
 			name:          "missing configuration file location",
 			args:          []string{"--format=json"},
 			wantErr:       assert.Error,
-			expectedError: "Error: missing configuration file location argument, please provide the location of the configuration file\n",
+			expectedError: "impossible to find config file in the default locations [./,/goff/,/etc/opt/goff/]\nError: invalid GO Feature Flag configuration\n",
 		},
 		{
 			name:          "invalid configuration",

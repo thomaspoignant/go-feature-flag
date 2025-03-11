@@ -15,7 +15,7 @@ test-flag:
   metadata:
     description: this is a simple feature flag
     issue-link: https://jira.xxx/GOFF-01
-    default: false
+    defaultValue: false
 
 test-flag2:
   variations:
@@ -32,7 +32,7 @@ test-flag2:
     name: defaultRule
     variation: Default
   metadata:
-    default: false
+    defaultValue: false
 
 
 test-flag3:
@@ -50,6 +50,5 @@ test-flag3:
     name: defaultRule
     variation: Default
   metadata:
-    default: 1
+    defaultValue: 1
     description: totot
-
