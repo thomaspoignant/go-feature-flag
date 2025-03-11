@@ -10,11 +10,6 @@ import (
 )
 
 func TestManifestCmd(t *testing.T) {
-	type args struct {
-		config         string
-		format         string
-		setDestination bool
-	}
 	tests := []struct {
 		name             string
 		args             []string

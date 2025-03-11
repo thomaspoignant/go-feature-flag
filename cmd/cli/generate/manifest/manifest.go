@@ -31,7 +31,6 @@ type Manifest struct {
 
 // Generate the manifest file
 func (m *Manifest) Generate() (helper.Output, error) {
-	output := helper.Output{}
 	definitions, output, err := m.generateDefinitions(m.dtos)
 	if err != nil {
 		return output, err
@@ -90,5 +89,5 @@ func (m *Manifest) toJSON(definitions map[string]model.FlagDefinition) (string, 
 }
 
 func (m *Manifest) storeManifest(definitionsJSON string) error {
-	return os.WriteFile(m.flagManifestDestination, []byte(definitionsJSON), 0644)
+	return os.WriteFile(m.flagManifestDestination, []byte(definitionsJSON), 0600)
 }

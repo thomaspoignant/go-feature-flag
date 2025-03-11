@@ -17,7 +17,7 @@ func NewManifestCmd() *cobra.Command {
 		Long: "📄 (experimental) Generate an OpenFeature flag manifest based on your flags configuration. " +
 			"⚠️ note that this is an experimental feature and we may change this command line without warning.",
 
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			m, _ := NewManifest(manifestConfigFile, manifestFlagFormat, flagManifestDestination)
 			output, err := m.Generate()
 			if err != nil {
