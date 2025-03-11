@@ -5,8 +5,8 @@ import (
 )
 
 var (
-	evalFlagFormat          string
-	evalConfigFile          string
+	manifestFlagFormat      string
+	manifestConfigFile      string
 	flagManifestDestination string
 )
 
@@ -18,7 +18,7 @@ func NewManifestCmd() *cobra.Command {
 			"⚠️ note that this is an experimental feature and we may change this command line without warning.",
 
 		RunE: func(cmd *cobra.Command, args []string) error {
-			m, _ := NewManifest(evalConfigFile, evalFlagFormat, flagManifestDestination)
+			m, _ := NewManifest(manifestConfigFile, manifestFlagFormat, flagManifestDestination)
 			output, err := m.Generate()
 			if err != nil {
 				cmd.SilenceUsage = true
@@ -28,9 +28,9 @@ func NewManifestCmd() *cobra.Command {
 			return nil
 		},
 	}
-	manifestCmd.Flags().StringVarP(&evalFlagFormat,
+	manifestCmd.Flags().StringVarP(&manifestFlagFormat,
 		"format", "f", "yaml", "Format of your input file (YAML, JSON or TOML)")
-	manifestCmd.Flags().StringVarP(&evalConfigFile,
+	manifestCmd.Flags().StringVarP(&manifestConfigFile,
 		"config", "c", "", "Location of your GO Feature Flag local configuration file")
 	manifestCmd.Flags().StringVar(&flagManifestDestination,
 		"flag_manifest_destination", "", "Destination of your flag manifest file. "+
