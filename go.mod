@@ -62,14 +62,14 @@ require (
 	go.mongodb.org/mongo-driver v1.17.3
 	go.opentelemetry.io/contrib/exporters/autoexport v0.60.0
 	go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho v0.60.0
-	go.opentelemetry.io/contrib/samplers/jaegerremote v0.28.0
+	go.opentelemetry.io/contrib/samplers/jaegerremote v0.29.0
 	go.opentelemetry.io/otel v1.35.0
 	go.opentelemetry.io/otel/sdk v1.35.0
 	go.opentelemetry.io/otel/trace v1.35.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/net v0.37.0
 	golang.org/x/oauth2 v0.27.0
-	google.golang.org/api v0.223.0
+	google.golang.org/api v0.224.0
 	google.golang.org/grpc v1.71.0
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.32.2
@@ -155,7 +155,7 @@ require (
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/renameio/v2 v2.0.0 // indirect
 	github.com/google/s2a-go v0.1.9 // indirect
-	github.com/googleapis/enterprise-certificate-proxy v0.3.4 // indirect
+	github.com/googleapis/enterprise-certificate-proxy v0.3.5 // indirect
 	github.com/googleapis/gax-go/v2 v2.14.1 // indirect
 	github.com/gorilla/handlers v1.5.2 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
@@ -261,7 +261,7 @@ require (
 	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028 // indirect
 	google.golang.org/genproto v0.0.0-20250122153221-138b5a5a4fd4 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20250218202821-56aae31c358a // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250219182151-9fdb1cabc7b2 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250227231956-55c901821b1e // indirect
 	google.golang.org/protobuf v1.36.5 // indirect
 	gopkg.in/evanphx/json-patch.v4 v4.12.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect

@@ -1,0 +1,21 @@
+[test-flag.variations]
+var_a = true
+var_b = false
+
+[test-flag.defaultRule]
+variation = "var_a"
+
+[test-flag.metadata]
+description = "this is a simple feature flag"
+defaultValue = false
+
+[test-flag2.variations]
+var_a = 1
+var_b = 2
+
+[test-flag2.defaultRule]
+variation = "var_b"
+
+[test-flag2.metadata]
+defaultValue = 123
+

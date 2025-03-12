@@ -1,0 +1,18 @@
+test-flag:
+  variations:
+    var_a: true
+    var_b: false
+  defaultRule:
+    variation: var_a
+  metadata:
+    description: this is a simple feature flag
+    defaultValue: false
+
+test-flag2:
+  variations:
+    var_a: 1
+    var_b: 2
+  defaultRule:
+    variation: var_b
+  metadata:
+    defaultValue
