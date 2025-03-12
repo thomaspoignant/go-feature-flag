@@ -17,8 +17,8 @@ var (
 func NewEvaluateCmd() *cobra.Command {
 	evaluateCmd := &cobra.Command{
 		Use:   "evaluate",
-		Short: "Evaluate feature flags based on configuration and context",
-		Long: "Evaluate feature flags based on configuration and context," +
+		Short: "⚙️ Evaluate feature flags based on configuration and context",
+		Long: "⚙️ Evaluate feature flags based on configuration and context," +
 			" if no specific flag requested it will evaluate all flags",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runEvaluate(cmd, args, evalFlagFormat, evalConfigFile, evalFlag, evalCtx)

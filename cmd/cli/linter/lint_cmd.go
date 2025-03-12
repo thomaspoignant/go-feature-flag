@@ -11,8 +11,8 @@ var lintFlagFormat string
 func NewLintCmd() *cobra.Command {
 	lintCmd := &cobra.Command{
 		Use:   "lint <config_file>",
-		Short: "Lint GO Feature Flag configuration file.",
-		Long:  `Validate GO Feature Flag configuration file, it will return an error if your file is not valid.`,
+		Short: "🛑 Lint GO Feature Flag configuration file.",
+		Long:  `🛑 Validate GO Feature Flag configuration file, it will return an error if your file is not valid.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runLint(cmd, args, lintFlagFormat)
 		},
@@ -22,12 +22,8 @@ func NewLintCmd() *cobra.Command {
 }
 
 func runLint(cmd *cobra.Command, args []string, lintFlagFormat string) error {
-	if len(args) == 0 || args[0] == "" {
-		return fmt.Errorf("missing configuration file location argument, " +
-			"please provide the location of the configuration file")
-	}
 	l := Linter{
-		InputFile:   args[0],
+		InputFile:   getFilePath(args),
 		InputFormat: lintFlagFormat,
 	}
 	if errs := l.Lint(); len(errs) > 0 {
@@ -39,4 +35,11 @@ func runLint(cmd *cobra.Command, args []string, lintFlagFormat string) error {
 	}
 	_, err := fmt.Fprint(cmd.OutOrStdout(), "Valid GO Feature Flag configuration")
 	return err
+}
+
+func getFilePath(args []string) string {
+	if len(args) == 0 {
+		return ""
+	}
+	return args[0]
 }

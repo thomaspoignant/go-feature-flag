@@ -1,0 +1,14 @@
+{
+  "flags": {
+    "test-flag2": {
+      "flagType": "boolean",
+      "defaultValue": false,
+      "description": ""
+    },
+    "test-flag3": {
+      "flagType": "integer",
+      "defaultValue": 1,
+      "description": "totot"
+    }
+  }
+}

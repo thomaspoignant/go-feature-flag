@@ -1,0 +1,9 @@
+{
+  "flags": {
+    "test-flag": {
+      "flagType": "integer",
+      "defaultValue": 25,
+      "description": "this is a simple feature flag"
+    }
+  }
+}

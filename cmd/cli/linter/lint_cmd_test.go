@@ -21,13 +21,13 @@ func TestCmdLint(t *testing.T) {
 			name:          "missing configuration file location",
 			args:          []string{"--format=json"},
 			wantErr:       assert.Error,
-			expectedError: "Error: missing configuration file location argument, please provide the location of the configuration file\n",
+			expectedError: "impossible to find config file in the default locations [./,/goff/,/etc/opt/goff/]\nError: invalid GO Feature Flag configuration\n",
 		},
 		{
 			name:          "invalid configuration",
 			args:          []string{"testdata/invalid.json", "--format=json"},
 			wantErr:       assert.Error,
-			expectedError: "testdata/invalid.json: could not parse file: invalid character ':' after top-level value\nError: invalid GO Feature Flag configuration\n",
+			expectedError: "testdata/invalid.json: could not parse file (json): invalid character ':' after top-level value\nError: invalid GO Feature Flag configuration\n",
 		},
 		{
 			name:    "valid configuration",
