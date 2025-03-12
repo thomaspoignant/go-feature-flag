@@ -14,7 +14,7 @@ func NewManifest(configFile string, configFormat string, flagManifestDestination
 	if flagManifestDestination == "" {
 		return Manifest{}, fmt.Errorf("--flag_manifest_destination is mandatory")
 	}
-	flagDTOs, err := helper.LoadConfigFile(configFile, configFormat)
+	flagDTOs, err := helper.LoadConfigFile(configFile, configFormat, helper.ConfigFileDefaultLocations)
 	if err != nil {
 		return Manifest{}, err
 	}

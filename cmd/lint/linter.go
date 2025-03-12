@@ -12,7 +12,7 @@ type Linter struct {
 }
 
 func (l *Linter) Lint() []error {
-	flags, err := helper.LoadConfigFile(l.InputFile, l.InputFormat)
+	flags, err := helper.LoadConfigFile(l.InputFile, l.InputFormat, helper.ConfigFileDefaultLocations)
 	if err != nil {
 		return []error{err}
 	}

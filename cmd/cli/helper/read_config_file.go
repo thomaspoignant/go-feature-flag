@@ -11,12 +11,16 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func LoadConfigFile(inputFilePath string, configFormat string) (map[string]dto.DTO, error) {
+var ConfigFileDefaultLocations = []string{
+	"./",
+	"/goff/",
+	"/etc/opt/goff/",
+}
+
+func LoadConfigFile(inputFilePath string, configFormat string, defaultLocations []string) (map[string]dto.DTO, error) {
 	filename := "flags.goff"
-	defaultLocations := []string{
-		"./",
-		"/goff/",
-		"/etc/opt/goff/",
+	if defaultLocations == nil {
+		defaultLocations = ConfigFileDefaultLocations
 	}
 	supportedExtensions := []string{
 		"yaml",
