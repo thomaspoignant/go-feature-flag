@@ -16,6 +16,49 @@ This allows to have a type safe way to access your flags in your code based on a
 To generate the OpenFeature flag manifest you can use the `generate manifest` command of the `go-feature-flag-cli`,
 it will generate a flag manifest file compatible with the **`OpenFeature cli`** that you can use.
 
+## Add information to your flags
+To generate the flag manifest you need to provide information about your flags in your configuration file.  
+To do this we leverage the `metadata` field of your flags in your configuration file, to provide information about the flag.
+
+You need to provide 2 fields in the `metadata` to allow the flag to be generated in the flag manifest:
+- `defaultValue`: **(mandatory)** The default value of the flag.
+- `description`: A description of the flag.
+
+:::info
+If you don't provide a `defaultValue` field in your metadata the flag will be ignored in the flag manifest.
+:::
+
+```yaml title="flags.goff.yaml"
+enableFeatureA:
+  variations:
+    var_a: false
+    var_b: true
+  defaultRule:
+    variation: var_a
+  metadata:
+    # highlight-next-line
+    description: Controls whether Feature A is enabled.
+    # highlight-next-line
+    defaultValue: false
+
+usernameMaxLength:
+  variations:
+    var_a: false
+    var_b: true
+  defaultRule:
+    variation: var_a
+  metadata:
+    # highlight-next-line
+    description: Maximum allowed length for usernames.
+    # highlight-next-line
+    defaultValue: 50
+
+# ...
+```
+
+
+
+
 ## Install the Command Line
 Check the [installation guide](./cli) to install the `go-feature-flag-cli`.
 
