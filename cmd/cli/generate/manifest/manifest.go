@@ -49,14 +49,15 @@ func (m *Manifest) Generate() (helper.Output, error) {
 
 // generateDefinitions will generate the definitions from the flagDTOs
 func (m *Manifest) generateDefinitions(flagDTOs map[string]dto.DTO) (
-	map[string]model.FlagDefinition, helper.Output, error) {
-	result := make(map[string]model.FlagDefinition)
+	model.FlagManifest, helper.Output, error) {
+	definitions := make(map[string]model.FlagDefinition)
 	output := helper.Output{}
 	for flagKey, flagDTO := range flagDTOs {
 		flag := dto.ConvertDtoToInternalFlag(flagDTO)
 		flagType, err := helper.GetFlagTypeFromVariations(flag.GetVariations())
 		if err != nil {
-			return nil, output, fmt.Errorf("invalid configuration for flag %s: %s", flagKey, err.Error())
+			return model.FlagManifest{}, output,
+				fmt.Errorf("invalid configuration for flag %s: %s", flagKey, err.Error())
 		}
 
 		metadata := flag.GetMetadata()
@@ -70,18 +71,18 @@ func (m *Manifest) generateDefinitions(flagDTOs map[string]dto.DTO) (
 			output.Add(fmt.Sprintf("flag %s ignored: no default value provided", flagKey), helper.WarnLevel)
 			continue
 		}
-		result[flagKey] = model.FlagDefinition{
+		definitions[flagKey] = model.FlagDefinition{
 			FlagType:     flagType,
 			DefaultValue: defaultValue,
 			Description:  description,
 		}
 	}
-	return result, output, nil
+	return model.FlagManifest{Flags: definitions}, output, nil
 }
 
 // toJSON will convert the definitions to a JSON string
-func (m *Manifest) toJSON(definitions map[string]model.FlagDefinition) (string, error) {
-	definitionsJSON, err := json.MarshalIndent(definitions, "", "  ")
+func (m *Manifest) toJSON(manifest model.FlagManifest) (string, error) {
+	definitionsJSON, err := json.MarshalIndent(manifest, "", "  ")
 	if err != nil {
 		return "", err
 	}
