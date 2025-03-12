@@ -1,36 +1,76 @@
 ---
 sidebar_position: 30
-title: 🎯 Evaluate CLI
+title: 🏗️ Generate OpenFeature flag manifest
 description: Evaluate feature flags directly in your terminal
 ---
 
-# 🎯 Evaluate feature flags in your terminal
+# 🏗️ Generate OpenFeature flag manifest
 
-Sometimes for debug or testing purposes, you may want to be able to know what will be the variant used during the evaluation of your feature flag.
-With the GO Feature Flag Command Line, you can evaluate a feature flag directly in your terminal.
-
-:::tip
-You can also use the `evaluate` command to use feature flags in your CI/CD pipelines.
+:::warning
+This feature is experimental and may change in the future.
 :::
 
-## Install the Command Line
+The [OpenFeature cli](https://github.com/open-feature/cli) allow code generation for flag accessors for OpenFeature.  
+This allows to have a type safe way to access your flags in your code based on a flag manifest you can provide to the OpenFeature cli.
 
+To generate the OpenFeature flag manifest you can use the `generate manifest` command of the `go-feature-flag-cli`,
+it will generate a flag manifest file compatible with the **`OpenFeature cli`** that you can use.
+
+## Install the Command Line
 Check the [installation guide](./cli) to install the `go-feature-flag-cli`.
 
-## Use the evaluate command in your terminal
+## Generate the flag manifest
 
 ```shell
-./go-feature-flag-cli evaluate \
+go-feature-flag-cli generate manifest \
   --config="<location_of_your_flag_configuration_file>" \
-  --format="yaml" \
-  --flag="<name_of_your_flag_to_evaluate>" \ 
-  --ctx='<evaluation_ctx_as_json_string>'
+  --flag_manifest_destination="<destination_of_your_flag_manifest>"
 ```
 
-| param      | description                                                                                                            |
-|------------|------------------------------------------------------------------------------------------------------------------------|
-| `--config` | **(mandatory)** The location of your configuration file.                                                               |
-| `--ctx`    | **(mandatory)** The evaluation context used to evaluate the flag in json format (ex: `{"targetingKey":"123"}`).        |
-| `--format` | The format of your configuration flag _(acceptable values:`yaml`, `json`, `toml`)_.<br/>Default: **`yaml`**            |
-| `--flag`   | The name of the flag you want to evaluate, if omitted all flags will be evaluated                                      |
+| param                         | description                                                                                                                                                            |
+|-------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `--flag_manifest_destination` | (mandatory) The destination where your manifest will be stored.                                                                                                        |
+| `--config`                    | The location of your configuration file. _(if not provided we will search a file named `flags.goff.yaml`_ in one of this directories `./`, `/goff/`, `/etc/opt/goff/`. |
+| `--format`                    | The format of your configuration flag _(acceptable values:`yaml`, `json`, `toml`)_.<br/>Default: **`yaml`**                                                            |
 
+### Example of flag manifest
+```json title="flag_manifest.json"
+{
+  "flags": {
+    "enableFeatureA": {
+      "flagType": "boolean",
+      "defaultValue": false,
+      "description": "Controls whether Feature A is enabled."
+    },
+    "usernameMaxLength": {
+      "flagType": "integer",
+      "defaultValue": 50,
+      "description": "Maximum allowed length for usernames."
+    },
+    "greetingMessage": {
+      "flagType": "string",
+      "defaultValue": "Hello there!",
+      "description": "The message to use for greeting users."
+    }
+  }
+}
+```
+
+## Use the OpenFeature cli to generate the flag accessors
+
+To install the OpenFeature cli you can follow the [installation guide](https://github.com/open-feature/cli) from the repository.
+
+Once you have the OpenFeature cli installed you can use the `generate` command to generate the flag accessors.
+
+```shell
+openfeature-cli generate go \
+  --flag_manifest_path="<destination_of_your_flag_manifest>" \
+  --package_name="<name of your GO package>" \
+  --output_path="<destination_go_file>"
+```
+
+:::info 
+Here the example is using code generation in GO, but react and other languages are supported.
+
+Refer to the [OpenFeature cli documentation](https://github.com/open-feature/cli) for more information.
+:::
