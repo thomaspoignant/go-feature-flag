@@ -69,6 +69,9 @@ openfeature-cli generate go \
   --output_path="<destination_go_file>"
 ```
 
+As the result of this command, you will have a file with the flag accessors generated based on the flag manifest you provided.
+You will be able to use a type-safe way to access your flags in your code.
+
 :::info 
 Here the example is using code generation in GO, but react and other languages are supported.
 
