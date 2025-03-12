@@ -114,7 +114,6 @@ func (f FeatureEvent) FormatInCSV(csvTemplate *template.Template) ([]byte, error
 		return nil, err
 	}
 	return buf.Bytes(), nil
-
 }
 
 func (f FeatureEvent) FormatInJSON() ([]byte, error) {

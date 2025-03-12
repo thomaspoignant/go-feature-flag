@@ -22,7 +22,7 @@ func (e ExportableMockEvent) GetCreationDate() int64 {
 	return 0
 }
 
-func (e ExportableMockEvent) FormatInCSV(csvTemplate *template.Template) ([]byte, error) {
+func (e ExportableMockEvent) FormatInCSV(_ *template.Template) ([]byte, error) {
 	return []byte(e.name), nil
 }
 
