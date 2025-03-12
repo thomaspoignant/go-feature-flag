@@ -43,8 +43,8 @@ enableFeatureA:
 
 usernameMaxLength:
   variations:
-    var_a: false
-    var_b: true
+    var_a: 20
+    var_b: 30
   defaultRule:
     variation: var_a
   metadata:
