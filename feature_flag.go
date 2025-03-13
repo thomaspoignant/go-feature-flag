@@ -11,6 +11,7 @@ import (
 
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
+	"github.com/thomaspoignant/go-feature-flag/internal/notification"
 	"github.com/thomaspoignant/go-feature-flag/model/dto"
 	"github.com/thomaspoignant/go-feature-flag/notifier/logsnotifier"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
@@ -43,11 +44,12 @@ func Init(config Config) error {
 // GoFeatureFlag is the main object of the library
 // it contains the cache, the config, the updater and the exporter.
 type GoFeatureFlag struct {
-	cache            cache.Manager
-	config           Config
-	bgUpdater        backgroundUpdater
-	dataExporter     exporter.Manager[exporter.FeatureEvent]
-	retrieverManager *retriever.Manager
+	cache                     cache.Manager
+	config                    Config
+	bgUpdater                 backgroundUpdater
+	featureEventDataExporter  exporter.Manager[exporter.FeatureEvent]
+	trackingEventDataExporter exporter.Manager[exporter.TrackingEvent]
+	retrieverManager          *retriever.Manager
 }
 
 // ff is the default object for go-feature-flag
@@ -57,21 +59,13 @@ var onceFF sync.Once
 // New creates a new go-feature-flag instances that retrieve the config from a YAML file
 // and return everything you need to manage your flags.
 func New(config Config) (*GoFeatureFlag, error) {
-	switch {
-	case config.PollingInterval == 0:
-		// The default value for the poll interval is 60 seconds
-		config.PollingInterval = 60 * time.Second
-	case config.PollingInterval > 0 && config.PollingInterval < time.Second:
-		// the minimum value for the polling policy is 1 second
-		config.PollingInterval = time.Second
-	default:
-		// do nothing
-	}
+	config.PollingInterval = adjustPollingInterval(config.PollingInterval)
 
 	if config.offlineMutex == nil {
 		config.offlineMutex = &sync.RWMutex{}
 	}
 
+	// initialize internal logger
 	config.internalLogger = &fflog.FFLogger{
 		LeveledLogger: config.LeveledLogger,
 		LegacyLogger:  config.Logger,
@@ -81,70 +75,134 @@ func New(config Config) (*GoFeatureFlag, error) {
 		config: config,
 	}
 
-	if !config.Offline {
-		notifiers := config.Notifiers
-		notifiers = append(notifiers, &logsnotifier.Notifier{Logger: config.internalLogger})
+	if config.Offline {
+		// in case we are in offline mode, we don't need to initialize the cache since we will not use it.
+		goFF.config.internalLogger.Info("GO Feature Flag is in offline mode")
+		return goFF, nil
+	}
 
-		notificationService := cache.NewNotificationService(notifiers)
-		goFF.cache = cache.New(notificationService, config.PersistentFlagConfigurationFile, config.internalLogger)
+	notificationService := initializeNotificationService(config)
 
-		retrievers, err := config.GetRetrievers()
-		if err != nil {
+	// init internal cache
+	goFF.cache = cache.New(notificationService, config.PersistentFlagConfigurationFile, config.internalLogger)
+
+	retrieverManager, err := initializeRetrieverManager(config)
+	if err != nil && (retrieverManager == nil || !config.StartWithRetrieverError) {
+		return nil, fmt.Errorf("impossible to initialize the retrievers, please check your configuration: %v", err)
+	}
+	goFF.retrieverManager = retrieverManager
+
+	// first retrieval of the flags
+	if err := retrieveFlagsAndUpdateCache(goFF.config, goFF.cache, goFF.retrieverManager, true); err != nil {
+		if err := handleFirstRetrieverError(config, goFF.config.internalLogger, goFF.cache, err); err != nil {
 			return nil, err
 		}
-		goFF.retrieverManager = retriever.NewManager(config.Context, retrievers, config.internalLogger)
-		err = goFF.retrieverManager.Init(config.Context)
-		if err != nil && !config.StartWithRetrieverError {
-			return nil, fmt.Errorf("impossible to initialize the retrievers, please check your configuration: %v", err)
-		}
-
-		err = retrieveFlagsAndUpdateCache(goFF.config, goFF.cache, goFF.retrieverManager, true)
-		if err != nil {
-			switch {
-			case config.PersistentFlagConfigurationFile != "":
-				errPersist := retrievePersistentLocalDisk(config.Context, config, goFF)
-				if errPersist != nil && !config.StartWithRetrieverError {
-					return nil, fmt.Errorf("impossible to use the persistent flag configuration file: %v "+
-						"[original error: %v]", errPersist, err)
-				}
-			case !config.StartWithRetrieverError:
-				return nil, fmt.Errorf("impossible to retrieve the flags, please check your configuration: %v", err)
-			default:
-				// We accept to start with a retriever error, we will serve only default value
-				goFF.config.internalLogger.Error("Impossible to retrieve the flags, starting with the "+
-					"retriever error", slog.Any("error", err))
-			}
-		}
-
-		if config.PollingInterval > 0 {
-			goFF.bgUpdater = newBackgroundUpdater(config.PollingInterval, config.EnablePollingJitter)
-			go goFF.startFlagUpdaterDaemon()
-		}
-
-		exporters := goFF.config.GetDataExporters()
-		if len(exporters) > 0 {
-			// init the data exporter
-			expConfigs := make([]exporter.Config, len(exporters))
-			for index, exp := range exporters {
-				expConfigs[index] = exporter.Config{
-					Exporter:         exp.Exporter,
-					FlushInterval:    exp.FlushInterval,
-					MaxEventInMemory: exp.MaxEventInMemory,
-				}
-			}
-			goFF.dataExporter = exporter.NewManager[exporter.FeatureEvent](
-				config.Context, expConfigs, config.ExporterCleanQueueInterval, goFF.config.internalLogger)
-			go goFF.dataExporter.Start()
-		}
 	}
+
+	// start the background task to update the flags periodically
+	if config.PollingInterval > 0 {
+		goFF.bgUpdater = newBackgroundUpdater(config.PollingInterval, config.EnablePollingJitter)
+		go goFF.startFlagUpdaterDaemon()
+	}
+
+	goFF.featureEventDataExporter, goFF.trackingEventDataExporter = initializeDataExporters(config, goFF.config.internalLogger)
 	config.internalLogger.Debug("GO Feature Flag is initialized")
 	return goFF, nil
+}
+
+// adjustPollingInterval is a function that will check the polling interval and set it to the minimum value if it is
+// lower than 1 second. It also set the default value to 60 seconds if the polling interval is 0.
+func adjustPollingInterval(pollingInterval time.Duration) time.Duration {
+	switch {
+	case pollingInterval == 0:
+		// The default value for the poll interval is 60 seconds
+		return 60 * time.Second
+	case pollingInterval > 0 && pollingInterval < time.Second:
+		// the minimum value for the polling policy is 1 second
+		return time.Second
+	default:
+		return pollingInterval
+	}
+}
+
+// initializeNotificationService is a function that will initialize the notification service with the notifiers
+func initializeNotificationService(config Config) notification.Service {
+	notifiers := config.Notifiers
+	notifiers = append(notifiers, &logsnotifier.Notifier{Logger: config.internalLogger})
+	return notification.NewService(notifiers)
+}
+
+// initializeRetrieverManager is a function that will initialize the retriever manager with the retrievers
+func initializeRetrieverManager(config Config) (*retriever.Manager, error) {
+	retrievers, err := config.GetRetrievers()
+	if err != nil {
+		return nil, err
+	}
+	manager := retriever.NewManager(config.Context, retrievers, config.internalLogger)
+	err = manager.Init(config.Context)
+	return manager, err
+}
+
+func initializeDataExporters(config Config, logger *fflog.FFLogger) (
+	exporter.Manager[exporter.FeatureEvent], exporter.Manager[exporter.TrackingEvent]) {
+	exporters := config.GetDataExporters()
+	featureEventExporterConfigs := make([]exporter.Config, 0)
+	trackingEventExporterConfigs := make([]exporter.Config, 0)
+	if len(exporters) > 0 {
+		for _, exp := range exporters {
+			c := exporter.Config{
+				Exporter:         exp.Exporter,
+				FlushInterval:    exp.FlushInterval,
+				MaxEventInMemory: exp.MaxEventInMemory,
+			}
+			if exp.ExporterEventType == TrackingEventExporter {
+				trackingEventExporterConfigs = append(trackingEventExporterConfigs, c)
+				continue
+			}
+			featureEventExporterConfigs = append(featureEventExporterConfigs, c)
+		}
+	}
+
+	var trackingEventManager exporter.Manager[exporter.TrackingEvent]
+	if len(trackingEventExporterConfigs) > 0 {
+		trackingEventManager = exporter.NewManager[exporter.TrackingEvent](
+			config.Context, trackingEventExporterConfigs, config.ExporterCleanQueueInterval, logger)
+		trackingEventManager.Start()
+	}
+
+	var featureEventManager exporter.Manager[exporter.FeatureEvent]
+	if len(featureEventExporterConfigs) > 0 {
+		featureEventManager = exporter.NewManager[exporter.FeatureEvent](
+			config.Context, featureEventExporterConfigs, config.ExporterCleanQueueInterval, logger)
+		featureEventManager.Start()
+	}
+	return featureEventManager, trackingEventManager
+}
+
+// handleFirstRetrieverError is a function that will handle the first error when trying to retrieve
+// the flags the first time when starting GO Feature Flag.
+func handleFirstRetrieverError(config Config, logger *fflog.FFLogger, cache cache.Manager, err error) error {
+	switch {
+	case config.PersistentFlagConfigurationFile != "":
+		errPersist := retrievePersistentLocalDisk(config.Context, config, cache)
+		if errPersist != nil && !config.StartWithRetrieverError {
+			return fmt.Errorf("impossible to use the persistent flag configuration file: %v "+
+				"[original error: %v]", errPersist, err)
+		}
+	case !config.StartWithRetrieverError:
+		return fmt.Errorf("impossible to retrieve the flags, please check your configuration: %v", err)
+	default:
+		// We accept to start with a retriever error, we will serve only default value
+		logger.Error("Impossible to retrieve the flags, starting with the "+
+			"retriever error", slog.Any("error", err))
+	}
+	return nil
 }
 
 // retrievePersistentLocalDisk is a function used in case we are not able to retrieve any flag when starting
 // GO Feature Flag.
 // This function will look at any pre-existent persistent configuration and start with it.
-func retrievePersistentLocalDisk(ctx context.Context, config Config, goFF *GoFeatureFlag) error {
+func retrievePersistentLocalDisk(ctx context.Context, config Config, cache cache.Manager) error {
 	if config.PersistentFlagConfigurationFile != "" {
 		config.internalLogger.Error("Impossible to retrieve your flag configuration, trying to use the persistent"+
 			" flag configuration file.", slog.String("path", config.PersistentFlagConfigurationFile))
@@ -158,7 +216,7 @@ func retrievePersistentLocalDisk(ctx context.Context, config Config, goFF *GoFea
 				return err
 			}
 			defer func() { _ = fallBackRetrieverManager.Shutdown(ctx) }()
-			err = retrieveFlagsAndUpdateCache(goFF.config, goFF.cache, fallBackRetrieverManager, true)
+			err = retrieveFlagsAndUpdateCache(config, cache, fallBackRetrieverManager, true)
 			if err != nil {
 				return err
 			}
@@ -181,8 +239,8 @@ func (g *GoFeatureFlag) Close() {
 			g.bgUpdater.close()
 		}
 
-		if g.dataExporter != nil {
-			g.dataExporter.Stop()
+		if g.featureEventDataExporter != nil {
+			g.featureEventDataExporter.Stop()
 		}
 		if g.retrieverManager != nil {
 			_ = g.retrieverManager.Shutdown(g.config.Context)
