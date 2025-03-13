@@ -49,11 +49,6 @@ func TestDataExporterFlush_TriggerErrorIfNotKnowType(t *testing.T) {
 		expectedLog string
 	}{
 		{
-			name:        "classic exporter",
-			exporter:    &mock.Exporter{},
-			expectedLog: "trying to send unknown object to the exporter\n",
-		},
-		{
 			name:        "deprecated exporter",
 			exporter:    &mock.ExporterDeprecated{},
 			expectedLog: "trying to send unknown object to the exporter (deprecated)\n",

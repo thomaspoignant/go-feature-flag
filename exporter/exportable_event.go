@@ -11,8 +11,8 @@ type ExportableEvent interface {
 	GetKey() string
 	// GetCreationDate returns the creationDate of the event.
 	GetCreationDate() int64
-	// FormatEventInCSV returns the event in CSV format.
+	// FormatInCSV FormatEventInCSV returns the event in CSV format.
 	FormatInCSV(csvTemplate *template.Template) ([]byte, error)
-	// FormatEventInJSON returns the event in JSON format.
+	// FormatInJSON FormatEventInJSON returns the event in JSON format.
 	FormatInJSON() ([]byte, error)
 }

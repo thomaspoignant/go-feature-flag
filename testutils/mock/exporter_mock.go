@@ -11,10 +11,10 @@ import (
 
 type ExporterMock interface {
 	exporter.CommonExporter
-	GetExportedEvents() []exporter.FeatureEvent
+	GetExportedEvents() []exporter.ExportableEvent
 }
 type Exporter struct {
-	ExportedEvents    []exporter.FeatureEvent
+	ExportedEvents    []exporter.ExportableEvent
 	Err               error
 	ExpectedNumberErr int
 	CurrentNumberErr  int
@@ -24,7 +24,7 @@ type Exporter struct {
 	once  sync.Once
 }
 
-func (m *Exporter) Export(_ context.Context, _ *fflog.FFLogger, events []exporter.FeatureEvent) error {
+func (m *Exporter) Export(_ context.Context, _ *fflog.FFLogger, events []exporter.ExportableEvent) error {
 	m.once.Do(m.initMutex)
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
@@ -38,7 +38,7 @@ func (m *Exporter) Export(_ context.Context, _ *fflog.FFLogger, events []exporte
 	return nil
 }
 
-func (m *Exporter) GetExportedEvents() []exporter.FeatureEvent {
+func (m *Exporter) GetExportedEvents() []exporter.ExportableEvent {
 	m.once.Do(m.initMutex)
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
@@ -79,11 +79,16 @@ func (m *ExporterDeprecated) Export(_ context.Context, _ *log.Logger, events []e
 	return nil
 }
 
-func (m *ExporterDeprecated) GetExportedEvents() []exporter.FeatureEvent {
+func (m *ExporterDeprecated) GetExportedEvents() []exporter.ExportableEvent {
 	m.once.Do(m.initMutex)
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
-	return m.ExportedEvents
+
+	exportableEvents := make([]exporter.ExportableEvent, len(m.ExportedEvents))
+	for index, event := range m.ExportedEvents {
+		exportableEvents[index] = event
+	}
+	return exportableEvents
 }
 
 func (m *ExporterDeprecated) IsBulk() bool {
