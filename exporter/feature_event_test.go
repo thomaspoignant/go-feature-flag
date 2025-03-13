@@ -99,6 +99,20 @@ func TestFeatureEvent_MarshalInterface(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name: "nil value",
+			featureEvent: &exporter.FeatureEvent{
+				Kind:         "feature",
+				ContextKind:  "anonymousUser",
+				UserKey:      "ABCD",
+				CreationDate: 1617970547,
+				Key:          "random-key",
+				Variation:    "Default",
+				Value:        nil,
+				Default:      false,
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -195,6 +209,86 @@ func TestFeatureEvent_MarshalJSON(t *testing.T) {
 			if err != nil {
 				assert.JSONEq(t, tt.want, string(got))
 			}
+		})
+	}
+}
+
+func TestFeatureEvent_GetKey(t *testing.T) {
+	tests := []struct {
+		name         string
+		featureEvent *exporter.FeatureEvent
+		want         string
+	}{
+		{
+			name: "return existing key",
+			featureEvent: &exporter.FeatureEvent{
+				Kind:         "feature",
+				ContextKind:  "anonymousUser",
+				UserKey:      "ABCD",
+				CreationDate: 1617970547,
+				Key:          "random-key",
+				Variation:    "Default",
+				Value: map[string]interface{}{
+					"string": "string",
+					"bool":   true,
+					"float":  1.23,
+					"int":    1,
+				},
+				Default: false,
+			},
+			want: "random-key",
+		},
+		{
+			name: "empty key",
+			featureEvent: &exporter.FeatureEvent{
+				Kind:         "feature",
+				ContextKind:  "anonymousUser",
+				UserKey:      "ABCD",
+				CreationDate: 1617970547,
+				Key:          "",
+				Variation:    "Default",
+				Value:        nil,
+				Default:      false,
+			},
+			want: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, tt.featureEvent.GetKey())
+		})
+	}
+}
+
+func TestFeatureEvent_GetUserKey(t *testing.T) {
+	tests := []struct {
+		name         string
+		featureEvent *exporter.FeatureEvent
+		want         string
+	}{
+		{
+			name: "return existing key",
+			featureEvent: &exporter.FeatureEvent{
+				Kind:         "feature",
+				ContextKind:  "anonymousUser",
+				UserKey:      "ABCD",
+				CreationDate: 1617970547,
+				Key:          "random-key",
+				Variation:    "Default",
+				Value: map[string]interface{}{
+					"string": "string",
+					"bool":   true,
+					"float":  1.23,
+					"int":    1,
+				},
+				Default: false,
+			},
+			want: "ABCD",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, tt.featureEvent.GetUserKey())
 		})
 	}
 }
