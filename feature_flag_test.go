@@ -75,15 +75,6 @@ func TestMultipleRetrieversWithOverrideFlag(t *testing.T) {
 	assert.NotEqual(t, flag.ErrorCodeFlagNotFound, flagRes2.ErrorCode)
 }
 
-func TestStartWithNegativeInterval(t *testing.T) {
-	_, err := ffclient.New(ffclient.Config{
-		PollingInterval: -60 * time.Second,
-		Retriever:       &fileretriever.Retriever{Path: "testdata/flag-config.yaml"},
-		LeveledLogger:   slog.Default(),
-	})
-	assert.Error(t, err)
-}
-
 func TestStartWithMinInterval(t *testing.T) {
 	_, err := ffclient.New(ffclient.Config{
 		PollingInterval: 2,
@@ -742,4 +733,40 @@ func Test_DisableNotifierOnInit(t *testing.T) {
 			assert.Equal(t, tt.expectedNotifyCalled, mockNotifier.GetNotifyCalls() > 0)
 		})
 	}
+}
+
+func TestStartWithNegativeIntervalToDisablePolling(t *testing.T) {
+	content, err := os.ReadFile("testdata/flag-config.yaml")
+	assert.NoError(t, err)
+
+	// copy of the file
+	tempFile, err := os.CreateTemp("", "")
+	assert.NoError(t, err)
+	defer func() { _ = os.Remove(tempFile.Name()) }()
+	err = os.WriteFile(tempFile.Name(), content, os.ModePerm)
+	assert.NoError(t, err)
+
+	goff, err := ffclient.New(ffclient.Config{
+		PollingInterval: -1 * time.Second,
+		Retriever:       &fileretriever.Retriever{Path: tempFile.Name()},
+		LeveledLogger:   slog.Default(),
+	})
+	assert.NoError(t, err)
+
+	cacheRefresh := goff.GetCacheRefreshDate()
+
+	// modify the file to trigger a refresh
+	newContent, err := os.ReadFile("testdata/flag-config-2nd-file.yaml")
+	assert.NoError(t, err)
+	err = os.WriteFile(tempFile.Name(), newContent, os.ModePerm)
+	assert.NoError(t, err)
+
+	// wait to be sure we give time to the goroutine to refresh the cache
+	time.Sleep(2 * time.Second)
+
+	assert.Equal(t, cacheRefresh, goff.GetCacheRefreshDate())
+
+	// we force a refresh to check if the cache is refreshed
+	goff.ForceRefresh()
+	assert.NotEqual(t, cacheRefresh, goff.GetCacheRefreshDate())
 }

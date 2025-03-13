@@ -15,6 +15,7 @@ Despite that you can start with a minimum configuration and fine tune it later.
 
 ## Configuration file
 The configuration of the **relay proxy** is based on a configuration file that you have to provide.
+The configuration of the **relay proxy** is based on a configuration file that you have to provide.
 This is a `yaml` file and usage is to call it `goff-proxy.yaml` but you can name it as you will.
 
 You can provide the configuration file with the option `--config=/path_to_your_file.yaml` when launching the relay proxy.
@@ -121,6 +122,7 @@ This is the time interval **in millisecond** when the relay proxy is reloading t
 - type: **int**
 - default: **`60000`**
 - The minimum time accepted is 1000 millisecond (1 second).
+- If you set a negative value, the polling will be disabled.
 - mandatory: <NotMandatory />
 
 ### `enablePollingJitter`

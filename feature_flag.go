@@ -61,10 +61,7 @@ func New(config Config) (*GoFeatureFlag, error) {
 	case config.PollingInterval == 0:
 		// The default value for the poll interval is 60 seconds
 		config.PollingInterval = 60 * time.Second
-	case config.PollingInterval < 0:
-		// Check that value is not negative
-		return nil, fmt.Errorf("%d is not a valid PollingInterval value, it need to be > 0", config.PollingInterval)
-	case config.PollingInterval < time.Second:
+	case config.PollingInterval > 0 && config.PollingInterval < time.Second:
 		// the minimum value for the polling policy is 1 second
 		config.PollingInterval = time.Second
 	default:
@@ -89,7 +86,6 @@ func New(config Config) (*GoFeatureFlag, error) {
 		notifiers = append(notifiers, &logsnotifier.Notifier{Logger: config.internalLogger})
 
 		notificationService := cache.NewNotificationService(notifiers)
-		goFF.bgUpdater = newBackgroundUpdater(config.PollingInterval, config.EnablePollingJitter)
 		goFF.cache = cache.New(notificationService, config.PersistentFlagConfigurationFile, config.internalLogger)
 
 		retrievers, err := config.GetRetrievers()
@@ -120,7 +116,10 @@ func New(config Config) (*GoFeatureFlag, error) {
 			}
 		}
 
-		go goFF.startFlagUpdaterDaemon()
+		if config.PollingInterval > 0 {
+			goFF.bgUpdater = newBackgroundUpdater(config.PollingInterval, config.EnablePollingJitter)
+			go goFF.startFlagUpdaterDaemon()
+		}
 
 		exporters := goFF.config.GetDataExporters()
 		if len(exporters) > 0 {
