@@ -32,6 +32,10 @@ func TestDataExporterManager_flushWithTime(t *testing.T) {
 			name:         "flushTime: deprecated exporter",
 			mockExporter: &mock.ExporterDeprecated{Bulk: true},
 		},
+		{
+			name:         "flushTime: deprecated exporter v2",
+			mockExporter: &mock.ExporterDeprecatedV2{Bulk: true},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -78,6 +82,10 @@ func TestDataExporterManager_flushWithNumberOfEvents(t *testing.T) {
 			name:         "flushWithNumberOfEvents: deprecated exporter",
 			mockExporter: &mock.ExporterDeprecated{Bulk: true},
 		},
+		{
+			name:         "flushWithNumberOfEvents: deprecated exporter v2",
+			mockExporter: &mock.ExporterDeprecatedV2{Bulk: true},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -121,6 +129,10 @@ func TestDataExporterManager_defaultFlush(t *testing.T) {
 		{
 			name:         "deprecated exporter",
 			mockExporter: &mock.ExporterDeprecated{Bulk: true},
+		},
+		{
+			name:         "deprecated exporter v2",
+			mockExporter: &mock.ExporterDeprecatedV2{Bulk: true},
 		},
 	}
 
