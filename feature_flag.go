@@ -105,7 +105,8 @@ func New(config Config) (*GoFeatureFlag, error) {
 		go goFF.startFlagUpdaterDaemon()
 	}
 
-	goFF.featureEventDataExporter, goFF.trackingEventDataExporter = initializeDataExporters(config, goFF.config.internalLogger)
+	goFF.featureEventDataExporter, goFF.trackingEventDataExporter =
+		initializeDataExporters(config, goFF.config.internalLogger)
 	config.internalLogger.Debug("GO Feature Flag is initialized")
 	return goFF, nil
 }

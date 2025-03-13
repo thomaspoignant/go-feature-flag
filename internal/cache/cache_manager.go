@@ -36,7 +36,10 @@ type cacheManagerImpl struct {
 	persistentFlagConfigurationFile string
 }
 
-func New(notificationService notification.Service, persistentFlagConfigurationFile string, logger *fflog.FFLogger) Manager {
+func New(
+	notificationService notification.Service,
+	persistentFlagConfigurationFile string,
+	logger *fflog.FFLogger) Manager {
 	return &cacheManagerImpl{
 		logger:                          logger,
 		inMemoryCache:                   NewInMemoryCache(logger),

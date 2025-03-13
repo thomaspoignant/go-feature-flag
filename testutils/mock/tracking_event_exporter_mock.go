@@ -34,7 +34,6 @@ func (m *TrackingEventExporter) Export(_ context.Context, _ *fflog.FFLogger, eve
 	case []exporter.TrackingEvent:
 		m.ExportedEvents = append(m.ExportedEvents, events...)
 		break
-
 	}
 	if m.Err != nil {
 		if m.ExpectedNumberErr > m.CurrentNumberErr {
@@ -49,7 +48,7 @@ func (m *TrackingEventExporter) GetExportedEvents() []exporter.ExportableEvent {
 	m.once.Do(m.initMutex)
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
-	var trackingEvents []exporter.ExportableEvent
+	trackingEvents := make([]exporter.ExportableEvent, 0)
 	for _, event := range m.ExportedEvents {
 		trackingEvents = append(trackingEvents, event)
 	}
