@@ -131,18 +131,22 @@ func (f *Exporter) writeFile(filePath string, events []exporter.ExportableEvent)
 
 func (f *Exporter) writeParquet(filePath string, events []exporter.ExportableEvent) error {
 	parquetFeatureEvents := make([]exporter.FeatureEvent, 0)
+	parquetTrackingEvents := make([]exporter.TrackingEvent, 0)
 	for _, event := range events {
 		switch ev := any(event).(type) {
 		case exporter.FeatureEvent:
 			parquetFeatureEvents = append(parquetFeatureEvents, ev)
 			break
+		case exporter.TrackingEvent:
+			parquetTrackingEvents = append(parquetTrackingEvents, ev)
+			break
 		default:
 			// do nothing
 		}
 	}
-
-	// TODO: create same logic for TrackingEvents
-
+	if len(parquetTrackingEvents) > 0 {
+		return f.writeParquetTrackingEvent(filePath, parquetTrackingEvents)
+	}
 	return f.writeParquetFeatureEvent(filePath, parquetFeatureEvents)
 }
 
@@ -169,6 +173,32 @@ func (f *Exporter) writeParquetFeatureEvent(filePath string, events []exporter.F
 			return err
 		}
 		event.Value = eventValue
+		if err = pw.Write(event); err != nil {
+			return fmt.Errorf("error while writing the export file: %v", err)
+		}
+	}
+
+	return pw.WriteStop()
+}
+
+func (f *Exporter) writeParquetTrackingEvent(filePath string, events []exporter.TrackingEvent) error {
+	fw, err := local.NewLocalFileWriter(filePath)
+	if err != nil {
+		return err
+	}
+	defer fw.Close()
+
+	pw, err := writer.NewParquetWriter(fw, new(exporter.FeatureEvent), int64(runtime.NumCPU()))
+	if err != nil {
+		return err
+	}
+
+	pw.CompressionType = parquet.CompressionCodec_SNAPPY
+	if ct, err := parquet.CompressionCodecFromString(f.ParquetCompressionCodec); err == nil {
+		pw.CompressionType = ct
+	}
+
+	for _, event := range events {
 		if err = pw.Write(event); err != nil {
 			return fmt.Errorf("error while writing the export file: %v", err)
 		}
