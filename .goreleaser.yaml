@@ -148,7 +148,7 @@ archives:
       {{- with .Arm }}v{{ . }}{{ end }}\
       {{- with .Mips }}_{{ . }}{{ end }}\
       {{- if not (eq .Amd64 \"v1\") }}{{ .Amd64 }}{{ end }}"
-    builds:
+    ids:
       - go-feature-flag-editor
 
   # DEPRECATED: check go-feature-flag
@@ -162,7 +162,7 @@ archives:
       {{- with .Arm }}v{{ . }}{{ end }}\
       {{- with .Mips }}_{{ . }}{{ end }}\
       {{- if not (eq .Amd64 \"v1\") }}{{ .Amd64 }}{{ end }}"
-    builds:
+    ids:
       - go-feature-flag-relay-proxy
 
   - id: go-feature-flag
@@ -175,7 +175,7 @@ archives:
       {{- with .Arm }}v{{ . }}{{ end }}\
       {{- with .Mips }}_{{ . }}{{ end }}\
       {{- if not (eq .Amd64 \"v1\") }}{{ .Amd64 }}{{ end }}"
-    builds:
+    ids:
       - go-feature-flag
   - id: go-feature-flag-lint
     name_template: "go-feature-flag-lint_\
@@ -187,7 +187,7 @@ archives:
       {{- with .Arm }}v{{ . }}{{ end }}\
       {{- with .Mips }}_{{ . }}{{ end }}\
       {{- if not (eq .Amd64 \"v1\") }}{{ .Amd64 }}{{ end }}"
-    builds:
+    ids:
       - go-feature-flag-lint
 
   - id: go-feature-flag-cli
@@ -200,13 +200,13 @@ archives:
       {{- with .Arm }}v{{ . }}{{ end }}\
       {{- with .Mips }}_{{ . }}{{ end }}\
       {{- if not (eq .Amd64 \"v1\") }}{{ .Amd64 }}{{ end }}"
-    builds:
+    ids:
       - go-feature-flag-cli
 
   - id: goff-lambda
     name_template: "go-feature-flag-aws-lambda_{{ .Version }}"
     formats: zip
-    builds:
+    ids:
       - go-feature-flag-lambda
 
 checksum:
