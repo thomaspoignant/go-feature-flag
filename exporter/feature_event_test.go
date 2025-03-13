@@ -1,7 +1,7 @@
 package exporter_test
 
 import (
-	"encoding/json"
+	"fmt"
 	"testing"
 	"time"
 
@@ -128,7 +128,7 @@ func TestFeatureEvent_MarshalInterface(t *testing.T) {
 	}
 }
 
-func TestFeatureEvent_MarshalJSON(t *testing.T) {
+func TestFeatureEvent_FormatInJSON(t *testing.T) {
 	tests := []struct {
 		name         string
 		featureEvent *exporter.FeatureEvent
@@ -153,7 +153,7 @@ func TestFeatureEvent_MarshalJSON(t *testing.T) {
 				Default:  false,
 				Metadata: map[string]interface{}{},
 			},
-			want:    `{"kind":"feature","contextKind":"anonymousUser","userKey":"ABCD","creationDate":1617970547,"key":"random-key","variation":"Default","value":{"string":"string","bool":true,"float":1.23,"int":1},"default":false}`,
+			want:    `{"kind":"feature","contextKind":"anonymousUser","userKey":"ABCD","creationDate":1617970547,"key":"random-key","variation":"Default","value":{"bool":true,"float":1.23,"int":1,"string":"string"},"default":false,"version":"","source":""}`,
 			wantErr: assert.NoError,
 		},
 		{
@@ -173,7 +173,7 @@ func TestFeatureEvent_MarshalJSON(t *testing.T) {
 				},
 				Default: false,
 			},
-			want:    `{"kind":"feature","contextKind":"anonymousUser","userKey":"ABCD","creationDate":1617970547,"key":"random-key","variation":"Default","value":{"string":"string","bool":true,"float":1.23,"int":1},"default":false}`,
+			want:    `{"kind":"feature","contextKind":"anonymousUser","userKey":"ABCD","creationDate":1617970547,"key":"random-key","variation":"Default","value":{"bool":true,"float":1.23,"int":1,"string":"string"},"default":false,"version":"","source":""}`,
 			wantErr: assert.NoError,
 		},
 		{
@@ -198,15 +198,16 @@ func TestFeatureEvent_MarshalJSON(t *testing.T) {
 					"metadata3": true,
 				},
 			},
-			want:    `{"kind":"feature","contextKind":"anonymousUser","userKey":"ABCD","creationDate":1617970547,"key":"random-key","variation":"Default","value":{"string":"string","bool":true,"float":1.23,"int":1},"default":false,"metadata":{"metadata1":"metadata1","metadata2":24,"metadata3":true}}`,
+			want:    `{"kind":"feature","contextKind":"anonymousUser","userKey":"ABCD","creationDate":1617970547,"key":"random-key","variation":"Default","value":{"bool":true,"float":1.23,"int":1,"string":"string"},"default":false,"version":"","source":"","metadata":{"metadata1":"metadata1","metadata2":24,"metadata3":true}}`,
 			wantErr: assert.NoError,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := json.Marshal(tt.featureEvent)
+			got, err := tt.featureEvent.FormatInJSON()
 			tt.wantErr(t, err)
-			if err != nil {
+			if err == nil {
+				fmt.Println(string(got))
 				assert.JSONEq(t, tt.want, string(got))
 			}
 		})
@@ -263,7 +264,7 @@ func TestFeatureEvent_GetKey(t *testing.T) {
 func TestFeatureEvent_GetUserKey(t *testing.T) {
 	tests := []struct {
 		name         string
-		featureEvent *exporter.FeatureEvent
+		featureEvent *exporter.FeatureEvent ``
 		want         string
 	}{
 		{

@@ -13,71 +13,71 @@ func TestNewUser(t *testing.T) {
 		want EvaluationContext
 	}{
 		{
-			name: "Builder with only key",
-			got:  NewEvaluationContextBuilder("random-key").Build(),
+			name: "Builder with only targetingKey",
+			got:  NewEvaluationContextBuilder("random-targetingKey").Build(),
 			want: EvaluationContext{
-				key:    "random-key",
-				custom: map[string]interface{}{},
+				targetingKey: "random-targetingKey",
+				attributes:   map[string]interface{}{},
 			},
 		},
 		{
-			name: "Builder with custom attribute",
-			got: NewEvaluationContextBuilder("random-key").
-				AddCustom("test", "custom").
+			name: "Builder with attributes attribute",
+			got: NewEvaluationContextBuilder("random-targetingKey").
+				AddCustom("test", "attributes").
 				Build(),
 			want: EvaluationContext{
-				key: "random-key",
-				custom: map[string]interface{}{
-					"test": "custom",
+				targetingKey: "random-targetingKey",
+				attributes: map[string]interface{}{
+					"test": "attributes",
 				},
 			},
 		},
 		{
-			name: "Builder with custom attribute",
-			got: NewEvaluationContextBuilder("random-key").
+			name: "Builder with attributes attribute",
+			got: NewEvaluationContextBuilder("random-targetingKey").
 				Anonymous(true).
-				AddCustom("test", "custom").
+				AddCustom("test", "attributes").
 				Build(),
 			want: EvaluationContext{
-				key: "random-key",
-				custom: map[string]interface{}{
-					"test":      "custom",
+				targetingKey: "random-targetingKey",
+				attributes: map[string]interface{}{
+					"test":      "attributes",
 					"anonymous": true,
 				},
 			},
 		},
 		{
-			name: "NewUser with key",
-			got:  NewEvaluationContext("random-key"),
+			name: "NewUser with targetingKey",
+			got:  NewEvaluationContext("random-targetingKey"),
 			want: EvaluationContext{
-				key:    "random-key",
-				custom: map[string]interface{}{},
+				targetingKey: "random-targetingKey",
+				attributes:   map[string]interface{}{},
 			},
 		},
 		{
-			name: "NewUser without key",
+			name: "NewUser without targetingKey",
 			got:  NewEvaluationContext(""),
 			want: EvaluationContext{
-				key:    "",
-				custom: map[string]interface{}{},
+				targetingKey: "",
+				attributes:   map[string]interface{}{},
 			},
 		},
 		{
-			name: "NewAnonymousUser with key",
-			got:  NewAnonymousEvaluationContext("random-key"),
+			name: "NewAnonymousUser with targetingKey",
+			got:  NewAnonymousEvaluationContext("random-targetingKey"),
 			want: EvaluationContext{
-				key: "random-key",
-				custom: map[string]interface{}{
+				targetingKey: "random-targetingKey",
+				attributes: map[string]interface{}{
 					"anonymous": true,
 				},
 			},
 		},
 		{
-			name: "NewAnonymousUser without key",
+			name: "NewAnonymousUser without targetingKey",
 			got:  NewAnonymousEvaluationContext(""),
 			want: EvaluationContext{
-				key: "",
-				custom: map[string]interface{}{
+				targetingKey: "",
+				attributes: map[string]interface{}{
 					"anonymous": true,
 				},
 			},

@@ -1,6 +1,11 @@
 package exporter
 
 import (
+	"bytes"
+	"encoding/json"
+	"text/template"
+	"time"
+
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 )
 
@@ -27,14 +32,10 @@ type TrackingEvent struct {
 	// Key of the feature flag requested.
 	Key string `json:"key" example:"my-feature-flag" parquet:"name=key, type=BYTE_ARRAY, convertedtype=UTF8"`
 
-	// Source indicates where the event was generated.
-	// This is set to SERVER when the event was evaluated in the relay-proxy and PROVIDER_CACHE when it is evaluated from the cache.
-	Source string `json:"source" example:"SERVER" parquet:"name=source, type=BYTE_ARRAY, convertedtype=UTF8"`
-
-	// TODO:
+	// EvaluationContext contains the evaluation context used for the tracking
 	EvaluationContext ffcontext.EvaluationContext `json:"evaluationContext" parquet:"name=evaluationContext, type=MAP, keytype=BYTE_ARRAY, keyconvertedtype=UTF8, valuetype=BYTE_ARRAY, valueconvertedtype=UTF8"`
 
-	// TODO:
+	// TrackingDetails contains the details of the tracking event
 	TrackingDetails TrackingEventDetails `json:"trackingEventDetails" parquet:"name=evaluationContext, type=MAP, keytype=BYTE_ARRAY, keyconvertedtype=UTF8, valuetype=BYTE_ARRAY, valueconvertedtype=UTF8"`
 }
 
@@ -50,4 +51,25 @@ func (f TrackingEvent) GetUserKey() string {
 // GetCreationDate returns the creationDate of the event.
 func (f TrackingEvent) GetCreationDate() int64 {
 	return f.CreationDate
+}
+
+func (f TrackingEvent) FormatInCSV(csvTemplate *template.Template) ([]byte, error) {
+	var buf bytes.Buffer
+	err := csvTemplate.Execute(&buf, struct {
+		TrackingEvent
+		FormattedDate string
+	}{
+		TrackingEvent: f,
+		FormattedDate: time.Unix(f.GetCreationDate(), 0).Format(time.RFC3339),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
+func (f TrackingEvent) FormatInJSON() ([]byte, error) {
+	b, err := json.Marshal(f)
+	b = append(b, []byte("\n")...)
+	return b, err
 }
