@@ -30,7 +30,7 @@ func TestS3_Export(t *testing.T) {
 	tests := []struct {
 		name         string
 		fields       fields
-		events       []exporter.FeatureEvent
+		events       []exporter.ExportableEvent
 		wantErr      bool
 		expectedFile string
 		expectedName string
@@ -41,8 +41,8 @@ func TestS3_Export(t *testing.T) {
 				Bucket:  "test",
 				Context: context.TODO(),
 			},
-			events: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 				},
@@ -56,8 +56,8 @@ func TestS3_Export(t *testing.T) {
 				Bucket:  "test",
 				Context: nil,
 			},
-			events: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 				},
@@ -66,14 +66,14 @@ func TestS3_Export(t *testing.T) {
 			expectedName: "^/flag-variation-" + hostname + "-[0-9]*\\.json$",
 		},
 		{
-			name: "With DeprecatedExporter Path",
+			name: "With DeprecatedExporterV1 Path",
 			fields: fields{
 				S3Path:  "random/path",
 				Bucket:  "test",
 				Context: context.TODO(),
 			},
-			events: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 				},
@@ -88,8 +88,8 @@ func TestS3_Export(t *testing.T) {
 				Bucket:  "test",
 				Context: context.TODO(),
 			},
-			events: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 				},
@@ -105,8 +105,8 @@ func TestS3_Export(t *testing.T) {
 				Bucket:      "test",
 				Context:     context.TODO(),
 			},
-			events: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 				},
@@ -122,8 +122,8 @@ func TestS3_Export(t *testing.T) {
 				Bucket:   "test",
 				Context:  context.TODO(),
 			},
-			events: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 				},
@@ -138,8 +138,8 @@ func TestS3_Export(t *testing.T) {
 				Bucket:  "test",
 				Context: context.TODO(),
 			},
-			events: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 				},
@@ -153,8 +153,8 @@ func TestS3_Export(t *testing.T) {
 				Format:  "xxx",
 				Context: context.TODO(),
 			},
-			events: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 				},
@@ -168,8 +168,8 @@ func TestS3_Export(t *testing.T) {
 				Bucket:   "test",
 				Context:  context.TODO(),
 			},
-			events: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 				},
@@ -183,8 +183,8 @@ func TestS3_Export(t *testing.T) {
 				CsvTemplate: "{{ .Foo}}",
 				Context:     context.TODO(),
 			},
-			events: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 				},
@@ -202,8 +202,8 @@ func TestS3_Export(t *testing.T) {
 				},
 				Context: context.TODO(),
 			},
-			events: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 				},
@@ -253,11 +253,11 @@ func Test_errSDK(t *testing.T) {
 		Bucket:    "empty",
 		AwsConfig: &aws.Config{},
 	}
-	err := f.Export(context.Background(), &fflog.FFLogger{LeveledLogger: slog.Default()}, []exporter.FeatureEvent{})
+	err := f.Export(context.Background(), &fflog.FFLogger{LeveledLogger: slog.Default()}, []exporter.ExportableEvent{})
 	assert.Error(t, err, "Empty AWS config should failed")
 }
 
 func TestS3_IsBulk(t *testing.T) {
 	exporter := Exporter{}
-	assert.True(t, exporter.IsBulk(), "DeprecatedExporter is a bulk exporter")
+	assert.True(t, exporter.IsBulk(), "DeprecatedExporterV1 is a bulk exporter")
 }
