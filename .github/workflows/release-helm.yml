@@ -18,12 +18,12 @@ jobs:
 
       - name: Get changed files in the docs folder
         id: changed-files-specific
-        uses: tj-actions/changed-files@v45
+        uses: marceloprado/has-changed-path@v1.0.1
         with:
-          files: ./cmd/relayproxy/helm-charts/**
+          paths: ./cmd/relayproxy/helm-charts/
 
       - name: Publish Helm chart
-        if: steps.changed-files-specific.outputs.any_changed == 'true'
+        if: steps.changed-files-specific.outputs.changed == 'true'
         uses: stefanprodan/helm-gh-pages@master
         with:
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
@@ -42,7 +42,7 @@ jobs:
           check-latest: true
 
       - name: Update chart README
-        if: steps.changed-files-specific.outputs.any_changed == 'true'
+        if: steps.changed-files-specific.outputs.changed == 'true'
         run: make generate-helm-docs
 
       - name: Checkout main branch
@@ -60,7 +60,7 @@ jobs:
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7
-        if: steps.changed-files-specific.outputs.any_changed == 'true'
+        if: steps.changed-files-specific.outputs.changed == 'true'
         with:
           branch: update-relay-proxy-chart-readme
           title: "docs(helm): Update relay proxy helm README"

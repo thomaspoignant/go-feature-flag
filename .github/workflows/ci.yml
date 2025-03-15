@@ -173,24 +173,24 @@ jobs:
           fetch-depth: 1
       - name: Get changed files in the docs folder
         id: changed-files-specific
-        uses: tj-actions/changed-files@v45
+        uses: marceloprado/has-changed-path@v1.0.1
         with:
-          files: ./openfeature/providers/python-provider/**
+          paths: ./openfeature/providers/python-provider/
       - uses: actions/setup-python@v5
         with:
           python-version: 3.9
       - name: Setup Poetry
-        if: steps.changed-files-specific.outputs.any_changed == 'true'
+        if: steps.changed-files-specific.outputs.changed == 'true'
         uses: abatilo/actions-poetry@v4
       - name: Poetry install
-        if: steps.changed-files-specific.outputs.any_changed == 'true'
+        if: steps.changed-files-specific.outputs.changed == 'true'
         working-directory: ./openfeature/providers/python-provider
         run: poetry install
       - name: lint black
-        if: steps.changed-files-specific.outputs.any_changed == 'true'
+        if: steps.changed-files-specific.outputs.changed == 'true'
         working-directory: ./openfeature/providers/python-provider
         run: poetry run black . --check
       - name: Pytest
-        if: steps.changed-files-specific.outputs.any_changed == 'true'
+        if: steps.changed-files-specific.outputs.changed == 'true'
         working-directory: ./openfeature/providers/python-provider
         run: poetry run pytest
