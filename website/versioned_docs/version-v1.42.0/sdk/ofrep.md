@@ -22,11 +22,11 @@ For the full technical details, you can head over to the Open Feature Protocol d
 - When you want to use a SDK that has support of OFREP but not the official GO Feature Flag providers.
 
 ## How to use OFREP with GO Feature Flag?
-To use OpenFeature Remote Evaluation Protocol (OFREP) with GO Feature Flag, you need to have the [`relay-proxy`](./relay-proxy) running in your infrastructure.
+To use OpenFeature Remote Evaluation Protocol (OFREP) with GO Feature Flag, you need to have the [`relay-proxy`](../relay-proxy) running in your infrastructure.
 
 The `relay-proxy` has all the endpoints needed to communicate with any of the feature flag providers that support OFREP.
 
 If you want to look at those endpoints, you can look at them in the [API doc](https://gofeatureflag.org/API_relayproxy#tag/OpenFeature-Remote-Evaluation-Protocol-(OFREP)).
 
 ## Any questions about OFREP?
-Ask them on [Slack](./slack) or open an issue on the [GitHub repository](https://github.com/thomaspoignant/go-feature-flag/issues).
+Ask them on [Slack](/slack) or open an issue on the [GitHub repository](https://github.com/thomaspoignant/go-feature-flag/issues).
