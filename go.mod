@@ -1,6 +1,7 @@
 module github.com/thomaspoignant/go-feature-flag
 
 go 1.23.6
+toolchain go1.24.1
 
 require (
 	cloud.google.com/go/pubsub v1.47.0
@@ -73,7 +74,7 @@ require (
 	google.golang.org/grpc v1.71.0
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.32.2
-	k8s.io/apimachinery v0.32.2
+	k8s.io/apimachinery v0.32.3
 	k8s.io/client-go v0.32.2
 )
 
