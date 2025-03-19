@@ -291,7 +291,29 @@ export const sdk = [
     faLogo: 'devicon-nestjs-plain colored',
     badgeUrl:
       'https://img.shields.io/npm/v/%40openfeature%2Fgo-feature-flag-provider?color=blue&style=flat-square&logo=npm',
-    docLink: 'client_providers/openfeature_javascript',
+    docLink: 'server_providers/openfeature_nestjs',
+    featureList: [
+      {
+        name: 'Remote Evaluation',
+        status: 'done',
+      },
+      {
+        name: 'Local Cache',
+        status: 'done',
+      },
+      {
+        name: 'Dynamic Cache Refresh',
+        status: 'done',
+      },
+    ],
+  },
+  {
+    name: 'Angular',
+    paradigm: ['Client'],
+    faLogo: 'devicon-angularjs-plain colored',
+    badgeUrl:
+      'https://img.shields.io/npm/v/%40openfeature%2Fgo-feature-flag-web-provider?color=blue&style=flat-square&logo=npm',
+    docLink: 'client_providers/openfeature_angular',
     featureList: [
       {
         name: 'Remote Evaluation',
