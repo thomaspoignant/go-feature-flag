@@ -87,6 +87,10 @@ func (e *Exporter) initializeProducer() error {
 		e.Settings.Config.Producer.Return.Successes = true // Needs to be true for sync producers
 	}
 
+	if err := e.Settings.Config.Validate(); err != nil {
+		return fmt.Errorf("invalid configuration: %w", err)
+	}
+
 	if e.dialer == nil {
 		e.dialer = func(addrs []string, config *sarama.Config) (MessageSender, error) {
 			// Adapter for the function to comply with the MessageSender interface return

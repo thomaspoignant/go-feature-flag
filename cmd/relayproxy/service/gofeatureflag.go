@@ -5,6 +5,8 @@ import (
 	"log/slog"
 	"time"
 
+	"dario.cat/mergo"
+	"github.com/IBM/sarama"
 	awsConf "github.com/aws/aws-sdk-go-v2/config"
 	slogzap "github.com/samber/slog-zap/v2"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
@@ -345,6 +347,13 @@ func createExporter(c *config.ExporterConf) (exporter.CommonExporter, error) {
 			AwsConfig: &awsConfig,
 		}, nil
 	case config.KafkaExporter:
+		if c.Kafka.Config != nil {
+			defaultConfig := sarama.NewConfig()
+			err := mergo.Merge(c.Kafka.Config, defaultConfig)
+			if err != nil {
+				return nil, err
+			}
+		}
 		return &kafkaexporter.Exporter{
 			Format:   format,
 			Settings: c.Kafka,
