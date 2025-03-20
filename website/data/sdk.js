@@ -1,6 +1,6 @@
 export const sdk = [
   {
-    name: 'GO',
+    name: 'Golang',
     paradigm: ['Server'],
     faLogo: 'devicon-go-original-wordmark colored',
     badgeUrl:
