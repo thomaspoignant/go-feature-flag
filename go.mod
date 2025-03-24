@@ -9,7 +9,7 @@ require (
 	cloud.google.com/go/storage v1.51.0
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.8.2
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.6.0
-	github.com/BurntSushi/toml v1.4.0
+	github.com/BurntSushi/toml v1.5.0
 	github.com/IBM/sarama v1.45.1
 	github.com/atc0005/go-teams-notify/v2 v2.13.0
 	github.com/aws/aws-lambda-go v1.47.0
@@ -23,7 +23,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.38.1
 	github.com/aws/smithy-go v1.22.3
 	github.com/awslabs/aws-lambda-go-api-proxy v0.16.2
-	github.com/diegoholiveira/jsonlogic/v3 v3.7.4
+	github.com/diegoholiveira/jsonlogic/v3 v3.7.5
 	github.com/fsouza/fake-gcs-server v1.52.2
 	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.7.0
