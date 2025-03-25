@@ -7,7 +7,7 @@ package ffcontext
 func NewEvaluationContextBuilder(key string) EvaluationContextBuilder {
 	return &evaluationContextBuilderImpl{
 		key:    key,
-		custom: map[string]interface{}{},
+		custom: map[string]any{},
 	}
 }
 
@@ -18,7 +18,7 @@ type EvaluationContextBuilder interface {
 	// instead of using this function.
 	Anonymous(bool) EvaluationContextBuilder
 
-	AddCustom(string, interface{}) EvaluationContextBuilder
+	AddCustom(string, any) EvaluationContextBuilder
 	Build() EvaluationContext
 }
 
@@ -37,7 +37,7 @@ func (u *evaluationContextBuilderImpl) Anonymous(anonymous bool) EvaluationConte
 }
 
 // AddCustom allows you to add a custom attribute to the EvaluationContext.
-func (u *evaluationContextBuilderImpl) AddCustom(key string, value interface{}) EvaluationContextBuilder {
+func (u *evaluationContextBuilderImpl) AddCustom(key string, value any) EvaluationContextBuilder {
 	u.custom[key] = value
 	return u
 }

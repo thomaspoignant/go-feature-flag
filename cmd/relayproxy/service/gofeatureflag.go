@@ -26,7 +26,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/notifier/slacknotifier"
 	"github.com/thomaspoignant/go-feature-flag/notifier/webhooknotifier"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
-	"github.com/thomaspoignant/go-feature-flag/retriever/azblobstorageretriever"
+	azblobretriever "github.com/thomaspoignant/go-feature-flag/retriever/azblobstorageretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/bitbucketretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/gcstorageretriever"
@@ -69,8 +69,12 @@ func NewGoFeatureFlagClient(
 	notif = append(notif, notifiers...)
 
 	f := ffclient.Config{
-		PollingInterval:                 time.Duration(proxyConf.PollingInterval) * time.Millisecond,
-		LeveledLogger:                   slog.New(slogzap.Option{Level: slog.LevelDebug, Logger: logger}.NewZapHandler()),
+		PollingInterval: time.Duration(
+			proxyConf.PollingInterval,
+		) * time.Millisecond,
+		LeveledLogger: slog.New(
+			slogzap.Option{Level: slog.LevelDebug, Logger: logger}.NewZapHandler(),
+		),
 		Context:                         context.Background(),
 		Retrievers:                      retrievers,
 		Notifiers:                       notif,
@@ -110,6 +114,7 @@ func initRetrievers(proxyConf *config.Config) ([]retriever.Retriever, error) {
 }
 
 // initRetriever initialize the retriever based on the configuration
+// nolint: funlen
 func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 	retrieverTimeout := config.DefaultRetriever.Timeout
 	if c.Timeout != 0 {
@@ -184,10 +189,18 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &k8sretriever.Retriever{Namespace: c.Namespace, ConfigMapName: c.ConfigMap, Key: c.Key,
-			ClientConfig: *client}, nil
+		return &k8sretriever.Retriever{
+			Namespace:     c.Namespace,
+			ConfigMapName: c.ConfigMap,
+			Key:           c.Key,
+			ClientConfig:  *client,
+		}, nil
 	case config.MongoDBRetriever:
-		return &mongodbretriever.Retriever{Database: c.Database, URI: c.URI, Collection: c.Collection}, nil
+		return &mongodbretriever.Retriever{
+			Database:   c.Database,
+			URI:        c.URI,
+			Collection: c.Collection,
+		}, nil
 	case config.RedisRetriever:
 		return &redisretriever.Retriever{Options: c.RedisOptions, Prefix: c.RedisPrefix}, nil
 	case config.AzBlobStorageRetriever:
@@ -383,7 +396,10 @@ func initNotifier(c []config.NotifierConf) ([]notifier.Notifier, error) {
 				zap.L().Warn("slackWebhookURL field is deprecated, please use webhookURL instead")
 				cNotif.WebhookURL = cNotif.SlackWebhookURL // nolint
 			}
-			notifiers = append(notifiers, &slacknotifier.Notifier{SlackWebhookURL: cNotif.WebhookURL})
+			notifiers = append(
+				notifiers,
+				&slacknotifier.Notifier{SlackWebhookURL: cNotif.WebhookURL},
+			)
 		case config.MicrosoftTeamsNotifier:
 			notifiers = append(
 				notifiers,
@@ -401,7 +417,10 @@ func initNotifier(c []config.NotifierConf) ([]notifier.Notifier, error) {
 				},
 			)
 		case config.DiscordNotifier:
-			notifiers = append(notifiers, &discordnotifier.Notifier{DiscordWebhookURL: cNotif.WebhookURL})
+			notifiers = append(
+				notifiers,
+				&discordnotifier.Notifier{DiscordWebhookURL: cNotif.WebhookURL},
+			)
 		default:
 			return nil, fmt.Errorf("invalid notifier: kind \"%s\" is not supported", cNotif.Kind)
 		}

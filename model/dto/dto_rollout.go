@@ -48,7 +48,7 @@ type ScheduledRolloutV0 struct {
 
 type ScheduledStepV0 struct {
 	DTO  `yaml:",inline"`
-	Date *time.Time `json:"date,omitempty" yaml:"date,omitempty" toml:"date,omitempty"`
+	Date *time.Time `yaml:"date,omitempty" json:"date,omitempty" toml:"date,omitempty"`
 }
 
 // ProgressiveV0 is the configuration struct to define a progressive rollout.

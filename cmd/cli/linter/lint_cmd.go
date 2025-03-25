@@ -17,7 +17,8 @@ func NewLintCmd() *cobra.Command {
 			return runLint(cmd, args, lintFlagFormat)
 		},
 	}
-	lintCmd.Flags().StringVarP(&lintFlagFormat, "format", "f", "yaml", "Format of your input file (YAML, JSON or TOML)")
+	lintCmd.Flags().
+		StringVarP(&lintFlagFormat, "format", "f", "yaml", "Format of your input file (YAML, JSON or TOML)")
 	return lintCmd
 }
 

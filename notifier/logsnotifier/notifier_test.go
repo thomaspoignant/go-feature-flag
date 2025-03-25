@@ -25,7 +25,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 			diff: notifier.DiffCache{
 				Deleted: map[string]flag.Flag{
 					"test-flag": &flag.InternalFlag{
-						Variations: &map[string]*interface{}{
+						Variations: &map[string]*any{
 							"Default": testconvert.Interface(false),
 							"False":   testconvert.Interface(false),
 							"True":    testconvert.Interface(true),
@@ -68,7 +68,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 									},
 								},
 							},
-							Variations: &map[string]*interface{}{
+							Variations: &map[string]*any{
 								"Default": testconvert.Interface(false),
 								"False":   testconvert.Interface(false),
 								"True":    testconvert.Interface(true),
@@ -79,7 +79,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 							},
 						},
 						After: &flag.InternalFlag{
-							Variations: &map[string]*interface{}{
+							Variations: &map[string]*any{
 								"Default": testconvert.Interface(false),
 								"False":   testconvert.Interface(false),
 								"True":    testconvert.Interface(true),
@@ -122,7 +122,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 									},
 								},
 							},
-							Variations: &map[string]*interface{}{
+							Variations: &map[string]*any{
 								"Default": testconvert.Interface(false),
 								"False":   testconvert.Interface(false),
 								"True":    testconvert.Interface(true),
@@ -143,7 +143,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 									},
 								},
 							},
-							Variations: &map[string]*interface{}{
+							Variations: &map[string]*any{
 								"Default": testconvert.Interface(false),
 								"False":   testconvert.Interface(false),
 								"True":    testconvert.Interface(true),
@@ -184,7 +184,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 								},
 							},
 						},
-						Variations: &map[string]*interface{}{
+						Variations: &map[string]*any{
 							"Default": testconvert.Interface(false),
 							"False":   testconvert.Interface(false),
 							"True":    testconvert.Interface(true),
@@ -222,7 +222,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 									},
 								},
 							},
-							Variations: &map[string]*interface{}{
+							Variations: &map[string]*any{
 								"Default": testconvert.Interface(false),
 								"False":   testconvert.Interface(false),
 								"True":    testconvert.Interface(true),
@@ -243,7 +243,7 @@ func TestLogNotifier_Notify(t *testing.T) {
 									},
 								},
 							},
-							Variations: &map[string]*interface{}{
+							Variations: &map[string]*any{
 								"Default": testconvert.Interface(false),
 								"False":   testconvert.Interface(false),
 								"True":    testconvert.Interface(true),

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/thomaspoignant/go-feature-flag"
+	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/azureexporter"
@@ -735,5 +735,10 @@ func TestNewGoFeatureFlagClient_ProxyConfNil(t *testing.T) {
 
 	// Assert that the function returns nil and an error
 	assert.Nil(t, goff, "Expected GoFeatureFlag client to be nil when proxyConf is nil")
-	assert.EqualError(t, err, "proxy config is empty", "Expected error message to indicate empty proxy config")
+	assert.EqualError(
+		t,
+		err,
+		"proxy config is empty",
+		"Expected error message to indicate empty proxy config",
+	)
 }

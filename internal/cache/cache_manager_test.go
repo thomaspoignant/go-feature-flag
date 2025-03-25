@@ -112,7 +112,7 @@ trackEvents = false
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"false_var": testconvert.Interface(false),
 						"true_var":  testconvert.Interface(true),
 					},
@@ -159,7 +159,7 @@ test-flag:
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"false_var": testconvert.Interface(false),
 						"true_var":  testconvert.Interface(true),
 					},
@@ -213,7 +213,7 @@ test-flag:
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"false_var": testconvert.Interface(false),
 						"true_var":  testconvert.Interface(true),
 					},
@@ -304,7 +304,7 @@ test-flag:
 			},
 			expected: map[string]flag.InternalFlag{
 				"test-flag": {
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"false_var": testconvert.Interface(false),
 						"true_var":  testconvert.Interface(true),
 					},
@@ -359,7 +359,7 @@ test-flag2:
 			},
 			expected: map[string]flag.InternalFlag{
 				"test-flag": {
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"false_var": testconvert.Interface(false),
 						"true_var":  testconvert.Interface(true),
 					},
@@ -378,7 +378,7 @@ test-flag2:
 					TrackEvents: testconvert.Bool(false),
 				},
 				"test-flag2": {
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"false_var": testconvert.Interface("false"),
 						"true_var":  testconvert.Interface("true"),
 					},
@@ -519,7 +519,7 @@ func TestCacheManager_UpdateCache(t *testing.T) {
 			name: "Update existing flags",
 			initialFlags: map[string]dto.DTO{
 				"flag1": {
-					Variations: &map[string]*interface{}{},
+					Variations: &map[string]*any{},
 					DefaultRule: &flag.Rule{
 						VariationResult: testconvert.String("true"),
 					},
@@ -527,7 +527,7 @@ func TestCacheManager_UpdateCache(t *testing.T) {
 			},
 			updatedFlags: map[string]dto.DTO{
 				"flag1": {
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"true": testconvert.Interface(true),
 					},
 					DefaultRule: &flag.Rule{
@@ -535,7 +535,7 @@ func TestCacheManager_UpdateCache(t *testing.T) {
 					},
 				},
 				"flag2": {
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"false": testconvert.Interface(false),
 					},
 					DefaultRule: &flag.Rule{
@@ -549,7 +549,7 @@ func TestCacheManager_UpdateCache(t *testing.T) {
 			initialFlags: map[string]dto.DTO{},
 			updatedFlags: map[string]dto.DTO{
 				"flag1": {
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"true": testconvert.Interface(true),
 					},
 					DefaultRule: &flag.Rule{
@@ -562,7 +562,7 @@ func TestCacheManager_UpdateCache(t *testing.T) {
 			name: "Remove a flag",
 			initialFlags: map[string]dto.DTO{
 				"flag1": {
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"true": testconvert.Interface(true),
 					},
 					DefaultRule: &flag.Rule{
@@ -570,7 +570,7 @@ func TestCacheManager_UpdateCache(t *testing.T) {
 					},
 				},
 				"flag2": {
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"false": testconvert.Interface(false),
 					},
 					DefaultRule: &flag.Rule{
@@ -580,7 +580,7 @@ func TestCacheManager_UpdateCache(t *testing.T) {
 			},
 			updatedFlags: map[string]dto.DTO{
 				"flag1": {
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"true": testconvert.Interface(true),
 					},
 					DefaultRule: &flag.Rule{
@@ -595,33 +595,61 @@ func TestCacheManager_UpdateCache(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Test UpdateCache without notification
 			mockNotificationService := &mock.NotificationService{}
-			cm := cache.New(mockNotificationService, "", &fflog.FFLogger{LeveledLogger: slog.Default()})
+			cm := cache.New(
+				mockNotificationService,
+				"",
+				&fflog.FFLogger{LeveledLogger: slog.Default()},
+			)
 
 			err := cm.UpdateCache(tt.initialFlags, nil, false)
 			assert.NoError(t, err)
 
 			err = cm.UpdateCache(tt.updatedFlags, nil, false)
 			assert.NoError(t, err)
-			assert.Equal(t, 0, mockNotificationService.GetNotifyCalls(), "Notify should not be called for UpdateCache")
+			assert.Equal(
+				t,
+				0,
+				mockNotificationService.GetNotifyCalls(),
+				"Notify should not be called for UpdateCache",
+			)
 
 			flags, err := cm.AllFlags()
 			assert.NoError(t, err)
-			assert.Len(t, flags, len(tt.updatedFlags), "Cache should be updated with correct number of flags")
+			assert.Len(
+				t,
+				flags,
+				len(tt.updatedFlags),
+				"Cache should be updated with correct number of flags",
+			)
 
 			// Test UpdateCacache with notification
 			mockNotificationService = &mock.NotificationService{}
-			cm = cache.New(mockNotificationService, "", &fflog.FFLogger{LeveledLogger: slog.Default()})
+			cm = cache.New(
+				mockNotificationService,
+				"",
+				&fflog.FFLogger{LeveledLogger: slog.Default()},
+			)
 
 			err = cm.UpdateCache(tt.initialFlags, nil, false)
 			assert.NoError(t, err)
 
 			err = cm.UpdateCache(tt.updatedFlags, nil, true)
 			assert.NoError(t, err)
-			assert.Equal(t, 1, mockNotificationService.GetNotifyCalls(), "Notify should be called once for UpdateCache with notification")
+			assert.Equal(
+				t,
+				1,
+				mockNotificationService.GetNotifyCalls(),
+				"Notify should be called once for UpdateCache with notification",
+			)
 
 			flags, err = cm.AllFlags()
 			assert.NoError(t, err)
-			assert.Len(t, flags, len(tt.updatedFlags), "Cache should be updated with correct number of flags")
+			assert.Len(
+				t,
+				flags,
+				len(tt.updatedFlags),
+				"Cache should be updated with correct number of flags",
+			)
 		})
 	}
 }

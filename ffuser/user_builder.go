@@ -9,7 +9,7 @@ package ffuser
 func NewUserBuilder(key string) UserBuilder {
 	return &userBuilderImpl{
 		key:    key,
-		custom: map[string]interface{}{},
+		custom: map[string]any{},
 	}
 }
 
@@ -18,7 +18,7 @@ func NewUserBuilder(key string) UserBuilder {
 // UserBuilder is a builder to create a User.
 type UserBuilder interface {
 	Anonymous(bool) UserBuilder
-	AddCustom(string, interface{}) UserBuilder
+	AddCustom(string, any) UserBuilder
 	Build() User
 }
 
@@ -35,7 +35,7 @@ func (u *userBuilderImpl) Anonymous(anonymous bool) UserBuilder {
 }
 
 // AddCustom allows you to add a custom attribute to the user.
-func (u *userBuilderImpl) AddCustom(key string, value interface{}) UserBuilder {
+func (u *userBuilderImpl) AddCustom(key string, value any) UserBuilder {
 	u.custom[key] = value
 	return u
 }

@@ -5,7 +5,7 @@ repos:
       - id: gofumpt
 
   - repo: https://github.com/golangci/golangci-lint
-    rev: v1.64.6
+    rev: v2.0.2
     hooks:
       - id: golangci-lint
         entry: golangci-lint run --enable-only=gci --fix

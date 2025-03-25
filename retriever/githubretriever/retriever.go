@@ -31,7 +31,11 @@ type Retriever struct {
 
 func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	if r.FilePath == "" || r.RepositorySlug == "" {
-		return nil, fmt.Errorf("missing mandatory information filePath=%s, repositorySlug=%s", r.FilePath, r.RepositorySlug)
+		return nil, fmt.Errorf(
+			"missing mandatory information filePath=%s, repositorySlug=%s",
+			r.FilePath,
+			r.RepositorySlug,
+		)
 	}
 
 	// default branch is main

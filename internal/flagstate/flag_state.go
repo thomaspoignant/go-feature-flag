@@ -9,15 +9,15 @@ import (
 
 // FlagState represents the state of an individual feature flag, with regard to a specific user, when it was called.
 type FlagState struct {
-	Value         interface{}            `json:"value"`
-	Timestamp     int64                  `json:"timestamp"`
-	VariationType string                 `json:"variationType"`
-	TrackEvents   bool                   `json:"trackEvents"`
-	Failed        bool                   `json:"-"`
-	ErrorCode     flag.ErrorCode         `json:"errorCode"`
-	ErrorDetails  string                 `json:"errorDetails,omitempty"`
-	Reason        flag.ResolutionReason  `json:"reason"`
-	Metadata      map[string]interface{} `json:"metadata,omitempty"`
+	Value         any                   `json:"value"`
+	Timestamp     int64                 `json:"timestamp"`
+	VariationType string                `json:"variationType"`
+	TrackEvents   bool                  `json:"trackEvents"`
+	Failed        bool                  `json:"-"`
+	ErrorCode     flag.ErrorCode        `json:"errorCode"`
+	ErrorDetails  string                `json:"errorDetails,omitempty"`
+	Reason        flag.ResolutionReason `json:"reason"`
+	Metadata      map[string]any        `json:"metadata,omitempty"`
 }
 
 func FromFlagEvaluation(key string, evaluationCtx ffcontext.Context,
@@ -50,7 +50,7 @@ func FromFlagEvaluation(key string, evaluationCtx ffcontext.Context,
 	}
 
 	switch v := flagValue; v.(type) {
-	case int, float64, bool, string, []interface{}, map[string]interface{}:
+	case int, float64, bool, string, []any, map[string]any:
 		return FlagState{
 			Value:         v,
 			Timestamp:     time.Now().Unix(),

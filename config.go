@@ -100,7 +100,7 @@ type Config struct {
 	// All those fields will be included in the custom attributes of the evaluation context,
 	// if in the evaluation context you have a field with the same name, it will override the common one.
 	// Default: nil
-	EvaluationContextEnrichment map[string]interface{}
+	EvaluationContextEnrichment map[string]any
 
 	// PersistentFlagConfigurationFile (optional) if set GO Feature Flag will store flags configuration in this file
 	//  to be able to serve the flags even if none of the retrievers is available during starting time.

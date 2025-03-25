@@ -11,7 +11,7 @@ import (
 func Test_ConvertEvaluationCtxFromReq(t *testing.T) {
 	type fields struct {
 		Key    string
-		Custom map[string]interface{}
+		Custom map[string]any
 	}
 	tests := []struct {
 		name   string
@@ -22,7 +22,7 @@ func Test_ConvertEvaluationCtxFromReq(t *testing.T) {
 			name: "simple case",
 			fields: fields{
 				Key: "2323f37b-eef7-4bbc-856f-7d16c67de3ae",
-				Custom: map[string]interface{}{
+				Custom: map[string]any{
 					"company_name": "go feature flag",
 				},
 			},
@@ -35,7 +35,7 @@ func Test_ConvertEvaluationCtxFromReq(t *testing.T) {
 			name: "should return a float if the value is a float",
 			fields: fields{
 				Key: "2323f37b-eef7-4bbc-856f-7d16c67de3ae",
-				Custom: map[string]interface{}{
+				Custom: map[string]any{
 					"company_name": "go feature flag",
 					"company_id":   1.1,
 				},
@@ -50,7 +50,7 @@ func Test_ConvertEvaluationCtxFromReq(t *testing.T) {
 			name: "should return an int if the value is a float but without decimal",
 			fields: fields{
 				Key: "2323f37b-eef7-4bbc-856f-7d16c67de3ae",
-				Custom: map[string]interface{}{
+				Custom: map[string]any{
 					"company_name": "go feature flag",
 					"company_id":   1.0,
 				},

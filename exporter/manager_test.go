@@ -42,15 +42,29 @@ func TestDataExporterManager_flushWithTime(t *testing.T) {
 					Exporter:         tt.mockExporter,
 				},
 			}
-			dc := exporter.NewManager[exporter.FeatureEvent](context.Background(), dataExporterMock, exporter.DefaultExporterCleanQueueInterval, nil)
+			dc := exporter.NewManager[exporter.FeatureEvent](
+				context.Background(),
+				dataExporterMock,
+				exporter.DefaultExporterCleanQueueInterval,
+				nil,
+			)
 			go dc.Start()
 			defer dc.Stop()
 
 			// Initialize inputEvents slice
 			inputEvents := []exporter.FeatureEvent{
 				exporter.NewFeatureEvent(
-					ffcontext.NewEvaluationContextBuilder("ABCD").AddCustom("anonymous", true).Build(), "random-key",
-					"YO", "defaultVar", false, "", "SERVER", nil),
+					ffcontext.NewEvaluationContextBuilder("ABCD").
+						AddCustom("anonymous", true).
+						Build(),
+					"random-key",
+					"YO",
+					"defaultVar",
+					false,
+					"",
+					"SERVER",
+					nil,
+				),
 			}
 
 			for _, event := range inputEvents {
@@ -86,7 +100,12 @@ func TestDataExporterManager_flushWithNumberOfEvents(t *testing.T) {
 					Exporter:         tt.mockExporter,
 				},
 			}
-			dc := exporter.NewManager[exporter.FeatureEvent](context.Background(), dataExporterMock, exporter.DefaultExporterCleanQueueInterval, nil)
+			dc := exporter.NewManager[exporter.FeatureEvent](
+				context.Background(),
+				dataExporterMock,
+				exporter.DefaultExporterCleanQueueInterval,
+				nil,
+			)
 			go dc.Start()
 			defer dc.Stop()
 
@@ -94,8 +113,17 @@ func TestDataExporterManager_flushWithNumberOfEvents(t *testing.T) {
 			var inputEvents []exporter.FeatureEvent
 			for i := 0; i <= 100; i++ {
 				inputEvents = append(inputEvents, exporter.NewFeatureEvent(
-					ffcontext.NewEvaluationContextBuilder("ABCD").AddCustom("anonymous", true).Build(),
-					"random-key", "YO", "defaultVar", false, "", "SERVER", nil))
+					ffcontext.NewEvaluationContextBuilder("ABCD").
+						AddCustom("anonymous", true).
+						Build(),
+					"random-key",
+					"YO",
+					"defaultVar",
+					false,
+					"",
+					"SERVER",
+					nil,
+				))
 			}
 			for _, event := range inputEvents {
 				dc.AddEvent(event)
@@ -138,8 +166,17 @@ func TestDataExporterManager_defaultFlush(t *testing.T) {
 			var inputEvents []exporter.FeatureEvent
 			for i := 0; i <= 100000; i++ {
 				inputEvents = append(inputEvents, exporter.NewFeatureEvent(
-					ffcontext.NewEvaluationContextBuilder("ABCD").AddCustom("anonymous", true).Build(),
-					"random-key", "YO", "defaultVar", false, "", "SERVER", nil))
+					ffcontext.NewEvaluationContextBuilder("ABCD").
+						AddCustom("anonymous", true).
+						Build(),
+					"random-key",
+					"YO",
+					"defaultVar",
+					false,
+					"",
+					"SERVER",
+					nil,
+				))
 			}
 			for _, event := range inputEvents {
 				dc.AddEvent(event)
@@ -216,19 +253,21 @@ func TestAddExporterMetadataFromContextToExporter(t *testing.T) {
 	tests := []struct {
 		name string
 		ctx  ffcontext.EvaluationContext
-		want map[string]interface{}
+		want map[string]any
 	}{
 		{
 			name: "extract exporter metadata from context",
-			ctx: ffcontext.NewEvaluationContextBuilder("targeting-key").AddCustom("gofeatureflag", map[string]interface{}{
-				"exporterMetadata": map[string]interface{}{
-					"key1": "value1",
-					"key2": 123,
-					"key3": true,
-					"key4": 123.45,
-				},
-			}).Build(),
-			want: map[string]interface{}{
+			ctx: ffcontext.NewEvaluationContextBuilder("targeting-key").
+				AddCustom("gofeatureflag", map[string]any{
+					"exporterMetadata": map[string]any{
+						"key1": "value1",
+						"key2": 123,
+						"key3": true,
+						"key4": 123.45,
+					},
+				}).
+				Build(),
+			want: map[string]any{
 				"key1": "value1",
 				"key2": 123,
 				"key3": true,
@@ -381,7 +420,7 @@ func TestDataExporterManager_ValidateNumberOfEvents(t *testing.T) {
 			_, _ = ffclient.BoolVariation("test-flag", user1, false)
 			_, _ = ffclient.BoolVariation("test-flag", user2, false)
 			_, _ = ffclient.StringVariation("test-flag2", user1, "defaultValue")
-			_, _ = ffclient.JSONVariation("test-flag2", user1, map[string]interface{}{"test": "toto"})
+			_, _ = ffclient.JSONVariation("test-flag2", user1, map[string]any{"test": "toto"})
 			time.Sleep(300 * time.Millisecond)
 			assert.Equal(t, 4, len(mockExporter.GetExportedEvents()))
 

@@ -108,7 +108,11 @@ func evaluateRule(query string, queryFormat QueryFormat, ctx ffcontext.Context) 
 }
 
 // EvaluateProgressiveRollout is evaluating the progressive rollout for the rule.
-func (r *Rule) EvaluateProgressiveRollout(key string, flagName string, evaluationDate time.Time) (string, error) {
+func (r *Rule) EvaluateProgressiveRollout(
+	key string,
+	flagName string,
+	evaluationDate time.Time,
+) (string, error) {
 	progressiveRolloutMaxPercentage := uint32(100 * PercentageMultiplier)
 	hashID := utils.BuildHash(flagName, key, progressiveRolloutMaxPercentage)
 	variation, err := r.getVariationFromProgressiveRollout(hashID, evaluationDate)
@@ -142,10 +146,14 @@ func (r *Rule) IsDynamic() bool {
 			break
 		}
 	}
-	return r.ProgressiveRollout != nil || (r.Percentages != nil && len(r.GetPercentages()) > 0 && !hasPercentage100)
+	return r.ProgressiveRollout != nil ||
+		(r.Percentages != nil && len(r.GetPercentages()) > 0 && !hasPercentage100)
 }
 
-func (r *Rule) getVariationFromProgressiveRollout(hash uint32, evaluationDate time.Time) (string, error) {
+func (r *Rule) getVariationFromProgressiveRollout(
+	hash uint32,
+	evaluationDate time.Time,
+) (string, error) {
 	isRolloutValid := r.ProgressiveRollout != nil &&
 		r.ProgressiveRollout.Initial != nil &&
 		r.ProgressiveRollout.Initial.Date != nil &&
@@ -162,7 +170,8 @@ func (r *Rule) getVariationFromProgressiveRollout(hash uint32, evaluationDate ti
 
 		// We are between initial and end
 		initialPercentage := r.ProgressiveRollout.Initial.getPercentage() * PercentageMultiplier
-		if r.ProgressiveRollout.End.getPercentage() == 0 || r.ProgressiveRollout.End.getPercentage() > 100 {
+		if r.ProgressiveRollout.End.getPercentage() == 0 ||
+			r.ProgressiveRollout.End.getPercentage() > 100 {
 			maxPercentage := float64(100)
 			r.ProgressiveRollout.End.Percentage = &maxPercentage
 		}
@@ -260,7 +269,7 @@ func (r *Rule) MergeRules(updatedRule Rule) {
 }
 
 // IsValid is checking if the rule is valid
-func (r *Rule) IsValid(defaultRule bool, variations map[string]*interface{}) error {
+func (r *Rule) IsValid(defaultRule bool, variations map[string]*any) error {
 	if !defaultRule && r.IsDisable() {
 		return nil
 	}
@@ -296,19 +305,28 @@ func (r *Rule) IsValid(defaultRule bool, variations map[string]*interface{}) err
 	// Progressive rollout: check that initial is lower than end
 	if r.ProgressiveRollout != nil {
 		if r.GetProgressiveRollout().End.getPercentage() < r.GetProgressiveRollout().Initial.getPercentage() {
-			return fmt.Errorf("invalid progressive rollout, initial percentage should be lower "+
-				"than end percentage: %v/%v",
-				r.GetProgressiveRollout().Initial.getPercentage(), r.GetProgressiveRollout().End.getPercentage())
+			return fmt.Errorf(
+				"invalid progressive rollout, initial percentage should be lower "+
+					"than end percentage: %v/%v",
+				r.GetProgressiveRollout().Initial.getPercentage(),
+				r.GetProgressiveRollout().End.getPercentage(),
+			)
 		}
 
 		endVar := r.GetProgressiveRollout().End.getVariation()
 		if _, ok := variations[endVar]; !ok {
-			return fmt.Errorf("invalid progressive rollout, end variation %s does not exist", endVar)
+			return fmt.Errorf(
+				"invalid progressive rollout, end variation %s does not exist",
+				endVar,
+			)
 		}
 
 		initialVar := r.GetProgressiveRollout().Initial.getVariation()
 		if _, ok := variations[initialVar]; !ok {
-			return fmt.Errorf("invalid progressive rollout, initial variation %s does not exist", initialVar)
+			return fmt.Errorf(
+				"invalid progressive rollout, initial variation %s does not exist",
+				initialVar,
+			)
 		}
 	}
 
@@ -347,7 +365,7 @@ func validateNikunjyQuery(query string) error {
 	if err != nil {
 		return err
 	}
-	_, err = ev.Process(map[string]interface{}{})
+	_, err = ev.Process(map[string]any{})
 	if err != nil {
 		return fmt.Errorf("invalid query: %w", err)
 	}

@@ -115,7 +115,7 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 	metadata := flagValue.Metadata
 	if flagValue.Cacheable {
 		if metadata == nil {
-			metadata = make(map[string]interface{})
+			metadata = make(map[string]any)
 		}
 		metadata["gofeatureflag_cacheable"] = true
 	}
@@ -212,7 +212,9 @@ func (h *EvaluateCtrl) BulkEvaluate(c echo.Context) error {
 	return c.JSON(http.StatusOK, response)
 }
 
-func assertOFREPEvaluateRequest(ofrepEvalReq *model.OFREPEvalFlagRequest) *model.OFREPCommonErrorResponse {
+func assertOFREPEvaluateRequest(
+	ofrepEvalReq *model.OFREPEvalFlagRequest,
+) *model.OFREPCommonErrorResponse {
 	if ofrepEvalReq.Context == nil || ofrepEvalReq.Context["targetingKey"] == "" {
 		return NewOFREPCommonError(flag.ErrorCodeTargetingKeyMissing,
 			"GO Feature Flag MUST have a targeting key in the request.")

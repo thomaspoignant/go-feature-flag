@@ -1,6 +1,6 @@
 package utils
 
-func JSONTypeExtractor(variation interface{}) (string, error) {
+func JSONTypeExtractor(variation any) (string, error) {
 	switch variation.(type) {
 	case string:
 		return "(string)", nil
@@ -8,9 +8,9 @@ func JSONTypeExtractor(variation interface{}) (string, error) {
 		return "(number)", nil
 	case bool:
 		return "(bool)", nil
-	case []interface{}:
+	case []any:
 		return "([]interface{})", nil
-	case map[string]interface{}:
+	case map[string]any:
 		return "(map[string]interface{})", nil
 	}
 	return "", nil

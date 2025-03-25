@@ -39,7 +39,7 @@ func TestDiffCache_HasDiff(t *testing.T) {
 			fields: fields{
 				Deleted: map[string]flag.Flag{
 					"flag": &flag.InternalFlag{
-						Variations: &map[string]*interface{}{
+						Variations: &map[string]*any{
 							"Default": testconvert.Interface(true),
 							"True":    testconvert.Interface(true),
 							"False":   testconvert.Interface(true),
@@ -63,7 +63,7 @@ func TestDiffCache_HasDiff(t *testing.T) {
 			fields: fields{
 				Added: map[string]flag.Flag{
 					"flag": &flag.InternalFlag{
-						Variations: &map[string]*interface{}{
+						Variations: &map[string]*any{
 							"Default": testconvert.Interface(true),
 							"True":    testconvert.Interface(true),
 							"False":   testconvert.Interface(true),
@@ -90,7 +90,7 @@ func TestDiffCache_HasDiff(t *testing.T) {
 				Updated: map[string]notifier.DiffUpdated{
 					"flag": {
 						Before: &flag.InternalFlag{
-							Variations: &map[string]*interface{}{
+							Variations: &map[string]*any{
 								"Default": testconvert.Interface(true),
 								"True":    testconvert.Interface(true),
 								"False":   testconvert.Interface(true),
@@ -104,7 +104,7 @@ func TestDiffCache_HasDiff(t *testing.T) {
 							},
 						},
 						After: &flag.InternalFlag{
-							Variations: &map[string]*interface{}{
+							Variations: &map[string]*any{
 								"Default": testconvert.Interface(false),
 								"True":    testconvert.Interface(true),
 								"False":   testconvert.Interface(true),
@@ -127,7 +127,7 @@ func TestDiffCache_HasDiff(t *testing.T) {
 			fields: fields{
 				Added: map[string]flag.Flag{
 					"flag": &flag.InternalFlag{
-						Variations: &map[string]*interface{}{
+						Variations: &map[string]*any{
 							"Default": testconvert.Interface(true),
 							"True":    testconvert.Interface(true),
 							"False":   testconvert.Interface(true),
@@ -143,7 +143,7 @@ func TestDiffCache_HasDiff(t *testing.T) {
 				},
 				Deleted: map[string]flag.Flag{
 					"flag": &flag.InternalFlag{
-						Variations: &map[string]*interface{}{
+						Variations: &map[string]*any{
 							"Default": testconvert.Interface(true),
 							"True":    testconvert.Interface(true),
 							"False":   testconvert.Interface(true),
@@ -160,7 +160,7 @@ func TestDiffCache_HasDiff(t *testing.T) {
 				Updated: map[string]notifier.DiffUpdated{
 					"flag": {
 						Before: &flag.InternalFlag{
-							Variations: &map[string]*interface{}{
+							Variations: &map[string]*any{
 								"Default": testconvert.Interface(true),
 								"True":    testconvert.Interface(true),
 								"False":   testconvert.Interface(true),
@@ -174,7 +174,7 @@ func TestDiffCache_HasDiff(t *testing.T) {
 							},
 						},
 						After: &flag.InternalFlag{
-							Variations: &map[string]*interface{}{
+							Variations: &map[string]*any{
 								"Default": testconvert.Interface(false),
 								"True":    testconvert.Interface(true),
 								"False":   testconvert.Interface(true),

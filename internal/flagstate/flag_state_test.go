@@ -45,7 +45,7 @@ func TestFromFlagEvaluation(t *testing.T) {
 			flagCtx:       flag.Context{},
 			currentFlag: &flag.InternalFlag{
 				Disable: testconvert.Bool(false),
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"var1": testconvert.Interface(1),
 					"var2": testconvert.Interface(2),
 				},
@@ -70,7 +70,7 @@ func TestFromFlagEvaluation(t *testing.T) {
 			flagCtx:       flag.Context{},
 			currentFlag: &flag.InternalFlag{
 				Disable: testconvert.Bool(false),
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"var1": testconvert.Interface(1),
 					"var2": testconvert.Interface(2),
 				},
@@ -95,9 +95,9 @@ func TestFromFlagEvaluation(t *testing.T) {
 			flagCtx:       flag.Context{},
 			currentFlag: &flag.InternalFlag{
 				Disable: testconvert.Bool(false),
-				Variations: &map[string]*interface{}{
-					"var1": testconvert.Interface(map[bool]*interface{}{true: testconvert.Interface(1)}),
-					"var2": testconvert.Interface(map[bool]*interface{}{true: testconvert.Interface(2)}),
+				Variations: &map[string]*any{
+					"var1": testconvert.Interface(map[bool]*any{true: testconvert.Interface(1)}),
+					"var2": testconvert.Interface(map[bool]*any{true: testconvert.Interface(2)}),
 				},
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("var1"),
@@ -117,7 +117,12 @@ func TestFromFlagEvaluation(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := flagstate.FromFlagEvaluation(tt.key, tt.evaluationCtx, tt.flagCtx, tt.currentFlag)
+			got := flagstate.FromFlagEvaluation(
+				tt.key,
+				tt.evaluationCtx,
+				tt.flagCtx,
+				tt.currentFlag,
+			)
 			assert.Equal(t, tt.expected, got)
 		})
 	}

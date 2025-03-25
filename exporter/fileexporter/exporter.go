@@ -53,11 +53,23 @@ type Exporter struct {
 }
 
 // Export is saving a collection of events in a file.
-func (f *Exporter) Export(_ context.Context, _ *fflog.FFLogger, featureEvents []exporter.FeatureEvent) error {
+func (f *Exporter) Export(
+	_ context.Context,
+	_ *fflog.FFLogger,
+	featureEvents []exporter.FeatureEvent,
+) error {
 	// Parse the template only once
 	f.initTemplates.Do(func() {
-		f.csvTemplate = exporter.ParseTemplate("csvFormat", f.CsvTemplate, exporter.DefaultCsvTemplate)
-		f.filenameTemplate = exporter.ParseTemplate("filenameFormat", f.Filename, exporter.DefaultFilenameTemplate)
+		f.csvTemplate = exporter.ParseTemplate(
+			"csvFormat",
+			f.CsvTemplate,
+			exporter.DefaultCsvTemplate,
+		)
+		f.filenameTemplate = exporter.ParseTemplate(
+			"filenameFormat",
+			f.Filename,
+			exporter.DefaultFilenameTemplate,
+		)
 	})
 
 	// Default format for the output
@@ -79,6 +91,7 @@ func (f *Exporter) Export(_ context.Context, _ *fflog.FFLogger, featureEvents []
 		filePath = filename
 	} else {
 		// Ensure OutputDir exists or create it
+		// nolint:gosec
 		if err := os.MkdirAll(outputDir, 0755); err != nil {
 			return fmt.Errorf("failed to create output directory: %v", err)
 		}
@@ -98,11 +111,12 @@ func (f *Exporter) IsBulk() bool {
 }
 
 func (f *Exporter) writeFile(filePath string, featureEvents []exporter.FeatureEvent) error {
+	// nolint:gosec
 	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 	for _, event := range featureEvents {
 		var line []byte
 		var err error
@@ -134,7 +148,7 @@ func (f *Exporter) writeParquet(filePath string, featureEvents []exporter.Featur
 	if err != nil {
 		return err
 	}
-	defer fw.Close()
+	defer func() { _ = fw.Close() }()
 
 	pw, err := writer.NewParquetWriter(fw, new(exporter.FeatureEvent), int64(runtime.NumCPU()))
 	if err != nil {

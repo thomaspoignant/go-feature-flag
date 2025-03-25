@@ -21,7 +21,10 @@ func GetFlagsFromCache() (map[string]flag.Flag, error) {
 
 // GetFlagStates is evaluating all the flags in flagsToEvaluate based on the context provided.
 // If flagsToEvaluate is nil or empty, it will evaluate all the flags available in GO Feature Flag.
-func (g *GoFeatureFlag) GetFlagStates(evaluationCtx ffcontext.Context, flagsToEvaluate []string) flagstate.AllFlags {
+func (g *GoFeatureFlag) GetFlagStates(
+	evaluationCtx ffcontext.Context,
+	flagsToEvaluate []string,
+) flagstate.AllFlags {
 	if g == nil {
 		return flagstate.AllFlags{}
 	}
@@ -47,7 +50,10 @@ func (g *GoFeatureFlag) GetFlagStates(evaluationCtx ffcontext.Context, flagsToEv
 				// We ignore flags in error
 				continue
 			}
-			flagStates.AddFlag(key, flagstate.FromFlagEvaluation(key, evaluationCtx, flagCtx, currentFlag))
+			flagStates.AddFlag(
+				key,
+				flagstate.FromFlagEvaluation(key, evaluationCtx, flagCtx, currentFlag),
+			)
 		}
 		return flagStates
 	}
@@ -59,7 +65,10 @@ func (g *GoFeatureFlag) GetFlagStates(evaluationCtx ffcontext.Context, flagsToEv
 	}
 	allFlags := flagstate.NewAllFlags()
 	for key, currentFlag := range flags {
-		allFlags.AddFlag(key, flagstate.FromFlagEvaluation(key, evaluationCtx, flagCtx, currentFlag))
+		allFlags.AddFlag(
+			key,
+			flagstate.FromFlagEvaluation(key, evaluationCtx, flagCtx, currentFlag),
+		)
 	}
 	return allFlags
 }

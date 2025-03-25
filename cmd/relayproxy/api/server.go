@@ -85,9 +85,19 @@ func (s *Server) initRoutes() {
 	cAllFlags := controller.NewAllFlags(s.services.GOFeatureFlagService, s.services.Metrics)
 	cFlagEval := controller.NewFlagEval(s.services.GOFeatureFlagService, s.services.Metrics)
 	cFlagEvalOFREP := ofrep.NewOFREPEvaluate(s.services.GOFeatureFlagService, s.services.Metrics)
-	cEvalDataCollector := controller.NewCollectEvalData(s.services.GOFeatureFlagService, s.services.Metrics, s.zapLog)
-	cRetrieverRefresh := controller.NewForceFlagsRefresh(s.services.GOFeatureFlagService, s.services.Metrics)
-	cFlagChangeAPI := controller.NewAPIFlagChange(s.services.GOFeatureFlagService, s.services.Metrics)
+	cEvalDataCollector := controller.NewCollectEvalData(
+		s.services.GOFeatureFlagService,
+		s.services.Metrics,
+		s.zapLog,
+	)
+	cRetrieverRefresh := controller.NewForceFlagsRefresh(
+		s.services.GOFeatureFlagService,
+		s.services.Metrics,
+	)
+	cFlagChangeAPI := controller.NewAPIFlagChange(
+		s.services.GOFeatureFlagService,
+		s.services.Metrics,
+	)
 
 	// Init routes
 	s.addGOFFRoutes(cAllFlags, cFlagEval, cEvalDataCollector, cFlagChangeAPI)
@@ -117,7 +127,10 @@ func (s *Server) Start() {
 	// start the OpenTelemetry tracing service
 	err := s.otelService.Init(context.Background(), s.zapLog, *s.config)
 	if err != nil {
-		s.zapLog.Error("error while initializing OTel, continuing without tracing enabled", zap.Error(err))
+		s.zapLog.Error(
+			"error while initializing OTel, continuing without tracing enabled",
+			zap.Error(err),
+		)
 		// we can continue because otel is not mandatory to start the server
 	}
 
@@ -142,7 +155,7 @@ func (s *Server) StartAwsLambda() {
 	lambda.Start(s.getLambdaHandler())
 }
 
-func (s *Server) getLambdaHandler() interface{} {
+func (s *Server) getLambdaHandler() any {
 	handlerMngr := newAwsLambdaHandlerManager(s.apiEcho)
 	return handlerMngr.GetAdapter(s.config.AwsLambdaAdapter)
 }

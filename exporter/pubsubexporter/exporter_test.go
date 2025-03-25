@@ -30,7 +30,10 @@ func TestExporter_Export(t *testing.T) {
 	server := pstest.NewServer()
 	t.Cleanup(func() { server.Close() })
 
-	conn, err := grpc.NewClient(server.Addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(
+		server.Addr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
 	require.NoError(t, err)
 	t.Cleanup(func() { conn.Close() })
 
@@ -198,7 +201,11 @@ func TestExporter_IsBulk(t *testing.T) {
 	assert.False(t, e.IsBulk(), "PubSub exporter is not a bulk one")
 }
 
-func assertMessages(t *testing.T, expectedEvents []exporter.FeatureEvent, messages []*pstest.Message) {
+func assertMessages(
+	t *testing.T,
+	expectedEvents []exporter.FeatureEvent,
+	messages []*pstest.Message,
+) {
 	events := make([]exporter.FeatureEvent, len(messages))
 	for i, message := range messages {
 		assert.Equal(t, map[string]string{"emitter": "GO Feature Flag"}, message.Attributes,
@@ -213,7 +220,11 @@ func assertMessages(t *testing.T, expectedEvents []exporter.FeatureEvent, messag
 	assert.ElementsMatchf(t, expectedEvents, events, "events should match in any order")
 }
 
-func assertPublisherSettings(t *testing.T, expectedSettings *pubsub.PublishSettings, publisher *pubsub.Topic) {
+func assertPublisherSettings(
+	t *testing.T,
+	expectedSettings *pubsub.PublishSettings,
+	publisher *pubsub.Topic,
+) {
 	if expectedSettings != nil {
 		assert.Equal(t, *expectedSettings, publisher.PublishSettings)
 	} else {

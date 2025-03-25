@@ -38,7 +38,7 @@ func main() {
 		Build()
 
 	// Call multiple time the same flag to see the change in time.
-	for true {
+	for {
 		time.Sleep(1 * time.Second)
 		fmt.Println(ffclient.BoolVariation("progressive-flag", user, false))
 	}

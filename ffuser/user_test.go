@@ -10,19 +10,19 @@ import (
 func TestUser_AddCustomAttribute(t *testing.T) {
 	type args struct {
 		name  string
-		value interface{}
+		value any
 	}
 	tests := []struct {
 		name string
 		user ffuser.User
 		args args
-		want map[string]interface{}
+		want map[string]any
 	}{
 		{
 			name: "trying to add nil value",
 			user: ffuser.NewUser("123"),
 			args: args{},
-			want: map[string]interface{}{},
+			want: map[string]any{},
 		},
 		{
 			name: "add valid element",
@@ -31,7 +31,7 @@ func TestUser_AddCustomAttribute(t *testing.T) {
 				name:  "test",
 				value: "test",
 			},
-			want: map[string]interface{}{
+			want: map[string]any{
 				"test": "test",
 			},
 		},

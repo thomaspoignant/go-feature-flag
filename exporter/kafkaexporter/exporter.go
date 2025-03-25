@@ -45,7 +45,11 @@ type Exporter struct {
 
 // Export will produce a message to the Kafka topic. The message's value will contain the event encoded in the
 // selected format. Messages are published synchronously and will error immediately on failure.
-func (e *Exporter) Export(_ context.Context, _ *fflog.FFLogger, featureEvents []exporter.FeatureEvent) error {
+func (e *Exporter) Export(
+	_ context.Context,
+	_ *fflog.FFLogger,
+	featureEvents []exporter.FeatureEvent,
+) error {
 	if e.sender == nil {
 		err := e.initializeProducer()
 		if err != nil {
@@ -84,7 +88,8 @@ func (e *Exporter) IsBulk() bool {
 func (e *Exporter) initializeProducer() error {
 	if e.Settings.Config == nil {
 		e.Settings.Config = sarama.NewConfig()
-		e.Settings.Config.Producer.Return.Successes = true // Needs to be true for sync producers
+		// Needs to be true for sync producers
+		e.Settings.Producer.Return.Successes = true
 	}
 
 	if e.dialer == nil {

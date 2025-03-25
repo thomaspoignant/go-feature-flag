@@ -10,6 +10,7 @@ import (
 	"golang.org/x/net/context"
 )
 
+// CallHTTPAPI is a shared function to call an HTTP API
 func CallHTTPAPI(
 	ctx context.Context,
 	url string, method string,

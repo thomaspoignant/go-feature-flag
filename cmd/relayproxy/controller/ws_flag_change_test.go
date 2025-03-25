@@ -30,7 +30,7 @@ func Test_websocket_flag_change(t *testing.T) {
 				Updated: map[string]notifier.DiffUpdated{
 					"my-flag": {
 						Before: &flag.InternalFlag{
-							Variations: &map[string]*interface{}{
+							Variations: &map[string]*any{
 								"A": testconvert.Interface(true),
 								"B": testconvert.Interface(false),
 							},
@@ -39,7 +39,7 @@ func Test_websocket_flag_change(t *testing.T) {
 							},
 						},
 						After: &flag.InternalFlag{
-							Variations: &map[string]*interface{}{
+							Variations: &map[string]*any{
 								"A": testconvert.Interface(true),
 								"B": testconvert.Interface(false),
 							},
@@ -56,7 +56,7 @@ func Test_websocket_flag_change(t *testing.T) {
 			flagChange: notifier.DiffCache{
 				Deleted: map[string]flag.Flag{
 					"flag-1": &flag.InternalFlag{
-						Variations: &map[string]*interface{}{
+						Variations: &map[string]*any{
 							"A": testconvert.Interface(true),
 							"B": testconvert.Interface(false),
 						},
@@ -67,7 +67,7 @@ func Test_websocket_flag_change(t *testing.T) {
 				},
 				Added: map[string]flag.Flag{
 					"flag-2": &flag.InternalFlag{
-						Variations: &map[string]*interface{}{
+						Variations: &map[string]*any{
 							"A": testconvert.Interface(true),
 							"B": testconvert.Interface(false),
 						},
@@ -79,7 +79,7 @@ func Test_websocket_flag_change(t *testing.T) {
 				Updated: map[string]notifier.DiffUpdated{
 					"my-flag": {
 						Before: &flag.InternalFlag{
-							Variations: &map[string]*interface{}{
+							Variations: &map[string]*any{
 								"A": testconvert.Interface(true),
 								"B": testconvert.Interface(false),
 							},
@@ -88,7 +88,7 @@ func Test_websocket_flag_change(t *testing.T) {
 							},
 						},
 						After: &flag.InternalFlag{
-							Variations: &map[string]*interface{}{
+							Variations: &map[string]*any{
 								"A": testconvert.Interface(true),
 								"B": testconvert.Interface(false),
 							},
