@@ -387,21 +387,17 @@ func setKafkaConfig(k kafkaexporter.Settings) (kafkaexporter.Settings, error) {
 			return kafkaexporter.Settings{}, err
 		}
 
-		if k.Config.Net.SASL.Enable {
-			switch k.Config.Net.SASL.Mechanism {
-			case sarama.SASLTypeSCRAMSHA256:
-				k.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient {
-					return &kafka.XDGSCRAMClient{HashGeneratorFcn: kafka.SHA256}
-				}
-				break
-			case sarama.SASLTypeSCRAMSHA512:
-				k.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient {
-					return &kafka.XDGSCRAMClient{HashGeneratorFcn: kafka.SHA512}
-				}
-				break
-			default:
-				return kafkaexporter.Settings{}, fmt.Errorf("invalid exporter: invalid SASL mechanism")
+		switch k.Config.Net.SASL.Mechanism {
+		case sarama.SASLTypeSCRAMSHA256:
+			k.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient {
+				return &kafka.XDGSCRAMClient{HashGeneratorFcn: kafka.SHA256}
 			}
+			break
+		case sarama.SASLTypeSCRAMSHA512:
+			k.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient {
+				return &kafka.XDGSCRAMClient{HashGeneratorFcn: kafka.SHA512}
+			}
+			break
 		}
 	}
 	return k, nil
