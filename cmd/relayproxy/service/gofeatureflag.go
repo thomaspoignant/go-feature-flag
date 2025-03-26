@@ -5,10 +5,13 @@ import (
 	"log/slog"
 	"time"
 
+	"dario.cat/mergo"
+	"github.com/IBM/sarama"
 	awsConf "github.com/aws/aws-sdk-go-v2/config"
 	slogzap "github.com/samber/slog-zap/v2"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config/kafka"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/azureexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
@@ -345,9 +348,13 @@ func createExporter(c *config.ExporterConf) (exporter.CommonExporter, error) {
 			AwsConfig: &awsConfig,
 		}, nil
 	case config.KafkaExporter:
+		settings, err := setKafkaConfig(c.Kafka)
+		if err != nil {
+			return nil, err
+		}
 		return &kafkaexporter.Exporter{
 			Format:   format,
-			Settings: c.Kafka,
+			Settings: settings,
 		}, nil
 	case config.PubSubExporter:
 		return &pubsubexporter.Exporter{
@@ -368,6 +375,34 @@ func createExporter(c *config.ExporterConf) (exporter.CommonExporter, error) {
 	default:
 		return nil, fmt.Errorf("invalid exporter: kind \"%s\" is not supported", c.Kind)
 	}
+}
+
+// setKafkaConfig set the kafka configuration based on the default configuration
+// it will initialize the default configuration and merge it with the changes from the user.
+func setKafkaConfig(k kafkaexporter.Settings) (kafkaexporter.Settings, error) {
+	if k.Config == nil {
+		return k, nil
+	}
+
+	defaultConfig := sarama.NewConfig()
+	err := mergo.Merge(k.Config, defaultConfig)
+	if err != nil {
+		return kafkaexporter.Settings{}, err
+	}
+
+	switch k.Config.Net.SASL.Mechanism {
+	case sarama.SASLTypeSCRAMSHA256:
+		k.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient {
+			return &kafka.XDGSCRAMClient{HashGeneratorFcn: kafka.SHA256}
+		}
+		break
+	case sarama.SASLTypeSCRAMSHA512:
+		k.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient {
+			return &kafka.XDGSCRAMClient{HashGeneratorFcn: kafka.SHA512}
+		}
+		break
+	}
+	return k, nil
 }
 
 func initNotifier(c []config.NotifierConf) ([]notifier.Notifier, error) {
