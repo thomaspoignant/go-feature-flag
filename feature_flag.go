@@ -243,6 +243,11 @@ func (g *GoFeatureFlag) Close() {
 		if g.featureEventDataExporter != nil {
 			g.featureEventDataExporter.Stop()
 		}
+
+		if g.trackingEventDataExporter != nil {
+			g.trackingEventDataExporter.Stop()
+		}
+
 		if g.retrieverManager != nil {
 			_ = g.retrieverManager.Shutdown(g.config.Context)
 		}
