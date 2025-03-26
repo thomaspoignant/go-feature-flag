@@ -381,8 +381,6 @@ func createExporter(c *config.ExporterConf) (exporter.CommonExporter, error) {
 // it will initialize the default configuration and merge it with the changes from the user.
 func setKafkaConfig(k kafkaexporter.Settings) (kafkaexporter.Settings, error) {
 	if k.Config == nil {
-		k.Config = sarama.NewConfig()
-		k.Config.Producer.Return.Successes = true
 		return k, nil
 	}
 
