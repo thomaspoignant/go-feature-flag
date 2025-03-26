@@ -8,6 +8,7 @@ import (
 )
 
 // Tracking is used to track an event.
+// Note: Use this function only if you are using multiple go-feature-flag instances.
 func (g *GoFeatureFlag) Tracking(
 	trackingEventName string, ctx ffcontext.EvaluationContext, trackingEventDetails exporter.TrackingEventDetails) {
 	if g != nil && g.trackingEventDataExporter != nil {
@@ -26,4 +27,10 @@ func (g *GoFeatureFlag) Tracking(
 		}
 		g.trackingEventDataExporter.AddEvent(event)
 	}
+}
+
+// Tracking is used to track an event.
+func Tracking(
+	trackingEventName string, ctx ffcontext.EvaluationContext, trackingEventDetails exporter.TrackingEventDetails) {
+	ff.Tracking(trackingEventName, ctx, trackingEventDetails)
 }
