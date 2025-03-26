@@ -987,4 +987,17 @@ func TestSetKafkaConfig(t *testing.T) {
 		assert.Equal(t, "TODO", settings.Config.Net.SASL.User)
 		assert.Equal(t, "TODO", settings.Config.Net.SASL.Password)
 	})
+
+	t.Run("should return a valid sarama.Config with Config nil", func(t *testing.T) {
+		settings := kafkaexporter.Settings{
+			Topic:     "my-kafka-topic",
+			Addresses: []string{"addr1", "addr2"},
+		}
+		kafkaConfig, err := setKafkaConfig(settings)
+		assert.NoError(t, err)
+
+		// after calling setKafkaConfig, the settings should be valid because they are merged with the default config.
+		assert.NoError(t, kafkaConfig.Config.Validate())
+		assert.True(t, kafkaConfig.Producer.Return.Successes)
+	})
 }

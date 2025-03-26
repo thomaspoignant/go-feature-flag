@@ -380,25 +380,29 @@ func createExporter(c *config.ExporterConf) (exporter.CommonExporter, error) {
 // setKafkaConfig set the kafka configuration based on the default configuration
 // it will initialize the default configuration and merge it with the changes from the user.
 func setKafkaConfig(k kafkaexporter.Settings) (kafkaexporter.Settings, error) {
-	if k.Config != nil {
-		defaultConfig := sarama.NewConfig()
-		err := mergo.Merge(k.Config, defaultConfig)
-		if err != nil {
-			return kafkaexporter.Settings{}, err
-		}
+	if k.Config == nil {
+		k.Config = sarama.NewConfig()
+		k.Config.Producer.Return.Successes = true
+		return k, nil
+	}
 
-		switch k.Config.Net.SASL.Mechanism {
-		case sarama.SASLTypeSCRAMSHA256:
-			k.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient {
-				return &kafka.XDGSCRAMClient{HashGeneratorFcn: kafka.SHA256}
-			}
-			break
-		case sarama.SASLTypeSCRAMSHA512:
-			k.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient {
-				return &kafka.XDGSCRAMClient{HashGeneratorFcn: kafka.SHA512}
-			}
-			break
+	defaultConfig := sarama.NewConfig()
+	err := mergo.Merge(k.Config, defaultConfig)
+	if err != nil {
+		return kafkaexporter.Settings{}, err
+	}
+
+	switch k.Config.Net.SASL.Mechanism {
+	case sarama.SASLTypeSCRAMSHA256:
+		k.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient {
+			return &kafka.XDGSCRAMClient{HashGeneratorFcn: kafka.SHA256}
 		}
+		break
+	case sarama.SASLTypeSCRAMSHA512:
+		k.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient {
+			return &kafka.XDGSCRAMClient{HashGeneratorFcn: kafka.SHA512}
+		}
+		break
 	}
 	return k, nil
 }
