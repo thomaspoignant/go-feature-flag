@@ -987,5 +987,4 @@ func TestSetKafkaConfig(t *testing.T) {
 		assert.Equal(t, "TODO", settings.Config.Net.SASL.User)
 		assert.Equal(t, "TODO", settings.Config.Net.SASL.Password)
 	})
-
 }
