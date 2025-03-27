@@ -7,9 +7,9 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 )
 
-// Tracking is used to track an event.
+// Track is used to track an event.
 // Note: Use this function only if you are using multiple go-feature-flag instances.
-func (g *GoFeatureFlag) Tracking(
+func (g *GoFeatureFlag) Track(
 	trackingEventName string, ctx ffcontext.EvaluationContext, trackingEventDetails exporter.TrackingEventDetails) {
 	if g != nil && g.trackingEventDataExporter != nil {
 		contextKind := "user"
@@ -29,8 +29,8 @@ func (g *GoFeatureFlag) Tracking(
 	}
 }
 
-// Tracking is used to track an event.
-func Tracking(
+// Track is used to track an event.
+func Track(
 	trackingEventName string, ctx ffcontext.EvaluationContext, trackingEventDetails exporter.TrackingEventDetails) {
-	ff.Tracking(trackingEventName, ctx, trackingEventDetails)
+	ff.Track(trackingEventName, ctx, trackingEventDetails)
 }

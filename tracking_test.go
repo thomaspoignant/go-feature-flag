@@ -27,7 +27,7 @@ func TestValidTrackingEvent(t *testing.T) {
 	})
 	assert.NoError(t, err)
 
-	goff.Tracking("my-feature-flag",
+	goff.Track("my-feature-flag",
 		ffcontext.NewEvaluationContextBuilder("1668d845-051d-4dd9-907a-7ebe6aa2c9da").AddCustom("admin", true).Build(),
 		map[string]interface{}{"additional data": "value"})
 
