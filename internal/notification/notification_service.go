@@ -1,4 +1,4 @@
-package cache
+package notification
 
 import (
 	"log/slog"
@@ -15,7 +15,7 @@ type Service interface {
 	Notify(oldCache map[string]flag.Flag, newCache map[string]flag.Flag, log *fflog.FFLogger)
 }
 
-func NewNotificationService(notifiers []notifier.Notifier) Service {
+func NewService(notifiers []notifier.Notifier) Service {
 	return &notificationService{
 		Notifiers: notifiers,
 		waitGroup: &sync.WaitGroup{},

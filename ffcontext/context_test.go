@@ -54,7 +54,7 @@ func Test_ExtractGOFFProtectedFields(t *testing.T) {
 	}{
 		{
 			name: "context goff specifics as map[string]string",
-			ctx: ffcontext.NewEvaluationContextBuilder("my-key").AddCustom("gofeatureflag", map[string]string{
+			ctx: ffcontext.NewEvaluationContextBuilder("my-targetingKey").AddCustom("gofeatureflag", map[string]string{
 				"currentDateTime": time.Date(2022, 8, 1, 0, 0, 10, 0, time.UTC).Format(time.RFC3339),
 			}).Build(),
 			want: ffcontext.GoffContextSpecifics{
@@ -63,7 +63,7 @@ func Test_ExtractGOFFProtectedFields(t *testing.T) {
 		},
 		{
 			name: "context goff specifics as map[string]interface and date as time.Time",
-			ctx: ffcontext.NewEvaluationContextBuilder("my-key").AddCustom("gofeatureflag", map[string]interface{}{
+			ctx: ffcontext.NewEvaluationContextBuilder("my-targetingKey").AddCustom("gofeatureflag", map[string]interface{}{
 				"currentDateTime": time.Date(2022, 8, 1, 0, 0, 10, 0, time.UTC),
 			}).Build(),
 			want: ffcontext.GoffContextSpecifics{
@@ -72,7 +72,7 @@ func Test_ExtractGOFFProtectedFields(t *testing.T) {
 		},
 		{
 			name: "context goff specifics as map[string]interface and date as *time.Time",
-			ctx: ffcontext.NewEvaluationContextBuilder("my-key").AddCustom("gofeatureflag", map[string]interface{}{
+			ctx: ffcontext.NewEvaluationContextBuilder("my-targetingKey").AddCustom("gofeatureflag", map[string]interface{}{
 				"currentDateTime": testconvert.Time(time.Date(2022, 8, 1, 0, 0, 10, 0, time.UTC)),
 			}).Build(),
 			want: ffcontext.GoffContextSpecifics{
@@ -81,7 +81,7 @@ func Test_ExtractGOFFProtectedFields(t *testing.T) {
 		},
 		{
 			name: "context goff specifics as map[string]interface",
-			ctx: ffcontext.NewEvaluationContextBuilder("my-key").AddCustom("gofeatureflag", map[string]interface{}{
+			ctx: ffcontext.NewEvaluationContextBuilder("my-targetingKey").AddCustom("gofeatureflag", map[string]interface{}{
 				"currentDateTime": time.Date(2022, 8, 1, 0, 0, 10, 0, time.UTC).Format(time.RFC3339),
 			}).Build(),
 			want: ffcontext.GoffContextSpecifics{
@@ -90,21 +90,21 @@ func Test_ExtractGOFFProtectedFields(t *testing.T) {
 		},
 		{
 			name: "context goff specifics nil",
-			ctx:  ffcontext.NewEvaluationContextBuilder("my-key").AddCustom("gofeatureflag", nil).Build(),
+			ctx:  ffcontext.NewEvaluationContextBuilder("my-targetingKey").AddCustom("gofeatureflag", nil).Build(),
 			want: ffcontext.GoffContextSpecifics{
 				CurrentDateTime: nil,
 			},
 		},
 		{
 			name: "no context goff specifics",
-			ctx:  ffcontext.NewEvaluationContextBuilder("my-key").Build(),
+			ctx:  ffcontext.NewEvaluationContextBuilder("my-targetingKey").Build(),
 			want: ffcontext.GoffContextSpecifics{
 				CurrentDateTime: nil,
 			},
 		},
 		{
 			name: "context goff specifics as GoffContextSpecifics type",
-			ctx: ffcontext.NewEvaluationContextBuilder("my-key").AddCustom("gofeatureflag", ffcontext.GoffContextSpecifics{
+			ctx: ffcontext.NewEvaluationContextBuilder("my-targetingKey").AddCustom("gofeatureflag", ffcontext.GoffContextSpecifics{
 				CurrentDateTime: testconvert.Time(time.Date(2022, 8, 1, 0, 0, 10, 0, time.UTC)),
 			}).Build(),
 			want: ffcontext.GoffContextSpecifics{
@@ -113,7 +113,7 @@ func Test_ExtractGOFFProtectedFields(t *testing.T) {
 		},
 		{
 			name: "context goff specifics as GoffContextSpecifics type contains flagList",
-			ctx: ffcontext.NewEvaluationContextBuilder("my-key").AddCustom("gofeatureflag", ffcontext.GoffContextSpecifics{
+			ctx: ffcontext.NewEvaluationContextBuilder("my-targetingKey").AddCustom("gofeatureflag", ffcontext.GoffContextSpecifics{
 				CurrentDateTime: testconvert.Time(time.Date(2022, 8, 1, 0, 0, 10, 0, time.UTC)),
 				FlagList:        []string{"flag1", "flag2"},
 			}).Build(),
@@ -124,7 +124,7 @@ func Test_ExtractGOFFProtectedFields(t *testing.T) {
 		},
 		{
 			name: "context goff specifics as map[string]interface type contains flagList",
-			ctx: ffcontext.NewEvaluationContextBuilder("my-key").AddCustom("gofeatureflag", map[string]interface{}{
+			ctx: ffcontext.NewEvaluationContextBuilder("my-targetingKey").AddCustom("gofeatureflag", map[string]interface{}{
 				"currentDateTime": testconvert.Time(time.Date(2022, 8, 1, 0, 0, 10, 0, time.UTC)).Format(time.RFC3339),
 				"flagList":        []string{"flag1", "flag2"},
 			}).Build(),
@@ -135,7 +135,7 @@ func Test_ExtractGOFFProtectedFields(t *testing.T) {
 		},
 		{
 			name: "context goff specifics only flagList",
-			ctx: ffcontext.NewEvaluationContextBuilder("my-key").AddCustom("gofeatureflag", map[string]interface{}{
+			ctx: ffcontext.NewEvaluationContextBuilder("my-targetingKey").AddCustom("gofeatureflag", map[string]interface{}{
 				"flagList": []string{"flag1", "flag2"},
 			}).Build(),
 			want: ffcontext.GoffContextSpecifics{
@@ -144,7 +144,7 @@ func Test_ExtractGOFFProtectedFields(t *testing.T) {
 		},
 		{
 			name: "context goff specifics with exporter metadata",
-			ctx: ffcontext.NewEvaluationContextBuilder("my-key").AddCustom("gofeatureflag", map[string]interface{}{
+			ctx: ffcontext.NewEvaluationContextBuilder("my-targetingKey").AddCustom("gofeatureflag", map[string]interface{}{
 				"exporterMetadata": map[string]interface{}{
 					"toto": 123,
 					"titi": 123.45,

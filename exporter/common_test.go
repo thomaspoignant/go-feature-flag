@@ -141,11 +141,11 @@ func TestFormatEventInCSV(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := exporter.FormatEventInCSV(tt.args.csvTemplate, tt.args.event)
-			if !tt.wantErr(t, err, fmt.Sprintf("FormatEventInCSV(%v, %v)", tt.args.csvTemplate, tt.args.event)) {
+			got, err := tt.args.event.FormatInCSV(tt.args.csvTemplate)
+			if !tt.wantErr(t, err, fmt.Sprintf("FormatInCSV(%v, %v)", tt.args.csvTemplate, tt.args.event)) {
 				return
 			}
-			assert.Equalf(t, tt.want, string(got), "FormatEventInCSV(%v, %v)", tt.args.csvTemplate, tt.args.event)
+			assert.Equalf(t, tt.want, string(got), "FormatInCSV(%v, %v)", tt.args.csvTemplate, tt.args.event)
 		})
 	}
 }
@@ -172,11 +172,11 @@ func TestFormatEventInJSON(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := exporter.FormatEventInJSON(tt.args.event)
-			if !tt.wantErr(t, err, fmt.Sprintf("FormatEventInJSON(%v)", tt.args.event)) {
+			got, err := tt.args.event.FormatInJSON()
+			if !tt.wantErr(t, err, fmt.Sprintf("FormatInJSON(%v)", tt.args.event)) {
 				return
 			}
-			assert.Equalf(t, tt.want, string(got), "FormatEventInJSON(%v)", tt.args.event)
+			assert.Equalf(t, tt.want, string(got), "FormatInJSON(%v)", tt.args.event)
 		})
 	}
 }

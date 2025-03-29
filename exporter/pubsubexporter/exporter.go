@@ -36,14 +36,14 @@ type Exporter struct {
 }
 
 // Export publishes a PubSub message for each exporter.FeatureEvent received.
-func (e *Exporter) Export(ctx context.Context, _ *fflog.FFLogger, featureEvents []exporter.FeatureEvent) error {
+func (e *Exporter) Export(ctx context.Context, _ *fflog.FFLogger, events []exporter.ExportableEvent) error {
 	if e.publisher == nil {
 		if err := e.initPublisher(ctx); err != nil {
 			return err
 		}
 	}
 
-	for _, event := range featureEvents {
+	for _, event := range events {
 		messageBody, err := json.Marshal(event)
 		if err != nil {
 			return err

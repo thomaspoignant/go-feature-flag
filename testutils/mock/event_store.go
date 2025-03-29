@@ -9,11 +9,11 @@ import (
 
 const consumerNameError = "error"
 
-type implMockEventStore[T any] struct {
+type implMockEventStore[T exporter.ExportableEvent] struct {
 	store []T
 }
 
-func NewEventStore[T any]() exporter.EventStore[T] {
+func NewEventStore[T exporter.ExportableEvent]() exporter.EventStore[T] {
 	store := &implMockEventStore[T]{}
 	return store
 }
