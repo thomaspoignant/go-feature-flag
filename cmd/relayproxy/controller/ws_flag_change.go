@@ -63,7 +63,11 @@ func (f *wsFlagChange) Handler(c echo.Context) error {
 		if err != nil {
 			close(stopper)
 			f.websocketService.Deregister(conn)
-			f.logger.Debug("closing websocket connection", zap.Error(err), zap.Any("connection", conn))
+			f.logger.Debug(
+				"closing websocket connection",
+				zap.Error(err),
+				zap.Any("connection", conn),
+			)
 			isOpen = false
 		}
 	}
@@ -87,7 +91,11 @@ func (f *wsFlagChange) pingPongLoop(stopper chan struct{}, conn *websocket.Conn)
 			// Send a ping message to the client
 			err := conn.WriteMessage(websocket.PingMessage, nil)
 			if err != nil {
-				f.logger.Debug("closing websocket connection", zap.Error(err), zap.Any("connection", conn))
+				f.logger.Debug(
+					"closing websocket connection",
+					zap.Error(err),
+					zap.Any("connection", conn),
+				)
 				f.websocketService.Deregister(conn)
 				return
 			}

@@ -14,7 +14,7 @@ func TestNewFeatureEvent(t *testing.T) {
 	type args struct {
 		user             ffcontext.Context
 		flagKey          string
-		value            interface{}
+		value            any
 		variation        string
 		failed           bool
 		version          string
@@ -29,7 +29,9 @@ func TestNewFeatureEvent(t *testing.T) {
 		{
 			name: "anonymous user",
 			args: args{
-				user:      ffcontext.NewEvaluationContextBuilder("ABCD").AddCustom("anonymous", true).Build(),
+				user: ffcontext.NewEvaluationContextBuilder("ABCD").
+					AddCustom("anonymous", true).
+					Build(),
 				flagKey:   "random-key",
 				value:     "YO",
 				variation: "Default",
@@ -45,7 +47,28 @@ func TestNewFeatureEvent(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equalf(t, tt.want, exporter.NewFeatureEvent(tt.args.user, tt.args.flagKey, tt.args.value, tt.args.variation, tt.args.failed, tt.args.version, tt.args.source, tt.args.exporterMetadata), "NewFeatureEvent(%v, %v, %v, %v, %v, %v, %V)", tt.args.user, tt.args.flagKey, tt.args.value, tt.args.variation, tt.args.failed, tt.args.version, tt.args.source)
+			assert.Equalf(
+				t,
+				tt.want,
+				exporter.NewFeatureEvent(
+					tt.args.user,
+					tt.args.flagKey,
+					tt.args.value,
+					tt.args.variation,
+					tt.args.failed,
+					tt.args.version,
+					tt.args.source,
+					tt.args.exporterMetadata,
+				),
+				"NewFeatureEvent(%v, %v, %v, %v, %v, %v, %V)",
+				tt.args.user,
+				tt.args.flagKey,
+				tt.args.value,
+				tt.args.variation,
+				tt.args.failed,
+				tt.args.version,
+				tt.args.source,
+			)
 		})
 	}
 }
@@ -66,7 +89,7 @@ func TestFeatureEvent_MarshalInterface(t *testing.T) {
 				CreationDate: 1617970547,
 				Key:          "random-key",
 				Variation:    "Default",
-				Value: map[string]interface{}{
+				Value: map[string]any{
 					"string": "string",
 					"bool":   true,
 					"float":  1.23,
@@ -133,14 +156,14 @@ func TestFeatureEvent_MarshalJSON(t *testing.T) {
 				CreationDate: 1617970547,
 				Key:          "random-key",
 				Variation:    "Default",
-				Value: map[string]interface{}{
+				Value: map[string]any{
 					"string": "string",
 					"bool":   true,
 					"float":  1.23,
 					"int":    1,
 				},
 				Default:  false,
-				Metadata: map[string]interface{}{},
+				Metadata: map[string]any{},
 			},
 			want:    `{"kind":"feature","contextKind":"anonymousUser","userKey":"ABCD","creationDate":1617970547,"key":"random-key","variation":"Default","value":{"string":"string","bool":true,"float":1.23,"int":1},"default":false}`,
 			wantErr: assert.NoError,
@@ -154,7 +177,7 @@ func TestFeatureEvent_MarshalJSON(t *testing.T) {
 				CreationDate: 1617970547,
 				Key:          "random-key",
 				Variation:    "Default",
-				Value: map[string]interface{}{
+				Value: map[string]any{
 					"string": "string",
 					"bool":   true,
 					"float":  1.23,
@@ -174,14 +197,14 @@ func TestFeatureEvent_MarshalJSON(t *testing.T) {
 				CreationDate: 1617970547,
 				Key:          "random-key",
 				Variation:    "Default",
-				Value: map[string]interface{}{
+				Value: map[string]any{
 					"string": "string",
 					"bool":   true,
 					"float":  1.23,
 					"int":    1,
 				},
 				Default: false,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"metadata1": "metadata1",
 					"metadata2": 24,
 					"metadata3": true,

@@ -17,7 +17,7 @@ func TestNewUser(t *testing.T) {
 			got:  NewEvaluationContextBuilder("random-key").Build(),
 			want: EvaluationContext{
 				key:    "random-key",
-				custom: map[string]interface{}{},
+				custom: map[string]any{},
 			},
 		},
 		{
@@ -27,7 +27,7 @@ func TestNewUser(t *testing.T) {
 				Build(),
 			want: EvaluationContext{
 				key: "random-key",
-				custom: map[string]interface{}{
+				custom: map[string]any{
 					"test": "custom",
 				},
 			},
@@ -40,7 +40,7 @@ func TestNewUser(t *testing.T) {
 				Build(),
 			want: EvaluationContext{
 				key: "random-key",
-				custom: map[string]interface{}{
+				custom: map[string]any{
 					"test":      "custom",
 					"anonymous": true,
 				},
@@ -51,7 +51,7 @@ func TestNewUser(t *testing.T) {
 			got:  NewEvaluationContext("random-key"),
 			want: EvaluationContext{
 				key:    "random-key",
-				custom: map[string]interface{}{},
+				custom: map[string]any{},
 			},
 		},
 		{
@@ -59,7 +59,7 @@ func TestNewUser(t *testing.T) {
 			got:  NewEvaluationContext(""),
 			want: EvaluationContext{
 				key:    "",
-				custom: map[string]interface{}{},
+				custom: map[string]any{},
 			},
 		},
 		{
@@ -67,7 +67,7 @@ func TestNewUser(t *testing.T) {
 			got:  NewAnonymousEvaluationContext("random-key"),
 			want: EvaluationContext{
 				key: "random-key",
-				custom: map[string]interface{}{
+				custom: map[string]any{
 					"anonymous": true,
 				},
 			},
@@ -77,7 +77,7 @@ func TestNewUser(t *testing.T) {
 			got:  NewAnonymousEvaluationContext(""),
 			want: EvaluationContext{
 				key: "",
-				custom: map[string]interface{}{
+				custom: map[string]any{
 					"anonymous": true,
 				},
 			},

@@ -104,7 +104,9 @@ func TestPIFlagChange_WithoutConfigChange(t *testing.T) {
 	handlerErr := ctrl.Handler(c)
 	assert.NoError(t, handlerErr)
 
-	want, _ := os.ReadFile("../testdata/controller/flag_change/flag_change_without_config_change.json")
+	want, _ := os.ReadFile(
+		"../testdata/controller/flag_change/flag_change_without_config_change.json",
+	)
 	assert.JSONEq(t, string(want), rec.Body.String())
 	assert.Equal(t, http.StatusOK, rec.Code)
 

@@ -22,7 +22,7 @@ func Int(t int) *int {
 	return &t
 }
 
-func Interface(v interface{}) *interface{} {
+func Interface(v any) *any {
 	return &v
 }
 

@@ -37,7 +37,7 @@ func (e evaluate) Evaluate() (map[string]model.RawVarResult, error) {
 		return nil, errors.New("invalid evaluation context (missing targeting key)")
 	}
 
-	var ctxAsMap map[string]interface{}
+	var ctxAsMap map[string]any
 	result := map[string]model.RawVarResult{}
 	err = json.Unmarshal([]byte(e.evaluationCtx), &ctxAsMap)
 	if err != nil {

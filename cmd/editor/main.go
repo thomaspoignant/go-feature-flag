@@ -62,7 +62,7 @@ func EvaluateHandler(c echo.Context) error {
 			DefaultSdkValue: nil,
 		},
 	)
-	resp := model.VariationResult[interface{}]{
+	resp := model.VariationResult[any]{
 		Value:         value,
 		VariationType: resolutionDetails.Variant,
 		Reason:        resolutionDetails.Reason,
@@ -89,5 +89,5 @@ type editorEvaluateRequest struct {
 // ContextWrapper is a struct to migrate the API request to an actual evaluation context.
 type ContextWrapper struct {
 	Key    string `json:"key,omitempty"`
-	Custom map[string]interface{}
+	Custom map[string]any
 }

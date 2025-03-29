@@ -1,5 +1,5 @@
 package model
 
 type FlagEval struct {
-	Value interface{} `json:"value"`
+	Value any `json:"value"`
 }

@@ -10,11 +10,19 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/model/dto"
 )
 
-func NewManifest(configFile string, configFormat string, flagManifestDestination string) (Manifest, error) {
+func NewManifest(
+	configFile string,
+	configFormat string,
+	flagManifestDestination string,
+) (Manifest, error) {
 	if flagManifestDestination == "" {
 		return Manifest{}, fmt.Errorf("--flag_manifest_destination is mandatory")
 	}
-	flagDTOs, err := helper.LoadConfigFile(configFile, configFormat, helper.ConfigFileDefaultLocations)
+	flagDTOs, err := helper.LoadConfigFile(
+		configFile,
+		configFormat,
+		helper.ConfigFileDefaultLocations,
+	)
 	if err != nil {
 		return Manifest{}, err
 	}
@@ -68,7 +76,10 @@ func (m *Manifest) generateDefinitions(flagDTOs map[string]dto.DTO) (
 
 		defaultValue, ok := metadata["defaultValue"]
 		if !ok {
-			output.Add(fmt.Sprintf("flag %s ignored: no default value provided", flagKey), helper.WarnLevel)
+			output.Add(
+				fmt.Sprintf("flag %s ignored: no default value provided", flagKey),
+				helper.WarnLevel,
+			)
 			continue
 		}
 		definitions[flagKey] = model.FlagDefinition{

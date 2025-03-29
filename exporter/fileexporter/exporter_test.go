@@ -107,7 +107,7 @@ func TestFile_Export(t *testing.T) {
 				featureEvents: []exporter.FeatureEvent{
 					{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-						Variation: "Default", Value: "YO", Default: false, Source: "SERVER", Metadata: map[string]interface{}{"test": "test"},
+						Variation: "Default", Value: "YO", Default: false, Source: "SERVER", Metadata: map[string]any{"test": "test"},
 					},
 					{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
@@ -120,11 +120,11 @@ func TestFile_Export(t *testing.T) {
 				featureEvents: []exporter.FeatureEvent{
 					{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-						Variation: "Default", Value: `"YO"`, Default: false, Source: "SERVER", Metadata: map[string]interface{}{"test": "test"},
+						Variation: "Default", Value: `"YO"`, Default: false, Source: "SERVER", Metadata: map[string]any{"test": "test"},
 					},
 					{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
-						Variation: "Default", Value: `"YO2"`, Default: false, Version: "127", Source: "SERVER", Metadata: map[string]interface{}{},
+						Variation: "Default", Value: `"YO2"`, Default: false, Version: "127", Source: "SERVER", Metadata: map[string]any{},
 					},
 				},
 			},
@@ -169,7 +169,7 @@ func TestFile_Export(t *testing.T) {
 						CreationDate: 1617970547,
 						Key:          "random-key",
 						Variation:    "Default",
-						Value: map[string]interface{}{
+						Value: map[string]any{
 							"string": "string",
 							"bool":   true,
 							"float":  1.23,
@@ -177,7 +177,7 @@ func TestFile_Export(t *testing.T) {
 						},
 						Default:  false,
 						Source:   "SERVER",
-						Metadata: map[string]interface{}{"test": "test"},
+						Metadata: map[string]any{"test": "test"},
 					},
 				},
 			},
@@ -194,7 +194,7 @@ func TestFile_Export(t *testing.T) {
 						Value:        `{"bool":true,"float":1.23,"int":1,"string":"string"}`,
 						Default:      false,
 						Source:       "SERVER",
-						Metadata:     map[string]interface{}{"test": "test"},
+						Metadata:     map[string]any{"test": "test"},
 					},
 				},
 			},
@@ -428,7 +428,11 @@ func TestFile_Export(t *testing.T) {
 				fr, err := local.NewLocalFileReader(outputDir + "/" + files[0].Name())
 				assert.NoError(t, err)
 				defer fr.Close()
-				pr, err := reader.NewParquetReader(fr, new(exporter.FeatureEvent), int64(runtime.NumCPU()))
+				pr, err := reader.NewParquetReader(
+					fr,
+					new(exporter.FeatureEvent),
+					int64(runtime.NumCPU()),
+				)
 				assert.NoError(t, err)
 				defer pr.ReadStop()
 				gotFeatureEvents := make([]exporter.FeatureEvent, pr.GetNumRows())
@@ -440,7 +444,12 @@ func TestFile_Export(t *testing.T) {
 
 			expectedContent, _ := os.ReadFile(tt.expected.content)
 			gotContent, _ := os.ReadFile(outputDir + "/" + files[0].Name())
-			assert.Equal(t, string(expectedContent), string(gotContent), "Wrong content in the output file")
+			assert.Equal(
+				t,
+				string(expectedContent),
+				string(gotContent),
+				"Wrong content in the output file",
+			)
 		})
 	}
 }

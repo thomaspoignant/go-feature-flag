@@ -5,7 +5,11 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 )
 
-func NewEvaluateError(key string, errorCode flag.ErrorCode, errorDetails string) *model.OFREPEvaluateErrorResponse {
+func NewEvaluateError(
+	key string,
+	errorCode flag.ErrorCode,
+	errorDetails string,
+) *model.OFREPEvaluateErrorResponse {
 	return &model.OFREPEvaluateErrorResponse{
 		OFREPCommonErrorResponse: model.OFREPCommonErrorResponse{
 			ErrorCode:    errorCode,
@@ -15,7 +19,10 @@ func NewEvaluateError(key string, errorCode flag.ErrorCode, errorDetails string)
 	}
 }
 
-func NewOFREPCommonError(errorCode flag.ErrorCode, errorDetails string) *model.OFREPCommonErrorResponse {
+func NewOFREPCommonError(
+	errorCode flag.ErrorCode,
+	errorDetails string,
+) *model.OFREPCommonErrorResponse {
 	return &model.OFREPCommonErrorResponse{
 		ErrorCode:    errorCode,
 		ErrorDetails: errorDetails,

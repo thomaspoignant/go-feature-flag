@@ -67,7 +67,7 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer cursor.Close(ctx)
+	defer func() { _ = cursor.Close(ctx) }()
 
 	ffDocs := make(map[string]bson.M)
 

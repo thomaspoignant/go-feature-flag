@@ -62,7 +62,7 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 	k.Delete("")
 
 	// Default values
-	_ = k.Load(confmap.Provider(map[string]interface{}{
+	_ = k.Load(confmap.Provider(map[string]any{
 		"listen":          "1031",
 		"host":            "localhost",
 		"fileFormat":      "yaml",
@@ -85,10 +85,8 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 		switch strings.ToLower(ext) {
 		case ".toml":
 			parser = toml.Parser()
-			break
 		case ".json":
 			parser = json.Parser()
-			break
 		default:
 			parser = yaml.Parser()
 		}
@@ -99,14 +97,19 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 	}
 
 	// Map environment variables
-	_ = k.Load(env.ProviderWithValue("", ".", func(s string, v string) (string, interface{}) {
+	_ = k.Load(env.ProviderWithValue("", ".", func(s string, v string) (string, any) {
 		if strings.HasPrefix(s, "RETRIEVERS") ||
 			strings.HasPrefix(s, "NOTIFIERS") ||
 			strings.HasPrefix(s, "EXPORTERS") {
 			configMap := k.Raw()
 			err := loadArrayEnv(s, v, configMap)
 			if err != nil {
-				log.Error("config: error loading array env", zap.String("key", s), zap.String("value", v), zap.Error(err))
+				log.Error(
+					"config: error loading array env",
+					zap.String("key", s),
+					zap.String("value", v),
+					zap.Error(err),
+				)
 				return s, v
 			}
 			return s, v
@@ -147,22 +150,22 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 
 func parseOtelResourceAttributes(attributes string, log *zap.Logger) {
 	configMap := k.Raw()
-	otel, ok := configMap["otel"].(map[string]interface{})
+	otel, ok := configMap["otel"].(map[string]any)
 	if !ok {
-		configMap["otel"] = make(map[string]interface{})
-		otel = configMap["otel"].(map[string]interface{})
+		configMap["otel"] = make(map[string]any)
+		otel = configMap["otel"].(map[string]any)
 	}
 
-	resource, ok := otel["resource"].(map[string]interface{})
+	resource, ok := otel["resource"].(map[string]any)
 	if !ok {
-		otel["resource"] = make(map[string]interface{})
-		resource = otel["resource"].(map[string]interface{})
+		otel["resource"] = make(map[string]any)
+		resource = otel["resource"].(map[string]any)
 	}
 
-	attrs, ok := resource["attributes"].(map[string]interface{})
+	attrs, ok := resource["attributes"].(map[string]any)
 	if !ok {
-		resource["attributes"] = make(map[string]interface{})
-		attrs = resource["attributes"].(map[string]interface{})
+		resource["attributes"] = make(map[string]any)
+		attrs = resource["attributes"].(map[string]any)
 	}
 
 	for _, attr := range strings.Split(attributes, ",") {
@@ -297,7 +300,7 @@ type Config struct {
 	// if in the evaluation context you have a field with the same name,
 	// it will be overridden by the evaluationContextEnrichment.
 	// Default: nil
-	EvaluationContextEnrichment map[string]interface{} `mapstructure:"evaluationContextEnrichment" koanf:"evaluationcontextenrichment"` //nolint: lll
+	EvaluationContextEnrichment map[string]any `mapstructure:"evaluationContextEnrichment" koanf:"evaluationcontextenrichment"` //nolint: lll
 
 	// OpenTelemetryOtlpEndpoint (optional) is the endpoint of the OpenTelemetry collector
 	// Default: ""
@@ -324,11 +327,11 @@ type Config struct {
 
 	// apiKeySet is the internal representation of an API keys list configured
 	// we store them in a set to be
-	apiKeysSet map[string]interface{}
+	apiKeysSet map[string]any
 
 	// adminAPIKeySet is the internal representation of an admin API keys list configured
 	// we store them in a set to be
-	adminAPIKeySet map[string]interface{}
+	adminAPIKeySet map[string]any
 }
 
 // OpenTelemetryConfiguration is the configuration for the OpenTelemetry part of the relay proxy
@@ -337,14 +340,14 @@ type Config struct {
 type OpenTelemetryConfiguration struct {
 	SDK struct {
 		Disabled bool `mapstructure:"disabled" koanf:"disabled"`
-	} `mapstructure:"sdk" koanf:"sdk"`
+	} `mapstructure:"sdk"      koanf:"sdk"`
 	Exporter OtelExporter `mapstructure:"exporter" koanf:"exporter"`
 	Service  struct {
 		Name string `mapstructure:"name" koanf:"name"`
-	} `mapstructure:"service" koanf:"service"`
+	} `mapstructure:"service"  koanf:"service"`
 	Traces struct {
 		Sampler string `mapstructure:"sampler" koanf:"sampler"`
-	} `mapstructure:"traces" koanf:"traces"`
+	} `mapstructure:"traces"   koanf:"traces"`
 	Resource OtelResource `mapstructure:"resource" koanf:"resource"`
 }
 
@@ -382,9 +385,9 @@ type JaegerSamplerConfiguration struct {
 // APIKeysAdminExists is checking if an admin API Key exist in the relay proxy configuration
 func (c *Config) APIKeysAdminExists(apiKey string) bool {
 	if c.adminAPIKeySet == nil {
-		adminAPIKeySet := make(map[string]interface{})
+		adminAPIKeySet := make(map[string]any)
 		for _, currentAPIKey := range c.AuthorizedKeys.Admin {
-			adminAPIKeySet[currentAPIKey] = new(interface{})
+			adminAPIKeySet[currentAPIKey] = new(any)
 		}
 		c.adminAPIKeySet = adminAPIKeySet
 	}
@@ -399,16 +402,16 @@ func (c *Config) APIKeyExists(apiKey string) bool {
 		return true
 	}
 	if c.apiKeysSet == nil {
-		apiKeySet := make(map[string]interface{})
+		apiKeySet := make(map[string]any)
 
 		// Remove this part when the APIKeys field is removed
 		for _, currentAPIKey := range c.APIKeys {
-			apiKeySet[currentAPIKey] = new(interface{})
+			apiKeySet[currentAPIKey] = new(any)
 		}
 		// end of remove
 
 		for _, currentAPIKey := range c.AuthorizedKeys.Evaluation {
-			apiKeySet[currentAPIKey] = new(interface{})
+			apiKeySet[currentAPIKey] = new(any)
 		}
 		c.apiKeysSet = apiKeySet
 	}
@@ -529,27 +532,29 @@ func locateConfigFile(inputFilePath string) (string, error) {
 		}
 	}
 	return "", fmt.Errorf(
-		"impossible to find config file in the default locations [%s]", strings.Join(defaultLocations, ","))
+		"impossible to find config file in the default locations [%s]",
+		strings.Join(defaultLocations, ","),
+	)
 }
 
 // Load the ENV Like:RETRIEVERS_0_HEADERS_AUTHORIZATION
-func loadArrayEnv(s string, v string, configMap map[string]interface{}) error {
+func loadArrayEnv(s string, v string, configMap map[string]any) error {
 	paths := strings.Split(s, "_")
 	for i, str := range paths {
 		paths[i] = strings.ToLower(str)
 	}
 	prefixKey := paths[0]
-	if configArray, ok := configMap[prefixKey].([]interface{}); ok {
+	if configArray, ok := configMap[prefixKey].([]any); ok {
 		index, err := strconv.Atoi(paths[1])
 		if err != nil {
 			return err
 		}
-		var configItem map[string]interface{}
+		var configItem map[string]any
 		outRange := index > len(configArray)-1
 		if outRange {
-			configItem = make(map[string]interface{})
+			configItem = make(map[string]any)
 		} else {
-			configItem = configArray[index].(map[string]interface{})
+			configItem = configArray[index].(map[string]any)
 		}
 
 		keys := paths[2:]
@@ -561,14 +566,14 @@ func loadArrayEnv(s string, v string, configMap map[string]interface{}) error {
 				if y != lowerKey {
 					continue
 				}
-				if nextMap, ok := currentMap[y].(map[string]interface{}); ok {
+				if nextMap, ok := currentMap[y].(map[string]any); ok {
 					currentMap = nextMap
 					hasKey = true
 					break
 				}
 			}
 			if !hasKey && i != len(keys)-1 {
-				newMap := make(map[string]interface{})
+				newMap := make(map[string]any)
 				currentMap[lowerKey] = newMap
 				currentMap = newMap
 			}
@@ -578,7 +583,7 @@ func loadArrayEnv(s string, v string, configMap map[string]interface{}) error {
 		if outRange {
 			blank := index - len(configArray) + 1
 			for i := 0; i < blank; i++ {
-				configArray = append(configArray, make(map[string]interface{}))
+				configArray = append(configArray, make(map[string]any))
 			}
 			configArray[index] = configItem
 		} else {

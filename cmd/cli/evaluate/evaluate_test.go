@@ -67,7 +67,7 @@ func Test_evaluate_Evaluate(t *testing.T) {
 					ErrorDetails:  "",
 					Value:         false,
 					Cacheable:     true,
-					Metadata: map[string]interface{}{
+					Metadata: map[string]any{
 						"description": "this is a simple feature flag",
 						"issue-link":  "https://jira.xxx/GOFF-01",
 					},
@@ -93,7 +93,7 @@ func Test_evaluate_Evaluate(t *testing.T) {
 					ErrorDetails:  "",
 					Value:         false,
 					Cacheable:     true,
-					Metadata: map[string]interface{}{
+					Metadata: map[string]any{
 						"description": "this is a simple feature flag",
 						"issue-link":  "https://jira.xxx/GOFF-01",
 					},

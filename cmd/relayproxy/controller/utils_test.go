@@ -105,7 +105,7 @@ func Test_evaluationContextFromRequest(t *testing.T) {
 				User: nil,
 				EvaluationContext: &model.EvaluationContextRequest{
 					Key: "key-1",
-					Custom: map[string]interface{}{
+					Custom: map[string]any{
 						"anonymous":    false,
 						"custom-field": true,
 					},
@@ -123,7 +123,7 @@ func Test_evaluationContextFromRequest(t *testing.T) {
 				User: &model.UserRequest{
 					Key:       "key-1",
 					Anonymous: false,
-					Custom: map[string]interface{}{
+					Custom: map[string]any{
 						"custom-field": true,
 					},
 				},

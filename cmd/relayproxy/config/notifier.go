@@ -3,14 +3,14 @@ package config
 import "fmt"
 
 type NotifierConf struct {
-	Kind NotifierKind `mapstructure:"kind" koanf:"kind"`
+	Kind NotifierKind `mapstructure:"kind"            koanf:"kind"`
 	// Deprecated: Use WebhookURL instead
 	SlackWebhookURL string              `mapstructure:"slackWebhookUrl" koanf:"slackwebhookurl"`
-	EndpointURL     string              `mapstructure:"endpointUrl" koanf:"endpointurl"`
-	Secret          string              `mapstructure:"secret" koanf:"secret"`
-	Meta            map[string]string   `mapstructure:"meta" koanf:"meta"`
-	Headers         map[string][]string `mapstructure:"headers" koanf:"headers"`
-	WebhookURL      string              `mapstructure:"webhookUrl" koanf:"webhookurl"`
+	EndpointURL     string              `mapstructure:"endpointUrl"     koanf:"endpointurl"`
+	Secret          string              `mapstructure:"secret"          koanf:"secret"`
+	Meta            map[string]string   `mapstructure:"meta"            koanf:"meta"`
+	Headers         map[string][]string `mapstructure:"headers"         koanf:"headers"`
+	WebhookURL      string              `mapstructure:"webhookUrl"      koanf:"webhookurl"`
 }
 
 func (c *NotifierConf) IsValid() error {
@@ -18,16 +18,28 @@ func (c *NotifierConf) IsValid() error {
 		return err
 	}
 	if c.Kind == SlackNotifier && (c.SlackWebhookURL == "" && c.WebhookURL == "") {
-		return fmt.Errorf("invalid notifier: no \"slackWebhookUrl\" property found for kind \"%s\"", c.Kind)
+		return fmt.Errorf(
+			"invalid notifier: no \"slackWebhookUrl\" property found for kind \"%s\"",
+			c.Kind,
+		)
 	}
 	if c.Kind == MicrosoftTeamsNotifier && c.WebhookURL == "" {
-		return fmt.Errorf("invalid notifier: no \"WebhookURL\" property found for kind \"%s\"", c.Kind)
+		return fmt.Errorf(
+			"invalid notifier: no \"WebhookURL\" property found for kind \"%s\"",
+			c.Kind,
+		)
 	}
 	if c.Kind == WebhookNotifier && c.EndpointURL == "" {
-		return fmt.Errorf("invalid notifier: no \"endpointUrl\" property found for kind \"%s\"", c.Kind)
+		return fmt.Errorf(
+			"invalid notifier: no \"endpointUrl\" property found for kind \"%s\"",
+			c.Kind,
+		)
 	}
 	if c.Kind == DiscordNotifier && c.WebhookURL == "" {
-		return fmt.Errorf("invalid notifier: no \"webhookUrl\" property found for kind \"%s\"", c.Kind)
+		return fmt.Errorf(
+			"invalid notifier: no \"webhookUrl\" property found for kind \"%s\"",
+			c.Kind,
+		)
 	}
 	return nil
 }

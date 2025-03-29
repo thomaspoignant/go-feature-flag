@@ -101,7 +101,10 @@ func Test_bitbucket_Retrieve(t *testing.T) {
 				filePath:       "flags/config.goff.yaml",
 			},
 			wantErr: true,
-			errMsg:  "request to https://api.bitbucket.org/2.0/repositories/gofeatureflag/config-repo/src/main/flags/config.goff.yaml failed with code 429. Bitbucket Headers: map[X-Content-Type-Options:nosniff X-Frame-Options:deny X-Github-Media-Type:github.v3; format=json X-Github-Request-Id:F82D:37B98C:232EF263:235C93BD:6650BDC6 X-Ratelimit-Limit:60 X-Ratelimit-Remaining:0 X-Ratelimit-Reset:" + strconv.FormatInt(endRatelimit.Unix(), 10) + " X-Ratelimit-Resource:core X-Ratelimit-Used:60 X-Xss-Protection:1; mode=block]",
+			errMsg: "request to https://api.bitbucket.org/2.0/repositories/gofeatureflag/config-repo/src/main/flags/config.goff.yaml failed with code 429. Bitbucket Headers: map[X-Content-Type-Options:nosniff X-Frame-Options:deny X-Github-Media-Type:github.v3; format=json X-Github-Request-Id:F82D:37B98C:232EF263:235C93BD:6650BDC6 X-Ratelimit-Limit:60 X-Ratelimit-Remaining:0 X-Ratelimit-Reset:" + strconv.FormatInt(
+				endRatelimit.Unix(),
+				10,
+			) + " X-Ratelimit-Resource:core X-Ratelimit-Used:60 X-Xss-Protection:1; mode=block]",
 		},
 		{
 			name: "Use Bitbucket token",
@@ -128,12 +131,23 @@ func Test_bitbucket_Retrieve(t *testing.T) {
 			if tt.errMsg != "" {
 				assert.EqualError(t, err, tt.errMsg)
 			}
-			assert.Equal(t, tt.wantErr, err != nil, "Retrieve() error = %v wantErr %v", err, tt.wantErr)
+			assert.Equal(
+				t,
+				tt.wantErr,
+				err != nil,
+				"Retrieve() error = %v wantErr %v",
+				err,
+				tt.wantErr,
+			)
 			if !tt.wantErr {
 				assert.Equal(t, http.MethodGet, tt.fields.httpClient.Req.Method)
 				assert.Equal(t, strings.TrimSpace(string(tt.want)), strings.TrimSpace(string(got)))
 				if tt.fields.bitbucketToken != "" {
-					assert.Equal(t, "Bearer "+tt.fields.bitbucketToken, tt.fields.httpClient.Req.Header.Get("Authorization"))
+					assert.Equal(
+						t,
+						"Bearer "+tt.fields.bitbucketToken,
+						tt.fields.httpClient.Req.Header.Get("Authorization"),
+					)
 				}
 			}
 		})

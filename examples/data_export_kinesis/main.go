@@ -78,5 +78,4 @@ func main() {
 	_, _ = ffclient.JSONVariation("unknown-flag-2", user1, map[string]interface{}{"test": "toto"})
 	_, _ = ffclient.BoolVariation("new-admin-access", user1, false)
 	_, _ = ffclient.BoolVariation("new-admin-access", user2, false)
-
 }

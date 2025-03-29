@@ -64,7 +64,10 @@ func (h *allFlags) Handler(c echo.Context) error {
 	var allFlags flagstate.AllFlags
 	if len(evaluationCtx.ExtractGOFFProtectedFields().FlagList) > 0 {
 		// if we have a list of flags to evaluate in the evaluation context, we evaluate only those flags.
-		allFlags = h.goFF.GetFlagStates(evaluationCtx, evaluationCtx.ExtractGOFFProtectedFields().FlagList)
+		allFlags = h.goFF.GetFlagStates(
+			evaluationCtx,
+			evaluationCtx.ExtractGOFFProtectedFields().FlagList,
+		)
 	} else {
 		allFlags = h.goFF.AllFlagsState(evaluationCtx)
 	}

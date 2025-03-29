@@ -35,7 +35,9 @@ func (s *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 		return nil, fmt.Errorf("k8s client is nil after initialization")
 	}
 
-	configMap, err := s.client.CoreV1().ConfigMaps(s.Namespace).Get(ctx, s.ConfigMapName, v1.GetOptions{})
+	configMap, err := s.client.CoreV1().
+		ConfigMaps(s.Namespace).
+		Get(ctx, s.ConfigMapName, v1.GetOptions{})
 	if err != nil {
 		return nil, fmt.Errorf(
 			"unable to read from config map %s.%s, error: %s", s.ConfigMapName, s.Namespace, err,
@@ -43,7 +45,12 @@ func (s *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	}
 	content, ok := configMap.Data[s.Key]
 	if !ok {
-		return nil, fmt.Errorf("key %s not existing in config map %s.%s", s.Key, s.ConfigMapName, s.Namespace)
+		return nil, fmt.Errorf(
+			"key %s not existing in config map %s.%s",
+			s.Key,
+			s.ConfigMapName,
+			s.Namespace,
+		)
 	}
 	return []byte(content), nil
 }

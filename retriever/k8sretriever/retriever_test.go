@@ -105,7 +105,9 @@ func Test_kubernetesRetriever_Retrieve(t *testing.T) {
 				namespace:     "WrongNamespace",
 				configMapName: "NotExisting",
 			},
-			wantErr: errors.New("unable to read from config map NotExisting.WrongNamespace, error: configmaps \"NotExisting\" not found"),
+			wantErr: errors.New(
+				"unable to read from config map NotExisting.WrongNamespace, error: configmaps \"NotExisting\" not found",
+			),
 		},
 		{
 			name: "Client already there",
@@ -119,7 +121,9 @@ func Test_kubernetesRetriever_Retrieve(t *testing.T) {
 				key:           "valid",
 				setClient:     true,
 			},
-			wantErr: errors.New("unable to read from config map ConfigMap1.Namespace, error: configmaps \"ConfigMap1\" not found"),
+			wantErr: errors.New(
+				"unable to read from config map ConfigMap1.Namespace, error: configmaps \"ConfigMap1\" not found",
+			),
 		},
 		{
 			name: "k8s client is nil",
@@ -155,7 +159,14 @@ func Test_kubernetesRetriever_Retrieve(t *testing.T) {
 			got, err := s.Retrieve(tt.fields.context)
 			assert.Equal(t, tt.wantErr, err, "Retrieve() error = %v, wantErr %v", err, tt.wantErr)
 			if err == nil {
-				assert.Equal(t, tt.want, got, "Retrieve() got = %v, want %v", string(got), string(tt.want))
+				assert.Equal(
+					t,
+					tt.want,
+					got,
+					"Retrieve() got = %v, want %v",
+					string(got),
+					string(tt.want),
+				)
 			}
 		})
 	}

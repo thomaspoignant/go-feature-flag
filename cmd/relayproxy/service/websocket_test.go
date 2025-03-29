@@ -11,11 +11,11 @@ import (
 )
 
 type mockConn struct {
-	writeJSONFunc func(v interface{}) error
+	writeJSONFunc func(v any) error
 	throwError    bool
 }
 
-func (m *mockConn) WriteJSON(v interface{}) error {
+func (m *mockConn) WriteJSON(v any) error {
 	if m.throwError {
 		return fmt.Errorf("error websocket connection")
 	}
@@ -45,12 +45,12 @@ func TestBroadcastFlagChanges(t *testing.T) {
 	conn2WriteJSONCalled := false
 
 	// Set the function to be executed when WriteJSON is called on the connections
-	conn1.writeJSONFunc = func(v interface{}) error {
+	conn1.writeJSONFunc = func(v any) error {
 		conn1WriteJSONCalled = true
 		return nil
 	}
 
-	conn2.writeJSONFunc = func(v interface{}) error {
+	conn2.writeJSONFunc = func(v any) error {
 		conn2WriteJSONCalled = true
 		return nil
 	}
@@ -75,7 +75,7 @@ func TestDeregister(t *testing.T) {
 
 	// Set the function to be executed when WriteJSON is called on the connections
 	conn1WriteJSONCalled := false
-	conn.writeJSONFunc = func(v interface{}) error {
+	conn.writeJSONFunc = func(v any) error {
 		conn1WriteJSONCalled = true
 		return nil
 	}
@@ -110,12 +110,12 @@ func TestClose(t *testing.T) {
 	conn2WriteJSONCalled := false
 
 	// Set the function to be executed when WriteJSON is called on the connections
-	conn1.writeJSONFunc = func(v interface{}) error {
+	conn1.writeJSONFunc = func(v any) error {
 		conn1WriteJSONCalled = true
 		return nil
 	}
 
-	conn2.writeJSONFunc = func(v interface{}) error {
+	conn2.writeJSONFunc = func(v any) error {
 		conn2WriteJSONCalled = true
 		return nil
 	}
@@ -152,7 +152,7 @@ func TestBroadcastFlagChangesDeadLock(t *testing.T) {
 	websocketService.Register(conn1)
 	websocketService.Register(conn2)
 	conn1WriteJSONCalled := false
-	conn1.writeJSONFunc = func(v interface{}) error {
+	conn1.writeJSONFunc = func(v any) error {
 		conn1WriteJSONCalled = true
 		return nil
 	}

@@ -10,6 +10,11 @@ import (
 
 // DownloaderAPI provides methods to manage downloads to an S3 bucket.
 type DownloaderAPI interface {
-	Download(ctx context.Context, w io.WriterAt, input *s3.GetObjectInput, options ...func(*manager.Downloader)) (
+	Download(
+		ctx context.Context,
+		w io.WriterAt,
+		input *s3.GetObjectInput,
+		options ...func(*manager.Downloader),
+	) (
 		n int64, err error)
 }

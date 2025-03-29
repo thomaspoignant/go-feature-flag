@@ -10,15 +10,15 @@ import (
 func Test_JSONTypeExtractor(t *testing.T) {
 	tests := []struct {
 		name     string
-		input    interface{}
+		input    any
 		expected string
 	}{
 		{"string", "hello", "(string)"},
 		{"integer", 42, "(number)"},
 		{"float", 3.14, "(number)"},
 		{"bool", true, "(bool)"},
-		{"[]interface", []interface{}{1, "two", 3.0}, "([]interface{})"},
-		{"map", map[string]interface{}{"key1": "value1", "key2": 2}, "(map[string]interface{})"},
+		{"[]interface", []any{1, "two", 3.0}, "([]interface{})"},
+		{"map", map[string]any{"key1": "value1", "key2": 2}, "(map[string]interface{})"},
 		{"null", nil, ""},
 	}
 

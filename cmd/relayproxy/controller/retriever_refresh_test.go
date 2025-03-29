@@ -23,7 +23,11 @@ func Test_retriever_refresh_Handler_no_goff(t *testing.T) {
 	c := e.NewContext(req, rec)
 	handlerErr := ctrl.Handler(c)
 	assert.Error(t, handlerErr)
-	assert.Equal(t, "code=500, message=forceFlagsRefresh: goFF is not initialized", handlerErr.Error())
+	assert.Equal(
+		t,
+		"code=500, message=forceFlagsRefresh: goFF is not initialized",
+		handlerErr.Error(),
+	)
 }
 
 func Test_retriever_refresh_Handler_valid(t *testing.T) {

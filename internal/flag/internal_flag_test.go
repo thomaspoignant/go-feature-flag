@@ -22,20 +22,20 @@ func TestInternalFlag_Value(t *testing.T) {
 		name  string
 		flag  flag.InternalFlag
 		args  args
-		want  interface{}
+		want  any
 		want1 flag.ResolutionDetails
 	}{
 		{
 			name: "Should use default value if no targeting",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"variation_A": testconvert.Interface(true),
 					"variation_B": testconvert.Interface(false),
 				},
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -52,7 +52,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				Variant:   "variation_A",
 				Reason:    flag.ReasonStatic,
 				Cacheable: true,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -61,7 +61,7 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Should use default value if percentages are empty",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"variation_A": testconvert.Interface(true),
 					"variation_B": testconvert.Interface(false),
 				},
@@ -69,7 +69,7 @@ func TestInternalFlag_Value(t *testing.T) {
 					VariationResult: testconvert.String("variation_A"),
 					Percentages:     &map[string]float64{},
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -86,7 +86,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				Variant:   "variation_A",
 				Reason:    flag.ReasonStatic,
 				Cacheable: true,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -96,7 +96,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			name: "Should return sdk default value when flag is disabled",
 			flag: flag.InternalFlag{
 				Disable: testconvert.Bool(true),
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -113,7 +113,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				Variant:   "SdkDefault",
 				Reason:    flag.ReasonDisabled,
 				Cacheable: true,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -126,7 +126,7 @@ func TestInternalFlag_Value(t *testing.T) {
 					Start: testconvert.Time(time.Now().Add(1 * time.Second)),
 					End:   testconvert.Time(time.Now().Add(5 * time.Second)),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -143,7 +143,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				Variant:   "SdkDefault",
 				Reason:    flag.ReasonDisabled,
 				Cacheable: false,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -156,16 +156,18 @@ func TestInternalFlag_Value(t *testing.T) {
 					Start: testconvert.Time(time.Now().Add(-5 * time.Second)),
 					End:   testconvert.Time(time.Now().Add(5 * time.Second)),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
 			},
 			args: args{
 				flagName: "my-flag",
-				user: ffcontext.NewEvaluationContextBuilder("user-key").AddCustom("gofeatureflag", map[string]interface{}{
-					"currentDateTime": time.Now().Add(6 * time.Second).Format(time.RFC3339),
-				}).Build(),
+				user: ffcontext.NewEvaluationContextBuilder("user-key").
+					AddCustom("gofeatureflag", map[string]any{
+						"currentDateTime": time.Now().Add(6 * time.Second).Format(time.RFC3339),
+					}).
+					Build(),
 				flagContext: flag.Context{
 					DefaultSdkValue: "default-sdk",
 				},
@@ -175,7 +177,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				Variant:   "SdkDefault",
 				Reason:    flag.ReasonDisabled,
 				Cacheable: false,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -188,7 +190,7 @@ func TestInternalFlag_Value(t *testing.T) {
 					Start: testconvert.Time(time.Now().Add(-15 * time.Second)),
 					End:   testconvert.Time(time.Now().Add(-5 * time.Second)),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -205,7 +207,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				Variant:   "SdkDefault",
 				Reason:    flag.ReasonDisabled,
 				Cacheable: false,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -214,7 +216,7 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Should return the variation specified in the rule if rule match",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"variation_A": testconvert.Interface(true),
 					"variation_B": testconvert.Interface(false),
 				},
@@ -228,7 +230,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -247,7 +249,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				RuleIndex: testconvert.Int(0),
 				RuleName:  testconvert.String("rule1"),
 				Cacheable: true,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -256,7 +258,7 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Should return the variation specified in the rule if rule match (jsonLogic)",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"variation_A": testconvert.Interface(true),
 					"variation_B": testconvert.Interface(false),
 				},
@@ -270,7 +272,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -289,7 +291,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				RuleIndex: testconvert.Int(0),
 				RuleName:  testconvert.String("rule1"),
 				Cacheable: true,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -298,7 +300,7 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Should match the 2nd rule",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"variation_A": testconvert.Interface("value_A"),
 					"variation_B": testconvert.Interface("value_B"),
 					"variation_C": testconvert.Interface("value_C"),
@@ -318,7 +320,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -337,7 +339,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				RuleIndex: testconvert.Int(1),
 				RuleName:  testconvert.String("rule2"),
 				Cacheable: true,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -346,15 +348,17 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Should match the 2nd rule (jsonLogic)",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"variation_A": testconvert.Interface("value_A"),
 					"variation_B": testconvert.Interface("value_B"),
 					"variation_C": testconvert.Interface("value_C"),
 				},
 				Rules: &[]flag.Rule{
 					{
-						Name:            testconvert.String("rule1"),
-						Query:           testconvert.String(`{"==":[{"var":"key"},"not-user-key"]}`),
+						Name: testconvert.String("rule1"),
+						Query: testconvert.String(
+							`{"==":[{"var":"key"},"not-user-key"]}`,
+						),
 						VariationResult: testconvert.String("variation_C"),
 					},
 					{
@@ -366,7 +370,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -385,7 +389,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				RuleIndex: testconvert.Int(1),
 				RuleName:  testconvert.String("rule2"),
 				Cacheable: true,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -394,7 +398,7 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Should match a rule with no name",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"variation_A": testconvert.Interface("value_A"),
 					"variation_B": testconvert.Interface("value_B"),
 					"variation_C": testconvert.Interface("value_C"),
@@ -412,7 +416,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -430,7 +434,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				Reason:    flag.ReasonTargetingMatch,
 				RuleIndex: testconvert.Int(1),
 				Cacheable: true,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -439,14 +443,16 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Should match a rule with no name (jsonLogic)",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"variation_A": testconvert.Interface("value_A"),
 					"variation_B": testconvert.Interface("value_B"),
 					"variation_C": testconvert.Interface("value_C"),
 				},
 				Rules: &[]flag.Rule{
 					{
-						Query:           testconvert.String(`{"==":[{"var":"key"},"not-user-key"]}`),
+						Query: testconvert.String(
+							`{"==":[{"var":"key"},"not-user-key"]}`,
+						),
 						VariationResult: testconvert.String("variation_C"),
 					},
 					{
@@ -457,7 +463,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -475,7 +481,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				Reason:    flag.ReasonTargetingMatch,
 				RuleIndex: testconvert.Int(1),
 				Cacheable: true,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -484,7 +490,7 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Should match only the first rule that apply (even if more than one can apply)",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"variation_A": testconvert.Interface("value_A"),
 					"variation_B": testconvert.Interface("value_B"),
 					"variation_C": testconvert.Interface("value_C"),
@@ -507,14 +513,16 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffcontext.NewEvaluationContextBuilder("user-key").AddCustom("company", "go-feature-flag").Build(),
+				user: ffcontext.NewEvaluationContextBuilder("user-key").
+					AddCustom("company", "go-feature-flag").
+					Build(),
 				flagContext: flag.Context{
 					DefaultSdkValue: "value_default",
 				},
@@ -525,7 +533,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				Reason:    flag.ReasonTargetingMatch,
 				RuleIndex: testconvert.Int(1),
 				Cacheable: true,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -534,7 +542,7 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Should match only the first rule that apply (even if more than one can apply) (jsonLogic)",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"variation_A": testconvert.Interface("value_A"),
 					"variation_B": testconvert.Interface("value_B"),
 					"variation_C": testconvert.Interface("value_C"),
@@ -542,11 +550,15 @@ func TestInternalFlag_Value(t *testing.T) {
 				},
 				Rules: &[]flag.Rule{
 					{
-						Query:           testconvert.String(`{"==":[{"var":"key"},"not-user-key"]}`),
+						Query: testconvert.String(
+							`{"==":[{"var":"key"},"not-user-key"]}`,
+						),
 						VariationResult: testconvert.String("variation_C"),
 					},
 					{
-						Query:           testconvert.String(`{"==":[{"var":"company"},"go-feature-flag"]}`),
+						Query: testconvert.String(
+							`{"==":[{"var":"company"},"go-feature-flag"]}`,
+						),
 						VariationResult: testconvert.String("variation_D"),
 					},
 					{
@@ -557,14 +569,16 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffcontext.NewEvaluationContextBuilder("user-key").AddCustom("company", "go-feature-flag").Build(),
+				user: ffcontext.NewEvaluationContextBuilder("user-key").
+					AddCustom("company", "go-feature-flag").
+					Build(),
 				flagContext: flag.Context{
 					DefaultSdkValue: "value_default",
 				},
@@ -575,7 +589,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				Reason:    flag.ReasonTargetingMatch,
 				RuleIndex: testconvert.Int(1),
 				Cacheable: true,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -584,7 +598,7 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Should ignore a rule that is disabled",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"variation_A": testconvert.Interface("value_A"),
 					"variation_B": testconvert.Interface("value_B"),
 					"variation_C": testconvert.Interface("value_C"),
@@ -608,14 +622,16 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffcontext.NewEvaluationContextBuilder("user-key").AddCustom("company", "go-feature-flag").Build(),
+				user: ffcontext.NewEvaluationContextBuilder("user-key").
+					AddCustom("company", "go-feature-flag").
+					Build(),
 				flagContext: flag.Context{
 					DefaultSdkValue: "value_default",
 				},
@@ -626,7 +642,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				Reason:    flag.ReasonTargetingMatch,
 				RuleIndex: testconvert.Int(2),
 				Cacheable: true,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -635,7 +651,7 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Should return an error if rule is invalid",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"variation_A": testconvert.Interface("value_A"),
 					"variation_B": testconvert.Interface("value_B"),
 					"variation_C": testconvert.Interface("value_C"),
@@ -650,7 +666,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -667,7 +683,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				Variant:   flag.VariationSDKDefault,
 				Reason:    flag.ReasonError,
 				ErrorCode: flag.ErrorFlagConfiguration,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -676,7 +692,7 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Should return an error if rule is invalid (jsonLogic)",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"variation_A": testconvert.Interface("value_A"),
 					"variation_B": testconvert.Interface("value_B"),
 					"variation_C": testconvert.Interface("value_C"),
@@ -691,7 +707,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -708,7 +724,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				Variant:   flag.VariationSDKDefault,
 				Reason:    flag.ReasonError,
 				ErrorCode: flag.ErrorFlagConfiguration,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -717,7 +733,7 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Should return an error if no targeting match and we have no default rule",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"variation_A": testconvert.Interface("value_A"),
 					"variation_B": testconvert.Interface("value_B"),
 					"variation_C": testconvert.Interface("value_C"),
@@ -732,7 +748,7 @@ func TestInternalFlag_Value(t *testing.T) {
 						},
 					},
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -749,7 +765,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				Variant:   flag.VariationSDKDefault,
 				Reason:    flag.ReasonError,
 				ErrorCode: flag.ErrorFlagConfiguration,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -758,7 +774,7 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Should return an error if default rule is invalid",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"variation_A": testconvert.Interface("value_A"),
 					"variation_B": testconvert.Interface("value_B"),
 					"variation_C": testconvert.Interface("value_C"),
@@ -767,7 +783,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					Percentages: &map[string]float64{},
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -784,7 +800,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				Variant:   flag.VariationSDKDefault,
 				Reason:    flag.ReasonError,
 				ErrorCode: flag.ErrorFlagConfiguration,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -793,14 +809,14 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Should not have any change if all scheduled steps are in the future",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"variation_A": testconvert.Interface("value_A"),
 					"variation_B": testconvert.Interface("value_B"),
 				},
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -815,7 +831,7 @@ func TestInternalFlag_Value(t *testing.T) {
 					},
 					{
 						InternalFlag: flag.InternalFlag{
-							Variations: &map[string]*interface{}{
+							Variations: &map[string]*any{
 								"variation_A": testconvert.Interface("value_QWERTY"),
 							},
 						},
@@ -834,7 +850,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			want1: flag.ResolutionDetails{
 				Variant: "variation_A",
 				Reason:  flag.ReasonStatic,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -843,14 +859,14 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Should change if all scheduled steps are in the future BUT context override is in the future too",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"variation_A": testconvert.Interface("value_A"),
 					"variation_B": testconvert.Interface("value_B"),
 				},
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -865,7 +881,7 @@ func TestInternalFlag_Value(t *testing.T) {
 					},
 					{
 						InternalFlag: flag.InternalFlag{
-							Variations: &map[string]*interface{}{
+							Variations: &map[string]*any{
 								"variation_A": testconvert.Interface("value_QWERTY"),
 							},
 						},
@@ -875,9 +891,11 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user: ffcontext.NewEvaluationContextBuilder("user-key").AddCustom("gofeatureflag", map[string]string{
-					"currentDateTime": time.Now().Add(1 * time.Minute).Format(time.RFC3339),
-				}).Build(),
+				user: ffcontext.NewEvaluationContextBuilder("user-key").
+					AddCustom("gofeatureflag", map[string]string{
+						"currentDateTime": time.Now().Add(1 * time.Minute).Format(time.RFC3339),
+					}).
+					Build(),
 				flagContext: flag.Context{
 					DefaultSdkValue: "value_default",
 				},
@@ -886,7 +904,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			want1: flag.ResolutionDetails{
 				Variant: "variation_B",
 				Reason:  flag.ReasonStatic,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -895,14 +913,14 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Should only apply 1 scheduled step",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"variation_A": testconvert.Interface("value_A"),
 					"variation_B": testconvert.Interface("value_B"),
 				},
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -917,7 +935,7 @@ func TestInternalFlag_Value(t *testing.T) {
 					},
 					{
 						InternalFlag: flag.InternalFlag{
-							Variations: &map[string]*interface{}{
+							Variations: &map[string]*any{
 								"variation_B": testconvert.Interface("value_QWERTY"),
 							},
 						},
@@ -936,7 +954,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			want1: flag.ResolutionDetails{
 				Variant: "variation_B",
 				Reason:  flag.ReasonStatic,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -945,14 +963,14 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Should only apply 1 scheduled step if step at the exact same time",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"variation_A": testconvert.Interface("value_A"),
 					"variation_B": testconvert.Interface("value_B"),
 				},
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -967,7 +985,7 @@ func TestInternalFlag_Value(t *testing.T) {
 					},
 					{
 						InternalFlag: flag.InternalFlag{
-							Variations: &map[string]*interface{}{
+							Variations: &map[string]*any{
 								"variation_B": testconvert.Interface("value_QWERTY"),
 							},
 						},
@@ -977,9 +995,13 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user: ffcontext.NewEvaluationContextBuilder("user-key").AddCustom("gofeatureflag", ffcontext.GoffContextSpecifics{
-					CurrentDateTime: testconvert.Time(time.Date(2022, 1, 1, 12, 12, 12, 12, time.UTC)),
-				}).Build(),
+				user: ffcontext.NewEvaluationContextBuilder("user-key").
+					AddCustom("gofeatureflag", ffcontext.GoffContextSpecifics{
+						CurrentDateTime: testconvert.Time(
+							time.Date(2022, 1, 1, 12, 12, 12, 12, time.UTC),
+						),
+					}).
+					Build(),
 				flagContext: flag.Context{
 					DefaultSdkValue: "value_default",
 				},
@@ -988,7 +1010,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			want1: flag.ResolutionDetails{
 				Variant: "variation_B",
 				Reason:  flag.ReasonStatic,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -997,14 +1019,14 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Should apply all scheduled steps in the past",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"variation_A": testconvert.Interface("value_A"),
 					"variation_B": testconvert.Interface("value_B"),
 				},
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -1019,7 +1041,7 @@ func TestInternalFlag_Value(t *testing.T) {
 					},
 					{
 						InternalFlag: flag.InternalFlag{
-							Variations: &map[string]*interface{}{
+							Variations: &map[string]*any{
 								"variation_B": testconvert.Interface("value_QWERTY"),
 							},
 						},
@@ -1038,7 +1060,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			want1: flag.ResolutionDetails{
 				Variant: "variation_B",
 				Reason:  flag.ReasonStatic,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -1047,21 +1069,21 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Should ignore scheduled steps with no dates",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"variation_A": testconvert.Interface("value_A"),
 					"variation_B": testconvert.Interface("value_B"),
 				},
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
 				Scheduled: &[]flag.ScheduledStep{
 					{
 						InternalFlag: flag.InternalFlag{
-							Variations: &map[string]*interface{}{
+							Variations: &map[string]*any{
 								"variation_A": testconvert.Interface("value_QWERTY"),
 							},
 						},
@@ -1079,7 +1101,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			want1: flag.ResolutionDetails{
 				Variant: "variation_A",
 				Reason:  flag.ReasonStatic,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -1088,7 +1110,7 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Should update a rule that exists with a scheduled step",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"variation_A": testconvert.Interface("value_A"),
 					"variation_B": testconvert.Interface("value_B"),
 				},
@@ -1102,7 +1124,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -1110,7 +1132,7 @@ func TestInternalFlag_Value(t *testing.T) {
 					{
 						Date: testconvert.Time(time.Now().Add(-1 * time.Second)),
 						InternalFlag: flag.InternalFlag{
-							Variations: &map[string]*interface{}{
+							Variations: &map[string]*any{
 								"variation_C": testconvert.Interface("value_C"),
 							},
 							Rules: &[]flag.Rule{
@@ -1136,7 +1158,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				Reason:    flag.ReasonTargetingMatch,
 				RuleIndex: testconvert.Int(0),
 				RuleName:  testconvert.String("rule1"),
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -1145,7 +1167,7 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Should update default rule with a scheduled step",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"variation_A": testconvert.Interface("value_A"),
 					"variation_B": testconvert.Interface("value_B"),
 					"variation_C": testconvert.Interface("value_C"),
@@ -1153,7 +1175,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_C"),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -1182,7 +1204,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			want1: flag.ResolutionDetails{
 				Variant: "variation_C",
 				Reason:  flag.ReasonSplit,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -1191,7 +1213,7 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Should add a new rule with a scheduled step",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"variation_A": testconvert.Interface("value_A"),
 					"variation_B": testconvert.Interface("value_B"),
 				},
@@ -1202,7 +1224,7 @@ func TestInternalFlag_Value(t *testing.T) {
 						VariationResult: testconvert.String("variation_B"),
 					},
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -1213,7 +1235,7 @@ func TestInternalFlag_Value(t *testing.T) {
 					{
 						Date: testconvert.Time(time.Now().Add(-1 * time.Second)),
 						InternalFlag: flag.InternalFlag{
-							Variations: &map[string]*interface{}{
+							Variations: &map[string]*any{
 								"variation_C": testconvert.Interface("value_C"),
 							},
 							Rules: &[]flag.Rule{
@@ -1240,7 +1262,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				Reason:    flag.ReasonTargetingMatch,
 				RuleIndex: testconvert.Int(1),
 				RuleName:  testconvert.String("rule2"),
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -1249,14 +1271,14 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Should apply all the changes if all scheduled steps are in the past",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"variation_A": testconvert.Interface("value_A"),
 					"variation_B": testconvert.Interface("value_B"),
 				},
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -1271,7 +1293,7 @@ func TestInternalFlag_Value(t *testing.T) {
 					},
 					{
 						InternalFlag: flag.InternalFlag{
-							Variations: &map[string]*interface{}{
+							Variations: &map[string]*any{
 								"variation_B": testconvert.Interface("value_QWERTY"),
 							},
 						},
@@ -1290,7 +1312,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			want1: flag.ResolutionDetails{
 				Variant: "variation_B",
 				Reason:  flag.ReasonStatic,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -1299,14 +1321,14 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Should disable the flag with a scheduled step",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"variation_A": testconvert.Interface("value_A"),
 					"variation_B": testconvert.Interface("value_B"),
 				},
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -1332,7 +1354,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			want1: flag.ResolutionDetails{
 				Variant: flag.VariationSDKDefault,
 				Reason:  flag.ReasonDisabled,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -1341,14 +1363,14 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Should create an experimentation for a dedicated time",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"variation_A": testconvert.Interface("value_A"),
 					"variation_B": testconvert.Interface("value_B"),
 				},
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -1375,7 +1397,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			want1: flag.ResolutionDetails{
 				Variant: "variation_A",
 				Reason:  flag.ReasonStatic,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -1384,28 +1406,28 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Should not apply a scheduled step inside another scheduled step",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"variation_A": testconvert.Interface("value_A"),
 					"variation_B": testconvert.Interface("value_B"),
 				},
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
 				Scheduled: &[]flag.ScheduledStep{
 					{
 						InternalFlag: flag.InternalFlag{
-							Variations: &map[string]*interface{}{
+							Variations: &map[string]*any{
 								"variation_A": testconvert.Interface("value_AB"),
 								"variation_B": testconvert.Interface("value_B"),
 							},
 							Scheduled: &[]flag.ScheduledStep{
 								{
 									InternalFlag: flag.InternalFlag{
-										Variations: &map[string]*interface{}{
+										Variations: &map[string]*any{
 											"variation_A": testconvert.Interface("value_ABC"),
 										},
 									},
@@ -1428,7 +1450,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			want1: flag.ResolutionDetails{
 				Variant: "variation_A",
 				Reason:  flag.ReasonStatic,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -1437,7 +1459,7 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Should return the false value if not in between initial and end percentage",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"variation_A": testconvert.Interface("value_A"),
 					"variation_B": testconvert.Interface("value_B"),
 				},
@@ -1455,7 +1477,7 @@ func TestInternalFlag_Value(t *testing.T) {
 						},
 					},
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -1472,7 +1494,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				Variant:   "variation_A",
 				Reason:    flag.ReasonSplit,
 				Cacheable: false,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -1481,7 +1503,7 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Should return the reason TARGETING_MATCH if rule apply and return a simple variation",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"variation_A": testconvert.Interface("value_A"),
 					"variation_B": testconvert.Interface("value_B"),
 				},
@@ -1495,7 +1517,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -1514,7 +1536,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				RuleIndex: testconvert.Int(0),
 				RuleName:  testconvert.String("test-rule"),
 				Cacheable: true,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -1523,7 +1545,7 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Should return the reason TARGETING_MATCH_SPLIT if rule apply and has percentage",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"variation_A": testconvert.Interface("value_A"),
 					"variation_B": testconvert.Interface("value_B"),
 				},
@@ -1540,7 +1562,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -1559,7 +1581,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				RuleIndex: testconvert.Int(0),
 				RuleName:  testconvert.String("test-rule"),
 				Cacheable: true,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -1569,7 +1591,7 @@ func TestInternalFlag_Value(t *testing.T) {
 
 			name: "Should return the reason TARGETING_MATCH_SPLIT if rule apply and has progressive rollout",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"variation_A": testconvert.Interface("value_A"),
 					"variation_B": testconvert.Interface("value_B"),
 				},
@@ -1594,7 +1616,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -1613,7 +1635,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				RuleIndex: testconvert.Int(0),
 				RuleName:  testconvert.String("test-rule"),
 				Cacheable: false,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -1622,7 +1644,7 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Should return the reason SPLIT if rule not apply and has percentage",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"variation_A": testconvert.Interface("value_A"),
 					"variation_B": testconvert.Interface("value_B"),
 				},
@@ -1639,7 +1661,7 @@ func TestInternalFlag_Value(t *testing.T) {
 						"variation_B": 50,
 					},
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -1656,7 +1678,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				Variant:   "variation_A",
 				Reason:    flag.ReasonSplit,
 				Cacheable: true,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -1665,7 +1687,7 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Should return the reason DEFAULT if rule not apply and has default variation",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"variation_A": testconvert.Interface("value_A"),
 					"variation_B": testconvert.Interface("value_B"),
 				},
@@ -1679,7 +1701,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -1696,7 +1718,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				Variant:   "variation_A",
 				Reason:    flag.ReasonDefault,
 				Cacheable: true,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -1705,14 +1727,14 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Should return the reason STATIC if no rule and has default variation",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"variation_A": testconvert.Interface("value_A"),
 					"variation_B": testconvert.Interface("value_B"),
 				},
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -1729,7 +1751,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				Variant:   "variation_A",
 				Reason:    flag.ReasonStatic,
 				Cacheable: true,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -1738,7 +1760,7 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Should return the reason STATIC if no rule and has default percentage to 100%",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"variation_A": testconvert.Interface("value_A"),
 					"variation_B": testconvert.Interface("value_B"),
 				},
@@ -1748,7 +1770,7 @@ func TestInternalFlag_Value(t *testing.T) {
 						"variation_B": 0,
 					},
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -1765,7 +1787,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				Variant:   "variation_A",
 				Reason:    flag.ReasonStatic,
 				Cacheable: true,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -1774,7 +1796,7 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Should use the environment as a rule criteria",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"A": testconvert.Interface(false),
 					"B": testconvert.Interface(true),
 				},
@@ -1792,7 +1814,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("B"),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -1802,7 +1824,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				user:     ffcontext.NewEvaluationContextBuilder("1").Build(),
 				flagContext: flag.Context{
 					DefaultSdkValue: true,
-					EvaluationContextEnrichment: map[string]interface{}{
+					EvaluationContextEnrichment: map[string]any{
 						"env": "development",
 					},
 				},
@@ -1813,7 +1835,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				Reason:    flag.ReasonTargetingMatch,
 				Cacheable: true,
 				RuleIndex: testconvert.Int(0),
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -1822,7 +1844,7 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Should have a targeting match if common evaluation context match",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"A": testconvert.Interface("A"),
 					"B": testconvert.Interface("B"),
 				},
@@ -1841,7 +1863,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				user:     ffcontext.NewEvaluationContext("user-key"),
 				flagContext: flag.Context{
 					DefaultSdkValue: "default-sdk",
-					EvaluationContextEnrichment: map[string]interface{}{
+					EvaluationContextEnrichment: map[string]any{
 						"environment": "prod",
 					},
 				},
@@ -1857,7 +1879,7 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "EvaluationContextEnrichment should override request evaluation context",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"A": testconvert.Interface("A"),
 					"B": testconvert.Interface("B"),
 				},
@@ -1873,10 +1895,12 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffcontext.NewEvaluationContextBuilder("key1").AddCustom("environment", "dev").Build(),
+				user: ffcontext.NewEvaluationContextBuilder("key1").
+					AddCustom("environment", "dev").
+					Build(),
 				flagContext: flag.Context{
 					DefaultSdkValue: "default-sdk",
-					EvaluationContextEnrichment: map[string]interface{}{
+					EvaluationContextEnrichment: map[string]any{
 						"environment": "prod",
 					},
 				},
@@ -1896,7 +1920,7 @@ func TestInternalFlag_Value(t *testing.T) {
 					Start: testconvert.Time(time.Now().Add(-15 * time.Second)),
 					End:   testconvert.Time(time.Now().Add(-5 * time.Second)),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": make(chan int),
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -1929,14 +1953,14 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Empty targeting key",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"variation_A": testconvert.Interface(true),
 					"variation_B": testconvert.Interface(false),
 				},
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -1955,7 +1979,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				ErrorCode:    flag.ErrorCodeTargetingKeyMissing,
 				ErrorMessage: "Error: Empty targeting key",
 				Cacheable:    false,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -1964,14 +1988,14 @@ func TestInternalFlag_Value(t *testing.T) {
 		{
 			name: "Empty bucketing key",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"variation_A": testconvert.Interface(true),
 					"variation_B": testconvert.Interface(false),
 				},
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("variation_A"),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -1979,7 +2003,9 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffcontext.NewEvaluationContextBuilder("toto").AddCustom("teamId", "").Build(),
+				user: ffcontext.NewEvaluationContextBuilder("toto").
+					AddCustom("teamId", "").
+					Build(),
 				flagContext: flag.Context{
 					DefaultSdkValue: false,
 				},
@@ -1991,7 +2017,7 @@ func TestInternalFlag_Value(t *testing.T) {
 				ErrorCode:    flag.ErrorCodeTargetingKeyMissing,
 				ErrorMessage: "Error: Empty bucketing key",
 				Cacheable:    false,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -2023,7 +2049,7 @@ func TestInternalFlag_ValueWithBucketingKey(t *testing.T) {
 		{
 			name: "Should use custom bucketing key when set",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"variation_A": testconvert.Interface("value_A"),
 					"variation_B": testconvert.Interface("value_B"),
 					"variation_C": testconvert.Interface("value_C"),
@@ -2038,7 +2064,9 @@ func TestInternalFlag_ValueWithBucketingKey(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffcontext.NewEvaluationContextBuilder("user-key").AddCustom("teamId", "team-123").Build(),
+				user: ffcontext.NewEvaluationContextBuilder("user-key").
+					AddCustom("teamId", "team-123").
+					Build(),
 				flagContext: flag.Context{
 					DefaultSdkValue: "value_default",
 				},
@@ -2051,12 +2079,20 @@ func TestInternalFlag_ValueWithBucketingKey(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			flagWithBucketingKey := tt.flag
 
-			_, got := flagWithBucketingKey.Value(tt.args.flagName, tt.args.user, tt.args.flagContext)
+			_, got := flagWithBucketingKey.Value(
+				tt.args.flagName,
+				tt.args.user,
+				tt.args.flagContext,
+			)
 			assert.Equal(t, tt.wantForTeamID, got.Variant)
 
 			flagWithoutBucketingKey := tt.flag
 			flagWithoutBucketingKey.BucketingKey = testconvert.String("")
-			_, got = flagWithoutBucketingKey.Value(tt.args.flagName, tt.args.user, tt.args.flagContext)
+			_, got = flagWithoutBucketingKey.Value(
+				tt.args.flagName,
+				tt.args.user,
+				tt.args.flagContext,
+			)
 
 			assert.Equal(t, tt.wantForTargetingKey, got.Variant)
 		})
@@ -2065,7 +2101,7 @@ func TestInternalFlag_ValueWithBucketingKey(t *testing.T) {
 
 func TestInternalFlag_ValueWithBucketingKeyNotFound(t *testing.T) {
 	f := &flag.InternalFlag{
-		Variations: &map[string]*interface{}{
+		Variations: &map[string]*any{
 			"variation_A": testconvert.Interface("value_A"),
 			"variation_B": testconvert.Interface("value_B"),
 			"variation_C": testconvert.Interface("value_C"),
@@ -2078,7 +2114,11 @@ func TestInternalFlag_ValueWithBucketingKeyNotFound(t *testing.T) {
 			},
 		},
 	}
-	_, got := f.Value("my-flag", ffcontext.NewEvaluationContextBuilder("user-key").Build(), flag.Context{})
+	_, got := f.Value(
+		"my-flag",
+		ffcontext.NewEvaluationContextBuilder("user-key").Build(),
+		flag.Context{},
+	)
 	want := flag.ResolutionDetails{
 		Variant:      "SdkDefault",
 		Reason:       flag.ReasonError,
@@ -2090,7 +2130,7 @@ func TestInternalFlag_ValueWithBucketingKeyNotFound(t *testing.T) {
 
 func TestFlag_ProgressiveRollout(t *testing.T) {
 	f := &flag.InternalFlag{
-		Variations: &map[string]*interface{}{
+		Variations: &map[string]*any{
 			"variation_A": testconvert.Interface("value_A"),
 			"variation_B": testconvert.Interface("value_B"),
 		},
@@ -2130,29 +2170,29 @@ func TestInternalFlag_GetVariations(t *testing.T) {
 	tests := []struct {
 		name string
 		flag flag.InternalFlag
-		want map[string]*interface{}
+		want map[string]*any
 	}{
 		{
 			name: "Should return empty map if variations nil",
 			flag: flag.InternalFlag{Variations: nil},
-			want: map[string]*interface{}{},
+			want: map[string]*any{},
 		},
 		{
 			name: "Should return empty map if variations empty map",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{},
+				Variations: &map[string]*any{},
 			},
-			want: map[string]*interface{}{},
+			want: map[string]*any{},
 		},
 		{
 			name: "Should return variations if map is not empty",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"varA": testconvert.Interface("valueA"),
 					"varB": testconvert.Interface("valueB"),
 				},
 			},
-			want: map[string]*interface{}{
+			want: map[string]*any{
 				"varA": testconvert.Interface("valueA"),
 				"varB": testconvert.Interface("valueB"),
 			},
@@ -2206,7 +2246,13 @@ func TestInternalFlag_GetRuleIndexByName(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equalf(t, tt.want, tt.flag.GetRuleIndexByName(tt.ruleName), "GetRuleIndexByName(%v)", tt.ruleName)
+			assert.Equalf(
+				t,
+				tt.want,
+				tt.flag.GetRuleIndexByName(tt.ruleName),
+				"GetRuleIndexByName(%v)",
+				tt.ruleName,
+			)
 		})
 	}
 }
@@ -2216,12 +2262,12 @@ func TestInternalFlag_GetVariationValue(t *testing.T) {
 		name      string
 		flag      flag.InternalFlag
 		variation string
-		want      interface{}
+		want      any
 	}{
 		{
 			name: "Should return nil if variation does not exist",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"varA": testconvert.Interface("valueA"),
 					"varB": testconvert.Interface("valueB"),
 				},
@@ -2232,7 +2278,7 @@ func TestInternalFlag_GetVariationValue(t *testing.T) {
 		{
 			name: "Should return variation value if exists",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"varA": testconvert.Interface("valueA"),
 					"varB": testconvert.Interface("valueB"),
 				},
@@ -2243,7 +2289,7 @@ func TestInternalFlag_GetVariationValue(t *testing.T) {
 		{
 			name: "Should return nil if variation value is nil",
 			flag: flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"varA": testconvert.Interface(nil),
 					"varB": testconvert.Interface("valueB"),
 				},
@@ -2254,14 +2300,20 @@ func TestInternalFlag_GetVariationValue(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equalf(t, tt.want, tt.flag.GetVariationValue(tt.variation), "GetVariationValue(%v)", tt.variation)
+			assert.Equalf(
+				t,
+				tt.want,
+				tt.flag.GetVariationValue(tt.variation),
+				"GetVariationValue(%v)",
+				tt.variation,
+			)
 		})
 	}
 }
 
 func TestInternalFlag_IsValid(t *testing.T) {
 	type fields struct {
-		Variations      *map[string]*interface{}
+		Variations      *map[string]*any
 		Rules           *[]flag.Rule
 		DefaultRule     *flag.Rule
 		Rollout         *flag.Rollout
@@ -2270,7 +2322,7 @@ func TestInternalFlag_IsValid(t *testing.T) {
 		Version         *string
 		Experimentation *flag.ExperimentationRollout
 		Scheduled       *[]flag.ScheduledStep
-		Metadata        *map[string]interface{}
+		Metadata        *map[string]any
 	}
 	tests := []struct {
 		name     string
@@ -2281,7 +2333,7 @@ func TestInternalFlag_IsValid(t *testing.T) {
 		{
 			name: "no variation",
 			fields: fields{
-				Variations: &map[string]*interface{}{},
+				Variations: &map[string]*any{},
 			},
 			wantErr:  assert.Error,
 			errorMsg: "no variation available",
@@ -2289,7 +2341,7 @@ func TestInternalFlag_IsValid(t *testing.T) {
 		{
 			name: "different types in variation",
 			fields: fields{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"A": testconvert.Interface("A"),
 					"C": testconvert.Interface("C"),
 					"B": testconvert.Interface(120.1),
@@ -2297,7 +2349,7 @@ func TestInternalFlag_IsValid(t *testing.T) {
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("A"),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -2308,14 +2360,14 @@ func TestInternalFlag_IsValid(t *testing.T) {
 		{
 			name: "different types in variation int/float should be ok",
 			fields: fields{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"A": testconvert.Interface(120),
 					"B": testconvert.Interface(120.1),
 				},
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("A"),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -2325,7 +2377,7 @@ func TestInternalFlag_IsValid(t *testing.T) {
 		{
 			name: "no default rule",
 			fields: fields{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"A": testconvert.Interface("A"),
 				},
 				Rules: &[]flag.Rule{
@@ -2335,7 +2387,7 @@ func TestInternalFlag_IsValid(t *testing.T) {
 						VariationResult: testconvert.String("A"),
 					},
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -2346,13 +2398,13 @@ func TestInternalFlag_IsValid(t *testing.T) {
 		{
 			name: "multiple rule with same name",
 			fields: fields{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"A": testconvert.Interface("A"),
 				},
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("A"),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -2395,7 +2447,7 @@ func TestInternalFlag_IsValid(t *testing.T) {
 		{
 			name: "wrong percentages for default rule",
 			fields: fields{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"A": testconvert.Interface("A"),
 					"B": testconvert.Interface("B"),
 				},
@@ -2405,7 +2457,7 @@ func TestInternalFlag_IsValid(t *testing.T) {
 						"B": 0,
 					},
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -2416,14 +2468,14 @@ func TestInternalFlag_IsValid(t *testing.T) {
 		{
 			name: "empty percentages for default rule",
 			fields: fields{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"A": testconvert.Interface("A"),
 					"B": testconvert.Interface("B"),
 				},
 				DefaultRule: &flag.Rule{
 					Percentages: &map[string]float64{},
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -2434,7 +2486,7 @@ func TestInternalFlag_IsValid(t *testing.T) {
 		{
 			name: "wrong percentages for targeting",
 			fields: fields{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"A": testconvert.Interface("A"),
 					"B": testconvert.Interface("B"),
 				},
@@ -2444,7 +2496,7 @@ func TestInternalFlag_IsValid(t *testing.T) {
 						"B": 00,
 					},
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -2465,13 +2517,13 @@ func TestInternalFlag_IsValid(t *testing.T) {
 		{
 			name: "empty percentages for targeting",
 			fields: fields{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"A": testconvert.Interface("A"),
 				},
 				DefaultRule: &flag.Rule{
 					Percentages: &map[string]float64{},
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -2489,7 +2541,7 @@ func TestInternalFlag_IsValid(t *testing.T) {
 		{
 			name: "targeting without query",
 			fields: fields{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"A": testconvert.Interface("A"),
 					"B": testconvert.Interface("B"),
 				},
@@ -2508,7 +2560,7 @@ func TestInternalFlag_IsValid(t *testing.T) {
 						},
 					},
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -2519,11 +2571,11 @@ func TestInternalFlag_IsValid(t *testing.T) {
 		{
 			name: "Nothing to return in rule",
 			fields: fields{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"A": testconvert.Interface("A"),
 					"B": testconvert.Interface("B"),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -2537,11 +2589,11 @@ func TestInternalFlag_IsValid(t *testing.T) {
 		{
 			name: "progressive rollout percentage initial > end",
 			fields: fields{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"A": testconvert.Interface("A"),
 					"B": testconvert.Interface("B"),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -2567,11 +2619,11 @@ func TestInternalFlag_IsValid(t *testing.T) {
 		{
 			name: "ignore invalid rule if disabled",
 			fields: fields{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"A": testconvert.Interface("A"),
 					"B": testconvert.Interface("B"),
 				},
-				Metadata: &map[string]interface{}{
+				Metadata: &map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -2597,7 +2649,7 @@ func TestInternalFlag_IsValid(t *testing.T) {
 		{
 			name: "should error if default rule referencing a variation that does not exist",
 			fields: fields{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"A": testconvert.Interface("A"),
 					"B": testconvert.Interface("B"),
 				},
@@ -2611,7 +2663,7 @@ func TestInternalFlag_IsValid(t *testing.T) {
 		{
 			name: "should error if default percentage rule referencing a variation that does not exist",
 			fields: fields{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"A": testconvert.Interface("A"),
 					"B": testconvert.Interface("B"),
 				},
@@ -2629,7 +2681,7 @@ func TestInternalFlag_IsValid(t *testing.T) {
 		{
 			name: "should error if default progressive rule end rollout step referencing a variation that does not exist",
 			fields: fields{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"A": testconvert.Interface("A"),
 					"B": testconvert.Interface("B"),
 				},
@@ -2654,7 +2706,7 @@ func TestInternalFlag_IsValid(t *testing.T) {
 		{
 			name: "should error if default progressive rule initial rollout step referencing a variation that does not exist",
 			fields: fields{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"A": testconvert.Interface("A"),
 					"B": testconvert.Interface("B"),
 				},
@@ -2679,7 +2731,7 @@ func TestInternalFlag_IsValid(t *testing.T) {
 		{
 			name: "should error if targeting rule referencing a variation that does not exist",
 			fields: fields{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"A": testconvert.Interface("A"),
 					"B": testconvert.Interface("B"),
 				},
@@ -2699,7 +2751,7 @@ func TestInternalFlag_IsValid(t *testing.T) {
 		{
 			name: "should error if percentage in targeting rule referencing a variation that does not exist",
 			fields: fields{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"A": testconvert.Interface("A"),
 					"B": testconvert.Interface("B"),
 				},
@@ -2723,7 +2775,7 @@ func TestInternalFlag_IsValid(t *testing.T) {
 		{
 			name: "should error if progressive rollout in targeting rule referencing an initial variation that does not exist",
 			fields: fields{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"A": testconvert.Interface("A"),
 					"B": testconvert.Interface("B"),
 				},
@@ -2754,7 +2806,7 @@ func TestInternalFlag_IsValid(t *testing.T) {
 		{
 			name: "should error if progressive rollout in targeting rule referencing an end variation that does not exist",
 			fields: fields{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"A": testconvert.Interface("A"),
 					"B": testconvert.Interface("B"),
 				},
@@ -2785,7 +2837,7 @@ func TestInternalFlag_IsValid(t *testing.T) {
 		{
 			name: "should error if rule query is not valid for the parser",
 			fields: fields{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"A": testconvert.Interface("A"),
 					"B": testconvert.Interface("B"),
 				},
@@ -2829,14 +2881,14 @@ func TestInternalFlag_IsValid(t *testing.T) {
 func TestInternalFlag_ApplySheduledRollout(t *testing.T) {
 	cases := 1000
 	internalFlag := flag.InternalFlag{
-		Variations: &map[string]*interface{}{
+		Variations: &map[string]*any{
 			"variation_A": testconvert.Interface("value_A"),
 			"variation_B": testconvert.Interface("value_B"),
 		},
 		DefaultRule: &flag.Rule{
 			VariationResult: testconvert.String("variation_A"),
 		},
-		Metadata: &map[string]interface{}{
+		Metadata: &map[string]any{
 			"description": "this is a flag",
 			"issue-link":  "https://issue.link/GOFF-1",
 		},
@@ -2851,7 +2903,7 @@ func TestInternalFlag_ApplySheduledRollout(t *testing.T) {
 			},
 			{
 				InternalFlag: flag.InternalFlag{
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"variation_B": testconvert.Interface("value_QWERTY"),
 					},
 				},
@@ -2867,7 +2919,7 @@ func TestInternalFlag_ApplySheduledRollout(t *testing.T) {
 			wantDetails := flag.ResolutionDetails{
 				Variant: "variation_B",
 				Reason:  flag.ReasonStatic,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
@@ -2881,7 +2933,13 @@ func TestInternalFlag_ApplySheduledRollout(t *testing.T) {
 				},
 			)
 			assert.Equalf(t, wantResult, got, "not expected value: %s", cmp.Diff(wantResult, got))
-			assert.Equalf(t, wantDetails, got1, "not expected value: %s", cmp.Diff(wantDetails, got1))
+			assert.Equalf(
+				t,
+				wantDetails,
+				got1,
+				"not expected value: %s",
+				cmp.Diff(wantDetails, got1),
+			)
 		})
 	}
 }

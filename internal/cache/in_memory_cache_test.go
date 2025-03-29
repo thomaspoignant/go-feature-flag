@@ -20,7 +20,7 @@ func TestAll(t *testing.T) {
 			name: "all with 1 flag",
 			param: map[string]dto.DTO{
 				"test": {
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"True":    testconvert.Interface("true"),
 						"False":   testconvert.Interface("false"),
 						"Default": testconvert.Interface("default"),
@@ -35,7 +35,7 @@ func TestAll(t *testing.T) {
 			},
 			want: map[string]flag.Flag{
 				"test": &flag.InternalFlag{
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface("default"),
 						"False":   testconvert.Interface("false"),
 						"True":    testconvert.Interface("true"),
@@ -53,7 +53,7 @@ func TestAll(t *testing.T) {
 			name: "all with multiple flags",
 			param: map[string]dto.DTO{
 				"test": {
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"True":    testconvert.Interface("true"),
 						"False":   testconvert.Interface("false"),
 						"Default": testconvert.Interface("default"),
@@ -67,7 +67,7 @@ func TestAll(t *testing.T) {
 					},
 				},
 				"test1": {
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"True":    testconvert.Interface(true),
 						"False":   testconvert.Interface(false),
 						"Default": testconvert.Interface(false),
@@ -83,7 +83,7 @@ func TestAll(t *testing.T) {
 			},
 			want: map[string]flag.Flag{
 				"test": &flag.InternalFlag{
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface("default"),
 						"False":   testconvert.Interface("false"),
 						"True":    testconvert.Interface("true"),
@@ -97,7 +97,7 @@ func TestAll(t *testing.T) {
 					},
 				},
 				"test1": &flag.InternalFlag{
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface(false),
 						"False":   testconvert.Interface(false),
 						"True":    testconvert.Interface(true),
@@ -136,7 +136,7 @@ func TestCopy(t *testing.T) {
 			name: "copy with 1 flag",
 			param: map[string]dto.DTO{
 				"test": {
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"True":    testconvert.Interface("true"),
 						"False":   testconvert.Interface("false"),
 						"Default": testconvert.Interface("default"),
