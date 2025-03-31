@@ -6,7 +6,7 @@ toolchain go1.24.1
 require (
 	cloud.google.com/go/pubsub v1.48.0
 	cloud.google.com/go/storage v1.51.0
-	dario.cat/mergo v1.0.0
+	dario.cat/mergo v1.0.1
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.8.2
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.6.0
 	github.com/BurntSushi/toml v1.5.0
