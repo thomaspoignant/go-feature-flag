@@ -15,7 +15,7 @@
     "@openfeature/react-sdk": "^0.4.11",
     "@openfeature/web-sdk": "^1.4.1",
     "react": "^19.1.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.1.0"
   },
   "devDependencies": {
     "@types/react": "^19.0.12",
@@ -28,7 +28,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",
     "postcss": "^8.5.3",
-    "tailwindcss": "^4.0.15",
+    "tailwindcss": "^4.0.17",
     "typescript": "^5.8.2",
     "vite": "^6.2.2"
   }
