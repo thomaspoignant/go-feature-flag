@@ -3,6 +3,7 @@ package ffclient
 import (
 	"fmt"
 	"maps"
+	"sync"
 
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
@@ -14,6 +15,8 @@ const (
 	errorFlagNotAvailable = "flag %v is not present or disabled"
 	errorWrongVariation   = "wrong variation used for flag %v"
 )
+
+var wg = sync.WaitGroup{}
 
 // BoolVariation return the value of the flag in boolean.
 // An error is return if you don't have init the library before calling the function.
@@ -256,7 +259,7 @@ func (g *GoFeatureFlag) getFlagFromCache(flagKey string) (flag.Flag, error) {
 func (g *GoFeatureFlag) CollectEventData(event exporter.FeatureEvent) {
 	if g != nil && g.dataExporter != nil {
 		// Add event in the exporter
-		go g.dataExporter.AddEvent(event)
+		g.dataExporter.AddEvent(event)
 	}
 }
 
@@ -271,7 +274,11 @@ func notifyVariation[T model.JSONType](
 	if result.TrackEvents {
 		event := exporter.NewFeatureEvent(ctx, flagKey, result.Value, result.VariationType, result.Failed, result.Version,
 			"SERVER", ctx.ExtractGOFFProtectedFields().ExporterMetadata)
-		g.CollectEventData(event)
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			g.CollectEventData(event)
+		}()
 	}
 }
 

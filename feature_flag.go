@@ -354,5 +354,6 @@ func ForceRefresh() bool {
 // Close the component by stopping the background refresh and clean the cache.
 func Close() {
 	onceFF = sync.Once{}
+	wg.Wait()
 	ff.Close()
 }
