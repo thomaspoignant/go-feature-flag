@@ -256,7 +256,7 @@ func (g *GoFeatureFlag) getFlagFromCache(flagKey string) (flag.Flag, error) {
 func (g *GoFeatureFlag) CollectEventData(event exporter.FeatureEvent) {
 	if g != nil && g.dataExporter != nil {
 		// Add event in the exporter
-		g.dataExporter.AddEvent(event)
+		go g.dataExporter.AddEvent(event)
 	}
 }
 
