@@ -15,7 +15,7 @@
     "@openfeature/react-sdk": "^0.4.11",
     "@openfeature/web-sdk": "^1.4.1",
     "react": "^19.1.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.1.0"
   },
   "devDependencies": {
     "@types/react": "^19.0.12",
