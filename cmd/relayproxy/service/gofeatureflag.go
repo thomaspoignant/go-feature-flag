@@ -29,20 +29,12 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/notifier/slacknotifier"
 	"github.com/thomaspoignant/go-feature-flag/notifier/webhooknotifier"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
-	azblobretriever "github.com/thomaspoignant/go-feature-flag/retriever/azblobstorageretriever"
-	"github.com/thomaspoignant/go-feature-flag/retriever/bitbucketretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/gcstorageretriever"
-	"github.com/thomaspoignant/go-feature-flag/retriever/githubretriever"
-	"github.com/thomaspoignant/go-feature-flag/retriever/gitlabretriever"
-	"github.com/thomaspoignant/go-feature-flag/retriever/httpretriever"
-	"github.com/thomaspoignant/go-feature-flag/retriever/k8sretriever"
-	"github.com/thomaspoignant/go-feature-flag/retriever/mongodbretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/redisretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/s3retrieverv2"
 	"go.uber.org/zap"
 	"golang.org/x/net/context"
-	"k8s.io/client-go/rest"
 )
 
 func NewGoFeatureFlagClient(
@@ -122,96 +114,30 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 	if c.Timeout != 0 {
 		retrieverTimeout = time.Duration(c.Timeout) * time.Millisecond
 	}
-
-	// Conversions
 	switch c.Kind {
 	case config.GitHubRetriever:
-		token := c.AuthToken
-		if token == "" && c.GithubToken != "" { // nolint: staticcheck
-			token = c.GithubToken // nolint: staticcheck
-		}
-		return &githubretriever.Retriever{
-			RepositorySlug: c.RepositorySlug,
-			Branch: func() string {
-				if c.Branch == "" {
-					return config.DefaultRetriever.GitBranch
-				}
-				return c.Branch
-			}(),
-			FilePath:    c.Path,
-			GithubToken: token,
-			Timeout:     retrieverTimeout,
-		}, nil
+		return initGithubRetriever(c, retrieverTimeout)
 	case config.GitlabRetriever:
-		return &gitlabretriever.Retriever{
-			BaseURL: c.BaseURL,
-			Branch: func() string {
-				if c.Branch == "" {
-					return config.DefaultRetriever.GitBranch
-				}
-				return c.Branch
-			}(),
-			FilePath:       c.Path,
-			GitlabToken:    c.AuthToken,
-			RepositorySlug: c.RepositorySlug,
-			Timeout:        retrieverTimeout,
-		}, nil
+		return initGitlabRetriever(c, retrieverTimeout)
 	case config.BitbucketRetriever:
-		return &bitbucketretriever.Retriever{
-			RepositorySlug: c.RepositorySlug,
-			Branch: func() string {
-				if c.Branch == "" {
-					return config.DefaultRetriever.GitBranch
-				}
-				return c.Branch
-			}(),
-			FilePath:       c.Path,
-			BitBucketToken: c.AuthToken,
-			BaseURL:        c.BaseURL,
-			Timeout:        retrieverTimeout,
-		}, nil
+		return initBitbucketRetriever(c, retrieverTimeout)
 	case config.FileRetriever:
 		return &fileretriever.Retriever{Path: c.Path}, nil
 	case config.S3Retriever:
 		awsConfig, err := awsConf.LoadDefaultConfig(context.Background())
 		return &s3retrieverv2.Retriever{Bucket: c.Bucket, Item: c.Item, AwsConfig: &awsConfig}, err
 	case config.HTTPRetriever:
-		return &httpretriever.Retriever{
-			URL: c.URL,
-			Method: func() string {
-				if c.HTTPMethod == "" {
-					return config.DefaultRetriever.HTTPMethod
-				}
-				return c.HTTPMethod
-			}(), Body: c.HTTPBody, Header: c.HTTPHeaders, Timeout: retrieverTimeout}, nil
+		return initHTTPRetriever(c, retrieverTimeout)
 	case config.GoogleStorageRetriever:
 		return &gcstorageretriever.Retriever{Bucket: c.Bucket, Object: c.Object}, nil
 	case config.KubernetesRetriever:
-		client, err := rest.InClusterConfig()
-		if err != nil {
-			return nil, err
-		}
-		return &k8sretriever.Retriever{
-			Namespace:     c.Namespace,
-			ConfigMapName: c.ConfigMap,
-			Key:           c.Key,
-			ClientConfig:  *client,
-		}, nil
+		return initK8sRetriever(c)
 	case config.MongoDBRetriever:
-		return &mongodbretriever.Retriever{
-			Database:   c.Database,
-			URI:        c.URI,
-			Collection: c.Collection,
-		}, nil
+		return initMongoRetriever(c)
 	case config.RedisRetriever:
 		return &redisretriever.Retriever{Options: c.RedisOptions, Prefix: c.RedisPrefix}, nil
 	case config.AzBlobStorageRetriever:
-		return &azblobretriever.Retriever{
-			Container:   c.Container,
-			Object:      c.Object,
-			AccountName: c.AccountName,
-			AccountKey:  c.AccountKey,
-		}, nil
+		return initAzBlobRetriever(c)
 	default:
 		return nil, fmt.Errorf("invalid retriever: kind \"%s\" "+
 			"is not supported", c.Kind)
