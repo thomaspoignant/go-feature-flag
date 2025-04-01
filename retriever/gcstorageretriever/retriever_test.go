@@ -113,13 +113,27 @@ func TestRetriever_Retrieve(t *testing.T) {
 
 			assertRetrieve := func(want string) {
 				gotContent, err := retriever.Retrieve(ctx)
-				assert.Equal(t, tt.wantErr, err != nil, "Retrieve() error = %v, wantErr %v", err, tt.wantErr)
+				assert.Equal(
+					t,
+					tt.wantErr,
+					err != nil,
+					"Retrieve() error = %v, wantErr %v",
+					err,
+					tt.wantErr,
+				)
 
 				if err == nil {
 					wantContent, err := os.ReadFile(want)
 					assert.NoError(t, err)
 
-					assert.Equal(t, wantContent, gotContent, "Retrieve() got = %v, want %v", gotContent, wantContent)
+					assert.Equal(
+						t,
+						wantContent,
+						gotContent,
+						"Retrieve() got = %v, want %v",
+						gotContent,
+						wantContent,
+					)
 				}
 			}
 

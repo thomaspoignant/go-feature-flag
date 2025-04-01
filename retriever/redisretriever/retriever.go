@@ -11,6 +11,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
+// Retriever is the interface to fetch the flags from Redis.
 type Retriever struct {
 	// Options to connect to Redis
 	Options *redis.Options
@@ -24,6 +25,7 @@ type Retriever struct {
 	client *redis.Client
 }
 
+// Init is initializing the retriever to start fetching the flags configuration.
 func (r *Retriever) Init(ctx context.Context, _ *fflog.FFLogger) error {
 	r.status = retriever.RetrieverNotReady
 	client := redis.NewClient(r.Options)
@@ -38,15 +40,18 @@ func (r *Retriever) Init(ctx context.Context, _ *fflog.FFLogger) error {
 	return nil
 }
 
+// Status is the function returning the internal state of the retriever.
 func (r *Retriever) Status() retriever.Status {
 	return r.status
 }
 
+// Shutdown gracefully shutdown the provider and set the status as not ready.
 func (r *Retriever) Shutdown(ctx context.Context) error {
 	r.client.Shutdown(ctx)
 	return nil
 }
 
+// Retrieve is the function in charge of fetching the flag configuration.
 func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	var flagsData = make(map[string]interface{})
 

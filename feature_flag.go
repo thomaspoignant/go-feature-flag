@@ -87,16 +87,27 @@ func New(config Config) (*GoFeatureFlag, error) {
 		notifiers = append(notifiers, &logsnotifier.Notifier{Logger: config.internalLogger})
 
 		notificationService := cache.NewNotificationService(notifiers)
-		goFF.cache = cache.New(notificationService, config.PersistentFlagConfigurationFile, config.internalLogger)
+		goFF.cache = cache.New(
+			notificationService,
+			config.PersistentFlagConfigurationFile,
+			config.internalLogger,
+		)
 
 		retrievers, err := config.GetRetrievers()
 		if err != nil {
 			return nil, err
 		}
-		goFF.retrieverManager = retriever.NewManager(config.Context, retrievers, config.internalLogger)
+		goFF.retrieverManager = retriever.NewManager(
+			config.Context,
+			retrievers,
+			config.internalLogger,
+		)
 		err = goFF.retrieverManager.Init(config.Context)
 		if err != nil && !config.StartWithRetrieverError {
-			return nil, fmt.Errorf("impossible to initialize the retrievers, please check your configuration: %v", err)
+			return nil, fmt.Errorf(
+				"impossible to initialize the retrievers, please check your configuration: %v",
+				err,
+			)
 		}
 
 		err = retrieveFlagsAndUpdateCache(goFF.config, goFF.cache, goFF.retrieverManager, true)
@@ -105,20 +116,33 @@ func New(config Config) (*GoFeatureFlag, error) {
 			case config.PersistentFlagConfigurationFile != "":
 				errPersist := retrievePersistentLocalDisk(config.Context, config, goFF)
 				if errPersist != nil && !config.StartWithRetrieverError {
-					return nil, fmt.Errorf("impossible to use the persistent flag configuration file: %v "+
-						"[original error: %v]", errPersist, err)
+					return nil, fmt.Errorf(
+						"impossible to use the persistent flag configuration file: %v "+
+							"[original error: %v]",
+						errPersist,
+						err,
+					)
 				}
 			case !config.StartWithRetrieverError:
-				return nil, fmt.Errorf("impossible to retrieve the flags, please check your configuration: %v", err)
+				return nil, fmt.Errorf(
+					"impossible to retrieve the flags, please check your configuration: %v",
+					err,
+				)
 			default:
 				// We accept to start with a retriever error, we will serve only default value
-				goFF.config.internalLogger.Error("Impossible to retrieve the flags, starting with the "+
-					"retriever error", slog.Any("error", err))
+				goFF.config.internalLogger.Error(
+					"Impossible to retrieve the flags, starting with the "+
+						"retriever error",
+					slog.Any("error", err),
+				)
 			}
 		}
 
 		if config.PollingInterval > 0 {
-			goFF.bgUpdater = newBackgroundUpdater(config.PollingInterval, config.EnablePollingJitter)
+			goFF.bgUpdater = newBackgroundUpdater(
+				config.PollingInterval,
+				config.EnablePollingJitter,
+			)
 			go goFF.startFlagUpdaterDaemon()
 		}
 
@@ -134,7 +158,11 @@ func New(config Config) (*GoFeatureFlag, error) {
 				}
 			}
 			goFF.dataExporter = exporter.NewManager[exporter.FeatureEvent](
-				config.Context, expConfigs, config.ExporterCleanQueueInterval, goFF.config.internalLogger)
+				config.Context,
+				expConfigs,
+				config.ExporterCleanQueueInterval,
+				goFF.config.internalLogger,
+			)
 			go goFF.dataExporter.Start()
 		}
 	}
@@ -147,19 +175,31 @@ func New(config Config) (*GoFeatureFlag, error) {
 // This function will look at any pre-existent persistent configuration and start with it.
 func retrievePersistentLocalDisk(ctx context.Context, config Config, goFF *GoFeatureFlag) error {
 	if config.PersistentFlagConfigurationFile != "" {
-		config.internalLogger.Error("Impossible to retrieve your flag configuration, trying to use the persistent"+
-			" flag configuration file.", slog.String("path", config.PersistentFlagConfigurationFile))
+		config.internalLogger.Error(
+			"Impossible to retrieve your flag configuration, trying to use the persistent"+
+				" flag configuration file.",
+			slog.String("path", config.PersistentFlagConfigurationFile),
+		)
 		if _, err := os.Stat(config.PersistentFlagConfigurationFile); err == nil {
 			// we found the configuration file on the disk
 			r := &fileretriever.Retriever{Path: config.PersistentFlagConfigurationFile}
 
-			fallBackRetrieverManager := retriever.NewManager(config.Context, []retriever.Retriever{r}, config.internalLogger)
+			fallBackRetrieverManager := retriever.NewManager(
+				config.Context,
+				[]retriever.Retriever{r},
+				config.internalLogger,
+			)
 			err := fallBackRetrieverManager.Init(ctx)
 			if err != nil {
 				return err
 			}
 			defer func() { _ = fallBackRetrieverManager.Shutdown(ctx) }()
-			err = retrieveFlagsAndUpdateCache(goFF.config, goFF.cache, fallBackRetrieverManager, true)
+			err = retrieveFlagsAndUpdateCache(
+				goFF.config,
+				goFF.cache,
+				fallBackRetrieverManager,
+				true,
+			)
 			if err != nil {
 				return err
 			}
@@ -199,7 +239,10 @@ func (g *GoFeatureFlag) startFlagUpdaterDaemon() {
 			if !g.IsOffline() {
 				err := retrieveFlagsAndUpdateCache(g.config, g.cache, g.retrieverManager, false)
 				if err != nil {
-					g.config.internalLogger.Error("Error while updating the cache.", slog.Any("error", err))
+					g.config.internalLogger.Error(
+						"Error while updating the cache.",
+						slog.Any("error", err),
+					)
 				}
 			}
 		case <-g.bgUpdater.updaterChan:
@@ -242,7 +285,8 @@ func retreiveFlags(
 			defer wg.Done()
 
 			// If the retriever is not ready, we ignore it
-			if rr, ok := r.(retriever.CommonInitializableRetriever); ok && rr.Status() != retriever.RetrieverReady {
+			if rr, ok := r.(retriever.CommonInitializableRetriever); ok &&
+				rr.Status() != retriever.RetrieverReady {
 				resultsChan <- Results{Error: nil, Value: map[string]dto.DTO{}, Index: index}
 				return
 			}
@@ -284,7 +328,11 @@ func retrieveFlagsAndUpdateCache(config Config, cache cache.Manager,
 		return err
 	}
 
-	err = cache.UpdateCache(newFlags, config.internalLogger, !(isInit && config.DisableNotifierOnInit))
+	err = cache.UpdateCache(
+		newFlags,
+		config.internalLogger,
+		!isInit || !config.DisableNotifierOnInit,
+	)
 	if err != nil {
 		log.Printf("error: impossible to update the cache of the flags: %v", err)
 		return err
@@ -309,7 +357,10 @@ func (g *GoFeatureFlag) ForceRefresh() bool {
 	}
 	err := retrieveFlagsAndUpdateCache(g.config, g.cache, g.retrieverManager, false)
 	if err != nil {
-		g.config.internalLogger.Error("Error while force updating the cache.", slog.Any("error", err))
+		g.config.internalLogger.Error(
+			"Error while force updating the cache.",
+			slog.Any("error", err),
+		)
 		return false
 	}
 	return true

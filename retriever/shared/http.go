@@ -10,6 +10,7 @@ import (
 	"golang.org/x/net/context"
 )
 
+// CallHTTPAPI is the default function to make an HTTP call in the retrievers.
 func CallHTTPAPI(
 	ctx context.Context,
 	url string, method string,

@@ -33,6 +33,7 @@ type Retriever struct {
 	obj *storage.ObjectHandle
 }
 
+// Retrieve is the function in charge of fetching the flag configuration.
 func (retriever *Retriever) Retrieve(ctx context.Context) (content []byte, err error) {
 	if retriever.obj == nil {
 		// Create GC Storage Client.
@@ -61,13 +62,18 @@ func (retriever *Retriever) Retrieve(ctx context.Context) (content []byte, err e
 	if err != nil {
 		return nil, err
 	}
-	defer reader.Close()
+	defer func() { _ = reader.Close() }()
 
 	// Read all contents from the Reader.
 	content, err = io.ReadAll(reader)
 	if err != nil {
 		return nil,
-			fmt.Errorf("unable to read from GCP Object %s in Bucket %s, error: %s", retriever.Bucket, retriever.Object, err)
+			fmt.Errorf(
+				"unable to read from GCP Object %s in Bucket %s, error: %s",
+				retriever.Bucket,
+				retriever.Object,
+				err,
+			)
 	}
 
 	// Update Cache along with its hash.

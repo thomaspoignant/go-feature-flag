@@ -17,7 +17,11 @@ type S3ManagerV2Mock struct {
 	TestDataLocation        string
 }
 
-func (s *S3ManagerV2Mock) Upload(ctx context.Context, uploadInput *s3.PutObjectInput, opts ...func(uploader *manager.Uploader)) (*manager.UploadOutput, error) {
+func (s *S3ManagerV2Mock) Upload(
+	ctx context.Context,
+	uploadInput *s3.PutObjectInput,
+	opts ...func(uploader *manager.Uploader),
+) (*manager.UploadOutput, error) {
 	if ctx == nil {
 		return nil, errors.New("cannot create context from nil parent")
 	}
@@ -41,7 +45,12 @@ func (s *S3ManagerV2Mock) Upload(ctx context.Context, uploadInput *s3.PutObjectI
 	}, nil
 }
 
-func (s *S3ManagerV2Mock) Download(ctx context.Context, w io.WriterAt, input *s3.GetObjectInput, options ...func(*manager.Downloader)) (n int64, err error) {
+func (s *S3ManagerV2Mock) Download(
+	ctx context.Context,
+	w io.WriterAt,
+	input *s3.GetObjectInput,
+	options ...func(*manager.Downloader),
+) (n int64, err error) {
 	if ctx == nil {
 		return -1, errors.New("cannot create context from nil parent")
 	}

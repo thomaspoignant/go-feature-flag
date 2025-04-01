@@ -160,9 +160,11 @@ func TestValidUseCaseMultilineQueryJson(t *testing.T) {
 	// Valid use case
 	gffClient, err := ffclient.New(ffclient.Config{
 		PollingInterval: 5 * time.Second,
-		Retriever:       &fileretriever.Retriever{Path: "testdata/flag-config-multiline-query.json"},
-		LeveledLogger:   slog.Default(),
-		FileFormat:      "json",
+		Retriever: &fileretriever.Retriever{
+			Path: "testdata/flag-config-multiline-query.json",
+		},
+		LeveledLogger: slog.Default(),
+		FileFormat:    "json",
 	})
 	defer gffClient.Close()
 
@@ -242,7 +244,11 @@ test-flag:
 	})
 	defer gffClient1.Close()
 
-	flagValue, _ := gffClient1.BoolVariation("test-flag", ffcontext.NewEvaluationContext("random-key"), false)
+	flagValue, _ := gffClient1.BoolVariation(
+		"test-flag",
+		ffcontext.NewEvaluationContext("random-key"),
+		false,
+	)
 	assert.True(t, flagValue)
 
 	updatedFileContent := `
@@ -260,12 +266,20 @@ test-flag:
 
 	_ = os.WriteFile(flagFile.Name(), []byte(updatedFileContent), os.ModePerm)
 
-	flagValue, _ = gffClient1.BoolVariation("test-flag", ffcontext.NewEvaluationContext("random-key"), false)
+	flagValue, _ = gffClient1.BoolVariation(
+		"test-flag",
+		ffcontext.NewEvaluationContext("random-key"),
+		false,
+	)
 	assert.True(t, flagValue)
 
 	time.Sleep(2 * time.Second)
 
-	flagValue, _ = gffClient1.BoolVariation("test-flag", ffcontext.NewEvaluationContext("random-key"), false)
+	flagValue, _ = gffClient1.BoolVariation(
+		"test-flag",
+		ffcontext.NewEvaluationContext("random-key"),
+		false,
+	)
 	assert.False(t, flagValue)
 }
 
@@ -293,17 +307,29 @@ test-flag:
 	})
 	defer gffClient1.Close()
 
-	flagValue, _ := gffClient1.BoolVariation("test-flag", ffcontext.NewEvaluationContext("random-key"), false)
+	flagValue, _ := gffClient1.BoolVariation(
+		"test-flag",
+		ffcontext.NewEvaluationContext("random-key"),
+		false,
+	)
 	assert.True(t, flagValue)
 
-	flagValue, _ = gffClient1.BoolVariation("test-flag", ffcontext.NewEvaluationContext("random-key"), false)
+	flagValue, _ = gffClient1.BoolVariation(
+		"test-flag",
+		ffcontext.NewEvaluationContext("random-key"),
+		false,
+	)
 	assert.True(t, flagValue)
 
 	// remove file we should still take the last version in consideration
 	os.Remove(flagFile.Name())
 	time.Sleep(2 * time.Second)
 
-	flagValue, _ = gffClient1.BoolVariation("test-flag", ffcontext.NewEvaluationContext("random-key"), false)
+	flagValue, _ = gffClient1.BoolVariation(
+		"test-flag",
+		ffcontext.NewEvaluationContext("random-key"),
+		false,
+	)
 	assert.True(t, flagValue)
 }
 
@@ -335,14 +361,22 @@ test-flag:
 
 	assert.NoError(t, err, "should not return any error even if we can't retrieve the file")
 
-	flagValue, _ := gff.StringVariation("test-flag", ffcontext.NewEvaluationContext("random-key"), "SDKdefault")
+	flagValue, _ := gff.StringVariation(
+		"test-flag",
+		ffcontext.NewEvaluationContext("random-key"),
+		"SDKdefault",
+	)
 	assert.Equal(t, "SDKdefault", flagValue, "should use the SDK default value")
 
 	err = os.WriteFile(flagFilePath, []byte(initialFileContent), os.ModePerm)
 	assert.NoError(t, err)
 	time.Sleep(2 * time.Second)
 
-	flagValue, _ = gff.StringVariation("test-flag", ffcontext.NewEvaluationContext("random-key"), "SDKdefault")
+	flagValue, _ = gff.StringVariation(
+		"test-flag",
+		ffcontext.NewEvaluationContext("random-key"),
+		"SDKdefault",
+	)
 	assert.Equal(t, "true", flagValue, "should use the true value")
 }
 
@@ -354,13 +388,19 @@ func TestInvalidConf(t *testing.T) {
 	})
 	defer gff.Close()
 	assert.Error(t, err)
-	assert.Equal(t, err.Error(), "impossible to retrieve the flags, please check your configuration: yaml: line 43: did not find expected ',' or '}'")
+	assert.Equal(
+		t,
+		err.Error(),
+		"impossible to retrieve the flags, please check your configuration: yaml: line 43: did not find expected ',' or '}'",
+	)
 }
 
 func TestInvalidConfAndRetrieverError(t *testing.T) {
 	gff, err := ffclient.New(ffclient.Config{
-		PollingInterval:         1 * time.Second,
-		Retriever:               &fileretriever.Retriever{Path: "testdata/invalid-flag-config.json"},
+		PollingInterval: 1 * time.Second,
+		Retriever: &fileretriever.Retriever{
+			Path: "testdata/invalid-flag-config.json",
+		},
 		LeveledLogger:           slog.Default(),
 		StartWithRetrieverError: true,
 	})
@@ -618,7 +658,11 @@ func Test_PersistFlagConfigurationOnDisk(t *testing.T) {
 
 	time.Sleep(100 * time.Millisecond) // Waiting for the go routine to write the persistent file
 	// 5. Checking that the flags have been loaded from the persistent file
-	details, _ := gffClient2.BoolVariationDetails("foo-flag", ffcontext.NewEvaluationContext("random-key"), false)
+	details, _ := gffClient2.BoolVariationDetails(
+		"foo-flag",
+		ffcontext.NewEvaluationContext("random-key"),
+		false,
+	)
 	assert.NotEqual(t, "ERROR", details.Reason)
 
 	time.Sleep(2 * time.Second) // Waiting to be sure that it continue to check updates
@@ -646,14 +690,20 @@ func Test_PersistFlagConfigurationOnDisk(t *testing.T) {
 func Test_UseCustomBucketingKey(t *testing.T) {
 	gffClient, err := ffclient.New(ffclient.Config{
 		PollingInterval: 1 * time.Second,
-		Retriever:       &fileretriever.Retriever{Path: "testdata/flag-config-custom-bucketingkey.yaml"},
-		LeveledLogger:   slog.Default(),
-		Offline:         false,
+		Retriever: &fileretriever.Retriever{
+			Path: "testdata/flag-config-custom-bucketingkey.yaml",
+		},
+		LeveledLogger: slog.Default(),
+		Offline:       false,
 	})
 	assert.NoError(t, err)
 
 	{
-		got, err := gffClient.StringVariationDetails("my-flag", ffcontext.NewEvaluationContext("random-key"), "default")
+		got, err := gffClient.StringVariationDetails(
+			"my-flag",
+			ffcontext.NewEvaluationContext("random-key"),
+			"default",
+		)
 		assert.NoError(t, err)
 		want := model.VariationResult[string]{
 			Value:         "default",
@@ -670,8 +720,11 @@ func Test_UseCustomBucketingKey(t *testing.T) {
 	{
 		got, err := gffClient.StringVariationDetails(
 			"my-flag",
-			ffcontext.NewEvaluationContextBuilder("random-key").AddCustom("teamId", "team-123").Build(),
-			"default")
+			ffcontext.NewEvaluationContextBuilder("random-key").
+				AddCustom("teamId", "team-123").
+				Build(),
+			"default",
+		)
 		assert.NoError(t, err)
 		want := model.VariationResult[string]{
 			Value:         "value_A",
