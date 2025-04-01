@@ -85,10 +85,8 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 		switch strings.ToLower(ext) {
 		case ".toml":
 			parser = toml.Parser()
-			break
 		case ".json":
 			parser = json.Parser()
-			break
 		default:
 			parser = yaml.Parser()
 		}

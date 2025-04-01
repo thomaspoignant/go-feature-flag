@@ -333,12 +333,10 @@ func setKafkaConfig(k kafkaexporter.Settings) (kafkaexporter.Settings, error) {
 		k.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient {
 			return &kafka.XDGSCRAMClient{HashGeneratorFcn: kafka.SHA256}
 		}
-		break
 	case sarama.SASLTypeSCRAMSHA512:
 		k.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient {
 			return &kafka.XDGSCRAMClient{HashGeneratorFcn: kafka.SHA512}
 		}
-		break
 	}
 	return k, nil
 }
