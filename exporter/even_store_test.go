@@ -170,7 +170,6 @@ func Test_MultipleConsumersMultipleGORoutines(t *testing.T) {
 	wg := &sync.WaitGroup{}
 
 	consumFunc := func(eventStore exporter.EventStore[string], consumerName string) {
-		wg.Add(1)
 		defer wg.Done()
 
 		err := eventStore.ProcessPendingEvents(
@@ -195,6 +194,7 @@ func Test_MultipleConsumersMultipleGORoutines(t *testing.T) {
 		assert.Nil(t, err)
 	}
 
+	wg.Add(2)
 	go consumFunc(eventStore, consumerNames[0])
 	go consumFunc(eventStore, consumerNames[1])
 	wg.Wait()

@@ -48,6 +48,7 @@ type GoFeatureFlag struct {
 	bgUpdater        backgroundUpdater
 	dataExporter     exporter.Manager[exporter.FeatureEvent]
 	retrieverManager *retriever.Manager
+	exporterWg       sync.WaitGroup
 }
 
 // ff is the default object for go-feature-flag
@@ -405,5 +406,6 @@ func ForceRefresh() bool {
 // Close the component by stopping the background refresh and clean the cache.
 func Close() {
 	onceFF = sync.Once{}
+	ff.exporterWg.Wait()
 	ff.Close()
 }
