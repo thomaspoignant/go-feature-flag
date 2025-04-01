@@ -40,8 +40,11 @@ func TestFFLogger_Error(t *testing.T) {
 				LegacyLogger:  log.New(os.Stdout, "", 0),
 			},
 			fields: fields{
-				msg:           "Error message",
-				keysAndValues: []interface{}{slog.String("test", "toto"), slog.String("toto", "test")},
+				msg: "Error message",
+				keysAndValues: []interface{}{
+					slog.String("test", "toto"),
+					slog.String("toto", "test"),
+				},
 			},
 			expectedLog: "ERROR Error message test=toto toto=test" + "\n",
 		},
@@ -62,8 +65,11 @@ func TestFFLogger_Error(t *testing.T) {
 				LegacyLogger: log.New(os.Stdout, "", 0),
 			},
 			fields: fields{
-				msg:           "Error message",
-				keysAndValues: []interface{}{slog.String("test", "toto"), slog.String("toto", "test")},
+				msg: "Error message",
+				keysAndValues: []interface{}{
+					slog.String("test", "toto"),
+					slog.String("toto", "test"),
+				},
 			},
 			expectedLog: "ERROR Error message test=toto toto=test" + "\n",
 		},
@@ -147,8 +153,11 @@ func TestFFLogger_Warn(t *testing.T) {
 				LegacyLogger:  log.New(os.Stdout, "", 0),
 			},
 			fields: fields{
-				msg:           "Warn message",
-				keysAndValues: []interface{}{slog.String("test", "toto"), slog.String("toto", "test")},
+				msg: "Warn message",
+				keysAndValues: []interface{}{
+					slog.String("test", "toto"),
+					slog.String("toto", "test"),
+				},
 			},
 			expectedLog: "WARN Warn message test=toto toto=test" + "\n",
 		},
@@ -169,8 +178,11 @@ func TestFFLogger_Warn(t *testing.T) {
 				LegacyLogger: log.New(os.Stdout, "", 0),
 			},
 			fields: fields{
-				msg:           "Warn message",
-				keysAndValues: []interface{}{slog.String("test", "toto"), slog.String("toto", "test")},
+				msg: "Warn message",
+				keysAndValues: []interface{}{
+					slog.String("test", "toto"),
+					slog.String("toto", "test"),
+				},
 			},
 			expectedLog: "WARN Warn message test=toto toto=test" + "\n",
 		},
@@ -254,8 +266,11 @@ func TestFFLogger_Info(t *testing.T) {
 				LegacyLogger:  log.New(os.Stdout, "", 0),
 			},
 			fields: fields{
-				msg:           "Info message",
-				keysAndValues: []interface{}{slog.String("test", "toto"), slog.String("toto", "test")},
+				msg: "Info message",
+				keysAndValues: []interface{}{
+					slog.String("test", "toto"),
+					slog.String("toto", "test"),
+				},
 			},
 			expectedLog: "INFO Info message test=toto toto=test" + "\n",
 		},
@@ -276,8 +291,11 @@ func TestFFLogger_Info(t *testing.T) {
 				LegacyLogger: log.New(os.Stdout, "", 0),
 			},
 			fields: fields{
-				msg:           "Info message",
-				keysAndValues: []interface{}{slog.String("test", "toto"), slog.String("toto", "test")},
+				msg: "Info message",
+				keysAndValues: []interface{}{
+					slog.String("test", "toto"),
+					slog.String("toto", "test"),
+				},
 			},
 			expectedLog: "INFO Info message test=toto toto=test" + "\n",
 		},
@@ -361,8 +379,11 @@ func TestFFLogger_Debug(t *testing.T) {
 				LegacyLogger:  log.New(os.Stdout, "", 0),
 			},
 			fields: fields{
-				msg:           "Debug message",
-				keysAndValues: []interface{}{slog.String("test", "toto"), slog.String("toto", "test")},
+				msg: "Debug message",
+				keysAndValues: []interface{}{
+					slog.String("test", "toto"),
+					slog.String("toto", "test"),
+				},
 			},
 			expectedLog: "DEBUG Debug message test=toto toto=test" + "\n",
 		},
@@ -383,8 +404,11 @@ func TestFFLogger_Debug(t *testing.T) {
 				LegacyLogger: log.New(os.Stdout, "", 0),
 			},
 			fields: fields{
-				msg:           "Debug message",
-				keysAndValues: []interface{}{slog.String("test", "toto"), slog.String("toto", "test")},
+				msg: "Debug message",
+				keysAndValues: []interface{}{
+					slog.String("test", "toto"),
+					slog.String("toto", "test"),
+				},
 			},
 			expectedLog: "DEBUG Debug message test=toto toto=test" + "\n",
 		},

@@ -13,12 +13,14 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 )
 
+// Notifier is the component in charge of sending flag changes to Microsoft Teams.
 type Notifier struct {
 	MicrosoftTeamsWebhookURL string
 
 	teamsClient *goteamsnotify.TeamsClient
 }
 
+// Notify is the notifying all the changes to the notifier.
 func (c *Notifier) Notify(diff notifier.DiffCache) error {
 	if c.MicrosoftTeamsWebhookURL == "" {
 		return fmt.Errorf("error: (Microsoft Teams Notifier) invalid notifier configuration, no " +

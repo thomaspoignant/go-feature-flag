@@ -36,8 +36,11 @@ func (u *evaluationContextBuilderImpl) Anonymous(anonymous bool) EvaluationConte
 	return u
 }
 
-// AddCustom allows you to add a attributes attribute to the EvaluationContext.
-func (u *evaluationContextBuilderImpl) AddCustom(key string, value interface{}) EvaluationContextBuilder {
+// AddCustom allows you to add an attributes attribute to the EvaluationContext.
+func (u *evaluationContextBuilderImpl) AddCustom(
+	key string,
+	value interface{},
+) EvaluationContextBuilder {
 	u.custom[key] = value
 	return u
 }

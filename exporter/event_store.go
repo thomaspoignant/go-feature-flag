@@ -62,7 +62,10 @@ type EventStore[T ExportableEvent] interface {
 
 	// ProcessPendingEvents is processing all the available item in the Event store for this consumer
 	// with the process events function in parameter,
-	ProcessPendingEvents(consumerID string, processEventsFunc func(context.Context, []T) error) error
+	ProcessPendingEvents(
+		consumerID string,
+		processEventsFunc func(context.Context, []T) error,
+	) error
 
 	// Stop is closing the Event store and stop the periodic cleaning.
 	Stop()
@@ -144,7 +147,11 @@ func (e *eventStoreImpl[T]) fetchPendingEvents(consumerID string) (*EventList[T]
 			events = append(events, event.Data)
 		}
 	}
-	return &EventList[T]{Events: events, InitialOffset: currentConsumer.Offset, NewOffset: e.lastOffset}, nil
+	return &EventList[T]{
+		Events:        events,
+		InitialOffset: currentConsumer.Offset,
+		NewOffset:     e.lastOffset,
+	}, nil
 }
 
 // getConsumer checks if the consumer exists and returns it.
@@ -160,7 +167,11 @@ func (e *eventStoreImpl[T]) getConsumer(consumerID string) (*consumer, error) {
 // WARNING: please call this function only in a function that has locked the mutex first.
 func (e *eventStoreImpl[T]) updateConsumerOffset(consumerID string, offset int64) error {
 	if offset > e.lastOffset {
-		return fmt.Errorf("invalid offset: offset %d is greater than the last offset %d", offset, e.lastOffset)
+		return fmt.Errorf(
+			"invalid offset: offset %d is greater than the last offset %d",
+			offset,
+			e.lastOffset,
+		)
 	}
 	currentConsumer, err := e.getConsumer(consumerID)
 	if err != nil {

@@ -30,7 +30,10 @@ func TestExporter_Export(t *testing.T) {
 	server := pstest.NewServer()
 	t.Cleanup(func() { server.Close() })
 
-	conn, err := grpc.NewClient(server.Addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(
+		server.Addr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
 	require.NoError(t, err)
 	t.Cleanup(func() { conn.Close() })
 
@@ -175,7 +178,7 @@ func TestExporter_Export(t *testing.T) {
 				EnableMessageOrdering: tt.fields.enableMessageOrdering,
 				newClientFunc:         tt.fields.newClientFunc,
 			}
-			err = e.Export(ctx, logger, tt.events)
+			err = e.Export(ctx, logger, tt.featureEvents)
 
 			if tt.wantErr {
 				assert.Error(t, err)

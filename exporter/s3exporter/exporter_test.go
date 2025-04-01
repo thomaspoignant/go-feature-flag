@@ -156,8 +156,8 @@ func TestS3_Export(t *testing.T) {
 				Format:      "csv",
 				CsvTemplate: "{{ .Foo}}",
 			},
-			events: []exporter.ExportableEvent{
-				exporter.FeatureEvent{
+			events: []exporter.FeatureEvent{
+				{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 				},

@@ -197,13 +197,14 @@ func handleFirstRetrieverError(config Config, logger *fflog.FFLogger, cache cach
 		logger.Error("Impossible to retrieve the flags, starting with the "+
 			"retriever error", slog.Any("error", err))
 	}
-	return nil
+	config.internalLogger.Debug("GO Feature Flag is initialized")
+	return goFF, nil
 }
 
 // retrievePersistentLocalDisk is a function used in case we are not able to retrieve any flag when starting
 // GO Feature Flag.
 // This function will look at any pre-existent persistent configuration and start with it.
-func retrievePersistentLocalDisk(ctx context.Context, config Config, cache cache.Manager) error {
+func retrievePersistentLocalDisk(ctx context.Context, config Config, goFF *GoFeatureFlag) error {
 	if config.PersistentFlagConfigurationFile != "" {
 		config.internalLogger.Error("Impossible to retrieve your flag configuration, trying to use the persistent"+
 			" flag configuration file.", slog.String("path", config.PersistentFlagConfigurationFile))
@@ -217,7 +218,7 @@ func retrievePersistentLocalDisk(ctx context.Context, config Config, cache cache
 				return err
 			}
 			defer func() { _ = fallBackRetrieverManager.Shutdown(ctx) }()
-			err = retrieveFlagsAndUpdateCache(config, cache, fallBackRetrieverManager, true)
+			err = retrieveFlagsAndUpdateCache(goFF.config, goFF.cache, fallBackRetrieverManager, true)
 			if err != nil {
 				return err
 			}
@@ -418,5 +419,6 @@ func ForceRefresh() bool {
 // Close the component by stopping the background refresh and clean the cache.
 func Close() {
 	onceFF = sync.Once{}
+	ff.exporterWg.Wait()
 	ff.Close()
 }

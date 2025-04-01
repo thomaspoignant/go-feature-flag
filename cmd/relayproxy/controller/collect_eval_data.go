@@ -25,7 +25,11 @@ type collectEvalData struct {
 }
 
 // NewCollectEvalData initialize the controller for the /data/collector endpoint
-func NewCollectEvalData(goFF *ffclient.GoFeatureFlag, metrics metric.Metrics, logger *zap.Logger) Controller {
+func NewCollectEvalData(
+	goFF *ffclient.GoFeatureFlag,
+	metrics metric.Metrics,
+	logger *zap.Logger,
+) Controller {
 	return &collectEvalData{
 		goFF:    goFF,
 		metrics: metrics,

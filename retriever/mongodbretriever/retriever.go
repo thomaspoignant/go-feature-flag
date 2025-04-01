@@ -25,6 +25,7 @@ type Retriever struct {
 	logger       *fflog.FFLogger
 }
 
+// Init is initializing the retriever to start fetching the flags configuration.
 func (r *Retriever) Init(ctx context.Context, logger *fflog.FFLogger) error {
 	r.logger = logger
 	if r.dbConnection == nil {
@@ -67,7 +68,7 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer cursor.Close(ctx)
+	defer func() { _ = cursor.Close(ctx) }()
 
 	ffDocs := make(map[string]bson.M)
 

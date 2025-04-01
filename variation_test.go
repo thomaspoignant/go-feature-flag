@@ -4041,7 +4041,7 @@ func Test_constructMetadataParallel(t *testing.T) {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	// generate test cases
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 10_000; i++ {
 		ruleName := fmt.Sprintf("rule-%d", i)
 		tests = append(tests, struct {
 			name                  string

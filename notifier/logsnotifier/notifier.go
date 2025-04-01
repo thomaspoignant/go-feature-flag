@@ -7,10 +7,12 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
+// Notifier is the component in charge of sending flag changes to the logs.
 type Notifier struct {
 	Logger *fflog.FFLogger
 }
 
+// Notify is the notifying all the changes to the notifier.
 func (c *Notifier) Notify(diff notifier.DiffCache) error {
 	for key := range diff.Deleted {
 		c.Logger.Info("flag removed", slog.String("key", key))

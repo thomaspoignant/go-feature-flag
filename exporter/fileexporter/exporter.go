@@ -97,7 +97,7 @@ func (f *Exporter) IsBulk() bool {
 	return true
 }
 
-func (f *Exporter) writeFile(filePath string, events []exporter.ExportableEvent) error {
+func (f *Exporter) writeFile(filePath string, featureEvents []exporter.FeatureEvent) error {
 	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
 		return err
@@ -155,7 +155,7 @@ func (f *Exporter) writeParquetFeatureEvent(filePath string, events []exporter.F
 	if err != nil {
 		return err
 	}
-	defer fw.Close()
+	defer func() { _ = fw.Close() }()
 
 	pw, err := writer.NewParquetWriter(fw, new(exporter.FeatureEvent), int64(runtime.NumCPU()))
 	if err != nil {

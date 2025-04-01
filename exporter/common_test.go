@@ -52,7 +52,10 @@ func Test_ParseTemplate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			defaultT, _ := template.New("random-name").Parse(tt.args.defaultTemplate)
-			assert.NotPanics(t, func() { exporter.ParseTemplate("random-name", tt.args.template, tt.args.defaultTemplate) })
+			assert.NotPanics(
+				t,
+				func() { exporter.ParseTemplate("random-name", tt.args.template, tt.args.defaultTemplate) },
+			)
 			got := exporter.ParseTemplate("random-name", tt.args.template, tt.args.defaultTemplate)
 
 			if tt.wantErr {
@@ -79,8 +82,12 @@ func TestComputeFilename(t *testing.T) {
 		{
 			name: "Nothing to template",
 			args: args{
-				template: exporter.ParseTemplate("filenameFormat", "flag-variation", "flag-variation"),
-				format:   "json",
+				template: exporter.ParseTemplate(
+					"filenameFormat",
+					"flag-variation",
+					"flag-variation",
+				),
+				format: "json",
 			},
 			want:    "flag-variation",
 			wantErr: assert.NoError,
@@ -88,8 +95,12 @@ func TestComputeFilename(t *testing.T) {
 		{
 			name: "With extension",
 			args: args{
-				template: exporter.ParseTemplate("filenameFormat", "flag-variation.{{ .Format }}", "flag-variation"),
-				format:   "json",
+				template: exporter.ParseTemplate(
+					"filenameFormat",
+					"flag-variation.{{ .Format }}",
+					"flag-variation",
+				),
+				format: "json",
 			},
 			want:    "flag-variation.json",
 			wantErr: assert.NoError,
@@ -97,8 +108,12 @@ func TestComputeFilename(t *testing.T) {
 		{
 			name: "Multiple templates",
 			args: args{
-				template: exporter.ParseTemplate("filenameFormat", "flag-variation-{{ .Hostname}}.{{ .Format}}", "flag-variation"),
-				format:   "json",
+				template: exporter.ParseTemplate(
+					"filenameFormat",
+					"flag-variation-{{ .Hostname}}.{{ .Format}}",
+					"flag-variation",
+				),
+				format: "json",
 			},
 			want:    "flag-variation-" + hostname + ".json",
 			wantErr: assert.NoError,
@@ -107,10 +122,21 @@ func TestComputeFilename(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := exporter.ComputeFilename(tt.args.template, tt.args.format)
-			if !tt.wantErr(t, err, fmt.Sprintf("ComputeFilename(%v, %v)", tt.args.template, tt.args.format)) {
+			if !tt.wantErr(
+				t,
+				err,
+				fmt.Sprintf("ComputeFilename(%v, %v)", tt.args.template, tt.args.format),
+			) {
 				return
 			}
-			assert.Equalf(t, tt.want, got, "ComputeFilename(%v, %v)", tt.args.template, tt.args.format)
+			assert.Equalf(
+				t,
+				tt.want,
+				got,
+				"ComputeFilename(%v, %v)",
+				tt.args.template,
+				tt.args.format,
+			)
 		})
 	}
 }
@@ -129,7 +155,11 @@ func TestFormatEventInCSV(t *testing.T) {
 		{
 			name: "valid",
 			args: args{
-				csvTemplate: exporter.ParseTemplate("exporterExample", exporter.DefaultCsvTemplate, exporter.DefaultCsvTemplate),
+				csvTemplate: exporter.ParseTemplate(
+					"exporterExample",
+					exporter.DefaultCsvTemplate,
+					exporter.DefaultCsvTemplate,
+				),
 				event: exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false, Source: "SERVER",

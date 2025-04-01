@@ -21,6 +21,7 @@ const (
 
 var DefaultPartitionKey = func(context context.Context, _ exporter.ExportableEvent) string {
 	context.Value("feature")
+
 	return "default"
 }
 
