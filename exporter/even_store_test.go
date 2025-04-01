@@ -154,10 +154,8 @@ func Test_MultipleConsumersMultipleGORoutines(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
 	wg := &sync.WaitGroup{}
 
-	consumeFunc := func(eventStore exporter.EventStore[testutils.ExportableMockEvent], consumerName string) {
-		wg.Add(1)
+	consumeFunc := func(eventStore exporter.EventStore[testutils.ExportableMockEvent], consumerName string, eventCounters *map[string]int) {
 		defer wg.Done()
-
 		err := eventStore.ProcessPendingEvents(consumerName,
 			func(ctx context.Context, events []testutils.ExportableMockEvent) error {
 				assert.True(t, len(events) > 0)
@@ -168,15 +166,22 @@ func Test_MultipleConsumersMultipleGORoutines(t *testing.T) {
 
 		err = eventStore.ProcessPendingEvents(consumerName,
 			func(ctx context.Context, events []testutils.ExportableMockEvent) error {
-				assert.True(t, len(events) > 0)
+				if eventCounters != nil {
+					(*eventCounters)[consumerName] = len(events)
+				}
 				return nil
 			})
 		assert.Nil(t, err)
 	}
 
-	go consumeFunc(eventStore, consumerNames[0])
-	go consumeFunc(eventStore, consumerNames[1])
+	wg.Add(2)
+	eventCounters := map[string]int{}
+	go consumeFunc(eventStore, consumerNames[0], &eventCounters)
+	go consumeFunc(eventStore, consumerNames[1], &eventCounters)
 	wg.Wait()
+
+	assert.Greater(t, eventCounters[consumerNames[0]], 0)
+	assert.Greater(t, eventCounters[consumerNames[1]], 0)
 }
 
 func Test_ProcessPendingEventInError(t *testing.T) {
