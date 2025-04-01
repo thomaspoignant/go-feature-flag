@@ -898,8 +898,8 @@ github.com/testcontainers/testcontainers-go/modules/azurite v0.35.0 h1:gUZ25e1DV
 github.com/testcontainers/testcontainers-go/modules/azurite v0.35.0/go.mod h1:2Fc67EpyOEexLAF99zhSuzu9H22zd83pkjxEHHTtHf4=
 github.com/testcontainers/testcontainers-go/modules/mongodb v0.36.0 h1:HDW6rknSqci/154rpEGNL8VrKJxXmApxcG++VedQKTE=
 github.com/testcontainers/testcontainers-go/modules/mongodb v0.36.0/go.mod h1:RhguDt49jCUepedF4zBRJwb66VWWvSg5YQ+nQNff370=
-github.com/testcontainers/testcontainers-go/modules/redis v0.35.0 h1:RBgVefU5j5IWapp3TNKqMTYX+M22OSjtuORjPd4+g08=
-github.com/testcontainers/testcontainers-go/modules/redis v0.35.0/go.mod h1:UgghVXQ0//D3MjC8X71Bpb/lUCChidjNCRILD+btqfU=
+github.com/testcontainers/testcontainers-go/modules/redis v0.36.0 h1:Z+6APQ0DjQP8Kj5Fu+lkAlH2v7f5QkAQyyjnf1Kq8sw=
+github.com/testcontainers/testcontainers-go/modules/redis v0.36.0/go.mod h1:LV66RJhSMikZrxJRc6O0nKcRqykmjQSyX82S93haE2w=
 github.com/thejerf/slogassert v0.3.4 h1:VoTsXixRbXMrRSSxDjYTiEDCM4VWbsYPW5rB/hX24kM=
 github.com/thejerf/slogassert v0.3.4/go.mod h1:0zn9ISLVKo1aPMTqcGfG1o6dWwt+Rk574GlUxHD4rs8=
 github.com/tklauser/go-sysconf v0.3.12 h1:0QaGUFOdQaIVdPgfITYzaTegZvdCjmYO52cSFAEVmqU=
