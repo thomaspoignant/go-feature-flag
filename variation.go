@@ -318,8 +318,16 @@ func notifyVariation[T model.JSONType](
 	result model.VariationResult[T],
 ) {
 	if result.TrackEvents {
-		event := exporter.NewFeatureEvent(ctx, flagKey, result.Value, result.VariationType, result.Failed, result.Version,
-			"SERVER", ctx.ExtractGOFFProtectedFields().ExporterMetadata)
+		event := exporter.NewFeatureEvent(
+			ctx,
+			flagKey,
+			result.Value,
+			result.VariationType,
+			result.Failed,
+			result.Version,
+			"SERVER",
+			ctx.ExtractGOFFProtectedFields().ExporterMetadata,
+		)
 		g.exporterWg.Add(1)
 		go func() {
 			defer g.exporterWg.Done()
