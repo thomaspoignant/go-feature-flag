@@ -116,11 +116,11 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 	}
 	switch c.Kind {
 	case config.GitHubRetriever:
-		return initGithubRetriever(c, retrieverTimeout)
+		return initGithubRetriever(c, retrieverTimeout), nil
 	case config.GitlabRetriever:
-		return initGitlabRetriever(c, retrieverTimeout)
+		return initGitlabRetriever(c, retrieverTimeout), nil
 	case config.BitbucketRetriever:
-		return initBitbucketRetriever(c, retrieverTimeout)
+		return initBitbucketRetriever(c, retrieverTimeout), nil
 	case config.FileRetriever:
 		return &fileretriever.Retriever{Path: c.Path}, nil
 	case config.S3Retriever:
