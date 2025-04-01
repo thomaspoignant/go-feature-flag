@@ -104,6 +104,8 @@ linters:
     #    - wsl
     - zerologlint
   settings:
+    revive:
+      confidence: 0.8
     funlen:
       lines: 90
       statements: 50
