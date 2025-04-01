@@ -64,7 +64,7 @@ func (c *Notifier) Notify(diff notifier.DiffCache) error {
 	if err != nil {
 		return fmt.Errorf("error: (Discord Notifier) error calling webhook: %v", err)
 	}
-	defer response.Body.Close()
+	defer func() { _ = response.Body.Close() }()
 	if response.StatusCode > 399 {
 		return fmt.Errorf("error: (Discord Notifier) webhook call failed with statusCode = %d", response.StatusCode)
 	}

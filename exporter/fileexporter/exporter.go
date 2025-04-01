@@ -102,7 +102,7 @@ func (f *Exporter) writeFile(filePath string, featureEvents []exporter.FeatureEv
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 	for _, event := range featureEvents {
 		var line []byte
 		var err error
@@ -134,7 +134,7 @@ func (f *Exporter) writeParquet(filePath string, featureEvents []exporter.Featur
 	if err != nil {
 		return err
 	}
-	defer fw.Close()
+	defer func() { _ = fw.Close() }()
 
 	pw, err := writer.NewParquetWriter(fw, new(exporter.FeatureEvent), int64(runtime.NumCPU()))
 	if err != nil {

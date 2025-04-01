@@ -61,7 +61,7 @@ func (retriever *Retriever) Retrieve(ctx context.Context) (content []byte, err e
 	if err != nil {
 		return nil, err
 	}
-	defer reader.Close()
+	defer func() { _ = reader.Close() }()
 
 	// Read all contents from the Reader.
 	content, err = io.ReadAll(reader)
