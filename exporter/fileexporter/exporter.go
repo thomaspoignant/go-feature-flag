@@ -53,11 +53,23 @@ type Exporter struct {
 }
 
 // Export is saving a collection of events in a file.
-func (f *Exporter) Export(_ context.Context, _ *fflog.FFLogger, featureEvents []exporter.FeatureEvent) error {
+func (f *Exporter) Export(
+	_ context.Context,
+	_ *fflog.FFLogger,
+	featureEvents []exporter.FeatureEvent,
+) error {
 	// Parse the template only once
 	f.initTemplates.Do(func() {
-		f.csvTemplate = exporter.ParseTemplate("csvFormat", f.CsvTemplate, exporter.DefaultCsvTemplate)
-		f.filenameTemplate = exporter.ParseTemplate("filenameFormat", f.Filename, exporter.DefaultFilenameTemplate)
+		f.csvTemplate = exporter.ParseTemplate(
+			"csvFormat",
+			f.CsvTemplate,
+			exporter.DefaultCsvTemplate,
+		)
+		f.filenameTemplate = exporter.ParseTemplate(
+			"filenameFormat",
+			f.Filename,
+			exporter.DefaultFilenameTemplate,
+		)
 	})
 
 	// Default format for the output

@@ -67,7 +67,12 @@ func (retriever *Retriever) Retrieve(ctx context.Context) (content []byte, err e
 	content, err = io.ReadAll(reader)
 	if err != nil {
 		return nil,
-			fmt.Errorf("unable to read from GCP Object %s in Bucket %s, error: %s", retriever.Bucket, retriever.Object, err)
+			fmt.Errorf(
+				"unable to read from GCP Object %s in Bucket %s, error: %s",
+				retriever.Bucket,
+				retriever.Object,
+				err,
+			)
 	}
 
 	// Update Cache along with its hash.

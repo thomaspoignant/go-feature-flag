@@ -35,7 +35,9 @@ func (h *EvaluateCtrl) Configuration(c echo.Context) error {
 					MinPollingInterval: h.goFF.GetPollingInterval(),
 				},
 			},
-			FlagEvaluation: model.OFREPConfigCapabilitiesFlagEvaluation{UnsupportedTypes: []string{}},
+			FlagEvaluation: model.OFREPConfigCapabilitiesFlagEvaluation{
+				UnsupportedTypes: []string{},
+			},
 		},
 	}
 	return c.JSON(http.StatusOK, response)

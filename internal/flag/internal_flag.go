@@ -122,7 +122,12 @@ func (f *InternalFlag) Value(
 }
 
 // selectEvaluationReason is choosing which reason has been chosen for the evaluation.
-func selectEvaluationReason(hasRule bool, targetingMatch bool, isDynamic bool, isDefaultRule bool) ResolutionReason {
+func selectEvaluationReason(
+	hasRule bool,
+	targetingMatch bool,
+	isDynamic bool,
+	isDefaultRule bool,
+) ResolutionReason {
 	if hasRule && targetingMatch {
 		if isDynamic {
 			return ReasonTargetingMatchSplit
@@ -212,7 +217,8 @@ func (f *InternalFlag) applyScheduledRolloutSteps(evaluationDate time.Time) (*In
 
 	// We apply the scheduled rollout
 	for _, steps := range *f.Scheduled {
-		if steps.Date != nil && (steps.Date.Before(evaluationDate) || steps.Date.Equal(evaluationDate)) {
+		if steps.Date != nil &&
+			(steps.Date.Before(evaluationDate) || steps.Date.Equal(evaluationDate)) {
 			flagCopy.Rules = MergeSetOfRules(f.GetRules(), steps.GetRules())
 			if steps.Disable != nil {
 				flagCopy.Disable = steps.Disable

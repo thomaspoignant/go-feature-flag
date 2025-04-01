@@ -163,9 +163,11 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user: ffcontext.NewEvaluationContextBuilder("user-key").AddCustom("gofeatureflag", map[string]interface{}{
-					"currentDateTime": time.Now().Add(6 * time.Second).Format(time.RFC3339),
-				}).Build(),
+				user: ffcontext.NewEvaluationContextBuilder("user-key").
+					AddCustom("gofeatureflag", map[string]interface{}{
+						"currentDateTime": time.Now().Add(6 * time.Second).Format(time.RFC3339),
+					}).
+					Build(),
 				flagContext: flag.Context{
 					DefaultSdkValue: "default-sdk",
 				},
@@ -353,8 +355,10 @@ func TestInternalFlag_Value(t *testing.T) {
 				},
 				Rules: &[]flag.Rule{
 					{
-						Name:            testconvert.String("rule1"),
-						Query:           testconvert.String(`{"==":[{"var":"key"},"not-user-key"]}`),
+						Name: testconvert.String("rule1"),
+						Query: testconvert.String(
+							`{"==":[{"var":"key"},"not-user-key"]}`,
+						),
 						VariationResult: testconvert.String("variation_C"),
 					},
 					{
@@ -446,7 +450,9 @@ func TestInternalFlag_Value(t *testing.T) {
 				},
 				Rules: &[]flag.Rule{
 					{
-						Query:           testconvert.String(`{"==":[{"var":"key"},"not-user-key"]}`),
+						Query: testconvert.String(
+							`{"==":[{"var":"key"},"not-user-key"]}`,
+						),
 						VariationResult: testconvert.String("variation_C"),
 					},
 					{
@@ -514,7 +520,9 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffcontext.NewEvaluationContextBuilder("user-key").AddCustom("company", "go-feature-flag").Build(),
+				user: ffcontext.NewEvaluationContextBuilder("user-key").
+					AddCustom("company", "go-feature-flag").
+					Build(),
 				flagContext: flag.Context{
 					DefaultSdkValue: "value_default",
 				},
@@ -542,11 +550,15 @@ func TestInternalFlag_Value(t *testing.T) {
 				},
 				Rules: &[]flag.Rule{
 					{
-						Query:           testconvert.String(`{"==":[{"var":"key"},"not-user-key"]}`),
+						Query: testconvert.String(
+							`{"==":[{"var":"key"},"not-user-key"]}`,
+						),
 						VariationResult: testconvert.String("variation_C"),
 					},
 					{
-						Query:           testconvert.String(`{"==":[{"var":"company"},"go-feature-flag"]}`),
+						Query: testconvert.String(
+							`{"==":[{"var":"company"},"go-feature-flag"]}`,
+						),
 						VariationResult: testconvert.String("variation_D"),
 					},
 					{
@@ -564,7 +576,9 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffcontext.NewEvaluationContextBuilder("user-key").AddCustom("company", "go-feature-flag").Build(),
+				user: ffcontext.NewEvaluationContextBuilder("user-key").
+					AddCustom("company", "go-feature-flag").
+					Build(),
 				flagContext: flag.Context{
 					DefaultSdkValue: "value_default",
 				},
@@ -615,7 +629,9 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffcontext.NewEvaluationContextBuilder("user-key").AddCustom("company", "go-feature-flag").Build(),
+				user: ffcontext.NewEvaluationContextBuilder("user-key").
+					AddCustom("company", "go-feature-flag").
+					Build(),
 				flagContext: flag.Context{
 					DefaultSdkValue: "value_default",
 				},
@@ -875,9 +891,11 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user: ffcontext.NewEvaluationContextBuilder("user-key").AddCustom("gofeatureflag", map[string]string{
-					"currentDateTime": time.Now().Add(1 * time.Minute).Format(time.RFC3339),
-				}).Build(),
+				user: ffcontext.NewEvaluationContextBuilder("user-key").
+					AddCustom("gofeatureflag", map[string]string{
+						"currentDateTime": time.Now().Add(1 * time.Minute).Format(time.RFC3339),
+					}).
+					Build(),
 				flagContext: flag.Context{
 					DefaultSdkValue: "value_default",
 				},
@@ -977,9 +995,11 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user: ffcontext.NewEvaluationContextBuilder("user-key").AddCustom("gofeatureflag", ffcontext.GoffContextSpecifics{
-					CurrentDateTime: testconvert.Time(time.Date(2022, 1, 1, 12, 12, 12, 12, time.UTC)),
-				}).Build(),
+				user: ffcontext.NewEvaluationContextBuilder("user-key").
+					AddCustom("gofeatureflag", ffcontext.GoffContextSpecifics{
+						CurrentDateTime: testconvert.Time(time.Date(2022, 1, 1, 12, 12, 12, 12, time.UTC)),
+					}).
+					Build(),
 				flagContext: flag.Context{
 					DefaultSdkValue: "value_default",
 				},
@@ -1873,7 +1893,9 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffcontext.NewEvaluationContextBuilder("key1").AddCustom("environment", "dev").Build(),
+				user: ffcontext.NewEvaluationContextBuilder("key1").
+					AddCustom("environment", "dev").
+					Build(),
 				flagContext: flag.Context{
 					DefaultSdkValue: "default-sdk",
 					EvaluationContextEnrichment: map[string]interface{}{
@@ -1979,7 +2001,9 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffcontext.NewEvaluationContextBuilder("toto").AddCustom("teamId", "").Build(),
+				user: ffcontext.NewEvaluationContextBuilder("toto").
+					AddCustom("teamId", "").
+					Build(),
 				flagContext: flag.Context{
 					DefaultSdkValue: false,
 				},
@@ -2038,7 +2062,9 @@ func TestInternalFlag_ValueWithBucketingKey(t *testing.T) {
 			},
 			args: args{
 				flagName: "my-flag",
-				user:     ffcontext.NewEvaluationContextBuilder("user-key").AddCustom("teamId", "team-123").Build(),
+				user: ffcontext.NewEvaluationContextBuilder("user-key").
+					AddCustom("teamId", "team-123").
+					Build(),
 				flagContext: flag.Context{
 					DefaultSdkValue: "value_default",
 				},
@@ -2051,12 +2077,20 @@ func TestInternalFlag_ValueWithBucketingKey(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			flagWithBucketingKey := tt.flag
 
-			_, got := flagWithBucketingKey.Value(tt.args.flagName, tt.args.user, tt.args.flagContext)
+			_, got := flagWithBucketingKey.Value(
+				tt.args.flagName,
+				tt.args.user,
+				tt.args.flagContext,
+			)
 			assert.Equal(t, tt.wantForTeamID, got.Variant)
 
 			flagWithoutBucketingKey := tt.flag
 			flagWithoutBucketingKey.BucketingKey = testconvert.String("")
-			_, got = flagWithoutBucketingKey.Value(tt.args.flagName, tt.args.user, tt.args.flagContext)
+			_, got = flagWithoutBucketingKey.Value(
+				tt.args.flagName,
+				tt.args.user,
+				tt.args.flagContext,
+			)
 
 			assert.Equal(t, tt.wantForTargetingKey, got.Variant)
 		})
@@ -2078,7 +2112,11 @@ func TestInternalFlag_ValueWithBucketingKeyNotFound(t *testing.T) {
 			},
 		},
 	}
-	_, got := f.Value("my-flag", ffcontext.NewEvaluationContextBuilder("user-key").Build(), flag.Context{})
+	_, got := f.Value(
+		"my-flag",
+		ffcontext.NewEvaluationContextBuilder("user-key").Build(),
+		flag.Context{},
+	)
 	want := flag.ResolutionDetails{
 		Variant:      "SdkDefault",
 		Reason:       flag.ReasonError,
@@ -2206,7 +2244,13 @@ func TestInternalFlag_GetRuleIndexByName(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equalf(t, tt.want, tt.flag.GetRuleIndexByName(tt.ruleName), "GetRuleIndexByName(%v)", tt.ruleName)
+			assert.Equalf(
+				t,
+				tt.want,
+				tt.flag.GetRuleIndexByName(tt.ruleName),
+				"GetRuleIndexByName(%v)",
+				tt.ruleName,
+			)
 		})
 	}
 }
@@ -2254,7 +2298,13 @@ func TestInternalFlag_GetVariationValue(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equalf(t, tt.want, tt.flag.GetVariationValue(tt.variation), "GetVariationValue(%v)", tt.variation)
+			assert.Equalf(
+				t,
+				tt.want,
+				tt.flag.GetVariationValue(tt.variation),
+				"GetVariationValue(%v)",
+				tt.variation,
+			)
 		})
 	}
 }
@@ -2881,7 +2931,13 @@ func TestInternalFlag_ApplySheduledRollout(t *testing.T) {
 				},
 			)
 			assert.Equalf(t, wantResult, got, "not expected value: %s", cmp.Diff(wantResult, got))
-			assert.Equalf(t, wantDetails, got1, "not expected value: %s", cmp.Diff(wantDetails, got1))
+			assert.Equalf(
+				t,
+				wantDetails,
+				got1,
+				"not expected value: %s",
+				cmp.Diff(wantDetails, got1),
+			)
 		})
 	}
 }

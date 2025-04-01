@@ -106,7 +106,12 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 			configMap := k.Raw()
 			err := loadArrayEnv(s, v, configMap)
 			if err != nil {
-				log.Error("config: error loading array env", zap.String("key", s), zap.String("value", v), zap.Error(err))
+				log.Error(
+					"config: error loading array env",
+					zap.String("key", s),
+					zap.String("value", v),
+					zap.Error(err),
+				)
 				return s, v
 			}
 			return s, v
@@ -337,14 +342,14 @@ type Config struct {
 type OpenTelemetryConfiguration struct {
 	SDK struct {
 		Disabled bool `mapstructure:"disabled" koanf:"disabled"`
-	} `mapstructure:"sdk" koanf:"sdk"`
+	} `mapstructure:"sdk"      koanf:"sdk"`
 	Exporter OtelExporter `mapstructure:"exporter" koanf:"exporter"`
 	Service  struct {
 		Name string `mapstructure:"name" koanf:"name"`
-	} `mapstructure:"service" koanf:"service"`
+	} `mapstructure:"service"  koanf:"service"`
 	Traces struct {
 		Sampler string `mapstructure:"sampler" koanf:"sampler"`
-	} `mapstructure:"traces" koanf:"traces"`
+	} `mapstructure:"traces"   koanf:"traces"`
 	Resource OtelResource `mapstructure:"resource" koanf:"resource"`
 }
 
@@ -529,7 +534,9 @@ func locateConfigFile(inputFilePath string) (string, error) {
 		}
 	}
 	return "", fmt.Errorf(
-		"impossible to find config file in the default locations [%s]", strings.Join(defaultLocations, ","))
+		"impossible to find config file in the default locations [%s]",
+		strings.Join(defaultLocations, ","),
+	)
 }
 
 // Load the ENV Like:RETRIEVERS_0_HEADERS_AUTHORIZATION

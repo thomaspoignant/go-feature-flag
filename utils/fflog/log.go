@@ -55,7 +55,13 @@ func (f *FFLogger) legacyLog(level string, msg string, keysAndValues ...any) {
 		for _, attr := range keysAndValues {
 			attrs = append(attrs, fmt.Sprintf("%v", attr))
 		}
-		f.LegacyLogger.Printf("%s %s %s %v", time.Now().Format("2006/01/02 15:04:05"), level, msg, strings.Join(attrs, " "))
+		f.LegacyLogger.Printf(
+			"%s %s %s %v",
+			time.Now().Format("2006/01/02 15:04:05"),
+			level,
+			msg,
+			strings.Join(attrs, " "),
+		)
 	}
 }
 

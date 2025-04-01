@@ -7,7 +7,7 @@ import (
 )
 
 type OFREPEvaluateErrorResponse struct {
-	OFREPCommonErrorResponse `json:",inline" yaml:",inline" toml:",inline"`
+	OFREPCommonErrorResponse `       json:",inline" yaml:",inline" toml:",inline"`
 	Key                      string `json:"key"`
 }
 

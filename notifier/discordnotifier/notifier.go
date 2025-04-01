@@ -34,7 +34,9 @@ type Notifier struct {
 
 func (c *Notifier) Notify(diff notifier.DiffCache) error {
 	if c.DiscordWebhookURL == "" {
-		return fmt.Errorf("error: (Discord Notifier) invalid notifier configuration, no DiscordWebhookURL provided")
+		return fmt.Errorf(
+			"error: (Discord Notifier) invalid notifier configuration, no DiscordWebhookURL provided",
+		)
 	}
 
 	// init the notifier
@@ -46,7 +48,10 @@ func (c *Notifier) Notify(diff notifier.DiffCache) error {
 
 	discordURL, err := url.Parse(c.DiscordWebhookURL)
 	if err != nil {
-		return fmt.Errorf("error: (Discord Notifier) invalid DiscordWebhookURL: %v", c.DiscordWebhookURL)
+		return fmt.Errorf(
+			"error: (Discord Notifier) invalid DiscordWebhookURL: %v",
+			c.DiscordWebhookURL,
+		)
 	}
 
 	reqBody := convertToDiscordMessage(diff)
@@ -66,7 +71,10 @@ func (c *Notifier) Notify(diff notifier.DiffCache) error {
 	}
 	defer func() { _ = response.Body.Close() }()
 	if response.StatusCode > 399 {
-		return fmt.Errorf("error: (Discord Notifier) webhook call failed with statusCode = %d", response.StatusCode)
+		return fmt.Errorf(
+			"error: (Discord Notifier) webhook call failed with statusCode = %d",
+			response.StatusCode,
+		)
 	}
 	return nil
 }
@@ -113,7 +121,11 @@ func convertUpdatedFlagsToDiscordEmbed(diffCache notifier.DiffCache) []embed {
 		changelog, _ := diff.Diff(value.Before, value.After, diff.AllowTypeMismatch(true))
 		for _, change := range changelog {
 			if change.Type == "update" {
-				fieldValue := fmt.Sprintf("%s => %s", render.Render(change.From), render.Render(change.To))
+				fieldValue := fmt.Sprintf(
+					"%s => %s",
+					render.Render(change.From),
+					render.Render(change.To),
+				)
 				short := len(fieldValue) < longDiscordField
 				fields = append(fields, embedField{
 					Name:   strings.Join(change.Path, "."),

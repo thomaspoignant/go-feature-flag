@@ -212,7 +212,9 @@ func (h *EvaluateCtrl) BulkEvaluate(c echo.Context) error {
 	return c.JSON(http.StatusOK, response)
 }
 
-func assertOFREPEvaluateRequest(ofrepEvalReq *model.OFREPEvalFlagRequest) *model.OFREPCommonErrorResponse {
+func assertOFREPEvaluateRequest(
+	ofrepEvalReq *model.OFREPEvalFlagRequest,
+) *model.OFREPCommonErrorResponse {
 	if ofrepEvalReq.Context == nil || ofrepEvalReq.Context["targetingKey"] == "" {
 		return NewOFREPCommonError(flag.ErrorCodeTargetingKeyMissing,
 			"GO Feature Flag MUST have a targeting key in the request.")

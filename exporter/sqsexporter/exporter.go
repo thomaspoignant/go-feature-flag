@@ -28,7 +28,11 @@ type Exporter struct {
 }
 
 // Export is sending SQS event for each featureEvents received.
-func (f *Exporter) Export(ctx context.Context, _ *fflog.FFLogger, featureEvents []exporter.FeatureEvent) error {
+func (f *Exporter) Export(
+	ctx context.Context,
+	_ *fflog.FFLogger,
+	featureEvents []exporter.FeatureEvent,
+) error {
 	if f.AwsConfig == nil {
 		cfg, err := config.LoadDefaultConfig(ctx)
 		if err != nil {
