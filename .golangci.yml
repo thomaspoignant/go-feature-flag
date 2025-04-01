@@ -1,81 +1,190 @@
+version: "2"
 linters:
   enable:
+    - asasalint
     - asciicheck
+    - bidichk
     - bodyclose
+    #    - canonicalheader
+    #    - containedctx
+    #    - contextcheck
+    - copyloopvar
+    #    - cyclop
+    - decorder
+    #    - depguard
     - dogsled
     - dupl
+    #    - dupword
+    - durationcheck
+    #    - err113
+    #    - errcheck
+    #    - errchkjson
+    - errname
+    #    - errorlint
+    #    - exhaustive
+    #    - exhaustruct
+    - exptostd
+    - fatcontext
+    #    - forbidigo
+    #    - forcetypeassert
     - funlen
+    - ginkgolinter
+    - gocheckcompilerdirectives
+    #    - gochecknoglobals
     - gochecknoinits
+    - gochecksumtype
     - gocognit
     - goconst
     - gocritic
     - gocyclo
-    - revive
+    #    - godot
+    - godox
+    - goheader
+    - gomoddirectives
+    - gomodguard
+    - goprintffuncname
     - gosec
+    #    - gosmopolitan
+    - govet
+    - grouper
+    - iface
+    - importas
+    #    - inamedparam
+    - ineffassign
+    - interfacebloat
+    #    - intrange
+    #    - ireturn
     - lll
+    - loggercheck
+    #    - maintidx
+    - makezero
+    - mirror
     - misspell
+    #    - mnd
+    - musttag
     - nakedret
+    #    - nestif
+    - nilerr
+    - nilnesserr
+    #    - nilnil
+    #    - nlreturn
     - noctx
+    #    - nolintlint
+    #    - nonamedreturns
+    - nosprintfhostport
+    #    - paralleltest
+    #    - perfsprint
     - prealloc
+    - predeclared
+    #    - promlinter
+    - protogetter
+    - reassign
+    - recvcheck
+    - revive
     - rowserrcheck
-    - copyloopvar
-    - stylecheck
+    - sloglint
+    - spancheck
+    - sqlclosecheck
+    - staticcheck
+    #    - tagalign
+    #    - tagliatelle
+    - testableexamples
+    #    - testifylint
+    #    - testpackage
+    #    - thelper
     - unconvert
     - unparam
+    - unused
+    #    - usestdlibvars
+    #    - usetesting
+    #    - varnamelen
+    - wastedassign
     - whitespace
-    - gofmt
+    #    - wrapcheck
+    #    - wsl
+    - zerologlint
+  settings:
+    funlen:
+      lines: 90
+      statements: 50
+    gocritic:
+      disabled-checks:
+        - singleCaseSwitch
+    gosec:
+      excludes:
+        - G304
+    gosimple:
+      checks: [ "all","-S1023" ]
+  exclusions:
+    paths:
+      - (^|/)bin($|/)
+      - (^|/)examples($|/)
+      - (^|/)docs($|/)
+    rules:
+      - path: testutils/
+        linters:
+          - revive
+      - path: cmd/relayproxy/modeldocs/
+        linters:
+          - lll
+      - path: _test\.go
+        linters:
+          - errcheck
+          - funlen
+          - maligned
+          - noctx
+          - scopelint
+          - bodyclose
+          - lll
+          - goconst
+          - gocognit
+          - gocyclo
+          - gochecknoinits
+          - dupl
+          - staticcheck
+          - revive
+          - gosec
+          - copyloopvar
+      - path: _mock\.go
+        linters:
+          - errcheck
+          - funlen
+          - maligned
+          - noctx
+          - scopelint
+          - bodyclose
+          - lll
+          - goconst
+          - gocognit
+          - gocyclo
+          - gochecknoinits
+          - dupl
+          - staticcheck
+          - revive
+          - predeclared
+formatters:
+  enable:
     - gci
-#    - gofumpt
-linters-settings:
-  funlen:
-    lines: 90
-    statements: 50
-  gocritic:
-    disabled-checks:
-      - singleCaseSwitch
-  golint:
-    min-confidence: 0.6
-  gosimple:
-    checks: ["all","-S1023"]
-  gofumpt:
-    module-path: github.com/thomaspoignant/go-feature-flag
-  gci:
-    skip-generated: true
-    no-lex-order: true
+    - gofmt
+    - goimports
+    - golines
+  settings:
+    gofumpt:
+      module-path: github.com/thomaspoignant/go-feature-flag
+    gci:
+      no-lex-order: true
+    gofmt:
+      simplify: false
+      rewrite-rules:
+        #        - pattern: 'interface{}'
+        #          replacement: 'any'
+        - pattern: 'a[b:len(a)]'
+          replacement: 'a[b:]'
+  exclusions:
+    paths:
+      - (^|/)bin($|/)
+      - (^|/)examples($|/)
+      - (^|/)docs($|/)
 issues:
-  exclude-dirs:
-    - (^|/)bin($|/)
-    - (^|/)examples($|/)
-  exclude-rules:
-    - path: _test.go
-      linters:
-        - funlen
-        - maligned
-        - noctx
-        - scopelint
-        - bodyclose
-        - lll
-        - goconst
-        - gocognit
-        - gocyclo
-        - gochecknoinits
-        - dupl
-        - staticcheck
-        - revive
-        - gosec
-        - copyloopvar
-    - path: _mock.go
-      linters:
-        - funlen
-        - maligned
-        - noctx
-        - scopelint
-        - bodyclose
-        - lll
-        - goconst
-        - gocognit
-        - gocyclo
-        - gochecknoinits
-        - dupl
-        - staticcheck
-        - revive
+  # See the dedicated "issues" documentation section.
+  max-issues-per-linter: 0
