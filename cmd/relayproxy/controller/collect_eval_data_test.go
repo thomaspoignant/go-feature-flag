@@ -2,6 +2,7 @@ package controller_test
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
@@ -183,4 +184,67 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 			assert.JSONEq(t, string(wantCollectData), string(exportedData), "Invalid exported data")
 		})
 	}
+}
+
+func Test_collect_tracking_and_evaluation_events(t *testing.T) {
+	evalExporter, err := os.CreateTemp("", "evalExport.json")
+	assert.NoError(t, err)
+	trackingExporter, err := os.CreateTemp("", "trackExport.json")
+	assert.NoError(t, err)
+	defer func() {
+		_ = os.Remove(evalExporter.Name())
+		_ = os.Remove(trackingExporter.Name())
+	}()
+
+	// init go-feature-flag
+	goFF, _ := ffclient.New(ffclient.Config{
+		PollingInterval: 10 * time.Second,
+		LeveledLogger:   slog.Default(),
+		Context:         context.Background(),
+		Retriever: &fileretriever.Retriever{
+			Path: configFlagsLocation,
+		},
+
+		DataExporters: []ffclient.DataExporter{
+			{
+				FlushInterval:    10 * time.Second,
+				MaxEventInMemory: 10000,
+				Exporter:         &fileexporter.Exporter{Filename: evalExporter.Name()},
+			},
+			{
+				FlushInterval:     10 * time.Second,
+				MaxEventInMemory:  10000,
+				Exporter:          &fileexporter.Exporter{Filename: trackingExporter.Name()},
+				ExporterEventType: ffclient.TrackingEventExporter,
+			},
+		},
+	})
+	logger, err := zap.NewDevelopment()
+	require.NoError(t, err)
+	ctrl := controller.NewCollectEvalData(goFF, metric.Metrics{}, logger)
+
+	bodyReq, err := os.ReadFile(
+		"../testdata/controller/collect_eval_data/valid_request_mix_tracking_evaluation.json")
+
+	e := echo.New()
+	rec := httptest.NewRecorder()
+
+	req := httptest.NewRequest(echo.POST, "/v1/data/collector", strings.NewReader(string(bodyReq)))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	c := e.NewContext(req, rec)
+	c.SetPath("/v1/data/collector")
+	handlerErr := ctrl.Handler(c)
+	assert.NoError(t, handlerErr)
+	goFF.Close()
+
+	fmt.Println("Evaluation events:")
+	evalEvents, err := os.ReadFile(evalExporter.Name())
+	assert.NoError(t, err)
+	fmt.Println(string(evalEvents))
+
+	fmt.Println("Tracking events:")
+	trackingEvents, err := os.ReadFile(trackingExporter.Name())
+	assert.NoError(t, err)
+	fmt.Println(string(trackingEvents))
+
 }

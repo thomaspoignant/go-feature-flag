@@ -22,7 +22,7 @@ func (g *GoFeatureFlag) Track(
 			UserKey:           ctx.GetKey(),
 			CreationDate:      time.Now().Unix(),
 			Key:               trackingEventName,
-			EvaluationContext: ctx,
+			EvaluationContext: ctx.ToMap(),
 			TrackingDetails:   trackingEventDetails,
 		}
 		g.trackingEventDataExporter.AddEvent(event)

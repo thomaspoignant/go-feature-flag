@@ -34,8 +34,7 @@ func TestValidTrackingEvent(t *testing.T) {
 	assert.Equal(t, 1, len(exp.ExportedEvents))
 	assert.Equal(t, "1668d845-051d-4dd9-907a-7ebe6aa2c9da", exp.ExportedEvents[0].UserKey)
 	assert.Equal(t, "my-feature-flag", exp.ExportedEvents[0].Key)
-	assert.Equal(t,
-		ffcontext.NewEvaluationContextBuilder("1668d845-051d-4dd9-907a-7ebe6aa2c9da").AddCustom("admin", true).Build(),
+	assert.Equal(t, map[string]interface{}{"targetingKey": "1668d845-051d-4dd9-907a-7ebe6aa2c9da", "admin": true},
 		exp.ExportedEvents[0].EvaluationContext)
 	assert.Equal(t, map[string]interface{}{"additional data": "value"}, exp.ExportedEvents[0].TrackingDetails)
 }

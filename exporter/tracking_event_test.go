@@ -7,7 +7,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
-	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 )
 
 func TestTrackingEvent_FormatInCSV(t *testing.T) {
@@ -26,13 +25,13 @@ func TestTrackingEvent_FormatInCSV(t *testing.T) {
 				UserKey:           "ABCD",
 				CreationDate:      1617970547,
 				Key:               "random-key",
-				EvaluationContext: ffcontext.NewEvaluationContextBuilder("ABCD").Build(),
+				EvaluationContext: map[string]any{"targetingKey": "ABCD"},
 				TrackingDetails: map[string]interface{}{
 					"event": "123",
 				},
 			},
 			template: `{{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .EvaluationContext}};{{ .TrackingDetails}}`,
-			want:     `tracking;anonymousUser;ABCD;1617970547;{ABCD map[]};map[event:123]`,
+			want:     `tracking;anonymousUser;ABCD;1617970547;map[targetingKey:ABCD];map[event:123]`,
 			wantErr:  assert.NoError,
 		},
 		{
@@ -43,13 +42,13 @@ func TestTrackingEvent_FormatInCSV(t *testing.T) {
 				UserKey:           "ABCD",
 				CreationDate:      1617970547,
 				Key:               "random-key",
-				EvaluationContext: ffcontext.NewEvaluationContextBuilder("ABCD").AddCustom("toto", 123).Build(),
+				EvaluationContext: map[string]any{"targetingKey": "ABCD", "toto": 123},
 				TrackingDetails: map[string]interface{}{
 					"event": "123",
 				},
 			},
 			template: `{{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .EvaluationContext}};{{ .TrackingDetails}}`,
-			want:     `tracking;anonymousUser;ABCD;1617970547;{ABCD map[toto:123]};map[event:123]`,
+			want:     `tracking;anonymousUser;ABCD;1617970547;map[targetingKey:ABCD toto:123];map[event:123]`,
 			wantErr:  assert.NoError,
 		},
 	}
@@ -81,12 +80,12 @@ func TestTrackingEvent_FormatInJSON(t *testing.T) {
 				UserKey:           "ABCD",
 				CreationDate:      1617970547,
 				Key:               "random-key",
-				EvaluationContext: ffcontext.NewEvaluationContextBuilder("ABCD").Build(),
+				EvaluationContext: map[string]any{"targetingKey": "ABCD"},
 				TrackingDetails: map[string]interface{}{
 					"event": "123",
 				},
 			},
-			want:    `{"kind":"tracking","contextKind":"anonymousUser","userKey":"ABCD","creationDate":1617970547,"key":"random-key","evaluationContext":{"targetingKey":"ABCD","attributes":{}},"trackingEventDetails":{"event":"123"}}`,
+			want:    `{"kind":"tracking","contextKind":"anonymousUser","userKey":"ABCD","creationDate":1617970547,"key":"random-key","evaluationContext":{"targetingKey":"ABCD"},"trackingEventDetails":{"event":"123"}}`,
 			wantErr: assert.NoError,
 		},
 		{
@@ -97,12 +96,12 @@ func TestTrackingEvent_FormatInJSON(t *testing.T) {
 				UserKey:           "ABCD",
 				CreationDate:      1617970547,
 				Key:               "random-key",
-				EvaluationContext: ffcontext.NewEvaluationContextBuilder("ABCD").AddCustom("toto", 123).Build(),
+				EvaluationContext: map[string]any{"targetingKey": "ABCD", "toto": 123},
 				TrackingDetails: map[string]interface{}{
 					"event": "123",
 				},
 			},
-			want:    `{"kind":"tracking","contextKind":"anonymousUser","userKey":"ABCD","creationDate":1617970547,"key":"random-key","evaluationContext":{"targetingKey":"ABCD","attributes":{"toto":123}},"trackingEventDetails":{"event":"123"}}`,
+			want:    `{"kind":"tracking","contextKind":"anonymousUser","userKey":"ABCD","creationDate":1617970547,"key":"random-key","evaluationContext":{"targetingKey":"ABCD","toto":123},"trackingEventDetails":{"event":"123"}}`,
 			wantErr: assert.NoError,
 		},
 	}

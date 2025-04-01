@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"text/template"
 	"time"
-
-	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 )
 
 type TrackingEventDetails = map[string]interface{}
@@ -33,7 +31,7 @@ type TrackingEvent struct {
 	Key string `json:"key" example:"my-feature-flag" parquet:"name=key, type=BYTE_ARRAY, convertedtype=UTF8"`
 
 	// EvaluationContext contains the evaluation context used for the tracking
-	EvaluationContext ffcontext.EvaluationContext `json:"evaluationContext" parquet:"name=evaluationContext, type=MAP, keytype=BYTE_ARRAY, keyconvertedtype=UTF8, valuetype=BYTE_ARRAY, valueconvertedtype=UTF8"`
+	EvaluationContext map[string]any `json:"evaluationContext" parquet:"name=evaluationContext, type=MAP, keytype=BYTE_ARRAY, keyconvertedtype=UTF8, valuetype=BYTE_ARRAY, valueconvertedtype=UTF8"`
 
 	// TrackingDetails contains the details of the tracking event
 	TrackingDetails TrackingEventDetails `json:"trackingEventDetails" parquet:"name=evaluationContext, type=MAP, keytype=BYTE_ARRAY, keyconvertedtype=UTF8, valuetype=BYTE_ARRAY, valueconvertedtype=UTF8"`
