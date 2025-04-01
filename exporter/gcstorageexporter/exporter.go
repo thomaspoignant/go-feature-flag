@@ -54,7 +54,11 @@ func (f *Exporter) IsBulk() bool {
 }
 
 // Export is saving a collection of events in a file.
-func (f *Exporter) Export(ctx context.Context, logger *fflog.FFLogger, featureEvents []exporter.FeatureEvent) error {
+func (f *Exporter) Export(
+	ctx context.Context,
+	logger *fflog.FFLogger,
+	featureEvents []exporter.FeatureEvent,
+) error {
 	// Init google storage client
 	client, err := storage.NewClient(ctx, f.Options...)
 	if err != nil {
@@ -111,8 +115,12 @@ func (f *Exporter) Export(ctx context.Context, logger *fflog.FFLogger, featureEv
 		_, err = io.Copy(wc, of)
 		_ = wc.Close()
 		if err != nil {
-			return fmt.Errorf("error: [GCP Exporter] impossible to copy the file from %s to bucket %s: %v",
-				source, f.Bucket, err)
+			return fmt.Errorf(
+				"error: [GCP Exporter] impossible to copy the file from %s to bucket %s: %v",
+				source,
+				f.Bucket,
+				err,
+			)
 		}
 	}
 

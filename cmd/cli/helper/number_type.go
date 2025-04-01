@@ -21,19 +21,14 @@ func GetFlagTypeFromVariations(variations map[string]*interface{}) (model.FlagTy
 		switch vv.(type) {
 		case bool:
 			variationTypes[model.FlagTypeBoolean] = interface{}(nil)
-			break
 		case string:
 			variationTypes[model.FlagTypeString] = interface{}(nil)
-			break
 		case int:
 			variationTypes[model.FlagTypeInteger] = interface{}(nil)
-			break
 		case float64:
 			variationTypes[model.FlagTypeFloat] = interface{}(nil)
-			break
 		case map[string]interface{}:
 			variationTypes[model.FlagTypeObject] = interface{}(nil)
-			break
 		default:
 			// do nothing here
 			continue

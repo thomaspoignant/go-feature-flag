@@ -11,6 +11,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
+// Retriever is the interface to fetch the flags from Azure Blob Storage.
 type Retriever struct {
 	// Container is the name of your Azure Blob Storage Container.
 	Container string
@@ -34,9 +35,12 @@ type Retriever struct {
 	status retriever.Status
 }
 
+// Init is initializing the retriever to start fetching the flags configuration.
 func (r *Retriever) Init(_ context.Context, _ *fflog.FFLogger) error {
 	if r.AccountName == "" {
-		return fmt.Errorf("unable to connect to Azure Blob Storage, \"AccountName\" cannot be empty")
+		return fmt.Errorf(
+			"unable to connect to Azure Blob Storage, \"AccountName\" cannot be empty",
+		)
 	}
 
 	url := r.ServiceURL
@@ -75,16 +79,19 @@ func (r *Retriever) Init(_ context.Context, _ *fflog.FFLogger) error {
 	return nil
 }
 
+// Shutdown gracefully shutdown the provider and set the status as not ready.
 func (r *Retriever) Shutdown(_ context.Context) error {
 	r.client = nil
 	r.status = retriever.RetrieverNotReady
 	return nil
 }
 
+// Status is the function returning the internal state of the retriever.
 func (r *Retriever) Status() retriever.Status {
 	return r.status
 }
 
+// Retrieve is the function in charge of fetching the flag configuration.
 func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	if r.client == nil {
 		r.status = retriever.RetrieverError
@@ -92,7 +99,11 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	}
 
 	if r.Object == "" || r.Container == "" {
-		return nil, fmt.Errorf("missing mandatory information object=%s, repositorySlug=%s", r.Object, r.Container)
+		return nil, fmt.Errorf(
+			"missing mandatory information object=%s, repositorySlug=%s",
+			r.Object,
+			r.Container,
+		)
 	}
 
 	fileStream, err := r.client.DownloadStream(ctx, r.Container, r.Object, nil)
@@ -106,7 +117,12 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	body, err := io.ReadAll(retryReader)
 	if err != nil {
 		return nil,
-			fmt.Errorf("unable to read from Azure Blob Storage Object %s in Container %s, error: %s", r.Object, r.Container, err)
+			fmt.Errorf(
+				"unable to read from Azure Blob Storage Object %s in Container %s, error: %s",
+				r.Object,
+				r.Container,
+				err,
+			)
 	}
 
 	return body, nil

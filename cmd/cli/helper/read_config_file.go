@@ -17,7 +17,11 @@ var ConfigFileDefaultLocations = []string{
 	"/etc/opt/goff/",
 }
 
-func LoadConfigFile(inputFilePath string, configFormat string, defaultLocations []string) (map[string]dto.DTO, error) {
+func LoadConfigFile(
+	inputFilePath string,
+	configFormat string,
+	defaultLocations []string,
+) (map[string]dto.DTO, error) {
 	filename := "flags.goff"
 	if defaultLocations == nil {
 		defaultLocations = ConfigFileDefaultLocations
@@ -44,7 +48,9 @@ func LoadConfigFile(inputFilePath string, configFormat string, defaultLocations 
 		}
 	}
 	return nil, fmt.Errorf(
-		"impossible to find config file in the default locations [%s]", strings.Join(defaultLocations, ","))
+		"impossible to find config file in the default locations [%s]",
+		strings.Join(defaultLocations, ","),
+	)
 }
 
 func readConfigFile(configFile string, configFormat string) (map[string]dto.DTO, error) {
