@@ -83,6 +83,7 @@ type Notifier struct {
 	init       sync.Once
 }
 
+// Notify is the notifying all the changes to the notifier.
 func (c *Notifier) Notify(diff notifier.DiffCache) error {
 	if c.EndpointURL == "" {
 		return fmt.Errorf(

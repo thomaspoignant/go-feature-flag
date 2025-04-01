@@ -25,6 +25,7 @@ const (
 	longDiscordField = 35
 )
 
+// Notifier is the component in charge of sending flag changes to Discord.
 type Notifier struct {
 	DiscordWebhookURL string
 
@@ -32,6 +33,7 @@ type Notifier struct {
 	init       sync.Once
 }
 
+// Notify is the notifying all the changes to the notifier.
 func (c *Notifier) Notify(diff notifier.DiffCache) error {
 	if c.DiscordWebhookURL == "" {
 		return fmt.Errorf(

@@ -22,6 +22,7 @@ type Retriever struct {
 	client        kubernetes.Interface
 }
 
+// Retrieve is the function in charge of fetching the flag configuration.
 func (s *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	if s.client == nil {
 		client, clientErr := kubeClientProvider(&s.ClientConfig)

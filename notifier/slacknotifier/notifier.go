@@ -27,6 +27,7 @@ const (
 	longSlackAttachment = 35
 )
 
+// Notifier is the component in charge of sending flag changes to Slack.
 type Notifier struct {
 	SlackWebhookURL string
 
@@ -34,6 +35,7 @@ type Notifier struct {
 	init       sync.Once
 }
 
+// Notify is the notifying all the changes to the notifier.
 func (c *Notifier) Notify(diff notifier.DiffCache) error {
 	if c.SlackWebhookURL == "" {
 		return fmt.Errorf("error: (Slack Notifier) invalid notifier configuration, no " +
@@ -166,12 +168,14 @@ type attachment struct {
 	Footer     string  `json:"footer,omitempty"`
 }
 
+// Field is the representation of a field in a slack message.
 type Field struct {
 	Title string `json:"title"`
 	Value string `json:"value"`
 	Short bool   `json:"short"`
 }
 
+// ByTitle implements sort.Interface for []Field based on the Title field.
 type ByTitle []Field
 
 func (a ByTitle) Len() int           { return len(a) }

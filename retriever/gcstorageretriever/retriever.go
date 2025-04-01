@@ -33,6 +33,7 @@ type Retriever struct {
 	obj *storage.ObjectHandle
 }
 
+// Retrieve is the function in charge of fetching the flag configuration.
 func (retriever *Retriever) Retrieve(ctx context.Context) (content []byte, err error) {
 	if retriever.obj == nil {
 		// Create GC Storage Client.

@@ -13,6 +13,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/retriever/shared"
 )
 
+// Retriever is the interface to fetch the flags from Bitbucket.
 type Retriever struct {
 	RepositorySlug     string
 	FilePath           string

@@ -25,6 +25,7 @@ type Retriever struct {
 	logger       *fflog.FFLogger
 }
 
+// Init is initializing the retriever to start fetching the flags configuration.
 func (r *Retriever) Init(ctx context.Context, logger *fflog.FFLogger) error {
 	r.logger = logger
 	if r.dbConnection == nil {

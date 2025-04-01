@@ -29,6 +29,7 @@ type Retriever struct {
 	rateLimitReset     time.Time
 }
 
+// Retrieve is the function in charge of fetching the flag configuration.
 func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	if r.FilePath == "" || r.RepositorySlug == "" {
 		return nil, fmt.Errorf(
