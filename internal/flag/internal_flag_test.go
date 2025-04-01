@@ -997,7 +997,9 @@ func TestInternalFlag_Value(t *testing.T) {
 				flagName: "my-flag",
 				user: ffcontext.NewEvaluationContextBuilder("user-key").
 					AddCustom("gofeatureflag", ffcontext.GoffContextSpecifics{
-						CurrentDateTime: testconvert.Time(time.Date(2022, 1, 1, 12, 12, 12, 12, time.UTC)),
+						CurrentDateTime: testconvert.Time(
+							time.Date(2022, 1, 1, 12, 12, 12, 12, time.UTC),
+						),
 					}).
 					Build(),
 				flagContext: flag.Context{

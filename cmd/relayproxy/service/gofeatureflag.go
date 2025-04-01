@@ -127,17 +127,17 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 		awsConfig, err := awsConf.LoadDefaultConfig(context.Background())
 		return &s3retrieverv2.Retriever{Bucket: c.Bucket, Item: c.Item, AwsConfig: &awsConfig}, err
 	case config.HTTPRetriever:
-		return initHTTPRetriever(c, retrieverTimeout)
+		return initHTTPRetriever(c, retrieverTimeout), nil
 	case config.GoogleStorageRetriever:
 		return &gcstorageretriever.Retriever{Bucket: c.Bucket, Object: c.Object}, nil
 	case config.KubernetesRetriever:
 		return initK8sRetriever(c)
 	case config.MongoDBRetriever:
-		return initMongoRetriever(c)
+		return initMongoRetriever(c), nil
 	case config.RedisRetriever:
 		return &redisretriever.Retriever{Options: c.RedisOptions, Prefix: c.RedisPrefix}, nil
 	case config.AzBlobStorageRetriever:
-		return initAzBlobRetriever(c)
+		return initAzBlobRetriever(c), nil
 	default:
 		return nil, fmt.Errorf("invalid retriever: kind \"%s\" "+
 			"is not supported", c.Kind)

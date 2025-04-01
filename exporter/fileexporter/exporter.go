@@ -91,6 +91,7 @@ func (f *Exporter) Export(
 		filePath = filename
 	} else {
 		// Ensure OutputDir exists or create it
+		// nolint: gosec
 		if err := os.MkdirAll(outputDir, 0755); err != nil {
 			return fmt.Errorf("failed to create output directory: %v", err)
 		}
@@ -110,7 +111,7 @@ func (f *Exporter) IsBulk() bool {
 }
 
 func (f *Exporter) writeFile(filePath string, featureEvents []exporter.FeatureEvent) error {
-	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
+	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644) // nolint: gosec
 	if err != nil {
 		return err
 	}

@@ -8,7 +8,7 @@ type AllFlagRequest struct {
 }
 
 type EvalFlagRequest struct {
-	AllFlagRequest `json:",inline" yaml:",inline" toml:",inline"`
+	AllFlagRequest `json:",inline"`
 	// The value will we use if we are not able to get the variation of the flag.
 	DefaultValue interface{} `json:"defaultValue"                               xml:"defaultValue" form:"defaultValue" query:"defaultValue"`
 }
