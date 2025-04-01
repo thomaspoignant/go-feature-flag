@@ -163,7 +163,7 @@ func (f *InternalFlag) selectVariation(
 			variationName, err := target.Evaluate(key, ctx, flagName, false)
 			if err != nil {
 				// the targeting does not apply
-				if _, ok := err.(*internalerror.RuleNotApply); ok {
+				if _, ok := err.(*internalerror.RuleNotApplyError); ok {
 					continue
 				}
 				return nil, err

@@ -42,9 +42,9 @@ func NewOFREPEvaluate(goFF *ffclient.GoFeatureFlag, metrics metric.Metrics) Eval
 // @Param 		 data body model.OFREPEvalFlagRequest true "Evaluation Context for this API call"
 // @Param        flag_key path string true "Name of your feature flag"
 // @Success      200  {object} model.OFREPEvaluateSuccessResponse "Success"
-// @Failure      400 {object}  model.OFREPEvaluateErrorResponse "Bad Request"
+// @Failure      400 {object}  model.OFREPEvaluateResponseError "Bad Request"
 // @Failure      401 {object}  modeldocs.HTTPErrorDoc "Unauthorized"
-// @Failure      404 {object}  model.OFREPEvaluateErrorResponse "Flag Not Found"
+// @Failure      404 {object}  model.OFREPEvaluateResponseError "Flag Not Found"
 // @Failure      500 {object}  modeldocs.HTTPErrorDoc "Internal server error"
 // @Router       /ofrep/v1/evaluate/flags/{flag_key} [post]
 func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
@@ -64,8 +64,8 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 			NewEvaluateError(flagKey, flag.ErrorCodeInvalidContext, err.Error()))
 	}
 	if err := assertOFREPEvaluateRequest(reqBody); err != nil {
-		return c.JSON(http.StatusBadRequest, model.OFREPEvaluateErrorResponse{
-			OFREPCommonErrorResponse: *err,
+		return c.JSON(http.StatusBadRequest, model.OFREPEvaluateResponseError{
+			OFREPCommonResponseError: *err,
 			Key:                      flagKey,
 		})
 	}
@@ -73,8 +73,8 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 	if err != nil {
 		return c.JSON(
 			http.StatusBadRequest,
-			model.OFREPEvaluateErrorResponse{
-				OFREPCommonErrorResponse: model.OFREPCommonErrorResponse{
+			model.OFREPEvaluateResponseError{
+				OFREPCommonResponseError: model.OFREPCommonResponseError{
 					ErrorCode:    flag.ErrorCodeInvalidContext,
 					ErrorDetails: err.Error(),
 				},
@@ -143,7 +143,7 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 // @Param 		data body model.OFREPEvalFlagRequest true "Evaluation Context and list of flag for this API call"
 // @Success     200 {object} model.OFREPBulkEvaluateSuccessResponse "OFREP successful evaluation response"
 // @Success     304 {string} string "Etag: \"117-0193435c612c50d93b798619d9464856263dbf9f\""
-// @Failure     400 {object}  model.OFREPCommonErrorResponse "Bad evaluation request"
+// @Failure     400 {object}  model.OFREPCommonResponseError "Bad evaluation request"
 // @Failure     401 {object}  modeldocs.HTTPErrorDoc "Unauthorized - You need credentials to access the API"
 // @Failure     403 {object}  modeldocs.HTTPErrorDoc "Forbidden - You are not authorized to access the API"
 // @Failure     500 {object}  modeldocs.HTTPErrorDoc "Internal server error"
@@ -214,7 +214,7 @@ func (h *EvaluateCtrl) BulkEvaluate(c echo.Context) error {
 
 func assertOFREPEvaluateRequest(
 	ofrepEvalReq *model.OFREPEvalFlagRequest,
-) *model.OFREPCommonErrorResponse {
+) *model.OFREPCommonResponseError {
 	if ofrepEvalReq.Context == nil || ofrepEvalReq.Context["targetingKey"] == "" {
 		return NewOFREPCommonError(flag.ErrorCodeTargetingKeyMissing,
 			"GO Feature Flag MUST have a targeting key in the request.")

@@ -10,7 +10,7 @@ type AllFlagRequest struct {
 type EvalFlagRequest struct {
 	AllFlagRequest `json:",inline"`
 	// The value will we use if we are not able to get the variation of the flag.
-	DefaultValue interface{} `json:"defaultValue"                               xml:"defaultValue" form:"defaultValue" query:"defaultValue"`
+	DefaultValue interface{} `json:"defaultValue" xml:"defaultValue" form:"defaultValue" query:"defaultValue"`
 }
 
 // Deprecated: UserRequest The representation of a user for your feature flag system.

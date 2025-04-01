@@ -21,7 +21,7 @@ import (
 // @Success      200  {object} model.OFREPConfiguration "Success"
 // @Success      304 {string} string "Etag: \"117-0193435c612c50d93b798619d9464856263dbf9f\""
 // @Failure      401 {object}  modeldocs.HTTPErrorDoc "Unauthorized"
-// @Failure      404 {object}  model.OFREPEvaluateErrorResponse "Flag Not Found"
+// @Failure      404 {object}  model.OFREPEvaluateResponseError "Flag Not Found"
 // @Failure      500 {object}  modeldocs.HTTPErrorDoc "Internal server error"
 // @Router       /ofrep/v1/configuration [get]
 func (h *EvaluateCtrl) Configuration(c echo.Context) error {

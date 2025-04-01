@@ -9,9 +9,9 @@ func NewEvaluateError(
 	key string,
 	errorCode flag.ErrorCode,
 	errorDetails string,
-) *model.OFREPEvaluateErrorResponse {
-	return &model.OFREPEvaluateErrorResponse{
-		OFREPCommonErrorResponse: model.OFREPCommonErrorResponse{
+) *model.OFREPEvaluateResponseError {
+	return &model.OFREPEvaluateResponseError{
+		OFREPCommonResponseError: model.OFREPCommonResponseError{
 			ErrorCode:    errorCode,
 			ErrorDetails: errorDetails,
 		},
@@ -22,8 +22,8 @@ func NewEvaluateError(
 func NewOFREPCommonError(
 	errorCode flag.ErrorCode,
 	errorDetails string,
-) *model.OFREPCommonErrorResponse {
-	return &model.OFREPCommonErrorResponse{
+) *model.OFREPCommonResponseError {
+	return &model.OFREPCommonResponseError{
 		ErrorCode:    errorCode,
 		ErrorDetails: errorDetails,
 	}

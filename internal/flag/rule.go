@@ -67,7 +67,7 @@ func (r *Rule) Evaluate(key string, ctx ffcontext.Context, flagName string, isDe
 	// Check if the rule applies for this user
 	ruleApply := isDefault || evaluateRule(r.GetTrimmedQuery(), r.GetQueryFormat(), ctx)
 	if !ruleApply || (!isDefault && r.IsDisable()) {
-		return "", &internalerror.RuleNotApply{Context: ctx}
+		return "", &internalerror.RuleNotApplyError{Context: ctx}
 	}
 	if r.ProgressiveRollout != nil {
 		return r.EvaluateProgressiveRollout(key, flagName, evaluationDate)
