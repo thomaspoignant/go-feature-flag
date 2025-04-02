@@ -19,7 +19,11 @@ type TrackingEventExporter struct {
 	once  sync.Once
 }
 
-func (m *TrackingEventExporter) Export(_ context.Context, _ *fflog.FFLogger, events []exporter.ExportableEvent) error {
+func (m *TrackingEventExporter) Export(
+	_ context.Context,
+	_ *fflog.FFLogger,
+	events []exporter.ExportableEvent,
+) error {
 	m.once.Do(m.initMutex)
 	m.mutex.Lock()
 	defer m.mutex.Unlock()

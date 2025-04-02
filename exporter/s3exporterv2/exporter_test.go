@@ -228,17 +228,31 @@ func TestS3_Export(t *testing.T) {
 
 			// Verify that S3ClientOptions are correctly set on the Exporter
 			if tt.fields.S3ClientOptions != nil {
-				assert.Equal(t, tt.fields.S3ClientOptions, f.S3ClientOptions, "S3ClientOptions should be set correctly on the Exporter")
+				assert.Equal(
+					t,
+					tt.fields.S3ClientOptions,
+					f.S3ClientOptions,
+					"S3ClientOptions should be set correctly on the Exporter",
+				)
 			}
 
-			err := f.Export(tt.fields.Context, &fflog.FFLogger{LeveledLogger: slog.Default()}, tt.events)
+			err := f.Export(
+				tt.fields.Context,
+				&fflog.FFLogger{LeveledLogger: slog.Default()},
+				tt.events,
+			)
 			if tt.wantErr {
 				assert.Error(t, err, "Export should error")
 				return
 			}
 
 			assert.NoError(t, err, "Export should not error")
-			assert.Equal(t, 1, len(s3ManagerMock.S3ManagerMockFileSystem), "we should have 1 file in our mock")
+			assert.Equal(
+				t,
+				1,
+				len(s3ManagerMock.S3ManagerMockFileSystem),
+				"we should have 1 file in our mock",
+			)
 			expectedContent, _ := os.ReadFile(tt.expectedFile)
 			for k, v := range s3ManagerMock.S3ManagerMockFileSystem {
 				assert.Equal(t, string(expectedContent), v, "invalid file content")
@@ -253,7 +267,11 @@ func Test_errSDK(t *testing.T) {
 		Bucket:    "empty",
 		AwsConfig: &aws.Config{},
 	}
-	err := f.Export(context.Background(), &fflog.FFLogger{LeveledLogger: slog.Default()}, []exporter.ExportableEvent{})
+	err := f.Export(
+		context.Background(),
+		&fflog.FFLogger{LeveledLogger: slog.Default()},
+		[]exporter.ExportableEvent{},
+	)
 	assert.Error(t, err, "Empty AWS config should failed")
 }
 

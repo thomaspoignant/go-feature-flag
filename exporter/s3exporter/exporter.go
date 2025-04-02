@@ -56,7 +56,11 @@ type Exporter struct {
 }
 
 // Export is saving a collection of events in a file.
-func (f *Exporter) Export(ctx context.Context, logger *fflog.FFLogger, events []exporter.ExportableEvent) error {
+func (f *Exporter) Export(
+	ctx context.Context,
+	logger *fflog.FFLogger,
+	events []exporter.ExportableEvent,
+) error {
 	// init the s3 uploader
 	if f.s3Uploader == nil {
 		var initErr error

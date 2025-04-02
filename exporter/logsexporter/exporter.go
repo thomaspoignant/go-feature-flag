@@ -29,7 +29,11 @@ type Exporter struct {
 }
 
 // Export is saving a collection of events in a file.
-func (f *Exporter) Export(_ context.Context, logger *fflog.FFLogger, events []exporter.ExportableEvent) error {
+func (f *Exporter) Export(
+	_ context.Context,
+	logger *fflog.FFLogger,
+	events []exporter.ExportableEvent,
+) error {
 	f.initTemplates.Do(func() {
 		// Remove below after deprecation of Format
 		if f.LogFormat == "" && f.Format != "" {

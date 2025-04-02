@@ -131,7 +131,10 @@ func TestBoolVariation(t *testing.T) {
 				flagKey:      "key-not-exist",
 				user:         ffcontext.NewEvaluationContext("random-key"),
 				defaultValue: true,
-				cacheMock:    NewCacheMock(&flag.InternalFlag{}, errors.New("flag [key-not-exist] does not exists")),
+				cacheMock: NewCacheMock(
+					&flag.InternalFlag{},
+					errors.New("flag [key-not-exist] does not exists"),
+				),
 			},
 			want:        true,
 			wantErr:     true,
@@ -328,23 +331,30 @@ func TestBoolVariation(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					featureEventDataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.Config{
-						{
-							FlushInterval:    0,
-							MaxEventInMemory: 0,
-							Exporter: &logsexporter.Exporter{
-								LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
-									"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+					featureEventDataExporter: exporter.NewManager[exporter.FeatureEvent](
+						context.Background(),
+						[]exporter.Config{
+							{
+								FlushInterval:    0,
+								MaxEventInMemory: 0,
+								Exporter: &logsexporter.Exporter{
+									LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+										"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+								},
 							},
 						},
-					}, exporter.DefaultExporterCleanQueueInterval, &fflog.FFLogger{LeveledLogger: logger}),
+						exporter.DefaultExporterCleanQueueInterval,
+						&fflog.FFLogger{LeveledLogger: logger},
+					),
 				}
 			}
 
 			got, err := BoolVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
-				time.Sleep(40 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
+				time.Sleep(
+					40 * time.Millisecond,
+				) // since the log is async, we are waiting to be sure it's written
 				if tt.expectedLog == "" {
 					handler.AssertEmpty()
 				} else {
@@ -450,7 +460,10 @@ func TestBoolVariationDetails(t *testing.T) {
 				flagKey:      "key-not-exist",
 				user:         ffcontext.NewEvaluationContext("random-key"),
 				defaultValue: true,
-				cacheMock:    NewCacheMock(&flag.InternalFlag{}, errors.New("flag [key-not-exist] does not exists")),
+				cacheMock: NewCacheMock(
+					&flag.InternalFlag{},
+					errors.New("flag [key-not-exist] does not exists"),
+				),
 			},
 			wantErr:     true,
 			expectedLog: `user="random-key", flag="key-not-exist", value="true", variation="SdkDefault"`,
@@ -733,23 +746,30 @@ func TestBoolVariationDetails(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					featureEventDataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.Config{
-						{
-							FlushInterval:    0,
-							MaxEventInMemory: 0,
-							Exporter: &logsexporter.Exporter{
-								LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
-									"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+					featureEventDataExporter: exporter.NewManager[exporter.FeatureEvent](
+						context.Background(),
+						[]exporter.Config{
+							{
+								FlushInterval:    0,
+								MaxEventInMemory: 0,
+								Exporter: &logsexporter.Exporter{
+									LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+										"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+								},
 							},
 						},
-					}, exporter.DefaultExporterCleanQueueInterval, &fflog.FFLogger{LeveledLogger: logger}),
+						exporter.DefaultExporterCleanQueueInterval,
+						&fflog.FFLogger{LeveledLogger: logger},
+					),
 				}
 			}
 
 			got, err := BoolVariationDetails(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
-				time.Sleep(40 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
+				time.Sleep(
+					40 * time.Millisecond,
+				) // since the log is async, we are waiting to be sure it's written
 				if tt.expectedLog == "" {
 					handler.AssertEmpty()
 				} else {
@@ -764,7 +784,13 @@ func TestBoolVariationDetails(t *testing.T) {
 			}
 
 			if tt.wantErr {
-				assert.Error(t, err, "BoolVariationDetails() error = %v, wantErr %v", err, tt.wantErr)
+				assert.Error(
+					t,
+					err,
+					"BoolVariationDetails() error = %v, wantErr %v",
+					err,
+					tt.wantErr,
+				)
 				return
 			}
 			assert.Equal(t, tt.want, got, "BoolVariationDetails() got = %v, want %v", got, tt.want)
@@ -850,7 +876,10 @@ func TestFloat64Variation(t *testing.T) {
 				flagKey:      "key-not-exist",
 				user:         ffcontext.NewEvaluationContext("random-key"),
 				defaultValue: 118.12,
-				cacheMock:    NewCacheMock(&flag.InternalFlag{}, errors.New("flag [key-not-exist] does not exists")),
+				cacheMock: NewCacheMock(
+					&flag.InternalFlag{},
+					errors.New("flag [key-not-exist] does not exists"),
+				),
 			},
 			want:        118.12,
 			wantErr:     true,
@@ -1047,23 +1076,30 @@ func TestFloat64Variation(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					featureEventDataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.Config{
-						{
-							FlushInterval:    0,
-							MaxEventInMemory: 0,
-							Exporter: &logsexporter.Exporter{
-								LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
-									"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+					featureEventDataExporter: exporter.NewManager[exporter.FeatureEvent](
+						context.Background(),
+						[]exporter.Config{
+							{
+								FlushInterval:    0,
+								MaxEventInMemory: 0,
+								Exporter: &logsexporter.Exporter{
+									LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+										"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+								},
 							},
 						},
-					}, exporter.DefaultExporterCleanQueueInterval, &fflog.FFLogger{LeveledLogger: logger}),
+						exporter.DefaultExporterCleanQueueInterval,
+						&fflog.FFLogger{LeveledLogger: logger},
+					),
 				}
 			}
 
 			got, err := Float64Variation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
-				time.Sleep(40 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
+				time.Sleep(
+					40 * time.Millisecond,
+				) // since the log is async, we are waiting to be sure it's written
 				if tt.expectedLog == "" {
 					handler.AssertEmpty()
 				} else {
@@ -1168,7 +1204,10 @@ func TestFloat64VariationDetails(t *testing.T) {
 				flagKey:      "key-not-exist",
 				user:         ffcontext.NewEvaluationContext("random-key"),
 				defaultValue: 118.12,
-				cacheMock:    NewCacheMock(&flag.InternalFlag{}, errors.New("flag [key-not-exist] does not exists")),
+				cacheMock: NewCacheMock(
+					&flag.InternalFlag{},
+					errors.New("flag [key-not-exist] does not exists"),
+				),
 			},
 			wantErr:     true,
 			expectedLog: `user="random-key", flag="key-not-exist", value="118.12", variation="SdkDefault"`,
@@ -1370,23 +1409,30 @@ func TestFloat64VariationDetails(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					featureEventDataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.Config{
-						{
-							FlushInterval:    0,
-							MaxEventInMemory: 0,
-							Exporter: &logsexporter.Exporter{
-								LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
-									"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+					featureEventDataExporter: exporter.NewManager[exporter.FeatureEvent](
+						context.Background(),
+						[]exporter.Config{
+							{
+								FlushInterval:    0,
+								MaxEventInMemory: 0,
+								Exporter: &logsexporter.Exporter{
+									LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+										"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+								},
 							},
 						},
-					}, exporter.DefaultExporterCleanQueueInterval, &fflog.FFLogger{LeveledLogger: logger}),
+						exporter.DefaultExporterCleanQueueInterval,
+						&fflog.FFLogger{LeveledLogger: logger},
+					),
 				}
 			}
 
 			got, err := Float64VariationDetails(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
-				time.Sleep(40 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
+				time.Sleep(
+					40 * time.Millisecond,
+				) // since the log is async, we are waiting to be sure it's written
 				if tt.expectedLog == "" {
 					handler.AssertEmpty()
 				} else {
@@ -1486,7 +1532,10 @@ func TestJSONArrayVariation(t *testing.T) {
 				flagKey:      "key-not-exist",
 				user:         ffcontext.NewEvaluationContext("random-key"),
 				defaultValue: []interface{}{"toto"},
-				cacheMock:    NewCacheMock(&flag.InternalFlag{}, errors.New("flag [key-not-exist] does not exists")),
+				cacheMock: NewCacheMock(
+					&flag.InternalFlag{},
+					errors.New("flag [key-not-exist] does not exists"),
+				),
 			},
 			want:        []interface{}{"toto"},
 			wantErr:     true,
@@ -1669,16 +1718,21 @@ func TestJSONArrayVariation(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					featureEventDataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.Config{
-						{
-							FlushInterval:    0,
-							MaxEventInMemory: 0,
-							Exporter: &logsexporter.Exporter{
-								LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
-									"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+					featureEventDataExporter: exporter.NewManager[exporter.FeatureEvent](
+						context.Background(),
+						[]exporter.Config{
+							{
+								FlushInterval:    0,
+								MaxEventInMemory: 0,
+								Exporter: &logsexporter.Exporter{
+									LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+										"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+								},
 							},
 						},
-					}, exporter.DefaultExporterCleanQueueInterval, &fflog.FFLogger{LeveledLogger: logger}),
+						exporter.DefaultExporterCleanQueueInterval,
+						&fflog.FFLogger{LeveledLogger: logger},
+					),
 				}
 			}
 
@@ -1690,7 +1744,9 @@ func TestJSONArrayVariation(t *testing.T) {
 			}
 			assert.Equal(t, tt.want, got, "JSONArrayVariation() got = %v, want %v", got, tt.want)
 			if tt.expectedLog != "" {
-				time.Sleep(40 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
+				time.Sleep(
+					40 * time.Millisecond,
+				) // since the log is async, we are waiting to be sure it's written
 				if tt.expectedLog == "" {
 					handler.AssertEmpty()
 				} else {
@@ -1789,7 +1845,10 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 				flagKey:      "key-not-exist",
 				user:         ffcontext.NewEvaluationContext("random-key"),
 				defaultValue: []interface{}{"toto"},
-				cacheMock:    NewCacheMock(&flag.InternalFlag{}, errors.New("flag [key-not-exist] does not exists")),
+				cacheMock: NewCacheMock(
+					&flag.InternalFlag{},
+					errors.New("flag [key-not-exist] does not exists"),
+				),
 			},
 			wantErr:     true,
 			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"\\[toto\\]\"\n",
@@ -1981,20 +2040,29 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					featureEventDataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.Config{
-						{
-							FlushInterval:    0,
-							MaxEventInMemory: 0,
-							Exporter: &logsexporter.Exporter{
-								LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
-									"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+					featureEventDataExporter: exporter.NewManager[exporter.FeatureEvent](
+						context.Background(),
+						[]exporter.Config{
+							{
+								FlushInterval:    0,
+								MaxEventInMemory: 0,
+								Exporter: &logsexporter.Exporter{
+									LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+										"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+								},
 							},
 						},
-					}, exporter.DefaultExporterCleanQueueInterval, &fflog.FFLogger{LeveledLogger: logger}),
+						exporter.DefaultExporterCleanQueueInterval,
+						&fflog.FFLogger{LeveledLogger: logger},
+					),
 				}
 			}
 
-			got, err := JSONArrayVariationDetails(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
+			got, err := JSONArrayVariationDetails(
+				tt.args.flagKey,
+				tt.args.user,
+				tt.args.defaultValue,
+			)
 
 			if tt.wantErr {
 				assert.Error(t, err, "JSONArrayVariation() error = %v, wantErr %v", err, tt.wantErr)
@@ -2002,7 +2070,9 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 			}
 			assert.Equal(t, tt.want, got, "JSONArrayVariation() got = %v, want %v", got, tt.want)
 			if tt.expectedLog != "" {
-				time.Sleep(40 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
+				time.Sleep(
+					40 * time.Millisecond,
+				) // since the log is async, we are waiting to be sure it's written
 				if tt.expectedLog == "" {
 					handler.AssertEmpty()
 				} else {
@@ -2096,7 +2166,10 @@ func TestJSONVariation(t *testing.T) {
 				flagKey:      "key-not-exist",
 				user:         ffcontext.NewEvaluationContext("random-key"),
 				defaultValue: map[string]interface{}{"default-notkey": true},
-				cacheMock:    NewCacheMock(&flag.InternalFlag{}, errors.New("flag [key-not-exist] does not exists")),
+				cacheMock: NewCacheMock(
+					&flag.InternalFlag{},
+					errors.New("flag [key-not-exist] does not exists"),
+				),
 			},
 			want:        map[string]interface{}{"default-notkey": true},
 			wantErr:     true,
@@ -2260,23 +2333,30 @@ func TestJSONVariation(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					featureEventDataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.Config{
-						{
-							FlushInterval:    0,
-							MaxEventInMemory: 0,
-							Exporter: &logsexporter.Exporter{
-								LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
-									"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+					featureEventDataExporter: exporter.NewManager[exporter.FeatureEvent](
+						context.Background(),
+						[]exporter.Config{
+							{
+								FlushInterval:    0,
+								MaxEventInMemory: 0,
+								Exporter: &logsexporter.Exporter{
+									LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+										"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+								},
 							},
 						},
-					}, exporter.DefaultExporterCleanQueueInterval, &fflog.FFLogger{LeveledLogger: logger}),
+						exporter.DefaultExporterCleanQueueInterval,
+						&fflog.FFLogger{LeveledLogger: logger},
+					),
 				}
 			}
 
 			got, err := JSONVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
-				time.Sleep(40 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
+				time.Sleep(
+					40 * time.Millisecond,
+				) // since the log is async, we are waiting to be sure it's written
 				if tt.expectedLog == "" {
 					handler.AssertEmpty()
 				} else {
@@ -2498,23 +2578,30 @@ func TestJSONVariationDetails(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					featureEventDataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.Config{
-						{
-							FlushInterval:    0,
-							MaxEventInMemory: 0,
-							Exporter: &logsexporter.Exporter{
-								LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
-									"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+					featureEventDataExporter: exporter.NewManager[exporter.FeatureEvent](
+						context.Background(),
+						[]exporter.Config{
+							{
+								FlushInterval:    0,
+								MaxEventInMemory: 0,
+								Exporter: &logsexporter.Exporter{
+									LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+										"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+								},
 							},
 						},
-					}, exporter.DefaultExporterCleanQueueInterval, &fflog.FFLogger{LeveledLogger: logger}),
+						exporter.DefaultExporterCleanQueueInterval,
+						&fflog.FFLogger{LeveledLogger: logger},
+					),
 				}
 			}
 
 			got, err := JSONVariationDetails(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
-				time.Sleep(40 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
+				time.Sleep(
+					40 * time.Millisecond,
+				) // since the log is async, we are waiting to be sure it's written
 				if tt.expectedLog == "" {
 					handler.AssertEmpty()
 				} else {
@@ -2615,7 +2702,10 @@ func TestStringVariation(t *testing.T) {
 				flagKey:      "key-not-exist",
 				user:         ffcontext.NewEvaluationContext("random-key"),
 				defaultValue: "default-notkey",
-				cacheMock:    NewCacheMock(&flag.InternalFlag{}, errors.New("flag [key-not-exist] does not exists")),
+				cacheMock: NewCacheMock(
+					&flag.InternalFlag{},
+					errors.New("flag [key-not-exist] does not exists"),
+				),
 			},
 			want:        "default-notkey",
 			wantErr:     true,
@@ -2780,22 +2870,29 @@ func TestStringVariation(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					featureEventDataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.Config{
-						{
-							FlushInterval:    0,
-							MaxEventInMemory: 0,
-							Exporter: &logsexporter.Exporter{
-								LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
-									"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+					featureEventDataExporter: exporter.NewManager[exporter.FeatureEvent](
+						context.Background(),
+						[]exporter.Config{
+							{
+								FlushInterval:    0,
+								MaxEventInMemory: 0,
+								Exporter: &logsexporter.Exporter{
+									LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+										"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+								},
 							},
 						},
-					}, exporter.DefaultExporterCleanQueueInterval, &fflog.FFLogger{LeveledLogger: logger}),
+						exporter.DefaultExporterCleanQueueInterval,
+						&fflog.FFLogger{LeveledLogger: logger},
+					),
 				}
 			}
 			got, err := StringVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
-				time.Sleep(40 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
+				time.Sleep(
+					40 * time.Millisecond,
+				) // since the log is async, we are waiting to be sure it's written
 				if tt.expectedLog == "" {
 					handler.AssertEmpty()
 				} else {
@@ -3017,22 +3114,29 @@ func TestStringVariationDetails(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					featureEventDataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.Config{
-						{
-							FlushInterval:    0,
-							MaxEventInMemory: 0,
-							Exporter: &logsexporter.Exporter{
-								LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
-									"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+					featureEventDataExporter: exporter.NewManager[exporter.FeatureEvent](
+						context.Background(),
+						[]exporter.Config{
+							{
+								FlushInterval:    0,
+								MaxEventInMemory: 0,
+								Exporter: &logsexporter.Exporter{
+									LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+										"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+								},
 							},
 						},
-					}, exporter.DefaultExporterCleanQueueInterval, &fflog.FFLogger{LeveledLogger: logger}),
+						exporter.DefaultExporterCleanQueueInterval,
+						&fflog.FFLogger{LeveledLogger: logger},
+					),
 				}
 			}
 			got, err := StringVariationDetails(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
-				time.Sleep(40 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
+				time.Sleep(
+					40 * time.Millisecond,
+				) // since the log is async, we are waiting to be sure it's written
 				if tt.expectedLog == "" {
 					handler.AssertEmpty()
 				} else {
@@ -3133,7 +3237,10 @@ func TestIntVariation(t *testing.T) {
 				flagKey:      "key-not-exist",
 				user:         ffcontext.NewEvaluationContext("random-key"),
 				defaultValue: 118,
-				cacheMock:    NewCacheMock(&flag.InternalFlag{}, errors.New("flag [key-not-exist] does not exists")),
+				cacheMock: NewCacheMock(
+					&flag.InternalFlag{},
+					errors.New("flag [key-not-exist] does not exists"),
+				),
 			},
 			want:        118,
 			wantErr:     true,
@@ -3329,22 +3436,29 @@ func TestIntVariation(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					featureEventDataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.Config{
-						{
-							FlushInterval:    0,
-							MaxEventInMemory: 0,
-							Exporter: &logsexporter.Exporter{
-								LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
-									"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+					featureEventDataExporter: exporter.NewManager[exporter.FeatureEvent](
+						context.Background(),
+						[]exporter.Config{
+							{
+								FlushInterval:    0,
+								MaxEventInMemory: 0,
+								Exporter: &logsexporter.Exporter{
+									LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+										"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+								},
 							},
 						},
-					}, exporter.DefaultExporterCleanQueueInterval, &fflog.FFLogger{LeveledLogger: logger}),
+						exporter.DefaultExporterCleanQueueInterval,
+						&fflog.FFLogger{LeveledLogger: logger},
+					),
 				}
 			}
 			got, err := IntVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
-				time.Sleep(40 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
+				time.Sleep(
+					40 * time.Millisecond,
+				) // since the log is async, we are waiting to be sure it's written
 				if tt.expectedLog == "" {
 					handler.AssertEmpty()
 				} else {
@@ -3608,22 +3722,29 @@ func TestIntVariationDetails(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					featureEventDataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.Config{
-						{
-							FlushInterval:    0,
-							MaxEventInMemory: 0,
-							Exporter: &logsexporter.Exporter{
-								LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
-									"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+					featureEventDataExporter: exporter.NewManager[exporter.FeatureEvent](
+						context.Background(),
+						[]exporter.Config{
+							{
+								FlushInterval:    0,
+								MaxEventInMemory: 0,
+								Exporter: &logsexporter.Exporter{
+									LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+										"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+								},
 							},
 						},
-					}, exporter.DefaultExporterCleanQueueInterval, &fflog.FFLogger{LeveledLogger: logger}),
+						exporter.DefaultExporterCleanQueueInterval,
+						&fflog.FFLogger{LeveledLogger: logger},
+					),
 				}
 			}
 			got, err := IntVariationDetails(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
-				time.Sleep(40 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
+				time.Sleep(
+					40 * time.Millisecond,
+				) // since the log is async, we are waiting to be sure it's written
 				if tt.expectedLog == "" {
 					handler.AssertEmpty()
 				} else {
@@ -3745,7 +3866,10 @@ func TestRawVariation(t *testing.T) {
 				flagKey:      "key-not-exist",
 				user:         ffcontext.NewEvaluationContext("random-key"),
 				defaultValue: 123456,
-				cacheMock:    NewCacheMock(&flag.InternalFlag{}, errors.New("flag [key-not-exist] does not exists")),
+				cacheMock: NewCacheMock(
+					&flag.InternalFlag{},
+					errors.New("flag [key-not-exist] does not exists"),
+				),
 			},
 			want: model.RawVarResult{
 				Value:         123456,
@@ -3981,23 +4105,30 @@ func TestRawVariation(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					featureEventDataExporter: exporter.NewManager[exporter.FeatureEvent](context.Background(), []exporter.Config{
-						{
-							FlushInterval:    0,
-							MaxEventInMemory: 0,
-							Exporter: &logsexporter.Exporter{
-								LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
-									"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+					featureEventDataExporter: exporter.NewManager[exporter.FeatureEvent](
+						context.Background(),
+						[]exporter.Config{
+							{
+								FlushInterval:    0,
+								MaxEventInMemory: 0,
+								Exporter: &logsexporter.Exporter{
+									LogFormat: "user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", " +
+										"value=\"{{ .Value}}\", variation=\"{{ .Variation}}\"",
+								},
 							},
 						},
-					}, exporter.DefaultExporterCleanQueueInterval, &fflog.FFLogger{LeveledLogger: logger}),
+						exporter.DefaultExporterCleanQueueInterval,
+						&fflog.FFLogger{LeveledLogger: logger},
+					),
 				}
 			}
 
 			got, err := ff.RawVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
-				time.Sleep(40 * time.Millisecond) // since the log is async, we are waiting to be sure it's written
+				time.Sleep(
+					40 * time.Millisecond,
+				) // since the log is async, we are waiting to be sure it's written
 				if tt.expectedLog == "" {
 					handler.AssertEmpty()
 				} else {
@@ -4097,7 +4228,11 @@ flag1:
 	})
 	require.NoError(t, err)
 
-	res, err1 := goff.BoolVariation("flag1", ffcontext.NewEvaluationContextBuilder("my-key").Build(), false)
+	res, err1 := goff.BoolVariation(
+		"flag1",
+		ffcontext.NewEvaluationContextBuilder("my-key").Build(),
+		false,
+	)
 	assert.True(t, res)
 	assert.NoError(t, err1)
 	allFlags := goff.AllFlagsState(ffcontext.NewEvaluationContextBuilder("my-key").Build())
@@ -4112,7 +4247,11 @@ flag1:
 		},
 	})
 	require.NoError(t, err2)
-	res2, err3 := goff2.BoolVariation("flag1", ffcontext.NewEvaluationContextBuilder("my-key").Build(), false)
+	res2, err3 := goff2.BoolVariation(
+		"flag1",
+		ffcontext.NewEvaluationContextBuilder("my-key").Build(),
+		false,
+	)
 	assert.True(t, res2)
 	assert.NoError(t, err3)
 	allFlags2 := goff2.AllFlagsState(ffcontext.NewEvaluationContextBuilder("my-key").Build())
@@ -4128,7 +4267,11 @@ flag1:
 		},
 	})
 	require.NoError(t, err4)
-	res3, err5 := goff3.BoolVariation("flag1", ffcontext.NewEvaluationContextBuilder("my-key").Build(), false)
+	res3, err5 := goff3.BoolVariation(
+		"flag1",
+		ffcontext.NewEvaluationContextBuilder("my-key").Build(),
+		false,
+	)
 	assert.True(t, res3)
 	assert.NoError(t, err5)
 

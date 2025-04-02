@@ -336,9 +336,9 @@ func notifyVariation[T model.JSONType](
 			"SERVER",
 			ctx.ExtractGOFFProtectedFields().ExporterMetadata,
 		)
-		g.exporterWg.Add(1)
+		g.evalExporterWg.Add(1)
 		go func() {
-			defer g.exporterWg.Done()
+			defer g.evalExporterWg.Done()
 			g.CollectEventData(event)
 		}()
 	}

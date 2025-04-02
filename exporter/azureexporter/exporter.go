@@ -52,7 +52,11 @@ func (f *Exporter) initializeAzureClient() (*azblob.Client, error) {
 	return azblob.NewClientWithSharedKeyCredential(url, cred, nil)
 }
 
-func (f *Exporter) Export(ctx context.Context, logger *fflog.FFLogger, featureEvents []exporter.ExportableEvent) error {
+func (f *Exporter) Export(
+	ctx context.Context,
+	logger *fflog.FFLogger,
+	featureEvents []exporter.ExportableEvent,
+) error {
 	if f.AccountName == "" {
 		return fmt.Errorf("you should specify an AccountName. %v is invalid", f.AccountName)
 	}
@@ -92,7 +96,10 @@ func (f *Exporter) Export(ctx context.Context, logger *fflog.FFLogger, featureEv
 		fileName := file.Name()
 		of, err := os.Open(outputDir + "/" + fileName)
 		if err != nil {
-			logger.Error("[Azure Exporter] impossible to open file", slog.String("path", outputDir+"/"+fileName))
+			logger.Error(
+				"[Azure Exporter] impossible to open file",
+				slog.String("path", outputDir+"/"+fileName),
+			)
 			continue
 		}
 		defer func() { _ = of.Close() }()
@@ -105,11 +112,17 @@ func (f *Exporter) Export(ctx context.Context, logger *fflog.FFLogger, featureEv
 
 		_, err = client.UploadFile(context.Background(), f.Container, source, of, nil)
 		if err != nil {
-			logger.Error("[Azure Exporter] failed to upload file", slog.String("path", outputDir+"/"+fileName))
+			logger.Error(
+				"[Azure Exporter] failed to upload file",
+				slog.String("path", outputDir+"/"+fileName),
+			)
 			return err
 		}
 
-		logger.Info("[Azure Exporter] file uploaded.", slog.String("location", f.Container+"/"+fileName))
+		logger.Info(
+			"[Azure Exporter] file uploaded.",
+			slog.String("location", f.Container+"/"+fileName),
+		)
 	}
 	return nil
 }

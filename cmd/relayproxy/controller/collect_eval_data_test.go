@@ -187,6 +187,17 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 }
 
 func Test_collect_tracking_and_evaluation_events(t *testing.T) {
+	//
+	//
+	//
+	//
+	// PLEASE REWORK THIS TEST
+	//
+	//
+	//
+	//
+	//
+
 	evalExporter, err := os.CreateTemp("", "evalExport.json")
 	assert.NoError(t, err)
 	trackingExporter, err := os.CreateTemp("", "trackExport.json")
@@ -225,7 +236,7 @@ func Test_collect_tracking_and_evaluation_events(t *testing.T) {
 
 	bodyReq, err := os.ReadFile(
 		"../testdata/controller/collect_eval_data/valid_request_mix_tracking_evaluation.json")
-
+	assert.NoError(t, err)
 	e := echo.New()
 	rec := httptest.NewRecorder()
 
@@ -246,5 +257,4 @@ func Test_collect_tracking_and_evaluation_events(t *testing.T) {
 	trackingEvents, err := os.ReadFile(trackingExporter.Name())
 	assert.NoError(t, err)
 	fmt.Println(string(trackingEvents))
-
 }

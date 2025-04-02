@@ -153,7 +153,6 @@ func (d *dataExporterImpl[T]) sendEvents(ctx context.Context, events []T) error 
 		default:
 			return fmt.Errorf("trying to send unknown object to the exporter (deprecated)")
 		}
-		break
 	case DeprecatedExporterV2:
 		switch events := any(events).(type) {
 		case []FeatureEvent:
@@ -164,7 +163,6 @@ func (d *dataExporterImpl[T]) sendEvents(ctx context.Context, events []T) error 
 		default:
 			return fmt.Errorf("trying to send unknown object to the exporter")
 		}
-		break
 	case Exporter:
 		exportableEvents := make([]ExportableEvent, len(events))
 		for i, event := range events {
@@ -174,7 +172,6 @@ func (d *dataExporterImpl[T]) sendEvents(ctx context.Context, events []T) error 
 		if err != nil {
 			return fmt.Errorf("error while exporting data: %w", err)
 		}
-		break
 	default:
 		return fmt.Errorf("this is not a valid exporter")
 	}

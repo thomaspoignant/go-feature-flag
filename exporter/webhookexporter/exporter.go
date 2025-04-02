@@ -60,7 +60,11 @@ type webhookPayload struct {
 }
 
 // Export is sending a collection of events in a webhook call.
-func (f *Exporter) Export(ctx context.Context, _ *fflog.FFLogger, events []exporter.ExportableEvent) error {
+func (f *Exporter) Export(
+	ctx context.Context,
+	_ *fflog.FFLogger,
+	events []exporter.ExportableEvent,
+) error {
 	f.init.Do(func() {
 		if f.httpClient == nil {
 			f.httpClient = internal.DefaultHTTPClient()
@@ -109,7 +113,10 @@ func (f *Exporter) Export(ctx context.Context, _ *fflog.FFLogger, events []expor
 	defer func() { _ = response.Body.Close() }()
 	if response.StatusCode > 399 {
 		return fmt.Errorf(
-			"error while calling the webhook, HTTP Code %d received, response: %v", response.StatusCode, response.Body)
+			"error while calling the webhook, HTTP Code %d received, response: %v",
+			response.StatusCode,
+			response.Body,
+		)
 	}
 	return nil
 }

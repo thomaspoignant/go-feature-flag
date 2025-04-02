@@ -26,7 +26,10 @@ var DefaultPartitionKey = func(context context.Context, _ exporter.ExportableEve
 }
 
 type MessageSender interface {
-	SendMessages(ctx context.Context, msgs *kinesis.PutRecordsInput) (*kinesis.PutRecordsOutput, error)
+	SendMessages(
+		ctx context.Context,
+		msgs *kinesis.PutRecordsInput,
+	) (*kinesis.PutRecordsOutput, error)
 }
 
 type DefaultKinesisSender struct {
@@ -145,7 +148,11 @@ func (e *Exporter) initializeProducer(ctx context.Context) error {
 	return initErr
 }
 
-func (e *Exporter) Export(ctx context.Context, logger *fflog.FFLogger, featureEvents []exporter.ExportableEvent) error {
+func (e *Exporter) Export(
+	ctx context.Context,
+	logger *fflog.FFLogger,
+	featureEvents []exporter.ExportableEvent,
+) error {
 	err := e.initializeProducer(ctx)
 	if err != nil {
 		return fmt.Errorf("writer: %w", err)

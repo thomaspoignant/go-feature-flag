@@ -195,7 +195,9 @@ func TestExporterSettingsCreation(t *testing.T) {
 			WithStreamName("test-stream-name"),
 			WithStreamArn("test-stream-arn"),
 			WithExplicitHashKey("test-explicit-hash-key"),
-			WithPartitionKey(func(_ context.Context, _ exporter.ExportableEvent) string { return "non-default" }),
+			WithPartitionKey(
+				func(_ context.Context, _ exporter.ExportableEvent) string { return "non-default" },
+			),
 		)
 		assert.Equal(t, settings.PartitionKey(context.TODO(), NewFeatureEvent()), "non-default")
 		assert.Nil(t, settings.StreamName) // overwritten by streamArn
@@ -267,7 +269,10 @@ type MockKinesisSender struct {
 	PutRecordsInputs []*kinesis.PutRecordsInput
 }
 
-func (k *MockKinesisSender) SendMessages(ctx context.Context, msgs *kinesis.PutRecordsInput) (*kinesis.PutRecordsOutput, error) {
+func (k *MockKinesisSender) SendMessages(
+	ctx context.Context,
+	msgs *kinesis.PutRecordsInput,
+) (*kinesis.PutRecordsOutput, error) {
 	k.PutRecordsInputs = append(k.PutRecordsInputs, msgs)
 	failedRecordCount := int32(0)
 	output := kinesis.PutRecordsOutput{
@@ -281,6 +286,9 @@ func (k *MockKinesisSender) SendMessages(ctx context.Context, msgs *kinesis.PutR
 
 type MockKinesisSenderWithError struct{}
 
-func (k *MockKinesisSenderWithError) SendMessages(ctx context.Context, msgs *kinesis.PutRecordsInput) (*kinesis.PutRecordsOutput, error) {
+func (k *MockKinesisSenderWithError) SendMessages(
+	ctx context.Context,
+	msgs *kinesis.PutRecordsInput,
+) (*kinesis.PutRecordsOutput, error) {
 	return nil, errors.New("failure to send message: datacenter on fire")
 }

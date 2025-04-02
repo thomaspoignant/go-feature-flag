@@ -16,27 +16,40 @@ import (
 const defaultTestCleanQueueDuration = 100 * time.Millisecond
 
 func Test_ConsumerNameInvalid(t *testing.T) {
-	t.Run("GetPendingEventCount: should return an error if the consumer name is invalid", func(t *testing.T) {
-		eventStore := exporter.NewEventStore[testutils.ExportableMockEvent](defaultTestCleanQueueDuration)
-		eventStore.AddConsumer("consumer1")
-		defer eventStore.Stop()
-		_, err := eventStore.GetPendingEventCount("wrong name")
-		assert.NotNil(t, err)
-	})
-	t.Run("ProcessPendingEvents: should return an error if the consumer name is invalid", func(t *testing.T) {
-		eventStore := exporter.NewEventStore[testutils.ExportableMockEvent](defaultTestCleanQueueDuration)
-		eventStore.AddConsumer("consumer1")
-		defer eventStore.Stop()
-		err := eventStore.ProcessPendingEvents(
-			"wrong name",
-			func(ctx context.Context, events []testutils.ExportableMockEvent) error { return nil })
-		assert.NotNil(t, err)
-	})
+	t.Run(
+		"GetPendingEventCount: should return an error if the consumer name is invalid",
+		func(t *testing.T) {
+			eventStore := exporter.NewEventStore[testutils.ExportableMockEvent](
+				defaultTestCleanQueueDuration,
+			)
+			eventStore.AddConsumer("consumer1")
+			defer eventStore.Stop()
+			_, err := eventStore.GetPendingEventCount("wrong name")
+			assert.NotNil(t, err)
+		},
+	)
+	t.Run(
+		"ProcessPendingEvents: should return an error if the consumer name is invalid",
+		func(t *testing.T) {
+			eventStore := exporter.NewEventStore[testutils.ExportableMockEvent](
+				defaultTestCleanQueueDuration,
+			)
+			eventStore.AddConsumer("consumer1")
+			defer eventStore.Stop()
+			err := eventStore.ProcessPendingEvents(
+				"wrong name",
+				func(ctx context.Context, events []testutils.ExportableMockEvent) error { return nil },
+			)
+			assert.NotNil(t, err)
+		},
+	)
 }
 
 func Test_SingleConsumer(t *testing.T) {
 	consumerName := "consumer1"
-	eventStore := exporter.NewEventStore[testutils.ExportableMockEvent](defaultTestCleanQueueDuration)
+	eventStore := exporter.NewEventStore[testutils.ExportableMockEvent](
+		defaultTestCleanQueueDuration,
+	)
 	eventStore.AddConsumer(consumerName)
 	defer eventStore.Stop()
 	got, _ := eventStore.GetPendingEventCount(consumerName)
@@ -82,7 +95,9 @@ func Test_SingleConsumer(t *testing.T) {
 
 func Test_MultipleConsumersSingleThread(t *testing.T) {
 	consumerNames := []string{"consumer1", "consumer2"}
-	eventStore := exporter.NewEventStore[testutils.ExportableMockEvent](defaultTestCleanQueueDuration)
+	eventStore := exporter.NewEventStore[testutils.ExportableMockEvent](
+		defaultTestCleanQueueDuration,
+	)
 	for _, name := range consumerNames {
 		eventStore.AddConsumer(name)
 	}
@@ -142,7 +157,9 @@ func Test_MultipleConsumersSingleThread(t *testing.T) {
 
 func Test_MultipleConsumersMultipleGORoutines(t *testing.T) {
 	consumerNames := []string{"consumer1", "consumer2"}
-	eventStore := exporter.NewEventStore[testutils.ExportableMockEvent](defaultTestCleanQueueDuration)
+	eventStore := exporter.NewEventStore[testutils.ExportableMockEvent](
+		defaultTestCleanQueueDuration,
+	)
 	for _, name := range consumerNames {
 		eventStore.AddConsumer(name)
 	}
@@ -162,7 +179,9 @@ func Test_MultipleConsumersMultipleGORoutines(t *testing.T) {
 				return nil
 			})
 		assert.Nil(t, err)
-		time.Sleep(50 * time.Millisecond) // we wait to be sure that the producer has produce new events
+		time.Sleep(
+			50 * time.Millisecond,
+		) // we wait to be sure that the producer has produce new events
 
 		err = eventStore.ProcessPendingEvents(consumerName,
 			func(ctx context.Context, events []testutils.ExportableMockEvent) error {
@@ -186,7 +205,9 @@ func Test_MultipleConsumersMultipleGORoutines(t *testing.T) {
 
 func Test_ProcessPendingEventInError(t *testing.T) {
 	consumerName := "consumer1"
-	eventStore := exporter.NewEventStore[testutils.ExportableMockEvent](defaultTestCleanQueueDuration)
+	eventStore := exporter.NewEventStore[testutils.ExportableMockEvent](
+		defaultTestCleanQueueDuration,
+	)
 	eventStore.AddConsumer(consumerName)
 	defer eventStore.Stop()
 	// start producer
@@ -198,10 +219,13 @@ func Test_ProcessPendingEventInError(t *testing.T) {
 	assert.Nil(t, err)
 
 	// process is in error, so we are not able to update the offset
-	err = eventStore.ProcessPendingEvents(consumerName, func(ctx context.Context, events []testutils.ExportableMockEvent) error {
-		assert.Equal(t, 1000, len(events))
-		return fmt.Errorf("error")
-	})
+	err = eventStore.ProcessPendingEvents(
+		consumerName,
+		func(ctx context.Context, events []testutils.ExportableMockEvent) error {
+			assert.Equal(t, 1000, len(events))
+			return fmt.Errorf("error")
+		},
+	)
 	assert.NotNil(t, err)
 
 	// We still have the same number of items waiting for next process
@@ -210,10 +234,13 @@ func Test_ProcessPendingEventInError(t *testing.T) {
 	assert.Nil(t, err)
 
 	// process is not in error anymore
-	err = eventStore.ProcessPendingEvents(consumerName, func(ctx context.Context, events []testutils.ExportableMockEvent) error {
-		assert.Equal(t, 1000, len(events))
-		return nil
-	})
+	err = eventStore.ProcessPendingEvents(
+		consumerName,
+		func(ctx context.Context, events []testutils.ExportableMockEvent) error {
+			assert.Equal(t, 1000, len(events))
+			return nil
+		},
+	)
 	assert.Nil(t, err)
 
 	// we have consumed all the items
@@ -224,7 +251,9 @@ func Test_ProcessPendingEventInError(t *testing.T) {
 
 func Test_WaitForEmptyClean(t *testing.T) {
 	consumerNames := []string{"consumer1"}
-	eventStore := exporter.NewEventStore[testutils.ExportableMockEvent](defaultTestCleanQueueDuration)
+	eventStore := exporter.NewEventStore[testutils.ExportableMockEvent](
+		defaultTestCleanQueueDuration,
+	)
 	for _, name := range consumerNames {
 		eventStore.AddConsumer(name)
 	}
@@ -233,17 +262,25 @@ func Test_WaitForEmptyClean(t *testing.T) {
 	// start producer
 	ctx := context.Background()
 	startEventProducer(ctx, eventStore, 100, false)
-	err := eventStore.ProcessPendingEvents(consumerNames[0], func(ctx context.Context, events []testutils.ExportableMockEvent) error {
-		assert.Equal(t, 100, len(events))
-		return nil
-	})
+	err := eventStore.ProcessPendingEvents(
+		consumerNames[0],
+		func(ctx context.Context, events []testutils.ExportableMockEvent) error {
+			assert.Equal(t, 100, len(events))
+			return nil
+		},
+	)
 	assert.Nil(t, err)
 	assert.True(t, eventStore.GetTotalEventCount() > 0)
 	time.Sleep(3 * defaultTestCleanQueueDuration)
 	assert.Equal(t, int64(0), eventStore.GetTotalEventCount())
 }
 
-func startEventProducer(ctx context.Context, eventStore exporter.EventStore[testutils.ExportableMockEvent], produceMax int, randomizeProducingTime bool) {
+func startEventProducer(
+	ctx context.Context,
+	eventStore exporter.EventStore[testutils.ExportableMockEvent],
+	produceMax int,
+	randomizeProducingTime bool,
+) {
 	for i := 0; i < produceMax; i++ {
 		select {
 		case <-ctx.Done():

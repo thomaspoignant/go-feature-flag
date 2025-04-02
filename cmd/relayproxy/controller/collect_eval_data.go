@@ -73,7 +73,10 @@ func (h *collectEvalData) Handler(c echo.Context) error {
 		case "tracking":
 			e, err := convertTrackingEvent(event, h.logger)
 			if err != nil {
-				h.logger.Error("impossible to convert the event to a tracking event", zap.Error(err))
+				h.logger.Error(
+					"impossible to convert the event to a tracking event",
+					zap.Error(err),
+				)
 				continue
 			}
 			h.goFF.CollectTrackingEventData(e)
@@ -89,14 +92,19 @@ func (h *collectEvalData) Handler(c echo.Context) error {
 		}
 	}
 	span.SetAttributes(attribute.Int("collectEventData.trackingCollectionSize", counterTracking))
-	span.SetAttributes(attribute.Int("collectEventData.evaluationCollectionSize", counterEvaluation))
+	span.SetAttributes(
+		attribute.Int("collectEventData.evaluationCollectionSize", counterEvaluation),
+	)
 	h.metrics.IncCollectEvalData(float64(len(reqBody.Events)))
 	return c.JSON(http.StatusOK, model.CollectEvalDataResponse{
 		IngestedContentCount: len(reqBody.Events),
 	})
 }
 
-func convertTrackingEvent(event map[string]any, logger *zap.Logger) (exporter.TrackingEvent, error) {
+func convertTrackingEvent(
+	event map[string]any,
+	logger *zap.Logger,
+) (exporter.TrackingEvent, error) {
 	var e exporter.TrackingEvent
 	marshalled, err := json.Marshal(event)
 	if err != nil {

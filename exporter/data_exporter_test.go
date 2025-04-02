@@ -68,11 +68,17 @@ func TestDataExporterFlush_TriggerErrorIfNotKnowType(t *testing.T) {
 			defer func() { _ = os.Remove(logFile.Name()) }()
 
 			exporterMock := tt.exporter
-			exp := exporter.NewDataExporter[testutils.ExportableMockEvent](context.TODO(), exporter.Config{
-				Exporter:         exporterMock,
-				FlushInterval:    0,
-				MaxEventInMemory: 0,
-			}, "id-consumer", &evStore, logger)
+			exp := exporter.NewDataExporter[testutils.ExportableMockEvent](
+				context.TODO(),
+				exporter.Config{
+					Exporter:         exporterMock,
+					FlushInterval:    0,
+					MaxEventInMemory: 0,
+				},
+				"id-consumer",
+				&evStore,
+				logger,
+			)
 
 			exp.Flush()
 			// flush should error and not return any event

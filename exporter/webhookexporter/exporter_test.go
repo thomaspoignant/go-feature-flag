@@ -217,6 +217,14 @@ func TestWebhook_Export_impossibleToParse(t *testing.T) {
 		EndpointURL: " http://invalid.com/",
 	}
 
-	err := f.Export(context.Background(), &fflog.FFLogger{LeveledLogger: slog.Default()}, []exporter.ExportableEvent{})
-	assert.EqualError(t, err, "parse \" http://invalid.com/\": first path segment in URL cannot contain colon")
+	err := f.Export(
+		context.Background(),
+		&fflog.FFLogger{LeveledLogger: slog.Default()},
+		[]exporter.ExportableEvent{},
+	)
+	assert.EqualError(
+		t,
+		err,
+		"parse \" http://invalid.com/\": first path segment in URL cannot contain colon",
+	)
 }

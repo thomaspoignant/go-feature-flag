@@ -141,7 +141,8 @@ func (c *cacheManagerImpl) PersistCache(
 	newCache map[string]flag.Flag,
 ) {
 	go func() {
-		if _, err := os.Stat(c.persistentFlagConfigurationFile); !os.IsNotExist(err) && cmp.Equal(oldCache, newCache) {
+		if _, err := os.Stat(c.persistentFlagConfigurationFile); !os.IsNotExist(err) &&
+			cmp.Equal(oldCache, newCache) {
 			c.logger.Debug("No change in the cache, skipping the persist")
 			return
 		}

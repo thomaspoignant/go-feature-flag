@@ -178,7 +178,7 @@ func TestExporter_Export(t *testing.T) {
 				EnableMessageOrdering: tt.fields.enableMessageOrdering,
 				newClientFunc:         tt.fields.newClientFunc,
 			}
-			err = e.Export(ctx, logger, tt.featureEvents)
+			err = e.Export(ctx, logger, tt.events)
 
 			if tt.wantErr {
 				assert.Error(t, err)
@@ -201,7 +201,11 @@ func TestExporter_IsBulk(t *testing.T) {
 	assert.False(t, e.IsBulk(), "PubSub exporter is not a bulk one")
 }
 
-func assertMessages(t *testing.T, expectedEvents []exporter.ExportableEvent, messages []*pstest.Message) {
+func assertMessages(
+	t *testing.T,
+	expectedEvents []exporter.ExportableEvent,
+	messages []*pstest.Message,
+) {
 	events := make([]exporter.FeatureEvent, len(messages))
 	for i, message := range messages {
 		assert.Equal(t, map[string]string{"emitter": "GO Feature Flag"}, message.Attributes,
@@ -216,7 +220,11 @@ func assertMessages(t *testing.T, expectedEvents []exporter.ExportableEvent, mes
 	assert.ElementsMatchf(t, expectedEvents, events, "events should match in any order")
 }
 
-func assertPublisherSettings(t *testing.T, expectedSettings *pubsub.PublishSettings, publisher *pubsub.Topic) {
+func assertPublisherSettings(
+	t *testing.T,
+	expectedSettings *pubsub.PublishSettings,
+	publisher *pubsub.Topic,
+) {
 	if expectedSettings != nil {
 		assert.Equal(t, *expectedSettings, publisher.PublishSettings)
 	} else {

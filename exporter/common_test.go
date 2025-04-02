@@ -172,10 +172,21 @@ func TestFormatEventInCSV(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := tt.args.event.FormatInCSV(tt.args.csvTemplate)
-			if !tt.wantErr(t, err, fmt.Sprintf("FormatInCSV(%v, %v)", tt.args.csvTemplate, tt.args.event)) {
+			if !tt.wantErr(
+				t,
+				err,
+				fmt.Sprintf("FormatInCSV(%v, %v)", tt.args.csvTemplate, tt.args.event),
+			) {
 				return
 			}
-			assert.Equalf(t, tt.want, string(got), "FormatInCSV(%v, %v)", tt.args.csvTemplate, tt.args.event)
+			assert.Equalf(
+				t,
+				tt.want,
+				string(got),
+				"FormatInCSV(%v, %v)",
+				tt.args.csvTemplate,
+				tt.args.event,
+			)
 		})
 	}
 }

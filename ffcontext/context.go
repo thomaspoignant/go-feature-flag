@@ -61,20 +61,6 @@ func (u EvaluationContext) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func (u EvaluationContext) UnmarshalJSON(data []byte) error {
-	var aux struct {
-		TargetingKey string `json:"targetingKey"`
-		Attributes   value  `json:"attributes"`
-	}
-	err := json.Unmarshal(data, &aux)
-	if err != nil {
-		return err
-	}
-	u.targetingKey = aux.TargetingKey
-	u.attributes = aux.Attributes
-	return nil
-}
-
 // GetKey return the unique targetingKey for the user.
 func (u EvaluationContext) GetKey() string {
 	return u.targetingKey
