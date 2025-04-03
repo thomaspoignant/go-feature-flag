@@ -190,7 +190,11 @@ func TestGoogleStorage_Export(t *testing.T) {
 				CsvTemplate: tt.fields.CsvTemplate,
 			}
 
-			err := f.Export(context.Background(), &fflog.FFLogger{LeveledLogger: slog.Default()}, tt.events)
+			err := f.Export(
+				context.Background(),
+				&fflog.FFLogger{LeveledLogger: slog.Default()},
+				tt.events,
+			)
 			if tt.wantErr {
 				assert.Error(t, err, "Export should error")
 				return

@@ -29,7 +29,9 @@ func TestNewFeatureEvent(t *testing.T) {
 		{
 			name: "anonymous user",
 			args: args{
-				user:      ffcontext.NewEvaluationContextBuilder("ABCD").AddCustom("anonymous", true).Build(),
+				user: ffcontext.NewEvaluationContextBuilder("ABCD").
+					AddCustom("anonymous", true).
+					Build(),
 				flagKey:   "random-key",
 				value:     "YO",
 				variation: "Default",
@@ -45,7 +47,28 @@ func TestNewFeatureEvent(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equalf(t, tt.want, exporter.NewFeatureEvent(tt.args.user, tt.args.flagKey, tt.args.value, tt.args.variation, tt.args.failed, tt.args.version, tt.args.source, tt.args.exporterMetadata), "NewFeatureEvent(%v, %v, %v, %v, %v, %v, %V)", tt.args.user, tt.args.flagKey, tt.args.value, tt.args.variation, tt.args.failed, tt.args.version, tt.args.source)
+			assert.Equalf(
+				t,
+				tt.want,
+				exporter.NewFeatureEvent(
+					tt.args.user,
+					tt.args.flagKey,
+					tt.args.value,
+					tt.args.variation,
+					tt.args.failed,
+					tt.args.version,
+					tt.args.source,
+					tt.args.exporterMetadata,
+				),
+				"NewFeatureEvent(%v, %v, %v, %v, %v, %v, %V)",
+				tt.args.user,
+				tt.args.flagKey,
+				tt.args.value,
+				tt.args.variation,
+				tt.args.failed,
+				tt.args.version,
+				tt.args.source,
+			)
 		})
 	}
 }

@@ -30,5 +30,9 @@ func TestMonitoringImpl_Health(t *testing.T) {
 func TestMonitoringImpl_Info(t *testing.T) {
 	m := service.NewMonitoring(testGOFeatureFlag)
 	info := m.Info()
-	assert.False(t, info.LatestCacheRefresh.IsZero(), "Expected LatestCacheRefresh to not be zero, got zero")
+	assert.False(
+		t,
+		info.LatestCacheRefresh.IsZero(),
+		"Expected LatestCacheRefresh to not be zero, got zero",
+	)
 }

@@ -190,7 +190,7 @@ definitions:
           $ref: '#/definitions/model.OFREPFlagBulkEvaluateSuccessResponse'
         type: array
     type: object
-  model.OFREPCommonErrorResponse:
+  model.OFREPCommonResponseError:
     properties:
       errorCode:
         $ref: '#/definitions/flag.ErrorCode'
@@ -242,7 +242,7 @@ definitions:
           targetingKey: 4f433951-4c8c-42b3-9f18-8c9a5ed8e9eb
         type: object
     type: object
-  model.OFREPEvaluateErrorResponse:
+  model.OFREPEvaluateResponseError:
     properties:
       errorCode:
         $ref: '#/definitions/flag.ErrorCode'
@@ -518,7 +518,7 @@ paths:
         "404":
           description: Flag Not Found
           schema:
-            $ref: '#/definitions/model.OFREPEvaluateErrorResponse'
+            $ref: '#/definitions/model.OFREPEvaluateResponseError'
         "500":
           description: Internal server error
           schema:
@@ -562,7 +562,7 @@ paths:
         "400":
           description: Bad evaluation request
           schema:
-            $ref: '#/definitions/model.OFREPCommonErrorResponse'
+            $ref: '#/definitions/model.OFREPCommonResponseError'
         "401":
           description: Unauthorized - You need credentials to access the API
           schema:
@@ -609,7 +609,7 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/model.OFREPEvaluateErrorResponse'
+            $ref: '#/definitions/model.OFREPEvaluateResponseError'
         "401":
           description: Unauthorized
           schema:
@@ -617,7 +617,7 @@ paths:
         "404":
           description: Flag Not Found
           schema:
-            $ref: '#/definitions/model.OFREPEvaluateErrorResponse'
+            $ref: '#/definitions/model.OFREPEvaluateResponseError'
         "500":
           description: Internal server error
           schema:
