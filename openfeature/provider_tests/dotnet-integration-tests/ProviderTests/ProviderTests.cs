@@ -396,7 +396,7 @@ public class ProviderTests
             ErrorType.General, 
             Reason.Error,
             "",
-            "impossible to contact GO Feature Flag relay proxy instance");
+            "invalid token used to contact GO Feature Flag relay proxy instance");
         var got = await authenticatedClient.GetBooleanDetailsAsync(flagKey, false, defaultEvaluationContext);
         got.Should().BeEquivalentTo(want);
     }
