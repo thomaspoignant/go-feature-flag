@@ -57,7 +57,7 @@ func (f *Exporter) IsBulk() bool {
 func (f *Exporter) Export(
 	ctx context.Context,
 	logger *fflog.FFLogger,
-	featureEvents []exporter.FeatureEvent,
+	events []exporter.ExportableEvent,
 ) error {
 	// Init google storage client
 	client, err := storage.NewClient(ctx, f.Options...)
@@ -85,7 +85,7 @@ func (f *Exporter) Export(
 		CsvTemplate:             f.CsvTemplate,
 		ParquetCompressionCodec: f.ParquetCompressionCodec,
 	}
-	err = fileExporter.Export(ctx, logger, featureEvents)
+	err = fileExporter.Export(ctx, logger, events)
 	if err != nil {
 		return err
 	}

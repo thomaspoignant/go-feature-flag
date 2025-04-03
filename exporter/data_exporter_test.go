@@ -9,6 +9,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
+	"github.com/thomaspoignant/go-feature-flag/testutils"
 	"github.com/thomaspoignant/go-feature-flag/testutils/mock"
 	"github.com/thomaspoignant/go-feature-flag/testutils/slogutil"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
@@ -48,11 +49,6 @@ func TestDataExporterFlush_TriggerErrorIfNotKnowType(t *testing.T) {
 		expectedLog string
 	}{
 		{
-			name:        "classic exporter",
-			exporter:    &mock.Exporter{},
-			expectedLog: "trying to send unknown object to the exporter\n",
-		},
-		{
 			name:        "deprecated exporter",
 			exporter:    &mock.ExporterDeprecated{},
 			expectedLog: "trying to send unknown object to the exporter (deprecated)\n",
@@ -61,9 +57,9 @@ func TestDataExporterFlush_TriggerErrorIfNotKnowType(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			evStore := mock.NewEventStore[string]()
+			evStore := mock.NewEventStore[testutils.ExportableMockEvent]()
 			for i := 0; i < 100; i++ {
-				evStore.Add("feature")
+				evStore.Add(testutils.NewExportableMockEvent("feature"))
 			}
 
 			logFile, _ := os.CreateTemp("", "")
@@ -72,11 +68,17 @@ func TestDataExporterFlush_TriggerErrorIfNotKnowType(t *testing.T) {
 			defer func() { _ = os.Remove(logFile.Name()) }()
 
 			exporterMock := tt.exporter
-			exp := exporter.NewDataExporter[string](context.TODO(), exporter.Config{
-				Exporter:         exporterMock,
-				FlushInterval:    0,
-				MaxEventInMemory: 0,
-			}, "id-consumer", &evStore, logger)
+			exp := exporter.NewDataExporter[testutils.ExportableMockEvent](
+				context.TODO(),
+				exporter.Config{
+					Exporter:         exporterMock,
+					FlushInterval:    0,
+					MaxEventInMemory: 0,
+				},
+				"id-consumer",
+				&evStore,
+				logger,
+			)
 
 			exp.Flush()
 			// flush should error and not return any event

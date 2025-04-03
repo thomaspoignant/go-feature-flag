@@ -12,6 +12,7 @@ import (
 	"github.com/BurntSushi/toml"
 	"github.com/google/go-cmp/cmp"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
+	"github.com/thomaspoignant/go-feature-flag/internal/notification"
 	"github.com/thomaspoignant/go-feature-flag/model/dto"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"gopkg.in/yaml.v3"
@@ -29,14 +30,14 @@ type Manager interface {
 type cacheManagerImpl struct {
 	inMemoryCache                   Cache
 	mutex                           sync.RWMutex
-	notificationService             Service
+	notificationService             notification.Service
 	latestUpdate                    time.Time
 	logger                          *fflog.FFLogger
 	persistentFlagConfigurationFile string
 }
 
 func New(
-	notificationService Service,
+	notificationService notification.Service,
 	persistentFlagConfigurationFile string,
 	logger *fflog.FFLogger,
 ) Manager {

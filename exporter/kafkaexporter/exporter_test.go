@@ -25,19 +25,19 @@ func (s *messageSenderMock) SendMessages(msgs []*sarama.ProducerMessage) error {
 
 func TestExporter_IsBulk(t *testing.T) {
 	exp := Exporter{}
-	assert.False(t, exp.IsBulk(), "DeprecatedExporter is not a bulk exporter")
+	assert.False(t, exp.IsBulk(), "DeprecatedExporterV1 is not a bulk exporter")
 }
 
 func TestExporter_Export(t *testing.T) {
 	const mockTopic = "mockTopic"
 
 	tests := []struct {
-		name          string
-		format        string
-		dialer        func(addrs []string, config *sarama.Config) (MessageSender, error)
-		featureEvents []exporter.FeatureEvent
-		wantErr       bool
-		settings      Settings
+		name     string
+		format   string
+		dialer   func(addrs []string, config *sarama.Config) (MessageSender, error)
+		events   []exporter.ExportableEvent
+		wantErr  bool
+		settings Settings
 	}{
 		{
 			name:    "should receive an error if dial failed",
@@ -65,12 +65,12 @@ func TestExporter_Export(t *testing.T) {
 			name:    "should receive an event with a valid feature event",
 			format:  "json",
 			wantErr: false,
-			featureEvents: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false,
 				},
-				{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCDEF", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false,
 				},
@@ -87,12 +87,12 @@ func TestExporter_Export(t *testing.T) {
 			name:    "should default to JSON format if none provided",
 			format:  "", // Should default to JSON and generate a valid message
 			wantErr: false,
-			featureEvents: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false,
 				},
-				{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCDEF", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false,
 				},
@@ -109,12 +109,12 @@ func TestExporter_Export(t *testing.T) {
 			name:    "should return an error if the publisher is returning an error",
 			format:  "json",
 			wantErr: true,
-			featureEvents: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false,
 				},
-				{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCDEF", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false,
 				},
@@ -144,7 +144,7 @@ func TestExporter_Export(t *testing.T) {
 			}
 
 			logger := &fflog.FFLogger{LeveledLogger: slog.Default()}
-			err := exp.Export(context.Background(), logger, tt.featureEvents)
+			err := exp.Export(context.Background(), logger, tt.events)
 			if tt.wantErr {
 				assert.Error(t, err)
 				return
@@ -152,12 +152,12 @@ func TestExporter_Export(t *testing.T) {
 
 			assert.NoError(t, err)
 
-			want := make([]*sarama.ProducerMessage, len(tt.featureEvents))
-			for index, event := range tt.featureEvents {
+			want := make([]*sarama.ProducerMessage, len(tt.events))
+			for index, event := range tt.events {
 				messageBody, _ := json.Marshal(event)
 				want[index] = &sarama.ProducerMessage{
 					Topic: mockTopic,
-					Key:   sarama.StringEncoder(event.UserKey),
+					Key:   sarama.StringEncoder(event.GetUserKey()),
 					Value: sarama.ByteEncoder(messageBody),
 				}
 			}

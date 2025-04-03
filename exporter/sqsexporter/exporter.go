@@ -27,11 +27,11 @@ type Exporter struct {
 	sqsService SQSSendMessageAPI
 }
 
-// Export is sending SQS event for each featureEvents received.
+// Export is sending SQS event for each events received.
 func (f *Exporter) Export(
 	ctx context.Context,
 	_ *fflog.FFLogger,
-	featureEvents []exporter.FeatureEvent,
+	events []exporter.ExportableEvent,
 ) error {
 	if f.AwsConfig == nil {
 		cfg, err := config.LoadDefaultConfig(ctx)
@@ -51,7 +51,7 @@ func (f *Exporter) Export(
 		})
 	}
 
-	for _, event := range featureEvents {
+	for _, event := range events {
 		messageBody, err := json.Marshal(event)
 		if err != nil {
 			return err

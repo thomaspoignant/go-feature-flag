@@ -19,7 +19,7 @@ const (
 	Mb         = 1024 * 1024
 )
 
-var DefaultPartitionKey = func(context context.Context, _ exporter.FeatureEvent) string {
+var DefaultPartitionKey = func(context context.Context, _ exporter.ExportableEvent) string {
 	context.Value("feature")
 
 	return "default"
@@ -67,7 +67,7 @@ type Exporter struct {
 	sender MessageSender
 }
 
-type PartitionKeyFunc = func(context.Context, exporter.FeatureEvent) string
+type PartitionKeyFunc = func(context.Context, exporter.ExportableEvent) string
 
 type Settings struct {
 	StreamName      *string
@@ -151,7 +151,7 @@ func (e *Exporter) initializeProducer(ctx context.Context) error {
 func (e *Exporter) Export(
 	ctx context.Context,
 	logger *fflog.FFLogger,
-	featureEvents []exporter.FeatureEvent,
+	featureEvents []exporter.ExportableEvent,
 ) error {
 	err := e.initializeProducer(ctx)
 	if err != nil {
@@ -223,7 +223,7 @@ func (e *Exporter) Export(
 }
 
 // formatMessage returns the event encoded in the selected format. Will always use JSON for now.
-func (e *Exporter) formatMessage(event exporter.FeatureEvent) ([]byte, error) {
+func (e *Exporter) formatMessage(event exporter.ExportableEvent) ([]byte, error) {
 	switch e.Format {
 	case formatJSON:
 		fallthrough

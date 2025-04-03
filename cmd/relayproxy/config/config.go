@@ -18,6 +18,7 @@ import (
 	"github.com/knadh/koanf/providers/posflag"
 	"github.com/knadh/koanf/v2"
 	"github.com/spf13/pflag"
+	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/xitongsys/parquet-go/parquet"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -45,6 +46,7 @@ var DefaultExporter = struct {
 	MaxEventInMemory        int64
 	ParquetCompressionCodec string
 	LogLevel                string
+	ExporterEventType       ffclient.ExporterEventType
 }{
 	Format:    "JSON",
 	LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", value=\"{{ .Value}}\"",
@@ -55,6 +57,7 @@ var DefaultExporter = struct {
 	MaxEventInMemory:        100000,
 	ParquetCompressionCodec: parquet.CompressionCodec_SNAPPY.String(),
 	LogLevel:                DefaultLogLevel,
+	ExporterEventType:       ffclient.FeatureEventExporter,
 }
 
 // New is reading the configuration file

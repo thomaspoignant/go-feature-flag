@@ -14,7 +14,7 @@ import (
 
 func TestWebhook_IsBulk(t *testing.T) {
 	exporter := Exporter{}
-	assert.True(t, exporter.IsBulk(), "DeprecatedExporter is a bulk exporter")
+	assert.True(t, exporter.IsBulk(), "DeprecatedExporterV1 is a bulk exporter")
 }
 
 func TestWebhook_Export(t *testing.T) {
@@ -28,7 +28,7 @@ func TestWebhook_Export(t *testing.T) {
 	}
 	type args struct {
 		logger        *fflog.FFLogger
-		featureEvents []exporter.FeatureEvent
+		featureEvents []exporter.ExportableEvent
 	}
 	type expected struct {
 		bodyFilePath string
@@ -58,12 +58,12 @@ func TestWebhook_Export(t *testing.T) {
 			},
 			args: args{
 				logger: logger,
-				featureEvents: []exporter.FeatureEvent{
-					{
+				featureEvents: []exporter.ExportableEvent{
+					exporter.FeatureEvent{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 						Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 					},
-					{
+					exporter.FeatureEvent{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
 						Variation: "Default", Value: "YO2", Default: false, Version: "127", Source: "SERVER",
 					},
@@ -85,12 +85,12 @@ func TestWebhook_Export(t *testing.T) {
 			},
 			args: args{
 				logger: logger,
-				featureEvents: []exporter.FeatureEvent{
-					{
+				featureEvents: []exporter.ExportableEvent{
+					exporter.FeatureEvent{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 						Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 					},
-					{
+					exporter.FeatureEvent{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
 						Variation: "Default", Value: "YO2", Default: false, Version: "127", Source: "SERVER",
 					},
@@ -112,12 +112,12 @@ func TestWebhook_Export(t *testing.T) {
 			},
 			args: args{
 				logger: logger,
-				featureEvents: []exporter.FeatureEvent{
-					{
+				featureEvents: []exporter.ExportableEvent{
+					exporter.FeatureEvent{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 						Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 					},
-					{
+					exporter.FeatureEvent{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
 						Variation: "Default", Value: "YO2", Default: false, Source: "SERVER",
 					},
@@ -135,12 +135,12 @@ func TestWebhook_Export(t *testing.T) {
 			},
 			args: args{
 				logger: logger,
-				featureEvents: []exporter.FeatureEvent{
-					{
+				featureEvents: []exporter.ExportableEvent{
+					exporter.FeatureEvent{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 						Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 					},
-					{
+					exporter.FeatureEvent{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
 						Variation: "Default", Value: "YO2", Default: false, Source: "SERVER",
 					},
@@ -158,12 +158,12 @@ func TestWebhook_Export(t *testing.T) {
 			},
 			args: args{
 				logger: logger,
-				featureEvents: []exporter.FeatureEvent{
-					{
+				featureEvents: []exporter.ExportableEvent{
+					exporter.FeatureEvent{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 						Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 					},
-					{
+					exporter.FeatureEvent{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
 						Variation: "Default", Value: "YO2", Default: false, Version: "127", Source: "SERVER",
 					},
@@ -220,7 +220,7 @@ func TestWebhook_Export_impossibleToParse(t *testing.T) {
 	err := f.Export(
 		context.Background(),
 		&fflog.FFLogger{LeveledLogger: slog.Default()},
-		[]exporter.FeatureEvent{},
+		[]exporter.ExportableEvent{},
 	)
 	assert.EqualError(
 		t,

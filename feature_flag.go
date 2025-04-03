@@ -11,6 +11,7 @@ import (
 
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
+	"github.com/thomaspoignant/go-feature-flag/internal/notification"
 	"github.com/thomaspoignant/go-feature-flag/model/dto"
 	"github.com/thomaspoignant/go-feature-flag/notifier/logsnotifier"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
@@ -43,11 +44,12 @@ func Init(config Config) error {
 // GoFeatureFlag is the main object of the library
 // it contains the cache, the config, the updater and the exporter.
 type GoFeatureFlag struct {
-	cache                    cache.Manager
-	config                   Config
-	bgUpdater                backgroundUpdater
-	featureEventDataExporter exporter.Manager[exporter.FeatureEvent]
-	retrieverManager         *retriever.Manager
+	cache                     cache.Manager
+	config                    Config
+	bgUpdater                 backgroundUpdater
+	featureEventDataExporter  exporter.Manager[exporter.FeatureEvent]
+	trackingEventDataExporter exporter.Manager[exporter.TrackingEvent]
+	retrieverManager          *retriever.Manager
 	// evalExporterWg is a wait group to wait for the evaluation exporter to finish the export before closing GOFF
 	evalExporterWg sync.WaitGroup
 }
@@ -112,7 +114,7 @@ func New(config Config) (*GoFeatureFlag, error) {
 		go goFF.startFlagUpdaterDaemon()
 	}
 
-	goFF.featureEventDataExporter =
+	goFF.featureEventDataExporter, goFF.trackingEventDataExporter =
 		initializeDataExporters(config, goFF.config.internalLogger)
 	config.internalLogger.Debug("GO Feature Flag is initialized")
 	return goFF, nil
@@ -134,10 +136,10 @@ func adjustPollingInterval(pollingInterval time.Duration) time.Duration {
 }
 
 // initializeNotificationService is a function that will initialize the notification service with the notifiers
-func initializeNotificationService(config Config) cache.Service {
+func initializeNotificationService(config Config) notification.Service {
 	notifiers := config.Notifiers
 	notifiers = append(notifiers, &logsnotifier.Notifier{Logger: config.internalLogger})
-	return cache.NewNotificationService(notifiers)
+	return notification.NewService(notifiers)
 }
 
 // initializeRetrieverManager is a function that will initialize the retriever manager with the retrievers
@@ -151,12 +153,11 @@ func initializeRetrieverManager(config Config) (*retriever.Manager, error) {
 	return manager, err
 }
 
-func initializeDataExporters(
-	config Config,
-	logger *fflog.FFLogger,
-) exporter.Manager[exporter.FeatureEvent] {
+func initializeDataExporters(config Config, logger *fflog.FFLogger) (
+	exporter.Manager[exporter.FeatureEvent], exporter.Manager[exporter.TrackingEvent]) {
 	exporters := config.GetDataExporters()
 	featureEventExporterConfigs := make([]exporter.Config, 0)
+	trackingEventExporterConfigs := make([]exporter.Config, 0)
 	if len(exporters) > 0 {
 		for _, exp := range exporters {
 			c := exporter.Config{
@@ -164,8 +165,19 @@ func initializeDataExporters(
 				FlushInterval:    exp.FlushInterval,
 				MaxEventInMemory: exp.MaxEventInMemory,
 			}
+			if exp.ExporterEventType == TrackingEventExporter {
+				trackingEventExporterConfigs = append(trackingEventExporterConfigs, c)
+				continue
+			}
 			featureEventExporterConfigs = append(featureEventExporterConfigs, c)
 		}
+	}
+
+	var trackingEventManager exporter.Manager[exporter.TrackingEvent]
+	if len(trackingEventExporterConfigs) > 0 {
+		trackingEventManager = exporter.NewManager[exporter.TrackingEvent](
+			config.Context, trackingEventExporterConfigs, config.ExporterCleanQueueInterval, logger)
+		trackingEventManager.Start()
 	}
 
 	var featureEventManager exporter.Manager[exporter.FeatureEvent]
@@ -174,7 +186,7 @@ func initializeDataExporters(
 			config.Context, featureEventExporterConfigs, config.ExporterCleanQueueInterval, logger)
 		featureEventManager.Start()
 	}
-	return featureEventManager
+	return featureEventManager, trackingEventManager
 }
 
 // handleFirstRetrieverError is a function that will handle the first error when trying to retrieve
@@ -253,6 +265,10 @@ func (g *GoFeatureFlag) Close() {
 		g.evalExporterWg.Wait()
 		if g.featureEventDataExporter != nil {
 			g.featureEventDataExporter.Stop()
+		}
+
+		if g.trackingEventDataExporter != nil {
+			g.trackingEventDataExporter.Stop()
 		}
 
 		if g.retrieverManager != nil {

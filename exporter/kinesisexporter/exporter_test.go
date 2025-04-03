@@ -17,7 +17,7 @@ import (
 
 func TestExporter_IsBulk(t *testing.T) {
 	exp := Exporter{}
-	assert.False(t, exp.IsBulk(), "DeprecatedExporter is not a bulk exporter")
+	assert.False(t, exp.IsBulk(), "DeprecatedExporterV1 is not a bulk exporter")
 }
 
 func TestExporter_ExportBasicWithStreamName(t *testing.T) {
@@ -34,10 +34,10 @@ func TestExporter_ExportBasicWithStreamName(t *testing.T) {
 	err := exp.Export(
 		context.Background(),
 		logger,
-		[]exporter.FeatureEvent{
-			*NewFeatureEvent(),
-			*NewFeatureEvent(),
-			*NewFeatureEvent(),
+		[]exporter.ExportableEvent{
+			NewFeatureEvent(),
+			NewFeatureEvent(),
+			NewFeatureEvent(),
 		},
 	)
 
@@ -67,10 +67,10 @@ func TestExporter_ExportBasicWithStreamArn(t *testing.T) {
 	err := exp.Export(
 		context.Background(),
 		logger,
-		[]exporter.FeatureEvent{
-			*NewFeatureEvent(),
-			*NewFeatureEvent(),
-			*NewFeatureEvent(),
+		[]exporter.ExportableEvent{
+			NewFeatureEvent(),
+			NewFeatureEvent(),
+			NewFeatureEvent(),
 		},
 	)
 
@@ -101,7 +101,7 @@ func TestExporter_ShouldRaiseErrorIfNoStreamIsSpecified(t *testing.T) {
 	err := exp.Export(
 		context.Background(),
 		logger,
-		[]exporter.FeatureEvent{*NewFeatureEvent()},
+		[]exporter.ExportableEvent{NewFeatureEvent()},
 	)
 
 	assert.Error(t, err)
@@ -115,7 +115,7 @@ func TestExporter_ExportAWSConfigurationCustomisation(t *testing.T) {
 		sender: &mock,
 		Settings: NewSettings(
 			WithStreamName("test-stream"),
-			WithPartitionKey(func(context.Context, exporter.FeatureEvent) string {
+			WithPartitionKey(func(context.Context, exporter.ExportableEvent) string {
 				return "test-key"
 			}),
 		),
@@ -129,8 +129,8 @@ func TestExporter_ExportAWSConfigurationCustomisation(t *testing.T) {
 	err := exp.Export(
 		context.Background(),
 		logger,
-		[]exporter.FeatureEvent{
-			*NewFeatureEvent(),
+		[]exporter.ExportableEvent{
+			NewFeatureEvent(),
 		},
 	)
 
@@ -153,8 +153,8 @@ func TestExporter_ExportSenderError(t *testing.T) {
 	err := exp.Export(
 		context.Background(),
 		logger,
-		[]exporter.FeatureEvent{
-			*NewFeatureEvent(),
+		[]exporter.ExportableEvent{
+			NewFeatureEvent(),
 		},
 	)
 
@@ -164,28 +164,28 @@ func TestExporter_ExportSenderError(t *testing.T) {
 func TestExporterSettingsCreation(t *testing.T) {
 	{
 		settings := NewSettings()
-		assert.Equal(t, settings.PartitionKey(context.TODO(), *NewFeatureEvent()), "default")
+		assert.Equal(t, settings.PartitionKey(context.TODO(), NewFeatureEvent()), "default")
 		assert.Nil(t, settings.StreamName)
 		assert.Nil(t, settings.StreamArn)
 		assert.Nil(t, settings.ExplicitHashKey)
 	}
 	{
 		settings := NewSettings(WithStreamArn("test-stream-arn"))
-		assert.Equal(t, settings.PartitionKey(context.TODO(), *NewFeatureEvent()), "default")
+		assert.Equal(t, settings.PartitionKey(context.TODO(), NewFeatureEvent()), "default")
 		assert.Nil(t, settings.StreamName)
 		assert.Equal(t, *settings.StreamArn, "test-stream-arn")
 		assert.Nil(t, settings.ExplicitHashKey)
 	}
 	{
 		settings := NewSettings(WithStreamName("test-stream-name"))
-		assert.Equal(t, settings.PartitionKey(context.TODO(), *NewFeatureEvent()), "default")
+		assert.Equal(t, settings.PartitionKey(context.TODO(), NewFeatureEvent()), "default")
 		assert.Equal(t, *settings.StreamName, "test-stream-name")
 		assert.Nil(t, settings.StreamArn)
 		assert.Nil(t, settings.ExplicitHashKey)
 	}
 	{
 		settings := NewSettings(WithExplicitHashKey("test-explicit-hash-key"))
-		assert.Equal(t, settings.PartitionKey(context.TODO(), *NewFeatureEvent()), "default")
+		assert.Equal(t, settings.PartitionKey(context.TODO(), NewFeatureEvent()), "default")
 		assert.Nil(t, settings.StreamName)
 		assert.Nil(t, settings.StreamArn)
 		assert.Equal(t, *settings.ExplicitHashKey, "test-explicit-hash-key")
@@ -196,10 +196,10 @@ func TestExporterSettingsCreation(t *testing.T) {
 			WithStreamArn("test-stream-arn"),
 			WithExplicitHashKey("test-explicit-hash-key"),
 			WithPartitionKey(
-				func(_ context.Context, _ exporter.FeatureEvent) string { return "non-default" },
+				func(_ context.Context, _ exporter.ExportableEvent) string { return "non-default" },
 			),
 		)
-		assert.Equal(t, settings.PartitionKey(context.TODO(), *NewFeatureEvent()), "non-default")
+		assert.Equal(t, settings.PartitionKey(context.TODO(), NewFeatureEvent()), "non-default")
 		assert.Nil(t, settings.StreamName) // overwritten by streamArn
 		assert.Equal(t, *settings.StreamArn, "test-stream-arn")
 		assert.Equal(t, *settings.ExplicitHashKey, "test-explicit-hash-key")
@@ -215,7 +215,16 @@ func TestExporterSettingsCreation(t *testing.T) {
 }
 
 func TestHugeMessageExportFlow(t *testing.T) {
-	event := NewFeatureEvent()
+	event := exporter.FeatureEvent{
+		Kind:         "feature",
+		ContextKind:  "anonymousUser",
+		UserKey:      "ABCD",
+		CreationDate: 1617970547,
+		Key:          "random-key",
+		Variation:    "Default",
+		Value:        "YO",
+		Default:      false,
+	}
 	event.Value = string(make([]byte, Mb))
 
 	mock := MockKinesisSender{}
@@ -231,11 +240,11 @@ func TestHugeMessageExportFlow(t *testing.T) {
 	err := exp.Export(
 		context.Background(),
 		logger,
-		[]exporter.FeatureEvent{
-			*event,
-			*event,
-			*event,
-			*event,
+		[]exporter.ExportableEvent{
+			event,
+			event,
+			event,
+			event,
 		},
 	)
 
@@ -243,7 +252,7 @@ func TestHugeMessageExportFlow(t *testing.T) {
 	assert.Len(t, mock.PutRecordsInputs, 0)
 }
 
-func NewFeatureEvent() *exporter.FeatureEvent {
+func NewFeatureEvent() exporter.ExportableEvent {
 	return &exporter.FeatureEvent{
 		Kind:         "feature",
 		ContextKind:  "anonymousUser",

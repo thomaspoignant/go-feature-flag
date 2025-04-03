@@ -1,6 +1,6 @@
 //go:build !race
 
-package cache_test
+package notification_test
 
 import (
 	"fmt"
@@ -10,8 +10,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/thejerf/slogassert"
-	"github.com/thomaspoignant/go-feature-flag/internal/cache"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
+	"github.com/thomaspoignant/go-feature-flag/internal/notification"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
@@ -19,7 +19,7 @@ import (
 
 func Test_notificationService_callNotifier(t *testing.T) {
 	n := &NotifierMock{}
-	c := cache.NewNotificationService([]notifier.Notifier{n})
+	c := notification.NewService([]notifier.Notifier{n})
 	oldCache := map[string]flag.Flag{
 		"yo": &flag.InternalFlag{Version: testconvert.String("1.0")},
 	}
@@ -33,7 +33,7 @@ func Test_notificationService_callNotifier(t *testing.T) {
 
 func Test_notificationService_no_difference(t *testing.T) {
 	n := &NotifierMock{}
-	c := cache.NewNotificationService([]notifier.Notifier{n})
+	c := notification.NewService([]notifier.Notifier{n})
 	oldCache := map[string]flag.Flag{
 		"yo": &flag.InternalFlag{Version: testconvert.String("1.0")},
 	}
@@ -49,7 +49,7 @@ func Test_notificationService_with_error(t *testing.T) {
 	handler := slogassert.New(t, slog.LevelDebug, nil)
 	logger := slog.New(handler)
 	n := &NotifierMock{WithError: true}
-	c := cache.NewNotificationService([]notifier.Notifier{n})
+	c := notification.NewService([]notifier.Notifier{n})
 	oldCache := map[string]flag.Flag{
 		"yo": &flag.InternalFlag{Version: testconvert.String("1.0")},
 	}

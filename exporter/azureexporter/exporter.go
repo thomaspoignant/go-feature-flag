@@ -55,7 +55,7 @@ func (f *Exporter) initializeAzureClient() (*azblob.Client, error) {
 func (f *Exporter) Export(
 	ctx context.Context,
 	logger *fflog.FFLogger,
-	featureEvents []exporter.FeatureEvent,
+	featureEvents []exporter.ExportableEvent,
 ) error {
 	if f.AccountName == "" {
 		return fmt.Errorf("you should specify an AccountName. %v is invalid", f.AccountName)

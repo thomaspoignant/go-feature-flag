@@ -11,10 +11,10 @@ import (
 
 type ExporterMock interface {
 	exporter.CommonExporter
-	GetExportedEvents() []exporter.FeatureEvent
+	GetExportedEvents() []exporter.ExportableEvent
 }
 type Exporter struct {
-	ExportedEvents    []exporter.FeatureEvent
+	ExportedEvents    []exporter.ExportableEvent
 	Err               error
 	ExpectedNumberErr int
 	CurrentNumberErr  int
@@ -27,7 +27,7 @@ type Exporter struct {
 func (m *Exporter) Export(
 	_ context.Context,
 	_ *fflog.FFLogger,
-	events []exporter.FeatureEvent,
+	events []exporter.ExportableEvent,
 ) error {
 	m.once.Do(m.initMutex)
 	m.mutex.Lock()
@@ -42,7 +42,7 @@ func (m *Exporter) Export(
 	return nil
 }
 
-func (m *Exporter) GetExportedEvents() []exporter.FeatureEvent {
+func (m *Exporter) GetExportedEvents() []exporter.ExportableEvent {
 	m.once.Do(m.initMutex)
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
@@ -87,11 +87,16 @@ func (m *ExporterDeprecated) Export(
 	return nil
 }
 
-func (m *ExporterDeprecated) GetExportedEvents() []exporter.FeatureEvent {
+func (m *ExporterDeprecated) GetExportedEvents() []exporter.ExportableEvent {
 	m.once.Do(m.initMutex)
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
-	return m.ExportedEvents
+
+	exportableEvents := make([]exporter.ExportableEvent, len(m.ExportedEvents))
+	for index, event := range m.ExportedEvents {
+		exportableEvents[index] = event
+	}
+	return exportableEvents
 }
 
 func (m *ExporterDeprecated) IsBulk() bool {
@@ -99,5 +104,55 @@ func (m *ExporterDeprecated) IsBulk() bool {
 }
 
 func (m *ExporterDeprecated) initMutex() {
+	m.mutex = sync.Mutex{}
+}
+
+// ExporterDeprecatedV2 -----
+type ExporterDeprecatedV2 struct {
+	ExportedEvents    []exporter.FeatureEvent
+	Err               error
+	ExpectedNumberErr int
+	CurrentNumberErr  int
+	Bulk              bool
+
+	mutex sync.Mutex
+	once  sync.Once
+}
+
+func (m *ExporterDeprecatedV2) Export(
+	_ context.Context,
+	_ *fflog.FFLogger,
+	events []exporter.FeatureEvent,
+) error {
+	m.once.Do(m.initMutex)
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
+	m.ExportedEvents = append(m.ExportedEvents, events...)
+	if m.Err != nil {
+		if m.ExpectedNumberErr > m.CurrentNumberErr {
+			m.CurrentNumberErr++
+			return m.Err
+		}
+	}
+	return nil
+}
+
+func (m *ExporterDeprecatedV2) GetExportedEvents() []exporter.ExportableEvent {
+	m.once.Do(m.initMutex)
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
+
+	exportableEvents := make([]exporter.ExportableEvent, len(m.ExportedEvents))
+	for index, event := range m.ExportedEvents {
+		exportableEvents[index] = event
+	}
+	return exportableEvents
+}
+
+func (m *ExporterDeprecatedV2) IsBulk() bool {
+	return m.Bulk
+}
+
+func (m *ExporterDeprecatedV2) initMutex() {
 	m.mutex = sync.Mutex{}
 }

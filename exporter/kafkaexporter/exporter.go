@@ -48,7 +48,7 @@ type Exporter struct {
 func (e *Exporter) Export(
 	_ context.Context,
 	_ *fflog.FFLogger,
-	featureEvents []exporter.FeatureEvent,
+	events []exporter.ExportableEvent,
 ) error {
 	if e.sender == nil {
 		err := e.initializeProducer()
@@ -57,8 +57,8 @@ func (e *Exporter) Export(
 		}
 	}
 
-	messages := make([]*sarama.ProducerMessage, 0, len(featureEvents))
-	for _, event := range featureEvents {
+	messages := make([]*sarama.ProducerMessage, 0, len(events))
+	for _, event := range events {
 		data, err := e.formatMessage(event)
 		if err != nil {
 			return fmt.Errorf("format: %w", err)
@@ -66,7 +66,7 @@ func (e *Exporter) Export(
 
 		messages = append(messages, &sarama.ProducerMessage{
 			Topic: e.Settings.Topic,
-			Key:   sarama.StringEncoder(event.UserKey),
+			Key:   sarama.StringEncoder(event.GetUserKey()),
 			Value: sarama.ByteEncoder(data),
 		})
 	}
@@ -113,7 +113,7 @@ func (e *Exporter) initializeProducer() error {
 }
 
 // formatMessage returns the event encoded in the selected format. Will always use JSON for now.
-func (e *Exporter) formatMessage(event exporter.FeatureEvent) ([]byte, error) {
+func (e *Exporter) formatMessage(event exporter.ExportableEvent) ([]byte, error) {
 	switch e.Format {
 	case formatJSON:
 		fallthrough

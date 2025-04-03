@@ -1,8 +1,8 @@
 package ffcontext
 
-// NewEvaluationContextBuilder constructs a new EvaluationContextBuilder, specifying the user key.
+// NewEvaluationContextBuilder constructs a new EvaluationContextBuilder, specifying the user targetingKey.
 //
-// For authenticated users, the key may be a username or e-mail address. For anonymous users,
+// For authenticated users, the targetingKey may be a username or e-mail address. For anonymous users,
 // this could be an IP address or session ID.
 func NewEvaluationContextBuilder(key string) EvaluationContextBuilder {
 	return &evaluationContextBuilderImpl{
@@ -36,7 +36,7 @@ func (u *evaluationContextBuilderImpl) Anonymous(anonymous bool) EvaluationConte
 	return u
 }
 
-// AddCustom allows you to add a custom attribute to the EvaluationContext.
+// AddCustom allows you to add an attributes attribute to the EvaluationContext.
 func (u *evaluationContextBuilderImpl) AddCustom(
 	key string,
 	value interface{},
@@ -48,7 +48,7 @@ func (u *evaluationContextBuilderImpl) AddCustom(
 // Build is creating the EvaluationContext.
 func (u *evaluationContextBuilderImpl) Build() EvaluationContext {
 	return EvaluationContext{
-		key:    u.key,
-		custom: u.custom,
+		targetingKey: u.key,
+		attributes:   u.custom,
 	}
 }

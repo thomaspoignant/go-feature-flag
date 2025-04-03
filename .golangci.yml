@@ -131,6 +131,7 @@ linters:
           - lll
       - path: _test\.go
         linters:
+          - gosec
           - errcheck
           - funlen
           - maligned
