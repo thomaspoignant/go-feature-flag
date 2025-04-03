@@ -5,6 +5,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	etag "github.com/pablor21/echo-etag/v4"
 	echoSwagger "github.com/swaggo/echo-swagger"
+	middleware2 "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/controller"
 )
 
@@ -21,6 +22,7 @@ func (s *Server) addGOFFRoutes(
 			Validator: func(key string, _ echo.Context) (bool, error) {
 				return s.config.APIKeyExists(key), nil
 			},
+			ErrorHandler: middleware2.AuthMiddlewareErrHandler,
 		}))
 	}
 	v1.Use(etag.WithConfig(etag.Config{

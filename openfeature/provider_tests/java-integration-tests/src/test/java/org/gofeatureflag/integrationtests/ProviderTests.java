@@ -27,6 +27,7 @@ public class ProviderTests {
             .addString("description", "this is a test")
             .addString("pr_link", "https://github.com/thomaspoignant/go-feature-flag/pull/916")
             .build();
+
     @BeforeEach
     void init() throws InvalidOptions, ExecutionException, InterruptedException {
         MutableContext userContext = new MutableContext()
@@ -363,7 +364,7 @@ public class ProviderTests {
                 .reason(Reason.ERROR.toString())
                 .value(false)
                 .errorCode(ErrorCode.GENERAL)
-                .errorMessage("impossible to contact GO Feature Flag relay proxy instance")
+                .errorMessage("authentication/authorization error")
                 .build();
         FlagEvaluationDetails<Boolean> got = goffClient.getBooleanDetails(flagKey, false, defaultEvaluationContext);
         assertEquals(expected, got);
@@ -385,7 +386,7 @@ public class ProviderTests {
                 .reason(Reason.ERROR.toString())
                 .value(false)
                 .errorCode(ErrorCode.GENERAL)
-                .errorMessage("invalid token used to contact GO Feature Flag relay proxy instance")
+                .errorMessage("authentication/authorization error")
                 .build();
         FlagEvaluationDetails<Boolean> got = goffClient.getBooleanDetails(flagKey, false, defaultEvaluationContext);
         assertEquals(expected, got);
