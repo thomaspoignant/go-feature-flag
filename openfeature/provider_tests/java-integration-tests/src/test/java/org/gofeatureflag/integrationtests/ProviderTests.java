@@ -89,26 +89,30 @@ public class ProviderTests {
     @DisplayName("bool: should error if we expect a boolean and got another type")
     @Test
     void shouldErrorIfWeExpectABooleanAndGotAnotherType() {
+        String flagKey = "string_key";
         FlagEvaluationDetails expected = FlagEvaluationDetails.builder()
+                .flagKey(flagKey)
                 .reason(Reason.ERROR.toString())
                 .value(false)
                 .errorCode(ErrorCode.TYPE_MISMATCH)
                 .errorMessage("Flag value string_key had unexpected type class java.lang.String, expected class java.lang.Boolean.")
                 .build();
-        FlagEvaluationDetails<Boolean> got = goffClient.getBooleanDetails("string_key", false, defaultEvaluationContext);
+        FlagEvaluationDetails<Boolean> got = goffClient.getBooleanDetails(flagKey, false, defaultEvaluationContext);
         assertEquals(expected, got);
     }
 
     @DisplayName("bool: should error if flag does not exists")
     @Test
     void boolShouldErrorIfFlagDoesNotExists() {
+        String flagKey = "does_not_exists";
         FlagEvaluationDetails expected = FlagEvaluationDetails.builder()
+                .flagKey(flagKey)
                 .reason(Reason.ERROR.toString())
                 .value(false)
                 .errorCode(ErrorCode.FLAG_NOT_FOUND)
                 .errorMessage("Flag does_not_exists was not found in your configuration")
                 .build();
-        FlagEvaluationDetails<Boolean> got = goffClient.getBooleanDetails("does_not_exists", false, defaultEvaluationContext);
+        FlagEvaluationDetails<Boolean> got = goffClient.getBooleanDetails(flagKey, false, defaultEvaluationContext);
         assertEquals(expected, got);
     }
 
@@ -146,6 +150,7 @@ public class ProviderTests {
     void shouldErrorIfWeExpectAStringAndGotAnotherType() {
         String flagKey = "bool_targeting_match";
         FlagEvaluationDetails expected = FlagEvaluationDetails.builder()
+                .flagKey(flagKey)
                 .reason(Reason.ERROR.toString())
                 .value("default")
                 .errorCode(ErrorCode.TYPE_MISMATCH)
@@ -160,6 +165,7 @@ public class ProviderTests {
     void stringShouldErrorIfFlagDoesNotExists() {
         String flagKey = "does_not_exists";
         FlagEvaluationDetails expected = FlagEvaluationDetails.builder()
+                .flagKey(flagKey)
                 .reason(Reason.ERROR.toString())
                 .value("default")
                 .errorCode(ErrorCode.FLAG_NOT_FOUND)
@@ -203,6 +209,7 @@ public class ProviderTests {
     void shouldErrorIfWeExpectADoubleAndGotAnotherType() {
         String flagKey = "bool_targeting_match";
         FlagEvaluationDetails expected = FlagEvaluationDetails.builder()
+                .flagKey(flagKey)
                 .reason(Reason.ERROR.toString())
                 .value(123.45)
                 .errorCode(ErrorCode.TYPE_MISMATCH)
@@ -217,6 +224,7 @@ public class ProviderTests {
     void doubleShouldErrorIfFlagDoesNotExists() {
         String flagKey = "does_not_exists";
         FlagEvaluationDetails expected = FlagEvaluationDetails.builder()
+                .flagKey(flagKey)
                 .reason(Reason.ERROR.toString())
                 .value(123.45)
                 .errorCode(ErrorCode.FLAG_NOT_FOUND)
@@ -260,6 +268,7 @@ public class ProviderTests {
     void shouldErrorIfWeExpectAIntAndGotAnotherType() {
         String flagKey = "bool_targeting_match";
         FlagEvaluationDetails expected = FlagEvaluationDetails.builder()
+                .flagKey(flagKey)
                 .reason(Reason.ERROR.toString())
                 .value(123)
                 .errorCode(ErrorCode.TYPE_MISMATCH)
@@ -274,6 +283,7 @@ public class ProviderTests {
     void intShouldErrorIfFlagDoesNotExists() {
         String flagKey = "does_not_exists";
         FlagEvaluationDetails expected = FlagEvaluationDetails.builder()
+                .flagKey(flagKey)
                 .reason(Reason.ERROR.toString())
                 .value(123)
                 .errorCode(ErrorCode.FLAG_NOT_FOUND)
@@ -318,6 +328,7 @@ public class ProviderTests {
     void objectShouldErrorIfFlagDoesNotExists() {
         String flagKey = "does_not_exists";
         FlagEvaluationDetails expected = FlagEvaluationDetails.builder()
+                .flagKey(flagKey)
                 .reason(Reason.ERROR.toString())
                 .errorCode(ErrorCode.FLAG_NOT_FOUND)
                 .errorMessage("Flag does_not_exists was not found in your configuration")
@@ -361,6 +372,7 @@ public class ProviderTests {
 
         String flagKey = "bool_targeting_match";
         FlagEvaluationDetails expected = FlagEvaluationDetails.builder()
+                .flagKey(flagKey)
                 .reason(Reason.ERROR.toString())
                 .value(false)
                 .errorCode(ErrorCode.GENERAL)
@@ -383,6 +395,7 @@ public class ProviderTests {
 
         String flagKey = "bool_targeting_match";
         FlagEvaluationDetails expected = FlagEvaluationDetails.builder()
+                .flagKey(flagKey)
                 .reason(Reason.ERROR.toString())
                 .value(false)
                 .errorCode(ErrorCode.GENERAL)

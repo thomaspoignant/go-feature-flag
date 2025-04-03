@@ -763,7 +763,7 @@ func TestProvider_apikey_relay_proxy(t *testing.T) {
 						Variant:      "",
 						Reason:       of.ErrorReason,
 						ErrorCode:    of.GeneralCode,
-						ErrorMessage: "",
+						ErrorMessage: "authentication/authorization error",
 						FlagMetadata: map[string]interface{}{},
 					},
 				},
