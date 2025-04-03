@@ -331,7 +331,7 @@ func TestBoolVariation(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: exporter.NewManager[exporter.FeatureEvent](
+					featureEventDataExporter: exporter.NewManager[exporter.FeatureEvent](
 						context.Background(),
 						[]exporter.Config{
 							{
@@ -746,7 +746,7 @@ func TestBoolVariationDetails(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: exporter.NewManager[exporter.FeatureEvent](
+					featureEventDataExporter: exporter.NewManager[exporter.FeatureEvent](
 						context.Background(),
 						[]exporter.Config{
 							{
@@ -1076,7 +1076,7 @@ func TestFloat64Variation(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: exporter.NewManager[exporter.FeatureEvent](
+					featureEventDataExporter: exporter.NewManager[exporter.FeatureEvent](
 						context.Background(),
 						[]exporter.Config{
 							{
@@ -1409,7 +1409,7 @@ func TestFloat64VariationDetails(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: exporter.NewManager[exporter.FeatureEvent](
+					featureEventDataExporter: exporter.NewManager[exporter.FeatureEvent](
 						context.Background(),
 						[]exporter.Config{
 							{
@@ -1718,7 +1718,7 @@ func TestJSONArrayVariation(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: exporter.NewManager[exporter.FeatureEvent](
+					featureEventDataExporter: exporter.NewManager[exporter.FeatureEvent](
 						context.Background(),
 						[]exporter.Config{
 							{
@@ -2040,7 +2040,7 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: exporter.NewManager[exporter.FeatureEvent](
+					featureEventDataExporter: exporter.NewManager[exporter.FeatureEvent](
 						context.Background(),
 						[]exporter.Config{
 							{
@@ -2333,7 +2333,7 @@ func TestJSONVariation(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: exporter.NewManager[exporter.FeatureEvent](
+					featureEventDataExporter: exporter.NewManager[exporter.FeatureEvent](
 						context.Background(),
 						[]exporter.Config{
 							{
@@ -2578,7 +2578,7 @@ func TestJSONVariationDetails(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: exporter.NewManager[exporter.FeatureEvent](
+					featureEventDataExporter: exporter.NewManager[exporter.FeatureEvent](
 						context.Background(),
 						[]exporter.Config{
 							{
@@ -2870,7 +2870,7 @@ func TestStringVariation(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: exporter.NewManager[exporter.FeatureEvent](
+					featureEventDataExporter: exporter.NewManager[exporter.FeatureEvent](
 						context.Background(),
 						[]exporter.Config{
 							{
@@ -3114,7 +3114,7 @@ func TestStringVariationDetails(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: exporter.NewManager[exporter.FeatureEvent](
+					featureEventDataExporter: exporter.NewManager[exporter.FeatureEvent](
 						context.Background(),
 						[]exporter.Config{
 							{
@@ -3436,7 +3436,7 @@ func TestIntVariation(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: exporter.NewManager[exporter.FeatureEvent](
+					featureEventDataExporter: exporter.NewManager[exporter.FeatureEvent](
 						context.Background(),
 						[]exporter.Config{
 							{
@@ -3722,7 +3722,7 @@ func TestIntVariationDetails(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: exporter.NewManager[exporter.FeatureEvent](
+					featureEventDataExporter: exporter.NewManager[exporter.FeatureEvent](
 						context.Background(),
 						[]exporter.Config{
 							{
@@ -4105,7 +4105,7 @@ func TestRawVariation(t *testing.T) {
 						LeveledLogger:   logger,
 						Offline:         tt.args.offline,
 					},
-					dataExporter: exporter.NewManager[exporter.FeatureEvent](
+					featureEventDataExporter: exporter.NewManager[exporter.FeatureEvent](
 						context.Background(),
 						[]exporter.Config{
 							{

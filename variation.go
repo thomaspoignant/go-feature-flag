@@ -303,9 +303,9 @@ func (g *GoFeatureFlag) getFlagFromCache(flagKey string) (flag.Flag, error) {
 
 // CollectEventData is collecting events and sending them to the data exporter to be stored.
 func (g *GoFeatureFlag) CollectEventData(event exporter.FeatureEvent) {
-	if g != nil && g.dataExporter != nil {
+	if g != nil && g.featureEventDataExporter != nil {
 		// Add event in the exporter
-		g.dataExporter.AddEvent(event)
+		g.featureEventDataExporter.AddEvent(event)
 	}
 }
 
@@ -328,9 +328,9 @@ func notifyVariation[T model.JSONType](
 			"SERVER",
 			ctx.ExtractGOFFProtectedFields().ExporterMetadata,
 		)
-		g.exporterWg.Add(1)
+		g.evalExporterWg.Add(1)
 		go func() {
-			defer g.exporterWg.Done()
+			defer g.evalExporterWg.Done()
 			g.CollectEventData(event)
 		}()
 	}
