@@ -191,7 +191,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Flag Not Found",
                         "schema": {
-                            "$ref": "#/definitions/model.OFREPEvaluateErrorResponse"
+                            "$ref": "#/definitions/model.OFREPEvaluateResponseError"
                         }
                     },
                     "500": {
@@ -254,7 +254,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad evaluation request",
                         "schema": {
-                            "$ref": "#/definitions/model.OFREPCommonErrorResponse"
+                            "$ref": "#/definitions/model.OFREPCommonResponseError"
                         }
                     },
                     "401": {
@@ -324,7 +324,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/model.OFREPEvaluateErrorResponse"
+                            "$ref": "#/definitions/model.OFREPEvaluateResponseError"
                         }
                     },
                     "401": {
@@ -336,7 +336,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Flag Not Found",
                         "schema": {
-                            "$ref": "#/definitions/model.OFREPEvaluateErrorResponse"
+                            "$ref": "#/definitions/model.OFREPEvaluateResponseError"
                         }
                     },
                     "500": {
@@ -843,7 +843,7 @@ const docTemplate = `{
                 }
             }
         },
-        "model.OFREPCommonErrorResponse": {
+        "model.OFREPCommonResponseError": {
             "type": "object",
             "properties": {
                 "errorCode": {
@@ -923,7 +923,7 @@ const docTemplate = `{
                 }
             }
         },
-        "model.OFREPEvaluateErrorResponse": {
+        "model.OFREPEvaluateResponseError": {
             "type": "object",
             "properties": {
                 "errorCode": {

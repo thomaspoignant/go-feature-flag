@@ -533,7 +533,9 @@ func TestRule_Evaluate(t *testing.T) {
 					"variation_C": 10,
 					"variation_B": 20,
 				},
-				Query: testconvert.String(`{"==": [{"var": "key"}, "96ac59e6-7492-436b-b15a-ba1d797d2423"]}`),
+				Query: testconvert.String(
+					`{"==": [{"var": "key"}, "96ac59e6-7492-436b-b15a-ba1d797d2423"]}`,
+				),
 			},
 			args: args{
 				user: ffcontext.NewEvaluationContext("96ac59e6-7492-436b-b15a-ba1d797d2423"),
@@ -550,7 +552,9 @@ func TestRule_Evaluate(t *testing.T) {
 					"variation_C": 10,
 					"variation_B": 20,
 				},
-				Query: testconvert.String(`{"=": [{"var": "key"}, "96ac59e6-7492-436b-b15a-ba1d797d2423"]}`),
+				Query: testconvert.String(
+					`{"=": [{"var": "key"}, "96ac59e6-7492-436b-b15a-ba1d797d2423"]}`,
+				),
 			},
 			args: args{
 				user: ffcontext.NewEvaluationContext("96ac59e6-7492-436b-b15a-ba1d797d2423"),
@@ -566,7 +570,11 @@ func TestRule_Evaluate(t *testing.T) {
 			}
 			got, err := tt.rule.Evaluate(key, tt.args.user, "flagname+", tt.args.isDefault)
 
-			if !tt.wantErr(t, err, fmt.Sprintf("Evaluate(%v, %v)", tt.args.user, tt.args.isDefault)) {
+			if !tt.wantErr(
+				t,
+				err,
+				fmt.Sprintf("Evaluate(%v, %v)", tt.args.user, tt.args.isDefault),
+			) {
 				return
 			}
 			assert.Equalf(t, tt.want, got, "Evaluate(%v, %v)", tt.args.user, tt.args.isDefault)
@@ -667,11 +675,15 @@ func TestRule_MergeRules(t *testing.T) {
 				ProgressiveRollout: &flag.ProgressiveRollout{
 					Initial: &flag.ProgressiveRolloutStep{
 						Variation: testconvert.String("variation_B"),
-						Date:      testconvert.Time(time.Date(2021, time.February, 1, 10, 10, 10, 10, time.UTC)),
+						Date: testconvert.Time(
+							time.Date(2021, time.February, 1, 10, 10, 10, 10, time.UTC),
+						),
 					},
 					End: &flag.ProgressiveRolloutStep{
 						Variation: testconvert.String("variation_C"),
-						Date:      testconvert.Time(time.Date(2021, time.February, 3, 10, 10, 10, 10, time.UTC)),
+						Date: testconvert.Time(
+							time.Date(2021, time.February, 3, 10, 10, 10, 10, time.UTC),
+						),
 					},
 				},
 			},
@@ -681,11 +693,15 @@ func TestRule_MergeRules(t *testing.T) {
 				ProgressiveRollout: &flag.ProgressiveRollout{
 					Initial: &flag.ProgressiveRolloutStep{
 						Variation: testconvert.String("variation_B"),
-						Date:      testconvert.Time(time.Date(2021, time.February, 1, 10, 10, 10, 10, time.UTC)),
+						Date: testconvert.Time(
+							time.Date(2021, time.February, 1, 10, 10, 10, 10, time.UTC),
+						),
 					},
 					End: &flag.ProgressiveRolloutStep{
 						Variation: testconvert.String("variation_C"),
-						Date:      testconvert.Time(time.Date(2021, time.February, 3, 10, 10, 10, 10, time.UTC)),
+						Date: testconvert.Time(
+							time.Date(2021, time.February, 3, 10, 10, 10, 10, time.UTC),
+						),
 					},
 				},
 			},
@@ -698,11 +714,15 @@ func TestRule_MergeRules(t *testing.T) {
 				ProgressiveRollout: &flag.ProgressiveRollout{
 					Initial: &flag.ProgressiveRolloutStep{
 						Variation: testconvert.String("variation_B"),
-						Date:      testconvert.Time(time.Date(2021, time.February, 1, 10, 10, 10, 10, time.UTC)),
+						Date: testconvert.Time(
+							time.Date(2021, time.February, 1, 10, 10, 10, 10, time.UTC),
+						),
 					},
 					End: &flag.ProgressiveRolloutStep{
 						Variation: testconvert.String("variation_C"),
-						Date:      testconvert.Time(time.Date(2021, time.February, 3, 10, 10, 10, 10, time.UTC)),
+						Date: testconvert.Time(
+							time.Date(2021, time.February, 3, 10, 10, 10, 10, time.UTC),
+						),
 					},
 				},
 			},
@@ -711,7 +731,9 @@ func TestRule_MergeRules(t *testing.T) {
 					Initial: &flag.ProgressiveRolloutStep{
 						Variation:  testconvert.String("variation_D"),
 						Percentage: testconvert.Float64(40),
-						Date:       testconvert.Time(time.Date(2021, time.February, 1, 10, 10, 10, 10, time.UTC)),
+						Date: testconvert.Time(
+							time.Date(2021, time.February, 1, 10, 10, 10, 10, time.UTC),
+						),
 					},
 				},
 			},
@@ -722,11 +744,15 @@ func TestRule_MergeRules(t *testing.T) {
 					Initial: &flag.ProgressiveRolloutStep{
 						Variation:  testconvert.String("variation_D"),
 						Percentage: testconvert.Float64(40),
-						Date:       testconvert.Time(time.Date(2021, time.February, 1, 10, 10, 10, 10, time.UTC)),
+						Date: testconvert.Time(
+							time.Date(2021, time.February, 1, 10, 10, 10, 10, time.UTC),
+						),
 					},
 					End: &flag.ProgressiveRolloutStep{
 						Variation: testconvert.String("variation_C"),
-						Date:      testconvert.Time(time.Date(2021, time.February, 3, 10, 10, 10, 10, time.UTC)),
+						Date: testconvert.Time(
+							time.Date(2021, time.February, 3, 10, 10, 10, 10, time.UTC),
+						),
 					},
 				},
 			},
@@ -739,18 +765,24 @@ func TestRule_MergeRules(t *testing.T) {
 				ProgressiveRollout: &flag.ProgressiveRollout{
 					Initial: &flag.ProgressiveRolloutStep{
 						Variation: testconvert.String("variation_B"),
-						Date:      testconvert.Time(time.Date(2021, time.February, 1, 10, 10, 10, 10, time.UTC)),
+						Date: testconvert.Time(
+							time.Date(2021, time.February, 1, 10, 10, 10, 10, time.UTC),
+						),
 					},
 					End: &flag.ProgressiveRolloutStep{
 						Variation: testconvert.String("variation_C"),
-						Date:      testconvert.Time(time.Date(2021, time.February, 3, 10, 10, 10, 10, time.UTC)),
+						Date: testconvert.Time(
+							time.Date(2021, time.February, 3, 10, 10, 10, 10, time.UTC),
+						),
 					},
 				},
 			},
 			updatedRule: flag.Rule{
 				ProgressiveRollout: &flag.ProgressiveRollout{
 					End: &flag.ProgressiveRolloutStep{
-						Date:       testconvert.Time(time.Date(2021, time.February, 12, 10, 10, 10, 10, time.UTC)),
+						Date: testconvert.Time(
+							time.Date(2021, time.February, 12, 10, 10, 10, 10, time.UTC),
+						),
 						Percentage: testconvert.Float64(100),
 					},
 				},
@@ -761,11 +793,15 @@ func TestRule_MergeRules(t *testing.T) {
 				ProgressiveRollout: &flag.ProgressiveRollout{
 					Initial: &flag.ProgressiveRolloutStep{
 						Variation: testconvert.String("variation_B"),
-						Date:      testconvert.Time(time.Date(2021, time.February, 1, 10, 10, 10, 10, time.UTC)),
+						Date: testconvert.Time(
+							time.Date(2021, time.February, 1, 10, 10, 10, 10, time.UTC),
+						),
 					},
 					End: &flag.ProgressiveRolloutStep{
-						Variation:  testconvert.String("variation_C"),
-						Date:       testconvert.Time(time.Date(2021, time.February, 12, 10, 10, 10, 10, time.UTC)),
+						Variation: testconvert.String("variation_C"),
+						Date: testconvert.Time(
+							time.Date(2021, time.February, 12, 10, 10, 10, 10, time.UTC),
+						),
 						Percentage: testconvert.Float64(100),
 					},
 				},

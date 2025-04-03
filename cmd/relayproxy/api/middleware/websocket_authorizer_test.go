@@ -46,7 +46,11 @@ func TestWebsocketAuthorizer(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			e := echo.New()
-			req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/websocket?apiKey=%s", tt.args.urlAPIKey), nil)
+			req := httptest.NewRequest(
+				http.MethodGet,
+				fmt.Sprintf("/websocket?apiKey=%s", tt.args.urlAPIKey),
+				nil,
+			)
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)

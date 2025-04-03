@@ -190,7 +190,10 @@ func TestSlackNotifier_Notify(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mockHTTPClient := &testutils.HTTPClientMock{StatusCode: tt.args.statusCode, ForceError: tt.args.forceError}
+			mockHTTPClient := &testutils.HTTPClientMock{
+				StatusCode: tt.args.statusCode,
+				ForceError: tt.args.forceError,
+			}
 
 			c := Notifier{
 				SlackWebhookURL: tt.args.url,
