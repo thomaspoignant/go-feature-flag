@@ -44,6 +44,7 @@ type simpleRetriever struct {
 	retrieveCalled bool
 }
 
+// Retrieve is the function in charge of fetching the flag configuration.
 func (s *simpleRetriever) Retrieve(_ context.Context) ([]byte, error) {
 	s.retrieveCalled = true
 	return []byte{}, nil
@@ -56,21 +57,25 @@ type initializableRetrieverLegacy struct {
 	statusCalled   bool
 }
 
+// Retrieve is the function in charge of fetching the flag configuration.
 func (i *initializableRetrieverLegacy) Retrieve(_ context.Context) ([]byte, error) {
 	i.retrieveCalled = true
 	return []byte{}, nil
 }
 
+// Init is initializing the retriever to start fetching the flags configuration.
 func (i *initializableRetrieverLegacy) Init(_ context.Context, _ *log.Logger) error {
 	i.initCalled = true
 	return nil
 }
 
+// Shutdown gracefully shutdown the provider and set the status as not ready.
 func (i *initializableRetrieverLegacy) Shutdown(_ context.Context) error {
 	i.shutdownCalled = true
 	return nil
 }
 
+// Status is the function returning the internal state of the retriever.
 func (i *initializableRetrieverLegacy) Status() retriever.Status {
 	i.statusCalled = true
 	return retriever.RetrieverReady
@@ -83,21 +88,25 @@ type initializableRetriever struct {
 	statusCalled   bool
 }
 
+// Retrieve is the function in charge of fetching the flag configuration.
 func (i *initializableRetriever) Retrieve(_ context.Context) ([]byte, error) {
 	i.retrieveCalled = true
 	return []byte{}, nil
 }
 
+// Init is initializing the retriever to start fetching the flags configuration.
 func (i *initializableRetriever) Init(_ context.Context, _ *fflog.FFLogger) error {
 	i.initCalled = true
 	return nil
 }
 
+// Shutdown gracefully shutdown the provider and set the status as not ready.
 func (i *initializableRetriever) Shutdown(_ context.Context) error {
 	i.shutdownCalled = true
 	return nil
 }
 
+// Status is the function returning the internal state of the retriever.
 func (i *initializableRetriever) Status() retriever.Status {
 	i.statusCalled = true
 	return retriever.RetrieverReady

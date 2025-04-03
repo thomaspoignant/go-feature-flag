@@ -6,10 +6,10 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 )
 
-type RuleNotApply struct {
+type RuleNotApplyError struct {
 	Context ffcontext.Context
 }
 
-func (m *RuleNotApply) Error() string {
+func (m *RuleNotApplyError) Error() string {
 	return fmt.Sprintf("Rule does not apply for this user %s", m.Context.GetKey())
 }

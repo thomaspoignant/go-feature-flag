@@ -29,6 +29,7 @@ type Retriever struct {
 	downloader s3manageriface.DownloaderAPI
 }
 
+// Retrieve is the function in charge of fetching the flag configuration.
 func (s *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	// Download the item from the bucket.
 	// If an error occurs, log it and exit.

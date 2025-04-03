@@ -83,9 +83,12 @@ type Notifier struct {
 	init       sync.Once
 }
 
+// Notify is the notifying all the changes to the notifier.
 func (c *Notifier) Notify(diff notifier.DiffCache) error {
 	if c.EndpointURL == "" {
-		return fmt.Errorf("invalid notifier configuration, no endpointURL provided for the webhook notifier")
+		return fmt.Errorf(
+			"invalid notifier configuration, no endpointURL provided for the webhook notifier",
+		)
 	}
 
 	// init the notifier

@@ -113,15 +113,34 @@ func Test_s3Retriever_Retrieve(t *testing.T) {
 
 			// Verify that S3ClientOptions are correctly set on the Retriever
 			if tt.fields.S3ClientOptions != nil {
-				assert.Equal(t, tt.fields.S3ClientOptions, s.S3ClientOptions, "S3ClientOptions should be set correctly on the Retriever")
+				assert.Equal(
+					t,
+					tt.fields.S3ClientOptions,
+					s.S3ClientOptions,
+					"S3ClientOptions should be set correctly on the Retriever",
+				)
 			}
 
 			got, err := s.Retrieve(tt.fields.context)
-			assert.Equal(t, tt.wantErr, err != nil, "Retrieve() error = %v, wantErr %v", err, tt.wantErr)
+			assert.Equal(
+				t,
+				tt.wantErr,
+				err != nil,
+				"Retrieve() error = %v, wantErr %v",
+				err,
+				tt.wantErr,
+			)
 			if err == nil {
 				want, err := os.ReadFile(tt.want)
 				assert.NoError(t, err)
-				assert.Equal(t, string(want), string(got), "Retrieve() got = %v, want %v", string(want), string(got))
+				assert.Equal(
+					t,
+					string(want),
+					string(got),
+					"Retrieve() got = %v, want %v",
+					string(want),
+					string(got),
+				)
 			}
 		})
 	}
@@ -138,13 +157,21 @@ func TestRetriever_Init(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, s.AwsConfig)
 		assert.NotNil(t, s.downloader)
-		assert.Equal(t, "us-west-2", s.AwsConfig.Region, "Setting the region from the environment variable should be copied to the aws config")
+		assert.Equal(
+			t,
+			"us-west-2",
+			s.AwsConfig.Region,
+			"Setting the region from the environment variable should be copied to the aws config",
+		)
 		assert.Equal(t, retriever.RetrieverReady, s.Status())
 	})
 
 	t.Run("With AwsConfig", func(t *testing.T) {
 		t.Setenv("AWS_REGION", "us-west-2")
-		awsConfig, err := config.LoadDefaultConfig(context.Background(), config.WithRegion("us-east-1"))
+		awsConfig, err := config.LoadDefaultConfig(
+			context.Background(),
+			config.WithRegion("us-east-1"),
+		)
 		assert.NoError(t, err)
 		s := Retriever{
 			Bucket:    "TestBucket",
@@ -155,7 +182,12 @@ func TestRetriever_Init(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, s.AwsConfig)
 		assert.NotNil(t, s.downloader)
-		assert.Equal(t, "us-east-1", s.AwsConfig.Region, "Setting the region from the AwsConfig should be used over the environment variable")
+		assert.Equal(
+			t,
+			"us-east-1",
+			s.AwsConfig.Region,
+			"Setting the region from the AwsConfig should be used over the environment variable",
+		)
 		assert.Equal(t, retriever.RetrieverReady, s.Status())
 	})
 
@@ -174,7 +206,12 @@ func TestRetriever_Init(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, s.AwsConfig)
 		assert.NotNil(t, s.downloader)
-		assert.Equal(t, "us-west-2", s.AwsConfig.Region, "Setting the region from the environment variable should be copied to the aws config")
+		assert.Equal(
+			t,
+			"us-west-2",
+			s.AwsConfig.Region,
+			"Setting the region from the environment variable should be copied to the aws config",
+		)
 		assert.Equal(t, retriever.RetrieverReady, s.Status())
 		assert.NotNil(t, s.S3ClientOptions, "S3ClientOptions should be set")
 		assert.Len(t, s.S3ClientOptions, 1, "S3ClientOptions should have one option")

@@ -35,7 +35,11 @@ type cacheManagerImpl struct {
 	persistentFlagConfigurationFile string
 }
 
-func New(notificationService Service, persistentFlagConfigurationFile string, logger *fflog.FFLogger) Manager {
+func New(
+	notificationService Service,
+	persistentFlagConfigurationFile string,
+	logger *fflog.FFLogger,
+) Manager {
 	return &cacheManagerImpl{
 		logger:                          logger,
 		inMemoryCache:                   NewInMemoryCache(logger),
@@ -45,7 +49,10 @@ func New(notificationService Service, persistentFlagConfigurationFile string, lo
 	}
 }
 
-func (c *cacheManagerImpl) ConvertToFlagStruct(loadedFlags []byte, fileFormat string) (map[string]dto.DTO, error) {
+func (c *cacheManagerImpl) ConvertToFlagStruct(
+	loadedFlags []byte,
+	fileFormat string,
+) (map[string]dto.DTO, error) {
 	var newFlags map[string]dto.DTO
 	var err error
 	switch strings.ToLower(fileFormat) {
@@ -60,7 +67,11 @@ func (c *cacheManagerImpl) ConvertToFlagStruct(loadedFlags []byte, fileFormat st
 	return newFlags, err
 }
 
-func (c *cacheManagerImpl) UpdateCache(newFlags map[string]dto.DTO, log *fflog.FFLogger, notifyChanges bool) error {
+func (c *cacheManagerImpl) UpdateCache(
+	newFlags map[string]dto.DTO,
+	log *fflog.FFLogger,
+	notifyChanges bool,
+) error {
 	newCache := NewInMemoryCache(c.logger)
 	newCache.Init(newFlags)
 	newCacheFlags := newCache.All()
@@ -124,9 +135,13 @@ func (c *cacheManagerImpl) GetLatestUpdateDate() time.Time {
 // It is useful to have a fallback in case of a problem with the retrievers, such as a network issue.
 //
 // The persistence is done in a goroutine to not block the main thread.
-func (c *cacheManagerImpl) PersistCache(oldCache map[string]flag.Flag, newCache map[string]flag.Flag) {
+func (c *cacheManagerImpl) PersistCache(
+	oldCache map[string]flag.Flag,
+	newCache map[string]flag.Flag,
+) {
 	go func() {
-		if _, err := os.Stat(c.persistentFlagConfigurationFile); !os.IsNotExist(err) && cmp.Equal(oldCache, newCache) {
+		if _, err := os.Stat(c.persistentFlagConfigurationFile); !os.IsNotExist(err) &&
+			cmp.Equal(oldCache, newCache) {
 			c.logger.Debug("No change in the cache, skipping the persist")
 			return
 		}
@@ -141,6 +156,9 @@ func (c *cacheManagerImpl) PersistCache(oldCache map[string]flag.Flag, newCache 
 			c.logger.Error("Error while writing flags to file", slog.Any("error", err))
 			return
 		}
-		c.logger.Info("Flags cache persisted to file", slog.String("file", c.persistentFlagConfigurationFile))
+		c.logger.Info(
+			"Flags cache persisted to file",
+			slog.String("file", c.persistentFlagConfigurationFile),
+		)
 	}()
 }

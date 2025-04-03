@@ -235,7 +235,11 @@ func TestLoadConfigFile(t *testing.T) {
 				tt.defaultLocations = []string{dir + "/"}
 			}
 
-			result, err := helper.LoadConfigFile(tt.inputFilePath, tt.configFormat, tt.defaultLocations)
+			result, err := helper.LoadConfigFile(
+				tt.inputFilePath,
+				tt.configFormat,
+				tt.defaultLocations,
+			)
 			if tt.expectErr {
 				assert.Error(t, err)
 			} else {

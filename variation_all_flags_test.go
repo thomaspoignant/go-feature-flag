@@ -127,9 +127,11 @@ func TestGetFlagStates(t *testing.T) {
 			valid:      true,
 			jsonOutput: "./testdata/ffclient/get_flagstates/marshal_json/valid_flag1_flag4.json",
 			initModule: true,
-			evaluationContext: ffcontext.NewEvaluationContextBuilder("123").AddCustom("gofeatureflag", map[string]interface{}{
-				"flagList": []string{"test-flag1", "test-flag4"},
-			}).Build(),
+			evaluationContext: ffcontext.NewEvaluationContextBuilder("123").
+				AddCustom("gofeatureflag", map[string]interface{}{
+					"flagList": []string{"test-flag1", "test-flag4"},
+				}).
+				Build(),
 		},
 		{
 			name: "empty list of flags in context",
@@ -141,9 +143,11 @@ func TestGetFlagStates(t *testing.T) {
 			valid:      true,
 			jsonOutput: "./testdata/ffclient/get_flagstates/marshal_json/all_flags.json",
 			initModule: true,
-			evaluationContext: ffcontext.NewEvaluationContextBuilder("123").AddCustom("gofeatureflag", map[string]interface{}{
-				"flagList": []string{},
-			}).Build(),
+			evaluationContext: ffcontext.NewEvaluationContextBuilder("123").
+				AddCustom("gofeatureflag", map[string]interface{}{
+					"flagList": []string{},
+				}).
+				Build(),
 		},
 		{
 			name: "no field in context context",
@@ -192,7 +196,10 @@ func TestGetFlagStates(t *testing.T) {
 				goff.Close()
 			}
 
-			allFlagsState := goff.GetFlagStates(tt.evaluationContext, tt.evaluationContext.ExtractGOFFProtectedFields().FlagList)
+			allFlagsState := goff.GetFlagStates(
+				tt.evaluationContext,
+				tt.evaluationContext.ExtractGOFFProtectedFields().FlagList,
+			)
 			assert.Equal(t, tt.valid, allFlagsState.IsValid())
 
 			// expected JSON output - we force the timestamp

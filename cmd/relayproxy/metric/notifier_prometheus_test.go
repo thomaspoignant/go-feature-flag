@@ -37,9 +37,21 @@ func TestPrometheusNotifier_with_diff(t *testing.T) {
 	assert.Equal(t, 1.0, testutil.ToFloat64(m.flagDeleteCounter))
 	assert.Equal(t, 1.0, testutil.ToFloat64(m.flagUpdateCounter))
 	assert.Equal(t, 3.0, testutil.ToFloat64(m.flagCreateCounter))
-	assert.Equal(t, 1.0, testutil.ToFloat64(m.flagCreateCounterVec.WithLabelValues("test-flagAdd1")))
-	assert.Equal(t, 1.0, testutil.ToFloat64(m.flagCreateCounterVec.WithLabelValues("test-flagAdd2")))
-	assert.Equal(t, 1.0, testutil.ToFloat64(m.flagCreateCounterVec.WithLabelValues("test-flagAdd3")))
+	assert.Equal(
+		t,
+		1.0,
+		testutil.ToFloat64(m.flagCreateCounterVec.WithLabelValues("test-flagAdd1")),
+	)
+	assert.Equal(
+		t,
+		1.0,
+		testutil.ToFloat64(m.flagCreateCounterVec.WithLabelValues("test-flagAdd2")),
+	)
+	assert.Equal(
+		t,
+		1.0,
+		testutil.ToFloat64(m.flagCreateCounterVec.WithLabelValues("test-flagAdd3")),
+	)
 	assert.Equal(t, 1.0, testutil.ToFloat64(m.flagUpdateCounterVec.WithLabelValues("test-flag2")))
 	assert.Equal(t, 1.0, testutil.ToFloat64(m.flagDeleteCounterVec.WithLabelValues("test-flag")))
 	assert.Equal(t, 1.0, testutil.ToFloat64(m.flagChange))
@@ -61,9 +73,21 @@ func TestPrometheusNotifier_no_diff(t *testing.T) {
 	assert.Equal(t, 0.0, testutil.ToFloat64(m.flagDeleteCounter))
 	assert.Equal(t, 0.0, testutil.ToFloat64(m.flagUpdateCounter))
 	assert.Equal(t, 0.0, testutil.ToFloat64(m.flagCreateCounter))
-	assert.Equal(t, 0.0, testutil.ToFloat64(m.flagCreateCounterVec.WithLabelValues("test-flagAdd1")))
-	assert.Equal(t, 0.0, testutil.ToFloat64(m.flagCreateCounterVec.WithLabelValues("test-flagAdd2")))
-	assert.Equal(t, 0.0, testutil.ToFloat64(m.flagCreateCounterVec.WithLabelValues("test-flagAdd3")))
+	assert.Equal(
+		t,
+		0.0,
+		testutil.ToFloat64(m.flagCreateCounterVec.WithLabelValues("test-flagAdd1")),
+	)
+	assert.Equal(
+		t,
+		0.0,
+		testutil.ToFloat64(m.flagCreateCounterVec.WithLabelValues("test-flagAdd2")),
+	)
+	assert.Equal(
+		t,
+		0.0,
+		testutil.ToFloat64(m.flagCreateCounterVec.WithLabelValues("test-flagAdd3")),
+	)
 	assert.Equal(t, 0.0, testutil.ToFloat64(m.flagUpdateCounterVec.WithLabelValues("test-flag2")))
 	assert.Equal(t, 0.0, testutil.ToFloat64(m.flagDeleteCounterVec.WithLabelValues("test-flag")))
 	assert.Equal(t, 0.0, testutil.ToFloat64(m.flagChange))

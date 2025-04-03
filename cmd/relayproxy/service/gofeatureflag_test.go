@@ -10,7 +10,7 @@ import (
 
 	"github.com/IBM/sarama"
 	"github.com/stretchr/testify/assert"
-	"github.com/thomaspoignant/go-feature-flag"
+	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/azureexporter"
@@ -739,26 +739,52 @@ func TestNewGoFeatureFlagClient_ProxyConfNil(t *testing.T) {
 
 	// Assert that the function returns nil and an error
 	assert.Nil(t, goff, "Expected GoFeatureFlag client to be nil when proxyConf is nil")
-	assert.EqualError(t, err, "proxy config is empty", "Expected error message to indicate empty proxy config")
+	assert.EqualError(
+		t,
+		err,
+		"proxy config is empty",
+		"Expected error message to indicate empty proxy config",
+	)
 }
 
 func TestSetKafkaConfig(t *testing.T) {
-	t.Run("should have a SCRAMClientGeneratorFunc if SCRAM is enabled and use SCRAM-SHA-512 mechanism", func(t *testing.T) {
-		settings := kafkaexporter.Settings{
-			Topic:     "my-kafka-topic",
-			Addresses: []string{"addr1", "addr2"},
-			Config: &sarama.Config{
-				Net: struct {
-					MaxOpenRequests                  int
-					DialTimeout                      time.Duration
-					ReadTimeout                      time.Duration
-					WriteTimeout                     time.Duration
-					ResolveCanonicalBootstrapServers bool
-					TLS                              struct {
-						Enable bool
-						Config *tls.Config
-					}
-					SASL struct {
+	t.Run(
+		"should have a SCRAMClientGeneratorFunc if SCRAM is enabled and use SCRAM-SHA-512 mechanism",
+		func(t *testing.T) {
+			settings := kafkaexporter.Settings{
+				Topic:     "my-kafka-topic",
+				Addresses: []string{"addr1", "addr2"},
+				Config: &sarama.Config{
+					Net: struct {
+						MaxOpenRequests                  int
+						DialTimeout                      time.Duration
+						ReadTimeout                      time.Duration
+						WriteTimeout                     time.Duration
+						ResolveCanonicalBootstrapServers bool
+						TLS                              struct {
+							Enable bool
+							Config *tls.Config
+						}
+						SASL struct {
+							Enable                   bool
+							Mechanism                sarama.SASLMechanism
+							Version                  int16
+							Handshake                bool
+							AuthIdentity             string
+							User                     string
+							Password                 string
+							SCRAMAuthzID             string
+							SCRAMClientGeneratorFunc func() sarama.SCRAMClient
+							TokenProvider            sarama.AccessTokenProvider
+							GSSAPI                   sarama.GSSAPIConfig
+						}
+						KeepAlive time.Duration
+						LocalAddr net.Addr
+						Proxy     struct {
+							Enable bool
+							Dialer proxy.Dialer
+						}
+					}{SASL: struct {
 						Enable                   bool
 						Mechanism                sarama.SASLMechanism
 						Version                  int16
@@ -770,50 +796,53 @@ func TestSetKafkaConfig(t *testing.T) {
 						SCRAMClientGeneratorFunc func() sarama.SCRAMClient
 						TokenProvider            sarama.AccessTokenProvider
 						GSSAPI                   sarama.GSSAPIConfig
-					}
-					KeepAlive time.Duration
-					LocalAddr net.Addr
-					Proxy     struct {
-						Enable bool
-						Dialer proxy.Dialer
-					}
-				}{SASL: struct {
-					Enable                   bool
-					Mechanism                sarama.SASLMechanism
-					Version                  int16
-					Handshake                bool
-					AuthIdentity             string
-					User                     string
-					Password                 string
-					SCRAMAuthzID             string
-					SCRAMClientGeneratorFunc func() sarama.SCRAMClient
-					TokenProvider            sarama.AccessTokenProvider
-					GSSAPI                   sarama.GSSAPIConfig
-				}{Enable: true, Mechanism: "SCRAM-SHA-512", User: "TODO", Password: "TODO"}},
-			},
-		}
-		kafkaConfig, err := setKafkaConfig(settings)
-		assert.NoError(t, err)
+					}{Enable: true, Mechanism: "SCRAM-SHA-512", User: "TODO", Password: "TODO"}},
+				},
+			}
+			kafkaConfig, err := setKafkaConfig(settings)
+			assert.NoError(t, err)
 
-		assert.NotNil(t, kafkaConfig.Net.SASL.SCRAMClientGeneratorFunc)
-	})
+			assert.NotNil(t, kafkaConfig.Net.SASL.SCRAMClientGeneratorFunc)
+		},
+	)
 
-	t.Run("should have a SCRAMClientGeneratorFunc if SCRAM is enabled and use SCRAM-SHA-256 mechanism", func(t *testing.T) {
-		settings := kafkaexporter.Settings{
-			Topic:     "my-kafka-topic",
-			Addresses: []string{"addr1", "addr2"},
-			Config: &sarama.Config{
-				Net: struct {
-					MaxOpenRequests                  int
-					DialTimeout                      time.Duration
-					ReadTimeout                      time.Duration
-					WriteTimeout                     time.Duration
-					ResolveCanonicalBootstrapServers bool
-					TLS                              struct {
-						Enable bool
-						Config *tls.Config
-					}
-					SASL struct {
+	t.Run(
+		"should have a SCRAMClientGeneratorFunc if SCRAM is enabled and use SCRAM-SHA-256 mechanism",
+		func(t *testing.T) {
+			settings := kafkaexporter.Settings{
+				Topic:     "my-kafka-topic",
+				Addresses: []string{"addr1", "addr2"},
+				Config: &sarama.Config{
+					Net: struct {
+						MaxOpenRequests                  int
+						DialTimeout                      time.Duration
+						ReadTimeout                      time.Duration
+						WriteTimeout                     time.Duration
+						ResolveCanonicalBootstrapServers bool
+						TLS                              struct {
+							Enable bool
+							Config *tls.Config
+						}
+						SASL struct {
+							Enable                   bool
+							Mechanism                sarama.SASLMechanism
+							Version                  int16
+							Handshake                bool
+							AuthIdentity             string
+							User                     string
+							Password                 string
+							SCRAMAuthzID             string
+							SCRAMClientGeneratorFunc func() sarama.SCRAMClient
+							TokenProvider            sarama.AccessTokenProvider
+							GSSAPI                   sarama.GSSAPIConfig
+						}
+						KeepAlive time.Duration
+						LocalAddr net.Addr
+						Proxy     struct {
+							Enable bool
+							Dialer proxy.Dialer
+						}
+					}{SASL: struct {
 						Enable                   bool
 						Mechanism                sarama.SASLMechanism
 						Version                  int16
@@ -825,50 +854,53 @@ func TestSetKafkaConfig(t *testing.T) {
 						SCRAMClientGeneratorFunc func() sarama.SCRAMClient
 						TokenProvider            sarama.AccessTokenProvider
 						GSSAPI                   sarama.GSSAPIConfig
-					}
-					KeepAlive time.Duration
-					LocalAddr net.Addr
-					Proxy     struct {
-						Enable bool
-						Dialer proxy.Dialer
-					}
-				}{SASL: struct {
-					Enable                   bool
-					Mechanism                sarama.SASLMechanism
-					Version                  int16
-					Handshake                bool
-					AuthIdentity             string
-					User                     string
-					Password                 string
-					SCRAMAuthzID             string
-					SCRAMClientGeneratorFunc func() sarama.SCRAMClient
-					TokenProvider            sarama.AccessTokenProvider
-					GSSAPI                   sarama.GSSAPIConfig
-				}{Enable: true, Mechanism: "SCRAM-SHA-256", User: "TODO", Password: "TODO"}},
-			},
-		}
-		kafkaConfig, err := setKafkaConfig(settings)
-		assert.NoError(t, err)
+					}{Enable: true, Mechanism: "SCRAM-SHA-256", User: "TODO", Password: "TODO"}},
+				},
+			}
+			kafkaConfig, err := setKafkaConfig(settings)
+			assert.NoError(t, err)
 
-		assert.NotNil(t, kafkaConfig.Net.SASL.SCRAMClientGeneratorFunc)
-	})
+			assert.NotNil(t, kafkaConfig.Net.SASL.SCRAMClientGeneratorFunc)
+		},
+	)
 
-	t.Run("should not have a SCRAMClientGeneratorFunc if SCRAM is enabled and use an unknown mechanism", func(t *testing.T) {
-		settings := kafkaexporter.Settings{
-			Topic:     "my-kafka-topic",
-			Addresses: []string{"addr1", "addr2"},
-			Config: &sarama.Config{
-				Net: struct {
-					MaxOpenRequests                  int
-					DialTimeout                      time.Duration
-					ReadTimeout                      time.Duration
-					WriteTimeout                     time.Duration
-					ResolveCanonicalBootstrapServers bool
-					TLS                              struct {
-						Enable bool
-						Config *tls.Config
-					}
-					SASL struct {
+	t.Run(
+		"should not have a SCRAMClientGeneratorFunc if SCRAM is enabled and use an unknown mechanism",
+		func(t *testing.T) {
+			settings := kafkaexporter.Settings{
+				Topic:     "my-kafka-topic",
+				Addresses: []string{"addr1", "addr2"},
+				Config: &sarama.Config{
+					Net: struct {
+						MaxOpenRequests                  int
+						DialTimeout                      time.Duration
+						ReadTimeout                      time.Duration
+						WriteTimeout                     time.Duration
+						ResolveCanonicalBootstrapServers bool
+						TLS                              struct {
+							Enable bool
+							Config *tls.Config
+						}
+						SASL struct {
+							Enable                   bool
+							Mechanism                sarama.SASLMechanism
+							Version                  int16
+							Handshake                bool
+							AuthIdentity             string
+							User                     string
+							Password                 string
+							SCRAMAuthzID             string
+							SCRAMClientGeneratorFunc func() sarama.SCRAMClient
+							TokenProvider            sarama.AccessTokenProvider
+							GSSAPI                   sarama.GSSAPIConfig
+						}
+						KeepAlive time.Duration
+						LocalAddr net.Addr
+						Proxy     struct {
+							Enable bool
+							Dialer proxy.Dialer
+						}
+					}{SASL: struct {
 						Enable                   bool
 						Mechanism                sarama.SASLMechanism
 						Version                  int16
@@ -880,32 +912,14 @@ func TestSetKafkaConfig(t *testing.T) {
 						SCRAMClientGeneratorFunc func() sarama.SCRAMClient
 						TokenProvider            sarama.AccessTokenProvider
 						GSSAPI                   sarama.GSSAPIConfig
-					}
-					KeepAlive time.Duration
-					LocalAddr net.Addr
-					Proxy     struct {
-						Enable bool
-						Dialer proxy.Dialer
-					}
-				}{SASL: struct {
-					Enable                   bool
-					Mechanism                sarama.SASLMechanism
-					Version                  int16
-					Handshake                bool
-					AuthIdentity             string
-					User                     string
-					Password                 string
-					SCRAMAuthzID             string
-					SCRAMClientGeneratorFunc func() sarama.SCRAMClient
-					TokenProvider            sarama.AccessTokenProvider
-					GSSAPI                   sarama.GSSAPIConfig
-				}{Enable: true, Mechanism: "UNKNONW-MECHANISM", User: "TODO", Password: "TODO"}},
-			},
-		}
-		kafkaConfig, err := setKafkaConfig(settings)
-		assert.NoError(t, err)
-		assert.Nil(t, kafkaConfig.Net.SASL.SCRAMClientGeneratorFunc)
-	})
+					}{Enable: true, Mechanism: "UNKNONW-MECHANISM", User: "TODO", Password: "TODO"}},
+				},
+			}
+			kafkaConfig, err := setKafkaConfig(settings)
+			assert.NoError(t, err)
+			assert.Nil(t, kafkaConfig.Net.SASL.SCRAMClientGeneratorFunc)
+		},
+	)
 
 	t.Run("should return a valid sarama.Config if settings are nil", func(t *testing.T) {
 		settings := kafkaexporter.Settings{

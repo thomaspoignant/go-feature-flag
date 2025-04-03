@@ -10,6 +10,10 @@ import (
 // UploaderAPI provides methods to manage uploads to an S3 bucket.
 type UploaderAPI interface {
 	// Upload provides a method to upload objects to S3.
-	Upload(ctx context.Context, input *s3.PutObjectInput, opts ...func(uploader *manager.Uploader)) (
+	Upload(
+		ctx context.Context,
+		input *s3.PutObjectInput,
+		opts ...func(uploader *manager.Uploader),
+	) (
 		*manager.UploadOutput, error)
 }
