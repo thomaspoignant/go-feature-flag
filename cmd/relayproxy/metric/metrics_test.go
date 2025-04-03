@@ -35,8 +35,16 @@ func TestMetrics_IncFlagEvaluation(t *testing.T) {
 	metricSrv.IncFlagEvaluation("test-flag")
 	metricSrv.IncFlagEvaluation("test-flag2")
 
-	assert.Equal(t, 2.0, testutil.ToFloat64(metricSrv.flagEvaluationCounter.WithLabelValues("test-flag")))
-	assert.Equal(t, 1.0, testutil.ToFloat64(metricSrv.flagEvaluationCounter.WithLabelValues("test-flag2")))
+	assert.Equal(
+		t,
+		2.0,
+		testutil.ToFloat64(metricSrv.flagEvaluationCounter.WithLabelValues("test-flag")),
+	)
+	assert.Equal(
+		t,
+		1.0,
+		testutil.ToFloat64(metricSrv.flagEvaluationCounter.WithLabelValues("test-flag2")),
+	)
 }
 
 func TestMetrics_IncFlagCreated(t *testing.T) {
@@ -47,8 +55,16 @@ func TestMetrics_IncFlagCreated(t *testing.T) {
 	metricSrv.IncFlagCreated("test-flag2")
 
 	assert.Equal(t, 2.0, testutil.ToFloat64(metricSrv.flagCreateCounter))
-	assert.Equal(t, 1.0, testutil.ToFloat64(metricSrv.flagCreateCounterVec.WithLabelValues("test-flag2")))
-	assert.Equal(t, 1.0, testutil.ToFloat64(metricSrv.flagCreateCounterVec.WithLabelValues("test-flag")))
+	assert.Equal(
+		t,
+		1.0,
+		testutil.ToFloat64(metricSrv.flagCreateCounterVec.WithLabelValues("test-flag2")),
+	)
+	assert.Equal(
+		t,
+		1.0,
+		testutil.ToFloat64(metricSrv.flagCreateCounterVec.WithLabelValues("test-flag")),
+	)
 }
 
 func TestMetrics_IncFlagUpdated(t *testing.T) {
@@ -59,8 +75,16 @@ func TestMetrics_IncFlagUpdated(t *testing.T) {
 	metricSrv.IncFlagUpdated("test-flag2")
 
 	assert.Equal(t, 2.0, testutil.ToFloat64(metricSrv.flagUpdateCounter))
-	assert.Equal(t, 1.0, testutil.ToFloat64(metricSrv.flagUpdateCounterVec.WithLabelValues("test-flag2")))
-	assert.Equal(t, 1.0, testutil.ToFloat64(metricSrv.flagUpdateCounterVec.WithLabelValues("test-flag")))
+	assert.Equal(
+		t,
+		1.0,
+		testutil.ToFloat64(metricSrv.flagUpdateCounterVec.WithLabelValues("test-flag2")),
+	)
+	assert.Equal(
+		t,
+		1.0,
+		testutil.ToFloat64(metricSrv.flagUpdateCounterVec.WithLabelValues("test-flag")),
+	)
 }
 
 func TestMetrics_IncFlagDeleted(t *testing.T) {
@@ -71,8 +95,16 @@ func TestMetrics_IncFlagDeleted(t *testing.T) {
 	metricSrv.IncFlagDeleted("test-flag2")
 
 	assert.Equal(t, 2.0, testutil.ToFloat64(metricSrv.flagDeleteCounter))
-	assert.Equal(t, 1.0, testutil.ToFloat64(metricSrv.flagDeleteCounterVec.WithLabelValues("test-flag2")))
-	assert.Equal(t, 1.0, testutil.ToFloat64(metricSrv.flagDeleteCounterVec.WithLabelValues("test-flag")))
+	assert.Equal(
+		t,
+		1.0,
+		testutil.ToFloat64(metricSrv.flagDeleteCounterVec.WithLabelValues("test-flag2")),
+	)
+	assert.Equal(
+		t,
+		1.0,
+		testutil.ToFloat64(metricSrv.flagDeleteCounterVec.WithLabelValues("test-flag")),
+	)
 }
 
 func TestMetrics_IncFlagChange(t *testing.T) {

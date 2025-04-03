@@ -25,6 +25,8 @@ type InitializableRetriever interface {
 	Init(ctx context.Context, logger *fflog.FFLogger) error
 }
 
+// CommonInitializableRetriever is the common interface for all versions of
+// retrievers that can be initialized and shutdown.
 type CommonInitializableRetriever interface {
 	Retriever
 	Shutdown(ctx context.Context) error
@@ -37,7 +39,10 @@ type CommonInitializableRetriever interface {
 type Status = string
 
 const (
-	RetrieverReady    Status = "READY"
+	// RetrieverReady is the status when the retriever is ready to be used.
+	RetrieverReady Status = "READY"
+	// RetrieverNotReady is the status when the retriever is not ready yet to be used.
 	RetrieverNotReady Status = "NOT_READY"
-	RetrieverError    Status = "ERROR"
+	// RetrieverError is the status when the retriever is in error.
+	RetrieverError Status = "ERROR"
 )

@@ -428,7 +428,11 @@ func TestFile_Export(t *testing.T) {
 				fr, err := local.NewLocalFileReader(outputDir + "/" + files[0].Name())
 				assert.NoError(t, err)
 				defer fr.Close()
-				pr, err := reader.NewParquetReader(fr, new(exporter.FeatureEvent), int64(runtime.NumCPU()))
+				pr, err := reader.NewParquetReader(
+					fr,
+					new(exporter.FeatureEvent),
+					int64(runtime.NumCPU()),
+				)
 				assert.NoError(t, err)
 				defer pr.ReadStop()
 				gotFeatureEvents := make([]exporter.FeatureEvent, pr.GetNumRows())
@@ -440,7 +444,12 @@ func TestFile_Export(t *testing.T) {
 
 			expectedContent, _ := os.ReadFile(tt.expected.content)
 			gotContent, _ := os.ReadFile(outputDir + "/" + files[0].Name())
-			assert.Equal(t, string(expectedContent), string(gotContent), "Wrong content in the output file")
+			assert.Equal(
+				t,
+				string(expectedContent),
+				string(gotContent),
+				"Wrong content in the output file",
+			)
 		})
 	}
 }

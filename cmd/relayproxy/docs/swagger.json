@@ -183,7 +183,7 @@
                     "404": {
                         "description": "Flag Not Found",
                         "schema": {
-                            "$ref": "#/definitions/model.OFREPEvaluateErrorResponse"
+                            "$ref": "#/definitions/model.OFREPEvaluateResponseError"
                         }
                     },
                     "500": {
@@ -246,7 +246,7 @@
                     "400": {
                         "description": "Bad evaluation request",
                         "schema": {
-                            "$ref": "#/definitions/model.OFREPCommonErrorResponse"
+                            "$ref": "#/definitions/model.OFREPCommonResponseError"
                         }
                     },
                     "401": {
@@ -316,7 +316,7 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/model.OFREPEvaluateErrorResponse"
+                            "$ref": "#/definitions/model.OFREPEvaluateResponseError"
                         }
                     },
                     "401": {
@@ -328,7 +328,7 @@
                     "404": {
                         "description": "Flag Not Found",
                         "schema": {
-                            "$ref": "#/definitions/model.OFREPEvaluateErrorResponse"
+                            "$ref": "#/definitions/model.OFREPEvaluateResponseError"
                         }
                     },
                     "500": {
@@ -835,7 +835,7 @@
                 }
             }
         },
-        "model.OFREPCommonErrorResponse": {
+        "model.OFREPCommonResponseError": {
             "type": "object",
             "properties": {
                 "errorCode": {
@@ -915,7 +915,7 @@
                 }
             }
         },
-        "model.OFREPEvaluateErrorResponse": {
+        "model.OFREPEvaluateResponseError": {
             "type": "object",
             "properties": {
                 "errorCode": {

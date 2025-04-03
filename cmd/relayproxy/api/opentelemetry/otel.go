@@ -62,7 +62,12 @@ func (s *OtelService) Init(ctx context.Context, zapLog *zap.Logger, config confi
 		return fmt.Errorf("initializing OTel sampler: %w", err)
 	}
 
-	resource, err := initResource(ctx, serviceName, config.Version, config.OtelConfig.Resource.Attributes)
+	resource, err := initResource(
+		ctx,
+		serviceName,
+		config.Version,
+		config.OtelConfig.Resource.Attributes,
+	)
 	if err != nil {
 		return fmt.Errorf("initializing OTel resources: %w", err)
 	}
@@ -81,7 +86,10 @@ func (s *OtelService) Init(ctx context.Context, zapLog *zap.Logger, config confi
 		zapLog.Error("OTel error", zap.Error(err))
 	}))
 
-	propagator := propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{})
+	propagator := propagation.NewCompositeTextMapPropagator(
+		propagation.TraceContext{},
+		propagation.Baggage{},
+	)
 	otel.SetTextMapPropagator(propagator)
 
 	return nil

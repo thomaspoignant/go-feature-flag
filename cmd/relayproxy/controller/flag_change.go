@@ -56,5 +56,8 @@ func (h *FlagChangeAPICtrl) Handler(c echo.Context) error {
 		flagHashes[key] = utils.Hash(string(jsonFlag))
 	}
 
-	return c.JSON(http.StatusOK, FlagChangeResponse{Hash: utils.Hash(string(res)), Flags: flagHashes})
+	return c.JSON(
+		http.StatusOK,
+		FlagChangeResponse{Hash: utils.Hash(string(res)), Flags: flagHashes},
+	)
 }

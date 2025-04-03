@@ -85,7 +85,12 @@ func TestManifestCmd(t *testing.T) {
 				assert.NoError(t, err)
 				gotManifest, err := os.ReadFile(tmpManifest.Name())
 				assert.NoError(t, err)
-				assert.Equal(t, string(wantManifest), string(gotManifest), "manifest is not expected")
+				assert.Equal(
+					t,
+					string(wantManifest),
+					string(gotManifest),
+					"manifest is not expected",
+				)
 			}
 		})
 	}

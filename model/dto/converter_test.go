@@ -35,12 +35,16 @@ func TestConvertV1DtoToInternalFlag(t *testing.T) {
 							Initial: &flag.ProgressiveRolloutStep{
 								Variation:  testconvert.String("var1"),
 								Percentage: testconvert.Float64(30),
-								Date:       testconvert.Time(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
+								Date: testconvert.Time(
+									time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC),
+								),
 							},
 							End: &flag.ProgressiveRolloutStep{
 								Variation:  testconvert.String("var2"),
 								Percentage: testconvert.Float64(70),
-								Date:       testconvert.Time(time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC)),
+								Date: testconvert.Time(
+									time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
+								),
 							},
 						},
 					},
@@ -89,12 +93,16 @@ func TestConvertV1DtoToInternalFlag(t *testing.T) {
 							Initial: &flag.ProgressiveRolloutStep{
 								Variation:  testconvert.String("var1"),
 								Percentage: testconvert.Float64(30),
-								Date:       testconvert.Time(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
+								Date: testconvert.Time(
+									time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC),
+								),
 							},
 							End: &flag.ProgressiveRolloutStep{
 								Variation:  testconvert.String("var2"),
 								Percentage: testconvert.Float64(70),
-								Date:       testconvert.Time(time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC)),
+								Date: testconvert.Time(
+									time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
+								),
 							},
 						},
 					},

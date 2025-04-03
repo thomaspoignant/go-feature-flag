@@ -745,7 +745,13 @@ func TestConfig_APIKeyExists(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equalf(t, tt.want, tt.config.APIKeyExists(tt.apiKey), "APIKeyExists(%v)", tt.apiKey)
+			assert.Equalf(
+				t,
+				tt.want,
+				tt.config.APIKeyExists(tt.apiKey),
+				"APIKeyExists(%v)",
+				tt.apiKey,
+			)
 		})
 	}
 }
@@ -843,7 +849,13 @@ func TestConfig_APIAdminKeyExists(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equalf(t, tt.want, tt.config.APIKeysAdminExists(tt.apiKey), "APIKeyExists(%v)", tt.apiKey)
+			assert.Equalf(
+				t,
+				tt.want,
+				tt.config.APIKeysAdminExists(tt.apiKey),
+				"APIKeyExists(%v)",
+				tt.apiKey,
+			)
 		})
 	}
 }

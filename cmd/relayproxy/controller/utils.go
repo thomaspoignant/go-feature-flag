@@ -14,7 +14,10 @@ import (
 func assertRequest(u *model.AllFlagRequest) *echo.HTTPError {
 	// nolint: staticcheck
 	if u == nil || (u.User == nil && u.EvaluationContext == nil) {
-		return echo.NewHTTPError(http.StatusBadRequest, "assertRequest: impossible to find user in request")
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			"assertRequest: impossible to find user in request",
+		)
 	}
 
 	if u.EvaluationContext != nil {
@@ -37,7 +40,10 @@ func assertContextKey(key string) *echo.HTTPError {
 func evaluationContextFromRequest(req *model.AllFlagRequest) (ffcontext.Context, error) {
 	if req == nil {
 		return ffcontext.EvaluationContext{},
-			echo.NewHTTPError(http.StatusBadRequest, "evaluationContextFromRequest: impossible to convert the request, req nil")
+			echo.NewHTTPError(
+				http.StatusBadRequest,
+				"evaluationContextFromRequest: impossible to convert the request, req nil",
+			)
 	}
 	if req.EvaluationContext != nil {
 		u := req.EvaluationContext
@@ -50,7 +56,9 @@ func evaluationContextFromRequest(req *model.AllFlagRequest) (ffcontext.Context,
 // nolint: staticcheck
 func userRequestToUser(u *model.UserRequest) (ffcontext.Context, error) {
 	if u == nil {
-		return ffcontext.EvaluationContext{}, fmt.Errorf("userRequestToUser: impossible to convert user, userRequest nil")
+		return ffcontext.EvaluationContext{}, fmt.Errorf(
+			"userRequestToUser: impossible to convert user, userRequest nil",
+		)
 	}
 	u.Custom["anonymous"] = u.Anonymous
 	return utils.ConvertEvaluationCtxFromRequest(u.Key, u.Custom), nil

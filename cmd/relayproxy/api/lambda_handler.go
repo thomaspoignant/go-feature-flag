@@ -37,13 +37,19 @@ func (h *awsLambdaHandler) GetAdapter(mode string) interface{} {
 }
 
 // HandlerAPIGatewayV2 is the function that proxy the lambda events to echo calls for API Gateway V2.
-func (h *awsLambdaHandler) HandlerAPIGatewayV2(ctx context.Context, req events.APIGatewayV2HTTPRequest) (
+func (h *awsLambdaHandler) HandlerAPIGatewayV2(
+	ctx context.Context,
+	req events.APIGatewayV2HTTPRequest,
+) (
 	events.APIGatewayV2HTTPResponse, error) {
 	return h.adapterAPIGtwV2.ProxyWithContext(ctx, req)
 }
 
 // HandlerAPIGatewayV1 is the function that proxy the lambda events to echo calls for API Gateway V1.
-func (h *awsLambdaHandler) HandlerAPIGatewayV1(ctx context.Context, req events.APIGatewayProxyRequest) (
+func (h *awsLambdaHandler) HandlerAPIGatewayV1(
+	ctx context.Context,
+	req events.APIGatewayProxyRequest,
+) (
 	events.APIGatewayProxyResponse, error) {
 	return h.adapterAPIGtwV1.ProxyWithContext(ctx, req)
 }

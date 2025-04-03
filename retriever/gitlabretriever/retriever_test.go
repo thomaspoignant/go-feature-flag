@@ -151,12 +151,23 @@ func Test_gitlab_Retrieve(t *testing.T) {
 			}
 			h.SetHTTPClient(&tt.fields.httpClient)
 			got, err := h.Retrieve(tt.fields.context)
-			assert.Equal(t, tt.wantErr, err != nil, "Retrieve() error = %v, wantErr %v", err, tt.wantErr)
+			assert.Equal(
+				t,
+				tt.wantErr,
+				err != nil,
+				"Retrieve() error = %v, wantErr %v",
+				err,
+				tt.wantErr,
+			)
 			if !tt.wantErr {
 				assert.Equal(t, http.MethodGet, tt.fields.httpClient.Req.Method)
 				assert.Equal(t, strings.TrimSpace(string(tt.want)), strings.TrimSpace(string(got)))
 				if tt.fields.gitlabToken != "" {
-					assert.Equal(t, tt.fields.gitlabToken, tt.fields.httpClient.Req.Header.Get("PRIVATE-TOKEN"))
+					assert.Equal(
+						t,
+						tt.fields.gitlabToken,
+						tt.fields.httpClient.Req.Header.Get("PRIVATE-TOKEN"),
+					)
 				}
 			}
 		})
