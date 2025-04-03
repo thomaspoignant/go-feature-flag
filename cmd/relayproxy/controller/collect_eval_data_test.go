@@ -193,7 +193,7 @@ func Test_collect_tracking_and_evaluation_events(t *testing.T) {
 	//
 	// PLEASE REWORK THIS TEST
 	//
-	//
+	// TODO: Do some tests that the exporterEventType is correctly set in the exporter
 	//
 	//
 	//
