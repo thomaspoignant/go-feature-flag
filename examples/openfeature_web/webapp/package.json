@@ -36,7 +36,7 @@
     "babel-loader": "^10.0.0",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-preset-env": "^1.7.0",
-    "browser-sync": "^3.0.3",
+    "browser-sync": "^3.0.4",
     "eslint": "^9.23.0",
     "eslint-webpack-plugin": "^5.0.0",
     "htmlnano": "^2.1.1",
