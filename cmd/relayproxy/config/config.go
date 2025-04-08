@@ -115,6 +115,10 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 			return s, v
 		}
 
+		if strings.HasPrefix(s, "EXPORTER_KAFKA_ADDRESSES") {
+			return "exporter.kafka.addresses", strings.Split(v, ",")
+		}
+
 		if strings.HasPrefix(s, "AUTHORIZEDKEYS_EVALUATION") {
 			return "authorizedKeys.evaluation", strings.Split(v, ",")
 		}
@@ -138,6 +142,12 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 		return nil, errUnmarshal
 	}
 
+	if proxyConf.Exporters != nil {
+		for i := range *proxyConf.Exporters {
+			(*proxyConf.Exporters)[i].Kafka.Addresses = stringToArray((*proxyConf.Exporters)[i].Kafka.Addresses)
+		}
+	}
+
 	if proxyConf.Debug {
 		log.Warn(
 			"Option Debug that you are using in your configuration file is deprecated" +
@@ -146,6 +156,13 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 	}
 
 	return proxyConf, nil
+}
+
+func stringToArray(item []string) []string {
+	if item != nil && len(item) > 0 {
+		return strings.Split(item[0], ",")
+	}
+	return item
 }
 
 func parseOtelResourceAttributes(attributes string, log *zap.Logger) {
