@@ -940,7 +940,7 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 			},
 		},
 		{
-			name:         "Change kafka exporters",
+			name:         "Change kafka exporter",
 			fileLocation: "../testdata/config/validate-array-env-file.yaml",
 			want: &config.Config{
 				ListenPort:      1031,
@@ -951,12 +951,6 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 					{
 						Kind: "http",
 						URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
-						HTTPHeaders: map[string][]string{
-							"authorization": {
-								"test",
-							},
-							"token": {"token"},
-						},
 					},
 					{
 						Kind: "file",
@@ -964,9 +958,6 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 						HTTPHeaders: map[string][]string{
 							"token": {
 								"11213123",
-							},
-							"authorization": {
-								"test1",
 							},
 						},
 					},
@@ -977,6 +968,67 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 						Addresses: []string{"localhost:19092", "localhost:19093"},
 					},
 				},
+				AuthorizedKeys: config.APIKeys{
+					Admin: []string{
+						"apikey3",
+					},
+					Evaluation: []string{
+						"apikey1",
+						"apikey2",
+					},
+				},
+				StartWithRetrieverError: false,
+				Version:                 "1.X.X",
+				EnableSwagger:           true,
+				LogLevel:                "info",
+			},
+			wantErr: assert.NoError,
+			envVars: map[string]string{
+				"EXPORTER_KAFKA_ADDRESSES": "localhost:19092,localhost:19093",
+				"EXPORTER_KIND":            "kafka",
+			},
+		},
+		{
+			name:         "Change kafka exporters",
+			fileLocation: "../testdata/config/valid-env-exporters-kafka.yaml",
+			want: &config.Config{
+				ListenPort:      1031,
+				PollingInterval: 1000,
+				FileFormat:      "yaml",
+				Host:            "localhost",
+				Retrievers: &[]config.RetrieverConf{
+					{
+						Kind: "http",
+						URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
+					},
+					{
+						Kind: "file",
+						Path: "examples/retriever_file/flags.goff.yaml",
+						HTTPHeaders: map[string][]string{
+							"token": {
+								"11213123",
+							},
+						},
+					},
+				},
+				Exporters: &[]config.ExporterConf{
+					{
+						Kind: "kafka",
+						Kafka: kafkaexporter.Settings{
+							Addresses: []string{"localhost:19092", "localhost:19093"},
+							Topic:     "svc-goff.evaluation",
+						},
+					},
+				},
+				AuthorizedKeys: config.APIKeys{
+					Admin: []string{
+						"apikey3",
+					},
+					Evaluation: []string{
+						"apikey1",
+						"apikey2",
+					},
+				},
 				StartWithRetrieverError: false,
 				Version:                 "1.X.X",
 				EnableSwagger:           true,
@@ -985,7 +1037,6 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 			wantErr: assert.NoError,
 			envVars: map[string]string{
 				"EXPORTERS_0_KAFKA_ADDRESSES": "localhost:19092,localhost:19093",
-				"EXPORTERS_0_KIND":            "kafka",
 			},
 		},
 		{

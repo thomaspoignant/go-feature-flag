@@ -97,7 +97,35 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 	}
 
 	// Map environment variables
-	_ = k.Load(env.ProviderWithValue("", ".", func(s string, v string) (string, interface{}) {
+	_ = k.Load(mapEnvVariablesProvider(log), nil)
+	_ = k.Set("version", version)
+
+	proxyConf := &Config{}
+	errUnmarshal := k.Unmarshal("", &proxyConf)
+	if errUnmarshal != nil {
+		return nil, errUnmarshal
+	}
+
+	if proxyConf.Exporters != nil {
+		for i := range *proxyConf.Exporters {
+			(*proxyConf.Exporters)[i].Kafka.Addresses = stringToArray(
+				(*proxyConf.Exporters)[i].Kafka.Addresses,
+			)
+		}
+	}
+
+	if proxyConf.Debug {
+		log.Warn(
+			"Option Debug that you are using in your configuration file is deprecated" +
+				"and will be removed in future versions." +
+				"Please use logLevel: debug to continue to run the relay-proxy with debug logs.")
+	}
+
+	return proxyConf, nil
+}
+
+func mapEnvVariablesProvider(log *zap.Logger) koanf.Provider {
+	return env.ProviderWithValue("", ".", func(s string, v string) (string, interface{}) {
 		if strings.HasPrefix(s, "RETRIEVERS") ||
 			strings.HasPrefix(s, "NOTIFIERS") ||
 			strings.HasPrefix(s, "EXPORTERS") {
@@ -132,34 +160,11 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 		}
 
 		return strings.ReplaceAll(strings.ToLower(s), "_", "."), v
-	}), nil)
-
-	_ = k.Set("version", version)
-
-	proxyConf := &Config{}
-	errUnmarshal := k.Unmarshal("", &proxyConf)
-	if errUnmarshal != nil {
-		return nil, errUnmarshal
-	}
-
-	if proxyConf.Exporters != nil {
-		for i := range *proxyConf.Exporters {
-			(*proxyConf.Exporters)[i].Kafka.Addresses = stringToArray((*proxyConf.Exporters)[i].Kafka.Addresses)
-		}
-	}
-
-	if proxyConf.Debug {
-		log.Warn(
-			"Option Debug that you are using in your configuration file is deprecated" +
-				"and will be removed in future versions." +
-				"Please use logLevel: debug to continue to run the relay-proxy with debug logs.")
-	}
-
-	return proxyConf, nil
+	})
 }
 
 func stringToArray(item []string) []string {
-	if item != nil && len(item) > 0 {
+	if len(item) > 0 {
 		return strings.Split(item[0], ",")
 	}
 	return item
