@@ -2,7 +2,6 @@ package controller_test
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
@@ -207,7 +206,6 @@ func Test_collect_tracking_and_evaluation_events(t *testing.T) {
 		_ = os.Remove(trackingExporter.Name())
 	}()
 
-	// init go-feature-flag
 	goFF, _ := ffclient.New(ffclient.Config{
 		PollingInterval: 10 * time.Second,
 		LeveledLogger:   slog.Default(),
@@ -247,14 +245,12 @@ func Test_collect_tracking_and_evaluation_events(t *testing.T) {
 	handlerErr := ctrl.Handler(c)
 	assert.NoError(t, handlerErr)
 	goFF.Close()
-
-	fmt.Println("Evaluation events:")
 	evalEvents, err := os.ReadFile(evalExporter.Name())
 	assert.NoError(t, err)
-	fmt.Println(string(evalEvents))
-
-	fmt.Println("Tracking events:")
+	want := "{\"kind\":\"feature\",\"contextKind\":\"user\",\"userKey\":\"94a25909-20d8-40cc-8500-fee99b569345\",\"creationDate\":1680246000,\"key\":\"my-feature-flag\",\"variation\":\"admin-variation\",\"value\":\"string\",\"default\":false,\"version\":\"v1.0.0\",\"source\":\"PROVIDER_CACHE\",\"metadata\":{\"environment\":\"production\",\"sdkVersion\":\"v1.0.0\",\"source\":\"my-source\",\"timestamp\":1680246000}}\n"
+	assert.JSONEq(t, want, string(evalEvents), "Invalid exported data")
+	wantTracking := "{\"kind\":\"tracking\",\"contextKind\":\"user\",\"userKey\":\"94a25909-20d8-40cc-8500-fee99b569345\",\"creationDate\":1680246020,\"key\":\"my-feature-flag\",\"evaluationContext\":{\"admin\":true,\"name\":\"john doe\",\"targetingKey\":\"94a25909-20d8-40cc-8500-fee99b569345\"},\"trackingEventDetails\":{\"value\":\"string\",\"version\":\"v1.0.0\"}}\n"
 	trackingEvents, err := os.ReadFile(trackingExporter.Name())
 	assert.NoError(t, err)
-	fmt.Println(string(trackingEvents))
+	assert.JSONEq(t, wantTracking, string(trackingEvents), "Invalid exported data")
 }
