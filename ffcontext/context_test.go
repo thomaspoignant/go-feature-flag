@@ -54,7 +54,7 @@ func Test_ExtractGOFFProtectedFields(t *testing.T) {
 	}{
 		{
 			name: "context goff specifics as map[string]string",
-			ctx: ffcontext.NewEvaluationContextBuilder("my-key").
+			ctx: ffcontext.NewEvaluationContextBuilder("my-targetingKey").
 				AddCustom("gofeatureflag", map[string]string{
 					"currentDateTime": time.Date(2022, 8, 1, 0, 0, 10, 0, time.UTC).
 						Format(time.RFC3339),
@@ -66,7 +66,7 @@ func Test_ExtractGOFFProtectedFields(t *testing.T) {
 		},
 		{
 			name: "context goff specifics as map[string]interface and date as time.Time",
-			ctx: ffcontext.NewEvaluationContextBuilder("my-key").
+			ctx: ffcontext.NewEvaluationContextBuilder("my-targetingKey").
 				AddCustom("gofeatureflag", map[string]interface{}{
 					"currentDateTime": time.Date(2022, 8, 1, 0, 0, 10, 0, time.UTC),
 				}).
@@ -77,7 +77,7 @@ func Test_ExtractGOFFProtectedFields(t *testing.T) {
 		},
 		{
 			name: "context goff specifics as map[string]interface and date as *time.Time",
-			ctx: ffcontext.NewEvaluationContextBuilder("my-key").
+			ctx: ffcontext.NewEvaluationContextBuilder("my-targetingKey").
 				AddCustom("gofeatureflag", map[string]interface{}{
 					"currentDateTime": testconvert.Time(
 						time.Date(2022, 8, 1, 0, 0, 10, 0, time.UTC),
@@ -90,7 +90,7 @@ func Test_ExtractGOFFProtectedFields(t *testing.T) {
 		},
 		{
 			name: "context goff specifics as map[string]interface",
-			ctx: ffcontext.NewEvaluationContextBuilder("my-key").
+			ctx: ffcontext.NewEvaluationContextBuilder("my-targetingKey").
 				AddCustom("gofeatureflag", map[string]interface{}{
 					"currentDateTime": time.Date(2022, 8, 1, 0, 0, 10, 0, time.UTC).
 						Format(time.RFC3339),
@@ -102,7 +102,7 @@ func Test_ExtractGOFFProtectedFields(t *testing.T) {
 		},
 		{
 			name: "context goff specifics nil",
-			ctx: ffcontext.NewEvaluationContextBuilder("my-key").
+			ctx: ffcontext.NewEvaluationContextBuilder("my-targetingKey").
 				AddCustom("gofeatureflag", nil).
 				Build(),
 			want: ffcontext.GoffContextSpecifics{
@@ -111,14 +111,14 @@ func Test_ExtractGOFFProtectedFields(t *testing.T) {
 		},
 		{
 			name: "no context goff specifics",
-			ctx:  ffcontext.NewEvaluationContextBuilder("my-key").Build(),
+			ctx:  ffcontext.NewEvaluationContextBuilder("my-targetingKey").Build(),
 			want: ffcontext.GoffContextSpecifics{
 				CurrentDateTime: nil,
 			},
 		},
 		{
 			name: "context goff specifics as GoffContextSpecifics type",
-			ctx: ffcontext.NewEvaluationContextBuilder("my-key").
+			ctx: ffcontext.NewEvaluationContextBuilder("my-targetingKey").
 				AddCustom("gofeatureflag", ffcontext.GoffContextSpecifics{
 					CurrentDateTime: testconvert.Time(time.Date(2022, 8, 1, 0, 0, 10, 0, time.UTC)),
 				}).
@@ -129,7 +129,7 @@ func Test_ExtractGOFFProtectedFields(t *testing.T) {
 		},
 		{
 			name: "context goff specifics as GoffContextSpecifics type contains flagList",
-			ctx: ffcontext.NewEvaluationContextBuilder("my-key").
+			ctx: ffcontext.NewEvaluationContextBuilder("my-targetingKey").
 				AddCustom("gofeatureflag", ffcontext.GoffContextSpecifics{
 					CurrentDateTime: testconvert.Time(time.Date(2022, 8, 1, 0, 0, 10, 0, time.UTC)),
 					FlagList:        []string{"flag1", "flag2"},
@@ -142,7 +142,7 @@ func Test_ExtractGOFFProtectedFields(t *testing.T) {
 		},
 		{
 			name: "context goff specifics as map[string]interface type contains flagList",
-			ctx: ffcontext.NewEvaluationContextBuilder("my-key").
+			ctx: ffcontext.NewEvaluationContextBuilder("my-targetingKey").
 				AddCustom("gofeatureflag", map[string]interface{}{
 					"currentDateTime": testconvert.Time(time.Date(2022, 8, 1, 0, 0, 10, 0, time.UTC)).
 						Format(time.RFC3339),
@@ -156,7 +156,7 @@ func Test_ExtractGOFFProtectedFields(t *testing.T) {
 		},
 		{
 			name: "context goff specifics only flagList",
-			ctx: ffcontext.NewEvaluationContextBuilder("my-key").
+			ctx: ffcontext.NewEvaluationContextBuilder("my-targetingKey").
 				AddCustom("gofeatureflag", map[string]interface{}{
 					"flagList": []string{"flag1", "flag2"},
 				}).
@@ -167,7 +167,7 @@ func Test_ExtractGOFFProtectedFields(t *testing.T) {
 		},
 		{
 			name: "context goff specifics with exporter metadata",
-			ctx: ffcontext.NewEvaluationContextBuilder("my-key").
+			ctx: ffcontext.NewEvaluationContextBuilder("my-targetingKey").
 				AddCustom("gofeatureflag", map[string]interface{}{
 					"exporterMetadata": map[string]interface{}{
 						"toto": 123,
@@ -192,6 +192,95 @@ func Test_ExtractGOFFProtectedFields(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got := tt.ctx.ExtractGOFFProtectedFields()
 			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestEvaluationContext_MarshalJSON(t *testing.T) {
+	tests := []struct {
+		name     string
+		context  ffcontext.EvaluationContext
+		expected string
+	}{
+		{
+			name:     "marshal with empty attributes",
+			context:  ffcontext.NewEvaluationContext("test-key"),
+			expected: `{"targetingKey":"test-key","attributes":{}}`,
+		},
+		{
+			name: "marshal with attributes",
+			context: ffcontext.NewEvaluationContextBuilder("test-key").
+				AddCustom("attr1", "value1").
+				AddCustom("attr2", 123).
+				Build(),
+			expected: `{"targetingKey":"test-key","attributes":{"attr1":"value1","attr2":123}}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			data, err := tt.context.MarshalJSON()
+			assert.NoError(t, err)
+			assert.JSONEq(t, tt.expected, string(data))
+		})
+	}
+}
+
+func TestEvaluationContext_ToMap(t *testing.T) {
+	tests := []struct {
+		name     string
+		context  ffcontext.EvaluationContext
+		expected map[string]interface{}
+	}{
+		{
+			name:     "empty attributes",
+			context:  ffcontext.NewEvaluationContext("test-key"),
+			expected: map[string]interface{}{"targetingKey": "test-key"},
+		},
+		{
+			name: "attributes with values",
+			context: ffcontext.NewEvaluationContextBuilder("test-key").
+				AddCustom("attr1", "value1").
+				AddCustom("attr2", 123).
+				Build(),
+			expected: map[string]interface{}{
+				"targetingKey": "test-key",
+				"attr1":        "value1",
+				"attr2":        123,
+			},
+		},
+		{
+			name: "attributes with nested map",
+			context: ffcontext.NewEvaluationContextBuilder("test-key").
+				AddCustom("nested", map[string]interface{}{
+					"key1": "value1",
+					"key2": 42,
+				}).
+				Build(),
+			expected: map[string]interface{}{
+				"targetingKey": "test-key",
+				"nested": map[string]interface{}{
+					"key1": "value1",
+					"key2": 42,
+				},
+			},
+		},
+		{
+			name: "attributes with nil value",
+			context: ffcontext.NewEvaluationContextBuilder("test-key").
+				AddCustom("attr1", nil).
+				Build(),
+			expected: map[string]interface{}{
+				"targetingKey": "test-key",
+				"attr1":        nil,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.context.ToMap()
+			assert.Equal(t, tt.expected, got)
 		})
 	}
 }

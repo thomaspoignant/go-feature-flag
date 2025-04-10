@@ -19,7 +19,7 @@ func TestLog_Export(t *testing.T) {
 		LogFormat string
 	}
 	type args struct {
-		featureEvents []exporter.FeatureEvent
+		featureEvents []exporter.ExportableEvent
 	}
 	tests := []struct {
 		name        string
@@ -31,8 +31,8 @@ func TestLog_Export(t *testing.T) {
 		{
 			name:   "Default format",
 			fields: fields{LogFormat: ""},
-			args: args{featureEvents: []exporter.FeatureEvent{
-				{
+			args: args{featureEvents: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false,
 				},
@@ -44,8 +44,8 @@ func TestLog_Export(t *testing.T) {
 			fields: fields{
 				LogFormat: "key=\"{{ .Key}}\"",
 			},
-			args: args{featureEvents: []exporter.FeatureEvent{
-				{
+			args: args{featureEvents: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false,
 				},
@@ -57,8 +57,8 @@ func TestLog_Export(t *testing.T) {
 			fields: fields{
 				LogFormat: "key=\"{{ .Key}\" [{{ .FormattedDate}}]",
 			},
-			args: args{featureEvents: []exporter.FeatureEvent{
-				{
+			args: args{featureEvents: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false,
 				},
@@ -70,8 +70,8 @@ func TestLog_Export(t *testing.T) {
 			fields: fields{
 				LogFormat: "key=\"{{ .UnknownKey}}\" [{{ .FormattedDate}}]",
 			},
-			args: args{featureEvents: []exporter.FeatureEvent{
-				{
+			args: args{featureEvents: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false,
 				},
@@ -96,7 +96,7 @@ func TestLog_Export(t *testing.T) {
 				return
 			}
 
-			assert.NoError(t, err, "DeprecatedExporter should not throw errors")
+			assert.NoError(t, err, "DeprecatedExporterV1 should not throw errors")
 
 			logContent, _ := os.ReadFile(logFile.Name())
 			assert.Regexp(t, tt.expectedLog, string(logContent))

@@ -1,33 +1,35 @@
 package ffcontext
 
+import "encoding/json"
+
 type Context interface {
-	// GetKey return the unique key for the context.
+	// GetKey return the unique targetingKey for the context.
 	GetKey() string
 	// IsAnonymous return if the context is about an anonymous user or not.
 	IsAnonymous() bool
-	// GetCustom return all the custom properties added to the context.
+	// GetCustom return all the attributes properties added to the context.
 	GetCustom() map[string]interface{}
-	// AddCustomAttribute allows to add a custom attribute into the context.
+	// AddCustomAttribute allows to add a attributes attribute into the context.
 	AddCustomAttribute(name string, value interface{})
 	// ExtractGOFFProtectedFields extract the goff specific attributes from the evaluation context.
 	ExtractGOFFProtectedFields() GoffContextSpecifics
 }
 
-// value is a type to define custom attribute.
+// value is a type to define attributes.
 type value map[string]interface{}
 
-// NewEvaluationContext creates a new evaluation context identified by the given key.
+// NewEvaluationContext creates a new evaluation context identified by the given targetingKey.
 func NewEvaluationContext(key string) EvaluationContext {
-	return EvaluationContext{key: key, custom: map[string]interface{}{}}
+	return EvaluationContext{targetingKey: key, attributes: map[string]interface{}{}}
 }
 
 // Deprecated: NewAnonymousEvaluationContext is here for compatibility reason.
-// Please use NewEvaluationContext instead and add a custom attribute to know that it is an anonymous user.
+// Please use NewEvaluationContext instead and add a attributes attribute to know that it is an anonymous user.
 //
-// ctx := NewEvaluationContext("my-key")
+// ctx := NewEvaluationContext("my-targetingKey")
 // ctx.AddCustomAttribute("anonymous", true)
 func NewAnonymousEvaluationContext(key string) EvaluationContext {
-	return EvaluationContext{key: key, custom: map[string]interface{}{
+	return EvaluationContext{targetingKey: key, attributes: map[string]interface{}{
 		"anonymous": true,
 	}}
 }
@@ -42,18 +44,31 @@ func NewAnonymousEvaluationContext(key string) EvaluationContext {
 // To construct an EvaluationContext, use either a simple constructor (NewEvaluationContext) or the builder pattern
 // with NewEvaluationContextBuilder.
 type EvaluationContext struct {
-	key    string // only mandatory attribute
-	custom value
+	// uniquely identifying the subject (end-user, or client service) of a flag evaluation
+	targetingKey string
+	attributes   value
 }
 
-// GetKey return the unique key for the user.
+// MarshalJSON is a custom JSON marshaller for EvaluationContext.
+// It will only marshal the targetingKey and the attributes of the context and avoid to expose the internal structure.
+func (u EvaluationContext) MarshalJSON() ([]byte, error) {
+	return json.Marshal(&struct {
+		TargetingKey string `json:"targetingKey"`
+		Attributes   value  `json:"attributes"`
+	}{
+		TargetingKey: u.targetingKey,
+		Attributes:   u.attributes,
+	})
+}
+
+// GetKey return the unique targetingKey for the user.
 func (u EvaluationContext) GetKey() string {
-	return u.key
+	return u.targetingKey
 }
 
 // IsAnonymous return if the user is anonymous or not.
 func (u EvaluationContext) IsAnonymous() bool {
-	anonymous := u.custom["anonymous"]
+	anonymous := u.attributes["anonymous"]
 	switch v := anonymous.(type) {
 	case bool:
 		return v
@@ -62,22 +77,28 @@ func (u EvaluationContext) IsAnonymous() bool {
 	}
 }
 
-// GetCustom return all the custom properties of a user.
+// GetCustom return all the attributes properties of a user.
 func (u EvaluationContext) GetCustom() map[string]interface{} {
-	return u.custom
+	return u.attributes
 }
 
-// AddCustomAttribute allows to add a custom attribute into the user.
+// AddCustomAttribute allows to add a attributes attribute into the user.
 func (u EvaluationContext) AddCustomAttribute(name string, value interface{}) {
 	if name != "" {
-		u.custom[name] = value
+		u.attributes[name] = value
 	}
+}
+
+func (u EvaluationContext) ToMap() map[string]any {
+	resMap := u.attributes
+	resMap["targetingKey"] = u.targetingKey
+	return resMap
 }
 
 // ExtractGOFFProtectedFields extract the goff specific attributes from the evaluation context.
 func (u EvaluationContext) ExtractGOFFProtectedFields() GoffContextSpecifics {
 	goff := GoffContextSpecifics{}
-	switch v := u.custom["gofeatureflag"].(type) {
+	switch v := u.attributes["gofeatureflag"].(type) {
 	case map[string]string:
 		goff.addCurrentDateTime(v["currentDateTime"])
 		goff.addListFlags(v["flagList"])

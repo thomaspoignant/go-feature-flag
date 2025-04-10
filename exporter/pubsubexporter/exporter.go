@@ -39,7 +39,7 @@ type Exporter struct {
 func (e *Exporter) Export(
 	ctx context.Context,
 	_ *fflog.FFLogger,
-	featureEvents []exporter.FeatureEvent,
+	events []exporter.ExportableEvent,
 ) error {
 	if e.publisher == nil {
 		if err := e.initPublisher(ctx); err != nil {
@@ -47,7 +47,7 @@ func (e *Exporter) Export(
 		}
 	}
 
-	for _, event := range featureEvents {
+	for _, event := range events {
 		messageBody, err := json.Marshal(event)
 		if err != nil {
 			return err

@@ -1,7 +1,10 @@
 package exporter
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
+	"text/template"
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
@@ -83,15 +86,50 @@ type FeatureEvent struct {
 	Metadata FeatureEventMetadata `json:"metadata,omitempty" parquet:"name=metadata, type=MAP, keytype=BYTE_ARRAY, keyconvertedtype=UTF8, valuetype=BYTE_ARRAY, valueconvertedtype=UTF8"`
 }
 
-// MarshalInterface marshals all interface type fields in FeatureEvent into JSON-encoded string.
-func (f *FeatureEvent) MarshalInterface() error {
-	if f == nil {
-		return nil
+// GetKey returns the key of the event
+func (f FeatureEvent) GetKey() string {
+	return f.Key
+}
+
+// GetUserKey returns the user key of the event
+func (f FeatureEvent) GetUserKey() string {
+	return f.UserKey
+}
+
+// GetCreationDate returns the creationDate of the event.
+func (f FeatureEvent) GetCreationDate() int64 {
+	return f.CreationDate
+}
+
+func (f FeatureEvent) FormatInCSV(csvTemplate *template.Template) ([]byte, error) {
+	var buf bytes.Buffer
+	err := csvTemplate.Execute(&buf, struct {
+		FeatureEvent
+		FormattedDate string
+	}{
+		FeatureEvent:  f,
+		FormattedDate: time.Unix(f.GetCreationDate(), 0).Format(time.RFC3339),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
+func (f FeatureEvent) FormatInJSON() ([]byte, error) {
+	b, err := json.Marshal(f)
+	b = append(b, []byte("\n")...)
+	return b, err
+}
+
+// ConvertValueForParquet converts the value of the event to a string to be stored in a parquet file.
+func (f FeatureEvent) ConvertValueForParquet() (string, error) {
+	if f.Value == nil {
+		return "", fmt.Errorf("no value to convert, returning empty string")
 	}
 	b, err := json.Marshal(f.Value)
 	if err != nil {
-		return err
+		return "", err
 	}
-	f.Value = string(b)
-	return nil
+	return string(b), nil
 }

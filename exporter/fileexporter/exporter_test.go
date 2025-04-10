@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
+	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"github.com/xitongsys/parquet-go-source/local"
 	"github.com/xitongsys/parquet-go/parquet"
@@ -33,15 +34,17 @@ func TestFile_Export(t *testing.T) {
 		CsvTemplate             string
 		OutputDir               string
 		ParquetCompressionCodec string
+		EventType               string
 	}
 	type args struct {
-		logger        *fflog.FFLogger
-		featureEvents []exporter.FeatureEvent
+		logger *fflog.FFLogger
+		events []exporter.ExportableEvent
 	}
 	type expected struct {
-		fileNameRegex string
-		content       string
-		featureEvents []exporter.FeatureEvent
+		fileNameRegex  string
+		content        string
+		featureEvents  []exporter.FeatureEvent
+		trackingEvents []exporter.TrackingEvent
 	}
 	tests := []struct {
 		name     string
@@ -57,12 +60,12 @@ func TestFile_Export(t *testing.T) {
 			wantErr: false,
 			fields:  fields{},
 			args: args{
-				featureEvents: []exporter.FeatureEvent{
-					{
+				events: []exporter.ExportableEvent{
+					exporter.FeatureEvent{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 						Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 					},
-					{
+					exporter.FeatureEvent{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
 						Variation: "Default", Value: "YO2", Default: false, Version: "127", Source: "SERVER",
 					},
@@ -80,12 +83,12 @@ func TestFile_Export(t *testing.T) {
 				Format: "csv",
 			},
 			args: args{
-				featureEvents: []exporter.FeatureEvent{
-					{
+				events: []exporter.ExportableEvent{
+					exporter.FeatureEvent{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 						Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 					},
-					{
+					exporter.FeatureEvent{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
 						Variation: "Default", Value: "YO2", Default: false, Source: "SERVER",
 					},
@@ -104,12 +107,12 @@ func TestFile_Export(t *testing.T) {
 				ParquetCompressionCodec: parquet.CompressionCodec_SNAPPY.String(),
 			},
 			args: args{
-				featureEvents: []exporter.FeatureEvent{
-					{
+				events: []exporter.ExportableEvent{
+					exporter.FeatureEvent{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 						Variation: "Default", Value: "YO", Default: false, Source: "SERVER", Metadata: map[string]interface{}{"test": "test"},
 					},
-					{
+					exporter.FeatureEvent{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
 						Variation: "Default", Value: "YO2", Default: false, Version: "127", Source: "SERVER",
 					},
@@ -130,6 +133,44 @@ func TestFile_Export(t *testing.T) {
 			},
 		},
 		{
+			name:    "all default parquet tracking events",
+			wantErr: false,
+			fields: fields{
+				Format:                  "parquet",
+				ParquetCompressionCodec: parquet.CompressionCodec_SNAPPY.String(),
+				Filename:                "tracking-{{ .Hostname}}-{{ .Timestamp}}.parquet",
+				EventType:               "tracking",
+			},
+			args: args{
+
+				events: []exporter.ExportableEvent{
+					exporter.TrackingEvent{
+						Kind:              "feature",
+						ContextKind:       "anonymous",
+						UserKey:           "xxx",
+						CreationDate:      1617970547,
+						Key:               "what-ever-you-want",
+						EvaluationContext: ffcontext.NewEvaluationContext("xxx-xxx-xxx").ToMap(),
+						TrackingDetails:   map[string]interface{}{"foo": "bar"},
+					},
+				},
+			},
+			expected: expected{
+				fileNameRegex: "^tracking-" + hostname + "-[0-9]*\\.parquet$",
+				trackingEvents: []exporter.TrackingEvent{
+					{
+						Kind:              "feature",
+						ContextKind:       "anonymous",
+						UserKey:           "xxx",
+						CreationDate:      1617970547,
+						Key:               "what-ever-you-want",
+						EvaluationContext: ffcontext.NewEvaluationContext("xxx-xxx-xxx").ToMap(),
+						TrackingDetails:   map[string]interface{}{"foo": "bar"},
+					},
+				},
+			},
+		},
+		{
 			name:    "custom CSV format",
 			wantErr: false,
 			fields: fields{
@@ -137,12 +178,12 @@ func TestFile_Export(t *testing.T) {
 				CsvTemplate: "{{ .Kind}};{{ .ContextKind}}\n",
 			},
 			args: args{
-				featureEvents: []exporter.FeatureEvent{
-					{
+				events: []exporter.ExportableEvent{
+					exporter.FeatureEvent{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 						Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 					},
-					{
+					exporter.FeatureEvent{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
 						Variation: "Default", Value: "YO2", Default: false, Source: "SERVER",
 					},
@@ -161,8 +202,8 @@ func TestFile_Export(t *testing.T) {
 				ParquetCompressionCodec: parquet.CompressionCodec_UNCOMPRESSED.String(),
 			},
 			args: args{
-				featureEvents: []exporter.FeatureEvent{
-					{
+				events: []exporter.ExportableEvent{
+					exporter.FeatureEvent{
 						Kind:         "feature",
 						ContextKind:  "anonymousUser",
 						UserKey:      "ABCD",
@@ -207,12 +248,12 @@ func TestFile_Export(t *testing.T) {
 				Filename: "{{ .Format}}-test-{{ .Timestamp}}",
 			},
 			args: args{
-				featureEvents: []exporter.FeatureEvent{
-					{
+				events: []exporter.ExportableEvent{
+					exporter.FeatureEvent{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 						Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 					},
-					{
+					exporter.FeatureEvent{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
 						Variation: "Default", Value: "YO2", Default: false, Source: "SERVER",
 					},
@@ -230,12 +271,12 @@ func TestFile_Export(t *testing.T) {
 				Format: "xxx",
 			},
 			args: args{
-				featureEvents: []exporter.FeatureEvent{
-					{
+				events: []exporter.ExportableEvent{
+					exporter.FeatureEvent{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 						Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 					},
-					{
+					exporter.FeatureEvent{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
 						Variation: "Default", Value: "YO2", Default: false, Version: "127", Source: "SERVER",
 					},
@@ -253,12 +294,12 @@ func TestFile_Export(t *testing.T) {
 				OutputDir: filepath.Join(tempDir, "non-existent-dir"),
 			},
 			args: args{
-				featureEvents: []exporter.FeatureEvent{
-					{
+				events: []exporter.ExportableEvent{
+					exporter.FeatureEvent{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 						Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 					},
-					{
+					exporter.FeatureEvent{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
 						Variation: "Default", Value: "YO2", Default: false, Version: "127", Source: "SERVER",
 					},
@@ -276,12 +317,12 @@ func TestFile_Export(t *testing.T) {
 				Filename: "{{ .InvalidField}}",
 			},
 			args: args{
-				featureEvents: []exporter.FeatureEvent{
-					{
+				events: []exporter.ExportableEvent{
+					exporter.FeatureEvent{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 						Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 					},
-					{
+					exporter.FeatureEvent{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
 						Variation: "Default", Value: "YO2", Default: false, Source: "SERVER",
 					},
@@ -296,12 +337,12 @@ func TestFile_Export(t *testing.T) {
 				CsvTemplate: "{{ .Foo}}",
 			},
 			args: args{
-				featureEvents: []exporter.FeatureEvent{
-					{
+				events: []exporter.ExportableEvent{
+					exporter.FeatureEvent{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 						Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 					},
-					{
+					exporter.FeatureEvent{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
 						Variation: "Default", Value: "YO2", Default: false, Source: "SERVER",
 					},
@@ -316,8 +357,8 @@ func TestFile_Export(t *testing.T) {
 				OutputDir: filepath.Join(tempDir, "invalid-permissions-dir"),
 			},
 			args: args{
-				featureEvents: []exporter.FeatureEvent{
-					{
+				events: []exporter.ExportableEvent{
+					exporter.FeatureEvent{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 						Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 					},
@@ -342,8 +383,8 @@ func TestFile_Export(t *testing.T) {
 				OutputDir: filepath.Join(tempDir, "invalid-parent-dir"),
 			},
 			args: args{
-				featureEvents: []exporter.FeatureEvent{
-					{
+				events: []exporter.ExportableEvent{
+					exporter.FeatureEvent{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 						Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 					},
@@ -368,12 +409,12 @@ func TestFile_Export(t *testing.T) {
 				OutputDir: filepath.Join(tempDir, "dir-with-trailing-slash") + "/",
 			},
 			args: args{
-				featureEvents: []exporter.FeatureEvent{
-					{
+				events: []exporter.ExportableEvent{
+					exporter.FeatureEvent{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 						Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
 					},
-					{
+					exporter.FeatureEvent{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
 						Variation: "Default", Value: "YO2", Default: false, Version: "127", Source: "SERVER",
 					},
@@ -408,7 +449,7 @@ func TestFile_Export(t *testing.T) {
 				CsvTemplate:             tt.fields.CsvTemplate,
 				ParquetCompressionCodec: tt.fields.ParquetCompressionCodec,
 			}
-			err := f.Export(context.Background(), tt.args.logger, tt.args.featureEvents)
+			err := f.Export(context.Background(), tt.args.logger, tt.args.events)
 			if tt.wantErr {
 				assert.Error(t, err, "export method should error")
 				return
@@ -425,21 +466,40 @@ func TestFile_Export(t *testing.T) {
 			assert.Regexp(t, tt.expected.fileNameRegex, files[0].Name(), "Invalid file name")
 
 			if tt.fields.Format == "parquet" {
-				fr, err := local.NewLocalFileReader(outputDir + "/" + files[0].Name())
-				assert.NoError(t, err)
-				defer fr.Close()
-				pr, err := reader.NewParquetReader(
-					fr,
-					new(exporter.FeatureEvent),
-					int64(runtime.NumCPU()),
-				)
-				assert.NoError(t, err)
-				defer pr.ReadStop()
-				gotFeatureEvents := make([]exporter.FeatureEvent, pr.GetNumRows())
-				err = pr.Read(&gotFeatureEvents)
-				assert.NoError(t, err)
-				assert.ElementsMatch(t, tt.expected.featureEvents, gotFeatureEvents)
-				return
+				switch tt.fields.EventType {
+				case "tracking":
+					fr, err := local.NewLocalFileReader(outputDir + "/" + files[0].Name())
+					assert.NoError(t, err)
+					defer fr.Close()
+					pr, err := reader.NewParquetReader(
+						fr,
+						new(exporter.TrackingEvent),
+						int64(runtime.NumCPU()),
+					)
+					assert.NoError(t, err)
+					defer pr.ReadStop()
+					gotFeatureEvents := make([]exporter.TrackingEvent, pr.GetNumRows())
+					err = pr.Read(&gotFeatureEvents)
+					assert.NoError(t, err)
+					assert.ElementsMatch(t, tt.expected.trackingEvents, gotFeatureEvents)
+					return
+				default:
+					fr, err := local.NewLocalFileReader(outputDir + "/" + files[0].Name())
+					assert.NoError(t, err)
+					defer fr.Close()
+					pr, err := reader.NewParquetReader(
+						fr,
+						new(exporter.FeatureEvent),
+						int64(runtime.NumCPU()),
+					)
+					assert.NoError(t, err)
+					defer pr.ReadStop()
+					gotFeatureEvents := make([]exporter.FeatureEvent, pr.GetNumRows())
+					err = pr.Read(&gotFeatureEvents)
+					assert.NoError(t, err)
+					assert.ElementsMatch(t, tt.expected.featureEvents, gotFeatureEvents)
+					return
+				}
 			}
 
 			expectedContent, _ := os.ReadFile(tt.expected.content)
@@ -455,15 +515,16 @@ func TestFile_Export(t *testing.T) {
 }
 
 func TestFile_IsBulk(t *testing.T) {
-	exporter := fileexporter.Exporter{}
-	assert.True(t, exporter.IsBulk(), "DeprecatedExporter is a bulk exporter")
+	e := fileexporter.Exporter{}
+	assert.True(t, e.IsBulk(), "DeprecatedExporterV1 is a bulk exporter")
 }
 
 func TestExportWithoutOutputDir(t *testing.T) {
-	featureEvents := []exporter.FeatureEvent{{
-		Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-		Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
-	}}
+	featureEvents := []exporter.ExportableEvent{
+		exporter.FeatureEvent{
+			Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
+			Variation: "Default", Value: "YO", Default: false, Source: "SERVER",
+		}}
 
 	filePrefix := "test-flag-variation-EXAMPLE-"
 	e := fileexporter.Exporter{

@@ -184,3 +184,62 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 		})
 	}
 }
+
+func Test_collect_tracking_and_evaluation_events(t *testing.T) {
+	evalExporter, err := os.CreateTemp("", "evalExport.json")
+	assert.NoError(t, err)
+	trackingExporter, err := os.CreateTemp("", "trackExport.json")
+	assert.NoError(t, err)
+	defer func() {
+		_ = os.Remove(evalExporter.Name())
+		_ = os.Remove(trackingExporter.Name())
+	}()
+
+	goFF, _ := ffclient.New(ffclient.Config{
+		PollingInterval: 10 * time.Second,
+		LeveledLogger:   slog.Default(),
+		Context:         context.Background(),
+		Retriever: &fileretriever.Retriever{
+			Path: configFlagsLocation,
+		},
+
+		DataExporters: []ffclient.DataExporter{
+			{
+				FlushInterval:    10 * time.Second,
+				MaxEventInMemory: 10000,
+				Exporter:         &fileexporter.Exporter{Filename: evalExporter.Name()},
+			},
+			{
+				FlushInterval:     10 * time.Second,
+				MaxEventInMemory:  10000,
+				Exporter:          &fileexporter.Exporter{Filename: trackingExporter.Name()},
+				ExporterEventType: ffclient.TrackingEventExporter,
+			},
+		},
+	})
+	logger, err := zap.NewDevelopment()
+	require.NoError(t, err)
+	ctrl := controller.NewCollectEvalData(goFF, metric.Metrics{}, logger)
+
+	bodyReq, err := os.ReadFile(
+		"../testdata/controller/collect_eval_data/valid_request_mix_tracking_evaluation.json")
+	assert.NoError(t, err)
+	e := echo.New()
+	rec := httptest.NewRecorder()
+
+	req := httptest.NewRequest(echo.POST, "/v1/data/collector", strings.NewReader(string(bodyReq)))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	c := e.NewContext(req, rec)
+	c.SetPath("/v1/data/collector")
+	handlerErr := ctrl.Handler(c)
+	assert.NoError(t, handlerErr)
+	goFF.Close()
+	evalEvents, err := os.ReadFile(evalExporter.Name())
+	assert.NoError(t, err)
+	want := "{\"kind\":\"feature\",\"contextKind\":\"user\",\"userKey\":\"94a25909-20d8-40cc-8500-fee99b569345\",\"creationDate\":1680246000,\"key\":\"my-feature-flag\",\"variation\":\"admin-variation\",\"value\":\"string\",\"default\":false,\"version\":\"v1.0.0\",\"source\":\"PROVIDER_CACHE\",\"metadata\":{\"environment\":\"production\",\"sdkVersion\":\"v1.0.0\",\"source\":\"my-source\",\"timestamp\":1680246000}}\n"
+	assert.JSONEq(t, want, string(evalEvents), "Invalid exported data")
+	wantTracking := "{\"kind\":\"tracking\",\"contextKind\":\"user\",\"userKey\":\"94a25909-20d8-40cc-8500-fee99b569345\",\"creationDate\":1680246020,\"key\":\"my-feature-flag\",\"evaluationContext\":{\"admin\":true,\"name\":\"john doe\",\"targetingKey\":\"94a25909-20d8-40cc-8500-fee99b569345\"},\"trackingEventDetails\":{\"value\":\"string\",\"version\":\"v1.0.0\"}}\n"
+	trackingEvents, err := os.ReadFile(trackingExporter.Name())
+	assert.NoError(t, err)
+	assert.JSONEq(t, wantTracking, string(trackingEvents), "Invalid exported data")
+}

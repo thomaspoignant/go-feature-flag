@@ -6,6 +6,13 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 )
 
+type ExporterEventType = string
+
+const (
+	TrackingEventExporter ExporterEventType = "tracking"
+	FeatureEventExporter  ExporterEventType = "feature"
+)
+
 // DataExporter is the configuration of your export target.
 type DataExporter struct {
 	// FlushInterval is the interval we are waiting to export the data.
@@ -22,4 +29,8 @@ type DataExporter struct {
 	// Exporter is the configuration of your exporter.
 	// You can see all available exporter in the exporter package.
 	Exporter exporter.CommonExporter
+
+	// ExporterEventType is the type of event the exporter is expecting.
+	// The default type if not set is FeatureEventExporter.
+	ExporterEventType ExporterEventType
 }

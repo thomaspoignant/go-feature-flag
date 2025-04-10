@@ -26,7 +26,7 @@ func TestAzureBlobStorage_Export(t *testing.T) {
 	tests := []struct {
 		name         string
 		exporter     azureexporter.Exporter
-		events       []exporter.FeatureEvent
+		events       []exporter.ExportableEvent
 		wantErr      assert.ErrorAssertionFunc
 		wantBlobName string
 	}{
@@ -37,8 +37,8 @@ func TestAzureBlobStorage_Export(t *testing.T) {
 				AccountName: azurite.AccountName,
 				AccountKey:  azurite.AccountKey,
 			},
-			events: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false,
 				},
@@ -54,8 +54,8 @@ func TestAzureBlobStorage_Export(t *testing.T) {
 				AccountName: azurite.AccountName,
 				AccountKey:  azurite.AccountKey,
 			},
-			events: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false,
 				},
@@ -71,8 +71,8 @@ func TestAzureBlobStorage_Export(t *testing.T) {
 				AccountName: azurite.AccountName,
 				AccountKey:  azurite.AccountKey,
 			},
-			events: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false,
 				},
@@ -88,8 +88,8 @@ func TestAzureBlobStorage_Export(t *testing.T) {
 				AccountName: azurite.AccountName,
 				AccountKey:  azurite.AccountKey,
 			},
-			events: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false,
 				},
@@ -105,8 +105,8 @@ func TestAzureBlobStorage_Export(t *testing.T) {
 				AccountName: azurite.AccountName,
 				AccountKey:  azurite.AccountKey,
 			},
-			events: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false,
 				},
@@ -122,8 +122,8 @@ func TestAzureBlobStorage_Export(t *testing.T) {
 				AccountName: azurite.AccountName,
 				AccountKey:  azurite.AccountKey,
 			},
-			events: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false,
 				},
@@ -137,8 +137,8 @@ func TestAzureBlobStorage_Export(t *testing.T) {
 				AccountName: azurite.AccountName,
 				AccountKey:  azurite.AccountKey,
 			},
-			events: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false,
 				},
@@ -148,8 +148,8 @@ func TestAzureBlobStorage_Export(t *testing.T) {
 		{
 			name:     "Should error with nil container",
 			exporter: azureexporter.Exporter{},
-			events: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false,
 				},
@@ -161,8 +161,8 @@ func TestAzureBlobStorage_Export(t *testing.T) {
 			exporter: azureexporter.Exporter{
 				AccountName: "",
 			},
-			events: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false,
 				},
@@ -176,8 +176,8 @@ func TestAzureBlobStorage_Export(t *testing.T) {
 				AccountKey:  azurite.AccountKey,
 				Container:   containerName,
 			},
-			events: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false,
 				},

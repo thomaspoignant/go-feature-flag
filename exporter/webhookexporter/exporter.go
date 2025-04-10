@@ -56,14 +56,14 @@ type webhookPayload struct {
 	Meta map[string]string `json:"meta"`
 
 	// events is the list of the event we send in the payload
-	Events []exporter.FeatureEvent `json:"events"`
+	Events []exporter.ExportableEvent `json:"events"`
 }
 
 // Export is sending a collection of events in a webhook call.
 func (f *Exporter) Export(
 	ctx context.Context,
 	_ *fflog.FFLogger,
-	featureEvents []exporter.FeatureEvent,
+	events []exporter.ExportableEvent,
 ) error {
 	f.init.Do(func() {
 		if f.httpClient == nil {
@@ -82,7 +82,7 @@ func (f *Exporter) Export(
 
 	body := webhookPayload{
 		Meta:   f.Meta,
-		Events: featureEvents,
+		Events: events,
 	}
 	payload, err := json.Marshal(body)
 	if err != nil {

@@ -33,6 +33,7 @@ type ExporterConf struct {
 	AccountName             string                 `mapstructure:"accountName"             koanf:"accountname"`
 	AccountKey              string                 `mapstructure:"accountKey"              koanf:"accountkey"`
 	Container               string                 `mapstructure:"container"               koanf:"container"`
+	ExporterEventType       string                 `mapstructure:"eventType"               koanf:"eventtype"`
 }
 
 func (c *ExporterConf) IsValid() error {

@@ -57,10 +57,10 @@ func TestExporter_Export(t *testing.T) {
 		newClientFunc         func(context.Context, string, ...option.ClientOption) (*pubsub.Client, error)
 	}
 	tests := []struct {
-		name          string
-		fields        fields
-		featureEvents []exporter.FeatureEvent
-		wantErr       bool
+		name    string
+		fields  fields
+		events  []exporter.ExportableEvent
+		wantErr bool
 	}{
 		{
 			name: "should publish a single message with the feature event",
@@ -68,8 +68,8 @@ func TestExporter_Export(t *testing.T) {
 				topic:         topic,
 				newClientFunc: defaultNewClientFunc,
 			},
-			featureEvents: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false,
 				},
@@ -81,12 +81,12 @@ func TestExporter_Export(t *testing.T) {
 				topic:         topic,
 				newClientFunc: defaultNewClientFunc,
 			},
-			featureEvents: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature1", ContextKind: "anonymousUser1", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key1",
 					Variation: "Default", Value: "YO", Default: false,
 				},
-				{
+				exporter.FeatureEvent{
 					Kind: "feature2", ContextKind: "anonymousUser2", UserKey: "ABCDEF", CreationDate: 1617970527, Key: "random-key2",
 					Variation: "Default", Value: "YO", Default: true,
 				},
@@ -106,8 +106,8 @@ func TestExporter_Export(t *testing.T) {
 					return client, nil
 				},
 			},
-			featureEvents: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false,
 				},
@@ -120,8 +120,8 @@ func TestExporter_Export(t *testing.T) {
 				newClientFunc:   defaultNewClientFunc,
 				publishSettings: &pubsub.PublishSettings{CountThreshold: 123},
 			},
-			featureEvents: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false,
 				},
@@ -134,8 +134,8 @@ func TestExporter_Export(t *testing.T) {
 				newClientFunc:         defaultNewClientFunc,
 				enableMessageOrdering: true,
 			},
-			featureEvents: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false,
 				},
@@ -157,8 +157,8 @@ func TestExporter_Export(t *testing.T) {
 				topic:         "not-existing-topic",
 				newClientFunc: defaultNewClientFunc,
 			},
-			featureEvents: []exporter.FeatureEvent{
-				{
+			events: []exporter.ExportableEvent{
+				exporter.FeatureEvent{
 					Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
 					Variation: "Default", Value: "YO", Default: false,
 				},
@@ -178,7 +178,7 @@ func TestExporter_Export(t *testing.T) {
 				EnableMessageOrdering: tt.fields.enableMessageOrdering,
 				newClientFunc:         tt.fields.newClientFunc,
 			}
-			err = e.Export(ctx, logger, tt.featureEvents)
+			err = e.Export(ctx, logger, tt.events)
 
 			if tt.wantErr {
 				assert.Error(t, err)
@@ -186,7 +186,7 @@ func TestExporter_Export(t *testing.T) {
 			}
 
 			assert.NoError(t, err)
-			assertMessages(t, tt.featureEvents, server.Messages())
+			assertMessages(t, tt.events, server.Messages())
 			assertPublisherSettings(t, tt.fields.publishSettings, e.publisher)
 			assert.Equal(t, tt.fields.enableMessageOrdering, e.publisher.EnableMessageOrdering)
 		})
@@ -203,7 +203,7 @@ func TestExporter_IsBulk(t *testing.T) {
 
 func assertMessages(
 	t *testing.T,
-	expectedEvents []exporter.FeatureEvent,
+	expectedEvents []exporter.ExportableEvent,
 	messages []*pstest.Message,
 ) {
 	events := make([]exporter.FeatureEvent, len(messages))

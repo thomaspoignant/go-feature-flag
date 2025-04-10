@@ -168,6 +168,10 @@ func initDataExporters(proxyConf *config.Config) ([]ffclient.DataExporter, error
 }
 
 func initDataExporter(c *config.ExporterConf) (ffclient.DataExporter, error) {
+	exporterEventType := c.ExporterEventType
+	if exporterEventType == "" {
+		exporterEventType = config.DefaultExporter.ExporterEventType
+	}
 	dataExp := ffclient.DataExporter{
 		FlushInterval: func() time.Duration {
 			if c.FlushInterval != 0 {
@@ -181,6 +185,7 @@ func initDataExporter(c *config.ExporterConf) (ffclient.DataExporter, error) {
 			}
 			return config.DefaultExporter.MaxEventInMemory
 		}(),
+		ExporterEventType: exporterEventType,
 	}
 
 	var err error

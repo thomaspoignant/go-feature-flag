@@ -32,6 +32,10 @@ func TestDataExporterManager_flushWithTime(t *testing.T) {
 			name:         "flushTime: deprecated exporter",
 			mockExporter: &mock.ExporterDeprecated{Bulk: true},
 		},
+		{
+			name:         "flushTime: deprecated exporter v2",
+			mockExporter: &mock.ExporterDeprecatedV2{Bulk: true},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -67,12 +71,14 @@ func TestDataExporterManager_flushWithTime(t *testing.T) {
 				),
 			}
 
-			for _, event := range inputEvents {
+			want := make([]exporter.ExportableEvent, len(inputEvents))
+			for i, event := range inputEvents {
 				dc.AddEvent(event)
+				want[i] = event
 			}
 
 			time.Sleep(500 * time.Millisecond)
-			assert.Equal(t, inputEvents, tt.mockExporter.GetExportedEvents())
+			assert.Equal(t, want, tt.mockExporter.GetExportedEvents())
 		})
 	}
 }
@@ -89,6 +95,10 @@ func TestDataExporterManager_flushWithNumberOfEvents(t *testing.T) {
 		{
 			name:         "flushWithNumberOfEvents: deprecated exporter",
 			mockExporter: &mock.ExporterDeprecated{Bulk: true},
+		},
+		{
+			name:         "flushWithNumberOfEvents: deprecated exporter v2",
+			mockExporter: &mock.ExporterDeprecatedV2{Bulk: true},
 		},
 	}
 	for _, tt := range tests {
@@ -125,10 +135,12 @@ func TestDataExporterManager_flushWithNumberOfEvents(t *testing.T) {
 					nil,
 				))
 			}
-			for _, event := range inputEvents {
+			want := make([]exporter.ExportableEvent, len(inputEvents))
+			for i, event := range inputEvents {
 				dc.AddEvent(event)
+				want[i] = event
 			}
-			assert.Equal(t, inputEvents[:100], tt.mockExporter.GetExportedEvents())
+			assert.Equal(t, want[:100], tt.mockExporter.GetExportedEvents())
 		})
 	}
 }
@@ -145,6 +157,10 @@ func TestDataExporterManager_defaultFlush(t *testing.T) {
 		{
 			name:         "deprecated exporter",
 			mockExporter: &mock.ExporterDeprecated{Bulk: true},
+		},
+		{
+			name:         "deprecated exporter v2",
+			mockExporter: &mock.ExporterDeprecatedV2{Bulk: true},
 		},
 	}
 
@@ -178,10 +194,12 @@ func TestDataExporterManager_defaultFlush(t *testing.T) {
 					nil,
 				))
 			}
-			for _, event := range inputEvents {
+			want := make([]exporter.ExportableEvent, len(inputEvents))
+			for i, event := range inputEvents {
 				dc.AddEvent(event)
+				want[i] = event
 			}
-			assert.Equal(t, inputEvents[:100000], tt.mockExporter.GetExportedEvents())
+			assert.Equal(t, want[:100000], tt.mockExporter.GetExportedEvents())
 		})
 	}
 }
@@ -212,11 +230,13 @@ func TestDataExporterManager_exporterReturnError(t *testing.T) {
 			ffcontext.NewEvaluationContextBuilder("ABCD").AddCustom("anonymous", true).Build(),
 			"random-key", "YO", "defaultVar", false, "", "SERVER", nil))
 	}
-	for _, event := range inputEvents {
+	want := make([]exporter.ExportableEvent, len(inputEvents))
+	for i, event := range inputEvents {
 		dc.AddEvent(event)
+		want[i] = event
 	}
 	// check that the first 100 events are exported
-	assert.Equal(t, inputEvents[:100], mockExporter.GetExportedEvents()[:100])
+	assert.Equal(t, want[:100], mockExporter.GetExportedEvents()[:100])
 	handler.AssertMessage("error while exporting data: random err")
 }
 
@@ -240,13 +260,15 @@ func TestDataExporterManager_nonBulkExporter(t *testing.T) {
 			ffcontext.NewEvaluationContextBuilder("ABCD").AddCustom("anonymous", true).Build(),
 			"random-key", "YO", "defaultVar", false, "", "SERVER", nil))
 	}
-	for _, event := range inputEvents {
+	want := make([]exporter.ExportableEvent, len(inputEvents))
+	for i, event := range inputEvents {
 		dc.AddEvent(event)
+		want[i] = event
 		// we have to wait because we are opening a new thread to slow down the flag evaluation.
 		time.Sleep(1 * time.Millisecond)
 	}
 
-	assert.Equal(t, inputEvents[:100], mockExporter.GetExportedEvents())
+	assert.Equal(t, want[:100], mockExporter.GetExportedEvents())
 }
 
 func TestAddExporterMetadataFromContextToExporter(t *testing.T) {
@@ -299,8 +321,14 @@ func TestAddExporterMetadataFromContextToExporter(t *testing.T) {
 
 			time.Sleep(120 * time.Millisecond)
 			assert.Equal(t, 1, len(mockExporter.GetExportedEvents()))
-			got := mockExporter.GetExportedEvents()[0].Metadata
-			assert.Equal(t, tt.want, got)
+
+			switch val := mockExporter.GetExportedEvents()[0].(type) {
+			case exporter.FeatureEvent:
+				assert.Equal(t, tt.want, val.Metadata)
+				break
+			default:
+				assert.Fail(t, "The exported event is not a FeatureEvent")
+			}
 		})
 	}
 }
@@ -332,16 +360,18 @@ func TestDataExporterManager_multipleExporters(t *testing.T) {
 			ffcontext.NewEvaluationContextBuilder("ABCD").AddCustom("anonymous", true).Build(),
 			"random-key", "YO", "defaultVar", false, "", "SERVER", nil))
 	}
-	for _, event := range inputEvents {
+	want := make([]exporter.ExportableEvent, len(inputEvents))
+	for i, event := range inputEvents {
 		dc.AddEvent(event)
+		want[i] = event
 		// we have to wait because we are opening a new thread to slow down the flag evaluation.
 		time.Sleep(1 * time.Millisecond)
 	}
 
-	assert.Equal(t, inputEvents[:100], mockExporter1.GetExportedEvents())
+	assert.Equal(t, want[:100], mockExporter1.GetExportedEvents())
 	assert.Equal(t, 0, len(mockExporter2.GetExportedEvents()))
 	time.Sleep(250 * time.Millisecond)
-	assert.Equal(t, inputEvents[:100], mockExporter2.GetExportedEvents())
+	assert.Equal(t, want[:100], mockExporter2.GetExportedEvents())
 }
 
 func TestDataExporterManager_multipleExportersWithDifferentFlushInterval(t *testing.T) {

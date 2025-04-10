@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
+	"github.com/thomaspoignant/go-feature-flag/internal/notification"
 	"github.com/thomaspoignant/go-feature-flag/model/dto"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"github.com/thomaspoignant/go-feature-flag/testutils/mock"
@@ -248,7 +249,7 @@ variation = "false_var"
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fCache := cache.New(cache.NewNotificationService([]notifier.Notifier{}), "",
+			fCache := cache.New(notification.NewService([]notifier.Notifier{}), "",
 				&fflog.FFLogger{LeveledLogger: slog.Default()})
 			newFlags, err := fCache.ConvertToFlagStruct(tt.args.loadedFlags, tt.flagFormat)
 			if tt.wantErr {
@@ -412,7 +413,7 @@ test-flag2:
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fCache := cache.New(cache.NewNotificationService([]notifier.Notifier{}), "", nil)
+			fCache := cache.New(notification.NewService([]notifier.Notifier{}), "", nil)
 			newFlags, err := fCache.ConvertToFlagStruct(tt.args.loadedFlags, tt.flagFormat)
 			if tt.wantErr {
 				assert.Error(t, err)
@@ -453,7 +454,7 @@ func Test_cacheManagerImpl_GetLatestUpdateDate(t *testing.T) {
   trackEvents: false
 `)
 
-	fCache := cache.New(cache.NewNotificationService([]notifier.Notifier{}), "", nil)
+	fCache := cache.New(notification.NewService([]notifier.Notifier{}), "", nil)
 	timeBefore := fCache.GetLatestUpdateDate()
 	newFlags, _ := fCache.ConvertToFlagStruct(loadedFlags, "yaml")
 	_ = fCache.UpdateCache(newFlags, &fflog.FFLogger{LeveledLogger: slog.Default()}, true)
@@ -485,7 +486,7 @@ func Test_persistCacheAndRestartCacheWithIt(t *testing.T) {
 	err = yaml.Unmarshal(loadedFlags, &loadedFlagsMap)
 	assert.NoError(t, err)
 
-	fCache := cache.New(cache.NewNotificationService([]notifier.Notifier{}), file.Name(), nil)
+	fCache := cache.New(notification.NewService([]notifier.Notifier{}), file.Name(), nil)
 	err = fCache.UpdateCache(loadedFlagsMap, &fflog.FFLogger{LeveledLogger: slog.Default()}, true)
 	assert.NoError(t, err)
 	allFlags1, err := fCache.AllFlags()
@@ -494,7 +495,7 @@ func Test_persistCacheAndRestartCacheWithIt(t *testing.T) {
 	time.Sleep(100 * time.Millisecond) // waiting to let the go routine write in the file
 
 	// we start a new cache with the file persisted
-	fCache2 := cache.New(cache.NewNotificationService([]notifier.Notifier{}), "", nil)
+	fCache2 := cache.New(notification.NewService([]notifier.Notifier{}), "", nil)
 	content, err := os.ReadFile(file.Name())
 	assert.NoError(t, err)
 	loadedFlagsMap2 := map[string]dto.DTO{}

@@ -10,5 +10,6 @@ type CollectEvalDataRequest struct {
 	Meta exporter.FeatureEventMetadata `json:"meta"`
 
 	// Events is the list of the event we send in the payload
-	Events []exporter.FeatureEvent `json:"events"`
+	// here the type is any because we will unmarshal later in the different event types
+	Events []map[string]any `json:"events"`
 }
