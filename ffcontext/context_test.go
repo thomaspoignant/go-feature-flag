@@ -195,3 +195,33 @@ func Test_ExtractGOFFProtectedFields(t *testing.T) {
 		})
 	}
 }
+
+func TestEvaluationContext_MarshalJSON(t *testing.T) {
+	tests := []struct {
+		name     string
+		context  ffcontext.EvaluationContext
+		expected string
+	}{
+		{
+			name:     "marshal with empty attributes",
+			context:  ffcontext.NewEvaluationContext("test-key"),
+			expected: `{"targetingKey":"test-key","attributes":{}}`,
+		},
+		{
+			name: "marshal with attributes",
+			context: ffcontext.NewEvaluationContextBuilder("test-key").
+				AddCustom("attr1", "value1").
+				AddCustom("attr2", 123).
+				Build(),
+			expected: `{"targetingKey":"test-key","attributes":{"attr1":"value1","attr2":123}}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			data, err := tt.context.MarshalJSON()
+			assert.NoError(t, err)
+			assert.JSONEq(t, tt.expected, string(data))
+		})
+	}
+}
