@@ -225,3 +225,62 @@ func TestEvaluationContext_MarshalJSON(t *testing.T) {
 		})
 	}
 }
+
+func TestEvaluationContext_ToMap(t *testing.T) {
+	tests := []struct {
+		name     string
+		context  ffcontext.EvaluationContext
+		expected map[string]interface{}
+	}{
+		{
+			name:     "empty attributes",
+			context:  ffcontext.NewEvaluationContext("test-key"),
+			expected: map[string]interface{}{"targetingKey": "test-key"},
+		},
+		{
+			name: "attributes with values",
+			context: ffcontext.NewEvaluationContextBuilder("test-key").
+				AddCustom("attr1", "value1").
+				AddCustom("attr2", 123).
+				Build(),
+			expected: map[string]interface{}{
+				"targetingKey": "test-key",
+				"attr1":        "value1",
+				"attr2":        123,
+			},
+		},
+		{
+			name: "attributes with nested map",
+			context: ffcontext.NewEvaluationContextBuilder("test-key").
+				AddCustom("nested", map[string]interface{}{
+					"key1": "value1",
+					"key2": 42,
+				}).
+				Build(),
+			expected: map[string]interface{}{
+				"targetingKey": "test-key",
+				"nested": map[string]interface{}{
+					"key1": "value1",
+					"key2": 42,
+				},
+			},
+		},
+		{
+			name: "attributes with nil value",
+			context: ffcontext.NewEvaluationContextBuilder("test-key").
+				AddCustom("attr1", nil).
+				Build(),
+			expected: map[string]interface{}{
+				"targetingKey": "test-key",
+				"attr1":        nil,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.context.ToMap()
+			assert.Equal(t, tt.expected, got)
+		})
+	}
+}
