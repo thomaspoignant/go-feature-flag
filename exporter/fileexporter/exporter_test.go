@@ -500,7 +500,6 @@ func TestFile_Export(t *testing.T) {
 					assert.ElementsMatch(t, tt.expected.featureEvents, gotFeatureEvents)
 					return
 				}
-
 			}
 
 			expectedContent, _ := os.ReadFile(tt.expected.content)
