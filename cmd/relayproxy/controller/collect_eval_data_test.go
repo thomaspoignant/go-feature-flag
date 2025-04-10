@@ -186,17 +186,6 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 }
 
 func Test_collect_tracking_and_evaluation_events(t *testing.T) {
-	//
-	//
-	//
-	//
-	// PLEASE REWORK THIS TEST
-	//
-	// TODO: Do some tests that the exporterEventType is correctly set in the exporter
-	//
-	//
-	//
-
 	evalExporter, err := os.CreateTemp("", "evalExport.json")
 	assert.NoError(t, err)
 	trackingExporter, err := os.CreateTemp("", "trackExport.json")
