@@ -162,6 +162,7 @@ func (f *Exporter) writeParquet(filePath string, events []exporter.ExportableEve
 	return f.writeParquetFeatureEvent(filePath, parquetFeatureEvents)
 }
 
+// writeParquetFeatureEvent writes the feature events in a parquet file
 func (f *Exporter) writeParquetFeatureEvent(filePath string, events []exporter.FeatureEvent) error {
 	fw, err := local.NewLocalFileWriter(filePath)
 	if err != nil {
@@ -186,13 +187,14 @@ func (f *Exporter) writeParquetFeatureEvent(filePath string, events []exporter.F
 		}
 		event.Value = eventValue
 		if err = pw.Write(event); err != nil {
-			return fmt.Errorf("error while writing the export file: %v", err)
+			return fmt.Errorf("error while writing the parquet export file: %v", err)
 		}
 	}
 
 	return pw.WriteStop()
 }
 
+// writeParquetTrackingEvent writes the tracking events in a parquet file
 func (f *Exporter) writeParquetTrackingEvent(
 	filePath string,
 	events []exporter.TrackingEvent,
@@ -215,7 +217,7 @@ func (f *Exporter) writeParquetTrackingEvent(
 
 	for _, event := range events {
 		if err = pw.Write(event); err != nil {
-			return fmt.Errorf("error while writing the export file: %v", err)
+			return fmt.Errorf("error while writing the parquet export file: %v", err)
 		}
 	}
 
