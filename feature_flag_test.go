@@ -85,16 +85,23 @@ func TestStartWithMinInterval(t *testing.T) {
 }
 
 func TestValidUseCase(t *testing.T) {
+	cliExport := mock.Exporter{Bulk: false}
 	// Valid use case
 	err := ffclient.Init(ffclient.Config{
 		PollingInterval: 5 * time.Second,
 		Retriever:       &fileretriever.Retriever{Path: "testdata/flag-config.yaml"},
 		LeveledLogger:   slog.Default(),
-		DataExporter: ffclient.DataExporter{
-			FlushInterval:    10 * time.Second,
-			MaxEventInMemory: 1000,
-			Exporter: &mock.Exporter{
-				Bulk: true,
+		DataExporters: []ffclient.DataExporter{
+			{
+				FlushInterval:    10 * time.Second,
+				MaxEventInMemory: 1000,
+				Exporter: &mock.Exporter{
+					Bulk: true,
+				},
+			},
+			{
+				Exporter:          &cliExport,
+				ExporterEventType: ffclient.TrackingEventExporter,
 			},
 		},
 	})
@@ -117,6 +124,8 @@ func TestValidUseCase(t *testing.T) {
 	ffclient.SetOffline(false)
 	assert.False(t, ffclient.IsOffline())
 	assert.True(t, ffclient.ForceRefresh())
+	ffclient.Track("toto", user, map[string]interface{}{"key": "value"})
+	assert.Equal(t, 1, len(cliExport.ExportedEvents))
 }
 
 func TestValidUseCaseToml(t *testing.T) {

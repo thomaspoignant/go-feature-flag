@@ -31,6 +31,7 @@ func TestValidTrackingEvent(t *testing.T) {
 		"my-feature-flag",
 		ffcontext.NewEvaluationContextBuilder("1668d845-051d-4dd9-907a-7ebe6aa2c9da").
 			AddCustom("admin", true).
+			AddCustom("anonymous", true).
 			Build(),
 		map[string]interface{}{"additional data": "value"},
 	)
@@ -43,6 +44,7 @@ func TestValidTrackingEvent(t *testing.T) {
 		map[string]interface{}{
 			"targetingKey": "1668d845-051d-4dd9-907a-7ebe6aa2c9da",
 			"admin":        true,
+			"anonymous":    true,
 		},
 		exp.ExportedEvents[0].EvaluationContext,
 	)
