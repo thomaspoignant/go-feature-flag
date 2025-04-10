@@ -27,7 +27,7 @@ type TrackingEvent struct {
 	// CreationDate When the feature flag was requested at Unix epoch time in milliseconds.
 	CreationDate int64 `json:"creationDate" example:"1680246000011" parquet:"name=creationDate, type=INT64"`
 
-	// Key of the feature flag requested.
+	// Key of the event.
 	Key string `json:"key" example:"my-feature-flag" parquet:"name=key, type=BYTE_ARRAY, convertedtype=UTF8"`
 
 	// EvaluationContext contains the evaluation context used for the tracking
