@@ -203,7 +203,7 @@ func (f *Exporter) writeParquetTrackingEvent(
 	}
 	defer func() { _ = fw.Close() }()
 
-	pw, err := writer.NewParquetWriter(fw, new(exporter.FeatureEvent), int64(runtime.NumCPU()))
+	pw, err := writer.NewParquetWriter(fw, new(exporter.TrackingEvent), int64(runtime.NumCPU()))
 	if err != nil {
 		return err
 	}

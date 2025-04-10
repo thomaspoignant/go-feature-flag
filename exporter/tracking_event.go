@@ -34,7 +34,7 @@ type TrackingEvent struct {
 	EvaluationContext map[string]any `json:"evaluationContext" parquet:"name=evaluationContext, type=MAP, keytype=BYTE_ARRAY, keyconvertedtype=UTF8, valuetype=BYTE_ARRAY, valueconvertedtype=UTF8"`
 
 	// TrackingDetails contains the details of the tracking event
-	TrackingDetails TrackingEventDetails `json:"trackingEventDetails" parquet:"name=evaluationContext, type=MAP, keytype=BYTE_ARRAY, keyconvertedtype=UTF8, valuetype=BYTE_ARRAY, valueconvertedtype=UTF8"`
+	TrackingDetails TrackingEventDetails `json:"trackingEventDetails" parquet:"name=trackingEventDetails, type=MAP, keytype=BYTE_ARRAY, keyconvertedtype=UTF8, valuetype=BYTE_ARRAY, valueconvertedtype=UTF8"`
 }
 
 func (f TrackingEvent) GetKey() string {
