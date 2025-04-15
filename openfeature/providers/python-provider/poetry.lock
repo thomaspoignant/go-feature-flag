@@ -292,14 +292,14 @@ files = [
 
 [[package]]
 name = "openfeature-sdk"
-version = "0.8.0"
+version = "0.8.1"
 description = "Standardizing Feature Flagging for Everyone"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "openfeature_sdk-0.8.0-py3-none-any.whl", hash = "sha256:e8c683577bebbc22535435cde9b679de9f0139e5df789eb65b004dc2544136fd"},
-    {file = "openfeature_sdk-0.8.0.tar.gz", hash = "sha256:f504dd9a90e82732d85f63a1135a616b326a3ca011b42db66c3318e79bfdaba9"},
+    {file = "openfeature_sdk-0.8.1-py3-none-any.whl", hash = "sha256:8320724d4567bcc4af638475d56a888866006cdea44a973fc4d7307412687489"},
+    {file = "openfeature_sdk-0.8.1.tar.gz", hash = "sha256:475681c39b19ff33bd335e6f6b9bb79180a6f7def95a9aa2c3d6f2693d5f6ac1"},
 ]
 
 [[package]]
@@ -361,14 +361,14 @@ testing = ["pytest", "pytest-benchmark"]
 
 [[package]]
 name = "pydantic"
-version = "2.11.2"
+version = "2.11.3"
 description = "Data validation using Python type hints"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "pydantic-2.11.2-py3-none-any.whl", hash = "sha256:7f17d25846bcdf89b670a86cdfe7b29a9f1c9ca23dee154221c9aa81845cfca7"},
-    {file = "pydantic-2.11.2.tar.gz", hash = "sha256:2138628e050bd7a1e70b91d4bf4a91167f4ad76fdb83209b107c8d84b854917e"},
+    {file = "pydantic-2.11.3-py3-none-any.whl", hash = "sha256:a082753436a07f9ba1289c6ffa01cd93db3548776088aa917cc43b63f68fa60f"},
+    {file = "pydantic-2.11.3.tar.gz", hash = "sha256:7471657138c16adad9322fe3070c0116dd6c3ad8d649300e3cbdfe91f4db4ec3"},
 ]
 
 [package.dependencies]
@@ -717,14 +717,14 @@ typing-extensions = ">=4.12.0"
 
 [[package]]
 name = "urllib3"
-version = "2.3.0"
+version = "2.4.0"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 optional = false
 python-versions = ">=3.9"
 groups = ["main", "dev"]
 files = [
-    {file = "urllib3-2.3.0-py3-none-any.whl", hash = "sha256:1cee9ad369867bfdbbb48b7dd50374c0967a0bb7710050facf0dd6911440e3df"},
-    {file = "urllib3-2.3.0.tar.gz", hash = "sha256:f8c5449b3cf0861679ce7e0503c7b44b5ec981bec0d1d3795a07f1ba96f0204d"},
+    {file = "urllib3-2.4.0-py3-none-any.whl", hash = "sha256:4e16665048960a0900c702d4a66415956a584919c03361cac9f1df5c5dd7e813"},
+    {file = "urllib3-2.4.0.tar.gz", hash = "sha256:414bc6535b787febd7567804cc015fee39daab8ad86268f1310a9250697de466"},
 ]
 
 [package.extras]
