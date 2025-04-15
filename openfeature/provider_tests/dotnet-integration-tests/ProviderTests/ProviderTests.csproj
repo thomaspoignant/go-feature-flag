@@ -16,7 +16,7 @@
         <PackageReference Include="NUnit3TestAdapter" Version="5.0.0" />
         <PackageReference Include="NUnit.Analyzers" Version="4.7.0" />
         <PackageReference Include="coverlet.collector" Version="6.0.4" />
-        <PackageReference Include="OpenFeature" Version="2.3.2" />
+        <PackageReference Include="OpenFeature" Version="2.4.0" />
         <PackageReference Include="OpenFeature.Contrib.GOFeatureFlag" Version="0.2.0" />
     </ItemGroup>
 
