@@ -2,10 +2,11 @@ package evaluation
 
 import (
 	"fmt"
+	"maps"
+
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/model"
-	"maps"
 )
 
 const errorWrongVariation = "wrong variation used for flag %v"

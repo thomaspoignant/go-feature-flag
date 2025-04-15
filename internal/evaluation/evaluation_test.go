@@ -2,10 +2,11 @@ package evaluation
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
-	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"runtime"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 )
 
 func Test_constructMetadataParallel(t *testing.T) {
