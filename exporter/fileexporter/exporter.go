@@ -137,7 +137,7 @@ func (f *Exporter) writeFile(filePath string, events []exporter.ExportableEvent)
 		}
 		_, errWrite := file.Write(line)
 		if errWrite != nil {
-			return fmt.Errorf("error while writing the export file: %v", err)
+			return fmt.Errorf("error while writing the export file: %v", errWrite)
 		}
 	}
 	return nil
