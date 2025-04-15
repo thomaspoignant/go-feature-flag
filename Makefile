@@ -34,6 +34,9 @@ build-editor-api: create-out-dir ## Build the linter in out/bin/
 build-jsonschema-generator: create-out-dir ## Build the jsonschema-generator in out/bin/
 	CGO_ENABLED=0 GO111MODULE=on $(GOCMD) build -mod vendor -o out/bin/jsonschema-generator ./cmd/jsonschema-generator/
 
+build-wasm:
+	CGO_ENABLED=0 GO111MODULE=on $(GOCMD) build -mod vendor -o out/bin/evaluation ./lib/evaluation
+
 build-doc: ## Build the documentation
 	cd website; \
 	npm i && npm run build
