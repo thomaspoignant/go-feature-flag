@@ -13,7 +13,8 @@ func (s *Server) addGOFFRoutes(
 	cAllFlags controller.Controller,
 	cFlagEval controller.Controller,
 	cEvalDataCollector controller.Controller,
-	cFlagChange controller.Controller) {
+	cFlagChange controller.Controller,
+	cFlagConfiguration controller.Controller) {
 	// Grouping the routes
 	v1 := s.apiEcho.Group("/v1")
 	// nolint: staticcheck
@@ -28,7 +29,9 @@ func (s *Server) addGOFFRoutes(
 	v1.Use(etag.WithConfig(etag.Config{
 		Skipper: func(c echo.Context) bool {
 			switch c.Path() {
-			case "/v1/flag/change":
+			case
+				"/v1/flag/change",
+				"/v1/flag/configuration":
 				return false
 			default:
 				return true
@@ -41,6 +44,7 @@ func (s *Server) addGOFFRoutes(
 	v1.POST("/feature/:flagKey/eval", cFlagEval.Handler)
 	v1.POST("/data/collector", cEvalDataCollector.Handler)
 	v1.GET("/flag/change", cFlagChange.Handler)
+	v1.POST("/flag/configuration", cFlagConfiguration.Handler)
 
 	// Swagger - only available if option is enabled
 	if s.config.EnableSwagger {

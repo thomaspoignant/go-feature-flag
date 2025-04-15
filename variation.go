@@ -2,9 +2,9 @@ package ffclient
 
 import (
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/internal/evaluation"
 	"maps"
 
+	"github.com/thomaspoignant/go-feature-flag/evaluation"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"

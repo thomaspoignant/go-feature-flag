@@ -90,6 +90,13 @@ func NewMetrics() (Metrics, error) {
 		Subsystem: GOFFSubSystem,
 	})
 
+	// counts the number of call to the flag configuration endpoint
+	flagConfigurationCounter := prom.NewCounter(prom.CounterOpts{
+		Name:      "flag_configuration_total",
+		Help:      "Counter events for number of configuration api requests.",
+		Subsystem: GOFFSubSystem,
+	})
+
 	metricToRegister := []prom.Collector{
 		flagEvaluationCounter,
 		allFlagCounter,
@@ -102,6 +109,7 @@ func NewMetrics() (Metrics, error) {
 		flagDeleteCounterVec,
 		flagCreateCounterVec,
 		forceRefreshCounter,
+		flagConfigurationCounter,
 		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
 		collectors.NewGoCollector(),
 	}
@@ -114,35 +122,37 @@ func NewMetrics() (Metrics, error) {
 	}
 
 	return Metrics{
-		flagEvaluationCounter:  *flagEvaluationCounter,
-		allFlagCounter:         allFlagCounter,
-		collectEvalDataCounter: collectEvalDataCounter,
-		flagChange:             flagChange,
-		flagCreateCounter:      flagCreateCounter,
-		flagDeleteCounter:      flagDeleteCounter,
-		flagUpdateCounter:      flagUpdateCounter,
-		flagUpdateCounterVec:   *flagUpdateCounterVec,
-		flagDeleteCounterVec:   *flagDeleteCounterVec,
-		flagCreateCounterVec:   *flagCreateCounterVec,
-		forceRefreshCounter:    forceRefreshCounter,
-		Registry:               customRegistry,
+		flagEvaluationCounter:    *flagEvaluationCounter,
+		allFlagCounter:           allFlagCounter,
+		collectEvalDataCounter:   collectEvalDataCounter,
+		flagChange:               flagChange,
+		flagCreateCounter:        flagCreateCounter,
+		flagDeleteCounter:        flagDeleteCounter,
+		flagUpdateCounter:        flagUpdateCounter,
+		flagUpdateCounterVec:     *flagUpdateCounterVec,
+		flagDeleteCounterVec:     *flagDeleteCounterVec,
+		flagCreateCounterVec:     *flagCreateCounterVec,
+		forceRefreshCounter:      forceRefreshCounter,
+		flagConfigurationCounter: flagConfigurationCounter,
+		Registry:                 customRegistry,
 	}, nil
 }
 
 // Metrics is a struct containing all custom prometheus metrics
 type Metrics struct {
-	Registry               *prom.Registry
-	flagEvaluationCounter  prom.CounterVec
-	allFlagCounter         prom.Counter
-	collectEvalDataCounter prom.Counter
-	flagChange             prom.Counter
-	flagCreateCounter      prom.Counter
-	flagDeleteCounter      prom.Counter
-	flagUpdateCounter      prom.Counter
-	flagUpdateCounterVec   prom.CounterVec
-	flagDeleteCounterVec   prom.CounterVec
-	flagCreateCounterVec   prom.CounterVec
-	forceRefreshCounter    prom.Counter
+	Registry                 *prom.Registry
+	flagEvaluationCounter    prom.CounterVec
+	allFlagCounter           prom.Counter
+	collectEvalDataCounter   prom.Counter
+	flagChange               prom.Counter
+	flagCreateCounter        prom.Counter
+	flagDeleteCounter        prom.Counter
+	flagUpdateCounter        prom.Counter
+	forceRefreshCounter      prom.Counter
+	flagConfigurationCounter prom.Counter
+	flagUpdateCounterVec     prom.CounterVec
+	flagDeleteCounterVec     prom.CounterVec
+	flagCreateCounterVec     prom.CounterVec
 }
 
 func (m *Metrics) IncFlagEvaluation(flagName string) {
@@ -201,5 +211,12 @@ func (m *Metrics) IncFlagCreated(flagName string) {
 func (m *Metrics) IncFlagChange() {
 	if m.flagChange != nil {
 		m.flagChange.Inc()
+	}
+}
+
+// IncFlagConfigurationCall is incrementing the counters when the flag configuration endpoint is called.
+func (m *Metrics) IncFlagConfigurationCall() {
+	if m.flagConfigurationCounter != nil {
+		m.flagConfigurationCounter.Inc()
 	}
 }

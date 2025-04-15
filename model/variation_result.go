@@ -1,6 +1,10 @@
 package model
 
-import "github.com/thomaspoignant/go-feature-flag/internal/flag"
+import (
+	"encoding/json"
+
+	"github.com/thomaspoignant/go-feature-flag/internal/flag"
+)
 
 // JSONType contains all acceptable flag value types
 type JSONType interface {
@@ -15,10 +19,15 @@ type VariationResult[T JSONType] struct {
 	Version       string                 `json:"version"`
 	Reason        flag.ResolutionReason  `json:"reason"`
 	ErrorCode     flag.ErrorCode         `json:"errorCode"`
-	ErrorDetails  string                 `json:"errrorDetails,omitempty"`
+	ErrorDetails  string                 `json:"errorDetails,omitempty"`
 	Value         T                      `json:"value"`
 	Cacheable     bool                   `json:"cacheable"`
 	Metadata      map[string]interface{} `json:"metadata,omitempty"`
+}
+
+func (v VariationResult[T]) ToJsonStr() string {
+	content, _ := json.Marshal(v)
+	return string(content)
 }
 
 // RawVarResult is the result of the raw variation call.
