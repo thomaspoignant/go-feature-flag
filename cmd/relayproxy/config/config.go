@@ -162,7 +162,11 @@ func mapEnvVariablesProvider(log *zap.Logger) koanf.Provider {
 			return s, v
 		}
 
-		return strings.ReplaceAll(strings.ToLower(s), "_", "."), v
+		if strings.HasPrefix(s, "OTEL_") {
+			return strings.ReplaceAll(strings.ToLower(s), "_", "."), v
+		}
+
+		return strings.ToLower(s), v
 	})
 }
 
