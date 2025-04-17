@@ -20,31 +20,17 @@ func TestPprofEndpointsStarts(t *testing.T) {
 	type test struct {
 		name               string
 		MonitoringPort     int
-		Debug              bool
 		EnablePprof        bool
 		expectedStatusCode int
 	}
 	tests := []test{
 		{
 			name:               "pprof available in proxy port",
-			Debug:              true,
+			EnablePprof:        true,
 			expectedStatusCode: http.StatusOK,
 		},
 		{
 			name:               "pprof available in monitoring port",
-			Debug:              true,
-			MonitoringPort:     1032,
-			expectedStatusCode: http.StatusOK,
-		},
-		{
-			name:               "pprof not available if debug not enabled",
-			Debug:              false,
-			MonitoringPort:     1032,
-			expectedStatusCode: http.StatusNotFound,
-		},
-		{
-			name:               "pprof available when enablePprof is true",
-			Debug:              false,
 			EnablePprof:        true,
 			MonitoringPort:     1032,
 			expectedStatusCode: http.StatusOK,
@@ -62,7 +48,6 @@ func TestPprofEndpointsStarts(t *testing.T) {
 				},
 				MonitoringPort: tt.MonitoringPort,
 				ListenPort:     1031,
-				Debug:          tt.Debug,
 				EnablePprof:    tt.EnablePprof,
 			}
 
