@@ -117,13 +117,6 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 		}
 	}
 
-	if proxyConf.Debug {
-		log.Warn(
-			"Option Debug that you are using in your configuration file is deprecated" +
-				"and will be removed in future versions." +
-				"Please use logLevel: debug to continue to run the relay-proxy with debug logs.")
-	}
-
 	return proxyConf, nil
 }
 
@@ -213,11 +206,6 @@ type Config struct {
 
 	// HideBanner (optional) if true, we don't display the go-feature-flag relay proxy banner
 	HideBanner bool `mapstructure:"hideBanner" koanf:"hidebanner"`
-
-	// Debug (optional) if true, go-feature-flag relay proxy will run on debug mode, with more logs and custom responses.
-	// It will also start the pprof endpoints on the same port as the monitoring.
-	// Default: false
-	Debug bool `mapstructure:"debug" koanf:"debug"`
 
 	// EnablePprof (optional) if true, go-feature-flag relay proxy will start
 	// the pprof endpoints on the same port as the monitoring.
@@ -623,18 +611,13 @@ func (c *Config) IsDebugEnabled() bool {
 	if c == nil {
 		return false
 	}
-	return strings.ToLower(c.LogLevel) == "debug" || c.Debug
+	return strings.ToLower(c.LogLevel) == "debug"
 }
 
 func (c *Config) ZapLogLevel() zapcore.Level {
 	if c == nil {
 		return zapcore.InvalidLevel
 	}
-	// Use debug flag for backward compatibility
-	if c.Debug {
-		return zapcore.DebugLevel
-	}
-
 	level, err := zapcore.ParseLevel(c.LogLevel)
 	if err != nil {
 		return zapcore.InvalidLevel

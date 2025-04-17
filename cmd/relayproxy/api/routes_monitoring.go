@@ -43,7 +43,7 @@ func (s *Server) initMonitoringEndpoint(echoInstance *echo.Echo) {
 	echoInstance.GET("/health", cHealth.Handler)
 	echoInstance.GET("/info", cInfo.Handler)
 
-	if s.config.Debug || s.config.EnablePprof {
+	if s.config.IsDebugEnabled() || s.config.EnablePprof {
 		pprof.Register(echoInstance)
 	}
 }
