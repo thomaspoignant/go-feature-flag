@@ -329,6 +329,8 @@ func setKafkaConfig(k kafkaexporter.Settings) (kafkaexporter.Settings, error) {
 
 	defaultConfig := sarama.NewConfig()
 	err := mergo.Merge(k.Config, defaultConfig)
+	k.Config = defaultConfig
+	k.Config.Producer.Return.Successes = true
 	if err != nil {
 		return kafkaexporter.Settings{}, err
 	}
