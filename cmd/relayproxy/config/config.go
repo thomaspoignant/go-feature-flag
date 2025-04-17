@@ -100,7 +100,7 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 	}
 
 	// Map environment variables
-	_ = k.Load(mapEnvVariablesProvider(log), nil)
+	_ = k.Load(mapEnvVariablesProvider(k.String("envVariablePrefix"), log), nil)
 	_ = k.Set("version", version)
 
 	proxyConf := &Config{}
@@ -120,42 +120,43 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 	return proxyConf, nil
 }
 
-func mapEnvVariablesProvider(log *zap.Logger) koanf.Provider {
-	return env.ProviderWithValue("", ".", func(s string, v string) (string, interface{}) {
-		if strings.HasPrefix(s, "RETRIEVERS") ||
-			strings.HasPrefix(s, "NOTIFIERS") ||
-			strings.HasPrefix(s, "EXPORTERS") {
+func mapEnvVariablesProvider(prefix string, log *zap.Logger) koanf.Provider {
+	return env.ProviderWithValue(prefix, ".", func(key string, v string) (string, interface{}) {
+		key = strings.TrimPrefix(key, prefix)
+		if strings.HasPrefix(key, "RETRIEVERS") ||
+			strings.HasPrefix(key, "NOTIFIERS") ||
+			strings.HasPrefix(key, "EXPORTERS") {
 			configMap := k.Raw()
-			err := loadArrayEnv(s, v, configMap)
+			err := loadArrayEnv(key, v, configMap)
 			if err != nil {
 				log.Error(
 					"config: error loading array env",
-					zap.String("key", s),
+					zap.String("key", key),
 					zap.String("value", v),
 					zap.Error(err),
 				)
-				return s, v
+				return key, v
 			}
-			return s, v
+			return key, v
 		}
 
-		if strings.HasPrefix(s, "EXPORTER_KAFKA_ADDRESSES") {
+		if strings.HasPrefix(key, "EXPORTER_KAFKA_ADDRESSES") {
 			return "exporter.kafka.addresses", strings.Split(v, ",")
 		}
 
-		if strings.HasPrefix(s, "AUTHORIZEDKEYS_EVALUATION") {
+		if strings.HasPrefix(key, "AUTHORIZEDKEYS_EVALUATION") {
 			return "authorizedKeys.evaluation", strings.Split(v, ",")
 		}
-		if strings.HasPrefix(s, "AUTHORIZEDKEYS_ADMIN") {
+		if strings.HasPrefix(key, "AUTHORIZEDKEYS_ADMIN") {
 			return "authorizedKeys.admin", strings.Split(v, ",")
 		}
 
-		if s == "OTEL_RESOURCE_ATTRIBUTES" {
+		if key == "OTEL_RESOURCE_ATTRIBUTES" {
 			parseOtelResourceAttributes(v, log)
-			return s, v
+			return key, v
 		}
 
-		return strings.ReplaceAll(strings.ToLower(s), "_", "."), v
+		return strings.ReplaceAll(strings.ToLower(key), "_", "."), v
 	})
 }
 
@@ -335,6 +336,10 @@ type Config struct {
 
 	// JaegerConfig is the configuration for the Jaeger sampling of the relay proxy
 	JaegerConfig JaegerSamplerConfiguration `mapstructure:"jaeger" koanf:"jaeger"`
+
+	// EnvVariablePrefix (optional) is the prefix we are using to load the environment variables
+	// By default we have no prefix
+	EnvVariablePrefix string `mapstructure:"envVariablePrefix" koanf:"envvariableprefix"`
 
 	// ---- private fields
 

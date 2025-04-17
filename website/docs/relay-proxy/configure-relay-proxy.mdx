@@ -68,6 +68,14 @@ You can override file configurations using environment variables.
   ```shell
   export RETRIEVERS_0_KIND=github
   ```
+
+:::info
+If you want to avoid any collision with existing environment variables that are not specifically related to the relay proxy, you can prefix your environment variables.
+
+You can configure the prefix using the [`envVariablePrefix`](#envvariableprefix) field in your configuration file.
+:::
+
+
 ## Configuration Options
 ### `retrievers`
 This is the configuration on how to retrieve the configuration of the files.
@@ -300,6 +308,20 @@ You will be able to forward those traces to your OpenTelemetry solution directly
 - option name: `openTelemetryOtlpEndpoint`
 - type: **string**
 - default: **none**
+- mandatory: <NotMandatory />
+
+### `envVariablePrefix`
+Prefix for your environment variables.  
+This useful if you want to avoid any collision with existing environment variables that are not specifically related to the relay proxy.
+
+If you use this option you will have to prefix all your environment variables with the value you set here. For example if you want to override the port of the relay-proxy and the prefix is `GOFF_`.
+```shell
+export GOFF_LISTEN=8080
+```
+
+- option name: `envVariablePrefix`
+- type: **string**
+- default: **empty string**
 - mandatory: <NotMandatory />
 
 ## Configuration Types
