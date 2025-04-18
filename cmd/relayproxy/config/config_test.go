@@ -189,7 +189,6 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 					"apikey2",
 				},
 				LogLevel: "",
-				Debug:    true,
 			},
 			wantErr: assert.NoError,
 		},
@@ -940,6 +939,76 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 			},
 		},
 		{
+			name:         "Valid file with prefix",
+			fileLocation: "../testdata/config/validate-array-env-file-envprefix.yaml",
+			want: &config.Config{
+				EnvVariablePrefix: "GOFF_",
+				ListenPort:        1031,
+				PollingInterval:   1000,
+				FileFormat:        "yaml",
+				Host:              "localhost",
+				Retrievers: &[]config.RetrieverConf{
+					{
+						Kind: "http",
+						URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
+						HTTPHeaders: map[string][]string{
+							"authorization": {
+								"test",
+							},
+							"token": {"token"},
+						},
+					},
+					{
+						Kind: "file",
+						Path: "examples/retriever_file/flags.goff.yaml",
+						HTTPHeaders: map[string][]string{
+							"token": {
+								"11213123",
+							},
+							"authorization": {
+								"test1",
+							},
+						},
+					},
+					{
+						HTTPHeaders: map[string][]string{
+							"authorization": {
+								"test1",
+							},
+							"x-goff-custom": {
+								"custom",
+							},
+						},
+					},
+				},
+				Exporter: &config.ExporterConf{
+					Kind: "log",
+				},
+				StartWithRetrieverError: false,
+				Version:                 "1.X.X",
+				EnableSwagger:           true,
+				AuthorizedKeys: config.APIKeys{
+					Admin: []string{
+						"apikey3",
+					},
+					Evaluation: []string{
+						"apikey1",
+						"apikey2",
+					},
+				},
+				LogLevel: "info",
+			},
+			wantErr: assert.NoError,
+			envVars: map[string]string{
+				"GOFF_RETRIEVERS_0_HEADERS_AUTHORIZATION": "test",
+				"GOFF_RETRIEVERS_X_HEADERS_AUTHORIZATION": "test",
+				"GOFF_RETRIEVERS_1_HEADERS_AUTHORIZATION": "test1",
+				"GOFF_RETRIEVERS_0_HEADERS_TOKEN":         "token",
+				"GOFF_RETRIEVERS_2_HEADERS_AUTHORIZATION": "test1",
+				"GOFF_RETRIEVERS_2_HEADERS_X-GOFF-CUSTOM": "custom",
+			},
+		},
+		{
 			name:         "Change kafka exporter",
 			fileLocation: "../testdata/config/validate-array-env-file.yaml",
 			want: &config.Config{
@@ -1172,23 +1241,6 @@ func TestConfig_LogLevel(t *testing.T) {
 			},
 			wantDebug:    false,
 			wantLogLevel: zapcore.PanicLevel,
-		},
-		{
-			name: "debug flag is set but not log level",
-			config: &config.Config{
-				Debug: true,
-			},
-			wantDebug:    true,
-			wantLogLevel: zapcore.DebugLevel,
-		},
-		{
-			name: "debug flag is set but and log level override",
-			config: &config.Config{
-				LogLevel: "info",
-				Debug:    true,
-			},
-			wantDebug:    true,
-			wantLogLevel: zapcore.DebugLevel,
 		},
 	}
 
