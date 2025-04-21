@@ -34,7 +34,7 @@ require (
 	github.com/invopop/jsonschema v0.13.0
 	github.com/jessevdk/go-flags v1.6.1
 	github.com/jsternberg/zap-logfmt v1.3.0
-	github.com/knadh/koanf/parsers/json v0.1.0
+	github.com/knadh/koanf/parsers/json v1.0.0
 	github.com/knadh/koanf/parsers/toml v0.1.0
 	github.com/knadh/koanf/parsers/yaml v1.0.0
 	github.com/knadh/koanf/providers/confmap v0.1.0
