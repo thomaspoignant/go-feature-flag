@@ -679,8 +679,8 @@ github.com/knadh/koanf/parsers/json v0.1.0 h1:dzSZl5pf5bBcW0Acnu20Djleto19T0CfHc
 github.com/knadh/koanf/parsers/json v0.1.0/go.mod h1:ll2/MlXcZ2BfXD6YJcjVFzhG9P0TdJ207aIBKQhV2hY=
 github.com/knadh/koanf/parsers/toml v0.1.0 h1:S2hLqS4TgWZYj4/7mI5m1CQQcWurxUz6ODgOub/6LCI=
 github.com/knadh/koanf/parsers/toml v0.1.0/go.mod h1:yUprhq6eo3GbyVXFFMdbfZSo928ksS+uo0FFqNMnO18=
-github.com/knadh/koanf/parsers/yaml v0.1.0 h1:ZZ8/iGfRLvKSaMEECEBPM1HQslrZADk8fP1XFUxVI5w=
-github.com/knadh/koanf/parsers/yaml v0.1.0/go.mod h1:cvbUDC7AL23pImuQP0oRw/hPuccrNBS2bps8asS0CwY=
+github.com/knadh/koanf/parsers/yaml v1.0.0 h1:PXyeHCRhAMKyfLJaoTWsqUTxIFeDMmdAKz3XVEslZV4=
+github.com/knadh/koanf/parsers/yaml v1.0.0/go.mod h1:Q63VAOh/s6XaQs6a0TB2w9GFUuuPGvfYrCSWb9eWAQU=
 github.com/knadh/koanf/providers/confmap v0.1.0 h1:gOkxhHkemwG4LezxxN8DMOFopOPghxRVp7JbIvdvqzU=
 github.com/knadh/koanf/providers/confmap v0.1.0/go.mod h1:2uLhxQzJnyHKfxG927awZC7+fyHFdQkd697K4MdLnIU=
 github.com/knadh/koanf/providers/env v1.0.0 h1:ufePaI9BnWH+ajuxGGiJ8pdTG0uLEUWC7/HDDPGLah0=
