@@ -50,7 +50,7 @@
     "posthtml-cli": "^0.10.0",
     "posthtml-modules": "^0.9.1",
     "stylelint": "^16.18.0",
-    "webpack": "^5.99.5",
+    "webpack": "^5.99.6",
     "webpack-cli": "^6.0.1"
   },
   "dependencies": {
