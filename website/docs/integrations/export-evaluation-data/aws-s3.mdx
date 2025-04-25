@@ -55,6 +55,30 @@ export AWS_DEFAULT_REGION=eu-west-1
 | `path`                    | <NotMandatory /> | string | **bucket root level**                                                                                                              | The location of the directory in S3.                                                                                                                                                                                                                                                                                                                                                  |
 | `parquetCompressionCodec` | <NotMandatory /> | string | `SNAPPY`                                                                                                                           | ParquetCompressionCodec is the parquet compression codec for better space efficiency. [Available options](https://github.com/apache/parquet-format/blob/master/Compression.md)                                                                                                                                                                                                        |`
 
+### Compatibility with S3-Compatible Solutions
+
+The S3 retriever is compatible with S3-compatible on-premises solutions such as `MinIO`.  
+To use an S3-compatible storage provider, ensure that you configure the following parameters:
+
+- **Endpoint URL**: Provide the endpoint URL of your S3-compatible solution.
+- **Access Credentials**: Use your S3-compatible solution's access key and secret key.
+- **Bucket and Key**: Specify the bucket name and the key where your configuration file is stored.
+
+:::warning
+The AWS SDK requires a region to be set, even if you are using an S3-compatible solution.
+```shell
+export AWS_DEFAULT_REGION=xxx
+````
+:::
+
+:::info
+If you get spammed with
+```shell
+SDK 2025/04/25 13:07:36 WARN Response has no supported checksum.
+````
+Not validating response payload. you might want to set `export AWS_RESPONSE_CHECKSUM_VALIDATION=when_required` as well.
+:::
+
 ## Configure the GO Module
 To configure your GO module to use the {exporterName} exporter, you need to add the following
 configuration to your `ffclient.Config{}` object:
