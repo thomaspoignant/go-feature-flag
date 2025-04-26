@@ -4,7 +4,7 @@ go 1.22.5
 
 require (
 	github.com/open-feature/go-sdk v1.14.1
-	github.com/open-feature/go-sdk-contrib/providers/go-feature-flag v0.2.4
+	github.com/open-feature/go-sdk-contrib/providers/go-feature-flag v0.2.5
 	github.com/stretchr/testify v1.10.0
 )
 

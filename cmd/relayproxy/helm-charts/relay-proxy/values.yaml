@@ -10,18 +10,18 @@ relayproxy:
       url: https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml
     exporter:
       kind: log
+#    envVariablePrefix: "GOFFPROXY_"
 
 # -- Environment variables to pass to the relay proxy
 env: {}
-  # Examples:
-  # ENV_VARIABLE_EXAMPLE:
-  #   value: my value
-  #
-  # ENV_VARIABLE_FROM_SECRET:
-  #   valueFrom:
-  #     secretKeyRef:
-  #       name: my-secret-name
-  #       key: my-secret-key
+# Examples:
+# LISTEN: 1032
+#
+# ENV_VARIABLE_FROM_SECRET:
+#   valueFrom:
+#     secretKeyRef:
+#       name: my-secret-name
+#       key: my-secret-key
 
 # -- The number of replicas to create for the deployment
 replicaCount: 1
@@ -55,16 +55,16 @@ podAnnotations: {}
 
 # -- A security context defines privilege and access control settings for a Pod
 podSecurityContext: {}
-  # fsGroup: 2000
+# fsGroup: 2000
 
 # -- A security context defines privilege and access control settings for a Container
 securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
+# capabilities:
+#   drop:
+#   - ALL
+# readOnlyRootFilesystem: true
+# runAsNonRoot: true
+# runAsUser: 1000
 
 service:
   # -- The type of service to create
@@ -80,8 +80,8 @@ ingress:
   className: ""
   # -- Annotations to add to the ingress
   annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
+  # kubernetes.io/ingress.class: nginx
+  # kubernetes.io/tls-acme: "true"
   hosts:
     - host: chart-example.local
       paths:

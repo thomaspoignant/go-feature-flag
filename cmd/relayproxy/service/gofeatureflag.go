@@ -323,27 +323,33 @@ func createExporter(c *config.ExporterConf) (exporter.CommonExporter, error) {
 // setKafkaConfig set the kafka configuration based on the default configuration
 // it will initialize the default configuration and merge it with the changes from the user.
 func setKafkaConfig(k kafkaexporter.Settings) (kafkaexporter.Settings, error) {
-	if k.Config == nil {
-		return k, nil
+	c := kafkaexporter.Settings{
+		Topic:     k.Topic,
+		Addresses: k.Addresses,
 	}
 
-	defaultConfig := sarama.NewConfig()
-	err := mergo.Merge(k.Config, defaultConfig)
+	if k.Config == nil {
+		return c, nil
+	}
+	saramaConfig := sarama.NewConfig()
+	err := mergo.Merge(saramaConfig, k.Config)
 	if err != nil {
 		return kafkaexporter.Settings{}, err
 	}
+	saramaConfig.Producer.Return.Errors = true
 
-	switch k.Net.SASL.Mechanism {
+	switch saramaConfig.Net.SASL.Mechanism {
 	case sarama.SASLTypeSCRAMSHA256:
-		k.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient {
+		saramaConfig.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient {
 			return &kafka.XDGSCRAMClient{HashGeneratorFcn: kafka.SHA256}
 		}
 	case sarama.SASLTypeSCRAMSHA512:
-		k.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient {
+		saramaConfig.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient {
 			return &kafka.XDGSCRAMClient{HashGeneratorFcn: kafka.SHA512}
 		}
 	}
-	return k, nil
+	c.Config = saramaConfig
+	return c, nil
 }
 
 func initNotifier(c []config.NotifierConf) ([]notifier.Notifier, error) {
