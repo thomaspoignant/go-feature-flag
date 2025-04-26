@@ -312,7 +312,7 @@ func (g *GoFeatureFlag) CollectEventData(event exporter.FeatureEvent) {
 
 // CollectTrackingEventData is collecting tracking events and sending them to the data exporter to be stored.
 func (g *GoFeatureFlag) CollectTrackingEventData(event exporter.TrackingEvent) {
-	if g != nil && g.featureEventDataExporter != nil {
+	if g != nil && g.trackingEventDataExporter != nil {
 		// Add event in the exporter
 		g.trackingEventDataExporter.AddEvent(event)
 	}
