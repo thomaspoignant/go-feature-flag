@@ -900,8 +900,8 @@ github.com/testcontainers/testcontainers-go v0.37.0 h1:L2Qc0vkTw2EHWQ08djon0D2uw
 github.com/testcontainers/testcontainers-go v0.37.0/go.mod h1:QPzbxZhQ6Bclip9igjLFj6z0hs01bU8lrl2dHQmgFGM=
 github.com/testcontainers/testcontainers-go/modules/azurite v0.35.0 h1:gUZ25e1DVE/0+ZZ0nupsIo+C1j7UNloN7Pkg3w6tceI=
 github.com/testcontainers/testcontainers-go/modules/azurite v0.35.0/go.mod h1:2Fc67EpyOEexLAF99zhSuzu9H22zd83pkjxEHHTtHf4=
-github.com/testcontainers/testcontainers-go/modules/mongodb v0.36.0 h1:HDW6rknSqci/154rpEGNL8VrKJxXmApxcG++VedQKTE=
-github.com/testcontainers/testcontainers-go/modules/mongodb v0.36.0/go.mod h1:RhguDt49jCUepedF4zBRJwb66VWWvSg5YQ+nQNff370=
+github.com/testcontainers/testcontainers-go/modules/mongodb v0.37.0 h1:drGy4LJOVkIKpKGm1YKTfVzb1qRhN/konVpmuUphq0k=
+github.com/testcontainers/testcontainers-go/modules/mongodb v0.37.0/go.mod h1:e9/4dGJfSZW59/kXGf/ksrEvA+BqP/daax0Usp2cpsM=
 github.com/testcontainers/testcontainers-go/modules/redis v0.37.0 h1:9HIY28I9ME/Zmb+zey1p/I1mto5+5ch0wLX+nJdOsQ4=
 github.com/testcontainers/testcontainers-go/modules/redis v0.37.0/go.mod h1:Abu9g/25Qv+FkYVx3U4Voaynou1c+7D0HIhaQJXvk6E=
 github.com/thejerf/slogassert v0.3.4 h1:VoTsXixRbXMrRSSxDjYTiEDCM4VWbsYPW5rB/hX24kM=
