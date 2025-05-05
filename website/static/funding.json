@@ -65,7 +65,7 @@
                 "guid": "premium-support",
                 "status": "active",
                 "name": "Premium Support Plan",
-                "description": "Help us shape the future of GO Feature Flag with your ideas by making a donation every month.",
+                "description": "Help us shape the future of GO Feature Flag with your ideas by making a donation every month. A maintainer can join your slack/teams organisation and be available to answer your questions directly there.",
                 "amount": 800,
                 "currency": "USD",
                 "frequency": "monthly",
