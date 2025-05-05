@@ -120,12 +120,22 @@ export default function Pricing() {
               <MdOutlineCheck className={"w-6 h-6 text-goff-500"} />
               Training material for your team
             </li>
+            <li className="flex gap-x-3">
+              <MdOutlineCheck className={"w-6 h-6 text-goff-500"} />
+              Maintainer join your slack/teams organisation
+            </li>
           </ul>
           <Link
             to={"mailto:contact@gofeatureflag.org?subject=Enterprise support"}
             className=" mt-8 block rounded-md bg-indigo-500 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 sm:mt-10"
           >
             Contact us
+          </Link>
+          <Link
+            to={"https://calendly.com/thomas-poignant-o1pt/30min"}
+            className="mt-2 block rounded-md bg-indigo-500 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 sm:mt-2"
+          >
+            Book a demo 📅
           </Link>
         </div>
       </div>
