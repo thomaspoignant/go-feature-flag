@@ -36,7 +36,7 @@
         {
             "guid": "bank-transfer",
             "type": "bank",
-            "address": "mailto:contact@gofeatureflag.org",
+            "address": "contact@gofeatureflag.org",
             "description": "If you prefer a wire transfer, please contact GO Feature Flag directly."
         }],
 
