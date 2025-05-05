@@ -49,7 +49,8 @@ public class ProviderTests
             ErrorType.None, 
             Reason.TargetingMatch,
             "True",
-            null);
+            null,
+            new ImmutableMetadata());
         var got = await client.GetBooleanDetailsAsync(flagKey, false, defaultEvaluationContext);
         got.Should().BeEquivalentTo(want);
 
@@ -109,7 +110,8 @@ public class ProviderTests
             ErrorType.None, 
             Reason.TargetingMatch,
             "True",
-            null); 
+            null,
+            new ImmutableMetadata()); 
         var got = await client.GetStringDetailsAsync(flagKey, "default", defaultEvaluationContext);
         got.Should().BeEquivalentTo(want);
     }
@@ -169,7 +171,8 @@ public class ProviderTests
             ErrorType.None, 
             Reason.TargetingMatch,
             "True",
-            null); 
+            null,
+            new ImmutableMetadata()); 
         var got = await client.GetDoubleDetailsAsync(flagKey,  123.45, defaultEvaluationContext);
         got.Should().BeEquivalentTo(want);
     }
@@ -229,7 +232,8 @@ public class ProviderTests
             ErrorType.None, 
             Reason.TargetingMatch,
             "True",
-            null); 
+            null,
+            new ImmutableMetadata()); 
         var got = await client.GetIntegerDetailsAsync(flagKey,  123, defaultEvaluationContext);
         got.Should().BeEquivalentTo(want);
     }
@@ -298,7 +302,8 @@ public class ProviderTests
             ErrorType.None, 
             Reason.TargetingMatch,
             "True",
-            null); 
+            null,
+            new ImmutableMetadata()); 
         var got = await client.GetObjectDetailsAsync(flagKey,  new Value(123), defaultEvaluationContext);
         got.Should().BeEquivalentTo(want);
     }
@@ -351,7 +356,8 @@ public class ProviderTests
             ErrorType.None, 
             Reason.TargetingMatch,
             "True",
-            null);
+            null,
+            new ImmutableMetadata());
         var got = await authenticatedClient.GetBooleanDetailsAsync(flagKey, false, defaultEvaluationContext);
         got.Should().BeEquivalentTo(want);
     }
