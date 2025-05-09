@@ -45,6 +45,24 @@ jobs:
           dotnet-version: '7.0.x'
       - run: make vendor
       - run: make provider-tests
+
+  wasm-release:
+    needs: integration-tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: acifani/setup-tinygo@v2
+        with:
+          tinygo-version: '0.37.0'
+      - run: make vendor
+      - run: make build-wasm
+      - run: make build-wasi
+  
+  
+  
   goreleaser:
     needs: integration-tests
     runs-on: ubuntu-latest
