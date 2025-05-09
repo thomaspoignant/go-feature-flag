@@ -12,6 +12,9 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/wasm/helpers"
 )
 
+// main is the entry point for the wasm module.
+// we should keep it to be make sure that the module
+// is a valid wasm module for tinygo.
 func main() {
 	// We keep this main empty because it is required by the tinygo when building wasm.
 }

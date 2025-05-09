@@ -36,10 +36,10 @@ build-jsonschema-generator: create-out-dir ## Build the jsonschema-generator in 
 	CGO_ENABLED=0 GO111MODULE=on $(GOCMD) build -mod vendor -o out/bin/jsonschema-generator ./cmd/jsonschema-generator/
 
 build-wasm: create-out-dir ## Build the wasm evaluation library in out/bin/
-	cd wasm && $(TINYGOCMD) build -o ../out/bin/gofeatureflag-evaluation.wasm -target wasm --no-debug -scheduler=none && cd ..
+	cd wasm && $(TINYGOCMD) build -o ../out/bin/gofeatureflag-evaluation.wasm -target wasm -opt=2 -opt=s --no-debug -scheduler=none && cd ..
 
 build-wasi: create-out-dir ## Build the wasi evaluation library in out/bin/
-	cd wasm && $(TINYGOCMD) build -o ../out/bin/gofeatureflag-evaluation.wasi -target wasi --no-debug -scheduler=none && cd ..
+	cd wasm && $(TINYGOCMD) build -o ../out/bin/gofeatureflag-evaluation.wasi -target wasi -opt=2 -opt=s --no-debug -scheduler=none && cd ..
 
 build-doc: ## Build the documentation
 	cd website; \
