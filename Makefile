@@ -11,8 +11,6 @@ RESET  := $(shell tput -Txterm sgr0)
 
 .PHONY: all test build vendor
 
-
-
 all: help
 ## Build:
 build: build-relayproxy build-lint build-editor-api build-jsonschema-generator build-cli ## Build all the binaries and put the output in out/bin/

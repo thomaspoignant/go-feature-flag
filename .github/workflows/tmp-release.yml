@@ -21,7 +21,5 @@ jobs:
       - uses: acifani/setup-tinygo@v2
         with:
           tinygo-version: '0.37.0'
-      - run: make vendor
-      - run: make build-wasm
-      - run: make build-wasi
-      
+      - run: ./.github/ci-scripts/release_wasm.sh ${{  github.ref_name }}
+      - run: ls ./out/release-wasm

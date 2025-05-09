@@ -17,6 +17,8 @@
     <a href="https://github.com/avelino/awesome-go/#server-applications"><img src="https://awesome.re/mentioned-badge.svg" alt="Mentioned in Awesome Go"></a>
     <a href="https://gofeatureflag.org/slack"><img src="https://img.shields.io/badge/join-us%20on%20slack-gray.svg?longCache=true&logo=slack&colorB=green" alt="Join us on slack"></a>
     <a href="https://github.com/sponsors/thomaspoignant"><img src="https://img.shields.io/github/sponsors/thomaspoignant?logo=GitHub%20Sponsors" alt="Sponsords"></a>
+    <br />
+    <a href="https://gofeatureflag.org">GO Feature Flag is a simple, complete and lightweight self-hosted feature flag solution 100% Open Source.</a>
 </p>
 
 > :pray: If you are using **GO Feature Flag** please consider to add yourself in the [adopters](./ADOPTERS.md) list.  
@@ -42,7 +44,6 @@
   - [Export data](#export-data)
   - [Linter](#linter)
 - [How can I contribute?](#how-can-i-contribute)
-  - [Community Meetings](#community-meetings)
   - [Contributors](#contributors)
   - [Sponsors](#sponsors)
   - [Adopters](#adopters)
@@ -589,18 +590,6 @@ A command line tool is available to help you lint your configuration file: [go-f
 # How can I contribute?
 
 This project welcomes contributions from the community. If you're interested in contributing, see the [contributors' guide](CONTRIBUTING.md) for some helpful tips.
-
-## Community meetings
-Since everyone's voice is important we want to hear back from the community.  
-For this reason, we are launching a community meeting every 2 weeks and it is the perfect place to discuss the future of GO Feature Flag and help you use it at full potential.
-
-| Name | Meeting Time | Meeting Notes | Discussions |
-| ---- | ------------ | ------------- | ----------- |
-| GO Feature Flag Community Meeting | Every other Thursday at 10:00 am ET / 16:00 CET | [Google Doc](https://docs.google.com/document/d/13hVS1Eoq6iHwegdk4lveTE3jV4mUehVGqUtf5TLH2pY/edit) | [VC Link (meet)](https://meet.google.com/fpg-ckxs-vmr) |
-
-- [Calendar](https://bit.ly/gofeatureflag-calendar)
-- [ICS](https://calendar.google.com/calendar/ical/30ba1a7fbba6dc31596a2686f6ab22e9971e8785289033f8bb32319c93dd3b59%40group.calendar.google.com/public/basic.ics)
-- [Web](https://calendar.google.com/calendar/embed?src=30ba1a7fbba6dc31596a2686f6ab22e9971e8785289033f8bb32319c93dd3b59%40group.calendar.google.com&ctz=Europe%2FParis)
 
 ## Contributors
 
