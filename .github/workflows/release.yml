@@ -15,7 +15,7 @@ jobs:
             echo "This is a pre-release version, stopping workflow..."
             exit 1
           fi
-
+  
   integration-tests:
     name: Integration Tests
     needs:
@@ -45,6 +45,32 @@ jobs:
           dotnet-version: '7.0.x'
       - run: make vendor
       - run: make provider-tests
+
+  wasm-release:
+    needs: integration-tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          check-latest: true
+      - uses: acifani/setup-tinygo@v2
+        with:
+          tinygo-version: '0.37.0'
+      - run: ./.github/ci-scripts/release_wasm.sh ${{  github.ref_name }}
+      - name: Upload assets
+        uses: softprops/action-gh-release@v2
+        if: github.ref_type == 'tag'
+        with:
+          files: |
+            ./out/release-wasm/gofeatureflag-evaluation_${{  github.ref_name }}.wasi
+            ./out/release-wasm/gofeatureflag-evaluation_${{  github.ref_name }}.wasm
+
   goreleaser:
     needs: integration-tests
     runs-on: ubuntu-latest

@@ -1,4 +1,5 @@
 GOCMD=go
+TINYGOCMD=tinygo
 GOTEST=$(GOCMD) test
 GOVET=$(GOCMD) vet
 
@@ -9,8 +10,6 @@ CYAN   := $(shell tput -Txterm setaf 6)
 RESET  := $(shell tput -Txterm sgr0)
 
 .PHONY: all test build vendor
-
-
 
 all: help
 ## Build:
@@ -33,6 +32,12 @@ build-editor-api: create-out-dir ## Build the linter in out/bin/
 
 build-jsonschema-generator: create-out-dir ## Build the jsonschema-generator in out/bin/
 	CGO_ENABLED=0 GO111MODULE=on $(GOCMD) build -mod vendor -o out/bin/jsonschema-generator ./cmd/jsonschema-generator/
+
+build-wasm: create-out-dir ## Build the wasm evaluation library in out/bin/
+	cd wasm && $(TINYGOCMD) build -o ../out/bin/gofeatureflag-evaluation.wasm -target wasm -opt=2 -opt=s --no-debug -scheduler=none && cd ..
+
+build-wasi: create-out-dir ## Build the wasi evaluation library in out/bin/
+	cd wasm && $(TINYGOCMD) build -o ../out/bin/gofeatureflag-evaluation.wasi -target wasi -opt=2 -opt=s --no-debug -scheduler=none && cd ..
 
 build-doc: ## Build the documentation
 	cd website; \
