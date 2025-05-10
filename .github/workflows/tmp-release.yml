@@ -23,3 +23,8 @@ jobs:
           tinygo-version: '0.37.0'
       - run: ./.github/ci-scripts/release_wasm.sh ${{  github.ref_name }}
       - run: ls ./out/release-wasm
+      - uses: actions/upload-artifact@v4
+        name: Upload release-wasm
+        with:
+          path: './out/release-wasm/*'
+          if-no-files-found: 'error'
