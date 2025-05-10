@@ -63,12 +63,13 @@ jobs:
         with:
           tinygo-version: '0.37.0'
       - run: ./.github/ci-scripts/release_wasm.sh ${{  github.ref_name }}
-      - run: ls ./out/release-wasm
-      - uses: actions/upload-artifact@v4
-        name: Upload release-wasm
+      - name: Upload assets
+        uses: softprops/action-gh-release@v2
+        if: github.ref_type == 'tag'
         with:
-          path: './out/release-wasm/*'
-          if-no-files-found: 'error'
+          files: |
+            ./out/release-wasm/gofeatureflag-evaluation_${{  github.ref_name }}.wasi
+            ./out/release-wasm/gofeatureflag-evaluation_${{  github.ref_name }}.wasm
 
 #  goreleaser:
 #    needs: integration-tests
