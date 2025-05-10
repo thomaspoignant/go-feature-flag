@@ -78,7 +78,7 @@ func (h *FlagConfigurationAPICtrl) Handler(c echo.Context) error {
 			http.StatusBadRequest,
 			FlagConfigurationResponse{
 				ErrorCode:    FlagConfigErrorInvalidRequest,
-				ErrorDetails: fmt.Sprintf("empty request body"),
+				ErrorDetails: "empty request body",
 			},
 		)
 	}

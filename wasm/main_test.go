@@ -28,6 +28,5 @@ func Test_localEvaluation(t *testing.T) {
 			got := localEvaluation(string(content))
 			assert.JSONEq(t, string(want), got)
 		})
-
 	}
 }
