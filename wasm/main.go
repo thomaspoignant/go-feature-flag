@@ -19,6 +19,7 @@ func main() {
 	// We keep this main empty because it is required by the tinygo when building wasm.
 }
 
+// nolint: unused
 // evaluate is the entry point for the wasm module.
 // what it does is:
 // 1. read the input from the memory
@@ -69,5 +70,6 @@ func convertEvaluationCtx(ctx map[string]any) (ffcontext.Context, error) {
 		evalCtx := utils.ConvertEvaluationCtxFromRequest(targetingKey, ctx)
 		return evalCtx, nil
 	}
-	return ffcontext.NewEvaluationContextBuilder("").Build(), fmt.Errorf("targetingKey not found in context")
+	return ffcontext.NewEvaluationContextBuilder("").Build(),
+		fmt.Errorf("targetingKey not found in context")
 }

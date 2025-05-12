@@ -355,12 +355,7 @@ func (r *Rule) isQueryValid(defaultRule bool) error {
 	// Validate the query with the parser
 	switch r.GetQueryFormat() {
 	case JSONLogicQueryFormat:
-		//var rule interface{}
-		//_ = json.Unmarshal([]byte(r.GetTrimmedQuery()), &rule)
-		//err := jsonlogic.Validate(rule)
-		//if err != nil {
-		//	return fmt.Errorf("invalid jsonlogic query: %s", r.GetTrimmedQuery())
-		//}
+		// No validation available with this JSON logic library
 		return nil
 	default:
 		return validateNikunjyQuery(r.GetTrimmedQuery())

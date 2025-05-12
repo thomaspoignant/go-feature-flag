@@ -2,6 +2,7 @@ package helpers
 
 import "unsafe"
 
+// nolint:gosec, govet
 // WasmReadBufferFromMemory reads a buffer from memory and returns it as a byte slice.
 func WasmReadBufferFromMemory(bufferPosition *uint32, length uint32) []byte {
 	subjectBuffer := make([]byte, length)
@@ -13,6 +14,7 @@ func WasmReadBufferFromMemory(bufferPosition *uint32, length uint32) []byte {
 	return subjectBuffer
 }
 
+// nolint:gosec
 // WasmCopyBufferToMemory copies a buffer to memory and returns a pointer to the memory location.
 func WasmCopyBufferToMemory(buffer []byte) uint64 {
 	bufferPtr := &buffer[0]

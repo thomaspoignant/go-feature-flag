@@ -73,15 +73,6 @@ func (h *FlagConfigurationAPICtrl) Handler(c echo.Context) error {
 			},
 		)
 	}
-	if reqBody == nil {
-		return c.JSON(
-			http.StatusBadRequest,
-			FlagConfigurationResponse{
-				ErrorCode:    FlagConfigErrorInvalidRequest,
-				ErrorDetails: "empty request body",
-			},
-		)
-	}
 
 	flags, err := h.goFF.GetFlagsFromCache()
 	if err != nil {
@@ -90,11 +81,22 @@ func (h *FlagConfigurationAPICtrl) Handler(c echo.Context) error {
 			ErrorDetails: fmt.Sprintf("impossible to retrieve flag configuration: %s", err),
 		})
 	}
-	// TODO: add a filter to only return the flags that are in the request body
+
+	// filter if we have a list of flags in the request.
+	if reqBody.Flags != nil && len(reqBody.Flags) > 0 {
+		tmpFlags := map[string]flag.Flag{}
+		for _, flagKey := range reqBody.Flags {
+			if _, ok := flags[flagKey]; ok {
+				tmpFlags[flagKey] = flags[flagKey]
+			}
+		}
+		flags = tmpFlags
+	}
 
 	span.SetAttributes(attribute.Int("flagConfiguration.configurationSize", len(flags)))
-
-	c.Response().Header().Set(echo.HeaderLastModified, h.goFF.GetCacheRefreshDate().Format(time.RFC1123))
+	c.Response().Header().
+		Set(echo.HeaderLastModified, h.goFF.GetCacheRefreshDate().
+			Format(time.RFC1123))
 	return c.JSON(
 		http.StatusOK,
 		FlagConfigurationResponse{

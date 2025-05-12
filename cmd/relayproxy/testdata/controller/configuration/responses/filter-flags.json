@@ -1,0 +1,32 @@
+{
+  "flags": {
+    "new-admin-access": {
+      "variations": {
+        "disabled": false,
+        "enabled": true
+      },
+      "defaultRule": {
+        "name": "defaultRule",
+        "percentage": {
+          "disabled": 70,
+          "enabled": 30
+        }
+      }
+    },
+    "targeting-key-rule": {
+      "variations": {
+        "disabled": false,
+        "enabled": true
+      },
+      "targeting": [
+        {
+          "query": "targetingKey eq \"specific-targeting-key\"",
+          "variation": "enabled"
+        }
+      ],
+      "defaultRule": {
+        "variation": "disabled"
+      }
+    }
+  }
+}
