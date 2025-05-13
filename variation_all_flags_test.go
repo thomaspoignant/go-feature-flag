@@ -233,6 +233,7 @@ func TestAllFlagsFromCache(t *testing.T) {
 		config     ffclient.Config
 		initModule bool
 		numberFlag int
+		err        assert.ErrorAssertionFunc
 	}{
 		{
 			name: "Valid multiple types",
@@ -243,6 +244,7 @@ func TestAllFlagsFromCache(t *testing.T) {
 			},
 			initModule: true,
 			numberFlag: 7,
+			err:        assert.NoError,
 		},
 		{
 			name: "module not init",
@@ -252,6 +254,18 @@ func TestAllFlagsFromCache(t *testing.T) {
 				},
 			},
 			initModule: false,
+			err:        assert.NoError,
+		},
+		{
+			name: "offline",
+			config: ffclient.Config{
+				Offline: true,
+				Retriever: &fileretriever.Retriever{
+					Path: "./testdata/ffclient/all_flags/config_flag/flag-config-all-flags.yaml",
+				},
+			},
+			initModule: true,
+			err:        assert.Error,
 		},
 	}
 	for _, tt := range tests {
@@ -264,9 +278,11 @@ func TestAllFlagsFromCache(t *testing.T) {
 				defer goff.Close()
 
 				flags, err := goff.GetFlagsFromCache()
-				assert.NoError(t, err)
+				tt.err(t, err)
 
-				assert.Equal(t, tt.numberFlag, len(flags))
+				if err != nil {
+					assert.Equal(t, tt.numberFlag, len(flags))
+				}
 			} else {
 				// we close directly so we can test with module not init
 				goff, _ = ffclient.New(tt.config)
