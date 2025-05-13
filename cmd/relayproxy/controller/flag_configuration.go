@@ -83,7 +83,7 @@ func (h *FlagConfigurationAPICtrl) Handler(c echo.Context) error {
 	}
 
 	// filter if we have a list of flags in the request.
-	if reqBody.Flags != nil && len(reqBody.Flags) > 0 {
+	if len(reqBody.Flags) > 0 {
 		tmpFlags := map[string]flag.Flag{}
 		for _, flagKey := range reqBody.Flags {
 			if _, ok := flags[flagKey]; ok {
