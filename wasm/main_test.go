@@ -12,11 +12,22 @@ func Test_localEvaluation(t *testing.T) {
 		name          string
 		inputLocation string
 		wantLocation  string
+		err           assert.ErrorAssertionFunc
 	}{
 		{
 			name:          "Test with a valid input",
 			inputLocation: "testdata/local_evaluation_inputs/valid.json",
 			wantLocation:  "testdata/local_evaluation_outputs/valid.json",
+		},
+		{
+			name:          "Test with invalid json input",
+			inputLocation: "testdata/local_evaluation_inputs/invalid.json",
+			wantLocation:  "testdata/local_evaluation_outputs/invalid.json",
+		},
+		{
+			name:          "Test with invalid json input",
+			inputLocation: "testdata/local_evaluation_inputs/missing-targeting-key.json",
+			wantLocation:  "testdata/local_evaluation_outputs/missing-targeting-key.json",
 		},
 	}
 	for _, tt := range tests {

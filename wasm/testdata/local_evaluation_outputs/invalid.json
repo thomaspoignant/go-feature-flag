@@ -1,0 +1,11 @@
+{
+  "trackEvents": false,
+  "variationType": "",
+  "failed": false,
+  "version": "",
+  "reason": "",
+  "errorCode": "PARSE_ERROR",
+  "errorDetails": "unexpected end of JSON input",
+  "value": null,
+  "cacheable": false
+}
