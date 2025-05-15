@@ -7,7 +7,7 @@ require (
 	cloud.google.com/go/storage v1.53.0
 	dario.cat/mergo v1.0.1
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.9.0
-	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.6.0
+	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.6.1
 	github.com/BurntSushi/toml v1.5.0
 	github.com/IBM/sarama v1.45.1
 	github.com/atc0005/go-teams-notify/v2 v2.13.0
