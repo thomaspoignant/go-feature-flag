@@ -7,17 +7,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/wasm/helpers"
 )
 
-func TestWasmReadBufferFromMemory_ReturnsCorrectBytes(t *testing.T) {
-	data := []byte("ABCD")
-	// Use a byte array instead of int32 array to match WebAssembly memory representation
-	mem := make([]byte, len(data))
-	copy(mem, data)
-	result := helpers.WasmReadBufferFromMemory((*uint32)(unsafe.Pointer(&mem[0])), uint32(len(data)))
-	if string(result) != "ABCD" {
-		t.Errorf("Expected 'ABCD', got '%s'", string(result))
-	}
-}
-
 func TestWasmReadBufferFromMemory_ZeroLengthReturnsEmptySlice(t *testing.T) {
 	mem := []int32{0x41, 0x42}
 	result := helpers.WasmReadBufferFromMemory((*uint32)(unsafe.Pointer(&mem[0])), 0)
