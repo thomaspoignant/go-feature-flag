@@ -1,0 +1,210 @@
+{
+  "flags": {
+    "array-flag": {
+      "variations": {
+        "variation_A": [
+          "batmanDefault",
+          "supermanDefault",
+          "superherosDefault"
+        ],
+        "variation_B": [
+          "batmanFalse",
+          "supermanFalse",
+          "superherosFalse"
+        ],
+        "variation_C": [
+          "batmanTrue",
+          "supermanTrue",
+          "superherosTrue"
+        ]
+      },
+      "targeting": [
+        {
+          "name": "rule1",
+          "query": "anonymous eq true",
+          "percentage": {
+            "variation_A": 0,
+            "variation_B": 90,
+            "variation_C": 10
+          }
+        }
+      ],
+      "defaultRule": {
+        "variation": "variation_A"
+      }
+    },
+    "disable-flag": {
+      "variations": {
+        "variation_A": "value A",
+        "variation_B": "value B",
+        "variation_C": "value C"
+      },
+      "targeting": [
+        {
+          "name": "rule1",
+          "query": "admin eq true",
+          "percentage": {
+            "variation_A": 0,
+            "variation_B": 90,
+            "variation_C": 10
+          }
+        }
+      ],
+      "defaultRule": {
+        "name": "defaultRule",
+        "variation": "variation_A"
+      },
+      "disable": true
+    },
+    "flag-only-for-admin": {
+      "variations": {
+        "disabled": false,
+        "enabled": true
+      },
+      "targeting": [
+        {
+          "name": "rule1",
+          "query": "admin eq true",
+          "percentage": {
+            "disabled": 100,
+            "enabled": 0
+          }
+        }
+      ],
+      "defaultRule": {
+        "name": "defaultRule",
+        "variation": "disabled"
+      }
+    },
+    "new-admin-access": {
+      "variations": {
+        "disabled": false,
+        "enabled": true
+      },
+      "defaultRule": {
+        "name": "defaultRule",
+        "percentage": {
+          "disabled": 70,
+          "enabled": 30
+        }
+      }
+    },
+    "number-flag": {
+      "variations": {
+        "variation_A": 1,
+        "variation_B": 3,
+        "variation_C": 2
+      },
+      "targeting": [
+        {
+          "name": "rule1",
+          "query": "anonymous eq true",
+          "percentage": {
+            "variation_B": 0,
+            "variation_C": 100
+          }
+        }
+      ],
+      "defaultRule": {
+        "name": "defaultRule",
+        "variation": "variation_A"
+      }
+    },
+    "targeting-key-rule": {
+      "variations": {
+        "disabled": false,
+        "enabled": true
+      },
+      "targeting": [
+        {
+          "query": "targetingKey eq \"specific-targeting-key\"",
+          "variation": "enabled"
+        }
+      ],
+      "defaultRule": {
+        "variation": "disabled"
+      }
+    },
+    "test-flag-rule-apply": {
+      "variations": {
+        "variation_A": {
+          "test": "test"
+        },
+        "variation_B": {
+          "test3": "test"
+        },
+        "variation_C": {
+          "test2": "test"
+        }
+      },
+      "targeting": [
+        {
+          "name": "rule1",
+          "query": "key eq \"random-key\"",
+          "percentage": {
+            "variation_B": 0,
+            "variation_C": 100
+          }
+        }
+      ],
+      "defaultRule": {
+        "name": "defaultRule",
+        "variation": "variation_A"
+      }
+    },
+    "test-flag-rule-apply-false": {
+      "variations": {
+        "variation_A": {
+          "test": "test"
+        },
+        "variation_B": {
+          "test3": "test"
+        },
+        "variation_C": {
+          "test2": "test"
+        }
+      },
+      "targeting": [
+        {
+          "name": "rule1",
+          "query": "anonymous eq true",
+          "percentage": {
+            "variation_B": 90,
+            "variation_C": 10
+          }
+        }
+      ],
+      "defaultRule": {
+        "name": "defaultRule",
+        "variation": "variation_A"
+      }
+    },
+    "test-flag-rule-not-apply": {
+      "variations": {
+        "variation_A": {
+          "test": "test"
+        },
+        "variation_B": {
+          "test3": "test"
+        },
+        "variation_C": {
+          "test2": "test"
+        }
+      },
+      "targeting": [
+        {
+          "name": "rule1",
+          "query": "key eq \"key\"",
+          "percentage": {
+            "variation_B": 0,
+            "variation_C": 100
+          }
+        }
+      ],
+      "defaultRule": {
+        "name": "defaultRule",
+        "variation": "variation_A"
+      }
+    }
+  }
+}

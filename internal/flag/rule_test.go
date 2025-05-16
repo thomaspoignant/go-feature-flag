@@ -90,6 +90,21 @@ func TestRule_Evaluate(t *testing.T) {
 			wantErr: assert.NoError,
 		},
 		{
+			name: "JSONLogic rule return string 'true'",
+			rule: flag.Rule{
+				Name:            testconvert.String("rule1"),
+				VariationResult: testconvert.String("variation_A"),
+				Query:           testconvert.String("{\"cat\": [\"t\", \"r\", \"u\", \"e\"]}"),
+			},
+			args: args{
+				isDefault: false,
+				user:      ffcontext.NewEvaluationContext("abc"),
+			},
+			want:    "variation_A",
+			wantErr: assert.NoError,
+		},
+
+		{
 			name: "User match the query (jsonlogic)",
 			rule: flag.Rule{
 				Name:            testconvert.String("rule1"),

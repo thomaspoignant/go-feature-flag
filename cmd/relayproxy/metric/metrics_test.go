@@ -128,3 +128,14 @@ func TestMetrics_IncForceRefresh(t *testing.T) {
 
 	assert.Equal(t, 3.0, testutil.ToFloat64(metricSrv.forceRefreshCounter))
 }
+
+func TestMetrics_IncFlagConfigurationCall(t *testing.T) {
+	metricSrv, err := NewMetrics()
+	assert.NoError(t, err)
+
+	metricSrv.IncFlagConfigurationCall()
+	metricSrv.IncFlagConfigurationCall()
+	metricSrv.IncFlagConfigurationCall()
+
+	assert.Equal(t, 3.0, testutil.ToFloat64(metricSrv.flagConfigurationCounter))
+}

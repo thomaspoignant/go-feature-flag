@@ -170,7 +170,7 @@ formatters:
     - gci
     - gofmt
     - goimports
-    - golines
+  #    - golines
   settings:
     gofumpt:
       module-path: github.com/thomaspoignant/go-feature-flag

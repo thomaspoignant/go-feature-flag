@@ -1,0 +1,38 @@
+{
+  "flagKey": "TEST",
+  "flag": {
+    "variations": {
+      "enable": true,
+      "disable": false
+    },
+    "targeting": [
+      {
+        "name": "targetingID rule",
+        "query": "targetingKey eq \"random-key\"",
+        "percentage": {
+          "enable": 90,
+          "disable": 10
+        }
+      }
+    ],
+    "defaultRule": {
+      "variation": "disable"
+    },
+    "metadata": {
+      "description": "test flag",
+      "type": "boolean"
+    }
+  },
+  "evalContext": {
+    "targetingKey": "random-key",
+    "name": "foo",
+    "age": 42,
+    "fullname": "foo bar",
+    "email": "foo.bar@gofeatureflag.org"
+  },
+  "flagContext": {
+    "evaluationContextEnrichment": {
+      "env": "production"
+    },
+    "defaultSdkValue": false
+ 

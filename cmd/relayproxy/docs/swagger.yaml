@@ -9,6 +9,27 @@ definitions:
       hash:
         type: integer
     type: object
+  controller.FlagConfigurationRequest:
+    properties:
+      flags:
+        items:
+          type: string
+        type: array
+    type: object
+  controller.FlagConfigurationResponse:
+    properties:
+      errorCode:
+        type: string
+      errorDetails:
+        type: string
+      evaluationContextEnrichment:
+        additionalProperties: true
+        type: object
+      flags:
+        additionalProperties:
+          $ref: '#/definitions/flag.Flag'
+        type: object
+    type: object
   controller.retrieverRefreshResponse:
     properties:
       refreshed:
@@ -719,6 +740,43 @@ paths:
       - ApiKeyAuth: []
       summary: Endpoint to poll if you want to know if there is a configuration change
         in the flags
+      tags:
+      - GO Feature Flag Evaluation API
+  /v1/flag/configuration:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Making a **POST** request to the URL `/v1/flag/configuration` will give you the list of
+        the flags to use them for local evaluation in your provider.
+      parameters:
+      - description: List of flags to get the configuration from.
+        in: body
+        name: data
+        schema:
+          $ref: '#/definitions/controller.FlagConfigurationRequest'
+      - description: The request will be processed only if ETag doesn't match.
+        in: header
+        name: If-None-Match
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/controller.FlagConfigurationResponse'
+        "304":
+          description: 'Etag: \"117-0193435c612c50d93b798619d9464856263dbf9f\'
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/modeldocs.HTTPErrorDoc'
+      security:
+      - ApiKeyAuth: []
+      summary: Endpoint to poll if you want to get the configuration of the flags.
       tags:
       - GO Feature Flag Evaluation API
   /ws/v1/flag/change:
