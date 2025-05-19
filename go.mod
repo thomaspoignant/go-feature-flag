@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go/pubsub v1.49.0
 	cloud.google.com/go/storage v1.53.0
 	dario.cat/mergo v1.0.1
-	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.9.0
+	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.10.0
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.6.0
 	github.com/BurntSushi/toml v1.5.0
 	github.com/IBM/sarama v1.45.1
@@ -73,10 +73,10 @@ require (
 	golang.org/x/net v0.40.0
 	golang.org/x/oauth2 v0.30.0
 	google.golang.org/api v0.233.0
-	google.golang.org/grpc v1.72.0
+	google.golang.org/grpc v1.72.1
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.33.0
-	k8s.io/apimachinery v0.33.0
+	k8s.io/apimachinery v0.33.1
 	k8s.io/client-go v0.33.0
 )
 
