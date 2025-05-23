@@ -41,3 +41,8 @@ func Test_localEvaluation(t *testing.T) {
 		})
 	}
 }
+
+func Test_main(t *testing.T) {
+	// just to make sure that the main function exists for tinygo
+	main()
+}
