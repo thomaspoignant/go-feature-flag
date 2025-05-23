@@ -116,6 +116,7 @@ jobs:
     name: Upload dockerhub readme
     needs:
       - goreleaser
+      - wasm-release
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -145,6 +146,7 @@ jobs:
     name: Upload dockerhub readme
     needs:
       - goreleaser
+      - wasm-release
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -164,6 +166,7 @@ jobs:
     name: Upload dockerhub readme
     needs:
       - goreleaser
+      - wasm-release
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -183,6 +186,7 @@ jobs:
     name: Upload dockerhub readme
     needs:
       - goreleaser
+      - wasm-release
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -218,6 +222,7 @@ jobs:
     name: Create new documentation tag
     needs:
       - goreleaser
+      - wasm-release
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -279,6 +284,7 @@ jobs:
     name: Bump Relay Proxy Helm Chart appVersion
     needs:
       - goreleaser
+      - wasm-release
     env:
       CHART_YAML_FILE_LOCATION: cmd/relayproxy/helm-charts/relay-proxy/Chart.yaml
       MAIN_BRANCH_NAME: main
@@ -333,6 +339,7 @@ jobs:
     name: Release jsonschema
     needs:
       - goreleaser
+      - wasm-release
     env:
       SCHEMA_LOCATION: .schema/flag-schema.json
       MAIN_BRANCH_NAME: main
