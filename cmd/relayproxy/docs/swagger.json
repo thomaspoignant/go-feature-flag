@@ -548,6 +548,62 @@
                 }
             }
         },
+        "/v1/flag/configuration": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Making a **POST** request to the URL `/v1/flag/configuration` will give you the list of\nthe flags to use them for local evaluation in your provider.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "GO Feature Flag Evaluation API"
+                ],
+                "summary": "Endpoint to poll if you want to get the configuration of the flags.",
+                "parameters": [
+                    {
+                        "description": "List of flags to get the configuration from.",
+                        "name": "data",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/controller.FlagConfigurationRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "The request will be processed only if ETag doesn't match.",
+                        "name": "If-None-Match",
+                        "in": "header"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/controller.FlagConfigurationResponse"
+                        }
+                    },
+                    "304": {
+                        "description": "Etag: \\\"117-0193435c612c50d93b798619d9464856263dbf9f\\",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
+                        }
+                    }
+                }
+            }
+        },
         "/ws/v1/flag/change": {
             "post": {
                 "description": "This endpoint is a websocket endpoint to be notified about flag changes, every change\nwill send a request to the client with a model.DiffCache format.\n",
@@ -604,6 +660,38 @@
                 },
                 "hash": {
                     "type": "integer"
+                }
+            }
+        },
+        "controller.FlagConfigurationRequest": {
+            "type": "object",
+            "properties": {
+                "flags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "controller.FlagConfigurationResponse": {
+            "type": "object",
+            "properties": {
+                "errorCode": {
+                    "type": "string"
+                },
+                "errorDetails": {
+                    "type": "string"
+                },
+                "evaluationContextEnrichment": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "flags": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/flag.Flag"
+                    }
                 }
             }
         },

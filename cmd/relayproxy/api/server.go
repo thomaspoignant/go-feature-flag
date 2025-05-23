@@ -98,9 +98,13 @@ func (s *Server) initRoutes() {
 		s.services.GOFeatureFlagService,
 		s.services.Metrics,
 	)
+	cFlagConfiguration := controller.NewAPIFlagConfiguration(
+		s.services.GOFeatureFlagService,
+		s.services.Metrics,
+	)
 
 	// Init routes
-	s.addGOFFRoutes(cAllFlags, cFlagEval, cEvalDataCollector, cFlagChangeAPI)
+	s.addGOFFRoutes(cAllFlags, cFlagEval, cEvalDataCollector, cFlagChangeAPI, cFlagConfiguration)
 	s.addOFREPRoutes(cFlagEvalOFREP)
 	s.addWebsocketRoutes()
 	s.addMonitoringRoutes()

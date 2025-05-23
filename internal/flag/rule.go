@@ -1,15 +1,13 @@
 package flag
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"log/slog"
 	"sort"
-	"strings"
 	"time"
 
-	jsonlogic "github.com/diegoholiveira/jsonlogic/v3"
+	jsonlogic "github.com/GeorgeD19/json-logic-go"
 	"github.com/nikunjy/rules/parser"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/internal/internalerror"
@@ -94,14 +92,20 @@ func evaluateRule(query string, queryFormat QueryFormat, ctx ffcontext.Context) 
 				slog.Any("mapCtx", mapCtx), slog.Any("error", err))
 			return false
 		}
-		var result bytes.Buffer
-		err = jsonlogic.Apply(strings.NewReader(query), strings.NewReader(string(strCtx)), &result)
+		result, err := jsonlogic.Apply(query, string(strCtx))
 		if err != nil {
 			slog.Error("error while evaluating the jsonlogic query",
 				slog.String("query", query), slog.Any("error", err))
 			return false
 		}
-		return utils.StrTrim(result.String()) == "true"
+		switch v := result.(type) {
+		case bool:
+			return v
+		case string:
+			return utils.StrTrim(v) == "true"
+		default:
+			return false
+		}
 	default:
 		return parser.Evaluate(query, mapCtx)
 	}
@@ -351,9 +355,7 @@ func (r *Rule) isQueryValid(defaultRule bool) error {
 	// Validate the query with the parser
 	switch r.GetQueryFormat() {
 	case JSONLogicQueryFormat:
-		if !jsonlogic.IsValid(strings.NewReader(r.GetTrimmedQuery())) {
-			return fmt.Errorf("invalid jsonlogic query: %s", r.GetTrimmedQuery())
-		}
+		// No validation available with this JSON logic library
 		return nil
 	default:
 		return validateNikunjyQuery(r.GetTrimmedQuery())

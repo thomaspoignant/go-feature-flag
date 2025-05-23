@@ -1,0 +1,15 @@
+{
+  "trackEvents": true,
+  "variationType": "enable",
+  "failed": false,
+  "version": "",
+  "reason": "TARGETING_MATCH_SPLIT",
+  "errorCode": "",
+  "value": true,
+  "cacheable": true,
+  "metadata": {
+    "description": "test flag",
+    "evaluatedRuleName": "targetingID rule",
+    "type": "boolean"
+  }
+}

@@ -394,6 +394,11 @@ func (g *GoFeatureFlag) GetCacheRefreshDate() time.Time {
 	return g.cache.GetLatestUpdateDate()
 }
 
+// GetEvaluationContextEnrichment returns the evaluation context enrichment
+func (g *GoFeatureFlag) GetEvaluationContextEnrichment() map[string]any {
+	return g.config.EvaluationContextEnrichment
+}
+
 // ForceRefresh is a function that forces to call the retrievers and refresh the configuration of flags.
 // This function can be called explicitly to refresh the flags if you know that a change has been made in
 // the configuration.
