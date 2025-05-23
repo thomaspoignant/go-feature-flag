@@ -5,7 +5,7 @@ go 1.24.3
 require (
 	cloud.google.com/go/pubsub v1.49.0
 	cloud.google.com/go/storage v1.54.0
-	dario.cat/mergo v1.0.1
+	dario.cat/mergo v1.0.2
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.10.0
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.6.0
 	github.com/BurntSushi/toml v1.5.0
