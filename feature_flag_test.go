@@ -832,3 +832,35 @@ func TestStartWithNegativeIntervalToDisablePolling(t *testing.T) {
 	goff.ForceRefresh()
 	assert.NotEqual(t, cacheRefresh, goff.GetCacheRefreshDate())
 }
+
+func TestGoFeatureFlag_GetEvaluationContextEnrichment(t *testing.T) {
+	tests := []struct {
+		name       string
+		enrichment map[string]any
+	}{
+		{
+			name:       "nil enrichment",
+			enrichment: nil,
+		},
+		{
+			name:       "empty enrichment",
+			enrichment: map[string]any{},
+		},
+		{
+			name:       "non-empty enrichment",
+			enrichment: map[string]any{"foo": "bar", "num": 42},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gff, err := ffclient.New(ffclient.Config{
+				Retriever:                   &fileretriever.Retriever{Path: "testdata/flag-config.yaml"},
+				EvaluationContextEnrichment: tt.enrichment,
+			})
+			assert.NoError(t, err)
+			got := gff.GetEvaluationContextEnrichment()
+			assert.Equal(t, tt.enrichment, got)
+		})
+	}
+}
