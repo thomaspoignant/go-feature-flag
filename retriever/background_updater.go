@@ -1,4 +1,4 @@
-package ffclient
+package retriever
 
 import (
 	"math/rand"
@@ -37,6 +37,10 @@ func newBackgroundUpdater(pollingInterval time.Duration, useJitter bool) backgro
 
 // close stops the ticker and closes the channel.
 func (bgu *backgroundUpdater) close() {
-	bgu.ticker.Stop()
-	close(bgu.updaterChan)
+	if bgu.updaterChan != nil {
+		close(bgu.updaterChan)
+	}
+	if bgu.ticker != nil {
+		bgu.ticker.Stop()
+	}
 }

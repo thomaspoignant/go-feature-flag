@@ -284,7 +284,6 @@ func startEventProducer(
 	for i := 0; i < produceMax; i++ {
 		select {
 		case <-ctx.Done():
-			fmt.Println("Goroutine stopped")
 			return
 		default:
 			if randomizeProducingTime {

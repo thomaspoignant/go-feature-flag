@@ -142,7 +142,7 @@ func Test_httpRetriever_Retrieve(t *testing.T) {
 				t,
 				tt.wantErr,
 				err != nil,
-				"Retrieve() error = %v, wantErr %v",
+				"retrieve() error = %v, wantErr %v",
 				err,
 				tt.wantErr,
 			)

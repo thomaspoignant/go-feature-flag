@@ -399,8 +399,9 @@ func TestInvalidConf(t *testing.T) {
 	assert.Error(t, err)
 	assert.Equal(
 		t,
+
+		"impossible to initialize the retrievers, please check your configuration: impossible to retrieve the flags, please check your configuration: yaml: line 43: did not find expected ',' or '}'",
 		err.Error(),
-		"impossible to retrieve the flags, please check your configuration: yaml: line 43: did not find expected ',' or '}'",
 	)
 }
 
@@ -649,7 +650,6 @@ func Test_PersistFlagConfigurationOnDisk(t *testing.T) {
 
 	// 4. Stopping GO Feature Flag and restart with a retriever that will fail
 	gffClient.Close()
-
 	configFile2, err := os.CreateTemp("", "")
 	assert.NoError(t, err)
 	err = os.Remove(configFile2.Name())
@@ -689,7 +689,6 @@ func Test_PersistFlagConfigurationOnDisk(t *testing.T) {
 	flags2, err := gffClient2.GetFlagsFromCache()
 	assert.NoError(t, err)
 	assert.NotEqual(t, len(flags), len(flags2))
-
 	// 8. Checking that the persistence happened and that the file is different from the previous one
 	contentP3, err := os.ReadFile(persistFile.Name())
 	assert.NoError(t, err)

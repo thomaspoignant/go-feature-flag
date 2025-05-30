@@ -24,7 +24,7 @@ func Test_evaluate_Evaluate(t *testing.T) {
 				evaluationCtx: `{"targetingKey": "user-123"}`,
 			},
 			wantErr:     assert.Error,
-			expectedErr: "impossible to retrieve the flags, please check your configuration: open testdata/invalid.yaml: no such file or directory",
+			expectedErr: "impossible to initialize the retrievers, please check your configuration: impossible to retrieve the flags, please check your configuration: open testdata/invalid.yaml: no such file or directory",
 		},
 		{
 			name: "Should error if no evaluation context provided",

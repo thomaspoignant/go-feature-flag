@@ -1,7 +1,6 @@
 package exporter_test
 
 import (
-	"fmt"
 	"testing"
 	"text/template"
 
@@ -110,7 +109,6 @@ func TestTrackingEvent_FormatInJSON(t *testing.T) {
 			got, err := tt.trackingEvent.FormatInJSON()
 			tt.wantErr(t, err)
 			if err == nil {
-				fmt.Println(string(got))
 				assert.JSONEq(t, tt.want, string(got))
 			}
 		})
