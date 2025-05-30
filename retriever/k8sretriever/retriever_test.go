@@ -157,13 +157,13 @@ func Test_kubernetesRetriever_Retrieve(t *testing.T) {
 				s.client = fake.NewSimpleClientset()
 			}
 			got, err := s.Retrieve(tt.fields.context)
-			assert.Equal(t, tt.wantErr, err, "Retrieve() error = %v, wantErr %v", err, tt.wantErr)
+			assert.Equal(t, tt.wantErr, err, "retrieve() error = %v, wantErr %v", err, tt.wantErr)
 			if err == nil {
 				assert.Equal(
 					t,
 					tt.want,
 					got,
-					"Retrieve() got = %v, want %v",
+					"retrieve() got = %v, want %v",
 					string(got),
 					string(tt.want),
 				)

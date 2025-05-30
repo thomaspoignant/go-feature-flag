@@ -86,11 +86,11 @@ func TestAzureBlobStorageRetriever(t *testing.T) {
 				assert.NoError(t, err)
 			}()
 			got, err := tt.retriever.Retrieve(context.Background())
-			assert.Equal(t, tt.wantErr, err != nil, "Retrieve() error = %v, wantErr %v", err, tt.wantErr)
+			assert.Equal(t, tt.wantErr, err != nil, "retrieve() error = %v, wantErr %v", err, tt.wantErr)
 			if err == nil {
 				want, err := os.ReadFile(tt.want)
 				assert.NoError(t, err)
-				assert.Equal(t, string(want), string(got), "Retrieve() got = %v, want %v", string(want), string(got))
+				assert.Equal(t, string(want), string(got), "retrieve() got = %v, want %v", string(want), string(got))
 			}
 		})
 	}

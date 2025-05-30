@@ -251,7 +251,7 @@ variation = "false_var"
 		t.Run(tt.name, func(t *testing.T) {
 			fCache := cache.New(notification.NewService([]notifier.Notifier{}), "",
 				&fflog.FFLogger{LeveledLogger: slog.Default()})
-			newFlags, err := fCache.ConvertToFlagStruct(tt.args.loadedFlags, tt.flagFormat)
+			newFlags, err := cache.ConvertToFlagStruct(tt.args.loadedFlags, tt.flagFormat)
 			if tt.wantErr {
 				assert.Error(t, err)
 				return
@@ -414,7 +414,7 @@ test-flag2:
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			fCache := cache.New(notification.NewService([]notifier.Notifier{}), "", nil)
-			newFlags, err := fCache.ConvertToFlagStruct(tt.args.loadedFlags, tt.flagFormat)
+			newFlags, err := cache.ConvertToFlagStruct(tt.args.loadedFlags, tt.flagFormat)
 			if tt.wantErr {
 				assert.Error(t, err)
 				return
@@ -456,7 +456,7 @@ func Test_cacheManagerImpl_GetLatestUpdateDate(t *testing.T) {
 
 	fCache := cache.New(notification.NewService([]notifier.Notifier{}), "", nil)
 	timeBefore := fCache.GetLatestUpdateDate()
-	newFlags, _ := fCache.ConvertToFlagStruct(loadedFlags, "yaml")
+	newFlags, _ := cache.ConvertToFlagStruct(loadedFlags, "yaml")
 	_ = fCache.UpdateCache(newFlags, &fflog.FFLogger{LeveledLogger: slog.Default()}, true)
 	timeAfter := fCache.GetLatestUpdateDate()
 

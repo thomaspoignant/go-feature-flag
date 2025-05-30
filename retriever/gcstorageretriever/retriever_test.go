@@ -117,7 +117,7 @@ func TestRetriever_Retrieve(t *testing.T) {
 					t,
 					tt.wantErr,
 					err != nil,
-					"Retrieve() error = %v, wantErr %v",
+					"retrieve() error = %v, wantErr %v",
 					err,
 					tt.wantErr,
 				)
@@ -130,7 +130,7 @@ func TestRetriever_Retrieve(t *testing.T) {
 						t,
 						wantContent,
 						gotContent,
-						"Retrieve() got = %v, want %v",
+						"retrieve() got = %v, want %v",
 						gotContent,
 						wantContent,
 					)

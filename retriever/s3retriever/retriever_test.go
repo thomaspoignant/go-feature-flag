@@ -74,7 +74,7 @@ func Test_s3Retriever_Retrieve(t *testing.T) {
 				t,
 				tt.wantErr,
 				err != nil,
-				"Retrieve() error = %v, wantErr %v",
+				"retrieve() error = %v, wantErr %v",
 				err,
 				tt.wantErr,
 			)
@@ -85,7 +85,7 @@ func Test_s3Retriever_Retrieve(t *testing.T) {
 					t,
 					string(want),
 					string(got),
-					"Retrieve() got = %v, want %v",
+					"retrieve() got = %v, want %v",
 					string(want),
 					string(got),
 				)

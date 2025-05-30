@@ -1,7 +1,6 @@
 package exporter_test
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
@@ -230,7 +229,6 @@ func TestFeatureEvent_FormatInJSON(t *testing.T) {
 			got, err := tt.featureEvent.FormatInJSON()
 			tt.wantErr(t, err)
 			if err == nil {
-				fmt.Println(string(got))
 				assert.JSONEq(t, tt.want, string(got))
 			}
 		})

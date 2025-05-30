@@ -19,6 +19,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/model"
 	"github.com/thomaspoignant/go-feature-flag/model/dto"
+	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
@@ -319,11 +320,21 @@ func TestBoolVariation(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			handler := slogassert.New(t, slog.LevelInfo, nil)
 			logger := slog.New(handler)
+			fflog := &fflog.FFLogger{
+				LeveledLogger: slog.New(handler),
+			}
 
 			if !tt.args.disableInit {
+				c := retriever.ManagerConfig{
+					Ctx:                     context.Background(),
+					FileFormat:              "YAML",
+					DisableNotifierOnInit:   false,
+					StartWithRetrieverError: false,
+					EnablePollingJitter:     true,
+					PollingInterval:         500,
+				}
 				ff = &GoFeatureFlag{
-					bgUpdater: newBackgroundUpdater(500, true),
-					cache:     tt.args.cacheMock,
+					retrieverManager: retriever.NewManager(c, []retriever.Retriever{}, tt.args.cacheMock, fflog),
 					config: Config{
 						PollingInterval: 0,
 						LeveledLogger:   logger,
@@ -342,7 +353,7 @@ func TestBoolVariation(t *testing.T) {
 							},
 						},
 						exporter.DefaultExporterCleanQueueInterval,
-						&fflog.FFLogger{LeveledLogger: logger},
+						fflog,
 					),
 				}
 			}
@@ -736,9 +747,16 @@ func TestBoolVariationDetails(t *testing.T) {
 			logger := slog.New(handler)
 
 			if !tt.args.disableInit {
+				c := retriever.ManagerConfig{
+					Ctx:                     context.Background(),
+					FileFormat:              "YAML",
+					DisableNotifierOnInit:   false,
+					StartWithRetrieverError: false,
+					EnablePollingJitter:     true,
+					PollingInterval:         500,
+				}
 				ff = &GoFeatureFlag{
-					bgUpdater: newBackgroundUpdater(500, true),
-					cache:     tt.args.cacheMock,
+					retrieverManager: retriever.NewManager(c, []retriever.Retriever{}, tt.args.cacheMock, &fflog.FFLogger{LeveledLogger: logger}),
 					config: Config{
 						PollingInterval: 0,
 						LeveledLogger:   logger,
@@ -1066,9 +1084,16 @@ func TestFloat64Variation(t *testing.T) {
 			logger := slog.New(handler)
 
 			if !tt.args.disableInit {
+				c := retriever.ManagerConfig{
+					Ctx:                     context.Background(),
+					FileFormat:              "YAML",
+					DisableNotifierOnInit:   false,
+					StartWithRetrieverError: false,
+					EnablePollingJitter:     true,
+					PollingInterval:         500,
+				}
 				ff = &GoFeatureFlag{
-					bgUpdater: newBackgroundUpdater(500, true),
-					cache:     tt.args.cacheMock,
+					retrieverManager: retriever.NewManager(c, []retriever.Retriever{}, tt.args.cacheMock, &fflog.FFLogger{LeveledLogger: logger}),
 					config: Config{
 						PollingInterval: 0,
 						LeveledLogger:   logger,
@@ -1399,9 +1424,16 @@ func TestFloat64VariationDetails(t *testing.T) {
 			logger := slog.New(handler)
 
 			if !tt.args.disableInit {
+				c := retriever.ManagerConfig{
+					Ctx:                     context.Background(),
+					FileFormat:              "YAML",
+					DisableNotifierOnInit:   false,
+					StartWithRetrieverError: false,
+					EnablePollingJitter:     true,
+					PollingInterval:         500,
+				}
 				ff = &GoFeatureFlag{
-					bgUpdater: newBackgroundUpdater(500, true),
-					cache:     tt.args.cacheMock,
+					retrieverManager: retriever.NewManager(c, []retriever.Retriever{}, tt.args.cacheMock, &fflog.FFLogger{LeveledLogger: logger}),
 					config: Config{
 						PollingInterval: 0,
 						LeveledLogger:   logger,
@@ -1708,9 +1740,16 @@ func TestJSONArrayVariation(t *testing.T) {
 			logger := slog.New(handler)
 
 			if !tt.args.disableInit {
+				c := retriever.ManagerConfig{
+					Ctx:                     context.Background(),
+					FileFormat:              "YAML",
+					DisableNotifierOnInit:   false,
+					StartWithRetrieverError: false,
+					EnablePollingJitter:     true,
+					PollingInterval:         500,
+				}
 				ff = &GoFeatureFlag{
-					bgUpdater: newBackgroundUpdater(500, true),
-					cache:     tt.args.cacheMock,
+					retrieverManager: retriever.NewManager(c, []retriever.Retriever{}, tt.args.cacheMock, &fflog.FFLogger{LeveledLogger: logger}),
 					config: Config{
 						PollingInterval: 0,
 						LeveledLogger:   logger,
@@ -2030,9 +2069,16 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 			logger := slog.New(handler)
 
 			if !tt.args.disableInit {
+				c := retriever.ManagerConfig{
+					Ctx:                     context.Background(),
+					FileFormat:              "YAML",
+					DisableNotifierOnInit:   false,
+					StartWithRetrieverError: false,
+					EnablePollingJitter:     true,
+					PollingInterval:         500,
+				}
 				ff = &GoFeatureFlag{
-					bgUpdater: newBackgroundUpdater(500, true),
-					cache:     tt.args.cacheMock,
+					retrieverManager: retriever.NewManager(c, []retriever.Retriever{}, tt.args.cacheMock, &fflog.FFLogger{LeveledLogger: logger}),
 					config: Config{
 						PollingInterval: 0,
 						LeveledLogger:   logger,
@@ -2323,9 +2369,16 @@ func TestJSONVariation(t *testing.T) {
 			logger := slog.New(handler)
 
 			if !tt.args.disableInit {
+				c := retriever.ManagerConfig{
+					Ctx:                     context.Background(),
+					FileFormat:              "YAML",
+					DisableNotifierOnInit:   false,
+					StartWithRetrieverError: false,
+					EnablePollingJitter:     true,
+					PollingInterval:         500,
+				}
 				ff = &GoFeatureFlag{
-					bgUpdater: newBackgroundUpdater(500, true),
-					cache:     tt.args.cacheMock,
+					retrieverManager: retriever.NewManager(c, []retriever.Retriever{}, tt.args.cacheMock, &fflog.FFLogger{LeveledLogger: logger}),
 					config: Config{
 						PollingInterval: 0,
 						LeveledLogger:   logger,
@@ -2568,9 +2621,16 @@ func TestJSONVariationDetails(t *testing.T) {
 			logger := slog.New(handler)
 
 			if !tt.args.disableInit {
+				c := retriever.ManagerConfig{
+					Ctx:                     context.Background(),
+					FileFormat:              "YAML",
+					DisableNotifierOnInit:   false,
+					StartWithRetrieverError: false,
+					EnablePollingJitter:     true,
+					PollingInterval:         500,
+				}
 				ff = &GoFeatureFlag{
-					bgUpdater: newBackgroundUpdater(500, true),
-					cache:     tt.args.cacheMock,
+					retrieverManager: retriever.NewManager(c, []retriever.Retriever{}, tt.args.cacheMock, &fflog.FFLogger{LeveledLogger: logger}),
 					config: Config{
 						PollingInterval: 0,
 						LeveledLogger:   logger,
@@ -2860,9 +2920,16 @@ func TestStringVariation(t *testing.T) {
 			logger := slog.New(handler)
 
 			if !tt.args.disableInit {
+				c := retriever.ManagerConfig{
+					Ctx:                     context.Background(),
+					FileFormat:              "YAML",
+					DisableNotifierOnInit:   false,
+					StartWithRetrieverError: false,
+					EnablePollingJitter:     true,
+					PollingInterval:         500,
+				}
 				ff = &GoFeatureFlag{
-					bgUpdater: newBackgroundUpdater(500, true),
-					cache:     tt.args.cacheMock,
+					retrieverManager: retriever.NewManager(c, []retriever.Retriever{}, tt.args.cacheMock, &fflog.FFLogger{LeveledLogger: logger}),
 					config: Config{
 						PollingInterval: 0,
 						LeveledLogger:   logger,
@@ -3104,9 +3171,16 @@ func TestStringVariationDetails(t *testing.T) {
 			logger := slog.New(handler)
 
 			if !tt.args.disableInit {
+				c := retriever.ManagerConfig{
+					Ctx:                     context.Background(),
+					FileFormat:              "YAML",
+					DisableNotifierOnInit:   false,
+					StartWithRetrieverError: false,
+					EnablePollingJitter:     true,
+					PollingInterval:         500,
+				}
 				ff = &GoFeatureFlag{
-					bgUpdater: newBackgroundUpdater(500, true),
-					cache:     tt.args.cacheMock,
+					retrieverManager: retriever.NewManager(c, []retriever.Retriever{}, tt.args.cacheMock, &fflog.FFLogger{LeveledLogger: logger}),
 					config: Config{
 						PollingInterval: 0,
 						LeveledLogger:   logger,
@@ -3426,9 +3500,16 @@ func TestIntVariation(t *testing.T) {
 			logger := slog.New(handler)
 
 			if !tt.args.disableInit {
+				c := retriever.ManagerConfig{
+					Ctx:                     context.Background(),
+					FileFormat:              "YAML",
+					DisableNotifierOnInit:   false,
+					StartWithRetrieverError: false,
+					EnablePollingJitter:     true,
+					PollingInterval:         500,
+				}
 				ff = &GoFeatureFlag{
-					bgUpdater: newBackgroundUpdater(500, true),
-					cache:     tt.args.cacheMock,
+					retrieverManager: retriever.NewManager(c, []retriever.Retriever{}, tt.args.cacheMock, &fflog.FFLogger{LeveledLogger: logger}),
 					config: Config{
 						PollingInterval: 0,
 						LeveledLogger:   logger,
@@ -3712,9 +3793,16 @@ func TestIntVariationDetails(t *testing.T) {
 			logger := slog.New(handler)
 
 			if !tt.args.disableInit {
+				c := retriever.ManagerConfig{
+					Ctx:                     context.Background(),
+					FileFormat:              "YAML",
+					DisableNotifierOnInit:   false,
+					StartWithRetrieverError: false,
+					EnablePollingJitter:     true,
+					PollingInterval:         500,
+				}
 				ff = &GoFeatureFlag{
-					bgUpdater: newBackgroundUpdater(500, true),
-					cache:     tt.args.cacheMock,
+					retrieverManager: retriever.NewManager(c, []retriever.Retriever{}, tt.args.cacheMock, &fflog.FFLogger{LeveledLogger: logger}),
 					config: Config{
 						PollingInterval: 0,
 						LeveledLogger:   logger,
@@ -4095,9 +4183,16 @@ func TestRawVariation(t *testing.T) {
 			logger := slog.New(handler)
 
 			if !tt.args.disableInit {
+				c := retriever.ManagerConfig{
+					Ctx:                     context.Background(),
+					FileFormat:              "YAML",
+					DisableNotifierOnInit:   false,
+					StartWithRetrieverError: false,
+					EnablePollingJitter:     true,
+					PollingInterval:         500,
+				}
 				ff = &GoFeatureFlag{
-					bgUpdater: newBackgroundUpdater(500, true),
-					cache:     tt.args.cacheMock,
+					retrieverManager: retriever.NewManager(c, []retriever.Retriever{}, tt.args.cacheMock, &fflog.FFLogger{LeveledLogger: logger}),
 					config: Config{
 						PollingInterval: 0,
 						LeveledLogger:   logger,
@@ -4158,14 +4253,14 @@ func Test_OverrideContextEnrichmentWithEnvironment(t *testing.T) {
 
 	err = os.WriteFile(tempFile.Name(), []byte(`
 flag1:
-  variations:
-    enabled: true
-    disabled: false
-  targeting:
-    - query: env eq "staging"
-      variation: enabled
-  defaultRule:
-    variation: disabled
+ variations:
+   enabled: true
+   disabled: false
+ targeting:
+   - query: env eq "staging"
+     variation: enabled
+ defaultRule:
+   variation: disabled
 
 `), 0644)
 	require.NoError(t, err)

@@ -1,8 +1,6 @@
 package ffclient
 
 import (
-	"fmt"
-
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/internal/flagstate"
@@ -47,7 +45,7 @@ func (g *GoFeatureFlag) GetFlagStates(
 	if len(flagsToEvaluate) != 0 {
 		flagStates := flagstate.NewAllFlags()
 		for _, key := range flagsToEvaluate {
-			currentFlag, err := g.cache.GetFlag(key)
+			currentFlag, err := g.retrieverManager.GetFlag(key)
 			if err != nil {
 				// We ignore flags in error
 				continue
@@ -87,8 +85,5 @@ func (g *GoFeatureFlag) AllFlagsState(evaluationCtx ffcontext.Context) flagstate
 // current state when calling this method. If cache hasn't been initialized, an
 // error reporting this is returned.
 func (g *GoFeatureFlag) GetFlagsFromCache() (map[string]flag.Flag, error) {
-	if g == nil || g.cache == nil {
-		return nil, fmt.Errorf("cache is not initialized")
-	}
-	return g.cache.AllFlags()
+	return g.retrieverManager.GetFlagsFromCache()
 }

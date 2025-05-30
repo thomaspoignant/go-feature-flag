@@ -44,7 +44,7 @@ type simpleRetriever struct {
 	retrieveCalled bool
 }
 
-// Retrieve is the function in charge of fetching the flag configuration.
+// retrieve is the function in charge of fetching the flag configuration.
 func (s *simpleRetriever) Retrieve(_ context.Context) ([]byte, error) {
 	s.retrieveCalled = true
 	return []byte{}, nil
@@ -57,7 +57,7 @@ type initializableRetrieverLegacy struct {
 	statusCalled   bool
 }
 
-// Retrieve is the function in charge of fetching the flag configuration.
+// retrieve is the function in charge of fetching the flag configuration.
 func (i *initializableRetrieverLegacy) Retrieve(_ context.Context) ([]byte, error) {
 	i.retrieveCalled = true
 	return []byte{}, nil
@@ -88,7 +88,7 @@ type initializableRetriever struct {
 	statusCalled   bool
 }
 
-// Retrieve is the function in charge of fetching the flag configuration.
+// retrieve is the function in charge of fetching the flag configuration.
 func (i *initializableRetriever) Retrieve(_ context.Context) ([]byte, error) {
 	i.retrieveCalled = true
 	return []byte{}, nil

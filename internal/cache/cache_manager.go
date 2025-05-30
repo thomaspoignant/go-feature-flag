@@ -19,7 +19,6 @@ import (
 )
 
 type Manager interface {
-	ConvertToFlagStruct(loadedFlags []byte, fileFormat string) (map[string]dto.DTO, error)
 	UpdateCache(newFlags map[string]dto.DTO, log *fflog.FFLogger, notifyChanges bool) error
 	Close()
 	GetFlag(key string) (flag.Flag, error)
@@ -50,7 +49,7 @@ func New(
 	}
 }
 
-func (c *cacheManagerImpl) ConvertToFlagStruct(
+func ConvertToFlagStruct(
 	loadedFlags []byte,
 	fileFormat string,
 ) (map[string]dto.DTO, error) {
