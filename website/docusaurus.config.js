@@ -291,11 +291,11 @@ const config = {
     ['@docusaurus/theme-mermaid', {theme: 'default'}],
   ],
   themeConfig:
-    /** @type {import("@docusaurus/preset-classic").ThemeConfig} */
+    /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       announcementBar: {
         id: 'support_usz', // Increment on change
-        content: `⭐ If you like GO Feature Flag, give it a star on <a target="_blank" rel="noopener noreferrer" href="https://github.com/thomaspoignant/go-feature-flag">GitHub</a> and follow us on <a target="_blank" rel="noopener noreferrer" href="https://x.com/gofeatureflag">X</a>`,
+        content: `⭐ If you like GO Feature Flag, give it a star on <a target="_blank" rel="noopener noreferrer" href="https://github.com/thomaspoignant/go-feature-flag">GitHub</a> and follow us on <a target="_blank" rel="noopener noreferrer" href="https://bsky.app/profile/gofeatureflag.org">Bluesky</a>`,
       },
       image: 'img/logo/x-card.png',
       navbar: {
