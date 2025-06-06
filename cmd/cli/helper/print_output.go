@@ -1,8 +1,7 @@
 package helper
 
 import (
-	"fmt"
-
+	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 )
 
@@ -30,9 +29,9 @@ func (o *Output) PrintLines(cmd *cobra.Command) {
 	for _, line := range o.Lines {
 		switch line.Level {
 		case WarnLevel:
-			cmd.Println(fmt.Sprintf("⚠️ %s", line.Text))
-		default:
-			cmd.Println(line.Text)
+			pterm.Warning.Println(line.Text)
+		default: // InfoLevel
+			pterm.Info.Println(line.Text)
 		}
 	}
 }

@@ -1,0 +1,15 @@
+test-flag:
+  variations:
+    A: true
+    B: false
+  defaultRule:
+    variation: A
+another-flag:
+  variations:
+    on: "enabled"
+    off: "disabled"
+  targeting:
+    - query: key eq "user1"
+      variation: "on"
+  defaultRule:
+    variation: "off"
