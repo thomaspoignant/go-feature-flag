@@ -59,7 +59,7 @@ func (h *collectEvalData) Handler(c echo.Context) error {
 			http.StatusBadRequest,
 			fmt.Sprintf("collectEvalData: invalid input data %v", err))
 	}
-	if reqBody == nil || reqBody.Events == nil {
+	if reqBody.Events == nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "collectEvalData: invalid input data")
 	}
 	tracer := otel.GetTracerProvider().Tracer(config.OtelTracerName)
