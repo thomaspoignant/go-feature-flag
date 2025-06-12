@@ -143,66 +143,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/ofrep/v1/configuration": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "OFREP configuration to provide information about the remote flag management system, to configure the\nOpenFeature SDK providers.\n\nThis endpoint will be called during the initialization of the provider.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "OpenFeature Remote Evaluation Protocol (OFREP)"
-                ],
-                "summary": "OFREP provider configuration",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "The request will be processed only if ETag doesn't match.",
-                        "name": "If-None-Match",
-                        "in": "header"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success",
-                        "schema": {
-                            "$ref": "#/definitions/model.OFREPConfiguration"
-                        }
-                    },
-                    "304": {
-                        "description": "Etag: \\\"117-0193435c612c50d93b798619d9464856263dbf9f\\",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
-                        }
-                    },
-                    "404": {
-                        "description": "Flag Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/model.OFREPEvaluateResponseError"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
-                        }
-                    }
-                }
-            }
-        },
         "/ofrep/v1/evaluate/flags": {
             "post": {
                 "security": [
@@ -878,58 +818,6 @@ const docTemplate = `{
                     "$ref": "#/definitions/flag.ErrorCode"
                 },
                 "errorDetails": {
-                    "type": "string"
-                }
-            }
-        },
-        "model.OFREPConfigCapabilities": {
-            "type": "object",
-            "properties": {
-                "cacheInvalidation": {
-                    "$ref": "#/definitions/model.OFREPConfigCapabilitiesCacheInvalidation"
-                },
-                "flagEvaluation": {
-                    "$ref": "#/definitions/model.OFREPConfigCapabilitiesFlagEvaluation"
-                }
-            }
-        },
-        "model.OFREPConfigCapabilitiesCacheInvalidation": {
-            "type": "object",
-            "properties": {
-                "polling": {
-                    "$ref": "#/definitions/model.OFREPConfigCapabilitiesCacheInvalidationPolling"
-                }
-            }
-        },
-        "model.OFREPConfigCapabilitiesCacheInvalidationPolling": {
-            "type": "object",
-            "properties": {
-                "enabled": {
-                    "type": "boolean"
-                },
-                "minPollingInterval": {
-                    "type": "integer"
-                }
-            }
-        },
-        "model.OFREPConfigCapabilitiesFlagEvaluation": {
-            "type": "object",
-            "properties": {
-                "unsupportedTypes": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            }
-        },
-        "model.OFREPConfiguration": {
-            "type": "object",
-            "properties": {
-                "capabilities": {
-                    "$ref": "#/definitions/model.OFREPConfigCapabilities"
-                },
-                "name": {
                     "type": "string"
                 }
             }

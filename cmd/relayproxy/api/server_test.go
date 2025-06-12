@@ -180,21 +180,13 @@ func Test_CheckOFREPAPIExists(t *testing.T) {
 
 	time.Sleep(10 * time.Millisecond)
 
-	req, err := http.NewRequest("GET",
-		"http://localhost:11024/ofrep/v1/configuration", nil)
-	assert.NoError(t, err)
-	req.Header.Add("Authorization", "Bearer test")
-	response, err := http.DefaultClient.Do(req)
-	assert.NoError(t, err)
-	assert.Equal(t, http.StatusOK, response.StatusCode)
-
-	req, err = http.NewRequest("POST",
+	req, err := http.NewRequest("POST",
 		"http://localhost:11024/ofrep/v1/evaluate/flags",
 		strings.NewReader(`{ "context":{"targetingKey":"some-key"}}`))
 	assert.NoError(t, err)
 	req.Header.Add("Authorization", "Bearer test")
 	req.Header.Add("Content-Type", "application/json")
-	response, err = http.DefaultClient.Do(req)
+	response, err := http.DefaultClient.Do(req)
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 

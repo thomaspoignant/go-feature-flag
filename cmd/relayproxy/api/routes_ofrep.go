@@ -33,5 +33,4 @@ func (s *Server) addOFREPRoutes(cFlagEvalOFREP ofrep.EvaluateCtrl) {
 	}
 	ofrepGroup.POST("/evaluate/flags", cFlagEvalOFREP.BulkEvaluate)
 	ofrepGroup.POST("/evaluate/flags/:flagKey", cFlagEvalOFREP.Evaluate)
-	ofrepGroup.GET("/configuration", cFlagEvalOFREP.Configuration)
 }
