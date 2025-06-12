@@ -684,7 +684,7 @@ docker_manifests:
       - thomaspoignant/go-feature-flag-cli:v{{ .RawVersion }}-arm64v8
       - thomaspoignant/go-feature-flag-cli:v{{ .RawVersion }}-armv7
       - thomaspoignant/go-feature-flag-cli:v{{ .RawVersion }}-amd64
-brews:
+homebrew_casks:
   # DEPRECATED: check go-feature-flag
   - ids:
       - go-feature-flag-relay-proxy
