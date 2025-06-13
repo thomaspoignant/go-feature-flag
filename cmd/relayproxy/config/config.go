@@ -19,6 +19,7 @@ import (
 	"github.com/knadh/koanf/v2"
 	"github.com/spf13/pflag"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
+	"github.com/thomaspoignant/go-feature-flag/utils"
 	"github.com/xitongsys/parquet-go/parquet"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -111,94 +112,13 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 
 	if proxyConf.Exporters != nil {
 		for i := range *proxyConf.Exporters {
-			(*proxyConf.Exporters)[i].Kafka.Addresses = stringToArray(
+			(*proxyConf.Exporters)[i].Kafka.Addresses = utils.StringToArray(
 				(*proxyConf.Exporters)[i].Kafka.Addresses,
 			)
 		}
 	}
 
 	return proxyConf, nil
-}
-
-func mapEnvVariablesProvider(prefix string, log *zap.Logger) koanf.Provider {
-	return env.ProviderWithValue(prefix, ".", func(key string, v string) (string, interface{}) {
-		key = strings.TrimPrefix(key, prefix)
-		if strings.HasPrefix(key, "RETRIEVERS") ||
-			strings.HasPrefix(key, "NOTIFIERS") ||
-			strings.HasPrefix(key, "EXPORTERS") {
-			configMap := k.Raw()
-			err := loadArrayEnv(key, v, configMap)
-			if err != nil {
-				log.Error(
-					"config: error loading array env",
-					zap.String("key", key),
-					zap.String("value", v),
-					zap.Error(err),
-				)
-				return key, v
-			}
-			return key, v
-		}
-
-		if strings.HasPrefix(key, "EXPORTER_KAFKA_ADDRESSES") {
-			return "exporter.kafka.addresses", strings.Split(v, ",")
-		}
-
-		if strings.HasPrefix(key, "AUTHORIZEDKEYS_EVALUATION") {
-			return "authorizedKeys.evaluation", strings.Split(v, ",")
-		}
-		if strings.HasPrefix(key, "AUTHORIZEDKEYS_ADMIN") {
-			return "authorizedKeys.admin", strings.Split(v, ",")
-		}
-
-		if key == "OTEL_RESOURCE_ATTRIBUTES" {
-			parseOtelResourceAttributes(v, log)
-			return key, v
-		}
-
-		return strings.ReplaceAll(strings.ToLower(key), "_", "."), v
-	})
-}
-
-func stringToArray(item []string) []string {
-	if len(item) > 0 {
-		return strings.Split(item[0], ",")
-	}
-	return item
-}
-
-func parseOtelResourceAttributes(attributes string, log *zap.Logger) {
-	configMap := k.Raw()
-	otel, ok := configMap["otel"].(map[string]interface{})
-	if !ok {
-		configMap["otel"] = make(map[string]interface{})
-		otel = configMap["otel"].(map[string]interface{})
-	}
-
-	resource, ok := otel["resource"].(map[string]interface{})
-	if !ok {
-		otel["resource"] = make(map[string]interface{})
-		resource = otel["resource"].(map[string]interface{})
-	}
-
-	attrs, ok := resource["attributes"].(map[string]interface{})
-	if !ok {
-		resource["attributes"] = make(map[string]interface{})
-		attrs = resource["attributes"].(map[string]interface{})
-	}
-
-	for _, attr := range strings.Split(attributes, ",") {
-		k, v, found := strings.Cut(attr, "=")
-		if !found {
-			log.Error("config: error loading OTEL_RESOURCE_ATTRIBUTES - incorrect format",
-				zap.String("key", k), zap.String("value", v))
-			continue
-		}
-
-		attrs[k] = v
-	}
-
-	_ = k.Set("otel", otel)
 }
 
 type Config struct {
@@ -350,6 +270,83 @@ type Config struct {
 	// adminAPIKeySet is the internal representation of an admin API keys list configured
 	// we store them in a set to be
 	adminAPIKeySet map[string]interface{}
+}
+
+func mapEnvVariablesProvider(prefix string, log *zap.Logger) koanf.Provider {
+	return env.ProviderWithValue(prefix, ".", func(key string, v string) (string, interface{}) {
+		key = strings.TrimPrefix(key, prefix)
+		if strings.HasPrefix(key, "RETRIEVERS") ||
+			strings.HasPrefix(key, "NOTIFIERS") ||
+			strings.HasPrefix(key, "EXPORTERS") {
+			configMap := k.Raw()
+			err := loadArrayEnv(key, v, configMap)
+			if err != nil {
+				log.Error(
+					"config: error loading array env",
+					zap.String("key", key),
+					zap.String("value", v),
+					zap.Error(err),
+				)
+				return key, v
+			}
+			return key, v
+		}
+
+		if strings.HasPrefix(key, "EXPORTER_KAFKA_ADDRESSES") {
+			return "exporter.kafka.addresses", strings.Split(v, ",")
+		}
+
+		if strings.HasPrefix(key, "AUTHORIZEDKEYS_EVALUATION") {
+			return "authorizedKeys.evaluation", strings.Split(v, ",")
+		}
+		if strings.HasPrefix(key, "AUTHORIZEDKEYS_ADMIN") {
+			return "authorizedKeys.admin", strings.Split(v, ",")
+		}
+
+		if key == "OTEL_RESOURCE_ATTRIBUTES" {
+			parseOtelResourceAttributes(v, log)
+			return key, v
+		}
+
+		return strings.ReplaceAll(strings.ToLower(key), "_", "."), v
+	})
+}
+
+// parseOtelResourceAttributes parses the OTEL_RESOURCE_ATTRIBUTES environment variable
+// and sets the attributes in the koanf configuration.
+// The expected format is "key1=value1,key2=value2,..."
+func parseOtelResourceAttributes(attributes string, log *zap.Logger) {
+	configMap := k.Raw()
+	otel, ok := configMap["otel"].(map[string]interface{})
+	if !ok {
+		configMap["otel"] = make(map[string]interface{})
+		otel = configMap["otel"].(map[string]interface{})
+	}
+
+	resource, ok := otel["resource"].(map[string]interface{})
+	if !ok {
+		otel["resource"] = make(map[string]interface{})
+		resource = otel["resource"].(map[string]interface{})
+	}
+
+	attrs, ok := resource["attributes"].(map[string]interface{})
+	if !ok {
+		resource["attributes"] = make(map[string]interface{})
+		attrs = resource["attributes"].(map[string]interface{})
+	}
+
+	for _, attr := range strings.Split(attributes, ",") {
+		k, v, found := strings.Cut(attr, "=")
+		if !found {
+			log.Error("config: error loading OTEL_RESOURCE_ATTRIBUTES - incorrect format",
+				zap.String("key", k), zap.String("value", v))
+			continue
+		}
+
+		attrs[k] = v
+	}
+
+	_ = k.Set("otel", otel)
 }
 
 // OpenTelemetryConfiguration is the configuration for the OpenTelemetry part of the relay proxy
