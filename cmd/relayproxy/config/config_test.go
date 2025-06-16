@@ -742,6 +742,53 @@ func TestConfig_APIKeyExists(t *testing.T) {
 			},
 			want: false,
 		},
+		{
+			name:   "key exists in flag set",
+			apiKey: "flag-set-api-key",
+			config: config.Config{
+				FlagSets: []config.FlagSet{
+					{
+						Name:   "test-flag-set",
+						ApiKey: "flag-set-api-key",
+					},
+				},
+			},
+			want: true,
+		},
+		{
+			name:   "key exists in multiple flag sets",
+			apiKey: "flag-set-api-key-2",
+			config: config.Config{
+				FlagSets: []config.FlagSet{
+					{
+						Name:   "test-flag-set-1",
+						ApiKey: "flag-set-api-key-1",
+					},
+					{
+						Name:   "test-flag-set-2",
+						ApiKey: "flag-set-api-key-2",
+					},
+				},
+			},
+			want: true,
+		},
+		{
+			name:   "key does not exist in flag sets",
+			apiKey: "non-existent-key",
+			config: config.Config{
+				FlagSets: []config.FlagSet{
+					{
+						Name:   "test-flag-set-1",
+						ApiKey: "flag-set-api-key-1",
+					},
+					{
+						Name:   "test-flag-set-2",
+						ApiKey: "flag-set-api-key-2",
+					},
+				},
+			},
+			want: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

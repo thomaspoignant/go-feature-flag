@@ -82,7 +82,7 @@ func main() {
 	defer wsService.Close() // close all the open connections
 	prometheusNotifier := metric.NewPrometheusNotifier(metricsV2)
 	proxyNotifier := service.NewNotifierWebsocket(wsService)
-	goff, err := service.NewGoFeatureFlagClient(proxyConf, logger.ZapLogger, []notifier.Notifier{
+	goff, err := service.NewGoFeatureFlagClient(prepareDefaultFlagSet(proxyConf), logger.ZapLogger, []notifier.Notifier{
 		prometheusNotifier,
 		proxyNotifier,
 	})
@@ -108,5 +108,21 @@ func main() {
 			apiServer.Stop(ctx)
 		}()
 		apiServer.Start()
+	}
+}
+
+func prepareDefaultFlagSet(proxyConf *config.Config) *config.FlagSet {
+	return &config.FlagSet{
+		Name:                            "default",
+		Retrievers:                      proxyConf.Retrievers,
+		Notifiers:                       &proxyConf.Notifiers,
+		Exporters:                       proxyConf.Exporters,
+		FileFormat:                      proxyConf.FileFormat,
+		PollingInterval:                 proxyConf.PollingInterval,
+		StartWithRetrieverError:         proxyConf.StartWithRetrieverError,
+		EnablePollingJitter:             proxyConf.EnablePollingJitter,
+		DisableNotifierOnInit:           proxyConf.DisableNotifierOnInit,
+		EvaluationContextEnrichment:     proxyConf.EvaluationContextEnrichment,
+		PersistentFlagConfigurationFile: proxyConf.PersistentFlagConfigurationFile,
 	}
 }

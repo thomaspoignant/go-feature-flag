@@ -38,7 +38,7 @@ import (
 )
 
 func NewGoFeatureFlagClient(
-	proxyConf *config.Config,
+	proxyConf *config.FlagSet,
 	logger *zap.Logger,
 	notifiers []notifier.Notifier,
 ) (*ffclient.GoFeatureFlag, error) {
@@ -57,7 +57,7 @@ func NewGoFeatureFlagClient(
 		return nil, err
 	}
 
-	notif, err := initNotifier(proxyConf.Notifiers)
+	notif, err := initNotifier(*proxyConf.Notifiers)
 	if err != nil {
 		return nil, err
 	}
@@ -87,15 +87,8 @@ func NewGoFeatureFlagClient(
 
 // initRetrievers initialize the retrievers based on the configuration
 // it handles both the `retriever` and `retrievers` fields
-func initRetrievers(proxyConf *config.Config) ([]retriever.Retriever, error) {
+func initRetrievers(proxyConf *config.FlagSet) ([]retriever.Retriever, error) {
 	retrievers := make([]retriever.Retriever, 0)
-	if proxyConf.Retriever != nil {
-		currentRetriever, err := initRetriever(proxyConf.Retriever)
-		if err != nil {
-			return nil, err
-		}
-		retrievers = append(retrievers, currentRetriever)
-	}
 	if proxyConf.Retrievers != nil {
 		for _, r := range *proxyConf.Retrievers {
 			currentRetriever, err := initRetriever(&r)
@@ -146,15 +139,8 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 
 // initDataExporters initialize the exporters based on the configuration
 // it handles both the `exporter` and `exporters` fields.
-func initDataExporters(proxyConf *config.Config) ([]ffclient.DataExporter, error) {
+func initDataExporters(proxyConf *config.FlagSet) ([]ffclient.DataExporter, error) {
 	exporters := make([]ffclient.DataExporter, 0)
-	if proxyConf.Exporter != nil {
-		exp, err := initDataExporter(proxyConf.Exporter)
-		if err != nil {
-			return nil, err
-		}
-		exporters = append(exporters, exp)
-	}
 	if proxyConf.Exporters != nil {
 		for _, e := range *proxyConf.Exporters {
 			currentExporter, err := initDataExporter(&e)

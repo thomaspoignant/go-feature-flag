@@ -261,6 +261,10 @@ type Config struct {
 	// By default we have no prefix
 	EnvVariablePrefix string `mapstructure:"envVariablePrefix" koanf:"envvariableprefix"`
 
+	// FlagSets is the list of flag sets configured.
+	// A flag set is a group of flags that can be used to configure the relay proxy.
+	// Each flag set can have its own API key, retrievers, notifiers and exporters.
+	FlagSets []FlagSet `mapstructure:"flagSets" koanf:"flagsets"`
 	// ---- private fields
 
 	// apiKeySet is the internal representation of an API keys list configured
@@ -428,6 +432,14 @@ func (c *Config) APIKeyExists(apiKey string) bool {
 		for _, currentAPIKey := range c.AuthorizedKeys.Evaluation {
 			apiKeySet[currentAPIKey] = new(interface{})
 		}
+
+		// Add API keys from flag sets
+		for _, flagSet := range c.FlagSets {
+			if flagSet.ApiKey != "" {
+				apiKeySet[flagSet.ApiKey] = new(interface{})
+			}
+		}
+
 		c.apiKeysSet = apiKeySet
 	}
 
