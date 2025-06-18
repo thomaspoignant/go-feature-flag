@@ -5,12 +5,15 @@ package config
 // It is used to group flags together and to apply the same configuration to them.
 // It is also used to apply the same API key to all the flags in the flag set.
 type FlagSet struct {
+	CommomFlagSet
 	// Name is the name of the flag set.
 	Name string `mapstructure:"name,omitempty" koanf:"name"`
+}
 
-	// ApiKey is the api key for the flag set.
-	// This will add a new API key to the list of authorizedKeys.evaluation keys.
-	ApiKey string `mapstructure:"apiKey,omitempty" koanf:"apikey"`
+type CommomFlagSet struct {
+	// ApiKeys is the api keys for the flag set.
+	// This will add a new API keys to the list of authorizedKeys.evaluation keys.
+	ApiKeys []string `mapstructure:"apiKeys,omitempty" koanf:"apikeys"`
 
 	// Retrievers is the list of retrievers for the flag set.
 	Retrievers *[]RetrieverConf `mapstructure:"retrievers" koanf:"retrievers"`
@@ -41,4 +44,7 @@ type FlagSet struct {
 
 	// PersistentFlagConfigurationFile is the flag to enable the persistent flag configuration file.
 	PersistentFlagConfigurationFile string `mapstructure:"persistentFlagConfigurationFile" koanf:"persistentflagconfigurationfile"`
+
+	// Environment is the environment of the flag set.
+	Environment string `mapstructure:"environment" koanf:"environment"`
 }
