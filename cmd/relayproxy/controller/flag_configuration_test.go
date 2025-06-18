@@ -120,3 +120,34 @@ func TestFlagConfigurationAPICtrl_Handler(t *testing.T) {
 		})
 	}
 }
+
+func TestFlagConfigurationAPICtrl_LastModifiedHeaderIsGMT(t *testing.T) {
+	goff, err := ffclient.New(ffclient.Config{
+		Retrievers: []retriever.Retriever{
+			&fileretriever.Retriever{Path: "../testdata/controller/configuration_flags.yaml"},
+		},
+	})
+	assert.NoError(t, err)
+
+	ctrl := controller.NewAPIFlagConfiguration(goff, metric.Metrics{})
+	e := echo.New()
+	rec := httptest.NewRecorder()
+
+	// Use a minimal valid request body
+	req := httptest.NewRequest(echo.POST, "/v1/flag/configuration", strings.NewReader("{}"))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	c := e.NewContext(req, rec)
+	c.SetPath("/v1/flag/configuration")
+
+	assert.NoError(t, ctrl.Handler(c))
+
+	lastModified := rec.Header().Get("Last-Modified")
+	assert.NotEmpty(t, lastModified, "Last-Modified header should be set")
+
+	// Check that the header ends with GMT
+	assert.True(t, strings.HasSuffix(lastModified, "GMT"), "Last-Modified header should end with 'GMT'")
+
+	// Check that the header is a valid RFC1123 date
+	_, err = http.ParseTime(lastModified)
+	assert.NoError(t, err, "Last-Modified header should be a valid RFC1123 date")
+}

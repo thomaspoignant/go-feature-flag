@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -95,8 +96,8 @@ func (h *FlagConfigurationAPICtrl) Handler(c echo.Context) error {
 
 	span.SetAttributes(attribute.Int("flagConfiguration.configurationSize", len(flags)))
 	c.Response().Header().
-		Set(echo.HeaderLastModified, h.goFF.GetCacheRefreshDate().
-			Format(time.RFC1123))
+		Set(echo.HeaderLastModified, strings.Replace(
+			h.goFF.GetCacheRefreshDate().UTC().Format(time.RFC1123), "UTC", "GMT", 1))
 	return c.JSON(
 		http.StatusOK,
 		FlagConfigurationResponse{
