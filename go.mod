@@ -14,14 +14,14 @@ require (
 	github.com/atc0005/go-teams-notify/v2 v2.13.0
 	github.com/aws/aws-lambda-go v1.48.0
 	github.com/aws/aws-sdk-go v1.55.7
-	github.com/aws/aws-sdk-go-v2 v1.36.3
+	github.com/aws/aws-sdk-go-v2 v1.36.5
 	github.com/aws/aws-sdk-go-v2/config v1.29.15
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.68
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.77
 	github.com/aws/aws-sdk-go-v2/service/kinesis v1.35.0
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.80.0
-	github.com/aws/aws-sdk-go-v2/service/sqs v1.38.6
-	github.com/aws/smithy-go v1.22.3
+	github.com/aws/aws-sdk-go-v2/service/sqs v1.38.8
+	github.com/aws/smithy-go v1.22.4
 	github.com/awslabs/aws-lambda-go-api-proxy v0.16.2
 	github.com/fsouza/fake-gcs-server v1.52.2
 	github.com/go-viper/mapstructure/v2 v2.2.1
@@ -44,7 +44,7 @@ require (
 	github.com/labstack/echo/v4 v4.13.4
 	github.com/luci/go-render v0.0.0-20160219211803-9a04cc21af0f
 	github.com/nikunjy/rules v1.5.0
-	github.com/pablor21/echo-etag/v4 v4.0.3
+	github.com/pablor21/echo-etag/v4 v4.0.4
 	github.com/prometheus/client_golang v1.22.0
 	github.com/r3labs/diff/v3 v3.0.1
 	github.com/redis/go-redis/v9 v9.10.0
@@ -75,9 +75,9 @@ require (
 	google.golang.org/api v0.236.0
 	google.golang.org/grpc v1.72.2
 	gopkg.in/yaml.v3 v3.0.1
-	k8s.io/api v0.33.1
-	k8s.io/apimachinery v0.33.1
-	k8s.io/client-go v0.33.1
+	k8s.io/api v0.33.2
+	k8s.io/apimachinery v0.33.2
+	k8s.io/client-go v0.33.2
 )
 
 require (
@@ -102,8 +102,8 @@ require (
 	github.com/apache/thrift v0.21.0 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.10 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.30 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.34 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.34 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.36 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.36 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.3 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/v4a v1.3.34 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.12.3 // indirect
@@ -262,7 +262,7 @@ require (
 	golang.org/x/sys v0.33.0 // indirect
 	golang.org/x/term v0.32.0 // indirect
 	golang.org/x/text v0.26.0 // indirect
-	golang.org/x/time v0.11.0 // indirect
+	golang.org/x/time v0.12.0 // indirect
 	golang.org/x/tools v0.33.0 // indirect
 	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028 // indirect
 	google.golang.org/genproto v0.0.0-20250505200425-f936aa4a68b2 // indirect
