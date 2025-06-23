@@ -13,3 +13,9 @@ ignore:
   - "cmd/jsonschema-generator/"
   - "cmd/relayproxy/modeldocs/"
   - "model/dto/converter_v0.go"
+
+coverage:
+  status:
+    project:
+      default:
+        threshold: 0.1%
