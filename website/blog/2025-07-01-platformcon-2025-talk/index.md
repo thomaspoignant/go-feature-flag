@@ -44,9 +44,9 @@ PlatformCon is the premier conference for platform engineering, bringing togethe
 
 If you're interested in implementing feature flags in your own projects, check out:
 
-- **[GO Feature Flag Documentation](/docs/go_module/getting-started)** - Get started with our open-source feature flag solution
-- **[OpenFeature Integration](/docs/openfeature/server-providers/go-feature-flag)** - Learn how to use GO Feature Flag with OpenFeature
-- **[Best Practices Guide](/docs/concepts/flag-evaluation)** - Understand how to implement feature flags effectively
+- **[GO Feature Flag Documentation](https://gofeatureflag.org/docs/getting-started)** - Get started with our open-source feature flag solution
+- **[OpenFeature Integration](https://gofeatureflag.org/docs/sdk)** - Learn how to use GO Feature Flag with OpenFeature
+- **[Best Practices Guide](https://gofeatureflag.org/docs/concepts/flag-evaluation)** - Understand how to implement feature flags effectively
 
 ---
 
