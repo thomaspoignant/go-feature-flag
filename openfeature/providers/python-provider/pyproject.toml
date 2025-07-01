@@ -28,7 +28,6 @@ urllib3 = "^2.1.0"
 pylru = "^1.2.1"
 websocket-client = "^1.6.4"
 rel = "^0.4.9"
-asyncio = "^3.4.3"
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=7.4,<9.0"
