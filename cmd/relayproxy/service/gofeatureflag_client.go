@@ -57,10 +57,14 @@ func NewGoFeatureFlagClient(
 		return ffclient.GoFeatureFlag{}, err
 	}
 
-	notif, err := initNotifier(*proxyConf.Notifiers)
-	if err != nil {
-		return ffclient.GoFeatureFlag{}, err
+	notif := make([]notifier.Notifier, 0)
+	if proxyConf.Notifiers != nil {
+		notif, err = initNotifier(proxyConf.Notifiers)
+		if err != nil {
+			return ffclient.GoFeatureFlag{}, err
+		}
 	}
+
 	notif = append(notif, notifiers...)
 
 	f := ffclient.Config{

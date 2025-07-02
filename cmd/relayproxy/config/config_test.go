@@ -26,20 +26,22 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 			name:         "Valid yaml file",
 			fileLocation: "../testdata/config/valid-file.yaml",
 			want: &config.Config{
-				ListenPort:      1031,
-				PollingInterval: 1000,
-				FileFormat:      "yaml",
-				Host:            "localhost",
-				Retriever: &config.RetrieverConf{
-					Kind: "http",
-					URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
+				CommonFlagSet: config.CommonFlagSet{
+					PollingInterval: 1000,
+					FileFormat:      "yaml",
+					Retriever: &config.RetrieverConf{
+						Kind: "http",
+						URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
+					},
+					Exporter: &config.ExporterConf{
+						Kind: "log",
+					},
+					StartWithRetrieverError: false,
 				},
-				Exporter: &config.ExporterConf{
-					Kind: "log",
-				},
-				StartWithRetrieverError: false,
-				Version:                 "1.X.X",
-				EnableSwagger:           true,
+				ListenPort:    1031,
+				Host:          "localhost",
+				Version:       "1.X.X",
+				EnableSwagger: true,
 				AuthorizedKeys: config.APIKeys{
 					Admin: []string{
 						"apikey3",
@@ -57,26 +59,34 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 			name:         "Valid yaml file with notifier",
 			fileLocation: "../testdata/config/valid-yaml-notifier.yaml",
 			want: &config.Config{
-				ListenPort:      1031,
-				PollingInterval: 1000,
-				FileFormat:      "yaml",
-				Host:            "localhost",
-				Retriever: &config.RetrieverConf{
-					Kind: "http",
-					URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
-				},
-				Exporter: &config.ExporterConf{
-					Kind: "log",
-				},
-				Notifiers: []config.NotifierConf{
-					{
-						Kind:       "slack",
-						WebhookURL: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
+				CommonFlagSet: config.CommonFlagSet{
+					PollingInterval: 1000,
+					FileFormat:      "yaml",
+					Retriever: &config.RetrieverConf{
+						Kind: "http",
+						URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
 					},
+					Exporter: &config.ExporterConf{
+						Kind: "log",
+					},
+					Notifiers: []config.NotifierConf{
+						{
+							Kind:       "slack",
+							WebhookURL: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
+						},
+					},
+					StartWithRetrieverError: false,
+					EnablePollingJitter:     false,
+					DisableNotifierOnInit:   false,
+					Retrievers:              &[]config.RetrieverConf{},
+					Exporters:               &[]config.ExporterConf{},
 				},
-				StartWithRetrieverError: false,
-				Version:                 "1.X.X",
-				EnableSwagger:           true,
+				ListenPort: 1031,
+
+				Host: "localhost",
+
+				Version:       "1.X.X",
+				EnableSwagger: true,
 				AuthorizedKeys: config.APIKeys{
 					Admin: nil,
 					Evaluation: []string{
@@ -88,13 +98,8 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 				HideBanner:                      false,
 				EnablePprof:                     false,
 				LogFormat:                       "",
-				EnablePollingJitter:             false,
-				DisableNotifierOnInit:           false,
-				Retrievers:                      &[]config.RetrieverConf{},
-				Exporters:                       &[]config.ExporterConf{},
 				ExporterCleanQueueInterval:      0,
 				DisableVersionHeader:            false,
-				APIKeys:                         []string{},
 				StartAsAwsLambda:                false,
 				AwsLambdaAdapter:                "",
 				EvaluationContextEnrichment:     map[string]interface{}{},
@@ -112,26 +117,28 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 			name:         "Valid yaml file with multiple exporters",
 			fileLocation: "../testdata/config/valid-yaml-multiple-exporters.yaml",
 			want: &config.Config{
-				ListenPort:      1031,
-				PollingInterval: 1000,
-				FileFormat:      "yaml",
-				Host:            "localhost",
-				Retriever: &config.RetrieverConf{
-					Kind: "http",
-					URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
-				},
-				Exporters: &[]config.ExporterConf{
-					{
-						Kind: "log",
+				CommonFlagSet: config.CommonFlagSet{
+					PollingInterval: 1000,
+					FileFormat:      "yaml",
+					Retriever: &config.RetrieverConf{
+						Kind: "http",
+						URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
 					},
-					{
-						Kind:      "file",
-						OutputDir: "./",
+					Exporters: &[]config.ExporterConf{
+						{
+							Kind: "log",
+						},
+						{
+							Kind:      "file",
+							OutputDir: "./",
+						},
 					},
+					StartWithRetrieverError: false,
 				},
-				StartWithRetrieverError: false,
-				Version:                 "1.X.X",
-				EnableSwagger:           true,
+				ListenPort:    1031,
+				Host:          "localhost",
+				Version:       "1.X.X",
+				EnableSwagger: true,
 				AuthorizedKeys: config.APIKeys{
 					Admin: []string{
 						"apikey3",
@@ -149,30 +156,34 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 			name:         "Valid yaml file with both exporter and exporters",
 			fileLocation: "../testdata/config/valid-yaml-exporter-and-exporters.yaml",
 			want: &config.Config{
-				ListenPort:      1031,
-				PollingInterval: 1000,
-				FileFormat:      "yaml",
-				Host:            "localhost",
-				Retriever: &config.RetrieverConf{
-					Kind: "http",
-					URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
-				},
-				Exporter: &config.ExporterConf{
-					Kind: "log",
-				},
-				Exporters: &[]config.ExporterConf{
-					{
-						Kind:        "webhook",
-						EndpointURL: "https://example.com/webhook",
+				CommonFlagSet: config.CommonFlagSet{
+					PollingInterval: 1000,
+					FileFormat:      "yaml",
+					Retriever: &config.RetrieverConf{
+						Kind: "http",
+						URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
 					},
-					{
-						Kind:      "file",
-						OutputDir: "./",
+					Exporter: &config.ExporterConf{
+						Kind: "log",
 					},
+					Exporters: &[]config.ExporterConf{
+						{
+							Kind:        "webhook",
+							EndpointURL: "https://example.com/webhook",
+						},
+						{
+							Kind:      "file",
+							OutputDir: "./",
+						},
+					},
+					StartWithRetrieverError: false,
 				},
-				StartWithRetrieverError: false,
-				Version:                 "1.X.X",
-				EnableSwagger:           true,
+				ListenPort: 1031,
+
+				Host: "localhost",
+
+				Version:       "1.X.X",
+				EnableSwagger: true,
 				AuthorizedKeys: config.APIKeys{
 					Admin: []string{
 						"apikey3",
@@ -190,23 +201,28 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 			name:         "Valid json file",
 			fileLocation: "../testdata/config/valid-file.json",
 			want: &config.Config{
-				ListenPort:      1031,
-				PollingInterval: 1000,
-				FileFormat:      "yaml",
-				Host:            "localhost",
-				Retriever: &config.RetrieverConf{
-					Kind: "http",
-					URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
+				CommonFlagSet: config.CommonFlagSet{
+					PollingInterval: 1000,
+					FileFormat:      "yaml",
+					Retriever: &config.RetrieverConf{
+						Kind: "http",
+						URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
+					},
+					Exporter: &config.ExporterConf{
+						Kind: "log",
+					},
+					StartWithRetrieverError: false,
 				},
-				Exporter: &config.ExporterConf{
-					Kind: "log",
-				},
-				StartWithRetrieverError: false,
-				Version:                 "1.X.X",
-				EnableSwagger:           true,
-				APIKeys: []string{
-					"apikey1",
-					"apikey2",
+				ListenPort: 1031,
+				Host:       "localhost",
+
+				Version:       "1.X.X",
+				EnableSwagger: true,
+				AuthorizedKeys: config.APIKeys{
+					Evaluation: []string{
+						"apikey1",
+						"apikey2",
+					},
 				},
 				LogLevel: "",
 			},
@@ -216,23 +232,29 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 			name:         "Valid toml file",
 			fileLocation: "../testdata/config/valid-file.toml",
 			want: &config.Config{
-				ListenPort:      1031,
-				PollingInterval: 1000,
-				FileFormat:      "yaml",
-				Host:            "localhost",
-				Retriever: &config.RetrieverConf{
-					Kind: "http",
-					URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
+				CommonFlagSet: config.CommonFlagSet{
+					PollingInterval: 1000,
+					FileFormat:      "yaml",
+					Retriever: &config.RetrieverConf{
+						Kind: "http",
+						URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
+					},
+					Exporter: &config.ExporterConf{
+						Kind: "log",
+					},
+					StartWithRetrieverError: false,
 				},
-				Exporter: &config.ExporterConf{
-					Kind: "log",
-				},
-				StartWithRetrieverError: false,
-				Version:                 "1.X.X",
-				EnableSwagger:           true,
-				APIKeys: []string{
-					"apikey1",
-					"apikey2",
+				ListenPort: 1031,
+
+				Host: "localhost",
+
+				Version:       "1.X.X",
+				EnableSwagger: true,
+				AuthorizedKeys: config.APIKeys{
+					Evaluation: []string{
+						"apikey1",
+						"apikey2",
+					},
 				},
 				LogLevel: config.DefaultLogLevel,
 			},
@@ -242,13 +264,15 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 			name:         "All default",
 			fileLocation: "../testdata/config/all-default.yaml",
 			want: &config.Config{
-				ListenPort:              1031,
-				PollingInterval:         60000,
-				FileFormat:              "yaml",
-				Host:                    "localhost",
-				StartWithRetrieverError: false,
-				Version:                 "1.X.X",
-				LogLevel:                config.DefaultLogLevel,
+				CommonFlagSet: config.CommonFlagSet{
+					PollingInterval:         60000,
+					FileFormat:              "yaml",
+					StartWithRetrieverError: false,
+				},
+				ListenPort: 1031,
+				Host:       "localhost",
+				Version:    "1.X.X",
+				LogLevel:   config.DefaultLogLevel,
 			},
 			wantErr: assert.NoError,
 		},
@@ -261,18 +285,20 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 			name:         "Valid YAML with OTel config",
 			fileLocation: "../testdata/config/valid-otel.yaml",
 			want: &config.Config{
-				ListenPort:      1031,
-				PollingInterval: 60000,
-				FileFormat:      "yaml",
-				Host:            "localhost",
-				LogLevel:        config.DefaultLogLevel,
-				Version:         "1.X.X",
-				Retrievers: &[]config.RetrieverConf{
-					{
-						Kind: "file",
-						Path: "examples/retriever_file/flags.goff.yaml",
+				CommonFlagSet: config.CommonFlagSet{
+					PollingInterval: 60000,
+					FileFormat:      "yaml",
+					Retrievers: &[]config.RetrieverConf{
+						{
+							Kind: "file",
+							Path: "examples/retriever_file/flags.goff.yaml",
+						},
 					},
 				},
+				ListenPort: 1031,
+				Host:       "localhost",
+				LogLevel:   config.DefaultLogLevel,
+				Version:    "1.X.X",
 				OtelConfig: config.OpenTelemetryConfiguration{
 					Exporter: config.OtelExporter{
 						Otlp: config.OtelExporterOtlp{
@@ -318,20 +344,22 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 			name:         "Valid file",
 			fileLocation: "../testdata/config/valid-file.yaml",
 			want: &config.Config{
-				ListenPort:      1031,
-				PollingInterval: 1000,
-				FileFormat:      "yaml",
-				Host:            "localhost",
-				Retriever: &config.RetrieverConf{
-					Kind: "http",
-					URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
+				CommonFlagSet: config.CommonFlagSet{
+					PollingInterval: 1000,
+					FileFormat:      "yaml",
+					Retriever: &config.RetrieverConf{
+						Kind: "http",
+						URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
+					},
+					Exporter: &config.ExporterConf{
+						Kind: "log",
+					},
+					StartWithRetrieverError: false,
 				},
-				Exporter: &config.ExporterConf{
-					Kind: "log",
-				},
-				StartWithRetrieverError: false,
-				Version:                 "1.X.X",
-				EnableSwagger:           true,
+				ListenPort:    1031,
+				Host:          "localhost",
+				Version:       "1.X.X",
+				EnableSwagger: true,
 				AuthorizedKeys: config.APIKeys{
 					Admin: []string{
 						"apikey3",
@@ -349,13 +377,15 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 			name:         "All default",
 			fileLocation: "../testdata/config/all-default.yaml",
 			want: &config.Config{
-				ListenPort:              1031,
-				PollingInterval:         60000,
-				FileFormat:              "yaml",
-				Host:                    "localhost",
-				StartWithRetrieverError: false,
-				Version:                 "1.X.X",
-				LogLevel:                config.DefaultLogLevel,
+				CommonFlagSet: config.CommonFlagSet{
+					PollingInterval:         60000,
+					FileFormat:              "yaml",
+					StartWithRetrieverError: false,
+				},
+				ListenPort: 1031,
+				Host:       "localhost",
+				Version:    "1.X.X",
+				LogLevel:   config.DefaultLogLevel,
 			},
 			wantErr: assert.NoError,
 		},
@@ -369,13 +399,15 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 			fileLocation: "../testdata/config/file-not-exist.yaml",
 			wantErr:      assert.NoError,
 			want: &config.Config{
-				ListenPort:              1031,
-				PollingInterval:         60000,
-				FileFormat:              "yaml",
-				Host:                    "localhost",
-				StartWithRetrieverError: false,
-				Version:                 "1.X.X",
-				LogLevel:                config.DefaultLogLevel,
+				CommonFlagSet: config.CommonFlagSet{
+					PollingInterval:         60000,
+					FileFormat:              "yaml",
+					StartWithRetrieverError: false,
+				},
+				ListenPort: 1031,
+				Host:       "localhost",
+				Version:    "1.X.X",
+				LogLevel:   config.DefaultLogLevel,
 			},
 		},
 		{
@@ -383,13 +415,15 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 			fileLocation: "",
 			wantErr:      assert.NoError,
 			want: &config.Config{
-				ListenPort:              1031,
-				PollingInterval:         60000,
-				FileFormat:              "yaml",
-				Host:                    "localhost",
-				StartWithRetrieverError: false,
-				Version:                 "1.X.X",
-				LogLevel:                config.DefaultLogLevel,
+				CommonFlagSet: config.CommonFlagSet{
+					PollingInterval:         60000,
+					FileFormat:              "yaml",
+					StartWithRetrieverError: false,
+				},
+				ListenPort: 1031,
+				Host:       "localhost",
+				Version:    "1.X.X",
+				LogLevel:   config.DefaultLogLevel,
 			},
 		},
 		{
@@ -397,13 +431,15 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 			fileLocation: "",
 			wantErr:      assert.NoError,
 			want: &config.Config{
-				ListenPort:              1031,
-				PollingInterval:         60000,
-				FileFormat:              "yaml",
-				Host:                    "localhost",
-				StartWithRetrieverError: false,
-				Version:                 "1.X.X",
-				LogLevel:                config.DefaultLogLevel,
+				CommonFlagSet: config.CommonFlagSet{
+					PollingInterval:         60000,
+					FileFormat:              "yaml",
+					StartWithRetrieverError: false,
+				},
+				ListenPort: 1031,
+				Host:       "localhost",
+				Version:    "1.X.X",
+				LogLevel:   config.DefaultLogLevel,
 			},
 			disableDefaultFileCreation: true,
 		},
@@ -633,19 +669,21 @@ func TestConfig_IsValid(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &config.Config{
-				ListenPort:              tt.fields.ListenPort,
-				HideBanner:              tt.fields.HideBanner,
-				EnableSwagger:           tt.fields.EnableSwagger,
-				Host:                    tt.fields.Host,
-				PollingInterval:         tt.fields.PollingInterval,
-				FileFormat:              tt.fields.FileFormat,
-				StartWithRetrieverError: tt.fields.StartWithRetrieverError,
-				Retriever:               tt.fields.Retriever,
-				Exporter:                tt.fields.Exporter,
-				Notifiers:               tt.fields.Notifiers,
-				Retrievers:              tt.fields.Retrievers,
-				LogLevel:                tt.fields.LogLevel,
-				LogFormat:               tt.fields.LogFormat,
+				CommonFlagSet: config.CommonFlagSet{
+					PollingInterval:         tt.fields.PollingInterval,
+					FileFormat:              tt.fields.FileFormat,
+					StartWithRetrieverError: tt.fields.StartWithRetrieverError,
+					Retriever:               tt.fields.Retriever,
+					Exporter:                tt.fields.Exporter,
+					Notifiers:               tt.fields.Notifiers,
+					Retrievers:              tt.fields.Retrievers,
+				},
+				ListenPort:    tt.fields.ListenPort,
+				HideBanner:    tt.fields.HideBanner,
+				EnableSwagger: tt.fields.EnableSwagger,
+				Host:          tt.fields.Host,
+				LogLevel:      tt.fields.LogLevel,
+				LogFormat:     tt.fields.LogFormat,
 			}
 			if tt.name == "empty config" {
 				c = nil
@@ -665,7 +703,9 @@ func TestConfig_APIKeyExists(t *testing.T) {
 		{
 			name: "no key in the config",
 			config: config.Config{
-				APIKeys: []string{},
+				AuthorizedKeys: config.APIKeys{
+					Evaluation: []string{},
+				},
 			},
 			apiKey: "49b67ab9-20fc-42ac-ac53-b36e29834c7",
 			want:   false,
@@ -674,17 +714,19 @@ func TestConfig_APIKeyExists(t *testing.T) {
 			name:   "key exists in a list of keys (legacy)",
 			apiKey: "49b67ab9-20fc-42ac-ac53-b36e29834c7",
 			config: config.Config{
-				APIKeys: []string{
-					"0359cdb3-5fb5-4d65-b25f-b8909ec3c44",
-					"fb124cf9-e058-4f34-8385-ad225ff85a3",
-					"d05087dd-efff-4144-b9a6-89476a14695",
-					"5082a8df-cc67-48b4-aca4-26ce1425645",
-					"04d9f1b7-f50c-4407-83bb-e9c4ddc5d45",
-					"62507779-bd2d-4170-b715-8d93ee7110f",
-					"e0dcb798-4f97-4646-a1a9-57a6c69c235",
-					"6bfd6b61-f8a9-45b3-9ca8-37125438be4",
-					"aecd6aea-1350-46af-a7b9-231e9a609fd",
-					"49b67ab9-20fc-42ac-ac53-b36e29834c7",
+				AuthorizedKeys: config.APIKeys{
+					Evaluation: []string{
+						"0359cdb3-5fb5-4d65-b25f-b8909ec3c44",
+						"fb124cf9-e058-4f34-8385-ad225ff85a3",
+						"d05087dd-efff-4144-b9a6-89476a14695",
+						"5082a8df-cc67-48b4-aca4-26ce1425645",
+						"04d9f1b7-f50c-4407-83bb-e9c4ddc5d45",
+						"62507779-bd2d-4170-b715-8d93ee7110f",
+						"e0dcb798-4f97-4646-a1a9-57a6c69c235",
+						"6bfd6b61-f8a9-45b3-9ca8-37125438be4",
+						"aecd6aea-1350-46af-a7b9-231e9a609fd",
+						"49b67ab9-20fc-42ac-ac53-b36e29834c7",
+					},
 				},
 			},
 			want: true,
@@ -728,17 +770,19 @@ func TestConfig_APIKeyExists(t *testing.T) {
 		{
 			name: "no api key passed in the function",
 			config: config.Config{
-				APIKeys: []string{
-					"0359cdb3-5fb5-4d65-b25f-b8909ec3c44",
-					"fb124cf9-e058-4f34-8385-ad225ff85a3",
-					"d05087dd-efff-4144-b9a6-89476a14695",
-					"5082a8df-cc67-48b4-aca4-26ce1425645",
-					"04d9f1b7-f50c-4407-83bb-e9c4ddc5d45",
-					"62507779-bd2d-4170-b715-8d93ee7110f",
-					"e0dcb798-4f97-4646-a1a9-57a6c69c235",
-					"6bfd6b61-f8a9-45b3-9ca8-37125438be4",
-					"aecd6aea-1350-46af-a7b9-231e9a609fd",
-					"49b67ab9-20fc-42ac-ac53-b36e29834c7",
+				AuthorizedKeys: config.APIKeys{
+					Evaluation: []string{
+						"0359cdb3-5fb5-4d65-b25f-b8909ec3c44",
+						"fb124cf9-e058-4f34-8385-ad225ff85a3",
+						"d05087dd-efff-4144-b9a6-89476a14695",
+						"5082a8df-cc67-48b4-aca4-26ce1425645",
+						"04d9f1b7-f50c-4407-83bb-e9c4ddc5d45",
+						"62507779-bd2d-4170-b715-8d93ee7110f",
+						"e0dcb798-4f97-4646-a1a9-57a6c69c235",
+						"6bfd6b61-f8a9-45b3-9ca8-37125438be4",
+						"aecd6aea-1350-46af-a7b9-231e9a609fd",
+						"49b67ab9-20fc-42ac-ac53-b36e29834c7",
+					},
 				},
 			},
 			want: false,
@@ -747,17 +791,19 @@ func TestConfig_APIKeyExists(t *testing.T) {
 			name:   "empty key passed in the function",
 			apiKey: "",
 			config: config.Config{
-				APIKeys: []string{
-					"0359cdb3-5fb5-4d65-b25f-b8909ec3c44",
-					"fb124cf9-e058-4f34-8385-ad225ff85a3",
-					"d05087dd-efff-4144-b9a6-89476a14695",
-					"5082a8df-cc67-48b4-aca4-26ce1425645",
-					"04d9f1b7-f50c-4407-83bb-e9c4ddc5d45",
-					"62507779-bd2d-4170-b715-8d93ee7110f",
-					"e0dcb798-4f97-4646-a1a9-57a6c69c235",
-					"6bfd6b61-f8a9-45b3-9ca8-37125438be4",
-					"aecd6aea-1350-46af-a7b9-231e9a609fd",
-					"49b67ab9-20fc-42ac-ac53-b36e29834c7",
+				AuthorizedKeys: config.APIKeys{
+					Evaluation: []string{
+						"0359cdb3-5fb5-4d65-b25f-b8909ec3c44",
+						"fb124cf9-e058-4f34-8385-ad225ff85a3",
+						"d05087dd-efff-4144-b9a6-89476a14695",
+						"5082a8df-cc67-48b4-aca4-26ce1425645",
+						"04d9f1b7-f50c-4407-83bb-e9c4ddc5d45",
+						"62507779-bd2d-4170-b715-8d93ee7110f",
+						"e0dcb798-4f97-4646-a1a9-57a6c69c235",
+						"6bfd6b61-f8a9-45b3-9ca8-37125438be4",
+						"aecd6aea-1350-46af-a7b9-231e9a609fd",
+						"49b67ab9-20fc-42ac-ac53-b36e29834c7",
+					},
 				},
 			},
 			want: false,
@@ -768,8 +814,8 @@ func TestConfig_APIKeyExists(t *testing.T) {
 			config: config.Config{
 				FlagSets: []config.FlagSet{
 					{
-						Name:   "test-flag-set",
-						ApiKey: "flag-set-api-key",
+						Name:    "test-flag-set",
+						ApiKeys: []string{"flag-set-api-key"},
 					},
 				},
 			},
@@ -781,12 +827,12 @@ func TestConfig_APIKeyExists(t *testing.T) {
 			config: config.Config{
 				FlagSets: []config.FlagSet{
 					{
-						Name:   "test-flag-set-1",
-						ApiKey: "flag-set-api-key-1",
+						Name:    "test-flag-set-1",
+						ApiKeys: []string{"flag-set-api-key-1"},
 					},
 					{
-						Name:   "test-flag-set-2",
-						ApiKey: "flag-set-api-key-2",
+						Name:    "test-flag-set-2",
+						ApiKeys: []string{"flag-set-api-key-2"},
 					},
 				},
 			},
@@ -798,12 +844,12 @@ func TestConfig_APIKeyExists(t *testing.T) {
 			config: config.Config{
 				FlagSets: []config.FlagSet{
 					{
-						Name:   "test-flag-set-1",
-						ApiKey: "flag-set-api-key-1",
+						Name:    "test-flag-set-1",
+						ApiKeys: []string{"flag-set-api-key-1"},
 					},
 					{
-						Name:   "test-flag-set-2",
-						ApiKey: "flag-set-api-key-2",
+						Name:    "test-flag-set-2",
+						ApiKeys: []string{"flag-set-api-key-2"},
 					},
 				},
 			},
@@ -940,50 +986,52 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 			name:         "Valid file",
 			fileLocation: "../testdata/config/validate-array-env-file.yaml",
 			want: &config.Config{
-				ListenPort:      1031,
-				PollingInterval: 1000,
-				FileFormat:      "yaml",
-				Host:            "localhost",
-				Retrievers: &[]config.RetrieverConf{
-					{
-						Kind: "http",
-						URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
-						HTTPHeaders: map[string][]string{
-							"authorization": {
-								"test",
-							},
-							"token": {"token"},
-						},
-					},
-					{
-						Kind: "file",
-						Path: "examples/retriever_file/flags.goff.yaml",
-						HTTPHeaders: map[string][]string{
-							"token": {
-								"11213123",
-							},
-							"authorization": {
-								"test1",
+				CommonFlagSet: config.CommonFlagSet{
+					PollingInterval: 1000,
+					FileFormat:      "yaml",
+					Retrievers: &[]config.RetrieverConf{
+						{
+							Kind: "http",
+							URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
+							HTTPHeaders: map[string][]string{
+								"authorization": {
+									"test",
+								},
+								"token": {"token"},
 							},
 						},
-					},
-					{
-						HTTPHeaders: map[string][]string{
-							"authorization": {
-								"test1",
+						{
+							Kind: "file",
+							Path: "examples/retriever_file/flags.goff.yaml",
+							HTTPHeaders: map[string][]string{
+								"token": {
+									"11213123",
+								},
+								"authorization": {
+									"test1",
+								},
 							},
-							"x-goff-custom": {
-								"custom",
+						},
+						{
+							HTTPHeaders: map[string][]string{
+								"authorization": {
+									"test1",
+								},
+								"x-goff-custom": {
+									"custom",
+								},
 							},
 						},
 					},
+					Exporter: &config.ExporterConf{
+						Kind: "log",
+					},
+					StartWithRetrieverError: false,
 				},
-				Exporter: &config.ExporterConf{
-					Kind: "log",
-				},
-				StartWithRetrieverError: false,
-				Version:                 "1.X.X",
-				EnableSwagger:           true,
+				ListenPort:    1031,
+				Host:          "localhost",
+				Version:       "1.X.X",
+				EnableSwagger: true,
 				AuthorizedKeys: config.APIKeys{
 					Admin: []string{
 						"apikey3",
@@ -1009,51 +1057,53 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 			name:         "Valid file with prefix",
 			fileLocation: "../testdata/config/validate-array-env-file-envprefix.yaml",
 			want: &config.Config{
+				CommonFlagSet: config.CommonFlagSet{
+					PollingInterval: 1000,
+					FileFormat:      "yaml",
+					Retrievers: &[]config.RetrieverConf{
+						{
+							Kind: "http",
+							URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
+							HTTPHeaders: map[string][]string{
+								"authorization": {
+									"test",
+								},
+								"token": {"token"},
+							},
+						},
+						{
+							Kind: "file",
+							Path: "examples/retriever_file/flags.goff.yaml",
+							HTTPHeaders: map[string][]string{
+								"token": {
+									"11213123",
+								},
+								"authorization": {
+									"test1",
+								},
+							},
+						},
+						{
+							HTTPHeaders: map[string][]string{
+								"authorization": {
+									"test1",
+								},
+								"x-goff-custom": {
+									"custom",
+								},
+							},
+						},
+					},
+					Exporter: &config.ExporterConf{
+						Kind: "log",
+					},
+					StartWithRetrieverError: false,
+				},
 				EnvVariablePrefix: "GOFF_",
 				ListenPort:        1031,
-				PollingInterval:   1000,
-				FileFormat:        "yaml",
 				Host:              "localhost",
-				Retrievers: &[]config.RetrieverConf{
-					{
-						Kind: "http",
-						URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
-						HTTPHeaders: map[string][]string{
-							"authorization": {
-								"test",
-							},
-							"token": {"token"},
-						},
-					},
-					{
-						Kind: "file",
-						Path: "examples/retriever_file/flags.goff.yaml",
-						HTTPHeaders: map[string][]string{
-							"token": {
-								"11213123",
-							},
-							"authorization": {
-								"test1",
-							},
-						},
-					},
-					{
-						HTTPHeaders: map[string][]string{
-							"authorization": {
-								"test1",
-							},
-							"x-goff-custom": {
-								"custom",
-							},
-						},
-					},
-				},
-				Exporter: &config.ExporterConf{
-					Kind: "log",
-				},
-				StartWithRetrieverError: false,
-				Version:                 "1.X.X",
-				EnableSwagger:           true,
+				Version:           "1.X.X",
+				EnableSwagger:     true,
 				AuthorizedKeys: config.APIKeys{
 					Admin: []string{
 						"apikey3",
@@ -1079,31 +1129,35 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 			name:         "Change kafka exporter",
 			fileLocation: "../testdata/config/validate-array-env-file.yaml",
 			want: &config.Config{
-				ListenPort:      1031,
-				PollingInterval: 1000,
-				FileFormat:      "yaml",
-				Host:            "localhost",
-				Retrievers: &[]config.RetrieverConf{
-					{
-						Kind: "http",
-						URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
-					},
-					{
-						Kind: "file",
-						Path: "examples/retriever_file/flags.goff.yaml",
-						HTTPHeaders: map[string][]string{
-							"token": {
-								"11213123",
+				CommonFlagSet: config.CommonFlagSet{
+					PollingInterval: 1000,
+					FileFormat:      "yaml",
+					Retrievers: &[]config.RetrieverConf{
+						{
+							Kind: "http",
+							URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
+						},
+						{
+							Kind: "file",
+							Path: "examples/retriever_file/flags.goff.yaml",
+							HTTPHeaders: map[string][]string{
+								"token": {
+									"11213123",
+								},
 							},
 						},
 					},
-				},
-				Exporter: &config.ExporterConf{
-					Kind: "kafka",
-					Kafka: kafkaexporter.Settings{
-						Addresses: []string{"localhost:19092", "localhost:19093"},
+					Exporter: &config.ExporterConf{
+						Kind: "kafka",
+						Kafka: kafkaexporter.Settings{
+							Addresses: []string{"localhost:19092", "localhost:19093"},
+						},
 					},
+					StartWithRetrieverError: false,
 				},
+				ListenPort: 1031,
+				Host:       "localhost",
+
 				AuthorizedKeys: config.APIKeys{
 					Admin: []string{
 						"apikey3",
@@ -1113,10 +1167,9 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 						"apikey2",
 					},
 				},
-				StartWithRetrieverError: false,
-				Version:                 "1.X.X",
-				EnableSwagger:           true,
-				LogLevel:                "info",
+				Version:       "1.X.X",
+				EnableSwagger: true,
+				LogLevel:      "info",
 			},
 			wantErr: assert.NoError,
 			envVars: map[string]string{
@@ -1128,34 +1181,38 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 			name:         "Change kafka exporters",
 			fileLocation: "../testdata/config/valid-env-exporters-kafka.yaml",
 			want: &config.Config{
-				ListenPort:      1031,
-				PollingInterval: 1000,
-				FileFormat:      "yaml",
-				Host:            "localhost",
-				Retrievers: &[]config.RetrieverConf{
-					{
-						Kind: "http",
-						URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
-					},
-					{
-						Kind: "file",
-						Path: "examples/retriever_file/flags.goff.yaml",
-						HTTPHeaders: map[string][]string{
-							"token": {
-								"11213123",
+				CommonFlagSet: config.CommonFlagSet{
+					PollingInterval: 1000,
+					FileFormat:      "yaml",
+					Retrievers: &[]config.RetrieverConf{
+						{
+							Kind: "http",
+							URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
+						},
+						{
+							Kind: "file",
+							Path: "examples/retriever_file/flags.goff.yaml",
+							HTTPHeaders: map[string][]string{
+								"token": {
+									"11213123",
+								},
 							},
 						},
 					},
-				},
-				Exporters: &[]config.ExporterConf{
-					{
-						Kind: "kafka",
-						Kafka: kafkaexporter.Settings{
-							Addresses: []string{"localhost:19092", "localhost:19093"},
-							Topic:     "svc-goff.evaluation",
+					Exporters: &[]config.ExporterConf{
+						{
+							Kind: "kafka",
+							Kafka: kafkaexporter.Settings{
+								Addresses: []string{"localhost:19092", "localhost:19093"},
+								Topic:     "svc-goff.evaluation",
+							},
 						},
 					},
+					StartWithRetrieverError: false,
 				},
+				ListenPort: 1031,
+				Host:       "localhost",
+
 				AuthorizedKeys: config.APIKeys{
 					Admin: []string{
 						"apikey3",
@@ -1165,10 +1222,9 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 						"apikey2",
 					},
 				},
-				StartWithRetrieverError: false,
-				Version:                 "1.X.X",
-				EnableSwagger:           true,
-				LogLevel:                "info",
+				Version:       "1.X.X",
+				EnableSwagger: true,
+				LogLevel:      "info",
 			},
 			wantErr: assert.NoError,
 			envVars: map[string]string{
@@ -1180,18 +1236,20 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 			fileLocation:               "../testdata/config/valid-otel.yaml",
 			disableDefaultFileCreation: true,
 			want: &config.Config{
-				ListenPort:      1031,
-				PollingInterval: 60000,
-				FileFormat:      "yaml",
-				Host:            "localhost",
-				LogLevel:        config.DefaultLogLevel,
-				Version:         "1.X.X",
-				Retrievers: &[]config.RetrieverConf{
-					{
-						Kind: "file",
-						Path: "examples/retriever_file/flags.goff.yaml",
+				CommonFlagSet: config.CommonFlagSet{
+					PollingInterval: 60000,
+					FileFormat:      "yaml",
+					Retrievers: &[]config.RetrieverConf{
+						{
+							Kind: "file",
+							Path: "examples/retriever_file/flags.goff.yaml",
+						},
 					},
 				},
+				ListenPort: 1031,
+				Host:       "localhost",
+				LogLevel:   config.DefaultLogLevel,
+				Version:    "1.X.X",
 				OtelConfig: config.OpenTelemetryConfiguration{
 					Exporter: config.OtelExporter{
 						Otlp: config.OtelExporterOtlp{

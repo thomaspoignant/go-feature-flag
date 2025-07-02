@@ -82,7 +82,7 @@ func (s *Server) initRoutes() {
 	s.apiEcho.Use(middleware.Recover())
 
 	// Init controllers
-	cAllFlags := controller.NewAllFlags(s.services.GOFeatureFlagService, s.services.Metrics)
+	cAllFlags := controller.NewAllFlags(s.services.FlagsetManager, s.services.Metrics)
 	cFlagEval := controller.NewFlagEval(s.services.GOFeatureFlagService, s.services.Metrics)
 	cFlagEvalOFREP := ofrep.NewOFREPEvaluate(s.services.GOFeatureFlagService, s.services.Metrics)
 	cEvalDataCollector := controller.NewCollectEvalData(

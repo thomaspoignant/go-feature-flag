@@ -4,24 +4,24 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/model"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"github.com/thomaspoignant/go-feature-flag/internal/flagstate"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 )
 
 type allFlags struct {
-	goFF    *ffclient.GoFeatureFlag
-	metrics metric.Metrics
+	flagsetManager service.FlagsetManager
+	metrics        metric.Metrics
 }
 
-func NewAllFlags(goFF *ffclient.GoFeatureFlag, metrics metric.Metrics) Controller {
+func NewAllFlags(flagsetManager service.FlagsetManager, metrics metric.Metrics) Controller {
 	return &allFlags{
-		goFF:    goFF,
-		metrics: metrics,
+		flagsetManager: flagsetManager,
+		metrics:        metrics,
 	}
 }
 
@@ -44,6 +44,12 @@ func NewAllFlags(goFF *ffclient.GoFeatureFlag, metrics metric.Metrics) Controlle
 func (h *allFlags) Handler(c echo.Context) error {
 	h.metrics.IncAllFlag()
 
+	// Extract API key from Authorization header
+	apiKey := c.Request().Header.Get("Authorization")
+	if len(apiKey) > 7 && apiKey[:7] == "Bearer " {
+		apiKey = apiKey[7:]
+	}
+
 	reqBody := new(model.AllFlagRequest)
 	if err := c.Bind(reqBody); err != nil {
 		return err
@@ -64,12 +70,12 @@ func (h *allFlags) Handler(c echo.Context) error {
 	var allFlags flagstate.AllFlags
 	if len(evaluationCtx.ExtractGOFFProtectedFields().FlagList) > 0 {
 		// if we have a list of flags to evaluate in the evaluation context, we evaluate only those flags.
-		allFlags = h.goFF.GetFlagStates(
+		allFlags = h.flagsetManager.GetFlagSet(apiKey).GetFlagStates(
 			evaluationCtx,
 			evaluationCtx.ExtractGOFFProtectedFields().FlagList,
 		)
 	} else {
-		allFlags = h.goFF.AllFlagsState(evaluationCtx)
+		allFlags = h.flagsetManager.GetFlagSet(apiKey).AllFlagsState(evaluationCtx)
 	}
 
 	span.SetAttributes(
