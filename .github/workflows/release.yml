@@ -37,7 +37,7 @@ jobs:
           maven-version: 3.8.2
       - uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 23
       - name: Install ICU packages
         run: sudo apt-get update && sudo apt-get install -y libicu-dev
       - uses: actions/setup-dotnet@v4
@@ -70,6 +70,39 @@ jobs:
           files: |
             ./out/release-wasm/gofeatureflag-evaluation_${{  github.ref_name }}.wasi
             ./out/release-wasm/gofeatureflag-evaluation_${{  github.ref_name }}.wasm
+
+      - name: Checkout wasm-releases repository
+        uses: actions/checkout@v4
+        with:
+          repository: go-feature-flag/wasm-releases
+          path: wasm-releases
+          token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+
+      - name: Copy WASM files to wasm-releases repository
+        run: |
+          mkdir -p wasm-releases/evaluation
+          cp ./out/release-wasm/gofeatureflag-evaluation_${{  github.ref_name }}.wasi wasm-releases/evaluation/
+          cp ./out/release-wasm/gofeatureflag-evaluation_${{  github.ref_name }}.wasm wasm-releases/evaluation/
+
+      - name: Create Pull Request to wasm-releases
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: publish-wasm-evaluation-${{  github.ref_name }}
+          title: "feat: Publish WASM files for ${{  github.ref_name }}"
+          body: |
+            Automated pull request to publish evaluation WASM files for release ${{  github.ref_name }}
+            
+            This PR includes:
+            - gofeatureflag-evaluation_${{  github.ref_name }}.wasi
+            - gofeatureflag-evaluation_${{  github.ref_name }}.wasm
+          commit-message: Publish evaluation WASM files for ${{  github.ref_name }}
+          assignees: thomaspoignant
+          draft: false
+          signoff: true
+          delete-branch: true
+          labels: automerge
+          path: main
+          token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
   goreleaser:
     needs: integration-tests

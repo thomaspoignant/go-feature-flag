@@ -123,7 +123,7 @@ jobs:
           maven-version: 3.8.2
       - uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 23
       - name: Install ICU packages
         run: sudo apt-get update && sudo apt-get install -y libicu-dev
       - uses: actions/setup-dotnet@v4
