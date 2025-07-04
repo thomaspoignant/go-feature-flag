@@ -317,7 +317,9 @@ func Test_initRetrievers(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			proxyConf := config.FlagSet{
-				Retrievers: tt.retrievers,
+				CommonFlagSet: config.CommonFlagSet{
+					Retrievers: tt.retrievers,
+				},
 			}
 			r, err := initRetrievers(&proxyConf)
 			tt.wantErr(t, err)
@@ -400,7 +402,9 @@ func Test_initExporters(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			proxyConf := config.FlagSet{
-				Exporters: tt.exporters,
+				CommonFlagSet: config.CommonFlagSet{
+					Exporters: tt.exporters,
+				},
 			}
 			r, err := initDataExporters(&proxyConf)
 			tt.wantErr(t, err)

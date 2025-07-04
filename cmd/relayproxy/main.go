@@ -100,7 +100,7 @@ func main() {
 	services := service.Services{
 		MonitoringService:    service.NewMonitoring(&goff),
 		WebsocketService:     wsService,
-		GOFeatureFlagService: &goff,
+		GOFeatureFlagService: flagsetManager.GetFlagSet(proxyConf.AuthorizedKeys.Evaluation[0]),
 		FlagsetManager:       flagsetManager,
 		Metrics:              metricsV2,
 	}
@@ -116,23 +116,5 @@ func main() {
 			apiServer.Stop(ctx)
 		}()
 		apiServer.Start()
-	}
-}
-
-func prepareDefaultFlagSet(proxyConf *config.Config) *config.FlagSet {
-	return &config.FlagSet{
-		Name: "default",
-		CommonFlagSet: config.CommonFlagSet{
-			Retrievers:                      proxyConf.Retrievers,
-			Notifiers:                       proxyConf.Notifiers,
-			Exporters:                       proxyConf.Exporters,
-			FileFormat:                      proxyConf.FileFormat,
-			PollingInterval:                 proxyConf.PollingInterval,
-			StartWithRetrieverError:         proxyConf.StartWithRetrieverError,
-			EnablePollingJitter:             proxyConf.EnablePollingJitter,
-			DisableNotifierOnInit:           proxyConf.DisableNotifierOnInit,
-			EvaluationContextEnrichment:     proxyConf.EvaluationContextEnrichment,
-			PersistentFlagConfigurationFile: proxyConf.PersistentFlagConfigurationFile,
-		},
 	}
 }

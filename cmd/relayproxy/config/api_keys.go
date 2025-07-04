@@ -51,10 +51,6 @@ func (c *Config) preloadAPIKeys() {
 			apiKeySet[currentAPIKey] = EvaluationKeyType
 		}
 
-		if len(apiKeySet) != 0 {
-			c.forceAuthenticatedRequests = true
-		}
-
 		// Add API keys from flag sets
 		for _, flagSet := range c.FlagSets {
 			for _, apiKey := range flagSet.ApiKeys {
@@ -65,5 +61,9 @@ func (c *Config) preloadAPIKeys() {
 			apiKeySet[currentAPIKey] = AdminKeyType
 		}
 		c.apiKeysSet = apiKeySet
+
+		if len(apiKeySet) != 0 {
+			c.forceAuthenticatedRequests = true
+		}
 	}
 }

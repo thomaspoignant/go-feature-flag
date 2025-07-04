@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -11,6 +12,13 @@ import (
 )
 
 const defaultFlagSetName = "default"
+
+type flagsetManagerMode string
+
+const (
+	flagsetManagerModeDefault  flagsetManagerMode = "default"
+	flagsetManagerModeFlagsets flagsetManagerMode = "flagsets"
+)
 
 // FlagsetManager is the manager of the flagsets.
 // It is used to retrieve the flagset linked to the API Key.
@@ -31,6 +39,9 @@ type FlagsetManager struct {
 	// Config is the configuration of the relay proxy.
 	// It is used to retrieve the configuration of the relay proxy.
 	config *config.Config
+
+	// Mode is the mode of the flagset manager.
+	mode flagsetManagerMode
 }
 
 // NewFlagsetManager is creating a new FlagsetManager.
@@ -40,27 +51,58 @@ func NewFlagsetManager(config *config.Config, logger *zap.Logger) (FlagsetManage
 		return FlagsetManager{}, fmt.Errorf("configuration is nil")
 	}
 
-	// in case you are using the relay proxy without any flagset, we use the default configuration.
 	if len(config.FlagSets) == 0 {
-		client, err := NewGoFeatureFlagClient(&flagset, logger, []notifier.Notifier{})
-		if err != nil {
-			return FlagsetManager{}, err
-		}
-		return FlagsetManager{
-			DefaultFlagSet: &client,
-			config:         config,
-		}, nil
+		// in case you are using the relay proxy with flagsets, we create the flagsets and map them to the APIKeys.
+		// note that the default configuration is ignored in this case.
+		return newFlagsetManagerWithDefaultConfig(config, logger)
 	}
 
-	// in case you are using the relay proxy with flagsets, we create the flagsets and map them to the APIKeys.
-	// note that the default configuration is ignored in this case.
+	flagsetMngr, err := newFlagsetManagerWithFlagsets(config, logger)
+	if err != nil {
+		return newFlagsetManagerWithDefaultConfig(config, logger)
+	}
+	return flagsetMngr, nil
+}
+
+// newFlagsetManagerWithDefaultConfig is creating a new FlagsetManager with the default configuration.
+// The default configuration is the top level configuration of the relay proxy.
+func newFlagsetManagerWithDefaultConfig(c *config.Config, logger *zap.Logger) (FlagsetManager, error) {
+	defaultFlagSet := config.FlagSet{
+		Name: "default",
+		CommonFlagSet: config.CommonFlagSet{
+			Retrievers:                      c.Retrievers,
+			Notifiers:                       c.Notifiers,
+			Exporters:                       c.Exporters,
+			FileFormat:                      c.FileFormat,
+			PollingInterval:                 c.PollingInterval,
+			StartWithRetrieverError:         c.StartWithRetrieverError,
+			EnablePollingJitter:             c.EnablePollingJitter,
+			DisableNotifierOnInit:           c.DisableNotifierOnInit,
+			EvaluationContextEnrichment:     c.EvaluationContextEnrichment,
+			PersistentFlagConfigurationFile: c.PersistentFlagConfigurationFile,
+		},
+	}
+	client, err := NewGoFeatureFlagClient(&defaultFlagSet, logger, []notifier.Notifier{})
+	if err != nil {
+		return FlagsetManager{}, err
+	}
+	return FlagsetManager{
+		DefaultFlagSet: &client,
+		config:         c,
+		mode:           flagsetManagerModeDefault,
+	}, nil
+}
+
+// newFlagsetManagerWithFlagsets is creating a new FlagsetManager with flagsets.
+// It is used to create the flagsets and map them to the APIKeys.
+func newFlagsetManagerWithFlagsets(config *config.Config, logger *zap.Logger) (FlagsetManager, error) {
 	flagsets := make(map[string]*ffclient.GoFeatureFlag)
 	apiKeysToFlagSet := make(map[string]string)
 
 	for _, flagset := range config.FlagSets {
 		client, err := NewGoFeatureFlagClient(&flagset, logger, []notifier.Notifier{})
 		if err != nil {
-			logger.Error("failed to create goff client", zap.Error(err))
+			logger.Error("failed to create goff client for flagset", zap.String("flagset", flagset.Name), zap.Error(err))
 			continue
 		}
 
@@ -76,45 +118,24 @@ func NewFlagsetManager(config *config.Config, logger *zap.Logger) (FlagsetManage
 		}
 	}
 
-	// add default flagset
-	defaultFlagSetConfig := prepareDefaultFlagSet(config)
-	defaultFlagSet, err := NewGoFeatureFlagClient(&defaultFlagSetConfig, logger, []notifier.Notifier{})
-	if err != nil {
-		logger.Error("faild to create default flagset")
+	if len(flagsets) == 0 {
+		return FlagsetManager{}, errors.New("no flagset configured")
 	}
-	flagsets[defaultFlagSetName] = &defaultFlagSet
+
 	return FlagsetManager{
 		FlagSets:         flagsets,
 		APIKeysToFlagSet: apiKeysToFlagSet,
 		config:           config,
+		mode:             flagsetManagerModeFlagsets,
 	}, nil
 }
 
 // GetFlagSet is returning the flag set linked to the API Key
 func (m *FlagsetManager) GetFlagSet(apiKey string) *ffclient.GoFeatureFlag {
-	keyType := m.config.GetAPIKeyType(apiKey)
-	switch keyType {
-	case config.FlagSetKeyType:
+	switch m.mode {
+	case flagsetManagerModeFlagsets:
 		return m.FlagSets[m.APIKeysToFlagSet[apiKey]]
 	default:
-		return m.FlagSets[defaultFlagSetName]
-	}
-}
-
-func prepareDefaultFlagSet(proxyConf *config.Config) config.FlagSet {
-	return config.FlagSet{
-		Name: "default",
-		CommonFlagSet: config.CommonFlagSet{
-			Retrievers:                      proxyConf.Retrievers,
-			Notifiers:                       proxyConf.Notifiers,
-			Exporters:                       proxyConf.Exporters,
-			FileFormat:                      proxyConf.FileFormat,
-			PollingInterval:                 proxyConf.PollingInterval,
-			StartWithRetrieverError:         proxyConf.StartWithRetrieverError,
-			EnablePollingJitter:             proxyConf.EnablePollingJitter,
-			DisableNotifierOnInit:           proxyConf.DisableNotifierOnInit,
-			EvaluationContextEnrichment:     proxyConf.EvaluationContextEnrichment,
-			PersistentFlagConfigurationFile: proxyConf.PersistentFlagConfigurationFile,
-		},
+		return m.DefaultFlagSet
 	}
 }

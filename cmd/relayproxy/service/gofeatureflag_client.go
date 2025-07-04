@@ -38,28 +38,28 @@ import (
 )
 
 func NewGoFeatureFlagClient(
-	proxyConf *config.FlagSet,
+	cFlagSet *config.FlagSet,
 	logger *zap.Logger,
 	notifiers []notifier.Notifier,
 ) (ffclient.GoFeatureFlag, error) {
 	var err error
-	if proxyConf == nil {
+	if cFlagSet == nil {
 		return ffclient.GoFeatureFlag{}, fmt.Errorf("proxy config is empty")
 	}
 
-	retrievers, err := initRetrievers(proxyConf)
+	retrievers, err := initRetrievers(cFlagSet)
 	if err != nil {
 		return ffclient.GoFeatureFlag{}, err
 	}
 
-	exporters, err := initDataExporters(proxyConf)
+	exporters, err := initDataExporters(cFlagSet)
 	if err != nil {
 		return ffclient.GoFeatureFlag{}, err
 	}
 
 	notif := make([]notifier.Notifier, 0)
-	if proxyConf.Notifiers != nil {
-		notif, err = initNotifier(proxyConf.Notifiers)
+	if cFlagSet.Notifiers != nil {
+		notif, err = initNotifier(cFlagSet.Notifiers)
 		if err != nil {
 			return ffclient.GoFeatureFlag{}, err
 		}
@@ -69,7 +69,7 @@ func NewGoFeatureFlagClient(
 
 	f := ffclient.Config{
 		PollingInterval: time.Duration(
-			proxyConf.PollingInterval,
+			cFlagSet.PollingInterval,
 		) * time.Millisecond,
 		LeveledLogger: slog.New(
 			slogzap.Option{Level: slog.LevelDebug, Logger: logger}.NewZapHandler(),
@@ -77,13 +77,13 @@ func NewGoFeatureFlagClient(
 		Context:                         context.Background(),
 		Retrievers:                      retrievers,
 		Notifiers:                       notif,
-		FileFormat:                      proxyConf.FileFormat,
+		FileFormat:                      cFlagSet.FileFormat,
 		DataExporters:                   exporters,
-		StartWithRetrieverError:         proxyConf.StartWithRetrieverError,
-		EnablePollingJitter:             proxyConf.EnablePollingJitter,
-		DisableNotifierOnInit:           proxyConf.DisableNotifierOnInit,
-		EvaluationContextEnrichment:     proxyConf.EvaluationContextEnrichment,
-		PersistentFlagConfigurationFile: proxyConf.PersistentFlagConfigurationFile,
+		StartWithRetrieverError:         cFlagSet.StartWithRetrieverError,
+		EnablePollingJitter:             cFlagSet.EnablePollingJitter,
+		DisableNotifierOnInit:           cFlagSet.DisableNotifierOnInit,
+		EvaluationContextEnrichment:     cFlagSet.EvaluationContextEnrichment,
+		PersistentFlagConfigurationFile: cFlagSet.PersistentFlagConfigurationFile,
 	}
 	client, err := ffclient.New(f)
 	if err != nil {
