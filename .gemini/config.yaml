@@ -1,0 +1,5 @@
+pull_request_opened:
+  # we disable the summary and code review for the pull request opened event
+  # because I want to be sure to trigger it on demand and not automatically.
+  summary: false
+  code_review: false
