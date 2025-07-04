@@ -80,6 +80,9 @@ require (
 	k8s.io/client-go v0.33.2
 )
 
+// TODO: remove this once https://github.com/nikunjy/rules/pull/43 merges and a new version is available
+replace github.com/nikunjy/rules => github.com/hairyhenderson/rules v0.0.0-20250704181428-58ee76134adc
+
 require (
 	cel.dev/expr v0.23.0 // indirect
 	cloud.google.com/go v0.121.1 // indirect
@@ -115,7 +118,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sts v1.34.0 // indirect
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/blang/semver v3.5.1+incompatible // indirect
+	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.2 // indirect
