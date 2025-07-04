@@ -70,8 +70,13 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
         websocket.enableTrace(self.options.debug)
         self._ws = websocket.WebSocketApp(
             self._build_websocket_uri(),
+            on_open=self.on_open,
             on_message=self._websocket_message_handler,
         )
+
+    def on_open(self, ws):
+        if self._cache is not None:
+            self._cache.clear()
 
     def initialize(self, evaluation_context: EvaluationContext) -> None:
         """
@@ -179,7 +184,7 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
                 user=goff_evaluation_context,
                 defaultValue=default_value,
             )
-            evaluation_context_hash = goff_evaluation_context.hash()
+            evaluation_context_hash = f"{flag_key}:{goff_evaluation_context.hash()}"
             is_from_cache = False
 
             if evaluation_context_hash in self._cache:
