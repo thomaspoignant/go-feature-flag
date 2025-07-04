@@ -12,17 +12,48 @@ import (
 
 const defaultFlagSetName = "default"
 
+// FlagsetManager is the manager of the flagsets.
+// It is used to retrieve the flagset linked to the API Key.
 type FlagsetManager struct {
-	FlagSets         map[string]*ffclient.GoFeatureFlag
+	// DefaultFlagSet is the flagset used when no API Key is provider.
+	// It is the legacy way to handle feature flags in GO Feature Flag.
+	// This is used only if no flag set is configured in the configuration file.
+	DefaultFlagSet *ffclient.GoFeatureFlag
+
+	// FlagSets is a map that stores the different instances of GoFeatureFlag (one per flagset)
+	// It is used to retrieve the flagset linked to the API Key.
+	FlagSets map[string]*ffclient.GoFeatureFlag
+
+	// APIKeysToFlagSet is a map that stores the API Key linked to the flagset name.
+	// It is used to retrieve the flagset linked to the API Key.
 	APIKeysToFlagSet map[string]string
-	config           *config.Config
+
+	// Config is the configuration of the relay proxy.
+	// It is used to retrieve the configuration of the relay proxy.
+	config *config.Config
 }
 
+// NewFlagsetManager is creating a new FlagsetManager.
+// It is used to retrieve the flagset linked to the API Key.
 func NewFlagsetManager(config *config.Config, logger *zap.Logger) (FlagsetManager, error) {
 	if config == nil {
 		return FlagsetManager{}, fmt.Errorf("configuration is nil")
 	}
 
+	// in case you are using the relay proxy without any flagset, we use the default configuration.
+	if len(config.FlagSets) == 0 {
+		client, err := NewGoFeatureFlagClient(&flagset, logger, []notifier.Notifier{})
+		if err != nil {
+			return FlagsetManager{}, err
+		}
+		return FlagsetManager{
+			DefaultFlagSet: &client,
+			config:         config,
+		}, nil
+	}
+
+	// in case you are using the relay proxy with flagsets, we create the flagsets and map them to the APIKeys.
+	// note that the default configuration is ignored in this case.
 	flagsets := make(map[string]*ffclient.GoFeatureFlag)
 	apiKeysToFlagSet := make(map[string]string)
 
