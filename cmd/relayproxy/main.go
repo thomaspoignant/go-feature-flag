@@ -82,7 +82,8 @@ func main() {
 	defer wsService.Close() // close all the open connections
 	prometheusNotifier := metric.NewPrometheusNotifier(metricsV2)
 	proxyNotifier := service.NewNotifierWebsocket(wsService)
-	goff, err := service.NewGoFeatureFlagClient(proxyConf, logger.ZapLogger, []notifier.Notifier{
+
+	goff, err := service.NewGoFeatureFlagClient(prepareDefaultFlagSet(proxyConf), logger.ZapLogger, []notifier.Notifier{
 		prometheusNotifier,
 		proxyNotifier,
 	})
@@ -90,10 +91,17 @@ func main() {
 		panic(err)
 	}
 
+	flagsetManager, err := service.NewFlagsetManager(proxyConf, logger.ZapLogger)
+	if err != nil {
+		// TODO: rework that part
+		panic(err)
+	}
+
 	services := service.Services{
-		MonitoringService:    service.NewMonitoring(goff),
+		MonitoringService:    service.NewMonitoring(&goff),
 		WebsocketService:     wsService,
-		GOFeatureFlagService: goff,
+		GOFeatureFlagService: &goff,
+		FlagsetManager:       flagsetManager,
 		Metrics:              metricsV2,
 	}
 	// Init API server
@@ -108,5 +116,23 @@ func main() {
 			apiServer.Stop(ctx)
 		}()
 		apiServer.Start()
+	}
+}
+
+func prepareDefaultFlagSet(proxyConf *config.Config) *config.FlagSet {
+	return &config.FlagSet{
+		Name: "default",
+		CommonFlagSet: config.CommonFlagSet{
+			Retrievers:                      proxyConf.Retrievers,
+			Notifiers:                       proxyConf.Notifiers,
+			Exporters:                       proxyConf.Exporters,
+			FileFormat:                      proxyConf.FileFormat,
+			PollingInterval:                 proxyConf.PollingInterval,
+			StartWithRetrieverError:         proxyConf.StartWithRetrieverError,
+			EnablePollingJitter:             proxyConf.EnablePollingJitter,
+			DisableNotifierOnInit:           proxyConf.DisableNotifierOnInit,
+			EvaluationContextEnrichment:     proxyConf.EvaluationContextEnrichment,
+			PersistentFlagConfigurationFile: proxyConf.PersistentFlagConfigurationFile,
+		},
 	}
 }

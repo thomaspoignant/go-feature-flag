@@ -19,6 +19,7 @@ import (
 	"github.com/knadh/koanf/v2"
 	"github.com/spf13/pflag"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
+	"github.com/thomaspoignant/go-feature-flag/utils"
 	"github.com/xitongsys/parquet-go/parquet"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -111,7 +112,7 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 
 	if proxyConf.Exporters != nil {
 		for i := range *proxyConf.Exporters {
-			(*proxyConf.Exporters)[i].Kafka.Addresses = stringToArray(
+			(*proxyConf.Exporters)[i].Kafka.Addresses = utils.StringToArray(
 				(*proxyConf.Exporters)[i].Kafka.Addresses,
 			)
 		}
@@ -120,88 +121,8 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 	return proxyConf, nil
 }
 
-func mapEnvVariablesProvider(prefix string, log *zap.Logger) koanf.Provider {
-	return env.ProviderWithValue(prefix, ".", func(key string, v string) (string, interface{}) {
-		key = strings.TrimPrefix(key, prefix)
-		if strings.HasPrefix(key, "RETRIEVERS") ||
-			strings.HasPrefix(key, "NOTIFIERS") ||
-			strings.HasPrefix(key, "EXPORTERS") {
-			configMap := k.Raw()
-			err := loadArrayEnv(key, v, configMap)
-			if err != nil {
-				log.Error(
-					"config: error loading array env",
-					zap.String("key", key),
-					zap.String("value", v),
-					zap.Error(err),
-				)
-				return key, v
-			}
-			return key, v
-		}
-
-		if strings.HasPrefix(key, "EXPORTER_KAFKA_ADDRESSES") {
-			return "exporter.kafka.addresses", strings.Split(v, ",")
-		}
-
-		if strings.HasPrefix(key, "AUTHORIZEDKEYS_EVALUATION") {
-			return "authorizedKeys.evaluation", strings.Split(v, ",")
-		}
-		if strings.HasPrefix(key, "AUTHORIZEDKEYS_ADMIN") {
-			return "authorizedKeys.admin", strings.Split(v, ",")
-		}
-
-		if key == "OTEL_RESOURCE_ATTRIBUTES" {
-			parseOtelResourceAttributes(v, log)
-			return key, v
-		}
-
-		return strings.ReplaceAll(strings.ToLower(key), "_", "."), v
-	})
-}
-
-func stringToArray(item []string) []string {
-	if len(item) > 0 {
-		return strings.Split(item[0], ",")
-	}
-	return item
-}
-
-func parseOtelResourceAttributes(attributes string, log *zap.Logger) {
-	configMap := k.Raw()
-	otel, ok := configMap["otel"].(map[string]interface{})
-	if !ok {
-		configMap["otel"] = make(map[string]interface{})
-		otel = configMap["otel"].(map[string]interface{})
-	}
-
-	resource, ok := otel["resource"].(map[string]interface{})
-	if !ok {
-		otel["resource"] = make(map[string]interface{})
-		resource = otel["resource"].(map[string]interface{})
-	}
-
-	attrs, ok := resource["attributes"].(map[string]interface{})
-	if !ok {
-		resource["attributes"] = make(map[string]interface{})
-		attrs = resource["attributes"].(map[string]interface{})
-	}
-
-	for _, attr := range strings.Split(attributes, ",") {
-		k, v, found := strings.Cut(attr, "=")
-		if !found {
-			log.Error("config: error loading OTEL_RESOURCE_ATTRIBUTES - incorrect format",
-				zap.String("key", k), zap.String("value", v))
-			continue
-		}
-
-		attrs[k] = v
-	}
-
-	_ = k.Set("otel", otel)
-}
-
 type Config struct {
+	CommonFlagSet `mapstructure:",inline" koanf:",squash"`
 	// ListenPort (optional) is the port we are using to start the proxy
 	ListenPort int `mapstructure:"listen" koanf:"listen"`
 
@@ -230,60 +151,10 @@ type Config struct {
 	// Default: json
 	LogFormat string `mapstructure:"logFormat" koanf:"logformat"`
 
-	// PollingInterval (optional) Poll every X time
-	// The minimum possible is 1 second
-	// Default: 60 seconds
-	PollingInterval int `mapstructure:"pollingInterval" koanf:"pollinginterval"`
-
-	// EnablePollingJitter (optional) set to true if you want to avoid having true periodicity when
-	// retrieving your flags. It is useful to avoid having spike on your flag configuration storage
-	// in case your application is starting multiple instance at the same time.
-	// We ensure a deviation that is maximum + or - 10% of your polling interval.
-	// Default: false
-	EnablePollingJitter bool `mapstructure:"enablePollingJitter" koanf:"enablepollingjitter"`
-
-	// DisableNotifierOnInit (optional) set to true if you do not want to call any notifier
-	// when the flags are loaded.
-	// This is useful if you do not want a Slack/Webhook notification saying that
-	// the flags have been added every time you start the application.
-	// Default is set to false for backward compatibility.
-	// Default: false
-	DisableNotifierOnInit bool `mapstructure:"DisableNotifierOnInit" koanf:"DisableNotifierOnInit"`
-
-	// FileFormat (optional) is the format of the file to retrieve (available YAML, TOML and JSON)
-	// Default: YAML
-	FileFormat string `mapstructure:"fileFormat" koanf:"fileformat"`
-
-	// StartWithRetrieverError (optional) If true, the relay proxy will start even if we did not get any flags from
-	// the retriever. It will serve only default values until the retriever returns the flags.
-	// The init method will not return any error if the flag file is unreachable.
-	// Default: false
-	StartWithRetrieverError bool `mapstructure:"startWithRetrieverError" koanf:"startwithretrievererror"`
-
-	// Retriever is the configuration on how to retrieve the file
-	Retriever *RetrieverConf `mapstructure:"retriever" koanf:"retriever"`
-
-	// Retrievers is the exact same things than Retriever but allows to give more than 1 retriever at the time.
-	// We are dealing with config files in order, if you have the same flag name in multiple files it will be override
-	// based of the order of the retrievers in the slice.
-	//
-	// Note: If both Retriever and Retrievers are set, we will start by calling the Retriever and,
-	// after we will use the order of Retrievers.
-	Retrievers *[]RetrieverConf `mapstructure:"retrievers" koanf:"retrievers"`
-
-	// Exporter is the configuration on how to export data
-	Exporter *ExporterConf `mapstructure:"exporter" koanf:"exporter"`
-
-	// Exporters is the exact same things than Exporter but allows to give more than 1 exporter at the time.
-	Exporters *[]ExporterConf `mapstructure:"exporters" koanf:"exporters"`
-
 	// ExporterCleanQueueInterval (optional) is the duration between each cleaning of the queue by the thread in charge
 	// of removing the old events.
 	// Default: 1 minute
 	ExporterCleanQueueInterval time.Duration `mapstructure:"exporterCleanQueueInterval" koanf:"exportercleanqueueinterval"`
-
-	// Notifiers is the configuration on where to notify a flag change
-	Notifiers []NotifierConf `mapstructure:"notifier" koanf:"notifier"`
 
 	// Version is the version of the relay-proxy
 	Version string `mapstructure:"version" koanf:"version"`
@@ -291,10 +162,6 @@ type Config struct {
 	// Disable x-gofeatureflag-version header in the relay-proxy HTTP response
 	// Default: false
 	DisableVersionHeader bool `mapstructure:"disableVersionHeader" koanf:"disableversionheader"`
-
-	// Deprecated: use AuthorizedKeys instead
-	// APIKeys list of API keys that authorized to use endpoints
-	APIKeys []string `mapstructure:"apiKeys" koanf:"apikeys"`
 
 	// AuthorizedKeys list of API keys that authorized to use endpoints
 	AuthorizedKeys APIKeys `mapstructure:"authorizedKeys" koanf:"authorizedkeys"`
@@ -341,15 +208,95 @@ type Config struct {
 	// By default we have no prefix
 	EnvVariablePrefix string `mapstructure:"envVariablePrefix" koanf:"envvariableprefix"`
 
+	// FlagSets is the list of flag sets configured.
+	// A flag set is a group of flags that can be used to configure the relay proxy.
+	// Each flag set can have its own API key, retrievers, notifiers and exporters.
+	FlagSets []FlagSet `mapstructure:"flagSets" koanf:"flagsets"`
 	// ---- private fields
 
 	// apiKeySet is the internal representation of an API keys list configured
 	// we store them in a set to be
-	apiKeysSet map[string]interface{}
+	apiKeysSet map[string]ApiKeyType
 
-	// adminAPIKeySet is the internal representation of an admin API keys list configured
-	// we store them in a set to be
-	adminAPIKeySet map[string]interface{}
+	// forceAuthenticatedRequests is true if we have at least 1 AuthorizedKey.Evaluation key set.
+	forceAuthenticatedRequests bool
+}
+
+func mapEnvVariablesProvider(prefix string, log *zap.Logger) koanf.Provider {
+	return env.ProviderWithValue(prefix, ".", func(key string, v string) (string, interface{}) {
+		key = strings.TrimPrefix(key, prefix)
+		if strings.HasPrefix(key, "RETRIEVERS") ||
+			strings.HasPrefix(key, "NOTIFIERS") ||
+			strings.HasPrefix(key, "EXPORTERS") {
+			configMap := k.Raw()
+			err := loadArrayEnv(key, v, configMap)
+			if err != nil {
+				log.Error(
+					"config: error loading array env",
+					zap.String("key", key),
+					zap.String("value", v),
+					zap.Error(err),
+				)
+				return key, v
+			}
+			return key, v
+		}
+
+		if strings.HasPrefix(key, "EXPORTER_KAFKA_ADDRESSES") {
+			return "exporter.kafka.addresses", strings.Split(v, ",")
+		}
+
+		if strings.HasPrefix(key, "AUTHORIZEDKEYS_EVALUATION") {
+			return "authorizedKeys.evaluation", strings.Split(v, ",")
+		}
+		if strings.HasPrefix(key, "AUTHORIZEDKEYS_ADMIN") {
+			return "authorizedKeys.admin", strings.Split(v, ",")
+		}
+
+		if key == "OTEL_RESOURCE_ATTRIBUTES" {
+			parseOtelResourceAttributes(v, log)
+			return key, v
+		}
+
+		return strings.ReplaceAll(strings.ToLower(key), "_", "."), v
+	})
+}
+
+// parseOtelResourceAttributes parses the OTEL_RESOURCE_ATTRIBUTES environment variable
+// and sets the attributes in the koanf configuration.
+// The expected format is "key1=value1,key2=value2,..."
+func parseOtelResourceAttributes(attributes string, log *zap.Logger) {
+	configMap := k.Raw()
+	otel, ok := configMap["otel"].(map[string]interface{})
+	if !ok {
+		configMap["otel"] = make(map[string]interface{})
+		otel = configMap["otel"].(map[string]interface{})
+	}
+
+	resource, ok := otel["resource"].(map[string]interface{})
+	if !ok {
+		otel["resource"] = make(map[string]interface{})
+		resource = otel["resource"].(map[string]interface{})
+	}
+
+	attrs, ok := resource["attributes"].(map[string]interface{})
+	if !ok {
+		resource["attributes"] = make(map[string]interface{})
+		attrs = resource["attributes"].(map[string]interface{})
+	}
+
+	for _, attr := range strings.Split(attributes, ",") {
+		k, v, found := strings.Cut(attr, "=")
+		if !found {
+			log.Error("config: error loading OTEL_RESOURCE_ATTRIBUTES - incorrect format",
+				zap.String("key", k), zap.String("value", v))
+			continue
+		}
+
+		attrs[k] = v
+	}
+
+	_ = k.Set("otel", otel)
 }
 
 // OpenTelemetryConfiguration is the configuration for the OpenTelemetry part of the relay proxy
@@ -398,44 +345,6 @@ type JaegerSamplerConfiguration struct {
 			Operations int `mapstructure:"operations" koanf:"operations"`
 		} `mapstructure:"max" koanf:"max"`
 	} `mapstructure:"sampler" koanf:"sampler"`
-}
-
-// APIKeysAdminExists is checking if an admin API Key exist in the relay proxy configuration
-func (c *Config) APIKeysAdminExists(apiKey string) bool {
-	if c.adminAPIKeySet == nil {
-		adminAPIKeySet := make(map[string]interface{})
-		for _, currentAPIKey := range c.AuthorizedKeys.Admin {
-			adminAPIKeySet[currentAPIKey] = new(interface{})
-		}
-		c.adminAPIKeySet = adminAPIKeySet
-	}
-
-	_, ok := c.adminAPIKeySet[apiKey]
-	return ok
-}
-
-// APIKeyExists is checking if an API Key exist in the relay proxy configuration
-func (c *Config) APIKeyExists(apiKey string) bool {
-	if c.APIKeysAdminExists(apiKey) {
-		return true
-	}
-	if c.apiKeysSet == nil {
-		apiKeySet := make(map[string]interface{})
-
-		// Remove this part when the APIKeys field is removed
-		for _, currentAPIKey := range c.APIKeys {
-			apiKeySet[currentAPIKey] = new(interface{})
-		}
-		// end of remove
-
-		for _, currentAPIKey := range c.AuthorizedKeys.Evaluation {
-			apiKeySet[currentAPIKey] = new(interface{})
-		}
-		c.apiKeysSet = apiKeySet
-	}
-
-	_, ok := c.apiKeysSet[apiKey]
-	return ok
 }
 
 // IsValid contains all the validation of the configuration.

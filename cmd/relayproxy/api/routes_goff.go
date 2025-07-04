@@ -18,7 +18,7 @@ func (s *Server) addGOFFRoutes(
 	// Grouping the routes
 	v1 := s.apiEcho.Group("/v1")
 	// nolint: staticcheck
-	if len(s.config.AuthorizedKeys.Evaluation) > 0 || len(s.config.APIKeys) > 0 {
+	if s.config.IsAuthenticationEnabled() {
 		v1.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
 			Validator: func(key string, _ echo.Context) (bool, error) {
 				return s.config.APIKeyExists(key), nil

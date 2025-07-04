@@ -248,7 +248,6 @@ func Test_initRetrievers(t *testing.T) {
 	tests := []struct {
 		name       string
 		retrievers *[]config.RetrieverConf
-		retriever  *config.RetrieverConf
 		wantErr    assert.ErrorAssertionFunc
 	}{
 		{
@@ -263,14 +262,14 @@ func Test_initRetrievers(t *testing.T) {
 					AuthToken:      "XXX_BITBUCKET_TOKEN",
 					BaseURL:        "https://api.bitbucket.goff.org",
 				},
-			},
-			retriever: &config.RetrieverConf{
-				Kind:           "bitbucket",
-				Branch:         "main",
-				RepositorySlug: "gofeatureflag/config-repo",
-				Path:           "flags/config.goff.yaml",
-				AuthToken:      "XXX_BITBUCKET_TOKEN",
-				BaseURL:        "https://api.bitbucket.goff.org",
+				{
+					Kind:           "bitbucket",
+					Branch:         "main",
+					RepositorySlug: "gofeatureflag/config-repo",
+					Path:           "flags/config.goff.yaml",
+					AuthToken:      "XXX_BITBUCKET_TOKEN",
+					BaseURL:        "https://api.bitbucket.goff.org",
+				},
 			},
 		},
 		{
@@ -285,9 +284,9 @@ func Test_initRetrievers(t *testing.T) {
 					AuthToken:      "XXX_BITBUCKET_TOKEN",
 					BaseURL:        "https://api.bitbucket.goff.org",
 				},
-			},
-			retriever: &config.RetrieverConf{
-				Kind: "unknown",
+				{
+					Kind: "unknown",
+				},
 			},
 		},
 		{
@@ -297,18 +296,6 @@ func Test_initRetrievers(t *testing.T) {
 				{
 					Kind: "unknown",
 				},
-			},
-		},
-		{
-			name:    "only retriever",
-			wantErr: assert.NoError,
-			retriever: &config.RetrieverConf{
-				Kind:           "bitbucket",
-				Branch:         "main",
-				RepositorySlug: "gofeatureflag/config-repo",
-				Path:           "flags/config.goff.yaml",
-				AuthToken:      "XXX_BITBUCKET_TOKEN",
-				BaseURL:        "https://api.bitbucket.goff.org",
 			},
 		},
 		{
@@ -329,9 +316,8 @@ func Test_initRetrievers(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			proxyConf := config.Config{
+			proxyConf := config.FlagSet{
 				Retrievers: tt.retrievers,
-				Retriever:  tt.retriever,
 			}
 			r, err := initRetrievers(&proxyConf)
 			tt.wantErr(t, err)
@@ -339,9 +325,6 @@ func Test_initRetrievers(t *testing.T) {
 				nbRetriever := 0
 				if tt.retrievers != nil {
 					nbRetriever += len(*tt.retrievers)
-				}
-				if tt.retriever != nil {
-					nbRetriever++
 				}
 				assert.Len(t, r, nbRetriever)
 			}
@@ -359,26 +342,17 @@ func Test_initExporters(t *testing.T) {
 		{
 			name:    "both exporter and exporters",
 			wantErr: assert.NoError,
-			exporter: &config.ExporterConf{
-				Kind:        "webhook",
-				EndpointURL: "https://gofeatureflag.org/webhook-example",
-				Secret:      "1234",
-			},
 			exporters: &[]config.ExporterConf{
 				{
 					Kind:        "webhook",
 					EndpointURL: "https://gofeatureflag.org/webhook-example",
 					Secret:      "1234",
 				},
-			},
-		},
-		{
-			name:    "exporter only",
-			wantErr: assert.NoError,
-			exporter: &config.ExporterConf{
-				Kind:        "webhook",
-				EndpointURL: "https://gofeatureflag.org/webhook-example",
-				Secret:      "1234",
+				{
+					Kind:        "webhook",
+					EndpointURL: "https://gofeatureflag.org/webhook-example",
+					Secret:      "1234",
+				},
 			},
 		},
 		{
@@ -395,10 +369,10 @@ func Test_initExporters(t *testing.T) {
 		{
 			name:    "invalid exporter",
 			wantErr: assert.Error,
-			exporter: &config.ExporterConf{
-				Kind: "invalid",
-			},
 			exporters: &[]config.ExporterConf{
+				{
+					Kind: "invalid",
+				},
 				{
 					Kind:        "webhook",
 					EndpointURL: "https://gofeatureflag.org/webhook-example",
@@ -409,13 +383,13 @@ func Test_initExporters(t *testing.T) {
 		{
 			name:    "invalid exporters",
 			wantErr: assert.Error,
-			exporter: &config.ExporterConf{
-
-				Kind:        "webhook",
-				EndpointURL: "https://gofeatureflag.org/webhook-example",
-				Secret:      "1234",
-			},
 			exporters: &[]config.ExporterConf{
+				{
+
+					Kind:        "webhook",
+					EndpointURL: "https://gofeatureflag.org/webhook-example",
+					Secret:      "1234",
+				},
 				{
 					Kind: "invalid",
 				},
@@ -425,9 +399,8 @@ func Test_initExporters(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			proxyConf := config.Config{
+			proxyConf := config.FlagSet{
 				Exporters: tt.exporters,
-				Exporter:  tt.exporter,
 			}
 			r, err := initDataExporters(&proxyConf)
 			tt.wantErr(t, err)
