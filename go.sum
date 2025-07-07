@@ -247,8 +247,8 @@ github.com/aws/aws-sdk-go-v2/service/kinesis v1.35.3 h1:aAi9YBNpYMEX52Z9qy1YP2t3
 github.com/aws/aws-sdk-go-v2/service/kinesis v1.35.3/go.mod h1:DH0TzTbBG82HKNpBQlplRNSS4bGz0dsbJvxdK9f6rUY=
 github.com/aws/aws-sdk-go-v2/service/kms v1.16.3/go.mod h1:QuiHPBqlOFCi4LqdSskYYAWpQlx3PKmohy+rE2F+o5g=
 github.com/aws/aws-sdk-go-v2/service/s3 v1.26.3/go.mod h1:g1qvDuRsJY+XghsV6zg00Z4KJ7DtFFCx8fJD2a491Ak=
-github.com/aws/aws-sdk-go-v2/service/s3 v1.82.0 h1:JubM8CGDDFaAOmBrd8CRYNr49ZNgEAiLwGwgNMdS0nw=
-github.com/aws/aws-sdk-go-v2/service/s3 v1.82.0/go.mod h1:kUklwasNoCn5YpyAqC/97r6dzTA1SRKJfKq16SXeoDU=
+github.com/aws/aws-sdk-go-v2/service/s3 v1.83.0 h1:5Y75q0RPQoAbieyOuGLhjV9P3txvYgXv2lg0UwJOfmE=
+github.com/aws/aws-sdk-go-v2/service/s3 v1.83.0/go.mod h1:kUklwasNoCn5YpyAqC/97r6dzTA1SRKJfKq16SXeoDU=
 github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.15.4/go.mod h1:PJc8s+lxyU8rrre0/4a0pn2wgwiDvOEzoOjcJUBr67o=
 github.com/aws/aws-sdk-go-v2/service/sns v1.17.4/go.mod h1:kElt+uCcXxcqFyc+bQqZPFD9DME/eC6oHBXvFzQ9Bcw=
 github.com/aws/aws-sdk-go-v2/service/sqs v1.18.3/go.mod h1:skmQo0UPvsjsuYYSYMVmrPc1HWCbHUJyrCEp+ZaLzqM=
