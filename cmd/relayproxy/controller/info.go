@@ -29,5 +29,9 @@ func NewInfo(monitoring service.Monitoring) Controller {
 // @Success      200  {object}   model.InfoResponse
 // @Router       /info [get]
 func (h *info) Handler(c echo.Context) error {
-	return c.JSON(http.StatusOK, h.monitoringService.Info())
+	info, err := h.monitoringService.Info()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
+	return c.JSON(http.StatusOK, info)
 }

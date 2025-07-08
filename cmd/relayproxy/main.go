@@ -83,26 +83,20 @@ func main() {
 	prometheusNotifier := metric.NewPrometheusNotifier(metricsV2)
 	proxyNotifier := service.NewNotifierWebsocket(wsService)
 
-	goff, err := service.NewGoFeatureFlagClient(prepareDefaultFlagSet(proxyConf), logger.ZapLogger, []notifier.Notifier{
+	flagsetManager, err := service.NewFlagsetManager(proxyConf, logger.ZapLogger, []notifier.Notifier{
 		prometheusNotifier,
 		proxyNotifier,
 	})
-	if err != nil {
-		panic(err)
-	}
-
-	flagsetManager, err := service.NewFlagsetManager(proxyConf, logger.ZapLogger)
 	if err != nil {
 		// TODO: rework that part
 		panic(err)
 	}
 
 	services := service.Services{
-		MonitoringService:    service.NewMonitoring(&goff),
-		WebsocketService:     wsService,
-		GOFeatureFlagService: flagsetManager.GetFlagSet(proxyConf.AuthorizedKeys.Evaluation[0]),
-		FlagsetManager:       flagsetManager,
-		Metrics:              metricsV2,
+		MonitoringService: service.NewMonitoring(flagsetManager),
+		WebsocketService:  wsService,
+		FlagsetManager:    flagsetManager,
+		Metrics:           metricsV2,
 	}
 	// Init API server
 	apiServer := api.New(proxyConf, services, logger.ZapLogger)

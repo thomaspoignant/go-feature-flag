@@ -20,9 +20,23 @@ const (
 	flagsetManagerModeFlagsets flagsetManagerMode = "flagsets"
 )
 
-// FlagsetManager is the manager of the flagsets.
+// FlagsetManager is the interface for managing flagsets.
 // It is used to retrieve the flagset linked to the API Key.
-type FlagsetManager struct {
+type FlagsetManager interface {
+	// GetFlagSet returns the flag set linked to the API Key
+	GetFlagSet(apiKey string) (*ffclient.GoFeatureFlag, error)
+	// GetFlagSetName returns the name of the flagset linked to the API Key
+	GetFlagSetName(apiKey string) (string, error)
+	// GetFlagSets returns all flag sets of the flagset manager
+	GetFlagSets() (map[string]*ffclient.GoFeatureFlag, error)
+	// GetDefaultFlagSet returns the default flagset
+	GetDefaultFlagSet() *ffclient.GoFeatureFlag
+	// IsDefaultFlagSet returns true if the manager is in default mode (no flagsets configured)
+	IsDefaultFlagSet() bool
+}
+
+// flagsetManagerImpl is the internal implementation of FlagsetManager
+type flagsetManagerImpl struct {
 	// DefaultFlagSet is the flagset used when no API Key is provider.
 	// It is the legacy way to handle feature flags in GO Feature Flag.
 	// This is used only if no flag set is configured in the configuration file.
@@ -32,9 +46,9 @@ type FlagsetManager struct {
 	// It is used to retrieve the flagset linked to the API Key.
 	FlagSets map[string]*ffclient.GoFeatureFlag
 
-	// APIKeysToFlagSet is a map that stores the API Key linked to the flagset name.
+	// APIKeysToFlagSetName is a map that stores the API Key linked to the flagset name.
 	// It is used to retrieve the flagset linked to the API Key.
-	APIKeysToFlagSet map[string]string
+	APIKeysToFlagSetName map[string]string
 
 	// Config is the configuration of the relay proxy.
 	// It is used to retrieve the configuration of the relay proxy.
@@ -46,27 +60,27 @@ type FlagsetManager struct {
 
 // NewFlagsetManager is creating a new FlagsetManager.
 // It is used to retrieve the flagset linked to the API Key.
-func NewFlagsetManager(config *config.Config, logger *zap.Logger) (FlagsetManager, error) {
+func NewFlagsetManager(config *config.Config, logger *zap.Logger, notifiers []notifier.Notifier) (FlagsetManager, error) {
 	if config == nil {
-		return FlagsetManager{}, fmt.Errorf("configuration is nil")
+		return nil, fmt.Errorf("configuration is nil")
 	}
 
 	if len(config.FlagSets) == 0 {
 		// in case you are using the relay proxy with flagsets, we create the flagsets and map them to the APIKeys.
 		// note that the default configuration is ignored in this case.
-		return newFlagsetManagerWithDefaultConfig(config, logger)
+		return newFlagsetManagerWithDefaultConfig(config, logger, notifiers)
 	}
 
-	flagsetMngr, err := newFlagsetManagerWithFlagsets(config, logger)
+	flagsetMngr, err := newFlagsetManagerWithFlagsets(config, logger, notifiers)
 	if err != nil {
-		return newFlagsetManagerWithDefaultConfig(config, logger)
+		return newFlagsetManagerWithDefaultConfig(config, logger, notifiers)
 	}
 	return flagsetMngr, nil
 }
 
 // newFlagsetManagerWithDefaultConfig is creating a new FlagsetManager with the default configuration.
 // The default configuration is the top level configuration of the relay proxy.
-func newFlagsetManagerWithDefaultConfig(c *config.Config, logger *zap.Logger) (FlagsetManager, error) {
+func newFlagsetManagerWithDefaultConfig(c *config.Config, logger *zap.Logger, notifiers []notifier.Notifier) (FlagsetManager, error) {
 	defaultFlagSet := config.FlagSet{
 		Name: "default",
 		CommonFlagSet: config.CommonFlagSet{
@@ -82,11 +96,11 @@ func newFlagsetManagerWithDefaultConfig(c *config.Config, logger *zap.Logger) (F
 			PersistentFlagConfigurationFile: c.PersistentFlagConfigurationFile,
 		},
 	}
-	client, err := NewGoFeatureFlagClient(&defaultFlagSet, logger, []notifier.Notifier{})
+	client, err := NewGoFeatureFlagClient(&defaultFlagSet, logger, notifiers)
 	if err != nil {
-		return FlagsetManager{}, err
+		return nil, err
 	}
-	return FlagsetManager{
+	return &flagsetManagerImpl{
 		DefaultFlagSet: &client,
 		config:         c,
 		mode:           flagsetManagerModeDefault,
@@ -95,12 +109,12 @@ func newFlagsetManagerWithDefaultConfig(c *config.Config, logger *zap.Logger) (F
 
 // newFlagsetManagerWithFlagsets is creating a new FlagsetManager with flagsets.
 // It is used to create the flagsets and map them to the APIKeys.
-func newFlagsetManagerWithFlagsets(config *config.Config, logger *zap.Logger) (FlagsetManager, error) {
+func newFlagsetManagerWithFlagsets(config *config.Config, logger *zap.Logger, notifiers []notifier.Notifier) (FlagsetManager, error) {
 	flagsets := make(map[string]*ffclient.GoFeatureFlag)
 	apiKeysToFlagSet := make(map[string]string)
 
 	for _, flagset := range config.FlagSets {
-		client, err := NewGoFeatureFlagClient(&flagset, logger, []notifier.Notifier{})
+		client, err := NewGoFeatureFlagClient(&flagset, logger, notifiers)
 		if err != nil {
 			logger.Error("failed to create goff client for flagset", zap.String("flagset", flagset.Name), zap.Error(err))
 			continue
@@ -119,23 +133,59 @@ func newFlagsetManagerWithFlagsets(config *config.Config, logger *zap.Logger) (F
 	}
 
 	if len(flagsets) == 0 {
-		return FlagsetManager{}, errors.New("no flagset configured")
+		return nil, errors.New("no flagset configured")
 	}
 
-	return FlagsetManager{
-		FlagSets:         flagsets,
-		APIKeysToFlagSet: apiKeysToFlagSet,
-		config:           config,
-		mode:             flagsetManagerModeFlagsets,
+	return &flagsetManagerImpl{
+		FlagSets:             flagsets,
+		APIKeysToFlagSetName: apiKeysToFlagSet,
+		config:               config,
+		mode:                 flagsetManagerModeFlagsets,
 	}, nil
 }
 
 // GetFlagSet is returning the flag set linked to the API Key
-func (m *FlagsetManager) GetFlagSet(apiKey string) *ffclient.GoFeatureFlag {
+func (m *flagsetManagerImpl) GetFlagSet(apiKey string) (*ffclient.GoFeatureFlag, error) {
 	switch m.mode {
 	case flagsetManagerModeFlagsets:
-		return m.FlagSets[m.APIKeysToFlagSet[apiKey]]
+		if apiKey == "" {
+			return nil, fmt.Errorf("no API key provided")
+		}
+		return m.FlagSets[m.APIKeysToFlagSetName[apiKey]], nil
 	default:
-		return m.DefaultFlagSet
+		return m.DefaultFlagSet, nil
 	}
+}
+
+// GetFlagSetName returns the name of the flagset linked to the API Key
+func (m *flagsetManagerImpl) GetFlagSetName(apiKey string) (string, error) {
+	return m.APIKeysToFlagSetName[apiKey], nil
+}
+
+// GetFlagSets returns the flag sets of the flagset manager.
+func (m *flagsetManagerImpl) GetFlagSets() (map[string]*ffclient.GoFeatureFlag, error) {
+	switch m.mode {
+	case flagsetManagerModeFlagsets:
+		if len(m.FlagSets) == 0 {
+			return nil, fmt.Errorf("no flagsets configured")
+		}
+		return m.FlagSets, nil
+	default:
+		if m.DefaultFlagSet == nil {
+			return nil, fmt.Errorf("no default flagset configured")
+		}
+		return map[string]*ffclient.GoFeatureFlag{
+			"default": m.DefaultFlagSet,
+		}, nil
+	}
+}
+
+// GetDefaultFlagSet returns the default flagset
+func (m *flagsetManagerImpl) GetDefaultFlagSet() *ffclient.GoFeatureFlag {
+	return m.DefaultFlagSet
+}
+
+// IsDefaultFlagSet returns true if the manager is in default mode (no flagsets configured)
+func (m *flagsetManagerImpl) IsDefaultFlagSet() bool {
+	return m.mode == flagsetManagerModeDefault
 }

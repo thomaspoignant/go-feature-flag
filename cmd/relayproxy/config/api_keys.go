@@ -39,6 +39,7 @@ func (c *Config) GetAPIKeyType(apiKey string) ApiKeyType {
 
 // IsAuthenticationEnabled returns true if we need to be authenticated.
 func (c *Config) IsAuthenticationEnabled() bool {
+	c.preloadAPIKeys()
 	return c.forceAuthenticatedRequests
 }
 

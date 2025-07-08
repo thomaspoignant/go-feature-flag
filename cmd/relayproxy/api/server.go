@@ -83,23 +83,23 @@ func (s *Server) initRoutes() {
 
 	// Init controllers
 	cAllFlags := controller.NewAllFlags(s.services.FlagsetManager, s.services.Metrics)
-	cFlagEval := controller.NewFlagEval(s.services.GOFeatureFlagService, s.services.Metrics)
-	cFlagEvalOFREP := ofrep.NewOFREPEvaluate(s.services.GOFeatureFlagService, s.services.Metrics)
+	cFlagEval := controller.NewFlagEval(s.services.FlagsetManager, s.services.Metrics)
+	cFlagEvalOFREP := ofrep.NewOFREPEvaluate(s.services.FlagsetManager, s.services.Metrics)
 	cEvalDataCollector := controller.NewCollectEvalData(
-		s.services.GOFeatureFlagService,
+		s.services.FlagsetManager,
 		s.services.Metrics,
 		s.zapLog,
 	)
 	cRetrieverRefresh := controller.NewForceFlagsRefresh(
-		s.services.GOFeatureFlagService,
+		s.services.FlagsetManager,
 		s.services.Metrics,
 	)
 	cFlagChangeAPI := controller.NewAPIFlagChange(
-		s.services.GOFeatureFlagService,
+		s.services.FlagsetManager,
 		s.services.Metrics,
 	)
 	cFlagConfiguration := controller.NewAPIFlagConfiguration(
-		s.services.GOFeatureFlagService,
+		s.services.FlagsetManager,
 		s.services.Metrics,
 	)
 

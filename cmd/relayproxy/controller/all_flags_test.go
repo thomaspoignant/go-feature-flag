@@ -15,13 +15,19 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/controller"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"github.com/thomaspoignant/go-feature-flag/exporter/logsexporter"
+	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
+	"go.uber.org/zap"
 )
 
-func Test_all_flag_Handler(t *testing.T) {
+func Test_all_flag_Handler_DefaultMode(t *testing.T) {
+	const configFlagsLocation = "../../../testdata/flag-config.yaml"
+
 	type want struct {
 		httpCode   int
 		bodyFile   string
@@ -89,6 +95,23 @@ func Test_all_flag_Handler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			conf := config.Config{
+				FlagSets: []config.FlagSet{
+					{
+						CommonFlagSet: config.CommonFlagSet{
+							Retriever: &config.RetrieverConf{
+								Path: tt.args.configFlagsLocation,
+							},
+							Exporter: &config.ExporterConf{
+								Kind: config.LogExporter,
+							},
+						},
+					},
+				},
+			}
+			flagsetManager, err := service.NewFlagsetManager(&conf, zap.NewNop(), []notifier.Notifier{})
+			assert.NoError(t, err, "impossible to create flagset manager")
+
 			// init go-feature-flag
 			goFF, _ := ffclient.New(ffclient.Config{
 				PollingInterval: 10 * time.Second,
@@ -104,7 +127,8 @@ func Test_all_flag_Handler(t *testing.T) {
 				},
 			})
 			defer goFF.Close()
-			ctrl := controller.NewAllFlags(goFF, metric.Metrics{})
+
+			ctrl := controller.NewAllFlags(flagsetManager, metric.Metrics{})
 
 			e := echo.New()
 			rec := httptest.NewRecorder()

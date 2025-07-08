@@ -5,6 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/helper"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/model"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
@@ -43,13 +44,6 @@ func NewAllFlags(flagsetManager service.FlagsetManager, metrics metric.Metrics) 
 // @Router       /v1/allflags [post]
 func (h *allFlags) Handler(c echo.Context) error {
 	h.metrics.IncAllFlag()
-
-	// Extract API key from Authorization header
-	apiKey := c.Request().Header.Get("Authorization")
-	if len(apiKey) > 7 && apiKey[:7] == "Bearer " {
-		apiKey = apiKey[7:]
-	}
-
 	reqBody := new(model.AllFlagRequest)
 	if err := c.Bind(reqBody); err != nil {
 		return err
@@ -67,15 +61,21 @@ func (h *allFlags) Handler(c echo.Context) error {
 	_, span := tracer.Start(c.Request().Context(), "AllFlagsState")
 	defer span.End()
 
+	// retrieve the flagset from the flagset manager
+	flagset, err := h.flagsetManager.GetFlagSet(helper.GetAPIKey(c))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "error while getting flagset: %w", err)
+	}
+
 	var allFlags flagstate.AllFlags
 	if len(evaluationCtx.ExtractGOFFProtectedFields().FlagList) > 0 {
 		// if we have a list of flags to evaluate in the evaluation context, we evaluate only those flags.
-		allFlags = h.flagsetManager.GetFlagSet(apiKey).GetFlagStates(
+		allFlags = flagset.GetFlagStates(
 			evaluationCtx,
 			evaluationCtx.ExtractGOFFProtectedFields().FlagList,
 		)
 	} else {
-		allFlags = h.flagsetManager.GetFlagSet(apiKey).AllFlagsState(evaluationCtx)
+		allFlags = flagset.AllFlagsState(evaluationCtx)
 	}
 
 	span.SetAttributes(

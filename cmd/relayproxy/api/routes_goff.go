@@ -17,15 +17,15 @@ func (s *Server) addGOFFRoutes(
 	cFlagConfiguration controller.Controller) {
 	// Grouping the routes
 	v1 := s.apiEcho.Group("/v1")
-	// nolint: staticcheck
-	if s.config.IsAuthenticationEnabled() {
-		v1.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
-			Validator: func(key string, _ echo.Context) (bool, error) {
-				return s.config.APIKeyExists(key), nil
-			},
-			ErrorHandler: middleware2.AuthMiddlewareErrHandler,
-		}))
-	}
+	v1.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
+		Validator: func(key string, _ echo.Context) (bool, error) {
+			return s.config.APIKeyExists(key), nil
+		},
+		ErrorHandler: middleware2.AuthMiddlewareErrHandler,
+		Skipper: func(c echo.Context) bool {
+			return !s.config.IsAuthenticationEnabled()
+		},
+	}))
 	v1.Use(etag.WithConfig(etag.Config{
 		Skipper: func(c echo.Context) bool {
 			switch c.Path() {
