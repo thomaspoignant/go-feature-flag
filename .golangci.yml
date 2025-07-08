@@ -117,6 +117,10 @@ linters:
         - G304
     gosimple:
       checks: [ "all","-S1023" ]
+    gomoddirectives:
+      replace-allow-list:
+        # remove once https://github.com/nikunjy/rules/pull/43 is merged
+        - github.com/nikunjy/rules
   exclusions:
     paths:
       - (^|/)bin($|/)
