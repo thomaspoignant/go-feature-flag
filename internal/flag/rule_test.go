@@ -576,6 +576,22 @@ func TestRule_Evaluate(t *testing.T) {
 			},
 			wantErr: assert.Error,
 		},
+		{
+			name: "Semver comparison with prerelease identifiers",
+			rule: flag.Rule{
+				Name:            testconvert.String("semver_rule"),
+				VariationResult: testconvert.String("variation_A"),
+				Query:           testconvert.String("version gt \"1.0.0-1234\""),
+			},
+			args: args{
+				isDefault: false,
+				user: ffcontext.NewEvaluationContextBuilder("user-key").
+					AddCustom("version", "1.0.0-2345").
+					Build(),
+			},
+			want:    "variation_A",
+			wantErr: assert.NoError,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
