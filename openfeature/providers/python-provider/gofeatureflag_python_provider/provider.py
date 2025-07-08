@@ -49,7 +49,7 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
 
     def __init__(self, **data):
         """
-        Constructor of the provider.
+        Constructor of the provide
         It will initialize the http client for calling the GO Feature Flag relay proxy.
 
         :param data: data coming from pydantic configuration
