@@ -6,7 +6,7 @@ import pytest
 import requests
 import yaml
 from openfeature import api
-from openfeature.flag_evaluation import FlagEvaluationDetails, Reason
+from openfeature.flag_evaluation import FlagEvaluationDetails, Reason, ErrorCode
 
 from gofeatureflag_python_provider.options import GoFeatureFlagOptions
 from gofeatureflag_python_provider.provider import GoFeatureFlagProvider
@@ -20,7 +20,7 @@ def is_responsive(url):
         response = requests.get(url)
         if response.status_code == 200:
             return True
-    except ConnectionError:
+    except requests.exceptions.ConnectionError:
         return False
 
 
@@ -80,6 +80,15 @@ def test_test_websocket_cache_invalidation(goff):
     )
     want.reason = Reason.CACHED
     assert got == want
+
+    # test https://github.com/thomaspoignant/go-feature-flag/issues/3613
+    got = client.get_boolean_details(
+        flag_key="nonexistent-flag-key",
+        default_value=False,
+        evaluation_context=_default_evaluation_ctx,
+    )
+    assert got.error_code == ErrorCode.FLAG_NOT_FOUND
+
     modify_flag_config()
     got = client.get_boolean_details(
         flag_key=flag_key,
