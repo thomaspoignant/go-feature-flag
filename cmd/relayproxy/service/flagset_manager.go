@@ -76,7 +76,7 @@ func NewFlagsetManager(
 
 	flagsetMngr, err := newFlagsetManagerWithFlagsets(config, logger, notifiers)
 	if err != nil {
-		return newFlagsetManagerWithDefaultConfig(config, logger, notifiers)
+		return nil, err
 	}
 	return flagsetMngr, nil
 }

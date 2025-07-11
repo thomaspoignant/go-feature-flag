@@ -64,7 +64,7 @@ func TestNewFlagsetManager(t *testing.T) {
 			wantErr:   false,
 		},
 		{
-			name: "invalid flagsets should fallback to default manager",
+			name: "invalid flagsets should error even if default flagset is valid",
 			config: &config.Config{
 				FlagSets: []config.FlagSet{
 					{
@@ -87,7 +87,7 @@ func TestNewFlagsetManager(t *testing.T) {
 			},
 			logger:    zap.NewNop(),
 			notifiers: []notifier.Notifier{},
-			wantErr:   false,
+			wantErr:   true,
 		},
 	}
 
