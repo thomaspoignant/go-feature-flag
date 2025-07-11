@@ -161,11 +161,11 @@ func (m *flagsetManagerImpl) GetFlagSet(apiKey string) (*ffclient.GoFeatureFlag,
 
 		flagsetName, exists := m.APIKeysToFlagSetName[apiKey]
 		if !exists {
-			return nil, fmt.Errorf("API key not found")
+			return nil, fmt.Errorf("flagset not found for API key")
 		}
 		flagset, exists := m.FlagSets[flagsetName]
 		if !exists {
-			return nil, fmt.Errorf("flagset not found for API key")
+			return nil, fmt.Errorf("impossible to find the flagset with the name %s", flagsetName)
 		}
 		return flagset, nil
 	default:

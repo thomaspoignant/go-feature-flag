@@ -27,7 +27,7 @@ func GetFlagSet(flagsetManager service.FlagsetManager, apiKey string) (*ffclient
 	}
 	flagset, err := flagsetManager.GetFlagSet(apiKey)
 	if err != nil {
-		return nil, echo.NewHTTPError(http.StatusBadRequest, "error while getting flagset: %w", err)
+		return nil, echo.NewHTTPError(http.StatusBadRequest, "error while getting flagset: "+err.Error())
 	}
 	return flagset, nil
 }
