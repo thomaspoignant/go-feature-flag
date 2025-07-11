@@ -78,8 +78,8 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 					StartWithRetrieverError: false,
 					EnablePollingJitter:     false,
 					DisableNotifierOnInit:   false,
-					Retrievers:              &[]config.RetrieverConf{},
-					Exporters:               &[]config.ExporterConf{},
+					Retrievers:              nil,
+					Exporters:               nil,
 				},
 				ListenPort: 1031,
 
@@ -102,14 +102,14 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 				DisableVersionHeader:            false,
 				StartAsAwsLambda:                false,
 				AwsLambdaAdapter:                "",
-				EvaluationContextEnrichment:     map[string]interface{}{},
+				EvaluationContextEnrichment:     nil,
 				OpenTelemetryOtlpEndpoint:       "",
 				MonitoringPort:                  0,
 				PersistentFlagConfigurationFile: "",
 				OtelConfig:                      config.OpenTelemetryConfiguration{},
 				JaegerConfig:                    config.JaegerSamplerConfiguration{},
 				EnvVariablePrefix:               "",
-				FlagSets:                        []config.FlagSet{},
+				FlagSets:                        nil,
 			},
 			wantErr: assert.NoError,
 		},
@@ -218,11 +218,9 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 
 				Version:       "1.X.X",
 				EnableSwagger: true,
-				AuthorizedKeys: config.APIKeys{
-					Evaluation: []string{
-						"apikey1",
-						"apikey2",
-					},
+				APIKeys: []string{
+					"apikey1",
+					"apikey2",
 				},
 				LogLevel: "",
 			},
@@ -250,11 +248,9 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 
 				Version:       "1.X.X",
 				EnableSwagger: true,
-				AuthorizedKeys: config.APIKeys{
-					Evaluation: []string{
-						"apikey1",
-						"apikey2",
-					},
+				APIKeys: []string{
+					"apikey1",
+					"apikey2",
 				},
 				LogLevel: config.DefaultLogLevel,
 			},

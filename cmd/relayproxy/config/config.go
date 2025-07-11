@@ -163,6 +163,10 @@ type Config struct {
 	// Default: false
 	DisableVersionHeader bool `mapstructure:"disableVersionHeader" koanf:"disableversionheader"`
 
+	// Deprecated: use AuthorizedKeys instead
+	// APIKeys list of API keys that authorized to use endpoints
+	APIKeys []string `mapstructure:"apiKeys" koanf:"apikeys"`
+
 	// AuthorizedKeys list of API keys that authorized to use endpoints
 	AuthorizedKeys APIKeys `mapstructure:"authorizedKeys" koanf:"authorizedkeys"`
 

@@ -75,10 +75,9 @@ func (h *FlagConfigurationAPICtrl) Handler(c echo.Context) error {
 		)
 	}
 
-	// retrieve the flagset from the flagset manager
-	flagset, err := h.flagsetManager.GetFlagSet(helper.GetAPIKey(c))
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "error while getting flagset: %w", err)
+	flagset, httpErr := helper.GetFlagSet(h.flagsetManager, helper.GetAPIKey(c))
+	if httpErr != nil {
+		return httpErr
 	}
 
 	flags, err := flagset.GetFlagsFromCache()

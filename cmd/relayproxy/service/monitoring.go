@@ -34,6 +34,9 @@ func (m *monitoringImpl) Health() model.HealthResponse {
 
 // Info returns information about the relay-proxy
 func (m *monitoringImpl) Info() (model.InfoResponse, error) {
+	if m.flagsetManager == nil {
+		return model.InfoResponse{}, fmt.Errorf("flagset manager is not initialized")
+	}
 	flagSets, err := m.flagsetManager.GetFlagSets()
 	if err != nil {
 		return model.InfoResponse{}, err
@@ -50,10 +53,15 @@ func (m *monitoringImpl) Info() (model.InfoResponse, error) {
 	}
 
 	refreshDates := make(map[string]time.Time, len(flagSets))
+	latestRefreshDate := time.Time{}
 	for flagsetName, flagset := range flagSets {
 		refreshDates[flagsetName] = flagset.GetCacheRefreshDate()
+		if refreshDates[flagsetName].After(latestRefreshDate) {
+			latestRefreshDate = refreshDates[flagsetName]
+		}
 	}
 	return model.InfoResponse{
-		Flagsets: refreshDates,
+		Flagsets:           refreshDates,
+		LatestCacheRefresh: &latestRefreshDate,
 	}, nil
 }

@@ -52,6 +52,11 @@ func (c *Config) preloadAPIKeys() {
 			apiKeySet[currentAPIKey] = EvaluationKeyType
 		}
 
+		// add legacy API keys
+		for _, currentAPIKey := range c.APIKeys {
+			apiKeySet[currentAPIKey] = EvaluationKeyType
+		}
+
 		// Add API keys from flag sets
 		for _, flagSet := range c.FlagSets {
 			for _, apiKey := range flagSet.ApiKeys {

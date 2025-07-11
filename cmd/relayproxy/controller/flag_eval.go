@@ -73,10 +73,9 @@ func (h *flagEval) Handler(c echo.Context) error {
 	_, span := tracer.Start(c.Request().Context(), "flagEvaluation")
 	defer span.End()
 
-	// retrieve the flagset from the flagset manager
-	flagset, err := h.flagsetMngr.GetFlagSet(helper.GetAPIKey(c))
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "error while getting flagset: %w", err)
+	flagset, httpErr := helper.GetFlagSet(h.flagsetMngr, helper.GetAPIKey(c))
+	if httpErr != nil {
+		return httpErr
 	}
 
 	flagValue, _ := flagset.RawVariation(flagKey, evaluationCtx, reqBody.DefaultValue)
@@ -97,5 +96,6 @@ func (h *flagEval) Handler(c echo.Context) error {
 	if flagsetName, err := h.flagsetMngr.GetFlagSetName(helper.GetAPIKey(c)); err == nil {
 		span.SetAttributes(attribute.String("flagEvaluation.flagSetName", flagsetName))
 	}
+
 	return c.JSON(http.StatusOK, flagValue)
 }

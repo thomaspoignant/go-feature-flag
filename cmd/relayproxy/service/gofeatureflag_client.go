@@ -105,6 +105,15 @@ func initRetrievers(proxyConf *config.FlagSet) ([]retriever.Retriever, error) {
 			retrievers = append(retrievers, currentRetriever)
 		}
 	}
+
+	if proxyConf.Retriever != nil {
+		currentRetriever, err := initRetriever(proxyConf.Retriever)
+		if err != nil {
+			return nil, err
+		}
+		retrievers = append(retrievers, currentRetriever)
+	}
+
 	return retrievers, nil
 }
 
@@ -156,6 +165,14 @@ func initDataExporters(proxyConf *config.FlagSet) ([]ffclient.DataExporter, erro
 			}
 			exporters = append(exporters, currentExporter)
 		}
+	}
+
+	if proxyConf.Exporter != nil {
+		currentExporter, err := initDataExporter(proxyConf.Exporter)
+		if err != nil {
+			return nil, err
+		}
+		exporters = append(exporters, currentExporter)
 	}
 	return exporters, nil
 }

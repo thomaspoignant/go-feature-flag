@@ -68,10 +68,9 @@ func (h *collectEvalData) Handler(c echo.Context) error {
 	defer span.End()
 	span.SetAttributes(attribute.Int("collectEventData.eventCollectionSize", len(reqBody.Events)))
 
-	// retrieve the flagset from the flagset manager
-	flagset, err := h.flagsetManager.GetFlagSet(helper.GetAPIKey(c))
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "error while getting flagset: %w", err)
+	flagset, httpErr := helper.GetFlagSet(h.flagsetManager, helper.GetAPIKey(c))
+	if httpErr != nil {
+		return httpErr
 	}
 
 	counterTracking := 0

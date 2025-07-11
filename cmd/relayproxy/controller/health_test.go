@@ -8,9 +8,11 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
-	ffclient "github.com/thomaspoignant/go-feature-flag"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/controller"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/notifier"
+	"go.uber.org/zap"
 )
 
 func Test_health_Handler(t *testing.T) {
@@ -34,9 +36,20 @@ func Test_health_Handler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// init GO feature flag
-			goFF, _ := ffclient.New(ffclient.Config{Offline: true})
-			srv := service.NewMonitoring(goFF)
+			// Create config for default mode with offline flag
+			conf := config.Config{
+				CommonFlagSet: config.CommonFlagSet{
+					Retriever: &config.RetrieverConf{
+						Kind: config.FileRetriever,
+						Path: "../testdata/controller/config_flags.yaml",
+					},
+				},
+			}
+
+			flagsetManager, err := service.NewFlagsetManager(&conf, zap.NewNop(), []notifier.Notifier{})
+			assert.NoError(t, err, "impossible to create flagset manager")
+
+			srv := service.NewMonitoring(flagsetManager)
 			healthCtrl := controller.NewHealth(srv)
 
 			e := echo.New()

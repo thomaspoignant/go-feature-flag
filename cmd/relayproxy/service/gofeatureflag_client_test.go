@@ -722,7 +722,7 @@ func TestNewGoFeatureFlagClient_ProxyConfNil(t *testing.T) {
 	goff, err := NewGoFeatureFlagClient(nil, logger, nil)
 
 	// Assert that the function returns nil and an error
-	assert.Nil(t, goff, "Expected GoFeatureFlag client to be nil when proxyConf is nil")
+	assert.Equal(t, ffclient.GoFeatureFlag{}, goff, "Expected GoFeatureFlag client to be nil when proxyConf is nil")
 	assert.EqualError(
 		t,
 		err,

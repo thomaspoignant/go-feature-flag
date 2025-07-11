@@ -61,10 +61,9 @@ func (h *allFlags) Handler(c echo.Context) error {
 	_, span := tracer.Start(c.Request().Context(), "AllFlagsState")
 	defer span.End()
 
-	// retrieve the flagset from the flagset manager
-	flagset, err := h.flagsetManager.GetFlagSet(helper.GetAPIKey(c))
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "error while getting flagset: %w", err)
+	flagset, httpErr := helper.GetFlagSet(h.flagsetManager, helper.GetAPIKey(c))
+	if httpErr != nil {
+		return httpErr
 	}
 
 	var allFlags flagstate.AllFlags

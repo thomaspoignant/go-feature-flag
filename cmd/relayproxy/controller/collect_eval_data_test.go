@@ -1,9 +1,7 @@
 package controller_test
 
 import (
-	"context"
 	"io"
-	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -16,10 +14,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/controller"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
-	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
-	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"go.uber.org/zap"
 )
 
@@ -36,12 +35,53 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 		bodyFile string
 	}
 	tests := []struct {
-		name string
-		args args
-		want want
+		name   string
+		args   args
+		want   want
+		config config.Config
+		apiKey string
 	}{
 		{
 			name: "valid usecase",
+			config: config.Config{
+				CommonFlagSet: config.CommonFlagSet{
+					PollingInterval: 10,
+					Retrievers: &[]config.RetrieverConf{
+						{
+							Kind: "file",
+							Path: configFlagsLocation,
+						},
+					},
+				},
+			},
+			args: args{
+				bodyFile: "../testdata/controller/collect_eval_data/valid_request.json",
+			},
+			want: want{
+				httpCode:          http.StatusOK,
+				bodyFile:          "../testdata/controller/collect_eval_data/valid_response.json",
+				collectedDataFile: "../testdata/controller/collect_eval_data/valid_collected_data.json",
+			},
+		},
+		{
+			name:   "valid usecase flagset",
+			apiKey: "test",
+			config: config.Config{
+				FlagSets: []config.FlagSet{
+					{
+						ApiKeys: []string{"test"},
+						CommonFlagSet: config.CommonFlagSet{
+							PollingInterval: 10,
+							Retrievers: &[]config.RetrieverConf{
+								{
+									Kind: "file",
+									Path: configFlagsLocation,
+								},
+							},
+						},
+					},
+				},
+			},
 			args: args{
 				bodyFile: "../testdata/controller/collect_eval_data/valid_request.json",
 			},
@@ -53,6 +93,45 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 		},
 		{
 			name: "valid with source field",
+			config: config.Config{
+				CommonFlagSet: config.CommonFlagSet{
+					PollingInterval: 10,
+					Retrievers: &[]config.RetrieverConf{
+						{
+							Kind: "file",
+							Path: configFlagsLocation,
+						},
+					},
+				},
+			},
+			args: args{
+				bodyFile: "../testdata/controller/collect_eval_data/request_with_source_field.json",
+			},
+			want: want{
+				httpCode:          http.StatusOK,
+				bodyFile:          "../testdata/controller/collect_eval_data/valid_response.json",
+				collectedDataFile: "../testdata/controller/collect_eval_data/collected_data_with_source_field.json",
+			},
+		},
+		{
+			name:   "valid with source field flagset",
+			apiKey: "test",
+			config: config.Config{
+				FlagSets: []config.FlagSet{
+					{
+						ApiKeys: []string{"test"},
+						CommonFlagSet: config.CommonFlagSet{
+							PollingInterval: 10,
+							Retrievers: &[]config.RetrieverConf{
+								{
+									Kind: "file",
+									Path: configFlagsLocation,
+								},
+							},
+						},
+					},
+				},
+			},
 			args: args{
 				bodyFile: "../testdata/controller/collect_eval_data/request_with_source_field.json",
 			},
@@ -64,6 +143,17 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 		},
 		{
 			name: "invalid json",
+			config: config.Config{
+				CommonFlagSet: config.CommonFlagSet{
+					PollingInterval: 10,
+					Retrievers: &[]config.RetrieverConf{
+						{
+							Kind: "file",
+							Path: configFlagsLocation,
+						},
+					},
+				},
+			},
 			args: args{
 				bodyFile: "../testdata/controller/collect_eval_data/invalid_request.json",
 			},
@@ -78,6 +168,17 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 		},
 		{
 			name: "invalid data field",
+			config: config.Config{
+				CommonFlagSet: config.CommonFlagSet{
+					PollingInterval: 10,
+					Retrievers: &[]config.RetrieverConf{
+						{
+							Kind: "file",
+							Path: configFlagsLocation,
+						},
+					},
+				},
+			},
 			args: args{
 				bodyFile: "../testdata/controller/collect_eval_data/invalid_request_data_null.json",
 			},
@@ -90,6 +191,17 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 		},
 		{
 			name: "be sure that the creation date is a unix timestamp",
+			config: config.Config{
+				CommonFlagSet: config.CommonFlagSet{
+					PollingInterval: 10,
+					Retrievers: &[]config.RetrieverConf{
+						{
+							Kind: "file",
+							Path: configFlagsLocation,
+						},
+					},
+				},
+			},
 			args: args{
 				"../testdata/controller/collect_eval_data/valid_request_with_timestamp_ms.json",
 			},
@@ -101,6 +213,17 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 		},
 		{
 			name: "should have the metadata in the exporter",
+			config: config.Config{
+				CommonFlagSet: config.CommonFlagSet{
+					PollingInterval: 10,
+					Retrievers: &[]config.RetrieverConf{
+						{
+							Kind: "file",
+							Path: configFlagsLocation,
+						},
+					},
+				},
+			},
 			args: args{
 				"../testdata/controller/collect_eval_data/valid_request_metadata.json",
 			},
@@ -117,23 +240,33 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 			assert.NoError(t, err)
 			defer os.Remove(exporterFile.Name())
 
-			// init go-feature-flag
-			goFF, _ := ffclient.New(ffclient.Config{
-				PollingInterval: 10 * time.Second,
-				LeveledLogger:   slog.Default(),
-				Context:         context.Background(),
-				Retriever: &fileretriever.Retriever{
-					Path: configFlagsLocation,
-				},
-				DataExporter: ffclient.DataExporter{
-					FlushInterval:    10 * time.Second,
-					MaxEventInMemory: 10000,
-					Exporter:         &fileexporter.Exporter{Filename: exporterFile.Name()},
-				},
-			})
+			if len(tt.config.FlagSets) > 0 {
+				out := make([]config.FlagSet, len(tt.config.FlagSets))
+				for index, flagSet := range tt.config.FlagSets {
+					flagSet.Exporters = &[]config.ExporterConf{
+						{
+							Kind:     "file",
+							Filename: exporterFile.Name(),
+						},
+					}
+					out[index] = flagSet
+				}
+				tt.config.FlagSets = out
+			} else {
+				tt.config.Exporters = &[]config.ExporterConf{
+					{
+						Kind:     "file",
+						Filename: exporterFile.Name(),
+					},
+				}
+			}
+
+			flagsetManager, err := service.NewFlagsetManager(&tt.config, zap.NewNop(), []notifier.Notifier{})
+			assert.NoError(t, err)
+
 			logger, err := zap.NewDevelopment()
 			require.NoError(t, err)
-			ctrl := controller.NewCollectEvalData(goFF, metric.Metrics{}, logger)
+			ctrl := controller.NewCollectEvalData(flagsetManager, metric.Metrics{}, logger)
 
 			e := echo.New()
 			rec := httptest.NewRecorder()
@@ -148,6 +281,9 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 
 			req := httptest.NewRequest(echo.POST, "/v1/data/collector", bodyReq)
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+			if tt.apiKey != "" {
+				req.Header.Set("Authorization", "Bearer "+tt.apiKey)
+			}
 			c := e.NewContext(req, rec)
 			c.SetPath("/v1/data/collector")
 			handlerErr := ctrl.Handler(c)
@@ -163,8 +299,7 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 				}
 				return
 			}
-
-			goFF.Close()
+			flagsetManager.Close()
 			wantBody, err := os.ReadFile(tt.want.bodyFile)
 			assert.NoError(t, err)
 			wantCollectData, err := os.ReadFile(tt.want.collectedDataFile)
@@ -186,60 +321,126 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 }
 
 func Test_collect_tracking_and_evaluation_events(t *testing.T) {
-	evalExporter, err := os.CreateTemp("", "evalExport.json")
-	assert.NoError(t, err)
-	trackingExporter, err := os.CreateTemp("", "trackExport.json")
-	assert.NoError(t, err)
-	defer func() {
-		_ = os.Remove(evalExporter.Name())
-		_ = os.Remove(trackingExporter.Name())
-	}()
 
-	goFF, _ := ffclient.New(ffclient.Config{
-		PollingInterval: 10 * time.Second,
-		LeveledLogger:   slog.Default(),
-		Context:         context.Background(),
-		Retriever: &fileretriever.Retriever{
-			Path: configFlagsLocation,
-		},
-
-		DataExporters: []ffclient.DataExporter{
-			{
-				FlushInterval:    10 * time.Second,
-				MaxEventInMemory: 10000,
-				Exporter:         &fileexporter.Exporter{Filename: evalExporter.Name()},
-			},
-			{
-				FlushInterval:     10 * time.Second,
-				MaxEventInMemory:  10000,
-				Exporter:          &fileexporter.Exporter{Filename: trackingExporter.Name()},
-				ExporterEventType: ffclient.TrackingEventExporter,
+	tests := []struct {
+		name   string
+		config config.Config
+		apiKey string
+	}{
+		{
+			name: "default mode",
+			config: config.Config{
+				CommonFlagSet: config.CommonFlagSet{
+					PollingInterval: 10,
+					Retrievers: &[]config.RetrieverConf{
+						{
+							Kind: "file",
+							Path: configFlagsLocation,
+						},
+					},
+				},
 			},
 		},
-	})
-	logger, err := zap.NewDevelopment()
-	require.NoError(t, err)
-	ctrl := controller.NewCollectEvalData(goFF, metric.Metrics{}, logger)
+		{
+			name:   "flagset mode",
+			apiKey: "test",
+			config: config.Config{
+				FlagSets: []config.FlagSet{
+					{
+						ApiKeys: []string{"test"},
+						CommonFlagSet: config.CommonFlagSet{
+							PollingInterval: 10,
+							Retrievers: &[]config.RetrieverConf{
+								{
+									Kind: "file",
+									Path: configFlagsLocation,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
 
-	bodyReq, err := os.ReadFile(
-		"../testdata/controller/collect_eval_data/valid_request_mix_tracking_evaluation.json")
-	assert.NoError(t, err)
-	e := echo.New()
-	rec := httptest.NewRecorder()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			evalExporter, err := os.CreateTemp("", "evalExport.json")
+			assert.NoError(t, err)
+			trackingExporter, err := os.CreateTemp("", "trackExport.json")
+			assert.NoError(t, err)
+			defer func() {
+				_ = os.Remove(evalExporter.Name())
+				_ = os.Remove(trackingExporter.Name())
+			}()
 
-	req := httptest.NewRequest(echo.POST, "/v1/data/collector", strings.NewReader(string(bodyReq)))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	c := e.NewContext(req, rec)
-	c.SetPath("/v1/data/collector")
-	handlerErr := ctrl.Handler(c)
-	assert.NoError(t, handlerErr)
-	goFF.Close()
-	evalEvents, err := os.ReadFile(evalExporter.Name())
-	assert.NoError(t, err)
-	want := "{\"kind\":\"feature\",\"contextKind\":\"user\",\"userKey\":\"94a25909-20d8-40cc-8500-fee99b569345\",\"creationDate\":1680246000,\"key\":\"my-feature-flag\",\"variation\":\"admin-variation\",\"value\":\"string\",\"default\":false,\"version\":\"v1.0.0\",\"source\":\"PROVIDER_CACHE\",\"metadata\":{\"environment\":\"production\",\"sdkVersion\":\"v1.0.0\",\"source\":\"my-source\",\"timestamp\":1680246000}}\n"
-	assert.JSONEq(t, want, string(evalEvents), "Invalid exported data")
-	wantTracking := "{\"kind\":\"tracking\",\"contextKind\":\"user\",\"userKey\":\"94a25909-20d8-40cc-8500-fee99b569345\",\"creationDate\":1680246020,\"key\":\"my-feature-flag\",\"evaluationContext\":{\"admin\":true,\"name\":\"john doe\",\"targetingKey\":\"94a25909-20d8-40cc-8500-fee99b569345\"},\"trackingEventDetails\":{\"value\":\"string\",\"version\":\"v1.0.0\"}}\n"
-	trackingEvents, err := os.ReadFile(trackingExporter.Name())
-	assert.NoError(t, err)
-	assert.JSONEq(t, wantTracking, string(trackingEvents), "Invalid exported data")
+			if len(tt.config.FlagSets) > 0 {
+				out := make([]config.FlagSet, len(tt.config.FlagSets))
+
+				for index, flagSet := range tt.config.FlagSets {
+					flagSet.Exporters = &[]config.ExporterConf{
+						{
+							Kind:             config.FileExporter,
+							Filename:         evalExporter.Name(),
+							MaxEventInMemory: 10000,
+							FlushInterval:    int64(10 * time.Second),
+						},
+						{
+							Kind:              config.FileExporter,
+							Filename:          trackingExporter.Name(),
+							ExporterEventType: ffclient.TrackingEventExporter,
+							MaxEventInMemory:  10000,
+							FlushInterval:     int64(10 * time.Second),
+						},
+					}
+					out[index] = flagSet
+				}
+				tt.config.FlagSets = out
+			} else {
+				tt.config.Exporters = &[]config.ExporterConf{
+					{
+						Kind:             "file",
+						Filename:         evalExporter.Name(),
+						MaxEventInMemory: 10000,
+						FlushInterval:    int64(10 * time.Second),
+					},
+					{
+						Kind:              "file",
+						Filename:          trackingExporter.Name(),
+						ExporterEventType: ffclient.TrackingEventExporter,
+						MaxEventInMemory:  10000,
+						FlushInterval:     int64(10 * time.Second),
+					},
+				}
+			}
+
+			flagsetManager, err := service.NewFlagsetManager(&tt.config, zap.NewNop(), []notifier.Notifier{})
+			assert.NoError(t, err)
+			ctrl := controller.NewCollectEvalData(flagsetManager, metric.Metrics{}, zap.NewNop())
+			bodyReq, err := os.ReadFile(
+				"../testdata/controller/collect_eval_data/valid_request_mix_tracking_evaluation.json")
+			assert.NoError(t, err)
+			e := echo.New()
+			rec := httptest.NewRecorder()
+
+			req := httptest.NewRequest(echo.POST, "/v1/data/collector", strings.NewReader(string(bodyReq)))
+			if tt.apiKey != "" {
+				req.Header.Set("Authorization", "Bearer "+tt.apiKey)
+			}
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+			c := e.NewContext(req, rec)
+			c.SetPath("/v1/data/collector")
+			handlerErr := ctrl.Handler(c)
+			assert.NoError(t, handlerErr)
+			flagsetManager.Close()
+			evalEvents, err := os.ReadFile(evalExporter.Name())
+			assert.NoError(t, err)
+			want := "{\"kind\":\"feature\",\"contextKind\":\"user\",\"userKey\":\"94a25909-20d8-40cc-8500-fee99b569345\",\"creationDate\":1680246000,\"key\":\"my-feature-flag\",\"variation\":\"admin-variation\",\"value\":\"string\",\"default\":false,\"version\":\"v1.0.0\",\"source\":\"PROVIDER_CACHE\",\"metadata\":{\"environment\":\"production\",\"sdkVersion\":\"v1.0.0\",\"source\":\"my-source\",\"timestamp\":1680246000}}\n"
+			assert.JSONEq(t, want, string(evalEvents), "Invalid exported data")
+			wantTracking := "{\"kind\":\"tracking\",\"contextKind\":\"user\",\"userKey\":\"94a25909-20d8-40cc-8500-fee99b569345\",\"creationDate\":1680246020,\"key\":\"my-feature-flag\",\"evaluationContext\":{\"admin\":true,\"name\":\"john doe\",\"targetingKey\":\"94a25909-20d8-40cc-8500-fee99b569345\"},\"trackingEventDetails\":{\"value\":\"string\",\"version\":\"v1.0.0\"}}\n"
+			trackingEvents, err := os.ReadFile(trackingExporter.Name())
+			assert.NoError(t, err)
+			assert.JSONEq(t, wantTracking, string(trackingEvents), "Invalid exported data")
+		})
+	}
 }

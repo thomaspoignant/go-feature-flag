@@ -46,10 +46,10 @@ func NewForceFlagsRefresh(flagsetManager service.FlagsetManager, metrics metric.
 // @Router       /admin/v1/retriever/refresh [post]
 func (h *forceFlagsRefresh) Handler(c echo.Context) error {
 	h.metrics.IncForceRefresh()
-	// retrieve the flagset from the flagset manager
-	flagset, err := h.flagsetManager.GetFlagSet(helper.GetAPIKey(c))
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "error while getting flagset: %w", err)
+
+	flagset, httpErr := helper.GetFlagSet(h.flagsetManager, helper.GetAPIKey(c))
+	if httpErr != nil {
+		return httpErr
 	}
 
 	tracer := otel.GetTracerProvider().Tracer(config.OtelTracerName)

@@ -33,6 +33,8 @@ type FlagsetManager interface {
 	GetDefaultFlagSet() *ffclient.GoFeatureFlag
 	// IsDefaultFlagSet returns true if the manager is in default mode (no flagsets configured)
 	IsDefaultFlagSet() bool
+	// Close closes the flagset manager
+	Close()
 }
 
 // flagsetManagerImpl is the internal implementation of FlagsetManager
@@ -84,8 +86,10 @@ func newFlagsetManagerWithDefaultConfig(c *config.Config, logger *zap.Logger, no
 	defaultFlagSet := config.FlagSet{
 		Name: "default",
 		CommonFlagSet: config.CommonFlagSet{
+			Retriever:                       c.Retriever,
 			Retrievers:                      c.Retrievers,
 			Notifiers:                       c.Notifiers,
+			Exporter:                        c.Exporter,
 			Exporters:                       c.Exporters,
 			FileFormat:                      c.FileFormat,
 			PollingInterval:                 c.PollingInterval,
@@ -151,8 +155,20 @@ func (m *flagsetManagerImpl) GetFlagSet(apiKey string) (*ffclient.GoFeatureFlag,
 		if apiKey == "" {
 			return nil, fmt.Errorf("no API key provided")
 		}
-		return m.FlagSets[m.APIKeysToFlagSetName[apiKey]], nil
+
+		flagsetName, exists := m.APIKeysToFlagSetName[apiKey]
+		if !exists {
+			return nil, fmt.Errorf("API key not found")
+		}
+		flagset, exists := m.FlagSets[flagsetName]
+		if !exists {
+			return nil, fmt.Errorf("flagset not found for API key")
+		}
+		return flagset, nil
 	default:
+		if m.DefaultFlagSet == nil {
+			return nil, fmt.Errorf("no configured flagset")
+		}
 		return m.DefaultFlagSet, nil
 	}
 }
@@ -188,4 +204,13 @@ func (m *flagsetManagerImpl) GetDefaultFlagSet() *ffclient.GoFeatureFlag {
 // IsDefaultFlagSet returns true if the manager is in default mode (no flagsets configured)
 func (m *flagsetManagerImpl) IsDefaultFlagSet() bool {
 	return m.mode == flagsetManagerModeDefault
+}
+
+func (m *flagsetManagerImpl) Close() {
+	if m.DefaultFlagSet != nil {
+		m.DefaultFlagSet.Close()
+	}
+	for _, flagset := range m.FlagSets {
+		flagset.Close()
+	}
 }

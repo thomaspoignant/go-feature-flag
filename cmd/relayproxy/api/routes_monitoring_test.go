@@ -42,22 +42,26 @@ func TestPprofEndpointsStarts(t *testing.T) {
 			z, err := zap.NewProduction()
 			require.NoError(t, err)
 			c := &config.Config{
-				Retriever: &config.RetrieverConf{
-					Kind: "file",
-					Path: "../../../testdata/flag-config.yaml",
+				CommonFlagSet: config.CommonFlagSet{
+					Retrievers: &[]config.RetrieverConf{
+						{
+							Kind: "file",
+							Path: "../../../testdata/flag-config.yaml",
+						},
+					},
 				},
 				MonitoringPort: tt.MonitoringPort,
 				ListenPort:     1031,
 				EnablePprof:    tt.EnablePprof,
 			}
 
-			goff, err := service.NewGoFeatureFlagClient(c, z, []notifier.Notifier{})
+			flagsetManager, err := service.NewFlagsetManager(c, z, []notifier.Notifier{})
 			require.NoError(t, err)
 			apiServer := api.New(c, service.Services{
-				MonitoringService:    service.NewMonitoring(goff),
-				WebsocketService:     service.NewWebsocketService(),
-				GOFeatureFlagService: goff,
-				Metrics:              metric.Metrics{},
+				MonitoringService: service.NewMonitoring(flagsetManager),
+				WebsocketService:  service.NewWebsocketService(),
+				FlagsetManager:    flagsetManager,
+				Metrics:           metric.Metrics{},
 			}, z)
 
 			portToCheck := c.ListenPort

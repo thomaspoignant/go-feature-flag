@@ -87,10 +87,9 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 	_, span := tracer.Start(c.Request().Context(), "flagEvaluation")
 	defer span.End()
 
-	// retrieve the flagset from the flagset manager
-	flagset, err := h.flagsetManager.GetFlagSet(helper.GetAPIKey(c))
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "error while getting flagset: %w", err)
+	flagset, httpErr := helper.GetFlagSet(h.flagsetManager, helper.GetAPIKey(c))
+	if httpErr != nil {
+		return httpErr
 	}
 
 	defaultValue := "thisisadefaultvaluethatItest1233%%"
@@ -183,12 +182,17 @@ func (h *EvaluateCtrl) BulkEvaluate(c echo.Context) error {
 	_, span := tracer.Start(c.Request().Context(), "AllFlagsState")
 	defer span.End()
 
+	flagset, httpErr := helper.GetFlagSet(h.flagsetManager, helper.GetAPIKey(c))
+	if httpErr != nil {
+		return httpErr
+	}
+
 	var allFlagsResp flagstate.AllFlags
 	if len(evalCtx.ExtractGOFFProtectedFields().FlagList) > 0 {
 		// if we have a list of flags to evaluate in the evaluation context, we evaluate only those flags.
-		allFlagsResp = h.goFF.GetFlagStates(evalCtx, evalCtx.ExtractGOFFProtectedFields().FlagList)
+		allFlagsResp = flagset.GetFlagStates(evalCtx, evalCtx.ExtractGOFFProtectedFields().FlagList)
 	} else {
-		allFlagsResp = h.goFF.AllFlagsState(evalCtx)
+		allFlagsResp = flagset.AllFlagsState(evalCtx)
 	}
 	for key, val := range allFlagsResp.GetFlags() {
 		value := val.Value
