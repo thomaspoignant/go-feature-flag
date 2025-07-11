@@ -8,9 +8,9 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 )
 
-// GetAPIKey extracts the API key from the Authorization header
-// It supports both Bearer and Basic authentication schemes
-// Returns the API key or an emty string if the header is missing or invalid
+// GetAPIKey extracts the API key from the Authorization header.
+// It removes the "Bearer " prefix if it exists.
+// For other schemes, it returns the raw header value or an empty string if the header is missing.
 func GetAPIKey(c echo.Context) string {
 	apiKey := c.Request().Header.Get("Authorization")
 	if len(apiKey) > 7 && apiKey[:7] == "Bearer " {
