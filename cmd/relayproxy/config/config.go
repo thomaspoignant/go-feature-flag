@@ -368,16 +368,26 @@ func (c *Config) IsValid() error {
 			return err
 		}
 	}
-	if err := c.validateRetrievers(); err != nil {
-		return err
-	}
 
-	if err := c.validateExporters(); err != nil {
-		return err
-	}
+	// Check if we are in flagset mode or default mode
+	if len(c.FlagSets) > 0 {
+		// FlagSet mode: validate each flagset
+		if err := c.validateFlagSets(); err != nil {
+			return err
+		}
+	} else {
+		// Default mode: validate the embedded CommonFlagSet
+		if err := c.validateRetrievers(); err != nil {
+			return err
+		}
 
-	if err := c.validateNotifiers(); err != nil {
-		return err
+		if err := c.validateExporters(); err != nil {
+			return err
+		}
+
+		if err := c.validateNotifiers(); err != nil {
+			return err
+		}
 	}
 
 	// log format validation
@@ -386,6 +396,84 @@ func (c *Config) IsValid() error {
 		break
 	default:
 		return fmt.Errorf("invalid log format %s", c.LogFormat)
+	}
+
+	return nil
+}
+
+// validateFlagSets validates all configured flagsets
+func (c *Config) validateFlagSets() error {
+	if len(c.FlagSets) == 0 {
+		return fmt.Errorf("no flagsets configured")
+	}
+
+	// Track API keys to ensure no duplicates across flagsets
+	apiKeySet := make(map[string]string) // apiKey -> flagsetName
+
+	for _, flagset := range c.FlagSets {
+		// Validate API keys
+		if len(flagset.APIKeys) == 0 {
+			return fmt.Errorf("flagset %s has no API keys", flagset.Name)
+		}
+
+		// Check for duplicate API keys across flagsets
+		for _, apiKey := range flagset.APIKeys {
+			if existingFlagset, exists := apiKeySet[apiKey]; exists {
+				return fmt.Errorf("API key %s is used by multiple flagsets: %s and %s", apiKey, existingFlagset, flagset.Name)
+			}
+			apiKeySet[apiKey] = flagset.Name
+		}
+
+		// Validate the CommonFlagSet embedded in the flagset
+		if err := c.validateFlagSetCommonConfig(&flagset); err != nil {
+			return fmt.Errorf("flagset %s: %w", flagset.Name, err)
+		}
+	}
+
+	return nil
+}
+
+// validateFlagSetCommonConfig validates the CommonFlagSet configuration for a single flagset
+func (c *Config) validateFlagSetCommonConfig(flagset *FlagSet) error {
+	// Validate retrievers
+	if flagset.Retriever == nil && flagset.Retrievers == nil {
+		return fmt.Errorf("no retriever available in the flagset configuration")
+	}
+	if flagset.Retriever != nil {
+		if err := flagset.Retriever.IsValid(); err != nil {
+			return err
+		}
+	}
+
+	if flagset.Retrievers != nil {
+		for i, retriever := range *flagset.Retrievers {
+			if err := retriever.IsValid(); err != nil {
+				return fmt.Errorf("retriever at index %d validation failed: %w", i, err)
+			}
+		}
+	}
+
+	// Validate exporters
+	if flagset.Exporter != nil {
+		if err := flagset.Exporter.IsValid(); err != nil {
+			return err
+		}
+	}
+	if flagset.Exporters != nil {
+		for i, exporter := range *flagset.Exporters {
+			if err := exporter.IsValid(); err != nil {
+				return fmt.Errorf("exporter at index %d validation failed: %w", i, err)
+			}
+		}
+	}
+
+	// Validate notifiers
+	if flagset.Notifiers != nil {
+		for i, notifier := range flagset.Notifiers {
+			if err := notifier.IsValid(); err != nil {
+				return fmt.Errorf("notifier at index %d validation failed: %w", i, err)
+			}
+		}
 	}
 
 	return nil

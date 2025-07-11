@@ -479,6 +479,7 @@ func TestConfig_IsValid(t *testing.T) {
 		LogLevel                string
 		Debug                   bool
 		LogFormat               string
+		FlagSets                []config.FlagSet
 	}
 	tests := []struct {
 		name    string
@@ -661,6 +662,186 @@ func TestConfig_IsValid(t *testing.T) {
 			},
 			wantErr: assert.Error,
 		},
+		{
+			name: "valid flagset configuration",
+			fields: fields{
+				ListenPort: 8080,
+				FlagSets: []config.FlagSet{
+					{
+						Name:    "test-flagset",
+						APIKeys: []string{"test-api-key"},
+						CommonFlagSet: config.CommonFlagSet{
+							Retriever: &config.RetrieverConf{
+								Kind: "file",
+								Path: "../testdata/config/valid-file.yaml",
+							},
+						},
+					},
+				},
+			},
+			wantErr: assert.NoError,
+		},
+		{
+			name: "flagset without name",
+			fields: fields{
+				ListenPort: 8080,
+				FlagSets: []config.FlagSet{
+					{
+						APIKeys: []string{"test-api-key"},
+						CommonFlagSet: config.CommonFlagSet{
+							Retriever: &config.RetrieverConf{
+								Kind: "file",
+								Path: "../testdata/config/valid-file.yaml",
+							},
+						},
+					},
+				},
+			},
+			wantErr: assert.Error,
+		},
+		{
+			name: "flagset without API keys",
+			fields: fields{
+				ListenPort: 8080,
+				FlagSets: []config.FlagSet{
+					{
+						Name: "test-flagset",
+						CommonFlagSet: config.CommonFlagSet{
+							Retriever: &config.RetrieverConf{
+								Kind: "file",
+								Path: "../testdata/config/valid-file.yaml",
+							},
+						},
+					},
+				},
+			},
+			wantErr: assert.Error,
+		},
+		{
+			name: "duplicate API keys across flagsets",
+			fields: fields{
+				ListenPort: 8080,
+				FlagSets: []config.FlagSet{
+					{
+						Name:    "flagset-1",
+						APIKeys: []string{"shared-api-key"},
+						CommonFlagSet: config.CommonFlagSet{
+							Retriever: &config.RetrieverConf{
+								Kind: "file",
+								Path: "../testdata/config/valid-file.yaml",
+							},
+						},
+					},
+					{
+						Name:    "flagset-2",
+						APIKeys: []string{"shared-api-key"},
+						CommonFlagSet: config.CommonFlagSet{
+							Retriever: &config.RetrieverConf{
+								Kind: "file",
+								Path: "../testdata/config/valid-file.yaml",
+							},
+						},
+					},
+				},
+			},
+			wantErr: assert.Error,
+		},
+		{
+			name: "flagset with invalid retriever",
+			fields: fields{
+				ListenPort: 8080,
+				FlagSets: []config.FlagSet{
+					{
+						Name:    "test-flagset",
+						APIKeys: []string{"test-api-key"},
+						CommonFlagSet: config.CommonFlagSet{
+							Retriever: &config.RetrieverConf{
+								Kind: "file",
+								// Missing Path
+							},
+						},
+					},
+				},
+			},
+			wantErr: assert.Error,
+		},
+		{
+			name: "flagset with invalid exporter",
+			fields: fields{
+				ListenPort: 8080,
+				FlagSets: []config.FlagSet{
+					{
+						Name:    "test-flagset",
+						APIKeys: []string{"test-api-key"},
+						CommonFlagSet: config.CommonFlagSet{
+							Retriever: &config.RetrieverConf{
+								Kind: "file",
+								Path: "../testdata/config/valid-file.yaml",
+							},
+							Exporter: &config.ExporterConf{
+								Kind: "webhook",
+								// Missing EndpointURL
+							},
+						},
+					},
+				},
+			},
+			wantErr: assert.Error,
+		},
+		{
+			name: "flagset with invalid notifier",
+			fields: fields{
+				ListenPort: 8080,
+				FlagSets: []config.FlagSet{
+					{
+						Name:    "test-flagset",
+						APIKeys: []string{"test-api-key"},
+						CommonFlagSet: config.CommonFlagSet{
+							Retriever: &config.RetrieverConf{
+								Kind: "file",
+								Path: "../testdata/config/valid-file.yaml",
+							},
+							Notifiers: []config.NotifierConf{
+								{
+									Kind: "webhook",
+									// Missing EndpointURL
+								},
+							},
+						},
+					},
+				},
+			},
+			wantErr: assert.Error,
+		},
+		{
+			name: "multiple valid flagsets",
+			fields: fields{
+				ListenPort: 8080,
+				FlagSets: []config.FlagSet{
+					{
+						Name:    "flagset-1",
+						APIKeys: []string{"api-key-1"},
+						CommonFlagSet: config.CommonFlagSet{
+							Retriever: &config.RetrieverConf{
+								Kind: "file",
+								Path: "../testdata/config/valid-file.yaml",
+							},
+						},
+					},
+					{
+						Name:    "flagset-2",
+						APIKeys: []string{"api-key-2"},
+						CommonFlagSet: config.CommonFlagSet{
+							Retriever: &config.RetrieverConf{
+								Kind: "file",
+								Path: "../testdata/config/valid-file.yaml",
+							},
+						},
+					},
+				},
+			},
+			wantErr: assert.NoError,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -680,6 +861,7 @@ func TestConfig_IsValid(t *testing.T) {
 				Host:          tt.fields.Host,
 				LogLevel:      tt.fields.LogLevel,
 				LogFormat:     tt.fields.LogFormat,
+				FlagSets:      tt.fields.FlagSets,
 			}
 			if tt.name == "empty config" {
 				c = nil
