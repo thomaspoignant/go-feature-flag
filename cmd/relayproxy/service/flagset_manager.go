@@ -120,10 +120,15 @@ func newFlagsetManagerWithFlagsets(
 	flagsets := make(map[string]*ffclient.GoFeatureFlag)
 	apiKeysToFlagSet := make(map[string]string)
 
-	for _, flagset := range config.FlagSets {
+	for index, flagset := range config.FlagSets {
 		client, err := NewGoFeatureFlagClient(&flagset, logger, notifiers)
 		if err != nil {
-			logger.Error("failed to create goff client for flagset", zap.String("flagset", flagset.Name), zap.Error(err))
+			logger.Error(
+				"failed to create goff client for flagset",
+				zap.Int("flagset_index", index),
+				zap.String("flagset", flagset.Name),
+				zap.Error(err),
+			)
 			continue
 		}
 
