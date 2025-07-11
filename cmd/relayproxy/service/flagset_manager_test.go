@@ -4,543 +4,532 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"go.uber.org/zap"
 )
 
 func TestNewFlagsetManager(t *testing.T) {
+	flagConfig := "../testdata/controller/configuration_flags.yaml"
 	tests := []struct {
 		name        string
 		config      *config.Config
 		logger      *zap.Logger
+		notifiers   []notifier.Notifier
 		wantErr     bool
 		expectedErr string
-		expectedLen int // Number of API keys expected in flagsets mode
 	}{
 		{
 			name:        "nil config should return error",
 			config:      nil,
 			logger:      zap.NewNop(),
+			notifiers:   []notifier.Notifier{},
 			wantErr:     true,
 			expectedErr: "configuration is nil",
 		},
 		{
-			name: "empty flagsets should use default config",
+			name: "empty flagsets should create default manager",
 			config: &config.Config{
+				FlagSets: []config.FlagSet{},
 				CommonFlagSet: config.CommonFlagSet{
-					PollingInterval: 60000,
-					FileFormat:      "yaml",
-					Retrievers: &[]config.RetrieverConf{
-						{
-							Kind: "file",
-							Path: "../../../testdata/flag-config.yaml",
-						},
+					Retriever: &config.RetrieverConf{
+						Kind: "file",
+						Path: flagConfig,
 					},
 				},
 			},
-			logger:  zap.NewNop(),
-			wantErr: false,
+			logger:    zap.NewNop(),
+			notifiers: []notifier.Notifier{},
+			wantErr:   false,
 		},
 		{
-			name: "valid flagsets should create flagset manager",
+			name: "valid flagsets should create flagsets manager",
 			config: &config.Config{
 				FlagSets: []config.FlagSet{
 					{
-						Name: "test-flagset-1",
+						Name: "test-flagset",
 						CommonFlagSet: config.CommonFlagSet{
-							PollingInterval: 60000,
-							FileFormat:      "yaml",
-							Retrievers: &[]config.RetrieverConf{
-								{
-									Kind: "file",
-									Path: "../../../testdata/flag-config.yaml",
-								},
+							Retriever: &config.RetrieverConf{
+								Kind: "file",
+								Path: flagConfig,
 							},
 						},
-						ApiKeys: []string{"api-key-1", "api-key-2"},
-					},
-					{
-						Name: "test-flagset-2",
-						CommonFlagSet: config.CommonFlagSet{
-							PollingInterval: 60000,
-							FileFormat:      "yaml",
-							Retrievers: &[]config.RetrieverConf{
-								{
-									Kind: "file",
-									Path: "../../../testdata/flag-config-2nd-file.yaml",
-								},
-							},
-						},
-						ApiKeys: []string{"api-key-3"},
+						ApiKeys: []string{"test-api-key"},
 					},
 				},
 			},
-			logger:      zap.NewNop(),
-			wantErr:     false,
-			expectedLen: 3, // 3 API keys total
+			logger:    zap.NewNop(),
+			notifiers: []notifier.Notifier{},
+			wantErr:   false,
 		},
 		{
-			name: "flagset with empty name should generate UUID",
-			config: &config.Config{
-				FlagSets: []config.FlagSet{
-					{
-						Name: "", // Empty name
-						CommonFlagSet: config.CommonFlagSet{
-							PollingInterval: 60000,
-							FileFormat:      "yaml",
-							Retrievers: &[]config.RetrieverConf{
-								{
-									Kind: "file",
-									Path: "../../../testdata/flag-config.yaml",
-								},
-							},
-						},
-						ApiKeys: []string{"api-key-1"},
-					},
-				},
-			},
-			logger:      zap.NewNop(),
-			wantErr:     false,
-			expectedLen: 1, // 1 API key
-		},
-		{
-			name: "flagset with default name should generate UUID",
-			config: &config.Config{
-				FlagSets: []config.FlagSet{
-					{
-						Name: "default", // Default name
-						CommonFlagSet: config.CommonFlagSet{
-							PollingInterval: 60000,
-							FileFormat:      "yaml",
-							Retrievers: &[]config.RetrieverConf{
-								{
-									Kind: "file",
-									Path: "../../../testdata/flag-config.yaml",
-								},
-							},
-						},
-						ApiKeys: []string{"api-key-1"},
-					},
-				},
-			},
-			logger:      zap.NewNop(),
-			wantErr:     false,
-			expectedLen: 1, // 1 API key
-		},
-		{
-			name: "invalid flagset should fallback to default config",
-			config: &config.Config{
-				CommonFlagSet: config.CommonFlagSet{
-					PollingInterval: 60000,
-					FileFormat:      "yaml",
-					Retrievers: &[]config.RetrieverConf{
-						{
-							Kind: "file",
-							Path: "../../../testdata/flag-config.yaml",
-						},
-					},
-				},
-				FlagSets: []config.FlagSet{
-					{
-						Name: "invalid-flagset",
-						CommonFlagSet: config.CommonFlagSet{
-							PollingInterval: 60000,
-							FileFormat:      "yaml",
-							Retrievers: &[]config.RetrieverConf{
-								{
-									Kind: "file",
-									Path: "non-existent-file.yaml",
-								},
-							},
-						},
-						ApiKeys: []string{"api-key-1"},
-					},
-				},
-			},
-			logger:  zap.NewNop(),
-			wantErr: false, // Should fallback to default config
-		},
-		{
-			name: "mixed valid and invalid flagsets should succeed with valid ones",
+			name: "invalid flagsets should fallback to default manager",
 			config: &config.Config{
 				FlagSets: []config.FlagSet{
 					{
 						Name: "invalid-flagset",
 						CommonFlagSet: config.CommonFlagSet{
-							PollingInterval: 60000,
-							FileFormat:      "yaml",
-							Retrievers: &[]config.RetrieverConf{
-								{
-									Kind: "file",
-									Path: "non-existent-file.yaml",
-								},
+							Retriever: &config.RetrieverConf{
+								Kind: "invalid",
+								Path: flagConfig,
 							},
 						},
-						ApiKeys: []string{"api-key-1"},
+						ApiKeys: []string{"test-api-key"},
 					},
-					{
-						Name: "valid-flagset",
-						CommonFlagSet: config.CommonFlagSet{
-							PollingInterval: 60000,
-							FileFormat:      "yaml",
-							Retrievers: &[]config.RetrieverConf{
-								{
-									Kind: "file",
-									Path: "../../../testdata/flag-config.yaml",
-								},
-							},
-						},
-						ApiKeys: []string{"api-key-2"},
+				},
+				CommonFlagSet: config.CommonFlagSet{
+					Retriever: &config.RetrieverConf{
+						Kind: "file",
+						Path: flagConfig,
 					},
 				},
 			},
-			logger:      zap.NewNop(),
-			wantErr:     false,
-			expectedLen: 1, // Only valid flagset should be created
+			logger:    zap.NewNop(),
+			notifiers: []notifier.Notifier{},
+			wantErr:   false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			manager, err := service.NewFlagsetManager(tt.config, tt.logger, nil)
+			manager, err := service.NewFlagsetManager(tt.config, tt.logger, tt.notifiers)
+
 			if tt.wantErr {
 				assert.Error(t, err)
+				assert.Nil(t, manager)
 				if tt.expectedErr != "" {
-					assert.Contains(t, err.Error(), tt.expectedErr)
+					assert.Equal(t, tt.expectedErr, err.Error())
 				}
-				return
-			}
-			assert.NoError(t, err)
-			assert.NotNil(t, manager)
-
-			// Test interface methods
-			flagSets, err := manager.GetFlagSets()
-			assert.NoError(t, err)
-			assert.NotNil(t, flagSets)
-
-			// Test GetFlagSet with empty API key
-			flagSet, err := manager.GetFlagSet("")
-			assert.NoError(t, err)
-			assert.NotNil(t, flagSet)
-
-			// Test IsDefaultFlagSet
-			if tt.config != nil && len(tt.config.FlagSets) == 0 {
-				assert.True(t, manager.IsDefaultFlagSet())
 			} else {
-				assert.False(t, manager.IsDefaultFlagSet())
-			}
-
-			// Test GetFlagSets
-			flagSetsMap, err := manager.GetFlagSets()
-			assert.NoError(t, err)
-			if tt.config != nil && len(tt.config.FlagSets) > 0 {
-				if !manager.IsDefaultFlagSet() {
-					assert.NotEmpty(t, flagSetsMap)
-				} else {
-					assert.Empty(t, flagSetsMap)
-				}
+				assert.NoError(t, err)
+				assert.NotNil(t, manager)
+				defer manager.Close()
 			}
 		})
 	}
 }
 
 func TestFlagsetManager_GetFlagSet(t *testing.T) {
-	tests := []struct {
-		name           string
-		config         *config.Config
-		logger         *zap.Logger
-		apiKey         string
-		expectedResult bool // Whether we expect a non-nil result
-	}{
-		{
-			name: "default mode with empty API key should return default flagset",
-			config: &config.Config{
-				CommonFlagSet: config.CommonFlagSet{
-					PollingInterval: 60000,
-					FileFormat:      "yaml",
-					Retrievers: &[]config.RetrieverConf{
-						{
+	flagConfig := "../testdata/controller/configuration_flags.yaml"
+
+	// Test flagset mode
+	t.Run("flagset mode", func(t *testing.T) {
+		config := &config.Config{
+			FlagSets: []config.FlagSet{
+				{
+					Name: "test-flagset",
+					CommonFlagSet: config.CommonFlagSet{
+						Retriever: &config.RetrieverConf{
 							Kind: "file",
-							Path: "../../../testdata/flag-config.yaml",
+							Path: flagConfig,
 						},
 					},
+					ApiKeys: []string{"test-api-key"},
 				},
 			},
-			logger:         zap.NewNop(),
-			apiKey:         "",
-			expectedResult: true,
-		},
-		{
-			name: "flagsets mode with valid API key should return flagset",
-			config: &config.Config{
-				FlagSets: []config.FlagSet{
-					{
-						Name: "test-flagset",
-						CommonFlagSet: config.CommonFlagSet{
-							PollingInterval: 60000,
-							FileFormat:      "yaml",
-							Retrievers: &[]config.RetrieverConf{
-								{
-									Kind: "file",
-									Path: "../../../testdata/flag-config.yaml",
-								},
-							},
-						},
-						ApiKeys: []string{"test-api-key"},
-					},
-				},
-			},
-			logger:         zap.NewNop(),
-			apiKey:         "test-api-key",
-			expectedResult: true,
-		},
-		{
-			name: "flagsets mode with invalid API key should return nil",
-			config: &config.Config{
-				FlagSets: []config.FlagSet{
-					{
-						Name: "test-flagset",
-						CommonFlagSet: config.CommonFlagSet{
-							PollingInterval: 60000,
-							FileFormat:      "yaml",
-							Retrievers: &[]config.RetrieverConf{
-								{
-									Kind: "file",
-									Path: "../../../testdata/flag-config.yaml",
-								},
-							},
-						},
-						ApiKeys: []string{"test-api-key"},
-					},
-				},
-			},
-			logger:         zap.NewNop(),
-			apiKey:         "invalid-api-key",
-			expectedResult: false,
-		},
-	}
+		}
+		logger := zap.NewNop()
+		notifiers := []notifier.Notifier{}
+		manager, err := service.NewFlagsetManager(config, logger, notifiers)
+		if err != nil {
+			t.Fatalf("failed to create FlagsetManager: %v", err)
+		}
+		assert.NotNil(t, manager)
+		defer manager.Close()
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			manager, err := service.NewFlagsetManager(tt.config, tt.logger, nil)
-			require.NoError(t, err)
-			require.NotNil(t, manager)
-
-			result, err := manager.GetFlagSet(tt.apiKey)
-			if tt.expectedResult {
-				assert.NoError(t, err)
-				assert.NotNil(t, result)
-			} else {
-				if err == nil {
-					assert.Nil(t, result)
-				} else {
-					assert.Error(t, err)
-				}
-			}
+		t.Run("valid api key", func(t *testing.T) {
+			flagset, err := manager.GetFlagSet("test-api-key")
+			assert.NoError(t, err)
+			assert.NotNil(t, flagset)
 		})
-	}
+		t.Run("invalid api key", func(t *testing.T) {
+			flagset, err := manager.GetFlagSet("invalid-key")
+			assert.Error(t, err)
+			assert.Nil(t, flagset)
+		})
+		t.Run("empty api key", func(t *testing.T) {
+			flagset, err := manager.GetFlagSet("")
+			assert.Error(t, err)
+			assert.Nil(t, flagset)
+		})
+	})
+
+	// Test default mode
+	t.Run("default mode", func(t *testing.T) {
+		config := &config.Config{
+			FlagSets: []config.FlagSet{},
+			CommonFlagSet: config.CommonFlagSet{
+				Retriever: &config.RetrieverConf{
+					Kind: "file",
+					Path: flagConfig,
+				},
+			},
+		}
+		logger := zap.NewNop()
+		notifiers := []notifier.Notifier{}
+		manager, err := service.NewFlagsetManager(config, logger, notifiers)
+		if err != nil {
+			t.Fatalf("failed to create FlagsetManager: %v", err)
+		}
+		assert.NotNil(t, manager)
+		defer manager.Close()
+
+		t.Run("empty api key should work", func(t *testing.T) {
+			flagset, err := manager.GetFlagSet("")
+			assert.NoError(t, err)
+			assert.NotNil(t, flagset)
+		})
+	})
+}
+
+func TestFlagsetManager_GetFlagSetName(t *testing.T) {
+	flagConfig := "../testdata/controller/configuration_flags.yaml"
+
+	// Test flagset mode
+	t.Run("flagset mode", func(t *testing.T) {
+		config := &config.Config{
+			FlagSets: []config.FlagSet{
+				{
+					Name: "test-flagset",
+					CommonFlagSet: config.CommonFlagSet{
+						Retriever: &config.RetrieverConf{
+							Kind: "file",
+							Path: flagConfig,
+						},
+					},
+					ApiKeys: []string{"test-api-key"},
+				},
+			},
+		}
+		logger := zap.NewNop()
+		notifiers := []notifier.Notifier{}
+		manager, err := service.NewFlagsetManager(config, logger, notifiers)
+		if err != nil {
+			t.Fatalf("failed to create FlagsetManager: %v", err)
+		}
+		assert.NotNil(t, manager)
+		defer manager.Close()
+
+		t.Run("existing api key", func(t *testing.T) {
+			name, err := manager.GetFlagSetName("test-api-key")
+			assert.NoError(t, err)
+			assert.Equal(t, "test-flagset", name)
+		})
+		t.Run("non-existing api key", func(t *testing.T) {
+			name, err := manager.GetFlagSetName("invalid-key")
+			assert.Error(t, err)
+			assert.Equal(t, "", name)
+			assert.Equal(t, "no flag set associated to the API key", err.Error())
+		})
+	})
+
+	// Test default mode
+	t.Run("default mode", func(t *testing.T) {
+		config := &config.Config{
+			FlagSets: []config.FlagSet{},
+			CommonFlagSet: config.CommonFlagSet{
+				Retriever: &config.RetrieverConf{
+					Kind: "file",
+					Path: flagConfig,
+				},
+			},
+		}
+		logger := zap.NewNop()
+		notifiers := []notifier.Notifier{}
+		manager, err := service.NewFlagsetManager(config, logger, notifiers)
+		if err != nil {
+			t.Fatalf("failed to create FlagsetManager: %v", err)
+		}
+		assert.NotNil(t, manager)
+		defer manager.Close()
+
+		t.Run("empty api key should return default", func(t *testing.T) {
+			name, err := manager.GetFlagSetName("")
+			assert.NoError(t, err)
+			assert.Equal(t, "default", name)
+		})
+	})
 }
 
 func TestFlagsetManager_GetFlagSets(t *testing.T) {
-	tests := []struct {
-		name           string
-		config         *config.Config
-		logger         *zap.Logger
-		expectedLength int
-	}{
-		{
-			name: "default mode should return single flagset",
-			config: &config.Config{
-				CommonFlagSet: config.CommonFlagSet{
-					PollingInterval: 60000,
-					FileFormat:      "yaml",
-					Retrievers: &[]config.RetrieverConf{
-						{
+	flagConfig := "../testdata/controller/configuration_flags.yaml"
+
+	// Test flagset mode
+	t.Run("flagset mode", func(t *testing.T) {
+		config := &config.Config{
+			FlagSets: []config.FlagSet{
+				{
+					Name: "test-flagset-1",
+					CommonFlagSet: config.CommonFlagSet{
+						Retriever: &config.RetrieverConf{
 							Kind: "file",
-							Path: "../../../testdata/flag-config.yaml",
+							Path: flagConfig,
 						},
 					},
+					ApiKeys: []string{"api-key-1"},
 				},
-			},
-			logger:         zap.NewNop(),
-			expectedLength: 1,
-		},
-		{
-			name: "flagsets mode should return multiple flagsets",
-			config: &config.Config{
-				FlagSets: []config.FlagSet{
-					{
-						Name: "test-flagset-1",
-						CommonFlagSet: config.CommonFlagSet{
-							PollingInterval: 60000,
-							FileFormat:      "yaml",
-							Retrievers: &[]config.RetrieverConf{
-								{
-									Kind: "file",
-									Path: "../../../testdata/flag-config.yaml",
-								},
-							},
-						},
-						ApiKeys: []string{"api-key-1"},
-					},
-					{
-						Name: "test-flagset-2",
-						CommonFlagSet: config.CommonFlagSet{
-							PollingInterval: 60000,
-							FileFormat:      "yaml",
-							Retrievers: &[]config.RetrieverConf{
-								{
-									Kind: "file",
-									Path: "../../../testdata/flag-config-2nd-file.yaml",
-								},
-							},
-						},
-						ApiKeys: []string{"api-key-2"},
-					},
-				},
-			},
-			logger:         zap.NewNop(),
-			expectedLength: 2,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			manager, err := service.NewFlagsetManager(tt.config, tt.logger, nil)
-			require.NoError(t, err)
-			require.NotNil(t, manager)
-
-			flagSets, err := manager.GetFlagSets()
-			assert.NoError(t, err)
-			assert.Len(t, flagSets, tt.expectedLength)
-		})
-	}
-}
-
-func TestFlagsetManager_IsDefaultFlagSet(t *testing.T) {
-	tests := []struct {
-		name           string
-		config         *config.Config
-		logger         *zap.Logger
-		expectedResult bool
-	}{
-		{
-			name: "default mode should return true for IsDefaultFlagSet",
-			config: &config.Config{
-				CommonFlagSet: config.CommonFlagSet{
-					PollingInterval: 60000,
-					FileFormat:      "yaml",
-					Retrievers: &[]config.RetrieverConf{
-						{
+				{
+					Name: "test-flagset-2",
+					CommonFlagSet: config.CommonFlagSet{
+						Retriever: &config.RetrieverConf{
 							Kind: "file",
-							Path: "../../../testdata/flag-config.yaml",
+							Path: flagConfig,
 						},
 					},
+					ApiKeys: []string{"api-key-2"},
 				},
 			},
-			logger:         zap.NewNop(),
-			expectedResult: true,
-		},
-		{
-			name: "flagsets mode should return false for IsDefaultFlagSet",
-			config: &config.Config{
-				FlagSets: []config.FlagSet{
-					{
-						Name: "test-flagset",
-						CommonFlagSet: config.CommonFlagSet{
-							PollingInterval: 60000,
-							FileFormat:      "yaml",
-							Retrievers: &[]config.RetrieverConf{
-								{
-									Kind: "file",
-									Path: "../../../testdata/flag-config.yaml",
-								},
-							},
+		}
+		logger := zap.NewNop()
+		notifiers := []notifier.Notifier{}
+		manager, err := service.NewFlagsetManager(config, logger, notifiers)
+		if err != nil {
+			t.Fatalf("failed to create FlagsetManager: %v", err)
+		}
+		assert.NotNil(t, manager)
+		defer manager.Close()
+
+		flagsets, err := manager.GetFlagSets()
+		assert.NoError(t, err)
+		assert.Len(t, flagsets, 2)
+		assert.Contains(t, flagsets, "test-flagset-1")
+		assert.Contains(t, flagsets, "test-flagset-2")
+	})
+
+	t.Run("flagset mode using default flagset name", func(t *testing.T) {
+		config := &config.Config{
+			FlagSets: []config.FlagSet{
+				{
+					Name: "default",
+					CommonFlagSet: config.CommonFlagSet{
+						Retriever: &config.RetrieverConf{
+							Kind: "file",
+							Path: flagConfig,
 						},
-						ApiKeys: []string{"api-key-1"},
 					},
+					ApiKeys: []string{"api-key-1"},
+				},
+				{
+					Name: "test-flagset-2",
+					CommonFlagSet: config.CommonFlagSet{
+						Retriever: &config.RetrieverConf{
+							Kind: "file",
+							Path: flagConfig,
+						},
+					},
+					ApiKeys: []string{"api-key-2"},
 				},
 			},
-			logger:         zap.NewNop(),
-			expectedResult: false,
-		},
-	}
+		}
+		logger := zap.NewNop()
+		notifiers := []notifier.Notifier{}
+		manager, err := service.NewFlagsetManager(config, logger, notifiers)
+		if err != nil {
+			t.Fatalf("failed to create FlagsetManager: %v", err)
+		}
+		assert.NotNil(t, manager)
+		defer manager.Close()
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			manager, err := service.NewFlagsetManager(tt.config, tt.logger, nil)
-			require.NoError(t, err)
-			require.NotNil(t, manager)
+		flagsets, err := manager.GetFlagSets()
+		assert.NoError(t, err)
+		assert.Len(t, flagsets, 2)
+		assert.NotContains(t, flagsets, "default")
+		assert.Contains(t, flagsets, "test-flagset-2")
+	})
 
-			result := manager.IsDefaultFlagSet()
-			assert.Equal(t, tt.expectedResult, result)
-		})
-	}
+	// Test default mode
+	t.Run("default mode", func(t *testing.T) {
+		config := &config.Config{
+			FlagSets: []config.FlagSet{},
+			CommonFlagSet: config.CommonFlagSet{
+				Retriever: &config.RetrieverConf{
+					Kind: "file",
+					Path: flagConfig,
+				},
+			},
+		}
+		logger := zap.NewNop()
+		notifiers := []notifier.Notifier{}
+		manager, err := service.NewFlagsetManager(config, logger, notifiers)
+		if err != nil {
+			t.Fatalf("failed to create FlagsetManager: %v", err)
+		}
+		assert.NotNil(t, manager)
+		defer manager.Close()
+
+		flagsets, err := manager.GetFlagSets()
+		assert.NoError(t, err)
+		assert.Len(t, flagsets, 1)
+		assert.Contains(t, flagsets, "default")
+	})
 }
 
 func TestFlagsetManager_GetDefaultFlagSet(t *testing.T) {
-	tests := []struct {
-		name           string
-		config         *config.Config
-		logger         *zap.Logger
-		expectedResult bool
-	}{
-		{
-			name: "default mode should return default flagset",
-			config: &config.Config{
-				CommonFlagSet: config.CommonFlagSet{
-					PollingInterval: 60000,
-					FileFormat:      "yaml",
-					Retrievers: &[]config.RetrieverConf{
-						{
+	flagConfig := "../testdata/controller/configuration_flags.yaml"
+
+	// Test default mode
+	t.Run("default mode", func(t *testing.T) {
+		config := &config.Config{
+			FlagSets: []config.FlagSet{},
+			CommonFlagSet: config.CommonFlagSet{
+				Retriever: &config.RetrieverConf{
+					Kind: "file",
+					Path: flagConfig,
+				},
+			},
+		}
+		logger := zap.NewNop()
+		notifiers := []notifier.Notifier{}
+		manager, err := service.NewFlagsetManager(config, logger, notifiers)
+		if err != nil {
+			t.Fatalf("failed to create FlagsetManager: %v", err)
+		}
+		assert.NotNil(t, manager)
+		defer manager.Close()
+
+		defaultFlagset := manager.GetDefaultFlagSet()
+		assert.NotNil(t, defaultFlagset)
+	})
+
+	// Test flagset mode
+	t.Run("flagset mode", func(t *testing.T) {
+		config := &config.Config{
+			FlagSets: []config.FlagSet{
+				{
+					Name: "test-flagset",
+					CommonFlagSet: config.CommonFlagSet{
+						Retriever: &config.RetrieverConf{
 							Kind: "file",
-							Path: "../../../testdata/flag-config.yaml",
+							Path: flagConfig,
 						},
 					},
+					ApiKeys: []string{"test-api-key"},
 				},
 			},
-			logger:         zap.NewNop(),
-			expectedResult: true,
-		},
-		{
-			name: "flagsets mode should return nil default flagset",
-			config: &config.Config{
-				FlagSets: []config.FlagSet{
-					{
-						Name: "test-flagset",
-						CommonFlagSet: config.CommonFlagSet{
-							PollingInterval: 60000,
-							FileFormat:      "yaml",
-							Retrievers: &[]config.RetrieverConf{
-								{
-									Kind: "file",
-									Path: "../../../testdata/flag-config.yaml",
-								},
-							},
+		}
+		logger := zap.NewNop()
+		notifiers := []notifier.Notifier{}
+		manager, err := service.NewFlagsetManager(config, logger, notifiers)
+		if err != nil {
+			t.Fatalf("failed to create FlagsetManager: %v", err)
+		}
+		assert.NotNil(t, manager)
+		defer manager.Close()
+
+		defaultFlagset := manager.GetDefaultFlagSet()
+		assert.Nil(t, defaultFlagset)
+	})
+}
+
+func TestFlagsetManager_IsDefaultFlagSet(t *testing.T) {
+	flagConfig := "../testdata/controller/configuration_flags.yaml"
+
+	// Test default mode
+	t.Run("default mode", func(t *testing.T) {
+		config := &config.Config{
+			FlagSets: []config.FlagSet{},
+			CommonFlagSet: config.CommonFlagSet{
+				Retriever: &config.RetrieverConf{
+					Kind: "file",
+					Path: flagConfig,
+				},
+			},
+		}
+		logger := zap.NewNop()
+		notifiers := []notifier.Notifier{}
+		manager, err := service.NewFlagsetManager(config, logger, notifiers)
+		if err != nil {
+			t.Fatalf("failed to create FlagsetManager: %v", err)
+		}
+		assert.NotNil(t, manager)
+		defer manager.Close()
+
+		assert.True(t, manager.IsDefaultFlagSet())
+	})
+
+	// Test flagset mode
+	t.Run("flagset mode", func(t *testing.T) {
+		config := &config.Config{
+			FlagSets: []config.FlagSet{
+				{
+					Name: "test-flagset",
+					CommonFlagSet: config.CommonFlagSet{
+						Retriever: &config.RetrieverConf{
+							Kind: "file",
+							Path: flagConfig,
 						},
-						ApiKeys: []string{"api-key-1"},
 					},
+					ApiKeys: []string{"test-api-key"},
 				},
 			},
-			logger:         zap.NewNop(),
-			expectedResult: false,
-		},
-	}
+		}
+		logger := zap.NewNop()
+		notifiers := []notifier.Notifier{}
+		manager, err := service.NewFlagsetManager(config, logger, notifiers)
+		if err != nil {
+			t.Fatalf("failed to create FlagsetManager: %v", err)
+		}
+		assert.NotNil(t, manager)
+		defer manager.Close()
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			manager, err := service.NewFlagsetManager(tt.config, tt.logger, nil)
-			require.NoError(t, err)
-			require.NotNil(t, manager)
+		assert.False(t, manager.IsDefaultFlagSet())
+	})
+}
 
-			defaultFlagSet := manager.GetDefaultFlagSet()
-			if tt.expectedResult {
-				assert.NotNil(t, defaultFlagSet)
-			} else {
-				assert.Nil(t, defaultFlagSet)
-			}
+func TestFlagsetManager_Close(t *testing.T) {
+	flagConfig := "../testdata/controller/configuration_flags.yaml"
+
+	// Test default mode
+	t.Run("default mode", func(t *testing.T) {
+		config := &config.Config{
+			FlagSets: []config.FlagSet{},
+			CommonFlagSet: config.CommonFlagSet{
+				Retriever: &config.RetrieverConf{
+					Kind: "file",
+					Path: flagConfig,
+				},
+			},
+		}
+		logger := zap.NewNop()
+		notifiers := []notifier.Notifier{}
+		manager, err := service.NewFlagsetManager(config, logger, notifiers)
+		if err != nil {
+			t.Fatalf("failed to create FlagsetManager: %v", err)
+		}
+		assert.NotNil(t, manager)
+
+		assert.NotPanics(t, func() {
+			manager.Close()
 		})
-	}
+	})
+
+	// Test flagset mode
+	t.Run("flagset mode", func(t *testing.T) {
+		config := &config.Config{
+			FlagSets: []config.FlagSet{
+				{
+					Name: "test-flagset",
+					CommonFlagSet: config.CommonFlagSet{
+						Retriever: &config.RetrieverConf{
+							Kind: "file",
+							Path: flagConfig,
+						},
+					},
+					ApiKeys: []string{"test-api-key"},
+				},
+			},
+		}
+		logger := zap.NewNop()
+		notifiers := []notifier.Notifier{}
+		manager, err := service.NewFlagsetManager(config, logger, notifiers)
+		if err != nil {
+			t.Fatalf("failed to create FlagsetManager: %v", err)
+		}
+		assert.NotNil(t, manager)
+
+		assert.NotPanics(t, func() {
+			manager.Close()
+		})
+	})
 }

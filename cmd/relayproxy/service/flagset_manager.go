@@ -175,7 +175,15 @@ func (m *flagsetManagerImpl) GetFlagSet(apiKey string) (*ffclient.GoFeatureFlag,
 
 // GetFlagSetName returns the name of the flagset linked to the API Key
 func (m *flagsetManagerImpl) GetFlagSetName(apiKey string) (string, error) {
-	return m.APIKeysToFlagSetName[apiKey], nil
+	switch m.mode {
+	case flagsetManagerModeFlagsets:
+		if name, ok := m.APIKeysToFlagSetName[apiKey]; ok {
+			return name, nil
+		}
+		return "", fmt.Errorf("no flag set associated to the API key")
+	default:
+		return defaultFlagSetName, nil
+	}
 }
 
 // GetFlagSets returns the flag sets of the flagset manager.
