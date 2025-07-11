@@ -96,6 +96,15 @@ func NewGoFeatureFlagClient(
 // it handles both the `retriever` and `retrievers` fields
 func initRetrievers(proxyConf *config.FlagSet) ([]retriever.Retriever, error) {
 	retrievers := make([]retriever.Retriever, 0)
+	// if the retriever is set, we add it to the retrievers
+	if proxyConf.Retriever != nil {
+		currentRetriever, err := initRetriever(proxyConf.Retriever)
+		if err != nil {
+			return nil, err
+		}
+		retrievers = append(retrievers, currentRetriever)
+	}
+	// if the retrievers are set, we add them to the retrievers
 	if proxyConf.Retrievers != nil {
 		for _, r := range *proxyConf.Retrievers {
 			currentRetriever, err := initRetriever(&r)
@@ -105,15 +114,6 @@ func initRetrievers(proxyConf *config.FlagSet) ([]retriever.Retriever, error) {
 			retrievers = append(retrievers, currentRetriever)
 		}
 	}
-
-	if proxyConf.Retriever != nil {
-		currentRetriever, err := initRetriever(proxyConf.Retriever)
-		if err != nil {
-			return nil, err
-		}
-		retrievers = append(retrievers, currentRetriever)
-	}
-
 	return retrievers, nil
 }
 
