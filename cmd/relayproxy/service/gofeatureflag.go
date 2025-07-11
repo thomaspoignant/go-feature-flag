@@ -14,14 +14,15 @@ type GoFeatureFlagService struct {
 }
 
 // NewGoFeatureFlag creates a new GoFeatureFlag service.
-func NewGoFeatureFlagService(ctx context.Context, proxyConf config.Config, logger zap.Logger) (GoFeatureFlagService, error) {
+func NewGoFeatureFlagService(
+	ctx context.Context, proxyConf config.Config, logger zap.Logger) (GoFeatureFlagService, error) {
 	clients := make(map[string]*ffclient.GoFeatureFlag)
 	for _, flagSet := range proxyConf.FlagSets {
-		c, err := NewGoFeatureFlagClient(&flagSet, &logger, []notifier.Notifier{})
+		goff, err := NewGoFeatureFlagClient(&flagSet, &logger, []notifier.Notifier{})
 		if err != nil {
 			return GoFeatureFlagService{}, err
 		}
-		clients[flagSet.Name] = &c
+		clients[flagSet.Name] = goff
 	}
 
 	return GoFeatureFlagService{

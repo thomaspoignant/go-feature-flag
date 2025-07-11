@@ -321,7 +321,6 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 }
 
 func Test_collect_tracking_and_evaluation_events(t *testing.T) {
-
 	tests := []struct {
 		name   string
 		config config.Config

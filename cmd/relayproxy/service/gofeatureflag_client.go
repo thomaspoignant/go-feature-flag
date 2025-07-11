@@ -41,27 +41,27 @@ func NewGoFeatureFlagClient(
 	cFlagSet *config.FlagSet,
 	logger *zap.Logger,
 	notifiers []notifier.Notifier,
-) (ffclient.GoFeatureFlag, error) {
+) (*ffclient.GoFeatureFlag, error) {
 	var err error
 	if cFlagSet == nil {
-		return ffclient.GoFeatureFlag{}, fmt.Errorf("proxy config is empty")
+		return nil, fmt.Errorf("proxy config is empty")
 	}
 
 	retrievers, err := initRetrievers(cFlagSet)
 	if err != nil {
-		return ffclient.GoFeatureFlag{}, err
+		return nil, err
 	}
 
 	exporters, err := initDataExporters(cFlagSet)
 	if err != nil {
-		return ffclient.GoFeatureFlag{}, err
+		return nil, err
 	}
 
 	notif := make([]notifier.Notifier, 0)
 	if cFlagSet.Notifiers != nil {
 		notif, err = initNotifier(cFlagSet.Notifiers)
 		if err != nil {
-			return ffclient.GoFeatureFlag{}, err
+			return nil, err
 		}
 	}
 
@@ -87,9 +87,9 @@ func NewGoFeatureFlagClient(
 	}
 	client, err := ffclient.New(f)
 	if err != nil {
-		return ffclient.GoFeatureFlag{}, err
+		return nil, err
 	}
-	return *client, nil
+	return client, nil
 }
 
 // initRetrievers initialize the retrievers based on the configuration

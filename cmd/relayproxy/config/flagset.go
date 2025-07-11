@@ -69,10 +69,10 @@ type CommonFlagSet struct {
 	DisableNotifierOnInit bool `mapstructure:"DisableNotifierOnInit" koanf:"DisableNotifierOnInit"`
 
 	// EvaluationContextEnrichment is the flag to enable the evaluation context enrichment.
-	EvaluationContextEnrichment map[string]interface{} `mapstructure:"evaluationContextEnrichment" koanf:"evaluationcontextenrichment"`
+	EvaluationContextEnrichment map[string]interface{} `mapstructure:"evaluationContextEnrichment" koanf:"evaluationcontextenrichment"` //nolint: lll
 
 	// PersistentFlagConfigurationFile is the flag to enable the persistent flag configuration file.
-	PersistentFlagConfigurationFile string `mapstructure:"persistentFlagConfigurationFile" koanf:"persistentflagconfigurationfile"`
+	PersistentFlagConfigurationFile string `mapstructure:"persistentFlagConfigurationFile" koanf:"persistentflagconfigurationfile"` //nolint: lll
 
 	// Environment is the environment of the flag set.
 	Environment string `mapstructure:"environment" koanf:"environment"`

@@ -88,8 +88,11 @@ func main() {
 		proxyNotifier,
 	})
 	if err != nil {
-		// TODO: rework that part
-		panic(err)
+		logger.ZapLogger.Error(
+			"impossible to start GO Feature Flag, we are not able to initialize the retrieval of flags",
+			zap.Error(err),
+		)
+		return
 	}
 
 	services := service.Services{

@@ -10,5 +10,5 @@ type InfoResponse struct {
 
 	// Flagsets contains the cache refresh dates for each flagset when using multiple flagsets.
 	// The format is {"flagset name": "2022-06-13T11:22:55.941628+02:00"}
-	Flagsets map[string]time.Time `json:"flagsets,omitempty" example:"{\"flagset1\":\"2022-06-13T11:22:55.941628+02:00\",\"flagset2\":\"2022-06-13T11:22:55.941628+02:00\"}"`
+	Flagsets map[string]time.Time `json:"flagsets,omitempty" example:"{\"flagset1\":\"2022-06-13T11:22:55.941628+02:00\",\"flagset2\":\"2022-06-13T11:22:55.941628+02:00\"}"` //nolint: lll
 }

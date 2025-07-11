@@ -62,7 +62,8 @@ type flagsetManagerImpl struct {
 
 // NewFlagsetManager is creating a new FlagsetManager.
 // It is used to retrieve the flagset linked to the API Key.
-func NewFlagsetManager(config *config.Config, logger *zap.Logger, notifiers []notifier.Notifier) (FlagsetManager, error) {
+func NewFlagsetManager(
+	config *config.Config, logger *zap.Logger, notifiers []notifier.Notifier) (FlagsetManager, error) {
 	if config == nil {
 		return nil, fmt.Errorf("configuration is nil")
 	}
@@ -82,7 +83,8 @@ func NewFlagsetManager(config *config.Config, logger *zap.Logger, notifiers []no
 
 // newFlagsetManagerWithDefaultConfig is creating a new FlagsetManager with the default configuration.
 // The default configuration is the top level configuration of the relay proxy.
-func newFlagsetManagerWithDefaultConfig(c *config.Config, logger *zap.Logger, notifiers []notifier.Notifier) (FlagsetManager, error) {
+func newFlagsetManagerWithDefaultConfig(
+	c *config.Config, logger *zap.Logger, notifiers []notifier.Notifier) (FlagsetManager, error) {
 	defaultFlagSet := config.FlagSet{
 		Name: "default",
 		CommonFlagSet: config.CommonFlagSet{
@@ -105,7 +107,7 @@ func newFlagsetManagerWithDefaultConfig(c *config.Config, logger *zap.Logger, no
 		return nil, err
 	}
 	return &flagsetManagerImpl{
-		DefaultFlagSet: &client,
+		DefaultFlagSet: client,
 		config:         c,
 		mode:           flagsetManagerModeDefault,
 	}, nil
@@ -113,7 +115,8 @@ func newFlagsetManagerWithDefaultConfig(c *config.Config, logger *zap.Logger, no
 
 // newFlagsetManagerWithFlagsets is creating a new FlagsetManager with flagsets.
 // It is used to create the flagsets and map them to the APIKeys.
-func newFlagsetManagerWithFlagsets(config *config.Config, logger *zap.Logger, notifiers []notifier.Notifier) (FlagsetManager, error) {
+func newFlagsetManagerWithFlagsets(
+	config *config.Config, logger *zap.Logger, notifiers []notifier.Notifier) (FlagsetManager, error) {
 	flagsets := make(map[string]*ffclient.GoFeatureFlag)
 	apiKeysToFlagSet := make(map[string]string)
 
@@ -130,7 +133,7 @@ func newFlagsetManagerWithFlagsets(config *config.Config, logger *zap.Logger, no
 			flagSetName = uuid.New().String()
 		}
 
-		flagsets[flagSetName] = &client
+		flagsets[flagSetName] = client
 		for _, apiKey := range flagset.ApiKeys {
 			apiKeysToFlagSet[apiKey] = flagSetName
 		}
