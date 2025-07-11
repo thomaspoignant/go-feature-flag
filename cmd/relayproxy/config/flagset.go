@@ -9,7 +9,7 @@ type FlagSet struct {
 	// ApiKeys is the api keys for the flag set.
 	// This will add a new API keys to the list of authorizedKeys.evaluation keys.
 	// This property is madatory for every flagset, we will use it to filter the flag available.
-	ApiKeys []string `mapstructure:"apiKeys,omitempty" koanf:"apikeys"`
+	ApiKeys []string `mapstructure:"apiKeys" koanf:"apikeys"`
 
 	// Name of the flagset.
 	// This allow to identify the flagset.
