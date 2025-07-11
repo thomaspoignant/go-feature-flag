@@ -143,7 +143,7 @@ func TestGetFlagSet(t *testing.T) {
 				if err != nil || flagset == nil {
 					t.Logf("DEBUG: err=%v, flagset=%v", err, flagset)
 				}
-				assert.NoError(t, err)
+				assert.Nil(t, err)
 				assert.NotNil(t, flagset)
 			}
 		})
@@ -165,7 +165,7 @@ func TestGetFlagSet_Integration(t *testing.T) {
 		if err != nil || flagset == nil {
 			t.Logf("DEBUG: err=%v, flagset=%v", err, flagset)
 		}
-		assert.NoError(t, err)
+		assert.Nil(t, err)
 		assert.NotNil(t, flagset)
 	})
 }
