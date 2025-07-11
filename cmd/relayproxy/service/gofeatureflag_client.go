@@ -157,6 +157,13 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 // it handles both the `exporter` and `exporters` fields.
 func initDataExporters(proxyConf *config.FlagSet) ([]ffclient.DataExporter, error) {
 	exporters := make([]ffclient.DataExporter, 0)
+	if proxyConf.Exporter != nil {
+		currentExporter, err := initDataExporter(proxyConf.Exporter)
+		if err != nil {
+			return nil, err
+		}
+		exporters = append(exporters, currentExporter)
+	}
 	if proxyConf.Exporters != nil {
 		for _, e := range *proxyConf.Exporters {
 			currentExporter, err := initDataExporter(&e)
@@ -167,13 +174,6 @@ func initDataExporters(proxyConf *config.FlagSet) ([]ffclient.DataExporter, erro
 		}
 	}
 
-	if proxyConf.Exporter != nil {
-		currentExporter, err := initDataExporter(proxyConf.Exporter)
-		if err != nil {
-			return nil, err
-		}
-		exporters = append(exporters, currentExporter)
-	}
 	return exporters, nil
 }
 
