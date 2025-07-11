@@ -52,7 +52,7 @@ func Test_retriever_refresh_Handler_valid(t *testing.T) {
 	ctrl := controller.NewForceFlagsRefresh(flagsetManager, metric.Metrics{})
 	e := echo.New()
 	rec := httptest.NewRecorder()
-	req := httptest.NewRequest(echo.POST, "/admin/v1/retriver/refresh", nil)
+	req := httptest.NewRequest(echo.POST, "/admin/v1/retriever/refresh", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	c := e.NewContext(req, rec)
 	handlerErr := ctrl.Handler(c)
