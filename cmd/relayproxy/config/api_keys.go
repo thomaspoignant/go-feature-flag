@@ -60,7 +60,7 @@ func (c *Config) preloadAPIKeys() {
 
 			// Add API keys from flag sets
 			for _, flagSet := range c.FlagSets {
-				for _, apiKey := range flagSet.ApiKeys {
+				for _, apiKey := range flagSet.APIKeys {
 					apiKeySet[apiKey] = FlagSetKeyType
 				}
 			}

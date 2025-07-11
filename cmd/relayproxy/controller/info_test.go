@@ -50,7 +50,7 @@ func Test_info_Handler(t *testing.T) {
 				FlagSets: []config.FlagSet{
 					{
 						Name:    "teamA",
-						ApiKeys: []string{"teamA-api-key"},
+						APIKeys: []string{"teamA-api-key"},
 						CommonFlagSet: config.CommonFlagSet{
 							Retriever: &config.RetrieverConf{
 								Kind: config.FileRetriever,
@@ -60,7 +60,7 @@ func Test_info_Handler(t *testing.T) {
 					},
 					{
 						Name:    "teamB",
-						ApiKeys: []string{"teamA-api-key"},
+						APIKeys: []string{"teamA-api-key"},
 						CommonFlagSet: config.CommonFlagSet{
 							Retriever: &config.RetrieverConf{
 								Kind: config.FileRetriever,

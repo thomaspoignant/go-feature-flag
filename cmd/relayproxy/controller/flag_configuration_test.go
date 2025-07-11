@@ -183,7 +183,7 @@ func TestFlagConfigurationAPICtrl_Handler_FlagsetMode(t *testing.T) {
 								Kind: config.LogExporter,
 							},
 						},
-						ApiKeys: []string{"flagset1-api-key"},
+						APIKeys: []string{"flagset1-api-key"},
 					},
 					{
 						Name: "flagset2",
@@ -196,7 +196,7 @@ func TestFlagConfigurationAPICtrl_Handler_FlagsetMode(t *testing.T) {
 								Kind: config.LogExporter,
 							},
 						},
-						ApiKeys: []string{"flagset2-api-key"},
+						APIKeys: []string{"flagset2-api-key"},
 					},
 				},
 			}

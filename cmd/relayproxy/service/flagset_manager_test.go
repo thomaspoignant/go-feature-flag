@@ -55,7 +55,7 @@ func TestNewFlagsetManager(t *testing.T) {
 								Path: flagConfig,
 							},
 						},
-						ApiKeys: []string{"test-api-key"},
+						APIKeys: []string{"test-api-key"},
 					},
 				},
 			},
@@ -75,7 +75,7 @@ func TestNewFlagsetManager(t *testing.T) {
 								Path: flagConfig,
 							},
 						},
-						ApiKeys: []string{"test-api-key"},
+						APIKeys: []string{"test-api-key"},
 					},
 				},
 				CommonFlagSet: config.CommonFlagSet{
@@ -125,7 +125,7 @@ func TestFlagsetManager_GetFlagSet(t *testing.T) {
 							Path: flagConfig,
 						},
 					},
-					ApiKeys: []string{"test-api-key"},
+					APIKeys: []string{"test-api-key"},
 				},
 			},
 		}
@@ -204,7 +204,7 @@ func TestFlagsetManager_GetFlagSetName(t *testing.T) {
 							Path: flagConfig,
 						},
 					},
-					ApiKeys: []string{"test-api-key"},
+					APIKeys: []string{"test-api-key"},
 				},
 			},
 		}
@@ -273,7 +273,7 @@ func TestFlagsetManager_GetFlagSets(t *testing.T) {
 							Path: flagConfig,
 						},
 					},
-					ApiKeys: []string{"api-key-1"},
+					APIKeys: []string{"api-key-1"},
 				},
 				{
 					Name: "test-flagset-2",
@@ -283,7 +283,7 @@ func TestFlagsetManager_GetFlagSets(t *testing.T) {
 							Path: flagConfig,
 						},
 					},
-					ApiKeys: []string{"api-key-2"},
+					APIKeys: []string{"api-key-2"},
 				},
 			},
 		}
@@ -314,7 +314,7 @@ func TestFlagsetManager_GetFlagSets(t *testing.T) {
 							Path: flagConfig,
 						},
 					},
-					ApiKeys: []string{"api-key-1"},
+					APIKeys: []string{"api-key-1"},
 				},
 				{
 					Name: "test-flagset-2",
@@ -324,7 +324,7 @@ func TestFlagsetManager_GetFlagSets(t *testing.T) {
 							Path: flagConfig,
 						},
 					},
-					ApiKeys: []string{"api-key-2"},
+					APIKeys: []string{"api-key-2"},
 				},
 			},
 		}
@@ -410,7 +410,7 @@ func TestFlagsetManager_GetDefaultFlagSet(t *testing.T) {
 							Path: flagConfig,
 						},
 					},
-					ApiKeys: []string{"test-api-key"},
+					APIKeys: []string{"test-api-key"},
 				},
 			},
 		}
@@ -466,7 +466,7 @@ func TestFlagsetManager_IsDefaultFlagSet(t *testing.T) {
 							Path: flagConfig,
 						},
 					},
-					ApiKeys: []string{"test-api-key"},
+					APIKeys: []string{"test-api-key"},
 				},
 			},
 		}
@@ -522,7 +522,7 @@ func TestFlagsetManager_Close(t *testing.T) {
 							Path: flagConfig,
 						},
 					},
-					ApiKeys: []string{"test-api-key"},
+					APIKeys: []string{"test-api-key"},
 				},
 			},
 		}

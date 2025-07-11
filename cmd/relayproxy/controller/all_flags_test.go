@@ -221,7 +221,7 @@ func Test_all_flag_Handler_FlagsetMode(t *testing.T) {
 			conf := config.Config{
 				FlagSets: []config.FlagSet{
 					{
-						ApiKeys: []string{"test-api-key"},
+						APIKeys: []string{"test-api-key"},
 						CommonFlagSet: config.CommonFlagSet{
 							Retriever: &config.RetrieverConf{
 								Kind: config.FileRetriever,

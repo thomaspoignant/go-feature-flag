@@ -69,7 +69,7 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 			config: config.Config{
 				FlagSets: []config.FlagSet{
 					{
-						ApiKeys: []string{"test"},
+						APIKeys: []string{"test"},
 						CommonFlagSet: config.CommonFlagSet{
 							PollingInterval: 10,
 							Retrievers: &[]config.RetrieverConf{
@@ -119,7 +119,7 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 			config: config.Config{
 				FlagSets: []config.FlagSet{
 					{
-						ApiKeys: []string{"test"},
+						APIKeys: []string{"test"},
 						CommonFlagSet: config.CommonFlagSet{
 							PollingInterval: 10,
 							Retrievers: &[]config.RetrieverConf{
@@ -347,7 +347,7 @@ func Test_collect_tracking_and_evaluation_events(t *testing.T) {
 			config: config.Config{
 				FlagSets: []config.FlagSet{
 					{
-						ApiKeys: []string{"test"},
+						APIKeys: []string{"test"},
 						CommonFlagSet: config.CommonFlagSet{
 							PollingInterval: 10,
 							Retrievers: &[]config.RetrieverConf{

@@ -134,7 +134,7 @@ func newFlagsetManagerWithFlagsets(
 		}
 
 		flagsets[flagSetName] = client
-		for _, apiKey := range flagset.ApiKeys {
+		for _, apiKey := range flagset.APIKeys {
 			apiKeysToFlagSet[apiKey] = flagSetName
 		}
 	}

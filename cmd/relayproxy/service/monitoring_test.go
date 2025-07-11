@@ -101,7 +101,7 @@ func TestWithFlagsetsMode(t *testing.T) {
 							{Kind: "file", Path: "../../../testdata/flag-config.yaml"},
 						},
 					},
-					ApiKeys: []string{"test-api-key"},
+					APIKeys: []string{"test-api-key"},
 				},
 			},
 		}, zap.NewNop(), nil)
@@ -127,7 +127,7 @@ func TestWithFlagsetsMode(t *testing.T) {
 							{Kind: "file", Path: "../../../testdata/flag-config.yaml"},
 						},
 					},
-					ApiKeys: []string{"api-key-1"},
+					APIKeys: []string{"api-key-1"},
 				},
 				{
 					Name: "flagset2",
@@ -138,7 +138,7 @@ func TestWithFlagsetsMode(t *testing.T) {
 							{Kind: "file", Path: "../../../testdata/flag-config-2nd-file.yaml"},
 						},
 					},
-					ApiKeys: []string{"api-key-2"},
+					APIKeys: []string{"api-key-2"},
 				},
 			},
 		}, zap.NewNop(), nil)
@@ -165,7 +165,7 @@ func TestWithFlagsetsMode(t *testing.T) {
 							{Kind: "file", Path: "../../../testdata/flag-config.yaml"},
 						},
 					},
-					ApiKeys: []string{"test-api-key"},
+					APIKeys: []string{"test-api-key"},
 				},
 			},
 		}, zap.NewNop(), nil)
@@ -193,7 +193,7 @@ func TestWithFlagsetsMode(t *testing.T) {
 							{Kind: "file", Path: "../../../testdata/non-existent-file.yaml"},
 						},
 					},
-					ApiKeys: []string{"api-key-1"},
+					APIKeys: []string{"api-key-1"},
 				},
 			},
 		}, zap.NewNop(), nil)

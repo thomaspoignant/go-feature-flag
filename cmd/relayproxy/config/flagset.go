@@ -6,10 +6,10 @@ package config
 // It is also used to apply the same API key to all the flags in the flag set.
 type FlagSet struct {
 	CommonFlagSet `mapstructure:",inline" koanf:",squash"`
-	// ApiKeys is the api keys for the flag set.
+	// APIKeys is the api keys for the flag set.
 	// This will add a new API keys to the list of authorizedKeys.evaluation keys.
 	// This property is madatory for every flagset, we will use it to filter the flag available.
-	ApiKeys []string `mapstructure:"apiKeys" koanf:"apikeys"`
+	APIKeys []string `mapstructure:"apiKeys" koanf:"apikeys"`
 
 	// Name of the flagset.
 	// This allow to identify the flagset.

@@ -42,7 +42,7 @@ func TestPIFlagChange_WithConfigChange(t *testing.T) {
 			config: config.Config{
 				FlagSets: []config.FlagSet{
 					{
-						ApiKeys: []string{"test"},
+						APIKeys: []string{"test"},
 						CommonFlagSet: config.CommonFlagSet{
 							PollingInterval: 1000,
 							Retrievers: &[]config.RetrieverConf{
@@ -154,7 +154,7 @@ func TestPIFlagChange_WithoutConfigChange(t *testing.T) {
 			config: config.Config{
 				FlagSets: []config.FlagSet{
 					{
-						ApiKeys: []string{"test"},
+						APIKeys: []string{"test"},
 						CommonFlagSet: config.CommonFlagSet{
 							PollingInterval: 1000,
 							Retrievers: &[]config.RetrieverConf{

@@ -811,7 +811,7 @@ func TestConfig_APIKeyExists(t *testing.T) {
 				FlagSets: []config.FlagSet{
 					{
 						Name:    "test-flag-set",
-						ApiKeys: []string{"flag-set-api-key"},
+						APIKeys: []string{"flag-set-api-key"},
 					},
 				},
 			},
@@ -824,11 +824,11 @@ func TestConfig_APIKeyExists(t *testing.T) {
 				FlagSets: []config.FlagSet{
 					{
 						Name:    "test-flag-set-1",
-						ApiKeys: []string{"flag-set-api-key-1"},
+						APIKeys: []string{"flag-set-api-key-1"},
 					},
 					{
 						Name:    "test-flag-set-2",
-						ApiKeys: []string{"flag-set-api-key-2"},
+						APIKeys: []string{"flag-set-api-key-2"},
 					},
 				},
 			},
@@ -841,11 +841,11 @@ func TestConfig_APIKeyExists(t *testing.T) {
 				FlagSets: []config.FlagSet{
 					{
 						Name:    "test-flag-set-1",
-						ApiKeys: []string{"flag-set-api-key-1"},
+						APIKeys: []string{"flag-set-api-key-1"},
 					},
 					{
 						Name:    "test-flag-set-2",
-						ApiKeys: []string{"flag-set-api-key-2"},
+						APIKeys: []string{"flag-set-api-key-2"},
 					},
 				},
 			},
