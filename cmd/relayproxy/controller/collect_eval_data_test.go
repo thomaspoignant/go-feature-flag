@@ -234,7 +234,8 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 			},
 		},
 	}
-	for _, tt := range tests {
+	for i := range tests {
+		tt := &tests[i]
 		t.Run(tt.name, func(t *testing.T) {
 			exporterFile, err := os.CreateTemp("", "exporter.json")
 			assert.NoError(t, err)
@@ -362,7 +363,8 @@ func Test_collect_tracking_and_evaluation_events(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
+	for i := range tests {
+		tt := &tests[i]
 		t.Run(tt.name, func(t *testing.T) {
 			evalExporter, err := os.CreateTemp("", "evalExport.json")
 			assert.NoError(t, err)

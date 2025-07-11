@@ -29,7 +29,7 @@ func NewOtelService() OtelService {
 }
 
 // Init the OpenTelemetry service
-func (s *OtelService) Init(ctx context.Context, zapLog *zap.Logger, config config.Config) error {
+func (s *OtelService) Init(ctx context.Context, zapLog *zap.Logger, config *config.Config) error {
 	// Require the endpoint to be set either by the openTelemetryOtlpEndpoint
 	// config element or otel.exporter.otlp.endpoint
 	if (config.OpenTelemetryOtlpEndpoint == "" && config.OtelConfig.Exporter.Otlp.Endpoint == "") ||
@@ -137,7 +137,7 @@ func initResource(ctx context.Context, serviceName, version string,
 // JAEGER_SAMPLER_MAX_OPERATIONS).
 // If it's set to any other value, we return nil and sdktrace.NewTracerProvider
 // will set up the initSampler from the environment.
-func initSampler(serviceName string, conf config.Config) (sdktrace.Sampler, error) {
+func initSampler(serviceName string, conf *config.Config) (sdktrace.Sampler, error) {
 	sampler := conf.OtelConfig.Traces.Sampler
 	if sampler == "" {
 		return sdktrace.AlwaysSample(), nil
@@ -167,7 +167,7 @@ const (
 	defaultSamplingMaxOperations   = 256
 )
 
-func jaegerRemoteSamplerOpts(conf config.Config) (string, time.Duration, int, error) {
+func jaegerRemoteSamplerOpts(conf *config.Config) (string, time.Duration, int, error) {
 	samplerURL := defaultSamplerURL
 	if host := conf.JaegerConfig.Sampler.Manager.Host.Port; host != "" {
 		samplerURL = host

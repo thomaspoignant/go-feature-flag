@@ -129,7 +129,7 @@ func (s *Server) Start() {
 	}
 
 	// start the OpenTelemetry tracing service
-	err := s.otelService.Init(context.Background(), s.zapLog, *s.config)
+	err := s.otelService.Init(context.Background(), s.zapLog, s.config)
 	if err != nil {
 		s.zapLog.Error(
 			"error while initializing OTel, continuing without tracing enabled",

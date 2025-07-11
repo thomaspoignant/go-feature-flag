@@ -852,7 +852,8 @@ func TestConfig_APIKeyExists(t *testing.T) {
 			want: false,
 		},
 	}
-	for _, tt := range tests {
+	for i := range tests {
+		tt := &tests[i]
 		t.Run(tt.name, func(t *testing.T) {
 			assert.Equalf(
 				t,
@@ -956,7 +957,8 @@ func TestConfig_APIAdminKeyExists(t *testing.T) {
 			want: false,
 		},
 	}
-	for _, tt := range tests {
+	for i := range tests {
+		tt := &tests[i]
 		t.Run(tt.name, func(t *testing.T) {
 			assert.Equalf(
 				t,
@@ -1415,7 +1417,8 @@ func TestConfig_IsDebugEnabled(t *testing.T) {
 			want: false,
 		},
 	}
-	for _, tt := range tests {
+	for i := range tests {
+		tt := &tests[i]
 		t.Run(tt.name, func(t *testing.T) {
 			assert.Equalf(t, tt.want, tt.cfg.IsDebugEnabled(), "IsDebugEnabled()")
 		})
