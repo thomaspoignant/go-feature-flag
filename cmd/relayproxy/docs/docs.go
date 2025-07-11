@@ -794,9 +794,20 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "cacheRefresh": {
-                    "description": "This is the last time when your flag file was read and store in the internal cache.",
+                    "description": "LatestCacheRefresh is the last time when your flag file was read and stored in the internal cache.\nThis field is used for backward compatibility when using the default flagset.",
                     "type": "string",
                     "example": "2022-06-13T11:22:55.941628+02:00"
+                },
+                "flagsets": {
+                    "description": "Flagsets contains the cache refresh dates for each flagset when using multiple flagsets.\nThe format is {\"flagset name\": \"2022-06-13T11:22:55.941628+02:00\"}",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "example": {
+                        "\"flagset2\"": "\"2022-06-13T11:22:55.941628+02:00\"}",
+                        "{\"flagset1\"": "\"2022-06-13T11:22:55.941628+02:00\""
+                    }
                 }
             }
         },
