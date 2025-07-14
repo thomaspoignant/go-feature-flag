@@ -1,7 +1,6 @@
 package controller_test
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -239,7 +238,6 @@ func TestFlagConfigurationAPICtrl_Handler_FlagsetMode(t *testing.T) {
 			assert.Equal(t, tt.want.statusCode, rec.Code)
 
 			if tt.want.bodyLocation != "" {
-				fmt.Println(rec.Body.String())
 				wantBody, err := os.ReadFile(tt.want.bodyLocation)
 				assert.NoError(t, err)
 				assert.JSONEq(t, string(wantBody), rec.Body.String())
