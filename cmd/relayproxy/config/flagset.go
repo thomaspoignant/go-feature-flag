@@ -66,7 +66,7 @@ type CommonFlagSet struct {
 	// the flags have been added every time you start the application.
 	// Default is set to false for backward compatibility.
 	// Default: false
-	DisableNotifierOnInit bool `mapstructure:"DisableNotifierOnInit" koanf:"disablenotifieroninit"`
+	DisableNotifierOnInit bool `mapstructure:"disableNotifierOnInit" koanf:"disablenotifieroninit"`
 
 	// EvaluationContextEnrichment is the flag to enable the evaluation context enrichment.
 	EvaluationContextEnrichment map[string]interface{} `mapstructure:"evaluationContextEnrichment" koanf:"evaluationcontextenrichment"` //nolint: lll
