@@ -30,13 +30,13 @@ func validateLogLevel(logLevel string) error {
 
 // validateDefaultMode validates the default mode
 func (c *Config) validateDefaultMode() error {
-	if err := c.validateRetrievers(); err != nil {
+	if err := validateRetrievers(c.Retriever, c.Retrievers); err != nil {
 		return err
 	}
-	if err := c.validateExporters(); err != nil {
+	if err := validateExporters(c.Exporter, c.Exporters); err != nil {
 		return err
 	}
-	return c.validateNotifiers()
+	return validateNotifiers(c.Notifiers)
 }
 
 // validateFlagSets validates all configured flagsets
@@ -73,65 +73,36 @@ func (c *Config) validateFlagSets() error {
 
 // validateFlagSetCommonConfig validates the CommonFlagSet configuration for a single flagset
 func (c *Config) validateFlagSetCommonConfig(flagset *FlagSet) error {
-	// Validate retrievers
-	if flagset.Retriever == nil && flagset.Retrievers == nil {
-		return fmt.Errorf("no retriever available in the flagset configuration")
-	}
-	if flagset.Retriever != nil {
-		if err := flagset.Retriever.IsValid(); err != nil {
-			return err
-		}
+	if err := validateRetrievers(flagset.Retriever, flagset.Retrievers); err != nil {
+		return err
 	}
 
-	if flagset.Retrievers != nil {
-		for i, retriever := range *flagset.Retrievers {
-			if err := retriever.IsValid(); err != nil {
-				return fmt.Errorf("retriever at index %d validation failed: %w", i, err)
-			}
-		}
-	}
-
-	// Validate exporters
-	if flagset.Exporter != nil {
-		if err := flagset.Exporter.IsValid(); err != nil {
-			return err
-		}
-	}
-	if flagset.Exporters != nil {
-		for i, exporter := range *flagset.Exporters {
-			if err := exporter.IsValid(); err != nil {
-				return fmt.Errorf("exporter at index %d validation failed: %w", i, err)
-			}
-		}
+	if err := validateExporters(flagset.Exporter, flagset.Exporters); err != nil {
+		return err
 	}
 
 	// Validate notifiers
-	if flagset.Notifiers != nil {
-		for i, notifier := range flagset.Notifiers {
-			if err := notifier.IsValid(); err != nil {
-				return fmt.Errorf("notifier at index %d validation failed: %w", i, err)
-			}
-		}
+	if err := validateNotifiers(flagset.Notifiers); err != nil {
+		return err
 	}
-
 	return nil
 }
 
 // validateRetrievers validates the retrievers
-func (c *Config) validateRetrievers() error {
-	if c.Retriever == nil && c.Retrievers == nil {
+func validateRetrievers(retriever *RetrieverConf, retrievers *[]RetrieverConf) error {
+	if retriever == nil && retrievers == nil {
 		return fmt.Errorf("no retriever available in the configuration")
 	}
-	if c.Retriever != nil {
-		if err := c.Retriever.IsValid(); err != nil {
+	if retriever != nil {
+		if err := retriever.IsValid(); err != nil {
 			return err
 		}
 	}
 
-	if c.Retrievers != nil {
-		for _, retriever := range *c.Retrievers {
+	if retrievers != nil {
+		for i, retriever := range *retrievers {
 			if err := retriever.IsValid(); err != nil {
-				return err
+				return fmt.Errorf("retriever at index %d validation failed: %w", i, err)
 			}
 		}
 	}
@@ -139,16 +110,16 @@ func (c *Config) validateRetrievers() error {
 }
 
 // validateExporters validates the exporters
-func (c *Config) validateExporters() error {
-	if c.Exporter != nil {
-		if err := c.Exporter.IsValid(); err != nil {
+func validateExporters(exporter *ExporterConf, exporters *[]ExporterConf) error {
+	if exporter != nil {
+		if err := exporter.IsValid(); err != nil {
 			return err
 		}
 	}
-	if c.Exporters != nil {
-		for _, exporter := range *c.Exporters {
+	if exporters != nil {
+		for i, exporter := range *exporters {
 			if err := exporter.IsValid(); err != nil {
-				return err
+				return fmt.Errorf("exporter at index %d validation failed: %w", i, err)
 			}
 		}
 	}
@@ -156,11 +127,11 @@ func (c *Config) validateExporters() error {
 }
 
 // validateNotifiers validates the notifiers
-func (c *Config) validateNotifiers() error {
-	if c.Notifiers != nil {
-		for _, notif := range c.Notifiers {
+func validateNotifiers(notifiers []NotifierConf) error {
+	if len(notifiers) > 0 {
+		for i, notif := range notifiers {
 			if err := notif.IsValid(); err != nil {
-				return err
+				return fmt.Errorf("notifier at index %d validation failed: %w", i, err)
 			}
 		}
 	}
