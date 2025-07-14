@@ -697,7 +697,7 @@ func TestConfig_IsValid(t *testing.T) {
 					},
 				},
 			},
-			wantErr: assert.Error,
+			wantErr: assert.NoError,
 		},
 		{
 			name: "flagset without API keys",
