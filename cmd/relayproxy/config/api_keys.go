@@ -46,32 +46,29 @@ func (c *Config) IsAuthenticationEnabled() bool {
 // preloadAPIKeys is storing in the struct all the API Keys available for the relay-proxy.
 func (c *Config) preloadAPIKeys() {
 	c.apiKeyPreload.Do(func() {
-		if c.apiKeysSet == nil {
-			apiKeySet := make(map[string]ApiKeyType)
-			// store all the top level API keys
-			for _, currentAPIKey := range c.AuthorizedKeys.Evaluation {
-				apiKeySet[currentAPIKey] = EvaluationKeyType
-			}
+		if c.apiKeysSet != nil {
+			return
+		}
+		apiKeySet := make(map[string]ApiKeyType)
 
-			// add legacy API keys
-			for _, currentAPIKey := range c.APIKeys {
-				apiKeySet[currentAPIKey] = EvaluationKeyType
+		addAPIKeys := func(keys []string, keyType ApiKeyType) {
+			for _, k := range keys {
+				apiKeySet[k] = keyType
 			}
+		}
 
-			// Add API keys from flag sets
-			for _, flagSet := range c.FlagSets {
-				for _, apiKey := range flagSet.APIKeys {
-					apiKeySet[apiKey] = FlagSetKeyType
-				}
-			}
-			for _, currentAPIKey := range c.AuthorizedKeys.Admin {
-				apiKeySet[currentAPIKey] = AdminKeyType
-			}
-			c.apiKeysSet = apiKeySet
+		addAPIKeys(c.AuthorizedKeys.Evaluation, EvaluationKeyType)
+		addAPIKeys(c.APIKeys, EvaluationKeyType)
 
-			if len(apiKeySet) != 0 {
-				c.forceAuthenticatedRequests = true
-			}
+		for _, flagSet := range c.FlagSets {
+			addAPIKeys(flagSet.APIKeys, FlagSetKeyType)
+		}
+
+		addAPIKeys(c.AuthorizedKeys.Admin, AdminKeyType)
+
+		c.apiKeysSet = apiKeySet
+		if len(apiKeySet) > 0 {
+			c.forceAuthenticatedRequests = true
 		}
 	})
 }
