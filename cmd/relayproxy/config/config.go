@@ -216,6 +216,7 @@ type Config struct {
 	// FlagSets is the list of flag sets configured.
 	// A flag set is a group of flags that can be used to configure the relay proxy.
 	// Each flag set can have its own API key, retrievers, notifiers and exporters.
+	// There is no inheritance between flag sets.
 	FlagSets []FlagSet `mapstructure:"flagSets" koanf:"flagsets"`
 	// ---- private fields
 
