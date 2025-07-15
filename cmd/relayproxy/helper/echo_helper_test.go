@@ -25,9 +25,29 @@ func TestGetAPIKey(t *testing.T) {
 			expectedAPIKey: "my-api-key-123",
 		},
 		{
-			name:           "Bearer token with spaces",
+			name:           "Bearer token with leading/trailing spaces",
 			authorization:  "Bearer   my-api-key-with-spaces  ",
-			expectedAPIKey: "  my-api-key-with-spaces  ",
+			expectedAPIKey: "my-api-key-with-spaces",
+		},
+		{
+			name:           "Bearer token with only leading spaces",
+			authorization:  "Bearer   my-api-key-leading",
+			expectedAPIKey: "my-api-key-leading",
+		},
+		{
+			name:           "Bearer token with only trailing spaces",
+			authorization:  "Bearer my-api-key-trailing   ",
+			expectedAPIKey: "my-api-key-trailing",
+		},
+		{
+			name:           "Bearer token with tabs and newlines",
+			authorization:  "Bearer \t\nmy-api-key-with-tabs\n\t",
+			expectedAPIKey: "my-api-key-with-tabs",
+		},
+		{
+			name:           "Bearer token with mixed whitespace",
+			authorization:  "Bearer \t \n my-api-key-mixed \t \n ",
+			expectedAPIKey: "my-api-key-mixed",
 		},
 		{
 			name:           "Basic auth",
@@ -50,9 +70,14 @@ func TestGetAPIKey(t *testing.T) {
 			expectedAPIKey: "Bearer",
 		},
 		{
-			name:           "Bearer with empty token",
+			name:           "Bearer with single space",
 			authorization:  "Bearer ",
-			expectedAPIKey: "Bearer ", // Function only strips "Bearer " if length > 7
+			expectedAPIKey: "",
+		},
+		{
+			name:           "Bearer with multiple spaces only",
+			authorization:  "Bearer   ",
+			expectedAPIKey: "",
 		},
 		{
 			name:           "Short bearer token",
@@ -68,6 +93,61 @@ func TestGetAPIKey(t *testing.T) {
 			name:           "Bearer with special characters",
 			authorization:  "Bearer my-api-key!@#$%^&*()",
 			expectedAPIKey: "my-api-key!@#$%^&*()",
+		},
+		{
+			name:           "Bearer with spaces around special characters",
+			authorization:  "Bearer   my-api-key!@#$%^&*()  ",
+			expectedAPIKey: "my-api-key!@#$%^&*()",
+		},
+		{
+			name:           "Case insensitive Bearer prefix",
+			authorization:  "bearer my-api-key-lowercase",
+			expectedAPIKey: "my-api-key-lowercase",
+		},
+		{
+			name:           "Mixed case Bearer prefix",
+			authorization:  "BeArEr my-api-key-mixed-case",
+			expectedAPIKey: "my-api-key-mixed-case",
+		},
+		{
+			name:           "Bearer with only whitespace token",
+			authorization:  "Bearer \t\n\r ",
+			expectedAPIKey: "",
+		},
+		{
+			name:           "Bearer with token containing only spaces",
+			authorization:  "Bearer   \t  \n  ",
+			expectedAPIKey: "",
+		},
+		{
+			name:           "Bearer with token that has internal spaces",
+			authorization:  "Bearer my api key with spaces",
+			expectedAPIKey: "my api key with spaces",
+		},
+		{
+			name:           "Bearer with token that has internal spaces and trimming",
+			authorization:  "Bearer   my api key with spaces  ",
+			expectedAPIKey: "my api key with spaces",
+		},
+		{
+			name:           "Non-Bearer scheme with spaces",
+			authorization:  "  CustomScheme my-custom-key  ",
+			expectedAPIKey: "  CustomScheme my-custom-key  ",
+		},
+		{
+			name:           "Non-Bearer scheme without spaces",
+			authorization:  "CustomScheme my-custom-key",
+			expectedAPIKey: "CustomScheme my-custom-key",
+		},
+		{
+			name:           "Authorization header with only spaces",
+			authorization:  "   ",
+			expectedAPIKey: "   ",
+		},
+		{
+			name:           "Authorization header with tabs and newlines",
+			authorization:  "\t\n\r",
+			expectedAPIKey: "\t\n\r",
 		},
 	}
 

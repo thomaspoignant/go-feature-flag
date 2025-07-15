@@ -2,6 +2,7 @@ package helper
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
@@ -13,8 +14,9 @@ import (
 // For other schemes, it returns the raw header value or an empty string if the header is missing.
 func GetAPIKey(c echo.Context) string {
 	apiKey := c.Request().Header.Get("Authorization")
-	if len(apiKey) > 7 && apiKey[:7] == "Bearer " {
-		apiKey = apiKey[7:]
+	const bearerPrefix = "Bearer "
+	if len(apiKey) >= len(bearerPrefix) && strings.EqualFold(apiKey[:len(bearerPrefix)], bearerPrefix) {
+		return strings.TrimSpace(apiKey[len(bearerPrefix):])
 	}
 	return apiKey
 }
