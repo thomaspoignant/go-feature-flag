@@ -31,7 +31,7 @@ func NewInfo(monitoring service.Monitoring) Controller {
 func (h *info) Handler(c echo.Context) error {
 	info, err := h.monitoringService.Info()
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, info)
 }

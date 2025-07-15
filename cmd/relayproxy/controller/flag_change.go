@@ -49,11 +49,11 @@ func (h *FlagChangeAPICtrl) Handler(c echo.Context) error {
 
 	flags, err := flagset.GetFlagsFromCache()
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	res, err := json.Marshal(flags)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	flagHashes := map[string]uint32{}
