@@ -2,8 +2,9 @@
 sidebar_position: 20
 description: How to configure the relay proxy to serve your feature flags.
 ---
-import {Mandatory, NotMandatory} from "@site/src/components/checks/checks";
-import {integrations} from "@site/data/integrations";
+import { Mandatory, NotMandatory } from "@site/src/components/checks/checks";
+import { integrations } from "@site/data/integrations";
+import { Vignette } from "@site/src/components/doc/vignette";
 
 # 🔧 Configuration
 
@@ -12,6 +13,24 @@ In this page, you will find all the configuration options available for the **re
 
 The **GO Feature Flag relay-proxy** is highly configurable and can be adapted to your needs.
 Despite that you can start with a minimum configuration and fine tune it later.
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-8">
+  <Vignette 
+  icon="fa-user" 
+  color="cyan" 
+  link="#getting-started"
+  title="One set of feature flags"
+   description="This is the default way of using GO Feature Flag, it requires a minimum configuration and is easy to setup"
+    />
+
+<Vignette 
+icon="fa-users" 
+color="blue" 
+link="#configure-multiple-flag-sets"
+title="Use multiple flag sets"
+description="Separate your feature flags into different flag sets to give ownership to different teams or different usage."
+/ >
+</div>
 
 ## Configuration file
 The configuration of the **relay proxy** is based on a configuration file that you have to provide.
@@ -43,7 +62,249 @@ retrievers:
 
 All the other options are optional and can be added to the configuration file to fine-tune the **relay proxy**.
 
+## Configure multiple flag sets
 
+Flag sets allow you to organize your feature flags into separate groups, each with its own configuration, API keys, retrievers, exporters, and notifiers. This is particularly useful for:
+
+- **Team isolation**: Different teams can manage their own flags independently
+- **Environment separation**: Separate flags for different environments (dev, staging, prod)
+- **Access control**: Different API keys for different applications or teams
+- **Independent configurations**: Each flag set can have its own retrievers, exporters, and notifiers
+
+### How flag sets work
+
+When you configure flag sets, the relay proxy operates in **flag set mode** instead of the default single configuration mode. In flag set mode:
+
+- Each flag set requires at least one API key
+- API keys are used to route requests to the appropriate flag set
+- Each flag set can have its own retrievers, exporters, and notifiers
+- There is no inheritance between flag sets - each is completely independent
+
+### Basic flag set configuration
+
+```yaml title="goff-proxy.yaml"
+flagSets:
+  - name: teamA
+    apiKeys:
+      - "team-a-api-key-1"
+      - "team-a-api-key-2"
+    retrievers:
+      - kind: file
+        path: /path/to/team-a-flags.yaml
+    exporter:
+      kind: log
+
+  - name: teamB
+    apiKeys:
+      - "team-b-api-key"
+    retrievers:
+      - kind: s3
+        bucket: my-feature-flag-bucket
+        item: team-b/flags.yaml
+    exporters:
+      - kind: s3
+        bucket: evaluation-data-bucket
+    notifiers:
+      - kind: slack
+        webhookUrl: "https://hooks.slack.com/services/..."
+```
+
+### Flag set configuration options
+
+Each flag set supports all the same configuration options as the main relay proxy configuration:
+
+#### `name` (optional)
+- **type**: string
+- **default**: auto-generated UUID
+- **mandatory**: <NotMandatory />
+- A human-readable name for the flag set. If not provided, a UUID will be generated.
+
+#### `apiKeys` (mandatory)
+- **type**: []string
+- **mandatory**: <Mandatory />
+- List of API keys that can access this flag set. Each API key must be unique across all flag sets.
+
+#### `retriever` / `retrievers`
+- **type**: [retriever](#type-retriever) / [][]retriever
+- **mandatory**: <Mandatory />
+- Configuration for retrieving flag configurations. Supports the same options as the main configuration.
+
+#### `exporter` / `exporters`
+- **type**: [exporter](#type-exporter) / [][]exporter
+- **mandatory**: <NotMandatory />
+- Configuration for exporting evaluation data. Supports the same options as the main configuration.
+
+#### `notifier` / `notifiers`
+- **type**: [notifier](#type-notifier) / [][]notifier
+- **mandatory**: <NotMandatory />
+- Configuration for flag change notifications. Supports the same options as the main configuration.
+
+#### `fileFormat`
+- **type**: string
+- **default**: `yaml`
+- **mandatory**: <NotMandatory />
+- Format of the flag configuration files (yaml, json, toml).
+
+#### `pollingInterval`
+- **type**: int
+- **default**: `60000`
+- **mandatory**: <NotMandatory />
+- Polling interval in milliseconds for retrieving flag updates.
+
+#### `startWithRetrieverError`
+- **type**: boolean
+- **default**: `false`
+- **mandatory**: <NotMandatory />
+- Whether to start the flag set even if the retriever fails initially.
+
+#### `enablePollingJitter`
+- **type**: boolean
+- **default**: `false`
+- **mandatory**: <NotMandatory />
+- Whether to add jitter to polling intervals to avoid thundering herd problems.
+
+#### `disableNotifierOnInit`
+- **type**: boolean
+- **default**: `false`
+- **mandatory**: <NotMandatory />
+- Whether to disable notifications when flags are loaded for the first time.
+
+#### `evaluationContextEnrichment`
+- **type**: object
+- **mandatory**: <NotMandatory />
+- Additional context data to merge with all evaluation requests for this flag set.
+
+#### `persistentFlagConfigurationFile`
+- **type**: string
+- **mandatory**: <NotMandatory />
+- File path to persist flag configurations for this flag set.
+
+#### `environment`
+- **type**: string
+- **mandatory**: <NotMandatory />
+- Environment identifier for this flag set (e.g., "dev", "staging", "prod").
+
+### Using flag sets with API keys
+
+When using flag sets, all evaluation requests must include an API key in the `Authorization` header:
+
+```bash
+curl -H "Authorization: Bearer team-a-api-key-1" \
+     -H "Content-Type: application/json" \
+     -d '{"targetingKey": "user123", "flagKey": "my-feature"}' \
+     http://localhost:1031/v1/feature/my-feature/eval
+```
+
+The relay proxy will:
+1. Extract the API key from the `Authorization` header
+2. Find the flag set associated with that API key
+3. Route the evaluation request to that flag set
+4. Return the evaluation result from that flag set's flags
+
+### Migration from single configuration
+
+If you're currently using the single configuration mode and want to migrate to flag sets:
+
+1. **Create flag sets**: Move your existing configuration into one or more flag sets
+2. **Add API keys**: Each flag set needs at least one API key
+3. **Update clients**: Add the appropriate API key to your client requests
+4. **Test**: Verify that evaluations work correctly with the new API key-based routing
+
+### Example: Multi-team setup
+
+```yaml title="goff-proxy.yaml"
+listen: 1031
+logLevel: INFO
+
+flagSets:
+  # Frontend team flags
+  - name: frontend
+    apiKeys:
+      - "frontend-api-key"
+    retrievers:
+      - kind: file
+        path: /flags/frontend-flags.yaml
+    exporters:
+      - kind: s3
+        bucket: frontend-evaluations
+    notifiers:
+      - kind: slack
+        webhookUrl: "https://hooks.slack.com/services/frontend-webhook"
+
+  # Backend team flags
+  - name: backend
+    apiKeys:
+      - "backend-api-key"
+    retrievers:
+      - kind: github
+        repository: my-org/backend-flags
+        path: flags.yaml
+    exporters:
+      - kind: kafka
+        topic: backend-evaluations
+    notifiers:
+      - kind: discord
+        webhookUrl: "https://discord.com/api/webhooks/backend-webhook"
+
+  # Mobile team flags
+  - name: mobile
+    apiKeys:
+      - "mobile-api-key"
+    retrievers:
+      - kind: s3
+        bucket: mobile-feature-flags
+        item: flags.yaml
+    exporters:
+      - kind: file
+        outputDir: /logs/mobile-evaluations
+```
+
+### Example: Environment-based setup
+
+```yaml title="goff-proxy.yaml"
+listen: 1031
+logLevel: INFO
+
+flagSets:
+  # Development environment
+  - name: dev
+    apiKeys:
+      - "dev-api-key"
+    environment: dev
+    retrievers:
+      - kind: file
+        path: /flags/dev-flags.yaml
+    exporters:
+      - kind: log
+
+  # Staging environment
+  - name: staging
+    apiKeys:
+      - "staging-api-key"
+    environment: staging
+    retrievers:
+      - kind: file
+        path: /flags/staging-flags.yaml
+    exporters:
+      - kind: s3
+        bucket: staging-evaluations
+
+  # Production environment
+  - name: production
+    apiKeys:
+      - "prod-api-key"
+    environment: production
+    retrievers:
+      - kind: s3
+        bucket: prod-feature-flags
+        item: flags.yaml
+    exporters:
+      - kind: kafka
+        topic: prod-evaluations
+    notifiers:
+      - kind: slack
+        webhookUrl: "https://hooks.slack.com/services/prod-alerts"
+```
 
 ## Environment variables
 The primary way to configure the relay proxy is through a configuration file, but you can also use environment variables if you prefer.  
@@ -310,6 +571,40 @@ You will be able to forward those traces to your OpenTelemetry solution directly
 - default: **none**
 - mandatory: <NotMandatory />
 
+### `flagSets`
+Flag sets allow you to organize your feature flags into separate groups, each with its own configuration, API keys, retrievers, exporters, and notifiers.
+
+When you configure flag sets, the relay proxy operates in **flag set mode** instead of the default single configuration mode. Each flag set requires at least one API key and can have its own retrievers, exporters, and notifiers.
+
+- option name: `flagSets`
+- type: **[[]flagSet](#type-flagset)**
+- default: **none**
+- mandatory: <NotMandatory />
+- If flag sets are configured, the relay proxy will ignore the top-level `retrievers`, `exporters`, and `notifiers` configuration.
+
+```yaml title="example goff-proxy.yaml"
+flagSets:
+  - name: teamA
+    apiKeys:
+      - "team-a-api-key"
+    retrievers:
+      - kind: file
+        path: /flags/team-a-flags.yaml
+    exporter:
+      kind: log
+
+  - name: teamB
+    apiKeys:
+      - "team-b-api-key"
+    retrievers:
+      - kind: s3
+        bucket: my-feature-flag-bucket
+        item: team-b/flags.yaml
+    exporters:
+      - kind: s3
+        bucket: evaluation-data-bucket
+```
+
 ### `envVariablePrefix`
 Prefix for your environment variables.  
 This useful if you want to avoid any collision with existing environment variables that are not specifically related to the relay proxy.
@@ -402,6 +697,129 @@ Every `exporter` has its own configuration, check the [list of exporters](../int
   )) }
 </ul>
 :::
+
+### type `flagSet`
+A flag set is a collection of flags that are used to evaluate features. It is used to group flags together and to apply the same configuration to them.
+
+```yaml title="example goff-proxy.yaml"
+flagSets:
+  - name: my-flagset
+    apiKeys:
+      - "my-api-key"
+    retrievers:
+      - kind: file
+        path: /flags/my-flags.yaml
+    exporters:
+      - kind: s3
+        bucket: my-evaluations
+    notifiers:
+      - kind: slack
+        webhookUrl: "https://hooks.slack.com/services/..."
+```
+
+#### `flagSet.name`
+The name of the flag set. This allows you to identify the flag set.
+
+- option name: `name`
+- type: **string**
+- default: **auto-generated UUID**
+- mandatory: <NotMandatory />
+
+#### `flagSet.apiKeys`
+The API keys for the flag set. This will add new API keys to the list of authorized keys for evaluation. This property is mandatory for every flag set, as it is used to filter the flags available.
+
+- option name: `apiKeys`
+- type: **[]string**
+- default: **none**
+- mandatory: <Mandatory />
+
+#### `flagSet.retriever` / `flagSet.retrievers`
+Configuration for retrieving flag configurations. Supports the same options as the main configuration.
+
+- option name: `retriever` / `retrievers`
+- type: **[retriever](#type-retriever)** / **[[]retriever](#type-retriever)**
+- default: **none**
+- mandatory: <Mandatory />
+
+#### `flagSet.exporter` / `flagSet.exporters`
+Configuration for exporting evaluation data. Supports the same options as the main configuration.
+
+- option name: `exporter` / `exporters`
+- type: **[exporter](#type-exporter)** / **[[]exporter](#type-exporter)**
+- default: **none**
+- mandatory: <NotMandatory />
+
+#### `flagSet.notifier` / `flagSet.notifiers`
+Configuration for flag change notifications. Supports the same options as the main configuration.
+
+- option name: `notifier` / `notifiers`
+- type: **[notifier](#type-notifier)** / **[[]notifier](#type-notifier)**
+- default: **none**
+- mandatory: <NotMandatory />
+
+#### `flagSet.fileFormat`
+The format of the flag configuration files (yaml, json, toml).
+
+- option name: `fileFormat`
+- type: **string**
+- default: **`yaml`**
+- mandatory: <NotMandatory />
+
+#### `flagSet.pollingInterval`
+The time interval in milliseconds when the relay proxy is reloading the configuration file.
+
+- option name: `pollingInterval`
+- type: **int**
+- default: **`60000`**
+- mandatory: <NotMandatory />
+
+#### `flagSet.startWithRetrieverError`
+If true, the flag set will start even if the retriever fails initially.
+
+- option name: `startWithRetrieverError`
+- type: **boolean**
+- default: **`false`**
+- mandatory: <NotMandatory />
+
+#### `flagSet.enablePollingJitter`
+Set to true if you want to avoid having true periodicity when retrieving your flags.
+
+- option name: `enablePollingJitter`
+- type: **boolean**
+- default: **`false`**
+- mandatory: <NotMandatory />
+
+#### `flagSet.disableNotifierOnInit`
+Set to true if you do not want to call any notifier when the flags are loaded for the first time.
+
+- option name: `disableNotifierOnInit`
+- type: **boolean**
+- default: **`false`**
+- mandatory: <NotMandatory />
+
+#### `flagSet.evaluationContextEnrichment`
+Additional context data to merge with all evaluation requests for this flag set.
+
+- option name: `evaluationContextEnrichment`
+- type: **object**
+- default: **none**
+- mandatory: <NotMandatory />
+
+#### `flagSet.persistentFlagConfigurationFile`
+File path to persist flag configurations for this flag set.
+
+- option name: `persistentFlagConfigurationFile`
+- type: **string**
+- default: **none**
+- mandatory: <NotMandatory />
+
+#### `flagSet.environment`
+Environment identifier for this flag set (e.g., "dev", "staging", "prod").
+
+- option name: `environment`
+- type: **string**
+- default: **none**
+- mandatory: <NotMandatory />
 
 ### type `notifier`
 A [notifier](../concepts/notifier) is the component in charge of sending a notification when a flag changes to a remote system.
