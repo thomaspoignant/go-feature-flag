@@ -1,3 +1,5 @@
+import PropTypes from 'prop-types';
+
 export const Vignette = ({ color, link, title, description, icon }) => {
     const colors = {
         cyan: {
@@ -17,7 +19,7 @@ export const Vignette = ({ color, link, title, description, icon }) => {
         <a href={link} className={colors[color].href}>
             <div className="flex items-center mb-4">
                 <div className={colors[color].icon}>
-                    <i class={`fa-solid ${icon} text-2xl`}></i>
+                    <i className={`fa-solid ${icon} text-2xl`}></i>
                 </div>
                 <h3 className="text-lg font-semibold no-underline text-gray-900 dark:text-gray-100">{title}</h3>
             </div>
@@ -25,8 +27,20 @@ export const Vignette = ({ color, link, title, description, icon }) => {
                 {description}
             </p>
             <div className={colors[color].link}>
-                Get started <i class="fa-solid fa-circle-arrow-right ml-2"></i>
+                Get started <i className="fa-solid fa-circle-arrow-right ml-2"></i>
             </div>
         </a>
     );
+};
+
+Vignette.propTypes = {
+    color: PropTypes.oneOf(['cyan', 'blue']),
+    link: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+    description: PropTypes.string.isRequired,
+    icon: PropTypes.string.isRequired,
+};
+
+Vignette.defaultProps = {
+    color: 'blue',
 };
