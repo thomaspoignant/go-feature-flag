@@ -1169,6 +1169,12 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 				CommonFlagSet: config.CommonFlagSet{
 					PollingInterval: 1000,
 					FileFormat:      "yaml",
+					Notifiers: []config.NotifierConf{
+						{
+							Kind:        config.WebhookNotifier,
+							EndpointURL: "https://xxx.com/notifier",
+						},
+					},
 					Retrievers: &[]config.RetrieverConf{
 						{
 							Kind: "http",
@@ -1231,8 +1237,10 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 				"RETRIEVERS_0_HEADERS_TOKEN":         "token",
 				"RETRIEVERS_2_HEADERS_AUTHORIZATION": "test1",
 				"RETRIEVERS_2_HEADERS_X-GOFF-CUSTOM": "custom",
+				"NOTIFIER_0_ENDPOINTURL":             "https://xxx.com/notifier",
 			},
 		},
+
 		{
 			name:         "Valid file with prefix",
 			fileLocation: "../testdata/config/validate-array-env-file-envprefix.yaml",
@@ -1312,6 +1320,12 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 				CommonFlagSet: config.CommonFlagSet{
 					PollingInterval: 1000,
 					FileFormat:      "yaml",
+					Notifiers: []config.NotifierConf{
+						{
+							Kind:        config.WebhookNotifier,
+							EndpointURL: "http://localhost:8080/webhook",
+						},
+					},
 					Retrievers: &[]config.RetrieverConf{
 						{
 							Kind: "http",
@@ -1451,6 +1465,40 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 				"OTEL_RESOURCE_ATTRIBUTES":    "foo.baz=qux,foo.qux=quux,ignored.key",
 			},
 		},
+		{
+			name:                       "Configure flagset with basic environment variables",
+			fileLocation:               "",
+			disableDefaultFileCreation: true,
+			want: &config.Config{
+				CommonFlagSet: config.CommonFlagSet{
+					PollingInterval:         60000,
+					FileFormat:              "yaml",
+					StartWithRetrieverError: false,
+				},
+				ListenPort: 1031,
+				Host:       "localhost",
+				LogLevel:   config.DefaultLogLevel,
+				Version:    "1.X.X",
+				FlagSets: []config.FlagSet{
+					{
+						Name:    "default",
+						APIKeys: []string{"default-api-key"},
+						CommonFlagSet: config.CommonFlagSet{
+							PollingInterval:         60000,
+							FileFormat:              "yaml",
+							StartWithRetrieverError: false,
+						},
+					},
+				},
+			},
+			wantErr: assert.NoError,
+			envVars: map[string]string{
+				"FLAGSETS_0_NAME":            "default",
+				"FLAGSETS_0_APIKEYS":         "default-api-key",
+				"FLAGSETS_0_FILEFORMAT":      "yaml",
+				"FLAGSETS_0_POLLINGINTERVAL": "60000",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -1475,7 +1523,7 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 			if !tt.wantErr(t, err) {
 				return
 			}
-			assert.Equal(t, tt.want, got, "Config not matching")
+			assert.Equal(t, tt.want, got, "Config not matching expected %v, got %v", tt.want, got)
 		})
 	}
 }

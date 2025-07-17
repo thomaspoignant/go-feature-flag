@@ -235,7 +235,7 @@ func mapEnvVariablesProvider(prefix string, log *zap.Logger) koanf.Provider {
 	return env.ProviderWithValue(prefix, ".", func(key string, v string) (string, interface{}) {
 		key = strings.TrimPrefix(key, prefix)
 		if strings.HasPrefix(key, "RETRIEVERS") ||
-			strings.HasPrefix(key, "NOTIFIERS") ||
+			strings.HasPrefix(key, "NOTIFIER") ||
 			strings.HasPrefix(key, "EXPORTERS") {
 			configMap := k.Raw()
 			err := loadArrayEnv(key, v, configMap)
