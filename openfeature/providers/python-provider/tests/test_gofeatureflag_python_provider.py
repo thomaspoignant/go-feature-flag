@@ -733,6 +733,83 @@ def test_should_call_evaluation_api_with_exporter_metadata(
     assert got == want
 
 
+def test_hook_after_without_anonymous_attribute():
+    from openfeature.hook import HookContext
+    from openfeature.evaluation_context import EvaluationContext
+    from openfeature.flag_evaluation import FlagEvaluationDetails, Reason
+
+    def _create_hook_context_without_anonymous():
+        ctx = HookContext(
+            flag_key="test_key",
+            flag_type=bool,
+            default_value=False,
+            evaluation_context=EvaluationContext(
+                targeting_key="test_user_key",
+                attributes={"email": "test@example.com"},  # No anonymous attribute
+            ),
+            client_metadata=None,
+            provider_metadata=None,
+        )
+        return ctx
+
+    hook = DataCollectorHook(
+        options=GoFeatureFlagOptions(endpoint="http://test.com"), http_client=Mock()
+    )
+    # Clear any previous events from shared state
+    hook._event_queue = []
+
+    details = FlagEvaluationDetails(
+        flag_key="test_key", value=True, reason=Reason.CACHED, variant="true_variant"
+    )
+
+    # This should not raise a KeyError
+    hook.after(
+        hook_context=_create_hook_context_without_anonymous(),
+        details=details,
+        hints={},
+    )
+
+    # Verify the event was created with contextKind "user" (default when anonymous is missing)
+    assert len(hook._event_queue) == 1
+    assert hook._event_queue[0].contextKind == "user"
+
+
+def test_hook_error_without_anonymous_attribute():
+    from openfeature.hook import HookContext
+    from openfeature.evaluation_context import EvaluationContext
+
+    def _create_hook_context_without_anonymous():
+        ctx = HookContext(
+            flag_key="test_key",
+            flag_type=bool,
+            default_value=False,
+            evaluation_context=EvaluationContext(
+                targeting_key="test_user_key",
+                attributes={"email": "test@example.com"},  # No anonymous attribute
+            ),
+            client_metadata=None,
+            provider_metadata=None,
+        )
+        return ctx
+
+    hook = DataCollectorHook(
+        options=GoFeatureFlagOptions(endpoint="http://test.com"), http_client=Mock()
+    )
+    # Clear any previous events from shared state
+    hook._event_queue = []
+
+    # This should not raise a KeyError
+    hook.error(
+        hook_context=_create_hook_context_without_anonymous(),
+        exception=Exception("test exception raised"),
+        hints={},
+    )
+
+    # Verify the event was created with contextKind "user" (default when anonymous is missing)
+    assert len(hook._event_queue) == 1
+    assert hook._event_queue[0].contextKind == "user"
+
+
 def _read_mock_file(flag_key: str) -> str:
     # This hacky if is here to make test run inside pycharm and from the root of the project
     if os.getcwd().endswith("/tests"):
