@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -19,7 +20,7 @@ func mapEnvVariablesProvider(prefix string, log *zap.Logger) koanf.Provider {
 			strings.HasPrefix(key, "FLAGSETS"),
 			strings.HasPrefix(key, "EXPORTERS"):
 			configMap := k.Raw()
-			err := loadArrayEnv(key, v, configMap)
+			modifiedConfigMap, err := loadArrayEnv(key, v, configMap)
 			if err != nil {
 				log.Error(
 					"config: error loading array env",
@@ -29,7 +30,14 @@ func mapEnvVariablesProvider(prefix string, log *zap.Logger) koanf.Provider {
 				)
 				return key, v
 			}
+			// Update the global config with the modified configMap
+			for configKey, configValue := range modifiedConfigMap {
+				_ = k.Set(configKey, configValue)
+			}
 			return key, v
+			// case strings.HasPrefix(key, "FLAGSETS"):
+			// 	parseFlagSetsEnv(key, v, log)
+			// return key, v
 		case strings.HasSuffix(key, "KAFKA_ADDRESSES"):
 			return "exporter.kafka.addresses", strings.Split(v, ",")
 		case strings.HasPrefix(key, "AUTHORIZEDKEYS_EVALUATION"):
@@ -46,7 +54,7 @@ func mapEnvVariablesProvider(prefix string, log *zap.Logger) koanf.Provider {
 }
 
 // Load the ENV Like:RETRIEVERS_0_HEADERS_AUTHORIZATION
-func loadArrayEnv(s string, v string, configMap map[string]interface{}) error {
+func loadArrayEnv(s string, v string, configMap map[string]interface{}) (map[string]interface{}, error) {
 	paths := strings.Split(s, "_")
 	for i, str := range paths {
 		paths[i] = strings.ToLower(str)
@@ -55,7 +63,7 @@ func loadArrayEnv(s string, v string, configMap map[string]interface{}) error {
 	if configArray, ok := configMap[prefixKey].([]interface{}); ok {
 		index, err := strconv.Atoi(paths[1])
 		if err != nil {
-			return err
+			return configMap, err
 		}
 		var configItem map[string]interface{}
 		outRange := index > len(configArray)-1
@@ -97,9 +105,36 @@ func loadArrayEnv(s string, v string, configMap map[string]interface{}) error {
 		} else {
 			configArray[index] = configItem
 		}
-		_ = k.Set(prefixKey, configArray)
+		configMap[prefixKey] = configArray
 	}
-	return nil
+	return configMap, nil
+}
+
+func parseFlagSetsEnv(key, v string, log *zap.Logger) {
+	configMap := k.Raw()
+	flagSets, ok := configMap["flagsets"].([]interface{})
+	if !ok {
+		flagSets = make([]interface{}, 0)
+		// TODO - should ignore if index to be created is not the last one
+	}
+	flagSets = configMap["flagsets"].([]interface{})
+	keyIndex := strings.Split(key, "_")[1]
+	index, err := strconv.Atoi(keyIndex)
+	if err != nil {
+		log.Error("config: error loading FLAGSETS - incorrect format",
+			zap.String("key", key), zap.String("value", v))
+		return
+	}
+	flagSet := flagSets[index]
+	flagSetMap, ok := flagSet.(map[string]interface{})
+	if !ok {
+		log.Error("config: error loading FLAGSETS - incorrect format",
+			zap.String("key", key), zap.String("value", v))
+		return
+	}
+	fmt.Println(flagSetMap)
+
+	panic("unimplemented")
 }
 
 // parseOtelResourceAttributes parses the OTEL_RESOURCE_ATTRIBUTES environment variable
