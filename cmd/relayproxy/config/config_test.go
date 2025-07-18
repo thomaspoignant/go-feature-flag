@@ -56,8 +56,8 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 			wantErr: assert.NoError,
 		},
 		{
-			name:         "Valid yaml file with notifier",
-			fileLocation: "../testdata/config/valid-yaml-notifier.yaml",
+			name:         "Valid yaml file with legacy key notifier (without s)",
+			fileLocation: "../testdata/config/valid-file-notifier.yaml",
 			want: &config.Config{
 				CommonFlagSet: config.CommonFlagSet{
 					PollingInterval: 1000,
@@ -69,47 +69,63 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 					Exporter: &config.ExporterConf{
 						Kind: "log",
 					},
-					Notifiers: []config.NotifierConf{
-						{
-							Kind:       "slack",
-							WebhookURL: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
-						},
-					},
 					StartWithRetrieverError: false,
-					EnablePollingJitter:     false,
-					DisableNotifierOnInit:   false,
-					Retrievers:              nil,
-					Exporters:               nil,
+					FixNotifiers: []config.NotifierConf{
+						config.NotifierConf{Kind: config.DiscordNotifier, WebhookURL: "https://discord.com/api/webhooks/yyyy/xxxxxxx"},
+					},
 				},
-				ListenPort: 1031,
-
-				Host: "localhost",
-
+				ListenPort:    1031,
+				Host:          "localhost",
 				Version:       "1.X.X",
 				EnableSwagger: true,
 				AuthorizedKeys: config.APIKeys{
-					Admin: nil,
+					Admin: []string{
+						"apikey3",
+					},
 					Evaluation: []string{
 						"apikey1",
 						"apikey2",
 					},
 				},
-				LogLevel:                        config.DefaultLogLevel,
-				HideBanner:                      false,
-				EnablePprof:                     false,
-				LogFormat:                       "",
-				ExporterCleanQueueInterval:      0,
-				DisableVersionHeader:            false,
-				StartAsAwsLambda:                false,
-				AwsLambdaAdapter:                "",
-				EvaluationContextEnrichment:     nil,
-				OpenTelemetryOtlpEndpoint:       "",
-				MonitoringPort:                  0,
-				PersistentFlagConfigurationFile: "",
-				OtelConfig:                      config.OpenTelemetryConfiguration{},
-				JaegerConfig:                    config.JaegerSamplerConfiguration{},
-				EnvVariablePrefix:               "",
-				FlagSets:                        nil,
+
+				LogLevel: "info",
+			},
+			wantErr: assert.NoError,
+		},
+		{
+			name:         "Valid yaml file with legacy key notifier (without s)",
+			fileLocation: "../testdata/config/valid-file-notifiers.yaml",
+			want: &config.Config{
+				CommonFlagSet: config.CommonFlagSet{
+					PollingInterval: 1000,
+					FileFormat:      "yaml",
+					Retriever: &config.RetrieverConf{
+						Kind: "http",
+						URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
+					},
+					Exporter: &config.ExporterConf{
+						Kind: "log",
+					},
+					StartWithRetrieverError: false,
+					Notifiers: []config.NotifierConf{
+						config.NotifierConf{Kind: config.DiscordNotifier, WebhookURL: "https://discord.com/api/webhooks/yyyy/xxxxxxx"},
+					},
+				},
+				ListenPort:    1031,
+				Host:          "localhost",
+				Version:       "1.X.X",
+				EnableSwagger: true,
+				AuthorizedKeys: config.APIKeys{
+					Admin: []string{
+						"apikey3",
+					},
+					Evaluation: []string{
+						"apikey1",
+						"apikey2",
+					},
+				},
+
+				LogLevel: "info",
 			},
 			wantErr: assert.NoError,
 		},
@@ -1237,10 +1253,87 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 				"RETRIEVERS_0_HEADERS_TOKEN":         "token",
 				"RETRIEVERS_2_HEADERS_AUTHORIZATION": "test1",
 				"RETRIEVERS_2_HEADERS_X-GOFF-CUSTOM": "custom",
+				"NOTIFIERS_0_ENDPOINTURL":            "https://xxx.com/notifier",
+			},
+		},
+		{
+			name:         "Valid file (with legacy notifier without s)",
+			fileLocation: "../testdata/config/validate-array-env-file-legacy.yaml",
+			want: &config.Config{
+				CommonFlagSet: config.CommonFlagSet{
+					PollingInterval: 1000,
+					FileFormat:      "yaml",
+					FixNotifiers: []config.NotifierConf{
+						{
+							Kind:        config.WebhookNotifier,
+							EndpointURL: "https://xxx.com/notifier",
+						},
+					},
+					Retrievers: &[]config.RetrieverConf{
+						{
+							Kind: "http",
+							URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
+							HTTPHeaders: map[string][]string{
+								"authorization": {
+									"test",
+								},
+								"token": {"token"},
+							},
+						},
+						{
+							Kind: "file",
+							Path: "examples/retriever_file/flags.goff.yaml",
+							HTTPHeaders: map[string][]string{
+								"token": {
+									"11213123",
+								},
+								"authorization": {
+									"test1",
+								},
+							},
+						},
+						{
+							HTTPHeaders: map[string][]string{
+								"authorization": {
+									"test1",
+								},
+								"x-goff-custom": {
+									"custom",
+								},
+							},
+						},
+					},
+					Exporter: &config.ExporterConf{
+						Kind: "log",
+					},
+					StartWithRetrieverError: false,
+				},
+				ListenPort:    1031,
+				Host:          "localhost",
+				Version:       "1.X.X",
+				EnableSwagger: true,
+				AuthorizedKeys: config.APIKeys{
+					Admin: []string{
+						"apikey3",
+					},
+					Evaluation: []string{
+						"apikey1",
+						"apikey2",
+					},
+				},
+				LogLevel: "info",
+			},
+			wantErr: assert.NoError,
+			envVars: map[string]string{
+				"RETRIEVERS_0_HEADERS_AUTHORIZATION": "test",
+				"RETRIEVERS_X_HEADERS_AUTHORIZATION": "test",
+				"RETRIEVERS_1_HEADERS_AUTHORIZATION": "test1",
+				"RETRIEVERS_0_HEADERS_TOKEN":         "token",
+				"RETRIEVERS_2_HEADERS_AUTHORIZATION": "test1",
+				"RETRIEVERS_2_HEADERS_X-GOFF-CUSTOM": "custom",
 				"NOTIFIER_0_ENDPOINTURL":             "https://xxx.com/notifier",
 			},
 		},
-
 		{
 			name:         "Valid file with prefix",
 			fileLocation: "../testdata/config/validate-array-env-file-envprefix.yaml",
@@ -1513,17 +1606,17 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 			},
 			wantErr: assert.NoError,
 			envVars: map[string]string{
-				"FLAGSETS_0_NAME":                       "default",
-				"FLAGSETS_0_APIKEYS":                    "other-api-key,default-api-key",
-				"FLAGSETS_0_FILEFORMAT":                 "yaml",
-				"FLAGSETS_0_POLLINGINTERVAL":            "50000",
-				"FLAGSETS_0_STARTWITHRETRIEVERERROR":    "true",
-				"FLAGSETS_0_NOTIFIER_0_KIND":            "webhook",
-				"FLAGSETS_0_NOTIFIER_0_ENDPOINTURL":     "http://localhost:8080/webhook",
-				"FLAGSETS_0_EXPORTER_0_KIND":            "kafka",
-				"FLAGSETS_0_EXPORTER_0_KAFKA_ADDRESSES": "localhost:19092,localhost:19093",
-				"FLAGSETS_0_RETRIEVER_0_KIND":           "file",
-				"FLAGSETS_0_RETRIEVER_0_PATH":           "examples/retriever_file/flags.goff.yaml",
+				"FLAGSETS_0_NAME":                        "xxx",
+				"FLAGSETS_0_APIKEYS":                     "other-api-key,default-api-key",
+				"FLAGSETS_0_FILEFORMAT":                  "yaml",
+				"FLAGSETS_0_POLLINGINTERVAL":             "50000",
+				"FLAGSETS_0_STARTWITHRETRIEVERERROR":     "true",
+				"FLAGSETS_0_NOTIFIERS_0_KIND":            "webhook",
+				"FLAGSETS_0_NOTIFIERS_0_ENDPOINTURL":     "http://localhost:8080/webhook",
+				"FLAGSETS_0_EXPORTERS_0_KIND":            "kafka",
+				"FLAGSETS_0_EXPORTERS_0_KAFKA_ADDRESSES": "localhost:19092,localhost:19093",
+				"FLAGSETS_0_RETRIEVERS_0_KIND":           "file",
+				"FLAGSETS_0_RETRIEVERS_0_PATH":           "examples/retriever_file/flags.goff.yaml",
 			},
 		},
 	}
