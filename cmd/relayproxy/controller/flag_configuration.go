@@ -6,23 +6,24 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
-	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/helper"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 )
 
 type FlagConfigurationAPICtrl struct {
-	goFF    *ffclient.GoFeatureFlag
-	metrics metric.Metrics
+	flagsetManager service.FlagsetManager
+	metrics        metric.Metrics
 }
 
-func NewAPIFlagConfiguration(goFF *ffclient.GoFeatureFlag, metrics metric.Metrics) Controller {
+func NewAPIFlagConfiguration(flagsetManager service.FlagsetManager, metrics metric.Metrics) Controller {
 	return &FlagConfigurationAPICtrl{
-		goFF:    goFF,
-		metrics: metrics,
+		flagsetManager: flagsetManager,
+		metrics:        metrics,
 	}
 }
 
@@ -74,7 +75,12 @@ func (h *FlagConfigurationAPICtrl) Handler(c echo.Context) error {
 		)
 	}
 
-	flags, err := h.goFF.GetFlagsFromCache()
+	flagset, httpErr := helper.GetFlagSet(h.flagsetManager, helper.GetAPIKey(c))
+	if httpErr != nil {
+		return httpErr
+	}
+
+	flags, err := flagset.GetFlagsFromCache()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, FlagConfigurationResponse{
 			ErrorCode:    FlagConfigErrorRetrievingFlags,
@@ -95,12 +101,12 @@ func (h *FlagConfigurationAPICtrl) Handler(c echo.Context) error {
 
 	span.SetAttributes(attribute.Int("flagConfiguration.configurationSize", len(flags)))
 	c.Response().Header().
-		Set(echo.HeaderLastModified, h.goFF.GetCacheRefreshDate().
+		Set(echo.HeaderLastModified, flagset.GetCacheRefreshDate().
 			Format(time.RFC1123))
 	return c.JSON(
 		http.StatusOK,
 		FlagConfigurationResponse{
-			EvaluationContextEnrichment: h.goFF.GetEvaluationContextEnrichment(),
+			EvaluationContextEnrichment: flagset.GetEvaluationContextEnrichment(),
 			Flags:                       flags,
 		},
 	)

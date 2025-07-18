@@ -8,10 +8,11 @@ import (
 
 	"github.com/go-viper/mapstructure/v2"
 	"github.com/labstack/echo/v4"
-	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/helper"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/model"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -19,21 +20,21 @@ import (
 )
 
 type collectEvalData struct {
-	goFF    *ffclient.GoFeatureFlag
-	metrics metric.Metrics
-	logger  *zap.Logger
+	flagsetManager service.FlagsetManager
+	metrics        metric.Metrics
+	logger         *zap.Logger
 }
 
 // NewCollectEvalData initialize the controller for the /data/collector endpoint
 func NewCollectEvalData(
-	goFF *ffclient.GoFeatureFlag,
+	flagsetManager service.FlagsetManager,
 	metrics metric.Metrics,
 	logger *zap.Logger,
 ) Controller {
 	return &collectEvalData{
-		goFF:    goFF,
-		metrics: metrics,
-		logger:  logger,
+		flagsetManager: flagsetManager,
+		metrics:        metrics,
+		logger:         logger,
 	}
 }
 
@@ -66,6 +67,12 @@ func (h *collectEvalData) Handler(c echo.Context) error {
 	_, span := tracer.Start(c.Request().Context(), "collectEventData")
 	defer span.End()
 	span.SetAttributes(attribute.Int("collectEventData.eventCollectionSize", len(reqBody.Events)))
+
+	flagset, httpErr := helper.GetFlagSet(h.flagsetManager, helper.GetAPIKey(c))
+	if httpErr != nil {
+		return httpErr
+	}
+
 	counterTracking := 0
 	counterEvaluation := 0
 	for _, event := range reqBody.Events {
@@ -79,7 +86,7 @@ func (h *collectEvalData) Handler(c echo.Context) error {
 				)
 				continue
 			}
-			h.goFF.CollectTrackingEventData(e)
+			flagset.CollectTrackingEventData(e)
 			counterTracking++
 		default:
 			e, err := convertFeatureEvent(event, reqBody.Meta, h.logger)
@@ -87,7 +94,7 @@ func (h *collectEvalData) Handler(c echo.Context) error {
 				h.logger.Error("impossible to convert the event to a feature event", zap.Error(err))
 				continue
 			}
-			h.goFF.CollectEventData(e)
+			flagset.CollectEventData(e)
 			counterEvaluation++
 		}
 	}

@@ -68,7 +68,7 @@ func TestRetriever_Retrieve(t *testing.T) {
 			wantFromCache: true,
 		},
 		{
-			name: "retriver update file when it changes in bucket",
+			name: "retriever update file when it changes in bucket",
 			storage: storageConfig{
 				bucket: bucketName,
 				files:  bucketFiles,

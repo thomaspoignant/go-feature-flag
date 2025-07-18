@@ -55,7 +55,9 @@ func TestWebsocketAuthorizer(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 			conf := &config.Config{
-				APIKeys: []string{tt.args.confAPIKey},
+				AuthorizedKeys: config.APIKeys{
+					Evaluation: []string{tt.args.confAPIKey},
+				},
 			}
 			middleware := middleware2.WebsocketAuthorizer(conf)
 			handler := middleware(func(c echo.Context) error {

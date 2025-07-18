@@ -5,23 +5,24 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/helper"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/model"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 )
 
 type flagEval struct {
-	goFF    *ffclient.GoFeatureFlag
-	metrics metric.Metrics
+	flagsetMngr service.FlagsetManager
+	metrics     metric.Metrics
 }
 
-func NewFlagEval(goFF *ffclient.GoFeatureFlag, metrics metric.Metrics) Controller {
+func NewFlagEval(flagsetMngr service.FlagsetManager, metrics metric.Metrics) Controller {
 	return &flagEval{
-		goFF:    goFF,
-		metrics: metrics,
+		flagsetMngr: flagsetMngr,
+		metrics:     metrics,
 	}
 }
 
@@ -72,7 +73,12 @@ func (h *flagEval) Handler(c echo.Context) error {
 	_, span := tracer.Start(c.Request().Context(), "flagEvaluation")
 	defer span.End()
 
-	flagValue, _ := h.goFF.RawVariation(flagKey, evaluationCtx, reqBody.DefaultValue)
+	flagset, httpErr := helper.GetFlagSet(h.flagsetMngr, helper.GetAPIKey(c))
+	if httpErr != nil {
+		return httpErr
+	}
+
+	flagValue, _ := flagset.RawVariation(flagKey, evaluationCtx, reqBody.DefaultValue)
 
 	span.SetAttributes(
 		attribute.String("flagEvaluation.flagName", flagKey),
@@ -86,6 +92,10 @@ func (h *flagEval) Handler(c echo.Context) error {
 		// we convert to string because there is no attribute for interface{}
 		attribute.String("flagEvaluation.value", fmt.Sprintf("%v", flagValue.Value)),
 	)
+
+	if flagsetName, err := h.flagsetMngr.GetFlagSetName(helper.GetAPIKey(c)); err == nil {
+		span.SetAttributes(attribute.String("flagEvaluation.flagSetName", flagsetName))
+	}
 
 	return c.JSON(http.StatusOK, flagValue)
 }

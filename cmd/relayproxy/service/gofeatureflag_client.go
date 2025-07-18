@@ -38,34 +38,47 @@ import (
 )
 
 func NewGoFeatureFlagClient(
-	proxyConf *config.Config,
+	cFlagSet *config.FlagSet,
 	logger *zap.Logger,
 	notifiers []notifier.Notifier,
 ) (*ffclient.GoFeatureFlag, error) {
 	var err error
-	if proxyConf == nil {
+	if cFlagSet == nil {
 		return nil, fmt.Errorf("proxy config is empty")
 	}
 
-	retrievers, err := initRetrievers(proxyConf)
+	retrievers, err := initRetrievers(cFlagSet)
 	if err != nil {
 		return nil, err
 	}
 
-	exporters, err := initDataExporters(proxyConf)
+	exporters, err := initDataExporters(cFlagSet)
 	if err != nil {
 		return nil, err
 	}
 
-	notif, err := initNotifier(proxyConf.Notifiers)
-	if err != nil {
-		return nil, err
+	notif := make([]notifier.Notifier, 0)
+	if cFlagSet.Notifiers != nil {
+		notif, err = initNotifier(cFlagSet.Notifiers)
+		if err != nil {
+			return nil, err
+		}
 	}
+
+	// backward compatibility for the notifier field, it was called "notifier" instead of "notifiers"
+	// fixed in version v1.46.0
+	if len(notif) == 0 && cFlagSet.FixNotifiers != nil {
+		notif, err = initNotifier(cFlagSet.FixNotifiers)
+		if err != nil {
+			return nil, err
+		}
+	}
+	// end of backward compatibility for the notifier field in version v1.66.0
 	notif = append(notif, notifiers...)
 
 	f := ffclient.Config{
 		PollingInterval: time.Duration(
-			proxyConf.PollingInterval,
+			cFlagSet.PollingInterval,
 		) * time.Millisecond,
 		LeveledLogger: slog.New(
 			slogzap.Option{Level: slog.LevelDebug, Logger: logger}.NewZapHandler(),
@@ -73,22 +86,26 @@ func NewGoFeatureFlagClient(
 		Context:                         context.Background(),
 		Retrievers:                      retrievers,
 		Notifiers:                       notif,
-		FileFormat:                      proxyConf.FileFormat,
+		FileFormat:                      cFlagSet.FileFormat,
 		DataExporters:                   exporters,
-		StartWithRetrieverError:         proxyConf.StartWithRetrieverError,
-		EnablePollingJitter:             proxyConf.EnablePollingJitter,
-		DisableNotifierOnInit:           proxyConf.DisableNotifierOnInit,
-		EvaluationContextEnrichment:     proxyConf.EvaluationContextEnrichment,
-		PersistentFlagConfigurationFile: proxyConf.PersistentFlagConfigurationFile,
+		StartWithRetrieverError:         cFlagSet.StartWithRetrieverError,
+		EnablePollingJitter:             cFlagSet.EnablePollingJitter,
+		DisableNotifierOnInit:           cFlagSet.DisableNotifierOnInit,
+		EvaluationContextEnrichment:     cFlagSet.EvaluationContextEnrichment,
+		PersistentFlagConfigurationFile: cFlagSet.PersistentFlagConfigurationFile,
 	}
-
-	return ffclient.New(f)
+	client, err := ffclient.New(f)
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
 }
 
 // initRetrievers initialize the retrievers based on the configuration
 // it handles both the `retriever` and `retrievers` fields
-func initRetrievers(proxyConf *config.Config) ([]retriever.Retriever, error) {
+func initRetrievers(proxyConf *config.FlagSet) ([]retriever.Retriever, error) {
 	retrievers := make([]retriever.Retriever, 0)
+	// if the retriever is set, we add it to the retrievers
 	if proxyConf.Retriever != nil {
 		currentRetriever, err := initRetriever(proxyConf.Retriever)
 		if err != nil {
@@ -96,6 +113,7 @@ func initRetrievers(proxyConf *config.Config) ([]retriever.Retriever, error) {
 		}
 		retrievers = append(retrievers, currentRetriever)
 	}
+	// if the retrievers are set, we add them to the retrievers
 	if proxyConf.Retrievers != nil {
 		for _, r := range *proxyConf.Retrievers {
 			currentRetriever, err := initRetriever(&r)
@@ -146,14 +164,14 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 
 // initDataExporters initialize the exporters based on the configuration
 // it handles both the `exporter` and `exporters` fields.
-func initDataExporters(proxyConf *config.Config) ([]ffclient.DataExporter, error) {
+func initDataExporters(proxyConf *config.FlagSet) ([]ffclient.DataExporter, error) {
 	exporters := make([]ffclient.DataExporter, 0)
 	if proxyConf.Exporter != nil {
-		exp, err := initDataExporter(proxyConf.Exporter)
+		currentExporter, err := initDataExporter(proxyConf.Exporter)
 		if err != nil {
 			return nil, err
 		}
-		exporters = append(exporters, exp)
+		exporters = append(exporters, currentExporter)
 	}
 	if proxyConf.Exporters != nil {
 		for _, e := range *proxyConf.Exporters {
@@ -164,6 +182,7 @@ func initDataExporters(proxyConf *config.Config) ([]ffclient.DataExporter, error
 			exporters = append(exporters, currentExporter)
 		}
 	}
+
 	return exporters, nil
 }
 

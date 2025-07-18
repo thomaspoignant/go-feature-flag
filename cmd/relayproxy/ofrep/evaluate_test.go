@@ -1,23 +1,20 @@
 package ofrep_test
 
 import (
-	"context"
 	"io"
-	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
-	ffclient "github.com/thomaspoignant/go-feature-flag"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/ofrep"
-	"github.com/thomaspoignant/go-feature-flag/exporter/logsexporter"
-	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"go.uber.org/zap"
 )
 
 const configFlagsLocation = "../testdata/controller/config_flags.yaml"
@@ -99,23 +96,25 @@ func Test_Bulk_Evaluation(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// init go-feature-flag
-			goFF, _ := ffclient.New(ffclient.Config{
-				PollingInterval: 10 * time.Second,
-				LeveledLogger:   slog.Default(),
-				Context:         context.Background(),
-				Retriever: &fileretriever.Retriever{
-					Path: tt.args.configFlagsLocation,
+			// Create flagset manager with configuration
+			conf := &config.Config{
+				CommonFlagSet: config.CommonFlagSet{
+					PollingInterval: 10000, // 10 seconds in milliseconds
+					FileFormat:      "yaml",
+					Retrievers: &[]config.RetrieverConf{
+						{
+							Kind: config.FileRetriever,
+							Path: tt.args.configFlagsLocation,
+						},
+					},
 				},
-				DataExporter: ffclient.DataExporter{
-					FlushInterval:    10 * time.Second,
-					MaxEventInMemory: 10000,
-					Exporter:         &logsexporter.Exporter{},
-				},
-			})
-			defer goFF.Close()
+			}
 
-			ctrl := ofrep.NewOFREPEvaluate(goFF, metric.Metrics{})
+			flagsetManager, err := service.NewFlagsetManager(conf, zap.NewNop(), nil)
+			assert.NoError(t, err, "failed to create flagset manager")
+			defer flagsetManager.Close()
+
+			ctrl := ofrep.NewOFREPEvaluate(flagsetManager, metric.Metrics{})
 			e := echo.New()
 			rec := httptest.NewRecorder()
 
@@ -247,23 +246,25 @@ func Test_Evaluate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// init go-feature-flag
-			goFF, _ := ffclient.New(ffclient.Config{
-				PollingInterval: 10 * time.Second,
-				LeveledLogger:   slog.Default(),
-				Context:         context.Background(),
-				Retriever: &fileretriever.Retriever{
-					Path: tt.args.configFlagsLocation,
+			// Create flagset manager with configuration
+			conf := &config.Config{
+				CommonFlagSet: config.CommonFlagSet{
+					PollingInterval: 10000, // 10 seconds in milliseconds
+					FileFormat:      "yaml",
+					Retrievers: &[]config.RetrieverConf{
+						{
+							Kind: config.FileRetriever,
+							Path: tt.args.configFlagsLocation,
+						},
+					},
 				},
-				DataExporter: ffclient.DataExporter{
-					FlushInterval:    10 * time.Second,
-					MaxEventInMemory: 10000,
-					Exporter:         &logsexporter.Exporter{},
-				},
-			})
-			defer goFF.Close()
+			}
 
-			ctrl := ofrep.NewOFREPEvaluate(goFF, metric.Metrics{})
+			flagsetManager, err := service.NewFlagsetManager(conf, zap.NewNop(), nil)
+			assert.NoError(t, err, "failed to create flagset manager")
+			defer flagsetManager.Close()
+
+			ctrl := ofrep.NewOFREPEvaluate(flagsetManager, metric.Metrics{})
 			e := echo.New()
 			e.POST("/ofrep/v1/evaluate/flags/:flagKey", ctrl.Evaluate)
 			rec := httptest.NewRecorder()

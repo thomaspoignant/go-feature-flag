@@ -6,10 +6,11 @@ import (
 	"sort"
 
 	"github.com/labstack/echo/v4"
-	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/helper"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/model"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/internal/flagstate"
@@ -19,14 +20,14 @@ import (
 )
 
 type EvaluateCtrl struct {
-	goFF    *ffclient.GoFeatureFlag
-	metrics metric.Metrics
+	flagsetManager service.FlagsetManager
+	metrics        metric.Metrics
 }
 
-func NewOFREPEvaluate(goFF *ffclient.GoFeatureFlag, metrics metric.Metrics) EvaluateCtrl {
+func NewOFREPEvaluate(flagsetManager service.FlagsetManager, metrics metric.Metrics) EvaluateCtrl {
 	return EvaluateCtrl{
-		goFF:    goFF,
-		metrics: metrics,
+		flagsetManager: flagsetManager,
+		metrics:        metrics,
 	}
 }
 
@@ -85,8 +86,14 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 	tracer := otel.GetTracerProvider().Tracer(config.OtelTracerName)
 	_, span := tracer.Start(c.Request().Context(), "flagEvaluation")
 	defer span.End()
+
+	flagset, httpErr := helper.GetFlagSet(h.flagsetManager, helper.GetAPIKey(c))
+	if httpErr != nil {
+		return httpErr
+	}
+
 	defaultValue := "thisisadefaultvaluethatItest1233%%"
-	flagValue, _ := h.goFF.RawVariation(flagKey, evalCtx, defaultValue)
+	flagValue, _ := flagset.RawVariation(flagKey, evalCtx, defaultValue)
 
 	if flagValue.Reason == flag.ReasonError {
 		httpStatus := http.StatusBadRequest
@@ -175,12 +182,17 @@ func (h *EvaluateCtrl) BulkEvaluate(c echo.Context) error {
 	_, span := tracer.Start(c.Request().Context(), "AllFlagsState")
 	defer span.End()
 
+	flagset, httpErr := helper.GetFlagSet(h.flagsetManager, helper.GetAPIKey(c))
+	if httpErr != nil {
+		return httpErr
+	}
+
 	var allFlagsResp flagstate.AllFlags
 	if len(evalCtx.ExtractGOFFProtectedFields().FlagList) > 0 {
 		// if we have a list of flags to evaluate in the evaluation context, we evaluate only those flags.
-		allFlagsResp = h.goFF.GetFlagStates(evalCtx, evalCtx.ExtractGOFFProtectedFields().FlagList)
+		allFlagsResp = flagset.GetFlagStates(evalCtx, evalCtx.ExtractGOFFProtectedFields().FlagList)
 	} else {
-		allFlagsResp = h.goFF.AllFlagsState(evalCtx)
+		allFlagsResp = flagset.AllFlagsState(evalCtx)
 	}
 	for key, val := range allFlagsResp.GetFlags() {
 		value := val.Value

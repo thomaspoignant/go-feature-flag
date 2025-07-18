@@ -1,0 +1,21 @@
+{
+    "flags": {
+        "flag-only-for-admin": {
+            "value": false,
+            "timestamp": 1652273630,
+            "variationType": "Default",
+            "trackEvents": true,
+            "errorCode": "",
+            "reason": "DEFAULT"
+        },
+        "new-admin-access": {
+            "value": true,
+            "timestamp": 1652273630,
+            "variationType": "True",
+            "trackEvents": true,
+            "errorCode": "",
+            "reason": "SPLIT"
+        }
+    },
+    "valid": true
+}
