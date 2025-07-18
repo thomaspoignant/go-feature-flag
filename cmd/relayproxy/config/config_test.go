@@ -1467,7 +1467,7 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 		},
 		{
 			name:                       "Configure flagset with basic environment variables",
-			fileLocation:               "",
+			fileLocation:               "../testdata/config/validate-array-env-file-flagset.yaml",
 			disableDefaultFileCreation: true,
 			want: &config.Config{
 				CommonFlagSet: config.CommonFlagSet{
@@ -1482,21 +1482,22 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 				FlagSets: []config.FlagSet{
 					{
 						Name:    "default",
-						APIKeys: []string{"default-api-key"},
+						APIKeys: []string{"other-api-key", "default-api-key"},
 						CommonFlagSet: config.CommonFlagSet{
-							PollingInterval:         60000,
+							PollingInterval:         50000,
 							FileFormat:              "yaml",
-							StartWithRetrieverError: false,
+							StartWithRetrieverError: true,
 						},
 					},
 				},
 			},
 			wantErr: assert.NoError,
 			envVars: map[string]string{
-				"FLAGSETS_0_NAME":            "default",
-				"FLAGSETS_0_APIKEYS":         "default-api-key",
-				"FLAGSETS_0_FILEFORMAT":      "yaml",
-				"FLAGSETS_0_POLLINGINTERVAL": "60000",
+				"FLAGSETS_0_NAME":                    "default",
+				"FLAGSETS_0_APIKEYS":                 "other-api-key,default-api-key",
+				"FLAGSETS_0_FILEFORMAT":              "yaml",
+				"FLAGSETS_0_POLLINGINTERVAL":         "50000",
+				"FLAGSETS_0_STARTWITHRETRIEVERERROR": "true",
 			},
 		},
 	}

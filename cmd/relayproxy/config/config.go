@@ -217,7 +217,7 @@ type Config struct {
 	// A flag set is a group of flags that can be used to configure the relay proxy.
 	// Each flag set can have its own API key, retrievers, notifiers and exporters.
 	// There is no inheritance between flag sets.
-	FlagSets []FlagSet `mapstructure:"flagSets" koanf:"flagsets"`
+	FlagSets []FlagSet `mapstructure:"flagsets" koanf:"flagsets"`
 	// ---- private fields
 
 	// apiKeySet is the internal representation of an API keys list configured
@@ -236,6 +236,7 @@ func mapEnvVariablesProvider(prefix string, log *zap.Logger) koanf.Provider {
 		key = strings.TrimPrefix(key, prefix)
 		if strings.HasPrefix(key, "RETRIEVERS") ||
 			strings.HasPrefix(key, "NOTIFIER") ||
+			strings.HasPrefix(key, "FLAGSETS") ||
 			strings.HasPrefix(key, "EXPORTERS") {
 			configMap := k.Raw()
 			err := loadArrayEnv(key, v, configMap)
@@ -251,22 +252,17 @@ func mapEnvVariablesProvider(prefix string, log *zap.Logger) koanf.Provider {
 			return key, v
 		}
 
-		if strings.HasPrefix(key, "EXPORTER_KAFKA_ADDRESSES") {
+		switch {
+		case strings.HasSuffix(key, "KAFKA_ADDRESSES"):
 			return "exporter.kafka.addresses", strings.Split(v, ",")
-		}
-
-		if strings.HasPrefix(key, "AUTHORIZEDKEYS_EVALUATION") {
+		case strings.HasPrefix(key, "AUTHORIZEDKEYS_EVALUATION"):
 			return "authorizedKeys.evaluation", strings.Split(v, ",")
-		}
-		if strings.HasPrefix(key, "AUTHORIZEDKEYS_ADMIN") {
+		case strings.HasPrefix(key, "AUTHORIZEDKEYS_ADMIN"):
 			return "authorizedKeys.admin", strings.Split(v, ",")
-		}
-
-		if key == "OTEL_RESOURCE_ATTRIBUTES" {
+		case key == "OTEL_RESOURCE_ATTRIBUTES":
 			parseOtelResourceAttributes(v, log)
 			return key, v
 		}
-
 		return strings.ReplaceAll(strings.ToLower(key), "_", "."), v
 	})
 }
@@ -454,6 +450,42 @@ func loadArrayEnv(s string, v string, configMap map[string]interface{}) error {
 			}
 		}
 		lastKey := keys[len(keys)-1]
+
+		// if the value is a boolean, we convert it
+		boolValue, err := strconv.ParseBool(v)
+		if err == nil {
+			currentMap[lastKey] = boolValue
+			if outRange {
+				blank := index - len(configArray) + 1
+				for i := 0; i < blank; i++ {
+					configArray = append(configArray, make(map[string]interface{}))
+				}
+				configArray[index] = configItem
+			} else {
+				configArray[index] = configItem
+			}
+			_ = k.Set(prefixKey, configArray)
+			return nil
+		}
+
+		// if the value is a number, we convert it
+		intValue, err := strconv.Atoi(v)
+		if err == nil {
+			currentMap[lastKey] = intValue
+			if outRange {
+				blank := index - len(configArray) + 1
+				for i := 0; i < blank; i++ {
+					configArray = append(configArray, make(map[string]interface{}))
+				}
+				configArray[index] = configItem
+			} else {
+				configArray[index] = configItem
+			}
+			_ = k.Set(prefixKey, configArray)
+			return nil
+		}
+
+		// otherwise we keep it as a string
 		currentMap[lastKey] = v
 		if outRange {
 			blank := index - len(configArray) + 1
