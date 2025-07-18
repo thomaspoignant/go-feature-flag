@@ -220,9 +220,14 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 
 	if proxyConf.Exporters != nil {
 		for i := range *proxyConf.Exporters {
-			(*proxyConf.Exporters)[i].Kafka.Addresses = utils.StringToArray(
-				(*proxyConf.Exporters)[i].Kafka.Addresses,
-			)
+			// Only apply StringToArray if addresses is empty or has only one element that contains a comma
+			if len((*proxyConf.Exporters)[i].Kafka.Addresses) == 0 ||
+				(len((*proxyConf.Exporters)[i].Kafka.Addresses) == 1 &&
+					strings.Contains((*proxyConf.Exporters)[i].Kafka.Addresses[0], ",")) {
+				(*proxyConf.Exporters)[i].Kafka.Addresses = utils.StringToArray(
+					(*proxyConf.Exporters)[i].Kafka.Addresses,
+				)
+			}
 		}
 	}
 

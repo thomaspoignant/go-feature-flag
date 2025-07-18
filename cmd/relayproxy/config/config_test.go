@@ -1564,9 +1564,8 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 			disableDefaultFileCreation: true,
 			want: &config.Config{
 				CommonFlagSet: config.CommonFlagSet{
-					PollingInterval:         60000,
-					FileFormat:              "yaml",
-					StartWithRetrieverError: false,
+					FileFormat:      "yaml",
+					PollingInterval: 60000,
 				},
 				ListenPort: 1031,
 				Host:       "localhost",
@@ -1574,7 +1573,7 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 				Version:    "1.X.X",
 				FlagSets: []config.FlagSet{
 					{
-						Name:    "default",
+						Name:    "xxx",
 						APIKeys: []string{"other-api-key", "default-api-key"},
 						CommonFlagSet: config.CommonFlagSet{
 							PollingInterval:         50000,

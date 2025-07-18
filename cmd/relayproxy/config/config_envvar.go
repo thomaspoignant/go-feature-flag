@@ -1,7 +1,7 @@
 package config
 
 import (
-	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -35,15 +35,12 @@ func mapEnvVariablesProvider(prefix string, log *zap.Logger) koanf.Provider {
 				_ = k.Set(configKey, configValue)
 			}
 			return key, v
-			// case strings.HasPrefix(key, "FLAGSETS"):
-			// 	parseFlagSetsEnv(key, v, log)
-			// return key, v
-		case strings.HasSuffix(key, "KAFKA_ADDRESSES"):
-			return "exporter.kafka.addresses", strings.Split(v, ",")
-		case strings.HasPrefix(key, "AUTHORIZEDKEYS_EVALUATION"):
-			return "authorizedKeys.evaluation", strings.Split(v, ",")
-		case strings.HasPrefix(key, "AUTHORIZEDKEYS_ADMIN"):
-			return "authorizedKeys.admin", strings.Split(v, ",")
+		case strings.HasSuffix(key, "KAFKA_ADDRESSES"),
+			strings.HasSuffix(key, "APIKEYS"),
+			strings.HasPrefix(key, "AUTHORIZEDKEYS_EVALUATION"),
+			strings.HasPrefix(key, "AUTHORIZEDKEYS_ADMIN"):
+			transformedKey := strings.ReplaceAll(strings.ToLower(key), "_", ".")
+			return transformedKey, strings.Split(v, ",")
 		case key == "OTEL_RESOURCE_ATTRIBUTES":
 			parseOtelResourceAttributes(v, log)
 			return key, v
@@ -74,28 +71,43 @@ func loadArrayEnv(s string, v string, configMap map[string]interface{}) (map[str
 		}
 
 		keys := paths[2:]
+
 		currentMap := configItem
-		for i, key := range keys {
-			hasKey := false
-			lowerKey := key
-			for y := range currentMap {
-				if y != lowerKey {
-					continue
-				}
-				if nextMap, ok := currentMap[y].(map[string]interface{}); ok {
-					currentMap = nextMap
-					hasKey = true
-					break
+		recursiveKeys := []string{"retrievers", "notifier", "notifiers", "exporters"}
+		if prefixKey == "flagsets" && len(keys) >= 1 && slices.Contains(recursiveKeys, keys[0]) {
+			recursiveKey := strings.Join(keys, "_")
+			modifiedNestedConfig, err := loadArrayEnv(recursiveKey, v, configItem)
+			if err != nil {
+				return configMap, err
+			}
+			for k, val := range modifiedNestedConfig {
+				configItem[k] = val
+			}
+		} else {
+			for i, key := range keys {
+				lowerKey := key
+				next, ok := currentMap[lowerKey].(map[string]interface{})
+				if ok {
+					currentMap = next
+				} else if i != len(keys)-1 {
+					newMap := make(map[string]interface{})
+					currentMap[lowerKey] = newMap
+					currentMap = newMap
 				}
 			}
-			if !hasKey && i != len(keys)-1 {
-				newMap := make(map[string]interface{})
-				currentMap[lowerKey] = newMap
-				currentMap = newMap
+			lastKey := keys[len(keys)-1]
+			switch {
+			case lastKey == "addresses" && len(keys) > 1 && keys[len(keys)-2] == "kafka",
+				lastKey == "apikeys":
+				splitted := strings.Split(v, ",")
+				for i, items := range splitted {
+					splitted[i] = strings.TrimSpace(items)
+				}
+				currentMap[lastKey] = splitted
+			default:
+				currentMap[lastKey] = v
 			}
 		}
-		lastKey := keys[len(keys)-1]
-		currentMap[lastKey] = v
 		if outRange {
 			blank := index - len(configArray) + 1
 			for i := 0; i < blank; i++ {
@@ -108,33 +120,6 @@ func loadArrayEnv(s string, v string, configMap map[string]interface{}) (map[str
 		configMap[prefixKey] = configArray
 	}
 	return configMap, nil
-}
-
-func parseFlagSetsEnv(key, v string, log *zap.Logger) {
-	configMap := k.Raw()
-	flagSets, ok := configMap["flagsets"].([]interface{})
-	if !ok {
-		flagSets = make([]interface{}, 0)
-		// TODO - should ignore if index to be created is not the last one
-	}
-	flagSets = configMap["flagsets"].([]interface{})
-	keyIndex := strings.Split(key, "_")[1]
-	index, err := strconv.Atoi(keyIndex)
-	if err != nil {
-		log.Error("config: error loading FLAGSETS - incorrect format",
-			zap.String("key", key), zap.String("value", v))
-		return
-	}
-	flagSet := flagSets[index]
-	flagSetMap, ok := flagSet.(map[string]interface{})
-	if !ok {
-		log.Error("config: error loading FLAGSETS - incorrect format",
-			zap.String("key", key), zap.String("value", v))
-		return
-	}
-	fmt.Println(flagSetMap)
-
-	panic("unimplemented")
 }
 
 // parseOtelResourceAttributes parses the OTEL_RESOURCE_ATTRIBUTES environment variable

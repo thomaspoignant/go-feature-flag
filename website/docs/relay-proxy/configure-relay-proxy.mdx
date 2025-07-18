@@ -228,10 +228,10 @@ exporters:
     kafka:
       topic: "go-feature-flag-events"
 ```
-### `notifier`
+### `notifiers`
 Notifiers is the configuration on where to notify a flag changes.
-- option name: `notifier`
-- type: **[notifier](#type-notifier)**
+- option name: `notifiers`
+- type: **[[]notifier](#type-notifier)**
 - default: **none**
 - mandatory: <NotMandatory />
 - Configuration of a notifier depends on the one you are choosing. Check the [list of notifiers](../integrations/notify-flags-changes#available-notifiers) and go on the detail page of your choice to configure it.
@@ -543,7 +543,7 @@ A [notifier](../concepts/notifier) is the component in charge of sending a notif
 
 ```yaml title="example goff-proxy.yaml"
 # ...
-notifier:
+notifiers:
   - kind: discord
     webhookUrl: "https://discord.com/api/webhooks/yyyy/xxxxxxx"
   - kind: slack

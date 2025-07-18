@@ -1,5 +1,10 @@
 listen: 1031
-pollingInterval: 1000
 logLevel: info
 flagsets:
   - name: flagset1
+    notifiers:
+      - kind: tochange
+    exporters:
+      - kind: tochange
+    retrievers:
+      - kind: tochange
