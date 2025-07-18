@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -14,7 +13,6 @@ import (
 	"github.com/knadh/koanf/parsers/toml"
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/confmap"
-	"github.com/knadh/koanf/providers/env"
 	"github.com/knadh/koanf/providers/file"
 	"github.com/knadh/koanf/providers/posflag"
 	"github.com/knadh/koanf/v2"
@@ -60,66 +58,6 @@ var DefaultExporter = struct {
 	ParquetCompressionCodec: parquet.CompressionCodec_SNAPPY.String(),
 	LogLevel:                DefaultLogLevel,
 	ExporterEventType:       ffclient.FeatureEventExporter,
-}
-
-// New is reading the configuration file
-func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, error) {
-	k.Delete("")
-
-	// Default values
-	_ = k.Load(confmap.Provider(map[string]interface{}{
-		"listen":          "1031",
-		"host":            "localhost",
-		"fileFormat":      "yaml",
-		"pollingInterval": 60000,
-		"logLevel":        DefaultLogLevel,
-	}, "."), nil)
-
-	// mapping command line parameters to koanf
-	if errBindFlag := k.Load(posflag.Provider(flagSet, ".", k), nil); errBindFlag != nil {
-		log.Fatal("impossible to parse flag command line", zap.Error(errBindFlag))
-	}
-
-	// Read config file
-	configFileLocation, errFileLocation := locateConfigFile(k.String("config"))
-	if errFileLocation != nil {
-		log.Info("not using any configuration file", zap.Error(errFileLocation))
-	} else {
-		ext := filepath.Ext(configFileLocation)
-		var parser koanf.Parser
-		switch strings.ToLower(ext) {
-		case ".toml":
-			parser = toml.Parser()
-		case ".json":
-			parser = json.Parser()
-		default:
-			parser = yaml.Parser()
-		}
-
-		if errBindFile := k.Load(file.Provider(configFileLocation), parser); errBindFile != nil {
-			log.Error("error loading file", zap.Error(errBindFile))
-		}
-	}
-
-	// Map environment variables
-	_ = k.Load(mapEnvVariablesProvider(k.String("envVariablePrefix"), log), nil)
-	_ = k.Set("version", version)
-
-	proxyConf := &Config{}
-	errUnmarshal := k.Unmarshal("", &proxyConf)
-	if errUnmarshal != nil {
-		return nil, errUnmarshal
-	}
-
-	if proxyConf.Exporters != nil {
-		for i := range *proxyConf.Exporters {
-			(*proxyConf.Exporters)[i].Kafka.Addresses = utils.StringToArray(
-				(*proxyConf.Exporters)[i].Kafka.Addresses,
-			)
-		}
-	}
-
-	return proxyConf, nil
 }
 
 type Config struct {
@@ -231,78 +169,64 @@ type Config struct {
 	forceAuthenticatedRequests bool
 }
 
-func mapEnvVariablesProvider(prefix string, log *zap.Logger) koanf.Provider {
-	return env.ProviderWithValue(prefix, ".", func(key string, v string) (string, interface{}) {
-		key = strings.TrimPrefix(key, prefix)
-		if strings.HasPrefix(key, "RETRIEVERS") ||
-			strings.HasPrefix(key, "NOTIFIER") ||
-			strings.HasPrefix(key, "NOTIFIERS") ||
-			strings.HasPrefix(key, "FLAGSETS") ||
-			strings.HasPrefix(key, "EXPORTERS") {
-			configMap := k.Raw()
-			err := loadArrayEnv(key, v, configMap)
-			if err != nil {
-				log.Error(
-					"config: error loading array env",
-					zap.String("key", key),
-					zap.String("value", v),
-					zap.Error(err),
-				)
-				return key, v
-			}
-			return key, v
+// New is reading the configuration file
+func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, error) {
+	k.Delete("")
+
+	// Default values
+	_ = k.Load(confmap.Provider(map[string]interface{}{
+		"listen":          "1031",
+		"host":            "localhost",
+		"fileFormat":      "yaml",
+		"pollingInterval": 60000,
+		"logLevel":        DefaultLogLevel,
+	}, "."), nil)
+
+	// mapping command line parameters to koanf
+	if errBindFlag := k.Load(posflag.Provider(flagSet, ".", k), nil); errBindFlag != nil {
+		log.Fatal("impossible to parse flag command line", zap.Error(errBindFlag))
+	}
+
+	// Read config file
+	configFileLocation, errFileLocation := locateConfigFile(k.String("config"))
+	if errFileLocation != nil {
+		log.Info("not using any configuration file", zap.Error(errFileLocation))
+	} else {
+		ext := filepath.Ext(configFileLocation)
+		var parser koanf.Parser
+		switch strings.ToLower(ext) {
+		case ".toml":
+			parser = toml.Parser()
+		case ".json":
+			parser = json.Parser()
+		default:
+			parser = yaml.Parser()
 		}
 
-		switch {
-		case strings.HasSuffix(key, "KAFKA_ADDRESSES"):
-			return "exporter.kafka.addresses", strings.Split(v, ",")
-		case strings.HasPrefix(key, "AUTHORIZEDKEYS_EVALUATION"):
-			return "authorizedKeys.evaluation", strings.Split(v, ",")
-		case strings.HasPrefix(key, "AUTHORIZEDKEYS_ADMIN"):
-			return "authorizedKeys.admin", strings.Split(v, ",")
-		case key == "OTEL_RESOURCE_ATTRIBUTES":
-			parseOtelResourceAttributes(v, log)
-			return key, v
+		if errBindFile := k.Load(file.Provider(configFileLocation), parser); errBindFile != nil {
+			log.Error("error loading file", zap.Error(errBindFile))
 		}
-		return strings.ReplaceAll(strings.ToLower(key), "_", "."), v
-	})
-}
-
-// parseOtelResourceAttributes parses the OTEL_RESOURCE_ATTRIBUTES environment variable
-// and sets the attributes in the koanf configuration.
-// The expected format is "key1=value1,key2=value2,..."
-func parseOtelResourceAttributes(attributes string, log *zap.Logger) {
-	configMap := k.Raw()
-	otel, ok := configMap["otel"].(map[string]interface{})
-	if !ok {
-		configMap["otel"] = make(map[string]interface{})
-		otel = configMap["otel"].(map[string]interface{})
 	}
 
-	resource, ok := otel["resource"].(map[string]interface{})
-	if !ok {
-		otel["resource"] = make(map[string]interface{})
-		resource = otel["resource"].(map[string]interface{})
+	// Map environment variables
+	_ = k.Load(mapEnvVariablesProvider(k.String("envVariablePrefix"), log), nil)
+	_ = k.Set("version", version)
+
+	proxyConf := &Config{}
+	errUnmarshal := k.Unmarshal("", &proxyConf)
+	if errUnmarshal != nil {
+		return nil, errUnmarshal
 	}
 
-	attrs, ok := resource["attributes"].(map[string]interface{})
-	if !ok {
-		resource["attributes"] = make(map[string]interface{})
-		attrs = resource["attributes"].(map[string]interface{})
-	}
-
-	for _, attr := range strings.Split(attributes, ",") {
-		k, v, found := strings.Cut(attr, "=")
-		if !found {
-			log.Error("config: error loading OTEL_RESOURCE_ATTRIBUTES - incorrect format",
-				zap.String("key", k), zap.String("value", v))
-			continue
+	if proxyConf.Exporters != nil {
+		for i := range *proxyConf.Exporters {
+			(*proxyConf.Exporters)[i].Kafka.Addresses = utils.StringToArray(
+				(*proxyConf.Exporters)[i].Kafka.Addresses,
+			)
 		}
-
-		attrs[k] = v
 	}
 
-	_ = k.Set("otel", otel)
+	return proxyConf, nil
 }
 
 // OpenTelemetryConfiguration is the configuration for the OpenTelemetry part of the relay proxy
@@ -407,99 +331,6 @@ func locateConfigFile(inputFilePath string) (string, error) {
 		"impossible to find config file in the default locations [%s]",
 		strings.Join(defaultLocations, ","),
 	)
-}
-
-// Load the ENV Like:RETRIEVERS_0_HEADERS_AUTHORIZATION
-func loadArrayEnv(s string, v string, configMap map[string]interface{}) error {
-	paths := strings.Split(s, "_")
-	for i, str := range paths {
-		paths[i] = strings.ToLower(str)
-	}
-	prefixKey := paths[0]
-	if configArray, ok := configMap[prefixKey].([]interface{}); ok {
-		index, err := strconv.Atoi(paths[1])
-		if err != nil {
-			return err
-		}
-		var configItem map[string]interface{}
-		outRange := index > len(configArray)-1
-		if outRange {
-			configItem = make(map[string]interface{})
-		} else {
-			configItem = configArray[index].(map[string]interface{})
-		}
-
-		keys := paths[2:]
-		currentMap := configItem
-		for i, key := range keys {
-			hasKey := false
-			lowerKey := key
-			for y := range currentMap {
-				if y != lowerKey {
-					continue
-				}
-				if nextMap, ok := currentMap[y].(map[string]interface{}); ok {
-					currentMap = nextMap
-					hasKey = true
-					break
-				}
-			}
-			if !hasKey && i != len(keys)-1 {
-				newMap := make(map[string]interface{})
-				currentMap[lowerKey] = newMap
-				currentMap = newMap
-			}
-		}
-		lastKey := keys[len(keys)-1]
-
-		// if the value is a boolean, we convert it
-		boolValue, err := strconv.ParseBool(v)
-		if err == nil {
-			currentMap[lastKey] = boolValue
-			if outRange {
-				blank := index - len(configArray) + 1
-				for i := 0; i < blank; i++ {
-					configArray = append(configArray, make(map[string]interface{}))
-				}
-				configArray[index] = configItem
-			} else {
-				configArray[index] = configItem
-			}
-			_ = k.Set(prefixKey, configArray)
-			return nil
-		}
-
-		// if the value is a number, we convert it
-		intValue, err := strconv.Atoi(v)
-		if err == nil {
-			currentMap[lastKey] = intValue
-			if outRange {
-				blank := index - len(configArray) + 1
-				for i := 0; i < blank; i++ {
-					configArray = append(configArray, make(map[string]interface{}))
-				}
-				configArray[index] = configItem
-			} else {
-				configArray[index] = configItem
-			}
-			_ = k.Set(prefixKey, configArray)
-			return nil
-		}
-
-		// otherwise we keep it as a string
-		currentMap[lastKey] = v
-		if outRange {
-			blank := index - len(configArray) + 1
-			for i := 0; i < blank; i++ {
-				configArray = append(configArray, make(map[string]interface{}))
-			}
-			configArray[index] = configItem
-		} else {
-			configArray[index] = configItem
-		}
-		_ = k.Set(prefixKey, configArray)
-	}
-	return nil
 }
 
 func (c *Config) IsDebugEnabled() bool {
