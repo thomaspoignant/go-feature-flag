@@ -1487,17 +1487,43 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 							PollingInterval:         50000,
 							FileFormat:              "yaml",
 							StartWithRetrieverError: true,
+							Notifiers: []config.NotifierConf{
+								{
+									Kind:        config.WebhookNotifier,
+									EndpointURL: "http://localhost:8080/webhook",
+								},
+							},
+							Exporters: &[]config.ExporterConf{
+								{
+									Kind: "kafka",
+									Kafka: kafkaexporter.Settings{
+										Addresses: []string{"localhost:19092", "localhost:19093"},
+									},
+								},
+							},
+							Retrievers: &[]config.RetrieverConf{
+								{
+									Kind: "file",
+									Path: "examples/retriever_file/flags.goff.yaml",
+								},
+							},
 						},
 					},
 				},
 			},
 			wantErr: assert.NoError,
 			envVars: map[string]string{
-				"FLAGSETS_0_NAME":                    "default",
-				"FLAGSETS_0_APIKEYS":                 "other-api-key,default-api-key",
-				"FLAGSETS_0_FILEFORMAT":              "yaml",
-				"FLAGSETS_0_POLLINGINTERVAL":         "50000",
-				"FLAGSETS_0_STARTWITHRETRIEVERERROR": "true",
+				"FLAGSETS_0_NAME":                       "default",
+				"FLAGSETS_0_APIKEYS":                    "other-api-key,default-api-key",
+				"FLAGSETS_0_FILEFORMAT":                 "yaml",
+				"FLAGSETS_0_POLLINGINTERVAL":            "50000",
+				"FLAGSETS_0_STARTWITHRETRIEVERERROR":    "true",
+				"FLAGSETS_0_NOTIFIER_0_KIND":            "webhook",
+				"FLAGSETS_0_NOTIFIER_0_ENDPOINTURL":     "http://localhost:8080/webhook",
+				"FLAGSETS_0_EXPORTER_0_KIND":            "kafka",
+				"FLAGSETS_0_EXPORTER_0_KAFKA_ADDRESSES": "localhost:19092,localhost:19093",
+				"FLAGSETS_0_RETRIEVER_0_KIND":           "file",
+				"FLAGSETS_0_RETRIEVER_0_PATH":           "examples/retriever_file/flags.goff.yaml",
 			},
 		},
 	}
