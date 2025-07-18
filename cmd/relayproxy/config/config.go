@@ -236,6 +236,7 @@ func mapEnvVariablesProvider(prefix string, log *zap.Logger) koanf.Provider {
 		key = strings.TrimPrefix(key, prefix)
 		if strings.HasPrefix(key, "RETRIEVERS") ||
 			strings.HasPrefix(key, "NOTIFIER") ||
+			strings.HasPrefix(key, "NOTIFIERS") ||
 			strings.HasPrefix(key, "FLAGSETS") ||
 			strings.HasPrefix(key, "EXPORTERS") {
 			configMap := k.Raw()

@@ -30,7 +30,13 @@ type CommonFlagSet struct {
 	Retrievers *[]RetrieverConf `mapstructure:"retrievers" koanf:"retrievers"`
 
 	// Notifiers is the configuration on where to notify a flag change
-	Notifiers []NotifierConf `mapstructure:"notifier" koanf:"notifier"`
+	Notifiers []NotifierConf `mapstructure:"notifiers" koanf:"notifiers"`
+
+	// FixNotifiers, Before version v1.46.0, the notifier was called "notifier" instead of "notifiers".
+	// This is a backward compatibility fix to allow to use the old configuration.
+	// This will be removed in a future version.
+	// Deprecated: use Notifiers instead.
+	FixNotifiers []NotifierConf `mapstructure:"notifier" koanf:"notifier"`
 
 	// Exporter is the configuration on how to export data
 	Exporter *ExporterConf `mapstructure:"exporter" koanf:"exporter"`
