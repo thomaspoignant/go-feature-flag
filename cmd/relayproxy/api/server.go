@@ -55,14 +55,6 @@ func (s *Server) initRoutes() {
 	s.apiEcho.Debug = s.config.IsDebugEnabled()
 	s.apiEcho.Use(otelecho.Middleware("go-feature-flag"))
 	s.apiEcho.Use(custommiddleware.ZapLogger(s.zapLog, s.config))
-
-	// Only use BasePathMiddleware for non-Lambda deployments
-	// For Lambda, base path stripping is handled by the Lambda adapter's StripBasePath functionality
-	if !s.config.StartAsAwsLambda {
-		s.apiEcho.Use(custommiddleware.BasePathMiddleware(custommiddleware.BasePathConfig{
-			BasePath: s.config.AwsApiGatewayBasePath,
-		}))
-	}
 	s.apiEcho.Use(middleware.BodyDumpWithConfig(middleware.BodyDumpConfig{
 		Skipper: func(c echo.Context) bool {
 			isSwagger := strings.HasPrefix(c.Request().URL.String(), "/swagger")
