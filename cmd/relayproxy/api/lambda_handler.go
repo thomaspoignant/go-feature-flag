@@ -11,22 +11,11 @@ import (
 
 // newAwsLambdaHandlerManager is creating a new awsLambdaHandler struct with the echoadapter
 // to proxy all lambda event to echo.
-func newAwsLambdaHandlerManager(echoInstance *echo.Echo, basePath string) awsLambdaHandler {
-	adapterAPIGtwV2 := echoadapter.NewV2(echoInstance)
-	adapterALB := echoadapter.NewALB(echoInstance)
-	adapterAPIGtwV1 := echoadapter.New(echoInstance)
-
-	// Configure base path stripping if a base path is provided
-	if basePath != "" {
-		adapterAPIGtwV2.StripBasePath(basePath)
-		adapterALB.StripBasePath(basePath)
-		adapterAPIGtwV1.StripBasePath(basePath)
-	}
-
+func newAwsLambdaHandlerManager(echoInstance *echo.Echo) awsLambdaHandler {
 	return awsLambdaHandler{
-		adapterAPIGtwV2: adapterAPIGtwV2,
-		adapterALB:      adapterALB,
-		adapterAPIGtwV1: adapterAPIGtwV1,
+		adapterAPIGtwV2: echoadapter.NewV2(echoInstance),
+		adapterALB:      echoadapter.NewALB(echoInstance),
+		adapterAPIGtwV1: echoadapter.New(echoInstance),
 	}
 }
 
