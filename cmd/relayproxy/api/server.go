@@ -160,7 +160,7 @@ func (s *Server) StartAwsLambda() {
 }
 
 func (s *Server) getLambdaHandler() interface{} {
-	handlerMngr := newAwsLambdaHandlerManager(s.apiEcho)
+	handlerMngr := newAwsLambdaHandlerManager(s.apiEcho, s.config.AwsApiGatewayBasePath)
 	return handlerMngr.GetAdapter(s.config.AwsLambdaAdapter)
 }
 
