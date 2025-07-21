@@ -104,8 +104,15 @@ func shouldHandleRecursively(prefixKey string, keys []string) bool {
 }
 
 // handleRecursiveConfig processes recursive configuration for flagsets
-func handleRecursiveConfig(keys []string, v string, configItem map[string]interface{},
-	configArray []interface{}, index int, configMap map[string]interface{}, prefixKey string) (map[string]interface{}, error) {
+func handleRecursiveConfig(
+	keys []string,
+	v string,
+	configItem map[string]interface{},
+	configArray []interface{},
+	index int,
+	configMap map[string]interface{},
+	prefixKey string,
+) (map[string]interface{}, error) {
 	recursiveKey := strings.Join(keys, "_")
 	modifiedNestedConfig, err := loadArrayEnv(recursiveKey, v, configItem)
 	if err != nil {
@@ -120,8 +127,14 @@ func handleRecursiveConfig(keys []string, v string, configItem map[string]interf
 }
 
 // handleDirectConfig processes direct configuration assignment
-func handleDirectConfig(keys []string, v string, configItem map[string]interface{},
-	configArray []interface{}, index int, configMap map[string]interface{}, prefixKey string) (map[string]interface{}, error) {
+func handleDirectConfig(keys []string,
+	v string,
+	configItem map[string]interface{},
+	configArray []interface{},
+	index int,
+	configMap map[string]interface{},
+	prefixKey string,
+) (map[string]interface{}, error) {
 	currentMap := configItem
 
 	for i, key := range keys {
@@ -136,7 +149,12 @@ func handleDirectConfig(keys []string, v string, configItem map[string]interface
 }
 
 // ensureMapExists ensures a map exists at the specified key path
-func ensureMapExists(currentMap map[string]interface{}, key string, currentIndex, lastIndex int) map[string]interface{} {
+func ensureMapExists(
+	currentMap map[string]interface{},
+	key string,
+	currentIndex,
+	lastIndex int,
+) map[string]interface{} {
 	next, ok := currentMap[key].(map[string]interface{})
 	if ok {
 		return next
