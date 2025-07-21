@@ -2,6 +2,7 @@ package controller_test
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -11,7 +12,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/controller"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/model"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/testdata/mock"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"go.uber.org/zap"
 )
@@ -125,4 +128,61 @@ func Test_info_Handler(t *testing.T) {
 			}
 		})
 	}
+}
+
+// Test_info_Handler_Error tests the error scenario in the info handler
+func Test_info_Handler_Error(t *testing.T) {
+	t.Run("monitoring service returns error", func(t *testing.T) {
+		// Create a mock monitoring service that returns an error
+		mockMonitoring := &mock.MockMonitoringService{
+			HealthResponse: model.HealthResponse{Initialized: true},
+			InfoResponse:   model.InfoResponse{},
+			InfoError:      errors.New("flagset manager is not initialized"),
+		}
+
+		infoCtrl := controller.NewInfo(mockMonitoring)
+
+		e := echo.New()
+		rec := httptest.NewRecorder()
+		req := httptest.NewRequest(echo.GET, "/info", nil)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		c := e.NewContext(req, rec)
+		res := infoCtrl.Handler(c)
+
+		// Verify that the handler returns an error
+		assert.Error(t, res, "Handler should return an error when monitoring service fails")
+
+		// Verify that the error is an HTTP error with status 500
+		httpError, ok := res.(*echo.HTTPError)
+		assert.True(t, ok, "Error should be an HTTP error")
+		assert.Equal(t, http.StatusInternalServerError, httpError.Code, "Should return 500 status code")
+		assert.Equal(t, "flagset manager is not initialized", httpError.Message, "Error message should match")
+	})
+
+	t.Run("monitoring service returns different error", func(t *testing.T) {
+		// Create a mock monitoring service that returns a different error
+		mockMonitoring := &mock.MockMonitoringService{
+			HealthResponse: model.HealthResponse{Initialized: true},
+			InfoResponse:   model.InfoResponse{},
+			InfoError:      errors.New("failed to get flagsets"),
+		}
+
+		infoCtrl := controller.NewInfo(mockMonitoring)
+
+		e := echo.New()
+		rec := httptest.NewRecorder()
+		req := httptest.NewRequest(echo.GET, "/info", nil)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		c := e.NewContext(req, rec)
+		res := infoCtrl.Handler(c)
+
+		// Verify that the handler returns an error
+		assert.Error(t, res, "Handler should return an error when monitoring service fails")
+
+		// Verify that the error is an HTTP error with status 500
+		httpError, ok := res.(*echo.HTTPError)
+		assert.True(t, ok, "Error should be an HTTP error")
+		assert.Equal(t, http.StatusInternalServerError, httpError.Code, "Should return 500 status code")
+		assert.Equal(t, "failed to get flagsets", httpError.Message, "Error message should match")
+	})
 }

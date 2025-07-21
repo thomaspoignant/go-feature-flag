@@ -1,12 +1,16 @@
 package service_test
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/model"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/testdata/mock"
 	"go.uber.org/zap"
 )
 
@@ -199,5 +203,105 @@ func TestWithFlagsetsMode(t *testing.T) {
 		}, zap.NewNop(), nil)
 		assert.Error(t, err, "Expected error due to invalid file path")
 		assert.Nil(t, manager)
+	})
+}
+
+// TestMonitoringInfoErrors tests the error scenarios in the Info() function
+func TestMonitoringInfoErrors(t *testing.T) {
+	t.Run("nil flagsetManager should return error", func(t *testing.T) {
+		monitoring := service.NewMonitoring(nil)
+		info, err := monitoring.Info()
+		assert.Error(t, err, "Expected error when flagsetManager is nil")
+		assert.Equal(t, "flagset manager is not initialized", err.Error())
+		assert.Equal(t, model.InfoResponse{}, info, "Expected empty InfoResponse")
+	})
+
+	t.Run("GetFlagSets error should be propagated", func(t *testing.T) {
+		mockManager := &mock.MockFlagsetManager{
+			FlagSets:       nil,
+			DefaultFlagSet: nil,
+			GetFlagSetsErr: errors.New("failed to get flagsets"),
+		}
+		monitoring := service.NewMonitoring(mockManager)
+		info, err := monitoring.Info()
+		assert.Error(t, err, "Expected error from GetFlagSets")
+		assert.Equal(t, "failed to get flagsets", err.Error())
+		assert.Equal(t, model.InfoResponse{}, info, "Expected empty InfoResponse")
+	})
+
+	t.Run("default mode with nil default flagset should return error", func(t *testing.T) {
+		mockManager := &mock.MockFlagsetManager{
+			FlagSets:            map[string]*ffclient.GoFeatureFlag{},
+			DefaultFlagSet:      nil,
+			IsDefaultFlagSeItem: true,
+			GetFlagSetsErr:      nil,
+		}
+		monitoring := service.NewMonitoring(mockManager)
+		info, err := monitoring.Info()
+		assert.Error(t, err, "Expected error when default flagset is nil")
+		assert.Equal(t, "no default flagset configured", err.Error())
+		assert.Equal(t, model.InfoResponse{}, info, "Expected empty InfoResponse")
+	})
+
+	t.Run("default mode with valid default flagset should succeed", func(t *testing.T) {
+		// We need to mock the GetCacheRefreshDate method, but since it's not easily mockable,
+		// we'll test the happy path with a real manager instead
+
+		manager, err := service.NewFlagsetManager(&config.Config{
+			CommonFlagSet: config.CommonFlagSet{
+				PollingInterval: 60000,
+				FileFormat:      "yaml",
+				Retrievers: &[]config.RetrieverConf{
+					{Kind: "file", Path: "../../../testdata/flag-config.yaml"},
+				},
+			},
+		}, zap.NewNop(), nil)
+		require.NoError(t, err)
+		require.NotNil(t, manager)
+
+		monitoring := service.NewMonitoring(manager)
+		info, err := monitoring.Info()
+		assert.NoError(t, err, "Expected no error with valid default flagset")
+		assert.NotNil(t, info.LatestCacheRefresh, "Expected LatestCacheRefresh to not be nil")
+		assert.False(t, info.LatestCacheRefresh.IsZero(), "Expected LatestCacheRefresh to not be zero")
+	})
+
+	t.Run("flagsets mode with valid flagsets should succeed", func(t *testing.T) {
+		// Since we can't easily mock GetCacheRefreshDate, we'll test with real manager
+		manager, err := service.NewFlagsetManager(&config.Config{
+			FlagSets: []config.FlagSet{
+				{
+					Name: "test-flagset-1",
+					CommonFlagSet: config.CommonFlagSet{
+						PollingInterval: 60000,
+						FileFormat:      "yaml",
+						Retrievers: &[]config.RetrieverConf{
+							{Kind: "file", Path: "../../../testdata/flag-config.yaml"},
+						},
+					},
+					APIKeys: []string{"api-key-1"},
+				},
+				{
+					Name: "test-flagset-2",
+					CommonFlagSet: config.CommonFlagSet{
+						PollingInterval: 60000,
+						FileFormat:      "yaml",
+						Retrievers: &[]config.RetrieverConf{
+							{Kind: "file", Path: "../../../testdata/flag-config-2nd-file.yaml"},
+						},
+					},
+					APIKeys: []string{"api-key-2"},
+				},
+			},
+		}, zap.NewNop(), nil)
+		require.NoError(t, err)
+		require.NotNil(t, manager)
+
+		monitoring := service.NewMonitoring(manager)
+		info, err := monitoring.Info()
+		assert.NoError(t, err, "Expected no error with valid flagsets")
+		assert.NotEmpty(t, info.Flagsets, "Expected flagsets to not be empty")
+		assert.NotNil(t, info.LatestCacheRefresh, "Expected LatestCacheRefresh to not be nil")
+		assert.False(t, info.LatestCacheRefresh.IsZero(), "Expected LatestCacheRefresh to not be zero")
 	})
 }
