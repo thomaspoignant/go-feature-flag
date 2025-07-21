@@ -170,20 +170,23 @@ func TestAwsLambdaHandler_BasePathSupport(t *testing.T) {
 	z, err := zap.NewProduction()
 	require.NoError(t, err)
 
-	goffConfig := &config.Config{
-		Retriever: &config.RetrieverConf{
-			Kind: "file",
-			Path: "../../../testdata/flag-config.yaml",
+	flagsetManager, err := service.NewFlagsetManager(&config.Config{
+		CommonFlagSet: config.CommonFlagSet{
+			Retrievers: &[]config.RetrieverConf{
+				{
+					Kind: "file",
+					Path: "../../../testdata/flag-config.yaml",
+				},
+			},
 		},
-	}
-	goff, err := service.NewGoFeatureFlagClient(goffConfig, z, []notifier.Notifier{})
+	}, z, nil)
 	require.NoError(t, err)
 
 	commonServices := service.Services{
-		MonitoringService:    service.NewMonitoring(goff),
-		WebsocketService:     service.NewWebsocketService(),
-		GOFeatureFlagService: goff,
-		Metrics:              metric.Metrics{},
+		MonitoringService: service.NewMonitoring(flagsetManager),
+		WebsocketService:  service.NewWebsocketService(),
+		FlagsetManager:    flagsetManager,
+		Metrics:           metric.Metrics{},
 	}
 
 	for _, tt := range tests {
