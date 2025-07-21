@@ -84,7 +84,7 @@ jobs:
           go-version-file: go.mod
           check-latest: true
       - run: make swagger
-      - run: git diff --exit-code --quiet
+      - run: git diff --exit-code
 
   goreleaser-check:
     runs-on: ubuntu-latest
