@@ -84,7 +84,6 @@ jobs:
           go-version-file: go.mod
           check-latest: true
       - run: make swagger
-      - run: swag
       - run: git diff --exit-code
 
   goreleaser-check:
