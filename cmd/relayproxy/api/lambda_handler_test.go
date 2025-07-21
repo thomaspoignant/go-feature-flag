@@ -155,29 +155,41 @@ func TestAwsLambdaHandler_BasePathSupport(t *testing.T) {
 			requestPath:  "/health",
 			expectedCode: 200,
 		},
+		{
+			name:         "No base path configured - direct path",
+			basePath:     "",
+			requestPath:  "/health",
+			expectedCode: 200,
+		},
+	}
+
+	z, err := zap.NewProduction()
+	require.NoError(t, err)
+
+	goffConfig := &config.Config{
+		Retriever: &config.RetrieverConf{
+			Kind: "file",
+			Path: "../../../testdata/flag-config.yaml",
+		},
+	}
+	goff, err := service.NewGoFeatureFlagClient(goffConfig, z, []notifier.Notifier{})
+	require.NoError(t, err)
+
+	commonServices := service.Services{
+		MonitoringService:    service.NewMonitoring(goff),
+		WebsocketService:     service.NewWebsocketService(),
+		GOFeatureFlagService: goff,
+		Metrics:              metric.Metrics{},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			z, err := zap.NewProduction()
-			require.NoError(t, err)
 			c := &config.Config{
 				StartAsAwsLambda:      true,
 				AwsLambdaAdapter:      "APIGatewayV2",
 				AwsApiGatewayBasePath: tt.basePath,
-				Retriever: &config.RetrieverConf{
-					Kind: "file",
-					Path: "../../../testdata/flag-config.yaml",
-				},
 			}
-			goff, err := service.NewGoFeatureFlagClient(c, z, []notifier.Notifier{})
-			require.NoError(t, err)
-			apiServer := New(c, service.Services{
-				MonitoringService:    service.NewMonitoring(goff),
-				WebsocketService:     service.NewWebsocketService(),
-				GOFeatureFlagService: goff,
-				Metrics:              metric.Metrics{},
-			}, z)
+			apiServer := New(c, commonServices, z)
 
 			request := events.APIGatewayV2HTTPRequest{
 				RequestContext: events.APIGatewayV2HTTPRequestContext{
