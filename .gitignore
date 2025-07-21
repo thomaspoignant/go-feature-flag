@@ -46,3 +46,5 @@ oryxBuildBinary
 
 # Localstack cache
 volume
+
+.cursor/

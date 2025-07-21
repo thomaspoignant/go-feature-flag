@@ -52,7 +52,7 @@ class DataCollectorHook(Hook):
         feature_event = FeatureEvent(
             contextKind=(
                 "anonymousUser"
-                if hook_context.evaluation_context.attributes["anonymous"]
+                if hook_context.evaluation_context.attributes.get("anonymous", False)
                 else "user"
             ),
             creationDate=int(datetime.datetime.now().timestamp()),
@@ -73,7 +73,7 @@ class DataCollectorHook(Hook):
         feature_event = FeatureEvent(
             contextKind=(
                 "anonymousUser"
-                if hook_context.evaluation_context.attributes["anonymous"]
+                if hook_context.evaluation_context.attributes.get("anonymous", False)
                 else "user"
             ),
             creationDate=int(datetime.datetime.now().timestamp()),
