@@ -15,16 +15,16 @@ require (
 	github.com/aws/aws-lambda-go v1.49.0
 	github.com/aws/aws-sdk-go v1.55.7
 	github.com/aws/aws-sdk-go-v2 v1.36.6
-	github.com/aws/aws-sdk-go-v2/config v1.29.17
+	github.com/aws/aws-sdk-go-v2/config v1.29.18
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.71
-	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.83
+	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.85
 	github.com/aws/aws-sdk-go-v2/service/kinesis v1.35.4
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.84.1
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.38.8
 	github.com/aws/smithy-go v1.22.4
 	github.com/awslabs/aws-lambda-go-api-proxy v0.16.2
 	github.com/fsouza/fake-gcs-server v1.52.2
-	github.com/go-viper/mapstructure/v2 v2.3.0
+	github.com/go-viper/mapstructure/v2 v2.4.0
 	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.7.0
 	github.com/google/uuid v1.6.0
@@ -56,7 +56,7 @@ require (
 	github.com/swaggo/swag v1.16.5
 	github.com/testcontainers/testcontainers-go v0.38.0
 	github.com/testcontainers/testcontainers-go/modules/azurite v0.35.0
-	github.com/testcontainers/testcontainers-go/modules/mongodb v0.37.0
+	github.com/testcontainers/testcontainers-go/modules/mongodb v0.38.0
 	github.com/testcontainers/testcontainers-go/modules/redis v0.38.0
 	github.com/thejerf/slogassert v0.3.4
 	github.com/xdg-go/scram v1.1.2
