@@ -307,6 +307,13 @@ type Config struct {
 	// Default: "APIGatewayV2"
 	AwsLambdaAdapter string `mapstructure:"awsLambdaAdapter" koanf:"awslambdaadapter"`
 
+	// AwsApiGatewayBasePath (optional) is the base path prefix for AWS API Gateway deployments.
+	// This is useful when deploying behind a non-root path like "/api" or "/dev/feature-flags".
+	// The relay proxy will strip this base path from incoming requests before processing.
+	// Example: if set to "/api/feature-flags", requests to "/api/feature-flags/health" will be processed as "/health"
+	// Default: ""
+	AwsApiGatewayBasePath string `mapstructure:"awsApiGatewayBasePath" koanf:"awsapigatewaybasepath"`
+
 	// EvaluationContextEnrichment (optional) will be merged with the evaluation context sent during the evaluation.
 	// It is useful to add common attributes to all the evaluations, such as a server version, environment, ...
 	//
