@@ -261,6 +261,19 @@ This parameter allow you to decide which type of AWS lambda handler you want to 
 - mandatory: <NotMandatory />
 - This param is used only if `startAsAwsLambda` is `true`.
 
+### `awsApiGatewayBasePath`
+Specifies the base path prefix for AWS API Gateway deployments when using non-root routes.
+The relay proxy will strip this base path from incoming requests before processing them.
+This is useful when deploying behind paths like `/api` or `/dev/feature-flags`.
+
+- option name: `awsApiGatewayBasePath`
+- type: **string**
+- default: **none**
+- mandatory: <NotMandatory />
+- This param is used only if `startAsAwsLambda` is `true`.
+
+**Example:** If set to `/api/feature-flags`, requests to `/api/feature-flags/health` will be processed as `/health`.
+
 ### `debug`
 If `debug` is set to true, we will set the log level to debug and set some components in debug mode (`labstack/echo`, `pprof` etc ...).
 - option name: `debug`

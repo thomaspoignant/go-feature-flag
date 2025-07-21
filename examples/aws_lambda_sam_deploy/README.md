@@ -25,6 +25,22 @@ Finally, in another terminal the `make call-api` command sends a request to the 
 
 That's it! You can now test the `relay-proxy` as an AWS Lambda using AWS SAM.
 
+## Configuration Options
+
+### Base Path Configuration
+
+If you need to deploy the relay proxy behind a non-root path in API Gateway (e.g., `/api/feature-flags/{proxy+}`), you can configure a base path that will be stripped from incoming requests:
+
+Add this environment variable to your SAM template:
+
+```yaml
+Environment:
+  Variables:
+    AWSAPIGATEWAYBASEPATH: "/api/feature-flags"  # Strip this prefix from all requests
+```
+
+This configuration ensures that requests to `/api/feature-flags/health` are correctly processed as `/health`.
+
 ## Conclusion
 
 In this README, you learned how to use AWS SAM to test the relay-proxy as an AWS Lambda.
