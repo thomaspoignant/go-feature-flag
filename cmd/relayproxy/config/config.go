@@ -188,25 +188,7 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 	}
 
 	// Read config file
-	configFileLocation, errFileLocation := locateConfigFile(k.String("config"))
-	if errFileLocation != nil {
-		log.Info("not using any configuration file", zap.Error(errFileLocation))
-	} else {
-		ext := filepath.Ext(configFileLocation)
-		var parser koanf.Parser
-		switch strings.ToLower(ext) {
-		case ".toml":
-			parser = toml.Parser()
-		case ".json":
-			parser = json.Parser()
-		default:
-			parser = yaml.Parser()
-		}
-
-		if errBindFile := k.Load(file.Provider(configFileLocation), parser); errBindFile != nil {
-			log.Error("error loading file", zap.Error(errBindFile))
-		}
-	}
+	loadConfigFile(log)
 
 	// Map environment variables
 	_ = k.Load(mapEnvVariablesProvider(k.String("envVariablePrefix"), log), nil)
@@ -218,20 +200,50 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 		return nil, errUnmarshal
 	}
 
-	if proxyConf.Exporters != nil {
-		for i := range *proxyConf.Exporters {
-			// Only apply StringToArray if addresses is empty or has only one element that contains a comma
-			if len((*proxyConf.Exporters)[i].Kafka.Addresses) == 0 ||
-				(len((*proxyConf.Exporters)[i].Kafka.Addresses) == 1 &&
-					strings.Contains((*proxyConf.Exporters)[i].Kafka.Addresses[0], ",")) {
-				(*proxyConf.Exporters)[i].Kafka.Addresses = utils.StringToArray(
-					(*proxyConf.Exporters)[i].Kafka.Addresses,
-				)
-			}
-		}
-	}
+	processExporters(proxyConf)
 
 	return proxyConf, nil
+}
+
+// loadConfigFile handles the loading of configuration files
+func loadConfigFile(log *zap.Logger) {
+	configFileLocation, errFileLocation := locateConfigFile(k.String("config"))
+	if errFileLocation != nil {
+		log.Info("not using any configuration file", zap.Error(errFileLocation))
+		return
+	}
+
+	parser := getParserForFile(configFileLocation)
+	if errBindFile := k.Load(file.Provider(configFileLocation), parser); errBindFile != nil {
+		log.Error("error loading file", zap.Error(errBindFile))
+	}
+}
+
+// getParserForFile returns the appropriate parser based on file extension
+func getParserForFile(configFileLocation string) koanf.Parser {
+	ext := filepath.Ext(configFileLocation)
+	switch strings.ToLower(ext) {
+	case ".toml":
+		return toml.Parser()
+	case ".json":
+		return json.Parser()
+	default:
+		return yaml.Parser()
+	}
+}
+
+// processExporters handles the post-processing of exporters configuration
+func processExporters(proxyConf *Config) {
+	if proxyConf.Exporters == nil {
+		return
+	}
+
+	for i := range *proxyConf.Exporters {
+		addresses := (*proxyConf.Exporters)[i].Kafka.Addresses
+		if len(addresses) == 0 || (len(addresses) == 1 && strings.Contains(addresses[0], ",")) {
+			(*proxyConf.Exporters)[i].Kafka.Addresses = utils.StringToArray(addresses)
+		}
+	}
 }
 
 // OpenTelemetryConfiguration is the configuration for the OpenTelemetry part of the relay proxy
