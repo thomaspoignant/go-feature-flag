@@ -75,9 +75,9 @@ require (
 	google.golang.org/api v0.241.0
 	google.golang.org/grpc v1.73.0
 	gopkg.in/yaml.v3 v3.0.1
-	k8s.io/api v0.33.2
-	k8s.io/apimachinery v0.33.2
-	k8s.io/client-go v0.33.2
+	k8s.io/api v0.33.3
+	k8s.io/apimachinery v0.33.3
+	k8s.io/client-go v0.33.3
 )
 
 // TODO: remove this once https://github.com/nikunjy/rules/pull/43 merges and a new version is available
