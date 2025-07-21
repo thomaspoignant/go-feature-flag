@@ -603,7 +603,8 @@ const docTemplate = `{
                 "flags": {
                     "type": "object",
                     "additionalProperties": {
-                        "type": "integer"
+                        "type": "integer",
+                        "format": "int32"
                     }
                 },
                 "hash": {

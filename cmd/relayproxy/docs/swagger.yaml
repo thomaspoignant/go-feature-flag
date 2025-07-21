@@ -4,6 +4,7 @@ definitions:
     properties:
       flags:
         additionalProperties:
+          format: int32
           type: integer
         type: object
       hash:
