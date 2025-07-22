@@ -1,6 +1,7 @@
 package fflog
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"log/slog"
@@ -20,7 +21,7 @@ type FFLogger struct {
 // Error is the function to use to log error
 func (f *FFLogger) Error(msg string, keysAndValues ...any) {
 	if f != nil && f.LeveledLogger != nil {
-		f.LeveledLogger.Error(msg, keysAndValues...)
+		f.LeveledLogger.ErrorContext(context.Background(), msg, keysAndValues...)
 		return
 	}
 	f.legacyLog("ERROR", msg, keysAndValues...)
@@ -29,7 +30,7 @@ func (f *FFLogger) Error(msg string, keysAndValues ...any) {
 // Info is the function to use to log info
 func (f *FFLogger) Info(msg string, keysAndValues ...any) {
 	if f != nil && f.LeveledLogger != nil {
-		f.LeveledLogger.Info(msg, keysAndValues...)
+		f.LeveledLogger.InfoContext(context.Background(), msg, keysAndValues...)
 		return
 	}
 	f.legacyLog("INFO", msg, keysAndValues...)
@@ -38,7 +39,7 @@ func (f *FFLogger) Info(msg string, keysAndValues ...any) {
 // Debug is the function to use to log debug
 func (f *FFLogger) Debug(msg string, keysAndValues ...any) {
 	if f != nil && f.LeveledLogger != nil {
-		f.LeveledLogger.Debug(msg, keysAndValues...)
+		f.LeveledLogger.DebugContext(context.Background(), msg, keysAndValues...)
 		return
 	}
 	f.legacyLog("DEBUG", msg, keysAndValues...)
@@ -47,7 +48,7 @@ func (f *FFLogger) Debug(msg string, keysAndValues ...any) {
 // Warn is the function to use to log warn
 func (f *FFLogger) Warn(msg string, keysAndValues ...any) {
 	if f != nil && f.LeveledLogger != nil {
-		f.LeveledLogger.Warn(msg, keysAndValues...)
+		f.LeveledLogger.WarnContext(context.Background(), msg, keysAndValues...)
 		return
 	}
 	f.legacyLog("WARN", msg, keysAndValues...)
