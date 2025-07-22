@@ -15,12 +15,12 @@ require (
 	github.com/aws/aws-lambda-go v1.49.0
 	github.com/aws/aws-sdk-go v1.55.7
 	github.com/aws/aws-sdk-go-v2 v1.36.6
-	github.com/aws/aws-sdk-go-v2/config v1.29.17
+	github.com/aws/aws-sdk-go-v2/config v1.29.18
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.71
-	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.83
+	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.85
 	github.com/aws/aws-sdk-go-v2/service/kinesis v1.35.4
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.83.0
-	github.com/aws/aws-sdk-go-v2/service/sqs v1.38.8
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.84.1
+	github.com/aws/aws-sdk-go-v2/service/sqs v1.38.9
 	github.com/aws/smithy-go v1.22.4
 	github.com/awslabs/aws-lambda-go-api-proxy v0.16.2
 	github.com/fsouza/fake-gcs-server v1.52.2
@@ -56,7 +56,7 @@ require (
 	github.com/swaggo/swag v1.16.5
 	github.com/testcontainers/testcontainers-go v0.38.0
 	github.com/testcontainers/testcontainers-go/modules/azurite v0.35.0
-	github.com/testcontainers/testcontainers-go/modules/mongodb v0.37.0
+	github.com/testcontainers/testcontainers-go/modules/mongodb v0.38.0
 	github.com/testcontainers/testcontainers-go/modules/redis v0.38.0
 	github.com/thejerf/slogassert v0.3.4
 	github.com/xdg-go/scram v1.1.2
@@ -108,11 +108,11 @@ require (
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.37 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.37 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.3 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/v4a v1.3.36 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/v4a v1.3.37 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.12.4 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.7.4 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.7.5 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.12.18 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.18.17 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.18.18 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.25.6 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.30.4 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.34.1 // indirect

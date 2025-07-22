@@ -19,9 +19,13 @@ import (
 
 func Test_Starting_RelayProxy_with_monitoring_on_same_port(t *testing.T) {
 	proxyConf := &config.Config{
-		Retriever: &config.RetrieverConf{
-			Kind: "file",
-			Path: "../../../testdata/flag-config.yaml",
+		CommonFlagSet: config.CommonFlagSet{
+			Retrievers: &[]config.RetrieverConf{
+				{
+					Kind: "file",
+					Path: "../../../testdata/flag-config.yaml",
+				},
+			},
 		},
 		ListenPort: 11024,
 	}
@@ -36,7 +40,7 @@ func Test_Starting_RelayProxy_with_monitoring_on_same_port(t *testing.T) {
 	defer wsService.Close() // close all the open connections
 	prometheusNotifier := metric.NewPrometheusNotifier(metricsV2)
 	proxyNotifier := service.NewNotifierWebsocket(wsService)
-	goff, err := service.NewGoFeatureFlagClient(proxyConf, log.ZapLogger, []notifier.Notifier{
+	flagsetManager, err := service.NewFlagsetManager(proxyConf, log.ZapLogger, []notifier.Notifier{
 		prometheusNotifier,
 		proxyNotifier,
 	})
@@ -45,10 +49,10 @@ func Test_Starting_RelayProxy_with_monitoring_on_same_port(t *testing.T) {
 	}
 
 	services := service.Services{
-		MonitoringService:    service.NewMonitoring(goff),
-		WebsocketService:     wsService,
-		GOFeatureFlagService: goff,
-		Metrics:              metricsV2,
+		MonitoringService: service.NewMonitoring(flagsetManager),
+		WebsocketService:  wsService,
+		FlagsetManager:    flagsetManager,
+		Metrics:           metricsV2,
 	}
 
 	s := api.New(proxyConf, services, log.ZapLogger)
@@ -72,9 +76,13 @@ func Test_Starting_RelayProxy_with_monitoring_on_same_port(t *testing.T) {
 
 func Test_Starting_RelayProxy_with_monitoring_on_different_port(t *testing.T) {
 	proxyConf := &config.Config{
-		Retriever: &config.RetrieverConf{
-			Kind: "file",
-			Path: "../../../testdata/flag-config.yaml",
+		CommonFlagSet: config.CommonFlagSet{
+			Retrievers: &[]config.RetrieverConf{
+				{
+					Kind: "file",
+					Path: "../../../testdata/flag-config.yaml",
+				},
+			},
 		},
 		ListenPort:     11024,
 		MonitoringPort: 11025,
@@ -90,7 +98,7 @@ func Test_Starting_RelayProxy_with_monitoring_on_different_port(t *testing.T) {
 	defer wsService.Close() // close all the open connections
 	prometheusNotifier := metric.NewPrometheusNotifier(metricsV2)
 	proxyNotifier := service.NewNotifierWebsocket(wsService)
-	goff, err := service.NewGoFeatureFlagClient(proxyConf, log.ZapLogger, []notifier.Notifier{
+	flagsetManager, err := service.NewFlagsetManager(proxyConf, log.ZapLogger, []notifier.Notifier{
 		prometheusNotifier,
 		proxyNotifier,
 	})
@@ -99,10 +107,10 @@ func Test_Starting_RelayProxy_with_monitoring_on_different_port(t *testing.T) {
 	}
 
 	services := service.Services{
-		MonitoringService:    service.NewMonitoring(goff),
-		WebsocketService:     wsService,
-		GOFeatureFlagService: goff,
-		Metrics:              metricsV2,
+		MonitoringService: service.NewMonitoring(flagsetManager),
+		WebsocketService:  wsService,
+		FlagsetManager:    flagsetManager,
+		Metrics:           metricsV2,
 	}
 
 	s := api.New(proxyConf, services, log.ZapLogger)
@@ -138,9 +146,13 @@ func Test_Starting_RelayProxy_with_monitoring_on_different_port(t *testing.T) {
 
 func Test_CheckOFREPAPIExists(t *testing.T) {
 	proxyConf := &config.Config{
-		Retriever: &config.RetrieverConf{
-			Kind: "file",
-			Path: "../../../testdata/flag-config.yaml",
+		CommonFlagSet: config.CommonFlagSet{
+			Retrievers: &[]config.RetrieverConf{
+				{
+					Kind: "file",
+					Path: "../../../testdata/flag-config.yaml",
+				},
+			},
 		},
 		ListenPort: 11024,
 		AuthorizedKeys: config.APIKeys{
@@ -159,7 +171,7 @@ func Test_CheckOFREPAPIExists(t *testing.T) {
 	defer wsService.Close() // close all the open connections
 	prometheusNotifier := metric.NewPrometheusNotifier(metricsV2)
 	proxyNotifier := service.NewNotifierWebsocket(wsService)
-	goff, err := service.NewGoFeatureFlagClient(proxyConf, log.ZapLogger, []notifier.Notifier{
+	flagsetManager, err := service.NewFlagsetManager(proxyConf, log.ZapLogger, []notifier.Notifier{
 		prometheusNotifier,
 		proxyNotifier,
 	})
@@ -168,10 +180,10 @@ func Test_CheckOFREPAPIExists(t *testing.T) {
 	}
 
 	services := service.Services{
-		MonitoringService:    service.NewMonitoring(goff),
-		WebsocketService:     wsService,
-		GOFeatureFlagService: goff,
-		Metrics:              metricsV2,
+		MonitoringService: service.NewMonitoring(flagsetManager),
+		WebsocketService:  wsService,
+		FlagsetManager:    flagsetManager,
+		Metrics:           metricsV2,
 	}
 
 	s := api.New(proxyConf, services, log.ZapLogger)
@@ -213,9 +225,13 @@ func Test_CheckOFREPAPIExists(t *testing.T) {
 
 func Test_Middleware_VersionHeader_Enabled_Default(t *testing.T) {
 	proxyConf := &config.Config{
-		Retriever: &config.RetrieverConf{
-			Kind: "file",
-			Path: "../../../testdata/flag-config.yaml",
+		CommonFlagSet: config.CommonFlagSet{
+			Retrievers: &[]config.RetrieverConf{
+				{
+					Kind: "file",
+					Path: "../../../testdata/flag-config.yaml",
+				},
+			},
 		},
 		ListenPort: 11024,
 	}
@@ -225,13 +241,13 @@ func Test_Middleware_VersionHeader_Enabled_Default(t *testing.T) {
 	metricsV2, _ := metric.NewMetrics()
 	wsService := service.NewWebsocketService()
 	defer wsService.Close()
-	goff, _ := service.NewGoFeatureFlagClient(proxyConf, log.ZapLogger, nil)
+	flagsetManager, _ := service.NewFlagsetManager(proxyConf, log.ZapLogger, nil)
 
 	services := service.Services{
-		MonitoringService:    service.NewMonitoring(goff),
-		WebsocketService:     wsService,
-		GOFeatureFlagService: goff,
-		Metrics:              metricsV2,
+		MonitoringService: service.NewMonitoring(flagsetManager),
+		WebsocketService:  wsService,
+		FlagsetManager:    flagsetManager,
+		Metrics:           metricsV2,
 	}
 
 	s := api.New(proxyConf, services, log.ZapLogger)
@@ -248,9 +264,13 @@ func Test_Middleware_VersionHeader_Enabled_Default(t *testing.T) {
 
 func Test_VersionHeader_Disabled(t *testing.T) {
 	proxyConf := &config.Config{
-		Retriever: &config.RetrieverConf{
-			Kind: "file",
-			Path: "../../../testdata/flag-config.yaml",
+		CommonFlagSet: config.CommonFlagSet{
+			Retrievers: &[]config.RetrieverConf{
+				{
+					Kind: "file",
+					Path: "../../../testdata/flag-config.yaml",
+				},
+			},
 		},
 		ListenPort:           11024,
 		DisableVersionHeader: true,
@@ -261,13 +281,13 @@ func Test_VersionHeader_Disabled(t *testing.T) {
 	metricsV2, _ := metric.NewMetrics()
 	wsService := service.NewWebsocketService()
 	defer wsService.Close()
-	goff, _ := service.NewGoFeatureFlagClient(proxyConf, log.ZapLogger, nil)
+	flagsetManager, _ := service.NewFlagsetManager(proxyConf, log.ZapLogger, nil)
 
 	services := service.Services{
-		MonitoringService:    service.NewMonitoring(goff),
-		WebsocketService:     wsService,
-		GOFeatureFlagService: goff,
-		Metrics:              metricsV2,
+		MonitoringService: service.NewMonitoring(flagsetManager),
+		WebsocketService:  wsService,
+		FlagsetManager:    flagsetManager,
+		Metrics:           metricsV2,
 	}
 
 	s := api.New(proxyConf, services, log.ZapLogger)

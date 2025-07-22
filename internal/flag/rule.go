@@ -1,6 +1,7 @@
 package flag
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log/slog"
@@ -88,13 +89,13 @@ func evaluateRule(query string, queryFormat QueryFormat, ctx ffcontext.Context) 
 	case JSONLogicQueryFormat:
 		strCtx, err := json.Marshal(mapCtx)
 		if err != nil {
-			slog.Error("error while marhsalling the context for the jsonlogic query",
+			slog.ErrorContext(context.Background(), "error while marhsalling the context for the jsonlogic query",
 				slog.Any("mapCtx", mapCtx), slog.Any("error", err))
 			return false
 		}
 		result, err := jsonlogic.Apply(query, string(strCtx))
 		if err != nil {
-			slog.Error("error while evaluating the jsonlogic query",
+			slog.ErrorContext(context.Background(), "error while evaluating the jsonlogic query",
 				slog.String("query", query), slog.Any("error", err))
 			return false
 		}
