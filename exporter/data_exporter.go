@@ -144,7 +144,7 @@ func (d *dataExporterImpl[T]) sendEvents(ctx context.Context, events []T) error 
 		case []FeatureEvent:
 			// use dc exporter as a DeprecatedExporterV1
 			err := exp.Export(ctx, legacyLogger, events)
-			slog.Warn("You are using an exporter with the old logger."+
+			slog.WarnContext(ctx, "You are using an exporter with the old logger."+
 				"Please update your custom exporter to comply to the new Exporter interface.",
 				slog.Any("err", err))
 			if err != nil {
