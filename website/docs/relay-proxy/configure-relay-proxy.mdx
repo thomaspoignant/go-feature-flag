@@ -345,19 +345,19 @@ You will be able to forward those traces to your OpenTelemetry solution directly
 - default: **none**
 - mandatory: <NotMandatory />
 
-### `flagSets`
+### `flagsets`
 Flag sets allow you to organize your feature flags into separate groups, each with its own configuration, API keys, retrievers, exporters, and notifiers.
 
 When you configure flag sets, the relay proxy operates in **flag set mode** instead of the default single configuration mode. Each flag set requires at least one API key and can have its own retrievers, exporters, and notifiers.
 
-- option name: `flagSets`
+- option name: `flagsets`
 - type: **[[]flagSet](#type-flagset)**
 - default: **none**
 - mandatory: <NotMandatory />
 - If flag sets are configured, the relay proxy will ignore the top-level `retrievers`, `exporters`, and `notifiers` configuration.
 
 ```yaml title="example goff-proxy.yaml"
-flagSets:
+flagsets:
   - name: teamA
     apiKeys:
       - "team-a-api-key"
@@ -476,7 +476,7 @@ Every `exporter` has its own configuration, check the [list of exporters](../int
 A flag set is a collection of flags that are used to evaluate features. It is used to group flags together and to apply the same configuration to them.
 
 ```yaml title="example goff-proxy.yaml"
-flagSets:
+flagsets:
   - name: my-flagset
     apiKeys:
       - "my-api-key"
@@ -596,7 +596,7 @@ When you configure flag sets, the relay proxy operates in **flag set mode** inst
 ### Basic flag set configuration
 
 ```yaml title="goff-proxy.yaml"
-flagSets:
+flagsets:
   - name: teamA
     apiKeys:
       - "team-a-api-key-1"
@@ -648,7 +648,7 @@ The relay proxy will:
 listen: 1031
 logLevel: INFO
 
-flagSets:
+flagsets:
   # Frontend team flags
   - name: frontend
     apiKeys:
