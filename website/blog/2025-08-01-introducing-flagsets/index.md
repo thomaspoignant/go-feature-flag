@@ -58,7 +58,7 @@ Flag sets are configured in your relay proxy configuration file, instead of defi
 In each flag set you can configure his behavior like in this example:
 
 ```yaml
-flagSets:
+flagsets:
   - name: team-a
     apiKeys:
       - "team-a-api-key-1"
