@@ -22,15 +22,15 @@ func (s *Server) addOFREPRoutes(cFlagEvalOFREP ofrep.EvaluateCtrl) {
 		Weak: false,
 	}))
 
-	// nolint: staticcheck
-	if len(s.config.AuthorizedKeys.Evaluation) > 0 || len(s.config.APIKeys) > 0 {
-		ofrepGroup.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
-			Validator: func(key string, _ echo.Context) (bool, error) {
-				return s.config.APIKeyExists(key), nil
-			},
-			ErrorHandler: middleware2.AuthMiddlewareErrHandler,
-		}))
-	}
+	ofrepGroup.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
+		Validator: func(key string, _ echo.Context) (bool, error) {
+			return s.config.APIKeyExists(key), nil
+		},
+		ErrorHandler: middleware2.AuthMiddlewareErrHandler,
+		Skipper: func(c echo.Context) bool {
+			return !s.config.IsAuthenticationEnabled()
+		},
+	}))
 	ofrepGroup.POST("/evaluate/flags", cFlagEvalOFREP.BulkEvaluate)
 	ofrepGroup.POST("/evaluate/flags/:flagKey", cFlagEvalOFREP.Evaluate)
 }

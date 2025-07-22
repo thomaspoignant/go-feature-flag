@@ -4,16 +4,17 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/helper"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 )
 
 type forceFlagsRefresh struct {
-	goFF    *ffclient.GoFeatureFlag
-	metrics metric.Metrics
+	flagsetManager service.FlagsetManager
+	metrics        metric.Metrics
 }
 
 type retrieverRefreshResponse struct {
@@ -21,10 +22,10 @@ type retrieverRefreshResponse struct {
 }
 
 // NewForceFlagsRefresh initialize the controller for the /data/collector endpoint
-func NewForceFlagsRefresh(goFF *ffclient.GoFeatureFlag, metrics metric.Metrics) Controller {
+func NewForceFlagsRefresh(flagsetManager service.FlagsetManager, metrics metric.Metrics) Controller {
 	return &forceFlagsRefresh{
-		goFF:    goFF,
-		metrics: metrics,
+		flagsetManager: flagsetManager,
+		metrics:        metrics,
 	}
 }
 
@@ -45,16 +46,16 @@ func NewForceFlagsRefresh(goFF *ffclient.GoFeatureFlag, metrics metric.Metrics) 
 // @Router       /admin/v1/retriever/refresh [post]
 func (h *forceFlagsRefresh) Handler(c echo.Context) error {
 	h.metrics.IncForceRefresh()
-	if h.goFF == nil {
-		return echo.NewHTTPError(
-			http.StatusInternalServerError,
-			"forceFlagsRefresh: goFF is not initialized")
+
+	flagset, httpErr := helper.GetFlagSet(h.flagsetManager, helper.GetAPIKey(c))
+	if httpErr != nil {
+		return httpErr
 	}
 
 	tracer := otel.GetTracerProvider().Tracer(config.OtelTracerName)
 	_, span := tracer.Start(c.Request().Context(), "retrieverRefresh")
 	defer span.End()
-	forceRefreshStatus := h.goFF.ForceRefresh()
+	forceRefreshStatus := flagset.ForceRefresh()
 	resp := retrieverRefreshResponse{
 		Refreshed: forceRefreshStatus,
 	}

@@ -5,20 +5,21 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	ffclient "github.com/thomaspoignant/go-feature-flag"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/helper"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"github.com/thomaspoignant/go-feature-flag/internal/utils"
 )
 
 type FlagChangeAPICtrl struct {
-	goFF    *ffclient.GoFeatureFlag
-	metrics metric.Metrics
+	flagsetManager service.FlagsetManager
+	metrics        metric.Metrics
 }
 
-func NewAPIFlagChange(goFF *ffclient.GoFeatureFlag, metrics metric.Metrics) Controller {
+func NewAPIFlagChange(flagsetManager service.FlagsetManager, metrics metric.Metrics) Controller {
 	return &FlagChangeAPICtrl{
-		goFF:    goFF,
-		metrics: metrics,
+		flagsetManager: flagsetManager,
+		metrics:        metrics,
 	}
 }
 
@@ -41,13 +42,18 @@ type FlagChangeResponse struct {
 // @Failure     500 {object}  modeldocs.HTTPErrorDoc "Internal server error"
 // @Router      /v1/flag/change [get]
 func (h *FlagChangeAPICtrl) Handler(c echo.Context) error {
-	flags, err := h.goFF.GetFlagsFromCache()
+	flagset, httpErr := helper.GetFlagSet(h.flagsetManager, helper.GetAPIKey(c))
+	if httpErr != nil {
+		return httpErr
+	}
+
+	flags, err := flagset.GetFlagsFromCache()
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	res, err := json.Marshal(flags)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	flagHashes := map[string]uint32{}

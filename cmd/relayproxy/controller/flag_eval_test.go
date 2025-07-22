@@ -1,24 +1,22 @@
 package controller_test
 
 import (
-	"context"
 	"io"
 	"io/ioutil"
-	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
-	ffclient "github.com/thomaspoignant/go-feature-flag"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/controller"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
-	"github.com/thomaspoignant/go-feature-flag/exporter/logsexporter"
-	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/notifier"
+	"go.uber.org/zap"
 )
 
 const configFlagsLocation = "../testdata/controller/config_flags.yaml"
@@ -146,23 +144,23 @@ func Test_flag_eval_Handler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// init go-feature-flag
-			goFF, _ := ffclient.New(ffclient.Config{
-				PollingInterval: 10 * time.Second,
-				LeveledLogger:   slog.Default(),
-				Context:         context.Background(),
-				Retriever: &fileretriever.Retriever{
-					Path: configFlagsLocation,
+			// Create config for default mode
+			conf := config.Config{
+				CommonFlagSet: config.CommonFlagSet{
+					Retriever: &config.RetrieverConf{
+						Kind: config.FileRetriever,
+						Path: configFlagsLocation,
+					},
+					Exporter: &config.ExporterConf{
+						Kind: config.LogExporter,
+					},
 				},
-				DataExporter: ffclient.DataExporter{
-					FlushInterval:    10 * time.Second,
-					MaxEventInMemory: 10000,
-					Exporter:         &logsexporter.Exporter{},
-				},
-			})
-			defer goFF.Close()
+			}
 
-			flagEval := controller.NewFlagEval(goFF, metric.Metrics{})
+			flagsetManager, err := service.NewFlagsetManager(&conf, zap.NewNop(), []notifier.Notifier{})
+			assert.NoError(t, err, "impossible to create flagset manager")
+
+			flagEval := controller.NewFlagEval(flagsetManager, metric.Metrics{})
 
 			e := echo.New()
 			rec := httptest.NewRecorder()

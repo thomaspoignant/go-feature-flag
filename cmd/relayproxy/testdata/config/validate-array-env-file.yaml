@@ -18,3 +18,7 @@ authorizedKeys:
   admin:
     - apikey3
 logLevel: info
+notifiers:
+  - kind: "webhook"
+    endpointUrl: "http://localhost:8080/webhook"
+    

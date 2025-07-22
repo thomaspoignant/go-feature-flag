@@ -2,8 +2,9 @@
 sidebar_position: 20
 description: How to configure the relay proxy to serve your feature flags.
 ---
-import {Mandatory, NotMandatory} from "@site/src/components/checks/checks";
-import {integrations} from "@site/data/integrations";
+import { Mandatory, NotMandatory } from "@site/src/components/checks/checks";
+import { integrations } from "@site/data/integrations";
+import { Vignette } from "@site/src/components/doc/vignette";
 
 # 🔧 Configuration
 
@@ -32,6 +33,26 @@ By default, if you omit the `--config` option, the relay proxy will look for a c
 :::
 
 
+## Configuration Patterns
+<div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-8">
+  <Vignette 
+    icon="fa-user" 
+    color="cyan" 
+    link="#getting-started"
+    title="One set of feature flags"
+    description="Use one set of feature flags for all your applications. This is the default way of using GO Feature Flag, it requires a minimum configuration and is easy to setup"
+  />
+
+  <Vignette 
+    icon="fa-users" 
+    color="blue" 
+    link="#use-multiple-flag-sets"
+    title="Use multiple flag sets"
+    description="Separate your feature flags into different flag sets to give ownership to different teams or different usage, useful for multi-tenant applications or when you have different teams."
+  / >
+</div>
+
+
 ## Getting Started
 The minimum configuration to start the **relay proxy** is to provide where to retrieve your feature flags configuration.
 
@@ -44,6 +65,7 @@ retrievers:
 All the other options are optional and can be added to the configuration file to fine-tune the **relay proxy**.
 
 
+```
 
 ## Environment variables
 The primary way to configure the relay proxy is through a configuration file, but you can also use environment variables if you prefer.  
@@ -206,10 +228,10 @@ exporters:
     kafka:
       topic: "go-feature-flag-events"
 ```
-### `notifier`
+### `notifiers`
 Notifiers is the configuration on where to notify a flag changes.
-- option name: `notifier`
-- type: **[notifier](#type-notifier)**
+- option name: `notifiers`
+- type: **[[]notifier](#type-notifier)**
 - default: **none**
 - mandatory: <NotMandatory />
 - Configuration of a notifier depends on the one you are choosing. Check the [list of notifiers](../integrations/notify-flags-changes#available-notifiers) and go on the detail page of your choice to configure it.
@@ -323,6 +345,40 @@ You will be able to forward those traces to your OpenTelemetry solution directly
 - default: **none**
 - mandatory: <NotMandatory />
 
+### `flagSets`
+Flag sets allow you to organize your feature flags into separate groups, each with its own configuration, API keys, retrievers, exporters, and notifiers.
+
+When you configure flag sets, the relay proxy operates in **flag set mode** instead of the default single configuration mode. Each flag set requires at least one API key and can have its own retrievers, exporters, and notifiers.
+
+- option name: `flagSets`
+- type: **[[]flagSet](#type-flagset)**
+- default: **none**
+- mandatory: <NotMandatory />
+- If flag sets are configured, the relay proxy will ignore the top-level `retrievers`, `exporters`, and `notifiers` configuration.
+
+```yaml title="example goff-proxy.yaml"
+flagSets:
+  - name: teamA
+    apiKeys:
+      - "team-a-api-key"
+    retrievers:
+      - kind: file
+        path: /flags/team-a-flags.yaml
+    exporter:
+      kind: log
+
+  - name: teamB
+    apiKeys:
+      - "team-b-api-key"
+    retrievers:
+      - kind: s3
+        bucket: my-feature-flag-bucket
+        item: team-b/flags.yaml
+    exporters:
+      - kind: s3
+        bucket: evaluation-data-bucket
+```
+
 ### `envVariablePrefix`
 Prefix for your environment variables.  
 This useful if you want to avoid any collision with existing environment variables that are not specifically related to the relay proxy.
@@ -416,12 +472,91 @@ Every `exporter` has its own configuration, check the [list of exporters](../int
 </ul>
 :::
 
+### type `flagSet`
+A flag set is a collection of flags that are used to evaluate features. It is used to group flags together and to apply the same configuration to them.
+
+```yaml title="example goff-proxy.yaml"
+flagSets:
+  - name: my-flagset
+    apiKeys:
+      - "my-api-key"
+    retrievers:
+      - kind: file
+        path: /flags/my-flags.yaml
+    exporters:
+      - kind: s3
+        bucket: my-evaluations
+    notifiers:
+      - kind: slack
+        webhookUrl: "https://hooks.slack.com/services/..."
+```
+
+#### `flagSet.name`
+The name of the flag set. This allows you to identify the flag set.
+
+- option name: `name`
+- type: **string**
+- default: **auto-generated UUID**
+- mandatory: <NotMandatory />
+
+#### `flagSet.apiKeys`
+The API keys for the flag set. This will add new API keys to the list of authorized keys for evaluation. This property is mandatory for every flag set, as it is used to filter the flags available.
+
+- option name: `apiKeys`
+- type: **[]string**
+- default: **none**
+- mandatory: <Mandatory />
+
+#### `flagSet.retrievers`
+Configuration for retrieving flag configurations. Supports the same options as the main configuration.
+- [_see `retrievers`_](#retrievers)
+
+#### `flagSet.exporters`
+Configuration for exporting evaluation data. Supports the same options as the main configuration.
+- [_see `exporters`_](#exporters)
+
+#### `flagSet.notifiers`
+Configuration for flag change notifications. Supports the same options as the main configuration.
+- [_see `notifiers`_](#notifiers)
+
+#### `flagSet.fileFormat`
+The format of the flag configuration files (yaml, json, toml).
+- [_see `fileFormat`_](#fileformat)
+
+#### `flagSet.pollingInterval`
+The time interval in milliseconds when the relay proxy is reloading the configuration file.
+- [_see `pollingInterval`_](#pollinginterval)
+
+#### `flagSet.startWithRetrieverError`
+If true, the flag set will start even if the retriever fails initially.
+- [_see `startWithRetrieverError`_](#startwithretrievererror)
+
+#### `flagSet.enablePollingJitter`
+Set to true if you want to avoid having true periodicity when retrieving your flags.
+- [_see `enablePollingJitter`_](#enablepollingjitter)
+
+#### `flagSet.disableNotifierOnInit`
+Set to true if you do not want to call any notifier when the flags are loaded for the first time.
+- [_see `disableNotifierOnInit`_](#disablenotifieroninit)
+
+#### `flagSet.evaluationContextEnrichment`
+Additional context data to merge with all evaluation requests for this flag set.
+- [_see `evaluationContextEnrichment`_](#evaluationcontextenrichment)
+
+#### `flagSet.persistentFlagConfigurationFile`
+File path to persist flag configurations for this flag set.
+- [_see `persistentFlagConfigurationFile`_](#persistentflagconfigurationfile)
+
+#### `flagSet.environment`
+Environment identifier for this flag set (e.g., "dev", "staging", "prod").
+- [_see `environment`_](#environment)
+
 ### type `notifier`
 A [notifier](../concepts/notifier) is the component in charge of sending a notification when a flag changes to a remote system.
 
 ```yaml title="example goff-proxy.yaml"
 # ...
-notifier:
+notifiers:
   - kind: discord
     webhookUrl: "https://discord.com/api/webhooks/yyyy/xxxxxxx"
   - kind: slack
@@ -438,3 +573,120 @@ Every `notifier` has its own configuration, check the [list of notifiers](../int
   )) }
 </ul>
 :::
+
+
+## Use multiple flag sets
+
+Flag sets allow you to organize your feature flags into separate groups, each with its own configuration, API keys, retrievers, exporters, and notifiers. This is particularly useful for:
+
+- **Team isolation**: Different teams can manage their own flags independently
+- **Environment separation**: Separate flags for different environments (dev, staging, prod)
+- **Access control**: Different API keys for different applications or teams
+- **Independent configurations**: Each flag set can have its own retrievers, exporters, and notifiers
+
+### How flag sets work
+
+When you configure flag sets, the relay proxy operates in **flag set mode** instead of the default single configuration mode. In flag set mode:
+
+- Each flag set requires at least one API key
+- API keys are used to route requests to the appropriate flag set
+- Each flag set can have its own `retrievers`, `exporters`, and `notifiers`
+- There is no inheritance between flag sets - each is completely independent
+
+### Basic flag set configuration
+
+```yaml title="goff-proxy.yaml"
+flagSets:
+  - name: teamA
+    apiKeys:
+      - "team-a-api-key-1"
+      - "team-a-api-key-2"
+    retrievers:
+      - kind: file
+        path: /path/to/team-a-flags.yaml
+    exporter:
+      kind: log
+
+  - name: teamB
+    apiKeys:
+      - "team-b-api-key"
+    retrievers:
+      - kind: s3
+        bucket: my-feature-flag-bucket
+        item: team-b/flags.yaml
+    exporters:
+      - kind: s3
+        bucket: evaluation-data-bucket
+    notifiers:
+      - kind: slack
+        webhookUrl: "https://hooks.slack.com/services/..."
+```
+
+### Flag set configuration options
+
+:::warning
+If you are using flag sets, all top level configuration options will be ignored.
+:::
+
+Each flag set supports all the same configuration options as the main relay proxy configuration.
+You can find the list of options in the [flag set types](#type-flagset) section.
+
+### Using flag sets with API keys
+
+When using flag sets, all evaluation requests must include an API key.  
+You can do so by adding the API key in the initialization of your providers.
+
+The relay proxy will:
+1. Extract the API key from the `Authorization` header
+2. Find the flag set associated with that API key
+3. Route the evaluation request to that flag set
+4. Return the evaluation result from that flag set's flags
+
+### Example: Multi-team setup
+
+```yaml title="goff-proxy.yaml"
+listen: 1031
+logLevel: INFO
+
+flagSets:
+  # Frontend team flags
+  - name: frontend
+    apiKeys:
+      - "frontend-api-key"
+    retrievers:
+      - kind: file
+        path: /flags/frontend-flags.yaml
+    exporters:
+      - kind: s3
+        bucket: frontend-evaluations
+    notifiers:
+      - kind: slack
+        webhookUrl: "https://hooks.slack.com/services/frontend-webhook"
+
+  # Backend team flags
+  - name: backend
+    apiKeys:
+      - "backend-api-key"
+    retrievers:
+      - kind: github
+        repository: my-org/backend-flags
+        path: flags.yaml
+    exporters:
+      - kind: kafka
+        topic: backend-evaluations
+    notifiers:
+      - kind: discord
+        webhookUrl: "https://discord.com/api/webhooks/backend-webhook"
+
+  # Mobile team flags
+  - name: mobile
+    apiKeys:
+      - "mobile-api-key"
+    retrievers:
+      - kind: s3
+        bucket: mobile-feature-flags
+        item: flags.yaml
+    exporters:
+      - kind: file
+        outputDir: /logs/mobile-evaluations
+```
