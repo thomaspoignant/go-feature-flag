@@ -6,6 +6,7 @@
 
 <p align="center">
     <a href="https://github.com/thomaspoignant/go-feature-flag/actions/workflows/ci.yml"><img src="https://github.com/thomaspoignant/go-feature-flag/actions/workflows/ci.yml/badge.svg" alt="Build Status" /></a>
+    <a href="https://scorecard.dev/viewer/?uri=github.com/thomaspoignant/go-feature-flag"><img src="https://api.scorecard.dev/projects/github.com/thomaspoignant/go-feature-flag/badge"/></a>
     <a href="https://codecov.io/gh/thomaspoignant/go-feature-flag"><img src="https://codecov.io/gh/thomaspoignant/go-feature-flag/branch/main/graph/badge.svg?token=T59ACQWW1H"/></a>
     <a href="https://sonarcloud.io/dashboard?id=thomaspoignant_go-feature-flag"><img src="https://sonarcloud.io/api/project_badges/measure?project=thomaspoignant_go-feature-flag&metric=alert_status" alt="Sonarcloud Status" /></a>
     <a href="https://goreportcard.com/report/github.com/thomaspoignant/go-feature-flag"><img src="https://goreportcard.com/badge/github.com/thomaspoignant/go-feature-flag" alt="Build Status" /></a>
@@ -29,15 +30,30 @@
 ## Table of Contents
 
 - [🎛️ GO Feature Flag](#️-go-feature-flag)
+  - [Table of Contents](#table-of-contents)
   - [What is GO Feature Flag?](#what-is-go-feature-flag)
   - [What can I do with GO Feature Flag?](#what-can-i-do-with-go-feature-flag)
-  - [Getting started with GO Feature Flag](#getting-started)
+  - [Getting started](#getting-started)
+    - [Create a feature flag configuration](#create-a-feature-flag-configuration)
+    - [Create a relay proxy configuration file](#create-a-relay-proxy-configuration-file)
+    - [Install the relay proxy](#install-the-relay-proxy)
+    - [Use Open Feature SDK](#use-open-feature-sdk)
+      - [Install dependencies](#install-dependencies)
+      - [Init your Open Feature client](#init-your-open-feature-client)
+      - [Evaluate your flag](#evaluate-your-flag)
+    - [Installation](#installation)
+    - [Create a feature flag configuration](#create-a-feature-flag-configuration-1)
+    - [SDK Initialisation](#sdk-initialisation)
+    - [Evaluate your flags](#evaluate-your-flags)
   - [Can I use GO Feature Flag with any language?](#can-i-use-go-feature-flag-with-any-language)
   - [Where do I store my flags file?](#where-do-i-store-my-flags-file)
   - [Flags file format](#flags-file-format)
   - [Rule format](#rule-format)
+    - [Examples](#examples)
   - [Evaluation Context](#evaluation-context)
+  - [Custom bucketing](#custom-bucketing)
   - [Variations](#variations)
+    - [Example](#example)
   - [Rollout](#rollout)
     - [Complex rollout strategy available](#complex-rollout-strategy-available)
   - [Notifiers](#notifiers)
