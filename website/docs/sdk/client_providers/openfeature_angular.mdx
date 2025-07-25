@@ -5,6 +5,8 @@ description: How to use the OpenFeature Javascript Angular SDK for your React ap
 ---
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+import { sdk } from "@site/data/sdk";
+import { FeatureTable } from "@site/src/components/doc/featureTable";
 
 # Angular SDK
 [![NPM Version](https://img.shields.io/npm/v/%40openfeature%2Fgo-feature-flag-web-provider?color=blue&style=flat-square&logo=npm)](https://www.npmjs.com/package/@openfeature/go-feature-flag-web-provider)
@@ -174,6 +176,9 @@ You can check the [OpenFeature Angular SDK Documentation](https://openfeature.de
 
 ## Available options
 Check the available options for the provider in the [web provider page](./openfeature_javascript).
+
+## Features status
+<FeatureTable sdk={sdk.find(it => it.key === 'angular')} />
 
 ## Contribute to the provider
 You can find the source of the provider in the [`open-feature/js-sdk-contrib`](https://github.com/open-feature/js-sdk-contrib/tree/main/libs/providers/go-feature-flag-web) repository.
