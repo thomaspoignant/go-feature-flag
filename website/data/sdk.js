@@ -8,17 +8,29 @@ export const sdk = [
     docLink: 'server_providers/openfeature_go',
     featureList: [
       {
+        name: 'In process Evaluation',
+        status: 'not implemented',
+      },
+      {
         name: 'Remote Evaluation',
         status: 'done',
       },
       {
-        name: 'Local Cache',
+        name: 'Tracking Flag Evaluation',
         status: 'done',
       },
       {
-        name: 'Dynamic Cache Refresh',
+        name: 'Tracking Custom Events',
+        status: 'not implemented',
+      },
+      {
+        name: 'Configuration Change Updates',
         status: 'done',
       },
+      {
+        name: 'Provider Events Reactions',
+        status: 'done'
+      }
     ],
   },
   {
@@ -30,17 +42,29 @@ export const sdk = [
     docLink: 'server_providers/openfeature_java',
     featureList: [
       {
+        name: 'In process Evaluation',
+        status: 'done',
+      },
+      {
         name: 'Remote Evaluation',
         status: 'done',
       },
       {
-        name: 'Local Cache',
+        name: 'Tracking Flag Evaluation',
         status: 'done',
       },
       {
-        name: 'Dynamic Cache Refresh',
+        name: 'Tracking Custom Events',
         status: 'done',
       },
+      {
+        name: 'Configuration Change Updates',
+        status: 'done',
+      },
+      {
+        name: 'Provider Events Reactions',
+        status: 'done'
+      }
     ],
   },
   {
@@ -52,17 +76,29 @@ export const sdk = [
     docLink: 'server_providers/openfeature_java',
     featureList: [
       {
+        name: 'In process Evaluation',
+        status: 'done',
+      },
+      {
         name: 'Remote Evaluation',
         status: 'done',
       },
       {
-        name: 'Local Cache',
+        name: 'Tracking Flag Evaluation',
         status: 'done',
       },
       {
-        name: 'Dynamic Cache Refresh',
+        name: 'Tracking Custom Events',
         status: 'done',
       },
+      {
+        name: 'Configuration Change Updates',
+        status: 'done',
+      },
+      {
+        name: 'Provider Events Reactions',
+        status: 'done'
+      }
     ],
   },
   {
@@ -70,21 +106,33 @@ export const sdk = [
     paradigm: ['Server'],
     faLogo: 'devicon-dot-net-plain-wordmark colored',
     badgeUrl:
-      'https://img.shields.io/nuget/v/OpenFeature.Contrib.GOFeatureFlag?color=blue&style=flat-square&logo=nuget',
+      'https://img.shields.io/nuget/v/OpenFeature.Providers.GOFeatureFlag?color=blue&style=flat-square&logo=nuget',
     docLink: 'server_providers/openfeature_dotnet',
     featureList: [
+      {
+        name: 'In process Evaluation',
+        status: 'done',
+      },
       {
         name: 'Remote Evaluation',
         status: 'done',
       },
       {
-        name: 'Local Cache',
-        status: 'not implemented',
+        name: 'Tracking Flag Evaluation',
+        status: 'done',
       },
       {
-        name: 'Dynamic Cache Refresh',
-        status: 'not implemented',
+        name: 'Tracking Custom Events',
+        status: 'done',
       },
+      {
+        name: 'Configuration Change Updates',
+        status: 'done',
+      },
+      {
+        name: 'Provider Events Reactions',
+        status: 'done'
+      }
     ],
   },
   {
@@ -96,17 +144,29 @@ export const sdk = [
     docLink: 'server_providers/openfeature_python',
     featureList: [
       {
+        name: 'In process Evaluation',
+        status: 'not implemented',
+      },
+      {
         name: 'Remote Evaluation',
         status: 'done',
       },
       {
-        name: 'Local Cache',
+        name: 'Tracking Flag Evaluation',
         status: 'done',
       },
       {
-        name: 'Dynamic Cache Refresh',
+        name: 'Tracking Custom Events',
+        status: 'not implemented',
+      },
+      {
+        name: 'Configuration Change Updates',
         status: 'done',
       },
+      {
+        name: 'Provider Events Reactions',
+        status: 'not implemented'
+      }
     ],
   },
   {
@@ -122,12 +182,24 @@ export const sdk = [
         status: 'done',
       },
       {
-        name: 'Local Cache',
+        name: 'Flags Local Cache',
         status: 'done',
       },
       {
-        name: 'Dynamic Cache Refresh',
+        name: 'Tracking Flag Evaluation',
         status: 'done',
+      },
+      {
+        name: 'Tracking Custom Events',
+        status: 'done',
+      },
+      {
+        name: 'Configuration Change Updates',
+        status: 'done',
+      },
+      {
+        name: 'Provider Events Reactions',
+        status: 'done'
       },
     ],
   },
@@ -144,12 +216,24 @@ export const sdk = [
         status: 'done',
       },
       {
-        name: 'Local Cache',
+        name: 'Flags Local Cache',
         status: 'done',
       },
       {
-        name: 'Dynamic Cache Refresh',
+        name: 'Tracking Flag Evaluation',
         status: 'done',
+      },
+      {
+        name: 'Tracking Custom Events',
+        status: 'done',
+      },
+      {
+        name: 'Configuration Change Updates',
+        status: 'done',
+      },
+      {
+        name: 'Provider Events Reactions',
+        status: 'done'
       },
     ],
   },
@@ -166,11 +250,11 @@ export const sdk = [
         status: 'done',
       },
       {
-        name: 'Local Cache',
+        name: 'Flags Local Cache',
         status: 'done',
       },
       {
-        name: 'Dynamic Cache Refresh',
+        name: 'Configuration Change Updates',
         status: 'done',
       },
     ],
@@ -188,12 +272,24 @@ export const sdk = [
         status: 'done',
       },
       {
-        name: 'Local Cache',
+        name: 'Flags Local Cache',
         status: 'done',
       },
       {
-        name: 'Dynamic Cache Refresh',
+        name: 'Tracking Flag Evaluation',
         status: 'done',
+      },
+      {
+        name: 'Tracking Custom Events',
+        status: 'done',
+      },
+      {
+        name: 'Configuration Change Updates',
+        status: 'done',
+      },
+      {
+        name: 'Provider Events Reactions',
+        status: 'done'
       },
     ],
   },
@@ -210,12 +306,24 @@ export const sdk = [
         status: 'done',
       },
       {
-        name: 'Local Cache',
+        name: 'Flags Local Cache',
         status: 'done',
       },
       {
-        name: 'Dynamic Cache Refresh',
+        name: 'Tracking Flag Evaluation',
         status: 'done',
+      },
+      {
+        name: 'Tracking Custom Events',
+        status: 'not implemented',
+      },
+      {
+        name: 'Configuration Change Updates',
+        status: 'done',
+      },
+      {
+        name: 'Provider Events Reactions',
+        status: 'done'
       },
     ],
   },
@@ -232,12 +340,24 @@ export const sdk = [
         status: 'done',
       },
       {
-        name: 'Local Cache',
+        name: 'Flags Local Cache',
         status: 'done',
       },
       {
-        name: 'Dynamic Cache Refresh',
+        name: 'Tracking Flag Evaluation',
         status: 'done',
+      },
+      {
+        name: 'Tracking Custom Events',
+        status: 'not implemented',
+      },
+      {
+        name: 'Configuration Change Updates',
+        status: 'done',
+      },
+      {
+        name: 'Provider Events Reactions',
+        status: 'done'
       },
     ],
   },
@@ -250,17 +370,29 @@ export const sdk = [
       'https://img.shields.io/npm/v/%40openfeature%2Fgo-feature-flag-provider?color=blue&style=flat-square&logo=npm',
     featureList: [
       {
+        name: 'In process Evaluation',
+        status: 'not implemented',
+      },
+      {
         name: 'Remote Evaluation',
         status: 'done',
       },
       {
-        name: 'Local Cache',
+        name: 'Tracking Flag Evaluation',
         status: 'done',
       },
       {
-        name: 'Dynamic Cache Refresh',
+        name: 'Tracking Custom Events',
+        status: 'not implemented',
+      },
+      {
+        name: 'Configuration Change Updates',
         status: 'done',
       },
+      {
+        name: 'Provider Events Reactions',
+        status: 'not implemented'
+      }
     ],
   },
   {
@@ -272,17 +404,29 @@ export const sdk = [
     docLink: 'server_providers/openfeature_php',
     featureList: [
       {
+        name: 'In process Evaluation',
+        status: 'not implemented',
+      },
+      {
         name: 'Remote Evaluation',
         status: 'done',
       },
       {
-        name: 'Local Cache',
+        name: 'Tracking Flag Evaluation',
+        status: 'done',
+      },
+      {
+        name: 'Tracking Custom Events',
         status: 'not implemented',
       },
       {
-        name: 'Dynamic Cache Refresh',
+        name: 'Configuration Change Updates',
         status: 'not implemented',
       },
+      {
+        name: 'Provider Events Reactions',
+        status: 'not implemented'
+      }
     ],
   },
   {
@@ -294,17 +438,29 @@ export const sdk = [
     docLink: 'server_providers/openfeature_ruby',
     featureList: [
       {
+        name: 'In process Evaluation',
+        status: 'not implemented',
+      },
+      {
         name: 'Remote Evaluation',
         status: 'done',
       },
       {
-        name: 'Local Cache',
+        name: 'Tracking Flag Evaluation',
+        status: 'done',
+      },
+      {
+        name: 'Tracking Custom Events',
         status: 'not implemented',
       },
       {
-        name: 'Dynamic Cache Refresh',
+        name: 'Configuration Change Updates',
         status: 'not implemented',
       },
+      {
+        name: 'Provider Events Reactions',
+        status: 'not implemented'
+      }
     ],
   },
   {
@@ -316,17 +472,29 @@ export const sdk = [
     docLink: 'server_providers/openfeature_nestjs',
     featureList: [
       {
+        name: 'In process Evaluation',
+        status: 'not implemented',
+      },
+      {
         name: 'Remote Evaluation',
         status: 'done',
       },
       {
-        name: 'Local Cache',
+        name: 'Tracking Flag Evaluation',
         status: 'done',
       },
       {
-        name: 'Dynamic Cache Refresh',
+        name: 'Tracking Custom Events',
+        status: 'not implemented',
+      },
+      {
+        name: 'Configuration Change Updates',
         status: 'done',
       },
+      {
+        name: 'Provider Events Reactions',
+        status: 'not implemented'
+      }
     ],
   },
 ];
