@@ -21,7 +21,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/kinesis v1.35.4
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.84.1
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.38.10
-	github.com/aws/smithy-go v1.22.4
+	github.com/aws/smithy-go v1.22.5
 	github.com/awslabs/aws-lambda-go-api-proxy v0.16.2
 	github.com/fsouza/fake-gcs-server v1.52.2
 	github.com/go-viper/mapstructure/v2 v2.4.0
