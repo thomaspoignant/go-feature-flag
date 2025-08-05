@@ -14,11 +14,11 @@
     "@openfeature/go-feature-flag-web-provider": "^0.2.6",
     "@openfeature/react-sdk": "^1.0.0",
     "@openfeature/web-sdk": "^1.4.1",
-    "react": "^19.1.0",
+    "react": "^19.1.1",
     "react-dom": "^19.1.0"
   },
   "devDependencies": {
-    "@types/react": "^19.1.8",
+    "@types/react": "^19.1.9",
     "@types/react-dom": "^19.1.6",
     "@typescript-eslint/eslint-plugin": "^8.38.0",
     "@typescript-eslint/parser": "^8.36.0",
