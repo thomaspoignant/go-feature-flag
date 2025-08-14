@@ -77,18 +77,22 @@ func TestAwsLambdaHandler_GetAdapter(t *testing.T) {
 			c := &config.Config{
 				StartAsAwsLambda: true,
 				AwsLambdaAdapter: tt.mode,
-				Retriever: &config.RetrieverConf{
-					Kind: "file",
-					Path: "../../../testdata/flag-config.yaml",
+				CommonFlagSet: config.CommonFlagSet{
+					Retrievers: &[]config.RetrieverConf{
+						{
+							Kind: "file",
+							Path: "../../../testdata/flag-config.yaml",
+						},
+					},
 				},
 			}
-			goff, err := service.NewGoFeatureFlagClient(c, z, []notifier.Notifier{})
+			flagsetManager, err := service.NewFlagsetManager(c, z, []notifier.Notifier{})
 			require.NoError(t, err)
 			apiServer := New(c, service.Services{
-				MonitoringService:    service.NewMonitoring(goff),
-				WebsocketService:     service.NewWebsocketService(),
-				GOFeatureFlagService: goff,
-				Metrics:              metric.Metrics{},
+				MonitoringService: service.NewMonitoring(flagsetManager),
+				WebsocketService:  service.NewWebsocketService(),
+				FlagsetManager:    flagsetManager,
+				Metrics:           metric.Metrics{},
 			}, z)
 
 			reqJSON, err := json.Marshal(tt.request)
@@ -166,20 +170,23 @@ func TestAwsLambdaHandler_BasePathSupport(t *testing.T) {
 	z, err := zap.NewProduction()
 	require.NoError(t, err)
 
-	goffConfig := &config.Config{
-		Retriever: &config.RetrieverConf{
-			Kind: "file",
-			Path: "../../../testdata/flag-config.yaml",
+	flagsetManager, err := service.NewFlagsetManager(&config.Config{
+		CommonFlagSet: config.CommonFlagSet{
+			Retrievers: &[]config.RetrieverConf{
+				{
+					Kind: "file",
+					Path: "../../../testdata/flag-config.yaml",
+				},
+			},
 		},
-	}
-	goff, err := service.NewGoFeatureFlagClient(goffConfig, z, []notifier.Notifier{})
+	}, z, nil)
 	require.NoError(t, err)
 
 	commonServices := service.Services{
-		MonitoringService:    service.NewMonitoring(goff),
-		WebsocketService:     service.NewWebsocketService(),
-		GOFeatureFlagService: goff,
-		Metrics:              metric.Metrics{},
+		MonitoringService: service.NewMonitoring(flagsetManager),
+		WebsocketService:  service.NewWebsocketService(),
+		FlagsetManager:    flagsetManager,
+		Metrics:           metric.Metrics{},
 	}
 
 	for _, tt := range tests {

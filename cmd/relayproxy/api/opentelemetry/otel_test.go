@@ -28,7 +28,7 @@ func TestInitSampler(t *testing.T) {
 		c, errC := config.New(f, zap.L(), "1.X.X")
 		require.NoError(t, errC)
 
-		sampler, err := initSampler("test", *c)
+		sampler, err := initSampler("test", c)
 		require.NoError(t, err)
 		assert.Equal(t, sdktrace.AlwaysSample(), sampler)
 	})
@@ -39,7 +39,7 @@ func TestInitSampler(t *testing.T) {
 		c, errC := config.New(f, zap.L(), "1.X.X")
 		require.NoError(t, errC)
 
-		sampler, err := initSampler("test", *c)
+		sampler, err := initSampler("test", c)
 		require.NoError(t, err)
 		assert.Nil(t, sampler)
 	})
@@ -50,7 +50,7 @@ func TestInitSampler(t *testing.T) {
 		c, errC := config.New(f, zap.L(), "1.X.X")
 		require.NoError(t, errC)
 
-		sampler, err := initSampler("test", *c)
+		sampler, err := initSampler("test", c)
 		require.NoError(t, err)
 
 		// not really any way to assert on the sampler other than calling
@@ -65,7 +65,7 @@ func TestJaegerRemoteSamplerOpts(t *testing.T) {
 		c, errC := config.New(f, zap.L(), "1.X.X")
 		require.NoError(t, errC)
 
-		url, refreshInterval, maxOperations, err := jaegerRemoteSamplerOpts(*c)
+		url, refreshInterval, maxOperations, err := jaegerRemoteSamplerOpts(c)
 		require.NoError(t, err)
 		assert.Equal(t, defaultSamplerURL, url)
 		assert.Equal(t, defaultSamplingRefreshInterval, refreshInterval)
@@ -80,7 +80,7 @@ func TestJaegerRemoteSamplerOpts(t *testing.T) {
 		c, errC := config.New(f, zap.L(), "1.X.X")
 		require.NoError(t, errC)
 
-		url, _, _, err := jaegerRemoteSamplerOpts(*c)
+		url, _, _, err := jaegerRemoteSamplerOpts(c)
 		require.NoError(t, err)
 		assert.Equal(t, expected, url)
 	})
@@ -93,7 +93,7 @@ func TestJaegerRemoteSamplerOpts(t *testing.T) {
 		c, errC := config.New(f, zap.L(), "1.X.X")
 		require.NoError(t, errC)
 
-		_, refreshInterval, _, err := jaegerRemoteSamplerOpts(*c)
+		_, refreshInterval, _, err := jaegerRemoteSamplerOpts(c)
 		require.NoError(t, err)
 		assert.Equal(t, expected, refreshInterval)
 	})
@@ -106,7 +106,7 @@ func TestJaegerRemoteSamplerOpts(t *testing.T) {
 		c, errC := config.New(f, zap.L(), "1.X.X")
 		require.NoError(t, errC)
 
-		_, _, maxOperations, err := jaegerRemoteSamplerOpts(*c)
+		_, _, maxOperations, err := jaegerRemoteSamplerOpts(c)
 		require.NoError(t, err)
 		assert.Equal(t, expected, maxOperations)
 	})
@@ -118,7 +118,7 @@ func TestJaegerRemoteSamplerOpts(t *testing.T) {
 		c, errC := config.New(f, zap.L(), "1.X.X")
 		require.NoError(t, errC)
 
-		_, _, _, err := jaegerRemoteSamplerOpts(*c)
+		_, _, _, err := jaegerRemoteSamplerOpts(c)
 		require.Error(t, err)
 	})
 
@@ -172,7 +172,7 @@ func TestInit(t *testing.T) {
 	svc := NewOtelService()
 
 	t.Run("no config", func(t *testing.T) {
-		err := svc.Init(context.Background(), logger, config.Config{})
+		err := svc.Init(context.Background(), logger, &config.Config{})
 		require.NoError(t, err)
 		defer func() { _ = svc.Stop(context.Background()) }()
 		assert.NotNil(t, otel.GetTracerProvider())
@@ -184,14 +184,14 @@ func TestInit(t *testing.T) {
 		f := pflag.NewFlagSet("config", pflag.ContinueOnError)
 		c, errC := config.New(f, zap.L(), "1.X.X")
 		require.NoError(t, errC)
-		err := svc.Init(context.Background(), logger, *c)
+		err := svc.Init(context.Background(), logger, c)
 		require.NoError(t, err)
 		defer func() { _ = svc.Stop(context.Background()) }()
 		assert.Equal(t, noop.NewTracerProvider(), otel.GetTracerProvider())
 	})
 
 	t.Run("support openTelemetryOtlpEndpoint", func(t *testing.T) {
-		err := svc.Init(context.Background(), logger, config.Config{
+		err := svc.Init(context.Background(), logger, &config.Config{
 			OpenTelemetryOtlpEndpoint: "https://example.com:4318",
 		})
 		require.NoError(t, err)
@@ -205,7 +205,7 @@ func TestInit(t *testing.T) {
 		c, errC := config.New(f, zap.L(), "1.X.X")
 		require.NoError(t, errC)
 		c.OpenTelemetryOtlpEndpoint = "https://bogus.com:4317"
-		err := svc.Init(context.Background(), logger, *c)
+		err := svc.Init(context.Background(), logger, c)
 		require.NoError(t, err)
 		defer func() { _ = svc.Stop(context.Background()) }()
 		assert.Equal(t, "https://example.com:4318", os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT"))
@@ -222,7 +222,7 @@ func TestInit(t *testing.T) {
 		c, errC := config.New(f, zap.L(), "1.X.X")
 		require.NoError(t, errC)
 		c.OpenTelemetryOtlpEndpoint = "https://bogus.com:4317"
-		err := svc.Init(context.Background(), testLogger, *c)
+		err := svc.Init(context.Background(), testLogger, c)
 		require.NoError(t, err)
 		defer func() { _ = svc.Stop(context.Background()) }()
 		otel.GetErrorHandler().Handle(expectedErr)

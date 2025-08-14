@@ -4,24 +4,25 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/helper"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/model"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"github.com/thomaspoignant/go-feature-flag/internal/flagstate"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 )
 
 type allFlags struct {
-	goFF    *ffclient.GoFeatureFlag
-	metrics metric.Metrics
+	flagsetManager service.FlagsetManager
+	metrics        metric.Metrics
 }
 
-func NewAllFlags(goFF *ffclient.GoFeatureFlag, metrics metric.Metrics) Controller {
+func NewAllFlags(flagsetManager service.FlagsetManager, metrics metric.Metrics) Controller {
 	return &allFlags{
-		goFF:    goFF,
-		metrics: metrics,
+		flagsetManager: flagsetManager,
+		metrics:        metrics,
 	}
 }
 
@@ -43,7 +44,6 @@ func NewAllFlags(goFF *ffclient.GoFeatureFlag, metrics metric.Metrics) Controlle
 // @Router       /v1/allflags [post]
 func (h *allFlags) Handler(c echo.Context) error {
 	h.metrics.IncAllFlag()
-
 	reqBody := new(model.AllFlagRequest)
 	if err := c.Bind(reqBody); err != nil {
 		return err
@@ -61,15 +61,20 @@ func (h *allFlags) Handler(c echo.Context) error {
 	_, span := tracer.Start(c.Request().Context(), "AllFlagsState")
 	defer span.End()
 
+	flagset, httpErr := helper.GetFlagSet(h.flagsetManager, helper.GetAPIKey(c))
+	if httpErr != nil {
+		return httpErr
+	}
+
 	var allFlags flagstate.AllFlags
 	if len(evaluationCtx.ExtractGOFFProtectedFields().FlagList) > 0 {
 		// if we have a list of flags to evaluate in the evaluation context, we evaluate only those flags.
-		allFlags = h.goFF.GetFlagStates(
+		allFlags = flagset.GetFlagStates(
 			evaluationCtx,
 			evaluationCtx.ExtractGOFFProtectedFields().FlagList,
 		)
 	} else {
-		allFlags = h.goFF.AllFlagsState(evaluationCtx)
+		allFlags = flagset.AllFlagsState(evaluationCtx)
 	}
 
 	span.SetAttributes(

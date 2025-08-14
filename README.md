@@ -73,8 +73,7 @@ Originally, **GO Feature Flag** was designed as a solution exclusively for the `
 - Use **GO Feature Flag** in several languages with **Open Feature SDKs**.
 - Support your full stack, from the backend to the frontend including your mobile apps.
 
-
-https://user-images.githubusercontent.com/17908063/211581747-f6354a9d-8be6-4e52-aa53-7f0d6a40827e.mp4
+https://github.com/user-attachments/assets/56e1a2a2-996f-4db8-9c93-28c057e4ed5a
 
 _The code of this demo is available in [`examples/demo`](examples/demo) repository_.
 

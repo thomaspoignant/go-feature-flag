@@ -82,19 +82,24 @@ func main() {
 	defer wsService.Close() // close all the open connections
 	prometheusNotifier := metric.NewPrometheusNotifier(metricsV2)
 	proxyNotifier := service.NewNotifierWebsocket(wsService)
-	goff, err := service.NewGoFeatureFlagClient(proxyConf, logger.ZapLogger, []notifier.Notifier{
+
+	flagsetManager, err := service.NewFlagsetManager(proxyConf, logger.ZapLogger, []notifier.Notifier{
 		prometheusNotifier,
 		proxyNotifier,
 	})
 	if err != nil {
-		panic(err)
+		logger.ZapLogger.Error(
+			"impossible to start GO Feature Flag, we are not able to initialize the retrieval of flags",
+			zap.Error(err),
+		)
+		return
 	}
 
 	services := service.Services{
-		MonitoringService:    service.NewMonitoring(goff),
-		WebsocketService:     wsService,
-		GOFeatureFlagService: goff,
-		Metrics:              metricsV2,
+		MonitoringService: service.NewMonitoring(flagsetManager),
+		WebsocketService:  wsService,
+		FlagsetManager:    flagsetManager,
+		Metrics:           metricsV2,
 	}
 	// Init API server
 	apiServer := api.New(proxyConf, services, logger.ZapLogger)

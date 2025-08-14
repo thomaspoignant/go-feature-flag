@@ -1,0 +1,68 @@
+---
+sidebar_position: 50
+description: How to configure an AWS Kinesis exporter.
+---
+import { integrations } from "@site/data/integrations";
+import {Mandatory, NotMandatory} from "@site/src/components/checks/checks";
+export const exporterName = 'AWS Kinesis'
+export const info = integrations.exporters.find((r) => r.name === exporterName)
+
+# AWS Kinesis
+
+## Overview
+{info.longDescription ?? info.description}
+
+:::info
+{exporterName} is an exporter of type queue, it means that it send events as soon as he receives them it does not work in bulk but in near real time.
+:::
+## Configure the relay proxy
+
+To configure your relay proxy to use the {exporterName} exporter, you need to add the following
+configuration to your relay proxy configuration file:
+
+```yaml title="goff-proxy.yaml"
+# ...
+exporters:
+  - kind: kinesis
+    streamArn: "arn:aws:kinesis:us-east-1:XXXX:stream/test-stream"
+# ...
+```
+
+| Field name   |    Mandatory     | Type   | Default  | Description                                                                                               |
+|--------------|:----------------:|--------|----------|-----------------------------------------------------------------------------------------------------------|
+| `kind`       |  <Mandatory />   | string | **none** | Value should be **`kinesis`**.<br/>_This field is mandatory and describes which retriever you are using._ |
+| `streamArn`  |  <Mandatory />   | string | **none** | The ARN of your kinesis stream.                                                                           |
+| `streamName` | <NotMandatory /> | string | **none** | The name of your kinesis stream.                                                                          |
+
+## Configure the GO Module
+To configure your GO module to use the {exporterName} exporter, you need to add the following
+configuration to your `ffclient.Config{}` object:
+
+```go title="example.go"
+awsConfig, _ := config.LoadDefaultConfig(context.Background())
+config := ffclient.Config{
+   // ...
+   DataExporter: ffclient.DataExporter{
+        // ...
+        Exporter: &kinesisexporter.Exporter{
+            Settings: kinesisexporter.NewSettings(
+                kinesisexporter.WithStreamName("test-stream"),
+                kinesisexporter.WithPartitionKey("0"),
+                kinesisexporter.WithExplicitHashKey("0"),
+            ),
+            AwsConfig: &config, // aws custom configuration
+        },
+
+    },
+    // ...
+}
+err := ffclient.Init(config)
+defer ffclient.Close()
+```
+
+| Field                   |    Mandatory     | Description                                                                                                                                                                                                                                                                                                                                                  |
+|-------------------------|:----------------:|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `StreamName `           |  <Mandatory />   | Name of the Kinesis stream to publish messages to                                                                                                                                                                                                                                                                                                            |
+| `PartitionKey `         | <NotMandatory /> | Function that takes 'FeatureEvent' as an input and returns calculated string 'Partition Key'. If not specified, then by default string 'default' will be used for all events. Effectively this will assign all events to a single Kinesis shard. There is nothing bad in using single shard, but for performance consideration this field might be utilised. |
+| `ExplicitPartitionKey ` | <NotMandatory /> | String key to identify which stream shard event data belongs to. Overrides PartitionKey setting                                                                                                                                                                                                                                                              |
+| `AwsConfig `            | <NotMandatory /> | An instance of `*aws.Config` that holds additional settings connect to AWS                                                                                                                                                                                                                                                                                   |                                                                                                                                         |                                                                                                                                                     |

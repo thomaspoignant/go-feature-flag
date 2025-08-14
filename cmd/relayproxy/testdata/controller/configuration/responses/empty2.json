@@ -1,0 +1,39 @@
+{
+  "flags": {
+    "flag-only-for-admin": {
+      "variations": {
+        "Default": false,
+        "False": false,
+        "True": true
+      },
+      "targeting": [
+        {
+          "name": "rule1",
+          "query": "admin eq true",
+          "percentage": {
+            "False": 0,
+            "True": 100
+          }
+        }
+      ],
+      "defaultRule": {
+        "name": "defaultRule",
+        "variation": "Default"
+      }
+    },
+    "new-admin-access": {
+      "variations": {
+        "Default": false,
+        "False": false,
+        "True": true
+      },
+      "defaultRule": {
+        "name": "defaultRule",
+        "percentage": {
+          "False": 70,
+          "True": 30
+        }
+      }
+    }
+  }
+}
