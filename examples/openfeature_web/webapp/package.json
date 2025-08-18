@@ -50,12 +50,12 @@
     "posthtml-cli": "^0.10.0",
     "posthtml-modules": "^0.9.1",
     "stylelint": "^16.23.0",
-    "webpack": "^5.101.0",
+    "webpack": "^5.101.2",
     "webpack-cli": "^6.0.1"
   },
   "dependencies": {
     "@openfeature/go-feature-flag-web-provider": "^0.2.6",
-    "@openfeature/web-sdk": "^1.5.0",
+    "@openfeature/web-sdk": "^1.6.1",
     "highlight.js": "^11.11.1",
     "uuid": "^11.1.0"
   }
