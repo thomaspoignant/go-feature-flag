@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 1
       - name: Setup go
@@ -46,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: Setup go
@@ -67,7 +67,7 @@ jobs:
             ./out/release-wasm/gofeatureflag-evaluation_${{  github.ref_name }}.wasm
 
       - name: Checkout wasm-releases repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: go-feature-flag/wasm-releases
           path: wasm-releases
@@ -104,7 +104,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -162,7 +162,7 @@ jobs:
       - is-not-beta-release
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Release readme to DockerHub
         uses: ms-jpq/sync-dockerhub-readme@v1
         env:
@@ -193,7 +193,7 @@ jobs:
       - is-not-beta-release
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Release readme to DockerHub
         uses: ms-jpq/sync-dockerhub-readme@v1
         env:
@@ -214,7 +214,7 @@ jobs:
       - is-not-beta-release
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Release readme to DockerHub
         uses: ms-jpq/sync-dockerhub-readme@v1
         env:
@@ -235,7 +235,7 @@ jobs:
       - is-not-beta-release
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Release readme to DockerHub
         uses: ms-jpq/sync-dockerhub-readme@v1
         env:
@@ -272,7 +272,7 @@ jobs:
       - is-not-beta-release
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           path: release
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
@@ -298,7 +298,7 @@ jobs:
         run: go run versions.go
 
       - name: Checkout main branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ env.MAIN_BRANCH_NAME }}
           path: ${{ env.MAIN_BRANCH_NAME }}
@@ -338,7 +338,7 @@ jobs:
       MAIN_BRANCH_NAME: main
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           path: release
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
@@ -355,7 +355,7 @@ jobs:
         run: GIT_TAG_NAME=${{  github.ref_name }} && yq -i ".version=\"${GIT_TAG_NAME#v}\"" $CHART_YAML_FILE_LOCATION
 
       - name: Checkout main branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ env.MAIN_BRANCH_NAME }}
           path: ${{ env.MAIN_BRANCH_NAME }}
@@ -394,7 +394,7 @@ jobs:
       MAIN_BRANCH_NAME: main
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           path: release
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
@@ -414,7 +414,7 @@ jobs:
         run: ./out/bin/jsonschema-generator --schema-location=./.schema/flag-schema.json
 
       - name: Checkout main branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ env.MAIN_BRANCH_NAME }}
           path: ${{ env.MAIN_BRANCH_NAME }}
