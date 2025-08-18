@@ -47,7 +47,7 @@ require (
 	github.com/pablor21/echo-etag/v4 v4.0.5
 	github.com/prometheus/client_golang v1.23.0
 	github.com/r3labs/diff/v3 v3.0.2
-	github.com/redis/go-redis/v9 v9.11.0
+	github.com/redis/go-redis/v9 v9.12.1
 	github.com/samber/slog-zap/v2 v2.6.2
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/pflag v1.0.7
@@ -75,8 +75,8 @@ require (
 	google.golang.org/api v0.244.0
 	google.golang.org/grpc v1.74.2
 	gopkg.in/yaml.v3 v3.0.1
-	k8s.io/api v0.33.3
-	k8s.io/apimachinery v0.33.3
+	k8s.io/api v0.33.4
+	k8s.io/apimachinery v0.33.4
 	k8s.io/client-go v0.33.3
 )
 
