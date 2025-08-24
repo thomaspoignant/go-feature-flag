@@ -11,6 +11,7 @@ func NewGenerateCmd() *cobra.Command {
 		Short: "🏗️ Generate GO Feature Flag related files",
 		Long:  `🏗️ Generate GO Feature Flag relates files (examples: flag manifest, ...)`,
 	}
+
 	g.AddCommand(manifest.NewManifestCmd())
 	return g
 }

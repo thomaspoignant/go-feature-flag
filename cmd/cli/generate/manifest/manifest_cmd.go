@@ -21,13 +21,15 @@ func NewManifestCmd() *cobra.Command {
 			m, _ := NewManifest(manifestConfigFile, manifestFlagFormat, flagManifestDestination)
 			output, err := m.Generate()
 			if err != nil {
-				cmd.SilenceUsage = true
 				return err
 			}
 			output.PrintLines(cmd)
 			return nil
 		},
+		SilenceUsage:  true,
+		SilenceErrors: true,
 	}
+
 	manifestCmd.Flags().StringVarP(&manifestFlagFormat,
 		"format", "f", "yaml", "Format of your input file (YAML, JSON or TOML)")
 	manifestCmd.Flags().StringVarP(&manifestConfigFile,
