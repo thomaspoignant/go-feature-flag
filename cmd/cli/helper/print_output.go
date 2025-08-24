@@ -1,16 +1,16 @@
 package helper
 
 import (
-	"fmt"
-
+	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 )
 
 type Level = string
 
 const (
-	WarnLevel Level = "WARNING"
-	InfoLevel Level = "INFO"
+	WarnLevel  Level = "WARNING"
+	InfoLevel  Level = "INFO"
+	ErrorLevel Level = "ERROR"
 )
 
 type OutputLine struct {
@@ -26,13 +26,17 @@ func (o *Output) Add(line string, level Level) Output {
 	return *o
 }
 
-func (o *Output) PrintLines(cmd *cobra.Command) {
+func (o *Output) PrintLines(_ *cobra.Command) {
 	for _, line := range o.Lines {
 		switch line.Level {
+		case InfoLevel:
+			pterm.Info.Println(line.Text)
 		case WarnLevel:
-			cmd.Println(fmt.Sprintf("⚠️ %s", line.Text))
+			pterm.Warning.Println(line.Text)
+		case ErrorLevel:
+			pterm.Error.Println(line.Text)
 		default:
-			cmd.Println(line.Text)
+			pterm.Println(line.Text)
 		}
 	}
 }
