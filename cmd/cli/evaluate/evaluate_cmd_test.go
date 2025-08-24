@@ -1,7 +1,6 @@
 package evaluate_test
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
@@ -109,7 +108,6 @@ func TestCmdEvaluate(t *testing.T) {
 				require.NoError(t, err)
 				gotContent, err := os.ReadFile(stdOut.Name())
 				require.NoError(t, err)
-				fmt.Println(gotContent)
 				assert.JSONEq(t, string(expectedContent), string(gotContent))
 			}
 		})
