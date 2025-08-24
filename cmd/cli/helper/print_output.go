@@ -39,6 +39,7 @@ func (o *Output) PrintLines(cmd *cobra.Command) {
 			outputText = pterm.Info.Sprint(line.Text)
 		case WarnLevel:
 			outputText = pterm.Warning.Sprint(line.Text)
+		case ErrorLevel: outputText = pterm.Error.Sprint(line.Text)
 		default:
 			outputText = pterm.Sprint(line.Text)
 		}

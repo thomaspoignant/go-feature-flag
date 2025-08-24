@@ -80,7 +80,8 @@ func TestManifestCmd(t *testing.T) {
 			tt.assertError(t, err)
 
 			if err != nil {
-				// Explicitly write the error into stderr so it’s captured in redirectionStd
+				// Since SilenceUsage true
+				// Need Explicitly write the error into stderr so it’s captured in redirectionStd
 				_, _ = fmt.Fprintf(redirectionStd, "Error: %v\n", err)
 			}
 

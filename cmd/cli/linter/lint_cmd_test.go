@@ -1,6 +1,7 @@
 package linter_test
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -52,6 +53,12 @@ func TestCmdLint(t *testing.T) {
 			cmd.SetArgs(tt.args)
 			err = cmd.Execute()
 			tt.wantErr(t, err)
+			if err != nil {
+				// Since SilenceUsage true
+				// Need Explicitly write the error into stderr so it’s captured in redirectionStd
+				_, _ = fmt.Fprintf(redirectionStderr, "Error: %v\n", err)
+			}
+
 			if tt.expectedError != "" {
 				content, err := os.ReadFile(redirectionStderr.Name())
 				require.NoError(t, err)
