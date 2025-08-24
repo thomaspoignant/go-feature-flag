@@ -54,12 +54,12 @@ func runEvaluate(
 	}
 	result, err := e.Evaluate()
 	if err != nil {
-		return output.FormatError(err)
+		return err
 	}
 
 	detailed, err := json.MarshalIndent(result, "", "  ")
 	if err != nil {
-		return output.FormatError(err)
+		return err
 	}
 
 	output.Add(string(detailed), helper.DefaultLevel)

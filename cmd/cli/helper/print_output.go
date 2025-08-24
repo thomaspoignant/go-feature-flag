@@ -2,6 +2,7 @@ package helper
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
@@ -29,10 +30,6 @@ func (o *Output) Add(line string, level Level) Output {
 	return *o
 }
 
-func (o *Output) FormatError(err error) error {
-	formattedText := pterm.Error.Sprint(err.Error())
-	return fmt.Errorf(formattedText)
-}
 
 func (o *Output) PrintLines(cmd *cobra.Command) {
 	for _, line := range o.Lines {
@@ -42,11 +39,14 @@ func (o *Output) PrintLines(cmd *cobra.Command) {
 			outputText = pterm.Info.Sprint(line.Text)
 		case WarnLevel:
 			outputText = pterm.Warning.Sprint(line.Text)
-		case ErrorLevel:
-			outputText = pterm.Error.Sprint(line.Text)
 		default:
 			outputText = pterm.Sprint(line.Text)
 		}
-		fmt.Fprintln(cmd.OutOrStdout(), outputText)
+		_, _ = fmt.Fprintln(cmd.OutOrStdout(), outputText)
 	}
+}
+
+func PrintFatalAndExit(err error) {
+	pterm.Error.Printf("error executing command: %v\n", err)
+	os.Exit(1)
 }
