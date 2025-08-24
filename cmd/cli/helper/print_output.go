@@ -1,6 +1,8 @@
 package helper
 
 import (
+	"fmt"
+
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 )
@@ -8,9 +10,10 @@ import (
 type Level = string
 
 const (
-	WarnLevel  Level = "WARNING"
-	InfoLevel  Level = "INFO"
-	ErrorLevel Level = "ERROR"
+	WarnLevel    Level = "WARNING"
+	InfoLevel    Level = "INFO"
+	ErrorLevel   Level = "ERROR"
+	DefaultLevel Level = "DEFAULT"
 )
 
 type OutputLine struct {
@@ -26,17 +29,24 @@ func (o *Output) Add(line string, level Level) Output {
 	return *o
 }
 
-func (o *Output) PrintLines(_ *cobra.Command) {
+func (o *Output) FormatError(err error) error {
+	formattedText := pterm.Error.Sprint(err.Error())
+	return fmt.Errorf(formattedText)
+}
+
+func (o *Output) PrintLines(cmd *cobra.Command) {
 	for _, line := range o.Lines {
+		var outputText string
 		switch line.Level {
 		case InfoLevel:
-			pterm.Info.Println(line.Text)
+			outputText = pterm.Info.Sprint(line.Text)
 		case WarnLevel:
-			pterm.Warning.Println(line.Text)
+			outputText = pterm.Warning.Sprint(line.Text)
 		case ErrorLevel:
-			pterm.Error.Println(line.Text)
+			outputText = pterm.Error.Sprint(line.Text)
 		default:
-			pterm.Println(line.Text)
+			outputText = pterm.Sprint(line.Text)
 		}
+		fmt.Fprintln(cmd.OutOrStdout(), outputText)
 	}
 }
