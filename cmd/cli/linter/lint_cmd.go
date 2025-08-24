@@ -41,6 +41,7 @@ func runLint(cmd *cobra.Command, args []string, lintFlagFormat string) error {
 	}
 
 	output.Add("Valid GO Feature Flag configuration", helper.InfoLevel)
+	output.PrintLines(cmd)
 	return nil
 }
 
