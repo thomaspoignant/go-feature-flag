@@ -48,16 +48,32 @@ spec:
               mountPath: /goff
           ports:
             - name: http
-              containerPort: {{ .Values.service.port }}
+              containerPort: {{ .Values.service.port | default 1031 }}
               protocol: TCP
+            {{- $monitoringPort := include "relay-proxy.monitoringPort" . }}
+            {{- if $monitoringPort }}
+            - name: monitoring
+              containerPort: {{ $monitoringPort | int }}
+              protocol: TCP
+            {{- end }}
           livenessProbe:
             httpGet:
               path: /health
+              {{- $monitoringPort := include "relay-proxy.monitoringPort" . }}
+              {{- if $monitoringPort }}
+              port: monitoring
+              {{- else }}
               port: http
+              {{- end }}
           readinessProbe:
             httpGet:
               path: /health
+              {{- $monitoringPort := include "relay-proxy.monitoringPort" . }}
+              {{- if $monitoringPort }}
+              port: monitoring
+              {{- else }}
               port: http
+              {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

@@ -43,7 +43,7 @@ It will install the chart in your cluster.
 	<tbody>
 		<tr>
 			<td id="affinity">
-				<a href="./values.yaml#L122">affinity</a>
+				<a href="./values.yaml#L123">affinity</a>
             </td>
 			<td>
 object
@@ -61,7 +61,7 @@ object
 		</tr>
 		<tr>
 			<td id="autoscaling">
-				<a href="./values.yaml#L103">autoscaling</a>
+				<a href="./values.yaml#L104">autoscaling</a>
             </td>
 			<td>
 object
@@ -85,7 +85,7 @@ object
 		</tr>
 		<tr>
 			<td id="autoscaling--enabled">
-				<a href="./values.yaml#L105">autoscaling.enabled</a>
+				<a href="./values.yaml#L106">autoscaling.enabled</a>
             </td>
 			<td>
 bool
@@ -103,7 +103,7 @@ false
 		</tr>
 		<tr>
 			<td id="autoscaling--maxReplicas">
-				<a href="./values.yaml#L109">autoscaling.maxReplicas</a>
+				<a href="./values.yaml#L110">autoscaling.maxReplicas</a>
             </td>
 			<td>
 int
@@ -121,7 +121,7 @@ int
 		</tr>
 		<tr>
 			<td id="autoscaling--minReplicas">
-				<a href="./values.yaml#L107">autoscaling.minReplicas</a>
+				<a href="./values.yaml#L108">autoscaling.minReplicas</a>
             </td>
 			<td>
 int
@@ -139,7 +139,7 @@ int
 		</tr>
 		<tr>
 			<td id="autoscaling--targetCPUUtilizationPercentage">
-				<a href="./values.yaml#L111">autoscaling.targetCPUUtilizationPercentage</a>
+				<a href="./values.yaml#L112">autoscaling.targetCPUUtilizationPercentage</a>
             </td>
 			<td>
 int
@@ -157,7 +157,7 @@ int
 		</tr>
 		<tr>
 			<td id="autoscaling--targetMemoryUtilizationPercentage">
-				<a href="./values.yaml#L113">autoscaling.targetMemoryUtilizationPercentage</a>
+				<a href="./values.yaml#L114">autoscaling.targetMemoryUtilizationPercentage</a>
             </td>
 			<td>
 int
@@ -175,7 +175,7 @@ int
 		</tr>
 		<tr>
 			<td id="env">
-				<a href="./values.yaml#L16">env</a>
+				<a href="./values.yaml#L17">env</a>
             </td>
 			<td>
 object
@@ -193,7 +193,7 @@ object
 		</tr>
 		<tr>
 			<td id="extraManifests">
-				<a href="./values.yaml#L125">extraManifests</a>
+				<a href="./values.yaml#L126">extraManifests</a>
             </td>
 			<td>
 list
@@ -211,7 +211,7 @@ list
 		</tr>
 		<tr>
 			<td id="fullnameOverride">
-				<a href="./values.yaml#L42">fullnameOverride</a>
+				<a href="./values.yaml#L43">fullnameOverride</a>
             </td>
 			<td>
 string
@@ -229,7 +229,7 @@ string
 		</tr>
 		<tr>
 			<td id="image--pullPolicy">
-				<a href="./values.yaml#L33">image.pullPolicy</a>
+				<a href="./values.yaml#L34">image.pullPolicy</a>
             </td>
 			<td>
 string
@@ -247,7 +247,7 @@ string
 		</tr>
 		<tr>
 			<td id="image--repository">
-				<a href="./values.yaml#L31">image.repository</a>
+				<a href="./values.yaml#L32">image.repository</a>
             </td>
 			<td>
 string
@@ -265,7 +265,7 @@ string
 		</tr>
 		<tr>
 			<td id="image--tag">
-				<a href="./values.yaml#L35">image.tag</a>
+				<a href="./values.yaml#L36">image.tag</a>
             </td>
 			<td>
 string
@@ -283,7 +283,7 @@ string
 		</tr>
 		<tr>
 			<td id="imagePullSecrets">
-				<a href="./values.yaml#L38">imagePullSecrets</a>
+				<a href="./values.yaml#L39">imagePullSecrets</a>
             </td>
 			<td>
 list
@@ -301,7 +301,7 @@ list
 		</tr>
 		<tr>
 			<td id="ingress">
-				<a href="./values.yaml#L76">ingress</a>
+				<a href="./values.yaml#L77">ingress</a>
             </td>
 			<td>
 object
@@ -335,7 +335,7 @@ object
 		</tr>
 		<tr>
 			<td id="ingress--annotations">
-				<a href="./values.yaml#L82">ingress.annotations</a>
+				<a href="./values.yaml#L83">ingress.annotations</a>
             </td>
 			<td>
 object
@@ -353,7 +353,7 @@ object
 		</tr>
 		<tr>
 			<td id="ingress--className">
-				<a href="./values.yaml#L80">ingress.className</a>
+				<a href="./values.yaml#L81">ingress.className</a>
             </td>
 			<td>
 string
@@ -371,7 +371,7 @@ string
 		</tr>
 		<tr>
 			<td id="ingress--enabled">
-				<a href="./values.yaml#L78">ingress.enabled</a>
+				<a href="./values.yaml#L79">ingress.enabled</a>
             </td>
 			<td>
 bool
@@ -389,7 +389,7 @@ false
 		</tr>
 		<tr>
 			<td id="nameOverride">
-				<a href="./values.yaml#L40">nameOverride</a>
+				<a href="./values.yaml#L41">nameOverride</a>
             </td>
 			<td>
 string
@@ -407,7 +407,7 @@ string
 		</tr>
 		<tr>
 			<td id="nodeSelector">
-				<a href="./values.yaml#L116">nodeSelector</a>
+				<a href="./values.yaml#L117">nodeSelector</a>
             </td>
 			<td>
 object
@@ -425,7 +425,7 @@ object
 		</tr>
 		<tr>
 			<td id="podAnnotations">
-				<a href="./values.yaml#L54">podAnnotations</a>
+				<a href="./values.yaml#L55">podAnnotations</a>
             </td>
 			<td>
 object
@@ -443,7 +443,7 @@ object
 		</tr>
 		<tr>
 			<td id="podSecurityContext">
-				<a href="./values.yaml#L57">podSecurityContext</a>
+				<a href="./values.yaml#L58">podSecurityContext</a>
             </td>
 			<td>
 object
@@ -479,7 +479,7 @@ string
 		</tr>
 		<tr>
 			<td id="replicaCount">
-				<a href="./values.yaml#L27">replicaCount</a>
+				<a href="./values.yaml#L28">replicaCount</a>
             </td>
 			<td>
 int
@@ -497,7 +497,7 @@ int
 		</tr>
 		<tr>
 			<td id="resources--requests--cpu">
-				<a href="./values.yaml#L100">resources.requests.cpu</a>
+				<a href="./values.yaml#L101">resources.requests.cpu</a>
             </td>
 			<td>
 string
@@ -515,7 +515,7 @@ string
 		</tr>
 		<tr>
 			<td id="resources--requests--memory">
-				<a href="./values.yaml#L98">resources.requests.memory</a>
+				<a href="./values.yaml#L99">resources.requests.memory</a>
             </td>
 			<td>
 string
@@ -533,7 +533,7 @@ string
 		</tr>
 		<tr>
 			<td id="securityContext">
-				<a href="./values.yaml#L61">securityContext</a>
+				<a href="./values.yaml#L62">securityContext</a>
             </td>
 			<td>
 object
@@ -551,7 +551,7 @@ object
 		</tr>
 		<tr>
 			<td id="service--port">
-				<a href="./values.yaml#L73">service.port</a>
+				<a href="./values.yaml#L74">service.port</a>
             </td>
 			<td>
 int
@@ -569,7 +569,7 @@ int
 		</tr>
 		<tr>
 			<td id="service--type">
-				<a href="./values.yaml#L71">service.type</a>
+				<a href="./values.yaml#L72">service.type</a>
             </td>
 			<td>
 string
@@ -587,7 +587,7 @@ string
 		</tr>
 		<tr>
 			<td id="serviceAccount--annotations">
-				<a href="./values.yaml#L48">serviceAccount.annotations</a>
+				<a href="./values.yaml#L49">serviceAccount.annotations</a>
             </td>
 			<td>
 object
@@ -605,7 +605,7 @@ object
 		</tr>
 		<tr>
 			<td id="serviceAccount--create">
-				<a href="./values.yaml#L46">serviceAccount.create</a>
+				<a href="./values.yaml#L47">serviceAccount.create</a>
             </td>
 			<td>
 bool
@@ -623,7 +623,7 @@ true
 		</tr>
 		<tr>
 			<td id="serviceAccount--name">
-				<a href="./values.yaml#L51">serviceAccount.name</a>
+				<a href="./values.yaml#L52">serviceAccount.name</a>
             </td>
 			<td>
 string
@@ -641,7 +641,7 @@ string
 		</tr>
 		<tr>
 			<td id="tolerations">
-				<a href="./values.yaml#L119">tolerations</a>
+				<a href="./values.yaml#L120">tolerations</a>
             </td>
 			<td>
 list
@@ -660,5 +660,31 @@ list
 	</tbody>
 </table>
 
-## Advanced
+## Advanced Configuration
+
 You can edit the `values.yaml` file to enable an ingress or the autoscaling.
+
+### Monitoring Port Configuration
+
+The relay proxy supports exposing monitoring endpoints (health checks, metrics) on a separate port from the main service. This is configured by adding `monitoringPort` to your relay proxy configuration:
+
+```yaml
+relayproxy:
+  config: |
+    listen: 1031
+    monitoringPort: 1032
+    pollingInterval: 1000
+    logLevel: info
+    # ... other config
+```
+
+**Default behavior:** If `monitoringPort` is not specified in the config, monitoring endpoints will be served on the same port as the main service.
+
+When a separate monitoring port is configured:
+- A separate service (`<release-name>-relay-proxy-monitoring`) is created for monitoring endpoints
+- Health checks and readiness probes use the monitoring port
+- Both the main service port and monitoring port are exposed on the pod
+
+**Port logic:**
+- If `monitoringPort` is specified in the config, health checks use that port and a separate monitoring service is created
+- Otherwise, health checks use the main service port

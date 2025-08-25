@@ -1,0 +1,19 @@
+{{- $monitoringPort := include "relay-proxy.monitoringPort" . }}
+{{- if $monitoringPort }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "relay-proxy.fullname" . }}-monitoring
+  labels:
+    {{- include "relay-proxy.labels" . | nindent 4 }}
+    component: monitoring
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ $monitoringPort | int }}
+      targetPort: monitoring
+      protocol: TCP
+      name: monitoring
+  selector:
+    {{- include "relay-proxy.selectorLabels" . | nindent 4 }}
+{{- end }}

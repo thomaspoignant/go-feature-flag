@@ -11,6 +11,7 @@ relayproxy:
     exporter:
       kind: log
 #    envVariablePrefix: "GOFFPROXY_"
+#    monitoringPort: 1032  # Optional: Use a separate port for monitoring endpoints
 
 # -- Environment variables to pass to the relay proxy
 env: {}

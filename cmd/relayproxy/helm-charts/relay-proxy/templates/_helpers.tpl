@@ -74,3 +74,23 @@ Usage:
     {{- $value }}
 {{- end }}
 {{- end -}}
+
+{{/*
+Get the monitoring port from config if explicitly set, otherwise returns empty
+*/}}
+{{- define "relay-proxy.monitoringPort" -}}
+{{- $config := .Values.relayproxy.config -}}
+{{- if and $config (contains "monitoringPort:" $config) -}}
+  {{- range $line := splitList "\n" $config -}}
+    {{- if contains "monitoringPort:" $line -}}
+      {{- $parts := splitList ":" $line -}}
+      {{- if gt (len $parts) 1 -}}
+        {{- $portStr := index $parts 1 | trim -}}
+        {{- if $portStr -}}
+          {{- $portStr | int -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- end -}}
