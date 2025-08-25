@@ -74,3 +74,18 @@ Usage:
     {{- $value }}
 {{- end }}
 {{- end -}}
+
+{{/*
+Extract monitoringPort from relayproxy.config if it exists
+*/}}
+{{- define "relay-proxy.monitoringPort" -}}
+{{- if .Values.relayproxy.config }}
+{{- $config := .Values.relayproxy.config | toString }}
+{{- if contains "monitoringPort:" $config }}
+{{- $port := regexFind "monitoringPort:\\s*(\\d+)" $config }}
+{{- if $port }}
+{{- regexReplaceAll "monitoringPort:\\s*" $port "" }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end -}}
