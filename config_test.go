@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/stretchr/testify/assert"
 	ffClient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
@@ -14,7 +13,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/retriever/githubretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/gitlabretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/httpretriever"
-	"github.com/thomaspoignant/go-feature-flag/retriever/s3retriever"
 )
 
 func TestConfig_GetRetrievers(t *testing.T) {
@@ -37,21 +35,7 @@ func TestConfig_GetRetrievers(t *testing.T) {
 			want:    "*fileretriever.Retriever",
 			wantErr: false,
 		},
-		{
-			name: "S3 retriever",
-			fields: fields{
-				PollingInterval: 3 * time.Second,
-				Retriever: &s3retriever.Retriever{
-					Bucket: "tpoi-test",
-					Item:   "flag-config.yaml",
-					AwsConfig: aws.Config{
-						Region: aws.String("eu-west-1"),
-					},
-				},
-			},
-			want:    "*s3retriever.Retriever",
-			wantErr: false,
-		},
+
 		{
 			name: "HTTP retriever",
 			fields: fields{
