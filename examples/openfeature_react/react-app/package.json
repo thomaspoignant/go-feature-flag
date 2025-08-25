@@ -12,7 +12,7 @@
   "dependencies": {
     "@openfeature/core": "^1.8.1",
     "@openfeature/go-feature-flag-web-provider": "^0.2.6",
-    "@openfeature/react-sdk": "^1.0.0",
+    "@openfeature/react-sdk": "^1.0.1",
     "@openfeature/web-sdk": "^1.6.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
@@ -22,7 +22,7 @@
     "@types/react-dom": "^19.1.7",
     "@typescript-eslint/eslint-plugin": "^8.38.0",
     "@typescript-eslint/parser": "^8.36.0",
-    "@vitejs/plugin-react": "^5.0.0",
+    "@vitejs/plugin-react": "^5.0.1",
     "autoprefixer": "^10.4.21",
     "eslint": "^9.32.0",
     "eslint-plugin-react-hooks": "^5.2.0",
