@@ -1,13 +1,11 @@
 package ffclient_test
 
 import (
-	"context"
 	"net/http"
 	"reflect"
 	"testing"
 	"time"
 
-	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/stretchr/testify/assert"
 	ffClient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
@@ -19,9 +17,6 @@ import (
 )
 
 func TestConfig_GetRetrievers(t *testing.T) {
-	cfg, err := config.LoadDefaultConfig(context.Background())
-	assert.NoError(t, err)
-
 	type fields struct {
 		PollingInterval time.Duration
 		Retriever       retriever.Retriever
@@ -46,9 +41,8 @@ func TestConfig_GetRetrievers(t *testing.T) {
 			fields: fields{
 				PollingInterval: 3 * time.Second,
 				Retriever: &s3retrieverv2.Retriever{
-					Bucket:    "tpoi-test",
-					Item:      "flag-config.yaml",
-					AwsConfig: &cfg,
+					Bucket: "tpoi-test",
+					Item:   "flag-config.yaml",
 				},
 			},
 			want:    "*s3retrieverv2.Retriever",
