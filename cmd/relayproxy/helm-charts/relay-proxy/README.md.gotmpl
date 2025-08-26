@@ -18,6 +18,52 @@ helm install . --name-template=go-feature-flag-relay-proxy
 
 It will install the chart in your cluster.
 
+## Monitoring Port Configuration
+
+The Helm chart supports an optional `monitoringPort` configuration that allows you to:
+
+- **Separate monitoring traffic**: Expose a dedicated port for health checks and monitoring
+- **Enhanced security**: Keep monitoring endpoints separate from application traffic
+- **Flexible health checks**: Use the monitoring port for liveness and readiness probes
+
+### Example with monitoringPort:
+
+```yaml
+relayproxy:
+  config: |
+    listen: 1031
+    monitoringPort: 1032
+    pollingInterval: 1000
+    startWithRetrieverError: false
+    logLevel: debug
+    retriever:
+      kind: http
+      url: https://example.com/flags.yaml
+    exporter:
+      kind: log
+```
+
+When `monitoringPort` is configured:
+1. The monitoring port is exposed alongside the HTTP port
+2. Health checks (`/health` endpoint) use the monitoring port
+3. Both ports are accessible through the Kubernetes service
+
+### Example without monitoringPort (default behavior):
+
+```yaml
+relayproxy:
+  config: |
+    listen: 1031
+    pollingInterval: 1000
+    startWithRetrieverError: false
+    logLevel: debug
+    retriever:
+      kind: http
+      url: https://example.com/flags.yaml
+    exporter:
+      kind: log
+```
+
 {{ template "chart.homepageLine" . }}
 
 {{ template "chart.maintainersSection" . }}

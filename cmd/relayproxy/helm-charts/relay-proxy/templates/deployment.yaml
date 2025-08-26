@@ -50,14 +50,19 @@ spec:
             - name: http
               containerPort: {{ .Values.service.port }}
               protocol: TCP
+            {{- if (include "relay-proxy.monitoringPort" .) }}
+            - name: monitoring
+              containerPort: {{ include "relay-proxy.monitoringPort" . }}
+              protocol: TCP
+            {{- end }}
           livenessProbe:
             httpGet:
               path: /health
-              port: http
+              port: {{ if (include "relay-proxy.monitoringPort" .) }}monitoring{{ else }}http{{ end }}
           readinessProbe:
             httpGet:
               path: /health
-              port: http
+              port: {{ if (include "relay-proxy.monitoringPort" .) }}monitoring{{ else }}http{{ end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
