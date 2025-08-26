@@ -2,9 +2,9 @@ package evaluate
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/thomaspoignant/go-feature-flag/cmd/cli/helper"
 )
 
 var (
@@ -23,6 +23,8 @@ func NewEvaluateCmd() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runEvaluate(cmd, args, evalFlagFormat, evalConfigFile, evalFlag, evalCtx)
 		},
+		SilenceUsage:  true,
+		SilenceErrors: true,
 	}
 	evaluateCmd.Flags().StringVarP(&evalFlagFormat,
 		"format", "f", "yaml", "Format of your input file (YAML, JSON or TOML)")
@@ -43,6 +45,7 @@ func runEvaluate(
 	configFile string,
 	flag string,
 	ctx string) error {
+	output := helper.Output{}
 	e := evaluate{
 		config:        configFile,
 		fileFormat:    flagFormat,
@@ -59,6 +62,7 @@ func runEvaluate(
 		return err
 	}
 
-	_, err = fmt.Fprint(cmd.OutOrStdout(), string(detailed)+"\n")
-	return err
+	output.Add(string(detailed), helper.DefaultLevel)
+	output.PrintLines(cmd)
+	return nil
 }
