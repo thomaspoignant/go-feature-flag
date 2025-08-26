@@ -1,20 +1,16 @@
-package pubsubexporter
+package pubsubexporterv2
 
 import (
 	"context"
 	"encoding/json"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 	"google.golang.org/api/option"
 )
 
-// Exporter publishes events on a PubSub topic.
-//
-// Deprecated: Use pubsubexporterv2.Exporter instead. This exporter uses the legacy
-// cloud.google.com/go/pubsub v1 library. The v2 library provides improved performance
-// and additional features. This exporter will be removed in a future version.
+// Exporter publishes events on a PubSub topic using the v2 API.
 type Exporter struct {
 	// ProjectID is a project to which the PubSub topic belongs.
 	ProjectID string
@@ -36,7 +32,7 @@ type Exporter struct {
 	newClientFunc func(context.Context, string, ...option.ClientOption) (*pubsub.Client, error)
 
 	// publisher facilitates publishing messages on a PubSub topic.
-	publisher *pubsub.Topic
+	publisher *pubsub.Publisher
 }
 
 // Export publishes a PubSub message for each exporter.FeatureEvent received.
@@ -51,21 +47,26 @@ func (e *Exporter) Export(
 		}
 	}
 
+	results := make([]*pubsub.PublishResult, 0, len(events))
 	for _, event := range events {
 		messageBody, err := json.Marshal(event)
 		if err != nil {
 			return err
 		}
 
-		_, err = e.publisher.Publish(ctx, &pubsub.Message{
+		res := e.publisher.Publish(ctx, &pubsub.Message{
 			Data:       messageBody,
 			Attributes: map[string]string{"emitter": "GO Feature Flag"},
-		}).Get(ctx)
-		if err != nil {
+		})
+		results = append(results, res)
+	}
+
+	for _, res := range results {
+		if _, err := res.Get(ctx); err != nil {
+			// Return the first error encountered.
 			return err
 		}
 	}
-
 	return nil
 }
 
@@ -74,7 +75,7 @@ func (e *Exporter) IsBulk() bool {
 	return false
 }
 
-// initPublisher inits PubSub topic publisher according to the provided configuration.
+// initPublisher inits PubSub publisher according to the provided configuration.
 func (e *Exporter) initPublisher(ctx context.Context) error {
 	if e.newClientFunc == nil {
 		e.newClientFunc = pubsub.NewClient
@@ -85,12 +86,12 @@ func (e *Exporter) initPublisher(ctx context.Context) error {
 		return err
 	}
 
-	topic := client.Topic(e.Topic)
+	publisher := client.Publisher(e.Topic)
 	if e.PublishSettings != nil {
-		topic.PublishSettings = *e.PublishSettings
+		publisher.PublishSettings = *e.PublishSettings
 	}
-	topic.EnableMessageOrdering = e.EnableMessageOrdering
+	publisher.EnableMessageOrdering = e.EnableMessageOrdering
 
-	e.publisher = topic
+	e.publisher = publisher
 	return nil
 }
