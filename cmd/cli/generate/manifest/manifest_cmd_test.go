@@ -1,15 +1,19 @@
 package manifest_test
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
+	"github.com/pterm/pterm"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/cmd/cli/generate/manifest"
 )
 
 func TestManifestCmd(t *testing.T) {
+	pterm.DisableStyling()
+	pterm.DisableColor()
 	tests := []struct {
 		name             string
 		args             []string
@@ -21,14 +25,14 @@ func TestManifestCmd(t *testing.T) {
 			name:             "should return success if everything is ok",
 			args:             []string{"--config=testdata/input/flag.goff.yaml"},
 			expectedManifest: "testdata/output/flag.goff.json",
-			expectedOutput:   "🎉 Manifest has been created\n",
+			expectedOutput:   "INFO: 🎉 Manifest has been created\n",
 			assertError:      assert.NoError,
 		},
 		{
 			name:             "should ignore flag without value",
 			args:             []string{"--config=testdata/input/flag-no-default.yaml"},
 			expectedManifest: "testdata/output/flag-no-default.json",
-			expectedOutput:   "⚠️ flag test-flag ignored: no default value provided\n🎉 Manifest has been created\n",
+			expectedOutput:   "WARNING: flag test-flag ignored: no default value provided\nINFO: 🎉 Manifest has been created\n",
 			assertError:      assert.NoError,
 		},
 		{
@@ -42,14 +46,14 @@ func TestManifestCmd(t *testing.T) {
 			args:             []string{"--config=testdata/input/flag-int-as-float.yaml"},
 			assertError:      assert.NoError,
 			expectedManifest: "testdata/output/flag-int-as-float.json",
-			expectedOutput:   "🎉 Manifest has been created\n",
+			expectedOutput:   "INFO: 🎉 Manifest has been created\n",
 		},
 		{
 			name:             "should have float as type if 1 float and int are mixed",
 			args:             []string{"--config=testdata/input/flag-float-and-int.yaml"},
 			assertError:      assert.NoError,
 			expectedManifest: "testdata/output/flag-float-and-int.json",
-			expectedOutput:   "🎉 Manifest has been created\n",
+			expectedOutput:   "INFO: 🎉 Manifest has been created\n",
 		},
 	}
 
@@ -73,8 +77,13 @@ func TestManifestCmd(t *testing.T) {
 			cmd.SetOut(redirectionStd)
 			cmd.SetArgs(tt.args)
 			err = cmd.Execute()
-
 			tt.assertError(t, err)
+
+			if err != nil {
+				// Since SilenceUsage true
+				// Need Explicitly write the error into stderr so it’s captured in redirectionStd
+				_, _ = fmt.Fprintf(redirectionStd, "Error: %v\n", err)
+			}
 
 			output, err := os.ReadFile(redirectionStd.Name())
 			assert.NoError(t, err)
