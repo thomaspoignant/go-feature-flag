@@ -54,7 +54,7 @@ jobs:
         with:
           go-version-file: go.mod
           check-latest: true
-      - uses: acifani/setup-tinygo@b2ba42b249c7d3efdfe94166ec0f48b3191404f7 # v2.0.0
+      - uses: acifani/setup-tinygo@db56321a62b9a67922bb9ac8f9d085e218807bb3 # v2.0.1
         with:
           tinygo-version: "0.37.0"
       - run: ./.github/ci-scripts/release_wasm.sh ${{  github.ref_name }}
