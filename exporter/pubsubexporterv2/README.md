@@ -21,8 +21,12 @@ This exporter is a **queue-type** exporter, meaning it sends events individually
 package main
 
 import (
-    "github.com/thomaspoignant/go-feature-flag/ffclient"
+    "log"
+    "time"
+
     "github.com/thomaspoignant/go-feature-flag/exporter/pubsubexporterv2"
+    "github.com/thomaspoignant/go-feature-flag/ffclient"
+    "github.com/thomaspoignant/go-feature-flag/retriever/httpretriever"
 )
 
 func main() {
