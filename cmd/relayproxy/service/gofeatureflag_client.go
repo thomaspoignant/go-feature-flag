@@ -19,7 +19,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/exporter/kafkaexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/kinesisexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/logsexporter"
-	"github.com/thomaspoignant/go-feature-flag/exporter/pubsubexporter"
+	"github.com/thomaspoignant/go-feature-flag/exporter/pubsubexporterv2"
 	"github.com/thomaspoignant/go-feature-flag/exporter/s3exporterv2"
 	"github.com/thomaspoignant/go-feature-flag/exporter/sqsexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/webhookexporter"
@@ -319,7 +319,7 @@ func createExporter(c *config.ExporterConf) (exporter.CommonExporter, error) {
 			Settings: settings,
 		}, nil
 	case config.PubSubExporter:
-		return &pubsubexporter.Exporter{
+		return &pubsubexporterv2.Exporter{
 			ProjectID: c.ProjectID,
 			Topic:     c.Topic,
 		}, nil
