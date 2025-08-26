@@ -2,13 +2,11 @@ package ffclient_test
 
 import (
 	"errors"
-	"log"
 	"log/slog"
 	"os"
 	"testing"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/stretchr/testify/assert"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
@@ -17,7 +15,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
-	"github.com/thomaspoignant/go-feature-flag/retriever/s3retriever"
 	"github.com/thomaspoignant/go-feature-flag/testutils/initializableretriever"
 	"github.com/thomaspoignant/go-feature-flag/testutils/mock"
 )
@@ -184,19 +181,6 @@ func TestValidUseCaseMultilineQueryJson(t *testing.T) {
 	hasUnknownFlag, _ := gffClient.BoolVariation("unknown-flag", user, false)
 	assert.False(t, hasUnknownFlag, "User should use default value if flag does not exists")
 	assert.NotEqual(t, time.Time{}, gffClient.GetCacheRefreshDate())
-}
-
-func TestS3RetrieverReturnError(t *testing.T) {
-	_, err := ffclient.New(ffclient.Config{
-		Retriever: &s3retriever.Retriever{
-			Bucket:    "unknown-bucket",
-			Item:      "unknown-item",
-			AwsConfig: aws.Config{},
-		},
-		Logger: log.New(os.Stdout, "", 0),
-	})
-
-	assert.Error(t, err)
 }
 
 func Test2GoFeatureFlagInstance(t *testing.T) {
