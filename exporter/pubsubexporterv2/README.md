@@ -57,6 +57,9 @@ func main() {
 
 ```go
 import (
+    "runtime"
+    "time"
+
     "cloud.google.com/go/pubsub/v2"
     "google.golang.org/api/option"
 )
