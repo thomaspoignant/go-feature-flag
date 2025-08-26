@@ -47,21 +47,26 @@ func (e *Exporter) Export(
 		}
 	}
 
+	results := make([]*pubsub.PublishResult, 0, len(events))
 	for _, event := range events {
 		messageBody, err := json.Marshal(event)
 		if err != nil {
 			return err
 		}
 
-		_, err = e.publisher.Publish(ctx, &pubsub.Message{
+		res := e.publisher.Publish(ctx, &pubsub.Message{
 			Data:       messageBody,
 			Attributes: map[string]string{"emitter": "GO Feature Flag"},
-		}).Get(ctx)
-		if err != nil {
+		})
+		results = append(results, res)
+	}
+
+	for _, res := range results {
+		if _, err := res.Get(ctx); err != nil {
+			// Return the first error encountered.
 			return err
 		}
 	}
-
 	return nil
 }
 
