@@ -359,10 +359,10 @@ scream-level-feature:
     medium: "talk"
     high: "scream"
   targeting:
-    # highlight-start
-    query: targetingKey eq "aae1cb41-c3cb-4753-a117-031ddc958e81"
+  # highlight-start
+  - query: targetingKey eq "aae1cb41-c3cb-4753-a117-031ddc958e81"
     variation: high
-    # highlight-end
+  # highlight-end
   defaultRule:
     variation: low
 ```
