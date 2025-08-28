@@ -360,8 +360,8 @@ scream-level-feature:
     high: "scream"
   targeting:
     # highlight-start
-    query: targetingKey eq "aae1cb41-c3cb-4753-a117-031ddc958e81"
-    variation: high
+    - query: targetingKey eq "aae1cb41-c3cb-4753-a117-031ddc958e81"
+      variation: high
     # highlight-end
   defaultRule:
     variation: low

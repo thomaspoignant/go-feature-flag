@@ -2,9 +2,11 @@
 sidebar_position: 10
 description: What is a flag and how you can create them.
 ---
+
 # 🆕 Create Flags
 
 ## Overview
+
 In **GO Feature Flag** a flag is a configuration that allows you to serve a variation based on some conditions.
 
 Since day 1, we have decided that we won't be the one telling you were to store your feature flags, and this is why we have introduce the concept of [**retriever**](../concepts/retriever.mdx).
@@ -24,33 +26,34 @@ Creating the first version of the flag is not always pleasant, that's why we hav
 ## ✏️ Create your first feature flag manually
 
 1. When starting to use GO Feature Flag, the first step will be to create the flag that will store your feature flags.
-   __This file should be a `YAML`, `JSON` or `TOML` file.__
+   **This file should be a `YAML`, `JSON` or `TOML` file.**
 
    ✏️ In this file you can start creating your feature flags.
+
 2. First, **find a name** for your feature flag (this will be the key of your flag and **it must be unique**).
 3. Define the **variations** that your flag can return.
    ```yaml title="flag-config.goff.yaml"
    display-banner:
      variations:
-      enabled: true
-      disabled: false
-      # ...
-    ```
+       enabled: true
+       disabled: false
+       # ...
+   ```
 4. Define a **default rule**, that will be serve when no targeting match.
    ```yaml title="flag-config.goff.yaml"
    display-banner:
      variations:
-      enabled: true
-      disabled: false
+       enabled: true
+       disabled: false
      defaultRule:
        variation: disabled
    ```
 5. **🎉 Congrats you have your first feature flag created.**
-  _This flag will return the variation `disabled` and the value `false` for all the users, but you can start targeting a specific group of users to return the variant `enabled`._
+   _This flag will return the variation `disabled` and the value `false` for all the users, but you can start targeting a specific group of users to return the variant `enabled`._
 6. Now you can [store your flag](../integrations/store-flags-configuration) file in your favorite storage and start using it in your application.
 
-
 ### 👌 Allowed types
+
 GO Feature Flags allow you to use custom variations to dynamically configure flag behavior.
 Traditionally, feature flags return a boolean value: `true` or `false`. This works well for basic end user management and a kill switch.
 
@@ -63,15 +66,16 @@ Why? Because apps trying to evaluate them in the different language will expect 
 :::
 
 ### 🔢 Multi-variant flags
+
 Since GO Feature Flag is managing more than `boolean` we can have as many alternative variations as needed.
 This is useful for A/B testing, permissions management, and other use cases where targeting a consistent group of users is required.
 
 ```yaml title="flag-config.goff.yaml"
 scream-level-feature:
   variations:
-    low: "whisper"
-    medium: "talk"
-    high: "scream"
+    low: 'whisper'
+    medium: 'talk'
+    high: 'scream'
   defaultRule:
     variation: low
 ```
@@ -83,6 +87,7 @@ It is important that all variations have the same type, if not the flag will be 
 :::
 
 ### 💯 Percentages affectation
+
 A reason to use feature flags is to dynamically affect the traffic to different variations.
 We want a way to control the percentage of users that will see a specific variation.
 
@@ -91,9 +96,9 @@ If we take our example of a multi-variant flag, we can split the traffic in 3 gr
 ```yaml title="flag-config.goff.yaml"
 scream-level-feature:
   variations:
-    low: "whisper"
-    medium: "talk"
-    high: "scream"
+    low: 'whisper'
+    medium: 'talk'
+    high: 'scream'
   defaultRule:
     percentage:
       low: 10
@@ -310,6 +315,7 @@ It means that for a specific `targetingKey` the user will always see the same fl
         </p>
       </td>
     </tr>
+
   </tbody>
 </table>
 
@@ -329,25 +335,28 @@ In this example, we want to test the right screaming level we should have for th
 Considering that Today the level used is "whisper", this how we want our flag to act.
 
 #### 1. Creating the flag
+
 We are creating a new flag in our file called `flag-config.goff.yaml` and we are naming it `scream-level-feature`.
 
 ```yaml title="flag-config.goff.yaml"
 scream-level-feature:
   variations:
-    low: "whisper"
-    medium: "talk"
-    high: "scream"
+    low: 'whisper'
+    medium: 'talk'
+    high: 'scream'
   defaultRule:
     # highlight-next-line
     variation: low
 ```
 
 #### 2. Code deployment
+
 After the flag is configured in GO Feature Flag, we can deploy our code that is evaluating the flag.
 
 Since we are returning the same level as before, nothing is changing, we are happy about that 😁.
 
 #### 3. Start testing the flag
+
 Now we can start testing the flag, we can start by asking our product manager to test the new feature in production.
 
 To achieve this we are targeting the product manager with his unique ID and we are returning the variation `high`.
@@ -355,20 +364,19 @@ To achieve this we are targeting the product manager with his unique ID and we a
 ```yaml title="flag-config.goff.yaml"
 scream-level-feature:
   variations:
-    low: "whisper"
-    medium: "talk"
-    high: "scream"
+    low: 'whisper'
+    medium: 'talk'
+    high: 'scream'
   targeting:
-  # highlight-start
-  - query: targetingKey eq "aae1cb41-c3cb-4753-a117-031ddc958e81"
-    variation: high
-  # highlight-end
+    # highlight-start
+    - query: targetingKey eq "aae1cb41-c3cb-4753-a117-031ddc958e81"
+      variation: high
+    # highlight-end
   defaultRule:
     variation: low
 ```
 
 _We can iterate on this phase until the result is satisfying._
-
 
 #### 4. Testing variations
 
@@ -377,9 +385,9 @@ Now that we know that the flag is working well, we can start testing the 3 diffe
 ```yaml title="flag-config.goff.yaml"
 scream-level-feature:
   variations:
-    low: "whisper"
-    medium: "talk"
-    high: "scream"
+    low: 'whisper'
+    medium: 'talk'
+    high: 'scream'
   defaultRule:
     # highlight-start
     percentage:
@@ -390,14 +398,15 @@ scream-level-feature:
 ```
 
 #### 5. Set the new default value
-After testing the different variations, we can decide to change the default value to the one that performed the best _(here is it `high`).
+
+After testing the different variations, we can decide to change the default value to the one that performed the best \_(here is it `high`).
 
 ```yaml title="flag-config.goff.yaml"
 scream-level-feature:
   variations:
-    low: "whisper"
-    medium: "talk"
-    high: "scream"
+    low: 'whisper'
+    medium: 'talk'
+    high: 'scream'
   defaultRule:
     # highlight-start
     variation: high
@@ -405,4 +414,5 @@ scream-level-feature:
 ```
 
 #### 5. Remove the flag
+
 After some time and the feature is now part of the product, we can remove the flag.
