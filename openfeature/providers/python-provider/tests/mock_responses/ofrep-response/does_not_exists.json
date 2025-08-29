@@ -1,0 +1,7 @@
+{
+  "value": "",
+  "key": "does_not_exists",
+  "errorCode": "FLAG_NOT_FOUND",
+  "variant": "defaultSdk",
+  "errorDetails": "flag does_not_exists was not found in your configuration"
+}

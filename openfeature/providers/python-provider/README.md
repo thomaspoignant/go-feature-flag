@@ -1,77 +1,168 @@
-# GO Feature Flag Python Provider
+# GoFeatureFlag Python Provider for OpenFeature
 
-GO Feature Flag provider allows you to connect to your GO Feature Flag instance.  
+A Python provider for [OpenFeature](https://openfeature.dev/) that integrates with [GoFeatureFlag](https://gofeatureflag.org/).
 
-[GO Feature Flag](https://gofeatureflag.org) believes in simplicity and offers a simple and lightweight solution to use feature flags.  
-Our focus is to avoid any complex infrastructure work to use GO Feature Flag.
+## Features
 
-This is a complete feature flagging solution with the possibility to target only a group of users, use any types of flags, store your configuration in various location and advanced rollout functionality. You can also collect usage data of your flags and be notified of configuration changes.
+- **Remote Evaluation**: Uses the OFREP protocol for remote flag evaluation
+- **In-Process Evaluation**: Uses WASM for local flag evaluation (coming soon)
+- **Full OpenFeature Compliance**: Implements all required OpenFeature interfaces
+- **Async Support**: Full async/await support for all operations
+- **Comprehensive Testing**: Extensive test coverage with pytest
+- **Type Safety**: Full type hints and Pydantic models
 
-# Python SDK usage
+## Installation
 
-## Install dependencies
-
-The first things we will do is install the **Open Feature SDK** and the **GO Feature Flag provider**.
-
-```shell
+```bash
 pip install gofeatureflag-python-provider
 ```
 
-## Initialize your Open Feature client
+Or with Poetry:
 
-To evaluate the flags you need to have an Open Feature configured in you app.
-This code block shows you how you can create a client that you can use in your application.
+```bash
+poetry add gofeatureflag-python-provider
+```
+
+## Quick Start
 
 ```python
-from gofeatureflag_python_provider.provider import GoFeatureFlagProvider
-from gofeatureflag_python_provider.options import GoFeatureFlagOptions
+import asyncio
 from openfeature import api
-from openfeature.evaluation_context import EvaluationContext
+from gofeatureflag_python_provider import GoFeatureFlagProvider, GoFeatureFlagProviderOptions, EvaluationType
 
-# ...
+async def main():
+    # Create provider options
+    options = GoFeatureFlagProviderOptions(
+        endpoint="https://your-go-feature-flag-relay.com",
+        evaluation_type=EvaluationType.REMOTE,
+        timeout=5000
+    )
 
-goff_provider = GoFeatureFlagProvider(
-    options=GoFeatureFlagOptions(endpoint="https://gofeatureflag.org/")
-)
-api.set_provider(goff_provider)
-client = api.get_client(domain="test-client")
+    # Create and initialize the provider
+    provider = GoFeatureFlagProvider(options)
+    await provider.initialize()
+
+    # Set the provider in OpenFeature
+    api.set_provider(provider)
+
+    # Use the client
+    client = api.get_client()
+    result = await client.get_boolean_details("my-feature-flag", False)
+    print(f"Flag value: {result.value}")
+
+asyncio.run(main())
 ```
 
-## Evaluate your flag
+## Configuration Options
 
-This code block explains how you can create an `EvaluationContext` and use it to evaluate your flag.
+### GoFeatureFlagProviderOptions
 
+| Option                            | Type               | Default      | Description                                   |
+| --------------------------------- | ------------------ | ------------ | --------------------------------------------- |
+| `endpoint`                        | `str`              | **Required** | The endpoint of the GoFeatureFlag relay-proxy |
+| `evaluation_type`                 | `EvaluationType`   | `IN_PROCESS` | Type of evaluation (Remote or InProcess)      |
+| `timeout`                         | `int`              | `10000`      | HTTP request timeout in milliseconds          |
+| `flag_change_polling_interval_ms` | `int`              | `120000`     | Flag configuration polling interval           |
+| `data_flush_interval`             | `int`              | `120000`     | Data collection flush interval                |
+| `max_pending_events`              | `int`              | `10000`      | Maximum pending events before flushing        |
+| `disable_data_collection`         | `bool`             | `False`      | Whether to disable data collection            |
+| `api_key`                         | `str`              | `None`       | API key for authentication                    |
+| `exporter_metadata`               | `ExporterMetadata` | `None`       | Metadata for the exporter                     |
 
-> In this example we are evaluating a `boolean` flag, but other types are available.
-> 
-> **Refer to the [Open Feature documentation](https://docs.openfeature.dev/docs/reference/concepts/evaluation-api#basic-evaluation) to know more about it.**
+### Evaluation Types
+
+- **`EvaluationType.REMOTE`**: Uses the OFREP protocol for remote evaluation
+- **`EvaluationType.IN_PROCESS`**: Uses WASM for local evaluation (coming soon)
+
+## Usage Examples
+
+### Remote Evaluation
 
 ```python
-# Context of your flag evaluation.
-# With GO Feature Flag you MUST have a targetingKey that is a unique identifier of the user.
-evaluation_ctx = EvaluationContext(
-    targeting_key="d45e303a-38c2-11ed-a261-0242ac120002",
-    attributes={
-        "email": "john.doe@gofeatureflag.org",
-        "firstname": "john",
-        "lastname": "doe",
-        "anonymous": False,
-        "professional": True,
-        "rate": 3.14,
-        "age": 30,
-        "company_info": {"name": "my_company", "size": 120},
-        "labels": ["pro", "beta"],
-    },
+from gofeatureflag_python_provider import GoFeatureFlagProvider, GoFeatureFlagProviderOptions, EvaluationType
+
+options = GoFeatureFlagProviderOptions(
+    endpoint="https://your-relay.com",
+    evaluation_type=EvaluationType.REMOTE,
+    timeout=5000,
+    api_key="your-api-key"
 )
 
-admin_flag = client.get_boolean_value(
-          flag_key=flag_key,
-          default_value=default_value,
-          evaluation_context=ctx,
-      )
-      
-if admin_flag:
-  # flag "flag-only-for-admin" is true for the user
-else:
-  # flag "flag-only-for-admin" is false for the user
+provider = GoFeatureFlagProvider(options)
 ```
+
+### In-Process Evaluation (Coming Soon)
+
+```python
+options = GoFeatureFlagProviderOptions(
+    endpoint="https://your-relay.com",
+    evaluation_type=EvaluationType.IN_PROCESS,
+    flag_change_polling_interval_ms=60000
+)
+
+provider = GoFeatureFlagProvider(options)
+```
+
+### Custom Tracking
+
+```python
+# Track custom events
+provider.track("user_action", context, {"action": "button_click"})
+```
+
+## Development
+
+### Prerequisites
+
+- Python 3.9+
+- Poetry
+- GoFeatureFlag relay-proxy
+
+### Setup
+
+1. Clone the repository
+2. Install dependencies: `poetry install`
+3. Run tests: `poetry run pytest`
+4. Format code: `poetry run black .`
+
+### Testing
+
+```bash
+# Run all tests
+poetry run pytest
+
+# Run with coverage
+poetry run pytest --cov=gofeatureflag_python_provider
+
+# Run specific test file
+poetry run pytest tests/test_provider.py -v
+```
+
+## Architecture
+
+The provider follows the OpenFeature specification and includes:
+
+- **Provider**: Main provider class implementing OpenFeature interfaces
+- **Evaluators**: Strategy pattern for different evaluation types
+- **Models**: Pydantic models for configuration and responses
+- **WASM Integration**: WebAssembly support for local evaluation
+- **OFREP Integration**: Remote evaluation using the OFREP protocol
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests
+5. Run the test suite
+6. Submit a pull request
+
+## License
+
+Apache 2.0
+
+## Support
+
+- [GoFeatureFlag Documentation](https://gofeatureflag.org/)
+- [OpenFeature Documentation](https://openfeature.dev/)
+- [Issues](https://github.com/thomaspoignant/go-feature-flag/issues)

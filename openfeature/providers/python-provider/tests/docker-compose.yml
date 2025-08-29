@@ -1,14 +1,16 @@
-version: '2'
+version: "2"
 services:
   goff:
-    image: "thomaspoignant/go-feature-flag"
+    image: "gofeatureflag/go-feature-flag"
     ports:
       - "1031:1031"
     environment:
-        - LISTEN=1031
-        - POLLINGINTERVAL=1000
-        - RETRIEVER_KIND=file
-        - RETRIEVER_PATH=/config.goff.yaml
-        - AUTHORIZEDKEYS_EVALUATION=apikey1
+      - LISTEN=1031
+      - POLLINGINTERVAL=1000
+      - RETRIEVER_KIND=file
+      - RETRIEVER_PATH=/config.goff.yaml
+      - LOGLEVEL=debug
+      - EVALUATIONCONTEXTENRICHMENT_TESTENV=pytest
+      - AUTHORIZEDKEYS_EVALUATION=my-api-key
     volumes:
       - ./config.goff.yaml:/config.goff.yaml

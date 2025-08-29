@@ -1,0 +1,17 @@
+{
+  "flags": {
+    "TEST": {
+      "variations": {
+        "disabled": false,
+        "enabled": true
+      },
+      "defaultRule": {
+        "variation": "disabled"
+      },
+      "metadata": {
+        "description": "this is a test",
+        "pr_link": "https://github.com/thomaspoignant/go-feature-flag/pull/916"
+      }
+    }
+  }
+}
