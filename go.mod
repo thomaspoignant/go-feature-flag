@@ -64,7 +64,7 @@ require (
 	github.com/xitongsys/parquet-go-source v0.0.0-20230830030807-0dd610dbff1d
 	go.mongodb.org/mongo-driver v1.17.4
 	go.opentelemetry.io/contrib/exporters/autoexport v0.62.0
-	go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho v0.62.0
+	go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho v0.63.0
 	go.opentelemetry.io/contrib/samplers/jaegerremote v0.31.0
 	go.opentelemetry.io/otel v1.38.0
 	go.opentelemetry.io/otel/sdk v1.38.0
