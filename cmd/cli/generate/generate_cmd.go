@@ -20,6 +20,7 @@ func NewGenerateCmd() *cobra.Command {
 			return fmt.Errorf("no subcommand provided")
 		},
 		SilenceErrors: true,
+		SilenceUsage:  true,
 	}
 
 	g.AddCommand(manifest.NewManifestCmd())
