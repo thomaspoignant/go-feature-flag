@@ -2,6 +2,7 @@ package helper_test
 
 import (
 	"bytes"
+	"fmt"
 	"testing"
 
 	"github.com/pterm/pterm"
@@ -68,4 +69,24 @@ func TestOutput_PrintLines(t *testing.T) {
 			assert.Equal(t, tt.expected, buf.String())
 		})
 	}
+}
+
+func TestPrintFatalAndExit(t *testing.T) {
+	pterm.DisableStyling()
+	pterm.DisableColor()
+
+	var buf bytes.Buffer
+	pterm.Error.Writer = &buf // redirect Error output to buf
+
+	called := false
+	restore := helper.SetExitFuncForTest(func(code int) {
+		assert.Equal(t, 1, code)
+		called = true
+	})
+	defer restore()
+
+	helper.PrintFatalAndExit(fmt.Errorf("boom"))
+
+	assert.True(t, called, "exitFunc should have been called")
+	assert.Equal(t, "ERROR: error executing command: boom\n", buf.String())
 }
