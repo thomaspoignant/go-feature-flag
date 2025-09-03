@@ -1,7 +1,6 @@
 package manifest_test
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
@@ -19,6 +18,7 @@ func TestManifestCmd(t *testing.T) {
 		args             []string
 		expectedManifest string
 		expectedOutput   string
+		expectedError    string
 		assertError      assert.ErrorAssertionFunc
 	}{
 		{
@@ -36,10 +36,10 @@ func TestManifestCmd(t *testing.T) {
 			assertError:      assert.NoError,
 		},
 		{
-			name:           "should error if flag type is invalid",
-			args:           []string{"--config=testdata/input/flag-invalid-flag-type.yaml"},
-			assertError:    assert.Error,
-			expectedOutput: "Error: invalid configuration for flag test-flag: impossible to find type\n",
+			name:          "should error if flag type is invalid",
+			args:          []string{"--config=testdata/input/flag-invalid-flag-type.yaml"},
+			assertError:   assert.Error,
+			expectedError: "invalid configuration for flag test-flag: impossible to find type",
 		},
 		{
 			name:             "should have int as type if float with .0 and int are mixed",
@@ -60,15 +60,12 @@ func TestManifestCmd(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tmpManifest, err := os.CreateTemp("", "temp")
-			os.Remove(tmpManifest.Name())
-
 			require.NoError(t, err)
+			os.Remove(tmpManifest.Name()) // delete, we only want the path
 
 			redirectionStd, err := os.CreateTemp("", "temp")
 			require.NoError(t, err)
-			defer func() {
-				_ = os.Remove(redirectionStd.Name())
-			}()
+			defer func() { _ = os.Remove(redirectionStd.Name()) }()
 
 			tt.args = append(tt.args, "--flag_manifest_destination", tmpManifest.Name())
 
@@ -76,13 +73,12 @@ func TestManifestCmd(t *testing.T) {
 			cmd.SetErr(redirectionStd)
 			cmd.SetOut(redirectionStd)
 			cmd.SetArgs(tt.args)
+
 			err = cmd.Execute()
 			tt.assertError(t, err)
 
-			if err != nil {
-				// Since SilenceUsage true
-				// Need Explicitly write the error into stderr so it’s captured in redirectionStd
-				_, _ = fmt.Fprintf(redirectionStd, "Error: %v\n", err)
+			if tt.expectedError != "" {
+				assert.EqualError(t, err, tt.expectedError)
 			}
 
 			output, err := os.ReadFile(redirectionStd.Name())
@@ -94,12 +90,7 @@ func TestManifestCmd(t *testing.T) {
 				assert.NoError(t, err)
 				gotManifest, err := os.ReadFile(tmpManifest.Name())
 				assert.NoError(t, err)
-				assert.Equal(
-					t,
-					string(wantManifest),
-					string(gotManifest),
-					"manifest is not expected",
-				)
+				assert.Equal(t, string(wantManifest), string(gotManifest), "manifest is not expected")
 			}
 		})
 	}

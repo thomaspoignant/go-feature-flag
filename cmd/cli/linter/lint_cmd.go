@@ -33,7 +33,6 @@ func runLint(cmd *cobra.Command, args []string, lintFlagFormat string) error {
 	}
 	if errs := l.Lint(); len(errs) > 0 {
 		for _, err := range errs {
-			_, _ = fmt.Fprintf(cmd.ErrOrStderr(), "%s\n", err)
 			output.Add(err.Error(), helper.ErrorLevel)
 		}
 		output.PrintLines(cmd)
