@@ -33,6 +33,8 @@ func (o *Output) Add(line string, level Level) Output {
 func (o *Output) PrintLines(cmd *cobra.Command) {
 	for _, line := range o.Lines {
 		var outputText string
+		writer := cmd.OutOrStdout()
+
 		switch line.Level {
 		case InfoLevel:
 			outputText = pterm.Info.Sprint(line.Text)
@@ -40,10 +42,11 @@ func (o *Output) PrintLines(cmd *cobra.Command) {
 			outputText = pterm.Warning.Sprint(line.Text)
 		case ErrorLevel:
 			outputText = pterm.Error.Sprint(line.Text)
+			writer = cmd.ErrOrStderr()
 		default:
 			outputText = pterm.Sprint(line.Text)
 		}
-		_, _ = fmt.Fprintln(cmd.OutOrStdout(), outputText)
+		_, _ = fmt.Fprintln(writer, outputText)
 	}
 }
 

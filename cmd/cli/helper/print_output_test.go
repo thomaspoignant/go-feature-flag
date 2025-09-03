@@ -62,6 +62,7 @@ func TestOutput_PrintLines(t *testing.T) {
 			var buf bytes.Buffer
 			cmd := &cobra.Command{}
 			cmd.SetOut(&buf)
+			cmd.SetErr(&buf)
 
 			tt.output.PrintLines(cmd)
 			assert.Equal(t, tt.expected, buf.String())
