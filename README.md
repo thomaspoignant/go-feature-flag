@@ -31,30 +31,15 @@
 ## Table of Contents
 
 - [🎛️ GO Feature Flag](#️-go-feature-flag)
-  - [Table of Contents](#table-of-contents)
   - [What is GO Feature Flag?](#what-is-go-feature-flag)
   - [What can I do with GO Feature Flag?](#what-can-i-do-with-go-feature-flag)
-  - [Getting started](#getting-started)
-    - [Create a feature flag configuration](#create-a-feature-flag-configuration)
-    - [Create a relay proxy configuration file](#create-a-relay-proxy-configuration-file)
-    - [Install the relay proxy](#install-the-relay-proxy)
-    - [Use Open Feature SDK](#use-open-feature-sdk)
-      - [Install dependencies](#install-dependencies)
-      - [Init your Open Feature client](#init-your-open-feature-client)
-      - [Evaluate your flag](#evaluate-your-flag)
-    - [Installation](#installation)
-    - [Create a feature flag configuration](#create-a-feature-flag-configuration-1)
-    - [SDK Initialisation](#sdk-initialisation)
-    - [Evaluate your flags](#evaluate-your-flags)
+  - [Getting started with GO Feature Flag](#getting-started)
   - [Can I use GO Feature Flag with any language?](#can-i-use-go-feature-flag-with-any-language)
   - [Where do I store my flags file?](#where-do-i-store-my-flags-file)
   - [Flags file format](#flags-file-format)
   - [Rule format](#rule-format)
-    - [Examples](#examples)
   - [Evaluation Context](#evaluation-context)
-  - [Custom bucketing](#custom-bucketing)
   - [Variations](#variations)
-    - [Example](#example)
   - [Rollout](#rollout)
     - [Complex rollout strategy available](#complex-rollout-strategy-available)
   - [Notifiers](#notifiers)
@@ -627,3 +612,4 @@ These are our really cool sponsors!
 If you are using `go-feature-flag`, we encourage you to include your company's name in this list. This simple act significantly boosts the project's visibility and credibility, making a substantial contribution to its advancement. To do so, kindly add yourself to [adopters](./ADOPTERS.md).
 
 Here is the list of [adopters](./ADOPTERS.md).
+
