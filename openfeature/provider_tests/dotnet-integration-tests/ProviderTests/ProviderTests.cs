@@ -4,6 +4,7 @@ using OpenFeature;
 using OpenFeature.Constant;
 using OpenFeature.Contrib.Providers.GOFeatureFlag;
 using FluentAssertions;
+using Value = OpenFeature.Model.Value;
 
 namespace ProviderTests;
 

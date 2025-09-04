@@ -19,7 +19,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/exporter/kafkaexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/kinesisexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/logsexporter"
-	"github.com/thomaspoignant/go-feature-flag/exporter/pubsubexporter"
+	"github.com/thomaspoignant/go-feature-flag/exporter/pubsubexporterv2"
 	"github.com/thomaspoignant/go-feature-flag/exporter/s3exporterv2"
 	"github.com/thomaspoignant/go-feature-flag/exporter/sqsexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/webhookexporter"
@@ -547,12 +547,12 @@ func Test_initExporter(t *testing.T) {
 				Topic:     "fake-topic",
 			},
 			want: ffclient.DataExporter{
-				Exporter: &pubsubexporter.Exporter{
+				Exporter: &pubsubexporterv2.Exporter{
 					ProjectID: "fake-project-id",
 					Topic:     "fake-topic",
 				},
 			},
-			wantType:               &pubsubexporter.Exporter{},
+			wantType:               &pubsubexporterv2.Exporter{},
 			skipCompleteValidation: true,
 		},
 		{

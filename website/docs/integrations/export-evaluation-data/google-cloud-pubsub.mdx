@@ -39,12 +39,16 @@ exporters:
 To configure your GO module to use the {exporterName} exporter, you need to add the following
 configuration to your `ffclient.Config{}` object:
 
+:::note Migration from v1
+If you are migrating from the legacy `pubsubexporter` (v1), simply change the import and struct name from `pubsubexporter.Exporter` to `pubsubexporterv2.Exporter`. The v2 exporter uses `cloud.google.com/go/pubsub/v2` which provides improved performance and additional features.
+:::
+
 ```go title="example.go"
 config := ffclient.Config{
    // ...
     DataExporter: ffclient.DataExporter{
         // ...
-        Exporter: &pubsubexporter.Exporter{
+        Exporter: &pubsubexporterv2.Exporter{
             ProjectID: "project-id", // required
             Topic: "topic", // required
             Options: []option.ClientOption{...},
@@ -63,5 +67,5 @@ defer ffclient.Close()
 | `ProjectID `            |  <Mandatory />   | ID of GCP project.<br/>_You can find it in your GCP console_                                         |
 | `Topic `                |  <Mandatory />   | Name of topic on which messages will be published                                                    |
 | `Options`               | <NotMandatory /> | PubSub client options *(see [docs](https://pkg.go.dev/google.golang.org/api/option))*                |
-| `PublishSettings`       | <NotMandatory /> | Topic related settings *(see [docs](https://pkg.go.dev/cloud.google.com/go/pubsub#PublishSettings))* |
+| `PublishSettings`       | <NotMandatory /> | Publisher related settings *(see [docs](https://pkg.go.dev/cloud.google.com/go/pubsub/v2#PublishSettings))* |
 | `EnableMessageOrdering` | <NotMandatory /> | Enables delivery of ordered keys                                                                     |

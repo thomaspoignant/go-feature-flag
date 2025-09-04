@@ -67,9 +67,12 @@ To submit a pull request, follow these steps:
 7. Open a pull request, comparing your branch to the `main` branch of this repository.
 8. Provide a detailed description of your changes in the pull request.
 
-We will review your pull request as soon as possible
-Please be patient, as it might take some time for us to get back to you
+We will review your pull request as soon as possible.
+Please be patient, as it might take some time for us to get back to you.
 Your contributions are highly valued!
+
+If you want an early feedback on your pull requests, you can use gemini AI pull request review by adding the comment `/gemini review` as a message in the pull request.
+It will trigger gemini to review your pull request.
 
 ## 🧑‍💻 Development Setup
 We always strive to keep the project as simple as possible, so you will find everything you need in the `Makefile` at the root of the repository.

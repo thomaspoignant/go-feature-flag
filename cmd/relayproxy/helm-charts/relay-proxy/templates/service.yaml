@@ -11,5 +11,11 @@ spec:
       targetPort: http
       protocol: TCP
       name: http
+    {{- if (include "relay-proxy.monitoringPort" .) }}
+    - port: {{ include "relay-proxy.monitoringPort" . }}
+      targetPort: monitoring
+      protocol: TCP
+      name: monitoring
+    {{- end }}
   selector:
     {{- include "relay-proxy.selectorLabels" . | nindent 4 }}

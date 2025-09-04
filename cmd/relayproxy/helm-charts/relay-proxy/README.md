@@ -1,6 +1,6 @@
 # relay-proxy
 
-![Version: 1.45.5](https://img.shields.io/badge/Version-1.45.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.45.5](https://img.shields.io/badge/AppVersion-v1.45.5-informational?style=flat-square)
+![Version: 1.45.6](https://img.shields.io/badge/Version-1.45.6-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.45.6](https://img.shields.io/badge/AppVersion-v1.45.6-informational?style=flat-square)
 
 A Helm chart to deploy go-feature-flag-relay proxy into Kubernetes
 
@@ -18,6 +18,52 @@ helm install . --name-template=go-feature-flag-relay-proxy
 ```
 
 It will install the chart in your cluster.
+
+## Monitoring Port Configuration
+
+The Helm chart supports an optional `monitoringPort` configuration that allows you to:
+
+- **Separate monitoring traffic**: Expose a dedicated port for health checks and monitoring
+- **Enhanced security**: Keep monitoring endpoints separate from application traffic
+- **Flexible health checks**: Use the monitoring port for liveness and readiness probes
+
+### Example with monitoringPort:
+
+```yaml
+relayproxy:
+  config: |
+    listen: 1031
+    monitoringPort: 1032
+    pollingInterval: 1000
+    startWithRetrieverError: false
+    logLevel: debug
+    retriever:
+      kind: http
+      url: https://example.com/flags.yaml
+    exporter:
+      kind: log
+```
+
+When `monitoringPort` is configured:
+1. The monitoring port is exposed alongside the HTTP port
+2. Health checks (`/health` endpoint) use the monitoring port
+3. Both ports are accessible through the Kubernetes service
+
+### Example without monitoringPort (default behavior):
+
+```yaml
+relayproxy:
+  config: |
+    listen: 1031
+    pollingInterval: 1000
+    startWithRetrieverError: false
+    logLevel: debug
+    retriever:
+      kind: http
+      url: https://example.com/flags.yaml
+    exporter:
+      kind: log
+```
 
 **Homepage:** <https://gofeatureflag.org>
 
@@ -474,7 +520,7 @@ string
 </div>
 			</td>
 			<td>
-				GO Feature Flag relay proxy configuration as string (accept template).
+				GO Feature Flag relay proxy configuration as string (accept template). If monitoringPort is specified in the config, it will be exposed as a separate port and used for liveness and readiness probes instead of the main HTTP port. Example: add "monitoringPort: 1032" to your config to enable separate monitoring port.
 			</td>
 		</tr>
 		<tr>
