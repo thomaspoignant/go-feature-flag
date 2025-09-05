@@ -3,6 +3,8 @@ sidebar_position: 51
 title: Python
 description: How to use the OpenFeature Python SDK with GO Feature Flag
 ---
+import { sdk } from "@site/data/sdk";
+import { FeatureTable } from "@site/src/components/doc/featureTable";
 
 # Python
 [![PyPI - Version](https://img.shields.io/pypi/v/gofeatureflag-python-provider?color=blue&style=flat-square)](https://pypi.org/project/gofeatureflag-python-provider/)
@@ -75,6 +77,9 @@ if admin_flag:
 else:
   # flag "flag-only-for-admin" is false for the user
 ```
+
+## Features status
+<FeatureTable sdk={sdk.find(it => it.key === 'python')} />
 
 ## Contribute to the provider
 You can find the source of the provider in the [`repository`](https://github.com/thomaspoignant/go-feature-flag/tree/main/openfeature/providers/python-provider).

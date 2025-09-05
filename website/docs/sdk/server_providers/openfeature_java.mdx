@@ -7,6 +7,8 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import versions from '@site/static/sdk-versions.json';
 import CodeBlock from '@theme/CodeBlock';
+import { sdk } from "@site/data/sdk";
+import { FeatureTable } from "@site/src/components/doc/featureTable";
 
 # JAVA
 [![Maven Central Version](https://img.shields.io/maven-central/v/dev.openfeature.contrib.providers/go-feature-flag?color=blue&style=flat-square)](https://search.maven.org/artifact/dev.openfeature.contrib.providers/go-feature-flag)
@@ -207,6 +209,9 @@ OpenFeatureAPI.getInstance().setProviderAndWait(provider);
 ```
 
 For a complete list of customizations  options available in Caffeine, please refer to the [Caffeine documentation](https://github.com/ben-manes/caffeine/wiki) for more details.
+
+## Features status
+<FeatureTable sdk={sdk.find(it => it.key === 'java')} />
 
 ## Contribute to the provider
 You can find the source of the provider in the [`open-feature/java-sdk-contrib`](https://github.com/open-feature/java-sdk-contrib/tree/main/providers/go-feature-flag) repository.
