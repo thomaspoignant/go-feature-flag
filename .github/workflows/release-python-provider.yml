@@ -4,6 +4,8 @@ on:
     tags:
       - python-provider-v*
 
+permissions: read-all
+
 jobs:
   python-release:
     runs-on: ubuntu-latest
