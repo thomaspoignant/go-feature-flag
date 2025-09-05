@@ -2,6 +2,7 @@ name: "Check all SDK versions and update the documentation"
 on:
   schedule:
     - cron: "0 9 * * *"
+permissions: read-all
 
 jobs:
   sdk-versions:
