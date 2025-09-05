@@ -6,6 +6,8 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+permissions: read-all
+
 jobs:
   examples-linting:
     runs-on: ubuntu-latest
