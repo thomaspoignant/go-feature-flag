@@ -4,6 +4,8 @@ on:
     branches:
       - main
 
+permissions: read-all
+
 jobs:
   helm-release:
     runs-on: ubuntu-latest

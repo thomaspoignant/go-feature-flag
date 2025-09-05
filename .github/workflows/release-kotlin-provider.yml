@@ -4,6 +4,8 @@ on:
     tags:
       - kotlin-provider-v*
 
+permissions: read-all
+
 jobs:
   kotlin-release:
     runs-on: ubuntu-latest

@@ -10,6 +10,8 @@ on:
     paths:
       - openfeature/providers/kotlin-provider/**
 
+permissions: read-all
+
 jobs:
   Build:
     runs-on: ubuntu-latest
