@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/thomaspoignant/go-feature-flag/cmd/cli/helper"
 )
 
 var lintFlagFormat string
@@ -16,6 +17,8 @@ func NewLintCmd() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runLint(cmd, args, lintFlagFormat)
 		},
+		SilenceUsage:  true,
+		SilenceErrors: true,
 	}
 	lintCmd.Flags().
 		StringVarP(&lintFlagFormat, "format", "f", "yaml", "Format of your input file (YAML, JSON or TOML)")
@@ -23,19 +26,22 @@ func NewLintCmd() *cobra.Command {
 }
 
 func runLint(cmd *cobra.Command, args []string, lintFlagFormat string) error {
+	output := helper.Output{}
 	l := Linter{
 		InputFile:   getFilePath(args),
 		InputFormat: lintFlagFormat,
 	}
 	if errs := l.Lint(); len(errs) > 0 {
 		for _, err := range errs {
-			_, _ = fmt.Fprintf(cmd.ErrOrStderr(), "%s\n", err)
+			output.Add(err.Error(), helper.ErrorLevel)
 		}
-		cmd.SilenceUsage = true
+		output.PrintLines(cmd)
 		return fmt.Errorf("invalid GO Feature Flag configuration")
 	}
-	_, err := fmt.Fprint(cmd.OutOrStdout(), "Valid GO Feature Flag configuration")
-	return err
+
+	output.Add("Valid GO Feature Flag configuration", helper.InfoLevel)
+	output.PrintLines(cmd)
+	return nil
 }
 
 func getFilePath(args []string) string {
