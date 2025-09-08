@@ -48,7 +48,7 @@ require (
 	github.com/prometheus/client_golang v1.23.2
 	github.com/pterm/pterm v0.12.81
 	github.com/r3labs/diff/v3 v3.0.2
-	github.com/redis/go-redis/v9 v9.12.1
+	github.com/redis/go-redis/v9 v9.13.0
 	github.com/samber/slog-zap/v2 v2.6.2
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/pflag v1.0.10
