@@ -109,7 +109,9 @@ func (d *dataExporterImpl[T]) Flush() {
 	store := *d.eventStore
 	err := store.ProcessPendingEvents(d.consumerID, d.sendEvents)
 	if err != nil {
-		d.logger.Error(err.Error())
+		if d != nil && d.logger != nil {
+			d.logger.Error(err.Error())
+		}
 		return
 	}
 }
@@ -145,8 +147,7 @@ func (d *dataExporterImpl[T]) sendEvents(ctx context.Context, events []T) error 
 			// use dc exporter as a DeprecatedExporterV1
 			err := exp.Export(ctx, legacyLogger, events)
 			slog.WarnContext(ctx, "You are using an exporter with the old logger."+
-				"Please update your custom exporter to comply to the new Exporter interface.",
-				slog.Any("err", err))
+				"Please update your custom exporter to comply to the new Exporter interface.")
 			if err != nil {
 				return fmt.Errorf("error while exporting data (deprecated): %w", err)
 			}
