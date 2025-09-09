@@ -76,7 +76,7 @@ func (m *Manager) StartPolling() {
 			if err != nil {
 				m.logger.Error(
 					"Error while updating the cache.",
-					slog.Any("error", err),
+					slog.Any("error", err.Error()),
 				)
 			}
 		case <-m.bgUpdater.updaterChan:
@@ -178,7 +178,7 @@ func (m *Manager) handleFirstRetrieverError(err error) error {
 	default:
 		// We accept to start with a retriever error, we will serve only default value
 		m.logger.Error("Impossible to retrieve the flags, starting with the "+
-			"retriever error", slog.Any("error", err))
+			"retriever error", slog.Any("error", err.Error()))
 	}
 	return nil
 }
@@ -233,7 +233,7 @@ func (m *Manager) ForceRefresh() bool {
 	if err != nil {
 		m.logger.Error(
 			"Error while force updating the cache.",
-			slog.Any("error", err),
+			slog.Any("error", err.Error()),
 		)
 		return false
 	}
