@@ -109,7 +109,9 @@ func (d *dataExporterImpl[T]) Flush() {
 	store := *d.eventStore
 	err := store.ProcessPendingEvents(d.consumerID, d.sendEvents)
 	if err != nil {
-		d.logger.Error(err.Error())
+		if d != nil && d.logger != nil {
+			d.logger.Error(err.Error())
+		}
 		return
 	}
 }
