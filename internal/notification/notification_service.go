@@ -40,7 +40,7 @@ func (c *notificationService) Notify(
 				defer c.waitGroup.Done()
 				err := notif.Notify(diff)
 				if err != nil {
-					log.Error("error while calling the notifier", slog.Any("err", err))
+					log.Error("error while calling the notifier", slog.Any("error", err.Error()))
 				}
 			}()
 		}
