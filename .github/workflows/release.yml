@@ -3,6 +3,8 @@ on:
   release:
     types: [published]
 
+permissions: read-all
+
 jobs:
   main-release:
     if: ${{ startsWith(github.event.release.tag_name, 'v') }}

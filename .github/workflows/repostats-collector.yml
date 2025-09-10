@@ -8,9 +8,6 @@ permissions: read-all
 
 jobs:
   j1:
-    permissions:
-      contents: write
-      pull-requests: write
     if: github.repository == 'thomaspoignant/go-feature-flag'
     name: repostats-for-nice-project
     runs-on: ubuntu-latest
