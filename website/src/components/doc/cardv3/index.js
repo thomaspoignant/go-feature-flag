@@ -32,19 +32,26 @@ export const Card = ({
       {featureList && (
         <p>
           <ul className={'list-none pl-0'}>
-            {featureList.map((feature, index) => (
-              <li
-                key={`${index}.${feature.name}`}
-                className="flex items-center">
-                {feature.status === 'done' ? (
-                  <i className="fa-solid fa-circle-check text-green-500 mr-1.5"></i>
-                ) : (
-                  <i className="fa-solid fa-circle-xmark text-red-500 mr-1.5"></i>
-                )}
+            {featureList
+              .sort((a, b) => {
+                // Sort 'done' features first, then others
+                if (a.status === 'done' && b.status !== 'done') return -1;
+                if (a.status !== 'done' && b.status === 'done') return 1;
+                return 0;
+              })
+              .map((feature, index) => (
+                <li
+                  key={`${index}.${feature.name}`}
+                  className="flex items-center">
+                  {feature.status === 'done' ? (
+                    <i className="fa-solid fa-circle-check text-green-500 mr-1.5"></i>
+                  ) : (
+                    <i className="fa-solid fa-circle-xmark text-red-500 mr-1.5"></i>
+                  )}
 
-                <span>{feature.name}</span>
-              </li>
-            ))}
+                  <span>{feature.name}</span>
+                </li>
+              ))}
           </ul>
         </p>
       )}
