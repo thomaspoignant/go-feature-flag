@@ -31,6 +31,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/gcstorageretriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever/postgresqlretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/redisretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/s3retrieverv2"
 	"go.uber.org/zap"
@@ -157,6 +158,8 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 		return &redisretriever.Retriever{Options: c.RedisOptions, Prefix: c.RedisPrefix}, nil
 	case config.AzBlobStorageRetriever:
 		return initAzBlobRetriever(c), nil
+	case config.PostgreSQLRetriever:
+		return &postgresqlretriever.Retriever{URI: c.URI, Table: c.Table, Columns: c.Columns}, nil
 	default:
 		return nil, fmt.Errorf("invalid retriever: kind \"%s\" "+
 			"is not supported", c.Kind)

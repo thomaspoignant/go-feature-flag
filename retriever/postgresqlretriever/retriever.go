@@ -75,7 +75,6 @@ func (r *Retriever) Shutdown(ctx context.Context) error {
 
 // Retrieve fetches flag configuration from PostgreSQL.
 func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
-	fmt.Println("Retrieve", r.conn)
 	if r.conn == nil {
 		return nil, fmt.Errorf("database connection is not initialized")
 	}

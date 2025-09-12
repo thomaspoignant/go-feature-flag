@@ -1,3 +1,6 @@
+//go:build docker
+// +build docker
+
 package postgresqlretriever_test
 
 import (
@@ -81,7 +84,7 @@ func TestPostgreSQLRetriever(t *testing.T) {
 				Table:   tt.table_name,
 				Columns: tt.columns,
 			}
-			assert.NoError(t, retriever.Init(context.TODO(), nil, tt.flagset))
+			assert.NoError(t, retriever.Init(context.TODO(), nil, &tt.flagset))
 			defer func() {
 				assert.NoError(t, retriever.Shutdown(context.TODO()))
 			}()
