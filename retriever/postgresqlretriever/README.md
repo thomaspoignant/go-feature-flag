@@ -55,7 +55,7 @@ Create a `Retriever` struct with the following fields:
 
 ```go
 retriever := &postgresqlretriever.Retriever{
-    URI:   "postgres://user:password@localhost:5432/dbname=",
+    URI:   "postgres://user:password@localhost:5432/dbname",
     Table: "go_feature_flag",
 }
 ```
