@@ -93,6 +93,7 @@ func NewGoFeatureFlagClient(
 		DisableNotifierOnInit:           cFlagSet.DisableNotifierOnInit,
 		EvaluationContextEnrichment:     cFlagSet.EvaluationContextEnrichment,
 		PersistentFlagConfigurationFile: cFlagSet.PersistentFlagConfigurationFile,
+		Name:                            &cFlagSet.Name,
 	}
 	client, err := ffclient.New(f)
 	if err != nil {

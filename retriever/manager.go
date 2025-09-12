@@ -24,6 +24,7 @@ type ManagerConfig struct {
 	StartWithRetrieverError         bool
 	EnablePollingJitter             bool
 	PollingInterval                 time.Duration
+	Name                            *string
 }
 
 // Manager is a struct that managed the retrievers.
@@ -103,6 +104,15 @@ func (m *Manager) initRetrievers(ctx context.Context, retrieversToInit []Retriev
 
 		if r, ok := retriever.(InitializableRetriever); ok {
 			err := r.Init(ctx, m.logger)
+			if err != nil {
+				m.onErrorRetriever = append(m.onErrorRetriever, retriever)
+			}
+		}
+
+		// If the retriever implements the InitializableRetrieverWithFlagset interface
+		// we call the Init function with the flagset.
+		if r, ok := retriever.(InitializableRetrieverWithFlagset); ok {
+			err := r.Init(ctx, m.logger, m.config.Name)
 			if err != nil {
 				m.onErrorRetriever = append(m.onErrorRetriever, retriever)
 			}
