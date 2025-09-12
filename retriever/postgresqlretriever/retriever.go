@@ -30,7 +30,6 @@ type Retriever struct {
 }
 
 func (r *Retriever) Init(ctx context.Context, logger *fflog.FFLogger, flagset *string) error {
-	fmt.Println("Init")
 	r.status = retriever.RetrieverNotReady
 	r.logger = logger
 	r.columns = r.getColumnNames()
