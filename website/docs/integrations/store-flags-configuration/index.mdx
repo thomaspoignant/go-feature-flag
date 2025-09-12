@@ -47,12 +47,12 @@ Bellow is the full list of retrievers that are available in GO Feature Flag.
 ## Custom retriever
 If you have a specific use case that is not covered by the built-in retrievers, you can create your own custom retriever.
 
-To achieve this, you need to implement the [`InitializableRetriever`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/retriever/#InitializableRetriever) interface in your custom retriever.
+To achieve this, you need to implement the [`InitializableRetrieverWithFlagset`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/retriever/#InitializableRetrieverWithFlagset) interface in your custom retriever.
 
 ```go
-type InitializableRetriever interface {
+type InitializableRetrieverWithFlagset interface {
   Retrieve(ctx context.Context) ([]byte, error)
-  Init(ctx context.Context, logger *fflog.FFLogger) error
+  Init(ctx context.Context, logger *fflog.FFLogger, flagset *string) error
   Shutdown(ctx context.Context) error
   Status() retriever.Status
 }

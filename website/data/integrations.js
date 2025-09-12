@@ -14,6 +14,7 @@ import githublogo from '@site/static/docs/retrievers/github.png';
 import gitlablogo from '@site/static/docs/retrievers/gitlab.png';
 import mongodblogo from '@site/static/docs/retrievers/mongodb.png';
 import redislogo from '@site/static/docs/retrievers/redis.png';
+import postgreslogo from '@site/static/docs/retrievers/postgresql.png';
 import kafkalogo from '@site/static/docs/collectors/kafka.png';
 import discordlogo from '@site/static/docs/notifier/discord_logo.png';
 import slacklogo from '@site/static/docs/notifier/slack.png';
@@ -117,6 +118,15 @@ export const integrations = {
       faLogo: 'devicon-redis-plain-wordmark colored',
       logo: redislogo,
       docLink: 'redis',
+    },
+    {
+      name: 'Postgresql',
+      description: 'Load the configuration from Postgresql database.',
+      longDescription: `Load the configuration from Postgresql database. This retriever is useful when you are using Postgresql and want to use a database to store your configuration files.`,
+      bgColor: '#336791',
+      faLogo: 'devicon-postgresql-plain',
+      logo: postgreslogo,
+      docLink: 'postgresql',
     },
   ],
   exporters: [
