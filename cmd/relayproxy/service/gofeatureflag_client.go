@@ -29,11 +29,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/notifier/slacknotifier"
 	"github.com/thomaspoignant/go-feature-flag/notifier/webhooknotifier"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
-	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
-	"github.com/thomaspoignant/go-feature-flag/retriever/gcstorageretriever"
-	"github.com/thomaspoignant/go-feature-flag/retriever/postgresqlretriever"
-	"github.com/thomaspoignant/go-feature-flag/retriever/redisretriever"
-	"github.com/thomaspoignant/go-feature-flag/retriever/s3retrieverv2"
 	"go.uber.org/zap"
 	"golang.org/x/net/context"
 )
@@ -134,36 +129,12 @@ func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
 	if c.Timeout != 0 {
 		retrieverTimeout = time.Duration(c.Timeout) * time.Millisecond
 	}
-	switch c.Kind {
-	case config.GitHubRetriever:
-		return initGithubRetriever(c, retrieverTimeout), nil
-	case config.GitlabRetriever:
-		return initGitlabRetriever(c, retrieverTimeout), nil
-	case config.BitbucketRetriever:
-		return initBitbucketRetriever(c, retrieverTimeout), nil
-	case config.FileRetriever:
-		return &fileretriever.Retriever{Path: c.Path}, nil
-	case config.S3Retriever:
-		awsConfig, err := awsConf.LoadDefaultConfig(context.Background())
-		return &s3retrieverv2.Retriever{Bucket: c.Bucket, Item: c.Item, AwsConfig: &awsConfig}, err
-	case config.HTTPRetriever:
-		return initHTTPRetriever(c, retrieverTimeout), nil
-	case config.GoogleStorageRetriever:
-		return &gcstorageretriever.Retriever{Bucket: c.Bucket, Object: c.Object}, nil
-	case config.KubernetesRetriever:
-		return initK8sRetriever(c)
-	case config.MongoDBRetriever:
-		return initMongoRetriever(c), nil
-	case config.RedisRetriever:
-		return &redisretriever.Retriever{Options: c.RedisOptions, Prefix: c.RedisPrefix}, nil
-	case config.AzBlobStorageRetriever:
-		return initAzBlobRetriever(c), nil
-	case config.PostgreSQLRetriever:
-		return &postgresqlretriever.Retriever{URI: c.URI, Table: c.Table, Columns: c.Columns}, nil
-	default:
-		return nil, fmt.Errorf("invalid retriever: kind \"%s\" "+
-			"is not supported", c.Kind)
+
+	retrieverFactory, exists := retrieverFactories[c.Kind]
+	if !exists {
+		return nil, fmt.Errorf("invalid retriever: kind \"%s\" is not supported", c.Kind)
 	}
+	return retrieverFactory(c, retrieverTimeout)
 }
 
 // initDataExporters initialize the exporters based on the configuration
