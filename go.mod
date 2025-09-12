@@ -30,6 +30,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674
 	github.com/invopop/jsonschema v0.13.0
+	github.com/jackc/pgx/v5 v5.7.6
 	github.com/jessevdk/go-flags v1.6.1
 	github.com/jsternberg/zap-logfmt v1.3.0
 	github.com/knadh/koanf/parsers/json v1.0.0
@@ -58,6 +59,7 @@ require (
 	github.com/testcontainers/testcontainers-go v0.38.0
 	github.com/testcontainers/testcontainers-go/modules/azurite v0.35.0
 	github.com/testcontainers/testcontainers-go/modules/mongodb v0.38.0
+	github.com/testcontainers/testcontainers-go/modules/postgres v0.38.0
 	github.com/testcontainers/testcontainers-go/modules/redis v0.38.0
 	github.com/thejerf/slogassert v0.3.4
 	github.com/xdg-go/scram v1.1.2
@@ -176,6 +178,8 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.2 // indirect
 	github.com/hashicorp/go-uuid v1.0.3 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/jackc/pgpassfile v1.0.0 // indirect
+	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jaegertracing/jaeger-idl v0.5.0 // indirect
 	github.com/jcmturner/aescts/v2 v2.0.0 // indirect
 	github.com/jcmturner/dnsutils/v2 v2.0.0 // indirect

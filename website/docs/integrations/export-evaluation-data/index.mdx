@@ -1,7 +1,7 @@
 ---
 description: How to export evaluation data?
 ---
-import { integrations } from "@site/data/integrations";
+import { getIntegrations } from "@site/data/integrations";
 import { Card } from "@site/src/components/doc/cardv3";
 
 # 🚚 Export evaluation data
@@ -25,7 +25,7 @@ In all the details pages of the exporters bellow you will have an example for bo
 Bellow is the full list of exporters that are available in GO Feature Flag.
 
 <div className={"grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"}>
-  {integrations.exporters.filter(item => item.docLink !== undefined).map((item) => {
+  {getIntegrations("").exporters.filter(item => item.docLink !== undefined).map((item) => {
     return (
       <Card
         logo={item.logo}

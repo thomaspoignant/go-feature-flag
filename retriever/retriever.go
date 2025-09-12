@@ -25,6 +25,13 @@ type InitializableRetriever interface {
 	Init(ctx context.Context, logger *fflog.FFLogger) error
 }
 
+// InitializableRetrieverWithFlagset is an extended version of the retriever that can be initialized and shutdown.
+// It is used to initialize the retriever with a specific flagset.
+type InitializableRetrieverWithFlagset interface {
+	CommonInitializableRetriever
+	Init(ctx context.Context, logger *fflog.FFLogger, flagset *string) error
+}
+
 // CommonInitializableRetriever is the common interface for all versions of
 // retrievers that can be initialized and shutdown.
 type CommonInitializableRetriever interface {
