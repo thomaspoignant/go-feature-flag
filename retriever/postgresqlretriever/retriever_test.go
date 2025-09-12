@@ -72,6 +72,17 @@ func TestPostgreSQLRetriever(t *testing.T) {
 			flagset:    "team-A",
 			want:       "response/valid_alternative_flagset.json",
 		},
+		{
+			name: "valid set of flag with empty flagset",
+			files: []string{
+				"sql/init.sql",
+				"sql/insert_data.sql",
+			},
+			table_name: "go_feature_flag",
+			assertErr:  assert.NoError,
+			flagset:    "empty-flagset",
+			want:       "response/empty-flagset.json",
+		},
 	}
 
 	for _, tt := range tests {
