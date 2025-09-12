@@ -2,7 +2,7 @@
 sidebar_position: 30
 description: Where to store your flag configuration file
 ---
-import {integrations} from "@site/data/integrations";
+import { getIntegrations} from "@site/data/integrations";
 
 # 📦 Retrieve your feature flags configuration
 The module supports different ways of retrieving the flag file.  
@@ -11,7 +11,7 @@ To retrieve a file you need to provide a [retriever](https://pkg.go.dev/github.c
 
 **Available retrievers**:
 <ul>
-  { integrations.retrievers.filter(item => item.docLink !== undefined).map((r) => (
+  { getIntegrations("").retrievers.filter(item => item.docLink !== undefined).map((r) => (
     <li key={r.name}><a href={`../integrations/store-flags-configuration/${r.docLink}`}>{r.name}</a></li>
   )) }
 </ul>
