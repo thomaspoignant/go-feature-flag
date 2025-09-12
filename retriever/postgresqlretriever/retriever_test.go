@@ -22,7 +22,7 @@ func TestPostgreSQLRetriever(t *testing.T) {
 	tests := []struct {
 		name       string
 		files      []string
-		table_name string
+		tableName string
 		columns    map[string]string
 		flagset    string
 		assertErr  assert.ErrorAssertionFunc
@@ -34,7 +34,7 @@ func TestPostgreSQLRetriever(t *testing.T) {
 				"sql/init.sql",
 				"sql/insert_data.sql",
 			},
-			table_name: "go_feature_flag",
+			tableName: "go_feature_flag",
 			assertErr:  assert.NoError,
 			want:       "response/valid.json",
 		},
@@ -44,7 +44,7 @@ func TestPostgreSQLRetriever(t *testing.T) {
 				"sql/init.sql",
 				"sql/insert_data.sql",
 			},
-			table_name: "invalid_table_name",
+			tableName: "invalid_table_name",
 			assertErr:  assert.Error,
 		},
 		{
@@ -67,7 +67,7 @@ func TestPostgreSQLRetriever(t *testing.T) {
 				"sql/insert_data.sql",
 				"sql/insert_alternative_flagset.sql",
 			},
-			table_name: "go_feature_flag",
+			tableName: "go_feature_flag",
 			assertErr:  assert.NoError,
 			flagset:    "team-A",
 			want:       "response/valid_alternative_flagset.json",
@@ -78,7 +78,7 @@ func TestPostgreSQLRetriever(t *testing.T) {
 				"sql/init.sql",
 				"sql/insert_data.sql",
 			},
-			table_name: "go_feature_flag",
+			tableName: "go_feature_flag",
 			assertErr:  assert.NoError,
 			flagset:    "empty-flagset",
 			want:       "response/empty-flagset.json",
@@ -92,7 +92,7 @@ func TestPostgreSQLRetriever(t *testing.T) {
 
 			retriever := postgresqlretriever.Retriever{
 				URI:     connectionString,
-				Table:   tt.table_name,
+				Table:   tt.tableName,
 				Columns: tt.columns,
 			}
 			assert.NoError(t, retriever.Init(context.TODO(), nil, &tt.flagset))
