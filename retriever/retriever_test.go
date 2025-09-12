@@ -16,12 +16,14 @@ func TestMixLegacyTypesOfRetrievers(t *testing.T) {
 	sr := &simpleRetriever{}
 	ilr := &initializableRetrieverLegacy{}
 	il := &initializableRetriever{}
+	ilf := &initializableRetrieverWithFlagset{}
 	goff, err := ffclient.New(ffclient.Config{
 		PollingInterval: 10 * time.Second,
 		Retrievers: []retriever.Retriever{
 			sr,
 			ilr,
 			il,
+			ilf,
 		},
 	})
 	assert.NoError(t, err)
@@ -38,6 +40,11 @@ func TestMixLegacyTypesOfRetrievers(t *testing.T) {
 	assert.True(t, il.statusCalled)
 	assert.True(t, il.retrieveCalled)
 	assert.True(t, il.shutdownCalled)
+
+	assert.True(t, ilf.initCalled)
+	assert.True(t, ilf.statusCalled)
+	assert.True(t, ilf.retrieveCalled)
+	assert.True(t, ilf.shutdownCalled)
 }
 
 type simpleRetriever struct {
@@ -108,6 +115,37 @@ func (i *initializableRetriever) Shutdown(_ context.Context) error {
 
 // Status is the function returning the internal state of the retriever.
 func (i *initializableRetriever) Status() retriever.Status {
+	i.statusCalled = true
+	return retriever.RetrieverReady
+}
+
+type initializableRetrieverWithFlagset struct {
+	retrieveCalled bool
+	initCalled     bool
+	shutdownCalled bool
+	statusCalled   bool
+}
+
+// retrieve is the function in charge of fetching the flag configuration.
+func (i *initializableRetrieverWithFlagset) Retrieve(_ context.Context) ([]byte, error) {
+	i.retrieveCalled = true
+	return []byte{}, nil
+}
+
+// Init is initializing the retriever to start fetching the flags configuration.
+func (i *initializableRetrieverWithFlagset) Init(_ context.Context, _ *fflog.FFLogger, _ *string) error {
+	i.initCalled = true
+	return nil
+}
+
+// Shutdown gracefully shutdown the provider and set the status as not ready.
+func (i *initializableRetrieverWithFlagset) Shutdown(_ context.Context) error {
+	i.shutdownCalled = true
+	return nil
+}
+
+// Status is the function returning the internal state of the retriever.
+func (i *initializableRetrieverWithFlagset) Status() retriever.Status {
 	i.statusCalled = true
 	return retriever.RetrieverReady
 }
