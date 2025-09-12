@@ -32,6 +32,10 @@ type Retriever struct {
 func (r *Retriever) Init(ctx context.Context, logger *fflog.FFLogger, flagset *string) error {
 	r.status = retriever.RetrieverNotReady
 	r.logger = logger
+	if r.logger == nil {
+		r.logger = &fflog.FFLogger{}
+	}
+
 	r.columns = r.getColumnNames()
 	r.flagset = flagset
 
