@@ -80,9 +80,7 @@ func NewGoFeatureFlagClient(
 		PollingInterval: time.Duration(
 			cFlagSet.PollingInterval,
 		) * time.Millisecond,
-		LeveledLogger: slog.New(
-			slogzap.Option{Level: slog.LevelDebug, Logger: logger}.NewZapHandler(),
-		),
+		LeveledLogger:                   initLeveledLogger(cFlagSet, logger),
 		Context:                         context.Background(),
 		Retrievers:                      retrievers,
 		Notifiers:                       notif,
@@ -99,6 +97,17 @@ func NewGoFeatureFlagClient(
 		return nil, err
 	}
 	return client, nil
+}
+
+// initLeveledLogger initializes the leveled logger
+// it will add the flagset name as a contextual attribute if it is not the default flagset
+func initLeveledLogger(c *config.FlagSet, logger *zap.Logger) *slog.Logger {
+	baseHandler := slogzap.Option{Level: slog.LevelDebug, Logger: logger}.NewZapHandler()
+	if c.Name != "" && c.Name != "default" {
+		attrs := []slog.Attr{slog.String("flagset", c.Name)}
+		baseHandler = baseHandler.WithAttrs(attrs)
+	}
+	return slog.New(baseHandler)
 }
 
 // initRetrievers initialize the retrievers based on the configuration
