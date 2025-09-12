@@ -127,6 +127,7 @@ export const integrations = {
       faLogo: 'devicon-postgresql-plain',
       logo: postgreslogo,
       docLink: 'postgresql',
+      minVersion: 'v1.46.0',
     },
   ],
   exporters: [
@@ -256,4 +257,44 @@ export const integrations = {
       faLogo: 'fa-solid fa-file-lines fa-inverse',
     },
   ],
+};
+
+// Helper function to compare semantic versions
+const compareVersions = (version1, version2) => {
+  if (!version1 || !version2) return 0;
+
+  // Remove 'v' prefix if present
+  const v1 = version1.replace(/^v/, '').split('.').map(Number);
+  const v2 = version2.replace(/^v/, '').split('.').map(Number);
+
+  for (let i = 0; i < Math.max(v1.length, v2.length); i++) {
+    const num1 = v1[i] || 0;
+    const num2 = v2[i] || 0;
+
+    if (num1 > num2) return 1;
+    if (num1 < num2) return -1;
+  }
+
+  return 0;
+};
+
+// Filter integrations based on minVersion
+const filterByVersion = (items, targetVersion) => {
+  if (!targetVersion) return items;
+
+  return items.filter(item => {
+    // If no minVersion is specified, include the item
+    if (!item.minVersion) return true;
+
+    // Include item if targetVersion >= minVersion
+    return compareVersions(targetVersion, item.minVersion) >= 0;
+  });
+};
+
+export const getIntegrations = version => {
+  return {
+    retrievers: filterByVersion(integrations.retrievers, version),
+    exporters: filterByVersion(integrations.exporters, version),
+    notifiers: filterByVersion(integrations.notifiers, version),
+  };
 };
