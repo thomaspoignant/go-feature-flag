@@ -1,5 +1,9 @@
 package config
 
+import (
+	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
+)
+
 // FlagSet is the configuration for a flag set.
 // A flag set is a collection of flags that are used to evaluate features.
 // It is used to group flags together and to apply the same configuration to them.
@@ -19,7 +23,7 @@ type FlagSet struct {
 
 type CommonFlagSet struct {
 	// Retriever is the configuration on how to retrieve the file
-	Retriever *RetrieverConf `mapstructure:"retriever" koanf:"retriever"`
+	Retriever *retrieverconf.RetrieverConf `mapstructure:"retriever" koanf:"retriever"`
 
 	// Retrievers is the exact same things than Retriever but allows to give more than 1 retriever at the time.
 	// We are dealing with config files in order, if you have the same flag name in multiple files it will be override
@@ -27,7 +31,7 @@ type CommonFlagSet struct {
 	//
 	// Note: If both Retriever and Retrievers are set, we will start by calling the Retriever and,
 	// after we will use the order of Retrievers.
-	Retrievers *[]RetrieverConf `mapstructure:"retrievers" koanf:"retrievers"`
+	Retrievers *[]retrieverconf.RetrieverConf `mapstructure:"retrievers" koanf:"retrievers"`
 
 	// Notifiers is the configuration on where to notify a flag change
 	Notifiers []NotifierConf `mapstructure:"notifiers" koanf:"notifiers"`

@@ -13,6 +13,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/controller"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"go.uber.org/zap"
 )
@@ -67,8 +68,8 @@ func TestFlagConfigurationAPICtrl_Handler_DefaultMode(t *testing.T) {
 			// Create config for default mode (no flagsets)
 			conf := config.Config{
 				CommonFlagSet: config.CommonFlagSet{
-					Retriever: &config.RetrieverConf{
-						Kind: config.FileRetriever,
+					Retriever: &retrieverconf.RetrieverConf{
+						Kind: retrieverconf.FileRetriever,
 						Path: "../testdata/controller/configuration_flags.yaml",
 					},
 					Exporter: &config.ExporterConf{
@@ -174,8 +175,8 @@ func TestFlagConfigurationAPICtrl_Handler_FlagsetMode(t *testing.T) {
 					{
 						Name: "flagset1",
 						CommonFlagSet: config.CommonFlagSet{
-							Retriever: &config.RetrieverConf{
-								Kind: config.FileRetriever,
+							Retriever: &retrieverconf.RetrieverConf{
+								Kind: retrieverconf.FileRetriever,
 								Path: configFlagsLocation,
 							},
 							Exporter: &config.ExporterConf{
@@ -187,8 +188,8 @@ func TestFlagConfigurationAPICtrl_Handler_FlagsetMode(t *testing.T) {
 					{
 						Name: "flagset2",
 						CommonFlagSet: config.CommonFlagSet{
-							Retriever: &config.RetrieverConf{
-								Kind: config.FileRetriever,
+							Retriever: &retrieverconf.RetrieverConf{
+								Kind: retrieverconf.FileRetriever,
 								Path: configFlagsLocation2,
 							},
 							Exporter: &config.ExporterConf{

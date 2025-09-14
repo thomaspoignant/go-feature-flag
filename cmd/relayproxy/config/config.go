@@ -18,6 +18,7 @@ import (
 	"github.com/knadh/koanf/v2"
 	"github.com/spf13/pflag"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
+	retrieverInit "github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf/init"
 	"github.com/thomaspoignant/go-feature-flag/utils"
 	"github.com/xitongsys/parquet-go/parquet"
 	"go.uber.org/zap"
@@ -25,11 +26,7 @@ import (
 )
 
 var k = koanf.New(".")
-var DefaultRetriever = struct {
-	Timeout    time.Duration
-	HTTPMethod string
-	GitBranch  string
-}{
+var DefaultRetrieverConfig = retrieverInit.DefaultRetrieverConfig{
 	Timeout:    10 * time.Second,
 	HTTPMethod: http.MethodGet,
 	GitBranch:  "main",

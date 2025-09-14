@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
+	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 	"github.com/thomaspoignant/go-feature-flag/exporter/kafkaexporter"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -29,7 +30,7 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 				CommonFlagSet: config.CommonFlagSet{
 					PollingInterval: 1000,
 					FileFormat:      "yaml",
-					Retriever: &config.RetrieverConf{
+					Retriever: &retrieverconf.RetrieverConf{
 						Kind: "http",
 						URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
 					},
@@ -62,7 +63,7 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 				CommonFlagSet: config.CommonFlagSet{
 					PollingInterval: 1000,
 					FileFormat:      "yaml",
-					Retriever: &config.RetrieverConf{
+					Retriever: &retrieverconf.RetrieverConf{
 						Kind: "http",
 						URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
 					},
@@ -99,7 +100,7 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 				CommonFlagSet: config.CommonFlagSet{
 					PollingInterval: 1000,
 					FileFormat:      "yaml",
-					Retriever: &config.RetrieverConf{
+					Retriever: &retrieverconf.RetrieverConf{
 						Kind: "http",
 						URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
 					},
@@ -136,7 +137,7 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 				CommonFlagSet: config.CommonFlagSet{
 					PollingInterval: 1000,
 					FileFormat:      "yaml",
-					Retriever: &config.RetrieverConf{
+					Retriever: &retrieverconf.RetrieverConf{
 						Kind: "http",
 						URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
 					},
@@ -175,7 +176,7 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 				CommonFlagSet: config.CommonFlagSet{
 					PollingInterval: 1000,
 					FileFormat:      "yaml",
-					Retriever: &config.RetrieverConf{
+					Retriever: &retrieverconf.RetrieverConf{
 						Kind: "http",
 						URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
 					},
@@ -220,7 +221,7 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 				CommonFlagSet: config.CommonFlagSet{
 					PollingInterval: 1000,
 					FileFormat:      "yaml",
-					Retriever: &config.RetrieverConf{
+					Retriever: &retrieverconf.RetrieverConf{
 						Kind: "http",
 						URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
 					},
@@ -249,7 +250,7 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 				CommonFlagSet: config.CommonFlagSet{
 					PollingInterval: 1000,
 					FileFormat:      "yaml",
-					Retriever: &config.RetrieverConf{
+					Retriever: &retrieverconf.RetrieverConf{
 						Kind: "http",
 						URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
 					},
@@ -300,7 +301,7 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 				CommonFlagSet: config.CommonFlagSet{
 					PollingInterval: 60000,
 					FileFormat:      "yaml",
-					Retrievers: &[]config.RetrieverConf{
+					Retrievers: &[]retrieverconf.RetrieverConf{
 						{
 							Kind: "file",
 							Path: "examples/retriever_file/flags.goff.yaml",
@@ -359,7 +360,7 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 				CommonFlagSet: config.CommonFlagSet{
 					PollingInterval: 1000,
 					FileFormat:      "yaml",
-					Retriever: &config.RetrieverConf{
+					Retriever: &retrieverconf.RetrieverConf{
 						Kind: "http",
 						URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
 					},
@@ -488,8 +489,8 @@ func TestConfig_IsValid(t *testing.T) {
 		PollingInterval         int
 		FileFormat              string
 		StartWithRetrieverError bool
-		Retriever               *config.RetrieverConf
-		Retrievers              *[]config.RetrieverConf
+		Retriever               *retrieverconf.RetrieverConf
+		Retrievers              *[]retrieverconf.RetrieverConf
 		Exporter                *config.ExporterConf
 		Notifiers               []config.NotifierConf
 		LogLevel                string
@@ -534,7 +535,7 @@ func TestConfig_IsValid(t *testing.T) {
 			name: "valid configuration",
 			fields: fields{
 				ListenPort: 8080,
-				Retriever: &config.RetrieverConf{
+				Retriever: &retrieverconf.RetrieverConf{
 					Kind: "file",
 					Path: "../testdata/config/valid-file.yaml",
 				},
@@ -565,7 +566,7 @@ func TestConfig_IsValid(t *testing.T) {
 			name: "valid configuration with notifier included",
 			fields: fields{
 				ListenPort: 8080,
-				Retriever: &config.RetrieverConf{
+				Retriever: &retrieverconf.RetrieverConf{
 					Kind: "file",
 					Path: "../testdata/config/valid-file-notifier.yaml",
 				},
@@ -584,7 +585,7 @@ func TestConfig_IsValid(t *testing.T) {
 			name: "invalid retriever",
 			fields: fields{
 				ListenPort: 8080,
-				Retriever: &config.RetrieverConf{
+				Retriever: &retrieverconf.RetrieverConf{
 					Kind: "file",
 				},
 			},
@@ -594,7 +595,7 @@ func TestConfig_IsValid(t *testing.T) {
 			name: "1 invalid retriever in the list of retrievers",
 			fields: fields{
 				ListenPort: 8080,
-				Retrievers: &[]config.RetrieverConf{
+				Retrievers: &[]retrieverconf.RetrieverConf{
 					{
 						Kind: "file",
 						Path: "../testdata/config/valid-file.yaml",
@@ -614,7 +615,7 @@ func TestConfig_IsValid(t *testing.T) {
 			name: "invalid exporter",
 			fields: fields{
 				ListenPort: 8080,
-				Retriever: &config.RetrieverConf{
+				Retriever: &retrieverconf.RetrieverConf{
 					Kind: "file",
 					Path: "../testdata/config/valid-file.yaml",
 				},
@@ -628,7 +629,7 @@ func TestConfig_IsValid(t *testing.T) {
 			name: "invalid notifier",
 			fields: fields{
 				ListenPort: 8080,
-				Retriever: &config.RetrieverConf{
+				Retriever: &retrieverconf.RetrieverConf{
 					Kind: "file",
 					Path: "../testdata/config/valid-file.yaml",
 				},
@@ -644,7 +645,7 @@ func TestConfig_IsValid(t *testing.T) {
 			name: "invalid log level",
 			fields: fields{
 				ListenPort: 8080,
-				Retriever: &config.RetrieverConf{
+				Retriever: &retrieverconf.RetrieverConf{
 					Kind: "file",
 					Path: "../testdata/config/valid-file.yaml",
 				},
@@ -656,7 +657,7 @@ func TestConfig_IsValid(t *testing.T) {
 			name: "log level is not set but debug is set",
 			fields: fields{
 				ListenPort: 8080,
-				Retriever: &config.RetrieverConf{
+				Retriever: &retrieverconf.RetrieverConf{
 					Kind: "file",
 					Path: "../testdata/config/valid-file.yaml",
 				},
@@ -670,7 +671,7 @@ func TestConfig_IsValid(t *testing.T) {
 			fields: fields{
 				LogFormat:  "unknown",
 				ListenPort: 8080,
-				Retriever: &config.RetrieverConf{
+				Retriever: &retrieverconf.RetrieverConf{
 					Kind: "file",
 					Path: "../testdata/config/valid-file.yaml",
 				},
@@ -687,7 +688,7 @@ func TestConfig_IsValid(t *testing.T) {
 						Name:    "test-flagset",
 						APIKeys: []string{"test-api-key"},
 						CommonFlagSet: config.CommonFlagSet{
-							Retriever: &config.RetrieverConf{
+							Retriever: &retrieverconf.RetrieverConf{
 								Kind: "file",
 								Path: "../testdata/config/valid-file.yaml",
 							},
@@ -705,7 +706,7 @@ func TestConfig_IsValid(t *testing.T) {
 					{
 						APIKeys: []string{"test-api-key"},
 						CommonFlagSet: config.CommonFlagSet{
-							Retriever: &config.RetrieverConf{
+							Retriever: &retrieverconf.RetrieverConf{
 								Kind: "file",
 								Path: "../testdata/config/valid-file.yaml",
 							},
@@ -723,7 +724,7 @@ func TestConfig_IsValid(t *testing.T) {
 					{
 						Name: "test-flagset",
 						CommonFlagSet: config.CommonFlagSet{
-							Retriever: &config.RetrieverConf{
+							Retriever: &retrieverconf.RetrieverConf{
 								Kind: "file",
 								Path: "../testdata/config/valid-file.yaml",
 							},
@@ -742,7 +743,7 @@ func TestConfig_IsValid(t *testing.T) {
 						Name:    "flagset-1",
 						APIKeys: []string{"shared-api-key"},
 						CommonFlagSet: config.CommonFlagSet{
-							Retriever: &config.RetrieverConf{
+							Retriever: &retrieverconf.RetrieverConf{
 								Kind: "file",
 								Path: "../testdata/config/valid-file.yaml",
 							},
@@ -752,7 +753,7 @@ func TestConfig_IsValid(t *testing.T) {
 						Name:    "flagset-2",
 						APIKeys: []string{"shared-api-key"},
 						CommonFlagSet: config.CommonFlagSet{
-							Retriever: &config.RetrieverConf{
+							Retriever: &retrieverconf.RetrieverConf{
 								Kind: "file",
 								Path: "../testdata/config/valid-file.yaml",
 							},
@@ -771,7 +772,7 @@ func TestConfig_IsValid(t *testing.T) {
 						Name:    "test-flagset",
 						APIKeys: []string{"test-api-key"},
 						CommonFlagSet: config.CommonFlagSet{
-							Retriever: &config.RetrieverConf{
+							Retriever: &retrieverconf.RetrieverConf{
 								Kind: "file",
 								// Missing Path
 							},
@@ -790,7 +791,7 @@ func TestConfig_IsValid(t *testing.T) {
 						Name:    "test-flagset",
 						APIKeys: []string{"test-api-key"},
 						CommonFlagSet: config.CommonFlagSet{
-							Retriever: &config.RetrieverConf{
+							Retriever: &retrieverconf.RetrieverConf{
 								Kind: "file",
 								Path: "../testdata/config/valid-file.yaml",
 							},
@@ -813,7 +814,7 @@ func TestConfig_IsValid(t *testing.T) {
 						Name:    "test-flagset",
 						APIKeys: []string{"test-api-key"},
 						CommonFlagSet: config.CommonFlagSet{
-							Retriever: &config.RetrieverConf{
+							Retriever: &retrieverconf.RetrieverConf{
 								Kind: "file",
 								Path: "../testdata/config/valid-file.yaml",
 							},
@@ -838,7 +839,7 @@ func TestConfig_IsValid(t *testing.T) {
 						Name:    "flagset-1",
 						APIKeys: []string{"api-key-1"},
 						CommonFlagSet: config.CommonFlagSet{
-							Retriever: &config.RetrieverConf{
+							Retriever: &retrieverconf.RetrieverConf{
 								Kind: "file",
 								Path: "../testdata/config/valid-file.yaml",
 							},
@@ -848,7 +849,7 @@ func TestConfig_IsValid(t *testing.T) {
 						Name:    "flagset-2",
 						APIKeys: []string{"api-key-2"},
 						CommonFlagSet: config.CommonFlagSet{
-							Retriever: &config.RetrieverConf{
+							Retriever: &retrieverconf.RetrieverConf{
 								Kind: "file",
 								Path: "../testdata/config/valid-file.yaml",
 							},
@@ -1191,7 +1192,7 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 							EndpointURL: "https://xxx.com/notifier",
 						},
 					},
-					Retrievers: &[]config.RetrieverConf{
+					Retrievers: &[]retrieverconf.RetrieverConf{
 						{
 							Kind: "http",
 							URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
@@ -1269,7 +1270,7 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 							EndpointURL: "https://xxx.com/notifier",
 						},
 					},
-					Retrievers: &[]config.RetrieverConf{
+					Retrievers: &[]retrieverconf.RetrieverConf{
 						{
 							Kind: "http",
 							URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
@@ -1341,7 +1342,7 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 				CommonFlagSet: config.CommonFlagSet{
 					PollingInterval: 1000,
 					FileFormat:      "yaml",
-					Retrievers: &[]config.RetrieverConf{
+					Retrievers: &[]retrieverconf.RetrieverConf{
 						{
 							Kind: "http",
 							URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
@@ -1419,7 +1420,7 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 							EndpointURL: "http://localhost:8080/webhook",
 						},
 					},
-					Retrievers: &[]config.RetrieverConf{
+					Retrievers: &[]retrieverconf.RetrieverConf{
 						{
 							Kind: "http",
 							URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
@@ -1471,7 +1472,7 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 				CommonFlagSet: config.CommonFlagSet{
 					PollingInterval: 1000,
 					FileFormat:      "yaml",
-					Retrievers: &[]config.RetrieverConf{
+					Retrievers: &[]retrieverconf.RetrieverConf{
 						{
 							Kind: "http",
 							URL:  "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml",
@@ -1526,7 +1527,7 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 				CommonFlagSet: config.CommonFlagSet{
 					PollingInterval: 60000,
 					FileFormat:      "yaml",
-					Retrievers: &[]config.RetrieverConf{
+					Retrievers: &[]retrieverconf.RetrieverConf{
 						{
 							Kind: "file",
 							Path: "examples/retriever_file/flags.goff.yaml",
@@ -1593,7 +1594,7 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 									},
 								},
 							},
-							Retrievers: &[]config.RetrieverConf{
+							Retrievers: &[]retrieverconf.RetrieverConf{
 								{
 									Kind: "file",
 									Path: "examples/retriever_file/flags.goff.yaml",

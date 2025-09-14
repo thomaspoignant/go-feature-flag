@@ -12,6 +12,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"go.uber.org/zap"
 )
@@ -43,7 +44,7 @@ func TestPprofEndpointsStarts(t *testing.T) {
 			require.NoError(t, err)
 			c := &config.Config{
 				CommonFlagSet: config.CommonFlagSet{
-					Retrievers: &[]config.RetrieverConf{
+					Retrievers: &[]retrieverconf.RetrieverConf{
 						{
 							Kind: "file",
 							Path: "../../../testdata/flag-config.yaml",

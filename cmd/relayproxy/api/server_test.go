@@ -13,6 +13,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/log"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"go.uber.org/zap"
 )
@@ -20,7 +21,7 @@ import (
 func Test_Starting_RelayProxy_with_monitoring_on_same_port(t *testing.T) {
 	proxyConf := &config.Config{
 		CommonFlagSet: config.CommonFlagSet{
-			Retrievers: &[]config.RetrieverConf{
+			Retrievers: &[]retrieverconf.RetrieverConf{
 				{
 					Kind: "file",
 					Path: "../../../testdata/flag-config.yaml",
@@ -77,7 +78,7 @@ func Test_Starting_RelayProxy_with_monitoring_on_same_port(t *testing.T) {
 func Test_Starting_RelayProxy_with_monitoring_on_different_port(t *testing.T) {
 	proxyConf := &config.Config{
 		CommonFlagSet: config.CommonFlagSet{
-			Retrievers: &[]config.RetrieverConf{
+			Retrievers: &[]retrieverconf.RetrieverConf{
 				{
 					Kind: "file",
 					Path: "../../../testdata/flag-config.yaml",
@@ -147,7 +148,7 @@ func Test_Starting_RelayProxy_with_monitoring_on_different_port(t *testing.T) {
 func Test_CheckOFREPAPIExists(t *testing.T) {
 	proxyConf := &config.Config{
 		CommonFlagSet: config.CommonFlagSet{
-			Retrievers: &[]config.RetrieverConf{
+			Retrievers: &[]retrieverconf.RetrieverConf{
 				{
 					Kind: "file",
 					Path: "../../../testdata/flag-config.yaml",
@@ -226,7 +227,7 @@ func Test_CheckOFREPAPIExists(t *testing.T) {
 func Test_Middleware_VersionHeader_Enabled_Default(t *testing.T) {
 	proxyConf := &config.Config{
 		CommonFlagSet: config.CommonFlagSet{
-			Retrievers: &[]config.RetrieverConf{
+			Retrievers: &[]retrieverconf.RetrieverConf{
 				{
 					Kind: "file",
 					Path: "../../../testdata/flag-config.yaml",
@@ -265,7 +266,7 @@ func Test_Middleware_VersionHeader_Enabled_Default(t *testing.T) {
 func Test_VersionHeader_Disabled(t *testing.T) {
 	proxyConf := &config.Config{
 		CommonFlagSet: config.CommonFlagSet{
-			Retrievers: &[]config.RetrieverConf{
+			Retrievers: &[]retrieverconf.RetrieverConf{
 				{
 					Kind: "file",
 					Path: "../../../testdata/flag-config.yaml",

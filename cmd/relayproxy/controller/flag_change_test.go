@@ -13,6 +13,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/controller"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"go.uber.org/zap"
 )
@@ -28,7 +29,7 @@ func TestPIFlagChange_WithConfigChange(t *testing.T) {
 			config: config.Config{
 				CommonFlagSet: config.CommonFlagSet{
 					PollingInterval: 1000,
-					Retrievers: &[]config.RetrieverConf{
+					Retrievers: &[]retrieverconf.RetrieverConf{
 						{
 							Kind: "file",
 							Path: "../testdata/controller/config_flags.yaml",
@@ -45,7 +46,7 @@ func TestPIFlagChange_WithConfigChange(t *testing.T) {
 						APIKeys: []string{"test"},
 						CommonFlagSet: config.CommonFlagSet{
 							PollingInterval: 1000,
-							Retrievers: &[]config.RetrieverConf{
+							Retrievers: &[]retrieverconf.RetrieverConf{
 								{
 									Kind: "file",
 									Path: "../testdata/controller/config_flags.yaml",
@@ -81,7 +82,7 @@ func TestPIFlagChange_WithConfigChange(t *testing.T) {
 				(*tt.config.Retrievers)[0].Path = file.Name()
 			}
 			if len(tt.config.FlagSets) > 0 {
-				tt.config.FlagSets[0].Retrievers = &[]config.RetrieverConf{
+				tt.config.FlagSets[0].Retrievers = &[]retrieverconf.RetrieverConf{
 					{
 						Kind: "file",
 						Path: file.Name(),
@@ -140,7 +141,7 @@ func TestPIFlagChange_WithoutConfigChange(t *testing.T) {
 			config: config.Config{
 				CommonFlagSet: config.CommonFlagSet{
 					PollingInterval: 1000,
-					Retrievers: &[]config.RetrieverConf{
+					Retrievers: &[]retrieverconf.RetrieverConf{
 						{
 							Kind: "file",
 							Path: "../testdata/controller/config_flags.yaml",
@@ -157,7 +158,7 @@ func TestPIFlagChange_WithoutConfigChange(t *testing.T) {
 						APIKeys: []string{"test"},
 						CommonFlagSet: config.CommonFlagSet{
 							PollingInterval: 1000,
-							Retrievers: &[]config.RetrieverConf{
+							Retrievers: &[]retrieverconf.RetrieverConf{
 								{
 									Kind: "file",
 									Path: "../testdata/controller/config_flags.yaml",
@@ -193,7 +194,7 @@ func TestPIFlagChange_WithoutConfigChange(t *testing.T) {
 				(*tt.config.Retrievers)[0].Path = file.Name()
 			}
 			if len(tt.config.FlagSets) > 0 {
-				tt.config.FlagSets[0].Retrievers = &[]config.RetrieverConf{
+				tt.config.FlagSets[0].Retrievers = &[]retrieverconf.RetrieverConf{
 					{
 						Kind: "file",
 						Path: file.Name(),
