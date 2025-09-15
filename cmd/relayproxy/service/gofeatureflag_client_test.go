@@ -1,6 +1,7 @@
 package service
 
 import (
+	"bytes"
 	"crypto/tls"
 	"fmt"
 	"net"
@@ -38,6 +39,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/retriever/s3retrieverv2"
 	"github.com/xitongsys/parquet-go/parquet"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"golang.org/x/net/proxy"
 )
 
@@ -995,4 +997,89 @@ func TestSetKafkaConfig(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Nil(t, kafkaConfig.Config)
 	})
+}
+
+func Test_initLeveledLogger_FlagsetAttribute(t *testing.T) {
+	t.Run("verify flagset attribute logic", func(t *testing.T) {
+		// Test the logic directly by checking the conditions
+		tests := []struct {
+			name          string
+			flagsetName   string
+			shouldAddAttr bool
+		}{
+			{
+				name:          "default flagset name should not add attribute",
+				flagsetName:   DefaultFlagSetName,
+				shouldAddAttr: false,
+			},
+			{
+				name:          "empty flagset name should not add attribute",
+				flagsetName:   "",
+				shouldAddAttr: false,
+			},
+			{
+				name:          "custom flagset name should add attribute",
+				flagsetName:   "my-custom-flagset",
+				shouldAddAttr: true,
+			},
+			{
+				name:          "another custom flagset name should add attribute",
+				flagsetName:   "production-flags",
+				shouldAddAttr: true,
+			},
+		}
+
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				flagset := &config.FlagSet{
+					Name: tt.flagsetName,
+				}
+				// Create a buffer to capture log output
+				var logBuffer bytes.Buffer
+
+				// Create a zap logger that writes to our buffer
+				zapConfig := zap.NewProductionConfig()
+				zapConfig.OutputPaths = []string{"stdout"}
+				zapConfig.EncoderConfig.TimeKey = ""   // Remove timestamp for easier testing
+				zapConfig.EncoderConfig.LevelKey = ""  // Remove level for easier testing
+				zapConfig.EncoderConfig.CallerKey = "" // Remove caller for easier testing
+
+				zapLogger, err := zapConfig.Build()
+				assert.NoError(t, err)
+
+				// Create a custom writer that captures to our buffer
+				writer := &logCaptureWriter{&logBuffer}
+				zapLogger = zapLogger.WithOptions(zap.WrapCore(func(core zapcore.Core) zapcore.Core {
+					return zapcore.NewCore(
+						zapcore.NewJSONEncoder(zapConfig.EncoderConfig),
+						zapcore.AddSync(writer),
+						zapcore.InfoLevel,
+					)
+				}))
+
+				slogLogger := initLeveledLogger(flagset, zapLogger)
+				assert.NotNil(t, slogLogger, "initLeveledLogger should return a non-nil logger")
+
+				slogLogger.Info("test message")
+				_ = zapLogger.Sync()
+				logOutput := logBuffer.String()
+
+				if tt.shouldAddAttr {
+					assert.Contains(t, logOutput, `"flagset"`, "log output should contain flagset attribute")
+					assert.Contains(t, logOutput, tt.flagsetName, "log output should contain the flagset name")
+				} else {
+					assert.NotContains(t, logOutput, `"flagset"`, "log output should not contain flagset attribute for default flagset")
+				}
+			})
+		}
+	})
+}
+
+// logCaptureWriter is a custom writer that captures log output to a buffer
+type logCaptureWriter struct {
+	buffer *bytes.Buffer
+}
+
+func (w *logCaptureWriter) Write(p []byte) (n int, err error) {
+	return w.buffer.Write(p)
 }

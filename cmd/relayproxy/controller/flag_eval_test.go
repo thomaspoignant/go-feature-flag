@@ -141,6 +141,17 @@ func Test_flag_eval_Handler(t *testing.T) {
 				errorMsg:   "impossible to find the flag key in the URL",
 			},
 		},
+		{
+			name: "valid flag with custom flagset",
+			args: args{
+				flagKey:  "flag-only-for-admin",
+				bodyFile: "../testdata/controller/flag_eval/valid_request.json",
+			},
+			want: want{
+				httpCode: http.StatusOK,
+				bodyFile: "../testdata/controller/flag_eval/valid_response.json",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -199,4 +210,53 @@ func Test_flag_eval_Handler(t *testing.T) {
 			assert.JSONEq(t, string(wantBody), rec.Body.String(), "Invalid response wantBody")
 		})
 	}
+}
+
+func Test_flag_eval_Handler_WithCustomFlagset(t *testing.T) {
+	t.Run("should work with custom flagset configuration", func(t *testing.T) {
+		// Create config with custom flagset
+		conf := config.Config{
+			FlagSets: []config.FlagSet{
+				{
+					Name:    "custom-flagset",
+					APIKeys: []string{"test-api-key"},
+					CommonFlagSet: config.CommonFlagSet{
+						Retriever: &config.RetrieverConf{
+							Kind: config.FileRetriever,
+							Path: configFlagsLocation,
+						},
+						Exporter: &config.ExporterConf{
+							Kind: config.LogExporter,
+						},
+					},
+				},
+			},
+		}
+
+		flagsetManager, err := service.NewFlagsetManager(&conf, zap.NewNop(), []notifier.Notifier{})
+		assert.NoError(t, err, "impossible to create flagset manager")
+
+		flagEval := controller.NewFlagEval(flagsetManager, metric.Metrics{})
+
+		e := echo.New()
+		rec := httptest.NewRecorder()
+
+		// Read request body
+		bodyReqContent, err := ioutil.ReadFile("../testdata/controller/flag_eval/valid_request.json")
+		assert.NoError(t, err, "request body file missing")
+		bodyReq := strings.NewReader(string(bodyReqContent))
+
+		req := httptest.NewRequest(echo.POST, "/v1/feature/flag-only-for-admin/eval", bodyReq)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		req.Header.Set("Authorization", "Bearer test-api-key")
+
+		c := e.NewContext(req, rec)
+		c.SetPath("/v1/feature/:flagKey/eval")
+		c.SetParamNames("flagKey")
+		c.SetParamValues("flag-only-for-admin")
+
+		handlerErr := flagEval.Handler(c)
+		assert.NoError(t, handlerErr, "handler should not return an error")
+		assert.Equal(t, http.StatusOK, rec.Code, "Invalid HTTP Code")
+	})
 }

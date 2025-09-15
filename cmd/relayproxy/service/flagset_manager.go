@@ -133,7 +133,7 @@ func newFlagsetManagerWithFlagsets(
 		}
 
 		flagSetName := flagset.Name
-		if flagSetName == "" || flagSetName == defaultFlagSetName {
+		if flagSetName == "" || flagSetName == DefaultFlagSetName {
 			// generating a default flagset name if not provided or equals to default
 			flagSetName = uuid.New().String()
 		}
