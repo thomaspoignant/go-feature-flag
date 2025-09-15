@@ -104,7 +104,8 @@ func (m *Manager) initRetrievers(ctx context.Context, retrieversToInit []Retriev
 
 // tryInitializeLegacy attempts to initialize a retriever using the legacy interface.
 // This function will append the retriever to the onErrorRetriever slice if the initialization fails.
-// If retriever implements the InitializableRetrieverLegacy interface, it will be initialized using the legacy interface.
+// If retriever implements the InitializableRetrieverLegacy interface, it will be initialized using
+// the legacy interface.
 func (m *Manager) tryInitializeLegacy(ctx context.Context, retriever Retriever) {
 	if r, ok := retriever.(InitializableRetrieverLegacy); ok {
 		if err := r.Init(ctx, m.logger.GetLogLogger(slog.LevelError)); err != nil {
@@ -115,7 +116,8 @@ func (m *Manager) tryInitializeLegacy(ctx context.Context, retriever Retriever) 
 
 // tryInitializeStandard attempts to initialize a retriever using the standard interface.
 // This function will append the retriever to the onErrorRetriever slice if the initialization fails.
-// If retriever implements the InitializableRetriever interface, it will be initialized using the standard interface.
+// If retriever implements the InitializableRetriever interface, it will be initialized using
+// the standard interface.
 func (m *Manager) tryInitializeStandard(ctx context.Context, retriever Retriever) {
 	if r, ok := retriever.(InitializableRetriever); ok {
 		if err := r.Init(ctx, m.logger); err != nil {
@@ -126,7 +128,8 @@ func (m *Manager) tryInitializeStandard(ctx context.Context, retriever Retriever
 
 // tryInitializeWithFlagset attempts to initialize a retriever using the flagset interface.
 // This function will append the retriever to the onErrorRetriever slice if the initialization fails.
-// If retriever implements the InitializableRetrieverWithFlagset interface, it will be initialized using the flagset interface.
+// If retriever implements the InitializableRetrieverWithFlagset interface, it will be initialized using
+// the flagset interface.
 func (m *Manager) tryInitializeWithFlagset(ctx context.Context, retriever Retriever) {
 	if r, ok := retriever.(InitializableRetrieverWithFlagset); ok {
 		if err := r.Init(ctx, m.logger, m.config.Name); err != nil {
