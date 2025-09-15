@@ -15,8 +15,8 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
-	"github.com/thomaspoignant/go-feature-flag/testutils/initializableretriever"
 	"github.com/thomaspoignant/go-feature-flag/testutils/mock"
+	"github.com/thomaspoignant/go-feature-flag/testutils/mockretriever"
 )
 
 func TestStartWithoutRetriever(t *testing.T) {
@@ -425,10 +425,10 @@ func TestInitializableRetrieverWithRetrieverReady(t *testing.T) {
 	err = os.Remove(f.Name())
 	assert.NoError(t, err)
 
-	r := initializableretriever.NewMockInitializableRetriever(f.Name(), retriever.RetrieverReady)
+	r := mockretriever.NewFileInitializableRetriever(f.Name(), retriever.RetrieverReady)
 	gff, err := ffclient.New(ffclient.Config{
 		PollingInterval: 5 * time.Second,
-		Retriever:       &r,
+		Retriever:       r,
 	})
 	assert.NoError(t, err)
 	user := ffcontext.NewEvaluationContext("random-key")
@@ -446,13 +446,13 @@ func TestInitializableRetrieverWithRetrieverNotReady(t *testing.T) {
 	err = os.Remove(f.Name())
 	assert.NoError(t, err)
 
-	r := initializableretriever.NewMockInitializableRetriever(f.Name(), retriever.RetrieverNotReady)
+	r := mockretriever.NewFileInitializableRetriever(f.Name(), retriever.RetrieverNotReady)
 	gff, err := ffclient.New(ffclient.Config{
 		PollingInterval: 5 * time.Second,
-		Retriever:       &r,
+		Retriever:       r,
 	})
-	defer gff.Close()
 	assert.NoError(t, err)
+	defer gff.Close()
 	user := ffcontext.NewEvaluationContext("random-key")
 	hasTestFlag, _ := gff.BoolVariation("flag-xxxx-123", user, false)
 	assert.False(t, hasTestFlag, "Should resolve to default value if retriever is not ready")
