@@ -103,7 +103,7 @@ func NewGoFeatureFlagClient(
 // it will add the flagset name as a contextual attribute if it is not the default flagset
 func initLeveledLogger(c *config.FlagSet, logger *zap.Logger) *slog.Logger {
 	baseHandler := slogzap.Option{Level: slog.LevelDebug, Logger: logger}.NewZapHandler()
-	if c.Name != "" && c.Name != "default" {
+	if c.Name != "" && c.Name != DefaultFlagSetName {
 		attrs := []slog.Attr{slog.String("flagset", c.Name)}
 		baseHandler = baseHandler.WithAttrs(attrs)
 	}

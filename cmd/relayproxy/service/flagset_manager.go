@@ -11,7 +11,7 @@ import (
 	"go.uber.org/zap"
 )
 
-const defaultFlagSetName = "default"
+const DefaultFlagSetName = "default"
 
 type flagsetManagerMode string
 
@@ -86,7 +86,7 @@ func NewFlagsetManager(
 func newFlagsetManagerWithDefaultConfig(
 	c *config.Config, logger *zap.Logger, notifiers []notifier.Notifier) (FlagsetManager, error) {
 	defaultFlagSet := config.FlagSet{
-		Name: "default",
+		Name: DefaultFlagSetName,
 		CommonFlagSet: config.CommonFlagSet{
 			Retriever:                       c.Retriever,
 			Retrievers:                      c.Retrievers,
@@ -190,7 +190,7 @@ func (m *flagsetManagerImpl) GetFlagSetName(apiKey string) (string, error) {
 		}
 		return "", fmt.Errorf("no flag set associated to the API key")
 	default:
-		return defaultFlagSetName, nil
+		return DefaultFlagSetName, nil
 	}
 }
 
@@ -207,7 +207,7 @@ func (m *flagsetManagerImpl) GetFlagSets() (map[string]*ffclient.GoFeatureFlag, 
 			return nil, fmt.Errorf("no default flagset configured")
 		}
 		return map[string]*ffclient.GoFeatureFlag{
-			"default": m.DefaultFlagSet,
+			DefaultFlagSetName: m.DefaultFlagSet,
 		}, nil
 	}
 }
