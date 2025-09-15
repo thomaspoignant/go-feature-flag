@@ -78,7 +78,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.34.1
 	k8s.io/apimachinery v0.34.1
-	k8s.io/client-go v0.34.0
+	k8s.io/client-go v0.34.1
 )
 
 // TODO: remove this once https://github.com/nikunjy/rules/pull/43 merges and a new version is available
