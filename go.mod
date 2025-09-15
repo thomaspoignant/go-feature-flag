@@ -17,7 +17,7 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.39.0
 	github.com/aws/aws-sdk-go-v2/config v1.31.8
 	github.com/aws/aws-sdk-go-v2/credentials v1.18.12
-	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.19.4
+	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.19.6
 	github.com/aws/aws-sdk-go-v2/service/kinesis v1.40.1
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.88.1
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.42.5
@@ -74,7 +74,7 @@ require (
 	golang.org/x/net v0.44.0
 	golang.org/x/oauth2 v0.31.0
 	google.golang.org/api v0.248.0
-	google.golang.org/grpc v1.75.0
+	google.golang.org/grpc v1.75.1
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.34.1
 	k8s.io/apimachinery v0.34.1
