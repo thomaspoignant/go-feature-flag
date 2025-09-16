@@ -133,8 +133,10 @@ jobs:
           echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
       
       - name: Import GPG key
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
         run: |
-          echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import
+          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@e435ccd777264be153ace6237001ef4d979d3a7a # v6.4.0
