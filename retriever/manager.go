@@ -94,11 +94,15 @@ func (m *Manager) StopPolling() {
 // initRetrievers is a helper function to initialize the retrievers.
 func (m *Manager) initRetrievers(ctx context.Context, retrieversToInit []Retriever) error {
 	m.onErrorRetriever = make([]Retriever, 0)
+
 	for _, retriever := range retrieversToInit {
 		errLegacy := m.tryInitializeLegacy(ctx, retriever)
 		errStandard := m.tryInitializeStandard(ctx, retriever)
 		errFlagset := m.tryInitializeWithFlagset(ctx, retriever)
-		return m.checkInitializationErrors([]error{errLegacy, errStandard, errFlagset})
+		err := m.checkInitializationErrors([]error{errLegacy, errStandard, errFlagset})
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -109,11 +113,7 @@ func (m *Manager) initRetrievers(ctx context.Context, retrieversToInit []Retriev
 // the legacy interface.
 func (m *Manager) tryInitializeLegacy(ctx context.Context, retriever Retriever) error {
 	if r, ok := retriever.(InitializableRetrieverLegacy); ok {
-		err := r.Init(ctx, m.logger.GetLogLogger(slog.LevelError))
-		if err != nil {
-			return err
-		}
-		m.onErrorRetriever = append(m.onErrorRetriever, retriever)
+		return r.Init(ctx, m.logger.GetLogLogger(slog.LevelError))
 	}
 	return nil
 }
@@ -124,11 +124,7 @@ func (m *Manager) tryInitializeLegacy(ctx context.Context, retriever Retriever) 
 // the standard interface.
 func (m *Manager) tryInitializeStandard(ctx context.Context, retriever Retriever) error {
 	if r, ok := retriever.(InitializableRetriever); ok {
-		err := r.Init(ctx, m.logger)
-		if err != nil {
-			return err
-		}
-		m.onErrorRetriever = append(m.onErrorRetriever, retriever)
+		return r.Init(ctx, m.logger)
 	}
 	return nil
 }
@@ -139,11 +135,7 @@ func (m *Manager) tryInitializeStandard(ctx context.Context, retriever Retriever
 // the flagset interface.
 func (m *Manager) tryInitializeWithFlagset(ctx context.Context, retriever Retriever) error {
 	if r, ok := retriever.(InitializableRetrieverWithFlagset); ok {
-		err := r.Init(ctx, m.logger, m.config.Name)
-		if err != nil {
-			return err
-		}
-		m.onErrorRetriever = append(m.onErrorRetriever, retriever)
+		return r.Init(ctx, m.logger, m.config.Name)
 	}
 	return nil
 }
