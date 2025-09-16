@@ -2,8 +2,6 @@ package evaluation
 
 import (
 	"fmt"
-	"maps"
-
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/model"
@@ -60,24 +58,6 @@ func Evaluate[T model.JSONType](
 		TrackEvents:   f.IsTrackEvents(),
 		Version:       f.GetVersion(),
 		Cacheable:     resolutionDetails.Cacheable,
-		Metadata:      constructMetadata(f, resolutionDetails),
+		Metadata:      resolutionDetails.Metadata,
 	}, nil
-}
-
-// constructMetadata is the internal generic func used to enhance model.VariationResult adding
-// the targeting.rule's name (from configuration) to the Metadata.
-// That way, it is possible to see when a targeting rule is match during the evaluation process.
-func constructMetadata(
-	f flag.Flag,
-	resolutionDetails flag.ResolutionDetails,
-) map[string]interface{} {
-	metadata := maps.Clone(f.GetMetadata())
-	if resolutionDetails.RuleName == nil || *resolutionDetails.RuleName == "" {
-		return metadata
-	}
-	if metadata == nil {
-		metadata = make(map[string]interface{})
-	}
-	metadata["evaluatedRuleName"] = *resolutionDetails.RuleName
-	return metadata
 }
