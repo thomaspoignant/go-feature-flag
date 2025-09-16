@@ -53,7 +53,7 @@ func TestManagerInit_AllRetrieverTypes(t *testing.T) {
 				mockretriever.NewInitializableRetriever("standard"),
 				mockretriever.NewInitializableRetrieverWithFlagset("flagset"),
 			},
-			expectError: true,
+			expectError: false,
 			expectedInitCalls: map[string]bool{
 				"legacy":   true,
 				"standard": true,
@@ -76,7 +76,6 @@ func TestManagerInit_AllRetrieverTypes(t *testing.T) {
 			},
 			expectError: true,
 			expectedInitCalls: map[string]bool{
-				"legacy":   true,
 				"standard": true,
 				"flagset":  true,
 			},
