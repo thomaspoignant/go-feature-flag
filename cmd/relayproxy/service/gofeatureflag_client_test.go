@@ -1038,24 +1038,16 @@ func Test_initLeveledLogger_FlagsetAttribute(t *testing.T) {
 				var logBuffer bytes.Buffer
 
 				// Create a zap logger that writes to our buffer
-				zapConfig := zap.NewProductionConfig()
-				zapConfig.OutputPaths = []string{"stdout"}
-				zapConfig.EncoderConfig.TimeKey = ""   // Remove timestamp for easier testing
-				zapConfig.EncoderConfig.LevelKey = ""  // Remove level for easier testing
-				zapConfig.EncoderConfig.CallerKey = "" // Remove caller for easier testing
-
-				zapLogger, err := zapConfig.Build()
-				assert.NoError(t, err)
-
-				// Create a custom writer that captures to our buffer
-				writer := &logCaptureWriter{&logBuffer}
-				zapLogger = zapLogger.WithOptions(zap.WrapCore(func(core zapcore.Core) zapcore.Core {
-					return zapcore.NewCore(
-						zapcore.NewJSONEncoder(zapConfig.EncoderConfig),
-						zapcore.AddSync(writer),
-						zapcore.InfoLevel,
-					)
-				}))
+				encoderCfg := zap.NewProductionEncoderConfig()
+				encoderCfg.TimeKey = ""
+				encoderCfg.LevelKey = ""
+				encoderCfg.CallerKey = ""
+				core := zapcore.NewCore(
+					zapcore.NewJSONEncoder(encoderCfg),
+					zapcore.AddSync(&logBuffer),
+					zapcore.InfoLevel,
+				)
+				zapLogger := zap.New(core)
 
 				slogLogger := initLeveledLogger(flagset, zapLogger)
 				assert.NotNil(t, slogLogger, "initLeveledLogger should return a non-nil logger")
@@ -1073,13 +1065,4 @@ func Test_initLeveledLogger_FlagsetAttribute(t *testing.T) {
 			})
 		}
 	})
-}
-
-// logCaptureWriter is a custom writer that captures log output to a buffer
-type logCaptureWriter struct {
-	buffer *bytes.Buffer
-}
-
-func (w *logCaptureWriter) Write(p []byte) (n int, err error) {
-	return w.buffer.Write(p)
 }
