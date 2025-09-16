@@ -3,7 +3,6 @@
 //
 // This package contains mock retrievers that implement different retriever interfaces:
 //   - SimpleRetriever: Basic Retriever interface only (only retrieve)
-//   - InitializableRetrieverLegacy: Legacy interface with *log.Logger (init and shutdown)
 //   - InitializableRetriever: Standard interface with *fflog.FFLogger (init and shutdown)
 //   - InitializableRetrieverWithFlagset: Flagset interface with flagset parameter (init and shutdown)
 //   - FileInitializableRetriever: File-based mock for compatibility (init and shutdown)
@@ -16,4 +15,14 @@
 package mockretriever
 
 // Default flag configuration used by all mock retrievers
-const defaultFlagConfig = `{"test-flag": {"variations": {"true": true, "false": false}, "defaultRule": {"variation": "false"}}}`
+const defaultFlagConfig = `{
+    "test-flag": {
+        "variations": {
+            "true": true,
+            "false": false
+        },
+        "defaultRule": {
+            "variation": "false"
+        }
+    }
+}`

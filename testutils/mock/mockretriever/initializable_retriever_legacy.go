@@ -1,3 +1,4 @@
+// nolint: dupl
 package mockretriever
 
 import (
@@ -8,7 +9,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 )
 
-// InitializableRetrieverLegacy implements the legacy InitializableRetrieverLegacy interface
+// InitializableRetrieverLegacy implements the standard InitializableRetriever interface
 type InitializableRetrieverLegacy struct {
 	Name           string
 	InitShouldFail bool
@@ -28,7 +29,7 @@ func (m *InitializableRetrieverLegacy) Retrieve(_ context.Context) ([]byte, erro
 	return []byte(defaultFlagConfig), nil
 }
 
-func (m *InitializableRetrieverLegacy) Init(_ context.Context, logger *log.Logger) error {
+func (m *InitializableRetrieverLegacy) Init(ctx context.Context, logger *log.Logger) error {
 	m.InitCalled = true
 	m.ReceivedLogger = logger
 	if m.InitShouldFail {

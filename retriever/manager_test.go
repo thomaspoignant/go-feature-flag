@@ -9,7 +9,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/internal/notification"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
-	"github.com/thomaspoignant/go-feature-flag/testutils/mockretriever"
+	"github.com/thomaspoignant/go-feature-flag/testutils/mock/mockretriever"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
@@ -49,11 +49,7 @@ func TestManagerInit_AllRetrieverTypes(t *testing.T) {
 			name: "Mixed retriever types with one initialization failure",
 			retrievers: []retriever.Retriever{
 				mockretriever.NewSimpleRetriever("simple"),
-				func() *mockretriever.InitializableRetrieverLegacy {
-					r := mockretriever.NewInitializableRetrieverLegacy("legacy")
-					r.InitShouldFail = true
-					return r
-				}(),
+				mockretriever.NewInitializableRetrieverLegacy("legacy"),
 				mockretriever.NewInitializableRetriever("standard"),
 				mockretriever.NewInitializableRetrieverWithFlagset("flagset"),
 			},
@@ -67,11 +63,6 @@ func TestManagerInit_AllRetrieverTypes(t *testing.T) {
 		{
 			name: "All retrievers fail initialization",
 			retrievers: []retriever.Retriever{
-				func() *mockretriever.InitializableRetrieverLegacy {
-					r := mockretriever.NewInitializableRetrieverLegacy("legacy")
-					r.InitShouldFail = true
-					return r
-				}(),
 				func() *mockretriever.InitializableRetriever {
 					r := mockretriever.NewInitializableRetriever("standard")
 					r.InitShouldFail = true

@@ -16,7 +16,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"github.com/thomaspoignant/go-feature-flag/testutils/mock"
-	"github.com/thomaspoignant/go-feature-flag/testutils/mockretriever"
+	"github.com/thomaspoignant/go-feature-flag/testutils/mock/mockretriever"
 )
 
 func TestStartWithoutRetriever(t *testing.T) {
