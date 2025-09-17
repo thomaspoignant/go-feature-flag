@@ -8,6 +8,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
+	"github.com/thomaspoignant/go-feature-flag/utils"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
@@ -181,7 +182,7 @@ func (r *Retriever) getColumnNames() map[string]string {
 }
 
 func (r *Retriever) getFlagset() string {
-	if r.flagset != nil && *r.flagset != "" && *r.flagset != "default" {
+	if r.flagset != nil && *r.flagset != "" && *r.flagset != utils.DefaultFlagSetName {
 		return *r.flagset
 	}
 	return ""

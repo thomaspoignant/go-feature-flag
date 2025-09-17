@@ -1026,7 +1026,7 @@ func Test_initLeveledLogger_FlagsetAttribute(t *testing.T) {
 		}{
 			{
 				name:          "default flagset name should not add attribute",
-				flagsetName:   DefaultFlagSetName,
+				flagsetName:   utils.DefaultFlagSetName,
 				shouldAddAttr: false,
 			},
 			{

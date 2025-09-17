@@ -8,10 +8,9 @@ import (
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
+	"github.com/thomaspoignant/go-feature-flag/utils"
 	"go.uber.org/zap"
 )
-
-const DefaultFlagSetName = "default"
 
 type flagsetManagerMode string
 
@@ -86,7 +85,7 @@ func NewFlagsetManager(
 func newFlagsetManagerWithDefaultConfig(
 	c *config.Config, logger *zap.Logger, notifiers []notifier.Notifier) (FlagsetManager, error) {
 	defaultFlagSet := config.FlagSet{
-		Name: DefaultFlagSetName,
+		Name: utils.DefaultFlagSetName,
 		CommonFlagSet: config.CommonFlagSet{
 			Retriever:                       c.Retriever,
 			Retrievers:                      c.Retrievers,
@@ -133,7 +132,7 @@ func newFlagsetManagerWithFlagsets(
 		}
 
 		flagSetName := flagset.Name
-		if flagSetName == "" || flagSetName == DefaultFlagSetName {
+		if flagSetName == "" || flagSetName == utils.DefaultFlagSetName {
 			// generating a default flagset name if not provided or equals to default
 			flagSetName = uuid.New().String()
 		}
@@ -190,7 +189,7 @@ func (m *flagsetManagerImpl) GetFlagSetName(apiKey string) (string, error) {
 		}
 		return "", fmt.Errorf("no flag set associated to the API key")
 	default:
-		return DefaultFlagSetName, nil
+		return utils.DefaultFlagSetName, nil
 	}
 }
 
@@ -207,7 +206,7 @@ func (m *flagsetManagerImpl) GetFlagSets() (map[string]*ffclient.GoFeatureFlag, 
 			return nil, fmt.Errorf("no default flagset configured")
 		}
 		return map[string]*ffclient.GoFeatureFlag{
-			DefaultFlagSetName: m.DefaultFlagSet,
+			utils.DefaultFlagSetName: m.DefaultFlagSet,
 		}, nil
 	}
 }
