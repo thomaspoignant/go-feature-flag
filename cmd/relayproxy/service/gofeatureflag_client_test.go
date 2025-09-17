@@ -36,7 +36,9 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/retriever/githubretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/gitlabretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/httpretriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever/postgresqlretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/s3retrieverv2"
+	"github.com/thomaspoignant/go-feature-flag/utils"
 	"github.com/xitongsys/parquet-go/parquet"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -231,6 +233,22 @@ func Test_initRetriever(t *testing.T) {
 				Timeout:        10000000000,
 			},
 			wantType: &bitbucketretriever.Retriever{},
+		},
+		{
+			name:    "Convert Postgres Retriever",
+			wantErr: assert.NoError,
+			conf: &config.RetrieverConf{
+				Kind:    "postgresql",
+				URI:     "postgresql://user:password@localhost:5432/database",
+				Table:   "flags",
+				Columns: map[string]string{"flagset": "settings"},
+			},
+			want: &postgresqlretriever.Retriever{
+				URI:     "postgresql://user:password@localhost:5432/database",
+				Table:   "flags",
+				Columns: map[string]string{"flagset": "settings"},
+			},
+			wantType: &postgresqlretriever.Retriever{},
 		},
 	}
 	for _, tt := range tests {
@@ -1009,7 +1027,7 @@ func Test_initLeveledLogger_FlagsetAttribute(t *testing.T) {
 		}{
 			{
 				name:          "default flagset name should not add attribute",
-				flagsetName:   DefaultFlagSetName,
+				flagsetName:   utils.DefaultFlagSetName,
 				shouldAddAttr: false,
 			},
 			{

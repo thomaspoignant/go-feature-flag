@@ -1,0 +1,35 @@
+{
+    "array-flag": {
+        "defaultRule": {
+            "variation": "variation_A"
+        },
+        "targeting": [
+            {
+                "name": "rule1",
+                "percentage": {
+                    "variation_A": 0,
+                    "variation_B": 90,
+                    "variation_C": 10
+                },
+                "query": "anonymous eq true"
+            }
+        ],
+        "variations": {
+            "variation_A": [
+                "batmanDefault",
+                "supermanDefault",
+                "superherosDefault"
+            ],
+            "variation_B": [
+                "batmanFalse",
+                "supermanFalse",
+                "superherosFalse"
+            ],
+            "variation_C": [
+                "batmanTrue",
+                "supermanTrue",
+                "superherosTrue"
+            ]
+        }
+    }
+}
