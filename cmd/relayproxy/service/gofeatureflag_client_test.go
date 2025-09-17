@@ -1,6 +1,7 @@
 package service
 
 import (
+	"bytes"
 	"crypto/tls"
 	"fmt"
 	"net"
@@ -35,9 +36,12 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/retriever/githubretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/gitlabretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/httpretriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever/postgresqlretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/s3retrieverv2"
+	"github.com/thomaspoignant/go-feature-flag/utils"
 	"github.com/xitongsys/parquet-go/parquet"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"golang.org/x/net/proxy"
 )
 
@@ -229,6 +233,22 @@ func Test_initRetriever(t *testing.T) {
 				Timeout:        10000000000,
 			},
 			wantType: &bitbucketretriever.Retriever{},
+		},
+		{
+			name:    "Convert Postgres Retriever",
+			wantErr: assert.NoError,
+			conf: &config.RetrieverConf{
+				Kind:    "postgresql",
+				URI:     "postgresql://user:password@localhost:5432/database",
+				Table:   "flags",
+				Columns: map[string]string{"flagset": "settings"},
+			},
+			want: &postgresqlretriever.Retriever{
+				URI:     "postgresql://user:password@localhost:5432/database",
+				Table:   "flags",
+				Columns: map[string]string{"flagset": "settings"},
+			},
+			wantType: &postgresqlretriever.Retriever{},
 		},
 	}
 	for _, tt := range tests {
@@ -994,5 +1014,73 @@ func TestSetKafkaConfig(t *testing.T) {
 		kafkaConfig, err := setKafkaConfig(settings)
 		assert.NoError(t, err)
 		assert.Nil(t, kafkaConfig.Config)
+	})
+}
+
+func Test_initLeveledLogger_FlagsetAttribute(t *testing.T) {
+	t.Run("verify flagset attribute logic", func(t *testing.T) {
+		// Test the logic directly by checking the conditions
+		tests := []struct {
+			name          string
+			flagsetName   string
+			shouldAddAttr bool
+		}{
+			{
+				name:          "default flagset name should not add attribute",
+				flagsetName:   utils.DefaultFlagSetName,
+				shouldAddAttr: false,
+			},
+			{
+				name:          "empty flagset name should not add attribute",
+				flagsetName:   "",
+				shouldAddAttr: false,
+			},
+			{
+				name:          "custom flagset name should add attribute",
+				flagsetName:   "my-custom-flagset",
+				shouldAddAttr: true,
+			},
+			{
+				name:          "another custom flagset name should add attribute",
+				flagsetName:   "production-flags",
+				shouldAddAttr: true,
+			},
+		}
+
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				flagset := &config.FlagSet{
+					Name: tt.flagsetName,
+				}
+				// Create a buffer to capture log output
+				var logBuffer bytes.Buffer
+
+				// Create a zap logger that writes to our buffer
+				encoderCfg := zap.NewProductionEncoderConfig()
+				encoderCfg.TimeKey = ""
+				encoderCfg.LevelKey = ""
+				encoderCfg.CallerKey = ""
+				core := zapcore.NewCore(
+					zapcore.NewJSONEncoder(encoderCfg),
+					zapcore.AddSync(&logBuffer),
+					zapcore.InfoLevel,
+				)
+				zapLogger := zap.New(core)
+
+				slogLogger := initLeveledLogger(flagset, zapLogger)
+				assert.NotNil(t, slogLogger, "initLeveledLogger should return a non-nil logger")
+
+				slogLogger.Info("test message")
+				_ = zapLogger.Sync()
+				logOutput := logBuffer.String()
+
+				if tt.shouldAddAttr {
+					assert.Contains(t, logOutput, `"flagset"`, "log output should contain flagset attribute")
+					assert.Contains(t, logOutput, tt.flagsetName, "log output should contain the flagset name")
+				} else {
+					assert.NotContains(t, logOutput, `"flagset"`, "log output should not contain flagset attribute for default flagset")
+				}
+			})
+		}
 	})
 }

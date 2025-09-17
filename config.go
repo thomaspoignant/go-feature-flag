@@ -109,6 +109,11 @@ type Config struct {
 	// you ensure that GO Feature Flag will always start with a configuration but which can be out-dated.
 	PersistentFlagConfigurationFile string
 
+	// Name (optional) is the name of the flagset, this is used to identify the flagset inside the
+	// GO Feature Flag instance. This allow to identify the flagset.
+	// Default: nil
+	Name *string
+
 	// offlineMutex is a mutex to protect the Offline field.
 	offlineMutex *sync.RWMutex
 

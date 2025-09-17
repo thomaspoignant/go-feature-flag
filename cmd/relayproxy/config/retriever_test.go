@@ -293,6 +293,32 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 				Database:   "xxx",
 			},
 		},
+		{
+			name: "kind postgresql valid",
+			fields: config.RetrieverConf{
+				Kind:  "postgresql",
+				URI:   "xxx",
+				Table: "xxx",
+			},
+		},
+		{
+			name: "kind postgresql invalid without URI",
+			fields: config.RetrieverConf{
+				Kind:  "postgresql",
+				Table: "xxx",
+			},
+			wantErr:  true,
+			errValue: "invalid retriever: no \"uri\" property found for kind \"postgresql\"",
+		},
+		{
+			name: "kind postgresql invalid without Table",
+			fields: config.RetrieverConf{
+				Kind: "postgresql",
+				URI:  "xxx",
+			},
+			wantErr:  true,
+			errValue: "invalid retriever: no \"table\" property found for kind \"postgresql\"",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
