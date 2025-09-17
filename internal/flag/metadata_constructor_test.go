@@ -4,10 +4,11 @@ package flag
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"reflect"
 	"runtime"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_constructMetadataParallel(t *testing.T) {
