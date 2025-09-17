@@ -23,7 +23,7 @@ var defaultRetrieverConfig = DefaultRetrieverConfig{
 	GitBranch:  "main",
 }
 
-func Test_initRetriever(t *testing.T) {
+func Test_InitRetriever(t *testing.T) {
 	tests := []struct {
 		name                   string
 		conf                   *retrieverconf.RetrieverConf

@@ -1,17 +1,11 @@
 package init
 
 import (
-	"context"
 	"fmt"
 	"time"
 
-	awsConf "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
-	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
-	"github.com/thomaspoignant/go-feature-flag/retriever/gcstorageretriever"
-	"github.com/thomaspoignant/go-feature-flag/retriever/redisretriever"
-	"github.com/thomaspoignant/go-feature-flag/retriever/s3retrieverv2"
 )
 
 type DefaultRetrieverConfig struct {
@@ -23,34 +17,34 @@ type DefaultRetrieverConfig struct {
 // InitRetriever initialize the retriever based on the configuration
 func InitRetriever(
 	c *retrieverconf.RetrieverConf, defaultRetrieverConfig DefaultRetrieverConfig) (retriever.Retriever, error) {
-	var retrieverTimeout = defaultRetrieverConfig.Timeout
 	if c.Timeout != 0 {
-		retrieverTimeout = time.Duration(c.Timeout) * time.Millisecond
+		defaultRetrieverConfig.Timeout = time.Duration(c.Timeout) * time.Millisecond
 	}
 	switch c.Kind {
 	case retrieverconf.GitHubRetriever:
-		return initGithubRetriever(c, retrieverTimeout, defaultRetrieverConfig.GitBranch), nil
+		return createGitHubRetriever(c, &defaultRetrieverConfig)
 	case retrieverconf.GitlabRetriever:
-		return initGitlabRetriever(c, retrieverTimeout, defaultRetrieverConfig.GitBranch), nil
+		return createGitlabRetriever(c, &defaultRetrieverConfig)
 	case retrieverconf.BitbucketRetriever:
-		return initBitbucketRetriever(c, retrieverTimeout, defaultRetrieverConfig.GitBranch), nil
+		return createBitbucketRetriever(c, &defaultRetrieverConfig)
 	case retrieverconf.FileRetriever:
-		return &fileretriever.Retriever{Path: c.Path}, nil
+		return createFileRetriever(c, nil)
 	case retrieverconf.S3Retriever:
-		awsConfig, err := awsConf.LoadDefaultConfig(context.Background())
-		return &s3retrieverv2.Retriever{Bucket: c.Bucket, Item: c.Item, AwsConfig: &awsConfig}, err
+		return createS3Retriever(c, nil)
 	case retrieverconf.HTTPRetriever:
-		return initHTTPRetriever(c, retrieverTimeout, defaultRetrieverConfig.HTTPMethod), nil
+		return createHTTPRetriever(c, &defaultRetrieverConfig)
 	case retrieverconf.GoogleStorageRetriever:
-		return &gcstorageretriever.Retriever{Bucket: c.Bucket, Object: c.Object}, nil
+		return createGoogleStorageRetriever(c, nil)
 	case retrieverconf.KubernetesRetriever:
-		return initK8sRetriever(c)
+		return createKubernetesRetriever(c, nil)
 	case retrieverconf.MongoDBRetriever:
-		return initMongoRetriever(c), nil
+		return createMongoDBRetriever(c, nil)
 	case retrieverconf.RedisRetriever:
-		return &redisretriever.Retriever{Options: c.RedisOptions, Prefix: c.RedisPrefix}, nil
+		return createRedisRetriever(c, nil)
 	case retrieverconf.AzBlobStorageRetriever:
-		return initAzBlobRetriever(c), nil
+		return createAzBlobStorageRetriever(c, nil)
+	case retrieverconf.PostgreSQLRetriever:
+		return createPostgreSQLRetriever(c, nil)
 	default:
 		return nil, fmt.Errorf("invalid retriever: kind \"%s\" "+
 			"is not supported", c.Kind)
