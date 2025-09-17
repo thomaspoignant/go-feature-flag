@@ -3,7 +3,7 @@ sidebar_position: 20
 description: How to configure the relay proxy to serve your feature flags.
 ---
 import {Mandatory, NotMandatory} from "@site/src/components/checks/checks";
-import {integrations} from "@site/data/integrations";
+import { getIntegrations } from "@site/data/integrations";
 
 # 🔧 Configuration
 
@@ -376,7 +376,7 @@ To find the **`kind`** to use for your retriever and the **rest of the options**
 
 **Available retrievers**:
 <ul>
-{ integrations.retrievers.filter(r => r.docLink !== undefined).map((r) => (
+{ getIntegrations("v1.45.0").retrievers.filter(r => r.docLink !== undefined).map((r) => (
   <li key={r.name}><a href={`../integrations/store-flags-configuration/${r.docLink}`}>{r.name}</a></li>
 )) }
 </ul>
@@ -397,7 +397,7 @@ Every `exporter` has its own configuration, check the [list of exporters](../int
 
 **Available exporters**:
 <ul>
-  { integrations.exporters.filter(r => r.docLink !== undefined).map((r) => (
+  { getIntegrations("v1.45.0").exporters.filter(r => r.docLink !== undefined).map((r) => (
     <li key={r.name}><a href={`../integrations/export-evaluation-data/${r.docLink}`}>{r.name}</a></li>
   )) }
 </ul>
@@ -420,7 +420,7 @@ Every `notifier` has its own configuration, check the [list of notifiers](../int
 
 **Available notifiers**:
 <ul>
-  { integrations.notifiers.filter(r => r.docLink !== undefined).map((r) => (
+  { getIntegrations("v1.45.0").notifiers.filter(r => r.docLink !== undefined).map((r) => (
     <li key={r.name}><a href={`../integrations/notify-flags-changes/${r.docLink}`}>{r.name}</a></li>
   )) }
 </ul>
