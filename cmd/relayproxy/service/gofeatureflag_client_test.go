@@ -38,6 +38,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/retriever/httpretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/postgresqlretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/s3retrieverv2"
+	"github.com/thomaspoignant/go-feature-flag/utils"
 	"github.com/xitongsys/parquet-go/parquet"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
