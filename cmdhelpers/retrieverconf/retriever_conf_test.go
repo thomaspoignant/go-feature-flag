@@ -295,7 +295,7 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 		},
 		{
 			name: "kind postgresql valid",
-			fields: config.RetrieverConf{
+			fields: retrieverconf.RetrieverConf{
 				Kind:  "postgresql",
 				URI:   "xxx",
 				Table: "xxx",
@@ -303,7 +303,7 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 		},
 		{
 			name: "kind postgresql invalid without URI",
-			fields: config.RetrieverConf{
+			fields: retrieverconf.RetrieverConf{
 				Kind:  "postgresql",
 				Table: "xxx",
 			},
@@ -312,7 +312,7 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 		},
 		{
 			name: "kind postgresql invalid without Table",
-			fields: config.RetrieverConf{
+			fields: retrieverconf.RetrieverConf{
 				Kind: "postgresql",
 				URI:  "xxx",
 			},
