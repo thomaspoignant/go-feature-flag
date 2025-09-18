@@ -63,12 +63,17 @@ func (f *wsFlagChange) Handler(c echo.Context) error {
 	// Start the ping pong loop
 	go f.pingPongLoop(ctx, conn)
 
-	// Set read deadline to prevent hanging connections
-	conn.SetReadDeadline(time.Now().Add(60 * time.Second))
+	const readDeadline = 60 * time.Second
 
+	conn.SetPongHandler(func(string) error {
+		_ = conn.SetReadDeadline(time.Now().Add(readDeadline))
+		return nil
+	})
+
+	_ = conn.SetReadDeadline(time.Now().Add(readDeadline))
 	for {
-		_, _, err := conn.ReadMessage()
-		if err != nil {
+		// ReadMessage is needed to process control messages like pongs and close messages.
+		if _, _, err := conn.ReadMessage(); err != nil {
 			f.logger.Debug(
 				"closing websocket connection",
 				zap.Error(err),
@@ -76,8 +81,6 @@ func (f *wsFlagChange) Handler(c echo.Context) error {
 			)
 			return nil
 		}
-		// Reset read deadline after each message
-		conn.SetReadDeadline(time.Now().Add(60 * time.Second))
 	}
 }
 
@@ -102,7 +105,6 @@ func (f *wsFlagChange) pingPongLoop(ctx context.Context, conn *websocket.Conn) {
 					zap.Error(err),
 					zap.Any("connection", conn),
 				)
-				f.websocketService.Deregister(conn)
 				return
 			}
 		case <-ctx.Done():
