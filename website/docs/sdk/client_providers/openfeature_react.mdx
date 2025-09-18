@@ -5,6 +5,8 @@ description: How to use the OpenFeature Javascript React SDK for your React appl
 ---
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+import { sdk } from "@site/data/sdk";
+import { FeatureTable } from "@site/src/components/doc/featureTable";
 
 # React SDK usage
 [![NPM Version](https://img.shields.io/npm/v/%40openfeature%2Fgo-feature-flag-web-provider?color=blue&style=flat-square&logo=npm)](https://www.npmjs.com/package/@openfeature/go-feature-flag-web-provider)
@@ -89,6 +91,9 @@ Check the available options for the provider in the [web provider page](./openfe
 
 ## Example
 If you want to see some code, you can check the [example](https://github.com/thomaspoignant/go-feature-flag/tree/main/examples/openfeature_react) in the GO Feature Flag repository.
+
+## Features status
+<FeatureTable sdk={sdk.find(it => it.key === 'react')} />
 
 ## Contribute to the provider
 You can find the source of the provider in the [`open-feature/js-sdk-contrib`](https://github.com/open-feature/js-sdk-contrib/tree/main/libs/providers/go-feature-flag-web) repository.

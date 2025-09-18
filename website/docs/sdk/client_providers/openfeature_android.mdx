@@ -7,6 +7,8 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import versions from '@site/static/sdk-versions.json';
 import CodeBlock from '@theme/CodeBlock';
+import { sdk } from "@site/data/sdk";
+import { FeatureTable } from "@site/src/components/doc/featureTable";
 
 [![Maven Central Version](https://img.shields.io/maven-central/v/org.gofeatureflag.openfeature/gofeatureflag-kotlin-provider?color=blue&logo=android&style=flat-square)](https://search.maven.org/artifact/org.gofeatureflag.openfeature/gofeatureflag-kotlin-provider)
 
@@ -196,15 +198,4 @@ coroutineScope.launch {
 - `ProviderNotReady`: Provider is not ready to evaluate the feature flags.
 
 ## Features status
-
-
-| Status | Feature            | Description                                                                                                                                         |
-|--------|--------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
-| ✅      | Flag evaluation    | It is possible to evaluate all the type of flags                                                                                                    |
-| ✅      | Cache invalidation | A polling mechanism is in place to refresh the cache in case of configuration change                                                                |
-| ❌      | Logging            | Not supported by the SDK                                                                                                                            |
-| ✅      | Flag Metadata      | You have access to your flag metadata                                                                                                               |
-| ✅      | Event Streaming    | You can register to receive some internal event from the provider                                                                                   |
-| ✅      | Unit test          | The test are running one by one, but we still have an [issue open](https://github.com/open-feature/kotlin-sdk/issues/108) to enable fully the tests |
-
-<sub>Implemented: ✅ | In-progress: ⚠️ | Not implemented yet: ❌</sub>
+<FeatureTable sdk={sdk.find(it => it.key === 'android')} />
