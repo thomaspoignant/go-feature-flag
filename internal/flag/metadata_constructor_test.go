@@ -4,7 +4,6 @@ package flag
 
 import (
 	"fmt"
-	"reflect"
 	"runtime"
 	"testing"
 
@@ -96,9 +95,7 @@ func Test_ConstructMetadata(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := constructMetadata(tt.flagMetadata, tt.ruleName)
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("constructMetadata() = %v, want %v", got, tt.want)
-			}
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
