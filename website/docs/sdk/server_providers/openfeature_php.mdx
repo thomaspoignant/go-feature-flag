@@ -3,6 +3,8 @@ sidebar_position: 50
 title: PHP
 description: How to use the OpenFeature PHP SDK with GO Feature Flag
 ---
+import { sdk } from "@site/data/sdk";
+import { FeatureTable } from "@site/src/components/doc/featureTable";
 
 # PHP
 [![Packagist - Version](https://img.shields.io/packagist/v/open-feature/go-feature-flag-provider?logo=php&color=blue&style=flat-square)](https://packagist.org/packages/open-feature/go-feature-flag-provider)
@@ -132,3 +134,6 @@ This package also has a .tool-versions file for use with PHP version managers li
 Install dependencies with `composer install`, it will update the `composer.lock` with the most recent compatible versions.
 
 We value having as few runtime dependencies as possible. The addition of any dependencies requires careful consideration and review.
+
+## Features status
+<FeatureTable sdk={sdk.find(it => it.key === 'php')} />
