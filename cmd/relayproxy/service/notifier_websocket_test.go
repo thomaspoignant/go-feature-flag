@@ -2,6 +2,7 @@ package service_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
@@ -25,6 +26,11 @@ func (m *mockWebsocketService) Deregister(c service.WebsocketConn) {
 
 func (m *mockWebsocketService) Close() {
 	m.nbConnection = 0
+}
+
+func (m *mockWebsocketService) WaitForCleanup(timeout time.Duration) error {
+	// Mock implementation - just return nil immediately
+	return nil
 }
 
 func (m *mockWebsocketService) BroadcastFlagChanges(diff notifier.DiffCache) {

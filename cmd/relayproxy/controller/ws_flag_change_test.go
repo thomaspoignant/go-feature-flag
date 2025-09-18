@@ -1,10 +1,12 @@
 package controller_test
 
 import (
+	"context"
 	"encoding/json"
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
@@ -103,8 +105,19 @@ func Test_websocket_flag_change(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			// Create context with timeout for the entire test
+			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			defer cancel()
+
 			websocketService := service.NewWebsocketService()
-			defer websocketService.Close()
+			defer func() {
+				websocketService.Close()
+				// Wait for cleanup to complete to avoid leaking goroutines in tests.
+				if err := websocketService.WaitForCleanup(5 * time.Second); err != nil {
+					t.Errorf("websocket service cleanup failed: %v", err)
+				}
+			}()
+
 			log := zap.L()
 			ctrl := controller.NewWsFlagChange(websocketService, log)
 
@@ -112,13 +125,29 @@ func Test_websocket_flag_change(t *testing.T) {
 			e.GET("/ws/v1/flag/change", ctrl.Handler)
 			testServer := httptest.NewServer(e)
 			defer testServer.Close()
+
 			url := "ws" + strings.TrimPrefix(testServer.URL, "http") + "/ws/v1/flag/change"
-			ws, _, err := websocket.DefaultDialer.Dial(url, nil)
+
+			// Create websocket connection with timeout
+			dialer := &websocket.Dialer{
+				HandshakeTimeout: 10 * time.Second,
+			}
+			ws, _, err := dialer.DialContext(ctx, url, nil)
 			if err != nil {
 				t.Fatalf("Failed to connect to WebSocket: %v", err)
 			}
-			defer func() { _ = ws.Close() }()
+			defer func() {
+				ws.SetWriteDeadline(time.Now().Add(5 * time.Second))
+				_ = ws.Close()
+			}()
+
+			// Set read deadline to prevent hanging
+			ws.SetReadDeadline(time.Now().Add(10 * time.Second))
+
+			// Broadcast the flag change
 			websocketService.BroadcastFlagChanges(tt.flagChange)
+
+			// Read message with timeout
 			_, receivedMessage, err := ws.ReadMessage()
 			assert.NoError(t, err)
 
