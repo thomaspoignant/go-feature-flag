@@ -112,14 +112,9 @@ func Test_websocket_flag_change(t *testing.T) {
 			websocketService := service.NewWebsocketService()
 			defer func() {
 				websocketService.Close()
-				// Wait for cleanup with a reasonable timeout
-				cleanupCtx, cleanupCancel := context.WithTimeout(context.Background(), 5*time.Second)
-				defer cleanupCancel()
-				select {
-				case <-cleanupCtx.Done():
-					t.Log("Cleanup timeout reached")
-				case <-time.After(100 * time.Millisecond):
-					// Give a small buffer for cleanup
+				// Wait for cleanup to complete to avoid leaking goroutines in tests.
+				if err := websocketService.WaitForCleanup(5 * time.Second); err != nil {
+					t.Errorf("websocket service cleanup failed: %v", err)
 				}
 			}()
 
