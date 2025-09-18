@@ -250,8 +250,9 @@ func TestInternalFlag_Value(t *testing.T) {
 				RuleName:  testconvert.String("rule1"),
 				Cacheable: true,
 				Metadata: map[string]interface{}{
-					"description": "this is a flag",
-					"issue-link":  "https://issue.link/GOFF-1",
+					"description":       "this is a flag",
+					"issue-link":        "https://issue.link/GOFF-1",
+					"evaluatedRuleName": "rule1",
 				},
 			},
 		},
@@ -292,8 +293,9 @@ func TestInternalFlag_Value(t *testing.T) {
 				RuleName:  testconvert.String("rule1"),
 				Cacheable: true,
 				Metadata: map[string]interface{}{
-					"description": "this is a flag",
-					"issue-link":  "https://issue.link/GOFF-1",
+					"description":       "this is a flag",
+					"issue-link":        "https://issue.link/GOFF-1",
+					"evaluatedRuleName": "rule1",
 				},
 			},
 		},
@@ -340,8 +342,9 @@ func TestInternalFlag_Value(t *testing.T) {
 				RuleName:  testconvert.String("rule2"),
 				Cacheable: true,
 				Metadata: map[string]interface{}{
-					"description": "this is a flag",
-					"issue-link":  "https://issue.link/GOFF-1",
+					"description":       "this is a flag",
+					"issue-link":        "https://issue.link/GOFF-1",
+					"evaluatedRuleName": "rule2",
 				},
 			},
 		},
@@ -390,8 +393,9 @@ func TestInternalFlag_Value(t *testing.T) {
 				RuleName:  testconvert.String("rule2"),
 				Cacheable: true,
 				Metadata: map[string]interface{}{
-					"description": "this is a flag",
-					"issue-link":  "https://issue.link/GOFF-1",
+					"description":       "this is a flag",
+					"issue-link":        "https://issue.link/GOFF-1",
+					"evaluatedRuleName": "rule2",
 				},
 			},
 		},
@@ -1159,8 +1163,9 @@ func TestInternalFlag_Value(t *testing.T) {
 				RuleIndex: testconvert.Int(0),
 				RuleName:  testconvert.String("rule1"),
 				Metadata: map[string]interface{}{
-					"description": "this is a flag",
-					"issue-link":  "https://issue.link/GOFF-1",
+					"description":       "this is a flag",
+					"issue-link":        "https://issue.link/GOFF-1",
+					"evaluatedRuleName": "rule1",
 				},
 			},
 		},
@@ -1263,8 +1268,9 @@ func TestInternalFlag_Value(t *testing.T) {
 				RuleIndex: testconvert.Int(1),
 				RuleName:  testconvert.String("rule2"),
 				Metadata: map[string]interface{}{
-					"description": "this is a flag",
-					"issue-link":  "https://issue.link/GOFF-1",
+					"description":       "this is a flag",
+					"issue-link":        "https://issue.link/GOFF-1",
+					"evaluatedRuleName": "rule2",
 				},
 			},
 		},
@@ -1537,8 +1543,9 @@ func TestInternalFlag_Value(t *testing.T) {
 				RuleName:  testconvert.String("test-rule"),
 				Cacheable: true,
 				Metadata: map[string]interface{}{
-					"description": "this is a flag",
-					"issue-link":  "https://issue.link/GOFF-1",
+					"description":       "this is a flag",
+					"issue-link":        "https://issue.link/GOFF-1",
+					"evaluatedRuleName": "test-rule",
 				},
 			},
 		},
@@ -1582,13 +1589,13 @@ func TestInternalFlag_Value(t *testing.T) {
 				RuleName:  testconvert.String("test-rule"),
 				Cacheable: true,
 				Metadata: map[string]interface{}{
-					"description": "this is a flag",
-					"issue-link":  "https://issue.link/GOFF-1",
+					"description":       "this is a flag",
+					"issue-link":        "https://issue.link/GOFF-1",
+					"evaluatedRuleName": "test-rule",
 				},
 			},
 		},
 		{
-
 			name: "Should return the reason TARGETING_MATCH_SPLIT if rule apply and has progressive rollout",
 			flag: flag.InternalFlag{
 				Variations: &map[string]*interface{}{
@@ -1636,8 +1643,9 @@ func TestInternalFlag_Value(t *testing.T) {
 				RuleName:  testconvert.String("test-rule"),
 				Cacheable: false,
 				Metadata: map[string]interface{}{
-					"description": "this is a flag",
-					"issue-link":  "https://issue.link/GOFF-1",
+					"description":       "this is a flag",
+					"issue-link":        "https://issue.link/GOFF-1",
+					"evaluatedRuleName": "test-rule",
 				},
 			},
 		},

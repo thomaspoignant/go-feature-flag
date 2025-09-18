@@ -3,6 +3,8 @@ sidebar_position: 52
 title: Ruby
 description: How to use the OpenFeature Ruby SDK with GO Feature Flag
 ---
+import { sdk } from "@site/data/sdk";
+import { FeatureTable } from "@site/src/components/doc/featureTable";
 
 # Ruby
  <a href="https://github.com/open-feature/ruby-sdk-contrib/tree/main/providers/openfeature-go-feature-flag-provider"><img src="https://img.shields.io/gem/v/openfeature-go-feature-flag-provider?color=blue&style=flat-square&logo=ruby" alt="gem" /></a>
@@ -110,19 +112,8 @@ client.fetch_number_value(flag_key: 'my-flag', default_value: 0, evaluation_cont
 # Object
 client.fetch_object_value(flag_key: 'my-flag', default_value: {"default" => true}, evaluation_context: evaluation_context)
 ```
-
 ## Features status
-
-| Status | Feature         | Description                                                                |
-|--------|-----------------|----------------------------------------------------------------------------|
-| ✅      | Flag evaluation | It is possible to evaluate all the type of flags                           |
-| ❌      | Caching         | Mechanism is in place to refresh the cache in case of configuration change |
-| ❌      | Event Streaming | Not supported by the SDK                                                   |
-| ❌      | Logging         | Not supported by the SDK                                                   |
-| ✅      | Flag Metadata   | Not supported by the SDK                                                   |
-
-
-<sub>**Implemented**: ✅ | In-progress: ⚠️ | Not implemented yet: ❌</sub>
+<FeatureTable sdk={sdk.find(it => it.key === 'ruby')} />
 
 ## Contributing
 This project welcomes contributions from the community.

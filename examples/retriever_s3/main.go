@@ -3,12 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/thomaspoignant/go-feature-flag/ffcontext"
-	"github.com/thomaspoignant/go-feature-flag/retriever/s3retrieverv2"
 	"log"
 	"log/slog"
 	"time"
+
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/thomaspoignant/go-feature-flag/ffcontext"
+	"github.com/thomaspoignant/go-feature-flag/retriever/s3retrieverv2"
 
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 )
