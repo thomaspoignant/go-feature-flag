@@ -3,12 +3,15 @@ on:
   pull_request_target:
     types: [opened, reopened]
 
+permissions: read-all
 jobs:
   auto-assign:
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     steps:
-      - name: 'Auto-assign PR'
-        uses: pozil/auto-assign-issue@v2
+      - name: "Auto-assign PR"
+        uses: pozil/auto-assign-issue@39c06395cbac76e79afc4ad4e5c5c6db6ecfdd2e # v2.2.0
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           assignees: thomaspoignant

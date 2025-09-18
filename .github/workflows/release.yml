@@ -1,7 +1,9 @@
 name: Release
 on:
   release:
-    types: [ published ]
+    types: [published]
+
+permissions: read-all
 
 jobs:
   main-release:
@@ -18,26 +20,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           fetch-depth: 1
       - name: Setup go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
         with:
           go-version-file: go.mod
           check-latest: true
       - name: Set up Maven
-        uses: stCarolas/setup-maven@v5
+        uses: stCarolas/setup-maven@d6af6abeda15e98926a57b5aa970a96bb37f97d1 # v5
         with:
           maven-version: 3.8.2
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version: 23
       - name: Install ICU packages
         run: sudo apt-get update && sudo apt-get install -y libicu-dev
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d # v5.0.0
         with:
-          dotnet-version: '7.0.x'
+          dotnet-version: "7.0.x"
       - run: make vendor
       - run: make provider-tests
 
@@ -46,20 +48,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           fetch-depth: 0
       - name: Setup go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
         with:
           go-version-file: go.mod
           check-latest: true
-      - uses: acifani/setup-tinygo@v2
+      - uses: acifani/setup-tinygo@db56321a62b9a67922bb9ac8f9d085e218807bb3 # v2.0.1
         with:
-          tinygo-version: '0.37.0'
+          tinygo-version: "0.37.0"
       - run: ./.github/ci-scripts/release_wasm.sh ${{  github.ref_name }}
       - name: Upload assets
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@6cbd405e2c4e67a21c47fa9e383d020e4e28b836 # v2.3.3
         if: github.ref_type == 'tag'
         with:
           files: |
@@ -67,7 +69,7 @@ jobs:
             ./out/release-wasm/gofeatureflag-evaluation_${{  github.ref_name }}.wasm
 
       - name: Checkout wasm-releases repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           repository: go-feature-flag/wasm-releases
           path: wasm-releases
@@ -80,13 +82,13 @@ jobs:
           cp ./out/release-wasm/gofeatureflag-evaluation_${{  github.ref_name }}.wasm wasm-releases/evaluation/
 
       - name: Create Pull Request to wasm-releases
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
         with:
           branch: publish-wasm-evaluation-${{  github.ref_name }}
           title: "feat: Publish WASM files for ${{  github.ref_name }}"
           body: |
             Automated pull request to publish evaluation WASM files for release ${{  github.ref_name }}
-            
+
             This PR includes:
             - gofeatureflag-evaluation_${{  github.ref_name }}.wasi
             - gofeatureflag-evaluation_${{  github.ref_name }}.wasm
@@ -104,7 +106,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           fetch-depth: 0
 
@@ -115,13 +117,13 @@ jobs:
         run: git fetch --force --tags
 
       - name: Setup go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
         with:
           go-version-file: go.mod
           check-latest: true
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.1.1
 
       - name: Docker login
         env:
@@ -131,7 +133,7 @@ jobs:
           echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v6
+        uses: goreleaser/goreleaser-action@e435ccd777264be153ace6237001ef4d979d3a7a # v6.4.0
         with:
           distribution: goreleaser
           version: latest
@@ -162,9 +164,9 @@ jobs:
       - is-not-beta-release
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Release readme to DockerHub
-        uses: ms-jpq/sync-dockerhub-readme@v1
+        uses: ms-jpq/sync-dockerhub-readme@e2991ea1ba48832e73555cdbd5b82f5a2e91ee9b # v1
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
@@ -174,7 +176,7 @@ jobs:
           repository: thomaspoignant/go-feature-flag-lint
           readme: "./cmd/lint/DOCKERHUB_thomaspoignant.md"
       - name: Release readme to DockerHub gofeatureflag
-        uses: ms-jpq/sync-dockerhub-readme@v1
+        uses: ms-jpq/sync-dockerhub-readme@e2991ea1ba48832e73555cdbd5b82f5a2e91ee9b # v1
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
@@ -193,9 +195,9 @@ jobs:
       - is-not-beta-release
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Release readme to DockerHub
-        uses: ms-jpq/sync-dockerhub-readme@v1
+        uses: ms-jpq/sync-dockerhub-readme@e2991ea1ba48832e73555cdbd5b82f5a2e91ee9b # v1
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
@@ -214,9 +216,9 @@ jobs:
       - is-not-beta-release
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Release readme to DockerHub
-        uses: ms-jpq/sync-dockerhub-readme@v1
+        uses: ms-jpq/sync-dockerhub-readme@e2991ea1ba48832e73555cdbd5b82f5a2e91ee9b # v1
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
@@ -235,9 +237,9 @@ jobs:
       - is-not-beta-release
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Release readme to DockerHub
-        uses: ms-jpq/sync-dockerhub-readme@v1
+        uses: ms-jpq/sync-dockerhub-readme@e2991ea1ba48832e73555cdbd5b82f5a2e91ee9b # v1
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
@@ -247,7 +249,7 @@ jobs:
           repository: thomaspoignant/go-feature-flag
           readme: "./cmd/relayproxy/DOCKERHUB_thomaspoignant.md"
       - name: Release readme to DockerHub gofeatureflag
-        uses: ms-jpq/sync-dockerhub-readme@v1
+        uses: ms-jpq/sync-dockerhub-readme@e2991ea1ba48832e73555cdbd5b82f5a2e91ee9b # v1
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
@@ -272,12 +274,12 @@ jobs:
       - is-not-beta-release
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           path: release
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
 
       - name: Install dependencies
         working-directory: ./release/${{ env.WEBSITE_DIR }}
@@ -288,7 +290,7 @@ jobs:
         run: npm run docusaurus docs:version ${{  github.ref_name }}
 
       - name: Setup go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
         with:
           go-version-file: ./release/${{ env.WEBSITE_DIR }}/.ci/go.mod
           check-latest: true
@@ -298,7 +300,7 @@ jobs:
         run: go run versions.go
 
       - name: Checkout main branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           ref: ${{ env.MAIN_BRANCH_NAME }}
           path: ${{ env.MAIN_BRANCH_NAME }}
@@ -310,7 +312,7 @@ jobs:
         run: cp -rf release/${{ env.WEBSITE_DIR }}/ $MAIN_BRANCH_NAME
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
         with:
           branch: create-new-doc-version-${{  github.ref_name }}
           title: "docs(docusaurus): Create a new documentation version ${{  github.ref_name }}"
@@ -338,13 +340,13 @@ jobs:
       MAIN_BRANCH_NAME: main
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           path: release
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
       - name: yq - portable yaml processor
-        uses: mikefarah/yq@v4.47.1
+        uses: mikefarah/yq@6251e95af8df3505def48c71f3119836701495d6 #v4.47.2
 
       - name: Bump chart appVersion
         working-directory: ./release/
@@ -355,7 +357,7 @@ jobs:
         run: GIT_TAG_NAME=${{  github.ref_name }} && yq -i ".version=\"${GIT_TAG_NAME#v}\"" $CHART_YAML_FILE_LOCATION
 
       - name: Checkout main branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           ref: ${{ env.MAIN_BRANCH_NAME }}
           path: ${{ env.MAIN_BRANCH_NAME }}
@@ -367,7 +369,7 @@ jobs:
         run: cp -rf release/$CHART_YAML_FILE_LOCATION $MAIN_BRANCH_NAME/$CHART_YAML_FILE_LOCATION
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
         with:
           branch: bump-relay-proxy-helm-chart-${{  github.ref_name }}
           title: "chore(helm): Bump relay-proxy helm chart version ${{  github.ref_name }}"
@@ -394,13 +396,13 @@ jobs:
       MAIN_BRANCH_NAME: main
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           path: release
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
       - name: Setup go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
         with:
           go-version-file: ./release/go.mod
           check-latest: true
@@ -414,7 +416,7 @@ jobs:
         run: ./out/bin/jsonschema-generator --schema-location=./.schema/flag-schema.json
 
       - name: Checkout main branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           ref: ${{ env.MAIN_BRANCH_NAME }}
           path: ${{ env.MAIN_BRANCH_NAME }}
@@ -426,7 +428,7 @@ jobs:
         run: cp -rf release/$SCHEMA_LOCATION $MAIN_BRANCH_NAME/$SCHEMA_LOCATION
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
         with:
           branch: release-jsonschema-${{  github.ref_name }}
           title: "feat(jsonschema): Release a new version of the jsonschema ${{  github.ref_name }}"

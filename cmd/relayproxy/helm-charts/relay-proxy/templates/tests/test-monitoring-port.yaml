@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "relay-proxy.fullname" . }}-test-monitoring-port"
+  labels:
+    {{- include "relay-proxy.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": hook-succeeded,hook-failed
+spec:
+  containers:
+    - name: test-monitoring-port
+      image: busybox
+      command: ['/bin/sh']
+      args:
+        - -c
+        - |
+          # Test HTTP port (should always be accessible)
+          echo "Testing HTTP port on {{ .Values.service.port }}..."
+          wget -q --spider "{{ include "relay-proxy.fullname" . }}:{{ .Values.service.port }}/health" || exit 1
+          echo "✓ HTTP port {{ .Values.service.port }} is accessible"
+          
+          # Test monitoring port if configured
+          {{- if (include "relay-proxy.monitoringPort" .) }}
+          echo "Testing monitoring port on {{ include "relay-proxy.monitoringPort" . }}..."
+          wget -q --spider "{{ include "relay-proxy.fullname" . }}:{{ include "relay-proxy.monitoringPort" . }}/health" || exit 1
+          echo "✓ Monitoring port {{ include "relay-proxy.monitoringPort" . }} is accessible"
+          {{- else }}
+          echo "No monitoring port configured, skipping monitoring port test"
+          {{- end }}
+          
+          echo "All port tests passed successfully!"
+  restartPolicy: Never

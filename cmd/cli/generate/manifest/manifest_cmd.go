@@ -27,6 +27,8 @@ func NewManifestCmd() *cobra.Command {
 			output.PrintLines(cmd)
 			return nil
 		},
+		SilenceUsage:  true,
+		SilenceErrors: true,
 	}
 	manifestCmd.Flags().StringVarP(&manifestFlagFormat,
 		"format", "f", "yaml", "Format of your input file (YAML, JSON or TOML)")

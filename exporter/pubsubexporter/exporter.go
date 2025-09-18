@@ -11,6 +11,10 @@ import (
 )
 
 // Exporter publishes events on a PubSub topic.
+//
+// Deprecated: Use pubsubexporterv2.Exporter instead. This exporter uses the legacy
+// cloud.google.com/go/pubsub v1 library. The v2 library provides improved performance
+// and additional features. This exporter will be removed in a future version.
 type Exporter struct {
 	// ProjectID is a project to which the PubSub topic belongs.
 	ProjectID string

@@ -1,5 +1,5 @@
 relayproxy:
-  # -- GO Feature Flag relay proxy configuration as string (accept template).
+  # -- GO Feature Flag relay proxy configuration as string (accept template). If monitoringPort is specified in the config, it will be exposed as a separate port and used for liveness and readiness probes instead of the main HTTP port. Example: add "monitoringPort: 1032" to your config to enable separate monitoring port.
   config: | # This is a configuration example for the relay-proxy
     listen: 1031
     pollingInterval: 1000

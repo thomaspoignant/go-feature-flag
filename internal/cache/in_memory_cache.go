@@ -26,7 +26,7 @@ func (fc *InMemoryCache) addFlag(key string, value flag.InternalFlag) {
 		fc.Flags[key] = value
 	} else {
 		fc.Logger.Error("[cache] invalid configuration for flag",
-			slog.String("key", key), slog.Any("error", err))
+			slog.String("key", key), slog.Any("error", err.Error()))
 	}
 }
 
@@ -71,7 +71,7 @@ func (fc *InMemoryCache) Init(flags map[string]dto.DTO) {
 			cache[key] = flagToAdd
 		} else {
 			fc.Logger.Error("[cache] invalid configuration for flag",
-				slog.String("key", key), slog.Any("error", err))
+				slog.String("key", key), slog.Any("error", err.Error()))
 		}
 	}
 	fc.Flags = cache

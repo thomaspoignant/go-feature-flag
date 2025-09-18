@@ -147,13 +147,13 @@ func (c *cacheManagerImpl) PersistCache(
 		}
 		data, err := yaml.Marshal(newCache)
 		if err != nil {
-			c.logger.Error("Error while marshalling flags to persist", slog.Any("error", err))
+			c.logger.Error("Error while marshalling flags to persist", slog.Any("error", err.Error()))
 			return
 		}
 
 		err = os.WriteFile(c.persistentFlagConfigurationFile, data, 0600)
 		if err != nil {
-			c.logger.Error("Error while writing flags to file", slog.Any("error", err))
+			c.logger.Error("Error while writing flags to file", slog.Any("error", err.Error()))
 			return
 		}
 		c.logger.Info(

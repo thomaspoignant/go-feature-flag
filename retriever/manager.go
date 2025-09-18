@@ -24,6 +24,7 @@ type ManagerConfig struct {
 	StartWithRetrieverError         bool
 	EnablePollingJitter             bool
 	PollingInterval                 time.Duration
+	Name                            *string
 }
 
 // Manager is a struct that managed the retrievers.
@@ -76,7 +77,7 @@ func (m *Manager) StartPolling() {
 			if err != nil {
 				m.logger.Error(
 					"Error while updating the cache.",
-					slog.Any("error", err),
+					slog.Any("error", err.Error()),
 				)
 			}
 		case <-m.bgUpdater.updaterChan:
@@ -94,20 +95,51 @@ func (m *Manager) StopPolling() {
 func (m *Manager) initRetrievers(ctx context.Context, retrieversToInit []Retriever) error {
 	m.onErrorRetriever = make([]Retriever, 0)
 	for _, retriever := range retrieversToInit {
-		if r, ok := retriever.(InitializableRetrieverLegacy); ok {
-			err := r.Init(ctx, m.logger.GetLogLogger(slog.LevelError))
-			if err != nil {
-				m.onErrorRetriever = append(m.onErrorRetriever, retriever)
-			}
-		}
+		m.tryInitializeLegacy(ctx, retriever)
+		m.tryInitializeStandard(ctx, retriever)
+		m.tryInitializeWithFlagset(ctx, retriever)
+	}
+	return m.checkInitializationErrors()
+}
 
-		if r, ok := retriever.(InitializableRetriever); ok {
-			err := r.Init(ctx, m.logger)
-			if err != nil {
-				m.onErrorRetriever = append(m.onErrorRetriever, retriever)
-			}
+// tryInitializeLegacy attempts to initialize a retriever using the legacy interface.
+// This function will append the retriever to the onErrorRetriever slice if the initialization fails.
+// If retriever implements the InitializableRetrieverLegacy interface, it will be initialized using
+// the legacy interface.
+func (m *Manager) tryInitializeLegacy(ctx context.Context, retriever Retriever) {
+	if r, ok := retriever.(InitializableRetrieverLegacy); ok {
+		if err := r.Init(ctx, m.logger.GetLogLogger(slog.LevelError)); err != nil {
+			m.onErrorRetriever = append(m.onErrorRetriever, retriever)
 		}
 	}
+}
+
+// tryInitializeStandard attempts to initialize a retriever using the standard interface.
+// This function will append the retriever to the onErrorRetriever slice if the initialization fails.
+// If retriever implements the InitializableRetriever interface, it will be initialized using
+// the standard interface.
+func (m *Manager) tryInitializeStandard(ctx context.Context, retriever Retriever) {
+	if r, ok := retriever.(InitializableRetriever); ok {
+		if err := r.Init(ctx, m.logger); err != nil {
+			m.onErrorRetriever = append(m.onErrorRetriever, retriever)
+		}
+	}
+}
+
+// tryInitializeWithFlagset attempts to initialize a retriever using the flagset interface.
+// This function will append the retriever to the onErrorRetriever slice if the initialization fails.
+// If retriever implements the InitializableRetrieverWithFlagset interface, it will be initialized using
+// the flagset interface.
+func (m *Manager) tryInitializeWithFlagset(ctx context.Context, retriever Retriever) {
+	if r, ok := retriever.(InitializableRetrieverWithFlagset); ok {
+		if err := r.Init(ctx, m.logger, m.config.Name); err != nil {
+			m.onErrorRetriever = append(m.onErrorRetriever, retriever)
+		}
+	}
+}
+
+// checkInitializationErrors returns an error if any retrievers failed to initialize.
+func (m *Manager) checkInitializationErrors() error {
 	if len(m.onErrorRetriever) > 0 {
 		return fmt.Errorf("error while initializing the retrievers: %v", m.onErrorRetriever)
 	}
@@ -178,7 +210,7 @@ func (m *Manager) handleFirstRetrieverError(err error) error {
 	default:
 		// We accept to start with a retriever error, we will serve only default value
 		m.logger.Error("Impossible to retrieve the flags, starting with the "+
-			"retriever error", slog.Any("error", err))
+			"retriever error", slog.Any("error", err.Error()))
 	}
 	return nil
 }
@@ -233,7 +265,7 @@ func (m *Manager) ForceRefresh() bool {
 	if err != nil {
 		m.logger.Error(
 			"Error while force updating the cache.",
-			slog.Any("error", err),
+			slog.Any("error", err.Error()),
 		)
 		return false
 	}

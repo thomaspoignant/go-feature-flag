@@ -4,7 +4,9 @@ on:
     branches:
       - main
   pull_request:
-    types: [ opened, synchronize, reopened ]
+    types: [opened, synchronize, reopened]
+
+permissions: read-all
 
 jobs:
   examples-linting:
@@ -12,69 +14,69 @@ jobs:
     name: Lint all the examples configuration files
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
       - name: data_export_file
-        uses: go-feature-flag/gofeatureflag-lint-action@v1
+        uses: go-feature-flag/gofeatureflag-lint-action@2ecce17c1a8f5798671140cd011f76c6908b622f # v1.1.0
         with:
           flag-file: ./examples/data_export_file/flags.goff.yaml
 
       - name: data_export_googlecloudstorage
-        uses: go-feature-flag/gofeatureflag-lint-action@v1
+        uses: go-feature-flag/gofeatureflag-lint-action@2ecce17c1a8f5798671140cd011f76c6908b622f # v1.1.0
         with:
           flag-file: ./examples/data_export_googlecloudstorage/flags.goff.yaml
 
       - name: data_export_s3
-        uses: go-feature-flag/gofeatureflag-lint-action@v1
+        uses: go-feature-flag/gofeatureflag-lint-action@2ecce17c1a8f5798671140cd011f76c6908b622f # v1.1.0
         with:
           flag-file: ./examples/data_export_s3/flags.goff.yaml
 
       - name: demo
-        uses: go-feature-flag/gofeatureflag-lint-action@v1
+        uses: go-feature-flag/gofeatureflag-lint-action@2ecce17c1a8f5798671140cd011f76c6908b622f # v1.1.0
         with:
           flag-file: ./examples/demo/demo-flags.goff.yaml
 
       - name: retriever_configmap
-        uses: go-feature-flag/gofeatureflag-lint-action@v1
+        uses: go-feature-flag/gofeatureflag-lint-action@2ecce17c1a8f5798671140cd011f76c6908b622f # v1.1.0
         with:
           flag-file: ./examples/retriever_configmap/flags.goff.yaml
 
       - name: retriever_file
-        uses: go-feature-flag/gofeatureflag-lint-action@v1
+        uses: go-feature-flag/gofeatureflag-lint-action@2ecce17c1a8f5798671140cd011f76c6908b622f # v1.1.0
         with:
           flag-file: ./examples/retriever_file/flags.goff.yaml
 
       - name: retriever_github
-        uses: go-feature-flag/gofeatureflag-lint-action@v1
+        uses: go-feature-flag/gofeatureflag-lint-action@2ecce17c1a8f5798671140cd011f76c6908b622f # v1.1.0
         with:
           flag-file: ./examples/retriever_github/flags.goff.yaml
 
       - name: retriever_http
-        uses: go-feature-flag/gofeatureflag-lint-action@v1
+        uses: go-feature-flag/gofeatureflag-lint-action@2ecce17c1a8f5798671140cd011f76c6908b622f # v1.1.0
         with:
           flag-file: ./examples/retriever_http/flags.goff.yaml
 
       - name: retriever_multiple_config_files_1
-        uses: go-feature-flag/gofeatureflag-lint-action@v1
+        uses: go-feature-flag/gofeatureflag-lint-action@2ecce17c1a8f5798671140cd011f76c6908b622f # v1.1.0
         with:
           flag-file: ./examples/retriever_multiple_config_files/flags.goff.yaml
 
       - name: retriever_multiple_config_files_2
-        uses: go-feature-flag/gofeatureflag-lint-action@v1
+        uses: go-feature-flag/gofeatureflag-lint-action@2ecce17c1a8f5798671140cd011f76c6908b622f # v1.1.0
         with:
           flag-file: ./examples/retriever_multiple_config_files/flags2.goff.yaml
 
       - name: rollout_experimentation
-        uses: go-feature-flag/gofeatureflag-lint-action@v1
+        uses: go-feature-flag/gofeatureflag-lint-action@2ecce17c1a8f5798671140cd011f76c6908b622f # v1.1.0
         with:
           flag-file: ./examples/rollout_experimentation/flags.goff.yaml
 
       - name: rollout_progressive
-        uses: go-feature-flag/gofeatureflag-lint-action@v1
+        uses: go-feature-flag/gofeatureflag-lint-action@2ecce17c1a8f5798671140cd011f76c6908b622f # v1.1.0
         with:
           flag-file: ./examples/rollout_progressive/flags.goff.yaml
 
       - name: rollout_scheduled
-        uses: go-feature-flag/gofeatureflag-lint-action@v1
+        uses: go-feature-flag/gofeatureflag-lint-action@2ecce17c1a8f5798671140cd011f76c6908b622f # v1.1.0
         with:
           flag-file: ./examples/rollout_scheduled/flags.goff.yaml
