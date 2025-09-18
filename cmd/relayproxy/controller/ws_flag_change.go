@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"context"
 	"net/http"
 	"time"
 
@@ -50,41 +51,46 @@ func (f *wsFlagChange) Handler(c echo.Context) error {
 		return err
 	}
 	defer func() { _ = conn.Close() }()
+
 	f.websocketService.Register(conn)
 	defer f.websocketService.Deregister(conn)
 	f.logger.Debug("registering new websocket connection", zap.Any("connection", conn))
 
+	// Create context for cancellation
+	ctx, cancel := context.WithCancel(c.Request().Context())
+	defer cancel()
+
 	// Start the ping pong loop
-	stopper := make(chan struct{}, 1)
-	go f.pingPongLoop(stopper, conn)
-	isOpen := true
-	for isOpen {
+	go f.pingPongLoop(ctx, conn)
+
+	// Set read deadline to prevent hanging connections
+	conn.SetReadDeadline(time.Now().Add(60 * time.Second))
+
+	for {
 		_, _, err := conn.ReadMessage()
 		if err != nil {
-			close(stopper)
-			f.websocketService.Deregister(conn)
 			f.logger.Debug(
 				"closing websocket connection",
 				zap.Error(err),
 				zap.Any("connection", conn),
 			)
-			isOpen = false
+			return nil
 		}
+		// Reset read deadline after each message
+		conn.SetReadDeadline(time.Now().Add(60 * time.Second))
 	}
-	return nil
 }
 
 // pingPongLoop is a keep-alive call to the client.
 // It calls the client to ensure that the connection is still active.
 // If the ping is not working we are closing the session.
-func (f *wsFlagChange) pingPongLoop(stopper chan struct{}, conn *websocket.Conn) {
+func (f *wsFlagChange) pingPongLoop(ctx context.Context, conn *websocket.Conn) {
 	// Ping interval duration
 	pingInterval := 1 * time.Second
 	// Create a ticker to send pings at regular intervals
 	ticker := time.NewTicker(pingInterval)
 	defer ticker.Stop()
 
-	// nolint: gosimple
 	for {
 		select {
 		case <-ticker.C:
@@ -99,7 +105,7 @@ func (f *wsFlagChange) pingPongLoop(stopper chan struct{}, conn *websocket.Conn)
 				f.websocketService.Deregister(conn)
 				return
 			}
-		case <-stopper:
+		case <-ctx.Done():
 			f.logger.Debug("stopping ping pong loop")
 			return
 		}

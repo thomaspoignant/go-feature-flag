@@ -1,7 +1,9 @@
 package service
 
 import (
+	"context"
 	"sync"
+	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 )
@@ -22,6 +24,8 @@ type WebsocketService interface {
 	BroadcastFlagChanges(diff notifier.DiffCache)
 	// Close deregister all open connections.
 	Close()
+	// WaitForCleanup waits for all connections to be properly closed
+	WaitForCleanup(timeout time.Duration) error
 }
 
 // NewWebsocketService is a constructor to create a new WebsocketService.
@@ -29,6 +33,7 @@ func NewWebsocketService() WebsocketService {
 	return &websocketServiceImpl{
 		clients: map[WebsocketConn]interface{}{},
 		mutex:   &sync.RWMutex{},
+		closed:  make(chan struct{}),
 	}
 }
 
@@ -36,6 +41,7 @@ func NewWebsocketService() WebsocketService {
 type websocketServiceImpl struct {
 	clients map[WebsocketConn]interface{}
 	mutex   *sync.RWMutex
+	closed  chan struct{}
 }
 
 // BroadcastFlagChanges is sending a string to all the open connection.
@@ -72,5 +78,19 @@ func (w *websocketServiceImpl) Close() {
 	defer w.mutex.Unlock()
 	for c := range w.clients {
 		delete(w.clients, c)
+	}
+	close(w.closed)
+}
+
+// WaitForCleanup waits for all connections to be properly closed
+func (w *websocketServiceImpl) WaitForCleanup(timeout time.Duration) error {
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	select {
+	case <-w.closed:
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
 	}
 }
