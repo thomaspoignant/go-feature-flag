@@ -40,7 +40,8 @@ var retrieverFactories = map[retrieverconf.RetrieverKind]retrieverFactory{
 }
 
 // Factory functions for each retriever type
-func createGitHubRetriever(c *retrieverconf.RetrieverConf, defaultRetrieverConfig *DefaultRetrieverConfig) (retriever.Retriever, error) {
+func createGitHubRetriever(
+	c *retrieverconf.RetrieverConf, defaultRetrieverConfig *DefaultRetrieverConfig) (retriever.Retriever, error) {
 	token := c.AuthToken
 	if token == "" && c.GithubToken != "" { // nolint: staticcheck
 		token = c.GithubToken // nolint: staticcheck
@@ -59,7 +60,8 @@ func createGitHubRetriever(c *retrieverconf.RetrieverConf, defaultRetrieverConfi
 	}, nil
 }
 
-func createGitlabRetriever(c *retrieverconf.RetrieverConf, defaultRetrieverConfig *DefaultRetrieverConfig) (retriever.Retriever, error) {
+func createGitlabRetriever(
+	c *retrieverconf.RetrieverConf, defaultRetrieverConfig *DefaultRetrieverConfig) (retriever.Retriever, error) {
 	return &gitlabretriever.Retriever{
 		BaseURL: c.BaseURL,
 		Branch: func() string {
@@ -75,7 +77,8 @@ func createGitlabRetriever(c *retrieverconf.RetrieverConf, defaultRetrieverConfi
 	}, nil
 }
 
-func createBitbucketRetriever(c *retrieverconf.RetrieverConf, defaultRetrieverConfig *DefaultRetrieverConfig) (retriever.Retriever, error) {
+func createBitbucketRetriever(
+	c *retrieverconf.RetrieverConf, defaultRetrieverConfig *DefaultRetrieverConfig) (retriever.Retriever, error) {
 	return &bitbucketretriever.Retriever{
 		RepositorySlug: c.RepositorySlug,
 		Branch: func() string {
@@ -100,7 +103,8 @@ func createS3Retriever(c *retrieverconf.RetrieverConf, _ *DefaultRetrieverConfig
 	return &s3retrieverv2.Retriever{Bucket: c.Bucket, Item: c.Item, AwsConfig: &awsConfig}, err
 }
 
-func createHTTPRetriever(c *retrieverconf.RetrieverConf, defaultRetrieverConfig *DefaultRetrieverConfig) (retriever.Retriever, error) {
+func createHTTPRetriever(
+	c *retrieverconf.RetrieverConf, defaultRetrieverConfig *DefaultRetrieverConfig) (retriever.Retriever, error) {
 	return &httpretriever.Retriever{
 		URL: c.URL,
 		Method: func() string {
@@ -111,11 +115,13 @@ func createHTTPRetriever(c *retrieverconf.RetrieverConf, defaultRetrieverConfig 
 		}(), Body: c.HTTPBody, Header: c.HTTPHeaders, Timeout: defaultRetrieverConfig.Timeout}, nil
 }
 
-func createGoogleStorageRetriever(c *retrieverconf.RetrieverConf, _ *DefaultRetrieverConfig) (retriever.Retriever, error) {
+func createGoogleStorageRetriever(
+	c *retrieverconf.RetrieverConf, _ *DefaultRetrieverConfig) (retriever.Retriever, error) {
 	return &gcstorageretriever.Retriever{Bucket: c.Bucket, Object: c.Object}, nil
 }
 
-func createKubernetesRetriever(c *retrieverconf.RetrieverConf, _ *DefaultRetrieverConfig) (retriever.Retriever, error) {
+func createKubernetesRetriever(
+	c *retrieverconf.RetrieverConf, _ *DefaultRetrieverConfig) (retriever.Retriever, error) {
 	client, err := rest.InClusterConfig()
 	if err != nil {
 		return nil, err
@@ -136,7 +142,8 @@ func createRedisRetriever(c *retrieverconf.RetrieverConf, _ *DefaultRetrieverCon
 	return &redisretriever.Retriever{Options: c.RedisOptions, Prefix: c.RedisPrefix}, nil
 }
 
-func createAzBlobStorageRetriever(c *retrieverconf.RetrieverConf, _ *DefaultRetrieverConfig) (retriever.Retriever, error) {
+func createAzBlobStorageRetriever(
+	c *retrieverconf.RetrieverConf, _ *DefaultRetrieverConfig) (retriever.Retriever, error) {
 	return &azblobretriever.Retriever{
 		Container:   c.Container,
 		Object:      c.Object,
@@ -145,6 +152,7 @@ func createAzBlobStorageRetriever(c *retrieverconf.RetrieverConf, _ *DefaultRetr
 	}, nil
 }
 
-func createPostgreSQLRetriever(c *retrieverconf.RetrieverConf, _ *DefaultRetrieverConfig) (retriever.Retriever, error) {
+func createPostgreSQLRetriever(
+	c *retrieverconf.RetrieverConf, _ *DefaultRetrieverConfig) (retriever.Retriever, error) {
 	return &postgresqlretriever.Retriever{URI: c.URI, Table: c.Table, Columns: c.Columns}, nil
 }
