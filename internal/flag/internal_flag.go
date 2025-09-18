@@ -117,7 +117,7 @@ func (f *InternalFlag) Value(
 		RuleIndex: variationSelection.ruleIndex,
 		RuleName:  variationSelection.ruleName,
 		Cacheable: variationSelection.cacheable,
-		Metadata:  flag.GetMetadata(),
+		Metadata:  constructMetadata(flag.GetMetadata(), variationSelection.ruleName),
 	}
 }
 
