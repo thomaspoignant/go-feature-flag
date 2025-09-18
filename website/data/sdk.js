@@ -1,49 +1,56 @@
 const sdkFeatureAvailableList = [
   {
-    key: "localCache",
+    key: 'localCache',
     sdkType: 'client',
     name: 'Flags Local Cache',
-    description: 'The provider is able to cache the flags, it allow to evaluate the feature flags without waiting for the remote evaluation to be done.',
+    description:
+      'The provider is able to cache the flags, it allow to evaluate the feature flags without waiting for the remote evaluation to be done.',
   },
+  // {
+  //   key: "inprocess",
+  //   sdkType: 'server',
+  //   name: 'In process Evaluation',
+  //   description: 'The provider is able to evaluate the feature flags in process, it means that the provider does not do any remote call to evaluate the feature flags.',
+  // },
   {
-    key: "inprocess",
-    sdkType: 'server',
-    name: 'In process Evaluation',
-    description: 'The provider is able to evaluate the feature flags in process, it means that the provider does not do any remote call to evaluate the feature flags.',
-  },
-  {
-    key: "remote",
+    key: 'remote',
     name: 'Remote Evaluation',
-    description: 'The provider is calling the remote server to evaluate the feature flags.',
+    description:
+      'The provider is calling the remote server to evaluate the feature flags.',
   },
   {
-    key: "trackingFlag",
+    key: 'trackingFlag',
     name: 'Tracking Flag Evaluation',
-    description: 'The provider is tracking all the evaluations of your feature flags and you can export them using an exporter.',
+    description:
+      'The provider is tracking all the evaluations of your feature flags and you can export them using an exporter.',
   },
+  // {
+  //   key: "trackingEvents",
+  //   name: 'Tracking Custom Events',
+  //   description: 'The provider is tracking custom events through the track() function of your SDK. All those events are send to the exporter for you to forward them where you want.',
+  // },
   {
-    key: "trackingEvents",
-    name: 'Tracking Custom Events',
-    description: 'The provider is tracking custom events through the track() function of your SDK. All those events are send to the exporter for you to forward them where you want.',
-  },
-  {
-    key: "configurationChange",
+    key: 'configurationChange',
     name: 'Configuration Change Updates',
-    description: 'The provider is able to update the configuration based on the configuration, it means that the provider is able to react to any feature flag change on your configuration.',
+    description:
+      'The provider is able to update the configuration based on the configuration, it means that the provider is able to react to any feature flag change on your configuration.',
   },
   {
-    key: "providerEvents",
+    key: 'providerEvents',
     name: 'Provider Events Reactions',
-    description: 'You can add an event handler to the provider to react to the provider events.',
-  }
-]
+    description:
+      'You can add an event handler to the provider to react to the provider events.',
+  },
+];
 
 const features = (keys, sdkType) => {
-  return sdkFeatureAvailableList.filter(it => it.sdkType === sdkType || it.sdkType === undefined).map(it => ({
-    ...it,
-    status: keys.includes(it.key) ? 'done' : 'not implemented',
-  }))
-}
+  return sdkFeatureAvailableList
+    .filter(it => it.sdkType === sdkType || it.sdkType === undefined)
+    .map(it => ({
+      ...it,
+      status: keys.includes(it.key) ? 'done' : 'not implemented',
+    }));
+};
 
 export const sdk = [
   {
@@ -54,7 +61,16 @@ export const sdk = [
     badgeUrl:
       'https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fproxy.golang.org%2Fgithub.com%2Fopen-feature%2Fgo-sdk-contrib%2Fproviders%2Fgo-feature-flag%2F%40latest&query=%24.Version&label=GO&color=blue&style=flat-square&log=go',
     docLink: 'server_providers/openfeature_go',
-    featureList: features(['inprocess', 'remote', 'trackingFlag', 'configurationChange', 'providerEvents'], 'server'),
+    featureList: features(
+      [
+        'inprocess',
+        'remote',
+        'trackingFlag',
+        'configurationChange',
+        'providerEvents',
+      ],
+      'server'
+    ),
   },
   {
     key: 'java',
@@ -64,7 +80,17 @@ export const sdk = [
     badgeUrl:
       'https://img.shields.io/maven-central/v/dev.openfeature.contrib.providers/go-feature-flag?color=blue&style=flat-square&logo=java',
     docLink: 'server_providers/openfeature_java',
-    featureList: features(['inprocess', 'remote', 'trackingFlag', 'configurationChange', 'providerEvents', 'trackingEvents'], 'server'),
+    featureList: features(
+      [
+        'inprocess',
+        'remote',
+        'trackingFlag',
+        'configurationChange',
+        'providerEvents',
+        'trackingEvents',
+      ],
+      'server'
+    ),
   },
   {
     key: 'kotlin',
@@ -74,7 +100,17 @@ export const sdk = [
     badgeUrl:
       'https://img.shields.io/maven-central/v/dev.openfeature.contrib.providers/go-feature-flag?color=blue&style=flat-square&logo=java',
     docLink: 'server_providers/openfeature_java',
-    featureList: features(['inprocess', 'remote', 'trackingFlag', 'configurationChange', 'providerEvents', 'trackingEvents'], 'server'),
+    featureList: features(
+      [
+        'inprocess',
+        'remote',
+        'trackingFlag',
+        'configurationChange',
+        'providerEvents',
+        'trackingEvents',
+      ],
+      'server'
+    ),
   },
   {
     key: 'dotnet',
@@ -84,7 +120,17 @@ export const sdk = [
     badgeUrl:
       'https://img.shields.io/nuget/v/OpenFeature.Providers.GOFeatureFlag?color=blue&style=flat-square&logo=nuget',
     docLink: 'server_providers/openfeature_dotnet',
-    featureList: features(['inprocess', 'remote', 'trackingFlag', 'configurationChange', 'providerEvents', 'trackingEvents'], 'server'),
+    featureList: features(
+      [
+        'inprocess',
+        'remote',
+        'trackingFlag',
+        'configurationChange',
+        'providerEvents',
+        'trackingEvents',
+      ],
+      'server'
+    ),
   },
   {
     key: 'python',
@@ -94,7 +140,10 @@ export const sdk = [
     badgeUrl:
       'https://img.shields.io/pypi/v/gofeatureflag-python-provider?color=blue&style=flat-square&logo=pypi',
     docLink: 'server_providers/openfeature_python',
-    featureList: features(['remote', 'trackingFlag', 'configurationChange'], 'server'),
+    featureList: features(
+      ['remote', 'trackingFlag', 'configurationChange'],
+      'server'
+    ),
   },
   {
     key: 'javascript',
@@ -104,7 +153,17 @@ export const sdk = [
     badgeUrl:
       'https://img.shields.io/npm/v/%40openfeature%2Fgo-feature-flag-web-provider?color=blue&style=flat-square&logo=npm',
     docLink: 'client_providers/openfeature_javascript',
-    featureList: features(['localCache', 'remote', 'trackingFlag', 'configurationChange', 'providerEvents', 'trackingEvents'], 'client'),
+    featureList: features(
+      [
+        'localCache',
+        'remote',
+        'trackingFlag',
+        'configurationChange',
+        'providerEvents',
+        'trackingEvents',
+      ],
+      'client'
+    ),
   },
   {
     key: 'typescript',
@@ -114,7 +173,17 @@ export const sdk = [
     badgeUrl:
       'https://img.shields.io/npm/v/%40openfeature%2Fgo-feature-flag-web-provider?color=blue&style=flat-square&logo=npm',
     docLink: 'client_providers/openfeature_javascript',
-    featureList: features(['localCache', 'remote', 'trackingFlag', 'configurationChange', 'providerEvents', 'trackingEvents'], 'client'),
+    featureList: features(
+      [
+        'localCache',
+        'remote',
+        'trackingFlag',
+        'configurationChange',
+        'providerEvents',
+        'trackingEvents',
+      ],
+      'client'
+    ),
   },
   {
     key: 'react',
@@ -124,7 +193,17 @@ export const sdk = [
     badgeUrl:
       'https://img.shields.io/npm/v/%40openfeature%2Fgo-feature-flag-web-provider?color=blue&style=flat-square&logo=npm',
     docLink: 'client_providers/openfeature_react',
-    featureList: features(['localCache', 'remote', 'trackingFlag', 'configurationChange', 'providerEvents', 'trackingEvents'], 'client'),
+    featureList: features(
+      [
+        'localCache',
+        'remote',
+        'trackingFlag',
+        'configurationChange',
+        'providerEvents',
+        'trackingEvents',
+      ],
+      'client'
+    ),
   },
   {
     key: 'angular',
@@ -134,7 +213,17 @@ export const sdk = [
     badgeUrl:
       'https://img.shields.io/npm/v/%40openfeature%2Fgo-feature-flag-web-provider?color=blue&style=flat-square&logo=npm',
     docLink: 'client_providers/openfeature_angular',
-    featureList: features(['localCache', 'remote', 'trackingFlag', 'configurationChange', 'providerEvents', 'trackingEvents'], 'client'),
+    featureList: features(
+      [
+        'localCache',
+        'remote',
+        'trackingFlag',
+        'configurationChange',
+        'providerEvents',
+        'trackingEvents',
+      ],
+      'client'
+    ),
   },
   {
     key: 'swift',
@@ -144,7 +233,16 @@ export const sdk = [
     docLink: 'client_providers/openfeature_swift',
     badgeUrl:
       'https://img.shields.io/github/v/release/go-feature-flag/openfeature-swift-provider?label=Swift&amp;display_name=tag&style=flat-square&logo=Swift',
-    featureList: features(['localCache', 'remote', 'trackingFlag', 'configurationChange', 'providerEvents'], 'client'),
+    featureList: features(
+      [
+        'localCache',
+        'remote',
+        'trackingFlag',
+        'configurationChange',
+        'providerEvents',
+      ],
+      'client'
+    ),
   },
   {
     key: 'android',
@@ -154,7 +252,16 @@ export const sdk = [
     docLink: 'client_providers/openfeature_android',
     badgeUrl:
       'https://img.shields.io/maven-central/v/org.gofeatureflag.openfeature/gofeatureflag-kotlin-provider?color=blue&style=flat-square&logo=android',
-    featureList: features(['localCache', 'remote', 'trackingFlag', 'configurationChange', 'providerEvents'], 'client'),
+    featureList: features(
+      [
+        'localCache',
+        'remote',
+        'trackingFlag',
+        'configurationChange',
+        'providerEvents',
+      ],
+      'client'
+    ),
   },
   {
     key: 'nodejs',
@@ -164,7 +271,10 @@ export const sdk = [
     docLink: 'server_providers/openfeature_javascript',
     badgeUrl:
       'https://img.shields.io/npm/v/%40openfeature%2Fgo-feature-flag-provider?color=blue&style=flat-square&logo=npm',
-    featureList: features(['remote', 'trackingFlag', 'configurationChange', 'providerEvents'], 'server'),
+    featureList: features(
+      ['remote', 'trackingFlag', 'configurationChange', 'providerEvents'],
+      'server'
+    ),
   },
   {
     key: 'php',
@@ -194,6 +304,9 @@ export const sdk = [
     badgeUrl:
       'https://img.shields.io/npm/v/%40openfeature%2Fgo-feature-flag-provider?color=blue&style=flat-square&logo=npm',
     docLink: 'server_providers/openfeature_nestjs',
-    featureList: features(['remote', 'trackingFlag', 'configurationChange', 'providerEvents'], 'server'),
+    featureList: features(
+      ['remote', 'trackingFlag', 'configurationChange', 'providerEvents'],
+      'server'
+    ),
   },
 ];
