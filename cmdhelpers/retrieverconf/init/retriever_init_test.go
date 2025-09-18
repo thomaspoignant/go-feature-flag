@@ -18,12 +18,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/retriever/s3retrieverv2"
 )
 
-var defaultRetrieverConfig = DefaultRetrieverConfig{
-	Timeout:    10 * time.Second,
-	HTTPMethod: http.MethodGet,
-	GitBranch:  "main",
-}
-
 func Test_InitRetriever(t *testing.T) {
 	tests := []struct {
 		name                   string
@@ -232,7 +226,7 @@ func Test_InitRetriever(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := InitRetriever(tt.conf, defaultRetrieverConfig)
+			got, err := InitRetriever(tt.conf)
 			tt.wantErr(t, err)
 			if err == nil {
 				assert.IsType(t, tt.wantType, got)

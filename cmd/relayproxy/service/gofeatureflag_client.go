@@ -115,7 +115,7 @@ func initRetrievers(proxyConf *config.FlagSet) ([]retriever.Retriever, error) {
 	retrievers := make([]retriever.Retriever, 0)
 	// if the retriever is set, we add it to the retrievers
 	if proxyConf.Retriever != nil {
-		currentRetriever, err := retrieverInit.InitRetriever(proxyConf.Retriever, config.DefaultRetrieverConfig)
+		currentRetriever, err := retrieverInit.InitRetriever(proxyConf.Retriever)
 		if err != nil {
 			return nil, err
 		}
@@ -124,7 +124,7 @@ func initRetrievers(proxyConf *config.FlagSet) ([]retriever.Retriever, error) {
 	// if the retrievers are set, we add them to the retrievers
 	if proxyConf.Retrievers != nil {
 		for _, r := range *proxyConf.Retrievers {
-			currentRetriever, err := retrieverInit.InitRetriever(&r, config.DefaultRetrieverConfig)
+			currentRetriever, err := retrieverInit.InitRetriever(&r)
 			if err != nil {
 				return nil, err
 			}
