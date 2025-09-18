@@ -142,7 +142,13 @@ func Test_websocket_flag_change(t *testing.T) {
 			}()
 
 			// Set read deadline to prevent hanging
-			ws.SetReadDeadline(time.Now().Add(10 * time.Second))
+			err = ws.SetReadDeadline(time.Now().Add(10 * time.Second))
+			assert.NoError(t, err)
+
+			// Wait a short time to ensure WebSocket registration is complete
+			// This prevents the race condition where BroadcastFlagChanges is called
+			// before the WebSocket connection is fully registered in the service
+			time.Sleep(100 * time.Millisecond)
 
 			// Broadcast the flag change
 			websocketService.BroadcastFlagChanges(tt.flagChange)
