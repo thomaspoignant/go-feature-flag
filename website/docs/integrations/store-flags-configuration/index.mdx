@@ -2,7 +2,7 @@
 description: Where to store the flag's configuration?
 ---
 import { Card } from "@site/src/components/doc/cardv3";
-import { integrations } from "@site/data/integrations";
+import { getIntegrations } from "@site/data/integrations";
 
 # 💽 Store your flags’ configuration
 ## Overview
@@ -28,10 +28,11 @@ You have 2 different ways to specify a retriever depending on if you are using t
 In all the detail pages of the retrievers bellow you will have an example for both examples.
 
 ## Available retrievers
+
 Bellow is the full list of retrievers that are available in GO Feature Flag.
 
 <div className={"grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"}>
-  {integrations.retrievers.filter(item => item.docLink !== undefined).map((retriever) => {
+  {getIntegrations("").retrievers.filter(item => item.docLink !== undefined).map((retriever) => {
     return (
       <Card
         logo={retriever.logo}
@@ -47,12 +48,12 @@ Bellow is the full list of retrievers that are available in GO Feature Flag.
 ## Custom retriever
 If you have a specific use case that is not covered by the built-in retrievers, you can create your own custom retriever.
 
-To achieve this, you need to implement the [`InitializableRetriever`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/retriever/#InitializableRetriever) interface in your custom retriever.
+To achieve this, you need to implement the [`InitializableRetrieverWithFlagset`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/retriever/#InitializableRetrieverWithFlagset) interface in your custom retriever.
 
 ```go
-type InitializableRetriever interface {
+type InitializableRetrieverWithFlagset interface {
   Retrieve(ctx context.Context) ([]byte, error)
-  Init(ctx context.Context, logger *fflog.FFLogger) error
+  Init(ctx context.Context, logger *fflog.FFLogger, flagset *string) error
   Shutdown(ctx context.Context) error
   Status() retriever.Status
 }

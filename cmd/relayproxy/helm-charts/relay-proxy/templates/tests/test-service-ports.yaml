@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "relay-proxy.fullname" . }}-test-service-ports"
+  labels:
+    {{- include "relay-proxy.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": hook-succeeded,hook-failed
+spec:
+  containers:
+    - name: test-service-ports
+      image: busybox
+      command: ['/bin/sh']
+      args:
+        - -c
+        - |
+          echo "Testing service port configuration..."
+          
+          # Test HTTP port (should always be accessible)
+          echo "Testing HTTP port {{ .Values.service.port }}..."
+          wget -q --spider "{{ include "relay-proxy.fullname" . }}:{{ .Values.service.port }}/health" || exit 1
+          echo "✓ HTTP port {{ .Values.service.port }} is accessible"
+          
+          # Test monitoring port if configured
+          {{- if (include "relay-proxy.monitoringPort" .) }}
+          echo "Testing monitoring port {{ include "relay-proxy.monitoringPort" . }}..."
+          wget -q --spider "{{ include "relay-proxy.fullname" . }}:{{ include "relay-proxy.monitoringPort" . }}/health" || exit 1
+          echo "✓ Monitoring port {{ include "relay-proxy.monitoringPort" . }} is accessible"
+          
+          # Verify both ports are different
+          if [ "{{ .Values.service.port }}" = "{{ include "relay-proxy.monitoringPort" . }}" ]; then
+            echo "✗ Error: HTTP port and monitoring port cannot be the same"
+            exit 1
+          fi
+          echo "✓ Port separation verified"
+          {{- else }}
+          echo "No monitoring port configured - using HTTP port for health checks"
+          {{- end }}
+          
+          echo "Service port tests completed successfully!"
+  restartPolicy: Never

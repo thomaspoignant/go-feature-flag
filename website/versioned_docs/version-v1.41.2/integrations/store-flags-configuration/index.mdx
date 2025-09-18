@@ -2,7 +2,7 @@
 description: Where to store the flag's configuration?
 ---
 import { Card } from "@site/src/components/doc/cardv3";
-import { integrations } from "@site/data/integrations";
+import { getIntegrations } from "@site/data/integrations";
 
 # 💽 Store your flags’ configuration
 ## Overview
@@ -31,7 +31,7 @@ In all the detail pages of the retrievers bellow you will have an example for bo
 Bellow is the full list of retrievers that are available in GO Feature Flag.
 
 <div className={"grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"}>
-  {integrations.retrievers.filter(item => item.docLink !== undefined).map((retriever) => {
+  {getIntegrations("v1.45.0").retrievers.filter(item => item.docLink !== undefined).map((retriever) => {
     return (
       <Card
         logo={retriever.logo}

@@ -9,7 +9,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/gcstorageexporter"
@@ -21,7 +20,6 @@ func TestGoogleStorage_Export(t *testing.T) {
 	hostname, _ := os.Hostname()
 	type fields struct {
 		Bucket      string
-		AwsConfig   *aws.Config
 		Format      string
 		Path        string
 		Filename    string

@@ -1,17 +1,21 @@
 name: "Check open-feature pull request"
 on:
   schedule:
-    - cron:  '0 10 */3 * *'
+    - cron: "0 10 */3 * *"
   workflow_dispatch:
+
+permissions: read-all
 
 jobs:
   check_prs:
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
       - name: Install dependencies
         working-directory: ./openfeature/ci_scripts
         run: npm install

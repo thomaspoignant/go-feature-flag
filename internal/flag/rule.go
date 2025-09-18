@@ -90,13 +90,13 @@ func evaluateRule(query string, queryFormat QueryFormat, ctx ffcontext.Context) 
 		strCtx, err := json.Marshal(mapCtx)
 		if err != nil {
 			slog.ErrorContext(context.Background(), "error while marhsalling the context for the jsonlogic query",
-				slog.Any("mapCtx", mapCtx), slog.Any("error", err))
+				slog.Any("mapCtx", mapCtx), slog.Any("error", err.Error()))
 			return false
 		}
 		result, err := jsonlogic.Apply(query, string(strCtx))
 		if err != nil {
 			slog.ErrorContext(context.Background(), "error while evaluating the jsonlogic query",
-				slog.String("query", query), slog.Any("error", err))
+				slog.String("query", query), slog.Any("error", err.Error()))
 			return false
 		}
 		switch v := result.(type) {

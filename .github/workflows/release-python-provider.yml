@@ -4,11 +4,13 @@ on:
     tags:
       - python-provider-v*
 
+permissions: read-all
+
 jobs:
   python-release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Extract version
         run: |
           FULL_TAG_NAME=${{  github.ref_name }}
@@ -16,14 +18,14 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_ENV
 
       - name: Edit Toml
-        uses: colathro/toml-editor@1.1.1
+        uses: colathro/toml-editor@da6b46ee7779ed730d2160393ed95fb20e82696d # v1.1.1
         with:
           file: "openfeature/providers/python-provider/pyproject.toml"
           key: "tool.poetry.version"
           value: ${{ env.version }}
 
       - name: Build and publish to PyPi
-        uses: JRubics/poetry-publish@v2.1
+        uses: JRubics/poetry-publish@4b3306307f536bbfcb559603629b3b4f6aef5ab8 # v2.1
         with:
           package_directory: ./openfeature/providers/python-provider
           pypi_token: ${{ secrets.PYPI_TOKEN }}

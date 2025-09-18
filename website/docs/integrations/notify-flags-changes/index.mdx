@@ -1,7 +1,7 @@
 ---
 description: How to be notified of flags changes?
 ---
-import { integrations } from "@site/data/integrations";
+import { getIntegrations } from "@site/data/integrations";
 import { Card } from "@site/src/components/doc/cardv3";
 
 # 📣 Notify flag changes
@@ -35,7 +35,7 @@ In all the details pages of the retrievers bellow you will have an example for b
 Bellow is the full list of notifiers that are available in GO Feature Flag.
 
 <div className={"grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"}>
-  {integrations.notifiers.filter(item => item.docLink !== undefined).map((item) => {
+  {getIntegrations("").notifiers.filter(item => item.docLink !== undefined).map((item) => {
     return (
       <Card
         logo={item.logo}

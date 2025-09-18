@@ -4,35 +4,41 @@ import (
 	"os"
 	"testing"
 
+	"github.com/pterm/pterm"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/cmd/cli/linter"
 )
 
 func TestCmdLint(t *testing.T) {
+	pterm.DisableStyling()
+	pterm.DisableColor()
 	tests := []struct {
-		name           string
-		args           []string
-		lintFlagFormat string
-		wantErr        assert.ErrorAssertionFunc
-		expectedError  string
+		name              string
+		args              []string
+		wantErr           assert.ErrorAssertionFunc
+		expectedStderr    string
+		expectedErrString string
 	}{
 		{
-			name:          "missing configuration file location",
-			args:          []string{"--format=json"},
-			wantErr:       assert.Error,
-			expectedError: "impossible to find config file in the default locations [./,/goff/,/etc/opt/goff/]\nError: invalid GO Feature Flag configuration\n",
+			name:              "missing configuration file location",
+			args:              []string{"--format=json"},
+			wantErr:           assert.Error,
+			expectedStderr:    "ERROR: impossible to find config file in the default locations [./,/goff/,/etc/opt/goff/]\n",
+			expectedErrString: "invalid GO Feature Flag configuration",
 		},
 		{
-			name:          "invalid configuration",
-			args:          []string{"testdata/invalid.json", "--format=json"},
-			wantErr:       assert.Error,
-			expectedError: "testdata/invalid.json: could not parse file (json): invalid character ':' after top-level value\nError: invalid GO Feature Flag configuration\n",
+			name:              "invalid configuration",
+			args:              []string{"testdata/invalid.json", "--format=json"},
+			wantErr:           assert.Error,
+			expectedStderr:    "ERROR: testdata/invalid.json: could not parse file (json): invalid character ':' after top-level value\n",
+			expectedErrString: "invalid GO Feature Flag configuration",
 		},
 		{
-			name:    "valid configuration",
-			args:    []string{"testdata/valid.yaml", "--format=yaml"},
-			wantErr: assert.NoError,
+			name:           "valid configuration",
+			args:           []string{"testdata/valid.yaml", "--format=yaml"},
+			wantErr:        assert.NoError,
+			expectedStderr: "",
 		},
 	}
 	for _, tt := range tests {
@@ -52,10 +58,15 @@ func TestCmdLint(t *testing.T) {
 			cmd.SetArgs(tt.args)
 			err = cmd.Execute()
 			tt.wantErr(t, err)
-			if tt.expectedError != "" {
-				content, err := os.ReadFile(redirectionStderr.Name())
-				require.NoError(t, err)
-				assert.Equal(t, tt.expectedError, string(content))
+
+			// Check stderr content
+			content, rerr := os.ReadFile(redirectionStderr.Name())
+			require.NoError(t, rerr)
+			assert.Equal(t, tt.expectedStderr, string(content))
+
+			// If we expect an error string, check it separately
+			if tt.expectedErrString != "" {
+				assert.EqualError(t, err, tt.expectedErrString)
 			}
 		})
 	}

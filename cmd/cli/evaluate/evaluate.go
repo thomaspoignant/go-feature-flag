@@ -46,17 +46,17 @@ func (e evaluate) Evaluate() (map[string]model.RawVarResult, error) {
 
 	if targetingKey, ok := ctxAsMap["targetingKey"].(string); ok {
 		convertedEvaluationCtx := utils.ConvertEvaluationCtxFromRequest(targetingKey, ctxAsMap)
-		listFLags := make([]string, 0)
+		listFlags := make([]string, 0)
 		if e.flag != "" {
-			listFLags = append(listFLags, e.flag)
+			listFlags = append(listFlags, e.flag)
 		} else {
 			flags, _ := goff.GetFlagsFromCache()
 			for key := range flags {
-				listFLags = append(listFLags, key)
+				listFlags = append(listFlags, key)
 			}
 		}
 
-		for _, flag := range listFLags {
+		for _, flag := range listFlags {
 			res, _ := goff.RawVariation(flag, convertedEvaluationCtx, nil)
 			result[flag] = res
 		}

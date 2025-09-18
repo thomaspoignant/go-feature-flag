@@ -125,6 +125,7 @@ func initializeRetrieverManager(config Config) (*retriever.Manager, error) {
 		StartWithRetrieverError:         config.StartWithRetrieverError,
 		EnablePollingJitter:             config.EnablePollingJitter,
 		PollingInterval:                 config.PollingInterval,
+		Name:                            config.Name,
 	}
 
 	notificationService := initializeNotificationService(config)
