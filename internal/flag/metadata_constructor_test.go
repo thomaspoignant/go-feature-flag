@@ -1,5 +1,3 @@
-// Since the function we are about to test is internal,
-// I've added this test package in the main pack instead of proper one.
 package flag
 
 import (
