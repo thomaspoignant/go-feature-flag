@@ -275,7 +275,7 @@ export function OpenFeatureEcosystem() {
         <div className={'col col--6'}>
           <div className={clsx(styles.openfeaturelogo, 'text-center xl:mt-16')}>
             <img
-              src={'img/features/openfeature-old.svg'}
+              src={'img/features/openfeature.svg'}
               alt="openfeature-logo"
               style={{fill: 'red'}}
             />
