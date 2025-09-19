@@ -11,7 +11,7 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.6.0
 	github.com/BurntSushi/toml v1.5.0
 	github.com/GeorgeD19/json-logic-go v0.0.0-20220225111652-48cc2d2c387e
-	github.com/IBM/sarama v1.46.0
+	github.com/IBM/sarama v1.46.1
 	github.com/atc0005/go-teams-notify/v2 v2.13.0
 	github.com/aws/aws-lambda-go v1.49.0
 	github.com/aws/aws-sdk-go-v2 v1.39.0
