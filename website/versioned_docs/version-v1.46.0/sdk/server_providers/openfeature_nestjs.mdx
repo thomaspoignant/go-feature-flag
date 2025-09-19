@@ -1,0 +1,117 @@
+---
+sidebar_position: 60
+title: NestJS
+description: How to use the OpenFeature NestJS SDK
+---
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import { sdk } from "@site/data/sdk";
+import { FeatureTable } from "@site/src/components/doc/featureTable";
+
+# NestJS
+[![NPM Version](https://img.shields.io/npm/v/%40openfeature%2Fgo-feature-flag-provider?color=blue&style=flat-square)](https://www.npmjs.com/package/@openfeature/go-feature-flag-provider)
+![NPM Downloads](https://img.shields.io/npm/d18m/%40openfeature%2Fgo-feature-flag-provider?style=flat-square)
+
+The OpenFeature `NestJS` SDK is a package that provides a NestJS wrapper for the OpenFeature [`Node Server SDK`](./openfeature_javascript.mdx).
+
+:::info
+We don't have a specific provider for NestJS, you have to use the `GO Feature Flag node provider` with the OpenFeature SDK.
+
+We recommend you to check the [OpenFeature NestJS SDK Documentation](https://openfeature.dev/docs/reference/technologies/server/javascript/nestjs) to see all the available directives and how to use them.
+:::
+
+## Install dependencies
+
+The first things we will do is install the **Open Feature SDK** and the **GO Feature Flag provider**.
+
+<Tabs groupId="code">
+  <TabItem value="yarn" label="yarn">
+
+```shell 
+# yarn requires manual installation of the peer dependencies (see below) 
+yarn add @openfeature/nestjs-sdk \
+    @openfeature/server-sdk \
+    @openfeature/core \
+    @openfeature/go-feature-flag-provider
+```
+
+  </TabItem>
+  <TabItem value="npm" label="npm">
+
+```shell
+npm i @openfeature/nestjs-sdk @openfeature/go-feature-flag-provider
+```
+
+  </TabItem>
+</Tabs>
+
+## Initialize your Open Feature client
+
+To evaluate the flags you need to have an Open Feature configured in your app.
+This code block shows you how you can create a client that you can use in your application.
+
+```typescript
+import { Module, OnModuleInit } from '@nestjs/common';
+import { OpenFeatureModule } from '@openfeature/nestjs-sdk';
+import { GoFeatureFlagProvider } from  '@openfeature/go-feature-flag-provider';
+import { OpenFeature } from '@openfeature/server-sdk';
+
+@Module({
+  imports: [
+    ...
+    OpenFeatureModule.forRoot({
+      contextFactory: () => ({
+        targetingKey: 'nestjs-test'
+      }),
+    }),
+  ],
+  controllers: [...],
+  providers: [
+      goffProvider: new GoFeatureFlagProvider({
+        endpoint: 'http://localhost:1031/' // DNS of your instance of relay proxy
+      }),
+  ],
+})
+export class AppModule implements OnModuleInit {
+  async onModuleInit() {
+    await OpenFeature.setProviderAndWait(provider);
+  }
+}
+```
+
+## Evaluate your flag
+
+To use the OpenFeature NestJS SDK in a service first inject the OpenFeatureClient into the service.  
+Then use a flag value by creating the EvaluationContext, and pass the flag key, default value, and EvaluationContext to one of the OpenFeature flag evaluation methods.
+
+```typescript
+import { Injectable, Inject } from '@nestjs/common';
+import { OpenFeatureClient, Client } from '@openfeature/nestjs-sdk';
+
+const EVALUATION_CONTEXT = { targetingKey: '4b9e3d6e-cb2a-40fb-8834-5352c59f04c1' };
+
+@Injectable()
+export class ExampleService {
+  constructor(
+    @OpenFeatureClient() private ofClient: Client,
+  ) {}
+
+  async testFlag() {
+    const testFlag = await this.ofClient.getBooleanValue(
+      'test-flag',
+      false,
+      EVALUATION_CONTEXT,
+    );
+  }
+}
+```
+
+## Required TargetingKey
+GO Feature Flag needs a `targetingKey` to be set on the evaluation context.  
+This is used to bucket the users into the correct targeting group for the feature flag evaluation.
+
+## Features status
+<FeatureTable sdk={sdk.find(it => it.key === 'nestjs')} />
+
+## Contribute to the provider
+You can find the source of the provider in the [`open-feature/js-sdk-contrib`](https://github.com/open-feature/js-sdk-contrib/tree/main/libs/providers/go-feature-flag) repository.
