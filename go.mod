@@ -57,7 +57,7 @@ require (
 	github.com/swaggo/echo-swagger v1.4.1
 	github.com/swaggo/swag v1.16.6
 	github.com/testcontainers/testcontainers-go v0.39.0
-	github.com/testcontainers/testcontainers-go/modules/azurite v0.39.0
+	github.com/testcontainers/testcontainers-go/modules/azure v0.39.0
 	github.com/testcontainers/testcontainers-go/modules/mongodb v0.38.0
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.38.0
 	github.com/testcontainers/testcontainers-go/modules/redis v0.38.0
@@ -237,7 +237,6 @@ require (
 	github.com/spf13/cast v1.3.0 // indirect
 	github.com/spiffe/go-spiffe/v2 v2.5.0 // indirect
 	github.com/swaggo/files/v2 v2.0.0 // indirect
-	github.com/testcontainers/testcontainers-go/modules/azure v0.39.0 // indirect
 	github.com/tklauser/go-sysconf v0.3.12 // indirect
 	github.com/tklauser/numcpus v0.6.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
