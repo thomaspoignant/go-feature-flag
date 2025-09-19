@@ -5,6 +5,7 @@ import dev.openfeature.contrib.providers.gofeatureflag.GoFeatureFlagProvider;
 import dev.openfeature.contrib.providers.gofeatureflag.GoFeatureFlagProviderOptions;
 import dev.openfeature.contrib.providers.gofeatureflag.exception.InvalidOptions;
 import dev.openfeature.sdk.*;
+import dev.openfeature.sdk.exceptions.GeneralError;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,6 +17,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ProviderTests {
     private static final String relayProxyEndpoint = "http://localhost:1031";
@@ -366,17 +368,20 @@ public class ProviderTests {
         GoFeatureFlagProviderOptions options = GoFeatureFlagProviderOptions.builder()
                 .apiKey("").endpoint(relayProxyAuthenticatedEndpoint).build();
         GoFeatureFlagProvider provider = new GoFeatureFlagProvider(options);
-        OpenFeatureAPI.getInstance().setProviderAndWait(provider);
+
+        assertThrows(GeneralError.class, () -> {
+            OpenFeatureAPI.getInstance().setProviderAndWait(provider);
+        });
+
         OpenFeatureAPI api = OpenFeatureAPI.getInstance();
         goffClient = api.getClient();
-
         String flagKey = "bool_targeting_match";
         FlagEvaluationDetails expected = FlagEvaluationDetails.builder()
                 .flagKey(flagKey)
                 .reason(Reason.ERROR.toString())
                 .value(false)
-                .errorCode(ErrorCode.GENERAL)
-                .errorMessage("authentication/authorization error")
+                .errorCode(ErrorCode.FLAG_NOT_FOUND)
+                .errorMessage("Flag bool_targeting_match was not found in your configuration")
                 .build();
         FlagEvaluationDetails<Boolean> got = goffClient.getBooleanDetails(flagKey, false, defaultEvaluationContext);
         assertEquals(expected, got);
@@ -389,7 +394,9 @@ public class ProviderTests {
         GoFeatureFlagProviderOptions options = GoFeatureFlagProviderOptions.builder()
                 .apiKey("invalid-api-key").endpoint(relayProxyAuthenticatedEndpoint).build();
         GoFeatureFlagProvider provider = new GoFeatureFlagProvider(options);
-        OpenFeatureAPI.getInstance().setProviderAndWait(provider);
+        assertThrows(GeneralError.class, () -> {
+            OpenFeatureAPI.getInstance().setProviderAndWait(provider);
+        });
         OpenFeatureAPI api = OpenFeatureAPI.getInstance();
         goffClient = api.getClient();
 
@@ -398,8 +405,8 @@ public class ProviderTests {
                 .flagKey(flagKey)
                 .reason(Reason.ERROR.toString())
                 .value(false)
-                .errorCode(ErrorCode.GENERAL)
-                .errorMessage("authentication/authorization error")
+                .errorCode(ErrorCode.FLAG_NOT_FOUND)
+                .errorMessage("Flag bool_targeting_match was not found in your configuration")
                 .build();
         FlagEvaluationDetails<Boolean> got = goffClient.getBooleanDetails(flagKey, false, defaultEvaluationContext);
         assertEquals(expected, got);
