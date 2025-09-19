@@ -6,17 +6,18 @@ package azureexporter_test
 import (
 	"context"
 	"fmt"
+	"log/slog"
+	"os"
+	"testing"
+
 	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
-	"github.com/testcontainers/testcontainers-go/modules/azurite"
+	"github.com/testcontainers/testcontainers-go/modules/azure/azurite"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/azureexporter"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
-	"log/slog"
-	"os"
-	"testing"
 )
 
 var containerName = "testcontainer"
@@ -190,8 +191,11 @@ func TestAzureBlobStorage_Export(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			container, client := setupTest(t)
 			defer tearDown(t, container)
-			tt.exporter.ServiceURL = fmt.Sprintf("%s/%s", container.MustServiceURL(context.Background(), azurite.BlobService), azurite.AccountName)
-			err := tt.exporter.Export(context.Background(), &fflog.FFLogger{LeveledLogger: slog.Default()}, tt.events)
+			blobServiceUrl, err := container.BlobServiceURL(context.Background())
+			require.NoError(t, err)
+
+			tt.exporter.ServiceURL = fmt.Sprintf("%s/%s", blobServiceUrl, azurite.AccountName)
+			err = tt.exporter.Export(context.Background(), &fflog.FFLogger{LeveledLogger: slog.Default()}, tt.events)
 			tt.wantErr(t, err, "Export() error")
 			if err == nil {
 				files := make([]string, 0)
@@ -215,18 +219,21 @@ func TestAzureBlobStorage_IsBulk(t *testing.T) {
 	assert.True(t, e.IsBulk(), "exporter is a bulk exporter")
 }
 
-func setupTest(t *testing.T) (*azurite.AzuriteContainer, *azblob.Client) {
+func setupTest(t *testing.T) (*azurite.Container, *azblob.Client) {
 	ctx := context.Background()
 	azuriteContainer, err := azurite.Run(
 		ctx,
-		"mcr.microsoft.com/azure-storage/azurite:3.33.0",
+		"mcr.microsoft.com/azure-storage/azurite:3.35.0",
 	)
 	require.NoError(t, err)
 
 	cred, err := azblob.NewSharedKeyCredential(azurite.AccountName, azurite.AccountKey)
 	require.NoError(t, err)
 
-	blobServiceURL := fmt.Sprintf("%s/%s", azuriteContainer.MustServiceURL(ctx, azurite.BlobService), azurite.AccountName)
+	tmp, err := azuriteContainer.BlobServiceURL(ctx)
+	require.NoError(t, err)
+
+	blobServiceURL := fmt.Sprintf("%s/%s", tmp, azurite.AccountName)
 	client, err := azblob.NewClientWithSharedKeyCredential(blobServiceURL, cred, nil)
 	require.NoError(t, err)
 
@@ -236,7 +243,7 @@ func setupTest(t *testing.T) (*azurite.AzuriteContainer, *azblob.Client) {
 	return azuriteContainer, client
 }
 
-func tearDown(t *testing.T, container *azurite.AzuriteContainer) {
+func tearDown(t *testing.T, container *azurite.Container) {
 	err := testcontainers.TerminateContainer(container)
 	require.NoError(t, err)
 }
