@@ -58,7 +58,7 @@ require (
 	github.com/swaggo/swag v1.16.6
 	github.com/testcontainers/testcontainers-go v0.39.0
 	github.com/testcontainers/testcontainers-go/modules/azure v0.39.0
-	github.com/testcontainers/testcontainers-go/modules/mongodb v0.38.0
+	github.com/testcontainers/testcontainers-go/modules/mongodb v0.39.0
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.39.0
 	github.com/testcontainers/testcontainers-go/modules/redis v0.38.0
 	github.com/thejerf/slogassert v0.3.4
@@ -165,7 +165,7 @@ require (
 	github.com/gogo/googleapis v1.4.1 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang-jwt/jwt/v5 v5.3.0 // indirect
-	github.com/golang/snappy v0.0.4 // indirect
+	github.com/golang/snappy v1.0.0 // indirect
 	github.com/google/gnostic-models v0.7.0 // indirect
 	github.com/google/renameio/v2 v2.0.0 // indirect
 	github.com/google/s2a-go v0.1.9 // indirect
