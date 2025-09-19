@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"go.uber.org/zap"
 )
@@ -33,7 +34,7 @@ func TestNewFlagsetManager(t *testing.T) {
 			config: &config.Config{
 				FlagSets: []config.FlagSet{},
 				CommonFlagSet: config.CommonFlagSet{
-					Retriever: &config.RetrieverConf{
+					Retriever: &retrieverconf.RetrieverConf{
 						Kind: "file",
 						Path: flagConfig,
 					},
@@ -50,7 +51,7 @@ func TestNewFlagsetManager(t *testing.T) {
 					{
 						Name: "test-flagset",
 						CommonFlagSet: config.CommonFlagSet{
-							Retriever: &config.RetrieverConf{
+							Retriever: &retrieverconf.RetrieverConf{
 								Kind: "file",
 								Path: flagConfig,
 							},
@@ -70,7 +71,7 @@ func TestNewFlagsetManager(t *testing.T) {
 					{
 						Name: "invalid-flagset",
 						CommonFlagSet: config.CommonFlagSet{
-							Retriever: &config.RetrieverConf{
+							Retriever: &retrieverconf.RetrieverConf{
 								Kind: "invalid",
 								Path: flagConfig,
 							},
@@ -79,7 +80,7 @@ func TestNewFlagsetManager(t *testing.T) {
 					},
 				},
 				CommonFlagSet: config.CommonFlagSet{
-					Retriever: &config.RetrieverConf{
+					Retriever: &retrieverconf.RetrieverConf{
 						Kind: "file",
 						Path: flagConfig,
 					},
@@ -120,7 +121,7 @@ func TestFlagsetManager_GetFlagSet(t *testing.T) {
 				{
 					Name: "test-flagset",
 					CommonFlagSet: config.CommonFlagSet{
-						Retriever: &config.RetrieverConf{
+						Retriever: &retrieverconf.RetrieverConf{
 							Kind: "file",
 							Path: flagConfig,
 						},
@@ -166,7 +167,7 @@ func TestFlagsetManager_GetFlagSet(t *testing.T) {
 		config := &config.Config{
 			FlagSets: []config.FlagSet{},
 			CommonFlagSet: config.CommonFlagSet{
-				Retriever: &config.RetrieverConf{
+				Retriever: &retrieverconf.RetrieverConf{
 					Kind: "file",
 					Path: flagConfig,
 				},
@@ -199,7 +200,7 @@ func TestFlagsetManager_GetFlagSetName(t *testing.T) {
 				{
 					Name: "test-flagset",
 					CommonFlagSet: config.CommonFlagSet{
-						Retriever: &config.RetrieverConf{
+						Retriever: &retrieverconf.RetrieverConf{
 							Kind: "file",
 							Path: flagConfig,
 						},
@@ -235,7 +236,7 @@ func TestFlagsetManager_GetFlagSetName(t *testing.T) {
 		config := &config.Config{
 			FlagSets: []config.FlagSet{},
 			CommonFlagSet: config.CommonFlagSet{
-				Retriever: &config.RetrieverConf{
+				Retriever: &retrieverconf.RetrieverConf{
 					Kind: "file",
 					Path: flagConfig,
 				},
@@ -268,7 +269,7 @@ func TestFlagsetManager_GetFlagSets(t *testing.T) {
 				{
 					Name: "test-flagset-1",
 					CommonFlagSet: config.CommonFlagSet{
-						Retriever: &config.RetrieverConf{
+						Retriever: &retrieverconf.RetrieverConf{
 							Kind: "file",
 							Path: flagConfig,
 						},
@@ -278,7 +279,7 @@ func TestFlagsetManager_GetFlagSets(t *testing.T) {
 				{
 					Name: "test-flagset-2",
 					CommonFlagSet: config.CommonFlagSet{
-						Retriever: &config.RetrieverConf{
+						Retriever: &retrieverconf.RetrieverConf{
 							Kind: "file",
 							Path: flagConfig,
 						},
@@ -309,7 +310,7 @@ func TestFlagsetManager_GetFlagSets(t *testing.T) {
 				{
 					Name: "default",
 					CommonFlagSet: config.CommonFlagSet{
-						Retriever: &config.RetrieverConf{
+						Retriever: &retrieverconf.RetrieverConf{
 							Kind: "file",
 							Path: flagConfig,
 						},
@@ -319,7 +320,7 @@ func TestFlagsetManager_GetFlagSets(t *testing.T) {
 				{
 					Name: "test-flagset-2",
 					CommonFlagSet: config.CommonFlagSet{
-						Retriever: &config.RetrieverConf{
+						Retriever: &retrieverconf.RetrieverConf{
 							Kind: "file",
 							Path: flagConfig,
 						},
@@ -349,7 +350,7 @@ func TestFlagsetManager_GetFlagSets(t *testing.T) {
 		config := &config.Config{
 			FlagSets: []config.FlagSet{},
 			CommonFlagSet: config.CommonFlagSet{
-				Retriever: &config.RetrieverConf{
+				Retriever: &retrieverconf.RetrieverConf{
 					Kind: "file",
 					Path: flagConfig,
 				},
@@ -379,7 +380,7 @@ func TestFlagsetManager_GetDefaultFlagSet(t *testing.T) {
 		config := &config.Config{
 			FlagSets: []config.FlagSet{},
 			CommonFlagSet: config.CommonFlagSet{
-				Retriever: &config.RetrieverConf{
+				Retriever: &retrieverconf.RetrieverConf{
 					Kind: "file",
 					Path: flagConfig,
 				},
@@ -405,7 +406,7 @@ func TestFlagsetManager_GetDefaultFlagSet(t *testing.T) {
 				{
 					Name: "test-flagset",
 					CommonFlagSet: config.CommonFlagSet{
-						Retriever: &config.RetrieverConf{
+						Retriever: &retrieverconf.RetrieverConf{
 							Kind: "file",
 							Path: flagConfig,
 						},
@@ -436,7 +437,7 @@ func TestFlagsetManager_IsDefaultFlagSet(t *testing.T) {
 		config := &config.Config{
 			FlagSets: []config.FlagSet{},
 			CommonFlagSet: config.CommonFlagSet{
-				Retriever: &config.RetrieverConf{
+				Retriever: &retrieverconf.RetrieverConf{
 					Kind: "file",
 					Path: flagConfig,
 				},
@@ -461,7 +462,7 @@ func TestFlagsetManager_IsDefaultFlagSet(t *testing.T) {
 				{
 					Name: "test-flagset",
 					CommonFlagSet: config.CommonFlagSet{
-						Retriever: &config.RetrieverConf{
+						Retriever: &retrieverconf.RetrieverConf{
 							Kind: "file",
 							Path: flagConfig,
 						},
@@ -491,7 +492,7 @@ func TestFlagsetManager_Close(t *testing.T) {
 		config := &config.Config{
 			FlagSets: []config.FlagSet{},
 			CommonFlagSet: config.CommonFlagSet{
-				Retriever: &config.RetrieverConf{
+				Retriever: &retrieverconf.RetrieverConf{
 					Kind: "file",
 					Path: flagConfig,
 				},
@@ -517,7 +518,7 @@ func TestFlagsetManager_Close(t *testing.T) {
 				{
 					Name: "test-flagset",
 					CommonFlagSet: config.CommonFlagSet{
-						Retriever: &config.RetrieverConf{
+						Retriever: &retrieverconf.RetrieverConf{
 							Kind: "file",
 							Path: flagConfig,
 						},

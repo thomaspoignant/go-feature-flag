@@ -15,6 +15,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/model"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/testdata/mock"
+	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"go.uber.org/zap"
 )
@@ -37,8 +38,8 @@ func Test_info_Handler(t *testing.T) {
 			},
 			config: config.Config{
 				CommonFlagSet: config.CommonFlagSet{
-					Retriever: &config.RetrieverConf{
-						Kind: config.FileRetriever,
+					Retriever: &retrieverconf.RetrieverConf{
+						Kind: retrieverconf.FileRetriever,
 						Path: "../testdata/controller/config_flags.yaml",
 					},
 				},
@@ -55,8 +56,8 @@ func Test_info_Handler(t *testing.T) {
 						Name:    "teamA",
 						APIKeys: []string{"teamA-api-key"},
 						CommonFlagSet: config.CommonFlagSet{
-							Retriever: &config.RetrieverConf{
-								Kind: config.FileRetriever,
+							Retriever: &retrieverconf.RetrieverConf{
+								Kind: retrieverconf.FileRetriever,
 								Path: "../testdata/controller/config_flags.yaml",
 							},
 						},
@@ -65,8 +66,8 @@ func Test_info_Handler(t *testing.T) {
 						Name:    "teamB",
 						APIKeys: []string{"teamA-api-key"},
 						CommonFlagSet: config.CommonFlagSet{
-							Retriever: &config.RetrieverConf{
-								Kind: config.FileRetriever,
+							Retriever: &retrieverconf.RetrieverConf{
+								Kind: retrieverconf.FileRetriever,
 								Path: "../testdata/controller/config_flags.yaml",
 							},
 						},

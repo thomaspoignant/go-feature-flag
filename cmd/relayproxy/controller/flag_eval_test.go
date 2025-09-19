@@ -15,6 +15,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/controller"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"go.uber.org/zap"
 )
@@ -147,8 +148,8 @@ func Test_flag_eval_Handler(t *testing.T) {
 			// Create config for default mode
 			conf := config.Config{
 				CommonFlagSet: config.CommonFlagSet{
-					Retriever: &config.RetrieverConf{
-						Kind: config.FileRetriever,
+					Retriever: &retrieverconf.RetrieverConf{
+						Kind: retrieverconf.FileRetriever,
 						Path: configFlagsLocation,
 					},
 					Exporter: &config.ExporterConf{

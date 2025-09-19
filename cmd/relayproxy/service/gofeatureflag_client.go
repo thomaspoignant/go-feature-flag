@@ -12,6 +12,7 @@ import (
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config/kafka"
+	retrieverInit "github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf/init"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/azureexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
@@ -114,7 +115,7 @@ func initRetrievers(proxyConf *config.FlagSet) ([]retriever.Retriever, error) {
 	retrievers := make([]retriever.Retriever, 0)
 	// if the retriever is set, we add it to the retrievers
 	if proxyConf.Retriever != nil {
-		currentRetriever, err := initRetriever(proxyConf.Retriever)
+		currentRetriever, err := retrieverInit.InitRetriever(proxyConf.Retriever)
 		if err != nil {
 			return nil, err
 		}
@@ -123,7 +124,7 @@ func initRetrievers(proxyConf *config.FlagSet) ([]retriever.Retriever, error) {
 	// if the retrievers are set, we add them to the retrievers
 	if proxyConf.Retrievers != nil {
 		for _, r := range *proxyConf.Retrievers {
-			currentRetriever, err := initRetriever(&r)
+			currentRetriever, err := retrieverInit.InitRetriever(&r)
 			if err != nil {
 				return nil, err
 			}
@@ -131,20 +132,6 @@ func initRetrievers(proxyConf *config.FlagSet) ([]retriever.Retriever, error) {
 		}
 	}
 	return retrievers, nil
-}
-
-// initRetriever initialize the retriever based on the configuration
-func initRetriever(c *config.RetrieverConf) (retriever.Retriever, error) {
-	retrieverTimeout := config.DefaultRetriever.Timeout
-	if c.Timeout != 0 {
-		retrieverTimeout = time.Duration(c.Timeout) * time.Millisecond
-	}
-
-	retrieverFactory, exists := retrieverFactories[c.Kind]
-	if !exists {
-		return nil, fmt.Errorf("invalid retriever: kind \"%s\" is not supported", c.Kind)
-	}
-	return retrieverFactory(c, retrieverTimeout)
 }
 
 // initDataExporters initialize the exporters based on the configuration

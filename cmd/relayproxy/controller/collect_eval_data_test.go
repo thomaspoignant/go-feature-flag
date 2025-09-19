@@ -18,6 +18,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/controller"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"go.uber.org/zap"
 )
@@ -46,7 +47,7 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 			config: config.Config{
 				CommonFlagSet: config.CommonFlagSet{
 					PollingInterval: 10,
-					Retrievers: &[]config.RetrieverConf{
+					Retrievers: &[]retrieverconf.RetrieverConf{
 						{
 							Kind: "file",
 							Path: configFlagsLocation,
@@ -72,7 +73,7 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 						APIKeys: []string{"test"},
 						CommonFlagSet: config.CommonFlagSet{
 							PollingInterval: 10,
-							Retrievers: &[]config.RetrieverConf{
+							Retrievers: &[]retrieverconf.RetrieverConf{
 								{
 									Kind: "file",
 									Path: configFlagsLocation,
@@ -96,7 +97,7 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 			config: config.Config{
 				CommonFlagSet: config.CommonFlagSet{
 					PollingInterval: 10,
-					Retrievers: &[]config.RetrieverConf{
+					Retrievers: &[]retrieverconf.RetrieverConf{
 						{
 							Kind: "file",
 							Path: configFlagsLocation,
@@ -122,7 +123,7 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 						APIKeys: []string{"test"},
 						CommonFlagSet: config.CommonFlagSet{
 							PollingInterval: 10,
-							Retrievers: &[]config.RetrieverConf{
+							Retrievers: &[]retrieverconf.RetrieverConf{
 								{
 									Kind: "file",
 									Path: configFlagsLocation,
@@ -146,7 +147,7 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 			config: config.Config{
 				CommonFlagSet: config.CommonFlagSet{
 					PollingInterval: 10,
-					Retrievers: &[]config.RetrieverConf{
+					Retrievers: &[]retrieverconf.RetrieverConf{
 						{
 							Kind: "file",
 							Path: configFlagsLocation,
@@ -171,7 +172,7 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 			config: config.Config{
 				CommonFlagSet: config.CommonFlagSet{
 					PollingInterval: 10,
-					Retrievers: &[]config.RetrieverConf{
+					Retrievers: &[]retrieverconf.RetrieverConf{
 						{
 							Kind: "file",
 							Path: configFlagsLocation,
@@ -194,7 +195,7 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 			config: config.Config{
 				CommonFlagSet: config.CommonFlagSet{
 					PollingInterval: 10,
-					Retrievers: &[]config.RetrieverConf{
+					Retrievers: &[]retrieverconf.RetrieverConf{
 						{
 							Kind: "file",
 							Path: configFlagsLocation,
@@ -216,7 +217,7 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 			config: config.Config{
 				CommonFlagSet: config.CommonFlagSet{
 					PollingInterval: 10,
-					Retrievers: &[]config.RetrieverConf{
+					Retrievers: &[]retrieverconf.RetrieverConf{
 						{
 							Kind: "file",
 							Path: configFlagsLocation,
@@ -332,7 +333,7 @@ func Test_collect_tracking_and_evaluation_events(t *testing.T) {
 			config: config.Config{
 				CommonFlagSet: config.CommonFlagSet{
 					PollingInterval: 10,
-					Retrievers: &[]config.RetrieverConf{
+					Retrievers: &[]retrieverconf.RetrieverConf{
 						{
 							Kind: "file",
 							Path: configFlagsLocation,
@@ -350,7 +351,7 @@ func Test_collect_tracking_and_evaluation_events(t *testing.T) {
 						APIKeys: []string{"test"},
 						CommonFlagSet: config.CommonFlagSet{
 							PollingInterval: 10,
-							Retrievers: &[]config.RetrieverConf{
+							Retrievers: &[]retrieverconf.RetrieverConf{
 								{
 									Kind: "file",
 									Path: configFlagsLocation,

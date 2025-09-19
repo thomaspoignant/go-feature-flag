@@ -1,10 +1,22 @@
-package config
+package retrieverconf
 
 import (
 	"fmt"
+	"net/http"
+	"time"
 
 	"github.com/redis/go-redis/v9"
 )
+
+var DefaultRetrieverConfig = struct {
+	Timeout    time.Duration
+	HTTPMethod string
+	GitBranch  string
+}{
+	Timeout:    10 * time.Second,
+	HTTPMethod: http.MethodGet,
+	GitBranch:  "main",
+}
 
 // RetrieverConf contains all the field to configure a retriever
 type RetrieverConf struct {
