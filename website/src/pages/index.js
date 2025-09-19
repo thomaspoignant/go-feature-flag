@@ -23,9 +23,9 @@ export default function Home() {
       <Whatis />
       <UsingIt />
       <div className={'my-10'}></div>
+      <OpenFeatureEcosystem />
       <Sdk />
       <Integration />
-      <OpenFeatureEcosystem />
       <Headline />
       <Rollout />
       <Benefit />

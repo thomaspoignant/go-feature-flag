@@ -244,15 +244,6 @@ export function OpenFeatureEcosystem() {
     <div className="container my-8">
       <div className="row">
         <div className={'col col--6'}>
-          <div className={clsx(styles.openfeaturelogo, 'text-center xl:mt-16')}>
-            <img
-              src={'img/features/openfeature.svg'}
-              alt="openfeature-logo"
-              className={styles.openfeaturelogo}
-            />
-          </div>
-        </div>
-        <div className={'col col--6'}>
           <div className={clsx(styles.featureContent, 'mr-25')}>
             <h2>Part of the OpenFeature Ecosystem</h2>
             <p>
@@ -279,6 +270,15 @@ export function OpenFeatureEcosystem() {
                 </li>
               </ul>
             </div>
+          </div>
+        </div>
+        <div className={'col col--6'}>
+          <div className={clsx(styles.openfeaturelogo, 'text-center xl:mt-16')}>
+            <img
+              src={'img/features/openfeature-old.svg'}
+              alt="openfeature-logo"
+              style={{fill: 'red'}}
+            />
           </div>
         </div>
       </div>
