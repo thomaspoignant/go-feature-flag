@@ -162,3 +162,15 @@ updates:
       - "automerge"
     commit-message:
       prefix: "chore"
+
+  - package-ecosystem: npm
+    directory: "/examples/openfeature_web/webapp/"
+    schedule:
+      interval: weekly
+      time: "04:10"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "automerge"
+    commit-message:
+      prefix: "chore"
