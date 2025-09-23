@@ -302,3 +302,159 @@ func Test_VersionHeader_Disabled(t *testing.T) {
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 	assert.Empty(t, response.Header.Get("X-GOFEATUREFLAG-VERSION"))
 }
+
+func Test_AuthenticationMiddleware(t *testing.T) {
+	t.Run("Non Admin Endpoint", func(t *testing.T) {
+
+		tests := []struct {
+			name          string
+			configAPIKeys *config.APIKeys
+			want          int // http status code
+		}{
+			{
+				name:          "Authentication disabled",
+				configAPIKeys: nil,
+				want:          http.StatusOK,
+			},
+			{
+				name:          "Evaluation key provided",
+				configAPIKeys: &config.APIKeys{Evaluation: []string{"test"}},
+				want:          http.StatusUnauthorized,
+			},
+			{
+				name:          "Admin key provided, no evaluation key provided",
+				configAPIKeys: &config.APIKeys{Admin: []string{"test"}},
+				want:          http.StatusOK,
+			},
+			{
+				name:          "Evaluation and Admin key provided",
+				configAPIKeys: &config.APIKeys{Evaluation: []string{"test"}, Admin: []string{"test"}},
+				want:          http.StatusUnauthorized,
+			},
+		}
+
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				proxyConf := &config.Config{
+					CommonFlagSet: config.CommonFlagSet{
+						Retrievers: &[]retrieverconf.RetrieverConf{
+							{
+								Kind: "file",
+								Path: "../../../testdata/flag-config.yaml",
+							},
+						},
+					},
+					ListenPort:           11024,
+					DisableVersionHeader: true,
+				}
+				if tt.configAPIKeys != nil {
+					proxyConf.AuthorizedKeys = *tt.configAPIKeys
+				}
+
+				log := log.InitLogger()
+				defer func() { _ = log.ZapLogger.Sync() }()
+
+				metricsV2, _ := metric.NewMetrics()
+				wsService := service.NewWebsocketService()
+				defer wsService.Close()
+				flagsetManager, _ := service.NewFlagsetManager(proxyConf, log.ZapLogger, nil)
+
+				services := service.Services{
+					MonitoringService: service.NewMonitoring(flagsetManager),
+					WebsocketService:  wsService,
+					FlagsetManager:    flagsetManager,
+					Metrics:           metricsV2,
+				}
+
+				s := api.New(proxyConf, services, log.ZapLogger)
+				go func() { s.Start() }()
+				defer s.Stop(context.Background())
+				time.Sleep(10 * time.Millisecond)
+
+				response, err := http.Post("http://localhost:11024/ofrep/v1/evaluate/flags/test-flag", "application/json",
+					strings.NewReader(`{"context":{"targetingKey":"some-key"}}`),
+				)
+				assert.NoError(t, err)
+				assert.Equal(t, tt.want, response.StatusCode)
+			})
+		}
+	})
+
+	t.Run("Admin Endpoint", func(t *testing.T) {
+		tests := []struct {
+			name          string
+			configAPIKeys *config.APIKeys
+			want          int // http status code
+		}{
+			{
+				name:          "Authentication disabled",
+				configAPIKeys: nil,
+				want:          http.StatusBadRequest,
+			},
+			{
+				name:          "Evaluation key provided",
+				configAPIKeys: &config.APIKeys{Evaluation: []string{"test"}},
+				want:          http.StatusBadRequest,
+			},
+			{
+				name:          "Admin key provided, no evaluation key provided",
+				configAPIKeys: &config.APIKeys{Admin: []string{"test"}},
+				want:          http.StatusOK,
+			},
+			{
+				name:          "Evaluation and Admin key provided",
+				configAPIKeys: &config.APIKeys{Evaluation: []string{"test"}, Admin: []string{"test"}},
+				want:          http.StatusOK,
+			},
+		}
+
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				proxyConf := &config.Config{
+					CommonFlagSet: config.CommonFlagSet{
+						Retrievers: &[]retrieverconf.RetrieverConf{
+							{
+								Kind: "file",
+								Path: "../../../testdata/flag-config.yaml",
+							},
+						},
+					},
+					ListenPort:           11024,
+					DisableVersionHeader: true,
+				}
+				if tt.configAPIKeys != nil {
+					proxyConf.AuthorizedKeys = *tt.configAPIKeys
+				}
+
+				log := log.InitLogger()
+				defer func() { _ = log.ZapLogger.Sync() }()
+
+				metricsV2, _ := metric.NewMetrics()
+				wsService := service.NewWebsocketService()
+				defer wsService.Close()
+				flagsetManager, _ := service.NewFlagsetManager(proxyConf, log.ZapLogger, nil)
+
+				services := service.Services{
+					MonitoringService: service.NewMonitoring(flagsetManager),
+					WebsocketService:  wsService,
+					FlagsetManager:    flagsetManager,
+					Metrics:           metricsV2,
+				}
+
+				s := api.New(proxyConf, services, log.ZapLogger)
+				go func() { s.Start() }()
+				defer s.Stop(context.Background())
+				time.Sleep(10 * time.Millisecond)
+
+				request, err := http.NewRequest("POST", "http://localhost:11024/admin/v1/retriever/refresh", nil)
+				request.Header.Add("Content-Type", "application/json")
+				if tt.configAPIKeys != nil && len(tt.configAPIKeys.Admin) > 0 {
+					request.Header.Add("Authorization", "Bearer "+tt.configAPIKeys.Admin[0])
+				}
+				response, err := http.DefaultClient.Do(request)
+				assert.NoError(t, err)
+				assert.Equal(t, tt.want, response.StatusCode)
+			})
+		}
+	})
+}
