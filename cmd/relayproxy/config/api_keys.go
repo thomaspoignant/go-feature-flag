@@ -73,6 +73,5 @@ func (c *Config) preloadAPIKeys() {
 		addAPIKeys(c.AuthorizedKeys.Admin, AdminKeyType)
 
 		c.apiKeysSet = apiKeySet
-
 	})
 }

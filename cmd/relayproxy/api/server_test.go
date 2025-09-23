@@ -305,7 +305,6 @@ func Test_VersionHeader_Disabled(t *testing.T) {
 
 func Test_AuthenticationMiddleware(t *testing.T) {
 	t.Run("Non Admin Endpoint", func(t *testing.T) {
-
 		tests := []struct {
 			name          string
 			configAPIKeys *config.APIKeys
@@ -447,6 +446,7 @@ func Test_AuthenticationMiddleware(t *testing.T) {
 				time.Sleep(10 * time.Millisecond)
 
 				request, err := http.NewRequest("POST", "http://localhost:11024/admin/v1/retriever/refresh", nil)
+				assert.NoError(t, err)
 				request.Header.Add("Content-Type", "application/json")
 				if tt.configAPIKeys != nil && len(tt.configAPIKeys.Admin) > 0 {
 					request.Header.Add("Authorization", "Bearer "+tt.configAPIKeys.Admin[0])
