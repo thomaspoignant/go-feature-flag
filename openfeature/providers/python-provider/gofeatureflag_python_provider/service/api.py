@@ -1,6 +1,6 @@
 from datetime import datetime
 import json
-from typing import Any, List, Optional
+from typing import List, Optional, Union, Annotated
 
 import urllib3
 from urllib3.exceptions import HTTPError
@@ -20,7 +20,13 @@ from gofeatureflag_python_provider.model import (
     FlagConfigRequest,
     FlagConfigResponse,
 )
+from gofeatureflag_python_provider.model.feature_event import FeatureEvent
+from gofeatureflag_python_provider.model.tracking_event import TrackingEvent
 from gofeatureflag_python_provider.provider_options import GoFeatureFlagOptions
+from pydantic import Field
+
+# Define a discriminated union type for events
+Event = Annotated[Union[TrackingEvent, FeatureEvent], Field(discriminator="kind")]
 
 # HTTP constants
 APPLICATION_JSON = "application/json"
@@ -107,7 +113,7 @@ class Api:
                 method="POST",
                 url=f"{self.endpoint}/v1/flag/configuration",
                 headers=headers,
-                body=request_body.model_dump_json(),
+                body=request_body.model_dump_json(by_alias=True),
             )
 
             return self._handle_flag_configuration_response(response)
@@ -117,7 +123,9 @@ class Api:
             ) from error
 
     def send_event_to_data_collector(
-        self, events_list: List[Any], exporter_metadata: ExporterMetadata
+        self,
+        events_list: List[Union[TrackingEvent, FeatureEvent]],
+        exporter_metadata: ExporterMetadata,
     ) -> None:
         """
         Sends a list of events to the GO Feature Flag data collector.
@@ -144,8 +152,7 @@ class Api:
                 method="POST",
                 url=f"{self.endpoint}/v1/data/collector",
                 headers=headers,
-                body=request_body.model_dump_json(),
-                # we don't need to set a timeout here because the pool manager will handle it
+                body=request_body.model_dump_json(by_alias=True, exclude_none=True),
             )
 
             self._handle_data_collector_response(response, len(events_list))

@@ -1,0 +1,37 @@
+{
+    "meta": {
+        "test": "test",
+        "test2": 123,
+        "test3": true
+    },
+    "events": [
+        {
+            "kind": "tracking",
+            "userKey": "ABCD",
+            "contextKind": "anonymousUser",
+            "key": "xxx",
+            "trackingEventDetails": {
+                "toto": 123
+            },
+            "creationDate": 1617970548,
+            "evaluationContext": {
+                "firstname": "john",
+                "rate": 3.14,
+                "targetingKey": "d45e303a-38c2-11ed-a261-0242ac120002",
+                "company_info": {
+                    "size": 120,
+                    "name": "my_company"
+                },
+                "anonymous": false,
+                "email": "john.doe@gofeatureflag.org",
+                "age": 30,
+                "lastname": "doe",
+                "professional": true,
+                "labels": [
+                    "pro",
+                    "beta"
+                ]
+            }
+        }
+    ]
+}

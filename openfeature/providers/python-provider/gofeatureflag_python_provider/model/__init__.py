@@ -1,7 +1,6 @@
 # Export all types and classes from the model directory
 
 # Event-related exports
-from .event import Event
 from .feature_event import FeatureEvent
 from .tracking_event import TrackingEvent
 

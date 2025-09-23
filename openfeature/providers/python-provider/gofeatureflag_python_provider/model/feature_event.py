@@ -1,6 +1,5 @@
-from datetime import datetime
 from typing import Any, Dict, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class FeatureEvent(BaseModel):
@@ -11,26 +10,36 @@ class FeatureEvent(BaseModel):
     # Event kind
     kind: str = "feature"
 
-    # User key
-    user_key: str
-
     # Context kind
-    context_kind: str
+    context_kind: str = Field(alias="contextKind")
+
+    # User key
+    user_key: str = Field(alias="userKey")
+
+    # Creation date
+    creation_date: int = Field(alias="creationDate")
 
     # Flag key
     key: str
 
     # Variation type
-    variation_type: Optional[str] = None
+    variation: Optional[str] = Field(default=None, alias="variation")
 
     # Value
     value: Optional[Any] = None
 
-    # Default value
-    default_value: Optional[Any] = None
+    # Default
+    default: bool
 
-    # Creation date
-    creation_date: int
+    # Version
+    version: Optional[str] = None
 
-    # Evaluation context
-    evaluation_context: Dict[str, Any]
+    # Variation
+    metadata: Optional[Dict[str, Any]] = None
+
+    class Config:
+        """Populate by name and exclude None values."""
+
+        populate_by_name = True
+        exclude_none = True
+        exclude_unset = True

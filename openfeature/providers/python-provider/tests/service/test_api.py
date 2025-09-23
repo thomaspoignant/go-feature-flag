@@ -5,6 +5,7 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 
 import pytest
+import urllib3
 from urllib3.exceptions import HTTPError
 
 from gofeatureflag_python_provider.exception import (
@@ -13,6 +14,12 @@ from gofeatureflag_python_provider.exception import (
     InvalidOptionsException,
     UnauthorizedException,
 )
+from gofeatureflag_python_provider.exception.impossible_to_send_data_to_collector_exception import (
+    ImpossibleToSendDataToCollectorException,
+)
+from gofeatureflag_python_provider.model.exporter_metadata import ExporterMetadata
+from gofeatureflag_python_provider.model.feature_event import FeatureEvent
+from gofeatureflag_python_provider.model.tracking_event import TrackingEvent
 from gofeatureflag_python_provider.provider_options import GoFeatureFlagOptions
 from gofeatureflag_python_provider.service.api import Api
 
@@ -50,11 +57,39 @@ class TestApi:
             assert config_response.flags["string_key_with_version"] is not None
             assert config_response.evaluation_context_enrichment is not None
 
+        def test_should_call_the_configuration_endpoint_with_custom_pool_manager(
+            self, goff
+        ):
+            """Test that the configuration endpoint is called."""
+
+            api = Api(
+                options=GoFeatureFlagOptions(
+                    endpoint=goff,
+                    api_key="my-api-key",
+                ),
+                urllib3_pool_manager=urllib3.PoolManager(
+                    num_pools=100,
+                    timeout=urllib3.Timeout(connect=10, read=10),
+                    retries=urllib3.Retry(0),
+                ),
+            )
+            config_response = api.retrieve_flag_configuration()
+            assert config_response is not None
+
+            # check that config_response.last_updated is a datetime
+            assert isinstance(config_response.last_updated, datetime.datetime)
+            assert isinstance(config_response.flags, dict)
+            assert config_response.evaluation_context_enrichment["testenv"] == "pytest"
+            assert len(config_response.flags.keys()) == 12
+            assert config_response.flags["string_key_with_version"] is not None
+            assert config_response.evaluation_context_enrichment is not None
+
     class TestRetrieveFlagConfiguration:
         """Test group for RetrieveFlagConfiguration method."""
 
         @patch("urllib3.poolmanager.PoolManager.request")
         def test_should_call_the_configuration_endpoint2(self, mock_request):
+            """Test that the configuration endpoint is called."""
             mock_request.return_value = Mock(
                 status=200,
                 data=_read_mock_file("flag-configuration/default.json"),
@@ -73,9 +108,38 @@ class TestApi:
             )
 
         @patch("urllib3.poolmanager.PoolManager.request")
+        def test_should_log_warning_on_invalid_json_response(self, mock_request):
+            """Test that warning is logged on invalid JSON response."""
+            mock_request.return_value = Mock(
+                status=200,
+                data=_read_mock_file("flag-configuration/invalid-json.json"),
+                headers={
+                    "last-modified": "2021-01-01T00:00:00Z",
+                    "etag": '"1234567890"',
+                },
+            )
+
+            logger_mock = Mock()
+            api = Api(
+                options=GoFeatureFlagOptions(endpoint="http://goff.local/"),
+                logger=logger_mock,
+            )
+            api.retrieve_flag_configuration()
+            mock_request.assert_called_once_with(
+                method="POST",
+                url="http://goff.local/v1/flag/configuration",
+                headers={"Content-Type": "application/json"},
+                body=json.dumps({"flags": []}, separators=(",", ":")),
+            )
+            logger_mock.warning.assert_called_once_with(
+                'Failed to parse flag configuration response: Expecting property name enclosed in double quotes: line 1 column 2 (char 1). Response body: "{"'
+            )
+
+        @patch("urllib3.poolmanager.PoolManager.request")
         def test_should_include_if_none_match_header_when_etag_is_provided(
             self, mock_request
         ):
+            """Test that the If-None-Match header is included when etag is provided."""
             mock_request.return_value = Mock(
                 status=200,
                 data=_read_mock_file("flag-configuration/default.json"),
@@ -102,6 +166,7 @@ class TestApi:
 
         @patch("urllib3.poolmanager.PoolManager.request")
         def test_should_include_flags_in_request_body_when_provided(self, mock_request):
+            """Test that the flags are included in the request body when provided."""
             mock_request.return_value = Mock(
                 status=200,
                 data=_read_mock_file("flag-configuration/default.json"),
@@ -293,64 +358,292 @@ class TestApi:
 
             assert "Network error: Timeout" in str(exc_info.value)
 
-    # class TestSendEventToDataCollector:
-    #     """Test group for SendEventToDataCollector method."""
+    class TestSendEventToDataCollector:
+        """Test group for SendEventToDataCollector method."""
 
-    #     def test_should_call_the_data_collector_endpoint(self, api):
-    #         """Test that the data collector endpoint is called."""
-    #         pass
+        single_event_list = [
+            TrackingEvent(
+                kind="tracking",
+                context_kind="anonymousUser",
+                user_key="ABCD",
+                creation_date=1617970548,
+                key="xxx",
+                evaluation_context={
+                    "firstname": "john",
+                    "rate": 3.14,
+                    "targetingKey": "d45e303a-38c2-11ed-a261-0242ac120002",
+                    "company_info": {"size": 120, "name": "my_company"},
+                    "anonymous": False,
+                    "email": "john.doe@gofeatureflag.org",
+                    "age": 30,
+                    "lastname": "doe",
+                    "professional": True,
+                    "labels": ["pro", "beta"],
+                },
+                tracking_event_details={"toto": 123},
+            )
+        ]
 
-    #     def test_should_include_api_key_in_authorization_header_when_provided(
-    #         self, base_options
-    #     ):
-    #         """Test that API key is included in authorization header when provided."""
-    #         pass
+        tracking_plus_feature_event_list = [
+            TrackingEvent(
+                kind="tracking",
+                context_kind="anonymousUser",
+                user_key="ABCD",
+                creation_date=1617970548,
+                key="xxx",
+                evaluation_context={
+                    "firstname": "john",
+                    "rate": 3.14,
+                    "targetingKey": "d45e303a-38c2-11ed-a261-0242ac120002",
+                    "company_info": {"size": 120, "name": "my_company"},
+                    "anonymous": False,
+                    "email": "john.doe@gofeatureflag.org",
+                    "age": 30,
+                    "lastname": "doe",
+                    "professional": True,
+                    "labels": ["pro", "beta"],
+                },
+                tracking_event_details={"toto": 123},
+            ),
+            FeatureEvent(
+                context_kind="anonymousUser",
+                creation_date=1617970547,
+                key="xxx",
+                kind="feature",
+                user_key="ABCD",
+                value=True,
+                variation="enabled",
+                version=None,
+                default=False,
+            ),
+        ]
 
-    #     def test_should_not_include_authorization_header_when_api_key_is_not_provided(
-    #         self, api
-    #     ):
-    #         """Test that authorization header is not included when API key is not provided."""
-    #         pass
+        @patch("urllib3.poolmanager.PoolManager.request")
+        def test_should_call_the_data_collector_endpoint(self, mock_request):
+            """Test that the data collector endpoint is called."""
+            mock_request.return_value = Mock(
+                status=200,
+                data='{"ingestedContentCount": 1}',
+                headers={},
+            )
+            logger_mock = Mock()
+            api = Api(
+                options=GoFeatureFlagOptions(endpoint="http://goff.local/"),
+                logger=logger_mock,
+            )
+            want = json.loads(
+                _read_mock_file("data-collector/request/single_event_list.json")
+            )
 
-    #     def test_should_include_content_type_header(self, api):
-    #         """Test that content-type header is included."""
-    #         pass
+            api.send_event_to_data_collector(self.single_event_list, ExporterMetadata())
+            logger_mock.info.assert_called_once_with(
+                'Published 1 events successfully: {"ingestedContentCount": 1}'
+            )
+            mock_request.assert_called_once()
+            call_args = mock_request.call_args
+            assert call_args[1]["method"] == "POST"
+            assert call_args[1]["url"] == "http://goff.local/v1/data/collector"
+            assert call_args[1]["headers"] == {"Content-Type": "application/json"}
+            actual_body = json.loads(call_args[1]["body"])
+            assert actual_body == want
 
-    #     def test_should_include_events_and_metadata_in_request_body(self, api):
-    #         """Test that events and metadata are included in request body."""
-    #         pass
+        @patch("urllib3.poolmanager.PoolManager.request")
+        def test_should_include_api_key_in_authorization_header_when_provided(
+            self, mock_request
+        ):
+            """Test that API key is included in authorization header when provided."""
+            mock_request.return_value = Mock(
+                status=200,
+                data='{"ingestedContentCount": 1}',
+                headers={},
+            )
+            api = Api(
+                options=GoFeatureFlagOptions(
+                    endpoint="http://goff.local/", api_key="test-key"
+                )
+            )
+            want = json.loads(
+                _read_mock_file("data-collector/request/single_event_list.json")
+            )
 
-    #     def test_should_handle_tracking_events(self, api):
-    #         """Test that tracking events are handled."""
-    #         pass
+            api.send_event_to_data_collector(self.single_event_list, ExporterMetadata())
 
-    #     def test_should_throw_unauthorized_exception_on_401_response(self, api):
-    #         """Test that UnauthorizedException is thrown on 401 response."""
-    #         pass
+            mock_request.assert_called_once()
+            call_args = mock_request.call_args
+            assert call_args[1]["method"] == "POST"
+            assert call_args[1]["url"] == "http://goff.local/v1/data/collector"
+            assert call_args[1]["headers"] == {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer test-key",
+            }
+            actual_body = json.loads(call_args[1]["body"])
+            assert actual_body == want
 
-    #     def test_should_throw_unauthorized_exception_on_403_response(self, api):
-    #         """Test that UnauthorizedException is thrown on 403 response."""
-    #         pass
+        @patch("urllib3.poolmanager.PoolManager.request")
+        def test_should_include_content_type_header(self, mock_request):
+            """Test that content-type header is included."""
+            mock_request.return_value = Mock(
+                status=200,
+                data='{"ingestedContentCount": 1}',
+                headers={},
+            )
+            api = Api(options=GoFeatureFlagOptions(endpoint="http://goff.local/"))
+            want = json.loads(
+                _read_mock_file("data-collector/request/single_event_list.json")
+            )
 
-    #     def test_should_throw_impossible_to_send_data_to_the_collector_exception_on_400_response(
-    #         self, api
-    #     ):
-    #         """Test that ImpossibleToSendDataToTheCollectorException is thrown on 400 response."""
-    #         pass
+            api.send_event_to_data_collector(self.single_event_list, ExporterMetadata())
 
-    #     def test_should_throw_impossible_to_send_data_to_the_collector_exception_on_500_response(
-    #         self, api
-    #     ):
-    #         """Test that ImpossibleToSendDataToTheCollectorException is thrown on 500 response."""
-    #         pass
+            mock_request.assert_called_once()
+            call_args = mock_request.call_args
+            assert call_args[1]["method"] == "POST"
+            assert call_args[1]["url"] == "http://goff.local/v1/data/collector"
+            assert call_args[1]["headers"] == {
+                "Content-Type": "application/json",
+            }
+            actual_body = json.loads(call_args[1]["body"])
+            assert actual_body == want
 
-    #     def test_should_handle_network_errors(self, base_options):
-    #         """Test that network errors are handled."""
-    #         pass
+        @patch("urllib3.poolmanager.PoolManager.request")
+        def test_should_include_events_and_metadata_in_request_body(self, mock_request):
+            """Test that events and metadata are included in request body."""
+            mock_request.return_value = Mock(
+                status=200,
+                data='{"ingestedContentCount": 1}',
+                headers={},
+            )
 
-    #     def test_should_handle_timeout(self, base_options):
-    #         """Test that timeout is handled."""
-    #         pass
+            metadata = ExporterMetadata()
+            metadata.add("test", "test")
+            metadata.add("test2", 123)
+            metadata.add("test3", True)
+
+            api = Api(options=GoFeatureFlagOptions(endpoint="http://goff.local/"))
+            want = json.loads(
+                _read_mock_file("data-collector/request/single_event_list_metdata.json")
+            )
+            api.send_event_to_data_collector(self.single_event_list, metadata)
+            mock_request.assert_called_once()
+            call_args = mock_request.call_args
+            assert call_args[1]["method"] == "POST"
+            assert call_args[1]["url"] == "http://goff.local/v1/data/collector"
+            assert call_args[1]["headers"] == {
+                "Content-Type": "application/json",
+            }
+            actual_body = json.loads(call_args[1]["body"])
+            assert actual_body == want
+
+        @patch("urllib3.poolmanager.PoolManager.request")
+        def test_should_handle_tracking_and_feature_events(self, mock_request):
+            """Test that tracking events are handled."""
+            mock_request.return_value = Mock(
+                status=200,
+                data='{"ingestedContentCount": 2}',
+                headers={},
+            )
+
+            api = Api(options=GoFeatureFlagOptions(endpoint="http://goff.local/"))
+            want = json.loads(
+                _read_mock_file(
+                    "data-collector/request/tracking_plus_feature_event_list.json"
+                )
+            )
+            api.send_event_to_data_collector(
+                self.tracking_plus_feature_event_list, ExporterMetadata()
+            )
+            mock_request.assert_called_once()
+            call_args = mock_request.call_args
+            assert call_args[1]["method"] == "POST"
+            assert call_args[1]["url"] == "http://goff.local/v1/data/collector"
+            assert call_args[1]["headers"] == {
+                "Content-Type": "application/json",
+            }
+            actual_body = json.loads(call_args[1]["body"])
+            assert actual_body == want
+
+        @patch("urllib3.poolmanager.PoolManager.request")
+        def test_should_throw_unauthorized_exception_on_401_response(
+            self, mock_request
+        ):
+            """Test that UnauthorizedException is thrown on 401 response."""
+            mock_request.return_value = Mock(
+                status=401,
+                headers={},
+            )
+
+            api = Api(options=GoFeatureFlagOptions(endpoint="http://goff.local/"))
+            with pytest.raises(UnauthorizedException):
+                api.send_event_to_data_collector(
+                    self.single_event_list, ExporterMetadata()
+                )
+
+        @patch("urllib3.poolmanager.PoolManager.request")
+        def test_should_throw_unauthorized_exception_on_403_response(
+            self, mock_request
+        ):
+            """Test that UnauthorizedException is thrown on 403 response."""
+            mock_request.return_value = Mock(
+                status=403,
+                headers={},
+            )
+
+            api = Api(options=GoFeatureFlagOptions(endpoint="http://goff.local/"))
+            with pytest.raises(UnauthorizedException):
+                api.send_event_to_data_collector(
+                    self.single_event_list, ExporterMetadata()
+                )
+
+        @patch("urllib3.poolmanager.PoolManager.request")
+        def test_should_throw_impossible_to_send_data_to_the_collector_exception_on_400_response(
+            self, mock_request
+        ):
+            """Test that ImpossibleToSendDataToTheCollectorException is thrown on 400 response."""
+            mock_request.return_value = Mock(
+                status=400,
+                headers={},
+            )
+
+            api = Api(options=GoFeatureFlagOptions(endpoint="http://goff.local/"))
+            with pytest.raises(ImpossibleToSendDataToCollectorException):
+                api.send_event_to_data_collector(
+                    self.single_event_list, ExporterMetadata()
+                )
+
+        @patch("urllib3.poolmanager.PoolManager.request")
+        def test_should_throw_impossible_to_send_data_to_the_collector_exception_on_500_response(
+            self, mock_request
+        ):
+            """Test that ImpossibleToSendDataToTheCollectorException is thrown on 500 response."""
+            mock_request.return_value = Mock(
+                status=500,
+                headers={},
+            )
+
+            api = Api(options=GoFeatureFlagOptions(endpoint="http://goff.local/"))
+            with pytest.raises(ImpossibleToSendDataToCollectorException):
+                api.send_event_to_data_collector(
+                    self.single_event_list, ExporterMetadata()
+                )
+
+        @patch("urllib3.poolmanager.PoolManager.request")
+        def test_should_handle_network_errors(self, mock_request):
+            """Test that network errors are handled."""
+            mock_request.side_effect = HTTPError("Network error")
+            api = Api(options=GoFeatureFlagOptions(endpoint="http://goff.local/"))
+            with pytest.raises(ImpossibleToSendDataToCollectorException):
+                api.send_event_to_data_collector(
+                    self.single_event_list, ExporterMetadata()
+                )
+
+        @patch("urllib3.poolmanager.PoolManager.request")
+        def test_should_handle_timeout(self, mock_request):
+            """Test that timeout is handled."""
+            mock_request.side_effect = TimeoutError("Timeout")
+            api = Api(options=GoFeatureFlagOptions(endpoint="http://goff.local/"))
+            with pytest.raises(ImpossibleToSendDataToCollectorException):
+                api.send_event_to_data_collector(
+                    self.single_event_list, ExporterMetadata()
+                )
 
 
 def _read_mock_file(relative_path: str) -> str:

@@ -9,3 +9,7 @@ class FlagConfigRequest(BaseModel):
 
     # List of flags to retrieve, if not set or empty, we will retrieve all available flags.
     flags: Optional[List[str]] = None
+
+    class Config:
+        populate_by_name = True
+        exclude_none = True
