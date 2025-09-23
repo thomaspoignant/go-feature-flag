@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 	"github.com/thomaspoignant/go-feature-flag/model"
 )
 
@@ -18,7 +19,7 @@ func Test_evaluate_Evaluate(t *testing.T) {
 		{
 			name: "Should error is config file does not exist",
 			evaluate: evaluate{
-				config:        "testdata/invalid.yaml",
+				retrieverConf: retrieverconf.RetrieverConf{Kind: "file", Path: "testdata/invalid.yaml"},
 				fileFormat:    "yaml",
 				flag:          "test-flag",
 				evaluationCtx: `{"targetingKey": "user-123"}`,
@@ -29,9 +30,9 @@ func Test_evaluate_Evaluate(t *testing.T) {
 		{
 			name: "Should error if no evaluation context provided",
 			evaluate: evaluate{
-				config:     "testdata/flag.goff.yaml",
-				fileFormat: "yaml",
-				flag:       "test-flag",
+				retrieverConf: retrieverconf.RetrieverConf{Kind: "file", Path: "testdata/flag.goff.yaml"},
+				fileFormat:    "yaml",
+				flag:          "test-flag",
 			},
 			wantErr:     assert.Error,
 			expectedErr: "invalid evaluation context (missing targeting key)",
@@ -39,7 +40,7 @@ func Test_evaluate_Evaluate(t *testing.T) {
 		{
 			name: "Should error if evaluation context provided has no targeting key",
 			evaluate: evaluate{
-				config:        "testdata/flag.goff.yaml",
+				retrieverConf: retrieverconf.RetrieverConf{Kind: "file", Path: "testdata/flag.goff.yaml"},
 				fileFormat:    "yaml",
 				flag:          "test-flag",
 				evaluationCtx: `{"id": "user-123"}`,
@@ -50,7 +51,7 @@ func Test_evaluate_Evaluate(t *testing.T) {
 		{
 			name: "Should evaluate a single flag if flag name is provided",
 			evaluate: evaluate{
-				config:        "testdata/flag.goff.yaml",
+				retrieverConf: retrieverconf.RetrieverConf{Kind: "file", Path: "testdata/flag.goff.yaml"},
 				fileFormat:    "yaml",
 				flag:          "test-flag",
 				evaluationCtx: `{"targetingKey": "user-123"}`,
@@ -77,7 +78,7 @@ func Test_evaluate_Evaluate(t *testing.T) {
 		{
 			name: "Should evaluate all flags if flag name is not provided",
 			evaluate: evaluate{
-				config:        "testdata/flag.goff.yaml",
+				retrieverConf: retrieverconf.RetrieverConf{Kind: "file", Path: "testdata/flag.goff.yaml"},
 				fileFormat:    "yaml",
 				evaluationCtx: `{"targetingKey": "user-123"}`,
 			},
