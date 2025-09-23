@@ -1,0 +1,129 @@
+---
+sidebar_position: 60
+title: .NET
+description: How to use the OpenFeature .Net SDK
+---
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import { sdk } from "@site/data/sdk";
+import { FeatureTable } from "@site/src/components/doc/featureTable";
+
+# .Net
+[![NuGet Version](https://img.shields.io/nuget/v/OpenFeature.Contrib.GOFeatureFlag?color=blue&style=flat-square)](https://nuget.info/packages/OpenFeature.Contrib.GOFeatureFlag)
+![NuGet Downloads](https://img.shields.io/nuget/dt/OpenFeature.Contrib.GOFeatureFlag?style=flat-square)
+
+
+## Install dependencies
+
+The first things we will do is install the **Open Feature SDK** and the **GO Feature Flag provider**.
+
+<Tabs groupId="code">
+  <TabItem value="netcli" label=".NET CLI">
+
+```shell
+dotnet add package OpenFeature.Contrib.GOFeatureFlag
+```
+
+  </TabItem>
+  <TabItem value="pm" label="Package Manager">
+
+```shell
+NuGet\Install-Package OpenFeature.Contrib.GOFeatureFlag
+```
+
+  </TabItem>
+  <TabItem value="pr" label="Package Reference">
+
+```xml
+<PackageReference Include="OpenFeature.Contrib.GOFeatureFlag" />
+```
+
+  </TabItem>
+  <TabItem value="pc" label="Packet cli">
+
+```shell
+paket add OpenFeature.Contrib.GOFeatureFlag
+```
+
+  </TabItem>
+  <TabItem value="cake" label="Cake">
+
+```shell
+// Install OpenFeature.Contrib.GOFeatureFlag as a Cake Addin
+#addin nuget:?package=OpenFeature.Contrib.GOFeatureFlag
+
+// Install OpenFeature.Contrib.GOFeatureFlag as a Cake Tool
+#tool nuget:?package=OpenFeature.Contrib.GOFeatureFlag
+```
+
+  </TabItem>
+
+</Tabs>
+
+## Initialize your Open Feature client
+
+To evaluate the flags you need to have an Open Feature configured in you app.
+This code block shows you how you can create a client that you can use in your application.
+
+<Tabs groupId="code">
+  <TabItem value="csharp" label="C#">
+
+```csharp
+using OpenFeature;
+using OpenFeature.Contrib.GOFeatureFlag;
+
+// ...
+
+var goFeatureFlagProvider = new GoFeatureFlagProvider(new GoFeatureFlagProviderOptions
+{
+    Endpoint = "http://localhost:1031/",
+    Timeout = new TimeSpan(1000 * TimeSpan.TicksPerMillisecond)
+});
+Api.Instance.SetProvider(goFeatureFlagProvider);
+var client = Api.Instance.GetClient("my-app");
+```
+
+  </TabItem>
+</Tabs>
+
+## Evaluate your flag
+
+This code block explain how you can create an `EvaluationContext` and use it to evaluate your flag.
+
+:::note
+In this example we are evaluating a `boolean` flag, but other types are also available.
+
+**Refer to the [Open Feature documentation](https://docs.openfeature.dev/docs/reference/concepts/evaluation-api#basic-evaluation) to know more about it.**
+:::
+
+<Tabs groupId="code">
+  <TabItem value="csharp" label="C#">
+
+```csharp
+// Context of your flag evaluation.
+// With GO Feature Flag you MUST have a targetingKey that is a unique identifier of the user.
+var userContext = EvaluationContext.Builder()
+    .Set("targetingKey", "1d1b9238-2591-4a47-94cf-d2bc080892f1") // user unique identifier (mandatory)
+    .Set("firstname", "john")
+    .Set("lastname", "doe")
+    .Set("email", "john.doe@gofeatureflag.org")
+    .Set("admin", true) // this field is used in the targeting rule of the flag "flag-only-for-admin"
+    .Set("anonymous", false)
+    .Build();
+
+var adminFlag = await client.GetBooleanValue("flag-only-for-admin", false, userContext);
+if (adminFlag) {
+   // flag "flag-only-for-admin" is true for the user
+} else {
+  // flag "flag-only-for-admin" is false for the user
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## Features status
+<FeatureTable sdk={sdk.find(it => it.key === 'dotnet')} />
+
+## Contribute to the provider
+You can find the source of the provider in the [`open-feature/dotnet-sdk-contrib`](https://github.com/open-feature/dotnet-sdk-contrib/tree/main/src/OpenFeature.Contrib.Providers.GOFeatureFlag) repository.

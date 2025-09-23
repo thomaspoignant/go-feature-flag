@@ -1,0 +1,184 @@
+---
+sidebar_position: 12
+title: Angular
+description: How to use the OpenFeature Javascript Angular SDK for your React application
+---
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import { sdk } from "@site/data/sdk";
+import { FeatureTable } from "@site/src/components/doc/featureTable";
+
+# Angular SDK
+[![NPM Version](https://img.shields.io/npm/v/%40openfeature%2Fgo-feature-flag-web-provider?color=blue&style=flat-square&logo=npm)](https://www.npmjs.com/package/@openfeature/go-feature-flag-web-provider)
+![NPM Downloads](https://img.shields.io/npm/d18m/%40openfeature%2Fgo-feature-flag-web-provider?style=flat-square)
+
+
+This page describes how to use the OpenFeature Angular SDK for your client application.
+
+## About this provider
+OpenFeature Agular SDK allows you to connect to your GO Feature Flag instance with the `@openfeature/angular-sdk`.
+
+If you work with Angular the `@openfeature/angular-sdk` will give you a better integration with your Angular application.
+To integrate it with GO Feature Flag, you need to use the `@openfeature/go-feature-flag-web-provider` provider.
+
+:::info
+We recommend you to check the [OpenFeature Angular SDK Documentation](https://openfeature.dev/docs/reference/technologies/client/web/angular) to see all the available directives and how to use them.
+:::
+
+## Install the provider
+
+```shell
+npm install @openfeature/go-feature-flag-web-provider
+npm install @openfeature/angular-sdk
+```
+
+## How to use the provider?
+
+### Module
+To include the OpenFeature Angular directives in your application, you need to import the `OpenFeatureModule` and configure it using the `forRoot` method.
+
+```typescript
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { OpenFeatureModule } from '@openfeature/angular-sdk';
+import { GoFeatureFlagWebProvider } from '@openfeature/go-feature-flag-web-provider';
+
+@NgModule({
+  declarations: [
+    // Other components
+  ],
+  imports: [
+    CommonModule,
+    OpenFeatureModule.forRoot({
+      provider: new GoFeatureFlagWebProvider({
+        endpoint: 'http://localhost:1031'
+      }),
+    })
+  ],
+})
+export class AppModule {
+}
+```
+
+### Minimal Example
+
+You don't need to provide all the templates. Here's a minimal example using a boolean feature flag:
+
+If initializing and reconciling are not given, the feature flag value that is returned by the provider will determine what will be rendered.
+
+```javascript
+<div *booleanFeatureFlag="'isFeatureEnabled'; default: true">
+    This is shown when the feature flag is enabled.
+</div>
+```
+
+This example shows content when the feature flag `isFeatureEnabled` is `true` with a default value of `true`. No else, initializing, or reconciling templates are required in this case.
+
+### Available directives per types
+
+The OpenFeature SDK provides a set of directives `booleanFeatureFlag`, `numberFeatureFlag`, `stringFeatureFlag` and `objectFeatureFlag` to get the value of a feature flag.
+See the [OpenFeature Angular SDK Documentation](https://openfeature.dev/docs/reference/technologies/client/web/angular#how-to-use) for more details on how to use this directive, including how to use `<type>FeatureElse`, `<type>FeatureInitializing`, and `<type>FeatureReconciling`.
+
+<Tabs groupId="code">
+  <TabItem value="boolean" label="Boolean">
+
+```html
+<div
+  *booleanFeatureFlag="'isFeatureEnabled'; default: true; domain: 'userDomain'; else: booleanFeatureElse; initializing: booleanFeatureInitializing; reconciling: booleanFeatureReconciling">
+  This is shown when the feature flag is enabled.
+</div>
+<ng-template #booleanFeatureElse>
+  This is shown when the feature flag is disabled.
+</ng-template>
+<ng-template #booleanFeatureInitializing>
+  This is shown when the feature flag is initializing.
+</ng-template>
+<ng-template #booleanFeatureReconciling>
+  This is shown when the feature flag is reconciling.
+</ng-template>
+```
+
+  </TabItem>
+<TabItem value="number" label="Number">
+
+```html
+<div
+  *numberFeatureFlag="'discountRate'; value: 10; default: 5; domain: 'userDomain'; else: numberFeatureElse; initializing: numberFeatureInitializing; reconciling: numberFeatureReconciling">
+  This is shown when the feature flag matches the specified discount rate.
+</div>
+<ng-template #numberFeatureElse>
+  This is shown when the feature flag does not match the specified discount rate.
+</ng-template>
+<ng-template #numberFeatureInitializing>
+  This is shown when the feature flag is initializing.
+</ng-template>
+<ng-template #numberFeatureReconciling>
+  This is shown when the feature flag is reconciling.
+</ng-template>
+```
+
+  </TabItem>
+  <TabItem value="string" label="String">
+
+```html
+<div
+  *stringFeatureFlag="'themeColor'; value: 'dark'; default: 'light'; domain: 'userDomain'; else: stringFeatureElse; initializing: stringFeatureInitializing; reconciling: stringFeatureReconciling">
+  This is shown when the feature flag matches the specified theme color.
+</div>
+<ng-template #stringFeatureElse>
+  This is shown when the feature flag does not match the specified theme color.
+</ng-template>
+<ng-template #stringFeatureInitializing>
+  This is shown when the feature flag is initializing.
+</ng-template>
+<ng-template #stringFeatureReconciling>
+  This is shown when the feature flag is reconciling.
+</ng-template>
+```
+
+  </TabItem>
+  <TabItem value="object" label="Object">
+
+```html
+<div
+  *objectFeatureFlag="'userConfig'; value: { theme: 'dark' }; default: { theme: 'light' }; domain: 'userDomain'; else: objectFeatureElse; initializing: objectFeatureInitializing; reconciling: objectFeatureReconciling">
+  This is shown when the feature flag matches the specified user configuration.
+</div>
+<ng-template #objectFeatureElse>
+  This is shown when the feature flag does not match the specified user configuration.
+</ng-template>
+<ng-template #objectFeatureInitializing>
+  This is shown when the feature flag is initializing.
+</ng-template>
+<ng-template #objectFeatureReconciling>
+  This is shown when the feature flag is reconciling.
+</ng-template>
+```
+
+  </TabItem>
+</Tabs>
+
+## Required TargetingKey
+GO Feature Flag needs a `targetingKey` to be set on the evaluation context.  
+This is used to bucket the users into the correct targeting group for the feature flag evaluation.
+
+Don't forget to set a context with a `targetingKey` in your application.
+
+```typescript
+await OpenFeature.setContext({
+  targetingKey: 'user-key',
+  // ...
+});
+```
+
+### Advanced usage
+You can check the [OpenFeature Angular SDK Documentation](https://openfeature.dev/docs/reference/technologies/client/web/angular) to see all the available directives and how to use them.
+
+## Available options
+Check the available options for the provider in the [web provider page](./openfeature_javascript).
+
+## Features status
+<FeatureTable sdk={sdk.find(it => it.key === 'angular')} />
+
+## Contribute to the provider
+You can find the source of the provider in the [`open-feature/js-sdk-contrib`](https://github.com/open-feature/js-sdk-contrib/tree/main/libs/providers/go-feature-flag-web) repository.
