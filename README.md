@@ -1,5 +1,6 @@
 <p align="center">
-  <img width="400" src="gofeatureflag.svg" alt="go-feature-flag logo" />
+  <!-- <img width="400" src="gofeatureflag.svg" alt="go-feature-flag logo" /> -->
+  <img src="website/static/img/logo/logo_footer.png?raw=true" alt="go-feature-flag logo" />
 </p>
 
 # 🎛️ GO Feature Flag
