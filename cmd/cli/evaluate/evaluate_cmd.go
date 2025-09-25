@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/thomaspoignant/go-feature-flag/cmd/cli/helper"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
+	retrieverInit "github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf/init"
 )
 
 var (
@@ -73,6 +74,7 @@ func NewEvaluateCmd() *cobra.Command {
 	evaluateCmd.Flags().StringVar(&evalCtx,
 		"ctx", "{}", "Evaluation context in JSON format")
 	_ = evaluateCmd.Flags().MarkDeprecated("github-token", "Use auth-token instead")
+	_ = evaluateCmd.Flags().MarkDeprecated("config", "Use path instead")
 	_ = evaluateCmd.Flags()
 	return evaluateCmd
 }
@@ -85,12 +87,19 @@ func runEvaluate(
 	flag string,
 	ctx string) error {
 	output := helper.Output{}
+
+	r, err := retrieverInit.InitRetriever(&retrieverConf)
+	if err != nil {
+		return err
+	}
+
 	e := evaluate{
-		retrieverConf: retrieverConf,
+		retriever:     r,
 		fileFormat:    flagFormat,
 		flag:          flag,
 		evaluationCtx: ctx,
 	}
+
 	result, err := e.Evaluate()
 	if err != nil {
 		return err

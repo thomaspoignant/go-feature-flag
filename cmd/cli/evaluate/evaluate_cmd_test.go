@@ -19,7 +19,9 @@ func TestCmdEvaluate(t *testing.T) {
 		{
 			name: "should return an error if flag does not exists",
 			args: []string{
-				"--config",
+				"--kind",
+				"file",
+				"--path",
 				"testdata/flag.goff.yaml",
 				"--flag",
 				"non-existent-flag",
@@ -34,7 +36,9 @@ func TestCmdEvaluate(t *testing.T) {
 		{
 			name: "should return all flags if no flag is provided",
 			args: []string{
-				"--config",
+				"--kind",
+				"file",
+				"--path",
 				"testdata/flag.goff.yaml",
 				"--ctx",
 				`{"targetingKey": "user-123"}`,
@@ -47,7 +51,26 @@ func TestCmdEvaluate(t *testing.T) {
 		{
 			name: "should return a single flag if flag name is provided",
 			args: []string{
-				"--config",
+				"--kind",
+				"file",
+				"--path",
+				"testdata/flag.goff.yaml",
+				"--flag",
+				"test-flag",
+				"--ctx",
+				`{"targetingKey": "user-123"}`,
+				"--format",
+				"yaml",
+			},
+			wantErr:        assert.NoError,
+			expectedResult: "testdata/res/single-flag.json",
+		},
+		{
+			name: "should return a single flag if flag name is provided using path flag",
+			args: []string{
+				"--kind",
+				"file",
+				"--path",
 				"testdata/flag.goff.yaml",
 				"--flag",
 				"test-flag",

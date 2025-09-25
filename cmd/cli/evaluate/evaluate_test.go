@@ -5,56 +5,87 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
+	retrieverInit "github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf/init"
 	"github.com/thomaspoignant/go-feature-flag/model"
+	"github.com/thomaspoignant/go-feature-flag/retriever/githubretriever"
+	"github.com/thomaspoignant/go-feature-flag/testutils/mock"
 )
 
 func Test_evaluate_Evaluate(t *testing.T) {
 	tests := []struct {
 		name           string
 		evaluate       evaluate
+		initEvaluate   func() (evaluate, error)
 		wantErr        assert.ErrorAssertionFunc
 		expectedErr    string
 		expectedResult map[string]model.RawVarResult
 	}{
 		{
 			name: "Should error is config file does not exist",
-			evaluate: evaluate{
-				retrieverConf: retrieverconf.RetrieverConf{Kind: "file", Path: "testdata/invalid.yaml"},
-				fileFormat:    "yaml",
-				flag:          "test-flag",
-				evaluationCtx: `{"targetingKey": "user-123"}`,
+			initEvaluate: func() (evaluate, error) {
+				r, err := retrieverInit.InitRetriever(&retrieverconf.RetrieverConf{
+					Kind: "file",
+					Path: "testdata/invalid.yaml",
+				})
+				if err != nil {
+					return evaluate{}, err
+				}
+				return evaluate{
+					retriever:     r,
+					fileFormat:    "yaml",
+					flag:          "test-flag",
+					evaluationCtx: `{"targetingKey": "user-123"}`,
+				}, nil
 			},
 			wantErr:     assert.Error,
 			expectedErr: "impossible to initialize the retrievers, please check your configuration: impossible to retrieve the flags, please check your configuration: open testdata/invalid.yaml: no such file or directory",
 		},
 		{
 			name: "Should error if no evaluation context provided",
-			evaluate: evaluate{
-				retrieverConf: retrieverconf.RetrieverConf{Kind: "file", Path: "testdata/flag.goff.yaml"},
-				fileFormat:    "yaml",
-				flag:          "test-flag",
+			initEvaluate: func() (evaluate, error) {
+				r, err := retrieverInit.InitRetriever(&retrieverconf.RetrieverConf{Kind: "file", Path: "testdata/flag.goff.yaml"})
+				if err != nil {
+					return evaluate{}, err
+				}
+				return evaluate{
+					retriever:  r,
+					fileFormat: "yaml",
+					flag:       "test-flag",
+				}, nil
 			},
 			wantErr:     assert.Error,
 			expectedErr: "invalid evaluation context (missing targeting key)",
 		},
 		{
 			name: "Should error if evaluation context provided has no targeting key",
-			evaluate: evaluate{
-				retrieverConf: retrieverconf.RetrieverConf{Kind: "file", Path: "testdata/flag.goff.yaml"},
-				fileFormat:    "yaml",
-				flag:          "test-flag",
-				evaluationCtx: `{"id": "user-123"}`,
+			initEvaluate: func() (evaluate, error) {
+				r, err := retrieverInit.InitRetriever(&retrieverconf.RetrieverConf{Kind: "file", Path: "testdata/flag.goff.yaml"})
+				if err != nil {
+					return evaluate{}, err
+				}
+				return evaluate{
+					retriever:     r,
+					fileFormat:    "yaml",
+					flag:          "test-flag",
+					evaluationCtx: `{"id": "user-123"}`,
+				}, nil
 			},
 			wantErr:     assert.Error,
 			expectedErr: "invalid evaluation context (missing targeting key)",
 		},
 		{
 			name: "Should evaluate a single flag if flag name is provided",
-			evaluate: evaluate{
-				retrieverConf: retrieverconf.RetrieverConf{Kind: "file", Path: "testdata/flag.goff.yaml"},
-				fileFormat:    "yaml",
-				flag:          "test-flag",
-				evaluationCtx: `{"targetingKey": "user-123"}`,
+			initEvaluate: func() (evaluate, error) {
+				r, err := retrieverInit.InitRetriever(&retrieverconf.RetrieverConf{Kind: "file", Path: "testdata/flag.goff.yaml"})
+				if err != nil {
+					return evaluate{}, err
+				}
+				return evaluate{
+					retriever:     r,
+					fileFormat:    "yaml",
+					flag:          "test-flag",
+					evaluationCtx: `{"targetingKey": "user-123"}`,
+				}, nil
 			},
 			wantErr: assert.NoError,
 			expectedResult: map[string]model.RawVarResult{
@@ -77,10 +108,16 @@ func Test_evaluate_Evaluate(t *testing.T) {
 		},
 		{
 			name: "Should evaluate all flags if flag name is not provided",
-			evaluate: evaluate{
-				retrieverConf: retrieverconf.RetrieverConf{Kind: "file", Path: "testdata/flag.goff.yaml"},
-				fileFormat:    "yaml",
-				evaluationCtx: `{"targetingKey": "user-123"}`,
+			initEvaluate: func() (evaluate, error) {
+				r, err := retrieverInit.InitRetriever(&retrieverconf.RetrieverConf{Kind: "file", Path: "testdata/flag.goff.yaml"})
+				if err != nil {
+					return evaluate{}, err
+				}
+				return evaluate{
+					retriever:     r,
+					fileFormat:    "yaml",
+					evaluationCtx: `{"targetingKey": "user-123"}`,
+				}, nil
 			},
 			wantErr: assert.NoError,
 			expectedResult: map[string]model.RawVarResult{
@@ -112,10 +149,52 @@ func Test_evaluate_Evaluate(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "new test",
+			initEvaluate: func() (evaluate, error) {
+				r, err := retrieverInit.InitRetriever(
+					&retrieverconf.RetrieverConf{Kind: "github", RepositorySlug: "thomaspoignant/go-feature-flag",
+						GithubToken: "XXX_GH_TOKEN",
+						Path:        "testdata/flag-config.yaml"})
+				if err != nil {
+					return evaluate{}, err
+				}
+
+				githubRetriever, _ := r.(*githubretriever.Retriever)
+				githubRetriever.SetHTTPClient(&mock.HTTP{})
+
+				return evaluate{
+					retriever:     r,
+					fileFormat:    "yaml",
+					flag:          "test-flag",
+					evaluationCtx: `{"targetingKey": "user-123"}`,
+				}, nil
+			},
+			wantErr: assert.NoError,
+			expectedResult: map[string]model.RawVarResult{
+				"test-flag": {
+					TrackEvents:   true,
+					VariationType: "false_var",
+					Failed:        false,
+					Version:       "",
+					Reason:        "DEFAULT",
+					ErrorCode:     "",
+					ErrorDetails:  "",
+					Value:         false,
+					Cacheable:     true,
+					Metadata:      nil,
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			m, err := tt.evaluate.Evaluate()
+			e, err := tt.initEvaluate()
+			if err != nil {
+				tt.wantErr(t, err)
+				return
+			}
+			m, err := e.Evaluate()
 			tt.wantErr(t, err)
 
 			if tt.expectedErr != "" {
