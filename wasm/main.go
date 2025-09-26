@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/thomaspoignant/go-feature-flag/evaluation"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
@@ -65,11 +64,16 @@ func localEvaluation(input string) string {
 }
 
 // convertEvaluationCtx converts the evaluation context from the input to a ffcontext.Context.
+// Note: Empty targeting keys are now allowed - the core evaluation logic will determine
+// if a targeting key is required based on whether the flag needs bucketing.
 func convertEvaluationCtx(ctx map[string]any) (ffcontext.Context, error) {
-	if targetingKey, ok := ctx["targetingKey"].(string); ok {
-		evalCtx := utils.ConvertEvaluationCtxFromRequest(targetingKey, ctx)
-		return evalCtx, nil
+	// Allow empty or missing targeting keys - core evaluation logic will handle requirements
+	targetingKey := ""
+	if key, ok := ctx["targetingKey"].(string); ok {
+		targetingKey = key
 	}
-	return ffcontext.NewEvaluationContextBuilder("").Build(),
-		fmt.Errorf("targetingKey not found in context")
+
+	// Create evaluation context (empty targeting key is allowed)
+	evalCtx := utils.ConvertEvaluationCtxFromRequest(targetingKey, ctx)
+	return evalCtx, nil
 }

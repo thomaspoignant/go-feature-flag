@@ -65,15 +65,15 @@ func Test_all_flag_Handler_DefaultMode(t *testing.T) {
 			},
 		},
 		{
-			name: "No user key in payload",
+			name: "No user key in payload - should now pass and evaluate flags individually",
 			args: args{
 				bodyFile:            "../testdata/controller/all_flags/no_user_key_request.json",
 				configFlagsLocation: configFlagsLocation,
 			},
 			want: want{
-				handlerErr: true,
-				errorMsg:   "empty key for evaluation context, impossible to retrieve flags",
-				errorCode:  http.StatusBadRequest,
+				handlerErr: false, // No longer fails at API validation level
+				httpCode:   http.StatusOK,
+				bodyFile:   "../testdata/controller/all_flags/no_user_key_response_updated.json",
 			},
 		},
 		{
@@ -194,15 +194,15 @@ func Test_all_flag_Handler_FlagsetMode(t *testing.T) {
 			},
 		},
 		{
-			name: "No user key in payload",
+			name: "No user key in payload - should now pass and evaluate flags individually",
 			args: args{
 				bodyFile:            "../testdata/controller/all_flags/no_user_key_request.json",
 				configFlagsLocation: configFlagsLocation,
 			},
 			want: want{
-				handlerErr: true,
-				errorMsg:   "empty key for evaluation context, impossible to retrieve flags",
-				errorCode:  http.StatusBadRequest,
+				handlerErr: false, // No longer fails at API validation level
+				httpCode:   http.StatusOK,
+				bodyFile:   "../testdata/controller/all_flags/no_user_key_response_updated.json",
 			},
 		},
 		{

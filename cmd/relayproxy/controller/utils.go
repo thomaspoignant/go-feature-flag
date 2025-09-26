@@ -27,13 +27,10 @@ func assertRequest(u *model.AllFlagRequest) *echo.HTTPError {
 }
 
 // assertContextKey is checking that the user key is valid, if not an echo.HTTPError is return.
+// Note: Empty keys are now allowed - the core evaluation logic will determine if a targeting key
+// is required based on whether the flag needs bucketing (percentage-based rules, progressive rollouts).
 func assertContextKey(key string) *echo.HTTPError {
-	if len(key) == 0 {
-		return &echo.HTTPError{
-			Code:    http.StatusBadRequest,
-			Message: "empty key for evaluation context, impossible to retrieve flags",
-		}
-	}
+	// No validation needed - let core evaluation logic handle targeting key requirements
 	return nil
 }
 
