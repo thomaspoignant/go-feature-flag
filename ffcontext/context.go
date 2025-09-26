@@ -23,12 +23,6 @@ func NewEvaluationContext(key string) EvaluationContext {
 	return EvaluationContext{targetingKey: key, attributes: map[string]interface{}{}}
 }
 
-// NewEvaluationContextWithoutTargetingKey creates a new evaluation context without a targeting key.
-// This should only be used for flags that don't require bucketing (no percentage-based rules).
-func NewEvaluationContextWithoutTargetingKey() EvaluationContext {
-	return EvaluationContext{targetingKey: "", attributes: map[string]interface{}{}}
-}
-
 // Deprecated: NewAnonymousEvaluationContext is here for compatibility reason.
 // Please use NewEvaluationContext instead and add a attributes attribute to know that it is an anonymous user.
 //

@@ -258,7 +258,7 @@ func TestInternalFlag_Value_EmptyContext(t *testing.T) {
 					VariationResult: testconvert.String("disabled"),
 				},
 			},
-			evaluationCtx:  ffcontext.NewEvaluationContextWithoutTargetingKey(),
+			evaluationCtx:  ffcontext.NewEvaluationContext(""),
 			expectedValue:  false,
 			expectedReason: flag.ReasonStatic,
 			shouldSucceed:  true,
@@ -278,7 +278,7 @@ func TestInternalFlag_Value_EmptyContext(t *testing.T) {
 					},
 				},
 			},
-			evaluationCtx:     ffcontext.NewEvaluationContextWithoutTargetingKey(),
+			evaluationCtx:     ffcontext.NewEvaluationContext(""),
 			expectedErrorCode: flag.ErrorCodeTargetingKeyMissing,
 			expectedReason:    flag.ReasonError,
 			shouldSucceed:     false,
@@ -321,7 +321,7 @@ func TestInternalFlag_Value_EmptyContext(t *testing.T) {
 				},
 			},
 			evaluationCtx: func() ffcontext.Context {
-				ctx := ffcontext.NewEvaluationContextWithoutTargetingKey()
+				ctx := ffcontext.NewEvaluationContext("")
 				ctx.AddCustomAttribute("anonymous", true)
 				return ctx
 			}(),
@@ -371,7 +371,7 @@ func TestInternalFlag_GetBucketingKeyValue_EmptyContext(t *testing.T) {
 					VariationResult: testconvert.String("disabled"),
 				},
 			},
-			evaluationCtx: ffcontext.NewEvaluationContextWithoutTargetingKey(),
+			evaluationCtx: ffcontext.NewEvaluationContext(""),
 			expectedKey:   "",
 			expectedError: false,
 			description:   "Non-bucketing flag should allow empty targeting key",
@@ -390,7 +390,7 @@ func TestInternalFlag_GetBucketingKeyValue_EmptyContext(t *testing.T) {
 					},
 				},
 			},
-			evaluationCtx: ffcontext.NewEvaluationContextWithoutTargetingKey(),
+			evaluationCtx: ffcontext.NewEvaluationContext(""),
 			expectedKey:   "",
 			expectedError: true,
 			description:   "Bucketing flag should require targeting key",
@@ -411,7 +411,7 @@ func TestInternalFlag_GetBucketingKeyValue_EmptyContext(t *testing.T) {
 				},
 			},
 			evaluationCtx: func() ffcontext.Context {
-				ctx := ffcontext.NewEvaluationContextWithoutTargetingKey()
+				ctx := ffcontext.NewEvaluationContext("")
 				ctx.AddCustomAttribute("teamId", "team-123")
 				return ctx
 			}(),
@@ -432,7 +432,7 @@ func TestInternalFlag_GetBucketingKeyValue_EmptyContext(t *testing.T) {
 				},
 			},
 			evaluationCtx: func() ffcontext.Context {
-				ctx := ffcontext.NewEvaluationContextWithoutTargetingKey()
+				ctx := ffcontext.NewEvaluationContext("")
 				ctx.AddCustomAttribute("teamId", "")
 				return ctx
 			}(),

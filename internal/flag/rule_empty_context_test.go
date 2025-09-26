@@ -84,7 +84,7 @@ func TestRule_Evaluate_EmptyKey(t *testing.T) {
 				VariationResult: testconvert.String("enabled"),
 			},
 			key:           "",
-			ctx:           ffcontext.NewEvaluationContextWithoutTargetingKey(),
+			ctx:           ffcontext.NewEvaluationContext(""),
 			expectedError: false,
 			expectedValue: "enabled",
 			description:   "Static variation should work without key",
@@ -98,7 +98,7 @@ func TestRule_Evaluate_EmptyKey(t *testing.T) {
 				},
 			},
 			key:           "",
-			ctx:           ffcontext.NewEvaluationContextWithoutTargetingKey(),
+			ctx:           ffcontext.NewEvaluationContext(""),
 			expectedError: true,
 			description:   "Percentage rule should fail without key",
 		},
@@ -132,7 +132,7 @@ func TestRule_Evaluate_EmptyKey(t *testing.T) {
 				},
 			},
 			key:           "",
-			ctx:           ffcontext.NewEvaluationContextWithoutTargetingKey(),
+			ctx:           ffcontext.NewEvaluationContext(""),
 			expectedError: true,
 			description:   "Progressive rollout should fail without key",
 		},
@@ -144,7 +144,7 @@ func TestRule_Evaluate_EmptyKey(t *testing.T) {
 			},
 			key: "",
 			ctx: func() ffcontext.Context {
-				ctx := ffcontext.NewEvaluationContextWithoutTargetingKey()
+				ctx := ffcontext.NewEvaluationContext("")
 				ctx.AddCustomAttribute("anonymous", true)
 				return ctx
 			}(),

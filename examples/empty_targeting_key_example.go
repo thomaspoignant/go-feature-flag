@@ -62,7 +62,8 @@ my-targeted-feature:
 	}
 	defer ffclient.Close()
 
-	fmt.Println("=== Empty Targeting Key Examples ===\n")
+	fmt.Println("=== Empty Targeting Key Examples ===")
+	fmt.Println()
 
 	// Example 1: Static flag (should work with empty context)
 	fmt.Println("1. Static flag with empty evaluation context:")
