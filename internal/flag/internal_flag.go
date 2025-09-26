@@ -82,13 +82,18 @@ func (f *InternalFlag) Value(
 
 	key, keyError := flag.GetBucketingKeyValue(evaluationCtx)
 	if keyError != nil {
-		return flagContext.DefaultSdkValue, ResolutionDetails{
-			Variant:      VariationSDKDefault,
-			Reason:       ReasonError,
-			ErrorCode:    ErrorCodeTargetingKeyMissing,
-			ErrorMessage: keyError.Error(),
-			Metadata:     f.GetMetadata(),
+		// Only return error if the flag actually requires bucketing
+		if flag.RequiresBucketing() {
+			return flagContext.DefaultSdkValue, ResolutionDetails{
+				Variant:      VariationSDKDefault,
+				Reason:       ReasonError,
+				ErrorCode:    ErrorCodeTargetingKeyMissing,
+				ErrorMessage: keyError.Error(),
+				Metadata:     f.GetMetadata(),
+			}
 		}
+		// For flags that don't require bucketing, continue with empty key
+		key = ""
 	}
 
 	if flag.IsDisable() || flag.isExperimentationOver(evaluationDate) {
@@ -393,7 +398,26 @@ func (f *InternalFlag) GetBucketingKey() string {
 	return *f.BucketingKey
 }
 
+// RequiresBucketing checks if the flag requires a bucketing key for evaluation
+// A flag requires bucketing if it has percentage-based rules or progressive rollouts
+func (f *InternalFlag) RequiresBucketing() bool {
+	// Check if default rule requires bucketing
+	if f.DefaultRule != nil && f.DefaultRule.RequiresBucketing() {
+		return true
+	}
+
+	// Check if any targeting rule requires bucketing
+	for _, rule := range f.GetRules() {
+		if rule.RequiresBucketing() {
+			return true
+		}
+	}
+
+	return false
+}
+
 // GetBucketingKeyValue return the value of the bucketing key from the context
+// If requiresBucketing is false, it allows empty keys for flags that don't need them
 func (f *InternalFlag) GetBucketingKeyValue(ctx ffcontext.Context) (string, error) {
 	if f.BucketingKey != nil {
 		key := f.GetBucketingKey()
@@ -404,7 +428,11 @@ func (f *InternalFlag) GetBucketingKeyValue(ctx ffcontext.Context) (string, erro
 		switch v := value.(type) {
 		case string:
 			if v == "" {
-				return "", &gofferror.EmptyBucketingKeyError{Message: "Empty bucketing key"}
+				if f.RequiresBucketing() {
+					return "", &gofferror.EmptyBucketingKeyError{Message: "Empty bucketing key"}
+				}
+				// Return empty key if bucketing not required
+				return "", nil
 			}
 			return v, nil
 		default:
@@ -412,8 +440,13 @@ func (f *InternalFlag) GetBucketingKeyValue(ctx ffcontext.Context) (string, erro
 		}
 	}
 
+	// Check if targeting key is required for this flag
 	if ctx.GetKey() == "" {
-		return "", &gofferror.EmptyBucketingKeyError{Message: "Empty targeting key"}
+		if f.RequiresBucketing() {
+			return "", &gofferror.EmptyBucketingKeyError{Message: "Empty targeting key"}
+		}
+		// Return empty key if bucketing not required
+		return "", nil
 	}
 
 	return ctx.GetKey(), nil

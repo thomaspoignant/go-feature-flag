@@ -11,6 +11,15 @@ func NewEvaluationContextBuilder(key string) EvaluationContextBuilder {
 	}
 }
 
+// NewEvaluationContextBuilderWithoutTargetingKey constructs a new EvaluationContextBuilder without a targeting key.
+// This should only be used for flags that don't require bucketing (no percentage-based rules).
+func NewEvaluationContextBuilderWithoutTargetingKey() EvaluationContextBuilder {
+	return &evaluationContextBuilderImpl{
+		key:    "",
+		custom: map[string]interface{}{},
+	}
+}
+
 // EvaluationContextBuilder is a builder to create an EvaluationContext.
 type EvaluationContextBuilder interface {
 	// Deprecated: Anonymous is to flag the context for an anonymous context or not.

@@ -1959,7 +1959,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 		},
 		{
-			name: "Empty targeting key",
+			name: "Empty targeting key for static flag should succeed",
 			flag: flag.InternalFlag{
 				Variations: &map[string]*interface{}{
 					"variation_A": testconvert.Interface(true),
@@ -1980,13 +1980,11 @@ func TestInternalFlag_Value(t *testing.T) {
 					DefaultSdkValue: false,
 				},
 			},
-			want: false,
+			want: true,
 			want1: flag.ResolutionDetails{
-				Variant:      "SdkDefault",
-				Reason:       flag.ReasonError,
-				ErrorCode:    flag.ErrorCodeTargetingKeyMissing,
-				ErrorMessage: "Error: Empty targeting key",
-				Cacheable:    false,
+				Variant:   "variation_A",
+				Reason:    flag.ReasonStatic,
+				Cacheable: true,
 				Metadata: map[string]interface{}{
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
@@ -1994,7 +1992,7 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 		},
 		{
-			name: "Empty bucketing key",
+			name: "Empty bucketing key for static flag should succeed",
 			flag: flag.InternalFlag{
 				Variations: &map[string]*interface{}{
 					"variation_A": testconvert.Interface(true),
@@ -2018,12 +2016,48 @@ func TestInternalFlag_Value(t *testing.T) {
 					DefaultSdkValue: false,
 				},
 			},
+			want: true,
+			want1: flag.ResolutionDetails{
+				Variant:   "variation_A",
+				Reason:    flag.ReasonStatic,
+				Cacheable: true,
+				Metadata: map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
+			},
+		},
+		{
+			name: "Empty targeting key for percentage flag should fail",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"variation_A": testconvert.Interface(true),
+					"variation_B": testconvert.Interface(false),
+				},
+				DefaultRule: &flag.Rule{
+					Percentages: &map[string]float64{
+						"variation_A": 50,
+						"variation_B": 50,
+					},
+				},
+				Metadata: &map[string]interface{}{
+					"description": "this is a flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
+			},
+			args: args{
+				flagName: "my-flag",
+				user:     ffcontext.NewEvaluationContext(""),
+				flagContext: flag.Context{
+					DefaultSdkValue: false,
+				},
+			},
 			want: false,
 			want1: flag.ResolutionDetails{
 				Variant:      "SdkDefault",
 				Reason:       flag.ReasonError,
 				ErrorCode:    flag.ErrorCodeTargetingKeyMissing,
-				ErrorMessage: "Error: Empty bucketing key",
+				ErrorMessage: "Error: Empty targeting key",
 				Cacheable:    false,
 				Metadata: map[string]interface{}{
 					"description": "this is a flag",
