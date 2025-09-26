@@ -70,9 +70,10 @@ func (f *InternalFlag) Value(
 	flag, err := f.applyScheduledRolloutSteps(evaluationDate)
 	if err != nil {
 		return flagContext.DefaultSdkValue, ResolutionDetails{
-			Variant:   VariationSDKDefault,
-			Reason:    ReasonError,
-			ErrorCode: ErrorCodeGeneral,
+			Variant:      VariationSDKDefault,
+			Reason:       ReasonError,
+			ErrorCode:    ErrorCodeGeneral,
+			ErrorMessage: err.Error(),
 		}
 	}
 
@@ -104,10 +105,11 @@ func (f *InternalFlag) Value(
 	if err != nil {
 		return flagContext.DefaultSdkValue,
 			ResolutionDetails{
-				Variant:   VariationSDKDefault,
-				Reason:    ReasonError,
-				ErrorCode: ErrorFlagConfiguration,
-				Metadata:  flag.GetMetadata(),
+				Variant:      VariationSDKDefault,
+				Reason:       ReasonError,
+				ErrorCode:    ErrorFlagConfiguration,
+				ErrorMessage: err.Error(),
+				Metadata:     flag.GetMetadata(),
 			}
 	}
 
@@ -247,7 +249,7 @@ func (f *InternalFlag) applyScheduledRolloutSteps(evaluationDate time.Time) (*In
 					flagCopy.Experimentation = &ExperimentationRollout{}
 				}
 				if steps.Experimentation.Start != nil {
-					flagCopy.Experimentation.End = steps.Experimentation.End
+					flagCopy.Experimentation.Start = steps.Experimentation.Start
 				}
 				if steps.Experimentation.End != nil {
 					flagCopy.Experimentation.End = steps.Experimentation.End
@@ -377,10 +379,8 @@ func (f *InternalFlag) GetVersion() string {
 
 // GetVariationValue return the value of variation from his name
 func (f *InternalFlag) GetVariationValue(name string) interface{} {
-	for k, v := range f.GetVariations() {
-		if k == name && v != nil {
-			return *v
-		}
+	if v, exists := f.GetVariations()[name]; exists && v != nil {
+		return *v
 	}
 	return nil
 }
@@ -393,8 +393,49 @@ func (f *InternalFlag) GetBucketingKey() string {
 	return *f.BucketingKey
 }
 
+// RequiresBucketing checks if the flag requires a bucketing key for evaluation
+// A flag requires bucketing if it has percentage-based rules or progressive rollouts,
+// including those introduced by scheduled rollout steps
+func (f *InternalFlag) RequiresBucketing() bool {
+	// Check if default rule requires bucketing
+	if f.DefaultRule != nil && f.DefaultRule.RequiresBucketing() {
+		return true
+	}
+
+	// Check if any targeting rule requires bucketing
+	for _, rule := range f.GetRules() {
+		if rule.RequiresBucketing() {
+			return true
+		}
+	}
+
+	// Check if any scheduled rollout steps introduce bucketing requirements
+	if f.Scheduled != nil {
+		for _, step := range *f.Scheduled {
+			// Check if the scheduled step's default rule requires bucketing
+			if step.DefaultRule != nil && step.DefaultRule.RequiresBucketing() {
+				return true
+			}
+
+			// Check if any of the scheduled step's rules require bucketing
+			for _, rule := range step.GetRules() {
+				if rule.RequiresBucketing() {
+					return true
+				}
+			}
+		}
+	}
+
+	return false
+}
+
 // GetBucketingKeyValue return the value of the bucketing key from the context
+// If requiresBucketing is false, it allows empty keys for flags that don't need them
 func (f *InternalFlag) GetBucketingKeyValue(ctx ffcontext.Context) (string, error) {
+	// Cache the bucketing requirement check to avoid multiple calls
+	requiresBucketing := f.RequiresBucketing()
+
+	// Check if custom bucketing key is provided
 	if f.BucketingKey != nil {
 		key := f.GetBucketingKey()
 		if key == "" {
@@ -404,7 +445,11 @@ func (f *InternalFlag) GetBucketingKeyValue(ctx ffcontext.Context) (string, erro
 		switch v := value.(type) {
 		case string:
 			if v == "" {
-				return "", &gofferror.EmptyBucketingKeyError{Message: "Empty bucketing key"}
+				if requiresBucketing {
+					return "", &gofferror.EmptyBucketingKeyError{Message: "Empty bucketing key"}
+				}
+				// Return empty key if bucketing not required
+				return "", nil
 			}
 			return v, nil
 		default:
@@ -412,8 +457,13 @@ func (f *InternalFlag) GetBucketingKeyValue(ctx ffcontext.Context) (string, erro
 		}
 	}
 
+	// Check if targeting key is required for this flag
 	if ctx.GetKey() == "" {
-		return "", &gofferror.EmptyBucketingKeyError{Message: "Empty targeting key"}
+		if requiresBucketing {
+			return "", &gofferror.EmptyBucketingKeyError{Message: "Empty targeting key"}
+		}
+		// Return empty key if bucketing not required
+		return "", nil
 	}
 
 	return ctx.GetKey(), nil

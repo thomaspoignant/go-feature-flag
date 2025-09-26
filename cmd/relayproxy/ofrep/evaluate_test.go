@@ -80,18 +80,18 @@ func Test_Bulk_Evaluation(t *testing.T) {
 			},
 			want: want{
 				httpCode: http.StatusBadRequest,
-				bodyFile: "../testdata/ofrep/responses/nil_context.json",
+				bodyFile: "../testdata/ofrep/responses/nil_context_updated.json",
 			},
 		},
 		{
-			name: "No Targeting Key in context",
+			name: "No Targeting Key in context - should now pass and evaluate flags individually",
 			args: args{
 				bodyFile:            "../testdata/ofrep/no_targeting_key_context.json",
 				configFlagsLocation: configFlagsLocation,
 			},
 			want: want{
-				httpCode: http.StatusBadRequest,
-				bodyFile: "../testdata/ofrep/responses/no_targeting_key_context.json",
+				httpCode: http.StatusOK,
+				bodyFile: "../testdata/ofrep/responses/no_targeting_key_context_updated.json",
 			},
 		},
 	}
@@ -205,19 +205,43 @@ func Test_Evaluate(t *testing.T) {
 			},
 			want: want{
 				httpCode: http.StatusBadRequest,
-				bodyFile: "../testdata/ofrep/responses/nil_context_with_key.json",
+				bodyFile: "../testdata/ofrep/responses/nil_context_with_key_updated.json",
 			},
 		},
 		{
-			name: "No Targeting Key in context",
+			name: "No Targeting Key for bucketing-required flag - should return 400 from core evaluation",
 			args: args{
 				bodyFile:            "../testdata/ofrep/no_targeting_key_context.json",
 				configFlagsLocation: configFlagsLocation,
-				flagKey:             "number-flag",
+				flagKey:             "number-flag", // This flag has percentage rules, requires bucketing
 			},
 			want: want{
 				httpCode: http.StatusBadRequest,
-				bodyFile: "../testdata/ofrep/responses/no_targeting_key_context_with_key.json",
+				bodyFile: "../testdata/ofrep/responses/no_targeting_key_bucketing_flag.json",
+			},
+		},
+		{
+			name: "No Targeting Key for non-bucketing flag - should succeed",
+			args: args{
+				bodyFile:            "../testdata/ofrep/no_targeting_key_context.json",
+				configFlagsLocation: configFlagsLocation,
+				flagKey:             "targeting-key-rule", // This flag has no percentages, doesn't require bucketing
+			},
+			want: want{
+				httpCode: http.StatusOK,
+				bodyFile: "../testdata/ofrep/responses/no_targeting_key_static_flag.json",
+			},
+		},
+		{
+			name: "Percentage-based flag without targeting key should return 400 error",
+			args: args{
+				bodyFile:            "../testdata/ofrep/no_targeting_key_context.json",
+				configFlagsLocation: configFlagsLocation,
+				flagKey:             "flag-only-for-admin", // This flag has percentage rules, requires bucketing
+			},
+			want: want{
+				httpCode: http.StatusBadRequest, // Core evaluation returns 400 for missing targeting key
+				bodyFile: "../testdata/ofrep/responses/percentage_flag_no_key_error.json",
 			},
 		},
 		{

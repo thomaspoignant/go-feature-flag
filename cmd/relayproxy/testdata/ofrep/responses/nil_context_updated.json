@@ -1,0 +1,4 @@
+{
+  "errorCode": "INVALID_CONTEXT",
+  "errorDetails": "GO Feature Flag requires an evaluation context in the request."
+}

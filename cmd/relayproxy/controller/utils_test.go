@@ -40,14 +40,12 @@ func Test_assertRequest(t *testing.T) {
 				"assertRequest: impossible to find user in request"),
 		},
 		{
-			name: "user with User and EvaluationContext, empty key for evaluation context",
+			name: "user with User and EvaluationContext, empty key for evaluation context should now pass",
 			req: &model.AllFlagRequest{
 				User:              &model.UserRequest{Key: "my-key"},
 				EvaluationContext: &model.EvaluationContextRequest{Key: ""},
 			},
-			wantErr: echo.NewHTTPError(
-				http.StatusBadRequest,
-				"empty key for evaluation context, impossible to retrieve flags"),
+			wantErr: nil, // Empty keys are now allowed at API layer
 		},
 		{
 			name: "invalid user but valid evaluation context should pass",

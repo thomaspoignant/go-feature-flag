@@ -227,19 +227,23 @@ func (h *EvaluateCtrl) BulkEvaluate(c echo.Context) error {
 func assertOFREPEvaluateRequest(
 	ofrepEvalReq *model.OFREPEvalFlagRequest,
 ) *model.OFREPCommonResponseError {
-	if ofrepEvalReq.Context == nil || ofrepEvalReq.Context["targetingKey"] == "" {
-		return NewOFREPCommonError(flag.ErrorCodeTargetingKeyMissing,
-			"GO Feature Flag MUST have a targeting key in the request.")
+	// Note: Empty targeting keys are now allowed - the core evaluation logic will determine
+	// if a targeting key is required based on whether the flag needs bucketing.
+	if ofrepEvalReq.Context == nil {
+		return NewOFREPCommonError(flag.ErrorCodeInvalidContext,
+			"GO Feature Flag requires an evaluation context in the request.")
 	}
 	return nil
 }
 
 func evaluationContextFromOFREPRequest(ctx map[string]any) (ffcontext.Context, error) {
-	if targetingKey, ok := ctx["targetingKey"].(string); ok {
-		evalCtx := utils.ConvertEvaluationCtxFromRequest(targetingKey, ctx)
-		return evalCtx, nil
+	// Allow empty or missing targeting keys - core evaluation logic will handle requirements
+	targetingKey := ""
+	if key, ok := ctx["targetingKey"].(string); ok {
+		targetingKey = key
 	}
-	return ffcontext.EvaluationContext{}, NewOFREPCommonError(
-		flag.ErrorCodeTargetingKeyMissing,
-		"GO Feature Flag has received no targetingKey or a none string value that is not a string.")
+
+	// Create evaluation context (empty targeting key is allowed)
+	evalCtx := utils.ConvertEvaluationCtxFromRequest(targetingKey, ctx)
+	return evalCtx, nil
 }
