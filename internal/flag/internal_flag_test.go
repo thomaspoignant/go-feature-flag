@@ -691,6 +691,7 @@ func TestInternalFlag_Value(t *testing.T) {
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
+				ErrorMessage: "error in the configuration, no variation available for this rule",
 			},
 		},
 		{
@@ -732,6 +733,7 @@ func TestInternalFlag_Value(t *testing.T) {
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
+				ErrorMessage: "error in the configuration, no variation available for this rule",
 			},
 		},
 		{
@@ -773,6 +775,7 @@ func TestInternalFlag_Value(t *testing.T) {
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
+				ErrorMessage: "no default targeting for the flag",
 			},
 		},
 		{
@@ -808,6 +811,7 @@ func TestInternalFlag_Value(t *testing.T) {
 					"description": "this is a flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
+				ErrorMessage: "error in the configuration, no variation available for this rule",
 			},
 		},
 		{
@@ -1953,9 +1957,10 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 			want: "default-sdk",
 			want1: flag.ResolutionDetails{
-				Variant:   "SdkDefault",
-				Reason:    flag.ReasonError,
-				ErrorCode: flag.ErrorCodeGeneral,
+				Variant:      "SdkDefault",
+				Reason:       flag.ReasonError,
+				ErrorCode:    flag.ErrorCodeGeneral,
+				ErrorMessage: "json: unsupported type: chan int",
 			},
 		},
 		{
