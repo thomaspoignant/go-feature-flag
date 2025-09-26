@@ -2,6 +2,7 @@ package flag_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
@@ -103,6 +104,124 @@ func TestInternalFlag_RequiresBucketing(t *testing.T) {
 				},
 				DefaultRule: &flag.Rule{
 					VariationResult: testconvert.String("disabled"),
+				},
+			},
+			expected: false,
+		},
+		{
+			name: "Should require bucketing - scheduled rollout with percentages",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"enabled":  testconvert.Interface(true),
+					"disabled": testconvert.Interface(false),
+				},
+				Rules: &[]flag.Rule{
+					{
+						Query:           testconvert.String("key eq \"admin\""),
+						VariationResult: testconvert.String("enabled"),
+					},
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("disabled"),
+				},
+				Scheduled: &[]flag.ScheduledStep{
+					{
+						InternalFlag: flag.InternalFlag{
+							DefaultRule: &flag.Rule{
+								Percentages: &map[string]float64{
+									"enabled":  50,
+									"disabled": 50,
+								},
+							},
+						},
+						Date: testconvert.Time(time.Now()),
+					},
+				},
+			},
+			expected: true,
+		},
+		{
+			name: "Should require bucketing - scheduled rollout with progressive rollout",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"enabled":  testconvert.Interface(true),
+					"disabled": testconvert.Interface(false),
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("disabled"),
+				},
+				Scheduled: &[]flag.ScheduledStep{
+					{
+						InternalFlag: flag.InternalFlag{
+							DefaultRule: &flag.Rule{
+								ProgressiveRollout: &flag.ProgressiveRollout{
+									Initial: &flag.ProgressiveRolloutStep{
+										Variation:  testconvert.String("disabled"),
+										Percentage: testconvert.Float64(0),
+										Date:       testconvert.Time(time.Now()),
+									},
+									End: &flag.ProgressiveRolloutStep{
+										Variation:  testconvert.String("enabled"),
+										Percentage: testconvert.Float64(100),
+										Date:       testconvert.Time(time.Now().Add(time.Hour)),
+									},
+								},
+							},
+						},
+						Date: testconvert.Time(time.Now()),
+					},
+				},
+			},
+			expected: true,
+		},
+		{
+			name: "Should require bucketing - scheduled rollout with targeting rule percentages",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"enabled":  testconvert.Interface(true),
+					"disabled": testconvert.Interface(false),
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("disabled"),
+				},
+				Scheduled: &[]flag.ScheduledStep{
+					{
+						InternalFlag: flag.InternalFlag{
+							Rules: &[]flag.Rule{
+								{
+									Query: testconvert.String("beta eq true"),
+									Percentages: &map[string]float64{
+										"enabled":  25,
+										"disabled": 75,
+									},
+								},
+							},
+						},
+						Date: testconvert.Time(time.Now()),
+					},
+				},
+			},
+			expected: true,
+		},
+		{
+			name: "Should not require bucketing - scheduled rollout with only static variations",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"enabled":  testconvert.Interface(true),
+					"disabled": testconvert.Interface(false),
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("disabled"),
+				},
+				Scheduled: &[]flag.ScheduledStep{
+					{
+						InternalFlag: flag.InternalFlag{
+							DefaultRule: &flag.Rule{
+								VariationResult: testconvert.String("enabled"),
+							},
+						},
+						Date: testconvert.Time(time.Now()),
+					},
 				},
 			},
 			expected: false,
