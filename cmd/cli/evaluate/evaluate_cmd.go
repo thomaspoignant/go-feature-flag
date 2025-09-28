@@ -18,6 +18,7 @@ var (
 	githubToken    string
 	repositorySlug string
 	branch         string
+	baseURL        string
 	evalFlag       string
 	evalCtx        string
 )
@@ -41,6 +42,7 @@ func NewEvaluateCmd() *cobra.Command {
 				}(),
 				GithubToken: githubToken,
 				AuthToken:   authToken,
+				BaseURL:     baseURL,
 			}
 
 			err := retrieverConf.IsValid()
@@ -69,6 +71,8 @@ func NewEvaluateCmd() *cobra.Command {
 		"repository-slug", "", "Repository slug to access your private configuration file on GitHub")
 	evaluateCmd.Flags().StringVar(&branch,
 		"branch", "", "Branch to access your private configuration file on GitHub")
+	evaluateCmd.Flags().StringVar(&baseURL, "base-url", "",
+		"Base URL of your private configuration file on Gitlab")
 	evaluateCmd.Flags().StringVar(&evalFlag,
 		"flag", "", "Name of the flag to evaluate, if empty we will return the evaluation of all the flags")
 	evaluateCmd.Flags().StringVar(&evalCtx,

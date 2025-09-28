@@ -8,6 +8,7 @@ import (
 	retrieverInit "github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf/init"
 	"github.com/thomaspoignant/go-feature-flag/model"
 	"github.com/thomaspoignant/go-feature-flag/retriever/githubretriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever/gitlabretriever"
 	"github.com/thomaspoignant/go-feature-flag/testutils/mock"
 )
 
@@ -150,18 +151,60 @@ func Test_evaluate_Evaluate(t *testing.T) {
 			},
 		},
 		{
-			name: "new test",
+			name: "Should evaluate a flag from a github repository",
 			initEvaluate: func() (evaluate, error) {
 				r, err := retrieverInit.InitRetriever(
-					&retrieverconf.RetrieverConf{Kind: "github", RepositorySlug: "thomaspoignant/go-feature-flag",
-						GithubToken: "XXX_GH_TOKEN",
-						Path:        "testdata/flag-config.yaml"})
+					&retrieverconf.RetrieverConf{
+						Kind:           "github",
+						RepositorySlug: "thomaspoignant/go-feature-flag",
+						GithubToken:    "XXX_GH_TOKEN",
+						Path:           "testdata/flag-config.yaml"})
 				if err != nil {
 					return evaluate{}, err
 				}
 
-				githubRetriever, _ := r.(*githubretriever.Retriever)
-				githubRetriever.SetHTTPClient(&mock.HTTP{})
+				gitHubRetriever, _ := r.(*githubretriever.Retriever)
+				gitHubRetriever.SetHTTPClient(&mock.HTTP{})
+
+				return evaluate{
+					retriever:     r,
+					fileFormat:    "yaml",
+					flag:          "test-flag",
+					evaluationCtx: `{"targetingKey": "user-123"}`,
+				}, nil
+			},
+			wantErr: assert.NoError,
+			expectedResult: map[string]model.RawVarResult{
+				"test-flag": {
+					TrackEvents:   true,
+					VariationType: "false_var",
+					Failed:        false,
+					Version:       "",
+					Reason:        "DEFAULT",
+					ErrorCode:     "",
+					ErrorDetails:  "",
+					Value:         false,
+					Cacheable:     true,
+					Metadata:      nil,
+				},
+			},
+		},
+		{
+			name: "Should evaluate a flag from a gitlab repository",
+			initEvaluate: func() (evaluate, error) {
+				r, err := retrieverInit.InitRetriever(
+					&retrieverconf.RetrieverConf{
+						Kind:           "gitlab",
+						BaseURL:        baseURL,
+						RepositorySlug: "thomaspoignant/go-feature-flag",
+						AuthToken:      "XXX",
+						Path:           "testdata/flag-config.yaml"})
+				if err != nil {
+					return evaluate{}, err
+				}
+
+				gitLabRetriever, _ := r.(*gitlabretriever.Retriever)
+				gitLabRetriever.SetHTTPClient(&mock.HTTP{})
 
 				return evaluate{
 					retriever:     r,
