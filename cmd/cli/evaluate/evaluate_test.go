@@ -7,6 +7,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 	retrieverInit "github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf/init"
 	"github.com/thomaspoignant/go-feature-flag/model"
+	"github.com/thomaspoignant/go-feature-flag/retriever/bitbucketretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/githubretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/gitlabretriever"
 	"github.com/thomaspoignant/go-feature-flag/testutils/mock"
@@ -205,6 +206,46 @@ func Test_evaluate_Evaluate(t *testing.T) {
 
 				gitLabRetriever, _ := r.(*gitlabretriever.Retriever)
 				gitLabRetriever.SetHTTPClient(&mock.HTTP{})
+
+				return evaluate{
+					retriever:     r,
+					fileFormat:    "yaml",
+					flag:          "test-flag",
+					evaluationCtx: `{"targetingKey": "user-123"}`,
+				}, nil
+			},
+			wantErr: assert.NoError,
+			expectedResult: map[string]model.RawVarResult{
+				"test-flag": {
+					TrackEvents:   true,
+					VariationType: "false_var",
+					Failed:        false,
+					Version:       "",
+					Reason:        "DEFAULT",
+					ErrorCode:     "",
+					ErrorDetails:  "",
+					Value:         false,
+					Cacheable:     true,
+					Metadata:      nil,
+				},
+			},
+		},
+		{
+			name: "Should evaluate a flag from a bitbucket repository",
+			initEvaluate: func() (evaluate, error) {
+				r, err := retrieverInit.InitRetriever(
+					&retrieverconf.RetrieverConf{
+						Kind:           "bitbucket",
+						BaseURL:        baseURL,
+						RepositorySlug: "thomaspoignant/go-feature-flag",
+						AuthToken:      "XXX",
+						Path:           "testdata/flag-config.yaml"})
+				if err != nil {
+					return evaluate{}, err
+				}
+
+				bitBucketRetriever, _ := r.(*bitbucketretriever.Retriever)
+				bitBucketRetriever.SetHTTPClient(&mock.HTTP{})
 
 				return evaluate{
 					retriever:     r,
