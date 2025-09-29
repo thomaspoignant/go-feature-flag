@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
@@ -30,30 +31,32 @@ func compareJSONWithTimestampHandling(t *testing.T, expectedFilePath string, act
 	err = json.Unmarshal(actualJSON, &actualFlags)
 	assert.NoError(t, err, "Failed to unmarshal actual JSON")
 
+	expectedFlagData, ok := expectedFlags["flags"].(map[string]interface{})
+	require.True(t, ok, "expected 'flags' field should be a map")
+
+	actualFlagData, ok := actualFlags["flags"].(map[string]interface{})
+	require.True(t, ok, "actual 'flags' field should be a map")
+	currentTime := time.Now().Unix()
+
 	// Compare structure without timestamps first
-	if expectedFlagData, ok := expectedFlags["flags"].(map[string]interface{}); ok {
-		if actualFlagData, ok := actualFlags["flags"].(map[string]interface{}); ok {
-			currentTime := time.Now().Unix()
-			for flagName, expectedFlag := range expectedFlagData {
-				actualFlag, exists := actualFlagData[flagName]
-				assert.True(t, exists, "Flag %s should exist in actual results", flagName)
+	for flagName, expectedFlag := range expectedFlagData {
+		actualFlag, exists := actualFlagData[flagName]
+		assert.True(t, exists, "Flag %s should exist in actual results", flagName)
 
-				if expectedFlagObj, ok := expectedFlag.(map[string]interface{}); ok {
-					if actualFlagObj, ok := actualFlag.(map[string]interface{}); ok {
-						// Verify timestamp exists and is reasonable
-						assert.Contains(t, actualFlagObj, "timestamp")
-						actualTimestamp, ok := actualFlagObj["timestamp"].(float64)
-						assert.True(t, ok, "timestamp should be a number")
-						assert.NotEqual(t, 0, actualTimestamp, "timestamp should not be zero")
+		if expectedFlagObj, ok := expectedFlag.(map[string]interface{}); ok {
+			if actualFlagObj, ok := actualFlag.(map[string]interface{}); ok {
+				// Verify timestamp exists and is reasonable
+				assert.Contains(t, actualFlagObj, "timestamp")
+				actualTimestamp, ok := actualFlagObj["timestamp"].(float64)
+				assert.True(t, ok, "timestamp should be a number")
+				assert.NotEqual(t, 0, actualTimestamp, "timestamp should not be zero")
 
-						// Timestamp should be within the last minute (reasonable for test execution)
-						assert.True(t, actualTimestamp >= float64(currentTime-60), "timestamp should be recent")
-						assert.True(t, actualTimestamp <= float64(currentTime+60), "timestamp should not be in future")
+				// Timestamp should be within the last minute (reasonable for test execution)
+				assert.True(t, actualTimestamp >= float64(currentTime-60), "timestamp should be recent")
+				assert.True(t, actualTimestamp <= float64(currentTime+60), "timestamp should not be in future")
 
-						// Normalize timestamps to compare structure
-						expectedFlagObj["timestamp"] = actualFlagObj["timestamp"]
-					}
-				}
+				// Normalize timestamps to compare structure
+				expectedFlagObj["timestamp"] = actualFlagObj["timestamp"]
 			}
 		}
 	}
