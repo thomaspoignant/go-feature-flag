@@ -14,6 +14,56 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 )
 
+// compareJSONWithTimestampHandling compares expected and actual JSON while handling timestamp fields properly
+// to avoid flaky tests due to timing differences
+func compareJSONWithTimestampHandling(t *testing.T, expectedFilePath string, actualJSON []byte) {
+	t.Helper()
+
+	expected, err := os.ReadFile(expectedFilePath)
+	assert.NoError(t, err, "Failed to read expected JSON file")
+
+	var expectedFlags map[string]interface{}
+	err = json.Unmarshal(expected, &expectedFlags)
+	assert.NoError(t, err, "Failed to unmarshal expected JSON")
+
+	var actualFlags map[string]interface{}
+	err = json.Unmarshal(actualJSON, &actualFlags)
+	assert.NoError(t, err, "Failed to unmarshal actual JSON")
+
+	// Compare structure without timestamps first
+	if expectedFlagData, ok := expectedFlags["flags"].(map[string]interface{}); ok {
+		if actualFlagData, ok := actualFlags["flags"].(map[string]interface{}); ok {
+			currentTime := time.Now().Unix()
+			for flagName, expectedFlag := range expectedFlagData {
+				actualFlag, exists := actualFlagData[flagName]
+				assert.True(t, exists, "Flag %s should exist in actual results", flagName)
+
+				if expectedFlagObj, ok := expectedFlag.(map[string]interface{}); ok {
+					if actualFlagObj, ok := actualFlag.(map[string]interface{}); ok {
+						// Verify timestamp exists and is reasonable
+						assert.Contains(t, actualFlagObj, "timestamp")
+						actualTimestamp, ok := actualFlagObj["timestamp"].(float64)
+						assert.True(t, ok, "timestamp should be a number")
+						assert.NotEqual(t, 0, actualTimestamp, "timestamp should not be zero")
+
+						// Timestamp should be within the last minute (reasonable for test execution)
+						assert.True(t, actualTimestamp >= float64(currentTime-60), "timestamp should be recent")
+						assert.True(t, actualTimestamp <= float64(currentTime+60), "timestamp should not be in future")
+
+						// Normalize timestamps to compare structure
+						expectedFlagObj["timestamp"] = actualFlagObj["timestamp"]
+					}
+				}
+			}
+		}
+	}
+
+	// Now compare the full JSON structures
+	expectedJSON, err := json.Marshal(expectedFlags)
+	assert.NoError(t, err, "Failed to marshal normalized expected JSON")
+	assert.JSONEq(t, string(expectedJSON), string(actualJSON), "JSON structures should match after timestamp normalization")
+}
+
 func TestAllFlagsState(t *testing.T) {
 	tests := []struct {
 		name       string
@@ -83,23 +133,10 @@ func TestAllFlagsState(t *testing.T) {
 			allFlagsState := goff.AllFlagsState(user)
 			assert.Equal(t, tt.valid, allFlagsState.IsValid())
 
-			// expected JSON output - we force the timestamp
-			expected, _ := os.ReadFile(tt.jsonOutput)
-			var f map[string]interface{}
-			_ = json.Unmarshal(expected, &f)
-			if expectedFlags, ok := f["flags"].(map[string]interface{}); ok {
-				for _, value := range expectedFlags {
-					if valueObj, ok := value.(map[string]interface{}); ok {
-						assert.NotNil(t, valueObj["timestamp"])
-						assert.NotEqual(t, 0, valueObj["timestamp"])
-						valueObj["timestamp"] = time.Now().Unix()
-					}
-				}
-			}
-			expectedJSON, _ := json.Marshal(f)
+			// Compare JSON output with proper timestamp handling
 			marshaled, err := allFlagsState.MarshalJSON()
 			assert.NoError(t, err)
-			assert.JSONEq(t, string(expectedJSON), string(marshaled))
+			compareJSONWithTimestampHandling(t, tt.jsonOutput, marshaled)
 
 			// no data exported
 			files, _ := os.ReadDir(exportDir)
@@ -202,23 +239,10 @@ func TestGetFlagStates(t *testing.T) {
 			)
 			assert.Equal(t, tt.valid, allFlagsState.IsValid())
 
-			// expected JSON output - we force the timestamp
-			expected, _ := os.ReadFile(tt.jsonOutput)
-			var f map[string]interface{}
-			_ = json.Unmarshal(expected, &f)
-			if expectedFlags, ok := f["flags"].(map[string]interface{}); ok {
-				for _, value := range expectedFlags {
-					if valueObj, ok := value.(map[string]interface{}); ok {
-						assert.NotNil(t, valueObj["timestamp"])
-						assert.NotEqual(t, 0, valueObj["timestamp"])
-						valueObj["timestamp"] = time.Now().Unix()
-					}
-				}
-			}
-			expectedJSON, _ := json.Marshal(f)
+			// Compare JSON output with proper timestamp handling
 			marshaled, err := allFlagsState.MarshalJSON()
 			assert.NoError(t, err)
-			assert.JSONEq(t, string(expectedJSON), string(marshaled))
+			compareJSONWithTimestampHandling(t, tt.jsonOutput, marshaled)
 
 			// no data exported
 			files, _ := os.ReadDir(exportDir)
