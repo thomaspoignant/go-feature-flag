@@ -31,33 +31,34 @@ func compareJSONWithTimestampHandling(t *testing.T, expectedFilePath string, act
 	err = json.Unmarshal(actualJSON, &actualFlags)
 	assert.NoError(t, err, "Failed to unmarshal actual JSON")
 
-	expectedFlagData, ok := expectedFlags["flags"].(map[string]interface{})
-	require.True(t, ok, "expected 'flags' field should be a map")
+	// Handle cases where there might not be a "flags" field (e.g., offline, module_not_init)
+	expectedFlagData, hasExpectedFlags := expectedFlags["flags"].(map[string]interface{})
+	actualFlagData, hasActualFlags := actualFlags["flags"].(map[string]interface{})
 
-	actualFlagData, ok := actualFlags["flags"].(map[string]interface{})
-	require.True(t, ok, "actual 'flags' field should be a map")
-	currentTime := time.Now().Unix()
+	// Only proceed with timestamp validation if both have flags
+	if hasExpectedFlags && hasActualFlags {
+		// Compare structure without timestamps first
+		for flagName, expectedFlag := range expectedFlagData {
+			actualFlag, exists := actualFlagData[flagName]
+			require.True(t, exists, "Flag %s should exist in actual results", flagName)
 
-	// Compare structure without timestamps first
-	for flagName, expectedFlag := range expectedFlagData {
-		actualFlag, exists := actualFlagData[flagName]
-		assert.True(t, exists, "Flag %s should exist in actual results", flagName)
+			expectedFlagObj, ok := expectedFlag.(map[string]interface{})
+			require.True(t, ok, "expected flag %s should be a map", flagName)
 
-		if expectedFlagObj, ok := expectedFlag.(map[string]interface{}); ok {
-			if actualFlagObj, ok := actualFlag.(map[string]interface{}); ok {
-				// Verify timestamp exists and is reasonable
-				assert.Contains(t, actualFlagObj, "timestamp")
-				actualTimestamp, ok := actualFlagObj["timestamp"].(float64)
-				assert.True(t, ok, "timestamp should be a number")
-				assert.NotEqual(t, 0, actualTimestamp, "timestamp should not be zero")
+			actualFlagObj, ok := actualFlag.(map[string]interface{})
+			require.True(t, ok, "actual flag %s should be a map", flagName)
 
-				// Timestamp should be within the last minute (reasonable for test execution)
-				assert.True(t, actualTimestamp >= float64(currentTime-60), "timestamp should be recent")
-				assert.True(t, actualTimestamp <= float64(currentTime+60), "timestamp should not be in future")
+			// Verify timestamp exists and is reasonable
+			require.Contains(t, actualFlagObj, "timestamp", "timestamp should exist in flag %s", flagName)
+			actualTimestamp, ok := actualFlagObj["timestamp"].(float64)
+			require.True(t, ok, "timestamp should be a number for flag %s", flagName)
+			require.NotEqual(t, 0, actualTimestamp, "timestamp should not be zero for flag %s", flagName)
 
-				// Normalize timestamps to compare structure
-				expectedFlagObj["timestamp"] = actualFlagObj["timestamp"]
-			}
+			// Timestamp should be recent (within a small delta of the current time)
+			assert.InDelta(t, float64(time.Now().Unix()), actualTimestamp, 5.0, "timestamp should be recent for flag %s", flagName)
+
+			// Normalize timestamps to compare structure
+			expectedFlagObj["timestamp"] = actualFlagObj["timestamp"]
 		}
 	}
 
