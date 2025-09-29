@@ -2,6 +2,7 @@ package evaluate
 
 import (
 	"encoding/json"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/thomaspoignant/go-feature-flag/cmd/cli/helper"
@@ -21,11 +22,18 @@ var (
 	baseURL        string
 	bucket         string
 	item           string
+	url            string
+	method         string
+	body           string
+	headers        []string
+	timeout        int64
 	evalFlag       string
 	evalCtx        string
 )
 
 func NewEvaluateCmd() *cobra.Command {
+	parsedHeaders := parseHeaders()
+
 	evaluateCmd := &cobra.Command{
 		Use:   "evaluate",
 		Short: "⚙️ Evaluate feature flags based on configuration and context",
@@ -47,6 +55,11 @@ func NewEvaluateCmd() *cobra.Command {
 				BaseURL:     baseURL,
 				Bucket:      bucket,
 				Item:        item,
+				URL:         url,
+				Timeout:     timeout,
+				HTTPMethod:  method,
+				HTTPBody:    body,
+				HTTPHeaders: parsedHeaders,
 			}
 
 			err := retrieverConf.IsValid()
@@ -81,6 +94,16 @@ func NewEvaluateCmd() *cobra.Command {
 		"bucket", "", "Bucket of your configuration file on S3")
 	evaluateCmd.Flags().StringVar(&item,
 		"item", "", "Item of your configuration file on S3")
+	evaluateCmd.Flags().StringVar(&url,
+		"url", "", "URL of your configuration file on HTTP")
+	evaluateCmd.Flags().StringVar(&method,
+		"method", "GET", "Method to access your configuration file on HTTP")
+	evaluateCmd.Flags().StringVar(&body,
+		"body", "", "Body to access your configuration file on HTTP")
+	evaluateCmd.Flags().StringArrayVar(&headers,
+		"header", nil, "Header to access your configuration file on HTTP (may be repeated)")
+	evaluateCmd.Flags().Int64Var(&timeout,
+		"timeout", 0, "Timeout in seconds to access your configuration file on HTTP")
 	evaluateCmd.Flags().StringVar(&evalFlag,
 		"flag", "", "Name of the flag to evaluate, if empty we will return the evaluation of all the flags")
 	evaluateCmd.Flags().StringVar(&evalCtx,
@@ -125,4 +148,21 @@ func runEvaluate(
 	output.Add(string(detailed), helper.DefaultLevel)
 	output.PrintLines(cmd)
 	return nil
+}
+
+func parseHeaders() map[string][]string {
+	result := make(map[string][]string)
+	for _, h := range headers {
+		parts := strings.SplitN(h, "=", 2)
+		if len(parts) != 2 {
+			parts = strings.SplitN(h, ":", 2)
+		}
+		if len(parts) != 2 {
+			continue
+		}
+		key := strings.TrimSpace(parts[0])
+		val := strings.TrimSpace(parts[1])
+		result[key] = append(result[key], val)
+	}
+	return result
 }
