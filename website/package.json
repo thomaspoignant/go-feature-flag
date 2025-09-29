@@ -16,12 +16,12 @@
     "eslint:fix": "eslint \"**/*.js\" --fix"
   },
   "dependencies": {
-    "@docusaurus/core": "^3.8.1",
+    "@docusaurus/core": "^3.9.0",
     "@docusaurus/plugin-client-redirects": "^3.8.1",
     "@docusaurus/plugin-google-gtag": "^3.8.1",
     "@docusaurus/plugin-google-tag-manager": "^3.8.1",
-    "@docusaurus/preset-classic": "^3.8.1",
-    "@docusaurus/theme-mermaid": "^3.8.1",
+    "@docusaurus/preset-classic": "^3.9.0",
+    "@docusaurus/theme-mermaid": "^3.9.0",
     "@easyops-cn/docusaurus-search-local": "^0.52.1",
     "@hookform/error-message": "^2.0.1",
     "@iarna/toml": "^2.2.5",
