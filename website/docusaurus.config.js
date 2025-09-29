@@ -12,12 +12,14 @@ const config = {
   url: 'https://gofeatureflag.org',
   baseUrl: '/',
   onBrokenLinks: 'throw',
-  onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon/favicon.ico',
   organizationName: 'thomaspoignant',
   projectName: 'go-feature-flag',
   trailingSlash: false,
   markdown: {
+    hooks: {
+      onBrokenMarkdownLinks: 'warn',
+    },
     mermaid: true,
   },
   plugins: [
