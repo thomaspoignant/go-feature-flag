@@ -19,6 +19,8 @@ var (
 	repositorySlug string
 	branch         string
 	baseURL        string
+	bucket         string
+	item           string
 	evalFlag       string
 	evalCtx        string
 )
@@ -43,6 +45,8 @@ func NewEvaluateCmd() *cobra.Command {
 				GithubToken: githubToken,
 				AuthToken:   authToken,
 				BaseURL:     baseURL,
+				Bucket:      bucket,
+				Item:        item,
 			}
 
 			err := retrieverConf.IsValid()
@@ -64,15 +68,19 @@ func NewEvaluateCmd() *cobra.Command {
 	evaluateCmd.Flags().StringVarP(&path, "path", "p", "",
 		"Path to your GO Feature Flag configuration file (local or remote)")
 	evaluateCmd.Flags().StringVar(&authToken,
-		"auth-token", "", "Authentication token to access your private configuration file")
+		"auth-token", "", "Authentication token to access your configuration file")
 	evaluateCmd.Flags().StringVar(&githubToken,
-		"github-token", "", "Authentication token to access your private configuration file on GitHub")
+		"github-token", "", "Authentication token to access your configuration file on GitHub")
 	evaluateCmd.Flags().StringVar(&repositorySlug,
-		"repository-slug", "", "Repository slug to access your private configuration file on GitHub")
+		"repository-slug", "", "Repository slug to access your configuration file on GitHub")
 	evaluateCmd.Flags().StringVar(&branch,
-		"branch", "", "Branch to access your private configuration file on GitHub")
+		"branch", "", "Branch to access your configuration file on GitHub")
 	evaluateCmd.Flags().StringVar(&baseURL,
-		"base-url", "", "Base URL of your private configuration file on Gitlab")
+		"base-url", "", "Base URL of your configuration file on Gitlab")
+	evaluateCmd.Flags().StringVar(&bucket,
+		"bucket", "", "Bucket of your configuration file on S3")
+	evaluateCmd.Flags().StringVar(&item,
+		"item", "", "Item of your configuration file on S3")
 	evaluateCmd.Flags().StringVar(&evalFlag,
 		"flag", "", "Name of the flag to evaluate, if empty we will return the evaluation of all the flags")
 	evaluateCmd.Flags().StringVar(&evalCtx,

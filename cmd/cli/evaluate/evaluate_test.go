@@ -1,6 +1,7 @@
 package evaluate
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -10,6 +11,8 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/retriever/bitbucketretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/githubretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/gitlabretriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever/s3retrieverv2"
+	"github.com/thomaspoignant/go-feature-flag/testutils"
 	"github.com/thomaspoignant/go-feature-flag/testutils/mock"
 )
 
@@ -267,6 +270,53 @@ func Test_evaluate_Evaluate(t *testing.T) {
 					Value:         false,
 					Cacheable:     true,
 					Metadata:      nil,
+				},
+			},
+		},
+		{
+			name: "Should evaluate a flag from a S3 repository",
+			initEvaluate: func() (evaluate, error) {
+				downloader := &testutils.S3ManagerV2Mock{
+					TestDataLocation: "./testdata",
+				}
+
+				r, err := retrieverInit.InitRetriever(
+					&retrieverconf.RetrieverConf{
+						Kind:   "s3",
+						Bucket: "Bucket",
+						Item:   "valid",
+					})
+
+				if err != nil {
+					return evaluate{}, err
+				}
+
+				s3Retriever, _ := r.(*s3retrieverv2.Retriever)
+				s3Retriever.SetDownloader(downloader)
+
+				_ = s3Retriever.Init(context.Background(), nil)
+
+				return evaluate{
+					retriever:     r,
+					fileFormat:    "yaml",
+					flag:          "test-flag",
+					evaluationCtx: `{"targetingKey": "user-123"}`,
+				}, nil
+			},
+			wantErr: assert.NoError,
+			expectedResult: map[string]model.RawVarResult{
+				"test-flag": {
+					TrackEvents:   true,
+					VariationType: "Default",
+					Failed:        false,
+					Version:       "",
+					Reason:        "DEFAULT",
+					ErrorCode:     "",
+					ErrorDetails:  "",
+					Value:         false,
+					Cacheable:     true,
+					Metadata: map[string]interface{}{"description": "this is a simple feature flag",
+						"issue-link": "https://jira.xxx/GOFF-01"},
 				},
 			},
 		},
