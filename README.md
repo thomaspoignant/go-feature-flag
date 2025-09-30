@@ -299,6 +299,7 @@ The available retrievers are:
 - **Local file**
 - **Google Cloud Storage**
 - **Kubernetes ConfigMaps**
+- **Kubernetes Secrets**
 - **MongoDB**
 - **Redis**
 - **BitBucket**
