@@ -129,6 +129,21 @@ func Test_kubernetesSecretRetriever_Retrieve(t *testing.T) {
 			),
 		},
 		{
+			name: "Secret decoding fails",
+			fields: fields{
+				object: &api.Secret{
+					ObjectMeta: v1.ObjectMeta{Name: "Secret1", Namespace: "Namespace"},
+					StringData: map[string]string{"FEATURE_FLAGS": "_INVALID"},
+				},
+				namespace:  "Namespace",
+				secretName: "Secret1",
+				secretKey:  "FEATURE_FLAGS",
+			},
+			wantErr: errors.New(
+				"unable to decode secret Secret1.Namespace, error: illegal base64 data at input byte 0",
+			),
+		},
+		{
 			name: "k8s client is nil",
 			fields: fields{
 				object: &api.Secret{

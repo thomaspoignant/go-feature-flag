@@ -52,7 +52,7 @@ func (s *SecretRetriever) Retrieve(ctx context.Context) ([]byte, error) {
 
 	decodedContent, err := base64.StdEncoding.DecodeString(encodedContent)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unable to decode secret %s.%s, error: %s", s.SecretName, s.Namespace, err)
 	}
 
 	return decodedContent, nil
