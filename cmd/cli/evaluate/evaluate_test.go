@@ -2,6 +2,7 @@ package evaluate
 
 import (
 	"context"
+	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -11,6 +12,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/retriever/bitbucketretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/githubretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/gitlabretriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever/httpretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/s3retrieverv2"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
 	"github.com/thomaspoignant/go-feature-flag/testutils/mock"
@@ -317,6 +319,49 @@ func Test_evaluate_Evaluate(t *testing.T) {
 					Cacheable:     true,
 					Metadata: map[string]interface{}{"description": "this is a simple feature flag",
 						"issue-link": "https://jira.xxx/GOFF-01"},
+				},
+			},
+		},
+		{
+			name: "Should evaluate a flag from a HTTP endpoint",
+			initEvaluate: func() (evaluate, error) {
+
+				r, err := retrieverInit.InitRetriever(
+					&retrieverconf.RetrieverConf{
+						Kind:        "http",
+						URL:         "http://localhost.example/file",
+						HTTPMethod:  http.MethodGet,
+						HTTPBody:    "",
+						HTTPHeaders: nil,
+					})
+
+				if err != nil {
+					return evaluate{}, err
+				}
+
+				httpRetriever, _ := r.(*httpretriever.Retriever)
+				httpRetriever.SetHTTPClient(&mock.HTTP{})
+
+				return evaluate{
+					retriever:     r,
+					fileFormat:    "yaml",
+					flag:          "test-flag",
+					evaluationCtx: `{"targetingKey": "user-123"}`,
+				}, nil
+			},
+			wantErr: assert.NoError,
+			expectedResult: map[string]model.RawVarResult{
+				"test-flag": {
+					TrackEvents:   true,
+					VariationType: "false_var",
+					Failed:        false,
+					Version:       "",
+					Reason:        "DEFAULT",
+					ErrorCode:     "",
+					ErrorDetails:  "",
+					Value:         false,
+					Cacheable:     true,
+					Metadata:      nil,
 				},
 			},
 		},
