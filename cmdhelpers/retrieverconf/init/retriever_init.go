@@ -6,6 +6,8 @@ import (
 	"time"
 
 	awsConf "github.com/aws/aws-sdk-go-v2/config"
+	"k8s.io/client-go/rest"
+
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	azblobretriever "github.com/thomaspoignant/go-feature-flag/retriever/azblobstorageretriever"
@@ -20,7 +22,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/retriever/postgresqlretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/redisretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/s3retrieverv2"
-	"k8s.io/client-go/rest"
 )
 
 // retrieverFactory defines the signature for retriever factory functions
@@ -28,18 +29,19 @@ type retrieverFactory func(*retrieverconf.RetrieverConf, time.Duration) (retriev
 
 // retrieverFactories maps retriever kinds to their factory functions
 var retrieverFactories = map[retrieverconf.RetrieverKind]retrieverFactory{
-	retrieverconf.GitHubRetriever:        createGitHubRetriever,
-	retrieverconf.GitlabRetriever:        createGitlabRetriever,
-	retrieverconf.BitbucketRetriever:     createBitbucketRetriever,
-	retrieverconf.FileRetriever:          createFileRetriever,
-	retrieverconf.S3Retriever:            createS3Retriever,
-	retrieverconf.HTTPRetriever:          createHTTPRetriever,
-	retrieverconf.GoogleStorageRetriever: createGoogleStorageRetriever,
-	retrieverconf.KubernetesRetriever:    createKubernetesRetriever,
-	retrieverconf.MongoDBRetriever:       createMongoDBRetriever,
-	retrieverconf.RedisRetriever:         createRedisRetriever,
-	retrieverconf.AzBlobStorageRetriever: createAzBlobStorageRetriever,
-	retrieverconf.PostgreSQLRetriever:    createPostgreSQLRetriever,
+	retrieverconf.GitHubRetriever:           createGitHubRetriever,
+	retrieverconf.GitlabRetriever:           createGitlabRetriever,
+	retrieverconf.BitbucketRetriever:        createBitbucketRetriever,
+	retrieverconf.FileRetriever:             createFileRetriever,
+	retrieverconf.S3Retriever:               createS3Retriever,
+	retrieverconf.HTTPRetriever:             createHTTPRetriever,
+	retrieverconf.GoogleStorageRetriever:    createGoogleStorageRetriever,
+	retrieverconf.KubernetesRetriever:       createKubernetesRetriever,
+	retrieverconf.KubernetesSecretRetriever: createKubernetesSecretRetriever,
+	retrieverconf.MongoDBRetriever:          createMongoDBRetriever,
+	retrieverconf.RedisRetriever:            createRedisRetriever,
+	retrieverconf.AzBlobStorageRetriever:    createAzBlobStorageRetriever,
+	retrieverconf.PostgreSQLRetriever:       createPostgreSQLRetriever,
 }
 
 // InitRetriever initialize the retriever based on the configuration
@@ -148,6 +150,20 @@ func createKubernetesRetriever(
 		ConfigMapName: c.ConfigMap,
 		Key:           c.Key,
 		ClientConfig:  *client,
+	}, nil
+}
+
+func createKubernetesSecretRetriever(
+	c *retrieverconf.RetrieverConf, _ time.Duration) (retriever.Retriever, error) {
+	client, err := rest.InClusterConfig()
+	if err != nil {
+		return nil, err
+	}
+	return &k8sretriever.SecretRetriever{
+		Namespace:    c.Namespace,
+		SecretName:   c.Secret,
+		SecretKey:    c.Key,
+		ClientConfig: *client,
 	}, nil
 }
 
