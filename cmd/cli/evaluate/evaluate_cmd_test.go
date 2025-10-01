@@ -108,6 +108,30 @@ func TestCmdEvaluate(t *testing.T) {
 			},
 			wantErr: assert.Error,
 		},
+		{
+			name: "should return configuration of http retriever with headers set properly",
+			args: []string{
+				"--kind",
+				"http",
+				"--url",
+				"http://localhost:8080/config.yaml",
+				"--header",
+				"Content-Type: application/json",
+				"--header",
+				"X-API-Key: 123456",
+				"--header",
+				"X-API-Key: 654321",
+				"--flag",
+				"test-flag",
+				"--ctx",
+				`{"targetingKey": "user-123"}`,
+				"--format",
+				"yaml",
+				"--check-mode",
+			},
+			wantErr:        assert.NoError,
+			expectedResult: "testdata/res/check.json",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

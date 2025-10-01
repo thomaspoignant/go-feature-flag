@@ -45,7 +45,7 @@ func Test_evaluate_Evaluate(t *testing.T) {
 				}, nil
 			},
 			wantErr:     assert.Error,
-			expectedErr: "impossible to initialize the retrievers, please check your configuration: impossible to retrieve the flags, please check your configuration: open testdata/invalid.yaml: no such file or directory",
+			expectedErr: "impossible to initialize the retrievers, please checkMode your configuration: impossible to retrieve the flags, please checkMode your configuration: open testdata/invalid.yaml: no such file or directory",
 		},
 		{
 			name: "Should error if no evaluation context provided",
