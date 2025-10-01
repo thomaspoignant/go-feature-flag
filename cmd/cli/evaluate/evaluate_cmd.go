@@ -29,6 +29,7 @@ var (
 	timeout        int64
 	evalFlag       string
 	evalCtx        string
+	check          bool
 )
 
 func NewEvaluateCmd() *cobra.Command {
@@ -67,7 +68,11 @@ func NewEvaluateCmd() *cobra.Command {
 				return err
 			}
 
-			return runEvaluate(cmd, args, evalFlagFormat, retrieverConf, evalFlag, evalCtx)
+			if check {
+				return runCheck(cmd, retrieverConf)
+			} else {
+				return runEvaluate(cmd, args, evalFlagFormat, retrieverConf, evalFlag, evalCtx)
+			}
 		},
 		SilenceUsage:  true,
 		SilenceErrors: true,
@@ -108,6 +113,8 @@ func NewEvaluateCmd() *cobra.Command {
 		"flag", "", "Name of the flag to evaluate, if empty we will return the evaluation of all the flags")
 	evaluateCmd.Flags().StringVar(&evalCtx,
 		"ctx", "{}", "Evaluation context in JSON format")
+	evaluateCmd.Flags().BoolVar(&check,
+		"check", false, "Check only mode - it does not perform any evaluation and returns the configuration of retriever")
 	_ = evaluateCmd.Flags().MarkDeprecated("github-token", "Use auth-token instead")
 	_ = evaluateCmd.Flags().MarkDeprecated("config", "Use path instead")
 	_ = evaluateCmd.Flags()
@@ -141,6 +148,21 @@ func runEvaluate(
 	}
 
 	detailed, err := json.MarshalIndent(result, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	output.Add(string(detailed), helper.DefaultLevel)
+	output.PrintLines(cmd)
+	return nil
+}
+
+func runCheck(
+	cmd *cobra.Command,
+	retrieverConf retrieverconf.RetrieverConf) error {
+	output := helper.Output{}
+
+	detailed, err := json.MarshalIndent(retrieverConf, "", "")
 	if err != nil {
 		return err
 	}
