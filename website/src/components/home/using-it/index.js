@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import Link from '@docusaurus/Link';
 import lyft from '@site/static/img/using-it/lyft.png';
 import tencent from '@site/static/img/using-it/tencent.png';
 import minder from '@site/static/img/using-it/minder.png';
@@ -107,11 +108,15 @@ function UsingItLogos({companies}) {
     <div className={'grid grid-cols-2 lg:grid-cols-6 mt-8 items-center mb-0'}>
       {companies.map(company => (
         <div key={company.name}>
-          <img
-            src={company.logo}
-            alt={company.name}
-            className={company.imgClassName ? company.imgClassName : 'max-w-36'}
-          />
+          <Link to={company.url}>
+            <img
+              src={company.logo}
+              alt={company.name}
+              className={
+                company.imgClassName ? company.imgClassName : 'max-w-36'
+              }
+            />
+          </Link>
         </div>
       ))}
     </div>
