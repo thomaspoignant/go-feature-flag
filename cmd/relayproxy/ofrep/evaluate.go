@@ -239,7 +239,8 @@ func assertOFREPEvaluateRequest(
 }
 
 func evaluationContextFromOFREPRequest(ctx map[string]any) (ffcontext.Context, error) {
-	// Allow empty or missing targeting keys - core evaluation logic will handle requirements
+	// targetingKey is optional, it is only required if the flag needs bucketing and the check is done in the core evaluation logic.
+	// If we don't have a targetingKey, we return an empty string.
 	targetingKey := ""
 	if key, ok := ctx["targetingKey"].(string); ok {
 		targetingKey = key
