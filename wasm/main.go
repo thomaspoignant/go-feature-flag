@@ -47,7 +47,7 @@ func localEvaluation(input string) string {
 	evalCtx := convertEvaluationCtx(evaluateInput.EvaluationCtx)
 
 	// we don't care about the error here because the errorCode and errorDetails
-	// contains information about the type of the error directly, no need to check the GO error.
+	// contains information about the type of the error directly, no need to check the Go error.
 	c, _ := evaluation.Evaluate[interface{}](
 		&evaluateInput.Flag,
 		evaluateInput.FlagKey,
