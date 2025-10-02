@@ -44,14 +44,10 @@ func localEvaluation(input string) string {
 		}.ToJsonStr()
 	}
 
-	evalCtx, err := convertEvaluationCtx(evaluateInput.EvaluationCtx)
-	if err != nil {
-		return model.VariationResult[interface{}]{
-			ErrorCode:    flag.ErrorCodeTargetingKeyMissing,
-			ErrorDetails: err.Error(),
-		}.ToJsonStr()
-	}
+	evalCtx := convertEvaluationCtx(evaluateInput.EvaluationCtx)
 
+	// we don't care about the error here because the errorCode and errorDetails
+	// contains information about the type of the error directly, no need to check the GO error.
 	c, _ := evaluation.Evaluate[interface{}](
 		&evaluateInput.Flag,
 		evaluateInput.FlagKey,
@@ -66,7 +62,7 @@ func localEvaluation(input string) string {
 // convertEvaluationCtx converts the evaluation context from the input to a ffcontext.Context.
 // Note: Empty targeting keys are now allowed - the core evaluation logic will determine
 // if a targeting key is required based on whether the flag needs bucketing.
-func convertEvaluationCtx(ctx map[string]any) (ffcontext.Context, error) {
+func convertEvaluationCtx(ctx map[string]any) ffcontext.Context {
 	// Allow empty or missing targeting keys - core evaluation logic will handle requirements
 	targetingKey := ""
 	if key, ok := ctx["targetingKey"].(string); ok {
@@ -75,5 +71,5 @@ func convertEvaluationCtx(ctx map[string]any) (ffcontext.Context, error) {
 
 	// Create evaluation context (empty targeting key is allowed)
 	evalCtx := utils.ConvertEvaluationCtxFromRequest(targetingKey, ctx)
-	return evalCtx, nil
+	return evalCtx
 }
