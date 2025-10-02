@@ -6,6 +6,7 @@ import PropTypes from 'prop-types';
 import {integrations} from '@site/data/integrations';
 import {sdk} from '@site/data/sdk';
 
+
 SocialIcon.propTypes = {
   colorClassName: PropTypes.string,
   fontAwesomeIcon: PropTypes.string,
@@ -273,11 +274,15 @@ export function OpenFeatureEcosystem() {
           </div>
         </div>
         <div className={'col col--6'}>
-          <div className={clsx(styles.openfeaturelogo, 'text-center xl:mt-16')}>
+          <div
+            className={clsx(
+              styles.openfeaturelogo,
+              'text-center xl:mt-16 pt-16 md:pt-0'
+            )}>
             <img
               src={'img/features/openfeature.svg'}
               alt="openfeature-logo"
-              style={{fill: 'red'}}
+              className="max-w-lg"
             />
           </div>
         </div>
