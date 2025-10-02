@@ -109,7 +109,7 @@ func TestCmdEvaluate(t *testing.T) {
 			wantErr: assert.Error,
 		},
 		{
-			name: "should return configuration of http retriever with headers set properly",
+			name: "should return configuration of http retriever with headers set properly when using check-mode",
 			args: []string{
 				"--kind",
 				"http",
@@ -133,7 +133,7 @@ func TestCmdEvaluate(t *testing.T) {
 			expectedResult: "testdata/res/check-http.json",
 		},
 		{
-			name: "should return configuration of github retriever",
+			name: "should return configuration of github retriever when using check-mode",
 			args: []string{
 				"--kind",
 				"github",
@@ -157,7 +157,7 @@ func TestCmdEvaluate(t *testing.T) {
 			expectedResult: "testdata/res/check-github.json",
 		},
 		{
-			name: "should return configuration of gitlab retriever",
+			name: "should return configuration of gitlab retriever when using check-mode",
 			args: []string{
 				"--kind",
 				"gitlab",
@@ -181,6 +181,52 @@ func TestCmdEvaluate(t *testing.T) {
 			},
 			wantErr:        assert.NoError,
 			expectedResult: "testdata/res/check-gitlab.json",
+		},
+		{
+			name: "should return configuration of bitbucket retriever when using check-mode",
+			args: []string{
+				"--kind",
+				"bitbucket",
+				"--base-url",
+				"https://bitbucket.com/api/v4/",
+				"--repository-slug",
+				"thomaspoignant/go-feature-flag",
+				"--auth-token",
+				"XXX_BITBUCKET_TOKEN",
+				"--branch",
+				"master",
+				"--path",
+				"testdata/flag-config.yaml",
+				"--flag",
+				"test-flag",
+				"--ctx",
+				`{"targetingKey": "user-123"}`,
+				"--format",
+				"yaml",
+				"--check-mode",
+			},
+			wantErr:        assert.NoError,
+			expectedResult: "testdata/res/check-bitbucket.json",
+		},
+		{
+			name: "should return configuration of s3 retriever when using check-mode",
+			args: []string{
+				"--kind",
+				"s3",
+				"--bucket",
+				"Bucket",
+				"--item",
+				"valid",
+				"--flag",
+				"test-flag",
+				"--ctx",
+				`{"targetingKey": "user-123"}`,
+				"--format",
+				"yaml",
+				"--check-mode",
+			},
+			wantErr:        assert.NoError,
+			expectedResult: "testdata/res/check-s3.json",
 		},
 	}
 	for _, tt := range tests {

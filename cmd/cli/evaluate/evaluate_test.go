@@ -241,7 +241,7 @@ func Test_evaluate_Evaluate(t *testing.T) {
 				r, err := retrieverInit.InitRetriever(
 					&retrieverconf.RetrieverConf{
 						Kind:           "bitbucket",
-						BaseURL:        "https://gitlab.com/api/v4/",
+						BaseURL:        "https://bitbucket.com/api/v4/",
 						RepositorySlug: "thomaspoignant/go-feature-flag",
 						AuthToken:      "XXX",
 						Path:           "testdata/flag-config.yaml"})
