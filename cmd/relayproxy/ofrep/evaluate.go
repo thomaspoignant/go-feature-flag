@@ -227,12 +227,14 @@ func (h *EvaluateCtrl) BulkEvaluate(c echo.Context) error {
 func assertOFREPEvaluateRequest(
 	ofrepEvalReq *model.OFREPEvalFlagRequest,
 ) *model.OFREPCommonResponseError {
-	// Note: Empty targeting keys are now allowed - the core evaluation logic will determine
-	// if a targeting key is required based on whether the flag needs bucketing.
 	if ofrepEvalReq.Context == nil {
 		return NewOFREPCommonError(flag.ErrorCodeInvalidContext,
 			"GO Feature Flag requires an evaluation context in the request.")
 	}
+
+	// An empty context object is allowed since the evaluation context is optional.
+	// If the context does not have any targetingKey, this is fine since the core evaluation logic will handle if it is required or not.
+
 	return nil
 }
 
