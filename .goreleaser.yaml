@@ -775,3 +775,16 @@ scoops:
 
 snapshot:
   version_template: "{{ incpatch .Version }}-next"
+  
+signs:
+  - artifacts: checksum
+    cmd: gpg
+    args: [
+      "--batch",
+      "--yes",
+      "--pinentry-mode", "loopback",
+      "--passphrase", "{{ .Env.GPG_PASSPHRASE }}",
+      "--local-user", "{{ .Env.GPG_KEY_ID }}",
+      "--output", "${signature}",
+      "--detach-sign", "${artifact}"
+    ]
