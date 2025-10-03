@@ -84,14 +84,16 @@ func Test_Bulk_Evaluation(t *testing.T) {
 			},
 		},
 		{
-			name: "No Targeting Key in context - should now pass and evaluate flags individually",
+			name: "No Targeting Key in context",
+			// in this case we don't have a targetingKey, so we will evaluate the flags individually
+			// if the flag requires bucketing, we will return a targeting key missing error
 			args: args{
 				bodyFile:            "../testdata/ofrep/no_targeting_key_context.json",
 				configFlagsLocation: configFlagsLocation,
 			},
 			want: want{
 				httpCode: http.StatusOK,
-				bodyFile: "../testdata/ofrep/responses/no_targeting_key_context_updated.json",
+				bodyFile: "../testdata/ofrep/responses/no_targeting_key_context.json",
 			},
 		},
 	}
@@ -205,7 +207,7 @@ func Test_Evaluate(t *testing.T) {
 			},
 			want: want{
 				httpCode: http.StatusBadRequest,
-				bodyFile: "../testdata/ofrep/responses/nil_context_with_key_updated.json",
+				bodyFile: "../testdata/ofrep/responses/nil_context_with_key.json",
 			},
 		},
 		{
@@ -233,7 +235,7 @@ func Test_Evaluate(t *testing.T) {
 			},
 		},
 		{
-			name: "Percentage-based flag without targeting key should return 400 error",
+			name: "Percentage-based rule in flag without targeting key should return 400 error",
 			args: args{
 				bodyFile:            "../testdata/ofrep/no_targeting_key_context.json",
 				configFlagsLocation: configFlagsLocation,
