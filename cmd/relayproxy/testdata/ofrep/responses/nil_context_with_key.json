@@ -1,5 +1,5 @@
 {
-  "errorCode": "TARGETING_KEY_MISSING",
-  "errorDetails": "GO Feature Flag MUST have a targeting key in the request.",
+  "errorCode": "INVALID_CONTEXT",
+  "errorDetails": "GO Feature Flag requires an evaluation context in the request.",
   "key": "number-flag"
 }
