@@ -10,6 +10,7 @@
 @tailwind components;
 @tailwind utilities;
 
+/* CSS Custom Properties - placed after Tailwind to ensure they're not purged */
 :root {
     --ifm-color-primary: #2e8555;
     --ifm-color-primary-dark: #29784c;
@@ -59,7 +60,6 @@
 
     --goff-headline-green: var(--goff-variation-plus-button-bg);
     --goff-headline-purple: #6c46f2;
-
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
@@ -88,7 +88,6 @@
 
     --goff-card-bg-color: var(--goff-editor-form-field-bg);
     --goff-headline-title: #777;
-
 }
 
 

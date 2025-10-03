@@ -6,7 +6,6 @@ import PropTypes from 'prop-types';
 import {integrations} from '@site/data/integrations';
 import {sdk} from '@site/data/sdk';
 
-
 SocialIcon.propTypes = {
   colorClassName: PropTypes.string,
   fontAwesomeIcon: PropTypes.string,
@@ -31,58 +30,87 @@ function SocialIcon(props) {
   );
 }
 
+FeatureListItem.propTypes = {
+  children: PropTypes.node.isRequired,
+  icon: PropTypes.string,
+};
+
+function FeatureListItem({children, icon = 'fa-solid fa-circle-arrow-right'}) {
+  return (
+    <li className="flex text-left gap-2">
+      <i className={`${icon} text-titles-500 text-2xl`}></i>
+      <p className="dark:text-gray-50 font-poppins text-[1rem] font-[500] pt-1">
+        {children}
+      </p>
+    </li>
+  );
+}
+
+FeatureList.propTypes = {
+  children: PropTypes.node.isRequired,
+};
+
+function FeatureList({children}) {
+  return (
+    <div>
+      <ul className="list-none text-left pl-0">{children}</ul>
+    </div>
+  );
+}
+
+FeatureDescriptionBlock.propTypes = {
+  childrens: PropTypes.node.isRequired,
+};
+function FeatureDescriptionBlock({childrens = []}) {
+  return (
+    <div>
+      {childrens.map((children, idx) => (
+        <p
+          key={idx}
+          className="text-[1.05rem] text-gray-500 font-poppins font-[400] leading-8">
+          {children}
+        </p>
+      ))}
+    </div>
+  );
+}
+
 export function Rollout() {
   return (
     <div className="container my-8">
       <div className="row">
         <div className={'col col--6'}>
-          <div className={clsx(styles.featureContent, 'mr-25')}>
-            <h2>Advanced rollout capabilities</h2>
-            <p>
-              Feature flags allows to unlink deploy and release, this means that
-              you can decide how to release a feature without thinking about
-              architecture and complex deployments.
-            </p>
-            <p>
-              These capabilities will give you more control on your rollout
-              changes and will ensure that everything happened as expected.
-            </p>
-            <div className={styles.featureContentList}>
-              <ul>
-                <li>
-                  <i className="fa-solid fa-circle-arrow-right"></i>
-                  <p>Rules: Impact only the users you want to target.</p>
-                </li>
-                <li>
-                  <i className="fa-solid fa-circle-arrow-right"></i>
-                  <p>
-                    Canary release: Enable the feature only to a subset of your
-                    users.
-                  </p>
-                </li>
-                <li>
-                  <i className="fa-solid fa-circle-arrow-right"></i>
-                  <p>
-                    Progressive rollout: Affect from 0% to 100% of users within
-                    a time frame, you can monitor while releasing the change.
-                  </p>
-                </li>
-                <li>
-                  <i className="fa-solid fa-circle-arrow-right"></i>
-                  <p>
-                    Scheduled Workflows: Modify your flag at a specific time to
-                    impact more/less users.
-                  </p>
-                </li>
-                <li>
-                  <i className="fa-solid fa-circle-arrow-right"></i>
-                  <p>
-                    A/B testing: Split your audience in multiple groups and
-                    track their usage.
-                  </p>
-                </li>
-              </ul>
-            </div>
+          <div className="mr-25">
+            <h2 className="m-t-[2rem] text-4xl font-poppins font-[800] text-left tracking-[-0.08rem] color-gray-50">
+              Advanced rollout capabilities
+            </h2>
+            <FeatureDescriptionBlock
+              childrens={[
+                'Feature flags allow you to unlink deploy and release. This means you can decide how to release a feature without worrying about architecture and complex deployments.',
+                'These capabilities give you more control over your rollout changes and ensure that everything happens as expected.',
+              ]}
+            />
+            <FeatureList>
+              <FeatureListItem>
+                Rules: Impact only the users you want to target.
+              </FeatureListItem>
+              <FeatureListItem>
+                Canary release: Enable the feature only to a subset of your
+                users.
+              </FeatureListItem>
+              <FeatureListItem>
+                Progressive rollout: Affect from 0% to 100% of users within a
+                time frame, you can monitor while releasing the change.
+              </FeatureListItem>
+              <FeatureListItem>
+                Scheduled Workflows: Modify your flag at a specific time to
+                impact more/less users.
+              </FeatureListItem>
+              <FeatureListItem>
+                A/B testing: Split your audience in multiple groups and track
+                their usage.
+              </FeatureListItem>
+            </FeatureList>
             <p className={'mt-3'}>
               <Link to={'/docs/configure_flag/rollout-strategies'}>
                 {' '}
@@ -121,17 +149,23 @@ export function Sdk() {
           </div>
         </div>
         <div className="col col--6">
-          <div className={clsx(styles.featureContent, 'mr-25')}>
-            <h2>Supports your favorite languages</h2>
-            <p>
-              GO Feature Flag believe in OpenSource, and offer providers for the
-              feature flag standard{' '}
-              <Link href={'https://openfeature.dev'}>OpenFeature</Link>.
-              <br />
-              In combination with the <b>Open Feature SDKs</b> these{' '}
-              <b>providers</b> will allow you to use GO Feature Flag with all
-              supported languages.
-            </p>
+          <div className="mr-25">
+            <h2 className="m-t-[2rem] text-4xl font-poppins font-[800] text-left tracking-[-0.08rem] color-gray-50">
+              Supports your favorite languages
+            </h2>
+            <FeatureDescriptionBlock
+              childrens={[
+                <>
+                  GO Feature Flag believe in OpenSource, and offer providers for
+                  the feature flag standard{' '}
+                  <Link href={'https://openfeature.dev'}>OpenFeature</Link>.
+                  <br />
+                  In combination with the <b>Open Feature SDKs</b> these{' '}
+                  <b>providers</b> will allow you to use GO Feature Flag with
+                  all supported languages.
+                </>,
+              ]}
+            />
             <p>
               <Link to={'/docs/sdk'}>
                 {' '}
@@ -170,38 +204,33 @@ export function Integration() {
     <div className="container my-8">
       <div className="row">
         <div className={'col col--6'}>
-          <div className={clsx(styles.featureContent, 'mr-25')}>
-            <h2>Integrates with different systems</h2>
-            <p>
-              GO Feature flag is cloud ready and can retrieve its configuration
-              from various places, store your data usage where you want and
-              notify you when something changes.
-            </p>
-            <div className={styles.featureContentList}>
-              <ul>
-                <li>
-                  <i className="fa-solid fa-circle-arrow-right"></i>
-                  <p>
-                    Retrieve your file from S3, Google Cloud, Github,
-                    Kubernetes, and more.
-                  </p>
-                </li>
-                <li>
-                  <i className="fa-solid fa-circle-arrow-right"></i>
-                  <p>Store flags usage in your favorite dataset (S3, GCP, ).</p>
-                </li>
-                <li>
-                  <i className="fa-solid fa-circle-arrow-right"></i>
-                  <p>
-                    Be notified on slack or via a webhook that your flag has
-                    changed.
-                  </p>
-                </li>
-                <li>
-                  <i className="fa-solid fa-circle-arrow-right"></i>
-                  <p>You can also extend GO Feature Flag if needed.</p>
-                </li>
-              </ul>
+          <div className="mr-25">
+            <h2 className="m-t-[2rem] text-4xl font-poppins font-[800] text-left tracking-[-0.08rem] color-gray-50">
+              Integrates with different systems
+            </h2>
+            <FeatureDescriptionBlock
+              childrens={[
+                'GO Feature flag is cloud ready and can retrieve its configuration from various places, store your data usage where you want and notify you when something changes.',
+              ]}
+            />
+            <FeatureList>
+              <FeatureListItem>
+                Retrieve your file from S3, Google Cloud, Github, Kubernetes,
+                and more.
+              </FeatureListItem>
+              <FeatureListItem>
+                Store flags usage in your favorite dataset (S3, GCP, and many
+                more ...)
+              </FeatureListItem>
+              <FeatureListItem>
+                Be notified on slack or via a webhook that your flag has
+                changed.
+              </FeatureListItem>
+              <FeatureListItem>
+                You can also extend GO Feature Flag if needed.
+              </FeatureListItem>
+            </FeatureList>
+            <div>
               <p className={'mt-10 flex gap-2 items-center'}>
                 {' '}
                 See our integrations <i className="fa-solid fa-arrow-right"></i>
@@ -245,40 +274,27 @@ export function OpenFeatureEcosystem() {
     <div className="container my-8">
       <div className="row">
         <div className={'col col--6'}>
-          <div className={clsx(styles.featureContent, 'mr-25')}>
-            <h2>Part of the OpenFeature Ecosystem</h2>
-            <p>
-              At GO Feature Flag, we believe in the power of open standards and,
-              the importance of vendor neutrality. That's why we've chosen to
-              rely on Open Feature for our SDKs.
-              <br />
-              By adopting GO Feature Flag you embrace the OpenFeature standard
-              and you get all the benefits of the ecosystem.
-            </p>
-            <div className={styles.featureContentList}>
-              <ul>
-                <li>
-                  <i className="fa-solid fa-circle-arrow-right"></i>
-                  <p>Open-Source SDKs</p>
-                </li>
-                <li>
-                  <i className="fa-solid fa-circle-arrow-right"></i>
-                  <p>No Vendor Lock-In</p>
-                </li>
-                <li>
-                  <i className="fa-solid fa-circle-arrow-right"></i>
-                  <p>OpenFeature community based support for SDKs</p>
-                </li>
-              </ul>
-            </div>
+          <div className="mr-25">
+            <h2 className="m-t-[2rem] text-4xl font-poppins font-[800] text-left tracking-[-0.08rem] color-gray-50">
+              Part of the OpenFeature Ecosystem
+            </h2>
+            <FeatureDescriptionBlock
+              childrens={[
+                "At GO Feature Flag, we believe in the power of open standards and, the importance of vendor neutrality. That's why we've chosen to rely on Open Feature for our SDKs.",
+                'By adopting GO Feature Flag you embrace the OpenFeature standard and you get all the benefits of the ecosystem.',
+              ]}
+            />
+            <FeatureList>
+              <FeatureListItem>Open-Source SDKs</FeatureListItem>
+              <FeatureListItem>No Vendor Lock-In</FeatureListItem>
+              <FeatureListItem>
+                OpenFeature community based support for SDKs
+              </FeatureListItem>
+            </FeatureList>
           </div>
         </div>
         <div className={'col col--6'}>
-          <div
-            className={clsx(
-              styles.openfeaturelogo,
-              'text-center xl:mt-16 pt-16 md:pt-0'
-            )}>
+          <div className="flex text-center xl:mt-24 pt-8 md:pt-0 align-middle justify-center">
             <img
               src={'img/features/openfeature.svg'}
               alt="openfeature-logo"
