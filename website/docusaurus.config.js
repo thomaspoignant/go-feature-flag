@@ -260,10 +260,7 @@ const config = {
             'https://github.com/thomaspoignant/go-feature-flag/tree/main/website/',
         },
         theme: {
-          customCss: [
-            require.resolve('./src/css/custom.css'),
-            require.resolve('./src/css/pushy-buttons.css'), //https://github.com/iRaul/pushy-buttons
-          ],
+          customCss: [require.resolve('./src/css/custom.css')],
         },
         sitemap: {
           changefreq: 'weekly',
@@ -279,19 +276,7 @@ const config = {
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css',
     'https://cdn.jsdelivr.net/gh/devicons/devicon@v2.16.0/devicon.min.css', // https://devicon.dev/
   ],
-  themes: [
-    [
-      require.resolve('@easyops-cn/docusaurus-search-local'),
-      /** @type {import("@easyops-cn/docusaurus-search-local").PluginOptions} */
-      ({
-        hashed: true,
-        language: ['en', 'zh'],
-        highlightSearchTermsOnTargetPage: true,
-        explicitSearchResultPath: true,
-      }),
-    ],
-    ['@docusaurus/theme-mermaid', {theme: 'default'}],
-  ],
+  themes: [['@docusaurus/theme-mermaid', {theme: 'default'}]],
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
@@ -510,6 +495,12 @@ const config = {
       },
       colorMode: {
         defaultMode: 'dark',
+      },
+      algolia: {
+        appId: 'OV23HUCYBM',
+        apiKey: '37574755624276e0d875552f6bcc2b40',
+        indexName: 'goff',
+        contextualSearch: true,
       },
     }),
 };
