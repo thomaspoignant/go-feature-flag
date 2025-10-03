@@ -66,6 +66,12 @@ func (f *InternalFlag) Value(
 	evaluationCtx ffcontext.Context,
 	flagContext Context,
 ) (interface{}, ResolutionDetails) {
+	// if the evaluation context is nil, we create a new one with an empty key
+	// this is to avoid any nil pointer exception.
+	if evaluationCtx == nil {
+		evaluationCtx = ffcontext.NewEvaluationContext("")
+	}
+
 	evaluationDate := DateFromContextOrDefault(evaluationCtx, time.Now())
 	flag, err := f.applyScheduledRolloutSteps(evaluationDate)
 	if err != nil {
