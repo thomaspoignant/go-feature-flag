@@ -70,17 +70,11 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 			Key:                      flagKey,
 		})
 	}
-	evalCtx, err := evaluationContextFromOFREPRequest(reqBody.Context)
+	evalCtx, err := evaluationContextFromOFREPRequest(reqBody)
 	if err != nil {
 		return c.JSON(
 			http.StatusBadRequest,
-			model.OFREPEvaluateResponseError{
-				OFREPCommonResponseError: model.OFREPCommonResponseError{
-					ErrorCode:    flag.ErrorCodeInvalidContext,
-					ErrorDetails: err.Error(),
-				},
-				Key: flagKey,
-			})
+			err)
 	}
 
 	tracer := otel.GetTracerProvider().Tracer(config.OtelTracerName)
@@ -167,7 +161,7 @@ func (h *EvaluateCtrl) BulkEvaluate(c echo.Context) error {
 	if err := assertOFREPEvaluateRequest(request); err != nil {
 		return c.JSON(http.StatusBadRequest, err)
 	}
-	evalCtx, err := evaluationContextFromOFREPRequest(request.Context)
+	evalCtx, err := evaluationContextFromOFREPRequest(request)
 	if err != nil {
 		return c.JSON(
 			http.StatusBadRequest,
@@ -233,13 +227,23 @@ func assertOFREPEvaluateRequest(
 	}
 
 	// An empty context object is allowed since the evaluation context is optional.
-	// If the context does not have any targetingKey, this is fine since the core evaluation logic will handle if it is required or not.
+	// If the context does not have any targetingKey, this is fine since the core
+	// evaluation logic will handle if it is required or not.
 
 	return nil
 }
 
-func evaluationContextFromOFREPRequest(ctx map[string]any) (ffcontext.Context, error) {
-	// targetingKey is optional, it is only required if the flag needs bucketing and the check is done in the core evaluation logic.
+func evaluationContextFromOFREPRequest(req *model.OFREPEvalFlagRequest) (ffcontext.Context, error) {
+	if req == nil || req.Context == nil {
+		return ffcontext.EvaluationContext{}, NewOFREPCommonError(
+			flag.ErrorCodeInvalidContext,
+			"GO Feature Flag has received an invalid context.")
+	}
+
+	ctx := req.Context
+
+	// targetingKey is optional, it is only required if the flag needs bucketing and
+	// the check is done in the core evaluation logic.
 	// If we don't have a targetingKey, we return an empty string.
 	targetingKey := ""
 	if key, ok := ctx["targetingKey"].(string); ok {
