@@ -80,7 +80,7 @@ func Test_Bulk_Evaluation(t *testing.T) {
 			},
 			want: want{
 				httpCode: http.StatusBadRequest,
-				bodyFile: "../testdata/ofrep/responses/nil_context_updated.json",
+				bodyFile: "../testdata/ofrep/responses/nil_context.json",
 			},
 		},
 		{
