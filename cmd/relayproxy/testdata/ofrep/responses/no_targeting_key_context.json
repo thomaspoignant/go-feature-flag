@@ -1,4 +1,74 @@
 {
-  "errorCode": "TARGETING_KEY_MISSING",
-  "errorDetails": "GO Feature Flag has received no targetingKey or a none string value that is not a string."
+  "flags": [
+    {
+      "key": "array-flag",
+      "value": null,
+      "reason": "ERROR",
+      "variant": "",
+      "errorCode": "TARGETING_KEY_MISSING",
+      "errorDetails": "Error: Empty targeting key"
+    },
+    {
+      "key": "disable-flag",
+      "value": null,
+      "reason": "ERROR",
+      "variant": "",
+      "errorCode": "TARGETING_KEY_MISSING",
+      "errorDetails": "Error: Empty targeting key"
+    },
+    {
+      "key": "flag-only-for-admin",
+      "value": null,
+      "reason": "ERROR",
+      "variant": "",
+      "errorCode": "TARGETING_KEY_MISSING",
+      "errorDetails": "Error: Empty targeting key"
+    },
+    {
+      "key": "new-admin-access",
+      "value": null,
+      "reason": "ERROR",
+      "variant": "",
+      "errorCode": "TARGETING_KEY_MISSING",
+      "errorDetails": "Error: Empty targeting key"
+    },
+    {
+      "key": "number-flag",
+      "value": null,
+      "reason": "ERROR",
+      "variant": "",
+      "errorCode": "TARGETING_KEY_MISSING",
+      "errorDetails": "Error: Empty targeting key"
+    },
+    {
+      "key": "targeting-key-rule",
+      "value": false,
+      "reason": "DEFAULT",
+      "variant": "false_var"
+    },
+    {
+      "key": "test-flag-rule-apply",
+      "value": null,
+      "reason": "ERROR",
+      "variant": "",
+      "errorCode": "TARGETING_KEY_MISSING",
+      "errorDetails": "Error: Empty targeting key"
+    },
+    {
+      "key": "test-flag-rule-apply-false",
+      "value": null,
+      "reason": "ERROR",
+      "variant": "",
+      "errorCode": "TARGETING_KEY_MISSING",
+      "errorDetails": "Error: Empty targeting key"
+    },
+    {
+      "key": "test-flag-rule-not-apply",
+      "value": null,
+      "reason": "ERROR",
+      "variant": "",
+      "errorCode": "TARGETING_KEY_MISSING",
+      "errorDetails": "Error: Empty targeting key"
+    }
+  ]
 }
