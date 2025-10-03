@@ -73,6 +73,17 @@ func Test_Bulk_Evaluation(t *testing.T) {
 			},
 		},
 		{
+			name: "Empty body",
+			args: args{
+				bodyFile:            "../testdata/ofrep/empty_body.json",
+				configFlagsLocation: configFlagsLocation,
+			},
+			want: want{
+				httpCode: http.StatusBadRequest,
+				bodyFile: "../testdata/ofrep/responses/empty_body.json",
+			},
+		},
+		{
 			name: "Nil context",
 			args: args{
 				bodyFile:            "../testdata/ofrep/nil_context.json",
