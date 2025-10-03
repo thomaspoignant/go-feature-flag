@@ -2,7 +2,6 @@ package controller_test
 
 import (
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -126,9 +125,9 @@ func Test_flag_eval_Handler(t *testing.T) {
 				bodyFile: "../testdata/controller/flag_eval/no_user_key_request.json",
 			},
 			want: want{
-				handlerErr: true,
-				errorMsg:   "empty key for evaluation context, impossible to retrieve flags",
-				errorCode:  http.StatusBadRequest,
+				handlerErr: false,
+				bodyFile:   "../testdata/controller/flag_eval/no_user_key_response.json",
+				httpCode:   http.StatusOK,
 			},
 		},
 		{
@@ -169,7 +168,7 @@ func Test_flag_eval_Handler(t *testing.T) {
 			// read wantBody request file
 			var bodyReq io.Reader
 			if tt.args.bodyFile != "" {
-				bodyReqContent, err := ioutil.ReadFile(tt.args.bodyFile)
+				bodyReqContent, err := os.ReadFile(tt.args.bodyFile)
 				assert.NoError(t, err, "request wantBody file missing %s", tt.args.bodyFile)
 				bodyReq = strings.NewReader(string(bodyReqContent))
 			}
