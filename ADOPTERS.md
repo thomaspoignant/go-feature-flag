@@ -16,3 +16,4 @@ Thank you for trusting the `go-feature-flag` and using it in your organization.
 | Mecena               | https://mecena.co                                     | FF for backend microservices                   |
 | LandsEnd             | https://www.landsend.com                              | FF for backend and frontend apps               |
 | Grafana Labs         | https://grafana.com                                   | GOFF relay with OpenFeature clients            |
+| Miro                 | https://www.miro.com                                  | Feature flags in general with OpenFeature      | 
