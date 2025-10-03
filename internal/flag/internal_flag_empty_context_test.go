@@ -351,6 +351,98 @@ func TestInternalFlag_Value_EmptyContext(t *testing.T) {
 	}
 }
 
+func TestInternalFlag_Value_NilContext(t *testing.T) {
+	tests := []struct {
+		name              string
+		flag              flag.InternalFlag
+		evaluationCtx     ffcontext.Context
+		expectedValue     interface{}
+		expectedErrorCode string
+		expectedReason    string
+		shouldSucceed     bool
+		description       string
+	}{
+		{
+			name: "Should succeed with nil context for static flag",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"enabled":  testconvert.Interface(true),
+					"disabled": testconvert.Interface(false),
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("disabled"),
+				},
+			},
+			evaluationCtx:  nil,
+			expectedValue:  false,
+			expectedReason: flag.ReasonStatic,
+			shouldSucceed:  true,
+			description:    "Flag without bucketing requirements should work with nil context",
+		},
+		{
+			name: "Should fail with nil context for percentage-based flag",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"enabled":  testconvert.Interface(true),
+					"disabled": testconvert.Interface(false),
+				},
+				DefaultRule: &flag.Rule{
+					Percentages: &map[string]float64{
+						"enabled":  20,
+						"disabled": 80,
+					},
+				},
+			},
+			evaluationCtx:     nil,
+			expectedErrorCode: flag.ErrorCodeTargetingKeyMissing,
+			expectedReason:    flag.ReasonError,
+			shouldSucceed:     false,
+			description:       "Flag with percentage-based rollout should fail with nil context",
+		},
+		{
+			name: "Should succeed with nil context for flag with targeting rule without percentages",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"enabled":  testconvert.Interface(true),
+					"disabled": testconvert.Interface(false),
+				},
+				Rules: &[]flag.Rule{
+					{
+						Query:           testconvert.String("key eq \"admin\""),
+						VariationResult: testconvert.String("enabled"),
+					},
+				},
+				DefaultRule: &flag.Rule{
+					VariationResult: testconvert.String("disabled"),
+				},
+			},
+			evaluationCtx:  nil,
+			expectedValue:  false,
+			expectedReason: flag.ReasonDefault,
+			shouldSucceed:  true,
+			description:    "Flag with targeting rule but no bucketing should work with nil context (falls back to default)",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			flagContext := flag.Context{DefaultSdkValue: false}
+			value, resolutionDetails := tt.flag.Value("test-flag", tt.evaluationCtx, flagContext)
+
+			if tt.shouldSucceed {
+				assert.Equal(t, "", resolutionDetails.ErrorCode, tt.description)
+				assert.Equal(t, tt.expectedReason, resolutionDetails.Reason, tt.description)
+				if tt.expectedValue != nil {
+					assert.Equal(t, tt.expectedValue, value, tt.description)
+				}
+			} else {
+				assert.Equal(t, tt.expectedErrorCode, resolutionDetails.ErrorCode, tt.description)
+				assert.Equal(t, tt.expectedReason, resolutionDetails.Reason, tt.description)
+			}
+		})
+	}
+}
+
 func TestInternalFlag_GetBucketingKeyValue_EmptyContext(t *testing.T) {
 	tests := []struct {
 		name          string
