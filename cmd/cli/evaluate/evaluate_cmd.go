@@ -27,6 +27,7 @@ var (
 	body           string
 	headers        []string
 	timeout        int64
+	object         string
 	evalFlag       string
 	evalCtx        string
 	checkMode      bool
@@ -71,6 +72,7 @@ evaluate --kind http --url http://localhost:8080/config.yaml --header 'ContentTy
 				HTTPMethod:  method,
 				HTTPBody:    body,
 				HTTPHeaders: parsedHeaders,
+				Object:      object,
 			}
 
 			err := retrieverConf.IsValid()
@@ -112,11 +114,11 @@ evaluate --kind http --url http://localhost:8080/config.yaml --header 'ContentTy
 	evaluateCmd.Flags().StringVar(&url,
 		"url", "", "URL of your configuration file on HTTP")
 	evaluateCmd.Flags().StringVar(&method,
-		"method", "GET", "Method to access your configuration file on HTTP")
+		"method", "GET", "HTTP method to access your configuration file on HTTP")
 	evaluateCmd.Flags().StringVar(&body,
-		"body", "", "Body to access your configuration file on HTTP")
+		"body", "", "Http body to access your configuration file on HTTP")
 	evaluateCmd.Flags().StringArrayVar(&headers,
-		"header", nil, "Header to access your configuration file on HTTP (may be repeated). See example of `evaluate` command for usages")
+		"header", nil, "HTTP header to access your configuration file on HTTP (may be repeated). See example of `evaluate` command for usages")
 	evaluateCmd.Flags().Int64Var(&timeout,
 		"timeout", 0, "Timeout in seconds to access your configuration file on HTTP")
 	evaluateCmd.Flags().StringVar(&evalFlag,
@@ -124,7 +126,9 @@ evaluate --kind http --url http://localhost:8080/config.yaml --header 'ContentTy
 	evaluateCmd.Flags().StringVar(&evalCtx,
 		"ctx", "{}", "Evaluation context in JSON format")
 	evaluateCmd.Flags().BoolVar(&checkMode,
-		"check-mode", false, "Check only mode - it does not perform any evaluation and returns the configuration of spanned retriever")
+		"check-mode", false, "Check only mode - when set, the command will not perform any evaluation and returns the configuration of spanned retriever")
+	evaluateCmd.Flags().StringVar(&object,
+		"object", "", "Object of your configuration file on GCS")
 	_ = evaluateCmd.Flags().MarkDeprecated("github-token", "Use auth-token instead")
 	_ = evaluateCmd.Flags().MarkDeprecated("config", "Use path instead")
 	_ = evaluateCmd.Flags()

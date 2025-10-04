@@ -228,6 +228,26 @@ func TestCmdEvaluate(t *testing.T) {
 			wantErr:        assert.NoError,
 			expectedResult: "testdata/res/check-s3.json",
 		},
+		{
+			name: "should return configuration of GCS retriever when using check-mode",
+			args: []string{
+				"--kind",
+				"googleStorage",
+				"--bucket",
+				"Bucket",
+				"--object",
+				"flag-config.yaml",
+				"--flag",
+				"test-flag",
+				"--ctx",
+				`{"targetingKey": "user-123"}`,
+				"--format",
+				"yaml",
+				"--check-mode",
+			},
+			wantErr:        assert.NoError,
+			expectedResult: "testdata/res/check-gcs.json",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

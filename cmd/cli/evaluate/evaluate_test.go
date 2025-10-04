@@ -10,12 +10,15 @@ import (
 	retrieverInit "github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf/init"
 	"github.com/thomaspoignant/go-feature-flag/model"
 	"github.com/thomaspoignant/go-feature-flag/retriever/bitbucketretriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever/gcstorageretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/githubretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/gitlabretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/httpretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/s3retrieverv2"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
 	"github.com/thomaspoignant/go-feature-flag/testutils/mock"
+	"golang.org/x/oauth2/google"
+	"google.golang.org/api/option"
 )
 
 func Test_evaluate_Evaluate(t *testing.T) {
@@ -362,6 +365,53 @@ func Test_evaluate_Evaluate(t *testing.T) {
 					Value:         false,
 					Cacheable:     true,
 					Metadata:      nil,
+				},
+			},
+		},
+		{
+			name: "Should evaluate a flag from a GCS",
+			initEvaluate: func() (evaluate, error) {
+				mockedStorage := testutils.NewMockedGCS(t)
+				mockedStorage.WithFiles(t, "flags", map[string]string{"testdata/flag-config.yaml": "flag-config.yaml"})
+
+				r, err := retrieverInit.InitRetriever(
+					&retrieverconf.RetrieverConf{
+						Kind:   "googleStorage",
+						Bucket: "flags",
+						Object: "flag-config.yaml",
+					})
+
+				if err != nil {
+					return evaluate{}, err
+				}
+
+				gcsRetriever, _ := r.(*gcstorageretriever.Retriever)
+				gcsRetriever.SetOptions([]option.ClientOption{
+					option.WithCredentials(&google.Credentials{}),
+					option.WithHTTPClient(mockedStorage.Server.HTTPClient()),
+				})
+
+				return evaluate{
+					retriever:     r,
+					fileFormat:    "yaml",
+					flag:          "test-flag",
+					evaluationCtx: `{"targetingKey": "user-123"}`,
+				}, nil
+			},
+			wantErr: assert.NoError,
+			expectedResult: map[string]model.RawVarResult{
+				"test-flag": {
+					TrackEvents:   true,
+					VariationType: "Default",
+					Failed:        false,
+					Version:       "",
+					Reason:        "DEFAULT",
+					ErrorCode:     "",
+					ErrorDetails:  "",
+					Value:         false,
+					Cacheable:     true,
+					Metadata: map[string]interface{}{"description": "this is a simple feature flag",
+						"issue-link": "https://jira.xxx/GOFF-01"},
 				},
 			},
 		},
