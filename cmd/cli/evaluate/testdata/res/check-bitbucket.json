@@ -12,7 +12,7 @@
   "Bucket": "",
   "Object": "",
   "Item": "",
-  "Namespace": "",
+  "Namespace": "default",
   "ConfigMap": "",
   "Key": "",
   "BaseURL": "https://bitbucket.com/api/v4/",

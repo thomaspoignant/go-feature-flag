@@ -28,6 +28,9 @@ var (
 	headers        []string
 	timeout        int64
 	object         string
+	namespace      string
+	configMap      string
+	key            string
 	evalFlag       string
 	evalCtx        string
 	checkMode      bool
@@ -73,6 +76,9 @@ evaluate --kind http --url http://localhost:8080/config.yaml --header 'ContentTy
 				HTTPBody:    body,
 				HTTPHeaders: parsedHeaders,
 				Object:      object,
+				Namespace:   namespace,
+				ConfigMap:   configMap,
+				Key:         key,
 			}
 
 			err := retrieverConf.IsValid()
@@ -129,6 +135,12 @@ evaluate --kind http --url http://localhost:8080/config.yaml --header 'ContentTy
 		"check-mode", false, "Check only mode - when set, the command will not perform any evaluation and returns the configuration of spanned retriever")
 	evaluateCmd.Flags().StringVar(&object,
 		"object", "", "Object of your configuration file on GCS")
+	evaluateCmd.Flags().StringVar(&namespace,
+		"namespace", "default", "Namespace of your configuration file on K8s")
+	evaluateCmd.Flags().StringVar(&configMap,
+		"config-map", "", "Config map of your configuration file on K8s")
+	evaluateCmd.Flags().StringVar(&key,
+		"key", "", "Key of your configuration file on K8s")
 	_ = evaluateCmd.Flags().MarkDeprecated("github-token", "Use auth-token instead")
 	_ = evaluateCmd.Flags().MarkDeprecated("config", "Use path instead")
 	_ = evaluateCmd.Flags()

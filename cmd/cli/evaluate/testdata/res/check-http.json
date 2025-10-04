@@ -20,7 +20,7 @@
   "Bucket": "",
   "Object": "",
   "Item": "",
-  "Namespace": "",
+  "Namespace": "default",
   "ConfigMap": "",
   "Key": "",
   "BaseURL": "",

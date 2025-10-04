@@ -12,7 +12,7 @@
   "Bucket": "Bucket",
   "Object": "flag-config.yaml",
   "Item": "",
-  "Namespace": "",
+  "Namespace": "default",
   "ConfigMap": "",
   "Key": "",
   "BaseURL": "",

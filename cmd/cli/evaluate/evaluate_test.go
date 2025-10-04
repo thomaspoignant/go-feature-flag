@@ -176,7 +176,7 @@ func Test_evaluate_Evaluate(t *testing.T) {
 				gitHubRetriever.SetHTTPClient(&mock.HTTP{})
 
 				return evaluate{
-					retriever:     r,
+					retriever:     gitHubRetriever,
 					fileFormat:    "yaml",
 					flag:          "test-flag",
 					evaluationCtx: `{"targetingKey": "user-123"}`,
@@ -216,7 +216,7 @@ func Test_evaluate_Evaluate(t *testing.T) {
 				gitLabRetriever.SetHTTPClient(&mock.HTTP{})
 
 				return evaluate{
-					retriever:     r,
+					retriever:     gitLabRetriever,
 					fileFormat:    "yaml",
 					flag:          "test-flag",
 					evaluationCtx: `{"targetingKey": "user-123"}`,
@@ -256,7 +256,7 @@ func Test_evaluate_Evaluate(t *testing.T) {
 				bitBucketRetriever.SetHTTPClient(&mock.HTTP{})
 
 				return evaluate{
-					retriever:     r,
+					retriever:     bitBucketRetriever,
 					fileFormat:    "yaml",
 					flag:          "test-flag",
 					evaluationCtx: `{"targetingKey": "user-123"}`,
@@ -302,7 +302,7 @@ func Test_evaluate_Evaluate(t *testing.T) {
 				_ = s3Retriever.Init(context.Background(), nil)
 
 				return evaluate{
-					retriever:     r,
+					retriever:     s3Retriever,
 					fileFormat:    "yaml",
 					flag:          "test-flag",
 					evaluationCtx: `{"targetingKey": "user-123"}`,
@@ -346,7 +346,7 @@ func Test_evaluate_Evaluate(t *testing.T) {
 				httpRetriever.SetHTTPClient(&mock.HTTP{})
 
 				return evaluate{
-					retriever:     r,
+					retriever:     httpRetriever,
 					fileFormat:    "yaml",
 					flag:          "test-flag",
 					evaluationCtx: `{"targetingKey": "user-123"}`,
@@ -392,7 +392,7 @@ func Test_evaluate_Evaluate(t *testing.T) {
 				})
 
 				return evaluate{
-					retriever:     r,
+					retriever:     gcsRetriever,
 					fileFormat:    "yaml",
 					flag:          "test-flag",
 					evaluationCtx: `{"targetingKey": "user-123"}`,
