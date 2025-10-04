@@ -2,8 +2,10 @@ package evaluate
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 
+	"github.com/redis/go-redis/v9"
 	"github.com/spf13/cobra"
 	"github.com/thomaspoignant/go-feature-flag/cmd/cli/helper"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
@@ -31,6 +33,9 @@ var (
 	namespace      string
 	configMap      string
 	key            string
+	uri            string
+	database       string
+	collection     string
 	evalFlag       string
 	evalCtx        string
 	checkMode      bool
@@ -79,6 +84,9 @@ evaluate --kind http --url http://localhost:8080/config.yaml --header 'ContentTy
 				Namespace:   namespace,
 				ConfigMap:   configMap,
 				Key:         key,
+				URI:         uri,
+				Database:    database,
+				Collection:  collection,
 			}
 
 			err := retrieverConf.IsValid()
@@ -141,6 +149,12 @@ evaluate --kind http --url http://localhost:8080/config.yaml --header 'ContentTy
 		"config-map", "", "Config map of your configuration file on K8s")
 	evaluateCmd.Flags().StringVar(&key,
 		"key", "", "Key of your configuration file on K8s")
+	evaluateCmd.Flags().StringVar(&uri,
+		"uri", "", "URI of your configuration file")
+	evaluateCmd.Flags().StringVar(&database,
+		"database", "", "Database of your configuration file on MongoDB")
+	evaluateCmd.Flags().StringVar(&collection,
+		"collection", "", "Collection of your configuration file on MongoDB")
 	_ = evaluateCmd.Flags().MarkDeprecated("github-token", "Use auth-token instead")
 	_ = evaluateCmd.Flags().MarkDeprecated("config", "Use path instead")
 	_ = evaluateCmd.Flags()
@@ -213,4 +227,13 @@ func parseHeaders() map[string][]string {
 		result[key] = append(result[key], val)
 	}
 	return result
+}
+
+func parseRedisOptions(jsonStr string) (*redis.Options, error) {
+	var opts redis.Options
+	if err := json.Unmarshal([]byte(jsonStr), &opts); err != nil {
+		return nil, fmt.Errorf("failed to parse redis options: %w", err)
+	}
+
+	return &opts, nil
 }
