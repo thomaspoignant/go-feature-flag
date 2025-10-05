@@ -27,7 +27,7 @@
   "AuthToken": "",
   "URI": "",
   "Table": "",
-  "Columns": null,
+  "Columns": {},
   "Database": "",
   "Collection": "",
   "RedisOptions": null,

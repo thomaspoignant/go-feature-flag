@@ -19,7 +19,7 @@
   "AuthToken": "",
   "URI": "mongodb://localhost:27017",
   "Table": "",
-  "Columns": null,
+  "Columns": {},
   "Database": "goff-db",
   "Collection": "goff-collection",
   "RedisOptions": null,

@@ -19,7 +19,7 @@
   "AuthToken": "XXX_GITLAB_TOKEN",
   "URI": "",
   "Table": "",
-  "Columns": null,
+  "Columns": {},
   "Database": "",
   "Collection": "",
   "RedisOptions": null,

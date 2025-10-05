@@ -57,12 +57,39 @@ evaluate --kind file --path ./config.yaml --flag flag1 --ctx '{"targetingKey": "
 
 # Evaluate a specific flag using http retriever
 evaluate --kind http --url http://localhost:8080/config.yaml --header 'ContentType: application/json' --header 'X-Auth=Token' --flag flag1 --ctx '{"targetingKey": "user-123"}'
+
+# Evaluate a specific flag using github retriever
+evaluate --kind github --repository-slug thomaspoignant/go-feature-flag --branch master --flag flag1 --ctx '{"targetingKey": "user-123"}'
+
+# Evaluate a specific flag using gitlab retriever
+evaluate --kind gitlab --base-url https://gitlab.com --repository-slug thomaspoignant/go-feature-flag --branch master --flag flag1 --ctx '{"targetingKey": "user-123"}'
+
+# Evaluate a specific flag using bitbucket retriever
+evaluate --kind bitbucket --repository-slug thomaspoignant/go-feature-flag --branch master --flag flag1 --ctx '{"targetingKey": "user-123"}'
+
+# Evaluate a specific flag using s3 retriever
+evaluate --kind s3 --bucket my-bucket --item my-item.yaml --flag flag1 --ctx '{"targetingKey": "user-123"}'
+
+# Evaluate a specific flag using gcs retriever
+evaluate --kind googleStorage --bucket my-bucket --object my-item.yaml --flag flag1 --ctx '{"targetingKey": "user-123"}'
+
+# Evaluate a specific flag using configmap retriever
+evaluate --kind configmap --namespace default --config-map my-configmap --key my-key.yaml --flag flag1 --ctx '{"targetingKey": "user-123"}'
+
+# Evaluate a specific flag using mongodb retriever
+evaluate --kind mongodb --uri mongodb://localhost:27017 --database my-database --collection my-collection --flag flag1 --ctx '{"targetingKey": "user-123"}'
+
+# Evaluate a specific flag using azureblob retriever
+evaluate --kind azureblob --container my-container --account-name my-account-name --account-key my-account-key --object my-object --flag flag1 --ctx '{"targetingKey": "user-123"}'
+
+# Evaluate a specific flag using postgres retriever
+evaluate --kind postgres --table my-table --column my-column:my-column-type --flag flag1 --ctx '{"targetingKey": "user-123"}'
 `,
 		Long: "⚙️ Evaluate feature flags based on configuration and context," +
 			" if no specific flag requested it will evaluate all flags",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			parsedHeaders := parseHeaders()
-			parsedColumns := parseColumns()
+			parsedHeaders := parseHTTPHeaders()
+			parsedColumns := parsePostgresColumns()
 
 			retrieverConf := retrieverconf.RetrieverConf{
 				Kind:           retrieverconf.RetrieverKind(kind),
@@ -231,7 +258,7 @@ func runCheck(
 	return nil
 }
 
-func parseHeaders() map[string][]string {
+func parseHTTPHeaders() map[string][]string {
 	result := make(map[string][]string)
 	for _, h := range headers {
 		parts := strings.SplitN(h, "=", 2)
@@ -248,7 +275,7 @@ func parseHeaders() map[string][]string {
 	return result
 }
 
-func parseColumns() map[string]string {
+func parsePostgresColumns() map[string]string {
 	result := make(map[string]string)
 	for _, c := range columns {
 		parts := strings.SplitN(c, ":", 2)
