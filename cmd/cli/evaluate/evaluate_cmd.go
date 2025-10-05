@@ -2,10 +2,8 @@ package evaluate
 
 import (
 	"encoding/json"
-	"fmt"
 	"strings"
 
-	"github.com/redis/go-redis/v9"
 	"github.com/spf13/cobra"
 	"github.com/thomaspoignant/go-feature-flag/cmd/cli/helper"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
@@ -36,6 +34,11 @@ var (
 	uri            string
 	database       string
 	collection     string
+	container      string
+	accountName    string
+	accountKey     string
+	table          string
+	columns        []string
 	evalFlag       string
 	evalCtx        string
 	checkMode      bool
@@ -59,6 +62,7 @@ evaluate --kind http --url http://localhost:8080/config.yaml --header 'ContentTy
 			" if no specific flag requested it will evaluate all flags",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			parsedHeaders := parseHeaders()
+			parsedColumns := parseColumns()
 
 			retrieverConf := retrieverconf.RetrieverConf{
 				Kind:           retrieverconf.RetrieverKind(kind),
@@ -87,6 +91,11 @@ evaluate --kind http --url http://localhost:8080/config.yaml --header 'ContentTy
 				URI:         uri,
 				Database:    database,
 				Collection:  collection,
+				Container:   container,
+				AccountName: accountName,
+				AccountKey:  accountKey,
+				Table:       table,
+				Columns:     parsedColumns,
 			}
 
 			err := retrieverConf.IsValid()
@@ -155,6 +164,16 @@ evaluate --kind http --url http://localhost:8080/config.yaml --header 'ContentTy
 		"database", "", "Database of your configuration file on MongoDB")
 	evaluateCmd.Flags().StringVar(&collection,
 		"collection", "", "Collection of your configuration file on MongoDB")
+	evaluateCmd.Flags().StringVar(&container,
+		"container", "", "Container of your configuration file on Azure Blob Storage")
+	evaluateCmd.Flags().StringVar(&accountName,
+		"account-name", "", "Account name of your configuration file on Azure Blob Storage")
+	evaluateCmd.Flags().StringVar(&accountKey,
+		"account-key", "", "Account key of your configuration file on Azure Blob Storage")
+	evaluateCmd.Flags().StringVar(&table,
+		"table", "", "Postgres table of your configuration file on Postgres")
+	evaluateCmd.Flags().StringArrayVar(&columns,
+		"column", nil, "Postgres column mapping of your configuration file on Postgres (may be repeated)")
 	_ = evaluateCmd.Flags().MarkDeprecated("github-token", "Use auth-token instead")
 	_ = evaluateCmd.Flags().MarkDeprecated("config", "Use path instead")
 	_ = evaluateCmd.Flags()
@@ -229,11 +248,16 @@ func parseHeaders() map[string][]string {
 	return result
 }
 
-func parseRedisOptions(jsonStr string) (*redis.Options, error) {
-	var opts redis.Options
-	if err := json.Unmarshal([]byte(jsonStr), &opts); err != nil {
-		return nil, fmt.Errorf("failed to parse redis options: %w", err)
+func parseColumns() map[string]string {
+	result := make(map[string]string)
+	for _, c := range columns {
+		parts := strings.SplitN(c, ":", 2)
+		if len(parts) != 2 {
+			continue
+		}
+		key := strings.TrimSpace(parts[0])
+		val := strings.TrimSpace(parts[1])
+		result[key] = val
 	}
-
-	return &opts, nil
+	return result
 }

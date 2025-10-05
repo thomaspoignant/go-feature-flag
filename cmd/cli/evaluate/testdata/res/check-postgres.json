@@ -1,0 +1,33 @@
+{
+  "Kind": "postgresql",
+  "RepositorySlug": "",
+  "Branch": "",
+  "Path": "",
+  "GithubToken": "",
+  "URL": "",
+  "Timeout": 0,
+  "HTTPMethod": "GET",
+  "HTTPBody": "",
+  "HTTPHeaders": {},
+  "Bucket": "",
+  "Object": "",
+  "Item": "",
+  "Namespace": "default",
+  "ConfigMap": "",
+  "Key": "",
+  "BaseURL": "",
+  "AuthToken": "",
+  "URI": "postgresql://localhost:5432",
+  "Table": "goff-table",
+  "Columns": {
+    "config": "config",
+    "flag_name": "nonexistentcolumn"
+  },
+  "Database": "",
+  "Collection": "",
+  "RedisOptions": null,
+  "RedisPrefix": "",
+  "AccountName": "",
+  "AccountKey": "",
+  "Container": ""
+}
