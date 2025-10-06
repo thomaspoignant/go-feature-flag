@@ -47,6 +47,7 @@ go-feature-flag-cli evaluate [OPTIONS]
 | `--config`     | c         | Path to the local flag configuration file (⚠️ deprecated, use `--path` instead)                                                 | ""      |
 | `--format`     | f         | Format of your input file (YAML, JSON or TOML)                                                                                  | yaml    |
 | `--flag`       |           | Name of the flag to evaluate                                                                                                    | ""      |
+| `--timeout`    |           | Timeout in seconds to access your configuration file                                                                            | 0       |
 | `--ctx`        |           | Evaluation context as a json string                                                                                             | {}      |
 | `--check-mode` |           | Check only mode - when set, the command will not perform any <br/>evaluation and returns the configuration of spanned retriever | false   |
 
@@ -164,7 +165,8 @@ the path to the remote file.
 | `--table`  | Table of your configuration file                   | ""      |
 | `--column` | Column mapping to add. Supported format is `c1:c2` | ""      |
 
-As mentioned above the `--config` flag is deprecated and we encourage you to use the `--path` flag instead. For example the following command:
+As mentioned above the `--config` flag is deprecated and we encourage you to use the `--path` flag instead. For example
+the following command:
 
 ```shell
 go-feature-flag-cli evaluate --config="<location_of_your_flag_configuration_file>" --flag="<name_of_your_flag_to_evaluate>" --ctx='<evaluation_ctx_as_json_string>'
