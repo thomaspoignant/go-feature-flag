@@ -1,0 +1,172 @@
+<script>
+  function showMenu(menu) {
+    document.body.classList.remove("web", "mobile", "desktop", "plugin");
+    document.body.classList.add(menu);
+  }
+
+  window.showMenu = showMenu;
+</script>
+<div class="sdks-dropdown flex max-w-lg flex-col rounded-2xl lg:min-w-[768px]">
+  <div class="flex flex-col bg-secondary-800 p-4 lg:min-h-[300px] lg:flex-row">
+    <h1 class="text-titles-500 text-[2.8rem] font-poppins font-bold tracking-[-0.18rem] leading-10">SDKs</h1>
+    <div class="flex flex-1 flex-col gap-8 rounded-xl bg-secondary-1000 p-6">
+      <a
+        data-dropdown-sdks-menu="web"
+        onfocus="document.body.setAttribute('data-sdk-menu', 'web')"
+        onmouseover="document.body.setAttribute('data-sdk-menu', 'web')"
+        class="flex cursor-pointer items-start justify-start gap-2 border-none bg-transparent text-black dark:text-white"
+        href="/react-ui-kit"
+      >
+        <div class="flex-shrink-0">
+          <img
+            src="/static/landing-page/sdk-icons/resources/web.svg"
+            class="h-6 w-6"
+          />
+        </div>
+        <div class="flex flex-col items-start justify-start gap-1">
+          <div class="text-base font-semibold">Web</div>
+          <p class="mb-0 text-left text-sm text-text-400">
+            Guides and API reference for our Web SDKs
+          </p>
+        </div>
+      </a>
+      <a
+        data-dropdown-sdks-menu="mobile"
+        onfocus="document.body.setAttribute('data-sdk-menu', 'mobile')"
+        onmouseover="document.body.setAttribute('data-sdk-menu', 'mobile')"
+        class="flex cursor-pointer items-start justify-start gap-2 border-none bg-transparent text-black dark:text-white"
+        href="/react-native"
+      >
+        <div class="flex-shrink-0">
+          <img
+            src="/static/landing-page/sdk-icons/resources/mobile.svg"
+            class="h-6 w-6"
+          />
+        </div>
+        <div class="flex flex-col items-start justify-start gap-1">
+          <div class="text-base font-semibold">Mobile</div>
+          <p class="mb-0 text-left text-sm text-text-400">
+            Guides and API reference for our Mobile SDKs
+          </p>
+        </div>
+      </a>
+    </div>
+    <div class="flex-1 p-6">
+      <div class="flex flex-col gap-2" data-dropdown-sdks="web">
+        <div class="flex flex-1 flex-col">
+          <h3 class="!mb-0.5">Core SDK</h3>
+          <span class="none hidden text-sm font-normal lg:block"
+            >Video + Voice + Livestreaming</span
+          >
+          <ul class="sdk-ul">
+            <li>
+              <a href="/web-core" class="sdk-link">
+                <img src="/static/landing-page/sdk-icons/js.png" />
+                JavaScript
+              </a>
+            </li>
+            <li>
+              <a href="/react-web-core" class="sdk-link">
+                <img src="/static/landing-page/sdk-icons/react.png" />
+                React
+              </a>
+            </li>
+          </ul>
+        </div>
+        <div class="mt-6 flex flex-1 flex-col">
+          <h3 class="!mb-0.5">UI Kit</h3>
+          <span class="hidden text-sm font-normal lg:block"
+            >Easy to use library of UI components</span
+          >
+          <ul class="sdk-ul">
+            <li>
+              <a href="/react-ui-kit" class="sdk-link">
+                <img src="/static/landing-page/sdk-icons/react.png" />
+                React
+              </a>
+            </li>
+            <li>
+              <a href="/angular-ui-kit" class="sdk-link">
+                <img src="/static/landing-page/sdk-icons/angular.png" />
+                Angular
+              </a>
+            </li>
+            <li>
+              <a href="/ui-kit" class="sdk-link">
+                <img src="/static/landing-page/sdk-icons/html.png" />
+                Web Components
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-2" data-dropdown-sdks="mobile">
+        <div class="flex flex-1 flex-col">
+          <h3 class="!mb-0.5">Core SDK</h3>
+          <span class="none hidden text-sm font-normal lg:block"
+            >Video + Voice + Livestreaming</span
+          >
+          <ul class="sdk-ul">
+            <li>
+              <a href="/rn-core" class="sdk-link">
+                <img src="/static/landing-page/sdk-icons/react.png" />
+                React Native
+              </a>
+            </li>
+            <li>
+              <a href="/flutter-core" class="sdk-link">
+                <img src="/static/landing-page/sdk-icons/flutter.png" />
+                Flutter
+              </a>
+            </li>
+            <li>
+              <a href="/android-core" class="sdk-link">
+                <img src="/static/landing-page/sdk-icons/kotlin.png" />
+                Android
+              </a>
+            </li>
+            <li>
+              <a href="/ios-core" class="sdk-link">
+                <img src="/static/landing-page/sdk-icons/swift.png" />
+                iOS
+              </a>
+            </li>
+          </ul>
+        </div>
+        <div class="mt-6 flex flex-1 flex-col">
+          <h3 class="!mb-0.5">UI Kit</h3>
+          <span class="hidden text-sm font-normal lg:block"
+            >Easy to use library of UI components</span
+          >
+          <ul class="sdk-ul">
+            <li>
+              <a href="/react-native" class="sdk-link">
+                <img src="/static/landing-page/sdk-icons/react.png" />
+                React Native
+              </a>
+            </li>
+            <li>
+              <a href="/flutter" class="sdk-link">
+                <img src="/static/landing-page/sdk-icons/flutter.png" />
+                Flutter
+              </a>
+            </li>
+            <li>
+              <a href="/android" class="sdk-link">
+                <img src="/static/landing-page/sdk-icons/kotlin.png" />
+                Android
+              </a>
+            </li>
+            <li>
+              <a href="/ios" class="sdk-link">
+                <img src="/static/landing-page/sdk-icons/swift.png" />
+                iOS
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

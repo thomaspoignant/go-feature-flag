@@ -4,6 +4,9 @@
 const {sdk} = require('./data/sdk');
 const lightCodeTheme = require('prism-react-renderer').themes.github;
 const darkCodeTheme = require('prism-react-renderer').themes.dracula;
+const fs = require('fs');
+
+const sdksHTML = fs.readFileSync('./src/snippets/sdks.html', 'utf-8');
 
 /** @type {import("@docusaurus/types").Config} */
 const config = {
@@ -292,6 +295,18 @@ const config = {
           src: 'img/logo/navbar.png',
         },
         items: [
+          {
+            label: 'SDKs',
+            type: 'dropdown',
+            className: 'dyte-dropdown',
+            items: [
+              {
+                type: 'html',
+                value: sdksHTML,
+                className: 'dyte-dropdown',
+              },
+            ],
+          },
           {
             position: 'left',
             label: 'Product',
