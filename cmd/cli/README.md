@@ -65,7 +65,7 @@ Supported values for `--kind` are:
 - `azureBlobStorage`
 - `postgresql`
 
-**Caution**: We do not support `redis` retriever as for now due to: TODO.
+**Caution**: We do not support `redis` retriever as for now due to: https://github.com/thomaspoignant/go-feature-flag/issues/4023.
 
 ### Retriever specific flags
 
