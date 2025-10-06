@@ -1,6 +1,6 @@
 <p align="center">
-  <!-- <img width="400" src="gofeatureflag.svg" alt="go-feature-flag logo" /> -->
-  <img src="website/static/img/logo/logo_footer.png?raw=true" alt="go-feature-flag logo" />
+  <!-- <a href="https://gofeatureflag.org" target="_blank"><img width="400" src="gofeatureflag.svg" alt="go-feature-flag logo" /></a> -->
+  <a href="https://gofeatureflag.org" target="_blank"><img src="website/static/img/logo/logo_footer.png?raw=true" alt="go-feature-flag logo" /></a>
 </p>
 
 # 🎛️ GO Feature Flag
