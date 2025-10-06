@@ -221,6 +221,8 @@ func runEvaluate(
 		return err
 	}
 
+	//TODO: Depending on https://github.com/thomaspoignant/go-feature-flag/issues/4024 we should refine type of retriever and call its init method
+
 	e := evaluate{
 		retriever:     r,
 		fileFormat:    flagFormat,
