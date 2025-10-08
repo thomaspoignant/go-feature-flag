@@ -146,9 +146,9 @@ jobs:
           args: release --clean --timeout 60m
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
-          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-          GPG_KEY_ID: ${{ secrets.GPG_KEY_ID }}
+          SIGN_RELEASE_GPG_PRIVATE_KEY: ${{ secrets.SIGN_RELEASE_GPG_PRIVATE_KEY }}
+          SIGN_RELEASE_GPG_PASSPHRASE: ${{ secrets.SIGN_RELEASE_GPG_PASSPHRASE }}
+          SIGN_RELEASE_GPG_KEY_ID: ${{ secrets.SIGN_RELEASE_GPG_KEY_ID }}
 
 
 
