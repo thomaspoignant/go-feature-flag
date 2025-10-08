@@ -782,9 +782,10 @@ signs:
     args: [
       "--batch",
       "--yes",
+      "--armor",
       "--pinentry-mode", "loopback",
-      "--passphrase", "{{ .Env.GPG_PASSPHRASE }}",
-      "--local-user", "{{ .Env.GPG_KEY_ID }}",
+      "--passphrase", "{{ .Env.SIGN_RELEASE_GPG_PASSPHRASE }}",
+      "--local-user", "{{ .Env.SIGN_RELEASE_GPG_KEY_ID }}",
       "--output", "${signature}",
       "--detach-sign", "${artifact}"
     ]
