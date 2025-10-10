@@ -2,7 +2,7 @@ name: Release Kotlin Provider to Sonatype
 on:
   push:
     tags:
-      - kotlin-provider-v*
+      - openfeature/providers/kotlin-provider*
 
 permissions: read-all
 

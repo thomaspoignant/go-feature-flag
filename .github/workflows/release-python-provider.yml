@@ -2,7 +2,7 @@ name: Release Python provider to PyPi
 on:
   push:
     tags:
-      - python-provider-v*
+      - openfeature/providers/python-provider/*
 
 permissions: read-all
 
