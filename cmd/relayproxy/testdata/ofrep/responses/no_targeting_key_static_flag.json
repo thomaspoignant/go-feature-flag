@@ -1,0 +1,9 @@
+{
+  "key": "targeting-key-rule",
+  "value": false,
+  "reason": "DEFAULT",
+  "variant": "false_var",
+  "metadata": {
+    "gofeatureflag_cacheable": true
+  }
+}
