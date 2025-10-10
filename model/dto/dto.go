@@ -1,7 +1,7 @@
 package dto
 
 import (
-	"github.com/thomaspoignant/go-feature-flag/internal/flag"
+	"github.com/thomaspoignant/go-feature-flag/module/core/flag"
 )
 
 // DTO is representing all the fields we can have in a flag.

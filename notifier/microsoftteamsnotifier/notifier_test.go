@@ -12,7 +12,7 @@ import (
 	goteamsnotify "github.com/atc0005/go-teams-notify/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/thomaspoignant/go-feature-flag/internal/flag"
+	"github.com/thomaspoignant/go-feature-flag/module/core/flag"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 )

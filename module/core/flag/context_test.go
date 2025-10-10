@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/thomaspoignant/go-feature-flag/internal/flag"
+	"github.com/thomaspoignant/go-feature-flag/module/core/flag"
 )
 
 func TestContext_AddIntoEvaluationContextEnrichment(t *testing.T) {

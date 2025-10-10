@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/thomaspoignant/go-feature-flag/ffcontext"
-	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/internal/flagstate"
+	"github.com/thomaspoignant/go-feature-flag/module/core/ffcontext"
+	"github.com/thomaspoignant/go-feature-flag/module/core/flag"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 )
 

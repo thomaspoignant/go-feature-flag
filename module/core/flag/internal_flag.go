@@ -6,10 +6,10 @@ import (
 	"maps"
 	"time"
 
-	"github.com/thomaspoignant/go-feature-flag/ffcontext"
-	"github.com/thomaspoignant/go-feature-flag/gofferror"
-	"github.com/thomaspoignant/go-feature-flag/internal/internalerror"
-	"github.com/thomaspoignant/go-feature-flag/internal/utils"
+	"github.com/thomaspoignant/go-feature-flag/module/core/ffcontext"
+	"github.com/thomaspoignant/go-feature-flag/module/core/gofferror"
+	"github.com/thomaspoignant/go-feature-flag/module/core/internalerror"
+	"github.com/thomaspoignant/go-feature-flag/module/core/utils"
 )
 
 const (

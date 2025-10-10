@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/thomaspoignant/go-feature-flag/internal/flag"
+	"github.com/thomaspoignant/go-feature-flag/module/core/flag"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )

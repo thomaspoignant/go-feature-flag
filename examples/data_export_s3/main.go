@@ -9,7 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/exporter/s3exporterv2"
-	"github.com/thomaspoignant/go-feature-flag/ffcontext"
+	"github.com/thomaspoignant/go-feature-flag/module/core/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 )
 

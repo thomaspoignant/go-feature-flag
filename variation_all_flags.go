@@ -1,9 +1,9 @@
 package ffclient
 
 import (
-	"github.com/thomaspoignant/go-feature-flag/ffcontext"
-	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/internal/flagstate"
+	"github.com/thomaspoignant/go-feature-flag/module/core/ffcontext"
+	"github.com/thomaspoignant/go-feature-flag/module/core/flag"
 )
 
 // AllFlagsState return the values of all the flags for a specific user.

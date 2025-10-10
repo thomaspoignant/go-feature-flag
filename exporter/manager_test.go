@@ -13,7 +13,7 @@ import (
 	"github.com/thejerf/slogassert"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
-	"github.com/thomaspoignant/go-feature-flag/ffcontext"
+	"github.com/thomaspoignant/go-feature-flag/module/core/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"github.com/thomaspoignant/go-feature-flag/testutils/mock"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"

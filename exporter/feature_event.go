@@ -7,7 +7,7 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/thomaspoignant/go-feature-flag/ffcontext"
+	"github.com/thomaspoignant/go-feature-flag/module/core/ffcontext"
 )
 
 type FeatureEventMetadata = map[string]interface{}

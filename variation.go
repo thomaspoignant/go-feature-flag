@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"maps"
 
-	"github.com/thomaspoignant/go-feature-flag/evaluation"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
-	"github.com/thomaspoignant/go-feature-flag/ffcontext"
-	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/model"
+	"github.com/thomaspoignant/go-feature-flag/module/core/ffcontext"
+	"github.com/thomaspoignant/go-feature-flag/module/core/flag"
+	"github.com/thomaspoignant/go-feature-flag/module/evaluation"
 )
 
 const (

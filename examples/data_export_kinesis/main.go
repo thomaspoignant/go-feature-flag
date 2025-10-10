@@ -12,7 +12,7 @@ import (
 	kex "github.com/thomaspoignant/go-feature-flag/exporter/kinesisexporter"
 
 	ffclient "github.com/thomaspoignant/go-feature-flag"
-	"github.com/thomaspoignant/go-feature-flag/ffcontext"
+	"github.com/thomaspoignant/go-feature-flag/module/core/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 )
 

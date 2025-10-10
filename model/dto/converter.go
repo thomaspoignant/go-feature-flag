@@ -1,7 +1,7 @@
 package dto
 
 import (
-	"github.com/thomaspoignant/go-feature-flag/internal/flag"
+	"github.com/thomaspoignant/go-feature-flag/module/core/flag"
 )
 
 // ConvertDtoToInternalFlag is converting a DTO to a flag.InternalFlag

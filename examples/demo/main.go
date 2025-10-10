@@ -4,15 +4,16 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
-	ffclient "github.com/thomaspoignant/go-feature-flag"
-	"github.com/thomaspoignant/go-feature-flag/ffcontext"
-	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"html/template"
 	"io"
 	"net/http"
 	"time"
+
+	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
+	ffclient "github.com/thomaspoignant/go-feature-flag"
+	"github.com/thomaspoignant/go-feature-flag/module/core/ffcontext"
+	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 )
 
 var users = make(map[string]ffcontext.EvaluationContext, 2500)

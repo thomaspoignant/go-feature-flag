@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/internal/utils"
+	"github.com/thomaspoignant/go-feature-flag/module/core/ffcontext"
 )
 
 func TestUserToMap(t *testing.T) {

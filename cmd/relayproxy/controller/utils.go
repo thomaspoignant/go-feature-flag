@@ -6,8 +6,8 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/model"
-	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/internal/utils"
+	"github.com/thomaspoignant/go-feature-flag/module/core/ffcontext"
 )
 
 // assertRequest is the function which validates the request, if not valid an echo.HTTPError is return.

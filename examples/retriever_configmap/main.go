@@ -3,11 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"log"
 	"log/slog"
 	"net/http"
 	"time"
+
+	"github.com/thomaspoignant/go-feature-flag/module/core/ffcontext"
 
 	"github.com/thomaspoignant/go-feature-flag/retriever/k8sretriever"
 	"k8s.io/client-go/rest"

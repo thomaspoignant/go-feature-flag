@@ -2,13 +2,14 @@ package main
 
 import (
 	"context"
-	"github.com/thomaspoignant/go-feature-flag/exporter/kafkaexporter"
 	"log"
 	"log/slog"
 	"time"
 
+	"github.com/thomaspoignant/go-feature-flag/exporter/kafkaexporter"
+
 	ffclient "github.com/thomaspoignant/go-feature-flag"
-	"github.com/thomaspoignant/go-feature-flag/ffcontext"
+	"github.com/thomaspoignant/go-feature-flag/module/core/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 )
 
