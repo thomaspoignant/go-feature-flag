@@ -30,6 +30,7 @@
             "include-component-in-tag": false,
             "changelog-path": ".github/release-please/CHANGELOG.md",
             "path": ".",
+            "component": "go-feature-flag",
             "exclude-paths": [
                 "modules/evaluation",
                 "modules/core",
