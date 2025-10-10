@@ -43,14 +43,16 @@
             "path": "modules/evaluation",
             "include-component-in-tag": true,
             "component": "modules/evaluation",
-            "changelog-path": "CHANGELOG.md"
+            "changelog-path": "CHANGELOG.md",
+            "release-as": "v0.1.0"
         },
         "modules/core": {
             "release-type": "go",
             "path": "modules/core",
             "include-component-in-tag": true,
             "component": "modules/core",
-            "changelog-path": "CHANGELOG.md"
+            "changelog-path": "CHANGELOG.md",
+            "release-as": "v0.1.0"
         },
         "openfeature/providers/kotlin-provider": {
             "release-type": "java",
