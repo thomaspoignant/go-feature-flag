@@ -28,22 +28,27 @@ jobs:
           check-latest: true
 
       - name: Update internal module
+        env:
+          VERSION: ${{ inputs.version }}
+          MODULE_PATH: ${{ inputs.modulePath }}
         run: |
           export GOWORK=off
-          VERSION=${GITHUB_REF#refs/tags/modules/evaluation/}
-          go get github.com/thomaspoignant/go-feature-flag/${{ inputs.modulePath }}@${{ inputs.version }}
+          go get github.com/thomaspoignant/go-feature-flag/${MODULE_PATH}@${VERSION }
           go mod tidy
           go mod vendor
           go mod verify
 
       - name: Create Pull Request to bump module
         uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
+        env:
+          VERSION: ${{ inputs.version }}
+          MODULE_PATH: ${{ inputs.modulePath }}
         with:
-          branch: bump-module-${{ inputs.modulePath }}-${{ inputs.version }}
-          title: "chore(dependency): Bump module ${{  inputs.modulePath }} ${{ inputs.version }}"
+          branch: bump-module-${MODULE_PATH}-${VERSION}
+          title: "chore(dependency): Bump module ${MODULE_PATH} ${VERSION}"
           body: |
-            Automated pull request to bump module  ${{  inputs.modulePath }} ${{ inputs.version }}"
-          commit-message: "chore(dependency): Bump module  ${{  inputs.modulePath }} ${{ inputs.version }}"
+            Automated pull request to bump module  ${MODULE_PATH} ${VERSION}
+          commit-message: "chore(dependency): Bump module  ${MODULE_PATH} ${VERSION}"
           assignees: thomaspoignant
           draft: false
           signoff: true
