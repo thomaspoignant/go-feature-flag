@@ -11,10 +11,32 @@ permissions:
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    outputs:
+      module_evaluation_released: ${{ steps.release.outputs['modules/evaluation--release_created'] }}
+      module_evaluation_version: ${{ steps.release.outputs['modules/evaluation--version'] }}
+      module_core_released: ${{ steps.release.outputs['modules/core--release_created'] }}
+      module_core_version: ${{ steps.release.outputs['modules/core--version'] }}
     steps:
       - uses: googleapis/release-please-action@c2a5a2bd6a758a0937f1ddb1e8950609867ed15c # v4.3.0
+        id: release
         with:
           # See: https://github.com/googleapis/release-please
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
           config-file: .github/release-please/release-please-config.json
           manifest-file: .github/release-please/.release-please-manifest.json
+      
+  bump-module-evaluation:
+    if: ${{ needs.release-please.outputs.module_evaluation_released == 'true' }}
+    uses: ./.github/workflows/bump-modules.yml
+    needs: release-please
+    with:
+      modulePath: module/evaluation
+      version: ${{ needs.release-please.outputs.module_evaluation_version }}
+
+  bump-module-core:
+    if: ${{ needs.release-please.outputs.module_core_released == 'true' }}
+    uses: ./.github/workflows/bump-modules.yml
+    needs: release-please
+    with:
+      modulePath: module/core
+      version: ${{ needs.release-please.outputs.module_core_version }}
