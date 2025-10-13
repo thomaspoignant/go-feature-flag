@@ -7,7 +7,7 @@ require (
 	cloud.google.com/go/pubsub/v2 v2.2.0
 	cloud.google.com/go/storage v1.57.0
 	dario.cat/mergo v1.0.2
-	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.12.0
+	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.13.0
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.6.2
 	github.com/BurntSushi/toml v1.5.0
 	github.com/GeorgeD19/json-logic-go v0.0.0-20220225111652-48cc2d2c387e
@@ -76,7 +76,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.38.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/net v0.46.0
-	golang.org/x/oauth2 v0.31.0
+	golang.org/x/oauth2 v0.32.0
 	google.golang.org/api v0.251.0
 	google.golang.org/grpc v1.76.0
 	gopkg.in/yaml.v3 v3.0.1
