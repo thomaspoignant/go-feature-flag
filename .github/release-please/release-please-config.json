@@ -42,7 +42,8 @@
                 {
                     "type": "yaml",
                     "path": "cmd/relayproxy/helm-charts/relay-proxy/Chart.yaml",
-                    "jsonpath": "$.appVersion"
+                    "jsonpath": "$.appVersion",
+                    "replace-template": "v${version}"
                 },
                 {
                     "type": "yaml",
