@@ -40,7 +40,7 @@
             ],
             "extra-files": [
                 {
-                    "type": "helm-chart",
+                    "type": "helm",
                     "path": "cmd/relayproxy/helm-charts/relay-proxy/Chart.yaml"
                 }
             ]
