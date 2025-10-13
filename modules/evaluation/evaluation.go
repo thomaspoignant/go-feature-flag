@@ -1,5 +1,5 @@
 package evaluation
 
 func Evaluation() {
-	panic("not implemented")
+	panic("not implemented yet")
 }
