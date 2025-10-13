@@ -1,10 +1,13 @@
 name: Release Python provider to PyPi
-on:
-  push:
-    tags:
-      - openfeature/providers/python-provider/*
 
-permissions: read-all
+on:
+  workflow_call:
+    inputs:
+      version: { type: string, required: true }
+
+permissions:
+  actions: read
+  contents: read
 
 jobs:
   python-release:
@@ -13,16 +16,14 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Extract version
         run: |
-          FULL_TAG_NAME=${{  github.ref_name }}
-          VERSION=${FULL_TAG_NAME:17}
-          echo "version=$VERSION" >> $GITHUB_ENV
+          VERSION=${{ inputs.version }}
 
       - name: Edit Toml
         uses: colathro/toml-editor@da6b46ee7779ed730d2160393ed95fb20e82696d # v1.1.1
         with:
           file: "openfeature/providers/python-provider/pyproject.toml"
           key: "tool.poetry.version"
-          value: ${{ env.version }}
+          value: $VERSION
 
       - name: Build and publish to PyPi
         uses: JRubics/poetry-publish@4b3306307f536bbfcb559603629b3b4f6aef5ab8 # v2.1
