@@ -68,3 +68,12 @@ jobs:
     needs: release-please
     with:
       version: ${{ needs.release-please.outputs.root_version }}
+
+  helm-release:
+    if: ${{ needs.release-please.outputs.root_released == 'true' }}
+    uses: ./.github/workflows/release-helm.yml
+    needs:
+      - release-please
+      - root-release
+    with:
+      version: ${{ needs.release-please.outputs.root_version }}

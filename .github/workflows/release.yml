@@ -308,63 +308,6 @@ jobs:
           path: ${{ env.MAIN_BRANCH_NAME }}
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
-  bump-relay-proxy-helm-chart:
-    # bump-relay-proxy-helm-chart is opening a pull request to bump the appVersion field
-    # in the Chart.yaml file of the helm-chart.
-    runs-on: ubuntu-latest
-    name: Bump Relay Proxy Helm Chart appVersion
-    needs:
-      - goreleaser
-      - wasm-release
-    env:
-      CHART_YAML_FILE_LOCATION: cmd/relayproxy/helm-charts/relay-proxy/Chart.yaml
-      MAIN_BRANCH_NAME: main
-      VERSION: ${{ inputs.version }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-        with:
-          path: release
-          token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
-
-      - name: yq - portable yaml processor
-        uses: mikefarah/yq@0ecdce24e83f0fa127940334be98c86b07b0c488 #v4.48.1
-
-      - name: Bump chart appVersion
-        working-directory: ./release/
-        run: yq -i ".appVersion=\"${VERSION}\"" $CHART_YAML_FILE_LOCATION
-
-      - name: Bump chart version
-        working-directory: ./release/
-        run: GIT_TAG_NAME=${VERSION} && yq -i ".version=\"${GIT_TAG_NAME#v}\"" $CHART_YAML_FILE_LOCATION
-
-      - name: Checkout main branch
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-        with:
-          ref: ${{ env.MAIN_BRANCH_NAME }}
-          path: ${{ env.MAIN_BRANCH_NAME }}
-          token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
-
-      - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
-
-      - name: Copy version to main branch
-        run: cp -rf release/$CHART_YAML_FILE_LOCATION $MAIN_BRANCH_NAME/$CHART_YAML_FILE_LOCATION
-
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
-        with:
-          branch: bump-relay-proxy-helm-chart-${VERSION}
-          title: "chore(helm): Bump relay-proxy helm chart version ${VERSION}"
-          body: Automated pull request to bump relay-proxy helm chart version ${VERSION}
-          commit-message: Bump relay-proxy helm chart version ${VERSION}
-          labels: automerge
-          assignees: thomaspoignant
-          draft: false
-          signoff: true
-          delete-branch: true
-          path: ${{ env.MAIN_BRANCH_NAME }}
-          token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
-
   release-jsonschema:
     # release-jsonschema is opening a pull request to deploy a new jsonschema if needed
     runs-on: ubuntu-latest
