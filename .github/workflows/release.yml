@@ -1,22 +1,16 @@
 name: Release
 on:
-  release:
-    types: [published]
+  workflow_call:
+    inputs:
+      version: { type: string, required: true }
 
-permissions: read-all
+permissions:
+  contents: read
+  actions: read
 
 jobs:
-  main-release:
-    if: ${{ startsWith(github.event.release.tag_name, 'v') }}
-    name: check if release is a main release
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "This is a main release"
-
   integration-tests:
     name: Integration Tests
-    needs:
-      - main-release
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -48,6 +42,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      VERSION: ${{ inputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -61,14 +57,14 @@ jobs:
       - uses: acifani/setup-tinygo@db56321a62b9a67922bb9ac8f9d085e218807bb3 # v2.0.1
         with:
           tinygo-version: "0.37.0"
-      - run: ./.github/ci-scripts/release_wasm.sh ${{  github.ref_name }}
+      - run: ./.github/ci-scripts/release_wasm.sh ${VERSION}
       - name: Upload assets
         uses: softprops/action-gh-release@6da8fa9354ddfdc4aeace5fc48d7f679b5214090 # v2.4.1
         if: github.ref_type == 'tag'
         with:
           files: |
-            ./out/release-wasm/gofeatureflag-evaluation_${{  github.ref_name }}.wasi
-            ./out/release-wasm/gofeatureflag-evaluation_${{  github.ref_name }}.wasm
+            ./out/release-wasm/gofeatureflag-evaluation_${VERSION}.wasi
+            ./out/release-wasm/gofeatureflag-evaluation_${VERSION}.wasm
 
       - name: Checkout wasm-releases repository
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -80,21 +76,21 @@ jobs:
       - name: Copy WASM files to wasm-releases repository
         run: |
           mkdir -p wasm-releases/evaluation
-          cp ./out/release-wasm/gofeatureflag-evaluation_${{  github.ref_name }}.wasi wasm-releases/evaluation/
-          cp ./out/release-wasm/gofeatureflag-evaluation_${{  github.ref_name }}.wasm wasm-releases/evaluation/
+          cp ./out/release-wasm/gofeatureflag-evaluation_${VERSION}.wasi wasm-releases/evaluation/
+          cp ./out/release-wasm/gofeatureflag-evaluation_${VERSION}.wasm wasm-releases/evaluation/
 
       - name: Create Pull Request to wasm-releases
         uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
         with:
-          branch: publish-wasm-evaluation-${{  github.ref_name }}
-          title: "feat: Publish WASM files for ${{  github.ref_name }}"
+          branch: publish-wasm-evaluation-${VERSION}
+          title: "feat: Publish WASM files for ${VERSION}"
           body: |
-            Automated pull request to publish evaluation WASM files for release ${{  github.ref_name }}
+            Automated pull request to publish evaluation WASM files for release ${VERSION}
 
             This PR includes:
-            - gofeatureflag-evaluation_${{  github.ref_name }}.wasi
-            - gofeatureflag-evaluation_${{  github.ref_name }}.wasm
-          commit-message: Publish evaluation WASM files for ${{  github.ref_name }}
+            - gofeatureflag-evaluation_${VERSION}.wasi
+            - gofeatureflag-evaluation_${VERSION}.wasm
+          commit-message: Publish evaluation WASM files for ${VERSION}
           assignees: thomaspoignant
           draft: false
           signoff: true
@@ -145,27 +141,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
-  is-not-beta-release:
-    name: check if release is a beta release
-    runs-on: ubuntu-latest
-    needs:
-      - goreleaser
-      - wasm-release
-    steps:
-      - name: Stop if pre-release
-        run: |
-          if [[ "${{ github.event.release.tag_name }}" =~ - ]]; then
-            echo "This is a pre-release version, stopping workflow..."
-            exit 1
-          fi
-
   dockerhub-lint:
     runs-on: ubuntu-latest
     name: Upload dockerhub readme
     needs:
       - goreleaser
       - wasm-release
-      - is-not-beta-release
     steps:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -196,7 +177,6 @@ jobs:
     needs:
       - goreleaser
       - wasm-release
-      - is-not-beta-release
     steps:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -217,7 +197,6 @@ jobs:
     needs:
       - goreleaser
       - wasm-release
-      - is-not-beta-release
     steps:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -238,7 +217,6 @@ jobs:
     needs:
       - goreleaser
       - wasm-release
-      - is-not-beta-release
     steps:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -271,11 +249,11 @@ jobs:
     env:
       MAIN_BRANCH_NAME: main
       WEBSITE_DIR: website
+      VERSION: ${{ inputs.version }}
     name: Create new documentation tag
     needs:
       - goreleaser
       - wasm-release
-      - is-not-beta-release
     steps:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -291,7 +269,7 @@ jobs:
 
       - name: Tagging a new version
         working-directory: ./release/${{ env.WEBSITE_DIR }}
-        run: npm run docusaurus docs:version ${{  github.ref_name }}
+        run: npm run docusaurus docs:version ${VERSION}
 
       - name: Setup go
         uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
@@ -318,10 +296,10 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
         with:
-          branch: create-new-doc-version-${{  github.ref_name }}
-          title: "docs(docusaurus): Create a new documentation version ${{  github.ref_name }}"
-          body: Automated pull request to create a new documentation version ${{  github.ref_name }}
-          commit-message: Create a new documentation version ${{  github.ref_name }}
+          branch: create-new-doc-version-${VERSION}
+          title: "docs(docusaurus): Create a new documentation version ${VERSION}"
+          body: Automated pull request to create a new documentation version ${VERSION}
+          commit-message: Create a new documentation version ${VERSION}
           labels: automerge
           assignees: thomaspoignant
           draft: false
@@ -338,10 +316,10 @@ jobs:
     needs:
       - goreleaser
       - wasm-release
-      - is-not-beta-release
     env:
       CHART_YAML_FILE_LOCATION: cmd/relayproxy/helm-charts/relay-proxy/Chart.yaml
       MAIN_BRANCH_NAME: main
+      VERSION: ${{ inputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -354,11 +332,11 @@ jobs:
 
       - name: Bump chart appVersion
         working-directory: ./release/
-        run: yq -i ".appVersion=\"${{  github.ref_name }}\"" $CHART_YAML_FILE_LOCATION
+        run: yq -i ".appVersion=\"${VERSION}\"" $CHART_YAML_FILE_LOCATION
 
       - name: Bump chart version
         working-directory: ./release/
-        run: GIT_TAG_NAME=${{  github.ref_name }} && yq -i ".version=\"${GIT_TAG_NAME#v}\"" $CHART_YAML_FILE_LOCATION
+        run: GIT_TAG_NAME=${VERSION} && yq -i ".version=\"${GIT_TAG_NAME#v}\"" $CHART_YAML_FILE_LOCATION
 
       - name: Checkout main branch
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -375,10 +353,10 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
         with:
-          branch: bump-relay-proxy-helm-chart-${{  github.ref_name }}
-          title: "chore(helm): Bump relay-proxy helm chart version ${{  github.ref_name }}"
-          body: Automated pull request to bump relay-proxy helm chart version ${{  github.ref_name }}
-          commit-message: Bump relay-proxy helm chart version ${{  github.ref_name }}
+          branch: bump-relay-proxy-helm-chart-${VERSION}
+          title: "chore(helm): Bump relay-proxy helm chart version ${VERSION}"
+          body: Automated pull request to bump relay-proxy helm chart version ${VERSION}
+          commit-message: Bump relay-proxy helm chart version ${VERSION}
           labels: automerge
           assignees: thomaspoignant
           draft: false
@@ -394,10 +372,10 @@ jobs:
     needs:
       - goreleaser
       - wasm-release
-      - is-not-beta-release
     env:
       SCHEMA_LOCATION: .schema/flag-schema.json
       MAIN_BRANCH_NAME: main
+      VERSION: ${{ inputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -434,10 +412,10 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
         with:
-          branch: release-jsonschema-${{  github.ref_name }}
-          title: "feat(jsonschema): Release a new version of the jsonschema ${{  github.ref_name }}"
-          body: Automated pull request to release a new version of the jsonschema ${{  github.ref_name }}
-          commit-message: Release a new version of the jsonschema ${{  github.ref_name }}
+          branch: release-jsonschema-${VERSION}
+          title: "feat(jsonschema): Release a new version of the jsonschema ${VERSION}"
+          body: Automated pull request to release a new version of the jsonschema ${VERSION}
+          commit-message: Release a new version of the jsonschema ${VERSION}
           labels: automerge
           assignees: thomaspoignant
           draft: false

@@ -13,10 +13,16 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
     outputs:
+      root_released: ${{ steps.release.outputs['release_created'] }}
+      root_version: ${{ steps.release.outputs['version'] }}
       module_evaluation_released: ${{ steps.release.outputs['modules/evaluation--release_created'] }}
       module_evaluation_version: ${{ steps.release.outputs['modules/evaluation--version'] }}
       module_core_released: ${{ steps.release.outputs['modules/core--release_created'] }}
       module_core_version: ${{ steps.release.outputs['modules/core--version'] }}
+      provider_python_released: ${{ steps.release.outputs['openfeature/providers/python-provider--release_created'] }}
+      provider_python_version: ${{ steps.release.outputs['openfeature/providers/python-provider--version'] }}
+      provider_kotlin_released: ${{ steps.release.outputs['openfeature/providers/kotlin-provider--release_created'] }}
+      provider_kotlin_version: ${{ steps.release.outputs['openfeature/providers/kotlin-provider--version'] }}
     steps:
       - uses: googleapis/release-please-action@c2a5a2bd6a758a0937f1ddb1e8950609867ed15c # v4.3.0
         id: release
@@ -28,7 +34,7 @@ jobs:
 
   bump-module-evaluation:
     if: ${{ needs.release-please.outputs.module_evaluation_released == 'true' }}
-    uses: ./.github/workflows/bump-modules.yml
+    uses: ./.github/workflows/release-bump-modules.yml
     needs: release-please
     with:
       modulePath: modules/evaluation
@@ -36,8 +42,29 @@ jobs:
 
   bump-module-core:
     if: ${{ needs.release-please.outputs.module_core_released == 'true' }}
-    uses: ./.github/workflows/bump-modules.yml
+    uses: ./.github/workflows/release-bump-modules.yml
     needs: release-please
     with:
       modulePath: modules/core
       version: ${{ needs.release-please.outputs.module_core_version }}
+
+  python-provider-release:
+    if: ${{ needs.release-please.outputs.provider_python_released == 'true' }}
+    uses: ./.github/workflows/release-python-provider.yml
+    needs: release-please
+    with:
+      version: ${{ needs.release-please.outputs.provider_python_version }}
+
+  kotlin-provider-release:
+    if: ${{ needs.release-please.outputs.provider_kotlin_released == 'true' }}
+    uses: ./.github/workflows/release-kotlin-provider.yml
+    needs: release-please
+    with:
+      version: ${{ needs.release-please.outputs.provider_kotlin_version }}
+
+  root-release:
+    if: ${{ needs.release-please.outputs.root_released == 'true' }}
+    uses: ./.github/workflows/release.yml
+    needs: release-please
+    with:
+      version: ${{ needs.release-please.outputs.root_version }}
