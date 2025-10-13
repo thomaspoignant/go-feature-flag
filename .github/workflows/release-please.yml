@@ -25,13 +25,13 @@ jobs:
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
           config-file: .github/release-please/release-please-config.json
           manifest-file: .github/release-please/.release-please-manifest.json
-      
+
   bump-module-evaluation:
     if: ${{ needs.release-please.outputs.module_evaluation_released == 'true' }}
     uses: ./.github/workflows/bump-modules.yml
     needs: release-please
     with:
-      modulePath: module/evaluation
+      modulePath: modules/evaluation
       version: ${{ needs.release-please.outputs.module_evaluation_version }}
 
   bump-module-core:
@@ -39,5 +39,5 @@ jobs:
     uses: ./.github/workflows/bump-modules.yml
     needs: release-please
     with:
-      modulePath: module/core
+      modulePath: modules/core
       version: ${{ needs.release-please.outputs.module_core_version }}
