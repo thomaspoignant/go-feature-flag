@@ -13,6 +13,8 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
     outputs:
+      root_released: ${{ steps.release.outputs['release_created'] }}
+      root_version: ${{ steps.release.outputs['version'] }}
       module_evaluation_released: ${{ steps.release.outputs['modules/evaluation--release_created'] }}
       module_evaluation_version: ${{ steps.release.outputs['modules/evaluation--version'] }}
       module_core_released: ${{ steps.release.outputs['modules/core--release_created'] }}
@@ -59,3 +61,10 @@ jobs:
     needs: release-please
     with:
       version: ${{ needs.release-please.outputs.provider_kotlin_version }}
+
+  root-release:
+    if: ${{ needs.release-please.outputs.root_released == 'true' }}
+    uses: ./.github/workflows/release.yml
+    needs: release-please
+    with:
+      version: ${{ needs.release-please.outputs.root_version }}
