@@ -40,15 +40,8 @@
             ],
             "extra-files": [
                 {
-                    "type": "yaml",
-                    "path": "cmd/relayproxy/helm-charts/relay-proxy/Chart.yaml",
-                    "jsonpath": "$.appVersion",
-                    "replace-template": "v${version}"
-                },
-                {
-                    "type": "yaml",
-                    "path": "cmd/relayproxy/helm-charts/relay-proxy/Chart.yaml",
-                    "jsonpath": "$.version"
+                    "type": "generic",
+                    "path": "cmd/relayproxy/helm-charts/relay-proxy/Chart.yaml"
                 }
             ]
         },
