@@ -39,7 +39,16 @@
                 ".github/release-please"
             ],
             "extra-files": [
-                "cmd/relayproxy/helm-charts/relay-proxy/Chart.yaml"
+                {
+                    "type": "yaml",
+                    "path": "cmd/relayproxy/helm-charts/relay-proxy/Chart.yaml",
+                    "jsonpath": "$.appVersion"
+                },
+                {
+                    "type": "yaml",
+                    "path": "cmd/relayproxy/helm-charts/relay-proxy/Chart.yaml",
+                    "jsonpath": "$.version"
+                }
             ]
         },
         "modules/evaluation": {
