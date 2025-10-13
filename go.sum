@@ -253,8 +253,8 @@ github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.9.1/go.mod h1:G
 github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.13.1 h1:oegbebPEMA/1Jny7kvwejowCaHz1FWZAQ94WXFNCyTM=
 github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.13.1/go.mod h1:kemo5Myr9ac0U9JfSjMo9yHLtw+pECEHsFtJ9tqCEI8=
 github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.1.3/go.mod h1:Seb8KNmD6kVTjwRjVEgOT5hPin6sq+v4C2ycJQDwuH8=
-github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.8.9 h1:by3nYZLR9l8bUH7kgaMU4dJgYFjyRdFEfORlDpPILB4=
-github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.8.9/go.mod h1:IWjQYlqw4EX9jw2g3qnEPPWvCE6bS8fKzhMed1OK7c8=
+github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.9.0 h1:X0FveUndcZ3lKbSpIC6rMYGRiQTcUVRNH6X4yYtIrlU=
+github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.9.0/go.mod h1:IWjQYlqw4EX9jw2g3qnEPPWvCE6bS8fKzhMed1OK7c8=
 github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.9.3/go.mod h1:wlY6SVjuwvh3TVRpTqdy4I1JpBFLX4UGeKZdWntaocw=
 github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.9 h1:5r34CgVOD4WZudeEKZ9/iKpiT6cM1JyEROpXjOcdWv8=
 github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.9/go.mod h1:dB12CEbNWPbzO2uC6QSWHteqOg4JfBVJOojbAoAUb5I=
@@ -265,8 +265,8 @@ github.com/aws/aws-sdk-go-v2/service/kinesis v1.40.5 h1:GWAVIxhYlkFX76WGG2gus5ey
 github.com/aws/aws-sdk-go-v2/service/kinesis v1.40.5/go.mod h1:u/oFMSASsn9QNBRop5lrIpuNwHZwEXjYxNQp7sHFSxc=
 github.com/aws/aws-sdk-go-v2/service/kms v1.16.3/go.mod h1:QuiHPBqlOFCi4LqdSskYYAWpQlx3PKmohy+rE2F+o5g=
 github.com/aws/aws-sdk-go-v2/service/s3 v1.26.3/go.mod h1:g1qvDuRsJY+XghsV6zg00Z4KJ7DtFFCx8fJD2a491Ak=
-github.com/aws/aws-sdk-go-v2/service/s3 v1.88.3 h1:P18I4ipbk+b/3dZNq5YYh+Hq6XC0vp5RWkLp1tJldDA=
-github.com/aws/aws-sdk-go-v2/service/s3 v1.88.3/go.mod h1:Rm3gw2Jov6e6kDuamDvyIlZJDMYk97VeCZ82wz/mVZ0=
+github.com/aws/aws-sdk-go-v2/service/s3 v1.88.4 h1:mUI3b885qJgfqKDUSj6RgbRqLdX0wGmg8ruM03zNfQA=
+github.com/aws/aws-sdk-go-v2/service/s3 v1.88.4/go.mod h1:6v8ukAxc7z4x4oBjGUsLnH7KGLY9Uhcgij19UJNkiMg=
 github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.15.4/go.mod h1:PJc8s+lxyU8rrre0/4a0pn2wgwiDvOEzoOjcJUBr67o=
 github.com/aws/aws-sdk-go-v2/service/sns v1.17.4/go.mod h1:kElt+uCcXxcqFyc+bQqZPFD9DME/eC6oHBXvFzQ9Bcw=
 github.com/aws/aws-sdk-go-v2/service/sqs v1.18.3/go.mod h1:skmQo0UPvsjsuYYSYMVmrPc1HWCbHUJyrCEp+ZaLzqM=
