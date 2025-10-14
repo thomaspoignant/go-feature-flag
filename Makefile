@@ -118,7 +118,7 @@ bump-helm-chart-version: ## Bump Helm chart version (usage: make bump-helm-chart
 
 ## Test:
 test: ## Run the tests of the project
-	go list -f '{{.Dir}}/...' -m | xargs -I{} $(GOWORK_ENV) $(GOCMD) test -v -race -tags=docker {}
+	@$(foreach module, $(ALL_GO_MOD_DIRS), (echo "→ Testing $(module)"; cd $(module) && $(GOWORK_ENV)  $(GOCMD) test -v -race -tags=docker ./...);)
 
 provider-tests: ## Run the integration tests for the Open Feature Providers
 	./openfeature/provider_tests/integration_tests.sh
