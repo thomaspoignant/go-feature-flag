@@ -22,10 +22,12 @@ func Int(t int) *int {
 	return &t
 }
 
+// Interface returns a pointer to the interface value passed in.
 func Interface(v interface{}) *interface{} {
 	return &v
 }
 
+// String returns a pointer to the string value passed in.
 func String(v string) *string {
 	return &v
 }
