@@ -48,6 +48,15 @@ jobs:
       modulePath: modules/core
       version: ${{ needs.release-please.outputs.module_core_version }}
 
+  bump-module-core-dependency-for-evaluation:
+    if: ${{ needs.release-please.outputs.module_core_released == 'true' }}
+    uses: ./.github/workflows/release-bump-modules.yml
+    needs: release-please
+    with:
+      modulePath: modules/core
+      version: ${{ needs.release-please.outputs.module_core_version }}
+      goModDirectoryPath: modules/evaluation
+
   python-provider-release:
     if: ${{ needs.release-please.outputs.provider_python_released == 'true' }}
     uses: ./.github/workflows/release-python-provider.yml

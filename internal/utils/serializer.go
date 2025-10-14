@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"github.com/thomaspoignant/go-feature-flag/ffcontext"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/ffcontext"
 )
 
 // ContextToMap convert the context to a MAP to use the query on it.

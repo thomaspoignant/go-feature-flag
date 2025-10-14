@@ -8,7 +8,7 @@ import (
 
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/internal/utils"
-	"github.com/thomaspoignant/go-feature-flag/model"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/model"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 )
 

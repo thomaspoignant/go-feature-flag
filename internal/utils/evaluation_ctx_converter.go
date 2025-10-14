@@ -1,6 +1,6 @@
 package utils
 
-import "github.com/thomaspoignant/go-feature-flag/ffcontext"
+import "github.com/thomaspoignant/go-feature-flag/modules/core/ffcontext"
 
 // ConvertEvaluationCtxFromRequest convert the result of an unmarshal request from the API to a ffcontext.Context
 // @param targetingKey the targeting key to use for the context

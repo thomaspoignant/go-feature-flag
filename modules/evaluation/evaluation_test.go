@@ -1,12 +1,13 @@
-package evaluation
+package evaluation_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
-	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	"github.com/thomaspoignant/go-feature-flag/model"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/model"
+	"github.com/thomaspoignant/go-feature-flag/modules/evaluation"
 	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 )
 
@@ -169,7 +170,7 @@ func Test_evaluate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := Evaluate(tt.args.flag, tt.args.flagKey, tt.args.evaluationCtx, tt.args.flagCtx, tt.args.expectedType, tt.args.sdkDefaultValue)
+			got, err := evaluation.Evaluate(tt.args.flag, tt.args.flagKey, tt.args.evaluationCtx, tt.args.flagCtx, tt.args.expectedType, tt.args.sdkDefaultValue)
 			tt.errAssertion(t, err)
 			if err == nil {
 				assert.Equal(t, tt.want, got)
@@ -188,7 +189,7 @@ func Test_evaluate_typeMisMatch(t *testing.T) {
 			VariationResult: testconvert.String("on"),
 		},
 	}
-	got, err := Evaluate[int](f, "my-flag", ffcontext.NewEvaluationContext("e22a40e0-28fa-413c-aef8-4dc6a27593b7"), flag.Context{}, "int", 42)
+	got, err := evaluation.Evaluate[int](f, "my-flag", ffcontext.NewEvaluationContext("e22a40e0-28fa-413c-aef8-4dc6a27593b7"), flag.Context{}, "int", 42)
 	assert.Error(t, err)
 	want := model.VariationResult[int]{
 		VariationType: flag.VariationSDKDefault,
