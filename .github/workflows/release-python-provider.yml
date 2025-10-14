@@ -4,7 +4,8 @@ on:
   workflow_call:
     inputs:
       version: { type: string, required: true }
-
+    secrets:
+      pypi_token: { required: true }
 permissions:
   actions: read
   contents: read
@@ -27,4 +28,4 @@ jobs:
         uses: JRubics/poetry-publish@4b3306307f536bbfcb559603629b3b4f6aef5ab8 # v2.1
         with:
           package_directory: ./openfeature/providers/python-provider
-          pypi_token: ${{ secrets.PYPI_TOKEN }}
+          pypi_token: ${{ secrets.pypi_token }}

@@ -3,6 +3,10 @@ on:
   workflow_call:
     inputs:
       version: { type: string, required: true }
+    secrets:  
+      DOCKER_USERNAME: { required: true }
+      DOCKER_PASSWORD: { required: true }
+      PERSONAL_GITHUB_TOKEN: { required: true }
 
 permissions:
   contents: read

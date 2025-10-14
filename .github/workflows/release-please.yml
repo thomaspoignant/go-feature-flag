@@ -69,6 +69,8 @@ jobs:
     needs: release-please
     with:
       version: ${{ needs.release-please.outputs.provider_python_version }}
+    secrets:
+      pypi_token: ${{ secrets.PYPI_TOKEN }}
 
   kotlin-provider-release:
     if: ${{ needs.release-please.outputs.provider_kotlin_released == 'true' }}
@@ -76,6 +78,12 @@ jobs:
     needs: release-please
     with:
       version: ${{ needs.release-please.outputs.provider_kotlin_version }}
+    secrets:
+      OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+      OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+      GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+      GPG_SIGNING_KEY_PASSWORD: ${{ secrets.GPG_SIGNING_KEY_PASSWORD }}
+      GPG_SIGNING_KEY_ID: ${{ secrets.GPG_SIGNING_KEY_ID }}
 
   root-release:
     if: ${{ needs.release-please.outputs.root_released == 'true' }}
@@ -83,3 +91,7 @@ jobs:
     needs: release-please
     with:
       version: ${{ needs.release-please.outputs.root_version }}
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      PERSONAL_GITHUB_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
