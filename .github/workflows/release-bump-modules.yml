@@ -49,10 +49,10 @@ jobs:
           VERSION: ${{ inputs.version }}
           MODULE_PATH: ${{ inputs.modulePath }}
         with:
-          branch: bump-module-${MODULE_PATH}-${VERSION}
-          title: "chore(dependency): Bump module ${MODULE_PATH} ${VERSION}"
+          branch: bump-module-${{ env.MODULE_PATH}}-${{ env.VERSION }}
+          title: "chore(dependency): Bump module ${{ env.MODULE_PATH }} ${{ env.VERSION }}"
           body: |
-            Automated pull request to bump module  ${MODULE_PATH} ${VERSION}
+            Automated pull request to bump module ${{ env.MODULE_PATH}} ${{ env.VERSION }}
           commit-message: "chore(dependency): Bump module  ${MODULE_PATH} ${VERSION}"
           assignees: thomaspoignant
           draft: false
