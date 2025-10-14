@@ -51,10 +51,9 @@ build-wasi: create-out-dir ## Build the wasi evaluation library in out/bin/
 
 build-modules:  ## Run build command to build all modules in the workspace
 	@echo "Building all modules in go.work..."
-	@$(GOCMD) work edit -json | jq -r '.Use[].DiskPath' | while read m; do \
-		echo "→ Building $$m"; \
-		( cd "$$m" && CGO_ENABLED=0 GO111MODULE=on $(GOWORK_ENV) $(GOCMD) build $(MODFLAG) ./... ); \
-	done
+	$(foreach module, $(ALL_GO_MOD_DIRS), \
+		echo "→ Building $(module)"; \
+		cd $(module) && CGO_ENABLED=0 GO111MODULE=on $(GOWORK_ENV) $(GOCMD) build $(MODFLAG) ./... && cd - > /dev/null;)
 
 
 build-doc: ## Build the documentation
@@ -76,12 +75,7 @@ tidy: ## Run go mod tidy for all modules in the workspace
 ifeq ($(CI),)
 	$(GOWORK_ENV) $(GOCMD) work sync
 endif
-	@echo "Tidying all modules in go.work..."
-	@$(GOCMD) work edit -json | jq -r '.Use[].DiskPath' | while read m; do \
-		echo "→ Tidying $$m"; \
-		( cd "$$m" && $(GOWORK_ENV) $(GOCMD) mod tidy ); \
-	done
-
+	$(foreach module, $(ALL_GO_MOD_DIRS), cd $(module) && $(GOCMD) mod tidy && cd - > /dev/null;)
 
 ## Dev:
 workspace-init:
