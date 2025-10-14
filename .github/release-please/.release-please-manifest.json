@@ -2,6 +2,6 @@
     ".": "1.46.1",
     "openfeature/providers/python-provider": "0.4.4",
     "openfeature/providers/kotlin-provider": "0.3.0",
-    "modules/evaluation": "0.1.1",
+    "modules/evaluation": "0.1.2",
     "modules/core": "0.1.4"
 }
