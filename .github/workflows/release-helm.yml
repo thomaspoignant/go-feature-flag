@@ -1,12 +1,10 @@
 name: Release Charts
 on:
-  workflow_call:
-    inputs:
-      version: { type: string, required: true }
+  push:
+    branches:
+      - main
 
-permissions:
-  actions: read
-  contents: read
+permissions: read-all
 
 jobs:
   helm-release:
@@ -20,7 +18,14 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Get changed files in the docs folder
+        id: changed-files-specific
+        uses: marceloprado/has-changed-path@df1b7a3161b8fb9fd8c90403c66a9e66dfde50cb # v1.0.1
+        with:
+          paths: ./cmd/relayproxy/helm-charts/
+
       - name: Publish Helm chart
+        if: steps.changed-files-specific.outputs.changed == 'true'
         uses: stefanprodan/helm-gh-pages@0ad2bb377311d61ac04ad9eb6f252fb68e207260 # v1.7.0
         with:
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
@@ -39,6 +44,7 @@ jobs:
           check-latest: true
 
       - name: Update chart README
+        if: steps.changed-files-specific.outputs.changed == 'true'
         run: make generate-helm-docs
 
       - name: Checkout main branch
@@ -56,6 +62,7 @@ jobs:
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
+        if: steps.changed-files-specific.outputs.changed == 'true'
         with:
           branch: update-relay-proxy-chart-readme
           title: "docs(helm): Update relay proxy helm README"

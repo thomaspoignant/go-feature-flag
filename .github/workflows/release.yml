@@ -366,3 +366,38 @@ jobs:
           delete-branch: true
           path: ${{ env.MAIN_BRANCH_NAME }}
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+
+  bump-relay-proxy-helm-chart:
+    # bump-relay-proxy-helm-chart is opening a pull request to bump the appVersion field
+    # in the Chart.yaml file of the helm-chart.
+    runs-on: ubuntu-latest
+    name: Bump Relay Proxy Helm Chart appVersion
+    needs:
+      - goreleaser
+      - wasm-release
+    env:
+      CHART_YAML_FILE_LOCATION: cmd/relayproxy/helm-charts/relay-proxy/Chart.yaml
+      MAIN_BRANCH_NAME: main
+      VERSION: ${{ inputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Bump chart appVersion
+        run: make bump-helm-chart-version VERSION=${VERSION}
+
+      - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
+        with:
+          branch: bump-relay-proxy-helm-chart-${VERSION}
+          title: "chore(helm): Bump relay-proxy helm chart version ${VERSION}"
+          body: Automated pull request to bump relay-proxy helm chart version ${VERSION}
+          commit-message: Bump relay-proxy helm chart version ${VERSION}
+          labels: automerge
+          assignees: thomaspoignant
+          draft: false
+          signoff: true
+          delete-branch: true
+          token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}

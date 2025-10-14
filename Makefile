@@ -76,6 +76,15 @@ generate-helm-docs: ## Generates helm documentation for the project
 	$(GOCMD) install github.com/norwoodj/helm-docs/cmd/helm-docs@latest
 	helm-docs
 
+bump-helm-chart-version: ## Bump Helm chart version (usage: make bump-helm-chart-version VERSION=v1.2.3)
+	@if [ -z "$(VERSION)" ]; then \
+		echo "$(RED)Error: VERSION is required$(RESET)"; \
+		echo "Usage: make bump-helm-chart-version VERSION=v1.2.3"; \
+		echo "       make bump-helm-chart-version VERSION=1.2.3"; \
+		exit 1; \
+	fi
+	.github/ci-scripts/bump-helm-chart.sh $(VERSION)
+
 ## Test:
 test: ## Run the tests of the project
 	$(GOTEST) -v -race ./... -tags=docker
