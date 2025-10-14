@@ -25,6 +25,7 @@ type VariationResult[T JSONType] struct {
 	Metadata      map[string]interface{} `json:"metadata,omitempty"`
 }
 
+// ToJsonStr converts the VariationResult to a JSON string.
 func (v VariationResult[T]) ToJsonStr() string {
 	content, _ := json.Marshal(v)
 	return string(content)
