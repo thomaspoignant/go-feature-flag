@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/thomaspoignant/go-feature-flag/model"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/model"
 )
 
 func Test_evaluate_Evaluate(t *testing.T) {

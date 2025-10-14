@@ -8,6 +8,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/cli/generate/manifest/model"
 	"github.com/thomaspoignant/go-feature-flag/cmd/cli/helper"
 	"github.com/thomaspoignant/go-feature-flag/model/dto"
+	dtoCore "github.com/thomaspoignant/go-feature-flag/modules/core/dto"
 )
 
 func NewManifest(
@@ -61,7 +62,7 @@ func (m *Manifest) generateDefinitions(flagDTOs map[string]dto.DTO) (
 	definitions := make(map[string]model.FlagDefinition)
 	output := helper.Output{}
 	for flagKey, flagDTO := range flagDTOs {
-		flag := dto.ConvertDtoToInternalFlag(flagDTO)
+		flag := dtoCore.ConvertDtoToInternalFlag(flagDTO)
 		flagType, err := helper.GetFlagTypeFromVariations(flag.GetVariations())
 		if err != nil {
 			return model.FlagManifest{}, output,

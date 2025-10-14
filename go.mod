@@ -10,7 +10,6 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.13.0
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.6.2
 	github.com/BurntSushi/toml v1.5.0
-	github.com/GeorgeD19/json-logic-go v0.0.0-20220225111652-48cc2d2c387e
 	github.com/IBM/sarama v1.46.2
 	github.com/atc0005/go-teams-notify/v2 v2.13.0
 	github.com/aws/aws-lambda-go v1.50.0
@@ -44,7 +43,6 @@ require (
 	github.com/labstack/echo-contrib v0.17.4
 	github.com/labstack/echo/v4 v4.13.4
 	github.com/luci/go-render v0.0.0-20160219211803-9a04cc21af0f
-	github.com/nikunjy/rules v1.5.0
 	github.com/pablor21/echo-etag/v4 v4.0.5
 	github.com/prometheus/client_golang v1.23.2
 	github.com/pterm/pterm v0.12.81
@@ -62,8 +60,8 @@ require (
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.39.0
 	github.com/testcontainers/testcontainers-go/modules/redis v0.39.0
 	github.com/thejerf/slogassert v0.3.4
-	github.com/thomaspoignant/go-feature-flag/modules/core v0.1.0
-	github.com/thomaspoignant/go-feature-flag/modules/evaluation v0.1.0
+	github.com/thomaspoignant/go-feature-flag/modules/core v0.1.1-0.20251014100047-9b027b0c0365
+	github.com/thomaspoignant/go-feature-flag/modules/evaluation v0.1.1-0.20251014100047-9b027b0c0365
 	github.com/xdg-go/scram v1.1.2
 	github.com/xitongsys/parquet-go v1.6.2
 	github.com/xitongsys/parquet-go-source v0.0.0-20230830030807-0dd610dbff1d
@@ -85,9 +83,6 @@ require (
 	k8s.io/client-go v0.34.1
 )
 
-// TODO: remove this once https://github.com/nikunjy/rules/pull/43 merges and a new version is available
-replace github.com/nikunjy/rules => github.com/hairyhenderson/rules v0.0.0-20250704181428-58ee76134adc
-
 require (
 	atomicgo.dev/cursor v0.2.0 // indirect
 	atomicgo.dev/keyboard v0.2.9 // indirect
@@ -103,6 +98,7 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/internal v1.11.2 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect
 	github.com/AzureAD/microsoft-authentication-library-for-go v1.5.0 // indirect
+	github.com/GeorgeD19/json-logic-go v0.0.0-20220225111652-48cc2d2c387e // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.29.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.53.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.53.0 // indirect
@@ -126,7 +122,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sts v1.38.6 // indirect
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/blang/semver/v4 v4.0.0 // indirect
+	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
@@ -216,6 +212,7 @@ require (
 	github.com/montanaflynn/stats v0.7.1 // indirect
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
+	github.com/nikunjy/rules v1.5.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.1 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect

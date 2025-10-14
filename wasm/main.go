@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/thomaspoignant/go-feature-flag/evaluation"
-	"github.com/thomaspoignant/go-feature-flag/ffcontext"
-	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	"github.com/thomaspoignant/go-feature-flag/internal/utils"
-	"github.com/thomaspoignant/go-feature-flag/model"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/ffcontext"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/model"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/utils"
+	"github.com/thomaspoignant/go-feature-flag/modules/evaluation"
 	"github.com/thomaspoignant/go-feature-flag/wasm/helpers"
 )
 
