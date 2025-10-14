@@ -39,6 +39,7 @@ jobs:
     with:
       modulePath: modules/evaluation
       version: ${{ needs.release-please.outputs.module_evaluation_version }}
+    secrets:
       token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
   bump-module-core:
@@ -48,6 +49,7 @@ jobs:
     with:
       modulePath: modules/core
       version: ${{ needs.release-please.outputs.module_core_version }}
+    secrets:
       token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
   bump-module-core-dependency-for-evaluation:
@@ -58,6 +60,7 @@ jobs:
       modulePath: modules/core
       version: ${{ needs.release-please.outputs.module_core_version }}
       goModDirectoryPath: modules/evaluation
+    secrets:
       token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
   python-provider-release:

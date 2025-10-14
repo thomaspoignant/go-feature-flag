@@ -13,7 +13,8 @@ on:
       modulePath: { type: string, required: true }
       version: { type: string, required: true }
       goModDirectoryPath: { type: string, required: false, default: "." }
-      token: { type: string, required: true }
+    secrets:
+      token: { required: true }
 
 jobs:
   bump-module:
@@ -59,4 +60,4 @@ jobs:
           delete-branch: true
           base: main
           labels: automerge
-          token: ${{ inputs.token }}
+          token: ${{ secrets.token }}
