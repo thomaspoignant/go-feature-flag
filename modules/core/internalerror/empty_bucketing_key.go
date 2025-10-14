@@ -2,6 +2,7 @@ package internalerror
 
 import "fmt"
 
+// EmptyBucketingKeyError is the error returned when the bucketing key is empty.
 type EmptyBucketingKeyError struct {
 	Message string
 }
