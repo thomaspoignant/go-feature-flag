@@ -8,6 +8,7 @@ import coreCtx "github.com/thomaspoignant/go-feature-flag/modules/core/ffcontext
 type Context = coreCtx.Context
 type EvaluationContext = coreCtx.EvaluationContext
 type EvaluationContextBuilder = coreCtx.EvaluationContextBuilder
+type GoffContextSpecifics = coreCtx.GoffContextSpecifics
 
 // NewEvaluationContext creates a new evaluation context identified by the given targetingKey.
 func NewEvaluationContext(key string) EvaluationContext {
