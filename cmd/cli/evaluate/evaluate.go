@@ -7,8 +7,8 @@ import (
 	"time"
 
 	ffclient "github.com/thomaspoignant/go-feature-flag"
-	"github.com/thomaspoignant/go-feature-flag/internal/utils"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/model"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/utils"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 )
 

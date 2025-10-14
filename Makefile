@@ -2,6 +2,16 @@ GOCMD=go
 TINYGOCMD=tinygo
 GOTEST=$(GOCMD) test
 GOVET=$(GOCMD) vet
+ALL_GO_MOD_DIRS := ./ ./modules/evaluation ./modules/core
+
+# In CI we disable workspace mode.
+ifeq ($(CI),true)
+  GOWORK_ENV := GOWORK=off
+  MODFLAG := -mod=vendor
+else
+  GOWORK_ENV :=
+  MODFLAG :=
+endif
 
 GREEN  := $(shell tput -Txterm setaf 2)
 YELLOW := $(shell tput -Txterm setaf 3)
@@ -19,25 +29,33 @@ create-out-dir:
 	mkdir -p out/bin
 
 build-relayproxy: create-out-dir ## Build the relay proxy in out/bin/
-	CGO_ENABLED=0 GO111MODULE=on $(GOCMD) build -mod vendor -o out/bin/relayproxy ./cmd/relayproxy/
+	CGO_ENABLED=0 GO111MODULE=on $(GOWORK_ENV) $(GOCMD) build $(MODFLAG) -o out/bin/relayproxy ./cmd/relayproxy/
 
 build-lint: create-out-dir ## Build the linter in out/bin/
-	CGO_ENABLED=0 GO111MODULE=on $(GOCMD) build -mod vendor -o out/bin/lint ./cmd/lint/
+	CGO_ENABLED=0 GO111MODULE=on $(GOWORK_ENV) $(GOCMD) build $(MODFLAG) -o out/bin/lint ./cmd/lint/
 
 build-cli: create-out-dir ## Build the linter in out/bin/
-	CGO_ENABLED=0 GO111MODULE=on $(GOCMD) build -mod vendor -o out/bin/cli ./cmd/cli/
+	CGO_ENABLED=0 GO111MODULE=on $(GOWORK_ENV) $(GOCMD) build $(MODFLAG) -o out/bin/cli ./cmd/cli/
 
 build-editor-api: create-out-dir ## Build the linter in out/bin/
-	CGO_ENABLED=0 GO111MODULE=on $(GOCMD) build -mod vendor -o out/bin/editor-api ./cmd/editor/
+	CGO_ENABLED=0 GO111MODULE=on $(GOWORK_ENV) $(GOCMD) build $(MODFLAG) -o out/bin/editor-api ./cmd/editor/
 
 build-jsonschema-generator: create-out-dir ## Build the jsonschema-generator in out/bin/
-	CGO_ENABLED=0 GO111MODULE=on $(GOCMD) build -mod vendor -o out/bin/jsonschema-generator ./cmd/jsonschema-generator/
+	CGO_ENABLED=0 GO111MODULE=on $(GOWORK_ENV) $(GOCMD) build $(MODFLAG) -o out/bin/jsonschema-generator ./cmd/jsonschema-generator/
 
 build-wasm: create-out-dir ## Build the wasm evaluation library in out/bin/
 	cd wasm && $(TINYGOCMD) build -o ../out/bin/gofeatureflag-evaluation.wasm -target wasm -opt=2 -opt=s --no-debug -scheduler=none && cd ..
 
 build-wasi: create-out-dir ## Build the wasi evaluation library in out/bin/
 	cd wasm && $(TINYGOCMD) build -o ../out/bin/gofeatureflag-evaluation.wasi -target wasi -opt=2 -opt=s --no-debug -scheduler=none && cd ..
+
+build-modules:  ## Run build command to build all modules in the workspace
+	@echo "Building all modules in go.work..."
+	@$(GOCMD) work edit -json | jq -r '.Use[].DiskPath' | while read m; do \
+		echo "→ Building $$m"; \
+		( cd "$$m" && CGO_ENABLED=0 GO111MODULE=on $(GOWORK_ENV) $(GOCMD) build $(MODFLAG) ./... ); \
+	done
+
 
 build-doc: ## Build the documentation
 	cd website; \
@@ -47,17 +65,36 @@ clean: ## Remove build related file
 	-rm -fr ./bin ./out ./release
 	-rm -f ./junit-report.xml checkstyle-report.xml ./coverage.xml ./profile.cov yamllint-checkstyle.xml
 
-vendor: ## Copy of all packages needed to support builds and tests in the vendor directory
-	$(GOCMD) mod tidy
-	$(GOCMD) mod vendor
+vendor: tidy ## Copy of all packages needed to support builds and tests in the vendor directory
+ifneq ($(CI),)
+	$(GOWORK_ENV) $(GOCMD) mod vendor
+else
+	$(GOWORK_ENV) $(GOCMD) work vendor
+endif
+
+tidy: ## Run go mod tidy for all modules in the workspace	
+ifeq ($(CI),)
+	$(GOWORK_ENV) $(GOCMD) work sync
+endif
+	@echo "Tidying all modules in go.work..."
+	@$(GOCMD) work edit -json | jq -r '.Use[].DiskPath' | while read m; do \
+		echo "→ Tidying $$m"; \
+		( cd "$$m" && $(GOWORK_ENV) $(GOCMD) mod tidy ); \
+	done
+
 
 ## Dev:
+workspace-init:
+	go work init
+	$(foreach module, $(ALL_GO_MOD_DIRS), go work use $(module);)
+	go work sync
+
 watch-relayproxy: ## Launch the relay proxy in watch mode.
 	docker run -it --rm -w /go/src/github.com/thomaspoignant/go-feature-flag/ \
 		-v $(shell pwd):/go/src/github.com/thomaspoignant/go-feature-flag \
 		-v $(shell pwd)/cmd/relayproxy/testdata/config/valid-file.yaml:/goff/goff-proxy.yaml \
 		-p 1031:1031 cosmtrek/air \
-		--build.cmd "go build -mod vendor -o out/bin/relayproxy ./cmd/relayproxy/" \
+		--build.cmd "$(GOWORK_ENV) go build $(MODFLAG) -o out/bin/relayproxy ./cmd/relayproxy/" \
 		--build.bin "./out/bin/relayproxy"
 
 watch-doc: ## Launch a local server to work on the documentation
@@ -69,11 +106,11 @@ serve-doc: ## Serve the doc build by the build-doc target
 		npm run serve
 
 swagger: ## Build swagger documentation
-	$(GOCMD) install github.com/swaggo/swag/cmd/swag@latest
+	$(GOWORK_ENV) $(GOCMD) install github.com/swaggo/swag/cmd/swag@latest
 	cd cmd/relayproxy && swag init --parseDependency --parseDepth=1 --parseInternal --markdownFiles docs
 
 generate-helm-docs: ## Generates helm documentation for the project
-	$(GOCMD) install github.com/norwoodj/helm-docs/cmd/helm-docs@latest
+	$(GOWORK_ENV) $(GOCMD) install github.com/norwoodj/helm-docs/cmd/helm-docs@latest
 	helm-docs
 
 bump-helm-chart-version: ## Bump Helm chart version (usage: make bump-helm-chart-version VERSION=v1.2.3)
@@ -87,17 +124,17 @@ bump-helm-chart-version: ## Bump Helm chart version (usage: make bump-helm-chart
 
 ## Test:
 test: ## Run the tests of the project
-	$(GOTEST) -v -race ./... -tags=docker
+	go list -f '{{.Dir}}/...' -m | xargs -I{} go test -v -race -tags=docker {}
 
 provider-tests: ## Run the integration tests for the Open Feature Providers
 	./openfeature/provider_tests/integration_tests.sh
 
 coverage: ## Run the tests of the project and export the coverage
-	$(GOTEST) -cover -covermode=count -tags=docker -coverprofile=coverage.cov.tmp ./... \
+	$(GOWORK_ENV) $(GOTEST) -cover -covermode=count -tags=docker -coverprofile=coverage.cov.tmp ./... \
 	&& cat coverage.cov.tmp | grep -v "/examples/" > coverage.cov
 
 bench: ## Launch the benchmark test
-	 $(GOTEST) -tags=bench -bench Benchmark -cpu 2 -run=^$$
+	 $(GOWORK_ENV) $(GOTEST) -tags=bench -bench Benchmark -cpu 2 -run=^$$
 
 ## Lint:
 lint: ## Use golintci-lint on your project

@@ -7,8 +7,8 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/model"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/testutils/testconvert"
 	"github.com/thomaspoignant/go-feature-flag/modules/evaluation"
-	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 )
 
 func Test_evaluate(t *testing.T) {

@@ -10,9 +10,9 @@ import (
 
 	jsonlogic "github.com/GeorgeD19/json-logic-go"
 	"github.com/nikunjy/rules/parser"
-	"github.com/thomaspoignant/go-feature-flag/internal/internalerror"
-	"github.com/thomaspoignant/go-feature-flag/internal/utils"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/ffcontext"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/internalerror"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/utils"
 )
 
 type QueryFormat = string

@@ -1,4 +1,4 @@
-package gofferror
+package internalerror
 
 import "fmt"
 

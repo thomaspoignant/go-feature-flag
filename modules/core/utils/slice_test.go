@@ -1,6 +1,10 @@
-package utils
+package utils_test
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/thomaspoignant/go-feature-flag/modules/core/utils"
+)
 
 func TestContains(t *testing.T) {
 	type args struct {
@@ -31,7 +35,7 @@ func TestContains(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Contains(tt.args.s, tt.args.str); got != tt.want {
+			if got := utils.Contains(tt.args.s, tt.args.str); got != tt.want {
 				t.Errorf("Contains() = %v, want %v", got, tt.want)
 			}
 		})

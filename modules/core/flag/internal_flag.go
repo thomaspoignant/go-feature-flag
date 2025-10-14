@@ -6,10 +6,9 @@ import (
 	"maps"
 	"time"
 
-	"github.com/thomaspoignant/go-feature-flag/gofferror"
-	"github.com/thomaspoignant/go-feature-flag/internal/internalerror"
-	"github.com/thomaspoignant/go-feature-flag/internal/utils"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/ffcontext"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/internalerror"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/utils"
 )
 
 const (
@@ -404,7 +403,7 @@ func (f *InternalFlag) GetBucketingKeyValue(ctx ffcontext.Context) (string, erro
 		switch v := value.(type) {
 		case string:
 			if v == "" {
-				return "", &gofferror.EmptyBucketingKeyError{Message: "Empty bucketing key"}
+				return "", &internalerror.EmptyBucketingKeyError{Message: "Empty bucketing key"}
 			}
 			return v, nil
 		default:
@@ -413,7 +412,7 @@ func (f *InternalFlag) GetBucketingKeyValue(ctx ffcontext.Context) (string, erro
 	}
 
 	if ctx.GetKey() == "" {
-		return "", &gofferror.EmptyBucketingKeyError{Message: "Empty targeting key"}
+		return "", &internalerror.EmptyBucketingKeyError{Message: "Empty targeting key"}
 	}
 
 	return ctx.GetKey(), nil
