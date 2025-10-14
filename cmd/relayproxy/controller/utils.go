@@ -19,21 +19,6 @@ func assertRequest(u *model.AllFlagRequest) *echo.HTTPError {
 			"assertRequest: impossible to find user in request",
 		)
 	}
-
-	if u.EvaluationContext != nil {
-		return assertContextKey(u.EvaluationContext.Key)
-	}
-	return assertContextKey(u.User.Key) // nolint: staticcheck
-}
-
-// assertContextKey is checking that the user key is valid, if not an echo.HTTPError is return.
-func assertContextKey(key string) *echo.HTTPError {
-	if len(key) == 0 {
-		return &echo.HTTPError{
-			Code:    http.StatusBadRequest,
-			Message: "empty key for evaluation context, impossible to retrieve flags",
-		}
-	}
 	return nil
 }
 
