@@ -23,7 +23,7 @@ RESET  := $(shell tput -Txterm sgr0)
 
 all: help
 ## Build:
-build: build-relayproxy build-lint build-editor-api build-jsonschema-generator build-cli ## Build all the binaries and put the output in out/bin/
+build: build-modules build-relayproxy build-lint build-editor-api build-jsonschema-generator build-cli  ## Build all the binaries and put the output in out/bin/
 
 create-out-dir:
 	mkdir -p out/bin
