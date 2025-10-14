@@ -15,10 +15,19 @@ func NewEvaluationContext(key string) EvaluationContext {
 	return coreCtx.NewEvaluationContext(key)
 }
 
-func NewEvaluationContextBuilder(key string) EvaluationContextBuilder {
-	return coreCtx.NewEvaluationContextBuilder(key)
-}
-
+// Deprecated: NewAnonymousEvaluationContext is here for compatibility reason.
+// Please use NewEvaluationContext instead and add a attributes attribute to know that it is an anonymous user.
+//
+// ctx := NewEvaluationContext("my-targetingKey")
+// ctx.AddCustomAttribute("anonymous", true)
 func NewAnonymousEvaluationContext(key string) EvaluationContext {
 	return coreCtx.NewAnonymousEvaluationContext(key)
+}
+
+// NewEvaluationContextBuilder constructs a new EvaluationContextBuilder, specifying the user targetingKey.
+//
+// For authenticated users, the targetingKey may be a username or e-mail address. For anonymous users,
+// this could be an IP address or session ID.
+func NewEvaluationContextBuilder(key string) EvaluationContextBuilder {
+	return coreCtx.NewEvaluationContextBuilder(key)
 }
