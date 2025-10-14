@@ -36,7 +36,7 @@ jobs:
         run: |
           cd ${GO_MOD_DIRECTORY_PATH}
           export GOWORK=off
-          go get github.com/thomaspoignant/go-feature-flag/${MODULE_PATH}@${VERSION }
+          go get github.com/thomaspoignant/go-feature-flag/${MODULE_PATH}@${VERSION}
           go mod tidy
           go mod vendor
           go mod verify
