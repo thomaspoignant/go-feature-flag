@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.1.3...modules/core/v0.1.4) (2025-10-14)
+
+
+### 🔧 Chores
+
+* adding missing comments ([#4090](https://github.com/thomaspoignant/go-feature-flag/issues/4090)) ([2ca2369](https://github.com/thomaspoignant/go-feature-flag/commit/2ca2369d16ede4a5bcf0206fd71e1fb8eed7fd0c))
+
 ## [0.1.3](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.1.2...modules/core/v0.1.3) (2025-10-14)
 
 
