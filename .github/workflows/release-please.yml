@@ -69,6 +69,8 @@ jobs:
     needs: release-please
     with:
       version: ${{ needs.release-please.outputs.provider_python_version }}
+    secrets:
+      pypi_token: ${{ secrets.PYPI_TOKEN }}
 
   kotlin-provider-release:
     if: ${{ needs.release-please.outputs.provider_kotlin_released == 'true' }}
