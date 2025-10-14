@@ -1,7 +1,0 @@
-go 1.24.6
-
-use (
-	.
-	./modules/core
-	./modules/evaluation
-)
