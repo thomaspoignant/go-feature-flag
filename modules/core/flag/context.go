@@ -13,6 +13,7 @@ type Context struct {
 	DefaultSdkValue interface{} `json:"defaultSdkValue,omitempty"`
 }
 
+// AddIntoEvaluationContextEnrichment adds a key and value to the evaluation context enrichment.
 func (s *Context) AddIntoEvaluationContextEnrichment(key string, value interface{}) {
 	if s.EvaluationContextEnrichment == nil {
 		s.EvaluationContextEnrichment = make(map[string]interface{})
