@@ -75,7 +75,7 @@ tidy: ## Run go mod tidy for all modules in the workspace
 ifeq ($(CI),)
 	$(GOWORK_ENV) $(GOCMD) work sync
 endif
-	$(foreach module, $(ALL_GO_MOD_DIRS), cd $(module) && $(GOCMD) mod tidy && cd - > /dev/null;)
+	@$(foreach module, $(ALL_GO_MOD_DIRS), (echo "→ Tidying $(module)"; cd $(module) && $(GOWORK_ENV) $(GOCMD) mod tidy);)
 
 ## Dev:
 workspace-init:
