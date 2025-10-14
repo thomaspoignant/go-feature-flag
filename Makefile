@@ -50,10 +50,8 @@ build-wasi: create-out-dir ## Build the wasi evaluation library in out/bin/
 	cd wasm && $(TINYGOCMD) build -o ../out/bin/gofeatureflag-evaluation.wasi -target wasi -opt=2 -opt=s --no-debug -scheduler=none && cd ..
 
 build-modules:  ## Run build command to build all modules in the workspace
-	@echo "Building all modules in go.work..."
-	$(foreach module, $(ALL_GO_MOD_DIRS), \
-		echo "→ Building $(module)"; \
-		cd $(module) && CGO_ENABLED=0 GO111MODULE=on $(GOWORK_ENV) $(GOCMD) build $(MODFLAG) ./... && cd - > /dev/null;)
+	@echo "Building all modules in the workspace..."
+	@$(foreach module, $(ALL_GO_MOD_DIRS), (echo "→ Building $(module)"; CGO_ENABLED=0 GO111MODULE=on $(GOWORK_ENV) $(GOCMD) build $(MODFLAG) ./...);)
 
 
 build-doc: ## Build the documentation
