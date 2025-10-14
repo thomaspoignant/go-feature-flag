@@ -3,6 +3,12 @@ on:
   workflow_call:
     inputs:
       version: { type: string, required: false }
+    secrets:
+      OSSRH_USERNAME: { required: true }
+      OSSRH_PASSWORD: { required: true }
+      GPG_SIGNING_KEY: { required: true }
+      GPG_SIGNING_KEY_PASSWORD: { required: true }
+      GPG_SIGNING_KEY_ID: { required: true }
 
 permissions:
   actions: read
