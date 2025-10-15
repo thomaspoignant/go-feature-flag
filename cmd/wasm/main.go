@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/thomaspoignant/go-feature-flag/cmd/wasm/helpers"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/model"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/utils"
 	"github.com/thomaspoignant/go-feature-flag/modules/evaluation"
-	"github.com/thomaspoignant/go-feature-flag/wasm/helpers"
 )
 
 // main is the entry point for the wasm module.
