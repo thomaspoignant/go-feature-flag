@@ -10,7 +10,7 @@
     <a href="https://scorecard.dev/viewer/?uri=github.com/thomaspoignant/go-feature-flag"><img src="https://api.scorecard.dev/projects/github.com/thomaspoignant/go-feature-flag/badge"/></a>
     <a href="https://codecov.io/gh/thomaspoignant/go-feature-flag"><img src="https://codecov.io/gh/thomaspoignant/go-feature-flag/branch/main/graph/badge.svg?token=T59ACQWW1H"/></a>
     <a href="https://sonarcloud.io/dashboard?id=thomaspoignant_go-feature-flag"><img src="https://sonarcloud.io/api/project_badges/measure?project=thomaspoignant_go-feature-flag&metric=alert_status" alt="Sonarcloud Status" /></a>
-    <a href="https://github.com/thomaspoignant/go-feature-flag/releases"><img src="https://img.shields.io/github/v/release/thomaspoignant/go-feature-flag" alt="Release version" /></a>
+    <a href="https://github.com/thomaspoignant/go-feature-flag/releases"><img src="https://img.shields.io/github/v/release/thomaspoignant/go-feature-flag?filter=v*" alt="Release version" /></a>
     <a href="https://goreportcard.com/report/github.com/thomaspoignant/go-feature-flag"><img src="https://goreportcard.com/badge/github.com/thomaspoignant/go-feature-flag" alt="Build Status" /></a>
     <a href="https://github.com/thomaspoignant/go-feature-flag/blob/main/LICENSE"><img src="https://img.shields.io/github/license/thomaspoignant/go-feature-flag" alt="License"/></a>
     <br/>
