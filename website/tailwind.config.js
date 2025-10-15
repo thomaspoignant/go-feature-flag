@@ -6,7 +6,12 @@ module.exports = {
     preflight: false,
   },
   darkMode: ['class', '[data-theme="dark"]'],
-  content: ['./src/**/*.{js,jsx,ts,tsx,md,mdx}', './docs/**/*.{md,mdx}'],
+  content: {
+    files: ['./src/**/*.{js,jsx,ts,tsx,md,mdx}', './docs/**/*.{md,mdx}'],
+    extract: {
+      css: () => [], // Don't purge anything from CSS files
+    },
+  },
   theme: {
     extend: {
       fontFamily: {
@@ -30,6 +35,9 @@ module.exports = {
           800: '#0a5b4f',
           900: '#0a4a41',
           950: '#042a26',
+        },
+        titles: {
+          500: '#9fbeb3',
         },
       },
     },

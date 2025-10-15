@@ -3,7 +3,7 @@ package mock
 import (
 	"sync"
 
-	"github.com/thomaspoignant/go-feature-flag/internal/flag"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 

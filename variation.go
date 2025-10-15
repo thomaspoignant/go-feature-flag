@@ -4,16 +4,15 @@ import (
 	"fmt"
 	"maps"
 
-	"github.com/thomaspoignant/go-feature-flag/evaluation"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
-	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	"github.com/thomaspoignant/go-feature-flag/model"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/model"
+	"github.com/thomaspoignant/go-feature-flag/modules/evaluation"
 )
 
 const (
 	errorFlagNotAvailable = "flag %v is not present or disabled"
-	errorWrongVariation   = "wrong variation used for flag %v"
 )
 
 // BoolVariation return the value of the flag in boolean.

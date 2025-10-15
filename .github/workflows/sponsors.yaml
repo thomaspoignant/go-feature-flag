@@ -17,7 +17,7 @@ jobs:
       - name: Generate Sponsors 💖
         uses: JamesIves/github-sponsors-readme-action@1a120c92d5067dafeaedb33916301fd61338883d # v1.5.6
         with:
-          token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+          token: ${{ secrets.SPONSORS_GITHUB_PAT }}
           file: "sponsors/README.md"
           fallback: "No sponsor at the moment! 😢"
 
