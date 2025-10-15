@@ -106,6 +106,10 @@ export default function Pricing() {
             </li>
             <li className="flex gap-x-3">
               <MdOutlineCheck className={"w-6 h-6 text-goff-500"} />
+              SLA on CVE fix
+            </li>
+            <li className="flex gap-x-3">
+              <MdOutlineCheck className={"w-6 h-6 text-goff-500"} />
               Direct communication with the maintainers
             </li>
             <li className="flex gap-x-3">
@@ -135,7 +139,7 @@ export default function Pricing() {
             to={"https://calendly.com/thomas-poignant-o1pt/30min"}
             className="mt-2 block rounded-md bg-indigo-500 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 sm:mt-2"
           >
-            Book a demo 📅
+            Book a meeting 📅
           </Link>
         </div>
       </div>
