@@ -4,7 +4,7 @@ import (
 	"testing"
 	"unsafe"
 
-	"github.com/thomaspoignant/go-feature-flag/wasm/helpers"
+	"github.com/thomaspoignant/go-feature-flag/cmd/wasm/helpers"
 )
 
 func TestWasmReadBufferFromMemory_ZeroLengthReturnsEmptySlice(t *testing.T) {
