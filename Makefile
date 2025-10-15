@@ -60,7 +60,7 @@ build-doc: ## Build the documentation
 
 clean: ## Remove build related file
 	-rm -fr ./bin ./out ./release
-	-rm -f ./junit-report.xml checkstyle-report.xml ./coverage.xml ./profile.cov yamllint-checkstyle.xml
+	-rm -f ./junit-report.xml checkstyle-report.xml ./coverage.xml ./profile.cov yamllint-checkstyle.xml ./coverage-*.cov.tmp
 
 vendor: tidy ## Copy of all packages needed to support builds and tests in the vendor directory
 ifneq ($(CI),)
@@ -121,9 +121,17 @@ test: ## Run the tests of the project
 provider-tests: ## Run the integration tests for the Open Feature Providers
 	./openfeature/provider_tests/integration_tests.sh
 
-coverage: ## Run the tests of the project and export the coverage
-	$(GOWORK_ENV) $(GOTEST) -cover -covermode=count -tags=docker -coverprofile=coverage.cov.tmp ./... \
-	&& cat coverage.cov.tmp | grep -v "/examples/" > coverage.cov
+coverage: ## Run the tests of the project and export the coverage for all modules
+	@rm -f coverage*.cov coverage*.cov.tmp
+	@for module in $(ALL_GO_MOD_DIRS); do \
+		echo "Running coverage for $$module..."; \
+		export original_path=$(shell pwd); \
+		covfile="coverage-$$(basename $$module).cov.tmp"; \
+		cd $$module && $(GOWORK_ENV) $(GOTEST) -cover -covermode=count -tags=docker -coverprofile=$${original_path}/$${covfile} ./...; \
+		cd $$original_path; \
+	done
+	@echo "mode: count" > coverage.cov && cat *.cov.tmp | grep -v "mode: count" | grep -v "/examples/" >> coverage.cov
+	@rm -f *.cov.tmp
 
 bench: ## Launch the benchmark test
 	 $(GOWORK_ENV) $(GOTEST) -tags=bench -bench Benchmark -cpu 2 -run=^$$
