@@ -8,12 +8,12 @@
     "commit-search-depth": 400,
     "changelog-sections": [
         {
-            "type": "fix",
-            "section": "🐛 Bug Fixes"
-        },
-        {
             "type": "feat",
             "section": "🚀 New Features"
+        },
+        {
+            "type": "fix",
+            "section": "🐛 Bug Fixes"
         },
         {
             "type": "chore",
@@ -22,6 +22,10 @@
         {
             "type": "docs",
             "section": "📚 Documentation"
+        },
+        {
+            "type": "ci",
+            "section": "⚙️ CI/CD"
         }
     ],
     "packages": {
