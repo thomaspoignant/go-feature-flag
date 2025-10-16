@@ -1,7 +1,7 @@
 package notifier
 
 import (
-	"github.com/thomaspoignant/go-feature-flag/internal/flag"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
 )
 
 // DiffCache contains the changes made in the cache, to be able
