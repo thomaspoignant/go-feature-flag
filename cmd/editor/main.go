@@ -9,10 +9,10 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	custommiddleware "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/log"
-	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	"github.com/thomaspoignant/go-feature-flag/internal/utils"
-	"github.com/thomaspoignant/go-feature-flag/model"
-	"github.com/thomaspoignant/go-feature-flag/model/dto"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/dto"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/model"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/utils"
 )
 
 // This service is an API used to evaluate a flag with an evaluation context
