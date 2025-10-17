@@ -44,6 +44,7 @@ var (
 	checkMode      bool
 )
 
+// nolint:funlen
 func NewEvaluateCmd() *cobra.Command {
 	evaluateCmd := &cobra.Command{
 		Use:   "evaluate",
@@ -56,34 +57,43 @@ evaluate --config ./config.yaml --flag flag1 --ctx '{"targetingKey": "user-123"}
 evaluate --kind file --path ./config.yaml --flag flag1 --ctx '{"targetingKey": "user-123"}'
 
 # Evaluate a specific flag using http retriever
-evaluate --kind http --url http://localhost:8080/config.yaml --header 'ContentType: application/json' --header 'X-Auth=Token' --flag flag1 --ctx '{"targetingKey": "user-123"}'
+evaluate --kind http --url http://localhost:8080/config.yaml --header 'ContentType: application/json' --header 
+'X-Auth=Token' --flag flag1 --ctx '{"targetingKey": "user-123"}'
 
 # Evaluate a specific flag using github retriever
-evaluate --kind github --repository-slug thomaspoignant/go-feature-flag --branch master --flag flag1 --ctx '{"targetingKey": "user-123"}'
+evaluate --kind github --repository-slug thomaspoignant/go-feature-flag --branch master --flag flag1
+--ctx '{"targetingKey": "user-123"}'
 
 # Evaluate a specific flag using gitlab retriever
-evaluate --kind gitlab --base-url https://gitlab.com --repository-slug thomaspoignant/go-feature-flag --branch master --flag flag1 --ctx '{"targetingKey": "user-123"}'
+evaluate --kind gitlab --base-url https://gitlab.com --repository-slug thomaspoignant/go-feature-flag
+--branch master --flag flag1 --ctx '{"targetingKey": "user-123"}'
 
 # Evaluate a specific flag using bitbucket retriever
-evaluate --kind bitbucket --repository-slug thomaspoignant/go-feature-flag --branch master --flag flag1 --ctx '{"targetingKey": "user-123"}'
+evaluate --kind bitbucket --repository-slug thomaspoignant/go-feature-flag --branch master --flag flag1
+--ctx '{"targetingKey": "user-123"}'
 
 # Evaluate a specific flag using s3 retriever
 evaluate --kind s3 --bucket my-bucket --item my-item.yaml --flag flag1 --ctx '{"targetingKey": "user-123"}'
 
 # Evaluate a specific flag using gcs retriever
-evaluate --kind googleStorage --bucket my-bucket --object my-item.yaml --flag flag1 --ctx '{"targetingKey": "user-123"}'
+evaluate --kind googleStorage --bucket my-bucket --object my-item.yaml --flag flag1 --ctx
+'{"targetingKey": "user-123"}'
 
 # Evaluate a specific flag using configmap retriever
-evaluate --kind configmap --namespace default --config-map my-configmap --key my-key.yaml --flag flag1 --ctx '{"targetingKey": "user-123"}'
+evaluate --kind configmap --namespace default --config-map my-configmap --key my-key.yaml --flag flag1
+--ctx '{"targetingKey": "user-123"}'
 
 # Evaluate a specific flag using mongodb retriever
-evaluate --kind mongodb --uri mongodb://localhost:27017 --database my-database --collection my-collection --flag flag1 --ctx '{"targetingKey": "user-123"}'
+evaluate --kind mongodb --uri mongodb://localhost:27017 --database my-database --collection my-collection --flag flag1
+--ctx '{"targetingKey": "user-123"}'
 
 # Evaluate a specific flag using azureblob retriever
-evaluate --kind azureblob --container my-container --account-name my-account-name --account-key my-account-key --object my-object --flag flag1 --ctx '{"targetingKey": "user-123"}'
+evaluate --kind azureblob --container my-container --account-name my-account-name --account-key my-account-key
+--object my-object --flag flag1 --ctx '{"targetingKey": "user-123"}'
 
 # Evaluate a specific flag using postgres retriever
-evaluate --kind postgres --table my-table --column my-column:my-column-type --flag flag1 --ctx '{"targetingKey": "user-123"}'
+evaluate --kind postgres --table my-table --column my-column:my-column-type --flag flag1
+--ctx '{"targetingKey": "user-123"}'
 `,
 		Long: "⚙️ Evaluate feature flags based on configuration and context," +
 			" if no specific flag requested it will evaluate all flags",
@@ -168,15 +178,20 @@ evaluate --kind postgres --table my-table --column my-column:my-column-type --fl
 	evaluateCmd.Flags().StringVar(&body,
 		"body", "", "Http body to access your configuration file on HTTP")
 	evaluateCmd.Flags().StringArrayVar(&headers,
-		"header", nil, "HTTP header to access your configuration file on HTTP (may be repeated). See example of `evaluate` command for usages")
+		"header", nil,
+		"HTTP header to access your configuration file on HTTP (may be repeated). "+
+			"See example of `evaluate` command for usages")
 	evaluateCmd.Flags().Int64Var(&timeout,
 		"timeout", 0, "Timeout in seconds to access your configuration file on HTTP")
 	evaluateCmd.Flags().StringVar(&evalFlag,
-		"flag", "", "Name of the flag to evaluate, if empty we will return the evaluation of all the flags")
+		"flag", "",
+		"Name of the flag to evaluate, if empty we will return the evaluation of all the flags")
 	evaluateCmd.Flags().StringVar(&evalCtx,
 		"ctx", "{}", "Evaluation context in JSON format")
 	evaluateCmd.Flags().BoolVar(&checkMode,
-		"check-mode", false, "Check only mode - when set, the command will not perform any evaluation and returns the configuration of spanned retriever")
+		"check-mode", false,
+		"Check only mode - when set, the command will not perform any evaluation and returns "+
+			"the configuration of spanned retriever")
 	evaluateCmd.Flags().StringVar(&object,
 		"object", "", "Object of your configuration file on GCS")
 	evaluateCmd.Flags().StringVar(&namespace,
@@ -200,7 +215,8 @@ evaluate --kind postgres --table my-table --column my-column:my-column-type --fl
 	evaluateCmd.Flags().StringVar(&table,
 		"table", "", "Postgres table of your configuration file on Postgres")
 	evaluateCmd.Flags().StringArrayVar(&columns,
-		"column", nil, "Postgres column mapping of your configuration file on Postgres (may be repeated)")
+		"column", nil,
+		"Postgres column mapping of your configuration file on Postgres (may be repeated)")
 	_ = evaluateCmd.Flags().MarkDeprecated("github-token", "Use auth-token instead")
 	_ = evaluateCmd.Flags().MarkDeprecated("config", "Use path instead")
 	return evaluateCmd
@@ -219,8 +235,6 @@ func runEvaluate(
 	if err != nil {
 		return err
 	}
-
-	//TODO: Depending on https://github.com/thomaspoignant/go-feature-flag/issues/4024 we should refine type of retriever and call its init method
 
 	e := evaluate{
 		retriever:     r,
