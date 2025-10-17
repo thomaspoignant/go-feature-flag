@@ -1,7 +1,7 @@
 package testutils
 
 import (
-	"crypto/md5"
+	"crypto/md5" //nolint: gosec
 	"encoding/base64"
 	"os"
 	"testing"

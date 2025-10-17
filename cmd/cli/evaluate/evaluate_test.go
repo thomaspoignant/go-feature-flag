@@ -327,7 +327,6 @@ func Test_evaluate_Evaluate(t *testing.T) {
 		{
 			name: "Should evaluate a flag from a HTTP endpoint",
 			initEvaluate: func() (evaluate, error) {
-
 				r, err := retrieverInit.InitRetriever(
 					&retrieverconf.RetrieverConf{
 						Kind:        "http",
