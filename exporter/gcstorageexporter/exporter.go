@@ -98,7 +98,7 @@ func (f *Exporter) Export(
 	}
 
 	for _, file := range files {
-		of, err := os.Open(outputDir + "/" + path.Clean(file.Name()))
+		of, err := os.Open(path.Clean(outputDir + "/" + file.Name()))
 		if err != nil {
 			logger.Error("[GCP Exporter] impossible to open the file",
 				slog.String("path", outputDir+"/"+file.Name()))
@@ -109,7 +109,7 @@ func (f *Exporter) Export(
 		// prepend the path
 		source := file.Name()
 		if f.Path != "" {
-			source = f.Path + "/" + path.Clean(file.Name())
+			source = path.Clean(f.Path + "/" + file.Name())
 		}
 
 		wc := client.Bucket(f.Bucket).Object(source).NewWriter(ctx)

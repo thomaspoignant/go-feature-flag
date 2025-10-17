@@ -95,7 +95,7 @@ func (f *Exporter) Export(
 
 	for _, file := range files {
 		fileName := file.Name()
-		of, err := os.Open(outputDir + "/" + path.Clean(fileName))
+		of, err := os.Open(path.Clean(outputDir + "/" + fileName))
 		if err != nil {
 			logger.Error(
 				"[Azure Exporter] impossible to open file",
