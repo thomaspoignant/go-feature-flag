@@ -249,7 +249,7 @@ func TestCmdEvaluate(t *testing.T) {
 			expectedResult: "testdata/res/check-gcs.json",
 		},
 		{
-			name: "should return configuration of GCS retriever when using check-mode",
+			name: "should return configuration of k8s retriever when using check-mode",
 			args: []string{
 				"--kind",
 				"configmap",

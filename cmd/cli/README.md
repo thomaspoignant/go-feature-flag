@@ -65,7 +65,8 @@ Supported values for `--kind` are:
 - `azureBlobStorage`
 - `postgresql`
 
-**Caution**: We do not support `redis` retriever as for now due to: https://github.com/thomaspoignant/go-feature-flag/issues/4023.
+**Caution**: We do not support `redis` retriever as for now due
+to: https://github.com/thomaspoignant/go-feature-flag/issues/4023.
 
 ### Retriever specific flags
 
@@ -86,8 +87,8 @@ the path to the remote file.
 | Flag       | Description                                                         | Default |
 |------------|---------------------------------------------------------------------|---------|
 | `--url`    | URL of the remote flag configuration file                           | ""      |
-| `--method` | HTTP method to access your configuration file on HTTP               | ""      |
-| `--body`   | Http body to access your configuration file on HTTP                 | GET     |
+| `--method` | HTTP method to access your configuration file on HTTP               | GET     |
+| `--body`   | Http body to access your configuration file on HTTP                 | ""      |
 | `--header` | Header to add to the request. Supported formats are `k:v` and `k=v` | ""      |
 
 #### GitHub

@@ -203,7 +203,6 @@ evaluate --kind postgres --table my-table --column my-column:my-column-type --fl
 		"column", nil, "Postgres column mapping of your configuration file on Postgres (may be repeated)")
 	_ = evaluateCmd.Flags().MarkDeprecated("github-token", "Use auth-token instead")
 	_ = evaluateCmd.Flags().MarkDeprecated("config", "Use path instead")
-	_ = evaluateCmd.Flags()
 	return evaluateCmd
 }
 
@@ -263,9 +262,9 @@ func runCheck(
 func parseHTTPHeaders() map[string][]string {
 	result := make(map[string][]string)
 	for _, h := range headers {
-		parts := strings.SplitN(h, "=", 2)
+		parts := strings.SplitN(h, ":", 2)
 		if len(parts) != 2 {
-			parts = strings.SplitN(h, ":", 2)
+			parts = strings.SplitN(h, "=", 2)
 		}
 		if len(parts) != 2 {
 			continue

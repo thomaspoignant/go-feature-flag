@@ -24,7 +24,6 @@ import (
 func Test_evaluate_Evaluate(t *testing.T) {
 	tests := []struct {
 		name           string
-		evaluate       evaluate
 		initEvaluate   func() (evaluate, error)
 		wantErr        assert.ErrorAssertionFunc
 		expectedErr    string
