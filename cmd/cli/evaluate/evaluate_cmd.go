@@ -1,13 +1,18 @@
 package evaluate
 
 import (
+	"context"
 	"encoding/json"
+	"log/slog"
 	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/thomaspoignant/go-feature-flag/cmd/cli/helper"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 	retrieverInit "github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf/init"
+	"github.com/thomaspoignant/go-feature-flag/retriever"
+	"github.com/thomaspoignant/go-feature-flag/utils"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
 var (
@@ -236,6 +241,16 @@ func runEvaluate(
 		return err
 	}
 
+	logger := &fflog.FFLogger{LeveledLogger: slog.Default()}
+
+	if err := tryInitializeStandard(context.Background(), r, logger); err != nil {
+		return err
+	}
+
+	if err := tryInitializeWithFlagset(context.Background(), r, logger, utils.DefaultFlagSetName); err != nil {
+		return err
+	}
+
 	e := evaluate{
 		retriever:     r,
 		fileFormat:    flagFormat,
@@ -270,6 +285,27 @@ func runCheck(
 
 	output.Add(string(detailed), helper.DefaultLevel)
 	output.PrintLines(cmd)
+	return nil
+}
+
+func tryInitializeStandard(ctx context.Context, r retriever.Retriever, logger *fflog.FFLogger) error {
+	if r, ok := r.(retriever.InitializableRetriever); ok {
+		if err := r.Init(ctx, logger); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func tryInitializeWithFlagset(
+	ctx context.Context, r retriever.Retriever, logger *fflog.FFLogger, flagset string) error {
+	if r, ok := r.(retriever.InitializableRetrieverWithFlagset); ok {
+		if err := r.Init(ctx, logger, &flagset); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
