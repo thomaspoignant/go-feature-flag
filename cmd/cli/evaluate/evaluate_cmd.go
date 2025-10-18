@@ -3,6 +3,7 @@ package evaluate
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"strings"
 
@@ -291,7 +292,7 @@ func runCheck(
 func tryInitializeStandard(ctx context.Context, r retriever.Retriever, logger *fflog.FFLogger) error {
 	if r, ok := r.(retriever.InitializableRetriever); ok {
 		if err := r.Init(ctx, logger); err != nil {
-			return err
+			return fmt.Errorf("impossible to init retriever: %v", err)
 		}
 	}
 
@@ -302,7 +303,7 @@ func tryInitializeWithFlagset(
 	ctx context.Context, r retriever.Retriever, logger *fflog.FFLogger, flagset string) error {
 	if r, ok := r.(retriever.InitializableRetrieverWithFlagset); ok {
 		if err := r.Init(ctx, logger, &flagset); err != nil {
-			return err
+			return fmt.Errorf("impossible to init flagset retriever: %v", err)
 		}
 	}
 

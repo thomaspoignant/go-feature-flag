@@ -15,6 +15,7 @@ func TestCmdEvaluate(t *testing.T) {
 		args           []string
 		wantErr        assert.ErrorAssertionFunc
 		expectedResult string
+		expectedErr    string
 	}{
 		{
 			name: "should return an error if flag does not exists",
@@ -289,6 +290,25 @@ func TestCmdEvaluate(t *testing.T) {
 			expectedResult: "testdata/res/check-mongodb.json",
 		},
 		{
+			name: "should return an initialization error if mongodb uri is invalid",
+			args: []string{
+				"--kind",
+				"mongodb",
+				"--uri",
+				"inv4lid",
+				"--collection",
+				"goff-collection",
+				"--database",
+				"goff-db",
+				"--ctx",
+				`{"targetingKey": "user-123"}`,
+				"--format",
+				"yaml",
+			},
+			wantErr:     assert.Error,
+			expectedErr: "impossible to init retriever: error parsing uri: scheme must be \"mongodb\" or \"mongodb+srv\"",
+		},
+		{
 			name: "should return configuration of Azure Blob Storage retriever when using check-mode",
 			args: []string{
 				"--kind",
@@ -332,6 +352,27 @@ func TestCmdEvaluate(t *testing.T) {
 			wantErr:        assert.NoError,
 			expectedResult: "testdata/res/check-postgres.json",
 		},
+		{
+			name: "should return an initialization error if postgres uri is invalid",
+			args: []string{
+				"--kind",
+				"postgresql",
+				"--uri",
+				"inv4lid",
+				"--table",
+				"goff-table",
+				"--column",
+				"flag_name: nonexistentcolumn",
+				"--column",
+				"config: config",
+				"--ctx",
+				`{"targetingKey": "user-123"}`,
+				"--format",
+				"yaml",
+			},
+			wantErr:     assert.Error,
+			expectedErr: "impossible to init flagset retriever: cannot parse `inv4lid`: failed to parse as keyword/value (invalid keyword/value)",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -356,6 +397,10 @@ func TestCmdEvaluate(t *testing.T) {
 				gotContent, err := os.ReadFile(stdOut.Name())
 				require.NoError(t, err)
 				assert.JSONEq(t, string(expectedContent), string(gotContent))
+			}
+
+			if tt.expectedErr != "" {
+				assert.EqualError(t, err, tt.expectedErr)
 			}
 		})
 	}
