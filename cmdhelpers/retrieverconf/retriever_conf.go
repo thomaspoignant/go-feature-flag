@@ -20,46 +20,45 @@ var DefaultRetrieverConfig = struct {
 
 // RetrieverConf contains all the field to configure a retriever
 type RetrieverConf struct {
-	Kind           RetrieverKind `mapstructure:"kind"           koanf:"kind"`
-	RepositorySlug string        `mapstructure:"repositorySlug" koanf:"repositoryslug"`
-	Branch         string        `mapstructure:"branch"         koanf:"branch"`
-	Path           string        `mapstructure:"path"           koanf:"path"`
+	Kind           RetrieverKind `mapstructure:"kind"             koanf:"kind" json:"Kind"`
+	RepositorySlug string        `mapstructure:"repositorySlug"   koanf:"repositoryslug" json:"RepositorySlug"`
+	Branch         string        `mapstructure:"branch"           koanf:"branch" json:"Branch"`
+	Path           string        `mapstructure:"path"             koanf:"path" json:"Path"`
 	// Deprecated: Please use AuthToken instead
-	GithubToken string              `mapstructure:"githubToken"    koanf:"githubtoken"`
-	URL         string              `mapstructure:"url"            koanf:"url"`
-	Timeout     int64               `mapstructure:"timeout"        koanf:"timeout"`
-	HTTPMethod  string              `mapstructure:"method"         koanf:"method"`
-	HTTPBody    string              `mapstructure:"body"           koanf:"body"`
-	HTTPHeaders map[string][]string `mapstructure:"headers"        koanf:"headers"`
-	Bucket      string              `mapstructure:"bucket"         koanf:"bucket"`
-	Object      string              `mapstructure:"object"         koanf:"object"`
-	Item        string              `mapstructure:"item"           koanf:"item"`
-	Namespace   string              `mapstructure:"namespace"      koanf:"namespace"`
-	ConfigMap   string              `mapstructure:"configmap"      koanf:"configmap"`
-	Key         string              `mapstructure:"key"            koanf:"key"`
-	BaseURL     string              `mapstructure:"baseUrl"        koanf:"baseurl"`
-	AuthToken   string              `mapstructure:"token"          koanf:"token"`
+	GithubToken string              `mapstructure:"githubToken"   koanf:"githubtoken" json:"GithubToken"`
+	URL         string              `mapstructure:"url"           koanf:"url" json:"URL"`
+	Timeout     int64               `mapstructure:"timeout"       koanf:"timeout" json:"Timeout"`
+	HTTPMethod  string              `mapstructure:"method"        koanf:"method" json:"HTTPMethod"`
+	HTTPBody    string              `mapstructure:"body"          koanf:"body" json:"HTTPBody"`
+	HTTPHeaders map[string][]string `mapstructure:"headers"       koanf:"headers" json:"HTTPHeaders"`
+	Bucket      string              `mapstructure:"bucket"        koanf:"bucket" json:"Bucket"`
+	Object      string              `mapstructure:"object"        koanf:"object" json:"Object"`
+	Item        string              `mapstructure:"item"          koanf:"item" json:"Item"`
+	Namespace   string              `mapstructure:"namespace"     koanf:"namespace" json:"Namespace"`
+	ConfigMap   string              `mapstructure:"configmap"     koanf:"configmap" json:"ConfigMap"`
+	Key         string              `mapstructure:"key"           koanf:"key" json:"Key"`
+	BaseURL     string              `mapstructure:"baseUrl"       koanf:"baseurl" json:"BaseURL"`
+	AuthToken   string              `mapstructure:"token"         koanf:"token" json:"AuthToken"`
 
 	// URI is used by
 	// - the postgresql retriever
 	// - the mongodb retriever
-	URI string `mapstructure:"uri"            koanf:"uri"`
+	URI string `mapstructure:"uri"  koanf:"uri"  json:"URI"`
 
 	// Table is used by
 	// - the postgresql retriever
-	Table string `mapstructure:"table"          koanf:"table"`
+	Table string `mapstructure:"table"  koanf:"table"  json:"Table"`
 
 	// Columns is used by
 	// - the postgresql retriever (it allows to use custom column names)
-	Columns map[string]string `mapstructure:"columns"        koanf:"columns"`
-
-	Database     string         `mapstructure:"database"       koanf:"database"`
-	Collection   string         `mapstructure:"collection"     koanf:"collection"`
-	RedisOptions *redis.Options `mapstructure:"redisOptions"   koanf:"redisOptions"`
-	RedisPrefix  string         `mapstructure:"redisPrefix"    koanf:"redisPrefix"`
-	AccountName  string         `mapstructure:"accountName"    koanf:"accountname"`
-	AccountKey   string         `mapstructure:"accountKey"     koanf:"accountkey"`
-	Container    string         `mapstructure:"container"      koanf:"container"`
+	Columns      map[string]string `mapstructure:"columns"        koanf:"columns"        json:"Columns"`
+	Database     string            `mapstructure:"database"       koanf:"database"       json:"Database"`
+	Collection   string            `mapstructure:"collection"     koanf:"collection"     json:"Collection"`
+	RedisOptions *redis.Options    `mapstructure:"redisOptions"   koanf:"redisOptions"   json:"RedisOptions"`
+	RedisPrefix  string            `mapstructure:"redisPrefix"    koanf:"redisPrefix"    json:"RedisPrefix"`
+	AccountName  string            `mapstructure:"accountName"    koanf:"accountname"    json:"AccountName"`
+	AccountKey   string            `mapstructure:"accountKey"     koanf:"accountkey"     json:"AccountKey"`
+	Container    string            `mapstructure:"container"      koanf:"container"      json:"Container"`
 }
 
 // IsValid validate the configuration of the retriever
