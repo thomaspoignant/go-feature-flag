@@ -95,8 +95,8 @@ the path to the remote file.
 
 | Flag                | Description                                                                                                       | Default |
 |---------------------|-------------------------------------------------------------------------------------------------------------------|---------|
-| `--repository-slug` |                                                                                                                   | ""      |
-| `--branch`          | Name of the repository                                                                                            | ""      |
+| `--repository-slug` | Name of the repository                                                                                            | ""      |
+| `--branch`          | Git branch name                                                                                                   | ""      |
 | `--auth-token`      | Authentication token to access your configuration file                                                            | ""      |
 | `--github-token`    | Authentication token to access your configuration file on GitHub<br/> (⚠️ deprecated, use `--auth-token` instead) | ""      |
 | `--path`            | Path to the remote flag configuration file inside github repository                                               | ""      |
@@ -107,7 +107,7 @@ the path to the remote file.
 |---------------------|---------------------------------------------------------------------|---------|
 | `--base-url`        | Base URL of your configuration file on Gitlab                       | ""      |
 | `--repository-slug` | Name of the repository                                              | ""      |
-| `--branch`          | Name of the repository                                              | ""      |
+| `--branch`          | Git branch name                                                     | ""      |
 | `--path`            | Path to the remote flag configuration file inside gitlab repository | ""      |
 
 #### BitBucket
@@ -116,7 +116,7 @@ the path to the remote file.
 |---------------------|------------------------------------------------------------------------|---------|
 | `--base-url`        | Base URL of your configuration file on BitBucket                       | ""      |
 | `--repository-slug` | Name of the repository                                                 | ""      |
-| `--branch`          | Name of the repository                                                 | ""      |
+| `--branch`          | Git branch name                                                        | ""      |
 | `--path`            | Path to the remote flag configuration file inside bitbucket repository | ""      |
 
 #### S3
