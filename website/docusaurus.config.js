@@ -24,7 +24,6 @@ const config = {
     mermaid: true,
   },
   plugins: [
-    require('./plugins/tailwind-plugin.cjs'),
     [
       '@docusaurus/plugin-client-redirects',
       {
@@ -198,6 +197,7 @@ const config = {
         ],
       },
     ],
+    require('./plugins/tailwind-plugin.cjs'),
   ],
 
   customFields: {
