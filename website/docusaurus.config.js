@@ -4,6 +4,7 @@
 const {sdk} = require('./data/sdk');
 const lightCodeTheme = require('prism-react-renderer').themes.github;
 const darkCodeTheme = require('prism-react-renderer').themes.dracula;
+const {generateSdksDropdownHTML} = require('./src/components/navbar/sdks');
 
 /** @type {import("@docusaurus/types").Config} */
 const config = {
@@ -23,6 +24,7 @@ const config = {
     mermaid: true,
   },
   plugins: [
+    require('./plugins/tailwind-plugin.cjs'),
     [
       '@docusaurus/plugin-client-redirects',
       {
@@ -196,17 +198,6 @@ const config = {
         ],
       },
     ],
-    async function myPlugin(context, options) {
-      return {
-        name: 'docusaurus-tailwindcss',
-        configurePostCss(postcssOptions) {
-          // Appends TailwindCSS and AutoPrefixer.
-          postcssOptions.plugins.push(require('tailwindcss'));
-          postcssOptions.plugins.push(require('autoprefixer'));
-          return postcssOptions;
-        },
-      };
-    },
   ],
 
   customFields: {
@@ -292,6 +283,18 @@ const config = {
           src: 'img/logo/navbar.png',
         },
         items: [
+          {
+            label: 'SDKs',
+            type: 'dropdown',
+            className: 'dyte-dropdown',
+            items: [
+              {
+                type: 'html',
+                value: generateSdksDropdownHTML(),
+                className: 'dyte-dropdown',
+              },
+            ],
+          },
           {
             position: 'left',
             label: 'Product',
