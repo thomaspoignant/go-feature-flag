@@ -18,9 +18,9 @@ default_targeting_key = "undefined-targetingKey"
 
 class DataCollectorHook(Hook):
     # _thread_stopper is used to stop the background task when we shut down the hook
-    _thread_stopper: Event = None
+    _thread_stopper: Optional[Event] = None
     # _thread_data_collector is the thread used to call the relay proxy to collect data
-    _thread_data_collector: Thread = None
+    _thread_data_collector: Optional[Thread] = None
     # _options is the options of the provider
     _options: Optional[GoFeatureFlagOptions] = None
     # _data_collector_endpoint is the endpoint of the relay proxy
