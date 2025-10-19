@@ -7,7 +7,7 @@ module.exports = {
   },
   darkMode: ['class', '[data-theme="dark"]'],
   content: {
-    files: ['./src/**/*.{js,jsx,ts,tsx,md,mdx,html}', './docs/**/*.{md,mdx}'],
+    files: ['./src/**/*.{js,jsx,ts,tsx,md,mdx}', './docs/**/*.{md,mdx}'],
     extract: {
       css: () => [], // Don't purge anything from CSS files
     },
