@@ -50,6 +50,10 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name: ""
 
+pdb:
+  enable: false
+  minAvailable: 1
+
 # -- Pod annotations to add to the deployment
 podAnnotations: {}
 
