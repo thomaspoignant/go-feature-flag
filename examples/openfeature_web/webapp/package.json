@@ -46,7 +46,7 @@
     "onchange": "^7.1.0",
     "postcss-cli": "^11.0.1",
     "postcss-scss": "^4.0.9",
-    "posthtml": "^0.16.6",
+    "posthtml": "^0.16.7",
     "posthtml-cli": "^0.10.0",
     "posthtml-modules": "^0.9.1",
     "stylelint": "^16.25.0",
