@@ -8,7 +8,7 @@ require (
 	cloud.google.com/go/storage v1.57.0
 	dario.cat/mergo v1.0.2
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.13.0
-	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.6.2
+	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.6.3
 	github.com/BurntSushi/toml v1.5.0
 	github.com/IBM/sarama v1.46.2
 	github.com/atc0005/go-teams-notify/v2 v2.13.0
@@ -45,7 +45,7 @@ require (
 	github.com/luci/go-render v0.0.0-20160219211803-9a04cc21af0f
 	github.com/pablor21/echo-etag/v4 v4.0.5
 	github.com/prometheus/client_golang v1.23.2
-	github.com/pterm/pterm v0.12.81
+	github.com/pterm/pterm v0.12.82
 	github.com/r3labs/diff/v3 v3.0.2
 	github.com/redis/go-redis/v9 v9.14.1
 	github.com/samber/slog-zap/v2 v2.6.2
