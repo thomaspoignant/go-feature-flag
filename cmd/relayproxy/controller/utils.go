@@ -60,6 +60,11 @@ func userRequestToUser(u *model.UserRequest) (ffcontext.Context, error) {
 			"userRequestToUser: impossible to convert user, userRequest nil",
 		)
 	}
-	u.Custom["anonymous"] = u.Anonymous
-	return utils.ConvertEvaluationCtxFromRequest(u.Key, u.Custom), nil
+	custom := u.Custom
+	if custom == nil {
+		custom = make(map[string]interface{})
+	}
+
+	custom["anonymous"] = u.Anonymous
+	return utils.ConvertEvaluationCtxFromRequest(u.Key, custom), nil
 }
