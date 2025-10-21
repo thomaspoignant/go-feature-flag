@@ -96,8 +96,6 @@ class DataCollectorHook(Hook):
         self._thread_stopper.set()
         self._thread_data_collector.join()
         self._collect_data()
-        self._thread_stopper.clear()
-        self._event_queue = []
 
     def background_task(self):
         while not self._thread_stopper.is_set():
