@@ -1,0 +1,15 @@
+{{ if .Values.pdb.enable }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ template "relay-proxy.fullname" . }}
+spec:
+  {{- if .Values.pdb.maxUnavailable }}
+  maxUnavailable: {{ .Values.pdb.maxUnavailable }}
+  {{- else }}
+  minAvailable: {{ .Values.pdb.minAvailable | default 1 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      name: {{ template "relay-proxy.fullname" . }}
+{{ end }}
