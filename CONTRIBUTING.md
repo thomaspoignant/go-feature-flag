@@ -111,6 +111,10 @@ To launch the tests please run:
 make test
 ```
 
+### AI review
+The repository is ready to receive gemini reviews.  
+If you want a fast feedback loop you can add a comment `/gemini review` in your pull request and gemini will review the pull request.
+
 ## 🤔 Where can I ask questions about the project?
 
 If you want to contribute and you have any questions you can use different ways to contact us.
