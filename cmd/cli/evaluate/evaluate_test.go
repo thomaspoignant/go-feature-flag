@@ -1,59 +1,100 @@
 package evaluate
 
 import (
+	"context"
+	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
+	retrieverInit "github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf/init"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/model"
+	"github.com/thomaspoignant/go-feature-flag/retriever/bitbucketretriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever/gcstorageretriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever/githubretriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever/gitlabretriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever/httpretriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever/s3retrieverv2"
+	"github.com/thomaspoignant/go-feature-flag/testutils"
+	"github.com/thomaspoignant/go-feature-flag/testutils/mock"
+	"golang.org/x/oauth2/google"
+	"google.golang.org/api/option"
 )
 
 func Test_evaluate_Evaluate(t *testing.T) {
 	tests := []struct {
 		name           string
-		evaluate       evaluate
+		initEvaluate   func() (evaluate, error)
 		wantErr        assert.ErrorAssertionFunc
 		expectedErr    string
 		expectedResult map[string]model.RawVarResult
 	}{
 		{
 			name: "Should error is config file does not exist",
-			evaluate: evaluate{
-				config:        "testdata/invalid.yaml",
-				fileFormat:    "yaml",
-				flag:          "test-flag",
-				evaluationCtx: `{"targetingKey": "user-123"}`,
+			initEvaluate: func() (evaluate, error) {
+				r, err := retrieverInit.InitRetriever(&retrieverconf.RetrieverConf{
+					Kind: "file",
+					Path: "testdata/invalid.yaml",
+				})
+				if err != nil {
+					return evaluate{}, err
+				}
+				return evaluate{
+					retriever:     r,
+					fileFormat:    "yaml",
+					flag:          "test-flag",
+					evaluationCtx: `{"targetingKey": "user-123"}`,
+				}, nil
 			},
 			wantErr:     assert.Error,
 			expectedErr: "impossible to initialize the retrievers, please check your configuration: impossible to retrieve the flags, please check your configuration: open testdata/invalid.yaml: no such file or directory",
 		},
 		{
 			name: "Should error if no evaluation context provided",
-			evaluate: evaluate{
-				config:     "testdata/flag.goff.yaml",
-				fileFormat: "yaml",
-				flag:       "test-flag",
+			initEvaluate: func() (evaluate, error) {
+				r, err := retrieverInit.InitRetriever(&retrieverconf.RetrieverConf{Kind: "file", Path: "testdata/flag.goff.yaml"})
+				if err != nil {
+					return evaluate{}, err
+				}
+				return evaluate{
+					retriever:  r,
+					fileFormat: "yaml",
+					flag:       "test-flag",
+				}, nil
 			},
 			wantErr:     assert.Error,
 			expectedErr: "invalid evaluation context (missing targeting key)",
 		},
 		{
 			name: "Should error if evaluation context provided has no targeting key",
-			evaluate: evaluate{
-				config:        "testdata/flag.goff.yaml",
-				fileFormat:    "yaml",
-				flag:          "test-flag",
-				evaluationCtx: `{"id": "user-123"}`,
+			initEvaluate: func() (evaluate, error) {
+				r, err := retrieverInit.InitRetriever(&retrieverconf.RetrieverConf{Kind: "file", Path: "testdata/flag.goff.yaml"})
+				if err != nil {
+					return evaluate{}, err
+				}
+				return evaluate{
+					retriever:     r,
+					fileFormat:    "yaml",
+					flag:          "test-flag",
+					evaluationCtx: `{"id": "user-123"}`,
+				}, nil
 			},
 			wantErr:     assert.Error,
 			expectedErr: "invalid evaluation context (missing targeting key)",
 		},
 		{
 			name: "Should evaluate a single flag if flag name is provided",
-			evaluate: evaluate{
-				config:        "testdata/flag.goff.yaml",
-				fileFormat:    "yaml",
-				flag:          "test-flag",
-				evaluationCtx: `{"targetingKey": "user-123"}`,
+			initEvaluate: func() (evaluate, error) {
+				r, err := retrieverInit.InitRetriever(&retrieverconf.RetrieverConf{Kind: "file", Path: "testdata/flag.goff.yaml"})
+				if err != nil {
+					return evaluate{}, err
+				}
+				return evaluate{
+					retriever:     r,
+					fileFormat:    "yaml",
+					flag:          "test-flag",
+					evaluationCtx: `{"targetingKey": "user-123"}`,
+				}, nil
 			},
 			wantErr: assert.NoError,
 			expectedResult: map[string]model.RawVarResult{
@@ -76,10 +117,16 @@ func Test_evaluate_Evaluate(t *testing.T) {
 		},
 		{
 			name: "Should evaluate all flags if flag name is not provided",
-			evaluate: evaluate{
-				config:        "testdata/flag.goff.yaml",
-				fileFormat:    "yaml",
-				evaluationCtx: `{"targetingKey": "user-123"}`,
+			initEvaluate: func() (evaluate, error) {
+				r, err := retrieverInit.InitRetriever(&retrieverconf.RetrieverConf{Kind: "file", Path: "testdata/flag.goff.yaml"})
+				if err != nil {
+					return evaluate{}, err
+				}
+				return evaluate{
+					retriever:     r,
+					fileFormat:    "yaml",
+					evaluationCtx: `{"targetingKey": "user-123"}`,
+				}, nil
 			},
 			wantErr: assert.NoError,
 			expectedResult: map[string]model.RawVarResult{
@@ -111,10 +158,270 @@ func Test_evaluate_Evaluate(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "Should evaluate a flag from a github repository",
+			initEvaluate: func() (evaluate, error) {
+				r, err := retrieverInit.InitRetriever(
+					&retrieverconf.RetrieverConf{
+						Kind:           "github",
+						RepositorySlug: "thomaspoignant/go-feature-flag",
+						GithubToken:    "XXX_GH_TOKEN",
+						Path:           "testdata/flag-config.yaml"})
+				if err != nil {
+					return evaluate{}, err
+				}
+
+				gitHubRetriever, _ := r.(*githubretriever.Retriever)
+				gitHubRetriever.SetHTTPClient(&mock.HTTP{})
+
+				return evaluate{
+					retriever:     gitHubRetriever,
+					fileFormat:    "yaml",
+					flag:          "test-flag",
+					evaluationCtx: `{"targetingKey": "user-123"}`,
+				}, nil
+			},
+			wantErr: assert.NoError,
+			expectedResult: map[string]model.RawVarResult{
+				"test-flag": {
+					TrackEvents:   true,
+					VariationType: "false_var",
+					Failed:        false,
+					Version:       "",
+					Reason:        "DEFAULT",
+					ErrorCode:     "",
+					ErrorDetails:  "",
+					Value:         false,
+					Cacheable:     true,
+					Metadata:      nil,
+				},
+			},
+		},
+		{
+			name: "Should evaluate a flag from a gitlab repository",
+			initEvaluate: func() (evaluate, error) {
+				r, err := retrieverInit.InitRetriever(
+					&retrieverconf.RetrieverConf{
+						Kind:           "gitlab",
+						BaseURL:        "https://gitlab.com/api/v4/",
+						RepositorySlug: "thomaspoignant/go-feature-flag",
+						AuthToken:      "XXX",
+						Path:           "testdata/flag-config.yaml"})
+				if err != nil {
+					return evaluate{}, err
+				}
+
+				gitLabRetriever, _ := r.(*gitlabretriever.Retriever)
+				gitLabRetriever.SetHTTPClient(&mock.HTTP{})
+
+				return evaluate{
+					retriever:     gitLabRetriever,
+					fileFormat:    "yaml",
+					flag:          "test-flag",
+					evaluationCtx: `{"targetingKey": "user-123"}`,
+				}, nil
+			},
+			wantErr: assert.NoError,
+			expectedResult: map[string]model.RawVarResult{
+				"test-flag": {
+					TrackEvents:   true,
+					VariationType: "false_var",
+					Failed:        false,
+					Version:       "",
+					Reason:        "DEFAULT",
+					ErrorCode:     "",
+					ErrorDetails:  "",
+					Value:         false,
+					Cacheable:     true,
+					Metadata:      nil,
+				},
+			},
+		},
+		{
+			name: "Should evaluate a flag from a bitbucket repository",
+			initEvaluate: func() (evaluate, error) {
+				r, err := retrieverInit.InitRetriever(
+					&retrieverconf.RetrieverConf{
+						Kind:           "bitbucket",
+						BaseURL:        "https://bitbucket.com/api/v4/",
+						RepositorySlug: "thomaspoignant/go-feature-flag",
+						AuthToken:      "XXX",
+						Path:           "testdata/flag-config.yaml"})
+				if err != nil {
+					return evaluate{}, err
+				}
+
+				bitBucketRetriever, _ := r.(*bitbucketretriever.Retriever)
+				bitBucketRetriever.SetHTTPClient(&mock.HTTP{})
+
+				return evaluate{
+					retriever:     bitBucketRetriever,
+					fileFormat:    "yaml",
+					flag:          "test-flag",
+					evaluationCtx: `{"targetingKey": "user-123"}`,
+				}, nil
+			},
+			wantErr: assert.NoError,
+			expectedResult: map[string]model.RawVarResult{
+				"test-flag": {
+					TrackEvents:   true,
+					VariationType: "false_var",
+					Failed:        false,
+					Version:       "",
+					Reason:        "DEFAULT",
+					ErrorCode:     "",
+					ErrorDetails:  "",
+					Value:         false,
+					Cacheable:     true,
+					Metadata:      nil,
+				},
+			},
+		},
+		{
+			name: "Should evaluate a flag from a S3 repository",
+			initEvaluate: func() (evaluate, error) {
+				downloader := &testutils.S3ManagerV2Mock{
+					TestDataLocation: "./testdata",
+				}
+
+				r, err := retrieverInit.InitRetriever(
+					&retrieverconf.RetrieverConf{
+						Kind:   "s3",
+						Bucket: "Bucket",
+						Item:   "valid",
+					})
+
+				if err != nil {
+					return evaluate{}, err
+				}
+
+				s3Retriever, _ := r.(*s3retrieverv2.Retriever)
+				s3Retriever.SetDownloader(downloader)
+
+				_ = s3Retriever.Init(context.Background(), nil)
+
+				return evaluate{
+					retriever:     s3Retriever,
+					fileFormat:    "yaml",
+					flag:          "test-flag",
+					evaluationCtx: `{"targetingKey": "user-123"}`,
+				}, nil
+			},
+			wantErr: assert.NoError,
+			expectedResult: map[string]model.RawVarResult{
+				"test-flag": {
+					TrackEvents:   true,
+					VariationType: "Default",
+					Failed:        false,
+					Version:       "",
+					Reason:        "DEFAULT",
+					ErrorCode:     "",
+					ErrorDetails:  "",
+					Value:         false,
+					Cacheable:     true,
+					Metadata: map[string]interface{}{"description": "this is a simple feature flag",
+						"issue-link": "https://jira.xxx/GOFF-01"},
+				},
+			},
+		},
+		{
+			name: "Should evaluate a flag from a HTTP endpoint",
+			initEvaluate: func() (evaluate, error) {
+				r, err := retrieverInit.InitRetriever(
+					&retrieverconf.RetrieverConf{
+						Kind:        "http",
+						URL:         "http://localhost.example/file",
+						HTTPMethod:  http.MethodGet,
+						HTTPBody:    "",
+						HTTPHeaders: nil,
+					})
+
+				if err != nil {
+					return evaluate{}, err
+				}
+
+				httpRetriever, _ := r.(*httpretriever.Retriever)
+				httpRetriever.SetHTTPClient(&mock.HTTP{})
+
+				return evaluate{
+					retriever:     httpRetriever,
+					fileFormat:    "yaml",
+					flag:          "test-flag",
+					evaluationCtx: `{"targetingKey": "user-123"}`,
+				}, nil
+			},
+			wantErr: assert.NoError,
+			expectedResult: map[string]model.RawVarResult{
+				"test-flag": {
+					TrackEvents:   true,
+					VariationType: "false_var",
+					Failed:        false,
+					Version:       "",
+					Reason:        "DEFAULT",
+					ErrorCode:     "",
+					ErrorDetails:  "",
+					Value:         false,
+					Cacheable:     true,
+					Metadata:      nil,
+				},
+			},
+		},
+		{
+			name: "Should evaluate a flag from a GCS",
+			initEvaluate: func() (evaluate, error) {
+				mockedStorage := testutils.NewMockedGCS(t)
+				mockedStorage.WithFiles(t, "flags", map[string]string{"testdata/flag-config.yaml": "flag-config.yaml"})
+
+				r, err := retrieverInit.InitRetriever(
+					&retrieverconf.RetrieverConf{
+						Kind:   "googleStorage",
+						Bucket: "flags",
+						Object: "flag-config.yaml",
+					})
+
+				if err != nil {
+					return evaluate{}, err
+				}
+
+				gcsRetriever, _ := r.(*gcstorageretriever.Retriever)
+				gcsRetriever.SetOptions([]option.ClientOption{
+					option.WithCredentials(&google.Credentials{}),
+					option.WithHTTPClient(mockedStorage.Server.HTTPClient()),
+				})
+
+				return evaluate{
+					retriever:     gcsRetriever,
+					fileFormat:    "yaml",
+					flag:          "test-flag",
+					evaluationCtx: `{"targetingKey": "user-123"}`,
+				}, nil
+			},
+			wantErr: assert.NoError,
+			expectedResult: map[string]model.RawVarResult{
+				"test-flag": {
+					TrackEvents:   true,
+					VariationType: "Default",
+					Failed:        false,
+					Version:       "",
+					Reason:        "DEFAULT",
+					ErrorCode:     "",
+					ErrorDetails:  "",
+					Value:         false,
+					Cacheable:     true,
+					Metadata: map[string]interface{}{"description": "this is a simple feature flag",
+						"issue-link": "https://jira.xxx/GOFF-01"},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			m, err := tt.evaluate.Evaluate()
+			e, err := tt.initEvaluate()
+			if err != nil {
+				tt.wantErr(t, err)
+				return
+			}
+			m, err := e.Evaluate()
 			tt.wantErr(t, err)
 
 			if tt.expectedErr != "" {

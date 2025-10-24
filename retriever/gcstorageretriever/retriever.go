@@ -33,6 +33,10 @@ type Retriever struct {
 	obj *storage.ObjectHandle
 }
 
+func (retriever *Retriever) SetOptions(options []option.ClientOption) {
+	retriever.Options = options
+}
+
 // Retrieve is the function in charge of fetching the flag configuration.
 func (retriever *Retriever) Retrieve(ctx context.Context) (content []byte, err error) {
 	if retriever.obj == nil {
