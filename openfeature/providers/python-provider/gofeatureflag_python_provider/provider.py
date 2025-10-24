@@ -1,3 +1,4 @@
+import atexit
 import json
 import pylru
 import urllib3
@@ -88,8 +89,9 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
         self._data_collector_hook.initialize()
         # start the websocket thread
         if self.options.disable_cache_invalidation is False:
-            self._ws_thread = Thread(target=self.run_websocket)
+            self._ws_thread = Thread(target=self.run_websocket, daemon=True)
             self._ws_thread.start()
+        atexit.register(self.shutdown)
 
     def shutdown(self):
         if self.options.disable_cache_invalidation is False:
