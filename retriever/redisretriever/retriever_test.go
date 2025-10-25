@@ -4,15 +4,16 @@
 package redisretriever_test
 
 import (
+	"os"
+	"path/filepath"
+	"testing"
+
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
 	"github.com/testcontainers/testcontainers-go"
 	testcontainerRedis "github.com/testcontainers/testcontainers-go/modules/redis"
 	"github.com/thomaspoignant/go-feature-flag/retriever/redisretriever"
 	"golang.org/x/net/context"
-	"os"
-	"path/filepath"
-	"testing"
 )
 
 var redisContainerList = make(map[string]*testcontainerRedis.RedisContainer)
@@ -119,6 +120,32 @@ func stopRedis(t *testing.T, testName string) {
 			assert.NoError(t, err)
 		}
 	}
+}
+
+func Test_Redis_Shutdown(t *testing.T) {
+	options := startRedisAndAddData(t, t.Name(), []string{"flag1.json"}, "")
+	defer stopRedis(t, t.Name())
+
+	t.Run("shutdown after successful init", func(t *testing.T) {
+		retriever := redisretriever.Retriever{
+			Options: options,
+		}
+
+		err := retriever.Init(context.Background(), nil)
+		assert.NoError(t, err)
+
+		err = retriever.Shutdown(context.Background())
+		assert.NoError(t, err)
+	})
+
+	t.Run("shutdown without init (client is nil)", func(t *testing.T) {
+		retriever := &redisretriever.Retriever{
+			Options: options,
+		}
+
+		err := retriever.Shutdown(context.Background())
+		assert.NoError(t, err)
+	})
 }
 
 func readFile(t *testing.T, file string) (string, []byte) {

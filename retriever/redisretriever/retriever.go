@@ -47,8 +47,10 @@ func (r *Retriever) Status() retriever.Status {
 
 // Shutdown gracefully shutdown the provider and set the status as not ready.
 func (r *Retriever) Shutdown(ctx context.Context) error {
-	r.client.Shutdown(ctx)
-	return nil
+	if r.client == nil {
+		return nil
+	}
+	return r.client.Close()
 }
 
 // Retrieve is the function in charge of fetching the flag configuration.
