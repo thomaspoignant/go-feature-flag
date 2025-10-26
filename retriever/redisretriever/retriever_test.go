@@ -140,7 +140,7 @@ func Test_Redis_Shutdown(t *testing.T) {
 	defer stopRedis(t, t.Name())
 
 	t.Run("should close connection successfully", func(t *testing.T) {
-		retriever := redisretriever.Retriever{
+		retriever := &redisretriever.Retriever{
 			Options: options,
 		}
 
@@ -162,7 +162,7 @@ func Test_Redis_Shutdown(t *testing.T) {
 	})
 
 	t.Run("allow multiple calls idempotently", func(t *testing.T) {
-		retriever := redisretriever.Retriever{
+		retriever := &redisretriever.Retriever{
 			Options: options,
 		}
 
