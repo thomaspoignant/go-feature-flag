@@ -3,6 +3,13 @@
 ## [1.47.0](https://github.com/thomaspoignant/go-feature-flag/compare/v1.47.0...v1.47.0) (2025-10-26)
 
 
+### 🔧 Chores
+
+* fix build for wasi and wasm ([#4150](https://github.com/thomaspoignant/go-feature-flag/issues/4150)) ([833980b](https://github.com/thomaspoignant/go-feature-flag/commit/833980be44467d1c17212823f4966cbfe69bbbe8))
+
+## [1.47.0](https://github.com/thomaspoignant/go-feature-flag/compare/v1.47.0...v1.47.0) (2025-10-26)
+
+
 ### 🚀 New Features
 
 * filter type of releases in the badge ([#4101](https://github.com/thomaspoignant/go-feature-flag/issues/4101)) ([222c947](https://github.com/thomaspoignant/go-feature-flag/commit/222c9474587a79d233260b176e1e3277896087e5))
