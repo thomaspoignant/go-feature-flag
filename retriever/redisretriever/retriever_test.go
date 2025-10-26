@@ -146,6 +146,7 @@ func Test_Redis_Shutdown(t *testing.T) {
 
 		err := retriever.Init(context.Background(), nil)
 		assert.NoError(t, err)
+		assert.Equal(t, ret.RetrieverReady, retriever.Status())
 
 		err = retriever.Shutdown(context.Background())
 		assert.NoError(t, err)
@@ -159,6 +160,7 @@ func Test_Redis_Shutdown(t *testing.T) {
 
 		err := retriever.Shutdown(context.Background())
 		assert.NoError(t, err)
+		assert.Equal(t, ret.RetrieverNotReady, retriever.Status())
 	})
 
 	t.Run("allow multiple calls idempotently", func(t *testing.T) {
@@ -168,12 +170,93 @@ func Test_Redis_Shutdown(t *testing.T) {
 
 		err := retriever.Init(context.Background(), nil)
 		assert.NoError(t, err)
+		assert.Equal(t, ret.RetrieverReady, retriever.Status())
+
+		// First shutdown
+		err = retriever.Shutdown(context.Background())
+		assert.NoError(t, err)
+		assert.Equal(t, ret.RetrieverNotReady, retriever.Status())
+
+		// Second shutdown should also succeed
+		err = retriever.Shutdown(context.Background())
+		assert.NoError(t, err)
+		assert.Equal(t, ret.RetrieverNotReady, retriever.Status())
+	})
+
+	t.Run("should handle nil retriever gracefully", func(t *testing.T) {
+		var retriever *redisretriever.Retriever
+		err := retriever.Shutdown(context.Background())
+		assert.NoError(t, err)
+	})
+
+	t.Run("should handle nil client gracefully", func(t *testing.T) {
+		retriever := &redisretriever.Retriever{
+			Options: options,
+			client:  nil,
+		}
+
+		err := retriever.Shutdown(context.Background())
+		assert.NoError(t, err)
+		assert.Equal(t, ret.RetrieverNotReady, retriever.Status())
+	})
+
+	t.Run("should handle shutdown when retriever is in error state", func(t *testing.T) {
+		// Create retriever with invalid options to force error state
+		badOptions := &redis.Options{
+			Addr: "invalid-address:6379",
+		}
+		retriever := &redisretriever.Retriever{
+			Options: badOptions,
+		}
+
+		// Init should fail and set error status
+		err := retriever.Init(context.Background(), nil)
+		assert.Error(t, err)
+		assert.Equal(t, ret.RetrieverError, retriever.Status())
+
+		// Shutdown should still work even in error state
+		err = retriever.Shutdown(context.Background())
+		assert.NoError(t, err)
+		assert.Equal(t, ret.RetrieverNotReady, retriever.Status())
+	})
+
+	t.Run("should handle concurrent shutdown calls", func(t *testing.T) {
+		retriever := &redisretriever.Retriever{
+			Options: options,
+		}
+
+		err := retriever.Init(context.Background(), nil)
+		assert.NoError(t, err)
+
+		// Start multiple goroutines calling shutdown
+		done := make(chan error, 3)
+		for i := 0; i < 3; i++ {
+			go func() {
+				done <- retriever.Shutdown(context.Background())
+			}()
+		}
+
+		// All shutdown calls should succeed
+		for i := 0; i < 3; i++ {
+			err := <-done
+			assert.NoError(t, err)
+		}
+
+		assert.Equal(t, ret.RetrieverNotReady, retriever.Status())
+	})
+
+	t.Run("should verify status is set to not ready after shutdown", func(t *testing.T) {
+		retriever := &redisretriever.Retriever{
+			Options: options,
+		}
+
+		err := retriever.Init(context.Background(), nil)
+		assert.NoError(t, err)
+		assert.Equal(t, ret.RetrieverReady, retriever.Status())
 
 		err = retriever.Shutdown(context.Background())
 		assert.NoError(t, err)
-
-		err = retriever.Shutdown(context.Background())
-		assert.NoError(t, err)
+		assert.Equal(t, ret.RetrieverNotReady, retriever.Status())
 	})
 }
 
