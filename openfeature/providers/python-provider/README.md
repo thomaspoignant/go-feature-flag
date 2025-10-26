@@ -1,6 +1,6 @@
 # GO Feature Flag Python Provider
 
-GO Feature Flag provider allows you to connect to your GO Feature Flag instance.  
+GO Feature Flag provider allows you to connect to your GO Feature Flag instance.
 
 [GO Feature Flag](https://gofeatureflag.org) believes in simplicity and offers a simple and lightweight solution to use feature flags.  
 Our focus is to avoid any complex infrastructure work to use GO Feature Flag.
@@ -41,9 +41,8 @@ client = api.get_client(domain="test-client")
 
 This code block explains how you can create an `EvaluationContext` and use it to evaluate your flag.
 
-
 > In this example we are evaluating a `boolean` flag, but other types are available.
-> 
+>
 > **Refer to the [Open Feature documentation](https://docs.openfeature.dev/docs/reference/concepts/evaluation-api#basic-evaluation) to know more about it.**
 
 ```python
@@ -69,7 +68,7 @@ admin_flag = client.get_boolean_value(
           default_value=default_value,
           evaluation_context=ctx,
       )
-      
+
 if admin_flag:
   # flag "flag-only-for-admin" is true for the user
 else:

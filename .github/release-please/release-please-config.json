@@ -79,7 +79,8 @@
             "extra-files": [
                 "pyproject.toml",
                 "README.md"
-            ]
+            ],
+            "release-as": "v0.5.0"
         }
     }
 }
