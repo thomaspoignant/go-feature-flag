@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/testcontainers/testcontainers-go"
 	testcontainerRedis "github.com/testcontainers/testcontainers-go/modules/redis"
+	ret "github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/redisretriever"
 	"golang.org/x/net/context"
 )
@@ -126,7 +127,7 @@ func Test_Redis_Shutdown(t *testing.T) {
 	options := startRedisAndAddData(t, t.Name(), []string{"flag1.json"}, "")
 	defer stopRedis(t, t.Name())
 
-	t.Run("shutdown after successful init", func(t *testing.T) {
+	t.Run("should close connection successfully", func(t *testing.T) {
 		retriever := redisretriever.Retriever{
 			Options: options,
 		}
@@ -136,14 +137,30 @@ func Test_Redis_Shutdown(t *testing.T) {
 
 		err = retriever.Shutdown(context.Background())
 		assert.NoError(t, err)
+		assert.Equal(t, ret.RetrieverNotReady, retriever.Status())
 	})
 
-	t.Run("shutdown without init (client is nil)", func(t *testing.T) {
+	t.Run("should succeed when called before init", func(t *testing.T) {
 		retriever := &redisretriever.Retriever{
 			Options: options,
 		}
 
 		err := retriever.Shutdown(context.Background())
+		assert.NoError(t, err)
+	})
+
+	t.Run("allow multiple calls idempotently", func(t *testing.T) {
+		retriever := redisretriever.Retriever{
+			Options: options,
+		}
+
+		err := retriever.Init(context.Background(), nil)
+		assert.NoError(t, err)
+
+		err = retriever.Shutdown(context.Background())
+		assert.NoError(t, err)
+
+		err = retriever.Shutdown(context.Background())
 		assert.NoError(t, err)
 	})
 }
