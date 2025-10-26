@@ -3,6 +3,7 @@ package redisretriever
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -42,6 +43,9 @@ func (r *Retriever) Init(ctx context.Context, _ *fflog.FFLogger) error {
 
 // Status is the function returning the internal state of the retriever.
 func (r *Retriever) Status() retriever.Status {
+	if r == nil || r.status == "" {
+		return retriever.RetrieverNotReady
+	}
 	return r.status
 }
 
@@ -50,7 +54,15 @@ func (r *Retriever) Shutdown(ctx context.Context) error {
 	if r.client == nil {
 		return nil
 	}
-	return r.client.Close()
+	err := r.client.Close()
+	r.client = nil
+
+	if err != nil && !errors.Is(err, redis.ErrClosed) {
+		r.status = retriever.RetrieverError
+		return err
+	}
+	r.status = retriever.RetrieverNotReady
+	return nil
 }
 
 // Retrieve is the function in charge of fetching the flag configuration.
