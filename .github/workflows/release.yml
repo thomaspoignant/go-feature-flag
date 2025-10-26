@@ -2,11 +2,16 @@ name: Release
 on:
   workflow_call:
     inputs:
-      version: { type: string, required: true }
-    secrets:  
-      DOCKER_USERNAME: { required: true }
-      DOCKER_PASSWORD: { required: true }
-      PERSONAL_GITHUB_TOKEN: { required: true }
+      version:
+        type: string
+        required: true
+    secrets:
+      DOCKER_USERNAME:
+        required: true
+      DOCKER_PASSWORD:
+        required: true
+      PERSONAL_GITHUB_TOKEN:
+        required: true
 
 permissions:
   contents: read
@@ -49,6 +54,9 @@ jobs:
     env:
       VERSION: ${{ inputs.version }}
     steps:
+      - name: Echo Release wasm version
+        run: |
+          echo "Release wasm version: ${{ env.VERSION }}"
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
@@ -61,14 +69,14 @@ jobs:
       - uses: acifani/setup-tinygo@db56321a62b9a67922bb9ac8f9d085e218807bb3 # v2.0.1
         with:
           tinygo-version: "0.37.0"
-      - run: ./.github/ci-scripts/release_wasm.sh ${VERSION}
+      - run: ./.github/ci-scripts/release_wasm.sh ${{ env.VERSION }}
       - name: Upload assets
         uses: softprops/action-gh-release@6da8fa9354ddfdc4aeace5fc48d7f679b5214090 # v2.4.1
         if: github.ref_type == 'tag'
         with:
           files: |
-            ./out/release-wasm/gofeatureflag-evaluation_${VERSION}.wasi
-            ./out/release-wasm/gofeatureflag-evaluation_${VERSION}.wasm
+            ./out/release-wasm/gofeatureflag-evaluation_${{ env.VERSION }}.wasi
+            ./out/release-wasm/gofeatureflag-evaluation_${{ env.VERSION }}.wasm
 
       - name: Checkout wasm-releases repository
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -80,21 +88,21 @@ jobs:
       - name: Copy WASM files to wasm-releases repository
         run: |
           mkdir -p wasm-releases/evaluation
-          cp ./out/release-wasm/gofeatureflag-evaluation_${VERSION}.wasi wasm-releases/evaluation/
-          cp ./out/release-wasm/gofeatureflag-evaluation_${VERSION}.wasm wasm-releases/evaluation/
+          cp ./out/release-wasm/gofeatureflag-evaluation_${{ env.VERSION }}.wasi wasm-releases/evaluation/
+          cp ./out/release-wasm/gofeatureflag-evaluation_${{ env.VERSION }}.wasm wasm-releases/evaluation/
 
       - name: Create Pull Request to wasm-releases
         uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
         with:
-          branch: publish-wasm-evaluation-${VERSION}
-          title: "feat: Publish WASM files for ${VERSION}"
+          branch: publish-wasm-evaluation-${{ env.VERSION }}
+          title: "feat: Publish WASM files for ${{ env.VERSION}}"
           body: |
-            Automated pull request to publish evaluation WASM files for release ${VERSION}
+            Automated pull request to publish evaluation WASM files for release ${{ env.VERSION }}
 
             This PR includes:
-            - gofeatureflag-evaluation_${VERSION}.wasi
-            - gofeatureflag-evaluation_${VERSION}.wasm
-          commit-message: Publish evaluation WASM files for ${VERSION}
+            - gofeatureflag-evaluation_${{ env.VERSION }}.wasi
+            - gofeatureflag-evaluation_${{ env.VERSION }}.wasm
+          commit-message: Publish evaluation WASM files for ${{ env.VERSION }}
           assignees: thomaspoignant
           draft: false
           signoff: true
