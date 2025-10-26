@@ -70,9 +70,7 @@ jobs:
         with:
           tinygo-version: "0.37.0"
       - name: Release WASM
-        env:
-          VERSION: ${{ env.VERSION }}
-        run: ./.github/ci-scripts/release_wasm.sh ${VERSION}
+        run: ./.github/ci-scripts/release_wasm.sh ${{ env.VERSION }}
       - name: Upload assets
         uses: softprops/action-gh-release@6da8fa9354ddfdc4aeace5fc48d7f679b5214090 # v2.4.1
         with:
@@ -88,12 +86,10 @@ jobs:
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
       - name: Copy WASM files to wasm-releases repository
-        env:
-          VERSION: ${{ env.VERSION }}
         run: |
           mkdir -p wasm-releases/evaluation
-          cp ./out/release-wasm/gofeatureflag-evaluation_${VERSION}.wasi wasm-releases/evaluation/
-          cp ./out/release-wasm/gofeatureflag-evaluation_${VERSION}.wasm wasm-releases/evaluation/
+          cp ./out/release-wasm/gofeatureflag-evaluation_${{ env.VERSION }}.wasi wasm-releases/evaluation/
+          cp ./out/release-wasm/gofeatureflag-evaluation_${{ env.VERSION }}.wasm wasm-releases/evaluation/
 
       - name: Create Pull Request to wasm-releases
         uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
@@ -285,9 +281,7 @@ jobs:
 
       - name: Tagging a new version
         working-directory: ./release/${{ env.WEBSITE_DIR }}
-        env:
-          VERSION: ${{ env.VERSION }}
-        run: npm run docusaurus docs:version ${VERSION}
+        run: npm run docusaurus docs:version ${{ env.VERSION }}
 
       - name: Setup go
         uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
@@ -314,10 +308,10 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
         with:
-          branch: create-new-doc-version-${VERSION}
-          title: "docs(docusaurus): Create a new documentation version ${VERSION}"
-          body: Automated pull request to create a new documentation version ${VERSION}
-          commit-message: Create a new documentation version ${VERSION}
+          branch: create-new-doc-version-${{ env.VERSION }}
+          title: "docs(docusaurus): Create a new documentation version ${{ env.VERSION }}"
+          body: Automated pull request to create a new documentation version ${{ env.VERSION }}
+          commit-message: Create a new documentation version ${{ env.VERSION }}
           labels: automerge
           assignees: thomaspoignant
           draft: false
@@ -373,10 +367,10 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
         with:
-          branch: release-jsonschema-${VERSION}
-          title: "feat(jsonschema): Release a new version of the jsonschema ${VERSION}"
-          body: Automated pull request to release a new version of the jsonschema ${VERSION}
-          commit-message: Release a new version of the jsonschema ${VERSION}
+          branch: release-jsonschema-${{ env.VERSION }}
+          title: "feat(jsonschema): Release a new version of the jsonschema ${{ env.VERSION }}"
+          body: Automated pull request to release a new version of the jsonschema ${{ env.VERSION }}
+          commit-message: Release a new version of the jsonschema ${{ env.VERSION }}
           labels: automerge
           assignees: thomaspoignant
           draft: false
@@ -402,19 +396,17 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
       - name: Bump chart appVersion
-        env:
-          VERSION: ${{ env.VERSION }}
-        run: make bump-helm-chart-version VERSION=${VERSION}
+        run: make bump-helm-chart-version VERSION=${{ env.VERSION }}
 
       - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
         with:
-          branch: bump-relay-proxy-helm-chart-${VERSION}
-          title: "chore(helm): Bump relay-proxy helm chart version ${VERSION}"
-          body: Automated pull request to bump relay-proxy helm chart version ${VERSION}
-          commit-message: Bump relay-proxy helm chart version ${VERSION}
+          branch: bump-relay-proxy-helm-chart-${{ env.VERSION }}
+          title: "chore(helm): Bump relay-proxy helm chart version ${{ env.VERSION }}"
+          body: Automated pull request to bump relay-proxy helm chart version ${{ env.VERSION }}
+          commit-message: Bump relay-proxy helm chart version ${{ env.VERSION }}
           labels: automerge
           assignees: thomaspoignant
           draft: false
