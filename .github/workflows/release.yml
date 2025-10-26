@@ -69,10 +69,12 @@ jobs:
       - uses: acifani/setup-tinygo@db56321a62b9a67922bb9ac8f9d085e218807bb3 # v2.0.1
         with:
           tinygo-version: "0.37.0"
-      - run: ./.github/ci-scripts/release_wasm.sh ${{ env.VERSION }}
+      - name: Release WASM
+        env:
+          VERSION: ${{ env.VERSION }}
+        run: ./.github/ci-scripts/release_wasm.sh ${VERSION}
       - name: Upload assets
         uses: softprops/action-gh-release@6da8fa9354ddfdc4aeace5fc48d7f679b5214090 # v2.4.1
-        if: github.ref_type == 'tag'
         with:
           files: |
             ./out/release-wasm/gofeatureflag-evaluation_${{ env.VERSION }}.wasi
@@ -86,10 +88,12 @@ jobs:
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
       - name: Copy WASM files to wasm-releases repository
+        env:
+          VERSION: ${{ env.VERSION }}
         run: |
           mkdir -p wasm-releases/evaluation
-          cp ./out/release-wasm/gofeatureflag-evaluation_${{ env.VERSION }}.wasi wasm-releases/evaluation/
-          cp ./out/release-wasm/gofeatureflag-evaluation_${{ env.VERSION }}.wasm wasm-releases/evaluation/
+          cp ./out/release-wasm/gofeatureflag-evaluation_${VERSION}.wasi wasm-releases/evaluation/
+          cp ./out/release-wasm/gofeatureflag-evaluation_${VERSION}.wasm wasm-releases/evaluation/
 
       - name: Create Pull Request to wasm-releases
         uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
@@ -281,6 +285,8 @@ jobs:
 
       - name: Tagging a new version
         working-directory: ./release/${{ env.WEBSITE_DIR }}
+        env:
+          VERSION: ${{ env.VERSION }}
         run: npm run docusaurus docs:version ${VERSION}
 
       - name: Setup go
@@ -396,6 +402,8 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
       - name: Bump chart appVersion
+        env:
+          VERSION: ${{ env.VERSION }}
         run: make bump-helm-chart-version VERSION=${VERSION}
 
       - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
