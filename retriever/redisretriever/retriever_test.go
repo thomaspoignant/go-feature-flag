@@ -123,6 +123,18 @@ func stopRedis(t *testing.T, testName string) {
 	}
 }
 
+func Test_Redis_Status(t *testing.T) {
+	t.Run("should return NotReady for nil receiver", func(t *testing.T) {
+		var retriever *redisretriever.Retriever
+		assert.Equal(t, ret.RetrieverNotReady, retriever.Status())
+	})
+
+	t.Run("should return NotReady for uninitialized retriever", func(t *testing.T) {
+		retriever := &redisretriever.Retriever{}
+		assert.Equal(t, ret.RetrieverNotReady, retriever.Status())
+	})
+}
+
 func Test_Redis_Shutdown(t *testing.T) {
 	options := startRedisAndAddData(t, t.Name(), []string{"flag1.json"}, "")
 	defer stopRedis(t, t.Name())
