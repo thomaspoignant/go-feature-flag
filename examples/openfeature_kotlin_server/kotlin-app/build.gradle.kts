@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.cli.jvm.main
 
 plugins {
-    kotlin("jvm") version "2.2.20"
+    kotlin("jvm") version "2.2.21"
     application
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("java")
