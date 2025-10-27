@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.47.1](https://github.com/thomaspoignant/go-feature-flag/compare/v1.47.0...v1.47.1) (2025-10-27)
+
+
+### 🐛 Bug Fixes
+
+* Missing comments ([#4186](https://github.com/thomaspoignant/go-feature-flag/issues/4186)) ([7f82c01](https://github.com/thomaspoignant/go-feature-flag/commit/7f82c017d9cbc9da7d91fbadf26c03a802531113))
+
 ## [1.47.0](https://github.com/thomaspoignant/go-feature-flag/compare/v1.47.0...v1.47.0) (2025-10-27)
 
 ### 🚀 New Features
