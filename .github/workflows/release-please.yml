@@ -42,16 +42,6 @@ jobs:
     secrets:
       token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
-  bump-module-core:
-    if: ${{ needs.release-please.outputs.module_core_released == 'true' }}
-    uses: ./.github/workflows/release-bump-modules.yml
-    needs: release-please
-    with:
-      modulePath: modules/core
-      version: ${{ needs.release-please.outputs.module_core_version }}
-    secrets:
-      token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
-
   bump-module-core-dependency-for-evaluation:
     if: ${{ needs.release-please.outputs.module_core_released == 'true' }}
     uses: ./.github/workflows/release-bump-modules.yml
