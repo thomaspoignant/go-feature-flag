@@ -143,9 +143,10 @@ jobs:
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
           echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
-              
+
       - name: Import GPG key
         uses: crazy-max/ghaction-import-gpg@e89d40939c28e39f97cf32126055eeae86ba74ec # v6.3.0
+        id: import_gpg
         with:
           gpg_private_key: ${{ secrets.GPG_SIGNING_KEY }}
           passphrase: ${{ secrets.GPG_SIGNING_KEY_PASSWORD }}
@@ -158,11 +159,7 @@ jobs:
           args: release --clean --timeout 60m
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
-          SIGN_RELEASE_GPG_PRIVATE_KEY: ${{ secrets.SIGN_RELEASE_GPG_PRIVATE_KEY }}
-          SIGN_RELEASE_GPG_PASSPHRASE: ${{ secrets.SIGN_RELEASE_GPG_PASSPHRASE }}
-          SIGN_RELEASE_GPG_KEY_ID: 4AEE18F83AFDEB23
-
-
+          GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
 
   dockerhub-lint:
     runs-on: ubuntu-latest
