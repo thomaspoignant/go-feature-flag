@@ -96,15 +96,15 @@ jobs:
         env:
           VERSION: ${{ env.VERSION }}
         with:
-          branch: publish-wasm-evaluation-${VERSION}
-          title: "feat: Publish WASM files for ${VERSION}"
+          branch: publish-wasm-evaluation-${{ env.VERSION }}
+          title: "feat: Publish WASM files for ${{ env.VERSION }}"
           body: |
-            Automated pull request to publish evaluation WASM files for release ${VERSION}
+            Automated pull request to publish evaluation WASM files for release ${{ env.VERSION }}
 
             This PR includes:
-            - gofeatureflag-evaluation_${VERSION}.wasi
-            - gofeatureflag-evaluation_${VERSION}.wasm
-          commit-message: Publish evaluation WASM files for ${VERSION}
+            - gofeatureflag-evaluation_${{ env.VERSION }}.wasi
+            - gofeatureflag-evaluation_${{ env.VERSION }}.wasm
+          commit-message: Publish evaluation WASM files for ${{ env.VERSION }}
           assignees: thomaspoignant
           draft: false
           signoff: true
@@ -327,10 +327,10 @@ jobs:
         env:
           VERSION: ${{ env.VERSION }}
         with:
-          branch: create-new-doc-version-${VERSION}
-          title: "docs(docusaurus): Create a new documentation version ${VERSION}"
-          body: Automated pull request to create a new documentation version ${VERSION}
-          commit-message: Create a new documentation version ${VERSION}
+          branch: create-new-doc-version-${{ env.VERSION }}
+          title: "docs(docusaurus): Create a new documentation version ${{ env.VERSION }}"
+          body: Automated pull request to create a new documentation version ${{ env.VERSION }}
+          commit-message: Create a new documentation version ${{ env.VERSION }}
           labels: automerge
           assignees: thomaspoignant
           draft: false
@@ -390,10 +390,10 @@ jobs:
         env:
           VERSION: ${{ env.VERSION }}
         with:
-          branch: release-jsonschema-${VERSION}
-          title: "feat(jsonschema): Release a new version of the jsonschema ${VERSION}"
-          body: Automated pull request to release a new version of the jsonschema ${VERSION}
-          commit-message: Release a new version of the jsonschema ${VERSION}
+          branch: release-jsonschema-${{ env.VERSION }}
+          title: "feat(jsonschema): Release a new version of the jsonschema ${{ env.VERSION }}"
+          body: Automated pull request to release a new version of the jsonschema ${{ env.VERSION }}
+          commit-message: Release a new version of the jsonschema ${{ env.VERSION }}
           labels: automerge
           assignees: thomaspoignant
           draft: false
@@ -432,10 +432,10 @@ jobs:
         env:
           VERSION: ${{ env.VERSION }}
         with:
-          branch: bump-relay-proxy-helm-chart-${VERSION}
-          title: "chore(helm): Bump relay-proxy helm chart version ${VERSION}"
-          body: Automated pull request to bump relay-proxy helm chart version ${VERSION}
-          commit-message: Bump relay-proxy helm chart version ${VERSION}
+          branch: bump-relay-proxy-helm-chart-${{ env.VERSION }}
+          title: "chore(helm): Bump relay-proxy helm chart version ${{ env.VERSION }}"
+          body: Automated pull request to bump relay-proxy helm chart version ${{ env.VERSION }}
+          commit-message: Bump relay-proxy helm chart version ${{ env.VERSION }}
           labels: automerge
           assignees: thomaspoignant
           draft: false
