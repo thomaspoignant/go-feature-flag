@@ -30,7 +30,7 @@
   "author": "Thomas Poignant",
   "license": "MIT",
   "devDependencies": {
-    "@babel/eslint-parser": "^7.28.4",
+    "@babel/eslint-parser": "^7.28.5",
     "@babel/preset-env": "^7.28.3",
     "autoprefixer": "^10.4.21",
     "babel-loader": "^10.0.0",
@@ -55,7 +55,7 @@
   },
   "dependencies": {
     "@openfeature/go-feature-flag-web-provider": "^0.2.6",
-    "@openfeature/web-sdk": "^1.6.2",
+    "@openfeature/web-sdk": "^1.7.0",
     "highlight.js": "^11.11.1",
     "uuid": "^13.0.0"
   }
