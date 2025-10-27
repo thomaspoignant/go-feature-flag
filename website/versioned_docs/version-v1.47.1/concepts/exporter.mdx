@@ -1,0 +1,64 @@
+---
+sidebar_position: 60
+description: Exporter are used to export your evaluation data to a remote source.
+---
+import {integrations} from "@site/data/integrations";
+
+# 🚚 Exporter
+
+## Overview
+In GO Feature Flag, an **exporter** is a component that sends flag evaluation results to external systems.
+This allows you to track how your feature flags are being used, gather data for analysis, and monitor their impact on your application.
+
+## About exporters
+We have built the concept of **exporter** to allow you to export your evaluation data to a remote source, this can be useful in several occasion:
+- **Analytics and Monitoring**: Exporters enable you to collect data on feature flag usage, such as how often a flag is evaluated, the percentage of users receiving a specific variation, and the context in which flags are evaluated. This data can be used for A/B testing, performance monitoring, and understanding user behavior.
+- **Debugging and Troubleshooting**: By logging flag evaluations, exporters can help you identify issues related to feature flags, such as unexpected behavior or incorrect flag configurations.
+- **Integration with External Systems**: Exporters facilitate integration with various monitoring, logging, and analytics platforms, allowing you to centralize your data and gain comprehensive insights.
+
+## Synchronous vs Asynchronous exporters
+Considering the volume of information to process and the potential impact on your application's performance, exporters can be synchronous or asynchronous depending on where the data is send.
+
+<ul>
+  <li>
+    <span><strong>Synchronous exporters</strong>: These exporters send data immediately <i>(or near immediately)</i> after a flag evaluation. This is used for queue system or almost 0 latency write systems.</span>
+    <div className="flex gap-x-1 mt-1">
+      {
+        integrations.exporters.filter(exporter => exporter.type === 'sync').map((exporter) => (
+          <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">{exporter.name}</span>
+        ))}
+    </div>
+  </li>
+  <li className={"pt-5"}>
+    <span><strong>Asynchronous exporters</strong>: These exporters send data in batch, this is useful when you have a lot of data to send and you don't want to impact the performance of your application. This is used for all exporters writing files <i>(locally or remotely)</i>.</span>
+    <br /><span>Those exporters are using a buffer to store the data in memory before sending it. If for any reason the exporter can't send the data, the buffer will be used to store the data until the exporter can send it.</span>
+    <div className="flex gap-x-1 mt-1">
+      {
+        integrations.exporters.filter(exporter => exporter.type === 'async').map((exporter) => (
+          <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">{exporter.name}</span>
+        ))}
+    </div>
+  </li>
+</ul>
+
+## Supported exporters
+
+<ul>
+  {integrations.exporters.map((exporter) => (
+    <li>{exporter.name}</li>
+  ))}
+</ul>
+
+[Check how to configure the exporters](../integrations/export-evaluation-data)
+
+## How Exporters Work
+
+When a feature flag is evaluated using any of the SDK, GO Feature Flag notifies the configured exporters with the evaluation result. This result typically includes:
+
+- The name of the flag.
+- The variation returned.
+- The targetingKey.
+- The source of the evaluation (e.g., SERVER or PROVIDER).
+- Exporter metadata (e.g., source provider, etc ...), see [blog post about exporter metadata](/blog/2025/01/21/exporter-metadata). 
+
+The exporter then formats and sends this data to the configured destination.

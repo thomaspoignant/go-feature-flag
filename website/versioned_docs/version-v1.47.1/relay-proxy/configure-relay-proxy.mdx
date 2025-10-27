@@ -1,0 +1,813 @@
+---
+sidebar_position: 20
+description: How to configure the relay proxy to serve your feature flags.
+---
+
+import { Mandatory, NotMandatory } from "@site/src/components/checks/checks";
+import { getIntegrations } from "@site/data/integrations";
+import { Vignette } from "@site/src/components/doc/vignette";
+
+# 🔧 Configuration
+
+## Overview
+
+In this page, you will find all the configuration options available for the **relay-proxy**.
+
+The **GO Feature Flag relay-proxy** is highly configurable and can be adapted to your needs.
+Despite that you can start with a minimum configuration and fine tune it later.
+
+## Configuration file
+
+The configuration of the **relay proxy** is based on a configuration file that you have to provide.
+The configuration of the **relay proxy** is based on a configuration file that you have to provide.
+This is a `yaml` file and usage is to call it `goff-proxy.yaml` but you can name it as you will.
+
+You can provide the configuration file with the option `--config=/path_to_your_file.yaml` when launching the relay proxy.
+
+```shell
+go-feature-flag --config=/goff-proxy.yaml
+```
+
+:::info
+By default, if you omit the `--config` option, the relay proxy will look for a configuration file named `goff-proxy.yaml` in _(int this order)_:
+
+1. `./` _(the current directory)_
+1. `/goff/`
+1. `/etc/opt/goff/`
+
+:::
+
+## Configuration Patterns
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-8">
+  <Vignette 
+    icon="fa-user" 
+    color="cyan" 
+    link="#getting-started"
+    title="One set of feature flags"
+    description="Use one set of feature flags for all your applications. This is the default way of using GO Feature Flag, it requires a minimum configuration and is easy to setup"
+  />
+
+  <Vignette 
+    icon="fa-users" 
+    color="blue" 
+    link="#use-multiple-flag-sets"
+    title="Use multiple flag sets"
+    description="Separate your feature flags into different flag sets to give ownership to different teams or different usage, useful for multi-tenant applications or when you have different teams."
+  / >
+</div>
+
+
+## Getting Started
+
+The minimum configuration to start the **relay proxy** is to provide where to retrieve your feature flags configuration.
+
+```yaml title="goff-proxy.yaml"
+retrievers:
+  - kind: file
+    path: /goff/flags.yaml # Location of your feature flag files
+```
+
+All the other options are optional and can be added to the configuration file to fine-tune the **relay proxy**.
+
+
+## Environment variables
+The primary way to configure the relay proxy is through a configuration file, but you can also use environment variables if you prefer.  
+You can override file configurations using environment variables.
+
+**Here are some things to know when you are using environment variables:**
+
+- To set an option, the environment variable should have the same name as the configuration option in uppercase.  
+  For example, to set the `listen` option, you can set the `LISTEN` environment variable.
+
+  ```shell
+  export LISTEN=8080
+  ```
+
+- If you want to set a nested field, you can use `_` to separate each field.  
+  For example, to set the `retrievers` option, you can set the `RETRIEVERS` environment variable.
+
+  ```shell
+  export RETRIEVER_KIND=github
+  ```
+
+- If you want to set an array of string, you can add multiple values separated by a comma.
+
+  ```shell
+  export AUTHORIZEDKEYS_EVALUATION=my-first-key,my-second-key
+  ```
+
+- If you are modifying an array of objects, you can use the index to set the value.
+
+  ```shell
+  export RETRIEVERS_0_KIND=github
+  ```
+
+:::info
+If you want to avoid any collision with existing environment variables that are not specifically related to the relay proxy, you can prefix your environment variables.
+
+You can configure the prefix using the [`envVariablePrefix`](#envvariableprefix) field in your configuration file.
+:::
+
+## Configuration Options
+
+### `retrievers`
+
+This is the configuration on how to retrieve the configuration of the files.
+
+- option name: `retrievers`
+- type: [`[]retriever`](#type-retriever)
+- default: **none**
+- **mandatory: <Mandatory />**
+- You can have multiple retrievers at the same time, check [_"Using multiple retrievers"_](../concepts/retriever#using-multiple-retrievers) to see how it works.
+- Configuration of a retriever depends on the one you are choosing. Check the [list of retrievers](../integrations/store-flags-configuration#available-retrievers) and go on the detail page of your choice to configure it.
+
+```yaml title="example goff-proxy.yaml"
+retrievers:
+  - kind: file
+    path: /goff/my-flags.yaml
+  - kind: s3
+    bucket: my-featureflag-bucket
+    item: flag/flags.goff.yaml
+```
+
+### `startWithRetrieverError`
+
+By default, the **relay proxy** will crash if it is not able to retrieve the flags from the configuration.
+
+If you don't want your relay proxy to crash, you can set `startWithRetrieverError` to true. Until the flag is retrievable the relay proxy will only answer with default values.
+
+- option name: `startWithRetrieverError`
+- type: **boolean**
+- default: **`false`**
+- mandatory: <NotMandatory />
+
+### `persistentFlagConfigurationFile`
+
+If set, GO Feature Flag will store the flags configuration in this file to be able to serve the flags even if none of the retrievers is available during starting time.
+:::info
+By default, the flag configuration is not persisted and stays on the retriever system. By setting a file here, you ensure that GO Feature Flag will always start with a configuration but which can be out-dated.
+:::
+
+- option name: `persistentFlagConfigurationFile`
+- type: **string**
+- default: **none**
+- mandatory: <NotMandatory />
+- example: `/tmp/goff_persist_conf.yaml`
+
+### `fileFormat`
+
+This is the format of your flag configuration file.
+
+- option name: `fileFormat`
+- type: **string**
+- Acceptable values are :`yaml`, `json`, `toml`.
+- default: **`yaml`**
+- mandatory: <NotMandatory />
+
+### `pollingInterval`
+
+This is the time interval **in millisecond** when the relay proxy is reloading the configuration file.
+
+- option name: `pollingInterval`
+- type: **int**
+- default: **`60000`**
+- The minimum time accepted is 1000 millisecond (1 second).
+- If you set a negative value, the polling will be disabled.
+- mandatory: <NotMandatory />
+
+### `enablePollingJitter`
+
+Set to true if you want to avoid having true periodicity when retrieving your flags. It is useful to avoid having spike on your flag configuration storage in case your application is starting multiple instance at the same time.
+
+:::info
+We ensure a deviation that is maximum ±10% of your polling interval.
+:::
+
+- option name: `enablePollingJitter`
+- type: **boolean**
+- default: **`false`**
+- mandatory: <NotMandatory />
+
+### `listen`
+
+This is the port used by the relay proxy when starting the HTTP server.
+
+- option name: `listen`
+- type: **int**
+- default: **`1031`**
+- mandatory: <NotMandatory />
+
+### `monitoringPort`
+
+If set the monitoring endpoints will be served on this specific port.
+
+Check [_"Use specific port for the monitoring"_](./observability#use-specific-port-for-the-monitoring) to have more information.
+
+- option name: `monitoringPort`
+- type: **int**
+- default: **none**
+- mandatory: <NotMandatory />
+
+### `logLevel`
+
+The log level to use for the relay proxy.
+
+Check [_"Logging"_](./observability#logging) to have more information.
+
+- option name: `logLevel`
+- type: **string**
+- default: **`INFO`**
+- Acceptable values are `ERROR`, `WARN`, `INFO`, `DEBUG`.
+- mandatory: <NotMandatory />
+
+### `logFormat`
+
+The format to use for structured logs from the relay proxy.
+
+Check [_"Logging"_](./observability#logging) to have more information.
+
+- option name: `logFormat`
+- type: **string**
+- default: **`json`**
+- Acceptable values are `json` and `logfmt`.
+- mandatory: <NotMandatory />
+
+### `enablePprof`
+
+This param is used to enable **pprof endpoints** if you wish to enable profiling.
+
+Check [_"Profiling"_](./profiling) to have more information.
+
+- option name: `enablePprof`
+- type: **boolean**
+- default: **`false`**
+- mandatory: <NotMandatory />
+
+### `exporters`
+
+Exporters is the configuration used to define how to export the data from GO Feature Flag.
+
+- option name: `exporters`
+- type: **[[]exporter](#type-exporter)**
+- default: **none**
+- mandatory: <NotMandatory />
+- You can have multiple exporters at the same time, it will export the data to all the exporters you have configured in parallel.
+- Configuration of an exporter depends on the one you are choosing. Check the [list of exporters](../integrations/export-evaluation-data#available-exporters) and go on the detail page of your choice to configure it.
+
+```yaml title="example goff-proxy.yaml"
+exporters:
+  - kind: s3
+    bucket: evaluation-data-bucket
+  - kind: kafka
+    kafka:
+      topic: "go-feature-flag-events"
+```
+### `notifiers`
+
+Notifiers is the configuration on where to notify a flag changes.
+
+- option name: `notifiers`
+- type: **[[]notifier](#type-notifier)**
+- default: **none**
+- mandatory: <NotMandatory />
+- Configuration of a notifier depends on the one you are choosing. Check the [list of notifiers](../integrations/notify-flags-changes#available-notifiers) and go on the detail page of your choice to configure it.
+
+### `disableNotifierOnInit`
+
+If `disableNotifierOnInit` is set to **true**, the relay proxy will not call any notifier when the flags are loaded for the 1st time _(during initialization)_. This is useful if you do not want a Slack/Webhook notification saying that the flags have been added every time you start the proxy.
+
+- option name: `disableNotifierOnInit`
+- type: **boolean**
+- default: **`false`**
+- mandatory: <NotMandatory />
+
+### `startAsAwsLambda`
+
+Allow to start the relay-proxy as a AWS Lambda, it means that it will start the server to receive request in the AWS format _(see [`awsLambdaAdapter`](#awslambdaadapter) to set the request/response format you are using)_.
+Notifiers is the configuration on where to notify a flag changes.
+
+- option name: `startAsAwsLambda`
+- type: **boolean**
+- default: **`false`**
+- mandatory: <NotMandatory />
+
+### `awsLambdaAdapter`
+
+This parameter allow you to decide which type of AWS lambda handler you want to use.
+
+- option name: `awsLambdaAdapter`
+- type: **string**
+- default: **`APIGatewayV2`**
+- Acceptable values are `APIGatewayV2`, `APIGatewayV1`, `ALB`.
+- mandatory: <NotMandatory />
+- This param is used only if `startAsAwsLambda` is `true`.
+
+### `awsApiGatewayBasePath`
+
+Specifies the base path prefix for AWS API Gateway deployments when using non-root routes.
+The relay proxy will strip this base path from incoming requests before processing them.
+This is useful when deploying behind paths like `/api` or `/dev/feature-flags`.
+
+- option name: `awsApiGatewayBasePath`
+- type: **string**
+- default: **none**
+- mandatory: <NotMandatory />
+- This param is used only if `startAsAwsLambda` is `true`.
+
+**Example:** If set to `/api/feature-flags`, requests to `/api/feature-flags/health` will be processed as `/health`.
+
+### `debug`
+
+If `debug` is set to true, we will set the log level to debug and set some components in debug mode (`labstack/echo`, `pprof` etc ...).
+
+- option name: `debug`
+- type: **boolean**
+- default: **`false`**
+- mandatory: <NotMandatory />
+
+### `hideBanner`
+
+`hideBanner` can be used to hide the startup banner.
+
+- option name: `hideBanner`
+- type: **boolean**
+- default: **`false`**
+- mandatory: <NotMandatory />
+
+### `enableSwagger`
+
+Enables Swagger for testing the APIs directly. If you are enabling Swagger you will have to provide the [`host`](#host) configuration.
+
+- option name: `enableSwagger`
+- type: **boolean**
+- default: **`false`**
+- mandatory: <NotMandatory />
+- The Swagger UI will be available at `http://<host>:<listen>/swagger/`.
+
+### `host`
+
+`host` is the DNS you will use to access the relay proxy.
+
+- option name: `host`
+- type: **string**
+- default: **`localhost`**
+- mandatory: <NotMandatory />
+- This field is used by Swagger to query the API at the right place.
+
+### `disableVersionHeader`
+
+If `disableVersionHeader` is set to **`true`**, the relay proxy will not add the header `x-gofeatureflag-version` with the GO Feature Flag version in the HTTP response.
+
+- option name: `disableVersionHeader`
+- type: **boolean**
+- default: **`false`**
+- mandatory: <NotMandatory />
+
+### `authorizedKeys`
+
+List of authorized API keys.
+
+:::info
+If you don't set any API keys, the relay proxy will be fully open to all requests
+:::
+
+- option name: `authorizedKeys`
+- type: **[authorizedKeys](#type-authorizedkeys)**
+- default: **none**
+- mandatory: <NotMandatory />
+
+### `evaluationContextEnrichment`
+
+It is a free field that will be merged with the evaluation context sent during the evaluation.
+
+It is useful to add common attributes to all the evaluations, such as a server version, environment, etc.
+These fields will be included in the custom attributes of the evaluation context.
+
+:::warning
+If in the evaluation context you have a field with the same name, it will be overridden by the `evaluationContextEnrichment`.
+:::
+
+- option name: `evaluationContextEnrichment`
+- type: **object**
+- default: **none**
+- mandatory: <NotMandatory />
+
+### `openTelemetryOtlpEndpoint`
+
+Endpoint of your **OpenTelemetry OTLP collector**, used to send traces.
+
+You will be able to forward those traces to your OpenTelemetry solution directly from the collector.
+
+- option name: `openTelemetryOtlpEndpoint`
+- type: **string**
+- default: **none**
+- mandatory: <NotMandatory />
+
+### `flagSets`
+
+Flag sets allow you to organize your feature flags into separate groups, each with its own configuration, API keys, retrievers, exporters, and notifiers.
+
+When you configure flag sets, the relay proxy operates in **flag set mode** instead of the default single configuration mode. Each flag set requires at least one API key and can have its own retrievers, exporters, and notifiers.
+
+- option name: `flagSets`
+- type: **[[]flagSet](#type-flagset)**
+- default: **none**
+- mandatory: <NotMandatory />
+- If flag sets are configured, the relay proxy will ignore the top-level `retrievers`, `exporters`, and `notifiers` configuration.
+
+```yaml title="example goff-proxy.yaml"
+listen: 1031
+flagSets:
+  - name: teamA
+    apiKeys:
+      - "team-a-api-key"
+    retrievers:
+      - kind: file
+        path: /flags/team-a-flags.yaml
+    exporter:
+      kind: log
+
+  - name: teamB
+    apiKeys:
+      - "team-b-api-key"
+    retrievers:
+      - kind: s3
+        bucket: my-feature-flag-bucket
+        item: team-b/flags.yaml
+    exporters:
+      - kind: s3
+        bucket: evaluation-data-bucket
+```
+
+### `envVariablePrefix`
+
+Prefix for your environment variables.  
+This useful if you want to avoid any collision with existing environment variables that are not specifically related to the relay proxy.
+
+If you use this option you will have to prefix all your environment variables with the value you set here. For example if you want to override the port of the relay-proxy and the prefix is `GOFF_`.
+
+```shell
+export GOFF_LISTEN=8080
+```
+
+- option name: `envVariablePrefix`
+- type: **string**
+- default: **empty string**
+- mandatory: <NotMandatory />
+
+## Configuration Types
+
+### type `authorizedKeys`
+
+`authorizedKeys` is an object were it is possible to configure the list of API Keys that are accepted by the relay proxy.
+
+#### `authorizedKeys.evaluation`
+
+If set, we will check for each evaluation if an authorized key is provided.
+
+Each request will need to provide one of authorized key inside `Authorization` header with format `Bearer <api-key>`.
+
+- option name: `evaluation`
+- type: **[]string**
+- default: **none**
+- mandatory: <NotMandatory />
+
+#### `authorizedKeys.admin`
+
+You need to set API keys in this field if you want to access the `/v1/admin/*` endpoints.
+
+Each request will need to provide one of authorized key inside `Authorization` header with format `Bearer <api-key>`.
+
+- option name: `evaluation`
+- type: **[]string**
+- default: **none**
+- mandatory: <NotMandatory />
+- If no api key is configured the endpoint will be unreachable.
+
+#### Example
+
+```yaml title="goff-proxy.yaml"
+# ...
+authorizedKeys:
+  evaluation:
+    - "my-first-key"
+    - "my-second-key"
+  admin:
+    - "my-first-admin-key"
+    - "my-second-admin-key"
+```
+
+### type `retriever`
+
+A [retriever](../concepts/retriever) is the component in charge of loading your flag configuration from a remote source.
+
+#### `retriever.kind`
+
+Configuring a retriever always start by setting the kind of retriever you want to use. This is the only common param between all the retrievers.
+
+- option name: `kind`
+- type: **string**
+- default: **none**
+- mandatory: <Mandatory />
+
+:::info
+To find the **`kind`** to use for your retriever and the **rest of the options**, check the [list of retrievers](../integrations/store-flags-configuration#available-retrievers) and go on the detail page of your choice to configure it.
+
+**Available retrievers**:
+
+<ul>
+  {getIntegrations("")
+    .retrievers.filter((r) => r.docLink !== undefined)
+    .map((r) => (
+      <li key={r.name}>
+        <a href={`../integrations/store-flags-configuration/${r.docLink}`}>
+          {r.name}
+        </a>
+      </li>
+    ))}
+</ul>
+:::
+
+### type `exporter`
+
+An [exporter](../concepts/exporter) is the component in charge of sending your evaluation data to a remote source.
+
+```yaml title="example goff-proxy.yaml"
+# ...
+exporters:
+  - kind: s3
+    bucket: evaluation-data-bucket
+    flushInterval: 10000
+```
+:::info
+
+Every `exporter` has its own configuration, check the [list of exporters](../integrations/export-evaluation-data#available-exporters) and go on the detail page of your choice to configure it.
+
+**Available exporters**:
+
+<ul>
+  {getIntegrations("")
+    .exporters.filter((r) => r.docLink !== undefined)
+    .map((r) => (
+      <li key={r.name}>
+        <a href={`../integrations/export-evaluation-data/${r.docLink}`}>
+          {r.name}
+        </a>
+      </li>
+    ))}
+</ul>
+:::
+
+### type `flagSet`
+
+A flag set is a collection of flags that are used to evaluate features. It is used to group flags together and to apply the same configuration to them.
+
+```yaml title="example goff-proxy.yaml"
+flagSets:
+  - name: my-flagset
+    apiKeys:
+      - "my-api-key"
+    retrievers:
+      - kind: file
+        path: /flags/my-flags.yaml
+    exporters:
+      - kind: s3
+        bucket: my-evaluations
+    notifiers:
+      - kind: slack
+        webhookUrl: "https://hooks.slack.com/services/..."
+```
+
+#### `flagSet.name`
+
+The name of the flag set. This allows you to identify the flag set.
+
+- option name: `name`
+- type: **string**
+- default: **auto-generated UUID**
+- mandatory: <NotMandatory />
+
+#### `flagSet.apiKeys`
+
+The API keys for the flag set. This will add new API keys to the list of authorized keys for evaluation. This property is mandatory for every flag set, as it is used to filter the flags available.
+
+- option name: `apiKeys`
+- type: **[]string**
+- default: **none**
+- mandatory: <Mandatory />
+
+#### `flagSet.retrievers`
+
+Configuration for retrieving flag configurations. Supports the same options as the main configuration.
+
+- [_see `retrievers`_](#retrievers)
+
+#### `flagSet.exporters`
+
+Configuration for exporting evaluation data. Supports the same options as the main configuration.
+
+- [_see `exporters`_](#exporters)
+
+#### `flagSet.notifiers`
+
+Configuration for flag change notifications. Supports the same options as the main configuration.
+
+- [_see `notifiers`_](#notifiers)
+
+#### `flagSet.fileFormat`
+
+The format of the flag configuration files (yaml, json, toml).
+
+- [_see `fileFormat`_](#fileformat)
+
+#### `flagSet.pollingInterval`
+
+The time interval in milliseconds when the relay proxy is reloading the configuration file.
+
+- [_see `pollingInterval`_](#pollinginterval)
+
+#### `flagSet.startWithRetrieverError`
+
+If true, the flag set will start even if the retriever fails initially.
+
+- [_see `startWithRetrieverError`_](#startwithretrievererror)
+
+#### `flagSet.enablePollingJitter`
+
+Set to true if you want to avoid having true periodicity when retrieving your flags.
+
+- [_see `enablePollingJitter`_](#enablepollingjitter)
+
+#### `flagSet.disableNotifierOnInit`
+
+Set to true if you do not want to call any notifier when the flags are loaded for the first time.
+
+- [_see `disableNotifierOnInit`_](#disablenotifieroninit)
+
+#### `flagSet.evaluationContextEnrichment`
+
+Additional context data to merge with all evaluation requests for this flag set.
+
+- [_see `evaluationContextEnrichment`_](#evaluationcontextenrichment)
+
+#### `flagSet.persistentFlagConfigurationFile`
+
+File path to persist flag configurations for this flag set.
+
+- [_see `persistentFlagConfigurationFile`_](#persistentflagconfigurationfile)
+
+#### `flagSet.environment`
+
+Environment identifier for this flag set (e.g., "dev", "staging", "prod").
+
+- [_see `environment`_](#environment)
+
+### type `notifier`
+
+A [notifier](../concepts/notifier) is the component in charge of sending a notification when a flag changes to a remote system.
+
+```yaml title="example goff-proxy.yaml"
+# ...
+notifiers:
+  - kind: discord
+    webhookUrl: "https://discord.com/api/webhooks/yyyy/xxxxxxx"
+  - kind: slack
+    webhookUrl: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX"
+# ...
+```
+
+:::info
+Every `notifier` has its own configuration, check the [list of notifiers](../integrations/notify-flags-changes#available-notifiers) and go on the detail page of your choice to configure it.
+
+**Available notifiers**:
+<ul>
+  {getIntegrations("")
+    .notifiers.filter((r) => r.docLink !== undefined)
+    .map((r) => (
+      <li key={r.name}>
+        <a href={`../integrations/notify-flags-changes/${r.docLink}`}>
+          {r.name}
+        </a>
+      </li>
+    ))}
+</ul>
+:::
+
+## Use multiple flag sets
+
+Flag sets allow you to organize your feature flags into separate groups, each with its own configuration, API keys, retrievers, exporters, and notifiers. This is particularly useful for:
+
+- **Team isolation**: Different teams can manage their own flags independently
+- **Environment separation**: Separate flags for different environments (dev, staging, prod)
+- **Access control**: Different API keys for different applications or teams
+- **Independent configurations**: Each flag set can have its own retrievers, exporters, and notifiers
+
+### How flag sets work
+
+When you configure flag sets, the relay proxy operates in **flag set mode** instead of the default single configuration mode. In flag set mode:
+
+- Each flag set requires at least one API key
+- API keys are used to route requests to the appropriate flag set
+- Each flag set can have its own `retrievers`, `exporters`, and `notifiers`
+- There is no inheritance between flag sets - each is completely independent
+
+### Basic flag set configuration
+
+```yaml title="goff-proxy.yaml"
+listen: 1031
+flagSets:
+  - name: teamA
+    apiKeys:
+      - "team-a-api-key-1"
+      - "team-a-api-key-2"
+    retrievers:
+      - kind: file
+        path: /path/to/team-a-flags.yaml
+    exporter:
+      kind: log
+
+  - name: teamB
+    apiKeys:
+      - "team-b-api-key"
+    retrievers:
+      - kind: s3
+        bucket: my-feature-flag-bucket
+        item: team-b/flags.yaml
+    exporters:
+      - kind: s3
+        bucket: evaluation-data-bucket
+    notifiers:
+      - kind: slack
+        webhookUrl: "https://hooks.slack.com/services/..."
+```
+
+### Flag set configuration options
+
+:::warning
+If you are using flag sets, all top level configuration options will be ignored.
+:::
+
+Each flag set supports all the same configuration options as the main relay proxy configuration.
+You can find the list of options in the [flag set types](#type-flagset) section.
+
+### Using flag sets with API keys
+
+When using flag sets, all evaluation requests must include an API key.  
+You can do so by adding the API key in the initialization of your providers.
+
+The relay proxy will:
+
+1. Extract the API key from the `Authorization` header
+1. Find the flag set associated with that API key
+1. Route the evaluation request to that flag set
+1. Return the evaluation result from that flag set's flags
+
+### Example: Multi-team setup
+
+```yaml title="goff-proxy.yaml"
+listen: 1031
+logLevel: INFO
+
+flagSets:
+  # Frontend team flags
+  - name: frontend
+    apiKeys:
+      - "frontend-api-key"
+    retrievers:
+      - kind: file
+        path: /flags/frontend-flags.yaml
+    exporters:
+      - kind: s3
+        bucket: frontend-evaluations
+    notifiers:
+      - kind: slack
+        webhookUrl: "https://hooks.slack.com/services/frontend-webhook"
+
+  # Backend team flags
+  - name: backend
+    apiKeys:
+      - "backend-api-key"
+    retrievers:
+      - kind: github
+        repository: my-org/backend-flags
+        path: flags.yaml
+    exporters:
+      - kind: kafka
+        topic: backend-evaluations
+    notifiers:
+      - kind: discord
+        webhookUrl: "https://discord.com/api/webhooks/backend-webhook"
+
+  # Mobile team flags
+  - name: mobile
+    apiKeys:
+      - "mobile-api-key"
+    retrievers:
+      - kind: s3
+        bucket: mobile-feature-flags
+        item: flags.yaml
+    exporters:
+      - kind: file
+        outputDir: /logs/mobile-evaluations
+```
