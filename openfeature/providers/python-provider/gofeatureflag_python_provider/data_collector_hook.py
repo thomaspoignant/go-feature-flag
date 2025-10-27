@@ -1,5 +1,4 @@
 import datetime
-import threading
 import time
 import urllib3
 from gofeatureflag_python_provider.options import GoFeatureFlagOptions
@@ -10,6 +9,7 @@ from gofeatureflag_python_provider.request_data_collector import (
 from http import HTTPStatus
 from openfeature.flag_evaluation import FlagEvaluationDetails, Reason
 from openfeature.hook import Hook, HookContext
+from threading import Thread, Event
 from typing import Optional
 from urllib.parse import urljoin
 
@@ -18,9 +18,9 @@ default_targeting_key = "undefined-targetingKey"
 
 class DataCollectorHook(Hook):
     # _thread_stopper is used to stop the background task when we shut down the hook
-    _thread_stopper: bool = True
+    _thread_stopper: Optional[Event] = None
     # _thread_data_collector is the thread used to call the relay proxy to collect data
-    _thread_data_collector: threading.Thread = None
+    _thread_data_collector: Optional[Thread] = None
     # _options is the options of the provider
     _options: Optional[GoFeatureFlagOptions] = None
     # _data_collector_endpoint is the endpoint of the relay proxy
@@ -34,7 +34,7 @@ class DataCollectorHook(Hook):
 
     def __init__(self, options: GoFeatureFlagOptions, http_client: urllib3.PoolManager):
         self._http_client = http_client
-        self._thread_data_collector = threading.Thread(target=self.background_task)
+        self._thread_data_collector = Thread(target=self.background_task, daemon=True)
         self._options = options
         self._data_collector_endpoint = urljoin(
             str(self._options.endpoint), "/v1/data/collector"
@@ -88,21 +88,19 @@ class DataCollectorHook(Hook):
 
     def initialize(self):
         self._event_queue = []
-        self._thread_stopper = False
+        self._thread_stopper = Event()
         self._thread_data_collector.start()
 
     def shutdown(self):
         # setting the _thread_stopper to True will stop the background task
-        self._thread_stopper = True
+        self._thread_stopper.set()
         self._thread_data_collector.join()
         self._collect_data()
-        self._thread_stopper = False
-        self._event_queue = []
 
     def background_task(self):
-        while not self._thread_stopper:
+        while not self._thread_stopper.is_set():
             waiting_time = self._options.data_flush_interval / 1000
-            time.sleep(waiting_time)
+            self._thread_stopper.wait(waiting_time)
             self._collect_data()
 
     def _collect_data(self):

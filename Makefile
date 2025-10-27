@@ -44,10 +44,10 @@ build-jsonschema-generator: create-out-dir ## Build the jsonschema-generator in 
 	CGO_ENABLED=0 GO111MODULE=on $(GOWORK_ENV) $(GOCMD) build $(MODFLAG) -o out/bin/jsonschema-generator ./cmd/jsonschema-generator/
 
 build-wasm: create-out-dir ## Build the wasm evaluation library in out/bin/
-	cd cmd/wasm && $(TINYGOCMD) build -o ../out/bin/gofeatureflag-evaluation.wasm -target wasm -opt=2 -opt=s --no-debug -scheduler=none
+	cd cmd/wasm && $(TINYGOCMD) build -o ../../out/bin/gofeatureflag-evaluation.wasm -target wasm -opt=2 -opt=s --no-debug -scheduler=none
 
 build-wasi: create-out-dir ## Build the wasi evaluation library in out/bin/
-	cd cmd/wasm && $(TINYGOCMD) build -o ../out/bin/gofeatureflag-evaluation.wasi -target wasi -opt=2 -opt=s --no-debug -scheduler=none
+	cd cmd/wasm && $(TINYGOCMD) build -o ../../out/bin/gofeatureflag-evaluation.wasi -target wasi -opt=2 -opt=s --no-debug -scheduler=none
 
 build-modules:  ## Run build command to build all modules in the workspace
 	@echo "Building all modules in the workspace..."
