@@ -1,17 +1,8 @@
 name: Release
 on:
-  workflow_call:
-    inputs:
-      version:
-        type: string
-        required: true
-    secrets:
-      DOCKER_USERNAME:
-        required: true
-      DOCKER_PASSWORD:
-        required: true
-      PERSONAL_GITHUB_TOKEN:
-        required: true
+  push:
+    tags:
+      - "v*"
 
 permissions:
   contents: read
@@ -51,14 +42,15 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    env:
-      VERSION: ${{ inputs.version }}
     steps:
+      - name: Extract version from tag
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> "$GITHUB_ENV"
+
       - name: Echo Release wasm version
         env:
-          VERSION: ${{ inputs.version }}
+          VERSION: ${{ env.VERSION }}
         run: |
-          echo "Release wasm version: $VERSION"
+          echo "Release wasm version: ${VERSION}"
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
@@ -73,14 +65,16 @@ jobs:
           tinygo-version: "0.37.0"
       - name: Release WASM
         env:
-          VERSION: ${{ inputs.version }}
+          VERSION: ${{ env.VERSION }}
         run: ./.github/ci-scripts/release_wasm.sh "$VERSION"
       - name: Upload assets
         uses: softprops/action-gh-release@6da8fa9354ddfdc4aeace5fc48d7f679b5214090 # v2.4.1
+        env:
+          VERSION: ${{ env.VERSION }}
         with:
           files: |
-            ./out/release-wasm/gofeatureflag-evaluation_${{ env.VERSION }}.wasi
-            ./out/release-wasm/gofeatureflag-evaluation_${{ env.VERSION }}.wasm
+            ./out/release-wasm/gofeatureflag-evaluation_${VERSION}.wasi
+            ./out/release-wasm/gofeatureflag-evaluation_${VERSION}.wasm
 
       - name: Checkout wasm-releases repository
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -91,17 +85,19 @@ jobs:
 
       - name: Copy WASM files to wasm-releases repository
         env:
-          VERSION: ${{ inputs.version }}
+          VERSION: ${{ env.VERSION }}
         run: |
           mkdir -p wasm-releases/evaluation
-          cp "./out/release-wasm/gofeatureflag-evaluation_${VERSION}.wasi" wasm-releases/evaluation/
-          cp "./out/release-wasm/gofeatureflag-evaluation_${VERSION}.wasm" wasm-releases/evaluation/
+          cp ./out/release-wasm/gofeatureflag-evaluation_${VERSION}.wasi wasm-releases/evaluation/
+          cp ./out/release-wasm/gofeatureflag-evaluation_${VERSION}.wasm wasm-releases/evaluation/
 
       - name: Create Pull Request to wasm-releases
         uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
+        env:
+          VERSION: ${{ env.VERSION }}
         with:
           branch: publish-wasm-evaluation-${{ env.VERSION }}
-          title: "feat: Publish WASM files for ${{ env.VERSION}}"
+          title: "feat: Publish WASM files for ${{ env.VERSION }}"
           body: |
             Automated pull request to publish evaluation WASM files for release ${{ env.VERSION }}
 
@@ -123,6 +119,9 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Extract version from tag
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> "$GITHUB_ENV"
+
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
@@ -275,12 +274,14 @@ jobs:
     env:
       MAIN_BRANCH_NAME: main
       WEBSITE_DIR: website
-      VERSION: ${{ inputs.version }}
     name: Create new documentation tag
     needs:
       - goreleaser
       - wasm-release
     steps:
+      - name: Extract version from tag
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> "$GITHUB_ENV"
+
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
@@ -296,7 +297,7 @@ jobs:
       - name: Tagging a new version
         working-directory: ./release/${{ env.WEBSITE_DIR }}
         env:
-          VERSION: ${{ inputs.version }}
+          VERSION: ${{ env.VERSION }}
         run: npm run docusaurus docs:version "$VERSION"
 
       - name: Setup go
@@ -319,10 +320,12 @@ jobs:
       - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: Copy version to main branch
-        run: cp -rf release/$WEBSITE_DIR/ $MAIN_BRANCH_NAME
+        run: cp -rf release/${{ env.WEBSITE_DIR }}/ $MAIN_BRANCH_NAME
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
+        env:
+          VERSION: ${{ env.VERSION }}
         with:
           branch: create-new-doc-version-${{ env.VERSION }}
           title: "docs(docusaurus): Create a new documentation version ${{ env.VERSION }}"
@@ -346,8 +349,10 @@ jobs:
     env:
       SCHEMA_LOCATION: .schema/flag-schema.json
       MAIN_BRANCH_NAME: main
-      VERSION: ${{ inputs.version }}
     steps:
+      - name: Extract version from tag
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> "$GITHUB_ENV"
+
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
@@ -382,6 +387,8 @@ jobs:
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
+        env:
+          VERSION: ${{ env.VERSION }}
         with:
           branch: release-jsonschema-${{ env.VERSION }}
           title: "feat(jsonschema): Release a new version of the jsonschema ${{ env.VERSION }}"
@@ -406,20 +413,24 @@ jobs:
     env:
       CHART_YAML_FILE_LOCATION: cmd/relayproxy/helm-charts/relay-proxy/Chart.yaml
       MAIN_BRANCH_NAME: main
-      VERSION: ${{ inputs.version }}
     steps:
+      - name: Extract version from tag
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> "$GITHUB_ENV"
+
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
       - name: Bump chart appVersion
         env:
-          VERSION: ${{ inputs.version }}
+          VERSION: ${{ env.VERSION }}
         run: make bump-helm-chart-version VERSION="$VERSION"
 
       - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
+        env:
+          VERSION: ${{ env.VERSION }}
         with:
           branch: bump-relay-proxy-helm-chart-${{ env.VERSION }}
           title: "chore(helm): Bump relay-proxy helm chart version ${{ env.VERSION }}"

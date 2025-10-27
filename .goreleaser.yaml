@@ -780,12 +780,11 @@ signs:
   - artifacts: checksum
     cmd: gpg
     args: [
-      "--batch",
-      "--yes",
+      "--batch", "--yes",
       "--armor",
       "--pinentry-mode", "loopback",
-      "--passphrase", "{{ .Env.SIGN_RELEASE_GPG_PASSPHRASE }}",
-      "--local-user", "{{ .Env.SIGN_RELEASE_GPG_KEY_ID }}",
+      "--local-user", "{{ .Env.GPG_FINGERPRINT }}",
       "--output", "${signature}",
       "--detach-sign", "${artifact}"
     ]
+    signature: "${artifact}.sig"
