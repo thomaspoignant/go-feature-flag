@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 	"go.uber.org/zap/zapcore"
 )
 
@@ -89,7 +90,7 @@ func (c *Config) validateFlagSetCommonConfig(flagset *FlagSet) error {
 }
 
 // validateRetrievers validates the retrievers
-func validateRetrievers(retriever *RetrieverConf, retrievers *[]RetrieverConf) error {
+func validateRetrievers(retriever *retrieverconf.RetrieverConf, retrievers *[]retrieverconf.RetrieverConf) error {
 	if retriever == nil && retrievers == nil {
 		return fmt.Errorf("no retriever available in the configuration")
 	}

@@ -6,13 +6,6 @@
     text-align: center;
 }
 
-.title {
-    line-height: 2.5rem;
-    color: var(--goff-main-title-color);
-    font-family: Poppins, sans-serif;
-    font-weight: 800;
-}
-
 .emailInput {
     padding: 1rem;
     font-size: 1.05rem;

@@ -11,6 +11,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/model"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/testdata/mock"
+	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 	"go.uber.org/zap"
 )
 
@@ -20,7 +21,7 @@ func TestWithDefaultMode(t *testing.T) {
 			CommonFlagSet: config.CommonFlagSet{
 				PollingInterval: 60000, // 1 minute in milliseconds
 				FileFormat:      "yaml",
-				Retrievers: &[]config.RetrieverConf{
+				Retrievers: &[]retrieverconf.RetrieverConf{
 					{Kind: "file", Path: "../../../testdata/flag-config.yaml"},
 				},
 			},
@@ -38,7 +39,7 @@ func TestWithDefaultMode(t *testing.T) {
 			CommonFlagSet: config.CommonFlagSet{
 				PollingInterval: 60000, // 1 minute in milliseconds
 				FileFormat:      "yaml",
-				Retrievers: &[]config.RetrieverConf{
+				Retrievers: &[]retrieverconf.RetrieverConf{
 					{Kind: "file", Path: "../../../testdata/flag-config.yaml"},
 				},
 			},
@@ -62,7 +63,7 @@ func TestWithDefaultMode(t *testing.T) {
 			CommonFlagSet: config.CommonFlagSet{
 				PollingInterval: 60000, // 1 minute in milliseconds
 				FileFormat:      "yaml",
-				Retrievers: &[]config.RetrieverConf{
+				Retrievers: &[]retrieverconf.RetrieverConf{
 					{Kind: "file", Path: "../../../testdata/non-existent-file.yaml"},
 				},
 			},
@@ -82,7 +83,7 @@ func TestWithDefaultMode(t *testing.T) {
 			CommonFlagSet: config.CommonFlagSet{
 				PollingInterval: 60000, // 1 minute in milliseconds
 				FileFormat:      "yaml",
-				Retrievers: &[]config.RetrieverConf{
+				Retrievers: &[]retrieverconf.RetrieverConf{
 					{Kind: "file", Path: "../../../testdata/flag-config.yaml"},
 				},
 			},
@@ -101,7 +102,7 @@ func TestWithFlagsetsMode(t *testing.T) {
 					CommonFlagSet: config.CommonFlagSet{
 						PollingInterval: 60000, // 1 minute in milliseconds
 						FileFormat:      "yaml",
-						Retrievers: &[]config.RetrieverConf{
+						Retrievers: &[]retrieverconf.RetrieverConf{
 							{Kind: "file", Path: "../../../testdata/flag-config.yaml"},
 						},
 					},
@@ -127,7 +128,7 @@ func TestWithFlagsetsMode(t *testing.T) {
 					CommonFlagSet: config.CommonFlagSet{
 						PollingInterval: 60000, // 1 minute in milliseconds
 						FileFormat:      "yaml",
-						Retrievers: &[]config.RetrieverConf{
+						Retrievers: &[]retrieverconf.RetrieverConf{
 							{Kind: "file", Path: "../../../testdata/flag-config.yaml"},
 						},
 					},
@@ -138,7 +139,7 @@ func TestWithFlagsetsMode(t *testing.T) {
 					CommonFlagSet: config.CommonFlagSet{
 						PollingInterval: 60000, // 1 minute in milliseconds
 						FileFormat:      "yaml",
-						Retrievers: &[]config.RetrieverConf{
+						Retrievers: &[]retrieverconf.RetrieverConf{
 							{Kind: "file", Path: "../../../testdata/flag-config-2nd-file.yaml"},
 						},
 					},
@@ -165,7 +166,7 @@ func TestWithFlagsetsMode(t *testing.T) {
 					CommonFlagSet: config.CommonFlagSet{
 						PollingInterval: 60000, // 1 minute in milliseconds
 						FileFormat:      "yaml",
-						Retrievers: &[]config.RetrieverConf{
+						Retrievers: &[]retrieverconf.RetrieverConf{
 							{Kind: "file", Path: "../../../testdata/flag-config.yaml"},
 						},
 					},
@@ -193,7 +194,7 @@ func TestWithFlagsetsMode(t *testing.T) {
 					CommonFlagSet: config.CommonFlagSet{
 						PollingInterval: 60000, // 1 minute in milliseconds
 						FileFormat:      "yaml",
-						Retrievers: &[]config.RetrieverConf{
+						Retrievers: &[]retrieverconf.RetrieverConf{
 							{Kind: "file", Path: "../../../testdata/non-existent-file.yaml"},
 						},
 					},
@@ -251,7 +252,7 @@ func TestMonitoringInfoErrors(t *testing.T) {
 			CommonFlagSet: config.CommonFlagSet{
 				PollingInterval: 60000,
 				FileFormat:      "yaml",
-				Retrievers: &[]config.RetrieverConf{
+				Retrievers: &[]retrieverconf.RetrieverConf{
 					{Kind: "file", Path: "../../../testdata/flag-config.yaml"},
 				},
 			},
@@ -275,7 +276,7 @@ func TestMonitoringInfoErrors(t *testing.T) {
 					CommonFlagSet: config.CommonFlagSet{
 						PollingInterval: 60000,
 						FileFormat:      "yaml",
-						Retrievers: &[]config.RetrieverConf{
+						Retrievers: &[]retrieverconf.RetrieverConf{
 							{Kind: "file", Path: "../../../testdata/flag-config.yaml"},
 						},
 					},
@@ -286,7 +287,7 @@ func TestMonitoringInfoErrors(t *testing.T) {
 					CommonFlagSet: config.CommonFlagSet{
 						PollingInterval: 60000,
 						FileFormat:      "yaml",
-						Retrievers: &[]config.RetrieverConf{
+						Retrievers: &[]retrieverconf.RetrieverConf{
 							{Kind: "file", Path: "../../../testdata/flag-config-2nd-file.yaml"},
 						},
 					},

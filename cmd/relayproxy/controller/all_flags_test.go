@@ -15,6 +15,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/controller"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"go.uber.org/zap"
 )
@@ -86,13 +87,35 @@ func Test_all_flag_Handler_DefaultMode(t *testing.T) {
 				bodyFile: "../testdata/controller/all_flags/valid_response_specify_flags.json",
 			},
 		},
+		{
+			name: "user context without custom field should not crash",
+			args: args{
+				bodyFile:            "../testdata/controller/all_flags/invalid_user_context_request.json",
+				configFlagsLocation: configFlagsLocation,
+			},
+			want: want{
+				httpCode: http.StatusOK,
+				bodyFile: "../testdata/controller/all_flags/invalid_user_context_response.json",
+			},
+		},
+		{
+			name: "evaluation context without custom field should not crash",
+			args: args{
+				bodyFile:            "../testdata/controller/all_flags/invalid_evaluation_context_request.json",
+				configFlagsLocation: configFlagsLocation,
+			},
+			want: want{
+				httpCode: http.StatusOK,
+				bodyFile: "../testdata/controller/all_flags/invalid_evaluation_context_response.json",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			conf := config.Config{
 				CommonFlagSet: config.CommonFlagSet{
-					Retriever: &config.RetrieverConf{
-						Kind: config.FileRetriever,
+					Retriever: &retrieverconf.RetrieverConf{
+						Kind: retrieverconf.FileRetriever,
 						Path: tt.args.configFlagsLocation,
 					},
 					Exporter: &config.ExporterConf{
@@ -223,8 +246,8 @@ func Test_all_flag_Handler_FlagsetMode(t *testing.T) {
 					{
 						APIKeys: []string{"test-api-key"},
 						CommonFlagSet: config.CommonFlagSet{
-							Retriever: &config.RetrieverConf{
-								Kind: config.FileRetriever,
+							Retriever: &retrieverconf.RetrieverConf{
+								Kind: retrieverconf.FileRetriever,
 								Path: tt.args.configFlagsLocation,
 							},
 							Exporter: &config.ExporterConf{

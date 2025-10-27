@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -25,15 +24,6 @@ import (
 )
 
 var k = koanf.New(".")
-var DefaultRetriever = struct {
-	Timeout    time.Duration
-	HTTPMethod string
-	GitBranch  string
-}{
-	Timeout:    10 * time.Second,
-	HTTPMethod: http.MethodGet,
-	GitBranch:  "main",
-}
 
 const DefaultLogLevel = "info"
 

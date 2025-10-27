@@ -9,21 +9,22 @@ Please take a moment to review the following guidelines.
 ## Table of Contents
 
 1. [Code of Conduct](#-code-of-conduct)
-2. [How Can I Contribute?](#-how-can-i-contribute)
-3. [Where can I ask questions about the project?](#-where-can-i-ask-questions-about-the-project)
-4. [Book a Meeting](#-book-a-meeting)
-5. [Development Setup](#-development-setup)
-6. [Documentation](#-documentation)
-7. [License](#-license)
-
+1. [How Can I Contribute?](#-how-can-i-contribute)
+1. [Where can I ask questions about the project?](#-where-can-i-ask-questions-about-the-project)
+1. [Book a Meeting](#-book-a-meeting)
+1. [Development Setup](#-development-setup)
+1. [Documentation](#-documentation)
+1. [License](#-license)
 
 ## 🚓 Code of Conduct
+
 We expect all contributors to abide by our [Code of Conduct](CODE_OF_CONDUCT.md).  
 Please read it thoroughly before contributing.
 
 ## 🙇 How Can I Contribute?
 
 ### Bug Reports
+
 If you encounter any bugs or issues with the project, please [create a new issue](../../issues/new?assignees=&labels=bug%2Cneeds-triage&projects=&template=bug.yaml&title=%28bug%29+%3Ctitle%3E) and include as many details as possible, such as:
 
 - A clear and descriptive title
@@ -35,7 +36,7 @@ If you encounter any bugs or issues with the project, please [create a new issue
 
 ### Feature Requests
 
-If you have a feature idea that you would like to see implemented, please [create a new issue](../../issues/new?assignees=&labels=enhancement%2Cneeds-triage&projects=&template=feature.yaml&title=(feature)+<title>) with the following information:
+If you have a feature idea that you would like to see implemented, please [create a new issue](<../../issues/new?assignees=&labels=enhancement%2Cneeds-triage&projects=&template=feature.yaml&title=(feature)+<title>>) with the following information:
 
 - A clear and descriptive title
 - A detailed description of the feature
@@ -43,7 +44,7 @@ If you have a feature idea that you would like to see implemented, please [creat
 
 ### Pull Requests
 
-We welcome contributions in the form of pull requests. 
+We welcome contributions in the form of pull requests.
 
 Before opening a pull request, we kindly request you check if there is an open issue related to your proposed contribution.
 By doing so, we can initiate a discussion and provide feedback on your changes before proceeding with the pull request.
@@ -52,20 +53,20 @@ This approach ensures that your efforts align with the project's goals and enhan
 If you want to take an issue that is already open, please follow those steps:
 
 1. Check that the issue is not assigned.
-2. Assign the issue to yourself by adding a comment on the issue containing the text `/assign-me`.
-3. This will assign you the issue automatically.
-4. After 10 days the assignment will be removed, if you need more time to work on it add a comment on the issue.
+1. Assign the issue to yourself by adding a comment on the issue containing the text `/assign-me`.
+1. This will assign you the issue automatically.
+1. After 10 days the assignment will be removed, if you need more time to work on it add a comment on the issue.
 
 To submit a pull request, follow these steps:
 
 1. Fork the repository to your GitHub account.
-2. Create a new branch from the `main` branch.
-3. Make your changes.
-4. Test your changes thoroughly.
-5. Commit your changes with a clear and descriptive commit message.
-6. Push your branch to your forked repository.
-7. Open a pull request, comparing your branch to the `main` branch of this repository.
-8. Provide a detailed description of your changes in the pull request.
+1. Create a new branch from the `main` branch.
+1. Make your changes.
+1. Test your changes thoroughly.
+1. Commit your changes with a clear and descriptive commit message.
+1. Push your branch to your forked repository.
+1. Open a pull request, comparing your branch to the `main` branch of this repository.
+1. Provide a detailed description of your changes in the pull request.
 
 We will review your pull request as soon as possible.
 Please be patient, as it might take some time for us to get back to you.
@@ -75,13 +76,18 @@ If you want an early feedback on your pull requests, you can use gemini AI pull 
 It will trigger gemini to review your pull request.
 
 ## 🧑‍💻 Development Setup
+
 We always strive to keep the project as simple as possible, so you will find everything you need in the `Makefile` at the root of the repository.
 
-To start contributing please set up your GO environment and run: 
+GO Feature Flag is using a [go workspace](https://go.dev/doc/tutorial/workspaces) that needs to be initialized before starting any development.
+
+To start contributing please set up your GO environment and run:
 
 ```shell
-make vendor
+make workspace-init # it will setup the go.work file at the root of the repo.
+make vendor # will tidy the project and vendor the dependencies
 ```
+
 It will download the dependencies and your project will be ready to be used.
 
 ### Coding standards
@@ -89,23 +95,36 @@ It will download the dependencies and your project will be ready to be used.
 It is easier for contributors to work on the same project if it has a consistent, unified style, approach, and layout.
 
 To help with that, we are using [pre-commit](https://pre-commit.com/) to lint before each commit, I would recommend you to install it, and to apply it to the project by running:
+
 ```bash
 pre-commit install
 ```
 
 ### Tests
+
 Every feature or bug should come with an associate test to keep the coverage as high as possible.
 We aim to have 90% of coverage for the project.
 
+To launch the tests please run:
+
+```bash
+make test
+```
+
+### AI review
+The repository is ready to receive gemini reviews.  
+If you want a fast feedback loop you can add a comment `/gemini review` in your pull request and gemini will review the pull request.
+
 ## 🤔 Where can I ask questions about the project?
+
 If you want to contribute and you have any questions you can use different ways to contact us.
 
 1. You can create an issue and ask your question - [Create an issue](https://github.com/thomaspoignant/go-feature-flag/issues/new/choose).
-2. You can join the `#go-feature-flag` channel in the gopher slack.  
+1. You can join the `#go-feature-flag` channel in the gopher slack.  
    To join:
    - Request an invitation [here](https://invite.slack.golangbridge.org/)
    - Join the [`#go-feature-flag`](https://gophers.slack.com/archives/C029TH8KDFG) channel.
-4. Send us an email to contact@gofeatureflag.org
+1. Send us an email to contact@gofeatureflag.org
 
 ## 🎤 Book A Meeting
 
@@ -115,6 +134,7 @@ This will allow for a focused and interactive discussion.
 ## 📚 Documentation
 
 We are maintaining 2 documentations:
+
 - [README.md](README.md) which contains everything you need to know to start working with the module.
 - [go-feature-flag website](https://gofeatureflag.org) which is the full detail website containing the documentation.
 
@@ -129,9 +149,11 @@ You can start locally the website.
 
 1. Open a terminal and go to the root project of this repository.
 2. Launch the command below, it will install the dependencies and run the local server for the documentation.
+
 ```shell
 make watch-doc
 ```
+
 3. You can now access to the documentation directly in your browser: [http://localhost:3000/](http://localhost:3000/).
 
 ## 🪪 License
@@ -144,4 +166,4 @@ If you want to check the stats of GO Feature Flag you can have a look at https:/
 
 ---
 
-We encourage everyone to participate in this project and make it better for everyone. Happy contributing 🎉 
+We encourage everyone to participate in this project and make it better for everyone. Happy contributing 🎉

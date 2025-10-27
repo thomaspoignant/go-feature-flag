@@ -1,0 +1,53 @@
+---
+sidebar_position: 30
+description: Where to store your flag configuration file
+---
+
+import { getIntegrations } from "@site/data/integrations";
+
+# 📦 Retrieve your feature flags configuration
+
+The module supports different ways of retrieving the flag file.
+
+To retrieve a file you need to provide a [retriever](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/retriever/#Retriever) in your `ffclient.Config{}` during the initialization.  
+
+**Available retrievers**:
+
+<ul>
+  {getIntegrations("")
+    .retrievers.filter((item) => item.docLink !== undefined)
+    .map((r) => (
+      <li key={r.name}>
+        <a href={`../integrations/store-flags-configuration/${r.docLink}`}>
+          {r.name}
+        </a>
+      </li>
+    ))}
+</ul>
+
+:::info
+In each retriever documentation, you will find the configuration needed to set up the retriever.
+:::
+
+## Explicitly call the retrievers
+
+By default, the retrievers are called regularly to refresh the configuration based on the polling interval.
+
+But there are use cases where you want to refresh the configuration explicitly _(for example, during the CI process
+after you have changed your configuration file)_.
+
+To do that, you can call the `ForceRefresh` method on the client.
+
+```go
+// Init ffclient with a file retriever.
+	goff, _ := ffclient.New(ffclient.Config{
+		PollingInterval: 10 * time.Minute,
+		Retriever: &fileretriever.Retriever{
+			Path: "xxxx.yaml",
+		},
+	})
+
+	// ...
+	goff.ForceRefresh()
+	// ...
+```

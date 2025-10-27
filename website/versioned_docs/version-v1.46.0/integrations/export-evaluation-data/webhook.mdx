@@ -1,0 +1,110 @@
+---
+sidebar_position: 80
+description: How to configure a Webhook exporter.
+---
+import { integrations } from "@site/data/integrations";
+import {Mandatory, NotMandatory} from "@site/src/components/checks/checks";
+export const exporterName = 'Webhook'
+export const info = integrations.exporters.find((r) => r.name === exporterName)
+
+# Webhook
+
+## Overview
+{info.longDescription ?? info.description}
+
+Everytime the `FlushInterval` or `MaxEventInMemory` is reached an HTTP call will be emitted to the {exporterName} exporter.
+
+:::info
+If for some reason the {exporterName} HTTP call fails, we will keep the data in memory and retry to add the next time we reach `FlushInterval` or `MaxEventInMemory`.
+:::
+
+## Webhook format
+If you have configured a webhook, a `POST` request will be sent to the `EndpointURL` with a body in this format:
+
+```json
+{
+    "meta": {
+        "hostname": "server01",
+        // ...
+    },
+    "events": [
+        {
+            "kind": "feature",
+            "contextKind": "anonymousUser",
+            "userKey": "14613538188334553206",
+            "creationDate": 1618909178,
+            "key": "test-flag",
+            "variation": "Default",
+            "value": false,
+            "default": false,
+            "source": "SERVER"
+        },
+        // ...
+    ]
+}
+```
+
+## Signature
+This header **`X-Hub-Signature-256`** is sent if the webhook is configured with a **`secret`**.
+This is the **HMAC hex digest** of the request body, and is generated using the **SHA-256** hash function and the **secret as the HMAC key**.
+
+:::caution
+The recommendation is to always use the `Secret` and on your API/webhook always verify the signature key to be sure that you don't get into a man-in-the-middle attack.
+:::
+
+## Configure the relay proxy
+
+To configure your relay proxy to use the {exporterName} exporter, you need to add the following
+configuration to your relay proxy configuration file:
+
+```yaml title="goff-proxy.yaml"
+# ...
+exporters:
+  - kind: webhook
+    endpointUrl: https://your-webhook-url.com/
+# ...
+```
+
+| Field name         |    Mandatory     | Type                | Default  | Description                                                                                                                                                    |
+|--------------------|:----------------:|---------------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `kind`             |  <Mandatory />   | string              | **none** | **Value should be `webhook`**.<br/>_This field is mandatory and describes which retriever you are using._                                                      |
+| `endpointUrl`      |  <Mandatory />   | string              | **none** | EndpointURL of your webhook.                                                                                                                                   |
+| `flushInterval`    | <NotMandatory /> | int                 | `60000`  | The interval in millisecond between 2 calls to the webhook _(if the `maxEventInMemory` is reached before the flushInterval we will call the exporter before)_. |
+| `maxEventInMemory` | <NotMandatory /> | int                 | `100000` | If we hit that limit we will call the exporter.                                                                                                                |
+| `secret`           | <NotMandatory /> | string              | **none** | Secret used to sign your request body and fill the `X-Hub-Signature-256` header.<br/> See [signature section](#signature) for more details.                    |
+| `meta`             | <NotMandatory /> | map[string]string   | **none** | Add all the information you want to see in your request.                                                                                                       |
+| `headers`          | <NotMandatory /> | map[string][]string | **none** | Add all the headers you want to add while calling the endpoint                                                                                                 |
+
+## Configure the GO Module
+To configure your GO module to use the {exporterName} exporter, you need to add the following
+configuration to your `ffclient.Config{}` object:
+
+```go title="example.go"
+config := ffclient.Config{
+    // ...
+   DataExporter: ffclient.DataExporter{
+        // ...
+        Exporter: &webhookexporter.Exporter{
+            EndpointURL: " https://webhook.url/",
+            Secret:      "secret-for-signing",
+            Meta:        map[string]string{
+                "extraInfo": "info",
+            },
+            Headers: map[string][]string{
+                "Authorization": {"Bearer auth_token"},
+            },
+        },
+    },
+    // ...
+}
+err := ffclient.Init(config)
+defer ffclient.Close()
+```
+
+| Field          |    Mandatory     | Description                                                                                                                                |
+|----------------|:----------------:|--------------------------------------------------------------------------------------------------------------------------------------------|
+| `EndpointURL ` |  <Mandatory />   | EndpointURL of your webhook                                                                                                                |
+| `Secret `      | <NotMandatory /> | Secret used to sign your request body and fill the `X-Hub-Signature-256` header.<br/>See [signature section](#signature) for more details. |
+| `Meta`         | <NotMandatory /> | Add all the information you want to see in your request.                                                                                   |
+| `Headers`      | <NotMandatory /> | List of Headers to send to the endpoint                                                                                                    |
+

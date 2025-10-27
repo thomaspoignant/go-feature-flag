@@ -1,0 +1,71 @@
+---
+description: Where to store the flag's configuration?
+---
+import { Card } from "@site/src/components/doc/cardv3";
+import { getIntegrations } from "@site/data/integrations";
+
+# 💽 Store your flags’ configuration
+## Overview
+GO Feature Flag is a tool that makes it easy to implement feature flags in your application.
+
+One of the benefits of using GO Feature Flag is that it is designed to be simple and lightweight.  
+To achieve this, the solution offers flexible ways to manage and store your feature flag configurations.
+
+The goal is to let you store your flag configuration where is suits you the best, and to do this we have built a list
+of [retrievers](../concepts/retriever) that are able to load your file from different sources.
+
+## 📍 Where to store the flag's configuration
+
+The easiest way to get started with GO Feature Flag is to store your flags' configuration in a file.
+
+You can then upload those files where you want, and GO Feature Flag will use it.
+The way the solution achieves this is through the use of retrievers, which allow you to load your feature flag
+configuration file from various sources.
+
+**GO Feature Flag** supports a variety of retrievers out of the box _(see list bellow)_.
+
+You have 2 different ways to specify a retriever depending on if you are using the **GO Module** or the **Relay Proxy**.
+In all the detail pages of the retrievers bellow you will have an example for both examples.
+
+## Available retrievers
+
+Bellow is the full list of retrievers that are available in GO Feature Flag.
+
+<div className={"grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"}>
+  {getIntegrations("").retrievers.filter(item => item.docLink !== undefined).map((retriever) => {
+    return (
+      <Card
+        logo={retriever.logo}
+        link={`store-flags-configuration/${retriever.docLink}`}
+        name={retriever.name}
+        cssLogo={retriever.faLogo}
+        description={retriever.description}
+      />
+    );
+  })}
+</div>
+
+## Custom retriever
+If you have a specific use case that is not covered by the built-in retrievers, you can create your own custom retriever.
+
+To achieve this, you need to implement the [`InitializableRetrieverWithFlagset`](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag/retriever/#InitializableRetrieverWithFlagset) interface in your custom retriever.
+
+```go
+type InitializableRetrieverWithFlagset interface {
+  Retrieve(ctx context.Context) ([]byte, error)
+  Init(ctx context.Context, logger *fflog.FFLogger, flagset *string) error
+  Shutdown(ctx context.Context) error
+  Status() retriever.Status
+}
+```
+
+To avoid any issue to call the Retrieve function before the Init function, you have to manage the status of your retriever.
+GO Feature Flag will try to call the Retrieve function only if the status is `RetrieverStatusReady`.
+
+:::note
+If you think your custom retriever could be useful for others, feel free to open a [pull request](https://github.com/thomaspoignant/go-feature-flag/pulls) to add it to the list of available retrievers.
+:::
+
+:::warning
+If you are using a custom retriever, it is easy to use it for the GO Module, but if you want to use it in the relay proxy you will have to recompile it yourself.
+:::

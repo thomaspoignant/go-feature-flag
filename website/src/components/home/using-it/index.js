@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import Link from '@docusaurus/Link';
 import lyft from '@site/static/img/using-it/lyft.png';
 import tencent from '@site/static/img/using-it/tencent.png';
 import minder from '@site/static/img/using-it/minder.png';
@@ -10,6 +11,8 @@ import agentero from '@site/static/img/using-it/agentero.png';
 import mecena from '@site/static/img/using-it/mecena.png';
 import landsend from '@site/static/img/using-it/landsend.png';
 import helloworldcs from '@site/static/img/using-it/helloworldcs.png';
+import miro from '@site/static/img/using-it/miro.png';
+import stacklok from '@site/static/img/using-it/stacklok.png';
 
 export function UsingIt() {
   const companies = [
@@ -17,19 +20,25 @@ export function UsingIt() {
       name: 'Grafana Labs',
       logo: grafana,
       url: 'https://grafana.com',
-      imgClassName: 'max-w-48',
+      imgClassName: 'max-w-56',
+    },
+    {
+      name: 'Miro',
+      logo: miro,
+      url: 'https://miro.com',
+      imgClassName: 'max-w-36',
     },
     {
       name: 'Cast.ai',
       logo: castai,
       url: 'https://cast.ai',
-      imgClassName: 'max-w-24',
+      imgClassName: 'max-w-32',
     },
     {
       name: 'Lyft',
       logo: lyft,
       url: 'https://lyft.com',
-      imgClassName: 'max-w-16',
+      imgClassName: 'max-w-20',
     },
     {
       name: 'Tencent',
@@ -66,6 +75,11 @@ export function UsingIt() {
       logo: helloworldcs,
       url: 'https://helloworldcs.org/',
     },
+    {
+      name: 'Stacklok',
+      logo: stacklok,
+      url: 'https://github.com/stacklok/',
+    },
   ];
 
   return (
@@ -91,17 +105,18 @@ UsingItLogos.propTypes = {
 
 function UsingItLogos({companies}) {
   return (
-    <div
-      className={
-        'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 2xl:grid-cols-10 mt-8 items-center mb-0'
-      }>
+    <div className={'grid grid-cols-2 lg:grid-cols-6 mt-8 items-center mb-0'}>
       {companies.map(company => (
         <div key={company.name}>
-          <img
-            src={company.logo}
-            alt={company.name}
-            className={company.imgClassName ? company.imgClassName : 'max-w-36'}
-          />
+          <Link to={company.url}>
+            <img
+              src={company.logo}
+              alt={company.name}
+              className={
+                company.imgClassName ? company.imgClassName : 'max-w-36'
+              }
+            />
+          </Link>
         </div>
       ))}
     </div>

@@ -6,90 +6,12 @@
 
 /* You can override the default Infima variables here. */
 
+/* Import variables from a separate file to prevent Tailwind from purging them */
+@import './variables.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-:root {
-    --ifm-color-primary: #2e8555;
-    --ifm-color-primary-dark: #29784c;
-    --ifm-color-primary-darker: #277148;
-    --ifm-color-primary-darkest: #205d3b;
-    --ifm-color-primary-light: #33925d;
-    --ifm-color-primary-lighter: #359962;
-    --ifm-color-primary-lightest: #3cad6e;
-    --ifm-code-font-size: 90%;
-    --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
-
-    --site-primary-hue-saturation: 167 68%;
-    --site-primary-hue-saturation-light: 167 56%;
-
-    --goff-header-background: #fff;
-    --goff-header-text-color: #273437;
-
-    --goff-main-subtitle-color: #9fbeb3;
-    --goff-main-title-color: #273437;
-    --goff-main-ff-description: #8c8c94;
-    --goff-getstarted-bg: #b93a01;
-    --goff-github-bg: #555;
-    --goff-sponsor-bg: #a0bfb5;
-    --goff-whatis-bg: #f9f9f9;
-    --goff-benif-bg: #dff1f4;
-    --goff-feature-list-arrow-color: #9fbeb3;
-    --goff-feature-list-text-color: var(--goff-header-text-color);
-    --goff-benefits-postitem-bg: #fff;
-    --goff-message-error: #ec7063;
-    --goff-message-success: #73c6b6;
-
-    --goff-editor-form-field-bg: #e9e9e9;
-    --goff-editor-container-bg: #f9f9f9;
-    --goff-editor-title-bg: var(--goff-editor-form-field-bg);
-    --goff-editor-placeholder: #73c6b6;
-    --goff-editor-input-placeholder: #73c6b6;
-    --goff-editor-input-text: #363636;
-    --goff-editor-form-bg: var(--goff-editor-title-bg);
-    --goff-switch-bg-on: var(--goff-editor-form-field-bg);
-    --goff-switch-bg-off: var(--goff-editor-form-field-bg);
-    --goff-variation-plus-button-bg: var(--goff-editor-input-placeholder);
-
-    --goff-card-round-color: #e9e9e9;
-    --goff-card-txt-badge-info: var(--goff-sponsor-bg);
-    --goff-card-bg-badge-info: var(--goff-card-round-color);
-    --goff-card-bg-color: #F6F6F6;
-
-    --goff-headline-green: var(--goff-variation-plus-button-bg);
-    --goff-headline-purple: #6c46f2;
-
-}
-
-/* For readability concerns, you should choose a lighter palette in dark mode. */
-[data-theme="dark"] {
-    --ifm-color-primary: #25c2a0;
-    --ifm-color-primary-dark: #21af90;
-    --ifm-color-primary-darker: #1fa588;
-    --ifm-color-primary-darkest: #1a8870;
-    --ifm-color-primary-light: #29d5b0;
-    --ifm-color-primary-lighter: #32d8b4;
-    --ifm-color-primary-lightest: #4fddbf;
-    --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
-
-    --goff-header-background: #000;
-    --goff-main-subtitle-color: #9fbeb3;
-    --goff-main-title-color: #fff;
-    --goff-feature-list-text-color: #fff;
-    --goff-whatis-bg: #363636;
-    --goff-benefits-postitem-bg: #363636;
-    --goff-benif-bg: #87a8a7;
-
-    --goff-editor-form-field-bg: #444444;
-    --goff-editor-container-bg: #363636;
-    --goff-editor-placeholder: #f1f1f1;
-    --goff-editor-input-text: #f1f1f1;
-
-    --goff-card-bg-color: var(--goff-editor-form-field-bg);
-    --goff-headline-title: #777;
-
-}
 
 
 .menu__link {

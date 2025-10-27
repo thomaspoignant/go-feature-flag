@@ -11,6 +11,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/controller"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"go.uber.org/zap"
 )
@@ -39,8 +40,8 @@ func Test_health_Handler(t *testing.T) {
 			// Create config for default mode with offline flag
 			conf := config.Config{
 				CommonFlagSet: config.CommonFlagSet{
-					Retriever: &config.RetrieverConf{
-						Kind: config.FileRetriever,
+					Retriever: &retrieverconf.RetrieverConf{
+						Kind: retrieverconf.FileRetriever,
 						Path: "../testdata/controller/config_flags.yaml",
 					},
 				},

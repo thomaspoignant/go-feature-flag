@@ -12,6 +12,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"go.uber.org/zap"
 )
@@ -78,7 +79,7 @@ func TestAwsLambdaHandler_GetAdapter(t *testing.T) {
 				StartAsAwsLambda: true,
 				AwsLambdaAdapter: tt.mode,
 				CommonFlagSet: config.CommonFlagSet{
-					Retrievers: &[]config.RetrieverConf{
+					Retrievers: &[]retrieverconf.RetrieverConf{
 						{
 							Kind: "file",
 							Path: "../../../testdata/flag-config.yaml",
@@ -172,7 +173,7 @@ func TestAwsLambdaHandler_BasePathSupport(t *testing.T) {
 
 	flagsetManager, err := service.NewFlagsetManager(&config.Config{
 		CommonFlagSet: config.CommonFlagSet{
-			Retrievers: &[]config.RetrieverConf{
+			Retrievers: &[]retrieverconf.RetrieverConf{
 				{
 					Kind: "file",
 					Path: "../../../testdata/flag-config.yaml",

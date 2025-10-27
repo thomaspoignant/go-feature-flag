@@ -14,6 +14,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/ofrep"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 	"go.uber.org/zap"
 )
 
@@ -101,9 +102,9 @@ func Test_Bulk_Evaluation(t *testing.T) {
 				CommonFlagSet: config.CommonFlagSet{
 					PollingInterval: 10000, // 10 seconds in milliseconds
 					FileFormat:      "yaml",
-					Retrievers: &[]config.RetrieverConf{
+					Retrievers: &[]retrieverconf.RetrieverConf{
 						{
-							Kind: config.FileRetriever,
+							Kind: retrieverconf.FileRetriever,
 							Path: tt.args.configFlagsLocation,
 						},
 					},
@@ -251,9 +252,9 @@ func Test_Evaluate(t *testing.T) {
 				CommonFlagSet: config.CommonFlagSet{
 					PollingInterval: 10000, // 10 seconds in milliseconds
 					FileFormat:      "yaml",
-					Retrievers: &[]config.RetrieverConf{
+					Retrievers: &[]retrieverconf.RetrieverConf{
 						{
-							Kind: config.FileRetriever,
+							Kind: retrieverconf.FileRetriever,
 							Path: tt.args.configFlagsLocation,
 						},
 					},
