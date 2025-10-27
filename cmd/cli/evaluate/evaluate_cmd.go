@@ -279,6 +279,7 @@ func runCheck(
 	retrieverConf retrieverconf.RetrieverConf) error {
 	output := helper.Output{}
 
+	// nolint:musttag
 	detailed, err := json.MarshalIndent(retrieverConf, "", "  ")
 	if err != nil {
 		return err
