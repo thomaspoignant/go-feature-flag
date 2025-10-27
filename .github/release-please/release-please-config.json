@@ -41,8 +41,7 @@
                 "openfeature/providers/kotlin-provider",
                 "openfeature/providers/python-provider",
                 ".github/release-please"
-            ],
-            "release-as": "v1.47.0"
+            ]
         },
         "modules/evaluation": {
             "release-type": "go",
