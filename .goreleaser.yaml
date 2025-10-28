@@ -32,6 +32,8 @@ builds:
       - goos: linux
         goarch: arm
         goarm: 6
+      - goos: windows
+        goarch: arm
 
   - id: go-feature-flag
     main: ./cmd/relayproxy
@@ -56,6 +58,8 @@ builds:
       - goos: linux
         goarch: arm
         goarm: 6
+      - goos: windows
+        goarch: arm
 
   - id: go-feature-flag-lint
     main: ./cmd/lint
@@ -80,6 +84,8 @@ builds:
       - goos: linux
         goarch: arm
         goarm: 6
+      - goos: windows
+        goarch: arm
 
   - id: go-feature-flag-cli
     main: ./cmd/cli
@@ -104,6 +110,8 @@ builds:
       - goos: linux
         goarch: arm
         goarm: 6
+      - goos: windows
+        goarch: arm
 
   - id: go-feature-flag-editor
     main: ./cmd/editor
@@ -123,6 +131,8 @@ builds:
       - goos: linux
         goarch: arm
         goarm: 6
+      - goos: windows
+        goarch: arm
 
   # Build an AWS lambda compatible binary
   - id: go-feature-flag-lambda
