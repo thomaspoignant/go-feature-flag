@@ -131,6 +131,8 @@ builds:
       - goos: linux
         goarch: arm
         goarm: 6
+      - goos: windows
+        goarch: arm
 
   # Build an AWS lambda compatible binary
   - id: go-feature-flag-lambda
