@@ -42,7 +42,7 @@
                 "openfeature/providers/python-provider",
                 ".github/release-please"
             ],
-            "release-as": "v1.47.0"
+            "release-as": "v1.47.1"
         },
         "modules/evaluation": {
             "release-type": "go",

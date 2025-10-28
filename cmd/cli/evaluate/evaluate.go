@@ -19,6 +19,7 @@ type evaluate struct {
 	evaluationCtx string
 }
 
+// Evaluate evaluates the feature flags based on the configuration and context
 func (e evaluate) Evaluate() (map[string]model.RawVarResult, error) {
 	c := ffclient.Config{
 		PollingInterval:       10 * time.Minute,
