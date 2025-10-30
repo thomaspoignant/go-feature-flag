@@ -33,6 +33,7 @@ Since we are using an attribute that is common to multiple users at the same tim
 :::warning
 - If a value in the corresponding `bucketingKey` is not found in the **evaluation context**, the flag rules will not be evaluated, and the SDK will return the default value.
 - Since the `bucketingKey` is not unique to a user, you can end up with a not uniform distribution of users in the variations depending on the repartition of the `bucketingKey` values.
+- The bucketing key must be a **string**.
 :::
 
 ## Example: Split users based on their team ID
@@ -68,3 +69,44 @@ boolValue, _ := client.BooleanValue("first-flag", false, evalCtx)
 
 As a result, users who are members of the same team will receive the same flag variation, consistently.  
 A different `bucketingKey` can be used per experiment, though normally you'll only have a handful of possible values.
+
+## Example: Using nested properties for bucketing
+
+GO Feature Flag supports dot notation for accessing nested properties in your evaluation context. This is particularly useful when your context has a hierarchical structure.
+
+For instance, if you want to bucket users based on their company ID, which is nested inside a `company` object:
+
+```yaml title="flag-config.goff.yaml"
+premium-feature:
+  # highlight-next-line
+  bucketingKey: "company.id"
+  variations:
+    enabled: true
+    disabled: false
+  defaultRule:
+    percentage:
+      enabled: 20
+      disabled: 80
+```
+
+The evaluation context should include the nested structure:
+
+```go title="example.go"
+evalCtx := openfeature.NewEvaluationContext(
+    "user-456",
+    map[string]interface{}{
+        "company": map[string]interface{}{
+            "id":   "company-789",
+            "name": "GO Feature Flag",
+            "tier": "enterprise",
+        },
+    },
+)
+boolValue, _ := client.BooleanValue("premium-feature", false, evalCtx)
+```
+
+In this example, all users from the same company will receive the same feature variation because the bucketing is based on `company.id`.
+
+:::tip Deep nesting
+You can use multiple levels of nesting, such as `user.profile.role` or `organization.settings.region`, allowing for flexible bucketing strategies based on your data structure.
+:::
