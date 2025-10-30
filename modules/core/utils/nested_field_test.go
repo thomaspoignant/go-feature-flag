@@ -65,6 +65,16 @@ func TestGetNestedFieldValue(t *testing.T) {
 			key:     "a.b",
 			wantErr: true,
 		},
+		{
+			name: "trying to navigate into non-map value returns error",
+			ctx: map[string]interface{}{
+				"user": map[string]interface{}{
+					"name": "alice", // name is a string, not a map
+				},
+			},
+			key:     "user.name.first", // trying to access .first on a string
+			wantErr: true,
+		},
 	}
 
 	for _, tt := range tests {
