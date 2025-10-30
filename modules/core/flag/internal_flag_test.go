@@ -2082,6 +2082,37 @@ func TestInternalFlag_ValueWithBucketingKey(t *testing.T) {
 			wantForTargetingKey: "variation_A",
 			wantForTeamID:       "variation_B",
 		},
+		{
+			name: "Should use nested bucketing key when set",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"variation_A": testconvert.Interface("value_A"),
+					"variation_B": testconvert.Interface("value_B"),
+					"variation_C": testconvert.Interface("value_C"),
+				},
+				BucketingKey: testconvert.String("company.id"),
+				DefaultRule: &flag.Rule{
+					Percentages: &map[string]float64{
+						"variation_A": 33,
+						"variation_B": 67,
+					},
+				},
+			},
+			args: args{
+				flagName: "my-flag",
+				user: ffcontext.NewEvaluationContextBuilder("user-key").
+					AddCustom("teamId", "team-123").
+					AddCustom("company", map[string]any{
+						"id": "company-456",
+					}).
+					Build(),
+				flagContext: flag.Context{
+					DefaultSdkValue: "value_default",
+				},
+			},
+			wantForTargetingKey: "variation_A",
+			wantForTeamID:       "variation_B",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -2107,33 +2138,117 @@ func TestInternalFlag_ValueWithBucketingKey(t *testing.T) {
 	}
 }
 
-func TestInternalFlag_ValueWithBucketingKeyNotFound(t *testing.T) {
-	f := &flag.InternalFlag{
-		Variations: &map[string]*interface{}{
-			"variation_A": testconvert.Interface("value_A"),
-			"variation_B": testconvert.Interface("value_B"),
-			"variation_C": testconvert.Interface("value_C"),
+func TestInternalFlag_ValueWithInvalidBucketingKey(t *testing.T) {
+	type args struct {
+		flagName    string
+		user        ffcontext.Context
+		flagContext flag.Context
+	}
+	tests := []struct {
+		name string
+		flag flag.InternalFlag
+		args args
+		want flag.ResolutionDetails
+	}{
+		{
+			name: "Should return error when bucketing key not found",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"variation_A": testconvert.Interface("value_A"),
+					"variation_B": testconvert.Interface("value_B"),
+					"variation_C": testconvert.Interface("value_C"),
+				},
+				BucketingKey: testconvert.String("teamId"),
+				DefaultRule: &flag.Rule{
+					Percentages: &map[string]float64{
+						"variation_A": 33,
+						"variation_B": 67,
+					},
+				},
+			},
+			args: args{
+				flagName:    "my-flag",
+				user:        ffcontext.NewEvaluationContextBuilder("user-key").Build(),
+				flagContext: flag.Context{},
+			},
+			want: flag.ResolutionDetails{
+				Variant:      "SdkDefault",
+				Reason:       flag.ReasonError,
+				ErrorCode:    flag.ErrorCodeTargetingKeyMissing,
+				ErrorMessage: "invalid bucketing key",
+			},
 		},
-		BucketingKey: testconvert.String("teamId"),
-		DefaultRule: &flag.Rule{
-			Percentages: &map[string]float64{
-				"variation_A": 33,
-				"variation_B": 67,
+		{
+			name: "Should return error when nested bucketing key not found",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"variation_A": testconvert.Interface("value_A"),
+					"variation_B": testconvert.Interface("value_B"),
+					"variation_C": testconvert.Interface("value_C"),
+				},
+				BucketingKey: testconvert.String("company.id"),
+				DefaultRule: &flag.Rule{
+					Percentages: &map[string]float64{
+						"variation_A": 33,
+						"variation_B": 67,
+					},
+				},
+			},
+			args: args{
+				flagName: "my-flag",
+				user: ffcontext.NewEvaluationContextBuilder("user-key").
+					AddCustom("company", map[string]any{
+						"name": "acme-corp",
+					}).
+					Build(),
+				flagContext: flag.Context{},
+			},
+			want: flag.ResolutionDetails{
+				Variant:      "SdkDefault",
+				Reason:       flag.ReasonError,
+				ErrorCode:    flag.ErrorCodeTargetingKeyMissing,
+				ErrorMessage: "impossible to find bucketingKey in context: nested key not found: company.id",
+			},
+		},
+		{
+			name: "Should return error when nested bucketing key is not a string",
+			flag: flag.InternalFlag{
+				Variations: &map[string]*interface{}{
+					"variation_A": testconvert.Interface("value_A"),
+					"variation_B": testconvert.Interface("value_B"),
+					"variation_C": testconvert.Interface("value_C"),
+				},
+				BucketingKey: testconvert.String("company.id"),
+				DefaultRule: &flag.Rule{
+					Percentages: &map[string]float64{
+						"variation_A": 33,
+						"variation_B": 67,
+					},
+				},
+			},
+			args: args{
+				flagName: "my-flag",
+				user: ffcontext.NewEvaluationContextBuilder("user-key").
+					AddCustom("company", map[string]any{
+						"id": 12345,
+					}).
+					Build(),
+				flagContext: flag.Context{},
+			},
+			want: flag.ResolutionDetails{
+				Variant:      "SdkDefault",
+				Reason:       flag.ReasonError,
+				ErrorCode:    flag.ErrorCodeTargetingKeyMissing,
+				ErrorMessage: "invalid bucketing key",
 			},
 		},
 	}
-	_, got := f.Value(
-		"my-flag",
-		ffcontext.NewEvaluationContextBuilder("user-key").Build(),
-		flag.Context{},
-	)
-	want := flag.ResolutionDetails{
-		Variant:      "SdkDefault",
-		Reason:       flag.ReasonError,
-		ErrorCode:    flag.ErrorCodeTargetingKeyMissing,
-		ErrorMessage: "invalid bucketing key",
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, got := tt.flag.Value(tt.args.flagName, tt.args.user, tt.args.flagContext)
+			assert.Equal(t, tt.want, got)
+		})
 	}
-	assert.Equal(t, want, got)
 }
 
 func TestFlag_ProgressiveRollout(t *testing.T) {
