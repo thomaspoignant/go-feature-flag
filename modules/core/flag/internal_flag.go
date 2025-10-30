@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"maps"
-	"strings"
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/modules/core/ffcontext"
@@ -401,17 +400,9 @@ func (f *InternalFlag) GetBucketingKeyValue(ctx ffcontext.Context) (string, erro
 			return ctx.GetKey(), nil
 		}
 
-		var value any
-		if strings.Contains(key, ".") {
-			// we have a nested key
-			var err error
-			value, err = utils.GetNestedFieldValue(ctx.GetCustom(), key)
-			if err != nil {
-				return "", fmt.Errorf("impossible to find bucketingKey in context: %w", err)
-			}
-		} else {
-			// top level bucketing key
-			value = ctx.GetCustom()[key]
+		value, err := utils.GetNestedFieldValue(ctx.GetCustom(), key)
+		if err != nil {
+			return "", fmt.Errorf("impossible to find bucketingKey in context: %w", err)
 		}
 
 		switch v := value.(type) {

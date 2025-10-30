@@ -2175,7 +2175,7 @@ func TestInternalFlag_ValueWithInvalidBucketingKey(t *testing.T) {
 				Variant:      "SdkDefault",
 				Reason:       flag.ReasonError,
 				ErrorCode:    flag.ErrorCodeTargetingKeyMissing,
-				ErrorMessage: "invalid bucketing key",
+				ErrorMessage: "impossible to find bucketingKey in context: nested key not found: teamId",
 			},
 		},
 		{

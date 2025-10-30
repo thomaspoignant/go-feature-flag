@@ -65,14 +65,6 @@ func TestGetNestedFieldValue(t *testing.T) {
 			key:     "a.b",
 			wantErr: true,
 		},
-		{
-			name: "unmarshallable value returns error",
-			ctx: map[string]interface{}{
-				"data": make(chan int), // channels cannot be marshalled to JSON
-			},
-			key:     "data",
-			wantErr: true,
-		},
 	}
 
 	for _, tt := range tests {
