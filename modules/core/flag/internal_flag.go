@@ -399,7 +399,12 @@ func (f *InternalFlag) GetBucketingKeyValue(ctx ffcontext.Context) (string, erro
 		if key == "" {
 			return ctx.GetKey(), nil
 		}
-		value := ctx.GetCustom()[key]
+
+		value, err := utils.GetNestedFieldValue(ctx.GetCustom(), key)
+		if err != nil {
+			return "", fmt.Errorf("impossible to find bucketingKey in context: %w", err)
+		}
+
 		switch v := value.(type) {
 		case string:
 			if v == "" {

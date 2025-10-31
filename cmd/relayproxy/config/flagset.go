@@ -39,6 +39,7 @@ type CommonFlagSet struct {
 	// FixNotifiers, Before version v1.46.0, the notifier was called "notifier" instead of "notifiers".
 	// This is a backward compatibility fix to allow to use the old configuration.
 	// This will be removed in a future version.
+	//
 	// Deprecated: use Notifiers instead.
 	FixNotifiers []NotifierConf `mapstructure:"notifier" koanf:"notifier"`
 
