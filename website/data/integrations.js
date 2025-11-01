@@ -49,6 +49,15 @@ export const integrations = {
       docLink: 'kubernetes-configmap',
     },
     {
+      name: 'Kubernetes Secret',
+      description: 'Loads the configuration from a Kubernetes Secret.',
+      longDescription: `Loads the configuration from a Kubernetes Secret. This retriever is useful when you are using Kubernetes and want to use Secrets to store your configuration files.`,
+      bgColor: 'cornflowerblue',
+      faLogo: 'devicon-kubernetes-plain',
+      logo: k8slogo,
+      docLink: 'kubernetes-secret',
+    },
+    {
       name: 'AWS S3',
       description: 'Retrieves the configuration from an AWS S3 bucket.',
       longDescription: `Retrieves the configuration from an AWS S3 bucket. This retriever is useful when you are using AWS and want to use S3 to store you configuration files.`,

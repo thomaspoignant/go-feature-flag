@@ -36,6 +36,7 @@ type RetrieverConf struct {
 	Item        string              `mapstructure:"item"           koanf:"item"`
 	Namespace   string              `mapstructure:"namespace"      koanf:"namespace"`
 	ConfigMap   string              `mapstructure:"configmap"      koanf:"configmap"`
+	Secret      string              `mapstructure:"secret"         koanf:"secret"`
 	Key         string              `mapstructure:"key"            koanf:"key"`
 	BaseURL     string              `mapstructure:"baseUrl"        koanf:"baseurl"`
 	AuthToken   string              `mapstructure:"token"          koanf:"token"`
@@ -199,26 +200,27 @@ func (c *RetrieverConf) validateAzBlobStorageRetriever() error {
 type RetrieverKind string
 
 const (
-	HTTPRetriever          RetrieverKind = "http"
-	GitHubRetriever        RetrieverKind = "github"
-	GitlabRetriever        RetrieverKind = "gitlab"
-	S3Retriever            RetrieverKind = "s3"
-	FileRetriever          RetrieverKind = "file"
-	GoogleStorageRetriever RetrieverKind = "googleStorage"
-	KubernetesRetriever    RetrieverKind = "configmap"
-	MongoDBRetriever       RetrieverKind = "mongodb"
-	RedisRetriever         RetrieverKind = "redis"
-	BitbucketRetriever     RetrieverKind = "bitbucket"
-	AzBlobStorageRetriever RetrieverKind = "azureBlobStorage"
-	PostgreSQLRetriever    RetrieverKind = "postgresql"
+	HTTPRetriever             RetrieverKind = "http"
+	GitHubRetriever           RetrieverKind = "github"
+	GitlabRetriever           RetrieverKind = "gitlab"
+	S3Retriever               RetrieverKind = "s3"
+	FileRetriever             RetrieverKind = "file"
+	GoogleStorageRetriever    RetrieverKind = "googleStorage"
+	KubernetesRetriever       RetrieverKind = "configmap"
+	KubernetesSecretRetriever RetrieverKind = "secret"
+	MongoDBRetriever          RetrieverKind = "mongodb"
+	RedisRetriever            RetrieverKind = "redis"
+	BitbucketRetriever        RetrieverKind = "bitbucket"
+	AzBlobStorageRetriever    RetrieverKind = "azureBlobStorage"
+	PostgreSQLRetriever       RetrieverKind = "postgresql"
 )
 
 // IsValid is checking if the value is part of the enum
 func (r RetrieverKind) IsValid() error {
 	switch r {
 	case HTTPRetriever, GitHubRetriever, GitlabRetriever, S3Retriever, RedisRetriever,
-		FileRetriever, GoogleStorageRetriever, KubernetesRetriever, MongoDBRetriever,
-		BitbucketRetriever, AzBlobStorageRetriever, PostgreSQLRetriever:
+		FileRetriever, GoogleStorageRetriever, KubernetesRetriever, KubernetesSecretRetriever,
+		MongoDBRetriever, BitbucketRetriever, AzBlobStorageRetriever, PostgreSQLRetriever:
 		return nil
 	}
 	return fmt.Errorf("invalid retriever: kind \"%s\" is not supported", r)
