@@ -97,3 +97,7 @@ func (s *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 
 	return writerAt.Bytes(), nil
 }
+
+func (s *Retriever) SetDownloader(downloader DownloaderAPI) {
+	s.downloader = downloader
+}
