@@ -606,7 +606,7 @@ Thanks so much to our contributors.
 [Become a sponsor](https://github.com/sponsors/thomaspoignant) and show your support to GO Feature Flag.
 
 These are our really cool sponsors!
-<!-- sponsors --><a href="https://github.com/cybozu"><img src="https:&#x2F;&#x2F;github.com&#x2F;cybozu.png" width="60px" alt="User avatar: Cybozu" /></a><a href="https://github.com/AltaModaTech"><img src="https:&#x2F;&#x2F;github.com&#x2F;AltaModaTech.png" width="60px" alt="User avatar: AltaModa Technologies" /></a><!-- sponsors -->
+<!-- sponsors -->No sponsor at the moment! 😢<!-- sponsors -->
 
 ## Adopters
 
