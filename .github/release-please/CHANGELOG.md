@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.47.1](https://github.com/thomaspoignant/go-feature-flag/compare/v1.47.1...v1.47.1) (2025-11-01)
+
+
+### 🚀 New Features
+
+* Support nested property access in bucketingKey ([#4198](https://github.com/thomaspoignant/go-feature-flag/issues/4198)) ([284638d](https://github.com/thomaspoignant/go-feature-flag/commit/284638d019eee39a93aee213dcc729ce9ebcd33f))
+
+
+### 🔧 Chores
+
+* Bump Helm chart version manually after CI failed for 1.47.1 ([#4192](https://github.com/thomaspoignant/go-feature-flag/issues/4192)) ([a3ba28b](https://github.com/thomaspoignant/go-feature-flag/commit/a3ba28bd5ad992e0b46a48535970fb4f3431aa30))
+* Bump NUnit.Analyzers from 4.10.0 to 4.11.0 ([#4197](https://github.com/thomaspoignant/go-feature-flag/issues/4197)) ([f21d093](https://github.com/thomaspoignant/go-feature-flag/commit/f21d093160124bac35af62672259962e7e5925ce))
+* Bump NUnit.Analyzers from 4.11.0 to 4.11.1 ([#4200](https://github.com/thomaspoignant/go-feature-flag/issues/4200)) ([53bd1cf](https://github.com/thomaspoignant/go-feature-flag/commit/53bd1cf0aee64385f4d30b19545a0e97740e1257))
+* Ignore Windows ARM 32bits builds in GoReleaser configuration ([#4195](https://github.com/thomaspoignant/go-feature-flag/issues/4195)) ([f1d1d3d](https://github.com/thomaspoignant/go-feature-flag/commit/f1d1d3d63856d6b9dfe0409cde22e6545d0ff08b))
+
+
+### ⚙️ CI/CD
+
+* Fix bump helm chart ([#4191](https://github.com/thomaspoignant/go-feature-flag/issues/4191)) ([44d2197](https://github.com/thomaspoignant/go-feature-flag/commit/44d2197f3ff4cb0401d4b1f15fe33f67e9df80d2))
+
 ## [1.47.1](https://github.com/thomaspoignant/go-feature-flag/compare/v1.47.1...v1.47.1) (2025-10-27)
 
 
