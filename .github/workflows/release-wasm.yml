@@ -16,7 +16,6 @@ jobs:
     steps:
       - name: Extract version from tag
         run: |
-        run: |
           TAG_NAME="${{ github.ref }}"
           VERSION=$(echo $TAG_NAME | awk -F '/' '{print $NF}' | sed 's/^v//')
           echo "tag_name_full=$TAG_NAME" >> $GITHUB_OUTPUT
