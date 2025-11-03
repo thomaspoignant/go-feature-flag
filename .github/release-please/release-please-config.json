@@ -35,6 +35,7 @@
             "changelog-path": ".github/release-please/CHANGELOG.md",
             "path": ".",
             "component": "go-feature-flag",
+            "group": "main-versions",
             "exclude-paths": [
                 "modules/evaluation",
                 "modules/core",
@@ -63,6 +64,7 @@
             "path": "cmd/wasm",
             "include-component-in-tag": true,
             "component": "cmd/wasm",
+            "group": "main-versions",
             "changelog-path": "CHANGELOG.md"
         },
         "openfeature/providers/kotlin-provider": {
