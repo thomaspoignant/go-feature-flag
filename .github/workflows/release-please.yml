@@ -63,6 +63,28 @@ jobs:
     secrets:
       token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
+  bump-module-core-dependency-for-wasm-module:
+    if: ${{ needs.release-please.outputs.module_core_released == 'true' }}
+    uses: ./.github/workflows/release-bump-modules.yml
+    needs: release-please
+    with:
+      modulePath: modules/core
+      version: ${{ needs.release-please.outputs.module_core_version }}
+      goModDirectoryPath: cmd/wasm
+    secrets:
+      token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+
+  bump-module-evaluation-dependency-for-wasm-module:
+    if: ${{ needs.release-please.outputs.module_evaluation_released == 'true' }}
+    uses: ./.github/workflows/release-bump-modules.yml
+    needs: release-please
+    with:
+      modulePath: modules/evaluation
+      version: ${{ needs.release-please.outputs.module_evaluation_version }}
+      goModDirectoryPath: cmd/wasm
+    secrets:
+      token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+
   python-provider-release:
     if: ${{ needs.release-please.outputs.provider_python_released == 'true' }}
     uses: ./.github/workflows/release-python-provider.yml
