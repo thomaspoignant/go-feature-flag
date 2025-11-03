@@ -1,5 +1,48 @@
 # Changelog
 
+## [1.47.1](https://github.com/thomaspoignant/go-feature-flag/compare/v1.47.1...v1.47.1) (2025-11-03)
+
+
+### 🚀 New Features
+
+* Support nested property access in bucketingKey ([#4198](https://github.com/thomaspoignant/go-feature-flag/issues/4198)) ([284638d](https://github.com/thomaspoignant/go-feature-flag/commit/284638d019eee39a93aee213dcc729ce9ebcd33f))
+
+
+### 🔧 Chores
+
+* Bump @openfeature/react-sdk ([#4216](https://github.com/thomaspoignant/go-feature-flag/issues/4216)) ([60b6f1a](https://github.com/thomaspoignant/go-feature-flag/commit/60b6f1ac2d2d88173f96811260c09dd61432b762))
+* Bump @openfeature/web-sdk ([#4215](https://github.com/thomaspoignant/go-feature-flag/issues/4215)) ([3aba807](https://github.com/thomaspoignant/go-feature-flag/commit/3aba807603dd42084980eebb1a42e129d45e6d19))
+* Bump @openfeature/web-sdk in /examples/openfeature_web/webapp ([#4208](https://github.com/thomaspoignant/go-feature-flag/issues/4208)) ([66599d3](https://github.com/thomaspoignant/go-feature-flag/commit/66599d3df09dfe1bc2f34d4e1b5a40bf9a009cea))
+* Bump cloud.google.com/go/storage from 1.57.0 to 1.57.1 ([#4207](https://github.com/thomaspoignant/go-feature-flag/issues/4207)) ([f9a0257](https://github.com/thomaspoignant/go-feature-flag/commit/f9a0257a4a6e35ece97370a6b93af4f5500c7b7d))
+* Bump eslint in /examples/openfeature_react/react-app ([#4217](https://github.com/thomaspoignant/go-feature-flag/issues/4217)) ([f24f431](https://github.com/thomaspoignant/go-feature-flag/commit/f24f4312f20145b888cc0442c359d1e078dd9be2))
+* Bump eslint in /examples/openfeature_web/webapp ([#4209](https://github.com/thomaspoignant/go-feature-flag/issues/4209)) ([bcfe139](https://github.com/thomaspoignant/go-feature-flag/commit/bcfe139cd6ee60e0b6c7ba891c8b2189913685ef))
+* Bump github.com/aws/aws-sdk-go-v2/config from 1.31.15 to 1.31.16 ([#4206](https://github.com/thomaspoignant/go-feature-flag/issues/4206)) ([0827d15](https://github.com/thomaspoignant/go-feature-flag/commit/0827d15a5f245a52b201c0651011ca2092770371))
+* Bump github.com/aws/aws-sdk-go-v2/credentials ([#4203](https://github.com/thomaspoignant/go-feature-flag/issues/4203)) ([4116fb3](https://github.com/thomaspoignant/go-feature-flag/commit/4116fb31caae3e96e68fe8e8337ff24c5f5b45ea))
+* Bump github.com/aws/aws-sdk-go-v2/feature/s3/manager ([#4213](https://github.com/thomaspoignant/go-feature-flag/issues/4213)) ([a4502c3](https://github.com/thomaspoignant/go-feature-flag/commit/a4502c370cc14016402e28cfdacdd159b0bfbc5d))
+* Bump github.com/aws/aws-sdk-go-v2/service/kinesis ([#4204](https://github.com/thomaspoignant/go-feature-flag/issues/4204)) ([c4ad0a7](https://github.com/thomaspoignant/go-feature-flag/commit/c4ad0a750a6ca6b7e019c64765889626953c774c))
+* Bump github.com/aws/aws-sdk-go-v2/service/sqs ([#4210](https://github.com/thomaspoignant/go-feature-flag/issues/4210)) ([c1c67b7](https://github.com/thomaspoignant/go-feature-flag/commit/c1c67b739478af18ff51609849d3da7ccc1ed0ff))
+* Bump github/codeql-action from 4.31.0 to 4.31.2 ([#4219](https://github.com/thomaspoignant/go-feature-flag/issues/4219)) ([e173a46](https://github.com/thomaspoignant/go-feature-flag/commit/e173a4602e92119a30ba6e9e51e921ce7ef96404))
+* Bump go version v1.24.8 ([#4222](https://github.com/thomaspoignant/go-feature-flag/issues/4222)) ([3f9e324](https://github.com/thomaspoignant/go-feature-flag/commit/3f9e324cbad8c52fbf1d7cf528424ac1862ca5ab))
+* Bump go.mongodb.org/mongo-driver from 1.17.4 to 1.17.6 ([#4212](https://github.com/thomaspoignant/go-feature-flag/issues/4212)) ([0d7f653](https://github.com/thomaspoignant/go-feature-flag/commit/0d7f6532e77ce2c53dc3554600699124ef471869))
+* Bump google.golang.org/api from 0.253.0 to 0.254.0 ([#4214](https://github.com/thomaspoignant/go-feature-flag/issues/4214)) ([73fa97d](https://github.com/thomaspoignant/go-feature-flag/commit/73fa97da010b904e66c6fbd56d4303b1d33a7f0c))
+* Bump Helm chart version manually after CI failed for 1.47.1 ([#4192](https://github.com/thomaspoignant/go-feature-flag/issues/4192)) ([a3ba28b](https://github.com/thomaspoignant/go-feature-flag/commit/a3ba28bd5ad992e0b46a48535970fb4f3431aa30))
+* Bump NUnit.Analyzers from 4.10.0 to 4.11.0 ([#4197](https://github.com/thomaspoignant/go-feature-flag/issues/4197)) ([f21d093](https://github.com/thomaspoignant/go-feature-flag/commit/f21d093160124bac35af62672259962e7e5925ce))
+* Bump NUnit.Analyzers from 4.11.0 to 4.11.1 ([#4200](https://github.com/thomaspoignant/go-feature-flag/issues/4200)) ([53bd1cf](https://github.com/thomaspoignant/go-feature-flag/commit/53bd1cf0aee64385f4d30b19545a0e97740e1257))
+* Bump NUnit.Analyzers from 4.11.1 to 4.11.2 ([#4221](https://github.com/thomaspoignant/go-feature-flag/issues/4221)) ([9b7904c](https://github.com/thomaspoignant/go-feature-flag/commit/9b7904ce0186f5a594a32fd061991cdb18a5f5c3))
+* Bump octokit from 5.0.4 to 5.0.5 in /openfeature/ci_scripts ([#4218](https://github.com/thomaspoignant/go-feature-flag/issues/4218)) ([e0e8a5b](https://github.com/thomaspoignant/go-feature-flag/commit/e0e8a5b89830db39a522026e5fb758f18f6c3d99))
+* Bump org.junit.jupiter:junit-jupiter-engine ([#4220](https://github.com/thomaspoignant/go-feature-flag/issues/4220)) ([581d19e](https://github.com/thomaspoignant/go-feature-flag/commit/581d19e755f5fdd7f63554f213944ef080938516))
+* Ignore Windows ARM 32bits builds in GoReleaser configuration ([#4195](https://github.com/thomaspoignant/go-feature-flag/issues/4195)) ([f1d1d3d](https://github.com/thomaspoignant/go-feature-flag/commit/f1d1d3d63856d6b9dfe0409cde22e6545d0ff08b))
+
+
+### 📚 Documentation
+
+* add programmatic linting example and documentation ([#4223](https://github.com/thomaspoignant/go-feature-flag/issues/4223)) ([f9bc536](https://github.com/thomaspoignant/go-feature-flag/commit/f9bc536f6d77644c74288f277f4f8756ee6e500c))
+
+
+### ⚙️ CI/CD
+
+* Fix bump helm chart ([#4191](https://github.com/thomaspoignant/go-feature-flag/issues/4191)) ([44d2197](https://github.com/thomaspoignant/go-feature-flag/commit/44d2197f3ff4cb0401d4b1f15fe33f67e9df80d2))
+
 ## [1.47.1](https://github.com/thomaspoignant/go-feature-flag/compare/v1.47.1...v1.47.1) (2025-10-27)
 
 
