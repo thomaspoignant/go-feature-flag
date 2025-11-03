@@ -58,6 +58,13 @@
             "component": "modules/core",
             "changelog-path": "CHANGELOG.md"
         },
+        "cmd/wasm": {
+            "release-type": "go",
+            "path": "cmd/wasm",
+            "include-component-in-tag": true,
+            "component": "cmd/wasm",
+            "changelog-path": "CHANGELOG.md"
+        },
         "openfeature/providers/kotlin-provider": {
             "release-type": "java",
             "path": "openfeature/providers/kotlin-provider",
@@ -82,5 +89,14 @@
                 "README.md"
             ]
         }
-    }
+    },
+    "plugins": [
+        {
+          "type": "linked-versions",
+          "groupName": "main-versions",
+          "components": [
+            "go-feature-flag", "cmd/wasm"
+          ]
+      }
+    ]
 }
