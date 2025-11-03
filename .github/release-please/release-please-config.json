@@ -63,7 +63,8 @@
             "path": "cmd/wasm",
             "include-component-in-tag": true,
             "component": "cmd-wasm",
-            "changelog-path": "CHANGELOG.md"
+            "changelog-path": "CHANGELOG.md",
+            "release-as": "0.0.1"
         },
         "openfeature/providers/kotlin-provider": {
             "release-type": "java",
