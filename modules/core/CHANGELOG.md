@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.1.4...modules/core/v0.2.0) (2025-11-03)
+
+
+### 🚀 New Features
+
+* Support nested property access in bucketingKey ([#4198](https://github.com/thomaspoignant/go-feature-flag/issues/4198)) ([284638d](https://github.com/thomaspoignant/go-feature-flag/commit/284638d019eee39a93aee213dcc729ce9ebcd33f))
+
 ## [0.1.4](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.1.3...modules/core/v0.1.4) (2025-10-14)
 
 
