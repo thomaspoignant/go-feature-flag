@@ -35,7 +35,6 @@
             "changelog-path": ".github/release-please/CHANGELOG.md",
             "path": ".",
             "component": "go-feature-flag",
-            "group": "main-versions",
             "exclude-paths": [
                 "modules/evaluation",
                 "modules/core",
@@ -63,9 +62,9 @@
             "release-type": "go",
             "path": "cmd/wasm",
             "include-component-in-tag": true,
-            "component": "cmd/wasm",
-            "group": "main-versions",
-            "changelog-path": "CHANGELOG.md"
+            "component": "cmd-wasm",
+            "changelog-path": "CHANGELOG.md",
+            "release-as": "0.0.1"
         },
         "openfeature/providers/kotlin-provider": {
             "release-type": "java",
@@ -91,14 +90,5 @@
                 "README.md"
             ]
         }
-    },
-    "plugins": [
-        {
-          "type": "linked-versions",
-          "groupName": "main-versions",
-          "components": [
-            "go-feature-flag", "cmd/wasm"
-          ]
-      }
-    ]
+    }
 }
