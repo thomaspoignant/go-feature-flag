@@ -1,6 +1,6 @@
 module github.com/thomaspoignant/go-feature-flag/cmd/wasm
 
-go 1.24.8
+go 1.24
 
 require (
 	github.com/thomaspoignant/go-feature-flag/modules/core v0.1.4
