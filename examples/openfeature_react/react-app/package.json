@@ -13,7 +13,7 @@
     "@openfeature/core": "^1.9.1",
     "@openfeature/go-feature-flag-web-provider": "^0.2.6",
     "@openfeature/react-sdk": "^1.0.1",
-    "@openfeature/web-sdk": "^1.7.0",
+    "@openfeature/web-sdk": "^1.7.1",
     "react": "^19.1.1",
     "react-dom": "^19.2.0"
   },
