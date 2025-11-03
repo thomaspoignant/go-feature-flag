@@ -40,7 +40,8 @@
                 "modules/core",
                 "openfeature/providers/kotlin-provider",
                 "openfeature/providers/python-provider",
-                ".github/release-please"
+                ".github/release-please",
+                "cmd/wasm"
             ],
             "release-as": "v1.47.1"
         },
