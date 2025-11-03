@@ -63,7 +63,7 @@
             "release-type": "go",
             "path": "cmd/wasm",
             "include-component-in-tag": true,
-            "component": "cmd/wasm",
+            "component": "cmd-wasm",
             "group": "main-versions",
             "changelog-path": "CHANGELOG.md"
         },
@@ -97,7 +97,7 @@
           "type": "linked-versions",
           "groupName": "main-versions",
           "components": [
-            "go-feature-flag", "cmd/wasm"
+            "go-feature-flag", "cmd-wasm"
           ]
       }
     ]
