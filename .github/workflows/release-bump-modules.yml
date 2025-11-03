@@ -48,8 +48,9 @@ jobs:
         env:
           VERSION: ${{ inputs.version }}
           MODULE_PATH: ${{ inputs.modulePath }}
+          GO_MOD_DIRECTORY_PATH: ${{ inputs.goModDirectoryPath }}
         with:
-          branch: bump-module-${{ env.MODULE_PATH}}-${{ env.VERSION }}
+          branch: bump-module-${{ env.GO_MOD_DIRECTORY_PATH }}-${{ env.MODULE_PATH}}-${{ env.VERSION }}
           title: "chore(dependency): Bump module ${{ env.MODULE_PATH }} ${{ env.VERSION }}"
           body: |
             Automated pull request to bump module ${{ env.MODULE_PATH}} ${{ env.VERSION }}
