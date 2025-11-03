@@ -9,6 +9,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "octokit": "^5.0.4"
+    "octokit": "^5.0.5"
   }
 }

@@ -40,9 +40,9 @@
                 "modules/core",
                 "openfeature/providers/kotlin-provider",
                 "openfeature/providers/python-provider",
-                ".github/release-please"
-            ],
-            "release-as": "v1.47.1"
+                ".github/release-please",
+                "cmd/wasm"
+            ]
         },
         "modules/evaluation": {
             "release-type": "go",
@@ -56,6 +56,13 @@
             "path": "modules/core",
             "include-component-in-tag": true,
             "component": "modules/core",
+            "changelog-path": "CHANGELOG.md"
+        },
+        "cmd/wasm": {
+            "release-type": "go",
+            "path": "cmd/wasm",
+            "include-component-in-tag": true,
+            "component": "cmd/wasm",
             "changelog-path": "CHANGELOG.md"
         },
         "openfeature/providers/kotlin-provider": {
@@ -82,5 +89,14 @@
                 "README.md"
             ]
         }
-    }
+    },
+    "plugins": [
+        {
+          "type": "linked-versions",
+          "groupName": "main-versions",
+          "components": [
+            "go-feature-flag", "cmd/wasm"
+          ]
+      }
+    ]
 }
