@@ -185,3 +185,27 @@ updates:
       - "automerge"
     commit-message:
       prefix: "chore(dependencies)"
+
+  - package-ecosystem: gomod
+    directory: "/modules/core"
+    schedule:
+      interval: weekly
+      time: "01:05"
+    open-pull-requests-limit: 20
+    labels:
+      - "dependencies"
+      - "automerge"
+    commit-message:
+      prefix: "chore(dependencies)"
+
+  - package-ecosystem: gomod
+    directory: "/modules/evaluation"
+    schedule:
+      interval: weekly
+      time: "01:10"
+    open-pull-requests-limit: 20
+    labels:
+      - "dependencies"
+      - "automerge"
+    commit-message:
+      prefix: "chore(dependencies)"
