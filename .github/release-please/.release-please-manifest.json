@@ -1,6 +1,6 @@
 {
     ".": "1.47.1",
-    "cmd/wasm": "0.0.1",
+    "cmd/wasm": "0.0.2",
     "openfeature/providers/python-provider": "0.5.0",
     "openfeature/providers/kotlin-provider": "0.3.0",
     "modules/evaluation": "0.1.2",
