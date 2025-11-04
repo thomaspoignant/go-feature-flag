@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/aws/aws-lambda-go/lambda"
@@ -46,6 +48,7 @@ type Server struct {
 	services       service.Services
 	zapLog         *zap.Logger
 	otelService    opentelemetry.OtelService
+	unixListener   net.Listener
 }
 
 // initRoutes initialize the API endpoints that contain business logic and specificity for the relay proxy
@@ -139,18 +142,27 @@ func (s *Server) Start() {
 	}
 
 	// starting the main application
-	if s.config.ListenPort == 0 {
-		s.config.ListenPort = 1031
+	// Start Unix socket listener if configured
+	if s.config.UnixSocket != "" {
+		go s.startUnixSocket()
+		defer s.cleanupUnixSocket()
 	}
-	address := fmt.Sprintf("0.0.0.0:%d", s.config.ListenPort)
-	s.zapLog.Info(
-		"Starting go-feature-flag relay proxy ...",
-		zap.String("address", address),
-		zap.String("version", s.config.Version))
 
-	err = s.apiEcho.Start(address)
-	if err != nil && !errors.Is(err, http.ErrServerClosed) {
-		s.zapLog.Fatal("Error starting relay proxy", zap.Error(err))
+	// Start TCP listener if port is configured
+	if s.config.ListenPort != 0 {
+		address := fmt.Sprintf("0.0.0.0:%d", s.config.ListenPort)
+		s.zapLog.Info(
+			"Starting go-feature-flag relay proxy ...",
+			zap.String("address", address),
+			zap.String("version", s.config.Version))
+
+		err = s.apiEcho.Start(address)
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			s.zapLog.Fatal("Error starting relay proxy", zap.Error(err))
+		}
+	} else if s.config.UnixSocket != "" {
+		// If only Unix socket is configured, wait for shutdown
+		select {}
 	}
 }
 
@@ -178,8 +190,52 @@ func (s *Server) Stop(ctx context.Context) {
 		}
 	}
 
+	// Close Unix socket listener if it exists
+	s.cleanupUnixSocket()
+
 	err = s.apiEcho.Close()
 	if err != nil {
 		s.zapLog.Fatal("impossible to stop go-feature-flag relay proxy", zap.Error(err))
+	}
+}
+
+// startUnixSocket starts the API server on a Unix socket
+func (s *Server) startUnixSocket() {
+	// Remove existing socket file if it exists
+	_ = os.Remove(s.config.UnixSocket)
+
+	listener, err := net.Listen("unix", s.config.UnixSocket)
+	if err != nil {
+		s.zapLog.Fatal("Error creating Unix socket listener", zap.Error(err))
+		return
+	}
+
+	s.unixListener = listener
+	s.zapLog.Info(
+		"Starting go-feature-flag relay proxy on Unix socket ...",
+		zap.String("socket", s.config.UnixSocket),
+		zap.String("version", s.config.Version))
+
+	err = s.apiEcho.Server.Serve(listener)
+	if err != nil && !errors.Is(err, http.ErrServerClosed) {
+		s.zapLog.Fatal("Error starting relay proxy on Unix socket", zap.Error(err))
+	}
+}
+
+// cleanupUnixSocket closes the Unix socket listener and removes the socket file
+func (s *Server) cleanupUnixSocket() {
+	if s.unixListener != nil {
+		err := s.unixListener.Close()
+		if err != nil {
+			s.zapLog.Error("Error closing Unix socket listener", zap.Error(err))
+		}
+		s.unixListener = nil
+	}
+
+	if s.config.UnixSocket != "" {
+		err := os.Remove(s.config.UnixSocket)
+		if err != nil && !os.IsNotExist(err) {
+			s.zapLog.Error("Error removing Unix socket file", zap.Error(err))
+		}
 	}
 }

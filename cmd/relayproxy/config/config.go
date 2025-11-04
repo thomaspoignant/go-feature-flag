@@ -55,6 +55,11 @@ type Config struct {
 	// ListenPort (optional) is the port we are using to start the proxy
 	ListenPort int `mapstructure:"listen" koanf:"listen"`
 
+	// UnixSocket (optional) is the path to the Unix socket file to listen on
+	// When set, the relay proxy will listen on this Unix socket in addition to (or instead of) the TCP port
+	// Example: "/var/run/goff/goff.sock"
+	UnixSocket string `mapstructure:"unixSocket" koanf:"unixsocket"`
+
 	// HideBanner (optional) if true, we don't display the go-feature-flag relay proxy banner
 	HideBanner bool `mapstructure:"hideBanner" koanf:"hidebanner"`
 
@@ -296,8 +301,9 @@ func (c *Config) IsValid() error {
 	if c == nil {
 		return fmt.Errorf("empty config")
 	}
-	if c.ListenPort == 0 {
-		return fmt.Errorf("invalid port %d", c.ListenPort)
+	// Either ListenPort or UnixSocket must be set
+	if c.ListenPort == 0 && c.UnixSocket == "" {
+		return fmt.Errorf("either listen port or unix socket must be configured")
 	}
 	if err := validateLogLevel(c.LogLevel); err != nil {
 		return err
