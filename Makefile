@@ -2,7 +2,7 @@ GOCMD=go
 TINYGOCMD=tinygo
 GOTEST=$(GOCMD) test
 GOVET=$(GOCMD) vet
-ALL_GO_MOD_DIRS := ./ ./modules/evaluation ./modules/core
+ALL_GO_MOD_DIRS := ./ ./modules/evaluation ./modules/core ./cmd/wasm
 
 # In CI we disable workspace mode.
 ifeq ($(CI),true)
@@ -61,6 +61,8 @@ build-doc: ## Build the documentation
 clean: ## Remove build related file
 	-rm -fr ./bin ./out ./release
 	-rm -f ./junit-report.xml checkstyle-report.xml ./coverage.xml ./profile.cov yamllint-checkstyle.xml ./coverage-*.cov.tmp
+	-rm -rf vendor
+	-rm -f go.work.sum go.work
 
 vendor: tidy ## Copy of all packages needed to support builds and tests in the vendor directory
 ifneq ($(CI),)

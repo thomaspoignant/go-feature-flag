@@ -37,82 +37,6 @@ jobs:
       - run: make vendor
       - run: make provider-tests
 
-  wasm-release:
-    needs: integration-tests
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Extract version from tag
-        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> "$GITHUB_ENV"
-
-      - name: Echo Release wasm version
-        env:
-          VERSION: ${{ env.VERSION }}
-        run: |
-          echo "Release wasm version: ${VERSION}"
-      - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-        with:
-          fetch-depth: 0
-      - name: Setup go
-        uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
-        with:
-          go-version-file: go.mod
-          check-latest: true
-      - uses: acifani/setup-tinygo@db56321a62b9a67922bb9ac8f9d085e218807bb3 # v2.0.1
-        with:
-          tinygo-version: "0.37.0"
-      - name: Release WASM
-        env:
-          VERSION: ${{ env.VERSION }}
-        run: ./.github/ci-scripts/release_wasm.sh "$VERSION"
-      - name: Upload assets
-        uses: softprops/action-gh-release@6da8fa9354ddfdc4aeace5fc48d7f679b5214090 # v2.4.1
-        env:
-          VERSION: ${{ env.VERSION }}
-        with:
-          files: |
-            ./out/release-wasm/gofeatureflag-evaluation_${VERSION}.wasi
-            ./out/release-wasm/gofeatureflag-evaluation_${VERSION}.wasm
-
-      - name: Checkout wasm-releases repository
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-        with:
-          repository: go-feature-flag/wasm-releases
-          path: wasm-releases
-          token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
-
-      - name: Copy WASM files to wasm-releases repository
-        env:
-          VERSION: ${{ env.VERSION }}
-        run: |
-          mkdir -p wasm-releases/evaluation
-          cp ./out/release-wasm/gofeatureflag-evaluation_${VERSION}.wasi wasm-releases/evaluation/
-          cp ./out/release-wasm/gofeatureflag-evaluation_${VERSION}.wasm wasm-releases/evaluation/
-
-      - name: Create Pull Request to wasm-releases
-        uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
-        env:
-          VERSION: ${{ env.VERSION }}
-        with:
-          branch: publish-wasm-evaluation-${{ env.VERSION }}
-          title: "feat: Publish WASM files for ${{ env.VERSION }}"
-          body: |
-            Automated pull request to publish evaluation WASM files for release ${{ env.VERSION }}
-
-            This PR includes:
-            - gofeatureflag-evaluation_${{ env.VERSION }}.wasi
-            - gofeatureflag-evaluation_${{ env.VERSION }}.wasm
-          commit-message: Publish evaluation WASM files for ${{ env.VERSION }}
-          assignees: thomaspoignant
-          draft: false
-          signoff: true
-          delete-branch: true
-          labels: automerge
-          path: wasm-releases
-          token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
-
   goreleaser:
     needs: integration-tests
     runs-on: ubuntu-latest
@@ -171,7 +95,6 @@ jobs:
     name: Upload dockerhub readme
     needs:
       - goreleaser
-      - wasm-release
     steps:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -201,7 +124,6 @@ jobs:
     name: Upload dockerhub readme
     needs:
       - goreleaser
-      - wasm-release
     steps:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -221,7 +143,6 @@ jobs:
     name: Upload dockerhub readme
     needs:
       - goreleaser
-      - wasm-release
     steps:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -241,7 +162,6 @@ jobs:
     name: Upload dockerhub readme
     needs:
       - goreleaser
-      - wasm-release
     steps:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -277,7 +197,6 @@ jobs:
     name: Create new documentation tag
     needs:
       - goreleaser
-      - wasm-release
     steps:
       - name: Extract version from tag
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> "$GITHUB_ENV"
@@ -345,7 +264,6 @@ jobs:
     name: Release jsonschema
     needs:
       - goreleaser
-      - wasm-release
     env:
       SCHEMA_LOCATION: .schema/flag-schema.json
       MAIN_BRANCH_NAME: main
@@ -409,7 +327,6 @@ jobs:
     name: Bump Relay Proxy Helm Chart appVersion
     needs:
       - goreleaser
-      - wasm-release
     env:
       CHART_YAML_FILE_LOCATION: cmd/relayproxy/helm-charts/relay-proxy/Chart.yaml
       MAIN_BRANCH_NAME: main
