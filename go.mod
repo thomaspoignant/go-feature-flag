@@ -61,7 +61,7 @@ require (
 	github.com/testcontainers/testcontainers-go/modules/redis v0.39.0
 	github.com/thejerf/slogassert v0.3.4
 	github.com/thomaspoignant/go-feature-flag/modules/core v0.2.0
-	github.com/thomaspoignant/go-feature-flag/modules/evaluation v0.1.2
+	github.com/thomaspoignant/go-feature-flag/modules/evaluation v0.1.3
 	github.com/xdg-go/scram v1.1.2
 	github.com/xitongsys/parquet-go v1.6.2
 	github.com/xitongsys/parquet-go-source v0.0.0-20230830030807-0dd610dbff1d
