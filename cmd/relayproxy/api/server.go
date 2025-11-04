@@ -218,7 +218,10 @@ func (s *Server) startUnixSocket() {
 
 	err = s.apiEcho.Server.Serve(listener)
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
-		s.zapLog.Fatal("Error starting relay proxy on Unix socket", zap.Error(err))
+		// Don't fatal if the error is due to the listener being closed during shutdown
+		if !strings.Contains(err.Error(), "use of closed network connection") {
+			s.zapLog.Fatal("Error starting relay proxy on Unix socket", zap.Error(err))
+		}
 	}
 }
 
