@@ -138,7 +138,7 @@ func (s *Server) Start() {
 		// we can continue because otel is not mandatory to start the server
 	}
 
-	address := fmt.Sprintf("%s:%d", s.config.GetServerHost(), s.config.GetServerPort())
+	address := fmt.Sprintf("%s:%d", s.config.GetServerHost(), s.config.GetServerPort(s.zapLog))
 	s.zapLog.Info(
 		"Starting go-feature-flag relay proxy ...",
 		zap.String("address", address),

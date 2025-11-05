@@ -1,5 +1,7 @@
 package config
 
+import "go.uber.org/zap"
+
 type Server struct {
 	// Host is the server host.
 	// default: 0.0.0.0
@@ -19,8 +21,11 @@ type Server struct {
 
 // GetMonitoringPort returns the monitoring port, checking first the top-level config
 // and then the server config.
-func (c *Config) GetMonitoringPort() int {
+func (c *Config) GetMonitoringPort(logger *zap.Logger) int {
 	if c.MonitoringPort != 0 {
+		if logger != nil {
+			logger.Warn("The monitoring port is set using `monitoringPort`, this option is deprecated, please migrate to `server.monitoringPort`")
+		}
 		return c.MonitoringPort
 	}
 	return c.Server.MonitoringPort
@@ -36,8 +41,11 @@ func (c *Config) GetServerHost() string {
 
 // GetServerPort returns the server port, checking first the server config
 // and then the top-level config, defaulting to 1031 if not set.
-func (c *Config) GetServerPort() int {
+func (c *Config) GetServerPort(logger *zap.Logger) int {
 	if c.Server.Port != 0 {
+		if logger != nil {
+			logger.Warn("The server port is set using `port`, this option is deprecated, please migrate to `server.port`")
+		}
 		return c.Server.Port
 	}
 
