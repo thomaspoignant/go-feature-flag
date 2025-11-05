@@ -75,7 +75,7 @@ require (
 	go.uber.org/zap v1.27.0
 	golang.org/x/net v0.46.0
 	golang.org/x/oauth2 v0.32.0
-	google.golang.org/api v0.254.0
+	google.golang.org/api v0.255.0
 	google.golang.org/grpc v1.76.0
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.34.1
@@ -288,7 +288,7 @@ require (
 	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028 // indirect
 	google.golang.org/genproto v0.0.0-20250603155806-513f23925822 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20250825161204-c5933d9347a5 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20251022142026-3a174f9686a8 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20251029180050-ab9386a59fda // indirect
 	google.golang.org/protobuf v1.36.10 // indirect
 	gopkg.in/evanphx/json-patch.v4 v4.12.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
