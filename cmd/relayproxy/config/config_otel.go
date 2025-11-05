@@ -1,5 +1,4 @@
 package config
-package config
 
 // OpenTelemetryConfiguration is the configuration for the OpenTelemetry part of the relay proxy
 // It is used to configure the OpenTelemetry SDK and the OpenTelemetry Exporter
