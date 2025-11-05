@@ -8,6 +8,27 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+// IsValid contains all the validation of the configuration.
+func (c *Config) IsValid() error {
+	if c == nil {
+		return fmt.Errorf("empty config")
+	}
+	if c.GetServerPort() == 0 {
+		return fmt.Errorf("invalid port %d", c.GetServerPort())
+	}
+	if err := validateLogLevel(c.LogLevel); err != nil {
+		return err
+	}
+	if err := validateLogFormat(c.LogFormat); err != nil {
+		return err
+	}
+
+	if len(c.FlagSets) > 0 {
+		return c.validateFlagSets()
+	}
+	return c.validateDefaultMode()
+}
+
 // validateLogFormat validates the log format
 func validateLogFormat(logFormat string) error {
 	switch strings.ToLower(logFormat) {

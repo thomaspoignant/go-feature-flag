@@ -116,7 +116,7 @@ func (s *Server) Start() {
 	// starting the monitoring server on a different port if configured
 	if s.monitoringEcho != nil {
 		go func() {
-			addressMonitoring := fmt.Sprintf("0.0.0.0:%d", s.config.MonitoringPort)
+			addressMonitoring := fmt.Sprintf("%s:%d", s.config.GetServerHost(), s.config.GetMonitoringPort())
 			s.zapLog.Info(
 				"Starting monitoring",
 				zap.String("address", addressMonitoring))
@@ -138,11 +138,7 @@ func (s *Server) Start() {
 		// we can continue because otel is not mandatory to start the server
 	}
 
-	// starting the main application
-	if s.config.ListenPort == 0 {
-		s.config.ListenPort = 1031
-	}
-	address := fmt.Sprintf("0.0.0.0:%d", s.config.ListenPort)
+	address := fmt.Sprintf("%s:%d", s.config.GetServerHost(), s.config.GetServerPort())
 	s.zapLog.Info(
 		"Starting go-feature-flag relay proxy ...",
 		zap.String("address", address),
