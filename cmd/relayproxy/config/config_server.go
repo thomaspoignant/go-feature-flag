@@ -1,10 +1,20 @@
 package config
 
 type Server struct {
-	Host           string `mapstructure:"host" koanf:"host"`
-	Port           int    `mapstructure:"port" koanf:"port"`
-	UnixSocket     string `mapstructure:"unixSocket" koanf:"unixsocket"`
-	MonitoringPort int    `mapstructure:"monitoringPort" koanf:"monitoringport"`
+	// Host is the server host.
+	// default: 0.0.0.0
+	Host string `mapstructure:"host" koanf:"host"`
+
+	// Port is the server port.
+	// default: 1031
+	Port int `mapstructure:"port" koanf:"port"`
+
+	// MonitoringPort is the monitoring port.
+	// default: none, it will use the same as server port.
+	MonitoringPort int `mapstructure:"monitoringPort" koanf:"monitoringport"`
+
+	// UnixSocket is the server unix socket path.
+	UnixSocket string `mapstructure:"unixSocket" koanf:"unixsocket"`
 }
 
 // GetMonitoringPort returns the monitoring port, checking first the top-level config
