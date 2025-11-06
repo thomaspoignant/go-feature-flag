@@ -65,7 +65,7 @@ func Test_Starting_RelayProxy_with_monitoring_on_same_port(t *testing.T) {
 	}
 
 	s := api.New(proxyConf, services, log.ZapLogger)
-	go func() { s.StartWithContext(context.TODO()) }()
+	go func() { s.StartWithContext(context.Background()) }()
 	defer s.Stop(context.Background())
 
 	time.Sleep(10 * time.Millisecond)
@@ -126,7 +126,7 @@ func Test_Starting_RelayProxy_with_monitoring_on_different_port(t *testing.T) {
 	}
 
 	s := api.New(proxyConf, services, log.ZapLogger)
-	go func() { s.StartWithContext(context.TODO()) }()
+	go func() { s.StartWithContext(context.Background()) }()
 	defer s.Stop(context.Background())
 
 	time.Sleep(10 * time.Millisecond)
@@ -202,7 +202,7 @@ func Test_CheckOFREPAPIExists(t *testing.T) {
 	}
 
 	s := api.New(proxyConf, services, log.ZapLogger)
-	go func() { s.StartWithContext(context.TODO()) }()
+	go func() { s.StartWithContext(context.Background()) }()
 	defer s.Stop(context.Background())
 
 	time.Sleep(10 * time.Millisecond)
@@ -269,7 +269,7 @@ func Test_Middleware_VersionHeader_Enabled_Default(t *testing.T) {
 	}
 
 	s := api.New(proxyConf, services, log.ZapLogger)
-	go func() { s.StartWithContext(context.TODO()) }()
+	go func() { s.StartWithContext(context.Background()) }()
 	defer s.Stop(context.Background())
 
 	time.Sleep(10 * time.Millisecond)
@@ -312,7 +312,7 @@ func Test_VersionHeader_Disabled(t *testing.T) {
 	}
 
 	s := api.New(proxyConf, services, log.ZapLogger)
-	go func() { s.StartWithContext(context.TODO()) }()
+	go func() { s.StartWithContext(context.Background()) }()
 	defer s.Stop(context.Background())
 
 	time.Sleep(10 * time.Millisecond)
@@ -389,7 +389,7 @@ func Test_AuthenticationMiddleware(t *testing.T) {
 				}
 
 				s := api.New(proxyConf, services, log.ZapLogger)
-				go func() { s.StartWithContext(context.TODO()) }()
+				go func() { s.StartWithContext(context.Background()) }()
 				defer s.Stop(context.Background())
 				time.Sleep(10 * time.Millisecond)
 
@@ -467,7 +467,7 @@ func Test_AuthenticationMiddleware(t *testing.T) {
 				}
 
 				s := api.New(proxyConf, services, log.ZapLogger)
-				go func() { s.StartWithContext(context.TODO()) }()
+				go func() { s.StartWithContext(context.Background()) }()
 				defer s.Stop(context.Background())
 				time.Sleep(10 * time.Millisecond)
 
@@ -543,7 +543,7 @@ func Test_Starting_RelayProxy_UnixSocket(t *testing.T) {
 	}
 
 	s := api.New(proxyConf, services, log.ZapLogger)
-	go func() { s.StartWithContext(context.TODO()) }()
+	go func() { s.StartWithContext(context.Background()) }()
 	defer s.Stop(context.Background())
 
 	// Wait for the socket to be created
@@ -623,7 +623,7 @@ func Test_Starting_RelayProxy_UnixSocket_OFREP_API(t *testing.T) {
 	}
 
 	s := api.New(proxyConf, services, log.ZapLogger)
-	go func() { s.StartWithContext(context.TODO()) }()
+	go func() { s.StartWithContext(context.Background()) }()
 	defer s.Stop(context.Background())
 
 	// Wait for the socket to be created
@@ -766,7 +766,7 @@ func Test_Starting_RelayProxy_UnixSocket_Authentication(t *testing.T) {
 			}
 
 			s := api.New(proxyConf, services, log.ZapLogger)
-			go func() { s.StartWithContext(context.TODO()) }()
+			go func() { s.StartWithContext(context.Background()) }()
 			defer s.Stop(context.Background())
 
 			// Wait for the socket to be created
@@ -858,7 +858,7 @@ func Test_Starting_RelayProxy_UnixSocket_VersionHeader(t *testing.T) {
 			}
 
 			s := api.New(proxyConf, services, log.ZapLogger)
-			go func() { s.StartWithContext(context.TODO()) }()
+			go func() { s.StartWithContext(context.Background()) }()
 			defer s.Stop(context.Background())
 
 			// Wait for the socket to be created
