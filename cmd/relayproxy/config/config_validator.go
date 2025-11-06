@@ -13,9 +13,6 @@ func (c *Config) IsValid() error {
 	if c == nil {
 		return fmt.Errorf("empty config")
 	}
-	if c.GetServerPort(nil) == 0 {
-		return fmt.Errorf("invalid port %d", c.GetServerPort(nil))
-	}
 	if err := validateLogLevel(c.LogLevel); err != nil {
 		return err
 	}
