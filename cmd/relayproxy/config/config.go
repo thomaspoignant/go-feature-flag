@@ -110,11 +110,15 @@ type Config struct {
 	AuthorizedKeys APIKeys `mapstructure:"authorizedKeys" koanf:"authorizedkeys"`
 
 	// StartAsAwsLambda (optional) if true, the relay proxy will start ready to be launched as AWS Lambda
+	//
+	// Deprecated: use `Server.Mode = lambda` instead
 	StartAsAwsLambda bool `mapstructure:"startAsAwsLambda" koanf:"startasawslambda"`
 
 	// AwsLambdaAdapter (optional) is the adapter to use when the relay proxy is started as an AWS Lambda.
 	// Possible values are "APIGatewayV1", "APIGatewayV2" and "ALB"
 	// Default: "APIGatewayV2"
+	//
+	// Deprecated: use `Server.LambdaAdapter` instead
 	AwsLambdaAdapter string `mapstructure:"awsLambdaAdapter" koanf:"awslambdaadapter"`
 
 	// AwsApiGatewayBasePath (optional) is the base path prefix for AWS API Gateway deployments.
@@ -122,6 +126,8 @@ type Config struct {
 	// The relay proxy will strip this base path from incoming requests before processing.
 	// Example: if set to "/api/feature-flags", requests to "/api/feature-flags/health" will be processed as "/health"
 	// Default: ""
+	//
+	// Deprecated: use `Server.AwsApiGatewayBasePath` instead
 	AwsApiGatewayBasePath string `mapstructure:"awsApiGatewayBasePath" koanf:"awsapigatewaybasepath"`
 
 	// EvaluationContextEnrichment (optional) will be merged with the evaluation context sent during the evaluation.

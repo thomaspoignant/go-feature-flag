@@ -22,7 +22,9 @@ func (c *Config) IsValid() error {
 	if err := validateLogFormat(c.LogFormat); err != nil {
 		return err
 	}
-
+	if err := c.Server.Validate(); err != nil {
+		return err
+	}
 	if len(c.FlagSets) > 0 {
 		return c.validateFlagSets()
 	}

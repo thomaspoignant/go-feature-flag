@@ -4,7 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
+	"net"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/aws/aws-lambda-go/lambda"
@@ -111,12 +114,59 @@ func (s *Server) initRoutes() {
 	s.addAdminRoutes(cRetrieverRefresh)
 }
 
-// Start launch the API server
 func (s *Server) Start() {
+	// start the OpenTelemetry tracing service
+	err := s.otelService.Init(context.Background(), s.zapLog, s.config)
+	if err != nil {
+		s.zapLog.Error(
+			"error while initializing OTel, continuing without tracing enabled",
+			zap.Error(err),
+		)
+		// we can continue because otel is not mandatory to start the server
+	}
+
+	switch s.config.GetServerMode(s.zapLog) {
+	case config.ServerModeLambda:
+		s.startAwsLambda()
+	case config.ServerModeUnixSocket:
+		s.startUnixSocketServer()
+	default:
+		s.startAsHTTPServer()
+	}
+}
+
+func (s *Server) startUnixSocketServer() {
+	socketPath := s.config.GetUnixSocketPath()
+	// Clean up the old socket file if it exists (important for graceful restarts)
+	if _, err := os.Stat(socketPath); err == nil {
+		os.Remove(socketPath)
+	}
+
+	listener, err := net.Listen("unix", socketPath)
+	if err != nil {
+		log.Fatalf("Error creating Unix listener: %v", err)
+	}
+
+	defer listener.Close()
+	s.apiEcho.Listener = listener
+
+	s.zapLog.Info(
+		"Starting go-feature-flag relay proxy as unix socket...",
+		zap.String("socket", socketPath),
+		zap.String("version", s.config.Version))
+
+	err = s.apiEcho.StartServer(new(http.Server))
+	if err != nil && !errors.Is(err, http.ErrServerClosed) {
+		s.zapLog.Fatal("Error starting relay proxy as unix socket", zap.Error(err))
+	}
+}
+
+// startAsHTTPServer launch the API server
+func (s *Server) startAsHTTPServer() {
 	// starting the monitoring server on a different port if configured
 	if s.monitoringEcho != nil {
 		go func() {
-			addressMonitoring := fmt.Sprintf("%s:%d", s.config.GetServerHost(), s.config.GetMonitoringPort())
+			addressMonitoring := fmt.Sprintf("%s:%d", s.config.GetServerHost(), s.config.GetMonitoringPort(s.zapLog))
 			s.zapLog.Info(
 				"Starting monitoring",
 				zap.String("address", addressMonitoring))
@@ -126,16 +176,6 @@ func (s *Server) Start() {
 			}
 		}()
 		defer func() { _ = s.monitoringEcho.Close() }()
-	}
-
-	// start the OpenTelemetry tracing service
-	err := s.otelService.Init(context.Background(), s.zapLog, s.config)
-	if err != nil {
-		s.zapLog.Error(
-			"error while initializing OTel, continuing without tracing enabled",
-			zap.Error(err),
-		)
-		// we can continue because otel is not mandatory to start the server
 	}
 
 	address := fmt.Sprintf("%s:%d", s.config.GetServerHost(), s.config.GetServerPort(s.zapLog))
@@ -150,14 +190,10 @@ func (s *Server) Start() {
 	}
 }
 
-// StartAwsLambda is starting the relay proxy as an AWS Lambda
-func (s *Server) StartAwsLambda() {
-	lambda.Start(s.getLambdaHandler())
-}
-
-func (s *Server) getLambdaHandler() interface{} {
-	handlerMngr := newAwsLambdaHandlerManager(s.apiEcho, s.config.AwsApiGatewayBasePath)
-	return handlerMngr.GetAdapter(s.config.AwsLambdaAdapter)
+// startAwsLambda is starting the relay proxy as an AWS Lambda
+func (s *Server) startAwsLambda() {
+	handlerMngr := newAwsLambdaHandlerManager(s.apiEcho, s.config.GetAwsApiGatewayBasePath())
+	lambda.Start(handlerMngr.GetAdapter(s.config.GetLambdaAdapter()))
 }
 
 // Stop shutdown the API server
