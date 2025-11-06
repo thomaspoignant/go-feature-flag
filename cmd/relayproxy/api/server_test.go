@@ -33,7 +33,10 @@ func Test_Starting_RelayProxy_with_monitoring_on_same_port(t *testing.T) {
 				},
 			},
 		},
-		ListenPort: 11024,
+		Server: config.Server{
+			Mode: config.ServerModeHTTP,
+			Port: 11024,
+		},
 	}
 	log := log.InitLogger()
 	defer func() { _ = log.ZapLogger.Sync() }()
@@ -90,8 +93,11 @@ func Test_Starting_RelayProxy_with_monitoring_on_different_port(t *testing.T) {
 				},
 			},
 		},
-		ListenPort:     11024,
-		MonitoringPort: 11025,
+		Server: config.Server{
+			Mode:           config.ServerModeHTTP,
+			Port:           11024,
+			MonitoringPort: 11025,
+		},
 	}
 	log := log.InitLogger()
 	defer func() { _ = log.ZapLogger.Sync() }()
@@ -160,7 +166,10 @@ func Test_CheckOFREPAPIExists(t *testing.T) {
 				},
 			},
 		},
-		ListenPort: 11024,
+		Server: config.Server{
+			Mode: config.ServerModeHTTP,
+			Port: 11024,
+		},
 		AuthorizedKeys: config.APIKeys{
 			Admin:      nil,
 			Evaluation: []string{"test"},
@@ -239,7 +248,10 @@ func Test_Middleware_VersionHeader_Enabled_Default(t *testing.T) {
 				},
 			},
 		},
-		ListenPort: 11024,
+		Server: config.Server{
+			Mode: config.ServerModeHTTP,
+			Port: 11024,
+		},
 	}
 	log := log.InitLogger()
 	defer func() { _ = log.ZapLogger.Sync() }()
@@ -278,7 +290,10 @@ func Test_VersionHeader_Disabled(t *testing.T) {
 				},
 			},
 		},
-		ListenPort:           11024,
+		Server: config.Server{
+			Mode: config.ServerModeHTTP,
+			Port: 11024,
+		},
 		DisableVersionHeader: true,
 	}
 	log := log.InitLogger()
@@ -348,7 +363,10 @@ func Test_AuthenticationMiddleware(t *testing.T) {
 							},
 						},
 					},
-					ListenPort:           11024,
+					Server: config.Server{
+						Mode: config.ServerModeHTTP,
+						Port: 11024,
+					},
 					DisableVersionHeader: true,
 				}
 				if tt.configAPIKeys != nil {
@@ -423,7 +441,10 @@ func Test_AuthenticationMiddleware(t *testing.T) {
 							},
 						},
 					},
-					ListenPort:           11024,
+					Server: config.Server{
+						Mode: config.ServerModeHTTP,
+						Port: 11024,
+					},
 					DisableVersionHeader: true,
 				}
 				if tt.configAPIKeys != nil {

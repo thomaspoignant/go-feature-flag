@@ -78,17 +78,17 @@ You can override file configurations using environment variables.
 **Here are some things to know when you are using environment variables:**
 
 - To set an option, the environment variable should have the same name as the configuration option in uppercase.  
-  For example, to set the `listen` option, you can set the `LISTEN` environment variable.
+  For example, to set the `logLevel` option, you can set the `LOGLEVEL` environment variable.
 
   ```shell
-  export LISTEN=8080
+  export LOGLEVEL=debug
   ```
 
 - If you want to set a nested field, you can use `_` to separate each field.  
-  For example, to set the `retrievers` option, you can set the `RETRIEVERS` environment variable.
+  For example, to set the `server.port` option, you can set the `SERVER_PORT` environment variable.
 
   ```shell
-  export RETRIEVER_KIND=github
+  export SERVER_PORT=8080
   ```
 
 - If you want to set an array of string, you can add multiple values separated by a comma.
@@ -110,6 +110,17 @@ You can configure the prefix using the [`envVariablePrefix`](#envvariableprefix)
 :::
 
 ## Configuration Options
+
+### `server`
+
+This is the configuration related to the server behavior of the relay proxy.
+It allows the internal server behaviors such as your execution mode, monitoring port, etc ...
+
+- option name: `server`
+- type: [`serverConfig`](#type-serverconfig)
+- default: **none**
+- mandatory: <NotMandatory />
+- Check the [server configuration types](#type-serverconfig) to have more information about the available options.
 
 ### `retrievers`
 
@@ -189,26 +200,6 @@ We ensure a deviation that is maximum ±10% of your polling interval.
 - default: **`false`**
 - mandatory: <NotMandatory />
 
-### `listen`
-
-This is the port used by the relay proxy when starting the HTTP server.
-
-- option name: `listen`
-- type: **int**
-- default: **`1031`**
-- mandatory: <NotMandatory />
-
-### `monitoringPort`
-
-If set the monitoring endpoints will be served on this specific port.
-
-Check [_"Use specific port for the monitoring"_](./observability#use-specific-port-for-the-monitoring) to have more information.
-
-- option name: `monitoringPort`
-- type: **int**
-- default: **none**
-- mandatory: <NotMandatory />
-
 ### `logLevel`
 
 The log level to use for the relay proxy.
@@ -282,41 +273,6 @@ If `disableNotifierOnInit` is set to **true**, the relay proxy will not call any
 - default: **`false`**
 - mandatory: <NotMandatory />
 
-### `startAsAwsLambda`
-
-Allow to start the relay-proxy as a AWS Lambda, it means that it will start the server to receive request in the AWS format _(see [`awsLambdaAdapter`](#awslambdaadapter) to set the request/response format you are using)_.
-Notifiers is the configuration on where to notify a flag changes.
-
-- option name: `startAsAwsLambda`
-- type: **boolean**
-- default: **`false`**
-- mandatory: <NotMandatory />
-
-### `awsLambdaAdapter`
-
-This parameter allow you to decide which type of AWS lambda handler you want to use.
-
-- option name: `awsLambdaAdapter`
-- type: **string**
-- default: **`APIGatewayV2`**
-- Acceptable values are `APIGatewayV2`, `APIGatewayV1`, `ALB`.
-- mandatory: <NotMandatory />
-- This param is used only if `startAsAwsLambda` is `true`.
-
-### `awsApiGatewayBasePath`
-
-Specifies the base path prefix for AWS API Gateway deployments when using non-root routes.
-The relay proxy will strip this base path from incoming requests before processing them.
-This is useful when deploying behind paths like `/api` or `/dev/feature-flags`.
-
-- option name: `awsApiGatewayBasePath`
-- type: **string**
-- default: **none**
-- mandatory: <NotMandatory />
-- This param is used only if `startAsAwsLambda` is `true`.
-
-**Example:** If set to `/api/feature-flags`, requests to `/api/feature-flags/health` will be processed as `/health`.
-
 ### `debug`
 
 If `debug` is set to true, we will set the log level to debug and set some components in debug mode (`labstack/echo`, `pprof` etc ...).
@@ -343,7 +299,7 @@ Enables Swagger for testing the APIs directly. If you are enabling Swagger you w
 - type: **boolean**
 - default: **`false`**
 - mandatory: <NotMandatory />
-- The Swagger UI will be available at `http://<host>:<listen>/swagger/`.
+- The Swagger UI will be available at `http://<host>:<server.port>/swagger/`.
 
 ### `host`
 
@@ -417,7 +373,9 @@ When you configure flag sets, the relay proxy operates in **flag set mode** inst
 - If flag sets are configured, the relay proxy will ignore the top-level `retrievers`, `exporters`, and `notifiers` configuration.
 
 ```yaml title="example goff-proxy.yaml"
-listen: 1031
+server:
+  mode: http
+  port: 1031
 flagSets:
   - name: teamA
     apiKeys:
@@ -448,7 +406,7 @@ This useful if you want to avoid any collision with existing environment variabl
 If you use this option you will have to prefix all your environment variables with the value you set here. For example if you want to override the port of the relay-proxy and the prefix is `GOFF_`.
 
 ```shell
-export GOFF_LISTEN=8080
+export GOFF_SERVER_PORT=8080
 ```
 
 - option name: `envVariablePrefix`
@@ -497,6 +455,89 @@ authorizedKeys:
     - "my-first-admin-key"
     - "my-second-admin-key"
 ```
+
+### type `serverConfig`
+
+Configuration related to the server behavior of the relay proxy.
+
+#### `server.mode`
+
+The execution mode of the relay proxy, you can choose to start the relay-proxy in different modes depending how you want to call the APIs.
+
+- option name: `mode`
+- type: **string**
+- Acceptable values are :`http`, `lambda`, `unixsocket`.
+- default: **http**
+- mandatory: <NotMandatory />
+- `http`: Start the relay proxy as a HTTP server.  
+  `lambda`: Start the relay proxy as an AWS Lambda handler.  
+  `unixsocket`: Start the relay proxy and listen on a Unix socket, you have to set the `unixSocketPath` field to define where the socket file will be created.
+
+#### `server.unixSocketPath`
+
+The path where the Unix socket file will be created when the relay proxy is started in `unixsocket` mode.
+
+- option name: `unixSocketPath`
+- type: **string**
+- default: **none**
+- mandatory: <NotMandatory />
+- This field is mandatory if the `mode` is set to `unixsocket`.
+
+#### `server.host`
+
+The server host used by the relay proxy to bind the HTTP server.
+
+- option name: `host`
+- type: **string**
+- default: **`0.0.0.0`**
+- mandatory: <NotMandatory />
+- This field is used only in `http` mode.
+
+#### `server.port`
+
+The server port used by the relay proxy to bind the HTTP server.
+
+- option name: `port`
+- type: **int**
+- default: **1031**
+- mandatory: <NotMandatory />
+- This field is used only in `http` mode.
+
+#### `server.monitoringPort`
+
+If set the monitoring endpoints will be served on this specific port.
+
+Check [_"Use specific port for the monitoring"_](./observability#use-specific-port-for-the-monitoring) to have more information.
+
+- option name: `monitoringPort`
+- type: **int**
+- default: **none**
+- mandatory: <NotMandatory />
+- This field is used only in `http` mode.
+
+#### `server.awsLambdaAdapter`
+This parameter allow you to decide which type of AWS lambda handler you want to use.
+
+- option name: `awsLambdaAdapter`
+- type: **string**
+- default: **`APIGatewayV2`**
+- Acceptable values are `APIGatewayV2`, `APIGatewayV1`, `ALB`.
+- mandatory: <NotMandatory />
+- This param is used only if `server.mode` is set to `lambda`.
+
+#### `server.awsApiGatewayBasePath`
+
+Specifies the base path prefix for AWS API Gateway deployments when using non-root routes.
+The relay proxy will strip this base path from incoming requests before processing them.
+This is useful when deploying behind paths like `/api` or `/dev/feature-flags`.
+
+- option name: `awsApiGatewayBasePath`
+- type: **string**
+- default: **none**
+- mandatory: <NotMandatory />
+- This param is used only if `server.mode` is set to `lambda`.
+
+**Example:** If set to `/api/feature-flags`, requests to `/api/feature-flags/health` will be processed as `/health`.
 
 ### type `retriever`
 
@@ -715,7 +756,9 @@ When you configure flag sets, the relay proxy operates in **flag set mode** inst
 ### Basic flag set configuration
 
 ```yaml title="goff-proxy.yaml"
-listen: 1031
+server:
+  mode: http
+  port: 1031
 flagSets:
   - name: teamA
     apiKeys:
@@ -766,7 +809,10 @@ The relay proxy will:
 ### Example: Multi-team setup
 
 ```yaml title="goff-proxy.yaml"
-listen: 1031
+server:
+  mode: http
+  port: 1031
+
 logLevel: INFO
 
 flagSets:

@@ -51,8 +51,11 @@ func TestPprofEndpointsStarts(t *testing.T) {
 						},
 					},
 				},
+				Server: config.Server{
+					Mode: config.ServerModeHTTP,
+					Port: 1031,
+				},
 				MonitoringPort: tt.MonitoringPort,
-				ListenPort:     1031,
 				EnablePprof:    tt.EnablePprof,
 			}
 
@@ -65,7 +68,7 @@ func TestPprofEndpointsStarts(t *testing.T) {
 				Metrics:           metric.Metrics{},
 			}, z)
 
-			portToCheck := c.ListenPort
+			portToCheck := c.GetServerPort(nil)
 			if tt.MonitoringPort != 0 {
 				portToCheck = tt.MonitoringPort
 			}

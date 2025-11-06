@@ -5,7 +5,8 @@ services:
     ports:
       - "1031:1031"
     environment:
-        - LISTEN=1031
+        - SERVER_PORT=1031
+        - SERVER_MODE=http
         - POLLINGINTERVAL=1000
         - RETRIEVER_KIND=file
         - RETRIEVER_PATH=/config.goff.yaml

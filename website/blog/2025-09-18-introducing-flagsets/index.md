@@ -78,7 +78,9 @@ Flag sets are configured in your relay proxy configuration file, instead of defi
 In each flag set you can configure his behavior like in this example:
 
 ```yaml
-listen: 1031
+server:
+  mode: http
+  port: 1031
 flagsets:
   - name: team-a
     apiKeys:

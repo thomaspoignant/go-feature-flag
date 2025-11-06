@@ -184,7 +184,6 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 
 	// Default values
 	_ = k.Load(confmap.Provider(map[string]interface{}{
-		"listen":          "1031",
 		"host":            "localhost",
 		"fileFormat":      "yaml",
 		"pollingInterval": 60000,

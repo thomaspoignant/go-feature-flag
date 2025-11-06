@@ -32,8 +32,10 @@ The Helm chart supports an optional `monitoringPort` configuration that allows y
 ```yaml
 relayproxy:
   config: |
-    listen: 1031
-    monitoringPort: 1032
+    server:
+	  mode: http
+	  port: 1031
+	  monitoringPort: 1032
     pollingInterval: 1000
     startWithRetrieverError: false
     logLevel: debug
@@ -54,7 +56,9 @@ When `monitoringPort` is configured:
 ```yaml
 relayproxy:
   config: |
-    listen: 1031
+    server:
+	  mode: http
+	  port: 1031
     pollingInterval: 1000
     startWithRetrieverError: false
     logLevel: debug

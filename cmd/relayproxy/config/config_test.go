@@ -39,7 +39,10 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 					},
 					StartWithRetrieverError: false,
 				},
-				ListenPort:    1031,
+				Server: config.Server{
+					Mode: config.ServerModeHTTP,
+					Port: 1031,
+				},
 				Host:          "localhost",
 				Version:       "1.X.X",
 				EnableSwagger: true,
@@ -75,7 +78,10 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 						config.NotifierConf{Kind: config.DiscordNotifier, WebhookURL: "https://discord.com/api/webhooks/yyyy/xxxxxxx"},
 					},
 				},
-				ListenPort:    1031,
+				Server: config.Server{
+					Mode: config.ServerModeHTTP,
+					Port: 1031,
+				},
 				Host:          "localhost",
 				Version:       "1.X.X",
 				EnableSwagger: true,
@@ -112,7 +118,10 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 						config.NotifierConf{Kind: config.DiscordNotifier, WebhookURL: "https://discord.com/api/webhooks/yyyy/xxxxxxx"},
 					},
 				},
-				ListenPort:    1031,
+				Server: config.Server{
+					Mode: config.ServerModeHTTP,
+					Port: 1031,
+				},
 				Host:          "localhost",
 				Version:       "1.X.X",
 				EnableSwagger: true,
@@ -152,7 +161,10 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 					},
 					StartWithRetrieverError: false,
 				},
-				ListenPort:    1031,
+				Server: config.Server{
+					Mode: config.ServerModeHTTP,
+					Port: 1031,
+				},
 				Host:          "localhost",
 				Version:       "1.X.X",
 				EnableSwagger: true,
@@ -195,7 +207,10 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 					},
 					StartWithRetrieverError: false,
 				},
-				ListenPort: 1031,
+				Server: config.Server{
+					Mode: config.ServerModeHTTP,
+					Port: 1031,
+				},
 
 				Host: "localhost",
 
@@ -230,8 +245,11 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 					},
 					StartWithRetrieverError: false,
 				},
-				ListenPort: 1031,
-				Host:       "localhost",
+				Server: config.Server{
+					Mode: config.ServerModeHTTP,
+					Port: 1031,
+				},
+				Host: "localhost",
 
 				Version:       "1.X.X",
 				EnableSwagger: true,
@@ -259,7 +277,10 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 					},
 					StartWithRetrieverError: false,
 				},
-				ListenPort: 1031,
+				Server: config.Server{
+					Mode: config.ServerModeHTTP,
+					Port: 1031,
+				},
 
 				Host: "localhost",
 
@@ -282,10 +303,13 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 					FileFormat:              "yaml",
 					StartWithRetrieverError: false,
 				},
-				ListenPort: 1031,
-				Host:       "localhost",
-				Version:    "1.X.X",
-				LogLevel:   config.DefaultLogLevel,
+				Server: config.Server{
+					Mode: config.ServerModeHTTP,
+					Port: 1031,
+				},
+				Host:     "localhost",
+				Version:  "1.X.X",
+				LogLevel: config.DefaultLogLevel,
 			},
 			wantErr: assert.NoError,
 		},
@@ -308,10 +332,13 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 						},
 					},
 				},
-				ListenPort: 1031,
-				Host:       "localhost",
-				LogLevel:   config.DefaultLogLevel,
-				Version:    "1.X.X",
+				Server: config.Server{
+					Mode: config.ServerModeHTTP,
+					Port: 1031,
+				},
+				Host:     "localhost",
+				LogLevel: config.DefaultLogLevel,
+				Version:  "1.X.X",
 				OtelConfig: config.OpenTelemetryConfiguration{
 					Exporter: config.OtelExporter{
 						Otlp: config.OtelExporterOtlp{
@@ -369,7 +396,10 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 					},
 					StartWithRetrieverError: false,
 				},
-				ListenPort:    1031,
+				Server: config.Server{
+					Mode: config.ServerModeHTTP,
+					Port: 1031,
+				},
 				Host:          "localhost",
 				Version:       "1.X.X",
 				EnableSwagger: true,
@@ -395,10 +425,13 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 					FileFormat:              "yaml",
 					StartWithRetrieverError: false,
 				},
-				ListenPort: 1031,
-				Host:       "localhost",
-				Version:    "1.X.X",
-				LogLevel:   config.DefaultLogLevel,
+				Server: config.Server{
+					Mode: config.ServerModeHTTP,
+					Port: 1031,
+				},
+				Host:     "localhost",
+				Version:  "1.X.X",
+				LogLevel: config.DefaultLogLevel,
 			},
 			wantErr: assert.NoError,
 		},
@@ -417,10 +450,13 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 					FileFormat:              "yaml",
 					StartWithRetrieverError: false,
 				},
-				ListenPort: 1031,
-				Host:       "localhost",
-				Version:    "1.X.X",
-				LogLevel:   config.DefaultLogLevel,
+				Server: config.Server{
+					Mode: config.ServerModeHTTP,
+					Port: 1031,
+				},
+				Host:     "localhost",
+				Version:  "1.X.X",
+				LogLevel: config.DefaultLogLevel,
 			},
 		},
 		{
@@ -433,10 +469,13 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 					FileFormat:              "yaml",
 					StartWithRetrieverError: false,
 				},
-				ListenPort: 1031,
-				Host:       "localhost",
-				Version:    "1.X.X",
-				LogLevel:   config.DefaultLogLevel,
+				Server: config.Server{
+					Mode: config.ServerModeHTTP,
+					Port: 1031,
+				},
+				Host:     "localhost",
+				Version:  "1.X.X",
+				LogLevel: config.DefaultLogLevel,
 			},
 		},
 		{
@@ -449,10 +488,13 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 					FileFormat:              "yaml",
 					StartWithRetrieverError: false,
 				},
-				ListenPort: 1031,
-				Host:       "localhost",
-				Version:    "1.X.X",
-				LogLevel:   config.DefaultLogLevel,
+				Server: config.Server{
+					Mode: config.ServerModeHTTP,
+					Port: 1031,
+				},
+				Host:     "localhost",
+				Version:  "1.X.X",
+				LogLevel: config.DefaultLogLevel,
 			},
 			disableDefaultFileCreation: true,
 		},
@@ -872,7 +914,10 @@ func TestConfig_IsValid(t *testing.T) {
 					Notifiers:               tt.fields.Notifiers,
 					Retrievers:              tt.fields.Retrievers,
 				},
-				ListenPort:    tt.fields.ListenPort,
+				Server: config.Server{
+					Mode: config.ServerModeHTTP,
+					Port: tt.fields.ListenPort,
+				},
 				HideBanner:    tt.fields.HideBanner,
 				EnableSwagger: tt.fields.EnableSwagger,
 				Host:          tt.fields.Host,
@@ -1231,7 +1276,10 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 					},
 					StartWithRetrieverError: false,
 				},
-				ListenPort:    1031,
+				Server: config.Server{
+					Mode: config.ServerModeHTTP,
+					Port: 1031,
+				},
 				Host:          "localhost",
 				Version:       "1.X.X",
 				EnableSwagger: true,
@@ -1309,7 +1357,10 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 					},
 					StartWithRetrieverError: false,
 				},
-				ListenPort:    1031,
+				Server: config.Server{
+					Mode: config.ServerModeHTTP,
+					Port: 1031,
+				},
 				Host:          "localhost",
 				Version:       "1.X.X",
 				EnableSwagger: true,
@@ -1382,10 +1433,13 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 					StartWithRetrieverError: false,
 				},
 				EnvVariablePrefix: "GOFF_",
-				ListenPort:        1031,
-				Host:              "localhost",
-				Version:           "1.X.X",
-				EnableSwagger:     true,
+				Server: config.Server{
+					Mode: config.ServerModeHTTP,
+					Port: 1031,
+				},
+				Host:          "localhost",
+				Version:       "1.X.X",
+				EnableSwagger: true,
 				AuthorizedKeys: config.APIKeys{
 					Admin: []string{
 						"apikey3",
@@ -1443,8 +1497,11 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 					},
 					StartWithRetrieverError: false,
 				},
-				ListenPort: 1031,
-				Host:       "localhost",
+				Server: config.Server{
+					Mode: config.ServerModeHTTP,
+					Port: 1031,
+				},
+				Host: "localhost",
 
 				AuthorizedKeys: config.APIKeys{
 					Admin: []string{
@@ -1498,8 +1555,11 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 					},
 					StartWithRetrieverError: false,
 				},
-				ListenPort: 1031,
-				Host:       "localhost",
+				Server: config.Server{
+					Mode: config.ServerModeHTTP,
+					Port: 1031,
+				},
+				Host: "localhost",
 
 				AuthorizedKeys: config.APIKeys{
 					Admin: []string{
@@ -1534,10 +1594,13 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 						},
 					},
 				},
-				ListenPort: 1031,
-				Host:       "localhost",
-				LogLevel:   config.DefaultLogLevel,
-				Version:    "1.X.X",
+				Server: config.Server{
+					Mode: config.ServerModeHTTP,
+					Port: 1031,
+				},
+				Host:     "localhost",
+				LogLevel: config.DefaultLogLevel,
+				Version:  "1.X.X",
 				OtelConfig: config.OpenTelemetryConfiguration{
 					Exporter: config.OtelExporter{
 						Otlp: config.OtelExporterOtlp{
@@ -1568,10 +1631,13 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 					FileFormat:      "yaml",
 					PollingInterval: 60000,
 				},
-				ListenPort: 1031,
-				Host:       "localhost",
-				LogLevel:   config.DefaultLogLevel,
-				Version:    "1.X.X",
+				Server: config.Server{
+					Mode: config.ServerModeHTTP,
+					Port: 1031,
+				},
+				Host:     "localhost",
+				LogLevel: config.DefaultLogLevel,
+				Version:  "1.X.X",
 				FlagSets: []config.FlagSet{
 					{
 						Name:    "xxx",
