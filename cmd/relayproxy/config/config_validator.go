@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -19,13 +20,24 @@ func (c *Config) IsValid() error {
 	if err := validateLogFormat(c.LogFormat); err != nil {
 		return err
 	}
-	if err := c.Server.Validate(); err != nil {
+	if err := c.validateServerConfig(); err != nil {
 		return err
 	}
 	if len(c.FlagSets) > 0 {
 		return c.validateFlagSets()
 	}
 	return c.validateDefaultMode()
+}
+
+// validateServerConfig validates the server configuration
+func (c *Config) validateServerConfig() error {
+	mode := c.GetServerMode(nil)
+	if mode == ServerModeUnixSocket {
+		if c.GetUnixSocketPath() == "" {
+			return errors.New("unixSocketPath must be set when server mode is unixsocket")
+		}
+	}
+	return nil
 }
 
 // validateLogFormat validates the log format

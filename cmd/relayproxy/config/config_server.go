@@ -1,8 +1,6 @@
 package config
 
 import (
-	"errors"
-
 	"go.uber.org/zap"
 )
 
@@ -56,18 +54,6 @@ type Server struct {
 	// Example: if set to "/api/feature-flags", requests to "/api/feature-flags/health" will be processed as "/health"
 	// Default: ""
 	AwsApiGatewayBasePath string `mapstructure:"awsApiGatewayBasePath" koanf:"awsapigatewaybasepath"`
-}
-
-func (s *Server) Validate() error {
-	switch s.Mode {
-	case ServerModeUnixSocket:
-		if s.UnixSocketPath == "" {
-			return errors.New("unixSocket must be set when server mode is unixsocket")
-		}
-		return nil
-	default:
-		return nil
-	}
 }
 
 // GetMonitoringPort returns the monitoring port, checking first the top-level config
