@@ -118,7 +118,7 @@ func (c *Config) GetServerMode(logger *zap.Logger) ServerMode {
 
 	if c.StartAsAwsLambda {
 		if logger != nil {
-			zap.L().Warn("The server mode is set using `startAsAwsLambda`, this option is deprecated, please migrate to `server.mode`")
+			logger.Warn("The server mode is set using `startAsAwsLambda`, this option is deprecated, please migrate to `server.mode`")
 		}
 		return ServerModeLambda
 	}
@@ -135,7 +135,7 @@ func (c *Config) GetLambdaAdapter(logger *zap.Logger) LambdaAdapter {
 
 	if c.AwsLambdaAdapter != "" {
 		if logger != nil {
-			zap.L().Warn("The lambda adapter is set using `awsLambdaAdapter`, this option is deprecated, please migrate to `server.awsLambdaAdapter`")
+			logger.Warn("The lambda adapter is set using `awsLambdaAdapter`, this option is deprecated, please migrate to `server.awsLambdaAdapter`")
 		}
 		return LambdaAdapter(c.AwsLambdaAdapter)
 	}
