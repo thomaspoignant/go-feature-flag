@@ -155,7 +155,7 @@ func (c *Config) GetAwsApiGatewayBasePath(logger *zap.Logger) string {
 
 	if c.AwsApiGatewayBasePath != "" {
 		if logger != nil {
-			zap.L().Warn("The AWS API Gateway base path is set using `awsApiGatewayBasePath`, " +
+			logger.Warn("The AWS API Gateway base path is set using `awsApiGatewayBasePath`, " +
 				"this option is deprecated, please migrate to `server.awsApiGatewayBasePath`")
 		}
 		return c.AwsApiGatewayBasePath
