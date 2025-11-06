@@ -137,7 +137,7 @@ func (s *Server) StartWithContext(ctx context.Context) {
 // startUnixSocketServer launch the API server as a unix socket.
 func (s *Server) startUnixSocketServer(ctx context.Context) {
 	socketPath := s.config.GetUnixSocketPath()
-	
+
 	// Clean up the old socket file if it exists (important for graceful restarts)
 	if _, err := os.Stat(socketPath); err == nil {
 		if err := os.Remove(socketPath); err != nil {
@@ -151,7 +151,11 @@ func (s *Server) startUnixSocketServer(ctx context.Context) {
 		s.zapLog.Fatal("Error creating Unix listener", zap.Error(err))
 	}
 
-	defer func() { _ = listener.Close() }()
+	defer func() {
+		if err := listener.Close(); err != nil {
+			s.zapLog.Error("error closing unix socket listener", zap.Error(err))
+		}
+	}()
 	s.apiEcho.Listener = listener
 
 	s.zapLog.Info(
