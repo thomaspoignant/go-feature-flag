@@ -146,7 +146,7 @@ func (s *Server) startUnixSocketServer(ctx context.Context) {
 	lc := net.ListenConfig{}
 	listener, err := lc.Listen(ctx, "unix", socketPath)
 	if err != nil {
-		log.Fatalf("Error creating Unix listener: %v", err)
+		s.zapLog.Fatal("Error creating Unix listener", zap.Error(err))
 	}
 
 	defer func() { _ = listener.Close() }()
