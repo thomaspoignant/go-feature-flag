@@ -43,7 +43,7 @@ type Server struct {
 	MonitoringPort int `mapstructure:"monitoringPort" koanf:"monitoringport"`
 
 	// UnixSocket is the server unix socket path.
-	UnixSocket string `mapstructure:"unixSocket" koanf:"unixsocket"`
+	UnixSocketPath string `mapstructure:"unixSocketPath" koanf:"unixsocketpath"`
 
 	// AWS Lambda configuration
 	// LambdaAdapter is the adapter to use when the relay proxy is started as an AWS Lambda.
@@ -61,27 +61,28 @@ type Server struct {
 func (s *Server) Validate() error {
 	switch s.Mode {
 	case ServerModeUnixSocket:
-		if s.UnixSocket == "" {
+		if s.UnixSocketPath == "" {
 			return errors.New("unixSocket must be set when server mode is unixsocket")
 		}
 		return nil
-	case ServerModeLambda, ServerModeHTTP:
-		return nil
 	default:
-		return errors.New("invalid server mode: " + s.Mode)
+		return nil
 	}
 }
 
 // GetMonitoringPort returns the monitoring port, checking first the top-level config
 // and then the server config.
 func (c *Config) GetMonitoringPort(logger *zap.Logger) int {
+	if c.Server.MonitoringPort != 0 {
+		return c.Server.MonitoringPort
+	}
 	if c.MonitoringPort != 0 {
 		if logger != nil {
 			logger.Warn("The monitoring port is set using `monitoringPort`, this option is deprecated, please migrate to `server.monitoringPort`")
 		}
 		return c.MonitoringPort
 	}
-	return c.Server.MonitoringPort
+	return 0
 }
 
 // GetServerHost returns the server host, defaulting to "0.0.0.0" if not set.
@@ -96,13 +97,13 @@ func (c *Config) GetServerHost() string {
 // and then the top-level config, defaulting to 1031 if not set.
 func (c *Config) GetServerPort(logger *zap.Logger) int {
 	if c.Server.Port != 0 {
-		if logger != nil {
-			logger.Warn("The server port is set using `port`, this option is deprecated, please migrate to `server.port`")
-		}
 		return c.Server.Port
 	}
 
 	if c.ListenPort != 0 {
+		if logger != nil {
+			logger.Warn("The server port is set using `port`, this option is deprecated, please migrate to `server.port`")
+		}
 		return c.ListenPort
 	}
 	return 1031
@@ -157,4 +158,9 @@ func (c *Config) GetAwsApiGatewayBasePath(logger *zap.Logger) string {
 	}
 
 	return ""
+}
+
+// GetUnixSocketPath returns the unix socket path.
+func (c *Config) GetUnixSocketPath() string {
+	return c.Server.UnixSocketPath
 }
