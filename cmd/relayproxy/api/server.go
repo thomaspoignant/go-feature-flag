@@ -114,9 +114,9 @@ func (s *Server) initRoutes() {
 	s.addAdminRoutes(cRetrieverRefresh)
 }
 
-func (s *Server) Start() {
+func (s *Server) StartWithContext(ctx context.Context) {
 	// start the OpenTelemetry tracing service
-	err := s.otelService.Init(context.Background(), s.zapLog, s.config)
+	err := s.otelService.Init(ctx, s.zapLog, s.config)
 	if err != nil {
 		s.zapLog.Error(
 			"error while initializing OTel, continuing without tracing enabled",
@@ -129,26 +129,27 @@ func (s *Server) Start() {
 	case config.ServerModeLambda:
 		s.startAwsLambda()
 	case config.ServerModeUnixSocket:
-		s.startUnixSocketServer()
+		s.startUnixSocketServer(ctx)
 	default:
 		s.startAsHTTPServer()
 	}
 }
 
 // startUnixSocketServer launch the API server as a unix socket.
-func (s *Server) startUnixSocketServer() {
+func (s *Server) startUnixSocketServer(ctx context.Context) {
 	socketPath := s.config.GetUnixSocketPath()
 	// Clean up the old socket file if it exists (important for graceful restarts)
 	if _, err := os.Stat(socketPath); err == nil {
-		os.Remove(socketPath)
+		_ = os.Remove(socketPath)
 	}
 
-	listener, err := net.Listen("unix", socketPath)
+	lc := net.ListenConfig{}
+	listener, err := lc.Listen(ctx, "unix", socketPath)
 	if err != nil {
 		log.Fatalf("Error creating Unix listener: %v", err)
 	}
 
-	defer listener.Close()
+	defer func() { _ = listener.Close() }()
 	s.apiEcho.Listener = listener
 
 	s.zapLog.Info(
@@ -185,7 +186,7 @@ func (s *Server) startAsHTTPServer() {
 		zap.String("address", address),
 		zap.String("version", s.config.Version))
 
-	err = s.apiEcho.Start(address)
+	err := s.apiEcho.Start(address)
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		s.zapLog.Fatal("Error starting relay proxy", zap.Error(err))
 	}
@@ -193,8 +194,15 @@ func (s *Server) startAsHTTPServer() {
 
 // startAwsLambda is starting the relay proxy as an AWS Lambda
 func (s *Server) startAwsLambda() {
-	handlerMngr := newAwsLambdaHandlerManager(s.apiEcho, s.config.GetAwsApiGatewayBasePath())
-	lambda.Start(handlerMngr.GetAdapter(s.config.GetLambdaAdapter()))
+	lambda.Start(s.getLambdaHandler())
+}
+
+// getLambdaHandler returns the appropriate lambda handler based on the configuration.
+// We need a dedicated function because it is called from tests as well, this is the
+// reason why we can't merged it in startAwsLambda.
+func (s *Server) getLambdaHandler() interface{} {
+	handlerMngr := newAwsLambdaHandlerManager(s.apiEcho, s.config.GetAwsApiGatewayBasePath(s.zapLog))
+	return handlerMngr.GetAdapter(s.config.GetLambdaAdapter(s.zapLog))
 }
 
 // Stop shutdown the API server

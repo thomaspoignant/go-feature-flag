@@ -71,7 +71,7 @@ func main() {
 
 	// Init swagger
 	docs.SwaggerInfo.Version = proxyConf.Version
-	docs.SwaggerInfo.Host = fmt.Sprintf("%s:%d", proxyConf.Host, proxyConf.ListenPort)
+	docs.SwaggerInfo.Host = fmt.Sprintf("%s:%d", proxyConf.Host, proxyConf.GetServerPort(logger.ZapLogger))
 
 	// Init services
 	metricsV2, err := metric.NewMetrics()
@@ -108,5 +108,5 @@ func main() {
 		defer cancel()
 		apiServer.Stop(ctx)
 	}()
-	apiServer.Start()
+	apiServer.StartWithContext(context.Background())
 }

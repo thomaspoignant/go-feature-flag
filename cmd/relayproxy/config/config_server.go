@@ -78,7 +78,8 @@ func (c *Config) GetMonitoringPort(logger *zap.Logger) int {
 	}
 	if c.MonitoringPort != 0 {
 		if logger != nil {
-			logger.Warn("The monitoring port is set using `monitoringPort`, this option is deprecated, please migrate to `server.monitoringPort`")
+			logger.Warn("The monitoring port is set using `monitoringPort`, " +
+				"this option is deprecated, please migrate to `server.monitoringPort`")
 		}
 		return c.MonitoringPort
 	}
@@ -118,7 +119,8 @@ func (c *Config) GetServerMode(logger *zap.Logger) ServerMode {
 
 	if c.StartAsAwsLambda {
 		if logger != nil {
-			logger.Warn("The server mode is set using `startAsAwsLambda`, this option is deprecated, please migrate to `server.mode`")
+			logger.Warn("The server mode is set using `startAsAwsLambda`," +
+				" this option is deprecated, please migrate to `server.mode`")
 		}
 		return ServerModeLambda
 	}
@@ -135,9 +137,10 @@ func (c *Config) GetLambdaAdapter(logger *zap.Logger) LambdaAdapter {
 
 	if c.AwsLambdaAdapter != "" {
 		if logger != nil {
-			logger.Warn("The lambda adapter is set using `awsLambdaAdapter`, this option is deprecated, please migrate to `server.awsLambdaAdapter`")
+			logger.Warn("The lambda adapter is set using `awsLambdaAdapter`," +
+				" this option is deprecated, please migrate to `server.awsLambdaAdapter`")
 		}
-		return LambdaAdapter(c.AwsLambdaAdapter)
+		return c.AwsLambdaAdapter
 	}
 
 	return LambdaAdapterAPIGatewayV2
@@ -152,7 +155,8 @@ func (c *Config) GetAwsApiGatewayBasePath(logger *zap.Logger) string {
 
 	if c.AwsApiGatewayBasePath != "" {
 		if logger != nil {
-			zap.L().Warn("The AWS API Gateway base path is set using `awsApiGatewayBasePath`, this option is deprecated, please migrate to `server.awsApiGatewayBasePath`")
+			zap.L().Warn("The AWS API Gateway base path is set using `awsApiGatewayBasePath`, " +
+				"this option is deprecated, please migrate to `server.awsApiGatewayBasePath`")
 		}
 		return c.AwsApiGatewayBasePath
 	}
