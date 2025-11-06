@@ -103,15 +103,10 @@ func main() {
 	}
 	// Init API server
 	apiServer := api.New(proxyConf, services, logger.ZapLogger)
-
-	if proxyConf.StartAsAwsLambda {
-		apiServer.StartAwsLambda()
-	} else {
-		defer func() {
-			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-			defer cancel()
-			apiServer.Stop(ctx)
-		}()
-		apiServer.Start()
-	}
+	defer func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		apiServer.Stop(ctx)
+	}()
+	apiServer.Start()
 }

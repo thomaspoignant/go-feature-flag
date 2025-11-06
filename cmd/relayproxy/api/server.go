@@ -135,6 +135,7 @@ func (s *Server) Start() {
 	}
 }
 
+// startUnixSocketServer launch the API server as a unix socket.
 func (s *Server) startUnixSocketServer() {
 	socketPath := s.config.GetUnixSocketPath()
 	// Clean up the old socket file if it exists (important for graceful restarts)
@@ -210,8 +211,10 @@ func (s *Server) Stop(ctx context.Context) {
 		}
 	}
 
-	err = s.apiEcho.Close()
-	if err != nil {
-		s.zapLog.Fatal("impossible to stop go-feature-flag relay proxy", zap.Error(err))
+	if s.apiEcho != nil {
+		err = s.apiEcho.Close()
+		if err != nil {
+			s.zapLog.Fatal("impossible to stop go-feature-flag relay proxy", zap.Error(err))
+		}
 	}
 }
