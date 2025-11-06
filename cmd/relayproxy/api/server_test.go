@@ -547,7 +547,10 @@ func Test_Starting_RelayProxy_UnixSocket(t *testing.T) {
 	defer s.Stop(context.Background())
 
 	// Wait for the socket to be created
-	time.Sleep(50 * time.Millisecond)
+	require.Eventually(t, func() bool {
+		_, err := os.Stat(socketPath)
+		return err == nil
+	}, 1*time.Second, 10*time.Millisecond, "unix socket file was not created in time")
 
 	// Verify socket file exists
 	_, err = os.Stat(socketPath)
