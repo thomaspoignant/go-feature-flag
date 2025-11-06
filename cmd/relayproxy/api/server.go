@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"net"
 	"net/http"
 	"os"
@@ -138,9 +137,12 @@ func (s *Server) StartWithContext(ctx context.Context) {
 // startUnixSocketServer launch the API server as a unix socket.
 func (s *Server) startUnixSocketServer(ctx context.Context) {
 	socketPath := s.config.GetUnixSocketPath()
+	
 	// Clean up the old socket file if it exists (important for graceful restarts)
 	if _, err := os.Stat(socketPath); err == nil {
-		_ = os.Remove(socketPath)
+		if err := os.Remove(socketPath); err != nil {
+			s.zapLog.Fatal("Could not remove old socket file", zap.String("path", socketPath), zap.Error(err))
+		}
 	}
 
 	lc := net.ListenConfig{}
