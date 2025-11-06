@@ -11,7 +11,7 @@ import (
 )
 
 func (s *Server) addMonitoringRoutes() {
-	if s.config.GetMonitoringPort(nil) != 0 {
+	if s.config.GetMonitoringPort(s.zapLog) != 0 {
 		s.monitoringEcho = echo.New()
 		s.monitoringEcho.HideBanner = true
 		s.monitoringEcho.HidePort = true
