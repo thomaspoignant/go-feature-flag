@@ -54,7 +54,7 @@ jobs:
           title: "chore(dependency): Bump module ${{ env.MODULE_PATH }} ${{ env.VERSION }}"
           body: |
             Automated pull request to bump module ${{ env.MODULE_PATH}} ${{ env.VERSION }}
-          commit-message: "chore(dependency): Bump module  ${MODULE_PATH} ${VERSION}"
+          commit-message: "chore(dependency): Bump module ${{ env.MODULE_PATH}} ${{ env.VERSION }}
           assignees: thomaspoignant
           draft: false
           signoff: true
