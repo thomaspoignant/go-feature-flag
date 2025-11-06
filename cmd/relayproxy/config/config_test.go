@@ -524,7 +524,7 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 
 func TestConfig_IsValid(t *testing.T) {
 	type fields struct {
-		ListenPort              int
+		Server                  config.Server
 		HideBanner              bool
 		EnableSwagger           bool
 		Host                    string
@@ -552,13 +552,16 @@ func TestConfig_IsValid(t *testing.T) {
 		},
 		{
 			name:    "invalid port",
-			fields:  fields{ListenPort: 0},
+			fields:  fields{},
 			wantErr: assert.Error,
 		},
 		{
 			name: "no retriever",
 			fields: fields{
-				ListenPort: 8080,
+				Server: config.Server{
+					Port: 8080,
+					Mode: config.ServerModeHTTP,
+				},
 				Notifiers: []config.NotifierConf{
 					{
 						Kind:        "webhook",
@@ -576,7 +579,10 @@ func TestConfig_IsValid(t *testing.T) {
 		{
 			name: "valid configuration",
 			fields: fields{
-				ListenPort: 8080,
+				Server: config.Server{
+					Port: 8080,
+					Mode: config.ServerModeHTTP,
+				},
 				Retriever: &retrieverconf.RetrieverConf{
 					Kind: "file",
 					Path: "../testdata/config/valid-file.yaml",
@@ -607,7 +613,10 @@ func TestConfig_IsValid(t *testing.T) {
 		{
 			name: "valid configuration with notifier included",
 			fields: fields{
-				ListenPort: 8080,
+				Server: config.Server{
+					Port: 8080,
+					Mode: config.ServerModeHTTP,
+				},
 				Retriever: &retrieverconf.RetrieverConf{
 					Kind: "file",
 					Path: "../testdata/config/valid-file-notifier.yaml",
@@ -626,7 +635,10 @@ func TestConfig_IsValid(t *testing.T) {
 		{
 			name: "invalid retriever",
 			fields: fields{
-				ListenPort: 8080,
+				Server: config.Server{
+					Port: 8080,
+					Mode: config.ServerModeHTTP,
+				},
 				Retriever: &retrieverconf.RetrieverConf{
 					Kind: "file",
 				},
@@ -636,7 +648,10 @@ func TestConfig_IsValid(t *testing.T) {
 		{
 			name: "1 invalid retriever in the list of retrievers",
 			fields: fields{
-				ListenPort: 8080,
+				Server: config.Server{
+					Port: 8080,
+					Mode: config.ServerModeHTTP,
+				},
 				Retrievers: &[]retrieverconf.RetrieverConf{
 					{
 						Kind: "file",
@@ -656,7 +671,10 @@ func TestConfig_IsValid(t *testing.T) {
 		{
 			name: "invalid exporter",
 			fields: fields{
-				ListenPort: 8080,
+				Server: config.Server{
+					Port: 8080,
+					Mode: config.ServerModeHTTP,
+				},
 				Retriever: &retrieverconf.RetrieverConf{
 					Kind: "file",
 					Path: "../testdata/config/valid-file.yaml",
@@ -670,7 +688,10 @@ func TestConfig_IsValid(t *testing.T) {
 		{
 			name: "invalid notifier",
 			fields: fields{
-				ListenPort: 8080,
+				Server: config.Server{
+					Port: 8080,
+					Mode: config.ServerModeHTTP,
+				},
 				Retriever: &retrieverconf.RetrieverConf{
 					Kind: "file",
 					Path: "../testdata/config/valid-file.yaml",
@@ -686,7 +707,10 @@ func TestConfig_IsValid(t *testing.T) {
 		{
 			name: "invalid log level",
 			fields: fields{
-				ListenPort: 8080,
+				Server: config.Server{
+					Port: 8080,
+					Mode: config.ServerModeHTTP,
+				},
 				Retriever: &retrieverconf.RetrieverConf{
 					Kind: "file",
 					Path: "../testdata/config/valid-file.yaml",
@@ -698,7 +722,10 @@ func TestConfig_IsValid(t *testing.T) {
 		{
 			name: "log level is not set but debug is set",
 			fields: fields{
-				ListenPort: 8080,
+				Server: config.Server{
+					Port: 8080,
+					Mode: config.ServerModeHTTP,
+				},
 				Retriever: &retrieverconf.RetrieverConf{
 					Kind: "file",
 					Path: "../testdata/config/valid-file.yaml",
@@ -711,8 +738,11 @@ func TestConfig_IsValid(t *testing.T) {
 		{
 			name: "invalid logFormat",
 			fields: fields{
-				LogFormat:  "unknown",
-				ListenPort: 8080,
+				LogFormat: "unknown",
+				Server: config.Server{
+					Port: 8080,
+					Mode: config.ServerModeHTTP,
+				},
 				Retriever: &retrieverconf.RetrieverConf{
 					Kind: "file",
 					Path: "../testdata/config/valid-file.yaml",
@@ -724,7 +754,10 @@ func TestConfig_IsValid(t *testing.T) {
 		{
 			name: "valid flagset configuration",
 			fields: fields{
-				ListenPort: 8080,
+				Server: config.Server{
+					Port: 8080,
+					Mode: config.ServerModeHTTP,
+				},
 				FlagSets: []config.FlagSet{
 					{
 						Name:    "test-flagset",
@@ -743,7 +776,10 @@ func TestConfig_IsValid(t *testing.T) {
 		{
 			name: "flagset without name",
 			fields: fields{
-				ListenPort: 8080,
+				Server: config.Server{
+					Port: 8080,
+					Mode: config.ServerModeHTTP,
+				},
 				FlagSets: []config.FlagSet{
 					{
 						APIKeys: []string{"test-api-key"},
@@ -761,7 +797,10 @@ func TestConfig_IsValid(t *testing.T) {
 		{
 			name: "flagset without API keys",
 			fields: fields{
-				ListenPort: 8080,
+				Server: config.Server{
+					Port: 8080,
+					Mode: config.ServerModeHTTP,
+				},
 				FlagSets: []config.FlagSet{
 					{
 						Name: "test-flagset",
@@ -779,7 +818,10 @@ func TestConfig_IsValid(t *testing.T) {
 		{
 			name: "duplicate API keys across flagsets",
 			fields: fields{
-				ListenPort: 8080,
+				Server: config.Server{
+					Port: 8080,
+					Mode: config.ServerModeHTTP,
+				},
 				FlagSets: []config.FlagSet{
 					{
 						Name:    "flagset-1",
@@ -808,7 +850,10 @@ func TestConfig_IsValid(t *testing.T) {
 		{
 			name: "flagset with invalid retriever",
 			fields: fields{
-				ListenPort: 8080,
+				Server: config.Server{
+					Port: 8080,
+					Mode: config.ServerModeHTTP,
+				},
 				FlagSets: []config.FlagSet{
 					{
 						Name:    "test-flagset",
@@ -827,7 +872,10 @@ func TestConfig_IsValid(t *testing.T) {
 		{
 			name: "flagset with invalid exporter",
 			fields: fields{
-				ListenPort: 8080,
+				Server: config.Server{
+					Port: 8080,
+					Mode: config.ServerModeHTTP,
+				},
 				FlagSets: []config.FlagSet{
 					{
 						Name:    "test-flagset",
@@ -850,7 +898,10 @@ func TestConfig_IsValid(t *testing.T) {
 		{
 			name: "flagset with invalid notifier",
 			fields: fields{
-				ListenPort: 8080,
+				Server: config.Server{
+					Port: 8080,
+					Mode: config.ServerModeHTTP,
+				},
 				FlagSets: []config.FlagSet{
 					{
 						Name:    "test-flagset",
@@ -875,7 +926,10 @@ func TestConfig_IsValid(t *testing.T) {
 		{
 			name: "multiple valid flagsets",
 			fields: fields{
-				ListenPort: 8080,
+				Server: config.Server{
+					Port: 8080,
+					Mode: config.ServerModeHTTP,
+				},
 				FlagSets: []config.FlagSet{
 					{
 						Name:    "flagset-1",
@@ -901,6 +955,22 @@ func TestConfig_IsValid(t *testing.T) {
 			},
 			wantErr: assert.NoError,
 		},
+		{
+			name: "missing unix socket path",
+			fields: fields{
+				LogFormat: "unknown",
+				Server: config.Server{
+					Mode:           config.ServerModeUnixSocket,
+					UnixSocketPath: "",
+				},
+				Retriever: &retrieverconf.RetrieverConf{
+					Kind: "file",
+					Path: "../testdata/config/valid-file.yaml",
+				},
+				LogLevel: "info",
+			},
+			wantErr: assert.Error,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -914,10 +984,7 @@ func TestConfig_IsValid(t *testing.T) {
 					Notifiers:               tt.fields.Notifiers,
 					Retrievers:              tt.fields.Retrievers,
 				},
-				Server: config.Server{
-					Mode: config.ServerModeHTTP,
-					Port: tt.fields.ListenPort,
-				},
+				Server:        tt.fields.Server,
 				HideBanner:    tt.fields.HideBanner,
 				EnableSwagger: tt.fields.EnableSwagger,
 				Host:          tt.fields.Host,
