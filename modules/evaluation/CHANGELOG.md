@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/thomaspoignant/go-feature-flag/compare/modules/evaluation/v0.1.2...modules/evaluation/v0.1.3) (2025-11-04)
+
+
+### 🔧 Chores
+
+* **dependencies:** Bump github.com/thomaspoignant/go-feature-flag/modules/core ([#4247](https://github.com/thomaspoignant/go-feature-flag/issues/4247)) ([ab482c2](https://github.com/thomaspoignant/go-feature-flag/commit/ab482c224cfcf6298b6f0fc6e96fd53f6f2171e1))
+
 ## [0.1.2](https://github.com/thomaspoignant/go-feature-flag/compare/modules/evaluation/v0.1.1...modules/evaluation/v0.1.2) (2025-10-14)
 
 
