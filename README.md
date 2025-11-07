@@ -80,6 +80,20 @@ https://github.com/user-attachments/assets/56e1a2a2-996f-4db8-9c93-28c057e4ed5a
 
 _The code of this demo is available in [`examples/demo`](examples/demo) repository_.
 
+## Part of the OpenFeature Ecosystem
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/cab0bbc294e77a0a0afff64fd499ff691bb0b792/website/static/img/features/openfeature.svg" width="340" />
+</p>
+
+At GO Feature Flag, we believe in the power of open standards and, the importance of vendor neutrality. That's why we've chosen to rely on Open Feature for our SDKs.
+
+By adopting GO Feature Flag you embrace the OpenFeature standard and you get all the benefits of the ecosystem.
+
+- Open-Source standard SDKs
+- No Vendor Lock-In
+- OpenFeature community based support for SDKs
+
 ## Getting started
 
 > [!IMPORTANT]
