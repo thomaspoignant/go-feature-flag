@@ -55,7 +55,7 @@ require (
 	github.com/swaggo/echo-swagger v1.4.1
 	github.com/swaggo/swag v1.16.6
 	github.com/testcontainers/testcontainers-go v0.40.0
-	github.com/testcontainers/testcontainers-go/modules/azure v0.39.0
+	github.com/testcontainers/testcontainers-go/modules/azure v0.40.0
 	github.com/testcontainers/testcontainers-go/modules/mongodb v0.39.0
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.40.0
 	github.com/testcontainers/testcontainers-go/modules/redis v0.39.0
