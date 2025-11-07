@@ -34,6 +34,7 @@
 - [🎛️ GO Feature Flag](#️-go-feature-flag)
   - [What is GO Feature Flag?](#what-is-go-feature-flag)
   - [What can I do with GO Feature Flag?](#what-can-i-do-with-go-feature-flag)
+  - [Part of the OpenFeature Ecosystem](#part-of-the-openFeature-ecosystem)
   - [Getting started with GO Feature Flag](#getting-started)
   - [Can I use GO Feature Flag with any language?](#can-i-use-go-feature-flag-with-any-language)
   - [Where do I store my flags file?](#where-do-i-store-my-flags-file)
@@ -64,6 +65,7 @@ Originally, **GO Feature Flag** was designed as a solution exclusively for the `
 
 ## What can I do with GO Feature Flag?
 
+- Use the feature flag standard [OpenFeature](https://openfeature.dev) in your favorite language _([see list](#can-i-use-go-feature-flag-with-any-language))_.
 - Storing your configuration flags file on various locations (`HTTP`, `S3`, `Kubernetes`, [_see full list_](https://gofeatureflag.org/docs/configure_flag/store_your_flags)).
 - Configuring your flags in various [format](https://gofeatureflag.org/docs/configure_flag/flag_format) (`JSON`, `TOML` and `YAML`).
 - Adding complex [rules](https://gofeatureflag.org/docs/configure_flag/target-with-flags) to target your users.
@@ -73,7 +75,6 @@ Originally, **GO Feature Flag** was designed as a solution exclusively for the `
   - [Schedule your flag updates](https://gofeatureflag.org/docs/configure_flag/rollout-strategies/scheduled).
 - Exporting your flags usage data to various destinations such as _(`S3`, `Google cloud storage`, `file`, `kubernetes`, see the [_full list_](https://gofeatureflag.org/docs/integrations/store-flags-configuration#available-retrievers))_.
 - Getting notified when a flag has been changed _(`webhook` and `slack`)_.
-- Use **GO Feature Flag** in several languages with **Open Feature SDKs**.
 - Support your full stack, from the backend to the frontend including your mobile apps.
 
 https://github.com/user-attachments/assets/56e1a2a2-996f-4db8-9c93-28c057e4ed5a
