@@ -58,7 +58,7 @@ require (
 	github.com/testcontainers/testcontainers-go/modules/azure v0.39.0
 	github.com/testcontainers/testcontainers-go/modules/mongodb v0.39.0
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.40.0
-	github.com/testcontainers/testcontainers-go/modules/redis v0.39.0
+	github.com/testcontainers/testcontainers-go/modules/redis v0.40.0
 	github.com/thejerf/slogassert v0.3.4
 	github.com/thomaspoignant/go-feature-flag/modules/core v0.2.0
 	github.com/thomaspoignant/go-feature-flag/modules/evaluation v0.1.3
