@@ -1,6 +1,7 @@
 package ffclient_test
 
 import (
+	"context"
 	"net/http"
 	"reflect"
 	"testing"
@@ -17,6 +18,24 @@ import (
 )
 
 func TestConfig_Initialize(t *testing.T) {
+	t.Run("provided context", func(t *testing.T) {
+		ctx := context.WithValue(t.Context(), "type", "custom")
+
+		c := ffClient.Config{
+			Context: ctx,
+		}
+		c.Initialize()
+
+		assert.Equal(t, ctx, c.Context)
+	})
+
+	t.Run("default context", func(t *testing.T) {
+		c := ffClient.Config{}
+		c.Initialize()
+
+		assert.Equal(t, context.Background(), c.Context)
+	})
+
 	t.Run("adjust polling interval", func(t *testing.T) {
 		tests := []struct {
 			name            string

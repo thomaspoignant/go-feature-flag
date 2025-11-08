@@ -124,6 +124,10 @@ type Config struct {
 
 // Initialize assigns defaults to the configuration.
 func (c *Config) Initialize() {
+	if c.Context == nil {
+		c.Context = context.Background()
+	}
+
 	c.PollingInterval = adjustPollingInterval(c.PollingInterval)
 	if c.offlineMutex == nil {
 		c.offlineMutex = &sync.RWMutex{}
