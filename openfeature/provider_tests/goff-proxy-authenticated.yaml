@@ -1,4 +1,6 @@
-listen: 1032
+server:
+  mode: http
+  port: 1032
 pollingInterval: 1000
 startWithRetrieverError: false
 retriever:

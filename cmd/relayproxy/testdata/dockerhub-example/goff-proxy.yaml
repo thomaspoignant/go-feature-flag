@@ -1,7 +1,9 @@
 # This is an example of a configuration file for the relay proxy.
 
 # The port on which the relay proxy will listen to.
-listen: 1031
+server:
+  mode: http
+  port: 1031
 
 # The interval in milliseconds to check if your feature flag configuration has changed.
 pollingInterval: 1000

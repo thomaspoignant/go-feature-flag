@@ -1,7 +1,10 @@
 relayproxy:
   # -- GO Feature Flag relay proxy configuration as string (accept template). If monitoringPort is specified in the config, it will be exposed as a separate port and used for liveness and readiness probes instead of the main HTTP port. Example: add "monitoringPort: 1032" to your config to enable separate monitoring port.
   config: | # This is a configuration example for the relay-proxy
-    listen: 1031
+    server:
+      mode: http
+      port: 1031
+      monitoringPort: 1032
     pollingInterval: 1000
     startWithRetrieverError: false
     logLevel: info
@@ -11,11 +14,10 @@ relayproxy:
     exporter:
       kind: log
 #    envVariablePrefix: "GOFFPROXY_"
-
 # -- Environment variables to pass to the relay proxy
 env: {}
 # Examples:
-# LISTEN: 1032
+# SERVER_PORT: 1032
 #
 # ENV_VARIABLE_FROM_SECRET:
 #   valueFrom:

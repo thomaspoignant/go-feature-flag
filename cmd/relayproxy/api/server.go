@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/aws/aws-lambda-go/lambda"
@@ -111,12 +113,68 @@ func (s *Server) initRoutes() {
 	s.addAdminRoutes(cRetrieverRefresh)
 }
 
-// Start launch the API server
-func (s *Server) Start() {
+func (s *Server) StartWithContext(ctx context.Context) {
+	// start the OpenTelemetry tracing service
+	err := s.otelService.Init(ctx, s.zapLog, s.config)
+	if err != nil {
+		s.zapLog.Error(
+			"error while initializing OTel, continuing without tracing enabled",
+			zap.Error(err),
+		)
+		// we can continue because otel is not mandatory to start the server
+	}
+
+	switch s.config.GetServerMode(s.zapLog) {
+	case config.ServerModeLambda:
+		s.startAwsLambda()
+	case config.ServerModeUnixSocket:
+		s.startUnixSocketServer(ctx)
+	default:
+		s.startAsHTTPServer()
+	}
+}
+
+// startUnixSocketServer launch the API server as a unix socket.
+func (s *Server) startUnixSocketServer(ctx context.Context) {
+	socketPath := s.config.GetUnixSocketPath()
+
+	// Clean up the old socket file if it exists (important for graceful restarts)
+	if _, err := os.Stat(socketPath); err == nil {
+		if err := os.Remove(socketPath); err != nil {
+			s.zapLog.Fatal("Could not remove old socket file", zap.String("path", socketPath), zap.Error(err))
+		}
+	}
+
+	lc := net.ListenConfig{}
+	listener, err := lc.Listen(ctx, "unix", socketPath)
+	if err != nil {
+		s.zapLog.Fatal("Error creating Unix listener", zap.Error(err))
+	}
+
+	defer func() {
+		if err := listener.Close(); err != nil {
+			s.zapLog.Error("error closing unix socket listener", zap.Error(err))
+		}
+	}()
+	s.apiEcho.Listener = listener
+
+	s.zapLog.Info(
+		"Starting go-feature-flag relay proxy as unix socket...",
+		zap.String("socket", socketPath),
+		zap.String("version", s.config.Version))
+
+	err = s.apiEcho.StartServer(new(http.Server))
+	if err != nil && !errors.Is(err, http.ErrServerClosed) {
+		s.zapLog.Fatal("Error starting relay proxy as unix socket", zap.Error(err))
+	}
+}
+
+// startAsHTTPServer launch the API server
+func (s *Server) startAsHTTPServer() {
 	// starting the monitoring server on a different port if configured
 	if s.monitoringEcho != nil {
 		go func() {
-			addressMonitoring := fmt.Sprintf("0.0.0.0:%d", s.config.MonitoringPort)
+			addressMonitoring := fmt.Sprintf("%s:%d", s.config.GetServerHost(), s.config.GetMonitoringPort(s.zapLog))
 			s.zapLog.Info(
 				"Starting monitoring",
 				zap.String("address", addressMonitoring))
@@ -128,40 +186,29 @@ func (s *Server) Start() {
 		defer func() { _ = s.monitoringEcho.Close() }()
 	}
 
-	// start the OpenTelemetry tracing service
-	err := s.otelService.Init(context.Background(), s.zapLog, s.config)
-	if err != nil {
-		s.zapLog.Error(
-			"error while initializing OTel, continuing without tracing enabled",
-			zap.Error(err),
-		)
-		// we can continue because otel is not mandatory to start the server
-	}
-
-	// starting the main application
-	if s.config.ListenPort == 0 {
-		s.config.ListenPort = 1031
-	}
-	address := fmt.Sprintf("0.0.0.0:%d", s.config.ListenPort)
+	address := fmt.Sprintf("%s:%d", s.config.GetServerHost(), s.config.GetServerPort(s.zapLog))
 	s.zapLog.Info(
 		"Starting go-feature-flag relay proxy ...",
 		zap.String("address", address),
 		zap.String("version", s.config.Version))
 
-	err = s.apiEcho.Start(address)
+	err := s.apiEcho.Start(address)
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		s.zapLog.Fatal("Error starting relay proxy", zap.Error(err))
 	}
 }
 
-// StartAwsLambda is starting the relay proxy as an AWS Lambda
-func (s *Server) StartAwsLambda() {
+// startAwsLambda is starting the relay proxy as an AWS Lambda
+func (s *Server) startAwsLambda() {
 	lambda.Start(s.getLambdaHandler())
 }
 
+// getLambdaHandler returns the appropriate lambda handler based on the configuration.
+// We need a dedicated function because it is called from tests as well, this is the
+// reason why we can't merged it in startAwsLambda.
 func (s *Server) getLambdaHandler() interface{} {
-	handlerMngr := newAwsLambdaHandlerManager(s.apiEcho, s.config.AwsApiGatewayBasePath)
-	return handlerMngr.GetAdapter(s.config.AwsLambdaAdapter)
+	handlerMngr := newAwsLambdaHandlerManager(s.apiEcho, s.config.GetAwsApiGatewayBasePath(s.zapLog))
+	return handlerMngr.GetAdapter(s.config.GetLambdaAdapter(s.zapLog))
 }
 
 // Stop shutdown the API server
@@ -178,8 +225,10 @@ func (s *Server) Stop(ctx context.Context) {
 		}
 	}
 
-	err = s.apiEcho.Close()
-	if err != nil {
-		s.zapLog.Fatal("impossible to stop go-feature-flag relay proxy", zap.Error(err))
+	if s.apiEcho != nil {
+		err = s.apiEcho.Close()
+		if err != nil {
+			s.zapLog.Fatal("impossible to stop go-feature-flag relay proxy", zap.Error(err))
+		}
 	}
 }
