@@ -134,7 +134,9 @@ This flag split the usage of this flag, 20% will use the variation `my-new-featu
 Create a new `YAML` file containing the configuration of your relay proxy.
 
 ```yaml title="goff-proxy.yaml"
-listen: 1031
+server:
+  mode: http
+  port: 1031
 pollingInterval: 1000
 startWithRetrieverError: false
 retriever:

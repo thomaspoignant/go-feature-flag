@@ -1,4 +1,6 @@
-listen: 1031
+server:
+  mode: http
+  port: 1031
 envVariablePrefix: GOFF_
 pollingInterval: 1000
 startWithRetrieverError: false

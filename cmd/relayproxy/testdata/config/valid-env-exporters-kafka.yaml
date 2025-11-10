@@ -1,4 +1,6 @@
-listen: 1031
+server:
+  mode: http
+  port: 1031
 pollingInterval: 1000
 startWithRetrieverError: false
 retrievers:
@@ -12,7 +14,7 @@ exporters:
   - kind: kafka
     kafka:
       topic: svc-goff.evaluation
-      addresses: [ kafka:9092 ]
+      addresses: [kafka:9092]
 enableSwagger: true
 authorizedKeys:
   evaluation:

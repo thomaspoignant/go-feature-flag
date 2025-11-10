@@ -17,7 +17,6 @@ import (
 	"github.com/knadh/koanf/v2"
 	"github.com/spf13/pflag"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
-	"github.com/thomaspoignant/go-feature-flag/utils"
 	"github.com/xitongsys/parquet-go/parquet"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -53,7 +52,18 @@ var DefaultExporter = struct {
 type Config struct {
 	CommonFlagSet `mapstructure:",inline" koanf:",squash"`
 	// ListenPort (optional) is the port we are using to start the proxy
+	//
+	// Deprecated: use Server.Port instead
 	ListenPort int `mapstructure:"listen" koanf:"listen"`
+
+	// MonitoringPort (optional) is the port we are using to expose the metrics and healthchecks
+	// If not set we will use the same port as the proxy
+	//
+	// Deprecated: use Server.MonitoringPort instead
+	MonitoringPort int `mapstructure:"monitoringPort" koanf:"monitoringport"`
+
+	// Server is the server configuration, including host, port, and unix socket
+	Server Server `mapstructure:"server" koanf:"server"`
 
 	// HideBanner (optional) if true, we don't display the go-feature-flag relay proxy banner
 	HideBanner bool `mapstructure:"hideBanner" koanf:"hidebanner"`
@@ -100,11 +110,15 @@ type Config struct {
 	AuthorizedKeys APIKeys `mapstructure:"authorizedKeys" koanf:"authorizedkeys"`
 
 	// StartAsAwsLambda (optional) if true, the relay proxy will start ready to be launched as AWS Lambda
+	//
+	// Deprecated: use `Server.Mode = lambda` instead
 	StartAsAwsLambda bool `mapstructure:"startAsAwsLambda" koanf:"startasawslambda"`
 
 	// AwsLambdaAdapter (optional) is the adapter to use when the relay proxy is started as an AWS Lambda.
 	// Possible values are "APIGatewayV1", "APIGatewayV2" and "ALB"
 	// Default: "APIGatewayV2"
+	//
+	// Deprecated: use `Server.LambdaAdapter` instead
 	AwsLambdaAdapter string `mapstructure:"awsLambdaAdapter" koanf:"awslambdaadapter"`
 
 	// AwsApiGatewayBasePath (optional) is the base path prefix for AWS API Gateway deployments.
@@ -112,6 +126,8 @@ type Config struct {
 	// The relay proxy will strip this base path from incoming requests before processing.
 	// Example: if set to "/api/feature-flags", requests to "/api/feature-flags/health" will be processed as "/health"
 	// Default: ""
+	//
+	// Deprecated: use `Server.AwsApiGatewayBasePath` instead
 	AwsApiGatewayBasePath string `mapstructure:"awsApiGatewayBasePath" koanf:"awsapigatewaybasepath"`
 
 	// EvaluationContextEnrichment (optional) will be merged with the evaluation context sent during the evaluation.
@@ -126,10 +142,6 @@ type Config struct {
 	// OpenTelemetryOtlpEndpoint (optional) is the endpoint of the OpenTelemetry collector
 	// Default: ""
 	OpenTelemetryOtlpEndpoint string `mapstructure:"openTelemetryOtlpEndpoint" koanf:"opentelemetryotlpendpoint"`
-
-	// MonitoringPort (optional) is the port we are using to expose the metrics and healthchecks
-	// If not set we will use the same port as the proxy
-	MonitoringPort int `mapstructure:"monitoringPort" koanf:"monitoringport"`
 
 	// PersistentFlagConfigurationFile (optional) if set GO Feature Flag will store flags configuration in this file
 	//  to be able to serve the flags even if none of the retrievers is available during starting time.
@@ -172,7 +184,6 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 
 	// Default values
 	_ = k.Load(confmap.Provider(map[string]interface{}{
-		"listen":          "1031",
 		"host":            "localhost",
 		"fileFormat":      "yaml",
 		"pollingInterval": 60000,
@@ -227,89 +238,6 @@ func getParserForFile(configFileLocation string) koanf.Parser {
 	default:
 		return yaml.Parser()
 	}
-}
-
-// processExporters handles the post-processing of exporters configuration
-func processExporters(proxyConf *Config) {
-	if proxyConf.Exporters == nil {
-		return
-	}
-
-	for i := range *proxyConf.Exporters {
-		addresses := (*proxyConf.Exporters)[i].Kafka.Addresses
-		if len(addresses) == 0 || (len(addresses) == 1 && strings.Contains(addresses[0], ",")) {
-			(*proxyConf.Exporters)[i].Kafka.Addresses = utils.StringToArray(addresses)
-		}
-	}
-}
-
-// OpenTelemetryConfiguration is the configuration for the OpenTelemetry part of the relay proxy
-// It is used to configure the OpenTelemetry SDK and the OpenTelemetry Exporter
-// Most of the time this configuration is set using environment variables.
-type OpenTelemetryConfiguration struct {
-	SDK struct {
-		Disabled bool `mapstructure:"disabled" koanf:"disabled"`
-	} `mapstructure:"sdk"      koanf:"sdk"`
-	Exporter OtelExporter `mapstructure:"exporter" koanf:"exporter"`
-	Service  struct {
-		Name string `mapstructure:"name" koanf:"name"`
-	} `mapstructure:"service"  koanf:"service"`
-	Traces struct {
-		Sampler string `mapstructure:"sampler" koanf:"sampler"`
-	} `mapstructure:"traces"   koanf:"traces"`
-	Resource OtelResource `mapstructure:"resource" koanf:"resource"`
-}
-
-type OtelExporter struct {
-	Otlp OtelExporterOtlp `mapstructure:"otlp" koanf:"otlp"`
-}
-
-type OtelExporterOtlp struct {
-	Endpoint string `mapstructure:"endpoint" koanf:"endpoint"`
-	Protocol string `mapstructure:"protocol" koanf:"protocol"`
-}
-
-type OtelResource struct {
-	Attributes map[string]string `mapstructure:"attributes" koanf:"attributes"`
-}
-
-// JaegerSamplerConfiguration is the configuration object to configure the sampling.
-// Most of the time this configuration is set using environment variables.
-type JaegerSamplerConfiguration struct {
-	Sampler struct {
-		Manager struct {
-			Host struct {
-				Port string `mapstructure:"port" koanf:"port"`
-			} `mapstructure:"host" koanf:"host"`
-		} `mapstructure:"manager" koanf:"manager"`
-		Refresh struct {
-			Interval string `mapstructure:"interval" koanf:"interval"`
-		} `mapstructure:"refresh" koanf:"refresh"`
-		Max struct {
-			Operations int `mapstructure:"operations" koanf:"operations"`
-		} `mapstructure:"max" koanf:"max"`
-	} `mapstructure:"sampler" koanf:"sampler"`
-}
-
-// IsValid contains all the validation of the configuration.
-func (c *Config) IsValid() error {
-	if c == nil {
-		return fmt.Errorf("empty config")
-	}
-	if c.ListenPort == 0 {
-		return fmt.Errorf("invalid port %d", c.ListenPort)
-	}
-	if err := validateLogLevel(c.LogLevel); err != nil {
-		return err
-	}
-	if err := validateLogFormat(c.LogFormat); err != nil {
-		return err
-	}
-
-	if len(c.FlagSets) > 0 {
-		return c.validateFlagSets()
-	}
-	return c.validateDefaultMode()
 }
 
 // locateConfigFile is selecting the configuration file we will use.

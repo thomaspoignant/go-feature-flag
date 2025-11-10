@@ -1,4 +1,6 @@
-listen: 1031
+server:
+  mode: http
+  port: 1031
 retrievers:
   - kind: file
     path: examples/retriever_file/flags.goff.yaml

@@ -1,8 +1,11 @@
-listen = 1031.00
 pollingInterval = 1000.00
 startWithRetrieverError = false
 enableSwagger = true
 apiKeys = [ "apikey1", "apikey2" ]
+
+[server]
+port = 1031.00
+mode = http
 
 [retriever]
 kind = "http"
