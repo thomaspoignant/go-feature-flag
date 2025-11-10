@@ -1,4 +1,6 @@
-listen: 1031
+server:
+  mode: http
+  port: 1031
 pollingInterval: 1000
 startWithRetrieverError: false
 retrievers:
@@ -21,4 +23,3 @@ logLevel: info
 notifiers:
   - kind: "webhook"
     endpointUrl: "http://localhost:8080/webhook"
-    

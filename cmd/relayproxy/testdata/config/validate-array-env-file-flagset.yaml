@@ -1,4 +1,6 @@
-listen: 1031
+server:
+  mode: http
+  port: 1031
 logLevel: info
 flagsets:
   - name: flagset1
