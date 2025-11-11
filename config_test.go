@@ -1,6 +1,7 @@
 package ffclient_test
 
 import (
+	"context"
 	"net/http"
 	"reflect"
 	"testing"
@@ -15,6 +16,61 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/retriever/httpretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/s3retrieverv2"
 )
+
+func TestConfig_Initialize(t *testing.T) {
+	t.Run("provided context", func(t *testing.T) {
+		ctx := context.WithValue(t.Context(), "type", "custom")
+
+		c := ffClient.Config{
+			Context: ctx,
+		}
+		c.Initialize()
+
+		assert.Equal(t, ctx, c.Context)
+	})
+
+	t.Run("default context", func(t *testing.T) {
+		c := ffClient.Config{}
+		c.Initialize()
+
+		assert.Equal(t, context.Background(), c.Context)
+	})
+
+	t.Run("adjust polling interval", func(t *testing.T) {
+		tests := []struct {
+			name            string
+			pollingInterval time.Duration
+			want            time.Duration
+		}{
+			{
+				name:            "empty",
+				pollingInterval: 0,
+				want:            60 * time.Second,
+			},
+			{
+				name:            "lower than minimum",
+				pollingInterval: 1 * time.Millisecond,
+				want:            1 * time.Second,
+			},
+			{
+				name:            "valid",
+				pollingInterval: 42 * time.Minute,
+				want:            42 * time.Minute,
+			},
+		}
+
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				c := ffClient.Config{
+					PollingInterval: tt.pollingInterval,
+				}
+				c.Initialize()
+
+				assert.Equal(t, tt.want, c.PollingInterval)
+			})
+		}
+	})
+}
 
 func TestConfig_GetRetrievers(t *testing.T) {
 	type fields struct {

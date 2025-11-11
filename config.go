@@ -122,6 +122,39 @@ type Config struct {
 	internalLogger *fflog.FFLogger
 }
 
+// Initialize assigns defaults to the configuration.
+func (c *Config) Initialize() {
+	if c.Context == nil {
+		c.Context = context.Background()
+	}
+
+	c.PollingInterval = adjustPollingInterval(c.PollingInterval)
+	if c.offlineMutex == nil {
+		c.offlineMutex = &sync.RWMutex{}
+	}
+
+	// initialize internal logger
+	c.internalLogger = &fflog.FFLogger{
+		LeveledLogger: c.LeveledLogger,
+		LegacyLogger:  c.Logger,
+	}
+}
+
+// adjustPollingInterval is a function that will check the polling interval and set it to the minimum value if it is
+// lower than 1 second. It also set the default value to 60 seconds if the polling interval is 0.
+func adjustPollingInterval(pollingInterval time.Duration) time.Duration {
+	switch {
+	case pollingInterval == 0:
+		// The default value for the poll interval is 60 seconds
+		return 60 * time.Second
+	case pollingInterval > 0 && pollingInterval < time.Second:
+		// the minimum value for the polling policy is 1 second
+		return time.Second
+	default:
+		return pollingInterval
+	}
+}
+
 // GetRetrievers returns a retriever.Retriever configure with the retriever available in the config.
 func (c *Config) GetRetrievers() ([]retriever.Retriever, error) {
 	if c.Retriever == nil && len(c.Retrievers) == 0 {
