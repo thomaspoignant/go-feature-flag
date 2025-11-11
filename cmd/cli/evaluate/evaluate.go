@@ -9,11 +9,11 @@ import (
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/model"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/utils"
-	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever"
 )
 
 type evaluate struct {
-	config        string
+	retriever     retriever.Retriever
 	fileFormat    string
 	flag          string
 	evaluationCtx string
@@ -25,7 +25,7 @@ func (e evaluate) Evaluate() (map[string]model.RawVarResult, error) {
 		PollingInterval:       10 * time.Minute,
 		DisableNotifierOnInit: true,
 		Context:               context.Background(),
-		Retriever:             &fileretriever.Retriever{Path: e.config},
+		Retriever:             e.retriever,
 		FileFormat:            e.fileFormat,
 	}
 
