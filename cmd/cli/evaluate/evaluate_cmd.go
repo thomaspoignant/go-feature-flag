@@ -3,12 +3,14 @@ package evaluate
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
 	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/thomaspoignant/go-feature-flag/cmd/cli/helper"
+	rerr "github.com/thomaspoignant/go-feature-flag/cmdhelpers/err"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 	retrieverInit "github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf/init"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
@@ -143,6 +145,9 @@ evaluate --kind postgres --table my-table --column my-column:my-column-type --fl
 
 			err := retrieverConf.IsValid()
 			if err != nil {
+				if rcErr, ok := err.(*rerr.RetrieverConfError); ok {
+					return errors.New(rcErr.CliErrorMessage())
+				}
 				return err
 			}
 
