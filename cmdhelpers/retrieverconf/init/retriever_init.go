@@ -6,6 +6,7 @@ import (
 	"time"
 
 	awsConf "github.com/aws/aws-sdk-go-v2/config"
+	"github.com/redis/go-redis/v9"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	azblobretriever "github.com/thomaspoignant/go-feature-flag/retriever/azblobstorageretriever"
@@ -156,7 +157,15 @@ func createMongoDBRetriever(c *retrieverconf.RetrieverConf, _ time.Duration) (re
 }
 
 func createRedisRetriever(c *retrieverconf.RetrieverConf, _ time.Duration) (retriever.Retriever, error) {
-	return &redisretriever.Retriever{Options: c.RedisOptions, Prefix: c.RedisPrefix}, nil
+	// Prioritize the new serializable Redis configuration
+	// Fall back to deprecated RedisOptions for backward compatibility
+	var options *redis.Options
+	if c.Redis != nil {
+		options = c.Redis.ToRedisOptions()
+	} else if c.RedisOptions != nil {
+		options = c.RedisOptions
+	}
+	return &redisretriever.Retriever{Options: options, Prefix: c.RedisPrefix}, nil
 }
 
 func createAzBlobStorageRetriever(

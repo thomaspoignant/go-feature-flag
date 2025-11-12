@@ -5,7 +5,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/bitbucketretriever"
@@ -15,6 +17,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/retriever/gitlabretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/httpretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/postgresqlretriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever/redisretriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/s3retrieverv2"
 )
 
@@ -232,6 +235,133 @@ func Test_InitRetriever(t *testing.T) {
 				assert.IsType(t, tt.wantType, got)
 				if !tt.skipCompleteValidation {
 					assert.Equal(t, tt.want, got)
+				}
+			}
+		})
+	}
+}
+
+func Test_InitRetriever_Redis(t *testing.T) {
+	tests := []struct {
+		name              string
+		conf              *retrieverconf.RetrieverConf
+		wantErr           bool
+		validateRetriever func(t *testing.T, r retriever.Retriever)
+	}{
+		{
+			name: "Redis with old RedisOptions (backward compatibility)",
+			conf: &retrieverconf.RetrieverConf{
+				Kind: retrieverconf.RedisRetriever,
+				RedisOptions: &redis.Options{
+					Addr:     "localhost:6379",
+					Password: "secret",
+					DB:       1,
+				},
+				RedisPrefix: "test:",
+			},
+			wantErr: false,
+			validateRetriever: func(t *testing.T, r retriever.Retriever) {
+				redisRet, ok := r.(*redisretriever.Retriever)
+				require.True(t, ok, "expected *redisretriever.Retriever")
+				assert.Equal(t, "localhost:6379", redisRet.Options.Addr)
+				assert.Equal(t, "secret", redisRet.Options.Password)
+				assert.Equal(t, 1, redisRet.Options.DB)
+				assert.Equal(t, "test:", redisRet.Prefix)
+			},
+		},
+		{
+			name: "Redis with new SerializableRedisOptions",
+			conf: &retrieverconf.RetrieverConf{
+				Kind: retrieverconf.RedisRetriever,
+				Redis: &retrieverconf.SerializableRedisOptions{
+					Addr:     "redis.example.com:6380",
+					Password: "newsecret",
+					DB:       2,
+					Username: "admin",
+				},
+				RedisPrefix: "flags:",
+			},
+			wantErr: false,
+			validateRetriever: func(t *testing.T, r retriever.Retriever) {
+				redisRet, ok := r.(*redisretriever.Retriever)
+				require.True(t, ok, "expected *redisretriever.Retriever")
+				assert.Equal(t, "redis.example.com:6380", redisRet.Options.Addr)
+				assert.Equal(t, "newsecret", redisRet.Options.Password)
+				assert.Equal(t, 2, redisRet.Options.DB)
+				assert.Equal(t, "admin", redisRet.Options.Username)
+				assert.Equal(t, "flags:", redisRet.Prefix)
+			},
+		},
+		{
+			name: "Redis with both options (new takes priority)",
+			conf: &retrieverconf.RetrieverConf{
+				Kind: retrieverconf.RedisRetriever,
+				RedisOptions: &redis.Options{
+					Addr:     "old:6379",
+					Password: "old-secret",
+				},
+				Redis: &retrieverconf.SerializableRedisOptions{
+					Addr:     "new:6380",
+					Password: "new-secret",
+				},
+				RedisPrefix: "test:",
+			},
+			wantErr: false,
+			validateRetriever: func(t *testing.T, r retriever.Retriever) {
+				redisRet, ok := r.(*redisretriever.Retriever)
+				require.True(t, ok, "expected *redisretriever.Retriever")
+				// New configuration should take priority
+				assert.Equal(t, "new:6380", redisRet.Options.Addr)
+				assert.Equal(t, "new-secret", redisRet.Options.Password)
+				assert.Equal(t, "test:", redisRet.Prefix)
+			},
+		},
+		{
+			name: "Redis with full SerializableRedisOptions",
+			conf: &retrieverconf.RetrieverConf{
+				Kind: retrieverconf.RedisRetriever,
+				Redis: &retrieverconf.SerializableRedisOptions{
+					Addr:              "redis:6379",
+					Password:          "pass",
+					DB:                3,
+					MaxRetries:        5,
+					DialTimeoutMs:     10000,
+					ReadTimeoutMs:     5000,
+					PoolSize:          20,
+					MinIdleConns:      5,
+					ClientName:        "test-client",
+					ContextTimeoutEnabled: true,
+				},
+			},
+			wantErr: false,
+			validateRetriever: func(t *testing.T, r retriever.Retriever) {
+				redisRet, ok := r.(*redisretriever.Retriever)
+				require.True(t, ok, "expected *redisretriever.Retriever")
+				assert.Equal(t, "redis:6379", redisRet.Options.Addr)
+				assert.Equal(t, "pass", redisRet.Options.Password)
+				assert.Equal(t, 3, redisRet.Options.DB)
+				assert.Equal(t, 5, redisRet.Options.MaxRetries)
+				assert.Equal(t, 10000*time.Millisecond, redisRet.Options.DialTimeout)
+				assert.Equal(t, 5000*time.Millisecond, redisRet.Options.ReadTimeout)
+				assert.Equal(t, 20, redisRet.Options.PoolSize)
+				assert.Equal(t, 5, redisRet.Options.MinIdleConns)
+				assert.Equal(t, "test-client", redisRet.Options.ClientName)
+				assert.True(t, redisRet.Options.ContextTimeoutEnabled)
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := InitRetriever(tt.conf)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.NotNil(t, got)
+				assert.IsType(t, &redisretriever.Retriever{}, got)
+				if tt.validateRetriever != nil {
+					tt.validateRetriever(t, got)
 				}
 			}
 		})

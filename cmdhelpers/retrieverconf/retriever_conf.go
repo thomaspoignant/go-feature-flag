@@ -52,14 +52,22 @@ type RetrieverConf struct {
 
 	// Columns is used by
 	// - the postgresql retriever (it allows to use custom column names)
-	Columns      map[string]string `mapstructure:"columns"        koanf:"columns"`
-	Database     string            `mapstructure:"database"       koanf:"database"`
-	Collection   string            `mapstructure:"collection"     koanf:"collection"`
-	RedisOptions *redis.Options    `mapstructure:"redisOptions"   koanf:"redisOptions"`
-	RedisPrefix  string            `mapstructure:"redisPrefix"    koanf:"redisPrefix"`
-	AccountName  string            `mapstructure:"accountName"    koanf:"accountname"`
-	AccountKey   string            `mapstructure:"accountKey"     koanf:"accountkey"`
-	Container    string            `mapstructure:"container"      koanf:"container"`
+	Columns    map[string]string `mapstructure:"columns"        koanf:"columns"`
+	Database   string            `mapstructure:"database"       koanf:"database"`
+	Collection string            `mapstructure:"collection"     koanf:"collection"`
+
+	// RedisOptions is the non-serializable redis.Options (deprecated in favor of Redis)
+	// This field is kept for backward compatibility but cannot be used via JSON/YAML configuration
+	// Deprecated: Use Redis instead for JSON/YAML serializable configuration
+	RedisOptions *redis.Options `mapstructure:"redisOptions"   koanf:"redisOptions"`
+
+	// Redis is the serializable redis configuration that can be used in JSON/YAML files
+	Redis *SerializableRedisOptions `mapstructure:"redis"   koanf:"redis"`
+
+	RedisPrefix string `mapstructure:"redisPrefix"    koanf:"redisPrefix"`
+	AccountName string `mapstructure:"accountName"    koanf:"accountname"`
+	AccountKey  string `mapstructure:"accountKey"     koanf:"accountkey"`
+	Container   string `mapstructure:"container"      koanf:"container"`
 }
 
 // IsValid validate the configuration of the retriever
@@ -152,8 +160,17 @@ func (c *RetrieverConf) validateMongoDBRetriever() error {
 }
 
 func (c *RetrieverConf) validateRedisRetriever() error {
-	if c.RedisOptions == nil {
-		return err.NewRetrieverConfError("redisOptions", string(c.Kind))
+	// Support both old RedisOptions (deprecated) and new Redis (serializable)
+	// At least one must be provided for backward compatibility
+	if c.RedisOptions == nil && c.Redis == nil {
+		return err.NewRetrieverConfError("redis", string(c.Kind))
+	}
+	// If both are provided, validate that at least one has the required Addr field
+	if c.RedisOptions != nil && c.RedisOptions.Addr == "" && (c.Redis == nil || c.Redis.Addr == "") {
+		return err.NewRetrieverConfError("redis.addr", string(c.Kind))
+	}
+	if c.RedisOptions == nil && c.Redis != nil && c.Redis.Addr == "" {
+		return err.NewRetrieverConfError("redis.addr", string(c.Kind))
 	}
 	return nil
 }

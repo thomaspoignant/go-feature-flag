@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 )
@@ -254,13 +255,73 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 			errValue: "invalid retriever: no \"uri\" property found for kind \"mongodb\"",
 		},
 		{
-			name: "kind redis without options",
+			name: "kind redis without options (old RedisOptions)",
 			fields: retrieverconf.RetrieverConf{
 				Kind:        "redis",
 				RedisPrefix: "xxx",
 			},
 			wantErr:  true,
-			errValue: "invalid retriever: no \"redisOptions\" property found for kind \"redis\"",
+			errValue: "invalid retriever: no \"redis\" property found for kind \"redis\"",
+		},
+		{
+			name: "kind redis with old RedisOptions (backward compatibility)",
+			fields: retrieverconf.RetrieverConf{
+				Kind: "redis",
+				RedisOptions: &redis.Options{
+					Addr: "localhost:6379",
+				},
+				RedisPrefix: "xxx",
+			},
+			wantErr: false,
+		},
+		{
+			name: "kind redis with new SerializableRedisOptions",
+			fields: retrieverconf.RetrieverConf{
+				Kind: "redis",
+				Redis: &retrieverconf.SerializableRedisOptions{
+					Addr: "localhost:6379",
+				},
+				RedisPrefix: "xxx",
+			},
+			wantErr: false,
+		},
+		{
+			name: "kind redis with both options (new takes priority)",
+			fields: retrieverconf.RetrieverConf{
+				Kind: "redis",
+				RedisOptions: &redis.Options{
+					Addr: "old:6379",
+				},
+				Redis: &retrieverconf.SerializableRedisOptions{
+					Addr: "new:6379",
+				},
+				RedisPrefix: "xxx",
+			},
+			wantErr: false,
+		},
+		{
+			name: "kind redis with RedisOptions but empty Addr",
+			fields: retrieverconf.RetrieverConf{
+				Kind: "redis",
+				RedisOptions: &redis.Options{
+					Addr: "",
+				},
+				RedisPrefix: "xxx",
+			},
+			wantErr:  true,
+			errValue: "invalid retriever: no \"redis.addr\" property found for kind \"redis\"",
+		},
+		{
+			name: "kind redis with new Redis but empty Addr",
+			fields: retrieverconf.RetrieverConf{
+				Kind: "redis",
+				Redis: &retrieverconf.SerializableRedisOptions{
+					Addr: "",
+				},
+				RedisPrefix: "xxx",
+			},
+			wantErr:  true,
+			errValue: "invalid retriever: no \"redis.addr\" property found for kind \"redis\"",
 		},
 		{
 			name: "kind mongoDB without Collection",
