@@ -7,10 +7,10 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-// Options is a JSON-serializable alternative to redis.Options.
+// SerializableRedisOptions is a JSON-serializable alternative to redis.Options.
 // It contains only the fields that can be serialized and are most commonly used.
 // This allows the configuration to be passed via command line or JSON files.
-type Options struct {
+type SerializableRedisOptions struct {
 	// Network type, either tcp or unix. Default is tcp.
 	Network string `mapstructure:"network" koanf:"network" json:"network,omitempty"`
 
@@ -106,8 +106,8 @@ type Options struct {
 	IdentitySuffix string `mapstructure:"identitySuffix" koanf:"identitysuffix" json:"identitySuffix,omitempty"`
 }
 
-// ToRedisOptions converts Options to redis.Options
-func (s *Options) ToRedisOptions() *redis.Options {
+// ToRedisOptions converts SerializableRedisOptions to redis.Options
+func (s *SerializableRedisOptions) ToRedisOptions() *redis.Options {
 	opts := &redis.Options{
 		Network:    s.Network,
 		Addr:       s.Addr,

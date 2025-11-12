@@ -62,7 +62,7 @@ type RetrieverConf struct {
 	RedisOptions *redis.Options `mapstructure:"redisOptions"   koanf:"redisOptions"`
 
 	// Redis is the serializable redis configuration that can be used in JSON/YAML files
-	Redis *Options `mapstructure:"redis"   koanf:"redis"`
+	Redis *SerializableRedisOptions `mapstructure:"redis"   koanf:"redis"`
 
 	RedisPrefix string `mapstructure:"redisPrefix"    koanf:"redisPrefix"`
 	AccountName string `mapstructure:"accountName"    koanf:"accountname"`
