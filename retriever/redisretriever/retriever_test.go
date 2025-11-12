@@ -3,6 +3,7 @@
 package redisretriever_test
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -13,7 +14,6 @@ import (
 	testcontainerRedis "github.com/testcontainers/testcontainers-go/modules/redis"
 	ret "github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/redisretriever"
-	"golang.org/x/net/context"
 )
 
 var redisContainerList = make(map[string]*testcontainerRedis.RedisContainer)
