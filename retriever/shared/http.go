@@ -1,13 +1,13 @@
 package shared
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/internal"
-	"golang.org/x/net/context"
 )
 
 // CallHTTPAPI is the default function to make an HTTP call in the retrievers.
