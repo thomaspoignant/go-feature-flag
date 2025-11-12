@@ -155,10 +155,10 @@ func (c *RetrieverConf) validateMongoDBRetriever() error {
 
 func (c *RetrieverConf) validateRedisRetriever() error {
 	if c.RedisOptions == nil {
-		return err.NewRetrieverConfError("redis", string(c.Kind))
+		return err.NewRetrieverConfError("redisOptions", string(c.Kind))
 	}
 	if c.RedisOptions.Addr == "" {
-		return err.NewRetrieverConfError("redis.addr", string(c.Kind))
+		return err.NewRetrieverConfError("redisOptions.addr", string(c.Kind))
 	}
 	return nil
 }

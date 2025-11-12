@@ -260,7 +260,7 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 				RedisPrefix: "xxx",
 			},
 			wantErr:  true,
-			errValue: "invalid retriever: no \"redis\" property found for kind \"redis\"",
+			errValue: "invalid retriever: no \"redisOptions\" property found for kind \"redis\"",
 		},
 		{
 			name: "kind redis with RedisOptions",
@@ -305,7 +305,7 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 				RedisPrefix: "xxx",
 			},
 			wantErr:  true,
-			errValue: "invalid retriever: no \"redis.addr\" property found for kind \"redis\"",
+			errValue: "invalid retriever: no \"redisOptions.addr\" property found for kind \"redis\"",
 		},
 		{
 			name: "kind redis with RedisOptions but empty Addr (2)",
@@ -317,7 +317,7 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 				RedisPrefix: "xxx",
 			},
 			wantErr:  true,
-			errValue: "invalid retriever: no \"redis.addr\" property found for kind \"redis\"",
+			errValue: "invalid retriever: no \"redisOptions.addr\" property found for kind \"redis\"",
 		},
 		{
 			name: "kind mongoDB without Collection",
