@@ -17,7 +17,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.31.19
 	github.com/aws/aws-sdk-go-v2/credentials v1.18.23
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.20.5
-	github.com/aws/aws-sdk-go-v2/service/kinesis v1.42.1
+	github.com/aws/aws-sdk-go-v2/service/kinesis v1.42.2
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.90.0
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.42.13
 	github.com/aws/smithy-go v1.23.2
