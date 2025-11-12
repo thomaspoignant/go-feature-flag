@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 )
@@ -264,10 +263,10 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 			errValue: "invalid retriever: no \"redis\" property found for kind \"redis\"",
 		},
 		{
-			name: "kind redis with old RedisOptions (backward compatibility)",
+			name: "kind redis with RedisOptions",
 			fields: retrieverconf.RetrieverConf{
 				Kind: "redis",
-				RedisOptions: &redis.Options{
+				RedisOptions: &retrieverconf.SerializableRedisOptions{
 					Addr: "localhost:6379",
 				},
 				RedisPrefix: "xxx",
@@ -275,10 +274,10 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "kind redis with new SerializableRedisOptions",
+			name: "kind redis with SerializableRedisOptions",
 			fields: retrieverconf.RetrieverConf{
 				Kind: "redis",
-				Redis: &retrieverconf.SerializableRedisOptions{
+				RedisOptions: &retrieverconf.SerializableRedisOptions{
 					Addr: "localhost:6379",
 				},
 				RedisPrefix: "xxx",
@@ -286,13 +285,10 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "kind redis with both options (new takes priority)",
+			name: "kind redis with RedisOptions",
 			fields: retrieverconf.RetrieverConf{
 				Kind: "redis",
-				RedisOptions: &redis.Options{
-					Addr: "old:6379",
-				},
-				Redis: &retrieverconf.SerializableRedisOptions{
+				RedisOptions: &retrieverconf.SerializableRedisOptions{
 					Addr: "new:6379",
 				},
 				RedisPrefix: "xxx",
@@ -303,7 +299,7 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 			name: "kind redis with RedisOptions but empty Addr",
 			fields: retrieverconf.RetrieverConf{
 				Kind: "redis",
-				RedisOptions: &redis.Options{
+				RedisOptions: &retrieverconf.SerializableRedisOptions{
 					Addr: "",
 				},
 				RedisPrefix: "xxx",
@@ -312,10 +308,10 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 			errValue: "invalid retriever: no \"redis.addr\" property found for kind \"redis\"",
 		},
 		{
-			name: "kind redis with new Redis but empty Addr",
+			name: "kind redis with RedisOptions but empty Addr (2)",
 			fields: retrieverconf.RetrieverConf{
 				Kind: "redis",
-				Redis: &retrieverconf.SerializableRedisOptions{
+				RedisOptions: &retrieverconf.SerializableRedisOptions{
 					Addr: "",
 				},
 				RedisPrefix: "xxx",

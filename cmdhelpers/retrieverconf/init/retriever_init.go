@@ -157,13 +157,9 @@ func createMongoDBRetriever(c *retrieverconf.RetrieverConf, _ time.Duration) (re
 }
 
 func createRedisRetriever(c *retrieverconf.RetrieverConf, _ time.Duration) (retriever.Retriever, error) {
-	// Prioritize the new serializable Redis configuration
-	// Fall back to deprecated RedisOptions for backward compatibility
 	var options *redis.Options
-	if c.Redis != nil {
-		options = c.Redis.ToRedisOptions()
-	} else if c.RedisOptions != nil {
-		options = c.RedisOptions
+	if c.RedisOptions != nil {
+		options = c.RedisOptions.ToRedisOptions()
 	}
 	return &redisretriever.Retriever{Options: options, Prefix: c.RedisPrefix}, nil
 }

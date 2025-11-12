@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/redis/go-redis/v9"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/err"
 )
 
@@ -56,13 +55,8 @@ type RetrieverConf struct {
 	Database   string            `mapstructure:"database"       koanf:"database"`
 	Collection string            `mapstructure:"collection"     koanf:"collection"`
 
-	// RedisOptions is the non-serializable redis.Options (deprecated in favor of Redis)
-	// This field is kept for backward compatibility but cannot be used via JSON/YAML configuration
-	// Deprecated: Use Redis instead for JSON/YAML serializable configuration
-	RedisOptions *redis.Options `mapstructure:"redisOptions"   koanf:"redisOptions"`
-
-	// Redis is the serializable redis configuration that can be used in JSON/YAML files
-	Redis *SerializableRedisOptions `mapstructure:"redis"   koanf:"redis"`
+	// RedisOptions is the serializable redis configuration that can be used in JSON/YAML files
+	RedisOptions *SerializableRedisOptions `mapstructure:"redisOptions"   koanf:"redisOptions"`
 
 	RedisPrefix string `mapstructure:"redisPrefix"    koanf:"redisPrefix"`
 	AccountName string `mapstructure:"accountName"    koanf:"accountname"`
@@ -160,16 +154,10 @@ func (c *RetrieverConf) validateMongoDBRetriever() error {
 }
 
 func (c *RetrieverConf) validateRedisRetriever() error {
-	// Support both old RedisOptions (deprecated) and new Redis (serializable)
-	// At least one must be provided for backward compatibility
-	if c.RedisOptions == nil && c.Redis == nil {
+	if c.RedisOptions == nil {
 		return err.NewRetrieverConfError("redis", string(c.Kind))
 	}
-	// If both are provided, validate that at least one has the required Addr field
-	if c.RedisOptions != nil && c.RedisOptions.Addr == "" && (c.Redis == nil || c.Redis.Addr == "") {
-		return err.NewRetrieverConfError("redis.addr", string(c.Kind))
-	}
-	if c.RedisOptions == nil && c.Redis != nil && c.Redis.Addr == "" {
+	if c.RedisOptions.Addr == "" {
 		return err.NewRetrieverConfError("redis.addr", string(c.Kind))
 	}
 	return nil
