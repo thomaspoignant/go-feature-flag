@@ -12,15 +12,15 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 )
 
-func TestSerializableRedisOptions_ToRedisOptions(t *testing.T) {
+func TestOptions_ToRedisOptions(t *testing.T) {
 	tests := []struct {
 		name     string
-		input    *retrieverconf.SerializableRedisOptions
+		input    *retrieverconf.Options
 		validate func(t *testing.T, opts *redis.Options)
 	}{
 		{
 			name: "basic configuration with addr and password",
-			input: &retrieverconf.SerializableRedisOptions{
+			input: &retrieverconf.Options{
 				Addr:     "localhost:6379",
 				Password: "secret",
 				DB:       1,
@@ -33,7 +33,7 @@ func TestSerializableRedisOptions_ToRedisOptions(t *testing.T) {
 		},
 		{
 			name: "full configuration",
-			input: &retrieverconf.SerializableRedisOptions{
+			input: &retrieverconf.Options{
 				Network:               "tcp",
 				Addr:                  "redis.example.com:6380",
 				ClientName:            "go-feature-flag",
@@ -86,7 +86,7 @@ func TestSerializableRedisOptions_ToRedisOptions(t *testing.T) {
 		},
 		{
 			name: "TLS enabled",
-			input: &retrieverconf.SerializableRedisOptions{
+			input: &retrieverconf.Options{
 				Addr:       "secure-redis.example.com:6379",
 				TLSEnabled: true,
 			},
@@ -98,7 +98,7 @@ func TestSerializableRedisOptions_ToRedisOptions(t *testing.T) {
 		},
 		{
 			name: "TLS disabled",
-			input: &retrieverconf.SerializableRedisOptions{
+			input: &retrieverconf.Options{
 				Addr:       "redis.example.com:6379",
 				TLSEnabled: false,
 			},
@@ -109,7 +109,7 @@ func TestSerializableRedisOptions_ToRedisOptions(t *testing.T) {
 		},
 		{
 			name: "zero values are not set (use redis defaults)",
-			input: &retrieverconf.SerializableRedisOptions{
+			input: &retrieverconf.Options{
 				Addr: "localhost:6379",
 			},
 			validate: func(t *testing.T, opts *redis.Options) {
@@ -131,14 +131,14 @@ func TestSerializableRedisOptions_ToRedisOptions(t *testing.T) {
 	}
 }
 
-func TestSerializableRedisOptions_JSONSerialization(t *testing.T) {
+func TestOptions_JSONSerialization(t *testing.T) {
 	tests := []struct {
 		name string
-		opts *retrieverconf.SerializableRedisOptions
+		opts *retrieverconf.Options
 	}{
 		{
 			name: "basic options",
-			opts: &retrieverconf.SerializableRedisOptions{
+			opts: &retrieverconf.Options{
 				Addr:     "localhost:6379",
 				Password: "secret",
 				DB:       1,
@@ -146,7 +146,7 @@ func TestSerializableRedisOptions_JSONSerialization(t *testing.T) {
 		},
 		{
 			name: "full options",
-			opts: &retrieverconf.SerializableRedisOptions{
+			opts: &retrieverconf.Options{
 				Network:               "tcp",
 				Addr:                  "redis.example.com:6380",
 				ClientName:            "test-client",
@@ -183,7 +183,7 @@ func TestSerializableRedisOptions_JSONSerialization(t *testing.T) {
 			require.NotEmpty(t, jsonData)
 
 			// Unmarshal from JSON
-			var decoded retrieverconf.SerializableRedisOptions
+			var decoded retrieverconf.Options
 			err = json.Unmarshal(jsonData, &decoded)
 			require.NoError(t, err)
 
@@ -201,7 +201,7 @@ func TestSerializableRedisOptions_JSONSerialization(t *testing.T) {
 	}
 }
 
-func TestSerializableRedisOptions_JSONStructure(t *testing.T) {
+func TestOptions_JSONStructure(t *testing.T) {
 	// This test ensures the JSON structure is as expected
 	jsonStr := `{
 		"addr": "localhost:6379",
@@ -214,7 +214,7 @@ func TestSerializableRedisOptions_JSONStructure(t *testing.T) {
 		"tlsEnabled": true
 	}`
 
-	var opts retrieverconf.SerializableRedisOptions
+	var opts retrieverconf.Options
 	err := json.Unmarshal([]byte(jsonStr), &opts)
 	require.NoError(t, err)
 

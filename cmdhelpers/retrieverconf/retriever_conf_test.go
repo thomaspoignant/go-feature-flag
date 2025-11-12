@@ -278,7 +278,7 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 			name: "kind redis with new SerializableRedisOptions",
 			fields: retrieverconf.RetrieverConf{
 				Kind: "redis",
-				Redis: &retrieverconf.SerializableRedisOptions{
+				Redis: &retrieverconf.Options{
 					Addr: "localhost:6379",
 				},
 				RedisPrefix: "xxx",
@@ -292,7 +292,7 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 				RedisOptions: &redis.Options{
 					Addr: "old:6379",
 				},
-				Redis: &retrieverconf.SerializableRedisOptions{
+				Redis: &retrieverconf.Options{
 					Addr: "new:6379",
 				},
 				RedisPrefix: "xxx",
@@ -315,7 +315,7 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 			name: "kind redis with new Redis but empty Addr",
 			fields: retrieverconf.RetrieverConf{
 				Kind: "redis",
-				Redis: &retrieverconf.SerializableRedisOptions{
+				Redis: &retrieverconf.Options{
 					Addr: "",
 				},
 				RedisPrefix: "xxx",

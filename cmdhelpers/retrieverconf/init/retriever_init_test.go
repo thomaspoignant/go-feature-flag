@@ -273,7 +273,7 @@ func Test_InitRetriever_Redis(t *testing.T) {
 			name: "Redis with new SerializableRedisOptions",
 			conf: &retrieverconf.RetrieverConf{
 				Kind: retrieverconf.RedisRetriever,
-				Redis: &retrieverconf.SerializableRedisOptions{
+				Redis: &retrieverconf.Options{
 					Addr:     "redis.example.com:6380",
 					Password: "newsecret",
 					DB:       2,
@@ -300,7 +300,7 @@ func Test_InitRetriever_Redis(t *testing.T) {
 					Addr:     "old:6379",
 					Password: "old-secret",
 				},
-				Redis: &retrieverconf.SerializableRedisOptions{
+				Redis: &retrieverconf.Options{
 					Addr:     "new:6380",
 					Password: "new-secret",
 				},
@@ -320,7 +320,7 @@ func Test_InitRetriever_Redis(t *testing.T) {
 			name: "Redis with full SerializableRedisOptions",
 			conf: &retrieverconf.RetrieverConf{
 				Kind: retrieverconf.RedisRetriever,
-				Redis: &retrieverconf.SerializableRedisOptions{
+				Redis: &retrieverconf.Options{
 					Addr:              "redis:6379",
 					Password:          "pass",
 					DB:                3,
