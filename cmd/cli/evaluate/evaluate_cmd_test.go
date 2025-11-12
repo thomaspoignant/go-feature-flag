@@ -373,6 +373,51 @@ func TestCmdEvaluate(t *testing.T) {
 			wantErr:     assert.Error,
 			expectedErr: "impossible to init flagset retriever: cannot parse `inv4lid`: failed to parse as keyword/value (invalid keyword/value)",
 		},
+		{
+			name: "should return RetrieverConfError with CLI-friendly message when required property is missing",
+			args: []string{
+				"--kind",
+				"github",
+				"--path",
+				"testdata/flag-config.yaml",
+				"--branch",
+				"master",
+				"--ctx",
+				`{"targetingKey": "user-123"}`,
+				"--format",
+				"yaml",
+			},
+			wantErr:     assert.Error,
+			expectedErr: "invalid retriever: no \"repository-slug\" property found for kind \"github\"",
+		},
+		{
+			name: "should return RetrieverConfError with CLI-friendly message when path is missing for file kind",
+			args: []string{
+				"--kind",
+				"file",
+				"--ctx",
+				`{"targetingKey": "user-123"}`,
+				"--format",
+				"yaml",
+			},
+			wantErr:     assert.Error,
+			expectedErr: "invalid retriever: no \"path\" property found for kind \"file\"",
+		},
+		{
+			name: "should return RetrieverConfError with CLI-friendly message when bucket is missing for s3 kind",
+			args: []string{
+				"--kind",
+				"s3",
+				"--item",
+				"config.yaml",
+				"--ctx",
+				`{"targetingKey": "user-123"}`,
+				"--format",
+				"yaml",
+			},
+			wantErr:     assert.Error,
+			expectedErr: "invalid retriever: no \"bucket\" property found for kind \"s3\"",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
