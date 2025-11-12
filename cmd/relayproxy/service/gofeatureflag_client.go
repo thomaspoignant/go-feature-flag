@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"time"
@@ -32,7 +33,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/utils"
 	"go.uber.org/zap"
-	"golang.org/x/net/context"
 )
 
 func NewGoFeatureFlagClient(
