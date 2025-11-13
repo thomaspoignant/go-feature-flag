@@ -129,12 +129,9 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Release readme to DockerHub
         uses: ms-jpq/sync-dockerhub-readme@e2991ea1ba48832e73555cdbd5b82f5a2e91ee9b # v1
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         with:
-          username: ${DOCKER_USERNAME}
-          password: ${DOCKER_PASSWORD}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
           repository: gofeatureflag/go-feature-flag-cli
           readme: "./cmd/cli/DOCKERHUB.md"
 
@@ -148,12 +145,9 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Release readme to DockerHub
         uses: ms-jpq/sync-dockerhub-readme@e2991ea1ba48832e73555cdbd5b82f5a2e91ee9b # v1
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         with:
-          username: ${DOCKER_USERNAME}
-          password: ${DOCKER_PASSWORD}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
           repository: thomaspoignant/go-feature-flag-relay-proxy
           readme: "./cmd/relayproxy/DOCKERHUB_deprecated.md"
 
@@ -167,22 +161,16 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Release readme to DockerHub
         uses: ms-jpq/sync-dockerhub-readme@e2991ea1ba48832e73555cdbd5b82f5a2e91ee9b # v1
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         with:
-          username: ${DOCKER_USERNAME}
-          password: ${DOCKER_PASSWORD}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
           repository: thomaspoignant/go-feature-flag
           readme: "./cmd/relayproxy/DOCKERHUB_thomaspoignant.md"
       - name: Release readme to DockerHub gofeatureflag
         uses: ms-jpq/sync-dockerhub-readme@e2991ea1ba48832e73555cdbd5b82f5a2e91ee9b # v1
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         with:
-          username: ${DOCKER_USERNAME}
-          password: ${DOCKER_PASSWORD}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
           repository: gofeatureflag/go-feature-flag
           readme: "./cmd/relayproxy/DOCKERHUB.md"
 
@@ -344,7 +332,7 @@ jobs:
       - name: Bump chart appVersion
         env:
           VERSION: ${{ env.VERSION }}
-        run: make bump-helm-chart-version VERSION="$VERSION"
+        run: make bump-helm-chart-version VERSION="${{ env.VERSION }}"
 
       - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
