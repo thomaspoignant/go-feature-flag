@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.48.1](https://github.com/thomaspoignant/go-feature-flag/compare/v1.48.0...v1.48.1) (2025-11-13)
+
+
+### 🔧 Chores
+
+* Bump version and appVersion to 1.48.0 ([#4311](https://github.com/thomaspoignant/go-feature-flag/issues/4311)) ([61149b9](https://github.com/thomaspoignant/go-feature-flag/commit/61149b9f2eb43ce3f2aa9deeb2f41f5c2c0fc6dc))
+
+
+### ⚙️ CI/CD
+
+* **release:** fix secrets and env in release ([#4314](https://github.com/thomaspoignant/go-feature-flag/issues/4314)) ([65c56fb](https://github.com/thomaspoignant/go-feature-flag/commit/65c56fba5a0f8580601301f415baab9a9dc91c5a))
+
 ## [1.48.0](https://github.com/thomaspoignant/go-feature-flag/compare/v1.47.1...v1.48.0) (2025-11-13)
 
 
