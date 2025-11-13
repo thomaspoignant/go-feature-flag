@@ -63,7 +63,7 @@ type SerializableRedisOptions struct {
 
 	// ContextTimeoutEnabled controls whether the client respects context timeouts and deadlines.
 	// Default is false.
-	ContextTimeoutEnabled bool `mapstructure:"contextTimeoutEnabled" koanf:"contexttimeoutenabled" json:"contextTimeoutEnabled,omitempty"`
+	ContextTimeoutEnabled bool `mapstructure:"contextTimeoutEnabled" koanf:"contexttimeoutenabled" json:"contextTimeoutEnabled,omitempty"` // nolint:lll
 
 	// PoolFIFO uses FIFO mode for each node connection pool GET/PUT (default LIFO).
 	PoolFIFO bool `mapstructure:"poolFIFO" koanf:"poolfifo" json:"poolFIFO,omitempty"`
@@ -109,19 +109,19 @@ type SerializableRedisOptions struct {
 // ToRedisOptions converts SerializableRedisOptions to redis.Options
 func (s *SerializableRedisOptions) ToRedisOptions() *redis.Options {
 	opts := &redis.Options{
-		Network:    s.Network,
-		Addr:       s.Addr,
-		ClientName: s.ClientName,
-		Protocol:   s.Protocol,
-		Username:   s.Username,
-		Password:   s.Password,
-		DB:         s.DB,
-		PoolFIFO:   s.PoolFIFO,
-		PoolSize:   s.PoolSize,
-		MinIdleConns: s.MinIdleConns,
-		MaxIdleConns: s.MaxIdleConns,
-		DisableIndentity: s.DisableIndentity,
-		IdentitySuffix:   s.IdentitySuffix,
+		Network:               s.Network,
+		Addr:                  s.Addr,
+		ClientName:            s.ClientName,
+		Protocol:              s.Protocol,
+		Username:              s.Username,
+		Password:              s.Password,
+		DB:                    s.DB,
+		PoolFIFO:              s.PoolFIFO,
+		PoolSize:              s.PoolSize,
+		MinIdleConns:          s.MinIdleConns,
+		MaxIdleConns:          s.MaxIdleConns,
+		DisableIndentity:      s.DisableIndentity,
+		IdentitySuffix:        s.IdentitySuffix,
 		ContextTimeoutEnabled: s.ContextTimeoutEnabled,
 	}
 
