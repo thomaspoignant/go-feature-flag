@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4](https://github.com/thomaspoignant/go-feature-flag/compare/modules/evaluation/v0.1.3...modules/evaluation/v0.1.4) (2025-11-13)
+
+
+### 🔧 Chores
+
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#4263](https://github.com/thomaspoignant/go-feature-flag/issues/4263)) ([3944a49](https://github.com/thomaspoignant/go-feature-flag/commit/3944a491413056d903236573fbf5a75fc7336dd9))
+
 ## [0.1.3](https://github.com/thomaspoignant/go-feature-flag/compare/modules/evaluation/v0.1.2...modules/evaluation/v0.1.3) (2025-11-04)
 
 
