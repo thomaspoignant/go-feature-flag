@@ -294,7 +294,7 @@ func Test_InitRetriever_Redis(t *testing.T) {
 		{
 			name: "Redis with RedisOptions password",
 			conf: &retrieverconf.RetrieverConf{
-				Kind:        retrieverconf.RedisRetriever,
+				Kind: retrieverconf.RedisRetriever,
 				RedisOptions: &retrieverconf.SerializableRedisOptions{
 					Addr:     "new:6380",
 					Password: "new-secret",
@@ -315,15 +315,15 @@ func Test_InitRetriever_Redis(t *testing.T) {
 			conf: &retrieverconf.RetrieverConf{
 				Kind: retrieverconf.RedisRetriever,
 				RedisOptions: &retrieverconf.SerializableRedisOptions{
-					Addr:              "redis:6379",
-					Password:          "pass",
-					DB:                3,
-					MaxRetries:        5,
-					DialTimeoutMs:     10000,
-					ReadTimeoutMs:     5000,
-					PoolSize:          20,
-					MinIdleConns:      5,
-					ClientName:        "test-client",
+					Addr:                  "redis:6379",
+					Password:              "pass",
+					DB:                    3,
+					MaxRetries:            5,
+					DialTimeoutMs:         10000,
+					ReadTimeoutMs:         5000,
+					PoolSize:              20,
+					MinIdleConns:          5,
+					ClientName:            "test-client",
 					ContextTimeoutEnabled: true,
 				},
 			},
