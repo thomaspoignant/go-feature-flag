@@ -1,0 +1,66 @@
+---
+sidebar_position: 91
+description: How to configure a Redis retriever.
+---
+import { integrations } from "@site/data/integrations";
+import {Mandatory, NotMandatory} from "@site/src/components/checks/checks";
+export const retrieverName = 'Redis';
+export const info = integrations.retrievers.find((r) => r.name === retrieverName)
+
+# Redis
+
+## Overview
+{info.longDescription ?? info.description}
+
+## Redis Format
+If you use Redis to store your flags, you need a specific format to store your flags.
+
+We expect the flag to be stored as a `string:string` format where the key if the flag key (with or without a prefix) and the value is a string representing the flag in JSON.
+
+The retriever will `Scan` redis filtering with the `Prefix` and will parse the value as a `JSON object`.
+
+The retriever will read all the flags from Redis at once.
+
+## Configure the relay proxy
+
+To configure your relay proxy to use the {retrieverName} retriever, you need to add the following
+configuration to your relay proxy configuration file:
+
+```yaml title="goff-proxy.yaml"
+# ...
+retrievers:
+  - kind: redis
+    options:
+      addr: "127.0.0.1:6379"
+    prefix: "goff:"
+# ...
+```
+| Field name |    Mandatory     | Type   | Default  | Description                                                                                                                                                                                                                           |
+|------------|:----------------:|--------|----------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `kind`     |  <Mandatory />   | string | **none** | **Value should be `redis`**.<br/>_This field is mandatory and describes which retriever you are using._                                                                                                                               |
+| `options`  |  <Mandatory />   | object | **none** | Options used to connect to your redis instance.<br/>All the options from the `go-redis` SDK are available _([check `redis.Options`](https://github.com/redis/go-redis/blob/683f4fa6a6b0615344353a10478548969b09f89c/options.go#L31))_ |
+| `prefix`   | <NotMandatory /> | string | **none** | Prefix used before your flag name in the Redis DB.                                                                                                                                                                                    |
+
+
+## Configure the GO Module
+To configure your GO module to use the {retrieverName} retriever, you need to add the following
+configuration to your `ffclient.Config{}` object:
+
+```go title="example.go"
+err := ffclient.Init(ffclient.Config{
+    PollingInterval: 3 * time.Second,
+	  Retriever: &redisRetriver.Retriever{
+        Prefix: "goff:",
+		    Options: &redis.Options{
+            Addr: "127.0.0.1:6379",
+        },
+    },
+})
+defer ffclient.Close()
+```
+
+
+| Field         |    Mandatory     | Description                                                                                                                                      |
+|---------------|:----------------:|--------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`Options`** |  <Mandatory />   | A [`redis.Options`](https://pkg.go.dev/github.com/redis/go-redis/v9#Options) object containing the connection information to the redis instance. |
+| **`Prefix`**  | <NotMandatory /> | Key prefix to filter on the key names.                                                                                                           |
