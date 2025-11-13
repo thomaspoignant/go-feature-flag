@@ -4,7 +4,6 @@ relayproxy:
     server:
       mode: http
       port: 1031
-      monitoringPort: 1032
     pollingInterval: 1000
     startWithRetrieverError: false
     logLevel: info
