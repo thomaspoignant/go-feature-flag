@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	promversion "github.com/prometheus/common/version"
 	"github.com/spf13/pflag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
@@ -17,7 +18,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// version, releaseDate are override by the makefile during the build.
+// version is overridden by GoReleaser during the build.
 var version = "localdev"
 
 const banner = `█▀▀ █▀█   █▀▀ █▀▀ ▄▀█ ▀█▀ █ █ █▀█ █▀▀   █▀▀ █   ▄▀█ █▀▀
@@ -73,11 +74,15 @@ func main() {
 	docs.SwaggerInfo.Version = proxyConf.Version
 	docs.SwaggerInfo.Host = fmt.Sprintf("%s:%d", proxyConf.Host, proxyConf.GetServerPort(logger.ZapLogger))
 
-	// Init services
+	// Set the version for the prometheus version collector
+	promversion.Version = version
+	// Initialize metrics
 	metricsV2, err := metric.NewMetrics()
 	if err != nil {
 		logger.ZapLogger.Error("impossible to initialize prometheus metrics", zap.Error(err))
 	}
+
+	// Init services
 	wsService := service.NewWebsocketService()
 	defer wsService.Close() // close all the open connections
 	prometheusNotifier := metric.NewPrometheusNotifier(metricsV2)
