@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.6.0](https://github.com/thomaspoignant/go-feature-flag/compare/openfeature/providers/python-provider/v0.5.0...openfeature/providers/python-provider/v0.6.0) (2025-11-21)
+
+
+### 🚀 New Features
+
+* Start the relayproxy as a unix socket. ([#4261](https://github.com/thomaspoignant/go-feature-flag/issues/4261)) ([7b369b4](https://github.com/thomaspoignant/go-feature-flag/commit/7b369b48d008aa310f00e68bc23103213adb838c))
+
+
+### 🔧 Chores
+
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#4263](https://github.com/thomaspoignant/go-feature-flag/issues/4263)) ([3944a49](https://github.com/thomaspoignant/go-feature-flag/commit/3944a491413056d903236573fbf5a75fc7336dd9))
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#4326](https://github.com/thomaspoignant/go-feature-flag/issues/4326)) ([927e392](https://github.com/thomaspoignant/go-feature-flag/commit/927e392662eaad75f33bd88275c566a465d02446))
+* Bump pydantic in /openfeature/providers/python-provider ([#4275](https://github.com/thomaspoignant/go-feature-flag/issues/4275)) ([c371092](https://github.com/thomaspoignant/go-feature-flag/commit/c371092c82051a2fadee7e705cde6f1d27de9bce))
+
 ## [0.5.0](https://github.com/thomaspoignant/go-feature-flag/compare/openfeature/providers/python-provider/v0.5.0...openfeature/providers/python-provider/v0.5.0) (2025-10-26)
 
 
