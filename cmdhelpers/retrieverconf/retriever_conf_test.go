@@ -254,13 +254,70 @@ func TestRetrieverConf_IsValid(t *testing.T) {
 			errValue: "invalid retriever: no \"uri\" property found for kind \"mongodb\"",
 		},
 		{
-			name: "kind redis without options",
+			name: "kind redis without options (old RedisOptions)",
 			fields: retrieverconf.RetrieverConf{
 				Kind:        "redis",
 				RedisPrefix: "xxx",
 			},
 			wantErr:  true,
 			errValue: "invalid retriever: no \"redisOptions\" property found for kind \"redis\"",
+		},
+		{
+			name: "kind redis with RedisOptions",
+			fields: retrieverconf.RetrieverConf{
+				Kind: "redis",
+				RedisOptions: &retrieverconf.SerializableRedisOptions{
+					Addr: "localhost:6379",
+				},
+				RedisPrefix: "xxx",
+			},
+			wantErr: false,
+		},
+		{
+			name: "kind redis with SerializableRedisOptions",
+			fields: retrieverconf.RetrieverConf{
+				Kind: "redis",
+				RedisOptions: &retrieverconf.SerializableRedisOptions{
+					Addr: "localhost:6379",
+				},
+				RedisPrefix: "xxx",
+			},
+			wantErr: false,
+		},
+		{
+			name: "kind redis with RedisOptions",
+			fields: retrieverconf.RetrieverConf{
+				Kind: "redis",
+				RedisOptions: &retrieverconf.SerializableRedisOptions{
+					Addr: "new:6379",
+				},
+				RedisPrefix: "xxx",
+			},
+			wantErr: false,
+		},
+		{
+			name: "kind redis with RedisOptions but empty Addr",
+			fields: retrieverconf.RetrieverConf{
+				Kind: "redis",
+				RedisOptions: &retrieverconf.SerializableRedisOptions{
+					Addr: "",
+				},
+				RedisPrefix: "xxx",
+			},
+			wantErr:  true,
+			errValue: "invalid retriever: no \"redisOptions.addr\" property found for kind \"redis\"",
+		},
+		{
+			name: "kind redis with RedisOptions but empty Addr (2)",
+			fields: retrieverconf.RetrieverConf{
+				Kind: "redis",
+				RedisOptions: &retrieverconf.SerializableRedisOptions{
+					Addr: "",
+				},
+				RedisPrefix: "xxx",
+			},
+			wantErr:  true,
+			errValue: "invalid retriever: no \"redisOptions.addr\" property found for kind \"redis\"",
 		},
 		{
 			name: "kind mongoDB without Collection",
