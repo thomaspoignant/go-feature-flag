@@ -62,9 +62,7 @@ func (s *Server) initRoutes() {
 			isSwagger := strings.HasPrefix(c.Request().URL.String(), "/swagger")
 			return isSwagger || !s.zapLog.Core().Enabled(zap.DebugLevel)
 		},
-		Handler: func(_ echo.Context, reqBody []byte, _ []byte) {
-			s.zapLog.Debug("Request info", zap.ByteString("request_body", reqBody))
-		},
+		Handler: bodyDumpHandler(s.zapLog),
 	}))
 	if s.services.Metrics != (metric.Metrics{}) {
 		s.apiEcho.Use(echoprometheus.NewMiddlewareWithConfig(echoprometheus.MiddlewareConfig{
