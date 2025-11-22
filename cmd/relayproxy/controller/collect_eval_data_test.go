@@ -1,6 +1,7 @@
 package controller_test
 
 import (
+	"context"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -320,6 +321,47 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 			assert.JSONEq(t, string(wantCollectData), string(exportedData), "Invalid exported data")
 		})
 	}
+}
+
+func TestCollectEvalData_Handler_cancellation(t *testing.T) {
+	flagsetManager, err := service.NewFlagsetManager(&config.Config{
+		CommonFlagSet: config.CommonFlagSet{
+			PollingInterval: 10,
+			Retrievers:      &[]retrieverconf.RetrieverConf{{Kind: "file", Path: configFlagsLocation}},
+		},
+	}, zap.NewNop(), []notifier.Notifier{})
+	require.NoError(t, err)
+
+	t.Cleanup(func() { flagsetManager.Close() })
+
+	ctrl := controller.NewCollectEvalData(flagsetManager, metric.Metrics{}, zap.NewNop())
+
+	// large payload with 20,000 events to ensure processing takes time
+	event := `{"kind":"feature","contextKind":"user","userKey":"u","creationDate":1680246000,"key":"f","variation":"v","value":"true","default":false,"version":"1","source":"PROVIDER_CACHE"}`
+	body := `{"events":[` + strings.Repeat(event+",", 19999) + event + `]}`
+
+	ctx, cancel := context.WithCancel(t.Context())
+	req := httptest.NewRequestWithContext(ctx, http.MethodPost, "/v1/data/collector", strings.NewReader(body))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+
+	e := echo.New()
+	c := e.NewContext(req, httptest.NewRecorder())
+
+	// run handler in background, cancel after 10ms
+	done := make(chan error, 1)
+	go func() {
+		done <- ctrl.Handler(c)
+	}()
+
+	time.Sleep(10 * time.Millisecond)
+	cancel()
+
+	err = <-done
+
+	require.ErrorIs(t, err, context.Canceled)
+	assert.Contains(t, err.Error(), "context cancelled after processing")
+	// count will be less than the total if cancellation worked
+	assert.NotContains(t, err.Error(), "20000/20000")
 }
 
 func Test_collect_tracking_and_evaluation_events(t *testing.T) {
