@@ -147,6 +147,7 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 // @Produce     json
 // @Accept	 	json
 // @Param       If-None-Match header string false "The request will be processed only if ETag doesn't match."
+// @Param       X-Enable-Bulk-Metric-Flag-Names header boolean false "If true, enables per flag metrics for this bulk evaluation request."
 // @Param 		data body model.OFREPEvalFlagRequest true "Evaluation Context and list of flag for this API call"
 // @Success     200 {object} model.OFREPBulkEvaluateSuccessResponse "OFREP successful evaluation response"
 // @Success     304 {string} string "Etag: \"117-0193435c612c50d93b798619d9464856263dbf9f\""
@@ -157,6 +158,7 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 // @Router      /ofrep/v1/evaluate/flags [post]
 func (h *EvaluateCtrl) BulkEvaluate(c echo.Context) error {
 	h.metrics.IncAllFlag()
+	enableBulkMetricFlagNames := c.Request().Header.Get("X-Enable-Bulk-Metric-Flag-Names") == "true"
 
 	request := new(model.OFREPEvalFlagRequest)
 	if err := c.Bind(request); err != nil {
@@ -195,6 +197,9 @@ func (h *EvaluateCtrl) BulkEvaluate(c echo.Context) error {
 		allFlagsResp = flagset.AllFlagsState(evalCtx)
 	}
 	for key, val := range allFlagsResp.GetFlags() {
+		if enableBulkMetricFlagNames {
+			h.metrics.IncFlagEvaluation(key)
+		}
 		value := val.Value
 		if val.Reason == flag.ReasonError {
 			value = nil
