@@ -43,8 +43,10 @@ func NewMetrics(opts ...MetricsOpts) (Metrics, error) {
 		Subsystem: GOFFSubSystem,
 	})
 
+	// counts the number of bulk evaluations along with flag
 	allFlagCounterWithFlag := prom.NewCounterVec(prom.CounterOpts{
 		Name:      "all_flags_evaluations_total_with_flag",
+		Help:      "Counter events for all flags bulk evaluations with individual flag names",
 		Subsystem: GOFFSubSystem,
 	}, []string{"flag_name"})
 
@@ -195,7 +197,7 @@ func (m *Metrics) IncAllFlag(flagNames ...string) {
 		m.allFlagCounter.Inc()
 	}
 
-	if m.opts.EnableBulkMetricFlagNames && m.allFlagCounterWithFlag.MetricVec != nil {
+	if m.ShouldCollectBulkMetrics() {
 		for _, flagName := range flagNames {
 			m.allFlagCounterWithFlag.With(prom.Labels{"flag_name": flagName}).Inc()
 		}
@@ -252,4 +254,8 @@ func (m *Metrics) IncFlagConfigurationCall() {
 	if m.flagConfigurationCounter != nil {
 		m.flagConfigurationCounter.Inc()
 	}
+}
+
+func (m *Metrics) ShouldCollectBulkMetrics() bool {
+	return m.opts.EnableBulkMetricFlagNames && m.allFlagCounterWithFlag.MetricVec != nil
 }
