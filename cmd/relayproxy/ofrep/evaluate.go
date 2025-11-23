@@ -222,7 +222,6 @@ func (h *EvaluateCtrl) BulkEvaluate(c echo.Context) error {
 	)
 
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	// @Param       X-Enable-Bulk-Metric-Flag-Names header boolean false "If true, enables per flag metrics"
 	return c.JSON(http.StatusOK, response)
 }
 
