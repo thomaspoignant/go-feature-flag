@@ -32,7 +32,6 @@ func Test_Bulk_Evaluation(t *testing.T) {
 	type args struct {
 		bodyFile            string
 		configFlagsLocation string
-		headers             map[string]string
 	}
 
 	tests := []struct {
@@ -95,20 +94,6 @@ func Test_Bulk_Evaluation(t *testing.T) {
 				bodyFile: "../testdata/ofrep/responses/no_targeting_key_context.json",
 			},
 		},
-		{
-			name: "per-metrics flag enabled",
-			args: args{
-				bodyFile:            "../testdata/ofrep/valid_request.json",
-				configFlagsLocation: configFlagsLocation,
-				headers: map[string]string{
-					"X-Enable-Bulk-Metric-Flag-Names": "true",
-				},
-			},
-			want: want{
-				httpCode: http.StatusOK,
-				bodyFile: "../testdata/ofrep/responses/valid_response.json",
-			},
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -144,9 +129,6 @@ func Test_Bulk_Evaluation(t *testing.T) {
 
 			req := httptest.NewRequest(echo.POST, "/ofrep/v1/evaluate/flags", bodyReq)
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-			for k, v := range tt.args.headers {
-				req.Header.Set(k, v)
-			}
 			c := e.NewContext(req, rec)
 
 			c.SetPath("/ofrep/v1/evaluate/flags")

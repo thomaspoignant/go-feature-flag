@@ -160,6 +160,9 @@ type Config struct {
 	// By default we have no prefix
 	EnvVariablePrefix string `mapstructure:"envVariablePrefix" koanf:"envvariableprefix"`
 
+	// TODO: write doc
+	EnableBulkMetricFlagNames bool `mapstructure:"enableBulkMetricFlagNames" koanf:"enablebulkmetricflagnames"`
+
 	// FlagSets is the list of flag sets configured.
 	// A flag set is a group of flags that can be used to configure the relay proxy.
 	// Each flag set can have its own API key, retrievers, notifiers and exporters.

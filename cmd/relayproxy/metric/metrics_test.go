@@ -22,6 +22,23 @@ func TestMetrics_IncAllFlag(t *testing.T) {
 
 	assert.Equal(t, 3.0, testutil.ToFloat64(metricSrv.allFlagCounter))
 }
+
+func TestMetrics_IncAllFlag_WithBulkMetricEnabled(t *testing.T) {
+	metricSrv, err := NewMetrics(MetricsOpts{
+		EnableBulkMetricFlagNames: true,
+	})
+	assert.NoError(t, err)
+	metricSrv.IncAllFlag("test-flag")
+	metricSrv.IncAllFlag("test-flag")
+
+	assert.Equal(
+		t,
+		2.0,
+		testutil.ToFloat64(metricSrv.allFlagCounterWithFlag.WithLabelValues("test-flag")),
+	)
+	assert.Equal(t, 2.0, testutil.ToFloat64(metricSrv.allFlagCounter))
+}
+
 func TestMetrics_IncCollectEvalData(t *testing.T) {
 	metricSrv, err := NewMetrics()
 	assert.NoError(t, err)

@@ -77,7 +77,9 @@ func main() {
 	// Set the version for the prometheus version collector
 	promversion.Version = version
 	// Initialize metrics
-	metricsV2, err := metric.NewMetrics()
+	metricsV2, err := metric.NewMetrics(metric.MetricsOpts{
+		EnableBulkMetricFlagNames: proxyConf.EnableBulkMetricFlagNames,
+	})
 	if err != nil {
 		logger.ZapLogger.Error("impossible to initialize prometheus metrics", zap.Error(err))
 	}
