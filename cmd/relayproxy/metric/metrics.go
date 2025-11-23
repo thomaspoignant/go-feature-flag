@@ -22,10 +22,8 @@ func NewMetrics(opts ...MetricsOpts) (Metrics, error) {
 		EnableBulkMetricFlagNames: false,
 	}
 
-	for _, opt := range opts {
-		if opt.EnableBulkMetricFlagNames {
-			mo.EnableBulkMetricFlagNames = true
-		}
+	if len(opts) > 0 {
+		mo = &opts[0]
 	}
 	customRegistry := prom.NewRegistry()
 
