@@ -160,7 +160,9 @@ type Config struct {
 	// By default we have no prefix
 	EnvVariablePrefix string `mapstructure:"envVariablePrefix" koanf:"envvariableprefix"`
 
-	// TODO: write doc
+	// EnableBulkMetricFlagNames (optional) enables per-flag metrics for bulk evaluation endpoints.
+	// This adds flag_name labels to the all_flags_evaluations_total_with_flag metric.
+	// Default: false
 	EnableBulkMetricFlagNames bool `mapstructure:"enableBulkMetricFlagNames" koanf:"enablebulkmetricflagnames"`
 
 	// FlagSets is the list of flag sets configured.

@@ -7,7 +7,7 @@ import (
 )
 
 type MetricsOpts struct {
-	// TODO: Write doc
+	// enables per-flag metrics for bulk evaluation endpoints
 	EnableBulkMetricFlagNames bool
 }
 
@@ -44,9 +44,8 @@ func NewMetrics(opts ...MetricsOpts) (Metrics, error) {
 	})
 
 	allFlagCounterWithFlag := prom.NewCounterVec(prom.CounterOpts{
-		Name: "all_flags_evaluations_total_with_flag",
-		// TODO: complete this
-		Help:      "Count",
+		Name:      "all_flags_evaluations_total_with_flag",
+		Help:      "Counter events for all flags bulk evaluations with individual flag names (opt-in via enableBulkMetricFlagNames).",
 		Subsystem: GOFFSubSystem,
 	}, []string{"flag_name"})
 
