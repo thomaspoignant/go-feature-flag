@@ -211,6 +211,8 @@ Check [_"Logging"_](./observability#logging) to have more information.
 - default: **`INFO`**
 - Acceptable values are `ERROR`, `WARN`, `INFO`, `DEBUG`.
 - mandatory: <NotMandatory />
+- When in `DEBUG` mode, the relay proxy will log the request body and response body,
+for large payloads this can be a lot of data and can impact the performance this is the reason why we truncate the body if it is larger than **8KiB**.
 
 ### `logFormat`
 
