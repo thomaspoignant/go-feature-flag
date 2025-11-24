@@ -16,6 +16,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 	"go.uber.org/zap"
 )
 
@@ -54,6 +55,12 @@ func NewCollectEvalData(
 // @Failure      500 {object} modeldocs.HTTPErrorDoc "Internal server error"
 // @Router       /v1/data/collector [post]
 func (h *collectEvalData) Handler(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	tracer := otel.Tracer(config.OtelTracerName)
+	ctx, span := tracer.Start(ctx, "collectEventData")
+	defer span.End()
+
 	reqBody := new(model.CollectEvalDataRequest)
 	if err := c.Bind(reqBody); err != nil {
 		return echo.NewHTTPError(
@@ -63,9 +70,7 @@ func (h *collectEvalData) Handler(c echo.Context) error {
 	if reqBody.Events == nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "collectEvalData: invalid input data")
 	}
-	tracer := otel.GetTracerProvider().Tracer(config.OtelTracerName)
-	_, span := tracer.Start(c.Request().Context(), "collectEventData")
-	defer span.End()
+
 	span.SetAttributes(attribute.Int("collectEventData.eventCollectionSize", len(reqBody.Events)))
 
 	flagset, httpErr := helper.GetFlagSet(h.flagsetManager, helper.GetAPIKey(c))
@@ -75,7 +80,26 @@ func (h *collectEvalData) Handler(c echo.Context) error {
 
 	counterTracking := 0
 	counterEvaluation := 0
-	for _, event := range reqBody.Events {
+	for i, event := range reqBody.Events {
+		// Check if context is cancelled before processing each event, to avoid
+		// long delays on large payloads.
+		select {
+		case <-ctx.Done():
+			err := fmt.Errorf("context cancelled after processing %d/%d events: %w",
+				i, len(reqBody.Events), ctx.Err())
+			span.SetAttributes(
+				attribute.Int("processed_tracking", counterTracking),
+				attribute.Int("processed_evaluation", counterEvaluation),
+				attribute.Int("total_events", len(reqBody.Events)),
+			)
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
+
+			return err
+		default:
+			// all good, keep going
+		}
+
 		switch event["kind"] {
 		case "tracking":
 			e, err := convertTrackingEvent(event, h.logger)
@@ -98,11 +122,13 @@ func (h *collectEvalData) Handler(c echo.Context) error {
 			counterEvaluation++
 		}
 	}
+
 	span.SetAttributes(attribute.Int("collectEventData.trackingCollectionSize", counterTracking))
 	span.SetAttributes(
 		attribute.Int("collectEventData.evaluationCollectionSize", counterEvaluation),
 	)
 	h.metrics.IncCollectEvalData(float64(len(reqBody.Events)))
+
 	return c.JSON(http.StatusOK, model.CollectEvalDataResponse{
 		IngestedContentCount: len(reqBody.Events),
 	})
