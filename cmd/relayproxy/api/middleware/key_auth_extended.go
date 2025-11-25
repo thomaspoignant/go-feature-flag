@@ -28,10 +28,8 @@ type KeyAuthExtendedConfig struct {
 	KeyLookup string
 }
 
-// KeyAuthExtended is a middleware that extends middleware.KeyAuthWithConfig
-// to also check the X-API-Key header in addition to the standard Authorization header.
-func KeyAuthExtended(config KeyAuthExtendedConfig) echo.MiddlewareFunc {
-	// Set default values
+// setDefaults sets default values for the KeyAuthExtendedConfig.
+func setDefaults(config *KeyAuthExtendedConfig) {
 	if config.Validator == nil {
 		panic("echo: key auth extended middleware requires a validator function")
 	}
@@ -44,6 +42,36 @@ func KeyAuthExtended(config KeyAuthExtendedConfig) echo.MiddlewareFunc {
 	if config.KeyLookup == "" {
 		config.KeyLookup = middleware.DefaultKeyAuthConfig.KeyLookup
 	}
+}
+
+// validateXAPIKey validates the X-API-Key header if present.
+// Returns (handled, error) where handled indicates if X-API-Key was processed.
+// If handled is true and error is nil, the request should continue to next handler.
+// If handled is true and error is not nil, the error should be returned.
+// If handled is false, fall back to standard KeyAuth middleware.
+func validateXAPIKey(c echo.Context, config KeyAuthExtendedConfig, next echo.HandlerFunc) (bool, error) {
+	xAPIKey := c.Request().Header.Get("X-API-Key")
+	if xAPIKey == "" {
+		return false, nil // X-API-Key not present, fall back to standard middleware
+	}
+
+	valid, err := config.Validator(xAPIKey, c)
+	if err != nil {
+		return true, config.ErrorHandler(err, c) // X-API-Key present but validation error
+	}
+	if !valid {
+		return true, config.ErrorHandler(echo.ErrUnauthorized, c) // X-API-Key present but invalid
+	}
+
+	// X-API-Key is valid, continue to next handler
+	return true, next(c)
+}
+
+// KeyAuthExtended is a middleware that extends middleware.KeyAuthWithConfig
+// to also check the X-API-Key header in addition to the standard Authorization header.
+func KeyAuthExtended(config KeyAuthExtendedConfig) echo.MiddlewareFunc {
+	// Set default values
+	setDefaults(&config)
 
 	// Create the standard KeyAuth middleware for Authorization header
 	keyAuthMiddleware := middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
@@ -61,17 +89,9 @@ func KeyAuthExtended(config KeyAuthExtendedConfig) echo.MiddlewareFunc {
 			}
 
 			// First, check X-API-Key header
-			xAPIKey := c.Request().Header.Get("X-API-Key")
-			if xAPIKey != "" {
-				valid, err := config.Validator(xAPIKey, c)
-				if err != nil {
-					return config.ErrorHandler(err, c)
-				}
-				if valid {
-					return next(c)
-				}
-				// If X-API-Key is present but invalid, return error
-				return config.ErrorHandler(echo.ErrUnauthorized, c)
+			handled, err := validateXAPIKey(c, config, next)
+			if handled {
+				return err
 			}
 
 			// If X-API-Key is not present, fall back to standard KeyAuth behavior
