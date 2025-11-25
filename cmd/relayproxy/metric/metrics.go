@@ -3,6 +3,7 @@ package metric
 import (
 	prom "github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
+	versioncollector "github.com/prometheus/client_golang/prometheus/collectors/version"
 )
 
 // GOFFSubSystem is the name of the prefix we are using for all the metrics
@@ -110,6 +111,7 @@ func NewMetrics() (Metrics, error) {
 		flagCreateCounterVec,
 		forceRefreshCounter,
 		flagConfigurationCounter,
+		versioncollector.NewCollector(GOFFSubSystem),
 		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
 		collectors.NewGoCollector(),
 	}
