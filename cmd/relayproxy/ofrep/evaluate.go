@@ -38,6 +38,7 @@ func NewOFREPEvaluate(flagsetManager service.FlagsetManager, metrics metric.Metr
 // @Description value of the flag for this evaluation context
 // @Description
 // @Security     ApiKeyAuth
+// @Security     XApiKeyAuth
 // @Produce      json
 // @Accept	 	 json
 // @Param 		 data body model.OFREPEvalFlagRequest true "Evaluation Context for this API call"
@@ -144,6 +145,7 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 // @Description
 // @Description If no flags are provided, the API will evaluate all available flags in the configuration.
 // @Security    ApiKeyAuth
+// @Security    XApiKeyAuth
 // @Produce     json
 // @Accept	 	json
 // @Param       If-None-Match header string false "The request will be processed only if ETag doesn't match."

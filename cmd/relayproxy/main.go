@@ -46,7 +46,8 @@ _____________________________________________`
 // @securitydefinitions.apikey XApiKeyAuth
 // @in header
 // @name X-API-Key
-// @description Use configured APIKeys in yaml config as authorization keys via X-API-Key header, disabled when this yaml config is not set.
+// @description Use configured APIKeys in yaml config as authorization keys via X-API-Key header,
+// @description disabled when this yaml config is not set.
 func main() {
 	// Init pFlag for config file
 	f := pflag.NewFlagSet("config", pflag.ContinueOnError)
