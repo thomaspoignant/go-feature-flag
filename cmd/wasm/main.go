@@ -10,6 +10,8 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/modules/core/model"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/utils"
 	"github.com/thomaspoignant/go-feature-flag/modules/evaluation"
+
+	"unsafe"
 )
 
 // main is the entry point for the wasm module.
@@ -72,4 +74,32 @@ func convertEvaluationCtx(ctx map[string]any) (ffcontext.Context, error) {
 	}
 	return ffcontext.NewEvaluationContextBuilder("").Build(),
 		fmt.Errorf("targetingKey not found in context")
+}
+
+
+// alloc/free implementation for wasm-unknown target from:
+// https://github.com/tinygo-org/tinygo/blob/2a76ceb7dd5ea5a834ec470b724882564d9681b3/src/runtime/arch_tinygowasm_malloc.go#L7
+var allocs = make(map[uintptr][]byte)
+
+//export wasm_malloc
+func wasm_malloc(size uintptr) unsafe.Pointer {
+	if size == 0 {
+		return nil
+	}
+	buf := make([]byte, size)
+	ptr := unsafe.Pointer(&buf[0])
+	allocs[uintptr(ptr)] = buf
+	return ptr
+}
+
+//export wasm_free
+func wasm_free(ptr unsafe.Pointer) {
+	if ptr == nil {
+		return
+	}
+	if _, ok := allocs[uintptr(ptr)]; ok {
+		delete(allocs, uintptr(ptr))
+	} else {
+		panic("free: invalid pointer")
+	}
 }
