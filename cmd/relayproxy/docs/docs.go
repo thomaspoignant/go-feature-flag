@@ -1044,6 +1044,12 @@ const docTemplate = `{
             "type": "apiKey",
             "name": "Authorization",
             "in": "header"
+        },
+        "XApiKeyAuth": {
+            "description": "Use configured APIKeys in yaml config as authorization keys via X-API-Key header, disabled when this yaml config is not set.",
+            "type": "apiKey",
+            "name": "X-API-Key",
+            "in": "header"
         }
     }
 }`

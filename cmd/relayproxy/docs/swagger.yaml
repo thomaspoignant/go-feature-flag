@@ -753,4 +753,10 @@ securityDefinitions:
     in: header
     name: Authorization
     type: apiKey
+  XApiKeyAuth:
+    description: Use configured APIKeys in yaml config as authorization keys via X-API-Key
+      header, disabled when this yaml config is not set.
+    in: header
+    name: X-API-Key
+    type: apiKey
 swagger: "2.0"
