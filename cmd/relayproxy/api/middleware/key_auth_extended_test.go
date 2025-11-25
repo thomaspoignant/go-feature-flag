@@ -14,6 +14,7 @@ func TestKeyAuthExtended(t *testing.T) {
 	validKey := "valid-api-key"
 	invalidKey := "invalid-api-key"
 
+	// nolint:unparam
 	validator := func(key string, _ echo.Context) (bool, error) {
 		return key == validKey, nil
 	}
@@ -88,7 +89,7 @@ func TestKeyAuthExtended(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			e := echo.New()
 			req := httptest.NewRequest(http.MethodGet, "/test", nil)
-			
+
 			if tt.xAPIKey != "" {
 				req.Header.Set("X-API-Key", tt.xAPIKey)
 			}
@@ -127,4 +128,3 @@ func TestKeyAuthExtended(t *testing.T) {
 		})
 	}
 }
-
