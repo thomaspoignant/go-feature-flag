@@ -7,6 +7,8 @@ require (
 	github.com/thomaspoignant/go-feature-flag/modules/evaluation v0.1.3
 )
 
+require github.com/rogpeppe/go-internal v1.14.1 // indirect
+
 require (
 	github.com/GeorgeD19/json-logic-go v0.0.0-20220225111652-48cc2d2c387e // indirect
 	github.com/antlr4-go/antlr/v4 v4.13.0 // indirect

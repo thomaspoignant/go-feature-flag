@@ -476,6 +476,7 @@ paths:
             $ref: '#/definitions/modeldocs.HTTPErrorDoc'
       security:
       - ApiKeyAuth: []
+      - XApiKeyAuth: []
       summary: Open-Feature Remote Evaluation Protocol bulk evaluation API.
       tags:
       - OpenFeature Remote Evaluation Protocol (OFREP)
@@ -523,6 +524,7 @@ paths:
             $ref: '#/definitions/modeldocs.HTTPErrorDoc'
       security:
       - ApiKeyAuth: []
+      - XApiKeyAuth: []
       summary: Evaluate a feature flag using the OpenFeature Remote Evaluation Protocol
       tags:
       - OpenFeature Remote Evaluation Protocol (OFREP)
@@ -560,6 +562,7 @@ paths:
             $ref: '#/definitions/modeldocs.HTTPErrorDoc'
       security:
       - ApiKeyAuth: []
+      - XApiKeyAuth: []
       summary: All flags variations for a user
       tags:
       - GO Feature Flag Evaluation API
@@ -596,6 +599,7 @@ paths:
             $ref: '#/definitions/modeldocs.HTTPErrorDoc'
       security:
       - ApiKeyAuth: []
+      - XApiKeyAuth: []
       summary: Endpoint to send usage of your flags to be collected
       tags:
       - GO Feature Flag Evaluation API
@@ -643,6 +647,7 @@ paths:
             $ref: '#/definitions/modeldocs.HTTPErrorDoc'
       security:
       - ApiKeyAuth: []
+      - XApiKeyAuth: []
       summary: Evaluate a feature flag
       tags:
       - GO Feature Flag Evaluation API
@@ -675,6 +680,7 @@ paths:
             $ref: '#/definitions/modeldocs.HTTPErrorDoc'
       security:
       - ApiKeyAuth: []
+      - XApiKeyAuth: []
       summary: Endpoint to poll if you want to know if there is a configuration change
         in the flags
       tags:
@@ -713,6 +719,7 @@ paths:
             $ref: '#/definitions/modeldocs.HTTPErrorDoc'
       security:
       - ApiKeyAuth: []
+      - XApiKeyAuth: []
       summary: Endpoint to poll if you want to get the configuration of the flags.
       tags:
       - GO Feature Flag Evaluation API
@@ -752,5 +759,12 @@ securityDefinitions:
       when this yaml config is not set.
     in: header
     name: Authorization
+    type: apiKey
+  XApiKeyAuth:
+    description: |-
+      Use configured APIKeys in yaml config as authorization keys via X-API-Key header,
+      disabled when this yaml config is not set.
+    in: header
+    name: X-API-Key
     type: apiKey
 swagger: "2.0"

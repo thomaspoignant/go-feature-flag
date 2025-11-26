@@ -17,7 +17,7 @@ It will force the retrievers to be called and update the internal cache.
 curl -X 'POST' \
   'http://<your_domain>:1031/admin/v1/retriever/refresh' \
   -H 'accept: application/json' \
-  -H 'Authorization: Bearer <your_admin_api_key>' \
+  -H 'X-API-Key: <your_admin_api_key>' \
   -d ''
 ```
 

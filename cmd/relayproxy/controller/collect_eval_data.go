@@ -47,6 +47,7 @@ func NewCollectEvalData(
 // @Description  It is used by the different Open Feature providers to send in bulk all the cached events to avoid
 // @Description  to lose track of what happen when a cached flag is used.
 // @Security     ApiKeyAuth
+// @Security     XApiKeyAuth
 // @Produce      json
 // @Accept		 json
 // @Param 		 data body model.CollectEvalDataRequest true "List of flag evaluation that be passed to the data exporter"

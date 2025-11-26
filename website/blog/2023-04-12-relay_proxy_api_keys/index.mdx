@@ -31,7 +31,7 @@ In your **relay proxy** configuration file it will look like this:
 ```yaml
 # ...
 # List of authorized API keys.
-# Each request will need to provide one of authorized key inside Authorization header with format Bearer <api-key>.
+# Each request will need to provide one of authorized key inside a X-API-Key header with format` X-API-Key: <api-key>`.
 # There will be no authorization when this config is not configured.
 apiKeys:
   - 6147795c-4438-44f1-8ab2-18cb3fa9591f # apiKey for client 1
