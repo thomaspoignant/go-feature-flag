@@ -46,7 +46,7 @@ The `OpenFeature::GoFeatureFlag::Provider` needs some options to be created and 
 | **Option** | **Description**                                                                                                                             |
 |------------|---------------------------------------------------------------------------------------------------------------------------------------------|
 | `endpoint` | **(mandatory)** The URL to access to the relay-proxy.<br />*(example: `https://relay.proxy.gofeatureflag.org/`)*                            |
-| `headers`  | A `Hash` object containing the headers to send to the relay-proxy.<br/>*(example to send APIKey: `{"Authorization" => "Bearer my-api-key"}` |
+| `headers`  | A `Hash` object containing the headers to send to the relay-proxy.<br/>*(example to send APIKey: `{"X-API-Key" => "my-api-key"}` |
 
 The only required option to create a `GoFeatureFlagProvider` is the URL _(`endpoint`)_ to your GO Feature Flag relay-proxy instance.
 
