@@ -1,6 +1,8 @@
 package middleware
 
 import (
+	"errors"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -29,9 +31,9 @@ type KeyAuthExtendedConfig struct {
 }
 
 // setDefaults sets default values for the KeyAuthExtendedConfig.
-func setDefaults(config *KeyAuthExtendedConfig) {
+func setDefaults(config *KeyAuthExtendedConfig) error {
 	if config.Validator == nil {
-		panic("echo: key auth extended middleware requires a validator function")
+		return errors.New("echo: key auth extended middleware requires a validator function")
 	}
 	if config.ErrorHandler == nil {
 		config.ErrorHandler = middleware.DefaultKeyAuthConfig.ErrorHandler
@@ -42,6 +44,7 @@ func setDefaults(config *KeyAuthExtendedConfig) {
 	if config.KeyLookup == "" {
 		config.KeyLookup = middleware.DefaultKeyAuthConfig.KeyLookup
 	}
+	return nil
 }
 
 // validateXAPIKey validates the X-API-Key header if present.
@@ -71,7 +74,10 @@ func validateXAPIKey(c echo.Context, config KeyAuthExtendedConfig, next echo.Han
 // to also check the X-API-Key header in addition to the standard Authorization header.
 func KeyAuthExtended(config KeyAuthExtendedConfig) echo.MiddlewareFunc {
 	// Set default values
-	setDefaults(&config)
+	err := setDefaults(&config)
+	if err != nil {
+		panic(err)
+	}
 
 	// Create the standard KeyAuth middleware for Authorization header
 	keyAuthMiddleware := middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
