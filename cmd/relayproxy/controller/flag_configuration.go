@@ -10,7 +10,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/helper"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
-	"github.com/thomaspoignant/go-feature-flag/internal/flag"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 )
@@ -51,6 +51,7 @@ type FlagConfigurationResponse struct {
 // @Description Making a **POST** request to the URL `/v1/flag/configuration` will give you the list of
 // @Description the flags to use them for local evaluation in your provider.
 // @Security    ApiKeyAuth
+// @Security    XApiKeyAuth
 // @Produce     json
 // @Accept      json
 // @Param 		data body FlagConfigurationRequest false "List of flags to get the configuration from."

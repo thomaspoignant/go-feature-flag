@@ -8,6 +8,7 @@ import (
 )
 
 // DeprecatedExporterV1 is an interface to describe how an exporter looks like.
+//
 // Deprecated: use Exporter instead.
 type DeprecatedExporterV1 interface {
 	CommonExporter

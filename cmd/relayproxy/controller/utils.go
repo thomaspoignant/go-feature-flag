@@ -7,7 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/model"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
-	"github.com/thomaspoignant/go-feature-flag/internal/utils"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/utils"
 )
 
 // assertRequest is the function which validates the request, if not valid an echo.HTTPError is return.
@@ -45,6 +45,11 @@ func userRequestToUser(u *model.UserRequest) (ffcontext.Context, error) {
 			"userRequestToUser: impossible to convert user, userRequest nil",
 		)
 	}
-	u.Custom["anonymous"] = u.Anonymous
-	return utils.ConvertEvaluationCtxFromRequest(u.Key, u.Custom), nil
+	custom := u.Custom
+	if custom == nil {
+		custom = make(map[string]interface{})
+	}
+
+	custom["anonymous"] = u.Anonymous
+	return utils.ConvertEvaluationCtxFromRequest(u.Key, custom), nil
 }

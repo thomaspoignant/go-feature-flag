@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
+	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/err"
 )
 
 var DefaultRetrieverConfig = struct {
@@ -20,46 +21,45 @@ var DefaultRetrieverConfig = struct {
 
 // RetrieverConf contains all the field to configure a retriever
 type RetrieverConf struct {
-	Kind           RetrieverKind `mapstructure:"kind"           koanf:"kind"`
-	RepositorySlug string        `mapstructure:"repositorySlug" koanf:"repositoryslug"`
-	Branch         string        `mapstructure:"branch"         koanf:"branch"`
-	Path           string        `mapstructure:"path"           koanf:"path"`
+	Kind           RetrieverKind `mapstructure:"kind"             koanf:"kind"`
+	RepositorySlug string        `mapstructure:"repositorySlug"   koanf:"repositoryslug"`
+	Branch         string        `mapstructure:"branch"           koanf:"branch"`
+	Path           string        `mapstructure:"path"             koanf:"path"`
 	// Deprecated: Please use AuthToken instead
-	GithubToken string              `mapstructure:"githubToken"    koanf:"githubtoken"`
-	URL         string              `mapstructure:"url"            koanf:"url"`
-	Timeout     int64               `mapstructure:"timeout"        koanf:"timeout"`
-	HTTPMethod  string              `mapstructure:"method"         koanf:"method"`
-	HTTPBody    string              `mapstructure:"body"           koanf:"body"`
-	HTTPHeaders map[string][]string `mapstructure:"headers"        koanf:"headers"`
-	Bucket      string              `mapstructure:"bucket"         koanf:"bucket"`
-	Object      string              `mapstructure:"object"         koanf:"object"`
-	Item        string              `mapstructure:"item"           koanf:"item"`
-	Namespace   string              `mapstructure:"namespace"      koanf:"namespace"`
-	ConfigMap   string              `mapstructure:"configmap"      koanf:"configmap"`
-	Key         string              `mapstructure:"key"            koanf:"key"`
-	BaseURL     string              `mapstructure:"baseUrl"        koanf:"baseurl"`
-	AuthToken   string              `mapstructure:"token"          koanf:"token"`
+	GithubToken string              `mapstructure:"githubToken"   koanf:"githubtoken"`
+	URL         string              `mapstructure:"url"           koanf:"url"`
+	Timeout     int64               `mapstructure:"timeout"       koanf:"timeout"`
+	HTTPMethod  string              `mapstructure:"method"        koanf:"method"`
+	HTTPBody    string              `mapstructure:"body"          koanf:"body"`
+	HTTPHeaders map[string][]string `mapstructure:"headers"       koanf:"headers"`
+	Bucket      string              `mapstructure:"bucket"        koanf:"bucket"`
+	Object      string              `mapstructure:"object"        koanf:"object"`
+	Item        string              `mapstructure:"item"          koanf:"item"`
+	Namespace   string              `mapstructure:"namespace"     koanf:"namespace"`
+	ConfigMap   string              `mapstructure:"configmap"     koanf:"configmap"`
+	Key         string              `mapstructure:"key"           koanf:"key"`
+	BaseURL     string              `mapstructure:"baseUrl"       koanf:"baseurl"`
+	AuthToken   string              `mapstructure:"token"         koanf:"token"`
 
 	// URI is used by
 	// - the postgresql retriever
 	// - the mongodb retriever
-	URI string `mapstructure:"uri"            koanf:"uri"`
+	URI string `mapstructure:"uri"  koanf:"uri"`
 
 	// Table is used by
 	// - the postgresql retriever
-	Table string `mapstructure:"table"          koanf:"table"`
+	Table string `mapstructure:"table"  koanf:"table"`
 
 	// Columns is used by
 	// - the postgresql retriever (it allows to use custom column names)
-	Columns map[string]string `mapstructure:"columns"        koanf:"columns"`
-
-	Database     string         `mapstructure:"database"       koanf:"database"`
-	Collection   string         `mapstructure:"collection"     koanf:"collection"`
-	RedisOptions *redis.Options `mapstructure:"redisOptions"   koanf:"redisOptions"`
-	RedisPrefix  string         `mapstructure:"redisPrefix"    koanf:"redisPrefix"`
-	AccountName  string         `mapstructure:"accountName"    koanf:"accountname"`
-	AccountKey   string         `mapstructure:"accountKey"     koanf:"accountkey"`
-	Container    string         `mapstructure:"container"      koanf:"container"`
+	Columns      map[string]string `mapstructure:"columns"        koanf:"columns"`
+	Database     string            `mapstructure:"database"       koanf:"database"`
+	Collection   string            `mapstructure:"collection"     koanf:"collection"`
+	RedisOptions *redis.Options    `mapstructure:"redisOptions"   koanf:"redisOptions"`
+	RedisPrefix  string            `mapstructure:"redisPrefix"    koanf:"redisPrefix"`
+	AccountName  string            `mapstructure:"accountName"    koanf:"accountname"`
+	AccountKey   string            `mapstructure:"accountKey"     koanf:"accountkey"`
+	Container    string            `mapstructure:"container"      koanf:"container"`
 }
 
 // IsValid validate the configuration of the retriever
@@ -75,19 +75,19 @@ func (c *RetrieverConf) IsValid() error {
 		return c.validateGitRetriever()
 	}
 	if c.Kind == S3Retriever && c.Item == "" {
-		return fmt.Errorf("invalid retriever: no \"item\" property found for kind \"%s\"", c.Kind)
+		return err.NewRetrieverConfError("item", string(c.Kind))
 	}
 	if c.Kind == HTTPRetriever && c.URL == "" {
-		return fmt.Errorf("invalid retriever: no \"url\" property found for kind \"%s\"", c.Kind)
+		return err.NewRetrieverConfError("url", string(c.Kind))
 	}
 	if c.Kind == GoogleStorageRetriever && c.Object == "" {
-		return fmt.Errorf("invalid retriever: no \"object\" property found for kind \"%s\"", c.Kind)
+		return err.NewRetrieverConfError("object", string(c.Kind))
 	}
 	if c.Kind == FileRetriever && c.Path == "" {
-		return fmt.Errorf("invalid retriever: no \"path\" property found for kind \"%s\"", c.Kind)
+		return err.NewRetrieverConfError("path", string(c.Kind))
 	}
 	if (c.Kind == S3Retriever || c.Kind == GoogleStorageRetriever) && c.Bucket == "" {
-		return fmt.Errorf("invalid retriever: no \"bucket\" property found for kind \"%s\"", c.Kind)
+		return err.NewRetrieverConfError("bucket", string(c.Kind))
 	}
 	if c.Kind == KubernetesRetriever {
 		return c.validateKubernetesRetriever()
@@ -107,90 +107,66 @@ func (c *RetrieverConf) IsValid() error {
 // validatePostgreSQLRetriever validates the configuration of the postgresql retriever
 func (c *RetrieverConf) validatePostgreSQLRetriever() error {
 	if c.URI == "" {
-		return fmt.Errorf("invalid retriever: no \"uri\" property found for kind \"%s\"", c.Kind)
+		return err.NewRetrieverConfError("uri", string(c.Kind))
 	}
 	if c.Table == "" {
-		return fmt.Errorf("invalid retriever: no \"table\" property found for kind \"%s\"", c.Kind)
+		return err.NewRetrieverConfError("table", string(c.Kind))
 	}
 	return nil
 }
 
 func (c *RetrieverConf) validateGitRetriever() error {
 	if c.RepositorySlug == "" {
-		return fmt.Errorf(
-			"invalid retriever: no \"repositorySlug\" property found for kind \"%s\"",
-			c.Kind,
-		)
+		return err.NewRetrieverConfError("repositorySlug", string(c.Kind))
 	}
 	if c.Path == "" {
-		return fmt.Errorf("invalid retriever: no \"path\" property found for kind \"%s\"", c.Kind)
+		return err.NewRetrieverConfError("path", string(c.Kind))
 	}
 	return nil
 }
 
 func (c *RetrieverConf) validateKubernetesRetriever() error {
 	if c.ConfigMap == "" {
-		return fmt.Errorf(
-			"invalid retriever: no \"configmap\" property found for kind \"%s\"",
-			c.Kind,
-		)
+		return err.NewRetrieverConfError("configmap", string(c.Kind))
 	}
 	if c.Namespace == "" {
-		return fmt.Errorf(
-			"invalid retriever: no \"namespace\" property found for kind \"%s\"",
-			c.Kind,
-		)
+		return err.NewRetrieverConfError("namespace", string(c.Kind))
 	}
 	if c.Key == "" {
-		return fmt.Errorf("invalid retriever: no \"key\" property found for kind \"%s\"", c.Kind)
+		return err.NewRetrieverConfError("key", string(c.Kind))
 	}
 	return nil
 }
 
 func (c *RetrieverConf) validateMongoDBRetriever() error {
 	if c.Collection == "" {
-		return fmt.Errorf(
-			"invalid retriever: no \"collection\" property found for kind \"%s\"",
-			c.Kind,
-		)
+		return err.NewRetrieverConfError("collection", string(c.Kind))
 	}
 	if c.Database == "" {
-		return fmt.Errorf(
-			"invalid retriever: no \"database\" property found for kind \"%s\"",
-			c.Kind,
-		)
+		return err.NewRetrieverConfError("database", string(c.Kind))
 	}
 	if c.URI == "" {
-		return fmt.Errorf("invalid retriever: no \"uri\" property found for kind \"%s\"", c.Kind)
+		return err.NewRetrieverConfError("uri", string(c.Kind))
 	}
 	return nil
 }
 
 func (c *RetrieverConf) validateRedisRetriever() error {
 	if c.RedisOptions == nil {
-		return fmt.Errorf(
-			"invalid retriever: no \"redisOptions\" property found for kind \"%s\"",
-			c.Kind,
-		)
+		return err.NewRetrieverConfError("redisOptions", string(c.Kind))
 	}
 	return nil
 }
 
 func (c *RetrieverConf) validateAzBlobStorageRetriever() error {
 	if c.AccountName == "" {
-		return fmt.Errorf(
-			"invalid retriever: no \"accountName\" property found for kind \"%s\"",
-			c.Kind,
-		)
+		return err.NewRetrieverConfError("accountName", string(c.Kind))
 	}
 	if c.Container == "" {
-		return fmt.Errorf(
-			"invalid retriever: no \"container\" property found for kind \"%s\"",
-			c.Kind,
-		)
+		return err.NewRetrieverConfError("container", string(c.Kind))
 	}
 	if c.Object == "" {
-		return fmt.Errorf("invalid retriever: no \"object\" property found for kind \"%s\"", c.Kind)
+		return err.NewRetrieverConfError("object", string(c.Kind))
 	}
 	return nil
 }

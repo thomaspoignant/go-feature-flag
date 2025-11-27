@@ -1,8 +1,8 @@
 package cache
 
 import (
-	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	"github.com/thomaspoignant/go-feature-flag/model/dto"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/dto"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
 )
 
 // Cache is the interface to represent a cache in the system.

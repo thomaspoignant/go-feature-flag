@@ -16,13 +16,13 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/exporter/logsexporter"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
-	"github.com/thomaspoignant/go-feature-flag/internal/flag"
-	"github.com/thomaspoignant/go-feature-flag/model"
 	"github.com/thomaspoignant/go-feature-flag/model/dto"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/model"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/testutils/testconvert"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
-	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 

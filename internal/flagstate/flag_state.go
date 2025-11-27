@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
-	"github.com/thomaspoignant/go-feature-flag/internal/flag"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
 )
 
 // FlagState represents the state of an individual feature flag, with regard to a specific user, when it was called.

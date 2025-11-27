@@ -40,6 +40,7 @@ func NewFlagEval(flagsetMngr service.FlagsetManager, metrics metric.Metrics) Con
 // @Description an issue has occurred during the validation of the flag, in that case the value returned will be the
 // @Description default value.
 // @Security     ApiKeyAuth
+// @Security     XApiKeyAuth
 // @Produce      json
 // @Accept	 	 json
 // @Param 		 data body model.EvalFlagRequest true "Payload of the user we want to get all the flags from."

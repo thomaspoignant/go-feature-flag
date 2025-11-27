@@ -1,0 +1,32 @@
+test-flag:
+  variations:
+    Default: false
+    False: false
+    True: true
+  targeting:
+    - name: rule1
+      query: key eq "random-key"
+      percentage:
+        False: 0
+        True: 100
+  defaultRule:
+    name: defaultRule
+    variation: Default
+  metadata:
+    description: this is a simple feature flag
+    issue-link: https://jira.xxx/GOFF-01
+
+test-flag2:
+  variations:
+    Default: false
+    False: false
+    True: true
+  targeting:
+    - name: rule1
+      query: key eq "not-a-key"
+      percentage:
+        False: 0
+        True: 100
+  defaultRule:
+    name: defaultRule
+    variation: Default

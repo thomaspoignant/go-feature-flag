@@ -47,22 +47,15 @@ type GoFeatureFlag struct {
 }
 
 // ff is the default object for go-feature-flag
-var ff *GoFeatureFlag
-var onceFF sync.Once
+var (
+	ff     *GoFeatureFlag
+	onceFF sync.Once
+)
 
 // New creates a new go-feature-flag instances that retrieve the config from a YAML file
 // and return everything you need to manage your flags.
 func New(config Config) (*GoFeatureFlag, error) {
-	config.PollingInterval = adjustPollingInterval(config.PollingInterval)
-	if config.offlineMutex == nil {
-		config.offlineMutex = &sync.RWMutex{}
-	}
-
-	// initialize internal logger
-	config.internalLogger = &fflog.FFLogger{
-		LeveledLogger: config.LeveledLogger,
-		LegacyLogger:  config.Logger,
-	}
+	config.Initialize()
 
 	goFF := &GoFeatureFlag{
 		config:         config,
@@ -83,25 +76,10 @@ func New(config Config) (*GoFeatureFlag, error) {
 		)
 	}
 	goFF.retrieverManager = retrieverManager
-	goFF.featureEventDataExporter, goFF.trackingEventDataExporter =
-		initializeDataExporters(config, goFF.config.internalLogger)
+	goFF.featureEventDataExporter, goFF.trackingEventDataExporter = initializeDataExporters(
+		config, goFF.config.internalLogger)
 	config.internalLogger.Debug("GO Feature Flag is initialized")
 	return goFF, nil
-}
-
-// adjustPollingInterval is a function that will check the polling interval and set it to the minimum value if it is
-// lower than 1 second. It also set the default value to 60 seconds if the polling interval is 0.
-func adjustPollingInterval(pollingInterval time.Duration) time.Duration {
-	switch {
-	case pollingInterval == 0:
-		// The default value for the poll interval is 60 seconds
-		return 60 * time.Second
-	case pollingInterval > 0 && pollingInterval < time.Second:
-		// the minimum value for the polling policy is 1 second
-		return time.Second
-	default:
-		return pollingInterval
-	}
 }
 
 // initializeNotificationService is a function that will initialize the notification service with the notifiers
@@ -142,7 +120,8 @@ func initializeRetrieverManager(config Config) (*retriever.Manager, error) {
 }
 
 func initializeDataExporters(config Config, logger *fflog.FFLogger) (
-	exporter.Manager[exporter.FeatureEvent], exporter.Manager[exporter.TrackingEvent]) {
+	exporter.Manager[exporter.FeatureEvent], exporter.Manager[exporter.TrackingEvent],
+) {
 	exporters := config.GetDataExporters()
 	featureEventExporterConfigs := make([]exporter.Config, 0)
 	trackingEventExporterConfigs := make([]exporter.Config, 0)

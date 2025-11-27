@@ -3,6 +3,7 @@ package redisretriever
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -42,12 +43,25 @@ func (r *Retriever) Init(ctx context.Context, _ *fflog.FFLogger) error {
 
 // Status is the function returning the internal state of the retriever.
 func (r *Retriever) Status() retriever.Status {
+	if r == nil || r.status == "" {
+		return retriever.RetrieverNotReady
+	}
 	return r.status
 }
 
 // Shutdown gracefully shutdown the provider and set the status as not ready.
-func (r *Retriever) Shutdown(ctx context.Context) error {
-	r.client.Shutdown(ctx)
+func (r *Retriever) Shutdown(_ context.Context) error {
+	if r.client == nil {
+		return nil
+	}
+	err := r.client.Close()
+	r.client = nil
+
+	if err != nil && !errors.Is(err, redis.ErrClosed) {
+		r.status = retriever.RetrieverError
+		return err
+	}
+	r.status = retriever.RetrieverNotReady
 	return nil
 }
 

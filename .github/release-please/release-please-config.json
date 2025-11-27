@@ -1,0 +1,93 @@
+{
+    "bootstrap-sha": "bac636bf553bb3ee8fd44470fbd21d164ecc39e4",
+    "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+    "monorepo-tags": true,
+    "separate-pull-requests": true,
+    "include-v-in-tag": true,
+    "tag-separator": "/",
+    "commit-search-depth": 400,
+    "changelog-sections": [
+        {
+            "type": "feat",
+            "section": "🚀 New Features"
+        },
+        {
+            "type": "fix",
+            "section": "🐛 Bug Fixes"
+        },
+        {
+            "type": "chore",
+            "section": "🔧 Chores"
+        },
+        {
+            "type": "docs",
+            "section": "📚 Documentation"
+        },
+        {
+            "type": "ci",
+            "section": "⚙️ CI/CD"
+        }
+    ],
+    "packages": {
+        ".": {
+            "release-type": "go",
+            "include-component-in-tag": false,
+            "changelog-path": ".github/release-please/CHANGELOG.md",
+            "path": ".",
+            "component": "go-feature-flag",
+            "exclude-paths": [
+                "modules/evaluation",
+                "modules/core",
+                "openfeature/providers/kotlin-provider",
+                "openfeature/providers/python-provider",
+                ".github/release-please",
+                "cmd/wasm"
+            ]
+        },
+        "modules/evaluation": {
+            "release-type": "go",
+            "path": "modules/evaluation",
+            "include-component-in-tag": true,
+            "component": "modules/evaluation",
+            "changelog-path": "CHANGELOG.md"
+        },
+        "modules/core": {
+            "release-type": "go",
+            "path": "modules/core",
+            "include-component-in-tag": true,
+            "component": "modules/core",
+            "changelog-path": "CHANGELOG.md"
+        },
+        "cmd/wasm": {
+            "release-type": "go",
+            "path": "cmd/wasm",
+            "include-component-in-tag": true,
+            "component": "cmd/wasm",
+            "changelog-path": "CHANGELOG.md"
+        },
+        "openfeature/providers/kotlin-provider": {
+            "release-type": "java",
+            "path": "openfeature/providers/kotlin-provider",
+            "include-component-in-tag": true,
+            "component": "openfeature/providers/kotlin-provider",
+            "changelog-path": "CHANGELOG.md",
+            "skip-snapshot": true,
+            "extra-files": [
+                "gradle.properties",
+                "build.gradle.kts",
+                "README.md"
+            ]
+        },
+        "openfeature/providers/python-provider": {
+            "release-type": "python",
+            "path": "openfeature/providers/python-provider",
+            "include-component-in-tag": true,
+            "component": "openfeature/providers/python-provider",
+            "changelog-path": "CHANGELOG.md",
+            "extra-files": [
+                "pyproject.toml",
+                "README.md"
+            ]
+        }
+    }
+}

@@ -2,13 +2,11 @@ package gcstorageretriever
 
 import (
 	"context"
-	"crypto/md5" //nolint: gosec
-	"encoding/base64"
 	"os"
 	"testing"
 
-	"github.com/fsouza/fake-gcs-server/fakestorage"
 	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/testutils"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 )
@@ -99,8 +97,8 @@ func TestRetriever_Retrieve(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mockedStorage := newMockedGCS(t)
-			mockedStorage.withFiles(t, tt.storage.bucket, tt.storage.files)
+			mockedStorage := testutils.NewMockedGCS(t)
+			mockedStorage.WithFiles(t, tt.storage.bucket, tt.storage.files)
 
 			retriever := &Retriever{
 				Bucket: tt.fields.Bucket,
@@ -144,50 +142,9 @@ func TestRetriever_Retrieve(t *testing.T) {
 			}
 
 			if tt.wantUpdated {
-				mockedStorage.withFiles(t, tt.storage.bucket, tt.storage.updatedFiles)
+				mockedStorage.WithFiles(t, tt.storage.bucket, tt.storage.updatedFiles)
 				assertRetrieve(tt.wantWhenUpdated)
 			}
 		})
 	}
-}
-
-type mockedStorage struct {
-	Server *fakestorage.Server
-}
-
-func newMockedGCS(t *testing.T) mockedStorage {
-	server := fakestorage.NewServer(nil)
-	t.Cleanup(func() {
-		server.Stop()
-	})
-
-	return mockedStorage{
-		Server: server,
-	}
-}
-
-func (m mockedStorage) withFiles(t *testing.T, bucketName string, files map[string]string) {
-	for filename, name := range files {
-		content, err := os.ReadFile(filename)
-		if err != nil {
-			t.Fatalf("could not read testfile: %v", err)
-		}
-
-		object := fakestorage.Object{
-			Content: content,
-			ObjectAttrs: fakestorage.ObjectAttrs{
-				BucketName: bucketName,
-				Name:       name,
-				Md5Hash:    encodedMd5Hash(content),
-			},
-		}
-		m.Server.CreateObject(object)
-	}
-}
-
-func encodedMd5Hash(content []byte) string {
-	h := md5.New() //nolint: gosec
-	h.Write(content)
-
-	return base64.StdEncoding.EncodeToString(h.Sum(nil))
 }

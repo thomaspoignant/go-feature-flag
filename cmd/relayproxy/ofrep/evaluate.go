@@ -11,10 +11,10 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/model"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
-	"github.com/thomaspoignant/go-feature-flag/ffcontext"
-	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/internal/flagstate"
-	"github.com/thomaspoignant/go-feature-flag/internal/utils"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/ffcontext"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/utils"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 )
@@ -38,6 +38,7 @@ func NewOFREPEvaluate(flagsetManager service.FlagsetManager, metrics metric.Metr
 // @Description value of the flag for this evaluation context
 // @Description
 // @Security     ApiKeyAuth
+// @Security     XApiKeyAuth
 // @Produce      json
 // @Accept	 	 json
 // @Param 		 data body model.OFREPEvalFlagRequest true "Evaluation Context for this API call"
@@ -138,6 +139,7 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 // @Description
 // @Description If no flags are provided, the API will evaluate all available flags in the configuration.
 // @Security    ApiKeyAuth
+// @Security    XApiKeyAuth
 // @Produce     json
 // @Accept	 	json
 // @Param       If-None-Match header string false "The request will be processed only if ETag doesn't match."

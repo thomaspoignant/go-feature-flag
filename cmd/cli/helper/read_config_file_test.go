@@ -7,9 +7,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/cmd/cli/helper"
-	"github.com/thomaspoignant/go-feature-flag/internal/flag"
 	"github.com/thomaspoignant/go-feature-flag/model/dto"
-	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/testutils/testconvert"
 )
 
 func TestLoadConfigFile(t *testing.T) {

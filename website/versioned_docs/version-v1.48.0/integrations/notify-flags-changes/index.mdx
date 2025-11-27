@@ -1,0 +1,77 @@
+---
+description: How to be notified of flags changes?
+---
+import { getIntegrations } from "@site/data/integrations";
+import { Card } from "@site/src/components/doc/cardv3";
+
+# 📣 Notify flag changes
+
+## Overview
+In GO Feature Flag, if you want to be informed when a flag has changed, you can configure a [notifier](../concepts/notifier).
+
+A notifier will send one notification to the targeted system to inform them that a new flag configuration has been loaded.
+
+## About notifiers
+Notifiers are useful for a variety of purposes, such as:
+- **Information**: Notifiers can send to your team chat a notification that a feature flag has changed.
+- **Reacting to flag changes**: Using the webhook notifier, you can trigger any action you want in your system to react to flag changes.
+
+When the GO Feature Flag client detects a change in the configuration through the retriever's polling mechanism, it triggers the configured notifiers.
+
+:::info
+GO Feature Flag can handle more than one notifier at a time.
+:::
+
+:::warning **Limitation if you are running multiple GO Feature Flag**
+By nature, GO Feature Flag is 100% stateless, so if you run multiple instance of GO Feature Flag, you will receive notification for changes from each instance.
+In each notification you will have the `hostname` of the instance, it can be useful if you have multiple GO Feature Flag running.
+:::
+
+
+You have 2 different ways to specify a notifier depending on if you are using the **GO Module** or the **Relay Proxy**.
+In all the details pages of the retrievers bellow you will have an example for both examples.
+
+## Available Notifiers
+Bellow is the full list of notifiers that are available in GO Feature Flag.
+
+<div className={"grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"}>
+  {getIntegrations("").notifiers.filter(item => item.docLink !== undefined).map((item) => {
+    return (
+      <Card
+        logo={item.logo}
+        link={`notify-flags-changes/${item.docLink}`}
+        name={item.name}
+        cssLogo={item.faLogo}
+        description={item.description}
+      />
+    );
+  })}
+</div>
+
+## Custom notifier
+If you have a specific use case that is not covered by the built-in notifiers, you can create your own custom exporter.
+
+To create a custom notifier you must have a struct that implements the notifier.Notifier interface.
+
+In param you will receive a `notifier.DiffCache` struct that will tell you what has changed in your flag configuration.
+
+```go title="notifier.go"
+import (
+    ffclient "github.com/thomaspoignant/go-feature-flag"
+    "github.com/thomaspoignant/go-feature-flag/notifier/notifier"
+    "sync"
+)
+
+type Notifier struct{}
+func (c *Notifier) Notify(diff notifier.DiffCache) error {
+    // ...
+    // do whatever you want here
+}
+```
+
+:::note
+If you think your custom notifier could be useful for others, feel free to open a [pull request](https://github.com/thomaspoignant/go-feature-flag/pulls) to add it to the list of available notifiers.
+:::
+:::warning
+If you are using a custom exporter, it is easy to use it for the GO Module, but if you want to use it in the relay proxy you will have to recompile it yourself.
+:::

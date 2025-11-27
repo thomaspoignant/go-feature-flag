@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
-	"github.com/thomaspoignant/go-feature-flag/testutils/testconvert"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/testutils/testconvert"
 )
 
 func TestUser_AddCustomAttribute(t *testing.T) {

@@ -49,3 +49,6 @@ volume
 
 .cursor/
 .claude/
+
+go.work
+go.work.sum

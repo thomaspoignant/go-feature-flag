@@ -10,13 +10,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="FluentAssertions" Version="8.7.1" />
+        <PackageReference Include="FluentAssertions" Version="8.8.0" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
         <PackageReference Include="NUnit" Version="4.4.0" />
-        <PackageReference Include="NUnit3TestAdapter" Version="5.1.0" />
-        <PackageReference Include="NUnit.Analyzers" Version="4.10.0" />
+        <PackageReference Include="NUnit3TestAdapter" Version="5.2.0" />
+        <PackageReference Include="NUnit.Analyzers" Version="4.11.2" />
         <PackageReference Include="coverlet.collector" Version="6.0.4" />
-        <PackageReference Include="OpenFeature" Version="2.8.1" />
+        <PackageReference Include="OpenFeature" Version="2.9.0" />
         <PackageReference Include="OpenFeature.Contrib.GOFeatureFlag" Version="0.2.1" />
     </ItemGroup>
 

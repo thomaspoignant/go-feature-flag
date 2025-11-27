@@ -10,26 +10,26 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@openfeature/core": "^1.8.1",
+    "@openfeature/core": "^1.9.1",
     "@openfeature/go-feature-flag-web-provider": "^0.2.6",
-    "@openfeature/react-sdk": "^1.0.1",
-    "@openfeature/web-sdk": "^1.6.1",
+    "@openfeature/react-sdk": "^1.0.2",
+    "@openfeature/web-sdk": "^1.7.1",
     "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react-dom": "^19.2.0"
   },
   "devDependencies": {
-    "@types/react": "^19.1.15",
-    "@types/react-dom": "^19.1.9",
-    "@typescript-eslint/eslint-plugin": "^8.44.1",
-    "@typescript-eslint/parser": "^8.43.0",
-    "@vitejs/plugin-react": "^5.0.4",
-    "autoprefixer": "^10.4.21",
-    "eslint": "^9.36.0",
-    "eslint-plugin-react-hooks": "^5.2.0",
-    "eslint-plugin-react-refresh": "^0.4.22",
+    "@types/react": "^19.2.6",
+    "@types/react-dom": "^19.2.3",
+    "@typescript-eslint/eslint-plugin": "^8.47.0",
+    "@typescript-eslint/parser": "^8.47.0",
+    "@vitejs/plugin-react": "^5.1.1",
+    "autoprefixer": "^10.4.22",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
     "postcss": "^8.5.6",
-    "tailwindcss": "^4.1.13",
-    "typescript": "^5.9.2",
-    "vite": "^7.1.6"
+    "tailwindcss": "^4.1.17",
+    "typescript": "^5.9.3",
+    "vite": "^7.2.4"
   }
 }

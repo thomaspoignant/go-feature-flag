@@ -3,6 +3,7 @@ package fileexporter_test
 import (
 	"context"
 	"os"
+	"path"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -542,7 +543,7 @@ func TestExportWithoutOutputDir(t *testing.T) {
 	for _, file := range files {
 		if strings.HasPrefix(file.Name(), filePrefix) {
 			countFileWithPrefix++
-			err := os.Remove(file.Name())
+			err := os.Remove(path.Clean(file.Name()))
 			require.NoError(t, err)
 		}
 	}

@@ -1,0 +1,87 @@
+{
+    "flags": {
+        "array-flag": {
+            "value": [
+                "batmanDefault",
+                "supermanDefault",
+                "superherosDefault"
+            ],
+            "timestamp": 1652273630,
+            "variationType": "Default",
+            "trackEvents": true,
+            "errorCode": "",
+            "reason": "DEFAULT"
+        },
+        "disable-flag": {
+            "value": null,
+            "timestamp": 1652273630,
+            "variationType": "",
+            "trackEvents": true,
+            "errorCode": "",
+            "reason": "DISABLED"
+        },
+        "flag-only-for-admin": {
+            "value": false,
+            "timestamp": 1652273630,
+            "variationType": "Default",
+            "trackEvents": true,
+            "errorCode": "",
+            "reason": "DEFAULT"
+        },
+        "new-admin-access": {
+            "value": false,
+            "timestamp": 1652273630,
+            "variationType": "False",
+            "trackEvents": true,
+            "errorCode": "",
+            "reason": "SPLIT"
+        },
+        "number-flag": {
+            "value": 1,
+            "timestamp": 1652273630,
+            "variationType": "Default",
+            "trackEvents": true,
+            "errorCode": "",
+            "reason": "DEFAULT"
+        },
+        "targeting-key-rule": {
+            "value": false,
+            "timestamp": 1652273630,
+            "variationType": "false_var",
+            "trackEvents": true,
+            "errorCode": "",
+            "reason": "DEFAULT"
+        },
+        "test-flag-rule-apply": {
+            "value": {
+                "test": "test"
+            },
+            "timestamp": 1652273630,
+            "variationType": "Default",
+            "trackEvents": true,
+            "errorCode": "",
+            "reason": "DEFAULT"
+        },
+        "test-flag-rule-apply-false": {
+            "value": {
+                "test": "test"
+            },
+            "timestamp": 1652273630,
+            "variationType": "Default",
+            "trackEvents": true,
+            "errorCode": "",
+            "reason": "DEFAULT"
+        },
+        "test-flag-rule-not-apply": {
+            "value": {
+                "test": "test"
+            },
+            "timestamp": 1652273630,
+            "variationType": "Default",
+            "trackEvents": true,
+            "errorCode": "",
+            "reason": "DEFAULT"
+        }
+    },
+    "valid": true
+}

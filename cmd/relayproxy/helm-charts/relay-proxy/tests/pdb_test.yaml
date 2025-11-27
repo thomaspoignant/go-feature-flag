@@ -1,0 +1,97 @@
+suite: test pod disruption budget
+templates:
+  - pdb.yaml
+tests:
+  - it: should not create PDB when pdb.enable is false
+    set:
+      pdb.enable: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should create PDB when pdb.enable is true
+    set:
+      pdb.enable: true
+      pdb.minAvailable: 1
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: PodDisruptionBudget
+      - equal:
+          path: apiVersion
+          value: policy/v1
+
+  - it: should set correct metadata name
+    set:
+      pdb.enable: true
+      pdb.minAvailable: 1
+      fullnameOverride: my-relay-proxy
+    asserts:
+      - equal:
+          path: metadata.name
+          value: my-relay-proxy
+
+  - it: should set minAvailable when specified
+    set:
+      pdb.enable: true
+      pdb.minAvailable: 2
+    asserts:
+      - equal:
+          path: spec.minAvailable
+          value: 2
+      - isNull:
+          path: spec.maxUnavailable
+
+  - it: should default minAvailable to 1 if set but no value given
+    set:
+      pdb.enable: true
+    asserts:
+      - equal:
+          path: spec.minAvailable
+          value: 1
+
+  - it: should set maxUnavailable when minAvailable is not set
+    set:
+      pdb.enable: true
+      pdb.maxUnavailable: 1
+    asserts:
+      - equal:
+          path: spec.maxUnavailable
+          value: 1
+      - isNull:
+          path: spec.minAvailable
+
+  - it: should set maxUnavailable when both are specified
+    set:
+      pdb.enable: true
+      pdb.minAvailable: 2
+      pdb.maxUnavailable: 1
+    asserts:
+      - isNull:
+          path: spec.minAvailable
+      - equal:
+          path: spec.maxUnavailable
+          value: 1
+
+  - it: should set correct selector labels
+    set:
+      pdb.enable: true
+      pdb.minAvailable: 1
+      fullnameOverride: my-relay-proxy
+    asserts:
+      - equal:
+          path: spec.selector.matchLabels.name
+          value: my-relay-proxy
+
+  - it: should only set maxUnavailable when minAvailable is false/0
+    set:
+      pdb.enable: true
+      pdb.minAvailable: 0
+      pdb.maxUnavailable: 2
+    asserts:
+      - isNull:
+          path: spec.minAvailable
+      - equal:
+          path: spec.maxUnavailable
+          value: 2

@@ -1,0 +1,106 @@
+name: release-please
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: read
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      root_released: ${{ steps.release.outputs['release_created'] }}
+      root_version: ${{ steps.release.outputs['version'] }}
+      module_evaluation_released: ${{ steps.release.outputs['modules/evaluation--release_created'] }}
+      module_evaluation_version: ${{ steps.release.outputs['modules/evaluation--version'] }}
+      module_core_released: ${{ steps.release.outputs['modules/core--release_created'] }}
+      module_core_version: ${{ steps.release.outputs['modules/core--version'] }}
+      provider_python_released: ${{ steps.release.outputs['openfeature/providers/python-provider--release_created'] }}
+      provider_python_version: ${{ steps.release.outputs['openfeature/providers/python-provider--version'] }}
+      provider_kotlin_released: ${{ steps.release.outputs['openfeature/providers/kotlin-provider--release_created'] }}
+      provider_kotlin_version: ${{ steps.release.outputs['openfeature/providers/kotlin-provider--version'] }}
+    steps:
+      - uses: googleapis/release-please-action@16a9c90856f42705d54a6fda1823352bdc62cf38 # v4.4.0
+        id: release
+        with:
+          # See: https://github.com/googleapis/release-please
+          token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+          config-file: .github/release-please/release-please-config.json
+          manifest-file: .github/release-please/.release-please-manifest.json
+
+  bump-module-evaluation:
+    if: ${{ needs.release-please.outputs.module_evaluation_released == 'true' }}
+    uses: ./.github/workflows/release-bump-modules.yml
+    needs: release-please
+    with:
+      modulePath: modules/evaluation
+      version: ${{ needs.release-please.outputs.module_evaluation_version }}
+    secrets:
+      token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+
+  bump-module-core:
+    if: ${{ needs.release-please.outputs.module_core_released == 'true' }}
+    uses: ./.github/workflows/release-bump-modules.yml
+    needs: release-please
+    with:
+      modulePath: modules/core
+      version: ${{ needs.release-please.outputs.module_core_version }}
+    secrets:
+      token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+
+  bump-module-core-dependency-for-evaluation:
+    if: ${{ needs.release-please.outputs.module_core_released == 'true' }}
+    uses: ./.github/workflows/release-bump-modules.yml
+    needs: release-please
+    with:
+      modulePath: modules/core
+      version: ${{ needs.release-please.outputs.module_core_version }}
+      goModDirectoryPath: modules/evaluation
+    secrets:
+      token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+
+  bump-module-core-dependency-for-wasm-module:
+    if: ${{ needs.release-please.outputs.module_core_released == 'true' }}
+    uses: ./.github/workflows/release-bump-modules.yml
+    needs: release-please
+    with:
+      modulePath: modules/core
+      version: ${{ needs.release-please.outputs.module_core_version }}
+      goModDirectoryPath: cmd/wasm
+    secrets:
+      token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+
+  bump-module-evaluation-dependency-for-wasm-module:
+    if: ${{ needs.release-please.outputs.module_evaluation_released == 'true' }}
+    uses: ./.github/workflows/release-bump-modules.yml
+    needs: release-please
+    with:
+      modulePath: modules/evaluation
+      version: ${{ needs.release-please.outputs.module_evaluation_version }}
+      goModDirectoryPath: cmd/wasm
+    secrets:
+      token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+
+  python-provider-release:
+    if: ${{ needs.release-please.outputs.provider_python_released == 'true' }}
+    uses: ./.github/workflows/release-python-provider.yml
+    needs: release-please
+    secrets:
+      pypi_token: ${{ secrets.PYPI_TOKEN }}
+
+  kotlin-provider-release:
+    if: ${{ needs.release-please.outputs.provider_kotlin_released == 'true' }}
+    uses: ./.github/workflows/release-kotlin-provider.yml
+    needs: release-please
+    with:
+      version: ${{ needs.release-please.outputs.provider_kotlin_version }}
+    secrets:
+      OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+      OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+      GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+      GPG_SIGNING_KEY_PASSWORD: ${{ secrets.GPG_SIGNING_KEY_PASSWORD }}
+      GPG_SIGNING_KEY_ID: ${{ secrets.GPG_SIGNING_KEY_ID }}

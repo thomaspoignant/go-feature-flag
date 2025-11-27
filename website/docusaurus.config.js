@@ -4,6 +4,7 @@
 const {sdk} = require('./data/sdk');
 const lightCodeTheme = require('prism-react-renderer').themes.github;
 const darkCodeTheme = require('prism-react-renderer').themes.dracula;
+const {generateSdksDropdownHTML} = require('./src/components/navbar/sdks');
 
 /** @type {import("@docusaurus/types").Config} */
 const config = {
@@ -196,17 +197,7 @@ const config = {
         ],
       },
     ],
-    async function myPlugin(context, options) {
-      return {
-        name: 'docusaurus-tailwindcss',
-        configurePostCss(postcssOptions) {
-          // Appends TailwindCSS and AutoPrefixer.
-          postcssOptions.plugins.push(require('tailwindcss'));
-          postcssOptions.plugins.push(require('autoprefixer'));
-          return postcssOptions;
-        },
-      };
-    },
+    require('./plugins/tailwind-plugin.cjs'),
   ],
 
   customFields: {
@@ -260,10 +251,7 @@ const config = {
             'https://github.com/thomaspoignant/go-feature-flag/tree/main/website/',
         },
         theme: {
-          customCss: [
-            require.resolve('./src/css/custom.css'),
-            require.resolve('./src/css/pushy-buttons.css'), //https://github.com/iRaul/pushy-buttons
-          ],
+          customCss: [require.resolve('./src/css/custom.css')],
         },
         sitemap: {
           changefreq: 'weekly',
@@ -279,19 +267,7 @@ const config = {
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css',
     'https://cdn.jsdelivr.net/gh/devicons/devicon@v2.16.0/devicon.min.css', // https://devicon.dev/
   ],
-  themes: [
-    [
-      require.resolve('@easyops-cn/docusaurus-search-local'),
-      /** @type {import("@easyops-cn/docusaurus-search-local").PluginOptions} */
-      ({
-        hashed: true,
-        language: ['en', 'zh'],
-        highlightSearchTermsOnTargetPage: true,
-        explicitSearchResultPath: true,
-      }),
-    ],
-    ['@docusaurus/theme-mermaid', {theme: 'default'}],
-  ],
+  themes: [['@docusaurus/theme-mermaid', {theme: 'default'}]],
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
@@ -307,6 +283,18 @@ const config = {
           src: 'img/logo/navbar.png',
         },
         items: [
+          {
+            label: 'SDKs',
+            type: 'dropdown',
+            className: 'dyte-dropdown',
+            items: [
+              {
+                type: 'html',
+                value: generateSdksDropdownHTML(),
+                className: 'dyte-dropdown',
+              },
+            ],
+          },
           {
             position: 'left',
             label: 'Product',
@@ -510,6 +498,12 @@ const config = {
       },
       colorMode: {
         defaultMode: 'dark',
+      },
+      algolia: {
+        appId: 'OV23HUCYBM',
+        apiKey: '37574755624276e0d875552f6bcc2b40',
+        indexName: 'goff',
+        contextualSearch: true,
       },
     }),
 };

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"path"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob"
@@ -94,7 +95,7 @@ func (f *Exporter) Export(
 
 	for _, file := range files {
 		fileName := file.Name()
-		of, err := os.Open(outputDir + "/" + fileName)
+		of, err := os.Open(path.Clean(outputDir + "/" + fileName))
 		if err != nil {
 			logger.Error(
 				"[Azure Exporter] impossible to open file",

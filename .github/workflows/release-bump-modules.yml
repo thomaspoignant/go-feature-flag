@@ -1,0 +1,64 @@
+# ---------------------------------------
+# Bump module dependency is a workflow that bumps the dependency of a module to the latest version.
+# This is a reusable workflow and is used by the release-please workflow to bump the dependency of the module to the latest version.
+# ---------------------------------------
+name: bump module dependency
+permissions:
+  actions: read
+  contents: read
+
+on:
+  workflow_call:
+    inputs:
+      modulePath: { type: string, required: true }
+      version: { type: string, required: true }
+      goModDirectoryPath: { type: string, required: false, default: "." }
+    secrets:
+      token: { required: true }
+
+jobs:
+  bump-module:
+    name: Bump module dependency ${{ inputs.modulePath }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+
+      - name: Setup go
+        uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
+        with:
+          go-version-file: ${{ inputs.goModDirectoryPath }}/go.mod
+          check-latest: true
+
+      - name: Update internal module
+        env:
+          VERSION: ${{ inputs.version }}
+          MODULE_PATH: ${{ inputs.modulePath }}
+          GO_MOD_DIRECTORY_PATH: ${{ inputs.goModDirectoryPath }}
+        run: |
+          cd ${GO_MOD_DIRECTORY_PATH}
+          export GOWORK=off
+          go get github.com/thomaspoignant/go-feature-flag/${MODULE_PATH}@v${VERSION}
+          go mod tidy
+          go mod vendor
+          go mod verify
+
+      - name: Create Pull Request to bump module
+        uses: peter-evans/create-pull-request@84ae59a2cdc2258d6fa0732dd66352dddae2a412 # v7.0.9
+        env:
+          VERSION: ${{ inputs.version }}
+          MODULE_PATH: ${{ inputs.modulePath }}
+          GO_MOD_DIRECTORY_PATH: ${{ inputs.goModDirectoryPath }}
+        with:
+          branch: bump-module-${{ env.GO_MOD_DIRECTORY_PATH }}-${{ env.MODULE_PATH}}-${{ env.VERSION }}
+          title: "chore(dependency): Bump module ${{ env.MODULE_PATH }} ${{ env.VERSION }}"
+          body: |
+            Automated pull request to bump module ${{ env.MODULE_PATH}} ${{ env.VERSION }}
+          commit-message: "chore(dependency): Bump module ${{ env.MODULE_PATH}} ${{ env.VERSION }}"
+          assignees: thomaspoignant
+          draft: false
+          signoff: true
+          delete-branch: true
+          base: main
+          labels: automerge
+          token: ${{ secrets.token }}

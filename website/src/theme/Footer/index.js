@@ -75,7 +75,7 @@ const CustomForm = ({status, message, onValidated}) => {
 
 const NewsletterForm = ({url}) => (
   <div>
-    <div className={clsx(styles.title, 'text-center pt-0 mx-4 text-5xl mb-4')}>
+    <div className="text-center pt-0 mx-4 text-5xl mb-4 text-gray-800 dark:text-gray-100 font-poppins font-[800] tracking-[-0.08rem]">
       <i className="fa-solid fa-envelope"></i> <br />
       Get the latest <br /> Updates
     </div>

@@ -2,7 +2,6 @@ package api
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 	etag "github.com/pablor21/echo-etag/v4"
 	echoSwagger "github.com/swaggo/echo-swagger"
 	middleware2 "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"
@@ -17,7 +16,7 @@ func (s *Server) addGOFFRoutes(
 	cFlagConfiguration controller.Controller) {
 	// Grouping the routes
 	v1 := s.apiEcho.Group("/v1")
-	v1.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
+	v1.Use(middleware2.KeyAuthExtended(middleware2.KeyAuthExtendedConfig{
 		Validator: func(key string, _ echo.Context) (bool, error) {
 			return s.config.APIKeyExists(key), nil
 		},

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"time"
@@ -32,7 +33,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/utils"
 	"go.uber.org/zap"
-	"golang.org/x/net/context"
 )
 
 func NewGoFeatureFlagClient(
@@ -65,8 +65,8 @@ func NewGoFeatureFlagClient(
 
 	// backward compatibility for the notifier field, it was called "notifier" instead of "notifiers"
 	// fixed in version v1.46.0
-	if len(notif) == 0 && cFlagSet.FixNotifiers != nil {
-		notif, err = initNotifier(cFlagSet.FixNotifiers)
+	if len(notif) == 0 && cFlagSet.FixNotifiers != nil { // nolint: staticcheck
+		notif, err = initNotifier(cFlagSet.FixNotifiers) // nolint: staticcheck
 		if err != nil {
 			return nil, err
 		}

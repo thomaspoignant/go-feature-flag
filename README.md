@@ -1,6 +1,6 @@
 <p align="center">
-  <!-- <img width="400" src="gofeatureflag.svg" alt="go-feature-flag logo" /> -->
-  <img src="website/static/img/logo/logo_footer.png?raw=true" alt="go-feature-flag logo" />
+  <a href="https://gofeatureflag.org" target="_blank"><img width="400" src="gofeatureflag.svg" alt="go-feature-flag logo" /></a>
+  <!-- <a href="https://gofeatureflag.org" target="_blank"><img src="website/static/img/logo/logo_footer.png?raw=true" alt="go-feature-flag logo" /></a> -->
 </p>
 
 # 🎛️ GO Feature Flag
@@ -10,7 +10,7 @@
     <a href="https://scorecard.dev/viewer/?uri=github.com/thomaspoignant/go-feature-flag"><img src="https://api.scorecard.dev/projects/github.com/thomaspoignant/go-feature-flag/badge"/></a>
     <a href="https://codecov.io/gh/thomaspoignant/go-feature-flag"><img src="https://codecov.io/gh/thomaspoignant/go-feature-flag/branch/main/graph/badge.svg?token=T59ACQWW1H"/></a>
     <a href="https://sonarcloud.io/dashboard?id=thomaspoignant_go-feature-flag"><img src="https://sonarcloud.io/api/project_badges/measure?project=thomaspoignant_go-feature-flag&metric=alert_status" alt="Sonarcloud Status" /></a>
-    <a href="https://github.com/thomaspoignant/go-feature-flag/releases"><img src="https://img.shields.io/github/v/release/thomaspoignant/go-feature-flag" alt="Release version" /></a>
+    <a href="https://github.com/thomaspoignant/go-feature-flag/releases"><img src="https://img.shields.io/github/v/release/thomaspoignant/go-feature-flag?filter=v*" alt="Release version" /></a>
     <a href="https://goreportcard.com/report/github.com/thomaspoignant/go-feature-flag"><img src="https://goreportcard.com/badge/github.com/thomaspoignant/go-feature-flag" alt="Build Status" /></a>
     <a href="https://github.com/thomaspoignant/go-feature-flag/blob/main/LICENSE"><img src="https://img.shields.io/github/license/thomaspoignant/go-feature-flag" alt="License"/></a>
     <br/>
@@ -34,6 +34,7 @@
 - [🎛️ GO Feature Flag](#️-go-feature-flag)
   - [What is GO Feature Flag?](#what-is-go-feature-flag)
   - [What can I do with GO Feature Flag?](#what-can-i-do-with-go-feature-flag)
+  - [Part of the OpenFeature Ecosystem](#part-of-the-openFeature-ecosystem)
   - [Getting started with GO Feature Flag](#getting-started)
   - [Can I use GO Feature Flag with any language?](#can-i-use-go-feature-flag-with-any-language)
   - [Where do I store my flags file?](#where-do-i-store-my-flags-file)
@@ -64,6 +65,7 @@ Originally, **GO Feature Flag** was designed as a solution exclusively for the `
 
 ## What can I do with GO Feature Flag?
 
+- Use the feature flag standard [OpenFeature](https://openfeature.dev) in your favorite language _([see list](#can-i-use-go-feature-flag-with-any-language))_.
 - Storing your configuration flags file on various locations (`HTTP`, `S3`, `Kubernetes`, [_see full list_](https://gofeatureflag.org/docs/configure_flag/store_your_flags)).
 - Configuring your flags in various [format](https://gofeatureflag.org/docs/configure_flag/flag_format) (`JSON`, `TOML` and `YAML`).
 - Adding complex [rules](https://gofeatureflag.org/docs/configure_flag/target-with-flags) to target your users.
@@ -73,12 +75,25 @@ Originally, **GO Feature Flag** was designed as a solution exclusively for the `
   - [Schedule your flag updates](https://gofeatureflag.org/docs/configure_flag/rollout-strategies/scheduled).
 - Exporting your flags usage data to various destinations such as _(`S3`, `Google cloud storage`, `file`, `kubernetes`, see the [_full list_](https://gofeatureflag.org/docs/integrations/store-flags-configuration#available-retrievers))_.
 - Getting notified when a flag has been changed _(`webhook` and `slack`)_.
-- Use **GO Feature Flag** in several languages with **Open Feature SDKs**.
 - Support your full stack, from the backend to the frontend including your mobile apps.
 
 https://github.com/user-attachments/assets/56e1a2a2-996f-4db8-9c93-28c057e4ed5a
 
 _The code of this demo is available in [`examples/demo`](examples/demo) repository_.
+
+## Part of the OpenFeature Ecosystem
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/cab0bbc294e77a0a0afff64fd499ff691bb0b792/website/static/img/features/openfeature.svg" width="340" />
+</p>
+
+At GO Feature Flag, we believe in the power of open standards and, the importance of vendor neutrality. That's why we've chosen to rely on Open Feature for our SDKs.
+
+By adopting GO Feature Flag you embrace the OpenFeature standard and you get all the benefits of the ecosystem.
+
+- Open-Source standard SDKs
+- No Vendor Lock-In
+- OpenFeature community based support for SDKs
 
 ## Getting started
 
@@ -119,7 +134,9 @@ This flag split the usage of this flag, 20% will use the variation `my-new-featu
 Create a new `YAML` file containing the configuration of your relay proxy.
 
 ```yaml title="goff-proxy.yaml"
-listen: 1031
+server:
+  mode: http
+  port: 1031
 pollingInterval: 1000
 startWithRetrieverError: false
 retriever:
@@ -605,8 +622,8 @@ Thanks so much to our contributors.
 
 [Become a sponsor](https://github.com/sponsors/thomaspoignant) and show your support to GO Feature Flag.
 
-These are our really cool sponsors!
-<!-- sponsors --><a href="https://github.com/cybozu"><img src="https:&#x2F;&#x2F;github.com&#x2F;cybozu.png" width="60px" alt="User avatar: Cybozu" /></a><a href="https://github.com/AltaModaTech"><img src="https:&#x2F;&#x2F;github.com&#x2F;AltaModaTech.png" width="60px" alt="User avatar: AltaModa Technologies" /></a><!-- sponsors -->
+These are our really cool sponsors!  
+<a href="https://github.com/swisscom"><img src="https:&#x2F;&#x2F;github.com&#x2F;swisscom.png" width="60px" alt="User avatar: Swisscom" /></a><!-- sponsors --><a href="https://github.com/cybozu"><img src="https:&#x2F;&#x2F;github.com&#x2F;cybozu.png" width="60px" alt="User avatar: Cybozu" /></a><a href="https://github.com/AltaModaTech"><img src="https:&#x2F;&#x2F;github.com&#x2F;AltaModaTech.png" width="60px" alt="User avatar: AltaModa Technologies" /></a><!-- sponsors -->
 
 ## Adopters
 

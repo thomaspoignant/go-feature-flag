@@ -127,15 +127,6 @@
     font-size: 1rem;
 }
 
-.featureContent h2 {
-    margin-top: 2rem;
-    font-size: 2rem;
-    line-height: 2.5rem;
-    color: var(--goff-main-title-color);
-    font-family: Poppins, sans-serif;
-    font-weight: 800;
-    letter-spacing: -0.08rem;
-}
 
 .featureContent p {
     font-size: 1.05rem;
@@ -159,11 +150,4 @@
     left: 0;
     bottom: 0;
     right: 0;
-}
-
-.openfeaturelogo {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
 }

@@ -4,7 +4,7 @@ updates:
   - package-ecosystem: gomod
     directory: "/"
     schedule:
-      interval: weekly
+      interval: daily
       time: "01:00"
     open-pull-requests-limit: 20
     labels:
@@ -149,7 +149,6 @@ updates:
     commit-message:
       prefix: "chore"
 
-
   # Website CI scripts
   - package-ecosystem: gomod
     directory: "/website/.ci"
@@ -174,3 +173,39 @@ updates:
       - "automerge"
     commit-message:
       prefix: "chore"
+
+  - package-ecosystem: gomod
+    directory: "/modules/core"
+    schedule:
+      interval: daily
+      time: "01:15"
+    open-pull-requests-limit: 20
+    labels:
+      - "dependencies"
+      - "automerge"
+    commit-message:
+      prefix: "chore(dependencies)"
+
+  - package-ecosystem: gomod
+    directory: "/modules/evaluation"
+    schedule:
+      interval: daily
+      time: "01:30"
+    open-pull-requests-limit: 20
+    labels:
+      - "dependencies"
+      - "automerge"
+    commit-message:
+      prefix: "chore(dependencies)"
+
+  - package-ecosystem: gomod
+    directory: "/cmd/wasm"
+    schedule:
+      interval: daily
+      time: "02:00"
+    open-pull-requests-limit: 20
+    labels:
+      - "dependencies"
+      - "automerge"
+    commit-message:
+      prefix: "chore(dependencies)"

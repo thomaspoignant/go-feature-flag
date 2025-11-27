@@ -48,9 +48,11 @@ export function HomeHeader() {
         <div className="row">
           <div className="col col--6">
             <div className={styles.heroContent}>
-              <span className="goffMainTitle">GO Feature Flag</span>
+              <span className="text-gray-800 dark:text-gray-50 text-5xl font-poppins font-bold tracking-[-0.18rem]">
+                GO Feature Flag
+              </span>
               <br />
-              <span className="goffMainSubtitle">
+              <span className="text-titles-500 text-[2.8rem] font-poppins font-bold tracking-[-0.18rem] leading-10">
                 {`${siteConfig.tagline}`}
               </span>
               <p>

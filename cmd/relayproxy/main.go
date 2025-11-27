@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	promversion "github.com/prometheus/common/version"
 	"github.com/spf13/pflag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
@@ -17,7 +18,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// version, releaseDate are override by the makefile during the build.
+// version is overridden by GoReleaser during the build.
 var version = "localdev"
 
 const banner = `█▀▀ █▀█   █▀▀ █▀▀ ▄▀█ ▀█▀ █ █ █▀█ █▀▀   █▀▀ █   ▄▀█ █▀▀
@@ -42,6 +43,11 @@ _____________________________________________`
 // @in header
 // @name Authorization
 // @description Use configured APIKeys in yaml config as authorization keys, disabled when this yaml config is not set.
+// @securitydefinitions.apikey XApiKeyAuth
+// @in header
+// @name X-API-Key
+// @description Use configured APIKeys in yaml config as authorization keys via X-API-Key header,
+// @description disabled when this yaml config is not set.
 func main() {
 	// Init pFlag for config file
 	f := pflag.NewFlagSet("config", pflag.ContinueOnError)
@@ -71,13 +77,17 @@ func main() {
 
 	// Init swagger
 	docs.SwaggerInfo.Version = proxyConf.Version
-	docs.SwaggerInfo.Host = fmt.Sprintf("%s:%d", proxyConf.Host, proxyConf.ListenPort)
+	docs.SwaggerInfo.Host = fmt.Sprintf("%s:%d", proxyConf.Host, proxyConf.GetServerPort(logger.ZapLogger))
 
-	// Init services
+	// Set the version for the prometheus version collector
+	promversion.Version = version
+	// Initialize metrics
 	metricsV2, err := metric.NewMetrics()
 	if err != nil {
 		logger.ZapLogger.Error("impossible to initialize prometheus metrics", zap.Error(err))
 	}
+
+	// Init services
 	wsService := service.NewWebsocketService()
 	defer wsService.Close() // close all the open connections
 	prometheusNotifier := metric.NewPrometheusNotifier(metricsV2)
@@ -103,15 +113,10 @@ func main() {
 	}
 	// Init API server
 	apiServer := api.New(proxyConf, services, logger.ZapLogger)
-
-	if proxyConf.StartAsAwsLambda {
-		apiServer.StartAwsLambda()
-	} else {
-		defer func() {
-			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-			defer cancel()
-			apiServer.Stop(ctx)
-		}()
-		apiServer.Start()
-	}
+	defer func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		apiServer.Stop(ctx)
+	}()
+	apiServer.StartWithContext(context.Background())
 }

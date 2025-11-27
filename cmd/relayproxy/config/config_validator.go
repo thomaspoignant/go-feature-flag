@@ -1,12 +1,44 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 	"go.uber.org/zap/zapcore"
 )
+
+// IsValid contains all the validation of the configuration.
+func (c *Config) IsValid() error {
+	if c == nil {
+		return fmt.Errorf("empty config")
+	}
+	if err := validateLogLevel(c.LogLevel); err != nil {
+		return err
+	}
+	if err := validateLogFormat(c.LogFormat); err != nil {
+		return err
+	}
+	if err := c.validateServerConfig(); err != nil {
+		return err
+	}
+	if len(c.FlagSets) > 0 {
+		return c.validateFlagSets()
+	}
+	return c.validateDefaultMode()
+}
+
+// validateServerConfig validates the server configuration
+func (c *Config) validateServerConfig() error {
+	mode := c.GetServerMode(nil)
+	if mode == ServerModeUnixSocket {
+		if c.GetUnixSocketPath() == "" {
+			return errors.New("unixSocketPath must be set when server mode is unixsocket")
+		}
+	}
+	return nil
+}
 
 // validateLogFormat validates the log format
 func validateLogFormat(logFormat string) error {

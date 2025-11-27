@@ -78,7 +78,9 @@ Flag sets are configured in your relay proxy configuration file, instead of defi
 In each flag set you can configure his behavior like in this example:
 
 ```yaml
-listen: 1031
+server:
+  mode: http
+  port: 1031
 flagsets:
   - name: team-a
     apiKeys:
@@ -127,7 +129,7 @@ As you can see, you are able to configure every flag sets differently.
 
 The magic of flag sets lies in their API key-based routing system:
 
-1. **Extract API Key**: The relay proxy extracts the API key from the `Authorization` header.
+1. **Extract API Key**: The relay proxy extracts the API key from the `X-API-Key` header.
 1. **Find Flag Set**: It looks up which flag set is associated with that API key.
 1. **Route Request**: The evaluation request is routed to that specific flag set.
 1. **Return Result**: The evaluation result comes from that flag set's flags.

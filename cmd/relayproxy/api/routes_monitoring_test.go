@@ -51,8 +51,11 @@ func TestPprofEndpointsStarts(t *testing.T) {
 						},
 					},
 				},
+				Server: config.Server{
+					Mode: config.ServerModeHTTP,
+					Port: 1031,
+				},
 				MonitoringPort: tt.MonitoringPort,
-				ListenPort:     1031,
 				EnablePprof:    tt.EnablePprof,
 			}
 
@@ -65,12 +68,12 @@ func TestPprofEndpointsStarts(t *testing.T) {
 				Metrics:           metric.Metrics{},
 			}, z)
 
-			portToCheck := c.ListenPort
+			portToCheck := c.GetServerPort(z)
 			if tt.MonitoringPort != 0 {
 				portToCheck = tt.MonitoringPort
 			}
 
-			go apiServer.Start()
+			go apiServer.StartWithContext(context.Background())
 			defer apiServer.Stop(context.Background())
 			time.Sleep(1 * time.Second) // waiting for the apiServer to start
 			resp, err := http.Get(fmt.Sprintf("http://localhost:%d/debug/pprof/heap", portToCheck))

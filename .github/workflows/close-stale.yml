@@ -12,7 +12,7 @@ jobs:
       issues: write
       pull-requests: write
     steps:
-      - uses: actions/stale@3a9db7e6a41a89f618792c92c0e97cc736e1b13f # v10.0.0
+      - uses: actions/stale@5f858e3efba33a5ca4407a664cc011ad407f2008 # v10.1.0
         with:
           stale-issue-message: "This issue is stale because it has been open 30 days with no activity. Remove stale label or comment or this will be closed in 5 days."
           stale-pr-message: "This PR is stale because it has been open 45 days with no activity. Remove stale label or comment or this will be closed in 10 days."
@@ -22,5 +22,5 @@ jobs:
           days-before-pr-stale: 45
           days-before-issue-close: 10
           days-before-pr-close: 10
-          exempt-issue-labels: p1,p2,p3,bug,dependencies,roadmap
+          exempt-issue-labels: "priority:P1,priority:P2,priority:P3,bug,dependencies,roadmap"
           exempt-assignees: thomaspoignant
