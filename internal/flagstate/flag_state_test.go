@@ -50,7 +50,10 @@ func TestFromFlagEvaluation(t *testing.T) {
 					"var2": testconvert.Interface(2),
 				},
 				DefaultRule: &flag.Rule{
-					VariationResult: testconvert.String("var1"),
+					Percentages: &map[string]float64{
+						"var1": 50,
+						"var2": 50,
+					},
 				},
 			},
 			expected: flagstate.FlagState{

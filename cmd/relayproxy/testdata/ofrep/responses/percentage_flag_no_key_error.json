@@ -1,0 +1,5 @@
+{
+  "errorCode": "TARGETING_KEY_MISSING",
+  "errorDetails": "Error while evaluating the flag: flag-only-for-admin",
+  "key": "flag-only-for-admin"
+}

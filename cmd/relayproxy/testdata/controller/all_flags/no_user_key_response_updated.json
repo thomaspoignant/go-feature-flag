@@ -1,0 +1,85 @@
+{
+  "flags": {
+    "array-flag": {
+      "value": null,
+      "timestamp": 1652273630,
+      "variationType": "",
+      "trackEvents": true,
+      "errorCode": "TARGETING_KEY_MISSING",
+      "errorDetails": "Error: Empty targeting key",
+      "reason": "ERROR"
+    },
+    "disable-flag": {
+      "value": null,
+      "timestamp": 1652273630,
+      "variationType": "",
+      "trackEvents": true,
+      "errorCode": "TARGETING_KEY_MISSING",
+      "errorDetails": "Error: Empty targeting key",
+      "reason": "ERROR"
+    },
+    "flag-only-for-admin": {
+      "value": null,
+      "timestamp": 1652273630,
+      "variationType": "",
+      "trackEvents": true,
+      "errorCode": "TARGETING_KEY_MISSING",
+      "errorDetails": "Error: Empty targeting key",
+      "reason": "ERROR"
+    },
+    "new-admin-access": {
+      "value": null,
+      "timestamp": 1652273630,
+      "variationType": "",
+      "trackEvents": true,
+      "errorCode": "TARGETING_KEY_MISSING",
+      "errorDetails": "Error: Empty targeting key",
+      "reason": "ERROR"
+    },
+    "number-flag": {
+      "value": null,
+      "timestamp": 1652273630,
+      "variationType": "",
+      "trackEvents": true,
+      "errorCode": "TARGETING_KEY_MISSING",
+      "errorDetails": "Error: Empty targeting key",
+      "reason": "ERROR"
+    },
+    "targeting-key-rule": {
+      "value": false,
+      "timestamp": 1652273630,
+      "variationType": "false_var",
+      "trackEvents": true,
+      "errorCode": "",
+      "reason": "DEFAULT"
+    },
+    "test-flag-rule-apply": {
+      "value": null,
+      "timestamp": 1652273630,
+      "variationType": "",
+      "trackEvents": true,
+      "errorCode": "TARGETING_KEY_MISSING",
+      "errorDetails": "Error: Empty targeting key",
+      "reason": "ERROR"
+    },
+    "test-flag-rule-apply-false": {
+      "value": null,
+      "timestamp": 1652273630,
+      "variationType": "",
+      "trackEvents": true,
+      "errorCode": "TARGETING_KEY_MISSING",
+      "errorDetails": "Error: Empty targeting key",
+      "reason": "ERROR"
+    },
+    "test-flag-rule-not-apply": {
+      "value": null,
+      "timestamp": 1652273630,
+      "variationType": "",
+      "trackEvents": true,
+      "errorCode": "TARGETING_KEY_MISSING",
+      "errorDetails": "Error: Empty targeting key",
+      "reason": "ERROR"
+    }
+  },
+  "valid": false
+}
