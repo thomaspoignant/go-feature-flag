@@ -454,11 +454,7 @@ func (f *InternalFlag) GetBucketingKeyValue(ctx ffcontext.Context) (string, erro
 		switch v := value.(type) {
 		case string:
 			if v == "" {
-				if requiresBucketing {
-					return "", &internalerror.EmptyBucketingKeyError{Message: "Empty bucketing key"}
-				}
-				// Return empty key if bucketing not required
-				return "", nil
+				return f.requiresBucketingCheck(requiresBucketing, "bucketing")
 			}
 			return v, nil
 		default:
@@ -468,14 +464,18 @@ func (f *InternalFlag) GetBucketingKeyValue(ctx ffcontext.Context) (string, erro
 
 	// Check if targeting key is required for this flag
 	if ctx.GetKey() == "" {
-		if requiresBucketing {
-			return "", &internalerror.EmptyBucketingKeyError{Message: "Empty targeting key"}
-		}
-		// Return empty key if bucketing not required
-		return "", nil
+		return f.requiresBucketingCheck(requiresBucketing, "targeting")
 	}
 
 	return ctx.GetKey(), nil
+}
+
+// requiresBucketingCheck checks if the bucketing is required and returns the appropriate error
+func (f *InternalFlag) requiresBucketingCheck(requiresBucketing bool, key string) (string, error) {
+	if requiresBucketing {
+		return "", &internalerror.EmptyBucketingKeyError{Message: fmt.Sprintf("Empty %s key", key)}
+	}
+	return "", nil
 }
 
 // GetMetadata return the metadata associated to the flag
