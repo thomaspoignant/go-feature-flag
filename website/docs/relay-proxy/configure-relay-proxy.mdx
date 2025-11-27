@@ -416,6 +416,20 @@ export GOFF_SERVER_PORT=8080
 - default: **empty string**
 - mandatory: <NotMandatory />
 
+### `enableBulkMetricFlagNames`
+
+Enables per-flag metrics for bulk evaluation endpoints.
+This adds `flag_name` labels to the `all_flags_evaluations_total_with_flag` metric.
+
+:::info
+When enabled, this option provides more granular metrics by including the flag name in the metric labels for bulk evaluation endpoints. This can be useful for monitoring and alerting on specific flags, but may increase the cardinality of your metrics.
+:::
+
+- option name: `enableBulkMetricFlagNames`
+- type: **boolean**
+- default: **`false`**
+- mandatory: <NotMandatory />
+
 ## Configuration Types
 
 ### type `authorizedKeys`
