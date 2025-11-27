@@ -402,36 +402,35 @@ func (f *InternalFlag) GetBucketingKey() string {
 // A flag requires bucketing if it has percentage-based rules or progressive rollouts,
 // including those introduced by scheduled rollout steps
 func (f *InternalFlag) RequiresBucketing() bool {
-	// Check if default rule requires bucketing
-	if f.DefaultRule != nil && f.DefaultRule.RequiresBucketing() {
+	// Check if default rule requires bucketing and if any targeting rule requires bucketing
+	if f.defaultRuleRequiresBucketing() || f.rulesRequireBucketing(f.GetRules()) {
 		return true
-	}
-
-	// Check if any targeting rule requires bucketing
-	for _, rule := range f.GetRules() {
-		if rule.RequiresBucketing() {
-			return true
-		}
 	}
 
 	// Check if any scheduled rollout steps introduce bucketing requirements
 	if f.Scheduled != nil {
 		for _, step := range *f.Scheduled {
-			// Check if the scheduled step's default rule requires bucketing
-			if step.DefaultRule != nil && step.DefaultRule.RequiresBucketing() {
+			if f.defaultRuleRequiresBucketing() || f.rulesRequireBucketing(step.GetRules()) {
 				return true
-			}
-
-			// Check if any of the scheduled step's rules require bucketing
-			for _, rule := range step.GetRules() {
-				if rule.RequiresBucketing() {
-					return true
-				}
 			}
 		}
 	}
-
 	return false
+}
+
+// rulesRequireBucketing checks if any of the rules require bucketing
+func (f *InternalFlag) rulesRequireBucketing(rules []Rule) bool {
+	for _, rule := range rules {
+		if rule.RequiresBucketing() {
+			return true
+		}
+	}
+	return false
+}
+
+// defaultRuleRequiresBucketing checks if the default rule requires bucketing
+func (f *InternalFlag) defaultRuleRequiresBucketing() bool {
+	return f.DefaultRule != nil && f.DefaultRule.RequiresBucketing()
 }
 
 // GetBucketingKeyValue return the value of the bucketing key from the context
