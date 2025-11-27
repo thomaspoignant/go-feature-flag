@@ -63,7 +63,7 @@ The API key is what we use to route the request to the appropriate flag set, so 
 
 ### **How the routing works**
 
-1. **Extract API key**: The relay proxy extracts the API key from the `Authorization` header
+1. **Extract API key**: The relay proxy extracts the API key from the `X-API-Key` or `Authorization` header
 2. **Find flag set**: It looks up which flag set is associated with that API key
 3. **Route request**: The evaluation request is routed to that specific flag set
 4. **Return result**: The evaluation result comes from that flag set's flags

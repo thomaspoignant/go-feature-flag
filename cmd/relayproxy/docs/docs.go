@@ -148,6 +148,9 @@ const docTemplate = `{
                 "security": [
                     {
                         "ApiKeyAuth": []
+                    },
+                    {
+                        "XApiKeyAuth": []
                     }
                 ],
                 "description": "Making a **POST** request to the URL ` + "`" + `/ofrep/v1/evaluate/flags` + "`" + ` will give you the value of the list\nof feature flags for this evaluation context.\n\nIf no flags are provided, the API will evaluate all available flags in the configuration.",
@@ -223,6 +226,9 @@ const docTemplate = `{
                 "security": [
                     {
                         "ApiKeyAuth": []
+                    },
+                    {
+                        "XApiKeyAuth": []
                     }
                 ],
                 "description": "Making a **POST** request to the URL ` + "`" + `/ofrep/v1/evaluate/flags/{your_flag_name}` + "`" + ` will give you the\nvalue of the flag for this evaluation context\n",
@@ -293,6 +299,9 @@ const docTemplate = `{
                 "security": [
                     {
                         "ApiKeyAuth": []
+                    },
+                    {
+                        "XApiKeyAuth": []
                     }
                 ],
                 "description": "Making a **POST** request to the URL ` + "`" + `/v1/allflags` + "`" + ` will give you the values of all the flags for\nthis user.\n\nTo get a variation you should provide information about the user.\nFor that you should provide some user information in JSON in the request body.",
@@ -344,6 +353,9 @@ const docTemplate = `{
                 "security": [
                     {
                         "ApiKeyAuth": []
+                    },
+                    {
+                        "XApiKeyAuth": []
                     }
                 ],
                 "description": "This endpoint is receiving the events of your flags usage to send them in the data collector.\n\nIt is used by the different Open Feature providers to send in bulk all the cached events to avoid\nto lose track of what happen when a cached flag is used.",
@@ -395,6 +407,9 @@ const docTemplate = `{
                 "security": [
                     {
                         "ApiKeyAuth": []
+                    },
+                    {
+                        "XApiKeyAuth": []
                     }
                 ],
                 "description": "Making a **POST** request to the URL ` + "`" + `/v1/feature/\u003cyour_flag_name\u003e/eval` + "`" + ` will give you the value of the\nflag for this user.\n\nTo get a variation you should provide information about the user:\n- User information in JSON in the request body.\n- A default value in case there is an error while evaluating the flag.\n\nNote that you will always have a usable value in the response, you can use the field ` + "`" + `failed` + "`" + ` to know if\nan issue has occurred during the validation of the flag, in that case the value returned will be the\ndefault value.",
@@ -453,6 +468,9 @@ const docTemplate = `{
                 "security": [
                     {
                         "ApiKeyAuth": []
+                    },
+                    {
+                        "XApiKeyAuth": []
                     }
                 ],
                 "description": "Making a **GET** request to the URL ` + "`" + `/v1/flag/change` + "`" + ` will give you the hash of the current\nconfiguration, you can use this hash to know if the configuration has changed.",
@@ -501,6 +519,9 @@ const docTemplate = `{
                 "security": [
                     {
                         "ApiKeyAuth": []
+                    },
+                    {
+                        "XApiKeyAuth": []
                     }
                 ],
                 "description": "Making a **POST** request to the URL ` + "`" + `/v1/flag/configuration` + "`" + ` will give you the list of\nthe flags to use them for local evaluation in your provider.",
@@ -1043,6 +1064,12 @@ const docTemplate = `{
             "description": "Use configured APIKeys in yaml config as authorization keys, disabled when this yaml config is not set.",
             "type": "apiKey",
             "name": "Authorization",
+            "in": "header"
+        },
+        "XApiKeyAuth": {
+            "description": "Use configured APIKeys in yaml config as authorization keys via X-API-Key header,\ndisabled when this yaml config is not set.",
+            "type": "apiKey",
+            "name": "X-API-Key",
             "in": "header"
         }
     }
