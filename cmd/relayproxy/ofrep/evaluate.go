@@ -152,8 +152,6 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 // @Failure     500 {object}  modeldocs.HTTPErrorDoc "Internal server error"
 // @Router      /ofrep/v1/evaluate/flags [post]
 func (h *EvaluateCtrl) BulkEvaluate(c echo.Context) error {
-	h.metrics.IncAllFlag()
-
 	request := new(model.OFREPEvalFlagRequest)
 	if err := c.Bind(request); err != nil {
 		return c.JSON(
@@ -190,7 +188,9 @@ func (h *EvaluateCtrl) BulkEvaluate(c echo.Context) error {
 	} else {
 		allFlagsResp = flagset.AllFlagsState(evalCtx)
 	}
+	flagNames := make([]string, 0, len(allFlagsResp.GetFlags()))
 	for key, val := range allFlagsResp.GetFlags() {
+		flagNames = append(flagNames, key)
 		value := val.Value
 		if val.Reason == flag.ReasonError {
 			value = nil
@@ -207,6 +207,7 @@ func (h *EvaluateCtrl) BulkEvaluate(c echo.Context) error {
 			ErrorDetails: val.ErrorDetails,
 		})
 	}
+	h.metrics.IncAllFlag(flagNames...)
 
 	sort.Slice(response.Flags, func(i, j int) bool {
 		return response.Flags[i].Key < response.Flags[j].Key
