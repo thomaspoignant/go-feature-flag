@@ -51,7 +51,10 @@ func (e evaluate) Evaluate() (map[string]model.RawVarResult, error) {
 		if e.flag != "" {
 			listFlags = append(listFlags, e.flag)
 		} else {
-			flags, _ := goff.GetFlagsFromCache()
+			flags, err := goff.GetFlagsFromCache()
+			if err != nil {
+				return nil, err
+			}
 			for key := range flags {
 				listFlags = append(listFlags, key)
 			}
