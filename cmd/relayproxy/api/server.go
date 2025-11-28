@@ -198,13 +198,13 @@ func (s *Server) startAsHTTPServer() {
 
 // startAwsLambda is starting the relay proxy as an AWS Lambda
 func (s *Server) startAwsLambda() {
-	lambda.Start(s.getLambdaHandler())
+	lambda.Start(s.lambdaHandler())
 }
 
-// getLambdaHandler returns the appropriate lambda handler based on the configuration.
+// lambdaHandler returns the appropriate lambda handler based on the configuration.
 // We need a dedicated function because it is called from tests as well, this is the
 // reason why we can't merged it in startAwsLambda.
-func (s *Server) getLambdaHandler() interface{} {
+func (s *Server) lambdaHandler() interface{} {
 	handlerMngr := newAwsLambdaHandlerManager(s.apiEcho, s.config.GetAwsApiGatewayBasePath(s.zapLog))
 	return handlerMngr.GetAdapter(s.config.GetLambdaAdapter(s.zapLog))
 }
