@@ -1,8 +1,8 @@
 {
-  "user": {
+  "evaluationContext": {
     "key": "random-key-ssss1",
-    "anonymous": true,
     "custom": {
+      "anonymous": true,
       "custom1": "value1",
       "custom2": "value2"
     }

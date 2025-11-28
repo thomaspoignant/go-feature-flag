@@ -3,14 +3,28 @@ package metric
 import (
 	prom "github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
+	versioncollector "github.com/prometheus/client_golang/prometheus/collectors/version"
 )
+
+type MetricsOpts struct {
+	// enables per-flag metrics for bulk evaluation endpoints
+	EnableBulkMetricFlagNames bool
+}
 
 // GOFFSubSystem is the name of the prefix we are using for all the metrics
 const GOFFSubSystem = "gofeatureflag"
 
 // NewMetrics is the constructor for the custom metrics
 // nolint:funlen
-func NewMetrics() (Metrics, error) {
+func NewMetrics(opts ...MetricsOpts) (Metrics, error) {
+	// default opts
+	mo := &MetricsOpts{
+		EnableBulkMetricFlagNames: false,
+	}
+
+	if len(opts) > 0 {
+		mo = &opts[0]
+	}
 	customRegistry := prom.NewRegistry()
 
 	// counts the number of flag evaluations
@@ -26,6 +40,13 @@ func NewMetrics() (Metrics, error) {
 		Help:      "Counter events for number of all flags requests.",
 		Subsystem: GOFFSubSystem,
 	})
+
+	// counts the number of bulk evaluations along with flag
+	allFlagCounterWithFlag := prom.NewCounterVec(prom.CounterOpts{
+		Name:      "all_flags_evaluations_total_with_flag",
+		Help:      "Counter events for all flags bulk evaluations with individual flag names",
+		Subsystem: GOFFSubSystem,
+	}, []string{"flag_name"})
 
 	// counts the number of tracking events collected through the API
 	collectEvalDataCounter := prom.NewCounter(prom.CounterOpts{
@@ -100,6 +121,7 @@ func NewMetrics() (Metrics, error) {
 	metricToRegister := []prom.Collector{
 		flagEvaluationCounter,
 		allFlagCounter,
+		allFlagCounterWithFlag,
 		collectEvalDataCounter,
 		flagChange,
 		flagCreateCounter,
@@ -110,6 +132,7 @@ func NewMetrics() (Metrics, error) {
 		flagCreateCounterVec,
 		forceRefreshCounter,
 		flagConfigurationCounter,
+		versioncollector.NewCollector(GOFFSubSystem),
 		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
 		collectors.NewGoCollector(),
 	}
@@ -122,8 +145,10 @@ func NewMetrics() (Metrics, error) {
 	}
 
 	return Metrics{
+		opts:                     *mo,
 		flagEvaluationCounter:    *flagEvaluationCounter,
 		allFlagCounter:           allFlagCounter,
+		allFlagCounterWithFlag:   *allFlagCounterWithFlag,
 		collectEvalDataCounter:   collectEvalDataCounter,
 		flagChange:               flagChange,
 		flagCreateCounter:        flagCreateCounter,
@@ -140,9 +165,11 @@ func NewMetrics() (Metrics, error) {
 
 // Metrics is a struct containing all custom prometheus metrics
 type Metrics struct {
+	opts                     MetricsOpts
 	Registry                 *prom.Registry
 	flagEvaluationCounter    prom.CounterVec
 	allFlagCounter           prom.Counter
+	allFlagCounterWithFlag   prom.CounterVec
 	collectEvalDataCounter   prom.Counter
 	flagChange               prom.Counter
 	flagCreateCounter        prom.Counter
@@ -163,9 +190,15 @@ func (m *Metrics) IncFlagEvaluation(flagName string) {
 }
 
 // IncAllFlag increment the number call to AllFlag
-func (m *Metrics) IncAllFlag() {
+func (m *Metrics) IncAllFlag(flagNames ...string) {
 	if m.allFlagCounter != nil {
 		m.allFlagCounter.Inc()
+	}
+
+	if m.ShouldCollectBulkMetrics() {
+		for _, flagName := range flagNames {
+			m.allFlagCounterWithFlag.With(prom.Labels{"flag_name": flagName}).Inc()
+		}
 	}
 }
 
@@ -219,4 +252,8 @@ func (m *Metrics) IncFlagConfigurationCall() {
 	if m.flagConfigurationCounter != nil {
 		m.flagConfigurationCounter.Inc()
 	}
+}
+
+func (m *Metrics) ShouldCollectBulkMetrics() bool {
+	return m.opts.EnableBulkMetricFlagNames && m.allFlagCounterWithFlag.MetricVec != nil
 }

@@ -55,7 +55,7 @@ interface ProviderOptions {
   // Optional
   evaluationType?: 'InProcess' | 'Remote';       // Default: 'InProcess'
   timeout?: number;                              // HTTP timeout in milliseconds (default: 10000)
-  apiKey?: string;                               // Bearer token for authenticated requests
+  apiKey?: string;                               // API Key for authenticated requests
   flagChangePollingIntervalMs?: number;          // Config polling interval (default: 120000)
   flushIntervalMs?: number;                      // Event collection flush interval (default: 1000)
   maxPendingEvents?: number;                     // Max events before forced flush (default: 10000)
@@ -85,7 +85,7 @@ The provider must implement the OpenFeature provider interface for the target la
 
 **Headers**:
 - `Content-Type: application/json`
-- `Authorization: Bearer {apiKey}` (if configured)
+- `X-API-Key: {apiKey}` (if configured)
 - `If-None-Match: {etag}` (for caching)
 
 **Request Body**:
@@ -256,7 +256,7 @@ If available, you can use the OFREP implementation provided by OpenFeature. If n
 
 **Headers**:
 - `Content-Type: application/json`
-- `Authorization: Bearer {apiKey}` (if configured)
+- `X-API-Key: {apiKey}` (if configured)
 
 #### 2. Flag Evaluation Endpoint
 
@@ -460,7 +460,7 @@ class WasmInvalidResultException extends GoFeatureFlagException {}
 ## Security Considerations
 ### Authentication
 
-- Support Bearer token authentication
+- Support API Key token authentication
 - Validate API key format and presence
 - Handle authentication errors gracefully
 

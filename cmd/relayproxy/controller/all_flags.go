@@ -35,6 +35,7 @@ func NewAllFlags(flagsetManager service.FlagsetManager, metrics metric.Metrics) 
 // @Description To get a variation you should provide information about the user.
 // @Description For that you should provide some user information in JSON in the request body.
 // @Security     ApiKeyAuth
+// @Security     XApiKeyAuth
 // @Produce      json
 // @Accept		 json
 // @Param 	     data body model.AllFlagRequest true "Payload of the user we want to challenge against the flag."
@@ -43,7 +44,6 @@ func NewAllFlags(flagsetManager service.FlagsetManager, metrics metric.Metrics) 
 // @Failure      500 {object} modeldocs.HTTPErrorDoc "Internal server error"
 // @Router       /v1/allflags [post]
 func (h *allFlags) Handler(c echo.Context) error {
-	h.metrics.IncAllFlag()
 	reqBody := new(model.AllFlagRequest)
 	if err := c.Bind(reqBody); err != nil {
 		return err
@@ -76,6 +76,12 @@ func (h *allFlags) Handler(c echo.Context) error {
 	} else {
 		allFlags = flagset.AllFlagsState(evaluationCtx)
 	}
+
+	flagNames := make([]string, 0, len(allFlags.GetFlags()))
+	for key := range allFlags.GetFlags() {
+		flagNames = append(flagNames, key)
+	}
+	h.metrics.IncAllFlag(flagNames...)
 
 	span.SetAttributes(
 		attribute.Bool("AllFlagsState.valid", allFlags.IsValid()),

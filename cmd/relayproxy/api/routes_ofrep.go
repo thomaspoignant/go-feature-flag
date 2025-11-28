@@ -2,7 +2,6 @@ package api
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 	etag "github.com/pablor21/echo-etag/v4"
 	middleware2 "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/ofrep"
@@ -22,7 +21,7 @@ func (s *Server) addOFREPRoutes(cFlagEvalOFREP ofrep.EvaluateCtrl) {
 		Weak: false,
 	}))
 
-	ofrepGroup.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
+	ofrepGroup.Use(middleware2.KeyAuthExtended(middleware2.KeyAuthExtendedConfig{
 		Validator: func(key string, _ echo.Context) (bool, error) {
 			return s.config.APIKeyExists(key), nil
 		},

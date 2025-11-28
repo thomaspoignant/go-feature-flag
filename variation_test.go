@@ -57,12 +57,12 @@ func (c *cacheMock) AllFlags() (map[string]flag.Flag, error) { return nil, nil }
 
 func TestBoolVariation(t *testing.T) {
 	type args struct {
-		flagKey      string
-		user         ffcontext.Context
-		defaultValue bool
-		cacheMock    cache.Manager
-		offline      bool
-		disableInit  bool
+		flagKey       string
+		evaluationCtx ffcontext.Context
+		defaultValue  bool
+		cacheMock     cache.Manager
+		offline       bool
+		disableInit   bool
 	}
 	tests := []struct {
 		name        string
@@ -74,9 +74,9 @@ func TestBoolVariation(t *testing.T) {
 		{
 			name: "Call variation before init of SDK",
 			args: args{
-				flagKey:      "key-not-exist",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: false,
+				flagKey:       "key-not-exist",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  false,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Variations: &map[string]*interface{}{
 						"var_true":  testconvert.Interface(true),
@@ -99,9 +99,9 @@ func TestBoolVariation(t *testing.T) {
 		{
 			name: "Get default value if flag disable",
 			args: args{
-				flagKey:      "disable-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: true,
+				flagKey:       "disable-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  true,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Disable: testconvert.Bool(true),
 				}, nil),
@@ -113,9 +113,9 @@ func TestBoolVariation(t *testing.T) {
 		{
 			name: "Get error when cache not init",
 			args: args{
-				flagKey:      "key-not-exist",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: true,
+				flagKey:       "key-not-exist",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  true,
 				cacheMock: NewCacheMock(
 					&flag.InternalFlag{},
 					errors.New("impossible to read the toggle before the initialisation")),
@@ -127,9 +127,9 @@ func TestBoolVariation(t *testing.T) {
 		{
 			name: "Get default value with key not exist",
 			args: args{
-				flagKey:      "key-not-exist",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: true,
+				flagKey:       "key-not-exist",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  true,
 				cacheMock: NewCacheMock(
 					&flag.InternalFlag{},
 					errors.New("flag [key-not-exist] does not exists"),
@@ -142,9 +142,9 @@ func TestBoolVariation(t *testing.T) {
 		{
 			name: "Get default value, rule not apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: true,
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  true,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -174,9 +174,9 @@ func TestBoolVariation(t *testing.T) {
 		{
 			name: "Get true value, rule apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewAnonymousEvaluationContext("random-key"),
-				defaultValue: true,
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key"),
+				defaultValue:  true,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -206,9 +206,9 @@ func TestBoolVariation(t *testing.T) {
 		{
 			name: "Get false value, rule apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewAnonymousEvaluationContext("random-key-ssss1"),
-				defaultValue: true,
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key-ssss1"),
+				defaultValue:  true,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -238,9 +238,9 @@ func TestBoolVariation(t *testing.T) {
 		{
 			name: "Get default value, when rule apply and not right type",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewEvaluationContext("random-key-ssss1"),
-				defaultValue: true,
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key-ssss1"),
+				defaultValue:  true,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -270,9 +270,9 @@ func TestBoolVariation(t *testing.T) {
 		{
 			name: "No exported log",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewAnonymousEvaluationContext("random-key"),
-				defaultValue: true,
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key"),
+				defaultValue:  true,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -303,10 +303,10 @@ func TestBoolVariation(t *testing.T) {
 		{
 			name: "Get sdk default value if offline",
 			args: args{
-				offline:      true,
-				flagKey:      "disable-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: false,
+				offline:       true,
+				flagKey:       "disable-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  false,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Disable: testconvert.Bool(true),
 				}, nil),
@@ -358,7 +358,7 @@ func TestBoolVariation(t *testing.T) {
 				}
 			}
 
-			got, err := BoolVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
+			got, err := BoolVariation(tt.args.flagKey, tt.args.evaluationCtx, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
 				time.Sleep(
@@ -391,12 +391,12 @@ func TestBoolVariation(t *testing.T) {
 
 func TestBoolVariationDetails(t *testing.T) {
 	type args struct {
-		flagKey      string
-		user         ffcontext.Context
-		defaultValue bool
-		cacheMock    cache.Manager
-		offline      bool
-		disableInit  bool
+		flagKey       string
+		evaluationCtx ffcontext.Context
+		defaultValue  bool
+		cacheMock     cache.Manager
+		offline       bool
+		disableInit   bool
 	}
 	tests := []struct {
 		name        string
@@ -408,9 +408,9 @@ func TestBoolVariationDetails(t *testing.T) {
 		{
 			name: "Call variation before init of SDK",
 			args: args{
-				flagKey:      "key-not-exist",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: false,
+				flagKey:       "key-not-exist",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  false,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Variations: &map[string]*interface{}{
 						"var_true":  testconvert.Interface(true),
@@ -432,9 +432,9 @@ func TestBoolVariationDetails(t *testing.T) {
 		{
 			name: "Get default value if flag disable",
 			args: args{
-				flagKey:      "disable-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: true,
+				flagKey:       "disable-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  true,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Disable: testconvert.Bool(true),
 				}, nil),
@@ -453,9 +453,9 @@ func TestBoolVariationDetails(t *testing.T) {
 		{
 			name: "Get error when cache not init",
 			args: args{
-				flagKey:      "key-not-exist",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: true,
+				flagKey:       "key-not-exist",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  true,
 				cacheMock: NewCacheMock(
 					&flag.InternalFlag{},
 					errors.New("impossible to read the toggle before the initialisation")),
@@ -466,9 +466,9 @@ func TestBoolVariationDetails(t *testing.T) {
 		{
 			name: "Get default value with key not exist",
 			args: args{
-				flagKey:      "key-not-exist",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: true,
+				flagKey:       "key-not-exist",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  true,
 				cacheMock: NewCacheMock(
 					&flag.InternalFlag{},
 					errors.New("flag [key-not-exist] does not exists"),
@@ -480,9 +480,9 @@ func TestBoolVariationDetails(t *testing.T) {
 		{
 			name: "Get default value, rule not apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: true,
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  true,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -519,9 +519,9 @@ func TestBoolVariationDetails(t *testing.T) {
 		{
 			name: "Get true value, rule apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewAnonymousEvaluationContext("random-key"),
-				defaultValue: true,
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key"),
+				defaultValue:  true,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -561,9 +561,9 @@ func TestBoolVariationDetails(t *testing.T) {
 		{
 			name: "Get rule name on metadata, rule apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewAnonymousEvaluationContext("random-key"),
-				defaultValue: true,
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key"),
+				defaultValue:  true,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -603,9 +603,9 @@ func TestBoolVariationDetails(t *testing.T) {
 		{
 			name: "Get no rule name on metadata, rule apply has not name",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewAnonymousEvaluationContext("random-key"),
-				defaultValue: true,
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key"),
+				defaultValue:  true,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -641,9 +641,9 @@ func TestBoolVariationDetails(t *testing.T) {
 		{
 			name: "Get false value, rule apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewAnonymousEvaluationContext("random-key-ssss1"),
-				defaultValue: true,
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key-ssss1"),
+				defaultValue:  true,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -683,9 +683,9 @@ func TestBoolVariationDetails(t *testing.T) {
 		{
 			name: "Get default value, when rule apply and not right type",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewEvaluationContext("random-key-ssss1"),
-				defaultValue: true,
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key-ssss1"),
+				defaultValue:  true,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -722,10 +722,10 @@ func TestBoolVariationDetails(t *testing.T) {
 		{
 			name: "Get sdk default value if offline",
 			args: args{
-				offline:      true,
-				flagKey:      "disable-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: false,
+				offline:       true,
+				flagKey:       "disable-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  false,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Disable: testconvert.Bool(true),
 				}, nil),
@@ -739,6 +739,65 @@ func TestBoolVariationDetails(t *testing.T) {
 			},
 			wantErr:     false,
 			expectedLog: "",
+		},
+		{
+			name: "Evaluation without targetingKey: success",
+			args: args{
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext(""),
+				defaultValue:  true,
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Variations: &map[string]*interface{}{
+						"on":  testconvert.Interface(true),
+						"off": testconvert.Interface(false),
+					},
+					DefaultRule: &flag.Rule{
+						VariationResult: testconvert.String("on"),
+					},
+				}, nil),
+			},
+			want: model.VariationResult[bool]{
+				VariationType: "on",
+				Failed:        false,
+				Reason:        flag.ReasonStatic,
+				Value:         true,
+				TrackEvents:   true,
+				Cacheable:     true,
+			},
+			wantErr:     false,
+			expectedLog: `user="", flag="test-flag", value="true", variation="on"`,
+		},
+		{
+			name: "Evaluation without targetingKey: fail because flag requires bucketing",
+			args: args{
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext(""),
+				defaultValue:  false,
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Variations: &map[string]*interface{}{
+						"on":  testconvert.Interface(true),
+						"off": testconvert.Interface(false),
+					},
+					DefaultRule: &flag.Rule{
+						Percentages: &map[string]float64{
+							"on":  100,
+							"off": 0,
+						},
+					},
+				}, nil),
+			},
+			want: model.VariationResult[bool]{
+				VariationType: "SdkDefault",
+				Failed:        true,
+				Reason:        flag.ReasonError,
+				ErrorCode:     flag.ErrorCodeTargetingKeyMissing,
+				ErrorDetails:  "Error: Empty targeting key",
+				Value:         false,
+				TrackEvents:   true,
+				Cacheable:     false,
+			},
+			wantErr:     false,
+			expectedLog: `user="", flag="test-flag", value="false", variation="SdkDefault"`,
 		},
 	}
 	for _, tt := range tests {
@@ -780,7 +839,7 @@ func TestBoolVariationDetails(t *testing.T) {
 				}
 			}
 
-			got, err := BoolVariationDetails(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
+			got, err := BoolVariationDetails(tt.args.flagKey, tt.args.evaluationCtx, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
 				time.Sleep(
@@ -819,12 +878,12 @@ func TestBoolVariationDetails(t *testing.T) {
 
 func TestFloat64Variation(t *testing.T) {
 	type args struct {
-		flagKey      string
-		user         ffcontext.Context
-		defaultValue float64
-		cacheMock    cache.Manager
-		offline      bool
-		disableInit  bool
+		flagKey       string
+		evaluationCtx ffcontext.Context
+		defaultValue  float64
+		cacheMock     cache.Manager
+		offline       bool
+		disableInit   bool
 	}
 	tests := []struct {
 		name        string
@@ -836,9 +895,9 @@ func TestFloat64Variation(t *testing.T) {
 		{
 			name: "Call variation before init of SDK",
 			args: args{
-				flagKey:      "key-not-exist",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: 123.3,
+				flagKey:       "key-not-exist",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  123.3,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Variations: &map[string]*interface{}{
 						"var_true":  testconvert.Interface(true),
@@ -861,9 +920,9 @@ func TestFloat64Variation(t *testing.T) {
 		{
 			name: "Get default value if flag disable",
 			args: args{
-				flagKey:      "disable-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: 120.12,
+				flagKey:       "disable-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  120.12,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Disable: testconvert.Bool(true),
 				}, nil),
@@ -875,9 +934,9 @@ func TestFloat64Variation(t *testing.T) {
 		{
 			name: "Get error when cache not init",
 			args: args{
-				flagKey:      "key-not-exist",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: 118.12,
+				flagKey:       "key-not-exist",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  118.12,
 				cacheMock: NewCacheMock(
 					&flag.InternalFlag{},
 					errors.New("impossible to read the toggle before the initialisation")),
@@ -889,9 +948,9 @@ func TestFloat64Variation(t *testing.T) {
 		{
 			name: "Get default value with key not exist",
 			args: args{
-				flagKey:      "key-not-exist",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: 118.12,
+				flagKey:       "key-not-exist",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  118.12,
 				cacheMock: NewCacheMock(
 					&flag.InternalFlag{},
 					errors.New("flag [key-not-exist] does not exists"),
@@ -904,9 +963,9 @@ func TestFloat64Variation(t *testing.T) {
 		{
 			name: "Get default value, rule not apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: 118.12,
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  118.12,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -936,9 +995,9 @@ func TestFloat64Variation(t *testing.T) {
 		{
 			name: "Get true value, rule apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewAnonymousEvaluationContext("random-key"),
-				defaultValue: 118.12,
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key"),
+				defaultValue:  118.12,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -968,9 +1027,9 @@ func TestFloat64Variation(t *testing.T) {
 		{
 			name: "Get false value, rule apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewAnonymousEvaluationContext("random-key-ssss1"),
-				defaultValue: 118.12,
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key-ssss1"),
+				defaultValue:  118.12,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -1000,9 +1059,9 @@ func TestFloat64Variation(t *testing.T) {
 		{
 			name: "Get default value, when rule apply and not right type",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewEvaluationContext("random-key-ssss1"),
-				defaultValue: 118.12,
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key-ssss1"),
+				defaultValue:  118.12,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -1032,9 +1091,9 @@ func TestFloat64Variation(t *testing.T) {
 		{
 			name: "No exported log",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewAnonymousEvaluationContext("random-key"),
-				defaultValue: 118.12,
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key"),
+				defaultValue:  118.12,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -1065,10 +1124,10 @@ func TestFloat64Variation(t *testing.T) {
 		{
 			name: "Get sdk default value if offline",
 			args: args{
-				offline:      true,
-				flagKey:      "disable-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: 118.12,
+				offline:       true,
+				flagKey:       "disable-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  118.12,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Disable: testconvert.Bool(true),
 				}, nil),
@@ -1117,7 +1176,7 @@ func TestFloat64Variation(t *testing.T) {
 				}
 			}
 
-			got, err := Float64Variation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
+			got, err := Float64Variation(tt.args.flagKey, tt.args.evaluationCtx, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
 				time.Sleep(
@@ -1149,12 +1208,12 @@ func TestFloat64Variation(t *testing.T) {
 
 func TestFloat64VariationDetails(t *testing.T) {
 	type args struct {
-		flagKey      string
-		user         ffcontext.Context
-		defaultValue float64
-		cacheMock    cache.Manager
-		offline      bool
-		disableInit  bool
+		flagKey       string
+		evaluationCtx ffcontext.Context
+		defaultValue  float64
+		cacheMock     cache.Manager
+		offline       bool
+		disableInit   bool
 	}
 	tests := []struct {
 		name        string
@@ -1166,9 +1225,9 @@ func TestFloat64VariationDetails(t *testing.T) {
 		{
 			name: "Call variation before init of SDK",
 			args: args{
-				flagKey:      "key-not-exist",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: 123.3,
+				flagKey:       "key-not-exist",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  123.3,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Variations: &map[string]*interface{}{
 						"var_true":  testconvert.Interface(true),
@@ -1190,9 +1249,9 @@ func TestFloat64VariationDetails(t *testing.T) {
 		{
 			name: "Get default value if flag disable",
 			args: args{
-				flagKey:      "disable-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: 120.12,
+				flagKey:       "disable-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  120.12,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Disable: testconvert.Bool(true),
 				}, nil),
@@ -1211,9 +1270,9 @@ func TestFloat64VariationDetails(t *testing.T) {
 		{
 			name: "Get error when cache not init",
 			args: args{
-				flagKey:      "key-not-exist",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: 118.12,
+				flagKey:       "key-not-exist",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  118.12,
 				cacheMock: NewCacheMock(
 					&flag.InternalFlag{},
 					errors.New("impossible to read the toggle before the initialisation")),
@@ -1224,9 +1283,9 @@ func TestFloat64VariationDetails(t *testing.T) {
 		{
 			name: "Get default value with key not exist",
 			args: args{
-				flagKey:      "key-not-exist",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: 118.12,
+				flagKey:       "key-not-exist",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  118.12,
 				cacheMock: NewCacheMock(
 					&flag.InternalFlag{},
 					errors.New("flag [key-not-exist] does not exists"),
@@ -1238,9 +1297,9 @@ func TestFloat64VariationDetails(t *testing.T) {
 		{
 			name: "Get default value, rule not apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: 118.12,
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  118.12,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -1277,9 +1336,9 @@ func TestFloat64VariationDetails(t *testing.T) {
 		{
 			name: "Get true value, rule apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewAnonymousEvaluationContext("random-key"),
-				defaultValue: 118.12,
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key"),
+				defaultValue:  118.12,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -1319,9 +1378,9 @@ func TestFloat64VariationDetails(t *testing.T) {
 		{
 			name: "Get false value, rule apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewAnonymousEvaluationContext("random-key-ssss1"),
-				defaultValue: 118.12,
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key-ssss1"),
+				defaultValue:  118.12,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -1361,9 +1420,9 @@ func TestFloat64VariationDetails(t *testing.T) {
 		{
 			name: "Get default value, when rule apply and not right type",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewEvaluationContext("random-key-ssss1"),
-				defaultValue: 118.12,
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key-ssss1"),
+				defaultValue:  118.12,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -1399,10 +1458,10 @@ func TestFloat64VariationDetails(t *testing.T) {
 		{
 			name: "Get sdk default value if offline",
 			args: args{
-				offline:      true,
-				flagKey:      "disable-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: 118.12,
+				offline:       true,
+				flagKey:       "disable-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  118.12,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Disable: testconvert.Bool(true),
 				}, nil),
@@ -1457,7 +1516,7 @@ func TestFloat64VariationDetails(t *testing.T) {
 				}
 			}
 
-			got, err := Float64VariationDetails(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
+			got, err := Float64VariationDetails(tt.args.flagKey, tt.args.evaluationCtx, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
 				time.Sleep(
@@ -1489,12 +1548,12 @@ func TestFloat64VariationDetails(t *testing.T) {
 
 func TestJSONArrayVariation(t *testing.T) {
 	type args struct {
-		flagKey      string
-		user         ffcontext.Context
-		defaultValue []interface{}
-		cacheMock    cache.Manager
-		offline      bool
-		disableInit  bool
+		flagKey       string
+		evaluationCtx ffcontext.Context
+		defaultValue  []interface{}
+		cacheMock     cache.Manager
+		offline       bool
+		disableInit   bool
 	}
 	tests := []struct {
 		name        string
@@ -1506,9 +1565,9 @@ func TestJSONArrayVariation(t *testing.T) {
 		{
 			name: "Call variation before init of SDK",
 			args: args{
-				flagKey:      "key-not-exist",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: []interface{}{},
+				flagKey:       "key-not-exist",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  []interface{}{},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Variations: &map[string]*interface{}{
 						"var_true":  testconvert.Interface(true),
@@ -1531,9 +1590,9 @@ func TestJSONArrayVariation(t *testing.T) {
 		{
 			name: "Get default value if flag disable",
 			args: args{
-				flagKey:      "disable-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: []interface{}{"toto"},
+				flagKey:       "disable-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  []interface{}{"toto"},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Disable: testconvert.Bool(true),
 				}, nil),
@@ -1545,9 +1604,9 @@ func TestJSONArrayVariation(t *testing.T) {
 		{
 			name: "Get error when cache not init",
 			args: args{
-				flagKey:      "key-not-exist",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: []interface{}{"toto"},
+				flagKey:       "key-not-exist",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  []interface{}{"toto"},
 				cacheMock: NewCacheMock(
 					&flag.InternalFlag{},
 					errors.New("impossible to read the toggle before the initialisation")),
@@ -1559,9 +1618,9 @@ func TestJSONArrayVariation(t *testing.T) {
 		{
 			name: "Get default value with key not exist",
 			args: args{
-				flagKey:      "key-not-exist",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: []interface{}{"toto"},
+				flagKey:       "key-not-exist",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  []interface{}{"toto"},
 				cacheMock: NewCacheMock(
 					&flag.InternalFlag{},
 					errors.New("flag [key-not-exist] does not exists"),
@@ -1574,9 +1633,9 @@ func TestJSONArrayVariation(t *testing.T) {
 		{
 			name: "Get default value, rule not apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: []interface{}{"toto"},
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  []interface{}{"toto"},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -1606,9 +1665,9 @@ func TestJSONArrayVariation(t *testing.T) {
 		{
 			name: "Get true value, rule apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewAnonymousEvaluationContext("random-key"),
-				defaultValue: []interface{}{"toto"},
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key"),
+				defaultValue:  []interface{}{"toto"},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -1638,9 +1697,9 @@ func TestJSONArrayVariation(t *testing.T) {
 		{
 			name: "Get false value, rule apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewAnonymousEvaluationContext("random-key-ssss1"),
-				defaultValue: []interface{}{"toto"},
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key-ssss1"),
+				defaultValue:  []interface{}{"toto"},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Variations: &map[string]*interface{}{
 						"Default": testconvert.Interface([]interface{}{"default"}),
@@ -1663,9 +1722,9 @@ func TestJSONArrayVariation(t *testing.T) {
 		{
 			name: "Get default value, when rule apply and not right type",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewEvaluationContext("random-key-ssss1"),
-				defaultValue: []interface{}{"toto"},
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key-ssss1"),
+				defaultValue:  []interface{}{"toto"},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -1695,9 +1754,9 @@ func TestJSONArrayVariation(t *testing.T) {
 		{
 			name: "No exported log",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewEvaluationContext("random-key-ssss1"),
-				defaultValue: []interface{}{"toto"},
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key-ssss1"),
+				defaultValue:  []interface{}{"toto"},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Variations: &map[string]*interface{}{
 						"Default": testconvert.Interface([]interface{}{"default"}),
@@ -1721,10 +1780,10 @@ func TestJSONArrayVariation(t *testing.T) {
 		{
 			name: "Get sdk default value if offline",
 			args: args{
-				offline:      true,
-				flagKey:      "disable-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: []interface{}{"toto"},
+				offline:       true,
+				flagKey:       "disable-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  []interface{}{"toto"},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Disable: testconvert.Bool(true),
 				}, nil),
@@ -1773,7 +1832,7 @@ func TestJSONArrayVariation(t *testing.T) {
 				}
 			}
 
-			got, err := JSONArrayVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
+			got, err := JSONArrayVariation(tt.args.flagKey, tt.args.evaluationCtx, tt.args.defaultValue)
 
 			if tt.wantErr {
 				assert.Error(t, err, "JSONArrayVariation() error = %v, wantErr %v", err, tt.wantErr)
@@ -1804,12 +1863,12 @@ func TestJSONArrayVariation(t *testing.T) {
 
 func TestJSONArrayVariationDetails(t *testing.T) {
 	type args struct {
-		flagKey      string
-		user         ffcontext.Context
-		defaultValue []interface{}
-		cacheMock    cache.Manager
-		offline      bool
-		disableInit  bool
+		flagKey       string
+		evaluationCtx ffcontext.Context
+		defaultValue  []interface{}
+		cacheMock     cache.Manager
+		offline       bool
+		disableInit   bool
 	}
 	tests := []struct {
 		name        string
@@ -1821,9 +1880,9 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 		{
 			name: "Call variation before init of SDK",
 			args: args{
-				flagKey:      "key-not-exist",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: []interface{}{},
+				flagKey:       "key-not-exist",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  []interface{}{},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Variations: &map[string]*interface{}{
 						"var_true":  testconvert.Interface(true),
@@ -1845,9 +1904,9 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 		{
 			name: "Get default value if flag disable",
 			args: args{
-				flagKey:      "disable-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: []interface{}{"toto"},
+				flagKey:       "disable-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  []interface{}{"toto"},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Disable: testconvert.Bool(true),
 				}, nil),
@@ -1866,9 +1925,9 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 		{
 			name: "Get error when cache not init",
 			args: args{
-				flagKey:      "key-not-exist",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: []interface{}{"toto"},
+				flagKey:       "key-not-exist",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  []interface{}{"toto"},
 				cacheMock: NewCacheMock(
 					&flag.InternalFlag{},
 					errors.New("impossible to read the toggle before the initialisation")),
@@ -1879,9 +1938,9 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 		{
 			name: "Get default value with key not exist",
 			args: args{
-				flagKey:      "key-not-exist",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: []interface{}{"toto"},
+				flagKey:       "key-not-exist",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  []interface{}{"toto"},
 				cacheMock: NewCacheMock(
 					&flag.InternalFlag{},
 					errors.New("flag [key-not-exist] does not exists"),
@@ -1893,9 +1952,9 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 		{
 			name: "Get default value, rule not apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: []interface{}{"toto"},
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  []interface{}{"toto"},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -1932,9 +1991,9 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 		{
 			name: "Get true value, rule apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewAnonymousEvaluationContext("random-key"),
-				defaultValue: []interface{}{"toto"},
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key"),
+				defaultValue:  []interface{}{"toto"},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -1974,9 +2033,9 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 		{
 			name: "Get false value, rule apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewAnonymousEvaluationContext("random-key-ssss1"),
-				defaultValue: []interface{}{"toto"},
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key-ssss1"),
+				defaultValue:  []interface{}{"toto"},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Variations: &map[string]*interface{}{
 						"Default": testconvert.Interface([]interface{}{"default"}),
@@ -2006,9 +2065,9 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 		{
 			name: "Get default value, when rule apply and not right type",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewEvaluationContext("random-key-ssss1"),
-				defaultValue: []interface{}{"toto"},
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key-ssss1"),
+				defaultValue:  []interface{}{"toto"},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -2044,10 +2103,10 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 		{
 			name: "Get sdk default value if offline",
 			args: args{
-				offline:      true,
-				flagKey:      "disable-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: []interface{}{"toto"},
+				offline:       true,
+				flagKey:       "disable-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  []interface{}{"toto"},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Disable: testconvert.Bool(true),
 				}, nil),
@@ -2104,7 +2163,7 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 
 			got, err := JSONArrayVariationDetails(
 				tt.args.flagKey,
-				tt.args.user,
+				tt.args.evaluationCtx,
 				tt.args.defaultValue,
 			)
 
@@ -2137,12 +2196,12 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 
 func TestJSONVariation(t *testing.T) {
 	type args struct {
-		flagKey      string
-		user         ffcontext.Context
-		defaultValue map[string]interface{}
-		cacheMock    cache.Manager
-		offline      bool
-		disableInit  bool
+		flagKey       string
+		evaluationCtx ffcontext.Context
+		defaultValue  map[string]interface{}
+		cacheMock     cache.Manager
+		offline       bool
+		disableInit   bool
 	}
 	tests := []struct {
 		name        string
@@ -2154,9 +2213,9 @@ func TestJSONVariation(t *testing.T) {
 		{
 			name: "Call variation before init of SDK",
 			args: args{
-				flagKey:      "key-not-exist",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: map[string]interface{}{},
+				flagKey:       "key-not-exist",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  map[string]interface{}{},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Variations: &map[string]*interface{}{
 						"var_true":  testconvert.Interface(true),
@@ -2179,9 +2238,9 @@ func TestJSONVariation(t *testing.T) {
 		{
 			name: "Get default value if flag disable",
 			args: args{
-				flagKey:      "disable-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: map[string]interface{}{"default-notkey": true},
+				flagKey:       "disable-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  map[string]interface{}{"default-notkey": true},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Disable: testconvert.Bool(true),
 				}, nil),
@@ -2193,9 +2252,9 @@ func TestJSONVariation(t *testing.T) {
 		{
 			name: "Get error when cache not init",
 			args: args{
-				flagKey:      "key-not-exist",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: map[string]interface{}{"default-notkey": true},
+				flagKey:       "key-not-exist",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  map[string]interface{}{"default-notkey": true},
 				cacheMock: NewCacheMock(
 					&flag.InternalFlag{},
 					errors.New("impossible to read the toggle before the initialisation")),
@@ -2207,9 +2266,9 @@ func TestJSONVariation(t *testing.T) {
 		{
 			name: "Get default value with key not exist",
 			args: args{
-				flagKey:      "key-not-exist",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: map[string]interface{}{"default-notkey": true},
+				flagKey:       "key-not-exist",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  map[string]interface{}{"default-notkey": true},
 				cacheMock: NewCacheMock(
 					&flag.InternalFlag{},
 					errors.New("flag [key-not-exist] does not exists"),
@@ -2222,9 +2281,9 @@ func TestJSONVariation(t *testing.T) {
 		{
 			name: "Get default value, rule not apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: map[string]interface{}{"default-notkey": true},
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  map[string]interface{}{"default-notkey": true},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -2254,9 +2313,9 @@ func TestJSONVariation(t *testing.T) {
 		{
 			name: "Get true value, rule apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewAnonymousEvaluationContext("random-key"),
-				defaultValue: map[string]interface{}{"default-notkey": true},
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key"),
+				defaultValue:  map[string]interface{}{"default-notkey": true},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -2286,9 +2345,9 @@ func TestJSONVariation(t *testing.T) {
 		{
 			name: "Get false value, rule apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewAnonymousEvaluationContext("random-key-ssss1"),
-				defaultValue: map[string]interface{}{"default-notkey": true},
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key-ssss1"),
+				defaultValue:  map[string]interface{}{"default-notkey": true},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -2318,9 +2377,9 @@ func TestJSONVariation(t *testing.T) {
 		{
 			name: "Get default value, when rule apply and not right type",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewEvaluationContext("random-key-ssss1"),
-				defaultValue: map[string]interface{}{"default-notkey": true},
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key-ssss1"),
+				defaultValue:  map[string]interface{}{"default-notkey": true},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -2350,10 +2409,10 @@ func TestJSONVariation(t *testing.T) {
 		{
 			name: "Get sdk default value if offline",
 			args: args{
-				offline:      true,
-				flagKey:      "disable-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: map[string]interface{}{"default-notkey": true},
+				offline:       true,
+				flagKey:       "disable-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  map[string]interface{}{"default-notkey": true},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Disable: testconvert.Bool(true),
 				}, nil),
@@ -2402,7 +2461,7 @@ func TestJSONVariation(t *testing.T) {
 				}
 			}
 
-			got, err := JSONVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
+			got, err := JSONVariation(tt.args.flagKey, tt.args.evaluationCtx, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
 				time.Sleep(
@@ -2435,12 +2494,12 @@ func TestJSONVariation(t *testing.T) {
 
 func TestJSONVariationDetails(t *testing.T) {
 	type args struct {
-		flagKey      string
-		user         ffcontext.Context
-		defaultValue map[string]interface{}
-		cacheMock    cache.Manager
-		offline      bool
-		disableInit  bool
+		flagKey       string
+		evaluationCtx ffcontext.Context
+		defaultValue  map[string]interface{}
+		cacheMock     cache.Manager
+		offline       bool
+		disableInit   bool
 	}
 	tests := []struct {
 		name        string
@@ -2452,9 +2511,9 @@ func TestJSONVariationDetails(t *testing.T) {
 		{
 			name: "Get default value if flag disable",
 			args: args{
-				flagKey:      "disable-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: map[string]interface{}{"default-notkey": true},
+				flagKey:       "disable-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  map[string]interface{}{"default-notkey": true},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Disable: testconvert.Bool(true),
 				}, nil),
@@ -2473,9 +2532,9 @@ func TestJSONVariationDetails(t *testing.T) {
 		{
 			name: "Get default value, rule not apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: map[string]interface{}{"default-notkey": true},
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  map[string]interface{}{"default-notkey": true},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -2512,9 +2571,9 @@ func TestJSONVariationDetails(t *testing.T) {
 		{
 			name: "Get true value, rule apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewAnonymousEvaluationContext("random-key"),
-				defaultValue: map[string]interface{}{"default-notkey": true},
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key"),
+				defaultValue:  map[string]interface{}{"default-notkey": true},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -2554,9 +2613,9 @@ func TestJSONVariationDetails(t *testing.T) {
 		{
 			name: "Get false value, rule apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewAnonymousEvaluationContext("random-key-ssss1"),
-				defaultValue: map[string]interface{}{"default-notkey": true},
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key-ssss1"),
+				defaultValue:  map[string]interface{}{"default-notkey": true},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -2596,10 +2655,10 @@ func TestJSONVariationDetails(t *testing.T) {
 		{
 			name: "Get sdk default value if offline",
 			args: args{
-				offline:      true,
-				flagKey:      "disable-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: map[string]interface{}{"default-notkey": true},
+				offline:       true,
+				flagKey:       "disable-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  map[string]interface{}{"default-notkey": true},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Disable: testconvert.Bool(true),
 				}, nil),
@@ -2654,7 +2713,7 @@ func TestJSONVariationDetails(t *testing.T) {
 				}
 			}
 
-			got, err := JSONVariationDetails(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
+			got, err := JSONVariationDetails(tt.args.flagKey, tt.args.evaluationCtx, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
 				time.Sleep(
@@ -2687,12 +2746,12 @@ func TestJSONVariationDetails(t *testing.T) {
 
 func TestStringVariation(t *testing.T) {
 	type args struct {
-		flagKey      string
-		user         ffcontext.Context
-		defaultValue string
-		cacheMock    cache.Manager
-		offline      bool
-		disableInit  bool
+		flagKey       string
+		evaluationCtx ffcontext.Context
+		defaultValue  string
+		cacheMock     cache.Manager
+		offline       bool
+		disableInit   bool
 	}
 	tests := []struct {
 		name        string
@@ -2704,9 +2763,9 @@ func TestStringVariation(t *testing.T) {
 		{
 			name: "Call variation before init of SDK",
 			args: args{
-				flagKey:      "key-not-exist",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: "",
+				flagKey:       "key-not-exist",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  "",
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Variations: &map[string]*interface{}{
 						"var_true":  testconvert.Interface(true),
@@ -2729,9 +2788,9 @@ func TestStringVariation(t *testing.T) {
 		{
 			name: "Get default value if flag disable",
 			args: args{
-				flagKey:      "disable-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: "default-notkey",
+				flagKey:       "disable-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  "default-notkey",
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Disable: testconvert.Bool(true),
 				}, nil),
@@ -2743,9 +2802,9 @@ func TestStringVariation(t *testing.T) {
 		{
 			name: "Get error when cache not init",
 			args: args{
-				flagKey:      "key-not-exist",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: "default-notkey",
+				flagKey:       "key-not-exist",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  "default-notkey",
 				cacheMock: NewCacheMock(
 					&flag.InternalFlag{},
 					errors.New("impossible to read the toggle before the initialisation")),
@@ -2757,9 +2816,9 @@ func TestStringVariation(t *testing.T) {
 		{
 			name: "Get default value with key not exist",
 			args: args{
-				flagKey:      "key-not-exist",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: "default-notkey",
+				flagKey:       "key-not-exist",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  "default-notkey",
 				cacheMock: NewCacheMock(
 					&flag.InternalFlag{},
 					errors.New("flag [key-not-exist] does not exists"),
@@ -2773,9 +2832,9 @@ func TestStringVariation(t *testing.T) {
 		{
 			name: "Get default value, rule not apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: "default-notkey",
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  "default-notkey",
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -2805,9 +2864,9 @@ func TestStringVariation(t *testing.T) {
 		{
 			name: "Get true value, rule apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewAnonymousEvaluationContext("random-key"),
-				defaultValue: "default-notkey",
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key"),
+				defaultValue:  "default-notkey",
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -2837,9 +2896,9 @@ func TestStringVariation(t *testing.T) {
 		{
 			name: "Get false value, rule apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewAnonymousEvaluationContext("random-key-ssss1"),
-				defaultValue: "default-notkey",
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key-ssss1"),
+				defaultValue:  "default-notkey",
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -2869,9 +2928,9 @@ func TestStringVariation(t *testing.T) {
 		{
 			name: "Get default value, when rule apply and not right type",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewEvaluationContext("random-key-ssss1"),
-				defaultValue: "default-notkey",
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key-ssss1"),
+				defaultValue:  "default-notkey",
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -2901,10 +2960,10 @@ func TestStringVariation(t *testing.T) {
 		{
 			name: "Get sdk default value if offline",
 			args: args{
-				offline:      true,
-				flagKey:      "disable-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: "default-notkey",
+				offline:       true,
+				flagKey:       "disable-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  "default-notkey",
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Disable: testconvert.Bool(true),
 				}, nil),
@@ -2952,7 +3011,7 @@ func TestStringVariation(t *testing.T) {
 					),
 				}
 			}
-			got, err := StringVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
+			got, err := StringVariation(tt.args.flagKey, tt.args.evaluationCtx, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
 				time.Sleep(
@@ -2985,12 +3044,12 @@ func TestStringVariation(t *testing.T) {
 
 func TestStringVariationDetails(t *testing.T) {
 	type args struct {
-		flagKey      string
-		user         ffcontext.Context
-		defaultValue string
-		cacheMock    cache.Manager
-		offline      bool
-		disableInit  bool
+		flagKey       string
+		evaluationCtx ffcontext.Context
+		defaultValue  string
+		cacheMock     cache.Manager
+		offline       bool
+		disableInit   bool
 	}
 	tests := []struct {
 		name        string
@@ -3002,9 +3061,9 @@ func TestStringVariationDetails(t *testing.T) {
 		{
 			name: "Get default value if flag disable",
 			args: args{
-				flagKey:      "disable-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: "default-notkey",
+				flagKey:       "disable-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  "default-notkey",
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Disable: testconvert.Bool(true),
 				}, nil),
@@ -3023,9 +3082,9 @@ func TestStringVariationDetails(t *testing.T) {
 		{
 			name: "Get default value, rule not apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: "default-notkey",
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  "default-notkey",
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -3062,9 +3121,9 @@ func TestStringVariationDetails(t *testing.T) {
 		{
 			name: "Get true value, rule apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewAnonymousEvaluationContext("random-key"),
-				defaultValue: "default-notkey",
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key"),
+				defaultValue:  "default-notkey",
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -3104,9 +3163,9 @@ func TestStringVariationDetails(t *testing.T) {
 		{
 			name: "Get false value, rule apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewAnonymousEvaluationContext("random-key-ssss1"),
-				defaultValue: "default-notkey",
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key-ssss1"),
+				defaultValue:  "default-notkey",
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -3146,10 +3205,10 @@ func TestStringVariationDetails(t *testing.T) {
 		{
 			name: "Get sdk default value if offline",
 			args: args{
-				offline:      true,
-				flagKey:      "disable-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: "default-notkey",
+				offline:       true,
+				flagKey:       "disable-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  "default-notkey",
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Disable: testconvert.Bool(true),
 				}, nil),
@@ -3203,7 +3262,7 @@ func TestStringVariationDetails(t *testing.T) {
 					),
 				}
 			}
-			got, err := StringVariationDetails(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
+			got, err := StringVariationDetails(tt.args.flagKey, tt.args.evaluationCtx, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
 				time.Sleep(
@@ -3236,12 +3295,12 @@ func TestStringVariationDetails(t *testing.T) {
 
 func TestIntVariation(t *testing.T) {
 	type args struct {
-		flagKey      string
-		user         ffcontext.Context
-		defaultValue int
-		cacheMock    cache.Manager
-		offline      bool
-		disableInit  bool
+		flagKey       string
+		evaluationCtx ffcontext.Context
+		defaultValue  int
+		cacheMock     cache.Manager
+		offline       bool
+		disableInit   bool
 	}
 	tests := []struct {
 		name        string
@@ -3253,9 +3312,9 @@ func TestIntVariation(t *testing.T) {
 		{
 			name: "Call variation before init of SDK",
 			args: args{
-				flagKey:      "key-not-exist",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: 1,
+				flagKey:       "key-not-exist",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  1,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Variations: &map[string]*interface{}{
 						"var_true":  testconvert.Interface(true),
@@ -3278,9 +3337,9 @@ func TestIntVariation(t *testing.T) {
 		{
 			name: "Get default value if flag disable",
 			args: args{
-				flagKey:      "disable-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: 125,
+				flagKey:       "disable-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  125,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Disable: testconvert.Bool(true),
 				}, nil),
@@ -3292,9 +3351,9 @@ func TestIntVariation(t *testing.T) {
 		{
 			name: "Get error when cache not init",
 			args: args{
-				flagKey:      "key-not-exist",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: 118,
+				flagKey:       "key-not-exist",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  118,
 				cacheMock: NewCacheMock(
 					&flag.InternalFlag{},
 					errors.New("impossible to read the toggle before the initialisation")),
@@ -3306,9 +3365,9 @@ func TestIntVariation(t *testing.T) {
 		{
 			name: "Get default value with key not exist",
 			args: args{
-				flagKey:      "key-not-exist",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: 118,
+				flagKey:       "key-not-exist",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  118,
 				cacheMock: NewCacheMock(
 					&flag.InternalFlag{},
 					errors.New("flag [key-not-exist] does not exists"),
@@ -3321,9 +3380,9 @@ func TestIntVariation(t *testing.T) {
 		{
 			name: "Get default value rule not apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: 118,
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  118,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -3353,9 +3412,9 @@ func TestIntVariation(t *testing.T) {
 		{
 			name: "Get true value, rule apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewAnonymousEvaluationContext("random-key"),
-				defaultValue: 118,
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key"),
+				defaultValue:  118,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -3385,9 +3444,9 @@ func TestIntVariation(t *testing.T) {
 		{
 			name: "Get false value, rule apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewAnonymousEvaluationContext("random-key-ssss1"),
-				defaultValue: 118,
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key-ssss1"),
+				defaultValue:  118,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -3417,9 +3476,9 @@ func TestIntVariation(t *testing.T) {
 		{
 			name: "Get default value, when rule apply and not right type",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewEvaluationContext("random-key-ssss1"),
-				defaultValue: 118,
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key-ssss1"),
+				defaultValue:  118,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -3449,9 +3508,9 @@ func TestIntVariation(t *testing.T) {
 		{
 			name: "Convert float to Int",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewAnonymousEvaluationContext("random-key"),
-				defaultValue: 118,
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key"),
+				defaultValue:  118,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -3481,10 +3540,10 @@ func TestIntVariation(t *testing.T) {
 		{
 			name: "Get sdk default value if offline",
 			args: args{
-				offline:      true,
-				flagKey:      "disable-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: 125,
+				offline:       true,
+				flagKey:       "disable-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  125,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Disable: testconvert.Bool(true),
 				}, nil),
@@ -3532,7 +3591,7 @@ func TestIntVariation(t *testing.T) {
 					),
 				}
 			}
-			got, err := IntVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
+			got, err := IntVariation(tt.args.flagKey, tt.args.evaluationCtx, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
 				time.Sleep(
@@ -3565,12 +3624,12 @@ func TestIntVariation(t *testing.T) {
 
 func TestIntVariationDetails(t *testing.T) {
 	type args struct {
-		flagKey      string
-		user         ffcontext.Context
-		defaultValue int
-		cacheMock    cache.Manager
-		offline      bool
-		disableInit  bool
+		flagKey       string
+		evaluationCtx ffcontext.Context
+		defaultValue  int
+		cacheMock     cache.Manager
+		offline       bool
+		disableInit   bool
 	}
 	tests := []struct {
 		name        string
@@ -3582,9 +3641,9 @@ func TestIntVariationDetails(t *testing.T) {
 		{
 			name: "Get default value if flag disable",
 			args: args{
-				flagKey:      "disable-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: 125,
+				flagKey:       "disable-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  125,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Disable: testconvert.Bool(true),
 				}, nil),
@@ -3603,9 +3662,9 @@ func TestIntVariationDetails(t *testing.T) {
 		{
 			name: "Get default value rule not apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: 118,
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  118,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -3642,9 +3701,9 @@ func TestIntVariationDetails(t *testing.T) {
 		{
 			name: "Get true value, rule apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewAnonymousEvaluationContext("random-key"),
-				defaultValue: 118,
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key"),
+				defaultValue:  118,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -3684,9 +3743,9 @@ func TestIntVariationDetails(t *testing.T) {
 		{
 			name: "Get false value, rule apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewAnonymousEvaluationContext("random-key-ssss1"),
-				defaultValue: 118,
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key-ssss1"),
+				defaultValue:  118,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -3726,9 +3785,9 @@ func TestIntVariationDetails(t *testing.T) {
 		{
 			name: "Convert float to Int",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewAnonymousEvaluationContext("random-key"),
-				defaultValue: 118,
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key"),
+				defaultValue:  118,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -3768,10 +3827,10 @@ func TestIntVariationDetails(t *testing.T) {
 		{
 			name: "Get sdk default value if offline",
 			args: args{
-				offline:      true,
-				flagKey:      "disable-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: 125,
+				offline:       true,
+				flagKey:       "disable-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  125,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Disable: testconvert.Bool(true),
 				}, nil),
@@ -3825,7 +3884,7 @@ func TestIntVariationDetails(t *testing.T) {
 					),
 				}
 			}
-			got, err := IntVariationDetails(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
+			got, err := IntVariationDetails(tt.args.flagKey, tt.args.evaluationCtx, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
 				time.Sleep(
@@ -3858,12 +3917,12 @@ func TestIntVariationDetails(t *testing.T) {
 
 func TestRawVariation(t *testing.T) {
 	type args struct {
-		flagKey      string
-		user         ffcontext.Context
-		defaultValue interface{}
-		cacheMock    cache.Manager
-		offline      bool
-		disableInit  bool
+		flagKey       string
+		evaluationCtx ffcontext.Context
+		defaultValue  interface{}
+		cacheMock     cache.Manager
+		offline       bool
+		disableInit   bool
 	}
 	tests := []struct {
 		name        string
@@ -3875,9 +3934,9 @@ func TestRawVariation(t *testing.T) {
 		{
 			name: "Call variation before init of SDK",
 			args: args{
-				flagKey:      "key-not-exist",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: "",
+				flagKey:       "key-not-exist",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  "",
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Variations: &map[string]*interface{}{
 						"var_true":  testconvert.Interface(true),
@@ -3906,9 +3965,9 @@ func TestRawVariation(t *testing.T) {
 		{
 			name: "Get default value if flag disable",
 			args: args{
-				flagKey:      "disable-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: true,
+				flagKey:       "disable-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  true,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Disable: testconvert.Bool(true),
 				}, nil),
@@ -3927,9 +3986,9 @@ func TestRawVariation(t *testing.T) {
 		{
 			name: "Get error when cache not init",
 			args: args{
-				flagKey:      "key-not-exist",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: "defaultValue",
+				flagKey:       "key-not-exist",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  "defaultValue",
 				cacheMock: NewCacheMock(
 					&flag.InternalFlag{},
 					errors.New("impossible to read the toggle before the initialisation")),
@@ -3949,9 +4008,9 @@ func TestRawVariation(t *testing.T) {
 		{
 			name: "Get default value with key not exist",
 			args: args{
-				flagKey:      "key-not-exist",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: 123456,
+				flagKey:       "key-not-exist",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  123456,
 				cacheMock: NewCacheMock(
 					&flag.InternalFlag{},
 					errors.New("flag [key-not-exist] does not exists"),
@@ -3971,9 +4030,9 @@ func TestRawVariation(t *testing.T) {
 		{
 			name: "Get default value, rule not apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: map[string]interface{}{"test123": "test"},
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  map[string]interface{}{"test123": "test"},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -4010,9 +4069,9 @@ func TestRawVariation(t *testing.T) {
 		{
 			name: "Get true value, rule apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewAnonymousEvaluationContext("random-key"),
-				defaultValue: map[string]interface{}{"test123": "test"},
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key"),
+				defaultValue:  map[string]interface{}{"test123": "test"},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -4052,9 +4111,9 @@ func TestRawVariation(t *testing.T) {
 		{
 			name: "Get false value, rule apply",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewAnonymousEvaluationContext("random-key-ssss1"),
-				defaultValue: map[string]interface{}{"test123": "test"},
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key-ssss1"),
+				defaultValue:  map[string]interface{}{"test123": "test"},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -4094,9 +4153,9 @@ func TestRawVariation(t *testing.T) {
 		{
 			name: "No exported log",
 			args: args{
-				flagKey:      "test-flag",
-				user:         ffcontext.NewAnonymousEvaluationContext("random-key"),
-				defaultValue: true,
+				flagKey:       "test-flag",
+				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key"),
+				defaultValue:  true,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Variations: &map[string]*interface{}{
 						"Default": testconvert.Interface(false),
@@ -4137,10 +4196,10 @@ func TestRawVariation(t *testing.T) {
 		{
 			name: "Get sdk default value if offline",
 			args: args{
-				offline:      true,
-				flagKey:      "disable-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: false,
+				offline:       true,
+				flagKey:       "disable-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  false,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Disable: testconvert.Bool(true),
 				}, nil),
@@ -4158,9 +4217,9 @@ func TestRawVariation(t *testing.T) {
 		{
 			name: "should use interface default value if the flag is disabled",
 			args: args{
-				flagKey:      "disable-flag",
-				user:         ffcontext.NewEvaluationContext("random-key"),
-				defaultValue: nil,
+				flagKey:       "disable-flag",
+				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
+				defaultValue:  nil,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Disable: testconvert.Bool(true),
 				}, nil),
@@ -4216,7 +4275,7 @@ func TestRawVariation(t *testing.T) {
 				}
 			}
 
-			got, err := ff.RawVariation(tt.args.flagKey, tt.args.user, tt.args.defaultValue)
+			got, err := ff.RawVariation(tt.args.flagKey, tt.args.evaluationCtx, tt.args.defaultValue)
 
 			if tt.expectedLog != "" {
 				time.Sleep(

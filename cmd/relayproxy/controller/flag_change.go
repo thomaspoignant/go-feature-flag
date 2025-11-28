@@ -34,6 +34,7 @@ type FlagChangeResponse struct {
 // @Description Making a **GET** request to the URL `/v1/flag/change` will give you the hash of the current
 // @Description configuration, you can use this hash to know if the configuration has changed.
 // @Security    ApiKeyAuth
+// @Security    XApiKeyAuth
 // @Produce     json
 // @Accept      json
 // @Param       If-None-Match header string false "The request will be processed only if ETag doesn't match."

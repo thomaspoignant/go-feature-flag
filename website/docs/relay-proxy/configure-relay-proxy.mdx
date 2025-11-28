@@ -211,6 +211,8 @@ Check [_"Logging"_](./observability#logging) to have more information.
 - default: **`INFO`**
 - Acceptable values are `ERROR`, `WARN`, `INFO`, `DEBUG`.
 - mandatory: <NotMandatory />
+- When in `DEBUG` mode, the relay proxy will log the request body and response body,
+for large payloads this can be a lot of data and can impact the performance this is the reason why we truncate the body if it is larger than **8KiB**.
 
 ### `logFormat`
 
@@ -414,6 +416,20 @@ export GOFF_SERVER_PORT=8080
 - default: **empty string**
 - mandatory: <NotMandatory />
 
+### `enableBulkMetricFlagNames`
+
+Enables per-flag metrics for bulk evaluation endpoints.
+This adds `flag_name` labels to the `all_flags_evaluations_total_with_flag` metric.
+
+:::info
+When enabled, this option provides more granular metrics by including the flag name in the metric labels for bulk evaluation endpoints. This can be useful for monitoring and alerting on specific flags, but may increase the cardinality of your metrics.
+:::
+
+- option name: `enableBulkMetricFlagNames`
+- type: **boolean**
+- default: **`false`**
+- mandatory: <NotMandatory />
+
 ## Configuration Types
 
 ### type `authorizedKeys`
@@ -424,7 +440,7 @@ export GOFF_SERVER_PORT=8080
 
 If set, we will check for each evaluation if an authorized key is provided.
 
-Each request will need to provide one of authorized key inside `Authorization` header with format `Bearer <api-key>`.
+Each request will need to provide one of authorized key inside `X-API-Key` header.
 
 - option name: `evaluation`
 - type: **[]string**
@@ -435,7 +451,7 @@ Each request will need to provide one of authorized key inside `Authorization` h
 
 You need to set API keys in this field if you want to access the `/v1/admin/*` endpoints.
 
-Each request will need to provide one of authorized key inside `Authorization` header with format `Bearer <api-key>`.
+Each request will need to provide one of authorized key inside `X-API-Key` header.
 
 - option name: `evaluation`
 - type: **[]string**
