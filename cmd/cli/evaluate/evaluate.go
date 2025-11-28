@@ -61,7 +61,10 @@ func (e evaluate) Evaluate() (map[string]model.RawVarResult, error) {
 		}
 
 		for _, flag := range listFlags {
-			res, _ := goff.RawVariation(flag, convertedEvaluationCtx, nil)
+			res, err := goff.RawVariation(flag, convertedEvaluationCtx, nil)
+			if err != nil {
+				return nil, err
+			}
 			result[flag] = res
 		}
 		return result, nil
