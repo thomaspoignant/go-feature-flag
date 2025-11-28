@@ -24,7 +24,7 @@
         <dependency>
             <groupId>dev.openfeature</groupId>
             <artifactId>sdk</artifactId>
-            <version>1.18.2</version>
+            <version>1.19.0</version>
         </dependency>
         <dependency>
             <groupId>dev.openfeature.contrib.providers</groupId>
