@@ -2,62 +2,49 @@ package postgresqlretriever
 
 import (
 	"context"
-	"fmt"
 	"sync"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-var poolInstance *pgxpool.Pool
-var once sync.Once
-var errPool error
-
-// refCount tracks how many retrievers are currently using the pool.
-var refCount int
-var refCountMutex sync.Mutex
+var (
+    pool     *pgxpool.Pool
+    mu       sync.Mutex
+    refCount int
+)
 
 func GetPool(ctx context.Context, uri string) (*pgxpool.Pool, error) {
-	// The sync.Once ensures that the inner function is executed only once,
-	// even if called by multiple goroutines concurrently.
-	once.Do(func() {
-		poolInstance, errPool = pgxpool.New(ctx, uri)
-		if errPool != nil {
-			errPool = fmt.Errorf("failed to create connection pool: %w", errPool)
-			return
-		}
+    mu.Lock()
+    defer mu.Unlock()
 
-		// Check connection immediately
-		if err := poolInstance.Ping(ctx); err != nil {
-			errPool = fmt.Errorf("failed to ping database with new pool: %w", err)
-			// Don't close here, the pool remains valid for a retry connection
-		}
-	})
+    if pool == nil {
+        p, err := pgxpool.New(ctx, uri)
+        if err != nil {
+            return nil, err
+        }
+        if err := p.Ping(ctx); err != nil {
+            p.Close()
+            return nil, err
+        }
 
-	if errPool != nil {
-		return nil, errPool
-	}
+        pool = p
+    }
 
-	refCountMutex.Lock()
-	refCount++
-	refCountMutex.Unlock()
-
-	return poolInstance, nil
+    refCount++
+    return pool, nil
 }
 
 func ReleasePool() {
-	refCountMutex.Lock()
-	defer refCountMutex.Unlock()
+    mu.Lock()
+    defer mu.Unlock()
 
-	if refCount > 0 {
-		refCount--
-	}
-
-	// Only close the physical connection when the last reference is released.
-	if refCount == 0 && poolInstance != nil {
-		poolInstance.Close()
-		poolInstance = nil
-		// Reset sync.Once to allow re-initialization if needed
-		once = sync.Once{}
-		errPool = nil
-	}
+    refCount--
+    if refCount <= 0 {
+        if pool != nil {
+            pool.Close()
+            pool = nil
+        }
+        refCount = 0
+    }
 }
+
