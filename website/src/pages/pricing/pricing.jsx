@@ -136,7 +136,7 @@ export default function Pricing() {
             Contact us
           </Link>
           <Link
-            to={"https://calendly.com/thomas-poignant-o1pt/30min"}
+            to={"https://zcal.co/gofeatureflag/30min"}
             className="mt-2 block rounded-md bg-indigo-500 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 sm:mt-2"
           >
             Book a meeting 📅
