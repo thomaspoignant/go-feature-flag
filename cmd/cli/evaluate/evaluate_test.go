@@ -171,7 +171,8 @@ func Test_evaluate_Evaluate(t *testing.T) {
 					return evaluate{}, err
 				}
 
-				gitHubRetriever, _ := r.(*githubretriever.Retriever)
+				gitHubRetriever, ok := r.(*githubretriever.Retriever)
+				assert.True(t, ok, "failed to assert retriever to *githubretriever.Retriever")
 				gitHubRetriever.SetHTTPClient(&mock.HTTP{})
 
 				return evaluate{
@@ -211,7 +212,8 @@ func Test_evaluate_Evaluate(t *testing.T) {
 					return evaluate{}, err
 				}
 
-				gitLabRetriever, _ := r.(*gitlabretriever.Retriever)
+				gitLabRetriever, ok := r.(*gitlabretriever.Retriever)
+				assert.True(t, ok, "failed to assert retriever to *gitlabretriever.Retriever")
 				gitLabRetriever.SetHTTPClient(&mock.HTTP{})
 
 				return evaluate{
@@ -251,7 +253,8 @@ func Test_evaluate_Evaluate(t *testing.T) {
 					return evaluate{}, err
 				}
 
-				bitBucketRetriever, _ := r.(*bitbucketretriever.Retriever)
+				bitBucketRetriever, ok := r.(*bitbucketretriever.Retriever)
+				assert.True(t, ok, "failed to assert retriever to *bitbucketretriever.Retriever")
 				bitBucketRetriever.SetHTTPClient(&mock.HTTP{})
 
 				return evaluate{
@@ -295,7 +298,8 @@ func Test_evaluate_Evaluate(t *testing.T) {
 					return evaluate{}, err
 				}
 
-				s3Retriever, _ := r.(*s3retrieverv2.Retriever)
+				s3Retriever, ok := r.(*s3retrieverv2.Retriever)
+				assert.True(t, ok, "failed to assert retriever to *s3retrieverv2.Retriever")
 				s3Retriever.SetDownloader(downloader)
 
 				_ = s3Retriever.Init(context.Background(), nil)
@@ -340,7 +344,8 @@ func Test_evaluate_Evaluate(t *testing.T) {
 					return evaluate{}, err
 				}
 
-				httpRetriever, _ := r.(*httpretriever.Retriever)
+				httpRetriever, ok := r.(*httpretriever.Retriever)
+				assert.True(t, ok, "failed to assert retriever to *httpretriever.Retriever")
 				httpRetriever.SetHTTPClient(&mock.HTTP{})
 
 				return evaluate{
@@ -383,7 +388,8 @@ func Test_evaluate_Evaluate(t *testing.T) {
 					return evaluate{}, err
 				}
 
-				gcsRetriever, _ := r.(*gcstorageretriever.Retriever)
+				gcsRetriever, ok := r.(*gcstorageretriever.Retriever)
+				assert.True(t, ok, "failed to assert retriever to *gcstorageretriever.Retriever")
 				gcsRetriever.SetOptions([]option.ClientOption{
 					option.WithCredentials(&google.Credentials{}),
 					option.WithHTTPClient(mockedStorage.Server.HTTPClient()),

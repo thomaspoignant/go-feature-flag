@@ -206,7 +206,7 @@ func (s *Server) startAwsLambda() {
 // reason why we can't merged it in startAwsLambda.
 func (s *Server) lambdaHandler() interface{} {
 	handlerMngr := newAwsLambdaHandlerManager(s.apiEcho, s.config.GetAwsApiGatewayBasePath(s.zapLog))
-	return handlerMngr.GetAdapter(s.config.GetLambdaAdapter(s.zapLog))
+	return handlerMngr.SelectAdapter(s.config.GetLambdaAdapter(s.zapLog))
 }
 
 // Stop shutdown the API server
