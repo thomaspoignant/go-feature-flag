@@ -256,7 +256,8 @@ func Test_Middleware_VersionHeader_Enabled_Default(t *testing.T) {
 	log := log.InitLogger()
 	defer func() { _ = log.ZapLogger.Sync() }()
 
-	metricsV2, _ := metric.NewMetrics()
+	metricsV2, err := metric.NewMetrics()
+	require.NoError(t, err)
 	wsService := service.NewWebsocketService()
 	defer wsService.Close()
 	flagsetManager, _ := service.NewFlagsetManager(proxyConf, log.ZapLogger, nil)
@@ -300,7 +301,8 @@ func Test_VersionHeader_Disabled(t *testing.T) {
 	log := log.InitLogger()
 	defer func() { _ = log.ZapLogger.Sync() }()
 
-	metricsV2, _ := metric.NewMetrics()
+	metricsV2, err := metric.NewMetrics()
+	require.NoError(t, err)
 	wsService := service.NewWebsocketService()
 	defer wsService.Close()
 	flagsetManager, _ := service.NewFlagsetManager(proxyConf, log.ZapLogger, nil)
@@ -378,7 +380,8 @@ func Test_AuthenticationMiddleware(t *testing.T) {
 				log := log.InitLogger()
 				defer func() { _ = log.ZapLogger.Sync() }()
 
-				metricsV2, _ := metric.NewMetrics()
+				metricsV2, err := metric.NewMetrics()
+				require.NoError(t, err)
 				wsService := service.NewWebsocketService()
 				defer wsService.Close()
 				flagsetManager, err := service.NewFlagsetManager(proxyConf, log.ZapLogger, nil)
@@ -457,7 +460,8 @@ func Test_AuthenticationMiddleware(t *testing.T) {
 				log := log.InitLogger()
 				defer func() { _ = log.ZapLogger.Sync() }()
 
-				metricsV2, _ := metric.NewMetrics()
+				metricsV2, err := metric.NewMetrics()
+				require.NoError(t, err)
 				wsService := service.NewWebsocketService()
 				defer wsService.Close()
 				flagsetManager, err := service.NewFlagsetManager(proxyConf, log.ZapLogger, nil)
@@ -763,7 +767,8 @@ func Test_Starting_RelayProxy_UnixSocket_Authentication(t *testing.T) {
 			log := log.InitLogger()
 			defer func() { _ = log.ZapLogger.Sync() }()
 
-			metricsV2, _ := metric.NewMetrics()
+			metricsV2, err := metric.NewMetrics()
+			require.NoError(t, err)
 			wsService := service.NewWebsocketService()
 			defer wsService.Close()
 			flagsetManager, err := service.NewFlagsetManager(proxyConf, log.ZapLogger, nil)
