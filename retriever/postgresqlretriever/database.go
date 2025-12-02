@@ -1,11 +1,11 @@
 package postgresqlretriever
 
 import (
-    "context"
-    "fmt"
-    "sync"
+	"context"
+	"fmt"
+	"sync"
 
-    "github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 var poolInstance *pgxpool.Pool

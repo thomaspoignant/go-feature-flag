@@ -1,17 +1,16 @@
 package postgresqlretriever
 
 import (
-    "context"
-    "encoding/json"
-    "fmt"
-    "log/slog"
+	"context"
+	"encoding/json"
+	"fmt"
+	"log/slog"
 
-    "github.com/jackc/pgx/v5"
-    "github.com/jackc/pgx/v5/pgxpool"
-
-    "github.com/thomaspoignant/go-feature-flag/retriever"
-    "github.com/thomaspoignant/go-feature-flag/utils"
-    "github.com/thomaspoignant/go-feature-flag/utils/fflog"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/thomaspoignant/go-feature-flag/retriever"
+	"github.com/thomaspoignant/go-feature-flag/utils"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
 var defaultColumns = map[string]string{
