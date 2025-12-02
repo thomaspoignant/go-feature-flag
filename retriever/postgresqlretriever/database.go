@@ -1,16 +1,16 @@
 package postgresqlretriever
 
 import (
-	"context"
-	"fmt"
-	"sync"
+    "context"
+    "fmt"
+    "sync"
 
-	"github.com/jackc/pgx/v5/pgxpool"
+    "github.com/jackc/pgx/v5/pgxpool"
 )
 
 var poolInstance *pgxpool.Pool
 var once sync.Once
-var poolErr error
+var errPool error
 
 // refCount tracks how many retrievers are currently using the pool.
 var refCount int
@@ -20,21 +20,21 @@ func GetPool(ctx context.Context, uri string) (*pgxpool.Pool, error) {
 	// The sync.Once ensures that the inner function is executed only once,
 	// even if called by multiple goroutines concurrently.
 	once.Do(func() {
-		poolInstance, poolErr = pgxpool.New(ctx, uri)
-		if poolErr != nil {
-			poolErr = fmt.Errorf("failed to create connection pool: %w", poolErr)
+		poolInstance, errPool = pgxpool.New(ctx, uri)
+		if errPool != nil {
+			errPool = fmt.Errorf("failed to create connection pool: %w", errPool)
 			return
 		}
 
 		// Check connection immediately
 		if err := poolInstance.Ping(ctx); err != nil {
-			poolErr = fmt.Errorf("failed to ping database with new pool: %w", err)
+			errPool = fmt.Errorf("failed to ping database with new pool: %w", err)
 			// Don't close here, the pool remains valid for a retry connection
 		}
 	})
 
-	if poolErr != nil {
-		return nil, poolErr
+	if errPool != nil {
+		return nil, errPool
 	}
 
 	refCountMutex.Lock()
@@ -58,6 +58,6 @@ func ReleasePool() {
 		poolInstance = nil
 		// Reset sync.Once to allow re-initialization if needed
 		once = sync.Once{}
-		poolErr = nil
+		errPool = nil
 	}
 }
