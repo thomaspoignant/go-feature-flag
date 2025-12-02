@@ -25,7 +25,7 @@ func GetPool(ctx context.Context, uri string) (*pgxpool.Pool, error) {
 			poolErr = fmt.Errorf("failed to create connection pool: %w", poolErr)
 			return
 		}
-		
+
 		// Check connection immediately
 		if err := poolInstance.Ping(ctx); err != nil {
 			poolErr = fmt.Errorf("failed to ping database with new pool: %w", err)
@@ -57,8 +57,7 @@ func ReleasePool() {
 		poolInstance.Close()
 		poolInstance = nil
 		// Reset sync.Once to allow re-initialization if needed
-		once = sync.Once{} 
+		once = sync.Once{}
 		poolErr = nil
 	}
 }
-
