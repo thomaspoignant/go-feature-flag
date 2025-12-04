@@ -42,9 +42,10 @@ func LoadConfigFile(
 	for _, location := range defaultLocations {
 		for _, ext := range supportedExtensions {
 			configFile := fmt.Sprintf("%s%s.%s", location, filename, ext)
-			if _, err := os.Stat(configFile); err == nil {
-				return readConfigFile(configFile, ext)
+			if _, err := os.Stat(configFile); err != nil {
+				continue
 			}
+			return readConfigFile(configFile, ext)
 		}
 	}
 	return nil, fmt.Errorf(
@@ -53,7 +54,7 @@ func LoadConfigFile(
 	)
 }
 
-func readConfigFile(configFile string, configFormat string) (map[string]dto.DTO, error) {
+func readConfigFile(configFile, configFormat string) (map[string]dto.DTO, error) {
 	dat, err := os.ReadFile(configFile)
 	if err != nil {
 		return nil, err

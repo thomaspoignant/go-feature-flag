@@ -48,7 +48,10 @@ func (o *Output) PrintLines(cmd *cobra.Command) {
 		default:
 			outputText = pterm.Sprint(line.Text)
 		}
-		_, _ = fmt.Fprintln(writer, outputText)
+		_, err := fmt.Fprintln(writer, outputText)
+		if err != nil {
+			PrintFatalAndExit(err)
+		}
 	}
 }
 

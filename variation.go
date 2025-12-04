@@ -286,7 +286,7 @@ func (g *GoFeatureFlag) RawVariation(
 	ctx ffcontext.Context,
 	sdkDefaultValue interface{},
 ) (model.RawVarResult, error) {
-	res, err := getVariation[interface{}](g, flagKey, ctx, sdkDefaultValue, "interface{}")
+	res, err := getVariation(g, flagKey, ctx, sdkDefaultValue, "interface{}")
 	notifyVariation(g, flagKey, ctx, res)
 	return model.RawVarResult(res), err
 }

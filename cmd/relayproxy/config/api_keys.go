@@ -29,14 +29,6 @@ func (c *Config) APIKeyExists(apiKey string) bool {
 	return ok
 }
 
-func (c *Config) GetAPIKeyType(apiKey string) ApiKeyType {
-	c.preloadAPIKeys()
-	if keyType, ok := c.apiKeysSet[apiKey]; ok {
-		return keyType
-	}
-	return ErrorKeyType
-}
-
 // IsAuthenticationEnabled returns true if we need to be authenticated.
 func (c *Config) IsAuthenticationEnabled() bool {
 	c.preloadAPIKeys()

@@ -100,7 +100,7 @@ func TestAwsLambdaHandler_GetAdapter(t *testing.T) {
 			require.NoError(t, err)
 
 			// Create a Lambda handler
-			handler := lambda.NewHandler(apiServer.getLambdaHandler())
+			handler := lambda.NewHandler(apiServer.lambdaHandler())
 
 			// Invoke the handler with the mock event
 			response, err := handler.Invoke(context.Background(), reqJSON)
@@ -216,7 +216,7 @@ func TestAwsLambdaHandler_BasePathSupport(t *testing.T) {
 			require.NoError(t, err)
 
 			// Create a Lambda handler
-			handler := lambda.NewHandler(apiServer.getLambdaHandler())
+			handler := lambda.NewHandler(apiServer.lambdaHandler())
 
 			// Invoke the handler with the mock event
 			response, err := handler.Invoke(context.Background(), reqJSON)

@@ -153,9 +153,8 @@ evaluate --kind postgres --table my-table --column my-column:my-column-type --fl
 
 			if checkMode {
 				return runCheck(cmd, retrieverConf)
-			} else {
-				return runEvaluate(cmd, args, evalFlagFormat, retrieverConf, evalFlag, evalCtx)
 			}
+			return runEvaluate(cmd, args, evalFlagFormat, retrieverConf, evalFlag, evalCtx)
 		},
 		SilenceUsage:  true,
 		SilenceErrors: true,

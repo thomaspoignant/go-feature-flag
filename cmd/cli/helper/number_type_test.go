@@ -9,7 +9,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/modules/core/testutils/testconvert"
 )
 
-func TestGetFlagTypeFromVariations(t *testing.T) {
+func TestFlagTypeFromVariations(t *testing.T) {
 	tests := []struct {
 		name       string
 		variations map[string]*interface{}
@@ -101,7 +101,7 @@ func TestGetFlagTypeFromVariations(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := helper.GetFlagTypeFromVariations(tt.variations)
+			result, err := helper.FlagTypeFromVariations(tt.variations)
 			if tt.expectErr {
 				assert.Error(t, err)
 			} else {

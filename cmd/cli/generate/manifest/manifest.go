@@ -11,11 +11,7 @@ import (
 	dtoCore "github.com/thomaspoignant/go-feature-flag/modules/core/dto"
 )
 
-func NewManifest(
-	configFile string,
-	configFormat string,
-	flagManifestDestination string,
-) (Manifest, error) {
+func NewManifest(configFile, configFormat, flagManifestDestination string) (Manifest, error) {
 	if flagManifestDestination == "" {
 		return Manifest{}, fmt.Errorf("--flag_manifest_destination is mandatory")
 	}
@@ -63,7 +59,7 @@ func (m *Manifest) generateDefinitions(flagDTOs map[string]dto.DTO) (
 	output := helper.Output{}
 	for flagKey, flagDTO := range flagDTOs {
 		flag := dtoCore.ConvertDtoToInternalFlag(flagDTO)
-		flagType, err := helper.GetFlagTypeFromVariations(flag.GetVariations())
+		flagType, err := helper.FlagTypeFromVariations(flag.GetVariations())
 		if err != nil {
 			return model.FlagManifest{}, output,
 				fmt.Errorf("invalid configuration for flag %s: %s", flagKey, err.Error())

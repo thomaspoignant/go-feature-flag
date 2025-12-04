@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	echoadapter "github.com/awslabs/aws-lambda-go-api-proxy/echo"
 	"github.com/labstack/echo/v4"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 )
 
 // newAwsLambdaHandlerManager is creating a new awsLambdaHandler struct with the echoadapter
@@ -36,11 +37,12 @@ type awsLambdaHandler struct {
 	adapterALB      *echoadapter.EchoLambdaALB
 }
 
-func (h *awsLambdaHandler) GetAdapter(mode string) interface{} {
+// SelectAdapter returns the appropriate adapter based on the mode.
+func (h *awsLambdaHandler) SelectAdapter(mode string) interface{} {
 	switch strings.ToUpper(mode) {
-	case "APIGATEWAYV1":
+	case strings.ToUpper(config.LambdaAdapterAPIGatewayV1):
 		return h.HandlerAPIGatewayV1
-	case "ALB":
+	case strings.ToUpper(config.LambdaAdapterALB):
 		return h.HandlerALB
 	default:
 		return h.HandlerAPIGatewayV2

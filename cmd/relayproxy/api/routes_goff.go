@@ -9,10 +9,10 @@ import (
 )
 
 func (s *Server) addGOFFRoutes(
-	cAllFlags controller.Controller,
-	cFlagEval controller.Controller,
-	cEvalDataCollector controller.Controller,
-	cFlagChange controller.Controller,
+	cAllFlags,
+	cFlagEval,
+	cEvalDataCollector,
+	cFlagChange,
 	cFlagConfiguration controller.Controller) {
 	// Grouping the routes
 	v1 := s.apiEcho.Group("/v1")
