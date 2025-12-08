@@ -69,7 +69,7 @@ func (r *Retriever) Status() retriever.Status {
 // Shutdown closes the database connection.
 func (r *Retriever) Shutdown(ctx context.Context) error {
 	if r.pool != nil {
-		ReleasePool(r.URI)
+		ReleasePool(ctx, r.URI)
 		r.pool = nil
 	}
 	return nil
