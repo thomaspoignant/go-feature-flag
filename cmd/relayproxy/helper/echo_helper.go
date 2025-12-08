@@ -9,10 +9,10 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 )
 
-// GetAPIKey extracts the API key from the Authorization header.
+// APIKey extracts the API key from the Authorization header.
 // It removes the "Bearer " prefix if it exists.
 // For other schemes, it returns the raw header value or an empty string if the header is missing.
-func GetAPIKey(c echo.Context) string {
+func APIKey(c echo.Context) string {
 	apiKey := c.Request().Header.Get("Authorization")
 	const bearerPrefix = "Bearer "
 	if len(apiKey) >= len(bearerPrefix) && strings.EqualFold(apiKey[:len(bearerPrefix)], bearerPrefix) {
@@ -21,13 +21,13 @@ func GetAPIKey(c echo.Context) string {
 	return apiKey
 }
 
-// GetFlagSet retrieves the flagset for the given API key from the flagset manager
+// FlagSet retrieves the flagset for the given API key from the flagset manager
 // This layer ensure that the flagset manager is initialized and that the API key is valid
-func GetFlagSet(flagsetManager service.FlagsetManager, apiKey string) (*ffclient.GoFeatureFlag, *echo.HTTPError) {
+func FlagSet(flagsetManager service.FlagsetManager, apiKey string) (*ffclient.GoFeatureFlag, *echo.HTTPError) {
 	if flagsetManager == nil {
 		return nil, echo.NewHTTPError(http.StatusInternalServerError, "flagset manager is not initialized")
 	}
-	flagset, err := flagsetManager.GetFlagSet(apiKey)
+	flagset, err := flagsetManager.FlagSet(apiKey)
 	if err != nil {
 		return nil, echo.NewHTTPError(http.StatusBadRequest, "error while getting flagset: "+err.Error())
 	}

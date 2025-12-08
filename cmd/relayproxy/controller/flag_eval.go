@@ -74,7 +74,7 @@ func (h *flagEval) Handler(c echo.Context) error {
 	_, span := tracer.Start(c.Request().Context(), "flagEvaluation")
 	defer span.End()
 
-	flagset, httpErr := helper.GetFlagSet(h.flagsetMngr, helper.GetAPIKey(c))
+	flagset, httpErr := helper.FlagSet(h.flagsetMngr, helper.APIKey(c))
 	if httpErr != nil {
 		return httpErr
 	}
@@ -94,7 +94,7 @@ func (h *flagEval) Handler(c echo.Context) error {
 		attribute.String("flagEvaluation.value", fmt.Sprintf("%v", flagValue.Value)),
 	)
 
-	if flagsetName, err := h.flagsetMngr.GetFlagSetName(helper.GetAPIKey(c)); err == nil {
+	if flagsetName, err := h.flagsetMngr.FlagSetName(helper.APIKey(c)); err == nil {
 		span.SetAttributes(attribute.String("flagEvaluation.flagSetName", flagsetName))
 	}
 

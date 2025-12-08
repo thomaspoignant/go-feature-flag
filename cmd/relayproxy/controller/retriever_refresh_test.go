@@ -47,7 +47,7 @@ func Test_retriever_refresh_Handler_valid(t *testing.T) {
 	assert.NoError(t, err, "impossible to create flagset manager")
 
 	// Get the default flagset to check refresh date
-	defaultFlagset := flagsetManager.GetDefaultFlagSet()
+	defaultFlagset := flagsetManager.Default()
 	previousRefresh := defaultFlagset.GetCacheRefreshDate()
 
 	ctrl := controller.NewForceFlagsRefresh(flagsetManager, metric.Metrics{})

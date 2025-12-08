@@ -217,7 +217,7 @@ func TestMonitoringInfoErrors(t *testing.T) {
 		assert.Equal(t, model.InfoResponse{}, info, "Expected empty InfoResponse")
 	})
 
-	t.Run("GetFlagSets error should be propagated", func(t *testing.T) {
+	t.Run("FlagSets error should be propagated", func(t *testing.T) {
 		mockManager := &mock.MockFlagsetManager{
 			FlagSets:       nil,
 			DefaultFlagSet: nil,
@@ -225,7 +225,7 @@ func TestMonitoringInfoErrors(t *testing.T) {
 		}
 		monitoring := service.NewMonitoring(mockManager)
 		info, err := monitoring.Info()
-		assert.Error(t, err, "Expected error from GetFlagSets")
+		assert.Error(t, err, "Expected error from FlagSets")
 		assert.Equal(t, "failed to get flagsets", err.Error())
 		assert.Equal(t, model.InfoResponse{}, info, "Expected empty InfoResponse")
 	})

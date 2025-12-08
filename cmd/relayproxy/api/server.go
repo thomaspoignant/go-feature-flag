@@ -122,7 +122,7 @@ func (s *Server) StartWithContext(ctx context.Context) {
 		// we can continue because otel is not mandatory to start the server
 	}
 
-	switch s.config.GetServerMode(s.zapLog) {
+	switch s.config.ServerMode(s.zapLog) {
 	case config.ServerModeLambda:
 		s.startAwsLambda()
 	case config.ServerModeUnixSocket:
@@ -134,7 +134,7 @@ func (s *Server) StartWithContext(ctx context.Context) {
 
 // startUnixSocketServer launch the API server as a unix socket.
 func (s *Server) startUnixSocketServer(ctx context.Context) {
-	socketPath := s.config.GetUnixSocketPath()
+	socketPath := s.config.UnixSocketPath()
 
 	// Clean up the old socket file if it exists (important for graceful restarts)
 	if _, err := os.Stat(socketPath); err == nil {
@@ -172,7 +172,7 @@ func (s *Server) startAsHTTPServer() {
 	// starting the monitoring server on a different port if configured
 	if s.monitoringEcho != nil {
 		go func() {
-			addressMonitoring := fmt.Sprintf("%s:%d", s.config.GetServerHost(), s.config.GetMonitoringPort(s.zapLog))
+			addressMonitoring := fmt.Sprintf("%s:%d", s.config.ServerHost(), s.config.EffectiveMonitoringPort(s.zapLog))
 			s.zapLog.Info(
 				"Starting monitoring",
 				zap.String("address", addressMonitoring))
@@ -184,7 +184,7 @@ func (s *Server) startAsHTTPServer() {
 		defer func() { _ = s.monitoringEcho.Close() }()
 	}
 
-	address := fmt.Sprintf("%s:%d", s.config.GetServerHost(), s.config.GetServerPort(s.zapLog))
+	address := fmt.Sprintf("%s:%d", s.config.ServerHost(), s.config.ServerPort(s.zapLog))
 	s.zapLog.Info(
 		"Starting go-feature-flag relay proxy ...",
 		zap.String("address", address),
@@ -205,8 +205,8 @@ func (s *Server) startAwsLambda() {
 // We need a dedicated function because it is called from tests as well, this is the
 // reason why we can't merged it in startAwsLambda.
 func (s *Server) lambdaHandler() interface{} {
-	handlerMngr := newAwsLambdaHandlerManager(s.apiEcho, s.config.GetAwsApiGatewayBasePath(s.zapLog))
-	return handlerMngr.SelectAdapter(s.config.GetLambdaAdapter(s.zapLog))
+	handlerMngr := newAwsLambdaHandlerManager(s.apiEcho, s.config.EffectiveAwsApiGatewayBasePath(s.zapLog))
+	return handlerMngr.SelectAdapter(s.config.LambdaAdapter(s.zapLog))
 }
 
 // Stop shutdown the API server

@@ -68,7 +68,7 @@ func TestPprofEndpointsStarts(t *testing.T) {
 				Metrics:           metric.Metrics{},
 			}, z)
 
-			portToCheck := c.GetServerPort(z)
+			portToCheck := c.ServerPort(z)
 			if tt.MonitoringPort != 0 {
 				portToCheck = tt.MonitoringPort
 			}

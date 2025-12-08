@@ -22,14 +22,14 @@ const (
 // FlagsetManager is the interface for managing flagsets.
 // It is used to retrieve the flagset linked to the API Key.
 type FlagsetManager interface {
-	// GetFlagSet returns the flag set linked to the API Key
-	GetFlagSet(apiKey string) (*ffclient.GoFeatureFlag, error)
-	// GetFlagSetName returns the name of the flagset linked to the API Key
-	GetFlagSetName(apiKey string) (string, error)
-	// GetFlagSets returns all flag sets of the flagset manager
-	GetFlagSets() (map[string]*ffclient.GoFeatureFlag, error)
-	// GetDefaultFlagSet returns the default flagset
-	GetDefaultFlagSet() *ffclient.GoFeatureFlag
+	// FlagSet returns the flag set linked to the API Key
+	FlagSet(apiKey string) (*ffclient.GoFeatureFlag, error)
+	// FlagSetName returns the name of the flagset linked to the API Key
+	FlagSetName(apiKey string) (string, error)
+	// AllFlagSets returns all flag sets of the flagset manager
+	AllFlagSets() (map[string]*ffclient.GoFeatureFlag, error)
+	// Default returns the default flagset
+	Default() *ffclient.GoFeatureFlag
 	// IsDefaultFlagSet returns true if the manager is in default mode (no flagsets configured)
 	IsDefaultFlagSet() bool
 	// Close closes the flagset manager
@@ -155,8 +155,8 @@ func newFlagsetManagerWithFlagsets(
 	}, nil
 }
 
-// GetFlagSet is returning the flag set linked to the API Key
-func (m *flagsetManagerImpl) GetFlagSet(apiKey string) (*ffclient.GoFeatureFlag, error) {
+// FlagSet is returning the flag set linked to the API Key
+func (m *flagsetManagerImpl) FlagSet(apiKey string) (*ffclient.GoFeatureFlag, error) {
 	switch m.mode {
 	case flagsetManagerModeFlagsets:
 		if apiKey == "" {
@@ -180,8 +180,8 @@ func (m *flagsetManagerImpl) GetFlagSet(apiKey string) (*ffclient.GoFeatureFlag,
 	}
 }
 
-// GetFlagSetName returns the name of the flagset linked to the API Key
-func (m *flagsetManagerImpl) GetFlagSetName(apiKey string) (string, error) {
+// FlagSetName returns the name of the flagset linked to the API Key
+func (m *flagsetManagerImpl) FlagSetName(apiKey string) (string, error) {
 	switch m.mode {
 	case flagsetManagerModeFlagsets:
 		if name, ok := m.APIKeysToFlagSetName[apiKey]; ok {
@@ -193,8 +193,8 @@ func (m *flagsetManagerImpl) GetFlagSetName(apiKey string) (string, error) {
 	}
 }
 
-// GetFlagSets returns the flag sets of the flagset manager.
-func (m *flagsetManagerImpl) GetFlagSets() (map[string]*ffclient.GoFeatureFlag, error) {
+// AllFlagSets returns the flag sets of the flagset manager.
+func (m *flagsetManagerImpl) AllFlagSets() (map[string]*ffclient.GoFeatureFlag, error) {
 	switch m.mode {
 	case flagsetManagerModeFlagsets:
 		if len(m.FlagSets) == 0 {
@@ -211,8 +211,8 @@ func (m *flagsetManagerImpl) GetFlagSets() (map[string]*ffclient.GoFeatureFlag, 
 	}
 }
 
-// GetDefaultFlagSet returns the default flagset
-func (m *flagsetManagerImpl) GetDefaultFlagSet() *ffclient.GoFeatureFlag {
+// Default returns the default flagset
+func (m *flagsetManagerImpl) Default() *ffclient.GoFeatureFlag {
 	return m.DefaultFlagSet
 }
 
