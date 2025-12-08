@@ -75,7 +75,6 @@ func (r *Retriever) Shutdown(ctx context.Context) error {
 	return nil
 }
 
-
 // Retrieve fetches flag configuration from PostgreSQL.
 func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	if r.pool == nil {

@@ -13,8 +13,8 @@ type poolEntry struct {
 }
 
 var (
-	mu        sync.Mutex
-	poolMap   = make(map[string]*poolEntry)
+	mu      sync.Mutex
+	poolMap = make(map[string]*poolEntry)
 )
 
 // GetPool returns a pool for a given URI, creating it if needed.
@@ -46,7 +46,6 @@ func GetPool(ctx context.Context, uri string) (*pgxpool.Pool, error) {
 	return pool, nil
 }
 
-
 // ReleasePool decreases refCount and closes/removes when it hits zero.
 func ReleasePool(uri string) {
 	mu.Lock()
@@ -63,4 +62,3 @@ func ReleasePool(uri string) {
 		delete(poolMap, uri)
 	}
 }
-
