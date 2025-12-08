@@ -68,9 +68,13 @@ func (r *Retriever) Status() retriever.Status {
 
 // Shutdown closes the database connection.
 func (r *Retriever) Shutdown(ctx context.Context) error {
-	ReleasePool()
+	if r.pool != nil {
+		ReleasePool(r.URI)
+		r.pool = nil
+	}
 	return nil
 }
+
 
 // Retrieve fetches flag configuration from PostgreSQL.
 func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
