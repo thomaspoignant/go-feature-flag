@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           fetch-depth: 1
       - name: Setup go
@@ -26,7 +26,7 @@ jobs:
         uses: stCarolas/setup-maven@d6af6abeda15e98926a57b5aa970a96bb37f97d1 # v5
         with:
           maven-version: 3.8.2
-      - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
         with:
           node-version: 23
       - name: Install ICU packages
@@ -47,7 +47,7 @@ jobs:
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> "$GITHUB_ENV"
 
       - name: Checkout
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           fetch-depth: 0
 
@@ -97,7 +97,7 @@ jobs:
       - goreleaser
     steps:
       - name: Checkout
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
       - name: Release readme to DockerHub
         uses: ms-jpq/sync-dockerhub-readme@e2991ea1ba48832e73555cdbd5b82f5a2e91ee9b # v1
         env:
@@ -126,7 +126,7 @@ jobs:
       - goreleaser
     steps:
       - name: Checkout
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
       - name: Release readme to DockerHub
         uses: ms-jpq/sync-dockerhub-readme@e2991ea1ba48832e73555cdbd5b82f5a2e91ee9b # v1
         with:
@@ -142,7 +142,7 @@ jobs:
       - goreleaser
     steps:
       - name: Checkout
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
       - name: Release readme to DockerHub
         uses: ms-jpq/sync-dockerhub-readme@e2991ea1ba48832e73555cdbd5b82f5a2e91ee9b # v1
         with:
@@ -158,7 +158,7 @@ jobs:
       - goreleaser
     steps:
       - name: Checkout
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
       - name: Release readme to DockerHub
         uses: ms-jpq/sync-dockerhub-readme@e2991ea1ba48832e73555cdbd5b82f5a2e91ee9b # v1
         with:
@@ -190,12 +190,12 @@ jobs:
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> "$GITHUB_ENV"
 
       - name: Checkout
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           path: release
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
-      - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
 
       - name: Install dependencies
         working-directory: ./release/${{ env.WEBSITE_DIR }}
@@ -218,7 +218,7 @@ jobs:
         run: go run versions.go
 
       - name: Checkout main branch
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           ref: ${{ env.MAIN_BRANCH_NAME }}
           path: ${{ env.MAIN_BRANCH_NAME }}
@@ -230,7 +230,7 @@ jobs:
         run: cp -rf release/${{ env.WEBSITE_DIR }}/ $MAIN_BRANCH_NAME
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@84ae59a2cdc2258d6fa0732dd66352dddae2a412 # v7.0.9
+        uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7.0.11
         env:
           VERSION: ${{ env.VERSION }}
         with:
@@ -260,7 +260,7 @@ jobs:
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> "$GITHUB_ENV"
 
       - name: Checkout
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           path: release
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
@@ -280,7 +280,7 @@ jobs:
         run: ./out/bin/jsonschema-generator --schema-location=./.schema/flag-schema.json
 
       - name: Checkout main branch
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           ref: ${{ env.MAIN_BRANCH_NAME }}
           path: ${{ env.MAIN_BRANCH_NAME }}
@@ -292,7 +292,7 @@ jobs:
         run: cp -rf release/$SCHEMA_LOCATION $MAIN_BRANCH_NAME/$SCHEMA_LOCATION
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@84ae59a2cdc2258d6fa0732dd66352dddae2a412 # v7.0.9
+        uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7.0.11
         env:
           VERSION: ${{ env.VERSION }}
         with:
@@ -323,7 +323,7 @@ jobs:
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> "$GITHUB_ENV"
 
       - name: Checkout
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           ref: ${{ env.MAIN_BRANCH_NAME }}
           path: ${{ env.MAIN_BRANCH_NAME }}
@@ -337,7 +337,7 @@ jobs:
       - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@84ae59a2cdc2258d6fa0732dd66352dddae2a412 # v7.0.9
+        uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7.0.11
         env:
           VERSION: ${{ env.VERSION }}
         with:

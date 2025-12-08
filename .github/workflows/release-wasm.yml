@@ -28,7 +28,7 @@ jobs:
         run: |
           echo "Release wasm version: ${VERSION}"
       - name: Checkout
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           fetch-depth: 0
       - name: Setup go
@@ -44,7 +44,7 @@ jobs:
           VERSION: ${{ env.VERSION }}
         run: ./.github/ci-scripts/release_wasm.sh "$VERSION"
       - name: Upload assets
-        uses: softprops/action-gh-release@5be0e66d93ac7ed76da52eca8bb058f665c3a5fe # v2.4.2
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
         env:
           VERSION: ${{ env.VERSION }}
         with:
@@ -53,7 +53,7 @@ jobs:
             ./out/release-wasm/gofeatureflag-evaluation_${VERSION}.wasm
 
       - name: Checkout wasm-releases repository
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           repository: go-feature-flag/wasm-releases
           path: wasm-releases
@@ -68,7 +68,7 @@ jobs:
           cp ./out/release-wasm/gofeatureflag-evaluation_${VERSION}.wasm wasm-releases/evaluation/
 
       - name: Create Pull Request to wasm-releases
-        uses: peter-evans/create-pull-request@84ae59a2cdc2258d6fa0732dd66352dddae2a412 # v7.0.9
+        uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7.0.11
         env:
           VERSION: ${{ env.VERSION }}
         with:

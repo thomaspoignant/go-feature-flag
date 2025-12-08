@@ -10,7 +10,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@openfeature/go-feature-flag-provider": "^0.7.9",
+    "@openfeature/go-feature-flag-provider": "^1.0.1",
     "@openfeature/js-sdk": "^1.6.1"
   },
   "devDependencies": {
