@@ -492,6 +492,7 @@ The execution mode of the relay proxy, you can choose to start the relay-proxy i
 #### `server.unixSocketPath`
 
 The path where the Unix socket file will be created when the relay proxy is started in `unixsocket` mode.
+If used in combination with `server.monitoringPort` monitoring endpoints will be served via http on the provided port.
 
 - option name: `unixSocketPath`
 - type: **string**
