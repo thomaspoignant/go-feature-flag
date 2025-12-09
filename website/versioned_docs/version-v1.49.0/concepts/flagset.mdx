@@ -1,0 +1,69 @@
+---
+sidebar_position: 80
+description: "Flag sets are a powerful feature in GO Feature Flag that allows you to organize your feature flags into separate groups, each with its own configuration, API keys, retrievers, exporters, and notifiers."
+---
+
+# ⛳️ Flag Set
+
+## Overview
+
+A flag set is a collection of related flags. This grouping helps organize feature flags based on their intended use, facilitating easier management and deployment.
+
+## About flag sets
+
+Flag sets are a powerful feature in GO Feature Flag that allows you to organize your feature flags into separate groups, each with its own configuration, API keys, `retrievers`, `exporters`, and `notifiers`.
+
+This enables better organization and isolation of flags based on teams, environments, or applications.
+
+### Key characteristics of flag sets:
+
+- 🔧 **Independent configurations**: Each flag set can have its own retrievers, exporters, and notifiers
+- 🔑 **API key-based access**: Accessing to a flag set requires an API key, you can have multiple API keys for a flag set, we are using the API key to route the request to the appropriate flag set.
+- 🏰 **Complete isolation**: There is no inheritance between flag sets - each is completely independent.
+
+## When to use flag sets ?
+
+Flag sets are particularly useful in the following scenarios:
+
+### 🏰 **Flags Isolation**
+When different teams need to manage their own flags independently.
+- Frontend team manages UI-related feature flags
+- Backend team manages API-related feature flags
+
+Flag sets are particularly useful when you have different teams or applications that need to manage their own flags independently.
+Note that 2 teams can have identical flag name with different purposes without any collision if they are in different flag sets.
+
+### 🖖 **Environment Separation**
+When you need separate flags for different environments:
+- Development environment with experimental flags
+- Staging environment with pre-production flags
+- Production environment with stable flags
+
+### 🏘️ **Multi-tenant Applications**
+When serving multiple customers or organizations:
+- Each customer has their own flag set
+- Isolated flag configurations per customer
+- Separate evaluation data tracking
+
+
+:::info
+If none of these scenarios apply to you, we recommend you to not use flag sets to keep it simple.
+:::
+
+## How to access to a specific flag set ?
+
+To access a specific flag set, you need to include an API key in your evaluation requests. The relay proxy uses this API key to route your request to the appropriate flag set.
+
+### **Using API Keys**
+
+When using flag sets, authentication is required for all evaluation requests.  
+To do so, you need to initialize your providers with the correct API key.
+
+The API key is what we use to route the request to the appropriate flag set, so it is important to use the correct API key for the flag set you want to access.
+
+### **How the routing works**
+
+1. **Extract API key**: The relay proxy extracts the API key from the `X-API-Key` or `Authorization` header
+2. **Find flag set**: It looks up which flag set is associated with that API key
+3. **Route request**: The evaluation request is routed to that specific flag set
+4. **Return result**: The evaluation result comes from that flag set's flags
