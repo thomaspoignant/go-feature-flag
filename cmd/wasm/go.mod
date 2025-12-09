@@ -4,7 +4,7 @@ go 1.24.6
 
 require (
 	github.com/thomaspoignant/go-feature-flag/modules/core v0.3.0
-	github.com/thomaspoignant/go-feature-flag/modules/evaluation v0.1.3
+	github.com/thomaspoignant/go-feature-flag/modules/evaluation v0.2.0
 )
 
 require (
