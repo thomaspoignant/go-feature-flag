@@ -144,7 +144,7 @@ func (s *Server) startUnixSocketServer(ctx context.Context) {
 	}
 
 	// Start a http server for monitoring if monitoringport is configured
-	if s.monitoringEcho != nil && s.config.GetMonitoringPort(s.zapLog) > 0 {
+	if s.isMonitoringPortConfigured() {
 		go s.startMonitoringServer()
 		defer func() { _ = s.monitoringEcho.Close() }()
 	}
@@ -176,7 +176,7 @@ func (s *Server) startUnixSocketServer(ctx context.Context) {
 // startAsHTTPServer launch the API server
 func (s *Server) startAsHTTPServer() {
 	// starting the monitoring server on a different port if configured
-	if s.monitoringEcho != nil {
+	if s.isMonitoringPortConfigured() {
 		go s.startMonitoringServer()
 		defer func() { _ = s.monitoringEcho.Close() }()
 	}
@@ -237,4 +237,9 @@ func (s *Server) Stop(ctx context.Context) {
 			s.zapLog.Fatal("impossible to stop go-feature-flag relay proxy", zap.Error(err))
 		}
 	}
+}
+
+// isMonitoringPortConfigured checks if the monitoring port is configured.
+func (s *Server) isMonitoringPortConfigured() bool {
+	return s.monitoringEcho != nil && s.config.GetMonitoringPort(s.zapLog) > 0
 }
