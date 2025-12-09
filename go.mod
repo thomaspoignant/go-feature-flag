@@ -12,7 +12,7 @@ require (
 	github.com/BurntSushi/toml v1.5.0
 	github.com/IBM/sarama v1.46.3
 	github.com/atc0005/go-teams-notify/v2 v2.14.0
-	github.com/aws/aws-lambda-go v1.50.0
+	github.com/aws/aws-lambda-go v1.51.0
 	github.com/aws/aws-sdk-go-v2 v1.41.0
 	github.com/aws/aws-sdk-go-v2/config v1.32.3
 	github.com/aws/aws-sdk-go-v2/credentials v1.19.3
