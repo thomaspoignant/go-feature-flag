@@ -24,6 +24,73 @@ If the sum of your percentages is not equal to 100 this is not a problem, we are
 _**example**: if you have 2 variations and you set `variation1: 10` and `variation2: 50` it will be equivalent to `variation1: 10/60` and `variation2: 50/60`._
 :::
 
+## How percentage rollout works?
+
+GO Feature Flag uses a deterministic hashing algorithm to ensure consistent user assignment to variations. Here's how it works:
+
+### Hash computation
+
+For each evaluation, GO Feature Flag computes a hash based on the **targeting key** (also called bucketing key) and the **flag name**:
+
+```
+hash = hash(targetingKey + flagName) % maxPercentage
+```
+
+This hash produces a value between `0` and `maxPercentage` (which is the sum of all percentages). The hash function ensures that the same user (with the same targeting key) will always get the same hash value for a given flag, providing consistent assignment.
+
+### Bucket assignment
+
+All variations that are part of the percentage rollout are sorted by **reverse alphabetical**. This ensures consistent bucket assignment across evaluations.
+
+For example, if you have the following percentages:
+```yaml
+percentage:
+  - varC: 20
+  - varB: 30
+  - varA: 50
+```
+
+After sorting by inverse alphabetical order, the buckets are assigned as follows:
+- **0 to 20**: assigned to `varC`
+- **20 to 50**: assigned to `varB`
+- **50 to 100**: assigned to `varA`
+
+The hash value determines which bucket the user falls into, and thus which variation they receive.
+
+Since it is pure hash based, GO Feature Flag will always assign the evaluation context to the same bucket even if your evaluation is done on a different server or if you restart your relay-proxy.
+
+### Impact of changing percentages
+
+When you have two variations, adjusting the percentages simply increases or decreases the number of users assigned to each variation.  
+This allows you to gradually roll out a feature in a predictable and straightforward way.
+
+![2 variations percentage bucket](/img/docs/rollout-strategies/percentage-2-buckets.png)
+
+
+But if you have **more than 2 variations**, this can have an impact on how your bucketing works.  
+When you change the percentage configuration, **all buckets are recalculated**, which means users may be reassigned to different variations. This happens because the bucket boundaries shift based on the new percentages.
+
+For example, if you change the configuration to:
+```yaml
+percentage:
+  - varC: 30
+  - varB: 30
+  - varA: 40
+```
+
+The new bucket assignments become:
+- **0 to 30**: assigned to `varC`
+- **30 to 60**: assigned to `varB`
+- **60 to 100**: assigned to `varA`
+
+As you can see in the diagram below, changing percentages shifts the bucket boundaries, which can move users from one variation to another:
+
+![Percentage Rollout Bucket Shifting](/img/docs/rollout-strategies/percentage-buckets.png)
+
+:::info
+The deterministic hashing ensures that the same user will always get the same variation for a given configuration. However, when you change percentages, the bucket boundaries change, which may cause some users to be reassigned to different variations.
+:::
+
 
 ## Examples
 ### Define in the default rule
