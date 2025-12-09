@@ -332,7 +332,7 @@ jobs:
       - name: Bump chart appVersion
         env:
           VERSION: ${{ env.VERSION }}
-        run: make bump-helm-chart-version VERSION="${{ env.VERSION }}"
+        run: VERSION="${{ env.VERSION }}" make bump-helm-chart-version
 
       - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
