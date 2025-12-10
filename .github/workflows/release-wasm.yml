@@ -28,11 +28,11 @@ jobs:
         run: |
           echo "Release wasm version: ${VERSION}"
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           fetch-depth: 0
       - name: Setup go
-        uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
+        uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
         with:
           go-version-file: go.mod
           check-latest: true
@@ -44,7 +44,7 @@ jobs:
           VERSION: ${{ env.VERSION }}
         run: ./.github/ci-scripts/release_wasm.sh "$VERSION"
       - name: Upload assets
-        uses: softprops/action-gh-release@6da8fa9354ddfdc4aeace5fc48d7f679b5214090 # v2.4.1
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
         env:
           VERSION: ${{ env.VERSION }}
         with:
@@ -53,7 +53,7 @@ jobs:
             ./out/release-wasm/gofeatureflag-evaluation_${VERSION}.wasm
 
       - name: Checkout wasm-releases repository
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           repository: go-feature-flag/wasm-releases
           path: wasm-releases
@@ -68,7 +68,7 @@ jobs:
           cp ./out/release-wasm/gofeatureflag-evaluation_${VERSION}.wasm wasm-releases/evaluation/
 
       - name: Create Pull Request to wasm-releases
-        uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
+        uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7.0.11
         env:
           VERSION: ${{ env.VERSION }}
         with:

@@ -49,12 +49,28 @@ type Rule struct {
 	Disable *bool `json:"disable,omitempty" yaml:"disable,omitempty" toml:"disable,omitempty" jsonschema:"title=disable,description=Indicates that this rule is disabled."` // nolint: lll
 }
 
+// RequiresBucketing checks if this rule requires a bucketing key for evaluation
+func (r *Rule) RequiresBucketing() bool {
+	// Rules with percentages need bucketing for distribution
+	if r.Percentages != nil && len(r.GetPercentages()) > 0 {
+		return true
+	}
+
+	// Rules with progressive rollout need bucketing
+	if r.ProgressiveRollout != nil {
+		return true
+	}
+
+	return false
+}
+
 // Evaluate is checking if the rule applies to for the user.
 // If yes, it returns the variation you should use for this rule.
 func (r *Rule) Evaluate(key string, ctx ffcontext.Context, flagName string, isDefault bool,
 ) (string, error) {
-	if key == "" {
-		return "", fmt.Errorf("evaluate Rule: no key")
+	// Only require key if this rule needs bucketing
+	if key == "" && r.RequiresBucketing() {
+		return "", fmt.Errorf("evaluate Rule: no key for bucketing-required rule")
 	}
 
 	evaluationDate := DateFromContextOrDefault(ctx, time.Now())
@@ -69,9 +85,15 @@ func (r *Rule) Evaluate(key string, ctx ffcontext.Context, flagName string, isDe
 		return "", &internalerror.RuleNotApplyError{Context: ctx}
 	}
 	if r.ProgressiveRollout != nil {
+		if key == "" {
+			return "", fmt.Errorf("progressive rollout requires a bucketing key")
+		}
 		return r.EvaluateProgressiveRollout(key, flagName, evaluationDate)
 	}
 	if r.Percentages != nil && len(r.GetPercentages()) > 0 {
+		if key == "" {
+			return "", fmt.Errorf("percentage rollout requires a bucketing key")
+		}
 		return r.EvaluatePercentageRollout(key, flagName)
 	}
 	if r.VariationResult != nil {

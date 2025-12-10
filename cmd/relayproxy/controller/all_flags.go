@@ -35,6 +35,7 @@ func NewAllFlags(flagsetManager service.FlagsetManager, metrics metric.Metrics) 
 // @Description To get a variation you should provide information about the user.
 // @Description For that you should provide some user information in JSON in the request body.
 // @Security     ApiKeyAuth
+// @Security     XApiKeyAuth
 // @Produce      json
 // @Accept		 json
 // @Param 	     data body model.AllFlagRequest true "Payload of the user we want to challenge against the flag."

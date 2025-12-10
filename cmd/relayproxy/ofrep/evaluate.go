@@ -38,6 +38,7 @@ func NewOFREPEvaluate(flagsetManager service.FlagsetManager, metrics metric.Metr
 // @Description value of the flag for this evaluation context
 // @Description
 // @Security     ApiKeyAuth
+// @Security     XApiKeyAuth
 // @Produce      json
 // @Accept	 	 json
 // @Param 		 data body model.OFREPEvalFlagRequest true "Evaluation Context for this API call"
@@ -70,17 +71,11 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 			Key:                      flagKey,
 		})
 	}
-	evalCtx, err := evaluationContextFromOFREPRequest(reqBody.Context)
+	evalCtx, err := evaluationContextFromOFREPRequest(reqBody)
 	if err != nil {
 		return c.JSON(
 			http.StatusBadRequest,
-			model.OFREPEvaluateResponseError{
-				OFREPCommonResponseError: model.OFREPCommonResponseError{
-					ErrorCode:    flag.ErrorCodeInvalidContext,
-					ErrorDetails: err.Error(),
-				},
-				Key: flagKey,
-			})
+			err)
 	}
 
 	tracer := otel.GetTracerProvider().Tracer(config.OtelTracerName)
@@ -144,6 +139,7 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 // @Description
 // @Description If no flags are provided, the API will evaluate all available flags in the configuration.
 // @Security    ApiKeyAuth
+// @Security    XApiKeyAuth
 // @Produce     json
 // @Accept	 	json
 // @Param       If-None-Match header string false "The request will be processed only if ETag doesn't match."
@@ -165,7 +161,7 @@ func (h *EvaluateCtrl) BulkEvaluate(c echo.Context) error {
 	if err := assertOFREPEvaluateRequest(request); err != nil {
 		return c.JSON(http.StatusBadRequest, err)
 	}
-	evalCtx, err := evaluationContextFromOFREPRequest(request.Context)
+	evalCtx, err := evaluationContextFromOFREPRequest(request)
 	if err != nil {
 		return c.JSON(
 			http.StatusBadRequest,
@@ -228,19 +224,36 @@ func (h *EvaluateCtrl) BulkEvaluate(c echo.Context) error {
 func assertOFREPEvaluateRequest(
 	ofrepEvalReq *model.OFREPEvalFlagRequest,
 ) *model.OFREPCommonResponseError {
-	if ofrepEvalReq.Context == nil || ofrepEvalReq.Context["targetingKey"] == "" {
-		return NewOFREPCommonError(flag.ErrorCodeTargetingKeyMissing,
-			"GO Feature Flag MUST have a targeting key in the request.")
+	if ofrepEvalReq.Context == nil {
+		return NewOFREPCommonError(flag.ErrorCodeInvalidContext,
+			"GO Feature Flag requires an evaluation context in the request.")
 	}
+
+	// An empty context object is allowed since the evaluation context is optional.
+	// If the context does not have any targetingKey, this is fine since the core
+	// evaluation logic will handle if it is required or not.
+
 	return nil
 }
 
-func evaluationContextFromOFREPRequest(ctx map[string]any) (ffcontext.Context, error) {
-	if targetingKey, ok := ctx["targetingKey"].(string); ok {
-		evalCtx := utils.ConvertEvaluationCtxFromRequest(targetingKey, ctx)
-		return evalCtx, nil
+func evaluationContextFromOFREPRequest(req *model.OFREPEvalFlagRequest) (ffcontext.Context, error) {
+	if req == nil || req.Context == nil {
+		return ffcontext.EvaluationContext{}, NewOFREPCommonError(
+			flag.ErrorCodeInvalidContext,
+			"GO Feature Flag has received an invalid context.")
 	}
-	return ffcontext.EvaluationContext{}, NewOFREPCommonError(
-		flag.ErrorCodeTargetingKeyMissing,
-		"GO Feature Flag has received no targetingKey or a none string value that is not a string.")
+
+	ctx := req.Context
+
+	// targetingKey is optional, it is only required if the flag needs bucketing and
+	// the check is done in the core evaluation logic.
+	// If we don't have a targetingKey, we return an empty string.
+	targetingKey := ""
+	if key, ok := ctx["targetingKey"].(string); ok {
+		targetingKey = key
+	}
+
+	// Create evaluation context (empty targeting key is allowed)
+	evalCtx := utils.ConvertEvaluationCtxFromRequest(targetingKey, ctx)
+	return evalCtx, nil
 }

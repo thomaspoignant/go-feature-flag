@@ -62,9 +62,7 @@ func (s *Server) initRoutes() {
 			isSwagger := strings.HasPrefix(c.Request().URL.String(), "/swagger")
 			return isSwagger || !s.zapLog.Core().Enabled(zap.DebugLevel)
 		},
-		Handler: func(_ echo.Context, reqBody []byte, _ []byte) {
-			s.zapLog.Debug("Request info", zap.ByteString("request_body", reqBody))
-		},
+		Handler: bodyDumpHandler(s.zapLog),
 	}))
 	if s.services.Metrics != (metric.Metrics{}) {
 		s.apiEcho.Use(echoprometheus.NewMiddlewareWithConfig(echoprometheus.MiddlewareConfig{
@@ -145,6 +143,12 @@ func (s *Server) startUnixSocketServer(ctx context.Context) {
 		}
 	}
 
+	// Start a http server for monitoring if monitoringport is configured
+	if s.isMonitoringPortConfigured() {
+		go s.startMonitoringServer()
+		defer func() { _ = s.monitoringEcho.Close() }()
+	}
+
 	lc := net.ListenConfig{}
 	listener, err := lc.Listen(ctx, "unix", socketPath)
 	if err != nil {
@@ -172,17 +176,8 @@ func (s *Server) startUnixSocketServer(ctx context.Context) {
 // startAsHTTPServer launch the API server
 func (s *Server) startAsHTTPServer() {
 	// starting the monitoring server on a different port if configured
-	if s.monitoringEcho != nil {
-		go func() {
-			addressMonitoring := fmt.Sprintf("%s:%d", s.config.GetServerHost(), s.config.GetMonitoringPort(s.zapLog))
-			s.zapLog.Info(
-				"Starting monitoring",
-				zap.String("address", addressMonitoring))
-			err := s.monitoringEcho.Start(addressMonitoring)
-			if err != nil && !errors.Is(err, http.ErrServerClosed) {
-				s.zapLog.Fatal("Error starting monitoring", zap.Error(err))
-			}
-		}()
+	if s.isMonitoringPortConfigured() {
+		go s.startMonitoringServer()
 		defer func() { _ = s.monitoringEcho.Close() }()
 	}
 
@@ -195,6 +190,17 @@ func (s *Server) startAsHTTPServer() {
 	err := s.apiEcho.Start(address)
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		s.zapLog.Fatal("Error starting relay proxy", zap.Error(err))
+	}
+}
+
+func (s *Server) startMonitoringServer() {
+	addressMonitoring := fmt.Sprintf("%s:%d", s.config.GetServerHost(), s.config.GetMonitoringPort(s.zapLog))
+	s.zapLog.Info(
+		"Starting monitoring",
+		zap.String("address", addressMonitoring))
+	err := s.monitoringEcho.Start(addressMonitoring)
+	if err != nil && !errors.Is(err, http.ErrServerClosed) {
+		s.zapLog.Fatal("Error starting monitoring", zap.Error(err))
 	}
 }
 
@@ -231,4 +237,9 @@ func (s *Server) Stop(ctx context.Context) {
 			s.zapLog.Fatal("impossible to stop go-feature-flag relay proxy", zap.Error(err))
 		}
 	}
+}
+
+// isMonitoringPortConfigured checks if the monitoring port is configured.
+func (s *Server) isMonitoringPortConfigured() bool {
+	return s.monitoringEcho != nil && s.config.GetMonitoringPort(s.zapLog) > 0
 }

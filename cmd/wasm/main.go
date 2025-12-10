@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/thomaspoignant/go-feature-flag/cmd/wasm/helpers"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/ffcontext"
@@ -45,14 +44,10 @@ func localEvaluation(input string) string {
 		}.ToJsonStr()
 	}
 
-	evalCtx, err := convertEvaluationCtx(evaluateInput.EvaluationCtx)
-	if err != nil {
-		return model.VariationResult[interface{}]{
-			ErrorCode:    flag.ErrorCodeTargetingKeyMissing,
-			ErrorDetails: err.Error(),
-		}.ToJsonStr()
-	}
+	evalCtx := convertEvaluationCtx(evaluateInput.EvaluationCtx)
 
+	// we don't care about the error here because the errorCode and errorDetails
+	// contains information about the type of the error directly, no need to check the Go error.
 	c, _ := evaluation.Evaluate[interface{}](
 		&evaluateInput.Flag,
 		evaluateInput.FlagKey,
@@ -65,11 +60,16 @@ func localEvaluation(input string) string {
 }
 
 // convertEvaluationCtx converts the evaluation context from the input to a ffcontext.Context.
-func convertEvaluationCtx(ctx map[string]any) (ffcontext.Context, error) {
-	if targetingKey, ok := ctx["targetingKey"].(string); ok {
-		evalCtx := utils.ConvertEvaluationCtxFromRequest(targetingKey, ctx)
-		return evalCtx, nil
+// Note: Empty targeting keys are now allowed - the core evaluation logic will determine
+// if a targeting key is required based on whether the flag needs bucketing.
+func convertEvaluationCtx(ctx map[string]any) ffcontext.Context {
+	// Allow empty or missing targeting keys - core evaluation logic will handle requirements
+	targetingKey := ""
+	if key, ok := ctx["targetingKey"].(string); ok {
+		targetingKey = key
 	}
-	return ffcontext.NewEvaluationContextBuilder("").Build(),
-		fmt.Errorf("targetingKey not found in context")
+
+	// Create evaluation context (empty targeting key is allowed)
+	evalCtx := utils.ConvertEvaluationCtxFromRequest(targetingKey, ctx)
+	return evalCtx
 }

@@ -65,13 +65,20 @@ func (f *InternalFlag) Value(
 	evaluationCtx ffcontext.Context,
 	flagContext Context,
 ) (interface{}, ResolutionDetails) {
+	// if the evaluation context is nil, we create a new one with an empty key
+	// this is to avoid any nil pointer exception.
+	if evaluationCtx == nil {
+		evaluationCtx = ffcontext.NewEvaluationContext("")
+	}
+
 	evaluationDate := DateFromContextOrDefault(evaluationCtx, time.Now())
 	flag, err := f.applyScheduledRolloutSteps(evaluationDate)
 	if err != nil {
 		return flagContext.DefaultSdkValue, ResolutionDetails{
-			Variant:   VariationSDKDefault,
-			Reason:    ReasonError,
-			ErrorCode: ErrorCodeGeneral,
+			Variant:      VariationSDKDefault,
+			Reason:       ReasonError,
+			ErrorCode:    ErrorCodeGeneral,
+			ErrorMessage: err.Error(),
 		}
 	}
 
@@ -103,10 +110,11 @@ func (f *InternalFlag) Value(
 	if err != nil {
 		return flagContext.DefaultSdkValue,
 			ResolutionDetails{
-				Variant:   VariationSDKDefault,
-				Reason:    ReasonError,
-				ErrorCode: ErrorFlagConfiguration,
-				Metadata:  flag.GetMetadata(),
+				Variant:      VariationSDKDefault,
+				Reason:       ReasonError,
+				ErrorCode:    ErrorFlagConfiguration,
+				ErrorMessage: err.Error(),
+				Metadata:     flag.GetMetadata(),
 			}
 	}
 
@@ -246,7 +254,7 @@ func (f *InternalFlag) applyScheduledRolloutSteps(evaluationDate time.Time) (*In
 					flagCopy.Experimentation = &ExperimentationRollout{}
 				}
 				if steps.Experimentation.Start != nil {
-					flagCopy.Experimentation.End = steps.Experimentation.End
+					flagCopy.Experimentation.Start = steps.Experimentation.Start
 				}
 				if steps.Experimentation.End != nil {
 					flagCopy.Experimentation.End = steps.Experimentation.End
@@ -376,10 +384,8 @@ func (f *InternalFlag) GetVersion() string {
 
 // GetVariationValue return the value of variation from his name
 func (f *InternalFlag) GetVariationValue(name string) interface{} {
-	for k, v := range f.GetVariations() {
-		if k == name && v != nil {
-			return *v
-		}
+	if v, exists := f.GetVariations()[name]; exists && v != nil {
+		return *v
 	}
 	return nil
 }
@@ -392,8 +398,48 @@ func (f *InternalFlag) GetBucketingKey() string {
 	return *f.BucketingKey
 }
 
+// RequiresBucketing checks if the flag requires a bucketing key for evaluation
+// A flag requires bucketing if it has percentage-based rules or progressive rollouts,
+// including those introduced by scheduled rollout steps
+func (f *InternalFlag) RequiresBucketing() bool {
+	// Check if default rule requires bucketing and if any targeting rule requires bucketing
+	if f.defaultRuleRequiresBucketing() || f.rulesRequireBucketing(f.GetRules()) {
+		return true
+	}
+
+	// Check if any scheduled rollout steps introduce bucketing requirements
+	if f.Scheduled != nil {
+		for _, step := range *f.Scheduled {
+			if f.defaultRuleRequiresBucketing() || f.rulesRequireBucketing(step.GetRules()) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// rulesRequireBucketing checks if any of the rules require bucketing
+func (f *InternalFlag) rulesRequireBucketing(rules []Rule) bool {
+	for _, rule := range rules {
+		if rule.RequiresBucketing() {
+			return true
+		}
+	}
+	return false
+}
+
+// defaultRuleRequiresBucketing checks if the default rule requires bucketing
+func (f *InternalFlag) defaultRuleRequiresBucketing() bool {
+	return f.DefaultRule != nil && f.DefaultRule.RequiresBucketing()
+}
+
 // GetBucketingKeyValue return the value of the bucketing key from the context
+// If requiresBucketing is false, it allows empty keys for flags that don't need them
 func (f *InternalFlag) GetBucketingKeyValue(ctx ffcontext.Context) (string, error) {
+	// Cache the bucketing requirement check to avoid multiple calls
+	requiresBucketing := f.RequiresBucketing()
+
+	// Check if custom bucketing key is provided
 	if f.BucketingKey != nil {
 		key := f.GetBucketingKey()
 		if key == "" {
@@ -408,7 +454,7 @@ func (f *InternalFlag) GetBucketingKeyValue(ctx ffcontext.Context) (string, erro
 		switch v := value.(type) {
 		case string:
 			if v == "" {
-				return "", &internalerror.EmptyBucketingKeyError{Message: "Empty bucketing key"}
+				return f.requiresBucketingCheck(requiresBucketing, "bucketing")
 			}
 			return v, nil
 		default:
@@ -416,11 +462,20 @@ func (f *InternalFlag) GetBucketingKeyValue(ctx ffcontext.Context) (string, erro
 		}
 	}
 
+	// Check if targeting key is required for this flag
 	if ctx.GetKey() == "" {
-		return "", &internalerror.EmptyBucketingKeyError{Message: "Empty targeting key"}
+		return f.requiresBucketingCheck(requiresBucketing, "targeting")
 	}
 
 	return ctx.GetKey(), nil
+}
+
+// requiresBucketingCheck checks if the bucketing is required and returns the appropriate error
+func (f *InternalFlag) requiresBucketingCheck(requiresBucketing bool, key string) (string, error) {
+	if requiresBucketing {
+		return "", &internalerror.EmptyBucketingKeyError{Message: fmt.Sprintf("Empty %s key", key)}
+	}
+	return "", nil
 }
 
 // GetMetadata return the metadata associated to the flag

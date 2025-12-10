@@ -41,13 +41,14 @@ func Test_assertRequest(t *testing.T) {
 		},
 		{
 			name: "user with User and EvaluationContext, empty key for evaluation context",
+			// in this case, since we have a targetingKey set for the evaluation context we take the one from the
+			// evaluation context key not from the user key.
+			// In that case the targetingKey is empty, but this is allowed by the core evaluation logic.
 			req: &model.AllFlagRequest{
 				User:              &model.UserRequest{Key: "my-key"},
 				EvaluationContext: &model.EvaluationContextRequest{Key: ""},
 			},
-			wantErr: echo.NewHTTPError(
-				http.StatusBadRequest,
-				"empty key for evaluation context, impossible to retrieve flags"),
+			wantErr: nil,
 		},
 		{
 			name: "invalid user but valid evaluation context should pass",
