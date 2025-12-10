@@ -15,15 +15,6 @@ make watch-doc       # Start documentation server
 make help            # Show all available commands
 ```
 
-## ⚠️ What Agents Must NEVER Do
-
-**Critical Rules:**
-- **Never commit secrets** - No API keys, passwords, tokens, or credentials in code or config files
-- **Ask before adding dependencies** - Always request approval before adding new packages to `go.mod`
-- **Don't touch vendor directories** - Never modify `vendor/` directory directly (use `make vendor` instead)
-- **Don't modify `go.work` manually** - Use `make workspace-init` for workspace setup
-- **Don't force push to main/master** - Always work on feature branches
-
 ## 🎯 Project Overview
 
 **GO Feature Flag** is a lightweight, open-source feature flagging solution written in Go. This repository is a **monorepo** using Go workspaces.
@@ -215,6 +206,14 @@ pre-commit install   # Install pre-commit hooks
 **Interfaces:** `Retriever`, `Exporter`, `Notifier`, `Cache`  
 **Config:** YAML/JSON/TOML flags, `ffclient.Config`, `cmd/relayproxy/config/config.go`
 
+## ⚠️ What Agents Must NEVER Do
+
+**Critical Rules:**
+- **Never commit secrets** - No API keys, passwords, tokens, or credentials in code or config files
+- **Ask before adding dependencies** - Always request approval before adding new packages to `go.mod`
+- **Don't touch vendor directories** - Never modify `vendor/` directory directly (use `make vendor` instead)
+- **Don't modify `go.work` manually** - Use `make workspace-init` for workspace setup
+- **Don't force push to main/master** - Always work on feature branches
 ---
 
 **Note**: This is a living document. Update as the codebase evolves!
