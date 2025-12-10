@@ -1,3 +1,4 @@
 FROM gcr.io/distroless/static-debian12:latest
-COPY ./go-feature-flag /go-feature-flag
+ARG TARGETPLATFORM
+COPY $TARGETPLATFORM/go-feature-flag /go-feature-flag
 CMD ["/go-feature-flag"]
