@@ -219,8 +219,8 @@ func watchConfigFile(
 
 // isConfigFileEvent checks if the event is a write or rename operation on the config file
 func isConfigFileEvent(event fsnotify.Event, configFilePath string) bool {
-	isWriteOrRename := event.Op&fsnotify.Write == fsnotify.Write || event.Op&fsnotify.Rename == fsnotify.Rename
-	return isWriteOrRename && event.Name == configFilePath
+	return (event.Op&fsnotify.Write == fsnotify.Write || event.Op&fsnotify.Rename == fsnotify.Rename) &&
+		event.Name == configFilePath
 }
 
 // reloadFlagsets reloads the configuration file and updates flagsets

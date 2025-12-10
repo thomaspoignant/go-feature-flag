@@ -11,8 +11,22 @@ import (
 	"go.uber.org/zap"
 )
 
+const (
+	testFlagConfigPath   = "../testdata/controller/configuration_flags.yaml"
+	testFlagset1         = "flagset-1"
+	testFlagset2         = "flagset-2"
+	testFlagsetName      = "test-flagset"
+	testFlagset2Name     = "test-flagset-2"
+	testAPIKey           = "test-api-key"
+	testKey1             = "key-1"
+	testKey2             = "key-2"
+	testModeFlagset      = "flagset mode"
+	testModeDefault      = "default mode"
+	errMsgFailedToCreate = "failed to create FlagsetManager: %v"
+)
+
 func TestNewFlagsetManager(t *testing.T) {
-	flagConfig := "../testdata/controller/configuration_flags.yaml"
+	flagConfig := testFlagConfigPath
 	tests := []struct {
 		name        string
 		config      *config.Config
@@ -49,14 +63,14 @@ func TestNewFlagsetManager(t *testing.T) {
 			config: &config.Config{
 				FlagSets: []config.FlagSet{
 					{
-						Name: "test-flagset",
+						Name: testFlagsetName,
 						CommonFlagSet: config.CommonFlagSet{
 							Retriever: &retrieverconf.RetrieverConf{
 								Kind: "file",
 								Path: flagConfig,
 							},
 						},
-						APIKeys: []string{"test-api-key"},
+						APIKeys: []string{testAPIKey},
 					},
 				},
 			},
@@ -76,7 +90,7 @@ func TestNewFlagsetManager(t *testing.T) {
 								Path: flagConfig,
 							},
 						},
-						APIKeys: []string{"test-api-key"},
+						APIKeys: []string{testAPIKey},
 					},
 				},
 				CommonFlagSet: config.CommonFlagSet{
@@ -112,21 +126,21 @@ func TestNewFlagsetManager(t *testing.T) {
 }
 
 func TestFlagsetManager_GetFlagSet(t *testing.T) {
-	flagConfig := "../testdata/controller/configuration_flags.yaml"
+	flagConfig := testFlagConfigPath
 
 	// Test flagset mode
-	t.Run("flagset mode", func(t *testing.T) {
+	t.Run(testModeFlagset, func(t *testing.T) {
 		config := &config.Config{
 			FlagSets: []config.FlagSet{
 				{
-					Name: "test-flagset",
+					Name: testFlagsetName,
 					CommonFlagSet: config.CommonFlagSet{
 						Retriever: &retrieverconf.RetrieverConf{
 							Kind: "file",
 							Path: flagConfig,
 						},
 					},
-					APIKeys: []string{"test-api-key"},
+					APIKeys: []string{testAPIKey},
 				},
 			},
 		}
@@ -134,13 +148,13 @@ func TestFlagsetManager_GetFlagSet(t *testing.T) {
 		notifiers := []notifier.Notifier{}
 		manager, err := service.NewFlagsetManager(config, logger, notifiers)
 		if err != nil {
-			t.Fatalf("failed to create FlagsetManager: %v", err)
+			t.Fatalf(errMsgFailedToCreate, err)
 		}
 		assert.NotNil(t, manager)
 		defer manager.Close()
 
 		t.Run("valid api key", func(t *testing.T) {
-			flagset, err := manager.GetFlagSet("test-api-key")
+			flagset, err := manager.GetFlagSet(testAPIKey)
 			assert.NoError(t, err)
 			assert.NotNil(t, flagset)
 		})
@@ -163,7 +177,7 @@ func TestFlagsetManager_GetFlagSet(t *testing.T) {
 	})
 
 	// Test default mode
-	t.Run("default mode", func(t *testing.T) {
+	t.Run(testModeDefault, func(t *testing.T) {
 		config := &config.Config{
 			FlagSets: []config.FlagSet{},
 			CommonFlagSet: config.CommonFlagSet{
@@ -177,7 +191,7 @@ func TestFlagsetManager_GetFlagSet(t *testing.T) {
 		notifiers := []notifier.Notifier{}
 		manager, err := service.NewFlagsetManager(config, logger, notifiers)
 		if err != nil {
-			t.Fatalf("failed to create FlagsetManager: %v", err)
+			t.Fatalf(errMsgFailedToCreate, err)
 		}
 		assert.NotNil(t, manager)
 		defer manager.Close()
@@ -191,21 +205,21 @@ func TestFlagsetManager_GetFlagSet(t *testing.T) {
 }
 
 func TestFlagsetManager_GetFlagSetName(t *testing.T) {
-	flagConfig := "../testdata/controller/configuration_flags.yaml"
+	flagConfig := testFlagConfigPath
 
 	// Test flagset mode
-	t.Run("flagset mode", func(t *testing.T) {
+	t.Run(testModeFlagset, func(t *testing.T) {
 		config := &config.Config{
 			FlagSets: []config.FlagSet{
 				{
-					Name: "test-flagset",
+					Name: testFlagsetName,
 					CommonFlagSet: config.CommonFlagSet{
 						Retriever: &retrieverconf.RetrieverConf{
 							Kind: "file",
 							Path: flagConfig,
 						},
 					},
-					APIKeys: []string{"test-api-key"},
+					APIKeys: []string{testAPIKey},
 				},
 			},
 		}
@@ -213,15 +227,15 @@ func TestFlagsetManager_GetFlagSetName(t *testing.T) {
 		notifiers := []notifier.Notifier{}
 		manager, err := service.NewFlagsetManager(config, logger, notifiers)
 		if err != nil {
-			t.Fatalf("failed to create FlagsetManager: %v", err)
+			t.Fatalf(errMsgFailedToCreate, err)
 		}
 		assert.NotNil(t, manager)
 		defer manager.Close()
 
 		t.Run("existing api key", func(t *testing.T) {
-			name, err := manager.GetFlagSetName("test-api-key")
+			name, err := manager.GetFlagSetName(testAPIKey)
 			assert.NoError(t, err)
-			assert.Equal(t, "test-flagset", name)
+			assert.Equal(t, testFlagsetName, name)
 		})
 		t.Run("non-existing api key", func(t *testing.T) {
 			name, err := manager.GetFlagSetName("invalid-key")
@@ -232,7 +246,7 @@ func TestFlagsetManager_GetFlagSetName(t *testing.T) {
 	})
 
 	// Test default mode
-	t.Run("default mode", func(t *testing.T) {
+	t.Run(testModeDefault, func(t *testing.T) {
 		config := &config.Config{
 			FlagSets: []config.FlagSet{},
 			CommonFlagSet: config.CommonFlagSet{
@@ -246,7 +260,7 @@ func TestFlagsetManager_GetFlagSetName(t *testing.T) {
 		notifiers := []notifier.Notifier{}
 		manager, err := service.NewFlagsetManager(config, logger, notifiers)
 		if err != nil {
-			t.Fatalf("failed to create FlagsetManager: %v", err)
+			t.Fatalf(errMsgFailedToCreate, err)
 		}
 		assert.NotNil(t, manager)
 		defer manager.Close()
@@ -260,10 +274,10 @@ func TestFlagsetManager_GetFlagSetName(t *testing.T) {
 }
 
 func TestFlagsetManager_GetFlagSets(t *testing.T) {
-	flagConfig := "../testdata/controller/configuration_flags.yaml"
+	flagConfig := testFlagConfigPath
 
 	// Test flagset mode
-	t.Run("flagset mode", func(t *testing.T) {
+	t.Run(testModeFlagset, func(t *testing.T) {
 		config := &config.Config{
 			FlagSets: []config.FlagSet{
 				{
@@ -277,7 +291,7 @@ func TestFlagsetManager_GetFlagSets(t *testing.T) {
 					APIKeys: []string{"api-key-1"},
 				},
 				{
-					Name: "test-flagset-2",
+					Name: testFlagset2Name,
 					CommonFlagSet: config.CommonFlagSet{
 						Retriever: &retrieverconf.RetrieverConf{
 							Kind: "file",
@@ -292,7 +306,7 @@ func TestFlagsetManager_GetFlagSets(t *testing.T) {
 		notifiers := []notifier.Notifier{}
 		manager, err := service.NewFlagsetManager(config, logger, notifiers)
 		if err != nil {
-			t.Fatalf("failed to create FlagsetManager: %v", err)
+			t.Fatalf(errMsgFailedToCreate, err)
 		}
 		assert.NotNil(t, manager)
 		defer manager.Close()
@@ -301,7 +315,7 @@ func TestFlagsetManager_GetFlagSets(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Len(t, flagsets, 2)
 		assert.Contains(t, flagsets, "test-flagset-1")
-		assert.Contains(t, flagsets, "test-flagset-2")
+		assert.Contains(t, flagsets, testFlagset2Name)
 	})
 
 	t.Run("flagset mode using default flagset name", func(t *testing.T) {
@@ -318,7 +332,7 @@ func TestFlagsetManager_GetFlagSets(t *testing.T) {
 					APIKeys: []string{"api-key-1"},
 				},
 				{
-					Name: "test-flagset-2",
+					Name: testFlagset2Name,
 					CommonFlagSet: config.CommonFlagSet{
 						Retriever: &retrieverconf.RetrieverConf{
 							Kind: "file",
@@ -333,7 +347,7 @@ func TestFlagsetManager_GetFlagSets(t *testing.T) {
 		notifiers := []notifier.Notifier{}
 		manager, err := service.NewFlagsetManager(config, logger, notifiers)
 		if err != nil {
-			t.Fatalf("failed to create FlagsetManager: %v", err)
+			t.Fatalf(errMsgFailedToCreate, err)
 		}
 		assert.NotNil(t, manager)
 		defer manager.Close()
@@ -342,11 +356,11 @@ func TestFlagsetManager_GetFlagSets(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Len(t, flagsets, 2)
 		assert.NotContains(t, flagsets, "default")
-		assert.Contains(t, flagsets, "test-flagset-2")
+		assert.Contains(t, flagsets, testFlagset2Name)
 	})
 
 	// Test default mode
-	t.Run("default mode", func(t *testing.T) {
+	t.Run(testModeDefault, func(t *testing.T) {
 		config := &config.Config{
 			FlagSets: []config.FlagSet{},
 			CommonFlagSet: config.CommonFlagSet{
@@ -360,7 +374,7 @@ func TestFlagsetManager_GetFlagSets(t *testing.T) {
 		notifiers := []notifier.Notifier{}
 		manager, err := service.NewFlagsetManager(config, logger, notifiers)
 		if err != nil {
-			t.Fatalf("failed to create FlagsetManager: %v", err)
+			t.Fatalf(errMsgFailedToCreate, err)
 		}
 		assert.NotNil(t, manager)
 		defer manager.Close()
@@ -373,10 +387,10 @@ func TestFlagsetManager_GetFlagSets(t *testing.T) {
 }
 
 func TestFlagsetManager_GetDefaultFlagSet(t *testing.T) {
-	flagConfig := "../testdata/controller/configuration_flags.yaml"
+	flagConfig := testFlagConfigPath
 
 	// Test default mode
-	t.Run("default mode", func(t *testing.T) {
+	t.Run(testModeDefault, func(t *testing.T) {
 		config := &config.Config{
 			FlagSets: []config.FlagSet{},
 			CommonFlagSet: config.CommonFlagSet{
@@ -390,7 +404,7 @@ func TestFlagsetManager_GetDefaultFlagSet(t *testing.T) {
 		notifiers := []notifier.Notifier{}
 		manager, err := service.NewFlagsetManager(config, logger, notifiers)
 		if err != nil {
-			t.Fatalf("failed to create FlagsetManager: %v", err)
+			t.Fatalf(errMsgFailedToCreate, err)
 		}
 		assert.NotNil(t, manager)
 		defer manager.Close()
@@ -400,18 +414,18 @@ func TestFlagsetManager_GetDefaultFlagSet(t *testing.T) {
 	})
 
 	// Test flagset mode
-	t.Run("flagset mode", func(t *testing.T) {
+	t.Run(testModeFlagset, func(t *testing.T) {
 		config := &config.Config{
 			FlagSets: []config.FlagSet{
 				{
-					Name: "test-flagset",
+					Name: testFlagsetName,
 					CommonFlagSet: config.CommonFlagSet{
 						Retriever: &retrieverconf.RetrieverConf{
 							Kind: "file",
 							Path: flagConfig,
 						},
 					},
-					APIKeys: []string{"test-api-key"},
+					APIKeys: []string{testAPIKey},
 				},
 			},
 		}
@@ -419,7 +433,7 @@ func TestFlagsetManager_GetDefaultFlagSet(t *testing.T) {
 		notifiers := []notifier.Notifier{}
 		manager, err := service.NewFlagsetManager(config, logger, notifiers)
 		if err != nil {
-			t.Fatalf("failed to create FlagsetManager: %v", err)
+			t.Fatalf(errMsgFailedToCreate, err)
 		}
 		assert.NotNil(t, manager)
 		defer manager.Close()
@@ -430,10 +444,10 @@ func TestFlagsetManager_GetDefaultFlagSet(t *testing.T) {
 }
 
 func TestFlagsetManager_IsDefaultFlagSet(t *testing.T) {
-	flagConfig := "../testdata/controller/configuration_flags.yaml"
+	flagConfig := testFlagConfigPath
 
 	// Test default mode
-	t.Run("default mode", func(t *testing.T) {
+	t.Run(testModeDefault, func(t *testing.T) {
 		config := &config.Config{
 			FlagSets: []config.FlagSet{},
 			CommonFlagSet: config.CommonFlagSet{
@@ -447,7 +461,7 @@ func TestFlagsetManager_IsDefaultFlagSet(t *testing.T) {
 		notifiers := []notifier.Notifier{}
 		manager, err := service.NewFlagsetManager(config, logger, notifiers)
 		if err != nil {
-			t.Fatalf("failed to create FlagsetManager: %v", err)
+			t.Fatalf(errMsgFailedToCreate, err)
 		}
 		assert.NotNil(t, manager)
 		defer manager.Close()
@@ -456,18 +470,18 @@ func TestFlagsetManager_IsDefaultFlagSet(t *testing.T) {
 	})
 
 	// Test flagset mode
-	t.Run("flagset mode", func(t *testing.T) {
+	t.Run(testModeFlagset, func(t *testing.T) {
 		config := &config.Config{
 			FlagSets: []config.FlagSet{
 				{
-					Name: "test-flagset",
+					Name: testFlagsetName,
 					CommonFlagSet: config.CommonFlagSet{
 						Retriever: &retrieverconf.RetrieverConf{
 							Kind: "file",
 							Path: flagConfig,
 						},
 					},
-					APIKeys: []string{"test-api-key"},
+					APIKeys: []string{testAPIKey},
 				},
 			},
 		}
@@ -475,7 +489,7 @@ func TestFlagsetManager_IsDefaultFlagSet(t *testing.T) {
 		notifiers := []notifier.Notifier{}
 		manager, err := service.NewFlagsetManager(config, logger, notifiers)
 		if err != nil {
-			t.Fatalf("failed to create FlagsetManager: %v", err)
+			t.Fatalf(errMsgFailedToCreate, err)
 		}
 		assert.NotNil(t, manager)
 		defer manager.Close()
@@ -485,10 +499,10 @@ func TestFlagsetManager_IsDefaultFlagSet(t *testing.T) {
 }
 
 func TestFlagsetManager_Close(t *testing.T) {
-	flagConfig := "../testdata/controller/configuration_flags.yaml"
+	flagConfig := testFlagConfigPath
 
 	// Test default mode
-	t.Run("default mode", func(t *testing.T) {
+	t.Run(testModeDefault, func(t *testing.T) {
 		config := &config.Config{
 			FlagSets: []config.FlagSet{},
 			CommonFlagSet: config.CommonFlagSet{
@@ -502,7 +516,7 @@ func TestFlagsetManager_Close(t *testing.T) {
 		notifiers := []notifier.Notifier{}
 		manager, err := service.NewFlagsetManager(config, logger, notifiers)
 		if err != nil {
-			t.Fatalf("failed to create FlagsetManager: %v", err)
+			t.Fatalf(errMsgFailedToCreate, err)
 		}
 		assert.NotNil(t, manager)
 
@@ -512,18 +526,18 @@ func TestFlagsetManager_Close(t *testing.T) {
 	})
 
 	// Test flagset mode
-	t.Run("flagset mode", func(t *testing.T) {
+	t.Run(testModeFlagset, func(t *testing.T) {
 		config := &config.Config{
 			FlagSets: []config.FlagSet{
 				{
-					Name: "test-flagset",
+					Name: testFlagsetName,
 					CommonFlagSet: config.CommonFlagSet{
 						Retriever: &retrieverconf.RetrieverConf{
 							Kind: "file",
 							Path: flagConfig,
 						},
 					},
-					APIKeys: []string{"test-api-key"},
+					APIKeys: []string{testAPIKey},
 				},
 			},
 		}
@@ -531,7 +545,7 @@ func TestFlagsetManager_Close(t *testing.T) {
 		notifiers := []notifier.Notifier{}
 		manager, err := service.NewFlagsetManager(config, logger, notifiers)
 		if err != nil {
-			t.Fatalf("failed to create FlagsetManager: %v", err)
+			t.Fatalf(errMsgFailedToCreate, err)
 		}
 		assert.NotNil(t, manager)
 
@@ -542,7 +556,7 @@ func TestFlagsetManager_Close(t *testing.T) {
 }
 
 func TestFlagsetManager_ReloadFlagsets(t *testing.T) {
-	flagConfig := "../testdata/controller/configuration_flags.yaml"
+	flagConfig := testFlagConfigPath
 	logger := zap.NewNop()
 	notifiers := []notifier.Notifier{}
 
@@ -550,14 +564,14 @@ func TestFlagsetManager_ReloadFlagsets(t *testing.T) {
 		initialConfig := &config.Config{
 			FlagSets: []config.FlagSet{
 				{
-					Name: "flagset-1",
+					Name: testFlagset1,
 					CommonFlagSet: config.CommonFlagSet{
 						Retriever: &retrieverconf.RetrieverConf{
 							Kind: "file",
 							Path: flagConfig,
 						},
 					},
-					APIKeys: []string{"key-1"},
+					APIKeys: []string{testKey1},
 				},
 			},
 		}
@@ -575,24 +589,24 @@ func TestFlagsetManager_ReloadFlagsets(t *testing.T) {
 		newConfig := &config.Config{
 			FlagSets: []config.FlagSet{
 				{
-					Name: "flagset-1",
+					Name: testFlagset1,
 					CommonFlagSet: config.CommonFlagSet{
 						Retriever: &retrieverconf.RetrieverConf{
 							Kind: "file",
 							Path: flagConfig,
 						},
 					},
-					APIKeys: []string{"key-1"},
+					APIKeys: []string{testKey1},
 				},
 				{
-					Name: "flagset-2",
+					Name: testFlagset2,
 					CommonFlagSet: config.CommonFlagSet{
 						Retriever: &retrieverconf.RetrieverConf{
 							Kind: "file",
 							Path: flagConfig,
 						},
 					},
-					APIKeys: []string{"key-2"},
+					APIKeys: []string{testKey2},
 				},
 			},
 		}
@@ -604,15 +618,15 @@ func TestFlagsetManager_ReloadFlagsets(t *testing.T) {
 		flagsets, err = manager.GetFlagSets()
 		assert.NoError(t, err)
 		assert.Len(t, flagsets, 2)
-		assert.Contains(t, flagsets, "flagset-1")
-		assert.Contains(t, flagsets, "flagset-2")
+		assert.Contains(t, flagsets, testFlagset1)
+		assert.Contains(t, flagsets, testFlagset2)
 
 		// Verify both flagsets are accessible
-		flagset1, err := manager.GetFlagSet("key-1")
+		flagset1, err := manager.GetFlagSet(testKey1)
 		assert.NoError(t, err)
 		assert.NotNil(t, flagset1)
 
-		flagset2, err := manager.GetFlagSet("key-2")
+		flagset2, err := manager.GetFlagSet(testKey2)
 		assert.NoError(t, err)
 		assert.NotNil(t, flagset2)
 	})
@@ -621,24 +635,24 @@ func TestFlagsetManager_ReloadFlagsets(t *testing.T) {
 		initialConfig := &config.Config{
 			FlagSets: []config.FlagSet{
 				{
-					Name: "flagset-1",
+					Name: testFlagset1,
 					CommonFlagSet: config.CommonFlagSet{
 						Retriever: &retrieverconf.RetrieverConf{
 							Kind: "file",
 							Path: flagConfig,
 						},
 					},
-					APIKeys: []string{"key-1"},
+					APIKeys: []string{testKey1},
 				},
 				{
-					Name: "flagset-2",
+					Name: testFlagset2,
 					CommonFlagSet: config.CommonFlagSet{
 						Retriever: &retrieverconf.RetrieverConf{
 							Kind: "file",
 							Path: flagConfig,
 						},
 					},
-					APIKeys: []string{"key-2"},
+					APIKeys: []string{testKey2},
 				},
 			},
 		}
@@ -656,14 +670,14 @@ func TestFlagsetManager_ReloadFlagsets(t *testing.T) {
 		newConfig := &config.Config{
 			FlagSets: []config.FlagSet{
 				{
-					Name: "flagset-1",
+					Name: testFlagset1,
 					CommonFlagSet: config.CommonFlagSet{
 						Retriever: &retrieverconf.RetrieverConf{
 							Kind: "file",
 							Path: flagConfig,
 						},
 					},
-					APIKeys: []string{"key-1"},
+					APIKeys: []string{testKey1},
 				},
 			},
 		}
@@ -675,10 +689,10 @@ func TestFlagsetManager_ReloadFlagsets(t *testing.T) {
 		flagsets, err = manager.GetFlagSets()
 		assert.NoError(t, err)
 		assert.Len(t, flagsets, 1)
-		assert.Contains(t, flagsets, "flagset-1")
+		assert.Contains(t, flagsets, testFlagset1)
 
 		// Verify removed flagset is no longer accessible
-		_, err = manager.GetFlagSet("key-2")
+		_, err = manager.GetFlagSet(testKey2)
 		assert.Error(t, err)
 	})
 
@@ -686,7 +700,7 @@ func TestFlagsetManager_ReloadFlagsets(t *testing.T) {
 		initialConfig := &config.Config{
 			FlagSets: []config.FlagSet{
 				{
-					Name: "flagset-1",
+					Name: testFlagset1,
 					CommonFlagSet: config.CommonFlagSet{
 						Retriever: &retrieverconf.RetrieverConf{
 							Kind: "file",
@@ -694,7 +708,7 @@ func TestFlagsetManager_ReloadFlagsets(t *testing.T) {
 						},
 						PollingInterval: 60000,
 					},
-					APIKeys: []string{"key-1"},
+					APIKeys: []string{testKey1},
 				},
 			},
 		}
@@ -707,7 +721,7 @@ func TestFlagsetManager_ReloadFlagsets(t *testing.T) {
 		newConfig := &config.Config{
 			FlagSets: []config.FlagSet{
 				{
-					Name: "flagset-1",
+					Name: testFlagset1,
 					CommonFlagSet: config.CommonFlagSet{
 						Retriever: &retrieverconf.RetrieverConf{
 							Kind: "file",
@@ -715,7 +729,7 @@ func TestFlagsetManager_ReloadFlagsets(t *testing.T) {
 						},
 						PollingInterval: 30000, // Changed
 					},
-					APIKeys: []string{"key-1"},
+					APIKeys: []string{testKey1},
 				},
 			},
 		}
@@ -729,24 +743,24 @@ func TestFlagsetManager_ReloadFlagsets(t *testing.T) {
 		initialConfig := &config.Config{
 			FlagSets: []config.FlagSet{
 				{
-					Name: "flagset-1",
+					Name: testFlagset1,
 					CommonFlagSet: config.CommonFlagSet{
 						Retriever: &retrieverconf.RetrieverConf{
 							Kind: "file",
 							Path: flagConfig,
 						},
 					},
-					APIKeys: []string{"key-1"},
+					APIKeys: []string{testKey1},
 				},
 				{
-					Name: "flagset-2",
+					Name: testFlagset2,
 					CommonFlagSet: config.CommonFlagSet{
 						Retriever: &retrieverconf.RetrieverConf{
 							Kind: "file",
 							Path: flagConfig,
 						},
 					},
-					APIKeys: []string{"key-2"},
+					APIKeys: []string{testKey2},
 				},
 			},
 		}
@@ -759,17 +773,17 @@ func TestFlagsetManager_ReloadFlagsets(t *testing.T) {
 		newConfig := &config.Config{
 			FlagSets: []config.FlagSet{
 				{
-					Name: "flagset-1",
+					Name: testFlagset1,
 					CommonFlagSet: config.CommonFlagSet{
 						Retriever: &retrieverconf.RetrieverConf{
 							Kind: "file",
 							Path: flagConfig,
 						},
 					},
-					APIKeys: []string{"key-1", "key-2"}, // key-2 moved here
+					APIKeys: []string{testKey1, testKey2}, // key-2 moved here
 				},
 				{
-					Name: "flagset-2",
+					Name: testFlagset2,
 					CommonFlagSet: config.CommonFlagSet{
 						Retriever: &retrieverconf.RetrieverConf{
 							Kind: "file",
@@ -806,14 +820,14 @@ func TestFlagsetManager_ReloadFlagsets(t *testing.T) {
 		newConfig := &config.Config{
 			FlagSets: []config.FlagSet{
 				{
-					Name: "flagset-1",
+					Name: testFlagset1,
 					CommonFlagSet: config.CommonFlagSet{
 						Retriever: &retrieverconf.RetrieverConf{
 							Kind: "file",
 							Path: flagConfig,
 						},
 					},
-					APIKeys: []string{"key-1"},
+					APIKeys: []string{testKey1},
 				},
 			},
 		}
@@ -827,14 +841,14 @@ func TestFlagsetManager_ReloadFlagsets(t *testing.T) {
 		initialConfig := &config.Config{
 			FlagSets: []config.FlagSet{
 				{
-					Name: "flagset-1",
+					Name: testFlagset1,
 					CommonFlagSet: config.CommonFlagSet{
 						Retriever: &retrieverconf.RetrieverConf{
 							Kind: "file",
 							Path: flagConfig,
 						},
 					},
-					APIKeys: []string{"key-1"},
+					APIKeys: []string{testKey1},
 				},
 			},
 		}
@@ -856,14 +870,14 @@ func TestFlagsetManager_ReloadFlagsets(t *testing.T) {
 		initialConfig := &config.Config{
 			FlagSets: []config.FlagSet{
 				{
-					Name: "flagset-1",
+					Name: testFlagset1,
 					CommonFlagSet: config.CommonFlagSet{
 						Retriever: &retrieverconf.RetrieverConf{
 							Kind: "file",
 							Path: flagConfig,
 						},
 					},
-					APIKeys: []string{"key-1"},
+					APIKeys: []string{testKey1},
 				},
 			},
 		}
@@ -876,14 +890,14 @@ func TestFlagsetManager_ReloadFlagsets(t *testing.T) {
 		newConfig := &config.Config{
 			FlagSets: []config.FlagSet{
 				{
-					Name: "flagset-1",
+					Name: testFlagset1,
 					CommonFlagSet: config.CommonFlagSet{
 						Retriever: &retrieverconf.RetrieverConf{
 							Kind: "file",
 							Path: flagConfig,
 						},
 					},
-					APIKeys: []string{"key-1", "key-2"}, // Added key-2
+					APIKeys: []string{testKey1, testKey2}, // Added key-2
 				},
 			},
 		}
@@ -892,11 +906,11 @@ func TestFlagsetManager_ReloadFlagsets(t *testing.T) {
 		assert.NoError(t, err)
 
 		// Verify both API keys work
-		flagset1, err := manager.GetFlagSet("key-1")
+		flagset1, err := manager.GetFlagSet(testKey1)
 		assert.NoError(t, err)
 		assert.NotNil(t, flagset1)
 
-		flagset2, err := manager.GetFlagSet("key-2")
+		flagset2, err := manager.GetFlagSet(testKey2)
 		assert.NoError(t, err)
 		assert.NotNil(t, flagset2)
 
@@ -908,14 +922,14 @@ func TestFlagsetManager_ReloadFlagsets(t *testing.T) {
 		initialConfig := &config.Config{
 			FlagSets: []config.FlagSet{
 				{
-					Name: "flagset-1",
+					Name: testFlagset1,
 					CommonFlagSet: config.CommonFlagSet{
 						Retriever: &retrieverconf.RetrieverConf{
 							Kind: "file",
 							Path: flagConfig,
 						},
 					},
-					APIKeys: []string{"key-1", "key-2"},
+					APIKeys: []string{testKey1, testKey2},
 				},
 			},
 		}
@@ -928,14 +942,14 @@ func TestFlagsetManager_ReloadFlagsets(t *testing.T) {
 		newConfig := &config.Config{
 			FlagSets: []config.FlagSet{
 				{
-					Name: "flagset-1",
+					Name: testFlagset1,
 					CommonFlagSet: config.CommonFlagSet{
 						Retriever: &retrieverconf.RetrieverConf{
 							Kind: "file",
 							Path: flagConfig,
 						},
 					},
-					APIKeys: []string{"key-1"}, // Removed key-2
+					APIKeys: []string{testKey1}, // Removed key-2
 				},
 			},
 		}
@@ -944,11 +958,11 @@ func TestFlagsetManager_ReloadFlagsets(t *testing.T) {
 		assert.NoError(t, err)
 
 		// Verify key-1 still works
-		_, err = manager.GetFlagSet("key-1")
+		_, err = manager.GetFlagSet(testKey1)
 		assert.NoError(t, err)
 
 		// Verify key-2 no longer works
-		_, err = manager.GetFlagSet("key-2")
+		_, err = manager.GetFlagSet(testKey2)
 		assert.Error(t, err)
 	})
 
@@ -963,7 +977,7 @@ func TestFlagsetManager_ReloadFlagsets(t *testing.T) {
 							Path: flagConfig,
 						},
 					},
-					APIKeys: []string{"key-1"},
+					APIKeys: []string{testKey1},
 				},
 			},
 		}
@@ -983,7 +997,7 @@ func TestFlagsetManager_ReloadFlagsets(t *testing.T) {
 							Path: flagConfig,
 						},
 					},
-					APIKeys: []string{"key-1"},
+					APIKeys: []string{testKey1},
 				},
 			},
 		}
@@ -992,7 +1006,7 @@ func TestFlagsetManager_ReloadFlagsets(t *testing.T) {
 		assert.NoError(t, err)
 
 		// Verify it still works
-		_, err = manager.GetFlagSet("key-1")
+		_, err = manager.GetFlagSet(testKey1)
 		assert.NoError(t, err)
 	})
 }
