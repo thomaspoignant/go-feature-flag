@@ -169,37 +169,58 @@ func startConfigWatcher(
 	logger.Info("watching configuration file for changes", zap.String("file", configFilePath))
 
 	// Use a debounce mechanism to avoid multiple reloads for rapid file changes
-	var reloadTimer *time.Timer
-	var mu sync.Mutex
+	reloadTimer := &reloadTimerState{mu: sync.Mutex{}}
 
-	go func() {
-		for {
-			select {
-			case event, ok := <-watcher.Events:
-				if !ok {
-					return
-				}
-				// Only process write and rename events for the config file
-				if (event.Op&fsnotify.Write == fsnotify.Write || event.Op&fsnotify.Rename == fsnotify.Rename) &&
-					event.Name == configFilePath {
-					mu.Lock()
-					if reloadTimer != nil {
-						reloadTimer.Stop()
-					}
-					// Debounce: wait 500ms before reloading to handle rapid file changes
-					reloadTimer = time.AfterFunc(500*time.Millisecond, func() {
-						reloadFlagsets(configFilePath, flagSet, flagsetManager, logger, version, notifiers)
-					})
-					mu.Unlock()
-				}
-			case err, ok := <-watcher.Errors:
-				if !ok {
-					return
-				}
-				logger.Error("file watcher error", zap.Error(err))
+	go watchConfigFile(watcher, configFilePath, reloadTimer, func() {
+		reloadFlagsets(configFilePath, flagSet, flagsetManager, logger, version, notifiers)
+	}, logger)
+}
+
+type reloadTimerState struct {
+	timer *time.Timer
+	mu    sync.Mutex
+}
+
+func (r *reloadTimerState) reset(callback func()) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if r.timer != nil {
+		r.timer.Stop()
+	}
+	// Debounce: wait 500ms before reloading to handle rapid file changes
+	r.timer = time.AfterFunc(500*time.Millisecond, callback)
+}
+
+// watchConfigFile handles file system events and triggers reloads when the config file changes
+func watchConfigFile(
+	watcher *fsnotify.Watcher,
+	configFilePath string,
+	reloadTimer *reloadTimerState,
+	reloadCallback func(),
+	logger *zap.Logger,
+) {
+	for {
+		select {
+		case event, ok := <-watcher.Events:
+			if !ok {
+				return
 			}
+			if isConfigFileEvent(event, configFilePath) {
+				reloadTimer.reset(reloadCallback)
+			}
+		case err, ok := <-watcher.Errors:
+			if !ok {
+				return
+			}
+			logger.Error("file watcher error", zap.Error(err))
 		}
-	}()
+	}
+}
+
+// isConfigFileEvent checks if the event is a write or rename operation on the config file
+func isConfigFileEvent(event fsnotify.Event, configFilePath string) bool {
+	isWriteOrRename := event.Op&fsnotify.Write == fsnotify.Write || event.Op&fsnotify.Rename == fsnotify.Rename
+	return isWriteOrRename && event.Name == configFilePath
 }
 
 // reloadFlagsets reloads the configuration file and updates flagsets

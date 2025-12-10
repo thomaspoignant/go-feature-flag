@@ -251,100 +251,147 @@ func (m *flagsetManagerImpl) ReloadFlagsets(newConfig *config.Config, logger *za
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	// If we're in default mode, we don't support reloading
+	if err := m.validateReloadPreconditions(newConfig); err != nil {
+		return err
+	}
+
+	currentMappings := m.buildCurrentFlagsetMappings()
+
+	if err := m.validateFlagsetChanges(newConfig, currentMappings); err != nil {
+		return err
+	}
+
+	newFlagsets, newAPIKeysToFlagSetName, err := m.createNewFlagsets(newConfig, logger, notifiers)
+	if err != nil {
+		return err
+	}
+
+	m.closeRemovedFlagsets(newFlagsets, logger)
+	m.updateFlagsets(newFlagsets, newAPIKeysToFlagSetName, newConfig, logger)
+
+	return nil
+}
+
+// validateReloadPreconditions checks if reload is allowed
+func (m *flagsetManagerImpl) validateReloadPreconditions(newConfig *config.Config) error {
 	if m.mode == flagsetManagerModeDefault {
 		return fmt.Errorf("cannot reload flagsets in default mode")
 	}
-
-	// If new config has no flagsets, reject the change
 	if len(newConfig.FlagSets) == 0 {
 		return fmt.Errorf("cannot reload: new configuration has no flagsets")
 	}
+	return nil
+}
 
-	// Build a map of API keys to existing flagset configurations
-	// This allows us to match flagsets even if they don't have names
-	currentAPIKeyToFlagsetConfig := make(map[string]*config.FlagSet)
-	currentAPIKeyToFlagsetName := make(map[string]string)
+type flagsetMappings struct {
+	apiKeyToConfig map[string]*config.FlagSet
+	apiKeyToName   map[string]string
+}
+
+// buildCurrentFlagsetMappings builds maps of API keys to flagset configurations and names
+func (m *flagsetManagerImpl) buildCurrentFlagsetMappings() flagsetMappings {
+	mappings := flagsetMappings{
+		apiKeyToConfig: make(map[string]*config.FlagSet),
+		apiKeyToName:   make(map[string]string),
+	}
+
 	for i := range m.config.FlagSets {
 		flagset := &m.config.FlagSets[i]
-		flagSetName := flagset.Name
-		if flagSetName == "" || flagSetName == utils.DefaultFlagSetName {
-			// Generate a stable name for flagsets without names
-			flagSetName = uuid.New().String()
-		}
+		flagSetName := normalizeFlagsetName(flagset.Name)
 		for _, apiKey := range flagset.APIKeys {
-			currentAPIKeyToFlagsetConfig[apiKey] = flagset
-			currentAPIKeyToFlagsetName[apiKey] = flagSetName
+			mappings.apiKeyToConfig[apiKey] = flagset
+			mappings.apiKeyToName[apiKey] = flagSetName
 		}
 	}
+	return mappings
+}
 
-	// Validate that existing flagsets haven't been modified
-	// We match flagsets by their API keys (at least one API key must match)
+// normalizeFlagsetName returns the flagset name or generates a UUID if empty/default
+func normalizeFlagsetName(name string) string {
+	if name == "" || name == utils.DefaultFlagSetName {
+		return uuid.New().String()
+	}
+	return name
+}
+
+// validateFlagsetChanges validates that existing flagsets haven't been modified
+func (m *flagsetManagerImpl) validateFlagsetChanges(newConfig *config.Config, currentMappings flagsetMappings) error {
 	for _, newFlagset := range newConfig.FlagSets {
-		newFlagSetName := newFlagset.Name
-		if newFlagSetName == "" || newFlagSetName == utils.DefaultFlagSetName {
-			newFlagSetName = uuid.New().String()
-		}
-
-		// Find matching existing flagset by API key
-		var existingConfig *config.FlagSet
-		var existingFlagsetName string
-		for _, apiKey := range newFlagset.APIKeys {
-			if existing, exists := currentAPIKeyToFlagsetConfig[apiKey]; exists {
-				existingConfig = existing
-				existingFlagsetName = currentAPIKeyToFlagsetName[apiKey]
-				break
-			}
-		}
-
-		// If we found a matching flagset, validate it hasn't been modified
-		if existingConfig != nil {
-			if !flagsetConfigsEqual(existingConfig, &newFlagset) {
-				return fmt.Errorf("flagset '%s' has been modified, reload rejected", existingFlagsetName)
-			}
-			// Also check that API keys haven't moved to a different flagset
-			// But only if both flagsets have names (not generated UUIDs)
-			existingHasRealName := existingConfig.Name != "" && existingConfig.Name != utils.DefaultFlagSetName
-			newHasRealName := newFlagset.Name != "" && newFlagset.Name != utils.DefaultFlagSetName
-			if existingHasRealName && newHasRealName && existingFlagsetName != newFlagSetName {
-				return fmt.Errorf("flagset configuration changed (name changed from '%s' to '%s'), reload rejected", existingFlagsetName, newFlagSetName)
-			}
+		if err := m.validateSingleFlagset(&newFlagset, currentMappings); err != nil {
+			return err
 		}
 	}
+	return nil
+}
 
-	// Check if any API key moved to a different flagset (which would indicate a modification)
-	// We need to match flagsets by their actual configuration, not by generated UUIDs
-	for _, newFlagset := range newConfig.FlagSets {
-		newFlagSetName := newFlagset.Name
-		newHasRealName := newFlagSetName != "" && newFlagSetName != utils.DefaultFlagSetName
-		if !newHasRealName {
-			newFlagSetName = uuid.New().String()
+// validateSingleFlagset validates a single flagset hasn't been modified
+func (m *flagsetManagerImpl) validateSingleFlagset(newFlagset *config.FlagSet, currentMappings flagsetMappings) error {
+	existingConfig, existingFlagsetName := m.findMatchingFlagset(newFlagset, currentMappings)
+	if existingConfig == nil {
+		return nil // New flagset, no validation needed
+	}
+
+	if !flagsetConfigsEqual(existingConfig, newFlagset) {
+		return fmt.Errorf("flagset '%s' has been modified, reload rejected", existingFlagsetName)
+	}
+
+	if err := m.validateFlagsetNameChange(existingConfig, newFlagset, existingFlagsetName); err != nil {
+		return err
+	}
+
+	return m.validateAPIKeyMovements(newFlagset, currentMappings)
+}
+
+// findMatchingFlagset finds an existing flagset that matches the new one by API key
+func (m *flagsetManagerImpl) findMatchingFlagset(newFlagset *config.FlagSet, currentMappings flagsetMappings) (*config.FlagSet, string) {
+	for _, apiKey := range newFlagset.APIKeys {
+		if existing, exists := currentMappings.apiKeyToConfig[apiKey]; exists {
+			return existing, currentMappings.apiKeyToName[apiKey]
 		}
+	}
+	return nil, ""
+}
 
-		// For each API key in the new flagset, check if it moved from a different flagset
-		for _, apiKey := range newFlagset.APIKeys {
-			if _, exists := currentAPIKeyToFlagsetName[apiKey]; exists {
-				// Find the old flagset config to check if it has a real name
-				oldFlagsetConfig := currentAPIKeyToFlagsetConfig[apiKey]
-				oldHasRealName := oldFlagsetConfig != nil && oldFlagsetConfig.Name != "" && oldFlagsetConfig.Name != utils.DefaultFlagSetName
+// validateFlagsetNameChange validates that flagset names haven't changed
+func (m *flagsetManagerImpl) validateFlagsetNameChange(existingConfig, newFlagset *config.FlagSet, existingFlagsetName string) error {
+	existingHasRealName := hasRealFlagsetName(existingConfig.Name)
+	newHasRealName := hasRealFlagsetName(newFlagset.Name)
 
-				// Only check name changes if both flagsets have real names
-				// If either doesn't have a name, we match by configuration (already validated above)
-				if oldHasRealName && newHasRealName {
-					oldRealName := oldFlagsetConfig.Name
-					if oldRealName != newFlagSetName {
-						return fmt.Errorf("API key moved from flagset '%s' to '%s', reload rejected", oldRealName, newFlagSetName)
-					}
+	if existingHasRealName && newHasRealName && existingFlagsetName != normalizeFlagsetName(newFlagset.Name) {
+		return fmt.Errorf("flagset configuration changed (name changed from '%s' to '%s'), reload rejected", existingFlagsetName, normalizeFlagsetName(newFlagset.Name))
+	}
+	return nil
+}
+
+// hasRealFlagsetName checks if a flagset has a real (non-empty, non-default) name
+func hasRealFlagsetName(name string) bool {
+	return name != "" && name != utils.DefaultFlagSetName
+}
+
+// validateAPIKeyMovements validates that API keys haven't moved between flagsets
+func (m *flagsetManagerImpl) validateAPIKeyMovements(newFlagset *config.FlagSet, currentMappings flagsetMappings) error {
+	newFlagSetName := normalizeFlagsetName(newFlagset.Name)
+	newHasRealName := hasRealFlagsetName(newFlagset.Name)
+
+	for _, apiKey := range newFlagset.APIKeys {
+		if oldFlagsetConfig, exists := currentMappings.apiKeyToConfig[apiKey]; exists {
+			oldHasRealName := hasRealFlagsetName(oldFlagsetConfig.Name)
+			if oldHasRealName && newHasRealName {
+				oldRealName := oldFlagsetConfig.Name
+				if oldRealName != newFlagSetName {
+					return fmt.Errorf("API key moved from flagset '%s' to '%s', reload rejected", oldRealName, newFlagSetName)
 				}
 			}
 		}
 	}
+	return nil
+}
 
-	// Create a map of new flagsets by name
+// createNewFlagsets creates new flagset clients from the configuration
+func (m *flagsetManagerImpl) createNewFlagsets(newConfig *config.Config, logger *zap.Logger, notifiers []notifier.Notifier) (map[string]*ffclient.GoFeatureFlag, map[string]string, error) {
 	newFlagsets := make(map[string]*ffclient.GoFeatureFlag)
 	newAPIKeysToFlagSetName := make(map[string]string)
 
-	// Initialize new flagsets
 	for index, flagset := range newConfig.FlagSets {
 		client, err := NewGoFeatureFlagClient(&flagset, logger, notifiers)
 		if err != nil {
@@ -354,30 +401,31 @@ func (m *flagsetManagerImpl) ReloadFlagsets(newConfig *config.Config, logger *za
 				zap.String("flagset", flagset.Name),
 				zap.Error(err),
 			)
-			// If we can't create a new flagset, we should fail the reload
-			return fmt.Errorf("failed to create flagset '%s': %w", flagset.Name, err)
+			return nil, nil, fmt.Errorf("failed to create flagset '%s': %w", flagset.Name, err)
 		}
 
-		flagSetName := flagset.Name
-		if flagSetName == "" || flagSetName == utils.DefaultFlagSetName {
-			flagSetName = uuid.New().String()
-		}
-
+		flagSetName := normalizeFlagsetName(flagset.Name)
 		newFlagsets[flagSetName] = client
 		for _, apiKey := range flagset.APIKeys {
 			newAPIKeysToFlagSetName[apiKey] = flagSetName
 		}
 	}
 
-	// Close old flagsets that are being removed
+	return newFlagsets, newAPIKeysToFlagSetName, nil
+}
+
+// closeRemovedFlagsets closes flagsets that are no longer in the configuration
+func (m *flagsetManagerImpl) closeRemovedFlagsets(newFlagsets map[string]*ffclient.GoFeatureFlag, logger *zap.Logger) {
 	for name, flagset := range m.FlagSets {
 		if _, exists := newFlagsets[name]; !exists {
 			logger.Info("closing removed flagset", zap.String("flagset", name))
 			flagset.Close()
 		}
 	}
+}
 
-	// Update the manager with new flagsets
+// updateFlagsets updates the manager with the new flagsets
+func (m *flagsetManagerImpl) updateFlagsets(newFlagsets map[string]*ffclient.GoFeatureFlag, newAPIKeysToFlagSetName map[string]string, newConfig *config.Config, logger *zap.Logger) {
 	m.FlagSets = newFlagsets
 	m.APIKeysToFlagSetName = newAPIKeysToFlagSetName
 	m.config = newConfig
@@ -385,8 +433,6 @@ func (m *flagsetManagerImpl) ReloadFlagsets(newConfig *config.Config, logger *za
 	logger.Info("flagsets reloaded successfully",
 		zap.Int("flagsets_count", len(newFlagsets)),
 	)
-
-	return nil
 }
 
 // flagsetConfigsEqual compares two flagset configurations, excluding APIKeys
