@@ -96,7 +96,7 @@ OpenFeature SDKs → Relay Proxy (cmd/relayproxy/) → GO Module (ffclient)
 - `modules/evaluation`: Evaluation logic (depends on core)
 - Allows independent versioning and smaller dependency trees
 
-**PR Policy:** Must use `.github/PULL_REQUEST_TEMPLATE.md`. Fill all sections, link issues, complete checklist, include tests.
+**PR Policy:** Must use `.github/PULL_REQUEST_TEMPLATE.md`. Fill all sections, link issues, complete checklist, include tests. PR titles should use a semantic commit prefix.
 
 ## 🧪 Testing
 
