@@ -182,7 +182,7 @@ func (g *GoFeatureFlag) StringVariationDetails(
 	ctx ffcontext.Context,
 	defaultValue string,
 ) (model.VariationResult[string], error) {
-	res, err := getVariation[string](g, flagKey, ctx, defaultValue, "string")
+	res, err := getVariation(g, flagKey, ctx, defaultValue, "string")
 	notifyVariation(g, flagKey, ctx, res)
 	return res, err
 }
@@ -226,7 +226,7 @@ func (g *GoFeatureFlag) JSONArrayVariationDetails(
 	ctx ffcontext.Context,
 	defaultValue []interface{},
 ) (model.VariationResult[[]interface{}], error) {
-	res, err := getVariation[[]interface{}](g, flagKey, ctx, defaultValue, "[]interface{}")
+	res, err := getVariation(g, flagKey, ctx, defaultValue, "[]interface{}")
 	notifyVariation(g, flagKey, ctx, res)
 	return res, err
 }
