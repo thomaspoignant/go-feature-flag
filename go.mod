@@ -14,12 +14,12 @@ require (
 	github.com/atc0005/go-teams-notify/v2 v2.14.0
 	github.com/aws/aws-lambda-go v1.51.0
 	github.com/aws/aws-sdk-go-v2 v1.41.0
-	github.com/aws/aws-sdk-go-v2/config v1.32.4
-	github.com/aws/aws-sdk-go-v2/credentials v1.19.4
-	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.20.12
-	github.com/aws/aws-sdk-go-v2/service/kinesis v1.42.8
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.93.1
-	github.com/aws/aws-sdk-go-v2/service/sqs v1.42.19
+	github.com/aws/aws-sdk-go-v2/config v1.32.5
+	github.com/aws/aws-sdk-go-v2/credentials v1.19.5
+	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.20.15
+	github.com/aws/aws-sdk-go-v2/service/kinesis v1.42.9
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.93.2
+	github.com/aws/aws-sdk-go-v2/service/sqs v1.42.20
 	github.com/aws/smithy-go v1.24.0
 	github.com/awslabs/aws-lambda-go-api-proxy v0.16.2
 	github.com/fsouza/fake-gcs-server v1.52.3
@@ -61,8 +61,8 @@ require (
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.40.0
 	github.com/testcontainers/testcontainers-go/modules/redis v0.40.0
 	github.com/thejerf/slogassert v0.3.4
-	github.com/thomaspoignant/go-feature-flag/modules/core v0.2.0
-	github.com/thomaspoignant/go-feature-flag/modules/evaluation v0.1.3
+	github.com/thomaspoignant/go-feature-flag/modules/core v0.3.0
+	github.com/thomaspoignant/go-feature-flag/modules/evaluation v0.2.0
 	github.com/xdg-go/scram v1.2.0
 	github.com/xitongsys/parquet-go v1.6.2
 	github.com/xitongsys/parquet-go-source v0.0.0-20230830030807-0dd610dbff1d
@@ -121,7 +121,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/signin v1.0.4 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.30.7 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.35.12 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sts v1.41.4 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sts v1.41.5 // indirect
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/blang/semver v3.5.1+incompatible // indirect

@@ -583,6 +583,86 @@ func Test_Starting_RelayProxy_UnixSocket(t *testing.T) {
 	assert.Equal(t, http.StatusOK, responseI.StatusCode)
 }
 
+func Test_Starting_RelayProxy_UnixSocket_MonitoringPort(t *testing.T) {
+	// Create a temporary directory for the socket
+	tempDir, err := os.MkdirTemp("", "goff-test-socket-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(tempDir)
+
+	socketPath := filepath.Join(tempDir, "goff-test.sock")
+
+	proxyConf := &config.Config{
+		CommonFlagSet: config.CommonFlagSet{
+			Retrievers: &[]retrieverconf.RetrieverConf{
+				{
+					Kind: "file",
+					Path: "../../../testdata/flag-config.yaml",
+				},
+			},
+		},
+		Server: config.Server{
+			Mode:           config.ServerModeUnixSocket,
+			UnixSocketPath: socketPath,
+			MonitoringPort: 11026,
+		},
+	}
+	log := log.InitLogger()
+	defer func() { _ = log.ZapLogger.Sync() }()
+
+	metricsV2, err := metric.NewMetrics()
+	if err != nil {
+		log.ZapLogger.Error("impossible to initialize prometheus metrics", zap.Error(err))
+	}
+	wsService := service.NewWebsocketService()
+	defer wsService.Close()
+	prometheusNotifier := metric.NewPrometheusNotifier(metricsV2)
+	proxyNotifier := service.NewNotifierWebsocket(wsService)
+	flagsetManager, err := service.NewFlagsetManager(proxyConf, log.ZapLogger, []notifier.Notifier{
+		prometheusNotifier,
+		proxyNotifier,
+	})
+	require.NoError(t, err)
+
+	services := service.Services{
+		MonitoringService: service.NewMonitoring(flagsetManager),
+		WebsocketService:  wsService,
+		FlagsetManager:    flagsetManager,
+		Metrics:           metricsV2,
+	}
+
+	s := api.New(proxyConf, services, log.ZapLogger)
+	go func() { s.StartWithContext(context.Background()) }()
+	defer s.Stop(context.Background())
+
+	// Wait for the socket to be created
+	require.Eventually(t, func() bool {
+		_, err := os.Stat(socketPath)
+		return err == nil
+	}, 1*time.Second, 10*time.Millisecond, "unix socket file was not created in time")
+
+	// Verify socket file exists
+	_, err = os.Stat(socketPath)
+	assert.NoError(t, err, "Unix socket file should exist")
+
+	// Test health endpoint
+	responseH1, err := http.Get("http://localhost:11026/health")
+	assert.NoError(t, err)
+	defer responseH1.Body.Close()
+	assert.Equal(t, http.StatusOK, responseH1.StatusCode)
+
+	// Test metrics endpoint
+	responseM1, err := http.Get("http://localhost:11026/metrics")
+	assert.NoError(t, err)
+	defer responseM1.Body.Close()
+	assert.Equal(t, http.StatusOK, responseM1.StatusCode)
+
+	// Test info endpoint
+	responseI, err := http.Get("http://localhost:11026/info")
+	assert.NoError(t, err)
+	defer responseI.Body.Close()
+	assert.Equal(t, http.StatusOK, responseI.StatusCode)
+}
+
 func Test_Starting_RelayProxy_UnixSocket_OFREP_API(t *testing.T) {
 	// Create a temporary directory for the socket
 	tempDir, err := os.MkdirTemp("", "goff-test-socket-*")
