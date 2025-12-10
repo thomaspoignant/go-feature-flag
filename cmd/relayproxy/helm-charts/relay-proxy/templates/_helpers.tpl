@@ -77,15 +77,35 @@ Usage:
 
 {{/*
 Extract monitoringPort from relayproxy.config if it exists
+Supports both server.monitoringPort (new format) and monitoringPort (old format)
+Prioritizes server.monitoringPort if both are present
 */}}
 {{- define "relay-proxy.monitoringPort" -}}
 {{- if .Values.relayproxy.config }}
 {{- $config := .Values.relayproxy.config | toString }}
-{{- if contains "monitoringPort:" $config }}
-{{- $port := regexFind "monitoringPort:\\s*(\\d+)" $config }}
-{{- if $port }}
-{{- regexReplaceAll "monitoringPort:\\s*" $port "" }}
+{{- $port := "" }}
+{{- /* First check for server.monitoringPort (new format) */}}
+{{- if contains "server.monitoringPort:" $config }}
+{{- $serverPortMatch := regexFind "server\\.monitoringPort:\\s*(\\d+)" $config }}
+{{- if $serverPortMatch }}
+{{- /* Extract just the port number by removing everything before the digits */}}
+{{- $port = regexReplaceAll ".*monitoringPort:\\s*" $serverPortMatch "" }}
 {{- end }}
+{{- end }}
+{{- /* If not found, check for top-level monitoringPort (old format) */}}
+{{- if not $port }}
+{{- /* Replace server.monitoringPort temporarily to avoid matching it */}}
+{{- $tempConfig := $config | replace "server.monitoringPort:" "SERVER_MONITORING_PORT_PLACEHOLDER:" }}
+{{- if contains "monitoringPort:" $tempConfig }}
+{{- $topLevelPortMatch := regexFind "monitoringPort:\\s*(\\d+)" $tempConfig }}
+{{- if $topLevelPortMatch }}
+{{- /* Extract just the port number by removing everything before the digits */}}
+{{- $port = regexReplaceAll ".*monitoringPort:\\s*" $topLevelPortMatch "" }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- if $port }}
+{{- $port | trim }}
 {{- end }}
 {{- end }}
 {{- end -}}
