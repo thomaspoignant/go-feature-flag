@@ -258,6 +258,45 @@ func loadConfigFile(log *zap.Logger) {
 	}
 }
 
+// WatchConfigFile sets up a file watcher using koanf's built-in file watching
+// and calls the reloadCallback when the configuration file changes.
+// This function spawns a goroutine to watch for changes (Watch() is blocking).
+func WatchConfigFile(
+	configFilePath string,
+	reloadCallback func() error,
+	log *zap.Logger,
+) error {
+	parser := getParserForFile(configFilePath)
+	fileProvider := file.Provider(configFilePath)
+
+	// Watch for changes using koanf's built-in Watch() method
+	// Watch() is blocking and spawns a goroutine internally, so we call it in a goroutine
+	go func() {
+		if err := fileProvider.Watch(func(event interface{}, err error) {
+			if err != nil {
+				log.Error("error watching config file", zap.Error(err))
+				return
+			}
+
+			// Reload the configuration file
+			if err := k.Load(fileProvider, parser); err != nil {
+				log.Error("error reloading config file", zap.Error(err))
+				return
+			}
+
+			// Call the reload callback
+			if err := reloadCallback(); err != nil {
+				log.Error("error in reload callback", zap.Error(err))
+			}
+		}); err != nil {
+			log.Error("failed to start file watcher", zap.Error(err))
+		}
+	}()
+
+	log.Info("watching configuration file for changes", zap.String("file", configFilePath))
+	return nil
+}
+
 // getParserForFile returns the appropriate parser based on file extension
 func getParserForFile(configFileLocation string) koanf.Parser {
 	ext := filepath.Ext(configFileLocation)

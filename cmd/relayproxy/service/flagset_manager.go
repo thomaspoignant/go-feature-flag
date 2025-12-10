@@ -247,7 +247,11 @@ func (m *flagsetManagerImpl) IsDefaultFlagSet() bool {
 // ReloadFlagsets reloads flagsets from the new configuration.
 // It validates that existing flagsets haven't been modified, and adds/removes flagsets as needed.
 // Returns an error if any existing flagset has been modified.
-func (m *flagsetManagerImpl) ReloadFlagsets(newConfig *config.Config, logger *zap.Logger, notifiers []notifier.Notifier) error {
+func (m *flagsetManagerImpl) ReloadFlagsets(
+	newConfig *config.Config,
+	logger *zap.Logger,
+	notifiers []notifier.Notifier,
+) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -343,7 +347,10 @@ func (m *flagsetManagerImpl) validateSingleFlagset(newFlagset *config.FlagSet, c
 }
 
 // findMatchingFlagset finds an existing flagset that matches the new one by API key
-func (m *flagsetManagerImpl) findMatchingFlagset(newFlagset *config.FlagSet, currentMappings flagsetMappings) (*config.FlagSet, string) {
+func (m *flagsetManagerImpl) findMatchingFlagset(
+	newFlagset *config.FlagSet,
+	currentMappings flagsetMappings,
+) (*config.FlagSet, string) {
 	for _, apiKey := range newFlagset.APIKeys {
 		if existing, exists := currentMappings.apiKeyToConfig[apiKey]; exists {
 			return existing, currentMappings.apiKeyToName[apiKey]
@@ -353,12 +360,19 @@ func (m *flagsetManagerImpl) findMatchingFlagset(newFlagset *config.FlagSet, cur
 }
 
 // validateFlagsetNameChange validates that flagset names haven't changed
-func (m *flagsetManagerImpl) validateFlagsetNameChange(existingConfig, newFlagset *config.FlagSet, existingFlagsetName string) error {
+func (m *flagsetManagerImpl) validateFlagsetNameChange(
+	existingConfig, newFlagset *config.FlagSet,
+	existingFlagsetName string,
+) error {
 	existingHasRealName := hasRealFlagsetName(existingConfig.Name)
 	newHasRealName := hasRealFlagsetName(newFlagset.Name)
 
 	if existingHasRealName && newHasRealName && existingFlagsetName != normalizeFlagsetName(newFlagset.Name) {
-		return fmt.Errorf("flagset configuration changed (name changed from '%s' to '%s'), reload rejected", existingFlagsetName, normalizeFlagsetName(newFlagset.Name))
+		return fmt.Errorf(
+			"flagset configuration changed (name changed from '%s' to '%s'), reload rejected",
+			existingFlagsetName,
+			normalizeFlagsetName(newFlagset.Name),
+		)
 	}
 	return nil
 }
@@ -369,7 +383,10 @@ func hasRealFlagsetName(name string) bool {
 }
 
 // validateAPIKeyMovements validates that API keys haven't moved between flagsets
-func (m *flagsetManagerImpl) validateAPIKeyMovements(newFlagset *config.FlagSet, currentMappings flagsetMappings) error {
+func (m *flagsetManagerImpl) validateAPIKeyMovements(
+	newFlagset *config.FlagSet,
+	currentMappings flagsetMappings,
+) error {
 	newFlagSetName := normalizeFlagsetName(newFlagset.Name)
 	newHasRealName := hasRealFlagsetName(newFlagset.Name)
 
@@ -388,7 +405,11 @@ func (m *flagsetManagerImpl) validateAPIKeyMovements(newFlagset *config.FlagSet,
 }
 
 // createNewFlagsets creates new flagset clients from the configuration
-func (m *flagsetManagerImpl) createNewFlagsets(newConfig *config.Config, logger *zap.Logger, notifiers []notifier.Notifier) (map[string]*ffclient.GoFeatureFlag, map[string]string, error) {
+func (m *flagsetManagerImpl) createNewFlagsets(
+	newConfig *config.Config,
+	logger *zap.Logger,
+	notifiers []notifier.Notifier,
+) (map[string]*ffclient.GoFeatureFlag, map[string]string, error) {
 	newFlagsets := make(map[string]*ffclient.GoFeatureFlag)
 	newAPIKeysToFlagSetName := make(map[string]string)
 
@@ -425,7 +446,12 @@ func (m *flagsetManagerImpl) closeRemovedFlagsets(newFlagsets map[string]*ffclie
 }
 
 // updateFlagsets updates the manager with the new flagsets
-func (m *flagsetManagerImpl) updateFlagsets(newFlagsets map[string]*ffclient.GoFeatureFlag, newAPIKeysToFlagSetName map[string]string, newConfig *config.Config, logger *zap.Logger) {
+func (m *flagsetManagerImpl) updateFlagsets(
+	newFlagsets map[string]*ffclient.GoFeatureFlag,
+	newAPIKeysToFlagSetName map[string]string,
+	newConfig *config.Config,
+	logger *zap.Logger,
+) {
 	m.FlagSets = newFlagsets
 	m.APIKeysToFlagSetName = newAPIKeysToFlagSetName
 	m.config = newConfig
