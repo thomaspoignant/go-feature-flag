@@ -218,6 +218,32 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 	return proxyConf, nil
 }
 
+// ReloadFromFile reloads the configuration from the config file.
+// It preserves command line flags and environment variables.
+func ReloadFromFile(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, error) {
+	// Reload config file (this will overwrite the file-based config)
+	loadConfigFile(log)
+
+	// Map environment variables (they take precedence over file config)
+	_ = k.Load(mapEnvVariablesProvider(k.String("envVariablePrefix"), log), nil)
+	_ = k.Set("version", version)
+
+	proxyConf := &Config{}
+	errUnmarshal := k.Unmarshal("", &proxyConf)
+	if errUnmarshal != nil {
+		return nil, errUnmarshal
+	}
+
+	processExporters(proxyConf)
+
+	return proxyConf, nil
+}
+
+// GetConfigFilePath returns the path to the configuration file being used.
+func GetConfigFilePath() (string, error) {
+	return locateConfigFile(k.String("config"))
+}
+
 // loadConfigFile handles the loading of configuration files
 func loadConfigFile(log *zap.Logger) {
 	configFileLocation, errFileLocation := locateConfigFile(k.String("config"))

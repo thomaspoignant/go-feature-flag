@@ -4,8 +4,11 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
+	"sync"
 	"time"
 
+	"github.com/fsnotify/fsnotify"
 	promversion "github.com/prometheus/common/version"
 	"github.com/spf13/pflag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api"
@@ -120,5 +123,114 @@ func main() {
 		defer cancel()
 		apiServer.Stop(ctx)
 	}()
+
+	// Start config file watcher if flagsets are configured
+	if len(proxyConf.FlagSets) > 0 {
+		configFilePath, err := config.GetConfigFilePath()
+		if err == nil {
+			startConfigWatcher(configFilePath, f, flagsetManager, logger.ZapLogger, version, []notifier.Notifier{
+				prometheusNotifier,
+				proxyNotifier,
+			})
+		} else {
+			logger.ZapLogger.Warn("could not start config file watcher", zap.Error(err))
+		}
+	}
+
 	apiServer.StartWithContext(context.Background())
+}
+
+// startConfigWatcher starts a file watcher that monitors the configuration file for changes
+// and reloads flagsets when the file is modified.
+func startConfigWatcher(
+	configFilePath string,
+	flagSet *pflag.FlagSet,
+	flagsetManager service.FlagsetManager,
+	logger *zap.Logger,
+	version string,
+	notifiers []notifier.Notifier,
+) {
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		logger.Error("failed to create file watcher", zap.Error(err))
+		return
+	}
+	defer func() {
+		_ = watcher.Close()
+	}()
+
+	// Watch the directory containing the config file
+	configDir := filepath.Dir(configFilePath)
+	if err := watcher.Add(configDir); err != nil {
+		logger.Error("failed to watch config directory", zap.String("dir", configDir), zap.Error(err))
+		return
+	}
+
+	logger.Info("watching configuration file for changes", zap.String("file", configFilePath))
+
+	// Use a debounce mechanism to avoid multiple reloads for rapid file changes
+	var reloadTimer *time.Timer
+	var mu sync.Mutex
+
+	go func() {
+		for {
+			select {
+			case event, ok := <-watcher.Events:
+				if !ok {
+					return
+				}
+				// Only process write and rename events for the config file
+				if (event.Op&fsnotify.Write == fsnotify.Write || event.Op&fsnotify.Rename == fsnotify.Rename) &&
+					event.Name == configFilePath {
+					mu.Lock()
+					if reloadTimer != nil {
+						reloadTimer.Stop()
+					}
+					// Debounce: wait 500ms before reloading to handle rapid file changes
+					reloadTimer = time.AfterFunc(500*time.Millisecond, func() {
+						reloadFlagsets(configFilePath, flagSet, flagsetManager, logger, version, notifiers)
+					})
+					mu.Unlock()
+				}
+			case err, ok := <-watcher.Errors:
+				if !ok {
+					return
+				}
+				logger.Error("file watcher error", zap.Error(err))
+			}
+		}
+	}()
+}
+
+// reloadFlagsets reloads the configuration file and updates flagsets
+func reloadFlagsets(
+	configFilePath string,
+	flagSet *pflag.FlagSet,
+	flagsetManager service.FlagsetManager,
+	logger *zap.Logger,
+	version string,
+	notifiers []notifier.Notifier,
+) {
+	logger.Info("configuration file changed, reloading flagsets", zap.String("file", configFilePath))
+
+	// Reload configuration from file
+	newConfig, err := config.ReloadFromFile(flagSet, logger, version)
+	if err != nil {
+		logger.Error("failed to reload configuration file", zap.Error(err))
+		return
+	}
+
+	// Validate configuration
+	if err := newConfig.IsValid(); err != nil {
+		logger.Error("reloaded configuration is invalid", zap.Error(err))
+		return
+	}
+
+	// Reload flagsets
+	if err := flagsetManager.ReloadFlagsets(newConfig, logger, notifiers); err != nil {
+		logger.Error("failed to reload flagsets", zap.Error(err))
+		return
+	}
+
+	logger.Info("flagsets reloaded successfully")
 }
