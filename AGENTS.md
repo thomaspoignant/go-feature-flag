@@ -2,6 +2,19 @@
 
 Essential information for AI agents and developers working with the GO Feature Flag codebase.
 
+> **💡 Important**: The **Makefile is the easiest way to interact with this repository**. Use `make help` to see all commands.
+
+**Most Common Commands:**
+```bash
+make workspace-init  # Initialize Go workspace (required for monorepo)
+make vendor          # Vendor dependencies
+make test            # Run all tests
+make build           # Build all binaries
+make lint            # Run linter
+make watch-doc       # Start documentation server
+make help            # Show all available commands
+```
+
 ## 🎯 Project Overview
 
 **GO Feature Flag** is a lightweight, open-source feature flagging solution written in Go. This repository is a **monorepo** using Go workspaces.
