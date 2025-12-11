@@ -2,13 +2,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import LinkItem from '@theme/Footer/LinkItem';
+
 function Separator() {
   return <span className="footer__link-separator">·</span>;
 }
-
-Separator.propTypes = {
-  separator: PropTypes.string,
-};
 
 function SimpleLinkItem({item}) {
   return item.html ? (
