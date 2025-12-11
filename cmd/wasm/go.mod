@@ -3,11 +3,9 @@ module github.com/thomaspoignant/go-feature-flag/cmd/wasm
 go 1.24.6
 
 require (
-	github.com/thomaspoignant/go-feature-flag/modules/core v0.2.0
-	github.com/thomaspoignant/go-feature-flag/modules/evaluation v0.1.3
+	github.com/thomaspoignant/go-feature-flag/modules/core v0.3.0
+	github.com/thomaspoignant/go-feature-flag/modules/evaluation v0.2.0
 )
-
-require github.com/rogpeppe/go-internal v1.14.1 // indirect
 
 require (
 	github.com/GeorgeD19/json-logic-go v0.0.0-20220225111652-48cc2d2c387e // indirect

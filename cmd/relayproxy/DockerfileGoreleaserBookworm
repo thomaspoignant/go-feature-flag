@@ -1,3 +1,4 @@
 FROM debian:bookworm-slim
-COPY ./go-feature-flag /go-feature-flag
+ARG TARGETPLATFORM
+COPY $TARGETPLATFORM/go-feature-flag /go-feature-flag
 CMD ["/go-feature-flag"]
