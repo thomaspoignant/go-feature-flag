@@ -52,7 +52,7 @@ func (g *GoFeatureFlag) BoolVariationDetails(
 	ctx ffcontext.Context,
 	defaultValue bool,
 ) (model.VariationResult[bool], error) {
-	res, err := getVariation[bool](g, flagKey, ctx, defaultValue, "bool")
+	res, err := getVariation(g, flagKey, ctx, defaultValue, "bool")
 	notifyVariation(g, flagKey, ctx, res)
 	return res, err
 }
@@ -94,7 +94,7 @@ func IntVariationDetails(
 // Note: Use this function only if you are using multiple go-feature-flag instances.
 func (g *GoFeatureFlag) IntVariationDetails(flagKey string, ctx ffcontext.Context, defaultValue int,
 ) (model.VariationResult[int], error) {
-	res, err := getVariation[int](g, flagKey, ctx, defaultValue, "int")
+	res, err := getVariation(g, flagKey, ctx, defaultValue, "int")
 	notifyVariation(g, flagKey, ctx, res)
 	return res, err
 }
@@ -140,7 +140,7 @@ func (g *GoFeatureFlag) Float64VariationDetails(
 	ctx ffcontext.Context,
 	defaultValue float64,
 ) (model.VariationResult[float64], error) {
-	res, err := getVariation[float64](g, flagKey, ctx, defaultValue, "float64")
+	res, err := getVariation(g, flagKey, ctx, defaultValue, "float64")
 	notifyVariation(g, flagKey, ctx, res)
 	return res, err
 }
@@ -182,7 +182,7 @@ func (g *GoFeatureFlag) StringVariationDetails(
 	ctx ffcontext.Context,
 	defaultValue string,
 ) (model.VariationResult[string], error) {
-	res, err := getVariation[string](g, flagKey, ctx, defaultValue, "string")
+	res, err := getVariation(g, flagKey, ctx, defaultValue, "string")
 	notifyVariation(g, flagKey, ctx, res)
 	return res, err
 }
@@ -226,7 +226,7 @@ func (g *GoFeatureFlag) JSONArrayVariationDetails(
 	ctx ffcontext.Context,
 	defaultValue []interface{},
 ) (model.VariationResult[[]interface{}], error) {
-	res, err := getVariation[[]interface{}](g, flagKey, ctx, defaultValue, "[]interface{}")
+	res, err := getVariation(g, flagKey, ctx, defaultValue, "[]interface{}")
 	notifyVariation(g, flagKey, ctx, res)
 	return res, err
 }
@@ -271,7 +271,7 @@ func (g *GoFeatureFlag) JSONVariationDetails(
 	ctx ffcontext.Context,
 	defaultValue map[string]interface{},
 ) (model.VariationResult[map[string]interface{}], error) {
-	res, err := getVariation[map[string]interface{}](g, flagKey, ctx, defaultValue, "bool")
+	res, err := getVariation(g, flagKey, ctx, defaultValue, "bool")
 	notifyVariation(g, flagKey, ctx, res)
 	return res, err
 }

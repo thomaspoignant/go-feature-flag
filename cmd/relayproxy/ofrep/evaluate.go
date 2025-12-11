@@ -87,7 +87,8 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 		return httpErr
 	}
 
-	defaultValue := "thisisadefaultvaluethatItest1233%%"
+	// we set a nil value to the default value to avoid the default value to be used.
+	var defaultValue interface{} = nil
 	flagValue, _ := flagset.RawVariation(flagKey, evalCtx, defaultValue)
 
 	if flagValue.Reason == flag.ReasonError {
