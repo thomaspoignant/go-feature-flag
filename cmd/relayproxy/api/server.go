@@ -194,7 +194,7 @@ func (s *Server) startAsHTTPServer() {
 }
 
 func (s *Server) startMonitoringServer() {
-	addressMonitoring := fmt.Sprintf("%s:%d", s.config.GetServerHost(), s.config.GetMonitoringPort(s.zapLog))
+	addressMonitoring := fmt.Sprintf("%s:%d", s.config.ServerHost(), s.config.EffectiveMonitoringPort(s.zapLog))
 	s.zapLog.Info(
 		"Starting monitoring",
 		zap.String("address", addressMonitoring))
@@ -241,5 +241,5 @@ func (s *Server) Stop(ctx context.Context) {
 
 // isMonitoringPortConfigured checks if the monitoring port is configured.
 func (s *Server) isMonitoringPortConfigured() bool {
-	return s.monitoringEcho != nil && s.config.GetMonitoringPort(s.zapLog) > 0
+	return s.monitoringEcho != nil && s.config.EffectiveMonitoringPort(s.zapLog) > 0
 }
