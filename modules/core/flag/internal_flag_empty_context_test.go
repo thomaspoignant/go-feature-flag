@@ -134,7 +134,7 @@ func TestInternalFlag_RequiresBucketing(t *testing.T) {
 								},
 							},
 						},
-						Date: testconvert.Time(time.Now().Add(-5 * time.Second)),
+						Date: testconvert.Time(time.Now()),
 					},
 				},
 			},
