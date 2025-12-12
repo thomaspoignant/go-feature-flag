@@ -54,8 +54,7 @@ func (c *notificationService) Close() {
 
 // getDifferences is checking what are the difference in the updated cache.
 func (c *notificationService) getDifferences(
-	oldCache map[string]flag.Flag, newCache map[string]flag.Flag,
-) notifier.DiffCache {
+	oldCache, newCache map[string]flag.Flag) notifier.DiffCache {
 	diff := notifier.DiffCache{
 		Deleted: map[string]flag.Flag{},
 		Added:   map[string]flag.Flag{},

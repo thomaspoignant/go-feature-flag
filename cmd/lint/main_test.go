@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_Invalid_input_file(t *testing.T) {
+func TestInvalidInputFile(t *testing.T) {
 	inputFile := "testdata/invalid-rule.yaml"
 	inputFormat := "yaml"
 	testName := "Test_Invalid_input_file"
@@ -27,7 +27,7 @@ func Test_Invalid_input_file(t *testing.T) {
 	assert.True(t, ok && !e.Success())
 }
 
-func runAppMain(fileName string, format string) {
+func runAppMain(fileName, format string) {
 	args := strings.Split(os.Getenv("SHOULD_CRASH"), " ")
 	os.Args = append([]string{os.Args[0]}, args...)
 	os.Args = append(os.Args, "--input-file="+fileName)

@@ -26,7 +26,6 @@ func TestAzureBlobStorageRetriever(t *testing.T) {
 		name      string
 		want      string
 		wantErr   bool
-		context   context.Context
 		retriever azblobretriever.Retriever
 	}{
 		{
@@ -49,7 +48,6 @@ func TestAzureBlobStorageRetriever(t *testing.T) {
 				Object:      "flag-config.yaml",
 			},
 			want:    "./testdata/flag-config.yaml",
-			context: context.Background(),
 			wantErr: false,
 		},
 		{

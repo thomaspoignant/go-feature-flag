@@ -20,9 +20,9 @@ type SQSSendMessageAPIMock struct {
 	messages []sqs.SendMessageInput
 }
 
-func (s *SQSSendMessageAPIMock) SendMessage(ctx context.Context,
+func (s *SQSSendMessageAPIMock) SendMessage(_ context.Context,
 	params *sqs.SendMessageInput,
-	optFns ...func(*sqs.Options)) (*sqs.SendMessageOutput, error) {
+	_ ...func(*sqs.Options)) (*sqs.SendMessageOutput, error) {
 	if params.QueueUrl != nil && strings.HasSuffix(*params.QueueUrl, "error") {
 		return nil, fmt.Errorf("random error")
 	}
@@ -30,12 +30,12 @@ func (s *SQSSendMessageAPIMock) SendMessage(ctx context.Context,
 	return nil, nil
 }
 
-func TestSQS_IsBulk(t *testing.T) {
+func TestSQSIsBulk(t *testing.T) {
 	exporter := Exporter{}
 	assert.False(t, exporter.IsBulk(), "DeprecatedExporterV1 is not a bulk exporter")
 }
 
-func TestExporter_Export(t *testing.T) {
+func TestExporterExport(t *testing.T) {
 	type fields struct {
 		QueueURL   string
 		AwsConfig  *aws.Config
