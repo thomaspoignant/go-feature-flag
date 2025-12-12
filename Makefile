@@ -2,7 +2,7 @@ GOCMD=go
 TINYGOCMD=tinygo
 GOTEST=$(GOCMD) test
 GOVET=$(GOCMD) vet
-ALL_GO_MOD_DIRS := ./ ./modules/evaluation ./modules/core ./cmd/wasm
+ALL_GO_MOD_DIRS := ./modules/core ./modules/evaluation ./cmd/wasm ./
 
 # In CI we disable workspace mode.
 ifeq ($(CI),true)
@@ -118,7 +118,11 @@ bump-helm-chart-version: ## Bump Helm chart version (usage: make bump-helm-chart
 
 ## Test:
 test: ## Run the tests of the project
-	@$(foreach module, $(ALL_GO_MOD_DIRS), (echo "→ Testing $(module)"; cd $(module) && $(GOWORK_ENV)  $(GOCMD) test -v -race -tags=docker ./...);)
+	@for module in $(ALL_GO_MOD_DIRS); do \
+		echo "→ Testing $$module"; \
+		cd $$module && $(GOWORK_ENV) $(GOCMD) test -v -race -tags=docker ./... || exit 1;  \
+		cd - >/dev/null; \
+	done
 
 provider-tests: ## Run the integration tests for the Open Feature Providers
 	./openfeature/provider_tests/integration_tests.sh
