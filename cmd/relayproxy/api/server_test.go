@@ -137,22 +137,27 @@ func Test_Starting_RelayProxy_with_monitoring_on_different_port(t *testing.T) {
 
 	responseM, err := http.Get("http://localhost:11024/metrics")
 	assert.NoError(t, err)
+	defer func() { _ = responseM.Body.Close() }()
 	assert.Equal(t, http.StatusNotFound, responseM.StatusCode)
 
 	responseI, err := http.Get("http://localhost:11024/info")
 	assert.NoError(t, err)
+	defer func() { _ = responseI.Body.Close() }()
 	assert.Equal(t, http.StatusNotFound, responseI.StatusCode)
 
 	responseH1, err := http.Get("http://localhost:11025/health")
 	assert.NoError(t, err)
+	defer func() { _ = responseH1.Body.Close() }()
 	assert.Equal(t, http.StatusOK, responseH1.StatusCode)
 
 	responseM1, err := http.Get("http://localhost:11025/metrics")
 	assert.NoError(t, err)
+	defer func() { _ = responseM1.Body.Close() }()
 	assert.Equal(t, http.StatusOK, responseM1.StatusCode)
 
 	responseI1, err := http.Get("http://localhost:11025/info")
 	assert.NoError(t, err)
+	defer func() { _ = responseI1.Body.Close() }()
 	assert.Equal(t, http.StatusOK, responseI1.StatusCode)
 }
 
@@ -213,6 +218,7 @@ func Test_CheckOFREPAPIExists(t *testing.T) {
 	req.Header.Add("Content-Type", "application/json")
 	response, err := http.DefaultClient.Do(req)
 	assert.NoError(t, err)
+	defer func() { _ = response.Body.Close() }()
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 
 	req, err = http.NewRequest("POST",
@@ -260,7 +266,8 @@ func Test_Middleware_VersionHeader_Enabled_Default(t *testing.T) {
 	require.NoError(t, err)
 	wsService := service.NewWebsocketService()
 	defer wsService.Close()
-	flagsetManager, _ := service.NewFlagsetManager(proxyConf, log.ZapLogger, nil)
+	flagsetManager, err := service.NewFlagsetManager(proxyConf, log.ZapLogger, nil)
+	require.NoError(t, err)
 
 	services := service.Services{
 		MonitoringService: service.NewMonitoring(flagsetManager),
@@ -305,7 +312,8 @@ func Test_VersionHeader_Disabled(t *testing.T) {
 	require.NoError(t, err)
 	wsService := service.NewWebsocketService()
 	defer wsService.Close()
-	flagsetManager, _ := service.NewFlagsetManager(proxyConf, log.ZapLogger, nil)
+	flagsetManager, err := service.NewFlagsetManager(proxyConf, log.ZapLogger, nil)
+	require.NoError(t, err)
 
 	services := service.Services{
 		MonitoringService: service.NewMonitoring(flagsetManager),
@@ -403,6 +411,7 @@ func Test_AuthenticationMiddleware(t *testing.T) {
 					strings.NewReader(`{"context":{"targetingKey":"some-key"}}`),
 				)
 				assert.NoError(t, err)
+				defer func() { _ = response.Body.Close() }()
 				assert.Equal(t, tt.want, response.StatusCode)
 			})
 		}
@@ -487,6 +496,7 @@ func Test_AuthenticationMiddleware(t *testing.T) {
 				}
 				response, err := http.DefaultClient.Do(request)
 				assert.NoError(t, err)
+				defer func() { _ = response.Body.Close() }()
 				assert.Equal(t, tt.want, response.StatusCode)
 			})
 		}
@@ -570,16 +580,19 @@ func Test_Starting_RelayProxy_UnixSocket(t *testing.T) {
 	// Test health endpoint
 	response, err := client.Get("http://unix/health")
 	assert.NoError(t, err)
+	defer func() { _ = response.Body.Close() }()
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 
 	// Test metrics endpoint
 	responseM, err := client.Get("http://unix/metrics")
 	assert.NoError(t, err)
+	defer func() { _ = responseM.Body.Close() }()
 	assert.Equal(t, http.StatusOK, responseM.StatusCode)
 
 	// Test info endpoint
 	responseI, err := client.Get("http://unix/info")
 	assert.NoError(t, err)
+	defer func() { _ = responseI.Body.Close() }()
 	assert.Equal(t, http.StatusOK, responseI.StatusCode)
 }
 
@@ -739,6 +752,7 @@ func Test_Starting_RelayProxy_UnixSocket_OFREP_API(t *testing.T) {
 	req.Header.Add("Content-Type", "application/json")
 	response, err := client.Do(req)
 	assert.NoError(t, err)
+	defer func() { _ = response.Body.Close() }()
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 
 	// Test OFREP evaluate specific flag endpoint (non-existent flag)
@@ -750,6 +764,7 @@ func Test_Starting_RelayProxy_UnixSocket_OFREP_API(t *testing.T) {
 	req.Header.Add("Content-Type", "application/json")
 	response, err = client.Do(req)
 	assert.NoError(t, err)
+	defer func() { _ = response.Body.Close() }()
 	assert.Equal(t, http.StatusNotFound, response.StatusCode)
 
 	// Test OFREP evaluate specific flag endpoint (existing flag)
@@ -761,6 +776,7 @@ func Test_Starting_RelayProxy_UnixSocket_OFREP_API(t *testing.T) {
 	req.Header.Add("Content-Type", "application/json")
 	response, err = client.Do(req)
 	assert.NoError(t, err)
+	defer func() { _ = response.Body.Close() }()
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 }
 
@@ -892,6 +908,7 @@ func Test_Starting_RelayProxy_UnixSocket_Authentication(t *testing.T) {
 
 			response, err := client.Do(req)
 			assert.NoError(t, err)
+			defer func() { _ = response.Body.Close() }()
 			assert.Equal(t, tt.want, response.StatusCode)
 		})
 	}
@@ -973,6 +990,7 @@ func Test_Starting_RelayProxy_UnixSocket_VersionHeader(t *testing.T) {
 
 			response, err := client.Get("http://unix/health")
 			assert.NoError(t, err)
+			defer func() { _ = response.Body.Close() }()
 			assert.Equal(t, http.StatusOK, response.StatusCode)
 
 			if tt.wantVersionHeader {
