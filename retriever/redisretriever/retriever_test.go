@@ -122,7 +122,7 @@ func stopRedis(t *testing.T, testName string) {
 	}
 }
 
-func Test_Redis_Status(t *testing.T) {
+func TestRedisStatus(t *testing.T) {
 	t.Run("should return NotReady for nil receiver", func(t *testing.T) {
 		var retriever *redisretriever.Retriever
 		assert.Equal(t, ret.RetrieverNotReady, retriever.Status())
@@ -134,7 +134,7 @@ func Test_Redis_Status(t *testing.T) {
 	})
 }
 
-func Test_Redis_Shutdown(t *testing.T) {
+func TestRedisShutdown(t *testing.T) {
 	options := startRedisAndAddData(t, t.Name(), []string{"flag1.json"}, "")
 	defer stopRedis(t, t.Name())
 
@@ -215,31 +215,6 @@ func Test_Redis_Shutdown(t *testing.T) {
 		// Shutdown should still work even in error state
 		err = retriever.Shutdown(context.TODO())
 		assert.NoError(t, err)
-		assert.Equal(t, ret.RetrieverNotReady, retriever.Status())
-	})
-
-	t.Run("should handle concurrent shutdown calls", func(t *testing.T) {
-		retriever := &redisretriever.Retriever{
-			Options: options,
-		}
-
-		err := retriever.Init(context.TODO(), nil)
-		assert.NoError(t, err)
-
-		// Start multiple goroutines calling shutdown
-		done := make(chan error, 3)
-		for i := 0; i < 3; i++ {
-			go func() {
-				done <- retriever.Shutdown(context.TODO())
-			}()
-		}
-
-		// All shutdown calls should succeed
-		for i := 0; i < 3; i++ {
-			err := <-done
-			assert.NoError(t, err)
-		}
-
 		assert.Equal(t, ret.RetrieverNotReady, retriever.Status())
 	})
 

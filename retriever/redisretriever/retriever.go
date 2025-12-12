@@ -51,7 +51,11 @@ func (r *Retriever) Status() retriever.Status {
 
 // Shutdown gracefully shutdown the provider and set the status as not ready.
 func (r *Retriever) Shutdown(_ context.Context) error {
-	if r == nil || r.client == nil {
+	if r == nil {
+		return nil
+	}
+	if r.client == nil {
+		r.status = retriever.RetrieverNotReady
 		return nil
 	}
 	err := r.client.Close()
@@ -68,7 +72,6 @@ func (r *Retriever) Shutdown(_ context.Context) error {
 // Retrieve is the function in charge of fetching the flag configuration.
 func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	var flagsData = make(map[string]interface{})
-
 	iter := r.client.Scan(ctx, 0, r.Prefix+"*", 0).Iterator()
 	for iter.Next(ctx) {
 		key := iter.Val()
