@@ -111,7 +111,7 @@ func (f *Exporter) Export(
 			source = f.Path + "/" + fileName
 		}
 
-		_, err = client.UploadFile(context.Background(), f.Container, source, of, nil)
+		_, err = client.UploadFile(ctx, f.Container, source, of, nil)
 		if err != nil {
 			logger.Error(
 				"[Azure Exporter] failed to upload file",

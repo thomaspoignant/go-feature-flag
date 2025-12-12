@@ -129,12 +129,7 @@ func (f *InternalFlag) Value(
 }
 
 // selectEvaluationReason is choosing which reason has been chosen for the evaluation.
-func selectEvaluationReason(
-	hasRule bool,
-	targetingMatch bool,
-	isDynamic bool,
-	isDefaultRule bool,
-) ResolutionReason {
+func selectEvaluationReason(hasRule, targetingMatch, isDynamic, isDefaultRule bool) ResolutionReason {
 	if hasRule && targetingMatch {
 		if isDynamic {
 			return ReasonTargetingMatchSplit

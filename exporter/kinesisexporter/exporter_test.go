@@ -270,7 +270,7 @@ type MockKinesisSender struct {
 }
 
 func (k *MockKinesisSender) SendMessages(
-	ctx context.Context,
+	_ context.Context,
 	msgs *kinesis.PutRecordsInput,
 ) (*kinesis.PutRecordsOutput, error) {
 	k.PutRecordsInputs = append(k.PutRecordsInputs, msgs)
@@ -287,8 +287,8 @@ func (k *MockKinesisSender) SendMessages(
 type MockKinesisSenderWithError struct{}
 
 func (k *MockKinesisSenderWithError) SendMessages(
-	ctx context.Context,
-	msgs *kinesis.PutRecordsInput,
+	_ context.Context,
+	_ *kinesis.PutRecordsInput,
 ) (*kinesis.PutRecordsOutput, error) {
 	return nil, errors.New("failure to send message: datacenter on fire")
 }

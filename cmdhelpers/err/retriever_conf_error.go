@@ -13,7 +13,7 @@ type RetrieverConfError struct {
 	kind     string
 }
 
-func NewRetrieverConfError(property string, kind string) *RetrieverConfError {
+func NewRetrieverConfError(property, kind string) *RetrieverConfError {
 	return &RetrieverConfError{
 		property: property,
 		kind:     kind,

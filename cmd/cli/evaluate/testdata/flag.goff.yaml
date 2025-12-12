@@ -30,3 +30,13 @@ test-flag2:
   defaultRule:
     name: defaultRule
     variation: Default
+
+simple-flag:
+  variations:
+    A: false
+    B: true
+  defaultRule:
+    variation: B
+  metadata:
+    description: this is a simple feature flag
+    issue-link: https://jira.xxx/GOFF-01
