@@ -13,7 +13,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 )
 
-func TestGetAPIKey(t *testing.T) {
+func TestAPIKey(t *testing.T) {
 	tests := []struct {
 		name           string
 		authorization  string
@@ -165,7 +165,7 @@ func TestGetAPIKey(t *testing.T) {
 			}
 
 			// Call the function
-			result := helper.GetAPIKey(c)
+			result := helper.APIKey(c)
 
 			// Assert the result
 			assert.Equal(t, tt.expectedAPIKey, result, "GetAPIKey() = %v, want %v", result, tt.expectedAPIKey)
@@ -173,7 +173,7 @@ func TestGetAPIKey(t *testing.T) {
 	}
 }
 
-func TestGetFlagSet(t *testing.T) {
+func TestFlagSet(t *testing.T) {
 	tests := []struct {
 		name           string
 		flagsetManager service.FlagsetManager
@@ -212,7 +212,7 @@ func TestGetFlagSet(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			flagset, err := helper.GetFlagSet(tt.flagsetManager, tt.apiKey)
+			flagset, err := helper.FlagSet(tt.flagsetManager, tt.apiKey)
 			if tt.wantError {
 				assert.Error(t, err)
 				assert.Nil(t, flagset)
@@ -230,10 +230,10 @@ func TestGetFlagSet(t *testing.T) {
 	}
 }
 
-func TestGetFlagSet_Integration(t *testing.T) {
+func TestFlagSet_Integration(t *testing.T) {
 	t.Run("should handle specific error messages correctly", func(t *testing.T) {
 		mockManager := &MockFlagsetManager{err: errors.New("test error")}
-		flagset, err := helper.GetFlagSet(mockManager, "test-key")
+		flagset, err := helper.FlagSet(mockManager, "test-key")
 		assert.Error(t, err)
 		assert.Nil(t, flagset)
 		assert.Contains(t, err.Message, "error while getting flagset:")
@@ -241,7 +241,7 @@ func TestGetFlagSet_Integration(t *testing.T) {
 
 	t.Run("should return flagset when manager returns valid flagset", func(t *testing.T) {
 		mockManager := &MockFlagsetManager{flagset: &ffclient.GoFeatureFlag{}}
-		flagset, err := helper.GetFlagSet(mockManager, "valid-key")
+		flagset, err := helper.FlagSet(mockManager, "valid-key")
 		if err != nil || flagset == nil {
 			t.Logf("DEBUG: err=%v, flagset=%v", err, flagset)
 		}
@@ -256,19 +256,19 @@ type MockFlagsetManager struct {
 	err     error
 }
 
-func (m *MockFlagsetManager) GetFlagSet(apiKey string) (*ffclient.GoFeatureFlag, error) {
+func (m *MockFlagsetManager) FlagSet(apiKey string) (*ffclient.GoFeatureFlag, error) {
 	return m.flagset, m.err
 }
 
-func (m *MockFlagsetManager) GetFlagSetName(apiKey string) (string, error) {
+func (m *MockFlagsetManager) FlagSetName(apiKey string) (string, error) {
 	return "", nil
 }
 
-func (m *MockFlagsetManager) GetFlagSets() (map[string]*ffclient.GoFeatureFlag, error) {
+func (m *MockFlagsetManager) AllFlagSets() (map[string]*ffclient.GoFeatureFlag, error) {
 	return nil, nil
 }
 
-func (m *MockFlagsetManager) GetDefaultFlagSet() *ffclient.GoFeatureFlag {
+func (m *MockFlagsetManager) Default() *ffclient.GoFeatureFlag {
 	return nil
 }
 

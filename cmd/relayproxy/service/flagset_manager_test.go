@@ -111,7 +111,7 @@ func TestNewFlagsetManager(t *testing.T) {
 	}
 }
 
-func TestFlagsetManager_GetFlagSet(t *testing.T) {
+func TestFlagsetManager_FlagSet(t *testing.T) {
 	flagConfig := "../testdata/controller/configuration_flags.yaml"
 
 	// Test flagset mode
@@ -140,23 +140,23 @@ func TestFlagsetManager_GetFlagSet(t *testing.T) {
 		defer manager.Close()
 
 		t.Run("valid api key", func(t *testing.T) {
-			flagset, err := manager.GetFlagSet("test-api-key")
+			flagset, err := manager.FlagSet("test-api-key")
 			assert.NoError(t, err)
 			assert.NotNil(t, flagset)
 		})
 		t.Run("invalid api key", func(t *testing.T) {
-			flagset, err := manager.GetFlagSet("invalid-key")
+			flagset, err := manager.FlagSet("invalid-key")
 			assert.Error(t, err)
 			assert.Nil(t, flagset)
 		})
 		t.Run("empty api key", func(t *testing.T) {
-			flagset, err := manager.GetFlagSet("")
+			flagset, err := manager.FlagSet("")
 			assert.Error(t, err)
 			assert.Nil(t, flagset)
 		})
 
 		t.Run("empty api key", func(t *testing.T) {
-			flagset, err := manager.GetFlagSet("")
+			flagset, err := manager.FlagSet("")
 			assert.Error(t, err)
 			assert.Nil(t, flagset)
 		})
@@ -183,14 +183,14 @@ func TestFlagsetManager_GetFlagSet(t *testing.T) {
 		defer manager.Close()
 
 		t.Run("empty api key should work", func(t *testing.T) {
-			flagset, err := manager.GetFlagSet("")
+			flagset, err := manager.FlagSet("")
 			assert.NoError(t, err)
 			assert.NotNil(t, flagset)
 		})
 	})
 }
 
-func TestFlagsetManager_GetFlagSetName(t *testing.T) {
+func TestFlagsetManager_FlagSetName(t *testing.T) {
 	flagConfig := "../testdata/controller/configuration_flags.yaml"
 
 	// Test flagset mode
@@ -219,12 +219,12 @@ func TestFlagsetManager_GetFlagSetName(t *testing.T) {
 		defer manager.Close()
 
 		t.Run("existing api key", func(t *testing.T) {
-			name, err := manager.GetFlagSetName("test-api-key")
+			name, err := manager.FlagSetName("test-api-key")
 			assert.NoError(t, err)
 			assert.Equal(t, "test-flagset", name)
 		})
 		t.Run("non-existing api key", func(t *testing.T) {
-			name, err := manager.GetFlagSetName("invalid-key")
+			name, err := manager.FlagSetName("invalid-key")
 			assert.Error(t, err)
 			assert.Equal(t, "", name)
 			assert.Equal(t, "no flag set associated to the API key", err.Error())
@@ -252,14 +252,14 @@ func TestFlagsetManager_GetFlagSetName(t *testing.T) {
 		defer manager.Close()
 
 		t.Run("empty api key should return default", func(t *testing.T) {
-			name, err := manager.GetFlagSetName("")
+			name, err := manager.FlagSetName("")
 			assert.NoError(t, err)
 			assert.Equal(t, "default", name)
 		})
 	})
 }
 
-func TestFlagsetManager_GetFlagSets(t *testing.T) {
+func TestFlagsetManager_AllFlagSets(t *testing.T) {
 	flagConfig := "../testdata/controller/configuration_flags.yaml"
 
 	// Test flagset mode
@@ -297,7 +297,7 @@ func TestFlagsetManager_GetFlagSets(t *testing.T) {
 		assert.NotNil(t, manager)
 		defer manager.Close()
 
-		flagsets, err := manager.GetFlagSets()
+		flagsets, err := manager.AllFlagSets()
 		assert.NoError(t, err)
 		assert.Len(t, flagsets, 2)
 		assert.Contains(t, flagsets, "test-flagset-1")
@@ -338,7 +338,7 @@ func TestFlagsetManager_GetFlagSets(t *testing.T) {
 		assert.NotNil(t, manager)
 		defer manager.Close()
 
-		flagsets, err := manager.GetFlagSets()
+		flagsets, err := manager.AllFlagSets()
 		assert.NoError(t, err)
 		assert.Len(t, flagsets, 2)
 		assert.NotContains(t, flagsets, "default")
@@ -365,14 +365,14 @@ func TestFlagsetManager_GetFlagSets(t *testing.T) {
 		assert.NotNil(t, manager)
 		defer manager.Close()
 
-		flagsets, err := manager.GetFlagSets()
+		flagsets, err := manager.AllFlagSets()
 		assert.NoError(t, err)
 		assert.Len(t, flagsets, 1)
 		assert.Contains(t, flagsets, "default")
 	})
 }
 
-func TestFlagsetManager_GetDefaultFlagSet(t *testing.T) {
+func TestFlagsetManager_Default(t *testing.T) {
 	flagConfig := "../testdata/controller/configuration_flags.yaml"
 
 	// Test default mode
@@ -395,7 +395,7 @@ func TestFlagsetManager_GetDefaultFlagSet(t *testing.T) {
 		assert.NotNil(t, manager)
 		defer manager.Close()
 
-		defaultFlagset := manager.GetDefaultFlagSet()
+		defaultFlagset := manager.Default()
 		assert.NotNil(t, defaultFlagset)
 	})
 
@@ -424,7 +424,7 @@ func TestFlagsetManager_GetDefaultFlagSet(t *testing.T) {
 		assert.NotNil(t, manager)
 		defer manager.Close()
 
-		defaultFlagset := manager.GetDefaultFlagSet()
+		defaultFlagset := manager.Default()
 		assert.Nil(t, defaultFlagset)
 	})
 }

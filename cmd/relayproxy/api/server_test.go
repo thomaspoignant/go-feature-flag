@@ -53,9 +53,7 @@ func Test_Starting_RelayProxy_with_monitoring_on_same_port(t *testing.T) {
 		prometheusNotifier,
 		proxyNotifier,
 	})
-	if err != nil {
-		panic(err)
-	}
+	assert.NoError(t, err)
 
 	services := service.Services{
 		MonitoringService: service.NewMonitoring(flagsetManager),
@@ -72,14 +70,17 @@ func Test_Starting_RelayProxy_with_monitoring_on_same_port(t *testing.T) {
 
 	response, err := http.Get("http://localhost:11024/health")
 	assert.NoError(t, err)
+	defer func() { _ = response.Body.Close() }()
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 
 	responseM, err := http.Get("http://localhost:11024/metrics")
 	assert.NoError(t, err)
+	defer func() { _ = responseM.Body.Close() }()
 	assert.Equal(t, http.StatusOK, responseM.StatusCode)
 
 	responseI, err := http.Get("http://localhost:11024/info")
 	assert.NoError(t, err)
+	defer func() { _ = responseI.Body.Close() }()
 	assert.Equal(t, http.StatusOK, responseI.StatusCode)
 }
 
@@ -114,9 +115,7 @@ func Test_Starting_RelayProxy_with_monitoring_on_different_port(t *testing.T) {
 		prometheusNotifier,
 		proxyNotifier,
 	})
-	if err != nil {
-		panic(err)
-	}
+	assert.NoError(t, err)
 
 	services := service.Services{
 		MonitoringService: service.NewMonitoring(flagsetManager),
@@ -133,6 +132,7 @@ func Test_Starting_RelayProxy_with_monitoring_on_different_port(t *testing.T) {
 
 	response, err := http.Get("http://localhost:11024/health")
 	assert.NoError(t, err)
+	defer func() { _ = response.Body.Close() }()
 	assert.Equal(t, http.StatusNotFound, response.StatusCode)
 
 	responseM, err := http.Get("http://localhost:11024/metrics")
@@ -190,9 +190,7 @@ func Test_CheckOFREPAPIExists(t *testing.T) {
 		prometheusNotifier,
 		proxyNotifier,
 	})
-	if err != nil {
-		panic(err)
-	}
+	assert.NoError(t, err)
 
 	services := service.Services{
 		MonitoringService: service.NewMonitoring(flagsetManager),
@@ -225,6 +223,7 @@ func Test_CheckOFREPAPIExists(t *testing.T) {
 	req.Header.Add("Content-Type", "application/json")
 	response, err = http.DefaultClient.Do(req)
 	assert.NoError(t, err)
+	defer func() { _ = response.Body.Close() }()
 	assert.Equal(t, http.StatusNotFound, response.StatusCode)
 
 	req, err = http.NewRequest("POST",
@@ -235,6 +234,7 @@ func Test_CheckOFREPAPIExists(t *testing.T) {
 	req.Header.Add("Content-Type", "application/json")
 	response, err = http.DefaultClient.Do(req)
 	assert.NoError(t, err)
+	defer func() { _ = response.Body.Close() }()
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 }
 
@@ -256,7 +256,8 @@ func Test_Middleware_VersionHeader_Enabled_Default(t *testing.T) {
 	log := log.InitLogger()
 	defer func() { _ = log.ZapLogger.Sync() }()
 
-	metricsV2, _ := metric.NewMetrics()
+	metricsV2, err := metric.NewMetrics()
+	require.NoError(t, err)
 	wsService := service.NewWebsocketService()
 	defer wsService.Close()
 	flagsetManager, _ := service.NewFlagsetManager(proxyConf, log.ZapLogger, nil)
@@ -276,6 +277,7 @@ func Test_Middleware_VersionHeader_Enabled_Default(t *testing.T) {
 
 	response, err := http.Get("http://localhost:11024/health")
 	assert.NoError(t, err)
+	defer func() { _ = response.Body.Close() }()
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 	assert.Equal(t, proxyConf.Version, response.Header.Get("X-GOFEATUREFLAG-VERSION"))
 }
@@ -299,7 +301,8 @@ func Test_VersionHeader_Disabled(t *testing.T) {
 	log := log.InitLogger()
 	defer func() { _ = log.ZapLogger.Sync() }()
 
-	metricsV2, _ := metric.NewMetrics()
+	metricsV2, err := metric.NewMetrics()
+	require.NoError(t, err)
 	wsService := service.NewWebsocketService()
 	defer wsService.Close()
 	flagsetManager, _ := service.NewFlagsetManager(proxyConf, log.ZapLogger, nil)
@@ -319,6 +322,7 @@ func Test_VersionHeader_Disabled(t *testing.T) {
 
 	response, err := http.Get("http://localhost:11024/health")
 	assert.NoError(t, err)
+	defer func() { _ = response.Body.Close() }()
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 	assert.Empty(t, response.Header.Get("X-GOFEATUREFLAG-VERSION"))
 }
@@ -376,7 +380,8 @@ func Test_AuthenticationMiddleware(t *testing.T) {
 				log := log.InitLogger()
 				defer func() { _ = log.ZapLogger.Sync() }()
 
-				metricsV2, _ := metric.NewMetrics()
+				metricsV2, err := metric.NewMetrics()
+				require.NoError(t, err)
 				wsService := service.NewWebsocketService()
 				defer wsService.Close()
 				flagsetManager, err := service.NewFlagsetManager(proxyConf, log.ZapLogger, nil)
@@ -455,7 +460,8 @@ func Test_AuthenticationMiddleware(t *testing.T) {
 				log := log.InitLogger()
 				defer func() { _ = log.ZapLogger.Sync() }()
 
-				metricsV2, _ := metric.NewMetrics()
+				metricsV2, err := metric.NewMetrics()
+				require.NoError(t, err)
 				wsService := service.NewWebsocketService()
 				defer wsService.Close()
 				flagsetManager, err := service.NewFlagsetManager(proxyConf, log.ZapLogger, nil)
@@ -841,7 +847,8 @@ func Test_Starting_RelayProxy_UnixSocket_Authentication(t *testing.T) {
 			log := log.InitLogger()
 			defer func() { _ = log.ZapLogger.Sync() }()
 
-			metricsV2, _ := metric.NewMetrics()
+			metricsV2, err := metric.NewMetrics()
+			require.NoError(t, err)
 			wsService := service.NewWebsocketService()
 			defer wsService.Close()
 			flagsetManager, err := service.NewFlagsetManager(proxyConf, log.ZapLogger, nil)

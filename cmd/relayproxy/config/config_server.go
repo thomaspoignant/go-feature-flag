@@ -56,9 +56,9 @@ type Server struct {
 	AwsApiGatewayBasePath string `mapstructure:"awsApiGatewayBasePath" koanf:"awsapigatewaybasepath"`
 }
 
-// GetMonitoringPort returns the monitoring port, checking first the top-level config
+// EffectiveMonitoringPort returns the monitoring port, checking first the top-level config
 // and then the server config.
-func (c *Config) GetMonitoringPort(logger *zap.Logger) int {
+func (c *Config) EffectiveMonitoringPort(logger *zap.Logger) int {
 	if c.Server.MonitoringPort != 0 {
 		return c.Server.MonitoringPort
 	}
@@ -72,17 +72,17 @@ func (c *Config) GetMonitoringPort(logger *zap.Logger) int {
 	return 0
 }
 
-// GetServerHost returns the server host, defaulting to "0.0.0.0" if not set.
-func (c *Config) GetServerHost() string {
+// ServerHost returns the server host, defaulting to "0.0.0.0" if not set.
+func (c *Config) ServerHost() string {
 	if c.Server.Host != "" {
 		return c.Server.Host
 	}
 	return "0.0.0.0"
 }
 
-// GetServerPort returns the server port, checking first the server config
+// ServerPort returns the server port, checking first the server config
 // and then the top-level config, defaulting to 1031 if not set.
-func (c *Config) GetServerPort(logger *zap.Logger) int {
+func (c *Config) ServerPort(logger *zap.Logger) int {
 	if c.Server.Port != 0 {
 		return c.Server.Port
 	}
@@ -96,9 +96,9 @@ func (c *Config) GetServerPort(logger *zap.Logger) int {
 	return 1031
 }
 
-// GetServerMode returns the server mode, checking first the server config
+// ServerMode returns the server mode, checking first the server config
 // and then the top-level config, defaulting to HTTP if not set.
-func (c *Config) GetServerMode(logger *zap.Logger) ServerMode {
+func (c *Config) ServerMode(logger *zap.Logger) ServerMode {
 	if c.Server.Mode != "" {
 		return c.Server.Mode
 	}
@@ -114,9 +114,9 @@ func (c *Config) GetServerMode(logger *zap.Logger) ServerMode {
 	return ServerModeHTTP
 }
 
-// GetLambdaAdapter returns the lambda adapter, checking first the server config
+// LambdaAdapter returns the lambda adapter, checking first the server config
 // and then the top-level config, defaulting to APIGatewayV2 if not set.
-func (c *Config) GetLambdaAdapter(logger *zap.Logger) LambdaAdapter {
+func (c *Config) LambdaAdapter(logger *zap.Logger) LambdaAdapter {
 	if c.Server.LambdaAdapter != "" {
 		return c.Server.LambdaAdapter
 	}
@@ -132,9 +132,9 @@ func (c *Config) GetLambdaAdapter(logger *zap.Logger) LambdaAdapter {
 	return LambdaAdapterAPIGatewayV2
 }
 
-// GetAwsApiGatewayBasePath returns the AWS API Gateway base path, checking first the server config
+// EffectiveAwsApiGatewayBasePath returns the AWS API Gateway base path, checking first the server config
 // and then the top-level config, defaulting to empty string if not set.
-func (c *Config) GetAwsApiGatewayBasePath(logger *zap.Logger) string {
+func (c *Config) EffectiveAwsApiGatewayBasePath(logger *zap.Logger) string {
 	if c.Server.AwsApiGatewayBasePath != "" {
 		return c.Server.AwsApiGatewayBasePath
 	}
@@ -150,7 +150,7 @@ func (c *Config) GetAwsApiGatewayBasePath(logger *zap.Logger) string {
 	return ""
 }
 
-// GetUnixSocketPath returns the unix socket path.
-func (c *Config) GetUnixSocketPath() string {
+// UnixSocketPath returns the unix socket path.
+func (c *Config) UnixSocketPath() string {
 	return c.Server.UnixSocketPath
 }

@@ -68,7 +68,7 @@ func TestPprofEndpointsStarts(t *testing.T) {
 				Metrics:           metric.Metrics{},
 			}, z)
 
-			portToCheck := c.GetServerPort(z)
+			portToCheck := c.ServerPort(z)
 			if tt.MonitoringPort != 0 {
 				portToCheck = tt.MonitoringPort
 			}
@@ -77,6 +77,7 @@ func TestPprofEndpointsStarts(t *testing.T) {
 			defer apiServer.Stop(context.Background())
 			time.Sleep(1 * time.Second) // waiting for the apiServer to start
 			resp, err := http.Get(fmt.Sprintf("http://localhost:%d/debug/pprof/heap", portToCheck))
+			defer func() { _ = resp.Body.Close() }()
 			require.NoError(t, err)
 			require.Equal(t, tt.expectedStatusCode, resp.StatusCode)
 		})

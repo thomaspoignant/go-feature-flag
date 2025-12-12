@@ -61,7 +61,7 @@ func (h *allFlags) Handler(c echo.Context) error {
 	_, span := tracer.Start(c.Request().Context(), "AllFlagsState")
 	defer span.End()
 
-	flagset, httpErr := helper.GetFlagSet(h.flagsetManager, helper.GetAPIKey(c))
+	flagset, httpErr := helper.FlagSet(h.flagsetManager, helper.APIKey(c))
 	if httpErr != nil {
 		return httpErr
 	}

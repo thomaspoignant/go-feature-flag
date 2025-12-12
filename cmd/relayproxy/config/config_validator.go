@@ -31,9 +31,9 @@ func (c *Config) IsValid() error {
 
 // validateServerConfig validates the server configuration
 func (c *Config) validateServerConfig() error {
-	mode := c.GetServerMode(nil)
+	mode := c.ServerMode(nil)
 	if mode == ServerModeUnixSocket {
-		if c.GetUnixSocketPath() == "" {
+		if c.UnixSocketPath() == "" {
 			return errors.New("unixSocketPath must be set when server mode is unixsocket")
 		}
 	}

@@ -7,7 +7,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/cli/generate/manifest/model"
 )
 
-func GetFlagTypeFromVariations(variations map[string]*interface{}) (model.FlagType, error) {
+func FlagTypeFromVariations(variations map[string]*interface{}) (model.FlagType, error) {
 	if variations == nil {
 		return "", fmt.Errorf("impossible to find type, no variations found")
 	}

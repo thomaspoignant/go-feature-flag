@@ -28,7 +28,7 @@ func NewLintCmd() *cobra.Command {
 func runLint(cmd *cobra.Command, args []string, lintFlagFormat string) error {
 	output := helper.Output{}
 	l := Linter{
-		InputFile:   getFilePath(args),
+		InputFile:   extractFilePathFromArgs(args),
 		InputFormat: lintFlagFormat,
 	}
 	if errs := l.Lint(); len(errs) > 0 {
@@ -44,7 +44,7 @@ func runLint(cmd *cobra.Command, args []string, lintFlagFormat string) error {
 	return nil
 }
 
-func getFilePath(args []string) string {
+func extractFilePathFromArgs(args []string) string {
 	if len(args) == 0 {
 		return ""
 	}
