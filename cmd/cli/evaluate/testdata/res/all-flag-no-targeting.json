@@ -1,0 +1,42 @@
+{
+    "simple-flag": {
+        "trackEvents": true,
+        "variationType": "B",
+        "failed": false,
+        "version": "",
+        "reason": "STATIC",
+        "errorCode": "",
+        "value": true,
+        "cacheable": true,
+        "metadata": {
+            "description": "this is a simple feature flag",
+            "issue-link": "https://jira.xxx/GOFF-01"
+        }
+    },
+    "test-flag": {
+        "trackEvents": true,
+        "variationType": "SdkDefault",
+        "failed": true,
+        "version": "",
+        "reason": "ERROR",
+        "errorCode": "TARGETING_KEY_MISSING",
+        "errorDetails": "Error: Empty targeting key",
+        "value": null,
+        "cacheable": false,
+        "metadata": {
+            "description": "this is a simple feature flag",
+            "issue-link": "https://jira.xxx/GOFF-01"
+        }
+    },
+    "test-flag2": {
+        "trackEvents": true,
+        "variationType": "SdkDefault",
+        "failed": true,
+        "version": "",
+        "reason": "ERROR",
+        "errorCode": "TARGETING_KEY_MISSING",
+        "errorDetails": "Error: Empty targeting key",
+        "value": null,
+        "cacheable": false
+    }
+}

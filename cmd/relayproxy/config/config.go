@@ -51,6 +51,7 @@ var DefaultExporter = struct {
 
 type Config struct {
 	CommonFlagSet `mapstructure:",inline" koanf:",squash"`
+
 	// ListenPort (optional) is the port we are using to start the proxy
 	//
 	// Deprecated: use Server.Port instead

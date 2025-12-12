@@ -22,5 +22,19 @@
     "errorCode": "",
     "value": false,
     "cacheable": true
+  },
+  "simple-flag": {
+    "trackEvents": true,
+    "variationType": "B",
+    "failed": false,
+    "version": "",
+    "reason": "STATIC",
+    "errorCode": "",
+    "value": true,
+    "cacheable": true,
+    "metadata": {
+      "description": "this is a simple feature flag",
+      "issue-link": "https://jira.xxx/GOFF-01"
+    }
   }
 }

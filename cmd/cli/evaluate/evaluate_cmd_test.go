@@ -31,8 +31,8 @@ func TestCmdEvaluate(t *testing.T) {
 				"--format",
 				"yaml",
 			},
-			wantErr:        assert.NoError,
-			expectedResult: "testdata/res/empty.json",
+			wantErr:     assert.Error,
+			expectedErr: "flag non-existent-flag is not present or disabled",
 		},
 		{
 			name: "should return all flags if no flag is provided",
@@ -100,14 +100,17 @@ func TestCmdEvaluate(t *testing.T) {
 		{
 			name: "should return an error if context has no targeting key",
 			args: []string{
-				"--config",
+				"--kind",
+				"file",
+				"--path",
 				"testdata/flag.goff.yaml",
 				"--ctx",
 				`{"id": "user-123"}`,
 				"--format",
 				"yaml",
 			},
-			wantErr: assert.Error,
+			wantErr:        assert.NoError,
+			expectedResult: "testdata/res/all-flag-no-targeting.json",
 		},
 		{
 			name: "should return configuration of http retriever with headers set properly when using check-mode",
