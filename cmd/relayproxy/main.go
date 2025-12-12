@@ -120,5 +120,54 @@ func main() {
 		defer cancel()
 		apiServer.Stop(ctx)
 	}()
+
+	// Start config file watcher if flagsets are configured
+	if len(proxyConf.FlagSets) > 0 {
+		configFilePath, err := config.GetConfigFilePath()
+		if err == nil {
+			err = config.WatchConfigFile(configFilePath, func() error {
+				return reloadFlagsets(f, flagsetManager, logger.ZapLogger, version, []notifier.Notifier{
+					prometheusNotifier,
+					proxyNotifier,
+				})
+			}, logger.ZapLogger)
+			if err != nil {
+				logger.ZapLogger.Warn("could not start config file watcher", zap.Error(err))
+			}
+		} else {
+			logger.ZapLogger.Warn("could not start config file watcher", zap.Error(err))
+		}
+	}
+
 	apiServer.StartWithContext(context.Background())
+}
+
+// reloadFlagsets reloads the configuration file and updates flagsets
+func reloadFlagsets(
+	flagSet *pflag.FlagSet,
+	flagsetManager service.FlagsetManager,
+	logger *zap.Logger,
+	version string,
+	notifiers []notifier.Notifier,
+) error {
+	logger.Info("configuration file changed, reloading flagsets")
+
+	// Reload configuration from file
+	newConfig, err := config.ReloadFromFile(flagSet, logger, version)
+	if err != nil {
+		return fmt.Errorf("failed to reload configuration file: %w", err)
+	}
+
+	// Validate configuration
+	if err := newConfig.IsValid(); err != nil {
+		return fmt.Errorf("reloaded configuration is invalid: %w", err)
+	}
+
+	// Reload flagsets
+	if err := flagsetManager.ReloadFlagsets(newConfig, logger, notifiers); err != nil {
+		return fmt.Errorf("failed to reload flagsets: %w", err)
+	}
+
+	logger.Info("flagsets reloaded successfully")
+	return nil
 }

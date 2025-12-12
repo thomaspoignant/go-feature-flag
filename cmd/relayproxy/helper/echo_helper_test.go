@@ -9,8 +9,11 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/helper"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/notifier"
+	"go.uber.org/zap"
 )
 
 func TestGetAPIKey(t *testing.T) {
@@ -256,11 +259,11 @@ type MockFlagsetManager struct {
 	err     error
 }
 
-func (m *MockFlagsetManager) GetFlagSet(apiKey string) (*ffclient.GoFeatureFlag, error) {
+func (m *MockFlagsetManager) GetFlagSet(_ string) (*ffclient.GoFeatureFlag, error) {
 	return m.flagset, m.err
 }
 
-func (m *MockFlagsetManager) GetFlagSetName(apiKey string) (string, error) {
+func (m *MockFlagsetManager) GetFlagSetName(_ string) (string, error) {
 	return "", nil
 }
 
@@ -274,6 +277,11 @@ func (m *MockFlagsetManager) GetDefaultFlagSet() *ffclient.GoFeatureFlag {
 
 func (m *MockFlagsetManager) IsDefaultFlagSet() bool {
 	return false
+}
+
+func (m *MockFlagsetManager) ReloadFlagsets(newConfig *config.Config, logger *zap.Logger, notifiers []notifier.Notifier) error {
+	// nothing to do for mock
+	return nil
 }
 
 func (m *MockFlagsetManager) Close() {
