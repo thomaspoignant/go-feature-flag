@@ -143,14 +143,14 @@ func initializeDataExporters(config Config, logger *fflog.FFLogger) (
 	var trackingEventManager exporter.Manager[exporter.TrackingEvent]
 	if len(trackingEventExporterConfigs) > 0 {
 		trackingEventManager = exporter.NewManager[exporter.TrackingEvent](
-			config.Context, trackingEventExporterConfigs, config.ExporterCleanQueueInterval, logger)
+			trackingEventExporterConfigs, config.ExporterCleanQueueInterval, logger)
 		trackingEventManager.Start()
 	}
 
 	var featureEventManager exporter.Manager[exporter.FeatureEvent]
 	if len(featureEventExporterConfigs) > 0 {
 		featureEventManager = exporter.NewManager[exporter.FeatureEvent](
-			config.Context, featureEventExporterConfigs, config.ExporterCleanQueueInterval, logger)
+			featureEventExporterConfigs, config.ExporterCleanQueueInterval, logger)
 		featureEventManager.Start()
 	}
 	return featureEventManager, trackingEventManager
