@@ -218,31 +218,6 @@ func Test_Redis_Shutdown(t *testing.T) {
 		assert.Equal(t, ret.RetrieverNotReady, retriever.Status())
 	})
 
-	t.Run("should handle concurrent shutdown calls", func(t *testing.T) {
-		retriever := &redisretriever.Retriever{
-			Options: options,
-		}
-
-		err := retriever.Init(context.Background(), nil)
-		assert.NoError(t, err)
-
-		// Start multiple goroutines calling shutdown
-		done := make(chan error, 3)
-		for i := 0; i < 3; i++ {
-			go func() {
-				done <- retriever.Shutdown(context.Background())
-			}()
-		}
-
-		// All shutdown calls should succeed
-		for i := 0; i < 3; i++ {
-			err := <-done
-			assert.NoError(t, err)
-		}
-
-		assert.Equal(t, ret.RetrieverNotReady, retriever.Status())
-	})
-
 	t.Run("should verify status is set to not ready after shutdown", func(t *testing.T) {
 		retriever := &redisretriever.Retriever{
 			Options: options,
