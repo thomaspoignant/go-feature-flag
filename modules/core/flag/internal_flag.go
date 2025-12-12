@@ -405,7 +405,7 @@ func (f *InternalFlag) RequiresBucketing() bool {
 	// Check if any scheduled rollout steps introduce bucketing requirements
 	if f.Scheduled != nil {
 		for _, step := range *f.Scheduled {
-			if f.defaultRuleRequiresBucketing() || f.rulesRequireBucketing(step.GetRules()) {
+			if step.defaultRuleRequiresBucketing() || step.rulesRequireBucketing(step.GetRules()) {
 				return true
 			}
 		}
