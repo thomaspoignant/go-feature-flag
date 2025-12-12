@@ -1,12 +1,9 @@
-server:
-	  mode: http
-	  port: 1031
-	  monitoringPort: 1032
+listen: 1031
   - test
 pollingInterval: 1000
 startWithRetrieverError: false
 retriever:
   kind: http
-  url: https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/file/flags.goff.yaml
+  url: https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/file/flags.yaml
 exporter:
   kind: log

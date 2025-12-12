@@ -679,7 +679,7 @@ func Test_PersistFlagConfigurationOnDisk(t *testing.T) {
 	assert.NotEqual(t, contentP2, contentP3)
 }
 
-func Test_UseCustomBucketingKey(t *testing.T) {
+func TestUseCustomBucketingKey(t *testing.T) {
 	gffClient, err := ffclient.New(ffclient.Config{
 		PollingInterval: 1 * time.Second,
 		Retriever: &fileretriever.Retriever{
@@ -690,7 +690,7 @@ func Test_UseCustomBucketingKey(t *testing.T) {
 	})
 	assert.NoError(t, err)
 
-	{
+	t.Run("should return the default value if the bucketing key is not found", func(t *testing.T) {
 		got, err := gffClient.StringVariationDetails(
 			"my-flag",
 			ffcontext.NewEvaluationContext("random-key"),
@@ -704,12 +704,12 @@ func Test_UseCustomBucketingKey(t *testing.T) {
 			Failed:        true,
 			Reason:        flag.ReasonError,
 			ErrorCode:     flag.ErrorCodeTargetingKeyMissing,
-			ErrorDetails:  "invalid bucketing key",
+			ErrorDetails:  "impossible to find bucketingKey in context: nested key not found: teamId",
 		}
 		assert.Equal(t, want, got)
-	}
+	})
 
-	{
+	t.Run("should return the variation value if the bucketing key is found", func(t *testing.T) {
 		got, err := gffClient.StringVariationDetails(
 			"my-flag",
 			ffcontext.NewEvaluationContextBuilder("random-key").
@@ -727,7 +727,7 @@ func Test_UseCustomBucketingKey(t *testing.T) {
 			Cacheable:     true,
 		}
 		assert.Equal(t, want, got)
-	}
+	})
 }
 
 func Test_DisableNotifierOnInit(t *testing.T) {
