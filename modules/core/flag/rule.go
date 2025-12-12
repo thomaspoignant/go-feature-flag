@@ -358,7 +358,7 @@ func (r *Rule) GetProgressiveRollout() ProgressiveRollout {
 // from a schedule steps.
 // If you want to edit a rule this rule should have a name already to be able to
 // target the updates to the right place.
-func MergeSetOfRules(initialRules []Rule, updates []Rule) *[]Rule {
+func MergeSetOfRules(initialRules, updates []Rule) *[]Rule {
 	collection := initialRules
 	modified := make(map[string]Rule, 0)
 	for _, update := range updates {

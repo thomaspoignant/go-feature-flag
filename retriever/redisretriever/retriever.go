@@ -51,7 +51,7 @@ func (r *Retriever) Status() retriever.Status {
 
 // Shutdown gracefully shutdown the provider and set the status as not ready.
 func (r *Retriever) Shutdown(_ context.Context) error {
-	if r.client == nil {
+	if r == nil || r.client == nil {
 		return nil
 	}
 	err := r.client.Close()

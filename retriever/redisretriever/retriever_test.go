@@ -57,7 +57,7 @@ func Test_Redis_Retrieve(t *testing.T) {
 				Prefix:  tt.prefix,
 			}
 
-			err := retriever.Init(context.Background(), nil)
+			err := retriever.Init(context.TODO(), nil)
 			assert.NoError(t, err)
 			defer func() {
 				err := retriever.Shutdown(context.TODO())
@@ -143,11 +143,11 @@ func Test_Redis_Shutdown(t *testing.T) {
 			Options: options,
 		}
 
-		err := retriever.Init(context.Background(), nil)
+		err := retriever.Init(context.TODO(), nil)
 		assert.NoError(t, err)
 		assert.Equal(t, ret.RetrieverReady, retriever.Status())
 
-		err = retriever.Shutdown(context.Background())
+		err = retriever.Shutdown(context.TODO())
 		assert.NoError(t, err)
 		assert.Equal(t, ret.RetrieverNotReady, retriever.Status())
 	})
@@ -157,7 +157,7 @@ func Test_Redis_Shutdown(t *testing.T) {
 			Options: options,
 		}
 
-		err := retriever.Shutdown(context.Background())
+		err := retriever.Shutdown(context.TODO())
 		assert.NoError(t, err)
 		assert.Equal(t, ret.RetrieverNotReady, retriever.Status())
 	})
@@ -167,24 +167,24 @@ func Test_Redis_Shutdown(t *testing.T) {
 			Options: options,
 		}
 
-		err := retriever.Init(context.Background(), nil)
+		err := retriever.Init(context.TODO(), nil)
 		assert.NoError(t, err)
 		assert.Equal(t, ret.RetrieverReady, retriever.Status())
 
 		// First shutdown
-		err = retriever.Shutdown(context.Background())
+		err = retriever.Shutdown(context.TODO())
 		assert.NoError(t, err)
 		assert.Equal(t, ret.RetrieverNotReady, retriever.Status())
 
 		// Second shutdown should also succeed
-		err = retriever.Shutdown(context.Background())
+		err = retriever.Shutdown(context.TODO())
 		assert.NoError(t, err)
 		assert.Equal(t, ret.RetrieverNotReady, retriever.Status())
 	})
 
 	t.Run("should handle nil retriever gracefully", func(t *testing.T) {
 		var retriever *redisretriever.Retriever
-		err := retriever.Shutdown(context.Background())
+		err := retriever.Shutdown(context.TODO())
 		assert.NoError(t, err)
 	})
 
@@ -193,7 +193,7 @@ func Test_Redis_Shutdown(t *testing.T) {
 			Options: options,
 		}
 
-		err := retriever.Shutdown(context.Background())
+		err := retriever.Shutdown(context.TODO())
 		assert.NoError(t, err)
 		assert.Equal(t, ret.RetrieverNotReady, retriever.Status())
 	})
@@ -208,12 +208,12 @@ func Test_Redis_Shutdown(t *testing.T) {
 		}
 
 		// Init should fail and set error status
-		err := retriever.Init(context.Background(), nil)
+		err := retriever.Init(context.TODO(), nil)
 		assert.Error(t, err)
 		assert.Equal(t, ret.RetrieverError, retriever.Status())
 
 		// Shutdown should still work even in error state
-		err = retriever.Shutdown(context.Background())
+		err = retriever.Shutdown(context.TODO())
 		assert.NoError(t, err)
 		assert.Equal(t, ret.RetrieverNotReady, retriever.Status())
 	})
@@ -223,14 +223,14 @@ func Test_Redis_Shutdown(t *testing.T) {
 			Options: options,
 		}
 
-		err := retriever.Init(context.Background(), nil)
+		err := retriever.Init(context.TODO(), nil)
 		assert.NoError(t, err)
 
 		// Start multiple goroutines calling shutdown
 		done := make(chan error, 3)
 		for i := 0; i < 3; i++ {
 			go func() {
-				done <- retriever.Shutdown(context.Background())
+				done <- retriever.Shutdown(context.TODO())
 			}()
 		}
 
@@ -248,11 +248,11 @@ func Test_Redis_Shutdown(t *testing.T) {
 			Options: options,
 		}
 
-		err := retriever.Init(context.Background(), nil)
+		err := retriever.Init(context.TODO(), nil)
 		assert.NoError(t, err)
 		assert.Equal(t, ret.RetrieverReady, retriever.Status())
 
-		err = retriever.Shutdown(context.Background())
+		err = retriever.Shutdown(context.TODO())
 		assert.NoError(t, err)
 		assert.Equal(t, ret.RetrieverNotReady, retriever.Status())
 	})

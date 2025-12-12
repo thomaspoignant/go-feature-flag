@@ -2957,6 +2957,7 @@ func TestStringVariation(t *testing.T) {
 
 			if !tt.args.disableInit {
 				c := retriever.ManagerConfig{
+					Ctx:                     context.Background(),
 					FileFormat:              "YAML",
 					DisableNotifierOnInit:   false,
 					StartWithRetrieverError: false,
@@ -3821,6 +3822,7 @@ func TestIntVariationDetails(t *testing.T) {
 
 			if !tt.args.disableInit {
 				c := retriever.ManagerConfig{
+					Ctx:                     context.Background(),
 					FileFormat:              "YAML",
 					DisableNotifierOnInit:   false,
 					StartWithRetrieverError: false,
