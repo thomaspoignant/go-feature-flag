@@ -91,7 +91,10 @@ func (e evaluate) getFlagList(goff *ffclient.GoFeatureFlag) ([]string, error) {
 }
 
 // evaluateFlags evaluates the flags
-func (e evaluate) evaluateFlags(goff *ffclient.GoFeatureFlag, listFlags []string, convertedEvaluationCtx ffcontext.Context) (map[string]model.RawVarResult, error) {
+func (e evaluate) evaluateFlags(
+	goff *ffclient.GoFeatureFlag,
+	listFlags []string,
+	convertedEvaluationCtx ffcontext.Context) (map[string]model.RawVarResult, error) {
 	result := make(map[string]model.RawVarResult, len(listFlags))
 	for _, flag := range listFlags {
 		res, err := goff.RawVariation(flag, convertedEvaluationCtx, nil)
