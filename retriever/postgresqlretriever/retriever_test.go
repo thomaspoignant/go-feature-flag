@@ -378,7 +378,7 @@ func TestRetrieverDataHandlingErrors(t *testing.T) {
 			assert.Contains(t, err.Error(), "failed to execute query")
 		}
 	})
-	}
+}
 
 // TestRetrieverEdgeCases tests additional edge cases and boundary conditions
 func TestRetrieverEdgeCases(t *testing.T) {
