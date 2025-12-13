@@ -135,10 +135,7 @@ func (c *cacheManagerImpl) GetLatestUpdateDate() time.Time {
 // It is useful to have a fallback in case of a problem with the retrievers, such as a network issue.
 //
 // The persistence is done in a goroutine to not block the main thread.
-func (c *cacheManagerImpl) PersistCache(
-	oldCache map[string]flag.Flag,
-	newCache map[string]flag.Flag,
-) {
+func (c *cacheManagerImpl) PersistCache(oldCache, newCache map[string]flag.Flag) {
 	go func() {
 		if _, err := os.Stat(c.persistentFlagConfigurationFile); !os.IsNotExist(err) &&
 			cmp.Equal(oldCache, newCache) {

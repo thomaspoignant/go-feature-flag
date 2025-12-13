@@ -281,9 +281,6 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 					Mode: config.ServerModeHTTP,
 					Port: 1031,
 				},
-
-				Host: "localhost",
-
 				Version:       "1.X.X",
 				EnableSwagger: true,
 				APIKeys: []string{
@@ -302,10 +299,6 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 					PollingInterval:         60000,
 					FileFormat:              "yaml",
 					StartWithRetrieverError: false,
-				},
-				Server: config.Server{
-					Mode: config.ServerModeHTTP,
-					Port: 1031,
 				},
 				Host:     "localhost",
 				Version:  "1.X.X",
@@ -425,10 +418,6 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 					FileFormat:              "yaml",
 					StartWithRetrieverError: false,
 				},
-				Server: config.Server{
-					Mode: config.ServerModeHTTP,
-					Port: 1031,
-				},
 				Host:     "localhost",
 				Version:  "1.X.X",
 				LogLevel: config.DefaultLogLevel,
@@ -450,10 +439,6 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 					FileFormat:              "yaml",
 					StartWithRetrieverError: false,
 				},
-				Server: config.Server{
-					Mode: config.ServerModeHTTP,
-					Port: 1031,
-				},
 				Host:     "localhost",
 				Version:  "1.X.X",
 				LogLevel: config.DefaultLogLevel,
@@ -469,10 +454,6 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 					FileFormat:              "yaml",
 					StartWithRetrieverError: false,
 				},
-				Server: config.Server{
-					Mode: config.ServerModeHTTP,
-					Port: 1031,
-				},
 				Host:     "localhost",
 				Version:  "1.X.X",
 				LogLevel: config.DefaultLogLevel,
@@ -487,10 +468,6 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 					PollingInterval:         60000,
 					FileFormat:              "yaml",
 					StartWithRetrieverError: false,
-				},
-				Server: config.Server{
-					Mode: config.ServerModeHTTP,
-					Port: 1031,
 				},
 				Host:     "localhost",
 				Version:  "1.X.X",
