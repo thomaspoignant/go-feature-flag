@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.6.0](https://github.com/thomaspoignant/go-feature-flag/compare/openfeature/providers/python-provider/v0.5.0...openfeature/providers/python-provider/v0.6.0) (2025-12-13)
+
+
+### 🚀 New Features
+
+* Start the relayproxy as a unix socket. ([#4261](https://github.com/thomaspoignant/go-feature-flag/issues/4261)) ([7b369b4](https://github.com/thomaspoignant/go-feature-flag/commit/7b369b48d008aa310f00e68bc23103213adb838c))
+
+
+### 🔧 Chores
+
+* Bump black in /openfeature/providers/python-provider ([#4356](https://github.com/thomaspoignant/go-feature-flag/issues/4356)) ([8ee58e1](https://github.com/thomaspoignant/go-feature-flag/commit/8ee58e19f40a221f19939deba47e137056434638))
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#4263](https://github.com/thomaspoignant/go-feature-flag/issues/4263)) ([3944a49](https://github.com/thomaspoignant/go-feature-flag/commit/3944a491413056d903236573fbf5a75fc7336dd9))
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#4326](https://github.com/thomaspoignant/go-feature-flag/issues/4326)) ([927e392](https://github.com/thomaspoignant/go-feature-flag/commit/927e392662eaad75f33bd88275c566a465d02446))
+* Bump k8s.io/api from 0.34.2 to 0.34.3 ([#4464](https://github.com/thomaspoignant/go-feature-flag/issues/4464)) ([7c947e6](https://github.com/thomaspoignant/go-feature-flag/commit/7c947e68ec359dbf2afbb1ac80ccbd31c56982cb))
+* Bump pydantic in /openfeature/providers/python-provider ([#4275](https://github.com/thomaspoignant/go-feature-flag/issues/4275)) ([c371092](https://github.com/thomaspoignant/go-feature-flag/commit/c371092c82051a2fadee7e705cde6f1d27de9bce))
+* Bump pydantic in /openfeature/providers/python-provider ([#4378](https://github.com/thomaspoignant/go-feature-flag/issues/4378)) ([a8766e9](https://github.com/thomaspoignant/go-feature-flag/commit/a8766e939359971d133f353bcbb4fd20b3d97cb8))
+* Bump pytest-docker in /openfeature/providers/python-provider ([#4357](https://github.com/thomaspoignant/go-feature-flag/issues/4357)) ([c02f2da](https://github.com/thomaspoignant/go-feature-flag/commit/c02f2da5bbd4d83c2bd1bcc42a478225a306e405))
+* Bump rel in /openfeature/providers/python-provider ([#4358](https://github.com/thomaspoignant/go-feature-flag/issues/4358)) ([9b61055](https://github.com/thomaspoignant/go-feature-flag/commit/9b6105515f5b02b68df142526800c7973fd99ed4))
+* Bump urllib3 in /openfeature/providers/python-provider ([#4408](https://github.com/thomaspoignant/go-feature-flag/issues/4408)) ([42514a3](https://github.com/thomaspoignant/go-feature-flag/commit/42514a3bd7338c5dd9506ffaa5307cedc1b442e1))
+
 ## [0.5.0](https://github.com/thomaspoignant/go-feature-flag/compare/openfeature/providers/python-provider/v0.5.0...openfeature/providers/python-provider/v0.5.0) (2025-10-26)
 
 
