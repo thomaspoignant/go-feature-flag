@@ -9,7 +9,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/modules/core/testutils/testconvert"
 )
 
-func TestUser_AddCustomAttribute(t *testing.T) {
+func TestUserAddCustomAttribute(t *testing.T) {
 	type args struct {
 		name  string
 		value interface{}
@@ -46,7 +46,7 @@ func TestUser_AddCustomAttribute(t *testing.T) {
 	}
 }
 
-func Test_ExtractGOFFProtectedFields(t *testing.T) {
+func TestExtractGOFFProtectedFields(t *testing.T) {
 	tests := []struct {
 		name string
 		ctx  ffcontext.EvaluationContext
@@ -186,6 +186,61 @@ func Test_ExtractGOFFProtectedFields(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "context goff specifics with invalid date string",
+			ctx: ffcontext.NewEvaluationContextBuilder("my-targetingKey").
+				AddCustom("gofeatureflag", map[string]interface{}{
+					"currentDateTime": "invalid-date-format",
+				}).
+				Build(),
+			want: ffcontext.GoffContextSpecifics{
+				CurrentDateTime: nil,
+			},
+		},
+		{
+			name: "context goff specifics with currentDateTime as other type",
+			ctx: ffcontext.NewEvaluationContextBuilder("my-targetingKey").
+				AddCustom("gofeatureflag", map[string]interface{}{
+					"currentDateTime": 12345,
+				}).
+				Build(),
+			want: ffcontext.GoffContextSpecifics{
+				CurrentDateTime: nil,
+			},
+		},
+		{
+			name: "context goff specifics with flagList as []interface{} with non-string elements",
+			ctx: ffcontext.NewEvaluationContextBuilder("my-targetingKey").
+				AddCustom("gofeatureflag", map[string]interface{}{
+					"flagList": []interface{}{"flag1", 123, "flag2", true, "flag3"},
+				}).
+				Build(),
+			want: ffcontext.GoffContextSpecifics{
+				FlagList: []string{"flag1", "flag2", "flag3"},
+			},
+		},
+		{
+			name: "context goff specifics with flagList as other type",
+			ctx: ffcontext.NewEvaluationContextBuilder("my-targetingKey").
+				AddCustom("gofeatureflag", map[string]interface{}{
+					"flagList": "not-a-list",
+				}).
+				Build(),
+			want: ffcontext.GoffContextSpecifics{
+				FlagList: nil,
+			},
+		},
+		{
+			name: "context goff specifics with exporterMetadata as other type",
+			ctx: ffcontext.NewEvaluationContextBuilder("my-targetingKey").
+				AddCustom("gofeatureflag", map[string]interface{}{
+					"exporterMetadata": "not-a-map",
+				}).
+				Build(),
+			want: ffcontext.GoffContextSpecifics{
+				ExporterMetadata: nil,
+			},
+		},
 	}
 
 	for _, tt := range tests {
@@ -196,7 +251,7 @@ func Test_ExtractGOFFProtectedFields(t *testing.T) {
 	}
 }
 
-func TestEvaluationContext_MarshalJSON(t *testing.T) {
+func TestEvaluationContextMarshalJSON(t *testing.T) {
 	tests := []struct {
 		name     string
 		context  ffcontext.EvaluationContext
@@ -226,7 +281,7 @@ func TestEvaluationContext_MarshalJSON(t *testing.T) {
 	}
 }
 
-func TestEvaluationContext_ToMap(t *testing.T) {
+func TestEvaluationContextToMap(t *testing.T) {
 	tests := []struct {
 		name     string
 		context  ffcontext.EvaluationContext

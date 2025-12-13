@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import {useThemeConfig} from '@docusaurus/theme-common';
 import FooterLayout from './Layout';
 import FooterLinks from './Links';
@@ -7,7 +8,6 @@ import FooterCopyright from './Copyright';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import useIsBrowser from '@docusaurus/useIsBrowser';
 import MailchimpSubscribe from 'react-mailchimp-subscribe';
-import styles from './styles.module.css';
 import clsx from 'clsx';
 
 function Footer() {
@@ -16,7 +16,7 @@ function Footer() {
     return null;
   }
   const {copyright, links, logo, style} = footer;
-  const page = useIsBrowser() ? window.location : 'not_reachable';
+  const page = useIsBrowser() ? globalThis.location : 'not_reachable';
   const {siteConfig} = useDocusaurusContext();
   const url = `${siteConfig.customFields.mailchimpURL};SIGNUP=${page}`;
   return (
@@ -34,7 +34,7 @@ const CustomForm = ({status, message, onValidated}) => {
   let email;
   const submit = () =>
     email &&
-    email.value.indexOf('@') > -1 &&
+    email.value.includes('@') &&
     onValidated({
       EMAIL: email.value,
     });
@@ -73,6 +73,12 @@ const CustomForm = ({status, message, onValidated}) => {
   );
 };
 
+CustomForm.propTypes = {
+  status: PropTypes.string,
+  message: PropTypes.string,
+  onValidated: PropTypes.func.isRequired,
+};
+
 const NewsletterForm = ({url}) => (
   <div>
     <div className="text-center pt-0 mx-4 text-5xl mb-4 text-gray-800 dark:text-gray-100 font-poppins font-[800] tracking-[-0.08rem]">
@@ -101,5 +107,9 @@ const NewsletterForm = ({url}) => (
     </div>
   </div>
 );
+
+NewsletterForm.propTypes = {
+  url: PropTypes.string.isRequired,
+};
 
 export default React.memo(Footer);

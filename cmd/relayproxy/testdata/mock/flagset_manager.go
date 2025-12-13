@@ -10,19 +10,19 @@ type MockFlagsetManager struct {
 	GetFlagSetsErr      error
 }
 
-func (m *MockFlagsetManager) GetFlagSet(apiKey string) (*ffclient.GoFeatureFlag, error) {
+func (m *MockFlagsetManager) FlagSet(_ string) (*ffclient.GoFeatureFlag, error) {
 	return nil, nil
 }
 
-func (m *MockFlagsetManager) GetFlagSetName(apiKey string) (string, error) {
+func (m *MockFlagsetManager) FlagSetName(_ string) (string, error) {
 	return "", nil
 }
 
-func (m *MockFlagsetManager) GetFlagSets() (map[string]*ffclient.GoFeatureFlag, error) {
+func (m *MockFlagsetManager) AllFlagSets() (map[string]*ffclient.GoFeatureFlag, error) {
 	return m.FlagSets, m.GetFlagSetsErr
 }
 
-func (m *MockFlagsetManager) GetDefaultFlagSet() *ffclient.GoFeatureFlag {
+func (m *MockFlagsetManager) Default() *ffclient.GoFeatureFlag {
 	return m.DefaultFlagSet
 }
 

@@ -37,16 +37,16 @@ func (m *monitoringImpl) Info() (model.InfoResponse, error) {
 	if m.flagsetManager == nil {
 		return model.InfoResponse{}, fmt.Errorf("flagset manager is not initialized")
 	}
-	flagSets, err := m.flagsetManager.GetFlagSets()
+	flagSets, err := m.flagsetManager.AllFlagSets()
 	if err != nil {
 		return model.InfoResponse{}, err
 	}
 
 	if m.flagsetManager.IsDefaultFlagSet() {
-		if m.flagsetManager.GetDefaultFlagSet() == nil {
+		if m.flagsetManager.Default() == nil {
 			return model.InfoResponse{}, fmt.Errorf("no default flagset configured")
 		}
-		cacheRefreshDate := m.flagsetManager.GetDefaultFlagSet().GetCacheRefreshDate()
+		cacheRefreshDate := m.flagsetManager.Default().GetCacheRefreshDate()
 		return model.InfoResponse{
 			LatestCacheRefresh: &cacheRefreshDate,
 		}, nil

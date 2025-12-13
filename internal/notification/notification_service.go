@@ -27,10 +27,11 @@ type notificationService struct {
 	waitGroup *sync.WaitGroup
 }
 
-func (c *notificationService) Notify(
-	oldCache map[string]flag.Flag,
-	newCache map[string]flag.Flag,
-	log *fflog.FFLogger) {
+// Notify is sending the notification to the notifiers.
+// oldCache is the old cache of the flags.
+// newCache is the new cache of the flags.
+// log is the logger to use.
+func (c *notificationService) Notify(oldCache, newCache map[string]flag.Flag, log *fflog.FFLogger) {
 	diff := c.getDifferences(oldCache, newCache)
 	if diff.HasDiff() {
 		for _, n := range c.Notifiers {
@@ -53,8 +54,7 @@ func (c *notificationService) Close() {
 
 // getDifferences is checking what are the difference in the updated cache.
 func (c *notificationService) getDifferences(
-	oldCache map[string]flag.Flag, newCache map[string]flag.Flag,
-) notifier.DiffCache {
+	oldCache, newCache map[string]flag.Flag) notifier.DiffCache {
 	diff := notifier.DiffCache{
 		Deleted: map[string]flag.Flag{},
 		Added:   map[string]flag.Flag{},

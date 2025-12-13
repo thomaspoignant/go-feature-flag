@@ -30,7 +30,7 @@ func TestWasmCopyBufferToMemory_ReturnsCorrectPointerAndSize(t *testing.T) {
 
 func TestWasmCopyBufferToMemory_EmptyBufferPanics(t *testing.T) {
 	defer func() {
-		if r := recover(); r == nil {
+		if recover() == nil {
 			t.Errorf("Expected panic for empty buffer, but did not panic")
 		}
 	}()

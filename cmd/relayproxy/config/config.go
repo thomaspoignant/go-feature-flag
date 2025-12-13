@@ -50,7 +50,9 @@ var DefaultExporter = struct {
 }
 
 type Config struct {
+	// CommonFlagSet is the common flag set for the relay proxy
 	CommonFlagSet `mapstructure:",inline" koanf:",squash"`
+
 	// ListenPort (optional) is the port we are using to start the proxy
 	//
 	// Deprecated: use Server.Port instead
@@ -226,14 +228,14 @@ func loadConfigFile(log *zap.Logger) {
 		return
 	}
 
-	parser := getParserForFile(configFileLocation)
+	parser := selectParserForFile(configFileLocation)
 	if errBindFile := k.Load(file.Provider(configFileLocation), parser); errBindFile != nil {
 		log.Error("error loading file", zap.Error(errBindFile))
 	}
 }
 
-// getParserForFile returns the appropriate parser based on file extension
-func getParserForFile(configFileLocation string) koanf.Parser {
+// selectParserForFile returns the appropriate parser based on file extension
+func selectParserForFile(configFileLocation string) koanf.Parser {
 	ext := filepath.Ext(configFileLocation)
 	switch strings.ToLower(ext) {
 	case ".toml":

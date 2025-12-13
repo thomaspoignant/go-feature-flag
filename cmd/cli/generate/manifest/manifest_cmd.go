@@ -18,7 +18,10 @@ func NewManifestCmd() *cobra.Command {
 			"⚠️ note that this is an experimental feature and we may change this command line without warning.",
 
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			m, _ := NewManifest(manifestConfigFile, manifestFlagFormat, flagManifestDestination)
+			m, err := NewManifest(manifestConfigFile, manifestFlagFormat, flagManifestDestination)
+			if err != nil {
+				return err
+			}
 			output, err := m.Generate()
 			if err != nil {
 				cmd.SilenceUsage = true

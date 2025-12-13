@@ -162,5 +162,8 @@ func TestRetrieverConfError_CliErrorMessage(t *testing.T) {
 
 func TestRetrieverConfError_ImplementsError(t *testing.T) {
 	var _ error = &RetrieverConfError{}
-	var _ error = NewRetrieverConfError("test", "test")
+	err := NewRetrieverConfError("test", "test")
+	require.NotNil(t, err, "expected non-nil error")
+	assert.Equal(t, "test", err.property, "property should match")
+	assert.Equal(t, "test", err.kind, "kind should match")
 }

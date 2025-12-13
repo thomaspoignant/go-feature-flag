@@ -76,7 +76,7 @@ func (h *FlagConfigurationAPICtrl) Handler(c echo.Context) error {
 		)
 	}
 
-	flagset, httpErr := helper.GetFlagSet(h.flagsetManager, helper.GetAPIKey(c))
+	flagset, httpErr := helper.FlagSet(h.flagsetManager, helper.APIKey(c))
 	if httpErr != nil {
 		return httpErr
 	}

@@ -122,7 +122,7 @@ func (s *Server) StartWithContext(ctx context.Context) {
 		// we can continue because otel is not mandatory to start the server
 	}
 
-	switch s.config.GetServerMode(s.zapLog) {
+	switch s.config.ServerMode(s.zapLog) {
 	case config.ServerModeLambda:
 		s.startAwsLambda()
 	case config.ServerModeUnixSocket:
@@ -134,7 +134,7 @@ func (s *Server) StartWithContext(ctx context.Context) {
 
 // startUnixSocketServer launch the API server as a unix socket.
 func (s *Server) startUnixSocketServer(ctx context.Context) {
-	socketPath := s.config.GetUnixSocketPath()
+	socketPath := s.config.UnixSocketPath()
 
 	// Clean up the old socket file if it exists (important for graceful restarts)
 	if _, err := os.Stat(socketPath); err == nil {
@@ -181,7 +181,7 @@ func (s *Server) startAsHTTPServer() {
 		defer func() { _ = s.monitoringEcho.Close() }()
 	}
 
-	address := fmt.Sprintf("%s:%d", s.config.GetServerHost(), s.config.GetServerPort(s.zapLog))
+	address := fmt.Sprintf("%s:%d", s.config.ServerHost(), s.config.ServerPort(s.zapLog))
 	s.zapLog.Info(
 		"Starting go-feature-flag relay proxy ...",
 		zap.String("address", address),
@@ -194,7 +194,7 @@ func (s *Server) startAsHTTPServer() {
 }
 
 func (s *Server) startMonitoringServer() {
-	addressMonitoring := fmt.Sprintf("%s:%d", s.config.GetServerHost(), s.config.GetMonitoringPort(s.zapLog))
+	addressMonitoring := fmt.Sprintf("%s:%d", s.config.ServerHost(), s.config.EffectiveMonitoringPort(s.zapLog))
 	s.zapLog.Info(
 		"Starting monitoring",
 		zap.String("address", addressMonitoring))
@@ -206,15 +206,15 @@ func (s *Server) startMonitoringServer() {
 
 // startAwsLambda is starting the relay proxy as an AWS Lambda
 func (s *Server) startAwsLambda() {
-	lambda.Start(s.getLambdaHandler())
+	lambda.Start(s.lambdaHandler())
 }
 
-// getLambdaHandler returns the appropriate lambda handler based on the configuration.
+// lambdaHandler returns the appropriate lambda handler based on the configuration.
 // We need a dedicated function because it is called from tests as well, this is the
 // reason why we can't merged it in startAwsLambda.
-func (s *Server) getLambdaHandler() interface{} {
-	handlerMngr := newAwsLambdaHandlerManager(s.apiEcho, s.config.GetAwsApiGatewayBasePath(s.zapLog))
-	return handlerMngr.GetAdapter(s.config.GetLambdaAdapter(s.zapLog))
+func (s *Server) lambdaHandler() interface{} {
+	handlerMngr := newAwsLambdaHandlerManager(s.apiEcho, s.config.EffectiveAwsApiGatewayBasePath(s.zapLog))
+	return handlerMngr.SelectAdapter(s.config.LambdaAdapter(s.zapLog))
 }
 
 // Stop shutdown the API server
@@ -241,5 +241,5 @@ func (s *Server) Stop(ctx context.Context) {
 
 // isMonitoringPortConfigured checks if the monitoring port is configured.
 func (s *Server) isMonitoringPortConfigured() bool {
-	return s.monitoringEcho != nil && s.config.GetMonitoringPort(s.zapLog) > 0
+	return s.monitoringEcho != nil && s.config.EffectiveMonitoringPort(s.zapLog) > 0
 }

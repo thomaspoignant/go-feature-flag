@@ -150,7 +150,7 @@ func (r *Rule) EvaluateProgressiveRollout(
 }
 
 // EvaluatePercentageRollout is evaluating the percentage rollout for the rule.
-func (r *Rule) EvaluatePercentageRollout(key string, flagName string) (string, error) {
+func (r *Rule) EvaluatePercentageRollout(key, flagName string) (string, error) {
 	m := 0.0
 	for _, percentage := range r.GetPercentages() {
 		m += percentage
@@ -295,108 +295,6 @@ func (r *Rule) MergeRules(updatedRule Rule) {
 	}
 }
 
-// IsValid is checking if the rule is valid
-func (r *Rule) IsValid(defaultRule bool, variations map[string]*interface{}) error {
-	if !defaultRule && r.IsDisable() {
-		return nil
-	}
-
-	if r.Percentages == nil && r.ProgressiveRollout == nil && r.VariationResult == nil {
-		return fmt.Errorf("impossible to return value")
-	}
-
-	// targeting without query
-	if err := r.isQueryValid(defaultRule); err != nil {
-		return err
-	}
-
-	// Validate the percentage of the rule
-	if r.Percentages != nil {
-		count := float64(0)
-		for k, p := range r.GetPercentages() {
-			count += p
-			if _, ok := variations[k]; !ok {
-				return fmt.Errorf("invalid percentage: variation %s does not exist", k)
-			}
-		}
-
-		if len(r.GetPercentages()) == 0 {
-			return fmt.Errorf("invalid percentages: should not be empty")
-		}
-
-		if count == 0 {
-			return fmt.Errorf("invalid percentages: should not be equal to 0")
-		}
-	}
-
-	// Progressive rollout: check that initial is lower than end
-	if r.ProgressiveRollout != nil {
-		if r.GetProgressiveRollout().End.getPercentage() < r.GetProgressiveRollout().Initial.getPercentage() {
-			return fmt.Errorf(
-				"invalid progressive rollout, initial percentage should be lower "+
-					"than end percentage: %v/%v",
-				r.GetProgressiveRollout().Initial.getPercentage(),
-				r.GetProgressiveRollout().End.getPercentage(),
-			)
-		}
-
-		endVar := r.GetProgressiveRollout().End.getVariation()
-		if _, ok := variations[endVar]; !ok {
-			return fmt.Errorf(
-				"invalid progressive rollout, end variation %s does not exist",
-				endVar,
-			)
-		}
-
-		initialVar := r.GetProgressiveRollout().Initial.getVariation()
-		if _, ok := variations[initialVar]; !ok {
-			return fmt.Errorf(
-				"invalid progressive rollout, initial variation %s does not exist",
-				initialVar,
-			)
-		}
-	}
-
-	// Check that the variation exists
-	if r.Percentages == nil && r.ProgressiveRollout == nil && r.VariationResult != nil {
-		if _, ok := variations[r.GetVariationResult()]; !ok {
-			return fmt.Errorf("invalid variation: %s does not exist", r.GetVariationResult())
-		}
-	}
-	return nil
-}
-
-func (r *Rule) isQueryValid(defaultRule bool) error {
-	if defaultRule {
-		return nil
-	}
-
-	if r.Query == nil {
-		return fmt.Errorf("each targeting should have a query")
-	}
-
-	// Validate the query with the parser
-	switch r.GetQueryFormat() {
-	case JSONLogicQueryFormat:
-		// No validation available with this JSON logic library
-		return nil
-	default:
-		return validateNikunjyQuery(r.GetTrimmedQuery())
-	}
-}
-
-func validateNikunjyQuery(query string) error {
-	ev, err := parser.NewEvaluator(query)
-	if err != nil {
-		return err
-	}
-	_, err = ev.Process(map[string]interface{}{})
-	if err != nil {
-		return fmt.Errorf("invalid query: %w", err)
-	}
-	return nil
-}
-
 // GetTrimmedQuery is removing the break lines and return
 func (r *Rule) GetTrimmedQuery() string {
 	return utils.StrTrim(r.GetQuery())
@@ -460,7 +358,7 @@ func (r *Rule) GetProgressiveRollout() ProgressiveRollout {
 // from a schedule steps.
 // If you want to edit a rule this rule should have a name already to be able to
 // target the updates to the right place.
-func MergeSetOfRules(initialRules []Rule, updates []Rule) *[]Rule {
+func MergeSetOfRules(initialRules, updates []Rule) *[]Rule {
 	collection := initialRules
 	modified := make(map[string]Rule, 0)
 	for _, update := range updates {

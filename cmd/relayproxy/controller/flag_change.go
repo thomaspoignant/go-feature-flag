@@ -43,7 +43,7 @@ type FlagChangeResponse struct {
 // @Failure     500 {object}  modeldocs.HTTPErrorDoc "Internal server error"
 // @Router      /v1/flag/change [get]
 func (h *FlagChangeAPICtrl) Handler(c echo.Context) error {
-	flagset, httpErr := helper.GetFlagSet(h.flagsetManager, helper.GetAPIKey(c))
+	flagset, httpErr := helper.FlagSet(h.flagsetManager, helper.APIKey(c))
 	if httpErr != nil {
 		return httpErr
 	}

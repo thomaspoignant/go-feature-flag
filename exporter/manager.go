@@ -1,7 +1,6 @@
 package exporter
 
 import (
-	"context"
 	"time"
 
 	"github.com/google/uuid"
@@ -22,12 +21,8 @@ type managerImpl[T ExportableEvent] struct {
 	eventStore *EventStore[T]
 }
 
-func NewManager[T ExportableEvent](ctx context.Context, exporters []Config,
+func NewManager[T ExportableEvent](exporters []Config,
 	exporterCleanQueueInterval time.Duration, logger *fflog.FFLogger) Manager[T] {
-	if ctx == nil {
-		ctx = context.Background()
-	}
-
 	if exporterCleanQueueInterval == 0 {
 		// default value for the exporterCleanQueueDuration is 1 minute
 		exporterCleanQueueInterval = DefaultExporterCleanQueueInterval
@@ -37,7 +32,7 @@ func NewManager[T ExportableEvent](ctx context.Context, exporters []Config,
 	consumers := make([]DataExporter[T], len(exporters))
 	for index, exporter := range exporters {
 		consumerID := uuid.New().String()
-		exp := NewDataExporter[T](ctx, exporter, consumerID, &evStore, logger)
+		exp := NewDataExporter(exporter, consumerID, &evStore, logger)
 		consumers[index] = exp
 		evStore.AddConsumer(consumerID)
 	}

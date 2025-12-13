@@ -8,8 +8,8 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 )
 
-// WebsocketConn is an interface to be able to mock websocket.Conn
-type WebsocketConn interface {
+// WebsocketConnector is an interface to be able to mock websocket.Conn
+type WebsocketConnector interface {
 	WriteJSON(v interface{}) error
 }
 
@@ -17,9 +17,9 @@ type WebsocketConn interface {
 // This service is able to broadcast a notification to all the open websockets
 type WebsocketService interface {
 	// Register is adding the connection to the list of open connection.
-	Register(c WebsocketConn)
+	Register(c WebsocketConnector)
 	// Deregister is removing the connection from the list of open connection.
-	Deregister(c WebsocketConn)
+	Deregister(c WebsocketConnector)
 	// BroadcastFlagChanges is sending the diff cache struct to the client.
 	BroadcastFlagChanges(diff notifier.DiffCache)
 	// Close deregister all open connections.
@@ -31,7 +31,7 @@ type WebsocketService interface {
 // NewWebsocketService is a constructor to create a new WebsocketService.
 func NewWebsocketService() WebsocketService {
 	return &websocketServiceImpl{
-		clients: map[WebsocketConn]interface{}{},
+		clients: map[WebsocketConnector]interface{}{},
 		mutex:   &sync.RWMutex{},
 		closed:  make(chan struct{}),
 	}
@@ -39,7 +39,7 @@ func NewWebsocketService() WebsocketService {
 
 // websocketServiceImpl is the implementation of the interface.
 type websocketServiceImpl struct {
-	clients map[WebsocketConn]interface{}
+	clients map[WebsocketConnector]interface{}
 	mutex   *sync.RWMutex
 	closed  chan struct{}
 }
@@ -59,14 +59,14 @@ func (w *websocketServiceImpl) BroadcastFlagChanges(diff notifier.DiffCache) {
 }
 
 // Register is adding the connection to the list of open connection.
-func (w *websocketServiceImpl) Register(c WebsocketConn) {
+func (w *websocketServiceImpl) Register(c WebsocketConnector) {
 	w.mutex.Lock()
 	defer w.mutex.Unlock()
 	w.clients[c] = struct{}{}
 }
 
 // Deregister is removing the connection from the list of open connection.
-func (w *websocketServiceImpl) Deregister(c WebsocketConn) {
+func (w *websocketServiceImpl) Deregister(c WebsocketConnector) {
 	w.mutex.Lock()
 	defer w.mutex.Unlock()
 	delete(w.clients, c)

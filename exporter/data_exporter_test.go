@@ -1,7 +1,6 @@
 package exporter_test
 
 import (
-	"context"
 	"fmt"
 	"log/slog"
 	"os"
@@ -29,7 +28,7 @@ func TestDataExporterFlush_TriggerError(t *testing.T) {
 	defer func() { _ = os.Remove(logFile.Name()) }()
 
 	exporterMock := mock.Exporter{}
-	exp := exporter.NewDataExporter[exporter.FeatureEvent](context.TODO(), exporter.Config{
+	exp := exporter.NewDataExporter[exporter.FeatureEvent](exporter.Config{
 		Exporter:         &exporterMock,
 		FlushInterval:    0,
 		MaxEventInMemory: 0,
@@ -69,7 +68,6 @@ func TestDataExporterFlush_TriggerErrorIfNotKnowType(t *testing.T) {
 
 			exporterMock := tt.exporter
 			exp := exporter.NewDataExporter[testutils.ExportableMockEvent](
-				context.TODO(),
 				exporter.Config{
 					Exporter:         exporterMock,
 					FlushInterval:    0,
@@ -120,11 +118,12 @@ func TestDataExporterFlush_TriggerErrorIfExporterFail(t *testing.T) {
 			defer func() { _ = os.Remove(logFile.Name()) }()
 
 			exporterMock := tt.exporter
-			exp := exporter.NewDataExporter[exporter.FeatureEvent](context.TODO(), exporter.Config{
-				Exporter:         exporterMock,
-				FlushInterval:    0,
-				MaxEventInMemory: 0,
-			}, "id-consumer", &evStore, logger)
+			exp := exporter.NewDataExporter[exporter.FeatureEvent](
+				exporter.Config{
+					Exporter:         exporterMock,
+					FlushInterval:    0,
+					MaxEventInMemory: 0,
+				}, "id-consumer", &evStore, logger)
 
 			exp.Flush()
 			// flush should error and not return any event

@@ -16,11 +16,11 @@ type mockWebsocketService struct {
 	nbConnection int
 }
 
-func (m *mockWebsocketService) Register(c service.WebsocketConn) {
+func (m *mockWebsocketService) Register(_ service.WebsocketConnector) {
 	m.nbConnection++
 }
 
-func (m *mockWebsocketService) Deregister(c service.WebsocketConn) {
+func (m *mockWebsocketService) Deregister(_ service.WebsocketConnector) {
 	m.nbConnection--
 }
 
@@ -28,7 +28,7 @@ func (m *mockWebsocketService) Close() {
 	m.nbConnection = 0
 }
 
-func (m *mockWebsocketService) WaitForCleanup(timeout time.Duration) error {
+func (m *mockWebsocketService) WaitForCleanup(_ time.Duration) error {
 	// Mock implementation - just return nil immediately
 	return nil
 }

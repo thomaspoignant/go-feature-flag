@@ -11,7 +11,7 @@ import (
 )
 
 func mapEnvVariablesProvider(prefix string, log *zap.Logger) koanf.Provider {
-	return env.ProviderWithValue(prefix, ".", func(key string, v string) (string, interface{}) {
+	return env.ProviderWithValue(prefix, ".", func(key, v string) (string, interface{}) {
 		key = strings.TrimPrefix(key, prefix)
 		switch {
 		case strings.HasPrefix(key, "RETRIEVERS"),
@@ -65,7 +65,7 @@ func loadArrayEnv(s string, v string, configMap map[string]interface{}) (map[str
 		return configMap, err
 	}
 
-	configItem := getOrCreateConfigItem(configArray, index)
+	configItem := fetchOrInitConfigItemAtIndex(configArray, index)
 	keys := paths[2:]
 
 	if shouldHandleRecursively(prefixKey, keys) {
@@ -84,8 +84,8 @@ func normalizePaths(s string) []string {
 	return paths
 }
 
-// getOrCreateConfigItem retrieves or creates a config item at the specified index
-func getOrCreateConfigItem(configArray []interface{}, index int) map[string]interface{} {
+// fetchOrInitConfigItemAtIndex retrieves or creates a config item at the specified index
+func fetchOrInitConfigItemAtIndex(configArray []interface{}, index int) map[string]interface{} {
 	outRange := index > len(configArray)-1
 	if outRange {
 		return make(map[string]interface{})

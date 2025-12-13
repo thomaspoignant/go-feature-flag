@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap/zaptest/observer"
 )
 
-func TestConfig_GetMonitoringPort(t *testing.T) {
+func TestConfig_EffectiveMonitoringPort(t *testing.T) {
 	tests := []struct {
 		name                  string
 		config                *config.Config
@@ -88,7 +88,7 @@ func TestConfig_GetMonitoringPort(t *testing.T) {
 			if tt.setLoggerNil {
 				logger = nil
 			}
-			got := tt.config.GetMonitoringPort(logger)
+			got := tt.config.EffectiveMonitoringPort(logger)
 			assert.Equal(t, tt.wantPort, got)
 
 			if observedLogs != nil && tt.wantDeprecationWarned {
@@ -101,7 +101,7 @@ func TestConfig_GetMonitoringPort(t *testing.T) {
 	}
 }
 
-func TestConfig_GetServerHost(t *testing.T) {
+func TestConfig_ServerHost(t *testing.T) {
 	tests := []struct {
 		name     string
 		config   *config.Config
@@ -147,13 +147,13 @@ func TestConfig_GetServerHost(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := tt.config.GetServerHost()
+			got := tt.config.ServerHost()
 			assert.Equal(t, tt.wantHost, got)
 		})
 	}
 }
 
-func TestConfig_GetServerPort(t *testing.T) {
+func TestConfig_ServerPort(t *testing.T) {
 	tests := []struct {
 		name                  string
 		config                *config.Config
@@ -232,7 +232,7 @@ func TestConfig_GetServerPort(t *testing.T) {
 				logger = nil
 			}
 
-			got := tt.config.GetServerPort(logger)
+			got := tt.config.ServerPort(logger)
 			assert.Equal(t, tt.wantPort, got)
 
 			if observedLogs != nil && tt.wantDeprecationWarned {
@@ -245,7 +245,7 @@ func TestConfig_GetServerPort(t *testing.T) {
 	}
 }
 
-func TestConfig_GetServerMode(t *testing.T) {
+func TestConfig_ServerMode(t *testing.T) {
 	tests := []struct {
 		name                  string
 		config                *config.Config
@@ -332,7 +332,7 @@ func TestConfig_GetServerMode(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Note: GetServerMode uses zap.L() instead of the passed logger,
+			// Note: ServerMode uses zap.L() instead of the passed logger,
 			// so we need to replace the global logger to capture deprecation warnings
 			var logger *zap.Logger
 			var observedLogs *observer.ObservedLogs
@@ -349,7 +349,7 @@ func TestConfig_GetServerMode(t *testing.T) {
 				logger = zap.NewNop()
 			}
 
-			got := tt.config.GetServerMode(logger)
+			got := tt.config.ServerMode(logger)
 			assert.Equal(t, tt.wantMode, got)
 
 			if observedLogs != nil && tt.wantDeprecationWarned {
@@ -360,7 +360,7 @@ func TestConfig_GetServerMode(t *testing.T) {
 	}
 }
 
-func TestConfig_GetLambdaAdapter(t *testing.T) {
+func TestConfig_LambdaAdapter(t *testing.T) {
 	tests := []struct {
 		name                  string
 		config                *config.Config
@@ -448,7 +448,7 @@ func TestConfig_GetLambdaAdapter(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Note: GetLambdaAdapter uses zap.L() instead of the passed logger,
+			// Note: LambdaAdapter uses zap.L() instead of the passed logger,
 			// so we need to replace the global logger to capture deprecation warnings
 			var logger *zap.Logger
 			var observedLogs *observer.ObservedLogs
@@ -465,7 +465,7 @@ func TestConfig_GetLambdaAdapter(t *testing.T) {
 				logger = zap.NewNop()
 			}
 
-			got := tt.config.GetLambdaAdapter(logger)
+			got := tt.config.LambdaAdapter(logger)
 			assert.Equal(t, tt.wantAdapter, got)
 
 			if observedLogs != nil && tt.wantDeprecationWarned {
@@ -476,7 +476,7 @@ func TestConfig_GetLambdaAdapter(t *testing.T) {
 	}
 }
 
-func TestConfig_GetAwsApiGatewayBasePath(t *testing.T) {
+func TestConfig_EffectiveAwsApiGatewayBasePath(t *testing.T) {
 	tests := []struct {
 		name                  string
 		config                *config.Config
@@ -553,7 +553,7 @@ func TestConfig_GetAwsApiGatewayBasePath(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Note: GetAwsApiGatewayBasePath uses zap.L() instead of the passed logger,
+			// Note: EffectiveAwsApiGatewayBasePath uses zap.L() instead of the passed logger,
 			// so we need to replace the global logger to capture deprecation warnings
 			var logger *zap.Logger
 			var observedLogs *observer.ObservedLogs
@@ -570,7 +570,7 @@ func TestConfig_GetAwsApiGatewayBasePath(t *testing.T) {
 				logger = zap.NewNop()
 			}
 
-			got := tt.config.GetAwsApiGatewayBasePath(logger)
+			got := tt.config.EffectiveAwsApiGatewayBasePath(logger)
 			assert.Equal(t, tt.wantBasePath, got)
 
 			if observedLogs != nil && tt.wantDeprecationWarned {
@@ -581,7 +581,7 @@ func TestConfig_GetAwsApiGatewayBasePath(t *testing.T) {
 	}
 }
 
-func TestConfig_GetUnixSocketPath(t *testing.T) {
+func TestConfig_UnixSocketPath(t *testing.T) {
 	tests := []struct {
 		name           string
 		config         *config.Config
@@ -627,7 +627,7 @@ func TestConfig_GetUnixSocketPath(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := tt.config.GetUnixSocketPath()
+			got := tt.config.UnixSocketPath()
 			assert.Equal(t, tt.wantSocketPath, got)
 		})
 	}

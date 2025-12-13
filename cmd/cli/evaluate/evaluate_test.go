@@ -21,7 +21,7 @@ import (
 	"google.golang.org/api/option"
 )
 
-func Test_evaluate_Evaluate(t *testing.T) {
+func Test_Evaluate(t *testing.T) {
 	tests := []struct {
 		name           string
 		initEvaluate   func() (evaluate, error)
@@ -50,7 +50,7 @@ func Test_evaluate_Evaluate(t *testing.T) {
 			expectedErr: "impossible to initialize the retrievers, please check your configuration: impossible to retrieve the flags, please check your configuration: open testdata/invalid.yaml: no such file or directory",
 		},
 		{
-			name: "Should error if no evaluation context provided",
+			name: "Should error if no evaluation context provided with flag containing percentage rules",
 			initEvaluate: func() (evaluate, error) {
 				r, err := retrieverInit.InitRetriever(&retrieverconf.RetrieverConf{Kind: "file", Path: "testdata/flag.goff.yaml"})
 				if err != nil {
@@ -59,11 +59,55 @@ func Test_evaluate_Evaluate(t *testing.T) {
 				return evaluate{
 					retriever:  r,
 					fileFormat: "yaml",
-					flag:       "test-flag",
+					flag:       "simple-flag",
 				}, nil
 			},
-			wantErr:     assert.Error,
-			expectedErr: "invalid evaluation context (missing targeting key)",
+			wantErr: assert.NoError,
+			expectedResult: map[string]model.RawVarResult{
+				"simple-flag": {
+					TrackEvents:   true,
+					VariationType: "B",
+					Failed:        false,
+					Version:       "",
+					Reason:        "STATIC",
+					Value:         true,
+					Cacheable:     true,
+					Metadata: map[string]interface{}{
+						"description": "this is a simple feature flag",
+						"issue-link":  "https://jira.xxx/GOFF-01",
+					},
+				},
+			},
+		},
+		{
+			name: "Should perform evaluation if no evaluation context and compatible flag",
+			initEvaluate: func() (evaluate, error) {
+				r, err := retrieverInit.InitRetriever(&retrieverconf.RetrieverConf{Kind: "file", Path: "testdata/flag.goff.yaml"})
+				if err != nil {
+					return evaluate{}, err
+				}
+				return evaluate{
+					retriever:  r,
+					fileFormat: "yaml",
+					flag:       "simple-flag",
+				}, nil
+			},
+			wantErr: assert.NoError,
+			expectedResult: map[string]model.RawVarResult{
+				"simple-flag": {
+					TrackEvents:   true,
+					VariationType: "B",
+					Failed:        false,
+					Version:       "",
+					Reason:        "STATIC",
+					Value:         true,
+					Cacheable:     true,
+					Metadata: map[string]interface{}{
+						"description": "this is a simple feature flag",
+						"issue-link":  "https://jira.xxx/GOFF-01",
+					},
+				},
+			},
 		},
 		{
 			name: "Should error if evaluation context provided has no targeting key",
@@ -79,8 +123,24 @@ func Test_evaluate_Evaluate(t *testing.T) {
 					evaluationCtx: `{"id": "user-123"}`,
 				}, nil
 			},
-			wantErr:     assert.Error,
-			expectedErr: "invalid evaluation context (missing targeting key)",
+			wantErr: assert.NoError,
+			expectedResult: map[string]model.RawVarResult{
+				"test-flag": {
+					TrackEvents:   true,
+					VariationType: "SdkDefault",
+					Failed:        true,
+					Version:       "",
+					Reason:        "ERROR",
+					ErrorCode:     "TARGETING_KEY_MISSING",
+					ErrorDetails:  "Error: Empty targeting key",
+					Value:         nil,
+					Cacheable:     false,
+					Metadata: map[string]interface{}{
+						"description": "this is a simple feature flag",
+						"issue-link":  "https://jira.xxx/GOFF-01",
+					},
+				},
+			},
 		},
 		{
 			name: "Should evaluate a single flag if flag name is provided",
@@ -156,6 +216,21 @@ func Test_evaluate_Evaluate(t *testing.T) {
 					Value:         false,
 					Cacheable:     true,
 				},
+				"simple-flag": {
+					TrackEvents:   true,
+					VariationType: "B",
+					Failed:        false,
+					Version:       "",
+					Reason:        "STATIC",
+					ErrorCode:     "",
+					ErrorDetails:  "",
+					Value:         true,
+					Cacheable:     true,
+					Metadata: map[string]interface{}{
+						"description": "this is a simple feature flag",
+						"issue-link":  "https://jira.xxx/GOFF-01",
+					},
+				},
 			},
 		},
 		{
@@ -171,7 +246,8 @@ func Test_evaluate_Evaluate(t *testing.T) {
 					return evaluate{}, err
 				}
 
-				gitHubRetriever, _ := r.(*githubretriever.Retriever)
+				gitHubRetriever, ok := r.(*githubretriever.Retriever)
+				assert.True(t, ok, "failed to assert retriever to *githubretriever.Retriever")
 				gitHubRetriever.SetHTTPClient(&mock.HTTP{})
 
 				return evaluate{
@@ -211,7 +287,8 @@ func Test_evaluate_Evaluate(t *testing.T) {
 					return evaluate{}, err
 				}
 
-				gitLabRetriever, _ := r.(*gitlabretriever.Retriever)
+				gitLabRetriever, ok := r.(*gitlabretriever.Retriever)
+				assert.True(t, ok, "failed to assert retriever to *gitlabretriever.Retriever")
 				gitLabRetriever.SetHTTPClient(&mock.HTTP{})
 
 				return evaluate{
@@ -251,7 +328,8 @@ func Test_evaluate_Evaluate(t *testing.T) {
 					return evaluate{}, err
 				}
 
-				bitBucketRetriever, _ := r.(*bitbucketretriever.Retriever)
+				bitBucketRetriever, ok := r.(*bitbucketretriever.Retriever)
+				assert.True(t, ok, "failed to assert retriever to *bitbucketretriever.Retriever")
 				bitBucketRetriever.SetHTTPClient(&mock.HTTP{})
 
 				return evaluate{
@@ -295,7 +373,8 @@ func Test_evaluate_Evaluate(t *testing.T) {
 					return evaluate{}, err
 				}
 
-				s3Retriever, _ := r.(*s3retrieverv2.Retriever)
+				s3Retriever, ok := r.(*s3retrieverv2.Retriever)
+				assert.True(t, ok, "failed to assert retriever to *s3retrieverv2.Retriever")
 				s3Retriever.SetDownloader(downloader)
 
 				_ = s3Retriever.Init(context.Background(), nil)
@@ -340,7 +419,8 @@ func Test_evaluate_Evaluate(t *testing.T) {
 					return evaluate{}, err
 				}
 
-				httpRetriever, _ := r.(*httpretriever.Retriever)
+				httpRetriever, ok := r.(*httpretriever.Retriever)
+				assert.True(t, ok, "failed to assert retriever to *httpretriever.Retriever")
 				httpRetriever.SetHTTPClient(&mock.HTTP{})
 
 				return evaluate{
@@ -383,7 +463,8 @@ func Test_evaluate_Evaluate(t *testing.T) {
 					return evaluate{}, err
 				}
 
-				gcsRetriever, _ := r.(*gcstorageretriever.Retriever)
+				gcsRetriever, ok := r.(*gcstorageretriever.Retriever)
+				assert.True(t, ok, "failed to assert retriever to *gcstorageretriever.Retriever")
 				gcsRetriever.SetOptions([]option.ClientOption{
 					option.WithCredentials(&google.Credentials{}),
 					option.WithHTTPClient(mockedStorage.Server.HTTPClient()),
