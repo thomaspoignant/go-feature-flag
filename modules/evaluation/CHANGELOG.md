@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/thomaspoignant/go-feature-flag/compare/modules/evaluation/v0.2.0...modules/evaluation/v0.2.1) (2025-12-13)
+
+
+### 🔧 Chores
+
+* Bump k8s.io/api from 0.34.2 to 0.34.3 ([#4464](https://github.com/thomaspoignant/go-feature-flag/issues/4464)) ([7c947e6](https://github.com/thomaspoignant/go-feature-flag/commit/7c947e68ec359dbf2afbb1ac80ccbd31c56982cb))
+
 ## [0.2.0](https://github.com/thomaspoignant/go-feature-flag/compare/modules/evaluation/v0.1.3...modules/evaluation/v0.2.0) (2025-12-09)
 
 
