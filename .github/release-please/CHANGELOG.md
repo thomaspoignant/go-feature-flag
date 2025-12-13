@@ -1,5 +1,38 @@
 # Changelog
 
+## [1.49.1](https://github.com/thomaspoignant/go-feature-flag/compare/v1.49.0...v1.49.1) (2025-12-13)
+
+
+### 🐛 Bug Fixes
+
+* **makefile:** exit 1 if we have an error in one of the module ([#4472](https://github.com/thomaspoignant/go-feature-flag/issues/4472)) ([0981826](https://github.com/thomaspoignant/go-feature-flag/commit/09818265e04ae736e8a81dfcc55a06e4bff88a3c))
+* migrate dockers to dockers_v2 format ([#4461](https://github.com/thomaspoignant/go-feature-flag/issues/4461)) ([822bfae](https://github.com/thomaspoignant/go-feature-flag/commit/822bfaeeb24acb607725d8b86c4a2562cd3e9575)), closes [#4183](https://github.com/thomaspoignant/go-feature-flag/issues/4183)
+* **root:** fixing tests ([#4473](https://github.com/thomaspoignant/go-feature-flag/issues/4473)) ([6ec3ee1](https://github.com/thomaspoignant/go-feature-flag/commit/6ec3ee14121a6c0900dcece32def59323e905270))
+* support both monitoringPort formats in helm chart ([#4457](https://github.com/thomaspoignant/go-feature-flag/issues/4457)) ([8f9d54d](https://github.com/thomaspoignant/go-feature-flag/commit/8f9d54d698f5f73eb82bea333ea812926e83b769))
+* use nil default value in OFREP evaluate and remove explicit type parameters ([#4460](https://github.com/thomaspoignant/go-feature-flag/issues/4460)) ([57caa82](https://github.com/thomaspoignant/go-feature-flag/commit/57caa82b607007200e6c14381b53e4dc2a78e17e))
+
+
+### 🔧 Chores
+
+* Bump github.com/aws/aws-sdk-go-v2/config from 1.32.4 to 1.32.5 ([#4452](https://github.com/thomaspoignant/go-feature-flag/issues/4452)) ([b0ba688](https://github.com/thomaspoignant/go-feature-flag/commit/b0ba6882e19da0f69603dcdd6c01ce53a66dc1f7))
+* Bump github.com/aws/aws-sdk-go-v2/feature/s3/manager ([#4453](https://github.com/thomaspoignant/go-feature-flag/issues/4453)) ([5ff4cdd](https://github.com/thomaspoignant/go-feature-flag/commit/5ff4cddf2e5eff36a9cd11783957225ebab02025))
+* Bump github.com/aws/aws-sdk-go-v2/service/kinesis ([#4451](https://github.com/thomaspoignant/go-feature-flag/issues/4451)) ([f86b32a](https://github.com/thomaspoignant/go-feature-flag/commit/f86b32a0fa6678086a14eacf72081879ee151467))
+* Bump github.com/aws/aws-sdk-go-v2/service/sqs ([#4455](https://github.com/thomaspoignant/go-feature-flag/issues/4455)) ([075985d](https://github.com/thomaspoignant/go-feature-flag/commit/075985d39cb909cad1ce0ce4938ba3c615f995ed))
+* Bump github.com/labstack/echo/v4 from 4.13.4 to 4.14.0 ([#4469](https://github.com/thomaspoignant/go-feature-flag/issues/4469)) ([3a7ca53](https://github.com/thomaspoignant/go-feature-flag/commit/3a7ca537bdf2ab96d7b3de0720372747b07de53b))
+* Bump helm charts ([a448c5c](https://github.com/thomaspoignant/go-feature-flag/commit/a448c5c9da4600cb5208ae1e20c929ac70ad0cbb))
+* Bump k8s.io/apimachinery from 0.34.2 to 0.34.3 ([#4463](https://github.com/thomaspoignant/go-feature-flag/issues/4463)) ([74c4dbc](https://github.com/thomaspoignant/go-feature-flag/commit/74c4dbc79112fb4bc3d9e8c17f75bce5303a52e1))
+* Bump k8s.io/client-go from 0.34.2 to 0.34.3 ([#4465](https://github.com/thomaspoignant/go-feature-flag/issues/4465)) ([0202f07](https://github.com/thomaspoignant/go-feature-flag/commit/0202f07083b546dcc41b962ec436f62a719fa022))
+* Code cleaning following sonar recommendation - part 2 ([#4470](https://github.com/thomaspoignant/go-feature-flag/issues/4470)) ([cee1dd7](https://github.com/thomaspoignant/go-feature-flag/commit/cee1dd71a571da3b8048b1469f21c7a251466766))
+* Fix environment variable usage in release workflow ([fa71ceb](https://github.com/thomaspoignant/go-feature-flag/commit/fa71ceb4878ed56b10d92a931650af6f51e82b99))
+* fix some sonar warnings ([#4391](https://github.com/thomaspoignant/go-feature-flag/issues/4391)) ([fad894e](https://github.com/thomaspoignant/go-feature-flag/commit/fad894e47d0eb86b166576132051f6dac3ccf5c8))
+* fix some tests ([#4475](https://github.com/thomaspoignant/go-feature-flag/issues/4475)) ([2346f6e](https://github.com/thomaspoignant/go-feature-flag/commit/2346f6e179db302d61ca5fb6aa6ab26f577970ca))
+* **lint:** add deprecation warning to lint command ([#4477](https://github.com/thomaspoignant/go-feature-flag/issues/4477)) ([d6daec3](https://github.com/thomaspoignant/go-feature-flag/commit/d6daec3891b98e4e1c7c1b700df2c303219fb5f9))
+
+
+### 📚 Documentation
+
+* Add AGENTS.md codebase guide ([#4459](https://github.com/thomaspoignant/go-feature-flag/issues/4459)) ([580a618](https://github.com/thomaspoignant/go-feature-flag/commit/580a6181ea9a3636f1d65cc00e97080ecce4427f))
+
 ## [1.49.0](https://github.com/thomaspoignant/go-feature-flag/compare/v1.48.0...v1.49.0) (2025-12-09)
 
 
