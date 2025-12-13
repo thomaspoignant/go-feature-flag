@@ -9,6 +9,16 @@ import (
 )
 
 func main() {
+	// Deprecation warning
+	const red = "\033[31m"
+	const reset = "\033[0m"
+	fmt.Fprintf(os.Stderr, "%s⚠️ WARNING: The 'lint' command is deprecated and will be removed in a future version.%s\n",
+		red, reset)
+	fmt.Fprintf(os.Stderr,
+		"%s‼️ Please use 'go-feature-flag-lint' instead. "+
+			"See https://gofeatureflag.org/docs/tooling/cli for more information.%s\n\n",
+		red, reset)
+
 	var opts struct {
 		InputFile   string `short:"f" long:"input-file" description:"Location of the flag file you want to lint." required:"true"` //nolint: lll
 		InputFormat string `long:"input-format" description:"Format of your input file (YAML, JSON or TOML)" required:"true"`      //nolint: lll
