@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.1](https://github.com/thomaspoignant/go-feature-flag/compare/cmd/wasm/v0.1.0...cmd/wasm/v0.1.1) (2025-12-13)
+
+
+### 🔧 Chores
+
+* Bump k8s.io/api from 0.34.2 to 0.34.3 ([#4464](https://github.com/thomaspoignant/go-feature-flag/issues/4464)) ([7c947e6](https://github.com/thomaspoignant/go-feature-flag/commit/7c947e68ec359dbf2afbb1ac80ccbd31c56982cb))
+* Code cleaning following sonar recommendation - part 2 ([#4470](https://github.com/thomaspoignant/go-feature-flag/issues/4470)) ([cee1dd7](https://github.com/thomaspoignant/go-feature-flag/commit/cee1dd71a571da3b8048b1469f21c7a251466766))
+
 ## [0.1.0](https://github.com/thomaspoignant/go-feature-flag/compare/cmd/wasm/v0.0.2...cmd/wasm/v0.1.0) (2025-12-09)
 
 
