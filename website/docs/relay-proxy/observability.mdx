@@ -92,6 +92,10 @@ of the relay proxy.
 ### `/metrics`
 This endpoint is providing metrics about the relay proxy in the prometheus format.
 
+:::note
+The relay proxy supports [Prometheus native histograms](https://prometheus.io/docs/specs/native_histograms/) for improved latency distribution precision. When scraping with Prometheus (especially using protobuf format), histogram metrics will include both classic bucket data and native histogram data for higher-fidelity percentile calculations. Classic histogram buckets are preserved for backward compatibility.
+:::
+
 ---
 
 ## Use specific port for the monitoring

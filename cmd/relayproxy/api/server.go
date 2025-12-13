@@ -13,6 +13,7 @@ import (
 	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/prometheus/client_golang/prometheus"
 	custommiddleware "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/opentelemetry"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
@@ -68,6 +69,14 @@ func (s *Server) initRoutes() {
 		s.apiEcho.Use(echoprometheus.NewMiddlewareWithConfig(echoprometheus.MiddlewareConfig{
 			Subsystem:  metric.GOFFSubSystem,
 			Registerer: s.services.Metrics.Registry,
+			HistogramOptsFunc: func(opts prometheus.HistogramOpts) prometheus.HistogramOpts {
+				// Enable native histograms for all middleware histograms
+				// This provides higher-fidelity latency distributions while preserving
+				// classic histogram buckets for backward compatibility.
+				opts.NativeHistogramBucketFactor = 1.1
+				opts.NativeHistogramMaxBucketNumber = 160
+				return opts
+			},
 		}))
 	}
 	s.apiEcho.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
