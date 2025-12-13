@@ -32,16 +32,31 @@
 ## Table of Contents
 
 - [🎛️ GO Feature Flag](#️-go-feature-flag)
+  - [Table of Contents](#table-of-contents)
   - [What is GO Feature Flag?](#what-is-go-feature-flag)
   - [What can I do with GO Feature Flag?](#what-can-i-do-with-go-feature-flag)
-  - [Part of the OpenFeature Ecosystem](#part-of-the-openFeature-ecosystem)
-  - [Getting started with GO Feature Flag](#getting-started)
+  - [Part of the OpenFeature Ecosystem](#part-of-the-openfeature-ecosystem)
+  - [Getting started](#getting-started)
+    - [Create a feature flag configuration](#create-a-feature-flag-configuration)
+    - [Create a relay proxy configuration file](#create-a-relay-proxy-configuration-file)
+    - [Install the relay proxy](#install-the-relay-proxy)
+    - [Use Open Feature SDK](#use-open-feature-sdk)
+      - [Install dependencies](#install-dependencies)
+      - [Init your Open Feature client](#init-your-open-feature-client)
+      - [Evaluate your flag](#evaluate-your-flag)
+    - [Installation](#installation)
+    - [Create a feature flag configuration](#create-a-feature-flag-configuration-1)
+    - [SDK Initialisation](#sdk-initialisation)
+    - [Evaluate your flags](#evaluate-your-flags)
   - [Can I use GO Feature Flag with any language?](#can-i-use-go-feature-flag-with-any-language)
   - [Where do I store my flags file?](#where-do-i-store-my-flags-file)
   - [Flags file format](#flags-file-format)
   - [Rule format](#rule-format)
+    - [Examples](#examples)
   - [Evaluation Context](#evaluation-context)
+  - [Custom bucketing](#custom-bucketing)
   - [Variations](#variations)
+    - [Example](#example)
   - [Rollout](#rollout)
     - [Complex rollout strategy available](#complex-rollout-strategy-available)
   - [Notifiers](#notifiers)
@@ -604,7 +619,7 @@ The format of the data is [described in the documentation](https://gofeatureflag
 Events are collected and sent in bulk to avoid spamming your exporter.
 
 ## Linter
-A command line tool is available to help you lint your configuration file: [go-feature-flag-lint](cmd/cli/README.md).
+A command line tool is available to help you lint your configuration file: [go-feature-flag-cli](cmd/cli/README.md).
 
 # How can I contribute?
 

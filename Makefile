@@ -23,16 +23,13 @@ RESET  := $(shell tput -Txterm sgr0)
 
 all: help
 ## Build:
-build: build-modules build-relayproxy build-lint build-editor-api build-jsonschema-generator build-cli  ## Build all the binaries and put the output in out/bin/
+build: build-modules build-relayproxy build-editor-api build-jsonschema-generator build-cli  ## Build all the binaries and put the output in out/bin/
 
 create-out-dir:
 	mkdir -p out/bin
 
 build-relayproxy: create-out-dir ## Build the relay proxy in out/bin/
 	CGO_ENABLED=0 GO111MODULE=on $(GOWORK_ENV) $(GOCMD) build $(MODFLAG) -o out/bin/relayproxy ./cmd/relayproxy/
-
-build-lint: create-out-dir ## Build the linter in out/bin/
-	CGO_ENABLED=0 GO111MODULE=on $(GOWORK_ENV) $(GOCMD) build $(MODFLAG) -o out/bin/lint ./cmd/lint/
 
 build-cli: create-out-dir ## Build the linter in out/bin/
 	CGO_ENABLED=0 GO111MODULE=on $(GOWORK_ENV) $(GOCMD) build $(MODFLAG) -o out/bin/cli ./cmd/cli/
