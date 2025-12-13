@@ -780,7 +780,7 @@ func Test_Starting_RelayProxy_UnixSocket_OFREP_API(t *testing.T) {
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 }
 
-func Test_Starting_RelayProxy_UnixSocket_Authentication(t *testing.T) {
+func TestStartingRelayProxyUnixSocketAuthentication(t *testing.T) {
 	tests := []struct {
 		name          string
 		configAPIKeys *config.APIKeys
@@ -833,14 +833,14 @@ func Test_Starting_RelayProxy_UnixSocket_Authentication(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
+	for index, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Create a temporary directory for the socket
-			tempDir, err := os.MkdirTemp("", "goff-test-socket-*")
+			tempDir, err := os.MkdirTemp("", "")
 			require.NoError(t, err)
 			defer os.RemoveAll(tempDir)
 
-			socketPath := filepath.Join(tempDir, fmt.Sprintf("goff-test-%s.sock", strings.ReplaceAll(tt.name, " ", "-")))
+			socketPath := filepath.Join(tempDir, fmt.Sprintf("goff-test-%d.sock", index))
 
 			proxyConf := &config.Config{
 				CommonFlagSet: config.CommonFlagSet{
@@ -914,7 +914,7 @@ func Test_Starting_RelayProxy_UnixSocket_Authentication(t *testing.T) {
 	}
 }
 
-func Test_Starting_RelayProxy_UnixSocket_VersionHeader(t *testing.T) {
+func TestStartingRelayProxyUnixSocketVersionHeader(t *testing.T) {
 	tests := []struct {
 		name                 string
 		disableVersionHeader bool
@@ -932,14 +932,14 @@ func Test_Starting_RelayProxy_UnixSocket_VersionHeader(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
+	for index, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Create a temporary directory for the socket
-			tempDir, err := os.MkdirTemp("", "goff-test-socket-*")
+			tempDir, err := os.MkdirTemp("", "")
 			require.NoError(t, err)
 			defer os.RemoveAll(tempDir)
 
-			socketPath := filepath.Join(tempDir, fmt.Sprintf("goff-test-version-%s.sock", strings.ReplaceAll(tt.name, " ", "-")))
+			socketPath := filepath.Join(tempDir, fmt.Sprintf("goff-test-version-%d.sock", index))
 
 			proxyConf := &config.Config{
 				CommonFlagSet: config.CommonFlagSet{

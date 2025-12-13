@@ -68,7 +68,7 @@ type NotifierMock struct {
 	HasBeenCalled bool
 }
 
-func (n *NotifierMock) Notify(cache notifier.DiffCache) error {
+func (n *NotifierMock) Notify(_ notifier.DiffCache) error {
 	if n.WithError {
 		return fmt.Errorf("error")
 	}

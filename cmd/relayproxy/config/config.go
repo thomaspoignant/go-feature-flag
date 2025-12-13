@@ -50,7 +50,9 @@ var DefaultExporter = struct {
 }
 
 type Config struct {
+	// CommonFlagSet is the common flag set for the relay proxy
 	CommonFlagSet `mapstructure:",inline" koanf:",squash"`
+
 	// ListenPort (optional) is the port we are using to start the proxy
 	//
 	// Deprecated: use Server.Port instead

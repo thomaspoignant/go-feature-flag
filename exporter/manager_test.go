@@ -372,7 +372,7 @@ func TestDataExporterManager_multipleExporters(t *testing.T) {
 	assert.Equal(t, want[:100], mockExporter2.GetExportedEvents())
 }
 
-func TestDataExporterManager_multipleExportersWithDifferentFlushInterval(t *testing.T) {
+func TestDataExporterManagerMultipleExportersWithDifferentFlushInterval(t *testing.T) {
 	mockExporter1 := mock.Exporter{Bulk: true}
 	mockExporter2 := mock.Exporter{Bulk: true}
 	dataExporterMock := []exporter.Config{

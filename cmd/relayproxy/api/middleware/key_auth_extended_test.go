@@ -139,12 +139,25 @@ func TestKeyAuthExtended_SetDefaults(t *testing.T) {
 		return key == validKey, nil
 	}
 
-	t.Run("panics when Validator is nil", func(t *testing.T) {
-		assert.PanicsWithValue(t, "echo: key auth extended middleware requires a validator function", func() {
-			middleware2.KeyAuthExtended(middleware2.KeyAuthExtendedConfig{
-				Validator: nil,
-			})
+	t.Run("returns middleware that always errors when Validator is nil", func(t *testing.T) {
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodGet, "/test", nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		// Create middleware with nil Validator - should return middleware that always errors
+		mw := middleware2.KeyAuthExtended(middleware2.KeyAuthExtendedConfig{
+			Validator: nil,
 		})
+
+		handler := mw(func(c echo.Context) error {
+			return c.String(http.StatusOK, "Authorized")
+		})
+
+		// Middleware should always return an error regardless of request
+		err := handler(c)
+		require.Error(t, err)
+		assert.Equal(t, "echo: key auth extended middleware requires a validator function", err.Error())
 	})
 
 	t.Run("uses default ErrorHandler when nil", func(t *testing.T) {

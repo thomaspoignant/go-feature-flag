@@ -14,7 +14,7 @@ const DefaultCsvTemplate = "{{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .Creat
 const DefaultFilenameTemplate = "flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}"
 
 // ParseTemplate is parsing the template given by the config or use the default template
-func ParseTemplate(name string, templateToParse string, defaultTemplate string) *template.Template {
+func ParseTemplate(name, templateToParse, defaultTemplate string) *template.Template {
 	if templateToParse == "" {
 		templateToParse = defaultTemplate
 	}

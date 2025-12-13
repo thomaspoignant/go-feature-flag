@@ -16,11 +16,11 @@ type mockWebsocketService struct {
 	nbConnection int
 }
 
-func (m *mockWebsocketService) Register(c service.WebsocketConn) {
+func (m *mockWebsocketService) Register(_ service.WebsocketConnector) {
 	m.nbConnection++
 }
 
-func (m *mockWebsocketService) Deregister(c service.WebsocketConn) {
+func (m *mockWebsocketService) Deregister(_ service.WebsocketConnector) {
 	m.nbConnection--
 }
 

@@ -256,11 +256,11 @@ type MockFlagsetManager struct {
 	err     error
 }
 
-func (m *MockFlagsetManager) FlagSet(apiKey string) (*ffclient.GoFeatureFlag, error) {
+func (m *MockFlagsetManager) FlagSet(_ string) (*ffclient.GoFeatureFlag, error) {
 	return m.flagset, m.err
 }
 
-func (m *MockFlagsetManager) FlagSetName(apiKey string) (string, error) {
+func (m *MockFlagsetManager) FlagSetName(_ string) (string, error) {
 	return "", nil
 }
 
