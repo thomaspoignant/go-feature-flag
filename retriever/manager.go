@@ -107,7 +107,7 @@ func (m *Manager) initRetrievers(ctx context.Context, retrieversToInit []Retriev
 // the legacy interface.
 func (m *Manager) tryInitializeLegacy(ctx context.Context, retriever Retriever) {
 	if r, ok := retriever.(InitializableRetrieverLegacy); ok {
-		if err := r.Init(ctx, m.logger.GetLogLogger(slog.LevelError)); err != nil {
+		if r.Init(ctx, m.logger.GetLogLogger(slog.LevelError)) != nil {
 			m.onErrorRetriever = append(m.onErrorRetriever, retriever)
 		}
 	}
