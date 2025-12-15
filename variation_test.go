@@ -1,7 +1,6 @@
 package ffclient
 
 import (
-	"context"
 	"errors"
 	"log/slog"
 	"os"
@@ -326,7 +325,6 @@ func TestBoolVariation(t *testing.T) {
 
 			if !tt.args.disableInit {
 				c := retriever.ManagerConfig{
-					Ctx:                     context.Background(),
 					FileFormat:              "YAML",
 					DisableNotifierOnInit:   false,
 					StartWithRetrieverError: false,
@@ -804,7 +802,6 @@ func TestBoolVariationDetails(t *testing.T) {
 
 			if !tt.args.disableInit {
 				c := retriever.ManagerConfig{
-					Ctx:                     context.Background(),
 					FileFormat:              "YAML",
 					DisableNotifierOnInit:   false,
 					StartWithRetrieverError: false,
@@ -1137,8 +1134,7 @@ func TestFloat64Variation(t *testing.T) {
 			logger := slog.New(handler)
 
 			if !tt.args.disableInit {
-				c := retriever.ManagerConfig{
-					Ctx:                     context.Background(),
+				config := retriever.ManagerConfig{
 					FileFormat:              "YAML",
 					DisableNotifierOnInit:   false,
 					StartWithRetrieverError: false,
@@ -1146,7 +1142,7 @@ func TestFloat64Variation(t *testing.T) {
 					PollingInterval:         500,
 				}
 				ff = &GoFeatureFlag{
-					retrieverManager: retriever.NewManager(c, []retriever.Retriever{}, tt.args.cacheMock, &fflog.FFLogger{LeveledLogger: logger}),
+					retrieverManager: retriever.NewManager(config, []retriever.Retriever{}, tt.args.cacheMock, &fflog.FFLogger{LeveledLogger: logger}),
 					config: Config{
 						PollingInterval: 0,
 						LeveledLogger:   logger,
@@ -1475,7 +1471,6 @@ func TestFloat64VariationDetails(t *testing.T) {
 
 			if !tt.args.disableInit {
 				c := retriever.ManagerConfig{
-					Ctx:                     context.Background(),
 					FileFormat:              "YAML",
 					DisableNotifierOnInit:   false,
 					StartWithRetrieverError: false,
@@ -1788,7 +1783,6 @@ func TestJSONArrayVariation(t *testing.T) {
 
 			if !tt.args.disableInit {
 				c := retriever.ManagerConfig{
-					Ctx:                     context.Background(),
 					FileFormat:              "YAML",
 					DisableNotifierOnInit:   false,
 					StartWithRetrieverError: false,
@@ -2114,7 +2108,6 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 
 			if !tt.args.disableInit {
 				c := retriever.ManagerConfig{
-					Ctx:                     context.Background(),
 					FileFormat:              "YAML",
 					DisableNotifierOnInit:   false,
 					StartWithRetrieverError: false,
@@ -2411,7 +2404,6 @@ func TestJSONVariation(t *testing.T) {
 
 			if !tt.args.disableInit {
 				c := retriever.ManagerConfig{
-					Ctx:                     context.Background(),
 					FileFormat:              "YAML",
 					DisableNotifierOnInit:   false,
 					StartWithRetrieverError: false,
@@ -2660,7 +2652,6 @@ func TestJSONVariationDetails(t *testing.T) {
 
 			if !tt.args.disableInit {
 				c := retriever.ManagerConfig{
-					Ctx:                     context.Background(),
 					FileFormat:              "YAML",
 					DisableNotifierOnInit:   false,
 					StartWithRetrieverError: false,
@@ -3205,7 +3196,6 @@ func TestStringVariationDetails(t *testing.T) {
 
 			if !tt.args.disableInit {
 				c := retriever.ManagerConfig{
-					Ctx:                     context.Background(),
 					FileFormat:              "YAML",
 					DisableNotifierOnInit:   false,
 					StartWithRetrieverError: false,
@@ -3531,7 +3521,6 @@ func TestIntVariation(t *testing.T) {
 
 			if !tt.args.disableInit {
 				c := retriever.ManagerConfig{
-					Ctx:                     context.Background(),
 					FileFormat:              "YAML",
 					DisableNotifierOnInit:   false,
 					StartWithRetrieverError: false,
@@ -4207,7 +4196,6 @@ func TestRawVariation(t *testing.T) {
 
 			if !tt.args.disableInit {
 				c := retriever.ManagerConfig{
-					Ctx:                     context.Background(),
 					FileFormat:              "YAML",
 					DisableNotifierOnInit:   false,
 					StartWithRetrieverError: false,
