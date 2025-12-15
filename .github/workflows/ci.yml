@@ -65,7 +65,7 @@ jobs:
           check-latest: true
       - run: make coverage
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7 # v5.5.1
+        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
         with:
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -154,7 +154,7 @@ jobs:
       - name: Run benchmark
         run: make bench | tee bench-output.txt
       - name: Download previous benchmark data
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
         with:
           path: ./cache
           key: ${{ runner.os }}-benchmark
