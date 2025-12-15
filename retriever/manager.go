@@ -119,7 +119,7 @@ func (m *Manager) tryInitializeLegacy(ctx context.Context, retriever Retriever) 
 // the standard interface.
 func (m *Manager) tryInitializeStandard(ctx context.Context, retriever Retriever) {
 	if r, ok := retriever.(InitializableRetriever); ok {
-		if err := r.Init(ctx, m.logger); err != nil {
+		if r.Init(ctx, m.logger) != nil {
 			m.onErrorRetriever = append(m.onErrorRetriever, retriever)
 		}
 	}
@@ -131,7 +131,7 @@ func (m *Manager) tryInitializeStandard(ctx context.Context, retriever Retriever
 // the flagset interface.
 func (m *Manager) tryInitializeWithFlagset(ctx context.Context, retriever Retriever) {
 	if r, ok := retriever.(InitializableRetrieverWithFlagset); ok {
-		if err := r.Init(ctx, m.logger, m.config.Name); err != nil {
+		if r.Init(ctx, m.logger, m.config.Name) != nil {
 			m.onErrorRetriever = append(m.onErrorRetriever, retriever)
 		}
 	}
