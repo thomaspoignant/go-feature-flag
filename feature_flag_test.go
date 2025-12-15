@@ -121,7 +121,7 @@ func TestValidUseCase(t *testing.T) {
 	ffclient.SetOffline(false)
 	assert.False(t, ffclient.IsOffline())
 	assert.True(t, ffclient.ForceRefresh())
-	ffclient.Track("toto", user, map[string]interface{}{"key": "value"})
+	ffclient.Track("toto", user, map[string]any{"key": "value"})
 	assert.Equal(t, 1, len(cliExport.ExportedEvents))
 }
 

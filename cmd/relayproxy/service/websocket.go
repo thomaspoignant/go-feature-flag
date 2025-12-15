@@ -10,7 +10,7 @@ import (
 
 // WebsocketConnector is an interface to be able to mock websocket.Conn
 type WebsocketConnector interface {
-	WriteJSON(v interface{}) error
+	WriteJSON(v any) error
 }
 
 // WebsocketService is the service interface that handle the websocket connections
@@ -31,7 +31,7 @@ type WebsocketService interface {
 // NewWebsocketService is a constructor to create a new WebsocketService.
 func NewWebsocketService() WebsocketService {
 	return &websocketServiceImpl{
-		clients: map[WebsocketConnector]interface{}{},
+		clients: map[WebsocketConnector]any{},
 		mutex:   &sync.RWMutex{},
 		closed:  make(chan struct{}),
 	}
@@ -39,7 +39,7 @@ func NewWebsocketService() WebsocketService {
 
 // websocketServiceImpl is the implementation of the interface.
 type websocketServiceImpl struct {
-	clients map[WebsocketConnector]interface{}
+	clients map[WebsocketConnector]any
 	mutex   *sync.RWMutex
 	closed  chan struct{}
 }

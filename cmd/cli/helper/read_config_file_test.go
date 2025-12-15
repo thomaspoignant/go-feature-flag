@@ -28,27 +28,27 @@ func TestLoadConfigFile(t *testing.T) {
 			configFormat:  "yaml",
 			expected: map[string]dto.DTO{
 				"test-flag": {
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"var_a": testconvert.Interface(true),
 						"var_b": testconvert.Interface(false),
 					},
 					DefaultRule: &flag.Rule{
 						VariationResult: testconvert.String("var_a"),
 					},
-					Metadata: &map[string]interface{}{
+					Metadata: &map[string]any{
 						"description":  "this is a simple feature flag",
 						"defaultValue": false,
 					},
 				},
 				"test-flag2": {
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"var_a": testconvert.Interface(1),
 						"var_b": testconvert.Interface(2),
 					},
 					DefaultRule: &flag.Rule{
 						VariationResult: testconvert.String("var_b"),
 					},
-					Metadata: &map[string]interface{}{
+					Metadata: &map[string]any{
 						"defaultValue": 123,
 					},
 				},
@@ -60,27 +60,27 @@ func TestLoadConfigFile(t *testing.T) {
 			inputFilePath: "testdata/flag.goff.yaml",
 			expected: map[string]dto.DTO{
 				"test-flag": {
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"var_a": testconvert.Interface(true),
 						"var_b": testconvert.Interface(false),
 					},
 					DefaultRule: &flag.Rule{
 						VariationResult: testconvert.String("var_a"),
 					},
-					Metadata: &map[string]interface{}{
+					Metadata: &map[string]any{
 						"description":  "this is a simple feature flag",
 						"defaultValue": false,
 					},
 				},
 				"test-flag2": {
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"var_a": testconvert.Interface(1),
 						"var_b": testconvert.Interface(2),
 					},
 					DefaultRule: &flag.Rule{
 						VariationResult: testconvert.String("var_b"),
 					},
-					Metadata: &map[string]interface{}{
+					Metadata: &map[string]any{
 						"defaultValue": 123,
 					},
 				},
@@ -93,27 +93,27 @@ func TestLoadConfigFile(t *testing.T) {
 			configFormat:  "json",
 			expected: map[string]dto.DTO{
 				"test-flag": {
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"var_a": testconvert.Interface(true),
 						"var_b": testconvert.Interface(false),
 					},
 					DefaultRule: &flag.Rule{
 						VariationResult: testconvert.String("var_a"),
 					},
-					Metadata: &map[string]interface{}{
+					Metadata: &map[string]any{
 						"description":  "this is a simple feature flag",
 						"defaultValue": false,
 					},
 				},
 				"test-flag2": {
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"var_a": testconvert.Interface(1.0),
 						"var_b": testconvert.Interface(2.0),
 					},
 					DefaultRule: &flag.Rule{
 						VariationResult: testconvert.String("var_b"),
 					},
-					Metadata: &map[string]interface{}{
+					Metadata: &map[string]any{
 						"defaultValue": 123.0,
 					},
 				},
@@ -126,27 +126,27 @@ func TestLoadConfigFile(t *testing.T) {
 			configFormat:  "toml",
 			expected: map[string]dto.DTO{
 				"test-flag": {
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"var_a": testconvert.Interface(true),
 						"var_b": testconvert.Interface(false),
 					},
 					DefaultRule: &flag.Rule{
 						VariationResult: testconvert.String("var_a"),
 					},
-					Metadata: &map[string]interface{}{
+					Metadata: &map[string]any{
 						"description":  "this is a simple feature flag",
 						"defaultValue": false,
 					},
 				},
 				"test-flag2": {
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"var_a": testconvert.Interface(int64(1)),
 						"var_b": testconvert.Interface(int64(2)),
 					},
 					DefaultRule: &flag.Rule{
 						VariationResult: testconvert.String("var_b"),
 					},
-					Metadata: &map[string]interface{}{
+					Metadata: &map[string]any{
 						"defaultValue": int64(123),
 					},
 				},
@@ -160,27 +160,27 @@ func TestLoadConfigFile(t *testing.T) {
 			configFormat:       "yaml",
 			expected: map[string]dto.DTO{
 				"test-flag": {
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"var_a": testconvert.Interface(true),
 						"var_b": testconvert.Interface(false),
 					},
 					DefaultRule: &flag.Rule{
 						VariationResult: testconvert.String("var_a"),
 					},
-					Metadata: &map[string]interface{}{
+					Metadata: &map[string]any{
 						"description":  "this is a simple feature flag",
 						"defaultValue": false,
 					},
 				},
 				"test-flag2": {
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"var_a": testconvert.Interface(1),
 						"var_b": testconvert.Interface(2),
 					},
 					DefaultRule: &flag.Rule{
 						VariationResult: testconvert.String("var_b"),
 					},
-					Metadata: &map[string]interface{}{
+					Metadata: &map[string]any{
 						"defaultValue": 123,
 					},
 				},

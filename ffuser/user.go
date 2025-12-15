@@ -1,20 +1,20 @@
 package ffuser
 
 // value is a type to define custom attribute.
-type value map[string]interface{}
+type value map[string]any
 
 // Deprecated: NewUser, please use ffcontext.NewEvaluationContext instead
 //
 // NewUser creates a new user identified by the given key.
 func NewUser(key string) User {
-	return User{key: key, custom: map[string]interface{}{}}
+	return User{key: key, custom: map[string]any{}}
 }
 
 // Deprecated: NewAnonymousUser, please use ffcontext.NewAnonymousEvaluationContext instead.
 //
 // NewAnonymousUser creates a new anonymous user identified by the given key.
 func NewAnonymousUser(key string) User {
-	return User{key: key, anonymous: true, custom: map[string]interface{}{}}
+	return User{key: key, anonymous: true, custom: map[string]any{}}
 }
 
 // Deprecated: User, please use ffcontext.EvaluationContext instead.
@@ -42,12 +42,12 @@ func (u User) IsAnonymous() bool {
 }
 
 // GetCustom return all the custom properties of a user.
-func (u User) GetCustom() map[string]interface{} {
+func (u User) GetCustom() map[string]any {
 	return u.custom
 }
 
 // AddCustomAttribute allows to add a custom attribute into the user.
-func (u User) AddCustomAttribute(name string, value interface{}) {
+func (u User) AddCustomAttribute(name string, value any) {
 	if name != "" {
 		u.custom[name] = value
 	}

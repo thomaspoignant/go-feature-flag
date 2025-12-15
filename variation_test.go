@@ -77,7 +77,7 @@ func TestBoolVariation(t *testing.T) {
 				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
 				defaultValue:  false,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"var_true":  testconvert.Interface(true),
 						"var_false": testconvert.Interface(false),
 					},
@@ -155,7 +155,7 @@ func TestBoolVariation(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface(true),
 						"False":   testconvert.Interface(false),
 						"True":    testconvert.Interface(true),
@@ -187,7 +187,7 @@ func TestBoolVariation(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface(false),
 						"False":   testconvert.Interface(false),
 						"True":    testconvert.Interface(true),
@@ -219,7 +219,7 @@ func TestBoolVariation(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface(false),
 						"False":   testconvert.Interface(false),
 						"True":    testconvert.Interface(true),
@@ -251,7 +251,7 @@ func TestBoolVariation(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface("xxx"),
 						"False":   testconvert.Interface("xxx"),
 						"True":    testconvert.Interface("xxx"),
@@ -283,7 +283,7 @@ func TestBoolVariation(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface(false),
 						"False":   testconvert.Interface(false),
 						"True":    testconvert.Interface(true),
@@ -407,7 +407,7 @@ func TestBoolVariationDetails(t *testing.T) {
 				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
 				defaultValue:  false,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"var_true":  testconvert.Interface(true),
 						"var_false": testconvert.Interface(false),
 					},
@@ -489,7 +489,7 @@ func TestBoolVariationDetails(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface(true),
 						"False":   testconvert.Interface(false),
 						"True":    testconvert.Interface(true),
@@ -528,7 +528,7 @@ func TestBoolVariationDetails(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface(false),
 						"False":   testconvert.Interface(false),
 						"True":    testconvert.Interface(true),
@@ -546,7 +546,7 @@ func TestBoolVariationDetails(t *testing.T) {
 				Value:         true,
 				TrackEvents:   true,
 				Cacheable:     true,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"evaluatedRuleName": "rule1",
 				},
 			},
@@ -570,7 +570,7 @@ func TestBoolVariationDetails(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface(false),
 						"False":   testconvert.Interface(false),
 						"True":    testconvert.Interface(true),
@@ -588,7 +588,7 @@ func TestBoolVariationDetails(t *testing.T) {
 				Value:         true,
 				TrackEvents:   true,
 				Cacheable:     true,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"evaluatedRuleName": "rule1",
 				},
 			},
@@ -611,7 +611,7 @@ func TestBoolVariationDetails(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface(false),
 						"False":   testconvert.Interface(false),
 						"True":    testconvert.Interface(true),
@@ -650,7 +650,7 @@ func TestBoolVariationDetails(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface(false),
 						"False":   testconvert.Interface(false),
 						"True":    testconvert.Interface(true),
@@ -668,7 +668,7 @@ func TestBoolVariationDetails(t *testing.T) {
 				Value:         false,
 				TrackEvents:   true,
 				Cacheable:     true,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"evaluatedRuleName": "rule1",
 				},
 			},
@@ -692,7 +692,7 @@ func TestBoolVariationDetails(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface("xxx"),
 						"False":   testconvert.Interface("xxx"),
 						"True":    testconvert.Interface("xxx"),
@@ -742,7 +742,7 @@ func TestBoolVariationDetails(t *testing.T) {
 				evaluationCtx: ffcontext.NewEvaluationContext(""),
 				defaultValue:  true,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"on":  testconvert.Interface(true),
 						"off": testconvert.Interface(false),
 					},
@@ -769,7 +769,7 @@ func TestBoolVariationDetails(t *testing.T) {
 				evaluationCtx: ffcontext.NewEvaluationContext(""),
 				defaultValue:  false,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"on":  testconvert.Interface(true),
 						"off": testconvert.Interface(false),
 					},
@@ -890,7 +890,7 @@ func TestFloat64Variation(t *testing.T) {
 				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
 				defaultValue:  123.3,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"var_true":  testconvert.Interface(true),
 						"var_false": testconvert.Interface(false),
 					},
@@ -968,7 +968,7 @@ func TestFloat64Variation(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface(119.12),
 						"False":   testconvert.Interface(121.12),
 						"True":    testconvert.Interface(120.12),
@@ -1000,7 +1000,7 @@ func TestFloat64Variation(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface(119.12),
 						"False":   testconvert.Interface(121.12),
 						"True":    testconvert.Interface(120.12),
@@ -1032,7 +1032,7 @@ func TestFloat64Variation(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface(119.12),
 						"False":   testconvert.Interface(121.12),
 						"True":    testconvert.Interface(120.12),
@@ -1064,7 +1064,7 @@ func TestFloat64Variation(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface("xxx"),
 						"False":   testconvert.Interface("xxx"),
 						"True":    testconvert.Interface("xxx"),
@@ -1096,7 +1096,7 @@ func TestFloat64Variation(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface(119.12),
 						"False":   testconvert.Interface(121.12),
 						"True":    testconvert.Interface(120.12),
@@ -1216,7 +1216,7 @@ func TestFloat64VariationDetails(t *testing.T) {
 				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
 				defaultValue:  123.3,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"var_true":  testconvert.Interface(true),
 						"var_false": testconvert.Interface(false),
 					},
@@ -1298,7 +1298,7 @@ func TestFloat64VariationDetails(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface(119.12),
 						"False":   testconvert.Interface(121.12),
 						"True":    testconvert.Interface(120.12),
@@ -1337,7 +1337,7 @@ func TestFloat64VariationDetails(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface(119.12),
 						"False":   testconvert.Interface(121.12),
 						"True":    testconvert.Interface(120.12),
@@ -1355,7 +1355,7 @@ func TestFloat64VariationDetails(t *testing.T) {
 				Failed:        false,
 				Reason:        flag.ReasonTargetingMatch,
 				Cacheable:     true,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"evaluatedRuleName": "rule1",
 				},
 			},
@@ -1379,7 +1379,7 @@ func TestFloat64VariationDetails(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface(119.12),
 						"False":   testconvert.Interface(121.12),
 						"True":    testconvert.Interface(120.12),
@@ -1397,7 +1397,7 @@ func TestFloat64VariationDetails(t *testing.T) {
 				Failed:        false,
 				Reason:        flag.ReasonTargetingMatchSplit,
 				Cacheable:     true,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"evaluatedRuleName": "rule1",
 				},
 			},
@@ -1421,7 +1421,7 @@ func TestFloat64VariationDetails(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface("xxx"),
 						"False":   testconvert.Interface("xxx"),
 						"True":    testconvert.Interface("xxx"),
@@ -1533,7 +1533,7 @@ func TestJSONArrayVariation(t *testing.T) {
 	type args struct {
 		flagKey       string
 		evaluationCtx ffcontext.Context
-		defaultValue  []interface{}
+		defaultValue  []any
 		cacheMock     cache.Manager
 		offline       bool
 		disableInit   bool
@@ -1541,7 +1541,7 @@ func TestJSONArrayVariation(t *testing.T) {
 	tests := []struct {
 		name        string
 		args        args
-		want        []interface{}
+		want        []any
 		wantErr     bool
 		expectedLog string
 	}{
@@ -1550,9 +1550,9 @@ func TestJSONArrayVariation(t *testing.T) {
 			args: args{
 				flagKey:       "key-not-exist",
 				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
-				defaultValue:  []interface{}{},
+				defaultValue:  []any{},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"var_true":  testconvert.Interface(true),
 						"var_false": testconvert.Interface(false),
 					},
@@ -1567,7 +1567,7 @@ func TestJSONArrayVariation(t *testing.T) {
 				}, nil),
 				disableInit: true,
 			},
-			want:    []interface{}{},
+			want:    []any{},
 			wantErr: true,
 		},
 		{
@@ -1575,12 +1575,12 @@ func TestJSONArrayVariation(t *testing.T) {
 			args: args{
 				flagKey:       "disable-flag",
 				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
-				defaultValue:  []interface{}{"toto"},
+				defaultValue:  []any{"toto"},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Disable: testconvert.Bool(true),
 				}, nil),
 			},
-			want:        []interface{}{"toto"},
+			want:        []any{"toto"},
 			wantErr:     false,
 			expectedLog: `user="random-key", flag="disable-flag", value="[toto]", variation="SdkDefault"`,
 		},
@@ -1589,12 +1589,12 @@ func TestJSONArrayVariation(t *testing.T) {
 			args: args{
 				flagKey:       "key-not-exist",
 				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
-				defaultValue:  []interface{}{"toto"},
+				defaultValue:  []any{"toto"},
 				cacheMock: NewCacheMock(
 					&flag.InternalFlag{},
 					errors.New("impossible to read the toggle before the initialisation")),
 			},
-			want:        []interface{}{"toto"},
+			want:        []any{"toto"},
 			wantErr:     true,
 			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"\\[toto\\]\"\n",
 		},
@@ -1603,13 +1603,13 @@ func TestJSONArrayVariation(t *testing.T) {
 			args: args{
 				flagKey:       "key-not-exist",
 				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
-				defaultValue:  []interface{}{"toto"},
+				defaultValue:  []any{"toto"},
 				cacheMock: NewCacheMock(
 					&flag.InternalFlag{},
 					errors.New("flag [key-not-exist] does not exists"),
 				),
 			},
-			want:        []interface{}{"toto"},
+			want:        []any{"toto"},
 			wantErr:     true,
 			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key\", flag=\"key-not-exist\", value=\"\\[toto\\]\"\n",
 		},
@@ -1618,7 +1618,7 @@ func TestJSONArrayVariation(t *testing.T) {
 			args: args{
 				flagKey:       "test-flag",
 				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
-				defaultValue:  []interface{}{"toto"},
+				defaultValue:  []any{"toto"},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -1630,10 +1630,10 @@ func TestJSONArrayVariation(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
-						"Default": testconvert.Interface([]interface{}{"default"}),
-						"True":    testconvert.Interface([]interface{}{"true"}),
-						"False":   testconvert.Interface([]interface{}{"false"}),
+					Variations: &map[string]*any{
+						"Default": testconvert.Interface([]any{"default"}),
+						"True":    testconvert.Interface([]any{"true"}),
+						"False":   testconvert.Interface([]any{"false"}),
 					},
 					DefaultRule: &flag.Rule{
 						Name:            testconvert.String("defaultRule"),
@@ -1641,7 +1641,7 @@ func TestJSONArrayVariation(t *testing.T) {
 					},
 				}, nil),
 			},
-			want:        []interface{}{"default"},
+			want:        []any{"default"},
 			wantErr:     false,
 			expectedLog: `user="random-key", flag="test-flag", value="[default]", variation="Default"`,
 		},
@@ -1650,7 +1650,7 @@ func TestJSONArrayVariation(t *testing.T) {
 			args: args{
 				flagKey:       "test-flag",
 				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key"),
-				defaultValue:  []interface{}{"toto"},
+				defaultValue:  []any{"toto"},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -1662,10 +1662,10 @@ func TestJSONArrayVariation(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
-						"Default": testconvert.Interface([]interface{}{"default"}),
-						"True":    testconvert.Interface([]interface{}{"true"}),
-						"False":   testconvert.Interface([]interface{}{"false"}),
+					Variations: &map[string]*any{
+						"Default": testconvert.Interface([]any{"default"}),
+						"True":    testconvert.Interface([]any{"true"}),
+						"False":   testconvert.Interface([]any{"false"}),
 					},
 					DefaultRule: &flag.Rule{
 						Name:            testconvert.String("defaultRule"),
@@ -1673,7 +1673,7 @@ func TestJSONArrayVariation(t *testing.T) {
 					},
 				}, nil),
 			},
-			want:        []interface{}{"true"},
+			want:        []any{"true"},
 			wantErr:     false,
 			expectedLog: `user="random-key", flag="test-flag", value="[true]", variation="True"`,
 		},
@@ -1682,12 +1682,12 @@ func TestJSONArrayVariation(t *testing.T) {
 			args: args{
 				flagKey:       "test-flag",
 				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key-ssss1"),
-				defaultValue:  []interface{}{"toto"},
+				defaultValue:  []any{"toto"},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
-					Variations: &map[string]*interface{}{
-						"Default": testconvert.Interface([]interface{}{"default"}),
-						"True":    testconvert.Interface([]interface{}{"true"}),
-						"False":   testconvert.Interface([]interface{}{"false"}),
+					Variations: &map[string]*any{
+						"Default": testconvert.Interface([]any{"default"}),
+						"True":    testconvert.Interface([]any{"true"}),
+						"False":   testconvert.Interface([]any{"false"}),
 					},
 					DefaultRule: &flag.Rule{
 						Name: testconvert.String("defaultRule"),
@@ -1698,7 +1698,7 @@ func TestJSONArrayVariation(t *testing.T) {
 					},
 				}, nil),
 			},
-			want:        []interface{}{"false"},
+			want:        []any{"false"},
 			wantErr:     false,
 			expectedLog: `user="random-key-ssss1", flag="test-flag", value="[false]", variation="False"`,
 		},
@@ -1707,7 +1707,7 @@ func TestJSONArrayVariation(t *testing.T) {
 			args: args{
 				flagKey:       "test-flag",
 				evaluationCtx: ffcontext.NewEvaluationContext("random-key-ssss1"),
-				defaultValue:  []interface{}{"toto"},
+				defaultValue:  []any{"toto"},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -1719,7 +1719,7 @@ func TestJSONArrayVariation(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface("xxx"),
 						"False":   testconvert.Interface("xxx"),
 						"True":    testconvert.Interface("xxx"),
@@ -1730,7 +1730,7 @@ func TestJSONArrayVariation(t *testing.T) {
 					},
 				}, nil),
 			},
-			want:        []interface{}{"toto"},
+			want:        []any{"toto"},
 			wantErr:     true,
 			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"\\[toto\\]\"\n",
 		},
@@ -1739,12 +1739,12 @@ func TestJSONArrayVariation(t *testing.T) {
 			args: args{
 				flagKey:       "test-flag",
 				evaluationCtx: ffcontext.NewEvaluationContext("random-key-ssss1"),
-				defaultValue:  []interface{}{"toto"},
+				defaultValue:  []any{"toto"},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
-					Variations: &map[string]*interface{}{
-						"Default": testconvert.Interface([]interface{}{"default"}),
-						"True":    testconvert.Interface([]interface{}{"true"}),
-						"False":   testconvert.Interface([]interface{}{"false"}),
+					Variations: &map[string]*any{
+						"Default": testconvert.Interface([]any{"default"}),
+						"True":    testconvert.Interface([]any{"true"}),
+						"False":   testconvert.Interface([]any{"false"}),
 					},
 					DefaultRule: &flag.Rule{
 						Name: testconvert.String("defaultRule"),
@@ -1756,7 +1756,7 @@ func TestJSONArrayVariation(t *testing.T) {
 					TrackEvents: testconvert.Bool(false),
 				}, nil),
 			},
-			want:        []interface{}{"true"},
+			want:        []any{"true"},
 			wantErr:     false,
 			expectedLog: "",
 		},
@@ -1766,12 +1766,12 @@ func TestJSONArrayVariation(t *testing.T) {
 				offline:       true,
 				flagKey:       "disable-flag",
 				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
-				defaultValue:  []interface{}{"toto"},
+				defaultValue:  []any{"toto"},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Disable: testconvert.Bool(true),
 				}, nil),
 			},
-			want:        []interface{}{"toto"},
+			want:        []any{"toto"},
 			wantErr:     false,
 			expectedLog: "",
 		},
@@ -1844,7 +1844,7 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 	type args struct {
 		flagKey       string
 		evaluationCtx ffcontext.Context
-		defaultValue  []interface{}
+		defaultValue  []any
 		cacheMock     cache.Manager
 		offline       bool
 		disableInit   bool
@@ -1852,7 +1852,7 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 	tests := []struct {
 		name        string
 		args        args
-		want        model.VariationResult[[]interface{}]
+		want        model.VariationResult[[]any]
 		wantErr     bool
 		expectedLog string
 	}{
@@ -1861,9 +1861,9 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 			args: args{
 				flagKey:       "key-not-exist",
 				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
-				defaultValue:  []interface{}{},
+				defaultValue:  []any{},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"var_true":  testconvert.Interface(true),
 						"var_false": testconvert.Interface(false),
 					},
@@ -1885,17 +1885,17 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 			args: args{
 				flagKey:       "disable-flag",
 				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
-				defaultValue:  []interface{}{"toto"},
+				defaultValue:  []any{"toto"},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Disable: testconvert.Bool(true),
 				}, nil),
 			},
-			want: model.VariationResult[[]interface{}]{
+			want: model.VariationResult[[]any]{
 				TrackEvents:   true,
 				VariationType: flag.VariationSDKDefault,
 				Failed:        false,
 				Reason:        flag.ReasonDisabled,
-				Value:         []interface{}{"toto"},
+				Value:         []any{"toto"},
 				Cacheable:     true,
 			},
 			wantErr:     false,
@@ -1906,7 +1906,7 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 			args: args{
 				flagKey:       "key-not-exist",
 				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
-				defaultValue:  []interface{}{"toto"},
+				defaultValue:  []any{"toto"},
 				cacheMock: NewCacheMock(
 					&flag.InternalFlag{},
 					errors.New("impossible to read the toggle before the initialisation")),
@@ -1919,7 +1919,7 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 			args: args{
 				flagKey:       "key-not-exist",
 				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
-				defaultValue:  []interface{}{"toto"},
+				defaultValue:  []any{"toto"},
 				cacheMock: NewCacheMock(
 					&flag.InternalFlag{},
 					errors.New("flag [key-not-exist] does not exists"),
@@ -1933,7 +1933,7 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 			args: args{
 				flagKey:       "test-flag",
 				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
-				defaultValue:  []interface{}{"toto"},
+				defaultValue:  []any{"toto"},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -1945,10 +1945,10 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
-						"Default": testconvert.Interface([]interface{}{"default"}),
-						"True":    testconvert.Interface([]interface{}{"true"}),
-						"False":   testconvert.Interface([]interface{}{"false"}),
+					Variations: &map[string]*any{
+						"Default": testconvert.Interface([]any{"default"}),
+						"True":    testconvert.Interface([]any{"true"}),
+						"False":   testconvert.Interface([]any{"false"}),
 					},
 					DefaultRule: &flag.Rule{
 						Name:            testconvert.String("defaultRule"),
@@ -1956,12 +1956,12 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 					},
 				}, nil),
 			},
-			want: model.VariationResult[[]interface{}]{
+			want: model.VariationResult[[]any]{
 				TrackEvents:   true,
 				VariationType: "Default",
 				Failed:        false,
 				Reason:        flag.ReasonDefault,
-				Value:         []interface{}{"default"},
+				Value:         []any{"default"},
 				Cacheable:     true,
 			},
 			wantErr:     false,
@@ -1972,7 +1972,7 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 			args: args{
 				flagKey:       "test-flag",
 				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key"),
-				defaultValue:  []interface{}{"toto"},
+				defaultValue:  []any{"toto"},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -1984,10 +1984,10 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
-						"Default": testconvert.Interface([]interface{}{"default"}),
-						"True":    testconvert.Interface([]interface{}{"true"}),
-						"False":   testconvert.Interface([]interface{}{"false"}),
+					Variations: &map[string]*any{
+						"Default": testconvert.Interface([]any{"default"}),
+						"True":    testconvert.Interface([]any{"true"}),
+						"False":   testconvert.Interface([]any{"false"}),
 					},
 					DefaultRule: &flag.Rule{
 						Name:            testconvert.String("defaultRule"),
@@ -1995,14 +1995,14 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 					},
 				}, nil),
 			},
-			want: model.VariationResult[[]interface{}]{
+			want: model.VariationResult[[]any]{
 				TrackEvents:   true,
 				VariationType: "True",
 				Failed:        false,
 				Reason:        flag.ReasonTargetingMatch,
-				Value:         []interface{}{"true"},
+				Value:         []any{"true"},
 				Cacheable:     true,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"evaluatedRuleName": "rule1",
 				},
 			},
@@ -2014,12 +2014,12 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 			args: args{
 				flagKey:       "test-flag",
 				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key-ssss1"),
-				defaultValue:  []interface{}{"toto"},
+				defaultValue:  []any{"toto"},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
-					Variations: &map[string]*interface{}{
-						"Default": testconvert.Interface([]interface{}{"default"}),
-						"True":    testconvert.Interface([]interface{}{"true"}),
-						"False":   testconvert.Interface([]interface{}{"false"}),
+					Variations: &map[string]*any{
+						"Default": testconvert.Interface([]any{"default"}),
+						"True":    testconvert.Interface([]any{"true"}),
+						"False":   testconvert.Interface([]any{"false"}),
 					},
 					DefaultRule: &flag.Rule{
 						Name: testconvert.String("defaultRule"),
@@ -2030,12 +2030,12 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 					},
 				}, nil),
 			},
-			want: model.VariationResult[[]interface{}]{
+			want: model.VariationResult[[]any]{
 				TrackEvents:   true,
 				VariationType: "False",
 				Failed:        false,
 				Reason:        flag.ReasonSplit,
-				Value:         []interface{}{"false"},
+				Value:         []any{"false"},
 				Cacheable:     true,
 			},
 			wantErr:     false,
@@ -2046,7 +2046,7 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 			args: args{
 				flagKey:       "test-flag",
 				evaluationCtx: ffcontext.NewEvaluationContext("random-key-ssss1"),
-				defaultValue:  []interface{}{"toto"},
+				defaultValue:  []any{"toto"},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -2058,7 +2058,7 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface("xxx"),
 						"False":   testconvert.Interface("xxx"),
 						"True":    testconvert.Interface("xxx"),
@@ -2069,12 +2069,12 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 					},
 				}, nil),
 			},
-			want: model.VariationResult[[]interface{}]{
+			want: model.VariationResult[[]any]{
 				TrackEvents:   true,
 				VariationType: "Default",
 				Failed:        false,
 				Reason:        flag.ReasonDefault,
-				Value:         []interface{}{"toto"},
+				Value:         []any{"toto"},
 			},
 			wantErr:     true,
 			expectedLog: "^\\[" + testutils.RFC3339Regex + "\\] user=\"random-key-ssss1\", flag=\"test-flag\", value=\"\\[toto\\]\"\n",
@@ -2085,17 +2085,17 @@ func TestJSONArrayVariationDetails(t *testing.T) {
 				offline:       true,
 				flagKey:       "disable-flag",
 				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
-				defaultValue:  []interface{}{"toto"},
+				defaultValue:  []any{"toto"},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Disable: testconvert.Bool(true),
 				}, nil),
 			},
-			want: model.VariationResult[[]interface{}]{
+			want: model.VariationResult[[]any]{
 				TrackEvents:   false,
 				VariationType: flag.VariationSDKDefault,
 				Failed:        false,
 				Reason:        flag.ReasonOffline,
-				Value:         []interface{}{"toto"},
+				Value:         []any{"toto"},
 			},
 			wantErr:     false,
 			expectedLog: "",
@@ -2173,7 +2173,7 @@ func TestJSONVariation(t *testing.T) {
 	type args struct {
 		flagKey       string
 		evaluationCtx ffcontext.Context
-		defaultValue  map[string]interface{}
+		defaultValue  map[string]any
 		cacheMock     cache.Manager
 		offline       bool
 		disableInit   bool
@@ -2181,7 +2181,7 @@ func TestJSONVariation(t *testing.T) {
 	tests := []struct {
 		name        string
 		args        args
-		want        map[string]interface{}
+		want        map[string]any
 		wantErr     bool
 		expectedLog string
 	}{
@@ -2190,9 +2190,9 @@ func TestJSONVariation(t *testing.T) {
 			args: args{
 				flagKey:       "key-not-exist",
 				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
-				defaultValue:  map[string]interface{}{},
+				defaultValue:  map[string]any{},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"var_true":  testconvert.Interface(true),
 						"var_false": testconvert.Interface(false),
 					},
@@ -2207,7 +2207,7 @@ func TestJSONVariation(t *testing.T) {
 				}, nil),
 				disableInit: true,
 			},
-			want:    map[string]interface{}{},
+			want:    map[string]any{},
 			wantErr: true,
 		},
 		{
@@ -2215,12 +2215,12 @@ func TestJSONVariation(t *testing.T) {
 			args: args{
 				flagKey:       "disable-flag",
 				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
-				defaultValue:  map[string]interface{}{"default-notkey": true},
+				defaultValue:  map[string]any{"default-notkey": true},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Disable: testconvert.Bool(true),
 				}, nil),
 			},
-			want:        map[string]interface{}{"default-notkey": true},
+			want:        map[string]any{"default-notkey": true},
 			wantErr:     false,
 			expectedLog: `user="random-key", flag="disable-flag", value="map[default-notkey:true]", variation="SdkDefault"`,
 		},
@@ -2229,12 +2229,12 @@ func TestJSONVariation(t *testing.T) {
 			args: args{
 				flagKey:       "key-not-exist",
 				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
-				defaultValue:  map[string]interface{}{"default-notkey": true},
+				defaultValue:  map[string]any{"default-notkey": true},
 				cacheMock: NewCacheMock(
 					&flag.InternalFlag{},
 					errors.New("impossible to read the toggle before the initialisation")),
 			},
-			want:        map[string]interface{}{"default-notkey": true},
+			want:        map[string]any{"default-notkey": true},
 			wantErr:     true,
 			expectedLog: `user="random-key", flag="key-not-exist", value="map[default-notkey:true]", variation="SdkDefault"`,
 		},
@@ -2243,13 +2243,13 @@ func TestJSONVariation(t *testing.T) {
 			args: args{
 				flagKey:       "key-not-exist",
 				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
-				defaultValue:  map[string]interface{}{"default-notkey": true},
+				defaultValue:  map[string]any{"default-notkey": true},
 				cacheMock: NewCacheMock(
 					&flag.InternalFlag{},
 					errors.New("flag [key-not-exist] does not exists"),
 				),
 			},
-			want:        map[string]interface{}{"default-notkey": true},
+			want:        map[string]any{"default-notkey": true},
 			wantErr:     true,
 			expectedLog: `user="random-key", flag="key-not-exist", value="map[default-notkey:true]", variation="SdkDefault"`,
 		},
@@ -2258,7 +2258,7 @@ func TestJSONVariation(t *testing.T) {
 			args: args{
 				flagKey:       "test-flag",
 				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
-				defaultValue:  map[string]interface{}{"default-notkey": true},
+				defaultValue:  map[string]any{"default-notkey": true},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -2270,10 +2270,10 @@ func TestJSONVariation(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
-						"Default": testconvert.Interface(map[string]interface{}{"default": true}),
-						"True":    testconvert.Interface(map[string]interface{}{"true": true}),
-						"False":   testconvert.Interface(map[string]interface{}{"false": true}),
+					Variations: &map[string]*any{
+						"Default": testconvert.Interface(map[string]any{"default": true}),
+						"True":    testconvert.Interface(map[string]any{"true": true}),
+						"False":   testconvert.Interface(map[string]any{"false": true}),
 					},
 					DefaultRule: &flag.Rule{
 						Name:            testconvert.String("defaultRule"),
@@ -2281,7 +2281,7 @@ func TestJSONVariation(t *testing.T) {
 					},
 				}, nil),
 			},
-			want:        map[string]interface{}{"default": true},
+			want:        map[string]any{"default": true},
 			wantErr:     false,
 			expectedLog: `user="random-key", flag="test-flag", value="map[default:true]", variation="Default"`,
 		},
@@ -2290,7 +2290,7 @@ func TestJSONVariation(t *testing.T) {
 			args: args{
 				flagKey:       "test-flag",
 				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key"),
-				defaultValue:  map[string]interface{}{"default-notkey": true},
+				defaultValue:  map[string]any{"default-notkey": true},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -2302,10 +2302,10 @@ func TestJSONVariation(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
-						"Default": testconvert.Interface(map[string]interface{}{"default": true}),
-						"True":    testconvert.Interface(map[string]interface{}{"true": true}),
-						"False":   testconvert.Interface(map[string]interface{}{"false": true}),
+					Variations: &map[string]*any{
+						"Default": testconvert.Interface(map[string]any{"default": true}),
+						"True":    testconvert.Interface(map[string]any{"true": true}),
+						"False":   testconvert.Interface(map[string]any{"false": true}),
 					},
 					DefaultRule: &flag.Rule{
 						Name:            testconvert.String("defaultRule"),
@@ -2313,7 +2313,7 @@ func TestJSONVariation(t *testing.T) {
 					},
 				}, nil),
 			},
-			want:        map[string]interface{}{"true": true},
+			want:        map[string]any{"true": true},
 			wantErr:     false,
 			expectedLog: `user="random-key", flag="test-flag", value="map[true:true]", variation="True"`,
 		},
@@ -2322,7 +2322,7 @@ func TestJSONVariation(t *testing.T) {
 			args: args{
 				flagKey:       "test-flag",
 				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key-ssss1"),
-				defaultValue:  map[string]interface{}{"default-notkey": true},
+				defaultValue:  map[string]any{"default-notkey": true},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -2334,10 +2334,10 @@ func TestJSONVariation(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
-						"Default": testconvert.Interface(map[string]interface{}{"default": true}),
-						"True":    testconvert.Interface(map[string]interface{}{"true": true}),
-						"False":   testconvert.Interface(map[string]interface{}{"false": true}),
+					Variations: &map[string]*any{
+						"Default": testconvert.Interface(map[string]any{"default": true}),
+						"True":    testconvert.Interface(map[string]any{"true": true}),
+						"False":   testconvert.Interface(map[string]any{"false": true}),
 					},
 					DefaultRule: &flag.Rule{
 						Name:            testconvert.String("defaultRule"),
@@ -2345,7 +2345,7 @@ func TestJSONVariation(t *testing.T) {
 					},
 				}, nil),
 			},
-			want:        map[string]interface{}{"false": true},
+			want:        map[string]any{"false": true},
 			wantErr:     false,
 			expectedLog: `user="random-key-ssss1", flag="test-flag", value="map[false:true]", variation="False"`,
 		},
@@ -2354,7 +2354,7 @@ func TestJSONVariation(t *testing.T) {
 			args: args{
 				flagKey:       "test-flag",
 				evaluationCtx: ffcontext.NewEvaluationContext("random-key-ssss1"),
-				defaultValue:  map[string]interface{}{"default-notkey": true},
+				defaultValue:  map[string]any{"default-notkey": true},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -2366,7 +2366,7 @@ func TestJSONVariation(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface("xxx"),
 						"False":   testconvert.Interface("xxx"),
 						"True":    testconvert.Interface("xxx"),
@@ -2377,7 +2377,7 @@ func TestJSONVariation(t *testing.T) {
 					},
 				}, nil),
 			},
-			want:        map[string]interface{}{"default-notkey": true},
+			want:        map[string]any{"default-notkey": true},
 			wantErr:     true,
 			expectedLog: `user="random-key-ssss1", flag="test-flag", value="map[default-notkey:true]", variation="SdkDefault"`,
 		},
@@ -2387,12 +2387,12 @@ func TestJSONVariation(t *testing.T) {
 				offline:       true,
 				flagKey:       "disable-flag",
 				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
-				defaultValue:  map[string]interface{}{"default-notkey": true},
+				defaultValue:  map[string]any{"default-notkey": true},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Disable: testconvert.Bool(true),
 				}, nil),
 			},
-			want:        map[string]interface{}{"default-notkey": true},
+			want:        map[string]any{"default-notkey": true},
 			wantErr:     false,
 			expectedLog: "",
 		},
@@ -2467,7 +2467,7 @@ func TestJSONVariationDetails(t *testing.T) {
 	type args struct {
 		flagKey       string
 		evaluationCtx ffcontext.Context
-		defaultValue  map[string]interface{}
+		defaultValue  map[string]any
 		cacheMock     cache.Manager
 		offline       bool
 		disableInit   bool
@@ -2475,7 +2475,7 @@ func TestJSONVariationDetails(t *testing.T) {
 	tests := []struct {
 		name        string
 		args        args
-		want        model.VariationResult[map[string]interface{}]
+		want        model.VariationResult[map[string]any]
 		wantErr     bool
 		expectedLog string
 	}{
@@ -2484,17 +2484,17 @@ func TestJSONVariationDetails(t *testing.T) {
 			args: args{
 				flagKey:       "disable-flag",
 				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
-				defaultValue:  map[string]interface{}{"default-notkey": true},
+				defaultValue:  map[string]any{"default-notkey": true},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Disable: testconvert.Bool(true),
 				}, nil),
 			},
-			want: model.VariationResult[map[string]interface{}]{
+			want: model.VariationResult[map[string]any]{
 				TrackEvents:   true,
 				VariationType: flag.VariationSDKDefault,
 				Failed:        false,
 				Reason:        flag.ReasonDisabled,
-				Value:         map[string]interface{}{"default-notkey": true},
+				Value:         map[string]any{"default-notkey": true},
 				Cacheable:     true,
 			},
 			wantErr:     false,
@@ -2505,7 +2505,7 @@ func TestJSONVariationDetails(t *testing.T) {
 			args: args{
 				flagKey:       "test-flag",
 				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
-				defaultValue:  map[string]interface{}{"default-notkey": true},
+				defaultValue:  map[string]any{"default-notkey": true},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -2517,10 +2517,10 @@ func TestJSONVariationDetails(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
-						"Default": testconvert.Interface(map[string]interface{}{"default": true}),
-						"True":    testconvert.Interface(map[string]interface{}{"true": true}),
-						"False":   testconvert.Interface(map[string]interface{}{"false": true}),
+					Variations: &map[string]*any{
+						"Default": testconvert.Interface(map[string]any{"default": true}),
+						"True":    testconvert.Interface(map[string]any{"true": true}),
+						"False":   testconvert.Interface(map[string]any{"false": true}),
 					},
 					DefaultRule: &flag.Rule{
 						Name:            testconvert.String("defaultRule"),
@@ -2528,12 +2528,12 @@ func TestJSONVariationDetails(t *testing.T) {
 					},
 				}, nil),
 			},
-			want: model.VariationResult[map[string]interface{}]{
+			want: model.VariationResult[map[string]any]{
 				TrackEvents:   true,
 				VariationType: "Default",
 				Failed:        false,
 				Reason:        flag.ReasonDefault,
-				Value:         map[string]interface{}{"default": true},
+				Value:         map[string]any{"default": true},
 				Cacheable:     true,
 			},
 			wantErr:     false,
@@ -2544,7 +2544,7 @@ func TestJSONVariationDetails(t *testing.T) {
 			args: args{
 				flagKey:       "test-flag",
 				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key"),
-				defaultValue:  map[string]interface{}{"default-notkey": true},
+				defaultValue:  map[string]any{"default-notkey": true},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -2556,10 +2556,10 @@ func TestJSONVariationDetails(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
-						"Default": testconvert.Interface(map[string]interface{}{"default": true}),
-						"True":    testconvert.Interface(map[string]interface{}{"true": true}),
-						"False":   testconvert.Interface(map[string]interface{}{"false": true}),
+					Variations: &map[string]*any{
+						"Default": testconvert.Interface(map[string]any{"default": true}),
+						"True":    testconvert.Interface(map[string]any{"true": true}),
+						"False":   testconvert.Interface(map[string]any{"false": true}),
 					},
 					DefaultRule: &flag.Rule{
 						Name:            testconvert.String("defaultRule"),
@@ -2567,14 +2567,14 @@ func TestJSONVariationDetails(t *testing.T) {
 					},
 				}, nil),
 			},
-			want: model.VariationResult[map[string]interface{}]{
+			want: model.VariationResult[map[string]any]{
 				TrackEvents:   true,
 				VariationType: "True",
 				Failed:        false,
 				Reason:        flag.ReasonTargetingMatch,
-				Value:         map[string]interface{}{"true": true},
+				Value:         map[string]any{"true": true},
 				Cacheable:     true,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"evaluatedRuleName": "rule1",
 				},
 			},
@@ -2586,7 +2586,7 @@ func TestJSONVariationDetails(t *testing.T) {
 			args: args{
 				flagKey:       "test-flag",
 				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key-ssss1"),
-				defaultValue:  map[string]interface{}{"default-notkey": true},
+				defaultValue:  map[string]any{"default-notkey": true},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -2598,10 +2598,10 @@ func TestJSONVariationDetails(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
-						"Default": testconvert.Interface(map[string]interface{}{"default": true}),
-						"True":    testconvert.Interface(map[string]interface{}{"true": true}),
-						"False":   testconvert.Interface(map[string]interface{}{"false": true}),
+					Variations: &map[string]*any{
+						"Default": testconvert.Interface(map[string]any{"default": true}),
+						"True":    testconvert.Interface(map[string]any{"true": true}),
+						"False":   testconvert.Interface(map[string]any{"false": true}),
 					},
 					DefaultRule: &flag.Rule{
 						Name:            testconvert.String("defaultRule"),
@@ -2609,14 +2609,14 @@ func TestJSONVariationDetails(t *testing.T) {
 					},
 				}, nil),
 			},
-			want: model.VariationResult[map[string]interface{}]{
+			want: model.VariationResult[map[string]any]{
 				TrackEvents:   true,
 				VariationType: "False",
 				Failed:        false,
 				Reason:        flag.ReasonTargetingMatchSplit,
-				Value:         map[string]interface{}{"false": true},
+				Value:         map[string]any{"false": true},
 				Cacheable:     true,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"evaluatedRuleName": "rule1",
 				},
 			},
@@ -2629,17 +2629,17 @@ func TestJSONVariationDetails(t *testing.T) {
 				offline:       true,
 				flagKey:       "disable-flag",
 				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
-				defaultValue:  map[string]interface{}{"default-notkey": true},
+				defaultValue:  map[string]any{"default-notkey": true},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Disable: testconvert.Bool(true),
 				}, nil),
 			},
-			want: model.VariationResult[map[string]interface{}]{
+			want: model.VariationResult[map[string]any]{
 				TrackEvents:   false,
 				VariationType: flag.VariationSDKDefault,
 				Failed:        false,
 				Reason:        flag.ReasonOffline,
-				Value:         map[string]interface{}{"default-notkey": true},
+				Value:         map[string]any{"default-notkey": true},
 			},
 			wantErr:     false,
 			expectedLog: "",
@@ -2735,7 +2735,7 @@ func TestStringVariation(t *testing.T) {
 				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
 				defaultValue:  "",
 				cacheMock: NewCacheMock(&flag.InternalFlag{
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"var_true":  testconvert.Interface(true),
 						"var_false": testconvert.Interface(false),
 					},
@@ -2814,7 +2814,7 @@ func TestStringVariation(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface("default"),
 						"True":    testconvert.Interface("true"),
 						"False":   testconvert.Interface("false"),
@@ -2846,7 +2846,7 @@ func TestStringVariation(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface("default"),
 						"True":    testconvert.Interface("true"),
 						"False":   testconvert.Interface("false"),
@@ -2878,7 +2878,7 @@ func TestStringVariation(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface("default"),
 						"True":    testconvert.Interface("true"),
 						"False":   testconvert.Interface("false"),
@@ -2910,7 +2910,7 @@ func TestStringVariation(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface(1),
 						"False":   testconvert.Interface(2),
 						"True":    testconvert.Interface(3),
@@ -3061,7 +3061,7 @@ func TestStringVariationDetails(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface("default"),
 						"True":    testconvert.Interface("true"),
 						"False":   testconvert.Interface("false"),
@@ -3100,7 +3100,7 @@ func TestStringVariationDetails(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface("default"),
 						"True":    testconvert.Interface("true"),
 						"False":   testconvert.Interface("false"),
@@ -3118,7 +3118,7 @@ func TestStringVariationDetails(t *testing.T) {
 				Reason:        flag.ReasonTargetingMatch,
 				Value:         "true",
 				Cacheable:     true,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"evaluatedRuleName": "rule1",
 				},
 			},
@@ -3142,7 +3142,7 @@ func TestStringVariationDetails(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface("default"),
 						"True":    testconvert.Interface("true"),
 						"False":   testconvert.Interface("false"),
@@ -3160,7 +3160,7 @@ func TestStringVariationDetails(t *testing.T) {
 				Reason:        flag.ReasonTargetingMatchSplit,
 				Value:         "false",
 				Cacheable:     true,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"evaluatedRuleName": "rule1",
 				},
 			},
@@ -3277,7 +3277,7 @@ func TestIntVariation(t *testing.T) {
 				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
 				defaultValue:  1,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"var_true":  testconvert.Interface(true),
 						"var_false": testconvert.Interface(false),
 					},
@@ -3355,7 +3355,7 @@ func TestIntVariation(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface(119),
 						"True":    testconvert.Interface(120),
 						"False":   testconvert.Interface(121),
@@ -3387,7 +3387,7 @@ func TestIntVariation(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface(119),
 						"True":    testconvert.Interface(120),
 						"False":   testconvert.Interface(121),
@@ -3419,7 +3419,7 @@ func TestIntVariation(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface(119),
 						"True":    testconvert.Interface(120),
 						"False":   testconvert.Interface(121),
@@ -3451,7 +3451,7 @@ func TestIntVariation(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface("xxx"),
 						"False":   testconvert.Interface("xxx"),
 						"True":    testconvert.Interface("xxx"),
@@ -3483,7 +3483,7 @@ func TestIntVariation(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface(119.1),
 						"True":    testconvert.Interface(120.1),
 						"False":   testconvert.Interface(121.1),
@@ -3633,7 +3633,7 @@ func TestIntVariationDetails(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface(119),
 						"True":    testconvert.Interface(120),
 						"False":   testconvert.Interface(121),
@@ -3672,7 +3672,7 @@ func TestIntVariationDetails(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface(119),
 						"True":    testconvert.Interface(120),
 						"False":   testconvert.Interface(121),
@@ -3690,7 +3690,7 @@ func TestIntVariationDetails(t *testing.T) {
 				Reason:        flag.ReasonTargetingMatch,
 				Value:         120,
 				Cacheable:     true,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"evaluatedRuleName": "rule1",
 				},
 			},
@@ -3714,7 +3714,7 @@ func TestIntVariationDetails(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface(119),
 						"True":    testconvert.Interface(120),
 						"False":   testconvert.Interface(121),
@@ -3732,7 +3732,7 @@ func TestIntVariationDetails(t *testing.T) {
 				Reason:        flag.ReasonTargetingMatchSplit,
 				Value:         121,
 				Cacheable:     true,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"evaluatedRuleName": "rule1",
 				},
 			},
@@ -3756,7 +3756,7 @@ func TestIntVariationDetails(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface(119.1),
 						"True":    testconvert.Interface(120.1),
 						"False":   testconvert.Interface(121.1),
@@ -3774,7 +3774,7 @@ func TestIntVariationDetails(t *testing.T) {
 				Reason:        flag.ReasonTargetingMatch,
 				Value:         120,
 				Cacheable:     true,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"evaluatedRuleName": "rule1",
 				},
 			},
@@ -3872,7 +3872,7 @@ func TestRawVariation(t *testing.T) {
 	type args struct {
 		flagKey       string
 		evaluationCtx ffcontext.Context
-		defaultValue  interface{}
+		defaultValue  any
 		cacheMock     cache.Manager
 		offline       bool
 		disableInit   bool
@@ -3891,7 +3891,7 @@ func TestRawVariation(t *testing.T) {
 				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
 				defaultValue:  "",
 				cacheMock: NewCacheMock(&flag.InternalFlag{
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"var_true":  testconvert.Interface(true),
 						"var_false": testconvert.Interface(false),
 					},
@@ -3985,7 +3985,7 @@ func TestRawVariation(t *testing.T) {
 			args: args{
 				flagKey:       "test-flag",
 				evaluationCtx: ffcontext.NewEvaluationContext("random-key"),
-				defaultValue:  map[string]interface{}{"test123": "test"},
+				defaultValue:  map[string]any{"test123": "test"},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -3997,10 +3997,10 @@ func TestRawVariation(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
-						"Default": testconvert.Interface(map[string]interface{}{"test": "test"}),
-						"True":    testconvert.Interface(map[string]interface{}{"test2": "test"}),
-						"False":   testconvert.Interface(map[string]interface{}{"test3": "test"}),
+					Variations: &map[string]*any{
+						"Default": testconvert.Interface(map[string]any{"test": "test"}),
+						"True":    testconvert.Interface(map[string]any{"test2": "test"}),
+						"False":   testconvert.Interface(map[string]any{"test3": "test"}),
 					},
 					DefaultRule: &flag.Rule{
 						Name:            testconvert.String("defaultRule"),
@@ -4009,7 +4009,7 @@ func TestRawVariation(t *testing.T) {
 				}, nil),
 			},
 			want: model.RawVarResult{
-				Value:         map[string]interface{}{"test": "test"},
+				Value:         map[string]any{"test": "test"},
 				VariationType: "Default",
 				Failed:        false,
 				TrackEvents:   true,
@@ -4024,7 +4024,7 @@ func TestRawVariation(t *testing.T) {
 			args: args{
 				flagKey:       "test-flag",
 				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key"),
-				defaultValue:  map[string]interface{}{"test123": "test"},
+				defaultValue:  map[string]any{"test123": "test"},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -4036,10 +4036,10 @@ func TestRawVariation(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
-						"Default": testconvert.Interface(map[string]interface{}{"test": "test"}),
-						"True":    testconvert.Interface(map[string]interface{}{"test2": "test"}),
-						"False":   testconvert.Interface(map[string]interface{}{"test3": "test"}),
+					Variations: &map[string]*any{
+						"Default": testconvert.Interface(map[string]any{"test": "test"}),
+						"True":    testconvert.Interface(map[string]any{"test2": "test"}),
+						"False":   testconvert.Interface(map[string]any{"test3": "test"}),
 					},
 					DefaultRule: &flag.Rule{
 						Name:            testconvert.String("defaultRule"),
@@ -4048,13 +4048,13 @@ func TestRawVariation(t *testing.T) {
 				}, nil),
 			},
 			want: model.RawVarResult{
-				Value:         map[string]interface{}{"test2": "test"},
+				Value:         map[string]any{"test2": "test"},
 				VariationType: "True",
 				Failed:        false,
 				TrackEvents:   true,
 				Reason:        flag.ReasonTargetingMatch,
 				Cacheable:     true,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"evaluatedRuleName": "rule1",
 				},
 			},
@@ -4066,7 +4066,7 @@ func TestRawVariation(t *testing.T) {
 			args: args{
 				flagKey:       "test-flag",
 				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key-ssss1"),
-				defaultValue:  map[string]interface{}{"test123": "test"},
+				defaultValue:  map[string]any{"test123": "test"},
 				cacheMock: NewCacheMock(&flag.InternalFlag{
 					Rules: &[]flag.Rule{
 						{
@@ -4078,10 +4078,10 @@ func TestRawVariation(t *testing.T) {
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
-						"Default": testconvert.Interface(map[string]interface{}{"test": "test"}),
-						"True":    testconvert.Interface(map[string]interface{}{"test2": "test"}),
-						"False":   testconvert.Interface(map[string]interface{}{"test3": "test"}),
+					Variations: &map[string]*any{
+						"Default": testconvert.Interface(map[string]any{"test": "test"}),
+						"True":    testconvert.Interface(map[string]any{"test2": "test"}),
+						"False":   testconvert.Interface(map[string]any{"test3": "test"}),
 					},
 					DefaultRule: &flag.Rule{
 						Name:            testconvert.String("defaultRule"),
@@ -4090,13 +4090,13 @@ func TestRawVariation(t *testing.T) {
 				}, nil),
 			},
 			want: model.RawVarResult{
-				Value:         map[string]interface{}{"test3": "test"},
+				Value:         map[string]any{"test3": "test"},
 				VariationType: "False",
 				Failed:        false,
 				TrackEvents:   true,
 				Reason:        flag.ReasonTargetingMatchSplit,
 				Cacheable:     true,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"evaluatedRuleName": "rule1",
 				},
 			},
@@ -4110,7 +4110,7 @@ func TestRawVariation(t *testing.T) {
 				evaluationCtx: ffcontext.NewAnonymousEvaluationContext("random-key"),
 				defaultValue:  true,
 				cacheMock: NewCacheMock(&flag.InternalFlag{
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"Default": testconvert.Interface(false),
 						"True":    testconvert.Interface(true),
 						"False":   testconvert.Interface(false),
@@ -4139,7 +4139,7 @@ func TestRawVariation(t *testing.T) {
 				TrackEvents:   false,
 				Reason:        flag.ReasonTargetingMatch,
 				Cacheable:     true,
-				Metadata: map[string]interface{}{
+				Metadata: map[string]any{
 					"evaluatedRuleName": "rule1",
 				},
 			},
@@ -4276,7 +4276,7 @@ flag1:
 	goff, err := New(Config{
 		PollingInterval: 500 * time.Millisecond,
 		Retriever:       &fileretriever.Retriever{Path: tempFile.Name()},
-		EvaluationContextEnrichment: map[string]interface{}{
+		EvaluationContextEnrichment: map[string]any{
 			"env": "staging",
 		},
 	})
@@ -4296,7 +4296,7 @@ flag1:
 		PollingInterval: 500 * time.Millisecond,
 		Retriever:       &fileretriever.Retriever{Path: tempFile.Name()},
 		Environment:     "staging",
-		EvaluationContextEnrichment: map[string]interface{}{
+		EvaluationContextEnrichment: map[string]any{
 			"env": "staging",
 		},
 	})
@@ -4316,7 +4316,7 @@ flag1:
 		PollingInterval: 500 * time.Millisecond,
 		Retriever:       &fileretriever.Retriever{Path: tempFile.Name()},
 		Environment:     "staging",
-		EvaluationContextEnrichment: map[string]interface{}{
+		EvaluationContextEnrichment: map[string]any{
 			"env": "prod",
 		},
 	})

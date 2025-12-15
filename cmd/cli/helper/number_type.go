@@ -7,11 +7,11 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/cli/generate/manifest/model"
 )
 
-func FlagTypeFromVariations(variations map[string]*interface{}) (model.FlagType, error) {
+func FlagTypeFromVariations(variations map[string]*any) (model.FlagType, error) {
 	if variations == nil {
 		return "", fmt.Errorf("impossible to find type, no variations found")
 	}
-	variationTypes := make(map[model.FlagType]interface{}, len(variations))
+	variationTypes := make(map[model.FlagType]any, len(variations))
 	for _, val := range variations {
 		if val == nil {
 			// we skip if value is nil
@@ -20,15 +20,15 @@ func FlagTypeFromVariations(variations map[string]*interface{}) (model.FlagType,
 		vv := *val
 		switch vv.(type) {
 		case bool:
-			variationTypes[model.FlagTypeBoolean] = interface{}(nil)
+			variationTypes[model.FlagTypeBoolean] = any(nil)
 		case string:
-			variationTypes[model.FlagTypeString] = interface{}(nil)
+			variationTypes[model.FlagTypeString] = any(nil)
 		case int:
-			variationTypes[model.FlagTypeInteger] = interface{}(nil)
+			variationTypes[model.FlagTypeInteger] = any(nil)
 		case float64:
-			variationTypes[model.FlagTypeFloat] = interface{}(nil)
-		case map[string]interface{}:
-			variationTypes[model.FlagTypeObject] = interface{}(nil)
+			variationTypes[model.FlagTypeFloat] = any(nil)
+		case map[string]any:
+			variationTypes[model.FlagTypeObject] = any(nil)
 		default:
 			// do nothing here
 			continue
@@ -63,7 +63,7 @@ func FlagTypeFromVariations(variations map[string]*interface{}) (model.FlagType,
 	return "", fmt.Errorf("impossible to find type")
 }
 
-func numberType(value interface{}) (string, error) {
+func numberType(value any) (string, error) {
 	val := reflect.ValueOf(value)
 	switch val.Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,

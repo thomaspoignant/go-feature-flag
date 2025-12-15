@@ -7,16 +7,16 @@ type Context struct {
 	// All those fields will be included in the custom attributes of the evaluation context,
 	// if in the evaluation context you have a field with the same name, it will override the common one.
 	// Default: nil
-	EvaluationContextEnrichment map[string]interface{} `json:"evaluationContextEnrichment,omitempty"`
+	EvaluationContextEnrichment map[string]any `json:"evaluationContextEnrichment,omitempty"`
 
 	// DefaultSdkValue is the default value of the SDK when calling the variation.
-	DefaultSdkValue interface{} `json:"defaultSdkValue,omitempty"`
+	DefaultSdkValue any `json:"defaultSdkValue,omitempty"`
 }
 
 // AddIntoEvaluationContextEnrichment adds a key and value to the evaluation context enrichment.
-func (s *Context) AddIntoEvaluationContextEnrichment(key string, value interface{}) {
+func (s *Context) AddIntoEvaluationContextEnrichment(key string, value any) {
 	if s.EvaluationContextEnrichment == nil {
-		s.EvaluationContextEnrichment = make(map[string]interface{})
+		s.EvaluationContextEnrichment = make(map[string]any)
 	}
 	s.EvaluationContextEnrichment[key] = value
 }

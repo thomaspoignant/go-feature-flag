@@ -655,7 +655,7 @@ const docTemplate = `{
                 },
                 "evaluationContextEnrichment": {
                     "type": "object",
-                    "additionalProperties": true
+                    "additionalProperties": {}
                 },
                 "flags": {
                     "type": "object",
@@ -675,7 +675,7 @@ const docTemplate = `{
         },
         "exporter.FeatureEventMetadata": {
             "type": "object",
-            "additionalProperties": true
+            "additionalProperties": {}
         },
         "flag.ErrorCode": {
             "type": "string",
@@ -964,7 +964,7 @@ const docTemplate = `{
                 "metadata": {
                     "description": "Metadata is a field containing information about your flag such as an issue tracker link, a description, etc ...",
                     "type": "object",
-                    "additionalProperties": true
+                    "additionalProperties": {}
                 },
                 "reason": {
                     "description": "reason why we have returned this value.",

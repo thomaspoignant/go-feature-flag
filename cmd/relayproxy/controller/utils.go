@@ -47,7 +47,7 @@ func userRequestToUser(u *model.UserRequest) (ffcontext.Context, error) {
 	}
 	custom := u.Custom
 	if custom == nil {
-		custom = make(map[string]interface{})
+		custom = make(map[string]any)
 	}
 
 	custom["anonymous"] = u.Anonymous
