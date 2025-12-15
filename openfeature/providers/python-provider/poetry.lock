@@ -283,14 +283,14 @@ files = [
 
 [[package]]
 name = "openfeature-sdk"
-version = "0.8.3"
+version = "0.8.4"
 description = "Standardizing Feature Flagging for Everyone"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "openfeature_sdk-0.8.3-py3-none-any.whl", hash = "sha256:28e817514c5398e2243d0a158f3306624383757ba833032336ceba2b3cbcddd6"},
-    {file = "openfeature_sdk-0.8.3.tar.gz", hash = "sha256:37c379e3e5da39567f07b9410fca9153882cf0a95da81e03ccf7559fca054fd2"},
+    {file = "openfeature_sdk-0.8.4-py3-none-any.whl", hash = "sha256:805ba090669798fc343ca9fdcbc56ff0f4b57bf6757533f0854d2021192e620a"},
+    {file = "openfeature_sdk-0.8.4.tar.gz", hash = "sha256:66abf71f928ec8c0db1111072bb0ef2635dfbd09510f77f4b548e5d0ea0e6c1a"},
 ]
 
 [[package]]
