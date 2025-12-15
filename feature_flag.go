@@ -1,6 +1,7 @@
 package ffclient
 
 import (
+	"context"
 	"fmt"
 	"sync"
 	"time"
@@ -96,7 +97,6 @@ func initializeRetrieverManager(config Config) (*retriever.Manager, error) {
 		return nil, err
 	}
 	mngrConfig := retriever.ManagerConfig{
-		Ctx:                             config.Context,
 		FileFormat:                      config.FileFormat,
 		DisableNotifierOnInit:           config.DisableNotifierOnInit,
 		PersistentFlagConfigurationFile: config.PersistentFlagConfigurationFile,
@@ -191,7 +191,14 @@ func (g *GoFeatureFlag) GetEvaluationContextEnrichment() map[string]any {
 // This function can be called explicitly to refresh the flags if you know that a change has been made in
 // the configuration.
 func (g *GoFeatureFlag) ForceRefresh() bool {
-	return g.retrieverManager.ForceRefresh()
+	return g.ForceRefreshWithContext(g.config.Context)
+}
+
+// ForceRefreshWithContext is a function that forces to call the retrievers and refresh the configuration of flags.
+// This function can be called explicitly to refresh the flags if you know that a change has been made in
+// the configuration.
+func (g *GoFeatureFlag) ForceRefreshWithContext(ctx context.Context) bool {
+	return g.retrieverManager.ForceRefresh(ctx)
 }
 
 // SetOffline updates the config Offline parameter
@@ -211,11 +218,16 @@ func (g *GoFeatureFlag) GetPollingInterval() int64 {
 
 // SetOffline updates the config Offline parameter
 func SetOffline(control bool) {
+	SetOfflineWithContext(context.Background(), control)
+}
+
+// SetOfflineWithContext updates the config Offline parameter
+func SetOfflineWithContext(ctx context.Context, control bool) {
 	if !ff.IsOffline() && control {
 		ff.retrieverManager.StopPolling()
 	}
 	if ff.IsOffline() && !control {
-		ff.retrieverManager.StartPolling()
+		ff.retrieverManager.StartPolling(ctx)
 	}
 	ff.SetOffline(control)
 }

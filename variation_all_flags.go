@@ -1,6 +1,8 @@
 package ffclient
 
 import (
+	"context"
+
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/internal/flagstate"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
@@ -17,6 +19,13 @@ func AllFlagsState(ctx ffcontext.Context) flagstate.AllFlags {
 // error reporting this is returned.
 func GetFlagsFromCache() (map[string]flag.Flag, error) {
 	return ff.GetFlagsFromCache()
+}
+
+// GetFlagsFromCacheWithContext returns all the flags present in the cache with their
+// current state when calling this method. If cache hasn't been initialized, an
+// error reporting this is returned. The provided context is used for the operation.
+func GetFlagsFromCacheWithContext(ctx context.Context) (map[string]flag.Flag, error) {
+	return ff.GetFlagsFromCacheWithContext(ctx)
 }
 
 // GetFlagStates is evaluating all the flags in flagsToEvaluate based on the context provided.
@@ -85,5 +94,12 @@ func (g *GoFeatureFlag) AllFlagsState(evaluationCtx ffcontext.Context) flagstate
 // current state when calling this method. If cache hasn't been initialized, an
 // error reporting this is returned.
 func (g *GoFeatureFlag) GetFlagsFromCache() (map[string]flag.Flag, error) {
-	return g.retrieverManager.GetFlagsFromCache()
+	return g.GetFlagsFromCacheWithContext(context.Background())
+}
+
+// GetFlagsFromCacheWithContext returns all the flags present in the cache with their
+// current state when calling this method. If cache hasn't been initialized, an
+// error reporting this is returned. The provided context is used for the operation.
+func (g *GoFeatureFlag) GetFlagsFromCacheWithContext(ctx context.Context) (map[string]flag.Flag, error) {
+	return g.retrieverManager.GetFlagsFromCache(ctx)
 }
