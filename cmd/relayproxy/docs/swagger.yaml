@@ -24,7 +24,7 @@ definitions:
       errorDetails:
         type: string
       evaluationContextEnrichment:
-        additionalProperties: true
+        additionalProperties: {}
         type: object
       flags:
         additionalProperties:
@@ -37,7 +37,7 @@ definitions:
         type: boolean
     type: object
   exporter.FeatureEventMetadata:
-    additionalProperties: true
+    additionalProperties: {}
     type: object
   flag.ErrorCode:
     enum:
@@ -249,7 +249,7 @@ definitions:
         example: false
         type: boolean
       metadata:
-        additionalProperties: true
+        additionalProperties: {}
         description: Metadata is a field containing information about your flag such
           as an issue tracker link, a description, etc ...
         type: object
