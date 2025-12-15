@@ -60,7 +60,7 @@ With this flag configuration, the `teamId` value will be used for hashing instea
 ```go title="example.go"
 evalCtx := openfeature.NewEvaluationContext(
     "user-123",
-    map[string]interface{}{
+    map[string]any{
         "teamId", "f74b72",
     },
 )
@@ -94,8 +94,8 @@ The evaluation context should include the nested structure:
 ```go title="example.go"
 evalCtx := openfeature.NewEvaluationContext(
     "user-456",
-    map[string]interface{}{
-        "company": map[string]interface{}{
+    map[string]any{
+        "company": map[string]any{
             "id":   "company-789",
             "name": "GO Feature Flag",
             "tier": "enterprise",
