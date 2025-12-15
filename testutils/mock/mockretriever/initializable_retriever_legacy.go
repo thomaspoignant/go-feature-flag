@@ -29,7 +29,7 @@ func (m *InitializableRetrieverLegacy) Retrieve(_ context.Context) ([]byte, erro
 	return []byte(defaultFlagConfig), nil
 }
 
-func (m *InitializableRetrieverLegacy) Init(ctx context.Context, logger *log.Logger) error {
+func (m *InitializableRetrieverLegacy) Init(_ context.Context, logger *log.Logger) error {
 	m.InitCalled = true
 	m.ReceivedLogger = logger
 	if m.InitShouldFail {
