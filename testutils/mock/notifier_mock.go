@@ -11,7 +11,7 @@ type Notifier struct {
 	mu          sync.Mutex
 }
 
-func (n *Notifier) Notify(cache notifier.DiffCache) error {
+func (n *Notifier) Notify(_ notifier.DiffCache) error {
 	n.mu.Lock()
 	defer n.mu.Unlock()
 	n.NotifyCalls++

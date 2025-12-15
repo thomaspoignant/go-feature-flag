@@ -11,14 +11,12 @@ import (
 // FileInitializableRetriever is the existing file-based mock that creates/deletes files
 // This maintains compatibility with existing tests
 type FileInitializableRetriever struct {
-	Context       context.Context
 	Path          string
 	CurrentStatus retriever.Status
 }
 
 func NewFileInitializableRetriever(path string, status retriever.Status) *FileInitializableRetriever {
 	return &FileInitializableRetriever{
-		Context:       context.Background(),
 		Path:          path,
 		CurrentStatus: status,
 	}

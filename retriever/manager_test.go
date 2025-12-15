@@ -120,7 +120,6 @@ func TestManagerInit_AllRetrieverTypes(t *testing.T) {
 			cacheManager := cache.New(notification.NewService([]notifier.Notifier{}), "", &logger)
 
 			config := retriever.ManagerConfig{
-				Ctx:                     ctx,
 				FileFormat:              "yaml",
 				StartWithRetrieverError: tt.startWithRetrieverError,
 				PollingInterval:         0, // Disable polling for tests
