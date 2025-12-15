@@ -53,7 +53,7 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 				diff: notifier.DiffCache{
 					Added: map[string]flag.Flag{
 						"test-flag3": &flag.InternalFlag{
-							Variations: &map[string]*interface{}{
+							Variations: &map[string]*any{
 								"Default": testconvert.Interface("default"),
 								"False":   testconvert.Interface("false"),
 								"True":    testconvert.Interface("test"),
@@ -79,7 +79,7 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 									},
 								},
 							},
-							Variations: &map[string]*interface{}{
+							Variations: &map[string]*any{
 								"Default": testconvert.Interface(false),
 								"False":   testconvert.Interface(false),
 								"True":    testconvert.Interface(true),
@@ -103,7 +103,7 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 										},
 									},
 								},
-								Variations: &map[string]*interface{}{
+								Variations: &map[string]*any{
 									"Default": testconvert.Interface(false),
 									"False":   testconvert.Interface(false),
 									"True":    testconvert.Interface(true),
@@ -124,7 +124,7 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 										},
 									},
 								},
-								Variations: &map[string]*interface{}{
+								Variations: &map[string]*any{
 									"Default": testconvert.Interface(false),
 									"False":   testconvert.Interface(false),
 									"True":    testconvert.Interface(true),
@@ -152,7 +152,7 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 				diff: notifier.DiffCache{
 					Added: map[string]flag.Flag{
 						"test-flag3": &flag.InternalFlag{
-							Variations: &map[string]*interface{}{
+							Variations: &map[string]*any{
 								"Default": testconvert.Interface("default"),
 								"False":   testconvert.Interface("false"),
 								"True":    testconvert.Interface("test"),
@@ -228,7 +228,7 @@ func Test_webhookNotifier_Notify(t *testing.T) {
 				diff: notifier.DiffCache{
 					Added: map[string]flag.Flag{
 						"test-flag3": &flag.InternalFlag{
-							Variations: &map[string]*interface{}{
+							Variations: &map[string]*any{
 								"Default": testconvert.Interface("default"),
 								"False":   testconvert.Interface("false"),
 								"True":    testconvert.Interface("test"),
@@ -286,7 +286,7 @@ func Test_webhookNotifier_no_meta_data(t *testing.T) {
 	diff := notifier.DiffCache{
 		Added: map[string]flag.Flag{
 			"test-flag3": &flag.InternalFlag{
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"Default": testconvert.Interface("default"),
 					"False":   testconvert.Interface("false"),
 					"True":    testconvert.Interface("test"),
@@ -314,7 +314,7 @@ func Test_webhookNotifier_no_meta_data(t *testing.T) {
 	err := c.Notify(diff)
 
 	assert.NoError(t, err)
-	var m map[string]interface{}
+	var m map[string]any
 	_ = json.Unmarshal([]byte(mockHTTPClient.Body), &m)
 
 	assert.NotEmpty(t, m["meta"])

@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-type TrackingEventDetails = map[string]interface{}
+type TrackingEventDetails = map[string]any
 
 // TrackingEvent represent an Event that we store in the data storage
 // nolint:lll

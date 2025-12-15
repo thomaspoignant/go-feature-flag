@@ -87,9 +87,9 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	query := r.buildQuery()
 
 	// Build the arguments for the query
-	args := []interface{}{}
+	args := []any{}
 	if r.getFlagset() != "" {
-		args = []interface{}{r.getFlagset()}
+		args = []any{r.getFlagset()}
 	}
 
 	r.logger.Debug("Executing PostgreSQL query", slog.String("query", query), slog.Any("args", args))
@@ -101,7 +101,7 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	defer rows.Close()
 
 	// Map to store flag configurations with flag_name as key
-	flagConfigs := make(map[string]interface{})
+	flagConfigs := make(map[string]any)
 
 	for rows.Next() {
 		var flagName string

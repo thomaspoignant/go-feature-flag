@@ -39,10 +39,10 @@ const (
 )
 
 type FlagConfigurationResponse struct {
-	Flags                       map[string]flag.Flag   `json:"flags,omitempty"`
-	EvaluationContextEnrichment map[string]interface{} `json:"evaluationContextEnrichment,omitempty"`
-	ErrorCode                   string                 `json:"errorCode,omitempty"`
-	ErrorDetails                string                 `json:"errorDetails,omitempty"`
+	Flags                       map[string]flag.Flag `json:"flags,omitempty"`
+	EvaluationContextEnrichment map[string]any       `json:"evaluationContextEnrichment,omitempty"`
+	ErrorCode                   string               `json:"errorCode,omitempty"`
+	ErrorDetails                string               `json:"errorDetails,omitempty"`
 }
 
 // Handler is the endpoint to poll if you want to get the configuration of the flags.

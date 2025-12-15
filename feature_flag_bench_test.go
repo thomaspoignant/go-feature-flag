@@ -249,98 +249,98 @@ func BenchmarkFloat64Var_RolloutScheduled(b *testing.B) {
 func BenchmarkJSONVar_NoRule100(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		user := ffcontext.NewEvaluationContext(fmt.Sprintf("user-%d", i))
-		_, _ = client.JSONVariation("json-no-rule-100", user, map[string]interface{}{"sdkDefault": "default"})
+		_, _ = client.JSONVariation("json-no-rule-100", user, map[string]any{"sdkDefault": "default"})
 	}
 }
 
 func BenchmarkJSONVar_NoRule0(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		user := ffcontext.NewEvaluationContext(fmt.Sprintf("user-%d", i))
-		_, _ = client.JSONVariation("json-no-rule-0", user, map[string]interface{}{"sdkDefault": "default"})
+		_, _ = client.JSONVariation("json-no-rule-0", user, map[string]any{"sdkDefault": "default"})
 	}
 }
 
 func BenchmarkJSONVar_NoRule50(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		user := ffcontext.NewEvaluationContext(fmt.Sprintf("user-%d", i))
-		_, _ = client.JSONVariation("json-no-rule-50", user, map[string]interface{}{"sdkDefault": "default"})
+		_, _ = client.JSONVariation("json-no-rule-50", user, map[string]any{"sdkDefault": "default"})
 	}
 }
 
 func BenchmarkJSONVar_Rule(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		user := ffcontext.NewEvaluationContext(fmt.Sprintf("user-%d", i))
-		_, _ = client.JSONVariation("json-rule", user, map[string]interface{}{"sdkDefault": "default"})
+		_, _ = client.JSONVariation("json-rule", user, map[string]any{"sdkDefault": "default"})
 	}
 }
 
 func BenchmarkJSONVar_RuleComplex(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		user := ffcontext.NewEvaluationContext(fmt.Sprintf("user-%d", i))
-		_, _ = client.JSONVariation("json-rule-complex", user, map[string]interface{}{"sdkDefault": "default"})
+		_, _ = client.JSONVariation("json-rule-complex", user, map[string]any{"sdkDefault": "default"})
 	}
 }
 
 func BenchmarkJSONVar_RolloutProgressive(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		user := ffcontext.NewEvaluationContext(fmt.Sprintf("user-%d", i))
-		_, _ = client.JSONVariation("json-rollout-progressive", user, map[string]interface{}{"sdkDefault": "default"})
+		_, _ = client.JSONVariation("json-rollout-progressive", user, map[string]any{"sdkDefault": "default"})
 	}
 }
 
 func BenchmarkJSONVar_RolloutScheduled(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		user := ffcontext.NewEvaluationContext(fmt.Sprintf("user-%d", i))
-		_, _ = client.JSONVariation("json-rollout-scheduled", user, map[string]interface{}{"sdkDefault": "default"})
+		_, _ = client.JSONVariation("json-rollout-scheduled", user, map[string]any{"sdkDefault": "default"})
 	}
 }
 
 func BenchmarkJSONArrayVar_NoRule100(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		user := ffcontext.NewEvaluationContext(fmt.Sprintf("user-%d", i))
-		_, _ = client.JSONArrayVariation("jsonArr-no-rule-100", user, []interface{}{"sdkDefault", "default"})
+		_, _ = client.JSONArrayVariation("jsonArr-no-rule-100", user, []any{"sdkDefault", "default"})
 	}
 }
 
 func BenchmarkJSONArrayVar_NoRule0(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		user := ffcontext.NewEvaluationContext(fmt.Sprintf("user-%d", i))
-		_, _ = client.JSONArrayVariation("jsonArr-no-rule-0", user, []interface{}{"sdkDefault", "default"})
+		_, _ = client.JSONArrayVariation("jsonArr-no-rule-0", user, []any{"sdkDefault", "default"})
 	}
 }
 
 func BenchmarkJSONArrayVar_NoRule50(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		user := ffcontext.NewEvaluationContext(fmt.Sprintf("user-%d", i))
-		_, _ = client.JSONArrayVariation("jsonArr-no-rule-50", user, []interface{}{"sdkDefault", "default"})
+		_, _ = client.JSONArrayVariation("jsonArr-no-rule-50", user, []any{"sdkDefault", "default"})
 	}
 }
 
 func BenchmarkJSONArrayVar_Rule(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		user := ffcontext.NewEvaluationContext(fmt.Sprintf("user-%d", i))
-		_, _ = client.JSONArrayVariation("jsonArr-rule", user, []interface{}{"sdkDefault", "default"})
+		_, _ = client.JSONArrayVariation("jsonArr-rule", user, []any{"sdkDefault", "default"})
 	}
 }
 
 func BenchmarkJSONArrayVar_RuleComplex(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		user := ffcontext.NewEvaluationContext(fmt.Sprintf("user-%d", i))
-		_, _ = client.JSONArrayVariation("jsonArr-rule-complex", user, []interface{}{"sdkDefault", "default"})
+		_, _ = client.JSONArrayVariation("jsonArr-rule-complex", user, []any{"sdkDefault", "default"})
 	}
 }
 
 func BenchmarkJSONArrayVar_RolloutProgressive(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		user := ffcontext.NewEvaluationContext(fmt.Sprintf("user-%d", i))
-		_, _ = client.JSONArrayVariation("jsonArr-rollout-progressive", user, []interface{}{"sdkDefault", "default"})
+		_, _ = client.JSONArrayVariation("jsonArr-rollout-progressive", user, []any{"sdkDefault", "default"})
 	}
 }
 
 func BenchmarkJSONArrayVar_RolloutScheduled(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		user := ffcontext.NewEvaluationContext(fmt.Sprintf("user-%d", i))
-		_, _ = client.JSONArrayVariation("jsonArr-rollout-scheduled", user, []interface{}{"sdkDefault", "default"})
+		_, _ = client.JSONArrayVariation("jsonArr-rollout-scheduled", user, []any{"sdkDefault", "default"})
 	}
 }
 

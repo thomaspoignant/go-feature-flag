@@ -33,7 +33,7 @@ func TestValidTrackingEvent(t *testing.T) {
 			AddCustom("admin", true).
 			AddCustom("anonymous", true).
 			Build(),
-		map[string]interface{}{"additional data": "value"},
+		map[string]any{"additional data": "value"},
 	)
 
 	assert.Equal(t, 1, len(exp.ExportedEvents))
@@ -41,7 +41,7 @@ func TestValidTrackingEvent(t *testing.T) {
 	assert.Equal(t, "my-feature-flag", exp.ExportedEvents[0].Key)
 	assert.Equal(
 		t,
-		map[string]interface{}{
+		map[string]any{
 			"targetingKey": "1668d845-051d-4dd9-907a-7ebe6aa2c9da",
 			"admin":        true,
 			"anonymous":    true,
@@ -50,7 +50,7 @@ func TestValidTrackingEvent(t *testing.T) {
 	)
 	assert.Equal(
 		t,
-		map[string]interface{}{"additional data": "value"},
+		map[string]any{"additional data": "value"},
 		exp.ExportedEvents[0].TrackingDetails,
 	)
 }
