@@ -1,8 +1,11 @@
 package api_test
 
 import (
+	"bufio"
 	"context"
+	"errors"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"os"
@@ -11,6 +14,7 @@ import (
 	"testing"
 	"time"
 
+	promdto "github.com/prometheus/client_model/go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api"
@@ -21,6 +25,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/encoding/protodelim"
 )
 
 func Test_Starting_RelayProxy_with_monitoring_on_same_port(t *testing.T) {
@@ -999,5 +1004,116 @@ func TestStartingRelayProxyUnixSocketVersionHeader(t *testing.T) {
 				assert.Empty(t, response.Header.Get("X-GOFEATUREFLAG-VERSION"))
 			}
 		})
+	}
+}
+
+func Test_NativeHistograms_Enabled(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	t.Cleanup(cancel)
+
+	proxyConf := &config.Config{
+		CommonFlagSet: config.CommonFlagSet{
+			Retrievers: &[]retrieverconf.RetrieverConf{
+				{
+					Kind: "file",
+					Path: "../../../testdata/flag-config.yaml",
+				},
+			},
+		},
+		Server: config.Server{
+			Mode: config.ServerModeHTTP,
+			Port: 11024,
+		},
+	}
+
+	log := log.InitLogger()
+	defer func() { _ = log.ZapLogger.Sync() }()
+
+	metricsV2, err := metric.NewMetrics()
+	require.NoError(t, err)
+
+	wsService := service.NewWebsocketService()
+	defer wsService.Close()
+
+	prometheusNotifier := metric.NewPrometheusNotifier(metricsV2)
+	proxyNotifier := service.NewNotifierWebsocket(wsService)
+
+	flagsetManager, err := service.NewFlagsetManager(proxyConf, log.ZapLogger, []notifier.Notifier{
+		prometheusNotifier,
+		proxyNotifier,
+	})
+	require.NoError(t, err)
+
+	services := service.Services{
+		MonitoringService: service.NewMonitoring(flagsetManager),
+		WebsocketService:  wsService,
+		FlagsetManager:    flagsetManager,
+		Metrics:           metricsV2,
+	}
+
+	s := api.New(proxyConf, services, log.ZapLogger)
+	go func() { s.StartWithContext(ctx) }()
+	defer s.Stop(ctx)
+
+	time.Sleep(10 * time.Millisecond)
+
+	// Make some requests to generate histogram data
+	healthResp, err := http.Get("http://localhost:11024/health")
+	require.NoError(t, err)
+	_ = healthResp.Body.Close()
+
+	infoResp, err := http.Get("http://localhost:11024/info")
+	require.NoError(t, err)
+	_ = infoResp.Body.Close()
+
+	// Scrape /metrics with protobuf Accept header
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "http://localhost:11024/metrics", nil)
+	require.NoError(t, err)
+	req.Header.Set("Accept", "application/vnd.google.protobuf;proto=io.prometheus.client.MetricFamily;encoding=delimited")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	require.NoError(t, err)
+	defer func() { _ = resp.Body.Close() }()
+	require.Equal(t, http.StatusOK, resp.StatusCode)
+
+	// Decode delimited protobuf stream
+	var histogramFamilies []*promdto.MetricFamily
+	reader := bufio.NewReader(resp.Body)
+	for {
+		var mf promdto.MetricFamily
+		err := protodelim.UnmarshalFrom(reader, &mf)
+		if errors.Is(err, io.EOF) {
+			break
+		}
+		require.NoError(t, err)
+
+		// Only check histogram metric families from our subsystem
+		if mf.GetType() == promdto.MetricType_HISTOGRAM {
+			if strings.HasPrefix(mf.GetName(), "gofeatureflag_") {
+				histogramFamilies = append(histogramFamilies, &mf)
+			}
+		}
+	}
+
+	// Assert we found at least one histogram metric family
+	require.NotEmpty(t, histogramFamilies)
+
+	// Check each histogram has both classic buckets and native histogram fields
+	for _, mf := range histogramFamilies {
+		for _, metric := range mf.GetMetric() {
+			h := metric.GetHistogram()
+			if h == nil {
+				continue
+			}
+
+			// Assert classic histogram buckets are still present
+			assert.NotEmpty(t, h.GetBucket())
+
+			// Assert native histogram data is present
+			// Check for native histogram fields: PositiveSpan, NegativeSpan, or Schema
+			hasNativeData := len(h.GetPositiveSpan()) > 0 || len(h.GetNegativeSpan()) > 0 || h.Schema != nil
+			assert.True(t, hasNativeData)
+		}
 	}
 }
