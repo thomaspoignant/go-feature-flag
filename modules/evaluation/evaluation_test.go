@@ -18,19 +18,19 @@ func Test_evaluate(t *testing.T) {
 		evaluationCtx   ffcontext.Context
 		flagCtx         flag.Context
 		expectedType    string
-		sdkDefaultValue interface{}
+		sdkDefaultValue any
 	}
 	tests := []struct {
 		name         string
 		args         args
-		want         model.VariationResult[interface{}]
+		want         model.VariationResult[any]
 		errAssertion assert.ErrorAssertionFunc
 	}{
 		{
 			name: "Test with a rule name",
 			args: args{
 				flag: &flag.InternalFlag{
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"on":  testconvert.Interface(true),
 						"off": testconvert.Interface(false),
 					},
@@ -44,7 +44,7 @@ func Test_evaluate(t *testing.T) {
 				expectedType:    "bool",
 				sdkDefaultValue: false,
 			},
-			want: model.VariationResult[interface{}]{
+			want: model.VariationResult[any]{
 				TrackEvents:   true,
 				VariationType: "on",
 				Failed:        false,
@@ -58,7 +58,7 @@ func Test_evaluate(t *testing.T) {
 			name: "Test with nil value",
 			args: args{
 				flag: &flag.InternalFlag{
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"on":  nil,
 						"off": nil,
 					},
@@ -72,7 +72,7 @@ func Test_evaluate(t *testing.T) {
 				expectedType:    "bool",
 				sdkDefaultValue: false,
 			},
-			want: model.VariationResult[interface{}]{
+			want: model.VariationResult[any]{
 				VariationType: "on",
 				Failed:        false,
 				Reason:        flag.ReasonStatic,
@@ -86,7 +86,7 @@ func Test_evaluate(t *testing.T) {
 			name: "Test with float64 value and int expected",
 			args: args{
 				flag: &flag.InternalFlag{
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"on":  testconvert.Interface(float64(3)),
 						"off": testconvert.Interface(float64(0)),
 					},
@@ -100,7 +100,7 @@ func Test_evaluate(t *testing.T) {
 				expectedType:    "int",
 				sdkDefaultValue: 0,
 			},
-			want: model.VariationResult[interface{}]{
+			want: model.VariationResult[any]{
 				VariationType: "on",
 				Failed:        false,
 				Reason:        flag.ReasonStatic,
@@ -114,7 +114,7 @@ func Test_evaluate(t *testing.T) {
 			name: "Test with float64 value and int expected",
 			args: args{
 				flag: &flag.InternalFlag{
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"on":  testconvert.Interface(float64(3)),
 						"off": testconvert.Interface(float64(0)),
 					},
@@ -128,7 +128,7 @@ func Test_evaluate(t *testing.T) {
 				expectedType:    "int",
 				sdkDefaultValue: 0,
 			},
-			want: model.VariationResult[interface{}]{
+			want: model.VariationResult[any]{
 				VariationType: "on",
 				Failed:        false,
 				Reason:        flag.ReasonStatic,
@@ -142,7 +142,7 @@ func Test_evaluate(t *testing.T) {
 			name: "Test with float64 value and float expected",
 			args: args{
 				flag: &flag.InternalFlag{
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"on":  testconvert.Interface(float64(3.5)),
 						"off": testconvert.Interface(float64(0.3)),
 					},
@@ -156,7 +156,7 @@ func Test_evaluate(t *testing.T) {
 				expectedType:    "float",
 				sdkDefaultValue: 0,
 			},
-			want: model.VariationResult[interface{}]{
+			want: model.VariationResult[any]{
 				VariationType: "on",
 				Failed:        false,
 				Reason:        flag.ReasonStatic,
@@ -181,7 +181,7 @@ func Test_evaluate(t *testing.T) {
 
 func Test_evaluate_typeMisMatch(t *testing.T) {
 	f := &flag.InternalFlag{
-		Variations: &map[string]*interface{}{
+		Variations: &map[string]*any{
 			"on":  testconvert.Interface(true),
 			"off": testconvert.Interface(false),
 		},

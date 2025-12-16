@@ -139,7 +139,7 @@ type Config struct {
 	// if in the evaluation context you have a field with the same name,
 	// it will be overridden by the evaluationContextEnrichment.
 	// Default: nil
-	EvaluationContextEnrichment map[string]interface{} `mapstructure:"evaluationContextEnrichment" koanf:"evaluationcontextenrichment"` //nolint: lll
+	EvaluationContextEnrichment map[string]any `mapstructure:"evaluationContextEnrichment" koanf:"evaluationcontextenrichment"` //nolint: lll
 
 	// OpenTelemetryOtlpEndpoint (optional) is the endpoint of the OpenTelemetry collector
 	// Default: ""
@@ -190,7 +190,7 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 	k.Delete("")
 
 	// Default values
-	_ = k.Load(confmap.Provider(map[string]interface{}{
+	_ = k.Load(confmap.Provider(map[string]any{
 		"host":            "localhost",
 		"fileFormat":      "yaml",
 		"pollingInterval": 60000,

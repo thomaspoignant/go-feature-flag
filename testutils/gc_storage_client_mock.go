@@ -45,7 +45,7 @@ func (m *Mockobject) Attrs(ctx context.Context) (*storage.ObjectAttrs, error) {
 }
 
 // Attrs indicates an expected call of Attrs.
-func (mr *MockobjectMockRecorder) Attrs(ctx interface{}) *gomock.Call {
+func (mr *MockobjectMockRecorder) Attrs(ctx any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Attrs", reflect.TypeOf((*Mockobject)(nil).Attrs), ctx)
 }
@@ -60,7 +60,7 @@ func (m *Mockobject) NewReader(ctx context.Context) (*storage.Reader, error) {
 }
 
 // NewReader indicates an expected call of NewReader.
-func (mr *MockobjectMockRecorder) NewReader(ctx interface{}) *gomock.Call {
+func (mr *MockobjectMockRecorder) NewReader(ctx any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewReader", reflect.TypeOf((*Mockobject)(nil).NewReader), ctx)
 }

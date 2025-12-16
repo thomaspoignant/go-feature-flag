@@ -273,13 +273,13 @@ func TestAddExporterMetadataFromContextToExporter(t *testing.T) {
 	tests := []struct {
 		name string
 		ctx  ffcontext.EvaluationContext
-		want map[string]interface{}
+		want map[string]any
 	}{
 		{
 			name: "extract exporter metadata from context",
 			ctx: ffcontext.NewEvaluationContextBuilder("targeting-key").
-				AddCustom("gofeatureflag", map[string]interface{}{
-					"exporterMetadata": map[string]interface{}{
+				AddCustom("gofeatureflag", map[string]any{
+					"exporterMetadata": map[string]any{
 						"key1": "value1",
 						"key2": 123,
 						"key3": true,
@@ -287,7 +287,7 @@ func TestAddExporterMetadataFromContextToExporter(t *testing.T) {
 					},
 				}).
 				Build(),
-			want: map[string]interface{}{
+			want: map[string]any{
 				"key1": "value1",
 				"key2": 123,
 				"key3": true,
@@ -451,7 +451,7 @@ func TestDataExporterManager_ValidateNumberOfEvents(t *testing.T) {
 			_, _ = ffclient.JSONVariation(
 				"test-flag2",
 				user1,
-				map[string]interface{}{"test": "toto"},
+				map[string]any{"test": "toto"},
 			)
 			time.Sleep(300 * time.Millisecond)
 			assert.Equal(t, 4, len(mockExporter.GetExportedEvents()))

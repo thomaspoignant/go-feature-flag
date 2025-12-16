@@ -25,7 +25,7 @@ type DTO struct {
 
 	// Variations are all the variations available for this flag. The minimum is 2 variations and, we don't have any max
 	// limit except if the variationValue is a bool, the max is 2.
-	Variations *map[string]*interface{} `json:"variations,omitempty" yaml:"variations,omitempty" toml:"variations,omitempty" jsonschema:"required,title=variations,description=All the variations available for this flag. You need at least 2 variations and it is a key value pair. All the variations should have the same type."` // nolint:lll
+	Variations *map[string]*any `json:"variations,omitempty" yaml:"variations,omitempty" toml:"variations,omitempty" jsonschema:"required,title=variations,description=All the variations available for this flag. You need at least 2 variations and it is a key value pair. All the variations should have the same type."` // nolint:lll
 
 	// Rules is the list of Rule for this flag.
 	// This an optional field.
@@ -49,7 +49,7 @@ type DTO struct {
 	Experimentation *ExperimentationDto `json:"experimentation,omitempty" yaml:"experimentation,omitempty" toml:"experimentation,omitempty" jsonschema:"title=experimentation,description=Configure an experimentation. It will allow you to configure a start date and an end date for your flag."` // nolint: lll
 
 	// Metadata is a field containing information about your flag such as an issue tracker link, a description, etc ...
-	Metadata *map[string]interface{} `json:"metadata,omitempty" yaml:"metadata,omitempty" toml:"metadata,omitempty" jsonschema:"title=metadata,description=A field containing information about your flag such as an issue tracker link a description etc..."` // nolint: lll
+	Metadata *map[string]any `json:"metadata,omitempty" yaml:"metadata,omitempty" toml:"metadata,omitempty" jsonschema:"title=metadata,description=A field containing information about your flag such as an issue tracker link a description etc..."` // nolint: lll
 }
 
 // Convert is converting the DTO into a flag.InternalFlag.

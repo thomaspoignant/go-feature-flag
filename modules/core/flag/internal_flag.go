@@ -20,7 +20,7 @@ const (
 // converted into an InternalFlag to be used in the library.
 type InternalFlag struct {
 	// Variations are all the variations available for this flag. You can have as many variation as needed.
-	Variations *map[string]*interface{} `json:"variations,omitempty" yaml:"variations,omitempty" toml:"variations,omitempty"` // nolint:lll
+	Variations *map[string]*any `json:"variations,omitempty" yaml:"variations,omitempty" toml:"variations,omitempty"` // nolint:lll
 
 	// Rules is the list of Rule for this flag.
 	// This an optional field.
@@ -56,7 +56,7 @@ type InternalFlag struct {
 	Version *string `json:"version,omitempty" yaml:"version,omitempty" toml:"version,omitempty"`
 
 	// Metadata is a field containing information about your flag such as an issue tracker link, a description, etc ...
-	Metadata *map[string]interface{} `json:"metadata,omitempty" yaml:"metadata,omitempty" toml:"metadata,omitempty"`
+	Metadata *map[string]any `json:"metadata,omitempty" yaml:"metadata,omitempty" toml:"metadata,omitempty"`
 }
 
 // Value is returning the Value associate to the flag
@@ -64,7 +64,7 @@ func (f *InternalFlag) Value(
 	flagName string,
 	evaluationCtx ffcontext.Context,
 	flagContext Context,
-) (interface{}, ResolutionDetails) {
+) (any, ResolutionDetails) {
 	// if the evaluation context is nil, we create a new one with an empty key
 	// this is to avoid any nil pointer exception.
 	if evaluationCtx == nil {
@@ -309,7 +309,7 @@ func (f *InternalFlag) IsValid() error {
 		return err
 	}
 
-	ruleNames := map[string]interface{}{}
+	ruleNames := map[string]any{}
 	for _, rule := range f.GetRules() {
 		if err := rule.IsValid(!isDefaultRule, f.GetVariations()); err != nil {
 			return err
@@ -327,9 +327,9 @@ func (f *InternalFlag) IsValid() error {
 }
 
 // GetVariations is the getter of the field Variations
-func (f *InternalFlag) GetVariations() map[string]*interface{} {
+func (f *InternalFlag) GetVariations() map[string]*any {
 	if f.Variations == nil {
-		return map[string]*interface{}{}
+		return map[string]*any{}
 	}
 	return *f.Variations
 }
@@ -380,7 +380,7 @@ func (f *InternalFlag) GetVersion() string {
 }
 
 // GetVariationValue return the value of variation from his name
-func (f *InternalFlag) GetVariationValue(name string) interface{} {
+func (f *InternalFlag) GetVariationValue(name string) any {
 	if v, exists := f.GetVariations()[name]; exists && v != nil {
 		return *v
 	}
@@ -476,7 +476,7 @@ func (f *InternalFlag) requiresBucketingCheck(requiresBucketing bool, key string
 }
 
 // GetMetadata return the metadata associated to the flag
-func (f *InternalFlag) GetMetadata() map[string]interface{} {
+func (f *InternalFlag) GetMetadata() map[string]any {
 	if f.Metadata == nil {
 		return nil
 	}

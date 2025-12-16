@@ -13,7 +13,7 @@ type AllFlags struct {
 // FlagState represents the state of an individual feature flag, with regard to a specific user, when it was called.
 type FlagState struct {
 	// Value is the flag value, it can be any JSON types.
-	Value interface{} `json:"value"`
+	Value any `json:"value"`
 
 	// Timestamp is the time when the flag was evaluated.
 	Timestamp int64 `json:"timestamp" example:"1652113076"`

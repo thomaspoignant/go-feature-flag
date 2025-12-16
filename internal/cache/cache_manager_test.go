@@ -113,7 +113,7 @@ trackEvents = false
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"false_var": testconvert.Interface(false),
 						"true_var":  testconvert.Interface(true),
 					},
@@ -160,7 +160,7 @@ test-flag:
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"false_var": testconvert.Interface(false),
 						"true_var":  testconvert.Interface(true),
 					},
@@ -214,7 +214,7 @@ test-flag:
 							},
 						},
 					},
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"false_var": testconvert.Interface(false),
 						"true_var":  testconvert.Interface(true),
 					},
@@ -305,7 +305,7 @@ test-flag:
 			},
 			expected: map[string]flag.InternalFlag{
 				"test-flag": {
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"false_var": testconvert.Interface(false),
 						"true_var":  testconvert.Interface(true),
 					},
@@ -360,7 +360,7 @@ test-flag2:
 			},
 			expected: map[string]flag.InternalFlag{
 				"test-flag": {
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"false_var": testconvert.Interface(false),
 						"true_var":  testconvert.Interface(true),
 					},
@@ -379,7 +379,7 @@ test-flag2:
 					TrackEvents: testconvert.Bool(false),
 				},
 				"test-flag2": {
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"false_var": testconvert.Interface("false"),
 						"true_var":  testconvert.Interface("true"),
 					},
@@ -520,7 +520,7 @@ func TestCacheManager_UpdateCache(t *testing.T) {
 			name: "Update existing flags",
 			initialFlags: map[string]dto.DTO{
 				"flag1": {
-					Variations: &map[string]*interface{}{},
+					Variations: &map[string]*any{},
 					DefaultRule: &flag.Rule{
 						VariationResult: testconvert.String("true"),
 					},
@@ -528,7 +528,7 @@ func TestCacheManager_UpdateCache(t *testing.T) {
 			},
 			updatedFlags: map[string]dto.DTO{
 				"flag1": {
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"true": testconvert.Interface(true),
 					},
 					DefaultRule: &flag.Rule{
@@ -536,7 +536,7 @@ func TestCacheManager_UpdateCache(t *testing.T) {
 					},
 				},
 				"flag2": {
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"false": testconvert.Interface(false),
 					},
 					DefaultRule: &flag.Rule{
@@ -550,7 +550,7 @@ func TestCacheManager_UpdateCache(t *testing.T) {
 			initialFlags: map[string]dto.DTO{},
 			updatedFlags: map[string]dto.DTO{
 				"flag1": {
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"true": testconvert.Interface(true),
 					},
 					DefaultRule: &flag.Rule{
@@ -563,7 +563,7 @@ func TestCacheManager_UpdateCache(t *testing.T) {
 			name: "Remove a flag",
 			initialFlags: map[string]dto.DTO{
 				"flag1": {
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"true": testconvert.Interface(true),
 					},
 					DefaultRule: &flag.Rule{
@@ -571,7 +571,7 @@ func TestCacheManager_UpdateCache(t *testing.T) {
 					},
 				},
 				"flag2": {
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"false": testconvert.Interface(false),
 					},
 					DefaultRule: &flag.Rule{
@@ -581,7 +581,7 @@ func TestCacheManager_UpdateCache(t *testing.T) {
 			},
 			updatedFlags: map[string]dto.DTO{
 				"flag1": {
-					Variations: &map[string]*interface{}{
+					Variations: &map[string]*any{
 						"true": testconvert.Interface(true),
 					},
 					DefaultRule: &flag.Rule{

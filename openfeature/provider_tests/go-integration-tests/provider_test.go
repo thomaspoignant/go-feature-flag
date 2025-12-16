@@ -12,7 +12,7 @@ import (
 func defaultEvaluationCtx() of.EvaluationContext {
 	return of.NewEvaluationContext(
 		"d45e303a-38c2-11ed-a261-0242ac120002",
-		map[string]interface{}{
+		map[string]any{
 			"email":        "john.doe@gofeatureflag.org",
 			"firstname":    "john",
 			"lastname":     "doe",
@@ -21,7 +21,7 @@ func defaultEvaluationCtx() of.EvaluationContext {
 			"rate":         3.14,
 			"age":          30,
 			"admin":        true,
-			"company_info": map[string]interface{}{
+			"company_info": map[string]any{
 				"name": "my_company",
 				"size": 120,
 			},
@@ -59,7 +59,7 @@ func TestProvider_module_BooleanEvaluation(t *testing.T) {
 						Reason:       of.TargetingMatchReason,
 						ErrorCode:    "",
 						ErrorMessage: "",
-						FlagMetadata: map[string]interface{}{
+						FlagMetadata: map[string]any{
 							"description":             "this is a test",
 							"gofeatureflag_cacheable": true,
 							"pr_link":                 "https://github.com/thomaspoignant/go-feature-flag/pull/916",
@@ -85,7 +85,7 @@ func TestProvider_module_BooleanEvaluation(t *testing.T) {
 						Reason:       of.DisabledReason,
 						ErrorCode:    "",
 						ErrorMessage: "",
-						FlagMetadata: map[string]interface{}{
+						FlagMetadata: map[string]any{
 							"description":             "this is a test",
 							"gofeatureflag_cacheable": true,
 							"pr_link":                 "https://github.com/thomaspoignant/go-feature-flag/pull/916",
@@ -111,7 +111,7 @@ func TestProvider_module_BooleanEvaluation(t *testing.T) {
 						Reason:       of.ErrorReason,
 						ErrorCode:    of.TypeMismatchCode,
 						ErrorMessage: "resolved value CC0000 is not of boolean type",
-						FlagMetadata: map[string]interface{}{},
+						FlagMetadata: map[string]any{},
 					},
 				},
 			},
@@ -133,7 +133,7 @@ func TestProvider_module_BooleanEvaluation(t *testing.T) {
 						Reason:       of.ErrorReason,
 						ErrorCode:    of.FlagNotFoundCode,
 						ErrorMessage: "flag for key 'does_not_exists' does not exist",
-						FlagMetadata: map[string]interface{}{},
+						FlagMetadata: map[string]any{},
 					},
 				},
 			},
@@ -191,7 +191,7 @@ func TestProvider_module_StringEvaluation(t *testing.T) {
 						Reason:       of.TargetingMatchReason,
 						ErrorCode:    "",
 						ErrorMessage: "",
-						FlagMetadata: map[string]interface{}{
+						FlagMetadata: map[string]any{
 							"description":             "this is a test",
 							"gofeatureflag_cacheable": true,
 							"pr_link":                 "https://github.com/thomaspoignant/go-feature-flag/pull/916",
@@ -217,7 +217,7 @@ func TestProvider_module_StringEvaluation(t *testing.T) {
 						Reason:       of.DisabledReason,
 						ErrorCode:    "",
 						ErrorMessage: "",
-						FlagMetadata: map[string]interface{}{
+						FlagMetadata: map[string]any{
 							"description":             "this is a test",
 							"gofeatureflag_cacheable": true,
 							"pr_link":                 "https://github.com/thomaspoignant/go-feature-flag/pull/916",
@@ -243,7 +243,7 @@ func TestProvider_module_StringEvaluation(t *testing.T) {
 						Reason:       of.ErrorReason,
 						ErrorCode:    of.TypeMismatchCode,
 						ErrorMessage: "resolved value true is not of string type",
-						FlagMetadata: map[string]interface{}{},
+						FlagMetadata: map[string]any{},
 					},
 				},
 			},
@@ -265,7 +265,7 @@ func TestProvider_module_StringEvaluation(t *testing.T) {
 						Reason:       of.ErrorReason,
 						ErrorCode:    of.FlagNotFoundCode,
 						ErrorMessage: "flag for key 'does_not_exists' does not exist",
-						FlagMetadata: map[string]interface{}{},
+						FlagMetadata: map[string]any{},
 					},
 				},
 			},
@@ -285,7 +285,7 @@ func TestProvider_module_StringEvaluation(t *testing.T) {
 					ResolutionDetail: of.ResolutionDetail{
 						Variant: "A",
 						Reason:  of.TargetingMatchReason,
-						FlagMetadata: map[string]interface{}{
+						FlagMetadata: map[string]any{
 							"gofeatureflag_cacheable": true,
 						},
 					},
@@ -345,7 +345,7 @@ func TestProvider_module_FloatEvaluation(t *testing.T) {
 						Reason:       of.TargetingMatchReason,
 						ErrorCode:    "",
 						ErrorMessage: "",
-						FlagMetadata: map[string]interface{}{
+						FlagMetadata: map[string]any{
 							"description":             "this is a test",
 							"gofeatureflag_cacheable": true,
 							"pr_link":                 "https://github.com/thomaspoignant/go-feature-flag/pull/916",
@@ -371,7 +371,7 @@ func TestProvider_module_FloatEvaluation(t *testing.T) {
 						Reason:       of.DisabledReason,
 						ErrorCode:    "",
 						ErrorMessage: "",
-						FlagMetadata: map[string]interface{}{
+						FlagMetadata: map[string]any{
 							"description":             "this is a test",
 							"gofeatureflag_cacheable": true,
 							"pr_link":                 "https://github.com/thomaspoignant/go-feature-flag/pull/916",
@@ -397,7 +397,7 @@ func TestProvider_module_FloatEvaluation(t *testing.T) {
 						Reason:       of.ErrorReason,
 						ErrorCode:    of.TypeMismatchCode,
 						ErrorMessage: "resolved value true is not of float type",
-						FlagMetadata: map[string]interface{}{},
+						FlagMetadata: map[string]any{},
 					},
 				},
 			},
@@ -419,7 +419,7 @@ func TestProvider_module_FloatEvaluation(t *testing.T) {
 						Reason:       of.ErrorReason,
 						ErrorCode:    of.FlagNotFoundCode,
 						ErrorMessage: "flag for key 'does_not_exists' does not exist",
-						FlagMetadata: map[string]interface{}{},
+						FlagMetadata: map[string]any{},
 					},
 				},
 			},
@@ -477,7 +477,7 @@ func TestProvider_module_IntEvaluation(t *testing.T) {
 						Reason:       of.TargetingMatchReason,
 						ErrorCode:    "",
 						ErrorMessage: "",
-						FlagMetadata: map[string]interface{}{
+						FlagMetadata: map[string]any{
 							"description":             "this is a test",
 							"gofeatureflag_cacheable": true,
 							"pr_link":                 "https://github.com/thomaspoignant/go-feature-flag/pull/916",
@@ -503,7 +503,7 @@ func TestProvider_module_IntEvaluation(t *testing.T) {
 						Reason:       of.DisabledReason,
 						ErrorCode:    "",
 						ErrorMessage: "",
-						FlagMetadata: map[string]interface{}{
+						FlagMetadata: map[string]any{
 							"description":             "this is a test",
 							"gofeatureflag_cacheable": true,
 							"pr_link":                 "https://github.com/thomaspoignant/go-feature-flag/pull/916",
@@ -529,7 +529,7 @@ func TestProvider_module_IntEvaluation(t *testing.T) {
 						Reason:       of.ErrorReason,
 						ErrorCode:    of.TypeMismatchCode,
 						ErrorMessage: "resolved value true is not of integer type",
-						FlagMetadata: map[string]interface{}{},
+						FlagMetadata: map[string]any{},
 					},
 				},
 			},
@@ -551,7 +551,7 @@ func TestProvider_module_IntEvaluation(t *testing.T) {
 						Reason:       of.ErrorReason,
 						ErrorCode:    of.FlagNotFoundCode,
 						ErrorMessage: "flag for key 'does_not_exists' does not exist",
-						FlagMetadata: map[string]interface{}{},
+						FlagMetadata: map[string]any{},
 					},
 				},
 			},
@@ -584,7 +584,7 @@ func TestProvider_module_IntEvaluation(t *testing.T) {
 func TestProvider_module_ObjectEvaluation(t *testing.T) {
 	type args struct {
 		flag         string
-		defaultValue interface{}
+		defaultValue any
 		evalCtx      of.EvaluationContext
 	}
 	tests := []struct {
@@ -600,7 +600,7 @@ func TestProvider_module_ObjectEvaluation(t *testing.T) {
 				evalCtx:      defaultEvaluationCtx(),
 			},
 			want: of.InterfaceEvaluationDetails{
-				Value: map[string]interface{}{
+				Value: map[string]any{
 					"test":  "test1",
 					"test2": false,
 					"test3": 123.3,
@@ -614,7 +614,7 @@ func TestProvider_module_ObjectEvaluation(t *testing.T) {
 						Reason:       of.TargetingMatchReason,
 						ErrorCode:    "",
 						ErrorMessage: "",
-						FlagMetadata: map[string]interface{}{
+						FlagMetadata: map[string]any{
 							"description":             "this is a test",
 							"gofeatureflag_cacheable": true,
 							"pr_link":                 "https://github.com/thomaspoignant/go-feature-flag/pull/916",
@@ -640,7 +640,7 @@ func TestProvider_module_ObjectEvaluation(t *testing.T) {
 						Reason:       of.DisabledReason,
 						ErrorCode:    "",
 						ErrorMessage: "",
-						FlagMetadata: map[string]interface{}{
+						FlagMetadata: map[string]any{
 							"description":             "this is a test",
 							"gofeatureflag_cacheable": true,
 							"pr_link":                 "https://github.com/thomaspoignant/go-feature-flag/pull/916",
@@ -666,7 +666,7 @@ func TestProvider_module_ObjectEvaluation(t *testing.T) {
 						Reason:       of.ErrorReason,
 						ErrorCode:    of.FlagNotFoundCode,
 						ErrorMessage: "flag for key 'does_not_exists' does not exist",
-						FlagMetadata: map[string]interface{}{},
+						FlagMetadata: map[string]any{},
 					},
 				},
 			},
@@ -720,7 +720,7 @@ func TestProvider_apikey_relay_proxy(t *testing.T) {
 						Reason:       of.TargetingMatchReason,
 						ErrorCode:    "",
 						ErrorMessage: "",
-						FlagMetadata: map[string]interface{}{
+						FlagMetadata: map[string]any{
 							"description":             "this is a test",
 							"gofeatureflag_cacheable": true,
 							"pr_link":                 "https://github.com/thomaspoignant/go-feature-flag/pull/916",
@@ -744,7 +744,7 @@ func TestProvider_apikey_relay_proxy(t *testing.T) {
 						Reason:       of.ErrorReason,
 						ErrorCode:    of.GeneralCode,
 						ErrorMessage: "authentication/authorization error",
-						FlagMetadata: map[string]interface{}{},
+						FlagMetadata: map[string]any{},
 					},
 				},
 			},
@@ -764,7 +764,7 @@ func TestProvider_apikey_relay_proxy(t *testing.T) {
 						Reason:       of.ErrorReason,
 						ErrorCode:    of.GeneralCode,
 						ErrorMessage: "authentication/authorization error",
-						FlagMetadata: map[string]interface{}{},
+						FlagMetadata: map[string]any{},
 					},
 				},
 			},

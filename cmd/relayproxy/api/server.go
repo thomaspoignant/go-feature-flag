@@ -221,7 +221,7 @@ func (s *Server) startAwsLambda() {
 // lambdaHandler returns the appropriate lambda handler based on the configuration.
 // We need a dedicated function because it is called from tests as well, this is the
 // reason why we can't merged it in startAwsLambda.
-func (s *Server) lambdaHandler() interface{} {
+func (s *Server) lambdaHandler() any {
 	handlerMngr := newAwsLambdaHandlerManager(s.apiEcho, s.config.EffectiveAwsApiGatewayBasePath(s.zapLog))
 	return handlerMngr.SelectAdapter(s.config.LambdaAdapter(s.zapLog))
 }

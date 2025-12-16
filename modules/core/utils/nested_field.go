@@ -8,16 +8,16 @@ import (
 
 // GetNestedFieldValue returns the value from a nested path in the given map.
 // If the path does not exist or an error occurs, it returns an error.
-func GetNestedFieldValue(ctx map[string]interface{}, bucketingKey string) (interface{}, error) {
+func GetNestedFieldValue(ctx map[string]any, bucketingKey string) (any, error) {
 	if ctx == nil || bucketingKey == "" {
 		return nil, &internalerror.NestedKeyNotFoundError{Key: bucketingKey}
 	}
 
 	parts := strings.Split(bucketingKey, ".")
-	var current interface{} = ctx
+	var current any = ctx
 
 	for _, part := range parts {
-		m, ok := current.(map[string]interface{})
+		m, ok := current.(map[string]any)
 		if !ok {
 			return nil, &internalerror.NestedKeyNotFoundError{Key: bucketingKey}
 		}

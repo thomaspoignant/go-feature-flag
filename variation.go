@@ -193,8 +193,8 @@ func (g *GoFeatureFlag) StringVariationDetails(
 func JSONArrayVariation(
 	flagKey string,
 	ctx ffcontext.Context,
-	defaultValue []interface{},
-) ([]interface{}, error) {
+	defaultValue []any,
+) ([]any, error) {
 	return ff.JSONArrayVariation(flagKey, ctx, defaultValue)
 }
 
@@ -203,8 +203,8 @@ func JSONArrayVariation(
 // If the key does not exist we return the default value.
 // Note: Use this function only if you are using multiple go-feature-flag instances.
 func (g *GoFeatureFlag) JSONArrayVariation(
-	flagKey string, ctx ffcontext.Context, defaultValue []interface{},
-) ([]interface{}, error) {
+	flagKey string, ctx ffcontext.Context, defaultValue []any,
+) ([]any, error) {
 	res, err := g.JSONArrayVariationDetails(flagKey, ctx, defaultValue)
 	return res.Value, err
 }
@@ -212,8 +212,8 @@ func (g *GoFeatureFlag) JSONArrayVariation(
 // JSONArrayVariationDetails return the details of the evaluation for []interface{} flag.
 // An error is return if you don't have init the library before calling the function.
 // If the key does not exist we return the default value.
-func JSONArrayVariationDetails(flagKey string, ctx ffcontext.Context, defaultValue []interface{},
-) (model.VariationResult[[]interface{}], error) {
+func JSONArrayVariationDetails(flagKey string, ctx ffcontext.Context, defaultValue []any,
+) (model.VariationResult[[]any], error) {
 	return ff.JSONArrayVariationDetails(flagKey, ctx, defaultValue)
 }
 
@@ -224,8 +224,8 @@ func JSONArrayVariationDetails(flagKey string, ctx ffcontext.Context, defaultVal
 func (g *GoFeatureFlag) JSONArrayVariationDetails(
 	flagKey string,
 	ctx ffcontext.Context,
-	defaultValue []interface{},
-) (model.VariationResult[[]interface{}], error) {
+	defaultValue []any,
+) (model.VariationResult[[]any], error) {
 	res, err := getVariation(g, flagKey, ctx, defaultValue, "[]interface{}")
 	notifyVariation(g, flagKey, ctx, res)
 	return res, err
@@ -235,8 +235,8 @@ func (g *GoFeatureFlag) JSONArrayVariationDetails(
 // An error is return if you don't have init the library before calling the function.
 // If the key does not exist we return the default value.
 func JSONVariation(
-	flagKey string, ctx ffcontext.Context, defaultValue map[string]interface{},
-) (map[string]interface{}, error) {
+	flagKey string, ctx ffcontext.Context, defaultValue map[string]any,
+) (map[string]any, error) {
 	return ff.JSONVariation(flagKey, ctx, defaultValue)
 }
 
@@ -245,8 +245,8 @@ func JSONVariation(
 // If the key does not exist we return the default value.
 // Note: Use this function only if you are using multiple go-feature-flag instances.
 func (g *GoFeatureFlag) JSONVariation(
-	flagKey string, ctx ffcontext.Context, defaultValue map[string]interface{},
-) (map[string]interface{}, error) {
+	flagKey string, ctx ffcontext.Context, defaultValue map[string]any,
+) (map[string]any, error) {
 	res, err := g.JSONVariationDetails(flagKey, ctx, defaultValue)
 	return res.Value, err
 }
@@ -257,8 +257,8 @@ func (g *GoFeatureFlag) JSONVariation(
 func JSONVariationDetails(
 	flagKey string,
 	ctx ffcontext.Context,
-	defaultValue map[string]interface{},
-) (model.VariationResult[map[string]interface{}], error) {
+	defaultValue map[string]any,
+) (model.VariationResult[map[string]any], error) {
 	return ff.JSONVariationDetails(flagKey, ctx, defaultValue)
 }
 
@@ -269,8 +269,8 @@ func JSONVariationDetails(
 func (g *GoFeatureFlag) JSONVariationDetails(
 	flagKey string,
 	ctx ffcontext.Context,
-	defaultValue map[string]interface{},
-) (model.VariationResult[map[string]interface{}], error) {
+	defaultValue map[string]any,
+) (model.VariationResult[map[string]any], error) {
 	res, err := getVariation(g, flagKey, ctx, defaultValue, "bool")
 	notifyVariation(g, flagKey, ctx, res)
 	return res, err
@@ -284,7 +284,7 @@ func (g *GoFeatureFlag) JSONVariationDetails(
 func (g *GoFeatureFlag) RawVariation(
 	flagKey string,
 	ctx ffcontext.Context,
-	sdkDefaultValue interface{},
+	sdkDefaultValue any,
 ) (model.RawVarResult, error) {
 	res, err := getVariation(g, flagKey, ctx, sdkDefaultValue, "interface{}")
 	notifyVariation(g, flagKey, ctx, res)
