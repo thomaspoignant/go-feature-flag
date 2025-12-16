@@ -252,7 +252,7 @@ func (m *Manager) GetFlag(flagKey string) (flag.Flag, error) {
 // GetFlagsFromCache returns all the flags present in the cache with their
 // current state when calling this method. If cache hasn't been initialized, an
 // error reporting this is returned.
-func (m *Manager) GetFlagsFromCache(ctx context.Context) (map[string]flag.Flag, error) {
+func (m *Manager) GetFlagsFromCache(_ context.Context) (map[string]flag.Flag, error) {
 	if m == nil || m.cacheManager == nil {
 		return nil, fmt.Errorf("cache is not initialized")
 	}

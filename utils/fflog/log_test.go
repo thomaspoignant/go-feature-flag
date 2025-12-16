@@ -13,7 +13,7 @@ import (
 func TestFFLogger_Error(t *testing.T) {
 	type fields struct {
 		msg           string
-		keysAndValues []interface{}
+		keysAndValues []any
 	}
 	tests := []struct {
 		name        string
@@ -41,7 +41,7 @@ func TestFFLogger_Error(t *testing.T) {
 			},
 			fields: fields{
 				msg: "Error message",
-				keysAndValues: []interface{}{
+				keysAndValues: []any{
 					slog.String("test", "toto"),
 					slog.String("toto", "test"),
 				},
@@ -66,7 +66,7 @@ func TestFFLogger_Error(t *testing.T) {
 			},
 			fields: fields{
 				msg: "Error message",
-				keysAndValues: []interface{}{
+				keysAndValues: []any{
 					slog.String("test", "toto"),
 					slog.String("toto", "test"),
 				},
@@ -126,7 +126,7 @@ func TestFFLogger_Error(t *testing.T) {
 func TestFFLogger_Warn(t *testing.T) {
 	type fields struct {
 		msg           string
-		keysAndValues []interface{}
+		keysAndValues []any
 	}
 	tests := []struct {
 		name        string
@@ -154,7 +154,7 @@ func TestFFLogger_Warn(t *testing.T) {
 			},
 			fields: fields{
 				msg: "Warn message",
-				keysAndValues: []interface{}{
+				keysAndValues: []any{
 					slog.String("test", "toto"),
 					slog.String("toto", "test"),
 				},
@@ -179,7 +179,7 @@ func TestFFLogger_Warn(t *testing.T) {
 			},
 			fields: fields{
 				msg: "Warn message",
-				keysAndValues: []interface{}{
+				keysAndValues: []any{
 					slog.String("test", "toto"),
 					slog.String("toto", "test"),
 				},
@@ -239,7 +239,7 @@ func TestFFLogger_Warn(t *testing.T) {
 func TestFFLogger_Info(t *testing.T) {
 	type fields struct {
 		msg           string
-		keysAndValues []interface{}
+		keysAndValues []any
 	}
 	tests := []struct {
 		name        string
@@ -267,7 +267,7 @@ func TestFFLogger_Info(t *testing.T) {
 			},
 			fields: fields{
 				msg: "Info message",
-				keysAndValues: []interface{}{
+				keysAndValues: []any{
 					slog.String("test", "toto"),
 					slog.String("toto", "test"),
 				},
@@ -292,7 +292,7 @@ func TestFFLogger_Info(t *testing.T) {
 			},
 			fields: fields{
 				msg: "Info message",
-				keysAndValues: []interface{}{
+				keysAndValues: []any{
 					slog.String("test", "toto"),
 					slog.String("toto", "test"),
 				},
@@ -352,7 +352,7 @@ func TestFFLogger_Info(t *testing.T) {
 func TestFFLogger_Debug(t *testing.T) {
 	type fields struct {
 		msg           string
-		keysAndValues []interface{}
+		keysAndValues []any
 	}
 	tests := []struct {
 		name        string
@@ -380,7 +380,7 @@ func TestFFLogger_Debug(t *testing.T) {
 			},
 			fields: fields{
 				msg: "Debug message",
-				keysAndValues: []interface{}{
+				keysAndValues: []any{
 					slog.String("test", "toto"),
 					slog.String("toto", "test"),
 				},
@@ -405,7 +405,7 @@ func TestFFLogger_Debug(t *testing.T) {
 			},
 			fields: fields{
 				msg: "Debug message",
-				keysAndValues: []interface{}{
+				keysAndValues: []any{
 					slog.String("test", "toto"),
 					slog.String("toto", "test"),
 				},

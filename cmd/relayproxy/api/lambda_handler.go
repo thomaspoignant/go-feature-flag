@@ -38,7 +38,7 @@ type awsLambdaHandler struct {
 }
 
 // SelectAdapter returns the appropriate adapter based on the mode.
-func (h *awsLambdaHandler) SelectAdapter(mode string) interface{} {
+func (h *awsLambdaHandler) SelectAdapter(mode string) any {
 	switch strings.ToUpper(mode) {
 	case strings.ToUpper(config.LambdaAdapterAPIGatewayV1):
 		return h.HandlerAPIGatewayV1

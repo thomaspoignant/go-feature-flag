@@ -87,7 +87,6 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	// Build the arguments for the query
 	args := []any{}
 	if r.getFlagset() != "" {
-		// If a flagset is defined, it becomes the first ($1) argument.
 		args = []any{r.getFlagset()}
 	}
 

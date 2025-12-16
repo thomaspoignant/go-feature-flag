@@ -12,7 +12,7 @@ import (
 func TestVariationResultToJsonStr(t *testing.T) {
 	tests := []struct {
 		name     string
-		result   interface{}
+		result   any
 		wantJSON string
 	}{
 		{
@@ -27,7 +27,7 @@ func TestVariationResultToJsonStr(t *testing.T) {
 				ErrorDetails:  "test error",
 				Value:         true,
 				Cacheable:     true,
-				Metadata:      map[string]interface{}{"key": "value"},
+				Metadata:      map[string]any{"key": "value"},
 			},
 			wantJSON: `{"trackEvents":true,"variationType":"SdkDefault","failed":false,"version":"1.0.0","reason":"DEFAULT","errorCode":"GENERAL","errorDetails":"test error","value":true,"cacheable":true,"metadata":{"key":"value"}}`,
 		},
@@ -76,29 +76,29 @@ func TestVariationResultToJsonStr(t *testing.T) {
 		},
 		{
 			name: "map variation result",
-			result: model.VariationResult[map[string]interface{}]{
+			result: model.VariationResult[map[string]any]{
 				TrackEvents:   true,
 				VariationType: "enabled",
 				Failed:        false,
 				Version:       "5.0.0",
 				Reason:        flag.ReasonTargetingMatchSplit,
 				ErrorCode:     flag.ErrorCodeInvalidContext,
-				Value:         map[string]interface{}{"nested": "value", "number": 123},
+				Value:         map[string]any{"nested": "value", "number": 123},
 				Cacheable:     true,
-				Metadata:      map[string]interface{}{"meta": "data"},
+				Metadata:      map[string]any{"meta": "data"},
 			},
 			wantJSON: `{"trackEvents":true,"variationType":"enabled","failed":false,"version":"5.0.0","reason":"TARGETING_MATCH_SPLIT","errorCode":"INVALID_CONTEXT","value":{"nested":"value","number":123},"cacheable":true,"metadata":{"meta":"data"}}`,
 		},
 		{
 			name: "slice variation result",
-			result: model.VariationResult[[]interface{}]{
+			result: model.VariationResult[[]any]{
 				TrackEvents:   false,
 				VariationType: "disabled",
 				Failed:        false,
 				Version:       "6.0.0",
 				Reason:        flag.ReasonStatic,
 				ErrorCode:     flag.ErrorCodeTargetingKeyMissing,
-				Value:         []interface{}{"item1", "item2", 123},
+				Value:         []any{"item1", "item2", 123},
 				Cacheable:     true,
 			},
 			wantJSON: `{"trackEvents":false,"variationType":"disabled","failed":false,"version":"6.0.0","reason":"STATIC","errorCode":"TARGETING_KEY_MISSING","value":["item1","item2",123],"cacheable":true}`,
@@ -128,7 +128,7 @@ func TestVariationResultToJsonStr(t *testing.T) {
 				ErrorCode:     flag.ErrorFlagConfiguration,
 				Value:         false,
 				Cacheable:     true,
-				Metadata:      map[string]interface{}{},
+				Metadata:      map[string]any{},
 			},
 			wantJSON: `{"trackEvents":true,"variationType":"enabled","failed":false,"version":"1.0.0","reason":"OFFLINE","errorCode":"FLAG_CONFIG","value":false,"cacheable":true}`,
 		},
@@ -160,18 +160,18 @@ func TestVariationResultToJsonStr(t *testing.T) {
 				jsonStr = v.ToJsonStr()
 			case model.VariationResult[float64]:
 				jsonStr = v.ToJsonStr()
-			case model.VariationResult[map[string]interface{}]:
+			case model.VariationResult[map[string]any]:
 				jsonStr = v.ToJsonStr()
-			case model.VariationResult[[]interface{}]:
+			case model.VariationResult[[]any]:
 				jsonStr = v.ToJsonStr()
 			}
 
 			// Verify JSON is valid and matches expected
-			var gotJSON map[string]interface{}
+			var gotJSON map[string]any
 			err := json.Unmarshal([]byte(jsonStr), &gotJSON)
 			assert.NoError(t, err, "JSON should be valid")
 
-			var wantJSON map[string]interface{}
+			var wantJSON map[string]any
 			err = json.Unmarshal([]byte(tt.wantJSON), &wantJSON)
 			assert.NoError(t, err, "Expected JSON should be valid")
 
@@ -198,7 +198,7 @@ func TestRawVarResultJSONSerialization(t *testing.T) {
 				ErrorDetails:  "test error",
 				Value:         "test-value",
 				Cacheable:     true,
-				Metadata:      map[string]interface{}{"key": "value"},
+				Metadata:      map[string]any{"key": "value"},
 			},
 			wantJSON: `{"trackEvents":true,"variationType":"SdkDefault","failed":false,"version":"1.0.0","reason":"DEFAULT","errorCode":"GENERAL","errorDetails":"test error","value":"test-value","cacheable":true,"metadata":{"key":"value"}}`,
 		},
@@ -254,9 +254,9 @@ func TestRawVarResultJSONSerialization(t *testing.T) {
 				Version:       "5.0.0",
 				Reason:        flag.ReasonTargetingMatchSplit,
 				ErrorCode:     flag.ErrorCodeInvalidContext,
-				Value:         map[string]interface{}{"nested": "value", "number": 123},
+				Value:         map[string]any{"nested": "value", "number": 123},
 				Cacheable:     true,
-				Metadata:      map[string]interface{}{"meta": "data"},
+				Metadata:      map[string]any{"meta": "data"},
 			},
 			wantJSON: `{"trackEvents":true,"variationType":"enabled","failed":false,"version":"5.0.0","reason":"TARGETING_MATCH_SPLIT","errorCode":"INVALID_CONTEXT","value":{"nested":"value","number":123},"cacheable":true,"metadata":{"meta":"data"}}`,
 		},
@@ -269,7 +269,7 @@ func TestRawVarResultJSONSerialization(t *testing.T) {
 				Version:       "6.0.0",
 				Reason:        flag.ReasonStatic,
 				ErrorCode:     flag.ErrorCodeTargetingKeyMissing,
-				Value:         []interface{}{"item1", "item2", 123},
+				Value:         []any{"item1", "item2", 123},
 				Cacheable:     true,
 			},
 			wantJSON: `{"trackEvents":false,"variationType":"disabled","failed":false,"version":"6.0.0","reason":"STATIC","errorCode":"TARGETING_KEY_MISSING","value":["item1","item2",123],"cacheable":true}`,
@@ -311,11 +311,11 @@ func TestRawVarResultJSONSerialization(t *testing.T) {
 			assert.NoError(t, err, "JSON marshaling should succeed")
 
 			// Verify JSON matches expected
-			var gotJSON map[string]interface{}
+			var gotJSON map[string]any
 			err = json.Unmarshal(jsonBytes, &gotJSON)
 			assert.NoError(t, err, "JSON should be valid")
 
-			var wantJSON map[string]interface{}
+			var wantJSON map[string]any
 			err = json.Unmarshal([]byte(tt.wantJSON), &wantJSON)
 			assert.NoError(t, err, "Expected JSON should be valid")
 
@@ -369,7 +369,7 @@ func TestVariationResultJSONDeserialization(t *testing.T) {
 				ErrorCode:     flag.ErrorCodeFlagNotFound,
 				Value:         "value",
 				Cacheable:     false,
-				Metadata:      map[string]interface{}{"key": "value"},
+				Metadata:      map[string]any{"key": "value"},
 			},
 			wantErr: false,
 		},

@@ -8,7 +8,7 @@ import "github.com/thomaspoignant/go-feature-flag/modules/core/ffcontext"
 // @return ffcontext.Context
 func ConvertEvaluationCtxFromRequest(
 	targetingKey string,
-	custom map[string]interface{},
+	custom map[string]any,
 ) ffcontext.Context {
 	ctx := ffcontext.NewEvaluationContextBuilder(targetingKey)
 	for k, v := range custom {

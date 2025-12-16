@@ -111,7 +111,7 @@ func TestFile_Export(t *testing.T) {
 				events: []exporter.ExportableEvent{
 					exporter.FeatureEvent{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-						Variation: "Default", Value: "YO", Default: false, Source: "SERVER", Metadata: map[string]interface{}{"test": "test"},
+						Variation: "Default", Value: "YO", Default: false, Source: "SERVER", Metadata: map[string]any{"test": "test"},
 					},
 					exporter.FeatureEvent{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
@@ -124,11 +124,11 @@ func TestFile_Export(t *testing.T) {
 				featureEvents: []exporter.FeatureEvent{
 					{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "ABCD", CreationDate: 1617970547, Key: "random-key",
-						Variation: "Default", Value: `"YO"`, Default: false, Source: "SERVER", Metadata: map[string]interface{}{"test": "test"},
+						Variation: "Default", Value: `"YO"`, Default: false, Source: "SERVER", Metadata: map[string]any{"test": "test"},
 					},
 					{
 						Kind: "feature", ContextKind: "anonymousUser", UserKey: "EFGH", CreationDate: 1617970701, Key: "random-key",
-						Variation: "Default", Value: `"YO2"`, Default: false, Version: "127", Source: "SERVER", Metadata: map[string]interface{}{},
+						Variation: "Default", Value: `"YO2"`, Default: false, Version: "127", Source: "SERVER", Metadata: map[string]any{},
 					},
 				},
 			},
@@ -152,7 +152,7 @@ func TestFile_Export(t *testing.T) {
 						CreationDate:      1617970547,
 						Key:               "what-ever-you-want",
 						EvaluationContext: ffcontext.NewEvaluationContext("xxx-xxx-xxx").ToMap(),
-						TrackingDetails:   map[string]interface{}{"foo": "bar"},
+						TrackingDetails:   map[string]any{"foo": "bar"},
 					},
 				},
 			},
@@ -166,7 +166,7 @@ func TestFile_Export(t *testing.T) {
 						CreationDate:      1617970547,
 						Key:               "what-ever-you-want",
 						EvaluationContext: ffcontext.NewEvaluationContext("xxx-xxx-xxx").ToMap(),
-						TrackingDetails:   map[string]interface{}{"foo": "bar"},
+						TrackingDetails:   map[string]any{"foo": "bar"},
 					},
 				},
 			},
@@ -211,7 +211,7 @@ func TestFile_Export(t *testing.T) {
 						CreationDate: 1617970547,
 						Key:          "random-key",
 						Variation:    "Default",
-						Value: map[string]interface{}{
+						Value: map[string]any{
 							"string": "string",
 							"bool":   true,
 							"float":  1.23,
@@ -219,7 +219,7 @@ func TestFile_Export(t *testing.T) {
 						},
 						Default:  false,
 						Source:   "SERVER",
-						Metadata: map[string]interface{}{"test": "test"},
+						Metadata: map[string]any{"test": "test"},
 					},
 				},
 			},
@@ -236,7 +236,7 @@ func TestFile_Export(t *testing.T) {
 						Value:        `{"bool":true,"float":1.23,"int":1,"string":"string"}`,
 						Default:      false,
 						Source:       "SERVER",
-						Metadata:     map[string]interface{}{"test": "test"},
+						Metadata:     map[string]any{"test": "test"},
 					},
 				},
 			},

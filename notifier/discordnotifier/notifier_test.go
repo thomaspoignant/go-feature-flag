@@ -27,7 +27,7 @@ func TestDiscordNotifier_Notify(t *testing.T) {
 				},
 			},
 		},
-		Variations: &map[string]*interface{}{
+		Variations: &map[string]*any{
 			"Default": testconvert.Interface("default"),
 			"False":   testconvert.Interface("false"),
 			"True":    testconvert.Interface("test"),
@@ -79,7 +79,7 @@ func TestDiscordNotifier_Notify(t *testing.T) {
 									},
 								},
 							},
-							Variations: &map[string]*interface{}{
+							Variations: &map[string]*any{
 								"Default": testconvert.Interface("default"),
 								"False":   testconvert.Interface("false"),
 								"True":    testconvert.Interface("test"),
@@ -105,7 +105,7 @@ func TestDiscordNotifier_Notify(t *testing.T) {
 									},
 								},
 							},
-							Variations: &map[string]*interface{}{
+							Variations: &map[string]*any{
 								"Default": testconvert.Interface(false),
 								"False":   testconvert.Interface(false),
 								"True":    testconvert.Interface(true),
@@ -119,7 +119,7 @@ func TestDiscordNotifier_Notify(t *testing.T) {
 					Updated: map[string]notifier.DiffUpdated{
 						"test-flag2": {
 							Before: &flag.InternalFlag{
-								Variations: &map[string]*interface{}{
+								Variations: &map[string]*any{
 									"Default": testconvert.Interface(false),
 									"False":   testconvert.Interface(false),
 									"True":    testconvert.Interface(true),
@@ -137,7 +137,7 @@ func TestDiscordNotifier_Notify(t *testing.T) {
 								},
 							},
 							After: &flag.InternalFlag{
-								Variations: &map[string]*interface{}{
+								Variations: &map[string]*any{
 									"Default": testconvert.Interface("strDefault"),
 									"False":   testconvert.Interface("strFalse"),
 									"True":    testconvert.Interface("strTrue"),

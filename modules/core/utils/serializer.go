@@ -5,9 +5,9 @@ import (
 )
 
 // ContextToMap convert the context to a MAP to use the query on it.
-func ContextToMap(ctx ffcontext.Context) map[string]interface{} {
+func ContextToMap(ctx ffcontext.Context) map[string]any {
 	// We don't have a json copy of the user.
-	userCopy := make(map[string]interface{})
+	userCopy := make(map[string]any)
 
 	// Duplicate the map to keep User un-mutable
 	for key, value := range ctx.GetCustom() {

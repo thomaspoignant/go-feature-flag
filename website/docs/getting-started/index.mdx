@@ -91,7 +91,7 @@ import (
 func main() {
   e := echo.New()
   e.GET("/", func(c echo.Context) error {
-    response := map[string]interface{}{
+    response := map[string]any{
       "firstname": "Mike",
       "lastname": "Wazowski",
       "organization": "Monsters, Inc.",
@@ -139,7 +139,7 @@ func main() {
 
   e := echo.New()
   e.GET("/", func(c echo.Context) error {
-    response := map[string]interface{}{
+    response := map[string]any{
       "firstname": "Mike",
       "lastname": "Wazowski",
       "organization": "Monsters, Inc.",
@@ -191,7 +191,7 @@ func main() {
 
   e := echo.New()
   e.GET("/", func(c echo.Context) error {
-    response := map[string]interface{}{
+    response := map[string]any{
       "firstname": "Mike",
       "lastname": "Wazowski",
       "organization": "Monsters, Inc.",
@@ -200,7 +200,7 @@ func main() {
 
     // highlight-start
     // We are creating an evaluation context, the unique identifier is coming from the X-USER-ID header.
-    evalCtx := of.NewEvaluationContext(c.Request().Header.Get("X-USER-ID"), map[string]interface{}{})
+    evalCtx := of.NewEvaluationContext(c.Request().Header.Get("X-USER-ID"), map[string]any{})
 
     // We are evaluating the flag "show-email-contact" with a default value of false.
     if client.Boolean(c.Request().Context(), "show-email-contact", false, evalCtx) {
