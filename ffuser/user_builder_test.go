@@ -17,7 +17,7 @@ func TestNewUser(t *testing.T) {
 			got:  NewUserBuilder("random-key").Build(),
 			want: User{
 				key:    "random-key",
-				custom: map[string]interface{}{},
+				custom: map[string]any{},
 			},
 		},
 		{
@@ -27,7 +27,7 @@ func TestNewUser(t *testing.T) {
 				Build(),
 			want: User{
 				key: "random-key",
-				custom: map[string]interface{}{
+				custom: map[string]any{
 					"test": "custom",
 				},
 			},
@@ -41,7 +41,7 @@ func TestNewUser(t *testing.T) {
 			want: User{
 				key:       "random-key",
 				anonymous: true,
-				custom: map[string]interface{}{
+				custom: map[string]any{
 					"test": "custom",
 				},
 			},
@@ -52,7 +52,7 @@ func TestNewUser(t *testing.T) {
 			want: User{
 				key:       "random-key",
 				anonymous: false,
-				custom:    map[string]interface{}{},
+				custom:    map[string]any{},
 			},
 		},
 		{
@@ -61,7 +61,7 @@ func TestNewUser(t *testing.T) {
 			want: User{
 				key:       "",
 				anonymous: false,
-				custom:    map[string]interface{}{},
+				custom:    map[string]any{},
 			},
 		},
 		{
@@ -70,7 +70,7 @@ func TestNewUser(t *testing.T) {
 			want: User{
 				key:       "random-key",
 				anonymous: true,
-				custom:    map[string]interface{}{},
+				custom:    map[string]any{},
 			},
 		},
 		{
@@ -79,7 +79,7 @@ func TestNewUser(t *testing.T) {
 			want: User{
 				key:       "",
 				anonymous: true,
-				custom:    map[string]interface{}{},
+				custom:    map[string]any{},
 			},
 		},
 	}

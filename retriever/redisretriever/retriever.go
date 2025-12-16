@@ -73,7 +73,7 @@ func (r *Retriever) Shutdown(_ context.Context) error {
 
 // Retrieve is the function in charge of fetching the flag configuration.
 func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
-	var flagsData = make(map[string]interface{})
+	var flagsData = make(map[string]any)
 	iter := r.client.Scan(ctx, 0, r.Prefix+"*", 0).Iterator()
 	for iter.Next(ctx) {
 		key := iter.Val()
@@ -83,7 +83,7 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 			return nil, fmt.Errorf("error retrieving flag '%s': %v", key, err)
 		}
 
-		var flagData interface{}
+		var flagData any
 		if err := json.Unmarshal([]byte(value), &flagData); err != nil {
 			return nil, fmt.Errorf("error unmarshalling flag '%s': %v", key, err)
 		}

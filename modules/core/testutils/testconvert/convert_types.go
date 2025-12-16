@@ -23,7 +23,7 @@ func Int(t int) *int {
 }
 
 // Interface returns a pointer to the interface value passed in.
-func Interface(v interface{}) *interface{} {
+func Interface(v any) *any {
 	return &v
 }
 

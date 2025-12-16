@@ -1,24 +1,24 @@
 package utils_test
 
 import (
-    "testing"
+	"testing"
 
-    "github.com/stretchr/testify/require"
-    "github.com/thomaspoignant/go-feature-flag/modules/core/utils"
+	"github.com/stretchr/testify/require"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/utils"
 )
 
 func TestGetNestedFieldValue(t *testing.T) {
 	tests := []struct {
 		name    string
-		ctx     map[string]interface{}
+		ctx     map[string]any
 		key     string
-		want    interface{}
+		want    any
 		wantErr bool
 	}{
 		{
 			name: "simple nested string",
-			ctx: map[string]interface{}{
-				"user": map[string]interface{}{
+			ctx: map[string]any{
+				"user": map[string]any{
 					"name": "alice",
 				},
 			},
@@ -27,8 +27,8 @@ func TestGetNestedFieldValue(t *testing.T) {
 		},
 		{
 			name: "nested number",
-			ctx: map[string]interface{}{
-				"metrics": map[string]interface{}{
+			ctx: map[string]any{
+				"metrics": map[string]any{
 					"score": 42,
 				},
 			},
@@ -37,8 +37,8 @@ func TestGetNestedFieldValue(t *testing.T) {
 		},
 		{
 			name: "nested bool",
-			ctx: map[string]interface{}{
-				"flags": map[string]interface{}{
+			ctx: map[string]any{
+				"flags": map[string]any{
 					"beta": true,
 				},
 			},
@@ -47,15 +47,15 @@ func TestGetNestedFieldValue(t *testing.T) {
 		},
 		{
 			name: "missing key returns error",
-			ctx: map[string]interface{}{
-				"a": map[string]interface{}{"b": 1},
+			ctx: map[string]any{
+				"a": map[string]any{"b": 1},
 			},
 			key:     "a.c",
 			wantErr: true,
 		},
 		{
 			name:    "empty key returns error",
-			ctx:     map[string]interface{}{"a": 1},
+			ctx:     map[string]any{"a": 1},
 			key:     "",
 			wantErr: true,
 		},
@@ -67,8 +67,8 @@ func TestGetNestedFieldValue(t *testing.T) {
 		},
 		{
 			name: "trying to navigate into non-map value returns error",
-			ctx: map[string]interface{}{
-				"user": map[string]interface{}{
+			ctx: map[string]any{
+				"user": map[string]any{
 					"name": "alice", // name is a string, not a map
 				},
 			},
@@ -79,13 +79,13 @@ func TestGetNestedFieldValue(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-        got, err := utils.GetNestedFieldValue(tt.ctx, tt.key)
-        if tt.wantErr {
-            require.Error(t, err)
-            return
-        }
-        require.NoError(t, err)
-        require.EqualValues(t, tt.want, got)
+			got, err := utils.GetNestedFieldValue(tt.ctx, tt.key)
+			if tt.wantErr {
+				require.Error(t, err)
+				return
+			}
+			require.NoError(t, err)
+			require.EqualValues(t, tt.want, got)
 		})
 	}
 }

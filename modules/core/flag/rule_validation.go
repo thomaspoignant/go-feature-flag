@@ -7,7 +7,7 @@ import (
 )
 
 // IsValid is checking if the rule is valid
-func (r *Rule) IsValid(defaultRule bool, variations map[string]*interface{}) error {
+func (r *Rule) IsValid(defaultRule bool, variations map[string]*any) error {
 	if !defaultRule && r.IsDisable() {
 		return nil
 	}
@@ -38,7 +38,7 @@ func (r *Rule) IsValid(defaultRule bool, variations map[string]*interface{}) err
 // validatePercentages validates the percentage configuration of the rule.
 // It checks that percentages are not empty, the sum is not zero, and all
 // referenced variations exist in the provided variations map.
-func (r *Rule) validatePercentages(variations map[string]*interface{}) error {
+func (r *Rule) validatePercentages(variations map[string]*any) error {
 	if r.Percentages == nil {
 		return nil
 	}
@@ -66,7 +66,7 @@ func (r *Rule) validatePercentages(variations map[string]*interface{}) error {
 // validateProgressiveRollout validates the progressive rollout configuration of the rule.
 // It checks that the initial percentage is lower than the end percentage, and that
 // both the initial and end variations exist in the provided variations map.
-func (r *Rule) validateProgressiveRollout(variations map[string]*interface{}) error {
+func (r *Rule) validateProgressiveRollout(variations map[string]*any) error {
 	if r.ProgressiveRollout == nil {
 		return nil
 	}
@@ -107,7 +107,7 @@ func (r *Rule) validateProgressiveRollout(variations map[string]*interface{}) er
 // It checks that the variation result exists in the provided variations map.
 // This validation only applies when the rule uses a simple variation result
 // (not percentages or progressive rollout).
-func (r *Rule) validateVariationResult(variations map[string]*interface{}) error {
+func (r *Rule) validateVariationResult(variations map[string]*any) error {
 	if r.Percentages != nil || r.ProgressiveRollout != nil || r.VariationResult == nil {
 		return nil
 	}
@@ -147,7 +147,7 @@ func validateNikunjyQuery(query string) error {
 	if err != nil {
 		return err
 	}
-	_, err = ev.Process(map[string]interface{}{})
+	_, err = ev.Process(map[string]any{})
 	if err != nil {
 		return fmt.Errorf("invalid query: %w", err)
 	}

@@ -57,7 +57,7 @@ func (e evaluate) parseEvaluationContext() (ffcontext.Context, error) {
 		return ffcontext.NewEvaluationContextBuilder("").Build(), nil
 	}
 
-	var ctxAsMap map[string]interface{}
+	var ctxAsMap map[string]any
 	err := json.Unmarshal([]byte(e.evaluationCtx), &ctxAsMap)
 	if err != nil {
 		return nil, err

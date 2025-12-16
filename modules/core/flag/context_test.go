@@ -10,13 +10,13 @@ import (
 func TestContext_AddIntoEvaluationContextEnrichment(t *testing.T) {
 	type args struct {
 		key   string
-		value interface{}
+		value any
 	}
 	tests := []struct {
 		name                        string
-		EvaluationContextEnrichment map[string]interface{}
+		EvaluationContextEnrichment map[string]any
 		args                        args
-		expected                    interface{}
+		expected                    any
 	}{
 		{
 			name:                        "Add a new key to a nil map",
@@ -29,7 +29,7 @@ func TestContext_AddIntoEvaluationContextEnrichment(t *testing.T) {
 		},
 		{
 			name:                        "Add a new key to an existing map",
-			EvaluationContextEnrichment: map[string]interface{}{"john": "doe"},
+			EvaluationContextEnrichment: map[string]any{"john": "doe"},
 			args: args{
 				key:   "env",
 				value: "prod",
@@ -38,7 +38,7 @@ func TestContext_AddIntoEvaluationContextEnrichment(t *testing.T) {
 		},
 		{
 			name:                        "Override an existing key",
-			EvaluationContextEnrichment: map[string]interface{}{"env": "dev"},
+			EvaluationContextEnrichment: map[string]any{"env": "dev"},
 			args: args{
 				key:   "env",
 				value: "prod",

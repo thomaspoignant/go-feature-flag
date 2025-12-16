@@ -11,7 +11,7 @@ import (
 )
 
 func mapEnvVariablesProvider(prefix string, log *zap.Logger) koanf.Provider {
-	return env.ProviderWithValue(prefix, ".", func(key, v string) (string, interface{}) {
+	return env.ProviderWithValue(prefix, ".", func(key, v string) (string, any) {
 		key = strings.TrimPrefix(key, prefix)
 		switch {
 		case strings.HasPrefix(key, "RETRIEVERS"),
@@ -51,11 +51,11 @@ func mapEnvVariablesProvider(prefix string, log *zap.Logger) koanf.Provider {
 }
 
 // Load the ENV Like:RETRIEVERS_0_HEADERS_AUTHORIZATION
-func loadArrayEnv(s string, v string, configMap map[string]interface{}) (map[string]interface{}, error) {
+func loadArrayEnv(s string, v string, configMap map[string]any) (map[string]any, error) {
 	paths := normalizePaths(s)
 	prefixKey := paths[0]
 
-	configArray, ok := configMap[prefixKey].([]interface{})
+	configArray, ok := configMap[prefixKey].([]any)
 	if !ok {
 		return configMap, nil
 	}
@@ -85,12 +85,12 @@ func normalizePaths(s string) []string {
 }
 
 // fetchOrInitConfigItemAtIndex retrieves or creates a config item at the specified index
-func fetchOrInitConfigItemAtIndex(configArray []interface{}, index int) map[string]interface{} {
+func fetchOrInitConfigItemAtIndex(configArray []any, index int) map[string]any {
 	outRange := index > len(configArray)-1
 	if outRange {
-		return make(map[string]interface{})
+		return make(map[string]any)
 	}
-	return configArray[index].(map[string]interface{})
+	return configArray[index].(map[string]any)
 }
 
 // shouldHandleRecursively determines if the configuration should be handled recursively
@@ -107,12 +107,12 @@ func shouldHandleRecursively(prefixKey string, keys []string) bool {
 func handleRecursiveConfig(
 	keys []string,
 	v string,
-	configItem map[string]interface{},
-	configArray []interface{},
+	configItem map[string]any,
+	configArray []any,
 	index int,
-	configMap map[string]interface{},
+	configMap map[string]any,
 	prefixKey string,
-) (map[string]interface{}, error) {
+) (map[string]any, error) {
 	recursiveKey := strings.Join(keys, "_")
 	modifiedNestedConfig, err := loadArrayEnv(recursiveKey, v, configItem)
 	if err != nil {
@@ -129,12 +129,12 @@ func handleRecursiveConfig(
 // handleDirectConfig processes direct configuration assignment
 func handleDirectConfig(keys []string,
 	v string,
-	configItem map[string]interface{},
-	configArray []interface{},
+	configItem map[string]any,
+	configArray []any,
 	index int,
-	configMap map[string]interface{},
+	configMap map[string]any,
 	prefixKey string,
-) (map[string]interface{}, error) {
+) (map[string]any, error) {
 	currentMap := configItem
 
 	for i, key := range keys {
@@ -150,18 +150,18 @@ func handleDirectConfig(keys []string,
 
 // ensureMapExists ensures a map exists at the specified key path
 func ensureMapExists(
-	currentMap map[string]interface{},
+	currentMap map[string]any,
 	key string,
 	currentIndex,
 	lastIndex int,
-) map[string]interface{} {
-	next, ok := currentMap[key].(map[string]interface{})
+) map[string]any {
+	next, ok := currentMap[key].(map[string]any)
 	if ok {
 		return next
 	}
 
 	if currentIndex != lastIndex {
-		newMap := make(map[string]interface{})
+		newMap := make(map[string]any)
 		currentMap[key] = newMap
 		return newMap
 	}
@@ -170,7 +170,7 @@ func ensureMapExists(
 }
 
 // parseValue parses the value based on the key type
-func parseValue(lastKey string, keys []string, v string) interface{} {
+func parseValue(lastKey string, keys []string, v string) any {
 	if isArrayValue(lastKey, keys) {
 		return parseArrayValue(v)
 	}
@@ -193,8 +193,8 @@ func parseArrayValue(v string) []string {
 }
 
 // updateConfigArray updates the configuration array and returns the modified config map
-func updateConfigArray(configArray []interface{}, index int, configItem map[string]interface{},
-	configMap map[string]interface{}, prefixKey string) (map[string]interface{}, error) {
+func updateConfigArray(configArray []any, index int, configItem map[string]any,
+	configMap map[string]any, prefixKey string) (map[string]any, error) {
 	outRange := index > len(configArray)-1
 
 	if outRange {
@@ -208,10 +208,10 @@ func updateConfigArray(configArray []interface{}, index int, configItem map[stri
 }
 
 // expandArray expands the array to accommodate the new index
-func expandArray(configArray []interface{}, index int) []interface{} {
+func expandArray(configArray []any, index int) []any {
 	blank := index - len(configArray) + 1
 	for i := 0; i < blank; i++ {
-		configArray = append(configArray, make(map[string]interface{}))
+		configArray = append(configArray, make(map[string]any))
 	}
 	return configArray
 }
@@ -221,22 +221,22 @@ func expandArray(configArray []interface{}, index int) []interface{} {
 // The expected format is "key1=value1,key2=value2,..."
 func parseOtelResourceAttributes(attributes string, log *zap.Logger) {
 	configMap := k.Raw()
-	otel, ok := configMap["otel"].(map[string]interface{})
+	otel, ok := configMap["otel"].(map[string]any)
 	if !ok {
-		configMap["otel"] = make(map[string]interface{})
-		otel = configMap["otel"].(map[string]interface{})
+		configMap["otel"] = make(map[string]any)
+		otel = configMap["otel"].(map[string]any)
 	}
 
-	resource, ok := otel["resource"].(map[string]interface{})
+	resource, ok := otel["resource"].(map[string]any)
 	if !ok {
-		otel["resource"] = make(map[string]interface{})
-		resource = otel["resource"].(map[string]interface{})
+		otel["resource"] = make(map[string]any)
+		resource = otel["resource"].(map[string]any)
 	}
 
-	attrs, ok := resource["attributes"].(map[string]interface{})
+	attrs, ok := resource["attributes"].(map[string]any)
 	if !ok {
-		resource["attributes"] = make(map[string]interface{})
-		attrs = resource["attributes"].(map[string]interface{})
+		resource["attributes"] = make(map[string]any)
+		attrs = resource["attributes"].(map[string]any)
 	}
 
 	for _, attr := range strings.Split(attributes, ",") {

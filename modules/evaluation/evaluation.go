@@ -3,8 +3,8 @@ package evaluation
 import (
 	"fmt"
 
-	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/ffcontext"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/model"
 )
 
@@ -18,7 +18,7 @@ func Evaluate[T model.JSONType](
 	expectedType string,
 	sdkDefaultValue T) (model.VariationResult[T], error) {
 	flagValue, resolutionDetails := f.Value(flagKey, evaluationCtx, flagCtx)
-	var convertedValue interface{}
+	var convertedValue any
 	switch value := flagValue.(type) {
 	case float64:
 		// this part ensures that we convert float64 value into int if we call IntVariation on a float64 value.

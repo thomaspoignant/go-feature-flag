@@ -17,7 +17,7 @@ func TestNewUser(t *testing.T) {
 			got:  NewEvaluationContextBuilder("random-targetingKey").Build(),
 			want: EvaluationContext{
 				targetingKey: "random-targetingKey",
-				attributes:   map[string]interface{}{},
+				attributes:   map[string]any{},
 			},
 		},
 		{
@@ -27,7 +27,7 @@ func TestNewUser(t *testing.T) {
 				Build(),
 			want: EvaluationContext{
 				targetingKey: "random-targetingKey",
-				attributes: map[string]interface{}{
+				attributes: map[string]any{
 					"test": "attributes",
 				},
 			},
@@ -40,7 +40,7 @@ func TestNewUser(t *testing.T) {
 				Build(),
 			want: EvaluationContext{
 				targetingKey: "random-targetingKey",
-				attributes: map[string]interface{}{
+				attributes: map[string]any{
 					"test":      "attributes",
 					"anonymous": true,
 				},
@@ -51,7 +51,7 @@ func TestNewUser(t *testing.T) {
 			got:  NewEvaluationContext("random-targetingKey"),
 			want: EvaluationContext{
 				targetingKey: "random-targetingKey",
-				attributes:   map[string]interface{}{},
+				attributes:   map[string]any{},
 			},
 		},
 		{
@@ -59,7 +59,7 @@ func TestNewUser(t *testing.T) {
 			got:  NewEvaluationContext(""),
 			want: EvaluationContext{
 				targetingKey: "",
-				attributes:   map[string]interface{}{},
+				attributes:   map[string]any{},
 			},
 		},
 		{
@@ -67,7 +67,7 @@ func TestNewUser(t *testing.T) {
 			got:  NewAnonymousEvaluationContext("random-targetingKey"),
 			want: EvaluationContext{
 				targetingKey: "random-targetingKey",
-				attributes: map[string]interface{}{
+				attributes: map[string]any{
 					"anonymous": true,
 				},
 			},
@@ -77,7 +77,7 @@ func TestNewUser(t *testing.T) {
 			got:  NewAnonymousEvaluationContext(""),
 			want: EvaluationContext{
 				targetingKey: "",
-				attributes: map[string]interface{}{
+				attributes: map[string]any{
 					"anonymous": true,
 				},
 			},
@@ -96,7 +96,7 @@ func TestNewUser(t *testing.T) {
 func TestNewEvaluationContextWithoutTargetingKey(t *testing.T) {
 	ctx := NewEvaluationContext("")
 	assert.Equal(t, "", ctx.GetKey(), "Should have empty targeting key")
-	assert.Equal(t, map[string]interface{}{}, ctx.GetCustom(), "Should have empty custom attributes")
+	assert.Equal(t, map[string]any{}, ctx.GetCustom(), "Should have empty custom attributes")
 	assert.False(t, ctx.IsAnonymous(), "Should not be anonymous by default")
 }
 

@@ -23,17 +23,17 @@ func compareJSONWithTimestampHandling(t *testing.T, expectedFilePath string, act
 	expected, err := os.ReadFile(expectedFilePath)
 	assert.NoError(t, err, "Failed to read expected JSON file")
 
-	var expectedFlags map[string]interface{}
+	var expectedFlags map[string]any
 	err = json.Unmarshal(expected, &expectedFlags)
 	assert.NoError(t, err, "Failed to unmarshal expected JSON")
 
-	var actualFlags map[string]interface{}
+	var actualFlags map[string]any
 	err = json.Unmarshal(actualJSON, &actualFlags)
 	assert.NoError(t, err, "Failed to unmarshal actual JSON")
 
 	// Handle cases where there might not be a "flags" field (e.g., offline, module_not_init)
-	expectedFlagData, hasExpectedFlags := expectedFlags["flags"].(map[string]interface{})
-	actualFlagData, hasActualFlags := actualFlags["flags"].(map[string]interface{})
+	expectedFlagData, hasExpectedFlags := expectedFlags["flags"].(map[string]any)
+	actualFlagData, hasActualFlags := actualFlags["flags"].(map[string]any)
 
 	// Only proceed with timestamp validation if both have flags
 	if hasExpectedFlags && hasActualFlags {
@@ -42,10 +42,10 @@ func compareJSONWithTimestampHandling(t *testing.T, expectedFilePath string, act
 			actualFlag, exists := actualFlagData[flagName]
 			require.True(t, exists, "Flag %s should exist in actual results", flagName)
 
-			expectedFlagObj, ok := expectedFlag.(map[string]interface{})
+			expectedFlagObj, ok := expectedFlag.(map[string]any)
 			require.True(t, ok, "expected flag %s should be a map", flagName)
 
-			actualFlagObj, ok := actualFlag.(map[string]interface{})
+			actualFlagObj, ok := actualFlag.(map[string]any)
 			require.True(t, ok, "actual flag %s should be a map", flagName)
 
 			// Verify timestamp exists and is reasonable
@@ -169,7 +169,7 @@ func TestGetFlagStates(t *testing.T) {
 			jsonOutput: "./testdata/ffclient/get_flagstates/marshal_json/valid_flag1_flag4.json",
 			initModule: true,
 			evaluationContext: ffcontext.NewEvaluationContextBuilder("123").
-				AddCustom("gofeatureflag", map[string]interface{}{
+				AddCustom("gofeatureflag", map[string]any{
 					"flagList": []string{"test-flag1", "test-flag4"},
 				}).
 				Build(),
@@ -185,7 +185,7 @@ func TestGetFlagStates(t *testing.T) {
 			jsonOutput: "./testdata/ffclient/get_flagstates/marshal_json/all_flags.json",
 			initModule: true,
 			evaluationContext: ffcontext.NewEvaluationContextBuilder("123").
-				AddCustom("gofeatureflag", map[string]interface{}{
+				AddCustom("gofeatureflag", map[string]any{
 					"flagList": []string{},
 				}).
 				Build(),

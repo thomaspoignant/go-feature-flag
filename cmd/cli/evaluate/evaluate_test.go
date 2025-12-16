@@ -72,7 +72,7 @@ func Test_Evaluate(t *testing.T) {
 					Reason:        "STATIC",
 					Value:         true,
 					Cacheable:     true,
-					Metadata: map[string]interface{}{
+					Metadata: map[string]any{
 						"description": "this is a simple feature flag",
 						"issue-link":  "https://jira.xxx/GOFF-01",
 					},
@@ -102,7 +102,7 @@ func Test_Evaluate(t *testing.T) {
 					Reason:        "STATIC",
 					Value:         true,
 					Cacheable:     true,
-					Metadata: map[string]interface{}{
+					Metadata: map[string]any{
 						"description": "this is a simple feature flag",
 						"issue-link":  "https://jira.xxx/GOFF-01",
 					},
@@ -135,7 +135,7 @@ func Test_Evaluate(t *testing.T) {
 					ErrorDetails:  "Error: Empty targeting key",
 					Value:         nil,
 					Cacheable:     false,
-					Metadata: map[string]interface{}{
+					Metadata: map[string]any{
 						"description": "this is a simple feature flag",
 						"issue-link":  "https://jira.xxx/GOFF-01",
 					},
@@ -168,7 +168,7 @@ func Test_Evaluate(t *testing.T) {
 					ErrorDetails:  "",
 					Value:         false,
 					Cacheable:     true,
-					Metadata: map[string]interface{}{
+					Metadata: map[string]any{
 						"description": "this is a simple feature flag",
 						"issue-link":  "https://jira.xxx/GOFF-01",
 					},
@@ -200,7 +200,7 @@ func Test_Evaluate(t *testing.T) {
 					ErrorDetails:  "",
 					Value:         false,
 					Cacheable:     true,
-					Metadata: map[string]interface{}{
+					Metadata: map[string]any{
 						"description": "this is a simple feature flag",
 						"issue-link":  "https://jira.xxx/GOFF-01",
 					},
@@ -226,7 +226,7 @@ func Test_Evaluate(t *testing.T) {
 					ErrorDetails:  "",
 					Value:         true,
 					Cacheable:     true,
-					Metadata: map[string]interface{}{
+					Metadata: map[string]any{
 						"description": "this is a simple feature flag",
 						"issue-link":  "https://jira.xxx/GOFF-01",
 					},
@@ -398,7 +398,7 @@ func Test_Evaluate(t *testing.T) {
 					ErrorDetails:  "",
 					Value:         false,
 					Cacheable:     true,
-					Metadata: map[string]interface{}{"description": "this is a simple feature flag",
+					Metadata: map[string]any{"description": "this is a simple feature flag",
 						"issue-link": "https://jira.xxx/GOFF-01"},
 				},
 			},
@@ -489,7 +489,7 @@ func Test_Evaluate(t *testing.T) {
 					ErrorDetails:  "",
 					Value:         false,
 					Cacheable:     true,
-					Metadata: map[string]interface{}{"description": "this is a simple feature flag",
+					Metadata: map[string]any{"description": "this is a simple feature flag",
 						"issue-link": "https://jira.xxx/GOFF-01"},
 				},
 			},
