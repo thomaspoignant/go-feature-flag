@@ -13,7 +13,7 @@ type NotificationService struct {
 	mu          sync.Mutex
 }
 
-func (n *NotificationService) Notify(oldCache, newCache map[string]flag.Flag, _ *fflog.FFLogger) {
+func (n *NotificationService) Notify(_, _ map[string]flag.Flag, _ *fflog.FFLogger) {
 	n.mu.Lock()
 	defer n.mu.Unlock()
 	n.NotifyCalls++
