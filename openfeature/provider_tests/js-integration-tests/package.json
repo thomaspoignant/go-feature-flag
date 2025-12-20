@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@jest/globals": "^30.1.1",
-    "@openfeature/go-feature-flag-provider": "^1.0.3",
+    "@openfeature/go-feature-flag-provider": "^1.0.4",
     "@openfeature/server-sdk": "^1.19.2"
   }
 }

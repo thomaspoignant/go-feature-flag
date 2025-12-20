@@ -42,8 +42,8 @@ describe("Provider tests", () => {
     };
   });
 
-  afterEach(() => {
-    OpenFeature.close();
+  afterEach(async () => {
+    await OpenFeature.close();
   });
 
   describe("bool", () => {
@@ -331,13 +331,23 @@ describe("Provider tests", () => {
     });
   });
   describe("authenticated relay proxy", () => {
+    beforeEach(async () => {
+      // Clean up any existing provider before creating a new one
+      await OpenFeature.close();
+    });
+
+    afterEach(async () => {
+      // Ensure cleanup after each test in this describe block
+      await OpenFeature.close();
+    });
+
     it("should resolve a valid flag with an apiKey", async () => {
       const goFeatureFlagProvider = new GoFeatureFlagProvider({
         endpoint: "http://localhost:1032/",
         apiKey: "authorized_token",
       });
       goffClient = OpenFeature.getClient("my-app");
-      OpenFeature.setProvider(goFeatureFlagProvider);
+      await OpenFeature.setProviderAndWait("my-app", goFeatureFlagProvider);
 
       const flagKey = "bool_targeting_match";
       const expected = {
@@ -355,6 +365,7 @@ describe("Provider tests", () => {
     });
 
     it("should resolve a default value with an invalid apiKey", async () => {
+      await OpenFeature.close();
       const goFeatureFlagProvider = new GoFeatureFlagProvider({
         endpoint: "http://localhost:1032/",
         apiKey: "invalid-api-key",
@@ -379,6 +390,7 @@ describe("Provider tests", () => {
     });
 
     it("should resolve a default value with an empty apiKey", async () => {
+      await OpenFeature.close();
       const goFeatureFlagProvider = new GoFeatureFlagProvider({
         endpoint: "http://localhost:1032/",
         apiKey: "",
