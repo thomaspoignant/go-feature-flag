@@ -7,7 +7,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
-	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 )
 
@@ -104,7 +103,7 @@ func TestRetriever_Retrieve(t *testing.T) {
 				Bucket: tt.fields.Bucket,
 				Object: tt.fields.Object,
 				Options: []option.ClientOption{
-					option.WithCredentials(&google.Credentials{}),
+					option.WithoutAuthentication(),
 					option.WithHTTPClient(mockedStorage.Server.HTTPClient()),
 				},
 			}
