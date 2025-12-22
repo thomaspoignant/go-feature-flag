@@ -53,19 +53,11 @@ type Config struct {
 	// CommonFlagSet is the common flag set for the relay proxy
 	CommonFlagSet `mapstructure:",inline" koanf:",squash"`
 
-	// ListenPort (optional) is the port we are using to start the proxy
-	//
-	// Deprecated: use Server.Port instead
-	ListenPort int `mapstructure:"listen" koanf:"listen"`
-
-	// MonitoringPort (optional) is the port we are using to expose the metrics and healthchecks
-	// If not set we will use the same port as the proxy
-	//
-	// Deprecated: use Server.MonitoringPort instead
-	MonitoringPort int `mapstructure:"monitoringPort" koanf:"monitoringport"`
-
 	// Server is the server configuration, including host, port, and unix socket
 	Server Server `mapstructure:"server" koanf:"server"`
+
+	// Swagger is the swagger configuration
+	Swagger Swagger `mapstructure:"swagger" koanf:"swagger"`
 
 	// HideBanner (optional) if true, we don't display the go-feature-flag relay proxy banner
 	HideBanner bool `mapstructure:"hideBanner" koanf:"hidebanner"`
@@ -74,12 +66,6 @@ type Config struct {
 	// the pprof endpoints on the same port as the monitoring.
 	// Default: false
 	EnablePprof bool `mapstructure:"enablePprof" koanf:"enablepprof"`
-
-	// EnableSwagger (optional) to have access to the swagger
-	EnableSwagger bool `mapstructure:"enableSwagger" koanf:"enableswagger"`
-
-	// Host should be set if you are using swagger (default is localhost)
-	Host string `mapstructure:"host" koanf:"host"`
 
 	// LogLevel (optional) sets the verbosity for logging,
 	// Possible values: debug, info, warn, error, dpanic, panic, fatal
@@ -104,33 +90,8 @@ type Config struct {
 	// Default: false
 	DisableVersionHeader bool `mapstructure:"disableVersionHeader" koanf:"disableversionheader"`
 
-	// Deprecated: use AuthorizedKeys instead
-	// APIKeys list of API keys that authorized to use endpoints
-	APIKeys []string `mapstructure:"apiKeys" koanf:"apikeys"`
-
 	// AuthorizedKeys list of API keys that authorized to use endpoints
 	AuthorizedKeys APIKeys `mapstructure:"authorizedKeys" koanf:"authorizedkeys"`
-
-	// StartAsAwsLambda (optional) if true, the relay proxy will start ready to be launched as AWS Lambda
-	//
-	// Deprecated: use `Server.Mode = lambda` instead
-	StartAsAwsLambda bool `mapstructure:"startAsAwsLambda" koanf:"startasawslambda"`
-
-	// AwsLambdaAdapter (optional) is the adapter to use when the relay proxy is started as an AWS Lambda.
-	// Possible values are "APIGatewayV1", "APIGatewayV2" and "ALB"
-	// Default: "APIGatewayV2"
-	//
-	// Deprecated: use `Server.LambdaAdapter` instead
-	AwsLambdaAdapter string `mapstructure:"awsLambdaAdapter" koanf:"awslambdaadapter"`
-
-	// AwsApiGatewayBasePath (optional) is the base path prefix for AWS API Gateway deployments.
-	// This is useful when deploying behind a non-root path like "/api" or "/dev/feature-flags".
-	// The relay proxy will strip this base path from incoming requests before processing.
-	// Example: if set to "/api/feature-flags", requests to "/api/feature-flags/health" will be processed as "/health"
-	// Default: ""
-	//
-	// Deprecated: use `Server.AwsApiGatewayBasePath` instead
-	AwsApiGatewayBasePath string `mapstructure:"awsApiGatewayBasePath" koanf:"awsapigatewaybasepath"`
 
 	// EvaluationContextEnrichment (optional) will be merged with the evaluation context sent during the evaluation.
 	// It is useful to add common attributes to all the evaluations, such as a server version, environment, ...
@@ -172,7 +133,52 @@ type Config struct {
 	// Each flag set can have its own API key, retrievers, notifiers and exporters.
 	// There is no inheritance between flag sets.
 	FlagSets []FlagSet `mapstructure:"flagsets" koanf:"flagsets"`
-	// ---- private fields
+
+	// ---------- Deprecated fields ----------
+	// ListenPort (optional) is the port we are using to start the proxy
+	//
+	// Deprecated: use Server.Port instead
+	ListenPort int `mapstructure:"listen" koanf:"listen"`
+
+	// MonitoringPort (optional) is the port we are using to expose the metrics and healthchecks
+	// If not set we will use the same port as the proxy
+	//
+	// Deprecated: use Server.MonitoringPort instead
+	MonitoringPort int `mapstructure:"monitoringPort" koanf:"monitoringport"`
+
+	// Deprecated: use Swagger.Enabled instead
+	EnableSwagger bool `mapstructure:"enableSwagger" koanf:"enableswagger"`
+
+	// Deprecated: use Swagger.Host instead
+	Host string `mapstructure:"host" koanf:"host"`
+
+	// Deprecated: use AuthorizedKeys instead
+	// APIKeys list of API keys that authorized to use endpoints
+	APIKeys []string `mapstructure:"apiKeys" koanf:"apikeys"`
+
+	// StartAsAwsLambda (optional) if true, the relay proxy will start ready to be launched as AWS Lambda
+	//
+	// Deprecated: use `Server.Mode = lambda` instead
+	StartAsAwsLambda bool `mapstructure:"startAsAwsLambda" koanf:"startasawslambda"`
+
+	// AwsLambdaAdapter (optional) is the adapter to use when the relay proxy is started as an AWS Lambda.
+	// Possible values are "APIGatewayV1", "APIGatewayV2" and "ALB"
+	// Default: "APIGatewayV2"
+	//
+	// Deprecated: use `Server.LambdaAdapter` instead
+	AwsLambdaAdapter string `mapstructure:"awsLambdaAdapter" koanf:"awslambdaadapter"`
+
+	// AwsApiGatewayBasePath (optional) is the base path prefix for AWS API Gateway deployments.
+	// This is useful when deploying behind a non-root path like "/api" or "/dev/feature-flags".
+	// The relay proxy will strip this base path from incoming requests before processing.
+	// Example: if set to "/api/feature-flags", requests to "/api/feature-flags/health" will be processed as "/health"
+	// Default: ""
+	//
+	// Deprecated: use `Server.AwsApiGatewayBasePath` instead
+	AwsApiGatewayBasePath string `mapstructure:"awsApiGatewayBasePath" koanf:"awsapigatewaybasepath"`
+	// ---------- End of deprecated fields ----------
+
+	// ---------- Private fields ----------
 
 	// apiKeySet is the internal representation of an API keys list configured
 	// we store them in a set to be
@@ -183,6 +189,8 @@ type Config struct {
 
 	// forceAuthenticatedRequests is true if we have at least 1 AuthorizedKey.Evaluation key set.
 	forceAuthenticatedRequests bool
+
+	// ---------- End of private fields ----------
 }
 
 // New is reading the configuration file
@@ -191,7 +199,6 @@ func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, erro
 
 	// Default values
 	_ = k.Load(confmap.Provider(map[string]any{
-		"host":            "localhost",
 		"fileFormat":      "yaml",
 		"pollingInterval": 60000,
 		"logLevel":        DefaultLogLevel,

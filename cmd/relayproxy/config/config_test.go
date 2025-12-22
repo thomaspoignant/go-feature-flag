@@ -43,9 +43,8 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 					Mode: config.ServerModeHTTP,
 					Port: 1031,
 				},
-				Host:          "localhost",
-				Version:       "1.X.X",
-				EnableSwagger: true,
+				Swagger: config.Swagger{Enabled: true, Host: "gofeatureflag.org"},
+				Version: "1.X.X",
 				AuthorizedKeys: config.APIKeys{
 					Admin: []string{
 						"apikey3",
@@ -82,7 +81,6 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 					Mode: config.ServerModeHTTP,
 					Port: 1031,
 				},
-				Host:          "localhost",
 				Version:       "1.X.X",
 				EnableSwagger: true,
 				AuthorizedKeys: config.APIKeys{
@@ -122,7 +120,6 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 					Mode: config.ServerModeHTTP,
 					Port: 1031,
 				},
-				Host:          "localhost",
 				Version:       "1.X.X",
 				EnableSwagger: true,
 				AuthorizedKeys: config.APIKeys{
@@ -165,7 +162,6 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 					Mode: config.ServerModeHTTP,
 					Port: 1031,
 				},
-				Host:          "localhost",
 				Version:       "1.X.X",
 				EnableSwagger: true,
 				AuthorizedKeys: config.APIKeys{
@@ -211,9 +207,6 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 					Mode: config.ServerModeHTTP,
 					Port: 1031,
 				},
-
-				Host: "localhost",
-
 				Version:       "1.X.X",
 				EnableSwagger: true,
 				AuthorizedKeys: config.APIKeys{
@@ -249,8 +242,6 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 					Mode: config.ServerModeHTTP,
 					Port: 1031,
 				},
-				Host: "localhost",
-
 				Version:       "1.X.X",
 				EnableSwagger: true,
 				APIKeys: []string{
@@ -300,7 +291,6 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 					FileFormat:              "yaml",
 					StartWithRetrieverError: false,
 				},
-				Host:     "localhost",
 				Version:  "1.X.X",
 				LogLevel: config.DefaultLogLevel,
 			},
@@ -329,7 +319,6 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 					Mode: config.ServerModeHTTP,
 					Port: 1031,
 				},
-				Host:     "localhost",
 				LogLevel: config.DefaultLogLevel,
 				Version:  "1.X.X",
 				OtelConfig: config.OpenTelemetryConfiguration{
@@ -393,9 +382,8 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 					Mode: config.ServerModeHTTP,
 					Port: 1031,
 				},
-				Host:          "localhost",
-				Version:       "1.X.X",
-				EnableSwagger: true,
+				Version: "1.X.X",
+				Swagger: config.Swagger{Enabled: true, Host: "gofeatureflag.org"},
 				AuthorizedKeys: config.APIKeys{
 					Admin: []string{
 						"apikey3",
@@ -418,7 +406,6 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 					FileFormat:              "yaml",
 					StartWithRetrieverError: false,
 				},
-				Host:     "localhost",
 				Version:  "1.X.X",
 				LogLevel: config.DefaultLogLevel,
 			},
@@ -439,7 +426,6 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 					FileFormat:              "yaml",
 					StartWithRetrieverError: false,
 				},
-				Host:     "localhost",
 				Version:  "1.X.X",
 				LogLevel: config.DefaultLogLevel,
 			},
@@ -454,7 +440,6 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 					FileFormat:              "yaml",
 					StartWithRetrieverError: false,
 				},
-				Host:     "localhost",
 				Version:  "1.X.X",
 				LogLevel: config.DefaultLogLevel,
 			},
@@ -469,7 +454,6 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 					FileFormat:              "yaml",
 					StartWithRetrieverError: false,
 				},
-				Host:     "localhost",
 				Version:  "1.X.X",
 				LogLevel: config.DefaultLogLevel,
 			},
@@ -503,8 +487,7 @@ func TestConfig_IsValid(t *testing.T) {
 	type fields struct {
 		Server                  config.Server
 		HideBanner              bool
-		EnableSwagger           bool
-		Host                    string
+		Swagger                 config.Swagger
 		PollingInterval         int
 		FileFormat              string
 		StartWithRetrieverError bool
@@ -961,13 +944,12 @@ func TestConfig_IsValid(t *testing.T) {
 					Notifiers:               tt.fields.Notifiers,
 					Retrievers:              tt.fields.Retrievers,
 				},
-				Server:        tt.fields.Server,
-				HideBanner:    tt.fields.HideBanner,
-				EnableSwagger: tt.fields.EnableSwagger,
-				Host:          tt.fields.Host,
-				LogLevel:      tt.fields.LogLevel,
-				LogFormat:     tt.fields.LogFormat,
-				FlagSets:      tt.fields.FlagSets,
+				Server:     tt.fields.Server,
+				HideBanner: tt.fields.HideBanner,
+				Swagger:    tt.fields.Swagger,
+				LogLevel:   tt.fields.LogLevel,
+				LogFormat:  tt.fields.LogFormat,
+				FlagSets:   tt.fields.FlagSets,
 			}
 			if tt.name == "empty config" {
 				c = nil
@@ -1324,9 +1306,7 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 					Mode: config.ServerModeHTTP,
 					Port: 1031,
 				},
-				Host:          "localhost",
-				Version:       "1.X.X",
-				EnableSwagger: true,
+				Version: "1.X.X",
 				AuthorizedKeys: config.APIKeys{
 					Admin: []string{
 						"apikey3",
@@ -1336,7 +1316,8 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 						"apikey2",
 					},
 				},
-				LogLevel: "info",
+				LogLevel:      "info",
+				EnableSwagger: true,
 			},
 			wantErr: assert.NoError,
 			envVars: map[string]string{
@@ -1405,7 +1386,6 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 					Mode: config.ServerModeHTTP,
 					Port: 1031,
 				},
-				Host:          "localhost",
 				Version:       "1.X.X",
 				EnableSwagger: true,
 				AuthorizedKeys: config.APIKeys{
@@ -1481,7 +1461,6 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 					Mode: config.ServerModeHTTP,
 					Port: 1031,
 				},
-				Host:          "localhost",
 				Version:       "1.X.X",
 				EnableSwagger: true,
 				AuthorizedKeys: config.APIKeys{
@@ -1545,8 +1524,7 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 					Mode: config.ServerModeHTTP,
 					Port: 1031,
 				},
-				Host: "localhost",
-
+				EnableSwagger: true,
 				AuthorizedKeys: config.APIKeys{
 					Admin: []string{
 						"apikey3",
@@ -1556,9 +1534,8 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 						"apikey2",
 					},
 				},
-				Version:       "1.X.X",
-				EnableSwagger: true,
-				LogLevel:      "info",
+				Version:  "1.X.X",
+				LogLevel: "info",
 			},
 			wantErr: assert.NoError,
 			envVars: map[string]string{
@@ -1603,8 +1580,7 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 					Mode: config.ServerModeHTTP,
 					Port: 1031,
 				},
-				Host: "localhost",
-
+				EnableSwagger: true,
 				AuthorizedKeys: config.APIKeys{
 					Admin: []string{
 						"apikey3",
@@ -1614,9 +1590,8 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 						"apikey2",
 					},
 				},
-				Version:       "1.X.X",
-				EnableSwagger: true,
-				LogLevel:      "info",
+				Version:  "1.X.X",
+				LogLevel: "info",
 			},
 			wantErr: assert.NoError,
 			envVars: map[string]string{
@@ -1642,7 +1617,6 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 					Mode: config.ServerModeHTTP,
 					Port: 1031,
 				},
-				Host:     "localhost",
 				LogLevel: config.DefaultLogLevel,
 				Version:  "1.X.X",
 				OtelConfig: config.OpenTelemetryConfiguration{
@@ -1679,7 +1653,6 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 					Mode: config.ServerModeHTTP,
 					Port: 1031,
 				},
-				Host:     "localhost",
 				LogLevel: config.DefaultLogLevel,
 				Version:  "1.X.X",
 				FlagSets: []config.FlagSet{

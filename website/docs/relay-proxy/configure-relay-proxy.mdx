@@ -293,25 +293,14 @@ If `debug` is set to true, we will set the log level to debug and set some compo
 - default: **`false`**
 - mandatory: <NotMandatory />
 
-### `enableSwagger`
+### `swagger`
 
-Enables Swagger for testing the APIs directly. If you are enabling Swagger you will have to provide the [`host`](#host) configuration.
+Configuration related to the swagger behavior of the relay proxy.
 
-- option name: `enableSwagger`
-- type: **boolean**
-- default: **`false`**
+- option name: `swagger`
+- type: **[swagger](#type-swagger)**
+- default: **none**
 - mandatory: <NotMandatory />
-- The Swagger UI will be available at `http://<host>:<server.port>/swagger/`.
-
-### `host`
-
-`host` is the DNS you will use to access the relay proxy.
-
-- option name: `host`
-- type: **string**
-- default: **`localhost`**
-- mandatory: <NotMandatory />
-- This field is used by Swagger to query the API at the right place.
 
 ### `disableVersionHeader`
 
@@ -533,6 +522,7 @@ Check [_"Use specific port for the monitoring"_](./observability#use-specific-po
 - This field is used only in `http` mode.
 
 #### `server.awsLambdaAdapter`
+
 This parameter allow you to decide which type of AWS lambda handler you want to use.
 
 - option name: `awsLambdaAdapter`
@@ -751,6 +741,30 @@ Every `notifier` has its own configuration, check the [list of notifiers](../int
     ))}
 </ul>
 :::
+
+### type `swagger`
+
+Configuration related to the swagger behavior of the relay proxy.
+
+#### `swagger.enabled`
+
+Enables Swagger for testing the APIs directly. If you are enabling Swagger you will have to provide the [`swagger.host`](#swaggerhost) configuration (default is `localhost`).
+
+It will start the swagger server on the same port as the relay proxy and you can access it at `http://<host>:<server.port>/swagger/`.
+
+- option name: `enabled`
+- type: **boolean**
+- default: **`false`**
+- mandatory: <NotMandatory />
+
+#### `swagger.host`
+
+The DNS used by the swagger configuration to access the relay proxy.
+
+- option name: `host`
+- type: **string**
+- default: **`localhost`**
+- mandatory: <NotMandatory />
 
 ## Use multiple flag sets
 

@@ -77,7 +77,7 @@ func main() {
 
 	// Init swagger
 	docs.SwaggerInfo.Version = proxyConf.Version
-	docs.SwaggerInfo.Host = fmt.Sprintf("%s:%d", proxyConf.Host, proxyConf.ServerPort(logger.ZapLogger))
+	docs.SwaggerInfo.Host = fmt.Sprintf("%s:%d", proxyConf.SwaggerHost(), proxyConf.ServerPort(logger.ZapLogger))
 
 	// Set the version for the prometheus version collector
 	promversion.Version = version
