@@ -89,3 +89,147 @@ Dynamic flag evaluation provides several advantages:
 - **A/B testing:** Run experiments and gather data on different feature variations.
 - **Gradual rollouts:** Release features to a small group of users before wider deployment.
 - **Kill switches:** Quickly disable problematic features in production.
+
+## How Evaluation is performed inside your provider?
+
+Feature flag evaluation in GO Feature Flag depends on which type of SDK and provider you are using in your application.  
+There are two main categories **Client Providers** and **Server Providers** (see [SDK paradigms](./sdk-paradigms.mdx))
+
+The evaluation process is handled differently for each, bellow we will detail all the flows.
+
+### Client Provider
+
+When using a client SDK (e.g., JavaScript/React, Android, Swift), since you have a single evaluation context, GO Feature Flag will evaluate all flags once and you will use the local cache of evaluation.
+
+<details>
+
+```mermaid
+sequenceDiagram
+    box "Inside your application"
+        participant app as Client<br/>Application
+        participant sdk as OpenFeature<br/>SDK
+        participant provider as GO Feature Flag<br/>provider
+    end
+    box GO Feature Flag
+        participant goff as GO Feature Flag<br />Relay Proxy
+    end
+
+    note over app: SDK initializaition
+    app ->> sdk: Initialize OpenFeature + set Evaluation Context
+    sdk ->> provider: Call provider init method
+    provider ->> goff: Evaluate all flags
+    goff ->> goff: Perform evaluation of all flags
+    goff -->> provider: Evaluation responses
+    provider -->> provider: Store evaluation responses in memory
+    note over provider, goff: Bulk evaluation will be performed periodically <br/> if configuration change happens
+    provider -->> sdk: Provider Ready
+    sdk -->> app:
+
+    note over app: 1st evaluation
+    app ->> sdk: Evaluate flag "darkMode"<br/>with evalution context
+    sdk ->> provider: 
+    provider ->> provider: Get evaluation response for "darkMode"
+    provider -->> sdk: Evaluation response
+    sdk -->> app:
+
+    note over app: 2nd evaluation
+    app ->> sdk: Evaluate flag "newOnboarding"<br/>with evalution context
+    sdk ->> provider: 
+    provider ->> provider: Get evaluation response for "newOnboarding"
+    provider -->> sdk: Evaluation response
+    sdk -->> app:
+```
+
+</details>
+
+### Server Provider: In Process Evaluation
+
+- Your server-side provider is configured to call the Relay Proxy for flag evaluations.
+- This can simplify config management and centralize evaluations, but adds network round-trips on every evaluation.
+
+<details>
+
+```mermaid
+sequenceDiagram
+    box "Inside your application"
+        participant app as Server<br/>Application
+        participant sdk as OpenFeature<br/>SDK
+        participant provider as GO Feature Flag<br/>provider
+    end
+    box GO Feature Flag
+        participant goff as GO Feature Flag<br />Relay Proxy
+    end
+
+    note over app: SDK initializaition
+    app ->> sdk: Initialize OpenFeature
+    sdk ->> provider: Call provider init method
+    provider -->> goff: Retrieve flag configuration
+    goff -->> provider: Flag configuration
+    provider -->> provider: Store configuration in memory
+    note over provider, goff: Configuration will be refreshed periodically<br/>if configuration change happens
+    provider -->> sdk: Provider Ready
+    sdk -->> app:
+
+    note over app: 1st evaluation
+    app ->> sdk: Evaluate flag "darkMode"<br/>with evalution context
+    sdk ->> provider: 
+    provider ->> provider: Perform evaluation inside the provider
+    provider -->> sdk: Evaluation response
+    sdk -->> app:
+
+    note over app: 2nd evaluation
+    app ->> sdk: Evaluate flag "newOnboarding"<br/>with evalution context
+    sdk ->> provider: 
+    provider ->> provider: Perform evaluation inside the provider
+    provider -->> sdk: Evaluation response
+    sdk -->> app: 
+```
+
+</details>
+
+
+### Server Provider: Remote Evaluation
+
+- Your server-side provider is configured to call the Relay Proxy for flag evaluations.
+- This can simplify config management and centralize evaluations, but adds network round-trips on every evaluation.
+
+<details>
+
+```mermaid
+sequenceDiagram
+    box "Inside your application"
+        participant app as Server<br/>Application
+        participant sdk as OpenFeature<br/>SDK
+        participant provider as GO Feature Flag<br/>provider
+    end
+    box GO Feature Flag
+        participant goff as GO Feature Flag<br />Relay Proxy
+    end
+
+    note over app: SDK initializaition
+    app ->> sdk: Initialize OpenFeature
+    sdk ->> provider: Call provider init method
+    provider -->> provider: Provider init
+    provider -->> sdk: Provider Ready
+    sdk -->> app:
+
+    note over app: 1st evaluation
+    app ->> sdk: Evaluate flag "darkMode"<br/>with evalution context
+    sdk ->> provider: 
+    provider ->> goff: Call evaluation API for "darkMode"<br/>with evalution context
+    goff -->> goff: Perform evaluation
+    goff -->> provider: Evaluation response
+    provider -->> sdk:
+    sdk -->> app:
+
+    note over app: 2nd evaluation
+    app ->> sdk: Evaluate flag "newOnboarding"<br/>with evalution context
+    sdk ->> provider: 
+    provider ->> goff: Call evaluation API for "newOnboarding"<br/>with evalution context
+    goff -->> goff: Perform evaluation
+    goff -->> provider: Evaluation response
+    provider -->> sdk: 
+    sdk -->> app: 
+```
+
+</details>
