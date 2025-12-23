@@ -153,6 +153,9 @@ type Config struct {
 
 	// configLoader is the service in charge of loading the configuration.
 	configLoader *ConfigLoader
+
+	// logger is the logger for the relay proxy
+	logger *zap.Logger
 	// ---------- End of private fields ----------
 }
 
@@ -167,14 +170,8 @@ func New(cmdLineFlagSet *pflag.FlagSet, log *zap.Logger, version string) (*Confi
 
 	processExporters(proxyConf)
 	proxyConf.configLoader = configLoader
+	proxyConf.logger = log
 	return proxyConf, nil
-}
-
-func (c *Config) StopConfigChangeWatcher() error {
-	if c.configLoader == nil {
-		return nil
-	}
-	return c.configLoader.StopWatchChanges()
 }
 
 func (c *Config) IsDebugEnabled() bool {

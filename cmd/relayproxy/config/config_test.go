@@ -1911,4 +1911,15 @@ func resetConfigInternalFields(cfg *config.Config) {
 	if apiKeyPreloadField.IsValid() && apiKeyPreloadField.CanSet() {
 		apiKeyPreloadField.Set(reflect.Zero(apiKeyPreloadField.Type()))
 	}
+
+	// Reset logger
+	loggerField := v.FieldByName("logger")
+	if loggerField.IsValid() {
+		if loggerField.CanSet() {
+			loggerField.Set(reflect.Zero(loggerField.Type()))
+		} else {
+			fieldPtr := unsafe.Pointer(loggerField.UnsafeAddr())
+			*(**zap.Logger)(fieldPtr) = nil
+		}
+	}
 }
