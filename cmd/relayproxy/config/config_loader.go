@@ -52,7 +52,9 @@ func NewConfigLoader(
 	configLoader.loadConfig()
 
 	// start watching for changes
-	configLoader.startWatchChanges()
+	if watchChanges {
+		configLoader.startWatchChanges()
+	}
 	return &configLoader
 }
 
@@ -90,13 +92,7 @@ func (c *ConfigLoader) startWatchChanges() {
 			return
 		}
 
-		newConfig := &ConfigLoader{
-			cmdLineFlagSet: c.cmdLineFlagSet,
-			log:            c.log,
-			version:        c.version,
-			watchChanges:   false,
-			k:              koanf.New("."),
-		}
+		newConfig := NewConfigLoader(c.cmdLineFlagSet, c.log, c.version, false)
 		newConfig.loadConfig()          // load the new configuration
 		c2, err := newConfig.ToConfig() // unmarshal the new configuration
 		if err != nil {
@@ -204,7 +200,6 @@ func processExporters(proxyConf *Config) {
 	if proxyConf.Exporters == nil {
 		return
 	}
-
 	for i := range *proxyConf.Exporters {
 		addresses := (*proxyConf.Exporters)[i].Kafka.Addresses
 		if len(addresses) == 0 || (len(addresses) == 1 && strings.Contains(addresses[0], ",")) {

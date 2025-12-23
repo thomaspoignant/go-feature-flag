@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"reflect"
 	"testing"
-	"unsafe"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/spf13/pflag"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -351,8 +351,7 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 			if !tt.wantErr(t, err) {
 				return
 			}
-			resetConfigInternalFields(got)
-			assert.Equal(t, tt.want, got, "Config not matching")
+			assert.True(t, cmp.Equal(tt.want, got, cmpopts.IgnoreUnexported(config.Config{})))
 		})
 	}
 }
@@ -481,10 +480,7 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 			if !tt.wantErr(t, err) {
 				return
 			}
-
-			// Reset internal fields that shouldn't be compared
-			resetConfigInternalFields(got)
-			assert.Equal(t, tt.want, got, "Config not matching")
+			assert.True(t, cmp.Equal(tt.want, got, cmpopts.IgnoreUnexported(config.Config{})))
 		})
 	}
 }
@@ -1732,8 +1728,7 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 			if !tt.wantErr(t, err) {
 				return
 			}
-			resetConfigInternalFields(got)
-			assert.Equal(t, tt.want, got, "Config not matching expected %v, got %v", tt.want, got)
+			assert.True(t, cmp.Equal(tt.want, got, cmpopts.IgnoreUnexported(config.Config{})))
 		})
 	}
 }
@@ -1862,64 +1857,5 @@ func TestConfig_IsDebugEnabled(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			assert.Equalf(t, tt.want, tt.cfg.IsDebugEnabled(), "IsDebugEnabled()")
 		})
-	}
-}
-
-// resetConfigInternalFields resets internal/private fields in Config that shouldn't be compared in tests.
-// This includes configLoader, apiKeysSet, forceAuthenticatedRequests, and apiKeyPreload.
-func resetConfigInternalFields(cfg *config.Config) {
-	if cfg == nil {
-		return
-	}
-	v := reflect.ValueOf(cfg).Elem()
-
-	// Reset configLoader
-	configLoaderField := v.FieldByName("configLoader")
-	if configLoaderField.IsValid() {
-		if configLoaderField.CanSet() {
-			configLoaderField.Set(reflect.Zero(configLoaderField.Type()))
-		} else {
-			fieldPtr := unsafe.Pointer(configLoaderField.UnsafeAddr())
-			*(**config.ConfigLoader)(fieldPtr) = nil
-		}
-	}
-
-	// Reset apiKeysSet
-	apiKeySetField := v.FieldByName("apiKeysSet")
-	if apiKeySetField.IsValid() {
-		if apiKeySetField.CanSet() {
-			apiKeySetField.Set(reflect.Zero(apiKeySetField.Type()))
-		} else {
-			fieldPtr := unsafe.Pointer(apiKeySetField.UnsafeAddr())
-			*(*map[string]config.ApiKeyType)(fieldPtr) = nil
-		}
-	}
-
-	// Reset forceAuthenticatedRequests
-	forceAuthField := v.FieldByName("forceAuthenticatedRequests")
-	if forceAuthField.IsValid() {
-		if forceAuthField.CanSet() {
-			forceAuthField.SetBool(false)
-		} else {
-			fieldPtr := unsafe.Pointer(forceAuthField.UnsafeAddr())
-			*(*bool)(fieldPtr) = false
-		}
-	}
-
-	// Reset apiKeyPreload (sync.Once) - zero it out
-	apiKeyPreloadField := v.FieldByName("apiKeyPreload")
-	if apiKeyPreloadField.IsValid() && apiKeyPreloadField.CanSet() {
-		apiKeyPreloadField.Set(reflect.Zero(apiKeyPreloadField.Type()))
-	}
-
-	// Reset logger
-	loggerField := v.FieldByName("logger")
-	if loggerField.IsValid() {
-		if loggerField.CanSet() {
-			loggerField.Set(reflect.Zero(loggerField.Type()))
-		} else {
-			fieldPtr := unsafe.Pointer(loggerField.UnsafeAddr())
-			*(**zap.Logger)(fieldPtr) = nil
-		}
 	}
 }
