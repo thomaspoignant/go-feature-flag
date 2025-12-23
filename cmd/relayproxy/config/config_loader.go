@@ -93,7 +93,6 @@ func (c *ConfigLoader) startWatchChanges() {
 		}
 
 		newConfig := NewConfigLoader(c.cmdLineFlagSet, c.log, c.version, false)
-		newConfig.loadConfig()          // load the new configuration
 		c2, err := newConfig.ToConfig() // unmarshal the new configuration
 		if err != nil {
 			c.log.Error("error loading new config", zap.Error(err))
