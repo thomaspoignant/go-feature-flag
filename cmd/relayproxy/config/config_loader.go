@@ -14,6 +14,7 @@ import (
 	"github.com/knadh/koanf/providers/posflag"
 	"github.com/knadh/koanf/v2"
 	"github.com/spf13/pflag"
+	"github.com/thomaspoignant/go-feature-flag/utils"
 	"go.uber.org/zap"
 )
 
@@ -90,8 +91,8 @@ func (c *ConfigLoader) startWatchChanges() {
 			watchChanges:   false,
 			k:              koanf.New("."),
 		}
-		newConfig.loadConfig() // load the new configuration
-		c2, err := newConfig.ToConfig()
+		newConfig.loadConfig()          // load the new configuration
+		c2, err := newConfig.ToConfig() // unmarshal the new configuration
 		if err != nil {
 			c.log.Error("error loading new config", zap.Error(err))
 			return
@@ -110,6 +111,7 @@ func (c *ConfigLoader) ToConfig() (*Config, error) {
 	if errUnmarshal != nil {
 		return nil, errUnmarshal
 	}
+	processExporters(proxyConf)
 	return proxyConf, nil
 }
 
@@ -186,5 +188,19 @@ func selectParserForFile(configFileLocation string) koanf.Parser {
 		return json.Parser()
 	default:
 		return yaml.Parser()
+	}
+}
+
+// processExporters handles the post-processing of exporters configuration
+func processExporters(proxyConf *Config) {
+	if proxyConf.Exporters == nil {
+		return
+	}
+
+	for i := range *proxyConf.Exporters {
+		addresses := (*proxyConf.Exporters)[i].Kafka.Addresses
+		if len(addresses) == 0 || (len(addresses) == 1 && strings.Contains(addresses[0], ",")) {
+			(*proxyConf.Exporters)[i].Kafka.Addresses = utils.StringToArray(addresses)
+		}
 	}
 }

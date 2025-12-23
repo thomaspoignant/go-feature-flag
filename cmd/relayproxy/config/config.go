@@ -167,8 +167,6 @@ func New(cmdLineFlagSet *pflag.FlagSet, log *zap.Logger, version string) (*Confi
 	if errUnmarshal != nil {
 		return nil, errUnmarshal
 	}
-
-	processExporters(proxyConf)
 	proxyConf.configLoader = configLoader
 	proxyConf.logger = log
 	return proxyConf, nil
