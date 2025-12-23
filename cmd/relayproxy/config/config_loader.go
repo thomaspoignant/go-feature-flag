@@ -86,7 +86,7 @@ func (c *ConfigLoader) startWatchChanges() {
 	if c.fileProvider == nil || !c.watchChanges {
 		return
 	}
-	_ = c.fileProvider.Watch(func(event any, err error) {
+	errWatch := c.fileProvider.Watch(func(event any, err error) {
 		if err != nil {
 			c.log.Error("error watching for configuration changes (error from file provider)", zap.Error(err))
 			return
@@ -105,6 +105,9 @@ func (c *ConfigLoader) startWatchChanges() {
 			callback(c2)
 		}
 	})
+	if errWatch != nil {
+		c.log.Error("error watching for configuration changes (error from file provider)", zap.Error(errWatch))
+	}
 }
 
 // ToConfig returns the configuration.
