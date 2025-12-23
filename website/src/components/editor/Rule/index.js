@@ -98,18 +98,10 @@ export function Rule({variations, label, isDefaultRule}) {
                 valueEditor: FieldSelector,
                 operatorSelector: OperatorSelector,
                 combinatorSelector: CombinatorSelector,
-                addGroupAction: ({handleOnClick}) => (
-                  <AddAction handleOnClick={handleOnClick} variant="group" />
-                ),
-                addRuleAction: ({handleOnClick}) => (
-                  <AddAction handleOnClick={handleOnClick} variant="rule" />
-                ),
-                removeGroupAction: ({handleOnClick}) => (
-                  <RemoveAction handleOnClick={handleOnClick} variant="group" />
-                ),
-                removeRuleAction: ({handleOnClick}) => (
-                  <RemoveAction handleOnClick={handleOnClick} variant="rule" />
-                ),
+                addGroupAction: AddGroupAction,
+                addRuleAction: AddRuleAction,
+                removeGroupAction: RemoveGroupAction,
+                removeRuleAction: RemoveRuleAction,
               }}
               resetOnFieldChange={false}
               resetOnOperatorChange={false}
@@ -375,6 +367,22 @@ function convertToFormattedArray(input) {
 
   return JSON.stringify(formattedArray);
 }
+function AddGroupAction({handleOnClick}) {
+  return <AddAction handleOnClick={handleOnClick} variant="group" />;
+}
+
+function AddRuleAction({handleOnClick}) {
+  return <AddAction handleOnClick={handleOnClick} variant="rule" />;
+}
+
+function RemoveGroupAction({handleOnClick}) {
+  return <RemoveAction handleOnClick={handleOnClick} variant="group" />;
+}
+
+function RemoveRuleAction({handleOnClick}) {
+  return <RemoveAction handleOnClick={handleOnClick} variant="rule" />;
+}
+
 const ruleOperators = [
   {name: 'eq', label: 'Equals To'},
   {name: 'ne', label: 'Not Equals To'},

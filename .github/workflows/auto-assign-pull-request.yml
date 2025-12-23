@@ -3,7 +3,8 @@ on:
   pull_request_target:
     types: [opened, reopened]
 
-permissions: read-all
+permissions:
+  contents: read
 jobs:
   auto-assign:
     runs-on: ubuntu-latest

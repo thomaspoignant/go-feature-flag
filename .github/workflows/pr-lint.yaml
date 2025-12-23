@@ -7,7 +7,8 @@ on:
       - edited
       - synchronize
 
-permissions: read-all
+permissions:
+  contents: read
 
 jobs:
   main:

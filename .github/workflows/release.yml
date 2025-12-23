@@ -4,14 +4,13 @@ on:
     tags:
       - "v*"
 
-permissions:
-  contents: read
-  actions: read
-
 jobs:
   integration-tests:
     name: Integration Tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
@@ -41,6 +40,8 @@ jobs:
     needs: integration-tests
     runs-on: ubuntu-latest
     permissions:
+      contents: read
+      actions: read
       contents: write
     steps:
       - name: Extract version from tag
@@ -95,6 +96,9 @@ jobs:
     name: Upload dockerhub readme
     needs:
       - goreleaser
+    permissions:
+      contents: read
+      actions: read
     steps:
       - name: Checkout
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
@@ -124,6 +128,9 @@ jobs:
     name: Upload dockerhub readme
     needs:
       - goreleaser
+    permissions:
+      contents: read
+      actions: read
     steps:
       - name: Checkout
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
@@ -140,6 +147,9 @@ jobs:
     name: Upload dockerhub readme
     needs:
       - goreleaser
+    permissions:
+      contents: read
+      actions: read
     steps:
       - name: Checkout
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
@@ -156,6 +166,9 @@ jobs:
     name: Upload dockerhub readme
     needs:
       - goreleaser
+    permissions:
+      contents: read
+      actions: read
     steps:
       - name: Checkout
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
@@ -179,6 +192,9 @@ jobs:
     # the main branch. This new version of the doc will be release to gh-pages
     # when the GitHub Action called "Deploy to GitHub Pages" will be executed.
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
     env:
       MAIN_BRANCH_NAME: main
       WEBSITE_DIR: website
@@ -252,6 +268,9 @@ jobs:
     name: Release jsonschema
     needs:
       - goreleaser
+    permissions:
+      contents: read
+      actions: read
     env:
       SCHEMA_LOCATION: .schema/flag-schema.json
       MAIN_BRANCH_NAME: main
@@ -315,6 +334,9 @@ jobs:
     name: Bump Relay Proxy Helm Chart appVersion
     needs:
       - goreleaser
+    permissions:
+      contents: read
+      actions: read
     env:
       CHART_YAML_FILE_LOCATION: cmd/relayproxy/helm-charts/relay-proxy/Chart.yaml
       MAIN_BRANCH_NAME: main

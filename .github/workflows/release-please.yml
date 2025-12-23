@@ -4,14 +4,13 @@ on:
   push:
     branches: [main]
 
-permissions:
-  contents: write
-  pull-requests: write
-  actions: read
-
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: read
     outputs:
       root_released: ${{ steps.release.outputs['release_created'] }}
       root_version: ${{ steps.release.outputs['version'] }}
@@ -36,6 +35,10 @@ jobs:
     if: ${{ needs.release-please.outputs.module_evaluation_released == 'true' }}
     uses: ./.github/workflows/release-bump-modules.yml
     needs: release-please
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: read
     with:
       modulePath: modules/evaluation
       version: ${{ needs.release-please.outputs.module_evaluation_version }}
@@ -46,6 +49,10 @@ jobs:
     if: ${{ needs.release-please.outputs.module_core_released == 'true' }}
     uses: ./.github/workflows/release-bump-modules.yml
     needs: release-please
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: read
     with:
       modulePath: modules/core
       version: ${{ needs.release-please.outputs.module_core_version }}
@@ -56,6 +63,10 @@ jobs:
     if: ${{ needs.release-please.outputs.module_core_released == 'true' }}
     uses: ./.github/workflows/release-bump-modules.yml
     needs: release-please
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: read
     with:
       modulePath: modules/core
       version: ${{ needs.release-please.outputs.module_core_version }}
@@ -67,6 +78,10 @@ jobs:
     if: ${{ needs.release-please.outputs.module_core_released == 'true' }}
     uses: ./.github/workflows/release-bump-modules.yml
     needs: release-please
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: read
     with:
       modulePath: modules/core
       version: ${{ needs.release-please.outputs.module_core_version }}
@@ -78,6 +93,10 @@ jobs:
     if: ${{ needs.release-please.outputs.module_evaluation_released == 'true' }}
     uses: ./.github/workflows/release-bump-modules.yml
     needs: release-please
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: read
     with:
       modulePath: modules/evaluation
       version: ${{ needs.release-please.outputs.module_evaluation_version }}
@@ -89,6 +108,10 @@ jobs:
     if: ${{ needs.release-please.outputs.provider_python_released == 'true' }}
     uses: ./.github/workflows/release-python-provider.yml
     needs: release-please
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: read
     secrets:
       pypi_token: ${{ secrets.PYPI_TOKEN }}
 
@@ -96,6 +119,10 @@ jobs:
     if: ${{ needs.release-please.outputs.provider_kotlin_released == 'true' }}
     uses: ./.github/workflows/release-kotlin-provider.yml
     needs: release-please
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: read
     with:
       version: ${{ needs.release-please.outputs.provider_kotlin_version }}
     secrets:

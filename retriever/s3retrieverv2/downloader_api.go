@@ -8,8 +8,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
-// DownloaderAPI provides methods to manage downloads to an S3 bucket.
-type DownloaderAPI interface {
+// Downloader provides methods to manage downloads to an S3 bucket.
+type Downloader interface {
 	Download(
 		ctx context.Context,
 		w io.WriterAt,

@@ -14,10 +14,9 @@ import (
 
 func Test_s3Retriever_Retrieve(t *testing.T) {
 	type fields struct {
-		downloader      DownloaderAPI
+		downloader      Downloader
 		bucket          string
 		item            string
-		context         context.Context
 		S3ClientOptions []func(*s3.Options)
 	}
 	tests := []struct {
@@ -32,9 +31,8 @@ func Test_s3Retriever_Retrieve(t *testing.T) {
 				downloader: &testutils.S3ManagerV2Mock{
 					TestDataLocation: "./testdata",
 				},
-				bucket:  "Bucket",
-				item:    "valid",
-				context: context.TODO(),
+				bucket: "Bucket",
+				item:   "valid",
 			},
 			want:    "./testdata/flag-config.yaml",
 			wantErr: false,
@@ -45,11 +43,9 @@ func Test_s3Retriever_Retrieve(t *testing.T) {
 				downloader: &testutils.S3ManagerV2Mock{
 					TestDataLocation: "./testdata",
 				},
-				bucket:  "Bucket",
-				item:    "valid",
-				context: nil,
+				bucket: "Bucket",
+				item:   "valid",
 			},
-
 			want:    "./testdata/flag-config.yaml",
 			wantErr: false,
 		},
@@ -70,9 +66,8 @@ func Test_s3Retriever_Retrieve(t *testing.T) {
 				downloader: &testutils.S3ManagerV2Mock{
 					TestDataLocation: "./testdata",
 				},
-				bucket:  "Bucket",
-				item:    "valid",
-				context: context.Background(),
+				bucket: "Bucket",
+				item:   "valid",
 			},
 			want:    "./testdata/flag-config.yaml",
 			wantErr: false,
@@ -90,7 +85,6 @@ func Test_s3Retriever_Retrieve(t *testing.T) {
 						o.UseAccelerate = true
 					},
 				},
-				context: context.TODO(),
 			},
 			want:    "./testdata/flag-config.yaml",
 			wantErr: false,
@@ -104,10 +98,11 @@ func Test_s3Retriever_Retrieve(t *testing.T) {
 				downloader:      tt.fields.downloader,
 				S3ClientOptions: tt.fields.S3ClientOptions,
 			}
-			err := s.Init(tt.fields.context, nil)
+			ctx := context.Background()
+			err := s.Init(ctx, nil)
 			assert.NoError(t, err)
 			defer func() {
-				err := s.Shutdown(tt.fields.context)
+				err := s.Shutdown(ctx)
 				assert.NoError(t, err)
 			}()
 
@@ -121,7 +116,7 @@ func Test_s3Retriever_Retrieve(t *testing.T) {
 				)
 			}
 
-			got, err := s.Retrieve(tt.fields.context)
+			got, err := s.Retrieve(ctx)
 			assert.Equal(
 				t,
 				tt.wantErr,

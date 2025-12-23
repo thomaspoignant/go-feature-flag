@@ -3,7 +3,8 @@ name: Issue assignment
 on:
   issues:
     types: [opened]
-permissions: read-all
+permissions:
+  contents: read
 
 jobs:
   auto-assign:

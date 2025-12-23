@@ -11,7 +11,7 @@ Targeting.propTypes = {
 };
 export function Targeting({label, variations}) {
   const {control} = useFormContext();
-  const {fields, append, remove, update} = useFieldArray({
+  const {fields, append, remove} = useFieldArray({
     control,
     name: label,
   });

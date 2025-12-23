@@ -32,7 +32,7 @@ type Retriever struct {
 	S3ClientOptions []func(*s3.Options)
 
 	// downloader is an internal field, it is the downloader use by the AWS-SDK
-	downloader DownloaderAPI
+	downloader Downloader
 	status     retriever.Status
 }
 
@@ -98,6 +98,6 @@ func (s *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	return writerAt.Bytes(), nil
 }
 
-func (s *Retriever) SetDownloader(downloader DownloaderAPI) {
+func (s *Retriever) SetDownloader(downloader Downloader) {
 	s.downloader = downloader
 }

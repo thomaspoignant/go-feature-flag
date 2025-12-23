@@ -6,7 +6,8 @@ on:
   issue_comment:
     types: [created]
   workflow_dispatch:
-permissions: read-all
+permissions:
+  contents: read
 
 env:
   DAYS_UNTIL_STALE: 20 # Number of days before marking as stale

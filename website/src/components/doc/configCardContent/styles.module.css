@@ -4,7 +4,7 @@
     padding: 0.5rem 1rem;
     border-radius: 0.5rem;
     font-weight: 600;
-    color: #0077ff;
+    color: #0052cc;
     background-color: #e0efff;
     display: block;
 
@@ -14,8 +14,8 @@
 
 .button:focus,
 .button:hover {
-    background-color: #0077ff;
-    color: #e0efff;
+    background-color: #0052cc;
+    color: #ffffff;
 }
 
 .linkBox button {

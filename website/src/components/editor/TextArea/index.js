@@ -29,7 +29,7 @@ export function TextArea({
 
   return (
     <div
-      className={clsx(className ? className : styles.editorTextAreaContainer)}>
+      className={clsx(className || styles.editorTextAreaContainer)}>
       <textarea
         id={`${label}.textarea`}
         defaultValue={defaultValue}

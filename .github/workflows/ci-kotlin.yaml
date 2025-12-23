@@ -10,7 +10,8 @@ on:
     paths:
       - openfeature/providers/kotlin-provider/**
 
-permissions: read-all
+permissions:
+  contents: read
 
 jobs:
   Build:
