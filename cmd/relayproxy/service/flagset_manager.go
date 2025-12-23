@@ -114,8 +114,8 @@ func newFlagsetManagerWithDefaultConfig(
 	}, nil
 }
 
-func (m *flagsetManagerImpl) OnConfigChange(newConfig *config.Config) {
-	// TODO: implement the logic to handle the configuration changes
+func (m *flagsetManagerImpl) OnConfigChange(_ *config.Config) {
+	// here implement the logic to handle the configuration changes
 }
 
 // newFlagsetManagerWithFlagsets is creating a new FlagsetManager with flagsets.

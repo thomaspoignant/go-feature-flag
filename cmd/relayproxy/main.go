@@ -63,7 +63,11 @@ func main() {
 	if err != nil {
 		logger.ZapLogger.Fatal("error while reading configuration", zap.Error(err))
 	}
-	defer proxyConf.StopConfigChangeWatcher()
+	defer func() {
+		if err := proxyConf.StopConfigChangeWatcher(); err != nil {
+			logger.ZapLogger.Error("error while stopping the configuration watcher", zap.Error(err))
+		}
+	}()
 
 	if err := proxyConf.IsValid(); err != nil {
 		logger.ZapLogger.Fatal("configuration error", zap.Error(err))
