@@ -63,6 +63,11 @@ func main() {
 	if err != nil {
 		logger.ZapLogger.Fatal("error while reading configuration", zap.Error(err))
 	}
+	defer func() {
+		if err := proxyConf.StopConfigChangeWatcher(); err != nil {
+			logger.ZapLogger.Error("error while stopping the configuration watcher", zap.Error(err))
+		}
+	}()
 
 	if err := proxyConf.IsValid(); err != nil {
 		logger.ZapLogger.Fatal("configuration error", zap.Error(err))
@@ -77,7 +82,7 @@ func main() {
 
 	// Init swagger
 	docs.SwaggerInfo.Version = proxyConf.Version
-	docs.SwaggerInfo.Host = fmt.Sprintf("%s:%d", proxyConf.Host, proxyConf.ServerPort(logger.ZapLogger))
+	docs.SwaggerInfo.Host = fmt.Sprintf("%s:%d", proxyConf.SwaggerHost(), proxyConf.ServerPort(logger.ZapLogger))
 
 	// Set the version for the prometheus version collector
 	promversion.Version = version
@@ -99,6 +104,10 @@ func main() {
 		prometheusNotifier,
 		proxyNotifier,
 	})
+
+	// Attach a callback to the flagset manager to be called when the configuration changes
+	proxyConf.AttachConfigChangeCallback(flagsetManager.OnConfigChange)
+
 	if err != nil {
 		logger.ZapLogger.Error(
 			"impossible to start GO Feature Flag, we are not able to initialize the retrieval of flags",

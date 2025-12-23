@@ -46,7 +46,7 @@ func (s *Server) addGOFFRoutes(
 	v1.POST("/flag/configuration", cFlagConfiguration.Handler)
 
 	// Swagger - only available if option is enabled
-	if s.config.EnableSwagger {
+	if s.config.IsSwaggerEnabled() {
 		s.apiEcho.GET("/swagger/*", echoSwagger.WrapHandler)
 	}
 }

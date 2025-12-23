@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func mapEnvVariablesProvider(prefix string, log *zap.Logger) koanf.Provider {
+func (c *ConfigLoader) mapEnvVariablesProvider(prefix string, log *zap.Logger) koanf.Provider {
 	return env.ProviderWithValue(prefix, ".", func(key, v string) (string, any) {
 		key = strings.TrimPrefix(key, prefix)
 		switch {
@@ -19,7 +19,7 @@ func mapEnvVariablesProvider(prefix string, log *zap.Logger) koanf.Provider {
 			strings.HasPrefix(key, "NOTIFIERS"),
 			strings.HasPrefix(key, "FLAGSETS"),
 			strings.HasPrefix(key, "EXPORTERS"):
-			configMap := k.Raw()
+			configMap := c.k.Raw()
 			modifiedConfigMap, err := loadArrayEnv(key, v, configMap)
 			if err != nil {
 				log.Error(
@@ -32,7 +32,7 @@ func mapEnvVariablesProvider(prefix string, log *zap.Logger) koanf.Provider {
 			}
 			// Update the global config with the modified configMap
 			for configKey, configValue := range modifiedConfigMap {
-				_ = k.Set(configKey, configValue)
+				_ = c.k.Set(configKey, configValue)
 			}
 			return key, v
 		case strings.HasSuffix(key, "KAFKA_ADDRESSES"),
@@ -42,7 +42,7 @@ func mapEnvVariablesProvider(prefix string, log *zap.Logger) koanf.Provider {
 			transformedKey := strings.ReplaceAll(strings.ToLower(key), "_", ".")
 			return transformedKey, strings.Split(v, ",")
 		case key == "OTEL_RESOURCE_ATTRIBUTES":
-			parseOtelResourceAttributes(v, log)
+			c.parseOtelResourceAttributes(v, log)
 			return key, v
 		default:
 			return strings.ReplaceAll(strings.ToLower(key), "_", "."), v
@@ -219,8 +219,8 @@ func expandArray(configArray []any, index int) []any {
 // parseOtelResourceAttributes parses the OTEL_RESOURCE_ATTRIBUTES environment variable
 // and sets the attributes in the koanf configuration.
 // The expected format is "key1=value1,key2=value2,..."
-func parseOtelResourceAttributes(attributes string, log *zap.Logger) {
-	configMap := k.Raw()
+func (c *ConfigLoader) parseOtelResourceAttributes(attributes string, log *zap.Logger) {
+	configMap := c.k.Raw()
 	otel, ok := configMap["otel"].(map[string]any)
 	if !ok {
 		configMap["otel"] = make(map[string]any)
@@ -250,5 +250,5 @@ func parseOtelResourceAttributes(attributes string, log *zap.Logger) {
 		attrs[k] = v
 	}
 
-	_ = k.Set("otel", otel)
+	_ = c.k.Set("otel", otel)
 }

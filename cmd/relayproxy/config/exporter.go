@@ -2,10 +2,8 @@ package config
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/thomaspoignant/go-feature-flag/exporter/kafkaexporter"
-	"github.com/thomaspoignant/go-feature-flag/utils"
 	"github.com/xitongsys/parquet-go/parquet"
 )
 
@@ -36,20 +34,6 @@ type ExporterConf struct {
 	AccountKey              string                 `mapstructure:"accountKey"              koanf:"accountkey"`
 	Container               string                 `mapstructure:"container"               koanf:"container"`
 	ExporterEventType       string                 `mapstructure:"eventType"               koanf:"eventtype"`
-}
-
-// processExporters handles the post-processing of exporters configuration
-func processExporters(proxyConf *Config) {
-	if proxyConf.Exporters == nil {
-		return
-	}
-
-	for i := range *proxyConf.Exporters {
-		addresses := (*proxyConf.Exporters)[i].Kafka.Addresses
-		if len(addresses) == 0 || (len(addresses) == 1 && strings.Contains(addresses[0], ",")) {
-			(*proxyConf.Exporters)[i].Kafka.Addresses = utils.StringToArray(addresses)
-		}
-	}
 }
 
 func (c *ExporterConf) IsValid() error {

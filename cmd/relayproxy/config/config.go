@@ -1,71 +1,24 @@
 package config
 
 import (
-	"fmt"
-	"os"
-	"path/filepath"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/knadh/koanf/parsers/json"
-	"github.com/knadh/koanf/parsers/toml"
-	"github.com/knadh/koanf/parsers/yaml"
-	"github.com/knadh/koanf/providers/confmap"
-	"github.com/knadh/koanf/providers/file"
-	"github.com/knadh/koanf/providers/posflag"
-	"github.com/knadh/koanf/v2"
 	"github.com/spf13/pflag"
-	ffclient "github.com/thomaspoignant/go-feature-flag"
-	"github.com/xitongsys/parquet-go/parquet"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
-
-var k = koanf.New(".")
-
-const DefaultLogLevel = "info"
-
-var DefaultExporter = struct {
-	Format                  string
-	LogFormat               string
-	FileName                string
-	CsvFormat               string
-	FlushInterval           time.Duration
-	MaxEventInMemory        int64
-	ParquetCompressionCodec string
-	LogLevel                string
-	ExporterEventType       ffclient.ExporterEventType
-}{
-	Format:    "JSON",
-	LogFormat: "[{{ .FormattedDate}}] user=\"{{ .UserKey}}\", flag=\"{{ .Key}}\", value=\"{{ .Value}}\"",
-	FileName:  "flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}",
-	CsvFormat: "{{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};" +
-		"{{ .Value}};{{ .Default}};{{ .Source}}\n",
-	FlushInterval:           60000 * time.Millisecond,
-	MaxEventInMemory:        100000,
-	ParquetCompressionCodec: parquet.CompressionCodec_SNAPPY.String(),
-	LogLevel:                DefaultLogLevel,
-	ExporterEventType:       ffclient.FeatureEventExporter,
-}
 
 type Config struct {
 	// CommonFlagSet is the common flag set for the relay proxy
 	CommonFlagSet `mapstructure:",inline" koanf:",squash"`
 
-	// ListenPort (optional) is the port we are using to start the proxy
-	//
-	// Deprecated: use Server.Port instead
-	ListenPort int `mapstructure:"listen" koanf:"listen"`
-
-	// MonitoringPort (optional) is the port we are using to expose the metrics and healthchecks
-	// If not set we will use the same port as the proxy
-	//
-	// Deprecated: use Server.MonitoringPort instead
-	MonitoringPort int `mapstructure:"monitoringPort" koanf:"monitoringport"`
-
 	// Server is the server configuration, including host, port, and unix socket
 	Server Server `mapstructure:"server" koanf:"server"`
+
+	// Swagger is the swagger configuration
+	Swagger Swagger `mapstructure:"swagger" koanf:"swagger"`
 
 	// HideBanner (optional) if true, we don't display the go-feature-flag relay proxy banner
 	HideBanner bool `mapstructure:"hideBanner" koanf:"hidebanner"`
@@ -74,12 +27,6 @@ type Config struct {
 	// the pprof endpoints on the same port as the monitoring.
 	// Default: false
 	EnablePprof bool `mapstructure:"enablePprof" koanf:"enablepprof"`
-
-	// EnableSwagger (optional) to have access to the swagger
-	EnableSwagger bool `mapstructure:"enableSwagger" koanf:"enableswagger"`
-
-	// Host should be set if you are using swagger (default is localhost)
-	Host string `mapstructure:"host" koanf:"host"`
 
 	// LogLevel (optional) sets the verbosity for logging,
 	// Possible values: debug, info, warn, error, dpanic, panic, fatal
@@ -104,33 +51,8 @@ type Config struct {
 	// Default: false
 	DisableVersionHeader bool `mapstructure:"disableVersionHeader" koanf:"disableversionheader"`
 
-	// Deprecated: use AuthorizedKeys instead
-	// APIKeys list of API keys that authorized to use endpoints
-	APIKeys []string `mapstructure:"apiKeys" koanf:"apikeys"`
-
 	// AuthorizedKeys list of API keys that authorized to use endpoints
 	AuthorizedKeys APIKeys `mapstructure:"authorizedKeys" koanf:"authorizedkeys"`
-
-	// StartAsAwsLambda (optional) if true, the relay proxy will start ready to be launched as AWS Lambda
-	//
-	// Deprecated: use `Server.Mode = lambda` instead
-	StartAsAwsLambda bool `mapstructure:"startAsAwsLambda" koanf:"startasawslambda"`
-
-	// AwsLambdaAdapter (optional) is the adapter to use when the relay proxy is started as an AWS Lambda.
-	// Possible values are "APIGatewayV1", "APIGatewayV2" and "ALB"
-	// Default: "APIGatewayV2"
-	//
-	// Deprecated: use `Server.LambdaAdapter` instead
-	AwsLambdaAdapter string `mapstructure:"awsLambdaAdapter" koanf:"awslambdaadapter"`
-
-	// AwsApiGatewayBasePath (optional) is the base path prefix for AWS API Gateway deployments.
-	// This is useful when deploying behind a non-root path like "/api" or "/dev/feature-flags".
-	// The relay proxy will strip this base path from incoming requests before processing.
-	// Example: if set to "/api/feature-flags", requests to "/api/feature-flags/health" will be processed as "/health"
-	// Default: ""
-	//
-	// Deprecated: use `Server.AwsApiGatewayBasePath` instead
-	AwsApiGatewayBasePath string `mapstructure:"awsApiGatewayBasePath" koanf:"awsapigatewaybasepath"`
 
 	// EvaluationContextEnrichment (optional) will be merged with the evaluation context sent during the evaluation.
 	// It is useful to add common attributes to all the evaluations, such as a server version, environment, ...
@@ -172,7 +94,52 @@ type Config struct {
 	// Each flag set can have its own API key, retrievers, notifiers and exporters.
 	// There is no inheritance between flag sets.
 	FlagSets []FlagSet `mapstructure:"flagsets" koanf:"flagsets"`
-	// ---- private fields
+
+	// ---------- Deprecated fields ----------
+	// ListenPort (optional) is the port we are using to start the proxy
+	//
+	// Deprecated: use Server.Port instead
+	ListenPort int `mapstructure:"listen" koanf:"listen"`
+
+	// MonitoringPort (optional) is the port we are using to expose the metrics and healthchecks
+	// If not set we will use the same port as the proxy
+	//
+	// Deprecated: use Server.MonitoringPort instead
+	MonitoringPort int `mapstructure:"monitoringPort" koanf:"monitoringport"`
+
+	// Deprecated: use Swagger.Enabled instead
+	EnableSwagger bool `mapstructure:"enableSwagger" koanf:"enableswagger"`
+
+	// Deprecated: use Swagger.Host instead
+	Host string `mapstructure:"host" koanf:"host"`
+
+	// Deprecated: use AuthorizedKeys instead
+	// APIKeys list of API keys that authorized to use endpoints
+	APIKeys []string `mapstructure:"apiKeys" koanf:"apikeys"`
+
+	// StartAsAwsLambda (optional) if true, the relay proxy will start ready to be launched as AWS Lambda
+	//
+	// Deprecated: use `Server.Mode = lambda` instead
+	StartAsAwsLambda bool `mapstructure:"startAsAwsLambda" koanf:"startasawslambda"`
+
+	// AwsLambdaAdapter (optional) is the adapter to use when the relay proxy is started as an AWS Lambda.
+	// Possible values are "APIGatewayV1", "APIGatewayV2" and "ALB"
+	// Default: "APIGatewayV2"
+	//
+	// Deprecated: use `Server.LambdaAdapter` instead
+	AwsLambdaAdapter string `mapstructure:"awsLambdaAdapter" koanf:"awslambdaadapter"`
+
+	// AwsApiGatewayBasePath (optional) is the base path prefix for AWS API Gateway deployments.
+	// This is useful when deploying behind a non-root path like "/api" or "/dev/feature-flags".
+	// The relay proxy will strip this base path from incoming requests before processing.
+	// Example: if set to "/api/feature-flags", requests to "/api/feature-flags/health" will be processed as "/health"
+	// Default: ""
+	//
+	// Deprecated: use `Server.AwsApiGatewayBasePath` instead
+	AwsApiGatewayBasePath string `mapstructure:"awsApiGatewayBasePath" koanf:"awsapigatewaybasepath"`
+	// ---------- End of deprecated fields ----------
+
+	// ---------- Private fields ----------
 
 	// apiKeySet is the internal representation of an API keys list configured
 	// we store them in a set to be
@@ -183,103 +150,26 @@ type Config struct {
 
 	// forceAuthenticatedRequests is true if we have at least 1 AuthorizedKey.Evaluation key set.
 	forceAuthenticatedRequests bool
+
+	// configLoader is the service in charge of loading the configuration.
+	configLoader *ConfigLoader
+
+	// logger is the logger for the relay proxy
+	logger *zap.Logger
+	// ---------- End of private fields ----------
 }
 
 // New is reading the configuration file
-func New(flagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, error) {
-	k.Delete("")
-
-	// Default values
-	_ = k.Load(confmap.Provider(map[string]any{
-		"host":            "localhost",
-		"fileFormat":      "yaml",
-		"pollingInterval": 60000,
-		"logLevel":        DefaultLogLevel,
-	}, "."), nil)
-
-	// mapping command line parameters to koanf
-	if errBindFlag := k.Load(posflag.Provider(flagSet, ".", k), nil); errBindFlag != nil {
-		log.Fatal("impossible to parse flag command line", zap.Error(errBindFlag))
-	}
-
-	// Read config file
-	loadConfigFile(log)
-
+func New(cmdLineFlagSet *pflag.FlagSet, log *zap.Logger, version string) (*Config, error) {
 	// Map environment variables
-	_ = k.Load(mapEnvVariablesProvider(k.String("envVariablePrefix"), log), nil)
-	_ = k.Set("version", version)
-
-	proxyConf := &Config{}
-	errUnmarshal := k.Unmarshal("", &proxyConf)
+	configLoader := NewConfigLoader(cmdLineFlagSet, log, version, true)
+	proxyConf, errUnmarshal := configLoader.ToConfig()
 	if errUnmarshal != nil {
 		return nil, errUnmarshal
 	}
-
-	processExporters(proxyConf)
-
+	proxyConf.configLoader = configLoader
+	proxyConf.logger = log
 	return proxyConf, nil
-}
-
-// loadConfigFile handles the loading of configuration files
-func loadConfigFile(log *zap.Logger) {
-	configFileLocation, errFileLocation := locateConfigFile(k.String("config"))
-	if errFileLocation != nil {
-		log.Info("not using any configuration file", zap.Error(errFileLocation))
-		return
-	}
-
-	parser := selectParserForFile(configFileLocation)
-	if errBindFile := k.Load(file.Provider(configFileLocation), parser); errBindFile != nil {
-		log.Error("error loading file", zap.Error(errBindFile))
-	}
-}
-
-// selectParserForFile returns the appropriate parser based on file extension
-func selectParserForFile(configFileLocation string) koanf.Parser {
-	ext := filepath.Ext(configFileLocation)
-	switch strings.ToLower(ext) {
-	case ".toml":
-		return toml.Parser()
-	case ".json":
-		return json.Parser()
-	default:
-		return yaml.Parser()
-	}
-}
-
-// locateConfigFile is selecting the configuration file we will use.
-func locateConfigFile(inputFilePath string) (string, error) {
-	filename := "goff-proxy"
-	defaultLocations := []string{
-		"./",
-		"/goff/",
-		"/etc/opt/goff/",
-	}
-	supportedExtensions := []string{
-		"yaml",
-		"toml",
-		"json",
-		"yml",
-	}
-
-	if inputFilePath != "" {
-		if _, err := os.Stat(inputFilePath); err != nil {
-			return "", fmt.Errorf("impossible to find config file %s", inputFilePath)
-		}
-		return inputFilePath, nil
-	}
-	for _, location := range defaultLocations {
-		for _, ext := range supportedExtensions {
-			configFile := fmt.Sprintf("%s%s.%s", location, filename, ext)
-			if _, err := os.Stat(configFile); err == nil {
-				return configFile, nil
-			}
-		}
-	}
-	return "", fmt.Errorf(
-		"impossible to find config file in the default locations [%s]",
-		strings.Join(defaultLocations, ","),
-	)
 }
 
 func (c *Config) IsDebugEnabled() bool {
