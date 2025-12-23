@@ -131,7 +131,7 @@ func (c *ConfigLoader) loadPosflag(cmdLineFlagSet *pflag.FlagSet) {
 	posflagProvider := posflag.Provider(cmdLineFlagSet, ".", c.k)
 	errBindFlag := c.k.Load(posflagProvider, nil)
 	if errBindFlag != nil {
-		c.log.Fatal("impossible to parse flag command line", zap.Error(errBindFlag))
+		c.log.Error("impossible to parse flag command line", zap.Error(errBindFlag))
 	}
 }
 
