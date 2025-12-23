@@ -47,7 +47,7 @@ func GetPool(ctx context.Context, uri string) (*pgxpool.Pool, error) {
 }
 
 // ReleasePool decreases refCount and closes/removes when it hits zero.
-func ReleasePool(ctx context.Context, uri string) {
+func ReleasePool(_ context.Context, uri string) {
 	mu.Lock()
 	defer mu.Unlock()
 
