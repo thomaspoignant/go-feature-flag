@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/knadh/koanf/parsers/json"
 	"github.com/knadh/koanf/parsers/toml"
@@ -31,6 +32,9 @@ type ConfigLoader struct {
 
 	// callbacks to be called when the configuration changes
 	callbacks []func(newConfig *Config)
+
+	// callbacksMutex is used to protect the callbacks slice
+	callbacksMutex sync.RWMutex
 }
 
 // NewConfigLoader creates a new ConfigLoader.
@@ -71,6 +75,8 @@ func (c *ConfigLoader) loadConfig() {
 
 // AddConfigChangeCallback adds a callback to be called when the configuration changes
 func (c *ConfigLoader) AddConfigChangeCallback(callback func(newConfig *Config)) {
+	c.callbacksMutex.Lock()
+	defer c.callbacksMutex.Unlock()
 	c.callbacks = append(c.callbacks, callback)
 }
 
@@ -98,6 +104,8 @@ func (c *ConfigLoader) startWatchChanges() {
 			return
 		}
 
+		c.callbacksMutex.RLock()
+		defer c.callbacksMutex.RUnlock()
 		for _, callback := range c.callbacks {
 			callback(c2)
 		}
