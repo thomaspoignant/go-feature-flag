@@ -89,7 +89,7 @@ func (c *ConfigLoader) startWatchChanges() {
 			watchChanges:   false,
 			k:              koanf.New("."),
 		}
-
+		newConfig.loadConfig() // load the new configuration
 		c2, err := newConfig.ToConfig()
 		if err != nil {
 			c.log.Error("error loading new config", zap.Error(err))
