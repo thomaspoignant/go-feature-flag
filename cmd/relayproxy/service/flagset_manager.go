@@ -34,6 +34,8 @@ type FlagsetManager interface {
 	IsDefaultFlagSet() bool
 	// Close closes the flagset manager
 	Close()
+	// OnConfigChange is called when the configuration changes
+	OnConfigChange(newConfig *config.Config)
 }
 
 // flagsetManagerImpl is the internal implementation of FlagsetManager
@@ -110,6 +112,10 @@ func newFlagsetManagerWithDefaultConfig(
 		config:         c,
 		mode:           flagsetManagerModeDefault,
 	}, nil
+}
+
+func (m *flagsetManagerImpl) OnConfigChange(newConfig *config.Config) {
+	// TODO: implement the logic to handle the configuration changes
 }
 
 // newFlagsetManagerWithFlagsets is creating a new FlagsetManager with flagsets.

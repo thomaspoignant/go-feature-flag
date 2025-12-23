@@ -63,6 +63,7 @@ func main() {
 	if err != nil {
 		logger.ZapLogger.Fatal("error while reading configuration", zap.Error(err))
 	}
+	defer proxyConf.StopConfigChangeWatcher()
 
 	if err := proxyConf.IsValid(); err != nil {
 		logger.ZapLogger.Fatal("configuration error", zap.Error(err))
@@ -99,6 +100,10 @@ func main() {
 		prometheusNotifier,
 		proxyNotifier,
 	})
+
+	// Attach a callback to the flagset manager to be called when the configuration changes
+	proxyConf.AttachConfigChangeCallback(flagsetManager.OnConfigChange)
+
 	if err != nil {
 		logger.ZapLogger.Error(
 			"impossible to start GO Feature Flag, we are not able to initialize the retrieval of flags",
