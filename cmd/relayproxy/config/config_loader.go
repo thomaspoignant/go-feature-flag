@@ -82,6 +82,7 @@ func (c *ConfigLoader) AddConfigChangeCallback(callback func(newConfig *Config))
 	c.callbacks = append(c.callbacks, callback)
 }
 
+// startWatchChanges starts watching for changes in the configuration file
 func (c *ConfigLoader) startWatchChanges() {
 	if c.fileProvider == nil || !c.watchChanges {
 		return
