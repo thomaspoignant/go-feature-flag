@@ -77,7 +77,7 @@ require (
 	go.uber.org/zap v1.27.1
 	golang.org/x/net v0.48.0
 	google.golang.org/api v0.258.0
-	google.golang.org/grpc v1.77.0
+	google.golang.org/grpc v1.78.0
 	google.golang.org/protobuf v1.36.11
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.35.0
