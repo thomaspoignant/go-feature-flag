@@ -1,0 +1,123 @@
+````mdx
+---
+sidebar_position: 60
+description: Export evaluation events as OpenTelemetry spans.
+---
+import { integrations } from "@site/data/integrations";
+import {Mandatory, NotMandatory} from "@site/src/components/checks/checks";
+export const exporterName = 'OpenTelemetry'
+export const info = integrations.exporters.find((r) => r.name === exporterName)
+
+# OpenTelemetry
+
+## Overview
+{info.longDescription ?? info.description}
+
+The OpenTelemetry exporter converts each feature evaluation into an OpenTelemetry span.
+Each span contains attributes with non-sensitive evaluation details such as the flag key,
+the evaluated variation, the evaluation context key and optional metadata.
+
+This exporter is a streaming exporter (not a bulk exporter) and will create one span per
+feature evaluation.
+
+:::info
+The exporter does not configure an OpenTelemetry SDK/tracer provider for you. You must
+initialize and configure OpenTelemetry (OTLP/exporter, resource, sampler, etc.) in your
+application so that spans are exported to your tracing backend.
+:::
+
+## Behaviour
+
+- Export mode: streaming — the exporter implements `IsBulk()` returning `false`.
+- For each evaluation it creates a span named `feature_flag.evaluate` and attaches attributes:
+  - `feature_flag.key`, `feature_flag.user_key`, `feature_flag.context_kind`, `feature_flag.variation`, `feature_flag.default`, `feature_flag.version`, `feature_flag.source`
+  - `feature_flag.value` (JSON stringified when available)
+  - `feature_flag.metadata.<key>` for each metadata entry
+- If the default value was used, the span status will be set to an error code to signal fallback usage.
+
+## Configure the GO Module
+
+To use the exporter in your application with the GO Module, provide an instance of the exporter
+in the `ffclient.Config` `DataExporter.Exporter` field. Optionally override the tracer name
+with `TracerName`.
+
+```go title="example.go"
+import (
+    "context"
+
+    "github.com/thomaspoignant/go-feature-flag/exporter/opentelemetryexporter"
+    "github.com/thomaspoignant/go-feature-flag/ffclient"
+)
+
+// ... initialize your OpenTelemetry tracer provider here (OTLP, resource, etc.) ...
+
+cfg := ffclient.Config{
+    // ... other config ...
+    DataExporter: ffclient.DataExporter{
+        Exporter: &opentelemetryexporter.Exporter{
+            TracerName: "app-featureflags", // optional, default: "go-feature-flag"
+        },
+    },
+}
+
+_ = ffclient.Init(cfg)
+defer ffclient.Close()
+```
+
+| Field      |    Mandatory     | Description |
+|------------|:----------------:|-------------|
+| `TracerName` | <NotMandatory /> | Optional: override the OpenTelemetry tracer name. Default is `go-feature-flag`. |
+
+## Configure the Relay Proxy
+
+The Relay Proxy supports a per-flagset OpenTelemetry exporter (`kind: opentelemetry`).
+This exporter creates one span per evaluation using the configured `tracerName` and the process-wide
+OpenTelemetry TracerProvider. The relay proxy itself must have OpenTelemetry SDK/exporter configured
+so spans are sent to your collector — you can configure this using the proxy top-level `otel` section
+or environment variables (see relay proxy observability docs).
+
+Example (relay proxy config):
+
+```yaml title="goff-proxy.yaml"
+server:
+  mode: http
+  port: 1031
+
+# Configure the relay proxy OpenTelemetry SDK/exporter (process-level)
+otel:
+  exporter:
+    otlp:
+      endpoint: http://otel-collector:4317
+      protocol: grpc
+  resource:
+    attributes:
+      service.name: relay-proxy
+
+# A flagset that exports evaluation events as OpenTelemetry spans
+flagsets:
+  - name: default
+    retriever:
+      kind: file
+      path: examples/retriever_file/flags.goff.yaml
+    exporters:
+      - kind: opentelemetry
+        tracerName: go-feature-flag
+```
+
+Notes:
+
+- `otel` (top-level) config controls the OpenTelemetry SDK and the OTLP exporter used by the proxy process.
+  Ensure it points to your collector (OTLP endpoint) or export configuration is provided via environment variables.
+- The per-flagset exporter only accepts `tracerName` currently; the exporter re-uses the process global
+  TracerProvider. If you need a per-exporter OTLP endpoint or different SDK settings, we can extend the
+  exporter configuration to include those fields in a follow-up change.
+
+## Examples and notes
+
+- Make sure an OpenTelemetry `TracerProvider` is configured before evaluations happen; otherwise
+  spans will not be exported (they will be no-ops).
+- The exporter sets the span timestamp using the original event creation time when available.
+- Because values are JSON-marshalled, very large values may increase span payload size; prefer
+  sending only non-sensitive, compact metadata.
+
+````
