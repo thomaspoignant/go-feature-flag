@@ -3,6 +3,7 @@ package opentelemetryexporter
 import (
 	"context"
 	"testing"
+	"text/template"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
@@ -12,6 +13,15 @@ import (
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 )
+
+// MockUnsupportedEvent is used to test the '!ok' type assertion branch.
+type MockUnsupportedEvent struct{}
+
+func (m MockUnsupportedEvent) FormatInCSV(_ *template.Template) ([]byte, error) { return nil, nil }
+func (m MockUnsupportedEvent) FormatInJSON() ([]byte, error)                    { return nil, nil }
+func (m MockUnsupportedEvent) GetCreationDate() int64                           { return 0 }
+func (m MockUnsupportedEvent) GetUserKey() string                               { return "" }
+func (m MockUnsupportedEvent) GetKey() string                                   { return "" }
 
 func TestOpenTelemetryIsBulk(t *testing.T) {
 	exp := Exporter{}
@@ -93,6 +103,10 @@ func TestExporterSpanAttributes(t *testing.T) {
 		Default:      false,
 		Version:      "v1",
 		Source:       "SERVER",
+		//  the for-loop branch
+		Metadata: map[string]interface{}{
+			"team": "platform",
+		},
 	}
 
 	// Act
@@ -112,6 +126,21 @@ func TestExporterSpanAttributes(t *testing.T) {
 	assertAttribute(t, attrs, "feature_flag.variation", "on")
 	assertAttribute(t, attrs, "feature_flag.version", "v1")
 	assertAttribute(t, attrs, "feature_flag.source", "SERVER")
+	assertAttribute(t, attrs, "feature_flag.metadata.team", "platform")
+}
+
+// 'continue' logic when receiving non-FeatureEvent types.
+func TestExporter_Export_IgnoreUnsupportedEventTypes(t *testing.T) {
+	recorder := tracetest.NewSpanRecorder()
+	tp := sdktrace.NewTracerProvider(sdktrace.WithSpanProcessor(recorder))
+	otel.SetTracerProvider(tp)
+	exp := &Exporter{}
+
+	events := []exporter.ExportableEvent{MockUnsupportedEvent{}}
+	err := exp.Export(context.Background(), nil, events)
+
+	assert.NoError(t, err)
+	assert.Empty(t, recorder.Ended(), "No spans should be created for unsupported events")
 }
 
 func assertAttribute(t *testing.T, attrs []attribute.KeyValue, key string, expected any) {
