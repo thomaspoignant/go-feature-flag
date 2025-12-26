@@ -60,7 +60,7 @@ func (e *Exporter) Export(
 func (e *Exporter) createSpan(ctx context.Context, f exporter.FeatureEvent) {
 	startTime := time.Unix(f.CreationDate, 0)
 
-	ctx, span := e.tracer.Start(
+	_, span := e.tracer.Start(
 		ctx,
 		spanName,
 		trace.WithTimestamp(startTime),
