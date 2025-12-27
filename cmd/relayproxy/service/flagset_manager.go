@@ -150,7 +150,7 @@ func newFlagsetManagerWithFlagsets(
 
 			startLog := "no flagset name provided"
 			if flagset.Name == utils.DefaultFlagSetName {
-				startLog += "using 'default' flagset name"
+				startLog = "using 'default' as a flagset name"
 			}
 			logger.Warn(
 				fmt.Sprintf("%s, generating a default flagset name. This is not recommended. Not having"+
