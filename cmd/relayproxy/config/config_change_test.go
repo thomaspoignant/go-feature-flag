@@ -59,13 +59,14 @@ authorizedKeys:
 
 		s := api.New(c, services, zap.NewNop())
 		go func() { s.StartWithContext(context.Background()) }()
-		time.Sleep(10 * time.Millisecond)
+		time.Sleep(100 * time.Millisecond)
 		defer s.Stop(context.Background())
 
 		// Should have a 401 response without the correct API Keys
 		body := `{"evaluationContext":{"key":"08b5ffb7-7109-42f4-a6f2-b85560fbd20f"}}`
 		response, err := http.Post("http://localhost:41031/v1/allflags", "application/json", strings.NewReader(body))
 		require.NoError(t, err)
+		defer func() { _ = response.Body.Close() }()
 		assert.Equal(t, http.StatusUnauthorized, response.StatusCode)
 
 		// Should have a 200 response with the correct API Keys
@@ -92,10 +93,11 @@ authorizedKeys:
 		err = os.WriteFile(file.Name(), []byte(configContent), 0644)
 		require.NoError(t, err)
 
-		time.Sleep(10 * time.Millisecond)
+		time.Sleep(100 * time.Millisecond)
 
 		response3, err := http.Post("http://localhost:41031/v1/allflags", "application/json", strings.NewReader(body))
 		require.NoError(t, err)
+		defer func() { _ = response3.Body.Close() }()
 		assert.Equal(t, http.StatusUnauthorized, response3.StatusCode)
 	})
 
@@ -139,7 +141,7 @@ authorizedKeys:
 
 		s := api.New(c, services, zap.NewNop())
 		go func() { s.StartWithContext(context.Background()) }()
-		time.Sleep(10 * time.Millisecond)
+		time.Sleep(100 * time.Millisecond)
 		defer s.Stop(context.Background())
 
 		// Should have a 200 response with the correct API Keys
@@ -167,6 +169,7 @@ retrievers:
 
 		response3, err := http.Post("http://localhost:41032/v1/allflags", "application/json", strings.NewReader(body))
 		require.NoError(t, err)
+		defer func() { _ = response3.Body.Close() }()
 		assert.Equal(t, http.StatusOK, response3.StatusCode)
 	})
 }
