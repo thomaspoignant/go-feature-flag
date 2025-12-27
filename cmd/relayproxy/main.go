@@ -112,9 +112,6 @@ func main() {
 		)
 		return
 	}
-	// Attach a callback to the flagset manager to be called when the configuration changes
-	proxyConf.AttachConfigChangeCallback(flagsetManager.OnConfigChange)
-
 	services := service.Services{
 		MonitoringService: service.NewMonitoring(flagsetManager),
 		WebsocketService:  wsService,

@@ -1,0 +1,172 @@
+package config_test
+
+import (
+	"context"
+	"net/http"
+	"os"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/spf13/pflag"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"go.uber.org/zap"
+)
+
+func TestConfigChangeDefaultMode(t *testing.T) {
+	t.Run("change authorized keys from test to test2", func(t *testing.T) {
+		file, err := os.CreateTemp("", "")
+		require.NoError(t, err)
+		defer func() {
+			_ = file.Close()
+			_ = os.Remove(file.Name())
+		}()
+
+		configContent := `server:
+  port: 41031
+  mode: http
+retrievers:
+  - kind: file
+    path: ../../../testdata/flag-config.yaml
+authorizedKeys:
+  evaluation:
+    - test
+`
+		err = os.WriteFile(file.Name(), []byte(configContent), 0644)
+		require.NoError(t, err)
+
+		f := pflag.NewFlagSet("test", pflag.ContinueOnError)
+		f.String("config", file.Name(), "config file")
+
+		c, err := config.New(f, zap.NewNop(), "vTest")
+		require.NoError(t, err)
+
+		flagsetManager, err := service.NewFlagsetManager(c, zap.NewNop(), nil)
+		require.NoError(t, err)
+		defer flagsetManager.Close()
+
+		services := service.Services{
+			MonitoringService: service.NewMonitoring(flagsetManager),
+			WebsocketService:  service.NewWebsocketService(),
+			FlagsetManager:    flagsetManager,
+			Metrics:           metric.Metrics{},
+		}
+
+		s := api.New(c, services, zap.NewNop())
+		go func() { s.StartWithContext(context.Background()) }()
+		time.Sleep(10 * time.Millisecond)
+		defer s.Stop(context.Background())
+
+		// Should have a 401 response without the correct API Keys
+		body := `{"evaluationContext":{"key":"08b5ffb7-7109-42f4-a6f2-b85560fbd20f"}}`
+		response, err := http.Post("http://localhost:41031/v1/allflags", "application/json", strings.NewReader(body))
+		require.NoError(t, err)
+		assert.Equal(t, http.StatusUnauthorized, response.StatusCode)
+
+		// Should have a 200 response with the correct API Keys
+		request, err := http.NewRequest("POST", "http://localhost:41031/v1/allflags", strings.NewReader(body))
+		require.NoError(t, err)
+		defer func() { _ = request.Body.Close() }()
+		request.Header.Set("Content-Type", "application/json")
+		request.Header.Set("X-API-Key", "test")
+		response2, err := http.DefaultClient.Do(request)
+		require.NoError(t, err)
+		assert.Equal(t, http.StatusOK, response2.StatusCode)
+
+		configContent = `server:
+  port: 41031
+  mode: http
+retrievers:
+  - kind: file
+    path: ../../../testdata/flag-config.yaml
+authorizedKeys:
+  evaluation:
+    - test2
+`
+
+		err = os.WriteFile(file.Name(), []byte(configContent), 0644)
+		require.NoError(t, err)
+
+		time.Sleep(10 * time.Millisecond)
+
+		response3, err := http.Post("http://localhost:41031/v1/allflags", "application/json", strings.NewReader(body))
+		require.NoError(t, err)
+		assert.Equal(t, http.StatusUnauthorized, response3.StatusCode)
+	})
+
+	t.Run("remove authorized keys should allow all requests", func(t *testing.T) {
+		file, err := os.CreateTemp("", "")
+		require.NoError(t, err)
+		defer func() {
+			_ = file.Close()
+			_ = os.Remove(file.Name())
+		}()
+
+		configContent := `server:
+  port: 41032
+  mode: http
+retrievers:
+  - kind: file
+    path: ../../../testdata/flag-config.yaml
+authorizedKeys:
+  evaluation:
+    - test
+`
+		err = os.WriteFile(file.Name(), []byte(configContent), 0644)
+		require.NoError(t, err)
+
+		f := pflag.NewFlagSet("test", pflag.ContinueOnError)
+		f.String("config", file.Name(), "config file")
+
+		c, err := config.New(f, zap.NewNop(), "vTest")
+		require.NoError(t, err)
+
+		flagsetManager, err := service.NewFlagsetManager(c, zap.NewNop(), nil)
+		require.NoError(t, err)
+		defer flagsetManager.Close()
+
+		services := service.Services{
+			MonitoringService: service.NewMonitoring(flagsetManager),
+			WebsocketService:  service.NewWebsocketService(),
+			FlagsetManager:    flagsetManager,
+			Metrics:           metric.Metrics{},
+		}
+
+		s := api.New(c, services, zap.NewNop())
+		go func() { s.StartWithContext(context.Background()) }()
+		time.Sleep(10 * time.Millisecond)
+		defer s.Stop(context.Background())
+
+		// Should have a 200 response with the correct API Keys
+		body := `{"evaluationContext":{"key":"08b5ffb7-7109-42f4-a6f2-b85560fbd20f"}}`
+		request, err := http.NewRequest("POST", "http://localhost:41032/v1/allflags", strings.NewReader(body))
+		require.NoError(t, err)
+		defer func() { _ = request.Body.Close() }()
+		request.Header.Set("Content-Type", "application/json")
+		request.Header.Set("X-API-Key", "test")
+		response2, err := http.DefaultClient.Do(request)
+		require.NoError(t, err)
+		assert.Equal(t, http.StatusOK, response2.StatusCode)
+
+		configContent = `server:
+  port: 41032
+  mode: http
+retrievers:
+  - kind: file
+    path: ../../../testdata/flag-config.yaml
+`
+		err = os.WriteFile(file.Name(), []byte(configContent), 0644)
+		require.NoError(t, err)
+
+		time.Sleep(100 * time.Millisecond)
+
+		response3, err := http.Post("http://localhost:41032/v1/allflags", "application/json", strings.NewReader(body))
+		require.NoError(t, err)
+		assert.Equal(t, http.StatusOK, response3.StatusCode)
+	})
+}

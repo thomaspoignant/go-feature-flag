@@ -74,16 +74,20 @@ func NewFlagsetManager(
 		return nil, fmt.Errorf("configuration is nil")
 	}
 
+	var flagsetMngr FlagsetManager
+	var err error
 	if !config.IsUsingFlagsets() {
 		// in case you are using the relay proxy with flagsets, we create the flagsets and map them to the APIKeys.
 		// note that the default configuration is ignored in this case.
-		return newFlagsetManagerWithDefaultConfig(config, logger, notifiers)
+		flagsetMngr, err = newFlagsetManagerWithDefaultConfig(config, logger, notifiers)
+	} else {
+		flagsetMngr, err = newFlagsetManagerWithFlagsets(config, logger, notifiers)
 	}
-
-	flagsetMngr, err := newFlagsetManagerWithFlagsets(config, logger, notifiers)
 	if err != nil {
 		return nil, err
 	}
+	// Attach a callback to the flagset manager to be called when the configuration changes
+	config.AttachConfigChangeCallback(flagsetMngr.OnConfigChange)
 	return flagsetMngr, nil
 }
 

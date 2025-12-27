@@ -72,4 +72,6 @@ func (c *Config) preloadAPIKeys() {
 // This is used to reload the API Keys when the configuration changes.
 func (c *Config) ForceReloadAPIKeys() {
 	c.apiKeyPreload = sync.Once{}
+	c.forceAuthenticatedRequests = false
+	c.apiKeysSet = nil
 }
