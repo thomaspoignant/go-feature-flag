@@ -273,6 +273,7 @@ func (m *flagsetManagerImpl) OnConfigChange(newConfig *config.Config) {
 }
 
 func (m *flagsetManagerImpl) onConfigChangeWithFlagsets(newConfig *config.Config) {
+	// TODO: implement the logic to change the flagsets
 }
 
 // onConfigChangeWithDefault is called when the configuration changes in default mode.
