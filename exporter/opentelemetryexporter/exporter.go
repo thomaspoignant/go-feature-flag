@@ -67,8 +67,9 @@ func (e *Exporter) createSpan(ctx context.Context, f exporter.FeatureEvent) {
 	)
 	defer span.End()
 
-	// Core attributes
-	attributes := []attribute.KeyValue{
+	// Collect all attributes into a single slice, then set them once on the span.
+	attributes := make([]attribute.KeyValue, 0, 8+len(f.Metadata))
+	attributes = append(attributes,
 		attribute.String("feature_flag.key", f.Key),
 		attribute.String("feature_flag.user_key", f.UserKey),
 		attribute.String("feature_flag.context_kind", f.ContextKind),
@@ -76,26 +77,26 @@ func (e *Exporter) createSpan(ctx context.Context, f exporter.FeatureEvent) {
 		attribute.Bool("feature_flag.default", f.Default),
 		attribute.String("feature_flag.version", f.Version),
 		attribute.String("feature_flag.source", f.Source),
-	}
-	span.SetAttributes(attributes...)
+	)
 
 	// Value (safe stringification)
 	if f.Value != nil {
 		if b, err := json.Marshal(f.Value); err == nil {
-			span.SetAttributes(
-				attribute.String("feature_flag.value", string(b)),
-			)
+			attributes = append(attributes, attribute.String("feature_flag.value", string(b)))
 		}
 	}
 
 	// Metadata
 	for k, v := range f.Metadata {
-		span.SetAttributes(
-			attribute.String(
-				"feature_flag.metadata."+k,
-				fmt.Sprint(v),
-			),
-		)
+		attributes = append(attributes, attribute.String(
+			"feature_flag.metadata."+k,
+			fmt.Sprint(v),
+		))
+	}
+
+	// Apply all attributes in a single call to reduce overhead.
+	if len(attributes) > 0 {
+		span.SetAttributes(attributes...)
 	}
 
 	// Status
