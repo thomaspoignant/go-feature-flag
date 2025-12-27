@@ -1,4 +1,3 @@
-````mdx
 ---
 sidebar_position: 60
 description: Export evaluation events as OpenTelemetry spans.
@@ -119,5 +118,4 @@ Notes:
 - The exporter sets the span timestamp using the original event creation time when available.
 - Because values are JSON-marshalled, very large values may increase span payload size; prefer
   sending only non-sensitive, compact metadata.
-
-````
+```
