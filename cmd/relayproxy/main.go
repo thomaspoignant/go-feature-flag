@@ -105,9 +105,6 @@ func main() {
 		proxyNotifier,
 	})
 
-	// Attach a callback to the flagset manager to be called when the configuration changes
-	proxyConf.AttachConfigChangeCallback(flagsetManager.OnConfigChange)
-
 	if err != nil {
 		logger.ZapLogger.Error(
 			"impossible to start GO Feature Flag, we are not able to initialize the retrieval of flags",
@@ -115,6 +112,8 @@ func main() {
 		)
 		return
 	}
+	// Attach a callback to the flagset manager to be called when the configuration changes
+	proxyConf.AttachConfigChangeCallback(flagsetManager.OnConfigChange)
 
 	services := service.Services{
 		MonitoringService: service.NewMonitoring(flagsetManager),

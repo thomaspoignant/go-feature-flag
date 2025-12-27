@@ -1,5 +1,7 @@
 package config
 
+import "sync"
+
 // APIKeys is a struct to store the API keys for the different endpoints
 type APIKeys struct {
 	Admin      []string `mapstructure:"admin"      koanf:"admin"`
@@ -38,9 +40,6 @@ func (c *Config) IsAuthenticationEnabled() bool {
 // preloadAPIKeys is storing in the struct all the API Keys available for the relay-proxy.
 func (c *Config) preloadAPIKeys() {
 	c.apiKeyPreload.Do(func() {
-		if c.apiKeysSet != nil {
-			return
-		}
 		apiKeySet := make(map[string]ApiKeyType)
 
 		addAPIKeys := func(keys []string, keyType ApiKeyType) {
@@ -60,10 +59,17 @@ func (c *Config) preloadAPIKeys() {
 		// we don't want to force the authentication (except for the admin endpoints).
 		if len(apiKeySet) > 0 {
 			c.forceAuthenticatedRequests = true
+		} else {
+			c.forceAuthenticatedRequests = false
 		}
 
 		addAPIKeys(c.AuthorizedKeys.Admin, AdminKeyType)
-
 		c.apiKeysSet = apiKeySet
 	})
+}
+
+// ForceReloadAPIKeys is forcing the reload of the API Keys.
+// This is used to reload the API Keys when the configuration changes.
+func (c *Config) ForceReloadAPIKeys() {
+	c.apiKeyPreload = sync.Once{}
 }

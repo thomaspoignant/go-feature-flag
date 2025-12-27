@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
@@ -59,6 +61,9 @@ type flagsetManagerImpl struct {
 
 	// Mode is the mode of the flagset manager.
 	mode flagsetManagerMode
+
+	// Logger is the logger for the flagset manager.
+	logger *zap.Logger
 }
 
 // NewFlagsetManager is creating a new FlagsetManager.
@@ -69,7 +74,7 @@ func NewFlagsetManager(
 		return nil, fmt.Errorf("configuration is nil")
 	}
 
-	if len(config.FlagSets) == 0 {
+	if !config.IsUsingFlagsets() {
 		// in case you are using the relay proxy with flagsets, we create the flagsets and map them to the APIKeys.
 		// note that the default configuration is ignored in this case.
 		return newFlagsetManagerWithDefaultConfig(config, logger, notifiers)
@@ -111,11 +116,8 @@ func newFlagsetManagerWithDefaultConfig(
 		DefaultFlagSet: client,
 		config:         c,
 		mode:           flagsetManagerModeDefault,
+		logger:         logger,
 	}, nil
-}
-
-func (m *flagsetManagerImpl) OnConfigChange(_ *config.Config) {
-	// here implement the logic to handle the configuration changes
 }
 
 // newFlagsetManagerWithFlagsets is creating a new FlagsetManager with flagsets.
@@ -168,6 +170,7 @@ func newFlagsetManagerWithFlagsets(
 		APIKeysToFlagSetName: apiKeysToFlagSet,
 		config:               config,
 		mode:                 flagsetManagerModeFlagsets,
+		logger:               logger,
 	}, nil
 }
 
@@ -225,6 +228,7 @@ func (m *flagsetManagerImpl) AllFlagSets() (map[string]*ffclient.GoFeatureFlag, 
 			utils.DefaultFlagSetName: m.DefaultFlagSet,
 		}, nil
 	}
+
 }
 
 // Default returns the default flagset
@@ -237,11 +241,61 @@ func (m *flagsetManagerImpl) IsDefaultFlagSet() bool {
 	return m.mode == flagsetManagerModeDefault
 }
 
+// Close closes the flagset manager
 func (m *flagsetManagerImpl) Close() {
 	if m.DefaultFlagSet != nil {
 		m.DefaultFlagSet.Close()
 	}
 	for _, flagset := range m.FlagSets {
 		flagset.Close()
+	}
+}
+
+// OnConfigChange is called when the configuration changes
+func (m *flagsetManagerImpl) OnConfigChange(newConfig *config.Config) {
+	// dont allow to switch from default to flagsets mode (or the opposite) during runtime
+	if (newConfig.IsUsingFlagsets() && m.mode == flagsetManagerModeDefault) ||
+		(!newConfig.IsUsingFlagsets() && m.mode == flagsetManagerModeFlagsets) {
+		m.logger.Error("switching from default to flagsets mode (or the opposite) is not supported during runtime")
+		return
+	}
+
+	switch m.mode {
+	case flagsetManagerModeDefault:
+		m.onConfigChangeWithDefault(newConfig)
+	case flagsetManagerModeFlagsets:
+		m.onConfigChangeWithFlagsets(newConfig)
+	}
+}
+
+func (m *flagsetManagerImpl) onConfigChangeWithFlagsets(newConfig *config.Config) {
+}
+
+// onConfigChangeWithDefault is called when the configuration changes in default mode.
+// The only configuration that can be changed is the API Keys and the AuthorizedKeys.
+// All the other configuration changes are not supported.
+func (m *flagsetManagerImpl) onConfigChangeWithDefault(newConfig *config.Config) {
+	reloadAPIKeys := false
+	// on default mode, we can only change the API Keys, all the other configuration changes are not supported
+	if !cmp.Equal(m.config.AuthorizedKeys, newConfig.AuthorizedKeys, cmpopts.IgnoreUnexported(config.APIKeys{})) {
+		m.logger.Info("Configuration changed: reloading the AuthorizedKeys")
+		m.config.AuthorizedKeys = newConfig.AuthorizedKeys
+		reloadAPIKeys = true
+	}
+
+	if !cmp.Equal(m.config.APIKeys, newConfig.APIKeys) {
+		m.logger.Info("Configuration changed: reloading the APIKeys")
+		m.config.APIKeys = newConfig.APIKeys
+		reloadAPIKeys = true
+	}
+
+	if !reloadAPIKeys && !cmp.Equal(m.config, newConfig, cmpopts.IgnoreUnexported(config.Config{})) {
+		m.logger.Warn("Configuration changed not supported: only API Keys and AuthorizedKeys can be " +
+			"changed during runtime in default mode")
+		return
+	}
+
+	if reloadAPIKeys {
+		m.config.ForceReloadAPIKeys()
 	}
 }
