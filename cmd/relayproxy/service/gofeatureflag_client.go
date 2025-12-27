@@ -21,6 +21,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/exporter/kafkaexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/kinesisexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/logsexporter"
+	"github.com/thomaspoignant/go-feature-flag/exporter/opentelemetryexporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/pubsubexporterv2"
 	"github.com/thomaspoignant/go-feature-flag/exporter/s3exporterv2"
 	"github.com/thomaspoignant/go-feature-flag/exporter/sqsexporter"
@@ -305,6 +306,10 @@ func createExporter(c *config.ExporterConf) (exporter.CommonExporter, error) {
 			ParquetCompressionCodec: parquetCompressionCodec,
 			AccountKey:              c.AccountKey,
 			AccountName:             c.AccountName,
+		}, nil
+	case config.OpenTelemetryExporter:
+		return &opentelemetryexporter.Exporter{
+			TracerName: c.TracerName,
 		}, nil
 	default:
 		return nil, fmt.Errorf("invalid exporter: kind \"%s\" is not supported", c.Kind)
