@@ -141,6 +141,16 @@ func newFlagsetManagerWithFlagsets(
 		if flagSetName == "" || flagSetName == utils.DefaultFlagSetName {
 			// generating a default flagset name if not provided or equals to default
 			flagSetName = uuid.New().String()
+
+			startLog := "no flagset name provided"
+			if flagset.Name == utils.DefaultFlagSetName {
+				startLog += "using 'default' flagset name"
+			}
+			logger.Warn(
+				fmt.Sprintf("%s, generating a default flagset name. This is not recommended. Not having"+
+					"a flagset name will not allow you to change API Keys associated to the flagset during runtime.", startLog),
+				zap.String("flagset", flagSetName),
+			)
 		}
 
 		flagsets[flagSetName] = client
