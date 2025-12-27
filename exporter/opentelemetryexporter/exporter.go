@@ -68,7 +68,7 @@ func (e *Exporter) createSpan(ctx context.Context, f exporter.FeatureEvent) {
 	defer span.End()
 
 	// Core attributes
-	span.SetAttributes(
+	attributes := []attribute.KeyValue{
 		attribute.String("feature_flag.key", f.Key),
 		attribute.String("feature_flag.user_key", f.UserKey),
 		attribute.String("feature_flag.context_kind", f.ContextKind),
@@ -76,7 +76,8 @@ func (e *Exporter) createSpan(ctx context.Context, f exporter.FeatureEvent) {
 		attribute.Bool("feature_flag.default", f.Default),
 		attribute.String("feature_flag.version", f.Version),
 		attribute.String("feature_flag.source", f.Source),
-	)
+	}
+	span.SetAttributes(attributes...)
 
 	// Value (safe stringification)
 	if f.Value != nil {
