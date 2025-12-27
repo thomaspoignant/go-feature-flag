@@ -46,7 +46,7 @@
     - [Complex rollout strategy available](#complex-rollout-strategy-available)
   - [Notifiers](#notifiers)
   - [Export data](#export-data)
-  - [Linter](#linter)
+  - [Command Line](#command-line)
 - [How can I contribute?](#how-can-i-contribute)
   - [Contributors](#contributors)
   - [Sponsors](#sponsors)
@@ -603,8 +603,8 @@ It represents individual flag evaluations and is considered "full fidelity" even
 The format of the data is [described in the documentation](https://gofeatureflag.org/docs/).
 Events are collected and sent in bulk to avoid spamming your exporter.
 
-## Linter
-A command line tool is available to help you lint your configuration file: [go-feature-flag-lint](cmd/cli/README.md).
+## Command line
+A command line tool is available to help you lint your configuration file or evaluate your feature flag in the terminal: [go-feature-flag-cli](cmd/cli/README.md).
 
 # How can I contribute?
 
