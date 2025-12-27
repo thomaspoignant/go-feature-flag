@@ -172,6 +172,7 @@ func New(cmdLineFlagSet *pflag.FlagSet, log *zap.Logger, version string) (*Confi
 	return proxyConf, nil
 }
 
+// IsDebugEnabled returns true if the log level is debug
 func (c *Config) IsDebugEnabled() bool {
 	if c == nil {
 		return false
@@ -179,6 +180,7 @@ func (c *Config) IsDebugEnabled() bool {
 	return strings.ToLower(c.LogLevel) == "debug"
 }
 
+// ZapLogLevel returns the zap core level for the log level
 func (c *Config) ZapLogLevel() zapcore.Level {
 	if c == nil {
 		return zapcore.InvalidLevel
@@ -188,4 +190,9 @@ func (c *Config) ZapLogLevel() zapcore.Level {
 		return zapcore.InvalidLevel
 	}
 	return level
+}
+
+// IsUsingFlagsets returns true if the configuration is using flagsets
+func (c *Config) IsUsingFlagsets() bool {
+	return len(c.FlagSets) > 0
 }
