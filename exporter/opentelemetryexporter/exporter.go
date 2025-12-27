@@ -40,7 +40,7 @@ func (e *Exporter) init() {
 
 func (e *Exporter) Export(
 	ctx context.Context,
-	_ *fflog.FFLogger,
+	logger *fflog.FFLogger,
 	events []exporter.ExportableEvent,
 ) error {
 	e.init()
@@ -51,13 +51,13 @@ func (e *Exporter) Export(
 			continue
 		}
 
-		e.createSpan(ctx, featureEvent)
+		e.createSpan(ctx, featureEvent, logger)
 	}
 
 	return nil
 }
 
-func (e *Exporter) createSpan(ctx context.Context, f exporter.FeatureEvent) {
+func (e *Exporter) createSpan(ctx context.Context, f exporter.FeatureEvent, logger *fflog.FFLogger) {
 	startTime := time.Unix(f.CreationDate, 0)
 
 	_, span := e.tracer.Start(
@@ -78,6 +78,7 @@ func (e *Exporter) createSpan(ctx context.Context, f exporter.FeatureEvent) {
 		attribute.String("feature_flag.version", f.Version),
 		attribute.String("feature_flag.source", f.Source),
 	)
+	logger.Info("Exporting feature flag evaluation")
 
 	// Value (safe stringification)
 	if f.Value != nil {
@@ -94,6 +95,7 @@ func (e *Exporter) createSpan(ctx context.Context, f exporter.FeatureEvent) {
 		))
 	}
 
+	logger.Info("Setting span attributes for feature flag evaluation")
 	// Apply all attributes in a single call to reduce overhead.
 	if len(attributes) > 0 {
 		span.SetAttributes(attributes...)
@@ -105,6 +107,7 @@ func (e *Exporter) createSpan(ctx context.Context, f exporter.FeatureEvent) {
 	} else {
 		span.SetStatus(codes.Ok, "evaluation successful")
 	}
+	logger.Info("Feature flag evaluation span status set")
 }
 
 func (e *Exporter) IsBulk() bool {
