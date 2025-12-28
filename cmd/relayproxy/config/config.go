@@ -225,7 +225,11 @@ func (c *Config) SetAuthorizedKeys(authorizedKeys APIKeys) {
 func (c *Config) GetAuthorizedKeys() APIKeys {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
-	return c.AuthorizedKeys
+	// Return a deep copy to avoid external modification
+	return APIKeys{
+		Admin:      append([]string(nil), c.AuthorizedKeys.Admin...),
+		Evaluation: append([]string(nil), c.AuthorizedKeys.Evaluation...),
+	}
 }
 
 // GetAPIKeys returns a copy of the APIKeys with proper synchronization.

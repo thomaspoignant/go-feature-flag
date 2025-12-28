@@ -152,11 +152,9 @@ func newFlagsetManagerWithFlagsets(
 			if flagset.Name == utils.DefaultFlagSetName {
 				startLog = "using 'default' as a flagset name"
 			}
-			logger.Warn(
-				fmt.Sprintf("%s, generating a default flagset name. This is not recommended. Not having"+
-					"a flagset name will not allow you to change API Keys associated to the flagset during runtime.", startLog),
-				zap.String("flagset", flagSetName),
-			)
+			logMessage := startLog + ", generating a default flagset name. This is not recommended. " +
+				"Not having a flagset name will not allow you to change API Keys associated to the flagset during runtime."
+			logger.Warn(logMessage, zap.String("flagset", flagSetName))
 		}
 
 		flagsets[flagSetName] = client

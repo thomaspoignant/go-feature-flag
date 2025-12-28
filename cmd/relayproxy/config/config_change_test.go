@@ -57,10 +57,15 @@ authorizedKeys:
 			Metrics:           metric.Metrics{},
 		}
 
+		// attach a callback to the config to be called when the configuration changes
+		callbackCalled := make(chan bool, 1)
+		callback := func(newConfig *config.Config) {
+			callbackCalled <- true
+		}
+		c.AttachConfigChangeCallback(callback)
+
 		s := api.New(c, services, zap.NewNop())
 		go func() { s.StartWithContext(context.Background()) }()
-		time.Sleep(100 * time.Millisecond)
-		defer s.Stop(context.Background())
 
 		// Should have a 401 response without the correct API Keys
 		body := `{"evaluationContext":{"key":"08b5ffb7-7109-42f4-a6f2-b85560fbd20f"}}`
@@ -93,7 +98,13 @@ authorizedKeys:
 		err = os.WriteFile(file.Name(), []byte(configContent), 0644)
 		require.NoError(t, err)
 
-		time.Sleep(100 * time.Millisecond)
+		// wait for the callback to be called or error out after 500 milliseconds
+		select {
+		case <-callbackCalled:
+			// Callback was called, continue with test
+		case <-time.After(500 * time.Millisecond):
+			assert.Fail(t, "Timeout waiting for callback to be called")
+		}
 
 		response3, err := http.Post("http://localhost:41031/v1/allflags", "application/json", strings.NewReader(body))
 		require.NoError(t, err)
@@ -127,6 +138,12 @@ authorizedKeys:
 
 		c, err := config.New(f, zap.NewNop(), "vTest")
 		require.NoError(t, err)
+
+		callbackCalled := make(chan bool, 1)
+		callback := func(newConfig *config.Config) {
+			callbackCalled <- true
+		}
+		c.AttachConfigChangeCallback(callback)
 
 		flagsetManager, err := service.NewFlagsetManager(c, zap.NewNop(), nil)
 		require.NoError(t, err)
@@ -165,7 +182,13 @@ retrievers:
 		err = os.WriteFile(file.Name(), []byte(configContent), 0644)
 		require.NoError(t, err)
 
-		time.Sleep(100 * time.Millisecond)
+		// wait for the callback to be called or error out after 500 milliseconds
+		select {
+		case <-callbackCalled:
+			// Callback was called, continue with test
+		case <-time.After(500 * time.Millisecond):
+			assert.Fail(t, "Timeout waiting for callback to be called")
+		}
 
 		response3, err := http.Post("http://localhost:41032/v1/allflags", "application/json", strings.NewReader(body))
 		require.NoError(t, err)
