@@ -108,10 +108,25 @@ authorizedKeys:
 			assert.Fail(t, "Timeout waiting for callback to be called")
 		}
 
-		response3, err := http.Post("http://localhost:41031/v1/allflags", "application/json", strings.NewReader(body))
+		// After reload, the old API key "test" should be invalid.
+		requestOld, err := http.NewRequest("POST", "http://localhost:41031/v1/allflags", strings.NewReader(body))
 		require.NoError(t, err)
-		defer func() { _ = response3.Body.Close() }()
-		assert.Equal(t, http.StatusUnauthorized, response3.StatusCode)
+		requestOld.Header.Set("Content-Type", "application/json")
+		requestOld.Header.Set("X-API-Key", "test")
+		responseOld, err := http.DefaultClient.Do(requestOld)
+		require.NoError(t, err)
+		defer func() { _ = responseOld.Body.Close() }()
+		assert.Equal(t, http.StatusUnauthorized, responseOld.StatusCode)
+
+		// The new API key "test2" should now be valid.
+		requestNew, err := http.NewRequest("POST", "http://localhost:41031/v1/allflags", strings.NewReader(body))
+		require.NoError(t, err)
+		requestNew.Header.Set("Content-Type", "application/json")
+		requestNew.Header.Set("X-API-Key", "test2")
+		responseNew, err := http.DefaultClient.Do(requestNew)
+		require.NoError(t, err)
+		defer func() { _ = responseNew.Body.Close() }()
+		assert.Equal(t, http.StatusOK, responseNew.StatusCode)
 	})
 
 	t.Run("remove authorized keys should allow all requests", func(t *testing.T) {
