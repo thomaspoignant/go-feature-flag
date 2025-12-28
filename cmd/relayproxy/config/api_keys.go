@@ -1,7 +1,5 @@
 package config
 
-import "sync"
-
 // APIKeys is a struct to store the API keys for the different endpoints
 type APIKeys struct {
 	Admin      []string `mapstructure:"admin"      koanf:"admin"`
@@ -72,15 +70,9 @@ func (c *Config) preloadAPIKeysLocked() {
 
 // preloadAPIKeys is storing in the struct all the API Keys available for the relay-proxy.
 func (c *Config) preloadAPIKeys() {
-	c.mutex.RLock()
-	once := &c.apiKeyPreload
-	c.mutex.RUnlock()
-
-	once.Do(func() {
-		c.mutex.Lock()
-		defer c.mutex.Unlock()
-		c.preloadAPIKeysLocked()
-	})
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	c.preloadAPIKeysLocked()
 }
 
 // ForceReloadAPIKeys is forcing the reload of the API Keys.
@@ -89,11 +81,7 @@ func (c *Config) preloadAPIKeys() {
 func (c *Config) ForceReloadAPIKeys() {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
-	// Reset sync.Once to allow re-initialization
-	c.apiKeyPreload = sync.Once{}
-	// Reset fields
 	c.forceAuthenticatedRequests = false
 	c.apiKeysSet = nil
-	// Repopulate immediately under the same lock to ensure atomicity
 	c.preloadAPIKeysLocked()
 }

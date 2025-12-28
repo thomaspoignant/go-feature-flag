@@ -154,9 +154,6 @@ type Config struct {
 	// we store them in a set to be
 	apiKeysSet map[string]ApiKeyType
 
-	// apiKeyPreload is used to be sure that the apiKeysSet is loaded only once.
-	apiKeyPreload sync.Once
-
 	// forceAuthenticatedRequests is true if we have at least 1 AuthorizedKey.Evaluation key set.
 	forceAuthenticatedRequests bool
 
