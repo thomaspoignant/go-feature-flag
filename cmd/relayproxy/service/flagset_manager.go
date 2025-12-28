@@ -287,7 +287,7 @@ func (m *flagsetManagerImpl) onConfigChangeWithDefault(newConfig *config.Config)
 	newAuthorizedKeys := newConfig.GetAuthorizedKeys()
 	newAPIKeys := newConfig.GetAPIKeys()
 
-	if !reloadAPIKeys && !cmp.Equal(m.config, newConfig,
+	if !cmp.Equal(m.config, newConfig,
 		cmpopts.IgnoreUnexported(config.Config{}), cmpopts.IgnoreFields(config.Config{}, "APIKeys", "AuthorizedKeys")) {
 		m.logger.Warn("Configuration changed not supported: only API Keys and AuthorizedKeys can be " +
 			"changed during runtime in default mode")
