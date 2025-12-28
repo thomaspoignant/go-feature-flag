@@ -59,6 +59,7 @@ func TestWebsocketAuthorizer(t *testing.T) {
 					Evaluation: []string{tt.args.confAPIKey},
 				},
 			}
+			conf.ForceReloadAPIKeys()
 			middleware := middleware2.WebsocketAuthorizer(conf)
 			handler := middleware(func(c echo.Context) error {
 				return c.String(http.StatusOK, "Authorized")

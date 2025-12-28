@@ -389,6 +389,7 @@ func Test_AuthenticationMiddleware(t *testing.T) {
 				if tt.configAPIKeys != nil {
 					proxyConf.AuthorizedKeys = *tt.configAPIKeys
 				}
+				proxyConf.ForceReloadAPIKeys()
 
 				log := log.InitLogger()
 				defer func() { _ = log.ZapLogger.Sync() }()
@@ -470,6 +471,7 @@ func Test_AuthenticationMiddleware(t *testing.T) {
 				if tt.configAPIKeys != nil {
 					proxyConf.AuthorizedKeys = *tt.configAPIKeys
 				}
+				proxyConf.ForceReloadAPIKeys()
 
 				log := log.InitLogger()
 				defer func() { _ = log.ZapLogger.Sync() }()
@@ -864,6 +866,7 @@ func TestStartingRelayProxyUnixSocketAuthentication(t *testing.T) {
 			if tt.configAPIKeys != nil {
 				proxyConf.AuthorizedKeys = *tt.configAPIKeys
 			}
+			proxyConf.ForceReloadAPIKeys()
 
 			log := log.InitLogger()
 			defer func() { _ = log.ZapLogger.Sync() }()

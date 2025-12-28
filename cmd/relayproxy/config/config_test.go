@@ -1127,6 +1127,7 @@ func TestConfig_APIKeyExists(t *testing.T) {
 	for i := range tests {
 		tt := &tests[i]
 		t.Run(tt.name, func(t *testing.T) {
+			tt.config.ForceReloadAPIKeys()
 			assert.Equalf(
 				t,
 				tt.want,
@@ -1232,6 +1233,7 @@ func TestConfig_APIAdminKeyExists(t *testing.T) {
 	for i := range tests {
 		tt := &tests[i]
 		t.Run(tt.name, func(t *testing.T) {
+			tt.config.ForceReloadAPIKeys()
 			assert.Equalf(
 				t,
 				tt.want,
