@@ -102,6 +102,7 @@ authorizedKeys:
 		select {
 		case <-callbackCalled:
 			// Callback was called, continue with test
+			time.Sleep(100 * time.Millisecond)
 		case <-time.After(500 * time.Millisecond):
 			assert.Fail(t, "Timeout waiting for callback to be called")
 		}
@@ -158,7 +159,6 @@ authorizedKeys:
 
 		s := api.New(c, services, zap.NewNop())
 		go func() { s.StartWithContext(context.Background()) }()
-		time.Sleep(100 * time.Millisecond)
 		defer s.Stop(context.Background())
 
 		// Should have a 200 response with the correct API Keys
@@ -185,6 +185,7 @@ retrievers:
 		// wait for the callback to be called or error out after 500 milliseconds
 		select {
 		case <-callbackCalled:
+			time.Sleep(100 * time.Millisecond)
 			// Callback was called, continue with test
 		case <-time.After(500 * time.Millisecond):
 			assert.Fail(t, "Timeout waiting for callback to be called")
