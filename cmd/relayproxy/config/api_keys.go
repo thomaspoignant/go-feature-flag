@@ -45,9 +45,13 @@ func (c *Config) IsAuthenticationEnabled() bool {
 
 // preloadAPIKeys is storing in the struct all the API Keys available for the relay-proxy.
 func (c *Config) preloadAPIKeys() {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-	c.apiKeyPreload.Do(func() {
+	c.mutex.RLock()
+	once := &c.apiKeyPreload
+	c.mutex.RUnlock()
+
+	once.Do(func() {
+		c.mutex.Lock()
+		defer c.mutex.Unlock()
 		apiKeySet := make(map[string]ApiKeyType)
 		addAPIKeys := func(keys []string, keyType ApiKeyType) {
 			for _, k := range keys {
