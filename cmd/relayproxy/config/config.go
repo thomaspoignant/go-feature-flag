@@ -178,6 +178,7 @@ func New(cmdLineFlagSet *pflag.FlagSet, log *zap.Logger, version string) (*Confi
 	}
 	proxyConf.configLoader = configLoader
 	proxyConf.logger = log
+	proxyConf.preloadAPIKeys()
 	return proxyConf, nil
 }
 
