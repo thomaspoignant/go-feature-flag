@@ -76,12 +76,13 @@ func NewFlagsetManager(
 
 	var flagsetMngr FlagsetManager
 	var err error
-	if !config.IsUsingFlagsets() {
-		// in case you are using the relay proxy with flagsets, we create the flagsets and map them to the APIKeys.
-		// note that the default configuration is ignored in this case.
-		flagsetMngr, err = newFlagsetManagerWithDefaultConfig(config, logger, notifiers)
-	} else {
+	if config.IsUsingFlagsets() {
+		// flagsets mode: create flagsets based on the `flagsets` array in the configuration.
+		// The top-level retriever/exporter/etc. configuration is ignored in this mode.
 		flagsetMngr, err = newFlagsetManagerWithFlagsets(config, logger, notifiers)
+	} else {
+		// default mode: use the top-level configuration to create a single default flagset.
+		flagsetMngr, err = newFlagsetManagerWithDefaultConfig(config, logger, notifiers)
 	}
 	if err != nil {
 		return nil, err
