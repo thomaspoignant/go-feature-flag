@@ -204,6 +204,8 @@ func (c *Config) ZapLogLevel() zapcore.Level {
 
 // IsUsingFlagsets returns true if the configuration is using flagsets
 func (c *Config) IsUsingFlagsets() bool {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
 	return len(c.FlagSets) > 0
 }
 
