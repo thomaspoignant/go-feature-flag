@@ -232,7 +232,6 @@ func (m *flagsetManagerImpl) AllFlagSets() (map[string]*ffclient.GoFeatureFlag, 
 			utils.DefaultFlagSetName: m.DefaultFlagSet,
 		}, nil
 	}
-
 }
 
 // Default returns the default flagset
@@ -282,15 +281,23 @@ func (m *flagsetManagerImpl) onConfigChangeWithFlagsets(newConfig *config.Config
 func (m *flagsetManagerImpl) onConfigChangeWithDefault(newConfig *config.Config) {
 	reloadAPIKeys := false
 	// on default mode, we can only change the API Keys, all the other configuration changes are not supported
-	if !cmp.Equal(m.config.AuthorizedKeys, newConfig.AuthorizedKeys, cmpopts.IgnoreUnexported(config.APIKeys{})) {
+	// We need to read the current values with proper locking to avoid data races
+	currentAuthorizedKeys := m.config.GetAuthorizedKeys()
+	currentAPIKeys := m.config.GetAPIKeys()
+	newAuthorizedKeys := newConfig.GetAuthorizedKeys()
+	newAPIKeys := newConfig.GetAPIKeys()
+
+	if !cmp.Equal(currentAuthorizedKeys, newAuthorizedKeys, cmpopts.IgnoreUnexported(config.APIKeys{})) {
 		m.logger.Info("Configuration changed: reloading the AuthorizedKeys")
-		m.config.SetAuthorizedKeys(newConfig.AuthorizedKeys)
+		m.config.SetAuthorizedKeys(newAuthorizedKeys)
 		reloadAPIKeys = true
 	}
 
-	if !cmp.Equal(m.config.APIKeys, newConfig.APIKeys) {
+	// nolint: staticcheck
+	if !cmp.Equal(currentAPIKeys, newAPIKeys) {
 		m.logger.Info("Configuration changed: reloading the APIKeys")
-		m.config.SetAPIKeys(newConfig.APIKeys)
+		// nolint: staticcheck
+		m.config.SetAPIKeys(newAPIKeys)
 		reloadAPIKeys = true
 	}
 

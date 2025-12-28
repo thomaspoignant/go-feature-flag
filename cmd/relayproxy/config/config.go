@@ -141,7 +141,13 @@ type Config struct {
 
 	// ---------- Private fields ----------
 	// mutex is used to protect the configuration from concurrent access during runtime
-	// it applies to the following fields: AuthorizedKeys, APIKeys, FlagSets, apiKeysSet, apiKeyPreload, forceAuthenticatedRequests
+	// it applies to the following fields:
+	// - AuthorizedKeys
+	// - APIKeys
+	// - FlagSets
+	// - apiKeysSet
+	// - apiKeyPreload
+	// - forceAuthenticatedRequests
 	mutex sync.RWMutex
 
 	// apiKeySet is the internal representation of an API keys list configured
@@ -200,7 +206,7 @@ func (c *Config) IsUsingFlagsets() bool {
 	return len(c.FlagSets) > 0
 }
 
-// deprecated: use SetAuthorizedKeys instead
+// Deprecated: use SetAuthorizedKeys instead
 func (c *Config) SetAPIKeys(apiKeys []string) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
@@ -212,4 +218,21 @@ func (c *Config) SetAuthorizedKeys(authorizedKeys APIKeys) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 	c.AuthorizedKeys = authorizedKeys
+}
+
+// GetAuthorizedKeys returns a copy of the AuthorizedKeys with proper synchronization.
+func (c *Config) GetAuthorizedKeys() APIKeys {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+	return c.AuthorizedKeys
+}
+
+// GetAPIKeys returns a copy of the APIKeys with proper synchronization.
+func (c *Config) GetAPIKeys() []string {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+	// Return a copy to avoid external modification
+	result := make([]string, len(c.APIKeys))
+	copy(result, c.APIKeys)
+	return result
 }
