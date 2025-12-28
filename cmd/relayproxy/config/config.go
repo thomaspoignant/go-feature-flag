@@ -146,7 +146,6 @@ type Config struct {
 	// - APIKeys
 	// - FlagSets
 	// - apiKeysSet
-	// - apiKeyPreload
 	// - forceAuthenticatedRequests
 	mutex sync.RWMutex
 
