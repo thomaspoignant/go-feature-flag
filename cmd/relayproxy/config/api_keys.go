@@ -21,12 +21,16 @@ const (
 // APIKeysAdminExists is checking if an admin API Key exist in the relay proxy configuration
 func (c *Config) APIKeysAdminExists(apiKey string) bool {
 	c.preloadAPIKeys()
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
 	return c.apiKeysSet[apiKey] == AdminKeyType
 }
 
 // APIKeyExists is checking if an API Key exist in the relay proxy configuration
 func (c *Config) APIKeyExists(apiKey string) bool {
 	c.preloadAPIKeys()
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
 	_, ok := c.apiKeysSet[apiKey]
 	return ok
 }
@@ -34,12 +38,16 @@ func (c *Config) APIKeyExists(apiKey string) bool {
 // IsAuthenticationEnabled returns true if we need to be authenticated.
 func (c *Config) IsAuthenticationEnabled() bool {
 	c.preloadAPIKeys()
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
 	return c.forceAuthenticatedRequests
 }
 
 // preloadAPIKeys is storing in the struct all the API Keys available for the relay-proxy.
 func (c *Config) preloadAPIKeys() {
 	c.apiKeyPreload.Do(func() {
+		c.mutex.Lock()
+		defer c.mutex.Unlock()
 		apiKeySet := make(map[string]ApiKeyType)
 
 		addAPIKeys := func(keys []string, keyType ApiKeyType) {
@@ -71,6 +79,8 @@ func (c *Config) preloadAPIKeys() {
 // ForceReloadAPIKeys is forcing the reload of the API Keys.
 // This is used to reload the API Keys when the configuration changes.
 func (c *Config) ForceReloadAPIKeys() {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
 	c.apiKeyPreload = sync.Once{}
 	c.forceAuthenticatedRequests = false
 	c.apiKeysSet = nil

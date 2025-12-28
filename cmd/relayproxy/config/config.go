@@ -140,6 +140,9 @@ type Config struct {
 	// ---------- End of deprecated fields ----------
 
 	// ---------- Private fields ----------
+	// mutex is used to protect the configuration from concurrent access during runtime
+	// it applies to the following fields: AuthorizedKeys, APIKeys, FlagSets, apiKeysSet, apiKeyPreload, forceAuthenticatedRequests
+	mutex sync.RWMutex
 
 	// apiKeySet is the internal representation of an API keys list configured
 	// we store them in a set to be
@@ -195,4 +198,18 @@ func (c *Config) ZapLogLevel() zapcore.Level {
 // IsUsingFlagsets returns true if the configuration is using flagsets
 func (c *Config) IsUsingFlagsets() bool {
 	return len(c.FlagSets) > 0
+}
+
+// deprecated: use SetAuthorizedKeys instead
+func (c *Config) SetAPIKeys(apiKeys []string) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	c.APIKeys = apiKeys
+}
+
+// SetAuthorizedKeys sets the authorized keys for the configuration
+func (c *Config) SetAuthorizedKeys(authorizedKeys APIKeys) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	c.AuthorizedKeys = authorizedKeys
 }

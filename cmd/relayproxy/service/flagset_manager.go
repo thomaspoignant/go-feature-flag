@@ -284,13 +284,13 @@ func (m *flagsetManagerImpl) onConfigChangeWithDefault(newConfig *config.Config)
 	// on default mode, we can only change the API Keys, all the other configuration changes are not supported
 	if !cmp.Equal(m.config.AuthorizedKeys, newConfig.AuthorizedKeys, cmpopts.IgnoreUnexported(config.APIKeys{})) {
 		m.logger.Info("Configuration changed: reloading the AuthorizedKeys")
-		m.config.AuthorizedKeys = newConfig.AuthorizedKeys
+		m.config.SetAuthorizedKeys(newConfig.AuthorizedKeys)
 		reloadAPIKeys = true
 	}
 
 	if !cmp.Equal(m.config.APIKeys, newConfig.APIKeys) {
 		m.logger.Info("Configuration changed: reloading the APIKeys")
-		m.config.APIKeys = newConfig.APIKeys
+		m.config.SetAPIKeys(newConfig.APIKeys)
 		reloadAPIKeys = true
 	}
 
