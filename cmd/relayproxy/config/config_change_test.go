@@ -67,6 +67,7 @@ authorizedKeys:
 		s := api.New(c, services, zap.NewNop())
 		go func() { s.StartWithContext(context.Background()) }()
 		defer s.Stop(context.Background())
+		time.Sleep(100 * time.Millisecond) // wait for the server to start
 
 		// Should have a 401 response without the correct API Keys
 		body := `{"evaluationContext":{"key":"08b5ffb7-7109-42f4-a6f2-b85560fbd20f"}}`
@@ -176,6 +177,7 @@ authorizedKeys:
 		s := api.New(c, services, zap.NewNop())
 		go func() { s.StartWithContext(context.Background()) }()
 		defer s.Stop(context.Background())
+		time.Sleep(100 * time.Millisecond) // wait for the server to start
 
 		// Should have a 200 response with the correct API Keys
 		body := `{"evaluationContext":{"key":"08b5ffb7-7109-42f4-a6f2-b85560fbd20f"}}`
