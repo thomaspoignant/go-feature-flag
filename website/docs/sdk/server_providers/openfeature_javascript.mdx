@@ -311,7 +311,32 @@ featureFlagClient.track('user_action', context, {
 });
 ```
 
+## NextJS integration
+
+:::warning
+If you're using NextJS with in-process evaluation mode, you might encounter issues loading the WASM binary.
+:::
+
+In the server side, you might have an error like this _(only if you are using the in-process evaluation mode)_:
+
+```
+WasmNotLoadedException: Failed to load WASM binary: WASM file not found
+```
+
+Because of the specificity of **NextJS**, you need to add the following code to your `next.config.ts` file:
+
+```typescript
+const nextConfig: NextConfig = {
+  // ...
+  serverExternalPackages: ["@openfeature/go-feature-flag-provider"],
+  // ...
+};
+```
+
+This will tell NextJS to use the `@openfeature/go-feature-flag-provider` package as an external package and not to bundle it with the application, which is the best way to avoid the WASM binary not found error.
+
 ## Features status
+
 <FeatureTable sdk={sdk.find(it => it.key === 'nodejs')} />
 
 ## Contribute to the provider
