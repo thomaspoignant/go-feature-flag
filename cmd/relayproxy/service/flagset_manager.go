@@ -266,13 +266,14 @@ func (m *flagsetManagerImpl) OnConfigChange(newConfig *config.Config) {
 	case flagsetManagerModeDefault:
 		m.onConfigChangeWithDefault(newConfig)
 	case flagsetManagerModeFlagsets:
-		m.onConfigChangeWithFlagsets(newConfig)
+		m.logger.Debug("flagsets mode is not supported yet")
+		// m.onConfigChangeWithFlagsets(newConfig)
 	}
 }
 
-func (m *flagsetManagerImpl) onConfigChangeWithFlagsets(newConfig *config.Config) {
-	// TODO: implement the logic to change the flagsets
-}
+// func (m *flagsetManagerImpl) onConfigChangeWithFlagsets(newConfig *config.Config) {
+// 	// TODO: implement the logic to change the flagsets
+// }
 
 // onConfigChangeWithDefault is called when the configuration changes in default mode.
 // The only configuration that can be changed is the API Keys and the AuthorizedKeys.
