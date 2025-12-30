@@ -108,6 +108,7 @@ loglevel: error`,
 		t.Run(tt.name, func(t *testing.T) {
 			// Create temporary directory and config file
 			tempDir := t.TempDir()
+			defer os.RemoveAll(tempDir)
 			configFile := filepath.Join(tempDir, "goff-proxy.yaml")
 
 			// Write initial config
@@ -123,6 +124,7 @@ loglevel: error`,
 			// Create ConfigLoader with watchChanges enabled
 			logger := zap.NewNop()
 			loader := config.NewConfigLoader(f, logger, "1.0.0", true)
+			defer loader.StopWatchChanges()
 
 			// Setup callbacks
 			receivedConfigs, mu := tt.setupCallback(t, loader)
