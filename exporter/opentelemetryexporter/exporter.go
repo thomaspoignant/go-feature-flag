@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"log/slog"
 	"sync"
 	"time"
 
@@ -59,6 +61,13 @@ func (e *Exporter) Export(
 
 func (e *Exporter) createSpan(ctx context.Context, f exporter.FeatureEvent, logger *fflog.FFLogger) {
 	startTime := time.Unix(f.CreationDate, 0)
+
+	if logger == nil {
+		logger = &fflog.FFLogger{
+			// Noop logger to avoid any logging and nil issues
+			LeveledLogger: slog.New(slog.NewTextHandler(io.Discard, nil)),
+		}
+	}
 
 	_, span := e.tracer.Start(
 		ctx,
