@@ -140,13 +140,18 @@ type Config struct {
 	// ---------- End of deprecated fields ----------
 
 	// ---------- Private fields ----------
+	// mutex is used to protect the configuration from concurrent access during runtime
+	// it applies to the following fields:
+	// - AuthorizedKeys
+	// - APIKeys
+	// - FlagSets
+	// - apiKeysSet
+	// - forceAuthenticatedRequests
+	mutex sync.RWMutex
 
 	// apiKeySet is the internal representation of an API keys list configured
 	// we store them in a set to be
 	apiKeysSet map[string]ApiKeyType
-
-	// apiKeyPreload is used to be sure that the apiKeysSet is loaded only once.
-	apiKeyPreload sync.Once
 
 	// forceAuthenticatedRequests is true if we have at least 1 AuthorizedKey.Evaluation key set.
 	forceAuthenticatedRequests bool
@@ -169,9 +174,11 @@ func New(cmdLineFlagSet *pflag.FlagSet, log *zap.Logger, version string) (*Confi
 	}
 	proxyConf.configLoader = configLoader
 	proxyConf.logger = log
+	proxyConf.preloadAPIKeys()
 	return proxyConf, nil
 }
 
+// IsDebugEnabled returns true if the log level is debug
 func (c *Config) IsDebugEnabled() bool {
 	if c == nil {
 		return false
@@ -179,6 +186,7 @@ func (c *Config) IsDebugEnabled() bool {
 	return strings.ToLower(c.LogLevel) == "debug"
 }
 
+// ZapLogLevel returns the zap core level for the log level
 func (c *Config) ZapLogLevel() zapcore.Level {
 	if c == nil {
 		return zapcore.InvalidLevel
@@ -188,4 +196,46 @@ func (c *Config) ZapLogLevel() zapcore.Level {
 		return zapcore.InvalidLevel
 	}
 	return level
+}
+
+// IsUsingFlagsets returns true if the configuration is using flagsets
+func (c *Config) IsUsingFlagsets() bool {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+	return len(c.FlagSets) > 0
+}
+
+// Deprecated: use SetAuthorizedKeys instead
+func (c *Config) SetAPIKeys(apiKeys []string) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	c.APIKeys = apiKeys
+}
+
+// SetAuthorizedKeys sets the authorized keys for the configuration
+func (c *Config) SetAuthorizedKeys(authorizedKeys APIKeys) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	c.AuthorizedKeys = authorizedKeys
+}
+
+// GetAuthorizedKeys returns a copy of the AuthorizedKeys with proper synchronization.
+func (c *Config) GetAuthorizedKeys() APIKeys {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+	// Return a deep copy to avoid external modification
+	return APIKeys{
+		Admin:      append([]string(nil), c.AuthorizedKeys.Admin...),
+		Evaluation: append([]string(nil), c.AuthorizedKeys.Evaluation...),
+	}
+}
+
+// GetAPIKeys returns a copy of the APIKeys with proper synchronization.
+func (c *Config) GetAPIKeys() []string {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+	// Return a copy to avoid external modification
+	result := make([]string, len(c.APIKeys))
+	copy(result, c.APIKeys)
+	return result
 }
