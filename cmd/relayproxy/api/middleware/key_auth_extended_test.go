@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	middleware2 "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/helper"
 )
 
 func TestKeyAuthExtended(t *testing.T) {
@@ -93,7 +94,7 @@ func TestKeyAuthExtended(t *testing.T) {
 			req := httptest.NewRequest(http.MethodGet, "/test", nil)
 
 			if tt.xAPIKey != "" {
-				req.Header.Set("X-API-Key", tt.xAPIKey)
+				req.Header.Set(helper.XAPIKeyHeader, tt.xAPIKey)
 			}
 			if tt.authorization != "" {
 				req.Header.Set("Authorization", tt.authorization)

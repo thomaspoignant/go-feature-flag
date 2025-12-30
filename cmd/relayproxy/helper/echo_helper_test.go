@@ -175,12 +175,12 @@ func TestAPIKey(t *testing.T) {
 
 			// Set the X-API-Key header if provided
 			if tt.xAPIKey != "" {
-				c.Request().Header.Set("X-API-Key", tt.xAPIKey)
+				c.Request().Header.Set(helper.XAPIKeyHeader, tt.xAPIKey)
 			}
 
 			// Set the Authorization header
 			if tt.authorization != "" {
-				c.Request().Header.Set("Authorization", tt.authorization)
+				c.Request().Header.Set(helper.AuthorizationHeader, tt.authorization)
 			}
 
 			// Call the function
@@ -249,7 +249,7 @@ func TestFlagSet(t *testing.T) {
 	}
 }
 
-func TestFlagSet_Integration(t *testing.T) {
+func TestFlagSetIntegration(t *testing.T) {
 	t.Run("should handle specific error messages correctly", func(t *testing.T) {
 		mockManager := &mock.MockFlagsetManager{GetFlagSetsErr: errors.New("test error")}
 		flagset, err := helper.FlagSet(mockManager, "test-key")
