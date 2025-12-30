@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
+	"sync"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -54,6 +55,9 @@ type flagsetManagerImpl struct {
 	// APIKeysToFlagSetName is a map that stores the API Key linked to the flagset name.
 	// It is used to retrieve the flagset linked to the API Key.
 	APIKeysToFlagSetName map[string]string
+
+	// apiKeysMutex protects concurrent access to APIKeysToFlagSetName
+	apiKeysMutex sync.RWMutex
 
 	// Config is the configuration of the relay proxy.
 	// It is used to retrieve the configuration of the relay proxy.
@@ -185,7 +189,9 @@ func (m *flagsetManagerImpl) FlagSet(apiKey string) (*ffclient.GoFeatureFlag, er
 			return nil, fmt.Errorf("no API key provided")
 		}
 
+		m.apiKeysMutex.RLock()
 		flagsetName, exists := m.APIKeysToFlagSetName[apiKey]
+		m.apiKeysMutex.RUnlock()
 		if !exists {
 			return nil, fmt.Errorf("flagset not found for API key")
 		}
@@ -206,7 +212,10 @@ func (m *flagsetManagerImpl) FlagSet(apiKey string) (*ffclient.GoFeatureFlag, er
 func (m *flagsetManagerImpl) FlagSetName(apiKey string) (string, error) {
 	switch m.mode {
 	case flagsetManagerModeFlagsets:
-		if name, ok := m.APIKeysToFlagSetName[apiKey]; ok {
+		m.apiKeysMutex.RLock()
+		name, ok := m.APIKeysToFlagSetName[apiKey]
+		m.apiKeysMutex.RUnlock()
+		if ok {
 			return name, nil
 		}
 		return "", fmt.Errorf("no flag set associated to the API key")
@@ -284,28 +293,28 @@ func (m *flagsetManagerImpl) onConfigChangeWithFlagsets(newConfig *config.Config
 			continue
 		}
 
-		if _, exists := m.FlagSets[newConfigFlagsetName]; exists {
-			// the flagset already exists, we can modify the APIKeys
-			// m.FlagSets[newConfigFlagsetName].
+		// if a flagset with the same name already exists, we can only modify the APIKeys.
+		// we check if the APIKeys are different to avoid reloading the flagset if nothing changed.
+		if currentFlagsetAPIKeys, err := m.config.GetFlagSetAPIKeys(newConfigFlagsetName); err == nil {
+			if !cmp.Equal(currentFlagsetAPIKeys, newConfigFlagset.APIKeys) {
+				m.logger.Info("Configuration changed: updating the APIKeys for flagset", zap.String("flagset", newConfigFlagsetName))
+				m.config.SetFlagSetAPIKeys(newConfigFlagsetName, newConfigFlagset.APIKeys)
+				// modify flagset manager APIKeysToFlagSetName to use the new APIKeys
 
-			// TODO: add a check to see if the APIKeys are already in another flagset
-
-			copyAPIKeysToFlagSetName := make(map[string]string)
-			for apiKey, flagsetName := range m.APIKeysToFlagSetName {
-				if flagsetName != newConfigFlagsetName {
-					copyAPIKeysToFlagSetName[apiKey] = flagsetName
+				m.apiKeysMutex.Lock()
+				// remove the old APIKeys from the APIKeysToFlagSetName
+				for _, apiKey := range currentFlagsetAPIKeys {
+					delete(m.APIKeysToFlagSetName, apiKey)
 				}
+				// add the new APIKeys to the APIKeysToFlagSetName
+				for _, apiKey := range newConfigFlagset.APIKeys {
+					m.APIKeysToFlagSetName[apiKey] = newConfigFlagsetName
+				}
+				m.apiKeysMutex.Unlock()
+
+				m.config.ForceReloadAPIKeys()
+				continue
 			}
-
-			fmt.Println("copyAPIKeysToFlagSetName - 1", copyAPIKeysToFlagSetName)
-
-			for _, apiKey := range newConfigFlagset.APIKeys {
-				copyAPIKeysToFlagSetName[apiKey] = newConfigFlagsetName
-			}
-
-			m.APIKeysToFlagSetName = copyAPIKeysToFlagSetName
-
-			fmt.Println("copyAPIKeysToFlagSetName", copyAPIKeysToFlagSetName)
 		}
 	}
 }
