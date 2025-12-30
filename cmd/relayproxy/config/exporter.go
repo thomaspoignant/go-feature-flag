@@ -10,6 +10,7 @@ import (
 // ExporterConf contains all the field to configure an exporter
 type ExporterConf struct {
 	Kind                    ExporterKind           `mapstructure:"kind"                    koanf:"kind"`
+	TracerName              string                 `mapstructure:"tracerName"             koanf:"tracername"`
 	OutputDir               string                 `mapstructure:"outputDir"               koanf:"outputdir"`
 	Format                  string                 `mapstructure:"format"                  koanf:"format"`
 	Filename                string                 `mapstructure:"filename"                koanf:"filename"`
@@ -116,6 +117,7 @@ const (
 	KafkaExporter         ExporterKind = "kafka"
 	PubSubExporter        ExporterKind = "pubsub"
 	AzureExporter         ExporterKind = "azureBlobStorage"
+	OpenTelemetryExporter ExporterKind = "opentelemetry"
 )
 
 // IsValid is checking if the value is part of the enum
@@ -130,7 +132,8 @@ func (r ExporterKind) IsValid() error {
 		KafkaExporter,
 		PubSubExporter,
 		KinesisExporter,
-		AzureExporter:
+		AzureExporter,
+		OpenTelemetryExporter:
 		return nil
 	}
 	return fmt.Errorf("invalid exporter: kind \"%s\" is not supported", r)
