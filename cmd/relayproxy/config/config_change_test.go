@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/helper"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"go.uber.org/zap"
@@ -80,8 +81,8 @@ authorizedKeys:
 		request, err := http.NewRequest("POST", "http://localhost:41031/v1/allflags", strings.NewReader(body))
 		require.NoError(t, err)
 		defer func() { _ = request.Body.Close() }()
-		request.Header.Set("Content-Type", "application/json")
-		request.Header.Set("X-API-Key", "test")
+		request.Header.Set(helper.ContentTypeHeader, "application/json")
+		request.Header.Set(helper.XAPIKeyHeader, "test")
 		response2, err := http.DefaultClient.Do(request)
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusOK, response2.StatusCode)
@@ -112,8 +113,8 @@ authorizedKeys:
 		// After reload, the old API key "test" should be invalid.
 		requestOld, err := http.NewRequest("POST", "http://localhost:41031/v1/allflags", strings.NewReader(body))
 		require.NoError(t, err)
-		requestOld.Header.Set("Content-Type", "application/json")
-		requestOld.Header.Set("X-API-Key", "test")
+		requestOld.Header.Set(helper.ContentTypeHeader, "application/json")
+		requestOld.Header.Set(helper.XAPIKeyHeader, "test")
 		responseOld, err := http.DefaultClient.Do(requestOld)
 		require.NoError(t, err)
 		defer func() { _ = responseOld.Body.Close() }()
@@ -122,8 +123,8 @@ authorizedKeys:
 		// The new API key "test2" should now be valid.
 		requestNew, err := http.NewRequest("POST", "http://localhost:41031/v1/allflags", strings.NewReader(body))
 		require.NoError(t, err)
-		requestNew.Header.Set("Content-Type", "application/json")
-		requestNew.Header.Set("X-API-Key", "test2")
+		requestNew.Header.Set(helper.ContentTypeHeader, "application/json")
+		requestNew.Header.Set(helper.XAPIKeyHeader, "test2")
 		responseNew, err := http.DefaultClient.Do(requestNew)
 		require.NoError(t, err)
 		defer func() { _ = responseNew.Body.Close() }()
@@ -184,7 +185,7 @@ authorizedKeys:
 		request, err := http.NewRequest("POST", "http://localhost:41032/v1/allflags", strings.NewReader(body))
 		require.NoError(t, err)
 		defer func() { _ = request.Body.Close() }()
-		request.Header.Set("Content-Type", "application/json")
+		request.Header.Set(helper.ContentTypeHeader, "application/json")
 		request.Header.Set("X-API-Key", "test")
 		response2, err := http.DefaultClient.Do(request)
 		require.NoError(t, err)

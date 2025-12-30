@@ -16,15 +16,14 @@ import (
 // Returns an empty string if no API key is found.
 func APIKey(c echo.Context) string {
 	// First, check X-API-Key header (takes precedence)
-	if xAPIKey := c.Request().Header.Get("X-API-Key"); xAPIKey != "" {
+	if xAPIKey := c.Request().Header.Get(XAPIKeyHeader); xAPIKey != "" {
 		return xAPIKey
 	}
 
 	// Fall back to Authorization header
-	apiKey := c.Request().Header.Get("Authorization")
-	const bearerPrefix = "Bearer "
-	if len(apiKey) >= len(bearerPrefix) && strings.EqualFold(apiKey[:len(bearerPrefix)], bearerPrefix) {
-		return strings.TrimSpace(apiKey[len(bearerPrefix):])
+	apiKey := c.Request().Header.Get(AuthorizationHeader)
+	if len(apiKey) >= len(BearerPrefix) && strings.EqualFold(apiKey[:len(BearerPrefix)], BearerPrefix) {
+		return strings.TrimSpace(apiKey[len(BearerPrefix):])
 	}
 	return apiKey
 }
