@@ -101,6 +101,9 @@ func (c *ConfigLoader) startWatchChanges() {
 	}
 
 	// Start the event processor goroutine
+	// This approach is used to avoid blocking the fsnotify goroutine
+	// The event processor goroutine is responsible for processing the events and reloading the configuration
+	// Check https://github.com/knadh/koanf/issues/12#issuecomment-2637665148 to understand why this is necessary
 	go c.processConfigChangeEvents()
 
 	// The file watcher callback just sends to the channel and returns immediately
