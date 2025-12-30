@@ -266,14 +266,44 @@ func (m *flagsetManagerImpl) OnConfigChange(newConfig *config.Config) {
 	case flagsetManagerModeDefault:
 		m.onConfigChangeWithDefault(newConfig)
 	case flagsetManagerModeFlagsets:
-		m.logger.Debug("flagsets mode is not supported yet")
-		// m.onConfigChangeWithFlagsets(newConfig)
+		m.onConfigChangeWithFlagsets(newConfig)
 	}
 }
 
-// func (m *flagsetManagerImpl) onConfigChangeWithFlagsets(newConfig *config.Config) {
-// 	// TODO: implement the logic to change the flagsets
-// }
+func (m *flagsetManagerImpl) onConfigChangeWithFlagsets(newConfig *config.Config) {
+	// check changes in APIKeys for flagsets
+	for _, newConfigFlagset := range newConfig.FlagSets {
+		newConfigFlagsetName := newConfigFlagset.Name
+		if newConfigFlagsetName == "" || newConfigFlagsetName == utils.DefaultFlagSetName {
+			// you cannot modify a flagset without a name, we skip it
+			continue
+		}
+
+		if _, exists := m.FlagSets[newConfigFlagsetName]; exists {
+			// the flagset already exists, we can modify the APIKeys
+			// m.FlagSets[newConfigFlagsetName].
+
+			// TODO: add a check to see if the APIKeys are already in another flagset
+
+			copyAPIKeysToFlagSetName := make(map[string]string)
+			for apiKey, flagsetName := range m.APIKeysToFlagSetName {
+				if flagsetName != newConfigFlagsetName {
+					copyAPIKeysToFlagSetName[apiKey] = flagsetName
+				}
+			}
+
+			fmt.Println("copyAPIKeysToFlagSetName - 1", copyAPIKeysToFlagSetName)
+
+			for _, apiKey := range newConfigFlagset.APIKeys {
+				copyAPIKeysToFlagSetName[apiKey] = newConfigFlagsetName
+			}
+
+			m.APIKeysToFlagSetName = copyAPIKeysToFlagSetName
+
+			fmt.Println("copyAPIKeysToFlagSetName", copyAPIKeysToFlagSetName)
+		}
+	}
+}
 
 // onConfigChangeWithDefault is called when the configuration changes in default mode.
 // The only configuration that can be changed is the API Keys and the AuthorizedKeys.
