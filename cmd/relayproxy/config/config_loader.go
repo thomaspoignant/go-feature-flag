@@ -35,6 +35,12 @@ type ConfigLoader struct {
 
 	// callbacksMutex is used to protect the callbacks slice
 	callbacksMutex sync.RWMutex
+
+	// channel-based event processing for file watcher
+	// Using a buffered channel of size 1 coalesces multiple rapid events into one
+	eventChan chan struct{} // receives file change events
+	stopChan  chan struct{} // signals the event processor goroutine to stop
+	stopOnce  sync.Once     // ensures stopChan is only closed once
 }
 
 // NewConfigLoader creates a new ConfigLoader.
@@ -46,6 +52,12 @@ func NewConfigLoader(
 		version:        version,
 		watchChanges:   watchChanges,
 		k:              koanf.New("."),
+	}
+
+	// Initialize channels only if we're watching for changes
+	if watchChanges {
+		configLoader.eventChan = make(chan struct{}, 1) // buffered to avoid blocking
+		configLoader.stopChan = make(chan struct{})
 	}
 
 	// load the configuration from the command line, the configuration file, the environment variables and the version
@@ -87,27 +99,63 @@ func (c *ConfigLoader) startWatchChanges() {
 	if c.fileProvider == nil || !c.watchChanges {
 		return
 	}
+
+	// Start the event processor goroutine
+	// This approach is used to avoid blocking the fsnotify goroutine
+	// The event processor goroutine is responsible for processing the events and reloading the configuration
+	// Check https://github.com/knadh/koanf/issues/12#issuecomment-2637665148 to understand why this is necessary
+	go c.processConfigChangeEvents()
+
+	// The file watcher callback just sends to the channel and returns immediately
+	// This prevents blocking the fsnotify goroutine
 	errWatch := c.fileProvider.Watch(func(event any, err error) {
 		if err != nil {
 			c.log.Error("error watching for configuration changes (error from file provider)", zap.Error(err))
 			return
 		}
 
-		newConfig := NewConfigLoader(c.cmdLineFlagSet, c.log, c.version, false)
-		c2, err := newConfig.ToConfig() // unmarshal the new configuration
-		if err != nil {
-			c.log.Error("error loading new config", zap.Error(err))
-			return
-		}
-
-		c.callbacksMutex.RLock()
-		defer c.callbacksMutex.RUnlock()
-		for _, callback := range c.callbacks {
-			callback(c2)
+		// Non-blocking send to the event channel
+		// If the channel is full (event already pending), we skip this event
+		// since the pending event will trigger a config reload anyway
+		select {
+		case c.eventChan <- struct{}{}:
+			// Event sent successfully
+		default:
+			// Channel full, event already pending - skip this one
 		}
 	})
 	if errWatch != nil {
 		c.log.Error("error watching for configuration changes (error from file provider)", zap.Error(errWatch))
+	}
+}
+
+// processConfigChangeEvents processes file change events from the channel.
+// The buffered channel (size 1) naturally coalesces rapid events - if an event
+// is already pending, new events are dropped since they would trigger the same reload.
+func (c *ConfigLoader) processConfigChangeEvents() {
+	for {
+		select {
+		case <-c.stopChan:
+			return
+		case <-c.eventChan:
+			c.reloadConfigAndNotify()
+		}
+	}
+}
+
+// reloadConfigAndNotify reloads the configuration and notifies all callbacks
+func (c *ConfigLoader) reloadConfigAndNotify() {
+	newConfig := NewConfigLoader(c.cmdLineFlagSet, c.log, c.version, false)
+	modifiedConfig, err := newConfig.ToConfig()
+	if err != nil {
+		c.log.Error("error loading new config", zap.Error(err))
+		return
+	}
+
+	c.callbacksMutex.RLock()
+	defer c.callbacksMutex.RUnlock()
+	for _, callback := range c.callbacks {
+		callback(modifiedConfig)
 	}
 }
 
@@ -127,6 +175,14 @@ func (c *ConfigLoader) StopWatchChanges() error {
 	if c.fileProvider == nil || !c.watchChanges {
 		return nil
 	}
+
+	// Signal the event processor goroutine to stop (only once)
+	if c.stopChan != nil {
+		c.stopOnce.Do(func() {
+			close(c.stopChan)
+		})
+	}
+
 	return c.fileProvider.Unwatch()
 }
 
