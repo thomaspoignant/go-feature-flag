@@ -78,7 +78,7 @@ func (e *Exporter) createSpan(ctx context.Context, f exporter.FeatureEvent, logg
 		attribute.String("feature_flag.version", f.Version),
 		attribute.String("feature_flag.source", f.Source),
 	)
-	logger.Info("Exporting feature flag evaluation")
+	logger.Debug("Exporting feature flag evaluation")
 
 	// Value (safe stringification)
 	if f.Value != nil {
@@ -95,7 +95,7 @@ func (e *Exporter) createSpan(ctx context.Context, f exporter.FeatureEvent, logg
 		))
 	}
 
-	logger.Info("Setting span attributes for feature flag evaluation")
+	logger.Debug("Setting span attributes for feature flag evaluation")
 	// Apply all attributes in a single call to reduce overhead.
 	if len(attributes) > 0 {
 		span.SetAttributes(attributes...)
@@ -107,7 +107,7 @@ func (e *Exporter) createSpan(ctx context.Context, f exporter.FeatureEvent, logg
 	} else {
 		span.SetStatus(codes.Ok, "evaluation successful")
 	}
-	logger.Info("Feature flag evaluation span status set")
+	logger.Debug("Feature flag evaluation span status set")
 }
 
 func (e *Exporter) IsBulk() bool {
