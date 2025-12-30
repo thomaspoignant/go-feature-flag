@@ -89,10 +89,21 @@ func (e *Exporter) createSpan(ctx context.Context, f exporter.FeatureEvent, logg
 
 	// Metadata
 	for k, v := range f.Metadata {
-		attributes = append(attributes, attribute.String(
-			"feature_flag.metadata."+k,
-			fmt.Sprint(v),
-		))
+		key := "feature_flag.metadata." + k
+		switch value := v.(type) {
+		case bool:
+			attributes = append(attributes, attribute.Bool(key, value))
+		case int:
+			attributes = append(attributes, attribute.Int(key, value))
+		case int64:
+			attributes = append(attributes, attribute.Int64(key, value))
+		case float64:
+			attributes = append(attributes, attribute.Float64(key, value))
+		case string:
+			attributes = append(attributes, attribute.String(key, value))
+		default:
+			attributes = append(attributes, attribute.String(key, fmt.Sprint(v)))
+		}
 	}
 
 	logger.Debug("Setting span attributes for feature flag evaluation")
