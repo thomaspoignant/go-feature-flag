@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
+	"sync"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -64,6 +65,9 @@ type flagsetManagerImpl struct {
 
 	// Logger is the logger for the flagset manager.
 	logger *zap.Logger
+
+	// mutex protects FlagSets and APIKeysToFlagSetName from concurrent access
+	mutex sync.RWMutex
 }
 
 // NewFlagsetManager is creating a new FlagsetManager.
@@ -185,11 +189,14 @@ func (m *flagsetManagerImpl) FlagSet(apiKey string) (*ffclient.GoFeatureFlag, er
 			return nil, fmt.Errorf("no API key provided")
 		}
 
+		m.mutex.RLock()
 		flagsetName, exists := m.APIKeysToFlagSetName[apiKey]
 		if !exists {
+			m.mutex.RUnlock()
 			return nil, fmt.Errorf("flagset not found for API key")
 		}
 		flagset, exists := m.FlagSets[flagsetName]
+		m.mutex.RUnlock()
 		if !exists {
 			return nil, fmt.Errorf("impossible to find the flagset with the name %s", flagsetName)
 		}
@@ -206,7 +213,10 @@ func (m *flagsetManagerImpl) FlagSet(apiKey string) (*ffclient.GoFeatureFlag, er
 func (m *flagsetManagerImpl) FlagSetName(apiKey string) (string, error) {
 	switch m.mode {
 	case flagsetManagerModeFlagsets:
-		if name, ok := m.APIKeysToFlagSetName[apiKey]; ok {
+		m.mutex.RLock()
+		name, ok := m.APIKeysToFlagSetName[apiKey]
+		m.mutex.RUnlock()
+		if ok {
 			return name, nil
 		}
 		return "", fmt.Errorf("no flag set associated to the API key")
@@ -219,10 +229,17 @@ func (m *flagsetManagerImpl) FlagSetName(apiKey string) (string, error) {
 func (m *flagsetManagerImpl) AllFlagSets() (map[string]*ffclient.GoFeatureFlag, error) {
 	switch m.mode {
 	case flagsetManagerModeFlagsets:
+		m.mutex.RLock()
+		defer m.mutex.RUnlock()
 		if len(m.FlagSets) == 0 {
 			return nil, fmt.Errorf("no flagsets configured")
 		}
-		return m.FlagSets, nil
+		// Return a copy to avoid external modification
+		result := make(map[string]*ffclient.GoFeatureFlag, len(m.FlagSets))
+		for k, v := range m.FlagSets {
+			result[k] = v
+		}
+		return result, nil
 	default:
 		if m.DefaultFlagSet == nil {
 			return nil, fmt.Errorf("no default flagset configured")
@@ -248,7 +265,13 @@ func (m *flagsetManagerImpl) Close() {
 	if m.DefaultFlagSet != nil {
 		m.DefaultFlagSet.Close()
 	}
+	m.mutex.RLock()
+	flagSetsCopy := make([]*ffclient.GoFeatureFlag, 0, len(m.FlagSets))
 	for _, flagset := range m.FlagSets {
+		flagSetsCopy = append(flagSetsCopy, flagset)
+	}
+	m.mutex.RUnlock()
+	for _, flagset := range flagSetsCopy {
 		flagset.Close()
 	}
 }

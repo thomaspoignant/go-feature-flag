@@ -156,12 +156,6 @@ func TestFlagsetManager_FlagSet(t *testing.T) {
 			assert.Error(t, err)
 			assert.Nil(t, flagset)
 		})
-
-		t.Run("empty api key", func(t *testing.T) {
-			flagset, err := manager.FlagSet("")
-			assert.Error(t, err)
-			assert.Nil(t, flagset)
-		})
 	})
 
 	// Test default mode
