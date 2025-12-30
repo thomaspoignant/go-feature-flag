@@ -278,6 +278,11 @@ func (m *flagsetManagerImpl) Close() {
 
 // OnConfigChange is called when the configuration changes
 func (m *flagsetManagerImpl) OnConfigChange(newConfig *config.Config) {
+	if err := newConfig.IsValid(); err != nil {
+		m.logger.Error("the new configuration is invalid, it will not be applied", zap.Error(err))
+		return
+	}
+
 	// dont allow to switch from default to flagsets mode (or the opposite) during runtime
 	if (newConfig.IsUsingFlagsets() && m.mode == flagsetManagerModeDefault) ||
 		(!newConfig.IsUsingFlagsets() && m.mode == flagsetManagerModeFlagsets) {
