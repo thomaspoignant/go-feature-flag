@@ -17,9 +17,22 @@ import (
 func TestAPIKey(t *testing.T) {
 	tests := []struct {
 		name           string
+		xAPIKey        string
 		authorization  string
 		expectedAPIKey string
 	}{
+		{
+			name:           "X-API-Key header takes precedence",
+			xAPIKey:        "x-api-key-value",
+			authorization:  "Bearer auth-header-value",
+			expectedAPIKey: "x-api-key-value",
+		},
+		{
+			name:           "X-API-Key header only",
+			xAPIKey:        "x-api-key-only",
+			authorization:  "",
+			expectedAPIKey: "x-api-key-only",
+		},
 		{
 			name:           "Bearer token",
 			authorization:  "Bearer my-api-key-123",
@@ -159,6 +172,11 @@ func TestAPIKey(t *testing.T) {
 			req := httptest.NewRequest(http.MethodGet, "/", nil)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
+
+			// Set the X-API-Key header if provided
+			if tt.xAPIKey != "" {
+				c.Request().Header.Set("X-API-Key", tt.xAPIKey)
+			}
 
 			// Set the Authorization header
 			if tt.authorization != "" {
