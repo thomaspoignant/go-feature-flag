@@ -61,32 +61,6 @@ builds:
       - goos: windows
         goarch: arm
 
-  - id: go-feature-flag-lint
-    main: ./cmd/lint
-    binary: go-feature-flag-lint
-    env:
-      - CGO_ENABLED=0
-    goos:
-      - darwin
-      - linux
-      - windows
-    goarch:
-      - 386
-      - amd64
-      - arm64
-      - arm
-    goarm:
-      - 6
-      - 7
-    ignore:
-      - goos: darwin
-        goarch: 386
-      - goos: linux
-        goarch: arm
-        goarm: 6
-      - goos: windows
-        goarch: arm
-
   - id: go-feature-flag-cli
     main: ./cmd/cli
     binary: go-feature-flag-cli
@@ -187,19 +161,6 @@ archives:
       {{- if not (eq .Amd64 \"v1\") }}{{ .Amd64 }}{{ end }}"
     ids:
       - go-feature-flag
-  - id: go-feature-flag-lint
-    name_template: "go-feature-flag-lint_\
-      {{ .Version }}_\
-      {{- title .Os }}_\
-      {{- if eq .Arch \"amd64\" }}x86_64\
-      {{- else if eq .Arch \"386\" }}i386\
-      {{- else }}{{ .Arch }}{{ end }}\
-      {{- with .Arm }}v{{ . }}{{ end }}\
-      {{- with .Mips }}_{{ . }}{{ end }}\
-      {{- if not (eq .Amd64 \"v1\") }}{{ .Amd64 }}{{ end }}"
-    ids:
-      - go-feature-flag-lint
-
   - id: go-feature-flag-cli
     name_template: "go-feature-flag-cli_\
       {{ .Version }}_\
@@ -339,56 +300,6 @@ dockers_v2:
       "org.opencontainers.image.url": "https://gofeatureflag.org/docs/relay_proxy"
       "org.opencontainers.image.version": "{{ .Version }}"
 
-  # lint (thomaspoignant legacy)
-  - id: go-feature-flag-lint-legacy
-    ids:
-      - go-feature-flag-lint
-    dockerfile: ./cmd/lint/Dockerfile
-    images:
-      - thomaspoignant/go-feature-flag-lint
-    tags:
-      - "latest"
-      - "v{{ .RawVersion }}"
-      - "v{{ .Major }}"
-      - "v{{ .Major }}.{{ .Minor }}"
-    platforms:
-      - linux/amd64
-      - linux/arm64
-      - linux/arm/v7
-    labels:
-      "org.opencontainers.image.created": "{{ .Date }}"
-      "org.opencontainers.image.description": "A command line tool to lint your feature flag configuration file"
-      "org.opencontainers.image.revision": "{{ .FullCommit }}"
-      "org.opencontainers.image.source": "https://github.com/thomaspoignant/go-feature-flag"
-      "org.opencontainers.image.title": "go-feature-flag-lint"
-      "org.opencontainers.image.url": "https://gofeatureflag.org/docs/tooling/linter"
-      "org.opencontainers.image.version": "{{ .Version }}"
-
-  # lint (gofeatureflag)
-  - id: go-feature-flag-lint
-    ids:
-      - go-feature-flag-lint
-    dockerfile: ./cmd/lint/Dockerfile
-    images:
-      - gofeatureflag/go-feature-flag-lint
-    tags:
-      - "latest"
-      - "v{{ .RawVersion }}"
-      - "v{{ .Major }}"
-      - "v{{ .Major }}.{{ .Minor }}"
-    platforms:
-      - linux/amd64
-      - linux/arm64
-      - linux/arm/v7
-    labels:
-      "org.opencontainers.image.created": "{{ .Date }}"
-      "org.opencontainers.image.description": "A command line tool to lint your feature flag configuration file"
-      "org.opencontainers.image.revision": "{{ .FullCommit }}"
-      "org.opencontainers.image.source": "https://github.com/thomaspoignant/go-feature-flag"
-      "org.opencontainers.image.title": "go-feature-flag-lint"
-      "org.opencontainers.image.url": "https://gofeatureflag.org/docs/tooling/linter"
-      "org.opencontainers.image.version": "{{ .Version }}"
-
   # cli
   - id: go-feature-flag-cli
     ids:
@@ -438,17 +349,6 @@ homebrew_casks:
     description: "A stand alone server to run GO Feature Flag"
     skip_upload: auto
   - ids:
-      - go-feature-flag-lint
-    name: go-feature-flag-lint
-    repository:
-      owner: thomaspoignant
-      name: homebrew-tap
-      branch: master
-    caveats: "A command line tool to lint your feature flag configuration file"
-    homepage: "https://gofeatureflag.org/docs/tooling/linter"
-    description: "A command line tool to lint your feature flag configuration file"
-    skip_upload: auto
-  - ids:
       - go-feature-flag-cli
     name: go-feature-flag-cli
     repository:
@@ -480,16 +380,6 @@ scoops:
       name: scoop
     commit_msg_template: "Scoop update for {{ .ProjectName }} version {{ .Tag }}"
     homepage: "https://gofeatureflag.org/docs/relay_proxy"
-    license: MIT
-
-  - url_template: https://github.com/thomaspoignant/go-feature-flag/releases/download/{{ .Tag }}/{{ .ArtifactName }}
-    ids: [ go-feature-flag-lint ]
-    name: go-feature-flag-lint
-    repository:
-      owner: go-feature-flag
-      name: scoop
-    commit_msg_template: "Scoop update for {{ .ProjectName }} version {{ .Tag }}"
-    homepage: "https://gofeatureflag.org/docs/tooling/linter"
     license: MIT
 
   - url_template: https://github.com/thomaspoignant/go-feature-flag/releases/download/{{ .Tag }}/{{ .ArtifactName }}
