@@ -5,6 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/helper"
 )
 
 // KeyAuthExtendedConfig defines the configuration for the extended key auth middleware.
@@ -53,7 +54,7 @@ func setDefaults(config *KeyAuthExtendedConfig) error {
 // If handled is true and error is not nil, the error should be returned.
 // If handled is false, fall back to standard KeyAuth middleware.
 func validateXAPIKey(c echo.Context, config KeyAuthExtendedConfig, next echo.HandlerFunc) (bool, error) {
-	xAPIKey := c.Request().Header.Get("X-API-Key")
+	xAPIKey := c.Request().Header.Get(helper.XAPIKeyHeader)
 	if xAPIKey == "" {
 		return false, nil // X-API-Key not present, fall back to standard middleware
 	}

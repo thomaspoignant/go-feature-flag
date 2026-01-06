@@ -17,9 +17,22 @@ import (
 func TestAPIKey(t *testing.T) {
 	tests := []struct {
 		name           string
+		xAPIKey        string
 		authorization  string
 		expectedAPIKey string
 	}{
+		{
+			name:           "X-API-Key header takes precedence",
+			xAPIKey:        "x-api-key-value",
+			authorization:  "Bearer auth-header-value",
+			expectedAPIKey: "x-api-key-value",
+		},
+		{
+			name:           "X-API-Key header only",
+			xAPIKey:        "x-api-key-only",
+			authorization:  "",
+			expectedAPIKey: "x-api-key-only",
+		},
 		{
 			name:           "Bearer token",
 			authorization:  "Bearer my-api-key-123",
@@ -160,9 +173,14 @@ func TestAPIKey(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 
+			// Set the X-API-Key header if provided
+			if tt.xAPIKey != "" {
+				c.Request().Header.Set(helper.XAPIKeyHeader, tt.xAPIKey)
+			}
+
 			// Set the Authorization header
 			if tt.authorization != "" {
-				c.Request().Header.Set("Authorization", tt.authorization)
+				c.Request().Header.Set(helper.AuthorizationHeader, tt.authorization)
 			}
 
 			// Call the function
@@ -231,7 +249,7 @@ func TestFlagSet(t *testing.T) {
 	}
 }
 
-func TestFlagSet_Integration(t *testing.T) {
+func TestFlagSetIntegration(t *testing.T) {
 	t.Run("should handle specific error messages correctly", func(t *testing.T) {
 		mockManager := &mock.MockFlagsetManager{GetFlagSetsErr: errors.New("test error")}
 		flagset, err := helper.FlagSet(mockManager, "test-key")

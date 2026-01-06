@@ -121,6 +121,8 @@ linters:
       replace-allow-list:
         # remove once https://github.com/nikunjy/rules/pull/43 is merged
         - github.com/nikunjy/rules
+        # fix for Athena v3 parquet query issue - https://github.com/xitongsys/parquet-go/issues/547
+        - github.com/xitongsys/parquet-go
   exclusions:
     paths:
       - (^|/)bin($|/)
