@@ -133,6 +133,7 @@ func (c *ConfigLoader) startWatchChanges() {
 // The buffered channel (size 1) naturally coalesces rapid events - if an event
 // is already pending, new events are dropped since they would trigger the same reload.
 func (c *ConfigLoader) processConfigChangeEvents() {
+
 	for {
 		select {
 		case <-c.stopChan:
