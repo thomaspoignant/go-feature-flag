@@ -127,7 +127,7 @@ As you can see, you are able to configure every flag sets differently.
 
 :::tip
 Always provide a **`name`** for your flag sets. This enables runtime API key updates without requiring a restart of the relay proxy.
-If you omit the name, a UUID will be generated automatically and you won't be able to update API keys at runtime.
+If you omit the name (or use `default` as the name), a UUID will be generated automatically and you won't be able to update API keys at runtime.
 :::
 
 ### API Key-Based Routing
