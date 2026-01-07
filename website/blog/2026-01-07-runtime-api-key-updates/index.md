@@ -182,7 +182,7 @@ In flagset mode:
 
 **Solution**: Update the configuration file with new keys, keep old keys temporarily, migrate clients, then remove old keys—all without downtime.
 
-### Use Case32: Team Onboarding
+### Use Case 3: Team Onboarding
 
 **Scenario**: A new team needs access to a flag set.
 
