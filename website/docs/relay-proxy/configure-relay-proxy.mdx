@@ -324,6 +324,12 @@ If you don't set any API keys, the relay proxy will be fully open to all request
 - default: **none**
 - mandatory: <NotMandatory />
 
+:::tip
+**Runtime updates**: API keys can be updated at runtime without restarting the relay proxy.  
+When the configuration file changes, the relay proxy automatically detects and applies the new API key configuration.  
+This works in both default mode and flagset mode.
+:::
+
 ### `evaluationContextEnrichment`
 
 It is a free field that will be merged with the evaluation context sent during the evaluation.
@@ -771,6 +777,78 @@ The DNS used by the swagger configuration to access the relay proxy.
 - default: **`localhost`**
 - mandatory: <NotMandatory />
 
+## Runtime configuration updates
+
+GO Feature Flag relay proxy supports updating certain configuration options at runtime without requiring a restart.  
+When the configuration file changes, the relay proxy automatically detects and applies the changes.
+
+### Default mode runtime updates
+
+In **default mode** (when not using flag sets), you can update the following configuration at runtime:
+
+- **`authorizedKeys.evaluation`**: API keys for evaluation endpoints
+- **`authorizedKeys.admin`**: API keys for admin endpoints
+- **`apiKeys`**: Deprecated field (still supported for backward compatibility)
+
+:::warning
+In default mode, **only API keys can be updated at runtime**.  
+All other configuration changes (retrievers, exporters, notifiers, polling intervals, etc.) are not supported and will be ignored with a warning log message.
+:::
+
+**Example:**
+```yaml title="goff-proxy.yaml"
+# Initial configuration
+authorizedKeys:
+  evaluation:
+    - "key-1"
+    - "key-2"
+  admin:
+    - "admin-key-1"
+
+# Updated configuration (runtime update)
+authorizedKeys:
+  evaluation:
+    - "key-1"
+    - "key-2"
+    - "key-3"  # ✅ New key added
+  admin:
+    - "admin-key-1"
+    - "admin-key-2"  # ✅ New admin key added
+```
+
+### Flagset mode runtime updates
+
+In **flagset mode** (when using flag sets), you can update API keys for each flag set at runtime.
+
+**Supported operations:**
+- Adding new API keys to an existing flag set
+- Removing API keys from a flag set
+- Replacing API keys with new ones
+
+:::warning
+To enable runtime API key updates, your flag sets **must have a `name` configured**.  
+Without a name, a UUID is generated automatically and runtime updates won't work.
+
+```yaml
+flagSets:
+  - name: team-a  # ✅ Required for runtime API key updates
+    apiKeys:
+      - "team-a-api-key"
+    # ...
+```
+:::
+
+### How runtime updates work
+
+1. The relay proxy detects the configuration file change
+2. It validates the new configuration _(if the configuration is invalid, the relay proxy will not apply the changes)_
+3. It updates the internal API key mappings
+4. New requests immediately use the updated routing
+
+:::info
+During the update, there is no downtime. Requests continue to be processed normally, and the new API key configuration takes effect immediately after the update is applied.
+:::
+
 ## Use multiple flag sets
 
 Flag sets allow you to organize your feature flags into separate groups, each with its own configuration, API keys, retrievers, exporters, and notifiers. This is particularly useful for:
@@ -845,13 +923,7 @@ The relay proxy will:
 ### Runtime API key updates
 
 GO Feature Flag supports updating API keys at runtime without restarting the relay proxy.  
-When the configuration file changes, the relay proxy automatically detects and applies the new API key configuration.
-
-**Supported operations:**
-
-- Adding new API keys to an existing flag set
-- Removing API keys from a flag set
-- Replacing API keys with new ones
+See the [Runtime configuration updates](#runtime-configuration-updates) section for detailed information about runtime updates in flagset mode.
 
 :::warning
 To enable runtime API key updates, your flag sets **must have a `name` configured**.  

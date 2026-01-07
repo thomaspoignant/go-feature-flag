@@ -26,7 +26,9 @@ This enables better organization and isolation of flags based on teams, environm
 Flag sets are particularly useful in the following scenarios:
 
 ### 🏰 **Flags Isolation**
+
 When different teams need to manage their own flags independently.
+
 - Frontend team manages UI-related feature flags
 - Backend team manages API-related feature flags
 
@@ -34,13 +36,17 @@ Flag sets are particularly useful when you have different teams or applications 
 Note that 2 teams can have identical flag name with different purposes without any collision if they are in different flag sets.
 
 ### 🖖 **Environment Separation**
+
 When you need separate flags for different environments:
+
 - Development environment with experimental flags
 - Staging environment with pre-production flags
 - Production environment with stable flags
 
 ### 🏘️ **Multi-tenant Applications**
+
 When serving multiple customers or organizations:
+
 - Each customer has their own flag set
 - Isolated flag configurations per customer
 - Separate evaluation data tracking
@@ -71,7 +77,13 @@ The API key is what we use to route the request to the appropriate flag set, so 
 ## Runtime API key updates
 
 GO Feature Flag supports **updating API keys at runtime** without requiring a restart of the relay proxy.  
-This is useful when you need to rotate API keys or add new keys to an existing flag set while the service is running.
+This feature works in both **default mode** and **flagset mode**, allowing you to rotate API keys or add new keys while the service is running.
+
+:::info
+**Default mode**: In default mode, you can update `authorizedKeys.evaluation` and `authorizedKeys.admin` at runtime.  
+**Flagset mode**: In flagset mode, you can update API keys for each flag set individually.  
+See the [configuration documentation](../relay-proxy/configure-relay-proxy#runtime-configuration-updates) for more details.
+:::
 
 ### How it works
 
@@ -89,7 +101,7 @@ To enable runtime API key updates, your flag set **must have a `name` configured
 
 ```yaml title="goff-proxy.yaml"
 flagSets:
-  - name: team-a  # ✅ This flagset supports runtime API key updates
+  - name: team-a # ✅ This flagset supports runtime API key updates
     apiKeys:
       - "team-a-api-key"
     retrievers:
@@ -103,7 +115,7 @@ In this case, **runtime API key updates will not be possible**, as the relay pro
 
 ```yaml title="goff-proxy.yaml"
 flagSets:
-  - apiKeys:  # ⚠️ No name provided - runtime API key updates won't work
+  - apiKeys: # ⚠️ No name provided - runtime API key updates won't work
       - "my-api-key"
     retrievers:
       - kind: file
