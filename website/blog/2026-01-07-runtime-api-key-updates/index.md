@@ -4,27 +4,24 @@ description: "Discover how GO Feature Flag's new runtime API key update feature 
 authors: [thomaspoignant]
 tags:
   [
-    feature flags,
     api keys,
-    security,
     runtime updates,
-    zero downtime,
     key rotation,
   ]
-image: https://gofeatureflag.org/assets/images/runtime-api-key-updates.jpg
 ---
 
 # 🔄 Runtime API Key Updates: Zero-Downtime Key Rotation in GO Feature Flag
 
-We're excited to announce a powerful new feature in GO Feature Flag that makes API key management easier and more secure: **Runtime API Key Updates**! 🎉
+We're excited to announce a new feature in GO Feature Flag that makes API key management easier and more secure: **Runtime API Key Updates**! 🎉
 
-Managing API keys is a critical aspect of security, but it has traditionally required restarting services, causing potential downtime and service interruptions. With this new feature, you can now update, rotate, and manage API keys seamlessly while your relay proxy continues serving requests without interruption.
+We've heard from the community that having to restart the relay proxy for every API key update or rotation was a real pain point. Managing API keys is crucial for security, but needing a restart for each change led to unnecessary downtime and interruptions.  
+With this new feature, you can now update, rotate, and manage API keys on the fly—your relay proxy keeps running, and requests are served continuously, with no need for restarts.
 
 <!--truncate-->
 
 ## 🤔 The Challenge: API Key Management
 
-API keys are essential for securing access to your feature flag relay proxy. However, managing them has always been challenging:
+API keys are essential for securing access to your GO Feature Flag relay proxy. However, managing them has always been challenging:
 
 - **Key rotation** required service restarts, causing downtime
 - **Adding new keys** meant taking the service offline
@@ -35,13 +32,14 @@ These limitations made it difficult to follow security best practices like regul
 
 ## ✨ Introducing Runtime API Key Updates
 
-GO Feature Flag now supports **updating API keys at runtime** without requiring a restart of the relay proxy. This feature works in both **default mode** and **flagset mode**, giving you the flexibility to manage keys dynamically.
+GO Feature Flag now supports **updating API keys at runtime** without requiring a restart of the relay proxy.  
+This feature works in both **default mode** and **flagset mode**, giving you the flexibility to manage keys dynamically.
 
 ### Key Benefits
 
 - ✅ **Zero Downtime**: Update keys without interrupting service
 - ✅ **Immediate Response**: Remove compromised keys instantly
-- ✅ **Easy Rotation**: Rotate keys on a schedule without service impact
+- ✅ **Easy Rotation**: Rotate keys as soon as you change your configuration file
 - ✅ **Flexible Management**: Add, remove, or update keys as needed
 - ✅ **Automatic Detection**: Changes are detected and applied automatically
 
@@ -49,7 +47,7 @@ GO Feature Flag now supports **updating API keys at runtime** without requiring 
 
 The relay proxy continuously monitors your configuration file for changes. When it detects updates to API keys, it:
 
-1. **Validates** the new configuration
+1. **Validates** the new configuration _(if invalid your new configuration will be ignored)_
 2. **Updates** the internal API key mappings
 3. **Applies** changes immediately
 4. **Continues** serving requests without interruption
@@ -110,29 +108,12 @@ flagSets:
 
 :::warning
 **Important**: For flagset mode, your flag sets **must have a `name` configured** for runtime updates to work.  
-Without a name, a UUID is generated automatically and runtime updates won't be possible.
+Without a name, runtime updates won't be possible since we are not able to target which flagset has changed.
 :::
 
 ## 🔒 Security Best Practices
 
 This feature enables you to follow security best practices more easily:
-
-### Regular Key Rotation
-
-Rotate your API keys on a schedule without service disruption:
-
-```yaml
-# Week 1
-authorizedKeys:
-  evaluation:
-    - "key-old"
-    - "key-new"
-
-# Week 2 (after all clients migrated)
-authorizedKeys:
-  evaluation:
-    - "key-new"  # ✅ Old key removed, only new key remains
-```
 
 ### Immediate Response to Security Incidents
 
@@ -189,29 +170,23 @@ In flagset mode:
 
 ## 🎯 Real-World Use Cases
 
-### Use Case 1: Scheduled Key Rotation
+### Use Case 1: Multi-Tenant Key Management
+
+**Scenario**: Managing API keys for multiple customers in flagset mode.
+
+**Solution**: Update keys for individual flag sets independently. Each customer's keys can be managed separately without affecting others.
+
+### Use Case 2: Scheduled Key Rotation
 
 **Scenario**: Your security policy requires rotating API keys every 90 days.
 
 **Solution**: Update the configuration file with new keys, keep old keys temporarily, migrate clients, then remove old keys—all without downtime.
 
-### Use Case 2: Team Onboarding
+### Use Case32: Team Onboarding
 
 **Scenario**: A new team needs access to a flag set.
 
 **Solution**: Simply add their API key to the flag set configuration. No restart needed, and they can start using the service immediately.
-
-### Use Case 3: Security Incident Response
-
-**Scenario**: An API key is suspected to be compromised.
-
-**Solution**: Immediately remove the key from the configuration file. The relay proxy will stop accepting requests with that key within seconds, without any service interruption.
-
-### Use Case 4: Multi-Tenant Key Management
-
-**Scenario**: Managing API keys for multiple customers in flagset mode.
-
-**Solution**: Update keys for individual flag sets independently. Each customer's keys can be managed separately without affecting others.
 
 ## 📚 Learn More
 
@@ -221,7 +196,7 @@ In flagset mode:
 
 ## 🎉 Get Started Today
 
-Runtime API key updates are available now in GO Feature Flag! This feature makes API key management more secure, flexible, and convenient.
+Runtime API key updates are available in GO Feature Flag starting version `v1.50.0`! This feature makes API key management more secure, flexible, and convenient.
 
 Whether you're rotating keys, responding to security incidents, or managing access for multiple teams, runtime updates ensure your feature flag service remains available and secure.
 
@@ -232,4 +207,3 @@ Whether you're rotating keys, responding to security incidents, or managing acce
 - 📚 [Full Documentation](https://docs.gofeatureflag.org)
 
 We can't wait to see how this feature improves your API key management workflow! 🚀
-
