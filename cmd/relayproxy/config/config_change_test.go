@@ -329,7 +329,7 @@ func newAPIServerWithLogger(
 	err := f.Parse([]string{"--config=" + configFile.Name()})
 	require.NoError(t, err)
 
-	c, err := config.New(f, logger, "toto")
+	c, err := config.New(f, logger, "v0.0.0")
 	require.NoError(t, err)
 
 	flagsetManager, err := service.NewFlagsetManager(c, logger, nil)
