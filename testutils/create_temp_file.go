@@ -1,7 +1,6 @@
 package testutils
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
@@ -41,7 +40,6 @@ func CopyContentToNewTempFile(t *testing.T, content string) *os.File {
 
 	err = os.WriteFile(file.Name(), []byte(content), 0600)
 	require.NoError(t, err)
-	fmt.Println("file", file.Name())
 	return file
 }
 
