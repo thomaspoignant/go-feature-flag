@@ -85,6 +85,7 @@ func TestConfigChangeDefaultMode(t *testing.T) {
 			urlAPIAllFlags := localhostURL + tt.port + allFlagsEndpoint
 			configFile := testutils.CopyFileToNewTempFile(t, tt.initialConfigFile)
 			defer func() {
+				_ = configFile.Close()
 				_ = os.Remove(configFile.Name())
 			}()
 
@@ -189,6 +190,7 @@ func TestConfigChangeFlagsetModeAPIKeyChanges(t *testing.T) {
 			urlAPIAllFlags := localhostURL + tt.port + allFlagsEndpoint
 			configFile := testutils.CopyFileToNewTempFile(t, tt.initialConfigFile)
 			defer func() {
+				_ = configFile.Close()
 				_ = os.Remove(configFile.Name())
 			}()
 
@@ -201,7 +203,7 @@ func TestConfigChangeFlagsetModeAPIKeyChanges(t *testing.T) {
 			defer s.Stop(context.Background())
 			time.Sleep(100 * time.Millisecond) // wait for the server to start
 
-			body := `{"evaluationContext":{"key":"08b5ffb7-7109-42f4-a6f2-b85560fbd20f"}}`
+			body := `{"evaluationContext":{"key":"08b5ffb7-7109-42f4-a6f2-b85560fbd20d"}}`
 
 			// Run checks before config change
 			for _, check := range tt.checksBeforeChange {
@@ -271,6 +273,7 @@ func TestConfigChangeFlagsetInvalidChanges(t *testing.T) {
 			urlAPIAllFlags := localhostURL + tt.port + allFlagsEndpoint
 			configFile := testutils.CopyFileToNewTempFile(t, tt.initialConfigFile)
 			defer func() {
+				_ = configFile.Close()
 				_ = os.Remove(configFile.Name())
 			}()
 

@@ -24,7 +24,7 @@ func CopyFileToNewTempFile(t *testing.T, src string) *os.File {
 		_ = file.Close()
 	}()
 
-	err = os.WriteFile(file.Name(), srcContent, 0644)
+	err = os.WriteFile(file.Name(), srcContent, 0600)
 	require.NoError(t, err)
 	return file
 }
@@ -39,14 +39,14 @@ func CopyContentToNewTempFile(t *testing.T, content string) *os.File {
 		_ = file.Close()
 	}()
 
-	err = os.WriteFile(file.Name(), []byte(content), 0644)
+	err = os.WriteFile(file.Name(), []byte(content), 0600)
 	require.NoError(t, err)
 	fmt.Println("file", file.Name())
 	return file
 }
 
 func CopyContentToExistingTempFile(t *testing.T, content string, file *os.File) *os.File {
-	err := os.WriteFile(file.Name(), []byte(content), 0644)
+	err := os.WriteFile(file.Name(), []byte(content), 0600)
 	require.NoError(t, err)
 	return file
 }

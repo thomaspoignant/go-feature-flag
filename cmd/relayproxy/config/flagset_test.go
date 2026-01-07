@@ -211,7 +211,8 @@ func TestFlagSetAPIKeysConcurrency(t *testing.T) {
 			for j := 0; j < numIterations; j++ {
 				flagsetName := fmt.Sprintf(flagsetNameFmt, (id%3)+1)
 				newKeys := []string{fmt.Sprintf("key-%d-%d", id, j)}
-				_ = cfg.SetFlagSetAPIKeys(flagsetName, newKeys)
+				err := cfg.SetFlagSetAPIKeys(flagsetName, newKeys)
+				require.NoError(t, err)
 			}
 		}(i)
 	}

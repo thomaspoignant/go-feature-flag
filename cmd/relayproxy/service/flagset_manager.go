@@ -284,6 +284,8 @@ func (m *flagsetManagerImpl) OnConfigChange(newConfig *config.Config) {
 	}
 }
 
+// onConfigChangeWithFlagsets is called when the configuration changes in flagsets mode.
+// It is used to update the APIKeys for the flagsets.
 func (m *flagsetManagerImpl) onConfigChangeWithFlagsets(newConfig *config.Config) {
 	// check changes in APIKeys for flagsets
 	for _, newConfigFlagset := range newConfig.FlagSets {
@@ -297,10 +299,16 @@ func (m *flagsetManagerImpl) onConfigChangeWithFlagsets(newConfig *config.Config
 		// we check if the APIKeys are different to avoid reloading the flagset if nothing changed.
 		if currentFlagsetAPIKeys, err := m.config.GetFlagSetAPIKeys(newConfigFlagsetName); err == nil {
 			if !cmp.Equal(currentFlagsetAPIKeys, newConfigFlagset.APIKeys) {
-				m.logger.Info("Configuration changed: updating the APIKeys for flagset", zap.String("flagset", newConfigFlagsetName))
-				m.config.SetFlagSetAPIKeys(newConfigFlagsetName, newConfigFlagset.APIKeys)
-				// modify flagset manager APIKeysToFlagSetName to use the new APIKeys
+				m.logger.Info("Configuration changed: updating the APIKeys for flagset",
+					zap.String("flagset", newConfigFlagsetName))
+				err = m.config.SetFlagSetAPIKeys(newConfigFlagsetName, newConfigFlagset.APIKeys)
+				if err != nil {
+					m.logger.Error("failed to update the APIKeys for flagset", zap.Error(err))
+					continue
+				}
+				m.config.ForceReloadAPIKeys()
 
+				// modify flagset manager APIKeysToFlagSetName to use the new APIKeys
 				m.apiKeysMutex.Lock()
 				// remove the old APIKeys from the APIKeysToFlagSetName
 				for _, apiKey := range currentFlagsetAPIKeys {
@@ -312,7 +320,6 @@ func (m *flagsetManagerImpl) onConfigChangeWithFlagsets(newConfig *config.Config
 				}
 				m.apiKeysMutex.Unlock()
 
-				m.config.ForceReloadAPIKeys()
 				continue
 			}
 		}

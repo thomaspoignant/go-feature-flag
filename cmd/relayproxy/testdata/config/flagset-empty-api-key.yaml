@@ -1,0 +1,17 @@
+server:
+  port: 41037
+  mode: http
+flagsets:
+  - name: flagset-1
+    apiKeys:
+      - apikey-1
+    retrievers:
+      - kind: file
+        path: ../../../testdata/flag-config.yaml
+  - name: flagset-2
+    apiKeys:
+      - apikey-2
+    retrievers:
+      - kind: file
+        path: ../../../testdata/flag-config-2nd-file.yaml
+
