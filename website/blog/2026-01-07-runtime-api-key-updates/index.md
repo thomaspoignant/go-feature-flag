@@ -117,7 +117,7 @@ flagSets:
 
 :::warning
 **Important**: For flagset mode, your flag sets **must have a `name` configured** for runtime updates to work.  
-Without a name, runtime updates won't be possible since we are not able to target which flagset has changed.
+Without a name (or if you use `default` as the name), runtime updates won't be possible since we are not able to target which flagset has changed.
 :::
 
 ## 🎯 Real-World Use Cases
