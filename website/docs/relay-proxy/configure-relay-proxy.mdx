@@ -636,6 +636,11 @@ The name of the flag set. This allows you to identify the flag set.
 - default: **auto-generated UUID**
 - mandatory: <NotMandatory />
 
+:::warning
+If you want to update API keys at runtime without restarting the relay proxy, you **must provide a `name`** for your flag set.  
+Without a name (or using `default` as the name), a UUID is generated and runtime API key updates will not work.
+:::
+
 #### `flagSet.apiKeys`
 
 The API keys for the flag set. This will add new API keys to the list of authorized keys for evaluation. This property is mandatory for every flag set, as it is used to filter the flags available.
@@ -836,6 +841,31 @@ The relay proxy will:
 1. Find the flag set associated with that API key
 1. Route the evaluation request to that flag set
 1. Return the evaluation result from that flag set's flags
+
+### Runtime API key updates
+
+GO Feature Flag supports updating API keys at runtime without restarting the relay proxy.  
+When the configuration file changes, the relay proxy automatically detects and applies the new API key configuration.
+
+**Supported operations:**
+
+- Adding new API keys to an existing flag set
+- Removing API keys from a flag set
+- Replacing API keys with new ones
+
+:::warning
+To enable runtime API key updates, your flag sets **must have a `name` configured**.  
+Without a name, a UUID is generated automatically and runtime updates won't work.
+
+```yaml
+flagSets:
+  - name: team-a  # ✅ Required for runtime API key updates
+    apiKeys:
+      - "team-a-api-key"
+    # ...
+```
+
+:::
 
 ### Example: Multi-team setup
 

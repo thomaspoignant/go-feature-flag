@@ -125,6 +125,11 @@ flagsets:
 
 As you can see, you are able to configure every flag sets differently.
 
+:::tip
+Always provide a **`name`** for your flag sets. This enables runtime API key updates without requiring a restart of the relay proxy.
+If you omit the name, a UUID will be generated automatically and you won't be able to update API keys at runtime.
+:::
+
 ### API Key-Based Routing
 
 The magic of flag sets lies in their API key-based routing system:
@@ -156,6 +161,7 @@ All the providers have a way to pass the API Key to use, based on this one the r
 - API key-based authentication for each flag set
 - Multiple API keys per flag set for flexibility
 - No cross-contamination between teams or customers
+- **Runtime API key updates**: Update, add, or rotate API keys without restarting the relay proxy
 
 ### 🎯 **Flexible Configuration**
 
