@@ -6,3 +6,4 @@ const XAPIKeyHeader = "X-API-Key" // nolint: gosec
 const ContentTypeHeader = "Content-Type"
 const AuthorizationHeader = "Authorization"
 const BearerPrefix = "Bearer "
+const ContentTypeValueJSON = "application/json"

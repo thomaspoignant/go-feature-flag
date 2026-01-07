@@ -1,0 +1,9 @@
+server:
+  port: 41031
+  mode: http
+retrievers:
+  - kind: file
+    path: ../../../testdata/flag-config.yaml
+authorizedKeys:
+  evaluation:
+    - test2

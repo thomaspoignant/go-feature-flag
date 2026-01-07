@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
+	"sync"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -54,6 +55,9 @@ type flagsetManagerImpl struct {
 	// APIKeysToFlagSetName is a map that stores the API Key linked to the flagset name.
 	// It is used to retrieve the flagset linked to the API Key.
 	APIKeysToFlagSetName map[string]string
+
+	// apiKeysMutex protects concurrent access to APIKeysToFlagSetName
+	apiKeysMutex sync.RWMutex
 
 	// Config is the configuration of the relay proxy.
 	// It is used to retrieve the configuration of the relay proxy.
@@ -185,7 +189,9 @@ func (m *flagsetManagerImpl) FlagSet(apiKey string) (*ffclient.GoFeatureFlag, er
 			return nil, fmt.Errorf("no API key provided")
 		}
 
+		m.apiKeysMutex.RLock()
 		flagsetName, exists := m.APIKeysToFlagSetName[apiKey]
+		m.apiKeysMutex.RUnlock()
 		if !exists {
 			return nil, fmt.Errorf("flagset not found for API key")
 		}
@@ -206,7 +212,10 @@ func (m *flagsetManagerImpl) FlagSet(apiKey string) (*ffclient.GoFeatureFlag, er
 func (m *flagsetManagerImpl) FlagSetName(apiKey string) (string, error) {
 	switch m.mode {
 	case flagsetManagerModeFlagsets:
-		if name, ok := m.APIKeysToFlagSetName[apiKey]; ok {
+		m.apiKeysMutex.RLock()
+		name, ok := m.APIKeysToFlagSetName[apiKey]
+		m.apiKeysMutex.RUnlock()
+		if ok {
 			return name, nil
 		}
 		return "", fmt.Errorf("no flag set associated to the API key")
@@ -271,14 +280,55 @@ func (m *flagsetManagerImpl) OnConfigChange(newConfig *config.Config) {
 	case flagsetManagerModeDefault:
 		m.onConfigChangeWithDefault(newConfig)
 	case flagsetManagerModeFlagsets:
-		m.logger.Debug("flagsets mode is not supported yet")
-		// m.onConfigChangeWithFlagsets(newConfig)
+		m.onConfigChangeWithFlagsets(newConfig)
 	}
 }
 
-// func (m *flagsetManagerImpl) onConfigChangeWithFlagsets(newConfig *config.Config) {
-// 	// TODO: implement the logic to change the flagsets
-// }
+// onConfigChangeWithFlagsets is called when the configuration changes in flagsets mode.
+// It is used to update the APIKeys for the flagsets.
+func (m *flagsetManagerImpl) onConfigChangeWithFlagsets(newConfig *config.Config) {
+	for _, newConfigFlagset := range newConfig.FlagSets {
+		m.processFlagsetAPIKeyChange(newConfigFlagset)
+	}
+	m.config.ForceReloadAPIKeys()
+}
+
+// processFlagsetAPIKeyChange handles API key changes for a single flagset.
+func (m *flagsetManagerImpl) processFlagsetAPIKeyChange(newConfigFlagset config.FlagSet) {
+	flagsetName := newConfigFlagset.Name
+	if flagsetName == "" || flagsetName == utils.DefaultFlagSetName {
+		return
+	}
+	currentAPIKeys, err := m.config.GetFlagSetAPIKeys(flagsetName)
+	if err != nil {
+		return
+	}
+	if cmp.Equal(currentAPIKeys, newConfigFlagset.APIKeys) {
+		return
+	}
+
+	m.logger.Info("Configuration changed: updating the APIKeys for flagset",
+		zap.String("flagset", flagsetName))
+
+	if err = m.config.SetFlagSetAPIKeys(flagsetName, newConfigFlagset.APIKeys); err != nil {
+		m.logger.Error("failed to update the APIKeys for flagset", zap.Error(err))
+		return
+	}
+	m.updateAPIKeysMapping(flagsetName, currentAPIKeys, newConfigFlagset.APIKeys)
+}
+
+// updateAPIKeysMapping updates the APIKeysToFlagSetName map with the new API keys.
+func (m *flagsetManagerImpl) updateAPIKeysMapping(flagsetName string, oldKeys, newKeys []string) {
+	m.apiKeysMutex.Lock()
+	defer m.apiKeysMutex.Unlock()
+
+	for _, apiKey := range oldKeys {
+		delete(m.APIKeysToFlagSetName, apiKey)
+	}
+	for _, apiKey := range newKeys {
+		m.APIKeysToFlagSetName[apiKey] = flagsetName
+	}
+}
 
 // onConfigChangeWithDefault is called when the configuration changes in default mode.
 // The only configuration that can be changed is the API Keys and the AuthorizedKeys.

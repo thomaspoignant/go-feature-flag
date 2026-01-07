@@ -1,6 +1,8 @@
 package config
 
 import (
+	"fmt"
+
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 )
 
@@ -87,4 +89,38 @@ type CommonFlagSet struct {
 
 	// Environment is the environment of the flag set.
 	Environment string `mapstructure:"environment" koanf:"environment"`
+}
+
+func (c *Config) SetFlagSetAPIKeys(flagsetName string, apiKeys []string) error {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	index, err := c.getFlagSetIndexFromName(flagsetName)
+	if err != nil {
+		return err
+	}
+	c.FlagSets[index].APIKeys = apiKeys
+	return nil
+}
+
+func (c *Config) GetFlagSetAPIKeys(flagsetName string) ([]string, error) {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+	index, err := c.getFlagSetIndexFromName(flagsetName)
+	if err != nil {
+		return nil, err
+	}
+	return c.FlagSets[index].APIKeys, nil
+}
+
+// getFlagSetIndexFromName returns the index of the flagset in the FlagSets array.
+// If the flagset is not found, it returns -1.
+// This function is not thread safe, it is expected to be called with the mutex locked.
+func (c *Config) getFlagSetIndexFromName(flagsetName string) (int, error) {
+	for index, flagset := range c.FlagSets {
+		if flagset.Name == flagsetName {
+			return index, nil
+		}
+	}
+	return -1, fmt.Errorf("flagset %s not found", flagsetName)
 }
