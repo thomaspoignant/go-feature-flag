@@ -54,11 +54,16 @@ The relay proxy continuously monitors your configuration file for changes. When 
 
 All of this happens automatically in the background, with no manual intervention required.
 
-## 📝 Usage Examples
+## ⚙️ Configuration Requirements
 
 ### Default Mode
 
-In default mode, you can update `authorizedKeys` at runtime:
+In default mode, **only API keys can be updated at runtime**:
+- ✅ `authorizedKeys.evaluation`
+- ✅ `authorizedKeys.admin`
+- ❌ All other configuration changes are ignored
+
+#### 📝 Usage Example
 
 ```yaml title="goff-proxy.yaml"
 # Initial configuration
@@ -81,11 +86,15 @@ authorizedKeys:
     - "admin-key-2"  # ✅ New admin key added
 ```
 
-Simply update your configuration file, and the relay proxy will automatically apply the changes!
 
 ### Flagset Mode
 
-In flagset mode, you can update API keys for each flag set individually:
+In flagset mode:
+- ✅ API keys for each flag set can be updated
+- ✅ Flag sets must have a `name` configured
+- ❌ Other flagset configuration changes are not supported
+
+#### 📝 Usage Example
 
 ```yaml title="goff-proxy.yaml"
 flagSets:
@@ -110,63 +119,6 @@ flagSets:
 **Important**: For flagset mode, your flag sets **must have a `name` configured** for runtime updates to work.  
 Without a name, runtime updates won't be possible since we are not able to target which flagset has changed.
 :::
-
-## 🔒 Security Best Practices
-
-This feature enables you to follow security best practices more easily:
-
-### Immediate Response to Security Incidents
-
-If a key is compromised, remove it immediately:
-
-```yaml
-# Before incident
-authorizedKeys:
-  evaluation:
-    - "key-1"
-    - "key-2"  # ⚠️ Compromised!
-
-# After incident (immediate update)
-authorizedKeys:
-  evaluation:
-    - "key-1"  # ✅ Compromised key removed instantly
-```
-
-### Gradual Key Migration
-
-Add new keys alongside old ones, migrate clients gradually, then remove old keys:
-
-```yaml
-# Phase 1: Add new key
-authorizedKeys:
-  evaluation:
-    - "key-old"
-    - "key-new"  # ✅ New key added
-
-# Phase 2: Migrate clients to new key
-# (clients update their configuration)
-
-# Phase 3: Remove old key
-authorizedKeys:
-  evaluation:
-    - "key-new"  # ✅ Old key removed after migration
-```
-
-## ⚙️ Configuration Requirements
-
-### Default Mode
-
-In default mode, **only API keys can be updated at runtime**:
-- ✅ `authorizedKeys.evaluation`
-- ✅ `authorizedKeys.admin`
-- ❌ All other configuration changes are ignored
-
-### Flagset Mode
-
-In flagset mode:
-- ✅ API keys for each flag set can be updated
-- ✅ Flag sets must have a `name` configured
-- ❌ Other flagset configuration changes are not supported
 
 ## 🎯 Real-World Use Cases
 
