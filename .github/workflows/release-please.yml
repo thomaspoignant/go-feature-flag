@@ -4,14 +4,13 @@ on:
   push:
     branches: [main]
 
-permissions:
-  contents: write
-  pull-requests: write
-  actions: read
-
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: read
     outputs:
       root_released: ${{ steps.release.outputs['release_created'] }}
       root_version: ${{ steps.release.outputs['version'] }}
