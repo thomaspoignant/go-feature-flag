@@ -1,6 +1,8 @@
 name: Helm Lint and Test Charts
 on: pull_request
-permissions: read-all
+permissions:
+  contents: read
+  pull-requests: read
 
 jobs:
   lint-helm-chart:

@@ -4,7 +4,9 @@ on:
     - cron: "0 10 */3 * *"
   workflow_dispatch:
 
-permissions: read-all
+permissions:
+  contents: read
+  pull-requests: read
 
 jobs:
   check_prs:
