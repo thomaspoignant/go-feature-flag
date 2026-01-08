@@ -44,7 +44,8 @@ func ZapLogger(log *zap.Logger, cfg *config.Config) echo.MiddlewareFunc {
 			req := c.Request()
 			res := c.Response()
 
-			fields := []zapcore.Field{
+			fields := make([]zapcore.Field, 0, 8)
+			fields = append(fields,
 				zap.String("remote_ip", c.RealIP()),
 				zap.String("latency", time.Since(v.StartTime).String()),
 				zap.String("host", req.Host),
@@ -52,7 +53,7 @@ func ZapLogger(log *zap.Logger, cfg *config.Config) echo.MiddlewareFunc {
 				zap.Int("status", res.Status),
 				zap.Int64("size", res.Size),
 				zap.String("user_agent", req.UserAgent()),
-			}
+			)
 
 			id := req.Header.Get(echo.HeaderXRequestID)
 			if id == "" {
