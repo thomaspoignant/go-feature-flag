@@ -4,13 +4,13 @@ on:
     - cron: "0 23 * * *"
   workflow_dispatch:
 
-permissions: read-all
-
 jobs:
   j1:
     if: github.repository == 'thomaspoignant/go-feature-flag'
     name: repostats-for-nice-project
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: run-ghrs
         uses: jgehrcke/github-repo-stats@306db38ad131cab2aa5f2cd3062bf6f8aa78c1aa # v1.4.2

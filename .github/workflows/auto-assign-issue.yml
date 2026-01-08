@@ -3,12 +3,12 @@ name: Issue assignment
 on:
   issues:
     types: [opened]
-permissions: read-all
 
 jobs:
   auto-assign:
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       issues: write
     steps:
       - name: "Auto-assign issue"
