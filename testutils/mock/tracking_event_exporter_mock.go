@@ -52,7 +52,7 @@ func (m *TrackingEventExporter) GetExportedEvents() []exporter.ExportableEvent {
 	m.once.Do(m.initMutex)
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
-	trackingEvents := make([]exporter.ExportableEvent, 0)
+	trackingEvents := make([]exporter.ExportableEvent, 0, len(m.ExportedEvents))
 	for _, event := range m.ExportedEvents {
 		trackingEvents = append(trackingEvents, event)
 	}

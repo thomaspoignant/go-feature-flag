@@ -56,7 +56,7 @@ func NewGoFeatureFlagClient(
 		return nil, err
 	}
 
-	notif := make([]notifier.Notifier, 0)
+	notif := make([]notifier.Notifier, 0, len(notifiers))
 	if cFlagSet.Notifiers != nil {
 		notif, err = initNotifier(cFlagSet.Notifiers)
 		if err != nil {
