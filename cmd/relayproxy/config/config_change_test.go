@@ -92,10 +92,13 @@ func TestConfigChangeDefaultMode(t *testing.T) {
 			callbackCalled := make(chan bool, 1)
 			logger, err := zap.NewDevelopment()
 			require.NoError(t, err)
-			s := newAPIServerWithLogger(t, configFile, logger, func(newConfig *config.Config) {
+			s, c := newAPIServerWithLogger(t, configFile, logger, func(newConfig *config.Config) {
 				callbackCalled <- true
 			})
-			defer s.Stop(context.Background())
+			defer func() {
+				s.Stop(context.Background())
+				_ = c.StopConfigChangeWatcher()
+			}()
 			time.Sleep(100 * time.Millisecond) // wait for the server to start
 
 			body := `{"evaluationContext":{"key":"08b5ffb7-7109-42f4-a6f2-b85560fbd20f"}}`
@@ -197,10 +200,13 @@ func TestConfigChangeFlagsetModeAPIKeyChanges(t *testing.T) {
 			callbackCalled := make(chan bool, 1)
 			logger, err := zap.NewDevelopment()
 			require.NoError(t, err)
-			s := newAPIServerWithLogger(t, configFile, logger, func(newConfig *config.Config) {
+			s, c := newAPIServerWithLogger(t, configFile, logger, func(newConfig *config.Config) {
 				callbackCalled <- true
 			})
-			defer s.Stop(context.Background())
+			defer func() {
+				s.Stop(context.Background())
+				_ = c.StopConfigChangeWatcher()
+			}()
 			time.Sleep(100 * time.Millisecond) // wait for the server to start
 
 			body := `{"evaluationContext":{"key":"08b5ffb7-7109-42f4-a6f2-b85560fbd20d"}}`
@@ -281,10 +287,14 @@ func TestConfigChangeFlagsetInvalidChanges(t *testing.T) {
 			// Create observed logger to capture error logs
 			core, observedLogs := observer.New(zapcore.ErrorLevel)
 			observedLogger := zap.New(core)
-			s := newAPIServerWithLogger(t, configFile, observedLogger, func(newConfig *config.Config) {
+			s, c := newAPIServerWithLogger(t, configFile, observedLogger, func(newConfig *config.Config) {
 				callbackCalled <- true
 			})
-			defer s.Stop(context.Background())
+
+			defer func() {
+				s.Stop(context.Background())
+				_ = c.StopConfigChangeWatcher()
+			}()
 			time.Sleep(100 * time.Millisecond) // wait for the server to start
 
 			body := `{"evaluationContext":{"key":"08b5ffb7-7109-42f4-a6f2-b85560fbd20f"}}`
@@ -323,7 +333,7 @@ func newAPIServerWithLogger(
 	configFile *os.File,
 	logger *zap.Logger,
 	callback func(newConfig *config.Config),
-) api.Server {
+) (api.Server, *config.Config) {
 	f := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	f.String("config", "", "Location of your config file")
 	err := f.Parse([]string{"--config=" + configFile.Name()})
@@ -346,7 +356,7 @@ func newAPIServerWithLogger(
 
 	s := api.New(c, services, logger)
 	go func() { s.StartWithContext(context.Background()) }()
-	return s
+	return s, c
 }
 
 // doHTTPRequestAndCheck performs an HTTP POST request and verifies the response against expected checks
