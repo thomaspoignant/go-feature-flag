@@ -7,15 +7,12 @@ on:
       - edited
       - synchronize
 
-permissions:
-  contents: read
-  pull-requests: read
-
 jobs:
   main:
     permissions:
       # for amannn/action-semantic-pull-request to analyze PR titles
       # for marocchino/sticky-pull-request-comment to add comments to the PR
+      contents: read
       pull-requests: write
       statuses: write # for amannn/action-semantic-pull-request to mark status of analyzed PR
     name: Validate PR title

@@ -4,12 +4,12 @@ on:
     branches:
       - main
 
-permissions:
-  contents: read
-
 jobs:
   helm-release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     env:
       CHART_README_LOCATION: cmd/relayproxy/helm-charts/relay-proxy/README.md
       MAIN_BRANCH_NAME: main

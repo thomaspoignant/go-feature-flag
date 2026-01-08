@@ -4,14 +4,11 @@ on:
     - cron: "0 10 */3 * *"
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pull-requests: read
-
 jobs:
   check_prs:
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       pull-requests: write
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
