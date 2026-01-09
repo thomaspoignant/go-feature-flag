@@ -26,7 +26,9 @@ This enables better organization and isolation of flags based on teams, environm
 Flag sets are particularly useful in the following scenarios:
 
 ### 🏰 **Flags Isolation**
+
 When different teams need to manage their own flags independently.
+
 - Frontend team manages UI-related feature flags
 - Backend team manages API-related feature flags
 
@@ -34,13 +36,17 @@ Flag sets are particularly useful when you have different teams or applications 
 Note that 2 teams can have identical flag name with different purposes without any collision if they are in different flag sets.
 
 ### 🖖 **Environment Separation**
+
 When you need separate flags for different environments:
+
 - Development environment with experimental flags
 - Staging environment with pre-production flags
 - Production environment with stable flags
 
 ### 🏘️ **Multi-tenant Applications**
+
 When serving multiple customers or organizations:
+
 - Each customer has their own flag set
 - Isolated flag configurations per customer
 - Separate evaluation data tracking
