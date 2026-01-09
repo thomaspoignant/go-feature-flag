@@ -85,7 +85,6 @@ func TestConfigChangeDefaultMode(t *testing.T) {
 			urlAPIAllFlags := localhostURL + tt.port + allFlagsEndpoint
 			configFile := testutils.CopyFileToNewTempFile(t, tt.initialConfigFile)
 			testutils.ReplaceInFile(t, configFile, "1031", tt.port)
-
 			callbackCalled := make(chan bool, 1)
 			logger, err := zap.NewDevelopment()
 			require.NoError(t, err)
@@ -190,7 +189,6 @@ func TestConfigChangeFlagsetModeAPIKeyChanges(t *testing.T) {
 			urlAPIAllFlags := localhostURL + tt.port + allFlagsEndpoint
 			configFile := testutils.CopyFileToNewTempFile(t, tt.initialConfigFile)
 			testutils.ReplaceInFile(t, configFile, "1031", tt.port)
-
 			callbackCalled := make(chan bool, 1)
 			logger, err := zap.NewDevelopment()
 			require.NoError(t, err)
