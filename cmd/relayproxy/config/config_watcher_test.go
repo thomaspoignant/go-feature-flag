@@ -22,7 +22,6 @@ const (
 
 func createTestConfig(t *testing.T, configContent string) (*config.Config, *os.File) {
 	configFile := testutils.CopyContentToNewTempFile(t, configContent)
-
 	f := pflag.NewFlagSet("config", pflag.ContinueOnError)
 	f.String(configFlagName, "", configFlagUsage)
 	err := f.Parse([]string{configFlagPrefix + configFile.Name()})
