@@ -1,5 +1,5 @@
 server:
-  port: 41034
+  port: 1031
   mode: http
 flagsets:
   - name: flagset-1
@@ -9,4 +9,3 @@ flagsets:
     retrievers:
       - kind: file
         path: ../../../testdata/flag-config.yaml
-

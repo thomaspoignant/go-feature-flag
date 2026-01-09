@@ -266,6 +266,7 @@ func (m *flagsetManagerImpl) Close() {
 func (m *flagsetManagerImpl) OnConfigChange(newConfig *config.Config) {
 	if err := newConfig.IsValid(); err != nil {
 		m.logger.Error("the new configuration is invalid, it will not be applied", zap.Error(err))
+		m.logger.Debug("invalid configuration:", zap.Error(err), zap.Any("newConfig", newConfig))
 		return
 	}
 

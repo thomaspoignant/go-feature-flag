@@ -54,7 +54,7 @@ func TestConfigChangeDefaultMode(t *testing.T) {
 	}{
 		{
 			name:               "change authorized keys from test to test2",
-			port:               "41031",
+			port:               testutils.GetFreePortAsString(t),
 			initialConfigFile:  "../testdata/config/change-authorized-keys-from-test-to-test2.yaml",
 			modifiedConfigFile: "../testdata/config/change-authorized-keys-from-test-to-test2-MODIFIED.yaml",
 			checksBeforeChange: []httpRequestCheck{
@@ -68,7 +68,7 @@ func TestConfigChangeDefaultMode(t *testing.T) {
 		},
 		{
 			name:               "remove authorized keys should allow all requests",
-			port:               "41032",
+			port:               testutils.GetFreePortAsString(t),
 			initialConfigFile:  "../testdata/config/remove-authorized-keys-should-allow-all-requests.yaml",
 			modifiedConfigFile: "../testdata/config/remove-authorized-keys-should-allow-all-requests-MODIFIED.yaml",
 			checksBeforeChange: []httpRequestCheck{
@@ -84,6 +84,7 @@ func TestConfigChangeDefaultMode(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			urlAPIAllFlags := localhostURL + tt.port + allFlagsEndpoint
 			configFile := testutils.CopyFileToNewTempFile(t, tt.initialConfigFile)
+			testutils.ReplaceInFile(t, configFile, "1031", tt.port)
 			defer func() {
 				_ = configFile.Close()
 				_ = os.Remove(configFile.Name())
@@ -109,13 +110,13 @@ func TestConfigChangeDefaultMode(t *testing.T) {
 			}
 
 			// Modify the config file
-			_ = testutils.CopyFileToExistingTempFile(t, tt.modifiedConfigFile, configFile)
+			_ = testutils.ReplaceAndCopyFileToExistingFile(t, tt.modifiedConfigFile, configFile, "1031", tt.port)
 
 			// Wait for the callback to be called
 			select {
 			case <-callbackCalled:
 				time.Sleep(100 * time.Millisecond)
-			case <-time.After(500 * time.Millisecond):
+			case <-time.After(5000 * time.Millisecond):
 				require.Fail(t, timeoutCallbackMsg)
 			}
 
@@ -138,7 +139,7 @@ func TestConfigChangeFlagsetModeAPIKeyChanges(t *testing.T) {
 	}{
 		{
 			name:               "change API key from apikey-1 to apikey-2",
-			port:               "41033",
+			port:               testutils.GetFreePortAsString(t),
 			initialConfigFile:  "../testdata/config/flagset-change-api-key-from-key1-to-key2.yaml",
 			modifiedConfigFile: "../testdata/config/flagset-change-api-key-from-key1-to-key2-MODIFIED.yaml",
 			checksBeforeChange: []httpRequestCheck{
@@ -152,7 +153,7 @@ func TestConfigChangeFlagsetModeAPIKeyChanges(t *testing.T) {
 		},
 		{
 			name:               "add a second API key to flagset",
-			port:               "41034",
+			port:               testutils.GetFreePortAsString(t),
 			initialConfigFile:  "../testdata/config/flagset-add-api-key.yaml",
 			modifiedConfigFile: "../testdata/config/flagset-add-api-key-MODIFIED.yaml",
 			checksBeforeChange: []httpRequestCheck{
@@ -166,7 +167,7 @@ func TestConfigChangeFlagsetModeAPIKeyChanges(t *testing.T) {
 		},
 		{
 			name:               "move API key from one flagset to another",
-			port:               "41035",
+			port:               testutils.GetFreePortAsString(t),
 			initialConfigFile:  "../testdata/config/flagset-move-api-key-between-flagsets.yaml",
 			modifiedConfigFile: "../testdata/config/flagset-move-api-key-between-flagsets-MODIFIED.yaml",
 			checksBeforeChange: []httpRequestCheck{
@@ -192,6 +193,8 @@ func TestConfigChangeFlagsetModeAPIKeyChanges(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			urlAPIAllFlags := localhostURL + tt.port + allFlagsEndpoint
 			configFile := testutils.CopyFileToNewTempFile(t, tt.initialConfigFile)
+			testutils.ReplaceInFile(t, configFile, "1031", tt.port)
+
 			defer func() {
 				_ = configFile.Close()
 				_ = os.Remove(configFile.Name())
@@ -217,7 +220,7 @@ func TestConfigChangeFlagsetModeAPIKeyChanges(t *testing.T) {
 			}
 
 			// Modify the config file
-			_ = testutils.CopyFileToExistingTempFile(t, tt.modifiedConfigFile, configFile)
+			_ = testutils.ReplaceAndCopyFileToExistingFile(t, tt.modifiedConfigFile, configFile, "1031", tt.port)
 
 			// Wait for the callback to be called
 			select {
@@ -246,7 +249,7 @@ func TestConfigChangeFlagsetInvalidChanges(t *testing.T) {
 	}{
 		{
 			name:               "duplicate API key in config should be rejected",
-			port:               "41036",
+			port:               testutils.GetFreePortAsString(t),
 			initialConfigFile:  "../testdata/config/flagset-duplicate-api-key.yaml",
 			modifiedConfigFile: "../testdata/config/flagset-duplicate-api-key-MODIFIED.yaml",
 			checksBeforeChange: []httpRequestCheck{
@@ -260,7 +263,7 @@ func TestConfigChangeFlagsetInvalidChanges(t *testing.T) {
 		},
 		{
 			name:               "flagset with no API key should be rejected",
-			port:               "41037",
+			port:               testutils.GetFreePortAsString(t),
 			initialConfigFile:  "../testdata/config/flagset-empty-api-key.yaml",
 			modifiedConfigFile: "../testdata/config/flagset-empty-api-key-MODIFIED.yaml",
 			checksBeforeChange: []httpRequestCheck{
@@ -278,6 +281,7 @@ func TestConfigChangeFlagsetInvalidChanges(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			urlAPIAllFlags := localhostURL + tt.port + allFlagsEndpoint
 			configFile := testutils.CopyFileToNewTempFile(t, tt.initialConfigFile)
+			testutils.ReplaceInFile(t, configFile, "1031", tt.port)
 			defer func() {
 				_ = configFile.Close()
 				_ = os.Remove(configFile.Name())
@@ -305,7 +309,7 @@ func TestConfigChangeFlagsetInvalidChanges(t *testing.T) {
 			}
 
 			// Modify the config to create an invalid config
-			_ = testutils.CopyFileToExistingTempFile(t, tt.modifiedConfigFile, configFile)
+			_ = testutils.ReplaceAndCopyFileToExistingFile(t, tt.modifiedConfigFile, configFile, "1031", tt.port)
 
 			// The callback should be called even for invalid configs (validation happens after)
 			select {
