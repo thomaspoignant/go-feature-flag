@@ -15,9 +15,7 @@ func CopyFileToNewTempFile(t *testing.T, src string) *os.File {
 	srcContent, err := os.ReadFile(src)
 	require.NoError(t, err)
 
-	dir, err := os.MkdirTemp("", "goff")
-	require.NoError(t, err)
-
+	dir := t.TempDir()
 	file, err := os.CreateTemp(dir, "")
 	require.NoError(t, err)
 	defer func() {
@@ -31,9 +29,7 @@ func CopyFileToNewTempFile(t *testing.T, src string) *os.File {
 }
 
 func CopyContentToNewTempFile(t *testing.T, content string) *os.File {
-	dir, err := os.MkdirTemp("", "goff")
-	require.NoError(t, err)
-
+	dir := t.TempDir()
 	file, err := os.CreateTemp(dir, "")
 	require.NoError(t, err)
 	defer func() {
