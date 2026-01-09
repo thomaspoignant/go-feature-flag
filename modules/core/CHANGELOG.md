@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.3.1](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.3.0...modules/core/v0.3.1) (2026-01-09)
+
+
+### 🐛 Bug Fixes
+
+* Wrong rule checked in scheduled rollout ([#4471](https://github.com/thomaspoignant/go-feature-flag/issues/4471)) ([8eaf4ac](https://github.com/thomaspoignant/go-feature-flag/commit/8eaf4acf1e427cfc828457500b0ab44d3f634a8b))
+
+
+### 🔧 Chores
+
+* Bump k8s.io/api from 0.34.2 to 0.34.3 ([#4464](https://github.com/thomaspoignant/go-feature-flag/issues/4464)) ([7c947e6](https://github.com/thomaspoignant/go-feature-flag/commit/7c947e68ec359dbf2afbb1ac80ccbd31c56982cb))
+* Bump k8s.io/api from 0.34.3 to 0.35.0 ([#4517](https://github.com/thomaspoignant/go-feature-flag/issues/4517)) ([631144b](https://github.com/thomaspoignant/go-feature-flag/commit/631144b01a33c2531ab4d2160be908d96a80347f))
+* Code cleaning following sonar recommendation - part 2 ([#4470](https://github.com/thomaspoignant/go-feature-flag/issues/4470)) ([cee1dd7](https://github.com/thomaspoignant/go-feature-flag/commit/cee1dd71a571da3b8048b1469f21c7a251466766))
+* fix some tests ([#4475](https://github.com/thomaspoignant/go-feature-flag/issues/4475)) ([2346f6e](https://github.com/thomaspoignant/go-feature-flag/commit/2346f6e179db302d61ca5fb6aa6ab26f577970ca))
+* **test:** improve test coverage for core modules ([#4476](https://github.com/thomaspoignant/go-feature-flag/issues/4476)) ([7d96999](https://github.com/thomaspoignant/go-feature-flag/commit/7d96999d7a947d45e2e42df3d7fa88169fbbe9c9))
+
 ## [0.3.0](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.2.0...modules/core/v0.3.0) (2025-12-09)
 
 
