@@ -110,8 +110,8 @@ generate-helm-docs: ## Generates helm documentation for the project
 bump-helm-chart-version: ## Bump Helm chart version (usage: make bump-helm-chart-version VERSION=v1.2.3)
 	@if [ -z "$(VERSION)" ]; then \
 		echo "$(RED)Error: VERSION is required$(RESET)"; \
-		echo "Usage: make bump-helm-chart-version VERSION=v1.2.3"; \
-		echo "       make bump-helm-chart-version VERSION=1.2.3"; \
+		echo "Usage: VERSION=v1.2.3 make bump-helm-chart-version"; \
+		echo "       VERSION=v1.2.3 make bump-helm-chart-version"; \
 		exit 1; \
 	fi
 	.github/ci-scripts/bump-helm-chart.sh $(VERSION)
