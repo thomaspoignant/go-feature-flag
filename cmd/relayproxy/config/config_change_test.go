@@ -85,10 +85,6 @@ func TestConfigChangeDefaultMode(t *testing.T) {
 			urlAPIAllFlags := localhostURL + tt.port + allFlagsEndpoint
 			configFile := testutils.CopyFileToNewTempFile(t, tt.initialConfigFile)
 			testutils.ReplaceInFile(t, configFile, "1031", tt.port)
-			defer func() {
-				_ = configFile.Close()
-				_ = os.Remove(configFile.Name())
-			}()
 
 			callbackCalled := make(chan bool, 1)
 			logger, err := zap.NewDevelopment()
@@ -195,11 +191,6 @@ func TestConfigChangeFlagsetModeAPIKeyChanges(t *testing.T) {
 			configFile := testutils.CopyFileToNewTempFile(t, tt.initialConfigFile)
 			testutils.ReplaceInFile(t, configFile, "1031", tt.port)
 
-			defer func() {
-				_ = configFile.Close()
-				_ = os.Remove(configFile.Name())
-			}()
-
 			callbackCalled := make(chan bool, 1)
 			logger, err := zap.NewDevelopment()
 			require.NoError(t, err)
@@ -282,11 +273,6 @@ func TestConfigChangeFlagsetInvalidChanges(t *testing.T) {
 			urlAPIAllFlags := localhostURL + tt.port + allFlagsEndpoint
 			configFile := testutils.CopyFileToNewTempFile(t, tt.initialConfigFile)
 			testutils.ReplaceInFile(t, configFile, "1031", tt.port)
-			defer func() {
-				_ = configFile.Close()
-				_ = os.Remove(configFile.Name())
-			}()
-
 			callbackCalled := make(chan bool, 1)
 			// Create observed logger to capture error logs
 			core, observedLogs := observer.New(zapcore.ErrorLevel)

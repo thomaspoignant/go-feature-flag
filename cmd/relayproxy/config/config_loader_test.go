@@ -107,7 +107,6 @@ loglevel: error`,
 		t.Run(tt.name, func(t *testing.T) {
 			// Create temporary directory and config file
 			configFile := testutils.CopyContentToNewTempFile(t, tt.initialConfig)
-
 			// Create flag set and parse config file path
 			f := pflag.NewFlagSet("config", pflag.ContinueOnError)
 			f.String("config", "", "Location of your config file")
