@@ -62,7 +62,7 @@ require (
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.40.0
 	github.com/testcontainers/testcontainers-go/modules/redis v0.40.0
 	github.com/thejerf/slogassert v0.3.4
-	github.com/thomaspoignant/go-feature-flag/modules/core v0.3.0
+	github.com/thomaspoignant/go-feature-flag/modules/core v0.3.1
 	github.com/thomaspoignant/go-feature-flag/modules/evaluation v0.2.0
 	github.com/xdg-go/scram v1.2.0
 	github.com/xitongsys/parquet-go v1.6.2
