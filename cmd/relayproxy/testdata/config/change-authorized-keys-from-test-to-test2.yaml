@@ -1,5 +1,5 @@
 server:
-  port: 41031
+  port: 1031
   mode: http
 retrievers:
   - kind: file
