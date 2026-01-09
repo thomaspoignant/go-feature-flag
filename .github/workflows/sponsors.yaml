@@ -3,11 +3,13 @@ on:
   workflow_dispatch:
   schedule:
     - cron: 30 15 * * 0-6
-permissions: read-all
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1

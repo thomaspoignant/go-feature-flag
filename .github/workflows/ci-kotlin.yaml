@@ -10,11 +10,12 @@ on:
     paths:
       - openfeature/providers/kotlin-provider/**
 
-permissions: read-all
-
 jobs:
   Build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
     steps:
       - name: Cache Gradle and wrapper
         uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1

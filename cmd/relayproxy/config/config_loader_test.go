@@ -1,8 +1,6 @@
 package config_test
 
 import (
-	"os"
-	"path/filepath"
 	"sync"
 	"testing"
 	"time"
@@ -11,6 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
+	"github.com/thomaspoignant/go-feature-flag/testutils"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"go.uber.org/zap/zaptest/observer"
@@ -107,18 +106,12 @@ loglevel: error`,
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Create temporary directory and config file
-			tempDir := t.TempDir()
-			defer os.RemoveAll(tempDir)
-			configFile := filepath.Join(tempDir, "goff-proxy.yaml")
-
-			// Write initial config
-			err := os.WriteFile(configFile, []byte(tt.initialConfig), 0644)
-			require.NoError(t, err)
+			configFile := testutils.CopyContentToNewTempFile(t, tt.initialConfig)
 
 			// Create flag set and parse config file path
 			f := pflag.NewFlagSet("config", pflag.ContinueOnError)
 			f.String("config", "", "Location of your config file")
-			err = f.Parse([]string{"--config=" + configFile})
+			err := f.Parse([]string{"--config=" + configFile.Name()})
 			require.NoError(t, err)
 
 			// Create ConfigLoader with watchChanges enabled
@@ -138,8 +131,7 @@ loglevel: error`,
 			time.Sleep(100 * time.Millisecond)
 
 			// Update config file to trigger callback
-			err = os.WriteFile(configFile, []byte(tt.updatedConfig), 0644)
-			require.NoError(t, err)
+			_ = testutils.CopyContentToExistingTempFile(t, tt.updatedConfig, configFile)
 
 			// Wait for callback to be triggered (file watchers may have some delay)
 			timeout := time.After(5 * time.Second)
@@ -181,23 +173,15 @@ loglevel: error`,
 }
 
 func TestConfigLoaderAddConfigChangeCallbackNoWatchChanges(t *testing.T) {
-	// Create temporary directory and config file
-	tempDir := t.TempDir()
-	configFile := filepath.Join(tempDir, "goff-proxy.yaml")
-
-	initialConfig := `server:
+	configFile := testutils.CopyContentToNewTempFile(t, `server:
   port: 1031
 pollingInterval: 1000
-loglevel: info`
-
-	// Write initial config
-	err := os.WriteFile(configFile, []byte(initialConfig), 0644)
-	require.NoError(t, err)
+loglevel: info`)
 
 	// Create flag set and parse config file path
 	f := pflag.NewFlagSet("config", pflag.ContinueOnError)
 	f.String("config", "", "Location of your config file")
-	err = f.Parse([]string{"--config=" + configFile})
+	err := f.Parse([]string{"--config=" + configFile.Name()})
 	require.NoError(t, err)
 
 	// Create ConfigLoader with watchChanges disabled
@@ -214,12 +198,10 @@ loglevel: info`
 	})
 
 	// Update config file
-	updatedConfig := `server:
+	_ = testutils.CopyContentToExistingTempFile(t, `server:
   port: 9999
 pollingInterval: 5000
-loglevel: debug`
-	err = os.WriteFile(configFile, []byte(updatedConfig), 0644)
-	require.NoError(t, err)
+loglevel: debug`, configFile)
 
 	// Wait a bit to ensure no callback is triggered
 	time.Sleep(1 * time.Second)
@@ -232,22 +214,15 @@ loglevel: debug`
 
 func TestConfigLoaderAddConfigChangeCallbackInvalidConfig(t *testing.T) {
 	// Create temporary directory and config file
-	tempDir := t.TempDir()
-	configFile := filepath.Join(tempDir, "goff-proxy.yaml")
-
-	initialConfig := `server:
+	configFile := testutils.CopyContentToNewTempFile(t, `server:
   port: 1031
 pollingInterval: 1000
-loglevel: info`
-
-	// Write initial config
-	err := os.WriteFile(configFile, []byte(initialConfig), 0644)
-	require.NoError(t, err)
+loglevel: info`)
 
 	// Create flag set and parse config file path
 	f := pflag.NewFlagSet("config", pflag.ContinueOnError)
 	f.String("config", "", "Location of your config file")
-	err = f.Parse([]string{"--config=" + configFile})
+	err := f.Parse([]string{"--config=" + configFile.Name()})
 	require.NoError(t, err)
 
 	// Create ConfigLoader with watchChanges enabled and observer logger to capture logs
@@ -269,8 +244,7 @@ loglevel: info`
   port: invalid
 pollingInterval: 1000
 loglevel: info`
-	err = os.WriteFile(configFile, []byte(invalidConfig), 0644)
-	require.NoError(t, err)
+	_ = testutils.CopyContentToExistingTempFile(t, invalidConfig, configFile)
 
 	// Wait a bit for the file watcher to detect the change and attempt to load the config
 	time.Sleep(1 * time.Second)

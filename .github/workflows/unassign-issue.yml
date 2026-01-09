@@ -6,7 +6,6 @@ on:
   issue_comment:
     types: [created]
   workflow_dispatch:
-permissions: read-all
 
 env:
   DAYS_UNTIL_STALE: 20 # Number of days before marking as stale
@@ -18,6 +17,7 @@ jobs:
   assign_issue:
     if: github.event_name == 'issue_comment'
     permissions:
+      contents: read
       issues: write
     runs-on: ubuntu-latest
     steps:
@@ -78,6 +78,7 @@ jobs:
     if: github.event_name == 'schedule'
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       issues: write
     steps:
       - name: Mark stale issues

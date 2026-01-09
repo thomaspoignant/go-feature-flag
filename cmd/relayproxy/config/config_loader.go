@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/knadh/koanf/parsers/json"
 	"github.com/knadh/koanf/parsers/toml"
@@ -27,8 +28,9 @@ type ConfigLoader struct {
 	watchChanges   bool
 
 	// internal state
-	k            *koanf.Koanf
-	fileProvider *file.File
+	k              *koanf.Koanf
+	fileProvider   *file.File
+	configFilePath string // stored config file path for reload
 
 	// callbacks to be called when the configuration changes
 	callbacks []func(newConfig *Config)
@@ -132,12 +134,34 @@ func (c *ConfigLoader) startWatchChanges() {
 // processConfigChangeEvents processes file change events from the channel.
 // The buffered channel (size 1) naturally coalesces rapid events - if an event
 // is already pending, new events are dropped since they would trigger the same reload.
+// A small debounce delay is added to handle file systems (especially Linux with inotify)
+// where os.WriteFile triggers multiple events (truncate + write) in rapid succession.
 func (c *ConfigLoader) processConfigChangeEvents() {
+	// debounceDelay gives time for rapid file system events to settle.
+	// On Linux, os.WriteFile can trigger: 1) truncate event (file empty) 2) write event (file has content)
+	// Without debounce, we might read the file between truncate and write, seeing empty content.
+	const debounceDelay = 50 * time.Millisecond
+
 	for {
 		select {
 		case <-c.stopChan:
 			return
 		case <-c.eventChan:
+			// Debounce: wait a short time and drain any additional events that arrive
+			// This allows multiple rapid fsnotify events to coalesce into one reload
+		drainLoop:
+			for {
+				select {
+				case <-c.stopChan:
+					return
+				case <-c.eventChan:
+					// Another event arrived, keep draining
+				case <-time.After(debounceDelay):
+					// No more events for debounceDelay, proceed with reload
+					break drainLoop
+				}
+			}
+
 			c.reloadConfigAndNotify()
 		}
 	}
@@ -145,7 +169,16 @@ func (c *ConfigLoader) processConfigChangeEvents() {
 
 // reloadConfigAndNotify reloads the configuration and notifies all callbacks
 func (c *ConfigLoader) reloadConfigAndNotify() {
-	newConfig := NewConfigLoader(c.cmdLineFlagSet, c.log, c.version, false)
+	// Create a new ConfigLoader with the stored config file path
+	newConfig := &ConfigLoader{
+		cmdLineFlagSet: c.cmdLineFlagSet,
+		log:            c.log,
+		version:        c.version,
+		watchChanges:   false,
+		k:              koanf.New("."),
+		configFilePath: c.configFilePath,
+	}
+	newConfig.loadConfig()
 	modifiedConfig, err := newConfig.ToConfig()
 	if err != nil {
 		c.log.Error("error loading new config", zap.Error(err))
@@ -197,14 +230,19 @@ func (c *ConfigLoader) loadPosflag(cmdLineFlagSet *pflag.FlagSet) {
 
 // loadConfigFile loads the configuration file
 func (c *ConfigLoader) loadConfigFile() {
-	configFileLocation, errFileLocation := locateConfigFile(c.k.String("config"))
-	if errFileLocation != nil {
-		c.log.Info("not using any configuration file", zap.Error(errFileLocation))
-		return
+	var errFileLocation error
+
+	// Use stored config file path if available (for reload), otherwise read from flag set
+	if c.configFilePath == "" {
+		c.configFilePath, errFileLocation = locateConfigFile(c.k.String("config"))
+		if errFileLocation != nil {
+			c.log.Error("not using any configuration file", zap.Error(errFileLocation))
+			return
+		}
 	}
 
-	parser := selectParserForFile(configFileLocation)
-	c.fileProvider = file.Provider(configFileLocation)
+	parser := selectParserForFile(c.configFilePath)
+	c.fileProvider = file.Provider(c.configFilePath)
 	if errBindFile := c.k.Load(c.fileProvider, parser); errBindFile != nil {
 		c.log.Error("error loading file", zap.Error(errBindFile))
 	}

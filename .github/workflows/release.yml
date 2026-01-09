@@ -4,14 +4,13 @@ on:
     tags:
       - "v*"
 
-permissions:
-  contents: read
-  actions: read
-
 jobs:
   integration-tests:
     name: Integration Tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
@@ -95,6 +94,8 @@ jobs:
     name: Upload dockerhub readme
     needs:
       - goreleaser
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
@@ -124,6 +125,8 @@ jobs:
     name: Upload dockerhub readme
     needs:
       - goreleaser
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
@@ -140,6 +143,8 @@ jobs:
     name: Upload dockerhub readme
     needs:
       - goreleaser
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
@@ -156,6 +161,8 @@ jobs:
     name: Upload dockerhub readme
     needs:
       - goreleaser
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
@@ -185,6 +192,9 @@ jobs:
     name: Create new documentation tag
     needs:
       - goreleaser
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - name: Extract version from tag
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> "$GITHUB_ENV"
@@ -252,6 +262,9 @@ jobs:
     name: Release jsonschema
     needs:
       - goreleaser
+    permissions:
+      contents: read
+      pull-requests: write
     env:
       SCHEMA_LOCATION: .schema/flag-schema.json
       MAIN_BRANCH_NAME: main
@@ -315,6 +328,9 @@ jobs:
     name: Bump Relay Proxy Helm Chart appVersion
     needs:
       - goreleaser
+    permissions:
+      contents: read
+      pull-requests: write
     env:
       CHART_YAML_FILE_LOCATION: cmd/relayproxy/helm-charts/relay-proxy/Chart.yaml
       MAIN_BRANCH_NAME: main
