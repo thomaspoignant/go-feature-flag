@@ -72,12 +72,10 @@ func ReplaceInFile(t *testing.T, file *os.File, old, newStr string) {
 }
 
 func ReplaceAndCopyFileToExistingFile(t *testing.T, src string, dstFile *os.File, old, newStr string) *os.File {
-	tempConfigFile := CopyFileToNewTempFile(t, src)
-	defer func() {
-		_ = os.Remove(tempConfigFile.Name())
-	}()
-	ReplaceInFile(t, tempConfigFile, old, newStr)
-	return CopyFileToExistingTempFile(t, tempConfigFile.Name(), dstFile)
+	srcContent, err := os.ReadFile(src)
+	require.NoError(t, err)
+	updatedContent := strings.Replace(string(srcContent), old, newStr, 1)
+	return CopyContentToExistingTempFile(t, updatedContent, dstFile)
 }
 
 // syncFile ensures the file is written to disk before returning.
@@ -86,10 +84,9 @@ func ReplaceAndCopyFileToExistingFile(t *testing.T, src string, dstFile *os.File
 // causing the reload to read stale or empty file content.
 func syncFile(t *testing.T, filePath string) {
 	file, err := os.OpenFile(filePath, os.O_RDWR, 0600)
-	if err == nil {
-		err := file.Sync()
-		require.NoError(t, err)
-		err = file.Close()
-		require.NoError(t, err)
-	}
+	require.NoError(t, err, "failed to open file for syncing: %s", filePath)
+	err = file.Sync()
+	require.NoError(t, err, "failed to sync file: %s", filePath)
+	err = file.Close()
+	require.NoError(t, err, "failed to close file after syncing: %s", filePath)
 }
