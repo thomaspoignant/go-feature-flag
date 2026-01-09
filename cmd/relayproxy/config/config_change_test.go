@@ -116,7 +116,7 @@ func TestConfigChangeDefaultMode(t *testing.T) {
 			select {
 			case <-callbackCalled:
 				time.Sleep(100 * time.Millisecond)
-			case <-time.After(500 * time.Millisecond):
+			case <-time.After(5000 * time.Millisecond):
 				require.Fail(t, timeoutCallbackMsg)
 			}
 

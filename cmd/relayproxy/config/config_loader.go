@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/knadh/koanf/parsers/json"
 	"github.com/knadh/koanf/parsers/toml"
@@ -133,12 +134,34 @@ func (c *ConfigLoader) startWatchChanges() {
 // processConfigChangeEvents processes file change events from the channel.
 // The buffered channel (size 1) naturally coalesces rapid events - if an event
 // is already pending, new events are dropped since they would trigger the same reload.
+// A small debounce delay is added to handle file systems (especially Linux with inotify)
+// where os.WriteFile triggers multiple events (truncate + write) in rapid succession.
 func (c *ConfigLoader) processConfigChangeEvents() {
+	// debounceDelay gives time for rapid file system events to settle.
+	// On Linux, os.WriteFile can trigger: 1) truncate event (file empty) 2) write event (file has content)
+	// Without debounce, we might read the file between truncate and write, seeing empty content.
+	const debounceDelay = 50 * time.Millisecond
+
 	for {
 		select {
 		case <-c.stopChan:
 			return
 		case <-c.eventChan:
+			// Debounce: wait a short time and drain any additional events that arrive
+			// This allows multiple rapid fsnotify events to coalesce into one reload
+		drainLoop:
+			for {
+				select {
+				case <-c.stopChan:
+					return
+				case <-c.eventChan:
+					// Another event arrived, keep draining
+				case <-time.After(debounceDelay):
+					// No more events for debounceDelay, proceed with reload
+					break drainLoop
+				}
+			}
+
 			c.reloadConfigAndNotify()
 		}
 	}
