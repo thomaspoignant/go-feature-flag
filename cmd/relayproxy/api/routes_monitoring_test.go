@@ -14,6 +14,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
+	"github.com/thomaspoignant/go-feature-flag/testutils"
 	"go.uber.org/zap"
 )
 
@@ -53,7 +54,7 @@ func TestPprofEndpointsStarts(t *testing.T) {
 				},
 				Server: config.Server{
 					Mode: config.ServerModeHTTP,
-					Port: 1031,
+					Port: testutils.GetFreePort(t),
 				},
 				MonitoringPort: tt.MonitoringPort,
 				EnablePprof:    tt.EnablePprof,
