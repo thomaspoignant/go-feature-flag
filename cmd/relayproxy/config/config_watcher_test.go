@@ -21,6 +21,18 @@ const (
 	configFlagPrefix   = "--config="
 )
 
+// syncFile ensures the file is written to disk before returning.
+// This is important for file watchers that might detect changes before the file is fully written.
+// Without syncing, the file watcher might detect the change before the OS has flushed the write,
+// causing the reload to read stale or empty file content.
+func syncFile(filePath string) {
+	file, err := os.OpenFile(filePath, os.O_RDWR, 0644)
+	if err == nil {
+		file.Sync()
+		file.Close()
+	}
+}
+
 func createTestConfig(t *testing.T, configContent string) (*config.Config, string) {
 	tempDir := t.TempDir()
 	configFile := filepath.Join(tempDir, testConfigFileName)
@@ -67,6 +79,8 @@ loglevel: debug`
 	// Update config file
 	err := os.WriteFile(configFile, []byte(updatedConfig), 0644)
 	require.NoError(t, err)
+	// Sync the file to ensure it's written to disk before the watcher reads it
+	syncFile(configFile)
 
 	// Wait for callback to be triggered
 	timeout := time.After(5 * time.Second)
@@ -168,6 +182,8 @@ loglevel: error`
 
 	err := os.WriteFile(configFile, []byte(updatedConfig), 0644)
 	require.NoError(t, err)
+	// Sync the file to ensure it's written to disk before the watcher reads it
+	syncFile(configFile)
 
 	timeout := time.After(5 * time.Second)
 	ticker := time.NewTicker(100 * time.Millisecond)
