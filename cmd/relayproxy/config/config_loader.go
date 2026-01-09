@@ -213,7 +213,7 @@ func (c *ConfigLoader) loadConfigFile() {
 	if c.configFilePath == "" {
 		c.configFilePath, errFileLocation = locateConfigFile(c.k.String("config"))
 		if errFileLocation != nil {
-			c.log.Info("not using any configuration file", zap.Error(errFileLocation))
+			c.log.Error("not using any configuration file", zap.Error(errFileLocation))
 			return
 		}
 	}
