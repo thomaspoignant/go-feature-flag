@@ -984,8 +984,8 @@ github.com/thejerf/slogassert v0.3.4 h1:VoTsXixRbXMrRSSxDjYTiEDCM4VWbsYPW5rB/hX2
 github.com/thejerf/slogassert v0.3.4/go.mod h1:0zn9ISLVKo1aPMTqcGfG1o6dWwt+Rk574GlUxHD4rs8=
 github.com/thomaspoignant/go-feature-flag/modules/core v0.3.1 h1:TneaSFeR5zjwRudVA0j2ya8Qd/hi/ShwBkNQ0BHzNVY=
 github.com/thomaspoignant/go-feature-flag/modules/core v0.3.1/go.mod h1:zWMkWi2uP1GSG/p/GLDmQ89hNFqOg8sVt+Q/fmh3cvs=
-github.com/thomaspoignant/go-feature-flag/modules/evaluation v0.2.0 h1:CLp+xFGoDneD/kmwpsxkwvZUhzgoIJ0MpRI+1a6DsXI=
-github.com/thomaspoignant/go-feature-flag/modules/evaluation v0.2.0/go.mod h1:GdQYQLmicLLFIvVmD6hi4vwAc9nCFslGi2szjcNQyRI=
+github.com/thomaspoignant/go-feature-flag/modules/evaluation v0.2.1 h1:ui7od77bLvmUfGg+CJrPyX94swIeDcLli6ywQNHPWPc=
+github.com/thomaspoignant/go-feature-flag/modules/evaluation v0.2.1/go.mod h1:bMUMUBifSZChUnLDgg72NCiJOzobrfutGyB2HlNOWgc=
 github.com/tinylib/msgp v1.3.0 h1:ULuf7GPooDaIlbyvgAxBV/FI7ynli6LZ1/nVUNu+0ww=
 github.com/tinylib/msgp v1.3.0/go.mod h1:ykjzy2wzgrlvpDCRc4LA8UXy6D8bzMSuAF3WD57Gok0=
 github.com/tklauser/go-sysconf v0.3.12 h1:0QaGUFOdQaIVdPgfITYzaTegZvdCjmYO52cSFAEVmqU=
