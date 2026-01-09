@@ -32,8 +32,12 @@ These limitations made it difficult to follow security best practices like regul
 
 ## ✨ Introducing Runtime API Key Updates
 
-GO Feature Flag now supports **updating API keys at runtime** without requiring a restart of the relay proxy.  
+GO Feature Flag starting `v1.50.0` supports **updating API keys at runtime** without requiring a restart of the relay proxy.  
 This feature works in both **default mode** and **flagset mode**, giving you the flexibility to manage keys dynamically.
+
+:::info
+This feature is available starting from GO Feature Flag `v1.50.0` and above.
+:::
 
 ### Key Benefits
 
