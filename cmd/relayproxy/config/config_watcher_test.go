@@ -2,7 +2,6 @@ package config_test
 
 import (
 	"os"
-	"path/filepath"
 	"sync"
 	"testing"
 	"time"
@@ -11,38 +10,22 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
+	"github.com/thomaspoignant/go-feature-flag/testutils"
 	"go.uber.org/zap"
 )
 
 const (
-	testConfigFileName = "goff-proxy.yaml"
-	configFlagName     = "config"
-	configFlagUsage    = "Location of your config file"
-	configFlagPrefix   = "--config="
+	configFlagName   = "config"
+	configFlagUsage  = "Location of your config file"
+	configFlagPrefix = "--config="
 )
 
-// syncFile ensures the file is written to disk before returning.
-// This is important for file watchers that might detect changes before the file is fully written.
-// Without syncing, the file watcher might detect the change before the OS has flushed the write,
-// causing the reload to read stale or empty file content.
-func syncFile(filePath string) {
-	file, err := os.OpenFile(filePath, os.O_RDWR, 0644)
-	if err == nil {
-		file.Sync()
-		file.Close()
-	}
-}
-
-func createTestConfig(t *testing.T, configContent string) (*config.Config, string) {
-	tempDir := t.TempDir()
-	configFile := filepath.Join(tempDir, testConfigFileName)
-
-	err := os.WriteFile(configFile, []byte(configContent), 0644)
-	require.NoError(t, err)
+func createTestConfig(t *testing.T, configContent string) (*config.Config, *os.File) {
+	configFile := testutils.CopyContentToNewTempFile(t, configContent)
 
 	f := pflag.NewFlagSet("config", pflag.ContinueOnError)
 	f.String(configFlagName, "", configFlagUsage)
-	err = f.Parse([]string{configFlagPrefix + configFile})
+	err := f.Parse([]string{configFlagPrefix + configFile.Name()})
 	require.NoError(t, err)
 
 	cfg, err := config.New(f, zap.NewNop(), "1.0.0")
@@ -77,10 +60,7 @@ loglevel: debug`
 	cfg.AttachConfigChangeCallback(callback)
 
 	// Update config file
-	err := os.WriteFile(configFile, []byte(updatedConfig), 0644)
-	require.NoError(t, err)
-	// Sync the file to ensure it's written to disk before the watcher reads it
-	syncFile(configFile)
+	_ = testutils.CopyContentToExistingTempFile(t, updatedConfig, configFile)
 
 	// Wait for callback to be triggered
 	timeout := time.After(5 * time.Second)
@@ -100,7 +80,7 @@ loglevel: debug`
 				assert.Equal(t, 2000, receivedConfig.PollingInterval, "PollingInterval should be updated")
 				assert.Equal(t, "debug", receivedConfig.LogLevel, "LogLevel should be updated")
 
-				err = cfg.StopConfigChangeWatcher()
+				err := cfg.StopConfigChangeWatcher()
 				assert.NoError(t, err)
 				return
 			}
@@ -180,10 +160,7 @@ loglevel: error`
 	cfg.AttachConfigChangeCallback(callback1)
 	cfg.AttachConfigChangeCallback(callback2)
 
-	err := os.WriteFile(configFile, []byte(updatedConfig), 0644)
-	require.NoError(t, err)
-	// Sync the file to ensure it's written to disk before the watcher reads it
-	syncFile(configFile)
+	_ = testutils.CopyContentToExistingTempFile(t, updatedConfig, configFile)
 
 	timeout := time.After(5 * time.Second)
 	ticker := time.NewTicker(100 * time.Millisecond)
@@ -200,7 +177,7 @@ loglevel: error`
 				assert.True(t, callback1Called, "First callback should be called")
 				assert.True(t, callback2Called, "Second callback should be called")
 
-				err = cfg.StopConfigChangeWatcher()
+				err := cfg.StopConfigChangeWatcher()
 				assert.NoError(t, err)
 				return
 			}

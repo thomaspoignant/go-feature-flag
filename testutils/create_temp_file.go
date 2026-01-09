@@ -25,6 +25,7 @@ func CopyFileToNewTempFile(t *testing.T, src string) *os.File {
 
 	err = os.WriteFile(file.Name(), srcContent, 0600)
 	require.NoError(t, err)
+	syncFile(file.Name())
 	return file
 }
 
@@ -40,12 +41,14 @@ func CopyContentToNewTempFile(t *testing.T, content string) *os.File {
 
 	err = os.WriteFile(file.Name(), []byte(content), 0600)
 	require.NoError(t, err)
+	syncFile(file.Name())
 	return file
 }
 
 func CopyContentToExistingTempFile(t *testing.T, content string, file *os.File) *os.File {
 	err := os.WriteFile(file.Name(), []byte(content), 0600)
 	require.NoError(t, err)
+	syncFile(file.Name())
 	return file
 }
 
@@ -56,4 +59,16 @@ func CopyFileToExistingTempFile(t *testing.T, src string, file *os.File) *os.Fil
 	srcContent, err := os.ReadFile(src)
 	require.NoError(t, err)
 	return CopyContentToExistingTempFile(t, string(srcContent), file)
+}
+
+// syncFile ensures the file is written to disk before returning.
+// This is important for file watchers that might detect changes before the file is fully written.
+// Without syncing, the file watcher might detect the change before the OS has flushed the write,
+// causing the reload to read stale or empty file content.
+func syncFile(filePath string) {
+	file, err := os.OpenFile(filePath, os.O_RDWR, 0644)
+	if err == nil {
+		file.Sync()
+		file.Close()
+	}
 }
