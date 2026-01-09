@@ -10,9 +10,10 @@ import (
 
 // GetFreePort returns a free port on the local machine.
 func GetFreePort(t *testing.T) int {
-	listener, err := net.Listen("tcp", ":0")
+	var lc net.ListenConfig
+	listener, err := lc.Listen(t.Context(), "tcp", ":0") //nolint:gosec
 	require.NoError(t, err)
-	defer listener.Close()
+	defer func() { _ = listener.Close() }()
 	return listener.Addr().(*net.TCPAddr).Port
 }
 

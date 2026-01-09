@@ -62,21 +62,21 @@ func CopyFileToExistingTempFile(t *testing.T, src string, file *os.File) *os.Fil
 	return CopyContentToExistingTempFile(t, string(srcContent), file)
 }
 
-func ReplaceInFile(t *testing.T, file *os.File, old, new string) {
+func ReplaceInFile(t *testing.T, file *os.File, old, newStr string) {
 	content, err := os.ReadFile(file.Name())
 	require.NoError(t, err)
-	content = []byte(strings.Replace(string(content), old, new, 1))
-	err = os.WriteFile(file.Name(), []byte(content), 0600)
+	updated := strings.Replace(string(content), old, newStr, 1)
+	err = os.WriteFile(file.Name(), []byte(updated), 0600)
 	require.NoError(t, err)
 	syncFile(t, file.Name())
 }
 
-func ReplaceAndCopyFileToExistingFile(t *testing.T, src string, dstFile *os.File, old, new string) *os.File {
+func ReplaceAndCopyFileToExistingFile(t *testing.T, src string, dstFile *os.File, old, newStr string) *os.File {
 	tempConfigFile := CopyFileToNewTempFile(t, src)
 	defer func() {
 		_ = os.Remove(tempConfigFile.Name())
 	}()
-	ReplaceInFile(t, tempConfigFile, old, new)
+	ReplaceInFile(t, tempConfigFile, old, newStr)
 	return CopyFileToExistingTempFile(t, tempConfigFile.Name(), dstFile)
 }
 
@@ -85,7 +85,7 @@ func ReplaceAndCopyFileToExistingFile(t *testing.T, src string, dstFile *os.File
 // Without syncing, the file watcher might detect the change before the OS has flushed the write,
 // causing the reload to read stale or empty file content.
 func syncFile(t *testing.T, filePath string) {
-	file, err := os.OpenFile(filePath, os.O_RDWR, 0644)
+	file, err := os.OpenFile(filePath, os.O_RDWR, 0600)
 	if err == nil {
 		err := file.Sync()
 		require.NoError(t, err)
