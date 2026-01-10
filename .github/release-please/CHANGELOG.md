@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.50.1](https://github.com/thomaspoignant/go-feature-flag/compare/v1.50.0...v1.50.1) (2026-01-10)
+
+
+### 🔧 Chores
+
+* bump helm chart version to 1.50.0 and fix Makefile usage instructions ([#4596](https://github.com/thomaspoignant/go-feature-flag/issues/4596)) ([b7b3497](https://github.com/thomaspoignant/go-feature-flag/commit/b7b34977f59157ef14e545e08b177f021b7a1073))
+
+
+### 📚 Documentation
+
+* add comment explaining parquet-go replace directive ([#4600](https://github.com/thomaspoignant/go-feature-flag/issues/4600)) ([ec8a294](https://github.com/thomaspoignant/go-feature-flag/commit/ec8a294656e0b2c55c04df6e4c910f392d4f3154))
+
 ## [1.50.0](https://github.com/thomaspoignant/go-feature-flag/compare/v1.49.0...v1.50.0) (2026-01-09)
 
 
