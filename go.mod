@@ -303,4 +303,6 @@ require (
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
 
+// This change is needed to keep compatibility with AWS Athena v3 (Trino engine).
+// Check https://github.com/thomaspoignant/go-feature-flag/issues/4569 for more details.
 replace github.com/xitongsys/parquet-go => github.com/rudderlabs/parquet-go v0.0.3
