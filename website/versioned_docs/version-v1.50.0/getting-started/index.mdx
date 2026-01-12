@@ -61,7 +61,7 @@ Let's start GO Feature Flag relay-proxy:
 ```shell
 docker run \
   -p 1031:1031 \
-  -v $(pwd)/flag-config.goff.yaml:/goff/flag-config.goff.yaml \
+  -v $(pwd)/flags.goff.yaml:/goff/flags.goff.yaml \
   -v $(pwd)/goff-proxy.yaml:/goff/goff-proxy.yaml \
   gofeatureflag/go-feature-flag:latest
 ```
