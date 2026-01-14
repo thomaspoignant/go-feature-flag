@@ -51,8 +51,9 @@ The `OpenFeature::GoFeatureFlag::Provider` needs some options to be created and 
 The only required option to create a `GoFeatureFlagProvider` is the URL _(`endpoint`)_ to your GO Feature Flag relay-proxy instance.
 
 ```ruby
-import GOFeatureFlag
-import OpenFeature
+require 'open_feature/sdk'
+require 'openfeature/go-feature-flag/options'
+require 'openfeature/go-feature-flag/go_feature_flag_provider'
 
 # ...
 
