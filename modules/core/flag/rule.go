@@ -209,7 +209,14 @@ func (r *Rule) getVariationFromProgressiveRollout(
 
 		c := evaluationDate.Unix() - r.ProgressiveRollout.Initial.Date.Unix()
 		currentPercentage := float64(c)*percentPerSec + initialPercentage
+		// Cap the percentage at endPercentage if evaluation date is at or after end date
+		if !evaluationDate.Before(*r.ProgressiveRollout.End.Date) {
+			currentPercentage = endPercentage
+		}
 
+		// The percentage represents how many users get the END variation
+		// Users with hash < currentPercentage get END variation
+		// Users with hash >= currentPercentage get INITIAL variation
 		if hash < uint32(currentPercentage) {
 			return r.ProgressiveRollout.End.getVariation(), nil
 		}
