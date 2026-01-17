@@ -11,7 +11,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/modules/core/testutils/testconvert"
 )
 
-func TestRule_Evaluate(t *testing.T) {
+func TestRuleEvaluate(t *testing.T) {
 	type args struct {
 		user      ffcontext.Context
 		isDefault bool
