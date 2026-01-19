@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.4.0](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.3.1...modules/core/v0.4.0) (2026-01-19)
+
+
+### 🚀 New Features
+
+* Add cap to progressive rollout percentage ([#4634](https://github.com/thomaspoignant/go-feature-flag/issues/4634)) ([23c0fa4](https://github.com/thomaspoignant/go-feature-flag/commit/23c0fa4bb72e1d0c9785d709d74e762a40bd263d))
+
+
+### 🐛 Bug Fixes
+
+* **core:** include targetingKey in context map ([#4657](https://github.com/thomaspoignant/go-feature-flag/issues/4657)) ([9395a7a](https://github.com/thomaspoignant/go-feature-flag/commit/9395a7a448749b832c0fcc0524244ed554886137))
+
+
+### 🔧 Chores
+
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#4613](https://github.com/thomaspoignant/go-feature-flag/issues/4613)) ([a8e9b13](https://github.com/thomaspoignant/go-feature-flag/commit/a8e9b136eb972da636726525bffc1c2f86fcb432))
+
 ## [0.3.1](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.3.0...modules/core/v0.3.1) (2026-01-09)
 
 
