@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "css:scss": "node-sass --output-style compressed -o dist src/scss",
+    "css:scss": "sass --style=compressed src/scss:dist",
     "css:autoprefixer": "postcss -u autoprefixer -r dist/*.css",
     "css:lint": "stylelint src/scss/*.scss  --custom-syntax postcss-scss",
     "build:css": "npm run css:lint && npm run css:scss && npm run css:autoprefixer",
@@ -30,8 +30,8 @@
   "author": "Thomas Poignant",
   "license": "MIT",
   "devDependencies": {
-    "@babel/eslint-parser": "^7.28.5",
-    "@babel/preset-env": "^7.28.5",
+    "@babel/eslint-parser": "^7.28.6",
+    "@babel/preset-env": "^7.28.6",
     "autoprefixer": "^10.4.23",
     "babel-loader": "^10.0.0",
     "babel-plugin-transform-class-properties": "^6.24.1",
@@ -41,7 +41,7 @@
     "eslint-webpack-plugin": "^5.0.2",
     "htmlnano": "^3.0.0",
     "imagemin-cli": "^8.0.0",
-    "node-sass": "^9.0.0",
+    "sass": "^1.93.0",
     "npm-run-all": "^4.1.5",
     "onchange": "^7.1.0",
     "postcss-cli": "^11.0.1",
@@ -49,7 +49,7 @@
     "posthtml": "^0.16.7",
     "posthtml-cli": "^0.10.0",
     "posthtml-modules": "^0.9.1",
-    "stylelint": "^16.26.1",
+    "stylelint": "^17.0.0",
     "webpack": "^5.104.1",
     "webpack-cli": "^6.0.1"
   },
