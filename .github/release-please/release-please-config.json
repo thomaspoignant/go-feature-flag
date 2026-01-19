@@ -42,7 +42,8 @@
                 "openfeature/providers/python-provider",
                 ".github/release-please",
                 "cmd/wasm"
-            ]
+            ],
+            "release-as": "v1.50.1"
         },
         "modules/evaluation": {
             "release-type": "go",
