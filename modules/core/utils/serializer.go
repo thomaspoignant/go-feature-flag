@@ -15,5 +15,6 @@ func ContextToMap(ctx ffcontext.Context) map[string]any {
 	}
 	userCopy["anonymous"] = ctx.IsAnonymous()
 	userCopy["key"] = ctx.GetKey()
+	userCopy["targetingKey"] = ctx.GetKey()
 	return userCopy
 }
