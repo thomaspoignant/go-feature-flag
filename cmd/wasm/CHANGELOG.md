@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.2](https://github.com/thomaspoignant/go-feature-flag/compare/cmd/wasm/v0.1.1...cmd/wasm/v0.1.2) (2026-01-19)
+
+
+### 🔧 Chores
+
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#4613](https://github.com/thomaspoignant/go-feature-flag/issues/4613)) ([a8e9b13](https://github.com/thomaspoignant/go-feature-flag/commit/a8e9b136eb972da636726525bffc1c2f86fcb432))
+* **dependency:** Bump module modules/core 0.4.0 ([#4658](https://github.com/thomaspoignant/go-feature-flag/issues/4658)) ([a24696e](https://github.com/thomaspoignant/go-feature-flag/commit/a24696e4a31486e22c156c1d81b13d8187c18e9b))
+* **dependency:** Bump module modules/evaluation 0.2.2 ([#4661](https://github.com/thomaspoignant/go-feature-flag/issues/4661)) ([0ccf367](https://github.com/thomaspoignant/go-feature-flag/commit/0ccf36773d59314a386a18c9445a515367b9c961))
+
 ## [0.1.1](https://github.com/thomaspoignant/go-feature-flag/compare/cmd/wasm/v0.1.0...cmd/wasm/v0.1.1) (2026-01-09)
 
 
