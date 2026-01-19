@@ -116,6 +116,72 @@ func (c *Config) GetFlagSetAPIKeys(flagsetName string) ([]string, error) {
 // getFlagSetIndexFromName returns the index of the flagset in the FlagSets array.
 // If the flagset is not found, it returns -1.
 // This function is not thread safe, it is expected to be called with the mutex locked.
+// MergeWithTopLevel merges the flagset configuration with the top-level configuration.
+// The flagset configuration takes precedence over the top-level configuration.
+// This allows flagsets to inherit common settings from the top level while overriding specific values.
+func (fs *FlagSet) MergeWithTopLevel(topLevel CommonFlagSet) FlagSet {
+	merged := *fs // Create a copy of the flagset
+
+	// Merge Retriever/Retrievers
+	if merged.Retriever == nil && topLevel.Retriever != nil {
+		merged.Retriever = topLevel.Retriever
+	}
+	if merged.Retrievers == nil && topLevel.Retrievers != nil {
+		merged.Retrievers = topLevel.Retrievers
+	}
+
+	// Merge Notifiers
+	if len(merged.Notifiers) == 0 && len(topLevel.Notifiers) > 0 {
+		merged.Notifiers = topLevel.Notifiers
+	}
+
+	// Merge Exporter/Exporters
+	if merged.Exporter == nil && topLevel.Exporter != nil {
+		merged.Exporter = topLevel.Exporter
+	}
+	if merged.Exporters == nil && topLevel.Exporters != nil {
+		merged.Exporters = topLevel.Exporters
+	}
+
+	// Merge string fields
+	if merged.FileFormat == "" && topLevel.FileFormat != "" {
+		merged.FileFormat = topLevel.FileFormat
+	}
+
+	// Merge int fields
+	if merged.PollingInterval == 0 && topLevel.PollingInterval != 0 {
+		merged.PollingInterval = topLevel.PollingInterval
+	}
+
+	// Merge bool fields
+	if !merged.StartWithRetrieverError && topLevel.StartWithRetrieverError {
+		merged.StartWithRetrieverError = topLevel.StartWithRetrieverError
+	}
+	if !merged.EnablePollingJitter && topLevel.EnablePollingJitter {
+		merged.EnablePollingJitter = topLevel.EnablePollingJitter
+	}
+	if !merged.DisableNotifierOnInit && topLevel.DisableNotifierOnInit {
+		merged.DisableNotifierOnInit = topLevel.DisableNotifierOnInit
+	}
+
+	// Merge EvaluationContextEnrichment
+	if len(merged.EvaluationContextEnrichment) == 0 && len(topLevel.EvaluationContextEnrichment) > 0 {
+		merged.EvaluationContextEnrichment = topLevel.EvaluationContextEnrichment
+	}
+
+	// Merge PersistentFlagConfigurationFile
+	if merged.PersistentFlagConfigurationFile == "" && topLevel.PersistentFlagConfigurationFile != "" {
+		merged.PersistentFlagConfigurationFile = topLevel.PersistentFlagConfigurationFile
+	}
+
+	// Merge Environment
+	if merged.Environment == "" && topLevel.Environment != "" {
+		merged.Environment = topLevel.Environment
+	}
+
+	return merged
+}
+
 func (c *Config) getFlagSetIndexFromName(flagsetName string) (int, error) {
 	for index, flagset := range c.FlagSets {
 		if flagset.Name == flagsetName {

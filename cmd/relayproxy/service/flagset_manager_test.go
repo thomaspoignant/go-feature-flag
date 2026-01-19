@@ -1380,3 +1380,87 @@ func TestFlagsetManager_OnConfigChange(t *testing.T) {
 		assert.Equal(t, "flagset-2", name2)
 	})
 }
+
+func TestFlagsetManager_ConfigurationInheritance(t *testing.T) {
+	flagConfig := "../testdata/controller/configuration_flags.yaml"
+
+	// Test that flagsets inherit configuration from top level
+	config := &config.Config{
+		// Top-level configuration
+		CommonFlagSet: config.CommonFlagSet{
+			FileFormat:          "yaml",
+			PollingInterval:     120,
+			Environment:         "production",
+			EnablePollingJitter: true,
+		},
+		FlagSets: []config.FlagSet{
+			{
+				Name:    "test-flagset",
+				APIKeys: []string{"test-api-key"},
+				// Only overrides some fields, should inherit others from top level
+				CommonFlagSet: config.CommonFlagSet{
+					Retriever: &retrieverconf.RetrieverConf{
+						Kind: "file",
+						Path: flagConfig,
+					},
+					PollingInterval: 60, // Override polling interval
+					// Should inherit: FileFormat="json", Environment="production", EnablePollingJitter=true
+				},
+			},
+			{
+				Name:    "empty-flagset",
+				APIKeys: []string{"empty-api-key"},
+				// Should inherit all from top level
+				CommonFlagSet: config.CommonFlagSet{
+					Retriever: &retrieverconf.RetrieverConf{
+						Kind: "file",
+						Path: flagConfig,
+					},
+				},
+			},
+		},
+	}
+
+	logger, err := zap.NewDevelopment()
+	require.NoError(t, err)
+	notifiers := []notifier.Notifier{}
+	manager, err := service.NewFlagsetManager(config, logger, notifiers)
+	if err != nil {
+		t.Fatalf("failed to create FlagsetManager: %v", err)
+	}
+	assert.NotNil(t, manager)
+	defer manager.Close()
+
+	// Verify flagsets are accessible
+	t.Run("flagsets should be accessible", func(t *testing.T) {
+		flagset1, err := manager.FlagSet("test-api-key")
+		assert.NoError(t, err)
+		assert.NotNil(t, flagset1)
+
+		flagset2, err := manager.FlagSet("empty-api-key")
+		assert.NoError(t, err)
+		assert.NotNil(t, flagset2)
+	})
+
+	// Verify flagset names are returned correctly
+	t.Run("flagset names should be correct", func(t *testing.T) {
+		name1, err := manager.FlagSetName("test-api-key")
+		assert.NoError(t, err)
+		assert.Equal(t, "test-flagset", name1)
+
+		name2, err := manager.FlagSetName("empty-api-key")
+		assert.NoError(t, err)
+		assert.Equal(t, "empty-flagset", name2)
+	})
+
+	// Verify all flagsets are available
+	t.Run("all flagsets should be available", func(t *testing.T) {
+		allFlagsets, err := manager.AllFlagSets()
+		assert.NoError(t, err)
+		assert.Len(t, allFlagsets, 2)
+
+		// Verify flagsets exist by name
+		assert.Contains(t, allFlagsets, "test-flagset")
+		assert.Contains(t, allFlagsets, "empty-flagset")
+	})
+}

@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
+	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 )
 
 const (
@@ -241,5 +242,205 @@ func TestFlagSetAPIKeysConcurrency(t *testing.T) {
 		keys, err := cfg.GetFlagSetAPIKeys(flagsetName)
 		require.NoError(t, err)
 		assert.Len(t, keys, 1, "flagset %s should have exactly one key after concurrent writes", flagsetName)
+	}
+}
+
+func TestFlagSetMergeWithTopLevel(t *testing.T) {
+	tests := []struct {
+		name     string
+		flagset  config.FlagSet
+		topLevel config.CommonFlagSet
+		expected config.FlagSet
+	}{
+		{
+			name: "inherit all fields from top level when flagset is empty",
+			flagset: config.FlagSet{
+				Name:    "test-flagset",
+				APIKeys: []string{"key1"},
+			},
+			topLevel: config.CommonFlagSet{
+				Retriever:                       &retrieverconf.RetrieverConf{Kind: "http"},
+				FileFormat:                      "json",
+				PollingInterval:                 120,
+				StartWithRetrieverError:         true,
+				EnablePollingJitter:             true,
+				DisableNotifierOnInit:           true,
+				Environment:                     "production",
+				EvaluationContextEnrichment:     map[string]any{"key": "value"},
+				PersistentFlagConfigurationFile: "/tmp/flags.yaml",
+			},
+			expected: config.FlagSet{
+				Name:    "test-flagset",
+				APIKeys: []string{"key1"},
+				CommonFlagSet: config.CommonFlagSet{
+					Retriever:                       &retrieverconf.RetrieverConf{Kind: "http"},
+					FileFormat:                      "json",
+					PollingInterval:                 120,
+					StartWithRetrieverError:         true,
+					EnablePollingJitter:             true,
+					DisableNotifierOnInit:           true,
+					Environment:                     "production",
+					EvaluationContextEnrichment:     map[string]any{"key": "value"},
+					PersistentFlagConfigurationFile: "/tmp/flags.yaml",
+				},
+			},
+		},
+		{
+			name: "flagset overrides top level configuration",
+			flagset: config.FlagSet{
+				Name:    "test-flagset",
+				APIKeys: []string{"key1"},
+				CommonFlagSet: config.CommonFlagSet{
+					Retriever:       &retrieverconf.RetrieverConf{Kind: "s3"},
+					FileFormat:      "toml",
+					PollingInterval: 60,
+					Environment:     "staging",
+					Notifiers:       []config.NotifierConf{{Kind: "slack"}},
+				},
+			},
+			topLevel: config.CommonFlagSet{
+				Retriever:               &retrieverconf.RetrieverConf{Kind: "http"},
+				FileFormat:              "json",
+				PollingInterval:         120,
+				Environment:             "production",
+				Notifiers:               []config.NotifierConf{{Kind: "webhook"}},
+				StartWithRetrieverError: true,
+			},
+			expected: config.FlagSet{
+				Name:    "test-flagset",
+				APIKeys: []string{"key1"},
+				CommonFlagSet: config.CommonFlagSet{
+					Retriever:               &retrieverconf.RetrieverConf{Kind: "s3"},
+					FileFormat:              "toml",
+					PollingInterval:         60,
+					Environment:             "staging",
+					Notifiers:               []config.NotifierConf{{Kind: "slack"}},
+					StartWithRetrieverError: true,
+				},
+			},
+		},
+		{
+			name: "partial inheritance - some fields from top level",
+			flagset: config.FlagSet{
+				Name:    "test-flagset",
+				APIKeys: []string{"key1"},
+				CommonFlagSet: config.CommonFlagSet{
+					Retriever:       &retrieverconf.RetrieverConf{Kind: "s3"},
+					PollingInterval: 30,
+				},
+			},
+			topLevel: config.CommonFlagSet{
+				Retriever:           &retrieverconf.RetrieverConf{Kind: "http"},
+				FileFormat:          "json",
+				PollingInterval:     120,
+				Environment:         "production",
+				EnablePollingJitter: true,
+			},
+			expected: config.FlagSet{
+				Name:    "test-flagset",
+				APIKeys: []string{"key1"},
+				CommonFlagSet: config.CommonFlagSet{
+					Retriever:           &retrieverconf.RetrieverConf{Kind: "s3"},
+					FileFormat:          "json",
+					PollingInterval:     30,
+					Environment:         "production",
+					EnablePollingJitter: true,
+				},
+			},
+		},
+		{
+			name: "no inheritance when top level is empty",
+			flagset: config.FlagSet{
+				Name:    "test-flagset",
+				APIKeys: []string{"key1"},
+				CommonFlagSet: config.CommonFlagSet{
+					Retriever:   &retrieverconf.RetrieverConf{Kind: "s3"},
+					FileFormat:  "toml",
+					Environment: "staging",
+				},
+			},
+			topLevel: config.CommonFlagSet{},
+			expected: config.FlagSet{
+				Name:    "test-flagset",
+				APIKeys: []string{"key1"},
+				CommonFlagSet: config.CommonFlagSet{
+					Retriever:   &retrieverconf.RetrieverConf{Kind: "s3"},
+					FileFormat:  "toml",
+					Environment: "staging",
+				},
+			},
+		},
+		{
+			name: "inheritance with slices and complex types",
+			flagset: config.FlagSet{
+				Name:    "test-flagset",
+				APIKeys: []string{"key1"},
+			},
+			topLevel: config.CommonFlagSet{
+				Notifiers: []config.NotifierConf{
+					{Kind: "slack"},
+					{Kind: "webhook"},
+				},
+				EvaluationContextEnrichment: map[string]any{
+					"serverVersion": "1.0.0",
+					"region":        "us-west-2",
+				},
+			},
+			expected: config.FlagSet{
+				Name:    "test-flagset",
+				APIKeys: []string{"key1"},
+				CommonFlagSet: config.CommonFlagSet{
+					Notifiers: []config.NotifierConf{
+						{Kind: "slack"},
+						{Kind: "webhook"},
+					},
+					EvaluationContextEnrichment: map[string]any{
+						"serverVersion": "1.0.0",
+						"region":        "us-west-2",
+					},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.flagset.MergeWithTopLevel(tt.topLevel)
+
+			// Compare the flagset name and API keys
+			assert.Equal(t, tt.expected.Name, result.Name)
+			assert.Equal(t, tt.expected.APIKeys, result.APIKeys)
+
+			// Compare retriever
+			if tt.expected.Retriever != nil {
+				require.NotNil(t, result.Retriever)
+				assert.Equal(t, tt.expected.Retriever.Kind, result.Retriever.Kind)
+			} else {
+				assert.Nil(t, result.Retriever)
+			}
+
+			// Compare other fields
+			assert.Equal(t, tt.expected.FileFormat, result.FileFormat)
+			assert.Equal(t, tt.expected.PollingInterval, result.PollingInterval)
+			assert.Equal(t, tt.expected.StartWithRetrieverError, result.StartWithRetrieverError)
+			assert.Equal(t, tt.expected.EnablePollingJitter, result.EnablePollingJitter)
+			assert.Equal(t, tt.expected.DisableNotifierOnInit, result.DisableNotifierOnInit)
+			assert.Equal(t, tt.expected.Environment, result.Environment)
+			assert.Equal(t, tt.expected.PersistentFlagConfigurationFile, result.PersistentFlagConfigurationFile)
+
+			// Compare notifiers
+			assert.Equal(t, len(tt.expected.Notifiers), len(result.Notifiers))
+			for i, notifier := range tt.expected.Notifiers {
+				if i < len(result.Notifiers) {
+					assert.Equal(t, notifier.Kind, result.Notifiers[i].Kind)
+				}
+			}
+
+			// Compare evaluation context enrichment
+			assert.Equal(t, len(tt.expected.EvaluationContextEnrichment), len(result.EvaluationContextEnrichment))
+			for key, value := range tt.expected.EvaluationContextEnrichment {
+				assert.Equal(t, value, result.EvaluationContextEnrichment[key])
+			}
+		})
 	}
 }

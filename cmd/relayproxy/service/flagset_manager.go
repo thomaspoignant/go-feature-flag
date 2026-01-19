@@ -137,7 +137,11 @@ func newFlagsetManagerWithFlagsets(
 	apiKeysToFlagSet := make(map[string]string)
 
 	for index, flagset := range config.FlagSets {
-		client, err := NewGoFeatureFlagClient(&flagset, logger, notifiers)
+		// Merge flagset configuration with top-level configuration
+		// Flagset-specific settings take precedence over top-level settings
+		mergedFlagset := flagset.MergeWithTopLevel(config.CommonFlagSet)
+
+		client, err := NewGoFeatureFlagClient(&mergedFlagset, logger, notifiers)
 		if err != nil {
 			logger.Error(
 				"failed to create goff client for flagset",
