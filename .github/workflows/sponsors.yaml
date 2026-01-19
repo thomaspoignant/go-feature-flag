@@ -17,7 +17,7 @@ jobs:
           path: sponsors
 
       - name: Generate Sponsors 💖
-        uses: JamesIves/github-sponsors-readme-action@1a120c92d5067dafeaedb33916301fd61338883d # v1.5.6
+        uses: JamesIves/github-sponsors-readme-action@2fd9142e765f755780202122261dc85e78459405 # v1.6.0
         with:
           token: ${{ secrets.SPONSORS_GITHUB_PAT }}
           file: "sponsors/README.md"
