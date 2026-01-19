@@ -30,7 +30,7 @@
   "author": "Thomas Poignant",
   "license": "MIT",
   "devDependencies": {
-    "@babel/eslint-parser": "^7.28.5",
+    "@babel/eslint-parser": "^7.28.6",
     "@babel/preset-env": "^7.28.5",
     "autoprefixer": "^10.4.23",
     "babel-loader": "^10.0.0",
@@ -49,7 +49,7 @@
     "posthtml": "^0.16.7",
     "posthtml-cli": "^0.10.0",
     "posthtml-modules": "^0.9.1",
-    "stylelint": "^16.26.1",
+    "stylelint": "^17.0.0",
     "webpack": "^5.104.1",
     "webpack-cli": "^6.0.1"
   },
