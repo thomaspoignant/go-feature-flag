@@ -17,7 +17,7 @@ jobs:
         with:
           fetch-depth: 1
       - name: Setup go
-        uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
+        uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
         with:
           go-version-file: go.mod
           check-latest: true
@@ -25,12 +25,12 @@ jobs:
         uses: stCarolas/setup-maven@d6af6abeda15e98926a57b5aa970a96bb37f97d1 # v5
         with:
           maven-version: 3.8.2
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
         with:
           node-version: 23
       - name: Install ICU packages
         run: sudo apt-get update && sudo apt-get install -y libicu-dev
-      - uses: actions/setup-dotnet@2016bd2012dba4e32de620c46fe006a3ac9f0602 # v5.0.1
+      - uses: actions/setup-dotnet@baa11fbfe1d6520db94683bd5c7a3818018e4309 # v5.1.0
         with:
           dotnet-version: "7.0.x"
       - run: make vendor
@@ -57,7 +57,7 @@ jobs:
         run: git fetch --force --tags
 
       - name: Setup go
-        uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
+        uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
         with:
           go-version-file: go.mod
           check-latest: true
@@ -205,7 +205,7 @@ jobs:
           path: release
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
 
       - name: Install dependencies
         working-directory: ./release/${{ env.WEBSITE_DIR }}
@@ -218,7 +218,7 @@ jobs:
         run: npm run docusaurus docs:version "$VERSION"
 
       - name: Setup go
-        uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
+        uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
         with:
           go-version-file: ./release/${{ env.WEBSITE_DIR }}/.ci/go.mod
           check-latest: true
@@ -279,7 +279,7 @@ jobs:
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
       - name: Setup go
-        uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
+        uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
         with:
           go-version-file: ./release/go.mod
           check-latest: true
