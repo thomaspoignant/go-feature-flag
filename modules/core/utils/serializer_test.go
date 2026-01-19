@@ -21,9 +21,10 @@ func TestUserToMap(t *testing.T) {
 				AddCustom("email", "contact@gofeatureflag.org").
 				Build(),
 			want: map[string]any{
-				"key":       "key",
-				"anonymous": false,
-				"email":     "contact@gofeatureflag.org",
+				"key":          "key",
+				"anonymous":    false,
+				"email":        "contact@gofeatureflag.org",
+				"targetingKey": "key",
 			},
 		},
 		{
@@ -32,8 +33,9 @@ func TestUserToMap(t *testing.T) {
 				AddCustom("anonymous", true).
 				Build(),
 			want: map[string]any{
-				"key":       "key",
-				"anonymous": true,
+				"key":          "key",
+				"anonymous":    true,
+				"targetingKey": "key",
 			},
 		},
 	}
