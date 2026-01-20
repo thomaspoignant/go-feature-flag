@@ -2,7 +2,7 @@ GOCMD=go
 TINYGOCMD=tinygo
 GOTEST=$(GOCMD) test
 GOVET=$(GOCMD) vet
-ALL_GO_MOD_DIRS := ./modules/core ./modules/evaluation ./cmd/wasm ./
+ALL_GO_MOD_DIRS := ./modules/core ./cmd/wasm ./
 
 # In CI we disable workspace mode.
 ifeq ($(CI),true)
