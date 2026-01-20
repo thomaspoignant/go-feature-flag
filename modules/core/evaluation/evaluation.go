@@ -1,5 +1,8 @@
 package evaluation
 
+// This package is moved from the modules/evaluation package to the modules/core package.
+// It will be now part of the modules/core package.
+// The old package is still available for backward compatibility, but will not be maintained anymore.
 import (
 	"fmt"
 
