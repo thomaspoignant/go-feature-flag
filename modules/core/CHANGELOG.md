@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.4.0...modules/core/v0.4.1) (2026-01-20)
+
+
+### 📚 Documentation
+
+* **modules/core:** add migration notice to evaluation package ([#4667](https://github.com/thomaspoignant/go-feature-flag/issues/4667)) ([6bee4d3](https://github.com/thomaspoignant/go-feature-flag/commit/6bee4d3cdbc5c0bfa1bc9d94195291b244fbba7f))
+
 ## [0.4.0](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.3.1...modules/core/v0.4.0) (2026-01-19)
 
 
