@@ -982,8 +982,8 @@ github.com/testcontainers/testcontainers-go/modules/redis v0.40.0 h1:OG4qwcxp2O0
 github.com/testcontainers/testcontainers-go/modules/redis v0.40.0/go.mod h1:Bc+EDhKMo5zI5V5zdBkHiMVzeAXbtI4n5isS/nzf6zw=
 github.com/thejerf/slogassert v0.3.4 h1:VoTsXixRbXMrRSSxDjYTiEDCM4VWbsYPW5rB/hX24kM=
 github.com/thejerf/slogassert v0.3.4/go.mod h1:0zn9ISLVKo1aPMTqcGfG1o6dWwt+Rk574GlUxHD4rs8=
-github.com/thomaspoignant/go-feature-flag/modules/core v0.4.0 h1:WNPOakS+iHXkYHM2LHQifiytmW30EM4Zug2oWlc1qyU=
-github.com/thomaspoignant/go-feature-flag/modules/core v0.4.0/go.mod h1:zWMkWi2uP1GSG/p/GLDmQ89hNFqOg8sVt+Q/fmh3cvs=
+github.com/thomaspoignant/go-feature-flag/modules/core v0.4.1 h1:G0Q96xXJy+23IwEpvFoL3Daf+7j2gObIy7SbyxJvcIU=
+github.com/thomaspoignant/go-feature-flag/modules/core v0.4.1/go.mod h1:zWMkWi2uP1GSG/p/GLDmQ89hNFqOg8sVt+Q/fmh3cvs=
 github.com/thomaspoignant/go-feature-flag/modules/evaluation v0.2.2 h1:o9kzXTe2b1PYxLRtC0bf68LOY7Y+kcBdxfjPOb39+0E=
 github.com/thomaspoignant/go-feature-flag/modules/evaluation v0.2.2/go.mod h1:2lLWF2DKmQnH/AYe8hfdfiaUAQGQD+w/XVIyOm9ct1c=
 github.com/tinylib/msgp v1.3.0 h1:ULuf7GPooDaIlbyvgAxBV/FI7ynli6LZ1/nVUNu+0ww=
