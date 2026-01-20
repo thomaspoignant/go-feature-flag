@@ -36,7 +36,6 @@
             "path": ".",
             "component": "go-feature-flag",
             "exclude-paths": [
-                "modules/evaluation",
                 "modules/core",
                 "openfeature/providers/kotlin-provider",
                 "openfeature/providers/python-provider",
