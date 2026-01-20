@@ -42,8 +42,7 @@
                 "openfeature/providers/python-provider",
                 ".github/release-please",
                 "cmd/wasm"
-            ],
-            "release-as": "v1.50.1"
+            ]
         },
         "modules/core": {
             "release-type": "go",
@@ -57,8 +56,7 @@
             "path": "cmd/wasm",
             "include-component-in-tag": true,
             "component": "cmd/wasm",
-            "changelog-path": "CHANGELOG.md",
-            "release-as": "v0.1.2"
+            "changelog-path": "CHANGELOG.md"
         },
         "openfeature/providers/kotlin-provider": {
             "release-type": "java",
