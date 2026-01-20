@@ -41,7 +41,7 @@ OpenFeature SDKs → Relay Proxy (cmd/relayproxy/) → GO Module (ffclient)
 - **`retriever/`**: Flag configuration sources (file, HTTP, S3, K8s, MongoDB, Redis, GitHub, GitLab, Bitbucket, PostgreSQL, Azure)
 - **`exporter/`**: Data export destinations (S3, File, Kafka, Kinesis, Webhook, GCS, Pub/Sub, SQS, Azure)
 - **`notifier/`**: Change notifications (Slack, Webhook, Discord, Teams, Logs)
-- **`modules/core`** & **`modules/evaluation`**: Core logic modules used by OpenFeature providers and WASM
+- **`modules/core`**: Core logic modules used by OpenFeature providers and WASM
 
 ## 📁 Directory Structure
 
@@ -88,12 +88,11 @@ OpenFeature SDKs → Relay Proxy (cmd/relayproxy/) → GO Module (ffclient)
 **OpenFeature Providers:**
 - Most providers in OpenFeature contrib repos (Go, JS, Java, .NET, Ruby, Swift, PHP)
 - Some in this repo: Kotlin (`kotlin-provider/`), Python (`python-provider/`)
-- Providers use `modules/core` and `modules/evaluation` for evaluation logic
+- Providers use `modules/core`  for evaluation logic
 
-**Modules (`modules/core` & `modules/evaluation`):**
+**Modules (`modules/core`:**
 - Core logic separated for reuse by OpenFeature providers and WASM module
 - `modules/core`: Flag structures, context, models, utilities
-- `modules/evaluation`: Evaluation logic (depends on core)
 - Allows independent versioning and smaller dependency trees
 
 **PR Policy:** Must use `.github/PULL_REQUEST_TEMPLATE.md`. Fill all sections, link issues, complete checklist, include tests. PR titles should use a semantic commit prefix.
@@ -177,7 +176,7 @@ pre-commit install   # Install pre-commit hooks
 ## 🔗 Important Files
 
 - **`Makefile`**: Primary interface - `make help` for commands
-- **`go.mod`**: Dependencies (monorepo with `modules/core`, `modules/evaluation`, `cmd/wasm`)
+- **`go.mod`**: Dependencies (monorepo with `modules/core`, `cmd/wasm`)
 - **`.golangci.yml`**: Linter config
 - **`CONTRIBUTING.md`**: Contribution guidelines
 - **`.github/PULL_REQUEST_TEMPLATE.md`**: PR template (required)
@@ -188,8 +187,7 @@ pre-commit install   # Install pre-commit hooks
 
 **Monorepo Modules:**
 - Main module (root): Core library
-- `modules/core`: Core data structures (used by providers/WASM)
-- `modules/evaluation`: Evaluation logic (used by providers/WASM)
+- `modules/core`: Core data structures (used by providers/WASM/relayproxy)
 - `cmd/wasm`: WebAssembly evaluation
 - `openfeature/providers/`: Some providers (most in contrib repos)
 

@@ -6,9 +6,9 @@ import (
 
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/evaluation"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/model"
-	"github.com/thomaspoignant/go-feature-flag/modules/evaluation"
 )
 
 const (
