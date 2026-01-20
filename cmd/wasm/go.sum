@@ -29,8 +29,8 @@ github.com/spf13/cast v1.3.0/go.mod h1:Qx5cxh0v+4UWYiBimWS+eyWzqEqokIECu5etghLkU
 github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
 github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu7U=
 github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
-github.com/thomaspoignant/go-feature-flag/modules/core v0.4.0 h1:WNPOakS+iHXkYHM2LHQifiytmW30EM4Zug2oWlc1qyU=
-github.com/thomaspoignant/go-feature-flag/modules/core v0.4.0/go.mod h1:zWMkWi2uP1GSG/p/GLDmQ89hNFqOg8sVt+Q/fmh3cvs=
+github.com/thomaspoignant/go-feature-flag/modules/core v0.4.1 h1:G0Q96xXJy+23IwEpvFoL3Daf+7j2gObIy7SbyxJvcIU=
+github.com/thomaspoignant/go-feature-flag/modules/core v0.4.1/go.mod h1:zWMkWi2uP1GSG/p/GLDmQ89hNFqOg8sVt+Q/fmh3cvs=
 github.com/thomaspoignant/go-feature-flag/modules/evaluation v0.2.2 h1:o9kzXTe2b1PYxLRtC0bf68LOY7Y+kcBdxfjPOb39+0E=
 github.com/thomaspoignant/go-feature-flag/modules/evaluation v0.2.2/go.mod h1:2lLWF2DKmQnH/AYe8hfdfiaUAQGQD+w/XVIyOm9ct1c=
 golang.org/x/exp v0.0.0-20240506185415-9bf2ced13842 h1:vr/HnozRka3pE4EsMEg1lgkXJkTFJCVUX+S/ZT6wYzM=
