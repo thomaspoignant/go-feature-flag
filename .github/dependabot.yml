@@ -187,18 +187,6 @@ updates:
       prefix: "chore(dependencies)"
 
   - package-ecosystem: gomod
-    directory: "/modules/evaluation"
-    schedule:
-      interval: daily
-      time: "01:30"
-    open-pull-requests-limit: 20
-    labels:
-      - "dependencies"
-      - "automerge"
-    commit-message:
-      prefix: "chore(dependencies)"
-
-  - package-ecosystem: gomod
     directory: "/cmd/wasm"
     schedule:
       interval: daily

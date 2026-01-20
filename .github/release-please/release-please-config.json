@@ -45,13 +45,6 @@
             ],
             "release-as": "v1.50.1"
         },
-        "modules/evaluation": {
-            "release-type": "go",
-            "path": "modules/evaluation",
-            "include-component-in-tag": true,
-            "component": "modules/evaluation",
-            "changelog-path": "CHANGELOG.md"
-        },
         "modules/core": {
             "release-type": "go",
             "path": "modules/core",
