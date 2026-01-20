@@ -333,7 +333,6 @@ jobs:
       pull-requests: write
     env:
       CHART_YAML_FILE_LOCATION: cmd/relayproxy/helm-charts/relay-proxy/Chart.yaml
-      MAIN_BRANCH_NAME: main
     steps:
       - name: Extract version from tag
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> "$GITHUB_ENV"
@@ -341,8 +340,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
-          ref: ${{ env.MAIN_BRANCH_NAME }}
-          path: ${{ env.MAIN_BRANCH_NAME }}
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
       - name: Bump chart appVersion
