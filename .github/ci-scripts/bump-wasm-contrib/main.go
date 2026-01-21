@@ -39,7 +39,7 @@ func main() {
 	// JavaScript: Bump the wasm version in the config.js file
 	replaceLine(
 		fmt.Sprintf("%s/js-sdk-contrib/libs/providers/go-feature-flag/scripts/copy-latest-wasm.js", outDir),
-		fmt.Sprintf(`const TARGET_WASM_VERSION = "%s";`, wasmVersion),
+		fmt.Sprintf(`const TARGET_WASM_VERSION = '%s';`, wasmVersion),
 		"const TARGET_WASM_VERSION",
 	)
 }
@@ -68,6 +68,8 @@ func replaceLine(inputFile, newValue, lineMatcher string) {
 			lines = append(lines, line)
 		}
 	}
+	// Add an empty line at the end of the file
+	lines = append(lines, "")
 
 	if err := scanner.Err(); err != nil {
 		log.Fatalf("Error scanning file %s: %v", inputFile, err)
