@@ -48,7 +48,7 @@ jobs:
         with:
           repository: open-feature/java-sdk-contrib
           path: out/contrib/java-sdk-contrib
-          token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+          token: ${{ secrets.OPENFEATURE_PR_PAT }}
           fetch-depth: 1
 
       - name: Checkout OpenFeature dotnet contrib repository
@@ -56,7 +56,7 @@ jobs:
         with:
           repository: open-feature/dotnet-sdk-contrib
           path: out/contrib/dotnet-sdk-contrib
-          token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+          token: ${{ secrets.OPENFEATURE_PR_PAT }}
           fetch-depth: 1
 
       - name: Checkout OpenFeature JS contrib repository
@@ -64,7 +64,7 @@ jobs:
         with:
           repository: open-feature/js-sdk-contrib
           path: out/contrib/js-sdk-contrib
-          token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+          token: ${{ secrets.OPENFEATURE_PR_PAT }}
           fetch-depth: 1
 
       - name: Setup Go
@@ -87,7 +87,7 @@ jobs:
           commit-message: "chore: bump WASM to ${{ steps.normalize_version.outputs.wasm_version }}"
           signoff: true
           delete-branch: true
-          token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+          token: ${{ secrets.OPENFEATURE_PR_PAT }}
 
       - name: Create Pull Request to open-feature/dotnet-sdk-contrib
         uses: peter-evans/create-pull-request@98357b18bf14b5342f975ff684046ec3b2a07725 # v8.0.0
@@ -100,7 +100,7 @@ jobs:
           commit-message: "chore: bump WASM to ${{ steps.normalize_version.outputs.wasm_version }}"
           signoff: true
           delete-branch: true
-          token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+          token: ${{ secrets.OPENFEATURE_PR_PAT }}
 
       - name: Create Pull Request to open-feature/js-sdk-contrib
         uses: peter-evans/create-pull-request@98357b18bf14b5342f975ff684046ec3b2a07725 # v8.0.0
@@ -113,5 +113,5 @@ jobs:
           commit-message: "chore: bump WASM to ${{ steps.normalize_version.outputs.wasm_version }}"
           signoff: true
           delete-branch: true
-          token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+          token: ${{ secrets.OPENFEATURE_PR_PAT }}
 
