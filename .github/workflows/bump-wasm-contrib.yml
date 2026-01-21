@@ -40,13 +40,14 @@ jobs:
           echo "wasm_version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "Using wasm_version=$VERSION"
 
-      - name: Checkout OpenFeature java contrib repositories
+      - name: Checkout OpenFeature java contrib repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           repository: open-feature/java-sdk-contrib
           path: out/contrib/java-sdk-contrib
           token: ${{ secrets.OPENFEATURE_PR_PAT }}
           fetch-depth: 1
+          submodules: true
 
       - name: Checkout OpenFeature dotnet contrib repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
@@ -55,6 +56,7 @@ jobs:
           path: out/contrib/dotnet-sdk-contrib
           token: ${{ secrets.OPENFEATURE_PR_PAT }}
           fetch-depth: 1
+          submodules: true
 
       - name: Checkout OpenFeature JS contrib repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
@@ -63,12 +65,22 @@ jobs:
           path: out/contrib/js-sdk-contrib
           token: ${{ secrets.OPENFEATURE_PR_PAT }}
           fetch-depth: 1
+          submodules: true
 
       - name: Setup Go
         uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
         with:
           go-version-file: ./.github/ci-scripts/bump-wasm-contrib/go.mod
           check-latest: true
+
+      - name: Update submodule dotnet contrib repository
+        run: cd out/contrib/dotnet-sdk-contrib && git submodule update --remote src/OpenFeature.Providers.GOFeatureFlag/wasm-releases
+
+      - name: Update submodule js contrib repository
+        run: cd out/contrib/js-sdk-contrib && git submodule update --remote libs/providers/go-feature-flag/wasm-releases
+
+      - name: Update submodule java contrib repository
+        run: cd out/contrib/java-sdk-contrib && git submodule update --remote providers/go-feature-flag/wasm-releases
 
       - name: Bump WASM version in discovered files
         run: VERSION=${{ steps.normalize_version.outputs.wasm_version }} make bump-wasm-contrib
