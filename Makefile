@@ -121,7 +121,6 @@ bump-wasm-contrib: create-out-dir ## Bump WASM version in the different contrib 
 	@if [ -z "$(VERSION)" ]; then \
 		echo "$(RED)Error: VERSION is required$(RESET)"; \
 		echo "Usage: VERSION=v1.2.3 make bump-wasm-contrib"; \
-		echo "       VERSION=v1.2.3 make bump-wasm-contrib"; \
 		exit 1; \
 	fi
 	$(GOCMD) run .github/ci-scripts/bump-wasm-contrib/main.go $(VERSION)

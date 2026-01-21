@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 )
@@ -43,36 +44,39 @@ func main() {
 	)
 }
 
-// bumpWasmJavascript allows to bump the wasm version in a JavaScript file
-// inputFile: the JavaScript file to update
-// newValue: the new value to set (e.g. "v2.0.0")
+// replaceLine finds a line in a file matching a prefix and replaces the entire line.
+// inputFile: the file to update
+// newValue: the full new line to insert
+// lineMatcher: the prefix to match in the line
 func replaceLine(inputFile, newValue, lineMatcher string) {
 	file, err := os.Open(inputFile)
 	if err != nil {
-		panic(err)
+		log.Fatalf("Error opening file %s: %v", inputFile, err)
 	}
 	defer file.Close()
 
 	var lines []string
 	scanner := bufio.NewScanner(file)
 
+	var found bool
 	for scanner.Scan() {
 		line := scanner.Text()
-
-		// Check if this line defines our variable
-		// Using TrimSpace handles indentation
 		if strings.HasPrefix(strings.TrimSpace(line), lineMatcher) {
-			// Replace the whole line
 			lines = append(lines, newValue)
+			found = true
 		} else {
-			// Keep original line
 			lines = append(lines, line)
 		}
 	}
 
 	if err := scanner.Err(); err != nil {
-		panic(err)
+		log.Fatalf("Error scanning file %s: %v", inputFile, err)
 	}
-	os.WriteFile(inputFile, []byte(strings.Join(lines, "\n")), 0644)
+	if !found {
+		log.Fatalf("Error: line matcher %q not found in %s", lineMatcher, inputFile)
+	}
+	if err := os.WriteFile(inputFile, []byte(strings.Join(lines, "\n")), 0644); err != nil {
+		log.Fatalf("Error writing to file %s: %v", inputFile, err)
+	}
 	fmt.Printf("%s updated successfully.\n", inputFile)
 }
