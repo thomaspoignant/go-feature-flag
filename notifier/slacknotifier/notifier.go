@@ -18,6 +18,8 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 )
 
+var _ notifier.Notifier = &Notifier{}
+
 const (
 	goFFLogo            = "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png"
 	slackFooter         = "go-feature-flag"
