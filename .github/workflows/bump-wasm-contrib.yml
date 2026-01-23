@@ -20,7 +20,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout go-feature-flag repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 1
 
@@ -41,7 +41,7 @@ jobs:
           echo "Using wasm_version=$VERSION"
 
       - name: Checkout OpenFeature java contrib repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           repository: open-feature/java-sdk-contrib
           path: out/contrib/java-sdk-contrib
@@ -50,7 +50,7 @@ jobs:
           submodules: true
 
       - name: Checkout OpenFeature dotnet contrib repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           repository: open-feature/dotnet-sdk-contrib
           path: out/contrib/dotnet-sdk-contrib
@@ -59,7 +59,7 @@ jobs:
           submodules: true
 
       - name: Checkout OpenFeature JS contrib repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           repository: open-feature/js-sdk-contrib
           path: out/contrib/js-sdk-contrib
