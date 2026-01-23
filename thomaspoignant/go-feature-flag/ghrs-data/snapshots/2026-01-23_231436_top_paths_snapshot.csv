@@ -1,0 +1,11 @@
+url_path,views_total,views_unique
+/thomaspoignant/go-feature-flag,503,327
+/thomaspoignant/go-feature-flag/issues,81,35
+/thomaspoignant/go-feature-flag/releases,63,32
+/thomaspoignant/go-feature-flag/releases/tag/v1.50.0,43,32
+/thomaspoignant/go-feature-flag/pulls,42,20
+/thomaspoignant/go-feature-flag/tags,31,4
+/thomaspoignant/go-feature-flag/tree/main/examples,29,21
+/thomaspoignant/go-feature-flag/tree/main/openfeature/providers/python-provider,28,8
+/thomaspoignant/go-feature-flag/commit/195b750f1af79f0e8546b7f3f36d3a1c2bde3c82,24,23
+/thomaspoignant/go-feature-flag/compare/v1.49.0...v1.50.0,24,18
