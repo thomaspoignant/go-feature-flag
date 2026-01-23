@@ -7,6 +7,8 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
+var _ notifier.Notifier = &Notifier{}
+
 // Notifier is the component in charge of sending flag changes to the logs.
 type Notifier struct {
 	Logger *fflog.FFLogger

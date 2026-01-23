@@ -10,6 +10,8 @@ import (
 	"google.golang.org/api/option"
 )
 
+var _ exporter.Exporter = &Exporter{}
+
 // Exporter publishes events on a PubSub topic using the v2 API.
 type Exporter struct {
 	// ProjectID is a project to which the PubSub topic belongs.

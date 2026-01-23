@@ -13,6 +13,8 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 )
 
+var _ notifier.Notifier = &Notifier{}
+
 // Notifier is the component in charge of sending flag changes to Microsoft Teams.
 type Notifier struct {
 	MicrosoftTeamsWebhookURL string

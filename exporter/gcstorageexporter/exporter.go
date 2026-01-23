@@ -15,6 +15,8 @@ import (
 	"google.golang.org/api/option"
 )
 
+var _ exporter.Exporter = &Exporter{}
+
 type Exporter struct {
 	// Bucket is the name of your S3 Bucket.
 	Bucket string

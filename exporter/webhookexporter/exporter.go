@@ -16,6 +16,8 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
+var _ exporter.Exporter = &Exporter{}
+
 // Exporter is the exporter of your data to a webhook.
 // It calls the EndpointURL with a POST request with the following format:
 //

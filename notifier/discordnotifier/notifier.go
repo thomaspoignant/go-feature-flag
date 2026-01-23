@@ -18,6 +18,8 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 )
 
+var _ notifier.Notifier = &Notifier{}
+
 const (
 	colorDeleted     = 15158332
 	colorUpdated     = 16753920

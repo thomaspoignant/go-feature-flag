@@ -15,6 +15,8 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 )
 
+var _ notifier.Notifier = &Notifier{}
+
 // webhookReqBody is the format we are sending to the webhook
 type webhookReqBody struct {
 	Meta  map[string]string  `json:"meta"`
