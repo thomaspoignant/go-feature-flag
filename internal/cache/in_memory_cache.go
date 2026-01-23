@@ -9,6 +9,8 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
+var _ Cache = (*InMemoryCache)(nil)
+
 type InMemoryCache struct {
 	Flags  map[string]flag.InternalFlag
 	Logger *fflog.FFLogger

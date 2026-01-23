@@ -18,6 +18,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+var _ Manager = (*cacheManagerImpl)(nil)
+
 type Manager interface {
 	UpdateCache(newFlags map[string]dto.DTO, log *fflog.FFLogger, notifyChanges bool) error
 	Close()

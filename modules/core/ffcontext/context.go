@@ -2,6 +2,8 @@ package ffcontext
 
 import "encoding/json"
 
+var _ Context = (*EvaluationContext)(nil)
+
 type Context interface {
 	// GetKey return the unique targetingKey for the context.
 	GetKey() string

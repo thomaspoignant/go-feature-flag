@@ -10,6 +10,8 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
+var _ Service = (*notificationService)(nil)
+
 type Service interface {
 	Close()
 	Notify(oldCache, newCache map[string]flag.Flag, log *fflog.FFLogger)
