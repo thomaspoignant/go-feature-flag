@@ -16,6 +16,8 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
+var _ exporter.Exporter = &Exporter{}
+
 const (
 	defaultTracerName = "go-feature-flag"
 	spanName          = "feature_flag.evaluate"

@@ -14,6 +14,8 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
+var _ exporter.Exporter = &Exporter{}
+
 type Exporter struct {
 	// Container is the name of your Azure Blob Storage Container similar to Buckets in S3.
 	Container string

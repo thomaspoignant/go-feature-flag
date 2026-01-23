@@ -17,6 +17,8 @@ import (
 	"github.com/xitongsys/parquet-go/writer"
 )
 
+var _ exporter.Exporter = &Exporter{}
+
 type Exporter struct {
 	// Format is the output format you want in your exported file.
 	// Available format are JSON, CSV, and Parquet.

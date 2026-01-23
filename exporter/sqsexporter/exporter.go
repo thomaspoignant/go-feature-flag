@@ -14,6 +14,8 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
+var _ exporter.Exporter = &Exporter{}
+
 type Exporter struct {
 	// QueueURL is the URL of your SQS queue
 	// (mandatory)
