@@ -240,7 +240,7 @@ jobs:
         run: cp -rf release/${{ env.WEBSITE_DIR }}/ $MAIN_BRANCH_NAME
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@98357b18bf14b5342f975ff684046ec3b2a07725 # v8.0.0
+        uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
         env:
           VERSION: ${{ env.VERSION }}
         with:
@@ -305,7 +305,7 @@ jobs:
         run: cp -rf release/$SCHEMA_LOCATION $MAIN_BRANCH_NAME/$SCHEMA_LOCATION
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@98357b18bf14b5342f975ff684046ec3b2a07725 # v8.0.0
+        uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
         env:
           VERSION: ${{ env.VERSION }}
         with:
@@ -350,7 +350,7 @@ jobs:
       - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@98357b18bf14b5342f975ff684046ec3b2a07725 # v8.0.0
+        uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
         env:
           VERSION: ${{ env.VERSION }}
         with:
