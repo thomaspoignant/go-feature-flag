@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -67,15 +69,17 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	if baseURL == "" {
 		baseURL = "https://api.github.com"
 	}
-	// Remove trailing slash from baseURL to avoid double slashes in the final URL
-	baseURL = strings.TrimSuffix(baseURL, "/")
 
-	URL := fmt.Sprintf(
-		"%s/repos/%s/contents/%s?ref=%s",
-		baseURL,
-		r.RepositorySlug,
-		r.FilePath,
-		branch)
+	u, err := url.Parse(baseURL)
+	if err != nil {
+		return nil, fmt.Errorf("invalid base URL: %w", err)
+	}
+	u.Path = path.Join(u.Path, "repos", r.RepositorySlug, "contents", r.FilePath)
+
+	q := u.Query()
+	q.Set("ref", branch)
+	u.RawQuery = q.Encode()
+	URL := u.String()
 
 	resp, err := shared.CallHTTPAPI(ctx, URL, http.MethodGet, "", r.Timeout, header, r.httpClient)
 	if err != nil {
