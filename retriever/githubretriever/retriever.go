@@ -21,6 +21,11 @@ type Retriever struct {
 	GithubToken    string
 	Timeout        time.Duration // default is 10 seconds
 
+	// BaseURL is the base URL for the GitHub API.
+	// If not specified, it defaults to "https://api.github.com" for GitHub.com.
+	// For GitHub Enterprise instances, specify your instance URL (e.g., "https://github.acme.com/api/v3").
+	BaseURL string
+
 	// httpClient is the http.Client if you want to override it.
 	httpClient internal.HTTPClient
 
@@ -57,8 +62,17 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 		return nil, fmt.Errorf("rate limit exceeded. Next call will be after %s", r.rateLimitReset)
 	}
 
+	// Determine the base URL to use
+	baseURL := r.BaseURL
+	if baseURL == "" {
+		baseURL = "https://api.github.com"
+	}
+	// Remove trailing slash from baseURL to avoid double slashes in the final URL
+	baseURL = strings.TrimSuffix(baseURL, "/")
+
 	URL := fmt.Sprintf(
-		"https://api.github.com/repos/%s/contents/%s?ref=%s",
+		"%s/repos/%s/contents/%s?ref=%s",
+		baseURL,
 		r.RepositorySlug,
 		r.FilePath,
 		branch)
