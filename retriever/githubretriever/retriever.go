@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -20,6 +22,11 @@ type Retriever struct {
 	FilePath       string
 	GithubToken    string
 	Timeout        time.Duration // default is 10 seconds
+
+	// BaseURL is the base URL for the GitHub API.
+	// If not specified, it defaults to "https://api.github.com" for GitHub.com.
+	// For GitHub Enterprise instances, specify your instance URL (e.g., "https://github.acme.com/api/v3").
+	BaseURL string
 
 	// httpClient is the http.Client if you want to override it.
 	httpClient internal.HTTPClient
@@ -45,23 +52,16 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 		branch = "main"
 	}
 
-	header := http.Header{}
-	header.Add("Accept", "application/vnd.github.raw")
-	header.Add("X-GitHub-Api-Version", "2022-11-28")
-	// add header for GitHub Token if specified
-	if r.GithubToken != "" {
-		header.Add("Authorization", fmt.Sprintf("Bearer %s", r.GithubToken))
+	header := r.buildHeaders()
+
+	if err := r.checkRateLimit(); err != nil {
+		return nil, err
 	}
 
-	if r.rateLimitRemaining <= 0 && time.Now().Before(r.rateLimitReset) {
-		return nil, fmt.Errorf("rate limit exceeded. Next call will be after %s", r.rateLimitReset)
+	URL, err := r.buildURL(branch)
+	if err != nil {
+		return nil, err
 	}
-
-	URL := fmt.Sprintf(
-		"https://api.github.com/repos/%s/contents/%s?ref=%s",
-		r.RepositorySlug,
-		r.FilePath,
-		branch)
 
 	resp, err := shared.CallHTTPAPI(ctx, URL, http.MethodGet, "", r.Timeout, header, r.httpClient)
 	if err != nil {
@@ -71,6 +71,66 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 
 	r.updateRateLimit(resp.Header)
 
+	if err := r.checkResponseError(resp, URL); err != nil {
+		return nil, err
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	return body, nil
+}
+
+// buildHeaders constructs the HTTP headers for the GitHub API request.
+func (r *Retriever) buildHeaders() http.Header {
+	header := http.Header{}
+	header.Add("Accept", "application/vnd.github.raw")
+	header.Add("X-GitHub-Api-Version", "2022-11-28")
+	if r.GithubToken != "" {
+		header.Add("Authorization", fmt.Sprintf("Bearer %s", r.GithubToken))
+	}
+	return header
+}
+
+// checkRateLimit checks if the rate limit has been exceeded.
+func (r *Retriever) checkRateLimit() error {
+	if r.rateLimitRemaining <= 0 && time.Now().Before(r.rateLimitReset) {
+		return fmt.Errorf("rate limit exceeded. Next call will be after %s", r.rateLimitReset)
+	}
+	return nil
+}
+
+// buildURL constructs the GitHub API URL for retrieving the file.
+func (r *Retriever) buildURL(branch string) (string, error) {
+	// Validate inputs to prevent path traversal attacks
+	if strings.Contains(r.FilePath, "..") {
+		return "", fmt.Errorf("filepath must not contain '..'")
+	}
+	if strings.Contains(r.RepositorySlug, "..") {
+		return "", fmt.Errorf("repository slug must not contain '..'")
+	}
+
+	baseURL := r.BaseURL
+	if baseURL == "" {
+		baseURL = "https://api.github.com"
+	}
+
+	u, err := url.Parse(baseURL)
+	if err != nil {
+		return "", fmt.Errorf("invalid base URL: %w", err)
+	}
+	u.Path = path.Join(u.Path, "repos", r.RepositorySlug, "contents", r.FilePath)
+
+	q := u.Query()
+	q.Set("ref", branch)
+	u.RawQuery = q.Encode()
+
+	return u.String(), nil
+}
+
+// checkResponseError checks if the response indicates an error and returns an appropriate error message.
+func (r *Retriever) checkResponseError(resp *http.Response, url string) error {
 	if resp.StatusCode > 399 {
 		// Collect the headers to add in the error message
 		ghHeaders := map[string]string{}
@@ -80,14 +140,10 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 			}
 		}
 
-		return nil, fmt.Errorf("request to %s failed with code %d."+
-			" GitHub Headers: %v", URL, resp.StatusCode, ghHeaders)
+		return fmt.Errorf("request to %s failed with code %d."+
+			" GitHub Headers: %v", url, resp.StatusCode, ghHeaders)
 	}
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	return body, nil
+	return nil
 }
 
 // SetHTTPClient is here if you want to override the default http.Client we are using.

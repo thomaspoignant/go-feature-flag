@@ -86,6 +86,47 @@ func Test_InitRetriever(t *testing.T) {
 			wantType: &githubretriever.Retriever{},
 		},
 		{
+			name:    "Convert Github Retriever with BaseURL",
+			wantErr: assert.NoError,
+			conf: &retrieverconf.RetrieverConf{
+				Kind:           "github",
+				RepositorySlug: "myorg/myrepo",
+				Path:           "config/flags.yaml",
+				Timeout:        20,
+				AuthToken:      "xxx",
+				BaseURL:        "https://github.acme.com/api/v3",
+			},
+			want: &githubretriever.Retriever{
+				RepositorySlug: "myorg/myrepo",
+				Branch:         "main",
+				FilePath:       "config/flags.yaml",
+				GithubToken:    "xxx",
+				BaseURL:        "https://github.acme.com/api/v3",
+				Timeout:        20 * time.Millisecond,
+			},
+			wantType: &githubretriever.Retriever{},
+		},
+		{
+			name:    "Convert Github Retriever with BaseURL and trailing slash",
+			wantErr: assert.NoError,
+			conf: &retrieverconf.RetrieverConf{
+				Kind:           "github",
+				RepositorySlug: "myorg/myrepo",
+				Path:           "config/flags.yaml",
+				Timeout:        20,
+				BaseURL:        "https://github.acme.com/api/v3/",
+			},
+			want: &githubretriever.Retriever{
+				RepositorySlug: "myorg/myrepo",
+				Branch:         "main",
+				FilePath:       "config/flags.yaml",
+				GithubToken:    "",
+				BaseURL:        "https://github.acme.com/api/v3/",
+				Timeout:        20 * time.Millisecond,
+			},
+			wantType: &githubretriever.Retriever{},
+		},
+		{
 			name:    "Convert Gitlab Retriever",
 			wantErr: assert.NoError,
 			conf: &retrieverconf.RetrieverConf{
