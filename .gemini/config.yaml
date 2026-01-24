@@ -8,5 +8,5 @@ code_review:
     # because we want to be sure to trigger it on demand and not automatically.
     help: false
     summary: false
-    code_review: false
+    code_review: true
 ignore_patterns: []
