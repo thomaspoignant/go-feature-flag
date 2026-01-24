@@ -1861,3 +1861,30 @@ func TestConfig_IsDebugEnabled(t *testing.T) {
 		})
 	}
 }
+
+func TestConfigOnlyEnvVars(t *testing.T) {
+	t.Run("Retrievers", func(t *testing.T) {
+		t.Setenv("RETRIEVERS_0_KIND", string(retrieverconf.FileRetriever))
+		t.Setenv("RETRIEVERS_0_PATH", "examples/retriever_file/flags.goff.yaml")
+
+		f := pflag.NewFlagSet("config", pflag.ContinueOnError)
+
+		got, err := config.New(f, zap.L(), "1.X.X")
+		assert.NoError(t, err)
+
+		assert.Equal(t, retrieverconf.FileRetriever, (*got.Retrievers)[0].Kind)
+		assert.Equal(t, "examples/retriever_file/flags.goff.yaml", (*got.Retrievers)[0].Path)
+	})
+
+	t.Run("Flagset retriever", func(t *testing.T) {
+		t.Setenv("FLAGSETS_0_RETRIEVERS_0_KIND", string(retrieverconf.HTTPRetriever))
+		t.Setenv("FLAGSETS_0_RETRIEVERS_0_URL", "https://example.com/flags.goff.yaml")
+
+		f := pflag.NewFlagSet("config", pflag.ContinueOnError)
+		got, err := config.New(f, zap.L(), "1.X.X")
+		assert.NoError(t, err)
+
+		assert.Equal(t, retrieverconf.HTTPRetriever, (*got.FlagSets[0].Retrievers)[0].Kind)
+		assert.Equal(t, "https://example.com/flags.goff.yaml", (*got.FlagSets[0].Retrievers)[0].URL)
+	})
+}
