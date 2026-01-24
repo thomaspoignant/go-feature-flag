@@ -1861,3 +1861,16 @@ func TestConfig_IsDebugEnabled(t *testing.T) {
 		})
 	}
 }
+
+func TestConfigOnlyEnvVars(t *testing.T) {
+	t.Setenv("RETRIEVERS_0_KIND", string(retrieverconf.FileRetriever))
+	t.Setenv("RETRIEVERS_0_PATH", "examples/retriever_file/flags.goff.yaml")
+
+	f := pflag.NewFlagSet("config", pflag.ContinueOnError)
+
+	got, err := config.New(f, zap.L(), "1.X.X")
+	assert.NoError(t, err)
+
+	assert.Equal(t, retrieverconf.FileRetriever, (*got.Retrievers)[0].Kind)
+	assert.Equal(t, "examples/retriever_file/flags.goff.yaml", (*got.Retrievers)[0].Path)
+}
