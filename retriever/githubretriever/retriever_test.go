@@ -293,10 +293,20 @@ func Test_github_Retrieve_BaseURL(t *testing.T) {
         true_var: 0
         false_var: 100
   defaultRule:
-    variation: false_var	
+    variation: false_var
 `),
 			wantErr:     false,
 			expectedURL: "https://github.acme.com/api/v3/repos/myorg/myrepo/contents/config/flags.yaml?ref=main",
+		},
+		{
+			name: "Invalid base URL",
+			fields: fields{
+				repositorySlug: "myorg/myrepo",
+				filePath:       "config/flags.yaml",
+				baseURL:        ":invalid:url",
+			},
+			want:    nil,
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
