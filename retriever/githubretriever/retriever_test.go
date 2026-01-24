@@ -198,6 +198,7 @@ func Test_github_Retrieve_BaseURL(t *testing.T) {
 		filePath       string
 		githubToken    string
 		baseURL        string
+		branch         string
 	}
 	tests := []struct {
 		name        string
@@ -253,12 +254,13 @@ func Test_github_Retrieve_BaseURL(t *testing.T) {
 			expectedURL: "https://api.github.com/repos/thomaspoignant/go-feature-flag/contents/testdata/flag-config.yaml?ref=main",
 		},
 		{
-			name: "GitHub Enterprise with another URL",
+			name: "GitHub Enterprise with different branch",
 			fields: fields{
 				httpClient:     mock.HTTP{},
 				repositorySlug: "myorg/myrepo",
 				filePath:       "config/flags.yaml",
 				baseURL:        "https://github.enterprise.com/api/v3",
+				branch:         "develop",
 			},
 			want: []byte(`test-flag:
   variations:
@@ -273,7 +275,7 @@ func Test_github_Retrieve_BaseURL(t *testing.T) {
     variation: false_var	
 `),
 			wantErr:     false,
-			expectedURL: "https://github.enterprise.com/api/v3/repos/myorg/myrepo/contents/config/flags.yaml?ref=main",
+			expectedURL: "https://github.enterprise.com/api/v3/repos/myorg/myrepo/contents/config/flags.yaml?ref=develop",
 		},
 		{
 			name: "GitHub Enterprise with trailing slash in BaseURL",
@@ -293,7 +295,7 @@ func Test_github_Retrieve_BaseURL(t *testing.T) {
         true_var: 0
         false_var: 100
   defaultRule:
-    variation: false_var
+    variation: false_var	
 `),
 			wantErr:     false,
 			expectedURL: "https://github.acme.com/api/v3/repos/myorg/myrepo/contents/config/flags.yaml?ref=main",
@@ -316,13 +318,14 @@ func Test_github_Retrieve_BaseURL(t *testing.T) {
 				FilePath:       tt.fields.filePath,
 				GithubToken:    tt.fields.githubToken,
 				BaseURL:        tt.fields.baseURL,
+				Branch:         tt.fields.branch,
 			}
 
 			h.SetHTTPClient(&tt.fields.httpClient)
 			got, err := h.Retrieve(context.Background())
 			assert.Equal(t, tt.wantErr, err != nil, "retrieve() error = %v, wantErr %v", err, tt.wantErr)
 			if !tt.wantErr {
-				assert.Equal(t, tt.want, got)
+				assert.Equal(t, string(tt.want), string(got))
 				assert.Equal(t, tt.expectedURL, tt.fields.httpClient.Req.URL.String())
 				if tt.fields.githubToken != "" {
 					assert.Equal(
