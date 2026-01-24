@@ -310,6 +310,24 @@ func Test_github_Retrieve_BaseURL(t *testing.T) {
 			want:    nil,
 			wantErr: true,
 		},
+		{
+			name: "Path traversal in FilePath",
+			fields: fields{
+				repositorySlug: "myorg/myrepo",
+				filePath:       "../../../etc/passwd",
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name: "Path traversal in RepositorySlug",
+			fields: fields{
+				repositorySlug: "../../../etc/passwd",
+				filePath:       "config/flags.yaml",
+			},
+			want:    nil,
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

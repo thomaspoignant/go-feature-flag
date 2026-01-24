@@ -103,6 +103,14 @@ func (r *Retriever) checkRateLimit() error {
 
 // buildURL constructs the GitHub API URL for retrieving the file.
 func (r *Retriever) buildURL(branch string) (string, error) {
+	// Validate inputs to prevent path traversal attacks
+	if strings.Contains(r.FilePath, "..") {
+		return "", fmt.Errorf("filepath must not contain '..'")
+	}
+	if strings.Contains(r.RepositorySlug, "..") {
+		return "", fmt.Errorf("repository slug must not contain '..'")
+	}
+
 	baseURL := r.BaseURL
 	if baseURL == "" {
 		baseURL = "https://api.github.com"
