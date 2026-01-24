@@ -194,7 +194,6 @@ func Test_github_Retrieve(t *testing.T) {
 func Test_github_Retrieve_BaseURL(t *testing.T) {
 	type fields struct {
 		httpClient     mock.HTTP
-		context        context.Context
 		repositorySlug string
 		filePath       string
 		githubToken    string
@@ -254,7 +253,7 @@ func Test_github_Retrieve_BaseURL(t *testing.T) {
 			expectedURL: "https://api.github.com/repos/thomaspoignant/go-feature-flag/contents/testdata/flag-config.yaml?ref=main",
 		},
 		{
-			name: "GitHub Enterprise with custom branch",
+			name: "GitHub Enterprise with another URL",
 			fields: fields{
 				httpClient:     mock.HTTP{},
 				repositorySlug: "myorg/myrepo",
@@ -310,7 +309,7 @@ func Test_github_Retrieve_BaseURL(t *testing.T) {
 			}
 
 			h.SetHTTPClient(&tt.fields.httpClient)
-			got, err := h.Retrieve(tt.fields.context)
+			got, err := h.Retrieve(context.Background())
 			assert.Equal(t, tt.wantErr, err != nil, "retrieve() error = %v, wantErr %v", err, tt.wantErr)
 			if !tt.wantErr {
 				assert.Equal(t, tt.want, got)
