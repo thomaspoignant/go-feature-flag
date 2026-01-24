@@ -57,7 +57,9 @@ func loadArrayEnv(s string, v string, configMap map[string]any) (map[string]any,
 
 	configArray, ok := configMap[prefixKey].([]any)
 	if !ok {
-		return configMap, nil
+		// Initialize the array if it doesn't exist
+		configArray = []any{}
+		configMap[prefixKey] = configArray
 	}
 
 	index, err := strconv.Atoi(paths[1])
