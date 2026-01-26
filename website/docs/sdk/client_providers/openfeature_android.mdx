@@ -31,8 +31,13 @@ For documentation related to flags management in GO Feature Flag, refer to the [
       language="toml"
       showLineNumbers>
       {
-`api("dev.openfeature:android-sdk:${versions.maven.android}")
-api("org.gofeatureflag.openfeature:gofeatureflag-kotlin-provider${versions.maven.providerKt}")`
+`
+dependencies {
+    api("dev.openfeature:android-sdk:${versions.maven.android}")
+    implementation("org.gofeatureflag.openfeature:gofeatureflag-kotlin-provider:${versions.maven.providerKt}")
+}
+`
+
 }
 </CodeBlock>
 
