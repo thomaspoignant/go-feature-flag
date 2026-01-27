@@ -3,10 +3,6 @@ import PropTypes from 'prop-types';
 import Link from '@docusaurus/Link';
 import styles from './styles.module.css';
 
-ConfigCardContent.prototype = {
-  goModuleLink: PropTypes.array,
-  relayproxyLink: PropTypes.array,
-};
 export function ConfigCardContent(props) {
   return (
     <div className={styles.linkBox}>
@@ -28,3 +24,8 @@ export function ConfigCardContent(props) {
     </div>
   );
 }
+
+ConfigCardContent.propTypes = {
+  goModuleLink: PropTypes.string,
+  relayproxyLink: PropTypes.string,
+};

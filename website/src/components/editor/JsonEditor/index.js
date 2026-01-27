@@ -5,9 +5,6 @@ import styles from './styles.module.css';
 import {useFormContext} from 'react-hook-form';
 import PropTypes from 'prop-types';
 
-JsonEditor.propTypes = {
-  label: PropTypes.string.isRequired,
-};
 export function JsonEditor({label, value}) {
   const {register} = useFormContext();
   const {colorMode} = useColorMode();
@@ -33,3 +30,8 @@ export function JsonEditor({label, value}) {
     </div>
   );
 }
+
+JsonEditor.propTypes = {
+  label: PropTypes.string.isRequired,
+  value: PropTypes.string,
+};

@@ -1,6 +1,8 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import LinkItem from '@theme/Footer/LinkItem';
+
 function ColumnLinkItem({item}) {
   return item.html ? (
     <li
@@ -15,6 +17,16 @@ function ColumnLinkItem({item}) {
     </li>
   );
 }
+
+ColumnLinkItem.propTypes = {
+  item: PropTypes.shape({
+    html: PropTypes.string,
+    className: PropTypes.string,
+    href: PropTypes.string,
+    to: PropTypes.string,
+  }).isRequired,
+};
+
 function Column({column}) {
   return (
     <div className={clsx('col footer__col', column.className)}>
@@ -27,6 +39,15 @@ function Column({column}) {
     </div>
   );
 }
+
+Column.propTypes = {
+  column: PropTypes.shape({
+    className: PropTypes.string,
+    title: PropTypes.string,
+    items: PropTypes.array.isRequired,
+  }).isRequired,
+};
+
 export default function FooterLinksMultiColumn({columns}) {
   return (
     <div className="row footer__links">
@@ -36,3 +57,7 @@ export default function FooterLinksMultiColumn({columns}) {
     </div>
   );
 }
+
+FooterLinksMultiColumn.propTypes = {
+  columns: PropTypes.array.isRequired,
+};

@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import PropTypes from 'prop-types';
 import {useFormContext} from 'react-hook-form';
 import {singleFlagFormConvertor} from '../utils';
 import {JsonEditor} from '../JsonEditor';
@@ -96,3 +97,7 @@ export function FlagTest({flagInfo}) {
     </div>
   );
 }
+
+FlagTest.propTypes = {
+  flagInfo: PropTypes.string.isRequired,
+};

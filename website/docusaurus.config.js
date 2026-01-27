@@ -2,8 +2,6 @@
 // Note: type annotations allow type checking and IDEs autocompletion
 
 const {sdk} = require('./data/sdk');
-const lightCodeTheme = require('prism-react-renderer').themes.github;
-const darkCodeTheme = require('prism-react-renderer').themes.dracula;
 const {generateSdksDropdownHTML} = require('./src/components/navbar/sdks');
 
 /** @type {import("@docusaurus/types").Config} */
