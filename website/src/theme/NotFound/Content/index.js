@@ -1,8 +1,10 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import Translate from '@docusaurus/Translate';
 import Heading from '@theme/Heading';
-import Link from "@docusaurus/Link";
+import Link from '@docusaurus/Link';
+
 export default function NotFoundContent({className}) {
   return (
     <main className={clsx('container margin-vert--xl', className)}>
@@ -23,7 +25,8 @@ export default function NotFoundContent({className}) {
             </Translate>
           </p>
           <p>
-            The version you are looking for may not be available.<br />
+            The version you are looking for may not be available.
+            <br />
             Please check <Link to="/versions">the version page</Link> to find
             the documentation associated to the version you are using.
           </p>
@@ -35,9 +38,12 @@ export default function NotFoundContent({className}) {
               original URL and let them know their link is broken.
             </Translate>
           </p>
-
         </div>
       </div>
     </main>
   );
 }
+
+NotFoundContent.propTypes = {
+  className: PropTypes.string,
+};

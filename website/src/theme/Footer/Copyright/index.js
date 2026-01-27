@@ -1,4 +1,6 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+
 export default function FooterCopyright({copyright}) {
   return (
     <div
@@ -9,3 +11,7 @@ export default function FooterCopyright({copyright}) {
     />
   );
 }
+
+FooterCopyright.propTypes = {
+  copyright: PropTypes.string.isRequired,
+};

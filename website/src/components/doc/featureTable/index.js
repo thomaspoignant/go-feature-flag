@@ -46,7 +46,7 @@ export const FeatureTable = ({sdk}) => {
         <tbody>
           {sdk.featureList
             .sort((a, b) => a.status.localeCompare(b.status))
-            .map((feature, index) => (
+            .map(feature => (
               <tr
                 key={feature.name}
                 className="hover:bg-gray-50 dark:hover:bg-gray-800">

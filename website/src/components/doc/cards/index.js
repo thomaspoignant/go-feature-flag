@@ -1,5 +1,6 @@
 import React from 'react';
 import clsx from 'clsx';
+import PropTypes from 'prop-types';
 import styles from '@site/src/components/doc/cards/styles.module.css';
 import Link from '@docusaurus/Link';
 
@@ -41,3 +42,7 @@ function Card(item) {
     </div>
   );
 }
+
+Cards.propTypes = {
+  test: PropTypes.array.isRequired,
+};

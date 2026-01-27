@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import clsx from 'clsx';
 
 export default function FooterLayout({
@@ -26,3 +27,11 @@ export default function FooterLayout({
     </footer>
   );
 }
+
+FooterLayout.propTypes = {
+  style: PropTypes.string,
+  links: PropTypes.node,
+  logo: PropTypes.node,
+  copyright: PropTypes.node,
+  newsletter: PropTypes.node,
+};

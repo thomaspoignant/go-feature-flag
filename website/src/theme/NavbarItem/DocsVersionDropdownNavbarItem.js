@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import {
   useVersions,
   useActiveDocContext,
@@ -9,7 +10,7 @@ import {translate} from '@docusaurus/Translate';
 import {useLocation} from '@docusaurus/router';
 import DefaultNavbarItem from '@theme/NavbarItem/DefaultNavbarItem';
 import DropdownNavbarItem from '@theme/NavbarItem/DropdownNavbarItem';
-import semver from "semver";
+import semver from 'semver';
 
 const maxVersionToDisplayPerMajor = 4;
 const getVersionMainDoc = version =>
@@ -112,3 +113,10 @@ function getListVersionsToDisplay(versionToCheck) {
   return Array.from(latestMinorVersions.values()).map(v => v.toString());
 }
 
+DocsVersionDropdownNavbarItem.propTypes = {
+  mobile: PropTypes.bool,
+  docsPluginId: PropTypes.string,
+  dropdownActiveClassDisabled: PropTypes.bool,
+  dropdownItemsBefore: PropTypes.array,
+  dropdownItemsAfter: PropTypes.array,
+};

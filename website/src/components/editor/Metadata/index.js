@@ -43,11 +43,6 @@ export function Metadata({label}) {
   );
 }
 
-MetadataItem.propTypes = {
-  label: PropTypes.string.isRequired,
-  remove: PropTypes.func.isRequired,
-  index: PropTypes.number.isRequired,
-};
 function MetadataItem({type, label, remove, index, icon}) {
   const {register} = useFormContext();
   const handleOnClick = event => {
@@ -85,3 +80,11 @@ function MetadataItem({type, label, remove, index, icon}) {
     </div>
   );
 }
+
+MetadataItem.propTypes = {
+  label: PropTypes.string.isRequired,
+  remove: PropTypes.func.isRequired,
+  index: PropTypes.number.isRequired,
+  type: PropTypes.string,
+  icon: PropTypes.node,
+};
