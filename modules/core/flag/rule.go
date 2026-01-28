@@ -102,11 +102,23 @@ func (r *Rule) Evaluate(key string, ctx ffcontext.Context, flagName string, isDe
 	return "", fmt.Errorf("error in the configuration, no variation available for this rule")
 }
 
-func evaluateRule(query string, queryFormat QueryFormat, ctx ffcontext.Context) bool {
+func evaluateRule(query string, queryFormat QueryFormat, ctx ffcontext.Context) (success bool) {
 	if query == "" {
 		return true
 	}
 	mapCtx := utils.ContextToMap(ctx)
+
+	// Catch any panics that may occur during evaluation
+	defer func() {
+		if r := recover(); r != nil {
+			slog.ErrorContext(context.Background(), "panic recovered while evaluating query",
+				slog.Any("panic", r),
+				slog.String("query", query),
+			)
+			success = false
+		}
+	}()
+
 	switch queryFormat {
 	case JSONLogicQueryFormat:
 		strCtx, err := json.Marshal(mapCtx)
