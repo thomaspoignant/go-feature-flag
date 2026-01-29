@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.4.1...modules/core/v0.5.0) (2026-01-29)
+
+
+### 🚀 New Features
+
+* add compile-time interface checks ([#4699](https://github.com/thomaspoignant/go-feature-flag/issues/4699)) ([e4849d1](https://github.com/thomaspoignant/go-feature-flag/commit/e4849d196afc07b2a0466ccec55077ea4f2d1b64))
+
 ## [0.4.1](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.4.0...modules/core/v0.4.1) (2026-01-20)
 
 
