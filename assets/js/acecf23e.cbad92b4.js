@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkgo_feature_flag_website=globalThis.webpackChunkgo_feature_flag_website||[]).push([[81903],{1912:e=>{e.exports=JSON.parse('{"blogBasePath":"/blog","blogTitle":"Blog","authorsListPath":"/blog/authors"}')}}]);
