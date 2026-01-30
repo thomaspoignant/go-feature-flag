@@ -1,0 +1,72 @@
+---
+sidebar_position: 20
+description: How to configure a Discord Notifier
+---
+import { integrations } from "@site/data/integrations";
+import {Mandatory, NotMandatory} from "@site/src/components/checks/checks";
+export const notifierName = 'Discord'
+export const info = integrations.notifiers.find((r) => r.name === notifierName)
+
+# Discord
+
+## Overview
+{info.longDescription ?? info.description}
+
+## About {notifierName} Notifier
+The discord notifier allows to get notified on your favorite discord channel when an instance of `go-feature-flag` is
+detecting changes in the configuration of your flags.
+
+![Discord Notification](/docs/notifier/discord1.png)
+
+## Configure Discord Notifications
+
+1. Connect to your discord account and go on the channel where you want to send the notifications.
+2. Go on the settings menu of your channel.
+
+![Discord Config](/docs/notifier/discord2.png)
+
+3. Under your channel’s settings, go to the "Integrations" section and create a new webhook. To create it, please follow
+the [official documentation](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks).
+4. Copy the webhook URL
+
+![Discord WebHook](/docs/notifier/discord3.png)
+
+5. Now you can configure your notifier
+
+## Configure the relay proxy
+
+To configure your relay proxy to use the {notifierName} notifier, you need to add the following
+configuration to your relay proxy configuration file:
+
+```yaml title="goff-proxy.yaml"
+# ...
+notifier:
+  - kind: discord
+    webhookUrl: "https://discord.com/api/webhooks/yyyy/xxxxxxx"
+# ...
+```
+| Field name   |   Mandatory   | Type   | Default  | Description                                                                                              |
+|--------------|:-------------:|--------|----------|----------------------------------------------------------------------------------------------------------|
+| `kind`       | <Mandatory /> | string | **none** | **Value should be `discord`**.<br/>_This field is mandatory and describe which retriever you are using._ |
+| `webhookUrl` | <Mandatory /> | string | **none** | The complete URL of your incoming webhook configured in Discord.                                         |
+
+## Configure the GO Module
+To configure your GO module to use the {notifierName} notifier, you need to add the following
+configuration to your `ffclient.Config{}` object:
+
+```go title="example.go"
+err := ffclient.Init(ffclient.Config
+{
+    // ...
+    Notifiers: []notifier.Notifier{
+        &discordnotifier.Notifier{
+            DiscordWebhookURL: "https://discord.com/api/webhooks/yyyy/xxxxxxx",
+        },
+    },
+})
+defer ffclient.Close()
+```
+
+| **Field**           | **Mandatory** | **Description**                           |
+|---------------------|:-------------:|-------------------------------------------|
+| `DiscordWebhookURL` | <Mandatory /> | The complete URL of your discord webhook. |
