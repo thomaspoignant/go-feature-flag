@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.51.1](https://github.com/thomaspoignant/go-feature-flag/compare/v1.51.0...v1.51.1) (2026-01-30)
+
+
+### 🔧 Chores
+
+* bump Helm chart to 1.51.0 ([#4733](https://github.com/thomaspoignant/go-feature-flag/issues/4733)) ([f86fe67](https://github.com/thomaspoignant/go-feature-flag/commit/f86fe67e3ea16d0598e87f5a9bbcfda877513a5d))
+* **ci:** add base: main to create-pull-request actions in release workflow ([#4731](https://github.com/thomaspoignant/go-feature-flag/issues/4731)) ([ff37bba](https://github.com/thomaspoignant/go-feature-flag/commit/ff37bba606c21dd24b26b4ad8c18b3fda093a56f))
+
 ## [1.51.0](https://github.com/thomaspoignant/go-feature-flag/compare/v1.50.1...v1.51.0) (2026-01-30)
 
 
