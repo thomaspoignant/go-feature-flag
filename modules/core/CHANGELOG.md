@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.5.0](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.4.1...modules/core/v0.5.0) (2026-01-30)
+
+
+### 🚀 New Features
+
+* add compile-time interface checks ([#4699](https://github.com/thomaspoignant/go-feature-flag/issues/4699)) ([e4849d1](https://github.com/thomaspoignant/go-feature-flag/commit/e4849d196afc07b2a0466ccec55077ea4f2d1b64))
+* **core:** merge Disable field in MergeRules for scheduled rollout ([#4726](https://github.com/thomaspoignant/go-feature-flag/issues/4726)) ([53c1b11](https://github.com/thomaspoignant/go-feature-flag/commit/53c1b11c4bfb158445fc73bce938d55460841120))
+
+
+### 🐛 Bug Fixes
+
+* error when JsonLogic panics ([#4713](https://github.com/thomaspoignant/go-feature-flag/issues/4713)) ([ac70a0a](https://github.com/thomaspoignant/go-feature-flag/commit/ac70a0ab693cbeb337c90e8cc81316605b3219b8))
+
 ## [0.4.1](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.4.0...modules/core/v0.4.1) (2026-01-20)
 
 
