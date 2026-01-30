@@ -269,6 +269,10 @@ func (r *Rule) getPercentageBuckets() map[string]percentageBucket {
 // MergeRules is merging 2 rules.
 // It is used when we have to update a rule in a scheduled rollout.
 func (r *Rule) MergeRules(updatedRule Rule) {
+	if updatedRule.Disable != nil {
+		r.Disable = updatedRule.Disable
+	}
+
 	if updatedRule.Query != nil {
 		r.Query = updatedRule.Query
 	}

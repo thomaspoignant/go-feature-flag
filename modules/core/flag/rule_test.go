@@ -635,6 +635,37 @@ func TestRule_MergeRules(t *testing.T) {
 			},
 		},
 		{
+			name: "merge rule with disable set to true",
+			originalRule: flag.Rule{
+				Name:            testconvert.String("rule1"),
+				VariationResult: testconvert.String("variation_A"),
+			},
+			updatedRule: flag.Rule{
+				Disable: testconvert.Bool(true),
+			},
+			want: flag.Rule{
+				Name:            testconvert.String("rule1"),
+				VariationResult: testconvert.String("variation_A"),
+				Disable:         testconvert.Bool(true),
+			},
+		},
+		{
+			name: "merge rule with disable set to false",
+			originalRule: flag.Rule{
+				Name:            testconvert.String("rule1"),
+				VariationResult: testconvert.String("variation_A"),
+				Disable:         testconvert.Bool(true),
+			},
+			updatedRule: flag.Rule{
+				Disable: testconvert.Bool(false),
+			},
+			want: flag.Rule{
+				Name:            testconvert.String("rule1"),
+				VariationResult: testconvert.String("variation_A"),
+				Disable:         testconvert.Bool(false),
+			},
+		},
+		{
 			name: "merge percentage",
 			originalRule: flag.Rule{
 				Name: testconvert.String("rule1"),
