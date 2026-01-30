@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4](https://github.com/thomaspoignant/go-feature-flag/compare/cmd/wasm/v0.1.3...cmd/wasm/v0.1.4) (2026-01-30)
+
+
+### 🔧 Chores
+
+* **dependency:** Bump module modules/core 0.5.0 ([#4727](https://github.com/thomaspoignant/go-feature-flag/issues/4727)) ([8620857](https://github.com/thomaspoignant/go-feature-flag/commit/862085772eb15d1c1b4db8574f746e4d9d3a5000))
+
 ## [0.1.3](https://github.com/thomaspoignant/go-feature-flag/compare/cmd/wasm/v0.1.2...cmd/wasm/v0.1.3) (2026-01-21)
 
 
