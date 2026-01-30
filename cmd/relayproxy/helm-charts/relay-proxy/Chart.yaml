@@ -5,8 +5,8 @@ sources:
   - "https://github.com/thomaspoignant/go-feature-flag"
 description: A Helm chart to deploy go-feature-flag-relay proxy into Kubernetes
 type: application
-version: 1.50.1
-appVersion: "v1.50.1"
+version: 1.51.0
+appVersion: "v1.51.0"
 
 icon: https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo.png
 maintainers:
