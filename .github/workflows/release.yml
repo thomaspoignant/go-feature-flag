@@ -244,6 +244,7 @@ jobs:
         env:
           VERSION: ${{ env.VERSION }}
         with:
+          base: main
           branch: create-new-doc-version-${{ env.VERSION }}
           title: "docs(docusaurus): Create a new documentation version ${{ env.VERSION }}"
           body: Automated pull request to create a new documentation version ${{ env.VERSION }}
@@ -309,6 +310,7 @@ jobs:
         env:
           VERSION: ${{ env.VERSION }}
         with:
+          base: main
           branch: release-jsonschema-${{ env.VERSION }}
           title: "feat(jsonschema): Release a new version of the jsonschema ${{ env.VERSION }}"
           body: Automated pull request to release a new version of the jsonschema ${{ env.VERSION }}
@@ -354,6 +356,7 @@ jobs:
         env:
           VERSION: ${{ env.VERSION }}
         with:
+          base: main
           branch: bump-relay-proxy-helm-chart-${{ env.VERSION }}
           title: "chore(helm): Bump relay-proxy helm chart version ${{ env.VERSION }}"
           body: Automated pull request to bump relay-proxy helm chart version ${{ env.VERSION }}
