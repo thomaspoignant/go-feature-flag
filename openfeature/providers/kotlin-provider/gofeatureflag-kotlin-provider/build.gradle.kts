@@ -1,6 +1,7 @@
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.serialization")
     id("signing")
     id("maven-publish")
     id("org.jlleitschuh.gradle.ktlint")
@@ -10,7 +11,7 @@ val releaseVersion = project.extra["version"].toString()
 
 android {
     namespace = "org.gofeatureflag.openfeature"
-    compileSdk = 33
+    compileSdk = 35
 
     testOptions {
         unitTests {
@@ -93,13 +94,17 @@ publishing {
 }
 
 dependencies {
-    api("dev.openfeature:android-sdk:0.3.2")
-    api("com.squareup.okhttp3:okhttp:4.12.0")
-    api("com.google.code.gson:gson:2.12.1")
-    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
+    api("dev.openfeature:kotlin-sdk:0.6.2")
+    api("io.ktor:ktor-client-okhttp:3.0.3")
+    api("io.ktor:ktor-client-content-negotiation:3.0.3")
+    api("io.ktor:ktor-serialization-kotlinx-json:3.0.3")
+    api("com.squareup.okhttp3:okhttp:5.3.2")
+    api("com.google.code.gson:gson:2.13.2")
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+    api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
     testImplementation("junit:junit:4.13.2")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
-    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+    testImplementation("com.squareup.okhttp3:mockwebserver:5.3.2")
     testImplementation("org.skyscreamer:jsonassert:1.5.3")
 }
 

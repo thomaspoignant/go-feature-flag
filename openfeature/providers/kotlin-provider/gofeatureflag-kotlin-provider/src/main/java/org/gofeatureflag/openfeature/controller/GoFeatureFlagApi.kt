@@ -22,14 +22,14 @@ class GoFeatureFlagApi(private val options: GoFeatureFlagOptions) {
     }
 
     private var httpClient: OkHttpClient = OkHttpClient.Builder()
-        .connectTimeout(this.options.timeout, TimeUnit.MILLISECONDS)
-        .readTimeout(this.options.timeout, TimeUnit.MILLISECONDS)
-        .callTimeout(this.options.timeout, TimeUnit.MILLISECONDS)
-        .writeTimeout(this.options.timeout, TimeUnit.MILLISECONDS)
+        .connectTimeout(this.options.timeout.inWholeMilliseconds, TimeUnit.MILLISECONDS)
+        .readTimeout(this.options.timeout.inWholeMilliseconds, TimeUnit.MILLISECONDS)
+        .callTimeout(this.options.timeout.inWholeMilliseconds, TimeUnit.MILLISECONDS)
+        .writeTimeout(this.options.timeout.inWholeMilliseconds, TimeUnit.MILLISECONDS)
         .connectionPool(
             ConnectionPool(
                 this.options.maxIdleConnections,
-                this.options.keepAliveDuration,
+                this.options.keepAlive.inWholeMilliseconds,
                 TimeUnit.MILLISECONDS
             )
         )

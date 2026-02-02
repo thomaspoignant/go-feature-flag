@@ -1,8 +1,8 @@
 package org.gofeatureflag.openfeature
 
 import com.google.gson.Gson
-import dev.openfeature.sdk.ImmutableContext
-import dev.openfeature.sdk.OpenFeatureAPI
+import dev.openfeature.kotlin.sdk.ImmutableContext
+import dev.openfeature.kotlin.sdk.OpenFeatureAPI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
@@ -17,6 +17,7 @@ import org.junit.Before
 import org.junit.Test
 import java.nio.file.Files
 import java.nio.file.Paths
+import kotlin.time.Duration.Companion.milliseconds
 
 class GoFeatureFlagProviderTest {
     private var mockWebServer: MockWebServer? = null
@@ -43,7 +44,7 @@ class GoFeatureFlagProviderTest {
             GoFeatureFlagOptions(
                 endpoint = mockWebServer!!.url("/").toString(),
                 flushIntervalMs = 100,
-                pollingIntervalInMillis = 10000
+                pollingInterval = 10000.milliseconds
             )
 
         val provider = GoFeatureFlagProvider(options)
@@ -91,7 +92,7 @@ class GoFeatureFlagProviderTest {
             GoFeatureFlagOptions(
                 endpoint = mockWebServer!!.url("/").toString(),
                 flushIntervalMs = 100,
-                pollingIntervalInMillis = 10000
+                pollingInterval = 10000.milliseconds
             )
 
         val provider = GoFeatureFlagProvider(options)
@@ -143,7 +144,7 @@ class GoFeatureFlagProviderTest {
             GoFeatureFlagOptions(
                 endpoint = mockWebServer!!.url("/").toString(),
                 flushIntervalMs = 100,
-                pollingIntervalInMillis = 10000
+                pollingInterval = 10000.milliseconds
             )
 
         val provider = GoFeatureFlagProvider(options)
@@ -189,7 +190,7 @@ class GoFeatureFlagProviderTest {
             GoFeatureFlagOptions(
                 endpoint = mockWebServer!!.url("/").toString(),
                 flushIntervalMs = 100,
-                pollingIntervalInMillis = 10000,
+                pollingInterval = 10000.milliseconds,
                 exporterMetadata = mapOf("device" to "Pixel 4", "appVersion" to "1.0.0")
             )
 

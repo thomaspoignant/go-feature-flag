@@ -1,8 +1,8 @@
 package org.gofeatureflag.openfeature.hook
 
-import dev.openfeature.sdk.FlagEvaluationDetails
-import dev.openfeature.sdk.Hook
-import dev.openfeature.sdk.HookContext
+import dev.openfeature.kotlin.sdk.FlagEvaluationDetails
+import dev.openfeature.kotlin.sdk.Hook
+import dev.openfeature.kotlin.sdk.HookContext
 import org.gofeatureflag.openfeature.controller.DataCollectorManager
 import java.util.Date
 
