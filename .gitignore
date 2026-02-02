@@ -52,3 +52,16 @@ volume
 
 go.work
 go.work.sum
+
+# Worktree folders (semantic commit prefix + hyphen)
+chore-*/
+feat-*/
+fix-*/
+docs-*/
+style-*/
+refactor-*/
+test-*/
+build-*/
+ci-*/
+perf-*/
+revert-*/
