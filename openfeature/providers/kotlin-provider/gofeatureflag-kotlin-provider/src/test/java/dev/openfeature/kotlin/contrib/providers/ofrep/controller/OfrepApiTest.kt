@@ -7,9 +7,9 @@ import dev.openfeature.kotlin.contrib.providers.ofrep.bean.OfrepOptions
 import dev.openfeature.kotlin.contrib.providers.ofrep.error.OfrepError
 import dev.openfeature.kotlin.contrib.providers.ofrep.mockEngineWithOneResponse
 import dev.openfeature.kotlin.contrib.providers.ofrep.mockEngineWithTwoResponses
-import dev.openfeature.kotlin.contrib.providers.ofrep.payloadsinternal.INVALID_API_RESPONSE_PAYLOAD
-import dev.openfeature.kotlin.contrib.providers.ofrep.payloadsinternal.VALID_API_RESPONSE_PAYLOAD
-import dev.openfeature.kotlin.contrib.providers.ofrep.payloadsinternal.VALID_API_SHORT_RESPONSE_PAYLOAD
+import dev.openfeature.kotlin.contrib.providers.ofrep.payloads.INVALID_API_RESPONSE_PAYLOAD
+import dev.openfeature.kotlin.contrib.providers.ofrep.payloads.VALID_API_RESPONSE_PAYLOAD
+import dev.openfeature.kotlin.contrib.providers.ofrep.payloads.VALID_API_SHORT_RESPONSE_PAYLOAD
 import dev.openfeature.kotlin.sdk.EvaluationMetadata
 import dev.openfeature.kotlin.sdk.ImmutableContext
 import dev.openfeature.kotlin.sdk.Value

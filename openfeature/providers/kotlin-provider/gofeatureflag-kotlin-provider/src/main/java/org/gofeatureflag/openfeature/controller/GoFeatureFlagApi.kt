@@ -9,9 +9,10 @@ import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.toRequestBody
+import org.gofeatureflag.openfeature.bean.Event
 import org.gofeatureflag.openfeature.bean.GoFeatureFlagOptions
 import org.gofeatureflag.openfeature.error.GoFeatureFlagError
-import org.gofeatureflag.openfeature.bean.Event
+import org.gofeatureflag.openfeature.bean.FeatureEvent
 import org.gofeatureflag.openfeature.bean.Events
 import java.util.concurrent.TimeUnit
 
@@ -41,13 +42,13 @@ class GoFeatureFlagApi(private val options: GoFeatureFlagOptions) {
     /**
      * Call the GO Feature Flag API to collect the data
      */
-    suspend fun postEventsToDataCollector(events: List<Event>) {
+    suspend fun postEventsToDataCollector(featureEvents: List<Event>) {
         val urlBuilder = parsedEndpoint.newBuilder()
             .addEncodedPathSegment("v1")
             .addEncodedPathSegment("data")
             .addEncodedPathSegment("collector")
 
-        if (events.isEmpty()) {
+        if (featureEvents.isEmpty()) {
             return // nothing to send
         }
 
@@ -56,7 +57,7 @@ class GoFeatureFlagApi(private val options: GoFeatureFlagOptions) {
         val metadata = options.exporterMetadata.toMutableMap()
         metadata["provider"] = "android"
         metadata["openfeature"] = true
-        val requestBody = gson.toJson(Events(events, metadata)).toRequestBody(mediaType)
+        val requestBody = gson.toJson(Events(featureEvents, metadata)).toRequestBody(mediaType)
         val reqBuilder = okhttp3.Request.Builder()
             .url(urlBuilder.build())
             .post(requestBody)

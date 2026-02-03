@@ -7,13 +7,16 @@ import dev.openfeature.kotlin.sdk.FeatureProvider
 import dev.openfeature.kotlin.sdk.Hook
 import dev.openfeature.kotlin.sdk.ProviderEvaluation
 import dev.openfeature.kotlin.sdk.ProviderMetadata
+import dev.openfeature.kotlin.sdk.TrackingEventDetails
 import dev.openfeature.kotlin.sdk.Value
 import dev.openfeature.kotlin.sdk.events.OpenFeatureProviderEvents
 import kotlinx.coroutines.flow.Flow
 import org.gofeatureflag.openfeature.bean.GoFeatureFlagOptions
+import org.gofeatureflag.openfeature.bean.TrackingEvent
 import org.gofeatureflag.openfeature.controller.DataCollectorManager
 import org.gofeatureflag.openfeature.controller.GoFeatureFlagApi
 import org.gofeatureflag.openfeature.hook.DataCollectorHook
+import org.gofeatureflag.openfeature.utils.EvaluationContextUtil
 
 class GoFeatureFlagProvider(private val options: GoFeatureFlagOptions) : FeatureProvider {
     private val ofrepProvider: OfrepProvider
@@ -106,5 +109,32 @@ class GoFeatureFlagProvider(private val options: GoFeatureFlagOptions) : Feature
     override fun shutdown() {
         this.ofrepProvider.shutdown()
         this.dataCollectorManager?.stop()
+    }
+
+    /**
+     * Feature provider implementations can opt in for to support Tracking by implementing this method.
+     *
+     * Performs tracking of a particular action or application state.
+     *
+     * @param trackingEventName Event name to track
+     * @param context   Evaluation context used in flag evaluation (Optional)
+     * @param details   Data pertinent to a particular tracking event (Optional)
+     */
+    override fun track(trackingEventName: String, context: EvaluationContext?, details: TrackingEventDetails?) {
+        val trackingEventDetails = details?.asObjectMap()?.toMutableMap()
+        trackingEventDetails?.put("value", details.`value`)
+
+        print(trackingEventDetails)
+
+        val trackingEvent = TrackingEvent(
+            kind = "tracking",
+            key = trackingEventName,
+            evaluationContext = context?.asObjectMap(),
+            userKey = context?.getTargetingKey() ?: "undefined-targetingKey",
+            contextKind = if (EvaluationContextUtil.isAnonymousUser(context)) "anonymousUser" else "user",
+            trackingEventDetails = trackingEventDetails,
+            creationDate = System.currentTimeMillis() / 1000L
+        )
+        this.dataCollectorManager?.addEvent(trackingEvent)
     }
 }
