@@ -1,4 +1,4 @@
-package org.gofeatureflag.openfeature.hook
+package org.gofeatureflag.openfeature.bean
 
 
 data class Events(

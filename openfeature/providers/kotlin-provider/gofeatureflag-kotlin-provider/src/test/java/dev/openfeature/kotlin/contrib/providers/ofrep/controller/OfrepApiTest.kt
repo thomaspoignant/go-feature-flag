@@ -1,8 +1,5 @@
 package dev.openfeature.kotlin.contrib.providers.ofrep.controller
 
-import INVALID_API_RESPONSE_PAYLOAD
-import VALID_API_RESPONSE_PAYLOAD
-import VALID_API_SHORT_RESPONSE_PAYLOAD
 import dev.openfeature.kotlin.contrib.providers.ofrep.FAKE_ENDPOINT
 import dev.openfeature.kotlin.contrib.providers.ofrep.bean.FlagDto
 import dev.openfeature.kotlin.contrib.providers.ofrep.bean.OfrepApiResponse
@@ -10,6 +7,9 @@ import dev.openfeature.kotlin.contrib.providers.ofrep.bean.OfrepOptions
 import dev.openfeature.kotlin.contrib.providers.ofrep.error.OfrepError
 import dev.openfeature.kotlin.contrib.providers.ofrep.mockEngineWithOneResponse
 import dev.openfeature.kotlin.contrib.providers.ofrep.mockEngineWithTwoResponses
+import dev.openfeature.kotlin.contrib.providers.ofrep.payloadsinternal.INVALID_API_RESPONSE_PAYLOAD
+import dev.openfeature.kotlin.contrib.providers.ofrep.payloadsinternal.VALID_API_RESPONSE_PAYLOAD
+import dev.openfeature.kotlin.contrib.providers.ofrep.payloadsinternal.VALID_API_SHORT_RESPONSE_PAYLOAD
 import dev.openfeature.kotlin.sdk.EvaluationMetadata
 import dev.openfeature.kotlin.sdk.ImmutableContext
 import dev.openfeature.kotlin.sdk.Value
@@ -20,7 +20,6 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import kotlinx.coroutines.test.runTest
-import org.junit.Test
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

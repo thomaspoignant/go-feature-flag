@@ -6,7 +6,7 @@ import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import org.gofeatureflag.openfeature.bean.GoFeatureFlagOptions
 import org.gofeatureflag.openfeature.error.GoFeatureFlagError
-import org.gofeatureflag.openfeature.hook.Event
+import org.gofeatureflag.openfeature.bean.Event
 import org.junit.After
 import org.junit.Assert
 import org.junit.Assert.assertEquals

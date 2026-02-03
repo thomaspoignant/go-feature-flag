@@ -11,8 +11,8 @@ import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.gofeatureflag.openfeature.bean.GoFeatureFlagOptions
 import org.gofeatureflag.openfeature.error.GoFeatureFlagError
-import org.gofeatureflag.openfeature.hook.Event
-import org.gofeatureflag.openfeature.hook.Events
+import org.gofeatureflag.openfeature.bean.Event
+import org.gofeatureflag.openfeature.bean.Events
 import java.util.concurrent.TimeUnit
 
 class GoFeatureFlagApi(private val options: GoFeatureFlagOptions) {

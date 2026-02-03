@@ -9,7 +9,7 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import org.gofeatureflag.openfeature.bean.GoFeatureFlagOptions
-import org.gofeatureflag.openfeature.hook.Events
+import org.gofeatureflag.openfeature.bean.Events
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -38,8 +38,8 @@ class GoFeatureFlagProviderTest {
         val jsonFilePath =
             javaClass.classLoader?.getResource("org.gofeatureflag.openfeature.ofrep/valid_api_response.json")?.file
         val jsonString = String(Files.readAllBytes(Paths.get(jsonFilePath)))
-        mockWebServer!!.enqueue(MockResponse().setBody(jsonString).setResponseCode(200))
-        mockWebServer!!.enqueue(MockResponse().setBody("{}").setResponseCode(200))
+        mockWebServer!!.enqueue(MockResponse().setBody(jsonString).setHeader("Content-Type", "application/json").setResponseCode(200))
+        mockWebServer!!.enqueue(MockResponse().setBody("{}").setHeader("Content-Type", "application/json").setResponseCode(200))
         val options =
             GoFeatureFlagOptions(
                 endpoint = mockWebServer!!.url("/").toString(),
@@ -70,6 +70,7 @@ class GoFeatureFlagProviderTest {
 
 
         val got = Gson().fromJson(recordedRequest.body.readUtf8(), Events::class.java)
+        print(got?.events?.get(0)?.value)
         assertEquals(6, got.events?.size)
         got.events?.forEach {
             assertEquals("title-flag", it.key)
@@ -86,8 +87,8 @@ class GoFeatureFlagProviderTest {
 
     @Test
     fun `should call the hook with an error result`() {
-        mockWebServer!!.enqueue(MockResponse().setBody("{}").setResponseCode(200))
-        mockWebServer!!.enqueue(MockResponse().setBody("{}").setResponseCode(200))
+        mockWebServer!!.enqueue(MockResponse().setBody("{}").setHeader("Content-Type", "application/json").setResponseCode(200))
+        mockWebServer!!.enqueue(MockResponse().setBody("{}").setHeader("Content-Type", "application/json").setResponseCode(200))
         val options =
             GoFeatureFlagOptions(
                 endpoint = mockWebServer!!.url("/").toString(),
@@ -137,9 +138,9 @@ class GoFeatureFlagProviderTest {
         val jsonFilePath =
             javaClass.classLoader?.getResource("org.gofeatureflag.openfeature.ofrep/valid_api_response.json")?.file
         val jsonString = String(Files.readAllBytes(Paths.get(jsonFilePath)))
-        mockWebServer!!.enqueue(MockResponse().setBody(jsonString).setResponseCode(200))
-        mockWebServer!!.enqueue(MockResponse().setBody("{}").setResponseCode(200))
-        mockWebServer!!.enqueue(MockResponse().setBody("{}").setResponseCode(200))
+        mockWebServer!!.enqueue(MockResponse().setBody(jsonString).setHeader("Content-Type", "application/json").setResponseCode(200))
+        mockWebServer!!.enqueue(MockResponse().setBody("{}").setHeader("Content-Type", "application/json").setResponseCode(200))
+        mockWebServer!!.enqueue(MockResponse().setBody("{}").setHeader("Content-Type", "application/json").setResponseCode(200))
         val options =
             GoFeatureFlagOptions(
                 endpoint = mockWebServer!!.url("/").toString(),
@@ -183,9 +184,9 @@ class GoFeatureFlagProviderTest {
         val jsonFilePath =
             javaClass.classLoader?.getResource("org.gofeatureflag.openfeature.ofrep/valid_api_response.json")?.file
         val jsonString = String(Files.readAllBytes(Paths.get(jsonFilePath)))
-        mockWebServer!!.enqueue(MockResponse().setBody(jsonString).setResponseCode(200))
-        mockWebServer!!.enqueue(MockResponse().setBody("{}").setResponseCode(200))
-        mockWebServer!!.enqueue(MockResponse().setBody("{}").setResponseCode(200))
+        mockWebServer!!.enqueue(MockResponse().setBody(jsonString).setHeader("Content-Type", "application/json").setResponseCode(200))
+        mockWebServer!!.enqueue(MockResponse().setBody("{}").setHeader("Content-Type", "application/json").setResponseCode(200))
+        mockWebServer!!.enqueue(MockResponse().setBody("{}").setHeader("Content-Type", "application/json").setResponseCode(200))
         val options =
             GoFeatureFlagOptions(
                 endpoint = mockWebServer!!.url("/").toString(),

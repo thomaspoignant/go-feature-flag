@@ -67,7 +67,6 @@ internal class OfrepApi(
                 } catch (e: JsonConvertException) {
                     throw OfrepError.UnmarshallError(e)
                 } catch (e: Exception) {
-                    println(e)
                     throw OfrepError.UnexpectedResponseError(response)
                 }
             }

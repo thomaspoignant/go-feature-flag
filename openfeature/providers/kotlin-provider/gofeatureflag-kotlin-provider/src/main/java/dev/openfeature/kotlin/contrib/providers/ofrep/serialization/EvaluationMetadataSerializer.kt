@@ -42,6 +42,7 @@ internal class EvaluationMetadataSerializer : KSerializer<EvaluationMetadata> {
                 is String -> metadataBuilder.putString(entry.key, value)
                 is Boolean -> metadataBuilder.putBoolean(entry.key, value)
                 is Int -> metadataBuilder.putInt(entry.key, value)
+                is Double -> metadataBuilder.putDouble(entry.key, value)
                 else -> error("Unsupported type for: $value")
             }
         }

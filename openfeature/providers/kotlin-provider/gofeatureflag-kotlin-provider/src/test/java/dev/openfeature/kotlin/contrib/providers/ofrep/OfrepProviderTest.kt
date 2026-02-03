@@ -2,13 +2,13 @@
 
 package dev.openfeature.kotlin.contrib.providers.ofrep
 
-import INVALID_CONTEXT_PAYLOAD
-import PARSE_ERROR_PAYLOAD
-import VALID_1_FLAG_IN_PARSE_ERROR_PAYLOAD
-import VALID_API_RESPONSE2_PAYLOAD
-import VALID_API_RESPONSE_PAYLOAD
-import VALID_API_SHORT_RESPONSE_PAYLOAD
 import dev.openfeature.kotlin.contrib.providers.ofrep.bean.OfrepOptions
+import dev.openfeature.kotlin.contrib.providers.ofrep.payloads.INVALID_CONTEXT_PAYLOAD
+import dev.openfeature.kotlin.contrib.providers.ofrep.payloads.PARSE_ERROR_PAYLOAD
+import dev.openfeature.kotlin.contrib.providers.ofrep.payloads.VALID_1_FLAG_IN_PARSE_ERROR_PAYLOAD
+import dev.openfeature.kotlin.contrib.providers.ofrep.payloads.VALID_API_RESPONSE2_PAYLOAD
+import dev.openfeature.kotlin.contrib.providers.ofrep.payloads.VALID_API_RESPONSE_PAYLOAD
+import dev.openfeature.kotlin.contrib.providers.ofrep.payloads.VALID_API_SHORT_RESPONSE_PAYLOAD
 import dev.openfeature.kotlin.sdk.Client
 import dev.openfeature.kotlin.sdk.EvaluationContext
 import dev.openfeature.kotlin.sdk.EvaluationMetadata

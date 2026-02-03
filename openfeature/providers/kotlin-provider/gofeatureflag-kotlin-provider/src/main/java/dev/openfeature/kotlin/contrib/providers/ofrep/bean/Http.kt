@@ -15,8 +15,8 @@ internal fun defaultHttpEngine(options: OfrepOptions): HttpClientEngine {
             connectionPool(
                 ConnectionPool(
                     options.maxIdleConnections,
-                    options.keepAliveDuration.inWholeMinutes,
-                    TimeUnit.MINUTES
+                    options.keepAliveDuration.inWholeMilliseconds,
+                    TimeUnit.MILLISECONDS
                 )
             )
         }

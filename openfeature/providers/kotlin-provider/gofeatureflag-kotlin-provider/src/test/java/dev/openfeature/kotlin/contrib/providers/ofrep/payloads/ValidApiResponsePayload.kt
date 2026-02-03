@@ -1,4 +1,6 @@
-package dev.openfeature.kotlin.contrib.providers.ofrep.payloadsinternal const val VALID_API_RESPONSE_PAYLOAD = """
+package dev.openfeature.kotlin.contrib.providers.ofrep.payloads
+
+internal const val VALID_API_RESPONSE_PAYLOAD = """
 {
   "flags": [
     {
