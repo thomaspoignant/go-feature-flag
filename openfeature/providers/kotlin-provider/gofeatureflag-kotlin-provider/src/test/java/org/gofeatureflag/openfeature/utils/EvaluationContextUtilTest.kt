@@ -9,13 +9,13 @@ import org.junit.Test
 class EvaluationContextUtilTest {
 
     @Test
-    fun `isAnonymousUser should return true when context is null`() {
+    fun isAnonymousUserReturnsTrueWhenContextIsNull() {
         val result = EvaluationContextUtil.isAnonymousUser(null)
         assertTrue(result)
     }
 
     @Test
-    fun `isAnonymousUser should return true when anonymous field is true`() {
+    fun isAnonymousUserReturnsTrueWhenAnonymousFieldIsTrue() {
         val context = ImmutableContext(
             targetingKey = "user123",
             attributes = mapOf("anonymous" to Value.Boolean(true))
@@ -26,7 +26,7 @@ class EvaluationContextUtilTest {
     }
 
     @Test
-    fun `isAnonymousUser should return false when anonymous field is false`() {
+    fun isAnonymousUserReturnsFalseWhenAnonymousFieldIsFalse() {
         val context = ImmutableContext(
             targetingKey = "user123",
             attributes = mapOf("anonymous" to Value.Boolean(false))
@@ -37,7 +37,7 @@ class EvaluationContextUtilTest {
     }
 
     @Test
-    fun `isAnonymousUser should return false when anonymous field is not present`() {
+    fun isAnonymousUserReturnsFalseWhenAnonymousFieldIsNotPresent() {
         val context = ImmutableContext(
             targetingKey = "user123",
             attributes = mapOf("email" to Value.String("test@example.com"))
@@ -48,7 +48,7 @@ class EvaluationContextUtilTest {
     }
 
     @Test
-    fun `isAnonymousUser should return false when anonymous field is null`() {
+    fun isAnonymousUserReturnsFalseWhenAnonymousFieldIsNull() {
         val context = ImmutableContext(
             targetingKey = "user123",
             attributes = mapOf("anonymous" to Value.String("null"))
@@ -59,7 +59,7 @@ class EvaluationContextUtilTest {
     }
 
     @Test
-    fun `isAnonymousUser should return false when context has no attributes`() {
+    fun isAnonymousUserReturnsFalseWhenContextHasNoAttributes() {
         val context = ImmutableContext(targetingKey = "user123")
 
         val result = EvaluationContextUtil.isAnonymousUser(context)
@@ -67,7 +67,7 @@ class EvaluationContextUtilTest {
     }
 
     @Test
-    fun `isAnonymousUser should return false when anonymous field is string true`() {
+    fun isAnonymousUserReturnsFalseWhenAnonymousFieldIsStringTrue() {
         val context = ImmutableContext(
             targetingKey = "user123",
             attributes = mapOf("anonymous" to Value.String("true"))
@@ -78,7 +78,7 @@ class EvaluationContextUtilTest {
     }
 
     @Test
-    fun `isAnonymousUser should return false when anonymous field is string false`() {
+    fun isAnonymousUserReturnsFalseWhenAnonymousFieldIsStringFalse() {
         val context = ImmutableContext(
             targetingKey = "user123",
             attributes = mapOf("anonymous" to Value.String("false"))

@@ -2,7 +2,6 @@ package org.gofeatureflag.openfeature.controller
 
 import kotlinx.coroutines.runBlocking
 import org.gofeatureflag.openfeature.bean.Event
-import org.gofeatureflag.openfeature.bean.FeatureEvent
 import java.util.Collections
 import java.util.Timer
 import java.util.TimerTask

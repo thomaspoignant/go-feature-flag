@@ -24,6 +24,13 @@ import java.nio.file.Paths
 import kotlin.time.Duration.Companion.milliseconds
 
 class GoFeatureFlagProviderTest {
+    companion object {
+        private const val CONTENT_TYPE = "Content-Type"
+        private const val APPLICATION_JSON = "application/json"
+        private const val USER_ACTION = "user-action"
+        private const val PAGE_VIEW = "page-view"
+    }
+
     private var mockWebServer: MockWebServer? = null
 
     @Before
@@ -42,8 +49,8 @@ class GoFeatureFlagProviderTest {
         val jsonFilePath =
             javaClass.classLoader?.getResource("org.gofeatureflag.openfeature.ofrep/valid_api_response.json")?.file
         val jsonString = String(Files.readAllBytes(Paths.get(jsonFilePath)))
-        mockWebServer!!.enqueue(MockResponse().setBody(jsonString).setHeader("Content-Type", "application/json").setResponseCode(200))
-        mockWebServer!!.enqueue(MockResponse().setBody("{}").setHeader("Content-Type", "application/json").setResponseCode(200))
+        mockWebServer!!.enqueue(MockResponse().setBody(jsonString).setHeader(CONTENT_TYPE, APPLICATION_JSON).setResponseCode(200))
+        mockWebServer!!.enqueue(MockResponse().setBody("{}").setHeader(CONTENT_TYPE, APPLICATION_JSON).setResponseCode(200))
         val options =
             GoFeatureFlagOptions(
                 endpoint = mockWebServer!!.url("/").toString(),
@@ -90,8 +97,8 @@ class GoFeatureFlagProviderTest {
 
     @Test
     fun `should call the hook with an error result`() {
-        mockWebServer!!.enqueue(MockResponse().setBody("{}").setHeader("Content-Type", "application/json").setResponseCode(200))
-        mockWebServer!!.enqueue(MockResponse().setBody("{}").setHeader("Content-Type", "application/json").setResponseCode(200))
+        mockWebServer!!.enqueue(MockResponse().setBody("{}").setHeader(CONTENT_TYPE, APPLICATION_JSON).setResponseCode(200))
+        mockWebServer!!.enqueue(MockResponse().setBody("{}").setHeader(CONTENT_TYPE, APPLICATION_JSON).setResponseCode(200))
         val options =
             GoFeatureFlagOptions(
                 endpoint = mockWebServer!!.url("/").toString(),
@@ -141,9 +148,9 @@ class GoFeatureFlagProviderTest {
         val jsonFilePath =
             javaClass.classLoader?.getResource("org.gofeatureflag.openfeature.ofrep/valid_api_response.json")?.file
         val jsonString = String(Files.readAllBytes(Paths.get(jsonFilePath)))
-        mockWebServer!!.enqueue(MockResponse().setBody(jsonString).setHeader("Content-Type", "application/json").setResponseCode(200))
-        mockWebServer!!.enqueue(MockResponse().setBody("{}").setHeader("Content-Type", "application/json").setResponseCode(200))
-        mockWebServer!!.enqueue(MockResponse().setBody("{}").setHeader("Content-Type", "application/json").setResponseCode(200))
+        mockWebServer!!.enqueue(MockResponse().setBody(jsonString).setHeader(CONTENT_TYPE, APPLICATION_JSON).setResponseCode(200))
+        mockWebServer!!.enqueue(MockResponse().setBody("{}").setHeader(CONTENT_TYPE, APPLICATION_JSON).setResponseCode(200))
+        mockWebServer!!.enqueue(MockResponse().setBody("{}").setHeader(CONTENT_TYPE, APPLICATION_JSON).setResponseCode(200))
         val options =
             GoFeatureFlagOptions(
                 endpoint = mockWebServer!!.url("/").toString(),
@@ -187,9 +194,9 @@ class GoFeatureFlagProviderTest {
         val jsonFilePath =
             javaClass.classLoader?.getResource("org.gofeatureflag.openfeature.ofrep/valid_api_response.json")?.file
         val jsonString = String(Files.readAllBytes(Paths.get(jsonFilePath)))
-        mockWebServer!!.enqueue(MockResponse().setBody(jsonString).setHeader("Content-Type", "application/json").setResponseCode(200))
-        mockWebServer!!.enqueue(MockResponse().setBody("{}").setHeader("Content-Type", "application/json").setResponseCode(200))
-        mockWebServer!!.enqueue(MockResponse().setBody("{}").setHeader("Content-Type", "application/json").setResponseCode(200))
+        mockWebServer!!.enqueue(MockResponse().setBody(jsonString).setHeader(CONTENT_TYPE, APPLICATION_JSON).setResponseCode(200))
+        mockWebServer!!.enqueue(MockResponse().setBody("{}").setHeader(CONTENT_TYPE, APPLICATION_JSON).setResponseCode(200))
+        mockWebServer!!.enqueue(MockResponse().setBody("{}").setHeader(CONTENT_TYPE, APPLICATION_JSON).setResponseCode(200))
         val options =
             GoFeatureFlagOptions(
                 endpoint = mockWebServer!!.url("/").toString(),
@@ -238,12 +245,12 @@ class GoFeatureFlagProviderTest {
     }
 
     @Test
-    fun `should collect feature events and tracking events`() {
+    fun shouldCollectFeatureEventsAndTrackingEvents() {
         val jsonFilePath =
             javaClass.classLoader?.getResource("org.gofeatureflag.openfeature.ofrep/valid_api_response.json")?.file
         val jsonString = String(Files.readAllBytes(Paths.get(jsonFilePath)))
-        mockWebServer!!.enqueue(MockResponse().setBody(jsonString).setHeader("Content-Type", "application/json").setResponseCode(200))
-        mockWebServer!!.enqueue(MockResponse().setBody("{}").setHeader("Content-Type", "application/json").setResponseCode(200))
+        mockWebServer!!.enqueue(MockResponse().setBody(jsonString).setHeader(CONTENT_TYPE, APPLICATION_JSON).setResponseCode(200))
+        mockWebServer!!.enqueue(MockResponse().setBody("{}").setHeader(CONTENT_TYPE, APPLICATION_JSON).setResponseCode(200))
         val options =
             GoFeatureFlagOptions(
                 endpoint = mockWebServer!!.url("/").toString(),
@@ -276,9 +283,9 @@ class GoFeatureFlagProviderTest {
                 "element" to Value.String("button")
             )
         )
-        provider.track("user-action", ctx, trackingDetails)
-        provider.track("user-action", ctx, trackingDetails)
-        provider.track("page-view", ctx, null)
+        provider.track(USER_ACTION, ctx, trackingDetails)
+        provider.track(USER_ACTION, ctx, trackingDetails)
+        provider.track(PAGE_VIEW, ctx, null)
 
         Thread.sleep(1000)
         mockWebServer!!.takeRequest()
@@ -305,10 +312,10 @@ class GoFeatureFlagProviderTest {
         }
 
         // Verify tracking events
-        val userActionTrackingEvents = got.trackingEvents?.filter { it.key == "user-action" }
+        val userActionTrackingEvents = got.trackingEvents?.filter { it.key == USER_ACTION }
         assertEquals(2, userActionTrackingEvents?.size)
         userActionTrackingEvents?.forEach {
-            assertEquals("user-action", it.key)
+            assertEquals(USER_ACTION, it.key)
             assertEquals("123", it.userKey)
             assertEquals("tracking", it.kind)
             assertEquals("user", it.contextKind)
@@ -319,10 +326,10 @@ class GoFeatureFlagProviderTest {
             assertEquals("button", it.trackingEventDetails?.get("element"))
         }
 
-        val pageViewTrackingEvents = got.trackingEvents?.filter { it.key == "page-view" }
+        val pageViewTrackingEvents = got.trackingEvents?.filter { it.key == PAGE_VIEW }
         assertEquals(1, pageViewTrackingEvents?.size)
         pageViewTrackingEvents?.first()?.let {
-            assertEquals("page-view", it.key)
+            assertEquals(PAGE_VIEW, it.key)
             assertEquals("123", it.userKey)
             assertEquals("tracking", it.kind)
             assertEquals("user", it.contextKind)

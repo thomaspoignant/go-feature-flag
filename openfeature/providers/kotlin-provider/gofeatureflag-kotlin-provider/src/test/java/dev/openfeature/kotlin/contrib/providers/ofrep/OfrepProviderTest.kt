@@ -108,7 +108,7 @@ class OfrepProviderTest {
                     }
             }
             runCurrent()
-            withClient(provider, defaultEvalCtx) { client ->
+            withClient(provider, defaultEvalCtx) { _ ->
                 runCurrent()
                 assertTrue(providerErrorReceived, "ProviderError event was not received")
             }
@@ -136,7 +136,7 @@ class OfrepProviderTest {
                     }
             }
             runCurrent()
-            withClient(provider, defaultEvalCtx) { client ->
+            withClient(provider, defaultEvalCtx) { _ ->
                 runCurrent()
                 assertTrue(providerErrorReceived, "ProviderError event was not received")
             }
@@ -167,7 +167,7 @@ class OfrepProviderTest {
                     }
             }
             runCurrent()
-            withClient(provider, defaultEvalCtx) { client ->
+            withClient(provider, defaultEvalCtx) { _ ->
                 runCurrent()
                 assertTrue(providerErrorReceived, "ProviderError event was not received")
                 assertIs<OpenFeatureError.GeneralError>(exceptionReceived, "The exception is not of type GeneralError")
@@ -201,7 +201,7 @@ class OfrepProviderTest {
             }
             runCurrent()
             val evalCtx = ImmutableContext(targetingKey = "")
-            withClient(provider, evalCtx) { client ->
+            withClient(provider, evalCtx) { _ ->
                 runCurrent()
                 assertTrue(providerErrorReceived, "ProviderError event was not received")
                 assertIs<OpenFeatureError.TargetingKeyMissingError>(
@@ -233,7 +233,7 @@ class OfrepProviderTest {
             }
             runCurrent()
             val evalCtx = ImmutableContext()
-            withClient(provider, evalCtx) { client ->
+            withClient(provider, evalCtx) { _ ->
                 runCurrent()
                 assertTrue(providerErrorReceived, "ProviderError event was not received")
                 assertIs<OpenFeatureError.TargetingKeyMissingError>(
@@ -266,7 +266,7 @@ class OfrepProviderTest {
                     }
             }
             runCurrent()
-            withClient(provider, defaultEvalCtx) { client ->
+            withClient(provider, defaultEvalCtx) { _ ->
                 runCurrent()
                 assertTrue(providerErrorReceived, "ProviderError event was not received")
                 assertIs<OpenFeatureError.InvalidContextError>(exceptionReceived, "The exception is not of type InvalidContextError")
@@ -297,7 +297,7 @@ class OfrepProviderTest {
                     }
             }
             runCurrent()
-            withClient(provider, defaultEvalCtx) { client ->
+            withClient(provider, defaultEvalCtx) { _ ->
                 runCurrent()
                 assertTrue(providerErrorReceived, "ProviderError event was not received")
                 assertIs<OpenFeatureError.ParseError>(exceptionReceived, "The exception is not of type ParseError")
@@ -386,7 +386,7 @@ class OfrepProviderTest {
                     secondContent = VALID_API_RESPONSE2_PAYLOAD,
                 )
             val provider = createOfrepProvider(mockEngine)
-            withClient(provider, defaultEvalCtx) { client ->
+            withClient(provider, defaultEvalCtx) { _ ->
 
                 // TODO: should change when we have a way to observe context changes event
                 //       check issue https://github.com/open-feature/kotlin-sdk/issues/107

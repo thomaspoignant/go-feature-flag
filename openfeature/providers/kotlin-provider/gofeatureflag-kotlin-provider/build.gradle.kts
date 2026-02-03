@@ -95,22 +95,22 @@ publishing {
 }
 
 dependencies {
-    api("dev.openfeature:kotlin-sdk:0.6.2")
-    api("io.ktor:ktor-client-okhttp:3.0.3")
-    api("io.ktor:ktor-client-content-negotiation:3.0.3")
-    api("io.ktor:ktor-serialization-kotlinx-json:3.0.3")
-    api("com.squareup.okhttp3:okhttp:5.3.2")
-    api("com.google.code.gson:gson:2.13.2")
-    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-    api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
-    testImplementation("junit:junit:4.13.2")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
-    testImplementation("com.squareup.okhttp3:mockwebserver:5.3.2")
-    testImplementation("org.skyscreamer:jsonassert:1.5.3")
-    testImplementation("io.ktor:ktor-client-mock:3.0.3")
+    api("dev.openfeature:kotlin-sdk:${rootProject.extra["kotlinSdkVersion"]}")
+    api("io.ktor:ktor-client-okhttp:${rootProject.extra["ktorVersion"]}")
+    api("io.ktor:ktor-client-content-negotiation:${rootProject.extra["ktorVersion"]}")
+    api("io.ktor:ktor-serialization-kotlinx-json:${rootProject.extra["ktorVersion"]}")
+    api("com.squareup.okhttp3:okhttp:${rootProject.extra["okhttpVersion"]}")
+    api("com.google.code.gson:gson:${rootProject.extra["gsonVersion"]}")
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:${rootProject.extra["kotlinxCoroutinesCoreVersion"]}")
+    api("org.jetbrains.kotlinx:kotlinx-serialization-json:${rootProject.extra["kotlinxSerializationJsonVersion"]}")
+    testImplementation("junit:junit:${rootProject.extra["junitVersion"]}")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:${rootProject.extra["kotlinxCoroutinesTestVersion"]}")
+    testImplementation("com.squareup.okhttp3:mockwebserver:${rootProject.extra["okhttpVersion"]}")
+    testImplementation("org.skyscreamer:jsonassert:${rootProject.extra["jsonassertVersion"]}")
+    testImplementation("io.ktor:ktor-client-mock:${rootProject.extra["ktorClientMockVersion"]}")
     testImplementation(kotlin("test"))
-    testImplementation("org.robolectric:robolectric:4.12.2")
-    testImplementation("org.slf4j:slf4j-simple:2.0.9")
+    testImplementation("org.robolectric:robolectric:${rootProject.extra["robolectricVersion"]}")
+    testImplementation("org.slf4j:slf4j-simple:${rootProject.extra["slf4jSimpleVersion"]}")
 }
 
 signing {
