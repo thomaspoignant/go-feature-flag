@@ -96,6 +96,44 @@ class GoFeatureFlagProviderTest {
     }
 
     @Test
+    fun `should forward API key and custom headers to OFREP requests`() {
+        val jsonFilePath =
+            javaClass.classLoader?.getResource("org.gofeatureflag.openfeature.ofrep/valid_api_response.json")?.file
+        val jsonString = String(Files.readAllBytes(Paths.get(jsonFilePath)))
+        mockWebServer!!.enqueue(MockResponse().setBody(jsonString).setHeader(CONTENT_TYPE, APPLICATION_JSON).setResponseCode(200))
+        mockWebServer!!.enqueue(MockResponse().setBody("{}").setHeader(CONTENT_TYPE, APPLICATION_JSON).setResponseCode(200))
+        val options =
+            GoFeatureFlagOptions(
+                endpoint = mockWebServer!!.url("/").toString(),
+                flushIntervalMs = 100,
+                pollingInterval = 10000.milliseconds,
+                apiKey = "my-api-key",
+                customHeaders = mapOf("X-Custom-Header" to "custom-value")
+            )
+
+        val provider = GoFeatureFlagProvider(options)
+        val ctx = ImmutableContext(targetingKey = "123")
+        runBlocking {
+            OpenFeatureAPI.setProviderAndWait(
+                provider = provider,
+                dispatcher = Dispatchers.IO,
+                initialContext = ctx
+            )
+        }
+
+        val client = OpenFeatureAPI.getClient()
+        client.getStringValue("title-flag", "default")
+
+        val ofrepRequest: RecordedRequest = mockWebServer!!.takeRequest()
+        assertEquals("my-api-key", ofrepRequest.headers["X-API-Key"])
+        assertEquals("custom-value", ofrepRequest.headers["X-Custom-Header"])
+        assertTrue(ofrepRequest.headers[CONTENT_TYPE]?.contains(APPLICATION_JSON) == true)
+        runBlocking {
+            OpenFeatureAPI.shutdown()
+        }
+    }
+
+    @Test
     fun `should call the hook with an error result`() {
         mockWebServer!!.enqueue(MockResponse().setBody("{}").setHeader(CONTENT_TYPE, APPLICATION_JSON).setResponseCode(200))
         mockWebServer!!.enqueue(MockResponse().setBody("{}").setHeader(CONTENT_TYPE, APPLICATION_JSON).setResponseCode(200))
