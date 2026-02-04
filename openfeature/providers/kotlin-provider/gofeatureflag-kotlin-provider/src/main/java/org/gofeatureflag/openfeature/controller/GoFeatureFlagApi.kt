@@ -2,6 +2,7 @@ package org.gofeatureflag.openfeature.controller
 
 import com.google.gson.GsonBuilder
 import com.google.gson.ToNumberPolicy
+import io.ktor.http.ContentType
 import okhttp3.ConnectionPool
 import okhttp3.Headers
 import okhttp3.HttpUrl
@@ -61,12 +62,17 @@ class GoFeatureFlagApi(private val options: GoFeatureFlagOptions) {
             .url(urlBuilder.build())
             .post(requestBody)
 
-        val authorizationHeader = options.apiKey?.let { apiKey ->
-            val headers = Headers.Builder()
-            headers.add("Authorization", "Bearer $apiKey")
-            headers.build()
+
+        val headers = Headers.Builder()
+        options.customHeaders.forEach { (key, value) ->
+            headers.add(key, value)
+         }
+        options.apiKey?.let { apiKey ->
+            headers.add("X-API-Key", apiKey)
         }
-        authorizationHeader?.let { reqBuilder.headers(it) }
+        reqBuilder.headers(headers.build())
+
+
         httpClient.newCall(reqBuilder.build()).execute().use { response ->
             when (response.code) {
                 200 -> {
