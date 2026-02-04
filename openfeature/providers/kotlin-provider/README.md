@@ -21,8 +21,8 @@ For documentation related to flags management in GO Feature Flag, refer to the [
 
 ```kotlin
 dependencies {
-    api("dev.openfeature:android-sdk:0.3.0") // check on maven central to get the latest version
-    implementation("org.gofeatureflag.openfeature:gofeatureflag-kotlin-provider:0.1.0") // check on maven central to get the latest version
+    api("dev.openfeature:kotlin-sdk:0.7.0") // check on maven central to get the latest version
+    implementation("org.gofeatureflag.openfeature:gofeatureflag-kotlin-provider:1.0.0") // check on maven central to get the latest version
 }
 ```
 
