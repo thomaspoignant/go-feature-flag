@@ -31,6 +31,7 @@ class GoFeatureFlagProvider(private val options: GoFeatureFlagOptions) : Feature
         val headers = buildMap {
             options.apiKey?.let { put("X-API-Key", it) }
             put("Content-Type", "application/json")
+            putAll(options.customHeaders)
         }
         val ofrepOptions = OfrepOptions(
             endpoint = options.endpoint,

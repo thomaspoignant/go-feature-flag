@@ -113,7 +113,43 @@ class GoFeatureFlagApiTest {
             )
         api.postEventsToDataCollector(defaultFeatureEventLists)
         val recordedRequest: RecordedRequest = mockWebServer!!.takeRequest()
-        assertEquals("Bearer my-api-key", recordedRequest.headers["Authorization"])
+        assertEquals("my-api-key", recordedRequest.headers["X-API-Key"])
+    }
+
+    @Test
+    fun `should add custom headers to the request`(): Unit = runBlocking {
+        mockWebServer!!.enqueue(MockResponse().setBody("{}").setResponseCode(200))
+        val api =
+            GoFeatureFlagApi(
+                GoFeatureFlagOptions(
+                    endpoint = mockWebServer!!.url("/").toString(),
+                    customHeaders = mapOf(
+                        "X-Custom-Header" to "custom-value",
+                        "X-Another-Header" to "another-value"
+                    )
+                )
+            )
+        api.postEventsToDataCollector(defaultFeatureEventLists)
+        val recordedRequest: RecordedRequest = mockWebServer!!.takeRequest()
+        assertEquals("custom-value", recordedRequest.headers["X-Custom-Header"])
+        assertEquals("another-value", recordedRequest.headers["X-Another-Header"])
+    }
+
+    @Test
+    fun `should add both API key and custom headers to the request`(): Unit = runBlocking {
+        mockWebServer!!.enqueue(MockResponse().setBody("{}").setResponseCode(200))
+        val api =
+            GoFeatureFlagApi(
+                GoFeatureFlagOptions(
+                    endpoint = mockWebServer!!.url("/").toString(),
+                    apiKey = "my-api-key",
+                    customHeaders = mapOf("X-Custom-Header" to "custom-value")
+                )
+            )
+        api.postEventsToDataCollector(defaultFeatureEventLists)
+        val recordedRequest: RecordedRequest = mockWebServer!!.takeRequest()
+        assertEquals("my-api-key", recordedRequest.headers["X-API-Key"])
+        assertEquals("custom-value", recordedRequest.headers["X-Custom-Header"])
     }
 
     @Test

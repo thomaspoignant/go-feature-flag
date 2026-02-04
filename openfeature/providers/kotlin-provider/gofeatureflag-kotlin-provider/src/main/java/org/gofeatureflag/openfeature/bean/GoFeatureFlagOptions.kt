@@ -60,5 +60,11 @@ data class GoFeatureFlagOptions(
      * of this field will not be added to your feature events.
      */
     val exporterMetadata: Map<String, Any> = emptyMap(),
+
+    /**
+     * Headers to add to the OFREP calls
+     * Default: empty
+     */
+    val customHeaders: Map<String, String> = emptyMap(),
 )
 
