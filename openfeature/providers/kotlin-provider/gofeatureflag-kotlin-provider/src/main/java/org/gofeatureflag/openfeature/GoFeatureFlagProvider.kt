@@ -124,8 +124,6 @@ class GoFeatureFlagProvider(private val options: GoFeatureFlagOptions) : Feature
         val trackingEventDetails = details?.asObjectMap()?.toMutableMap()
         trackingEventDetails?.put("value", details.`value`)
 
-        print(trackingEventDetails)
-
         val trackingEvent = TrackingEvent(
             kind = "tracking",
             key = trackingEventName,
