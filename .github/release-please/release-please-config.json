@@ -68,7 +68,8 @@
                 "gradle.properties",
                 "build.gradle.kts",
                 "README.md"
-            ]
+            ],
+            "release-as": "1.0.0"
         },
         "openfeature/providers/python-provider": {
             "release-type": "python",
