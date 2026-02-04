@@ -92,7 +92,7 @@ runBlocking{
 When initializing the provider, you can pass some options to configure the provider and how it behaves with GO Feature Flag.
 
 | Option name               | Type   | Default | Description                                                                                                                                                                                     |
-|---------------------------|--------|---------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------------- | ----------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `endpoint`                | String |         | endpoint is the URL where your GO Feature Flag server is located.                                                                                                                               |
 | `timeout`                 | Long   | 10000   | (optional) timeout is the time in millisecond we wait for an answer from the server.                                                                                                            |
 | `maxIdleConnections`      | Int    | 1000    | (optional) maxIdleConnections is the maximum number of connexions in the connexion pool.                                                                                                        |
@@ -100,6 +100,7 @@ When initializing the provider, you can pass some options to configure the provi
 | `apiKey`                  | String |         | (optional) If GO Feature Flag is configured to authenticate the requests, you should provide an API Key to the provider. Please ask the administrator of the relay proxy to provide an API Key. |
 | `pollingIntervalInMillis` | Long   | 300000  | (optional) Polling interval in millisecond to check with GO Feature Flag relay proxy if there is a flag configuration change.                                                                   |
 | `flushIntervalMs`         | Long   | 1000    | (optional) Time to wait before calling GO Feature Flag to store all the data about the evaluation in the relay proxy.                                                                           |
+| `customHeaders`           | Map[string]string | {} | (optional) Custom HTTP headers that will be added to the requests sent to the relay proxy (for example to set a custom user-agent).                                                          |
 
 ### Update the Evaluation Context
 
