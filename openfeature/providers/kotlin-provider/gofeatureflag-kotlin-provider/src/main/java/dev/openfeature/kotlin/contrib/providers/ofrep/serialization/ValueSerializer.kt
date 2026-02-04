@@ -1,4 +1,3 @@
-
 package dev.openfeature.kotlin.contrib.providers.ofrep.serialization
 
 import dev.openfeature.kotlin.sdk.Value
@@ -35,59 +34,69 @@ internal object ValueSerializer : KSerializer<Value> {
 
     // Serializers for the concrete types
     private object BooleanValueSerializer : KSerializer<Value.Boolean> {
-        override val descriptor: SerialDescriptor = buildClassSerialDescriptor("dev.openfeature.kotlin.sdk.Value.Boolean")
+        override val descriptor: SerialDescriptor =
+            buildClassSerialDescriptor("dev.openfeature.kotlin.sdk.Value.Boolean")
 
         override fun serialize(
             encoder: Encoder,
             value: Value.Boolean,
         ) = encoder.encodeBoolean(value.boolean)
 
-        override fun deserialize(decoder: Decoder): Value.Boolean = Value.Boolean(decoder.decodeBoolean())
+        override fun deserialize(decoder: Decoder): Value.Boolean =
+            Value.Boolean(decoder.decodeBoolean())
     }
 
     private object DoubleValueSerializer : KSerializer<Value.Double> {
-        override val descriptor: SerialDescriptor = buildClassSerialDescriptor("dev.openfeature.kotlin.sdk.Value.Double")
+        override val descriptor: SerialDescriptor =
+            buildClassSerialDescriptor("dev.openfeature.kotlin.sdk.Value.Double")
 
         override fun serialize(
             encoder: Encoder,
             value: Value.Double,
         ) = encoder.encodeDouble(value.double)
 
-        override fun deserialize(decoder: Decoder): Value.Double = Value.Double(decoder.decodeDouble())
+        override fun deserialize(decoder: Decoder): Value.Double =
+            Value.Double(decoder.decodeDouble())
     }
 
     private object IntValueSerializer : KSerializer<Value.Integer> {
-        override val descriptor: SerialDescriptor = buildClassSerialDescriptor("dev.openfeature.kotlin.sdk.Value.Integer")
+        override val descriptor: SerialDescriptor =
+            buildClassSerialDescriptor("dev.openfeature.kotlin.sdk.Value.Integer")
 
         override fun serialize(
             encoder: Encoder,
             value: Value.Integer,
         ) = encoder.encodeInt(value.integer)
 
-        override fun deserialize(decoder: Decoder): Value.Integer = Value.Integer(decoder.decodeInt())
+        override fun deserialize(decoder: Decoder): Value.Integer =
+            Value.Integer(decoder.decodeInt())
     }
 
     @OptIn(ExperimentalTime::class)
     private object InstantValueSerializer : KSerializer<Value.Instant> {
-        override val descriptor: SerialDescriptor = buildClassSerialDescriptor("dev.openfeature.kotlin.sdk.Value.Instant")
+        override val descriptor: SerialDescriptor =
+            buildClassSerialDescriptor("dev.openfeature.kotlin.sdk.Value.Instant")
 
         override fun serialize(
             encoder: Encoder,
             value: Value.Instant,
         ) = encoder.encodeString(value.instant.toString())
 
-        override fun deserialize(decoder: Decoder): Value.Instant = Value.Instant(Instant.parse(decoder.decodeString()))
+        override fun deserialize(decoder: Decoder): Value.Instant =
+            Value.Instant(Instant.parse(decoder.decodeString()))
     }
 
     private object StringValueSerializer : KSerializer<Value.String> {
-        override val descriptor: SerialDescriptor = buildClassSerialDescriptor("dev.openfeature.kotlin.sdk.Value.String")
+        override val descriptor: SerialDescriptor =
+            buildClassSerialDescriptor("dev.openfeature.kotlin.sdk.Value.String")
 
         override fun serialize(
             encoder: Encoder,
             value: Value.String,
         ) = encoder.encodeString(value.string)
 
-        override fun deserialize(decoder: Decoder): Value.String = Value.String(decoder.decodeString())
+        override fun deserialize(decoder: Decoder): Value.String =
+            Value.String(decoder.decodeString())
     }
 
     // For ListValue, we need this ValueSerializer itself for its elements
@@ -100,12 +109,14 @@ internal object ValueSerializer : KSerializer<Value> {
             value: Value.List,
         ) = encoder.encodeSerializableValue(actualSerializer, value.list)
 
-        override fun deserialize(decoder: Decoder): Value.List = Value.List(decoder.decodeSerializableValue(actualSerializer))
+        override fun deserialize(decoder: Decoder): Value.List =
+            Value.List(decoder.decodeSerializableValue(actualSerializer))
     }
 
     // For StructureValue (Map), we need this ValueSerializer for its values
     private object StructureValueSerializer : KSerializer<Value.Structure> {
-        private val actualSerializer = MapSerializer(String.serializer(), ValueSerializer) // Recursive use
+        private val actualSerializer =
+            MapSerializer(String.serializer(), ValueSerializer) // Recursive use
         override val descriptor: SerialDescriptor = actualSerializer.descriptor
 
         override fun serialize(
@@ -113,12 +124,14 @@ internal object ValueSerializer : KSerializer<Value> {
             value: Value.Structure,
         ) = encoder.encodeSerializableValue(actualSerializer, value.structure)
 
-        override fun deserialize(decoder: Decoder): Value.Structure = Value.Structure(decoder.decodeSerializableValue(actualSerializer))
+        override fun deserialize(decoder: Decoder): Value.Structure =
+            Value.Structure(decoder.decodeSerializableValue(actualSerializer))
     }
 
     @OptIn(ExperimentalSerializationApi::class)
     private object NullValueSerializer : KSerializer<Value.Null> {
-        override val descriptor: SerialDescriptor = buildClassSerialDescriptor("dev.openfeature.kotlin.sdk.Value.Null")
+        override val descriptor: SerialDescriptor =
+            buildClassSerialDescriptor("dev.openfeature.kotlin.sdk.Value.Null")
 
         override fun serialize(
             encoder: Encoder,
@@ -175,6 +188,7 @@ internal object ValueSerializer : KSerializer<Value> {
                             DoubleValueSerializer
                         }
                     }
+
                     element.doubleOrNull != null -> DoubleValueSerializer
                     else -> error("Unknown JsonPrimitive type: $element")
                 }

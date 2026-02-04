@@ -13,7 +13,11 @@ import java.lang.reflect.Type
  * Deserializes events based on the "kind" field.
  */
 class EventTypeAdapter : JsonDeserializer<Event> {
-    override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): Event {
+    override fun deserialize(
+        json: JsonElement,
+        typeOfT: Type,
+        context: JsonDeserializationContext
+    ): Event {
         val jsonObject = json.asJsonObject
         val kind = jsonObject.get("kind")?.asString
 

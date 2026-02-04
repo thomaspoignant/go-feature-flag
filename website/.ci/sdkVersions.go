@@ -24,6 +24,7 @@ type Maven struct {
 	KotlinProvider string `json:"providerKt,omitempty"`
 	JavaProvider   string `json:"providerJava,omitempty"`
 	Android        string `json:"android,omitempty"`
+	KotlinSDK      string `json:"kotlinSdk,omitempty"`
 }
 
 type Npm struct {
@@ -56,14 +57,18 @@ type GO struct {
 func main() {
 	var wg sync.WaitGroup
 	versions := Versions{}
-	wg.Add(15)
+	wg.Add(16)
 	go func() {
 		defer wg.Done()
 		versions.Swift.Provider = getSwiftVersion("go-feature-flag/openfeature-swift-provider")
 	}()
 	go func() {
 		defer wg.Done()
-		versions.Maven.Android = getMavenVersion("dev.openfeature", "android-sdk")
+		versions.Maven.Android = getMavenVersion("dev.openfeature", "kotlin-sdk")
+	}()
+	go func() {
+		defer wg.Done()
+		versions.Maven.KotlinSDK = getMavenVersion("dev.openfeature", "android-sdk")
 	}()
 	go func() {
 		defer wg.Done()

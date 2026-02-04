@@ -25,6 +25,8 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
@@ -154,92 +156,27 @@ class OfrepProviderTest {
 
             val provider = createOfrepProvider(mockEngine)
             var providerErrorReceived = false
-            var exceptionReceived: Throwable? = null
-
+            var got: OpenFeatureProviderEvents.ProviderError ?= null
             launch {
-                provider
-                    .observe()
+                OpenFeatureAPI
+                    .observe<OpenFeatureProviderEvents>()
                     .filterIsInstance<OpenFeatureProviderEvents.ProviderError>()
-                    .take(1)
-                    .collect {
-                        providerErrorReceived = true
-                        exceptionReceived = it.error
-                    }
+                    .take(1).collect { result ->
+                    providerErrorReceived = true
+                    got = result
+                }
             }
-            runCurrent()
-            withClient(provider, defaultEvalCtx) { _ ->
+            withClient(provider, defaultEvalCtx) {  _ ->
                 runCurrent()
-                assertTrue(providerErrorReceived, "ProviderError event was not received")
-                assertIs<OpenFeatureError.GeneralError>(exceptionReceived, "The exception is not of type GeneralError")
-                assertEquals(
-                    "Rate limited",
-                    (exceptionReceived as OpenFeatureError.GeneralError).message,
-                    "The exception's message is not correct",
+                val want = OpenFeatureProviderEvents.ProviderError(
+                    OpenFeatureProviderEvents.EventDetails(
+                        message = "Rate limited",
+                        errorCode = ErrorCode.GENERAL
+                    )
                 )
-            }
-        }
 
-    @Test
-    fun `should be in Error status if error targeting key is empty`() =
-        runTest {
-            val mockEngine =
-                mockEngineWithOneResponse(VALID_API_RESPONSE_PAYLOAD)
-
-            val provider = createOfrepProvider(mockEngine)
-            var providerErrorReceived = false
-            var exceptionReceived: Throwable? = null
-
-            launch {
-                provider
-                    .observe()
-                    .filterIsInstance<OpenFeatureProviderEvents.ProviderError>()
-                    .take(1)
-                    .collect {
-                        providerErrorReceived = true
-                        exceptionReceived = it.error
-                    }
-            }
-            runCurrent()
-            val evalCtx = ImmutableContext(targetingKey = "")
-            withClient(provider, evalCtx) { _ ->
-                runCurrent()
                 assertTrue(providerErrorReceived, "ProviderError event was not received")
-                assertIs<OpenFeatureError.TargetingKeyMissingError>(
-                    exceptionReceived,
-                    "The exception is not of type TargetingKeyMissingError",
-                )
-            }
-        }
-
-    @Test
-    fun `should be in Error status if error targeting key is missing`() =
-        runTest {
-            val mockEngine =
-                mockEngineWithOneResponse(VALID_API_RESPONSE_PAYLOAD)
-
-            val provider = createOfrepProvider(mockEngine)
-            var providerErrorReceived = false
-            var exceptionReceived: Throwable? = null
-
-            launch {
-                provider
-                    .observe()
-                    .filterIsInstance<OpenFeatureProviderEvents.ProviderError>()
-                    .take(1)
-                    .collect {
-                        providerErrorReceived = true
-                        exceptionReceived = it.error
-                    }
-            }
-            runCurrent()
-            val evalCtx = ImmutableContext()
-            withClient(provider, evalCtx) { _ ->
-                runCurrent()
-                assertTrue(providerErrorReceived, "ProviderError event was not received")
-                assertIs<OpenFeatureError.TargetingKeyMissingError>(
-                    exceptionReceived,
-                    "The exception is not of type TargetingKeyMissingError",
-                )
+                assertEquals(want, got, "ProviderError event is not correct")
             }
         }
 
@@ -253,23 +190,29 @@ class OfrepProviderTest {
                 )
             val provider = createOfrepProvider(mockEngine)
             var providerErrorReceived = false
-            var exceptionReceived: Throwable? = null
+            var got: OpenFeatureProviderEvents.ProviderError? = null
 
             launch {
-                provider
-                    .observe()
+                OpenFeatureAPI
+                    .observe<OpenFeatureProviderEvents>()
                     .filterIsInstance<OpenFeatureProviderEvents.ProviderError>()
                     .take(1)
                     .collect {
                         providerErrorReceived = true
-                        exceptionReceived = it.error
+                        got = it
                     }
             }
             runCurrent()
             withClient(provider, defaultEvalCtx) { _ ->
                 runCurrent()
                 assertTrue(providerErrorReceived, "ProviderError event was not received")
-                assertIs<OpenFeatureError.InvalidContextError>(exceptionReceived, "The exception is not of type InvalidContextError")
+                val want = OpenFeatureProviderEvents.ProviderError(
+                    OpenFeatureProviderEvents.EventDetails(
+                        message = "Invalid or missing context",
+                        errorCode = ErrorCode.INVALID_CONTEXT
+                    )
+                )
+                assertEquals(want, got)
             }
         }
 
@@ -284,7 +227,7 @@ class OfrepProviderTest {
 
             val provider = createOfrepProvider(mockEngine)
             var providerErrorReceived = false
-            var exceptionReceived: Throwable? = null
+            var errorReceived: OpenFeatureProviderEvents.ProviderError? = null
 
             launch {
                 provider
@@ -293,14 +236,21 @@ class OfrepProviderTest {
                     .take(1)
                     .collect {
                         providerErrorReceived = true
-                        exceptionReceived = it.error
+                        errorReceived = it
                     }
             }
             runCurrent()
             withClient(provider, defaultEvalCtx) { _ ->
                 runCurrent()
                 assertTrue(providerErrorReceived, "ProviderError event was not received")
-                assertIs<OpenFeatureError.ParseError>(exceptionReceived, "The exception is not of type ParseError")
+                val want = OpenFeatureProviderEvents.ProviderError(
+                    OpenFeatureProviderEvents.EventDetails(
+                        message = "Error details about PARSE_ERROR",
+                        errorCode = ErrorCode.PARSE_ERROR
+                    )
+                )
+                assertTrue(providerErrorReceived)
+                assertEquals(want, errorReceived)
             }
         }
 

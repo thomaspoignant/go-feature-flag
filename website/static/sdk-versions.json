@@ -1,9 +1,10 @@
 {
     "maven": {
         "sdk": "1.15.1",
-        "providerKt": "0.3.0",
+        "providerKt": "1.0.0",
         "providerJava": "0.4.3",
-        "android": "0.3.0"
+        "android": "0.3.0",
+        "kotlinSdk": "0.7.0"
     },
     "npm": {
         "core": "1.9.0",

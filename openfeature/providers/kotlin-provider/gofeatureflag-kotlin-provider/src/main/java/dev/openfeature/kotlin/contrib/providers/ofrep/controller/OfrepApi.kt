@@ -26,7 +26,8 @@ internal class OfrepApi(
 ) {
     private val httpClient: HttpClient = createHttpClient(options)
     private var parsedEndpoint: Url =
-        parseUrl(options.endpoint) ?: throw OfrepError.InvalidOptionsError("invalid endpoint configuration: ${options.endpoint}")
+        parseUrl(options.endpoint)
+            ?: throw OfrepError.InvalidOptionsError("invalid endpoint configuration: ${options.endpoint}")
     private var etag: String? = null
 
     /**

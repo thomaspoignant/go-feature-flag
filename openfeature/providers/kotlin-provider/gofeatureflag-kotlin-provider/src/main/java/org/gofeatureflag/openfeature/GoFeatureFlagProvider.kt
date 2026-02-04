@@ -102,7 +102,10 @@ class GoFeatureFlagProvider(private val options: GoFeatureFlagOptions) : Feature
         return this.ofrepProvider.observe()
     }
 
-    override suspend fun onContextSet(oldContext: EvaluationContext?, newContext: EvaluationContext) {
+    override suspend fun onContextSet(
+        oldContext: EvaluationContext?,
+        newContext: EvaluationContext
+    ) {
         return this.ofrepProvider.onContextSet(oldContext, newContext)
     }
 
@@ -120,11 +123,13 @@ class GoFeatureFlagProvider(private val options: GoFeatureFlagOptions) : Feature
      * @param context   Evaluation context used in flag evaluation (Optional)
      * @param details   Data pertinent to a particular tracking event (Optional)
      */
-    override fun track(trackingEventName: String, context: EvaluationContext?, details: TrackingEventDetails?) {
+    override fun track(
+        trackingEventName: String,
+        context: EvaluationContext?,
+        details: TrackingEventDetails?
+    ) {
         val trackingEventDetails = details?.asObjectMap()?.toMutableMap()
         trackingEventDetails?.put("value", details.`value`)
-
-        print(trackingEventDetails)
 
         val trackingEvent = TrackingEvent(
             kind = "tracking",
