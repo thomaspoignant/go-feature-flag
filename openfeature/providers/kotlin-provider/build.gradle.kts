@@ -32,7 +32,6 @@ nexusPublishing {
         sonatype {
             nexusUrl.set(uri("https://central.sonatype.com/api/v1/publisher/deployment/ossrh"))
             snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
-            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
             username.set(System.getenv("OSSRH_USERNAME"))
             password.set(System.getenv("OSSRH_PASSWORD"))
         }
