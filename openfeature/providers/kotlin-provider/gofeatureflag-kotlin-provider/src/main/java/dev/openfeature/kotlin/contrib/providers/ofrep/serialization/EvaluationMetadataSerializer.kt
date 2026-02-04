@@ -35,7 +35,7 @@ internal class EvaluationMetadataSerializer : KSerializer<EvaluationMetadata> {
                         content
                     } else {
                         booleanOrNull ?: intOrNull ?: doubleOrNull
-                            ?: error("Cannot parse value")
+                        ?: error("Cannot parse value")
                     }
                 }
             when (value) {

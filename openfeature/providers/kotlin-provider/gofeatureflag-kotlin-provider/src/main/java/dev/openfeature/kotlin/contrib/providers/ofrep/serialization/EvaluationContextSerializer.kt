@@ -18,7 +18,10 @@ internal class EvaluationContextSerializer : KSerializer<EvaluationContext> {
     override fun serialize(
         encoder: Encoder,
         value: EvaluationContext,
-    ) = delegateSerializer.serialize(encoder, value.asMap() + mapOf("targetingKey" to Value.String(value.getTargetingKey())))
+    ) = delegateSerializer.serialize(
+        encoder,
+        value.asMap() + mapOf("targetingKey" to Value.String(value.getTargetingKey()))
+    )
 
     override fun deserialize(decoder: Decoder): EvaluationContext = error("Not implemented")
 }

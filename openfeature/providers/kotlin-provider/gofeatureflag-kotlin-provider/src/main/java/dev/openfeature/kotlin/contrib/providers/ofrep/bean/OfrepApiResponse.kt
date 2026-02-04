@@ -49,6 +49,7 @@ inline fun <reified T> Value.toPrimitive(): T {
             Instant::class ->
                 // Instants might have been serialized as a string
                 (asInstant() ?: asString()?.let { Instant.parse(it) }) as T?
+
             else -> error("toPrimitive not implemented for ${T::class}")
         }
     return value ?: throw OpenFeatureError.TypeMismatchError(

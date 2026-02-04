@@ -70,27 +70,32 @@ class OfrepProvider(
             } else {
                 statusFlow.emit(
                     OpenFeatureProviderEvents.ProviderError(
-                    OpenFeatureProviderEvents.EventDetails(
-                        errorCode = ErrorCode.PROVIDER_NOT_READY,
-                        message = "Provider not ready",
+                        OpenFeatureProviderEvents.EventDetails(
+                            errorCode = ErrorCode.PROVIDER_NOT_READY,
+                            message = "Provider not ready",
+                        )
                     )
-                )
                 )
             }
         } catch (e: OpenFeatureError) {
-            statusFlow.emit(OpenFeatureProviderEvents.ProviderError(
-                OpenFeatureProviderEvents.EventDetails(
-                    errorCode = e.errorCode(),
-                    message = e.message,
-                ),
-                ))
+            statusFlow.emit(
+                OpenFeatureProviderEvents.ProviderError(
+                    OpenFeatureProviderEvents.EventDetails(
+                        errorCode = e.errorCode(),
+                        message = e.message,
+                    ),
+                )
+            )
         } catch (e: Exception) {
-            statusFlow.emit(OpenFeatureProviderEvents.ProviderError(
-                OpenFeatureProviderEvents.EventDetails(
-                    errorCode = ErrorCode.GENERAL,
-                    message = e.message ?: "Unknown error",
+            statusFlow.emit(
+                OpenFeatureProviderEvents.ProviderError(
+                    OpenFeatureProviderEvents.EventDetails(
+                        errorCode = ErrorCode.GENERAL,
+                        message = e.message ?: "Unknown error",
 
-                )))
+                        )
+                )
+            )
         }
         startPolling()
     }
@@ -187,12 +192,14 @@ class OfrepProvider(
                 statusFlow.emit(OpenFeatureProviderEvents.ProviderReady())
             }
         } catch (e: Throwable) {
-            statusFlow.emit(OpenFeatureProviderEvents.ProviderError(
-                OpenFeatureProviderEvents.EventDetails(
-                    errorCode = ErrorCode.GENERAL,
-                    message = e.message ?: "",
+            statusFlow.emit(
+                OpenFeatureProviderEvents.ProviderError(
+                    OpenFeatureProviderEvents.EventDetails(
+                        errorCode = ErrorCode.GENERAL,
+                        message = e.message ?: "",
+                    )
                 )
-            ))
+            )
         }
     }
 
