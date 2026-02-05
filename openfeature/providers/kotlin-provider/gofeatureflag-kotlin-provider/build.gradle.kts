@@ -4,6 +4,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization")
     id("signing")
     id("maven-publish")
+    id("com.vanniktech.maven.publish")
     id("org.jlleitschuh.gradle.ktlint")
 }
 
@@ -50,46 +51,38 @@ android {
     }
 
 }
-publishing {
-    publications {
-        register<MavenPublication>("release") {
-            groupId = project.extra["groupId"].toString()
-            artifactId = "gofeatureflag-kotlin-provider"
-            version = releaseVersion
 
-            pom {
-                name.set("GO Feature Flag OpenFeature Provider for Android")
-                description.set(
-                    "This is the Android provider implementation of OpenFeature for GO Feature Flag."
-                )
-                url.set("https://gofeatureflag.org")
-                licenses {
-                    license {
-                        name.set("The Apache License, Version 2.0")
-                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-                    }
-                }
-                developers {
-                    developer {
-                        id.set("thomaspoignant")
-                        name.set("Thomas Poignant")
-                        email.set("thomas.poignant@gofeatureflag.org")
-                    }
-                }
-                scm {
-                    connection.set(
-                        "scm:git:https://github.com/thomaspoignant/go-feature-flag.git"
-                    )
-                    developerConnection.set(
-                        "scm:git:ssh://git@github.com:thomaspoignant/go-feature-flag.git"
-                    )
-                    url.set("https://github.com/thomaspoignant/go-feature-flag/tree/main/openfeature/providers/kotlin-provider")
-                }
+mavenPublishing {
+    coordinates(project.extra["groupId"].toString(), "gofeatureflag-kotlin-provider", releaseVersion)
+    publishToMavenCentral()
+    signAllPublications()
+    pom {
+        name.set("GO Feature Flag OpenFeature Provider for Android")
+        description.set(
+            "This is the Android provider implementation of OpenFeature for GO Feature Flag."
+        )
+        url.set("https://gofeatureflag.org")
+        licenses {
+            license {
+                name.set("The Apache License, Version 2.0")
+                url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
             }
-
-            afterEvaluate {
-                from(components["release"])
+        }
+        developers {
+            developer {
+                id.set("thomaspoignant")
+                name.set("Thomas Poignant")
+                email.set("thomas.poignant@gofeatureflag.org")
             }
+        }
+        scm {
+            connection.set(
+                "scm:git:https://github.com/thomaspoignant/go-feature-flag.git"
+            )
+            developerConnection.set(
+                "scm:git:ssh://git@github.com:thomaspoignant/go-feature-flag.git"
+            )
+            url.set("https://github.com/thomaspoignant/go-feature-flag/tree/main/openfeature/providers/kotlin-provider")
         }
     }
 }
@@ -113,6 +106,6 @@ dependencies {
     testImplementation("org.slf4j:slf4j-simple:${rootProject.extra["slf4jSimpleVersion"]}")
 }
 
-signing {
-    sign(publishing.publications["release"])
-}
+//signing {
+//    sign(publishing.publications["release"])
+//}
