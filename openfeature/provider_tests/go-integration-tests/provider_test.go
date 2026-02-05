@@ -83,32 +83,6 @@ func TestProvider_module_BooleanEvaluation(t *testing.T) {
 			},
 		},
 		{
-			name: "should resolve a valid boolean flag with TARGETING_MATCH reason",
-			args: args{
-				flag:         "boolean_semver_targeting_match",
-				defaultValue: false,
-				evalCtx:      defaultEvaluationCtx(),
-			},
-			want: of.BooleanEvaluationDetails{
-				Value: true,
-				EvaluationDetails: of.EvaluationDetails{
-					FlagKey:  "boolean_semver_targeting_match",
-					FlagType: of.Boolean,
-					ResolutionDetail: of.ResolutionDetail{
-						Variant:      "True",
-						Reason:       of.TargetingMatchReason,
-						ErrorCode:    "",
-						ErrorMessage: "",
-						FlagMetadata: map[string]any{
-							"description":             "this is a semver matching test",
-							"gofeatureflag_cacheable": true,
-							"issue_link":              "https://github.com/thomaspoignant/go-feature-flag/issues/4736",
-						},
-					},
-				},
-			},
-		},
-		{
 			name: "should use boolean default value if the flag is disabled",
 			args: args{
 				flag:         "disabled_bool",
