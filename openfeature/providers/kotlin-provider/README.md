@@ -16,6 +16,7 @@ For documentation related to flags management in GO Feature Flag, refer to the [
 - Prefetch and cache flag evaluations in order to give the flag value in an efficient way.
 - Automatic configuration changes polling, to be informed as soon as a flag configuration has changed.
 - Automatic data collection about which flags have been accessed by the application
+- OpenFeature Tracking API support.
 
 ## Dependency Setup
 
