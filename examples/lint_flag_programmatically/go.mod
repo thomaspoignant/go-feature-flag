@@ -18,6 +18,3 @@ require (
 	github.com/spf13/cast v1.3.0 // indirect
 	golang.org/x/exp v0.0.0-20240506185415-9bf2ced13842 // indirect
 )
-
-// TODO: remove this once https://github.com/nikunjy/rules/pull/43 merges and a new version is available
-replace github.com/nikunjy/rules => github.com/hairyhenderson/rules v0.0.0-20250704181428-58ee76134adc
