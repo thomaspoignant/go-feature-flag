@@ -40,7 +40,8 @@
                 "openfeature/providers/kotlin-provider",
                 "openfeature/providers/python-provider",
                 ".github/release-please",
-                "cmd/wasm"
+                "cmd/wasm",
+                "website"
             ]
         },
         "modules/core": {
