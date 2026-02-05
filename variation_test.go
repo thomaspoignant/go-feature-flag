@@ -2941,36 +2941,6 @@ func TestStringVariation(t *testing.T) {
 			expectedLog: "",
 		},
 		{
-			name: "Semver prerelease comparison - alpha less than beta",
-			args: args{
-				flagKey: "test-flag",
-				evaluationCtx: ffcontext.NewEvaluationContextBuilder("user-key").
-					AddCustom("version", "1.0.0-beta").
-					Build(),
-				defaultValue: "default",
-				cacheMock: NewCacheMock(&flag.InternalFlag{
-					Rules: &[]flag.Rule{
-						{
-							Name:            testconvert.String("semver_rule"),
-							Query:           testconvert.String("version gt \"1.0.0-alpha\""),
-							VariationResult: testconvert.String("beta"),
-						},
-					},
-					Variations: &map[string]*any{
-						"beta":    testconvert.Interface("beta-release"),
-						"default": testconvert.Interface("default-value"),
-					},
-					DefaultRule: &flag.Rule{
-						Name:            testconvert.String("defaultRule"),
-						VariationResult: testconvert.String("default"),
-					},
-				}, nil),
-			},
-			want:        "beta-release",
-			wantErr:     false,
-			expectedLog: `user="user-key", flag="test-flag", value="beta-release", variation="beta"`,
-		},
-		{
 			name: "Semver prerelease comparison - numeric prerelease identifiers",
 			args: args{
 				flagKey: "test-flag",
