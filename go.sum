@@ -408,8 +408,8 @@ github.com/fortytw2/leaktest v1.3.0/go.mod h1:jDsjWgpAGjm2CA7WthBh/CdZYEPF31XHqu
 github.com/fsnotify/fsnotify v1.5.1/go.mod h1:T3375wBYaZdLLcVNkcVbzGHY7f1l/uK5T5Ai1i3InKU=
 github.com/fsnotify/fsnotify v1.9.0 h1:2Ml+OJNzbYCTzsxtv8vKSFD9PbJjmhYF14k/jKC7S9k=
 github.com/fsnotify/fsnotify v1.9.0/go.mod h1:8jBTzvmWwFyi3Pb8djgCCO5IBqzKJ/Jwo8TRcHyHii0=
-github.com/fsouza/fake-gcs-server v1.53.0 h1:vboSrd2ZEBoIQBfvUBAWQX0xvSFh1oLsn/Cp+0Pa6IA=
-github.com/fsouza/fake-gcs-server v1.53.0/go.mod h1:kF+DadfinC7mlc1/2d/ZDHS9VyUk1hTcXJ6VwLSlzfM=
+github.com/fsouza/fake-gcs-server v1.53.1 h1:/gjEYut23/MMhe4daYJ5yIBGPUmLAYupgITuoWG3+jI=
+github.com/fsouza/fake-gcs-server v1.53.1/go.mod h1:kF+DadfinC7mlc1/2d/ZDHS9VyUk1hTcXJ6VwLSlzfM=
 github.com/fxamacker/cbor/v2 v2.9.0 h1:NpKPmjDBgUfBms6tr6JZkTHtfFGcMKsw3eGcmD/sapM=
 github.com/fxamacker/cbor/v2 v2.9.0/go.mod h1:vM4b+DJCtHn+zz7h3FFp/hDAI9WNWCsZj23V5ytsSxQ=
 github.com/ghodss/yaml v1.0.0 h1:wQHKEahhL6wmXdzwWG11gIVCkOv05bNOh+Rxn0yngAk=
