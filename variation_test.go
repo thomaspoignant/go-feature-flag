@@ -2940,6 +2940,36 @@ func TestStringVariation(t *testing.T) {
 			wantErr:     false,
 			expectedLog: "",
 		},
+		{
+			name: "Semver prerelease comparison - numeric prerelease identifiers",
+			args: args{
+				flagKey: "test-flag",
+				evaluationCtx: ffcontext.NewEvaluationContextBuilder("user-key").
+					AddCustom("version", "1.0.0-2345").
+					Build(),
+				defaultValue: "default",
+				cacheMock: NewCacheMock(&flag.InternalFlag{
+					Rules: &[]flag.Rule{
+						{
+							Name:            testconvert.String("semver_rule"),
+							Query:           testconvert.String("version gt \"1.0.0-1234\""),
+							VariationResult: testconvert.String("prerelease"),
+						},
+					},
+					Variations: &map[string]*any{
+						"prerelease": testconvert.Interface("newer-prerelease"),
+						"default":    testconvert.Interface("default-value"),
+					},
+					DefaultRule: &flag.Rule{
+						Name:            testconvert.String("defaultRule"),
+						VariationResult: testconvert.String("default"),
+					},
+				}, nil),
+			},
+			want:        "newer-prerelease",
+			wantErr:     false,
+			expectedLog: `user="user-key", flag="test-flag", value="newer-prerelease", variation="prerelease"`,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

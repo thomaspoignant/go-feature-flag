@@ -124,7 +124,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sts v1.41.6 // indirect
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/blang/semver v3.5.1+incompatible // indirect
+	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
@@ -305,3 +305,8 @@ require (
 // This change is needed to keep compatibility with AWS Athena v3 (Trino engine).
 // Check https://github.com/thomaspoignant/go-feature-flag/issues/4569 for more details.
 replace github.com/xitongsys/parquet-go => github.com/rudderlabs/parquet-go v0.0.3
+
+// TODO: remove this once https://github.com/nikunjy/rules/pull/43 merges and a new version is available
+// This fix is needed to resolve semver comparison issues with prerelease versions.
+// Check https://github.com/thomaspoignant/go-feature-flag/issues/4736 for more details.
+replace github.com/nikunjy/rules => github.com/hairyhenderson/rules v0.0.0-20250704181428-58ee76134adc
