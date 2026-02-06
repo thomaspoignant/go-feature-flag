@@ -823,14 +823,13 @@ func TestProvider_rules_semverEvaluation(t *testing.T) {
 		{
 			name: "should resolve with TARGETING_MATCH reason for valid semver match",
 			args: args{
-				flag:         "boolean_semver_targeting_ge_match",
-				defaultValue: false,
+				flag:         "boolean_semver_targeting_match",
 				evalCtx:      defaultEvaluationCtx(),
 			},
 			want: of.BooleanEvaluationDetails{
 				Value: true,
 				EvaluationDetails: of.EvaluationDetails{
-					FlagKey:  "boolean_semver_targeting_ge_match",
+					FlagKey:  "boolean_semver_targeting_match",
 					FlagType: of.Boolean,
 					ResolutionDetail: of.ResolutionDetail{
 						Variant:      "True",
@@ -840,7 +839,7 @@ func TestProvider_rules_semverEvaluation(t *testing.T) {
 						FlagMetadata: map[string]any{
 							"description":             "this is a semver matching test",
 							"gofeatureflag_cacheable": true,
-							"issue_link":              "https://github.com/thomaspoignant/go-feature-flag/issues/4736",
+							"pr_link":                 "https://github.com/thomaspoignant/go-feature-flag/pull/4764",
 						},
 					},
 				},
@@ -849,26 +848,25 @@ func TestProvider_rules_semverEvaluation(t *testing.T) {
 		{
 			name: "should resolve flag with DEFAULT reason for invalid semver match",
 			args: args{
-				flag:         "boolean_semver_targeting_ge_match",
-				defaultValue: false,
+				flag:         "boolean_semver_targeting_match",
 				evalCtx: withOverrides(defaultEvaluationCtx(), map[string]any{
 					"version": "10.0.0-2",
 				}),
 			},
 			want: of.BooleanEvaluationDetails{
-				Value: true,
+				Value: false,
 				EvaluationDetails: of.EvaluationDetails{
-					FlagKey:  "boolean_semver_targeting_ge_match",
+					FlagKey:  "boolean_semver_targeting_match",
 					FlagType: of.Boolean,
 					ResolutionDetail: of.ResolutionDetail{
-						Variant:      "True",
-						Reason:       of.TargetingMatchReason,
+						Variant:      "False",
+						Reason:       of.DefaultReason,
 						ErrorCode:    "",
 						ErrorMessage: "",
 						FlagMetadata: map[string]any{
 							"description":             "this is a semver matching test",
-							"gofeatureflag_cacheable": false,
-							"issue_link":              "https://github.com/thomaspoignant/go-feature-flag/issues/4736",
+							"gofeatureflag_cacheable": true,
+							"pr_link":                 "https://github.com/thomaspoignant/go-feature-flag/pull/4764",
 						},
 					},
 				},
