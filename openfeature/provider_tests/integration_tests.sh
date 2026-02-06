@@ -28,7 +28,6 @@ wait_relay_proxy 1031
 wait_relay_proxy 1032
 
 
-echo "TESTS NOW"
 # Launch java integration tests
 echo "------------------------------------------------------------------------------------------------"
 echo "----------- JAVA PROVIDER TESTS ----------------------------------------------------------------"
