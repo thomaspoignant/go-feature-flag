@@ -36,13 +36,10 @@ func defaultEvaluationCtx() of.EvaluationContext {
 }
 
 func withOverrides(base of.EvaluationContext, overrides map[string]any) of.EvaluationContext {
-	attributes := base.Attributes()
-	if attributes == nil {
-		attributes = make(map[string]any)
-	}
-
-	maps.Copy(attributes, overrides)
-	return of.NewEvaluationContext("d45e303a-38c2-11ed-a261-0242ac120002", attributes)
+	newAttributes := make(map[string]any, len(base.Attributes()))
+	maps.Copy(newAttributes, base.Attributes())
+	maps.Copy(newAttributes, overrides)
+	return of.NewEvaluationContext("d45e303a-38c2-11ed-a261-0242ac120002", newAttributes)
 }
 
 func TestProvider_module_BooleanEvaluation(t *testing.T) {
@@ -823,8 +820,8 @@ func TestProvider_rules_semverEvaluation(t *testing.T) {
 		{
 			name: "should resolve with TARGETING_MATCH reason for valid semver match",
 			args: args{
-				flag:         "boolean_semver_targeting_match",
-				evalCtx:      defaultEvaluationCtx(),
+				flag:    "boolean_semver_targeting_match",
+				evalCtx: defaultEvaluationCtx(),
 			},
 			want: of.BooleanEvaluationDetails{
 				Value: true,
@@ -848,7 +845,7 @@ func TestProvider_rules_semverEvaluation(t *testing.T) {
 		{
 			name: "should resolve flag with DEFAULT reason for invalid semver match",
 			args: args{
-				flag:         "boolean_semver_targeting_match",
+				flag: "boolean_semver_targeting_match",
 				evalCtx: withOverrides(defaultEvaluationCtx(), map[string]any{
 					"version": "10.0.0-2",
 				}),
