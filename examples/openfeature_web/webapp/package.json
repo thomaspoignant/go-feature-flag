@@ -39,7 +39,7 @@
     "browser-sync": "^3.0.4",
     "eslint": "^9.39.2",
     "eslint-webpack-plugin": "^5.0.2",
-    "htmlnano": "^3.0.0",
+    "htmlnano": "^3.1.0",
     "imagemin-cli": "^8.0.0",
     "sass": "^1.97.3",
     "npm-run-all": "^4.1.5",
