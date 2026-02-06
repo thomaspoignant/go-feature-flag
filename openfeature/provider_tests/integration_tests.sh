@@ -27,7 +27,6 @@ RELAY_PROXY_PID_AUTHENTICATED=$!
 wait_relay_proxy 1031
 wait_relay_proxy 1032
 
-
 # Launch java integration tests
 echo "------------------------------------------------------------------------------------------------"
 echo "----------- JAVA PROVIDER TESTS ----------------------------------------------------------------"
