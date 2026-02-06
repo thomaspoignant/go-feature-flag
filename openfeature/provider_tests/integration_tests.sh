@@ -29,18 +29,18 @@ wait_relay_proxy 1032
 
 
 echo "TESTS NOW"
-# # Launch java integration tests
-# echo "------------------------------------------------------------------------------------------------"
-# echo "----------- JAVA PROVIDER TESTS ----------------------------------------------------------------"
-# echo "------------------------------------------------------------------------------------------------"
-# mvn -f $(pwd)/openfeature/provider_tests/java-integration-tests/pom.xml test
+# Launch java integration tests
+echo "------------------------------------------------------------------------------------------------"
+echo "----------- JAVA PROVIDER TESTS ----------------------------------------------------------------"
+echo "------------------------------------------------------------------------------------------------"
+mvn -f $(pwd)/openfeature/provider_tests/java-integration-tests/pom.xml test
 
-# # Launch js integration tests
-# echo "------------------------------------------------------------------------------------------------"
-# echo "--------- JAVASCRIPT PROVIDER TESTS ------------------------------------------------------------"
-# echo "------------------------------------------------------------------------------------------------"
-# npm install --prefix $(pwd)/openfeature/provider_tests/js-integration-tests/
-# npm run test --prefix $(pwd)/openfeature/provider_tests/js-integration-tests/
+# Launch js integration tests
+echo "------------------------------------------------------------------------------------------------"
+echo "--------- JAVASCRIPT PROVIDER TESTS ------------------------------------------------------------"
+echo "------------------------------------------------------------------------------------------------"
+npm install --prefix $(pwd)/openfeature/provider_tests/js-integration-tests/
+npm run test --prefix $(pwd)/openfeature/provider_tests/js-integration-tests/
 
 # Launch GO integration test
 echo "------------------------------------------------------------------------------------------------"
@@ -54,10 +54,10 @@ GOWORK=off go test . -tags=integration
 cd "${CURRENT_FOLDER}"
 
 # Launch .NET integration test
-# echo "------------------------------------------------------------------------------------------------"
-# echo "------------- .NET PROVIDER TESTS --------------------------------------------------------------"
-# echo "------------------------------------------------------------------------------------------------"
-# dotnet test openfeature/provider_tests/dotnet-integration-tests
+echo "------------------------------------------------------------------------------------------------"
+echo "------------- .NET PROVIDER TESTS --------------------------------------------------------------"
+echo "------------------------------------------------------------------------------------------------"
+dotnet test openfeature/provider_tests/dotnet-integration-tests
 
 # Stop the relay proxy PID
 kill ${RELAY_PROXY_PID}
