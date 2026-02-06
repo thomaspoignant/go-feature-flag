@@ -787,7 +787,7 @@ func TestRule_isQueryValid(t *testing.T) {
 		{
 			name: "non-default rule with complex valid Nikunjy query",
 			rule: flag.Rule{
-				Query:           testconvert.String("key eq \"test\" and version gt \"1.0.0\""),
+				Query:           testconvert.String("key eq \"test\" and version gt 1.0.0"),
 				VariationResult: testconvert.String("variation_A"),
 			},
 			defaultRule: false,
@@ -863,7 +863,7 @@ func TestRule_validateNikunjyQuery(t *testing.T) {
 		{
 			name: "valid query with AND",
 			rule: flag.Rule{
-				Query:           testconvert.String("key eq \"test\" and version gt \"1.0.0\""),
+				Query:           testconvert.String("key eq \"test\" and version gt 1.0.0"),
 				VariationResult: testconvert.String("variation_A"),
 			},
 			defaultRule: false,
@@ -943,7 +943,7 @@ func TestRule_validateNikunjyQuery(t *testing.T) {
 		{
 			name: "valid query with parentheses",
 			rule: flag.Rule{
-				Query:           testconvert.String("(key eq \"test1\" or key eq \"test2\") and version gt \"1.0.0\""),
+				Query:           testconvert.String("(key eq \"test1\" or key eq \"test2\") and version gt 1.0.0"),
 				VariationResult: testconvert.String("variation_A"),
 			},
 			defaultRule: false,
@@ -986,7 +986,7 @@ func TestRule_validateNikunjyQuery(t *testing.T) {
 		{
 			name: "invalid query with malformed parentheses - removed as parser accepts it",
 			rule: flag.Rule{
-				Query:           testconvert.String("key eq \"test\" and (version gt \"1.0.0\""),
+				Query:           testconvert.String("key eq \"test\" and (version gt 1.0.0"),
 				VariationResult: testconvert.String("variation_A"),
 			},
 			defaultRule: false,
@@ -1017,7 +1017,7 @@ func TestRule_validateNikunjyQuery(t *testing.T) {
 		{
 			name: "valid query with semver comparison",
 			rule: flag.Rule{
-				Query:           testconvert.String("version gt \"1.0.0\""),
+				Query:           testconvert.String("version gt 1.0.0"),
 				VariationResult: testconvert.String("variation_A"),
 			},
 			defaultRule: false,
