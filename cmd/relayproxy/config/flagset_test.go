@@ -243,3 +243,227 @@ func TestFlagSetAPIKeysConcurrency(t *testing.T) {
 		assert.Len(t, keys, 1, "flagset %s should have exactly one key after concurrent writes", flagsetName)
 	}
 }
+
+func TestConfig_AddFlagSet(t *testing.T) {
+	tests := []struct {
+		name           string
+		config         *config.Config
+		flagset        config.FlagSet
+		wantErr        bool
+		wantErrContain string
+		wantCount      int
+	}{
+		{
+			name: "add new flagset successfully",
+			config: &config.Config{
+				FlagSets: []config.FlagSet{
+					{Name: flagset1Name, APIKeys: []string{"key-1"}},
+				},
+			},
+			flagset: config.FlagSet{
+				Name:    flagset2Name,
+				APIKeys: []string{"key-2"},
+			},
+			wantErr:   false,
+			wantCount: 2,
+		},
+		{
+			name: "add flagset to empty config",
+			config: &config.Config{
+				FlagSets: []config.FlagSet{},
+			},
+			flagset: config.FlagSet{
+				Name:    flagset1Name,
+				APIKeys: []string{"key-1"},
+			},
+			wantErr:   false,
+			wantCount: 1,
+		},
+		{
+			name: "add duplicate flagset should fail",
+			config: &config.Config{
+				FlagSets: []config.FlagSet{
+					{Name: flagset1Name, APIKeys: []string{"key-1"}},
+				},
+			},
+			flagset: config.FlagSet{
+				Name:    flagset1Name,
+				APIKeys: []string{"key-2"},
+			},
+			wantErr:        true,
+			wantErrContain: "flagset flagset-1 already exists",
+			wantCount:      1,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			initialCount := len(tt.config.FlagSets)
+			err := tt.config.AddFlagSet(tt.flagset)
+
+			if tt.wantErr {
+				require.Error(t, err)
+				assert.Contains(t, err.Error(), tt.wantErrContain)
+				assert.Equal(t, initialCount, len(tt.config.FlagSets), "flagset count should not change on error")
+			} else {
+				require.NoError(t, err)
+				assert.Equal(t, tt.wantCount, len(tt.config.FlagSets))
+				// Verify the flagset was actually added
+				gotKeys, err := tt.config.GetFlagSetAPIKeys(tt.flagset.Name)
+				require.NoError(t, err)
+				assert.Equal(t, tt.flagset.APIKeys, gotKeys)
+			}
+		})
+	}
+}
+
+func TestConfig_RemoveFlagSet(t *testing.T) {
+	tests := []struct {
+		name           string
+		config         *config.Config
+		flagsetName    string
+		wantErr        bool
+		wantErrContain string
+		wantCount      int
+	}{
+		{
+			name: "remove existing flagset",
+			config: &config.Config{
+				FlagSets: []config.FlagSet{
+					{Name: flagset1Name, APIKeys: []string{"key-1"}},
+					{Name: flagset2Name, APIKeys: []string{"key-2"}},
+				},
+			},
+			flagsetName: flagset1Name,
+			wantErr:     false,
+			wantCount:   1,
+		},
+		{
+			name: "remove flagset from single flagset config",
+			config: &config.Config{
+				FlagSets: []config.FlagSet{
+					{Name: flagset1Name, APIKeys: []string{"key-1"}},
+				},
+			},
+			flagsetName: flagset1Name,
+			wantErr:     false,
+			wantCount:   0,
+		},
+		{
+			name: "remove non-existing flagset should fail",
+			config: &config.Config{
+				FlagSets: []config.FlagSet{
+					{Name: flagset1Name, APIKeys: []string{"key-1"}},
+				},
+			},
+			flagsetName:    "non-existing",
+			wantErr:        true,
+			wantErrContain: "flagset non-existing not found",
+			wantCount:      1,
+		},
+		{
+			name: "remove from empty config should fail",
+			config: &config.Config{
+				FlagSets: []config.FlagSet{},
+			},
+			flagsetName:    flagset1Name,
+			wantErr:        true,
+			wantErrContain: "flagset flagset-1 not found",
+			wantCount:      0,
+		},
+		{
+			name: "remove middle flagset",
+			config: &config.Config{
+				FlagSets: []config.FlagSet{
+					{Name: flagset1Name, APIKeys: []string{"key-1"}},
+					{Name: flagset2Name, APIKeys: []string{"key-2"}},
+					{Name: flagset3Name, APIKeys: []string{"key-3"}},
+				},
+			},
+			flagsetName: flagset2Name,
+			wantErr:     false,
+			wantCount:   2,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			initialCount := len(tt.config.FlagSets)
+			err := tt.config.RemoveFlagSet(tt.flagsetName)
+
+			if tt.wantErr {
+				require.Error(t, err)
+				assert.Contains(t, err.Error(), tt.wantErrContain)
+				assert.Equal(t, initialCount, len(tt.config.FlagSets), "flagset count should not change on error")
+			} else {
+				require.NoError(t, err)
+				assert.Equal(t, tt.wantCount, len(tt.config.FlagSets))
+				// Verify the flagset was actually removed
+				_, err := tt.config.GetFlagSetAPIKeys(tt.flagsetName)
+				assert.Error(t, err)
+				assert.Contains(t, err.Error(), "not found")
+			}
+		})
+	}
+}
+
+func TestConfig_GetFlagSets(t *testing.T) {
+	tests := []struct {
+		name      string
+		config    *config.Config
+		wantCount int
+		wantNames []string
+	}{
+		{
+			name: "get flagsets from config with multiple flagsets",
+			config: &config.Config{
+				FlagSets: []config.FlagSet{
+					{Name: flagset1Name, APIKeys: []string{"key-1"}},
+					{Name: flagset2Name, APIKeys: []string{"key-2"}},
+					{Name: flagset3Name, APIKeys: []string{"key-3"}},
+				},
+			},
+			wantCount: 3,
+			wantNames: []string{flagset1Name, flagset2Name, flagset3Name},
+		},
+		{
+			name: "get flagsets from empty config",
+			config: &config.Config{
+				FlagSets: []config.FlagSet{},
+			},
+			wantCount: 0,
+			wantNames: []string{},
+		},
+		{
+			name: "get flagsets returns a copy",
+			config: &config.Config{
+				FlagSets: []config.FlagSet{
+					{Name: flagset1Name, APIKeys: []string{"key-1"}},
+				},
+			},
+			wantCount: 1,
+			wantNames: []string{flagset1Name},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			flagsets := tt.config.GetFlagSets()
+			assert.Equal(t, tt.wantCount, len(flagsets))
+
+			// Verify names match
+			names := make([]string, len(flagsets))
+			for i, fs := range flagsets {
+				names[i] = fs.Name
+			}
+			assert.ElementsMatch(t, tt.wantNames, names)
+
+			// Verify it's a copy - modifying the returned slice shouldn't affect the config
+			if len(flagsets) > 0 {
+				originalCount := len(tt.config.FlagSets)
+				flagsets = append(flagsets, config.FlagSet{Name: "new-flagset"})
+				assert.Equal(t, originalCount, len(tt.config.FlagSets), "modifying returned slice should not affect config")
+			}
+		})
+	}
+}
