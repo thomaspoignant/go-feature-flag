@@ -8,8 +8,15 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/internalerror"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/testutils/testconvert"
 )
+
+func ExpectError(target error) func(assert.TestingT, error, ...interface{}) bool {
+	return func(t assert.TestingT, err error, msgAndArgs ...interface{}) bool {
+		return assert.ErrorAs(t, err, &target, msgAndArgs...)
+	}
+}
 
 func TestRuleEvaluate(t *testing.T) {
 	type args struct {
@@ -590,20 +597,36 @@ func TestRuleEvaluate(t *testing.T) {
 			wantErr: assert.Error,
 		},
 		{
-			name: "Semver comparison with prerelease identifiers",
+			name: "Semver comparison with prerelease identifiers - higher version provided",
 			rule: flag.Rule{
 				Name:            testconvert.String("semver_rule"),
 				VariationResult: testconvert.String("variation_A"),
-				Query:           testconvert.String("version gt \"1.0.0-1234\""),
+				Query:           testconvert.String("version gt 1.0.0-10"),
 			},
 			args: args{
 				isDefault: false,
 				user: ffcontext.NewEvaluationContextBuilder("user-key").
-					AddCustom("version", "1.0.0-2345").
+					AddCustom("version", "1.0.0-11").
 					Build(),
 			},
 			want:    "variation_A",
 			wantErr: assert.NoError,
+		},
+		{
+			name: "Semver comparison with prerelease identifiers - lower version provided",
+			rule: flag.Rule{
+				Name:            testconvert.String("semver_rule"),
+				VariationResult: testconvert.String("variation_A"),
+				Query:           testconvert.String("version gt 1.0.0-10"),
+			},
+			args: args{
+				isDefault: false,
+				user: ffcontext.NewEvaluationContextBuilder("user-key").
+					AddCustom("version", "1.0.0-2").
+					Build(),
+			},
+			want:    "",
+			wantErr: ExpectError(&internalerror.RuleNotApplyError{}),
 		},
 	}
 	for _, tt := range tests {

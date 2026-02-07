@@ -3,10 +3,12 @@ package go_integration_tests
 import (
 	"context"
 	"fmt"
+	"maps"
+	"testing"
+
 	gofeatureflag "github.com/open-feature/go-sdk-contrib/providers/go-feature-flag/pkg"
 	of "github.com/open-feature/go-sdk/openfeature"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func defaultEvaluationCtx() of.EvaluationContext {
@@ -21,6 +23,7 @@ func defaultEvaluationCtx() of.EvaluationContext {
 			"rate":         3.14,
 			"age":          30,
 			"admin":        true,
+			"version":      "10.0.0-10",
 			"company_info": map[string]any{
 				"name": "my_company",
 				"size": 120,
@@ -31,6 +34,14 @@ func defaultEvaluationCtx() of.EvaluationContext {
 		},
 	)
 }
+
+func withOverrides(base of.EvaluationContext, overrides map[string]any) of.EvaluationContext {
+	newAttributes := make(map[string]any, len(base.Attributes()))
+	maps.Copy(newAttributes, base.Attributes())
+	maps.Copy(newAttributes, overrides)
+	return of.NewEvaluationContext("d45e303a-38c2-11ed-a261-0242ac120002", newAttributes)
+}
+
 func TestProvider_module_BooleanEvaluation(t *testing.T) {
 	type args struct {
 		flag         string
@@ -781,6 +792,94 @@ func TestProvider_apikey_relay_proxy(t *testing.T) {
 			assert.NoError(t, err)
 			client := of.NewClient("test-app")
 			value, err := client.BooleanValueDetails(context.TODO(), "bool_targeting_match", false, defaultEvaluationCtx())
+
+			if tt.want.ErrorCode != "" {
+				assert.Error(t, err)
+				want := fmt.Sprintf("error code: %s: %s", tt.want.ErrorCode, tt.want.ErrorMessage)
+				assert.Equal(t, want, err.Error())
+			} else {
+				assert.NoError(t, err)
+			}
+
+			assert.Equal(t, tt.want, value)
+		})
+	}
+}
+
+func TestProvider_rules_semverEvaluation(t *testing.T) {
+	type args struct {
+		flag         string
+		defaultValue bool
+		evalCtx      of.EvaluationContext
+	}
+	tests := []struct {
+		name string
+		args args
+		want of.BooleanEvaluationDetails
+	}{
+		{
+			name: "should resolve with TARGETING_MATCH reason for valid semver match",
+			args: args{
+				flag:    "boolean_semver_targeting_match",
+				evalCtx: defaultEvaluationCtx(),
+			},
+			want: of.BooleanEvaluationDetails{
+				Value: true,
+				EvaluationDetails: of.EvaluationDetails{
+					FlagKey:  "boolean_semver_targeting_match",
+					FlagType: of.Boolean,
+					ResolutionDetail: of.ResolutionDetail{
+						Variant:      "True",
+						Reason:       of.TargetingMatchReason,
+						ErrorCode:    "",
+						ErrorMessage: "",
+						FlagMetadata: map[string]any{
+							"description":             "this is a semver matching test",
+							"gofeatureflag_cacheable": true,
+							"pr_link":                 "https://github.com/thomaspoignant/go-feature-flag/pull/4764",
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "should resolve flag with DEFAULT reason for invalid semver match",
+			args: args{
+				flag: "boolean_semver_targeting_match",
+				evalCtx: withOverrides(defaultEvaluationCtx(), map[string]any{
+					"version": "10.0.0-2",
+				}),
+			},
+			want: of.BooleanEvaluationDetails{
+				Value: false,
+				EvaluationDetails: of.EvaluationDetails{
+					FlagKey:  "boolean_semver_targeting_match",
+					FlagType: of.Boolean,
+					ResolutionDetail: of.ResolutionDetail{
+						Variant:      "False",
+						Reason:       of.DefaultReason,
+						ErrorCode:    "",
+						ErrorMessage: "",
+						FlagMetadata: map[string]any{
+							"description":             "this is a semver matching test",
+							"gofeatureflag_cacheable": true,
+							"pr_link":                 "https://github.com/thomaspoignant/go-feature-flag/pull/4764",
+						},
+					},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			provider, err := gofeatureflag.NewProvider(gofeatureflag.ProviderOptions{
+				Endpoint: "http://localhost:1031/",
+			})
+			assert.NoError(t, err)
+			err = of.SetProviderAndWait(provider)
+			assert.NoError(t, err)
+			client := of.NewClient("test-app")
+			value, err := client.BooleanValueDetails(context.TODO(), tt.args.flag, tt.args.defaultValue, tt.args.evalCtx)
 
 			if tt.want.ErrorCode != "" {
 				assert.Error(t, err)
