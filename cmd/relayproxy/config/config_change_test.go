@@ -440,18 +440,8 @@ func TestConfigChangeFlagsetAddRemoveModify(t *testing.T) {
 			if tt.expectErrorLogs && observedLogs != nil {
 				assert.GreaterOrEqual(t, observedLogs.Len(), 1, "Expected at least one error log message")
 				for _, expectedMsg := range tt.errorLogContains {
-					errorLogs := observedLogs.FilterMessage(expectedMsg)
-					if errorLogs.Len() == 0 {
-						// Try to find it in any log message
-						found := false
-						for _, log := range observedLogs.All() {
-							if strings.Contains(log.Message, expectedMsg) {
-								found = true
-								break
-							}
-						}
-						assert.True(t, found, "Expected error log containing %q", expectedMsg)
-					}
+					errorLogs := observedLogs.FilterMessageSnippet(expectedMsg)
+					assert.Greater(t, errorLogs.Len(), 0, "Expected to find error log containing snippet: %q", expectedMsg)
 				}
 			}
 

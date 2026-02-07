@@ -191,11 +191,12 @@ func (m *flagsetManagerImpl) FlagSet(apiKey string) (*ffclient.GoFeatureFlag, er
 
 		m.apiKeysMutex.RLock()
 		flagsetName, exists := m.APIKeysToFlagSetName[apiKey]
-		m.apiKeysMutex.RUnlock()
 		if !exists {
+			m.apiKeysMutex.RUnlock()
 			return nil, fmt.Errorf("flagset not found for API key")
 		}
 		flagset, exists := m.FlagSets[flagsetName]
+		m.apiKeysMutex.RUnlock()
 		if !exists {
 			return nil, fmt.Errorf("impossible to find the flagset with the name %s", flagsetName)
 		}
@@ -228,10 +229,17 @@ func (m *flagsetManagerImpl) FlagSetName(apiKey string) (string, error) {
 func (m *flagsetManagerImpl) AllFlagSets() (map[string]*ffclient.GoFeatureFlag, error) {
 	switch m.mode {
 	case flagsetManagerModeFlagsets:
+		m.apiKeysMutex.RLock()
+		defer m.apiKeysMutex.RUnlock()
 		if len(m.FlagSets) == 0 {
 			return nil, fmt.Errorf("no flagsets configured")
 		}
-		return m.FlagSets, nil
+		// Return a copy to avoid external modifications
+		result := make(map[string]*ffclient.GoFeatureFlag, len(m.FlagSets))
+		for k, v := range m.FlagSets {
+			result[k] = v
+		}
+		return result, nil
 	default:
 		if m.DefaultFlagSet == nil {
 			return nil, fmt.Errorf("no default flagset configured")
@@ -257,7 +265,13 @@ func (m *flagsetManagerImpl) Close() {
 	if m.DefaultFlagSet != nil {
 		m.DefaultFlagSet.Close()
 	}
+	m.apiKeysMutex.RLock()
+	flagsets := make([]*ffclient.GoFeatureFlag, 0, len(m.FlagSets))
 	for _, flagset := range m.FlagSets {
+		flagsets = append(flagsets, flagset)
+	}
+	m.apiKeysMutex.RUnlock()
+	for _, flagset := range flagsets {
 		flagset.Close()
 	}
 }
@@ -410,31 +424,22 @@ func (m *flagsetManagerImpl) addFlagset(flagset config.FlagSet) {
 		return
 	}
 
-	// Add to FlagSets map
-	m.FlagSets[flagset.Name] = client
-
-	// Update API keys mapping
-	m.apiKeysMutex.Lock()
-	for _, apiKey := range flagset.APIKeys {
-		m.APIKeysToFlagSetName[apiKey] = flagset.Name
-	}
-	m.apiKeysMutex.Unlock()
-
-	// Update config struct
+	// Update config struct first (before adding to maps)
 	if err := m.config.AddFlagSet(flagset); err != nil {
 		m.logger.Error("failed to add flagset to config",
 			zap.String("flagset", flagset.Name),
 			zap.Error(err))
-		// Rollback: remove from maps if config update failed
-		delete(m.FlagSets, flagset.Name)
-		m.apiKeysMutex.Lock()
-		for _, apiKey := range flagset.APIKeys {
-			delete(m.APIKeysToFlagSetName, apiKey)
-		}
-		m.apiKeysMutex.Unlock()
 		client.Close()
 		return
 	}
+
+	// Add to FlagSets map and update API keys mapping (both protected by mutex)
+	m.apiKeysMutex.Lock()
+	m.FlagSets[flagset.Name] = client
+	for _, apiKey := range flagset.APIKeys {
+		m.APIKeysToFlagSetName[apiKey] = flagset.Name
+	}
+	m.apiKeysMutex.Unlock()
 
 	m.logger.Info("Configuration changed: added new flagset",
 		zap.String("flagset", flagset.Name))
@@ -442,36 +447,35 @@ func (m *flagsetManagerImpl) addFlagset(flagset config.FlagSet) {
 
 // removeFlagset removes a flagset dynamically and gracefully stops it.
 func (m *flagsetManagerImpl) removeFlagset(flagsetName string) {
-	// Get the client
+	// Get API keys for this flagset before acquiring the lock
+	apiKeysToRemove, err := m.config.GetFlagSetAPIKeys(flagsetName)
+	if err != nil {
+		m.logger.Error("failed to get API keys for flagset to remove, API key mapping may be inconsistent",
+			zap.String("flagset", flagsetName),
+			zap.Error(err))
+		apiKeysToRemove = []string{}
+	}
+
+	// Get the client and remove from maps (protected by mutex)
+	m.apiKeysMutex.Lock()
 	client, exists := m.FlagSets[flagsetName]
 	if !exists {
+		m.apiKeysMutex.Unlock()
 		m.logger.Warn("flagset not found for removal",
 			zap.String("flagset", flagsetName))
 		return
 	}
 
-	// Get API keys before removal
-	m.apiKeysMutex.RLock()
-	apiKeysToRemove := make([]string, 0)
-	for apiKey, name := range m.APIKeysToFlagSetName {
-		if name == flagsetName {
-			apiKeysToRemove = append(apiKeysToRemove, apiKey)
-		}
-	}
-	m.apiKeysMutex.RUnlock()
-
-	// Gracefully stop the client (stops polling, flushes exports, closes notifiers)
-	client.Close()
-
-	// Remove from FlagSets map
+	// Remove from FlagSets map and API keys mapping
 	delete(m.FlagSets, flagsetName)
-
-	// Remove API keys from mapping
-	m.apiKeysMutex.Lock()
 	for _, apiKey := range apiKeysToRemove {
 		delete(m.APIKeysToFlagSetName, apiKey)
 	}
 	m.apiKeysMutex.Unlock()
+
+	// Gracefully stop the client (stops polling, flushes exports, closes notifiers)
+	// Do this after releasing the lock to avoid blocking other operations
+	client.Close()
 
 	// Update config struct
 	if err := m.config.RemoveFlagSet(flagsetName); err != nil {
