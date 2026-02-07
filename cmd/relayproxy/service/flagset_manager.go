@@ -288,52 +288,71 @@ func (m *flagsetManagerImpl) OnConfigChange(newConfig *config.Config) {
 // onConfigChangeWithFlagsets is called when the configuration changes in flagsets mode.
 // It handles additions, removals, modifications, and API key changes for flagsets.
 func (m *flagsetManagerImpl) onConfigChangeWithFlagsets(newConfig *config.Config) {
-	// Build map of current flagsets (only named flagsets)
+	currentFlagsets := m.buildCurrentFlagsetsMap()
+	processedFlagsets := m.processNewFlagsets(newConfig.FlagSets, currentFlagsets)
+	m.removeDeletedFlagsets(currentFlagsets, processedFlagsets)
+	m.config.ForceReloadAPIKeys()
+}
+
+// buildCurrentFlagsetsMap builds a map of current named flagsets.
+func (m *flagsetManagerImpl) buildCurrentFlagsetsMap() map[string]config.FlagSet {
 	currentFlagsets := make(map[string]config.FlagSet)
 	for _, fs := range m.config.GetFlagSets() {
 		if fs.Name != "" && fs.Name != utils.DefaultFlagSetName {
 			currentFlagsets[fs.Name] = fs
 		}
 	}
+	return currentFlagsets
+}
 
-	// Track which flagsets to keep/add/remove
+// processNewFlagsets processes new flagsets from the config and returns a set of processed flagset names.
+func (m *flagsetManagerImpl) processNewFlagsets(newFlagsets []config.FlagSet, currentFlagsets map[string]config.FlagSet) map[string]bool {
 	processedFlagsets := make(map[string]bool)
-
-	// Process each flagset in the new config
-	for _, newFS := range newConfig.FlagSets {
-		// Reject unnamed flagsets in dynamic changes
-		if newFS.Name == "" || newFS.Name == utils.DefaultFlagSetName {
-			m.logger.Error("Configuration change rejected: unnamed flagsets cannot be added or modified dynamically",
-				zap.String("flagset", newFS.Name))
+	for _, newFS := range newFlagsets {
+		if m.rejectUnnamedFlagset(newFS) {
 			continue
 		}
-
 		processedFlagsets[newFS.Name] = true
+		m.processFlagsetChange(newFS, currentFlagsets)
+	}
+	return processedFlagsets
+}
 
-		if currentFS, exists := currentFlagsets[newFS.Name]; exists {
-			// Existing flagset - check for forbidden modifications
-			if m.hasCommonFlagSetChanged(currentFS, newFS) {
-				m.logger.Error("Configuration change rejected: flagset modification not allowed",
-					zap.String("flagset", newFS.Name),
-					zap.String("reason", "only API key changes are allowed for existing flagsets"))
-				continue
-			}
-			// Process allowed API key changes (existing logic)
-			m.processFlagsetAPIKeyChange(newFS)
-		} else {
-			// New flagset - add it
-			m.addFlagset(newFS)
-		}
+// rejectUnnamedFlagset rejects unnamed flagsets and logs an error. Returns true if rejected.
+func (m *flagsetManagerImpl) rejectUnnamedFlagset(flagset config.FlagSet) bool {
+	if flagset.Name == "" || flagset.Name == utils.DefaultFlagSetName {
+		m.logger.Error("Configuration change rejected: unnamed flagsets cannot be added or modified dynamically",
+			zap.String("flagset", flagset.Name))
+		return true
+	}
+	return false
+}
+
+// processFlagsetChange processes a single flagset change (add, modify, or API key update).
+func (m *flagsetManagerImpl) processFlagsetChange(newFS config.FlagSet, currentFlagsets map[string]config.FlagSet) {
+	currentFS, exists := currentFlagsets[newFS.Name]
+	if !exists {
+		m.addFlagset(newFS)
+		return
 	}
 
-	// Remove flagsets that no longer exist (only named flagsets can be removed)
+	if m.hasCommonFlagSetChanged(currentFS, newFS) {
+		m.logger.Error("Configuration change rejected: flagset modification not allowed",
+			zap.String("flagset", newFS.Name),
+			zap.String("reason", "only API key changes are allowed for existing flagsets"))
+		return
+	}
+
+	m.processFlagsetAPIKeyChange(newFS)
+}
+
+// removeDeletedFlagsets removes flagsets that no longer exist in the new config.
+func (m *flagsetManagerImpl) removeDeletedFlagsets(currentFlagsets map[string]config.FlagSet, processedFlagsets map[string]bool) {
 	for name := range currentFlagsets {
 		if !processedFlagsets[name] {
 			m.removeFlagset(name)
 		}
 	}
-
-	m.config.ForceReloadAPIKeys()
 }
 
 // processFlagsetAPIKeyChange handles API key changes for a single flagset.
