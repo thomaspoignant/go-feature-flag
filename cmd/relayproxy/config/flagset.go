@@ -113,15 +113,63 @@ func (c *Config) GetFlagSetAPIKeys(flagsetName string) ([]string, error) {
 	return c.FlagSets[index].APIKeys, nil
 }
 
-// GetFlagSets returns a copy of all flagsets in the config.
-// This method is thread-safe.
+// GetFlagSets returns a deep copy of all flagsets in the config.
+// This method is thread-safe and performs a deep copy to prevent callers
+// from modifying the live configuration, including reference types like slices and maps.
 func (c *Config) GetFlagSets() []FlagSet {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
-	// Return a copy to avoid external modifications
+	// Return a deep copy to prevent external modifications
 	result := make([]FlagSet, len(c.FlagSets))
-	copy(result, c.FlagSets)
+	for i, fs := range c.FlagSets {
+		result[i] = c.deepCopyFlagSet(fs)
+	}
 	return result
+}
+
+// deepCopyFlagSet creates a deep copy of a FlagSet.
+func (c *Config) deepCopyFlagSet(src FlagSet) FlagSet {
+	dst := FlagSet{
+		Name:    src.Name,
+		APIKeys: make([]string, len(src.APIKeys)),
+		CommonFlagSet: CommonFlagSet{
+			// Pointer fields - typically immutable config objects set during initialization
+			Retriever:  src.Retriever,
+			Retrievers: src.Retrievers,
+			Exporter:   src.Exporter,
+			Exporters:  src.Exporters,
+			// Value fields
+			FileFormat:                      src.FileFormat,
+			PollingInterval:                 src.PollingInterval,
+			StartWithRetrieverError:         src.StartWithRetrieverError,
+			EnablePollingJitter:             src.EnablePollingJitter,
+			DisableNotifierOnInit:           src.DisableNotifierOnInit,
+			PersistentFlagConfigurationFile: src.PersistentFlagConfigurationFile,
+			Environment:                     src.Environment,
+		},
+	}
+	// Deep copy the APIKeys slice
+	copy(dst.APIKeys, src.APIKeys)
+
+	// Deep copy slices in CommonFlagSet
+	if src.Notifiers != nil {
+		dst.Notifiers = make([]NotifierConf, len(src.Notifiers))
+		copy(dst.Notifiers, src.Notifiers)
+	}
+	if src.FixNotifiers != nil {
+		dst.FixNotifiers = make([]NotifierConf, len(src.FixNotifiers))
+		copy(dst.FixNotifiers, src.FixNotifiers)
+	}
+
+	// Deep copy the EvaluationContextEnrichment map
+	if src.EvaluationContextEnrichment != nil {
+		dst.EvaluationContextEnrichment = make(map[string]any, len(src.EvaluationContextEnrichment))
+		for k, v := range src.EvaluationContextEnrichment {
+			dst.EvaluationContextEnrichment[k] = v
+		}
+	}
+
+	return dst
 }
 
 // getFlagSetIndexFromName returns the index of the flagset in the FlagSets array.

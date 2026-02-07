@@ -461,7 +461,7 @@ func TestConfig_GetFlagSets(t *testing.T) {
 			// Verify it's a copy - modifying the returned slice shouldn't affect the config
 			if len(flagsets) > 0 {
 				originalCount := len(tt.config.FlagSets)
-				flagsets = append(flagsets, config.FlagSet{Name: "new-flagset"})
+				_ = append(flagsets, config.FlagSet{Name: "new-flagset"})
 				assert.Equal(t, originalCount, len(tt.config.FlagSets), "modifying returned slice should not affect config")
 			}
 		})

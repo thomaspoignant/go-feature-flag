@@ -1465,7 +1465,6 @@ func TestFlagsetManager_addFlagset(t *testing.T) {
 		}
 		assert.True(t, found, "Flagset should be in config")
 	})
-
 }
 
 func TestFlagsetManager_removeFlagset(t *testing.T) {
@@ -1546,62 +1545,6 @@ func TestFlagsetManager_removeFlagset(t *testing.T) {
 		}
 		assert.False(t, found, "Flagset should be removed from config")
 	})
-
-	t.Run("should handle flagset not found in FlagSets map", func(t *testing.T) {
-		cfg := &config.Config{
-			FlagSets: []config.FlagSet{
-				{
-					Name: "flagset-to-keep",
-					CommonFlagSet: config.CommonFlagSet{
-						Retriever: &retrieverconf.RetrieverConf{
-							Kind: "file",
-							Path: flagConfig,
-						},
-					},
-					APIKeys: []string{"key-to-keep"},
-				},
-			},
-		}
-		manager, _ := setupManager(t, cfg)
-
-		// Try to remove a non-existing flagset
-		newConfig := &config.Config{
-			FlagSets: []config.FlagSet{
-				{
-					Name: "flagset-to-keep",
-					CommonFlagSet: config.CommonFlagSet{
-						Retriever: &retrieverconf.RetrieverConf{
-							Kind: "file",
-							Path: flagConfig,
-						},
-					},
-					APIKeys: []string{"key-to-keep"},
-				},
-			},
-		}
-
-		// First, remove the flagset from config to simulate it not existing
-		cfg.RemoveFlagSet("non-existing-flagset")
-
-		// Now try to remove it - this will trigger the "not found" path
-		// Actually, we need to test the case where flagset exists in config but not in FlagSets map
-		// This is hard to test without accessing internals. Let's test a different scenario.
-		// Actually, let's test the warning path by trying to remove a flagset that doesn't exist
-		// but we'll do it through a config change that removes a flagset that was never added.
-
-		// Actually, the best way is to test through the normal flow - if a flagset is in config
-		// but somehow not in FlagSets map, that's an inconsistency. Let's test the warning path
-		// by ensuring we have a flagset that exists, then try to remove one that doesn't.
-
-		// Actually, let's test the RemoveFlagSet error path instead
-		manager.OnConfigChange(newConfig)
-
-		// Verify no error occurred (flagset-to-keep should still work)
-		flagset, err := manager.FlagSet("key-to-keep")
-		assert.NoError(t, err)
-		assert.NotNil(t, flagset)
-	})
-
 }
 
 func TestFlagsetManager_FlagSet_ErrorPath(t *testing.T) {

@@ -56,8 +56,12 @@ type flagsetManagerImpl struct {
 	// It is used to retrieve the flagset linked to the API Key.
 	APIKeysToFlagSetName map[string]string
 
-	// apiKeysMutex protects concurrent access to APIKeysToFlagSetName
+	// apiKeysMutex protects concurrent access to APIKeysToFlagSetName and FlagSets map
 	apiKeysMutex sync.RWMutex
+
+	// configChangeMutex protects concurrent execution of onConfigChangeWithFlagsets
+	// to ensure configuration changes are processed sequentially
+	configChangeMutex sync.Mutex
 
 	// Config is the configuration of the relay proxy.
 	// It is used to retrieve the configuration of the relay proxy.
@@ -301,7 +305,11 @@ func (m *flagsetManagerImpl) OnConfigChange(newConfig *config.Config) {
 
 // onConfigChangeWithFlagsets is called when the configuration changes in flagsets mode.
 // It handles additions, removals, modifications, and API key changes for flagsets.
+// This method is synchronized to ensure configuration changes are processed sequentially.
 func (m *flagsetManagerImpl) onConfigChangeWithFlagsets(newConfig *config.Config) {
+	m.configChangeMutex.Lock()
+	defer m.configChangeMutex.Unlock()
+
 	currentFlagsets := m.buildCurrentFlagsetsMap()
 	processedFlagsets := m.processNewFlagsets(newConfig.FlagSets, currentFlagsets)
 	m.removeDeletedFlagsets(currentFlagsets, processedFlagsets)
@@ -320,7 +328,10 @@ func (m *flagsetManagerImpl) buildCurrentFlagsetsMap() map[string]config.FlagSet
 }
 
 // processNewFlagsets processes new flagsets from the config and returns a set of processed flagset names.
-func (m *flagsetManagerImpl) processNewFlagsets(newFlagsets []config.FlagSet, currentFlagsets map[string]config.FlagSet) map[string]bool {
+func (m *flagsetManagerImpl) processNewFlagsets(
+	newFlagsets []config.FlagSet,
+	currentFlagsets map[string]config.FlagSet,
+) map[string]bool {
 	processedFlagsets := make(map[string]bool)
 	for _, newFS := range newFlagsets {
 		if m.rejectUnnamedFlagset(newFS) {
@@ -361,7 +372,10 @@ func (m *flagsetManagerImpl) processFlagsetChange(newFS config.FlagSet, currentF
 }
 
 // removeDeletedFlagsets removes flagsets that no longer exist in the new config.
-func (m *flagsetManagerImpl) removeDeletedFlagsets(currentFlagsets map[string]config.FlagSet, processedFlagsets map[string]bool) {
+func (m *flagsetManagerImpl) removeDeletedFlagsets(
+	currentFlagsets map[string]config.FlagSet,
+	processedFlagsets map[string]bool,
+) {
 	for name := range currentFlagsets {
 		if !processedFlagsets[name] {
 			m.removeFlagset(name)
@@ -408,8 +422,8 @@ func (m *flagsetManagerImpl) updateAPIKeysMapping(flagsetName string, oldKeys, n
 
 // hasCommonFlagSetChanged checks if the CommonFlagSet configuration has changed.
 // This is used to detect forbidden modifications (everything except APIKeys).
-func (m *flagsetManagerImpl) hasCommonFlagSetChanged(old, new config.FlagSet) bool {
-	return !cmp.Equal(old.CommonFlagSet, new.CommonFlagSet,
+func (m *flagsetManagerImpl) hasCommonFlagSetChanged(old, newFlagset config.FlagSet) bool {
+	return !cmp.Equal(old.CommonFlagSet, newFlagset.CommonFlagSet,
 		cmpopts.IgnoreUnexported(config.CommonFlagSet{}))
 }
 
@@ -446,9 +460,20 @@ func (m *flagsetManagerImpl) addFlagset(flagset config.FlagSet) {
 }
 
 // removeFlagset removes a flagset dynamically and gracefully stops it.
+// The order of operations ensures atomicity: config is updated first, then runtime state.
 func (m *flagsetManagerImpl) removeFlagset(flagsetName string) {
-	// Get API keys for this flagset before acquiring the lock
+	// Step 1: Get the client and API keys before making any changes
+	m.apiKeysMutex.RLock()
+	client, exists := m.FlagSets[flagsetName]
 	apiKeysToRemove, err := m.config.GetFlagSetAPIKeys(flagsetName)
+	m.apiKeysMutex.RUnlock()
+
+	if !exists {
+		m.logger.Warn("flagset not found for removal",
+			zap.String("flagset", flagsetName))
+		return
+	}
+
 	if err != nil {
 		m.logger.Error("failed to get API keys for flagset to remove, API key mapping may be inconsistent",
 			zap.String("flagset", flagsetName),
@@ -456,35 +481,26 @@ func (m *flagsetManagerImpl) removeFlagset(flagsetName string) {
 		apiKeysToRemove = []string{}
 	}
 
-	// Get the client and remove from maps (protected by mutex)
-	m.apiKeysMutex.Lock()
-	client, exists := m.FlagSets[flagsetName]
-	if !exists {
-		m.apiKeysMutex.Unlock()
-		m.logger.Warn("flagset not found for removal",
-			zap.String("flagset", flagsetName))
+	// Step 2: Update the source of truth (config) first
+	// If this fails, abort the operation to maintain consistency
+	if err := m.config.RemoveFlagSet(flagsetName); err != nil {
+		m.logger.Error("failed to remove flagset from config",
+			zap.String("flagset", flagsetName),
+			zap.Error(err))
 		return
 	}
 
-	// Remove from FlagSets map and API keys mapping
+	// Step 3: Update runtime state (maps) - protected by mutex
+	m.apiKeysMutex.Lock()
 	delete(m.FlagSets, flagsetName)
 	for _, apiKey := range apiKeysToRemove {
 		delete(m.APIKeysToFlagSetName, apiKey)
 	}
 	m.apiKeysMutex.Unlock()
 
-	// Gracefully stop the client (stops polling, flushes exports, closes notifiers)
+	// Step 4: Gracefully stop the client (stops polling, flushes exports, closes notifiers)
 	// Do this after releasing the lock to avoid blocking other operations
 	client.Close()
-
-	// Update config struct
-	if err := m.config.RemoveFlagSet(flagsetName); err != nil {
-		m.logger.Error("failed to remove flagset from config",
-			zap.String("flagset", flagsetName),
-			zap.Error(err))
-		// Note: Client is already closed, but we log the error
-		return
-	}
 
 	m.logger.Info("Configuration changed: removed flagset",
 		zap.String("flagset", flagsetName))
