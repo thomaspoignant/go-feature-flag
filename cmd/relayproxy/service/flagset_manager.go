@@ -286,11 +286,53 @@ func (m *flagsetManagerImpl) OnConfigChange(newConfig *config.Config) {
 }
 
 // onConfigChangeWithFlagsets is called when the configuration changes in flagsets mode.
-// It is used to update the APIKeys for the flagsets.
+// It handles additions, removals, modifications, and API key changes for flagsets.
 func (m *flagsetManagerImpl) onConfigChangeWithFlagsets(newConfig *config.Config) {
-	for _, newConfigFlagset := range newConfig.FlagSets {
-		m.processFlagsetAPIKeyChange(newConfigFlagset)
+	// Build map of current flagsets (only named flagsets)
+	currentFlagsets := make(map[string]config.FlagSet)
+	for _, fs := range m.config.GetFlagSets() {
+		if fs.Name != "" && fs.Name != utils.DefaultFlagSetName {
+			currentFlagsets[fs.Name] = fs
+		}
 	}
+
+	// Track which flagsets to keep/add/remove
+	processedFlagsets := make(map[string]bool)
+
+	// Process each flagset in the new config
+	for _, newFS := range newConfig.FlagSets {
+		// Reject unnamed flagsets in dynamic changes
+		if newFS.Name == "" || newFS.Name == utils.DefaultFlagSetName {
+			m.logger.Error("Configuration change rejected: unnamed flagsets cannot be added or modified dynamically",
+				zap.String("flagset", newFS.Name))
+			continue
+		}
+
+		processedFlagsets[newFS.Name] = true
+
+		if currentFS, exists := currentFlagsets[newFS.Name]; exists {
+			// Existing flagset - check for forbidden modifications
+			if m.hasCommonFlagSetChanged(currentFS, newFS) {
+				m.logger.Error("Configuration change rejected: flagset modification not allowed",
+					zap.String("flagset", newFS.Name),
+					zap.String("reason", "only API key changes are allowed for existing flagsets"))
+				continue
+			}
+			// Process allowed API key changes (existing logic)
+			m.processFlagsetAPIKeyChange(newFS)
+		} else {
+			// New flagset - add it
+			m.addFlagset(newFS)
+		}
+	}
+
+	// Remove flagsets that no longer exist (only named flagsets can be removed)
+	for name := range currentFlagsets {
+		if !processedFlagsets[name] {
+			m.removeFlagset(name)
+		}
+	}
+
 	m.config.ForceReloadAPIKeys()
 }
 
@@ -329,6 +371,100 @@ func (m *flagsetManagerImpl) updateAPIKeysMapping(flagsetName string, oldKeys, n
 	for _, apiKey := range newKeys {
 		m.APIKeysToFlagSetName[apiKey] = flagsetName
 	}
+}
+
+// hasCommonFlagSetChanged checks if the CommonFlagSet configuration has changed.
+// This is used to detect forbidden modifications (everything except APIKeys).
+func (m *flagsetManagerImpl) hasCommonFlagSetChanged(old, new config.FlagSet) bool {
+	return !cmp.Equal(old.CommonFlagSet, new.CommonFlagSet,
+		cmpopts.IgnoreUnexported(config.CommonFlagSet{}))
+}
+
+// addFlagset creates a new flagset dynamically and starts it.
+func (m *flagsetManagerImpl) addFlagset(flagset config.FlagSet) {
+	// Create the GoFeatureFlag client (this automatically starts polling)
+	client, err := NewGoFeatureFlagClient(&flagset, m.logger, nil)
+	if err != nil {
+		m.logger.Error("failed to create goff client for new flagset",
+			zap.String("flagset", flagset.Name),
+			zap.Error(err))
+		return
+	}
+
+	// Add to FlagSets map
+	m.FlagSets[flagset.Name] = client
+
+	// Update API keys mapping
+	m.apiKeysMutex.Lock()
+	for _, apiKey := range flagset.APIKeys {
+		m.APIKeysToFlagSetName[apiKey] = flagset.Name
+	}
+	m.apiKeysMutex.Unlock()
+
+	// Update config struct
+	if err := m.config.AddFlagSet(flagset); err != nil {
+		m.logger.Error("failed to add flagset to config",
+			zap.String("flagset", flagset.Name),
+			zap.Error(err))
+		// Rollback: remove from maps if config update failed
+		delete(m.FlagSets, flagset.Name)
+		m.apiKeysMutex.Lock()
+		for _, apiKey := range flagset.APIKeys {
+			delete(m.APIKeysToFlagSetName, apiKey)
+		}
+		m.apiKeysMutex.Unlock()
+		client.Close()
+		return
+	}
+
+	m.logger.Info("Configuration changed: added new flagset",
+		zap.String("flagset", flagset.Name))
+}
+
+// removeFlagset removes a flagset dynamically and gracefully stops it.
+func (m *flagsetManagerImpl) removeFlagset(flagsetName string) {
+	// Get the client
+	client, exists := m.FlagSets[flagsetName]
+	if !exists {
+		m.logger.Warn("flagset not found for removal",
+			zap.String("flagset", flagsetName))
+		return
+	}
+
+	// Get API keys before removal
+	m.apiKeysMutex.RLock()
+	apiKeysToRemove := make([]string, 0)
+	for apiKey, name := range m.APIKeysToFlagSetName {
+		if name == flagsetName {
+			apiKeysToRemove = append(apiKeysToRemove, apiKey)
+		}
+	}
+	m.apiKeysMutex.RUnlock()
+
+	// Gracefully stop the client (stops polling, flushes exports, closes notifiers)
+	client.Close()
+
+	// Remove from FlagSets map
+	delete(m.FlagSets, flagsetName)
+
+	// Remove API keys from mapping
+	m.apiKeysMutex.Lock()
+	for _, apiKey := range apiKeysToRemove {
+		delete(m.APIKeysToFlagSetName, apiKey)
+	}
+	m.apiKeysMutex.Unlock()
+
+	// Update config struct
+	if err := m.config.RemoveFlagSet(flagsetName); err != nil {
+		m.logger.Error("failed to remove flagset from config",
+			zap.String("flagset", flagsetName),
+			zap.Error(err))
+		// Note: Client is already closed, but we log the error
+		return
+	}
+
+	m.logger.Info("Configuration changed: removed flagset",
+		zap.String("flagset", flagsetName))
 }
 
 // onConfigChangeWithDefault is called when the configuration changes in default mode.

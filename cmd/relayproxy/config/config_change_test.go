@@ -316,6 +316,153 @@ func TestConfigChangeFlagsetInvalidChanges(t *testing.T) {
 	}
 }
 
+func TestConfigChangeFlagsetAddRemoveModify(t *testing.T) {
+	tests := []struct {
+		name               string
+		port               string
+		initialConfigFile  string
+		modifiedConfigFile string
+		checksBeforeChange []httpRequestCheck
+		checksAfterChange  []httpRequestCheck
+		expectErrorLogs    bool
+		errorLogContains   []string
+	}{
+		{
+			name:               "add new flagset",
+			port:               testutils.GetFreePortAsString(t),
+			initialConfigFile:  "../testdata/config/flagset-add-new-flagset.yaml",
+			modifiedConfigFile: "../testdata/config/flagset-add-new-flagset-MODIFIED.yaml",
+			checksBeforeChange: []httpRequestCheck{
+				{apiKey: apiKey1, expectedStatus: http.StatusOK, bodyContains: []string{testFlagName}},
+				{apiKey: apiKey2, expectedStatus: http.StatusUnauthorized},
+			},
+			checksAfterChange: []httpRequestCheck{
+				{apiKey: apiKey1, expectedStatus: http.StatusOK, bodyContains: []string{testFlagName}},
+				{apiKey: apiKey2, expectedStatus: http.StatusOK, bodyContains: []string{fooFlagName}},
+			},
+			expectErrorLogs: false,
+		},
+		{
+			name:               "remove flagset",
+			port:               testutils.GetFreePortAsString(t),
+			initialConfigFile:  "../testdata/config/flagset-remove-flagset.yaml",
+			modifiedConfigFile: "../testdata/config/flagset-remove-flagset-MODIFIED.yaml",
+			checksBeforeChange: []httpRequestCheck{
+				{apiKey: apiKey1, expectedStatus: http.StatusOK, bodyContains: []string{testFlagName}},
+				{apiKey: apiKey2, expectedStatus: http.StatusOK, bodyContains: []string{fooFlagName}},
+			},
+			checksAfterChange: []httpRequestCheck{
+				{apiKey: apiKey1, expectedStatus: http.StatusOK, bodyContains: []string{testFlagName}},
+				{apiKey: apiKey2, expectedStatus: http.StatusUnauthorized},
+			},
+			expectErrorLogs: false,
+		},
+		{
+			name:               "modify flagset retriever should be rejected",
+			port:               testutils.GetFreePortAsString(t),
+			initialConfigFile:  "../testdata/config/flagset-modify-retriever.yaml",
+			modifiedConfigFile: "../testdata/config/flagset-modify-retriever-MODIFIED.yaml",
+			checksBeforeChange: []httpRequestCheck{
+				{apiKey: apiKey1, expectedStatus: http.StatusOK, bodyContains: []string{testFlagName}},
+			},
+			checksAfterChange: []httpRequestCheck{
+				{apiKey: apiKey1, expectedStatus: http.StatusOK, bodyContains: []string{testFlagName}},
+			},
+			expectErrorLogs:  true,
+			errorLogContains: []string{"flagset modification not allowed"},
+		},
+		{
+			name:               "add unnamed flagset should be rejected",
+			port:               testutils.GetFreePortAsString(t),
+			initialConfigFile:  "../testdata/config/flagset-add-unnamed.yaml",
+			modifiedConfigFile: "../testdata/config/flagset-add-unnamed-MODIFIED.yaml",
+			checksBeforeChange: []httpRequestCheck{
+				{apiKey: apiKey1, expectedStatus: http.StatusOK, bodyContains: []string{testFlagName}},
+				{apiKey: apiKey2, expectedStatus: http.StatusUnauthorized},
+			},
+			checksAfterChange: []httpRequestCheck{
+				{apiKey: apiKey1, expectedStatus: http.StatusOK, bodyContains: []string{testFlagName}},
+				{apiKey: apiKey2, expectedStatus: http.StatusUnauthorized},
+			},
+			expectErrorLogs:  true,
+			errorLogContains: []string{"unnamed flagsets cannot be added"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			urlAPIAllFlags := localhostURL + tt.port + allFlagsEndpoint
+			configFile := testutils.CopyFileToNewTempFile(t, tt.initialConfigFile)
+			testutils.ReplaceInFile(t, configFile, "1031", tt.port)
+			callbackCalled := make(chan bool, 1)
+			// Create observed logger to capture error logs if needed
+			var observedLogs *observer.ObservedLogs
+			var observedLogger *zap.Logger
+			if tt.expectErrorLogs {
+				core, logs := observer.New(zapcore.ErrorLevel)
+				observedLogs = logs
+				observedLogger = zap.New(core)
+			} else {
+				logger, err := zap.NewDevelopment()
+				require.NoError(t, err)
+				observedLogger = logger
+			}
+
+			s, c := newAPIServerWithLogger(t, configFile, observedLogger, func(newConfig *config.Config) {
+				callbackCalled <- true
+			})
+
+			defer func() {
+				s.Stop(context.Background())
+				_ = c.StopConfigChangeWatcher()
+			}()
+			time.Sleep(100 * time.Millisecond) // wait for the server to start
+
+			body := `{"evaluationContext":{"key":"08b5ffb7-7109-42f4-a6f2-b85560fbd20f"}}`
+
+			// Run checks before config change
+			for _, check := range tt.checksBeforeChange {
+				doHTTPRequestAndCheck(t, urlAPIAllFlags, body, check, phaseBeforeChange)
+			}
+
+			// Modify the config file
+			_ = testutils.ReplaceAndCopyFileToExistingFile(t, tt.modifiedConfigFile, configFile, "1031", tt.port)
+
+			// Wait for the callback to be called
+			select {
+			case <-callbackCalled:
+				time.Sleep(100 * time.Millisecond)
+			case <-time.After(5000 * time.Millisecond):
+				require.Fail(t, timeoutCallbackMsg)
+			}
+
+			// Verify error logs if expected
+			if tt.expectErrorLogs && observedLogs != nil {
+				assert.GreaterOrEqual(t, observedLogs.Len(), 1, "Expected at least one error log message")
+				for _, expectedMsg := range tt.errorLogContains {
+					errorLogs := observedLogs.FilterMessage(expectedMsg)
+					if errorLogs.Len() == 0 {
+						// Try to find it in any log message
+						found := false
+						for _, log := range observedLogs.All() {
+							if strings.Contains(log.Message, expectedMsg) {
+								found = true
+								break
+							}
+						}
+						assert.True(t, found, "Expected error log containing %q", expectedMsg)
+					}
+				}
+			}
+
+			// Run checks after config change
+			for _, check := range tt.checksAfterChange {
+				doHTTPRequestAndCheck(t, urlAPIAllFlags, body, check, phaseAfterChange)
+			}
+		})
+	}
+}
+
 func newAPIServerWithLogger(
 	t *testing.T,
 	configFile *os.File,

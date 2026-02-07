@@ -113,6 +113,17 @@ func (c *Config) GetFlagSetAPIKeys(flagsetName string) ([]string, error) {
 	return c.FlagSets[index].APIKeys, nil
 }
 
+// GetFlagSets returns a copy of all flagsets in the config.
+// This method is thread-safe.
+func (c *Config) GetFlagSets() []FlagSet {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+	// Return a copy to avoid external modifications
+	result := make([]FlagSet, len(c.FlagSets))
+	copy(result, c.FlagSets)
+	return result
+}
+
 // getFlagSetIndexFromName returns the index of the flagset in the FlagSets array.
 // If the flagset is not found, it returns -1.
 // This function is not thread safe, it is expected to be called with the mutex locked.
@@ -123,4 +134,35 @@ func (c *Config) getFlagSetIndexFromName(flagsetName string) (int, error) {
 		}
 	}
 	return -1, fmt.Errorf("flagset %s not found", flagsetName)
+}
+
+// AddFlagSet adds a new flagset to the config.
+// This method is thread-safe and should be used when dynamically adding flagsets.
+func (c *Config) AddFlagSet(flagset FlagSet) error {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	// Check if flagset already exists
+	if _, err := c.getFlagSetIndexFromName(flagset.Name); err == nil {
+		return fmt.Errorf("flagset %s already exists", flagset.Name)
+	}
+
+	c.FlagSets = append(c.FlagSets, flagset)
+	return nil
+}
+
+// RemoveFlagSet removes a flagset from the config by name.
+// This method is thread-safe and should be used when dynamically removing flagsets.
+func (c *Config) RemoveFlagSet(flagsetName string) error {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	index, err := c.getFlagSetIndexFromName(flagsetName)
+	if err != nil {
+		return err
+	}
+
+	// Remove the flagset by creating a new slice without it
+	c.FlagSets = append(c.FlagSets[:index], c.FlagSets[index+1:]...)
+	return nil
 }
