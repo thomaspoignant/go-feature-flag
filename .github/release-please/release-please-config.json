@@ -28,6 +28,17 @@
             "section": "⚙️ CI/CD"
         }
     ],
+    "plugins": [
+        {
+            "type": "linked-versions",
+            "groupName": "go-feature-flag",
+            "components": [
+                ".",
+                "cmd/relayproxy"
+            ],
+            "merge": true
+        }
+    ],
     "packages": {
         ".": {
             "release-type": "go",
@@ -35,6 +46,21 @@
             "changelog-path": ".github/release-please/CHANGELOG.md",
             "path": ".",
             "component": "go-feature-flag",
+            "exclude-paths": [
+                "modules/core",
+                "openfeature/providers/kotlin-provider",
+                "openfeature/providers/python-provider",
+                ".github/release-please",
+                "cmd/wasm",
+                "website"
+            ]
+        },
+        "cmd/relayproxy": {
+            "release-type": "go",
+            "include-component-in-tag": false,
+            "changelog-path": ".github/release-please/CHANGELOG.md",
+            "path": "cmd/relayproxy",
+            "component": "cmd/relayproxy",
             "exclude-paths": [
                 "modules/core",
                 "openfeature/providers/kotlin-provider",
