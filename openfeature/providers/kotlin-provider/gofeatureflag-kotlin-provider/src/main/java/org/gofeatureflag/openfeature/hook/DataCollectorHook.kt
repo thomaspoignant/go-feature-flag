@@ -1,9 +1,11 @@
 package org.gofeatureflag.openfeature.hook
 
-import dev.openfeature.sdk.FlagEvaluationDetails
-import dev.openfeature.sdk.Hook
-import dev.openfeature.sdk.HookContext
+import dev.openfeature.kotlin.sdk.FlagEvaluationDetails
+import dev.openfeature.kotlin.sdk.Hook
+import dev.openfeature.kotlin.sdk.HookContext
+import org.gofeatureflag.openfeature.bean.FeatureEvent
 import org.gofeatureflag.openfeature.controller.DataCollectorManager
+import org.gofeatureflag.openfeature.utils.EvaluationContextUtil
 import java.util.Date
 
 class DataCollectorHook<T>(private val collectorManager: DataCollectorManager) : Hook<T> {
@@ -12,8 +14,8 @@ class DataCollectorHook<T>(private val collectorManager: DataCollectorManager) :
         details: FlagEvaluationDetails<T>,
         hints: Map<String, Any>
     ) {
-        val event = Event(
-            contextKind = "user",
+        val featureEvent = FeatureEvent(
+            contextKind = if (EvaluationContextUtil.isAnonymousUser(ctx.ctx)) "anonymousUser" else "user",
             creationDate = Date().time / 1000L,
             key = ctx.flagKey,
             kind = "feature",
@@ -23,12 +25,12 @@ class DataCollectorHook<T>(private val collectorManager: DataCollectorManager) :
             variation = details.variant,
             source = "PROVIDER_CACHE"
         )
-        collectorManager.addEvent(event)
+        collectorManager.addEvent(featureEvent)
     }
 
     override fun error(ctx: HookContext<T>, error: Exception, hints: Map<String, Any>) {
-        val event = Event(
-            contextKind = "user",
+        val featureEvent = FeatureEvent(
+            contextKind = if (EvaluationContextUtil.isAnonymousUser(ctx.ctx)) "anonymousUser" else "user",
             creationDate = Date().time / 1000L,
             key = ctx.flagKey,
             kind = "feature",
@@ -38,6 +40,6 @@ class DataCollectorHook<T>(private val collectorManager: DataCollectorManager) :
             variation = "SdkDefault",
             source = "PROVIDER_CACHE"
         )
-        collectorManager.addEvent(event)
+        collectorManager.addEvent(featureEvent)
     }
 }

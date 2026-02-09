@@ -116,7 +116,7 @@ func Test_MongoDBRetriever_InvalidURI(t *testing.T) {
 }
 
 func removeIDFromJSON(jsonStr string) (string, error) {
-	var data interface{}
+	var data any
 	if err := json.Unmarshal([]byte(jsonStr), &data); err != nil {
 		return "", err
 	}
@@ -131,14 +131,14 @@ func removeIDFromJSON(jsonStr string) (string, error) {
 	return string(modifiedJSON), nil
 }
 
-func removeIDFields(data interface{}) {
+func removeIDFields(data any) {
 	switch v := data.(type) {
-	case map[string]interface{}:
+	case map[string]any:
 		delete(v, "_id")
 		for _, value := range v {
 			removeIDFields(value)
 		}
-	case []interface{}:
+	case []any:
 		for _, item := range v {
 			removeIDFields(item)
 		}

@@ -1,5 +1,39 @@
 # Changelog
 
+## [0.1.4](https://github.com/thomaspoignant/go-feature-flag/compare/cmd/wasm/v0.1.3...cmd/wasm/v0.1.4) (2026-01-30)
+
+
+### 🔧 Chores
+
+* **dependency:** Bump module modules/core 0.5.0 ([#4727](https://github.com/thomaspoignant/go-feature-flag/issues/4727)) ([8620857](https://github.com/thomaspoignant/go-feature-flag/commit/862085772eb15d1c1b4db8574f746e4d9d3a5000))
+
+## [0.1.3](https://github.com/thomaspoignant/go-feature-flag/compare/cmd/wasm/v0.1.2...cmd/wasm/v0.1.3) (2026-01-21)
+
+
+### 🔧 Chores
+
+* **dependency:** Bump module modules/core 0.4.1 ([#4670](https://github.com/thomaspoignant/go-feature-flag/issues/4670)) ([3c6c390](https://github.com/thomaspoignant/go-feature-flag/commit/3c6c390f324628e2615d8c01b877efd072d4ec78))
+
+## [0.1.2](https://github.com/thomaspoignant/go-feature-flag/compare/cmd/wasm/v0.1.1...cmd/wasm/v0.1.2) (2026-01-19)
+
+
+### 🔧 Chores
+
+* Bump github.com/aws/aws-sdk-go-v2/service/s3 ([#4613](https://github.com/thomaspoignant/go-feature-flag/issues/4613)) ([a8e9b13](https://github.com/thomaspoignant/go-feature-flag/commit/a8e9b136eb972da636726525bffc1c2f86fcb432))
+* **dependency:** Bump module modules/core 0.4.0 ([#4658](https://github.com/thomaspoignant/go-feature-flag/issues/4658)) ([a24696e](https://github.com/thomaspoignant/go-feature-flag/commit/a24696e4a31486e22c156c1d81b13d8187c18e9b))
+* **dependency:** Bump module modules/evaluation 0.2.2 ([#4661](https://github.com/thomaspoignant/go-feature-flag/issues/4661)) ([0ccf367](https://github.com/thomaspoignant/go-feature-flag/commit/0ccf36773d59314a386a18c9445a515367b9c961))
+
+## [0.1.1](https://github.com/thomaspoignant/go-feature-flag/compare/cmd/wasm/v0.1.0...cmd/wasm/v0.1.1) (2026-01-09)
+
+
+### 🔧 Chores
+
+* Bump k8s.io/api from 0.34.2 to 0.34.3 ([#4464](https://github.com/thomaspoignant/go-feature-flag/issues/4464)) ([7c947e6](https://github.com/thomaspoignant/go-feature-flag/commit/7c947e68ec359dbf2afbb1ac80ccbd31c56982cb))
+* Bump k8s.io/api from 0.34.3 to 0.35.0 ([#4517](https://github.com/thomaspoignant/go-feature-flag/issues/4517)) ([631144b](https://github.com/thomaspoignant/go-feature-flag/commit/631144b01a33c2531ab4d2160be908d96a80347f))
+* Code cleaning following sonar recommendation - part 2 ([#4470](https://github.com/thomaspoignant/go-feature-flag/issues/4470)) ([cee1dd7](https://github.com/thomaspoignant/go-feature-flag/commit/cee1dd71a571da3b8048b1469f21c7a251466766))
+* **dependency:** Bump module modules/core 0.3.1 ([#4587](https://github.com/thomaspoignant/go-feature-flag/issues/4587)) ([c7e038a](https://github.com/thomaspoignant/go-feature-flag/commit/c7e038a14eaa66d155f47de17c772f25c46ac686))
+* **dependency:** Bump module modules/evaluation 0.2.1 ([#4590](https://github.com/thomaspoignant/go-feature-flag/issues/4590)) ([702993e](https://github.com/thomaspoignant/go-feature-flag/commit/702993ebda095da9e76f09edbe7d764a44c155b4))
+
 ## [0.1.0](https://github.com/thomaspoignant/go-feature-flag/compare/cmd/wasm/v0.0.2...cmd/wasm/v0.1.0) (2025-12-09)
 
 

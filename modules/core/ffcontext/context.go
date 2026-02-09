@@ -2,25 +2,27 @@ package ffcontext
 
 import "encoding/json"
 
+var _ Context = (*EvaluationContext)(nil)
+
 type Context interface {
 	// GetKey return the unique targetingKey for the context.
 	GetKey() string
 	// IsAnonymous return if the context is about an anonymous user or not.
 	IsAnonymous() bool
 	// GetCustom return all the attributes properties added to the context.
-	GetCustom() map[string]interface{}
+	GetCustom() map[string]any
 	// AddCustomAttribute allows to add a attributes attribute into the context.
-	AddCustomAttribute(name string, value interface{})
+	AddCustomAttribute(name string, value any)
 	// ExtractGOFFProtectedFields extract the goff specific attributes from the evaluation context.
 	ExtractGOFFProtectedFields() GoffContextSpecifics
 }
 
 // value is a type to define attributes.
-type value map[string]interface{}
+type value map[string]any
 
 // NewEvaluationContext creates a new evaluation context identified by the given targetingKey.
 func NewEvaluationContext(key string) EvaluationContext {
-	return EvaluationContext{targetingKey: key, attributes: map[string]interface{}{}}
+	return EvaluationContext{targetingKey: key, attributes: map[string]any{}}
 }
 
 // Deprecated: NewAnonymousEvaluationContext is here for compatibility reason.
@@ -29,7 +31,7 @@ func NewEvaluationContext(key string) EvaluationContext {
 // ctx := NewEvaluationContext("my-targetingKey")
 // ctx.AddCustomAttribute("anonymous", true)
 func NewAnonymousEvaluationContext(key string) EvaluationContext {
-	return EvaluationContext{targetingKey: key, attributes: map[string]interface{}{
+	return EvaluationContext{targetingKey: key, attributes: map[string]any{
 		"anonymous": true,
 	}}
 }
@@ -78,12 +80,12 @@ func (u EvaluationContext) IsAnonymous() bool {
 }
 
 // GetCustom return all the attributes properties of a user.
-func (u EvaluationContext) GetCustom() map[string]interface{} {
+func (u EvaluationContext) GetCustom() map[string]any {
 	return u.attributes
 }
 
 // AddCustomAttribute allows to add a attributes attribute into the user.
-func (u EvaluationContext) AddCustomAttribute(name string, value interface{}) {
+func (u EvaluationContext) AddCustomAttribute(name string, value any) {
 	if name != "" {
 		u.attributes[name] = value
 	}
@@ -103,7 +105,7 @@ func (u EvaluationContext) ExtractGOFFProtectedFields() GoffContextSpecifics {
 		goff.addCurrentDateTime(v["currentDateTime"])
 		goff.addListFlags(v["flagList"])
 		goff.addExporterMetadata(v["exporterMetadata"])
-	case map[string]interface{}:
+	case map[string]any:
 		goff.addCurrentDateTime(v["currentDateTime"])
 		goff.addListFlags(v["flagList"])
 		goff.addExporterMetadata(v["exporterMetadata"])

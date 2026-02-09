@@ -2,16 +2,15 @@ package config
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/thomaspoignant/go-feature-flag/exporter/kafkaexporter"
-	"github.com/thomaspoignant/go-feature-flag/utils"
 	"github.com/xitongsys/parquet-go/parquet"
 )
 
 // ExporterConf contains all the field to configure an exporter
 type ExporterConf struct {
 	Kind                    ExporterKind           `mapstructure:"kind"                    koanf:"kind"`
+	TracerName              string                 `mapstructure:"tracerName"             koanf:"tracername"`
 	OutputDir               string                 `mapstructure:"outputDir"               koanf:"outputdir"`
 	Format                  string                 `mapstructure:"format"                  koanf:"format"`
 	Filename                string                 `mapstructure:"filename"                koanf:"filename"`
@@ -36,20 +35,6 @@ type ExporterConf struct {
 	AccountKey              string                 `mapstructure:"accountKey"              koanf:"accountkey"`
 	Container               string                 `mapstructure:"container"               koanf:"container"`
 	ExporterEventType       string                 `mapstructure:"eventType"               koanf:"eventtype"`
-}
-
-// processExporters handles the post-processing of exporters configuration
-func processExporters(proxyConf *Config) {
-	if proxyConf.Exporters == nil {
-		return
-	}
-
-	for i := range *proxyConf.Exporters {
-		addresses := (*proxyConf.Exporters)[i].Kafka.Addresses
-		if len(addresses) == 0 || (len(addresses) == 1 && strings.Contains(addresses[0], ",")) {
-			(*proxyConf.Exporters)[i].Kafka.Addresses = utils.StringToArray(addresses)
-		}
-	}
 }
 
 func (c *ExporterConf) IsValid() error {
@@ -132,6 +117,7 @@ const (
 	KafkaExporter         ExporterKind = "kafka"
 	PubSubExporter        ExporterKind = "pubsub"
 	AzureExporter         ExporterKind = "azureBlobStorage"
+	OpenTelemetryExporter ExporterKind = "opentelemetry"
 )
 
 // IsValid is checking if the value is part of the enum
@@ -146,7 +132,8 @@ func (r ExporterKind) IsValid() error {
 		KafkaExporter,
 		PubSubExporter,
 		KinesisExporter,
-		AzureExporter:
+		AzureExporter,
+		OpenTelemetryExporter:
 		return nil
 	}
 	return fmt.Errorf("invalid exporter: kind \"%s\" is not supported", r)

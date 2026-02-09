@@ -25,7 +25,7 @@ func TestTrackingEvent_FormatInCSV(t *testing.T) {
 				CreationDate:      1617970547,
 				Key:               "random-key",
 				EvaluationContext: map[string]any{"targetingKey": "ABCD"},
-				TrackingDetails: map[string]interface{}{
+				TrackingDetails: map[string]any{
 					"event": "123",
 				},
 			},
@@ -42,7 +42,7 @@ func TestTrackingEvent_FormatInCSV(t *testing.T) {
 				CreationDate:      1617970547,
 				Key:               "random-key",
 				EvaluationContext: map[string]any{"targetingKey": "ABCD", "toto": 123},
-				TrackingDetails: map[string]interface{}{
+				TrackingDetails: map[string]any{
 					"event": "123",
 				},
 			},
@@ -80,7 +80,7 @@ func TestTrackingEvent_FormatInJSON(t *testing.T) {
 				CreationDate:      1617970547,
 				Key:               "random-key",
 				EvaluationContext: map[string]any{"targetingKey": "ABCD"},
-				TrackingDetails: map[string]interface{}{
+				TrackingDetails: map[string]any{
 					"event": "123",
 				},
 			},
@@ -96,7 +96,7 @@ func TestTrackingEvent_FormatInJSON(t *testing.T) {
 				CreationDate:      1617970547,
 				Key:               "random-key",
 				EvaluationContext: map[string]any{"targetingKey": "ABCD", "toto": 123},
-				TrackingDetails: map[string]interface{}{
+				TrackingDetails: map[string]any{
 					"event": "123",
 				},
 			},

@@ -18,6 +18,7 @@ import postgreslogo from '@site/static/docs/retrievers/postgresql.png';
 import kafkalogo from '@site/static/docs/collectors/kafka.png';
 import discordlogo from '@site/static/docs/notifier/discord_logo.png';
 import slacklogo from '@site/static/docs/notifier/slack.png';
+import opentelemetrylogo from '@site/static/docs/collectors/opentelemetry.png';
 
 export const integrations = {
   retrievers: [
@@ -214,6 +215,14 @@ export const integrations = {
       bgColor: '#000000',
       faLogo: 'fa-solid fa-file-lines fa-inverse',
       docLink: 'log',
+    },
+    {
+      name: 'OpenTelemetry',
+      description: 'Export evaluation events as OpenTelemetry spans.',
+      type: 'sync',
+      bgColor: '#4285f4',
+      logo: opentelemetrylogo,
+      docLink: 'opentelemetry',
     },
   ],
   notifiers: [

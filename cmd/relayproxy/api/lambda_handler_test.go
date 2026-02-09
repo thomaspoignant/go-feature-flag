@@ -21,7 +21,7 @@ func TestAwsLambdaHandler_GetAdapter(t *testing.T) {
 	type test struct {
 		name    string
 		mode    string
-		request interface{}
+		request any
 	}
 
 	tests := []test{

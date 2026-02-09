@@ -3,7 +3,10 @@ package service
 import (
 	"errors"
 	"fmt"
+	"sync"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
@@ -34,6 +37,8 @@ type FlagsetManager interface {
 	IsDefaultFlagSet() bool
 	// Close closes the flagset manager
 	Close()
+	// OnConfigChange is called when the configuration changes
+	OnConfigChange(newConfig *config.Config)
 }
 
 // flagsetManagerImpl is the internal implementation of FlagsetManager
@@ -51,12 +56,18 @@ type flagsetManagerImpl struct {
 	// It is used to retrieve the flagset linked to the API Key.
 	APIKeysToFlagSetName map[string]string
 
+	// apiKeysMutex protects concurrent access to APIKeysToFlagSetName
+	apiKeysMutex sync.RWMutex
+
 	// Config is the configuration of the relay proxy.
 	// It is used to retrieve the configuration of the relay proxy.
 	config *config.Config
 
 	// Mode is the mode of the flagset manager.
 	mode flagsetManagerMode
+
+	// Logger is the logger for the flagset manager.
+	logger *zap.Logger
 }
 
 // NewFlagsetManager is creating a new FlagsetManager.
@@ -67,16 +78,21 @@ func NewFlagsetManager(
 		return nil, fmt.Errorf("configuration is nil")
 	}
 
-	if len(config.FlagSets) == 0 {
-		// in case you are using the relay proxy with flagsets, we create the flagsets and map them to the APIKeys.
-		// note that the default configuration is ignored in this case.
-		return newFlagsetManagerWithDefaultConfig(config, logger, notifiers)
+	var flagsetMngr FlagsetManager
+	var err error
+	if config.IsUsingFlagsets() {
+		// flagsets mode: create flagsets based on the `flagsets` array in the configuration.
+		// The top-level retriever/exporter/etc. configuration is ignored in this mode.
+		flagsetMngr, err = newFlagsetManagerWithFlagsets(config, logger, notifiers)
+	} else {
+		// default mode: use the top-level configuration to create a single default flagset.
+		flagsetMngr, err = newFlagsetManagerWithDefaultConfig(config, logger, notifiers)
 	}
-
-	flagsetMngr, err := newFlagsetManagerWithFlagsets(config, logger, notifiers)
 	if err != nil {
 		return nil, err
 	}
+	// Attach a callback to the flagset manager to be called when the configuration changes
+	config.AttachConfigChangeCallback(flagsetMngr.OnConfigChange)
 	return flagsetMngr, nil
 }
 
@@ -109,6 +125,7 @@ func newFlagsetManagerWithDefaultConfig(
 		DefaultFlagSet: client,
 		config:         c,
 		mode:           flagsetManagerModeDefault,
+		logger:         logger,
 	}, nil
 }
 
@@ -135,6 +152,14 @@ func newFlagsetManagerWithFlagsets(
 		if flagSetName == "" || flagSetName == utils.DefaultFlagSetName {
 			// generating a default flagset name if not provided or equals to default
 			flagSetName = uuid.New().String()
+
+			startLog := "no flagset name provided"
+			if flagset.Name == utils.DefaultFlagSetName {
+				startLog = "using 'default' as a flagset name"
+			}
+			logMessage := startLog + ", generating a default flagset name. This is not recommended. " +
+				"Not having a flagset name will not allow you to change API Keys associated to the flagset during runtime."
+			logger.Warn(logMessage, zap.String("flagset", flagSetName))
 		}
 
 		flagsets[flagSetName] = client
@@ -152,6 +177,7 @@ func newFlagsetManagerWithFlagsets(
 		APIKeysToFlagSetName: apiKeysToFlagSet,
 		config:               config,
 		mode:                 flagsetManagerModeFlagsets,
+		logger:               logger,
 	}, nil
 }
 
@@ -163,7 +189,9 @@ func (m *flagsetManagerImpl) FlagSet(apiKey string) (*ffclient.GoFeatureFlag, er
 			return nil, fmt.Errorf("no API key provided")
 		}
 
+		m.apiKeysMutex.RLock()
 		flagsetName, exists := m.APIKeysToFlagSetName[apiKey]
+		m.apiKeysMutex.RUnlock()
 		if !exists {
 			return nil, fmt.Errorf("flagset not found for API key")
 		}
@@ -184,7 +212,10 @@ func (m *flagsetManagerImpl) FlagSet(apiKey string) (*ffclient.GoFeatureFlag, er
 func (m *flagsetManagerImpl) FlagSetName(apiKey string) (string, error) {
 	switch m.mode {
 	case flagsetManagerModeFlagsets:
-		if name, ok := m.APIKeysToFlagSetName[apiKey]; ok {
+		m.apiKeysMutex.RLock()
+		name, ok := m.APIKeysToFlagSetName[apiKey]
+		m.apiKeysMutex.RUnlock()
+		if ok {
 			return name, nil
 		}
 		return "", fmt.Errorf("no flag set associated to the API key")
@@ -221,11 +252,118 @@ func (m *flagsetManagerImpl) IsDefaultFlagSet() bool {
 	return m.mode == flagsetManagerModeDefault
 }
 
+// Close closes the flagset manager
 func (m *flagsetManagerImpl) Close() {
 	if m.DefaultFlagSet != nil {
 		m.DefaultFlagSet.Close()
 	}
 	for _, flagset := range m.FlagSets {
 		flagset.Close()
+	}
+}
+
+// OnConfigChange is called when the configuration changes
+func (m *flagsetManagerImpl) OnConfigChange(newConfig *config.Config) {
+	if err := newConfig.IsValid(); err != nil {
+		m.logger.Error("the new configuration is invalid, it will not be applied", zap.Error(err))
+		m.logger.Debug("invalid configuration:", zap.Error(err), zap.Any("newConfig", newConfig))
+		return
+	}
+
+	// dont allow to switch from default to flagsets mode (or the opposite) during runtime
+	if (newConfig.IsUsingFlagsets() && m.mode == flagsetManagerModeDefault) ||
+		(!newConfig.IsUsingFlagsets() && m.mode == flagsetManagerModeFlagsets) {
+		m.logger.Error("switching from default to flagsets mode (or the opposite) is not supported during runtime")
+		return
+	}
+
+	switch m.mode {
+	case flagsetManagerModeDefault:
+		m.onConfigChangeWithDefault(newConfig)
+	case flagsetManagerModeFlagsets:
+		m.onConfigChangeWithFlagsets(newConfig)
+	}
+}
+
+// onConfigChangeWithFlagsets is called when the configuration changes in flagsets mode.
+// It is used to update the APIKeys for the flagsets.
+func (m *flagsetManagerImpl) onConfigChangeWithFlagsets(newConfig *config.Config) {
+	for _, newConfigFlagset := range newConfig.FlagSets {
+		m.processFlagsetAPIKeyChange(newConfigFlagset)
+	}
+	m.config.ForceReloadAPIKeys()
+}
+
+// processFlagsetAPIKeyChange handles API key changes for a single flagset.
+func (m *flagsetManagerImpl) processFlagsetAPIKeyChange(newConfigFlagset config.FlagSet) {
+	flagsetName := newConfigFlagset.Name
+	if flagsetName == "" || flagsetName == utils.DefaultFlagSetName {
+		return
+	}
+	currentAPIKeys, err := m.config.GetFlagSetAPIKeys(flagsetName)
+	if err != nil {
+		return
+	}
+	if cmp.Equal(currentAPIKeys, newConfigFlagset.APIKeys) {
+		return
+	}
+
+	m.logger.Info("Configuration changed: updating the APIKeys for flagset",
+		zap.String("flagset", flagsetName))
+
+	if err = m.config.SetFlagSetAPIKeys(flagsetName, newConfigFlagset.APIKeys); err != nil {
+		m.logger.Error("failed to update the APIKeys for flagset", zap.Error(err))
+		return
+	}
+	m.updateAPIKeysMapping(flagsetName, currentAPIKeys, newConfigFlagset.APIKeys)
+}
+
+// updateAPIKeysMapping updates the APIKeysToFlagSetName map with the new API keys.
+func (m *flagsetManagerImpl) updateAPIKeysMapping(flagsetName string, oldKeys, newKeys []string) {
+	m.apiKeysMutex.Lock()
+	defer m.apiKeysMutex.Unlock()
+
+	for _, apiKey := range oldKeys {
+		delete(m.APIKeysToFlagSetName, apiKey)
+	}
+	for _, apiKey := range newKeys {
+		m.APIKeysToFlagSetName[apiKey] = flagsetName
+	}
+}
+
+// onConfigChangeWithDefault is called when the configuration changes in default mode.
+// The only configuration that can be changed is the API Keys and the AuthorizedKeys.
+// All the other configuration changes are not supported.
+func (m *flagsetManagerImpl) onConfigChangeWithDefault(newConfig *config.Config) {
+	reloadAPIKeys := false
+	// on default mode, we can only change the API Keys, all the other configuration changes are not supported
+	// We need to read the current values with proper locking to avoid data races
+	currentAuthorizedKeys := m.config.GetAuthorizedKeys()
+	currentAPIKeys := m.config.GetAPIKeys()
+	newAuthorizedKeys := newConfig.GetAuthorizedKeys()
+	newAPIKeys := newConfig.GetAPIKeys()
+
+	if !cmp.Equal(m.config, newConfig,
+		cmpopts.IgnoreUnexported(config.Config{}), cmpopts.IgnoreFields(config.Config{}, "APIKeys", "AuthorizedKeys")) {
+		m.logger.Warn("Configuration changed not supported: only API Keys and AuthorizedKeys can be " +
+			"changed during runtime in default mode")
+	}
+
+	if !cmp.Equal(currentAuthorizedKeys, newAuthorizedKeys, cmpopts.IgnoreUnexported(config.APIKeys{})) {
+		m.logger.Info("Configuration changed: reloading the AuthorizedKeys")
+		m.config.SetAuthorizedKeys(newAuthorizedKeys)
+		reloadAPIKeys = true
+	}
+
+	// nolint: staticcheck
+	if !cmp.Equal(currentAPIKeys, newAPIKeys) {
+		m.logger.Info("Configuration changed: reloading the APIKeys")
+		// nolint: staticcheck
+		m.config.SetAPIKeys(newAPIKeys)
+		reloadAPIKeys = true
+	}
+
+	if reloadAPIKeys {
+		m.config.ForceReloadAPIKeys()
 	}
 }

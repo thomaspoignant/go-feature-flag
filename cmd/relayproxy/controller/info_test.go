@@ -100,7 +100,7 @@ func Test_info_Handler(t *testing.T) {
 			assert.Equal(t, tt.want.httpCode, rec.Code, "Invalid HTTP Code")
 
 			// Parse the response JSON to check the structure
-			var response map[string]interface{}
+			var response map[string]any
 			err = json.Unmarshal(rec.Body.Bytes(), &response)
 			assert.NoError(t, err, "Response should be valid JSON")
 
@@ -116,10 +116,10 @@ func Test_info_Handler(t *testing.T) {
 			if tt.config.FlagSets != nil {
 				flagsets, exists := response["flagsets"]
 				assert.True(t, exists, "Response should contain flagsets field")
-				assert.Equal(t, len(tt.config.FlagSets), len(flagsets.(map[string]interface{})), "Number of flagsets should match")
+				assert.Equal(t, len(tt.config.FlagSets), len(flagsets.(map[string]any)), "Number of flagsets should match")
 				for _, flagset := range tt.config.FlagSets {
 					flagsetName := flagset.Name
-					flagsetRefreshDateStr, exists := flagsets.(map[string]interface{})[flagsetName]
+					flagsetRefreshDateStr, exists := flagsets.(map[string]any)[flagsetName]
 					assert.True(t, exists, "Response should contain flagset %s field", flagsetName)
 
 					flagsetRefreshDate, err := time.Parse(time.RFC3339, flagsetRefreshDateStr.(string))

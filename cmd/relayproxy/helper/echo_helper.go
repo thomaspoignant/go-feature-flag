@@ -9,14 +9,21 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 )
 
-// APIKey extracts the API key from the Authorization header.
-// It removes the "Bearer " prefix if it exists.
-// For other schemes, it returns the raw header value or an empty string if the header is missing.
+// APIKey extracts the API key from the request headers.
+// It checks headers in the following order of precedence:
+// 1. X-API-Key header (raw value)
+// 2. Authorization header (with "Bearer " prefix removed if present)
+// Returns an empty string if no API key is found.
 func APIKey(c echo.Context) string {
-	apiKey := c.Request().Header.Get("Authorization")
-	const bearerPrefix = "Bearer "
-	if len(apiKey) >= len(bearerPrefix) && strings.EqualFold(apiKey[:len(bearerPrefix)], bearerPrefix) {
-		return strings.TrimSpace(apiKey[len(bearerPrefix):])
+	// First, check X-API-Key header (takes precedence)
+	if xAPIKey := c.Request().Header.Get(XAPIKeyHeader); xAPIKey != "" {
+		return xAPIKey
+	}
+
+	// Fall back to Authorization header
+	apiKey := c.Request().Header.Get(AuthorizationHeader)
+	if len(apiKey) >= len(BearerPrefix) && strings.EqualFold(apiKey[:len(BearerPrefix)], BearerPrefix) {
+		return strings.TrimSpace(apiKey[len(BearerPrefix):])
 	}
 	return apiKey
 }

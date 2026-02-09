@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/cmd/cli/evaluate"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/helper"
 )
 
 func TestCmdEvaluate(t *testing.T) {
@@ -122,9 +123,9 @@ func TestCmdEvaluate(t *testing.T) {
 				"--header",
 				"Content-Type: application/json",
 				"--header",
-				"X-API-Key: 123456",
+				helper.XAPIKeyHeader + ": 123456",
 				"--header",
-				"X-API-Key: 654321",
+				helper.XAPIKeyHeader + ": 654321",
 				"--flag",
 				"test-flag",
 				"--ctx",

@@ -215,7 +215,7 @@ func TestRetrieverErrorHandling(t *testing.T) {
 
 		_, err := r.Retrieve(context.Background())
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "database connection is not initialized")
+		assert.Contains(t, err.Error(), "database connection pool is not initialized")
 	})
 
 	t.Run("Status - nil receiver", func(t *testing.T) {
@@ -378,7 +378,7 @@ func TestRetrieverDataHandlingErrors(t *testing.T) {
 			assert.Contains(t, err.Error(), "failed to execute query")
 		}
 	})
-	}
+}
 
 // TestRetrieverEdgeCases tests additional edge cases and boundary conditions
 func TestRetrieverEdgeCases(t *testing.T) {

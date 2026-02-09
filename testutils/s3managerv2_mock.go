@@ -8,8 +8,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
-	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager"
 )
 
 type S3ManagerV2Mock struct {
@@ -17,11 +16,11 @@ type S3ManagerV2Mock struct {
 	TestDataLocation        string
 }
 
-func (s *S3ManagerV2Mock) Upload(
+func (s *S3ManagerV2Mock) UploadObject(
 	ctx context.Context,
-	uploadInput *s3.PutObjectInput,
-	opts ...func(uploader *manager.Uploader),
-) (*manager.UploadOutput, error) {
+	uploadInput *transfermanager.UploadObjectInput,
+	opts ...func(*transfermanager.Options),
+) (*transfermanager.UploadObjectOutput, error) {
 	if ctx == nil {
 		return nil, errors.New("cannot create context from nil parent")
 	}
@@ -40,28 +39,31 @@ func (s *S3ManagerV2Mock) Upload(
 	}
 	s.S3ManagerMockFileSystem[*uploadInput.Key] = buf.String()
 
-	return &manager.UploadOutput{
-		Location: *uploadInput.Key,
+	return &transfermanager.UploadObjectOutput{
+		Location: uploadInput.Key,
 	}, nil
 }
 
-func (s *S3ManagerV2Mock) Download(
+func (s *S3ManagerV2Mock) DownloadObject(
 	ctx context.Context,
-	w io.WriterAt,
-	input *s3.GetObjectInput,
-	options ...func(*manager.Downloader),
-) (n int64, err error) {
+	input *transfermanager.DownloadObjectInput,
+	opts ...func(*transfermanager.Options),
+) (*transfermanager.DownloadObjectOutput, error) {
 	if ctx == nil {
-		return -1, errors.New("cannot create context from nil parent")
+		return nil, errors.New("cannot create context from nil parent")
+	}
+	if input.WriterAt == nil {
+		return nil, errors.New("WriterAt is required")
 	}
 
-	if *input.Key == "valid" {
+	if input.Key != nil && *input.Key == "valid" {
 		res, _ := os.ReadFile(s.TestDataLocation + "/flag-config.yaml")
-		_, _ = w.WriteAt(res, 0)
-		return 1, nil
-	} else if *input.Key == "no-file" {
-		return 0, errors.New("no file")
+		_, _ = input.WriterAt.WriteAt(res, 0)
+		return &transfermanager.DownloadObjectOutput{}, nil
+	}
+	if input.Key != nil && *input.Key == "no-file" {
+		return nil, errors.New("no file")
 	}
 
-	return 1, nil
+	return &transfermanager.DownloadObjectOutput{}, nil
 }

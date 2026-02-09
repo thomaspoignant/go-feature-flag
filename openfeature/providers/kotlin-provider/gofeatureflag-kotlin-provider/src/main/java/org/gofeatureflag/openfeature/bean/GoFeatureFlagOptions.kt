@@ -1,5 +1,8 @@
 package org.gofeatureflag.openfeature.bean
 
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+
 data class GoFeatureFlagOptions(
     /**
      * (mandatory) endpoint contains the DNS of your GO Feature Flag relay proxy
@@ -12,7 +15,7 @@ data class GoFeatureFlagOptions(
      * go-feature-flag relay proxy API.
      * Default: 10000 ms
      */
-    val timeout: Long = 10000,
+    val timeout: Duration = 10000.milliseconds,
 
     /**
      * (optional) maxIdleConnections is the maximum number of connexions in the connexion pool.
@@ -24,7 +27,7 @@ data class GoFeatureFlagOptions(
      * (optional) keepAliveDuration is the time in millisecond we keep the connexion open.
      * Default: 7200000 (2 hours)
      */
-    val keepAliveDuration: Long = 7200000,
+    val keepAlive: Duration = 7200000.milliseconds,
 
     /**
      * (optional) apiKey, if the relay proxy is configured to authenticate the requests, you should provide
@@ -39,7 +42,7 @@ data class GoFeatureFlagOptions(
      * (optional) polling interval in millisecond to refresh the flags
      * Default: 300000 (5 minutes)
      */
-    val pollingIntervalInMillis: Long = 300000,
+    val pollingInterval: Duration = 300000.milliseconds,
 
     /**
      * (optional) interval time we publish statistics collection data to the proxy.
@@ -57,5 +60,11 @@ data class GoFeatureFlagOptions(
      * of this field will not be added to your feature events.
      */
     val exporterMetadata: Map<String, Any> = emptyMap(),
+
+    /**
+     * Headers to add to the OFREP calls
+     * Default: empty
+     */
+    val customHeaders: Map<String, String> = emptyMap(),
 )
 

@@ -185,8 +185,8 @@ func TestTime(t *testing.T) {
 func TestInterface(t *testing.T) {
 	tests := []struct {
 		name  string
-		input interface{}
-		want  interface{}
+		input any
+		want  any
 	}{
 		{
 			name:  "string value",
@@ -220,13 +220,13 @@ func TestInterface(t *testing.T) {
 		},
 		{
 			name:  "map value",
-			input: map[string]interface{}{"key": "value"},
-			want:  map[string]interface{}{"key": "value"},
+			input: map[string]any{"key": "value"},
+			want:  map[string]any{"key": "value"},
 		},
 		{
 			name:  "slice value",
-			input: []interface{}{1, 2, 3},
-			want:  []interface{}{1, 2, 3},
+			input: []any{1, 2, 3},
+			want:  []any{1, 2, 3},
 		},
 		{
 			name:  "empty string",
@@ -278,4 +278,3 @@ func TestPointerIndependence(t *testing.T) {
 		assert.Equal(t, 3.14, *ptr, "Pointer value should not change when original variable changes")
 	})
 }
-

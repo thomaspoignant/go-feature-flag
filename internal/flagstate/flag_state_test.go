@@ -45,7 +45,7 @@ func TestFromFlagEvaluation(t *testing.T) {
 			flagCtx:       flag.Context{},
 			currentFlag: &flag.InternalFlag{
 				Disable: testconvert.Bool(false),
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"var1": testconvert.Interface(1),
 					"var2": testconvert.Interface(2),
 				},
@@ -73,7 +73,7 @@ func TestFromFlagEvaluation(t *testing.T) {
 			flagCtx:       flag.Context{},
 			currentFlag: &flag.InternalFlag{
 				Disable: testconvert.Bool(false),
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"var1": testconvert.Interface(1),
 					"var2": testconvert.Interface(2),
 				},
@@ -98,12 +98,12 @@ func TestFromFlagEvaluation(t *testing.T) {
 			flagCtx:       flag.Context{},
 			currentFlag: &flag.InternalFlag{
 				Disable: testconvert.Bool(false),
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"var1": testconvert.Interface(
-						map[bool]*interface{}{true: testconvert.Interface(1)},
+						map[bool]*any{true: testconvert.Interface(1)},
 					),
 					"var2": testconvert.Interface(
-						map[bool]*interface{}{true: testconvert.Interface(2)},
+						map[bool]*any{true: testconvert.Interface(2)},
 					),
 				},
 				DefaultRule: &flag.Rule{

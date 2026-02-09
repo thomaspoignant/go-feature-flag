@@ -88,7 +88,7 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 	}
 
 	// we set a nil value to the default value to avoid the default value to be used.
-	var defaultValue interface{} = nil
+	var defaultValue any = nil
 	flagValue, _ := flagset.RawVariation(flagKey, evalCtx, defaultValue)
 
 	if flagValue.Reason == flag.ReasonError {
@@ -118,7 +118,7 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 	metadata := flagValue.Metadata
 	if flagValue.Cacheable {
 		if metadata == nil {
-			metadata = make(map[string]interface{})
+			metadata = make(map[string]any)
 		}
 		metadata["gofeatureflag_cacheable"] = true
 	}

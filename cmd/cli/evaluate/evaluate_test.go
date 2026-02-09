@@ -17,7 +17,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/retriever/s3retrieverv2"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
 	"github.com/thomaspoignant/go-feature-flag/testutils/mock"
-	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 )
 
@@ -72,7 +71,7 @@ func Test_Evaluate(t *testing.T) {
 					Reason:        "STATIC",
 					Value:         true,
 					Cacheable:     true,
-					Metadata: map[string]interface{}{
+					Metadata: map[string]any{
 						"description": "this is a simple feature flag",
 						"issue-link":  "https://jira.xxx/GOFF-01",
 					},
@@ -102,7 +101,7 @@ func Test_Evaluate(t *testing.T) {
 					Reason:        "STATIC",
 					Value:         true,
 					Cacheable:     true,
-					Metadata: map[string]interface{}{
+					Metadata: map[string]any{
 						"description": "this is a simple feature flag",
 						"issue-link":  "https://jira.xxx/GOFF-01",
 					},
@@ -135,7 +134,7 @@ func Test_Evaluate(t *testing.T) {
 					ErrorDetails:  "Error: Empty targeting key",
 					Value:         nil,
 					Cacheable:     false,
-					Metadata: map[string]interface{}{
+					Metadata: map[string]any{
 						"description": "this is a simple feature flag",
 						"issue-link":  "https://jira.xxx/GOFF-01",
 					},
@@ -168,7 +167,7 @@ func Test_Evaluate(t *testing.T) {
 					ErrorDetails:  "",
 					Value:         false,
 					Cacheable:     true,
-					Metadata: map[string]interface{}{
+					Metadata: map[string]any{
 						"description": "this is a simple feature flag",
 						"issue-link":  "https://jira.xxx/GOFF-01",
 					},
@@ -200,7 +199,7 @@ func Test_Evaluate(t *testing.T) {
 					ErrorDetails:  "",
 					Value:         false,
 					Cacheable:     true,
-					Metadata: map[string]interface{}{
+					Metadata: map[string]any{
 						"description": "this is a simple feature flag",
 						"issue-link":  "https://jira.xxx/GOFF-01",
 					},
@@ -226,7 +225,7 @@ func Test_Evaluate(t *testing.T) {
 					ErrorDetails:  "",
 					Value:         true,
 					Cacheable:     true,
-					Metadata: map[string]interface{}{
+					Metadata: map[string]any{
 						"description": "this is a simple feature flag",
 						"issue-link":  "https://jira.xxx/GOFF-01",
 					},
@@ -398,7 +397,7 @@ func Test_Evaluate(t *testing.T) {
 					ErrorDetails:  "",
 					Value:         false,
 					Cacheable:     true,
-					Metadata: map[string]interface{}{"description": "this is a simple feature flag",
+					Metadata: map[string]any{"description": "this is a simple feature flag",
 						"issue-link": "https://jira.xxx/GOFF-01"},
 				},
 			},
@@ -466,7 +465,7 @@ func Test_Evaluate(t *testing.T) {
 				gcsRetriever, ok := r.(*gcstorageretriever.Retriever)
 				assert.True(t, ok, "failed to assert retriever to *gcstorageretriever.Retriever")
 				gcsRetriever.SetOptions([]option.ClientOption{
-					option.WithCredentials(&google.Credentials{}),
+					option.WithoutAuthentication(),
 					option.WithHTTPClient(mockedStorage.Server.HTTPClient()),
 				})
 
@@ -489,7 +488,7 @@ func Test_Evaluate(t *testing.T) {
 					ErrorDetails:  "",
 					Value:         false,
 					Cacheable:     true,
-					Metadata: map[string]interface{}{"description": "this is a simple feature flag",
+					Metadata: map[string]any{"description": "this is a simple feature flag",
 						"issue-link": "https://jira.xxx/GOFF-01"},
 				},
 			},

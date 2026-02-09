@@ -10,6 +10,8 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
+var _ exporter.Exporter = &Exporter{}
+
 const (
 	formatJSON = "json"
 )

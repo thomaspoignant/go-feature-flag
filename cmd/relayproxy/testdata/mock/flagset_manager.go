@@ -1,6 +1,9 @@
 package mock
 
-import ffclient "github.com/thomaspoignant/go-feature-flag"
+import (
+	ffclient "github.com/thomaspoignant/go-feature-flag"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
+)
 
 // MockFlagsetManager is a mock implementation for testing error scenarios
 type MockFlagsetManager struct {
@@ -11,7 +14,20 @@ type MockFlagsetManager struct {
 }
 
 func (m *MockFlagsetManager) FlagSet(_ string) (*ffclient.GoFeatureFlag, error) {
-	return nil, nil
+	if len(m.FlagSets) == 0 {
+		return nil, m.GetFlagSetsErr
+	}
+
+	if m.GetFlagSetsErr != nil {
+		return nil, m.GetFlagSetsErr
+	}
+
+	keys := make([]string, 0, len(m.FlagSets))
+	for key := range m.FlagSets {
+		keys = append(keys, key)
+	}
+
+	return m.FlagSets[keys[0]], m.GetFlagSetsErr
 }
 
 func (m *MockFlagsetManager) FlagSetName(_ string) (string, error) {
@@ -31,5 +47,9 @@ func (m *MockFlagsetManager) IsDefaultFlagSet() bool {
 }
 
 func (m *MockFlagsetManager) Close() {
+	// nothing to do
+}
+
+func (m *MockFlagsetManager) OnConfigChange(_ *config.Config) {
 	// nothing to do
 }

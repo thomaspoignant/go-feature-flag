@@ -6,6 +6,7 @@ github.com/blang/semver v3.5.1+incompatible h1:cQNTCjp13qL8KC3Nbxr/y2Bqb63oX6wdn
 github.com/blang/semver v3.5.1+incompatible/go.mod h1:kRBLl5iJ+tD4TcOOxsy/0fnwebNt5EWlYSAyrTnjyyk=
 github.com/buger/jsonparser v1.1.1 h1:2PnMjfWD7wBILjqQbt530v576A/cAbQvEW9gGIpYMUs=
 github.com/buger/jsonparser v1.1.1/go.mod h1:6RYKKt7H4d4+iWqouImQ9R2FZql3VbhNgx27UK13J/0=
+github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/dariubs/percent v0.0.0-20190521174708-8153fcbd48ae h1:0SUXUFz3+ksMulwvkS6XZnxCqw5ygjYJPKjpEBWNCJU=
 github.com/dariubs/percent v0.0.0-20190521174708-8153fcbd48ae/go.mod h1:NqjuQSHe8CjRVziJtxGCQDmOwoj68QdlKRkbddHfRtY=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
@@ -29,10 +30,8 @@ github.com/spf13/cast v1.3.0/go.mod h1:Qx5cxh0v+4UWYiBimWS+eyWzqEqokIECu5etghLkU
 github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
 github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu7U=
 github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
-github.com/thomaspoignant/go-feature-flag/modules/core v0.3.0 h1:+ICnCu4JPeUGAHQn6kKq0NZe+loTcMF850ParZInUFU=
-github.com/thomaspoignant/go-feature-flag/modules/core v0.3.0/go.mod h1:zWMkWi2uP1GSG/p/GLDmQ89hNFqOg8sVt+Q/fmh3cvs=
-github.com/thomaspoignant/go-feature-flag/modules/evaluation v0.2.0 h1:CLp+xFGoDneD/kmwpsxkwvZUhzgoIJ0MpRI+1a6DsXI=
-github.com/thomaspoignant/go-feature-flag/modules/evaluation v0.2.0/go.mod h1:GdQYQLmicLLFIvVmD6hi4vwAc9nCFslGi2szjcNQyRI=
+github.com/thomaspoignant/go-feature-flag/modules/core v0.5.0 h1:uvwCJeq32YOcdrixfde8j4fe11bTVNvhXZEEFm3QTiw=
+github.com/thomaspoignant/go-feature-flag/modules/core v0.5.0/go.mod h1:zWMkWi2uP1GSG/p/GLDmQ89hNFqOg8sVt+Q/fmh3cvs=
 golang.org/x/exp v0.0.0-20240506185415-9bf2ced13842 h1:vr/HnozRka3pE4EsMEg1lgkXJkTFJCVUX+S/ZT6wYzM=
 golang.org/x/exp v0.0.0-20240506185415-9bf2ced13842/go.mod h1:XtvwrStGgqGPLc4cjQfWqZHG1YFdYs6swckp8vpsjnc=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=

@@ -3,11 +3,11 @@ on:
   pull_request_target:
     types: [opened, reopened]
 
-permissions: read-all
 jobs:
   auto-assign:
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       pull-requests: write
     steps:
       - name: "Auto-assign PR"

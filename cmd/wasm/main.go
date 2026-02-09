@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 
 	"github.com/thomaspoignant/go-feature-flag/cmd/wasm/helpers"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/evaluation"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/model"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/utils"
-	"github.com/thomaspoignant/go-feature-flag/modules/evaluation"
 )
 
 // main is the entry point for the wasm module.
@@ -38,7 +38,7 @@ func localEvaluation(input string) string {
 	var evaluateInput EvaluateInput
 	err := json.Unmarshal([]byte(input), &evaluateInput)
 	if err != nil {
-		return model.VariationResult[interface{}]{
+		return model.VariationResult[any]{
 			ErrorCode:    flag.ErrorCodeParseError,
 			ErrorDetails: err.Error(),
 		}.ToJsonStr()
@@ -48,7 +48,7 @@ func localEvaluation(input string) string {
 
 	// we don't care about the error here because the errorCode and errorDetails
 	// contains information about the type of the error directly, no need to check the Go error.
-	c, _ := evaluation.Evaluate[interface{}](
+	c, _ := evaluation.Evaluate[any](
 		&evaluateInput.Flag,
 		evaluateInput.FlagKey,
 		evalCtx,

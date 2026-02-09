@@ -4,11 +4,13 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zaptest/observer"
 )
 
 func TestNewFlagsetManager(t *testing.T) {
@@ -538,5 +540,843 @@ func TestFlagsetManager_Close(t *testing.T) {
 		assert.NotPanics(t, func() {
 			manager.Close()
 		})
+	})
+}
+
+// setupManager is a helper function to create a manager and capture log messages
+func setupManager(t *testing.T, cfg *config.Config) (service.FlagsetManager, *observer.ObservedLogs) {
+	t.Helper()
+	obs, logs := observer.New(zap.ErrorLevel)
+	logger := zap.New(obs)
+	manager, err := service.NewFlagsetManager(cfg, logger, nil)
+	require.NoError(t, err)
+	t.Cleanup(func() { manager.Close() })
+	return manager, logs
+}
+func TestFlagsetManager_OnConfigChange(t *testing.T) {
+	flagConfig := "../testdata/controller/configuration_flags.yaml"
+
+	t.Run("should reject switching from default to flagsets mode", func(t *testing.T) {
+		// Create manager in default mode
+		cfg := &config.Config{
+			FlagSets: []config.FlagSet{},
+			CommonFlagSet: config.CommonFlagSet{
+				Retriever: &retrieverconf.RetrieverConf{
+					Kind: "file",
+					Path: flagConfig,
+				},
+			},
+		}
+		manager, logs := setupManager(t, cfg)
+
+		// Try to switch to flagsets mode
+		newConfig := &config.Config{
+			FlagSets: []config.FlagSet{
+				{
+					Name: "new-flagset",
+					CommonFlagSet: config.CommonFlagSet{
+						Retriever: &retrieverconf.RetrieverConf{
+							Kind: "file",
+							Path: flagConfig,
+						},
+					},
+					APIKeys: []string{"new-key"},
+				},
+			},
+		}
+
+		assert.NotPanics(t, func() {
+			manager.OnConfigChange(newConfig)
+		})
+
+		// Verify that the error log was displayed
+		assert.Equal(t, 1, logs.Len(), "Expected exactly one error log message")
+		logEntry := logs.All()[0]
+		assert.Equal(t, zap.ErrorLevel, logEntry.Level)
+		assert.Contains(t, logEntry.Message, "switching from default to flagsets mode (or the opposite) is not supported during runtime")
+	})
+
+	t.Run("should reject switching from flagsets to default mode", func(t *testing.T) {
+		// Create manager in flagsets mode
+		cfg := &config.Config{
+			FlagSets: []config.FlagSet{
+				{
+					Name: "test-flagset",
+					CommonFlagSet: config.CommonFlagSet{
+						Retriever: &retrieverconf.RetrieverConf{
+							Kind: "file",
+							Path: flagConfig,
+						},
+					},
+					APIKeys: []string{"test-api-key"},
+				},
+			},
+		}
+		manager, logs := setupManager(t, cfg)
+
+		// Try to switch to default mode
+		newConfig := &config.Config{
+			FlagSets: []config.FlagSet{},
+			CommonFlagSet: config.CommonFlagSet{
+				Retriever: &retrieverconf.RetrieverConf{
+					Kind: "file",
+					Path: flagConfig,
+				},
+			},
+		}
+
+		// Should not panic and should reject the change
+		assert.NotPanics(t, func() {
+			manager.OnConfigChange(newConfig)
+		})
+		// Verify that the error log was displayed
+		assert.Equal(t, 1, logs.Len(), "Expected exactly one error log message")
+		logEntry := logs.All()[0]
+		assert.Equal(t, zap.ErrorLevel, logEntry.Level)
+		assert.Contains(t, logEntry.Message, "switching from default to flagsets mode (or the opposite) is not supported during runtime")
+	})
+
+	t.Run("should update AuthorizedKeys in default mode", func(t *testing.T) {
+		// Create manager in default mode
+		cfg := &config.Config{
+			FlagSets: []config.FlagSet{},
+			CommonFlagSet: config.CommonFlagSet{
+				Retriever: &retrieverconf.RetrieverConf{
+					Kind: "file",
+					Path: flagConfig,
+				},
+			},
+			AuthorizedKeys: config.APIKeys{
+				Evaluation: []string{"old-key"},
+			},
+		}
+		manager, _ := setupManager(t, cfg)
+
+		// Update AuthorizedKeys
+		newConfig := &config.Config{
+			FlagSets: []config.FlagSet{},
+			CommonFlagSet: config.CommonFlagSet{
+				Retriever: &retrieverconf.RetrieverConf{
+					Kind: "file",
+					Path: flagConfig,
+				},
+			},
+			AuthorizedKeys: config.APIKeys{
+				Evaluation: []string{"new-key"},
+			},
+		}
+
+		manager.OnConfigChange(newConfig)
+
+		// Verify the key was updated - ForceReloadAPIKeys resets and reloads
+		assert.False(t, cfg.APIKeyExists("old-key"))
+		assert.True(t, cfg.APIKeyExists("new-key"))
+	})
+
+	t.Run("should update APIKeys in default mode", func(t *testing.T) {
+		// Create manager in default mode
+		cfg := &config.Config{
+			FlagSets: []config.FlagSet{},
+			CommonFlagSet: config.CommonFlagSet{
+				Retriever: &retrieverconf.RetrieverConf{
+					Kind: "file",
+					Path: flagConfig,
+				},
+			},
+			APIKeys: []string{"old-api-key"},
+		}
+		manager, _ := setupManager(t, cfg)
+
+		// Update APIKeys
+		newConfig := &config.Config{
+			FlagSets: []config.FlagSet{},
+			CommonFlagSet: config.CommonFlagSet{
+				Retriever: &retrieverconf.RetrieverConf{
+					Kind: "file",
+					Path: flagConfig,
+				},
+			},
+			APIKeys: []string{"new-api-key"},
+		}
+
+		manager.OnConfigChange(newConfig)
+
+		// Verify the key was updated - ForceReloadAPIKeys resets and reloads
+		assert.False(t, cfg.APIKeyExists("old-api-key"))
+		assert.True(t, cfg.APIKeyExists("new-api-key"))
+	})
+
+	t.Run("should update both AuthorizedKeys and APIKeys in default mode", func(t *testing.T) {
+		// Create manager in default mode
+		cfg := &config.Config{
+			FlagSets: []config.FlagSet{},
+			CommonFlagSet: config.CommonFlagSet{
+				Retriever: &retrieverconf.RetrieverConf{
+					Kind: "file",
+					Path: flagConfig,
+				},
+			},
+			AuthorizedKeys: config.APIKeys{
+				Evaluation: []string{"old-authorized-key"},
+			},
+			APIKeys: []string{"old-api-key"},
+		}
+		manager, _ := setupManager(t, cfg)
+
+		// Update both
+		newConfig := &config.Config{
+			FlagSets: []config.FlagSet{},
+			CommonFlagSet: config.CommonFlagSet{
+				Retriever: &retrieverconf.RetrieverConf{
+					Kind: "file",
+					Path: flagConfig,
+				},
+			},
+			AuthorizedKeys: config.APIKeys{
+				Evaluation: []string{"new-authorized-key"},
+			},
+			APIKeys: []string{"new-api-key"},
+		}
+
+		manager.OnConfigChange(newConfig)
+
+		// Verify both were updated
+		assert.False(t, cfg.APIKeyExists("old-authorized-key"))
+		assert.False(t, cfg.APIKeyExists("old-api-key"))
+		assert.True(t, cfg.APIKeyExists("new-authorized-key"))
+		assert.True(t, cfg.APIKeyExists("new-api-key"))
+	})
+
+	t.Run("should reject invalid configuration in default mode - missing retriever", func(t *testing.T) {
+		// Create manager in default mode
+		cfg := &config.Config{
+			FlagSets: []config.FlagSet{},
+			CommonFlagSet: config.CommonFlagSet{
+				Retriever: &retrieverconf.RetrieverConf{
+					Kind: "file",
+					Path: flagConfig,
+				},
+			},
+			APIKeys: []string{"old-api-key"},
+		}
+		// Preload API keys to initialize the internal API key set
+		cfg.ForceReloadAPIKeys()
+		manager, logs := setupManager(t, cfg)
+
+		// Try to update with invalid config (no retriever)
+		newConfig := &config.Config{
+			FlagSets: []config.FlagSet{},
+			CommonFlagSet: config.CommonFlagSet{
+				Retriever: nil,
+			},
+			APIKeys: []string{"new-api-key"},
+		}
+
+		assert.NotPanics(t, func() {
+			manager.OnConfigChange(newConfig)
+		})
+
+		// Verify that the error log was displayed
+		assert.Equal(t, 1, logs.Len(), "Expected exactly one error log message")
+		logEntry := logs.All()[0]
+		assert.Equal(t, zap.ErrorLevel, logEntry.Level)
+		assert.Contains(t, logEntry.Message, "the new configuration is invalid, it will not be applied")
+
+		// Verify the original config was not changed
+		assert.True(t, cfg.APIKeyExists("old-api-key"))
+		assert.False(t, cfg.APIKeyExists("new-api-key"))
+	})
+
+	t.Run("should reject invalid configuration in flagsets mode - flagset with no API keys", func(t *testing.T) {
+		// Create manager in flagsets mode
+		cfg := &config.Config{
+			FlagSets: []config.FlagSet{
+				{
+					Name: "test-flagset",
+					CommonFlagSet: config.CommonFlagSet{
+						Retriever: &retrieverconf.RetrieverConf{
+							Kind: "file",
+							Path: flagConfig,
+						},
+					},
+					APIKeys: []string{"test-api-key"},
+				},
+			},
+		}
+		manager, logs := setupManager(t, cfg)
+
+		// Try to update with invalid config (flagset with no API keys)
+		newConfig := &config.Config{
+			FlagSets: []config.FlagSet{
+				{
+					Name: "test-flagset",
+					CommonFlagSet: config.CommonFlagSet{
+						Retriever: &retrieverconf.RetrieverConf{
+							Kind: "file",
+							Path: flagConfig,
+						},
+					},
+					APIKeys: []string{}, // Invalid: no API keys
+				},
+			},
+		}
+
+		assert.NotPanics(t, func() {
+			manager.OnConfigChange(newConfig)
+		})
+
+		// Verify that the error log was displayed
+		assert.Equal(t, 1, logs.Len(), "Expected exactly one error log message")
+		logEntry := logs.All()[0]
+		assert.Equal(t, zap.ErrorLevel, logEntry.Level)
+		assert.Contains(t, logEntry.Message, "the new configuration is invalid, it will not be applied")
+
+		// Verify the original config was not changed
+		flagset, err := manager.FlagSet("test-api-key")
+		assert.NoError(t, err)
+		assert.NotNil(t, flagset)
+	})
+
+	t.Run("should reject invalid configuration in flagsets mode - duplicate API keys", func(t *testing.T) {
+		// Create manager in flagsets mode
+		cfg := &config.Config{
+			FlagSets: []config.FlagSet{
+				{
+					Name: "test-flagset-1",
+					CommonFlagSet: config.CommonFlagSet{
+						Retriever: &retrieverconf.RetrieverConf{
+							Kind: "file",
+							Path: flagConfig,
+						},
+					},
+					APIKeys: []string{"api-key-1"},
+				},
+				{
+					Name: "test-flagset-2",
+					CommonFlagSet: config.CommonFlagSet{
+						Retriever: &retrieverconf.RetrieverConf{
+							Kind: "file",
+							Path: flagConfig,
+						},
+					},
+					APIKeys: []string{"api-key-2"},
+				},
+			},
+		}
+		manager, logs := setupManager(t, cfg)
+
+		// Try to update with invalid config (duplicate API keys across flagsets)
+		newConfig := &config.Config{
+			FlagSets: []config.FlagSet{
+				{
+					Name: "test-flagset-1",
+					CommonFlagSet: config.CommonFlagSet{
+						Retriever: &retrieverconf.RetrieverConf{
+							Kind: "file",
+							Path: flagConfig,
+						},
+					},
+					APIKeys: []string{"duplicate-key"},
+				},
+				{
+					Name: "test-flagset-2",
+					CommonFlagSet: config.CommonFlagSet{
+						Retriever: &retrieverconf.RetrieverConf{
+							Kind: "file",
+							Path: flagConfig,
+						},
+					},
+					APIKeys: []string{"duplicate-key"}, // Invalid: duplicate API key
+				},
+			},
+		}
+
+		assert.NotPanics(t, func() {
+			manager.OnConfigChange(newConfig)
+		})
+
+		// Verify that the error log was displayed
+		assert.Equal(t, 1, logs.Len(), "Expected exactly one error log message")
+		logEntry := logs.All()[0]
+		assert.Equal(t, zap.ErrorLevel, logEntry.Level)
+		assert.Contains(t, logEntry.Message, "the new configuration is invalid, it will not be applied")
+
+		// Verify the original config was not changed
+		flagset1, err := manager.FlagSet("api-key-1")
+		assert.NoError(t, err)
+		assert.NotNil(t, flagset1)
+		flagset2, err := manager.FlagSet("api-key-2")
+		assert.NoError(t, err)
+		assert.NotNil(t, flagset2)
+	})
+
+	t.Run("should successfully update API keys in flagsets mode", func(t *testing.T) {
+		// Create manager in flagsets mode
+		cfg := &config.Config{
+			FlagSets: []config.FlagSet{
+				{
+					Name: "test-flagset",
+					CommonFlagSet: config.CommonFlagSet{
+						Retriever: &retrieverconf.RetrieverConf{
+							Kind: "file",
+							Path: flagConfig,
+						},
+					},
+					APIKeys: []string{"old-api-key"},
+				},
+			},
+		}
+		manager, _ := setupManager(t, cfg)
+
+		// Verify old key works before change
+		flagset, err := manager.FlagSet("old-api-key")
+		assert.NoError(t, err)
+		assert.NotNil(t, flagset)
+
+		// Update API key
+		newConfig := &config.Config{
+			FlagSets: []config.FlagSet{
+				{
+					Name: "test-flagset",
+					CommonFlagSet: config.CommonFlagSet{
+						Retriever: &retrieverconf.RetrieverConf{
+							Kind: "file",
+							Path: flagConfig,
+						},
+					},
+					APIKeys: []string{"new-api-key"},
+				},
+			},
+		}
+
+		manager.OnConfigChange(newConfig)
+
+		// Verify the key was updated
+		_, err = manager.FlagSet("old-api-key")
+		assert.Error(t, err, "old API key should no longer work")
+
+		flagset, err = manager.FlagSet("new-api-key")
+		assert.NoError(t, err, "new API key should work")
+		assert.NotNil(t, flagset)
+	})
+
+	t.Run("should add new API keys to existing flagset", func(t *testing.T) {
+		// Create manager in flagsets mode with single key
+		cfg := &config.Config{
+			FlagSets: []config.FlagSet{
+				{
+					Name: "test-flagset",
+					CommonFlagSet: config.CommonFlagSet{
+						Retriever: &retrieverconf.RetrieverConf{
+							Kind: "file",
+							Path: flagConfig,
+						},
+					},
+					APIKeys: []string{"api-key-1"},
+				},
+			},
+		}
+		manager, _ := setupManager(t, cfg)
+
+		// Verify initial state
+		_, err := manager.FlagSet("api-key-1")
+		assert.NoError(t, err)
+		_, err = manager.FlagSet("api-key-2")
+		assert.Error(t, err, "api-key-2 should not work yet")
+
+		// Add second API key
+		newConfig := &config.Config{
+			FlagSets: []config.FlagSet{
+				{
+					Name: "test-flagset",
+					CommonFlagSet: config.CommonFlagSet{
+						Retriever: &retrieverconf.RetrieverConf{
+							Kind: "file",
+							Path: flagConfig,
+						},
+					},
+					APIKeys: []string{"api-key-1", "api-key-2"},
+				},
+			},
+		}
+
+		manager.OnConfigChange(newConfig)
+
+		// Verify both keys work now
+		flagset1, err := manager.FlagSet("api-key-1")
+		assert.NoError(t, err)
+		assert.NotNil(t, flagset1)
+
+		flagset2, err := manager.FlagSet("api-key-2")
+		assert.NoError(t, err)
+		assert.NotNil(t, flagset2)
+
+		// Both should point to the same flagset
+		name1, _ := manager.FlagSetName("api-key-1")
+		name2, _ := manager.FlagSetName("api-key-2")
+		assert.Equal(t, name1, name2)
+	})
+
+	t.Run("should remove API keys from flagset", func(t *testing.T) {
+		// Create manager with two API keys
+		cfg := &config.Config{
+			FlagSets: []config.FlagSet{
+				{
+					Name: "test-flagset",
+					CommonFlagSet: config.CommonFlagSet{
+						Retriever: &retrieverconf.RetrieverConf{
+							Kind: "file",
+							Path: flagConfig,
+						},
+					},
+					APIKeys: []string{"api-key-1", "api-key-2"},
+				},
+			},
+		}
+		manager, _ := setupManager(t, cfg)
+
+		// Verify both keys work initially
+		_, err := manager.FlagSet("api-key-1")
+		assert.NoError(t, err)
+		_, err = manager.FlagSet("api-key-2")
+		assert.NoError(t, err)
+
+		// Remove one API key
+		newConfig := &config.Config{
+			FlagSets: []config.FlagSet{
+				{
+					Name: "test-flagset",
+					CommonFlagSet: config.CommonFlagSet{
+						Retriever: &retrieverconf.RetrieverConf{
+							Kind: "file",
+							Path: flagConfig,
+						},
+					},
+					APIKeys: []string{"api-key-1"},
+				},
+			},
+		}
+
+		manager.OnConfigChange(newConfig)
+
+		// Verify api-key-1 still works
+		flagset, err := manager.FlagSet("api-key-1")
+		assert.NoError(t, err)
+		assert.NotNil(t, flagset)
+
+		// Verify api-key-2 no longer works
+		_, err = manager.FlagSet("api-key-2")
+		assert.Error(t, err, "api-key-2 should no longer work")
+	})
+
+	t.Run("should move API key between flagsets", func(t *testing.T) {
+		// Create manager with two flagsets
+		cfg := &config.Config{
+			FlagSets: []config.FlagSet{
+				{
+					Name: "flagset-1",
+					CommonFlagSet: config.CommonFlagSet{
+						Retriever: &retrieverconf.RetrieverConf{
+							Kind: "file",
+							Path: flagConfig,
+						},
+					},
+					APIKeys: []string{"api-key-1", "api-key-move"},
+				},
+				{
+					Name: "flagset-2",
+					CommonFlagSet: config.CommonFlagSet{
+						Retriever: &retrieverconf.RetrieverConf{
+							Kind: "file",
+							Path: flagConfig,
+						},
+					},
+					APIKeys: []string{"api-key-2"},
+				},
+			},
+		}
+		manager, _ := setupManager(t, cfg)
+
+		// Verify initial state
+		name, err := manager.FlagSetName("api-key-move")
+		assert.NoError(t, err)
+		assert.Equal(t, "flagset-1", name)
+
+		// Move api-key-move from flagset-1 to flagset-2
+		newConfig := &config.Config{
+			FlagSets: []config.FlagSet{
+				{
+					Name: "flagset-1",
+					CommonFlagSet: config.CommonFlagSet{
+						Retriever: &retrieverconf.RetrieverConf{
+							Kind: "file",
+							Path: flagConfig,
+						},
+					},
+					APIKeys: []string{"api-key-1"},
+				},
+				{
+					Name: "flagset-2",
+					CommonFlagSet: config.CommonFlagSet{
+						Retriever: &retrieverconf.RetrieverConf{
+							Kind: "file",
+							Path: flagConfig,
+						},
+					},
+					APIKeys: []string{"api-key-2", "api-key-move"},
+				},
+			},
+		}
+
+		manager.OnConfigChange(newConfig)
+
+		// Verify api-key-move now points to flagset-2
+		name, err = manager.FlagSetName("api-key-move")
+		assert.NoError(t, err)
+		assert.Equal(t, "flagset-2", name)
+
+		// Verify other keys still work correctly
+		name1, _ := manager.FlagSetName("api-key-1")
+		assert.Equal(t, "flagset-1", name1)
+		name2, _ := manager.FlagSetName("api-key-2")
+		assert.Equal(t, "flagset-2", name2)
+	})
+
+	t.Run("should not update when config is unchanged in flagsets mode", func(t *testing.T) {
+		// Create manager in flagsets mode
+		cfg := &config.Config{
+			FlagSets: []config.FlagSet{
+				{
+					Name: "test-flagset",
+					CommonFlagSet: config.CommonFlagSet{
+						Retriever: &retrieverconf.RetrieverConf{
+							Kind: "file",
+							Path: flagConfig,
+						},
+					},
+					APIKeys: []string{"test-api-key"},
+				},
+			},
+		}
+		obs, logs := observer.New(zap.InfoLevel)
+		logger := zap.New(obs)
+		manager, err := service.NewFlagsetManager(cfg, logger, nil)
+		require.NoError(t, err)
+		t.Cleanup(func() { manager.Close() })
+
+		// Apply the same config again
+		sameConfig := &config.Config{
+			FlagSets: []config.FlagSet{
+				{
+					Name: "test-flagset",
+					CommonFlagSet: config.CommonFlagSet{
+						Retriever: &retrieverconf.RetrieverConf{
+							Kind: "file",
+							Path: flagConfig,
+						},
+					},
+					APIKeys: []string{"test-api-key"},
+				},
+			},
+		}
+
+		manager.OnConfigChange(sameConfig)
+
+		// Verify no "Configuration changed" log was produced
+		configChangeLogs := logs.FilterMessage("Configuration changed: updating the APIKeys for flagset")
+		assert.Equal(t, 0, configChangeLogs.Len(), "No config change log should be produced when config is unchanged")
+
+		// Verify the key still works
+		flagset, err := manager.FlagSet("test-api-key")
+		assert.NoError(t, err)
+		assert.NotNil(t, flagset)
+	})
+
+	t.Run("should not update API keys for flagset with empty name", func(t *testing.T) {
+		// Create manager with a flagset that has an empty name (gets auto-generated)
+		cfg := &config.Config{
+			FlagSets: []config.FlagSet{
+				{
+					Name: "", // Empty name - will be auto-generated
+					CommonFlagSet: config.CommonFlagSet{
+						Retriever: &retrieverconf.RetrieverConf{
+							Kind: "file",
+							Path: flagConfig,
+						},
+					},
+					APIKeys: []string{"original-key"},
+				},
+			},
+		}
+		obs, logs := observer.New(zap.WarnLevel)
+		logger := zap.New(obs)
+		manager, err := service.NewFlagsetManager(cfg, logger, nil)
+		require.NoError(t, err)
+		t.Cleanup(func() { manager.Close() })
+
+		// Verify the warning about empty name was logged
+		warnLogs := logs.FilterMessageSnippet("no flagset name provided")
+		assert.Equal(t, 1, warnLogs.Len(), "Expected warning about empty flagset name")
+
+		// Verify original key works
+		flagset, err := manager.FlagSet("original-key")
+		assert.NoError(t, err)
+		assert.NotNil(t, flagset)
+
+		// Try to update config with empty name flagset - should be ignored
+		newConfig := &config.Config{
+			FlagSets: []config.FlagSet{
+				{
+					Name: "", // Still empty
+					CommonFlagSet: config.CommonFlagSet{
+						Retriever: &retrieverconf.RetrieverConf{
+							Kind: "file",
+							Path: flagConfig,
+						},
+					},
+					APIKeys: []string{"new-key"}, // Try to change key
+				},
+			},
+		}
+
+		manager.OnConfigChange(newConfig)
+
+		// Original key should still work because empty name flagsets can't be updated
+		flagset, err = manager.FlagSet("original-key")
+		assert.NoError(t, err)
+		assert.NotNil(t, flagset)
+	})
+
+	t.Run("should not update API keys for flagset named default", func(t *testing.T) {
+		// Create manager with a flagset named "default" (gets auto-generated)
+		cfg := &config.Config{
+			FlagSets: []config.FlagSet{
+				{
+					Name: "default", // Reserved name - will be auto-generated
+					CommonFlagSet: config.CommonFlagSet{
+						Retriever: &retrieverconf.RetrieverConf{
+							Kind: "file",
+							Path: flagConfig,
+						},
+					},
+					APIKeys: []string{"original-key"},
+				},
+			},
+		}
+		obs, logs := observer.New(zap.WarnLevel)
+		logger := zap.New(obs)
+		manager, err := service.NewFlagsetManager(cfg, logger, nil)
+		require.NoError(t, err)
+		t.Cleanup(func() { manager.Close() })
+
+		// Verify the warning about using 'default' name was logged
+		warnLogs := logs.FilterMessageSnippet("using 'default' as a flagset name")
+		assert.Equal(t, 1, warnLogs.Len(), "Expected warning about using 'default' as flagset name")
+
+		// Verify original key works
+		flagset, err := manager.FlagSet("original-key")
+		assert.NoError(t, err)
+		assert.NotNil(t, flagset)
+
+		// Try to update config with "default" name flagset - should be ignored
+		newConfig := &config.Config{
+			FlagSets: []config.FlagSet{
+				{
+					Name: "default",
+					CommonFlagSet: config.CommonFlagSet{
+						Retriever: &retrieverconf.RetrieverConf{
+							Kind: "file",
+							Path: flagConfig,
+						},
+					},
+					APIKeys: []string{"new-key"},
+				},
+			},
+		}
+
+		manager.OnConfigChange(newConfig)
+
+		// Original key should still work because "default" name flagsets can't be updated
+		flagset, err = manager.FlagSet("original-key")
+		assert.NoError(t, err)
+		assert.NotNil(t, flagset)
+	})
+
+	t.Run("should update multiple flagsets API keys simultaneously", func(t *testing.T) {
+		// Create manager with multiple flagsets
+		cfg := &config.Config{
+			FlagSets: []config.FlagSet{
+				{
+					Name: "flagset-1",
+					CommonFlagSet: config.CommonFlagSet{
+						Retriever: &retrieverconf.RetrieverConf{
+							Kind: "file",
+							Path: flagConfig,
+						},
+					},
+					APIKeys: []string{"old-key-1"},
+				},
+				{
+					Name: "flagset-2",
+					CommonFlagSet: config.CommonFlagSet{
+						Retriever: &retrieverconf.RetrieverConf{
+							Kind: "file",
+							Path: flagConfig,
+						},
+					},
+					APIKeys: []string{"old-key-2"},
+				},
+			},
+		}
+		manager, _ := setupManager(t, cfg)
+
+		// Verify initial state
+		name1, _ := manager.FlagSetName("old-key-1")
+		assert.Equal(t, "flagset-1", name1)
+		name2, _ := manager.FlagSetName("old-key-2")
+		assert.Equal(t, "flagset-2", name2)
+
+		// Update both flagsets
+		newConfig := &config.Config{
+			FlagSets: []config.FlagSet{
+				{
+					Name: "flagset-1",
+					CommonFlagSet: config.CommonFlagSet{
+						Retriever: &retrieverconf.RetrieverConf{
+							Kind: "file",
+							Path: flagConfig,
+						},
+					},
+					APIKeys: []string{"new-key-1"},
+				},
+				{
+					Name: "flagset-2",
+					CommonFlagSet: config.CommonFlagSet{
+						Retriever: &retrieverconf.RetrieverConf{
+							Kind: "file",
+							Path: flagConfig,
+						},
+					},
+					APIKeys: []string{"new-key-2"},
+				},
+			},
+		}
+
+		manager.OnConfigChange(newConfig)
+
+		// Verify old keys no longer work
+		_, err := manager.FlagSet("old-key-1")
+		assert.Error(t, err)
+		_, err = manager.FlagSet("old-key-2")
+		assert.Error(t, err)
+
+		// Verify new keys work and point to correct flagsets
+		name1, err = manager.FlagSetName("new-key-1")
+		assert.NoError(t, err)
+		assert.Equal(t, "flagset-1", name1)
+
+		name2, err = manager.FlagSetName("new-key-2")
+		assert.NoError(t, err)
+		assert.Equal(t, "flagset-2", name2)
 	})
 }

@@ -6,6 +6,8 @@ import (
 	"os"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/spf13/pflag"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -43,9 +45,8 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 					Mode: config.ServerModeHTTP,
 					Port: 1031,
 				},
-				Host:          "localhost",
-				Version:       "1.X.X",
-				EnableSwagger: true,
+				Swagger: config.Swagger{Enabled: true, Host: "gofeatureflag.org"},
+				Version: "1.X.X",
 				AuthorizedKeys: config.APIKeys{
 					Admin: []string{
 						"apikey3",
@@ -82,7 +83,6 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 					Mode: config.ServerModeHTTP,
 					Port: 1031,
 				},
-				Host:          "localhost",
 				Version:       "1.X.X",
 				EnableSwagger: true,
 				AuthorizedKeys: config.APIKeys{
@@ -122,7 +122,6 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 					Mode: config.ServerModeHTTP,
 					Port: 1031,
 				},
-				Host:          "localhost",
 				Version:       "1.X.X",
 				EnableSwagger: true,
 				AuthorizedKeys: config.APIKeys{
@@ -165,7 +164,6 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 					Mode: config.ServerModeHTTP,
 					Port: 1031,
 				},
-				Host:          "localhost",
 				Version:       "1.X.X",
 				EnableSwagger: true,
 				AuthorizedKeys: config.APIKeys{
@@ -211,9 +209,6 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 					Mode: config.ServerModeHTTP,
 					Port: 1031,
 				},
-
-				Host: "localhost",
-
 				Version:       "1.X.X",
 				EnableSwagger: true,
 				AuthorizedKeys: config.APIKeys{
@@ -249,8 +244,6 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 					Mode: config.ServerModeHTTP,
 					Port: 1031,
 				},
-				Host: "localhost",
-
 				Version:       "1.X.X",
 				EnableSwagger: true,
 				APIKeys: []string{
@@ -300,7 +293,6 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 					FileFormat:              "yaml",
 					StartWithRetrieverError: false,
 				},
-				Host:     "localhost",
 				Version:  "1.X.X",
 				LogLevel: config.DefaultLogLevel,
 			},
@@ -329,7 +321,6 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 					Mode: config.ServerModeHTTP,
 					Port: 1031,
 				},
-				Host:     "localhost",
 				LogLevel: config.DefaultLogLevel,
 				Version:  "1.X.X",
 				OtelConfig: config.OpenTelemetryConfiguration{
@@ -360,7 +351,7 @@ func TestParseConfig_fileFromPflag(t *testing.T) {
 			if !tt.wantErr(t, err) {
 				return
 			}
-			assert.Equal(t, tt.want, got, "Config not matching")
+			assert.True(t, cmp.Equal(tt.want, got, cmpopts.IgnoreUnexported(config.Config{})))
 		})
 	}
 }
@@ -393,9 +384,8 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 					Mode: config.ServerModeHTTP,
 					Port: 1031,
 				},
-				Host:          "localhost",
-				Version:       "1.X.X",
-				EnableSwagger: true,
+				Version: "1.X.X",
+				Swagger: config.Swagger{Enabled: true, Host: "gofeatureflag.org"},
 				AuthorizedKeys: config.APIKeys{
 					Admin: []string{
 						"apikey3",
@@ -418,7 +408,6 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 					FileFormat:              "yaml",
 					StartWithRetrieverError: false,
 				},
-				Host:     "localhost",
 				Version:  "1.X.X",
 				LogLevel: config.DefaultLogLevel,
 			},
@@ -439,7 +428,6 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 					FileFormat:              "yaml",
 					StartWithRetrieverError: false,
 				},
-				Host:     "localhost",
 				Version:  "1.X.X",
 				LogLevel: config.DefaultLogLevel,
 			},
@@ -454,7 +442,6 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 					FileFormat:              "yaml",
 					StartWithRetrieverError: false,
 				},
-				Host:     "localhost",
 				Version:  "1.X.X",
 				LogLevel: config.DefaultLogLevel,
 			},
@@ -469,7 +456,6 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 					FileFormat:              "yaml",
 					StartWithRetrieverError: false,
 				},
-				Host:     "localhost",
 				Version:  "1.X.X",
 				LogLevel: config.DefaultLogLevel,
 			},
@@ -494,7 +480,7 @@ func TestParseConfig_fileFromFolder(t *testing.T) {
 			if !tt.wantErr(t, err) {
 				return
 			}
-			assert.Equal(t, tt.want, got, "Config not matching")
+			assert.True(t, cmp.Equal(tt.want, got, cmpopts.IgnoreUnexported(config.Config{})))
 		})
 	}
 }
@@ -503,8 +489,7 @@ func TestConfig_IsValid(t *testing.T) {
 	type fields struct {
 		Server                  config.Server
 		HideBanner              bool
-		EnableSwagger           bool
-		Host                    string
+		Swagger                 config.Swagger
 		PollingInterval         int
 		FileFormat              string
 		StartWithRetrieverError bool
@@ -961,13 +946,12 @@ func TestConfig_IsValid(t *testing.T) {
 					Notifiers:               tt.fields.Notifiers,
 					Retrievers:              tt.fields.Retrievers,
 				},
-				Server:        tt.fields.Server,
-				HideBanner:    tt.fields.HideBanner,
-				EnableSwagger: tt.fields.EnableSwagger,
-				Host:          tt.fields.Host,
-				LogLevel:      tt.fields.LogLevel,
-				LogFormat:     tt.fields.LogFormat,
-				FlagSets:      tt.fields.FlagSets,
+				Server:     tt.fields.Server,
+				HideBanner: tt.fields.HideBanner,
+				Swagger:    tt.fields.Swagger,
+				LogLevel:   tt.fields.LogLevel,
+				LogFormat:  tt.fields.LogFormat,
+				FlagSets:   tt.fields.FlagSets,
 			}
 			if tt.name == "empty config" {
 				c = nil
@@ -1143,6 +1127,7 @@ func TestConfig_APIKeyExists(t *testing.T) {
 	for i := range tests {
 		tt := &tests[i]
 		t.Run(tt.name, func(t *testing.T) {
+			tt.config.ForceReloadAPIKeys()
 			assert.Equalf(
 				t,
 				tt.want,
@@ -1248,6 +1233,7 @@ func TestConfig_APIAdminKeyExists(t *testing.T) {
 	for i := range tests {
 		tt := &tests[i]
 		t.Run(tt.name, func(t *testing.T) {
+			tt.config.ForceReloadAPIKeys()
 			assert.Equalf(
 				t,
 				tt.want,
@@ -1324,9 +1310,7 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 					Mode: config.ServerModeHTTP,
 					Port: 1031,
 				},
-				Host:          "localhost",
-				Version:       "1.X.X",
-				EnableSwagger: true,
+				Version: "1.X.X",
 				AuthorizedKeys: config.APIKeys{
 					Admin: []string{
 						"apikey3",
@@ -1336,7 +1320,8 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 						"apikey2",
 					},
 				},
-				LogLevel: "info",
+				LogLevel:      "info",
+				EnableSwagger: true,
 			},
 			wantErr: assert.NoError,
 			envVars: map[string]string{
@@ -1405,7 +1390,6 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 					Mode: config.ServerModeHTTP,
 					Port: 1031,
 				},
-				Host:          "localhost",
 				Version:       "1.X.X",
 				EnableSwagger: true,
 				AuthorizedKeys: config.APIKeys{
@@ -1481,7 +1465,6 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 					Mode: config.ServerModeHTTP,
 					Port: 1031,
 				},
-				Host:          "localhost",
 				Version:       "1.X.X",
 				EnableSwagger: true,
 				AuthorizedKeys: config.APIKeys{
@@ -1545,8 +1528,7 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 					Mode: config.ServerModeHTTP,
 					Port: 1031,
 				},
-				Host: "localhost",
-
+				EnableSwagger: true,
 				AuthorizedKeys: config.APIKeys{
 					Admin: []string{
 						"apikey3",
@@ -1556,9 +1538,8 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 						"apikey2",
 					},
 				},
-				Version:       "1.X.X",
-				EnableSwagger: true,
-				LogLevel:      "info",
+				Version:  "1.X.X",
+				LogLevel: "info",
 			},
 			wantErr: assert.NoError,
 			envVars: map[string]string{
@@ -1603,8 +1584,7 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 					Mode: config.ServerModeHTTP,
 					Port: 1031,
 				},
-				Host: "localhost",
-
+				EnableSwagger: true,
 				AuthorizedKeys: config.APIKeys{
 					Admin: []string{
 						"apikey3",
@@ -1614,9 +1594,8 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 						"apikey2",
 					},
 				},
-				Version:       "1.X.X",
-				EnableSwagger: true,
-				LogLevel:      "info",
+				Version:  "1.X.X",
+				LogLevel: "info",
 			},
 			wantErr: assert.NoError,
 			envVars: map[string]string{
@@ -1642,7 +1621,6 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 					Mode: config.ServerModeHTTP,
 					Port: 1031,
 				},
-				Host:     "localhost",
 				LogLevel: config.DefaultLogLevel,
 				Version:  "1.X.X",
 				OtelConfig: config.OpenTelemetryConfiguration{
@@ -1679,7 +1657,6 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 					Mode: config.ServerModeHTTP,
 					Port: 1031,
 				},
-				Host:     "localhost",
 				LogLevel: config.DefaultLogLevel,
 				Version:  "1.X.X",
 				FlagSets: []config.FlagSet{
@@ -1753,7 +1730,7 @@ func TestMergeConfig_FromOSEnv(t *testing.T) {
 			if !tt.wantErr(t, err) {
 				return
 			}
-			assert.Equal(t, tt.want, got, "Config not matching expected %v, got %v", tt.want, got)
+			assert.True(t, cmp.Equal(tt.want, got, cmpopts.IgnoreUnexported(config.Config{})))
 		})
 	}
 }
@@ -1883,4 +1860,31 @@ func TestConfig_IsDebugEnabled(t *testing.T) {
 			assert.Equalf(t, tt.want, tt.cfg.IsDebugEnabled(), "IsDebugEnabled()")
 		})
 	}
+}
+
+func TestConfigOnlyEnvVars(t *testing.T) {
+	t.Run("Retrievers", func(t *testing.T) {
+		t.Setenv("RETRIEVERS_0_KIND", string(retrieverconf.FileRetriever))
+		t.Setenv("RETRIEVERS_0_PATH", "examples/retriever_file/flags.goff.yaml")
+
+		f := pflag.NewFlagSet("config", pflag.ContinueOnError)
+
+		got, err := config.New(f, zap.L(), "1.X.X")
+		assert.NoError(t, err)
+
+		assert.Equal(t, retrieverconf.FileRetriever, (*got.Retrievers)[0].Kind)
+		assert.Equal(t, "examples/retriever_file/flags.goff.yaml", (*got.Retrievers)[0].Path)
+	})
+
+	t.Run("Flagset retriever", func(t *testing.T) {
+		t.Setenv("FLAGSETS_0_RETRIEVERS_0_KIND", string(retrieverconf.HTTPRetriever))
+		t.Setenv("FLAGSETS_0_RETRIEVERS_0_URL", "https://example.com/flags.goff.yaml")
+
+		f := pflag.NewFlagSet("config", pflag.ContinueOnError)
+		got, err := config.New(f, zap.L(), "1.X.X")
+		assert.NoError(t, err)
+
+		assert.Equal(t, retrieverconf.HTTPRetriever, (*got.FlagSets[0].Retrievers)[0].Kind)
+		assert.Equal(t, "https://example.com/flags.goff.yaml", (*got.FlagSets[0].Retrievers)[0].URL)
+	})
 }

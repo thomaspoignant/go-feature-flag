@@ -9,7 +9,6 @@ retriever:
   url: https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml
 exporter:
   kind: log
-enableSwagger: true
 authorizedKeys:
   evaluation:
     - apikey1 # owner: userID1
@@ -17,3 +16,6 @@ authorizedKeys:
   admin:
     - apikey3
 loglevel: info
+swagger:
+  enabled: true
+  host: gofeatureflag.org

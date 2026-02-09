@@ -4,10 +4,6 @@ import styles from './styles.module.css';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
 
-Cards.prototype = {
-  cards: PropTypes.array.isRequired,
-};
-
 export function Cards(props) {
   const listItems = props.cards.map((item, index) => (
     <Card {...item} key={index} />
@@ -19,6 +15,10 @@ export function Cards(props) {
   );
 }
 
+Cards.propTypes = {
+  cards: PropTypes.array.isRequired,
+};
+
 Card.propTypes = {
   title: PropTypes.string.isRequired,
   badges: PropTypes.array,
@@ -26,6 +26,7 @@ Card.propTypes = {
   logoCss: PropTypes.string,
   logoImg: PropTypes.string,
   docLink: PropTypes.string,
+  content: PropTypes.string,
 };
 
 export function Card(props) {
@@ -46,7 +47,7 @@ export function Card(props) {
         <p className={styles.message}>{props.content}</p>
         <div className={styles.badgeSection}>
           {props.badges &&
-            props.badges.map((item, i) => {
+            props.badges.map(item => {
               return (
                 <span
                   className={clsx(styles.badge, styles.badgeInfo)}
@@ -56,7 +57,7 @@ export function Card(props) {
               );
             })}
           {props.warningBadges &&
-            props.warningBadges.map((item, i) => {
+            props.warningBadges.map(item => {
               return (
                 <span
                   className={clsx(styles.badge, styles.badgeWarning)}

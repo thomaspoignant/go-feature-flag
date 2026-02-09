@@ -10,7 +10,7 @@ import (
 )
 
 func TestRule_IsValid(t *testing.T) {
-	variations := map[string]*interface{}{
+	variations := map[string]*any{
 		"variation_A": testconvert.Interface("value_A"),
 		"variation_B": testconvert.Interface("value_B"),
 		"variation_C": testconvert.Interface("value_C"),
@@ -20,7 +20,7 @@ func TestRule_IsValid(t *testing.T) {
 		name        string
 		rule        flag.Rule
 		defaultRule bool
-		variations  map[string]*interface{}
+		variations  map[string]*any
 		wantErr     assert.ErrorAssertionFunc
 	}{
 		{
@@ -79,8 +79,8 @@ func TestRule_IsValid(t *testing.T) {
 		{
 			name: "disabled rule with defaultRule should be valid",
 			rule: flag.Rule{
-				Disable:          testconvert.Bool(true),
-				VariationResult:  testconvert.String("variation_A"),
+				Disable:         testconvert.Bool(true),
+				VariationResult: testconvert.String("variation_A"),
 			},
 			defaultRule: true,
 			variations:  variations,
@@ -176,7 +176,7 @@ func TestRule_IsValid(t *testing.T) {
 }
 
 func TestRule_validatePercentages(t *testing.T) {
-	variations := map[string]*interface{}{
+	variations := map[string]*any{
 		"variation_A": testconvert.Interface("value_A"),
 		"variation_B": testconvert.Interface("value_B"),
 		"variation_C": testconvert.Interface("value_C"),
@@ -186,7 +186,7 @@ func TestRule_validatePercentages(t *testing.T) {
 		name        string
 		rule        flag.Rule
 		defaultRule bool
-		variations  map[string]*interface{}
+		variations  map[string]*any
 		wantErr     assert.ErrorAssertionFunc
 		wantErrMsg  string
 	}{
@@ -198,12 +198,12 @@ func TestRule_validatePercentages(t *testing.T) {
 			},
 			defaultRule: false,
 			variations:  variations,
-			wantErr:    assert.NoError,
+			wantErr:     assert.NoError,
 		},
 		{
 			name: "valid percentages",
 			rule: flag.Rule{
-				Query:       testconvert.String("key eq \"test\""),
+				Query: testconvert.String("key eq \"test\""),
 				Percentages: &map[string]float64{
 					"variation_A": 30,
 					"variation_B": 70,
@@ -211,12 +211,12 @@ func TestRule_validatePercentages(t *testing.T) {
 			},
 			defaultRule: false,
 			variations:  variations,
-			wantErr:    assert.NoError,
+			wantErr:     assert.NoError,
 		},
 		{
 			name: "valid percentages summing to 100",
 			rule: flag.Rule{
-				Query:       testconvert.String("key eq \"test\""),
+				Query: testconvert.String("key eq \"test\""),
 				Percentages: &map[string]float64{
 					"variation_A": 25,
 					"variation_B": 25,
@@ -225,7 +225,7 @@ func TestRule_validatePercentages(t *testing.T) {
 			},
 			defaultRule: false,
 			variations:  variations,
-			wantErr:    assert.NoError,
+			wantErr:     assert.NoError,
 		},
 		{
 			name: "empty percentages should fail",
@@ -235,13 +235,13 @@ func TestRule_validatePercentages(t *testing.T) {
 			},
 			defaultRule: false,
 			variations:  variations,
-			wantErr:    assert.Error,
-			wantErrMsg: "invalid percentages: should not be empty",
+			wantErr:     assert.Error,
+			wantErrMsg:  "invalid percentages: should not be empty",
 		},
 		{
 			name: "percentages summing to zero should fail",
 			rule: flag.Rule{
-				Query:       testconvert.String("key eq \"test\""),
+				Query: testconvert.String("key eq \"test\""),
 				Percentages: &map[string]float64{
 					"variation_A": 0,
 					"variation_B": 0,
@@ -249,26 +249,26 @@ func TestRule_validatePercentages(t *testing.T) {
 			},
 			defaultRule: false,
 			variations:  variations,
-			wantErr:    assert.Error,
-			wantErrMsg: "invalid percentages: should not be equal to 0",
+			wantErr:     assert.Error,
+			wantErrMsg:  "invalid percentages: should not be equal to 0",
 		},
 		{
 			name: "percentages with non-existent variation should fail",
 			rule: flag.Rule{
-				Query:       testconvert.String("key eq \"test\""),
+				Query: testconvert.String("key eq \"test\""),
 				Percentages: &map[string]float64{
 					"non_existent": 100,
 				},
 			},
 			defaultRule: false,
 			variations:  variations,
-			wantErr:    assert.Error,
-			wantErrMsg: "invalid percentage: variation non_existent does not exist",
+			wantErr:     assert.Error,
+			wantErrMsg:  "invalid percentage: variation non_existent does not exist",
 		},
 		{
 			name: "percentages with multiple non-existent variations should fail",
 			rule: flag.Rule{
-				Query:       testconvert.String("key eq \"test\""),
+				Query: testconvert.String("key eq \"test\""),
 				Percentages: &map[string]float64{
 					"variation_A":    50,
 					"non_existent_1": 25,
@@ -277,12 +277,12 @@ func TestRule_validatePercentages(t *testing.T) {
 			},
 			defaultRule: false,
 			variations:  variations,
-			wantErr:    assert.Error,
+			wantErr:     assert.Error,
 		},
 		{
 			name: "percentages with negative values should be valid (sum > 0)",
 			rule: flag.Rule{
-				Query:       testconvert.String("key eq \"test\""),
+				Query: testconvert.String("key eq \"test\""),
 				Percentages: &map[string]float64{
 					"variation_A": -10,
 					"variation_B": 110,
@@ -290,12 +290,12 @@ func TestRule_validatePercentages(t *testing.T) {
 			},
 			defaultRule: false,
 			variations:  variations,
-			wantErr:    assert.NoError,
+			wantErr:     assert.NoError,
 		},
 		{
 			name: "percentages summing to more than 100 should be valid",
 			rule: flag.Rule{
-				Query:       testconvert.String("key eq \"test\""),
+				Query: testconvert.String("key eq \"test\""),
 				Percentages: &map[string]float64{
 					"variation_A": 150,
 					"variation_B": 50,
@@ -303,7 +303,7 @@ func TestRule_validatePercentages(t *testing.T) {
 			},
 			defaultRule: false,
 			variations:  variations,
-			wantErr:    assert.NoError,
+			wantErr:     assert.NoError,
 		},
 	}
 
@@ -319,7 +319,7 @@ func TestRule_validatePercentages(t *testing.T) {
 }
 
 func TestRule_validateProgressiveRollout(t *testing.T) {
-	variations := map[string]*interface{}{
+	variations := map[string]*any{
 		"variation_A": testconvert.Interface("value_A"),
 		"variation_B": testconvert.Interface("value_B"),
 		"variation_C": testconvert.Interface("value_C"),
@@ -329,7 +329,7 @@ func TestRule_validateProgressiveRollout(t *testing.T) {
 		name        string
 		rule        flag.Rule
 		defaultRule bool
-		variations  map[string]*interface{}
+		variations  map[string]*any
 		wantErr     assert.ErrorAssertionFunc
 		wantErrMsg  string
 	}{
@@ -573,7 +573,7 @@ func TestRule_validateProgressiveRollout(t *testing.T) {
 }
 
 func TestRule_validateVariationResult(t *testing.T) {
-	variations := map[string]*interface{}{
+	variations := map[string]*any{
 		"variation_A": testconvert.Interface("value_A"),
 		"variation_B": testconvert.Interface("value_B"),
 		"variation_C": testconvert.Interface("value_C"),
@@ -583,7 +583,7 @@ func TestRule_validateVariationResult(t *testing.T) {
 		name        string
 		rule        flag.Rule
 		defaultRule bool
-		variations  map[string]*interface{}
+		variations  map[string]*any
 		wantErr     assert.ErrorAssertionFunc
 		wantErrMsg  string
 	}{
@@ -700,7 +700,7 @@ func TestRule_validateVariationResult(t *testing.T) {
 }
 
 func TestRule_isQueryValid(t *testing.T) {
-	variations := map[string]*interface{}{
+	variations := map[string]*any{
 		"variation_A": testconvert.Interface("value_A"),
 	}
 
@@ -708,7 +708,7 @@ func TestRule_isQueryValid(t *testing.T) {
 		name        string
 		rule        flag.Rule
 		defaultRule bool
-		variations  map[string]*interface{}
+		variations  map[string]*any
 		wantErr     assert.ErrorAssertionFunc
 		wantErrMsg  string
 	}{
@@ -787,7 +787,7 @@ func TestRule_isQueryValid(t *testing.T) {
 		{
 			name: "non-default rule with complex valid Nikunjy query",
 			rule: flag.Rule{
-				Query:           testconvert.String("key eq \"test\" and version gt \"1.0.0\""),
+				Query:           testconvert.String("key eq \"test\" and version gt 1.0.0"),
 				VariationResult: testconvert.String("variation_A"),
 			},
 			defaultRule: false,
@@ -838,7 +838,7 @@ func TestRule_isQueryValid(t *testing.T) {
 }
 
 func TestRule_validateNikunjyQuery(t *testing.T) {
-	variations := map[string]*interface{}{
+	variations := map[string]*any{
 		"variation_A": testconvert.Interface("value_A"),
 	}
 
@@ -846,7 +846,7 @@ func TestRule_validateNikunjyQuery(t *testing.T) {
 		name        string
 		rule        flag.Rule
 		defaultRule bool
-		variations  map[string]*interface{}
+		variations  map[string]*any
 		wantErr     assert.ErrorAssertionFunc
 		wantErrMsg  string
 	}{
@@ -863,7 +863,7 @@ func TestRule_validateNikunjyQuery(t *testing.T) {
 		{
 			name: "valid query with AND",
 			rule: flag.Rule{
-				Query:           testconvert.String("key eq \"test\" and version gt \"1.0.0\""),
+				Query:           testconvert.String("key eq \"test\" and version gt 1.0.0"),
 				VariationResult: testconvert.String("variation_A"),
 			},
 			defaultRule: false,
@@ -943,7 +943,7 @@ func TestRule_validateNikunjyQuery(t *testing.T) {
 		{
 			name: "valid query with parentheses",
 			rule: flag.Rule{
-				Query:           testconvert.String("(key eq \"test1\" or key eq \"test2\") and version gt \"1.0.0\""),
+				Query:           testconvert.String("(key eq \"test1\" or key eq \"test2\") and version gt 1.0.0"),
 				VariationResult: testconvert.String("variation_A"),
 			},
 			defaultRule: false,
@@ -986,7 +986,7 @@ func TestRule_validateNikunjyQuery(t *testing.T) {
 		{
 			name: "invalid query with malformed parentheses - removed as parser accepts it",
 			rule: flag.Rule{
-				Query:           testconvert.String("key eq \"test\" and (version gt \"1.0.0\""),
+				Query:           testconvert.String("key eq \"test\" and (version gt 1.0.0"),
 				VariationResult: testconvert.String("variation_A"),
 			},
 			defaultRule: false,
@@ -1017,7 +1017,7 @@ func TestRule_validateNikunjyQuery(t *testing.T) {
 		{
 			name: "valid query with semver comparison",
 			rule: flag.Rule{
-				Query:           testconvert.String("version gt \"1.0.0\""),
+				Query:           testconvert.String("version gt 1.0.0"),
 				VariationResult: testconvert.String("variation_A"),
 			},
 			defaultRule: false,
@@ -1046,4 +1046,3 @@ func TestRule_validateNikunjyQuery(t *testing.T) {
 		})
 	}
 }
-

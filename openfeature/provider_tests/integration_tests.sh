@@ -46,9 +46,9 @@ echo "------------- GO PROVIDER TESTS ------------------------------------------
 echo "------------------------------------------------------------------------------------------------"
 CURRENT_FOLDER=$(pwd)
 cd openfeature/provider_tests/go-integration-tests
-go mod vendor
-go mod tidy
-go test . -tags=integration
+GOWORK=off go mod vendor
+GOWORK=off go mod tidy
+GOWORK=off go test . -tags=integration
 cd "${CURRENT_FOLDER}"
 
 # Launch .NET integration test

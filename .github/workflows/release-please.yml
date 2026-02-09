@@ -4,19 +4,16 @@ on:
   push:
     branches: [main]
 
-permissions:
-  contents: write
-  pull-requests: write
-  actions: read
-
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: read
     outputs:
       root_released: ${{ steps.release.outputs['release_created'] }}
       root_version: ${{ steps.release.outputs['version'] }}
-      module_evaluation_released: ${{ steps.release.outputs['modules/evaluation--release_created'] }}
-      module_evaluation_version: ${{ steps.release.outputs['modules/evaluation--version'] }}
       module_core_released: ${{ steps.release.outputs['modules/core--release_created'] }}
       module_core_version: ${{ steps.release.outputs['modules/core--version'] }}
       provider_python_released: ${{ steps.release.outputs['openfeature/providers/python-provider--release_created'] }}
@@ -32,16 +29,6 @@ jobs:
           config-file: .github/release-please/release-please-config.json
           manifest-file: .github/release-please/.release-please-manifest.json
 
-  bump-module-evaluation:
-    if: ${{ needs.release-please.outputs.module_evaluation_released == 'true' }}
-    uses: ./.github/workflows/release-bump-modules.yml
-    needs: release-please
-    with:
-      modulePath: modules/evaluation
-      version: ${{ needs.release-please.outputs.module_evaluation_version }}
-    secrets:
-      token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
-
   bump-module-core:
     if: ${{ needs.release-please.outputs.module_core_released == 'true' }}
     uses: ./.github/workflows/release-bump-modules.yml
@@ -52,17 +39,6 @@ jobs:
     secrets:
       token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
-  bump-module-core-dependency-for-evaluation:
-    if: ${{ needs.release-please.outputs.module_core_released == 'true' }}
-    uses: ./.github/workflows/release-bump-modules.yml
-    needs: release-please
-    with:
-      modulePath: modules/core
-      version: ${{ needs.release-please.outputs.module_core_version }}
-      goModDirectoryPath: modules/evaluation
-    secrets:
-      token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
-
   bump-module-core-dependency-for-wasm-module:
     if: ${{ needs.release-please.outputs.module_core_released == 'true' }}
     uses: ./.github/workflows/release-bump-modules.yml
@@ -70,17 +46,6 @@ jobs:
     with:
       modulePath: modules/core
       version: ${{ needs.release-please.outputs.module_core_version }}
-      goModDirectoryPath: cmd/wasm
-    secrets:
-      token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
-
-  bump-module-evaluation-dependency-for-wasm-module:
-    if: ${{ needs.release-please.outputs.module_evaluation_released == 'true' }}
-    uses: ./.github/workflows/release-bump-modules.yml
-    needs: release-please
-    with:
-      modulePath: modules/evaluation
-      version: ${{ needs.release-please.outputs.module_evaluation_version }}
       goModDirectoryPath: cmd/wasm
     secrets:
       token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}

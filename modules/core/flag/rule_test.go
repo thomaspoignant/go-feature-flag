@@ -8,10 +8,17 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/internalerror"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/testutils/testconvert"
 )
 
-func TestRule_Evaluate(t *testing.T) {
+func ExpectError(target error) func(assert.TestingT, error, ...interface{}) bool {
+	return func(t assert.TestingT, err error, msgAndArgs ...interface{}) bool {
+		return assert.ErrorAs(t, err, &target, msgAndArgs...)
+	}
+}
+
+func TestRuleEvaluate(t *testing.T) {
 	type args struct {
 		user      ffcontext.Context
 		isDefault bool
@@ -577,20 +584,49 @@ func TestRule_Evaluate(t *testing.T) {
 			wantErr: assert.Error,
 		},
 		{
-			name: "Semver comparison with prerelease identifiers",
+			name: "Invalid JsonLogic rule that results in a panic",
+			rule: flag.Rule{
+				Name:            testconvert.String("rule1"),
+				VariationResult: testconvert.String("variation_A"),
+				// Getting longer substr than actual string is long results in a panic
+				Query: testconvert.String(`{"substr": ["a", -3]}`),
+			},
+			args: args{
+				user: ffcontext.NewEvaluationContext("96ac59e6-7492-436b-b15a-ba1d797d2423"),
+			},
+			wantErr: assert.Error,
+		},
+		{
+			name: "Semver comparison with prerelease identifiers - higher version provided",
 			rule: flag.Rule{
 				Name:            testconvert.String("semver_rule"),
 				VariationResult: testconvert.String("variation_A"),
-				Query:           testconvert.String("version gt \"1.0.0-1234\""),
+				Query:           testconvert.String("version gt 1.0.0-10"),
 			},
 			args: args{
 				isDefault: false,
 				user: ffcontext.NewEvaluationContextBuilder("user-key").
-					AddCustom("version", "1.0.0-2345").
+					AddCustom("version", "1.0.0-11").
 					Build(),
 			},
 			want:    "variation_A",
 			wantErr: assert.NoError,
+		},
+		{
+			name: "Semver comparison with prerelease identifiers - lower version provided",
+			rule: flag.Rule{
+				Name:            testconvert.String("semver_rule"),
+				VariationResult: testconvert.String("variation_A"),
+				Query:           testconvert.String("version gt 1.0.0-10"),
+			},
+			args: args{
+				isDefault: false,
+				user: ffcontext.NewEvaluationContextBuilder("user-key").
+					AddCustom("version", "1.0.0-2").
+					Build(),
+			},
+			want:    "",
+			wantErr: ExpectError(&internalerror.RuleNotApplyError{}),
 		},
 	}
 	for _, tt := range tests {
@@ -632,6 +668,37 @@ func TestRule_MergeRules(t *testing.T) {
 			want: flag.Rule{
 				Name:            testconvert.String("rule1"),
 				VariationResult: testconvert.String("variation_B"),
+			},
+		},
+		{
+			name: "merge rule with disable set to true",
+			originalRule: flag.Rule{
+				Name:            testconvert.String("rule1"),
+				VariationResult: testconvert.String("variation_A"),
+			},
+			updatedRule: flag.Rule{
+				Disable: testconvert.Bool(true),
+			},
+			want: flag.Rule{
+				Name:            testconvert.String("rule1"),
+				VariationResult: testconvert.String("variation_A"),
+				Disable:         testconvert.Bool(true),
+			},
+		},
+		{
+			name: "merge rule with disable set to false",
+			originalRule: flag.Rule{
+				Name:            testconvert.String("rule1"),
+				VariationResult: testconvert.String("variation_A"),
+				Disable:         testconvert.Bool(true),
+			},
+			updatedRule: flag.Rule{
+				Disable: testconvert.Bool(false),
+			},
+			want: flag.Rule{
+				Name:            testconvert.String("rule1"),
+				VariationResult: testconvert.String("variation_A"),
+				Disable:         testconvert.Bool(false),
 			},
 		},
 		{

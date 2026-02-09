@@ -15,6 +15,7 @@ jobs:
       contents: write
     steps:
       - name: Extract version from tag
+        id: extract_version
         run: |
           TAG_NAME="${{ github.ref }}"
           VERSION=$(echo $TAG_NAME | awk -F '/' '{print $NF}' | sed 's/^v//')
@@ -24,36 +25,34 @@ jobs:
 
       - name: Echo Release wasm version
         env:
-          VERSION: ${{ env.VERSION }}
+          VERSION: ${{ steps.extract_version.outputs.VERSION }}
         run: |
           echo "Release wasm version: ${VERSION}"
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
       - name: Setup go
-        uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
+        uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
         with:
-          go-version-file: go.mod
+          go-version-file: cmd/wasm/go.mod
           check-latest: true
       - uses: acifani/setup-tinygo@db56321a62b9a67922bb9ac8f9d085e218807bb3 # v2.0.1
         with:
           tinygo-version: "0.37.0"
       - name: Release WASM
         env:
-          VERSION: ${{ env.VERSION }}
+          VERSION: ${{ steps.extract_version.outputs.VERSION }}
         run: ./.github/ci-scripts/release_wasm.sh "$VERSION"
       - name: Upload assets
         uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
-        env:
-          VERSION: ${{ env.VERSION }}
         with:
           files: |
-            ./out/release-wasm/gofeatureflag-evaluation_${VERSION}.wasi
-            ./out/release-wasm/gofeatureflag-evaluation_${VERSION}.wasm
+            ./out/release-wasm/gofeatureflag-evaluation_${{ steps.extract_version.outputs.VERSION }}.wasi
+            ./out/release-wasm/gofeatureflag-evaluation_${{ steps.extract_version.outputs.VERSION }}.wasm
 
       - name: Checkout wasm-releases repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           repository: go-feature-flag/wasm-releases
           path: wasm-releases
@@ -61,26 +60,24 @@ jobs:
 
       - name: Copy WASM files to wasm-releases repository
         env:
-          VERSION: ${{ env.VERSION }}
+          VERSION: ${{ steps.extract_version.outputs.VERSION }}
         run: |
           mkdir -p wasm-releases/evaluation
           cp ./out/release-wasm/gofeatureflag-evaluation_${VERSION}.wasi wasm-releases/evaluation/
           cp ./out/release-wasm/gofeatureflag-evaluation_${VERSION}.wasm wasm-releases/evaluation/
 
       - name: Create Pull Request to wasm-releases
-        uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7.0.11
-        env:
-          VERSION: ${{ env.VERSION }}
+        uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
         with:
-          branch: publish-wasm-evaluation-${{ env.VERSION }}
-          title: "feat: Publish WASM files for ${{ env.VERSION }}"
+          branch: publish-wasm-evaluation-${{ steps.extract_version.outputs.VERSION }}
+          title: "feat: Publish WASM files for ${{ steps.extract_version.outputs.VERSION }}"
           body: |
-            Automated pull request to publish evaluation WASM files for release ${{ env.VERSION }}
+            Automated pull request to publish evaluation WASM files for release ${{ steps.extract_version.outputs.VERSION }}
 
             This PR includes:
-            - gofeatureflag-evaluation_${{ env.VERSION }}.wasi
-            - gofeatureflag-evaluation_${{ env.VERSION }}.wasm
-          commit-message: Publish evaluation WASM files for ${{ env.VERSION }}
+            - gofeatureflag-evaluation_${{ steps.extract_version.outputs.VERSION }}.wasi
+            - gofeatureflag-evaluation_${{ steps.extract_version.outputs.VERSION }}.wasm
+          commit-message: Publish evaluation WASM files for ${{ steps.extract_version.outputs.VERSION }}
           assignees: thomaspoignant
           draft: false
           signoff: true

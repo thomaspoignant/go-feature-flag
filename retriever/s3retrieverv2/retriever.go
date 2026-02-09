@@ -6,7 +6,8 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager/types"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
@@ -52,7 +53,7 @@ func (s *Retriever) Init(ctx context.Context, _ *fflog.FFLogger) error {
 			s.AwsConfig = &cfg
 		}
 		client := s3.NewFromConfig(*s.AwsConfig, s.S3ClientOptions...)
-		s.downloader = manager.NewDownloader(client)
+		s.downloader = transfermanager.New(client)
 	}
 	s.status = retriever.RetrieverReady
 	return nil
@@ -81,16 +82,13 @@ func (s *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 	}
 
 	// Download the item from the bucket.
-	// If an error occurs, log it and exit.
-	// Otherwise, notify the user that the download succeeded.
-	writerAt := manager.NewWriteAtBuffer([]byte{})
+	writerAt := types.NewWriteAtBuffer([]byte{})
 
-	s3Req := &s3.GetObjectInput{
-		Bucket: aws.String(s.Bucket),
-		Key:    aws.String(s.Item),
-	}
-
-	_, err := s.downloader.Download(ctx, writerAt, s3Req)
+	_, err := s.downloader.DownloadObject(ctx, &transfermanager.DownloadObjectInput{
+		Bucket:   aws.String(s.Bucket),
+		Key:      aws.String(s.Item),
+		WriterAt: writerAt,
+	})
 	if err != nil {
 		return nil, fmt.Errorf("unable to download item from S3 %q, %v", s.Item, err)
 	}

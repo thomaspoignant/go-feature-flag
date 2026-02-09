@@ -11,14 +11,28 @@ import (
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/helper"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/testdata/mock"
 )
 
 func TestAPIKey(t *testing.T) {
 	tests := []struct {
 		name           string
+		xAPIKey        string
 		authorization  string
 		expectedAPIKey string
 	}{
+		{
+			name:           "X-API-Key header takes precedence",
+			xAPIKey:        "x-api-key-value",
+			authorization:  "Bearer auth-header-value",
+			expectedAPIKey: "x-api-key-value",
+		},
+		{
+			name:           "X-API-Key header only",
+			xAPIKey:        "x-api-key-only",
+			authorization:  "",
+			expectedAPIKey: "x-api-key-only",
+		},
 		{
 			name:           "Bearer token",
 			authorization:  "Bearer my-api-key-123",
@@ -159,9 +173,14 @@ func TestAPIKey(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 
+			// Set the X-API-Key header if provided
+			if tt.xAPIKey != "" {
+				c.Request().Header.Set(helper.XAPIKeyHeader, tt.xAPIKey)
+			}
+
 			// Set the Authorization header
 			if tt.authorization != "" {
-				c.Request().Header.Set("Authorization", tt.authorization)
+				c.Request().Header.Set(helper.AuthorizationHeader, tt.authorization)
 			}
 
 			// Call the function
@@ -190,20 +209,20 @@ func TestFlagSet(t *testing.T) {
 		},
 		{
 			name:           "flagset manager error should return bad request error",
-			flagsetManager: &MockFlagsetManager{err: errors.New("flagset not found for API key")},
+			flagsetManager: &mock.MockFlagsetManager{GetFlagSetsErr: errors.New("flagset not found for API key")},
 			apiKey:         "invalid-api-key",
 			wantError:      true,
 			wantMsg:        "error while getting flagset: flagset not found for API key",
 		},
 		{
 			name:           "successful flagset retrieval should return flagset",
-			flagsetManager: &MockFlagsetManager{flagset: &ffclient.GoFeatureFlag{}},
+			flagsetManager: &mock.MockFlagsetManager{FlagSets: map[string]*ffclient.GoFeatureFlag{"valid-key": &ffclient.GoFeatureFlag{}}},
 			apiKey:         "valid-api-key",
 			wantError:      false,
 		},
 		{
 			name:           "empty api key with error should return bad request error",
-			flagsetManager: &MockFlagsetManager{err: errors.New("no API key provided")},
+			flagsetManager: &mock.MockFlagsetManager{GetFlagSetsErr: errors.New("no API key provided")},
 			apiKey:         "",
 			wantError:      true,
 			wantMsg:        "error while getting flagset: no API key provided",
@@ -230,9 +249,9 @@ func TestFlagSet(t *testing.T) {
 	}
 }
 
-func TestFlagSet_Integration(t *testing.T) {
+func TestFlagSetIntegration(t *testing.T) {
 	t.Run("should handle specific error messages correctly", func(t *testing.T) {
-		mockManager := &MockFlagsetManager{err: errors.New("test error")}
+		mockManager := &mock.MockFlagsetManager{GetFlagSetsErr: errors.New("test error")}
 		flagset, err := helper.FlagSet(mockManager, "test-key")
 		assert.Error(t, err)
 		assert.Nil(t, flagset)
@@ -240,7 +259,7 @@ func TestFlagSet_Integration(t *testing.T) {
 	})
 
 	t.Run("should return flagset when manager returns valid flagset", func(t *testing.T) {
-		mockManager := &MockFlagsetManager{flagset: &ffclient.GoFeatureFlag{}}
+		mockManager := &mock.MockFlagsetManager{FlagSets: map[string]*ffclient.GoFeatureFlag{"valid-key": &ffclient.GoFeatureFlag{}}}
 		flagset, err := helper.FlagSet(mockManager, "valid-key")
 		if err != nil || flagset == nil {
 			t.Logf("DEBUG: err=%v, flagset=%v", err, flagset)
@@ -248,34 +267,4 @@ func TestFlagSet_Integration(t *testing.T) {
 		assert.Nil(t, err)
 		assert.NotNil(t, flagset)
 	})
-}
-
-// MockFlagsetManager is a simple mock implementation of service.FlagsetManager
-type MockFlagsetManager struct {
-	flagset *ffclient.GoFeatureFlag
-	err     error
-}
-
-func (m *MockFlagsetManager) FlagSet(_ string) (*ffclient.GoFeatureFlag, error) {
-	return m.flagset, m.err
-}
-
-func (m *MockFlagsetManager) FlagSetName(_ string) (string, error) {
-	return "", nil
-}
-
-func (m *MockFlagsetManager) AllFlagSets() (map[string]*ffclient.GoFeatureFlag, error) {
-	return nil, nil
-}
-
-func (m *MockFlagsetManager) Default() *ffclient.GoFeatureFlag {
-	return nil
-}
-
-func (m *MockFlagsetManager) IsDefaultFlagSet() bool {
-	return false
-}
-
-func (m *MockFlagsetManager) Close() {
-	// nothing to do
 }

@@ -7,6 +7,7 @@ import (
 	"log/slog"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/utils"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
@@ -26,7 +27,7 @@ type Retriever struct {
 	logger  *fflog.FFLogger
 	status  retriever.Status
 	columns map[string]string
-	conn    *pgx.Conn
+	pool    *pgxpool.Pool
 	flagset *string
 }
 
@@ -40,23 +41,19 @@ func (r *Retriever) Init(ctx context.Context, logger *fflog.FFLogger, flagset *s
 	r.columns = r.getColumnNames()
 	r.flagset = flagset
 
-	if r.conn == nil {
+	if r.pool == nil {
 		r.logger.Info("Initializing PostgreSQL retriever")
 		r.logger.Debug("Using columns", "columns", r.columns)
 
-		conn, err := pgx.Connect(ctx, r.URI)
+		pool, err := GetPool(ctx, r.URI)
 		if err != nil {
 			r.status = retriever.RetrieverError
 			return err
 		}
 
-		if err := conn.Ping(ctx); err != nil {
-			r.status = retriever.RetrieverError
-			return err
-		}
-
-		r.conn = conn
+		r.pool = pool
 	}
+
 	r.status = retriever.RetrieverReady
 	return nil
 }
@@ -71,37 +68,38 @@ func (r *Retriever) Status() retriever.Status {
 
 // Shutdown closes the database connection.
 func (r *Retriever) Shutdown(ctx context.Context) error {
-	if r.conn == nil {
-		return nil
+	if r.pool != nil {
+		ReleasePool(ctx, r.URI)
+		r.pool = nil
 	}
-	return r.conn.Close(ctx)
+	return nil
 }
 
 // Retrieve fetches flag configuration from PostgreSQL.
 func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
-	if r.conn == nil {
-		return nil, fmt.Errorf("database connection is not initialized")
+	if r.pool == nil {
+		return nil, fmt.Errorf("database connection pool is not initialized")
 	}
 
 	// Build the query using the configured table and column names
 	query := r.buildQuery()
 
 	// Build the arguments for the query
-	args := []interface{}{}
+	args := []any{}
 	if r.getFlagset() != "" {
-		args = []interface{}{r.getFlagset()}
+		args = []any{r.getFlagset()}
 	}
 
 	r.logger.Debug("Executing PostgreSQL query", slog.String("query", query), slog.Any("args", args))
 
-	rows, err := r.conn.Query(ctx, query, args...)
+	rows, err := r.pool.Query(ctx, query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute query: %w", err)
 	}
 	defer rows.Close()
 
 	// Map to store flag configurations with flag_name as key
-	flagConfigs := make(map[string]interface{})
+	flagConfigs := make(map[string]any)
 
 	for rows.Next() {
 		var flagName string
@@ -121,6 +119,7 @@ func (r *Retriever) Retrieve(ctx context.Context) ([]byte, error) {
 		flagConfigs[flagName] = config
 	}
 
+	// Check for any errors that occurred during row iteration
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("rows iteration error: %w", err)
 	}

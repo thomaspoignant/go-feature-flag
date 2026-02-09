@@ -9,12 +9,14 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
+
+var _ exporter.Exporter = &Exporter{}
 
 type Exporter struct {
 	// Bucket is the name of your Exporter Bucket.
@@ -76,7 +78,7 @@ func (f *Exporter) initializeUploader(ctx context.Context) error {
 		}
 
 		client := s3.NewFromConfig(*f.AwsConfig, f.S3ClientOptions...)
-		f.s3Uploader = manager.NewUploader(client)
+		f.s3Uploader = transfermanager.New(client)
 	})
 	return initErr
 }
@@ -134,7 +136,7 @@ func (f *Exporter) Export(
 			continue
 		}
 
-		result, err := f.s3Uploader.Upload(ctx, &s3.PutObjectInput{
+		result, err := f.s3Uploader.UploadObject(ctx, &transfermanager.UploadObjectInput{
 			Bucket: aws.String(f.Bucket),
 			Key:    aws.String(f.S3Path + "/" + file.Name()),
 			Body:   of,
@@ -144,7 +146,11 @@ func (f *Exporter) Export(
 			return err
 		}
 
-		f.ffLogger.Info("[S3Exporter] file uploaded.", slog.String("location", result.Location))
+		location := ""
+		if result.Location != nil {
+			location = *result.Location
+		}
+		f.ffLogger.Info("[S3Exporter] file uploaded.", slog.String("location", location))
 	}
 	return nil
 }

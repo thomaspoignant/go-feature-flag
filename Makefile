@@ -2,7 +2,7 @@ GOCMD=go
 TINYGOCMD=tinygo
 GOTEST=$(GOCMD) test
 GOVET=$(GOCMD) vet
-ALL_GO_MOD_DIRS := ./modules/core ./modules/evaluation ./cmd/wasm ./
+ALL_GO_MOD_DIRS := ./modules/core ./cmd/wasm ./
 
 # In CI we disable workspace mode.
 ifeq ($(CI),true)
@@ -27,6 +27,7 @@ build: build-modules build-relayproxy build-editor-api build-jsonschema-generato
 
 create-out-dir:
 	mkdir -p out/bin
+	mkdir -p out/contrib
 
 build-relayproxy: create-out-dir ## Build the relay proxy in out/bin/
 	CGO_ENABLED=0 GO111MODULE=on $(GOWORK_ENV) $(GOCMD) build $(MODFLAG) -o out/bin/relayproxy ./cmd/relayproxy/
@@ -107,17 +108,25 @@ generate-helm-docs: ## Generates helm documentation for the project
 bump-helm-chart-version: ## Bump Helm chart version (usage: make bump-helm-chart-version VERSION=v1.2.3)
 	@if [ -z "$(VERSION)" ]; then \
 		echo "$(RED)Error: VERSION is required$(RESET)"; \
-		echo "Usage: make bump-helm-chart-version VERSION=v1.2.3"; \
-		echo "       make bump-helm-chart-version VERSION=1.2.3"; \
+		echo "Usage: VERSION=v1.2.3 make bump-helm-chart-version"; \
+		echo "       VERSION=v1.2.3 make bump-helm-chart-version"; \
 		exit 1; \
 	fi
 	.github/ci-scripts/bump-helm-chart.sh $(VERSION)
+
+bump-wasm-contrib: create-out-dir ## Bump WASM version in the different contrib repositories (usage: make bump-wasm-contrib VERSION=v2.0.12)
+	@if [ -z "$(VERSION)" ]; then \
+		echo "$(RED)Error: VERSION is required$(RESET)"; \
+		echo "Usage: VERSION=v1.2.3 make bump-wasm-contrib"; \
+		exit 1; \
+	fi
+	$(GOCMD) run .github/ci-scripts/bump-wasm-contrib/main.go $(VERSION)
 
 ## Test:
 test: ## Run the tests of the project
 	@for module in $(ALL_GO_MOD_DIRS); do \
 		echo "→ Testing $$module"; \
-		cd $$module && $(GOWORK_ENV) $(GOCMD) test -v -race -tags=docker ./... || exit 1;  \
+		cd $$module && CGO_ENABLED=1 GO111MODULE=on $(GOWORK_ENV) $(GOCMD) test -v -race -tags=docker ./... || exit 1;  \
 		cd - >/dev/null; \
 	done
 

@@ -18,6 +18,8 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 )
 
+var _ notifier.Notifier = &Notifier{}
+
 const (
 	colorDeleted     = 15158332
 	colorUpdated     = 16753920
@@ -106,7 +108,7 @@ func convertToDiscordMessage(diffCache notifier.DiffCache) discordMessage {
 }
 
 func convertDeletedFlagsToDiscordEmbed(diffCache notifier.DiffCache) []embed {
-	embeds := make([]embed, 0)
+	embeds := make([]embed, 0, len(diffCache.Deleted))
 	for key := range diffCache.Deleted {
 		embeds = append(embeds, embed{
 			Title: fmt.Sprintf("❌ Flag \"%s\" deleted", key),
@@ -117,7 +119,7 @@ func convertDeletedFlagsToDiscordEmbed(diffCache notifier.DiffCache) []embed {
 }
 
 func convertUpdatedFlagsToDiscordEmbed(diffCache notifier.DiffCache) []embed {
-	embeds := make([]embed, 0)
+	embeds := make([]embed, 0, len(diffCache.Updated))
 	for key, value := range diffCache.Updated {
 		fields := []embedField{}
 		changelog, _ := diff.Diff(value.Before, value.After, diff.AllowTypeMismatch(true))
@@ -147,7 +149,7 @@ func convertUpdatedFlagsToDiscordEmbed(diffCache notifier.DiffCache) []embed {
 }
 
 func convertAddedFlagsToDiscordEmbed(diff notifier.DiffCache) []embed {
-	embeds := make([]embed, 0)
+	embeds := make([]embed, 0, len(diff.Added))
 	for key := range diff.Added {
 		embeds = append(embeds, embed{
 			Title: fmt.Sprintf("🆕 Flag \"%s\" created", key),

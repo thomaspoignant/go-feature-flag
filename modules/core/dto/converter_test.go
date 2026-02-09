@@ -20,7 +20,7 @@ func TestConvertV1DtoToInternalFlag(t *testing.T) {
 			name: "all fields set",
 			input: dto.DTO{
 				BucketingKey: testconvert.String("bucketKey"),
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"var1": testconvert.Interface("var1"),
 					"var2": testconvert.Interface("var2"),
 				},
@@ -71,14 +71,14 @@ func TestConvertV1DtoToInternalFlag(t *testing.T) {
 					Start: testconvert.Time(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
 					End:   testconvert.Time(time.Date(2022, 1, 2, 0, 0, 0, 0, time.UTC)),
 				},
-				Metadata:    &map[string]interface{}{"key": "value"},
+				Metadata:    &map[string]any{"key": "value"},
 				TrackEvents: testconvert.Bool(true),
 				Disable:     testconvert.Bool(false),
 				Version:     testconvert.String("v1"),
 			},
 			expected: flag.InternalFlag{
 				BucketingKey: testconvert.String("bucketKey"),
-				Variations: &map[string]*interface{}{
+				Variations: &map[string]*any{
 					"var1": testconvert.Interface("var1"),
 					"var2": testconvert.Interface("var2"),
 				},
@@ -132,7 +132,7 @@ func TestConvertV1DtoToInternalFlag(t *testing.T) {
 					Start: testconvert.Time(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)),
 					End:   testconvert.Time(time.Date(2022, 1, 2, 0, 0, 0, 0, time.UTC)),
 				},
-				Metadata: &map[string]interface{}{"key": "value"},
+				Metadata: &map[string]any{"key": "value"},
 			},
 		},
 		{

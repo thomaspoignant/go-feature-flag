@@ -1,0 +1,18 @@
+flagsets:
+  - name: flagset-1
+    apiKeys:
+      - apikey-1
+      - apikey-2
+    retrievers:
+      - kind: http
+        url: https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml
+    pollingInterval: 1000
+
+  - name: flagset-2
+    apiKeys:
+      - apikey-3
+      - apikey-4
+    retrievers:
+      - kind: http
+        url: https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/examples/retriever_file/flags.goff.yaml
+    pollingInterval: 2000

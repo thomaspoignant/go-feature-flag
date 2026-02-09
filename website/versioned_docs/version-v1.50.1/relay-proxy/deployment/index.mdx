@@ -1,0 +1,34 @@
+---
+sidebar_position: 70
+description: How to deploy GO Feature Flag relay proxy in different environments.
+---
+import { Card } from "@site/src/components/doc/cardv3";
+import helmlogo from "@site/static/docs/deployment/helm.png";
+import lambdalogo from "@site/static/docs/deployment/aws-lambda.png";
+
+# 🚀 Deployment
+
+## Overview
+
+GO Feature Flag relay-proxy is a standalone service that acts as a proxy between your application and the GO Feature Flag configuration.
+
+The relay-proxy is a lightweight service that can be deployed in various environments, including Kubernetes, AWS Lambda, and more.
+This page provides an explanation of several methods for deploying the relay proxy.
+
+## How to deploy the relay proxy
+
+<div className={"grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"}>
+<Card
+  logo={helmlogo}
+  name={"Helm"}
+  description={"Deploy the relay-proxy in Kubernetes using a helm chart."}
+  link={"deployment/helm"}
+   />
+
+<Card
+  logo={lambdalogo}
+  name={"AWS Lambda"}
+  description={"Deploy the relay-proxy in a serverless environment using AWS Lambda."}
+  link={"deployment/aws-lambda"}
+/>
+</div>

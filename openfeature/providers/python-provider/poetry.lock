@@ -283,14 +283,14 @@ files = [
 
 [[package]]
 name = "openfeature-sdk"
-version = "0.8.3"
+version = "0.8.4"
 description = "Standardizing Feature Flagging for Everyone"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "openfeature_sdk-0.8.3-py3-none-any.whl", hash = "sha256:28e817514c5398e2243d0a158f3306624383757ba833032336ceba2b3cbcddd6"},
-    {file = "openfeature_sdk-0.8.3.tar.gz", hash = "sha256:37c379e3e5da39567f07b9410fca9153882cf0a95da81e03ccf7559fca054fd2"},
+    {file = "openfeature_sdk-0.8.4-py3-none-any.whl", hash = "sha256:805ba090669798fc343ca9fdcbc56ff0f4b57bf6757533f0854d2021192e620a"},
+    {file = "openfeature_sdk-0.8.4.tar.gz", hash = "sha256:66abf71f928ec8c0db1111072bb0ef2635dfbd09510f77f4b548e5d0ea0e6c1a"},
 ]
 
 [[package]]
@@ -677,13 +677,13 @@ files = [
 
 [[package]]
 name = "rel"
-version = "0.4.9.22"
+version = "0.4.9.23"
 description = "Registered Event Listener. Provides standard (pyevent) interface and functionality without external dependencies"
 optional = false
 python-versions = "*"
 groups = ["main"]
 files = [
-    {file = "rel-0.4.9.22-py3-none-any.whl", hash = "sha256:50d741439244048f9242118ca7957c22bd1d8be9f5b39bc11904cccc4c3c8b11"},
+    {file = "rel-0.4.9.23-py3-none-any.whl", hash = "sha256:2ea72bb5c334f99d570b159722ee922d924172bd033b5ed4e0fabf2b047e317f"},
 ]
 
 [[package]]
@@ -781,14 +781,14 @@ typing-extensions = ">=4.12.0"
 
 [[package]]
 name = "urllib3"
-version = "2.6.0"
+version = "2.6.3"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 optional = false
 python-versions = ">=3.9"
 groups = ["main", "dev"]
 files = [
-    {file = "urllib3-2.6.0-py3-none-any.whl", hash = "sha256:c90f7a39f716c572c4e3e58509581ebd83f9b59cced005b7db7ad2d22b0db99f"},
-    {file = "urllib3-2.6.0.tar.gz", hash = "sha256:cb9bcef5a4b345d5da5d145dc3e30834f58e8018828cbc724d30b4cb7d4d49f1"},
+    {file = "urllib3-2.6.3-py3-none-any.whl", hash = "sha256:bf272323e553dfb2e87d9bfd225ca7b0f467b919d7bbd355436d3fd37cb0acd4"},
+    {file = "urllib3-2.6.3.tar.gz", hash = "sha256:1b62b6884944a57dbe321509ab94fd4d3b307075e0c2eae991ac71ee15ad38ed"},
 ]
 
 [package.extras]

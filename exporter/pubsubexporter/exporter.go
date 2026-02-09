@@ -10,6 +10,8 @@ import (
 	"google.golang.org/api/option"
 )
 
+var _ exporter.Exporter = &Exporter{}
+
 // Exporter publishes events on a PubSub topic.
 //
 // Deprecated: Use pubsubexporterv2.Exporter instead. This exporter uses the legacy

@@ -4,21 +4,20 @@ on:
     tags:
       - "v*"
 
-permissions:
-  contents: read
-  actions: read
-
 jobs:
   integration-tests:
     name: Integration Tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 1
       - name: Setup go
-        uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
+        uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
         with:
           go-version-file: go.mod
           check-latest: true
@@ -26,12 +25,12 @@ jobs:
         uses: stCarolas/setup-maven@d6af6abeda15e98926a57b5aa970a96bb37f97d1 # v5
         with:
           maven-version: 3.8.2
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
         with:
           node-version: 23
       - name: Install ICU packages
         run: sudo apt-get update && sudo apt-get install -y libicu-dev
-      - uses: actions/setup-dotnet@2016bd2012dba4e32de620c46fe006a3ac9f0602 # v5.0.1
+      - uses: actions/setup-dotnet@baa11fbfe1d6520db94683bd5c7a3818018e4309 # v5.1.0
         with:
           dotnet-version: "7.0.x"
       - run: make vendor
@@ -47,7 +46,7 @@ jobs:
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> "$GITHUB_ENV"
 
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
 
@@ -58,13 +57,13 @@ jobs:
         run: git fetch --force --tags
 
       - name: Setup go
-        uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
+        uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
         with:
           go-version-file: go.mod
           check-latest: true
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.1.1
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.1.1
 
       - name: Docker login
         env:
@@ -95,9 +94,11 @@ jobs:
     name: Upload dockerhub readme
     needs:
       - goreleaser
+    permissions:
+      contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Release readme to DockerHub
         uses: ms-jpq/sync-dockerhub-readme@e2991ea1ba48832e73555cdbd5b82f5a2e91ee9b # v1
         with:
@@ -111,9 +112,11 @@ jobs:
     name: Upload dockerhub readme
     needs:
       - goreleaser
+    permissions:
+      contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Release readme to DockerHub
         uses: ms-jpq/sync-dockerhub-readme@e2991ea1ba48832e73555cdbd5b82f5a2e91ee9b # v1
         with:
@@ -127,9 +130,11 @@ jobs:
     name: Upload dockerhub readme
     needs:
       - goreleaser
+    permissions:
+      contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Release readme to DockerHub
         uses: ms-jpq/sync-dockerhub-readme@e2991ea1ba48832e73555cdbd5b82f5a2e91ee9b # v1
         with:
@@ -156,17 +161,20 @@ jobs:
     name: Create new documentation tag
     needs:
       - goreleaser
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - name: Extract version from tag
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> "$GITHUB_ENV"
 
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           path: release
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
 
       - name: Install dependencies
         working-directory: ./release/${{ env.WEBSITE_DIR }}
@@ -179,7 +187,7 @@ jobs:
         run: npm run docusaurus docs:version "$VERSION"
 
       - name: Setup go
-        uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
+        uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
         with:
           go-version-file: ./release/${{ env.WEBSITE_DIR }}/.ci/go.mod
           check-latest: true
@@ -189,7 +197,7 @@ jobs:
         run: go run versions.go
 
       - name: Checkout main branch
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: ${{ env.MAIN_BRANCH_NAME }}
           path: ${{ env.MAIN_BRANCH_NAME }}
@@ -201,10 +209,11 @@ jobs:
         run: cp -rf release/${{ env.WEBSITE_DIR }}/ $MAIN_BRANCH_NAME
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7.0.11
+        uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
         env:
           VERSION: ${{ env.VERSION }}
         with:
+          base: main
           branch: create-new-doc-version-${{ env.VERSION }}
           title: "docs(docusaurus): Create a new documentation version ${{ env.VERSION }}"
           body: Automated pull request to create a new documentation version ${{ env.VERSION }}
@@ -223,6 +232,9 @@ jobs:
     name: Release jsonschema
     needs:
       - goreleaser
+    permissions:
+      contents: read
+      pull-requests: write
     env:
       SCHEMA_LOCATION: .schema/flag-schema.json
       MAIN_BRANCH_NAME: main
@@ -231,13 +243,13 @@ jobs:
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> "$GITHUB_ENV"
 
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           path: release
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
       - name: Setup go
-        uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
+        uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
         with:
           go-version-file: ./release/go.mod
           check-latest: true
@@ -251,7 +263,7 @@ jobs:
         run: ./out/bin/jsonschema-generator --schema-location=./.schema/flag-schema.json
 
       - name: Checkout main branch
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: ${{ env.MAIN_BRANCH_NAME }}
           path: ${{ env.MAIN_BRANCH_NAME }}
@@ -263,10 +275,11 @@ jobs:
         run: cp -rf release/$SCHEMA_LOCATION $MAIN_BRANCH_NAME/$SCHEMA_LOCATION
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7.0.11
+        uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
         env:
           VERSION: ${{ env.VERSION }}
         with:
+          base: main
           branch: release-jsonschema-${{ env.VERSION }}
           title: "feat(jsonschema): Release a new version of the jsonschema ${{ env.VERSION }}"
           body: Automated pull request to release a new version of the jsonschema ${{ env.VERSION }}
@@ -286,18 +299,18 @@ jobs:
     name: Bump Relay Proxy Helm Chart appVersion
     needs:
       - goreleaser
+    permissions:
+      contents: read
+      pull-requests: write
     env:
       CHART_YAML_FILE_LOCATION: cmd/relayproxy/helm-charts/relay-proxy/Chart.yaml
-      MAIN_BRANCH_NAME: main
     steps:
       - name: Extract version from tag
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> "$GITHUB_ENV"
 
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          ref: ${{ env.MAIN_BRANCH_NAME }}
-          path: ${{ env.MAIN_BRANCH_NAME }}
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
 
       - name: Bump chart appVersion
@@ -308,10 +321,11 @@ jobs:
       - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7.0.11
+        uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
         env:
           VERSION: ${{ env.VERSION }}
         with:
+          base: main
           branch: bump-relay-proxy-helm-chart-${{ env.VERSION }}
           title: "chore(helm): Bump relay-proxy helm chart version ${{ env.VERSION }}"
           body: Automated pull request to bump relay-proxy helm chart version ${{ env.VERSION }}

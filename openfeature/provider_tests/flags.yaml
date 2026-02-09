@@ -174,3 +174,17 @@ flag-use-evaluation-context-enrichment:
       variation: A
   defaultRule:
     variation: B
+boolean_semver_targeting_match:
+  variations:
+    "False": false
+    "True": true
+  targeting:
+    - query: version ge 10.0.0-10
+      variation: "True"
+  defaultRule:
+    percentage:
+      "False": 100
+      "True": 0
+  metadata:
+    description: this is a semver matching test
+    pr_link: https://github.com/thomaspoignant/go-feature-flag/pull/4764

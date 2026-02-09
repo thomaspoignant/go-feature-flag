@@ -6,7 +6,8 @@ import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import org.gofeatureflag.openfeature.bean.GoFeatureFlagOptions
 import org.gofeatureflag.openfeature.error.GoFeatureFlagError
-import org.gofeatureflag.openfeature.hook.Event
+import org.gofeatureflag.openfeature.bean.Event
+import org.gofeatureflag.openfeature.bean.FeatureEvent
 import org.junit.After
 import org.junit.Assert
 import org.junit.Assert.assertEquals
@@ -18,8 +19,8 @@ import java.io.File
 
 class GoFeatureFlagApiTest {
     private var mockWebServer: MockWebServer? = null
-    private var defaultEventList: List<Event> = listOf(
-        Event(
+    private var defaultFeatureEventLists: List<FeatureEvent> = listOf(
+        FeatureEvent(
             contextKind = "contextKind",
             creationDate = 1721650841,
             key = "flag-1",
@@ -59,7 +60,7 @@ class GoFeatureFlagApiTest {
             GoFeatureFlagApi(GoFeatureFlagOptions(endpoint = mockWebServer!!.url("/").toString()))
         Assert.assertThrows(GoFeatureFlagError.ApiUnauthorizedError::class.java) {
             runBlocking {
-                api.postEventsToDataCollector(defaultEventList)
+                api.postEventsToDataCollector(defaultFeatureEventLists)
             }
         }
     }
@@ -71,7 +72,7 @@ class GoFeatureFlagApiTest {
             GoFeatureFlagApi(GoFeatureFlagOptions(endpoint = mockWebServer!!.url("/").toString()))
         Assert.assertThrows(GoFeatureFlagError.ApiUnauthorizedError::class.java) {
             runBlocking {
-                api.postEventsToDataCollector(defaultEventList)
+                api.postEventsToDataCollector(defaultFeatureEventLists)
             }
         }
     }
@@ -83,7 +84,7 @@ class GoFeatureFlagApiTest {
             GoFeatureFlagApi(GoFeatureFlagOptions(endpoint = mockWebServer!!.url("/").toString()))
         Assert.assertThrows(GoFeatureFlagError.UnexpectedResponseError::class.java) {
             runBlocking {
-                api.postEventsToDataCollector(defaultEventList)
+                api.postEventsToDataCollector(defaultFeatureEventLists)
             }
         }
     }
@@ -95,7 +96,7 @@ class GoFeatureFlagApiTest {
             GoFeatureFlagApi(GoFeatureFlagOptions(endpoint = mockWebServer!!.url("/").toString()))
         Assert.assertThrows(GoFeatureFlagError.InvalidRequest::class.java) {
             runBlocking {
-                api.postEventsToDataCollector(defaultEventList)
+                api.postEventsToDataCollector(defaultFeatureEventLists)
             }
         }
     }
@@ -110,9 +111,45 @@ class GoFeatureFlagApiTest {
                     apiKey = "my-api-key"
                 )
             )
-        api.postEventsToDataCollector(defaultEventList)
+        api.postEventsToDataCollector(defaultFeatureEventLists)
         val recordedRequest: RecordedRequest = mockWebServer!!.takeRequest()
-        assertEquals("Bearer my-api-key", recordedRequest.headers["Authorization"])
+        assertEquals("my-api-key", recordedRequest.headers["X-API-Key"])
+    }
+
+    @Test
+    fun `should add custom headers to the request`(): Unit = runBlocking {
+        mockWebServer!!.enqueue(MockResponse().setBody("{}").setResponseCode(200))
+        val api =
+            GoFeatureFlagApi(
+                GoFeatureFlagOptions(
+                    endpoint = mockWebServer!!.url("/").toString(),
+                    customHeaders = mapOf(
+                        "X-Custom-Header" to "custom-value",
+                        "X-Another-Header" to "another-value"
+                    )
+                )
+            )
+        api.postEventsToDataCollector(defaultFeatureEventLists)
+        val recordedRequest: RecordedRequest = mockWebServer!!.takeRequest()
+        assertEquals("custom-value", recordedRequest.headers["X-Custom-Header"])
+        assertEquals("another-value", recordedRequest.headers["X-Another-Header"])
+    }
+
+    @Test
+    fun `should add both API key and custom headers to the request`(): Unit = runBlocking {
+        mockWebServer!!.enqueue(MockResponse().setBody("{}").setResponseCode(200))
+        val api =
+            GoFeatureFlagApi(
+                GoFeatureFlagOptions(
+                    endpoint = mockWebServer!!.url("/").toString(),
+                    apiKey = "my-api-key",
+                    customHeaders = mapOf("X-Custom-Header" to "custom-value")
+                )
+            )
+        api.postEventsToDataCollector(defaultFeatureEventLists)
+        val recordedRequest: RecordedRequest = mockWebServer!!.takeRequest()
+        assertEquals("my-api-key", recordedRequest.headers["X-API-Key"])
+        assertEquals("custom-value", recordedRequest.headers["X-Custom-Header"])
     }
 
     @Test
@@ -132,7 +169,7 @@ class GoFeatureFlagApiTest {
                     apiKey = "my-api-key"
                 )
             )
-        api.postEventsToDataCollector(defaultEventList)
+        api.postEventsToDataCollector(defaultFeatureEventLists)
         val recordedRequest: RecordedRequest = mockWebServer!!.takeRequest()
         val jsonFilePath =
             javaClass.classLoader?.getResource("org/gofeatureflag/openfeature/hook/valid_result.json")?.file
@@ -152,7 +189,7 @@ class GoFeatureFlagApiTest {
                     exporterMetadata = mapOf("appVersion" to "1.0.0", "device" to "Pixel 4")
                 )
             )
-        api.postEventsToDataCollector(defaultEventList)
+        api.postEventsToDataCollector(defaultFeatureEventLists)
         val recordedRequest: RecordedRequest = mockWebServer!!.takeRequest()
         val jsonFilePath =
             javaClass.classLoader?.getResource("org/gofeatureflag/openfeature/hook/valid_result_metadata.json")?.file

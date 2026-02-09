@@ -1,0 +1,6 @@
+server:
+  port: 1031
+  mode: http
+retrievers:
+  - kind: file
+    path: ../../../testdata/flag-config.yaml

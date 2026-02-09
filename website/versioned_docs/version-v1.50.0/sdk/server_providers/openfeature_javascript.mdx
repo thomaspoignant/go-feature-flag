@@ -1,0 +1,343 @@
+---
+sidebar_position: 41
+title: Node.js
+description: How to use the OpenFeature Node.js SDK for server-side feature flag evaluation
+---
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import { sdk } from "@site/data/sdk";
+import { FeatureTable } from "@site/src/components/doc/featureTable";
+
+# Node.js
+[![NPM Version](https://img.shields.io/npm/v/%40openfeature%2Fgo-feature-flag-provider?color=blue&style=flat-square)](https://www.npmjs.com/package/@openfeature/go-feature-flag-provider)
+![NPM Downloads](https://img.shields.io/npm/d18m/%40openfeature%2Fgo-feature-flag-provider?style=flat-square)
+
+This provider supports both **in-process** and **remote** evaluation modes, offering flexibility for different deployment scenarios.
+
+## Install dependencies
+
+The first things we will do is install the **Open Feature SDK** and the **GO Feature Flag provider**.
+
+<Tabs groupId="code">
+  <TabItem value="yarn" label="yarn">
+
+```shell
+yarn add @openfeature/server-sdk @openfeature/go-feature-flag-provider
+```
+
+  </TabItem>
+  <TabItem value="npm" label="npm">
+
+```shell
+npm i @openfeature/server-sdk @openfeature/go-feature-flag-provider
+```
+
+  </TabItem>
+</Tabs>
+
+## Initialize your Open Feature client
+
+To evaluate the flags you need to have an Open Feature configured in your app.
+This code block shows you how you can create a client that you can use in your application.
+
+<Tabs groupId="code">
+  <TabItem value="javascript" label="JavaScript">
+
+```javascript
+import { OpenFeature } = from "@openfeature/server-sdk";
+import { GoFeatureFlagProvider, EvaluationType } = from "@openfeature/go-feature-flag-provider";
+
+// Initialize the provider
+const goFeatureFlagProvider = new GoFeatureFlagProvider({
+  endpoint: 'http://localhost:1031/', // DNS of your instance of relay proxy
+  evaluationType: EvaluationType.Remote,
+});
+
+// Register the provider
+await OpenFeature.setProviderAndWait(goFeatureFlagProvider);
+
+// Get a client
+const featureFlagClient = OpenFeature.getClient('my-app');
+```
+
+  </TabItem>
+
+  <TabItem value="ts" label="TypeScript">
+
+```typescript
+import { OpenFeature } from "@openfeature/server-sdk";
+import { GoFeatureFlagProvider, EvaluationType } from "@openfeature/go-feature-flag-provider";
+
+// Initialize the provider
+const goFeatureFlagProvider = new GoFeatureFlagProvider({
+  endpoint: 'http://localhost:1031/', // DNS of your instance of relay proxy
+  evaluationType: EvaluationType.Remote,
+});
+
+// Register the provider
+await OpenFeature.setProviderAndWait(goFeatureFlagProvider);
+
+// Get a client
+const featureFlagClient = OpenFeature.getClient('my-app');
+```
+
+  </TabItem>
+</Tabs>
+
+### In-Process Evaluation
+
+For high-performance scenarios where you want to evaluate flags locally:
+
+<Tabs groupId="code">
+  <TabItem value="javascript" label="JavaScript">
+
+```javascript
+const { GoFeatureFlagProvider, EvaluationType } = require("@openfeature/go-feature-flag-provider");
+
+const goFeatureFlagProvider = new GoFeatureFlagProvider({
+  endpoint: 'http://localhost:1031/',
+  evaluationType: EvaluationType.InProcess,
+  flagChangePollingIntervalMs: 30000, // Poll every 30 seconds
+});
+```
+
+  </TabItem>
+
+  <TabItem value="ts" label="TypeScript">
+
+```typescript
+import { GoFeatureFlagProvider, EvaluationType } from "@openfeature/go-feature-flag-provider";
+
+const goFeatureFlagProvider = new GoFeatureFlagProvider({
+  endpoint: 'http://localhost:1031/',
+  evaluationType: EvaluationType.InProcess,
+  flagChangePollingIntervalMs: 30000, // Poll every 30 seconds
+});
+```
+
+  </TabItem>
+</Tabs>
+
+## Configuration options
+
+| Option                        | Type               | Default      | Description                                     |
+| ----------------------------- | ------------------ | ------------ | ----------------------------------------------- |
+| `endpoint`                    | `string`           | **Required** | The endpoint of the GO Feature Flag relay-proxy |
+| `evaluationType`              | `EvaluationType`   | `InProcess`  | Evaluation mode: `InProcess` or `Remote`        |
+| `timeout`                     | `number`           | `10000`      | HTTP request timeout in milliseconds            |
+| `flagChangePollingIntervalMs` | `number`           | `120000`     | Polling interval for configuration changes      |
+| `dataFlushInterval`           | `number`           | `120000`     | Data collection flush interval                  |
+| `maxPendingEvents`            | `number`           | `10000`      | Maximum pending events before flushing          |
+| `disableDataCollection`       | `boolean`          | `false`      | Disable data collection entirely                |
+| `apiKey`                      | `string`           | `undefined`  | API key for authentication                      |
+| `exporterMetadata`            | `ExporterMetadata` | `undefined`  | Custom metadata for events                      |
+| `fetchImplementation`         | `FetchAPI`         | `undefined`  | Custom fetch implementation                     |
+
+### Evaluation types
+
+#### InProcess Evaluation
+
+- **Performance**: Fastest evaluation with local caching
+- **Network**: Minimal network calls, only for configuration updates and tracking
+- **Use Case**: High-performance applications, real-time evaluation
+
+#### Remote Evaluation
+
+- **Performance**: Network-dependent evaluation
+- **Network**: Each evaluation requires a network call, works well with side-cars or in the edge
+- **Use Case**: Centralized control
+
+## Evaluate your flag
+
+This code block explains how you can create an `EvaluationContext` and use it to evaluate your flag.
+
+:::note
+In this example, we are evaluating a `boolean` flag, but other types are also available.
+
+**Refer to the [Open Feature documentation](https://docs.openfeature.dev/docs/reference/concepts/evaluation-api#basic-evaluation) to know more about it.**
+:::
+
+<Tabs groupId="code">
+  <TabItem value="javascript" label="JavaScript">
+
+```javascript
+// Context of your flag evaluation.
+// With GO Feature Flag you MUST have a targetingKey that is a unique identifier of the user.
+const userContext = {
+  targetingKey: '1d1b9238-2591-4a47-94cf-d2bc080892f1', // user unique identifier (mandatory)
+  firstname: 'john',
+  lastname: 'doe',
+  email: 'john.doe@gofeatureflag.org',
+  admin: true, // this field is used in the targeting rule of the flag "flag-only-for-admin"
+  // ...
+};
+
+const adminFlag = await featureFlagClient.getBooleanValue('flag-only-for-admin', false, userContext);
+if (adminFlag) {
+   // flag "flag-only-for-admin" is true for the user
+} else {
+  // flag "flag-only-for-admin" is false for the user
+}
+```
+
+  </TabItem>
+
+  <TabItem value="ts" label="TypeScript">
+
+```typescript
+import { EvaluationContext } from "@openfeature/server-sdk";
+
+// Context of your flag evaluation.
+// With GO Feature Flag you MUST have a targetingKey that is a unique identifier of the user.
+const userContext: EvaluationContext = {
+  targetingKey: '1d1b9238-2591-4a47-94cf-d2bc080892f1', // user unique identifier
+  firstname: 'john',
+  lastname: 'doe',
+  email: 'john.doe@gofeatureflag.org',
+  admin: true, // this field is used in the targeting rule of the flag "flag-only-for-admin"
+  // ...
+};
+
+const adminFlag = await featureFlagClient.getBooleanValue('flag-only-for-admin', false, userContext);
+if (adminFlag) {
+  // flag "flag-only-for-admin" is true for the user
+} else {
+  // flag "flag-only-for-admin" is false for the user
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## Advanced usage
+
+### Custom context and targeting
+
+```typescript
+const context = {
+  targetingKey: 'user-123',
+  email: 'john.doe@example.com',
+  firstname: 'John',
+  lastname: 'Doe',
+  anonymous: false,
+  professional: true,
+  rate: 3.14,
+  age: 30,
+  company_info: {
+    name: 'my_company',
+    size: 120,
+  },
+  labels: ['pro', 'beta'],
+};
+
+const flagValue = await featureFlagClient.getBooleanValue('my-feature-flag', false, context);
+```
+
+### Data collection and analytics
+
+The provider automatically collects evaluation data. You can customize this behavior:
+
+```typescript
+const goFeatureFlagProvider = new GoFeatureFlagProvider({
+  endpoint: 'http://localhost:1031/',
+  evaluationType: EvaluationType.Remote,
+  disableDataCollection: false, // Enable data collection
+  dataFlushInterval: 20000, // Flush every 20 seconds
+  maxPendingEvents: 5000, // Max 5000 pending events
+});
+```
+
+### Custom exporter metadata
+
+Add custom metadata to your evaluation events:
+
+```typescript
+import { ExporterMetadata } from '@openfeature/go-feature-flag-provider';
+
+const metadata = new ExporterMetadata()
+  .add('environment', 'production')
+  .add('version', '1.0.0')
+  .add('region', 'us-east-1');
+
+const goFeatureFlagProvider = new GoFeatureFlagProvider({
+  endpoint: 'http://localhost:1031/',
+  evaluationType: EvaluationType.Remote,
+  exporterMetadata: metadata,
+});
+```
+
+## Flag types supported
+
+The provider supports all OpenFeature flag types:
+
+### Boolean flags
+
+```typescript
+const isEnabled = await featureFlagClient.getBooleanValue('feature-flag', false, context);
+const details = await featureFlagClient.getBooleanDetails('feature-flag', false, context);
+```
+
+### String flags
+
+```typescript
+const message = await featureFlagClient.getStringValue('welcome-message', 'Hello!', context);
+const details = await featureFlagClient.getStringDetails('welcome-message', 'Hello!', context);
+```
+
+### Number flags
+
+```typescript
+const percentage = await featureFlagClient.getNumberValue('discount-percentage', 0, context);
+const details = await featureFlagClient.getNumberDetails('discount-percentage', 0, context);
+```
+
+### Object flags
+
+```typescript
+const config = await featureFlagClient.getObjectValue('user-config', {}, context);
+const details = await featureFlagClient.getObjectDetails('user-config', {}, context);
+```
+
+## Tracking events
+
+The provider supports custom event tracking:
+
+```typescript
+// Track a custom event
+featureFlagClient.track('user_action', context, {
+  action: 'button_click',
+  page: 'homepage',
+  timestamp: Date.now(),
+});
+```
+
+## NextJS integration
+
+:::warning
+If you're using NextJS with in-process evaluation mode, you might encounter issues loading the WASM binary.
+:::
+
+In the server side, you might have an error like this _(only if you are using the in-process evaluation mode)_:
+
+```
+WasmNotLoadedException: Failed to load WASM binary: WASM file not found
+```
+
+Because of the specificity of **NextJS**, you need to add the following code to your `next.config.ts` file:
+
+```typescript
+const nextConfig: NextConfig = {
+  // ...
+  serverExternalPackages: ["@openfeature/go-feature-flag-provider"],
+  // ...
+};
+```
+
+This will tell NextJS to use the `@openfeature/go-feature-flag-provider` package as an external package and not to bundle it with the application, which is the best way to avoid the WASM binary not found error.
+
+## Features status
+
+<FeatureTable sdk={sdk.find(it => it.key === 'nodejs')} />
+
+## Contribute to the provider
+You can find the source of the provider in the [`open-feature/js-sdk-contrib`](https://github.com/open-feature/js-sdk-contrib/tree/main/libs/providers/go-feature-flag) repository.

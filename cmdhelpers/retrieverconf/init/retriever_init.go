@@ -74,6 +74,7 @@ func createGitHubRetriever(
 		}(),
 		FilePath:    c.Path,
 		GithubToken: token,
+		BaseURL:     c.BaseURL,
 		Timeout:     timeout,
 	}, nil
 }

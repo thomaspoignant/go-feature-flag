@@ -18,6 +18,8 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 )
 
+var _ notifier.Notifier = &Notifier{}
+
 const (
 	goFFLogo            = "https://raw.githubusercontent.com/thomaspoignant/go-feature-flag/main/logo_128.png"
 	slackFooter         = "go-feature-flag"
@@ -93,7 +95,7 @@ func convertToSlackMessage(diffCache notifier.DiffCache) slackMessage {
 }
 
 func convertDeletedFlagsToSlackMessage(diffCache notifier.DiffCache) []attachment {
-	attachments := make([]attachment, 0)
+	attachments := make([]attachment, 0, len(diffCache.Deleted))
 	for key := range diffCache.Deleted {
 		attachment := attachment{
 			Title:      fmt.Sprintf("❌ Flag \"%s\" deleted", key),
@@ -107,7 +109,7 @@ func convertDeletedFlagsToSlackMessage(diffCache notifier.DiffCache) []attachmen
 }
 
 func convertUpdatedFlagsToSlackMessage(diffCache notifier.DiffCache) []attachment {
-	attachments := make([]attachment, 0)
+	attachments := make([]attachment, 0, len(diffCache.Updated))
 	for key, value := range diffCache.Updated {
 		attachment := attachment{
 			Title:      fmt.Sprintf("✏️ Flag \"%s\" updated", key),
@@ -141,7 +143,7 @@ func convertUpdatedFlagsToSlackMessage(diffCache notifier.DiffCache) []attachmen
 }
 
 func convertAddedFlagsToSlackMessage(diff notifier.DiffCache) []attachment {
-	attachments := make([]attachment, 0)
+	attachments := make([]attachment, 0, len(diff.Added))
 	for key := range diff.Added {
 		attachment := attachment{
 			Title:      fmt.Sprintf("🆕 Flag \"%s\" created", key),

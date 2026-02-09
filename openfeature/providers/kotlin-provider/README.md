@@ -16,13 +16,14 @@ For documentation related to flags management in GO Feature Flag, refer to the [
 - Prefetch and cache flag evaluations in order to give the flag value in an efficient way.
 - Automatic configuration changes polling, to be informed as soon as a flag configuration has changed.
 - Automatic data collection about which flags have been accessed by the application
+- OpenFeature Tracking API support.
 
 ## Dependency Setup
 
 ```kotlin
 dependencies {
-    api("dev.openfeature:android-sdk:0.3.0") // check on maven central to get the latest version
-    implementation("org.gofeatureflag.openfeature:gofeatureflag-kotlin-provider:0.1.0") // check on maven central to get the latest version
+    api("dev.openfeature:kotlin-sdk:0.7.0") // check on maven central to get the latest version
+    implementation("org.gofeatureflag.openfeature:gofeatureflag-kotlin-provider:1.0.0") // check on maven central to get the latest version
 }
 ```
 
@@ -161,7 +162,7 @@ coroutineScope.launch {
 | ❌      | Logging            | Not supported by the SDK                                                                                                                            |
 | ✅      | Flag Metadata      | You have access to your flag metadata                                                                                                               |
 | ✅      | Event Streaming    | You can register to receive some internal event from the provider                                                                                   |
-| ✅      | Unit test          | The test are running one by one, but we still have an [issue open](https://github.com/open-feature/kotlin-sdk/issues/108) to enable fully the tests |
+| ✅      | Unit test          | The tests are running and passing                                                                                                                    |
 
 <sub>Implemented: ✅ | In-progress: ⚠️ | Not implemented yet: ❌</sub>
 

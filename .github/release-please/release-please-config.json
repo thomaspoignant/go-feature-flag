@@ -36,20 +36,13 @@
             "path": ".",
             "component": "go-feature-flag",
             "exclude-paths": [
-                "modules/evaluation",
                 "modules/core",
                 "openfeature/providers/kotlin-provider",
                 "openfeature/providers/python-provider",
                 ".github/release-please",
-                "cmd/wasm"
+                "cmd/wasm",
+                "website"
             ]
-        },
-        "modules/evaluation": {
-            "release-type": "go",
-            "path": "modules/evaluation",
-            "include-component-in-tag": true,
-            "component": "modules/evaluation",
-            "changelog-path": "CHANGELOG.md"
         },
         "modules/core": {
             "release-type": "go",
@@ -76,7 +69,8 @@
                 "gradle.properties",
                 "build.gradle.kts",
                 "README.md"
-            ]
+            ],
+            "release-as": "1.0.0"
         },
         "openfeature/providers/python-provider": {
             "release-type": "python",

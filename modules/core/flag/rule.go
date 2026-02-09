@@ -102,11 +102,23 @@ func (r *Rule) Evaluate(key string, ctx ffcontext.Context, flagName string, isDe
 	return "", fmt.Errorf("error in the configuration, no variation available for this rule")
 }
 
-func evaluateRule(query string, queryFormat QueryFormat, ctx ffcontext.Context) bool {
+func evaluateRule(query string, queryFormat QueryFormat, ctx ffcontext.Context) (success bool) {
 	if query == "" {
 		return true
 	}
 	mapCtx := utils.ContextToMap(ctx)
+
+	// Catch any panics that may occur during evaluation
+	defer func() {
+		if r := recover(); r != nil {
+			slog.ErrorContext(context.Background(), "panic recovered while evaluating query",
+				slog.Any("panic", r),
+				slog.String("query", query),
+			)
+			success = false
+		}
+	}()
+
 	switch queryFormat {
 	case JSONLogicQueryFormat:
 		strCtx, err := json.Marshal(mapCtx)
@@ -207,9 +219,18 @@ func (r *Rule) getVariationFromProgressiveRollout(
 		percentage := endPercentage - initialPercentage
 		percentPerSec := percentage / float64(nbSec)
 
-		c := evaluationDate.Unix() - r.ProgressiveRollout.Initial.Date.Unix()
-		currentPercentage := float64(c)*percentPerSec + initialPercentage
+		var currentPercentage float64
+		// Cap the percentage at endPercentage if evaluation date is at or after end date
+		if !evaluationDate.Before(*r.ProgressiveRollout.End.Date) {
+			currentPercentage = endPercentage
+		} else {
+			c := evaluationDate.Unix() - r.ProgressiveRollout.Initial.Date.Unix()
+			currentPercentage = float64(c)*percentPerSec + initialPercentage
+		}
 
+		// The percentage represents how many users get the END variation
+		// Users with hash < currentPercentage get END variation
+		// Users with hash >= currentPercentage get INITIAL variation
 		if hash < uint32(currentPercentage) {
 			return r.ProgressiveRollout.End.getVariation(), nil
 		}
@@ -260,6 +281,10 @@ func (r *Rule) getPercentageBuckets() map[string]percentageBucket {
 // MergeRules is merging 2 rules.
 // It is used when we have to update a rule in a scheduled rollout.
 func (r *Rule) MergeRules(updatedRule Rule) {
+	if updatedRule.Disable != nil {
+		r.Disable = updatedRule.Disable
+	}
+
 	if updatedRule.Query != nil {
 		r.Query = updatedRule.Query
 	}
