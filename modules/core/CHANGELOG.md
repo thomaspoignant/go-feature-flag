@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.5.0...modules/core/v0.5.1) (2026-02-11)
+
+
+### 🔧 Chores
+
+* use json-logic-go package with fix for in array partial match bug ([#4796](https://github.com/thomaspoignant/go-feature-flag/issues/4796)) ([5beeef4](https://github.com/thomaspoignant/go-feature-flag/commit/5beeef4521aa6965927b59a16954b4e76484cc78))
+
 ## [0.5.0](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.4.1...modules/core/v0.5.0) (2026-01-30)
 
 
