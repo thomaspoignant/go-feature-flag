@@ -1,5 +1,3 @@
-github.com/GeorgeD19/json-logic-go v0.0.0-20220225111652-48cc2d2c387e h1:pGKbZyClLVd95fyMC8yib8STgy76ShCwIaPOSZPhDMM=
-github.com/GeorgeD19/json-logic-go v0.0.0-20220225111652-48cc2d2c387e/go.mod h1:vIXtt8GZPXz4N4IZmJHYp8W8QWCi2IfNhOKWeqYc6RY=
 github.com/antlr4-go/antlr/v4 v4.13.0 h1:lxCg3LAv+EUK6t1i0y1V6/SLeUi0eKEKdhQAlS8TVTI=
 github.com/antlr4-go/antlr/v4 v4.13.0/go.mod h1:pfChB/xh/Unjila75QW7+VU4TSnWnnk9UTnmpPaOR2g=
 github.com/blang/semver/v4 v4.0.0 h1:1PFHFE6yCCTv8C1TeyNNarDzntLi7wMI5i/pzqYIsAM=
@@ -12,6 +10,8 @@ github.com/dariubs/percent v0.0.0-20190521174708-8153fcbd48ae/go.mod h1:NqjuQSHe
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/doriandekoning/json-logic-go v0.0.0-20260211095634-9d88fadd8311 h1:7lUYBxMjv5jfCTtU0K3cC9J8cU3PG9rmnBlVRX1uUTI=
+github.com/doriandekoning/json-logic-go v0.0.0-20260211095634-9d88fadd8311/go.mod h1:vIXtt8GZPXz4N4IZmJHYp8W8QWCi2IfNhOKWeqYc6RY=
 github.com/google/go-cmp v0.7.0 h1:wk8382ETsv4JYUZwIsn6YpYiWiBsYLSJiTsyBybVuN8=
 github.com/google/go-cmp v0.7.0/go.mod h1:pXiqmnSA92OHEEa9HXL2W4E7lf9JzCmGVUdgjX3N/iU=
 github.com/hairyhenderson/rules v0.0.0-20250704181428-58ee76134adc h1:Lf2F57nHEebTz1Z1WVB/bt6k8LvRgk1hWdDGM+Y3TgQ=
