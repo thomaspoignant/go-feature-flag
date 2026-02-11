@@ -8,7 +8,7 @@ import (
 	"sort"
 	"time"
 
-	jsonlogic "github.com/GeorgeD19/json-logic-go"
+	jsonlogic "github.com/doriandekoning/json-logic-go"
 	"github.com/nikunjy/rules/parser"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/internalerror"

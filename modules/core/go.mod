@@ -3,7 +3,7 @@ module github.com/thomaspoignant/go-feature-flag/modules/core
 go 1.24.6
 
 require (
-	github.com/GeorgeD19/json-logic-go v0.0.0-20220225111652-48cc2d2c387e
+	github.com/doriandekoning/json-logic-go v0.0.1
 	github.com/google/go-cmp v0.7.0
 	github.com/nikunjy/rules v1.5.0
 	github.com/stretchr/testify v1.11.1
@@ -11,10 +11,6 @@ require (
 
 // TODO: remove this once https://github.com/nikunjy/rules/pull/43 merges and a new version is available
 replace github.com/nikunjy/rules => github.com/hairyhenderson/rules v0.0.0-20250704181428-58ee76134adc
-
-// This change is needed to fix a bug with the jsonlogic IN operator also matching partial matches
-// Fixes this https://github.com/GeorgeD19/json-logic-go/pull/2 but not yet merged
-replace github.com/GeorgeD19/json-logic-go => github.com/doriandekoning/json-logic-go v0.0.0-20260211095634-9d88fadd8311
 
 require (
 	github.com/antlr4-go/antlr/v4 v4.13.0 // indirect
