@@ -533,6 +533,19 @@ func TestRuleEvaluate(t *testing.T) {
 			wantErr: assert.Error,
 		},
 		{
+			name: "User partially matches with in array operator (JsonLogic)",
+			rule: flag.Rule{
+				Name:            testconvert.String("rule1"),
+				VariationResult: testconvert.String("variation_A"),
+				Query:           testconvert.String(`{"in": [{"var": "key"}, ["abcdef", "1234"]]}`),
+			},
+			args: args{
+				isDefault: false,
+				user:      ffcontext.NewEvaluationContext("abc"),
+			},
+			wantErr: assert.Error,
+		},
+		{
 			name: "User match the query (JsonLogic)",
 			rule: flag.Rule{
 				Name:            testconvert.String("rule1"),
