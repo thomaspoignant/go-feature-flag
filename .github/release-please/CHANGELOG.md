@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.51.2](https://github.com/thomaspoignant/go-feature-flag/compare/v1.51.1...v1.51.2) (2026-02-11)
+
+
+### 🔧 Chores
+
+* Bump @openfeature/go-feature-flag-provider ([#4795](https://github.com/thomaspoignant/go-feature-flag/issues/4795)) ([ddc13e9](https://github.com/thomaspoignant/go-feature-flag/commit/ddc13e91a075ed316c0cfef1567a0bbf57ab5876))
+* Bump cloud.google.com/go/storage from 1.59.2 to 1.60.0 ([#4790](https://github.com/thomaspoignant/go-feature-flag/issues/4790)) ([8d4a95d](https://github.com/thomaspoignant/go-feature-flag/commit/8d4a95d00ee14824fe597c767e87ae12f0ace161))
+* Bump google.golang.org/api from 0.265.0 to 0.266.0 ([#4791](https://github.com/thomaspoignant/go-feature-flag/issues/4791)) ([418b83f](https://github.com/thomaspoignant/go-feature-flag/commit/418b83ff48a855bb7c7dbca04ac7daef403d98f0))
+* Bump k8s.io/client-go from 0.35.0 to 0.35.1 ([#4789](https://github.com/thomaspoignant/go-feature-flag/issues/4789)) ([547bc75](https://github.com/thomaspoignant/go-feature-flag/commit/547bc7557cdf3a504af1eaf87411f4be785bbb32))
+* **dependency:** Bump module modules/core 0.5.1 ([#4799](https://github.com/thomaspoignant/go-feature-flag/issues/4799)) ([649a82d](https://github.com/thomaspoignant/go-feature-flag/commit/649a82d613146ee46d3d19ef87c4cd4482977d3a))
+* use json-logic-go package with fix for in array partial match bug ([#4796](https://github.com/thomaspoignant/go-feature-flag/issues/4796)) ([5beeef4](https://github.com/thomaspoignant/go-feature-flag/commit/5beeef4521aa6965927b59a16954b4e76484cc78))
+
 ## [1.51.1](https://github.com/thomaspoignant/go-feature-flag/compare/v1.51.0...v1.51.1) (2026-02-10)
 
 
