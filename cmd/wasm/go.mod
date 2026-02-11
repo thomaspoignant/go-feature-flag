@@ -2,7 +2,7 @@ module github.com/thomaspoignant/go-feature-flag/cmd/wasm
 
 go 1.24.6
 
-require github.com/thomaspoignant/go-feature-flag/modules/core v0.5.0
+require github.com/thomaspoignant/go-feature-flag/modules/core v0.5.1
 
 require github.com/kr/text v0.2.0 // indirect
 
