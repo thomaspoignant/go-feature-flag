@@ -310,7 +310,3 @@ replace github.com/xitongsys/parquet-go => github.com/rudderlabs/parquet-go v0.0
 // This fix is needed to resolve semver comparison issues with prerelease versions.
 // Check https://github.com/thomaspoignant/go-feature-flag/issues/4736 for more details.
 replace github.com/nikunjy/rules => github.com/hairyhenderson/rules v0.0.0-20250704181428-58ee76134adc
-
-// This change is needed to fix a bug with the jsonlogic IN operator also matching partial matches
-// Fixes this https://github.com/GeorgeD19/json-logic-go/pull/2 but not yet merged
-replace github.com/GeorgeD19/json-logic-go => github.com/doriandekoning/json-logic-go v0.0.0-20260211095634-9d88fadd8311

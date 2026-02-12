@@ -107,8 +107,7 @@ func TestRuleEvaluate(t *testing.T) {
 				isDefault: false,
 				user:      ffcontext.NewEvaluationContext("abc"),
 			},
-			want:    "variation_A",
-			wantErr: assert.NoError,
+			wantErr: assert.Error,
 		},
 
 		{

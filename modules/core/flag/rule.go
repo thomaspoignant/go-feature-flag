@@ -1,14 +1,16 @@
 package flag
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"log/slog"
 	"sort"
+	"strings"
 	"time"
 
-	jsonlogic "github.com/GeorgeD19/json-logic-go"
+	jsonlogic2 "github.com/diegoholiveira/jsonlogic/v3"
 	"github.com/nikunjy/rules/parser"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/internalerror"
@@ -127,20 +129,18 @@ func evaluateRule(query string, queryFormat QueryFormat, ctx ffcontext.Context) 
 				slog.Any("mapCtx", mapCtx), slog.Any("error", err.Error()))
 			return false
 		}
-		result, err := jsonlogic.Apply(query, string(strCtx))
+		var result bytes.Buffer
+		err = jsonlogic2.Apply(
+			strings.NewReader(query),
+			strings.NewReader(string(strCtx)),
+			&result,
+		)
 		if err != nil {
 			slog.ErrorContext(context.Background(), "error while evaluating the jsonlogic query",
 				slog.String("query", query), slog.Any("error", err.Error()))
 			return false
 		}
-		switch v := result.(type) {
-		case bool:
-			return v
-		case string:
-			return utils.StrTrim(v) == "true"
-		default:
-			return false
-		}
+		return utils.StrTrim(result.String()) == "true"
 	default:
 		return parser.Evaluate(query, mapCtx)
 	}
