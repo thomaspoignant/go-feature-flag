@@ -13,6 +13,13 @@ require (
 	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/dariubs/percent v0.0.0-20190521174708-8153fcbd48ae // indirect
+	github.com/kr/text v0.2.0 // indirect
+	github.com/spf13/cast v1.3.0 // indirect
+)
+
+require (
+	github.com/antlr4-go/antlr/v4 v4.13.0 // indirect
+	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/nikunjy/rules v1.5.0 // indirect

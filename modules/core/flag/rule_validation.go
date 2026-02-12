@@ -2,7 +2,9 @@ package flag
 
 import (
 	"fmt"
+	"strings"
 
+	"github.com/diegoholiveira/jsonlogic/v3"
 	"github.com/nikunjy/rules/parser"
 )
 
@@ -134,7 +136,9 @@ func (r *Rule) isQueryValid(defaultRule bool) error {
 	// Validate the query with the parser
 	switch r.GetQueryFormat() {
 	case JSONLogicQueryFormat:
-		// No validation available with this JSON logic library
+		if !jsonlogic.IsValid(strings.NewReader(r.GetQuery())) {
+			return fmt.Errorf("invalid jsonlogic query")
+		}
 		return nil
 	default:
 		return validateNikunjyQuery(r.GetTrimmedQuery())
