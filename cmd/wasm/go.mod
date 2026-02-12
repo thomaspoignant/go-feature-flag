@@ -4,10 +4,12 @@ go 1.24.6
 
 require github.com/thomaspoignant/go-feature-flag/modules/core v0.5.1
 
-require github.com/kr/text v0.2.0 // indirect
-
 require (
 	github.com/GeorgeD19/json-logic-go v0.0.0-20220225111652-48cc2d2c387e // indirect
+	github.com/kr/text v0.2.0 // indirect
+)
+
+require (
 	github.com/antlr4-go/antlr/v4 v4.13.0 // indirect
 	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
