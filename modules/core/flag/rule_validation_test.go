@@ -774,6 +774,17 @@ func TestRule_isQueryValid(t *testing.T) {
 			wantErr:     assert.NoError,
 		},
 		{
+			name: "non-default rule with invalid JSONLogic query",
+			rule: flag.Rule{
+				Query:           testconvert.String(`{"unknownOperator": [1, 2]}`),
+				VariationResult: testconvert.String("variation_A"),
+			},
+			defaultRule: false,
+			variations:  variations,
+			wantErr:     assert.Error,
+			wantErrMsg:  "invalid jsonlogic query",
+		},
+		{
 			name: "non-default rule with invalid Nikunjy query",
 			rule: flag.Rule{
 				Query:           testconvert.String("invalid query syntax"),
