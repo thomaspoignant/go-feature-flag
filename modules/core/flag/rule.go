@@ -132,7 +132,7 @@ func evaluateRule(query string, queryFormat QueryFormat, ctx ffcontext.Context) 
 		var result bytes.Buffer
 		err = jsonlogic2.Apply(
 			strings.NewReader(query),
-			strings.NewReader(string(strCtx)),
+			bytes.NewReader(strCtx),
 			&result,
 		)
 		if err != nil {
