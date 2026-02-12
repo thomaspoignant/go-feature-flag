@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	jsonlogic2 "github.com/diegoholiveira/jsonlogic/v3"
+	"github.com/diegoholiveira/jsonlogic/v3"
 	"github.com/nikunjy/rules/parser"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/internalerror"
@@ -130,7 +130,7 @@ func evaluateRule(query string, queryFormat QueryFormat, ctx ffcontext.Context) 
 			return false
 		}
 		var result bytes.Buffer
-		err = jsonlogic2.Apply(
+		err = jsonlogic.Apply(
 			strings.NewReader(query),
 			bytes.NewReader(strCtx),
 			&result,
