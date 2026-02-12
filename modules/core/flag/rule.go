@@ -1,14 +1,16 @@
 package flag
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"log/slog"
 	"sort"
+	"strings"
 	"time"
 
-	jsonlogic "github.com/GeorgeD19/json-logic-go"
+	"github.com/diegoholiveira/jsonlogic/v3"
 	"github.com/nikunjy/rules/parser"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/internalerror"
@@ -127,19 +129,25 @@ func evaluateRule(query string, queryFormat QueryFormat, ctx ffcontext.Context) 
 				slog.Any("mapCtx", mapCtx), slog.Any("error", err.Error()))
 			return false
 		}
-		result, err := jsonlogic.Apply(query, string(strCtx))
+		var result bytes.Buffer
+		err = jsonlogic.Apply(
+			strings.NewReader(query),
+			bytes.NewReader(strCtx),
+			&result,
+		)
 		if err != nil {
 			slog.ErrorContext(context.Background(), "error while evaluating the jsonlogic query",
 				slog.String("query", query), slog.Any("error", err.Error()))
 			return false
 		}
-		switch v := result.(type) {
-		case bool:
-			return v
-		case string:
-			return utils.StrTrim(v) == "true"
-		default:
+		resStr := utils.StrTrim(result.String())
+		// As per JSONLogic spec, falsy values are: false, null, "", 0, and []
+		// All other values are truthy.
+		switch resStr {
+		case "false", "null", `""`, "0", "[]":
 			return false
+		default:
+			return true
 		}
 	default:
 		return parser.Evaluate(query, mapCtx)
