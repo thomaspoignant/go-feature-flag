@@ -140,7 +140,15 @@ func evaluateRule(query string, queryFormat QueryFormat, ctx ffcontext.Context) 
 				slog.String("query", query), slog.Any("error", err.Error()))
 			return false
 		}
-		return utils.StrTrim(result.String()) == "true"
+		resStr := utils.StrTrim(result.String())
+		// As per JSONLogic spec, falsy values are: false, null, "", 0, and []
+		// All other values are truthy.
+		switch resStr {
+		case "false", "null", `""`, "0", "[]":
+			return false
+		default:
+			return true
+		}
 	default:
 		return parser.Evaluate(query, mapCtx)
 	}
