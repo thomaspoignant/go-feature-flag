@@ -597,19 +597,6 @@ func TestRuleEvaluate(t *testing.T) {
 			wantErr: assert.Error,
 		},
 		{
-			name: "Invalid JsonLogic rule that results in a panic",
-			rule: flag.Rule{
-				Name:            testconvert.String("rule1"),
-				VariationResult: testconvert.String("variation_A"),
-				// Getting longer substr than actual string is long results in a panic
-				Query: testconvert.String(`{"substr": ["a", -3]}`),
-			},
-			args: args{
-				user: ffcontext.NewEvaluationContext("96ac59e6-7492-436b-b15a-ba1d797d2423"),
-			},
-			wantErr: assert.Error,
-		},
-		{
 			name: "Semver comparison with prerelease identifiers - higher version provided",
 			rule: flag.Rule{
 				Name:            testconvert.String("semver_rule"),

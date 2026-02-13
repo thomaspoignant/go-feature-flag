@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.52.0](https://github.com/thomaspoignant/go-feature-flag/compare/v1.51.2...v1.52.0) (2026-02-13)
+
+
+### 🚀 New Features
+
+* **core:** replace jsonlogic library with diegoholiveira/jsonlogic/v3 ([#4805](https://github.com/thomaspoignant/go-feature-flag/issues/4805)) ([c1b2948](https://github.com/thomaspoignant/go-feature-flag/commit/c1b2948ec41d8e1dad4e193da27226fa67b8267b))
+
+
+### 🔧 Chores
+
+* Bump @openfeature/go-feature-flag-provider ([#4814](https://github.com/thomaspoignant/go-feature-flag/issues/4814)) ([781d02a](https://github.com/thomaspoignant/go-feature-flag/commit/781d02ac192702bbb8e723b8af6c9d17baf44ee4))
+* Bump @openfeature/go-feature-flag-web-provider ([#4817](https://github.com/thomaspoignant/go-feature-flag/issues/4817)) ([15dee76](https://github.com/thomaspoignant/go-feature-flag/commit/15dee768bfe79c0956e2eebc2be86542503deede))
+* Bump @openfeature/go-feature-flag-web-provider ([#4823](https://github.com/thomaspoignant/go-feature-flag/issues/4823)) ([85346d7](https://github.com/thomaspoignant/go-feature-flag/commit/85346d7ff431db02f0212b4c6654fe03f7a7f4fc))
+* Bump @types/react in /examples/openfeature_react/react-app ([#4822](https://github.com/thomaspoignant/go-feature-flag/issues/4822)) ([672475a](https://github.com/thomaspoignant/go-feature-flag/commit/672475aaae66f373d7624378edbcd9a2b98f44f4))
+* Bump @typescript-eslint/eslint-plugin ([#4820](https://github.com/thomaspoignant/go-feature-flag/issues/4820)) ([5ec3b55](https://github.com/thomaspoignant/go-feature-flag/commit/5ec3b551a396a047e10e96a769a87244235ffc28))
+* Bump @typescript-eslint/parser ([#4821](https://github.com/thomaspoignant/go-feature-flag/issues/4821)) ([2f766fb](https://github.com/thomaspoignant/go-feature-flag/commit/2f766fbed7ad38a9dc5969eae0f12339d5c59ee9))
+* Bump @vitejs/plugin-react ([#4818](https://github.com/thomaspoignant/go-feature-flag/issues/4818)) ([6ca00d7](https://github.com/thomaspoignant/go-feature-flag/commit/6ca00d7edd07e68cdfa78337bf3cb9e3825e3ba2))
+* Bump eslint in /examples/openfeature_react/react-app ([#4819](https://github.com/thomaspoignant/go-feature-flag/issues/4819)) ([1e81a37](https://github.com/thomaspoignant/go-feature-flag/commit/1e81a3723edc73f4649f3a8fb808fddcac9b2c7c))
+* Bump eslint in /examples/openfeature_web/webapp ([#4815](https://github.com/thomaspoignant/go-feature-flag/issues/4815)) ([97388e7](https://github.com/thomaspoignant/go-feature-flag/commit/97388e755c97e24a1e6c5b43446f54e75a978420))
+* Bump google.golang.org/grpc from 1.78.0 to 1.79.0 ([#4811](https://github.com/thomaspoignant/go-feature-flag/issues/4811)) ([0621da1](https://github.com/thomaspoignant/go-feature-flag/commit/0621da11e0dfcb622e088ffe961558b93f35b391))
+* Bump stylelint in /examples/openfeature_web/webapp ([#4813](https://github.com/thomaspoignant/go-feature-flag/issues/4813)) ([15240a6](https://github.com/thomaspoignant/go-feature-flag/commit/15240a6c817322a3ed446b0aa3cea4374264f9b8))
+* Bump webpack in /examples/openfeature_web/webapp ([#4812](https://github.com/thomaspoignant/go-feature-flag/issues/4812)) ([b0e3fd1](https://github.com/thomaspoignant/go-feature-flag/commit/b0e3fd15e741a4e1180b2d29fb1b676981cb57e0))
+* **dependency:** Bump module modules/core 0.6.0 ([#4810](https://github.com/thomaspoignant/go-feature-flag/issues/4810)) ([e6868fb](https://github.com/thomaspoignant/go-feature-flag/commit/e6868fb9ce002da30a43bd1e94ca1f0e0a916e25))
+
 ## [1.51.2](https://github.com/thomaspoignant/go-feature-flag/compare/v1.51.1...v1.51.2) (2026-02-11)
 
 

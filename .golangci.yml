@@ -123,8 +123,6 @@ linters:
         - github.com/nikunjy/rules
         # fix for Athena v3 parquet query issue - https://github.com/xitongsys/parquet-go/issues/547
         - github.com/xitongsys/parquet-go
-        # fix for in array partial match bug - https://github.com/GeorgeD19/json-logic-go/pull/65
-        - github.com/GeorgeD19/json-logic-go
   exclusions:
     paths:
       - (^|/)bin($|/)

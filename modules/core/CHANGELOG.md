@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.5.1...modules/core/v0.6.0) (2026-02-12)
+
+
+### 🚀 New Features
+
+* **core:** replace jsonlogic library with diegoholiveira/jsonlogic/v3 ([#4805](https://github.com/thomaspoignant/go-feature-flag/issues/4805)) ([c1b2948](https://github.com/thomaspoignant/go-feature-flag/commit/c1b2948ec41d8e1dad4e193da27226fa67b8267b))
+
 ## [0.5.1](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.5.0...modules/core/v0.5.1) (2026-02-11)
 
 
