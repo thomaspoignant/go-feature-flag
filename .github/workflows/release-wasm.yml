@@ -39,7 +39,7 @@ jobs:
           check-latest: true
       - uses: acifani/setup-tinygo@db56321a62b9a67922bb9ac8f9d085e218807bb3 # v2.0.1
         with:
-          tinygo-version: "0.37.0"
+          tinygo-version: "0.40.1"
       - name: Release WASM
         env:
           VERSION: ${{ steps.extract_version.outputs.VERSION }}
