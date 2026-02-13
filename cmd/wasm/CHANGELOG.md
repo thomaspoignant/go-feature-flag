@@ -17,6 +17,25 @@
 
 * **dependency:** Bump module modules/core 0.5.1 ([#4798](https://github.com/thomaspoignant/go-feature-flag/issues/4798)) ([7ee8da8](https://github.com/thomaspoignant/go-feature-flag/commit/7ee8da85211d144ecc77c06f4e752dcdb96526e8))
 * **dependency:** Bump module modules/core 0.6.0 ([#4809](https://github.com/thomaspoignant/go-feature-flag/issues/4809)) ([f5287ba](https://github.com/thomaspoignant/go-feature-flag/commit/f5287ba5eab002767bd5ee39a6230e467982483b))
+* **main:** release cmd/wasm 0.2.0 ([#4800](https://github.com/thomaspoignant/go-feature-flag/issues/4800)) ([1803131](https://github.com/thomaspoignant/go-feature-flag/commit/18031310a00e6261191867a50e0f2b6036066ca3))
+
+## [0.2.0](https://github.com/thomaspoignant/go-feature-flag/compare/cmd/wasm/v0.1.4...cmd/wasm/v0.2.0) (2026-02-13)
+
+
+### 🚀 New Features
+
+* **core:** replace jsonlogic library with diegoholiveira/jsonlogic/v3 ([#4805](https://github.com/thomaspoignant/go-feature-flag/issues/4805)) ([c1b2948](https://github.com/thomaspoignant/go-feature-flag/commit/c1b2948ec41d8e1dad4e193da27226fa67b8267b))
+
+
+### 🐛 Bug Fixes
+
+* **wasm:** add replace directive for nikunjy/rules to fix semver prerelease handling ([#4808](https://github.com/thomaspoignant/go-feature-flag/issues/4808)) ([a466057](https://github.com/thomaspoignant/go-feature-flag/commit/a466057456811784908c2a057405428cdd6f4c9f))
+
+
+### 🔧 Chores
+
+* **dependency:** Bump module modules/core 0.5.1 ([#4798](https://github.com/thomaspoignant/go-feature-flag/issues/4798)) ([7ee8da8](https://github.com/thomaspoignant/go-feature-flag/commit/7ee8da85211d144ecc77c06f4e752dcdb96526e8))
+* **dependency:** Bump module modules/core 0.6.0 ([#4809](https://github.com/thomaspoignant/go-feature-flag/issues/4809)) ([f5287ba](https://github.com/thomaspoignant/go-feature-flag/commit/f5287ba5eab002767bd5ee39a6230e467982483b))
 
 ## [0.1.4](https://github.com/thomaspoignant/go-feature-flag/compare/cmd/wasm/v0.1.3...cmd/wasm/v0.1.4) (2026-01-30)
 
