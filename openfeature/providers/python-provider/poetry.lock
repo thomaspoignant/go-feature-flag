@@ -677,13 +677,13 @@ files = [
 
 [[package]]
 name = "rel"
-version = "0.4.9.23"
+version = "0.4.9.24"
 description = "Registered Event Listener. Provides standard (pyevent) interface and functionality without external dependencies"
 optional = false
 python-versions = "*"
 groups = ["main"]
 files = [
-    {file = "rel-0.4.9.23-py3-none-any.whl", hash = "sha256:2ea72bb5c334f99d570b159722ee922d924172bd033b5ed4e0fabf2b047e317f"},
+    {file = "rel-0.4.9.24-py3-none-any.whl", hash = "sha256:6892e7c2e98bdfb1d9dbeb59198614c0593bf1d6df6a8f1a66fc1b4fe2346074"},
 ]
 
 [[package]]
