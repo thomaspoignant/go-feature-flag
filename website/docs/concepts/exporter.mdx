@@ -51,6 +51,19 @@ Considering the volume of information to process and the potential impact on you
 
 [Check how to configure the exporters](../integrations/export-evaluation-data)
 
+
+## Feature vs Tracking exporters
+
+Exporters can be configured to receive one of two event types:
+
+- **Feature exporters** (default): They receive **feature events**—one event per flag evaluation. Each event describes which flag was evaluated, which variation was returned, and for which user/context. Use this to understand flag usage, power analytics, and feed A/B or experimentation tools. See [flag usage tracking](../tracking/flag-usage-tracking) for details.
+- **Tracking exporters**: They receive **tracking events**—custom actions or outcomes you record via the [OpenFeature Tracking API](https://openfeature.dev/specification/sections/tracking/) (e.g. "user completed checkout", "clicked CTA"). Use this to measure the impact of flags (e.g. conversion per variation) and run experiments. See [Tracking API](../tracking/tracking-api) for details.
+
+You choose the event type per exporter with the `eventType` option (`"feature"` or `"tracking"`).
+The default is `"feature"` when omitted. You can send both kinds of events to the same backend by defining two exporter entries—one for feature events, one for tracking events—if your pipeline accepts both.
+
+For more information, see the [tracking section](../tracking/flag-usage-tracking) (flag usage and [Tracking API](../tracking/tracking-api)).
+
 ## How Exporters Work
 
 When a feature flag is evaluated using any of the SDK, GO Feature Flag notifies the configured exporters with the evaluation result. This result typically includes:
