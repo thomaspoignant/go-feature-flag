@@ -1,8 +1,0 @@
-flag:
-  targeting:
-    - query: key eq "random-key"
-      percentage:
-        A: 0
-        B: 100
-  defaultRule:
-    variation: true
