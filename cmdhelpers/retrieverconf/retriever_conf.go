@@ -38,7 +38,7 @@ type RetrieverConf struct {
 	ConfigMap   string              `mapstructure:"configmap"     koanf:"configmap"`
 	Key         string              `mapstructure:"key"           koanf:"key"`
 	BaseURL     string              `mapstructure:"baseUrl"       koanf:"baseurl"`
-	AuthToken   string              `mapstructure:"token"         koanf:"token"`
+	AuthToken   string              `mapstructure:"token"         koanf:"token"` //nolint:gosec // G117
 
 	// URI is used by
 	// - the postgresql retriever
