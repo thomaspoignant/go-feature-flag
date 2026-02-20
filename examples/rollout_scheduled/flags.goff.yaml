@@ -6,17 +6,19 @@ new-admin-access:
   targeting:
     - query: key eq "785a14bf-d2c5-4caa-9c70-2bbc4e3732a5"
       name: rule_1
-      percentage:
-        false_var: 0
-        true_var: 100
+      variation: false_var
   defaultRule:
     variation: default
   scheduledRollout:
     - targeting:
-        - name: rule_1
+        - name: experiment_rule
           query: beta eq "true"
+          percentage:
+            false_var: 50
+            true_var: 50
       date: 2020-04-10T00:00:00.1+02:00
-    - targeting:
-        - name: rule_1
-          query: beta eq "false"
-      date: 2022-05-12T15:36:00.1+02:00
+    # - targeting:
+    #     - name: experiment_rule
+    #       disable: true
+    #   date: 2026-01-18T15:36:00.1+02:00
+    #   date: 2022-05-12T15:36:00.1+02:00

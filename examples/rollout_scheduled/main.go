@@ -3,10 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"log"
 	"log/slog"
 	"time"
+
+	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 
@@ -33,13 +34,21 @@ func main() {
 	defer ffclient.Close()
 
 	// create users
-	user := ffcontext.NewEvaluationContextBuilder("785a14bf-d2c5-4caa-9c70-2bbc4e3732a5").
+	user := ffcontext.NewEvaluationContextBuilder("785a14bf-d2c5-4caa-9c70-2bbc4e3732a56").
 		AddCustom("beta", "true").
+		Build()
+
+	user2 := ffcontext.NewEvaluationContextBuilder("785a14bf-d2c5-4caa-9c70-2bbc4e3732a5").
 		Build()
 
 	// Call multiple time the same flag to see the change in time.
 	for true {
 		time.Sleep(1 * time.Second)
-		fmt.Println(ffclient.BoolVariation("new-admin-access", user, false))
+		details, _ := ffclient.BoolVariationDetails("new-admin-access", user, false)
+		fmt.Println("Value user1: ", details.Value)
+		fmt.Println("Reason user1: ", details.Reason)
+		details, _ = ffclient.BoolVariationDetails("new-admin-access", user2, false)
+		fmt.Println("Value user2: ", details.Value)
+		fmt.Println("Reason user2: ", details.Reason)
 	}
 }
