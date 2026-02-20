@@ -73,7 +73,7 @@ type Notifier struct {
 	EndpointURL string
 
 	// Optional: Secret used to sign your request body.
-	Secret string
+	Secret string //nolint:gosec // G117
 
 	// Meta (optional) information that you want to send to your webhook
 	Meta map[string]string
