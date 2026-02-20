@@ -1,9 +1,7 @@
 {
-  "trackEvents": true,
-  "variationType": "True",
-  "failed": false,
-  "version": "1.0.0",
-  "reason": "TARGETING_MATCH",
-  "errorCode": "",
-  "value": true,
-  "cacheable": false,
+  "key": "invalid_json_body",
+  "value": {
+    "default": true
+  },
+  "reason": "DISABLED",
+  "variant": "defaultSdk",

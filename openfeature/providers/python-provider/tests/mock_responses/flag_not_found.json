@@ -1,11 +1,5 @@
 {
-  "trackEvents": true,
-  "variationType": "SdkDefault",
-  "failed": true,
-  "version": "1.0.0",
-  "reason": "ERROR",
+  "key": "flag_not_found",
   "errorCode": "FLAG_NOT_FOUND",
-  "value": true,
-  "metadata": {"test": "test1", "test2": false, "test3": 123.3},
-  "cacheable": false
+  "errorDetails": "Flag 'non-existent-flag' was not found"
 }

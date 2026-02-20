@@ -1,10 +1,5 @@
 {
-  "trackEvents": true,
-  "variationType": "True",
-  "failed": false,
-  "version": "1.0.0",
-  "reason": "CUSTOM_REASON",
-  "errorCode": "",
-  "value": true,
-  "cacheable": true
+  "key": "unknown_reason",
+  "errorCode": "UNKNOWN_REASON",
+  "errorDetails": "Unknown reason"
 }
