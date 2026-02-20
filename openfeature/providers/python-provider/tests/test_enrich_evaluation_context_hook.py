@@ -1,5 +1,7 @@
 """Tests for EnrichEvaluationContextHook."""
 
+from __future__ import annotations
+
 import pytest
 
 from gofeatureflag_python_provider.hooks import EnrichEvaluationContextHook

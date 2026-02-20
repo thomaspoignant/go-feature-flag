@@ -3,6 +3,8 @@ Tests for InProcessEvaluator: flag config fetch, storage, polling, and flag reso
 The EvaluateWasm instance is mocked so tests run without the real WASM binary.
 """
 
+from __future__ import annotations
+
 import time
 from unittest.mock import Mock, patch
 

@@ -3,6 +3,8 @@ Unit tests for GO Feature Flag API service layer (GoFeatureFlagApi).
 HTTP is mocked by patching urllib3.PoolManager so no real requests are made.
 """
 
+from __future__ import annotations
+
 import json
 from http import HTTPStatus
 from unittest.mock import Mock, patch

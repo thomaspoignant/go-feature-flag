@@ -2,6 +2,8 @@
 Tests for RemoteEvaluator OFREP bridge (delegation to openfeature-provider-ofrep).
 """
 
+from __future__ import annotations
+
 import asyncio
 from unittest.mock import patch
 

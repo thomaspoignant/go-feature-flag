@@ -3,6 +3,8 @@ Tests for EvaluateWasm: loads the real WASI binary via wasmtime and validates
 initialization, disposal, and flag evaluation for all supported types and scenarios.
 """
 
+from __future__ import annotations
+
 import pytest
 
 from gofeatureflag_python_provider.wasm import EvaluateWasm, WasmFlagContext, WasmInput
