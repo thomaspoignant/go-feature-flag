@@ -178,10 +178,7 @@ class EvaluateWasm:
                 f"malloc returned unexpected type {type(ptr).__name__!r}"
             )
 
-        mem_ptr = self._memory.data_ptr(self._store)
-        for i, byte in enumerate(data):
-            mem_ptr[ptr + i] = byte
-        mem_ptr[ptr + len(data)] = 0  # null terminator
+        self._memory.write(self._store, data + b"\x00", ptr)
         return ptr
 
     def _decode_result(self, result: int) -> WasmEvaluationResponse:
@@ -202,6 +199,7 @@ class EvaluateWasm:
                 "evaluate returned a null or zero-length output pointer"
             )
 
-        mem_ptr = self._memory.data_ptr(self._store)
-        output_bytes = bytes(mem_ptr[output_ptr : output_ptr + output_len])
+        output_bytes = self._memory.read(
+            self._store, output_ptr, output_ptr + output_len
+        )
         return WasmEvaluationResponse.model_validate_json(output_bytes)
