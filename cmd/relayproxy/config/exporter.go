@@ -18,7 +18,7 @@ type ExporterConf struct {
 	Bucket                  string                 `mapstructure:"bucket"                  koanf:"bucket"`
 	Path                    string                 `mapstructure:"path"                    koanf:"path"`
 	EndpointURL             string                 `mapstructure:"endpointUrl"             koanf:"endpointurl"`
-	Secret                  string                 `mapstructure:"secret"                  koanf:"secret"`
+	Secret                  string                 `mapstructure:"secret"                  koanf:"secret"` //nolint:gosec
 	Meta                    map[string]string      `mapstructure:"meta"                    koanf:"meta"`
 	LogFormat               string                 `mapstructure:"logFormat"               koanf:"logformat"`
 	FlushInterval           int64                  `mapstructure:"flushInterval"           koanf:"flushinterval"`
