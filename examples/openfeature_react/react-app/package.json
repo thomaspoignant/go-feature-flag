@@ -12,7 +12,7 @@
   "dependencies": {
     "@openfeature/core": "^1.9.1",
     "@openfeature/go-feature-flag-web-provider": "^0.2.8",
-    "@openfeature/react-sdk": "^1.2.0",
+    "@openfeature/react-sdk": "^1.2.1",
     "@openfeature/web-sdk": "^1.7.2",
     "react": "^19.2.1",
     "react-dom": "^19.2.4"
