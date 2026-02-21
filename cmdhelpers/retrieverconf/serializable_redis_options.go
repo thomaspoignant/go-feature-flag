@@ -28,7 +28,7 @@ type SerializableRedisOptions struct {
 	Username string `mapstructure:"username" koanf:"username" json:"username,omitempty"`
 
 	// Password is an optional password.
-	Password string `mapstructure:"password" koanf:"password" json:"password,omitempty"`
+	Password string `mapstructure:"password" koanf:"password" json:"password,omitempty"` //nolint:gosec // G117
 
 	// DB is the database to be selected after connecting to the server.
 	DB int `mapstructure:"db" koanf:"db" json:"db,omitempty"`
