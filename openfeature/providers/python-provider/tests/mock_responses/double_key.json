@@ -1,10 +1,6 @@
 {
-  "trackEvents": true,
-  "variationType": "True",
-  "failed": false,
-  "version": "1.0.0",
-  "reason": "TARGETING_MATCH",
-  "errorCode": "",
+  "key": "double_key",
   "value": 100.25,
-  "cacheable": true
+  "reason": "TARGETING_MATCH",
+  "variant": "True"
 }

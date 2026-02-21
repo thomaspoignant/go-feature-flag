@@ -1,10 +1,6 @@
 {
-  "trackEvents": true,
-  "variationType": "defaultSdk",
-  "failed": false,
-  "version": "1.0.0",
-  "reason": "DISABLED",
-  "errorCode": "",
+  "key": "disabled_float",
   "value": 123.45,
-  "cacheable": false
+  "reason": "DISABLED",
+  "variant": "defaultSdk"
 }

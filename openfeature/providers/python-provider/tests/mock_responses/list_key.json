@@ -1,10 +1,5 @@
 {
-  "trackEvents": true,
-  "variationType": "True",
-  "failed": false,
-  "version": "1.0.0",
-  "reason": "TARGETING_MATCH",
-  "errorCode": "",
+  "key": "list_key",
   "value": [
     "test",
     "test1",
@@ -12,5 +7,6 @@
     "false",
     "test3"
   ],
-  "cacheable": true
+  "reason": "TARGETING_MATCH",
+  "variant": "True"
 }
