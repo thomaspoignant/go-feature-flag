@@ -1,5 +1,56 @@
 # Changelog
 
+## [1.52.0](https://github.com/thomaspoignant/go-feature-flag/compare/v1.51.2...v1.52.0) (2026-02-21)
+
+
+### 🚀 New Features
+
+* **core:** replace jsonlogic library with diegoholiveira/jsonlogic/v3 ([#4805](https://github.com/thomaspoignant/go-feature-flag/issues/4805)) ([c1b2948](https://github.com/thomaspoignant/go-feature-flag/commit/c1b2948ec41d8e1dad4e193da27226fa67b8267b))
+
+
+### 🔧 Chores
+
+* add nolint directives for gosec false positives ([7dcae02](https://github.com/thomaspoignant/go-feature-flag/commit/7dcae02705525e199675ba43de0093820bbbabeb))
+* Bump @openfeature/core in /examples/openfeature_react/react-app ([#4853](https://github.com/thomaspoignant/go-feature-flag/issues/4853)) ([5e0fe96](https://github.com/thomaspoignant/go-feature-flag/commit/5e0fe960ab76d5294a94a323f4ab08cad796dd91))
+* Bump @openfeature/go-feature-flag-provider ([#4814](https://github.com/thomaspoignant/go-feature-flag/issues/4814)) ([781d02a](https://github.com/thomaspoignant/go-feature-flag/commit/781d02ac192702bbb8e723b8af6c9d17baf44ee4))
+* Bump @openfeature/go-feature-flag-provider ([#4833](https://github.com/thomaspoignant/go-feature-flag/issues/4833)) ([8d5609e](https://github.com/thomaspoignant/go-feature-flag/commit/8d5609e94c4f58a43908bdee5d206082f47e1145))
+* Bump @openfeature/go-feature-flag-provider ([#4848](https://github.com/thomaspoignant/go-feature-flag/issues/4848)) ([a2a035c](https://github.com/thomaspoignant/go-feature-flag/commit/a2a035c6d9c5ef6fe50ac54d75aa3b708743b21a))
+* Bump @openfeature/go-feature-flag-web-provider ([#4817](https://github.com/thomaspoignant/go-feature-flag/issues/4817)) ([15dee76](https://github.com/thomaspoignant/go-feature-flag/commit/15dee768bfe79c0956e2eebc2be86542503deede))
+* Bump @openfeature/go-feature-flag-web-provider ([#4823](https://github.com/thomaspoignant/go-feature-flag/issues/4823)) ([85346d7](https://github.com/thomaspoignant/go-feature-flag/commit/85346d7ff431db02f0212b4c6654fe03f7a7f4fc))
+* Bump @openfeature/react-sdk ([#4856](https://github.com/thomaspoignant/go-feature-flag/issues/4856)) ([42c05ce](https://github.com/thomaspoignant/go-feature-flag/commit/42c05cee5da9a094f870b36eb99b792f8b2e5fe2))
+* Bump @openfeature/server-sdk ([#4841](https://github.com/thomaspoignant/go-feature-flag/issues/4841)) ([ac48c8f](https://github.com/thomaspoignant/go-feature-flag/commit/ac48c8fe7902ee05ca96c2a7c3417f3b2a89f3ec))
+* Bump @openfeature/web-sdk ([#4851](https://github.com/thomaspoignant/go-feature-flag/issues/4851)) ([72c08ac](https://github.com/thomaspoignant/go-feature-flag/commit/72c08ac449ea2bc9122ac02e6ff64fe88d41db66))
+* Bump @openfeature/web-sdk in /examples/openfeature_web/webapp ([#4849](https://github.com/thomaspoignant/go-feature-flag/issues/4849)) ([539bda0](https://github.com/thomaspoignant/go-feature-flag/commit/539bda0e94957354e7c0799b549481bde047f078))
+* Bump @types/react in /examples/openfeature_react/react-app ([#4822](https://github.com/thomaspoignant/go-feature-flag/issues/4822)) ([672475a](https://github.com/thomaspoignant/go-feature-flag/commit/672475aaae66f373d7624378edbcd9a2b98f44f4))
+* Bump @typescript-eslint/eslint-plugin ([#4820](https://github.com/thomaspoignant/go-feature-flag/issues/4820)) ([5ec3b55](https://github.com/thomaspoignant/go-feature-flag/commit/5ec3b551a396a047e10e96a769a87244235ffc28))
+* Bump @typescript-eslint/eslint-plugin ([#4854](https://github.com/thomaspoignant/go-feature-flag/issues/4854)) ([f48b778](https://github.com/thomaspoignant/go-feature-flag/commit/f48b778cc6721a05e5c6edc027ccc68f9492fb9c))
+* Bump @typescript-eslint/parser ([#4821](https://github.com/thomaspoignant/go-feature-flag/issues/4821)) ([2f766fb](https://github.com/thomaspoignant/go-feature-flag/commit/2f766fbed7ad38a9dc5969eae0f12339d5c59ee9))
+* Bump @vitejs/plugin-react ([#4818](https://github.com/thomaspoignant/go-feature-flag/issues/4818)) ([6ca00d7](https://github.com/thomaspoignant/go-feature-flag/commit/6ca00d7edd07e68cdfa78337bf3cb9e3825e3ba2))
+* Bump actions/stale from 10.1.1 to 10.2.0 ([#4857](https://github.com/thomaspoignant/go-feature-flag/issues/4857)) ([32ff494](https://github.com/thomaspoignant/go-feature-flag/commit/32ff494c48ed1a37f233d99d9dafa222e5b0de1e))
+* Bump coverlet.collector from 6.0.4 to 8.0.0 ([#4834](https://github.com/thomaspoignant/go-feature-flag/issues/4834)) ([30576b4](https://github.com/thomaspoignant/go-feature-flag/commit/30576b45296ede02e3dc4d210450a4974dffa2a3))
+* Bump eslint in /examples/openfeature_react/react-app ([#4819](https://github.com/thomaspoignant/go-feature-flag/issues/4819)) ([1e81a37](https://github.com/thomaspoignant/go-feature-flag/commit/1e81a3723edc73f4649f3a8fb808fddcac9b2c7c))
+* Bump eslint in /examples/openfeature_web/webapp ([#4815](https://github.com/thomaspoignant/go-feature-flag/issues/4815)) ([97388e7](https://github.com/thomaspoignant/go-feature-flag/commit/97388e755c97e24a1e6c5b43446f54e75a978420))
+* Bump github.com/aws/aws-sdk-go-v2/config from 1.32.7 to 1.32.9 ([#4845](https://github.com/thomaspoignant/go-feature-flag/issues/4845)) ([264edf2](https://github.com/thomaspoignant/go-feature-flag/commit/264edf2de2db8c05997acef753985c11e4024ae2))
+* Bump github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager ([#4844](https://github.com/thomaspoignant/go-feature-flag/issues/4844)) ([8869d07](https://github.com/thomaspoignant/go-feature-flag/commit/8869d0722680b3398ec18170ac426ed1e52ac373))
+* Bump github.com/fsouza/fake-gcs-server from 1.53.1 to 1.54.0 ([#4830](https://github.com/thomaspoignant/go-feature-flag/issues/4830)) ([8f7d742](https://github.com/thomaspoignant/go-feature-flag/commit/8f7d74277e6926d852697ab41e3b472d8b21e416))
+* Bump github.com/redis/go-redis/v9 from 9.17.3 to 9.18.0 ([#4836](https://github.com/thomaspoignant/go-feature-flag/issues/4836)) ([ddc52d3](https://github.com/thomaspoignant/go-feature-flag/commit/ddc52d394de3244d52dd0261ab5286b8221daaaf))
+* Bump github/codeql-action from 4.32.2 to 4.32.3 ([#4858](https://github.com/thomaspoignant/go-feature-flag/issues/4858)) ([0fe8be8](https://github.com/thomaspoignant/go-feature-flag/commit/0fe8be80a246abb61a651f7c760b1ed40b18784f))
+* Bump google.golang.org/api from 0.266.0 to 0.267.0 ([#4838](https://github.com/thomaspoignant/go-feature-flag/issues/4838)) ([f16d38c](https://github.com/thomaspoignant/go-feature-flag/commit/f16d38c6f99048e83ed4d1f2cfe2d473b01f5e81))
+* Bump google.golang.org/grpc from 1.78.0 to 1.79.0 ([#4811](https://github.com/thomaspoignant/go-feature-flag/issues/4811)) ([0621da1](https://github.com/thomaspoignant/go-feature-flag/commit/0621da11e0dfcb622e088ffe961558b93f35b391))
+* Bump helm/kind-action from 1.13.0 to 1.14.0 ([#4859](https://github.com/thomaspoignant/go-feature-flag/issues/4859)) ([f3af2ed](https://github.com/thomaspoignant/go-feature-flag/commit/f3af2ed1117df8f9355023e677adcf8417ebad3f))
+* Bump NUnit from 4.4.0 to 4.5.0 ([#4847](https://github.com/thomaspoignant/go-feature-flag/issues/4847)) ([6fd7e83](https://github.com/thomaspoignant/go-feature-flag/commit/6fd7e83b52805caf66086d3d517cbf2907d50f0e))
+* Bump org.junit.jupiter:junit-jupiter-engine ([#4832](https://github.com/thomaspoignant/go-feature-flag/issues/4832)) ([060640f](https://github.com/thomaspoignant/go-feature-flag/commit/060640fc9ed23629d5bba15acc64d32b251a5592))
+* Bump stylelint in /examples/openfeature_web/webapp ([#4813](https://github.com/thomaspoignant/go-feature-flag/issues/4813)) ([15240a6](https://github.com/thomaspoignant/go-feature-flag/commit/15240a6c817322a3ed446b0aa3cea4374264f9b8))
+* Bump stylelint in /examples/openfeature_web/webapp ([#4850](https://github.com/thomaspoignant/go-feature-flag/issues/4850)) ([0ad9fc4](https://github.com/thomaspoignant/go-feature-flag/commit/0ad9fc41fe8f9bb88f4078a5c8a6a7e4024c6475))
+* Bump tailwindcss in /examples/openfeature_react/react-app ([#4852](https://github.com/thomaspoignant/go-feature-flag/issues/4852)) ([b68ffc9](https://github.com/thomaspoignant/go-feature-flag/commit/b68ffc998341e3abfecbd63a1f4d182efba8ad46))
+* Bump webpack in /examples/openfeature_web/webapp ([#4812](https://github.com/thomaspoignant/go-feature-flag/issues/4812)) ([b0e3fd1](https://github.com/thomaspoignant/go-feature-flag/commit/b0e3fd15e741a4e1180b2d29fb1b676981cb57e0))
+* **dependency:** Bump module modules/core 0.6.0 ([#4810](https://github.com/thomaspoignant/go-feature-flag/issues/4810)) ([e6868fb](https://github.com/thomaspoignant/go-feature-flag/commit/e6868fb9ce002da30a43bd1e94ca1f0e0a916e25))
+
+
+### ⚙️ CI/CD
+
+* Add build wasm in CI + bump tinygo version ([#4825](https://github.com/thomaspoignant/go-feature-flag/issues/4825)) ([1a50fc5](https://github.com/thomaspoignant/go-feature-flag/commit/1a50fc5671304cf01243620d71897e9cc65c971b))
+
 ## [1.52.0](https://github.com/thomaspoignant/go-feature-flag/compare/v1.51.2...v1.52.0) (2026-02-13)
 
 
