@@ -15,7 +15,7 @@ type FlagSet struct {
 	// APIKeys is the api keys for the flag set.
 	// This will add a new API keys to the list of authorizedKeys.evaluation keys.
 	// This property is madatory for every flagset, we will use it to filter the flag available.
-	APIKeys []string `mapstructure:"apiKeys" koanf:"apikeys"`
+	APIKeys []string `mapstructure:"apiKeys" koanf:"apikeys"` //nolint:gosec // G117
 
 	// Name of the flagset.
 	// This allow to identify the flagset.
