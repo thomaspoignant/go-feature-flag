@@ -89,37 +89,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
 
-  dockerhub-lint:
-    runs-on: ubuntu-latest
-    name: Upload dockerhub readme
-    needs:
-      - goreleaser
-    permissions:
-      contents: read
-    steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Release readme to DockerHub
-        uses: ms-jpq/sync-dockerhub-readme@e2991ea1ba48832e73555cdbd5b82f5a2e91ee9b # v1
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        with:
-          username: ${DOCKER_USERNAME}
-          password: ${DOCKER_PASSWORD}
-          repository: thomaspoignant/go-feature-flag-lint
-          readme: "./cmd/lint/DOCKERHUB_thomaspoignant.md"
-      - name: Release readme to DockerHub gofeatureflag
-        uses: ms-jpq/sync-dockerhub-readme@e2991ea1ba48832e73555cdbd5b82f5a2e91ee9b # v1
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        with:
-          username: ${DOCKER_USERNAME}
-          password: ${DOCKER_PASSWORD}
-          repository: gofeatureflag/go-feature-flag-lint
-          readme: "./cmd/lint/DOCKERHUB.md"
-
   dockerhub-cli:
     runs-on: ubuntu-latest
     name: Upload dockerhub readme
