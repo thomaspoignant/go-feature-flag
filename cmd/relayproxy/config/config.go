@@ -115,7 +115,7 @@ type Config struct {
 
 	// Deprecated: use AuthorizedKeys instead
 	// APIKeys list of API keys that authorized to use endpoints
-	APIKeys []string `mapstructure:"apiKeys" koanf:"apikeys"`
+	APIKeys []string `mapstructure:"apiKeys" koanf:"apikeys"` //nolint:gosec // G117
 
 	// StartAsAwsLambda (optional) if true, the relay proxy will start ready to be launched as AWS Lambda
 	//
