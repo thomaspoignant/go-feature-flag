@@ -83,6 +83,11 @@ class GoFeatureFlagOptions(BaseModel):
     # If not set, the bundled wasm-releases/evaluation/gofeatureflag-evaluation_0.2.0.wasi is used.
     wasm_file_path: typing.Optional[str] = None
 
+    # wasm_pool_size (optional) number of WASM Store instances for concurrent in-process evaluation.
+    # Used only when evaluation_type is INPROCESS. wasmtime.Store is not thread-safe; a pool
+    # allows multiple evaluations to run in parallel. default: 10
+    wasm_pool_size: typing.Optional[int] = 10
+
     def get_log_level_int(self) -> int:
         """Resolve log_level to a logging module level constant."""
         if self.log_level is None:

@@ -5,6 +5,8 @@ initialization, disposal, and flag evaluation for all supported types and scenar
 
 from __future__ import annotations
 
+import threading
+
 import pytest
 
 from gofeatureflag_python_provider.wasm import EvaluateWasm, WasmFlagContext, WasmInput
@@ -268,6 +270,58 @@ def test_evaluate_empty_context_still_returns_default_rule(evaluator):
         _make_input("empty-ctx", flag, ctx={}, default="fallback")
     )
     assert resp.value == "result"
+
+
+def test_evaluate_concurrent_threads():
+    """Multiple threads can evaluate flags concurrently using the pool; no races or errors."""
+    num_threads = 8
+    evals_per_thread = 25
+    pool_size = 4
+    e = EvaluateWasm(pool_size=pool_size)
+    e.initialize()
+    try:
+        flag = {
+            "variations": {"on": True, "off": False},
+            "defaultRule": {"variation": "on"},
+        }
+        results_per_thread: list[list[bool]] = []
+        errors: list[list[Exception]] = []
+
+        def run_thread(thread_id: int) -> None:
+            my_results: list[bool] = []
+            my_errors: list[Exception] = []
+            for i in range(evals_per_thread):
+                try:
+                    inp = _make_input(
+                        f"concurrent-flag-{thread_id}",
+                        flag,
+                        ctx={"targetingKey": f"user-{thread_id}-{i}"},
+                        default=False,
+                    )
+                    resp = e.evaluate(inp)
+                    my_results.append(resp.value is True)
+                except Exception as exc:
+                    my_errors.append(exc)
+            results_per_thread.append(my_results)
+            errors.append(my_errors)
+
+        threads = [
+            threading.Thread(target=run_thread, args=(tid,))
+            for tid in range(num_threads)
+        ]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
+
+        flat_errors = [exc for err_list in errors for exc in err_list]
+        assert not flat_errors, f"Concurrent evaluation raised: {flat_errors}"
+        assert len(results_per_thread) == num_threads
+        for tid, results in enumerate(results_per_thread):
+            assert len(results) == evals_per_thread, f"Thread {tid} result count"
+            assert all(results), f"Thread {tid}: expected all True, got {results}"
+    finally:
+        e.dispose()
 
 
 # ---------------------------------------------------------------------------
