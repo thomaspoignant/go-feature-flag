@@ -290,11 +290,8 @@ dependencies = [
     { name = "openfeature-provider-ofrep" },
     { name = "openfeature-sdk" },
     { name = "pydantic" },
-    { name = "pylru" },
-    { name = "rel" },
     { name = "urllib3" },
     { name = "wasmtime" },
-    { name = "websocket-client" },
 ]
 
 [package.dev-dependencies]
@@ -312,11 +309,8 @@ requires-dist = [
     { name = "openfeature-provider-ofrep", specifier = ">=0.2.0" },
     { name = "openfeature-sdk", specifier = ">=0.8.4,<0.9.0" },
     { name = "pydantic", specifier = ">=2.5.2" },
-    { name = "pylru", specifier = ">=1.2.1" },
-    { name = "rel", specifier = ">=0.4.9" },
     { name = "urllib3", specifier = ">=2.1.0" },
     { name = "wasmtime", specifier = ">=41.0.0" },
-    { name = "websocket-client", specifier = ">=1.6.4" },
 ]
 
 [package.metadata.requires-dev]
@@ -599,15 +593,6 @@ wheels = [
 ]
 
 [[package]]
-name = "pylru"
-version = "1.2.1"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/95/8e/2a0d3426738db0b41d69d36243bdd00420ad231e802d09dad8db02005d13/pylru-1.2.1.tar.gz", hash = "sha256:47ad140a63ab9389648dadfbb4330700e0ffeeb28ec04664ee47d37ed133b0f4", size = 16923, upload-time = "2022-03-06T20:17:07.947Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/2e/0d/0bfa25457d7bb1cc771c7073e05f254142e560d951f9c9d1c953c2324bac/pylru-1.2.1-py3-none-any.whl", hash = "sha256:b7c75b0676e2fbae647823bc209e23998772867d3679f1583c7350a9b02a59f0", size = 16338, upload-time = "2022-03-06T20:17:06.733Z" },
-]
-
-[[package]]
 name = "pytest"
 version = "8.4.2"
 source = { registry = "https://pypi.org/simple" }
@@ -757,14 +742,6 @@ wheels = [
 ]
 
 [[package]]
-name = "rel"
-version = "0.4.9.24"
-source = { registry = "https://pypi.org/simple" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/ef/57/ce1162fd8a46d5188c8de1039f22b94bc8aa31d90d7c4ad8f28aa8eb07e9/rel-0.4.9.24-py3-none-any.whl", hash = "sha256:6892e7c2e98bdfb1d9dbeb59198614c0593bf1d6df6a8f1a66fc1b4fe2346074", size = 16477, upload-time = "2026-02-10T23:32:15.611Z" },
-]
-
-[[package]]
 name = "requests"
 version = "2.32.5"
 source = { registry = "https://pypi.org/simple" }
@@ -880,13 +857,4 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/9f/09/4608b65fa35ce5fc1479e138293a1166b4ea817cfa9a79f019ab6d7013d8/wasmtime-41.0.0-py3-none-musllinux_1_2_x86_64.whl", hash = "sha256:d9627dfc5625b4947ea35c819561da358838fe76f65bda8ffe01ce34df8b32b1", size = 7754016, upload-time = "2026-01-20T18:17:55.346Z" },
     { url = "https://files.pythonhosted.org/packages/f4/9d/236bb367270579e4f628fb7b04fe93541151df7953006f3766607fc667c9/wasmtime-41.0.0-py3-none-win_amd64.whl", hash = "sha256:4f29171d73b71f232b6fe86cba77526fee84139f1590071af5facba401b0c9eb", size = 6325764, upload-time = "2026-01-20T18:17:57.034Z" },
     { url = "https://files.pythonhosted.org/packages/4a/4a/bba9c0368c377250ab24fd005a7a1e9076121778c1e83b1bcc092ab84f86/wasmtime-41.0.0-py3-none-win_arm64.whl", hash = "sha256:0c4bcaba055e78fc161f497b85f39f1d35d475f0341b1e0259fa0a4b49e223e8", size = 5392238, upload-time = "2026-01-20T18:17:59.052Z" },
-]
-
-[[package]]
-name = "websocket-client"
-version = "1.9.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/2c/41/aa4bf9664e4cda14c3b39865b12251e8e7d239f4cd0e3cc1b6c2ccde25c1/websocket_client-1.9.0.tar.gz", hash = "sha256:9e813624b6eb619999a97dc7958469217c3176312b3a16a4bd1bc7e08a46ec98", size = 70576, upload-time = "2025-10-07T21:16:36.495Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/34/db/b10e48aa8fff7407e67470363eac595018441cf32d5e1001567a7aeba5d2/websocket_client-1.9.0-py3-none-any.whl", hash = "sha256:af248a825037ef591efbf6ed20cc5faa03d3b47b9e5a2230a529eeee1c1fc3ef", size = 82616, upload-time = "2025-10-07T21:16:34.951Z" },
 ]

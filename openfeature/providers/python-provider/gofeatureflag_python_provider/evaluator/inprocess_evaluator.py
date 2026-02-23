@@ -309,8 +309,12 @@ class InProcessEvaluator(AbstractEvaluator):
         with self._lock:
             flag = self._flags.get(flag_key)
         if flag is None:
-            logger.error("Flag with key %s not found", flag_key)
+            logger.warning(
+                "Flag with key %s not found when checking if trackable", flag_key
+            )
+            # we default to trackable for unknown flags to be sure they are visible in the exporters
             return True
+
         track_events = flag.get("trackEvents", False)
         if isinstance(track_events, bool):
             return track_events
