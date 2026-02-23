@@ -526,7 +526,7 @@ def test_evaluation_context_enrichment_is_passed_to_wasm():
 
 
 def test_resolve_boolean_details_async_delegates_to_sync():
-    """Async resolve method delegates to the sync counterpart."""
+    """Async resolve method runs sync evaluation via asyncio.to_thread."""
     import asyncio
 
     evaluator, mock_wasm = _setup_evaluator_with_flag(_BOOL_FLAG_DICT)

@@ -3,6 +3,7 @@ In-process evaluator: evaluates flags locally via the WASM module.
 Fetches flag configuration from the relay proxy, stores it locally, and polls for updates.
 """
 
+import asyncio
 import logging
 import threading
 from typing import Any, Optional, Type, TypeVar, Union
@@ -251,7 +252,10 @@ class InProcessEvaluator(AbstractEvaluator):
         default_value: bool,
         evaluation_context: Optional[EvaluationContext] = None,
     ) -> FlagResolutionDetails[bool]:
-        return self.resolve_boolean_details(flag_key, default_value, evaluation_context)
+        """Resolve via WASM (async, runs sync evaluation in thread)."""
+        return await asyncio.to_thread(
+            self.resolve_boolean_details, flag_key, default_value, evaluation_context
+        )
 
     async def resolve_string_details_async(
         self,
@@ -259,7 +263,10 @@ class InProcessEvaluator(AbstractEvaluator):
         default_value: str,
         evaluation_context: Optional[EvaluationContext] = None,
     ) -> FlagResolutionDetails[str]:
-        return self.resolve_string_details(flag_key, default_value, evaluation_context)
+        """Resolve via WASM (async, runs sync evaluation in thread)."""
+        return await asyncio.to_thread(
+            self.resolve_string_details, flag_key, default_value, evaluation_context
+        )
 
     async def resolve_integer_details_async(
         self,
@@ -267,7 +274,10 @@ class InProcessEvaluator(AbstractEvaluator):
         default_value: int,
         evaluation_context: Optional[EvaluationContext] = None,
     ) -> FlagResolutionDetails[int]:
-        return self.resolve_integer_details(flag_key, default_value, evaluation_context)
+        """Resolve via WASM (async, runs sync evaluation in thread)."""
+        return await asyncio.to_thread(
+            self.resolve_integer_details, flag_key, default_value, evaluation_context
+        )
 
     async def resolve_float_details_async(
         self,
@@ -275,7 +285,10 @@ class InProcessEvaluator(AbstractEvaluator):
         default_value: float,
         evaluation_context: Optional[EvaluationContext] = None,
     ) -> FlagResolutionDetails[float]:
-        return self.resolve_float_details(flag_key, default_value, evaluation_context)
+        """Resolve via WASM (async, runs sync evaluation in thread)."""
+        return await asyncio.to_thread(
+            self.resolve_float_details, flag_key, default_value, evaluation_context
+        )
 
     async def resolve_object_details_async(
         self,
@@ -283,7 +296,10 @@ class InProcessEvaluator(AbstractEvaluator):
         default_value: Union[dict, list],
         evaluation_context: Optional[EvaluationContext] = None,
     ) -> FlagResolutionDetails[Union[dict, list]]:
-        return self.resolve_object_details(flag_key, default_value, evaluation_context)
+        """Resolve via WASM (async, runs sync evaluation in thread)."""
+        return await asyncio.to_thread(
+            self.resolve_object_details, flag_key, default_value, evaluation_context
+        )
 
     # ------------------------------------------------------------------
     # Tracking
