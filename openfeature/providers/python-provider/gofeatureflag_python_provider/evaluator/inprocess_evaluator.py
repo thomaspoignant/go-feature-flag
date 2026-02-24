@@ -50,7 +50,7 @@ class InProcessEvaluator(AbstractEvaluator):
         self._poll_interval_seconds: int = (
             options.flag_config_poll_interval_seconds or 10
         )
-        pool_size = options.wasm_pool_size if options.wasm_pool_size is not None else 4
+        pool_size = options.wasm_pool_size if options.wasm_pool_size is not None else 10
         self._wasm = EvaluateWasm(
             wasm_path=options.wasm_file_path,
             pool_size=pool_size,
