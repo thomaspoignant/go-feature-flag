@@ -24,8 +24,12 @@ class EventPublisher:
 
     - Periodic flush: every ``data_flush_interval`` ms (default 60 s).
     - Immediate flush: when the buffer reaches ``max_pending_events`` (fire-and-forget).
+      Only one immediate flush runs at a time; further triggers above the threshold
+      do not spawn additional threads until that flush finishes.
     - On stop: remaining events are flushed synchronously before returning.
     - On send failure: events are re-queued and retried on the next flush.
+    - Buffer cap: if the buffer exceeds ``max_pending_events * 2`` (e.g. collector down),
+      oldest events are dropped and a warning is logged to prevent unbounded growth.
     """
 
     def __init__(
@@ -48,6 +52,7 @@ class EventPublisher:
         self._stop_event = threading.Event()
         self._thread: Optional[threading.Thread] = None
         self._running = False
+        self._immediate_flush_scheduled = False
 
         meta = dict(options.exporter_metadata or {})
         meta["provider"] = "python"
@@ -83,16 +88,28 @@ class EventPublisher:
         Add an event to the buffer.
 
         If the buffer reaches *max_pending_events* after the append, an immediate
-        non-blocking flush is triggered (fire-and-forget daemon thread).
+        non-blocking flush is triggered (fire-and-forget daemon thread). At most
+        one immediate flush runs at a time. If the buffer exceeds the cap
+        (max_pending_events * 2), oldest events are dropped.
         """
         max_pending = self._options.max_pending_events or DEFAULT_MAX_PENDING_EVENTS
+        cap = max_pending * 2
         with self._lock:
             self._events.append(event)
-            should_flush = len(self._events) >= max_pending
-
-        if should_flush:
-            t = threading.Thread(target=self._publish_events, daemon=True)
-            t.start()
+            if len(self._events) > cap:
+                dropped = len(self._events) - cap
+                self._events = self._events[-cap:]
+                self._logger.warning(
+                    "EventPublisher: buffer overflow, dropped %d oldest event(s)",
+                    dropped,
+                )
+            should_flush = (
+                len(self._events) >= max_pending and not self._immediate_flush_scheduled
+            )
+            if should_flush:
+                self._immediate_flush_scheduled = True
+                t = threading.Thread(target=self._publish_events, daemon=True)
+                t.start()
 
     # ------------------------------------------------------------------
     # Internal helpers
@@ -112,25 +129,29 @@ class EventPublisher:
         Atomically drain the buffer and send events to the collector.
 
         On failure the drained batch is re-queued at the front of the buffer
-        so no events are lost.
+        so no events are lost. Always clears _immediate_flush_scheduled when done.
         """
-        with self._lock:
-            if not self._events:
-                return
-            events_to_send = list(self._events)
-            self._events.clear()
-
         try:
-            self._api.send_event_to_data_collector(
-                events_to_send,
-                self._exporter_metadata,
-            )
-        except Exception as exc:
-            self._logger.error(
-                "EventPublisher: error publishing events, re-queuing %d event(s): %s",
-                len(events_to_send),
-                exc,
-                exc_info=True,
-            )
             with self._lock:
-                self._events = events_to_send + self._events
+                if not self._events:
+                    return
+                events_to_send = list(self._events)
+                self._events.clear()
+
+            try:
+                self._api.send_event_to_data_collector(
+                    events_to_send,
+                    self._exporter_metadata,
+                )
+            except Exception as exc:
+                self._logger.error(
+                    "EventPublisher: error publishing events, re-queuing %d event(s): %s",
+                    len(events_to_send),
+                    exc,
+                    exc_info=True,
+                )
+                with self._lock:
+                    self._events = events_to_send + self._events
+        finally:
+            with self._lock:
+                self._immediate_flush_scheduled = False
