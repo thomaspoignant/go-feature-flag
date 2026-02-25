@@ -1,0 +1,58 @@
+{
+    "flags": {
+        "my-flag": {
+            "variations": {
+                "disabled": false,
+                "enabled": true
+            },
+            "defaultRule": {
+                "percentage": {
+                    "enabled": 0,
+                    "disabled": 100
+                }
+            },
+            "metadata": {
+                "description": "this is a test flag",
+                "defaultValue": false
+            },
+            "scheduledRollout": [
+                {
+                    "targeting": [
+                        {
+                            "query": "targetingKey eq \"d45e303a-38c2-11ed-a261-0242ac120002\"",
+                            "variation": "enabled"
+                        }
+                    ],
+                    "date": "2022-07-31T22:00:00.100Z"
+                }
+            ]
+        },
+        "my-flag-scheduled-in-future": {
+            "variations": {
+                "disabled": false,
+                "enabled": true
+            },
+            "defaultRule": {
+                "percentage": {
+                    "enabled": 0,
+                    "disabled": 100
+                }
+            },
+            "metadata": {
+                "description": "this is a test flag",
+                "defaultValue": false
+            },
+            "scheduledRollout": [
+                {
+                    "targeting": [
+                        {
+                            "query": "targetingKey eq \"d45e303a-38c2-11ed-a261-0242ac120002\"",
+                            "variation": "enabled"
+                        }
+                    ],
+                    "date": "3022-07-31T22:00:00.100Z"
+                }
+            ]
+        }
+    }
+}
