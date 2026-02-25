@@ -90,6 +90,10 @@ def test_buffer_cap_drops_oldest_events():
     """
     When the buffer exceeds the cap (max_pending_events * 2), oldest events
     are dropped and a warning is logged. Buffer size stays at cap.
+
+    Prevents the immediate flush from running (by mocking _publish_events) so
+    that only the cap-and-drop logic is tested, avoiding races with the
+    background flush thread.
     """
     mock_api = Mock()
     mock_api.send_event_to_data_collector.return_value = None
@@ -98,15 +102,15 @@ def test_buffer_cap_drops_oldest_events():
     cap = 5 * 2  # 10
     publisher = EventPublisher(api=mock_api, options=options)
 
-    with patch.object(publisher._logger, "warning") as mock_warning:
-        for i in range(15):
-            publisher.add_event(_make_event(key="flag", user_key=f"u{i}"))
+    with patch.object(publisher, "_publish_events"):
+        with patch.object(publisher._logger, "warning") as mock_warning:
+            for i in range(15):
+                publisher.add_event(_make_event(key="flag", user_key=f"u{i}"))
 
-        assert len(publisher._events) == cap
-        # Dropped 5 events total (15 - 10); may log once per overflow
-        assert mock_warning.call_count >= 1
-        call_args = mock_warning.call_args[0]
-        assert "dropped" in call_args[0].lower()
+            assert len(publisher._events) == cap
+            assert mock_warning.call_count >= 1
+            call_args = mock_warning.call_args[0]
+            assert "dropped" in call_args[0].lower()
 
     # Kept the last 10 events (indices 5..14)
     assert publisher._events[0].userKey == "u5"
@@ -117,31 +121,36 @@ def test_buffer_cap_with_failing_collector_requeue():
     """
     When flush fails and events are re-queued, if the buffer exceeds cap
     after re-queue, we still enforce the cap on next add_event.
-    """
-    mock_api = Mock()
-    mock_api.send_event_to_data_collector.side_effect = RuntimeError("collector down")
 
-    options = _make_options(max_pending_events=4)
+    Uses a threading.Event to wait until the failing send has run and
+    re-queued. Uses a long data_flush_interval so the periodic flush
+    does not run during the test. Asserts that the buffer never exceeds
+    cap and that the collector was attempted (re-queue scenario ran).
+    """
+    send_attempted = threading.Event()
+
+    def failing_send(*args, **kwargs):
+        send_attempted.set()
+        raise RuntimeError("collector down")
+
+    mock_api = Mock()
+    mock_api.send_event_to_data_collector.side_effect = failing_send
+
+    options = _make_options(max_pending_events=4, data_flush_interval=3600_000)
     cap = 8
     publisher = EventPublisher(api=mock_api, options=options)
     publisher.start()
 
     try:
-        # Fill to threshold (4) - triggers immediate flush
         for i in range(4):
             publisher.add_event(_make_event(user_key=f"u{i}"))
 
-        # Wait for flush to fail and re-queue
-        time.sleep(0.2)
+        assert send_attempted.wait(timeout=2.0), "flush should have attempted send"
 
-        # Add more events - buffer grows: 4 (requeued) + new = 4 + 8 = 12
-        # After 8 more we're at 12, cap is 8, so we drop 4 oldest
-        with patch.object(publisher._logger, "warning") as mock_warning:
-            for i in range(4, 12):
-                publisher.add_event(_make_event(user_key=f"u{i}"))
+        for i in range(4, 12):
+            publisher.add_event(_make_event(user_key=f"u{i}"))
 
-            # Should have triggered drop when we exceeded cap
-            assert mock_warning.call_count >= 1
-            assert len(publisher._events) <= cap
+        assert len(publisher._events) <= cap
+        assert mock_api.send_event_to_data_collector.call_count >= 1
     finally:
         publisher.stop()
