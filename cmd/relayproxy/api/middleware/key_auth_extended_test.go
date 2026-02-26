@@ -1,6 +1,7 @@
 package middleware_test
 
 import (
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -384,4 +385,51 @@ func TestKeyAuthExtended_InvalidXAPIKey_NilErrorHandler(t *testing.T) {
 			})
 		})
 	}
+}
+
+func TestKeyAuthExtended_ValidatorError(t *testing.T) {
+	validatorErr := errors.New("db connection lost")
+	failingValidator := func(_ string, _ echo.Context) (bool, error) {
+		return false, validatorErr
+	}
+
+	t.Run("validator error with nil ErrorHandler returns error directly", func(t *testing.T) {
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodPost, "/admin/v1/retriever/refresh", nil)
+		req.Header.Set(helper.XAPIKeyHeader, "any-key")
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		mw := middleware2.KeyAuthExtended(middleware2.KeyAuthExtendedConfig{
+			Validator: failingValidator,
+		})
+		handler := mw(func(c echo.Context) error {
+			return c.String(http.StatusOK, "OK")
+		})
+
+		err := handler(c)
+		assert.ErrorIs(t, err, validatorErr)
+	})
+
+	t.Run("validator error with ErrorHandler delegates to handler", func(t *testing.T) {
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodPost, "/admin/v1/retriever/refresh", nil)
+		req.Header.Set(helper.XAPIKeyHeader, "any-key")
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		mw := middleware2.KeyAuthExtended(middleware2.KeyAuthExtendedConfig{
+			Validator:    failingValidator,
+			ErrorHandler: middleware2.AuthMiddlewareErrHandler,
+		})
+		handler := mw(func(c echo.Context) error {
+			return c.String(http.StatusOK, "OK")
+		})
+
+		err := handler(c)
+		assert.Error(t, err)
+		httpErr, ok := err.(*echo.HTTPError)
+		require.True(t, ok)
+		assert.Equal(t, http.StatusUnauthorized, httpErr.Code)
+	})
 }
