@@ -324,3 +324,64 @@ func TestKeyAuthExtended_SetDefaults(t *testing.T) {
 		assert.Equal(t, middleware.DefaultKeyAuthConfig.KeyLookup, "header:Authorization")
 	})
 }
+
+func TestKeyAuthExtended_InvalidXAPIKey_NilErrorHandler(t *testing.T) {
+	// Reproduces https://github.com/thomaspoignant/go-feature-flag/issues/4842
+	// When ErrorHandler is nil (defaulting to echo's DefaultKeyAuthConfig.ErrorHandler
+	// which is also nil), sending an invalid X-API-Key causes a nil pointer dereference
+	// panic instead of returning 401 Unauthorized.
+	validator := func(key string, _ echo.Context) (bool, error) {
+		return key == "valid-key", nil
+	}
+
+	tests := []struct {
+		name           string
+		xAPIKey        string
+		expectedStatus int
+	}{
+		{
+			name:           "invalid X-API-Key with nil ErrorHandler should return 401 not panic",
+			xAPIKey:        "wrong-key",
+			expectedStatus: http.StatusUnauthorized,
+		},
+		{
+			name:           "valid X-API-Key with nil ErrorHandler should return 200",
+			xAPIKey:        "valid-key",
+			expectedStatus: http.StatusOK,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			e := echo.New()
+			req := httptest.NewRequest(http.MethodPost, "/admin/v1/retriever/refresh", nil)
+			req.Header.Set(helper.XAPIKeyHeader, tt.xAPIKey)
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+
+			mw := middleware2.KeyAuthExtended(middleware2.KeyAuthExtendedConfig{
+				Validator: validator,
+				// ErrorHandler intentionally left nil to reproduce the bug:
+				// setDefaults copies echo's DefaultKeyAuthConfig.ErrorHandler which is also nil,
+				// causing a panic in validateXAPIKey when X-API-Key is invalid.
+			})
+
+			handler := mw(func(c echo.Context) error {
+				return c.String(http.StatusOK, "OK")
+			})
+
+			assert.NotPanics(t, func() {
+				err := handler(c)
+				if tt.expectedStatus == http.StatusOK {
+					assert.NoError(t, err)
+					assert.Equal(t, http.StatusOK, rec.Code)
+				} else {
+					assert.Error(t, err)
+					httpErr, ok := err.(*echo.HTTPError)
+					require.True(t, ok)
+					assert.Equal(t, tt.expectedStatus, httpErr.Code)
+				}
+			})
+		})
+	}
+}
