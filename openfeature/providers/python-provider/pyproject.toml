@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gofeatureflag-python-provider"
-version = "0.5.0"
+version = "0.5.1"
 description = "GO Feature Flag provider for OpenFeature"
 license = "Apache-2.0"
 authors = ["Thomas Poignant"]
