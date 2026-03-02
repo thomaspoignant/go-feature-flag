@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkgo_feature_flag_website=globalThis.webpackChunkgo_feature_flag_website||[]).push([[86366],{86366:(e,a,t)=>{t.d(a,{createArchitectureServices:()=>r.S});var r=t(38980);t(87960)}}]);

@@ -1,0 +1,3 @@
+Contact: mailto:contact@gofeatureflag.org
+Expires: 2060-01-01T09:10:00.000Z
+Policy: https://github.com/thomaspoignant/go-feature-flag/blob/main/SECURITY.md
