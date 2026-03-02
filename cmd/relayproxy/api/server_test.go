@@ -432,12 +432,12 @@ func Test_AuthenticationMiddleware(t *testing.T) {
 			{
 				name:          "Authentication disabled",
 				configAPIKeys: nil,
-				want:          http.StatusBadRequest,
+				want:          http.StatusUnauthorized,
 			},
 			{
 				name:          "Evaluation key provided",
 				configAPIKeys: &config.APIKeys{Evaluation: []string{"test"}},
-				want:          http.StatusBadRequest,
+				want:          http.StatusUnauthorized,
 			},
 			{
 				name:          "Admin key provided, no evaluation key provided",
@@ -836,7 +836,7 @@ func TestStartingRelayProxyUnixSocketAuthentication(t *testing.T) {
 			endpoint:      "http://unix/admin/v1/retriever/refresh",
 			method:        "POST",
 			authHeader:    "",
-			want:          http.StatusBadRequest, // Returns 400 when auth is required but not provided
+			want:          http.StatusUnauthorized,
 		},
 	}
 
