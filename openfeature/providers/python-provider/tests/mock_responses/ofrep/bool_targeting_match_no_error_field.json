@@ -1,0 +1,11 @@
+{
+  "key": "bool_targeting_match_no_error_field",
+  "value": true,
+  "reason": "TARGETING_MATCH",
+  "variant": "True",
+  "metadata": {
+    "test": "test1",
+    "test2": false,
+    "test3": 123.3
+  }
+}

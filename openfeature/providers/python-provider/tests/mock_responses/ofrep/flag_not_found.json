@@ -1,0 +1,5 @@
+{
+  "key": "flag_not_found",
+  "errorCode": "FLAG_NOT_FOUND",
+  "errorDetails": "Flag 'non-existent-flag' was not found"
+}

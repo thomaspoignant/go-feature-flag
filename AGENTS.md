@@ -21,9 +21,9 @@ make help            # Show all available commands
 
 **Key Features:**
 - Feature flag implementation with OpenFeature standard support
-- Multiple storage backends (S3, HTTP, Kubernetes, MongoDB, Redis, etc.)
+- Multiple storage backends (S3, HTTP, Kubernetes, MongoDB, Redis, GCS, Azure, PostgreSQL, etc.)
 - Complex rollout strategies (A/B testing, progressive, scheduled)
-- Data export and notification systems
+- Data export, notification, and tracking systems
 
 ## 🏗️ Architecture
 
@@ -36,28 +36,37 @@ OpenFeature SDKs → Relay Proxy (cmd/relayproxy/) → GO Module (ffclient)
 **Data Flow:** Retrievers fetch configs → Cache stores flags → Change detection triggers Notifiers → Evaluation generates Events → Exporters send data
 
 **Key Components:**
-- **`ffclient`**: Core Go module for direct integration
+- **`ffclient` (root package)**: Core Go module for direct integration (root `.go` files are `package ffclient`)
 - **`cmd/relayproxy/`**: HTTP API server (uses Echo + Zap logging)
-- **`retriever/`**: Flag configuration sources (file, HTTP, S3, K8s, MongoDB, Redis, GitHub, GitLab, Bitbucket, PostgreSQL, Azure)
-- **`exporter/`**: Data export destinations (S3, File, Kafka, Kinesis, Webhook, GCS, Pub/Sub, SQS, Azure)
-- **`notifier/`**: Change notifications (Slack, Webhook, Discord, Teams, Logs)
-- **`modules/core`**: Core logic modules used by OpenFeature providers and WASM
+- **`retriever/`**: Flag configuration sources (File, HTTP, S3, K8s, MongoDB, Redis, GitHub, GitLab, Bitbucket, PostgreSQL, Azure Blob Storage, GCS)
+- **`exporter/`**: Data export destinations (S3, File, Kafka, Kinesis, Webhook, GCS, Pub/Sub, SQS, Azure, Logs, OpenTelemetry)
+- **`notifier/`**: Change notifications (Slack, Webhook, Discord, Microsoft Teams, Logs)
+- **`modules/core`**: Core logic module used by OpenFeature providers and WASM
 
 ## 📁 Directory Structure
 
 **Root Level:**
-- `ffclient/`: Core client package
-- `cmd/`: Applications (relayproxy, cli, lint, editor, wasm)
+- Root `.go` files: Core `ffclient` package (`variation.go`, `feature_flag.go`, `config.go`, `tracking.go`, `variation_all_flags.go`, `config_exporter.go`)
+- `cmd/`: Applications (relayproxy, cli, lint, editor, jsonschema-generator, wasm)
 - `retriever/`, `exporter/`, `notifier/`: Integration packages
-- `modules/`: Separate Go modules (core, evaluation)
+- `modules/`: Separate Go modules (`core` only)
 - `internal/`: Internal packages (cache, flagstate, notification, signer)
-- `openfeature/providers/`: Some providers (Kotlin, Python) - most are in OpenFeature contrib repos
+- `ffcontext/`: Evaluation context package
+- `ffuser/`: User context (legacy)
+- `model/`: DTO models
+- `cmdhelpers/`: Shared CLI helpers (errors, retriever config)
+- `utils/`: Utilities (fflog, string helpers, constants)
+- `openfeature/providers/`: In-repo providers (Kotlin, Python, PHP, Ruby, Swift)
+- `openfeature/provider_tests/`: Integration tests for providers (Go, JS, Java, .NET)
 - `testutils/`, `testdata/`, `examples/`, `website/`
 
 **Key Files:**
 - `variation.go`: Flag evaluation methods
-- `feature_flag.go`: Core logic
+- `variation_all_flags.go`: Bulk evaluation of all flags
+- `feature_flag.go`: Core logic and initialization
 - `config.go`: Configuration structure
+- `config_exporter.go`: Exporter configuration
+- `tracking.go`: Tracking/experimentation support
 - `Makefile`: Primary interface (use `make help`)
 
 ## 🔑 Key Concepts
@@ -72,7 +81,7 @@ OpenFeature SDKs → Relay Proxy (cmd/relayproxy/) → GO Module (ffclient)
 
 **Interfaces:**
 - `Retriever`: `Retrieve(ctx context.Context) ([]byte, error)`
-- `Exporter`: `Export(ctx context.Context, events []FeatureEvent) error`, `IsBulk() bool`
+- `Exporter`: `Export(context.Context, *fflog.FFLogger, []ExportableEvent) error` + `IsBulk() bool`
 - `Notifier`: `Notify(cache DiffCache) error`
 
 ## 🛠️ Common Tasks
@@ -86,11 +95,11 @@ OpenFeature SDKs → Relay Proxy (cmd/relayproxy/) → GO Module (ffclient)
 6. Update docs
 
 **OpenFeature Providers:**
-- Most providers in OpenFeature contrib repos (Go, JS, Java, .NET, Ruby, Swift, PHP)
-- Some in this repo: Kotlin (`kotlin-provider/`), Python (`python-provider/`)
-- Providers use `modules/core`  for evaluation logic
+- Most providers in OpenFeature contrib repos (Go, JS, Java, .NET)
+- In this repo: Kotlin (`kotlin-provider/`), Python (`python-provider/`), PHP (`php-provider/`), Ruby (`ruby-provider/`), Swift (`swift-provider/`)
+- Providers use `modules/core` for evaluation logic
 
-**Modules (`modules/core`:**
+**Modules (`modules/core`):**
 - Core logic separated for reuse by OpenFeature providers and WASM module
 - `modules/core`: Flag structures, context, models, utilities
 - Allows independent versioning and smaller dependency trees
@@ -117,7 +126,7 @@ func TestFunction(t *testing.T) {
 }
 ```
 
-**Commands:** `make test`, `make coverage`, `make bench`  
+**Commands:** `make test`, `make coverage`, `make bench`, `make provider-tests`
 **Coverage:** Aim for 90%+, use `testify/assert`, mock external deps
 
 ## 📝 Code Patterns
@@ -155,11 +164,11 @@ pre-commit install   # Install pre-commit hooks
 ```
 
 **Common Commands:**
-- **Build:** `make build`, `make build-relayproxy`, `make build-cli`, `make build-wasm`
-- **Dev:** `make watch-relayproxy`, `make watch-doc`
-- **Test:** `make test`, `make coverage`, `make bench`
+- **Build:** `make build`, `make build-relayproxy`, `make build-cli`, `make build-wasm`, `make build-wasi`, `make build-editor-api`, `make build-jsonschema-generator`, `make build-modules`
+- **Dev:** `make watch-relayproxy`, `make watch-doc`, `make serve-doc`
+- **Test:** `make test`, `make coverage`, `make bench`, `make provider-tests`
 - **Quality:** `make lint`, `make tidy`, `make vendor`
-- **Utils:** `make clean`, `make swagger`, `make generate-helm-docs`
+- **Utils:** `make clean`, `make swagger`, `make generate-helm-docs`, `make bump-helm-chart-version`, `make bump-wasm-contrib`
 
 **Code Quality:**
 - Use `make lint` (golangci-lint)
@@ -168,9 +177,9 @@ pre-commit install   # Install pre-commit hooks
 
 ## 🔍 Code Navigation
 
-**Flag Evaluation:** `variation.go` → `feature_flag.go` → `internal/cache/` → `internal/flagstate/`  
-**API Endpoints:** `cmd/relayproxy/api/routes_*.go` → `controller/` → `model/`  
-**Configuration:** `config.go` (ffclient), `cmd/relayproxy/config/config.go` (relay proxy)  
+**Flag Evaluation:** `variation.go` → `feature_flag.go` → `internal/cache/` → `internal/flagstate/`
+**API Endpoints:** `cmd/relayproxy/api/routes_*.go` → `controller/` → `model/`
+**Configuration:** `config.go` (ffclient), `cmd/relayproxy/config/config.go` (relay proxy)
 **Flag Format:** `.schema/flag-schema.json`, `testdata/flag-config.*`, https://gofeatureflag.org/docs
 
 ## 🔗 Important Files
@@ -185,11 +194,10 @@ pre-commit install   # Install pre-commit hooks
 
 **Key Libraries:** Echo (HTTP), Koanf (config), OpenTelemetry (observability), Prometheus (metrics), Testcontainers (integration tests)
 
-**Monorepo Modules:**
-- Main module (root): Core library
+**Monorepo Modules (Go workspace):**
+- Main module (root): Core `ffclient` library
 - `modules/core`: Core data structures (used by providers/WASM/relayproxy)
-- `cmd/wasm`: WebAssembly evaluation
-- `openfeature/providers/`: Some providers (most in contrib repos)
+- `cmd/wasm`: WebAssembly/WASI evaluation
 
 ## 📚 Resources
 
@@ -200,8 +208,8 @@ pre-commit install   # Install pre-commit hooks
 
 ## 🎯 Quick Reference
 
-**Entry Points:** `ffclient.Init()`, `cmd/relayproxy/main.go`, `cmd/cli/main.go`  
-**Interfaces:** `Retriever`, `Exporter`, `Notifier`, `Cache`  
+**Entry Points:** `ffclient.Init()`, `cmd/relayproxy/main.go`, `cmd/cli/main.go`
+**Interfaces:** `Retriever`, `Exporter`, `Notifier`, `Cache`
 **Config:** YAML/JSON/TOML flags, `ffclient.Config`, `cmd/relayproxy/config/config.go`
 
 ## ⚠️ What Agents Must NEVER Do

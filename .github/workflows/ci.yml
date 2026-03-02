@@ -191,6 +191,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 100
+          submodules: recursive
       - name: Get changed files in the docs folder
         id: changed-files-specific
         uses: marceloprado/has-changed-path@df1b7a3161b8fb9fd8c90403c66a9e66dfde50cb # v1.0.1
@@ -199,21 +200,21 @@ jobs:
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: 3.9
-      - name: Setup Poetry
+      - name: Install uv
         if: steps.changed-files-specific.outputs.changed == 'true'
-        uses: abatilo/actions-poetry@3765cf608f2d4a72178a9fc5b918668e542b89b1 # v4.0.0
-      - name: Poetry install
+        uses: astral-sh/setup-uv@eac588ad8def6316056a12d4907a9d4d84ff7a3b # v7.3.0
+      - name: uv sync
         if: steps.changed-files-specific.outputs.changed == 'true'
         working-directory: ./openfeature/providers/python-provider
-        run: poetry install
+        run: uv sync
       - name: lint black
         if: steps.changed-files-specific.outputs.changed == 'true'
         working-directory: ./openfeature/providers/python-provider
-        run: poetry run black . --check
+        run: uv run black . --check
       - name: Pytest
         if: steps.changed-files-specific.outputs.changed == 'true'
         working-directory: ./openfeature/providers/python-provider
-        run: poetry run pytest
+        run: uv run pytest
   GraddleWrapperValidation:
     runs-on: ubuntu-latest
     permissions:
