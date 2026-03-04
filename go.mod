@@ -17,7 +17,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.32.10
 	github.com/aws/aws-sdk-go-v2/credentials v1.19.11
 	github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager v0.1.6
-	github.com/aws/aws-sdk-go-v2/service/kinesis v1.43.1
+	github.com/aws/aws-sdk-go-v2/service/kinesis v1.43.2
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.96.2
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.42.23
 	github.com/aws/smithy-go v1.24.2
@@ -107,7 +107,7 @@ require (
 	github.com/antlr4-go/antlr/v4 v4.13.0 // indirect
 	github.com/apache/arrow/go/arrow v0.0.0-20200730104253-651201b0f516 // indirect
 	github.com/apache/thrift v0.21.0 // indirect
-	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.5 // indirect
+	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.6 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.19 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.19 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.19 // indirect
