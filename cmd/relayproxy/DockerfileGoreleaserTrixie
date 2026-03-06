@@ -1,4 +1,4 @@
-FROM gcr.io/distroless/static-debian13:latest
+FROM debian:trixie-slim
 ARG TARGETPLATFORM
 COPY $TARGETPLATFORM/go-feature-flag /go-feature-flag
 CMD ["/go-feature-flag"]
