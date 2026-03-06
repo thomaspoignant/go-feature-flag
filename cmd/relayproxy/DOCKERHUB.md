@@ -81,6 +81,8 @@ GO Feature Flag is publishing the following tags:
 The numbered version _(ex: `v1`, `1.29`, etc ...)_ are using a **`distroless`** base image,
 ensuring a minimal image size and high security.
 
+The versions with a Debian version name in the tag (e.g., `-trixie`, `-bookworm`) are based on `debian-slim` images. These are useful if you need to extend the image with additional tools. The `trixie` tag is based on Debian 13 and is the recommended extendable image.
+
 # License
 
 View [license](https://github.com/thomaspoignant/go-feature-flag/blob/main/LICENSE) information for the software contained in this image.
