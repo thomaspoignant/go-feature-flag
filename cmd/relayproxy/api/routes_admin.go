@@ -12,6 +12,7 @@ func (s *Server) addAdminRoutes(cRetrieverRefresh controller.Controller) {
 		Validator: func(key string, _ echo.Context) (bool, error) {
 			return s.config.APIKeysAdminExists(key), nil
 		},
+		ErrorHandler: middleware2.AuthMiddlewareErrHandler,
 	}))
 	adminGrp.POST("/retriever/refresh", cRetrieverRefresh.Handler)
 }

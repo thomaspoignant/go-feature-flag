@@ -1,0 +1,114 @@
+suite: test custom labels
+templates:
+  - deployment.yaml
+  - service.yaml
+  - configmap.yaml
+  - serviceaccount.yaml
+  - pdb.yaml
+tests:
+  - it: should not have commonLabels or podLabels by default on deployment
+    template: deployment.yaml
+    asserts:
+      - isNotNull:
+          path: metadata.labels["app.kubernetes.io/name"]
+      - isNull:
+          path: metadata.labels.custom-label
+
+  - it: should add commonLabels to deployment metadata
+    template: deployment.yaml
+    set:
+      commonLabels:
+        custom-label: custom-value
+        team: backend
+    asserts:
+      - equal:
+          path: metadata.labels["custom-label"]
+          value: custom-value
+      - equal:
+          path: metadata.labels.team
+          value: backend
+
+  - it: should add commonLabels to pod template labels
+    template: deployment.yaml
+    set:
+      commonLabels:
+        custom-label: custom-value
+    asserts:
+      - equal:
+          path: spec.template.metadata.labels["custom-label"]
+          value: custom-value
+
+  - it: should add podLabels to pod template labels
+    template: deployment.yaml
+    set:
+      podLabels:
+        pod-label: pod-value
+    asserts:
+      - equal:
+          path: spec.template.metadata.labels["pod-label"]
+          value: pod-value
+
+  - it: should not add podLabels to deployment metadata
+    template: deployment.yaml
+    set:
+      podLabels:
+        pod-label: pod-value
+    asserts:
+      - isNull:
+          path: metadata.labels["pod-label"]
+
+  - it: should add both commonLabels and podLabels to pod template
+    template: deployment.yaml
+    set:
+      commonLabels:
+        common: from-common
+      podLabels:
+        pod-only: from-pod
+    asserts:
+      - equal:
+          path: spec.template.metadata.labels.common
+          value: from-common
+      - equal:
+          path: spec.template.metadata.labels["pod-only"]
+          value: from-pod
+
+  - it: should add commonLabels to service metadata
+    template: service.yaml
+    set:
+      commonLabels:
+        custom-label: custom-value
+    asserts:
+      - equal:
+          path: metadata.labels["custom-label"]
+          value: custom-value
+
+  - it: should add commonLabels to configmap metadata
+    template: configmap.yaml
+    set:
+      commonLabels:
+        custom-label: custom-value
+    asserts:
+      - equal:
+          path: metadata.labels["custom-label"]
+          value: custom-value
+
+  - it: should add commonLabels to serviceaccount metadata
+    template: serviceaccount.yaml
+    set:
+      commonLabels:
+        custom-label: custom-value
+    asserts:
+      - equal:
+          path: metadata.labels["custom-label"]
+          value: custom-value
+
+  - it: should add commonLabels to pdb metadata
+    template: pdb.yaml
+    set:
+      pdb.enable: true
+      commonLabels:
+        custom-label: custom-value
+    asserts:
+      - equal:
+          path: metadata.labels["custom-label"]
+          value: custom-value

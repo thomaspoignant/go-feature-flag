@@ -3,6 +3,8 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: {{ template "relay-proxy.fullname" . }}
+  labels:
+    {{- include "relay-proxy.labels" . | nindent 4 }}
 spec:
   {{- if .Values.pdb.maxUnavailable }}
   maxUnavailable: {{ .Values.pdb.maxUnavailable }}

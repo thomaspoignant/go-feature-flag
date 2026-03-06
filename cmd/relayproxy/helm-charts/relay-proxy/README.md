@@ -94,7 +94,7 @@ relayproxy:
 	<tbody>
 		<tr>
 			<td id="affinity">
-				<a href="./values.yaml#L128">affinity</a>
+				<a href="./values.yaml#L134">affinity</a>
             </td>
 			<td>
 object
@@ -112,7 +112,7 @@ object
 		</tr>
 		<tr>
 			<td id="autoscaling">
-				<a href="./values.yaml#L109">autoscaling</a>
+				<a href="./values.yaml#L115">autoscaling</a>
             </td>
 			<td>
 object
@@ -136,7 +136,7 @@ object
 		</tr>
 		<tr>
 			<td id="autoscaling--enabled">
-				<a href="./values.yaml#L111">autoscaling.enabled</a>
+				<a href="./values.yaml#L117">autoscaling.enabled</a>
             </td>
 			<td>
 bool
@@ -154,7 +154,7 @@ false
 		</tr>
 		<tr>
 			<td id="autoscaling--maxReplicas">
-				<a href="./values.yaml#L115">autoscaling.maxReplicas</a>
+				<a href="./values.yaml#L121">autoscaling.maxReplicas</a>
             </td>
 			<td>
 int
@@ -172,7 +172,7 @@ int
 		</tr>
 		<tr>
 			<td id="autoscaling--minReplicas">
-				<a href="./values.yaml#L113">autoscaling.minReplicas</a>
+				<a href="./values.yaml#L119">autoscaling.minReplicas</a>
             </td>
 			<td>
 int
@@ -190,7 +190,7 @@ int
 		</tr>
 		<tr>
 			<td id="autoscaling--targetCPUUtilizationPercentage">
-				<a href="./values.yaml#L117">autoscaling.targetCPUUtilizationPercentage</a>
+				<a href="./values.yaml#L123">autoscaling.targetCPUUtilizationPercentage</a>
             </td>
 			<td>
 int
@@ -208,7 +208,7 @@ int
 		</tr>
 		<tr>
 			<td id="autoscaling--targetMemoryUtilizationPercentage">
-				<a href="./values.yaml#L119">autoscaling.targetMemoryUtilizationPercentage</a>
+				<a href="./values.yaml#L125">autoscaling.targetMemoryUtilizationPercentage</a>
             </td>
 			<td>
 int
@@ -222,6 +222,24 @@ int
 			</td>
 			<td>
 				target memory utilization percentage to spin up new pods
+			</td>
+		</tr>
+		<tr>
+			<td id="commonLabels">
+				<a href="./values.yaml#L63">commonLabels</a>
+            </td>
+			<td>
+object
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+{}
+</pre>
+</div>
+			</td>
+			<td>
+				Additional labels to add to all resources
 			</td>
 		</tr>
 		<tr>
@@ -244,7 +262,7 @@ object
 		</tr>
 		<tr>
 			<td id="extraManifests">
-				<a href="./values.yaml#L131">extraManifests</a>
+				<a href="./values.yaml#L137">extraManifests</a>
             </td>
 			<td>
 list
@@ -352,7 +370,7 @@ list
 		</tr>
 		<tr>
 			<td id="ingress">
-				<a href="./values.yaml#L82">ingress</a>
+				<a href="./values.yaml#L88">ingress</a>
             </td>
 			<td>
 object
@@ -386,7 +404,7 @@ object
 		</tr>
 		<tr>
 			<td id="ingress--annotations">
-				<a href="./values.yaml#L88">ingress.annotations</a>
+				<a href="./values.yaml#L94">ingress.annotations</a>
             </td>
 			<td>
 object
@@ -404,7 +422,7 @@ object
 		</tr>
 		<tr>
 			<td id="ingress--className">
-				<a href="./values.yaml#L86">ingress.className</a>
+				<a href="./values.yaml#L92">ingress.className</a>
             </td>
 			<td>
 string
@@ -422,7 +440,7 @@ string
 		</tr>
 		<tr>
 			<td id="ingress--enabled">
-				<a href="./values.yaml#L84">ingress.enabled</a>
+				<a href="./values.yaml#L90">ingress.enabled</a>
             </td>
 			<td>
 bool
@@ -458,7 +476,7 @@ string
 		</tr>
 		<tr>
 			<td id="nodeSelector">
-				<a href="./values.yaml#L122">nodeSelector</a>
+				<a href="./values.yaml#L128">nodeSelector</a>
             </td>
 			<td>
 object
@@ -529,8 +547,26 @@ object
 			</td>
 		</tr>
 		<tr>
+			<td id="podLabels">
+				<a href="./values.yaml#L66">podLabels</a>
+            </td>
+			<td>
+object
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+{}
+</pre>
+</div>
+			</td>
+			<td>
+				Additional labels to add to pods
+			</td>
+		</tr>
+		<tr>
 			<td id="podSecurityContext">
-				<a href="./values.yaml#L63">podSecurityContext</a>
+				<a href="./values.yaml#L69">podSecurityContext</a>
             </td>
 			<td>
 object
@@ -584,7 +620,7 @@ int
 		</tr>
 		<tr>
 			<td id="resources--requests--cpu">
-				<a href="./values.yaml#L106">resources.requests.cpu</a>
+				<a href="./values.yaml#L112">resources.requests.cpu</a>
             </td>
 			<td>
 string
@@ -602,7 +638,7 @@ string
 		</tr>
 		<tr>
 			<td id="resources--requests--memory">
-				<a href="./values.yaml#L104">resources.requests.memory</a>
+				<a href="./values.yaml#L110">resources.requests.memory</a>
             </td>
 			<td>
 string
@@ -620,7 +656,7 @@ string
 		</tr>
 		<tr>
 			<td id="securityContext">
-				<a href="./values.yaml#L67">securityContext</a>
+				<a href="./values.yaml#L73">securityContext</a>
             </td>
 			<td>
 object
@@ -638,7 +674,7 @@ object
 		</tr>
 		<tr>
 			<td id="service--port">
-				<a href="./values.yaml#L79">service.port</a>
+				<a href="./values.yaml#L85">service.port</a>
             </td>
 			<td>
 int
@@ -656,7 +692,7 @@ int
 		</tr>
 		<tr>
 			<td id="service--type">
-				<a href="./values.yaml#L77">service.type</a>
+				<a href="./values.yaml#L83">service.type</a>
             </td>
 			<td>
 string
@@ -728,7 +764,7 @@ string
 		</tr>
 		<tr>
 			<td id="tolerations">
-				<a href="./values.yaml#L125">tolerations</a>
+				<a href="./values.yaml#L131">tolerations</a>
             </td>
 			<td>
 list
