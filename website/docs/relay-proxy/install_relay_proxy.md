@@ -14,7 +14,7 @@ docker pull gofeatureflag/go-feature-flag:latest
 
 ####  <i class="fa-brands fa-docker"></i> Use as base image in Dockerfile
 ```dockerfile
-FROM gofeatureflag/go-feature-flag:bookworm
+FROM gofeatureflag/go-feature-flag:trixie
 ```
 
 ## <i class="fa-solid fa-beer-mug-empty"></i> HomeBrew (macOS and Linux)
