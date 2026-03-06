@@ -38,7 +38,7 @@
     "babel-preset-env": "^1.7.0",
     "browser-sync": "^3.0.4",
     "eslint": "^10.0.2",
-    "eslint-webpack-plugin": "^5.0.2",
+    "eslint-webpack-plugin": "^5.0.3",
     "htmlnano": "^3.1.0",
     "imagemin-cli": "^8.0.0",
     "sass": "^1.97.3",
@@ -50,7 +50,7 @@
     "posthtml-cli": "^0.10.0",
     "posthtml-modules": "^0.9.1",
     "stylelint": "^17.4.0",
-    "webpack": "^5.105.3",
+    "webpack": "^5.105.4",
     "webpack-cli": "^6.0.1"
   },
   "dependencies": {
