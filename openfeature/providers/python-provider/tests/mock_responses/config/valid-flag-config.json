@@ -1,0 +1,25 @@
+{
+    "flags": {
+        "TEST": {
+            "variations": {
+                "off": false,
+                "on": true
+            },
+            "defaultRule": {
+                "variation": "off"
+            }
+        },
+        "TEST2": {
+            "variations": {
+                "off": false,
+                "on": true
+            },
+            "defaultRule": {
+                "variation": "on"
+            }
+        }
+    },
+    "evaluationContextEnrichment": {
+        "env": "production"
+    }
+}

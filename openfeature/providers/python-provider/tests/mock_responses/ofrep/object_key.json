@@ -1,0 +1,12 @@
+{
+  "key": "object_key",
+  "value": {
+    "test": "test1",
+    "test2": false,
+    "test3": 123.3,
+    "test4": 1,
+    "test5": null
+  },
+  "reason": "TARGETING_MATCH",
+  "variant": "True"
+}

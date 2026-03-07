@@ -1,0 +1,12 @@
+{
+  "key": "list_key",
+  "value": [
+    "test",
+    "test1",
+    "test2",
+    "false",
+    "test3"
+  ],
+  "reason": "TARGETING_MATCH",
+  "variant": "True"
+}

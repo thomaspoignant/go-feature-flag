@@ -13,8 +13,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Build and publish to PyPi
-        uses: JRubics/poetry-publish@4b3306307f536bbfcb559603629b3b4f6aef5ab8 # v2.1
+      - name: Install uv
+        uses: astral-sh/setup-uv@bd01f18f5d15746b30239de8373e6f36c5be2f19 # v6.3.0
         with:
-          package_directory: ./openfeature/providers/python-provider
-          pypi_token: ${{ secrets.pypi_token }}
+          version: "latest"
+      - name: Build package
+        working-directory: ./openfeature/providers/python-provider
+        run: uv build
+      - name: Publish to PyPi
+        working-directory: ./openfeature/providers/python-provider
+        run: uv publish --token ${{ secrets.pypi_token }}
