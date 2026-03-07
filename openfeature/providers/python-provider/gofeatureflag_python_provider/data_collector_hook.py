@@ -112,7 +112,7 @@ class DataCollectorHook(Hook):
                 )
                 headers = {"Content-Type": "application/json"}
                 if self._options.api_key:
-                    headers["Authorization"] = "Bearer {}".format(self._options.api_key)
+                    headers["X-API-Key"] = self._options.api_key
 
                 response = self._http_client.request(
                     method="POST",

@@ -195,7 +195,7 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
             else:
                 headers = {"Content-Type": "application/json"}
                 if self.options.api_key is not None:
-                    headers["Authorization"] = "Bearer {}".format(self.options.api_key)
+                    headers["X-API-Key"] = self.options.api_key
                 url = "{}{}".format(
                     str(self.options.endpoint).rstrip("/"),
                     "/v1/feature/{}/eval".format(flag_key),
