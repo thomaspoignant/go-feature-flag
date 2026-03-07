@@ -1,6 +1,6 @@
 module github.com/thomaspoignant/go-feature-flag/modules/core
 
-go 1.24.6
+go 1.24.13
 
 require (
 	github.com/diegoholiveira/jsonlogic/v3 v3.9.0
