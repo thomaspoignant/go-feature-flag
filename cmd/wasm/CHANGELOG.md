@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/thomaspoignant/go-feature-flag/compare/cmd/wasm/v0.2.0...cmd/wasm/v0.2.1) (2026-03-07)
+
+
+### 🔧 Chores
+
+* bump Go version to 1.25.8 ([#4938](https://github.com/thomaspoignant/go-feature-flag/issues/4938)) ([09e24ee](https://github.com/thomaspoignant/go-feature-flag/commit/09e24eef81404ab377ca9b78b66af146b937bf3b))
+
 ## [0.2.0](https://github.com/thomaspoignant/go-feature-flag/compare/cmd/wasm/v0.1.4...cmd/wasm/v0.2.0) (2026-02-13)
 
 
