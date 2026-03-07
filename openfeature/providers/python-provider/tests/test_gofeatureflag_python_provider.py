@@ -690,6 +690,63 @@ def test_url_parsing(mock_request):
 
 
 @patch("urllib3.poolmanager.PoolManager.request")
+def test_should_send_api_key_in_x_api_key_header_for_evaluation(mock_request):
+    flag_key = "bool_targeting_match"
+    mock_request.return_value = Mock(status="200", data=_read_mock_file(flag_key))
+    goff_provider = GoFeatureFlagProvider(
+        options=GoFeatureFlagOptions(
+            endpoint="https://gofeatureflag.org/",
+            data_flush_interval=100,
+            disable_cache_invalidation=True,
+            api_key="apikey1",
+        ),
+    )
+    api.set_provider(goff_provider)
+    client = api.get_client(domain="test-client")
+    client.get_boolean_details(
+        flag_key=flag_key,
+        default_value=False,
+        evaluation_context=_default_evaluation_ctx,
+    )
+    api.shutdown()
+
+    headers = mock_request.call_args.kwargs["headers"]
+    assert headers["X-API-Key"] == "apikey1"
+    assert "Authorization" not in headers
+
+
+@patch("urllib3.poolmanager.PoolManager.request")
+def test_should_send_api_key_in_x_api_key_header_for_data_collector(mock_request):
+    flag_key = "bool_targeting_match"
+    mock_request.side_effect = [
+        Mock(status="200", data=_read_mock_file(flag_key)),
+        Mock(status="200", data={}),
+        Mock(status="200", data={}),
+    ]
+    goff_provider = GoFeatureFlagProvider(
+        options=GoFeatureFlagOptions(
+            endpoint="https://gofeatureflag.org/",
+            data_flush_interval=100,
+            disable_cache_invalidation=True,
+            api_key="apikey1",
+        )
+    )
+    api.set_provider(goff_provider)
+    client = api.get_client(domain="test-client")
+    client.get_boolean_details(
+        flag_key=flag_key,
+        default_value=False,
+        evaluation_context=_default_evaluation_ctx,
+    )
+    time.sleep(0.2)
+    api.shutdown()
+
+    collector_headers = mock_request.call_args_list[1].kwargs["headers"]
+    assert collector_headers["X-API-Key"] == "apikey1"
+    assert "Authorization" not in collector_headers
+
+
+@patch("urllib3.poolmanager.PoolManager.request")
 def test_should_call_evaluation_api_with_exporter_metadata(
     mock_request: Mock,
 ):
