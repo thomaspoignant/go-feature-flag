@@ -76,13 +76,12 @@ curl -X 'POST' \
 # Supported tags and respective `Dockerfile` links
 
 GO Feature Flag is publishing the following tags:
-- [`latest`](https://github.com/thomaspoignant/go-feature-flag/blob/main/cmd/relayproxy/DockerfileGoreleaser), [`bookworm`](https://github.com/thomaspoignant/go-feature-flag/blob/main/cmd/relayproxy/DockerfileGoreleaserBookworm), [`v1`](https://github.com/thomaspoignant/go-feature-flag/blob/main/cmd/relayproxy/DockerfileGoreleaser), [`v1-bookworm`](https://github.com/thomaspoignant/go-feature-flag/blob/main/cmd/relayproxy/DockerfileGoreleaserBookworm)
+- [`latest`](https://github.com/thomaspoignant/go-feature-flag/blob/main/cmd/relayproxy/DockerfileGoreleaser), [`bookworm`](https://github.com/thomaspoignant/go-feature-flag/blob/main/cmd/relayproxy/DockerfileGoreleaserBookworm), [`trixie`](https://github.com/thomaspoignant/go-feature-flag/blob/main/cmd/relayproxy/DockerfileGoreleaserTrixie), [`v1`](https://github.com/thomaspoignant/go-feature-flag/blob/main/cmd/relayproxy/DockerfileGoreleaser), [`v1-bookworm`](https://github.com/thomaspoignant/go-feature-flag/blob/main/cmd/relayproxy/DockerfileGoreleaserBookworm), [`v1-trixie`](https://github.com/thomaspoignant/go-feature-flag/blob/main/cmd/relayproxy/DockerfileGoreleaserTrixie)
 
 The numbered version _(ex: `v1`, `1.29`, etc ...)_ are using a **`distroless`** base image,
 ensuring a minimal image size and high security.
 
-The version with `-bookworm` is using the `bookworm` debian-slim image as base,
-it allows extending it with more tools if needed.
+The versions with a Debian version name in the tag (e.g., `-trixie`, `-bookworm`) are based on `debian-slim` images. These are useful if you need to extend the image with additional tools. The `trixie` tag is based on Debian 13 and is the recommended extendable image.
 
 # License
 

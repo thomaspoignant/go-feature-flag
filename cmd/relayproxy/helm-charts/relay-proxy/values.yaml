@@ -59,6 +59,12 @@ pdb:
 # -- Pod annotations to add to the deployment
 podAnnotations: {}
 
+# -- Additional labels to add to all resources
+commonLabels: {}
+
+# -- Additional labels to add to pods
+podLabels: {}
+
 # -- A security context defines privilege and access control settings for a Pod
 podSecurityContext: {}
 # fsGroup: 2000

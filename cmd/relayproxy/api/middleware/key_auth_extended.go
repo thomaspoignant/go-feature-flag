@@ -61,9 +61,15 @@ func validateXAPIKey(c echo.Context, config KeyAuthExtendedConfig, next echo.Han
 
 	valid, err := config.Validator(xAPIKey, c)
 	if err != nil {
+		if config.ErrorHandler == nil {
+			return true, err
+		}
 		return true, config.ErrorHandler(err, c) // X-API-Key present but validation error
 	}
 	if !valid {
+		if config.ErrorHandler == nil {
+			return true, echo.ErrUnauthorized
+		}
 		return true, config.ErrorHandler(echo.ErrUnauthorized, c) // X-API-Key present but invalid
 	}
 

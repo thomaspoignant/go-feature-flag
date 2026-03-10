@@ -283,7 +283,7 @@ func runCheck(
 	retrieverConf retrieverconf.RetrieverConf) error {
 	output := helper.Output{}
 
-	// nolint:musttag
+	// nolint:musttag,gosec // G117 - retriever config output is intentional for CLI display
 	detailed, err := json.MarshalIndent(retrieverConf, "", "  ")
 	if err != nil {
 		return err

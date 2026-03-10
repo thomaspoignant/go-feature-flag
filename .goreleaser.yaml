@@ -339,6 +339,32 @@ dockers_v2:
       "org.opencontainers.image.url": "https://gofeatureflag.org/docs/relay_proxy"
       "org.opencontainers.image.version": "{{ .Version }}"
 
+  # go-feature-flag-trixie
+  - id: go-feature-flag-trixie
+    ids:
+      - go-feature-flag
+    dockerfile: ./cmd/relayproxy/DockerfileGoreleaserTrixie
+    images:
+      - gofeatureflag/go-feature-flag
+    tags:
+      - "trixie"
+      - "v{{ .RawVersion }}-trixie"
+      - "v{{ .Major }}-trixie"
+      - "v{{ .Major }}.{{ .Minor }}-trixie"
+    platforms:
+      - linux/amd64
+      - linux/arm64
+      - linux/arm/v7
+    labels:
+      "org.opencontainers.image.created": "{{ .Date }}"
+      "org.opencontainers.image.description": "A stand alone server to run GO Feature Flag"
+      "org.opencontainers.image.licenses": "MIT"
+      "org.opencontainers.image.revision": "{{ .FullCommit }}"
+      "org.opencontainers.image.source": "https://github.com/thomaspoignant/go-feature-flag"
+      "org.opencontainers.image.title": "go-feature-flag"
+      "org.opencontainers.image.url": "https://gofeatureflag.org/docs/relay_proxy"
+      "org.opencontainers.image.version": "{{ .Version }}"
+
   # lint (thomaspoignant legacy)
   - id: go-feature-flag-lint-legacy
     ids:

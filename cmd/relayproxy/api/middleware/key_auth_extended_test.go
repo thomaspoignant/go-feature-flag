@@ -1,6 +1,7 @@
 package middleware_test
 
 import (
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -322,5 +323,113 @@ func TestKeyAuthExtended_SetDefaults(t *testing.T) {
 		// This test verifies that the default KeyLookup is "header:Authorization"
 		// by checking that it matches echo's DefaultKeyAuthConfig.KeyLookup
 		assert.Equal(t, middleware.DefaultKeyAuthConfig.KeyLookup, "header:Authorization")
+	})
+}
+
+func TestKeyAuthExtended_InvalidXAPIKey_NilErrorHandler(t *testing.T) {
+	// Reproduces https://github.com/thomaspoignant/go-feature-flag/issues/4842
+	// When ErrorHandler is nil (defaulting to echo's DefaultKeyAuthConfig.ErrorHandler
+	// which is also nil), sending an invalid X-API-Key causes a nil pointer dereference
+	// panic instead of returning 401 Unauthorized.
+	validator := func(key string, _ echo.Context) (bool, error) {
+		return key == "valid-key", nil
+	}
+
+	tests := []struct {
+		name           string
+		xAPIKey        string
+		expectedStatus int
+	}{
+		{
+			name:           "invalid X-API-Key with nil ErrorHandler should return 401 not panic",
+			xAPIKey:        "wrong-key",
+			expectedStatus: http.StatusUnauthorized,
+		},
+		{
+			name:           "valid X-API-Key with nil ErrorHandler should return 200",
+			xAPIKey:        "valid-key",
+			expectedStatus: http.StatusOK,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			e := echo.New()
+			req := httptest.NewRequest(http.MethodPost, "/admin/v1/retriever/refresh", nil)
+			req.Header.Set(helper.XAPIKeyHeader, tt.xAPIKey)
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+
+			mw := middleware2.KeyAuthExtended(middleware2.KeyAuthExtendedConfig{
+				Validator: validator,
+				// ErrorHandler intentionally left nil to reproduce the bug:
+				// setDefaults copies echo's DefaultKeyAuthConfig.ErrorHandler which is also nil,
+				// causing a panic in validateXAPIKey when X-API-Key is invalid.
+			})
+
+			handler := mw(func(c echo.Context) error {
+				return c.String(http.StatusOK, "OK")
+			})
+
+			assert.NotPanics(t, func() {
+				err := handler(c)
+				if tt.expectedStatus == http.StatusOK {
+					assert.NoError(t, err)
+					assert.Equal(t, http.StatusOK, rec.Code)
+				} else {
+					assert.Error(t, err)
+					httpErr, ok := err.(*echo.HTTPError)
+					require.True(t, ok)
+					assert.Equal(t, tt.expectedStatus, httpErr.Code)
+				}
+			})
+		})
+	}
+}
+
+func TestKeyAuthExtended_ValidatorError(t *testing.T) {
+	validatorErr := errors.New("db connection lost")
+	failingValidator := func(_ string, _ echo.Context) (bool, error) {
+		return false, validatorErr
+	}
+
+	t.Run("validator error with nil ErrorHandler returns error directly", func(t *testing.T) {
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodPost, "/admin/v1/retriever/refresh", nil)
+		req.Header.Set(helper.XAPIKeyHeader, "any-key")
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		mw := middleware2.KeyAuthExtended(middleware2.KeyAuthExtendedConfig{
+			Validator: failingValidator,
+		})
+		handler := mw(func(c echo.Context) error {
+			return c.String(http.StatusOK, "OK")
+		})
+
+		err := handler(c)
+		assert.ErrorIs(t, err, validatorErr)
+	})
+
+	t.Run("validator error with ErrorHandler delegates to handler", func(t *testing.T) {
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodPost, "/admin/v1/retriever/refresh", nil)
+		req.Header.Set(helper.XAPIKeyHeader, "any-key")
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		mw := middleware2.KeyAuthExtended(middleware2.KeyAuthExtendedConfig{
+			Validator:    failingValidator,
+			ErrorHandler: middleware2.AuthMiddlewareErrHandler,
+		})
+		handler := mw(func(c echo.Context) error {
+			return c.String(http.StatusOK, "OK")
+		})
+
+		err := handler(c)
+		assert.Error(t, err)
+		httpErr, ok := err.(*echo.HTTPError)
+		require.True(t, ok)
+		assert.Equal(t, http.StatusUnauthorized, httpErr.Code)
 	})
 }
