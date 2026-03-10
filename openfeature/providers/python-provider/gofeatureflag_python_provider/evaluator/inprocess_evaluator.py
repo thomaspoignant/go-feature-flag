@@ -139,7 +139,6 @@ class InProcessEvaluator(AbstractEvaluator):
             ctx.update(evaluation_context.attributes)
         return ctx
 
-    @staticmethod
     def _raise_for_error_code(
         self, flag_key: str, error_code: str, details: Optional[str]
     ) -> None:
