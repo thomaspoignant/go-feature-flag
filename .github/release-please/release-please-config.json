@@ -81,7 +81,8 @@
             "extra-files": [
                 "pyproject.toml",
                 "README.md"
-            ]
+            ],
+            "prerelease": true
         }
     }
 }
