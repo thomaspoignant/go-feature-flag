@@ -12,6 +12,8 @@ from openfeature.evaluation_context import EvaluationContext
 from openfeature.exception import (
     FlagNotFoundError,
     GeneralError,
+    InvalidContextError,
+    TargetingKeyMissingError,
     TypeMismatchError,
 )
 from openfeature.flag_evaluation import FlagResolutionDetails, Reason
@@ -139,13 +141,17 @@ class InProcessEvaluator(AbstractEvaluator):
 
     @staticmethod
     def _raise_for_error_code(
-        flag_key: str, error_code: str, details: Optional[str]
+        self, flag_key: str, error_code: str, details: Optional[str]
     ) -> None:
         """Translate a WASM error code into the appropriate OpenFeature exception."""
         if error_code == _ERROR_CODE_FLAG_NOT_FOUND:
             raise FlagNotFoundError(details or f"Flag '{flag_key}' not found")
         if error_code == _ERROR_CODE_TYPE_MISMATCH:
             raise TypeMismatchError(details or f"Type mismatch for flag '{flag_key}'")
+        if error_code == _ERROR_CODE_TARGETING_KEY_MISSING:
+            raise TargetingKeyMissingError(details or "Targeting key missing")
+        if error_code == _ERROR_CODE_INVALID_CONTEXT:
+            raise InvalidContextError(details or "Invalid context")
         raise GeneralError(
             details or f"Error evaluating flag '{flag_key}': {error_code}"
         )
