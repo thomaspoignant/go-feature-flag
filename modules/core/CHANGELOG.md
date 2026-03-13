@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.1](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.6.0...modules/core/v0.6.1) (2026-03-13)
+
+
+### 🔧 Chores
+
+* bump Go version to 1.25.8 ([#4938](https://github.com/thomaspoignant/go-feature-flag/issues/4938)) ([09e24ee](https://github.com/thomaspoignant/go-feature-flag/commit/09e24eef81404ab377ca9b78b66af146b937bf3b))
+* Bump go.opentelemetry.io/otel/sdk from 1.41.0 to 1.42.0 ([#4944](https://github.com/thomaspoignant/go-feature-flag/issues/4944)) ([ede0c19](https://github.com/thomaspoignant/go-feature-flag/commit/ede0c19d7452e55e9b8e27d1c929da9c0492a82a))
+
 ## [0.6.0](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.5.1...modules/core/v0.6.0) (2026-02-12)
 
 
