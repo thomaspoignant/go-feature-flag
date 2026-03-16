@@ -1,0 +1,57 @@
+---
+sidebar_position: 30
+description: How to configure a Microsoft Teams Notifier
+---
+import { integrations } from "@site/data/integrations";
+import {Mandatory, NotMandatory} from "@site/src/components/checks/checks";
+export const notifierName = 'Microsoft Teams'
+export const info = integrations.notifiers.find((r) => r.name === notifierName)
+
+# Microsoft Teams
+
+## Overview
+{info.longDescription ?? info.description}
+
+## Configure Slack Notification
+1. First create a Webhook in the channel you want to send notifications to.  
+   *Need a hand?* [Click here to see how it's done](https://support.microsoft.com/en-us/office/create-incoming-webhooks-with-workflows-for-microsoft-teams-8ae491c7-0394-4861-ba59-055e33f75498)
+2. Copy the webhook URL
+3. Now you can configure your notifier
+
+## Configure the relay proxy
+
+To configure your relay proxy to use the {notifierName} notifier, you need to add the following
+configuration to your relay proxy configuration file:
+
+```yaml title="goff-proxy.yaml"
+# ...
+notifier:
+  - kind: microsoftteams
+    webhookUrl: "https://xxx.xxx/..."
+# ...
+```
+| Field name   |   Mandatory   | Type   | Default  | Description                                                                                                     |
+|--------------|:-------------:|--------|----------|-----------------------------------------------------------------------------------------------------------------|
+| `kind`       | <Mandatory /> | string | **none** | **Value should be `microsoftteams`**.<br/>_This field is mandatory and describe which retriever you are using._ |
+| `webhookUrl` | <Mandatory /> | string | **none** | The complete URL of your incoming webhook configured in Microsoft Teams.                                        |
+
+## Configure the GO Module
+To configure your GO module to use the {notifierName} notifier, you need to add the following
+configuration to your `ffclient.Config{}` object:
+
+```go title="example.go"
+err := ffclient.Init(ffclient.Config
+{
+    // ...
+    Notifiers: []notifier.Notifier{
+        &microsoftteamsnotifier.Notifier{
+            MicrosoftTeamsWebhookURL: "https://xxx.xxx/..."
+        },
+    },
+})
+defer ffclient.Close()
+```
+
+| **Field**                  | **Mandatory** | **Description**                                   |
+|----------------------------|:-------------:|---------------------------------------------------|
+| `MicrosoftTeamsWebhookURL` | <Mandatory /> | The complete URL of your Microsoft Teams webhook. |
