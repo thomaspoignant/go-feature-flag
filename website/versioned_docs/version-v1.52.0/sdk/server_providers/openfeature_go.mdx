@@ -1,0 +1,127 @@
+---
+sidebar_position: 20
+title: GO
+description: How to use the OpenFeature GO SDK
+---
+import { sdk } from "@site/data/sdk";
+import { FeatureTable } from "@site/src/components/doc/featureTable";
+
+# GO
+[![GO Version](https://img.shields.io/badge/dynamic/json?color=blue&style=flat-square&url=https%3A%2F%2Fproxy.golang.org%2Fgithub.com%2Fopen-feature%2Fgo-sdk-contrib%2Fproviders%2Fgo-feature-flag%2F%40latest&query=%24.Version&label=GO)](https://github.com/open-feature/go-sdk-contrib/tree/main/providers/go-feature-flag)
+
+
+## Install dependencies
+
+The first things we will do is install the **Open Feature SDK** and the **GO Feature Flag provider**.
+
+```shell
+go get github.com/open-feature/go-sdk
+go get github.com/open-feature/go-sdk-contrib/providers/go-feature-flag
+```
+
+## Initialize your Open Feature provider
+
+Despite other providers, this GO provider can be used with the **relay proxy** or standalone
+using the **GO Feature Flag module**.
+
+### Using the relay proxy
+
+If you want to use the provider with the **relay proxy** you should set the field `Endpoint` in the options.
+By default it will use a default `HTTPClient` with a **timeout** configured at **10000** milliseconds. You can change
+this configuration by providing your own configuration of the `HTTPClient`.
+
+#### Example
+```go
+options := gofeatureflag.ProviderOptions{
+  Endpoint: "http://localhost:1031",
+  HTTPClient: &http.Client{
+    Timeout:   1 * time.Second,
+  },
+}
+provider, _ := gofeatureflag.NewProvider(options)
+```
+
+## Initialize your Open Feature client
+
+To evaluate the flags you need to have an Open Feature configured in you app.
+This code block shows you how you can create a client that you can use in your application.
+
+```go
+import (
+  // ...
+  gofeatureflag "github.com/open-feature/go-sdk-contrib/providers/go-feature-flag/pkg"
+  of "github.com/open-feature/go-sdk/openfeature"
+)
+
+// ...
+
+options := gofeatureflag.ProviderOptions{
+    Endpoint: "http://localhost:1031",
+}
+provider, err := gofeatureflag.NewProvider(options)
+of.SetProvider(provider)
+client := of.NewClient("my-app")
+```
+
+## Evaluate your flag
+
+This code block explains how you can create an `EvaluationContext` and use it to evaluate your flag.
+
+
+> In this example we are evaluating a `boolean` flag, but other types are also available.
+>
+> **Refer to the [Open Feature documentation](https://docs.openfeature.dev/docs/reference/concepts/evaluation-api#basic-evaluation) to know more about it.**
+
+```go
+evaluationCtx := of.NewEvaluationContext(
+    "1d1b9238-2591-4a47-94cf-d2bc080892f1",
+    map[string]any{
+      "firstname", "john",
+      "lastname", "doe",
+      "email", "john.doe@gofeatureflag.org",
+      "admin", true,
+      "anonymous", false,
+    })
+adminFlag, _ := client.BoolValue(context.TODO(), "flag-only-for-admin", false, evaluationCtx)
+if adminFlag {
+   // flag "flag-only-for-admin" is true for the user
+} else {
+  // flag "flag-only-for-admin" is false for the user
+}
+```
+
+## Unit testing
+
+When testing code that relies on feature flags, it's crucial to have control over the flag values to simulate different scenarios and isolate your tests.
+
+The **OpenFeature in-memory provider** offers a convenient solution by allowing you to define and manipulate feature flag values directly within your tests.
+This eliminates the need to start a relay-proxy and provides a more efficient and flexible testing environment.
+
+In this example, we demonstrate how to use the in-memory provider to set the value of 2 different feature flags in a test:
+
+```go
+func TestMyTest(t *testing.T) {
+    apiInstance := openfeature.GetApiInstance()
+    apiInstance.SetProvider(
+        memprovider.NewInMemoryProvider(
+            map[string]memprovider.InMemoryFlag{
+                "my-flag-1": {Key: "my-flag-1", DefaultVariant: "var_a", Variants: map[string]any{"var_a": true}},
+                "my-flag-2": {Key: "my-flag-2", DefaultVariant: "disabled", Variants: map[string]any{"disabled": false}},
+            }
+        ))
+
+    // Your test code here
+}
+```
+By setting the in memory provider you are able to predict the value of the flag you will get when running your tests.
+This is a good way to ensure that your test is using the value you are expecting as response of your feature flag.
+
+:::note
+The in memory provider is part of the OpenFeature SDK, you don't need to export any extra dependencies to use it.
+:::
+
+## Features status
+<FeatureTable sdk={sdk.find(it => it.key === 'go')} />
+
+## Contribute to the provider
+You can find the source of the provider in the [`open-feature/go-sdk-contrib`](https://github.com/open-feature/go-sdk-contrib/tree/main/providers/go-feature-flag) repository.
