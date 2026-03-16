@@ -5,7 +5,7 @@ go 1.25.8
 require (
 	cloud.google.com/go/pubsub v1.50.1
 	cloud.google.com/go/pubsub/v2 v2.4.0
-	cloud.google.com/go/storage v1.61.2
+	cloud.google.com/go/storage v1.61.3
 	dario.cat/mergo v1.0.2
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.13.1
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.6.4
