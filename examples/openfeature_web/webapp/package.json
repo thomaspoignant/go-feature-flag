@@ -51,7 +51,7 @@
     "posthtml-modules": "^0.9.1",
     "stylelint": "^17.5.0",
     "webpack": "^5.105.4",
-    "webpack-cli": "^6.0.1"
+    "webpack-cli": "^7.0.2"
   },
   "dependencies": {
     "@openfeature/go-feature-flag-web-provider": "^0.2.8",
