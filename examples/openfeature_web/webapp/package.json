@@ -31,7 +31,7 @@
   "license": "MIT",
   "devDependencies": {
     "@babel/eslint-parser": "^7.28.6",
-    "@babel/preset-env": "^7.29.0",
+    "@babel/preset-env": "^7.29.2",
     "autoprefixer": "^10.4.27",
     "babel-loader": "^10.1.1",
     "babel-plugin-transform-class-properties": "^6.24.1",
@@ -51,7 +51,7 @@
     "posthtml-modules": "^0.9.1",
     "stylelint": "^17.5.0",
     "webpack": "^5.105.4",
-    "webpack-cli": "^6.0.1"
+    "webpack-cli": "^7.0.2"
   },
   "dependencies": {
     "@openfeature/go-feature-flag-web-provider": "^0.2.8",
