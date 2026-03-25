@@ -42,7 +42,8 @@
                 ".github/release-please",
                 "cmd/wasm",
                 "website"
-            ]
+            ],
+            "release-as":"1.53.0"
         },
         "modules/core": {
             "release-type": "go",
@@ -80,7 +81,9 @@
             "extra-files": [
                 "pyproject.toml",
                 "README.md"
-            ]
+            ],
+            "prerelease": true,
+            "prerelease-type": "beta"
         }
     }
 }

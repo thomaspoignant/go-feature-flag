@@ -1,0 +1,248 @@
+{
+    "flags": {
+        "bool_targeting_match": {
+            "variations": {
+                "disabled": false,
+                "enabled": true
+            },
+            "targeting": [
+                {
+                    "query": "email eq \"john.doe@gofeatureflag.org\"",
+                    "variation": "enabled"
+                }
+            ],
+            "defaultRule": {
+                "percentage": {
+                    "enabled": 0,
+                    "disabled": 100
+                }
+            },
+            "metadata": {
+                "description": "this is a test flag",
+                "defaultValue": false
+            }
+        },
+        "disabled_bool": {
+            "disable": true,
+            "variations": {
+                "disabled": false,
+                "enabled": true
+            },
+            "defaultRule": {
+                "percentage": {
+                    "enabled": 0,
+                    "disabled": 100
+                }
+            },
+            "metadata": {
+                "description": "this is a test flag",
+                "defaultValue": false
+            }
+        },
+        "disabled_float": {
+            "disable": true,
+            "variations": {
+                "high": 103.25,
+                "medium": 101.25,
+                "low": 100.25
+            },
+            "defaultRule": {
+                "percentage": {
+                    "low": 0,
+                    "medium": 0,
+                    "high": 100
+                }
+            },
+            "metadata": {
+                "description": "this is a test",
+                "defaultValue": 100.25
+            }
+        },
+        "disabled_int": {
+            "disable": true,
+            "variations": {
+                "high": 103,
+                "medium": 101,
+                "low": 100
+            },
+            "defaultRule": {
+                "percentage": {
+                    "low": 0,
+                    "medium": 0,
+                    "high": 100
+                }
+            },
+            "metadata": {
+                "description": "this is a test",
+                "defaultValue": 100
+            }
+        },
+        "disabled_interface": {
+            "disable": true,
+            "variations": {
+                "varA": {
+                    "test": "john"
+                },
+                "varB": {
+                    "test": "doe"
+                }
+            },
+            "defaultRule": {
+                "percentage": {
+                    "varA": 0,
+                    "varB": 100
+                }
+            },
+            "metadata": {
+                "description": "this is a test"
+            }
+        },
+        "disabled_string": {
+            "disable": true,
+            "variations": {
+                "color1": "CC0002",
+                "color2": "CC0001",
+                "color3": "CC0000"
+            },
+            "defaultRule": {
+                "percentage": {
+                    "color3": 0,
+                    "color2": 0,
+                    "color1": 100
+                }
+            },
+            "metadata": {
+                "description": "this is a test",
+                "defaultValue": "CC0000"
+            }
+        },
+        "double_key": {
+            "variations": {
+                "high": 103.25,
+                "medium": 101.25,
+                "low": 100.25
+            },
+            "targeting": [
+                {
+                    "query": "email eq \"john.doe@gofeatureflag.org\"",
+                    "variation": "medium"
+                }
+            ],
+            "defaultRule": {
+                "percentage": {
+                    "high": 0,
+                    "medium": 0,
+                    "low": 100
+                }
+            },
+            "metadata": {
+                "description": "this is a test flag",
+                "defaultValue": 100.25
+            }
+        },
+        "integer_key": {
+            "variations": {
+                "high": 103,
+                "medium": 101,
+                "low": 100
+            },
+            "defaultRule": {
+                "percentage": {
+                    "low": 0,
+                    "medium": 0,
+                    "high": 100
+                }
+            },
+            "targeting": [
+                {
+                    "query": "email eq \"john.doe@gofeatureflag.org\"",
+                    "variation": "medium"
+                }
+            ],
+            "metadata": {
+                "defaultValue": 1000,
+                "description": "this is a test flag"
+            }
+        },
+        "object_key": {
+            "variations": {
+                "varA": {
+                    "test": "default"
+                },
+                "varB": {
+                    "test": "false"
+                }
+            },
+            "targeting": [
+                {
+                    "query": "email eq \"john.doe@gofeatureflag.org\"",
+                    "variation": "varB"
+                }
+            ],
+            "defaultRule": {
+                "variation": "varA"
+            }
+        },
+        "string_key": {
+            "trackEvents": false,
+            "variations": {
+                "color1": "CC0002",
+                "color2": "CC0001",
+                "color3": "CC0000"
+            },
+            "defaultRule": {
+                "percentage": {
+                    "color3": 0,
+                    "color2": 0,
+                    "color1": 100
+                }
+            },
+            "metadata": {
+                "description": "this is a test flag",
+                "defaultValue": "CC0000"
+            }
+        },
+        "string_key_with_version": {
+            "variations": {
+                "color1": "CC0002",
+                "color2": "CC0001",
+                "color3": "CC0000"
+            },
+            "defaultRule": {
+                "percentage": {
+                    "color3": 0,
+                    "color2": 0,
+                    "color1": 100
+                }
+            },
+            "targeting": [
+                {
+                    "query": "email eq \"john.doe@gofeatureflag.org\"",
+                    "variation": "color1"
+                }
+            ],
+            "metadata": {
+                "description": "this is a test",
+                "defaultValue": "CC0000"
+            }
+        },
+        "flag-use-evaluation-context-enrichment": {
+            "variations": {
+                "A": "A",
+                "B": "B"
+            },
+            "targeting": [
+                {
+                    "query": "environment eq \"integration-test\"",
+                    "variation": "A"
+                }
+            ],
+            "defaultRule": {
+                "variation": "B"
+            }
+        }
+    },
+    "evaluationContextEnrichment": {
+        "env": "production"
+    }
+}

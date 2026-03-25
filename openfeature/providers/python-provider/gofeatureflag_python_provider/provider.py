@@ -1,117 +1,135 @@
-import atexit
-import json
-import pylru
-import urllib3
-import websocket
-from gofeatureflag_python_provider.data_collector_hook import DataCollectorHook
+"""
+OpenFeature provider for GO Feature Flag.
+
+This module provides GoFeatureFlagProvider, which implements the
+OpenFeature provider interface for evaluating feature flags.
+Delegates to a RemoteEvaluator or InProcessEvaluator based on options.evaluation_type.
+"""
+
+import logging
+
+from gofeatureflag_python_provider.evaluator import (
+    AbstractEvaluator,
+    InProcessEvaluator,
+    RemoteEvaluator,
+)
+from gofeatureflag_python_provider.hooks import (
+    DataCollectorHook,
+    EnrichEvaluationContextHook,
+)
 from gofeatureflag_python_provider.metadata import GoFeatureFlagMetadata
-from gofeatureflag_python_provider.options import BaseModel, GoFeatureFlagOptions
-from gofeatureflag_python_provider.request_flag_evaluation import (
-    RequestFlagEvaluation,
-    convert_evaluation_context,
+from gofeatureflag_python_provider.services.api import GoFeatureFlagApi
+from gofeatureflag_python_provider.services.event_publisher import EventPublisher
+from gofeatureflag_python_provider.options import (
+    BaseModel,
+    EvaluationType,
+    GoFeatureFlagOptions,
 )
-from gofeatureflag_python_provider.response_flag_evaluation import (
-    JsonType,
-    ResponseFlagEvaluation,
-)
-from http import HTTPStatus
 from openfeature.evaluation_context import EvaluationContext
-from openfeature.exception import (
-    ErrorCode,
-    FlagNotFoundError,
-    GeneralError,
-    InvalidContextError,
-    OpenFeatureError,
-    TypeMismatchError,
-)
-from openfeature.flag_evaluation import FlagResolutionDetails, Reason
+from openfeature.flag_evaluation import FlagResolutionDetails
 from openfeature.hook import Hook
 from openfeature.provider import AbstractProvider
 from openfeature.provider.metadata import Metadata
-from pydantic import PrivateAttr, ValidationError
-from threading import Thread
-from typing import List, Optional, Type, Union
+from pydantic import PrivateAttr
+from typing import List, Optional, Union
 
 AbstractProviderMetaclass = type(AbstractProvider)
 BaseModelMetaclass = type(BaseModel)
 
 
 class CombinedMetaclass(AbstractProviderMetaclass, BaseModelMetaclass):
+    """
+    Metaclass combining AbstractProvider and Pydantic BaseModel so the provider
+    can use both inheritance and Pydantic configuration.
+    """
+
     pass
 
 
 class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetaclass):
+    """
+    OpenFeature provider for GO Feature Flag.
+    """
+
     options: GoFeatureFlagOptions
-    _http_client: urllib3.PoolManager = PrivateAttr()
-    _cache: pylru.lrucache = PrivateAttr()
-    _data_collector_hook: Optional[DataCollectorHook] = PrivateAttr()
-    _ws: websocket.WebSocketApp = PrivateAttr()
-    _ws_thread: Thread = PrivateAttr()
+
+    def __hash__(self) -> int:
+        """Make provider hashable for use as dict key in OpenFeature registry."""
+        return id(self)
+
+    def __eq__(self, other: object) -> bool:
+        """Identity equality so __hash__ contract is satisfied."""
+        return other is self
+
+    _evaluator: AbstractEvaluator = PrivateAttr()
+    _data_collector_hook: DataCollectorHook = PrivateAttr()
+    _event_publisher: EventPublisher = PrivateAttr()
+    _hooks: List[Hook] = PrivateAttr(default_factory=list)
 
     def __init__(self, **data):
         """
-        Constructor of the provider.
-        It will initialize the http client for calling the GO Feature Flag relay proxy.
+        Constructor of the provider. Passes through to Pydantic configuration.
+        Selects RemoteEvaluator or InProcessEvaluator based on options.evaluation_type.
 
         :param data: data coming from pydantic configuration
         """
         super().__init__(**data)
-        if self.options.urllib3_pool_manager is not None:
-            self._http_client = self.options.urllib3_pool_manager
+        logging.getLogger("gofeatureflag_python_provider").setLevel(
+            self.options.get_log_level_int()
+        )
+        api = GoFeatureFlagApi(self.options)
+        self._event_publisher = EventPublisher(api=api, options=self.options)
+
+        if self.options.evaluation_type == EvaluationType.REMOTE:
+            self._evaluator = RemoteEvaluator(self.options)
         else:
-            self._http_client = urllib3.PoolManager(
-                num_pools=100,
-                timeout=urllib3.Timeout(connect=10, read=10),
-                retries=urllib3.Retry(0),
+            self._evaluator = InProcessEvaluator(self.options, api)
+
+        # create the data collector hook if data collection is not disabled
+        self._hooks.append(
+            DataCollectorHook(
+                options=self.options,
+                event_publisher=self._event_publisher,
+                evaluator=self._evaluator,
             )
-        self._data_collector_hook = DataCollectorHook(
-            options=self.options,
-            http_client=self._http_client,
-        )
-        websocket.enableTrace(self.options.debug)
-        self._ws = websocket.WebSocketApp(
-            self._build_websocket_uri(),
-            on_open=self.on_open,
-            on_message=self._websocket_message_handler,
         )
 
-    def on_open(self, ws):
-        if self._cache is not None:
-            self._cache.clear()
+        # create the enrichment hook if exporter_metadata is not empty
+        if len(self.options.exporter_metadata) > 0:
+            self._hooks.append(
+                EnrichEvaluationContextHook(
+                    metadata=self.options.exporter_metadata,
+                )
+            )
 
-    def initialize(self, evaluation_context: EvaluationContext) -> None:
-        """
-        initialize is called when the provider is initialized.
-        :param evaluation_context: the evaluation context
-        :return: None
-        """
-        self._cache = pylru.lrucache(self.options.cache_size)
-        self._data_collector_hook.initialize()
-        # start the websocket thread
-        if self.options.disable_cache_invalidation is False:
-            self._ws_thread = Thread(target=self.run_websocket, daemon=True)
-            self._ws_thread.start()
-        atexit.register(self.shutdown)
+    def initialize(
+        self, evaluation_context: Optional[EvaluationContext] = None
+    ) -> None:
+        """Initialize the provider and its evaluator."""
+        self._event_publisher.start()
+        self._evaluator.initialize(evaluation_context)
 
-    def shutdown(self):
-        if self.options.disable_cache_invalidation is False:
-            self._ws.close(status=websocket.STATUS_NORMAL)
-            self._ws_thread.join()
-
-        if self._cache is not None:
-            self._cache.clear()
-
-        if self._data_collector_hook is not None:
-            self._data_collector_hook.shutdown()
-            self._data_collector_hook = None
+    def shutdown(self) -> None:
+        """Shut down the provider and release evaluator resources."""
+        self._evaluator.shutdown()
+        self._event_publisher.stop()
 
     def get_metadata(self) -> Metadata:
+        """
+        Return the provider metadata (name, version).
+
+        :return: Metadata for this provider (GoFeatureFlagMetadata).
+        """
         return GoFeatureFlagMetadata()
 
     def get_provider_hooks(self) -> List[Hook]:
-        if self._data_collector_hook is None:
-            return []
-        return [self._data_collector_hook]
+        """
+        Return the list of provider-level hooks.
+        Hooks are managed by the provider only; evaluators do not provide hooks.
+
+        :return: List of hooks (may be empty).
+        """
+        return self._hooks
 
     def resolve_boolean_details(
         self,
@@ -119,8 +137,16 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
         default_value: bool,
         evaluation_context: Optional[EvaluationContext] = None,
     ) -> FlagResolutionDetails[bool]:
-        return self.generic_go_feature_flag_resolver(
-            bool, flag_key, default_value, evaluation_context
+        """
+        Resolve the flag as a boolean.
+
+        :param flag_key: Flag key to evaluate.
+        :param default_value: Default value if the flag cannot be evaluated.
+        :param evaluation_context: Optional evaluation context (e.g. user/key and attributes).
+        :return: Flag resolution details for boolean.
+        """
+        return self._evaluator.resolve_boolean_details(
+            flag_key, default_value, evaluation_context
         )
 
     def resolve_string_details(
@@ -129,8 +155,16 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
         default_value: str,
         evaluation_context: Optional[EvaluationContext] = None,
     ) -> FlagResolutionDetails[str]:
-        return self.generic_go_feature_flag_resolver(
-            str, flag_key, default_value, evaluation_context
+        """
+        Resolve the flag as a string.
+
+        :param flag_key: Flag key to evaluate.
+        :param default_value: Default value if the flag cannot be evaluated.
+        :param evaluation_context: Optional evaluation context (e.g. user/key and attributes).
+        :return: Flag resolution details for string.
+        """
+        return self._evaluator.resolve_string_details(
+            flag_key, default_value, evaluation_context
         )
 
     def resolve_integer_details(
@@ -139,8 +173,16 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
         default_value: int,
         evaluation_context: Optional[EvaluationContext] = None,
     ) -> FlagResolutionDetails[int]:
-        return self.generic_go_feature_flag_resolver(
-            int, flag_key, default_value, evaluation_context
+        """
+        Resolve the flag as an integer.
+
+        :param flag_key: Flag key to evaluate.
+        :param default_value: Default value if the flag cannot be evaluated.
+        :param evaluation_context: Optional evaluation context (e.g. user/key and attributes).
+        :return: Flag resolution details for integer.
+        """
+        return self._evaluator.resolve_integer_details(
+            flag_key, default_value, evaluation_context
         )
 
     def resolve_float_details(
@@ -149,8 +191,16 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
         default_value: float,
         evaluation_context: Optional[EvaluationContext] = None,
     ) -> FlagResolutionDetails[float]:
-        return self.generic_go_feature_flag_resolver(
-            float, flag_key, default_value, evaluation_context
+        """
+        Resolve the flag as a float.
+
+        :param flag_key: Flag key to evaluate.
+        :param default_value: Default value if the flag cannot be evaluated.
+        :param evaluation_context: Optional evaluation context (e.g. user/key and attributes).
+        :return: Flag resolution details for float.
+        """
+        return self._evaluator.resolve_float_details(
+            flag_key, default_value, evaluation_context
         )
 
     def resolve_object_details(
@@ -159,170 +209,104 @@ class GoFeatureFlagProvider(BaseModel, AbstractProvider, metaclass=CombinedMetac
         default_value: dict,
         evaluation_context: Optional[EvaluationContext] = None,
     ) -> FlagResolutionDetails[Union[list, dict]]:
-        return self.generic_go_feature_flag_resolver(
-            Union[dict, list], flag_key, default_value, evaluation_context
+        """
+        Resolve the flag as an object.
+
+        :param flag_key: Flag key to evaluate.
+        :param default_value: Default value if the flag cannot be evaluated.
+        :param evaluation_context: Optional evaluation context (e.g. user/key and attributes).
+        :return: Flag resolution details for object.
+        """
+        return self._evaluator.resolve_object_details(
+            flag_key, default_value, evaluation_context
         )
 
-    def generic_go_feature_flag_resolver(
+    async def resolve_boolean_details_async(
         self,
-        original_type: Type[JsonType],
         flag_key: str,
-        default_value: JsonType,
+        default_value: bool,
         evaluation_context: Optional[EvaluationContext] = None,
-    ) -> FlagResolutionDetails[JsonType]:
+    ) -> FlagResolutionDetails[bool]:
         """
-        generic_go_feature_flag_resolver is a generic evaluations of your flag with GO Feature Flag relay proxy it works
-        with all types.
+        Asynchronously resolve the flag as a boolean.
 
-        :param original_type: type of the request
-        :param flag_key:  name of the flag
-        :param default_value: default value of the flag
-        :param evaluation_context: context to evaluate the flag
-        :return: a FlagResolutionDetails object containing the response for the SDK.
+        :param flag_key: Flag key to evaluate.
+        :param default_value: Default value if the flag cannot be evaluated.
+        :param evaluation_context: Optional evaluation context (e.g. user/key and attributes).
+        :return: Flag resolution details for boolean.
         """
-        try:
-            goff_evaluation_context = convert_evaluation_context(evaluation_context)
-            goff_request = RequestFlagEvaluation(
-                user=goff_evaluation_context,
-                defaultValue=default_value,
-            )
-            cache_key = f"{flag_key}:{goff_evaluation_context.hash()}"
-            is_from_cache = False
-
-            if cache_key in self._cache:
-                response_body = self._cache[cache_key]
-                is_from_cache = True
-            else:
-                headers = {"Content-Type": "application/json"}
-                if self.options.api_key is not None:
-                    headers["Authorization"] = "Bearer {}".format(self.options.api_key)
-                url = "{}{}".format(
-                    str(self.options.endpoint).rstrip("/"),
-                    "/v1/feature/{}/eval".format(flag_key),
-                )
-
-                # add exporter metadata to the context if it exists
-                if self.options.exporter_metadata:
-                    goff_request.gofeatureflag["exporterMetadata"] = (
-                        self.options.exporter_metadata
-                    )
-                    goff_request.gofeatureflag["exporterMetadata"]["openfeature"] = True
-                    goff_request.gofeatureflag["exporterMetadata"][
-                        "provider"
-                    ] = "python"
-
-                response = self._http_client.request(
-                    method="POST",
-                    url=url,
-                    headers=headers,
-                    body=goff_request.model_dump_json(),
-                )
-
-                response_body = response.data
-
-                # Handle 404 error code
-                if response.status == HTTPStatus.NOT_FOUND.value:
-                    raise FlagNotFoundError(
-                        "flag {} was not found in your configuration".format(flag_key)
-                    )
-
-                # Handle 400 error code
-                if int(response.status) == HTTPStatus.BAD_REQUEST.value:
-                    response_dict = json.loads(response_body)
-                    error_message = response_dict.get("message")
-
-                    if error_message is None:
-                        error_message = "no error message given."
-
-                    raise InvalidContextError("Invalid context: " + error_message)
-
-                # Handle every error response above 400
-                if int(response.status) > HTTPStatus.BAD_REQUEST.value:
-                    raise GeneralError(
-                        "impossible to contact GO Feature Flag relay proxy instance"
-                    )
-
-            response_flag_evaluation = ResponseFlagEvaluation.model_validate_json(
-                response_body
-            )
-
-            if response_flag_evaluation.cacheable:
-                self._cache[cache_key] = response_body
-
-            if original_type == int:
-                response_json = json.loads(response_body)
-                # in some cases, pydantic auto convert float in int.
-                if type(response_json.get("value")) != int:
-                    raise TypeMismatchError(
-                        "unexpected type for flag {}".format(flag_key)
-                    )
-
-            if response_flag_evaluation.reason == Reason.DISABLED.value:
-                return FlagResolutionDetails[original_type](
-                    value=default_value,
-                    reason=Reason.DISABLED,
-                )
-
-            if response_flag_evaluation.errorCode == ErrorCode.FLAG_NOT_FOUND.value:
-                raise FlagNotFoundError(
-                    "flag {} was not found in your configuration".format(flag_key)
-                )
-
-            return FlagResolutionDetails[original_type](
-                value=response_flag_evaluation.value,
-                variant=response_flag_evaluation.variationType,
-                reason=(
-                    Reason.CACHED if is_from_cache else response_flag_evaluation.reason
-                ),
-                flag_metadata=response_flag_evaluation.metadata,
-            )
-        except ValidationError as exc:
-            raise TypeMismatchError(
-                "unexpected type for flag {}: {}".format(flag_key, exc)
-            )
-
-        except OpenFeatureError as exc:
-            raise exc
-
-        except Exception as exc:
-            raise GeneralError(
-                "unexpected error while evaluating flag {}: {}".format(flag_key, exc)
-            )
-
-    def _build_websocket_uri(self):
-        """
-        _build_websocket_uri is a helper to build the websocket uri to connect to the GO Feature Flag relay proxy.
-        :return: a string representing the websocket uri
-        """
-        url = "/ws/v1/flag/change"
-        if self.options.api_key is not None:
-            url = "{}?apiKey={}".format(url, self.options.api_key)
-
-        http_uri = "{}{}".format(
-            str(self.options.endpoint).rstrip("/"),
-            url,
+        return await self._evaluator.resolve_boolean_details_async(
+            flag_key, default_value, evaluation_context
         )
 
-        http_uri = http_uri.replace("http", "ws")
-        http_uri = http_uri.replace("https", "wss")
-        return http_uri
+    async def resolve_string_details_async(
+        self,
+        flag_key: str,
+        default_value: str,
+        evaluation_context: Optional[EvaluationContext] = None,
+    ) -> FlagResolutionDetails[str]:
+        """
+        Asynchronously resolve the flag as a string.
 
-    def run_websocket(self) -> None:
+        :param flag_key: Flag key to evaluate.
+        :param default_value: Default value if the flag cannot be evaluated.
+        :param evaluation_context: Optional evaluation context (e.g. user/key and attributes).
+        :return: Flag resolution details for string.
         """
-        run_websocket is a helper to run the websocket connection to the GO Feature Flag server.
-        :return: None
-        """
-        self._ws.run_forever(reconnect=self.options.reconnect_interval)
+        return await self._evaluator.resolve_string_details_async(
+            flag_key, default_value, evaluation_context
+        )
 
-    def _websocket_message_handler(self, wsapp, message) -> None:
+    async def resolve_integer_details_async(
+        self,
+        flag_key: str,
+        default_value: int,
+        evaluation_context: Optional[EvaluationContext] = None,
+    ) -> FlagResolutionDetails[int]:
         """
-        websocket_message_handler is the handler called when we receive a message from the GO Feature Flag server
-        :param wsapp: the websocket app
-        :param message: the message received
-        :return: None
-        """
-        # when we receive a message from go-feature-flag server, we clear the cache.
-        self._cache.clear()
+        Asynchronously resolve the flag as an integer.
 
-    def __hash__(self):
-        return id(self)
+        :param flag_key: Flag key to evaluate.
+        :param default_value: Default value if the flag cannot be evaluated.
+        :param evaluation_context: Optional evaluation context (e.g. user/key and attributes).
+        :return: Flag resolution details for integer.
+        """
+        return await self._evaluator.resolve_integer_details_async(
+            flag_key, default_value, evaluation_context
+        )
+
+    async def resolve_float_details_async(
+        self,
+        flag_key: str,
+        default_value: float,
+        evaluation_context: Optional[EvaluationContext] = None,
+    ) -> FlagResolutionDetails[float]:
+        """
+        Asynchronously resolve the flag as a float.
+
+        :param flag_key: Flag key to evaluate.
+        :param default_value: Default value if the flag cannot be evaluated.
+        :param evaluation_context: Optional evaluation context (e.g. user/key and attributes).
+        :return: Flag resolution details for float.
+        """
+        return await self._evaluator.resolve_float_details_async(
+            flag_key, default_value, evaluation_context
+        )
+
+    async def resolve_object_details_async(
+        self,
+        flag_key: str,
+        default_value: Union[dict, list],
+        evaluation_context: Optional[EvaluationContext] = None,
+    ) -> FlagResolutionDetails[Union[dict, list]]:
+        """
+        Asynchronously resolve the flag as an object.
+
+        :param flag_key: Flag key to evaluate.
+        :param default_value: Default value if the flag cannot be evaluated.
+        :param evaluation_context: Optional evaluation context (e.g. user/key and attributes).
+        :return: Flag resolution details for object.
+        """
+        return await self._evaluator.resolve_object_details_async(
+            flag_key, default_value, evaluation_context
+        )

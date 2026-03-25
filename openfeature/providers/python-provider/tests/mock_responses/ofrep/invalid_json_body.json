@@ -1,0 +1,7 @@
+{
+  "key": "invalid_json_body",
+  "value": {
+    "default": true
+  },
+  "reason": "DISABLED",
+  "variant": "defaultSdk",

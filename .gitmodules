@@ -1,0 +1,3 @@
+[submodule "openfeature/providers/python-provider/wasm-releases"]
+	path = openfeature/providers/python-provider/wasm-releases
+	url = https://github.com/go-feature-flag/wasm-releases.git
