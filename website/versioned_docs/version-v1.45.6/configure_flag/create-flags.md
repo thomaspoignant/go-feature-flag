@@ -185,7 +185,7 @@ It means that for a specific `targetingKey` the user will always see the same fl
         </p>
         <p>
           <i>
-            See <a href="./target-with-flag">Target with Flag</a> to have more info on
+            See <a href="./target-with-flags">Target with Flag</a> to have more info on
             how to write a rule.
           </i>
         </p>
@@ -202,7 +202,7 @@ It means that for a specific `targetingKey` the user will always see the same fl
         </p>
         <p>
           <i>
-            See <a href="./target-with-flag">Target with Flag</a> to have more info on
+            See <a href="./target-with-flags">Target with Flag</a> to have more info on
             how to write a rule.
           </i>
         </p>
