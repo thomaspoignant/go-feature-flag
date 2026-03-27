@@ -49,7 +49,7 @@
     "posthtml": "^0.16.7",
     "posthtml-cli": "^0.10.0",
     "posthtml-modules": "^0.9.1",
-    "stylelint": "^17.5.0",
+    "stylelint": "^17.6.0",
     "webpack": "^5.105.4",
     "webpack-cli": "^7.0.2"
   },
