@@ -21,7 +21,6 @@ jobs:
         with:
           go-version-file: go.mod
           check-latest: true
-      - run: make vendor
       - run: make build
   Lint:
     runs-on: ubuntu-latest
