@@ -7,7 +7,7 @@ ALL_GO_MOD_DIRS := ./modules/core ./cmd/wasm ./
 # In CI we disable workspace mode.
 ifeq ($(CI),true)
   GOWORK_ENV := GOWORK=off
-  MODFLAG := -mod=vendor
+  MODFLAG := 
 else
   GOWORK_ENV :=
   MODFLAG :=
@@ -72,11 +72,17 @@ else
 	$(GOWORK_ENV) $(GOCMD) work vendor
 endif
 
-tidy: ## Run go mod tidy for all modules in the workspace	
+tidy: ## Run go mod tidy for all modules in the workspace
 ifeq ($(CI),)
 	$(GOWORK_ENV) $(GOCMD) work sync
 endif
 	@$(foreach module, $(ALL_GO_MOD_DIRS), (echo "→ Tidying $(module)"; cd $(module) && $(GOWORK_ENV) $(GOCMD) mod tidy);)
+
+tidy-check: tidy ## Check that go.mod and go.sum are tidy (fails if there are uncommitted changes after tidy)
+	git diff --exit-code --quiet go.mod go.sum modules/core/go.mod modules/core/go.sum cmd/wasm/go.mod cmd/wasm/go.sum
+
+verify: ## Run go mod verify for all modules to validate checksums match go.sum
+	@$(foreach module, $(ALL_GO_MOD_DIRS), (echo "→ Verifying $(module)"; cd $(module) && $(GOWORK_ENV) $(GOCMD) mod verify) &&) true
 
 ## Dev:
 workspace-init:
