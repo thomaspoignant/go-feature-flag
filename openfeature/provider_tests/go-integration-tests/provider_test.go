@@ -153,7 +153,8 @@ func TestProvider_module_BooleanEvaluation(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			provider, err := gofeatureflag.NewProvider(gofeatureflag.ProviderOptions{
-				Endpoint: "http://localhost:1031/",
+				Endpoint:       "http://localhost:1031/",
+				EvaluationType: gofeatureflag.EvaluationTypeRemote,
 			})
 			assert.NoError(t, err)
 			err = of.SetProviderAndWait(provider)
@@ -307,7 +308,8 @@ func TestProvider_module_StringEvaluation(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			provider, err := gofeatureflag.NewProvider(gofeatureflag.ProviderOptions{
-				Endpoint: "http://localhost:1031/",
+				Endpoint:       "http://localhost:1031/",
+				EvaluationType: gofeatureflag.EvaluationTypeRemote,
 			})
 			assert.NoError(t, err)
 			err = of.SetProviderAndWait(provider)
@@ -439,7 +441,8 @@ func TestProvider_module_FloatEvaluation(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			provider, err := gofeatureflag.NewProvider(gofeatureflag.ProviderOptions{
-				Endpoint: "http://localhost:1031/",
+				Endpoint:       "http://localhost:1031/",
+				EvaluationType: gofeatureflag.EvaluationTypeRemote,
 			})
 			assert.NoError(t, err)
 			err = of.SetProviderAndWait(provider)
@@ -571,7 +574,8 @@ func TestProvider_module_IntEvaluation(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			provider, err := gofeatureflag.NewProvider(gofeatureflag.ProviderOptions{
-				Endpoint: "http://localhost:1031/",
+				Endpoint:       "http://localhost:1031/",
+				EvaluationType: gofeatureflag.EvaluationTypeRemote,
 			})
 			assert.NoError(t, err)
 			err = of.SetProviderAndWait(provider)
@@ -686,7 +690,8 @@ func TestProvider_module_ObjectEvaluation(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			provider, err := gofeatureflag.NewProvider(gofeatureflag.ProviderOptions{
-				Endpoint: "http://localhost:1031/",
+				Endpoint:       "http://localhost:1031/",
+				EvaluationType: gofeatureflag.EvaluationTypeRemote,
 			})
 			assert.NoError(t, err)
 			err = of.SetProviderAndWait(provider)
@@ -762,9 +767,7 @@ func TestProvider_apikey_relay_proxy(t *testing.T) {
 		},
 		{
 			name: "should resolve a default value with no apiKey",
-			args: args{
-				apiKey: "",
-			},
+			args: args{},
 			want: of.BooleanEvaluationDetails{
 				Value: false,
 				EvaluationDetails: of.EvaluationDetails{
@@ -784,8 +787,9 @@ func TestProvider_apikey_relay_proxy(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			provider, err := gofeatureflag.NewProvider(gofeatureflag.ProviderOptions{
-				Endpoint: "http://localhost:1032/",
-				APIKey:   tt.args.apiKey,
+				Endpoint:       "http://localhost:1032/",
+				APIKey:         tt.args.apiKey,
+				EvaluationType: gofeatureflag.EvaluationTypeRemote,
 			})
 			assert.NoError(t, err)
 			err = of.SetProviderAndWait(provider)
@@ -873,7 +877,8 @@ func TestProvider_rules_semverEvaluation(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			provider, err := gofeatureflag.NewProvider(gofeatureflag.ProviderOptions{
-				Endpoint: "http://localhost:1031/",
+				Endpoint:       "http://localhost:1031/",
+				EvaluationType: gofeatureflag.EvaluationTypeRemote,
 			})
 			assert.NoError(t, err)
 			err = of.SetProviderAndWait(provider)
