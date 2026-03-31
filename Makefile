@@ -7,7 +7,7 @@ ALL_GO_MOD_DIRS := ./modules/core ./cmd/wasm ./
 # In CI we disable workspace mode.
 ifeq ($(CI),true)
   GOWORK_ENV := GOWORK=off
-  MODFLAG := -mod=vendor
+  MODFLAG := 
 else
   GOWORK_ENV :=
   MODFLAG :=
