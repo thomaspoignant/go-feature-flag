@@ -1,12 +1,5 @@
 const sdkFeatureAvailableList = [
   {
-    key: 'localCache',
-    sdkType: 'client',
-    name: 'Flags Local Cache',
-    description:
-      'The provider is able to cache the flags, it allow to evaluate the feature flags without waiting for the remote evaluation to be done.',
-  },
-  {
     key: 'inprocess',
     sdkType: 'server',
     name: 'In process Evaluation',
@@ -284,7 +277,7 @@ export const sdk = [
       'https://img.shields.io/npm/v/%40openfeature%2Fgo-feature-flag-provider?color=blue&style=flat-square&logo=npm',
     featureList: features(
       [
-        'localCache',
+        'inprocess',
         'remote',
         'trackingFlag',
         'configurationChange',
@@ -324,7 +317,7 @@ export const sdk = [
     docLink: 'server_providers/openfeature_nestjs',
     featureList: features(
       [
-        'localCache',
+        'inprocess',
         'remote',
         'trackingFlag',
         'configurationChange',
