@@ -40,6 +40,7 @@ Flags are evaluated locally using a bundled WASM module — no network call is m
 from gofeatureflag_python_provider.provider import GoFeatureFlagProvider
 from gofeatureflag_python_provider.options import GoFeatureFlagOptions, EvaluationType
 from openfeature import api
+from openfeature.evaluation_context import EvaluationContext
 
 goff_provider = GoFeatureFlagProvider(
     options=GoFeatureFlagOptions(
@@ -60,6 +61,7 @@ Remote evaluation sends each flag evaluation as an HTTP request to the relay pro
 from gofeatureflag_python_provider.provider import GoFeatureFlagProvider
 from gofeatureflag_python_provider.options import GoFeatureFlagOptions, EvaluationType
 from openfeature import api
+from openfeature.evaluation_context import EvaluationContext
 
 goff_provider = GoFeatureFlagProvider(
     options=GoFeatureFlagOptions(
