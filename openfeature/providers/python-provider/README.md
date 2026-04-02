@@ -17,21 +17,51 @@ The first things we will do is install the **Open Feature SDK** and the **GO Fea
 pip install gofeatureflag-python-provider
 ```
 
+## Evaluation modes
+
+The provider supports two evaluation modes:
+
+| Mode | Description |
+|------|-------------|
+| **In-Process** _(default)_ | Flag configuration is fetched and cached locally; evaluation runs via a WASM module — no per-evaluation network call. |
+| **Remote** | Each flag evaluation makes an HTTP request to the GO Feature Flag relay proxy using the OFREP API. |
+
 ## Initialize your Open Feature client
 
-To evaluate the flags you need to have an Open Feature configured in you app.
-This code block shows you how you can create a client that you can use in your application.
+### In-Process evaluation (default)
+
+In-Process evaluation fetches the flag configuration from the relay proxy at startup and on a configurable polling interval. Flags are evaluated locally using a bundled WASM module, which gives you lower latency and no per-evaluation network dependency.
 
 ```python
 from gofeatureflag_python_provider.provider import GoFeatureFlagProvider
-from gofeatureflag_python_provider.options import GoFeatureFlagOptions
+from gofeatureflag_python_provider.options import GoFeatureFlagOptions, EvaluationType
 from openfeature import api
 from openfeature.evaluation_context import EvaluationContext
 
-# ...
+goff_provider = GoFeatureFlagProvider(
+    options=GoFeatureFlagOptions(
+        endpoint="https://gofeatureflag.org/",
+        evaluation_type=EvaluationType.INPROCESS,  # default
+    )
+)
+api.set_provider(goff_provider)
+client = api.get_client(domain="test-client")
+```
+
+### Remote evaluation
+
+Remote evaluation sends each flag evaluation as an HTTP request to the relay proxy.
+
+```python
+from gofeatureflag_python_provider.provider import GoFeatureFlagProvider
+from gofeatureflag_python_provider.options import GoFeatureFlagOptions, EvaluationType
+from openfeature import api
 
 goff_provider = GoFeatureFlagProvider(
-    options=GoFeatureFlagOptions(endpoint="https://gofeatureflag.org/")
+    options=GoFeatureFlagOptions(
+        endpoint="https://gofeatureflag.org/",
+        evaluation_type=EvaluationType.REMOTE,
+    )
 )
 api.set_provider(goff_provider)
 client = api.get_client(domain="test-client")
@@ -64,13 +94,35 @@ evaluation_ctx = EvaluationContext(
 )
 
 admin_flag = client.get_boolean_value(
-          flag_key=flag_key,
-          default_value=default_value,
-          evaluation_context=ctx,
-      )
+    flag_key="flag-only-for-admin",
+    default_value=False,
+    evaluation_context=evaluation_ctx,
+)
 
 if admin_flag:
-  # flag "flag-only-for-admin" is true for the user
+    # flag "flag-only-for-admin" is true for the user
+    pass
 else:
-  # flag "flag-only-for-admin" is false for the user
+    # flag "flag-only-for-admin" is false for the user
+    pass
 ```
+
+## Configuration options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `endpoint` | `str` | _(required)_ | URL of the GO Feature Flag relay proxy |
+| `evaluation_type` | `EvaluationType` | `INPROCESS` | Evaluation mode: `INPROCESS` or `REMOTE` |
+| `cache_size` | `int` | `10000` | Maximum number of flag evaluations kept in the LRU cache _(remote mode)_ |
+| `data_flush_interval` | `int` | `60000` | Interval (ms) to flush usage data to the relay proxy |
+| `disable_data_collection` | `bool` | `False` | Set to `True` to disable usage analytics |
+| `reconnect_interval` | `int` | `60` | WebSocket reconnect interval (seconds) _(remote mode)_ |
+| `disable_cache_invalidation` | `bool` | `False` | Disable WebSocket-based cache invalidation _(remote mode)_ |
+| `flag_config_poll_interval_seconds` | `int` | `10` | Polling interval (seconds) for flag configuration _(in-process mode)_ |
+| `api_key` | `str` | `None` | API key for authenticated relay proxy requests |
+| `exporter_metadata` | `dict` | `{}` | Static metadata attached to evaluation events |
+| `max_pending_events` | `int` | `10000` | Maximum buffered events before a forced flush |
+| `wasm_file_path` | `str` | `None` | Path to a custom WASM/WASI evaluation binary _(in-process mode, uses bundled binary by default)_ |
+| `wasm_pool_size` | `int` | `10` | Pool size for concurrent WASM evaluation instances _(in-process mode)_ |
+| `log_level` | `str\|int` | `"WARNING"` | Logging level (`"DEBUG"`, `"INFO"`, `"WARNING"`, `"ERROR"`) |
+| `urllib3_pool_manager` | `urllib3.PoolManager` | `None` | Custom HTTP client |
