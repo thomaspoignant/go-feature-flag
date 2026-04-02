@@ -1,17 +1,11 @@
 const sdkFeatureAvailableList = [
   {
-    key: 'localCache',
-    sdkType: 'client',
-    name: 'Flags Local Cache',
+    key: 'inprocess',
+    sdkType: 'server',
+    name: 'In process Evaluation',
     description:
-      'The provider is able to cache the flags, it allow to evaluate the feature flags without waiting for the remote evaluation to be done.',
+      'The provider is able to evaluate the feature flags in process, it loads the configuration from the relay-proxy and perform evaluation inside the SDK.',
   },
-  // {
-  //   key: "inprocess",
-  //   sdkType: 'server',
-  //   name: 'In process Evaluation',
-  //   description: 'The provider is able to evaluate the feature flags in process, it means that the provider does not do any remote call to evaluate the feature flags.',
-  // },
   {
     key: 'remote',
     name: 'Remote Evaluation',
@@ -24,11 +18,12 @@ const sdkFeatureAvailableList = [
     description:
       'The provider is tracking all the evaluations of your feature flags and you can export them using an exporter.',
   },
-  // {
-  //   key: "trackingEvents",
-  //   name: 'Tracking Custom Events',
-  //   description: 'The provider is tracking custom events through the track() function of your SDK. All those events are send to the exporter for you to forward them where you want.',
-  // },
+  {
+    key: 'trackingEvents',
+    name: 'Tracking Custom Events',
+    description:
+      'The provider is tracking custom events through the track() function of your SDK. All those events are send to the exporter for you to forward them where you want.',
+  },
   {
     key: 'configurationChange',
     name: 'Configuration Change Updates',
@@ -68,6 +63,7 @@ export const sdk = [
         'trackingFlag',
         'configurationChange',
         'providerEvents',
+        'trackingEvents',
       ],
       'server'
     ),
@@ -141,7 +137,14 @@ export const sdk = [
       'https://img.shields.io/pypi/v/gofeatureflag-python-provider?color=blue&style=flat-square&logo=pypi',
     docLink: 'server_providers/openfeature_python',
     featureList: features(
-      ['remote', 'trackingFlag', 'configurationChange'],
+      [
+        'inprocess',
+        'remote',
+        'trackingFlag',
+        'configurationChange',
+        'providerEvents',
+        // 'trackingEvents',
+      ],
       'server'
     ),
   },
@@ -259,6 +262,7 @@ export const sdk = [
         'trackingFlag',
         'configurationChange',
         'providerEvents',
+        'trackingEvents',
       ],
       'client'
     ),
@@ -272,7 +276,14 @@ export const sdk = [
     badgeUrl:
       'https://img.shields.io/npm/v/%40openfeature%2Fgo-feature-flag-provider?color=blue&style=flat-square&logo=npm',
     featureList: features(
-      ['remote', 'trackingFlag', 'configurationChange', 'providerEvents'],
+      [
+        'inprocess',
+        'remote',
+        'trackingFlag',
+        'configurationChange',
+        'providerEvents',
+        'trackingEvents',
+      ],
       'server'
     ),
   },
@@ -305,7 +316,14 @@ export const sdk = [
       'https://img.shields.io/npm/v/%40openfeature%2Fgo-feature-flag-provider?color=blue&style=flat-square&logo=npm',
     docLink: 'server_providers/openfeature_nestjs',
     featureList: features(
-      ['remote', 'trackingFlag', 'configurationChange', 'providerEvents'],
+      [
+        'inprocess',
+        'remote',
+        'trackingFlag',
+        'configurationChange',
+        'providerEvents',
+        'trackingEvents',
+      ],
       'server'
     ),
   },
