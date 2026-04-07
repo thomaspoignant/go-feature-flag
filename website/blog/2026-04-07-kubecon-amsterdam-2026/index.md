@@ -25,8 +25,7 @@ and Alexandra Oberaigner, we shared the latest news from the OpenFeature ecosyst
 including the OpenFeature MCP server, the new GitHub Action for flag cleanup, and the stable
 release of OFREP.
 
-The slides from the session are available
-[here](https://docs.google.com/presentation/d/1I6ulZnEbR1NleY58Q2ppKGIjum8AksOJDwavqb7mp1w/edit#slide=id.p).
+The [slides from the session](https://docs.google.com/presentation/d/1I6ulZnEbR1NleY58Q2ppKGIjum8AksOJDwavqb7mp1w/edit#slide=id.p) are available.
 
 ## Governance Committee: Shaping the Future of OpenFeature
 
