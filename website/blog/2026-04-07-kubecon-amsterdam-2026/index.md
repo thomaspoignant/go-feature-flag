@@ -7,7 +7,7 @@ tags: [kubecon, openfeature, cncf, community]
 image: https://gofeatureflag.org/assets/images/banner-0c3bcabe324775638421434159ec33c5.png
 ---
 
-![banner](banner.png)
+![KubeCon EU 2026 Amsterdam Banner](banner.png)
 
 KubeCon + CloudNativeCon Europe 2026 in Amsterdam is behind us, and what a week it was.
 For GO Feature Flag, it was both an opportunity to represent the project on a big stage and
