@@ -1926,14 +1926,14 @@ func TestInternalFlag_Value(t *testing.T) {
 			},
 		},
 		{
-			name: "Should return sdk default value when we have an error in the deep copy",
+			name: "Should return sdk default value when the flag has no default rule after scheduled rollout",
 			flag: flag.InternalFlag{
 				Experimentation: &flag.ExperimentationRollout{
 					Start: testconvert.Time(time.Now().Add(-15 * time.Second)),
 					End:   testconvert.Time(time.Now().Add(-5 * time.Second)),
 				},
 				Metadata: &map[string]any{
-					"description": make(chan int),
+					"description": "test flag",
 					"issue-link":  "https://issue.link/GOFF-1",
 				},
 				Scheduled: &[]flag.ScheduledStep{
@@ -1959,8 +1959,12 @@ func TestInternalFlag_Value(t *testing.T) {
 			want1: flag.ResolutionDetails{
 				Variant:      "SdkDefault",
 				Reason:       flag.ReasonError,
-				ErrorCode:    flag.ErrorCodeGeneral,
-				ErrorMessage: "json: unsupported type: chan int",
+				ErrorCode:    flag.ErrorFlagConfiguration,
+				ErrorMessage: "no default targeting for the flag",
+				Metadata: map[string]any{
+					"description": "test flag",
+					"issue-link":  "https://issue.link/GOFF-1",
+				},
 			},
 		},
 		{

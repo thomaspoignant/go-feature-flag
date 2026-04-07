@@ -4,14 +4,9 @@ import "unsafe"
 
 // nolint:gosec, govet
 // WasmReadBufferFromMemory reads a buffer from memory and returns it as a byte slice.
+// It uses unsafe.Slice to return a view directly into WASM linear memory with no copying.
 func WasmReadBufferFromMemory(bufferPosition *uint32, length uint32) []byte {
-	subjectBuffer := make([]byte, length)
-	pointer := uintptr(unsafe.Pointer(bufferPosition))
-	for i := 0; i < int(length); i++ {
-		s := *(*int32)(unsafe.Pointer(pointer + uintptr(i)))
-		subjectBuffer[i] = byte(s)
-	}
-	return subjectBuffer
+	return unsafe.Slice((*byte)(unsafe.Pointer(bufferPosition)), length)
 }
 
 // nolint:gosec

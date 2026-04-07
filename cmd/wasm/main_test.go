@@ -36,8 +36,8 @@ func Test_localEvaluation(t *testing.T) {
 			assert.NoError(t, err)
 			want, err := os.ReadFile(tt.wantLocation)
 			assert.NoError(t, err)
-			got := localEvaluation(string(content))
-			assert.JSONEq(t, string(want), got)
+			got := localEvaluation(content)
+			assert.JSONEq(t, string(want), string(got))
 		})
 	}
 }
@@ -45,4 +45,37 @@ func Test_localEvaluation(t *testing.T) {
 func Test_main(_ *testing.T) {
 	// just to make sure that the main function exists for tinygo
 	main()
+}
+
+func Benchmark_localEvaluation(b *testing.B) {
+	tests := []struct {
+		name          string
+		inputLocation string
+	}{
+		{
+			name:          "simple flag (no rules)",
+			inputLocation: "testdata/local_evaluation_inputs/bench_simple.json",
+		},
+		{
+			name:          "flag with targeting rule and percentage rollout",
+			inputLocation: "testdata/local_evaluation_inputs/valid.json",
+		},
+		{
+			name:          "flag with scheduled rollout",
+			inputLocation: "testdata/local_evaluation_inputs/bench_scheduled.json",
+		},
+	}
+
+	for _, tt := range tests {
+		b.Run(tt.name, func(b *testing.B) {
+			content, err := os.ReadFile(tt.inputLocation)
+			if err != nil {
+				b.Fatal(err)
+			}
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				localEvaluation(content)
+			}
+		})
+	}
 }

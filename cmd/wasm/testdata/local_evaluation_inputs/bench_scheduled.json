@@ -1,0 +1,41 @@
+{
+  "flagKey": "BENCH_SCHEDULED",
+  "flag": {
+    "variations": {
+      "enable": true,
+      "disable": false
+    },
+    "defaultRule": {
+      "variation": "disable"
+    },
+    "scheduledRollout": [
+      {
+        "date": "2020-01-01T00:00:00.000Z",
+        "targeting": [
+          {
+            "name": "early-adopters",
+            "query": "targetingKey eq \"user-123\"",
+            "variation": "enable"
+          }
+        ]
+      },
+      {
+        "date": "2021-01-01T00:00:00.000Z",
+        "defaultRule": {
+          "percentage": {
+            "enable": 50,
+            "disable": 50
+          }
+        }
+      }
+    ]
+  },
+  "evalContext": {
+    "targetingKey": "user-123",
+    "name": "foo",
+    "age": 42
+  },
+  "flagContext": {
+    "defaultSdkValue": false
+  }
+}

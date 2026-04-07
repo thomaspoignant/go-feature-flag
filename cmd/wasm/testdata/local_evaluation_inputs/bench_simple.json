@@ -1,0 +1,18 @@
+{
+  "flagKey": "BENCH_SIMPLE",
+  "flag": {
+    "variations": {
+      "enable": true,
+      "disable": false
+    },
+    "defaultRule": {
+      "variation": "enable"
+    }
+  },
+  "evalContext": {
+    "targetingKey": "user-123"
+  },
+  "flagContext": {
+    "defaultSdkValue": false
+  }
+}

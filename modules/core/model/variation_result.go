@@ -25,10 +25,15 @@ type VariationResult[T JSONType] struct {
 	Metadata      map[string]any        `json:"metadata,omitempty"`
 }
 
+// ToJsonBytes converts the VariationResult to a JSON byte slice.
+func (v VariationResult[T]) ToJsonBytes() []byte {
+	content, _ := json.Marshal(v)
+	return content
+}
+
 // ToJsonStr converts the VariationResult to a JSON string.
 func (v VariationResult[T]) ToJsonStr() string {
-	content, _ := json.Marshal(v)
-	return string(content)
+	return string(v.ToJsonBytes())
 }
 
 // RawVarResult is the result of the raw variation call.

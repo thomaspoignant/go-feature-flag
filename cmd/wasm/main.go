@@ -28,20 +28,19 @@ func main() {
 //export evaluate
 func evaluate(valuePosition *uint32, length uint32) uint64 {
 	input := helpers.WasmReadBufferFromMemory(valuePosition, length)
-	c := localEvaluation(string(input))
-	return helpers.WasmCopyBufferToMemory([]byte(c))
+	return helpers.WasmCopyBufferToMemory(localEvaluation(input))
 }
 
 // localEvaluation is the function that will be called from the evaluate function.
-// It will unmarshal the input, call the evaluation function and return the result.
-func localEvaluation(input string) string {
+// It will unmarshal the input, call the evaluation function and return the result as bytes.
+func localEvaluation(input []byte) []byte {
 	var evaluateInput EvaluateInput
-	err := json.Unmarshal([]byte(input), &evaluateInput)
+	err := json.Unmarshal(input, &evaluateInput)
 	if err != nil {
 		return model.VariationResult[any]{
 			ErrorCode:    flag.ErrorCodeParseError,
 			ErrorDetails: err.Error(),
-		}.ToJsonStr()
+		}.ToJsonBytes()
 	}
 
 	evalCtx := convertEvaluationCtx(evaluateInput.EvaluationCtx)
@@ -56,7 +55,7 @@ func localEvaluation(input string) string {
 		"interface{}",
 		evaluateInput.FlagContext.DefaultSdkValue,
 	)
-	return c.ToJsonStr()
+	return c.ToJsonBytes()
 }
 
 // convertEvaluationCtx converts the evaluation context from the input to a ffcontext.Context.

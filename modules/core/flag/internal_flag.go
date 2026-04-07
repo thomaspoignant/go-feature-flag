@@ -1,7 +1,6 @@
 package flag
 
 import (
-	"encoding/json"
 	"fmt"
 	"maps"
 	"time"
@@ -200,6 +199,32 @@ func (f *InternalFlag) selectVariation(
 	}, nil
 }
 
+// DeepCopy returns a deep copy of the InternalFlag without using JSON serialization.
+// This avoids the expensive reflection-based marshal/unmarshal round-trip in TinyGo.
+func (f *InternalFlag) DeepCopy() *InternalFlag {
+	cp := *f
+	if f.Variations != nil {
+		varsCopy := make(map[string]*any, len(*f.Variations))
+		maps.Copy(varsCopy, *f.Variations)
+		cp.Variations = &varsCopy
+	}
+	if f.Rules != nil {
+		rulesCopy := make([]Rule, len(*f.Rules))
+		copy(rulesCopy, *f.Rules)
+		cp.Rules = &rulesCopy
+	}
+	if f.DefaultRule != nil {
+		defaultRuleCopy := *f.DefaultRule
+		cp.DefaultRule = &defaultRuleCopy
+	}
+	if f.Metadata != nil {
+		metaCopy := make(map[string]any, len(*f.Metadata))
+		maps.Copy(metaCopy, *f.Metadata)
+		cp.Metadata = &metaCopy
+	}
+	return &cp
+}
+
 // nolint: gocognit
 // applyScheduledRolloutSteps is checking if the flag has a scheduled rollout configured.
 // If yes we merge the changes to the current flag.
@@ -208,16 +233,9 @@ func (f *InternalFlag) applyScheduledRolloutSteps(evaluationDate time.Time) (*In
 		return f, nil
 	}
 
-	// We are doing a deep copy the flag to avoid modifying the original flag.
+	// We are doing a deep copy of the flag to avoid modifying the original flag.
 	// The deep copy is done to fix this issue https://github.com/thomaspoignant/go-feature-flag/issues/2256
-	data, err := json.Marshal(f)
-	if err != nil {
-		return &InternalFlag{}, err
-	}
-	var flagCopy *InternalFlag
-	if err := json.Unmarshal(data, &flagCopy); err != nil {
-		return &InternalFlag{}, err
-	}
+	flagCopy := f.DeepCopy()
 
 	// We apply the scheduled rollout
 	for _, steps := range *f.Scheduled {
@@ -237,9 +255,7 @@ func (f *InternalFlag) applyScheduledRolloutSteps(evaluationDate time.Time) (*In
 			}
 
 			if steps.Variations != nil {
-				for key, value := range steps.GetVariations() {
-					flagCopy.GetVariations()[key] = value
-				}
+				maps.Copy(flagCopy.GetVariations(), steps.GetVariations())
 			}
 
 			if steps.Version != nil {
