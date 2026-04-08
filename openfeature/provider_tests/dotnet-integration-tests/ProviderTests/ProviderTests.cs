@@ -45,13 +45,18 @@ public class ProviderTests
     {
         var flagKey = "bool_targeting_match";
         var want = new FlagEvaluationDetails<bool>(
-            flagKey, 
-            true, 
-            ErrorType.None, 
+            flagKey,
+            true,
+            ErrorType.None,
             Reason.TargetingMatch,
             "True",
             null,
-            new ImmutableMetadata());
+            new ImmutableMetadata(new Dictionary<string, object>
+            {
+                { "description", "this is a test" },
+                { "pr_link", "https://github.com/thomaspoignant/go-feature-flag/pull/916" },
+                { "gofeatureflag_cacheable", true }
+            }));
         var got = await client.GetBooleanDetailsAsync(flagKey, false, defaultEvaluationContext);
         got.Should().BeEquivalentTo(want);
 
@@ -106,13 +111,18 @@ public class ProviderTests
     {
         var flagKey = "string_key";
         var want = new FlagEvaluationDetails<string>(
-            flagKey, 
-            "CC0000", 
-            ErrorType.None, 
+            flagKey,
+            "CC0000",
+            ErrorType.None,
             Reason.TargetingMatch,
             "True",
             null,
-            new ImmutableMetadata()); 
+            new ImmutableMetadata(new Dictionary<string, object>
+            {
+                { "description", "this is a test" },
+                { "pr_link", "https://github.com/thomaspoignant/go-feature-flag/pull/916" },
+                { "gofeatureflag_cacheable", true }
+            }));
         var got = await client.GetStringDetailsAsync(flagKey, "default", defaultEvaluationContext);
         got.Should().BeEquivalentTo(want);
     }
@@ -167,13 +177,18 @@ public class ProviderTests
     {
         var flagKey = "double_key";
         var want = new FlagEvaluationDetails<double>(
-            flagKey, 
+            flagKey,
             100.25,
-            ErrorType.None, 
+            ErrorType.None,
             Reason.TargetingMatch,
             "True",
             null,
-            new ImmutableMetadata()); 
+            new ImmutableMetadata(new Dictionary<string, object>
+            {
+                { "description", "this is a test" },
+                { "pr_link", "https://github.com/thomaspoignant/go-feature-flag/pull/916" },
+                { "gofeatureflag_cacheable", true }
+            }));
         var got = await client.GetDoubleDetailsAsync(flagKey,  123.45, defaultEvaluationContext);
         got.Should().BeEquivalentTo(want);
     }
@@ -228,13 +243,18 @@ public class ProviderTests
     {
         var flagKey = "integer_key";
         var want = new FlagEvaluationDetails<int>(
-            flagKey, 
+            flagKey,
             100,
-            ErrorType.None, 
+            ErrorType.None,
             Reason.TargetingMatch,
             "True",
             null,
-            new ImmutableMetadata()); 
+            new ImmutableMetadata(new Dictionary<string, object>
+            {
+                { "description", "this is a test" },
+                { "pr_link", "https://github.com/thomaspoignant/go-feature-flag/pull/916" },
+                { "gofeatureflag_cacheable", true }
+            }));
         var got = await client.GetIntegerDetailsAsync(flagKey,  123, defaultEvaluationContext);
         got.Should().BeEquivalentTo(want);
     }
@@ -298,13 +318,18 @@ public class ProviderTests
         );
         var flagKey = "object_key";
         var want = new FlagEvaluationDetails<Value>(
-            flagKey, 
+            flagKey,
             new Value(expectedStructure),
-            ErrorType.None, 
+            ErrorType.None,
             Reason.TargetingMatch,
             "True",
             null,
-            new ImmutableMetadata()); 
+            new ImmutableMetadata(new Dictionary<string, object>
+            {
+                { "description", "this is a test" },
+                { "pr_link", "https://github.com/thomaspoignant/go-feature-flag/pull/916" },
+                { "gofeatureflag_cacheable", true }
+            }));
         var got = await client.GetObjectDetailsAsync(flagKey,  new Value(123), defaultEvaluationContext);
         got.Should().BeEquivalentTo(want);
     }
@@ -352,13 +377,18 @@ public class ProviderTests
         FeatureClient authenticatedClient = Api.Instance.GetClient("my-app");
         var flagKey = "bool_targeting_match";
         var want = new FlagEvaluationDetails<bool>(
-            flagKey, 
-            true, 
-            ErrorType.None, 
+            flagKey,
+            true,
+            ErrorType.None,
             Reason.TargetingMatch,
             "True",
             null,
-            new ImmutableMetadata());
+            new ImmutableMetadata(new Dictionary<string, object>
+            {
+                { "description", "this is a test" },
+                { "pr_link", "https://github.com/thomaspoignant/go-feature-flag/pull/916" },
+                { "gofeatureflag_cacheable", true }
+            }));
         var got = await authenticatedClient.GetBooleanDetailsAsync(flagKey, false, defaultEvaluationContext);
         got.Should().BeEquivalentTo(want);
     }
