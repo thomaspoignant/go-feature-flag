@@ -3,7 +3,7 @@ module github.com/thomaspoignant/go-feature-flag/openfeature/provider_tests/go-i
 go 1.25.8
 
 require (
-	github.com/open-feature/go-sdk v1.17.1
+	github.com/open-feature/go-sdk v1.17.2
 	github.com/open-feature/go-sdk-contrib/providers/go-feature-flag v1.0.1
 	github.com/stretchr/testify v1.11.1
 )
