@@ -7,7 +7,8 @@ tags: [kubecon, openfeature, cncf, community]
 image: https://gofeatureflag.org/assets/images/banner-0c3bcabe324775638421434159ec33c5.png
 ---
 
-![KubeCon EU 2026 Amsterdam Banner](banner.png)
+<!-- ![KubeCon EU 2026 Amsterdam Banner](banner.png) -->
+![image](image.png)
 
 KubeCon + CloudNativeCon Europe 2026 in Amsterdam is behind us, and what a week it was.
 For GO Feature Flag, it was both an opportunity to represent the project on a big stage and
@@ -17,7 +18,7 @@ to connect directly with the community in person.
 
 ## Speaking at the Maintainer Track
 
-![image](image.png)
+<iframe width="100%" height="444" src="https://www.youtube.com/embed/9ebYq4cbjIY" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe> 
 
 I had the privilege of presenting during the **"OpenFeature Update From the Maintainers"**
 session as part of the Maintainer Track on Wednesday. Alongside Lukas Reining, André Silva,
