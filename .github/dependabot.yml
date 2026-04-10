@@ -12,6 +12,8 @@ updates:
       - "automerge"
     commit-message:
       prefix: "chore"
+    cooldown:
+      default-days: 7
 
   # GitHub Actions
   - package-ecosystem: "github-actions"
@@ -25,6 +27,8 @@ updates:
       - "automerge"
     commit-message:
       prefix: "chore"
+    cooldown:
+      default-days: 7
 
   # Integration tests
   - package-ecosystem: nuget
@@ -38,6 +42,8 @@ updates:
       - "automerge"
     commit-message:
       prefix: "chore"
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: gomod
     directory: "/openfeature/provider_tests/go-integration-tests"
@@ -50,6 +56,8 @@ updates:
       - "automerge"
     commit-message:
       prefix: "chore"
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: npm
     directory: "/openfeature/provider_tests/js-integration-tests"
@@ -62,6 +70,8 @@ updates:
       - "automerge"
     commit-message:
       prefix: "chore"
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: maven
     directory: "/openfeature/provider_tests/java-integration-tests"
@@ -74,19 +84,23 @@ updates:
       - "automerge"
     commit-message:
       prefix: "chore"
+    cooldown:
+      default-days: 7
 
   # Providers
-  # - package-ecosystem: gradle
-  #   directory: "/openfeature/providers/kotlin-provider/gofeatureflag-kotlin-provider"
-  #   schedule:
-  #     interval: weekly
-  #     time: "01:00"
-  #   open-pull-requests-limit: 10
-  #   labels:
-  #     - "dependencies"
-  #     - "automerge"
-  #   commit-message:
-  #     prefix: "chore"
+  - package-ecosystem: gradle
+    directory: "/openfeature/providers/kotlin-provider/gofeatureflag-kotlin-provider"
+    schedule:
+      interval: weekly
+      time: "01:00"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "automerge"
+    commit-message:
+      prefix: "chore"
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: pip
     directory: "/openfeature/providers/python-provider"
@@ -99,6 +113,8 @@ updates:
       - "automerge"
     commit-message:
       prefix: "chore"
+    cooldown:
+      default-days: 7
 
   # Examples App
   - package-ecosystem: npm
@@ -112,6 +128,8 @@ updates:
       - "automerge"
     commit-message:
       prefix: "chore"
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: npm
     directory: "/examples/openfeature_nodejs/nodejs-app"
@@ -124,6 +142,8 @@ updates:
       - "automerge"
     commit-message:
       prefix: "chore"
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: npm
     directory: "/examples/openfeature_react/react-app"
@@ -136,6 +156,8 @@ updates:
       - "automerge"
     commit-message:
       prefix: "chore"
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: gradle
     directory: "/examples/openfeature_kotlin_server/kotlin-app"
@@ -148,6 +170,8 @@ updates:
       - "automerge"
     commit-message:
       prefix: "chore"
+    cooldown:
+      default-days: 7
 
   # Website CI scripts
   - package-ecosystem: gomod
@@ -161,6 +185,8 @@ updates:
       - "automerge"
     commit-message:
       prefix: "chore"
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: npm
     directory: "/openfeature/ci_scripts/"
@@ -173,6 +199,8 @@ updates:
       - "automerge"
     commit-message:
       prefix: "chore"
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: gomod
     directory: "/modules/core"
@@ -185,6 +213,8 @@ updates:
       - "automerge"
     commit-message:
       prefix: "chore(dependencies)"
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: gomod
     directory: "/cmd/wasm"
@@ -197,3 +227,5 @@ updates:
       - "automerge"
     commit-message:
       prefix: "chore(dependencies)"
+    cooldown:
+      default-days: 7
