@@ -21,6 +21,7 @@ jobs:
         with:
           go-version-file: go.mod
           check-latest: true
+          cache: false
       - name: Set up Maven
         uses: stCarolas/setup-maven@d6af6abeda15e98926a57b5aa970a96bb37f97d1 # v5
         with:
@@ -61,6 +62,7 @@ jobs:
         with:
           go-version-file: go.mod
           check-latest: true
+          cache: false
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v3.1.1
@@ -222,6 +224,7 @@ jobs:
         with:
           go-version-file: ./release/${{ env.WEBSITE_DIR }}/.ci/go.mod
           check-latest: true
+          cache: false
 
       - name: Clean up version.json
         working-directory: ./release/${{ env.WEBSITE_DIR }}/.ci
@@ -284,6 +287,7 @@ jobs:
         with:
           go-version-file: ./release/go.mod
           check-latest: true
+          cache: false
 
       - name: Build jsonschema-generator
         working-directory: ./release/
