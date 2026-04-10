@@ -1,6 +1,6 @@
 module github.com/thomaspoignant/go-feature-flag/openfeature/provider_tests/go-integration-tests
 
-go 1.25.8
+go 1.25.9
 
 require (
 	github.com/open-feature/go-sdk v1.17.2
