@@ -54,7 +54,6 @@ build-modules:  ## Run build command to build all modules in the workspace
 	@echo "Building all modules in the workspace..."
 	@$(foreach module, $(ALL_GO_MOD_DIRS), (echo "→ Building $(module)"; CGO_ENABLED=0 GO111MODULE=on $(GOWORK_ENV) $(GOCMD) build $(MODFLAG) ./...);)
 
-
 build-doc: ## Build the documentation
 	cd website; \
 	npm i && npm run build
@@ -162,6 +161,14 @@ lint: ## Use golintci-lint on your project
 	mkdir -p ./bin
 	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s latest # Install linters
 	./bin/golangci-lint run --timeout=5m ./... # Run linters
+
+vuln-check: ## Run govulncheck on all modules in the workspace
+	@which govulncheck > /dev/null 2>&1 || $(GOCMD) install golang.org/x/vuln/cmd/govulncheck@latest
+	@for module in $(ALL_GO_MOD_DIRS); do \
+		echo "→ Checking vulnerabilities in $$module"; \
+		cd $$module && $(GOWORK_ENV) govulncheck ./... || exit 1; \
+		cd - >/dev/null; \
+	done
 
 ## Help:
 help: ## Show this help.
