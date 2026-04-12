@@ -58,7 +58,7 @@ func (s *Server) initRoutes() {
 	s.apiEcho.HidePort = true
 	s.apiEcho.Debug = s.config.IsDebugEnabled()
 	s.apiEcho.Use(otelecho.Middleware("go-feature-flag"))
-	s.apiEcho.Use(helpermiddleware.ZapLogger(s.zapLog, (s.config != nil && s.config.IsDebugEnabled())))
+	s.apiEcho.Use(helpermiddleware.ZapLogger(s.zapLog, s.config.IsDebugEnabled()))
 	s.apiEcho.Use(middleware.BodyDumpWithConfig(middleware.BodyDumpConfig{
 		Skipper: func(c echo.Context) bool {
 			isSwagger := strings.HasPrefix(c.Request().URL.String(), "/swagger")
