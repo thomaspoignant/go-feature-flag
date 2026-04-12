@@ -7,8 +7,8 @@ import (
 	echoadapter "github.com/awslabs/aws-lambda-go-api-proxy/echo"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	custommiddleware "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/log"
+	custommiddleware "github.com/thomaspoignant/go-feature-flag/cmdhelpers/api/middleware"
+	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/log"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/dto"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/model"
@@ -24,7 +24,7 @@ func main() {
 	defer func() { _ = logger.ZapLogger.Sync() }()
 
 	e := echo.New()
-	e.Use(custommiddleware.ZapLogger(logger.ZapLogger, nil))
+	e.Use(custommiddleware.ZapLogger(logger.ZapLogger, false))
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{
 			"http://gofeatureflag.org",

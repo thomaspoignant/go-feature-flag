@@ -8,6 +8,7 @@ import (
 	custommiddleware "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/controller"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
+	helpermiddleware "github.com/thomaspoignant/go-feature-flag/cmdhelpers/api/middleware"
 )
 
 func (s *Server) addMonitoringRoutes() {
@@ -16,7 +17,7 @@ func (s *Server) addMonitoringRoutes() {
 		s.monitoringEcho.HideBanner = true
 		s.monitoringEcho.HidePort = true
 		s.monitoringEcho.Debug = s.config.IsDebugEnabled()
-		s.monitoringEcho.Use(custommiddleware.ZapLogger(s.zapLog, s.config))
+		s.monitoringEcho.Use(helpermiddleware.ZapLogger(s.zapLog, s.config.IsDebugEnabled()))
 		s.monitoringEcho.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
 		s.apiEcho.Use(custommiddleware.VersionHeader(custommiddleware.VersionHeaderConfig{
 			RelayProxyConfig: s.config,

@@ -7,8 +7,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
+	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/api/middleware"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest/observer"
 )
@@ -25,7 +24,7 @@ func TestZapLogger200(t *testing.T) {
 
 	obs, logs := observer.New(zap.DebugLevel)
 	logger := zap.New(obs)
-	err := middleware.ZapLogger(logger, &config.Config{})(h)(c)
+	err := middleware.ZapLogger(logger, false)(h)(c)
 	assert.Nil(t, err)
 	logFields := logs.AllUntimed()[0].ContextMap()
 	assert.Equal(t, 1, logs.Len())
@@ -48,7 +47,7 @@ func TestZapLogger300(t *testing.T) {
 
 	obs, logs := observer.New(zap.DebugLevel)
 	logger := zap.New(obs)
-	err := middleware.ZapLogger(logger, &config.Config{})(h)(c)
+	err := middleware.ZapLogger(logger, false)(h)(c)
 	assert.Nil(t, err)
 	logFields := logs.AllUntimed()[0].ContextMap()
 	assert.Equal(t, 1, logs.Len())
@@ -70,7 +69,7 @@ func TestZapLogger400(t *testing.T) {
 
 	obs, logs := observer.New(zap.DebugLevel)
 	logger := zap.New(obs)
-	err := middleware.ZapLogger(logger, &config.Config{})(h)(c)
+	err := middleware.ZapLogger(logger, false)(h)(c)
 	assert.Nil(t, err)
 	logFields := logs.AllUntimed()[0].ContextMap()
 	assert.Equal(t, 1, logs.Len())
@@ -93,7 +92,7 @@ func TestZapLogger500(t *testing.T) {
 
 	obs, logs := observer.New(zap.ErrorLevel)
 	logger := zap.New(obs)
-	err := middleware.ZapLogger(logger, &config.Config{})(h)(c)
+	err := middleware.ZapLogger(logger, false)(h)(c)
 	assert.Nil(t, err)
 	logFields := logs.AllUntimed()[0].ContextMap()
 	assert.Equal(t, 1, logs.Len())
@@ -116,7 +115,7 @@ func TestZapLoggerHealth(t *testing.T) {
 
 	obs, logs := observer.New(zap.DebugLevel)
 	logger := zap.New(obs)
-	err := middleware.ZapLogger(logger, &config.Config{})(h)(c)
+	err := middleware.ZapLogger(logger, false)(h)(c)
 	assert.Nil(t, err)
 	assert.Equal(t, 0, len(logs.AllUntimed()))
 }
@@ -133,7 +132,7 @@ func TestZapLoggerHealthDebug(t *testing.T) {
 
 	obs, logs := observer.New(zap.DebugLevel)
 	logger := zap.New(obs)
-	err := middleware.ZapLogger(logger, &config.Config{LogLevel: "debug"})(h)(c)
+	err := middleware.ZapLogger(logger, true)(h)(c)
 	assert.Nil(t, err)
 	assert.Equal(t, 1, len(logs.AllUntimed()))
 }
