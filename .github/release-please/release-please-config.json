@@ -43,7 +43,7 @@
                 "cmd/wasm",
                 "website"
             ],
-            "release-as":"1.53.0"
+            "release-as": "1.52.1"
         },
         "modules/core": {
             "release-type": "go",
