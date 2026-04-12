@@ -1,0 +1,275 @@
+---
+sidebar_position: 10
+---
+# 🏁 Getting Started
+
+## Overview
+In this page, we will guide you in your first experience with **GO Feature Flag** and [**OpenFeature**](https://openfeature.dev).
+
+> _OpenFeature is an open specification that provides a vendor-agnostic, community-driven API for feature flagging that works with your favorite feature flag management tool or in-house solution._
+
+**Let's have a working solution in 5 minutes. We will follow those steps:**
+1. Create your first flag in a configuration file.
+2. Configure and start the relay-proxy.
+3. Import OpenFeature SDK and GO Feature Flag into your GO API.
+4. Configure the GO Feature Flag provider to connect with the relay proxy.
+5. Rollout a change based on the flag value.
+
+:::info You prefer to use GO Feature Flag as GO Module?
+If you are not interested to use GO Feature Flag with **OpenFeature** and prefer to use GO Feature Flag as a go module, check this [getting started page](./go_module/getting-started).
+:::
+
+## Video Tutorial
+<iframe width="100%" style={{aspectRatio: "16 / 9"}} src="https://www.youtube.com/embed/DtaULVb8o_s/" title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen={true}></iframe>
+
+## 1. Create your first flag in a configuration file
+Create a new `yaml` file named `flags.goff.yaml`, it will be the place where all your feature flags will be stored.
+
+We will create our first flag to control if we display the contact button in our React page.
+By default, we will hide it for everyone.
+
+```yaml title="flags.goff.yaml"
+show-email-contact:
+  variations:
+    enabled: true
+    disabled: false
+  defaultRule:
+    variation: disabled
+```
+
+**🎉 You have successfully learned how to create feature flags using GO Feature Flag.**
+
+## 2. Configure and start the relay-proxy
+Now that we have a configuration file, we will run GO Feature Flag to use it. We will use the docker image for this tutorial.
+
+Create a new `yaml` file named `goff-proxy.yaml` which will be the configuration file for the [relay-proxy](./relay-proxy).
+> The GO Feature Flag Relay Proxy serves as the **backend** for your feature flag solution, housing all the necessary logic for feature flag management.
+
+```yaml title="goff-proxy.yaml"
+pollingInterval: 1000 # The relay-proxy will poll the file every second to check for changes
+retrievers:
+  - kind: file
+    path: /goff/flags.goff.yaml # Location of the flags configuration file in your docker container.
+```
+:::info
+Here we store our configuration as a local file, but you can use a remote file or a database to store your flags.  
+Check [Store your feature flag file](./integrations/store-flags-configuration/) to see all the available options.
+:::
+
+
+Let's start GO Feature Flag relay-proxy:
+```shell
+docker run \
+  -p 1031:1031 \
+  -v $(pwd)/flags.goff.yaml:/goff/flags.goff.yaml \
+  -v $(pwd)/goff-proxy.yaml:/goff/goff-proxy.yaml \
+  gofeatureflag/go-feature-flag:latest
+```
+
+GO Feature Flag has started on port `1031` and is ready to be used 🙌.
+
+**🎉 You have successfully learned how to configure and start GO Feature Flag relay-proxy.**
+
+## 3. Import OpenFeature SDK and GO Feature Flag into your GO API.
+:::info
+- In this example, we are using a GO API to demonstrate how GO Feature Flag works, but you can check all the [SDK available here](./sdk).
+- GO Feature Flag supports both `client` and `server` paradigms for feature flagging, see [SDK paradigms](./concepts/sdk-paradigms).
+:::
+
+#### Considering that you have a simple 1-file GO API
+
+In this example, we will build a simple user info API that will return a JSON response with some user information.
+
+```go title="main.go"
+package main
+
+import (
+  "net/http"
+  "github.com/labstack/echo/v4"
+)
+
+func main() {
+  e := echo.New()
+  e.GET("/", func(c echo.Context) error {
+    response := map[string]any{
+      "firstname": "Mike",
+      "lastname": "Wazowski",
+      "organization": "Monsters, Inc.",
+      "jobFunction": "Scare assistant",
+    }
+    return c.JSON(http.StatusOK, response)
+  })
+  e.Logger.Fatal(e.Start(":1323"))
+}
+````
+
+#### Install the dependencies:
+```shell
+go get github.com/open-feature/go-sdk # Official OpenFeature SDK for GO
+go get github.com/open-feature/go-sdk-contrib/providers/go-feature-flag # OpenFeature provider for GO Feature Flag
+```
+
+**🎉 You have successfully imported the dependencies to use GO Feature Flag in your GO API.**
+
+## 4. Configure the GO Feature Flag provider to connect with the relay proxy.
+
+Now that we have everything ready, we will connect our application with GO Feature Flag.
+
+```go title="main.go"
+package main
+
+import (
+  "net/http"
+  "github.com/labstack/echo/v4"
+  gofeatureflag "github.com/open-feature/go-sdk-contrib/providers/go-feature-flag/pkg"
+  of "github.com/open-feature/go-sdk/openfeature"
+)
+
+func main() {
+  // highlight-start
+  // Creation of the GO Feature Flag provider
+  provider, _ := gofeatureflag.NewProvider(
+    gofeatureflag.ProviderOptions{
+      Endpoint: "http://localhost:1031",
+  })
+  // Setting the provider to the OpenFeature SDK
+  _ = of.SetProviderAndWait(provider)
+  client := of.NewClient("my-openfeature-client")
+  // highlight-end
+
+  e := echo.New()
+  e.GET("/", func(c echo.Context) error {
+    response := map[string]any{
+      "firstname": "Mike",
+      "lastname": "Wazowski",
+      "organization": "Monsters, Inc.",
+      "jobFunction": "Scare assistant",
+    }
+    return c.JSON(http.StatusOK, response)
+  })
+  e.Logger.Fatal(e.Start(":1323"))
+}
+````
+
+**What is happening in this new code?**
+- We are creating a new GO Feature Flag provider with the endpoint of the relay proxy.
+- We are setting this provider as the default provider for OpenFeature SDK.
+- We are creating a new client for our application to be able to evaluate the flags.
+
+:::info What is a provider?
+An SDK-compliant implementation that resolves flag values from a particular flag management system, allowing the use of the Evaluation API as an abstraction for the system in question.
+
+_Source [OpenFeature documentation](https://openfeature.dev/specification/glossary#provider)_
+:::
+
+**🎉 You have successfully initiated the GO Feature Flag provider with a minimal configuration and set it to the OpenFeature SDK as the source of feature flags.**
+
+## 5. Rollout a change based on the flag value.
+Now that we have everything in place, we can start using feature flags in our code.
+
+In this example, we will use the flag `show-email-contact` to decide if we display the email of the user in the response.
+
+```go title="main.go"
+package main
+
+import (
+  "net/http"
+  "github.com/labstack/echo/v4"
+  gofeatureflag "github.com/open-feature/go-sdk-contrib/providers/go-feature-flag/pkg"
+  of "github.com/open-feature/go-sdk/openfeature"
+)
+
+func main() {
+  // Creation of the GO Feature Flag provider
+  provider, _ := gofeatureflag.NewProvider(
+    gofeatureflag.ProviderOptions{
+      Endpoint: "http://localhost:1031",
+  })
+  // Setting the provider to the OpenFeature SDK
+  _ = of.SetProviderAndWait(provider)
+  client := of.NewClient("my-app")
+
+  e := echo.New()
+  e.GET("/", func(c echo.Context) error {
+    response := map[string]any{
+      "firstname": "Mike",
+      "lastname": "Wazowski",
+      "organization": "Monsters, Inc.",
+      "jobFunction": "Scare assistant",
+    }
+
+    // highlight-start
+    // We are creating an evaluation context, the unique identifier is coming from the X-USER-ID header.
+    evalCtx := of.NewEvaluationContext(c.Request().Header.Get("X-USER-ID"), map[string]any{})
+
+    // We are evaluating the flag "show-email-contact" with a default value of false.
+    if client.Boolean(c.Request().Context(), "show-email-contact", false, evalCtx) {
+      response["email"] = "mike.wazowski@monster.inc"
+    }
+	  // highlight-end
+    return c.JSON(http.StatusOK, response)
+  })
+  e.Logger.Fatal(e.Start(":1323"))
+}
+```
+**What is happening in this new code?**
+- We are creating an evaluation context with a unique identifier of the user coming through the `X-USER-ID` header.  
+  > Here we are using a simple example, in a real application you will have to manage the unique identifier of the user from your database, a session id, a fingerprint or what makes more sense for your use case.
+- We are calling the OpenFeature API to evaluate the flag `show-email-contact`, with the following parameters:
+  - `context`: the GO context of the request.
+  - `flagName`: the name of the feature flag to evaluate.
+  - `defaultValue`: the default value if we have any error, the goal is to have a safe fallback value, whatever happens.
+  - `evaluationContext`: the context of the evaluation, in this case, the unique identifier of the user.
+- In return of the evaluation, we are guaranteed to have a value for the flag, so we can use it to decide if we display the email of the user in the response.
+
+**🎉 You have successfully added your first feature flag in your application.**
+
+You can start your API and test it with a `curl` command:
+```shell
+curl -H "X-USER-ID: 1" http://localhost:1323
+
+# Output: 
+# {"firstname":"Mike","jobFunction":"Scare assistant","lastname":"Wazowski","organization":"Monsters, Inc."}
+```
+
+Now you can change the value of the flag `show-email-contact` in the `flags.goff.yaml` file and see the change in your API response without restarting your API.  
+You can test this new flag configuration by adding a new targeting rule in the `flags.goff.yaml` file:
+
+```yaml title="flags.goff.yaml"
+show-email-contact:
+  variations:
+    enabled: true
+    disabled: false
+  # highlight-start
+  targeting:
+    - query: targetingKey eq "1"
+      variation: enabled
+  # highlight-end
+  defaultRule:
+    variation: disabled
+```
+If you `curl` again your API, you can see that the email is now displayed in the response:
+```shell
+curl -H "X-USER-ID: 1" http://localhost:1323
+
+# Output: 
+# {"email":"mike.wazowski@monster.inc","firstname":"Mike","jobFunction":"Scare assistant","lastname":"Wazowski","organization":"Monsters, Inc."}
+```
+
+If you want to test more, here are some suggestions:
+- Try to change the `X-USER-ID` header value to see the different behavior for different users.
+- Try to change the flag value in the `flags.goff.yaml` file to see the different behavior for different flags.
+
+**🎉 You have successfully played with the configuration of your feature flag.**
+
+## What's next?
+This was a pretty simple example to get you started with GO Feature Flag and OpenFeature.
+
+Now that you've been able to create your first feature flag, configure the relay proxy, and use it in your GO API, here are some pieces of documentation you may want to check:
+- [**Flag evaluation Concept**](./concepts/flag-evaluation): Understand the underlying concepts of flag evaluation in GO Feature Flag.
+- [**Architecture**](./concepts/architecture): Understand the architecture of GO Feature Flag.
+- [**SDK**](./sdk): Check the list of available SDKs for GO Feature Flag.
+- [**Store your flags’ configuration**](./integrations/store-flags-configuration): Learn where to store your feature flags configuration.
+- [**OpenFeature specification**](https://docs.openfeature.dev): Dive deeper into the OpenFeature specification.
+
+If you have any questions or need help, feel free to ask in the [community slack](/slack) or in the [GitHub repository](https://github.com/thomaspoignant/go-feature-flag).
