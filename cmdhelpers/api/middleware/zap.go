@@ -7,7 +7,6 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -31,10 +30,10 @@ func DebugSkipper(_ echo.Context) bool {
 }
 
 // ZapLogger is a middleware and zap to provide an "access log" like logging for each request.
-func ZapLogger(log *zap.Logger, cfg *config.Config) echo.MiddlewareFunc {
+func ZapLogger(log *zap.Logger, isDebugEnabled bool) echo.MiddlewareFunc {
 	// select the right skipper
 	skipper := DefaultSkipper
-	if cfg != nil && cfg.IsDebugEnabled() {
+	if isDebugEnabled {
 		skipper = DebugSkipper
 	}
 
