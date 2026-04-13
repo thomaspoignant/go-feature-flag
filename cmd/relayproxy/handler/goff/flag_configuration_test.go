@@ -10,7 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/controller"
+	controller "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/handler/goff"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
@@ -18,7 +18,7 @@ import (
 	"go.uber.org/zap"
 )
 
-const mockConfigFlagsLocation = "../testdata/controller/configuration/"
+const mockConfigFlagsLocation = testdataDir + "/configuration/"
 
 func TestFlagConfigurationAPICtrl_Handler_DefaultMode(t *testing.T) {
 	type want struct {
@@ -70,7 +70,7 @@ func TestFlagConfigurationAPICtrl_Handler_DefaultMode(t *testing.T) {
 				CommonFlagSet: config.CommonFlagSet{
 					Retriever: &retrieverconf.RetrieverConf{
 						Kind: retrieverconf.FileRetriever,
-						Path: "../testdata/controller/configuration_flags.yaml",
+						Path: testdataDir + "/configuration_flags.yaml",
 					},
 					Exporter: &config.ExporterConf{
 						Kind: config.LogExporter,
@@ -109,8 +109,8 @@ func TestFlagConfigurationAPICtrl_Handler_DefaultMode(t *testing.T) {
 }
 
 func TestFlagConfigurationAPICtrl_Handler_FlagsetMode(t *testing.T) {
-	const configFlagsLocation = "../testdata/controller/configuration_flags.yaml"
-	const configFlagsLocation2 = "../testdata/controller/config_flags_v2.yaml"
+	const configFlagsLocation = testdataDir + "/configuration_flags.yaml"
+	const configFlagsLocation2 = testdataDir + "/config_flags_v2.yaml"
 
 	type want struct {
 		bodyLocation string

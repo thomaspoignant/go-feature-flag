@@ -6,7 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	custommiddleware "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/controller"
+	controller "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/handler/goff"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	helpermiddleware "github.com/thomaspoignant/go-feature-flag/cmdhelpers/api/middleware"
 )

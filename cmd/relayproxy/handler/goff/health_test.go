@@ -9,7 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/controller"
+	controller "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/handler/goff"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
@@ -31,7 +31,7 @@ func Test_health_Handler(t *testing.T) {
 			name: "valid health",
 			want: want{
 				httpCode: http.StatusOK,
-				bodyFile: "../testdata/controller/health/valid.json",
+				bodyFile: testdataDir + "/health/valid.json",
 			},
 		},
 	}
@@ -42,7 +42,7 @@ func Test_health_Handler(t *testing.T) {
 				CommonFlagSet: config.CommonFlagSet{
 					Retriever: &retrieverconf.RetrieverConf{
 						Kind: retrieverconf.FileRetriever,
-						Path: "../testdata/controller/config_flags.yaml",
+						Path: testdataDir + "/config_flags.yaml",
 					},
 				},
 			}

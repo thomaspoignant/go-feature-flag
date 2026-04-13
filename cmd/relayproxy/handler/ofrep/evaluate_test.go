@@ -11,14 +11,15 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/handler/ofrep"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/ofrep"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 	"go.uber.org/zap"
 )
 
-const configFlagsLocation = "../testdata/controller/config_flags.yaml"
+const testdataDir = "../../testdata"
+const configFlagsLocation = testdataDir + "/goff/config_flags.yaml"
 
 func Test_Bulk_Evaluation(t *testing.T) {
 	type want struct {
@@ -42,56 +43,56 @@ func Test_Bulk_Evaluation(t *testing.T) {
 		{
 			name: "valid flag",
 			args: args{
-				bodyFile:            "../testdata/ofrep/valid_request.json",
+				bodyFile:            testdataDir + "/ofrep/valid_request.json",
 				configFlagsLocation: configFlagsLocation,
 			},
 			want: want{
 				httpCode: http.StatusOK,
-				bodyFile: "../testdata/ofrep/responses/valid_response.json",
+				bodyFile: testdataDir + "/ofrep/responses/valid_response.json",
 			},
 		},
 		{
 			name: "specify flag list in context",
 			args: args{
-				bodyFile:            "../testdata/ofrep/valid_request_specify_flags.json",
+				bodyFile:            testdataDir + "/ofrep/valid_request_specify_flags.json",
 				configFlagsLocation: configFlagsLocation,
 			},
 			want: want{
 				httpCode: http.StatusOK,
-				bodyFile: "../testdata/ofrep/responses/valid_response_specify_flags.json",
+				bodyFile: testdataDir + "/ofrep/responses/valid_response_specify_flags.json",
 			},
 		},
 		{
 			name: "Invalid context",
 			args: args{
-				bodyFile:            "../testdata/ofrep/invalid_context.json",
+				bodyFile:            testdataDir + "/ofrep/invalid_context.json",
 				configFlagsLocation: configFlagsLocation,
 			},
 			want: want{
 				httpCode: http.StatusBadRequest,
-				bodyFile: "../testdata/ofrep/responses/invalid_context.json",
+				bodyFile: testdataDir + "/ofrep/responses/invalid_context.json",
 			},
 		},
 		{
 			name: "Empty body",
 			args: args{
-				bodyFile:            "../testdata/ofrep/empty_body.json",
+				bodyFile:            testdataDir + "/ofrep/empty_body.json",
 				configFlagsLocation: configFlagsLocation,
 			},
 			want: want{
 				httpCode: http.StatusBadRequest,
-				bodyFile: "../testdata/ofrep/responses/empty_body.json",
+				bodyFile: testdataDir + "/ofrep/responses/empty_body.json",
 			},
 		},
 		{
 			name: "Nil context",
 			args: args{
-				bodyFile:            "../testdata/ofrep/nil_context.json",
+				bodyFile:            testdataDir + "/ofrep/nil_context.json",
 				configFlagsLocation: configFlagsLocation,
 			},
 			want: want{
 				httpCode: http.StatusBadRequest,
-				bodyFile: "../testdata/ofrep/responses/nil_context.json",
+				bodyFile: testdataDir + "/ofrep/responses/nil_context.json",
 			},
 		},
 		{
@@ -99,12 +100,12 @@ func Test_Bulk_Evaluation(t *testing.T) {
 			// in this case we don't have a targetingKey, so we will evaluate the flags individually
 			// if the flag requires bucketing, we will return a targeting key missing error
 			args: args{
-				bodyFile:            "../testdata/ofrep/no_targeting_key_context.json",
+				bodyFile:            testdataDir + "/ofrep/no_targeting_key_context.json",
 				configFlagsLocation: configFlagsLocation,
 			},
 			want: want{
 				httpCode: http.StatusOK,
-				bodyFile: "../testdata/ofrep/responses/no_targeting_key_context.json",
+				bodyFile: testdataDir + "/ofrep/responses/no_targeting_key_context.json",
 			},
 		},
 	}
@@ -188,97 +189,97 @@ func Test_Evaluate(t *testing.T) {
 		{
 			name: "valid evaluation",
 			args: args{
-				bodyFile:            "../testdata/ofrep/valid_request.json",
+				bodyFile:            testdataDir + "/ofrep/valid_request.json",
 				configFlagsLocation: configFlagsLocation,
 				flagKey:             "number-flag",
 			},
 			want: want{
 				httpCode: http.StatusOK,
-				bodyFile: "../testdata/ofrep/responses/valid_evaluation.json",
+				bodyFile: testdataDir + "/ofrep/responses/valid_evaluation.json",
 			},
 		},
 		{
 			name: "Invalid context",
 			args: args{
-				bodyFile:            "../testdata/ofrep/invalid_context.json",
+				bodyFile:            testdataDir + "/ofrep/invalid_context.json",
 				configFlagsLocation: configFlagsLocation,
 				flagKey:             "number-flag",
 			},
 			want: want{
 				httpCode: http.StatusBadRequest,
-				bodyFile: "../testdata/ofrep/responses/invalid_context_with_key.json",
+				bodyFile: testdataDir + "/ofrep/responses/invalid_context_with_key.json",
 			},
 		},
 		{
 			name: "Nil context",
 			args: args{
-				bodyFile:            "../testdata/ofrep/nil_context.json",
+				bodyFile:            testdataDir + "/ofrep/nil_context.json",
 				configFlagsLocation: configFlagsLocation,
 				flagKey:             "number-flag",
 			},
 			want: want{
 				httpCode: http.StatusBadRequest,
-				bodyFile: "../testdata/ofrep/responses/nil_context_with_key.json",
+				bodyFile: testdataDir + "/ofrep/responses/nil_context_with_key.json",
 			},
 		},
 		{
 			name: "No Targeting Key for bucketing-required flag - should return 400 from core evaluation",
 			args: args{
-				bodyFile:            "../testdata/ofrep/no_targeting_key_context.json",
+				bodyFile:            testdataDir + "/ofrep/no_targeting_key_context.json",
 				configFlagsLocation: configFlagsLocation,
 				flagKey:             "number-flag", // This flag has percentage rules, requires bucketing
 			},
 			want: want{
 				httpCode: http.StatusBadRequest,
-				bodyFile: "../testdata/ofrep/responses/no_targeting_key_bucketing_flag.json",
+				bodyFile: testdataDir + "/ofrep/responses/no_targeting_key_bucketing_flag.json",
 			},
 		},
 		{
 			name: "No Targeting Key for non-bucketing flag - should succeed",
 			args: args{
-				bodyFile:            "../testdata/ofrep/no_targeting_key_context.json",
+				bodyFile:            testdataDir + "/ofrep/no_targeting_key_context.json",
 				configFlagsLocation: configFlagsLocation,
 				flagKey:             "targeting-key-rule", // This flag has no percentages, doesn't require bucketing
 			},
 			want: want{
 				httpCode: http.StatusOK,
-				bodyFile: "../testdata/ofrep/responses/no_targeting_key_static_flag.json",
+				bodyFile: testdataDir + "/ofrep/responses/no_targeting_key_static_flag.json",
 			},
 		},
 		{
 			name: "Percentage-based rule in flag without targeting key should return 400 error",
 			args: args{
-				bodyFile:            "../testdata/ofrep/no_targeting_key_context.json",
+				bodyFile:            testdataDir + "/ofrep/no_targeting_key_context.json",
 				configFlagsLocation: configFlagsLocation,
 				flagKey:             "flag-only-for-admin", // This flag has percentage rules, requires bucketing
 			},
 			want: want{
 				httpCode: http.StatusBadRequest, // Core evaluation returns 400 for missing targeting key
-				bodyFile: "../testdata/ofrep/responses/percentage_flag_no_key_error.json",
+				bodyFile: testdataDir + "/ofrep/responses/percentage_flag_no_key_error.json",
 			},
 		},
 		{
 			name: "Empty flag key",
 			args: args{
-				bodyFile:            "../testdata/ofrep/valid_request.json",
+				bodyFile:            testdataDir + "/ofrep/valid_request.json",
 				configFlagsLocation: configFlagsLocation,
 				flagKey:             "",
 			},
 			want: want{
 				httpCode: http.StatusNotFound,
-				bodyFile: "../testdata/ofrep/responses/not_found.json",
+				bodyFile: testdataDir + "/ofrep/responses/not_found.json",
 			},
 		},
 		{
 			name: "targeting using the field targetingKey in the rules",
 			args: args{
-				bodyFile:            "../testdata/ofrep/valid_targeting_key_query_request.json",
+				bodyFile:            testdataDir + "/ofrep/valid_targeting_key_query_request.json",
 				configFlagsLocation: configFlagsLocation,
 				flagKey:             "targeting-key-rule",
 			},
 			want: want{
 				httpCode: http.StatusOK,
-				bodyFile: "../testdata/ofrep/responses/valid_targeting_key_query_response.json",
+				bodyFile: testdataDir + "/ofrep/responses/valid_targeting_key_query_response.json",
 			},
 		},
 	}

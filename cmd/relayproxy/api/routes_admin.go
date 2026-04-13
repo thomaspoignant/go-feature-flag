@@ -3,7 +3,7 @@ package api
 import (
 	"github.com/labstack/echo/v4"
 	middleware2 "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/controller"
+	controller "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/handler/goff"
 )
 
 func (s *Server) addAdminRoutes(cRetrieverRefresh controller.Controller) {

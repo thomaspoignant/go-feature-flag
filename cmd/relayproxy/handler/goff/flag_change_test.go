@@ -10,7 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/controller"
+	controller "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/handler/goff"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
@@ -32,7 +32,7 @@ func TestPIFlagChange_WithConfigChange(t *testing.T) {
 					Retrievers: &[]retrieverconf.RetrieverConf{
 						{
 							Kind: "file",
-							Path: "../testdata/controller/config_flags.yaml",
+							Path: testdataDir + "/config_flags.yaml",
 						},
 					},
 				},
@@ -49,7 +49,7 @@ func TestPIFlagChange_WithConfigChange(t *testing.T) {
 							Retrievers: &[]retrieverconf.RetrieverConf{
 								{
 									Kind: "file",
-									Path: "../testdata/controller/config_flags.yaml",
+									Path: testdataDir + "/config_flags.yaml",
 								},
 							},
 						},
@@ -70,7 +70,7 @@ func TestPIFlagChange_WithConfigChange(t *testing.T) {
 				_ = os.Remove(file.Name())
 			}()
 
-			content, err := os.ReadFile("../testdata/controller/config_flags.yaml")
+			content, err := os.ReadFile(testdataDir + "/config_flags.yaml")
 			assert.NoError(t, err)
 
 			errWF := os.WriteFile(file.Name(), content, 0644)
@@ -108,11 +108,11 @@ func TestPIFlagChange_WithConfigChange(t *testing.T) {
 			handlerErr := ctrl.Handler(c)
 			assert.NoError(t, handlerErr)
 
-			want, _ := os.ReadFile("../testdata/controller/flag_change/flag_change_with_config_change.json")
+			want, _ := os.ReadFile(testdataDir + "/flag_change/flag_change_with_config_change.json")
 			assert.JSONEq(t, string(want), rec.Body.String())
 			assert.Equal(t, http.StatusOK, rec.Code)
 
-			content, err = os.ReadFile("../testdata/controller/config_flags_v2.yaml")
+			content, err = os.ReadFile(testdataDir + "/config_flags_v2.yaml")
 			assert.NoError(t, err)
 
 			errWF = os.WriteFile(file.Name(), content, 0644)
@@ -144,7 +144,7 @@ func TestPIFlagChange_WithoutConfigChange(t *testing.T) {
 					Retrievers: &[]retrieverconf.RetrieverConf{
 						{
 							Kind: "file",
-							Path: "../testdata/controller/config_flags.yaml",
+							Path: testdataDir + "/config_flags.yaml",
 						},
 					},
 				},
@@ -161,7 +161,7 @@ func TestPIFlagChange_WithoutConfigChange(t *testing.T) {
 							Retrievers: &[]retrieverconf.RetrieverConf{
 								{
 									Kind: "file",
-									Path: "../testdata/controller/config_flags.yaml",
+									Path: testdataDir + "/config_flags.yaml",
 								},
 							},
 						},
@@ -182,7 +182,7 @@ func TestPIFlagChange_WithoutConfigChange(t *testing.T) {
 				_ = os.Remove(file.Name())
 			}()
 
-			content, err := os.ReadFile("../testdata/controller/config_flags.yaml")
+			content, err := os.ReadFile(testdataDir + "/config_flags.yaml")
 			assert.NoError(t, err)
 
 			errWF := os.WriteFile(file.Name(), content, 0644)
@@ -221,7 +221,7 @@ func TestPIFlagChange_WithoutConfigChange(t *testing.T) {
 			assert.NoError(t, handlerErr)
 
 			want, _ := os.ReadFile(
-				"../testdata/controller/flag_change/flag_change_without_config_change.json",
+				testdataDir + "/flag_change/flag_change_without_config_change.json",
 			)
 			assert.JSONEq(t, string(want), rec.Body.String())
 			assert.Equal(t, http.StatusOK, rec.Code)

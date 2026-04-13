@@ -16,7 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/controller"
+	controller "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/handler/goff"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
@@ -57,12 +57,12 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 				},
 			},
 			args: args{
-				bodyFile: "../testdata/controller/collect_eval_data/valid_request.json",
+				bodyFile: testdataDir + "/collect_eval_data/valid_request.json",
 			},
 			want: want{
 				httpCode:          http.StatusOK,
-				bodyFile:          "../testdata/controller/collect_eval_data/valid_response.json",
-				collectedDataFile: "../testdata/controller/collect_eval_data/valid_collected_data.json",
+				bodyFile:          testdataDir + "/collect_eval_data/valid_response.json",
+				collectedDataFile: testdataDir + "/collect_eval_data/valid_collected_data.json",
 			},
 		},
 		{
@@ -85,12 +85,12 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 				},
 			},
 			args: args{
-				bodyFile: "../testdata/controller/collect_eval_data/valid_request.json",
+				bodyFile: testdataDir + "/collect_eval_data/valid_request.json",
 			},
 			want: want{
 				httpCode:          http.StatusOK,
-				bodyFile:          "../testdata/controller/collect_eval_data/valid_response.json",
-				collectedDataFile: "../testdata/controller/collect_eval_data/valid_collected_data.json",
+				bodyFile:          testdataDir + "/collect_eval_data/valid_response.json",
+				collectedDataFile: testdataDir + "/collect_eval_data/valid_collected_data.json",
 			},
 		},
 		{
@@ -107,12 +107,12 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 				},
 			},
 			args: args{
-				bodyFile: "../testdata/controller/collect_eval_data/request_with_source_field.json",
+				bodyFile: testdataDir + "/collect_eval_data/request_with_source_field.json",
 			},
 			want: want{
 				httpCode:          http.StatusOK,
-				bodyFile:          "../testdata/controller/collect_eval_data/valid_response.json",
-				collectedDataFile: "../testdata/controller/collect_eval_data/collected_data_with_source_field.json",
+				bodyFile:          testdataDir + "/collect_eval_data/valid_response.json",
+				collectedDataFile: testdataDir + "/collect_eval_data/collected_data_with_source_field.json",
 			},
 		},
 		{
@@ -135,12 +135,12 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 				},
 			},
 			args: args{
-				bodyFile: "../testdata/controller/collect_eval_data/request_with_source_field.json",
+				bodyFile: testdataDir + "/collect_eval_data/request_with_source_field.json",
 			},
 			want: want{
 				httpCode:          http.StatusOK,
-				bodyFile:          "../testdata/controller/collect_eval_data/valid_response.json",
-				collectedDataFile: "../testdata/controller/collect_eval_data/collected_data_with_source_field.json",
+				bodyFile:          testdataDir + "/collect_eval_data/valid_response.json",
+				collectedDataFile: testdataDir + "/collect_eval_data/collected_data_with_source_field.json",
 			},
 		},
 		{
@@ -157,7 +157,7 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 				},
 			},
 			args: args{
-				bodyFile: "../testdata/controller/collect_eval_data/invalid_request.json",
+				bodyFile: testdataDir + "/collect_eval_data/invalid_request.json",
 			},
 			want: want{
 				handlerErr: true,
@@ -182,7 +182,7 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 				},
 			},
 			args: args{
-				bodyFile: "../testdata/controller/collect_eval_data/invalid_request_data_null.json",
+				bodyFile: testdataDir + "/collect_eval_data/invalid_request_data_null.json",
 			},
 			want: want{
 				handlerErr: true,
@@ -205,12 +205,12 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 				},
 			},
 			args: args{
-				"../testdata/controller/collect_eval_data/valid_request_with_timestamp_ms.json",
+				testdataDir + "/collect_eval_data/valid_request_with_timestamp_ms.json",
 			},
 			want: want{
 				httpCode:          http.StatusOK,
-				bodyFile:          "../testdata/controller/collect_eval_data/valid_response.json",
-				collectedDataFile: "../testdata/controller/collect_eval_data/valid_collected_data_with_timestamp_ms.json",
+				bodyFile:          testdataDir + "/collect_eval_data/valid_response.json",
+				collectedDataFile: testdataDir + "/collect_eval_data/valid_collected_data_with_timestamp_ms.json",
 			},
 		},
 		{
@@ -227,12 +227,12 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 				},
 			},
 			args: args{
-				"../testdata/controller/collect_eval_data/valid_request_metadata.json",
+				testdataDir + "/collect_eval_data/valid_request_metadata.json",
 			},
 			want: want{
 				httpCode:          http.StatusOK,
-				bodyFile:          "../testdata/controller/collect_eval_data/valid_response_metadata.json",
-				collectedDataFile: "../testdata/controller/collect_eval_data/valid_collected_data_metadata.json",
+				bodyFile:          testdataDir + "/collect_eval_data/valid_response_metadata.json",
+				collectedDataFile: testdataDir + "/collect_eval_data/valid_collected_data_metadata.json",
 			},
 		},
 	}
@@ -462,7 +462,7 @@ func Test_collect_tracking_and_evaluation_events(t *testing.T) {
 			assert.NoError(t, err)
 			ctrl := controller.NewCollectEvalData(flagsetManager, metric.Metrics{}, zap.NewNop())
 			bodyReq, err := os.ReadFile(
-				"../testdata/controller/collect_eval_data/valid_request_mix_tracking_evaluation.json")
+				testdataDir + "/collect_eval_data/valid_request_mix_tracking_evaluation.json")
 			assert.NoError(t, err)
 			e := echo.New()
 			rec := httptest.NewRecorder()

@@ -7,7 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/controller"
+	controller "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/handler/goff"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
@@ -38,7 +38,7 @@ func Test_retriever_refresh_Handler_valid(t *testing.T) {
 		CommonFlagSet: config.CommonFlagSet{
 			Retriever: &retrieverconf.RetrieverConf{
 				Kind: retrieverconf.FileRetriever,
-				Path: "../../../testdata/flag-config.yaml",
+				Path: "../../../../testdata/flag-config.yaml",
 			},
 		},
 	}

@@ -11,7 +11,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/controller"
+	controller "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/handler/goff"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
@@ -19,7 +19,7 @@ import (
 	"go.uber.org/zap"
 )
 
-const configFlagsLocation = "../testdata/controller/config_flags.yaml"
+const configFlagsLocation = testdataDir + "/config_flags.yaml"
 
 func Test_flag_eval_Handler(t *testing.T) {
 	type want struct {
@@ -44,73 +44,73 @@ func Test_flag_eval_Handler(t *testing.T) {
 			name: "valid flag",
 			args: args{
 				flagKey:  "flag-only-for-admin",
-				bodyFile: "../testdata/controller/flag_eval/valid_request.json",
+				bodyFile: testdataDir + "/flag_eval/valid_request.json",
 			},
 			want: want{
 				httpCode: http.StatusOK,
-				bodyFile: "../testdata/controller/flag_eval/valid_response.json",
+				bodyFile: testdataDir + "/flag_eval/valid_response.json",
 			},
 		},
 		{
 			name: "Get default value if flag disable",
 			args: args{
 				flagKey:  "disable-flag",
-				bodyFile: "../testdata/controller/flag_eval/disable_flag_request.json",
+				bodyFile: testdataDir + "/flag_eval/disable_flag_request.json",
 			},
 			want: want{
 				httpCode: http.StatusOK,
-				bodyFile: "../testdata/controller/flag_eval/disable_flag_response.json",
+				bodyFile: testdataDir + "/flag_eval/disable_flag_response.json",
 			},
 		},
 		{
 			name: "Get default value with key not exist",
 			args: args{
 				flagKey:  "random-key-does-not-exist",
-				bodyFile: "../testdata/controller/flag_eval/flag_not_exist_request.json",
+				bodyFile: testdataDir + "/flag_eval/flag_not_exist_request.json",
 			},
 			want: want{
 				httpCode: http.StatusOK,
-				bodyFile: "../testdata/controller/flag_eval/flag_not_exist_response.json",
+				bodyFile: testdataDir + "/flag_eval/flag_not_exist_response.json",
 			},
 		},
 		{
 			name: "Get default value, rule not apply",
 			args: args{
 				flagKey:  "test-flag-rule-not-apply",
-				bodyFile: "../testdata/controller/flag_eval/rule_not_apply_request.json",
+				bodyFile: testdataDir + "/flag_eval/rule_not_apply_request.json",
 			},
 			want: want{
 				httpCode: http.StatusOK,
-				bodyFile: "../testdata/controller/flag_eval/rule_not_apply_response.json",
+				bodyFile: testdataDir + "/flag_eval/rule_not_apply_response.json",
 			},
 		},
 		{
 			name: "Get true value, rule apply",
 			args: args{
 				flagKey:  "test-flag-rule-apply",
-				bodyFile: "../testdata/controller/flag_eval/rule_apply_request.json",
+				bodyFile: testdataDir + "/flag_eval/rule_apply_request.json",
 			},
 			want: want{
 				httpCode: http.StatusOK,
-				bodyFile: "../testdata/controller/flag_eval/rule_apply_response.json",
+				bodyFile: testdataDir + "/flag_eval/rule_apply_response.json",
 			},
 		},
 		{
 			name: "Get false value, rule apply",
 			args: args{
 				flagKey:  "test-flag-rule-apply-false",
-				bodyFile: "../testdata/controller/flag_eval/rule_apply_false_request.json",
+				bodyFile: testdataDir + "/flag_eval/rule_apply_false_request.json",
 			},
 			want: want{
 				httpCode: http.StatusOK,
-				bodyFile: "../testdata/controller/flag_eval/rule_apply_false_response.json",
+				bodyFile: testdataDir + "/flag_eval/rule_apply_false_response.json",
 			},
 		},
 		{
 			name: "Invalid json format",
 			args: args{
 				flagKey:  "test-flag-rule-apply-false",
-				bodyFile: "../testdata/controller/flag_eval/invalid_json_request.json",
+				bodyFile: testdataDir + "/flag_eval/invalid_json_request.json",
 			},
 			want: want{
 				handlerErr: true,
@@ -122,11 +122,11 @@ func Test_flag_eval_Handler(t *testing.T) {
 			name: "No user key in payload",
 			args: args{
 				flagKey:  "test-flag-rule-apply-false",
-				bodyFile: "../testdata/controller/flag_eval/no_user_key_request.json",
+				bodyFile: testdataDir + "/flag_eval/no_user_key_request.json",
 			},
 			want: want{
 				handlerErr: false,
-				bodyFile:   "../testdata/controller/flag_eval/no_user_key_response.json",
+				bodyFile:   testdataDir + "/flag_eval/no_user_key_response.json",
 				httpCode:   http.StatusOK,
 			},
 		},
@@ -134,7 +134,7 @@ func Test_flag_eval_Handler(t *testing.T) {
 			name: "no flag key in URL",
 			args: args{
 				flagKey:  "",
-				bodyFile: "../testdata/controller/flag_eval/valid_request.json",
+				bodyFile: testdataDir + "/flag_eval/valid_request.json",
 			},
 			want: want{
 				handlerErr: true,

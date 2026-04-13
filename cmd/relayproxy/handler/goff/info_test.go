@@ -11,7 +11,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/controller"
+	controller "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/handler/goff"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/model"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/testdata/mock"
@@ -40,7 +40,7 @@ func Test_info_Handler(t *testing.T) {
 				CommonFlagSet: config.CommonFlagSet{
 					Retriever: &retrieverconf.RetrieverConf{
 						Kind: retrieverconf.FileRetriever,
-						Path: "../testdata/controller/config_flags.yaml",
+						Path: testdataDir + "/config_flags.yaml",
 					},
 				},
 			},
@@ -58,7 +58,7 @@ func Test_info_Handler(t *testing.T) {
 						CommonFlagSet: config.CommonFlagSet{
 							Retriever: &retrieverconf.RetrieverConf{
 								Kind: retrieverconf.FileRetriever,
-								Path: "../testdata/controller/config_flags.yaml",
+								Path: testdataDir + "/config_flags.yaml",
 							},
 						},
 					},
@@ -68,7 +68,7 @@ func Test_info_Handler(t *testing.T) {
 						CommonFlagSet: config.CommonFlagSet{
 							Retriever: &retrieverconf.RetrieverConf{
 								Kind: retrieverconf.FileRetriever,
-								Path: "../testdata/controller/config_flags.yaml",
+								Path: testdataDir + "/config_flags.yaml",
 							},
 						},
 					},

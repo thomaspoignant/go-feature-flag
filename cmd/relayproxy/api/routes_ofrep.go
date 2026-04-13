@@ -4,7 +4,7 @@ import (
 	"github.com/labstack/echo/v4"
 	etag "github.com/pablor21/echo-etag/v4"
 	middleware2 "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/ofrep"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/handler/ofrep"
 )
 
 func (s *Server) addOFREPRoutes(cFlagEvalOFREP ofrep.EvaluateCtrl) {

@@ -12,7 +12,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/controller"
+	controller "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/handler/goff"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
@@ -20,8 +20,9 @@ import (
 	"go.uber.org/zap"
 )
 
+const testdataDir = "../../testdata/goff"
+
 func Test_all_flag_Handler_DefaultMode(t *testing.T) {
-	const configFlagsLocation = "../testdata/controller/config_flags.yaml"
 
 	type want struct {
 		httpCode   int
@@ -44,18 +45,18 @@ func Test_all_flag_Handler_DefaultMode(t *testing.T) {
 		{
 			name: "valid flag",
 			args: args{
-				bodyFile:            "../testdata/controller/all_flags/valid_request.json",
+				bodyFile:            testdataDir + "/all_flags/valid_request.json",
 				configFlagsLocation: configFlagsLocation,
 			},
 			want: want{
 				httpCode: http.StatusOK,
-				bodyFile: "../testdata/controller/all_flags/valid_response.json",
+				bodyFile: testdataDir + "/all_flags/valid_response.json",
 			},
 		},
 		{
 			name: "Invalid json format",
 			args: args{
-				bodyFile:            "../testdata/controller/all_flags/invalid_json_request.json",
+				bodyFile:            testdataDir + "/all_flags/invalid_json_request.json",
 				configFlagsLocation: configFlagsLocation,
 			},
 			want: want{
@@ -69,46 +70,46 @@ func Test_all_flag_Handler_DefaultMode(t *testing.T) {
 			// the API should return targeting key missing for all flags that require bucketing
 			// and it should also perform all the static evaluations for non-bucketing flags
 			args: args{
-				bodyFile:            "../testdata/controller/all_flags/no_user_key_request.json",
+				bodyFile:            testdataDir + "/all_flags/no_user_key_request.json",
 				configFlagsLocation: configFlagsLocation,
 			},
 			want: want{
 				handlerErr: false,
 				httpCode:   http.StatusOK,
-				bodyFile:   "../testdata/controller/all_flags/no_user_key_response_updated.json",
+				bodyFile:   testdataDir + "/all_flags/no_user_key_response_updated.json",
 			},
 		},
 		{
 			name: "specify flags in evaluation context",
 			args: args{
-				bodyFile:            "../testdata/controller/all_flags/valid_request_specify_flags.json",
+				bodyFile:            testdataDir + "/all_flags/valid_request_specify_flags.json",
 				configFlagsLocation: configFlagsLocation,
 			},
 			want: want{
 				httpCode: http.StatusOK,
-				bodyFile: "../testdata/controller/all_flags/valid_response_specify_flags.json",
+				bodyFile: testdataDir + "/all_flags/valid_response_specify_flags.json",
 			},
 		},
 		{
 			name: "user context without custom field should not crash",
 			args: args{
-				bodyFile:            "../testdata/controller/all_flags/invalid_user_context_request.json",
+				bodyFile:            testdataDir + "/all_flags/invalid_user_context_request.json",
 				configFlagsLocation: configFlagsLocation,
 			},
 			want: want{
 				httpCode: http.StatusOK,
-				bodyFile: "../testdata/controller/all_flags/invalid_user_context_response.json",
+				bodyFile: testdataDir + "/all_flags/invalid_user_context_response.json",
 			},
 		},
 		{
 			name: "evaluation context without custom field should not crash",
 			args: args{
-				bodyFile:            "../testdata/controller/all_flags/invalid_evaluation_context_request.json",
+				bodyFile:            testdataDir + "/all_flags/invalid_evaluation_context_request.json",
 				configFlagsLocation: configFlagsLocation,
 			},
 			want: want{
 				httpCode: http.StatusOK,
-				bodyFile: "../testdata/controller/all_flags/invalid_evaluation_context_response.json",
+				bodyFile: testdataDir + "/all_flags/invalid_evaluation_context_response.json",
 			},
 		},
 	}
@@ -174,7 +175,7 @@ func Test_all_flag_Handler_DefaultMode(t *testing.T) {
 }
 
 func Test_all_flag_Handler_FlagsetMode(t *testing.T) {
-	const configFlagsLocation = "../testdata/controller/config_flags.yaml"
+	const configFlagsLocation = testdataDir + "/config_flags.yaml"
 
 	type want struct {
 		httpCode   int
@@ -197,18 +198,18 @@ func Test_all_flag_Handler_FlagsetMode(t *testing.T) {
 		{
 			name: "valid flag",
 			args: args{
-				bodyFile:            "../testdata/controller/all_flags/valid_request.json",
+				bodyFile:            testdataDir + "/all_flags/valid_request.json",
 				configFlagsLocation: configFlagsLocation,
 			},
 			want: want{
 				httpCode: http.StatusOK,
-				bodyFile: "../testdata/controller/all_flags/valid_response.json",
+				bodyFile: testdataDir + "/all_flags/valid_response.json",
 			},
 		},
 		{
 			name: "Invalid json format",
 			args: args{
-				bodyFile:            "../testdata/controller/all_flags/invalid_json_request.json",
+				bodyFile:            testdataDir + "/all_flags/invalid_json_request.json",
 				configFlagsLocation: configFlagsLocation,
 			},
 			want: want{
@@ -222,24 +223,24 @@ func Test_all_flag_Handler_FlagsetMode(t *testing.T) {
 			// the API should return targeting key missing for all flags that require bucketing
 			// and it should also perform all the static evaluations for non-bucketing flags
 			args: args{
-				bodyFile:            "../testdata/controller/all_flags/no_user_key_request.json",
+				bodyFile:            testdataDir + "/all_flags/no_user_key_request.json",
 				configFlagsLocation: configFlagsLocation,
 			},
 			want: want{
 				handlerErr: false, // No longer fails at API validation level
 				httpCode:   http.StatusOK,
-				bodyFile:   "../testdata/controller/all_flags/no_user_key_response_updated.json",
+				bodyFile:   testdataDir + "/all_flags/no_user_key_response_updated.json",
 			},
 		},
 		{
 			name: "specify flags in evaluation context",
 			args: args{
-				bodyFile:            "../testdata/controller/all_flags/valid_request_specify_flags.json",
+				bodyFile:            testdataDir + "/all_flags/valid_request_specify_flags.json",
 				configFlagsLocation: configFlagsLocation,
 			},
 			want: want{
 				httpCode: http.StatusOK,
-				bodyFile: "../testdata/controller/all_flags/valid_response_specify_flags.json",
+				bodyFile: testdataDir + "/all_flags/valid_response_specify_flags.json",
 			},
 		},
 	}
