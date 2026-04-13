@@ -1,0 +1,99 @@
+---
+sidebar_position: 40
+description: How to configure an AWS S3 retriever.
+---
+import { integrations } from "@site/data/integrations";
+import {Mandatory, NotMandatory} from "@site/src/components/checks/checks";
+export const retrieverName = 'AWS S3'
+export const info = integrations.retrievers.find((r) => r.name === retrieverName)
+
+# AWS S3
+
+## Overview
+{info.longDescription ?? info.description}
+
+## Configure the relay proxy
+
+To configure your relay proxy to use the {retrieverName} retriever, you need to add the following
+configuration to your relay proxy configuration file:
+
+```yaml title="goff-proxy.yaml"
+# ...
+retrievers:
+  - kind: s3
+    bucket: my-featureflag-bucket
+    item: flag/flags.goff.yaml
+# ...
+```
+
+:::info
+If you are using the S3 provider, the easiest way to provide credentials is to set environment variables. It will be used by GO Feature Flag to identify to your S3 bucket.
+
+```shell
+export AWS_SECRET_ACCESS_KEY=xxxx
+export AWS_ACCESS_KEY_ID=xxx
+export AWS_DEFAULT_REGION=eu-west-1
+```
+:::
+
+| Field name |   Mandatory   | Type   | Default  | Description                                                                                          |
+|------------|:-------------:|--------|----------|------------------------------------------------------------------------------------------------------|
+| `kind`     | <Mandatory /> | string | **none** | **Value should be `s3`**.<br/>_This field is mandatory and describes which retriever you are using._ |
+| `bucket`   | <Mandatory /> | string | **none** | This is the name of your S3 bucket _(ex: `my-featureflag-bucket`)_.                                  |
+| `item`     | <Mandatory /> | string | **none** | Path to the file inside the bucket _(ex: `config/flag/my-flags.yaml`)_.                              |
+
+### Compatibility with S3-Compatible Solutions
+
+The S3 retriever is compatible with S3-compatible on-premises solutions such as `MinIO`.  
+To use an S3-compatible storage provider, ensure that you configure the following parameters:
+
+- **Endpoint URL**: Provide the endpoint URL of your S3-compatible solution.
+- **Access Credentials**: Use your S3-compatible solution's access key and secret key.
+- **Bucket and Key**: Specify the bucket name and the key where your configuration file is stored.
+
+:::warning
+The AWS SDK requires a region to be set, even if you are using an S3-compatible solution.
+```shell
+export AWS_DEFAULT_REGION=xxx
+````
+:::
+
+:::info
+If you get spammed with
+```shell
+SDK 2025/04/25 13:07:36 WARN Response has no supported checksum.
+````
+Not validating response payload. you might want to set `export AWS_RESPONSE_CHECKSUM_VALIDATION=when_required` as well.
+:::
+
+## Configure the GO Module
+To configure your GO module to use the {retrieverName} retriever, you need to add the following
+configuration to your `ffclient.Config{}` object:
+
+:::info
+The [**S3 Retriever v2**](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag@v1.23.1/retriever/s3retrieverv2) will use the [`aws-sdk-go-v2`](https://github.com/aws/aws-sdk-go-v2) to access your flag in an S3 bucket.
+
+The [**S3 Retriever v1**](https://pkg.go.dev/github.com/thomaspoignant/go-feature-flag@v1.23.1/retriever/s3retriever) will use the deprecated [`aws-sdk-go`](https://github.com/aws/aws-sdk-go) to access your flag in an S3 bucket.
+
+[AWS has announce end-of-support for AWS SDK for Go v1](https://aws.amazon.com/blogs/developer/announcing-end-of-support-for-aws-sdk-for-go-v1-on-july-31-2025/), and it's recommended to migrate from S3 Retriever v1 to v2.
+:::
+
+```go title="example.go"
+awsConfig, _ := config.LoadDefaultConfig(context.Background())
+err := ffclient.Init(ffclient.Config{
+    PollingInterval: 3 * time.Second,
+    Retriever: &s3retrieverv2.Retriever{
+        Bucket: "my-featureflag-bucket",
+        Item:   "flag/flags.goff.yaml",
+        AwsConfig: &awsConfig,
+    },
+})
+defer ffclient.Close()
+```
+
+
+| Field           | Mandatory     | Description                                                                                                                                                                                    |
+|-----------------|:-------------:|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`Bucket`**    | <Mandatory /> | The name of your bucket.                                                                                                                                                                       |
+| **`Item`**      | <Mandatory /> | The location of your file in the bucket.                                                                                                                                                       |
+| **`AwsConfig`** | <Mandatory /> | An instance of `aws.Config` that configure your access to AWS <br/>*check [this documentation for more info](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html)*. |

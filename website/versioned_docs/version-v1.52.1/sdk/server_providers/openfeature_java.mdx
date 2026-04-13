@@ -1,0 +1,280 @@
+---
+sidebar_position: 40
+title: Java
+description: How to use the OpenFeature JAVA SDK
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+import versions from "@site/static/sdk-versions.json";
+import CodeBlock from "@theme/CodeBlock";
+import { sdk } from "@site/data/sdk";
+import { FeatureTable } from "@site/src/components/doc/featureTable";
+
+# JAVA
+
+[![Maven Central Version](https://img.shields.io/maven-central/v/dev.openfeature.contrib.providers/go-feature-flag?color=blue&style=flat-square)](https://search.maven.org/artifact/dev.openfeature.contrib.providers/go-feature-flag)
+
+The Java provider for GO Feature Flag is a server provider that allows you to evaluate feature flags in your Java application.
+It allows you to:
+
+- Manage the integration of the OpenFeature Java SDK and GO Feature Flag relay-proxy.
+- 2 types of evaluations available:
+  - **In process**: fetch the flag configuration from the GO Feature Flag relay-proxy API and evaluate the flags directly in the provider.
+  - **Remote**: Call the GO Feature Flag relay-proxy for each flag evaluation.
+- Collect and send evaluation data to the GO Feature Flag relay-proxy for statistics and monitoring purposes.
+- Support the OpenFeature [tracking API](https://openfeature.dev/docs/reference/concepts/tracking/) to associate metrics or KPIs with feature flag evaluation contexts.
+
+## Install dependencies
+
+The first thing we will do is install the **Open Feature SDK** and the **GO Feature Flag provider**.
+
+<Tabs groupId="code">
+  <TabItem value="maven" label="maven">
+    <CodeBlock
+      language="xml"
+      showLineNumbers>
+      {
+        `<dependency>
+    <groupId>dev.openfeature</groupId>
+    <artifactId>sdk</artifactId>
+    <artifactId>${versions.maven.sdk}</artifactId>
+</dependency>
+<dependency>
+    <groupId>dev.openfeature.contrib.providers</groupId>
+    <artifactId>go-feature-flag</artifactId>
+    <version>${versions.maven.providerJava}</version>
+</dependency>`
+      }
+    </CodeBlock>
+
+  </TabItem>
+  <TabItem value="gradle" label="gradle">
+    <CodeBlock
+      language="toml"
+      showLineNumbers>
+      {
+        `implementation group: 'dev.openfeature', name: 'javasdk', version: '${versions.maven.sdk}'
+implementation group: 'dev.openfeature.contrib.providers', name: 'go-feature-flag', version: '${versions.maven.providerJava}'`}
+    </CodeBlock>
+
+  </TabItem>
+</Tabs>
+
+## Getting started
+
+### Initialize the provider
+
+GO Feature Flag provider needs to be created and then set in the global OpenFeatureAPI.
+
+The only required option to create a `GoFeatureFlagProvider` is the endpoint to your GO Feature Flag relay-proxy instance.
+
+
+<Tabs groupId="code">
+  <TabItem value="java" label="java">
+
+    ```java
+    import dev.openfeature.contrib.providers.gofeatureflag;
+    //...
+
+    FeatureProvider provider = new GoFeatureFlagProvider(
+            GoFeatureFlagProviderOptions.builder()
+                    .endpoint("https://my-instance.gofeatureflag.org")
+                    .build());
+
+    OpenFeatureAPI.getInstance().setProviderAndWait(provider);
+    // ...
+    Client client = OpenFeatureAPI.getInstance().getClient("my-goff-provider");
+
+    // targetingKey is mandatory for each evaluation
+    String targetingKey = "ad0c6f75-f5d6-4b17-b8eb-6c923d8d4698";
+    EvaluationContext evaluationContext = new ImmutableContext(targetingKey);
+
+    // Example of a boolean flag evaluation
+    FlagEvaluationDetails<Boolean> booleanFlagEvaluation = client.getBooleanValue("bool_targeting_match", false, evaluationContext);
+    ```
+
+  </TabItem>
+  <TabItem value="kotlin" label="Kotlin">
+
+    ```kotlin
+    import dev.openfeature.contrib.providers.gofeatureflag.*
+
+    //...
+
+    val provider = GoFeatureFlagProvider(
+        GoFeatureFlagProviderOptions.builder()
+            .endpoint("https://my-instance.gofeatureflag.org")
+            .build()
+    )
+
+    OpenFeatureAPI.getInstance().setProviderAndWait(provider)
+    // ...
+    val client = OpenFeatureAPI.getInstance().getClient("my-goff-provider")
+
+    // targetingKey is mandatory for each evaluation
+    val targetingKey = "ad0c6f75-f5d6-4b17-b8eb-6c923d8d4698"
+    val evaluationContext = ImmutableContext(targetingKey)
+
+    // Example of a boolean flag evaluation
+    val booleanFlagEvaluation = client.getBooleanValue("bool_targeting_match", false, evaluationContext)
+    ```
+
+  </TabItem>
+</Tabs>
+
+```java
+
+```
+
+The evaluation context is the way for the client to specify contextual data that GO Feature Flag uses to evaluate the feature flags, it allows to define rules on the flag.
+
+The `targetingKey` is mandatory for GO Feature Flag in order to evaluate the feature flag, it could be the id of a user, a session ID or anything you find relevant to use as identifier during the evaluation.
+
+### Configure the provider
+
+You can configure the provider with several options to customize its behavior. The following options are available:
+
+
+| name                              | mandatory | Description                                                                                                                                                                                                                                                                                                                                                                     |
+| --------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`endpoint`**                    | `true`    | endpoint contains the DNS of your GO Feature Flag relay proxy _(ex: https://mydomain.com/gofeatureflagproxy/)_                                                                                                                                                                                                                                                                  |
+| **`evaluationType`**              | `false`   | evaluationType is the type of evaluation you want to use.<ul><li>If you want to have a local evaluation, you should use IN_PROCESS.</li><li>If you want to have an evaluation on the relay-proxy directly, you should use REMOTE.</li></ul>Default: IN_PROCESS<br/>                                                                                                             |
+| **`timeout`**                     | `false`   | timeout in millisecond we are waiting when calling the relay proxy API. _(default: `10000`)_                                                                                                                                                                                                                                                                                    |
+| **`maxIdleConnections`**          | `false`   | maxIdleConnections is the maximum number of connections in the connection pool. _(default: `1000`)_                                                                                                                                                                                                                                                                             |
+| **`keepAliveDuration`**           | `false`   | keepAliveDuration is the time in millisecond we keep the connection open. _(default: `7200000` (2 hours))_                                                                                                                                                                                                                                                                      |
+| **`apiKey`**                      | `false`   | If the relay proxy is configured to authenticate the requests, you should provide an API Key to the provider. Please ask the administrator of the relay proxy to provide an API Key. (This feature is available only if you are using GO Feature Flag relay proxy v1.7.0 or above). _(default: null)_                                                                           |
+| **`flushIntervalMs`**             | `false`   | interval time we publish statistics collection data to the proxy. The parameter is used only if the cache is enabled, otherwise the collection of the data is done directly when calling the evaluation API. default: `1000` ms                                                                                                                                                 |
+| **`maxPendingEvents`**            | `false`   | max pending events aggregated before publishing for collection data to the proxy. When event is added while events collection is full, event is omitted. _(default: `10000`)_                                                                                                                                                                                                   |
+| **`disableDataCollection`**       | `false`   | set to true if you don't want to collect the usage of flags retrieved in the cache. _(default: `false`)_                                                                                                                                                                                                                                                                        |
+| **`exporterMetadata`**            | `false`   | exporterMetadata is the metadata we send to the GO Feature Flag relay proxy when we report the evaluation data usage.                                                                                                                                                                                                                                                           |
+| **`evaluationFlagList`**          | `false`   | If you are using in process evaluation, by default we will load in memory all the flags available in the relay proxy. If you want to limit the number of flags loaded in memory, you can use this parameter. By setting this parameter, you will only load the flags available in the list. <p>If null or empty, all the flags available in the relay proxy will be loaded.</p> |
+| **`flagChangePollingIntervalMs`** | `false`   | interval time we poll the proxy to check if the configuration has changed. It is used for the in process evaluation to check if we should refresh our internal cache. default: `120000`                                                                                                                                                                                         |
+
+
+## Evaluate your flag
+
+This code block explain how you can create an `EvaluationContext` and use it to evaluate your flag.
+
+:::note
+In this example we are evaluating a `boolean` flag, but other types are available.
+
+**Refer to the [Open Feature documentation](https://docs.openfeature.dev/docs/reference/concepts/evaluation-api#basic-evaluation) to know more about it.**
+:::
+
+<Tabs groupId="code">
+  <TabItem value="java" label="java">
+
+    ```java
+    // Context of your flag evaluation.
+    // With GO Feature Flag you MUST have a targetingKey that is a unique identifier of the user.
+    EvaluationContext userContext = new MutableContext("1d1b9238-2591-4a47-94cf-d2bc080892f1")
+      .add("firstname", "john")
+      .add("lastname", "doe")
+      .add("email","john.doe@gofeatureflag.org")
+      .add("admin", true)
+      .add("anonymous", false);
+
+    Boolean adminFlag = featureFlagClient.getBooleanValue("flag-only-for-admin", false, userContext);
+    if (adminFlag) {
+      // flag "flag-only-for-admin" is true for the user
+    } else {
+      // flag "flag-only-for-admin" is false for the user
+    }
+    ```
+
+  </TabItem>
+  <TabItem value="kotlin" label="Kotlin">
+
+    ```kotlin
+    // Context of your flag evaluation.
+    // With GO Feature Flag you MUST have a targetingKey that is a unique identifier of the user.
+    val userContext: EvaluationContext = MutableContext("1d1b9238-2591-4a47-94cf-d2bc080892f1")
+      .add("firstname", "john")
+      .add("lastname", "doe")
+      .add("email", "john.doe@gofeatureflag.org")
+      .add("admin", true)
+      .add("anonymous", false)
+
+    val adminFlag = featureFlagClient.getBooleanValue("bool_targeting_match", false, userContext)
+    if (adminFlag) {
+      // flag "flag-only-for-admin" is true for the user
+    } else {
+      // flag "flag-only-for-admin" is false for the user
+    }
+    ```
+
+  </TabItem>
+</Tabs>
+
+## Breaking changes
+
+### 1.0.0 - Introduce In Process Evaluation
+
+:::warning
+This version of the provider requires to use GO Feature Flag relay-proxy `v1.45.0` or above.
+If you have an older version of the relay-proxy, please use the version `0.4.3` of the provider.
+:::
+
+The version `1.0.0` of the provider introduces the in process evaluation.  
+This evaluation type is more efficient than the remote evaluation because it doesn't require to call the relay-proxy API for each flag evaluation.
+
+This is a new major version, some features have been added and some have been deprecated.
+
+### 0.4.0 - Cache Implementation Change: Guava to Caffeine
+
+In this release, we have updated the cache implementation from Guava to Caffeine. This change was made because Caffeine is now the recommended caching solution by the maintainers of Guava due to its performance improvements and enhanced features.
+
+Because of this, the cache configuration on `GoFeatureFlagProviderOptions` that used Guava's `CacheBuilder` is now handled by `Caffeine`.
+
+#### How to migrate
+
+Configuration cache with Guava used to be like this:
+
+```java
+import com.google.common.cache.CacheBuilder;
+// ...
+CacheBuilder guavaCacheBuilder = CacheBuilder.newBuilder()
+  .initialCapacity(100)
+  .maximumSize(2000);
+
+FeatureProvider provider = new GoFeatureFlagProvider(
+  GoFeatureFlagProviderOptions
+  .builder()
+  .endpoint("https://my-gofeatureflag-instance.org")
+  .cacheBuilder(guavaCacheBuilder)
+  .build());
+
+OpenFeatureAPI.getInstance().setProviderAndWait(provider);
+
+// ...
+```
+
+Now with Caffeine it should be like this:
+
+```java
+import com.github.benmanes.caffeine.cache.Caffeine;
+// ...
+Caffeine caffeineCacheConfig = Caffeine.newBuilder()
+  .initialCapacity(100)
+  .maximumSize(2000);
+
+FeatureProvider provider = new GoFeatureFlagProvider(
+  GoFeatureFlagProviderOptions
+  .builder()
+  .endpoint("https://my-gofeatureflag-instance.org")
+  .cacheConfig(caffeineCacheConfig)
+  .build());
+
+OpenFeatureAPI.getInstance().setProviderAndWait(provider);
+
+// ...
+```
+
+For a complete list of customizations  options available in Caffeine, please refer to the [Caffeine documentation](https://github.com/ben-manes/caffeine/wiki) for more details.
+
+## Features status
+<FeatureTable sdk={sdk.find(it => it.key === 'java')} />
+
+## Contribute to the provider
+You can find the source of the provider in the [`open-feature/java-sdk-contrib`](https://github.com/open-feature/java-sdk-contrib/tree/main/providers/go-feature-flag) repository.
