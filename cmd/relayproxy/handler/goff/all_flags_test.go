@@ -23,7 +23,6 @@ import (
 const testdataDir = "../../testdata/goff"
 
 func Test_all_flag_Handler_DefaultMode(t *testing.T) {
-
 	type want struct {
 		httpCode   int
 		bodyFile   string
