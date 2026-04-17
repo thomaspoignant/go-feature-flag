@@ -21,7 +21,7 @@ jobs:
       provider_kotlin_released: ${{ steps.release.outputs['openfeature/providers/kotlin-provider--release_created'] }}
       provider_kotlin_version: ${{ steps.release.outputs['openfeature/providers/kotlin-provider--version'] }}
     steps:
-      - uses: googleapis/release-please-action@16a9c90856f42705d54a6fda1823352bdc62cf38 # v4.4.0
+      - uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4.4.1
         id: release
         with:
           # See: https://github.com/googleapis/release-please
