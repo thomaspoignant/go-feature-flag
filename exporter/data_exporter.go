@@ -88,7 +88,7 @@ func (d *dataExporterImpl[T]) Start() {
 	}
 }
 
-// Stop is flushing the daya and stopping the ticker
+// Stop is flushing the data and stopping the ticker
 func (d *dataExporterImpl[T]) Stop() {
 	// we don't start the daemon if we are not in bulk mode
 	if !d.IsBulk() {
@@ -100,7 +100,7 @@ func (d *dataExporterImpl[T]) Stop() {
 	d.Flush()
 }
 
-// Flush is sending the data to the exporter.
+// Flush is sending the data to the exporter
 func (d *dataExporterImpl[T]) Flush() {
 	d.flushMu.Lock()
 	defer d.flushMu.Unlock()
