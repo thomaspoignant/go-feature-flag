@@ -340,12 +340,15 @@ func Test_ProcessPendingEvents_SameConsumerConcurrentCallsDoNotDuplicate(t *test
 		wg          sync.WaitGroup
 	)
 
-	processFunc := func(_ context.Context, events []testutils.ExportableMockEvent) error {
+	processFunc := func(ctx context.Context, events []testutils.ExportableMockEvent) error {
 		callbackMu.Lock()
 		batchSizes = append(batchSizes, len(events))
 		callbackMu.Unlock()
 		startedOnce.Do(func() { close(started) })
 		<-release
+		if err := ctx.Err(); err != nil {
+			return err
+		}
 		return nil
 	}
 
