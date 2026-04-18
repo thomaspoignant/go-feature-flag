@@ -319,6 +319,80 @@ func Test_ProcessPendingEvents_DoesNotBlockAdd(t *testing.T) {
 	<-processingDone
 }
 
+func Test_ProcessPendingEvents_SameConsumerConcurrentCallsDoNotDuplicate(t *testing.T) {
+	consumerName := "consumer1"
+	eventStore := exporter.NewEventStore[testutils.ExportableMockEvent](
+		defaultTestCleanQueueDuration,
+	)
+	eventStore.AddConsumer(consumerName)
+	defer eventStore.Stop()
+
+	for i := 0; i < 10; i++ {
+		eventStore.Add(testutils.NewExportableMockEvent("init"))
+	}
+
+	var (
+		callbackMu  sync.Mutex
+		batchSizes  []int
+		startedOnce sync.Once
+		started     = make(chan struct{})
+		release     = make(chan struct{})
+		wg          sync.WaitGroup
+	)
+
+	processFunc := func(ctx context.Context, events []testutils.ExportableMockEvent) error {
+		callbackMu.Lock()
+		batchSizes = append(batchSizes, len(events))
+		callbackMu.Unlock()
+		startedOnce.Do(func() { close(started) })
+		<-release
+		return nil
+	}
+
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		assert.Nil(t, eventStore.ProcessPendingEvents(consumerName, processFunc))
+	}()
+	<-started
+	go func() {
+		defer wg.Done()
+		assert.Nil(t, eventStore.ProcessPendingEvents(consumerName, processFunc))
+	}()
+
+	close(release)
+	wg.Wait()
+
+	callbackMu.Lock()
+	defer callbackMu.Unlock()
+	assert.Equal(t, []int{10}, batchSizes)
+
+	count, err := eventStore.GetPendingEventCount(consumerName)
+	assert.Nil(t, err)
+	assert.Equal(t, int64(0), count)
+}
+
+func Test_ProcessPendingEvents_EmptyBatchSkipsCallback(t *testing.T) {
+	consumerName := "consumer1"
+	eventStore := exporter.NewEventStore[testutils.ExportableMockEvent](
+		defaultTestCleanQueueDuration,
+	)
+	eventStore.AddConsumer(consumerName)
+	defer eventStore.Stop()
+
+	callbackCalled := false
+	err := eventStore.ProcessPendingEvents(
+		consumerName,
+		func(ctx context.Context, events []testutils.ExportableMockEvent) error {
+			callbackCalled = true
+			return nil
+		},
+	)
+
+	assert.Nil(t, err)
+	assert.False(t, callbackCalled)
+}
+
 func startEventProducer(
 	ctx context.Context,
 	eventStore exporter.EventStore[testutils.ExportableMockEvent],

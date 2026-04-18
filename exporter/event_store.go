@@ -78,6 +78,7 @@ type EventStoreItem[T ExportableEvent] struct {
 
 type consumer struct {
 	Offset int64
+	mutex  sync.Mutex
 }
 
 // AddConsumer is adding a new consumer to the Event store.
@@ -90,11 +91,23 @@ func (e *eventStoreImpl[T]) AddConsumer(consumerID string) {
 // with the process events function in parameter,
 func (e *eventStoreImpl[T]) ProcessPendingEvents(
 	consumerID string, processEventsFunc func(context.Context, []T) error) error {
+	currentConsumer, err := e.getConsumer(consumerID)
+	if err != nil {
+		return err
+	}
+
+	currentConsumer.mutex.Lock()
+	defer currentConsumer.mutex.Unlock()
+
 	e.mutex.Lock()
 	eventList, err := e.fetchPendingEvents(consumerID)
 	e.mutex.Unlock()
 	if err != nil {
 		return err
+	}
+
+	if len(eventList.Events) == 0 {
+		return nil
 	}
 
 	err = processEventsFunc(context.Background(), eventList.Events)
