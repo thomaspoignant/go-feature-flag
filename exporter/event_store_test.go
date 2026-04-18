@@ -171,6 +171,7 @@ func Test_MultipleConsumersMultipleGORoutines(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
 	wg := &sync.WaitGroup{}
 
+	var countersMu sync.Mutex
 	consumeFunc := func(eventStore exporter.EventStore[testutils.ExportableMockEvent], consumerName string, eventCounters *map[string]int) {
 		defer wg.Done()
 		err := eventStore.ProcessPendingEvents(consumerName,
@@ -186,7 +187,9 @@ func Test_MultipleConsumersMultipleGORoutines(t *testing.T) {
 		err = eventStore.ProcessPendingEvents(consumerName,
 			func(ctx context.Context, events []testutils.ExportableMockEvent) error {
 				if eventCounters != nil {
+					countersMu.Lock()
 					(*eventCounters)[consumerName] = len(events)
+					countersMu.Unlock()
 				}
 				return nil
 			})
@@ -273,6 +276,47 @@ func Test_WaitForEmptyClean(t *testing.T) {
 	assert.True(t, eventStore.GetTotalEventCount() > 0)
 	time.Sleep(3 * defaultTestCleanQueueDuration)
 	assert.Equal(t, int64(0), eventStore.GetTotalEventCount())
+}
+
+func Test_ProcessPendingEvents_DoesNotBlockAdd(t *testing.T) {
+	consumerName := "consumer1"
+	eventStore := exporter.NewEventStore[testutils.ExportableMockEvent](
+		defaultTestCleanQueueDuration,
+	)
+	eventStore.AddConsumer(consumerName)
+	defer eventStore.Stop()
+
+	for i := 0; i < 10; i++ {
+		eventStore.Add(testutils.NewExportableMockEvent("init"))
+	}
+
+	processingStarted := make(chan struct{})
+	processingDone := make(chan struct{})
+	go func() {
+		_ = eventStore.ProcessPendingEvents(consumerName,
+			func(ctx context.Context, events []testutils.ExportableMockEvent) error {
+				close(processingStarted)
+				time.Sleep(200 * time.Millisecond)
+				return nil
+			})
+		close(processingDone)
+	}()
+
+	<-processingStarted
+
+	addDone := make(chan struct{})
+	go func() {
+		eventStore.Add(testutils.NewExportableMockEvent("during-export"))
+		close(addDone)
+	}()
+
+	select {
+	case <-addDone:
+	case <-time.After(100 * time.Millisecond):
+		t.Fatal("Add() was blocked while ProcessPendingEvents was running a slow exporter")
+	}
+
+	<-processingDone
 }
 
 func startEventProducer(

@@ -91,21 +91,21 @@ func (e *eventStoreImpl[T]) AddConsumer(consumerID string) {
 func (e *eventStoreImpl[T]) ProcessPendingEvents(
 	consumerID string, processEventsFunc func(context.Context, []T) error) error {
 	e.mutex.Lock()
-	defer e.mutex.Unlock()
-
 	eventList, err := e.fetchPendingEvents(consumerID)
+	e.mutex.Unlock()
 	if err != nil {
 		return err
 	}
+
 	err = processEventsFunc(context.Background(), eventList.Events)
 	if err != nil {
 		return err
 	}
+
+	e.mutex.Lock()
 	err = e.updateConsumerOffset(consumerID, eventList.NewOffset)
-	if err != nil {
-		return err
-	}
-	return nil
+	e.mutex.Unlock()
+	return err
 }
 
 // GetTotalEventCount returns the total number of events in the store.
@@ -177,7 +177,7 @@ func (e *eventStoreImpl[T]) updateConsumerOffset(consumerID string, offset int64
 	if err != nil {
 		return err
 	}
-	currentConsumer.Offset = e.lastOffset
+	currentConsumer.Offset = offset
 	return nil
 }
 
