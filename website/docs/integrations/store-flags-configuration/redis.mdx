@@ -15,7 +15,7 @@ export const info = integrations.retrievers.find((r) => r.name === retrieverName
 ## Redis Format
 If you use Redis to store your flags, you need a specific format to store your flags.
 
-We expect the flag to be stored as a `string:string` format where the key if the flag key (with or without a prefix) and the value is a string representing the flag in JSON.
+We expect the flag to be stored as a `string:string` format where the key is the flag key (with or without a prefix) and the value is a string representing the flag in JSON.
 
 The retriever will `Scan` redis filtering with the `Prefix` and will parse the value as a `JSON object`.
 
@@ -49,7 +49,7 @@ configuration to your `ffclient.Config{}` object:
 ```go title="example.go"
 err := ffclient.Init(ffclient.Config{
     PollingInterval: 3 * time.Second,
-	  Retriever: &redisRetriver.Retriever{
+	  Retriever: &redisretriever.Retriever{
         Prefix: "goff:",
 		    Options: &redis.Options{
             Addr: "127.0.0.1:6379",
