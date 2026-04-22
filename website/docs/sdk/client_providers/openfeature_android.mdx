@@ -15,7 +15,7 @@ import { FeatureTable } from "@site/src/components/doc/featureTable";
 This OpenFeature provider has a Kotlin implementation for Android to communicate with the GO Feature
 Flag Server.
 
-In conjuction with the [OpenFeature SDK](https://openfeature.dev/docs/reference/technologies/client/kotlin) you will be able to evaluate your feature flags in your **Android** applications.
+In conjunction with the [OpenFeature SDK](https://openfeature.dev/docs/reference/technologies/client/kotlin) you will be able to evaluate your feature flags in your **Android** applications.
 
 For documentation related to flags management in GO Feature Flag, refer to the [GO Feature Flag documentation website](https://gofeatureflag.org/docs).
 
@@ -70,7 +70,7 @@ OpenFeatureAPI.setProvider(
 
 The evaluation context is the way for the client to specify contextual data that GO Feature Flag uses to evaluate the feature flags, it allows defining rules on the flag.
 
-The `targetingKey` is mandatory for GO Feature Flag in order to evaluate the feature flag, it could be the id of a user, a session ID or anything you find relevent to use as identifier during the evaluation.
+The `targetingKey` is mandatory for GO Feature Flag in order to evaluate the feature flag, it could be the id of a user, a session ID or anything you find relevant to use as identifier during the evaluation.
 
 The `setProvider()` function is synchronous and returns immediately however, this does not mean that the provider is ready to be used.
 An asynchronous network request to the GO Feature Flag backend to fetch all the flags configured for your application must be completed by the provider first. The provider will then emit a `READY` event indicating you can start resolving flags.
@@ -104,7 +104,7 @@ When initializing the provider, you can pass some options to configure the provi
 
 ### Update the Evaluation Context
 
-During the usage of your application it may appear that the `EvaluationContext` should be updated. For example, if a not logged-in user authentify himself, you will probably have to update the evaluation context.
+During the usage of your application it may appear that the `EvaluationContext` should be updated. For example, if a not logged-in user authenticates, you will probably have to update the evaluation context.
 
 ```kotlin
 val newContext: EvaluationContext = ImmutableContext(
@@ -112,7 +112,7 @@ val newContext: EvaluationContext = ImmutableContext(
     attributes = mapOf( "age" to Value.Integer(32), "email" to Value.String("batman@gofeatureflag.org"))
 )
 
-OpenFeatureAPI.setEvaluationContext(newEvalCtx)
+OpenFeatureAPI.setEvaluationContext(newContext)
 ```
 
 `setEvaluationContext()` is a synchronous function similar to `setProvider()` and will fetch the new version of the feature flags based on this new `EvaluationContext`.
@@ -143,7 +143,7 @@ val newContext: EvaluationContext = ImmutableContext(
             )
         )
 
-OpenFeatureAPI.setEvaluationContext(newEvalCtx)
+OpenFeatureAPI.setEvaluationContext(newContext)
 ```
 
 By setting the `gofeatureflag.flagList` key in the context, the provider will only fetch the flags specified in the list.

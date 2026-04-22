@@ -22,10 +22,10 @@ You can then upload those files where you want, and GO Feature Flag will use it.
 The way the solution achieves this is through the use of retrievers, which allow you to load your feature flag
 configuration file from various sources.
 
-**GO Feature Flag** supports a variety of retrievers out of the box _(see list bellow)_.
+**GO Feature Flag** supports a variety of retrievers out of the box _(see list below)_.
 
 You have 2 different ways to specify a retriever depending on if you are using the **GO Module** or the **Relay Proxy**.
-In all the detail pages of the retrievers bellow you will have an example for both examples.
+In all the detail pages of the retrievers below you will have an example for both examples.
 
 ## Available retrievers
 
@@ -60,7 +60,7 @@ type InitializableRetrieverWithFlagset interface {
 ```
 
 To avoid any issue to call the Retrieve function before the Init function, you have to manage the status of your retriever.
-GO Feature Flag will try to call the Retrieve function only if the status is `RetrieverStatusReady`.
+GO Feature Flag will try to call the Retrieve function only if the status is `RetrieverReady`.
 
 :::note
 If you think your custom retriever could be useful for others, feel free to open a [pull request](https://github.com/thomaspoignant/go-feature-flag/pulls) to add it to the list of available retrievers.

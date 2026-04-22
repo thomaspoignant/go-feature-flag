@@ -11,13 +11,13 @@ import { FeatureTable } from "@site/src/components/doc/featureTable";
 # Swift SDK
 [![version](https://img.shields.io/github/v/release/go-feature-flag/openfeature-swift-provider?label=Swift&amp;display_name=tag&style=flat-square&logo=Swift)](https://github.com/go-feature-flag/openfeature-swift-provider)
 
-In conjuction with the [OpenFeature SDK](https://openfeature.dev/docs/reference/concepts/provider) you will be able to evaluate your feature flags in your **iOS**/**tvOS**/**macOS** applications.
+In conjunction with the [OpenFeature SDK](https://openfeature.dev/docs/reference/concepts/provider) you will be able to evaluate your feature flags in your **iOS**/**tvOS**/**macOS** applications.
 
 For documentation related to flags management in GO Feature Flag, refer to the [GO Feature Flag documentation website](https://gofeatureflag.org/docs).
 
 ### Functionalities:
-- Managed the integration of the OpenFeature Swift SDK and GO Feature Flag relay-proxy.
-- Prefetch and cache flag evaluations in order to give the flag value in a efficient way.
+- Manages the integration of the OpenFeature Swift SDK and GO Feature Flag relay-proxy.
+- Prefetch and cache flag evaluations in order to give the flag value in an efficient way.
 - Automatic configuration changes polling, to be informed as soon as a flag configuration has changed.
 - Automatic data collection about which flags have been accessed by the application
 
@@ -71,7 +71,7 @@ OpenFeatureAPI.shared.setProvider(provider: provider, initialContext: evaluation
 
 The evaluation context is the way for the client to specify contextual data that GO Feature Flag uses to evaluate the feature flags, it allows to define rules on the flag.
 
-The `targetingKey` is mandatory for GO Feature Flag in order to evaluate the feature flag, it could be the id of a user, a session ID or anything you find relevent to use as identifier during the evaluation.
+The `targetingKey` is mandatory for GO Feature Flag in order to evaluate the feature flag, it could be the id of a user, a session ID or anything you find relevant to use as identifier during the evaluation.
 
 The `setProvider()` function is synchronous and returns immediately, however this does not mean that the provider is ready to be used. An asynchronous network request to the GO Feature Flag backend to fetch all the flags configured for your application must be completed by the provider first. The provider will then emit a `READY` event indicating you can start resolving flags.
 
@@ -83,7 +83,7 @@ await OpenFeatureAPI.shared.setProviderAndWait(provider: provider)
 
 ### Update the Evaluation Context
 
-During the usage of your application it may appears that the `EvaluationContext` should be updated. For example if a not logged in user, authentify himself you will probably have to update the evaluation context.
+During the usage of your application it may appears that the `EvaluationContext` should be updated. For example if a not logged-in user authenticates, you will probably have to update the evaluation context.
 
 ```swift
 let ctx = MutableContext(targetingKey: "myNewTargetingKey", structure: MutableStructure())
@@ -140,7 +140,7 @@ client.getIntegerValue(key: "my-flag", defaultValue: 1)
 client.getDoubleValue(key: "my-flag", defaultValue: 1.1)
 
 // Object
-client.getObjectValue(key: "my-flag", defaultValue: Value.structure(["key":Value.integer("1234")])
+client.getObjectValue(key: "my-flag", defaultValue: Value.structure(["key":Value.integer(1234)]))
 ```
 
 :::note
@@ -165,7 +165,7 @@ OpenFeatureAPI.shared.observe().sink { event in
 - `.ready`: Provider is ready.
 - `.error`: Provider in error.
 - `.configurationChanged`: Configuration has changed in GO Feature Flag.
-- `.PROVIDER_STALE`: Provider has not the latest version of the feature flags.
+- `.stale`: Provider has not the latest version of the feature flags.
 - `.notReady`: Provider is not ready to evaluate the feature flags.
 
 ## Features status

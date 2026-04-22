@@ -91,6 +91,7 @@ When limiting the flags to evaluate, if you try to evaluate a flag not in the li
 | websocketRetryInitialDelay    | number | 100            | (optional) initial delay in millisecond to wait before retrying to connect the websocket                                                                                                        |
 | websocketRetryDelayMultiplier | number | 2              | (optional) multiplier of websocketRetryInitialDelay after each failure _(example: 1st connection retry will be after 100ms, second after 200ms, third after 400ms ...)_                         |
 | websocketMaxRetries           | number | 10             | (optional) maximum number of retries before considering the websocket unreachable                                                                                                               |
+| customHeaders                 | object | {}             | (optional) custom HTTP headers to add to every request sent to the relay proxy _(e.g. `{"X-Custom-Header": "value"}`)_                                                                         |
 
 ### Reconnection
 If the connection to the GO Feature Flag instance fails, the provider will attempt to reconnect with an exponential back-off.

@@ -10,7 +10,7 @@ All GO Feature Flag SDKs use an evaluation context to determine which variation 
 An evaluation context in a feature flagging system is crucial for determining the output of a feature flag evaluation.
 
 It's a collection of pertinent data about the conditions under which the evaluation is being made.
-his data can be supplied through a mix of static information _(server name, IP, etc ...)_ and dynamic inputs
+This data can be supplied through a mix of static information _(server name, IP, etc ...)_ and dynamic inputs
 _(information about the user performing the action, etc ...)_, along with state information that is implicitly carried
 through the execution of the program.
 
@@ -77,6 +77,6 @@ Those fields are used by GO Feature Flag directly, you can use them as will in y
 
 | Field                            | Description                                                                                                                                                                                                                  |
 |----------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `gofeatureflag.currentDateTime`  | If this property is set, we will use this date as base for all the rollout strategies which implies dates _(experimentation, progressive and scheduled)_.<br/>**Format:** Date following the RF3339 format.                  |
-| `gofeatureflag.flagList`         | If this property is set, in the bulk evaluation mode (for the client SDK) we will only evaluate the flags in this list.<br/>If empty or not set the default behavior is too evaluate all the flags.<br/>**Format:** []string |
+| `gofeatureflag.currentDateTime`  | If this property is set, we will use this date as base for all the rollout strategies which implies dates _(experimentation, progressive and scheduled)_.<br/>**Format:** Date following the RFC3339 format.                  |
+| `gofeatureflag.flagList`         | If this property is set, in the bulk evaluation mode (for the client SDK) we will only evaluate the flags in this list.<br/>If empty or not set the default behavior is to evaluate all the flags.<br/>**Format:** []string |
 | `gofeatureflag.exporterMetadata` | If this property is set, we will add all the fields in the feature event send to the provider.<br/>**Format:** map[string]string\|number\|bool                                                                               |
