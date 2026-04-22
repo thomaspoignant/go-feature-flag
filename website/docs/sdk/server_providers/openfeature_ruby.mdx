@@ -11,7 +11,7 @@ import { FeatureTable } from "@site/src/components/doc/featureTable";
 
 This repository contains the official Ruby OpenFeature provider for accessing your feature flags with [GO Feature Flag](https://gofeatureflag.org).
 
-In conjuction with the [OpenFeature SDK](https://openfeature.dev/docs/reference/concepts/provider) you will be able
+In conjunction with the [OpenFeature SDK](https://openfeature.dev/docs/reference/concepts/provider) you will be able
 to evaluate your feature flags in your Ruby applications.
 
 For documentation related to flags management in GO Feature Flag,
@@ -51,8 +51,8 @@ The `OpenFeature::GoFeatureFlag::Provider` needs some options to be created and 
 The only required option to create a `GoFeatureFlagProvider` is the URL _(`endpoint`)_ to your GO Feature Flag relay-proxy instance.
 
 ```ruby
-import GOFeatureFlag
-import OpenFeature
+require "openfeature/go_feature_flag"
+require "openfeature/sdk"
 
 # ...
 

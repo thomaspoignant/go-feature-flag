@@ -28,7 +28,7 @@ If you use Postgresql to store your flags, you need a specific format to store y
 :::note
 You can customize the column names by configuring the retriever options. The example above uses the default column names that works out of the box.
 
-You can also add more columns to the table for your own needs, but only those 3 fields are mandatory to work with the GO Feature Flagretriever.
+You can also add more columns to the table for your own needs, but only those 3 fields are mandatory to work with the GO Feature Flag retriever.
 :::
 
 
@@ -119,7 +119,7 @@ configuration to your `ffclient.Config{}` object:
 ```go title="example.go"
 err := ffclient.Init(ffclient.Config{
     PollingInterval: 3 * time.Second,
-	  Retriever: &postgresql.Retriever{
+	  Retriever: &postgresqlretriever.Retriever{
       URI: "postgres://user:password@localhost:5432/dbname",
       Table: "go_feature_flag",
       Columns: map[string]string{

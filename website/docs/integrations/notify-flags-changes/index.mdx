@@ -29,10 +29,10 @@ In each notification you will have the `hostname` of the instance, it can be use
 
 
 You have 2 different ways to specify a notifier depending on if you are using the **GO Module** or the **Relay Proxy**.
-In all the details pages of the retrievers bellow you will have an example for both examples.
+In all the details pages of the notifiers below you will have an example for both examples.
 
 ## Available Notifiers
-Bellow is the full list of notifiers that are available in GO Feature Flag.
+Below is the full list of notifiers that are available in GO Feature Flag.
 
 <div className={"grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"}>
   {getIntegrations("").notifiers.filter(item => item.docLink !== undefined).map((item) => {
@@ -49,7 +49,7 @@ Bellow is the full list of notifiers that are available in GO Feature Flag.
 </div>
 
 ## Custom notifier
-If you have a specific use case that is not covered by the built-in notifiers, you can create your own custom exporter.
+If you have a specific use case that is not covered by the built-in notifiers, you can create your own custom notifier.
 
 To create a custom notifier you must have a struct that implements the notifier.Notifier interface.
 
@@ -58,7 +58,7 @@ In param you will receive a `notifier.DiffCache` struct that will tell you what 
 ```go title="notifier.go"
 import (
     ffclient "github.com/thomaspoignant/go-feature-flag"
-    "github.com/thomaspoignant/go-feature-flag/notifier/notifier"
+    "github.com/thomaspoignant/go-feature-flag/notifier"
     "sync"
 )
 
@@ -73,5 +73,5 @@ func (c *Notifier) Notify(diff notifier.DiffCache) error {
 If you think your custom notifier could be useful for others, feel free to open a [pull request](https://github.com/thomaspoignant/go-feature-flag/pulls) to add it to the list of available notifiers.
 :::
 :::warning
-If you are using a custom exporter, it is easy to use it for the GO Module, but if you want to use it in the relay proxy you will have to recompile it yourself.
+If you are using a custom notifier, it is easy to use it for the GO Module, but if you want to use it in the relay proxy you will have to recompile it yourself.
 :::

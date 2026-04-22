@@ -19,7 +19,6 @@ Despite that you can start with a minimum configuration and fine tune it later.
 ## Configuration file
 
 The configuration of the **relay proxy** is based on a configuration file that you have to provide.
-The configuration of the **relay proxy** is based on a configuration file that you have to provide.
 This is a `yaml` file and usage is to call it `goff-proxy.yaml` but you can name it as you will.
 
 You can provide the configuration file with the option `--config=/path_to_your_file.yaml` when launching the relay proxy.
@@ -54,7 +53,7 @@ By default, if you omit the `--config` option, the relay proxy will look for a c
     link="#use-multiple-flag-sets"
     title="Use multiple flag sets"
     description="Separate your feature flags into different flag sets to give ownership to different teams or different usage, useful for multi-tenant applications or when you have different teams."
-  / >
+  />
 </div>
 
 
@@ -208,8 +207,8 @@ Check [_"Logging"_](./observability#logging) to have more information.
 
 - option name: `logLevel`
 - type: **string**
-- default: **`INFO`**
-- Acceptable values are `ERROR`, `WARN`, `INFO`, `DEBUG`.
+- default: **`info`**
+- Acceptable values are `error`, `warn`, `info`, `debug`.
 - mandatory: <NotMandatory />
 - When in `DEBUG` mode, the relay proxy will log the request body and response body,
 for large payloads this can be a lot of data and can impact the performance this is the reason why we truncate the body if it is larger than **8KiB**.
@@ -380,8 +379,8 @@ flagSets:
     retrievers:
       - kind: file
         path: /flags/team-a-flags.yaml
-    exporter:
-      kind: log
+    exporters:
+      - kind: log
 
   - name: teamB
     apiKeys:
@@ -448,7 +447,7 @@ You need to set API keys in this field if you want to access the `/v1/admin/*` e
 
 Each request will need to provide one of authorized key inside `X-API-Key` header.
 
-- option name: `evaluation`
+- option name: `admin`
 - type: **[]string**
 - default: **none**
 - mandatory: <NotMandatory />
@@ -809,8 +808,8 @@ flagSets:
     retrievers:
       - kind: file
         path: /path/to/team-a-flags.yaml
-    exporter:
-      kind: log
+    exporters:
+      - kind: log
 
   - name: teamB
     apiKeys:
@@ -874,7 +873,7 @@ server:
   mode: http
   port: 1031
 
-logLevel: INFO
+logLevel: info
 
 flagSets:
   # Frontend team flags

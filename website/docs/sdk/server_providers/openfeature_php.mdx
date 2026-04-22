@@ -12,7 +12,7 @@ import { FeatureTable } from "@site/src/components/doc/featureTable";
 
 
 In conjunction with the [OpenFeature SDK](https://openfeature.dev/docs/reference/concepts/provider) you will be able
-to evaluate your feature flags in your Ruby applications.
+to evaluate your feature flags in your PHP applications.
 
 ### Functionalities:
 - Manage the integration of the OpenFeature PHP SDK and GO Feature Flag relay-proxy.
@@ -59,7 +59,7 @@ $evaluationContext = new MutableEvaluationContext(
       new Attributes(["email" => 'contact@gofeatureflag.org'])
   );
 
-$value = $client->getBooleanDetails('integer_key', false, $evaluationContext);
+$value = $client->getBooleanDetails('my-flag-key', false, $evaluationContext);
 if ($value) {
     echo "The flag is enabled";
 } else {
@@ -107,19 +107,6 @@ $client->getFloatValue('my-flag-key', 1.1, new MutableEvaluationContext("214b796
 $client->getObjectDetails('my-flag-key', ["default" => true], new MutableEvaluationContext("214b796a-807b-4697-b3a3-42de0ec10a37"));
 $client->getObjectValue('my-flag-key', ["default" => true], new MutableEvaluationContext("214b796a-807b-4697-b3a3-42de0ec10a37"));
 ```
-
-## Features status
-
-| Status | Feature         | Description                                                                |
-|-------|-----------------|----------------------------------------------------------------------------|
-| ✅     | Flag evaluation | It is possible to evaluate all the type of flags                           |
-| ❌     | Caching         | Mechanism is in place to refresh the cache in case of configuration change |
-| ❌     | Event Streaming | Not supported by the SDK                                                   |
-| ❌     | Logging         | Not supported by the SDK                                                   |
-| ❌     | Flag Metadata   | Not supported by the SDK                                                   |
-
-
-<sub>**Implemented**: ✅ | In-progress: ⚠️ | Not implemented yet: ❌</sub>
 
 ## Contributing
 This project welcomes contributions from the community.
