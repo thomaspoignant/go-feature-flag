@@ -84,6 +84,8 @@ type consumer struct {
 // AddConsumer is adding a new consumer to the Event store.
 // note that you can't add a consumer after the Event store has been started.
 func (e *eventStoreImpl[T]) AddConsumer(consumerID string) {
+	e.mutex.Lock()
+	defer e.mutex.Unlock()
 	e.consumers[consumerID] = &consumer{Offset: e.lastOffset}
 }
 
@@ -91,7 +93,9 @@ func (e *eventStoreImpl[T]) AddConsumer(consumerID string) {
 // with the process events function in parameter,
 func (e *eventStoreImpl[T]) ProcessPendingEvents(
 	consumerID string, processEventsFunc func(context.Context, []T) error) error {
+	e.mutex.RLock()
 	currentConsumer, err := e.getConsumer(consumerID)
+	e.mutex.RUnlock()
 	if err != nil {
 		return err
 	}

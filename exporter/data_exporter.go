@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"log/slog"
-	"sync"
 	"time"
 
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
@@ -44,7 +43,6 @@ type dataExporterImpl[T ExportableEvent] struct {
 
 	daemonChan chan struct{}
 	ticker     *time.Ticker
-	flushMu    sync.Mutex
 }
 
 // NewDataExporter create a new DataExporter with the given exporter and his consumer information to consume the data
@@ -102,9 +100,6 @@ func (d *dataExporterImpl[T]) Stop() {
 
 // Flush is sending the data to the exporter
 func (d *dataExporterImpl[T]) Flush() {
-	d.flushMu.Lock()
-	defer d.flushMu.Unlock()
-
 	store := *d.eventStore
 	err := store.ProcessPendingEvents(d.consumerID, d.sendEvents)
 	if err != nil {

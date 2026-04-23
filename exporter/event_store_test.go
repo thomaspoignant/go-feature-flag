@@ -319,6 +319,66 @@ func Test_ProcessPendingEvents_DoesNotBlockAdd(t *testing.T) {
 	<-processingDone
 }
 
+func Test_ProcessPendingEvents_QueuedSameConsumerCallDoesNotBlockAdd(t *testing.T) {
+	consumerName := "consumer1"
+	eventStore := exporter.NewEventStore[testutils.ExportableMockEvent](
+		defaultTestCleanQueueDuration,
+	)
+	eventStore.AddConsumer(consumerName)
+	defer eventStore.Stop()
+
+	for i := 0; i < 10; i++ {
+		eventStore.Add(testutils.NewExportableMockEvent("init"))
+	}
+
+	processingStarted := make(chan struct{})
+	releaseFirst := make(chan struct{})
+	secondCallStarted := make(chan struct{})
+	var wg sync.WaitGroup
+
+	processFunc := func(ctx context.Context, events []testutils.ExportableMockEvent) error {
+		select {
+		case <-processingStarted:
+		default:
+			close(processingStarted)
+		}
+		<-releaseFirst
+		return nil
+	}
+
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		assert.Nil(t, eventStore.ProcessPendingEvents(consumerName, processFunc))
+	}()
+
+	<-processingStarted
+
+	go func() {
+		close(secondCallStarted)
+		assert.Nil(t, eventStore.ProcessPendingEvents(consumerName, processFunc))
+		wg.Done()
+	}()
+
+	<-secondCallStarted
+	time.Sleep(20 * time.Millisecond)
+
+	addDone := make(chan struct{})
+	go func() {
+		eventStore.Add(testutils.NewExportableMockEvent("during-queued-flush"))
+		close(addDone)
+	}()
+
+	select {
+	case <-addDone:
+	case <-time.After(100 * time.Millisecond):
+		t.Fatal("Add() was blocked while a same-consumer ProcessPendingEvents call was queued")
+	}
+
+	close(releaseFirst)
+	wg.Wait()
+}
+
 func Test_ProcessPendingEvents_SameConsumerConcurrentCallsDoNotDuplicate(t *testing.T) {
 	consumerName := "consumer1"
 	eventStore := exporter.NewEventStore[testutils.ExportableMockEvent](
