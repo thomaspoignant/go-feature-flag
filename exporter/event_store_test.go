@@ -336,7 +336,7 @@ func Test_ProcessPendingEvents_QueuedSameConsumerCallDoesNotBlockAdd(t *testing.
 	secondCallStarted := make(chan struct{})
 	var wg sync.WaitGroup
 
-	processFunc := func(ctx context.Context, events []testutils.ExportableMockEvent) error {
+	processFunc := func(_ context.Context, events []testutils.ExportableMockEvent) error {
 		select {
 		case <-processingStarted:
 		default:
