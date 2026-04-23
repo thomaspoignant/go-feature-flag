@@ -336,27 +336,37 @@ func Test_ProcessPendingEvents_QueuedSameConsumerCallDoesNotBlockAdd(t *testing.
 	secondCallStarted := make(chan struct{})
 	var wg sync.WaitGroup
 
-	processFunc := func(_ context.Context, _ []testutils.ExportableMockEvent) error {
-		select {
-		case <-processingStarted:
-		default:
-			close(processingStarted)
-		}
-		<-releaseFirst
-		return nil
-	}
-
 	wg.Add(2)
 	go func() {
 		defer wg.Done()
-		assert.Nil(t, eventStore.ProcessPendingEvents(consumerName, processFunc))
+		assert.Nil(t, eventStore.ProcessPendingEvents(consumerName,
+			func(_ context.Context, _ []testutils.ExportableMockEvent) error {
+				select {
+				case <-processingStarted:
+				default:
+					close(processingStarted)
+				}
+				<-releaseFirst
+				return nil
+			},
+		))
 	}()
 
 	<-processingStarted
 
 	go func() {
 		close(secondCallStarted)
-		assert.Nil(t, eventStore.ProcessPendingEvents(consumerName, processFunc))
+		assert.Nil(t, eventStore.ProcessPendingEvents(consumerName,
+			func(_ context.Context, _ []testutils.ExportableMockEvent) error {
+				select {
+				case <-processingStarted:
+				default:
+					close(processingStarted)
+				}
+				<-releaseFirst
+				return nil
+			},
+		))
 		wg.Done()
 	}()
 
