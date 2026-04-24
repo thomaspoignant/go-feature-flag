@@ -104,25 +104,20 @@ func (e *eventStoreImpl[T]) ProcessPendingEvents(
 	defer currentConsumer.mutex.Unlock()
 
 	e.mutex.Lock()
-	eventList, err := e.fetchPendingEvents(consumerID)
+	eventList := e.fetchPendingEvents(currentConsumer)
 	e.mutex.Unlock()
-	if err != nil {
-		return err
-	}
 
 	if len(eventList.Events) == 0 {
 		return nil
 	}
 
-	err = processEventsFunc(context.Background(), eventList.Events)
-	if err != nil {
+	if err := processEventsFunc(context.Background(), eventList.Events); err != nil {
 		return err
 	}
 
 	e.mutex.Lock()
-	err = e.updateConsumerOffset(consumerID, eventList.NewOffset)
-	e.mutex.Unlock()
-	return err
+	defer e.mutex.Unlock()
+	return e.updateConsumerOffset(currentConsumer, eventList.NewOffset)
 }
 
 // GetTotalEventCount returns the total number of events in the store.
@@ -153,11 +148,7 @@ func (e *eventStoreImpl[T]) Add(data T) {
 
 // fetchPendingEvents is returning all the available item in the Event store for this consumer.
 // WARNING: please call this function only in a function that has locked the mutex first.
-func (e *eventStoreImpl[T]) fetchPendingEvents(consumerID string) (*EventList[T], error) {
-	currentConsumer, err := e.getConsumer(consumerID)
-	if err != nil {
-		return nil, err
-	}
+func (e *eventStoreImpl[T]) fetchPendingEvents(currentConsumer *consumer) *EventList[T] {
 	events := make([]T, 0)
 	for _, event := range e.events {
 		if event.Offset > currentConsumer.Offset {
@@ -168,7 +159,7 @@ func (e *eventStoreImpl[T]) fetchPendingEvents(consumerID string) (*EventList[T]
 		Events:        events,
 		InitialOffset: currentConsumer.Offset,
 		NewOffset:     e.lastOffset,
-	}, nil
+	}
 }
 
 // getConsumer checks if the consumer exists and returns it.
@@ -182,17 +173,13 @@ func (e *eventStoreImpl[T]) getConsumer(consumerID string) (*consumer, error) {
 
 // updateConsumerOffset updates the offset of the consumer to the new offset.
 // WARNING: please call this function only in a function that has locked the mutex first.
-func (e *eventStoreImpl[T]) updateConsumerOffset(consumerID string, offset int64) error {
+func (e *eventStoreImpl[T]) updateConsumerOffset(currentConsumer *consumer, offset int64) error {
 	if offset > e.lastOffset {
 		return fmt.Errorf(
 			"invalid offset: offset %d is greater than the last offset %d",
 			offset,
 			e.lastOffset,
 		)
-	}
-	currentConsumer, err := e.getConsumer(consumerID)
-	if err != nil {
-		return err
 	}
 	currentConsumer.Offset = offset
 	return nil
