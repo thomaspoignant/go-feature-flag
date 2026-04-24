@@ -103,9 +103,9 @@ func (e *eventStoreImpl[T]) ProcessPendingEvents(
 	currentConsumer.mutex.Lock()
 	defer currentConsumer.mutex.Unlock()
 
-	e.mutex.Lock()
-	eventList := e.fetchPendingEvents(currentConsumer)
-	e.mutex.Unlock()
+e.mutex.RLock()
+eventList := e.fetchPendingEvents(currentConsumer)
+e.mutex.RUnlock()
 
 	if len(eventList.Events) == 0 {
 		return nil
