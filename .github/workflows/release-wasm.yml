@@ -37,7 +37,7 @@ jobs:
         with:
           go-version-file: cmd/wasm/go.mod
           check-latest: true
-      - uses: acifani/setup-tinygo@db56321a62b9a67922bb9ac8f9d085e218807bb3 # v2.0.1
+      - uses: acifani/setup-tinygo@dd8a7075d951a7595b2ef2123ed0ab1af0c13e56 # v3.0.0
         with:
           tinygo-version: "0.40.1"
       - name: Release WASM
@@ -45,7 +45,7 @@ jobs:
           VERSION: ${{ steps.extract_version.outputs.VERSION }}
         run: ./.github/ci-scripts/release_wasm.sh "$VERSION"
       - name: Upload assets
-        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2.6.1
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
         with:
           files: |
             ./out/release-wasm/gofeatureflag-evaluation_${{ steps.extract_version.outputs.VERSION }}.wasi
