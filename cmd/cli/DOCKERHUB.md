@@ -52,8 +52,7 @@ docker run -v <location_of_your_local_file>:/config.yaml \
 ## How to lint a configuration file
 ```shell
 docker run -v <location_of_your_local_file>:/config.yaml \
-  gofeatureflag/go-feature-flag-cli lint \
-  --config=/config.yaml \
+  gofeatureflag/go-feature-flag-cli lint "/config.yaml" \
   --format="yaml"
 ```
 
