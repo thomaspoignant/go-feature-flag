@@ -32,7 +32,7 @@ The dates are in the format supported natively by your flag file format.
 experimentation-flag:
   variations:
     enabled: true
-    disabled: B
+    disabled: false
   defaultRule:
     percentage:
       enabled: 50

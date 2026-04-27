@@ -80,7 +80,7 @@ As you can see, the evaluation context API takes 3 parameters _(this is true in 
 - A default value to return if the flag is not found or the evaluation fails. The evaluation API will always return a value, even if there is an error.
 - An evaluation context giving information about the current user or request _([more information about evaluation context](evaluation-context.md))_.
 
-You can also see that we explicitely asking for a boolean value because `new_checkout_flow` is a boolean flag.
+You can also see that we are explicitly asking for a boolean value because `new_checkout_flow` is a boolean flag.
 
 ## Benefits of Dynamic Evaluation
 
@@ -95,7 +95,7 @@ Dynamic flag evaluation provides several advantages:
 Feature flag evaluation in GO Feature Flag depends on which type of SDK and provider you are using in your application.  
 There are two main categories **Client Providers** and **Server Providers** (see [SDK paradigms](./sdk-paradigms.mdx))
 
-The evaluation process is handled differently for each, bellow we will detail all the flows.
+The evaluation process is handled differently for each, below we will detail all the flows.
 
 ### Client Provider
 
@@ -114,7 +114,7 @@ sequenceDiagram
         participant goff as GO Feature Flag<br />Relay Proxy
     end
 
-    note over app: SDK initializaition
+    note over app: SDK initialization
     app ->> sdk: Initialize OpenFeature + set Evaluation Context
     sdk ->> provider: Call provider init method
     provider ->> goff: Evaluate all flags
@@ -126,14 +126,14 @@ sequenceDiagram
     sdk -->> app:
 
     note over app: 1st evaluation
-    app ->> sdk: Evaluate flag "darkMode"<br/>with evalution context
+    app ->> sdk: Evaluate flag "darkMode"<br/>with evaluation context
     sdk ->> provider: 
     provider ->> provider: Get evaluation response for "darkMode"
     provider -->> sdk: Evaluation response
     sdk -->> app:
 
     note over app: 2nd evaluation
-    app ->> sdk: Evaluate flag "newOnboarding"<br/>with evalution context
+    app ->> sdk: Evaluate flag "newOnboarding"<br/>with evaluation context
     sdk ->> provider: 
     provider ->> provider: Get evaluation response for "newOnboarding"
     provider -->> sdk: Evaluation response
@@ -144,8 +144,8 @@ sequenceDiagram
 
 ### Server Provider: In Process Evaluation
 
-- Your server-side provider is configured to call the Relay Proxy for flag evaluations.
-- This can simplify config management and centralize evaluations, but adds network round-trips on every evaluation.
+- Your server-side provider fetches the flag configuration from the Relay Proxy once and caches it locally.
+- Each evaluation is performed directly inside the provider — no per-evaluation network call to the Relay Proxy is needed.
 
 <details>
 
@@ -160,7 +160,7 @@ sequenceDiagram
         participant goff as GO Feature Flag<br />Relay Proxy
     end
 
-    note over app: SDK initializaition
+    note over app: SDK initialization
     app ->> sdk: Initialize OpenFeature
     sdk ->> provider: Call provider init method
     provider -->> goff: Retrieve flag configuration
@@ -171,14 +171,14 @@ sequenceDiagram
     sdk -->> app:
 
     note over app: 1st evaluation
-    app ->> sdk: Evaluate flag "darkMode"<br/>with evalution context
+    app ->> sdk: Evaluate flag "darkMode"<br/>with evaluation context
     sdk ->> provider: 
     provider ->> provider: Perform evaluation inside the provider
     provider -->> sdk: Evaluation response
     sdk -->> app:
 
     note over app: 2nd evaluation
-    app ->> sdk: Evaluate flag "newOnboarding"<br/>with evalution context
+    app ->> sdk: Evaluate flag "newOnboarding"<br/>with evaluation context
     sdk ->> provider: 
     provider ->> provider: Perform evaluation inside the provider
     provider -->> sdk: Evaluation response
@@ -206,7 +206,7 @@ sequenceDiagram
         participant goff as GO Feature Flag<br />Relay Proxy
     end
 
-    note over app: SDK initializaition
+    note over app: SDK initialization
     app ->> sdk: Initialize OpenFeature
     sdk ->> provider: Call provider init method
     provider -->> provider: Provider init
@@ -214,18 +214,18 @@ sequenceDiagram
     sdk -->> app:
 
     note over app: 1st evaluation
-    app ->> sdk: Evaluate flag "darkMode"<br/>with evalution context
+    app ->> sdk: Evaluate flag "darkMode"<br/>with evaluation context
     sdk ->> provider: 
-    provider ->> goff: Call evaluation API for "darkMode"<br/>with evalution context
+    provider ->> goff: Call evaluation API for "darkMode"<br/>with evaluation context
     goff -->> goff: Perform evaluation
     goff -->> provider: Evaluation response
     provider -->> sdk:
     sdk -->> app:
 
     note over app: 2nd evaluation
-    app ->> sdk: Evaluate flag "newOnboarding"<br/>with evalution context
+    app ->> sdk: Evaluate flag "newOnboarding"<br/>with evaluation context
     sdk ->> provider: 
-    provider ->> goff: Call evaluation API for "newOnboarding"<br/>with evalution context
+    provider ->> goff: Call evaluation API for "newOnboarding"<br/>with evaluation context
     goff -->> goff: Perform evaluation
     goff -->> provider: Evaluation response
     provider -->> sdk: 

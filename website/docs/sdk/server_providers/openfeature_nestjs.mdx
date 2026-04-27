@@ -56,6 +56,10 @@ import { OpenFeatureModule } from '@openfeature/nestjs-sdk';
 import { GoFeatureFlagProvider } from  '@openfeature/go-feature-flag-provider';
 import { OpenFeature } from '@openfeature/server-sdk';
 
+const goffProvider = new GoFeatureFlagProvider({
+  endpoint: 'http://localhost:1031/', // DNS of your instance of relay proxy
+});
+
 @Module({
   imports: [
     ...
@@ -66,15 +70,11 @@ import { OpenFeature } from '@openfeature/server-sdk';
     }),
   ],
   controllers: [...],
-  providers: [
-      goffProvider: new GoFeatureFlagProvider({
-        endpoint: 'http://localhost:1031/' // DNS of your instance of relay proxy
-      }),
-  ],
+  providers: [...],
 })
 export class AppModule implements OnModuleInit {
   async onModuleInit() {
-    await OpenFeature.setProviderAndWait(provider);
+    await OpenFeature.setProviderAndWait(goffProvider);
   }
 }
 ```
