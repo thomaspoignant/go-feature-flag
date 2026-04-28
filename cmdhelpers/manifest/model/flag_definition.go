@@ -1,6 +1,6 @@
 package model
 
-import "github.com/thomaspoignant/go-feature-flag/model/dto"
+import "github.com/thomaspoignant/go-feature-flag/modules/core/dto"
 
 type FlagDefinition struct {
 	dto.DTO      `json:",inline"`

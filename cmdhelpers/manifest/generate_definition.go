@@ -1,6 +1,8 @@
 package manifest
 
 import (
+	"fmt"
+
 	"github.com/thomaspoignant/go-feature-flag/cmd/cli/helper"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/manifest/model"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/dto"
@@ -15,8 +17,7 @@ func GenerateDefinition(flags map[string]flag.InternalFlag, logger fflog.FFLogge
 	for k, v := range flags {
 		flagType, err := helper.FlagTypeFromVariations(*v.Variations)
 		if err != nil {
-			logger.Error("invalid configuration for flag %s: %s", k, err.Error())
-			continue
+			return model.FlagManifest{}, fmt.Errorf("invalid configuration for flag %s: %w", k, err)
 		}
 
 		metadata := v.Metadata
@@ -27,7 +28,7 @@ func GenerateDefinition(flags map[string]flag.InternalFlag, logger fflog.FFLogge
 
 		defaultValue, ok := (*metadata)["defaultValue"]
 		if !ok {
-			logger.Error("flag %s ignored: no default value provided", k)
+			logger.Error(fmt.Sprintf("flag %s ignored: no default value provided", k))
 			continue
 		}
 
@@ -36,13 +37,13 @@ func GenerateDefinition(flags map[string]flag.InternalFlag, logger fflog.FFLogge
 			description = ""
 		}
 
-		defintion := model.FlagDefinition{
+		definition := model.FlagDefinition{
 			DTO:          dto.ConvertInternalFlagToDto(v),
 			FlagType:     model.FlagType(flagType),
 			DefaultValue: defaultValue,
 			Description:  description,
 		}
-		definitions[k] = defintion
+		definitions[k] = definition
 	}
 
 	return model.FlagManifest{Flags: definitions}, nil

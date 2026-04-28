@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/thomaspoignant/go-feature-flag/cmd/cli/helper"
+	helper "github.com/thomaspoignant/go-feature-flag/cmdhelpers/configfile"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/dto"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
 )
