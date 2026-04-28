@@ -3,12 +3,17 @@ package manifest
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
+	"strings"
 
-	"github.com/thomaspoignant/go-feature-flag/cmd/cli/generate/manifest/model"
 	"github.com/thomaspoignant/go-feature-flag/cmd/cli/helper"
+	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/manifest"
+	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/manifest/model"
 	"github.com/thomaspoignant/go-feature-flag/model/dto"
 	dtoCore "github.com/thomaspoignant/go-feature-flag/modules/core/dto"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
 func NewManifest(configFile, configFormat, flagManifestDestination string) (Manifest, error) {
@@ -36,7 +41,17 @@ type Manifest struct {
 
 // Generate the manifest file
 func (m *Manifest) Generate() (helper.Output, error) {
-	definitions, output, err := m.generateDefinitions(m.dtos)
+	var logs []string
+	logx := fflog.ConvertToFFLogger(log.New(&sliceWriter{logs: &logs}, "", log.LstdFlags))
+	flags := make(map[string]flag.InternalFlag)
+	for k, v := range m.dtos {
+		flags[k] = dtoCore.ConvertDtoToInternalFlag(v)
+	}
+	output := helper.Output{}
+	definitions, err := manifest.GenerateDefinition(flags, *logx)
+	if len(logs) > 0 {
+		output.Add(strings.Join(logs, "\n"), helper.WarnLevel)
+	}
 	if err != nil {
 		return output, err
 	}
@@ -52,42 +67,6 @@ func (m *Manifest) Generate() (helper.Output, error) {
 	return output.Add("🎉 Manifest has been created", helper.InfoLevel), nil
 }
 
-// generateDefinitions will generate the definitions from the flagDTOs
-func (m *Manifest) generateDefinitions(flagDTOs map[string]dto.DTO) (
-	model.FlagManifest, helper.Output, error) {
-	definitions := make(map[string]model.FlagDefinition)
-	output := helper.Output{}
-	for flagKey, flagDTO := range flagDTOs {
-		flag := dtoCore.ConvertDtoToInternalFlag(flagDTO)
-		flagType, err := helper.FlagTypeFromVariations(flag.GetVariations())
-		if err != nil {
-			return model.FlagManifest{}, output,
-				fmt.Errorf("invalid configuration for flag %s: %s", flagKey, err.Error())
-		}
-
-		metadata := flag.GetMetadata()
-		description, ok := metadata["description"].(string)
-		if !ok {
-			description = ""
-		}
-
-		defaultValue, ok := metadata["defaultValue"]
-		if !ok {
-			output.Add(
-				fmt.Sprintf("flag %s ignored: no default value provided", flagKey),
-				helper.WarnLevel,
-			)
-			continue
-		}
-		definitions[flagKey] = model.FlagDefinition{
-			FlagType:     flagType,
-			DefaultValue: defaultValue,
-			Description:  description,
-		}
-	}
-	return model.FlagManifest{Flags: definitions}, output, nil
-}
-
 // toJSON will convert the definitions to a JSON string
 func (m *Manifest) toJSON(manifest model.FlagManifest) (string, error) {
 	definitionsJSON, err := json.MarshalIndent(manifest, "", "  ")
@@ -99,4 +78,16 @@ func (m *Manifest) toJSON(manifest model.FlagManifest) (string, error) {
 
 func (m *Manifest) storeManifest(definitionsJSON string) error {
 	return os.WriteFile(m.flagManifestDestination, []byte(definitionsJSON), 0600)
+}
+
+// sliceWriter is an io.Writer that captures each Write call as an entry
+// in the underlying string slice. It is used to redirect a *log.Logger's
+// output into an in-memory array instead of stdout/stderr.
+type sliceWriter struct {
+	logs *[]string
+}
+
+func (w *sliceWriter) Write(p []byte) (int, error) {
+	*w.logs = append(*w.logs, strings.TrimRight(string(p), "\n"))
+	return len(p), nil
 }

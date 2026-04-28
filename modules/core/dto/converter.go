@@ -27,3 +27,26 @@ func ConvertDtoToInternalFlag(dto DTO) flag.InternalFlag {
 		Metadata:        dto.Metadata,
 	}
 }
+
+func ConvertInternalFlagToDto(flag flag.InternalFlag) DTO {
+	experimentation := &ExperimentationDto{}
+	if flag.Experimentation != nil {
+		experimentation = &ExperimentationDto{
+			Start: flag.Experimentation.Start,
+			End:   flag.Experimentation.End,
+		}
+	}
+
+	return DTO{
+		TrackEvents:     flag.TrackEvents,
+		Disable:         flag.Disable,
+		Version:         flag.Version,
+		Variations:      flag.Variations,
+		Rules:           flag.Rules,
+		BucketingKey:    flag.BucketingKey,
+		DefaultRule:     flag.DefaultRule,
+		Scheduled:       flag.Scheduled,
+		Experimentation: experimentation,
+		Metadata:        flag.Metadata,
+	}
+}
