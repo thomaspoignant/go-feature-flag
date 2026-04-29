@@ -113,7 +113,7 @@ go-feature-flag-cli generate manifest \
       "description": "The message to use for greeting users.",
       "variations": {
         "hi": "Hi there 👋",
-        "hello": "Hello, welcome to the show",
+        "hello": "Hello, welcome to the show"
       },
       "defaultRule": {
         "variation": "hi"
