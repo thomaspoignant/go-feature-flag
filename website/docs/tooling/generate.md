@@ -86,7 +86,7 @@ go-feature-flag-cli generate manifest \
       "description": "Controls whether Feature A is enabled.",
       "variations": {
         "enabled": true,
-        "disabled": false,
+        "disabled": false
       },
       "targeting": [
         {
