@@ -39,7 +39,7 @@ func GenerateDefinition(flags map[string]flag.InternalFlag, logger fflog.FFLogge
 
 		definition := model.FlagDefinition{
 			DTO:          dto.ConvertInternalFlagToDto(v),
-			FlagType:     model.FlagType(flagType),
+			FlagType:     flagType,
 			DefaultValue: defaultValue,
 			Description:  description,
 		}
