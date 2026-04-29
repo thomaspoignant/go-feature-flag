@@ -15,6 +15,10 @@ func GenerateDefinition(flags map[string]flag.InternalFlag, logger fflog.FFLogge
 	definitions := make(map[string]model.FlagDefinition)
 
 	for k, v := range flags {
+		if v.Variations == nil {
+			logger.Error(fmt.Sprintf("flag %s ignored: no variations provided", k))
+			continue
+		}
 		flagType, err := helper.FlagTypeFromVariations(*v.Variations)
 		if err != nil {
 			return model.FlagManifest{}, fmt.Errorf("invalid configuration for flag %s: %w", k, err)
