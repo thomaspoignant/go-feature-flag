@@ -277,16 +277,13 @@ func TestConvertInternalFlagToDto(t *testing.T) {
 				Version:         testconvert.String("v1"),
 			},
 			expected: dto.DTO{
-				Experimentation: &dto.ExperimentationDto{},
-				Version:         testconvert.String("v1"),
+				Version: testconvert.String("v1"),
 			},
 		},
 		{
-			name:  "empty input",
-			input: flag.InternalFlag{},
-			expected: dto.DTO{
-				Experimentation: &dto.ExperimentationDto{},
-			},
+			name:     "empty input",
+			input:    flag.InternalFlag{},
+			expected: dto.DTO{},
 		},
 	}
 	for _, tt := range tests {
