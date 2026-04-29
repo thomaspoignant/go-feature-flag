@@ -76,6 +76,9 @@ type EventStoreItem[T ExportableEvent] struct {
 	Data   T
 }
 
+// consumer serializes ProcessPendingEvents calls for a single consumer.
+// Lock ordering: consumer.mutex must always be acquired before eventStoreImpl.mutex.
+// Never acquire consumer.mutex while holding eventStoreImpl.mutex.
 type consumer struct {
 	Offset int64
 	mutex  sync.Mutex
