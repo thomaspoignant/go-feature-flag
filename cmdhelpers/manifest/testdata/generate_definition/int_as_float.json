@@ -1,0 +1,23 @@
+{
+  "$schema": "https://raw.githubusercontent.com/open-feature/cli/refs/heads/main/schema/v0/flag-manifest.json",
+  "flags": {
+    "mixed-flag": {
+      "variations": {
+        "Half": 2,
+        "Whole": 1
+      },
+      "defaultRule": {
+        "name": "defaultRule",
+        "variation": "Whole"
+      },
+      "experimentation": {},
+      "metadata": {
+        "defaultValue": 1,
+        "description": "int as float"
+      },
+      "flagType": "integer",
+      "defaultValue": 1,
+      "description": "int as float"
+    }
+  }
+}

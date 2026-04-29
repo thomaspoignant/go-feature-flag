@@ -1,0 +1,22 @@
+{
+  "$schema": "https://raw.githubusercontent.com/open-feature/cli/refs/heads/main/schema/v0/flag-manifest.json",
+  "flags": {
+    "valid-flag": {
+      "variations": {
+        "False": false,
+        "True": true
+      },
+      "defaultRule": {
+        "name": "defaultRule",
+        "variation": "True"
+      },
+      "experimentation": {},
+      "metadata": {
+        "defaultValue": true
+      },
+      "flagType": "boolean",
+      "defaultValue": true,
+      "description": ""
+    }
+  }
+}

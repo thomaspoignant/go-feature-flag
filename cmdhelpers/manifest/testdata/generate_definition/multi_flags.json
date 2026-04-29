@@ -1,0 +1,40 @@
+{
+  "$schema": "https://raw.githubusercontent.com/open-feature/cli/refs/heads/main/schema/v0/flag-manifest.json",
+  "flags": {
+    "flag-a": {
+      "variations": {
+        "False": false,
+        "True": true
+      },
+      "defaultRule": {
+        "name": "defaultRule",
+        "variation": "True"
+      },
+      "experimentation": {},
+      "metadata": {
+        "defaultValue": true
+      },
+      "flagType": "boolean",
+      "defaultValue": true,
+      "description": ""
+    },
+    "flag-b": {
+      "variations": {
+        "One": 1,
+        "Two": 2
+      },
+      "defaultRule": {
+        "name": "defaultRule",
+        "variation": "One"
+      },
+      "experimentation": {},
+      "metadata": {
+        "defaultValue": 1,
+        "description": "second"
+      },
+      "flagType": "integer",
+      "defaultValue": 1,
+      "description": "second"
+    }
+  }
+}

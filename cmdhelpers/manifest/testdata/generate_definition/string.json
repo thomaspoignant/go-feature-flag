@@ -1,0 +1,23 @@
+{
+  "$schema": "https://raw.githubusercontent.com/open-feature/cli/refs/heads/main/schema/v0/flag-manifest.json",
+  "flags": {
+    "string-flag": {
+      "variations": {
+        "A": "a",
+        "B": "b"
+      },
+      "defaultRule": {
+        "name": "defaultRule",
+        "variation": "A"
+      },
+      "experimentation": {},
+      "metadata": {
+        "defaultValue": "a",
+        "description": "strings"
+      },
+      "flagType": "string",
+      "defaultValue": "a",
+      "description": "strings"
+    }
+  }
+}
