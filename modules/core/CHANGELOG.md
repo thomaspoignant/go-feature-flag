@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.7.0](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.6.1...modules/core/v0.7.0) (2026-04-29)
+
+
+### 🚀 New Features
+
+* **modules/core:** add ConvertInternalFlagToDto converter ([#5177](https://github.com/thomaspoignant/go-feature-flag/issues/5177)) ([6d6b6a4](https://github.com/thomaspoignant/go-feature-flag/commit/6d6b6a4d810d738fa3ea47228bb6992984695e8e))
+
+
+### 🔧 Chores
+
+* Bump go.opentelemetry.io/otel/trace from 1.42.0 to 1.43.0 ([#5079](https://github.com/thomaspoignant/go-feature-flag/issues/5079)) ([9505e0b](https://github.com/thomaspoignant/go-feature-flag/commit/9505e0bf1139244123f3d683cfefb698305601e7))
+
 ## [0.6.1](https://github.com/thomaspoignant/go-feature-flag/compare/modules/core/v0.6.0...modules/core/v0.6.1) (2026-03-13)
 
 
