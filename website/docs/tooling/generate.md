@@ -83,17 +83,45 @@ go-feature-flag-cli generate manifest \
     "enableFeatureA": {
       "flagType": "boolean",
       "defaultValue": false,
-      "description": "Controls whether Feature A is enabled."
-    },
-    "usernameMaxLength": {
-      "flagType": "integer",
-      "defaultValue": 50,
-      "description": "Maximum allowed length for usernames."
+      "description": "Controls whether Feature A is enabled.",
+      "variations": {
+        "enabled": true,
+        "disabled": false,
+      },
+      "targeting": [
+        {
+          "name": "rule1",
+          "query": "key eq \"random-key\"",
+          "percentage": {
+            "enabled": 10,
+            "disabled": 90
+          }
+        }
+      ],
+      "defaultRule": {
+        "variation": "disabled"
+      },
+      "metadata": {
+        "defaultValue": false,
+        "description": "Controls whether Feature A is enabled.",
+        "issue-link": "https://jira.xxx/GOFF-01"
+      }
     },
     "greetingMessage": {
       "flagType": "string",
       "defaultValue": "Hello there!",
-      "description": "The message to use for greeting users."
+      "description": "The message to use for greeting users.",
+      "variations": {
+        "hi": "Hi there 👋",
+        "hello": "Hello, welcome to the show",
+      },
+      "defaultRule": {
+        "variation": "hi"
+      },
+      "metadata": {
+        "defaultValue": "",
+        "description": "The message to use for greeting users.",
+      }
     }
   }
 }
