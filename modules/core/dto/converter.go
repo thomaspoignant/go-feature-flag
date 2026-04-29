@@ -29,7 +29,7 @@ func ConvertDtoToInternalFlag(dto DTO) flag.InternalFlag {
 }
 
 func ConvertInternalFlagToDto(flag flag.InternalFlag) DTO {
-	experimentation := &ExperimentationDto{}
+	var experimentation *ExperimentationDto
 	if flag.Experimentation != nil {
 		experimentation = &ExperimentationDto{
 			Start: flag.Experimentation.Start,
