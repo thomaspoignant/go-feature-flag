@@ -4,8 +4,7 @@ import "encoding/json"
 
 // DefaultFlagManifestSchemaURL is the JSON Schema URL emitted for every serialized
 // flag manifest ($schema), per Open Feature CLI tooling.
-const DefaultFlagManifestSchemaURL =
-	"https://raw.githubusercontent.com/open-feature/cli/refs/heads/main/schema/v0/flag-manifest.json"
+const DefaultFlagManifestSchemaURL = "https://raw.githubusercontent.com/open-feature/cli/refs/heads/main/schema/v0/flag-manifest.json" //nolint: lll
 
 // FlagManifest is the machine-readable manifest envelope for CLI and tooling.
 type FlagManifest struct {
@@ -16,7 +15,7 @@ type FlagManifest struct {
 // published Open Feature CLI schema.
 func (m FlagManifest) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
-		Schema string `json:"$schema"`
+		Schema string                    `json:"$schema"`
 		Flags  map[string]FlagDefinition `json:"flags"`
 	}{
 		Schema: DefaultFlagManifestSchemaURL,
