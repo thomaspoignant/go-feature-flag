@@ -120,7 +120,7 @@ go-feature-flag-cli generate manifest \
       },
       "metadata": {
         "defaultValue": "",
-        "description": "The message to use for greeting users.",
+        "description": "The message to use for greeting users."
       }
     }
   }
