@@ -10,7 +10,6 @@
         "name": "defaultRule",
         "variation": "A"
       },
-      "experimentation": {},
       "metadata": {
         "defaultValue": "a",
         "description": "strings"

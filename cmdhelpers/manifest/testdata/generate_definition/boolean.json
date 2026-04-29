@@ -10,7 +10,6 @@
         "name": "defaultRule",
         "variation": "False"
       },
-      "experimentation": {},
       "metadata": {
         "defaultValue": false,
         "description": "a boolean flag"

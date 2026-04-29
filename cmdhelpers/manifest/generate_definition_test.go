@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -73,6 +74,21 @@ func boolFlag(defaultVariation string, metadata map[string]any) flag.InternalFla
 	}
 }
 
+// boolFlagWithExperimentation is like boolFlag but attaches an experimentation window.
+func boolFlagWithExperimentation(
+	defaultVariation string,
+	metadata map[string]any,
+	experimentationStart, experimentationEnd time.Time,
+) flag.InternalFlag {
+	f := boolFlag(defaultVariation, metadata)
+	s, e := experimentationStart, experimentationEnd
+	f.Experimentation = &flag.ExperimentationRollout{
+		Start: &s,
+		End:   &e,
+	}
+	return f
+}
+
 func readGolden(t *testing.T, name string) string {
 	t.Helper()
 	data, err := os.ReadFile(filepath.Join("testdata", "generate_definition", name))
@@ -106,6 +122,21 @@ func TestGenerateDefinition(t *testing.T) {
 				}),
 			},
 			goldenFile: "boolean.json",
+		},
+		{
+			name: "boolean flag with experimentation",
+			flags: map[string]flag.InternalFlag{
+				"exp-flag": boolFlagWithExperimentation(
+					"False",
+					map[string]any{
+						"defaultValue": false,
+						"description":  "A/B experiment",
+					},
+					time.Date(2026, 6, 1, 12, 0, 0, 0, time.UTC),
+					time.Date(2026, 6, 30, 23, 59, 59, 0, time.UTC),
+				),
+			},
+			goldenFile: "experimentation.json",
 		},
 		{
 			name: "string flag",

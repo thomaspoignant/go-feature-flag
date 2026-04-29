@@ -10,7 +10,6 @@
         "name": "defaultRule",
         "variation": "Whole"
       },
-      "experimentation": {},
       "metadata": {
         "defaultValue": 1,
         "description": "int as float"

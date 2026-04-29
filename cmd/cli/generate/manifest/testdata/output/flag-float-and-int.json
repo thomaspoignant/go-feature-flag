@@ -21,7 +21,6 @@
         "name": "defaultRule",
         "variation": "Default"
       },
-      "experimentation": {},
       "metadata": {
         "defaultValue": 25,
         "description": "this is a simple feature flag",

@@ -21,7 +21,6 @@
         "name": "defaultRule",
         "variation": "Default"
       },
-      "experimentation": {},
       "metadata": {
         "defaultValue": false
       },
@@ -49,7 +48,6 @@
         "name": "defaultRule",
         "variation": "Default"
       },
-      "experimentation": {},
       "metadata": {
         "defaultValue": 1,
         "description": "totot"

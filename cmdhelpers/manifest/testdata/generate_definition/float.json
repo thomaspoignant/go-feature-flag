@@ -10,7 +10,6 @@
         "name": "defaultRule",
         "variation": "Half"
       },
-      "experimentation": {},
       "metadata": {
         "defaultValue": 0.5
       },

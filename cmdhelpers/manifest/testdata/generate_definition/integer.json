@@ -10,7 +10,6 @@
         "name": "defaultRule",
         "variation": "One"
       },
-      "experimentation": {},
       "metadata": {
         "defaultValue": 1,
         "description": "ints"
