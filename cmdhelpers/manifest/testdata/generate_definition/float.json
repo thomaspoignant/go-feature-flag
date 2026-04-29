@@ -1,0 +1,21 @@
+{
+  "$schema": "https://raw.githubusercontent.com/open-feature/cli/refs/heads/main/schema/v0/flag-manifest.json",
+  "flags": {
+    "float-flag": {
+      "variations": {
+        "Half": 0.5,
+        "OneAndHalf": 1.5
+      },
+      "defaultRule": {
+        "name": "defaultRule",
+        "variation": "Half"
+      },
+      "metadata": {
+        "defaultValue": 0.5
+      },
+      "flagType": "float",
+      "defaultValue": 0.5,
+      "description": ""
+    }
+  }
+}

@@ -3,7 +3,7 @@ package linter
 import (
 	"fmt"
 
-	"github.com/thomaspoignant/go-feature-flag/cmd/cli/helper"
+	helper "github.com/thomaspoignant/go-feature-flag/cmdhelpers/configfile"
 )
 
 type Linter struct {

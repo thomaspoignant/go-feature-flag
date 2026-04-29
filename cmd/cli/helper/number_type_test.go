@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/thomaspoignant/go-feature-flag/cmd/cli/generate/manifest/model"
 	"github.com/thomaspoignant/go-feature-flag/cmd/cli/helper"
+	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/manifest/model"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/testutils/testconvert"
 )
 
