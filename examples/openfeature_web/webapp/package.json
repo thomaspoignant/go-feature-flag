@@ -37,7 +37,7 @@
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-preset-env": "^1.7.0",
     "browser-sync": "^3.0.4",
-    "eslint": "^10.2.0",
+    "eslint": "^10.2.1",
     "eslint-webpack-plugin": "^6.0.0",
     "htmlnano": "^3.2.0",
     "imagemin-cli": "^8.0.0",
@@ -55,7 +55,7 @@
   },
   "dependencies": {
     "@openfeature/go-feature-flag-web-provider": "^0.2.9",
-    "@openfeature/web-sdk": "^1.7.3",
+    "@openfeature/web-sdk": "^1.8.0",
     "highlight.js": "^11.11.1",
     "uuid": "^13.0.0"
   }
