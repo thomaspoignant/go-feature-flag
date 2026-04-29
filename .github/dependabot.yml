@@ -14,6 +14,8 @@ updates:
       prefix: "chore"
     cooldown:
       default-days: 7
+      exclude:
+        - "github.com/thomaspoignant/go-feature-flag/modules/core"
 
   # GitHub Actions
   - package-ecosystem: "github-actions"
@@ -187,6 +189,8 @@ updates:
       prefix: "chore"
     cooldown:
       default-days: 7
+      exclude:
+        - "github.com/thomaspoignant/go-feature-flag/modules/core"
 
   - package-ecosystem: npm
     directory: "/openfeature/ci_scripts/"
@@ -229,3 +233,5 @@ updates:
       prefix: "chore(dependencies)"
     cooldown:
       default-days: 7
+      exclude:
+        - "github.com/thomaspoignant/go-feature-flag/modules/core"
