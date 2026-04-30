@@ -1,4 +1,4 @@
-package helper_test
+package configfile_test
 
 import (
 	"os"
@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/thomaspoignant/go-feature-flag/cmd/cli/helper"
+	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/configfile"
 	"github.com/thomaspoignant/go-feature-flag/model/dto"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/testutils/testconvert"
@@ -235,7 +235,7 @@ func TestLoadConfigFile(t *testing.T) {
 				tt.defaultLocations = []string{dir + "/"}
 			}
 
-			result, err := helper.LoadConfigFile(
+			result, err := configfile.LoadConfigFile(
 				tt.inputFilePath,
 				tt.configFormat,
 				tt.defaultLocations,

@@ -1,24 +1,31 @@
 package manifest
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"os"
+	"strings"
 
-	"github.com/thomaspoignant/go-feature-flag/cmd/cli/generate/manifest/model"
 	"github.com/thomaspoignant/go-feature-flag/cmd/cli/helper"
+	configHelper "github.com/thomaspoignant/go-feature-flag/cmdhelpers/configfile"
+	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/manifest"
+	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/manifest/model"
 	"github.com/thomaspoignant/go-feature-flag/model/dto"
 	dtoCore "github.com/thomaspoignant/go-feature-flag/modules/core/dto"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
+	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
 func NewManifest(configFile, configFormat, flagManifestDestination string) (Manifest, error) {
 	if flagManifestDestination == "" {
 		return Manifest{}, fmt.Errorf("--flag_manifest_destination is mandatory")
 	}
-	flagDTOs, err := helper.LoadConfigFile(
+	flagDTOs, err := configHelper.LoadConfigFile(
 		configFile,
 		configFormat,
-		helper.ConfigFileDefaultLocations,
+		configHelper.ConfigFileDefaultLocations,
 	)
 	if err != nil {
 		return Manifest{}, err
@@ -36,7 +43,20 @@ type Manifest struct {
 
 // Generate the manifest file
 func (m *Manifest) Generate() (helper.Output, error) {
-	definitions, output, err := m.generateDefinitions(m.dtos)
+	var logs []string
+	handler := slogHandlerForLogs(&logs)
+	logx := fflog.FFLogger{
+		LeveledLogger: slog.New(handler),
+	}
+	flags := make(map[string]flag.InternalFlag)
+	for k, v := range m.dtos {
+		flags[k] = dtoCore.ConvertDtoToInternalFlag(v)
+	}
+	output := helper.Output{}
+	definitions, err := manifest.GenerateDefinition(flags, logx)
+	if len(logs) > 0 {
+		output.Add(strings.Join(logs, "\n"), helper.WarnLevel)
+	}
 	if err != nil {
 		return output, err
 	}
@@ -52,42 +72,6 @@ func (m *Manifest) Generate() (helper.Output, error) {
 	return output.Add("🎉 Manifest has been created", helper.InfoLevel), nil
 }
 
-// generateDefinitions will generate the definitions from the flagDTOs
-func (m *Manifest) generateDefinitions(flagDTOs map[string]dto.DTO) (
-	model.FlagManifest, helper.Output, error) {
-	definitions := make(map[string]model.FlagDefinition)
-	output := helper.Output{}
-	for flagKey, flagDTO := range flagDTOs {
-		flag := dtoCore.ConvertDtoToInternalFlag(flagDTO)
-		flagType, err := helper.FlagTypeFromVariations(flag.GetVariations())
-		if err != nil {
-			return model.FlagManifest{}, output,
-				fmt.Errorf("invalid configuration for flag %s: %s", flagKey, err.Error())
-		}
-
-		metadata := flag.GetMetadata()
-		description, ok := metadata["description"].(string)
-		if !ok {
-			description = ""
-		}
-
-		defaultValue, ok := metadata["defaultValue"]
-		if !ok {
-			output.Add(
-				fmt.Sprintf("flag %s ignored: no default value provided", flagKey),
-				helper.WarnLevel,
-			)
-			continue
-		}
-		definitions[flagKey] = model.FlagDefinition{
-			FlagType:     flagType,
-			DefaultValue: defaultValue,
-			Description:  description,
-		}
-	}
-	return model.FlagManifest{Flags: definitions}, output, nil
-}
-
 // toJSON will convert the definitions to a JSON string
 func (m *Manifest) toJSON(manifest model.FlagManifest) (string, error) {
 	definitionsJSON, err := json.MarshalIndent(manifest, "", "  ")
@@ -99,4 +83,26 @@ func (m *Manifest) toJSON(manifest model.FlagManifest) (string, error) {
 
 func (m *Manifest) storeManifest(definitionsJSON string) error {
 	return os.WriteFile(m.flagManifestDestination, []byte(definitionsJSON), 0600)
+}
+
+// captureHandler is a slog.Handler that appends each record's message to logs
+// (no timestamps/levels in the string; CLI applies WARNING/INFO via helper.Output).
+type captureHandler struct {
+	logs *[]string
+}
+
+func (h *captureHandler) Enabled(context.Context, slog.Level) bool { return true }
+
+func (h *captureHandler) Handle(_ context.Context, r slog.Record) error {
+	*h.logs = append(*h.logs, r.Message)
+	return nil
+}
+
+func (h *captureHandler) WithAttrs([]slog.Attr) slog.Handler { return h }
+
+func (h *captureHandler) WithGroup(string) slog.Handler { return h }
+
+// slogHandlerForLogs returns a slog.Handler that records log messages into logs.
+func slogHandlerForLogs(logs *[]string) slog.Handler {
+	return &captureHandler{logs: logs}
 }
