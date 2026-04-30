@@ -171,6 +171,7 @@ func Test_MultipleConsumersMultipleGORoutines(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
 	wg := &sync.WaitGroup{}
 
+	var countersMu sync.Mutex
 	consumeFunc := func(eventStore exporter.EventStore[testutils.ExportableMockEvent], consumerName string, eventCounters *map[string]int) {
 		defer wg.Done()
 		err := eventStore.ProcessPendingEvents(consumerName,
@@ -186,7 +187,9 @@ func Test_MultipleConsumersMultipleGORoutines(t *testing.T) {
 		err = eventStore.ProcessPendingEvents(consumerName,
 			func(ctx context.Context, events []testutils.ExportableMockEvent) error {
 				if eventCounters != nil {
+					countersMu.Lock()
 					(*eventCounters)[consumerName] = len(events)
+					countersMu.Unlock()
 				}
 				return nil
 			})
@@ -273,6 +276,194 @@ func Test_WaitForEmptyClean(t *testing.T) {
 	assert.True(t, eventStore.GetTotalEventCount() > 0)
 	time.Sleep(3 * defaultTestCleanQueueDuration)
 	assert.Equal(t, int64(0), eventStore.GetTotalEventCount())
+}
+
+func Test_ProcessPendingEvents_DoesNotBlockAdd(t *testing.T) {
+	consumerName := "consumer1"
+	eventStore := exporter.NewEventStore[testutils.ExportableMockEvent](
+		defaultTestCleanQueueDuration,
+	)
+	eventStore.AddConsumer(consumerName)
+	defer eventStore.Stop()
+
+	for i := 0; i < 10; i++ {
+		eventStore.Add(testutils.NewExportableMockEvent("init"))
+	}
+
+	processingStarted := make(chan struct{})
+	processingDone := make(chan struct{})
+	go func() {
+		_ = eventStore.ProcessPendingEvents(consumerName,
+			func(ctx context.Context, events []testutils.ExportableMockEvent) error {
+				close(processingStarted)
+				time.Sleep(200 * time.Millisecond)
+				return nil
+			})
+		close(processingDone)
+	}()
+
+	<-processingStarted
+
+	addDone := make(chan struct{})
+	go func() {
+		eventStore.Add(testutils.NewExportableMockEvent("during-export"))
+		close(addDone)
+	}()
+
+	select {
+	case <-addDone:
+	case <-time.After(100 * time.Millisecond):
+		t.Fatal("Add() was blocked while ProcessPendingEvents was running a slow exporter")
+	}
+
+	<-processingDone
+}
+
+func Test_ProcessPendingEvents_QueuedSameConsumerCallDoesNotBlockAdd(t *testing.T) {
+	consumerName := "consumer1"
+	eventStore := exporter.NewEventStore[testutils.ExportableMockEvent](
+		defaultTestCleanQueueDuration,
+	)
+	eventStore.AddConsumer(consumerName)
+	defer eventStore.Stop()
+
+	for i := 0; i < 10; i++ {
+		eventStore.Add(testutils.NewExportableMockEvent("init"))
+	}
+
+	processingStarted := make(chan struct{})
+	releaseFirst := make(chan struct{})
+	secondCallStarted := make(chan struct{})
+	var wg sync.WaitGroup
+
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		assert.Nil(t, eventStore.ProcessPendingEvents(consumerName,
+			func(_ context.Context, _ []testutils.ExportableMockEvent) error {
+				select {
+				case <-processingStarted:
+				default:
+					close(processingStarted)
+				}
+				<-releaseFirst
+				return nil
+			},
+		))
+	}()
+
+	<-processingStarted
+
+	go func() {
+		close(secondCallStarted)
+		assert.Nil(t, eventStore.ProcessPendingEvents(consumerName,
+			func(_ context.Context, _ []testutils.ExportableMockEvent) error {
+				select {
+				case <-processingStarted:
+				default:
+					close(processingStarted)
+				}
+				<-releaseFirst
+				return nil
+			},
+		))
+		wg.Done()
+	}()
+
+	<-secondCallStarted
+	time.Sleep(20 * time.Millisecond)
+
+	addDone := make(chan struct{})
+	go func() {
+		eventStore.Add(testutils.NewExportableMockEvent("during-queued-flush"))
+		close(addDone)
+	}()
+
+	select {
+	case <-addDone:
+	case <-time.After(100 * time.Millisecond):
+		t.Fatal("Add() was blocked while a same-consumer ProcessPendingEvents call was queued")
+	}
+
+	close(releaseFirst)
+	wg.Wait()
+}
+
+func Test_ProcessPendingEvents_SameConsumerConcurrentCallsDoNotDuplicate(t *testing.T) {
+	consumerName := "consumer1"
+	eventStore := exporter.NewEventStore[testutils.ExportableMockEvent](
+		defaultTestCleanQueueDuration,
+	)
+	eventStore.AddConsumer(consumerName)
+	defer eventStore.Stop()
+
+	for i := 0; i < 10; i++ {
+		eventStore.Add(testutils.NewExportableMockEvent("init"))
+	}
+
+	var (
+		callbackMu  sync.Mutex
+		batchSizes  []int
+		startedOnce sync.Once
+		started     = make(chan struct{})
+		release     = make(chan struct{})
+		wg          sync.WaitGroup
+	)
+
+	processFunc := func(ctx context.Context, events []testutils.ExportableMockEvent) error {
+		callbackMu.Lock()
+		batchSizes = append(batchSizes, len(events))
+		callbackMu.Unlock()
+		startedOnce.Do(func() { close(started) })
+		<-release
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		return nil
+	}
+
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		assert.Nil(t, eventStore.ProcessPendingEvents(consumerName, processFunc))
+	}()
+	<-started
+	go func() {
+		defer wg.Done()
+		assert.Nil(t, eventStore.ProcessPendingEvents(consumerName, processFunc))
+	}()
+
+	close(release)
+	wg.Wait()
+
+	callbackMu.Lock()
+	defer callbackMu.Unlock()
+	assert.Equal(t, []int{10}, batchSizes)
+
+	count, err := eventStore.GetPendingEventCount(consumerName)
+	assert.Nil(t, err)
+	assert.Equal(t, int64(0), count)
+}
+
+func Test_ProcessPendingEvents_EmptyBatchSkipsCallback(t *testing.T) {
+	consumerName := "consumer1"
+	eventStore := exporter.NewEventStore[testutils.ExportableMockEvent](
+		defaultTestCleanQueueDuration,
+	)
+	eventStore.AddConsumer(consumerName)
+	defer eventStore.Stop()
+
+	callbackCalled := false
+	err := eventStore.ProcessPendingEvents(
+		consumerName,
+		func(ctx context.Context, events []testutils.ExportableMockEvent) error {
+			callbackCalled = true
+			return nil
+		},
+	)
+
+	assert.Nil(t, err)
+	assert.False(t, callbackCalled)
 }
 
 func startEventProducer(

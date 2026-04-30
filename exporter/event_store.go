@@ -76,13 +76,19 @@ type EventStoreItem[T ExportableEvent] struct {
 	Data   T
 }
 
+// consumer serializes ProcessPendingEvents calls for a single consumer.
+// Lock ordering: consumer.mutex must always be acquired before eventStoreImpl.mutex.
+// Never acquire consumer.mutex while holding eventStoreImpl.mutex.
 type consumer struct {
 	Offset int64
+	mutex  sync.Mutex
 }
 
 // AddConsumer is adding a new consumer to the Event store.
 // note that you can't add a consumer after the Event store has been started.
 func (e *eventStoreImpl[T]) AddConsumer(consumerID string) {
+	e.mutex.Lock()
+	defer e.mutex.Unlock()
 	e.consumers[consumerID] = &consumer{Offset: e.lastOffset}
 }
 
@@ -90,22 +96,31 @@ func (e *eventStoreImpl[T]) AddConsumer(consumerID string) {
 // with the process events function in parameter,
 func (e *eventStoreImpl[T]) ProcessPendingEvents(
 	consumerID string, processEventsFunc func(context.Context, []T) error) error {
+	e.mutex.RLock()
+	currentConsumer, err := e.getConsumer(consumerID)
+	e.mutex.RUnlock()
+	if err != nil {
+		return err
+	}
+
+	currentConsumer.mutex.Lock()
+	defer currentConsumer.mutex.Unlock()
+
+	e.mutex.RLock()
+	eventList := e.fetchPendingEvents(currentConsumer)
+	e.mutex.RUnlock()
+
+	if len(eventList.Events) == 0 {
+		return nil
+	}
+
+	if err := processEventsFunc(context.Background(), eventList.Events); err != nil {
+		return err
+	}
+
 	e.mutex.Lock()
 	defer e.mutex.Unlock()
-
-	eventList, err := e.fetchPendingEvents(consumerID)
-	if err != nil {
-		return err
-	}
-	err = processEventsFunc(context.Background(), eventList.Events)
-	if err != nil {
-		return err
-	}
-	err = e.updateConsumerOffset(consumerID, eventList.NewOffset)
-	if err != nil {
-		return err
-	}
-	return nil
+	return e.updateConsumerOffset(currentConsumer, eventList.NewOffset)
 }
 
 // GetTotalEventCount returns the total number of events in the store.
@@ -136,11 +151,7 @@ func (e *eventStoreImpl[T]) Add(data T) {
 
 // fetchPendingEvents is returning all the available item in the Event store for this consumer.
 // WARNING: please call this function only in a function that has locked the mutex first.
-func (e *eventStoreImpl[T]) fetchPendingEvents(consumerID string) (*EventList[T], error) {
-	currentConsumer, err := e.getConsumer(consumerID)
-	if err != nil {
-		return nil, err
-	}
+func (e *eventStoreImpl[T]) fetchPendingEvents(currentConsumer *consumer) *EventList[T] {
 	events := make([]T, 0)
 	for _, event := range e.events {
 		if event.Offset > currentConsumer.Offset {
@@ -151,7 +162,7 @@ func (e *eventStoreImpl[T]) fetchPendingEvents(consumerID string) (*EventList[T]
 		Events:        events,
 		InitialOffset: currentConsumer.Offset,
 		NewOffset:     e.lastOffset,
-	}, nil
+	}
 }
 
 // getConsumer checks if the consumer exists and returns it.
@@ -165,7 +176,7 @@ func (e *eventStoreImpl[T]) getConsumer(consumerID string) (*consumer, error) {
 
 // updateConsumerOffset updates the offset of the consumer to the new offset.
 // WARNING: please call this function only in a function that has locked the mutex first.
-func (e *eventStoreImpl[T]) updateConsumerOffset(consumerID string, offset int64) error {
+func (e *eventStoreImpl[T]) updateConsumerOffset(currentConsumer *consumer, offset int64) error {
 	if offset > e.lastOffset {
 		return fmt.Errorf(
 			"invalid offset: offset %d is greater than the last offset %d",
@@ -173,11 +184,7 @@ func (e *eventStoreImpl[T]) updateConsumerOffset(consumerID string, offset int64
 			e.lastOffset,
 		)
 	}
-	currentConsumer, err := e.getConsumer(consumerID)
-	if err != nil {
-		return err
-	}
-	currentConsumer.Offset = e.lastOffset
+	currentConsumer.Offset = offset
 	return nil
 }
 

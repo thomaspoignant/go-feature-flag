@@ -1,10 +1,14 @@
 package exporter_test
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"os"
+	"sync"
+	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
@@ -13,6 +17,21 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/testutils/slogutil"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
+
+type slowExporter struct {
+	delay      time.Duration
+	exportCall atomic.Int32
+}
+
+func (s *slowExporter) Export(_ context.Context, _ *fflog.FFLogger, _ []exporter.ExportableEvent) error {
+	s.exportCall.Add(1)
+	time.Sleep(s.delay)
+	return nil
+}
+
+func (s *slowExporter) IsBulk() bool {
+	return true
+}
 
 func TestDataExporterFlush_TriggerError(t *testing.T) {
 	evStore := mock.NewEventStore[exporter.FeatureEvent]()
@@ -132,4 +151,39 @@ func TestDataExporterFlush_TriggerErrorIfExporterFail(t *testing.T) {
 			assert.Equal(t, tt.expectedLog, string(logContent))
 		})
 	}
+}
+
+func TestDataExporterFlush_ConcurrentFlushNoDuplicate(t *testing.T) {
+	evStore := exporter.NewEventStore[exporter.FeatureEvent](defaultTestCleanQueueDuration)
+	evStore.AddConsumer("slow-consumer")
+	defer evStore.Stop()
+
+	for i := 0; i < 100; i++ {
+		evStore.Add(exporter.FeatureEvent{Kind: "feature"})
+	}
+
+	slow := &slowExporter{delay: 200 * time.Millisecond}
+	exp := exporter.NewDataExporter[exporter.FeatureEvent](exporter.Config{
+		Exporter:         slow,
+		FlushInterval:    10 * time.Second,
+		MaxEventInMemory: 100000,
+	}, "slow-consumer", &evStore, nil)
+
+	var wg sync.WaitGroup
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		exp.Flush()
+	}()
+	time.Sleep(10 * time.Millisecond)
+	go func() {
+		defer wg.Done()
+		exp.Flush()
+	}()
+	wg.Wait()
+
+	assert.Equal(t, int32(1), slow.exportCall.Load())
+	count, err := evStore.GetPendingEventCount("slow-consumer")
+	assert.Nil(t, err)
+	assert.Equal(t, int64(0), count)
 }

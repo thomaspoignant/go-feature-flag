@@ -86,7 +86,7 @@ func (d *dataExporterImpl[T]) Start() {
 	}
 }
 
-// Stop is flushing the daya and stopping the ticker
+// Stop is flushing the data and stopping the ticker
 func (d *dataExporterImpl[T]) Stop() {
 	// we don't start the daemon if we are not in bulk mode
 	if !d.IsBulk() {
