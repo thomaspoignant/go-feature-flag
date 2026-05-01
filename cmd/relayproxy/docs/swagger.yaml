@@ -580,7 +580,6 @@ paths:
       description: |-
         Making a **GET** request to the URL `/openfeature/v0/manifest` returns the project manifest containing active flags.
         Archived flags are excluded.
-        This endpoint is considered as an admin endpoint and needs a valid API key.
       produces:
       - application/json
       responses:

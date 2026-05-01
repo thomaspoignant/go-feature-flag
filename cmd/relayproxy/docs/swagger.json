@@ -293,7 +293,7 @@
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Making a **GET** request to the URL `/openfeature/v0/manifest` returns the project manifest containing active flags.\nArchived flags are excluded.\nThis endpoint is considered as an admin endpoint and needs a valid API key.",
+                "description": "Making a **GET** request to the URL `/openfeature/v0/manifest` returns the project manifest containing active flags.\nArchived flags are excluded.",
                 "consumes": [
                     "application/json"
                 ],
