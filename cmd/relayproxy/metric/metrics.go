@@ -120,7 +120,7 @@ func NewMetrics(opts ...MetricsOpts) (Metrics, error) {
 		Subsystem: GOFFSubSystem,
 	})
 
-	// counts the number of call to the flag configuration endpoint
+	// counts the number of calls to the manifest endpoint
 	getManifestCounter := prom.NewCounter(prom.CounterOpts{
 		Name:      "get_manifest_total",
 		Help:      "Counter events for number of getManifest api requests.",
@@ -266,7 +266,7 @@ func (m *Metrics) IncFlagConfigurationCall() {
 	}
 }
 
-// IncFlagConfigurationCall is incrementing the counters when the flag configuration endpoint is called.
+// IncGetManifestCall is incrementing the counters when the manifest endpoint is called.
 func (m *Metrics) IncGetManifestCall() {
 	if m.getManifestCounter != nil {
 		m.getManifestCounter.Inc()
