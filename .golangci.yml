@@ -41,7 +41,7 @@ linters:
     - godox
     - goheader
     - gomoddirectives
-    - gomodguard
+    - gomodguard_v2
     - goprintffuncname
     - gosec
     #    - gosmopolitan
@@ -116,7 +116,7 @@ linters:
       excludes:
         - G304
     gosimple:
-      checks: [ "all","-S1023" ]
+      checks: ["all", "-S1023"]
     gomoddirectives:
       replace-allow-list:
         # remove once https://github.com/nikunjy/rules/pull/43 is merged
@@ -187,8 +187,8 @@ formatters:
       rewrite-rules:
         #        - pattern: 'interface{}'
         #          replacement: 'any'
-        - pattern: 'a[b:len(a)]'
-          replacement: 'a[b:]'
+        - pattern: "a[b:len(a)]"
+          replacement: "a[b:]"
   exclusions:
     paths:
       - (^|/)bin($|/)

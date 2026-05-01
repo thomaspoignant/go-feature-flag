@@ -6,6 +6,8 @@ import (
 	versioncollector "github.com/prometheus/client_golang/prometheus/collectors/version"
 )
 
+const flagNameLabel = "flag_name"
+
 type MetricsOpts struct {
 	// enables per-flag metrics for bulk evaluation endpoints
 	EnableBulkMetricFlagNames bool
@@ -32,7 +34,7 @@ func NewMetrics(opts ...MetricsOpts) (Metrics, error) {
 		Name:      "flag_evaluations_total",
 		Help:      "Counter events for number of flag evaluation.",
 		Subsystem: GOFFSubSystem,
-	}, []string{"flag_name"})
+	}, []string{flagNameLabel})
 
 	// counts the number of call to the all flag endpoint
 	allFlagCounter := prom.NewCounter(prom.CounterOpts{
@@ -46,7 +48,7 @@ func NewMetrics(opts ...MetricsOpts) (Metrics, error) {
 		Name:      "all_flags_evaluations_total_with_flag",
 		Help:      "Counter events for all flags bulk evaluations with individual flag names",
 		Subsystem: GOFFSubSystem,
-	}, []string{"flag_name"})
+	}, []string{flagNameLabel})
 
 	// counts the number of tracking events collected through the API
 	collectEvalDataCounter := prom.NewCounter(prom.CounterOpts{
@@ -88,21 +90,21 @@ func NewMetrics(opts ...MetricsOpts) (Metrics, error) {
 		Name:      "flag_update",
 		Help:      "Counter events for number of update per flag.",
 		Subsystem: GOFFSubSystem,
-	}, []string{"flag_name"})
+	}, []string{flagNameLabel})
 
 	// counts the number of delete per flag
 	flagDeleteCounterVec := prom.NewCounterVec(prom.CounterOpts{
 		Name:      "flag_delete",
 		Help:      "Counter events for number of delete per flag.",
 		Subsystem: GOFFSubSystem,
-	}, []string{"flag_name"})
+	}, []string{flagNameLabel})
 
 	// flagCreateCounterVec counts the number of create per flag
 	flagCreateCounterVec := prom.NewCounterVec(prom.CounterOpts{
 		Name:      "flag_create",
 		Help:      "Counter events for number of create per flag.",
 		Subsystem: GOFFSubSystem,
-	}, []string{"flag_name"})
+	}, []string{flagNameLabel})
 
 	// counts the number of flag updated from your configuration
 	forceRefreshCounter := prom.NewCounter(prom.CounterOpts{
@@ -184,7 +186,7 @@ type Metrics struct {
 
 func (m *Metrics) IncFlagEvaluation(flagName string) {
 	if m.flagEvaluationCounter.MetricVec != nil {
-		labels := prom.Labels{"flag_name": flagName}
+		labels := prom.Labels{flagNameLabel: flagName}
 		m.flagEvaluationCounter.With(labels).Inc()
 	}
 }
@@ -197,7 +199,7 @@ func (m *Metrics) IncAllFlag(flagNames ...string) {
 
 	if m.ShouldCollectBulkMetrics() {
 		for _, flagName := range flagNames {
-			m.allFlagCounterWithFlag.With(prom.Labels{"flag_name": flagName}).Inc()
+			m.allFlagCounterWithFlag.With(prom.Labels{flagNameLabel: flagName}).Inc()
 		}
 	}
 }
@@ -219,7 +221,7 @@ func (m *Metrics) IncCollectEvalData(numberEvents float64) {
 // IncFlagUpdated is incrementing the counters when a flag is updated.
 func (m *Metrics) IncFlagUpdated(flagName string) {
 	if m.flagUpdateCounterVec.MetricVec != nil {
-		m.flagUpdateCounterVec.With(prom.Labels{"flag_name": flagName}).Inc()
+		m.flagUpdateCounterVec.With(prom.Labels{flagNameLabel: flagName}).Inc()
 		m.flagUpdateCounter.Inc()
 	}
 }
@@ -227,7 +229,7 @@ func (m *Metrics) IncFlagUpdated(flagName string) {
 // IncFlagDeleted is incrementing the counters when a flag is deleted.
 func (m *Metrics) IncFlagDeleted(flagName string) {
 	if m.flagDeleteCounterVec.MetricVec != nil {
-		m.flagDeleteCounterVec.With(prom.Labels{"flag_name": flagName}).Inc()
+		m.flagDeleteCounterVec.With(prom.Labels{flagNameLabel: flagName}).Inc()
 		m.flagDeleteCounter.Inc()
 	}
 }
@@ -235,7 +237,7 @@ func (m *Metrics) IncFlagDeleted(flagName string) {
 // IncFlagCreated is incrementing the counters when a flag is created.
 func (m *Metrics) IncFlagCreated(flagName string) {
 	if m.flagCreateCounterVec.MetricVec != nil {
-		m.flagCreateCounterVec.With(prom.Labels{"flag_name": flagName}).Inc()
+		m.flagCreateCounterVec.With(prom.Labels{flagNameLabel: flagName}).Inc()
 		m.flagCreateCounter.Inc()
 	}
 }
