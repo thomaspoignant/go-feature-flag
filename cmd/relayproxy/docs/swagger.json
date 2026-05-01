@@ -286,6 +286,52 @@
                 }
             }
         },
+        "/openfeature/v0/manifest": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Making a **GET** request to the URL `/openfeature/v0/manifest` returns the project manifest containing active flags.\nArchived flags are excluded.\nThis endpoint is considered as an admin endpoint and needs a valid API key.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "OpenFeature Manisfest API"
+                ],
+                "summary": "GetManifest is a GET endpoint to return the flags configured in GO Feature Flag as a OpenFeature flag manifest.",
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/model.ManifestSuccessResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/model.ManifestError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/model.ManifestError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/model.ManifestError"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/allflags": {
             "post": {
                 "security": [
@@ -794,6 +840,23 @@
                 }
             }
         },
+        "model.FlagType": {
+            "type": "string",
+            "enum": [
+                "boolean",
+                "string",
+                "integer",
+                "float",
+                "object"
+            ],
+            "x-enum-varnames": [
+                "FlagTypeBoolean",
+                "FlagTypeString",
+                "FlagTypeInteger",
+                "FlagTypeFloat",
+                "FlagTypeObject"
+            ]
+        },
         "model.HealthResponse": {
             "type": "object",
             "properties": {
@@ -821,6 +884,53 @@
                     "example": {
                         "default": "2022-06-13T11:22:55.941628+02:00",
                         "feature-flags": "2022-06-13T11:22:55.941628+02:00"
+                    }
+                }
+            }
+        },
+        "model.ManifestDefinitionSuccessResponse": {
+            "type": "object",
+            "properties": {
+                "defaultValue": {},
+                "description": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/model.FlagType"
+                }
+            }
+        },
+        "model.ManifestError": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "$ref": "#/definitions/model.ManifestErrorDetails"
+                }
+            }
+        },
+        "model.ManifestErrorDetails": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Authorization header required"
+                },
+                "status": {
+                    "type": "integer",
+                    "example": 401
+                }
+            }
+        },
+        "model.ManifestSuccessResponse": {
+            "type": "object",
+            "properties": {
+                "flags": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.ManifestDefinitionSuccessResponse"
                     }
                 }
             }

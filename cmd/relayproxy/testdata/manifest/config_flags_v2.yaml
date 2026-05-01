@@ -1,0 +1,11 @@
+flagset2-flag:
+  variations:
+    Default: false
+    "False": false
+    "True": true
+  defaultRule:
+    name: defaultRule
+    variation: Default
+  metadata:
+    description: flag from flagset2
+    defaultValue: false
