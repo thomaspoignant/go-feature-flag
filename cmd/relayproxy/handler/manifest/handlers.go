@@ -10,7 +10,6 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/configfile"
 	manifestHelper "github.com/thomaspoignant/go-feature-flag/cmdhelpers/manifest"
-	_ "github.com/thomaspoignant/go-feature-flag/cmdhelpers/manifest/model"
 	"go.opentelemetry.io/otel"
 	"go.uber.org/zap"
 )
@@ -40,7 +39,6 @@ type ManifestCtrl struct {
 // @Tags OpenFeature Manisfest API
 // @Description Making a **GET** request to the URL `/openfeature/v0/manifest` returns the project manifest containing active flags.
 // @Description Archived flags are excluded.
-// @Description This endpoint is considered as an admin endpoint and needs a valid API key.
 // @Security     ApiKeyAuth
 // @Produce      json
 // @Accept	 	 json
@@ -51,7 +49,7 @@ type ManifestCtrl struct {
 // @Router       /openfeature/v0/manifest [GET]
 func (m *ManifestCtrl) GetManifest(c echo.Context) error {
 	tracer := otel.GetTracerProvider().Tracer(configfile.OtelTracerName)
-	_, span := tracer.Start(c.Request().Context(), "flagEvaluation")
+	_, span := tracer.Start(c.Request().Context(), "getManifest")
 	defer span.End()
 
 	flagset, httpErr := helper.FlagSet(m.flagsetManager, helper.APIKey(c))

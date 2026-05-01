@@ -15,7 +15,6 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/prometheus/client_golang/prometheus"
 	custommiddleware "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"
-	middleware2 "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/opentelemetry"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	controller "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/handler/goff"
@@ -270,18 +269,18 @@ func (s *Server) getAuthMiddleware(middlewareType AuthMiddlewareType) echo.Middl
 	switch middlewareType {
 
 	case AdminAuth:
-		return middleware2.KeyAuthExtended(middleware2.KeyAuthExtendedConfig{
+		return custommiddleware.KeyAuthExtended(custommiddleware.KeyAuthExtendedConfig{
 			Validator: func(key string, _ echo.Context) (bool, error) {
 				return s.config.APIKeysAdminExists(key), nil
 			},
-			ErrorHandler: middleware2.AuthMiddlewareErrHandler,
+			ErrorHandler: custommiddleware.AuthMiddlewareErrHandler,
 		})
 	default:
-		return middleware2.KeyAuthExtended(middleware2.KeyAuthExtendedConfig{
+		return custommiddleware.KeyAuthExtended(custommiddleware.KeyAuthExtendedConfig{
 			Validator: func(key string, _ echo.Context) (bool, error) {
 				return s.config.APIKeyExists(key), nil
 			},
-			ErrorHandler: middleware2.AuthMiddlewareErrHandler,
+			ErrorHandler: custommiddleware.AuthMiddlewareErrHandler,
 			Skipper: func(c echo.Context) bool {
 				return !s.config.IsAuthenticationEnabled()
 			},
