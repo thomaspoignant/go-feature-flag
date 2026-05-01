@@ -3,11 +3,10 @@ package api
 import (
 	"github.com/labstack/echo/v4"
 	etag "github.com/pablor21/echo-etag/v4"
-	middleware2 "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/handler/ofrep"
 )
 
-func (s *Server) addOFREPRoutes(cFlagEvalOFREP ofrep.EvaluateCtrl) {
+func (s *Server) addOFREPRoutes(cFlagEvalOFREP ofrep.EvaluateCtrl, authMiddleware echo.MiddlewareFunc) {
 	ofrepGroup := s.apiEcho.Group("/ofrep/v1")
 	ofrepGroup.Use(etag.WithConfig(etag.Config{
 		Skipper: func(c echo.Context) bool {
@@ -21,15 +20,7 @@ func (s *Server) addOFREPRoutes(cFlagEvalOFREP ofrep.EvaluateCtrl) {
 		Weak: false,
 	}))
 
-	ofrepGroup.Use(middleware2.KeyAuthExtended(middleware2.KeyAuthExtendedConfig{
-		Validator: func(key string, _ echo.Context) (bool, error) {
-			return s.config.APIKeyExists(key), nil
-		},
-		ErrorHandler: middleware2.AuthMiddlewareErrHandler,
-		Skipper: func(c echo.Context) bool {
-			return !s.config.IsAuthenticationEnabled()
-		},
-	}))
+	ofrepGroup.Use(authMiddleware)
 	ofrepGroup.POST("/evaluate/flags", cFlagEvalOFREP.BulkEvaluate)
 	ofrepGroup.POST("/evaluate/flags/:flagKey", cFlagEvalOFREP.Evaluate)
 }

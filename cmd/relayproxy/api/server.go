@@ -15,15 +15,24 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/prometheus/client_golang/prometheus"
 	custommiddleware "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"
+	middleware2 "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/opentelemetry"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	controller "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/handler/goff"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/handler/manifest"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/handler/ofrep"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	helpermiddleware "github.com/thomaspoignant/go-feature-flag/cmdhelpers/api/middleware"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
 	"go.uber.org/zap"
+)
+
+type AuthMiddlewareType = string
+
+const (
+	UserAuth  AuthMiddlewareType = "USER"
+	AdminAuth AuthMiddlewareType = "ADMIN"
 )
 
 // New is used to create a new instance of the API server
@@ -95,6 +104,7 @@ func (s *Server) initRoutes() {
 	cAllFlags := controller.NewAllFlags(s.services.FlagsetManager, s.services.Metrics)
 	cFlagEval := controller.NewFlagEval(s.services.FlagsetManager, s.services.Metrics)
 	cFlagEvalOFREP := ofrep.NewOFREPEvaluate(s.services.FlagsetManager, s.services.Metrics)
+	cManifest := manifest.NewManifest(s.services.FlagsetManager, s.services.Metrics, s.zapLog)
 	cEvalDataCollector := controller.NewCollectEvalData(
 		s.services.FlagsetManager,
 		s.services.Metrics,
@@ -114,11 +124,13 @@ func (s *Server) initRoutes() {
 	)
 
 	// Init routes
-	s.addGOFFRoutes(cAllFlags, cFlagEval, cEvalDataCollector, cFlagChangeAPI, cFlagConfiguration)
-	s.addOFREPRoutes(cFlagEvalOFREP)
+	s.addGOFFRoutes(
+		cAllFlags, cFlagEval, cEvalDataCollector, cFlagChangeAPI, cFlagConfiguration, s.getAuthMiddleware(UserAuth))
+	s.addOFREPRoutes(cFlagEvalOFREP, s.getAuthMiddleware(UserAuth))
 	s.addWebsocketRoutes()
 	s.addMonitoringRoutes()
-	s.addAdminRoutes(cRetrieverRefresh)
+	s.addAdminRoutes(cRetrieverRefresh, s.getAuthMiddleware(AdminAuth))
+	s.addManifestRoutes(cManifest, s.getAuthMiddleware(UserAuth))
 }
 
 func (s *Server) StartWithContext(ctx context.Context) {
@@ -252,4 +264,28 @@ func (s *Server) Stop(ctx context.Context) {
 // isMonitoringPortConfigured checks if the monitoring port is configured.
 func (s *Server) isMonitoringPortConfigured() bool {
 	return s.monitoringEcho != nil && s.config.EffectiveMonitoringPort(s.zapLog) > 0
+}
+
+func (s *Server) getAuthMiddleware(middlewareType AuthMiddlewareType) echo.MiddlewareFunc {
+	switch middlewareType {
+
+	case AdminAuth:
+		return middleware2.KeyAuthExtended(middleware2.KeyAuthExtendedConfig{
+			Validator: func(key string, _ echo.Context) (bool, error) {
+				return s.config.APIKeysAdminExists(key), nil
+			},
+			ErrorHandler: middleware2.AuthMiddlewareErrHandler,
+		})
+	default:
+		return middleware2.KeyAuthExtended(middleware2.KeyAuthExtendedConfig{
+			Validator: func(key string, _ echo.Context) (bool, error) {
+				return s.config.APIKeyExists(key), nil
+			},
+			ErrorHandler: middleware2.AuthMiddlewareErrHandler,
+			Skipper: func(c echo.Context) bool {
+				return !s.config.IsAuthenticationEnabled()
+			},
+		})
+	}
+
 }
