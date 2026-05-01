@@ -2,85 +2,16 @@
   "$schema": "https://raw.githubusercontent.com/open-feature/cli/refs/heads/main/schema/v0/flag-manifest.json",
   "flags": {
     "test-flag": {
-      "variations": {
-        "Default": false,
-        "False": false,
-        "True": true
-      },
-      "targeting": [
-        {
-          "name": "rule1",
-          "query": "key eq \"random-key\"",
-          "percentage": {
-            "False": 0,
-            "True": 100
-          }
-        }
-      ],
-      "defaultRule": {
-        "name": "defaultRule",
-        "variation": "Default"
-      },
-      "metadata": {
-        "defaultValue": false,
-        "description": "this is a simple feature flag",
-        "issue-link": "https://jira.xxx/GOFF-01"
-      },
       "flagType": "boolean",
       "defaultValue": false,
       "description": "this is a simple feature flag"
     },
     "test-flag2": {
-      "variations": {
-        "Default": false,
-        "False": false,
-        "True": true
-      },
-      "targeting": [
-        {
-          "name": "rule1",
-          "query": "key eq \"not-a-key\"",
-          "percentage": {
-            "False": 0,
-            "True": 100
-          }
-        }
-      ],
-      "defaultRule": {
-        "name": "defaultRule",
-        "variation": "Default"
-      },
-      "metadata": {
-        "defaultValue": false
-      },
       "flagType": "boolean",
       "defaultValue": false,
       "description": ""
     },
     "test-flag3": {
-      "variations": {
-        "Default": 1,
-        "False": 2,
-        "True": 3
-      },
-      "targeting": [
-        {
-          "name": "rule1",
-          "query": "key eq \"not-a-key\"",
-          "percentage": {
-            "False": 0,
-            "True": 100
-          }
-        }
-      ],
-      "defaultRule": {
-        "name": "defaultRule",
-        "variation": "Default"
-      },
-      "metadata": {
-        "defaultValue": 1,
-        "description": "totot"
-      },
       "flagType": "integer",
       "defaultValue": 1,
       "description": "totot"

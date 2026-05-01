@@ -1,26 +1,7 @@
 {
-  "$schema": "https://raw.githubusercontent.com/open-feature/cli/refs/heads/main/schema/v0/flag-manifest.json",
-  "flags": {
-    "exp-flag": {
-      "variations": {
-        "False": false,
-        "True": true
-      },
-      "defaultRule": {
-        "name": "defaultRule",
-        "variation": "False"
-      },
-      "experimentation": {
-        "start": "2026-06-01T12:00:00Z",
-        "end": "2026-06-30T23:59:59Z"
-      },
-      "metadata": {
-        "defaultValue": false,
-        "description": "A/B experiment"
-      },
-      "flagType": "boolean",
-      "defaultValue": false,
-      "description": "A/B experiment"
-    }
+  "exp-flag": {
+    "flagType": "boolean",
+    "defaultValue": false,
+    "description": "A/B experiment"
   }
 }

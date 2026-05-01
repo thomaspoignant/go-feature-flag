@@ -4,10 +4,10 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/helper"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/configfile"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 )
@@ -52,7 +52,7 @@ func (h *forceFlagsRefresh) Handler(c echo.Context) error {
 		return httpErr
 	}
 
-	tracer := otel.GetTracerProvider().Tracer(config.OtelTracerName)
+	tracer := otel.GetTracerProvider().Tracer(configfile.OtelTracerName)
 	_, span := tracer.Start(c.Request().Context(), "retrieverRefresh")
 	defer span.End()
 	forceRefreshStatus := flagset.ForceRefresh()

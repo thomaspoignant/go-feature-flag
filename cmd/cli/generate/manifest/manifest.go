@@ -6,16 +6,14 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
-	"strings"
 
+	"github.com/thomaspoignant/go-feature-flag/cmd/cli/generate/manifest/model"
 	"github.com/thomaspoignant/go-feature-flag/cmd/cli/helper"
 	configHelper "github.com/thomaspoignant/go-feature-flag/cmdhelpers/configfile"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/manifest"
-	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/manifest/model"
 	"github.com/thomaspoignant/go-feature-flag/model/dto"
 	dtoCore "github.com/thomaspoignant/go-feature-flag/modules/core/dto"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
-	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
 func NewManifest(configFile, configFormat, flagManifestDestination string) (Manifest, error) {
@@ -43,24 +41,28 @@ type Manifest struct {
 
 // Generate the manifest file
 func (m *Manifest) Generate() (helper.Output, error) {
-	var logs []string
-	handler := slogHandlerForLogs(&logs)
-	logx := fflog.FFLogger{
-		LeveledLogger: slog.New(handler),
-	}
+	var captured []capturedRecord
 	flags := make(map[string]flag.InternalFlag)
 	for k, v := range m.dtos {
 		flags[k] = dtoCore.ConvertDtoToInternalFlag(v)
 	}
 	output := helper.Output{}
-	definitions, err := manifest.GenerateDefinition(flags, logx)
-	if len(logs) > 0 {
-		output.Add(strings.Join(logs, "\n"), helper.WarnLevel)
+	prev := slog.Default()
+	slog.SetDefault(slog.New(slogHandlerForRecords(&captured)))
+	defer slog.SetDefault(prev)
+
+	definitions, err := manifest.GenerateDefinitionFromInternalFlags(flags)
+	for _, rec := range captured {
+		output.Add(rec.message, slogLevelToOutputLevel(rec.level))
 	}
 	if err != nil {
 		return output, err
 	}
-	definitionsJSON, err := m.toJSON(definitions)
+
+	manifest := model.FlagManifest{
+		Flags: definitions,
+	}
+	definitionsJSON, err := m.toJSON(manifest)
 	if err != nil {
 		return output, err
 	}
@@ -85,16 +87,20 @@ func (m *Manifest) storeManifest(definitionsJSON string) error {
 	return os.WriteFile(m.flagManifestDestination, []byte(definitionsJSON), 0600)
 }
 
-// captureHandler is a slog.Handler that appends each record's message to logs
-// (no timestamps/levels in the string; CLI applies WARNING/INFO via helper.Output).
+type capturedRecord struct {
+	level   slog.Level
+	message string
+}
+
+// captureHandler records each slog record for replay into helper.Output.
 type captureHandler struct {
-	logs *[]string
+	records *[]capturedRecord
 }
 
 func (h *captureHandler) Enabled(context.Context, slog.Level) bool { return true }
 
 func (h *captureHandler) Handle(_ context.Context, r slog.Record) error {
-	*h.logs = append(*h.logs, r.Message)
+	*h.records = append(*h.records, capturedRecord{level: r.Level, message: r.Message})
 	return nil
 }
 
@@ -102,7 +108,19 @@ func (h *captureHandler) WithAttrs([]slog.Attr) slog.Handler { return h }
 
 func (h *captureHandler) WithGroup(string) slog.Handler { return h }
 
-// slogHandlerForLogs returns a slog.Handler that records log messages into logs.
-func slogHandlerForLogs(logs *[]string) slog.Handler {
-	return &captureHandler{logs: logs}
+func slogHandlerForRecords(records *[]capturedRecord) slog.Handler {
+	return &captureHandler{records: records}
+}
+
+func slogLevelToOutputLevel(l slog.Level) helper.Level {
+	switch {
+	case l >= slog.LevelError:
+		return helper.ErrorLevel
+	case l >= slog.LevelWarn:
+		return helper.WarnLevel
+	case l >= slog.LevelInfo:
+		return helper.InfoLevel
+	default:
+		return helper.DefaultLevel
+	}
 }

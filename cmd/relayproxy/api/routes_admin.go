@@ -2,17 +2,11 @@ package api
 
 import (
 	"github.com/labstack/echo/v4"
-	middleware2 "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/api/middleware"
 	controller "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/handler/goff"
 )
 
-func (s *Server) addAdminRoutes(cRetrieverRefresh controller.Controller) {
+func (s *Server) addAdminRoutes(cRetrieverRefresh controller.Controller, authMiddleware echo.MiddlewareFunc) {
 	adminGrp := s.apiEcho.Group("/admin/v1")
-	adminGrp.Use(middleware2.KeyAuthExtended(middleware2.KeyAuthExtendedConfig{
-		Validator: func(key string, _ echo.Context) (bool, error) {
-			return s.config.APIKeysAdminExists(key), nil
-		},
-		ErrorHandler: middleware2.AuthMiddlewareErrHandler,
-	}))
+	adminGrp.Use(authMiddleware)
 	adminGrp.POST("/retriever/refresh", cRetrieverRefresh.Handler)
 }

@@ -162,3 +162,13 @@ func TestMetrics_IncFlagConfigurationCall(t *testing.T) {
 
 	assert.Equal(t, 3.0, testutil.ToFloat64(metricSrv.flagConfigurationCounter))
 }
+
+func TestMetrics_IncGetManifestCall(t *testing.T) {
+	metricSrv, err := NewMetrics()
+	assert.NoError(t, err)
+
+	metricSrv.IncGetManifestCall()
+	metricSrv.IncGetManifestCall()
+	metricSrv.IncGetManifestCall()
+	assert.Equal(t, 3.0, testutil.ToFloat64(metricSrv.getManifestCounter))
+}

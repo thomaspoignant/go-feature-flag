@@ -1,0 +1,10 @@
+{
+  "flags": [
+    {
+      "key": "flagset2-flag",
+      "type": "boolean",
+      "defaultValue": false,
+      "description": "flag from flagset2"
+    }
+  ]
+}

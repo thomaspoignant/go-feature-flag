@@ -2,26 +2,30 @@ package manifest
 
 import (
 	"fmt"
+	"log/slog"
 
 	"github.com/thomaspoignant/go-feature-flag/cmd/cli/helper"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/manifest/model"
-	"github.com/thomaspoignant/go-feature-flag/modules/core/dto"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
-	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
-func GenerateDefinition(flags map[string]flag.InternalFlag, logger fflog.FFLogger) (
-	model.FlagManifest, error) {
+func GenerateDefinitionFromFlags(flags map[string]flag.Flag) (
+	map[string]model.FlagDefinition, error) {
 	definitions := make(map[string]model.FlagDefinition)
 
 	for k, v := range flags {
+		v, ok := v.(*flag.InternalFlag)
+		if !ok || v == nil {
+			slog.Error(fmt.Sprintf("unexpected flag type for key %q, expected InternalFlag", k))
+			continue
+		}
 		if v.Variations == nil {
-			logger.Error(fmt.Sprintf("flag %s ignored: no variations provided", k))
+			slog.Error(fmt.Sprintf("flag %s ignored: no variations provided", k))
 			continue
 		}
 		flagType, err := helper.FlagTypeFromVariations(*v.Variations)
 		if err != nil {
-			return model.FlagManifest{}, fmt.Errorf("invalid configuration for flag %s: %w", k, err)
+			return definitions, fmt.Errorf("invalid configuration for flag %s: %w", k, err)
 		}
 
 		metadata := v.Metadata
@@ -32,7 +36,7 @@ func GenerateDefinition(flags map[string]flag.InternalFlag, logger fflog.FFLogge
 
 		defaultValue, ok := (*metadata)["defaultValue"]
 		if !ok {
-			logger.Error(fmt.Sprintf("flag %s ignored: no default value provided", k))
+			slog.Warn(fmt.Sprintf("flag %s ignored: no default value provided", k))
 			continue
 		}
 
@@ -42,7 +46,6 @@ func GenerateDefinition(flags map[string]flag.InternalFlag, logger fflog.FFLogge
 		}
 
 		definition := model.FlagDefinition{
-			DTO:          dto.ConvertInternalFlagToDto(v),
 			FlagType:     flagType,
 			DefaultValue: defaultValue,
 			Description:  description,
@@ -50,5 +53,15 @@ func GenerateDefinition(flags map[string]flag.InternalFlag, logger fflog.FFLogge
 		definitions[k] = definition
 	}
 
-	return model.FlagManifest{Flags: definitions}, nil
+	return definitions, nil
+}
+
+func GenerateDefinitionFromInternalFlags(flags map[string]flag.InternalFlag) (
+	map[string]model.FlagDefinition, error) {
+	asFlag := make(map[string]flag.Flag, len(flags))
+	for name := range flags {
+		f := flags[name]
+		asFlag[name] = &f
+	}
+	return GenerateDefinitionFromFlags(asFlag)
 }

@@ -1,22 +1,7 @@
 {
-  "$schema": "https://raw.githubusercontent.com/open-feature/cli/refs/heads/main/schema/v0/flag-manifest.json",
-  "flags": {
-    "int-flag": {
-      "variations": {
-        "One": 1,
-        "Two": 2
-      },
-      "defaultRule": {
-        "name": "defaultRule",
-        "variation": "One"
-      },
-      "metadata": {
-        "defaultValue": 1,
-        "description": "ints"
-      },
-      "flagType": "integer",
-      "defaultValue": 1,
-      "description": "ints"
-    }
+  "int-flag": {
+    "flagType": "integer",
+    "defaultValue": 1,
+    "description": "ints"
   }
 }

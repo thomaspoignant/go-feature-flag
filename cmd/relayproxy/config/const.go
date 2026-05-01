@@ -7,7 +7,6 @@ import (
 	"github.com/xitongsys/parquet-go/parquet"
 )
 
-const OtelTracerName = "go-feature-flag"
 const DefaultLogLevel = "info"
 
 var DefaultExporter = struct {
