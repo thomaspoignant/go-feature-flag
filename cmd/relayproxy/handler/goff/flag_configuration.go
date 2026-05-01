@@ -6,10 +6,10 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/helper"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/configfile"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -61,7 +61,7 @@ type FlagConfigurationResponse struct {
 // @Failure     500 {object}  modeldocs.HTTPErrorDoc "Internal server error"
 // @Router      /v1/flag/configuration [post]
 func (h *FlagConfigurationAPICtrl) Handler(c echo.Context) error {
-	tracer := otel.GetTracerProvider().Tracer(config.OtelTracerName)
+	tracer := otel.GetTracerProvider().Tracer(configfile.OtelTracerName)
 	_, span := tracer.Start(c.Request().Context(), "flagConfiguration")
 	defer span.End()
 

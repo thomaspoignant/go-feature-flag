@@ -8,11 +8,11 @@ import (
 
 	"github.com/go-viper/mapstructure/v2"
 	"github.com/labstack/echo/v4"
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/helper"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/model"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/configfile"
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -58,7 +58,7 @@ func NewCollectEvalData(
 func (h *collectEvalData) Handler(c echo.Context) error {
 	ctx := c.Request().Context()
 
-	tracer := otel.Tracer(config.OtelTracerName)
+	tracer := otel.Tracer(configfile.OtelTracerName)
 	ctx, span := tracer.Start(ctx, "collectEventData")
 	defer span.End()
 
