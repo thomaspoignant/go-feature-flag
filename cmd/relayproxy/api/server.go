@@ -123,13 +123,14 @@ func (s *Server) initRoutes() {
 	)
 
 	// Init routes
-	s.addGOFFRoutes(
-		cAllFlags, cFlagEval, cEvalDataCollector, cFlagChangeAPI, cFlagConfiguration, s.getAuthMiddleware(UserAuth))
-	s.addOFREPRoutes(cFlagEvalOFREP, s.getAuthMiddleware(UserAuth))
+	userAuth := s.getAuthMiddleware(UserAuth)
+	adminAuth := s.getAuthMiddleware(AdminAuth)
+	s.addGOFFRoutes(cAllFlags, cFlagEval, cEvalDataCollector, cFlagChangeAPI, cFlagConfiguration, userAuth)
+	s.addOFREPRoutes(cFlagEvalOFREP, userAuth)
 	s.addWebsocketRoutes()
 	s.addMonitoringRoutes()
-	s.addAdminRoutes(cRetrieverRefresh, s.getAuthMiddleware(AdminAuth))
-	s.addManifestRoutes(cManifest, s.getAuthMiddleware(UserAuth))
+	s.addAdminRoutes(cRetrieverRefresh, adminAuth)
+	s.addManifestRoutes(cManifest, userAuth)
 }
 
 func (s *Server) StartWithContext(ctx context.Context) {
@@ -285,7 +286,12 @@ func (s *Server) getAuthMiddleware(middlewareType AuthMiddlewareType) echo.Middl
 			},
 		})
 	default:
-		// should never happen
-		return nil
+		s.zapLog.Error("unknown auth middleware type", zap.String("middlewareType", middlewareType))
+		return func(next echo.HandlerFunc) echo.HandlerFunc {
+			return func(c echo.Context) error {
+				// Should not happen, so we consider it as a success
+				return nil
+			}
+		}
 	}
 }

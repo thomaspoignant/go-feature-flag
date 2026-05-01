@@ -2,6 +2,7 @@ package manifest
 
 import (
 	"net/http"
+	"sort"
 
 	"github.com/labstack/echo/v4"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/helper"
@@ -59,12 +60,14 @@ func (m *ManifestCtrl) GetManifest(c echo.Context) error {
 
 	flags, err := flagset.GetFlagsFromCacheWithContext(c.Request().Context())
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "error while getting flags from cache: "+err.Error())
+		m.logger.Error("error while getting flags from cache", zap.Error(err))
+		return echo.NewHTTPError(http.StatusInternalServerError, "error while getting flags from cache")
 	}
 
 	manifest, err := manifestHelper.GenerateDefinitionFromFlags(flags)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "error while generating manifest: "+err.Error())
+		m.logger.Error("error while generating manifest", zap.Error(err))
+		return echo.NewHTTPError(http.StatusInternalServerError, "error while generating manifest")
 	}
 	manifestSuccessResponse := model.ManifestSuccessResponse{
 		Flags: func() []model.ManifestDefinitionSuccessResponse {
@@ -77,6 +80,9 @@ func (m *ManifestCtrl) GetManifest(c echo.Context) error {
 					Description:  v.Description,
 				})
 			}
+			sort.Slice(responses, func(i, j int) bool {
+				return responses[i].Key < responses[j].Key
+			})
 			return responses
 		}(),
 	}
