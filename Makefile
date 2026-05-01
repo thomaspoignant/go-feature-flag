@@ -159,7 +159,7 @@ bench: ## Launch the benchmark test
 ## Lint:
 lint: ## Use golintci-lint on your project
 	mkdir -p ./bin
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s latest # Install linters
+	curl -sSfL https://golangci-lint.run/install.sh | sh -s -- -b ./bin
 	./bin/golangci-lint run --timeout=5m ./... # Run linters
 
 vuln-check: ## Run govulncheck on all modules in the workspace
