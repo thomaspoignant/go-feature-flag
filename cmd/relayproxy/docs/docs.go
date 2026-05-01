@@ -301,7 +301,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Making a **GET** request to the URL ` + "`" + `/openfeature/v0/manifest` + "`" + ` returns the project manifest containing active flags.\nArchived flags are excluded.",
+                "description": "**GET** request to the URL ` + "`" + `/openfeature/v0/manifest` + "`" + ` returns the project manifest\ncontaining active flags. Archived flags are excluded.",
                 "consumes": [
                     "application/json"
                 ],
@@ -311,7 +311,7 @@ const docTemplate = `{
                 "tags": [
                     "OpenFeature Manisfest API"
                 ],
-                "summary": "GetManifest is a GET endpoint to return the flags configured in GO Feature Flag as a OpenFeature flag manifest.",
+                "summary": "GetManifest is a GET endpoint to return the flags configured in GO Feature Flag.",
                 "responses": {
                     "200": {
                         "description": "Success",

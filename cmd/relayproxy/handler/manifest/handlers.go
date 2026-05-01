@@ -35,10 +35,10 @@ type ManifestCtrl struct {
 }
 
 // GetManifest is a GET endpoint to return the flags configured in GO Feature Flag as a OpenFeature flag manifest.
-// @Summary     GetManifest is a GET endpoint to return the flags configured in GO Feature Flag as a OpenFeature flag manifest.
+// @Summary   GetManifest is a GET endpoint to return the flags configured in GO Feature Flag.
 // @Tags OpenFeature Manisfest API
-// @Description Making a **GET** request to the URL `/openfeature/v0/manifest` returns the project manifest containing active flags.
-// @Description Archived flags are excluded.
+// @Description **GET** request to the URL `/openfeature/v0/manifest` returns the project manifest
+// @Description containing active flags. Archived flags are excluded.
 // @Security     ApiKeyAuth
 // @Produce      json
 // @Accept	 	 json

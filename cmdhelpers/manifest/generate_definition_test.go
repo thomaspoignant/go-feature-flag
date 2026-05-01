@@ -13,11 +13,12 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/manifest"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
-	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
 )
 
 // captureHandler stores every slog record so tests can assert message content
-// and severity emitted by GenerateDefinition.
+// and severity emitted by GenerateDefinition. The handler is wired in as the
+// default slog logger via slog.SetDefault so it intercepts the package-level
+// slog calls performed by the code under test.
 type captureHandler struct {
 	msgs   []string
 	levels []slog.Level
@@ -32,9 +33,16 @@ func (h *captureHandler) Handle(_ context.Context, r slog.Record) error {
 func (h *captureHandler) WithAttrs([]slog.Attr) slog.Handler { return h }
 func (h *captureHandler) WithGroup(string) slog.Handler      { return h }
 
-func newCaptureLogger() (fflog.FFLogger, *captureHandler) {
+// installCaptureLogger swaps the default slog logger for one backed by a
+// captureHandler and registers a cleanup that restores the previous default,
+// so each subtest gets an isolated capture.
+func installCaptureLogger(t *testing.T) *captureHandler {
+	t.Helper()
 	h := &captureHandler{}
-	return fflog.FFLogger{LeveledLogger: slog.New(h)}, h
+	previous := slog.Default()
+	slog.SetDefault(slog.New(h))
+	t.Cleanup(func() { slog.SetDefault(previous) })
+	return h
 }
 
 func ptrString(v string) *string { return &v }
@@ -339,9 +347,9 @@ func TestGenerateDefinition(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			logger, handler := newCaptureLogger()
+			handler := installCaptureLogger(t)
 
-			got, err := manifest.GenerateDefinition(tt.flags, logger)
+			got, err := manifest.GenerateDefinitionFromInternalFlags(tt.flags)
 
 			if tt.wantErr != "" {
 				require.Error(t, err)
@@ -357,7 +365,7 @@ func TestGenerateDefinition(t *testing.T) {
 
 			assert.ElementsMatch(t, tt.wantLogs, handler.msgs)
 			for _, lvl := range handler.levels {
-				assert.Equal(t, slog.LevelError, lvl)
+				assert.Equal(t, slog.LevelWarn, lvl)
 			}
 		})
 	}

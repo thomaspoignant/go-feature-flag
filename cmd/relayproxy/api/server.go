@@ -267,7 +267,6 @@ func (s *Server) isMonitoringPortConfigured() bool {
 
 func (s *Server) getAuthMiddleware(middlewareType AuthMiddlewareType) echo.MiddlewareFunc {
 	switch middlewareType {
-
 	case AdminAuth:
 		return custommiddleware.KeyAuthExtended(custommiddleware.KeyAuthExtendedConfig{
 			Validator: func(key string, _ echo.Context) (bool, error) {
@@ -275,7 +274,7 @@ func (s *Server) getAuthMiddleware(middlewareType AuthMiddlewareType) echo.Middl
 			},
 			ErrorHandler: custommiddleware.AuthMiddlewareErrHandler,
 		})
-	default:
+	case UserAuth:
 		return custommiddleware.KeyAuthExtended(custommiddleware.KeyAuthExtendedConfig{
 			Validator: func(key string, _ echo.Context) (bool, error) {
 				return s.config.APIKeyExists(key), nil
@@ -285,6 +284,8 @@ func (s *Server) getAuthMiddleware(middlewareType AuthMiddlewareType) echo.Middl
 				return !s.config.IsAuthenticationEnabled()
 			},
 		})
+	default:
+		// should never happen
+		return nil
 	}
-
 }
