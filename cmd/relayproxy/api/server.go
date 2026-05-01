@@ -275,7 +275,7 @@ func (s *Server) getAuthMiddleware(middlewareType AuthMiddlewareType) echo.Middl
 			},
 			ErrorHandler: custommiddleware.AuthMiddlewareErrHandler,
 		})
-	case UserAuth:
+	default:
 		return custommiddleware.KeyAuthExtended(custommiddleware.KeyAuthExtendedConfig{
 			Validator: func(key string, _ echo.Context) (bool, error) {
 				return s.config.APIKeyExists(key), nil
@@ -285,13 +285,5 @@ func (s *Server) getAuthMiddleware(middlewareType AuthMiddlewareType) echo.Middl
 				return !s.config.IsAuthenticationEnabled()
 			},
 		})
-	default:
-		s.zapLog.Error("unknown auth middleware type", zap.String("middlewareType", middlewareType))
-		return func(next echo.HandlerFunc) echo.HandlerFunc {
-			return func(c echo.Context) error {
-				// Should not happen, so we consider it as a success
-				return nil
-			}
-		}
 	}
 }
