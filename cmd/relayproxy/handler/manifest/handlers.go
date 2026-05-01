@@ -66,7 +66,6 @@ func (m *ManifestCtrl) GetManifest(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "error while generating manifest: "+err.Error())
 	}
-
 	manifestSuccessResponse := model.ManifestSuccessResponse{
 		Flags: func() []model.ManifestDefinitionSuccessResponse {
 			responses := make([]model.ManifestDefinitionSuccessResponse, 0, len(manifest))
@@ -81,7 +80,7 @@ func (m *ManifestCtrl) GetManifest(c echo.Context) error {
 			return responses
 		}(),
 	}
-
 	c.Response().Header().Set(manifestCapabilitiesHeader, manifestCapabilitiesValue)
+	m.metrics.IncGetManifestCall()
 	return c.JSON(http.StatusOK, manifestSuccessResponse)
 }

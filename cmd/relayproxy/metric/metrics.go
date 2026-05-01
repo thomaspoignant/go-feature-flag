@@ -120,6 +120,13 @@ func NewMetrics(opts ...MetricsOpts) (Metrics, error) {
 		Subsystem: GOFFSubSystem,
 	})
 
+	// counts the number of call to the flag configuration endpoint
+	getManifestCounter := prom.NewCounter(prom.CounterOpts{
+		Name:      "get_manifest_total",
+		Help:      "Counter events for number of getManifest api requests.",
+		Subsystem: GOFFSubSystem,
+	})
+
 	metricToRegister := []prom.Collector{
 		flagEvaluationCounter,
 		allFlagCounter,
@@ -134,6 +141,7 @@ func NewMetrics(opts ...MetricsOpts) (Metrics, error) {
 		flagCreateCounterVec,
 		forceRefreshCounter,
 		flagConfigurationCounter,
+		getManifestCounter,
 		versioncollector.NewCollector(GOFFSubSystem),
 		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
 		collectors.NewGoCollector(),
@@ -161,6 +169,7 @@ func NewMetrics(opts ...MetricsOpts) (Metrics, error) {
 		flagCreateCounterVec:     *flagCreateCounterVec,
 		forceRefreshCounter:      forceRefreshCounter,
 		flagConfigurationCounter: flagConfigurationCounter,
+		getManifestCounter:       getManifestCounter,
 		Registry:                 customRegistry,
 	}, nil
 }
@@ -182,6 +191,7 @@ type Metrics struct {
 	flagUpdateCounterVec     prom.CounterVec
 	flagDeleteCounterVec     prom.CounterVec
 	flagCreateCounterVec     prom.CounterVec
+	getManifestCounter       prom.Counter
 }
 
 func (m *Metrics) IncFlagEvaluation(flagName string) {
@@ -253,6 +263,13 @@ func (m *Metrics) IncFlagChange() {
 func (m *Metrics) IncFlagConfigurationCall() {
 	if m.flagConfigurationCounter != nil {
 		m.flagConfigurationCounter.Inc()
+	}
+}
+
+// IncFlagConfigurationCall is incrementing the counters when the flag configuration endpoint is called.
+func (m *Metrics) IncGetManifestCall() {
+	if m.getManifestCounter != nil {
+		m.getManifestCounter.Inc()
 	}
 }
 
