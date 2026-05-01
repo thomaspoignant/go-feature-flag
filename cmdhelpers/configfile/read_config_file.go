@@ -1,4 +1,4 @@
-package helper
+package configfile
 
 import (
 	"encoding/json"

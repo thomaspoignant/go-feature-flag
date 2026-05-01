@@ -1,0 +1,7 @@
+{
+  "valid-flag": {
+    "flagType": "boolean",
+    "defaultValue": true,
+    "description": ""
+  }
+}

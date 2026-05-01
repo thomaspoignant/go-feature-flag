@@ -1,0 +1,7 @@
+{
+  "exp-flag": {
+    "flagType": "boolean",
+    "defaultValue": false,
+    "description": "A/B experiment"
+  }
+}

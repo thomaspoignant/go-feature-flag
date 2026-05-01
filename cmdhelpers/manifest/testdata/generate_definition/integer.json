@@ -1,0 +1,7 @@
+{
+  "int-flag": {
+    "flagType": "integer",
+    "defaultValue": 1,
+    "description": "ints"
+  }
+}

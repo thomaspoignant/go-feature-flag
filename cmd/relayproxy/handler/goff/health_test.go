@@ -1,9 +1,9 @@
 package controller_test
 
 import (
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/labstack/echo/v4"
@@ -65,7 +65,7 @@ func Test_health_Handler(t *testing.T) {
 				return
 			}
 
-			body, err := ioutil.ReadFile(tt.want.bodyFile)
+			body, err := os.ReadFile(tt.want.bodyFile)
 			assert.NoError(t, err, "Impossible the expected body file %s", tt.want.bodyFile)
 			assert.Equal(t, tt.want.httpCode, rec.Code, "Invalid HTTP Code")
 			assert.JSONEq(t, string(body), rec.Body.String(), "Invalid response body")

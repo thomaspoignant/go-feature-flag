@@ -1,0 +1,7 @@
+{
+  "string-flag": {
+    "flagType": "string",
+    "defaultValue": "a",
+    "description": "strings"
+  }
+}

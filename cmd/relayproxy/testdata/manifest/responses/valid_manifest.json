@@ -1,0 +1,28 @@
+{
+  "flags": [
+    {
+      "key": "bool-flag",
+      "type": "boolean",
+      "defaultValue": false,
+      "description": "a simple boolean feature flag"
+    },
+    {
+      "key": "string-flag",
+      "type": "string",
+      "defaultValue": "default",
+      "description": "a string feature flag"
+    },
+    {
+      "key": "integer-flag",
+      "type": "integer",
+      "defaultValue": 1,
+      "description": ""
+    },
+    {
+      "key": "float-flag",
+      "type": "float",
+      "defaultValue": 1.5,
+      "description": "a float feature flag"
+    }
+  ]
+}

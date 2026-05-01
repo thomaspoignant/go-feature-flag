@@ -1,0 +1,12 @@
+{
+  "flag-a": {
+    "flagType": "boolean",
+    "defaultValue": true,
+    "description": ""
+  },
+  "flag-b": {
+    "flagType": "integer",
+    "defaultValue": 1,
+    "description": "second"
+  }
+}

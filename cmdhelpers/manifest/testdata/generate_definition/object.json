@@ -1,0 +1,9 @@
+{
+  "object-flag": {
+    "flagType": "object",
+    "defaultValue": {
+      "key": "value-a"
+    },
+    "description": "objects"
+  }
+}

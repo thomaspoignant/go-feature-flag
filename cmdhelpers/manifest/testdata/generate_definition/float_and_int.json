@@ -1,0 +1,7 @@
+{
+  "mixed-flag": {
+    "flagType": "float",
+    "defaultValue": 1,
+    "description": "float and int"
+  }
+}

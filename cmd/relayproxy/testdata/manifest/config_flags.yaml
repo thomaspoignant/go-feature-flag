@@ -1,0 +1,57 @@
+bool-flag:
+  variations:
+    Default: false
+    "False": false
+    "True": true
+  defaultRule:
+    name: defaultRule
+    variation: Default
+  metadata:
+    description: a simple boolean feature flag
+    defaultValue: false
+
+string-flag:
+  variations:
+    Default: "default"
+    "False": "false"
+    "True": "true"
+  defaultRule:
+    name: defaultRule
+    variation: Default
+  metadata:
+    description: a string feature flag
+    defaultValue: "default"
+
+integer-flag:
+  variations:
+    Default: 1
+    "False": 2
+    "True": 3
+  defaultRule:
+    name: defaultRule
+    variation: Default
+  metadata:
+    defaultValue: 1
+
+float-flag:
+  variations:
+    Default: 1.5
+    "False": 2.5
+    "True": 3.5
+  defaultRule:
+    name: defaultRule
+    variation: Default
+  metadata:
+    description: a float feature flag
+    defaultValue: 1.5
+
+flag-no-default-value:
+  variations:
+    Default: false
+    "False": false
+    "True": true
+  defaultRule:
+    name: defaultRule
+    variation: Default
+  metadata:
+    description: this flag should be excluded since it has no defaultValue

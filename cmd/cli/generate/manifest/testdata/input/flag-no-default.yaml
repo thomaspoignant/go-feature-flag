@@ -33,7 +33,6 @@ test-flag2:
   metadata:
     defaultValue: false
 
-
 test-flag3:
   variations:
     Default: 1

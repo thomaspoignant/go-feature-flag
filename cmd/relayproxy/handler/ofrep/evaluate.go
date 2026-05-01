@@ -6,11 +6,11 @@ import (
 	"sort"
 
 	"github.com/labstack/echo/v4"
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/helper"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/model"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/configfile"
 	"github.com/thomaspoignant/go-feature-flag/internal/flagstate"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
@@ -78,7 +78,7 @@ func (h *EvaluateCtrl) Evaluate(c echo.Context) error {
 			err)
 	}
 
-	tracer := otel.GetTracerProvider().Tracer(config.OtelTracerName)
+	tracer := otel.GetTracerProvider().Tracer(configfile.OtelTracerName)
 	_, span := tracer.Start(c.Request().Context(), "flagEvaluation")
 	defer span.End()
 
@@ -173,7 +173,7 @@ func (h *EvaluateCtrl) BulkEvaluate(c echo.Context) error {
 	response := model.OFREPBulkEvaluateSuccessResponse{
 		Flags: make([]model.OFREPFlagBulkEvaluateSuccessResponse, 0),
 	}
-	tracer := otel.GetTracerProvider().Tracer(config.OtelTracerName)
+	tracer := otel.GetTracerProvider().Tracer(configfile.OtelTracerName)
 	_, span := tracer.Start(c.Request().Context(), "AllFlagsState")
 	defer span.End()
 

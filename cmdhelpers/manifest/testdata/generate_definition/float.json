@@ -1,0 +1,7 @@
+{
+  "float-flag": {
+    "flagType": "float",
+    "defaultValue": 0.5,
+    "description": ""
+  }
+}

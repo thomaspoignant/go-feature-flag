@@ -1,0 +1,7 @@
+{
+  "boolean-flag": {
+    "flagType": "boolean",
+    "defaultValue": false,
+    "description": "a boolean flag"
+  }
+}

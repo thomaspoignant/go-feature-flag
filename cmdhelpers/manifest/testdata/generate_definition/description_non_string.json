@@ -1,0 +1,7 @@
+{
+  "weird-flag": {
+    "flagType": "boolean",
+    "defaultValue": false,
+    "description": ""
+  }
+}
