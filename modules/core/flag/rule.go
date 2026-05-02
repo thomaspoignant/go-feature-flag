@@ -213,8 +213,8 @@ func evaluateRule(query string, queryFormat QueryFormat, ctx ffcontext.Context) 
 		}
 		ok, err := ev.process(mapCtx)
 		if err != nil {
-			slog.ErrorContext(context.Background(), "error while evaluating the nikunjy query",
-				slog.String("query", query), slog.Any("error", err.Error()))
+			slog.Error("error while evaluating the nikunjy query",
+				slog.String("query", query), slog.Any("error", err))
 			return false
 		}
 		return ok
