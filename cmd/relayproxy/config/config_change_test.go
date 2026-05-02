@@ -330,7 +330,7 @@ func newAPIServerWithLogger(
 	c, err := config.New(f, logger, "v0.0.0")
 	require.NoError(t, err)
 
-	flagsetManager, err := service.NewFlagsetManager(c, logger, nil)
+	flagsetManager, err := service.NewFlagsetManager(c, logger, nil, nil)
 	require.NoError(t, err)
 
 	services := service.Services{

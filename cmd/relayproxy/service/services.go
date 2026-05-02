@@ -9,6 +9,8 @@ type Services struct {
 	MonitoringService Monitoring
 	// WebsocketBroadcasterService is the service in charge to manage the websockets in the relay proxy
 	WebsocketService WebsocketService
+	// SSEService is the service in charge of managing SSE connections in the relay proxy
+	SSEService SSEService
 	// Metrics is the service containing all the prometheus metrics
 	Metrics metric.Metrics
 	// FlagsetManager is the service in charge of managing the flagsets

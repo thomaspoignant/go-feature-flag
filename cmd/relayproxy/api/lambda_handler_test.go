@@ -87,7 +87,7 @@ func TestAwsLambdaHandler_GetAdapter(t *testing.T) {
 					},
 				},
 			}
-			flagsetManager, err := service.NewFlagsetManager(c, z, []notifier.Notifier{})
+			flagsetManager, err := service.NewFlagsetManager(c, z, []notifier.Notifier{}, nil)
 			require.NoError(t, err)
 			apiServer := New(c, service.Services{
 				MonitoringService: service.NewMonitoring(flagsetManager),
@@ -180,7 +180,7 @@ func TestAwsLambdaHandler_BasePathSupport(t *testing.T) {
 				},
 			},
 		},
-	}, z, nil)
+	}, z, nil, nil)
 	require.NoError(t, err)
 
 	commonServices := service.Services{

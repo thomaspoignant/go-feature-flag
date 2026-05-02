@@ -1,18 +1,34 @@
 package controller
 
 import (
+	"fmt"
+	"net/http"
+	"net/url"
+
 	"github.com/labstack/echo/v4"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/utils"
 	"go.uber.org/zap"
 )
 
 // NewSSEFlagChange is the constructor to create a new controller to handle SSE
 // requests to be notified about flag changes.
-func NewSSEFlagChange(logger *zap.Logger) Controller {
-	return &sseFlagChange{logger: logger}
+func NewSSEFlagChange(
+	sseService service.SSEService,
+	flagsetManager service.FlagsetManager,
+	logger *zap.Logger,
+) Controller {
+	return &sseFlagChange{
+		sseService:     sseService,
+		flagsetManager: flagsetManager,
+		logger:         logger,
+	}
 }
 
 type sseFlagChange struct {
-	logger *zap.Logger
+	sseService     service.SSEService
+	flagsetManager service.FlagsetManager
+	logger         *zap.Logger
 }
 
 // Handler is the entry point for the SSE endpoint to be notified of flag changes.
@@ -29,6 +45,34 @@ type sseFlagChange struct {
 // @Failure      500  {object} modeldocs.HTTPErrorDoc "Internal server error"
 // @Router       /stream/v1/sse/flag/change [get]
 func (h *sseFlagChange) Handler(c echo.Context) error {
-	// TODO: implement SSE streaming.
+	apiKey := c.QueryParam("apiKey")
+	flagsetName, err := h.resolveFlagsetName(apiKey)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	h.logger.Debug("SSE client connecting", zap.String("flagset", flagsetName))
+
+	// r3labs/sse routes by the "stream" query parameter.
+	q := make(url.Values)
+	q.Set("stream", flagsetName)
+	c.Request().URL.RawQuery = q.Encode()
+
+	h.sseService.ServeHTTP(c.Response(), c.Request())
 	return nil
+}
+
+// resolveFlagsetName resolves the flagset name from the API key
+// If the flagset manager is in default mode, it returns the default flagset name
+// @param apiKey the API key to resolve the flagset name from
+// @return the flagset name
+// @return an error if the flagset name cannot be resolved
+func (h *sseFlagChange) resolveFlagsetName(apiKey string) (string, error) {
+	if h.flagsetManager.IsDefaultFlagSet() {
+		return utils.DefaultFlagSetName, nil
+	}
+	if apiKey == "" {
+		return "", fmt.Errorf("apiKey is required when using flagsets")
+	}
+	return h.flagsetManager.FlagSetName(apiKey)
 }

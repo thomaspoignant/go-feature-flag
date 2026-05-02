@@ -14,7 +14,7 @@ func (s *Server) addStreamRoutes() {
 	authorize := custommiddleware.StreamAuthorizer(s.config)
 
 	cWsFlagChange := controller.NewWsFlagChange(s.services.WebsocketService, s.zapLog)
-	cSSEFlagChange := controller.NewSSEFlagChange(s.zapLog)
+	cSSEFlagChange := controller.NewSSEFlagChange(s.services.SSEService, s.services.FlagsetManager, s.zapLog)
 
 	streamV1 := s.apiEcho.Group("/stream/v1", authorize)
 	streamV1.GET("/ws/flag/change", cWsFlagChange.Handler)

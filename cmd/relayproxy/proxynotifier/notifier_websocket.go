@@ -1,14 +1,15 @@
-package service
+package proxynotifier
 
 import (
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 )
 
 type notifierWebsocket struct {
-	websocketService WebsocketService
+	websocketService service.WebsocketService
 }
 
-func NewNotifierWebsocket(websocketService WebsocketService) notifier.Notifier {
+func NewNotifierWebsocket(websocketService service.WebsocketService) notifier.Notifier {
 	return &notifierWebsocket{
 		websocketService: websocketService,
 	}

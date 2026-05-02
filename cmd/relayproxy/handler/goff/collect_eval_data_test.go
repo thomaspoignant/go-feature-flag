@@ -264,7 +264,7 @@ func Test_collect_eval_data_Handler(t *testing.T) {
 				}
 			}
 
-			flagsetManager, err := service.NewFlagsetManager(&tt.config, zap.NewNop(), []notifier.Notifier{})
+			flagsetManager, err := service.NewFlagsetManager(&tt.config, zap.NewNop(), []notifier.Notifier{}, nil)
 			assert.NoError(t, err)
 
 			logger, err := zap.NewDevelopment()
@@ -329,7 +329,7 @@ func TestCollectEvalData_Handler_cancellation(t *testing.T) {
 			PollingInterval: 10,
 			Retrievers:      &[]retrieverconf.RetrieverConf{{Kind: "file", Path: configFlagsLocation}},
 		},
-	}, zap.NewNop(), []notifier.Notifier{})
+	}, zap.NewNop(), []notifier.Notifier{}, nil)
 	require.NoError(t, err)
 
 	t.Cleanup(func() { flagsetManager.Close() })
@@ -458,7 +458,7 @@ func Test_collect_tracking_and_evaluation_events(t *testing.T) {
 				}
 			}
 
-			flagsetManager, err := service.NewFlagsetManager(&tt.config, zap.NewNop(), []notifier.Notifier{})
+			flagsetManager, err := service.NewFlagsetManager(&tt.config, zap.NewNop(), []notifier.Notifier{}, nil)
 			assert.NoError(t, err)
 			ctrl := controller.NewCollectEvalData(flagsetManager, metric.Metrics{}, zap.NewNop())
 			bodyReq, err := os.ReadFile(
