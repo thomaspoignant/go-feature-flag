@@ -125,8 +125,8 @@ func main() {
 		logger.ZapLogger.Info("Stopping API server")
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
-		apiServer.Stop(ctx)
 		wsService.Close()
+		apiServer.Stop(ctx)
 	}()
 	apiServer.StartWithContext(context.Background())
 }

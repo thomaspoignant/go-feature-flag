@@ -214,21 +214,25 @@ func (s *Server) startAsHTTPServer(ctx context.Context) {
 		zap.String("address", address),
 		zap.String("version", s.config.Version))
 
+	shutdownDone := make(chan struct{})
 	// nolint:gosec
 	go func() {
 		<-ctx.Done()
-		// we use a background context because we want to shutdown the server even if the context is cancelled.
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 		if err := s.apiEcho.Shutdown(shutdownCtx); err != nil {
 			s.zapLog.Error("error shutting down api server", zap.Error(err))
 		}
+		close(shutdownDone)
 	}()
 
 	err := s.apiEcho.Start(address)
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		s.zapLog.Fatal("Error starting relay proxy", zap.Error(err))
 	}
+
+	// Wait for Shutdown to finish draining connections before returning.
+	<-shutdownDone
 }
 
 func (s *Server) startMonitoringServer() {
