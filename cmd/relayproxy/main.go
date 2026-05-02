@@ -126,8 +126,7 @@ func main() {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 		apiServer.Stop(ctx)
+		wsService.Close()
 	}()
-	defer wsService.Close()
-
 	apiServer.StartWithContext(context.Background())
 }
