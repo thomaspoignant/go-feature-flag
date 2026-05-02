@@ -605,6 +605,68 @@ paths:
         Feature Flag.
       tags:
       - OpenFeature Manisfest API
+  /stream/v1/sse/flag/change:
+    get:
+      description: |-
+        Server-Sent Events endpoint pushing flag change notifications.
+        Each event payload is a `notifier.DiffCache` JSON document.
+        The full URL (including query string) is sensitive and must not be logged
+        or persisted by intermediaries.
+      parameters:
+      - description: apiKey to authorize the connection to the relay proxy
+        in: query
+        name: apiKey
+        type: string
+      produces:
+      - text/event-stream
+      responses:
+        "200":
+          description: SSE stream of flag change events
+          schema:
+            $ref: '#/definitions/notifier.DiffCache'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/modeldocs.HTTPErrorDoc'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/modeldocs.HTTPErrorDoc'
+      summary: SSE endpoint to be notified about flag changes
+      tags:
+      - GO Feature Flag Evaluation Stream API
+  /stream/v1/ws/flag/change:
+    get:
+      consumes:
+      - application/json
+      deprecated: true
+      description: |-
+        Deprecated: use /stream/v1/ws/flag/change instead. This endpoint
+        is a websocket endpoint to be notified about flag changes; every
+        change pushes a notifier.DiffCache message to the client.
+      parameters:
+      - description: apiKey to authorize the connection to the relay proxy
+        in: query
+        name: apiKey
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/notifier.DiffCache'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/modeldocs.HTTPErrorDoc'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/modeldocs.HTTPErrorDoc'
+      summary: Websocket endpoint to be notified about flag changes
+      tags:
+      - GO Feature Flag Evaluation Stream API
   /v1/allflags:
     post:
       consumes:
@@ -801,14 +863,16 @@ paths:
       tags:
       - GO Feature Flag Evaluation API
   /ws/v1/flag/change:
-    post:
+    get:
       consumes:
       - application/json
-      description: |
-        This endpoint is a websocket endpoint to be notified about flag changes, every change
-        will send a request to the client with a model.DiffCache format.
+      deprecated: true
+      description: |-
+        Deprecated: use /stream/v1/ws/flag/change instead. This endpoint
+        is a websocket endpoint to be notified about flag changes; every
+        change pushes a notifier.DiffCache message to the client.
       parameters:
-      - description: apiKey use authorize the connection to the relay proxy
+      - description: apiKey to authorize the connection to the relay proxy
         in: query
         name: apiKey
         type: string
@@ -829,7 +893,7 @@ paths:
             $ref: '#/definitions/modeldocs.HTTPErrorDoc'
       summary: Websocket endpoint to be notified about flag changes
       tags:
-      - GO Feature Flag Evaluation Websocket API
+      - GO Feature Flag Evaluation Stream API
 securityDefinitions:
   ApiKeyAuth:
     description: Use configured APIKeys in yaml config as authorization keys, disabled

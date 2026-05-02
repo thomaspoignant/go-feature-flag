@@ -34,17 +34,19 @@ type wsFlagChange struct {
 
 // Handler is the entry point for the websocket endpoint to get notified when a flag has been edited
 // @Summary      Websocket endpoint to be notified about flag changes
-// @Tags GO Feature Flag Evaluation Websocket API
-// @Description  This endpoint is a websocket endpoint to be notified about flag changes, every change
-// @Description  will send a request to the client with a model.DiffCache format.
-// @Description
+// @Tags         GO Feature Flag Evaluation Stream API
+// @Deprecated
+// @Description  Deprecated: use /stream/v1/ws/flag/change instead. This endpoint
+// @Description  is a websocket endpoint to be notified about flag changes; every
+// @Description  change pushes a notifier.DiffCache message to the client.
 // @Produce      json
-// @Accept		 json
-// @Param 	     apiKey query string false "apiKey use authorize the connection to the relay proxy"
+// @Accept       json
+// @Param        apiKey query string false "apiKey to authorize the connection to the relay proxy"
 // @Success      200  {object} notifier.DiffCache "Success"
-// @Failure      400 {object} modeldocs.HTTPErrorDoc "Bad Request"
-// @Failure      500 {object} modeldocs.HTTPErrorDoc "Internal server error"
-// @Router       /ws/v1/flag/change [post]
+// @Failure      400  {object} modeldocs.HTTPErrorDoc "Bad Request"
+// @Failure      500  {object} modeldocs.HTTPErrorDoc "Internal server error"
+// @Router       /stream/v1/ws/flag/change [get]
+// @Router       /ws/v1/flag/change [get]
 func (f *wsFlagChange) Handler(c echo.Context) error {
 	conn, err := f.upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
