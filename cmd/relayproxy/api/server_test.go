@@ -1149,7 +1149,7 @@ func Test_PortFreedAfterShutdown(t *testing.T) {
 
 	wsService := service.NewWebsocketService()
 
-	flagsetManager, err := service.NewFlagsetManager(proxyConf, l.ZapLogger, nil)
+	flagsetManager, err := service.NewFlagsetManager(proxyConf, l.ZapLogger, nil, nil)
 	require.NoError(t, err)
 
 	services := service.Services{
