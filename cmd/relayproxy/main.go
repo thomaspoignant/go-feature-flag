@@ -97,6 +97,7 @@ func main() {
 
 	// Init services
 	wsService := service.NewWebsocketService()
+	sseService := service.NewSSEService()
 	prometheusNotifier := metric.NewPrometheusNotifier(metricsV2)
 	proxyNotifier := proxynotifier.NewNotifierWebsocket(wsService)
 
@@ -128,7 +129,7 @@ func main() {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 		wsService.Close()
-    sseService.Close()
+		sseService.Close()
 		apiServer.Stop(ctx)
 	}()
 	apiServer.StartWithContext(context.Background())
