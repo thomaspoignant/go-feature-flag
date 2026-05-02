@@ -96,7 +96,6 @@ func main() {
 
 	// Init services
 	wsService := service.NewWebsocketService()
-	defer wsService.Close() // close all the open connections
 	prometheusNotifier := metric.NewPrometheusNotifier(metricsV2)
 	proxyNotifier := service.NewNotifierWebsocket(wsService)
 
@@ -120,11 +119,15 @@ func main() {
 	}
 	// Init API server
 	apiServer := api.New(proxyConf, services, logger.ZapLogger)
+
+	// Defers run LIFO: streaming clients disconnect first, then HTTP server stops.
 	defer func() {
 		logger.ZapLogger.Info("Stopping API server")
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 		apiServer.Stop(ctx)
 	}()
+	defer wsService.Close()
+
 	apiServer.StartWithContext(context.Background())
 }

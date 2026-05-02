@@ -1120,3 +1120,75 @@ func Test_NativeHistograms_Enabled(t *testing.T) {
 		}
 	}
 }
+
+func Test_PortFreedAfterShutdown(t *testing.T) {
+	// Pick a free port.
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	require.NoError(t, err)
+	port := ln.Addr().(*net.TCPAddr).Port
+	ln.Close()
+
+	proxyConf := &config.Config{
+		CommonFlagSet: config.CommonFlagSet{
+			Retrievers: &[]retrieverconf.RetrieverConf{
+				{
+					Kind: "file",
+					Path: "../../../testdata/flag-config.yaml",
+				},
+			},
+		},
+		Server: config.Server{
+			Mode: config.ServerModeHTTP,
+			Port: port,
+		},
+	}
+
+	l := log.InitLogger()
+	defer func() { _ = l.ZapLogger.Sync() }()
+
+	wsService := service.NewWebsocketService()
+
+	flagsetManager, err := service.NewFlagsetManager(proxyConf, l.ZapLogger, nil)
+	require.NoError(t, err)
+
+	services := service.Services{
+		MonitoringService: service.NewMonitoring(flagsetManager),
+		WebsocketService:  wsService,
+		FlagsetManager:    flagsetManager,
+	}
+
+	s := api.New(proxyConf, services, l.ZapLogger)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	done := make(chan struct{})
+	go func() {
+		s.StartWithContext(ctx)
+		close(done)
+	}()
+
+	// Wait for the server to be ready.
+	require.Eventually(t, func() bool {
+		resp, err := http.Get(fmt.Sprintf("http://127.0.0.1:%d/health", port))
+		if err != nil {
+			return false
+		}
+		_ = resp.Body.Close()
+		return resp.StatusCode == http.StatusOK
+	}, 5*time.Second, 50*time.Millisecond)
+
+	// Cancel the context to simulate Ctrl+C.
+	cancel()
+	wsService.Close()
+
+	// Wait for StartWithContext to return.
+	select {
+	case <-done:
+	case <-time.After(10 * time.Second):
+		t.Fatal("server did not stop within 10 seconds")
+	}
+
+	// Verify the port is free by binding to it again.
+	ln2, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", port))
+	require.NoError(t, err, "port %d should be free after shutdown", port)
+	ln2.Close()
+}

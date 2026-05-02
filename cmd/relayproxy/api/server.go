@@ -7,7 +7,10 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
+	"time"
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/labstack/echo-contrib/echoprometheus"
@@ -144,13 +147,16 @@ func (s *Server) StartWithContext(ctx context.Context) {
 		// we can continue because otel is not mandatory to start the server
 	}
 
+	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
+	defer cancel()
+
 	switch s.config.ServerMode(s.zapLog) {
 	case config.ServerModeLambda:
 		s.startAwsLambda()
 	case config.ServerModeUnixSocket:
 		s.startUnixSocketServer(ctx)
 	default:
-		s.startAsHTTPServer()
+		s.startAsHTTPServer(ctx)
 	}
 }
 
@@ -196,8 +202,7 @@ func (s *Server) startUnixSocketServer(ctx context.Context) {
 }
 
 // startAsHTTPServer launch the API server
-func (s *Server) startAsHTTPServer() {
-	// starting the monitoring server on a different port if configured
+func (s *Server) startAsHTTPServer(ctx context.Context) {
 	if s.isMonitoringPortConfigured() {
 		go s.startMonitoringServer()
 		defer func() { _ = s.monitoringEcho.Close() }()
@@ -208,6 +213,15 @@ func (s *Server) startAsHTTPServer() {
 		"Starting go-feature-flag relay proxy ...",
 		zap.String("address", address),
 		zap.String("version", s.config.Version))
+
+	go func() {
+		<-ctx.Done()
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := s.apiEcho.Shutdown(shutdownCtx); err != nil {
+			s.zapLog.Error("error shutting down api server", zap.Error(err))
+		}
+	}()
 
 	err := s.apiEcho.Start(address)
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
@@ -247,16 +261,14 @@ func (s *Server) Stop(ctx context.Context) {
 	}
 
 	if s.monitoringEcho != nil {
-		err = s.monitoringEcho.Close()
-		if err != nil {
-			s.zapLog.Fatal("impossible to stop monitoring", zap.Error(err))
+		if err = s.monitoringEcho.Shutdown(ctx); err != nil {
+			s.zapLog.Error("error stopping monitoring", zap.Error(err))
 		}
 	}
 
 	if s.apiEcho != nil {
-		err = s.apiEcho.Close()
-		if err != nil {
-			s.zapLog.Fatal("impossible to stop go-feature-flag relay proxy", zap.Error(err))
+		if err = s.apiEcho.Shutdown(ctx); err != nil {
+			s.zapLog.Error("error stopping relay proxy", zap.Error(err))
 		}
 	}
 }
