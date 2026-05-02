@@ -174,7 +174,7 @@ func (s *Server) startUnixSocketServer(ctx context.Context) {
 	// Start a http server for monitoring if monitoringport is configured
 	if s.isMonitoringPortConfigured() {
 		go s.startMonitoringServer()
-		defer func() { _ = s.monitoringEcho.Close() }()
+		defer func() { _ = s.monitoringEcho.Shutdown(ctx) }()
 	}
 
 	lc := net.ListenConfig{}
@@ -205,7 +205,7 @@ func (s *Server) startUnixSocketServer(ctx context.Context) {
 func (s *Server) startAsHTTPServer(ctx context.Context) {
 	if s.isMonitoringPortConfigured() {
 		go s.startMonitoringServer()
-		defer func() { _ = s.monitoringEcho.Close() }()
+		defer func() { _ = s.monitoringEcho.Shutdown(ctx) }()
 	}
 
 	address := fmt.Sprintf("%s:%d", s.config.ServerHost(), s.config.ServerPort(s.zapLog))
