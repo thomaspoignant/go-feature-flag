@@ -28,5 +28,12 @@ The `relay-proxy` has all the endpoints needed to communicate with any of the fe
 
 If you want to look at those endpoints, you can look at them in the [API doc](https://gofeatureflag.org/API_relayproxy#tag/OpenFeature-Remote-Evaluation-Protocol-(OFREP)).
 
+## Languages without a GO Feature Flag specific provider
+Some languages do not have a GO Feature Flag specific provider yet, but you can still use GO Feature Flag from those languages thanks to the OFREP provider available in the OpenFeature ecosystem.
+
+| Language | Provider |
+|----------|----------|
+| Rust     | [OpenFeature OFREP provider for Rust](./server_providers/openfeature_rust) — see the [Rust integration page](./server_providers/openfeature_rust) for details. |
+
 ## Any questions about OFREP?
 Ask them on [Slack](/slack) or open an issue on the [GitHub repository](https://github.com/thomaspoignant/go-feature-flag/issues).
