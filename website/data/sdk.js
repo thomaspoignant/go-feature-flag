@@ -308,6 +308,16 @@ export const sdk = [
     featureList: features(['remote', 'trackingFlag'], 'server'),
   },
   {
+    key: 'rust',
+    name: 'Rust',
+    paradigm: ['Server'],
+    faLogo: 'devicon-rust-plain colored',
+    badgeUrl:
+      'https://img.shields.io/crates/v/open-feature-ofrep?color=blue&style=flat-square&logo=rust',
+    docLink: 'server_providers/openfeature_rust',
+    featureList: features(['remote', 'trackingFlag'], 'server'),
+  },
+  {
     key: 'nestjs',
     name: 'NestJS',
     paradigm: ['Server'],
