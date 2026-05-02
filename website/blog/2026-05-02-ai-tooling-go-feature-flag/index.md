@@ -29,7 +29,7 @@ repository and are installed using the `npx playbooks` CLI.
 
 ### GO Feature Flag Skill
 
-This skill covers the GO Feature Flag flag format (YAML/JSON/TOML), targeting rules and operators,
+This skill covers the GO Feature Flag configuration format (YAML/JSON/TOML), targeting rules and operators,
 rollout strategies (progressive, scheduled, A/B), relay proxy configuration, and deployment patterns.
 
 ```shell
