@@ -47,7 +47,6 @@ let provider = OfrepProvider::new(OfrepOptions {
     base_url: "http://localhost:1031".to_string(),
     headers: HeaderMap::new(),
     connect_timeout: Duration::from_secs(10),
-    ..Default::default()
 })
 .await
 .expect("failed to create OFREP provider");
