@@ -216,7 +216,7 @@ func (s *Server) startAsHTTPServer(ctx context.Context) {
 
 	go func() {
 		<-ctx.Done()
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		shutdownCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 		defer cancel()
 		if err := s.apiEcho.Shutdown(shutdownCtx); err != nil {
 			s.zapLog.Error("error shutting down api server", zap.Error(err))
