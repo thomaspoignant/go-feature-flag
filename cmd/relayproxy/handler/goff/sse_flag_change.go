@@ -64,9 +64,6 @@ func (h *sseFlagChange) Handler(c echo.Context) error {
 
 // resolveFlagsetName resolves the flagset name from the API key
 // If the flagset manager is in default mode, it returns the default flagset name
-// @param apiKey the API key to resolve the flagset name from
-// @return the flagset name
-// @return an error if the flagset name cannot be resolved
 func (h *sseFlagChange) resolveFlagsetName(apiKey string) (string, error) {
 	if h.flagsetManager.IsDefaultFlagSet() {
 		return utils.DefaultFlagSetName, nil
