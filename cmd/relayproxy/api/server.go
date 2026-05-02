@@ -214,9 +214,11 @@ func (s *Server) startAsHTTPServer(ctx context.Context) {
 		zap.String("address", address),
 		zap.String("version", s.config.Version))
 
+	// nolint:gosec
 	go func() {
 		<-ctx.Done()
-		shutdownCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+		// we use a background context because we want to shutdown the server even if the context is cancelled.
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 		if err := s.apiEcho.Shutdown(shutdownCtx); err != nil {
 			s.zapLog.Error("error shutting down api server", zap.Error(err))
