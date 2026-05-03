@@ -42,9 +42,9 @@ func (m *mockFlagsetManagerSSE) FlagSet(_ string) (*ffclient.GoFeatureFlag, erro
 func (m *mockFlagsetManagerSSE) AllFlagSets() (map[string]*ffclient.GoFeatureFlag, error) {
 	return nil, nil
 }
-func (m *mockFlagsetManagerSSE) Default() *ffclient.GoFeatureFlag               { return nil }
-func (m *mockFlagsetManagerSSE) Close()                                          {}
-func (m *mockFlagsetManagerSSE) OnConfigChange(_ *config.Config)                 {}
+func (m *mockFlagsetManagerSSE) Default() *ffclient.GoFeatureFlag { return nil }
+func (m *mockFlagsetManagerSSE) Close()                           {}
+func (m *mockFlagsetManagerSSE) OnConfigChange(_ *config.Config)  {}
 
 func Test_SSE_FlagChange(t *testing.T) {
 	tests := []struct {
