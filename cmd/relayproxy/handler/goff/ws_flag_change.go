@@ -44,9 +44,27 @@ type wsFlagChange struct {
 // @Param        apiKey query string false "apiKey to authorize the connection to the relay proxy"
 // @Success      200  {object} notifier.DiffCache "Success"
 // @Failure      400  {object} modeldocs.HTTPErrorDoc "Bad Request"
+// @Failure      401  {object} modeldocs.HTTPErrorDoc "Unauthorized"
+// @Failure      500  {object} modeldocs.HTTPErrorDoc "Internal server error"
+// @Router       /ws/v1/flag/change [get]
+func (f *wsFlagChange) LegacyHandler(c echo.Context) error {
+	// This handler is deprecated and we keep it for the documentation.
+	return f.Handler(c)
+}
+
+// Handler is the entry point for the websocket endpoint to get notified when a flag has been edited
+// @Summary      Websocket endpoint to be notified about flag changes
+// @Tags         GO Feature Flag Evaluation Stream API
+// @Description  This endpoint is a websocket endpoint to be notified about flag changes;
+// @Description  every change pushes a notifier.DiffCache message to the client.
+// @Produce      json
+// @Accept       json
+// @Param        apiKey query string false "apiKey to authorize the connection to the relay proxy"
+// @Success      200  {object} notifier.DiffCache "Success"
+// @Failure      400  {object} modeldocs.HTTPErrorDoc "Bad Request"
+// @Failure      401  {object} modeldocs.HTTPErrorDoc "Unauthorized"
 // @Failure      500  {object} modeldocs.HTTPErrorDoc "Internal server error"
 // @Router       /stream/v1/ws/flag/change [get]
-// @Router       /ws/v1/flag/change [get]
 func (f *wsFlagChange) Handler(c echo.Context) error {
 	conn, err := f.upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {

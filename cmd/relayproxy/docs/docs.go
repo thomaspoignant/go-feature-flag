@@ -365,6 +365,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/notifier.DiffCache"
                         }
                     },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
+                        }
+                    },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
@@ -382,7 +388,7 @@ const docTemplate = `{
         },
         "/stream/v1/ws/flag/change": {
             "get": {
-                "description": "Deprecated: use /stream/v1/ws/flag/change instead. This endpoint\nis a websocket endpoint to be notified about flag changes; every\nchange pushes a notifier.DiffCache message to the client.",
+                "description": "This endpoint is a websocket endpoint to be notified about flag changes;\nevery change pushes a notifier.DiffCache message to the client.",
                 "consumes": [
                     "application/json"
                 ],
@@ -393,7 +399,6 @@ const docTemplate = `{
                     "GO Feature Flag Evaluation Stream API"
                 ],
                 "summary": "Websocket endpoint to be notified about flag changes",
-                "deprecated": true,
                 "parameters": [
                     {
                         "type": "string",
@@ -411,6 +416,12 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
                         }
@@ -734,6 +745,12 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
                         }

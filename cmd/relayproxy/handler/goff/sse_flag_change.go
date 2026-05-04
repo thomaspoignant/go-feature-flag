@@ -3,7 +3,6 @@ package controller
 import (
 	"fmt"
 	"net/http"
-	"net/url"
 
 	"github.com/labstack/echo/v4"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
@@ -41,6 +40,7 @@ type sseFlagChange struct {
 // @Produce      text/event-stream
 // @Param        apiKey query string false "apiKey to authorize the connection to the relay proxy"
 // @Success      200  {object} notifier.DiffCache "SSE stream of flag change events"
+// @Failure      400  {object} modeldocs.HTTPErrorDoc "Bad Request"
 // @Failure      401  {object} modeldocs.HTTPErrorDoc "Unauthorized"
 // @Failure      500  {object} modeldocs.HTTPErrorDoc "Internal server error"
 // @Router       /stream/v1/sse/flag/change [get]
@@ -54,8 +54,9 @@ func (h *sseFlagChange) Handler(c echo.Context) error {
 	h.logger.Debug("SSE client connecting", zap.String("flagset", flagsetName))
 
 	// r3labs/sse routes by the "stream" query parameter.
-	q := make(url.Values)
+	q := c.Request().URL.Query()
 	q.Set("stream", flagsetName)
+	q.Del("apiKey")
 	c.Request().URL.RawQuery = q.Encode()
 
 	h.sseService.ServeHTTP(c.Response(), c.Request())

@@ -624,6 +624,10 @@ paths:
           description: SSE stream of flag change events
           schema:
             $ref: '#/definitions/notifier.DiffCache'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/modeldocs.HTTPErrorDoc'
         "401":
           description: Unauthorized
           schema:
@@ -639,11 +643,9 @@ paths:
     get:
       consumes:
       - application/json
-      deprecated: true
       description: |-
-        Deprecated: use /stream/v1/ws/flag/change instead. This endpoint
-        is a websocket endpoint to be notified about flag changes; every
-        change pushes a notifier.DiffCache message to the client.
+        This endpoint is a websocket endpoint to be notified about flag changes;
+        every change pushes a notifier.DiffCache message to the client.
       parameters:
       - description: apiKey to authorize the connection to the relay proxy
         in: query
@@ -658,6 +660,10 @@ paths:
             $ref: '#/definitions/notifier.DiffCache'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/modeldocs.HTTPErrorDoc'
+        "401":
+          description: Unauthorized
           schema:
             $ref: '#/definitions/modeldocs.HTTPErrorDoc'
         "500":
@@ -885,6 +891,10 @@ paths:
             $ref: '#/definitions/notifier.DiffCache'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/modeldocs.HTTPErrorDoc'
+        "401":
+          description: Unauthorized
           schema:
             $ref: '#/definitions/modeldocs.HTTPErrorDoc'
         "500":
