@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -231,4 +232,61 @@ func Test_SSE_FlagChange_FlagsetScoping(t *testing.T) {
 	require.NotEmpty(t, received, "should have received an SSE data line")
 	assert.Contains(t, received, "right-flag")
 	assert.NotContains(t, received, "wrong-flag")
+}
+
+func Test_SSE_FlagChange_Errors(t *testing.T) {
+	tests := []struct {
+		name           string
+		apiKey         string
+		flagsetMgr     *mockFlagsetManagerSSE
+		expectedStatus int
+	}{
+		{
+			name:   "empty apiKey in flagset mode returns 400",
+			apiKey: "",
+			flagsetMgr: &mockFlagsetManagerSSE{
+				isDefault: false,
+			},
+			expectedStatus: http.StatusBadRequest,
+		},
+		{
+			name:   "FlagSetName error returns 400",
+			apiKey: "unknown-key",
+			flagsetMgr: &mockFlagsetManagerSSE{
+				isDefault: false,
+				err:       fmt.Errorf("unknown api key"),
+			},
+			expectedStatus: http.StatusBadRequest,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			sseService := service.NewSSEService()
+			defer sseService.Close()
+
+			ctrl := controller.NewSSEFlagChange(sseService, tt.flagsetMgr, zap.NewNop())
+
+			e := echo.New()
+			e.GET("/stream/v1/sse/flag/change", ctrl.Handler)
+			srv := httptest.NewServer(e)
+			defer srv.Close()
+
+			url := srv.URL + "/stream/v1/sse/flag/change"
+			if tt.apiKey != "" {
+				url += "?apiKey=" + tt.apiKey
+			}
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+
+			req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+			require.NoError(t, err)
+
+			resp, err := http.DefaultClient.Do(req)
+			require.NoError(t, err)
+			defer resp.Body.Close()
+
+			assert.Equal(t, tt.expectedStatus, resp.StatusCode)
+		})
+	}
 }

@@ -113,6 +113,56 @@ func TestNewFlagsetManager(t *testing.T) {
 	}
 }
 
+func TestNewFlagsetManager_WithSSEService(t *testing.T) {
+	flagConfig := "../testdata/goff/configuration_flags.yaml"
+
+	tests := []struct {
+		name   string
+		config *config.Config
+	}{
+		{
+			name: "default mode with SSE service attaches SSE notifier",
+			config: &config.Config{
+				CommonFlagSet: config.CommonFlagSet{
+					Retriever: &retrieverconf.RetrieverConf{
+						Kind: "file",
+						Path: flagConfig,
+					},
+				},
+			},
+		},
+		{
+			name: "flagsets mode with SSE service attaches SSE notifier per flagset",
+			config: &config.Config{
+				FlagSets: []config.FlagSet{
+					{
+						Name: "test-flagset",
+						CommonFlagSet: config.CommonFlagSet{
+							Retriever: &retrieverconf.RetrieverConf{
+								Kind: "file",
+								Path: flagConfig,
+							},
+						},
+						APIKeys: []string{"test-api-key"},
+					},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			sseService := service.NewSSEService()
+			defer sseService.Close()
+
+			manager, err := service.NewFlagsetManager(tt.config, zap.NewNop(), []notifier.Notifier{}, sseService)
+			require.NoError(t, err)
+			require.NotNil(t, manager)
+			defer manager.Close()
+		})
+	}
+}
+
 func TestFlagsetManager_FlagSet(t *testing.T) {
 	flagConfig := "../testdata/goff/configuration_flags.yaml"
 
