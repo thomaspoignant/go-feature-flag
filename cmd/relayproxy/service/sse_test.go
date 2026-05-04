@@ -70,21 +70,32 @@ func TestSSEService_BroadcastAndReceive(t *testing.T) {
 				srv.URL+"?stream="+tt.subscribeFlagset, nil)
 			require.NoError(t, err)
 
+			subscribed := make(chan struct{}, 1)
+			sseService.SetOnSubscribe(func(_ string) {
+				select {
+				case subscribed <- struct{}{}:
+				default:
+				}
+			})
+
 			resp, err := http.DefaultClient.Do(req)
 			require.NoError(t, err)
 			defer resp.Body.Close()
 			assert.Equal(t, http.StatusOK, resp.StatusCode)
 
-			time.Sleep(200 * time.Millisecond)
-			sseService.BroadcastFlagChanges(tt.broadcastFlagset, tt.diff)
+			select {
+			case <-subscribed:
+			case <-ctx.Done():
+				t.Fatal("timed out waiting for SSE client to subscribe")
+			}
+			require.NoError(t, sseService.BroadcastFlagChanges(tt.broadcastFlagset, tt.diff))
 
 			if tt.expectReceive {
 				scanner := bufio.NewScanner(resp.Body)
 				var received string
 				for scanner.Scan() {
-					line := scanner.Text()
-					if strings.HasPrefix(line, "data: ") {
-						received = strings.TrimPrefix(line, "data: ")
+					if data, ok := strings.CutPrefix(scanner.Text(), "data: "); ok {
+						received = data
 						break
 					}
 				}
@@ -97,14 +108,13 @@ func TestSSEService_BroadcastAndReceive(t *testing.T) {
 				afterDiff := notifier.DiffCache{
 					Added: map[string]flag.Flag{"marker": &flag.InternalFlag{}},
 				}
-				sseService.BroadcastFlagChanges(tt.subscribeFlagset, afterDiff)
+				require.NoError(t, sseService.BroadcastFlagChanges(tt.subscribeFlagset, afterDiff))
 
 				scanner := bufio.NewScanner(resp.Body)
 				var received string
 				for scanner.Scan() {
-					line := scanner.Text()
-					if strings.HasPrefix(line, "data: ") {
-						received = strings.TrimPrefix(line, "data: ")
+					if data, ok := strings.CutPrefix(scanner.Text(), "data: "); ok {
+						received = data
 						break
 					}
 				}

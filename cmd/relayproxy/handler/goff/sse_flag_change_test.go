@@ -104,6 +104,15 @@ func Test_SSE_FlagChange(t *testing.T) {
 
 			sseService := service.NewSSEService()
 			defer sseService.Close()
+
+			subscribed := make(chan struct{}, 1)
+			sseService.SetOnSubscribe(func(_ string) {
+				select {
+				case subscribed <- struct{}{}:
+				default:
+				}
+			})
+
 			flagsetMgr := &mockFlagsetManagerSSE{
 				flagsetName: "default",
 				isDefault:   true,
@@ -127,16 +136,18 @@ func Test_SSE_FlagChange(t *testing.T) {
 			assert.Equal(t, http.StatusOK, resp.StatusCode)
 			assert.Contains(t, resp.Header.Get("Content-Type"), "text/event-stream")
 
-			time.Sleep(200 * time.Millisecond)
-
-			sseService.BroadcastFlagChanges("default", tt.flagChange)
+			select {
+			case <-subscribed:
+			case <-ctx.Done():
+				t.Fatal("timed out waiting for SSE client to subscribe")
+			}
+			require.NoError(t, sseService.BroadcastFlagChanges("default", tt.flagChange))
 
 			scanner := bufio.NewScanner(resp.Body)
 			var received string
 			for scanner.Scan() {
-				line := scanner.Text()
-				if strings.HasPrefix(line, "data: ") {
-					received = strings.TrimPrefix(line, "data: ")
+				if data, ok := strings.CutPrefix(scanner.Text(), "data: "); ok {
+					received = data
 					break
 				}
 			}
@@ -155,6 +166,14 @@ func Test_SSE_FlagChange_FlagsetScoping(t *testing.T) {
 
 	sseService := service.NewSSEService()
 	defer sseService.Close()
+
+	subscribed := make(chan struct{}, 1)
+	sseService.SetOnSubscribe(func(_ string) {
+		select {
+		case subscribed <- struct{}{}:
+		default:
+		}
+	})
 
 	flagsetMgr := &mockFlagsetManagerSSE{
 		flagsetName: "flagsetA",
@@ -177,12 +196,16 @@ func Test_SSE_FlagChange_FlagsetScoping(t *testing.T) {
 	defer resp.Body.Close()
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
-	time.Sleep(200 * time.Millisecond)
+	select {
+	case <-subscribed:
+	case <-ctx.Done():
+		t.Fatal("timed out waiting for SSE client to subscribe")
+	}
 
 	// Broadcast to flagsetB -- the client on flagsetA should NOT receive it.
-	sseService.BroadcastFlagChanges("flagsetB", notifier.DiffCache{
+	require.NoError(t, sseService.BroadcastFlagChanges("flagsetB", notifier.DiffCache{
 		Added: map[string]flag.Flag{"wrong-flag": &flag.InternalFlag{}},
-	})
+	}))
 
 	// Broadcast to flagsetA -- the client should receive this one.
 	diff := notifier.DiffCache{
@@ -195,14 +218,13 @@ func Test_SSE_FlagChange_FlagsetScoping(t *testing.T) {
 			},
 		},
 	}
-	sseService.BroadcastFlagChanges("flagsetA", diff)
+	require.NoError(t, sseService.BroadcastFlagChanges("flagsetA", diff))
 
 	scanner := bufio.NewScanner(resp.Body)
 	var received string
 	for scanner.Scan() {
-		line := scanner.Text()
-		if strings.HasPrefix(line, "data: ") {
-			received = strings.TrimPrefix(line, "data: ")
+		if data, ok := strings.CutPrefix(scanner.Text(), "data: "); ok {
+			received = data
 			break
 		}
 	}

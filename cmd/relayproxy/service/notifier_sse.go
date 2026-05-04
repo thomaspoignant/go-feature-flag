@@ -19,6 +19,5 @@ func NewNotifierSSE(sseService SSEService, flagsetName string) notifier.Notifier
 }
 
 func (n *notifierSSE) Notify(diff notifier.DiffCache) error {
-	n.sseService.BroadcastFlagChanges(n.flagsetName, diff)
-	return nil
+	return n.sseService.BroadcastFlagChanges(n.flagsetName, diff)
 }
