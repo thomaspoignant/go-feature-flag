@@ -1,9 +1,10 @@
-package service_test
+package proxynotifier_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/proxynotifier"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/testutils/testconvert"
@@ -42,7 +43,7 @@ func TestNotifierSSE_Notify(t *testing.T) {
 			sseService := service.NewSSEService()
 			defer sseService.Close()
 
-			n := service.NewNotifierSSE(sseService, tt.flagsetName)
+			n := proxynotifier.NewNotifierSSE(sseService, tt.flagsetName)
 			assert.NoError(t, n.Notify(tt.diff))
 		})
 	}
