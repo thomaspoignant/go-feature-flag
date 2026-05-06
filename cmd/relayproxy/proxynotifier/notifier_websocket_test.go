@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/proxynotifier"
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service/stream"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/testutils/testconvert"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
@@ -17,11 +17,11 @@ type mockWebsocketService struct {
 	nbConnection int
 }
 
-func (m *mockWebsocketService) Register(_ service.WebsocketConnector) {
+func (m *mockWebsocketService) Register(_ stream.WebsocketConnector) {
 	m.nbConnection++
 }
 
-func (m *mockWebsocketService) Deregister(_ service.WebsocketConnector) {
+func (m *mockWebsocketService) Deregister(_ stream.WebsocketConnector) {
 	m.nbConnection--
 }
 

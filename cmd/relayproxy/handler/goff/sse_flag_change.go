@@ -6,6 +6,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service/stream"
 	"github.com/thomaspoignant/go-feature-flag/utils"
 	"go.uber.org/zap"
 )
@@ -13,7 +14,7 @@ import (
 // NewSSEFlagChange is the constructor to create a new controller to handle SSE
 // requests to be notified about flag changes.
 func NewSSEFlagChange(
-	sseService service.SSEService,
+	sseService stream.SSEService,
 	flagsetManager service.FlagsetManager,
 	logger *zap.Logger,
 ) Controller {
@@ -25,7 +26,7 @@ func NewSSEFlagChange(
 }
 
 type sseFlagChange struct {
-	sseService     service.SSEService
+	sseService     stream.SSEService
 	flagsetManager service.FlagsetManager
 	logger         *zap.Logger
 }

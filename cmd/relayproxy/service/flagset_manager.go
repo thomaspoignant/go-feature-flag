@@ -10,6 +10,8 @@ import (
 	"github.com/google/uuid"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/proxynotifier"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service/stream"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"github.com/thomaspoignant/go-feature-flag/utils"
 	"go.uber.org/zap"
@@ -76,7 +78,7 @@ type flagsetManagerImpl struct {
 // so that flag-change events are scoped to the correct flagset.
 func NewFlagsetManager(
 	config *config.Config, logger *zap.Logger, notifiers []notifier.Notifier,
-	sseService SSEService,
+	sseService stream.SSEService,
 ) (FlagsetManager, error) {
 	if config == nil {
 		return nil, fmt.Errorf("configuration is nil")
@@ -98,7 +100,7 @@ func NewFlagsetManager(
 
 func newFlagsetManagerWithDefaultConfig(
 	c *config.Config, logger *zap.Logger, notifiers []notifier.Notifier,
-	sseService SSEService,
+	sseService stream.SSEService,
 ) (FlagsetManager, error) {
 	defaultFlagSet := config.FlagSet{
 		Name: utils.DefaultFlagSetName,
@@ -132,7 +134,7 @@ func newFlagsetManagerWithDefaultConfig(
 
 func newFlagsetManagerWithFlagsets(
 	config *config.Config, logger *zap.Logger, notifiers []notifier.Notifier,
-	sseService SSEService,
+	sseService stream.SSEService,
 ) (FlagsetManager, error) {
 	flagsets := make(map[string]*ffclient.GoFeatureFlag)
 	apiKeysToFlagSet := make(map[string]string)
@@ -372,12 +374,12 @@ func (m *flagsetManagerImpl) onConfigChangeWithDefault(newConfig *config.Config)
 // appendSSENotifier returns a copy of notifiers with an SSE notifier appended
 // when sseService is non-nil.
 func appendSSENotifier(
-	notifiers []notifier.Notifier, sseService SSEService, flagsetName string,
+	notifiers []notifier.Notifier, sseService stream.SSEService, flagsetName string,
 ) []notifier.Notifier {
 	if sseService == nil {
 		return notifiers
 	}
 	out := make([]notifier.Notifier, len(notifiers), len(notifiers)+1)
 	copy(out, notifiers)
-	return append(out, NewNotifierSSE(sseService, flagsetName))
+	return append(out, proxynotifier.NewNotifierSSE(sseService, flagsetName))
 }

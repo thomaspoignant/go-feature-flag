@@ -12,6 +12,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service/stream"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"go.uber.org/zap"
@@ -91,7 +92,7 @@ func TestAwsLambdaHandler_GetAdapter(t *testing.T) {
 			require.NoError(t, err)
 			apiServer := New(c, service.Services{
 				MonitoringService: service.NewMonitoring(flagsetManager),
-				WebsocketService:  service.NewWebsocketService(),
+				WebsocketService:  stream.NewWebsocketService(),
 				FlagsetManager:    flagsetManager,
 				Metrics:           metric.Metrics{},
 			}, z)
@@ -185,7 +186,7 @@ func TestAwsLambdaHandler_BasePathSupport(t *testing.T) {
 
 	commonServices := service.Services{
 		MonitoringService: service.NewMonitoring(flagsetManager),
-		WebsocketService:  service.NewWebsocketService(),
+		WebsocketService:  stream.NewWebsocketService(),
 		FlagsetManager:    flagsetManager,
 		Metrics:           metric.Metrics{},
 	}

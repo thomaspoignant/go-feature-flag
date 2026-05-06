@@ -1,18 +1,18 @@
 package proxynotifier
 
 import (
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service/stream"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 )
 
 type notifierSSE struct {
-	sseService  service.SSEService
+	sseService  stream.SSEService
 	flagsetName string
 }
 
 // NewNotifierSSE creates a notifier that forwards flag change events to the
 // SSE service scoped to the given flagset name.
-func NewNotifierSSE(sseService service.SSEService, flagsetName string) notifier.Notifier {
+func NewNotifierSSE(sseService stream.SSEService, flagsetName string) notifier.Notifier {
 	return &notifierSSE{
 		sseService:  sseService,
 		flagsetName: flagsetName,

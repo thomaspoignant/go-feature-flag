@@ -7,13 +7,13 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service/stream"
 	"go.uber.org/zap"
 )
 
 // NewWsFlagChange is the constructor to create a new controller to handle websocket
 // request to be notified about flag changes.
-func NewWsFlagChange(websocketService service.WebsocketService, logger *zap.Logger) *WSFlagChange {
+func NewWsFlagChange(websocketService stream.WebsocketService, logger *zap.Logger) *WSFlagChange {
 	return &WSFlagChange{
 		websocketService: websocketService,
 		upgrader: websocket.Upgrader{
@@ -27,7 +27,7 @@ func NewWsFlagChange(websocketService service.WebsocketService, logger *zap.Logg
 
 // WSFlagChange is the implementation of the controller
 type WSFlagChange struct {
-	websocketService service.WebsocketService
+	websocketService stream.WebsocketService
 	upgrader         websocket.Upgrader
 	logger           *zap.Logger
 }

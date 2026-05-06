@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/proxynotifier"
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service/stream"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/testutils/testconvert"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
@@ -40,7 +40,7 @@ func TestNotifierSSE_Notify(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			sseService := service.NewSSEService()
+			sseService := stream.NewSSEService()
 			defer sseService.Close()
 
 			n := proxynotifier.NewNotifierSSE(sseService, tt.flagsetName)

@@ -17,7 +17,7 @@ import (
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	controller "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/handler/goff"
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service/stream"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/testutils/testconvert"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
@@ -103,7 +103,7 @@ func Test_SSE_FlagChange(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 			defer cancel()
 
-			sseService := service.NewSSEService()
+			sseService := stream.NewSSEService()
 			defer sseService.Close()
 
 			subscribed := make(chan struct{}, 1)
@@ -165,7 +165,7 @@ func Test_SSE_FlagChange_FlagsetScoping(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	sseService := service.NewSSEService()
+	sseService := stream.NewSSEService()
 	defer sseService.Close()
 
 	subscribed := make(chan struct{}, 1)
@@ -262,7 +262,7 @@ func Test_SSE_FlagChange_Errors(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			sseService := service.NewSSEService()
+			sseService := stream.NewSSEService()
 			defer sseService.Close()
 
 			ctrl := controller.NewSSEFlagChange(sseService, tt.flagsetMgr, zap.NewNop())

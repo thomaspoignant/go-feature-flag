@@ -17,6 +17,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/helper"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service/stream"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -335,7 +336,7 @@ func newAPIServerWithLogger(
 
 	services := service.Services{
 		MonitoringService: service.NewMonitoring(flagsetManager),
-		WebsocketService:  service.NewWebsocketService(),
+		WebsocketService:  stream.NewWebsocketService(),
 		FlagsetManager:    flagsetManager,
 		Metrics:           metric.Metrics{},
 	}

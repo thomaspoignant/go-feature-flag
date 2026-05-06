@@ -1,4 +1,4 @@
-package service_test
+package stream_test
 
 import (
 	"bufio"
@@ -12,7 +12,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service/stream"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/testutils/testconvert"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
@@ -60,7 +60,7 @@ func TestSSEService_BroadcastAndReceive(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 			defer cancel()
 
-			sseService := service.NewSSEService()
+			sseService := stream.NewSSEService()
 			defer sseService.Close()
 
 			srv := httptest.NewServer(http.HandlerFunc(sseService.ServeHTTP))
@@ -127,6 +127,6 @@ func TestSSEService_BroadcastAndReceive(t *testing.T) {
 }
 
 func TestSSEService_Close(t *testing.T) {
-	sseService := service.NewSSEService()
+	sseService := stream.NewSSEService()
 	sseService.Close()
 }

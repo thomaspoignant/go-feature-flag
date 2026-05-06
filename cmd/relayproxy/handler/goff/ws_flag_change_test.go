@@ -12,7 +12,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	controller "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/handler/goff"
-	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service/stream"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/testutils/testconvert"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
@@ -109,7 +109,7 @@ func Test_websocket_flag_change(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 			defer cancel()
 
-			websocketService := service.NewWebsocketService()
+			websocketService := stream.NewWebsocketService()
 			defer func() {
 				websocketService.Close()
 				// Wait for cleanup to complete to avoid leaking goroutines in tests.

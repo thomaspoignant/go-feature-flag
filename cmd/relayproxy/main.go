@@ -14,6 +14,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/proxynotifier"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	stream "github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service/stream"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/log"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"go.uber.org/zap"
@@ -96,8 +97,8 @@ func main() {
 	}
 
 	// Init services
-	wsService := service.NewWebsocketService()
-	sseService := service.NewSSEService()
+	wsService := stream.NewWebsocketService()
+	sseService := stream.NewSSEService()
 	prometheusNotifier := metric.NewPrometheusNotifier(metricsV2)
 	proxyNotifier := proxynotifier.NewNotifierWebsocket(wsService)
 

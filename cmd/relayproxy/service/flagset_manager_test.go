@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service/stream"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"go.uber.org/zap"
@@ -152,7 +153,7 @@ func TestNewFlagsetManager_WithSSEService(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			sseService := service.NewSSEService()
+			sseService := stream.NewSSEService()
 			defer sseService.Close()
 
 			manager, err := service.NewFlagsetManager(tt.config, zap.NewNop(), []notifier.Notifier{}, sseService)
