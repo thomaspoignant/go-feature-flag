@@ -125,7 +125,7 @@ func Test_all_flag_Handler_DefaultMode(t *testing.T) {
 					},
 				},
 			}
-			flagsetManager, err := service.NewFlagsetManager(&conf, zap.NewNop(), []notifier.Notifier{})
+			flagsetManager, err := service.NewFlagsetManager(&conf, zap.NewNop(), []notifier.Notifier{}, nil)
 			assert.NoError(t, err, "impossible to create flagset manager")
 
 			ctrl := controller.NewAllFlags(flagsetManager, metric.Metrics{})
@@ -260,7 +260,7 @@ func Test_all_flag_Handler_FlagsetMode(t *testing.T) {
 						}},
 				},
 			}
-			flagsetManager, err := service.NewFlagsetManager(&conf, zap.NewNop(), []notifier.Notifier{})
+			flagsetManager, err := service.NewFlagsetManager(&conf, zap.NewNop(), []notifier.Notifier{}, nil)
 			assert.NoError(t, err, "impossible to create flagset manager")
 
 			ctrl := controller.NewAllFlags(flagsetManager, metric.Metrics{})

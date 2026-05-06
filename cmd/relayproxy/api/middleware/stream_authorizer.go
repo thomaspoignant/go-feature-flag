@@ -5,8 +5,9 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 )
 
-// WebsocketAuthorizer is a middleware that checks in the params if we have the needed parameter for authorization
-func WebsocketAuthorizer(config *config.Config) echo.MiddlewareFunc {
+// StreamAuthorizer is a middleware that checks the apiKey query param to authorize
+// streaming connections (websocket / SSE).
+func StreamAuthorizer(config *config.Config) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			apiKey := c.QueryParam("apiKey")

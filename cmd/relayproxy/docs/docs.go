@@ -340,6 +340,101 @@ const docTemplate = `{
                 }
             }
         },
+        "/stream/v1/sse/flag/change": {
+            "get": {
+                "description": "Server-Sent Events endpoint pushing flag change notifications.\nEach event payload is a ` + "`" + `notifier.DiffCache` + "`" + ` JSON document.\nThe full URL (including query string) is sensitive and must not be logged\nor persisted by intermediaries.",
+                "produces": [
+                    "text/event-stream"
+                ],
+                "tags": [
+                    "GO Feature Flag Evaluation Stream API"
+                ],
+                "summary": "SSE endpoint to be notified about flag changes",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "apiKey to authorize the connection to the relay proxy",
+                        "name": "apiKey",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "SSE stream of flag change events",
+                        "schema": {
+                            "$ref": "#/definitions/notifier.DiffCache"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
+                        }
+                    }
+                }
+            }
+        },
+        "/stream/v1/ws/flag/change": {
+            "get": {
+                "description": "This endpoint is a websocket endpoint to be notified about flag changes;\nevery change pushes a notifier.DiffCache message to the client.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "GO Feature Flag Evaluation Stream API"
+                ],
+                "summary": "Websocket endpoint to be notified about flag changes",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "apiKey to authorize the connection to the relay proxy",
+                        "name": "apiKey",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/notifier.DiffCache"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/allflags": {
             "post": {
                 "security": [
@@ -620,8 +715,8 @@ const docTemplate = `{
             }
         },
         "/ws/v1/flag/change": {
-            "post": {
-                "description": "This endpoint is a websocket endpoint to be notified about flag changes, every change\nwill send a request to the client with a model.DiffCache format.\n",
+            "get": {
+                "description": "Deprecated: use /stream/v1/ws/flag/change instead. This endpoint\nis a websocket endpoint to be notified about flag changes; every\nchange pushes a notifier.DiffCache message to the client.",
                 "consumes": [
                     "application/json"
                 ],
@@ -629,13 +724,14 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "GO Feature Flag Evaluation Websocket API"
+                    "GO Feature Flag Evaluation Stream API"
                 ],
                 "summary": "Websocket endpoint to be notified about flag changes",
+                "deprecated": true,
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "apiKey use authorize the connection to the relay proxy",
+                        "description": "apiKey to authorize the connection to the relay proxy",
                         "name": "apiKey",
                         "in": "query"
                     }
@@ -649,6 +745,12 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/modeldocs.HTTPErrorDoc"
                         }

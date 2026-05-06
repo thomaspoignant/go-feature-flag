@@ -12,6 +12,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/metric"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service/stream"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"github.com/thomaspoignant/go-feature-flag/testutils"
@@ -60,11 +61,11 @@ func TestPprofEndpointsStarts(t *testing.T) {
 				EnablePprof:    tt.EnablePprof,
 			}
 
-			flagsetManager, err := service.NewFlagsetManager(c, z, []notifier.Notifier{})
+			flagsetManager, err := service.NewFlagsetManager(c, z, []notifier.Notifier{}, nil)
 			require.NoError(t, err)
 			apiServer := api.New(c, service.Services{
 				MonitoringService: service.NewMonitoring(flagsetManager),
-				WebsocketService:  service.NewWebsocketService(),
+				WebsocketService:  stream.NewWebsocketService(),
 				FlagsetManager:    flagsetManager,
 				Metrics:           metric.Metrics{},
 			}, z)

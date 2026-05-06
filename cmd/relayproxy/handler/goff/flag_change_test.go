@@ -90,7 +90,7 @@ func TestPIFlagChange_WithConfigChange(t *testing.T) {
 				}
 			}
 
-			flagsetManager, err := service.NewFlagsetManager(&tt.config, zap.NewNop(), []notifier.Notifier{})
+			flagsetManager, err := service.NewFlagsetManager(&tt.config, zap.NewNop(), []notifier.Notifier{}, nil)
 			assert.NoError(t, err)
 			defer flagsetManager.Close()
 
@@ -202,7 +202,7 @@ func TestPIFlagChange_WithoutConfigChange(t *testing.T) {
 				}
 			}
 
-			flagsetManager, err := service.NewFlagsetManager(&tt.config, zap.NewNop(), []notifier.Notifier{})
+			flagsetManager, err := service.NewFlagsetManager(&tt.config, zap.NewNop(), []notifier.Notifier{}, nil)
 			assert.NoError(t, err)
 			defer flagsetManager.Close()
 

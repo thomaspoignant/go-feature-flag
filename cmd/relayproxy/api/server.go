@@ -130,7 +130,7 @@ func (s *Server) initRoutes() {
 	adminAuth := s.getAuthMiddleware(AdminAuth)
 	s.addGOFFRoutes(cAllFlags, cFlagEval, cEvalDataCollector, cFlagChangeAPI, cFlagConfiguration, userAuth)
 	s.addOFREPRoutes(cFlagEvalOFREP, userAuth)
-	s.addWebsocketRoutes()
+	s.addStreamRoutes()
 	s.addMonitoringRoutes()
 	s.addAdminRoutes(cRetrieverRefresh, adminAuth)
 	s.addManifestRoutes(cManifest, userAuth)

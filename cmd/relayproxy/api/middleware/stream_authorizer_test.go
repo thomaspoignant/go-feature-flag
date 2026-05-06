@@ -12,7 +12,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 )
 
-func TestWebsocketAuthorizer(t *testing.T) {
+func TestStreamAuthorizer(t *testing.T) {
 	type args struct {
 		confAPIKey string
 		urlAPIKey  string
@@ -48,7 +48,7 @@ func TestWebsocketAuthorizer(t *testing.T) {
 			e := echo.New()
 			req := httptest.NewRequest(
 				http.MethodGet,
-				fmt.Sprintf("/websocket?apiKey=%s", tt.args.urlAPIKey),
+				fmt.Sprintf("/stream?apiKey=%s", tt.args.urlAPIKey),
 				nil,
 			)
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -60,7 +60,7 @@ func TestWebsocketAuthorizer(t *testing.T) {
 				},
 			}
 			conf.ForceReloadAPIKeys()
-			middleware := middleware2.WebsocketAuthorizer(conf)
+			middleware := middleware2.StreamAuthorizer(conf)
 			handler := middleware(func(c echo.Context) error {
 				return c.String(http.StatusOK, "Authorized")
 			})

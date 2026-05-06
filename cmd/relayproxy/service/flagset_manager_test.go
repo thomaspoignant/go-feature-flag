@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service/stream"
 	"github.com/thomaspoignant/go-feature-flag/cmdhelpers/retrieverconf"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"go.uber.org/zap"
@@ -96,7 +97,7 @@ func TestNewFlagsetManager(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			manager, err := service.NewFlagsetManager(tt.config, tt.logger, tt.notifiers)
+			manager, err := service.NewFlagsetManager(tt.config, tt.logger, tt.notifiers, nil)
 
 			if tt.wantErr {
 				assert.Error(t, err)
@@ -109,6 +110,56 @@ func TestNewFlagsetManager(t *testing.T) {
 				assert.NotNil(t, manager)
 				defer manager.Close()
 			}
+		})
+	}
+}
+
+func TestNewFlagsetManager_WithSSEService(t *testing.T) {
+	flagConfig := "../testdata/goff/configuration_flags.yaml"
+
+	tests := []struct {
+		name   string
+		config *config.Config
+	}{
+		{
+			name: "default mode with SSE service attaches SSE notifier",
+			config: &config.Config{
+				CommonFlagSet: config.CommonFlagSet{
+					Retriever: &retrieverconf.RetrieverConf{
+						Kind: "file",
+						Path: flagConfig,
+					},
+				},
+			},
+		},
+		{
+			name: "flagsets mode with SSE service attaches SSE notifier per flagset",
+			config: &config.Config{
+				FlagSets: []config.FlagSet{
+					{
+						Name: "test-flagset",
+						CommonFlagSet: config.CommonFlagSet{
+							Retriever: &retrieverconf.RetrieverConf{
+								Kind: "file",
+								Path: flagConfig,
+							},
+						},
+						APIKeys: []string{"test-api-key"},
+					},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			sseService := stream.NewSSEService()
+			defer sseService.Close()
+
+			manager, err := service.NewFlagsetManager(tt.config, zap.NewNop(), []notifier.Notifier{}, sseService)
+			require.NoError(t, err)
+			require.NotNil(t, manager)
+			defer manager.Close()
 		})
 	}
 }
@@ -134,7 +185,7 @@ func TestFlagsetManager_FlagSet(t *testing.T) {
 		}
 		logger := zap.NewNop()
 		notifiers := []notifier.Notifier{}
-		manager, err := service.NewFlagsetManager(config, logger, notifiers)
+		manager, err := service.NewFlagsetManager(config, logger, notifiers, nil)
 		if err != nil {
 			t.Fatalf("failed to create FlagsetManager: %v", err)
 		}
@@ -177,7 +228,7 @@ func TestFlagsetManager_FlagSet(t *testing.T) {
 		}
 		logger := zap.NewNop()
 		notifiers := []notifier.Notifier{}
-		manager, err := service.NewFlagsetManager(config, logger, notifiers)
+		manager, err := service.NewFlagsetManager(config, logger, notifiers, nil)
 		if err != nil {
 			t.Fatalf("failed to create FlagsetManager: %v", err)
 		}
@@ -213,7 +264,7 @@ func TestFlagsetManager_FlagSetName(t *testing.T) {
 		}
 		logger := zap.NewNop()
 		notifiers := []notifier.Notifier{}
-		manager, err := service.NewFlagsetManager(config, logger, notifiers)
+		manager, err := service.NewFlagsetManager(config, logger, notifiers, nil)
 		if err != nil {
 			t.Fatalf("failed to create FlagsetManager: %v", err)
 		}
@@ -246,7 +297,7 @@ func TestFlagsetManager_FlagSetName(t *testing.T) {
 		}
 		logger := zap.NewNop()
 		notifiers := []notifier.Notifier{}
-		manager, err := service.NewFlagsetManager(config, logger, notifiers)
+		manager, err := service.NewFlagsetManager(config, logger, notifiers, nil)
 		if err != nil {
 			t.Fatalf("failed to create FlagsetManager: %v", err)
 		}
@@ -292,7 +343,7 @@ func TestFlagsetManager_AllFlagSets(t *testing.T) {
 		}
 		logger := zap.NewNop()
 		notifiers := []notifier.Notifier{}
-		manager, err := service.NewFlagsetManager(config, logger, notifiers)
+		manager, err := service.NewFlagsetManager(config, logger, notifiers, nil)
 		if err != nil {
 			t.Fatalf("failed to create FlagsetManager: %v", err)
 		}
@@ -333,7 +384,7 @@ func TestFlagsetManager_AllFlagSets(t *testing.T) {
 		}
 		logger := zap.NewNop()
 		notifiers := []notifier.Notifier{}
-		manager, err := service.NewFlagsetManager(config, logger, notifiers)
+		manager, err := service.NewFlagsetManager(config, logger, notifiers, nil)
 		if err != nil {
 			t.Fatalf("failed to create FlagsetManager: %v", err)
 		}
@@ -360,7 +411,7 @@ func TestFlagsetManager_AllFlagSets(t *testing.T) {
 		}
 		logger := zap.NewNop()
 		notifiers := []notifier.Notifier{}
-		manager, err := service.NewFlagsetManager(config, logger, notifiers)
+		manager, err := service.NewFlagsetManager(config, logger, notifiers, nil)
 		if err != nil {
 			t.Fatalf("failed to create FlagsetManager: %v", err)
 		}
@@ -390,7 +441,7 @@ func TestFlagsetManager_Default(t *testing.T) {
 		}
 		logger := zap.NewNop()
 		notifiers := []notifier.Notifier{}
-		manager, err := service.NewFlagsetManager(config, logger, notifiers)
+		manager, err := service.NewFlagsetManager(config, logger, notifiers, nil)
 		if err != nil {
 			t.Fatalf("failed to create FlagsetManager: %v", err)
 		}
@@ -419,7 +470,7 @@ func TestFlagsetManager_Default(t *testing.T) {
 		}
 		logger := zap.NewNop()
 		notifiers := []notifier.Notifier{}
-		manager, err := service.NewFlagsetManager(config, logger, notifiers)
+		manager, err := service.NewFlagsetManager(config, logger, notifiers, nil)
 		if err != nil {
 			t.Fatalf("failed to create FlagsetManager: %v", err)
 		}
@@ -447,7 +498,7 @@ func TestFlagsetManager_IsDefaultFlagSet(t *testing.T) {
 		}
 		logger := zap.NewNop()
 		notifiers := []notifier.Notifier{}
-		manager, err := service.NewFlagsetManager(config, logger, notifiers)
+		manager, err := service.NewFlagsetManager(config, logger, notifiers, nil)
 		if err != nil {
 			t.Fatalf("failed to create FlagsetManager: %v", err)
 		}
@@ -475,7 +526,7 @@ func TestFlagsetManager_IsDefaultFlagSet(t *testing.T) {
 		}
 		logger := zap.NewNop()
 		notifiers := []notifier.Notifier{}
-		manager, err := service.NewFlagsetManager(config, logger, notifiers)
+		manager, err := service.NewFlagsetManager(config, logger, notifiers, nil)
 		if err != nil {
 			t.Fatalf("failed to create FlagsetManager: %v", err)
 		}
@@ -502,7 +553,7 @@ func TestFlagsetManager_Close(t *testing.T) {
 		}
 		logger := zap.NewNop()
 		notifiers := []notifier.Notifier{}
-		manager, err := service.NewFlagsetManager(config, logger, notifiers)
+		manager, err := service.NewFlagsetManager(config, logger, notifiers, nil)
 		if err != nil {
 			t.Fatalf("failed to create FlagsetManager: %v", err)
 		}
@@ -531,7 +582,7 @@ func TestFlagsetManager_Close(t *testing.T) {
 		}
 		logger := zap.NewNop()
 		notifiers := []notifier.Notifier{}
-		manager, err := service.NewFlagsetManager(config, logger, notifiers)
+		manager, err := service.NewFlagsetManager(config, logger, notifiers, nil)
 		if err != nil {
 			t.Fatalf("failed to create FlagsetManager: %v", err)
 		}
@@ -548,7 +599,7 @@ func setupManager(t *testing.T, cfg *config.Config) (service.FlagsetManager, *ob
 	t.Helper()
 	obs, logs := observer.New(zap.ErrorLevel)
 	logger := zap.New(obs)
-	manager, err := service.NewFlagsetManager(cfg, logger, nil)
+	manager, err := service.NewFlagsetManager(cfg, logger, nil, nil)
 	require.NoError(t, err)
 	t.Cleanup(func() { manager.Close() })
 	return manager, logs
@@ -1160,7 +1211,7 @@ func TestFlagsetManager_OnConfigChange(t *testing.T) {
 		}
 		obs, logs := observer.New(zap.InfoLevel)
 		logger := zap.New(obs)
-		manager, err := service.NewFlagsetManager(cfg, logger, nil)
+		manager, err := service.NewFlagsetManager(cfg, logger, nil, nil)
 		require.NoError(t, err)
 		t.Cleanup(func() { manager.Close() })
 
@@ -1210,7 +1261,7 @@ func TestFlagsetManager_OnConfigChange(t *testing.T) {
 		}
 		obs, logs := observer.New(zap.WarnLevel)
 		logger := zap.New(obs)
-		manager, err := service.NewFlagsetManager(cfg, logger, nil)
+		manager, err := service.NewFlagsetManager(cfg, logger, nil, nil)
 		require.NoError(t, err)
 		t.Cleanup(func() { manager.Close() })
 
@@ -1265,7 +1316,7 @@ func TestFlagsetManager_OnConfigChange(t *testing.T) {
 		}
 		obs, logs := observer.New(zap.WarnLevel)
 		logger := zap.New(obs)
-		manager, err := service.NewFlagsetManager(cfg, logger, nil)
+		manager, err := service.NewFlagsetManager(cfg, logger, nil, nil)
 		require.NoError(t, err)
 		t.Cleanup(func() { manager.Close() })
 
