@@ -54,6 +54,9 @@ func (h *sseFlagChange) Handler(c echo.Context) error {
 	h.logger.Debug("SSE client connecting", zap.String("flagset", flagsetName))
 
 	// r3labs/sse routes by the "stream" query parameter.
+	// We need to set the "stream" query parameter to the flagset name. We also need to delete the "apiKey" query parameter.
+	// This is because the r3labs/sse server will use the "stream" query parameter to route the request to the correct flagset.
+	// After that point the apiKey is not needed anymore, so we delete it.
 	q := c.Request().URL.Query()
 	q.Set("stream", flagsetName)
 	q.Del("apiKey")
