@@ -13,8 +13,8 @@ import (
 
 // NewWsFlagChange is the constructor to create a new controller to handle websocket
 // request to be notified about flag changes.
-func NewWsFlagChange(websocketService service.WebsocketService, logger *zap.Logger) Controller {
-	return &wsFlagChange{
+func NewWsFlagChange(websocketService service.WebsocketService, logger *zap.Logger) *WSFlagChange {
+	return &WSFlagChange{
 		websocketService: websocketService,
 		upgrader: websocket.Upgrader{
 			CheckOrigin: func(_ *http.Request) bool {
@@ -25,8 +25,8 @@ func NewWsFlagChange(websocketService service.WebsocketService, logger *zap.Logg
 	}
 }
 
-// wsFlagChange is the implementation of the controller
-type wsFlagChange struct {
+// WSFlagChange is the implementation of the controller
+type WSFlagChange struct {
 	websocketService service.WebsocketService
 	upgrader         websocket.Upgrader
 	logger           *zap.Logger
@@ -47,7 +47,7 @@ type wsFlagChange struct {
 // @Failure      401  {object} modeldocs.HTTPErrorDoc "Unauthorized"
 // @Failure      500  {object} modeldocs.HTTPErrorDoc "Internal server error"
 // @Router       /ws/v1/flag/change [get]
-func (f *wsFlagChange) LegacyHandler(c echo.Context) error {
+func (f *WSFlagChange) LegacyHandler(c echo.Context) error {
 	// This handler is deprecated and we keep it for the documentation.
 	return f.Handler(c)
 }
@@ -65,7 +65,7 @@ func (f *wsFlagChange) LegacyHandler(c echo.Context) error {
 // @Failure      401  {object} modeldocs.HTTPErrorDoc "Unauthorized"
 // @Failure      500  {object} modeldocs.HTTPErrorDoc "Internal server error"
 // @Router       /stream/v1/ws/flag/change [get]
-func (f *wsFlagChange) Handler(c echo.Context) error {
+func (f *WSFlagChange) Handler(c echo.Context) error {
 	conn, err := f.upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
 		return err
@@ -107,7 +107,7 @@ func (f *wsFlagChange) Handler(c echo.Context) error {
 // pingPongLoop is a keep-alive call to the client.
 // It calls the client to ensure that the connection is still active.
 // If the ping is not working we are closing the session.
-func (f *wsFlagChange) pingPongLoop(ctx context.Context, conn *websocket.Conn) {
+func (f *WSFlagChange) pingPongLoop(ctx context.Context, conn *websocket.Conn) {
 	// Ping interval duration
 	pingInterval := 1 * time.Second
 	// Create a ticker to send pings at regular intervals

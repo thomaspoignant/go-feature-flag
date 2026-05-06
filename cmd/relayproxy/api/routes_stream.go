@@ -23,7 +23,7 @@ func (s *Server) addStreamRoutes() {
 	// Legacy alias - kept for backward compatibility, marked deprecated.
 	s.apiEcho.GET(
 		"/ws/v1/flag/change",
-		cWsFlagChange.Handler,
+		cWsFlagChange.LegacyHandler,
 		authorize,
 		deprecatedAlias("/stream/v1/ws/flag/change"),
 	)
