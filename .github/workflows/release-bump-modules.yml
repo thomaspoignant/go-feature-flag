@@ -29,6 +29,7 @@ jobs:
         with:
           go-version-file: ${{ inputs.goModDirectoryPath }}/go.mod
           check-latest: true
+          cache: false
 
       - name: Update internal module
         env:

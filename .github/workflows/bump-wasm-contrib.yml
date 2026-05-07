@@ -72,6 +72,7 @@ jobs:
         with:
           go-version-file: ./.github/ci-scripts/bump-wasm-contrib/go.mod
           check-latest: true
+          cache: false
 
       - name: Update submodule dotnet contrib repository
         run: cd out/contrib/dotnet-sdk-contrib && git submodule update --remote src/OpenFeature.Providers.GOFeatureFlag/wasm-releases
@@ -126,4 +127,3 @@ jobs:
           signoff: true
           delete-branch: true
           token: ${{ secrets.OPENFEATURE_PR_PAT }}
-

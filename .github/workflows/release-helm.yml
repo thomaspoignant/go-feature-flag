@@ -43,6 +43,7 @@ jobs:
         with:
           go-version-file: go.mod
           check-latest: true
+          cache: false
 
       - name: Update chart README
         if: steps.changed-files-specific.outputs.changed == 'true'
