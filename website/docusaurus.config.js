@@ -7,7 +7,7 @@ const {generateSdksDropdownHTML} = require('./src/components/navbar/sdks');
 /** @type {import("@docusaurus/types").Config} */
 const config = {
   title: 'GO Feature Flag',
-  tagline: 'Simple Feature Flagging for All',
+  tagline: 'Cloud Native Feature Flagging',
   url: 'https://gofeatureflag.org',
   baseUrl: '/',
   onBrokenLinks: 'throw',

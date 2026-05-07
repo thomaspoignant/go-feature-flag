@@ -78,7 +78,7 @@ function StepCard({step, active, onClick}) {
         onClick={onClick}
         aria-pressed={active}
         className={clsx(
-          'w-full h-full text-left p-5 rounded-xl font-poppins transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--ifm-color-primary)] focus:ring-offset-white dark:focus:ring-offset-[#242526]',
+          'w-full h-full text-left p-2 rounded-xl font-poppins transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--ifm-color-primary)] focus:ring-offset-white dark:focus:ring-offset-[#242526]',
           'bg-gray-50 dark:bg-[#1f1f20] border-2',
           active
             ? 'border-[var(--ifm-color-primary)] shadow-[0_0_0_1px_var(--ifm-color-primary)]'
@@ -130,7 +130,7 @@ export function QuickStart() {
       </p>
 
       <div className="max-w-5xl mx-auto px-4 mt-10">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
           {steps.map(s => (
             <StepCard
               key={s.id}
