@@ -16,12 +16,12 @@
     "eslint:fix": "eslint \"**/*.js\" --fix"
   },
   "dependencies": {
-    "@docusaurus/core": "^3.9.2",
-    "@docusaurus/plugin-client-redirects": "^3.9.2",
-    "@docusaurus/plugin-google-gtag": "^3.9.2",
-    "@docusaurus/plugin-google-tag-manager": "^3.9.2",
-    "@docusaurus/preset-classic": "^3.9.2",
-    "@docusaurus/theme-mermaid": "^3.9.2",
+    "@docusaurus/core": "^3.10.1",
+    "@docusaurus/plugin-client-redirects": "^3.10.1",
+    "@docusaurus/plugin-google-gtag": "^3.10.1",
+    "@docusaurus/plugin-google-tag-manager": "^3.10.1",
+    "@docusaurus/preset-classic": "^3.10.1",
+    "@docusaurus/theme-mermaid": "^3.10.1",
     "@hookform/error-message": "^2.0.1",
     "@iarna/toml": "^2.2.5",
     "@mdx-js/react": "^3.1.1",
@@ -56,9 +56,9 @@
     "yaml": "^2.8.2"
   },
   "devDependencies": {
-    "@docusaurus/eslint-plugin": "^3.9.2",
-    "@docusaurus/module-type-aliases": "^3.9.2",
-    "@docusaurus/types": "^3.9.2",
+    "@docusaurus/eslint-plugin": "^3.10.1",
+    "@docusaurus/module-type-aliases": "^3.10.1",
+    "@docusaurus/types": "^3.10.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-mdx": "^3.6.2",
     "eslint-plugin-prettier": "^5.5.5",
