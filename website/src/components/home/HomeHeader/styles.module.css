@@ -2,7 +2,7 @@
   align-items: center;
   display: flex;
   padding: 4rem 2rem;
-  margin: 4rem 0 4rem 0;
+  margin: 4rem 0 0 0;
 }
 
 .heroShape {
@@ -17,7 +17,7 @@
   position: absolute;
   top: 0;
   right: 0;
-  width: 48%;
+  width: 43%;
 }
 
 .heroShape svg:last-child {
