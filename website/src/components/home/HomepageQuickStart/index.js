@@ -4,12 +4,12 @@ import PropTypes from 'prop-types';
 import {CodeCard} from './CodeCard';
 import {sdk} from '../../../../data/sdk';
 
-const dockerSnippet = `docker run \\
-    -v $(pwd)/flags.goff.yaml:/goff/flags.goff.yaml \\
-    -p 1031:1031 \\
-    -e RETRIEVERS_0_KIND=file \\
-    -e RETRIEVERS_0_PATH=/goff/flags.goff.yaml \\
-    gofeatureflag/go-feature-flag:latest`;
+const dockerSnippet = String.raw(`docker run \
+    -v $(pwd)/flags.goff.yaml:/goff/flags.goff.yaml \
+    -p 1031:1031 \
+    -e RETRIEVERS_0_KIND=file \
+    -e RETRIEVERS_0_PATH=/goff/flags.goff.yaml \
+    gofeatureflag/go-feature-flag:latest`);
 
 const yamlSnippet = `# Roll out to 10% of users — increase anytime
 my-new-feature:
