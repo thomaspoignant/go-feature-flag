@@ -1,0 +1,25 @@
+/* Hide scrollbars on the code <pre> while keeping horizontal scroll functionality. */
+.codePre {
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+
+.codePre::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none; /* Safari and Chrome */
+}
+
+/* Hide scrollbars on the language tablist while keeping horizontal scroll functionality. */
+.tabList {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+
+.tabList::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none; /* Safari and Chrome */
+}
