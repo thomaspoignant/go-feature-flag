@@ -247,7 +247,7 @@ dev = [
     { name = "pytest", specifier = ">=9.0,<10.0" },
     { name = "pytest-docker", specifier = ">=2.0.1,<4.0.0" },
     { name = "pyyaml", specifier = ">=6.0.1" },
-    { name = "requests", specifier = ">=2.33.0" },
+    { name = "requests", specifier = ">=2.33.0,<3.0.0" },
 ]
 
 [[package]]
