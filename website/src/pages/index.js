@@ -2,6 +2,7 @@ import React from 'react';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';
 import {Whatis} from '../components/home/whatis';
+import {QuickStart} from '../components/home/HomepageQuickStart';
 import {HomeHeader} from '../components/home/HomeHeader';
 import {Benefit} from '../components/home/benefit';
 import {
@@ -21,6 +22,7 @@ export default function Home() {
       description={`${siteConfig.customFields.description}`}>
       <HomeHeader />
       <Whatis />
+      <QuickStart />
       <UsingIt />
       <div className={'my-10'}></div>
       <OpenFeatureEcosystem />
