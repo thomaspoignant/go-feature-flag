@@ -31,7 +31,7 @@ jobs:
         id: normalize_version
         run: |
           set -euo pipefail
-          VERSION="${{ inputs.version }}"
+          VERSION="${VERSION}"
           if [[ ! "$VERSION" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+([\-+][0-9A-Za-z.-]+)?$ ]]; then
             echo "Invalid version: $VERSION"
             echo 'Expected something like "v2.0.0" or "2.0.0".'
@@ -39,6 +39,8 @@ jobs:
           fi          
           echo "wasm_version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "Using wasm_version=$VERSION"
+        env:
+          VERSION: ${{ inputs.version }}
 
       - name: Checkout OpenFeature java contrib repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
