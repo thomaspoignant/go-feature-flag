@@ -113,28 +113,40 @@ function CodeBody({code, language}) {
   const prismTheme = usePrismTheme();
   return (
     <Highlight code={code} language={language} theme={prismTheme}>
-      {({className, style, tokens, getLineProps, getTokenProps}) => (
-        <pre
-          className={clsx(
-            className,
-            styles.codePre,
-            'm-0 px-5 py-4 text-[0.85rem] leading-6 font-mono'
-          )}
-          style={{
-            ...style,
-            background: 'transparent',
-            overflowX: 'auto',
-            overflowY: 'hidden',
-          }}>
-          {tokens.map((line, i) => (
-            <div key={i} {...getLineProps({line})}>
-              {line.map((token, key) => (
-                <span key={key} {...getTokenProps({token})} />
-              ))}
-            </div>
-          ))}
-        </pre>
-      )}
+      {({className, style, tokens, getLineProps, getTokenProps}) => {
+        let lineStartOffset = 0;
+        return (
+          <pre
+            className={clsx(
+              className,
+              styles.codePre,
+              'm-0 px-5 py-4 text-[0.85rem] leading-6 font-mono'
+            )}
+            style={{
+              ...style,
+              background: 'transparent',
+              overflowX: 'auto',
+              overflowY: 'hidden',
+            }}>
+            {tokens.map(line => {
+              const lineOffset = lineStartOffset;
+              const lineText = line.map(t => t.content).join('');
+              lineStartOffset += lineText.length;
+              let tokenOrdinal = 0;
+              return (
+                <div key={`line-${lineOffset}`} {...getLineProps({line})}>
+                  {line.map(token => {
+                    const typesKey = (token.types ?? []).join('.');
+                    const tokenKey = `tok-${lineOffset}-${tokenOrdinal}-${typesKey}`;
+                    tokenOrdinal += 1;
+                    return <span key={tokenKey} {...getTokenProps({token})} />;
+                  })}
+                </div>
+              );
+            })}
+          </pre>
+        );
+      }}
     </Highlight>
   );
 }

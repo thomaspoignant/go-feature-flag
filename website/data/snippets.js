@@ -1,5 +1,5 @@
 export const tsSnippet = `import {OpenFeature} from '@openfeature/web-sdk';
-import {GoFeatureFlagProvider} from '@openfeature/go-feature-flag-web-provider';
+import {GoFeatureFlagWebProvider} from '@openfeature/go-feature-flag-web-provider';
 
 await OpenFeature.setProviderAndWait(
   new GoFeatureFlagWebProvider({endpoint: 'http://localhost:1031'})
@@ -11,6 +11,7 @@ const client = await OpenFeature.getClient();
 const enabled = await client.getBooleanValue('my-new-feature', false);`;
 
 export const goSnippet = `import (
+    "context"
     of "github.com/open-feature/go-sdk/openfeature"
     gofeatureflag "github.com/open-feature/go-sdk-contrib/providers/go-feature-flag"
 )
@@ -20,7 +21,7 @@ provider, _ := gofeatureflag.NewProvider(gofeatureflag.ProviderOptions{
 })
 of.SetProvider(provider)
 client := of.NewClient("my-app")
-enabled, _ := client.BooleanValue(ctx, "my-new-feature", false,
+enabled, _ := client.BooleanValue(context.Background(), "my-new-feature", false,
     of.NewEvaluationContext("user-123", nil))`;
 
 export const javaSnippet = `import dev.openfeature.sdk.*;
@@ -72,7 +73,7 @@ val evaluationContext: EvaluationContext = ImmutableContext(
 
 OpenFeatureAPI.setProvider(
     GoFeatureFlagProvider(
-        options = GoFeatureFlagOptions( endpoint = "http://localhost:1031")
+        options = GoFeatureFlagOptions(endpoint = "http://localhost:1031")
     ),
     evaluationContext
 )

@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import {CodeCard} from './CodeCard';
 import {sdk} from '../../../../data/sdk';
 
-const dockerSnippet = ` docker run \\
+const dockerSnippet = `docker run \\
     -v $(pwd)/flags.goff.yaml:/goff/flags.goff.yaml \\
     -p 1031:1031 \\
     -e RETRIEVERS_0_KIND=file \\
@@ -23,15 +23,16 @@ my-new-feature:
 
 const sdkTabs = sdk
   .sort((a, b) => {
-    const aIsClient = a.paradigm && a.paradigm.includes('Client');
-    const bIsClient = b.paradigm && b.paradigm.includes('Client');
+    const aIsClient = a.paradigm?.includes('Client');
+    const bIsClient = b.paradigm?.includes('Client');
     if (aIsClient === bIsClient) return 0;
     return aIsClient ? -1 : 1;
   })
   .filter(s => s.snippets !== undefined)
   .map(s => {
-    const paradigmSuffix =
-      s.paradigm && s.paradigm.includes('Client') ? ' (Client)' : ' (Server)';
+    const paradigmSuffix = s.paradigm?.includes('Client')
+      ? ' (Client)'
+      : ' (Server)';
     return {
       value: s.key,
       label: s.name,
@@ -171,7 +172,7 @@ export function QuickStart() {
             tabs={sdkTabs}
             moreLink={{
               to: '/docs/sdk',
-              label: 'More ...',
+              label: 'More (NodeJS, Python, React, Angular, PHP, Ruby ...)',
               ariaLabel: 'See all supported SDKs',
             }}
             callout={
