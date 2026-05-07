@@ -20,7 +20,6 @@ from gofeatureflag_python_provider.options import GoFeatureFlagOptions
 from gofeatureflag_python_provider.services.models import FlagConfigResponse
 from gofeatureflag_python_provider.wasm.models import WasmEvaluationResponse
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------

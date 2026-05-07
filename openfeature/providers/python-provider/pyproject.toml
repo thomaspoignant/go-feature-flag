@@ -30,9 +30,9 @@ Documentation = "https://github.com/thomaspoignant/go-feature-flag/tree/main/ope
 
 [dependency-groups]
 dev = [
-    "pytest>=7.4,<9.0",
-    "black>=23.10.1,<26.0.0",
-    "requests>=2.31.0",
+    "pytest>=9.0,<10.0",
+    "black>=26.0.0,<27.0.0",
+    "requests>=2.33.0,<3.0.0",
     "pyyaml>=6.0.1",
     "pytest-docker>=2.0.1,<4.0.0",
 ]
