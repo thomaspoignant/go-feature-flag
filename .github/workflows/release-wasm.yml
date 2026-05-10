@@ -11,8 +11,6 @@ permissions:
 jobs:
   wasm-release:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - name: Extract version from tag
         id: extract_version
