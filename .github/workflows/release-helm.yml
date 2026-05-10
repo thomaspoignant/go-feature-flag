@@ -57,6 +57,7 @@ jobs:
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
           fetch-depth: 0
           persist-credentials: false
+
       - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: Copy README to main branch
