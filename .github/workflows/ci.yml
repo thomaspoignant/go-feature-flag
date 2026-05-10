@@ -171,6 +171,7 @@ jobs:
         with:
           go-version-file: go.mod
           check-latest: true
+          cache: false
       - name: Run benchmark
         run: make bench | tee bench-output.txt
       - name: Download previous benchmark data
