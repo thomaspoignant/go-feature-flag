@@ -46,7 +46,7 @@
     "postcss-cli": "^11.0.1",
     "postcss-scss": "^4.0.9",
     "posthtml": "^0.16.7",
-    "posthtml-cli": "^0.7.7",
+    "posthtml-cli": "^0.10.0",
     "posthtml-modules": "^0.9.1",
     "sass": "^1.99.0",
     "stylelint": "^17.11.0",
