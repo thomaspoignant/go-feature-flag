@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
-
+          persist-credentials: false
       - name: Get changed files in the docs folder
         id: changed-files-specific
         uses: marceloprado/has-changed-path@df1b7a3161b8fb9fd8c90403c66a9e66dfde50cb # v1.0.1
@@ -43,6 +43,7 @@ jobs:
         with:
           go-version-file: go.mod
           check-latest: true
+          cache: false
 
       - name: Update chart README
         if: steps.changed-files-specific.outputs.changed == 'true'
@@ -55,6 +56,7 @@ jobs:
           path: ${{ env.MAIN_BRANCH_NAME }}
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
           fetch-depth: 0
+          persist-credentials: false
 
       - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 

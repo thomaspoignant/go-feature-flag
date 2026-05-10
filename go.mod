@@ -1,6 +1,6 @@
 module github.com/thomaspoignant/go-feature-flag
 
-go 1.25.9
+go 1.25.10
 
 require (
 	cloud.google.com/go/pubsub v1.50.2
