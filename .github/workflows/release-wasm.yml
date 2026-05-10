@@ -11,17 +11,17 @@ permissions:
 jobs:
   wasm-release:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - name: Extract version from tag
         id: extract_version
         run: |
-          TAG_NAME="${{ github.ref }}"
+          TAG_NAME="${TAG_NAME}"
           VERSION=$(echo $TAG_NAME | awk -F '/' '{print $NF}' | sed 's/^v//')
           echo "tag_name_full=$TAG_NAME" >> $GITHUB_OUTPUT
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
           echo "Extracted version: $VERSION"
+        env:
+          TAG_NAME: ${{ github.ref }}
 
       - name: Echo Release wasm version
         env:
@@ -32,11 +32,13 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
+          persist-credentials: false
       - name: Setup go
         uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
         with:
           go-version-file: cmd/wasm/go.mod
           check-latest: true
+          cache: false
       - uses: acifani/setup-tinygo@dd8a7075d951a7595b2ef2123ed0ab1af0c13e56 # v3.0.0
         with:
           tinygo-version: "0.40.1"
@@ -57,7 +59,7 @@ jobs:
           repository: go-feature-flag/wasm-releases
           path: wasm-releases
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
-
+          persist-credentials: false
       - name: Copy WASM files to wasm-releases repository
         env:
           VERSION: ${{ steps.extract_version.outputs.VERSION }}
@@ -85,4 +87,3 @@ jobs:
           labels: automerge
           path: wasm-releases
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
-
