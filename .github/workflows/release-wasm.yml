@@ -60,6 +60,7 @@ jobs:
           path: wasm-releases
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
           persist-credentials: false
+
       - name: Copy WASM files to wasm-releases repository
         env:
           VERSION: ${{ steps.extract_version.outputs.VERSION }}
