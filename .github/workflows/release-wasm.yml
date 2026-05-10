@@ -15,11 +15,13 @@ jobs:
       - name: Extract version from tag
         id: extract_version
         run: |
-          TAG_NAME="${{ github.ref }}"
+          TAG_NAME="${TAG_NAME}"
           VERSION=$(echo $TAG_NAME | awk -F '/' '{print $NF}' | sed 's/^v//')
           echo "tag_name_full=$TAG_NAME" >> $GITHUB_OUTPUT
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
           echo "Extracted version: $VERSION"
+        env:
+          TAG_NAME: ${{ github.ref }}
 
       - name: Echo Release wasm version
         env:
@@ -86,4 +88,3 @@ jobs:
           labels: automerge
           path: wasm-releases
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
-
