@@ -16,6 +16,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: data_export_file
         uses: go-feature-flag/gofeatureflag-lint-action@2ecce17c1a8f5798671140cd011f76c6908b622f # v1.1.0
