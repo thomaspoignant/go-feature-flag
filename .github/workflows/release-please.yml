@@ -4,6 +4,11 @@ on:
   push:
     branches: [main]
 
+# Default for jobs that call reusable workflows (least privilege). release-please overrides below.
+permissions:
+  actions: read
+  contents: read
+
 jobs:
   release-please:
     runs-on: ubuntu-latest
