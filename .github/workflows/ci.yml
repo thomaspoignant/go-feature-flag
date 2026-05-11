@@ -22,6 +22,7 @@ jobs:
         with:
           go-version-file: go.mod
           check-latest: true
+          cache: false
       - run: make build
   Lint:
     runs-on: ubuntu-latest
@@ -38,6 +39,7 @@ jobs:
         with:
           go-version-file: go.mod
           check-latest: true
+          cache: false
       - run: make lint
 
   Test:
@@ -55,6 +57,7 @@ jobs:
         with:
           go-version-file: go.mod
           check-latest: true
+          cache: false
       - run: make test
 
   Coverage:
@@ -72,6 +75,7 @@ jobs:
         with:
           go-version-file: go.mod
           check-latest: true
+          cache: false
       - run: make coverage
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v6.0.0
@@ -97,6 +101,7 @@ jobs:
         with:
           go-version-file: go.mod
           check-latest: true
+          cache: false
       - run: make swagger
       - run: git diff --exit-code --quiet
 
@@ -115,9 +120,10 @@ jobs:
         with:
           go-version-file: go.mod
           check-latest: true
+          cache: false
 
       - name: Run GoReleaser .goreleaser.yaml check
-        uses: goreleaser/goreleaser-action@e24998b8b67b290c2fa8b7c14fcfa7de2c5c9b8c # v7.1.0
+        uses: goreleaser/goreleaser-action@1a80836c5c9d9e5755a25cb59ec6f45a3b5f41a8 # v7.2.1
         with:
           distribution: goreleaser
           version: latest
@@ -139,6 +145,7 @@ jobs:
         with:
           go-version-file: go.mod
           check-latest: true
+          cache: false
       - name: Set up Maven
         uses: stCarolas/setup-maven@d6af6abeda15e98926a57b5aa970a96bb37f97d1 # v5
         with:
@@ -248,6 +255,7 @@ jobs:
         with:
           go-version-file: go.mod
           check-latest: true
+          cache: false
       - run: make verify
 
   Tidy:
@@ -265,6 +273,7 @@ jobs:
         with:
           go-version-file: go.mod
           check-latest: true
+          cache: false
       - run: make tidy-check
 
   Govulncheck:
@@ -282,6 +291,7 @@ jobs:
         with:
           go-version-file: go.mod
           check-latest: true
+          cache: false
       - name: Run govulncheck
         run: make vuln-check
 
@@ -298,6 +308,7 @@ jobs:
         with:
           go-version-file: cmd/wasm/go.mod
           check-latest: true
+          cache: false
       - uses: acifani/setup-tinygo@dd8a7075d951a7595b2ef2123ed0ab1af0c13e56 # v3.0.0
         with:
           tinygo-version: "0.40.1"
