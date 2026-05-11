@@ -12,11 +12,17 @@ import (
 	"time"
 
 	"github.com/diegoholiveira/jsonlogic/v3"
+	lru "github.com/hashicorp/golang-lru/v2"
 	"github.com/nikunjy/rules/parser"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/internalerror"
 	"github.com/thomaspoignant/go-feature-flag/modules/core/utils"
 )
+
+// DefaultRuleEvaluatorCacheSize is the default capacity of the nikunjy evaluator
+// LRU cache. It is bounded so that pathological flag configs (or churn from
+// scheduled rollouts / hot reloads) cannot grow the cache without limit.
+const DefaultRuleEvaluatorCacheSize = 1000
 
 // nikunjyEvaluatorCache memoizes a sync.Pool of *parser.Evaluator per query string.
 // Parsing the query via ANTLR is the dominant cost of a nikunjy rule evaluation
@@ -25,9 +31,45 @@ import (
 // concurrent calls require either serialization or a pool of evaluators per query.
 // We use sync.Pool because evaluations are typically high-throughput and short-lived.
 //
-// Memory note: cache entries are not evicted, since a feature flag's query strings
-// are part of static config and the set is bounded in practice.
-var nikunjyEvaluatorCache sync.Map // map[string]*pooledNikunjyEvaluator
+// The cache is an LRU bounded by DefaultRuleEvaluatorCacheSize (overridable via
+// SetRuleEvaluatorCacheSize). Eviction only drops the cached parsed evaluator;
+// the next evaluation of an evicted query simply re-parses.
+var (
+	nikunjyEvaluatorCacheMu   sync.RWMutex
+	nikunjyEvaluatorCache     *lru.Cache[string, *pooledNikunjyEvaluator]
+	nikunjyEvaluatorCacheOnce sync.Once
+)
+
+func ensureNikunjyEvaluatorCache() *lru.Cache[string, *pooledNikunjyEvaluator] {
+	nikunjyEvaluatorCacheOnce.Do(func() {
+		c, _ := lru.New[string, *pooledNikunjyEvaluator](DefaultRuleEvaluatorCacheSize)
+		nikunjyEvaluatorCacheMu.Lock()
+		nikunjyEvaluatorCache = c
+		nikunjyEvaluatorCacheMu.Unlock()
+	})
+	nikunjyEvaluatorCacheMu.RLock()
+	defer nikunjyEvaluatorCacheMu.RUnlock()
+	return nikunjyEvaluatorCache
+}
+
+// SetRuleEvaluatorCacheSize resizes the nikunjy evaluator LRU cache. Existing
+// entries are dropped (the next evaluation will re-parse the query). Returns an
+// error if size <= 0. The cache is process-global, so the last caller wins.
+func SetRuleEvaluatorCacheSize(size int) error {
+	if size <= 0 {
+		return fmt.Errorf("rule evaluator cache size must be > 0, got %d", size)
+	}
+	c, err := lru.New[string, *pooledNikunjyEvaluator](size)
+	if err != nil {
+		return err
+	}
+	// Make sure the Once is consumed so a later first-use does not overwrite us.
+	nikunjyEvaluatorCacheOnce.Do(func() {})
+	nikunjyEvaluatorCacheMu.Lock()
+	nikunjyEvaluatorCache = c
+	nikunjyEvaluatorCacheMu.Unlock()
+	return nil
+}
 
 type pooledNikunjyEvaluator struct {
 	pool sync.Pool
@@ -61,15 +103,20 @@ func (p *pooledNikunjyEvaluator) process(items map[string]interface{}) (bool, er
 }
 
 func getNikunjyEvaluator(query string) (*pooledNikunjyEvaluator, error) {
-	if v, ok := nikunjyEvaluatorCache.Load(query); ok {
-		return v.(*pooledNikunjyEvaluator), nil
+	cache := ensureNikunjyEvaluatorCache()
+	if v, ok := cache.Get(query); ok {
+		return v, nil
 	}
 	p, err := newPooledNikunjyEvaluator(query)
 	if err != nil {
 		return nil, err
 	}
-	actual, _ := nikunjyEvaluatorCache.LoadOrStore(query, p)
-	return actual.(*pooledNikunjyEvaluator), nil
+	// Re-fetch in case the cache was swapped concurrently by SetRuleEvaluatorCacheSize.
+	cache = ensureNikunjyEvaluatorCache()
+	if existing, ok, _ := cache.PeekOrAdd(query, p); ok {
+		return existing, nil
+	}
+	return p, nil
 }
 
 type QueryFormat = string

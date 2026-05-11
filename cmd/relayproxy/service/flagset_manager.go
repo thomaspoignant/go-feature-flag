@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"github.com/thomaspoignant/go-feature-flag/utils"
 	"go.uber.org/zap"
@@ -76,6 +77,12 @@ func NewFlagsetManager(
 	config *config.Config, logger *zap.Logger, notifiers []notifier.Notifier) (FlagsetManager, error) {
 	if config == nil {
 		return nil, fmt.Errorf("configuration is nil")
+	}
+
+	if config.RuleEvaluatorCacheSize > 0 {
+		if err := flag.SetRuleEvaluatorCacheSize(config.RuleEvaluatorCacheSize); err != nil {
+			return nil, fmt.Errorf("invalid RuleEvaluatorCacheSize: %w", err)
+		}
 	}
 
 	var flagsetMngr FlagsetManager

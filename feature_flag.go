@@ -9,6 +9,7 @@ import (
 	"github.com/thomaspoignant/go-feature-flag/exporter"
 	"github.com/thomaspoignant/go-feature-flag/internal/cache"
 	"github.com/thomaspoignant/go-feature-flag/internal/notification"
+	"github.com/thomaspoignant/go-feature-flag/modules/core/flag"
 	"github.com/thomaspoignant/go-feature-flag/notifier/logsnotifier"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/utils/fflog"
@@ -57,6 +58,11 @@ var (
 // and return everything you need to manage your flags.
 func New(config Config) (*GoFeatureFlag, error) {
 	config.Initialize()
+	if config.RuleEvaluatorCacheSize > 0 {
+		if err := flag.SetRuleEvaluatorCacheSize(config.RuleEvaluatorCacheSize); err != nil {
+			return nil, fmt.Errorf("invalid RuleEvaluatorCacheSize: %w", err)
+		}
+	}
 
 	goFF := &GoFeatureFlag{
 		config:         config,

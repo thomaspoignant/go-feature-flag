@@ -114,6 +114,14 @@ type Config struct {
 	// Default: nil
 	Name *string
 
+	// RuleEvaluatorCacheSize (optional) is the maximum number of distinct targeting
+	// queries whose parsed evaluators are cached. The cache is LRU-evicted past
+	// this size. The cache is process-global and shared across all flagsets, so
+	// the last initialization wins.
+	// Must be > 0 to take effect; values <= 0 leave the existing size in place
+	// (default: flag.DefaultRuleEvaluatorCacheSize, 1000).
+	RuleEvaluatorCacheSize int
+
 	// offlineMutex is a mutex to protect the Offline field.
 	offlineMutex *sync.RWMutex
 

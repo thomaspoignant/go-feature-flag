@@ -5,6 +5,7 @@ go 1.24.13
 require (
 	github.com/diegoholiveira/jsonlogic/v3 v3.9.0
 	github.com/google/go-cmp v0.7.0
+	github.com/hashicorp/golang-lru/v2 v2.0.7
 	github.com/nikunjy/rules v1.5.0
 	github.com/stretchr/testify v1.11.1
 )

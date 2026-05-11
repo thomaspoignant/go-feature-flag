@@ -89,6 +89,12 @@ type Config struct {
 	// Default: false
 	EnableBulkMetricFlagNames bool `mapstructure:"enableBulkMetricFlagNames" koanf:"enablebulkmetricflagnames"`
 
+	// RuleEvaluatorCacheSize (optional) is the maximum number of distinct targeting
+	// queries whose parsed evaluators are cached. The cache is LRU-evicted past
+	// this size. Process-global, shared across all flagsets.
+	// Default: 1000 (flag.DefaultRuleEvaluatorCacheSize). Must be > 0.
+	RuleEvaluatorCacheSize int `mapstructure:"ruleEvaluatorCacheSize" koanf:"ruleevaluatorcachesize"`
+
 	// FlagSets is the list of flag sets configured.
 	// A flag set is a group of flags that can be used to configure the relay proxy.
 	// Each flag set can have its own API key, retrievers, notifiers and exporters.
