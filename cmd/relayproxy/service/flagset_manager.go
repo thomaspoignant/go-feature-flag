@@ -10,6 +10,8 @@ import (
 	"github.com/google/uuid"
 	ffclient "github.com/thomaspoignant/go-feature-flag"
 	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/config"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/proxynotifier"
+	"github.com/thomaspoignant/go-feature-flag/cmd/relayproxy/service/stream"
 	"github.com/thomaspoignant/go-feature-flag/notifier"
 	"github.com/thomaspoignant/go-feature-flag/utils"
 	"go.uber.org/zap"
@@ -72,8 +74,12 @@ type flagsetManagerImpl struct {
 
 // NewFlagsetManager is creating a new FlagsetManager.
 // It is used to retrieve the flagset linked to the API Key.
+// sseService is optional: when non-nil a per-flagset SSE notifier is created
+// so that flag-change events are scoped to the correct flagset.
 func NewFlagsetManager(
-	config *config.Config, logger *zap.Logger, notifiers []notifier.Notifier) (FlagsetManager, error) {
+	config *config.Config, logger *zap.Logger, notifiers []notifier.Notifier,
+	sseService stream.SSEService,
+) (FlagsetManager, error) {
 	if config == nil {
 		return nil, fmt.Errorf("configuration is nil")
 	}
@@ -81,25 +87,21 @@ func NewFlagsetManager(
 	var flagsetMngr FlagsetManager
 	var err error
 	if config.IsUsingFlagsets() {
-		// flagsets mode: create flagsets based on the `flagsets` array in the configuration.
-		// The top-level retriever/exporter/etc. configuration is ignored in this mode.
-		flagsetMngr, err = newFlagsetManagerWithFlagsets(config, logger, notifiers)
+		flagsetMngr, err = newFlagsetManagerWithFlagsets(config, logger, notifiers, sseService)
 	} else {
-		// default mode: use the top-level configuration to create a single default flagset.
-		flagsetMngr, err = newFlagsetManagerWithDefaultConfig(config, logger, notifiers)
+		flagsetMngr, err = newFlagsetManagerWithDefaultConfig(config, logger, notifiers, sseService)
 	}
 	if err != nil {
 		return nil, err
 	}
-	// Attach a callback to the flagset manager to be called when the configuration changes
 	config.AttachConfigChangeCallback(flagsetMngr.OnConfigChange)
 	return flagsetMngr, nil
 }
 
-// newFlagsetManagerWithDefaultConfig is creating a new FlagsetManager with the default configuration.
-// The default configuration is the top level configuration of the relay proxy.
 func newFlagsetManagerWithDefaultConfig(
-	c *config.Config, logger *zap.Logger, notifiers []notifier.Notifier) (FlagsetManager, error) {
+	c *config.Config, logger *zap.Logger, notifiers []notifier.Notifier,
+	sseService stream.SSEService,
+) (FlagsetManager, error) {
 	defaultFlagSet := config.FlagSet{
 		Name: utils.DefaultFlagSetName,
 		CommonFlagSet: config.CommonFlagSet{
@@ -117,7 +119,8 @@ func newFlagsetManagerWithDefaultConfig(
 			PersistentFlagConfigurationFile: c.PersistentFlagConfigurationFile,
 		},
 	}
-	client, err := NewGoFeatureFlagClient(&defaultFlagSet, logger, notifiers)
+	allNotifiers := appendSSENotifier(notifiers, sseService, utils.DefaultFlagSetName)
+	client, err := NewGoFeatureFlagClient(&defaultFlagSet, logger, allNotifiers)
 	if err != nil {
 		return nil, err
 	}
@@ -129,28 +132,16 @@ func newFlagsetManagerWithDefaultConfig(
 	}, nil
 }
 
-// newFlagsetManagerWithFlagsets is creating a new FlagsetManager with flagsets.
-// It is used to create the flagsets and map them to the APIKeys.
 func newFlagsetManagerWithFlagsets(
-	config *config.Config, logger *zap.Logger, notifiers []notifier.Notifier) (FlagsetManager, error) {
+	config *config.Config, logger *zap.Logger, notifiers []notifier.Notifier,
+	sseService stream.SSEService,
+) (FlagsetManager, error) {
 	flagsets := make(map[string]*ffclient.GoFeatureFlag)
 	apiKeysToFlagSet := make(map[string]string)
 
 	for index, flagset := range config.FlagSets {
-		client, err := NewGoFeatureFlagClient(&flagset, logger, notifiers)
-		if err != nil {
-			logger.Error(
-				"failed to create goff client for flagset",
-				zap.Int("flagset_index", index),
-				zap.String("flagset", flagset.Name),
-				zap.Error(err),
-			)
-			continue
-		}
-
 		flagSetName := flagset.Name
 		if flagSetName == "" || flagSetName == utils.DefaultFlagSetName {
-			// generating a default flagset name if not provided or equals to default
 			flagSetName = uuid.New().String()
 
 			startLog := "no flagset name provided"
@@ -160,6 +151,18 @@ func newFlagsetManagerWithFlagsets(
 			logMessage := startLog + ", generating a default flagset name. This is not recommended. " +
 				"Not having a flagset name will not allow you to change API Keys associated to the flagset during runtime."
 			logger.Warn(logMessage, zap.String("flagset", flagSetName))
+		}
+
+		allNotifiers := appendSSENotifier(notifiers, sseService, flagSetName)
+		client, err := NewGoFeatureFlagClient(&flagset, logger, allNotifiers)
+		if err != nil {
+			logger.Error(
+				"failed to create goff client for flagset",
+				zap.Int("flagset_index", index),
+				zap.String("flagset", flagset.Name),
+				zap.Error(err),
+			)
+			continue
 		}
 
 		flagsets[flagSetName] = client
@@ -366,4 +369,17 @@ func (m *flagsetManagerImpl) onConfigChangeWithDefault(newConfig *config.Config)
 	if reloadAPIKeys {
 		m.config.ForceReloadAPIKeys()
 	}
+}
+
+// appendSSENotifier returns a copy of notifiers with an SSE notifier appended
+// when sseService is non-nil.
+func appendSSENotifier(
+	notifiers []notifier.Notifier, sseService stream.SSEService, flagsetName string,
+) []notifier.Notifier {
+	if sseService == nil {
+		return notifiers
+	}
+	out := make([]notifier.Notifier, len(notifiers), len(notifiers)+1)
+	copy(out, notifiers)
+	return append(out, proxynotifier.NewNotifierSSE(sseService, flagsetName))
 }

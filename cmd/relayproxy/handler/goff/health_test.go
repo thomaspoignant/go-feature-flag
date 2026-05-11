@@ -47,7 +47,7 @@ func Test_health_Handler(t *testing.T) {
 				},
 			}
 
-			flagsetManager, err := service.NewFlagsetManager(&conf, zap.NewNop(), []notifier.Notifier{})
+			flagsetManager, err := service.NewFlagsetManager(&conf, zap.NewNop(), []notifier.Notifier{}, nil)
 			assert.NoError(t, err, "impossible to create flagset manager")
 
 			srv := service.NewMonitoring(flagsetManager)

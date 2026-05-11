@@ -16,6 +16,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 1
+          persist-credentials: false
       - name: Setup go
         uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
         with:
@@ -51,6 +52,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Free space on runner
         run: ./.github/ci-scripts/free_space.sh
@@ -66,7 +68,7 @@ jobs:
           cache: false
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v3.1.1
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
 
       - name: Docker login
         env:
@@ -83,7 +85,7 @@ jobs:
           passphrase: ${{ secrets.GPG_SIGNING_KEY_PASSWORD }}
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@e24998b8b67b290c2fa8b7c14fcfa7de2c5c9b8c # v7.1.0
+        uses: goreleaser/goreleaser-action@1a80836c5c9d9e5755a25cb59ec6f45a3b5f41a8 # v7.2.1
         with:
           distribution: goreleaser
           version: latest
@@ -102,6 +104,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - name: Release readme to DockerHub
         uses: ms-jpq/sync-dockerhub-readme@e2991ea1ba48832e73555cdbd5b82f5a2e91ee9b # v1
         env:
@@ -133,6 +137,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - name: Release readme to DockerHub
         uses: ms-jpq/sync-dockerhub-readme@e2991ea1ba48832e73555cdbd5b82f5a2e91ee9b # v1
         with:
@@ -151,6 +157,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - name: Release readme to DockerHub
         uses: ms-jpq/sync-dockerhub-readme@e2991ea1ba48832e73555cdbd5b82f5a2e91ee9b # v1
         with:
@@ -169,6 +177,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - name: Release readme to DockerHub
         uses: ms-jpq/sync-dockerhub-readme@e2991ea1ba48832e73555cdbd5b82f5a2e91ee9b # v1
         with:
@@ -207,6 +217,7 @@ jobs:
         with:
           path: release
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+          persist-credentials: false
 
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
@@ -239,6 +250,7 @@ jobs:
           ref: ${{ env.MAIN_BRANCH_NAME }}
           path: ${{ env.MAIN_BRANCH_NAME }}
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+          persist-credentials: false
 
       - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
@@ -284,6 +296,7 @@ jobs:
         with:
           path: release
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+          persist-credentials: false
 
       - name: Setup go
         uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
@@ -306,6 +319,7 @@ jobs:
           ref: ${{ env.MAIN_BRANCH_NAME }}
           path: ${{ env.MAIN_BRANCH_NAME }}
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+          persist-credentials: false
 
       - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
@@ -350,6 +364,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+          persist-credentials: false
 
       - name: Bump chart appVersion
         env:

@@ -79,7 +79,7 @@ func Test_info_Handler(t *testing.T) {
 	for i := range tests {
 		tt := &tests[i]
 		t.Run(tt.name, func(t *testing.T) {
-			flagsetManager, err := service.NewFlagsetManager(&tt.config, zap.NewNop(), []notifier.Notifier{})
+			flagsetManager, err := service.NewFlagsetManager(&tt.config, zap.NewNop(), []notifier.Notifier{}, nil)
 			assert.NoError(t, err, "impossible to create flagset manager")
 
 			srv := service.NewMonitoring(flagsetManager)
