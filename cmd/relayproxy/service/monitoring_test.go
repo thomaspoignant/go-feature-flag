@@ -25,7 +25,7 @@ func TestWithDefaultMode(t *testing.T) {
 					{Kind: "file", Path: "../../../testdata/flag-config.yaml"},
 				},
 			},
-		}, zap.NewNop(), nil)
+		}, zap.NewNop(), nil, nil)
 		require.NoError(t, err)
 		require.NotNil(t, manager)
 
@@ -43,7 +43,7 @@ func TestWithDefaultMode(t *testing.T) {
 					{Kind: "file", Path: "../../../testdata/flag-config.yaml"},
 				},
 			},
-		}, zap.NewNop(), nil)
+		}, zap.NewNop(), nil, nil)
 		require.NoError(t, err)
 		require.NotNil(t, manager)
 
@@ -67,13 +67,13 @@ func TestWithDefaultMode(t *testing.T) {
 					{Kind: "file", Path: "../../../testdata/non-existent-file.yaml"},
 				},
 			},
-		}, zap.NewNop(), nil)
+		}, zap.NewNop(), nil, nil)
 		assert.Error(t, err, "Expected error due to invalid file path")
 		assert.Nil(t, manager)
 	})
 
 	t.Run("with nil config", func(t *testing.T) {
-		manager, err := service.NewFlagsetManager(nil, zap.NewNop(), nil)
+		manager, err := service.NewFlagsetManager(nil, zap.NewNop(), nil, nil)
 		assert.Error(t, err, "Expected error when config is nil")
 		assert.Nil(t, manager, "Expected manager to be nil")
 	})
@@ -87,7 +87,7 @@ func TestWithDefaultMode(t *testing.T) {
 					{Kind: "file", Path: "../../../testdata/flag-config.yaml"},
 				},
 			},
-		}, zap.NewNop(), nil)
+		}, zap.NewNop(), nil, nil)
 		require.NoError(t, err)
 		assert.True(t, managerDefault.IsDefaultFlagSet())
 	})
@@ -109,7 +109,7 @@ func TestWithFlagsetsMode(t *testing.T) {
 					APIKeys: []string{"test-api-key"},
 				},
 			},
-		}, zap.NewNop(), nil)
+		}, zap.NewNop(), nil, nil)
 		require.NoError(t, err)
 		require.NotNil(t, manager)
 
@@ -146,7 +146,7 @@ func TestWithFlagsetsMode(t *testing.T) {
 					APIKeys: []string{"api-key-2"},
 				},
 			},
-		}, zap.NewNop(), nil)
+		}, zap.NewNop(), nil, nil)
 		require.NoError(t, err)
 		require.NotNil(t, manager)
 
@@ -173,7 +173,7 @@ func TestWithFlagsetsMode(t *testing.T) {
 					APIKeys: []string{"test-api-key"},
 				},
 			},
-		}, zap.NewNop(), nil)
+		}, zap.NewNop(), nil, nil)
 		require.NoError(t, err)
 		assert.False(t, managerFlagsets.IsDefaultFlagSet())
 	})
@@ -181,7 +181,7 @@ func TestWithFlagsetsMode(t *testing.T) {
 	t.Run("empty flagsets", func(t *testing.T) {
 		manager, err := service.NewFlagsetManager(&config.Config{
 			FlagSets: []config.FlagSet{}, // Empty flagsets
-		}, zap.NewNop(), nil)
+		}, zap.NewNop(), nil, nil)
 		assert.Error(t, err, "Expected error due to no retrievers configured")
 		assert.Nil(t, manager)
 	})
@@ -201,7 +201,7 @@ func TestWithFlagsetsMode(t *testing.T) {
 					APIKeys: []string{"api-key-1"},
 				},
 			},
-		}, zap.NewNop(), nil)
+		}, zap.NewNop(), nil, nil)
 		assert.Error(t, err, "Expected error due to invalid file path")
 		assert.Nil(t, manager)
 	})
@@ -256,7 +256,7 @@ func TestMonitoringInfoErrors(t *testing.T) {
 					{Kind: "file", Path: "../../../testdata/flag-config.yaml"},
 				},
 			},
-		}, zap.NewNop(), nil)
+		}, zap.NewNop(), nil, nil)
 		require.NoError(t, err)
 		require.NotNil(t, manager)
 
@@ -294,7 +294,7 @@ func TestMonitoringInfoErrors(t *testing.T) {
 					APIKeys: []string{"api-key-2"},
 				},
 			},
-		}, zap.NewNop(), nil)
+		}, zap.NewNop(), nil, nil)
 		require.NoError(t, err)
 		require.NotNil(t, manager)
 

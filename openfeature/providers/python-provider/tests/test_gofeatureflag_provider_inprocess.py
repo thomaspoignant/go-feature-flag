@@ -14,7 +14,6 @@ from openfeature.evaluation_context import EvaluationContext
 from openfeature.exception import ErrorCode
 from openfeature.flag_evaluation import FlagEvaluationDetails, Reason
 
-
 _default_evaluation_ctx = EvaluationContext(
     targeting_key="d45e303a-38c2-11ed-a261-0242ac120002",
     attributes={

@@ -21,12 +21,9 @@ module.exports = [
       Atomics: 'readonly',
       SharedArrayBuffer: 'readonly',
     },
-    parser: '@babel/eslint-parser',
     parserOptions: {
-      requireConfigFile: false,
       ecmaVersion: 2018,
       sourceType: 'module',
-      allowImportExportEverywhere: true,
     },
     rules: {
       semi: ['error', 'always'],

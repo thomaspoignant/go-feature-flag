@@ -1,7 +1,6 @@
 from typing import Optional, Union, TypeVar
 from gofeatureflag_python_provider.options import BaseModel
 
-
 JsonType = TypeVar("JsonType", bool, int, str, float, list, Union[dict, list])
 
 

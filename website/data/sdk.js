@@ -1,3 +1,14 @@
+const snippets = require('./snippets');
+const {
+  SiGo,
+  SiTypescript,
+  SiDotnet,
+  SiSwift,
+  SiKotlin,
+} = require('react-icons/si');
+const {FaJava} = require('react-icons/fa');
+const React = require('react');
+
 const sdkFeatureAvailableList = [
   {
     key: 'inprocess',
@@ -50,6 +61,7 @@ const features = (keys, sdkType) => {
 export const sdk = [
   {
     key: 'go',
+    language: 'go',
     name: 'Golang',
     paradigm: ['Server'],
     faLogo: 'devicon-go-original-wordmark colored',
@@ -67,9 +79,12 @@ export const sdk = [
       ],
       'server'
     ),
+    snippets: snippets.goSnippet,
+    icon: React.createElement(SiGo, {className: 'text-[#00add8]'}),
   },
   {
     key: 'java',
+    language: 'java',
     name: 'Java',
     paradigm: ['Server'],
     faLogo: 'devicon-java-plain colored',
@@ -87,9 +102,12 @@ export const sdk = [
       ],
       'server'
     ),
+    snippets: snippets.javaSnippet,
+    icon: React.createElement(FaJava, {className: 'text-[#e76f00]'}),
   },
   {
     key: 'kotlin',
+    language: 'kotlin',
     name: 'Kotlin',
     paradigm: ['Server'],
     faLogo: 'devicon-kotlin-plain colored',
@@ -110,6 +128,7 @@ export const sdk = [
   },
   {
     key: 'dotnet',
+    language: 'dotnet',
     name: '.NET',
     paradigm: ['Server'],
     faLogo: 'devicon-dot-net-plain-wordmark colored',
@@ -127,9 +146,12 @@ export const sdk = [
       ],
       'server'
     ),
+    snippets: snippets.dotnetSnippet,
+    icon: React.createElement(SiDotnet, {className: 'text-[#512bd4]'}),
   },
   {
     key: 'python',
+    language: 'python',
     name: 'Python',
     paradigm: ['Server'],
     faLogo: 'devicon-python-plain colored',
@@ -150,6 +172,7 @@ export const sdk = [
   },
   {
     key: 'javascript',
+    language: 'javascript',
     name: 'Javascript',
     paradigm: ['Client'],
     faLogo: 'devicon-javascript-plain colored',
@@ -170,6 +193,7 @@ export const sdk = [
   },
   {
     key: 'typescript',
+    language: 'typescript',
     name: 'Typescript',
     paradigm: ['Client'],
     faLogo: 'devicon-typescript-plain colored',
@@ -187,9 +211,12 @@ export const sdk = [
       ],
       'client'
     ),
+    snippets: snippets.tsSnippet,
+    icon: React.createElement(SiTypescript, {className: 'text-[#3178c6]'}),
   },
   {
     key: 'react',
+    language: 'typescript',
     name: 'React',
     paradigm: ['Client'],
     faLogo: 'devicon-react-original colored',
@@ -209,7 +236,8 @@ export const sdk = [
     ),
   },
   {
-    key: 'angular',
+    key: 'angular', 
+    language: 'typescript',
     name: 'Angular',
     paradigm: ['Client'],
     faLogo: 'devicon-angularjs-plain colored',
@@ -230,6 +258,7 @@ export const sdk = [
   },
   {
     key: 'swift',
+    language: 'swift',
     name: 'Swift',
     paradigm: ['Client'],
     faLogo: 'devicon-swift-plain colored',
@@ -246,9 +275,12 @@ export const sdk = [
       ],
       'client'
     ),
+    snippets: snippets.swiftSnippet,
+    icon: React.createElement(SiSwift, {className: 'text-[#ffac45]'}),
   },
   {
     key: 'android',
+    language: 'kotlin',
     name: 'Kotlin / Android',
     paradigm: ['Client'],
     faLogo: 'devicon-android-plain colored',
@@ -266,9 +298,12 @@ export const sdk = [
       ],
       'client'
     ),
+    snippets: snippets.kotlinSnippet,
+    icon: React.createElement(SiKotlin, {className: 'text-[#e76f00]'}),
   },
   {
     key: 'nodejs',
+    language: 'typescript',
     name: 'Node.JS',
     paradigm: ['Server'],
     faLogo: 'devicon-nodejs-plain colored',
@@ -289,6 +324,7 @@ export const sdk = [
   },
   {
     key: 'php',
+    language: 'php',
     name: 'PHP',
     paradigm: ['Server'],
     faLogo: 'devicon-php-plain colored',
@@ -299,6 +335,7 @@ export const sdk = [
   },
   {
     key: 'ruby',
+    language: 'ruby',
     name: 'Ruby',
     paradigm: ['Server'],
     faLogo: 'devicon-ruby-plain colored',
@@ -308,7 +345,19 @@ export const sdk = [
     featureList: features(['remote', 'trackingFlag'], 'server'),
   },
   {
+    key: 'rust',
+    language: 'rust',
+    name: 'Rust',
+    paradigm: ['Server'],
+    faLogo: 'devicon-rust-plain colored',
+    badgeUrl:
+      'https://img.shields.io/crates/v/open-feature-ofrep?color=blue&style=flat-square&logo=rust',
+    docLink: 'server_providers/openfeature_rust',
+    featureList: features(['remote', 'trackingFlag'], 'server'),
+  },
+  {
     key: 'nestjs',
+    language: 'typescript',
     name: 'NestJS',
     paradigm: ['Server'],
     faLogo: 'devicon-nestjs-plain colored',
