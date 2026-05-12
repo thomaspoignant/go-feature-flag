@@ -12,10 +12,7 @@ import (
 // default so each test starts from a clean state.
 func resetNikunjyEvaluatorCache(t *testing.T) {
 	t.Helper()
-	nikunjyEvaluatorCacheMu.Lock()
-	nikunjyEvaluatorCache = nil
-	nikunjyEvaluatorCacheMu.Unlock()
-	nikunjyEvaluatorCacheOnce = sync.Once{}
+	nikunjyEvaluatorCache.Store(nil)
 }
 
 func TestSetRuleEvaluatorCacheSize_Validation(t *testing.T) {

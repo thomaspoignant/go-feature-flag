@@ -9,6 +9,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/diegoholiveira/jsonlogic/v3"
@@ -34,49 +35,49 @@ const DefaultRuleEvaluatorCacheSize = 1000
 // The cache is an LRU bounded by DefaultRuleEvaluatorCacheSize (overridable via
 // SetRuleEvaluatorCacheSize). Eviction only drops the cached parsed evaluator;
 // the next evaluation of an evicted query simply re-parses.
-var (
-	nikunjyEvaluatorCacheMu   sync.RWMutex
-	nikunjyEvaluatorCache     *lru.Cache[string, *pooledNikunjyEvaluator]
-	nikunjyEvaluatorCacheOnce sync.Once
-)
+//
+// The pointer is set exactly once (whichever of the lazy initializer or
+// SetRuleEvaluatorCacheSize wins the first CAS); afterwards SetRule mutates
+// the LRU in place via Resize. In-flight callers therefore never see the
+// pointer change underneath them.
+var nikunjyEvaluatorCache atomic.Pointer[lru.Cache[string, *pooledNikunjyEvaluator]]
 
 func ensureNikunjyEvaluatorCache() *lru.Cache[string, *pooledNikunjyEvaluator] {
-	nikunjyEvaluatorCacheOnce.Do(func() {
-		c, _ := lru.New[string, *pooledNikunjyEvaluator](DefaultRuleEvaluatorCacheSize)
-		nikunjyEvaluatorCacheMu.Lock()
-		nikunjyEvaluatorCache = c
-		nikunjyEvaluatorCacheMu.Unlock()
-	})
-	nikunjyEvaluatorCacheMu.RLock()
-	defer nikunjyEvaluatorCacheMu.RUnlock()
-	return nikunjyEvaluatorCache
+	if c := nikunjyEvaluatorCache.Load(); c != nil {
+		return c
+	}
+	c, _ := lru.New[string, *pooledNikunjyEvaluator](DefaultRuleEvaluatorCacheSize)
+	if nikunjyEvaluatorCache.CompareAndSwap(nil, c) {
+		return c
+	}
+	// Lost the race; another goroutine already installed a cache.
+	return nikunjyEvaluatorCache.Load()
 }
 
 // SetRuleEvaluatorCacheSize resizes the nikunjy evaluator LRU cache in place,
 // preserving the entries that still fit. Returns an error if size <= 0. The
 // cache is process-global, so the last caller wins.
 //
-// If the cache has not yet been initialized or the existing cache has a
-// different capacity, a new cache is created. When the requested size matches
-// the existing capacity, this is a no-op and cached evaluators are kept.
+// On the first call after process start, this installs the cache at the
+// requested size. Subsequent calls resize the same underlying LRU, so cached
+// evaluators survive resize and concurrent readers never see a pointer swap.
 func SetRuleEvaluatorCacheSize(size int) error {
 	if size <= 0 {
 		return fmt.Errorf("rule evaluator cache size must be > 0, got %d", size)
 	}
-	// Make sure the Once is consumed so a later first-use does not overwrite us.
-	nikunjyEvaluatorCacheOnce.Do(func() {})
-
-	nikunjyEvaluatorCacheMu.Lock()
-	defer nikunjyEvaluatorCacheMu.Unlock()
-	if nikunjyEvaluatorCache != nil {
-		nikunjyEvaluatorCache.Resize(size)
+	if existing := nikunjyEvaluatorCache.Load(); existing != nil {
+		existing.Resize(size)
 		return nil
 	}
 	c, err := lru.New[string, *pooledNikunjyEvaluator](size)
 	if err != nil {
 		return err
 	}
-	nikunjyEvaluatorCache = c
+	if !nikunjyEvaluatorCache.CompareAndSwap(nil, c) {
+		// Another goroutine installed a cache first; resize that one instead
+		// of swapping ours in (swapping would drop the entries it already holds).
+		nikunjyEvaluatorCache.Load().Resize(size)
+	}
 	return nil
 }
 
