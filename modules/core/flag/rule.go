@@ -66,7 +66,13 @@ func SetRuleEvaluatorCacheSize(size int) error {
 		return fmt.Errorf("rule evaluator cache size must be > 0, got %d", size)
 	}
 	if existing := nikunjyEvaluatorCache.Load(); existing != nil {
+		previous := existing.Len()
 		existing.Resize(size)
+		slog.InfoContext(context.Background(),
+			"resized nikunjy evaluator cache (process-global, shared across flagsets)",
+			slog.Int("size", size),
+			slog.Int("previousEntries", previous),
+		)
 		return nil
 	}
 	c, err := lru.New[string, *pooledNikunjyEvaluator](size)
